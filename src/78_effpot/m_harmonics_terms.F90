@@ -194,19 +194,19 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  harmonics_terms%ifcs%nrpt = nrpt
 
 !Allocation of total ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt))
  harmonics_terms%ifcs%atmfrc(:,:,:,:,:) = ifcs%atmfrc(:,:,:,:,:)
 
 !Allocation of ewald part of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
  harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:) = ifcs%ewald_atmfrc(:,:,:,:,:)
 
 !Allocation of short range part of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%short_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(harmonics_terms%ifcs%short_atmfrc,(3,natom,3,natom,nrpt))
  harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:) = ifcs%short_atmfrc(:,:,:,:,:)
 
 !Allocation of cell of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%cell,(3,nrpt))
+ ABI_MALLOC(harmonics_terms%ifcs%cell,(3,nrpt))
  harmonics_terms%ifcs%cell(:,:) = ifcs%cell(:,:)
 
 !Allocation of the dynamical matrix
@@ -229,7 +229,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  end if
 
 !Allocation of Effective charges array
- ABI_ALLOCATE(harmonics_terms%zeff,(3,3,natom))
+ ABI_MALLOC(harmonics_terms%zeff,(3,3,natom))
  harmonics_terms%zeff = zero
  if (present(zeff)) then
    call harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
@@ -237,7 +237,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  end if
 
 !Allocation of internal strain tensor
- ABI_ALLOCATE(harmonics_terms%strain_coupling,(6,3,natom))
+ ABI_MALLOC(harmonics_terms%strain_coupling,(6,3,natom))
  harmonics_terms%strain_coupling = zero
  if (present(strain_coupling)) then
    call harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupling)
@@ -289,27 +289,27 @@ subroutine harmonics_terms_free(harmonics_terms)
 
   if(allocated(harmonics_terms%zeff))then
     harmonics_terms%zeff=zero
-    ABI_DEALLOCATE(harmonics_terms%zeff)
+    ABI_FREE(harmonics_terms%zeff)
   end if
 
   if(allocated(harmonics_terms%strain_coupling)) then
     harmonics_terms%strain_coupling=zero
-    ABI_DEALLOCATE(harmonics_terms%strain_coupling)
+    ABI_FREE(harmonics_terms%strain_coupling)
   end if
 
   if(allocated(harmonics_terms%dynmat))then
     harmonics_terms%dynmat=zero
-    ABI_DEALLOCATE(harmonics_terms%dynmat)
+    ABI_FREE(harmonics_terms%dynmat)
   end if
 
   if(allocated(harmonics_terms%phfrq))then
     harmonics_terms%phfrq=zero
-    ABI_DEALLOCATE(harmonics_terms%phfrq)
+    ABI_FREE(harmonics_terms%phfrq)
   end if
 
   if(allocated(harmonics_terms%qpoints))then
     harmonics_terms%qpoints=zero
-    ABI_DEALLOCATE(harmonics_terms%qpoints)
+    ABI_FREE(harmonics_terms%qpoints)
   end if
 
   call harmonics_terms%ifcs%free()
@@ -366,11 +366,11 @@ subroutine harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupli
 
 ! 1-deallocate old array
   if(allocated(harmonics_terms%strain_coupling))then
-    ABI_DEALLOCATE(harmonics_terms%strain_coupling)
+    ABI_FREE(harmonics_terms%strain_coupling)
   end if
 
 ! 2-allocate and copy the new array
-  ABI_ALLOCATE(harmonics_terms%strain_coupling,(6,3,natom))
+  ABI_MALLOC(harmonics_terms%strain_coupling,(6,3,natom))
   harmonics_terms%strain_coupling(:,:,:) = strain_coupling(:,:,:)
 
 end subroutine harmonics_terms_setInternalStrain
@@ -425,11 +425,11 @@ subroutine harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
 
 ! 1-deallocate old array
   if(allocated(harmonics_terms%zeff))then
-    ABI_DEALLOCATE(harmonics_terms%zeff)
+    ABI_FREE(harmonics_terms%zeff)
   end if
 
 ! 2-allocate and copy the new array
-  ABI_ALLOCATE(harmonics_terms%zeff,(3,3,natom))
+  ABI_MALLOC(harmonics_terms%zeff,(3,3,natom))
   harmonics_terms%zeff(:,:,:) = zeff(:,:,:)
 
 
@@ -507,27 +507,27 @@ subroutine harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,phfrq,qpo
 
 ! 1-deallocate old array
   if(allocated(harmonics_terms%dynmat))then
-    ABI_DEALLOCATE(harmonics_terms%dynmat)
+    ABI_FREE(harmonics_terms%dynmat)
   end if
 
   if(allocated(harmonics_terms%phfrq))then
-    ABI_DEALLOCATE(harmonics_terms%phfrq)
+    ABI_FREE(harmonics_terms%phfrq)
   end if
 
   if(allocated(harmonics_terms%qpoints))then
-    ABI_DEALLOCATE(harmonics_terms%qpoints)
+    ABI_FREE(harmonics_terms%qpoints)
   end if
 
 ! 2-allocate and copy the new array
   harmonics_terms%nqpt = nqpt
 
-  ABI_ALLOCATE(harmonics_terms%dynmat,(2,3,natom,3,natom,nqpt))
+  ABI_MALLOC(harmonics_terms%dynmat,(2,3,natom,3,natom,nqpt))
   harmonics_terms%dynmat(:,:,:,:,:,:) = dynmat(:,:,:,:,:,:)
 
-  ABI_ALLOCATE(harmonics_terms%phfrq,(3*natom,nqpt))
+  ABI_MALLOC(harmonics_terms%phfrq,(3*natom,nqpt))
   harmonics_terms%phfrq(:,:) = phfrq(:,:)
 
-  ABI_ALLOCATE(harmonics_terms%qpoints,(3,nqpt))
+  ABI_MALLOC(harmonics_terms%qpoints,(3,nqpt))
   harmonics_terms%qpoints(:,:) = qpoints(:,:)
 
 end subroutine harmonics_terms_setDynmat

@@ -75,16 +75,16 @@ contains
 ! *************************************************************************
 
   !--ifixed from ATOMFLAGS is initialized :
-   ABI_ALLOCATE(ifixed,(lotfvar%natom))
+   ABI_MALLOC(ifixed,(lotfvar%natom))
    ifixed(:) = 1
 
   !--FINDS  FITTED ATOMS
-  ! ABI_ALLOCATE(tquant,(lotfvar%natom))
+  ! ABI_MALLOC(tquant,(lotfvar%natom))
   ! tquant(:) = .true.
   !  nquant = lotfvar%natom
   !nqxx   = lotfvar%natom
 
-   ABI_ALLOCATE(iq,(lotfvar%natom))
+   ABI_MALLOC(iq,(lotfvar%natom))
    iq(:)=(/(iat,iat=1,lotfvar%natom)/)
 
  end subroutine work_var_set
@@ -111,8 +111,8 @@ contains
  subroutine work_var_dealloc()
 
 ! *************************************************************************
-   ABI_DEALLOCATE(iq)
-   ABI_DEALLOCATE(ifixed)
+   ABI_FREE(iq)
+   ABI_FREE(ifixed)
  end subroutine work_var_dealloc
  !!***
 

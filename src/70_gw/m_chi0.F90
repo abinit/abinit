@@ -1072,7 +1072,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  end if
 
  if(dtset%ucrpa>=1 .AND. dtset%plowan_compute <10 ) then
-   ABI_DEALLOCATE(coeffW_BZ)
+   ABI_FREE(coeffW_BZ)
  endif
 
  call cwtime(cpu_time,wall_time,gflops,"stop")
@@ -1962,7 +1962,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  end if
 
  if(dtset%ucrpa>=1 .AND. dtset%plowan_compute<10) then
-   ABI_DEALLOCATE(coeffW_BZ)
+   ABI_FREE(coeffW_BZ)
  endif
 
  call timab(331,2,tsec)

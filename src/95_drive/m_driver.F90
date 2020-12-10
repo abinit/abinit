@@ -236,7 +236,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  end do
  call psps_init_global(mtypalch, npsp, psps, pspheads)
 
- ABI_ALLOCATE(jdtset_,(0:ndtset))
+ ABI_MALLOC(jdtset_,(0:ndtset))
  if(ndtset/=0)then
    jdtset_(:)=dtsets(0:ndtset)%jdtset
  else
@@ -394,14 +394,14 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    nimage=mpi_enregs(idtset)%my_nimage
 
 !  Retrieve evolving arrays (most of them depend on images)
-   ABI_ALLOCATE(acell_img,(3,nimage))
-   ABI_ALLOCATE(amu_img,(dtset%ntypat,nimage))
-   ABI_ALLOCATE(mixalch_img,(dtset%npspalch,dtset%ntypalch,nimage))
-   ABI_ALLOCATE(occ_img,(dtset%mband*dtset%nkpt*dtset%nsppol,nimage))
-   ABI_ALLOCATE(rprim_img,(3,3,nimage))
-   ABI_ALLOCATE(vel_img,(3,dtset%natom,nimage))
-   ABI_ALLOCATE(vel_cell_img,(3,3,nimage))
-   ABI_ALLOCATE(xred_img,(3,dtset%natom,nimage))
+   ABI_MALLOC(acell_img,(3,nimage))
+   ABI_MALLOC(amu_img,(dtset%ntypat,nimage))
+   ABI_MALLOC(mixalch_img,(dtset%npspalch,dtset%ntypalch,nimage))
+   ABI_MALLOC(occ_img,(dtset%mband*dtset%nkpt*dtset%nsppol,nimage))
+   ABI_MALLOC(rprim_img,(3,3,nimage))
+   ABI_MALLOC(vel_img,(3,dtset%natom,nimage))
+   ABI_MALLOC(vel_cell_img,(3,3,nimage))
+   ABI_MALLOC(xred_img,(3,dtset%natom,nimage))
    do iimage=1,nimage
      ii=mpi_enregs(idtset)%my_imgtab(iimage)
      acell_img   (:  ,iimage) = dtset%acell_orig(:,ii)
@@ -432,7 +432,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !    Check if parallelization over images is activated
      mxnimage=maxval(dtsets(1:ndtset_alloc)%nimage)
-     ABI_ALLOCATE(miximage,(mxnimage,mxnimage))
+     ABI_MALLOC(miximage,(mxnimage,mxnimage))
      test_img=(mxnimage/=1.and.maxval(dtsets(:)%npimage)>1)
      use_results_all=.false.
      if (test_img.and.mpi_enregs(idtset)%me_cell==0) then
@@ -541,8 +541,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          results_gathered=.true.
        end if
        if ((.not.test_img).or.mpi_enregs(idtset)%me_cell==0) then
-         ABI_ALLOCATE(xcart,(3,dtset%natom))
-         ABI_ALLOCATE(xredget,(3,dtset%natom))
+         ABI_MALLOC(xcart,(3,dtset%natom))
+         ABI_MALLOC(xredget,(3,dtset%natom))
          do iimage=1,nimage
            ii=mpi_enregs(idtset)%my_imgtab(iimage)
            xred_img(:,:,iimage)=zero
@@ -676,10 +676,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  Smaller integer arrays
    etotal=zero
-   ABI_ALLOCATE(npwtot,(dtset%nkpt))
+   ABI_MALLOC(npwtot,(dtset%nkpt))
    npwtot = 0
-   ABI_ALLOCATE(xred,(3,dtset%natom))
-   ABI_ALLOCATE(occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   ABI_MALLOC(xred,(3,dtset%natom))
+   ABI_MALLOC(occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
    if(dtset%optdriver/=RUNL_GSTATE)then
      occ(:)=occ_img(:,1)
      acell(:)=acell_img(:,1)
@@ -771,11 +771,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case(RUNL_GSTATE)
 
-     ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
-     ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
-     ABI_ALLOCATE(intgres_img,(dtset%nspden,dtset%natom,nimage))
-     ABI_ALLOCATE(etotal_img,(nimage))
-     ABI_ALLOCATE(strten_img,(6,nimage))
+     ABI_MALLOC(fcart_img,(3,dtset%natom,nimage))
+     ABI_MALLOC(fred_img,(3,dtset%natom,nimage))
+     ABI_MALLOC(intgres_img,(dtset%nspden,dtset%natom,nimage))
+     ABI_MALLOC(etotal_img,(nimage))
+     ABI_MALLOC(strten_img,(6,nimage))
 
      call gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
        fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
@@ -802,11 +802,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    case(RUNL_GWLS)
      ! For running G0W0 calculations with Lanczos basis for dielectric operator
      ! and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
-     ABI_ALLOCATE(etotal_img,(nimage))
-     ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
-     ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
-     ABI_ALLOCATE(intgres_img,(dtset%nspden,dtset%natom,nimage))
-     ABI_ALLOCATE(strten_img,(6,nimage))
+     ABI_MALLOC(etotal_img,(nimage))
+     ABI_MALLOC(fcart_img,(3,dtset%natom,nimage))
+     ABI_MALLOC(fred_img,(3,dtset%natom,nimage))
+     ABI_MALLOC(intgres_img,(dtset%nspden,dtset%natom,nimage))
+     ABI_MALLOC(strten_img,(6,nimage))
 
      call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
        fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&

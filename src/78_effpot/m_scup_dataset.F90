@@ -190,7 +190,7 @@ subroutine scup_dtset_free(scup_dtset)
 
 
 if(allocated(scup_dtset%scup_speck))then 
-        ABI_DEALLOCATE(scup_dtset%scup_speck)
+        ABI_FREE(scup_dtset%scup_speck)
 endif
 
 call scup_dtset%scup_kpath%free
@@ -334,8 +334,8 @@ implicit none
 !*********************************************************************
 
  marr=30
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
  jdtset=1
 
@@ -629,7 +629,7 @@ tmp_int=0
 !S
    !Allocate
    if(scup_dtset%scup_printbands)then 
-     ABI_ALLOCATE(scup_dtset%scup_speck,(3,scup_dtset%scup_nspeck))
+     ABI_MALLOC(scup_dtset%scup_speck,(3,scup_dtset%scup_nspeck))
     
    call intagm(dprarr,intarr,jdtset,marr,3*scup_dtset%scup_nspeck,string(1:lenstr),'scup_speck',tread,'DPR')
      if(tread==1)then
@@ -656,8 +656,8 @@ tmp_int=0
 !Finished reading in variables - deallocate
 !=======================================================================
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
 
 end subroutine invars10scup
 !!***
@@ -724,7 +724,7 @@ scup_kpath = kpath_new(speck,gprimd,ndivsm)
 !Change size of scup_kpath%ndivs(:) variable 
 !from nspeck-1 to nspeck and put 1 to first entry
 nspeck = size(speck,2)
-ABI_ALLOCATE(ndivs_tmp,(nspeck))
+ABI_MALLOC(ndivs_tmp,(nspeck))
 
 !First entry is always 1
  ndivs_tmp(1) = 1 
@@ -732,12 +732,12 @@ ABI_ALLOCATE(ndivs_tmp,(nspeck))
  ndivs_tmp(2:) = scup_kpath%ndivs(:) 
 
 !Delete original segments 
-ABI_DEALLOCATE(scup_kpath%ndivs)
+ABI_FREE(scup_kpath%ndivs)
 !Put new path 
-ABI_ALLOCATE(scup_kpath%ndivs,(nspeck))
+ABI_MALLOC(scup_kpath%ndivs,(nspeck))
 scup_kpath%ndivs = ndivs_tmp
 !Free temporary array
-ABI_DEALLOCATE(ndivs_tmp)
+ABI_FREE(ndivs_tmp)
 
 end subroutine scup_kpath_new
 !!***

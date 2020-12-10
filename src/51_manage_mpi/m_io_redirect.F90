@@ -85,8 +85,8 @@ contains
  
  if (nfil<=1) return
 
- ABI_ALLOCATE(filout,(nfil))
- ABI_ALLOCATE(fillog,(nfil))
+ ABI_MALLOC(filout,(nfil))
+ ABI_MALLOC(fillog,(nfil))
  me=xmpi_comm_rank(commworld)
  me_loc=xmpi_comm_rank(commspace1)
  call int2char4(me,tag)
@@ -236,7 +236,7 @@ contains
      if (present(dyn)) then
        my_dyn => dyn
      else
-       ABI_ALLOCATE(my_dyn,(nfil))
+       ABI_MALLOC(my_dyn,(nfil))
        my_dyn(:)=1
      end if
      do ii=1,nfil
@@ -256,7 +256,7 @@ contains
      end do
      call flush_unit(ab_out)
      if (.not.present(dyn)) then
-       ABI_DEALLOCATE(my_dyn)
+       ABI_FREE(my_dyn)
      end if
    end if
    call xmpi_barrier(commspace)
@@ -282,8 +282,8 @@ contains
 
  call xmpi_barrier(commspace)
 
- ABI_DEALLOCATE(filout)
- ABI_DEALLOCATE(fillog)
+ ABI_FREE(filout)
+ ABI_FREE(fillog)
 
  end subroutine localrdfile
 !!***

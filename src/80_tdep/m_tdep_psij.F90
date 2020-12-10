@@ -426,10 +426,10 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
   qbz(:,:)=DDB%qpt(1:3,:)
 
 ! Reduce the number of such points by symmetrization.
-  ABI_ALLOCATE(ibz2bz,(nqbz))
-  ABI_ALLOCATE(wtq,(nqbz))
-  ABI_ALLOCATE(bz2ibz_smap, (6, nqbz))
-  ABI_ALLOCATE(wtq_folded,(nqbz))
+  ABI_MALLOC(ibz2bz,(nqbz))
+  ABI_MALLOC(wtq,(nqbz))
+  ABI_MALLOC(bz2ibz_smap, (6, nqbz))
+  ABI_MALLOC(wtq_folded,(nqbz))
   wtq(:)=one/nqbz         ! Weights sum up to one
 
 !FB  write(InVar%stdlog,*) 'nqbz = ', nqbz
@@ -437,16 +437,16 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
     bz2ibz_smap, xmpi_comm_self)
 !FB  write(InVar%stdlog,*) 'nqibz = ', nqibz
 
-  ABI_DEALLOCATE(bz2ibz_smap)
+  ABI_FREE(bz2ibz_smap)
 
-  ABI_ALLOCATE(wtqibz   ,(nqibz))
-  ABI_ALLOCATE(qibz     ,(3,nqibz))
-  ABI_ALLOCATE(qibz_cart,(3,nqibz))
+  ABI_MALLOC(wtqibz   ,(nqibz))
+  ABI_MALLOC(qibz     ,(3,nqibz))
+  ABI_MALLOC(qibz_cart,(3,nqibz))
   do iq_ibz=1,nqibz
     wtqibz(iq_ibz)=wtq_folded(ibz2bz(iq_ibz))
     qibz(:,iq_ibz)=qbz(:,ibz2bz(iq_ibz))
   end do
-  ABI_DEALLOCATE(wtq_folded)
+  ABI_FREE(wtq_folded)
 
 ! Loop over irreducible q-points
 ! =======================

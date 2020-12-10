@@ -138,7 +138,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
    mband_upper  =mband_upper_(idtset)
    usepaw=dtsets(idtset)%usepaw
    ! Allocate arrays
-   ABI_ALLOCATE(zionpsp,(npsp))
+   ABI_MALLOC(zionpsp,(npsp))
    zionpsp(:)=pspheads(1:npsp)%zionpsp
 
    call mkrdim(dtsets(idtset)%acell_orig(1:3,1),dtsets(idtset)%rprim_orig(1:3,1:3,1),rprimd)
@@ -147,7 +147,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
    ! Here, nearly all the remaining input variables are initialized
    call invars2(bravais,dtsets(idtset),iout,jdtset,lenstr,mband_upper,msym,npsp,string,usepaw,zionpsp,ucvol,comm)
 
-   ABI_DEALLOCATE(zionpsp)
+   ABI_FREE(zionpsp)
 
    if (ANY(dtsets(idtset)%optdriver == [RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE])) then
     ! For GW or BSE calculations, we only use (npwwfn|ecutwfn) G-vectors read from the KSS file,
@@ -307,8 +307,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%natvshift*nsppol*natom,&
    3*dtset%nzchempot*ntypat)
 
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
  !----------------------------------------------------------------------------
 
@@ -3034,7 +3034,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(dtset%nconeq>0)then
 
    ! Read and check natcon
-   ABI_ALLOCATE(natcon,(dtset%nconeq))
+   ABI_MALLOC(natcon,(dtset%nconeq))
    call intagm(dprarr,intarr,jdtset,marr,dtset%nconeq,string(1:lenstr),'natcon',tread,'INT')
    if(tread==1)then
      natcon(:)=intarr(1:dtset%nconeq)
@@ -3056,7 +3056,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    niatcon=sum(natcon(:))
 
    ! Read and check iatcon
-   ABI_ALLOCATE(iatcon,(niatcon))
+   ABI_MALLOC(iatcon,(niatcon))
    call intagm(dprarr,intarr,jdtset,marr,niatcon,string(1:lenstr),'iatcon',tread,'INT')
    if(tread==1)then
      iatcon(:)=intarr(1:niatcon)
@@ -3092,8 +3092,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      iat=iat+natcon(ii)
    end do
 
-   ABI_DEALLOCATE(iatcon)
-   ABI_DEALLOCATE(natcon)
+   ABI_FREE(iatcon)
+   ABI_FREE(natcon)
  end if
 
   ! Initialize chempot
@@ -3295,7 +3295,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
          end do
        end if
 
-       ABI_ALLOCATE(dmatpawu_tmp,(dmatsize))
+       ABI_MALLOC(dmatpawu_tmp,(dmatsize))
        iat=1;jj=1
        do iatom=1,natom
          lpawu=dtset%lpawu(dtset%typat(iatom))
@@ -3319,7 +3319,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
            end if
          end do
        end if
-       ABI_DEALLOCATE(dmatpawu_tmp)
+       ABI_FREE(dmatpawu_tmp)
 
        if (tread/=1.and.tread_alt/=1) then
          write(msg, '(3a)' )&
@@ -3520,8 +3520,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ABI_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
  end if
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
  call timab(191,2,tsec)
 

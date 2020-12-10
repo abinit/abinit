@@ -468,7 +468,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !At beginning no error
  nerr_dilatmx = 0
 
- ABI_ALLOCATE(xred_prev,(3,scfcv_args%dtset%natom))
+ ABI_MALLOC(xred_prev,(3,scfcv_args%dtset%natom))
 
 !###########################################################
 !### 08. Loop for itime (From 1 to ntime)
@@ -593,13 +593,13 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
            ! Before running scfcv, on non-first geometry step iterations,
            ! we need to reformat the wavefunctions, taking into acount the new
            ! coordinates. We prepare to change rhog (to be removed) and rhor.
-           ABI_DEALLOCATE(rhog)
-           ABI_DEALLOCATE(rhor)
+           ABI_FREE(rhog)
+           ABI_FREE(rhor)
            call wvl_wfsinp_reformat(scfcv_args%dtset, scfcv_args%mpi_enreg,&
 &           scfcv_args%psps, rprimd, scfcv_args%wvl, xred, xred_old)
            scfcv_args%nfftf = scfcv_args%dtset%nfft
-           ABI_ALLOCATE(rhog,(2, scfcv_args%dtset%nfft))
-           ABI_ALLOCATE(rhor,(2, scfcv_args%dtset%nfft))
+           ABI_MALLOC(rhog,(2, scfcv_args%dtset%nfft))
+           ABI_MALLOC(rhor,(2, scfcv_args%dtset%nfft))
            call wvl_mkrho(scfcv_args%dtset, scfcv_args%irrzon, scfcv_args%mpi_enreg,&
 &           scfcv_args%phnons, rhor,scfcv_args%wvl%wfs,scfcv_args%wvl%den)
          end if
@@ -709,7 +709,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !    Store trajectory in xfh file
      if((ab_xfh%nxfh==0.or.itime/=1)) then
-       ABI_ALLOCATE(fred_corrected,(3,scfcv_args%dtset%natom))
+       ABI_MALLOC(fred_corrected,(3,scfcv_args%dtset%natom))
        call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
 !      Get rid of mean force on whole unit cell,
 !      but only if no generalized constraints are in effect
@@ -732,7 +732,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
            call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,hist%strten(:,hist%ihist),xred)
          end if
        end if
-       ABI_DEALLOCATE(fred_corrected)
+       ABI_FREE(fred_corrected)
      end if
 
 !    ###########################################################
@@ -960,7 +960,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  if (ab_mover%ionmov==10 .or. ab_mover%ionmov==11) call delocint_fin(deloc)
 
- ABI_DEALLOCATE(xred_prev)
+ ABI_FREE(xred_prev)
 
  call abihist_free(hist)
  call abihist_free(hist_prev)
@@ -1285,7 +1285,7 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 !###########################################################
 !### 1. Positions
 
- ABI_ALLOCATE(xcart,(3,ab_mover%natom))
+ ABI_MALLOC(xcart,(3,ab_mover%natom))
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
  write(msg, '(a,a)' )ch10,' Cartesian coordinates (xcart) [bohr]'
@@ -1294,14 +1294,14 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
  write(msg, '(a)' )' Reduced coordinates (xred)'
  call prtnatom(atlist,iout,msg,ab_mover%natom,prtallatoms,xred)
 
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
 !###########################################################
 !### 2. Forces
 
  if(pos==mover_AFTER)then
 
-   ABI_ALLOCATE(fred,(3,ab_mover%natom))
+   ABI_MALLOC(fred,(3,ab_mover%natom))
    call fcart2fred(fcart,fred,rprimd,ab_mover%natom)
 
 !  Compute max |f| and rms f,
@@ -1325,7 +1325,7 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 
    write(msg, '(a)' )' Reduced forces (fred)'
    call prtnatom(atlist,iout,msg,ab_mover%natom,prtallatoms,fred)
-   ABI_DEALLOCATE(fred)
+   ABI_FREE(fred)
  end if
 
 !###########################################################
@@ -1686,7 +1686,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
 !  Xcart from Xred
 #if defined HAVE_NETCDF
-   ABI_ALLOCATE(xcart,(3,dtset%natom))
+   ABI_MALLOC(xcart,(3,dtset%natom))
    call xred2xcart(dtset%natom,rprimd,xcart,xred)
 #endif
 
@@ -1850,8 +1850,8 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
      if (dtset%ionmov==1.or.(.not.atom_fix)) then
        vcart => vel
      else
-       ABI_ALLOCATE(vcart,(3,dtset%natom))
-       ABI_ALLOCATE(vred,(3,dtset%natom))
+       ABI_MALLOC(vcart,(3,dtset%natom))
+       ABI_MALLOC(vred,(3,dtset%natom))
        vtmp => vel
        call xcart2xred(dtset%natom,rprimd,vtmp,vred)
        do iatom=1,dtset%natom
@@ -1860,7 +1860,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
          end do
        end do
        call xred2xcart(dtset%natom,rprimd,vcart,vred)
-       ABI_DEALLOCATE(vred)
+       ABI_FREE(vred)
      end if
      do iatom=1,dtset%natom
        do ii=1,3
@@ -1868,7 +1868,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
        end do
      end do
      if (dtset%ionmov/=1.and.atom_fix)  then
-       ABI_DEALLOCATE(vcart)
+       ABI_FREE(vcart)
      end if
      ncerr = nf90_inq_varid(ncid, "E_kin", EkinId)
      NCF_CHECK_MSG(ncerr,'nf90_inq_varid')
@@ -1957,7 +1957,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
    end if
 
 #if defined HAVE_NETCDF
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
 #endif
 
 !  ==========================================================================

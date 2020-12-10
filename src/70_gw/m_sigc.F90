@@ -1620,27 +1620,27 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
      INTMETHOD = NSPLINE
      if (method==3) then
        GK_LEVEL = 15
-       ABI_ALLOCATE(KronN,(GK_LEVEL))
-       ABI_ALLOCATE(KronW,(GK_LEVEL))
-       ABI_ALLOCATE(GaussW,(GK_LEVEL-8))
-       ABI_ALLOCATE(fint,(GK_LEVEL))
-       ABI_ALLOCATE(fint2,(GK_LEVEL))
+       ABI_MALLOC(KronN,(GK_LEVEL))
+       ABI_MALLOC(KronW,(GK_LEVEL))
+       ABI_MALLOC(GaussW,(GK_LEVEL-8))
+       ABI_MALLOC(fint,(GK_LEVEL))
+       ABI_MALLOC(fint2,(GK_LEVEL))
        KronN(:) = Kron15N(:); KronW(:) = Kron15W(:); GaussW(:) = Gau7W(:)
      else if (method==4) then
        GK_LEVEL = 23
-       ABI_ALLOCATE(KronN,(GK_LEVEL))
-       ABI_ALLOCATE(KronW,(GK_LEVEL))
-       ABI_ALLOCATE(GaussW,(GK_LEVEL-12))
-       ABI_ALLOCATE(fint,(GK_LEVEL))
-       ABI_ALLOCATE(fint2,(GK_LEVEL))
+       ABI_MALLOC(KronN,(GK_LEVEL))
+       ABI_MALLOC(KronW,(GK_LEVEL))
+       ABI_MALLOC(GaussW,(GK_LEVEL-12))
+       ABI_MALLOC(fint,(GK_LEVEL))
+       ABI_MALLOC(fint2,(GK_LEVEL))
        KronN(:) = Kron23N(:); KronW(:) = Kron23W(:); GaussW(:) = Gau11W(:)
      else if (method>4) then
        GK_LEVEL = 31
-       ABI_ALLOCATE(KronN,(GK_LEVEL))
-       ABI_ALLOCATE(KronW,(GK_LEVEL))
-       ABI_ALLOCATE(GaussW,(GK_LEVEL-16))
-       ABI_ALLOCATE(fint,(GK_LEVEL))
-       ABI_ALLOCATE(fint2,(GK_LEVEL))
+       ABI_MALLOC(KronN,(GK_LEVEL))
+       ABI_MALLOC(KronW,(GK_LEVEL))
+       ABI_MALLOC(GaussW,(GK_LEVEL-16))
+       ABI_MALLOC(fint,(GK_LEVEL))
+       ABI_MALLOC(fint2,(GK_LEVEL))
        KronN(:) = Kron31N(:); KronW(:) = Kron31W(:); GaussW(:) = Gau15W(:)
      end if
    end if
@@ -1929,11 +1929,11 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
  npoles_missing = npoles_missing + my_err
 
  if (INTMETHOD>2) then
-   ABI_DEALLOCATE(KronN)
-   ABI_DEALLOCATE(KronW)
-   ABI_DEALLOCATE(GaussW)
-   ABI_DEALLOCATE(fint)
-   ABI_DEALLOCATE(fint2)
+   ABI_FREE(KronN)
+   ABI_FREE(KronW)
+   ABI_FREE(GaussW)
+   ABI_FREE(fint)
+   ABI_FREE(fint2)
  end if
 
 end subroutine calc_sigc_cd
@@ -2012,7 +2012,7 @@ subroutine calc_sig_ppm_comp(npwc,nomega,rhotwgp,botsq,otq,omegame0i_io,zcut,the
    ABI_ERROR(msg)
  end if
 
- ABI_ALLOCATE(ket_comp,(npwc))
+ ABI_MALLOC(ket_comp,(npwc))
  ket_comp(:)=0.d0
 
  fully_occupied=(abs(theta_mu_minus_e0i-1.)<0.001)
@@ -2055,7 +2055,7 @@ subroutine calc_sig_ppm_comp(npwc,nomega,rhotwgp,botsq,otq,omegame0i_io,zcut,the
    ket(:,io)=ket(:,io)+0.5*ket_comp(:)
  end do
 
- ABI_DEALLOCATE(ket_comp)
+ ABI_FREE(ket_comp)
 
 end subroutine calc_sig_ppm_comp
 !!***

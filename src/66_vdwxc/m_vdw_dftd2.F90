@@ -171,7 +171,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
  end if
 
 !Identify type(s) of atoms
- ABI_ALLOCATE(ivdw,(ntypat))
+ ABI_MALLOC(ivdw,(ntypat))
  do itypat=1,ntypat
    ivdw(itypat)=-1;jtypat=0
    call atomdata_from_znucl(atom,znucl(itypat))
@@ -199,8 +199,8 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
    write(msg,'(a,i8,a)')'  Van der Waals DFT-D2 correction not compatible with ixc=',ixc,' !'
    ABI_ERROR(msg)
  end if
- ABI_ALLOCATE(vdw_c6,(ntypat,ntypat))
- ABI_ALLOCATE(vdw_r0,(ntypat,ntypat))
+ ABI_MALLOC(vdw_c6,(ntypat,ntypat))
+ ABI_MALLOC(vdw_r0,(ntypat,ntypat))
  do itypat=1,ntypat
    do jtypat=1,ntypat
      vdw_c6(itypat,jtypat)=sqrt(vdw_c6_dftd2(ivdw(itypat))*vdw_c6_dftd2(ivdw(jtypat)))
@@ -222,7 +222,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !Map reduced coordinates into [0,1]
- ABI_ALLOCATE(xred01,(3,natom))
+ ABI_MALLOC(xred01,(3,natom))
  do ia=1,natom
    xred01(1,ia)=xred(1,ia)-aint(xred(1,ia))+half-sign(half,xred(1,ia))
    xred01(2,ia)=xred(2,ia)-aint(xred(2,ia))+half-sign(half,xred(2,ia))
@@ -480,10 +480,10 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
    call wrtout(std_out,msg,'COLL')
  end if
 
- ABI_DEALLOCATE(ivdw)
- ABI_DEALLOCATE(vdw_c6)
- ABI_DEALLOCATE(vdw_r0)
- ABI_DEALLOCATE(xred01)
+ ABI_FREE(ivdw)
+ ABI_FREE(vdw_c6)
+ ABI_FREE(vdw_r0)
+ ABI_FREE(xred01)
 
  DBG_EXIT("COLL")
 

@@ -144,18 +144,18 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !======================================
 !Allocations: levels and eigenvectors
 !======================================
- ABI_DATATYPE_ALLOCATE(level_diag,(natom))
- ABI_DATATYPE_ALLOCATE(eigvectmatlu,(natom,nsppol))
- ABI_DATATYPE_ALLOCATE(udens_atoms,(natom))
+ ABI_MALLOC(level_diag,(natom))
+ ABI_MALLOC(eigvectmatlu,(natom,nsppol))
+ ABI_MALLOC(udens_atoms,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
  do iatom=1,cryst_struc%natom
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu/=-1) then
      tndim=nspinor*(2*lpawu+1)
      do isppol=1,nsppol
-       ABI_ALLOCATE(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
+       ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
      end do
-     ABI_ALLOCATE(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     ABI_MALLOC(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
      level_diag(iatom)%mat=czero
    end if
  end do
@@ -209,7 +209,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !========================
 !Compute Weiss function
 !========================
- ABI_ALLOCATE(Id,(20,20,nspinor,nspinor))
+ ABI_MALLOC(Id,(20,20,nspinor,nspinor))
  do iatom = 1 , natom
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu/=-1) then
@@ -241,7 +241,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
      end do ! ifreq
    end if ! lpawu
  end do ! natom
- ABI_DEALLOCATE(Id)
+ ABI_FREE(Id)
 
 !=================================================================
 !Diagonalizes atomic levels and keep eigenvectors in eigvectmatlu
@@ -350,18 +350,18 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  call destroy_green(green_hubbard)
  call destroy_oper(energy_level)
  call destroy_matlu(level_diag,natom)
- ABI_DATATYPE_DEALLOCATE(level_diag)
+ ABI_FREE(level_diag)
  do iatom=1,cryst_struc%natom
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu/=-1) then
-     ABI_DEALLOCATE(udens_atoms(iatom)%value)
+     ABI_FREE(udens_atoms(iatom)%value)
      do isppol=1,nsppol
-       ABI_DEALLOCATE(eigvectmatlu(iatom,isppol)%value)
+       ABI_FREE(eigvectmatlu(iatom,isppol)%value)
      end do
    end if
  end do
- ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
- ABI_DATATYPE_DEALLOCATE(udens_atoms)
+ ABI_FREE(eigvectmatlu)
+ ABI_FREE(udens_atoms)
 !!***
 
 contains
@@ -464,18 +464,18 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !      ===================================
 !      Allocations
 !      ===================================
-       ABI_DATATYPE_ALLOCATE(occ_level,(0:nlevels))
-       ABI_ALLOCATE(maxener,(0:nlevels))
-       ABI_ALLOCATE(minener,(0:nlevels))
-       ABI_ALLOCATE(elevels,(nlevels))
-       ABI_DATATYPE_ALLOCATE(e_nelec,(0:nlevels))
+       ABI_MALLOC(occ_level,(0:nlevels))
+       ABI_MALLOC(maxener,(0:nlevels))
+       ABI_MALLOC(minener,(0:nlevels))
+       ABI_MALLOC(elevels,(nlevels))
+       ABI_MALLOC(e_nelec,(0:nlevels))
        do nelec=0,nlevels ! number of electrons
          cnk=nint(permutations(nlevels,nelec)/factorial(nelec))
-         ABI_ALLOCATE(occ_level(nelec)%repart      ,(cnk,nelec))
-         ABI_ALLOCATE(occ_level(nelec)%ocp         ,(cnk,nlevels))
-         ABI_ALLOCATE(occ_level(nelec)%transition  ,(cnk,nlevels-nelec))
-         ABI_ALLOCATE(occ_level(nelec)%transition_m,(cnk,nlevels))
-         ABI_ALLOCATE(e_nelec  (nelec)%config      ,(cnk))
+         ABI_MALLOC(occ_level(nelec)%repart      ,(cnk,nelec))
+         ABI_MALLOC(occ_level(nelec)%ocp         ,(cnk,nlevels))
+         ABI_MALLOC(occ_level(nelec)%transition  ,(cnk,nlevels-nelec))
+         ABI_MALLOC(occ_level(nelec)%transition_m,(cnk,nlevels))
+         ABI_MALLOC(e_nelec  (nelec)%config      ,(cnk))
          e_nelec(nelec)%config(:)=zero
 !        write(std_out,*) "permutations",nint(permutations(nlevels,nelec)/factorial(nelec))
 !        write(std_out,*) "size",size(occ_level),size(occ_level(nelec)%repart,1)
@@ -485,8 +485,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !        levels
 !        levels
        end do
-       ABI_ALLOCATE(occup,(0:nlevels,nlevels))
-       ABI_ALLOCATE(nconfig_nelec,(0:nlevels))
+       ABI_MALLOC(occup,(0:nlevels,nlevels))
+       ABI_MALLOC(nconfig_nelec,(0:nlevels))
 
 !      ===================================
 !      Initialization
@@ -693,8 +693,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !      ===================================
 !      Built Green Function
 !      ===================================
-       ABI_ALLOCATE(green_temp,(green_hubbard%nw,nlevels))
-       ABI_ALLOCATE(green_temp_realw,(green_hubbard%nw,nlevels))
+       ABI_MALLOC(green_temp,(green_hubbard%nw,nlevels))
+       ABI_MALLOC(green_temp_realw,(green_hubbard%nw,nlevels))
 !      For each freq.
 
        green_temp=czero
@@ -749,26 +749,26 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
        end do
 
 !      End calculation for this frequency
-       ABI_DEALLOCATE(green_temp)
-       ABI_DEALLOCATE(green_temp_realw)
+       ABI_FREE(green_temp)
+       ABI_FREE(green_temp_realw)
 
 !      ===================================
 !      Deallocations
 !      ===================================
        do nelec=0,nlevels
-         ABI_DEALLOCATE(occ_level(nelec)%repart)
-         ABI_DEALLOCATE(occ_level(nelec)%ocp)
-         ABI_DEALLOCATE(occ_level(nelec)%transition)
-         ABI_DEALLOCATE(occ_level(nelec)%transition_m)
-         ABI_DEALLOCATE(e_nelec(nelec)%config)
+         ABI_FREE(occ_level(nelec)%repart)
+         ABI_FREE(occ_level(nelec)%ocp)
+         ABI_FREE(occ_level(nelec)%transition)
+         ABI_FREE(occ_level(nelec)%transition_m)
+         ABI_FREE(e_nelec(nelec)%config)
        end do
-       ABI_DATATYPE_DEALLOCATE(occ_level)
-       ABI_DEALLOCATE(occup)
-       ABI_DEALLOCATE(nconfig_nelec)
-       ABI_DATATYPE_DEALLOCATE(e_nelec)
-       ABI_DEALLOCATE(elevels)
-       ABI_DEALLOCATE(maxener)
-       ABI_DEALLOCATE(minener)
+       ABI_FREE(occ_level)
+       ABI_FREE(occup)
+       ABI_FREE(nconfig_nelec)
+       ABI_FREE(e_nelec)
+       ABI_FREE(elevels)
+       ABI_FREE(maxener)
+       ABI_FREE(minener)
      end if
    end do
    call destroy_green(green_hubbard_realw)

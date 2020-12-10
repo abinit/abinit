@@ -481,7 +481,7 @@ type(abimover_specs),intent(out) :: specs
  ab_mover%znucl       =>dtset%znucl
 
  ab_mover%amu_curr    =>amu_curr
- ABI_ALLOCATE(ab_mover%amass,(natom))
+ ABI_MALLOC(ab_mover%amass,(natom))
  do iatom=1,natom
    ab_mover%amass(iatom)=amu_emass*amu_curr(dtset%typat(iatom))
  end do
@@ -959,9 +959,9 @@ subroutine mttk_ini(mttk_vars,nnos)
  integer,intent(in)  :: nnos
  type(mttk_type), intent(out) :: mttk_vars
 
- ABI_ALLOCATE(mttk_vars%glogs,(nnos))
- ABI_ALLOCATE(mttk_vars%vlogs,(nnos))
- ABI_ALLOCATE(mttk_vars%xlogs,(nnos))
+ ABI_MALLOC(mttk_vars%glogs,(nnos))
+ ABI_MALLOC(mttk_vars%vlogs,(nnos))
+ ABI_MALLOC(mttk_vars%xlogs,(nnos))
 
 end subroutine mttk_ini
 !!***
@@ -1028,8 +1028,8 @@ subroutine abiforstr_ini(forstr,natom)
  integer,intent(in)  :: natom
  type(abiforstr), intent(out) :: forstr
 
- ABI_ALLOCATE(forstr%fcart,(3,natom))
- ABI_ALLOCATE(forstr%fred,(3,natom))
+ ABI_MALLOC(forstr%fcart,(3,natom))
+ ABI_MALLOC(forstr%fred,(3,natom))
 
 end subroutine abiforstr_ini
 !!***
@@ -1163,7 +1163,7 @@ subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
  call make_angles(deloc,natom)
 
- ABI_ALLOCATE(badangles,(deloc%nang))
+ ABI_MALLOC(badangles,(deloc%nang))
  badangles(:) = 0
  do iang=1,deloc%nang
    write(std_out,'(a,i4,3(2i5,2x))') 'angle ', iang, deloc%angs(:,:,iang)
@@ -1216,7 +1216,7 @@ subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
  end do
 
  call make_dihedrals(badangles,deloc)
- ABI_DEALLOCATE(badangles)
+ ABI_FREE(badangles)
 
  do idihed=1,deloc%ndihed
    write(std_out,'(a,i4,4(2i5,2x))') 'dihedral ', idihed, deloc%dihedrals(:,:,idihed)
@@ -1250,7 +1250,7 @@ subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
    end if
  end do
  ABI_SFREE(deloc%carts)
- ABI_ALLOCATE(deloc%carts ,(2,deloc%ncart))
+ ABI_MALLOC(deloc%carts ,(2,deloc%ncart))
  icart = 0
  do iatom=1,natom
    if (particip_atom(iatom) < 4) then
@@ -1307,7 +1307,7 @@ subroutine make_angles(deloc,natom)
 ! *************************************************************************
 
 !tentative first allocation: < 6 angles per bond.
- ABI_ALLOCATE(angs_tmp,(2,3,72*natom))
+ ABI_MALLOC(angs_tmp,(2,3,72*natom))
 
  deloc%nang = 0
 
@@ -1356,11 +1356,11 @@ subroutine make_angles(deloc,natom)
  end do ! ibond
 
  ABI_SFREE(deloc%angs)
- ABI_ALLOCATE(deloc%angs,(2,3,deloc%nang))
+ ABI_MALLOC(deloc%angs,(2,3,deloc%nang))
  do iang=1,deloc%nang
    deloc%angs(:,:,iang) = angs_tmp(:,:,iang)
  end do
- ABI_DEALLOCATE(angs_tmp)
+ ABI_FREE(angs_tmp)
 
 end subroutine make_angles
 !!***
@@ -1404,7 +1404,7 @@ subroutine make_dihedrals(badangles,deloc)
 ! *************************************************************************
 
 !tentative first allocation: < 6 dihedrals per angle.
- ABI_ALLOCATE(diheds_tmp,(2,4,6*deloc%nang))
+ ABI_MALLOC(diheds_tmp,(2,4,6*deloc%nang))
 
  deloc%ndihed = 0
  diheds_tmp(:,:,:) = 0
@@ -1481,7 +1481,7 @@ subroutine make_dihedrals(badangles,deloc)
 
  ABI_SFREE(deloc%dihedrals)
 
- ABI_ALLOCATE(deloc%dihedrals,(2,4,deloc%ndihed))
+ ABI_MALLOC(deloc%dihedrals,(2,4,deloc%ndihed))
  do idihed=1,deloc%ndihed
    deloc%dihedrals(:,:,idihed) = diheds_tmp(:,:,idihed)
 
@@ -1500,7 +1500,7 @@ subroutine make_dihedrals(badangles,deloc)
      ABI_ERROR("dihedral extends beyond first neighboring unit cells!")
    end if
  end do
- ABI_DEALLOCATE(diheds_tmp)
+ ABI_FREE(diheds_tmp)
 
 end subroutine make_dihedrals
 !!***
@@ -1559,7 +1559,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 !write(std_out,*) ' natom =',natom
 
 !tentative first allocation: < 12 bonds per atom.
- ABI_ALLOCATE(bonds_tmp,(2,2,12*natom))
+ ABI_MALLOC(bonds_tmp,(2,2,12*natom))
 
  bondfudge = 1.1_dp
 
@@ -1596,7 +1596,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
  ABI_SFREE(deloc%bonds)
 
- ABI_ALLOCATE(deloc%bonds,(2,2,deloc%nbond))
+ ABI_MALLOC(deloc%bonds,(2,2,deloc%nbond))
  do ibond=1,deloc%nbond
    deloc%bonds(:,:,ibond) = bonds_tmp(:,:,ibond)
  end do
@@ -1606,7 +1606,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 ! write(std_out,*) ' make_bonds : deloc%bonds ', ibond, deloc%bonds(:,:,ibond)
 ! end do
 
-  ABI_DEALLOCATE(bonds_tmp)
+  ABI_FREE(bonds_tmp)
 
 end subroutine make_bonds
 !!***
@@ -2036,13 +2036,13 @@ real(dp) :: rpt(3)
  bonds_tmp%tolerance=bonds%tolerance
  ibond=0
 
- ABI_ALLOCATE(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
- ABI_ALLOCATE(bonds_tmp%bond_length,(natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%bond_length,(natom*natom*14-natom))
 
 !indexi contains the indeces to the bonds
- ABI_ALLOCATE(bonds_tmp%indexi,(natom,natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%indexi,(natom,natom*natom*14-natom))
 
- ABI_ALLOCATE(bonds_tmp%nbondi,(natom))
+ ABI_MALLOC(bonds_tmp%nbondi,(natom))
 
  bonds_tmp%indexi(:,:)=0
  bonds_tmp%nbondi(:)=0
@@ -2162,10 +2162,10 @@ real(dp) :: rpt(3)
 
  if (bonds%nbonds>0) then
 !  Allocate the arrays with exactly the rigth nbonds
-   ABI_ALLOCATE(bonds%bond_vect,(3,bonds%nbonds))
-   ABI_ALLOCATE(bonds%bond_length,(bonds%nbonds))
-   ABI_ALLOCATE(bonds%indexi,(natom,bonds%nbonds))
-   ABI_ALLOCATE(bonds%nbondi,(natom))
+   ABI_MALLOC(bonds%bond_vect,(3,bonds%nbonds))
+   ABI_MALLOC(bonds%bond_length,(bonds%nbonds))
+   ABI_MALLOC(bonds%indexi,(natom,bonds%nbonds))
+   ABI_MALLOC(bonds%nbondi,(natom))
 
 !  Fill the values
    bonds%bond_vect(:,1:bonds%nbonds)=bonds_tmp%bond_vect(:,1:bonds%nbonds)
@@ -2334,7 +2334,7 @@ subroutine delocint_ini(deloc)
    deloc%nrshift=(2*nshell+1)**3
    deloc%icenter = nshell*(2*nshell+1)**2 + nshell*(2*nshell+1) + nshell + 1
 
-   ABI_ALLOCATE(deloc%rshift,(3,deloc%nrshift))
+   ABI_MALLOC(deloc%rshift,(3,deloc%nrshift))
    irshift=0
    do ii=-nshell,nshell
      do jj=-nshell,nshell
@@ -2512,13 +2512,13 @@ real(dp) :: rpt(3)
  bonds_tmp%tolerance=bonds%tolerance
  ibond=0
 
- ABI_ALLOCATE(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
- ABI_ALLOCATE(bonds_tmp%bond_length,(natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%bond_length,(natom*natom*14-natom))
 
 !indexi contains the indeces to the bonds
- ABI_ALLOCATE(bonds_tmp%indexi,(natom,natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%indexi,(natom,natom*natom*14-natom))
 
- ABI_ALLOCATE(bonds_tmp%nbondi,(natom))
+ ABI_MALLOC(bonds_tmp%nbondi,(natom))
 
  bonds_tmp%indexi(:,:)=0
  bonds_tmp%nbondi(:)=0
@@ -2636,10 +2636,10 @@ real(dp) :: rpt(3)
 
  if (bonds%nbonds>0) then
 !  Allocate the arrays with exactly the rigth nbonds
-   ABI_ALLOCATE(bonds%bond_vect,(3,bonds%nbonds))
-   ABI_ALLOCATE(bonds%bond_length,(bonds%nbonds))
-   ABI_ALLOCATE(bonds%indexi,(natom,bonds%nbonds))
-   ABI_ALLOCATE(bonds%nbondi,(natom))
+   ABI_MALLOC(bonds%bond_vect,(3,bonds%nbonds))
+   ABI_MALLOC(bonds%bond_length,(bonds%nbonds))
+   ABI_MALLOC(bonds%indexi,(natom,bonds%nbonds))
+   ABI_MALLOC(bonds%nbondi,(natom))
 
 !  Fill the values
    bonds%bond_vect(:,1:bonds%nbonds)=bonds_tmp%bond_vect(:,1:bonds%nbonds)

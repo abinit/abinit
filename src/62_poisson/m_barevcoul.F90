@@ -234,9 +234,9 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
  
- ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
- ABI_ALLOCATE(gpq,(nfft))
- ABI_ALLOCATE(gpq2,(nfft))
+ ABI_MALLOC(gq,(3,max(n1,n2,n3)))
+ ABI_MALLOC(gpq,(nfft))
+ ABI_MALLOC(gpq2,(nfft))
  
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
@@ -507,9 +507,9 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    ABI_WARNING(msg)
  END SELECT
 
- ABI_DEALLOCATE(gq)
- ABI_DEALLOCATE(gpq)
- ABI_DEALLOCATE(gpq2)
+ ABI_FREE(gq)
+ ABI_FREE(gpq)
+ ABI_FREE(gpq2)
   
 end subroutine barevcoul
 !!***

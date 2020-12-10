@@ -143,7 +143,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn)
 
 !************************************************************************
 
- ABI_ALLOCATE(nprj,(0:MAXVAL(orbitals)))
+ ABI_MALLOC(nprj,(0:MAXVAL(orbitals)))
 
  ilmn=0; iln=0; nprj=0
  do ib=1,ln_size
@@ -161,7 +161,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn)
    ilmn=ilmn+2*il+1
  end do
 
- ABI_DEALLOCATE(nprj)
+ ABI_FREE(nprj)
 
 end subroutine make_indlmn
 !!***

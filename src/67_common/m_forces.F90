@@ -234,7 +234,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  call timab(69,1,tsec)
 
 !Save input value of forces
- ABI_ALLOCATE(fin,(3,dtset%natom))
+ ABI_MALLOC(fin,(3,dtset%natom))
  fin(:,:)=fcart(:,:)
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -248,7 +248,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !========= Local pseudopotential and core charge contributions =========
 !=======================================================================
 
- ABI_ALLOCATE(grl,(3,dtset%natom))
+ ABI_MALLOC(grl,(3,dtset%natom))
 
 !Determine by which method the local ionic potential and/or the pseudo core
 !  charge density contributions have to be computed
@@ -277,23 +277,23 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    end if
    call timab(550,1,tsec)
 !  Allocate (unused) dummy variables, otherwise some compilers complain
-   ABI_ALLOCATE(gauss_dum,(0,0))
-   ABI_ALLOCATE(atmrho_dum,(0))
-   ABI_ALLOCATE(atmvloc_dum,(0))
-   ABI_ALLOCATE(dyfrn_dum,(0,0,0))
-   ABI_ALLOCATE(dyfrv_dum,(0,0,0))
-   ABI_ALLOCATE(eltfrn_dum,(0,0))
+   ABI_MALLOC(gauss_dum,(0,0))
+   ABI_MALLOC(atmrho_dum,(0))
+   ABI_MALLOC(atmvloc_dum,(0))
+   ABI_MALLOC(dyfrn_dum,(0,0,0))
+   ABI_MALLOC(dyfrv_dum,(0,0,0))
+   ABI_MALLOC(eltfrn_dum,(0,0))
 !  Compute Vxc in reciprocal space
    if (coredens_method==1.and.n3xccc>0) then
-     ABI_ALLOCATE(v_dum,(nfft))
-     ABI_ALLOCATE(vxctotg,(2,nfft))
+     ABI_MALLOC(v_dum,(nfft))
+     ABI_MALLOC(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (dtset%nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
      call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
+     ABI_FREE(v_dum)
    else
-     ABI_ALLOCATE(vxctotg,(0,0))
+     ABI_MALLOC(vxctotg,(0,0))
    end if
 !  Compute contribution to forces from Vloc and/or pseudo core density
    optv=0;if (vloc_method==1) optv=1
@@ -309,19 +309,19 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    end if
    if (n3xccc==0.and.coredens_method==1) grxc=zero
-   ABI_DEALLOCATE(vxctotg)
+   ABI_FREE(vxctotg)
    if (dtset%usekden==1.and.coretau_method==1..and.n3xccc>0) then
 !    Compute contribution to forces from pseudo kinetic energy core density
      optv=0;optn=1;optn2=4
-     ABI_ALLOCATE(grxctau,(3,dtset%natom))
-     ABI_ALLOCATE(grl_dum,(0,0))
-     ABI_ALLOCATE(v_dum,(nfft))
-     ABI_ALLOCATE(vxctotg,(2,nfft))
+     ABI_MALLOC(grxctau,(3,dtset%natom))
+     ABI_MALLOC(grl_dum,(0,0))
+     ABI_MALLOC(v_dum,(nfft))
+     ABI_MALLOC(vxctotg,(2,nfft))
      v_dum(:)=vxctau(:,1,1);if (dtset%nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxctau(:,2,1))
      call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
+     ABI_FREE(v_dum)
      call atm2fft(atindx1,atmrho_dum,atmvloc_dum,dyfrn_dum,dyfrv_dum,&
 &     eltfrn_dum,gauss_dum,gmet,gprimd,&
 &     grxctau,grl_dum,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
@@ -330,26 +330,26 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
      grxc(:,:)=grxc(:,:)+grxctau(:,:)
-     ABI_DEALLOCATE(grl_dum)
-     ABI_DEALLOCATE(grxctau)
-     ABI_DEALLOCATE(vxctotg)
+     ABI_FREE(grl_dum)
+     ABI_FREE(grxctau)
+     ABI_FREE(vxctotg)
    end if
 !  Deallocate temporary arrays
-   ABI_DEALLOCATE(gauss_dum)
-   ABI_DEALLOCATE(atmrho_dum)
-   ABI_DEALLOCATE(atmvloc_dum)
-   ABI_DEALLOCATE(dyfrn_dum)
-   ABI_DEALLOCATE(dyfrv_dum)
-   ABI_DEALLOCATE(eltfrn_dum)
+   ABI_FREE(gauss_dum)
+   ABI_FREE(atmrho_dum)
+   ABI_FREE(atmvloc_dum)
+   ABI_FREE(dyfrn_dum)
+   ABI_FREE(dyfrv_dum)
+   ABI_FREE(eltfrn_dum)
    call timab(550,2,tsec)
  end if
 
 !Local ionic potential by method 2
  if (vloc_method==2) then
    option=2
-   ABI_ALLOCATE(dyfrlo_dum,(3,3,dtset%natom))
-   ABI_ALLOCATE(grtn_indx,(3,dtset%natom))
-   ABI_ALLOCATE(v_dum,(nfft))
+   ABI_MALLOC(dyfrlo_dum,(3,3,dtset%natom))
+   ABI_MALLOC(grtn_indx,(3,dtset%natom))
+   ABI_MALLOC(v_dum,(nfft))
    call mklocl(dtset,dyfrlo_dum,eei_dum1,gmet,gprimd,grtn_indx,gsqcut,dummy6,mgfft,&
 &   mpi_enreg,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,ntypat,option,pawtab,ph1d,psps,&
 &   qprtrb_dum,rhog,rhor,rprimd,ucvol,vprtrb_dum,v_dum,wvl,wvl_den,xred)
@@ -357,16 +357,16 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !    Has to use the indexing array atindx1
      grl(1:3,atindx1(iatom))=grtn_indx(1:3,iatom)
    end do
-   ABI_DEALLOCATE(dyfrlo_dum)
-   ABI_DEALLOCATE(grtn_indx)
-   ABI_DEALLOCATE(v_dum)
+   ABI_FREE(dyfrlo_dum)
+   ABI_FREE(grtn_indx)
+   ABI_FREE(v_dum)
 !  If gradients are computed in real space, we need to symmetrize the system before summing.
 !  Rshaltaf: I changed the following line to include surfaces BC
    if (dtset%icoulomb == 1 .or. dtset%icoulomb == 2) then
-     ABI_ALLOCATE(grnl_tmp,(3,dtset%natom))
+     ABI_MALLOC(grnl_tmp,(3,dtset%natom))
      call sygrad(grnl_tmp,dtset%natom,grl,dtset%nsym,symrec,indsym)
      grl(:, :) = grnl_tmp(:, :)
-     ABI_DEALLOCATE(grnl_tmp)
+     ABI_FREE(grnl_tmp)
    end if
  end if
 
@@ -375,8 +375,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    if (n1xccc/=0) then
      call timab(53,1,tsec)
      option=2
-     ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
-     ABI_ALLOCATE(xccc3d_dum,(n3xccc))
+     ABI_MALLOC(dyfrx2_dum,(3,3,dtset%natom))
+     ABI_MALLOC(xccc3d_dum,(n3xccc))
      if (coredens_method==2) then
        if (is_hybrid_ncpp) then
          call xchybrid_ncpp_cc(dtset,eei_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
@@ -407,16 +407,16 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
        end if
      end if
      if (dtset%usekden==1.and.coretau_method==2) then
-       ABI_ALLOCATE(grxctau,(3,dtset%natom))
+       ABI_MALLOC(grxctau,(3,dtset%natom))
        call mkcore_alt(atindx1,dummy6,dyfrx2_dum,grxctau,dtset%icoulomb,mpi_enreg,dtset%natom,nfft,&
 &       dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
 &       ucvol,vxctau(:,:,1),psps%xcccrc,psps%xccc1d,xccc3d_dum,xred,pawrad,pawtab,psps%usepaw,&
 &       usekden=.true.)
        grxc(:,:)=grxc(:,:)+grxctau(:,:)
-       ABI_DEALLOCATE(grxctau)
+       ABI_FREE(grxctau)
      end if
-     ABI_DEALLOCATE(xccc3d_dum)
-     ABI_DEALLOCATE(dyfrx2_dum)
+     ABI_FREE(xccc3d_dum)
+     ABI_FREE(dyfrx2_dum)
      call timab(53,2,tsec)
    else
      grxc(:,:)=zero
@@ -428,7 +428,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !=======================================================================
 
 !Only has to apply symmetries
- ABI_ALLOCATE(grnl_tmp,(3,dtset%natom))
+ ABI_MALLOC(grnl_tmp,(3,dtset%natom))
  do iatom=1,dtset%natom
    indx=3*(iatom-1);grnl_tmp(1:3,atindx1(iatom))=grnl(indx+1:indx+3)
  end do
@@ -437,7 +437,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  else
    synlgr = grnl_tmp
  end if
- ABI_DEALLOCATE(grnl_tmp)
+ ABI_FREE(grnl_tmp)
 
 !=======================================================================
 !============ Density/potential residual contributions =================
@@ -468,7 +468,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 & dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17)
  calc_epaw3_forces = (efield_flag .and. dtset%optforces /= 0 .and. psps%usepaw == 1)
  if ( efield_flag ) then
-   ABI_ALLOCATE(fionred,(3,dtset%natom))
+   ABI_MALLOC(fionred,(3,dtset%natom))
    fionred(:,:)=zero
    do iatom=1,dtset%natom
      itypat=dtset%typat(iatom)
@@ -488,7 +488,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 
 !(compute additional F3-type force due to projectors for electric field with PAW)
  if ( efield_flag .and. calc_epaw3_forces ) then
-   ABI_ALLOCATE(epawf3red,(3,dtset%natom))
+   ABI_MALLOC(epawf3red,(3,dtset%natom))
 ! dtefield%epawf3(iatom,idir,fdir) contains
    epawf3red(:,:)=zero
    do iatom=1,dtset%natom
@@ -527,7 +527,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 
 !Collect grads of etot wrt reduced coordinates
 !This gives non-symmetrized Hellman-Feynman reduced gradients
- ABI_ALLOCATE(grtn,(3,dtset%natom))
+ ABI_MALLOC(grtn,(3,dtset%natom))
  grtn(:,:)=grl(:,:)+grchempottn(:,:)+grcondft(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 
  if (usefock==1 .and. associated(fock)) then
@@ -616,13 +616,13 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 
 !=======================================================================
 !Memory deallocations
- ABI_DEALLOCATE(grl)
- ABI_DEALLOCATE(grtn)
- ABI_DEALLOCATE(fin)
+ ABI_FREE(grl)
+ ABI_FREE(grtn)
+ ABI_FREE(fin)
  if ( efield_flag )  then
-   ABI_DEALLOCATE(fionred)
+   ABI_FREE(fionred)
    if ( calc_epaw3_forces ) then
-     ABI_DEALLOCATE(epawf3red)
+     ABI_FREE(epawf3red)
    end if
  end if
 
@@ -805,15 +805,15 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
 
 !Inits
  optatm=0;optdyfr=0;opteltfr=0;optgr=1;optstr=0;optv=0;optn=1
- ABI_ALLOCATE(vresg,(2,nfft))
+ ABI_MALLOC(vresg,(2,nfft))
 
 !Transfer potential residual to reciprocal space
 !Use only Vres=Vres11+Vres22=Vres_up+Vres_dn
- ABI_ALLOCATE(work,(nfft))
+ ABI_MALLOC(work,(nfft))
  work(:)=vresid(:,1)
  if (dtset%nspden>=2) work(:)=work(:)+vresid(:,2)
  call fourdp(1,vresg,work,-1,mpi_enreg,nfft,1,ngfft,0)
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
 !Determine wether a gaussan atomic density has to be used or not
  usegauss=.true.
@@ -821,7 +821,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  if (usepaw==1) usegauss=(minval(pawtab(1:ntypat)%has_tvale)==0)
  if (usegauss) then
    optn2=3
-   ABI_ALLOCATE(gauss,(2,ntypat))
+   ABI_MALLOC(gauss,(2,ntypat))
    do itypat=1,ntypat
      gauss(1,itypat)=zion(itypat)
      gauss(2,itypat) = atom_length(dtset%densty(itypat,1),zion(itypat),znucl(itypat))
@@ -829,7 +829,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
    call wrtout(std_out," Computing residual forces using gaussian functions as atomic densities", "COLL")
  else
    optn2=2
-   ABI_ALLOCATE(gauss,(2,0))
+   ABI_MALLOC(gauss,(2,0))
    call wrtout(std_out," Computing residual forces using atomic densities taken from pseudos", "COLL")
  end if
 
@@ -844,8 +844,8 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
 !In case of nspden>=2, has to apply 1/2 factor
  if (dtset%nspden>=2) gresid=gresid*half
 
- ABI_DEALLOCATE(gauss)
- ABI_DEALLOCATE(vresg)
+ ABI_FREE(gauss)
+ ABI_FREE(vresg)
 
 end subroutine fresidrsp
 !!***
@@ -978,8 +978,8 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
  n4=n3/mpi_enreg%nproc_fft
  nfftot=PRODUCT(ngfft(1:3));nfft_tmp=nfftot
  if(mpi_enreg%paral_kgb==1) then
-   ABI_ALLOCATE(rhor_tot,(nfftot,dtset%nspden))
-   ABI_ALLOCATE(work_tot,(nfftot,dtset%nspden))
+   ABI_MALLOC(rhor_tot,(nfftot,dtset%nspden))
+   ABI_MALLOC(work_tot,(nfftot,dtset%nspden))
    do ispden=1,dtset%nspden
      call pre_gather(rhor(:,ispden),rhor_tot(:,ispden),n1,n2,n3,n4,mpi_enreg)
      call pre_gather(work(:,ispden),work_tot(:,ispden),n1,n2,n3,n4,mpi_enreg)
@@ -990,9 +990,9 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
  quit=0
 
 !Initialize appropriation function
- ABI_ALLOCATE(approp,(nfft_tmp))
- ABI_ALLOCATE(atmrho,(nfft_tmp,dtset%nspden))
- ABI_ALLOCATE(my_sphere,(nfft_tmp))
+ ABI_MALLOC(approp,(nfft_tmp))
+ ABI_MALLOC(atmrho,(nfft_tmp,dtset%nspden))
+ ABI_MALLOC(my_sphere,(nfft_tmp))
 
  approp(:)=app_remain
 !First loop over atoms in unit cell : build appropriation function
@@ -1046,8 +1046,8 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 
 !    Allocate ii and rrdiff
      mshift=2*maxval(irange(1:3))+1
-     ABI_ALLOCATE(ii,(mshift,3))
-     ABI_ALLOCATE(rrdiff,(mshift,3))
+     ABI_MALLOC(ii,(mshift,3))
+     ABI_MALLOC(rrdiff,(mshift,3))
 
 !    Consider each component in turn
      do mu=1,3
@@ -1385,8 +1385,8 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
        rho_tot(1:dtset%nspden)=rho_tot(1:dtset%nspden)+rhosum(1:dtset%nspden)*nfftot
      end if
 
-     ABI_DEALLOCATE(ii)
-     ABI_DEALLOCATE(rrdiff)
+     ABI_FREE(ii)
+     ABI_FREE(rrdiff)
 
 !    End loop on atoms
    end do
@@ -1458,12 +1458,12 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 !  ENDDEBUG
  end if
 
- ABI_DEALLOCATE(approp)
- ABI_DEALLOCATE(atmrho)
- ABI_DEALLOCATE(my_sphere)
+ ABI_FREE(approp)
+ ABI_FREE(atmrho)
+ ABI_FREE(my_sphere)
  if(mpi_enreg%paral_kgb==1) then
-   ABI_DEALLOCATE(rhor_tot)
-   ABI_DEALLOCATE(work_tot)
+   ABI_FREE(rhor_tot)
+   ABI_FREE(work_tot)
  end if
 
 !DEBUG
@@ -1551,14 +1551,14 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 !************************************************************************
 
 !Allocate temporary variables
- ABI_ALLOCATE(fpcart,(3,natom))
- ABI_ALLOCATE(fcartvec,(3*natom))
- ABI_ALLOCATE(fvector,(nconeq))
- ABI_ALLOCATE(vel_dummy,(3,natom))
- ABI_ALLOCATE(wmatrix,(nconeq,nconeq))
- ABI_ALLOCATE(wtatconvec,(3*natom,nconeq))
- ABI_ALLOCATE(wtcoeffs,(nconeq))
- ABI_ALLOCATE(xcart,(3,natom))
+ ABI_MALLOC(fpcart,(3,natom))
+ ABI_MALLOC(fcartvec,(3*natom))
+ ABI_MALLOC(fvector,(nconeq))
+ ABI_MALLOC(vel_dummy,(3,natom))
+ ABI_MALLOC(wmatrix,(nconeq,nconeq))
+ ABI_MALLOC(wtatconvec,(3*natom,nconeq))
+ ABI_MALLOC(wtcoeffs,(nconeq))
+ ABI_MALLOC(xcart,(3,natom))
 
 !If prtvol>10, output coordinates and forces prior to projecting
  if(prtvol>=10)then
@@ -1649,14 +1649,14 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
  forold(:,:)=fcart(:,:)
 
 !Dellocate temporary variables
- ABI_DEALLOCATE(fpcart)
- ABI_DEALLOCATE(fcartvec)
- ABI_DEALLOCATE(fvector)
- ABI_DEALLOCATE(vel_dummy)
- ABI_DEALLOCATE(wmatrix)
- ABI_DEALLOCATE(wtatconvec)
- ABI_DEALLOCATE(wtcoeffs)
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(fpcart)
+ ABI_FREE(fcartvec)
+ ABI_FREE(fvector)
+ ABI_FREE(vel_dummy)
+ ABI_FREE(wmatrix)
+ ABI_FREE(wtatconvec)
+ ABI_FREE(wtcoeffs)
+ ABI_FREE(xcart)
 
 end subroutine constrf
 !!***

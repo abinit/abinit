@@ -197,13 +197,13 @@ subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff
  fit_data%natom = natom
 
 !allocate arrays
- ABI_ALLOCATE(fit_data%fcart_diff,(3,natom,ntime))
+ ABI_MALLOC(fit_data%fcart_diff,(3,natom,ntime))
  fit_data%fcart_diff(:,:,:) = fcart_diff(:,:,:)
  
- ABI_ALLOCATE(fit_data%strten_diff,(6,ntime))
+ ABI_MALLOC(fit_data%strten_diff,(6,ntime))
  fit_data%strten_diff(:,:) = strten_diff(:,:)
 
- ABI_ALLOCATE(fit_data%energy_diff,(ntime))
+ ABI_MALLOC(fit_data%energy_diff,(ntime))
  fit_data%energy_diff(:) = energy_diff
  
  call training_set_init(fit_data%training_set,ts%displacement,ts%du_delta,&
@@ -250,13 +250,13 @@ subroutine fit_data_free(fit_data)
 
 ! Deallocate arrays  
   if(allocated(fit_data%energy_diff)) then
-    ABI_DEALLOCATE(fit_data%energy_diff)
+    ABI_FREE(fit_data%energy_diff)
   end if
   if(allocated(fit_data%fcart_diff)) then
-    ABI_DEALLOCATE(fit_data%fcart_diff)
+    ABI_FREE(fit_data%fcart_diff)
   end if
   if(allocated(fit_data%strten_diff)) then
-    ABI_DEALLOCATE(fit_data%strten_diff)
+    ABI_FREE(fit_data%strten_diff)
   end if
   call training_set_free(fit_data%training_set)
    
@@ -340,17 +340,17 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  end if
 
 !Allocation of temporary arrays
- ABI_ALLOCATE(displacement,(3,natom,ntime))
- ABI_ALLOCATE(du_delta,(6,3,natom,ntime))
- ABI_ALLOCATE(energy_diff,(ntime))
- ABI_ALLOCATE(fcart_fixed,(3,natom,ntime))
- ABI_ALLOCATE(fcart_diff,(3,natom,ntime))
- ABI_ALLOCATE(fred_fixed,(3,natom,ntime))
- ABI_ALLOCATE(strain,(6,ntime))
- ABI_ALLOCATE(strten_fixed,(6,ntime))
- ABI_ALLOCATE(strten_diff,(6,ntime))
- ABI_ALLOCATE(sqomega,(ntime))
- ABI_ALLOCATE(ucvol,(ntime))
+ ABI_MALLOC(displacement,(3,natom,ntime))
+ ABI_MALLOC(du_delta,(6,3,natom,ntime))
+ ABI_MALLOC(energy_diff,(ntime))
+ ABI_MALLOC(fcart_fixed,(3,natom,ntime))
+ ABI_MALLOC(fcart_diff,(3,natom,ntime))
+ ABI_MALLOC(fred_fixed,(3,natom,ntime))
+ ABI_MALLOC(strain,(6,ntime))
+ ABI_MALLOC(strten_fixed,(6,ntime))
+ ABI_MALLOC(strten_diff,(6,ntime))
+ ABI_MALLOC(sqomega,(ntime))
+ ABI_MALLOC(ucvol,(ntime))
 
  displacement = zero 
  du_delta = zero 
@@ -410,17 +410,17 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 
 !Free space
  call training_set_free(ts)
- ABI_DEALLOCATE(displacement)
- ABI_DEALLOCATE(du_delta)
- ABI_DEALLOCATE(energy_diff)
- ABI_DEALLOCATE(fcart_fixed)
- ABI_DEALLOCATE(fcart_diff)
- ABI_DEALLOCATE(fred_fixed)
- ABI_DEALLOCATE(strain)
- ABI_DEALLOCATE(strten_fixed)
- ABI_DEALLOCATE(strten_diff)
- ABI_DEALLOCATE(sqomega)
- ABI_DEALLOCATE(ucvol)
+ ABI_FREE(displacement)
+ ABI_FREE(du_delta)
+ ABI_FREE(energy_diff)
+ ABI_FREE(fcart_fixed)
+ ABI_FREE(fcart_diff)
+ ABI_FREE(fred_fixed)
+ ABI_FREE(strain)
+ ABI_FREE(strten_fixed)
+ ABI_FREE(strten_diff)
+ ABI_FREE(sqomega)
+ ABI_FREE(ucvol)
 
 end subroutine fit_data_compute
 !!***
@@ -477,19 +477,19 @@ subroutine training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega
  ts%natom = natom
 
 !allocate arrays
- ABI_ALLOCATE(ts%displacement,(3,natom,ntime))
+ ABI_MALLOC(ts%displacement,(3,natom,ntime))
  ts%displacement(:,:,:) = displacement(:,:,:)
  
- ABI_ALLOCATE(ts%du_delta,(6,3,natom,ntime))
+ ABI_MALLOC(ts%du_delta,(6,3,natom,ntime))
  ts%du_delta(:,:,:,:) = du_delta(:,:,:,:)
  
- ABI_ALLOCATE(ts%strain,(6,ntime))
+ ABI_MALLOC(ts%strain,(6,ntime))
  ts%strain(:,:) = strain(:,:)
  
- ABI_ALLOCATE(ts%sqomega,(ntime))
+ ABI_MALLOC(ts%sqomega,(ntime))
  ts%sqomega(:) = sqomega(:)
  
- ABI_ALLOCATE(ts%ucvol,(ntime))
+ ABI_MALLOC(ts%ucvol,(ntime))
  ts%ucvol(:) = ucvol(:)
  
 end subroutine training_set_init
@@ -533,19 +533,19 @@ subroutine training_set_free(ts)
 
 ! Deallocate arrays  
   if(allocated(ts%displacement)) then
-    ABI_DEALLOCATE(ts%displacement)
+    ABI_FREE(ts%displacement)
   end if
   if(allocated(ts%du_delta)) then
-    ABI_DEALLOCATE(ts%du_delta)
+    ABI_FREE(ts%du_delta)
   end if
   if(allocated(ts%strain)) then
-    ABI_DEALLOCATE(ts%strain)
+    ABI_FREE(ts%strain)
   end if
   if(allocated(ts%sqomega))then
-    ABI_DEALLOCATE(ts%sqomega)
+    ABI_FREE(ts%sqomega)
   end if
   if(allocated(ts%ucvol)) then
-    ABI_DEALLOCATE(ts%ucvol)
+    ABI_FREE(ts%ucvol)
   end if
    
 end subroutine training_set_free

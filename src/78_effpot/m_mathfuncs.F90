@@ -308,12 +308,12 @@ contains
 
     real(dp), intent(out)::a(:,:)
     real(dp), allocatable :: b(:,:)
-    ABI_ALLOCATE(b, (size(a,dim=1), size(a, dim=2)))
+    ABI_MALLOC(b, (size(a,dim=1), size(a, dim=2)))
     call random_number(a)
     b(:,:) = sqrt(-2*dlog(1.0-a(:,:)))
     call random_number(a)
     a(:,:)=b(:,:)*cos(PI*a(:,:))
-    ABI_DEALLOCATE(b)
+    ABI_FREE(b)
   end subroutine rand_normal_builtin
 
   !-------------------------------------------------------------------!
@@ -373,12 +373,12 @@ contains
     external ZHEEV
     ndim = size(evecs, 1)
     lwork = -1
-    ABI_ALLOCATE(work , (1))
+    ABI_MALLOC(work , (1))
     call ZHEEV('V', 'U', ndim, evecs, ndim, evals, work, lwork, rwork, info)
     lwork= INT(work(1))
     ABI_SFREE(work)
 
-    ABI_ALLOCATE(work , (lwork))
+    ABI_MALLOC(work , (lwork))
     call ZHEEV('V', 'U', ndim, evecs, ndim, evals, work, lwork, rwork, info)
     ABI_SFREE(work)
     IF( INFO.gt.0 ) THEN

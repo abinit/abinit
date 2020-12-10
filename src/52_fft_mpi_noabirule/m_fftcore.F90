@@ -3892,7 +3892,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
 
 !First, generate a 2d index for each column of data
- ABI_ALLOCATE(index2d,(n1,n2))
+ ABI_MALLOC(index2d,(n1,n2))
  index2d(:,:)=0
  index=1
  igb=3
@@ -3954,7 +3954,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
    end do
  end do
 
- ABI_DEALLOCATE(index2d)
+ ABI_FREE(index2d)
 
 end subroutine indfftrisc
 !!***
@@ -4058,8 +4058,8 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  if (mpw>0) then
    np_band=1; if(mpi_enreg%paral_kgb==1) np_band=max(1,mpi_enreg%nproc_band)
    alloc_size=max(alloc_size,(mpw+1)*np_band)
-   ABI_ALLOCATE(kg_small,(3, alloc_size))
-   ABI_ALLOCATE(kg_ind,(alloc_size))
+   ABI_MALLOC(kg_small,(3, alloc_size))
+   ABI_MALLOC(kg_ind,(alloc_size))
    kg_ind(:)=0
  end if
 
@@ -4099,12 +4099,12 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 !0 1 2 3 ... nmax nmin ... -1
 !If the mode is not standard, then some part of the FFT grid must be selected
 !
- ABI_ALLOCATE(ig1arr,(ngrid(1)))
- ABI_ALLOCATE(ig2arr,(ngrid(2)))
- ABI_ALLOCATE(ig3arr,(ngrid(3)))
- ABI_ALLOCATE(kg1arr,(ngrid(1)))
- ABI_ALLOCATE(kg2arr,(ngrid(2)))
- ABI_ALLOCATE(kg3arr,(ngrid(3)))
+ ABI_MALLOC(ig1arr,(ngrid(1)))
+ ABI_MALLOC(ig2arr,(ngrid(2)))
+ ABI_MALLOC(ig3arr,(ngrid(3)))
+ ABI_MALLOC(kg1arr,(ngrid(1)))
+ ABI_MALLOC(kg2arr,(ngrid(2)))
+ ABI_MALLOC(kg3arr,(ngrid(3)))
 
  do ig1p=1,ngrid(1)
    ig1arr(ig1p)=ig1p-1
@@ -4116,7 +4116,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 !---------------------------------------------------------------------
  ig2pmax=ngrid(2)
  if(istwf_k>=2 .and. exchn2n3d==0) ig2pmax=nmax(2)+1
- ABI_ALLOCATE(array_ipw,(-ig2pmax:ig2pmax))
+ ABI_MALLOC(array_ipw,(-ig2pmax:ig2pmax))
  array_ipw(:)=0
  do ig2p=1,ig2pmax
    ig2arr(ig2p)=ig2p-1
@@ -4249,18 +4249,18 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  end if
  alloc_size = max(alloc_size,npw)
 
- ABI_DEALLOCATE(ig1arr)
- ABI_DEALLOCATE(ig2arr)
- ABI_DEALLOCATE(ig3arr)
- ABI_DEALLOCATE(kg1arr)
- ABI_DEALLOCATE(kg2arr)
- ABI_DEALLOCATE(kg3arr)
+ ABI_FREE(ig1arr)
+ ABI_FREE(ig2arr)
+ ABI_FREE(ig3arr)
+ ABI_FREE(kg1arr)
+ ABI_FREE(kg2arr)
+ ABI_FREE(kg3arr)
 
 !BandFFT: plane-wave load balancing
  if (mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_fft>1.and. mpi_enreg%pw_unbal_thresh>zero.and. istwf_k==1) then
 !  Check for reequilibration
    np_fft=max(1,mpi_enreg%nproc_fft)
-   ABI_ALLOCATE(npw_gather,(np_fft)) ! Count pw before balancing
+   ABI_MALLOC(npw_gather,(np_fft)) ! Count pw before balancing
    call xmpi_allgather(npw,npw_gather,mpi_enreg%comm_fft,ierr)
    gap_pw = 100._dp*(maxval(npw_gather(:))-minval(npw_gather))/(1.*sum(npw_gather(:))/np_fft)
    write(msg,'(a,f5.2)' ) ' Relative gap for number of plane waves between process (%): ',gap_pw
@@ -4282,13 +4282,13 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 #endif
      alloc_size = max(alloc_size,npw)
      if(mpw>0 ) then  !Step for requilibration between fft process
-       ABI_ALLOCATE(npw_disp,(np_fft))
+       ABI_MALLOC(npw_disp,(np_fft))
        npw_disp=0
        do i1=2,np_fft
          npw_disp(i1) = npw_disp(i1-1) + npw_gather(i1-1)
        end do
-       ABI_ALLOCATE(kg_ind_gather,(npw_split))
-       ABI_ALLOCATE(kg_small_gather,(3,npw_split))
+       ABI_MALLOC(kg_ind_gather,(npw_split))
+       ABI_MALLOC(kg_small_gather,(3,npw_split))
        call xmpi_allgatherv(kg_ind, npw_gather(mpi_enreg%me_fft+1) , &
 &            kg_ind_gather,npw_gather,npw_disp,mpi_enreg%comm_fft,ierr)
        call xmpi_allgatherv(kg_small,3*npw_gather(mpi_enreg%me_fft+1), &
@@ -4299,12 +4299,12 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 #ifdef DEBUG_MODE
        call wrtout(std_out,"keeping values done")
 #endif
-       ABI_DEALLOCATE(npw_disp)
-       ABI_DEALLOCATE(kg_ind_gather)
-       ABI_DEALLOCATE(kg_small_gather)
+       ABI_FREE(npw_disp)
+       ABI_FREE(kg_ind_gather)
+       ABI_FREE(kg_small_gather)
      end if
    end if!End of reequilibration step for paral KGB
-   ABI_DEALLOCATE(npw_gather)
+   ABI_FREE(npw_gather)
  end if
 
 !BandFFT: band load balancing
@@ -4327,11 +4327,11 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
        mpi_enreg%my_kgtab(i1,ikpt_this_proc) = kg_ind(i1)
      end if
    end do
-   ABI_DEALLOCATE(kg_small)
-   ABI_DEALLOCATE(kg_ind)
+   ABI_FREE(kg_small)
+   ABI_FREE(kg_ind)
  end if
 
- ABI_DEALLOCATE(array_ipw)
+ ABI_FREE(array_ipw)
 
 !Take care of the me_g0 flag
  if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>0) then

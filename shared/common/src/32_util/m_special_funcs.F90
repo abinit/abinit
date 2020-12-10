@@ -366,12 +366,12 @@ function laguerre(x,n,a)
  else
    aa=0
  end if
- ABI_ALLOCATE(ff,(nn+1))
+ ABI_MALLOC(ff,(nn+1))
  ff=0.0_dp
  ff=(/ (binomcoeff(nn+aa,nn-ii)*((-1.0_dp)*x)**ii/factorial(ii) ,ii=0,nn) /)
  laguerre=sum(ff)
 
- ABI_DEALLOCATE(ff)
+ ABI_FREE(ff)
 
 end function laguerre
 !!***
@@ -1311,7 +1311,7 @@ subroutine sbf8(nm,xx,sb_out)
    else
      nlim=nm+int(1.36e0_dp*xx)+15
    end if
-   ABI_ALLOCATE(sb,(nlim+1))
+   ABI_MALLOC(sb,(nlim+1))
    nn=nlim
    xi=one/xx
    sb(nn+1)=zero
@@ -1325,7 +1325,7 @@ subroutine sbf8(nm,xx,sb_out)
    end do
    fn=1.d0/sqrt(sn)
    sb_out(:)=fn*sb(1:nm)
-   ABI_DEALLOCATE(sb)
+   ABI_FREE(sb)
  end if
 
 end subroutine sbf8

@@ -233,17 +233,17 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
  scell%rprimd(:,3) = rprimd_primcell(:,3) * rlatt(3,3)
 
  scell%ntypat = size(znucl)
- ABI_ALLOCATE(scell%znucl,(scell%ntypat))
+ ABI_MALLOC(scell%znucl,(scell%ntypat))
  scell%znucl(:) = znucl(:)
 
 !number of atoms in full supercell
  scell%natom= natom_primcell*scell%ncells
- ABI_ALLOCATE(scell%xcart,(3,scell%natom))
- ABI_ALLOCATE(scell%xcart_ref,(3,scell%natom))
- ABI_ALLOCATE(scell%typat,(scell%natom))
- ABI_ALLOCATE(scell%atom_indexing,(scell%natom))
- ABI_ALLOCATE(scell%uc_indexing,(3,scell%natom))
- ABI_ALLOCATE(scell%rvecs, (3, scell%ncells))
+ ABI_MALLOC(scell%xcart,(3,scell%natom))
+ ABI_MALLOC(scell%xcart_ref,(3,scell%natom))
+ ABI_MALLOC(scell%typat,(scell%natom))
+ ABI_MALLOC(scell%atom_indexing,(scell%natom))
+ ABI_MALLOC(scell%uc_indexing,(3,scell%natom))
+ ABI_MALLOC(scell%rvecs, (3, scell%ncells))
 
  iatom_supercell = 0
  icell =0
@@ -783,25 +783,25 @@ subroutine destroy_supercell (scell)
 ! *************************************************************************
 
   if(allocated(scell%xcart))  then
-    ABI_DEALLOCATE(scell%xcart)
+    ABI_FREE(scell%xcart)
   end if
   if(allocated(scell%xcart_ref))  then
-    ABI_DEALLOCATE(scell%xcart_ref)
+    ABI_FREE(scell%xcart_ref)
   end if
   if(allocated(scell%typat))  then
-    ABI_DEALLOCATE(scell%typat)
+    ABI_FREE(scell%typat)
   end if
   if(allocated(scell%atom_indexing))  then
-    ABI_DEALLOCATE(scell%atom_indexing)
+    ABI_FREE(scell%atom_indexing)
   end if
   if(allocated(scell%uc_indexing))  then
-    ABI_DEALLOCATE(scell%uc_indexing)
+    ABI_FREE(scell%uc_indexing)
   end if
   if(allocated(scell%znucl))  then
-    ABI_DEALLOCATE(scell%znucl)
+    ABI_FREE(scell%znucl)
   end if
    if(allocated(scell%rvecs))  then
-    ABI_DEALLOCATE(scell%rvecs)
+    ABI_FREE(scell%rvecs)
   end if
 
 end subroutine destroy_supercell
@@ -875,7 +875,7 @@ subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_
 
  rprimd_sc=reshape((/ (rprimd_org(ix,:)*ext(ix) ,ix=1,3) /),(/3,3 /))
  nprcl=product(ext)
- ABI_ALLOCATE(transv,(3,nat_org,nprcl))
+ ABI_MALLOC(transv,(3,nat_org,nprcl))
 
  transv=reshape((/ (((((/ ix,iy,iz /),iatom=1,nat_org),ix=0,ext(1)-1),iy=0,ext(2)-1),iz=0,ext(3)-1) /), (/ 3, nat_org,nprcl/) )
 
@@ -898,7 +898,7 @@ subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_
 !write(std_out,*)'mksupercell: magv_sc ', magv_sc
 !END DEBUG
 
- ABI_DEALLOCATE(transv)
+ ABI_FREE(transv)
 
 end subroutine mksupercell
 !!***

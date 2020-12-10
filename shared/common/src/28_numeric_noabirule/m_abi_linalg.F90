@@ -396,12 +396,12 @@ CONTAINS  !===========================================================
      num_cores_node = 1
      ABI_WARNING("You are using PLASMA but OpenMP is not enabled in Abinit!")
    end if
-   ABI_ALLOCATE(affinity,(num_cores))
+   ABI_MALLOC(affinity,(num_cores))
    do core_id =1,num_cores
      affinity(core_id) = MOD(rank*num_cores + (core_id-1), num_cores_node)
    end do
    call PLASMA_Init_Affinity(num_cores,affinity(1),abi_info2)
-   ABI_DEALLOCATE(affinity)
+   ABI_FREE(affinity)
    ABI_LINALG_PLASMA_ISON = .True.
    lapack_divide_conquer=.true.
  end if
@@ -484,7 +484,7 @@ CONTAINS  !===========================================================
    end if
  end if
  ABI_SFREE(eigen_s_work)
- ABI_ALLOCATE(eigen_s_work,(eigen_s_lwork))
+ ABI_MALLOC(eigen_s_work,(eigen_s_lwork))
 
 !Double precision WORK
  eigen_d_lwork = 0
@@ -515,7 +515,7 @@ CONTAINS  !===========================================================
    end if
  end if
  ABI_SFREE(eigen_d_work)
- ABI_ALLOCATE(eigen_d_work,(eigen_d_lwork))
+ ABI_MALLOC(eigen_d_work,(eigen_d_lwork))
 
 !Single complex WORK
  eigen_c_lwork = 0
@@ -546,7 +546,7 @@ CONTAINS  !===========================================================
    end if
  end if
  ABI_SFREE(eigen_c_work)
- ABI_ALLOCATE(eigen_c_work,(eigen_c_lwork))
+ ABI_MALLOC(eigen_c_work,(eigen_c_lwork))
 
 !Double complex WORK
  eigen_z_lwork = 0
@@ -577,7 +577,7 @@ CONTAINS  !===========================================================
    end if
  end if
  ABI_SFREE(eigen_z_work)
- ABI_ALLOCATE(eigen_z_work,(eigen_z_lwork))
+ ABI_MALLOC(eigen_z_work,(eigen_z_lwork))
 
 !Single precision RWORK
  eigen_c_lrwork = 0
@@ -592,7 +592,7 @@ CONTAINS  !===========================================================
    end if
  end if
  ABI_SFREE(eigen_c_rwork)
- ABI_ALLOCATE(eigen_c_rwork,(eigen_c_lrwork))
+ ABI_MALLOC(eigen_c_rwork,(eigen_c_lrwork))
 
 !Double precision RWORK
  eigen_z_lrwork = 0
@@ -607,7 +607,7 @@ CONTAINS  !===========================================================
    end if
  end if
  ABI_SFREE(eigen_z_rwork)
- ABI_ALLOCATE(eigen_z_rwork,(eigen_z_lrwork))
+ ABI_MALLOC(eigen_z_rwork,(eigen_z_lrwork))
 
 !Integer IWORK
  eigen_liwork = 0
@@ -622,7 +622,7 @@ CONTAINS  !===========================================================
    end if
  end if
  ABI_SFREE(eigen_iwork)
- ABI_ALLOCATE(eigen_iwork,(eigen_liwork))
+ ABI_MALLOC(eigen_iwork,(eigen_liwork))
 
  end subroutine abi_linalg_work_allocate
 !!***

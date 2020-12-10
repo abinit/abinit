@@ -142,7 +142,7 @@ subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
 !=== DS_mmpl is the rotation matrix for real spherical harmonics associated to symrec(:,:,isym) ===
 !* Note the convention used by Blanco in Eq. 27 : DS_mmp multiply spherical harmonics as row vectors
  lmax=Pawang%l_max-1 ! l_max is Max l+1
- ABI_ALLOCATE(DS_mmpl,(2*lmax+1,2*lmax+1,lmax+1))
+ ABI_MALLOC(DS_mmpl,(2*lmax+1,2*lmax+1,lmax+1))
  DS_mmpl=Pawang%zarot(:,:,:,isym)
 !
 !===========================================
@@ -215,7 +215,7 @@ subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
  end do !iatom
 
  call pawcprj_free(Cprjnk_kibz)
- ABI_DEALLOCATE(DS_mmpl)
+ ABI_FREE(DS_mmpl)
 
 end subroutine paw_symcprj
 !!***
@@ -317,7 +317,7 @@ subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cpr
 !=== DS_mmpl is the rotation matrix for real spherical harmonics associated to symrec(:,:,isym) ===
 !* Note the convention used by Blanco in Eq. 27 : DS_mmp multiply spherical harmonics as row vectors
  lmax=Pawang%l_max-1 ! l_max is Max l+1
- ABI_ALLOCATE(DS_mmpl,(2*lmax+1,2*lmax+1,lmax+1))
+ ABI_MALLOC(DS_mmpl,(2*lmax+1,2*lmax+1,lmax+1))
  DS_mmpl=Pawang%zarot(:,:,:,isym)
 
 !Local copy.
@@ -395,7 +395,7 @@ subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cpr
    end do !jlmn
  end do !iatom
 
- ABI_DEALLOCATE(DS_mmpl)
+ ABI_FREE(DS_mmpl)
 
 end subroutine paw_symcprj_op
 !!***

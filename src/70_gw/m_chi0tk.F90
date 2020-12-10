@@ -2072,8 +2072,8 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
 
  CASE (1)
    ! Symmetrize the contribution in the full BZ.
-   ABI_ALLOCATE(rhotwg_sym,(npwe))
-   ABI_ALLOCATE(Sm1_gmG0,(npwe))
+   ABI_MALLOC(rhotwg_sym,(npwe))
+   ABI_MALLOC(Sm1_gmG0,(npwe))
 
    do itim=1,Ltg_q%timrev
      do isym=1,Ltg_q%nsym_sg
@@ -2089,8 +2089,8 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
      end do !isym
    end do !itim
 
-   ABI_DEALLOCATE(rhotwg_sym)
-   ABI_DEALLOCATE(Sm1_gmG0)
+   ABI_FREE(rhotwg_sym)
+   ABI_FREE(Sm1_gmG0)
 
  CASE DEFAULT
    ABI_BUG(sjoin('Wrong value for symchi:', itoa(symchi)))

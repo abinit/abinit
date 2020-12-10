@@ -224,7 +224,7 @@ real(dp), allocatable :: psik_v_alltoall(:,:)    !wavefunctions in FFT format
 !===================================================================
 ! Allocate the global array which will contain the valence states
 !===================================================================
-ABI_ALLOCATE( valence_wavefunctions_FFT, (2,npw_g,nbdblock))
+ABI_MALLOC( valence_wavefunctions_FFT, (2,npw_g,nbdblock))
 
 valence_wavefunctions_FFT = zero
 
@@ -233,8 +233,8 @@ valence_wavefunctions_FFT = zero
 ! Allocate working arrays
 !====================================================
 
-ABI_ALLOCATE(psik_v,         (2,npw_kb))
-ABI_ALLOCATE(psik_v_alltoall,(2,npw_g))
+ABI_MALLOC(psik_v,         (2,npw_kb))
+ABI_MALLOC(psik_v_alltoall,(2,npw_g))
 
 
 
@@ -267,8 +267,8 @@ end do
 ! cleanup
 !====================================================
 
-ABI_DEALLOCATE(psik_v)
-ABI_DEALLOCATE(psik_v_alltoall)
+ABI_FREE(psik_v)
+ABI_FREE(psik_v_alltoall)
 
 
 end subroutine DistributeValenceWavefunctions
@@ -322,7 +322,7 @@ real(dp), allocatable :: psik_n_alltoall(:,:)    !wavefunctions in FFT format
 !===================================================================
 ! Allocate the global array which will contain the valence states
 !===================================================================
-ABI_ALLOCATE( kernel_wavefunctions_FFT, (2,npw_g, nband))
+ABI_MALLOC( kernel_wavefunctions_FFT, (2,npw_g, nband))
 
 kernel_wavefunctions_FFT = zero
 
@@ -330,8 +330,8 @@ kernel_wavefunctions_FFT = zero
 ! Allocate working arrays
 !====================================================
 
-ABI_ALLOCATE(psik_n,         (2,npw_kb))
-ABI_ALLOCATE(psik_n_alltoall,(2,npw_g))
+ABI_MALLOC(psik_n,         (2,npw_kb))
+ABI_MALLOC(psik_n_alltoall,(2,npw_g))
 
 
 ! loop on all valence states
@@ -355,8 +355,8 @@ end do
 ! cleanup
 !====================================================
 
-ABI_DEALLOCATE(psik_n)
-ABI_DEALLOCATE(psik_n_alltoall)
+ABI_FREE(psik_n)
+ABI_FREE(psik_n_alltoall)
 
 end subroutine DistributeValenceKernel
 !!***
@@ -409,7 +409,7 @@ integer :: mpi_communicator, ierr
 ! *************************************************************************
 
 
-ABI_ALLOCATE( psi_projected, (2,npw_g))
+ABI_MALLOC( psi_projected, (2,npw_g))
 
 mpi_communicator =  mpi_enreg%comm_fft
 
@@ -451,7 +451,7 @@ end if
 
 
 
-ABI_DEALLOCATE( psi_projected)
+ABI_FREE( psi_projected)
 
 end subroutine pc_k_valence_kernel
 !!***
@@ -542,10 +542,10 @@ if(mpi_enreg%nproc_band*mpi_enreg%bandpp > 1) then
   spaceComm=mpi_enreg%comm_fft
   if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_band
 
-  ABI_ALLOCATE(sendcountsloc,(nproc_band))
-  ABI_ALLOCATE(sdisplsloc   ,(nproc_band))
-  ABI_ALLOCATE(recvcountsloc,(nproc_band))
-  ABI_ALLOCATE(rdisplsloc   ,(nproc_band))
+  ABI_MALLOC(sendcountsloc,(nproc_band))
+  ABI_MALLOC(sdisplsloc   ,(nproc_band))
+  ABI_MALLOC(recvcountsloc,(nproc_band))
+  ABI_MALLOC(rdisplsloc   ,(nproc_band))
 
   recvcounts   =>bandfft_kpt(ikpt_this_proc)%recvcounts(:)
   sendcounts   =>bandfft_kpt(ikpt_this_proc)%sendcounts(:)
@@ -569,10 +569,10 @@ if(mpi_enreg%nproc_band*mpi_enreg%bandpp > 1) then
 
   end if
 
-  ABI_DEALLOCATE(sendcountsloc)
-  ABI_DEALLOCATE(sdisplsloc   )
-  ABI_DEALLOCATE(recvcountsloc)
-  ABI_DEALLOCATE(rdisplsloc   )
+  ABI_FREE(sendcountsloc)
+  ABI_FREE(sdisplsloc   )
+  ABI_FREE(recvcountsloc)
+  ABI_FREE(rdisplsloc   )
 
 else
 
@@ -661,7 +661,7 @@ exchange = 0.0_dp
 ! contain copies the e-state
 !====================================================
 
-ABI_ALLOCATE(psik_e,(2,npw_kb))
+ABI_MALLOC(psik_e,(2,npw_kb))
 
 ! fill psik_e with as many copies of the e-state as there are band processors;
 ! that way, upon LA -> FFT, each row of fft processors will have the e-state
@@ -674,8 +674,8 @@ end do
 ! contain the valence states
 !====================================================
 
-ABI_ALLOCATE(psik_v,         (2,npw_kb))
-ABI_ALLOCATE(psik_out,         (2,npw_kb))
+ABI_MALLOC(psik_v,         (2,npw_kb))
+ABI_MALLOC(psik_out,         (2,npw_kb))
 
 ! loop on all blocks of states,
 do iblk = 1, nbdblock
@@ -718,11 +718,11 @@ end do
 
 end do
 
-ABI_DEALLOCATE(psik_e)
+ABI_FREE(psik_e)
 
-ABI_DEALLOCATE(psik_v)
+ABI_FREE(psik_v)
 
-ABI_DEALLOCATE(psik_out)
+ABI_FREE(psik_out)
 
 end function exchange
 !!***
@@ -778,9 +778,9 @@ cplex  = 1 ! real potential
 option = 2 ! multiply wavefunction by potential
 nspinor= 1
 ! Allocate wavefunction arrays which contains the coefficients of the e-state
-ABI_ALLOCATE(psik_e,         (2,npw_kb))
-ABI_ALLOCATE(psik_e_alltoall,(2,npw_g))
-ABI_ALLOCATE(psik_out,       (3,npw_g))
+ABI_MALLOC(psik_e,         (2,npw_kb))
+ABI_MALLOC(psik_e_alltoall,(2,npw_g))
+ABI_MALLOC(psik_out,       (3,npw_g))
 
 
 ! Only fetch the e-state, setting other states in block to zero!
@@ -816,9 +816,9 @@ call xmpi_sum(dft_xc_energy_tmp,mpi_communicator, ierr) ! sum on all processors 
 
 dft_xc_energy = dft_xc_energy_tmp
 
-ABI_DEALLOCATE(psik_e)
-ABI_DEALLOCATE(psik_e_alltoall)
-ABI_DEALLOCATE(psik_out)
+ABI_FREE(psik_e)
+ABI_FREE(psik_e_alltoall)
+ABI_FREE(psik_out)
 
 end function dft_xc_energy
 !!***
@@ -1518,7 +1518,7 @@ real(dp), intent(in) :: vxc2(nfft2,nspden2)
 
 ! *************************************************************************
 
-ABI_ALLOCATE(vxc_dg,(nfft2,nspden2))
+ABI_MALLOC(vxc_dg,(nfft2,nspden2))
 vxc_dg = vxc2
 
 end subroutine build_vxc
@@ -1561,118 +1561,118 @@ call vcoul_free(Vcp)
 call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
 call destroy_mpi_enreg(mpi_enreg)
 
-!NOTE : the syntax if(allocated(a)) ABI_DEALLOCATE(a) result in an error if "a" is not allocated; since the macro replace
+!NOTE : the syntax if(allocated(a)) ABI_FREE(a) result in an error if "a" is not allocated; since the macro replace
 !ABI_ALLOCATE by more than one line of text, the second lines and up get outside the if... if() then syntax is equired.
 if(allocated(cg)) then
-  ABI_DEALLOCATE(cg)
+  ABI_FREE(cg)
 end if
 if(allocated(gbound)) then
-  ABI_DEALLOCATE(gbound)
+  ABI_FREE(gbound)
 end if
 if(allocated(kg_k)) then
-  ABI_DEALLOCATE(kg_k)
+  ABI_FREE(kg_k)
 end if
 if(allocated(ffnl)) then
-  ABI_DEALLOCATE(ffnl)
+  ABI_FREE(ffnl)
 end if
 if(allocated(ph3d)) then
-  ABI_DEALLOCATE(ph3d)
+  ABI_FREE(ph3d)
 end if
 if(allocated(kinpw)) then
-  ABI_DEALLOCATE(kinpw)
+  ABI_FREE(kinpw)
 end if
 if(allocated(vxc)) then
-  ABI_DEALLOCATE(vxc)
+  ABI_FREE(vxc)
 end if
 if(allocated(vlocal)) then
-  ABI_DEALLOCATE(vlocal)
+  ABI_FREE(vlocal)
 end if
 if(allocated(conjgrprj)) then
-  ABI_DATATYPE_DEALLOCATE(conjgrprj)
+  ABI_FREE(conjgrprj)
 end if
 if(allocated(istwfk)) then
-  ABI_DEALLOCATE(istwfk)
+  ABI_FREE(istwfk)
 end if
 if(allocated(dummy2)) then
-  ABI_DEALLOCATE(dummy2)
+  ABI_FREE(dummy2)
 end if
 if(allocated(dummy3)) then
-  ABI_DEALLOCATE(dummy3)
+  ABI_FREE(dummy3)
 end if
 if(allocated(eig)) then
-  ABI_DEALLOCATE(eig)
+  ABI_FREE(eig)
 end if
 if(allocated(scprod2)) then
-  ABI_DEALLOCATE(scprod2)
+  ABI_FREE(scprod2)
 end if
 if(allocated(pcon)) then
-  ABI_DEALLOCATE(pcon)
+  ABI_FREE(pcon)
 end if
 if(allocated(psik1)) then
-  ABI_DEALLOCATE(psik1)
+  ABI_FREE(psik1)
 end if
 if(allocated(psik2)) then
-  ABI_DEALLOCATE(psik2)
+  ABI_FREE(psik2)
 end if
 if(allocated(psik3)) then
-  ABI_DEALLOCATE(psik3)
+  ABI_FREE(psik3)
 end if
 if(allocated(psik4)) then
-  ABI_DEALLOCATE(psik4)
+  ABI_FREE(psik4)
 end if
 if(allocated(psikb1)) then
-  ABI_DEALLOCATE(psikb1)
+  ABI_FREE(psikb1)
 end if
 if(allocated(psikb2)) then
-  ABI_DEALLOCATE(psikb2)
+  ABI_FREE(psikb2)
 end if
 if(allocated(psikb3)) then
-  ABI_DEALLOCATE(psikb3)
+  ABI_FREE(psikb3)
 end if
 if(allocated(psikb4)) then
-  ABI_DEALLOCATE(psikb4)
+  ABI_FREE(psikb4)
 end if
 if(allocated(psig1)) then
-  ABI_DEALLOCATE(psig1)
+  ABI_FREE(psig1)
 end if
 if(allocated(psig2)) then
-  ABI_DEALLOCATE(psig2)
+  ABI_FREE(psig2)
 end if
 if(allocated(psig3)) then
-  ABI_DEALLOCATE(psig3)
+  ABI_FREE(psig3)
 end if
 if(allocated(psig4)) then
-  ABI_DEALLOCATE(psig4)
+  ABI_FREE(psig4)
 end if
 if(allocated(psir1)) then
-  ABI_DEALLOCATE(psir1)
+  ABI_FREE(psir1)
 end if
 if(allocated(psir2)) then
-  ABI_DEALLOCATE(psir2)
+  ABI_FREE(psir2)
 end if
 if(allocated(psir3)) then
-  ABI_DEALLOCATE(psir3)
+  ABI_FREE(psir3)
 end if
 if(allocated(psidg)) then
-  ABI_DEALLOCATE(psidg)
+  ABI_FREE(psidg)
 end if
 if(allocated(vxc_dg)) then
-  ABI_DEALLOCATE(vxc_dg)
+  ABI_FREE(vxc_dg)
 end if
 if(allocated(denpot)) then
-  ABI_DEALLOCATE(denpot)
+  ABI_FREE(denpot)
 end if
 if(allocated(kernel_wavefunctions_FFT)) then
-  ABI_DEALLOCATE(kernel_wavefunctions_FFT)
+  ABI_FREE(kernel_wavefunctions_FFT)
 end if
 if(allocated(valence_wavefunctions_FFT)) then
-  ABI_DEALLOCATE(valence_wavefunctions_FFT)
+  ABI_FREE(valence_wavefunctions_FFT)
 end if
 if(associated(gvec)) then
-  ABI_DEALLOCATE(gvec)
+  ABI_FREE(gvec)
 end if
 if(allocated(vc_sqrt)) then
-  ABI_DEALLOCATE(vc_sqrt)
+  ABI_FREE(vc_sqrt)
 end if
 
 end subroutine destroy_H
@@ -1752,22 +1752,22 @@ call copy_hamiltonian(gs_hamk,gs_hamk2)
 cpopt   = cpopt2
 npw_k = gs_hamk2%npw_k
 
-ABI_ALLOCATE(cg,(2,dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol))
+ABI_MALLOC(cg,(2,dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol))
 cg = cg2
 
-ABI_ALLOCATE(vlocal,(gs_hamk2%n4,gs_hamk2%n5,gs_hamk2%n6,gs_hamk2%nvloc))
+ABI_MALLOC(vlocal,(gs_hamk2%n4,gs_hamk2%n5,gs_hamk2%n6,gs_hamk2%nvloc))
 vlocal = gs_hamk2%vlocal
 gs_hamk%vlocal => vlocal
 
-ABI_ALLOCATE(kg_k,(3,npw_k))
+ABI_MALLOC(kg_k,(3,npw_k))
 kg_k = kg_k2
-ABI_ALLOCATE(kinpw,(npw_k))
+ABI_MALLOC(kinpw,(npw_k))
 kinpw = kinpw2
 
 dimffnl=0; if (blocksize<=1) dimffnl=size(gs_hamk2%ffnl_k,2)
-ABI_ALLOCATE(ffnl,(npw_k,dimffnl,gs_hamk%lmnmax,gs_hamk%ntypat))
+ABI_MALLOC(ffnl,(npw_k,dimffnl,gs_hamk%lmnmax,gs_hamk%ntypat))
 dimph3d=0; if (blocksize<=1) dimph3d=gs_hamk2%matblk
-ABI_ALLOCATE(ph3d,(2,npw_k,dimph3d))
+ABI_MALLOC(ph3d,(2,npw_k,dimph3d))
 
 !Initializing variables from dataset
 nfft  =  dtset%nfft
@@ -1784,12 +1784,12 @@ n5=ngfft(5)
 n6=ngfft(6)
 mgfft=maxval(ngfft(1:3))
 nbandv = int(dtset%nelect)/2
-ABI_ALLOCATE(istwfk,(dtset%nkpt))
+ABI_MALLOC(istwfk,(dtset%nkpt))
 istwfk(:)=dtset%istwfk
 
 !Initializing variables from gs_hamk
 ucvol = gs_hamk%ucvol
-ABI_ALLOCATE(gbound,(2*mgfft+8,2))
+ABI_MALLOC(gbound,(2*mgfft+8,2))
 !gbound = gs_hamk%gbound_k !Must be done later for bandft paralelism
 
 !Parameters which need to be set by hand for now...
@@ -1924,39 +1924,39 @@ call DistributeValenceKernel()
 cplx             = 2                                      ! wavefunctions have complex coefficients
 
 ! Initialize the dummy variables
-ABI_DATATYPE_ALLOCATE(conjgrprj,(0,0))
-ABI_ALLOCATE(dummy2,(0,0))
-ABI_ALLOCATE(dummy3,(0,0,0))
+ABI_MALLOC(conjgrprj,(0,0))
+ABI_MALLOC(dummy2,(0,0))
+ABI_MALLOC(dummy3,(0,0,0))
 
 !Initialisation of the total counter for iterations of SQMR :
 ktot = 0
 
 !Allocations of working arrays for the module
 !- for pc_k function
-ABI_ALLOCATE(scprod2,(2,nband))
+ABI_MALLOC(scprod2,(2,nband))
 
 !- for precondition function (and set_precondition subroutine)
-ABI_ALLOCATE(pcon,(npw_g))
+ABI_MALLOC(pcon,(npw_g))
 pcon = one
 
 !- for (private) working wf
-ABI_ALLOCATE(psik1,(2,npw_k))
-ABI_ALLOCATE(psik2,(2,npw_k))
-ABI_ALLOCATE(psik3,(2,npw_k))
-ABI_ALLOCATE(psik4,(2,npw_k))
-ABI_ALLOCATE(psikb1,(2,npw_kb))
-ABI_ALLOCATE(psikb2,(2,npw_kb))
-ABI_ALLOCATE(psikb3,(2,npw_kb))
-ABI_ALLOCATE(psikb4,(2,npw_kb))
-ABI_ALLOCATE(psig1,(2,npw_g))
-ABI_ALLOCATE(psig2,(2,npw_g))
-ABI_ALLOCATE(psig3,(2,npw_g))
-ABI_ALLOCATE(psig4,(2,npw_g))
-ABI_ALLOCATE(psir1,(2,n4,n5,n6))
-ABI_ALLOCATE(psir2,(2,n4,n5,n6))
-ABI_ALLOCATE(psir3,(2,n4,n5,n6))
-ABI_ALLOCATE(psidg,(2,nfft))
-ABI_ALLOCATE(denpot,(2*n4,n5,n6))
+ABI_MALLOC(psik1,(2,npw_k))
+ABI_MALLOC(psik2,(2,npw_k))
+ABI_MALLOC(psik3,(2,npw_k))
+ABI_MALLOC(psik4,(2,npw_k))
+ABI_MALLOC(psikb1,(2,npw_kb))
+ABI_MALLOC(psikb2,(2,npw_kb))
+ABI_MALLOC(psikb3,(2,npw_kb))
+ABI_MALLOC(psikb4,(2,npw_kb))
+ABI_MALLOC(psig1,(2,npw_g))
+ABI_MALLOC(psig2,(2,npw_g))
+ABI_MALLOC(psig3,(2,npw_g))
+ABI_MALLOC(psig4,(2,npw_g))
+ABI_MALLOC(psir1,(2,n4,n5,n6))
+ABI_MALLOC(psir2,(2,n4,n5,n6))
+ABI_MALLOC(psir3,(2,n4,n5,n6))
+ABI_MALLOC(psidg,(2,nfft))
+ABI_MALLOC(denpot,(2*n4,n5,n6))
 
 psir1 = zero
 psir2 = zero
@@ -1964,7 +1964,7 @@ psir3 = zero
 denpot = zero
 
 !Construct the vector of eigenvalues and write then to std output
-ABI_ALLOCATE(eig,(nband))
+ABI_MALLOC(eig,(nband))
 eig=zero
 
 write(std_out,*) ch10,"Eigenvalues computation check, routine build_H:",ch10
@@ -1984,8 +1984,8 @@ write(io_unit_debug,'(A,I5)') "                 npw_k = ", npw_k
 write(io_unit_debug,'(A,I5)') "              nbdblock = ", nbdblock
 
 ! temporary wavefunction array, for data in the "linear algebra" distribution
-ABI_ALLOCATE( wfk_tmp1, (2,npw_k))
-ABI_ALLOCATE( wfk_tmp2, (2,npw_k))
+ABI_MALLOC( wfk_tmp1, (2,npw_k))
+ABI_MALLOC( wfk_tmp2, (2,npw_k))
 
 do n=1, nband
 ! Extract i^t/h wavefunction
@@ -2050,8 +2050,8 @@ end do
 
 end do
 
-ABI_DEALLOCATE( wfk_tmp1 )
-ABI_DEALLOCATE( wfk_tmp2 )
+ABI_FREE( wfk_tmp1 )
+ABI_FREE( wfk_tmp2 )
 close(io_unit_debug)
 
 
@@ -2060,13 +2060,13 @@ close(io_unit_debug)
 ! to the single real grid (for the wfs).
 ! Assummes we only need one spin component; one transcription per spin being needed.
 if(allocated(vxc_dg)) then
-  ABI_ALLOCATE(vxc,(n4,n5,n6,dtset%nspden))
+  ABI_MALLOC(vxc,(n4,n5,n6,dtset%nspden))
   vxc = zero
   call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vxc_dg(:,ispden),vxc(:,:,:,ispden),2)
 end if
 
 timrev = 1 !Assumes istwfk *1. 1:time reversal symmetry NOT present | 2:" " " present
-ABI_ALLOCATE(title,(dtset%ntypat))
+ABI_MALLOC(title,(dtset%ntypat))
 do i=1,dtset%ntypat
 title(i) = "Bloup" ! The clean way would be to get the psps structure in this module
 ! (build_vxc is called from a place in GS calculations where it is available;
@@ -2076,7 +2076,7 @@ call crystal_init(dtset%amu_orig(:,1),Cryst,dtset%spgroup,dtset%natom,dtset%npsp
 &                 dtset%ntypat,dtset%nsym,dtset%rprimd_orig(:,:,1),dtset%typat,&
 &                 dtset%xred_orig(:,:,1),dtset%ziontypat,dtset%znucl,timrev,.false.,.false.,title,&
 &                 dtset%symrel,dtset%tnons,dtset%symafm)
-ABI_DEALLOCATE(title)
+ABI_FREE(title)
 call Cryst%print()
 
 !TODO : Should be put in a separate build_vc constructor, and should be called right after build_H in the context of optdriver 66.
@@ -2116,7 +2116,7 @@ if(dtset%optdriver==66) then
   ! It is necessary to construct a vc_sqrt vector with the GS sorting.
   ! Moreover, if we are in parallel (over band / FFTs), Vcp%vc_sqrt is the serial version
   ! and need to be distributed according to the GS scheme (Linear Algebra configuration).
-  ABI_ALLOCATE(vc_sqrt,(npw_k))
+  ABI_MALLOC(vc_sqrt,(npw_k))
   vc_sqrt=zero
   k=0
   do i=1,npw_k

@@ -249,14 +249,14 @@ subroutine WffReadSkipK(formeig,headform,ikpt,isppol,mpi_enreg,wff)
 
  option=-1
  tim_rwwf=0 ; mcg=1 ; mband=1 ; icg=0 ; optkg=0 ; nband=0
- ABI_ALLOCATE(eig_dum,(2**formeig))
- ABI_ALLOCATE(kg_dum,(3,optkg*npw1))
+ ABI_MALLOC(eig_dum,(2**formeig))
+ ABI_MALLOC(kg_dum,(3,optkg*npw1))
 
  call rwwf(cg_dum,eig_dum,formeig,headform,icg,ikpt,isppol,kg_dum,mband,mcg,mpi_enreg,nband,&
 & nband_disk,npw1,nspinor1,occ_dum,option,optkg,tim_rwwf,wff)
 
- ABI_DEALLOCATE(eig_dum)
- ABI_DEALLOCATE(kg_dum)
+ ABI_FREE(eig_dum)
+ ABI_FREE(kg_dum)
 
 end subroutine WffReadSkipK
 !!***
@@ -366,7 +366,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
    if (any(wff%iomode==[IO_MODE_MPI, IO_MODE_ETSF]).and.nband>0) then
      call xmpi_sum(npwsotot,wff%spaceComm_mpiio,ios)
      npwtot=npwsotot/nspinortot
-     ABI_ALLOCATE(ind_cg_mpi_to_seq,(npwso))
+     ABI_MALLOC(ind_cg_mpi_to_seq,(npwso))
      if (allocated(mpi_enreg%my_kgtab)) then
        ikpt_this_proc=mpi_enreg%my_kpttab(ikpt)
        if ( ikpt_this_proc <= 0  ) then
@@ -736,7 +736,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 ! Free memory
 !---------------------------------------------------------------------------
  if (allocated(ind_cg_mpi_to_seq)) then
-   ABI_DEALLOCATE(ind_cg_mpi_to_seq)
+   ABI_FREE(ind_cg_mpi_to_seq)
  end if
 
 end subroutine readwf
@@ -860,7 +860,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
    npwtot=npwsotot/nspinortot
 
    if (option/=4) then
-     ABI_ALLOCATE(ind_cg_mpi_to_seq,(npwso))
+     ABI_MALLOC(ind_cg_mpi_to_seq,(npwso))
      if (allocated(mpi_enreg%my_kgtab)) then
        ikpt_this_proc=mpi_enreg%my_kpttab(ikpt)
        do ispinor=1,nspinor
@@ -1045,7 +1045,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 !---------------------------------------------------------------------------
 
  if (allocated(ind_cg_mpi_to_seq)) then
-   ABI_DEALLOCATE(ind_cg_mpi_to_seq)
+   ABI_FREE(ind_cg_mpi_to_seq)
  end if
 
  RETURN

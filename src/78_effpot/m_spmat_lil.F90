@@ -63,8 +63,8 @@ module m_spmat_lil
     self%ndim=2
     self%nrow=mshape(1)
     self%ncol=mshape(2)
-    ABI_ALLOCATE(self%rows, (self%nrow))
-    ABI_ALLOCATE(self%mshape, (2))
+    ABI_MALLOC(self%rows, (self%nrow))
+    ABI_MALLOC(self%mshape, (2))
     self%mshape(:)=mshape(:)
   end subroutine LIL_mat_t_initialize
 
@@ -75,11 +75,11 @@ module m_spmat_lil
        do i=1, self%nrow, 1
           call llist_finalize(self%rows(i))
        end do
-       ABI_DEALLOCATE(self%rows)
+       ABI_FREE(self%rows)
     endif
     self%ncol=0
     self%nrow=0
-    if(allocated(self%mshape)) ABI_DEALLOCATE(self%mshape)
+    if(allocated(self%mshape)) ABI_FREE(self%mshape)
   end subroutine LIL_mat_t_finalize
 
   subroutine LIL_mat_t_insert(self, irow, icol, val, mode)

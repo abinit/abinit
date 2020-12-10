@@ -150,10 +150,10 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 
  if(iexit/=0)then  !icycle=ncycle and itime=ntime
    if (allocated(xred_hmc_prev))  then
-     ABI_DEALLOCATE(xred_hmc_prev)
+     ABI_FREE(xred_hmc_prev)
    end if
    if (allocated(fcart_hmc_prev))  then
-     ABI_DEALLOCATE(fcart_hmc_prev)
+     ABI_FREE(fcart_hmc_prev)
    end if
    call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! this is needed to deallocate vel_prev array allocated in pred_velverlet
    return
@@ -171,14 +171,14 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 
  if(itime==1.and.icycle==1) then
    if (allocated(xred_hmc_prev))  then
-     ABI_DEALLOCATE(xred_hmc_prev)
+     ABI_FREE(xred_hmc_prev)
    end if
    if (allocated(fcart_hmc_prev))  then
-     ABI_DEALLOCATE(fcart_hmc_prev)
+     ABI_FREE(fcart_hmc_prev)
    end if
 
-   ABI_ALLOCATE(xred_hmc_prev,(3,ab_mover%natom))
-   ABI_ALLOCATE(fcart_hmc_prev,(3,ab_mover%natom))
+   ABI_MALLOC(xred_hmc_prev,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_hmc_prev,(3,ab_mover%natom))
 
    seed=-239
 

@@ -133,9 +133,9 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
 
  minimal_den=tol6
  mpoint=4000
- ABI_ALLOCATE(npoint,(ntypat))
- ABI_ALLOCATE(radii,(4000,ntypat))
- ABI_ALLOCATE(aeden,(4000,ntypat))
+ ABI_MALLOC(npoint,(ntypat))
+ ABI_MALLOC(radii,(4000,ntypat))
+ ABI_MALLOC(aeden,(4000,ntypat))
  do itypat=1,ntypat
    write(std_out,'(a)' )' Please, give the filename of the all-electron density file'
    write(std_out,'(a,es16.6)' )' for the first type of atom, with atomic number=',znucl(itypat)
@@ -1572,10 +1572,10 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
  end if
 
 !Allocate rhomacu in case of molekel output format
- ABI_ALLOCATE(rhomacutt,(nresoll+1,nresolw+1))
- ABI_ALLOCATE(rhomacuux,(nresoll+1,nresolw+1))
- ABI_ALLOCATE(rhomacudy,(nresoll+1,nresolw+1))
- ABI_ALLOCATE(rhomacumz,(nresoll+1,nresolw+1))
+ ABI_MALLOC(rhomacutt,(nresoll+1,nresolw+1))
+ ABI_MALLOC(rhomacuux,(nresoll+1,nresolw+1))
+ ABI_MALLOC(rhomacudy,(nresoll+1,nresolw+1))
+ ABI_MALLOC(rhomacumz,(nresoll+1,nresolw+1))
 
  do k1=0,nresolh
 
@@ -1672,10 +1672,10 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
 
  close(unt)
 
- ABI_DEALLOCATE(rhomacutt)
- ABI_DEALLOCATE(rhomacuux)
- ABI_DEALLOCATE(rhomacudy)
- ABI_DEALLOCATE(rhomacumz)
+ ABI_FREE(rhomacutt)
+ ABI_FREE(rhomacuux)
+ ABI_FREE(rhomacudy)
+ ABI_FREE(rhomacumz)
 
 end subroutine cut3d_volumeint
 !!***
@@ -1787,7 +1787,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
  call initmpi_seq(mpi_enreg)
  mband=maxval(nband)
- ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
+ ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
  mpi_enreg%proc_distrb=0
  mpi_enreg%me_g0 = 1
  oldckpt=0
@@ -1813,9 +1813,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !max ang mom + 1
  mlang = 5
 
- ABI_ALLOCATE(kg_dum,(3,0))
+ ABI_MALLOC(kg_dum,(3,0))
 
- ABI_ALLOCATE(ph1d,(2,(2*nr1+1+2*nr2+1+2*nr3+1)*natom))
+ ABI_MALLOC(ph1d,(2,(2*nr1+1+2*nr2+1+2*nr3+1)*natom))
  call getph(atindx,natom,nr1,nr2,nr3,ph1d,xred)
 
  do
@@ -1891,13 +1891,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      mpw=maxval(npwarr)
      mcg=mpw*nspinor*mband
      if (allocated (cg_k))   then
-       ABI_DEALLOCATE(cg_k)
-       ABI_DEALLOCATE(eig_k)
-       ABI_DEALLOCATE(occ_k)
+       ABI_FREE(cg_k)
+       ABI_FREE(eig_k)
+       ABI_FREE(occ_k)
      end if
-     ABI_ALLOCATE(cg_k,(2,mcg))
-     ABI_ALLOCATE(eig_k,((2*mband)**formeig0*mband))
-     ABI_ALLOCATE(occ_k,(mband))
+     ABI_MALLOC(cg_k,(2,mcg))
+     ABI_MALLOC(eig_k,((2*mband)**formeig0*mband))
+     ABI_MALLOC(occ_k,(mband))
 
 !    FIXME
 !    nband depends on (kpt,spin)
@@ -1939,9 +1939,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      mode_paral='PERS'
      mkmem=nkpt
      mgfft=maxval(ngfft(1:3))
-     ABI_ALLOCATE(npwarr1,(nkpt))
-     ABI_ALLOCATE(kg,(3,mpw*mkmem))
-     ABI_ALLOCATE(npwtot1,(nkpt))
+     ABI_MALLOC(npwarr1,(nkpt))
+     ABI_MALLOC(kg,(3,mpw*mkmem))
+     ABI_MALLOC(npwtot1,(nkpt))
      call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfft(2),ngfft(3),'all')
 
 !    Create positions index for pw
@@ -1953,26 +1953,26 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ioffkg=ioffkg+npwarr1(ikpt)
      end do
      npw_k=npwarr(ckpt)
-     ABI_ALLOCATE(gbound,(2*mgfft+8,2))
-     ABI_ALLOCATE(kg_k,(3,npw_k))
+     ABI_MALLOC(gbound,(2*mgfft+8,2))
+     ABI_MALLOC(kg_k,(3,npw_k))
      kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
 
-     ABI_ALLOCATE(ylm_k,(npw_k,mlang*mlang))
-     ABI_ALLOCATE(ylmgr_dum,(npw_k,3,mlang*mlang))
+     ABI_MALLOC(ylm_k,(npw_k,mlang*mlang))
+     ABI_MALLOC(ylmgr_dum,(npw_k,3,mlang*mlang))
 
 !    call for only the kpoint we are interested in !
-     ABI_ALLOCATE(k1,(3,1))
+     ABI_MALLOC(k1,(3,1))
      k1(:,1)=kpt(:,ckpt)
-     ABI_ALLOCATE(npwarrk1,(1))
+     ABI_MALLOC(npwarrk1,(1))
      npwarrk1 = (/npw_k/)
      call initylmg(gprimd,kg_k,k1,1,mpi_enreg,mlang,npw_k,nband,1,&
 &     npwarrk1,nsppol,0,rprimd,ylm_k,ylmgr_dum)
-     ABI_DEALLOCATE(ylmgr_dum)
-     ABI_DEALLOCATE(k1)
-     ABI_DEALLOCATE(npwarrk1)
+     ABI_FREE(ylmgr_dum)
+     ABI_FREE(k1)
+     ABI_FREE(npwarrk1)
 
 !    Compute the norms of the k+G vectors
-     ABI_ALLOCATE(kpgnorm,(npw_k))
+     ABI_MALLOC(kpgnorm,(npw_k))
      call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
 
      call sphereboundary(gbound,istwfk(ckpt),kg_k,mgfft,npw_k)
@@ -2009,7 +2009,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        read(iunt,*) nband_qps
        read(iunt,*) ikpt_qps
 
-       ABI_ALLOCATE(ccoeff,(nband_qps,nband_qps))
+       ABI_MALLOC(ccoeff,(nband_qps,nband_qps))
        do ikpt=1,ckpt ! nkpt_qps
          read(iunt,*) kpt_qps(:)
          do iband=1,nband_qps
@@ -2019,8 +2019,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        end do
        close(iunt)
 
-       ABI_ALLOCATE(wfg,(npw_k,nband_qps))
-       ABI_ALLOCATE(wfg_qps,(npw_k))
+       ABI_MALLOC(wfg,(npw_k,nband_qps))
+       ABI_MALLOC(wfg_qps,(npw_k))
        do iband=1,nband_qps
          cgshift=(iband-1)*npw_k*nspinor + (cspinor-1)*npw_k
          wfg(:,iband) = dcmplx( cg_k(1,cgshift+1:cgshift+npw_k),cg_k(2,cgshift+1:cgshift+npw_k) )
@@ -2030,19 +2030,19 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
 !      write(std_out,*) 'norm',SUM( abs(wfg(:,cband))**2 )
 !      write(std_out,*) 'norm',SUM( abs(wfg_qps(:))**2 )
-       ABI_DEALLOCATE(ccoeff)
-       ABI_DEALLOCATE(wfg)
-       ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
+       ABI_FREE(ccoeff)
+       ABI_FREE(wfg)
+       ABI_MALLOC(cgcband,(2,npw_k*nspinor))
        cgcband = zero
        cgcband(1,:)= real(wfg_qps(:))
        cgcband(2,:)= aimag(wfg_qps(:))
-       ABI_DEALLOCATE(wfg_qps)
+       ABI_FREE(wfg_qps)
 
      else ! not a GW wavefunction
 
 ! get spin vector for present state
        cgshift=(cband-1)*npw_k*nspinor
-       ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
+       ABI_MALLOC(cgcband,(2,npw_k*nspinor))
        cgcband(:,1:npw_k*nspinor)=cg_k(:,cgshift+1:cgshift+nspinor*npw_k)
      end if ! test QPS wavefunction from GW
 
@@ -2054,9 +2054,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !    Fix the phase of cgcband, for portability reasons
 !    call fxphas(cgcband,cgcband,0,npw_k,1,npw_k,0)
 
-     ABI_ALLOCATE(denpot,(cplex*n4,n5,n6))
-     ABI_ALLOCATE(fofgout,(2,npw_k))
-     ABI_ALLOCATE(fofr,(2,n4,n5,n6))
+     ABI_MALLOC(denpot,(cplex*n4,n5,n6))
+     ABI_MALLOC(fofgout,(2,npw_k))
+     ABI_MALLOC(fofr,(2,n4,n5,n6))
 
      call fourwf(cplex,denpot,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),fofgout,fofr,gbound,gbound,&
 &     istwfk(ckpt),kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,npw_k,&
@@ -2093,14 +2093,14 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,'(a,2es16.6,i6)')' wffile : kpgmax, bessargmax, nradint = ', kpgmax, bessargmax,nradintmax
 
 !      Initialize general Bessel function array on uniform grid xx, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
-       ABI_ALLOCATE(rint,(nradintmax))
+       ABI_MALLOC(rint,(nradintmax))
 
        jlspl = jlspline_new(mbess, bessint_delta, mlang)
 
-       ABI_ALLOCATE(bess_fit,(mpw,nradintmax,mlang))
-       ABI_ALLOCATE(xfit,(npw_k))
-       ABI_ALLOCATE(yfit,(npw_k))
-       ABI_ALLOCATE(iindex,(npw_k))
+       ABI_MALLOC(bess_fit,(mpw,nradintmax,mlang))
+       ABI_MALLOC(xfit,(npw_k))
+       ABI_MALLOC(yfit,(npw_k))
+       ABI_MALLOC(iindex,(npw_k))
        nfit = npw_k
 
        do ixint=1,nradintmax
@@ -2128,13 +2128,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          phkxred(2,iatom)=sin(arg)
        end do
 
-       ABI_ALLOCATE(ph3d,(2,npw_k,natom))
+       ABI_MALLOC(ph3d,(2,npw_k,natom))
 !      Get full phases exp (2 pi i (k+G).x_tau) in ph3d
        call ph1d3d(1,natom,kg_k,natom,natom,npw_k,nr1,nr2,nr3,phkxred,ph1d,ph3d)
 
-       ABI_ALLOCATE(sum_1ll_1atom,(nspinor**2,mlang,natom))
-       ABI_ALLOCATE(sum_1lm_1atom,(nspinor**2,mlang**2,natom))
-       ABI_ALLOCATE(cplx_1lm_1atom,(2,nspinor,mlang**2,natom))
+       ABI_MALLOC(sum_1ll_1atom,(nspinor**2,mlang,natom))
+       ABI_MALLOC(sum_1lm_1atom,(nspinor**2,mlang**2,natom))
+       ABI_MALLOC(cplx_1lm_1atom,(2,nspinor,mlang**2,natom))
        prtsphere=1
        ratsph_arr(:)=ratsph
 
@@ -2153,28 +2153,28 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          write(std_out,'(a,i4,a,f14.8)' ) ' Atom number ',iatom,' :  charge =',cmax(iatom)
        end do
 
-       ABI_DEALLOCATE(sum_1ll_1atom)
-       ABI_DEALLOCATE(sum_1lm_1atom)
-       ABI_DEALLOCATE(cplx_1lm_1atom)
-       ABI_DEALLOCATE(ph3d)
-       ABI_DEALLOCATE(iindex)
-       ABI_DEALLOCATE(yfit)
-       ABI_DEALLOCATE(xfit)
-       ABI_DEALLOCATE(bess_fit)
+       ABI_FREE(sum_1ll_1atom)
+       ABI_FREE(sum_1lm_1atom)
+       ABI_FREE(cplx_1lm_1atom)
+       ABI_FREE(ph3d)
+       ABI_FREE(iindex)
+       ABI_FREE(yfit)
+       ABI_FREE(xfit)
+       ABI_FREE(bess_fit)
        call jlspline_free(jlspl)
-       ABI_DEALLOCATE(rint)
+       ABI_FREE(rint)
      end if ! ratsph < 0     = end if for atomic sphere analysis
 
-     ABI_DEALLOCATE(cgcband)
-     ABI_DEALLOCATE(fofgout)
-     ABI_DEALLOCATE(denpot)
-     ABI_DEALLOCATE(gbound)
-     ABI_DEALLOCATE(kg_k)
-     ABI_DEALLOCATE(npwarr1)
-     ABI_DEALLOCATE(kg)
-     ABI_DEALLOCATE(npwtot1)
-     ABI_DEALLOCATE(kpgnorm)
-     ABI_DEALLOCATE(ylm_k)
+     ABI_FREE(cgcband)
+     ABI_FREE(fofgout)
+     ABI_FREE(denpot)
+     ABI_FREE(gbound)
+     ABI_FREE(kg_k)
+     ABI_FREE(npwarr1)
+     ABI_FREE(kg)
+     ABI_FREE(npwtot1)
+     ABI_FREE(kpgnorm)
+     ABI_FREE(ylm_k)
      call destroy_distribfft(mpi_enreg%distribfft)
    end if
 
@@ -2328,7 +2328,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The file is ready to be use with OpenDX'
        write(std_out,*) 'The eig_kvalues and occupations numbers are in comments'
        write(std_out,*)
-       ABI_ALLOCATE(filename,(2))
+       ABI_MALLOC(filename,(2))
        filename(1)=trim(output)//'Real.dx'
        filename(2)=trim(output)//'Imag.dx'
        write(std_out,*) '  The name of your files is : '
@@ -2374,7 +2374,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
          close(unit=unout)
        end do
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
        exit
 
      case(8) ! OpenDX format, data R and data I
@@ -2383,7 +2383,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The file is ready to be use with OpenDX'
        write(std_out,*) 'The eig_kvalues and occupations numbers are in comments'
        write(std_out,*)
-       ABI_ALLOCATE(filename,(1))
+       ABI_MALLOC(filename,(1))
        filename(1)=trim(output)//'Real.dx'
        write(std_out,*) '  The name of your file is : '
        write(std_out,*) trim(filename(1)),'  for the real part,'
@@ -2425,7 +2425,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(a)')'component "data"        value "donnees"'
 
        close(unit=unout)
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
        exit
 
      case(9) !OpenDX format, data R and data I
@@ -2434,7 +2434,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The file is ready to be use with OpenDX'
        write(std_out,*) 'The eig_kvalues and occupations numbers are in comments'
        write(std_out,*)
-       ABI_ALLOCATE(filename,(1))
+       ABI_MALLOC(filename,(1))
        filename(1)=trim(output)//'Imag.dx'
        write(std_out,*) '  The name of your file is : '
        write(std_out,*) trim(filename(1)),'  for the imaginary part.'
@@ -2476,7 +2476,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(a)')'component "data"        value "donnees"'
 
        close(unit=unout)
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
        exit
 
      case(10)           !OpenDX format, data R and data I, atoms positions, lattice and cell
@@ -2486,7 +2486,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The eig_kvalues and occupations numbers are in comments'
        write(std_out,*) 'of the two data files'
        write(std_out,*)
-       ABI_ALLOCATE(filename,(2))
+       ABI_MALLOC(filename,(2))
        filename(1)=trim(output)//'Real.dx'
        filename(2)=trim(output)//'Imag.dx'
        write(std_out,*) '  The name of your data files is : '
@@ -2531,11 +2531,11 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
          close(unit=unout)
        end do
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
 !
 !        write LATTICE_VEC.dx file
 !
-       ABI_ALLOCATE(filename,(3))
+       ABI_MALLOC(filename,(3))
        filename(1)=trim(output1)//'_LATTICE_VEC.dx'
        filename(2)=trim(output1)//'_ATOM_POS.dx'
        filename(3)=trim(output1)//'_UCELL_FRAME.dx'
@@ -2614,7 +2614,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(a)') 'component "positions" value 4'
        write(unout,'(a)') 'component "connections" value 3'
        close(unout)
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
 
        write(std_out,*)
        exit
@@ -2641,7 +2641,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          shift_tau(:) = gridshift1*rprimd(:,1)/(nr1+1) + gridshift2*rprimd(:,2)/(nr2+1) + gridshift3*rprimd(:,3)/(nr3+1)
        end if
 
-       ABI_ALLOCATE(filename,(1))
+       ABI_MALLOC(filename,(1))
        filename(1)=trim(output)
        write(std_out,*) '  The name of your data files is : '
        write(std_out,*) trim(filename(1)),'  for the density (norm of the wfk),'
@@ -2773,7 +2773,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(1X,A)') 'END_BLOCK_DATAGRID3D'
        close(unout)
 
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
 
        write(std_out,*)
        exit
@@ -2807,7 +2807,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          shift_tau(:) = gridshift1*rprimd(:,1)/(nr1+1) + gridshift2*rprimd(:,2)/(nr2+1) + gridshift3*rprimd(:,3)/(nr3+1)
        end if
 
-       ABI_ALLOCATE(filename,(1))
+       ABI_MALLOC(filename,(1))
        filename(1)=trim(output)
        write(std_out,*) '  The name of your data files is : '
        write(std_out,*) trim(filename(1)),'  for the density (norm of the wfk),'
@@ -2880,7 +2880,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(1X,A)') 'END_BLOCK_DATAGRID3D'
        close(unout)
 
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
 
        write(std_out,*)
        exit
@@ -2916,7 +2916,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
    csppol=oldcsppol
    cspinor=oldcspinor
 !  deallocate the datas
-   ABI_DEALLOCATE(fofr)
+   ABI_FREE(fofr)
 
    write(std_out,*) ' Task ',ichoice,' has been done !'
    write(std_out,*)
@@ -2930,11 +2930,11 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  end do
 
 !Deallocate the datas
- ABI_DEALLOCATE(cg_k)
- ABI_DEALLOCATE(eig_k)
- ABI_DEALLOCATE(kg_dum)
- ABI_DEALLOCATE(ph1d)
- ABI_DEALLOCATE(occ_k)
+ ABI_FREE(cg_k)
+ ABI_FREE(eig_k)
+ ABI_FREE(kg_dum)
+ ABI_FREE(ph1d)
+ ABI_FREE(occ_k)
 
  call destroy_mpi_enreg(mpi_enreg)
 

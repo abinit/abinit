@@ -116,9 +116,9 @@ contains
 ! *************************************************************************
 
 !Determining presence p-like MLWFs see J.Chem.Phys.135:154105 (2011) [[cite:Andrinopoulos2011]]
- ABI_ALLOCATE(npwf,(nsppol))
- ABI_ALLOCATE(inwan,(origmwan,nsppol))
- ABI_ALLOCATE(nwan,(nsppol))
+ ABI_MALLOC(npwf,(nsppol))
+ ABI_MALLOC(inwan,(origmwan,nsppol))
+ ABI_MALLOC(nwan,(nsppol))
 
  ll = 0
  npwf(:) = 0
@@ -140,11 +140,11 @@ contains
  nwan(:)=orignwan(:)+npwf(:)
 
 
- ABI_ALLOCATE(wanncent,(3,mwan,nsppol))
- ABI_ALLOCATE(wannspr,(mwan,nsppol))
- ABI_ALLOCATE(wc_rec,(3,mwan,nsppol))
- ABI_ALLOCATE(ord,(mwan,nsppol))
- ABI_ALLOCATE(newocc_wan,(mwan,nsppol))
+ ABI_MALLOC(wanncent,(3,mwan,nsppol))
+ ABI_MALLOC(wannspr,(mwan,nsppol))
+ ABI_MALLOC(wc_rec,(3,mwan,nsppol))
+ ABI_MALLOC(ord,(mwan,nsppol))
+ ABI_MALLOC(newocc_wan,(mwan,nsppol))
 
  wanncent(:,:,:) = zero
  wannspr(:,:) = zero
@@ -284,8 +284,8 @@ contains
  if (all(npwf(:)==0).and.vdw_xc/=14) then !amalgamation is done only if no p-like
 
    mwan_half=mwan/2
-   ABI_ALLOCATE(amagr,(mwan,nsppol,mwan_half))
-   ABI_ALLOCATE(nw,(nsppol,mwan_half))
+   ABI_MALLOC(amagr,(mwan,nsppol,mwan_half))
+   ABI_MALLOC(nw,(nsppol,mwan_half))
    nw=0
 
    call amalgam(amagr,ngr,nsppol,nw,mwan,ord,nwan,vdw_nfrag,wanncent,wannspr)
@@ -294,9 +294,9 @@ contains
 
    if( any(nw(:,:) /= 0) ) then
 
-     ABI_ALLOCATE(amawf,(3,ngr))
-     ABI_ALLOCATE(amaspr,(ngr))
-     ABI_ALLOCATE(amaocc,(ngr))
+     ABI_MALLOC(amawf,(3,ngr))
+     ABI_MALLOC(amaspr,(ngr))
+     ABI_MALLOC(amaocc,(ngr))
 
      amawf(:,:) = 0
      amaspr(:) = 0
@@ -324,14 +324,14 @@ contains
      end do
 
 !    Redefining centres, spreads and occps arrays:
-     ABI_ALLOCATE(tmp_nwan,(nsppol))
+     ABI_MALLOC(tmp_nwan,(nsppol))
 
      tmp_nwan(:) = nwan(:) - sum(nw(:,1:ngr))
      tmp_mwan = maxval(tmp_nwan(:))
 
-     ABI_ALLOCATE(tmp_cent,(3,tmp_mwan,nsppol))
-     ABI_ALLOCATE(tmp_spr,(tmp_mwan,nsppol))
-     ABI_ALLOCATE(tmp_occ,(tmp_mwan,nsppol))
+     ABI_MALLOC(tmp_cent,(3,tmp_mwan,nsppol))
+     ABI_MALLOC(tmp_spr,(tmp_mwan,nsppol))
+     ABI_MALLOC(tmp_occ,(tmp_mwan,nsppol))
 
      tmp_cent(:,:,:) = zero
      tmp_spr(:,:) = zero
@@ -408,9 +408,9 @@ contains
 
  if(vdw_xc==10) then
 
-   ABI_ALLOCATE(dcenters,(3,mwan,nsppol))
-   ABI_ALLOCATE(rc,(mwan,nsppol))
-   ABI_ALLOCATE(rv,(mwan,nsppol))
+   ABI_MALLOC(dcenters,(3,mwan,nsppol))
+   ABI_MALLOC(rc,(mwan,nsppol))
+   ABI_MALLOC(rv,(mwan,nsppol))
 !  Calculate intermediate quantities
    do jj=1,nsppol
      do iwan=1, nwan(jj)
@@ -496,9 +496,9 @@ contains
      end do
    end do
 
-   ABI_DEALLOCATE(dcenters)
-   ABI_DEALLOCATE(rc)
-   ABI_DEALLOCATE(rv)
+   ABI_FREE(dcenters)
+   ABI_FREE(rc)
+   ABI_FREE(rv)
 
    write(message, '(2a,i2,2a,f12.6,2a,f12.6,a)' )ch10,&
 &   ' vdw_xc : ',10,ch10,&
@@ -513,9 +513,9 @@ contains
 
  if (vdw_xc==11) then
 
-   ABI_ALLOCATE(dcenters,(3,mwan,nsppol))
-   ABI_ALLOCATE(rv,(mwan,nsppol))
-   ABI_ALLOCATE(xi,(mwan,nsppol))
+   ABI_MALLOC(dcenters,(3,mwan,nsppol))
+   ABI_MALLOC(rv,(mwan,nsppol))
+   ABI_MALLOC(xi,(mwan,nsppol))
 
 !  Calculate intermediate quantities
    do jj=1,nsppol
@@ -608,18 +608,18 @@ contains
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
-   ABI_DEALLOCATE(dcenters)
-   ABI_DEALLOCATE(rv)
-   ABI_DEALLOCATE(xi)
+   ABI_FREE(dcenters)
+   ABI_FREE(rv)
+   ABI_FREE(xi)
  end if
 
 !vdW-WF VERSION 3 (Using the long range limit of VV10 functional)
 
  if(vdw_xc==12) then
 
-   ABI_ALLOCATE(dcenters,(3,mwan,nsppol))
-   ABI_ALLOCATE(rc,(mwan,nsppol))
-   ABI_ALLOCATE(rv,(mwan,nsppol))
+   ABI_MALLOC(dcenters,(3,mwan,nsppol))
+   ABI_MALLOC(rc,(mwan,nsppol))
+   ABI_MALLOC(rv,(mwan,nsppol))
 !  Calculate intermediate quantities
    do jj=1,nsppol
      do iwan=1, nwan(jj)
@@ -706,9 +706,9 @@ contains
      end do
    end do
 
-   ABI_DEALLOCATE(dcenters)
-   ABI_DEALLOCATE(rc)
-   ABI_DEALLOCATE(rv)
+   ABI_FREE(dcenters)
+   ABI_FREE(rc)
+   ABI_FREE(rv)
 
    write(message, '(2a,i2,2a,f12.6,2a,f12.6,a)' )ch10,&
 &   ' vdw_xc : ',12,ch10,&
@@ -728,8 +728,8 @@ contains
 ! since the matrix elements can be computed on the fly by translating the MLWFs centers.
 ! The polarizability and QHO frequencies are obteined for the MLWFs in the unit cell:
 
-   ABI_ALLOCATE(polar,(mwan))
-   ABI_ALLOCATE(omega,(mwan))
+   ABI_MALLOC(polar,(mwan))
+   ABI_MALLOC(omega,(mwan))
 
    corrvdw=zero
    fu=zero
@@ -757,9 +757,9 @@ contains
      fu=nc*fu
      write(std_out,*) (1.5d0)*fu,ch10
 !ENDDEBUG
-     ABI_ALLOCATE(c_QHO,(3*mwan*nc,3*mwan*nc))
-     ABI_ALLOCATE(Tij_dip,(3*mwan*nc,3*mwan*nc))
-     ABI_ALLOCATE(dcenters,(3,mwan,nsppol))
+     ABI_MALLOC(c_QHO,(3*mwan*nc,3*mwan*nc))
+     ABI_MALLOC(Tij_dip,(3*mwan*nc,3*mwan*nc))
+     ABI_MALLOC(dcenters,(3,mwan,nsppol))
 
      c_QHO(:,:)=zero
      Tij_dip(:,:)=zero
@@ -912,11 +912,11 @@ contains
 
 
 ! Here we diagonalize the matrix c_QHO and the eigenvalues come back in vector eigv
-     ABI_ALLOCATE(matrx,((3*mwan*nc*(3*mwan*nc+1))/2))
-     ABI_ALLOCATE(eigv,(3*mwan*nc))
-     ABI_ALLOCATE(eigvec,(3*mwan*nc,3*mwan*nc))
-     ABI_ALLOCATE(zhpev1,(3*2*mwan*nc-1))
-     ABI_ALLOCATE(zhpev2,(3*3*mwan*nc-2))
+     ABI_MALLOC(matrx,((3*mwan*nc*(3*mwan*nc+1))/2))
+     ABI_MALLOC(eigv,(3*mwan*nc))
+     ABI_MALLOC(eigvec,(3*mwan*nc,3*mwan*nc))
+     ABI_MALLOC(zhpev1,(3*2*mwan*nc-1))
+     ABI_MALLOC(zhpev2,(3*3*mwan*nc-2))
      matrx(:)=cmplx(zero,zero)
      do jj=1,3*mwan*nc
        do ii=1,jj
@@ -943,10 +943,10 @@ contains
        ABI_ERROR('zhpev fails!') !vz_d
      end if !vz_d
 
-     ABI_DEALLOCATE(matrx)
-     ABI_DEALLOCATE(eigvec)
-     ABI_DEALLOCATE(zhpev1)
-     ABI_DEALLOCATE(zhpev2)
+     ABI_FREE(matrx)
+     ABI_FREE(eigvec)
+     ABI_FREE(zhpev1)
+     ABI_FREE(zhpev2)
 
      do ii=1,3*mwan*nc  !3*nwan(isppol)
        corrvdw=corrvdw+sqrt(eigv(ii))
@@ -966,12 +966,12 @@ contains
 
    corrvdw=corrvdw-1.5d0*fu
 
-   ABI_DEALLOCATE(c_QHO)
-   ABI_DEALLOCATE(Tij_dip)
-   ABI_DEALLOCATE(dcenters)
-   ABI_DEALLOCATE(eigv)
-   ABI_DEALLOCATE(polar)
-   ABI_DEALLOCATE(omega)
+   ABI_FREE(c_QHO)
+   ABI_FREE(Tij_dip)
+   ABI_FREE(dcenters)
+   ABI_FREE(eigv)
+   ABI_FREE(polar)
+   ABI_FREE(omega)
 
    write(message, '(2a,i2,2a,f12.6,2a,f12.6,a)' )ch10,&
 &   ' vdw_xc : ',14,ch10,&
@@ -983,59 +983,59 @@ contains
  end if ! vdw-QHO
 
  if(allocated(ord))then
-   ABI_DEALLOCATE(ord)
+   ABI_FREE(ord)
  end if
  if(allocated(wanncent))then
-   ABI_DEALLOCATE(wanncent)
+   ABI_FREE(wanncent)
  end if
  if(allocated(wannspr))then
-   ABI_DEALLOCATE(wannspr)
+   ABI_FREE(wannspr)
  end if
  if(allocated(newocc_wan))then
-   ABI_DEALLOCATE(newocc_wan)
+   ABI_FREE(newocc_wan)
  end if
  if(allocated(npwf))then
-   ABI_DEALLOCATE(npwf)
+   ABI_FREE(npwf)
  end if
  if (allocated(inwan))then
-   ABI_DEALLOCATE(inwan)
+   ABI_FREE(inwan)
  end if
  if(allocated(nw))then
-   ABI_DEALLOCATE(nw)
+   ABI_FREE(nw)
  end if
  if(allocated(nwan))then
-   ABI_DEALLOCATE(nwan)
+   ABI_FREE(nwan)
  end if
- ABI_DEALLOCATE(wc_rec)
+ ABI_FREE(wc_rec)
  if(allocated(amagr))then
-   ABI_DEALLOCATE(amagr)
+   ABI_FREE(amagr)
  end if
  if(allocated(amawf))then
-   ABI_DEALLOCATE(amawf)
+   ABI_FREE(amawf)
  end if
  if(allocated(Tij_dip))then
-   ABI_DEALLOCATE(Tij_dip)
+   ABI_FREE(Tij_dip)
  end if
  if(allocated(c_QHO))then
-   ABI_DEALLOCATE(c_QHO)
+   ABI_FREE(c_QHO)
  end if
  if(allocated(amaspr))then
-   ABI_DEALLOCATE(amaspr)
+   ABI_FREE(amaspr)
  end if
  if(allocated(amaocc))then
-   ABI_DEALLOCATE(amaocc)
+   ABI_FREE(amaocc)
  end if
  if(allocated(tmp_cent))then
-   ABI_DEALLOCATE(tmp_cent)
+   ABI_FREE(tmp_cent)
  end if
  if(allocated(tmp_nwan))then
-   ABI_DEALLOCATE(tmp_nwan)
+   ABI_FREE(tmp_nwan)
  end if
  if(allocated(tmp_spr))then
-   ABI_DEALLOCATE(tmp_spr)
+   ABI_FREE(tmp_spr)
  end if
  if(allocated(tmp_occ))then
-   ABI_DEALLOCATE(tmp_occ)
+   ABI_FREE(tmp_occ)
  end if
 
 
@@ -1082,10 +1082,10 @@ end subroutine evdw_wannier
  deltax=xc/(real(nx,dp)-1.d0)
  deltay=yc/(real(ny,dp)-1.d0)
 
- ABI_ALLOCATE(arg1,(ny))
- ABI_ALLOCATE(res1,(ny))
- ABI_ALLOCATE(arg2,(nx))
- ABI_ALLOCATE(res2,(nx))
+ ABI_MALLOC(arg1,(ny))
+ ABI_MALLOC(res1,(ny))
+ ABI_MALLOC(arg2,(nx))
+ ABI_MALLOC(res2,(nx))
 
  do ix=1,nx
 
@@ -1105,10 +1105,10 @@ end subroutine evdw_wannier
 
  Fu = res2(nx)
 
- ABI_DEALLOCATE(arg1)
- ABI_DEALLOCATE(res1)
- ABI_DEALLOCATE(arg2)
- ABI_DEALLOCATE(res2)
+ ABI_FREE(arg1)
+ ABI_FREE(res1)
+ ABI_FREE(arg2)
+ ABI_FREE(res2)
 end subroutine getFu
 !!***
 
@@ -1145,7 +1145,7 @@ end subroutine getFu
    real(dp), allocatable :: tmp(:)
 ! *************************************************************************
 
- ABI_ALLOCATE(tmp,(3))
+ ABI_MALLOC(tmp,(3))
 
  do ll=1,nsppol
    do ii=1,nwan(ll)
@@ -1167,7 +1167,7 @@ end subroutine getFu
    end do
  end do
 
- ABI_DEALLOCATE(tmp)
+ ABI_FREE(tmp)
 
  end subroutine order_wannier
 !!***
@@ -1205,9 +1205,9 @@ end subroutine getFu
    real(dp), parameter :: delt = 0.05d0 !Bohr, spatial mesh (1D) step
 ! *************************************************************************
 
- ABI_ALLOCATE(intsec,(mwan,nsppol,mwan,nsppol))
- ABI_ALLOCATE(rpoint,(3))
- ABI_ALLOCATE(tmp,(3))
+ ABI_MALLOC(intsec,(mwan,nsppol,mwan,nsppol))
+ ABI_MALLOC(rpoint,(3))
+ ABI_MALLOC(tmp,(3))
  intsec(:,:,:,:) = 0
  xi(:,:) = 0.0d0
 !detecting WF intersecting neighbors
@@ -1316,9 +1316,9 @@ end subroutine getFu
    end do
  end do
 
- ABI_DEALLOCATE(intsec)
- ABI_DEALLOCATE(rpoint)
- ABI_DEALLOCATE(tmp)
+ ABI_FREE(intsec)
+ ABI_FREE(rpoint)
+ ABI_FREE(tmp)
 
  end subroutine ovlp_wann
 !!***
@@ -1365,10 +1365,10 @@ end subroutine getFu
  deltax=xc/(real(nx,dp)-1.d0)
  deltay=yc/(real(ny,dp)-1.d0)
 
- ABI_ALLOCATE(arg1,(ny))
- ABI_ALLOCATE(res1,(ny))
- ABI_ALLOCATE(arg2,(nx))
- ABI_ALLOCATE(res2,(nx))
+ ABI_MALLOC(arg1,(ny))
+ ABI_MALLOC(res1,(ny))
+ ABI_MALLOC(arg2,(nx))
+ ABI_MALLOC(res2,(nx))
 
  wgn = cons*( (18.0d0/(sn*sqrt3**three))**4 )
  pown = two*sqrt3/sn
@@ -1405,10 +1405,10 @@ end subroutine getFu
  end do
 !END DEBUG
 
- ABI_DEALLOCATE(arg1)
- ABI_DEALLOCATE(res1)
- ABI_DEALLOCATE(arg2)
- ABI_DEALLOCATE(res2)
+ ABI_FREE(arg1)
+ ABI_FREE(res1)
+ ABI_FREE(arg2)
+ ABI_FREE(res2)
 end subroutine vv10limit
 !!***
 
@@ -1446,7 +1446,7 @@ end subroutine vv10limit
  real(dp),allocatable :: tmp(:)
 ! *************************************************************************
 
- ABI_ALLOCATE(tmp,(3))
+ ABI_MALLOC(tmp,(3))
 
 !Selecting pairs of MLWFs satisfying amalgamation criteria
  write(std_out,*) 'Searching for MLWFs close enough to amalgamate...',ch10
@@ -1598,7 +1598,7 @@ end subroutine vv10limit
 !call flush
 !ENDDEBUG
 
- ABI_DEALLOCATE(tmp)
+ ABI_FREE(tmp)
  end subroutine amalgam
 !!***
 

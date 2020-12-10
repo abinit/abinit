@@ -2470,10 +2470,10 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
  identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
  n_axes(:)=0
 
- ABI_ALLOCATE(determinant,(nsym))
- ABI_ALLOCATE(order,(nsym))
- ABI_ALLOCATE(ptsym,(nsym))
- ABI_ALLOCATE(root_invers,(nsym))
+ ABI_MALLOC(determinant,(nsym))
+ ABI_MALLOC(order,(nsym))
+ ABI_MALLOC(ptsym,(nsym))
+ ABI_MALLOC(root_invers,(nsym))
 
 !Get the determinant
  call symdet(determinant,nsym,symrel)
@@ -2635,10 +2635,10 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
 !write(std_out,*)' iholohedry, ptgroup=',iholohedry,',',ptgroup
 !ENDDEBUG
 
- ABI_DEALLOCATE(determinant)
- ABI_DEALLOCATE(order)
- ABI_DEALLOCATE(ptsym)
- ABI_DEALLOCATE(root_invers)
+ ABI_FREE(determinant)
+ ABI_FREE(order)
+ ABI_FREE(ptsym)
+ ABI_FREE(root_invers)
 
 end subroutine symptgroup
 !!***

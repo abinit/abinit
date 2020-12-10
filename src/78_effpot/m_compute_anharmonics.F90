@@ -165,9 +165,9 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  !   - store the reference effective potential
  !   - Also get the strain
  !   - perform some checks
-  ABI_DATATYPE_ALLOCATE(eff_pots,(nfile))
-  ABI_DATATYPE_ALLOCATE(effpot_strain,(nfile))
-  ABI_ALLOCATE(file_usable,(nfile))
+  ABI_MALLOC(eff_pots,(nfile))
+  ABI_MALLOC(effpot_strain,(nfile))
+  ABI_MALLOC(file_usable,(nfile))
 
   ref_eff_pot => eff_pot
   file_usable(:) = .True.
@@ -441,7 +441,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 !   Allocation of array and set some values
     nrpt  = ref_eff_pot%harmonics_terms%ifcs%nrpt
     natom = ref_eff_pot%crystal%natom
-    ABI_ALLOCATE(elastic_displacement,(6,6,3,natom))
+    ABI_MALLOC(elastic_displacement,(6,6,3,natom))
 
     elastics3rd = zero
     elastics4th = zero
@@ -470,8 +470,8 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           end if
 !         Compute strain phonon-coupling
           phonon_strain(ii)%nrpt =  nrpt
-          ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt))
-          ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt))
+          ABI_MALLOC(phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt))
+          ABI_MALLOC(phonon_strain(ii)%cell,(3,nrpt))
           phonon_strain(ii)%atmfrc = zero
           phonon_strain(ii)%cell =  eff_pots(int(delta1))%harmonics_terms%ifcs%cell
 
@@ -519,7 +519,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     do ii = 1,6
       call phonon_strain(ii)%free()
     end do
-    ABI_DEALLOCATE(elastic_displacement)
+    ABI_FREE(elastic_displacement)
 
     write(message,'(4a)') ch10, ' The computation of the 3rd order elastics constants, ',ch10,&
 &    ' the phonon-strain coupling and the elastic-displacement coupling is done'
@@ -537,9 +537,9 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     call effective_potential_free(eff_pots(jj))
   end do
 
-  ABI_DATATYPE_DEALLOCATE(effpot_strain)
-  ABI_DATATYPE_DEALLOCATE(eff_pots)
-  ABI_DEALLOCATE(file_usable)
+  ABI_FREE(effpot_strain)
+  ABI_FREE(eff_pots)
+  ABI_FREE(file_usable)
 
 
   write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10

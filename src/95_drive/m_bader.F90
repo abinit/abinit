@@ -810,9 +810,9 @@ subroutine addout(aim_dtset)
    cod=0
  end select
 
- ABI_ALLOCATE(uu,(3,dims))
- ABI_ALLOCATE(nr,(dims))
- ABI_ALLOCATE(stp,(dims))
+ ABI_MALLOC(uu,(3,dims))
+ ABI_MALLOC(nr,(dims))
+ ABI_MALLOC(stp,(dims))
 
  write(std_out,*) 'grid:', aim_dtset%ngrid(1:dims)
  write(std_out,*) 'kod :', cod
@@ -830,11 +830,11 @@ subroutine addout(aim_dtset)
  end do
 
  if (aim_dtset%denout > 0) then
-   ABI_ALLOCATE(dfld,(tgrd+1))
+   ABI_MALLOC(dfld,(tgrd+1))
    dfld(:)=0._dp
  end if
  if (aim_dtset%lapout > 0)  then
-   ABI_ALLOCATE(lfld,(tgrd+1))
+   ABI_MALLOC(lfld,(tgrd+1))
  end if
 
  select case (dims)
@@ -899,14 +899,14 @@ subroutine addout(aim_dtset)
      end do
    end if
  end select
- ABI_DEALLOCATE(uu)
- ABI_DEALLOCATE(stp)
- ABI_DEALLOCATE(nr)
+ ABI_FREE(uu)
+ ABI_FREE(stp)
+ ABI_FREE(nr)
  if(aim_dtset%denout>0) then
-   ABI_DEALLOCATE(dfld)
+   ABI_FREE(dfld)
  end if
  if(aim_dtset%lapout>0) then
-   ABI_DEALLOCATE(lfld)
+   ABI_FREE(lfld)
  end if
 
 end subroutine addout
@@ -1455,7 +1455,7 @@ subroutine cpdrv(aim_dtset)
    write(untout, '(3es16.6)') (xorig(ii),ii=1,3)
    write(untout,*)
 
-   ABI_ALLOCATE(nr,(nvs))
+   ABI_MALLOC(nr,(nvs))
    do ii=1,nvs
      nr(ii)=ii
    end do
@@ -1480,7 +1480,7 @@ subroutine cpdrv(aim_dtset)
    end do
 
 !  SEARCHING BCP
-   ABI_DATATYPE_ALLOCATE(bcp,(nb))
+   ABI_MALLOC(bcp,(nb))
    nbcp=0
    iatinit=inxat
    iposinit=inxcell
@@ -1601,9 +1601,9 @@ subroutine cpdrv(aim_dtset)
 
 !    Order the BCP. CPs should appear by increasing values of x,y,z , the latter
 !    varying the fastest
-     ABI_ALLOCATE(sortguide,(nbcp))
-     ABI_ALLOCATE(indexcp,(nbcp))
-     ABI_DATATYPE_ALLOCATE(cp_tmp,(nbcp))
+     ABI_MALLOC(sortguide,(nbcp))
+     ABI_MALLOC(indexcp,(nbcp))
+     ABI_MALLOC(cp_tmp,(nbcp))
      do ii=3,1,-1
 !      DEBUG
 !      write(std_out,*)' cpdrv : sort on index ii=',ii
@@ -1655,9 +1655,9 @@ subroutine cpdrv(aim_dtset)
        write(std_out,'(":DISPC ",4F12.6)') bcp(jj)%diff(:),bcp(jj)%diff(1)/bcp(jj)%diff(3)
      end do
 
-     ABI_DATATYPE_DEALLOCATE(cp_tmp)
-     ABI_DEALLOCATE(indexcp)
-     ABI_DEALLOCATE(sortguide)
+     ABI_FREE(cp_tmp)
+     ABI_FREE(indexcp)
+     ABI_FREE(sortguide)
 
    end if ! nbcp>0
 
@@ -1702,11 +1702,11 @@ subroutine cpdrv(aim_dtset)
 !  nb_now=nbcp
 !  ENDDEBUG
    nn=nb_now*(nb_now-1)/2
-   ABI_DATATYPE_ALLOCATE(rcp,(nn))
+   ABI_MALLOC(rcp,(nn))
 
 !  Loop on pairs of BCP or atoms
    ipair=0
-   ABI_ALLOCATE(buffer,(16,nn))
+   ABI_MALLOC(buffer,(16,nn))
    buffer=zero
 
 !  DEBUG
@@ -1832,15 +1832,15 @@ subroutine cpdrv(aim_dtset)
      end do srcp ! jj=ii+2,nb_now
    end do ! ii=1,nb_now-1
 
-   ABI_DEALLOCATE(buffer)
+   ABI_FREE(buffer)
 
    if(nrcp>0)then
 
 !    Order the RCP. CPs should appear by increasing values of x,y,z , the latter
 !    varying the fastest
-     ABI_ALLOCATE(sortguide,(nrcp))
-     ABI_ALLOCATE(indexcp,(nrcp))
-     ABI_DATATYPE_ALLOCATE(cp_tmp,(nrcp))
+     ABI_MALLOC(sortguide,(nrcp))
+     ABI_MALLOC(indexcp,(nrcp))
+     ABI_MALLOC(cp_tmp,(nrcp))
      do ii=3,1,-1
 !      DEBUG
 !      write(std_out,*)' cpdrv : sort on index ii=',ii
@@ -1888,9 +1888,9 @@ subroutine cpdrv(aim_dtset)
 &       rcp(jj)%rr(:),rcp(jj)%ev(:),rcp(jj)%ev(1)+rcp(jj)%ev(2)+rcp(jj)%ev(3)
      end do
 
-     ABI_DATATYPE_DEALLOCATE(cp_tmp)
-     ABI_DEALLOCATE(indexcp)
-     ABI_DEALLOCATE(sortguide)
+     ABI_FREE(cp_tmp)
+     ABI_FREE(indexcp)
+     ABI_FREE(sortguide)
 
    end if ! nrcp>0
 
@@ -1911,7 +1911,7 @@ subroutine cpdrv(aim_dtset)
 
 
    nn=nrcp*(nrcp-1)/2
-   ABI_DATATYPE_ALLOCATE(ccp,(nn))
+   ABI_MALLOC(ccp,(nn))
 
    nccp=0
    do ii=1,nrcp-1
@@ -1972,9 +1972,9 @@ subroutine cpdrv(aim_dtset)
 
 !    Order the CCP. CPs should appear by increasing values of x,y,z , the latter
 !    varying the fastest
-     ABI_ALLOCATE(sortguide,(nccp))
-     ABI_ALLOCATE(indexcp,(nccp))
-     ABI_DATATYPE_ALLOCATE(cp_tmp,(nccp))
+     ABI_MALLOC(sortguide,(nccp))
+     ABI_MALLOC(indexcp,(nccp))
+     ABI_MALLOC(cp_tmp,(nccp))
      do ii=3,1,-1
        do jj=1,nccp
 !        Try to be platform-independent. Might need a larger tolerance.
@@ -2006,9 +2006,9 @@ subroutine cpdrv(aim_dtset)
 &       ccp(jj)%rr(:),ccp(jj)%ev(:),ccp(jj)%ev(1)+ccp(jj)%ev(2)+ccp(jj)%ev(3)
      end do
 
-     ABI_DEALLOCATE(sortguide)
-     ABI_DEALLOCATE(indexcp)
-     ABI_DATATYPE_DEALLOCATE(cp_tmp)
+     ABI_FREE(sortguide)
+     ABI_FREE(indexcp)
+     ABI_FREE(cp_tmp)
 
    end if ! nccp>0
 
@@ -2060,17 +2060,17 @@ subroutine cpdrv(aim_dtset)
 
  if (aim_dtset%crit==-1) then
    read(untc,*) nbcp
-   ABI_DATATYPE_ALLOCATE(bcp,(nbcp))
+   ABI_MALLOC(bcp,(nbcp))
    do ii=1,nbcp
      read(untc,*) bcp(ii)%rr(:)
    end do
    read(untc,*) nrcp
-   ABI_DATATYPE_ALLOCATE(rcp,(nrcp))
+   ABI_MALLOC(rcp,(nrcp))
    do ii=1,nrcp
      read(untc,*) rcp(ii)%rr(:)
    end do
    read(untc,*) nccp
-   ABI_DATATYPE_ALLOCATE(ccp,(nccp))
+   ABI_MALLOC(ccp,(nccp))
    do ii=1,nccp
      read(untc,*) ccp(ii)%rr(:)
    end do
@@ -2104,17 +2104,17 @@ subroutine cpdrv(aim_dtset)
        end if
      end do
    end do
-   ABI_DATATYPE_DEALLOCATE(bcp)
+   ABI_FREE(bcp)
  end if
  do ii=1,natom
    write(std_out,*) 'atom: ', ii, rminl(ii)
  end do
 
  if(allocated(rcp)) then
-   ABI_DATATYPE_DEALLOCATE(rcp)
+   ABI_FREE(rcp)
  end if
  if(allocated(ccp)) then
-   ABI_DATATYPE_DEALLOCATE(ccp)
+   ABI_FREE(ccp)
  end if
 
 !END CP ANALYSIS
@@ -2186,13 +2186,13 @@ subroutine critic(aim_dtset,vv,ev,zz,dmax,ires,sort)
 !ENDDEBUG
  oscl=.false.
  if (sort==3) then
-   ABI_ALLOCATE(pom,(4,4))
-   ABI_ALLOCATE(pom2,(4,4))
-   ABI_ALLOCATE(lamb,(4))
+   ABI_MALLOC(pom,(4,4))
+   ABI_MALLOC(pom2,(4,4))
+   ABI_MALLOC(lamb,(4))
  elseif (sort/=0) then
-   ABI_ALLOCATE(pom,(3,3))
-   ABI_ALLOCATE(pom2,(3,3))
-   ABI_ALLOCATE(lamb,(3))
+   ABI_MALLOC(pom,(3,3))
+   ABI_MALLOC(pom2,(3,3))
+   ABI_MALLOC(lamb,(3))
  end if
 
 
@@ -2443,9 +2443,9 @@ subroutine critic(aim_dtset,vv,ev,zz,dmax,ires,sort)
 !write(std_out,'(":AUTOVEC ",/,3F16.8,/,3F16.8,/,3F16.8)') ((zz(ii,jii),ii=1,3),jii=1,3)
 
  if (sort/=0)  then
-   ABI_DEALLOCATE(pom)
-   ABI_DEALLOCATE(pom2)
-   ABI_DEALLOCATE(lamb)
+   ABI_FREE(pom)
+   ABI_FREE(pom2)
+   ABI_FREE(lamb)
  end if
 
 !DEBUG
@@ -3154,32 +3154,32 @@ subroutine drvaim(aim_dtset,tcpui,twalli)
 
 !Deallocation of global variables allocated in initaim
 !and declared in defs_aimfields.
- ABI_DEALLOCATE(dig1)
- ABI_DEALLOCATE(dig2)
- ABI_DEALLOCATE(dig3)
- ABI_DEALLOCATE(llg1)
- ABI_DEALLOCATE(llg2)
- ABI_DEALLOCATE(llg3)
- ABI_DEALLOCATE(cdig1)
- ABI_DEALLOCATE(cdig2)
- ABI_DEALLOCATE(cdig3)
- ABI_DEALLOCATE(ddx)
- ABI_DEALLOCATE(ddy)
- ABI_DEALLOCATE(ddz)
- ABI_DEALLOCATE(rrad)
- ABI_DEALLOCATE(crho)
- ABI_DEALLOCATE(sp2)
- ABI_DEALLOCATE(sp3)
- ABI_DEALLOCATE(sp4)
- ABI_DEALLOCATE(corlim)
- ABI_DEALLOCATE(dvl)
- ABI_DEALLOCATE(ndat)
- ABI_DEALLOCATE(rminl)
+ ABI_FREE(dig1)
+ ABI_FREE(dig2)
+ ABI_FREE(dig3)
+ ABI_FREE(llg1)
+ ABI_FREE(llg2)
+ ABI_FREE(llg3)
+ ABI_FREE(cdig1)
+ ABI_FREE(cdig2)
+ ABI_FREE(cdig3)
+ ABI_FREE(ddx)
+ ABI_FREE(ddy)
+ ABI_FREE(ddz)
+ ABI_FREE(rrad)
+ ABI_FREE(crho)
+ ABI_FREE(sp2)
+ ABI_FREE(sp3)
+ ABI_FREE(sp4)
+ ABI_FREE(corlim)
+ ABI_FREE(dvl)
+ ABI_FREE(ndat)
+ ABI_FREE(rminl)
 !Deallocation of global variables allocated in initaim
 !and declared in defs_aimprom.
- ABI_DEALLOCATE(typat)
- ABI_DEALLOCATE(xred)
- ABI_DEALLOCATE(xatm)
+ ABI_FREE(typat)
+ ABI_FREE(xred)
+ ABI_FREE(xatm)
 
 end subroutine drvaim
 !!***
@@ -3228,9 +3228,9 @@ subroutine graph(unts,untg)
  read(unts,*) indx, xorig(1:3)
  read(unts,*) nth, thmin, thmax
  read(unts,*) nphi, phimin, phimax
- ABI_ALLOCATE(th,(nth))
- ABI_ALLOCATE(phi,(nphi))
- ABI_ALLOCATE(rr,(nth,nphi))
+ ABI_MALLOC(th,(nth))
+ ABI_MALLOC(phi,(nphi))
+ ABI_MALLOC(rr,(nth,nphi))
  do ii=1,nth
    do jj=1,nphi
      read(unts,*) th(ii),phi(jj),rr(ii,jj),ss
@@ -3360,13 +3360,13 @@ subroutine initaim(aim_dtset,znucl_batom)
  ntypat=hdr%ntypat
  rprimd(:,:)=hdr%rprimd(:,:)
 
- ABI_ALLOCATE(zionpsp,(npsp))
- ABI_ALLOCATE(znucl,(ntypat))
- ABI_ALLOCATE(typat,(natom))
- ABI_ALLOCATE(xred,(3,natom))
- ABI_ALLOCATE(symrel,(3,3,nsym))
- ABI_ALLOCATE(tnons,(3,nsym))
- ABI_ALLOCATE(xatm,(3,natom))
+ ABI_MALLOC(zionpsp,(npsp))
+ ABI_MALLOC(znucl,(ntypat))
+ ABI_MALLOC(typat,(natom))
+ ABI_MALLOC(xred,(3,natom))
+ ABI_MALLOC(symrel,(3,3,nsym))
+ ABI_MALLOC(tnons,(3,nsym))
+ ABI_MALLOC(xatm,(3,natom))
 
  symrel(:,:,:)=hdr%symrel(:,:,:)
  typat(:)=hdr%typat(:)
@@ -3379,7 +3379,7 @@ subroutine initaim(aim_dtset,znucl_batom)
 
 !-------------------------------------------------------------------------------
 
- ABI_ALLOCATE(dvl,(ngfft(1),ngfft(2),ngfft(3)))
+ ABI_MALLOC(dvl,(ngfft(1),ngfft(2),ngfft(3)))
 
  if(me==master)then
    if (aim_iomode == IO_MODE_ETSF) then
@@ -3485,8 +3485,8 @@ subroutine initaim(aim_dtset,znucl_batom)
 !READING OF THE CORE DENSITY
  write(std_out,*)ch10,' initaim : will read the core densities' ,ch10
 
- ABI_ALLOCATE(ndat,(ntypat))
- ABI_ALLOCATE(rminl,(natom))
+ ABI_MALLOC(ndat,(ntypat))
+ ABI_MALLOC(rminl,(natom))
  ndtmax=0
  if(me==master)then
    do ii=1,ntypat
@@ -3506,12 +3506,12 @@ subroutine initaim(aim_dtset,znucl_batom)
 
 !FIELDS FOR STORING CORE DENSITY
 
- ABI_ALLOCATE(rrad,(ndtmax,ntypat))
- ABI_ALLOCATE(crho,(ndtmax,ntypat))
- ABI_ALLOCATE(sp2,(ndtmax,ntypat))
- ABI_ALLOCATE(sp3,(ndtmax,ntypat))
- ABI_ALLOCATE(sp4,(ndtmax,ntypat))
- ABI_ALLOCATE(corlim,(ntypat))
+ ABI_MALLOC(rrad,(ndtmax,ntypat))
+ ABI_MALLOC(crho,(ndtmax,ntypat))
+ ABI_MALLOC(sp2,(ndtmax,ntypat))
+ ABI_MALLOC(sp3,(ndtmax,ntypat))
+ ABI_MALLOC(sp4,(ndtmax,ntypat))
+ ABI_MALLOC(corlim,(ntypat))
 
  sp2(:,:)=zero
  sp3(:,:)=zero
@@ -3572,18 +3572,18 @@ subroutine initaim(aim_dtset,znucl_batom)
 
 !FIELDS FOR INTERPOLATIONS OF THE VALENCE DENSITY
 
- ABI_ALLOCATE(dig1,(ngfft(1)))
- ABI_ALLOCATE(dig2,(ngfft(2)))
- ABI_ALLOCATE(dig3,(ngfft(3)))
- ABI_ALLOCATE(llg1,(ngfft(1)))
- ABI_ALLOCATE(llg2,(ngfft(2)))
- ABI_ALLOCATE(llg3,(ngfft(3)))
- ABI_ALLOCATE(cdig1,(ngfft(1)-1))
- ABI_ALLOCATE(cdig2,(ngfft(2)-1))
- ABI_ALLOCATE(cdig3,(ngfft(3)-1))
- ABI_ALLOCATE(ddx,(ngfft(1),ngfft(2),ngfft(3)))
- ABI_ALLOCATE(ddy,(ngfft(1),ngfft(2),ngfft(3)))
- ABI_ALLOCATE(ddz,(ngfft(1),ngfft(2),ngfft(3)))
+ ABI_MALLOC(dig1,(ngfft(1)))
+ ABI_MALLOC(dig2,(ngfft(2)))
+ ABI_MALLOC(dig3,(ngfft(3)))
+ ABI_MALLOC(llg1,(ngfft(1)))
+ ABI_MALLOC(llg2,(ngfft(2)))
+ ABI_MALLOC(llg3,(ngfft(3)))
+ ABI_MALLOC(cdig1,(ngfft(1)-1))
+ ABI_MALLOC(cdig2,(ngfft(2)-1))
+ ABI_MALLOC(cdig3,(ngfft(3)-1))
+ ABI_MALLOC(ddx,(ngfft(1),ngfft(2),ngfft(3)))
+ ABI_MALLOC(ddy,(ngfft(1),ngfft(2),ngfft(3)))
+ ABI_MALLOC(ddz,(ngfft(1),ngfft(2),ngfft(3)))
 
 !DECOMPOSITION OF THE MATRIX FOR THE DETERMINATION OF COEFFICIENTS
 !FOR CUBIC SPLINE INTERPOLATION (using the periodic boundary conditions)
@@ -3654,10 +3654,10 @@ subroutine initaim(aim_dtset,znucl_batom)
 
  znucl_batom=znucl(typat(aim_dtset%batom))
 
- ABI_DEALLOCATE(znucl)
- ABI_DEALLOCATE(zionpsp)
- ABI_DEALLOCATE(symrel)
- ABI_DEALLOCATE(tnons)
+ ABI_FREE(znucl)
+ ABI_FREE(zionpsp)
+ ABI_FREE(symrel)
+ ABI_FREE(tnons)
 
 !the pointers are obsolete - to remove later
 
@@ -3936,8 +3936,8 @@ subroutine integrho(aim_dtset,znucl_batom)
 
  write(std_out,*) 'NTH NPH ',nth,nph
 
- ABI_ALLOCATE(wgrs,(nth,nph))
- ABI_ALLOCATE(rdint,(nth,nph))
+ ABI_MALLOC(wgrs,(nth,nph))
+ ABI_MALLOC(rdint,(nth,nph))
 
  do ii=1,nth
    do jj=1,nph
@@ -3989,10 +3989,10 @@ subroutine integrho(aim_dtset,znucl_batom)
 
 !COEF. FOR SPHERICAL INTEGRATION
 
- ABI_ALLOCATE(nsp2,(kk))
- ABI_ALLOCATE(nsp3,(kk))
- ABI_ALLOCATE(nsp4,(kk))
- ABI_ALLOCATE(ncrho,(kk))
+ ABI_MALLOC(nsp2,(kk))
+ ABI_MALLOC(nsp3,(kk))
+ ABI_MALLOC(nsp4,(kk))
+ ABI_MALLOC(ncrho,(kk))
 
  do ii=1,kk
    ncrho(ii)=crho(ii,nn)*4._dp*pi*rrad(ii,nn)*rrad(ii,nn)
@@ -4101,16 +4101,16 @@ subroutine integrho(aim_dtset,znucl_batom)
 
  write(std_out,*) ':INTECOR ', cintr+nsphe
 
- ABI_DEALLOCATE(ncrho)
- ABI_DEALLOCATE(nsp2)
- ABI_DEALLOCATE(nsp3)
- ABI_DEALLOCATE(nsp4)
+ ABI_FREE(ncrho)
+ ABI_FREE(nsp2)
+ ABI_FREE(nsp3)
+ ABI_FREE(nsp4)
 
 !INTEGRATION OF THE VALENCE DENSITY
 
- ABI_ALLOCATE(rr,(aim_dtset%npt+1))
- ABI_ALLOCATE(vrho,(aim_dtset%npt+1))
- ABI_ALLOCATE(vdd,(aim_dtset%npt+1))
+ ABI_MALLOC(rr,(aim_dtset%npt+1))
+ ABI_MALLOC(vrho,(aim_dtset%npt+1))
+ ABI_MALLOC(vdd,(aim_dtset%npt+1))
 
 !in the case of the only irho appelation
 
@@ -4138,7 +4138,7 @@ subroutine integrho(aim_dtset,znucl_batom)
 !
 
  nsphe=0._dp
- ABI_ALLOCATE(work,(aim_dtset%npt+1))
+ ABI_MALLOC(work,(aim_dtset%npt+1))
  do ii=1,nth
    do jj=1,nph
 
@@ -4173,7 +4173,7 @@ subroutine integrho(aim_dtset,znucl_batom)
      nsphe=nsphe+rdint(ii,jj)*wgrs(ii,jj)
    end do
  end do
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
  if (gaus.or.weit) then
    nsphe=nsphe*(pi/(themin-themax))*(two_pi/(phimax-phimin))
@@ -4249,8 +4249,8 @@ subroutine integvol()
 
  write(std_out,*) 'NTH NPH ',nth,nph
 
- ABI_ALLOCATE(wgrs,(nth,nph))
- ABI_ALLOCATE(rdint,(nth,nph))
+ ABI_MALLOC(wgrs,(nth,nph))
+ ABI_MALLOC(rdint,(nth,nph))
 
  do ii=1,nth
    do jj=1,nph
@@ -4456,7 +4456,7 @@ subroutine plint()
  end do
  xl(nd+1)=rprimd(1,1)
 
- ABI_ALLOCATE(uu,(nn+3))
+ ABI_MALLOC(uu,(nn+3))
 
  uu(1)=0._dp
  uu(nn+3)=rprimd(2,2)
@@ -4490,7 +4490,7 @@ subroutine plint()
    end do
    write(untp,'(2E16.8)') vv(3), igr
  end do
- ABI_DEALLOCATE(uu)
+ ABI_FREE(uu)
 
 end subroutine plint
 !!***
@@ -4810,7 +4810,7 @@ subroutine surf(aim_dtset)
 !  To make the output independent of the number of processors, but still
 !  cut down the CPU time, use a multigrid technique
    srch=.true.
-   ABI_ALLOCATE(rs_computed,(nth,nph))
+   ABI_MALLOC(rs_computed,(nth,nph))
    rs(:,:)=zero
    rs_computed(:,:)=zero
    kk=0 ; init=0
@@ -4853,7 +4853,7 @@ subroutine surf(aim_dtset)
        init=1
      end if
    end do
-   ABI_DEALLOCATE(rs_computed)
+   ABI_FREE(rs_computed)
 
    srch=.true.
 

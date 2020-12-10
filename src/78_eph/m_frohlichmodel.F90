@@ -114,13 +114,13 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  nphi     = 2*ntheta
  nqdir     = nphi*ntheta
 
- ABI_ALLOCATE(gq_points_th,(ntheta))
- ABI_ALLOCATE(gq_weights_th,(ntheta))
- ABI_ALLOCATE(gq_points_cosph,(nphi))
- ABI_ALLOCATE(gq_points_sinph,(nphi))
+ ABI_MALLOC(gq_points_th,(ntheta))
+ ABI_MALLOC(gq_weights_th,(ntheta))
+ ABI_MALLOC(gq_points_cosph,(nphi))
+ ABI_MALLOC(gq_points_sinph,(nphi))
 
- ABI_ALLOCATE(unit_qdir,(3,nqdir))
- ABI_ALLOCATE(weight_qdir,(nqdir))
+ ABI_MALLOC(unit_qdir,(3,nqdir))
+ ABI_MALLOC(weight_qdir,(nqdir))
 
  call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
  weight_phi=two*pi/real(nphi,dp)
@@ -146,17 +146,17 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
    enddo
  enddo
 
- ABI_DEALLOCATE(gq_points_th)
- ABI_DEALLOCATE(gq_weights_th)
- ABI_DEALLOCATE(gq_points_cosph)
- ABI_DEALLOCATE(gq_points_sinph)
+ ABI_FREE(gq_points_th)
+ ABI_FREE(gq_weights_th)
+ ABI_FREE(gq_points_cosph)
+ ABI_FREE(gq_points_sinph)
 
- ABI_ALLOCATE(polarity_qdir,(3,3*cryst%natom,nqdir))
- ABI_ALLOCATE(proj_polarity_qdir,(3*cryst%natom,nqdir))
- ABI_ALLOCATE(zpr_q0_phononfactor_qdir,(nqdir))
- ABI_ALLOCATE(frohlich_phononfactor_qdir,(nqdir))
- ABI_ALLOCATE(phfrq_qdir,(3*cryst%natom,nqdir))
- ABI_ALLOCATE(dielt_qdir,(nqdir))
+ ABI_MALLOC(polarity_qdir,(3,3*cryst%natom,nqdir))
+ ABI_MALLOC(proj_polarity_qdir,(3*cryst%natom,nqdir))
+ ABI_MALLOC(zpr_q0_phononfactor_qdir,(nqdir))
+ ABI_MALLOC(frohlich_phononfactor_qdir,(nqdir))
+ ABI_MALLOC(phfrq_qdir,(3*cryst%natom,nqdir))
+ ABI_MALLOC(dielt_qdir,(nqdir))
 
  !Compute phonon frequencies and mode-polarity for each qdir
  call ifc%calcnwrite_nana_terms(cryst, nqdir, unit_qdir, phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
@@ -211,7 +211,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
      deg_dim    = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
 
-     ABI_ALLOCATE(eig2_diag_cart,(3,3,deg_dim,deg_dim))
+     ABI_MALLOC(eig2_diag_cart,(3,3,deg_dim,deg_dim))
 
      !Convert eig2_diag to cartesian coordinates
      do iband=1,deg_dim
@@ -222,13 +222,13 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
         enddo
      enddo
 
-     ABI_ALLOCATE(f3d,(deg_dim,deg_dim))
-     ABI_ALLOCATE(m_avg,(deg_dim))
-     ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
-     ABI_ALLOCATE(zpr_frohlich_avg,(deg_dim))
-     ABI_ALLOCATE(eigenval,(deg_dim))
-     ABI_ALLOCATE(saddle_warn,(deg_dim))
-     ABI_ALLOCATE(start_eigf3d_pos,(deg_dim))
+     ABI_MALLOC(f3d,(deg_dim,deg_dim))
+     ABI_MALLOC(m_avg,(deg_dim))
+     ABI_MALLOC(m_avg_frohlich,(deg_dim))
+     ABI_MALLOC(zpr_frohlich_avg,(deg_dim))
+     ABI_MALLOC(eigenval,(deg_dim))
+     ABI_MALLOC(saddle_warn,(deg_dim))
+     ABI_MALLOC(start_eigf3d_pos,(deg_dim))
 
      m_avg=zero
      m_avg_frohlich=zero
@@ -237,14 +237,14 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
      !Initializations for the diagonalization routine
      if(deg_dim>1)then
 
-       ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
+       ABI_MALLOC(eigenvec,(deg_dim,deg_dim))
        lwork=-1
-       ABI_ALLOCATE(rwork,(3*deg_dim-2))
-       ABI_ALLOCATE(work,(1))
+       ABI_MALLOC(rwork,(3*deg_dim-2))
+       ABI_MALLOC(work,(1))
        call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
        lwork=int(work(1))
-       ABI_DEALLOCATE(work)
-       ABI_ALLOCATE(work,(lwork))
+       ABI_FREE(work)
+       ABI_MALLOC(work,(lwork))
 
      endif
 
@@ -281,9 +281,9 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
      enddo
 
      if(deg_dim>1)then
-       ABI_DEALLOCATE(eigenvec)
-       ABI_DEALLOCATE(rwork)
-       ABI_DEALLOCATE(work)
+       ABI_FREE(eigenvec)
+       ABI_FREE(rwork)
+       ABI_FREE(work)
      endif
 
      m_avg = quarter*piinv*m_avg
@@ -337,26 +337,26 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 &        ' Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.'
      endif
 
-     ABI_DEALLOCATE(eig2_diag_cart)
-     ABI_DEALLOCATE(f3d)
-     ABI_DEALLOCATE(m_avg)
-     ABI_DEALLOCATE(m_avg_frohlich)
-     ABI_DEALLOCATE(zpr_frohlich_avg)
-     ABI_DEALLOCATE(eigenval)
-     ABI_DEALLOCATE(saddle_warn)
-     ABI_DEALLOCATE(start_eigf3d_pos)
+     ABI_FREE(eig2_diag_cart)
+     ABI_FREE(f3d)
+     ABI_FREE(m_avg)
+     ABI_FREE(m_avg_frohlich)
+     ABI_FREE(zpr_frohlich_avg)
+     ABI_FREE(eigenval)
+     ABI_FREE(saddle_warn)
+     ABI_FREE(start_eigf3d_pos)
 
    enddo ! ideg
  enddo ! ikpt
 
- ABI_DEALLOCATE(unit_qdir)
- ABI_DEALLOCATE(weight_qdir)
- ABI_DEALLOCATE(polarity_qdir)
- ABI_DEALLOCATE(proj_polarity_qdir)
- ABI_DEALLOCATE(phfrq_qdir)
- ABI_DEALLOCATE(dielt_qdir)
- ABI_DEALLOCATE(zpr_q0_phononfactor_qdir)
- ABI_DEALLOCATE(frohlich_phononfactor_qdir)
+ ABI_FREE(unit_qdir)
+ ABI_FREE(weight_qdir)
+ ABI_FREE(polarity_qdir)
+ ABI_FREE(proj_polarity_qdir)
+ ABI_FREE(phfrq_qdir)
+ ABI_FREE(dielt_qdir)
+ ABI_FREE(zpr_q0_phononfactor_qdir)
+ ABI_FREE(frohlich_phononfactor_qdir)
 
  end subroutine frohlichmodel
 

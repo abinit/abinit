@@ -166,32 +166,32 @@ real(dp),     allocatable :: real_wrk_mat(:,:), imag_wrk_mat(:,:)
 
 ! prepare the complex frequency array
 nz = 2*nfreq*npt_gauss
-ABI_ALLOCATE(list_z,(nz))
+ABI_MALLOC(list_z,(nz))
 
-ABI_ALLOCATE(matrix_elements_resolvent, (lmax,nz))
+ABI_MALLOC(matrix_elements_resolvent, (lmax,nz))
 
-ABI_ALLOCATE(psik_wrk,  (2,npw_k))
-ABI_ALLOCATE(psikb_wrk, (2,npw_kb))
-ABI_ALLOCATE(psikg_wrk, (2,npw_g))
-ABI_ALLOCATE(seed_vector, (npw_g))
-
-
-ABI_ALLOCATE(real_wrk_vec, (kmax_numeric*blocksize))
-ABI_ALLOCATE(imag_wrk_vec, (kmax_numeric*blocksize))
-ABI_ALLOCATE(real_wrk_mat, (kmax_numeric,kmax_numeric*blocksize))
-ABI_ALLOCATE(imag_wrk_mat, (kmax_numeric,kmax_numeric*blocksize))
-
-ABI_ALLOCATE(shift_lanczos_matrix, (kmax_numeric,kmax_numeric))
-
-ABI_ALLOCATE(work_vec, (kmax_numeric))
-
-ABI_ALLOCATE(right_vec_FFT,(kmax_numeric) )
-ABI_ALLOCATE(right_vec_LA,(kmax_numeric, blocksize) )
-ABI_ALLOCATE(LR_M_matrix_LA,(kmax_numeric,kmax_numeric, blocksize) )
-ABI_ALLOCATE(Hamiltonian_Qk_LA,(npw_k, kmax_numeric, blocksize) )
+ABI_MALLOC(psik_wrk,  (2,npw_k))
+ABI_MALLOC(psikb_wrk, (2,npw_kb))
+ABI_MALLOC(psikg_wrk, (2,npw_g))
+ABI_MALLOC(seed_vector, (npw_g))
 
 
-ABI_ALLOCATE(left_vecs_LA,(kmax_numeric, lmax) )
+ABI_MALLOC(real_wrk_vec, (kmax_numeric*blocksize))
+ABI_MALLOC(imag_wrk_vec, (kmax_numeric*blocksize))
+ABI_MALLOC(real_wrk_mat, (kmax_numeric,kmax_numeric*blocksize))
+ABI_MALLOC(imag_wrk_mat, (kmax_numeric,kmax_numeric*blocksize))
+
+ABI_MALLOC(shift_lanczos_matrix, (kmax_numeric,kmax_numeric))
+
+ABI_MALLOC(work_vec, (kmax_numeric))
+
+ABI_MALLOC(right_vec_FFT,(kmax_numeric) )
+ABI_MALLOC(right_vec_LA,(kmax_numeric, blocksize) )
+ABI_MALLOC(LR_M_matrix_LA,(kmax_numeric,kmax_numeric, blocksize) )
+ABI_MALLOC(Hamiltonian_Qk_LA,(npw_k, kmax_numeric, blocksize) )
+
+
+ABI_MALLOC(left_vecs_LA,(kmax_numeric, lmax) )
 
 iw = 0
 do iw_ext = 1, nfreq
@@ -427,33 +427,33 @@ array_integrand(:,:)  = array_integrand(:,:)/(2.0_dp*pi)
 call cleanup_LanczosResolvents
 
 
-ABI_DEALLOCATE(psik_wrk)
-ABI_DEALLOCATE(psikb_wrk)
-ABI_DEALLOCATE(psikg_wrk)
+ABI_FREE(psik_wrk)
+ABI_FREE(psikb_wrk)
+ABI_FREE(psikg_wrk)
 
-ABI_DEALLOCATE(seed_vector)
-ABI_DEALLOCATE(work_vec)
-
-
-ABI_DEALLOCATE(right_vec_FFT)
-ABI_DEALLOCATE(right_vec_LA)
-
-ABI_DEALLOCATE(LR_M_matrix_LA)
-
-ABI_DEALLOCATE(Hamiltonian_Qk_LA)
-
-ABI_DEALLOCATE(real_wrk_vec)
-ABI_DEALLOCATE(imag_wrk_vec)
-ABI_DEALLOCATE(real_wrk_mat)
-ABI_DEALLOCATE(imag_wrk_mat)
+ABI_FREE(seed_vector)
+ABI_FREE(work_vec)
 
 
-ABI_DEALLOCATE(shift_lanczos_matrix)
-ABI_DEALLOCATE(left_vecs_LA)
+ABI_FREE(right_vec_FFT)
+ABI_FREE(right_vec_LA)
+
+ABI_FREE(LR_M_matrix_LA)
+
+ABI_FREE(Hamiltonian_Qk_LA)
+
+ABI_FREE(real_wrk_vec)
+ABI_FREE(imag_wrk_vec)
+ABI_FREE(real_wrk_mat)
+ABI_FREE(imag_wrk_mat)
 
 
-ABI_DEALLOCATE(list_z)
-ABI_DEALLOCATE(matrix_elements_resolvent)
+ABI_FREE(shift_lanczos_matrix)
+ABI_FREE(left_vecs_LA)
+
+
+ABI_FREE(list_z)
+ABI_FREE(matrix_elements_resolvent)
 
 end subroutine compute_projected_BT_shift_Lanczos
 !!***
@@ -559,32 +559,32 @@ real(dp),     allocatable :: real_wrk_mat(:,:), imag_wrk_mat(:,:)
 
 ! prepare the complex frequency array
 nz = 2*nfreq*npt_gauss
-ABI_ALLOCATE(list_z,(nz))
+ABI_MALLOC(list_z,(nz))
 
-ABI_ALLOCATE(matrix_elements_resolvent, (lmax,nz))
+ABI_MALLOC(matrix_elements_resolvent, (lmax,nz))
 
-ABI_ALLOCATE(psik_wrk,  (2,npw_k))
-ABI_ALLOCATE(psikb_wrk, (2,npw_kb))
-ABI_ALLOCATE(psikg_wrk, (2,npw_g))
-ABI_ALLOCATE(seed_vector, (npw_g))
-
-
-ABI_ALLOCATE(real_wrk_vec, (kmax_numeric*blocksize))
-ABI_ALLOCATE(imag_wrk_vec, (kmax_numeric*blocksize))
-ABI_ALLOCATE(real_wrk_mat, (kmax_numeric,kmax_numeric*blocksize))
-ABI_ALLOCATE(imag_wrk_mat, (kmax_numeric,kmax_numeric*blocksize))
-
-ABI_ALLOCATE(shift_lanczos_matrix, (kmax_numeric,kmax_numeric))
-
-ABI_ALLOCATE(work_vec, (kmax_numeric))
-
-ABI_ALLOCATE(right_vec_FFT,(kmax_numeric) )
-ABI_ALLOCATE(right_vec_LA,(kmax_numeric, blocksize) )
-ABI_ALLOCATE(LR_M_matrix_LA,(kmax_numeric,kmax_numeric, blocksize) )
-ABI_ALLOCATE(Hamiltonian_Qk_LA,(npw_k, kmax_numeric, blocksize) )
+ABI_MALLOC(psik_wrk,  (2,npw_k))
+ABI_MALLOC(psikb_wrk, (2,npw_kb))
+ABI_MALLOC(psikg_wrk, (2,npw_g))
+ABI_MALLOC(seed_vector, (npw_g))
 
 
-ABI_ALLOCATE(left_vecs_LA,(kmax_numeric, lmax) )
+ABI_MALLOC(real_wrk_vec, (kmax_numeric*blocksize))
+ABI_MALLOC(imag_wrk_vec, (kmax_numeric*blocksize))
+ABI_MALLOC(real_wrk_mat, (kmax_numeric,kmax_numeric*blocksize))
+ABI_MALLOC(imag_wrk_mat, (kmax_numeric,kmax_numeric*blocksize))
+
+ABI_MALLOC(shift_lanczos_matrix, (kmax_numeric,kmax_numeric))
+
+ABI_MALLOC(work_vec, (kmax_numeric))
+
+ABI_MALLOC(right_vec_FFT,(kmax_numeric) )
+ABI_MALLOC(right_vec_LA,(kmax_numeric, blocksize) )
+ABI_MALLOC(LR_M_matrix_LA,(kmax_numeric,kmax_numeric, blocksize) )
+ABI_MALLOC(Hamiltonian_Qk_LA,(npw_k, kmax_numeric, blocksize) )
+
+
+ABI_MALLOC(left_vecs_LA,(kmax_numeric, lmax) )
 
 iw = 0
 do iw_ext = 1, nfreq
@@ -830,33 +830,33 @@ array_integrand(:,:)  = array_integrand(:,:)/(2.0_dp*pi)
 call cleanup_LanczosResolvents
 
 
-ABI_DEALLOCATE(psik_wrk)
-ABI_DEALLOCATE(psikb_wrk)
-ABI_DEALLOCATE(psikg_wrk)
+ABI_FREE(psik_wrk)
+ABI_FREE(psikb_wrk)
+ABI_FREE(psikg_wrk)
 
-ABI_DEALLOCATE(seed_vector)
-ABI_DEALLOCATE(work_vec)
-
-
-ABI_DEALLOCATE(right_vec_FFT)
-ABI_DEALLOCATE(right_vec_LA)
-
-ABI_DEALLOCATE(LR_M_matrix_LA)
-
-ABI_DEALLOCATE(Hamiltonian_Qk_LA)
-
-ABI_DEALLOCATE(real_wrk_vec)
-ABI_DEALLOCATE(imag_wrk_vec)
-ABI_DEALLOCATE(real_wrk_mat)
-ABI_DEALLOCATE(imag_wrk_mat)
+ABI_FREE(seed_vector)
+ABI_FREE(work_vec)
 
 
-ABI_DEALLOCATE(shift_lanczos_matrix)
-ABI_DEALLOCATE(left_vecs_LA)
+ABI_FREE(right_vec_FFT)
+ABI_FREE(right_vec_LA)
+
+ABI_FREE(LR_M_matrix_LA)
+
+ABI_FREE(Hamiltonian_Qk_LA)
+
+ABI_FREE(real_wrk_vec)
+ABI_FREE(imag_wrk_vec)
+ABI_FREE(real_wrk_mat)
+ABI_FREE(imag_wrk_mat)
 
 
-ABI_DEALLOCATE(list_z)
-ABI_DEALLOCATE(matrix_elements_resolvent)
+ABI_FREE(shift_lanczos_matrix)
+ABI_FREE(left_vecs_LA)
+
+
+ABI_FREE(list_z)
+ABI_FREE(matrix_elements_resolvent)
 
 end subroutine compute_projected_BT_shift_Lanczos_DISTRIBUTED
 !!***

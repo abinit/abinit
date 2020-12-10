@@ -132,16 +132,16 @@ program ujdet
 !write(std_out,*)'ujdet: ndtset: ',ndtset
 !ENDDEBUG
 
- ABI_DATATYPE_ALLOCATE(dtpawuj,(0:ndtpawuj))
+ ABI_MALLOC(dtpawuj,(0:ndtpawuj))
 
  call pawuj_ini(dtpawuj,ndtset)
 
  dtpawuj(1:ndtset)%ndtset=ndtset
 
  marr=ndtset
- ABI_ALLOCATE(idumar1,(marr))
- ABI_ALLOCATE(dpdumar,(marr))
- ABI_ALLOCATE(jdtset_,(ndtset))
+ ABI_MALLOC(idumar1,(marr))
+ ABI_MALLOC(dpdumar,(marr))
+ ABI_MALLOC(jdtset_,(ndtset))
  jdtset_=(/ ( ii,ii=1,ndtset )/)
 
 !Read integers (main dimensions)
@@ -241,16 +241,16 @@ program ujdet
 !Read arrays
 
  marr=maxval((/nspden*nat*nat, 3*3 ,nat*3/))
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
  do jdtset=0,ndtset
 !  DEBUG
 !  write(std_out,*)'ujdet 2a, jdtset ',jdtset
 !  END DEBUG
-   ABI_ALLOCATE(dtpawuj(jdtset)%vsh,(nspden,nat))
-   ABI_ALLOCATE(dtpawuj(jdtset)%occ,(nspden,nat))
-   ABI_ALLOCATE(dtpawuj(jdtset)%xred,(3,nat))
+   ABI_MALLOC(dtpawuj(jdtset)%vsh,(nspden,nat))
+   ABI_MALLOC(dtpawuj(jdtset)%occ,(nspden,nat))
+   ABI_MALLOC(dtpawuj(jdtset)%xred,(3,nat))
 
    dtpawuj(jdtset)%iuj=jdtset
    dtpawuj(jdtset)%vsh=zero
@@ -320,13 +320,13 @@ program ujdet
  do jdtset=0,ndtset
    call pawuj_free(dtpawuj(jdtset))
  end do
- ABI_DATATYPE_DEALLOCATE(dtpawuj)
+ ABI_FREE(dtpawuj)
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(idumar1)
- ABI_DEALLOCATE(dpdumar)
- ABI_DEALLOCATE(jdtset_)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
+ ABI_FREE(idumar1)
+ ABI_FREE(dpdumar)
+ ABI_FREE(jdtset_)
 
  call destroy_mpi_enreg(mpi_enreg)
 

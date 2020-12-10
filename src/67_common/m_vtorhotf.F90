@@ -193,8 +193,8 @@ subroutine vtorhotf(dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 
 ! *************************************************************************
 
-   ABI_ALLOCATE(rhor_mid,(nfft))
-   ABI_ALLOCATE(rhor_middx,(nfft))
+   ABI_MALLOC(rhor_mid,(nfft))
+   ABI_MALLOC(rhor_middx,(nfft))
    fermie_tol=1.e-10_dp
    cktf=one/two/pi**2*(two*dtset%tphysel)**1.5_dp
 
@@ -233,8 +233,8 @@ subroutine vtorhotf(dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
    end do
    fermie=rtnewt
    rhor(:,1)=rhor_mid(:)
-   ABI_DEALLOCATE(rhor_mid)
-   ABI_DEALLOCATE(rhor_middx)
+   ABI_FREE(rhor_mid)
+   ABI_FREE(rhor_middx)
 
 !  DEBUG
 !  write(std_out,*)'fmid,nmid,jdicho',fermie,nelect_mid,jdicho
@@ -278,7 +278,7 @@ end subroutine tf
 
 ! *************************************************************************
 
-   ABI_ALLOCATE(betamumoinsV,(nfft))
+   ABI_MALLOC(betamumoinsV,(nfft))
    cktf=one/two/pi**2*(two*dtset%tphysel)**1.5_dp
    eektf=zero
    feektf=zero
@@ -307,7 +307,7 @@ end subroutine tf
 !  ENDDEBUG
    ek=eektf
    entropy=(eektf-feektf)/dtset%tphysel
-   ABI_DEALLOCATE(betamumoinsV)
+   ABI_FREE(betamumoinsV)
  end subroutine tfek
 !!***
 

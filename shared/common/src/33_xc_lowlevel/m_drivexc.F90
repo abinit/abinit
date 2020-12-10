@@ -1026,8 +1026,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !If needed, compute rhotot and rs
  if (ixc==1.or.ixc==2.or.ixc==3.or.ixc==4.or.ixc==5.or.&
 &    ixc==6.or.ixc==21.or.ixc==22.or.ixc==50) then
-   ABI_ALLOCATE(rhotot,(npts))
-   ABI_ALLOCATE(rspts,(npts))
+   ABI_MALLOC(rhotot,(npts))
+   ABI_MALLOC(rspts,(npts))
    if(nspden==1)then
      rhotot(:)=two*rho_updn(:,1)
    else
@@ -1039,7 +1039,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 
 !If needed, compute zeta
  if (ixc==1.or.ixc==21.or.ixc==22) then
-   ABI_ALLOCATE(zeta,(npts))
+   ABI_MALLOC(zeta,(npts))
    if(nspden==1)then
      zeta(:)=zero
    else
@@ -1165,8 +1165,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !>>>>> RPA correlation from Perdew-Wang
  else if (ixc==10) then
    if (order**2 <= 1) then
-     ABI_ALLOCATE(exci_rpa,(npts))
-     ABI_ALLOCATE(vxci_rpa,(npts,2))
+     ABI_MALLOC(exci_rpa,(npts))
+     ABI_MALLOC(vxci_rpa,(npts,2))
      optpbe=3
      call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,nd2vxc)
      optpbe=1
@@ -1174,22 +1174,22 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      exc(:)=exc(:)-exci_rpa(:)
 !    PMA: second index of vxcrho is nspden while that of rpa is 2 they can mismatch
      vxcrho(:,1:min(nspden,2))=vxcrho(:,1:min(nspden,2))-vxci_rpa(:,1:min(nspden,2))
-     ABI_DEALLOCATE(exci_rpa)
-     ABI_DEALLOCATE(vxci_rpa)
+     ABI_FREE(exci_rpa)
+     ABI_FREE(vxci_rpa)
    else if (order /=3) then
-     ABI_ALLOCATE(exci_rpa,(npts))
-     ABI_ALLOCATE(vxci_rpa,(npts,2))
+     ABI_MALLOC(exci_rpa,(npts))
+     ABI_MALLOC(vxci_rpa,(npts,2))
      optpbe=3
      call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,nd2vxc,dvxci=dvxc)
      optpbe=1
      call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,dvxci=dvxc)
      exc(:)=exc(:)-exci_rpa(:)
      vxcrho(:,:)=vxcrho(:,:)-vxci_rpa(:,:)
-     ABI_DEALLOCATE(exci_rpa)
-     ABI_DEALLOCATE(vxci_rpa)
+     ABI_FREE(exci_rpa)
+     ABI_FREE(vxci_rpa)
    else if (order ==3) then
-     ABI_ALLOCATE(exci_rpa,(npts))
-     ABI_ALLOCATE(vxci_rpa,(npts,2))
+     ABI_MALLOC(exci_rpa,(npts))
+     ABI_MALLOC(vxci_rpa,(npts,2))
      optpbe=3
      call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,nd2vxc,&
 &     d2vxci=d2vxc,dvxci=dvxc)
@@ -1198,8 +1198,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &     d2vxci=d2vxc,dvxci=dvxc)
      exc(:)=exc(:)-exci_rpa(:)
      vxcrho(:,:)=vxcrho(:,:)-vxci_rpa(:,:)
-     ABI_DEALLOCATE(exci_rpa)
-     ABI_DEALLOCATE(vxci_rpa)
+     ABI_FREE(exci_rpa)
+     ABI_FREE(vxci_rpa)
    end if
 
 !>>>>> LDA xc energy like ixc==7, and Leeuwen-Baerends GGA xc potential
@@ -1317,9 +1317,9 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !  Requires to evaluate exchange-correlation with PBE (optpbe=2)
 !  minus hyb_mixing*exchange with PBE (optpbe=-2)
    ndvxc_x=8
-   ABI_ALLOCATE(exc_x,(npts))
-   ABI_ALLOCATE(vxcrho_x,(npts,nspden))
-   ABI_ALLOCATE(vxcgrho_x,(npts,nvxcgrho))
+   ABI_MALLOC(exc_x,(npts))
+   ABI_MALLOC(vxcrho_x,(npts,nspden))
+   ABI_MALLOC(vxcgrho_x,(npts,nvxcgrho))
    exc_x=zero;vxcrho_x=zero;vxcgrho_x=zero
    if (order**2 <= 1) then
      optpbe=2 !PBE exchange correlation
@@ -1332,7 +1332,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      vxcrho=vxcrho-vxcrho_x*my_hyb_mixing
      vxcgrho=vxcgrho-vxcgrho_x*my_hyb_mixing
    else if (order /=3) then
-     ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
+     ABI_MALLOC(dvxc_x,(npts,ndvxc_x))
      optpbe=2 !PBE exchange correlation
      call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
      dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
@@ -1343,12 +1343,12 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      vxcrho=vxcrho-vxcrho_x*my_hyb_mixing
      vxcgrho=vxcgrho-vxcgrho_x*my_hyb_mixing
      dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*my_hyb_mixing
-     ABI_DEALLOCATE(dvxc_x)
+     ABI_FREE(dvxc_x)
    else if (order ==3) then
 !    The size of exchange-correlation with PBE (optpbe=2)
 !    is the one which defines the size for ndvxc.
-     ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
-     ABI_ALLOCATE(d2vxc_x,(npts,nd2vxc))
+     ABI_MALLOC(dvxc_x,(npts,ndvxc_x))
+     ABI_MALLOC(d2vxc_x,(npts,nd2vxc))
      optpbe=2 !PBE exchange correlation
      call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
 &     d2vxci=d2vxc,dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
@@ -1360,12 +1360,12 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      vxcgrho=vxcgrho-vxcgrho_x*my_hyb_mixing
      d2vxc=d2vxc-d2vxc_x*my_hyb_mixing
      dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*my_hyb_mixing
-     ABI_DEALLOCATE(dvxc_x)
-     ABI_DEALLOCATE(d2vxc_x)
+     ABI_FREE(dvxc_x)
+     ABI_FREE(d2vxc_x)
    end if
-   ABI_DEALLOCATE(exc_x)
-   ABI_DEALLOCATE(vxcrho_x)
-   ABI_DEALLOCATE(vxcgrho_x)
+   ABI_FREE(exc_x)
+   ABI_FREE(vxcrho_x)
+   ABI_FREE(vxcgrho_x)
 
 !>>>>> Ichimaru,Iyetomi,Tanaka,  XC at finite temp (e- gaz)
  else if (ixc==50) then
@@ -1407,13 +1407,13 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    end if
 
 !  Then renormalize B3LYP and subtract VWN3 contribution
-   ABI_ALLOCATE(exc_c,(npts))
-   ABI_ALLOCATE(vxcrho_c,(npts,nspden))
+   ABI_MALLOC(exc_c,(npts))
+   ABI_MALLOC(vxcrho_c,(npts,nspden))
    if(order**2>1)then
-     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
+     ABI_MALLOC(dvxc_c,(npts,ndvxc))
    end if
    if(order**2>4)then
-     ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
+     ABI_MALLOC(d2vxc_c,(npts,nd2vxc))
    end if
    exc_c=zero;vxcrho_c=zero
    call libxc_functionals_init(-30,nspden,xc_functionals=xc_funcs_vwn3)
@@ -1457,13 +1457,13 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    if(order**2>4)d2vxc=d2vxc-quarter*0.81d0*d2vxc_c
    call libxc_functionals_end(xc_functionals=xc_funcs_lyp)
 
-   ABI_DEALLOCATE(exc_c)
-   ABI_DEALLOCATE(vxcrho_c)
+   ABI_FREE(exc_c)
+   ABI_FREE(vxcrho_c)
    if(allocated(dvxc_c))then
-     ABI_DEALLOCATE(dvxc_c)
+     ABI_FREE(dvxc_c)
    end if
    if(allocated(d2vxc_c))then
-     ABI_DEALLOCATE(d2vxc_c)
+     ABI_FREE(d2vxc_c)
    end if
 
 !>>>>> All libXC functionals
@@ -1573,13 +1573,13 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 ! =================================================
 !Deallocate arrays
  if(allocated(rhotot)) then
-   ABI_DEALLOCATE(rhotot)
+   ABI_FREE(rhotot)
  end if
  if(allocated(rspts)) then
-   ABI_DEALLOCATE(rspts)
+   ABI_FREE(rspts)
  end if
  if(allocated(zeta)) then
-   ABI_DEALLOCATE(zeta)
+   ABI_FREE(zeta)
  end if
 
 end subroutine drivexc

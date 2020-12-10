@@ -351,7 +351,7 @@ contains
     ! latt : TODO (replace this with full lattice)
     ! only toy harmonic part 
     if(self%params%dynamics>100) then
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
+       ABI_MALLOC_TYPE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
        select type(lat_ham_pot)
        type is (lattice_harmonic_primitive_potential_t)
           call lat_ham_pot%initialize(self%unitcell)
@@ -365,7 +365,7 @@ contains
     if(self%params%spin_dynamics>0) then
        ! The pointer will be allocated and added to the list
        ! and eventually deallocated by the list%finalize
-       ABI_DATATYPE_ALLOCATE_SCALAR(spin_primitive_potential_t, spin_pot)
+       ABI_MALLOC_TYPE_SCALAR(spin_primitive_potential_t, spin_pot)
 
        ! One may wonder why unitcell does not read data from files
        ! That is because the spin_pot (which has an pointer to unitcell)
@@ -383,7 +383,7 @@ contains
 
     ! spin-lattice coupling
     if(self%params%slc_coupling>0) then
-       ABI_DATATYPE_ALLOCATE_SCALAR(slc_primitive_potential_t, slc_pot)
+       ABI_MALLOC_TYPE_SCALAR(slc_primitive_potential_t, slc_pot)
        select type(slc_pot)
        type is (slc_primitive_potential_t)
           call slc_pot%initialize(self%unitcell)
@@ -451,15 +451,15 @@ contains
     class(mb_manager_t), intent(inout) :: self
     select case(self%params%dynamics)
     case (101)  ! Velocity Verlet (NVE)
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_verlet_mover_t, self%lattice_mover)
+       ABI_MALLOC_TYPE_SCALAR(lattice_verlet_mover_t, self%lattice_mover)
     case(102)   ! Langevin (NVT)
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_langevin_mover_t, self%lattice_mover)
+       ABI_MALLOC_TYPE_SCALAR(lattice_langevin_mover_t, self%lattice_mover)
     case(103)   ! Berendsen NVT
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NVT_mover_t, self%lattice_mover)
+       ABI_MALLOC_TYPE_SCALAR(lattice_berendsen_NVT_mover_t, self%lattice_mover)
     case(104)   ! Berendsen NPT (not yet avaliable)
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NPT_mover_t, self%lattice_mover)
+       ABI_MALLOC_TYPE_SCALAR(lattice_berendsen_NPT_mover_t, self%lattice_mover)
     case(120)   ! Dummy mover (Do not move atoms, For test only.)
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_dummy_mover_t, self%lattice_mover)
+       ABI_MALLOC_TYPE_SCALAR(lattice_dummy_mover_t, self%lattice_mover)
     end select
     call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
     ! FIXME: should be able to set to different mode using input.
@@ -534,9 +534,9 @@ contains
     do i =1, self%pots%size
       select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for spin_potential are used
       type is (spin_potential_t) 
-        ABI_ALLOCATE(Htmp, (3,scpot%nspin))
+        ABI_MALLOC(Htmp, (3,scpot%nspin))
         call scpot%get_Heff(scpot%supercell%spin%Sref, Htmp, scpot%eref)
-        ABI_DEALLOCATE(Htmp)
+        ABI_FREE(Htmp)
       end select
 
       select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for slc_potential are used

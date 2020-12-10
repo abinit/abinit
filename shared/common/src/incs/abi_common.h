@@ -157,7 +157,7 @@
 #  define _LOC(x)  int(loc(x), kind=8) 
 
 /* and now the debugging macros */
-#  define ABI_ALLOCATE(ARR, SIZE) \
+#  define ABI_MALLOC(ARR, SIZE) \
    allocate(ARR SIZE) NEWLINE \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
 
@@ -169,21 +169,13 @@
    call abimem_record(0, QUOTE(scalar), _LOC(scalar), "D", -storage_size(scalar, kind=8),  __FILE__, __LINE__) NEWLINE \
    deallocate(scalar)
 
-#  define ABI_DEALLOCATE(ARR) \
+#  define ABI_FREE(ARR) \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - ABI_MEM_BITS(ARR), __FILE__,  __LINE__) NEWLINE \
    deallocate(ARR) 
 
-#  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) \
+#  define ABI_STAT_MALLOC(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
-
-#  define ABI_DATATYPE_ALLOCATE(ARR,SIZE) \
-   allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
-
-#  define ABI_DATATYPE_DEALLOCATE(ARR)  \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - ABI_MEM_BITS(ARR), __FILE__, __LINE__) NEWLINE \
-   deallocate(ARR) 
 
 #  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
@@ -198,21 +190,15 @@
 
 
 /* Allocate a polymophic scalar that is: allocate(datatype:: scalar) */
-#  define ABI_DATATYPE_ALLOCATE_SCALAR(type, scalar)                    \
+#  define ABI_MALLOC_TYPE_SCALAR(type, scalar)                    \
   allocate(type::scalar) NEWLINE                                        \
     call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
 
-#  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)                        \
-  call abimem_record(0, QUOTE(scalar), _LOC(scalar), "D", -storage_size(scalar, kind=8), __FILE__, __LINE__) NEWLINE \
-    deallocate(scalar) 
-
 #else
 /* macros used in production */
-#  define ABI_ALLOCATE(ARR,SIZE) allocate(ARR SIZE)
-#  define ABI_DEALLOCATE(ARR)  deallocate(ARR)
-#  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) allocate(ARR SIZE, stat=ierr)
-#  define ABI_DATATYPE_ALLOCATE(ARR,SIZE)  allocate(ARR SIZE)
-#  define ABI_DATATYPE_DEALLOCATE(ARR)   deallocate(ARR)
+#  define ABI_MALLOC(ARR,SIZE) allocate(ARR SIZE)
+#  define ABI_FREE(ARR)  deallocate(ARR)
+#  define ABI_STAT_MALLOC(ARR,SIZE,ierr) allocate(ARR SIZE, stat=ierr)
 #  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
         allocate(ARR SIZE, stat=ierr) NEWLINE \
         ABI_CHECK(ierr == 0, "out-of-memory")
@@ -220,21 +206,15 @@
 #  define ABI_FREE_SCALAR(scalar) deallocate(scalar)
 #  define ABI_MOVE_ALLOC(from, to) call move_alloc(from, to)
 
-#  define ABI_DATATYPE_ALLOCATE_SCALAR(type,scalar)  allocate(type::scalar)
-#  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)   deallocate(scalar)
+#  define ABI_MALLOC_TYPE_SCALAR(type,scalar)  allocate(type::scalar)
 
 #endif
 
 
 /* Macros to allocate zero-initialized arrays. */
-#define ABI_CALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
-#define ABI_ICALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = 0
+#define ABI_CALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = zero
+#define ABI_ICALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = 0
 #define ABI_CALLOC_OR_DIE(ARR,SIZE,ierr) ABI_MALLOC_OR_DIE(ARR, SIZE, ierr) NEWLINE ARR = zero
-
-/* Shorthand versions */
-#define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
-#define ABI_FREE(ARR) ABI_DEALLOCATE(ARR)
-#define ABI_STAT_MALLOC(ARR,SIZE,ierr) ABI_STAT_ALLOCATE(ARR,SIZE,ierr)
 
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
  * or allocate arrays before calling MOVE_ALLOC.

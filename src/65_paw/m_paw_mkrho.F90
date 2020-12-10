@@ -215,7 +215,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 
 !In somes cases (parallelism), has to distribute the PAW occupation matrix
  if (size(pawrhoij)==natom.and.(my_natom/=natom)) then
-   ABI_DATATYPE_ALLOCATE(pawrhoij_ptr,(my_natom))
+   ABI_MALLOC(pawrhoij_ptr,(my_natom))
    call pawrhoij_nullify(pawrhoij_ptr)
    call pawrhoij_copy(pawrhoij,pawrhoij_ptr,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom, &
@@ -229,7 +229,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  if (present(pawnhat)) then
    pawnhat_ptr => pawnhat
  else
-   ABI_ALLOCATE(pawnhat_ptr,(pawfgr%nfft,nspden))
+   ABI_MALLOC(pawnhat_ptr,(pawfgr%nfft,nspden))
  end if
  if (present(pawrhoij0)) then
    pawrhoij0_ptr => pawrhoij0
@@ -261,11 +261,11 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 
 !Free temporary memory spaces
  if (.not.present(pawnhat)) then
-   ABI_DEALLOCATE(pawnhat_ptr)
+   ABI_FREE(pawnhat_ptr)
  end if
  if (size(pawrhoij)==natom.and.(my_natom/=natom)) then
    call pawrhoij_free(pawrhoij_ptr)
-   ABI_DATATYPE_DEALLOCATE(pawrhoij_ptr)
+   ABI_FREE(pawrhoij_ptr)
  end if
  nullify(pawnhat_ptr)
  nullify(pawrhoij_ptr)
@@ -417,7 +417,7 @@ end subroutine pawmkrho
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,typat)
      call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%qphase,l_size_atm,nspden,typat)
    end if
-   ABI_DEALLOCATE(l_size_atm)
+   ABI_FREE(l_size_atm)
  end if
 
 !Note: call to nhatgrid: comm_fft not used because FFT parallelism
@@ -495,7 +495,7 @@ end subroutine pawmkrho
    call wrtout(std_out,message,'PERS')
 
 !  obtain |r-R| values on fine grid
-   ABI_ALLOCATE(nrm,(nfgd))
+   ABI_MALLOC(nrm,(nfgd))
    do ifgd=1, nfgd
      nrm(ifgd) = sqrt(dot_product(local_pawfgrtab(iatom)%rfgd(:,ifgd),local_pawfgrtab(iatom)%rfgd(:,ifgd)))
    end do ! these are the |r-R| values
@@ -503,25 +503,25 @@ end subroutine pawmkrho
 !  compute Ylm for each r-R vector.
 !  ----
    ipsang = 1 + (pawtab(itypat)%l_size - 1)/2 ! recall l_size=2*l_max+1
-   ABI_ALLOCATE(ylm,(ipsang*ipsang,nfgd))
+   ABI_MALLOC(ylm,(ipsang*ipsang,nfgd))
    option = 1 ! compute Ylm(r-R) for vectors
    normchoice = 1 ! use computed norms of input vectors
    call initylmr(ipsang,normchoice,nfgd,nrm,option,local_pawfgrtab(iatom)%rfgd,ylm,ylmgr)
 
 !  in order to do spline fits, the |r-R| data must be sorted
 !  ----
-   ABI_ALLOCATE(nrm_ifftsph,(nfgd))
+   ABI_MALLOC(nrm_ifftsph,(nfgd))
    nrm_ifftsph(:) = local_pawfgrtab(iatom)%ifftsph(:) ! copy of indices of points, to be rearranged by sort_dp
    call sort_dp(nfgd,nrm,nrm_ifftsph,tol8) ! sort the nrm points, keeping track of which goes where
 
 !  now make spline fits of phi and tphi  onto the fine grid around the atom
 !  ----
-   ABI_ALLOCATE(phigrd,(nfgd,nnl))
-   ABI_ALLOCATE(tphigrd,(nfgd,nnl))
-   ABI_ALLOCATE(phi_at_zero,(nnl))
-   ABI_ALLOCATE(tphi_at_zero,(nnl))
-   ABI_ALLOCATE(ypp,(pawtab(itypat)%mesh_size))
-   ABI_ALLOCATE(diag,(pawtab(itypat)%mesh_size))
+   ABI_MALLOC(phigrd,(nfgd,nnl))
+   ABI_MALLOC(tphigrd,(nfgd,nnl))
+   ABI_MALLOC(phi_at_zero,(nnl))
+   ABI_MALLOC(tphi_at_zero,(nnl))
+   ABI_MALLOC(ypp,(pawtab(itypat)%mesh_size))
+   ABI_MALLOC(diag,(pawtab(itypat)%mesh_size))
 
    do inl = 1, nnl
 
@@ -555,8 +555,8 @@ end subroutine pawmkrho
      tphi_at_zero(inl) = yvals(1)
 
    end do ! end loop over nnl basis functions
-   ABI_DEALLOCATE(ypp)
-   ABI_DEALLOCATE(diag)
+   ABI_FREE(ypp)
+   ABI_FREE(diag)
 
 !  loop over basis elements for this atom
 !  because we have to store things like <phi|r'><r'|phi>-<tphi|r'><r'|tphi> at each point of the
@@ -661,13 +661,13 @@ end subroutine pawmkrho
      end do ! end loop over ilmn atomic basis states
    end do ! end loop over jlmn atomic basis states
 
-   ABI_DEALLOCATE(nrm)
-   ABI_DEALLOCATE(nrm_ifftsph)
-   ABI_DEALLOCATE(phigrd)
-   ABI_DEALLOCATE(tphigrd)
-   ABI_DEALLOCATE(ylm)
-   ABI_DEALLOCATE(phi_at_zero)
-   ABI_DEALLOCATE(tphi_at_zero)
+   ABI_FREE(nrm)
+   ABI_FREE(nrm_ifftsph)
+   ABI_FREE(phigrd)
+   ABI_FREE(tphigrd)
+   ABI_FREE(ylm)
+   ABI_FREE(phi_at_zero)
+   ABI_FREE(tphi_at_zero)
  end do     ! Loop on atoms
 
 !MPI sum on each node the different contributions to the PAW densities.
@@ -690,7 +690,7 @@ end subroutine pawmkrho
    if (nsppol==1)  then
      rhor_paw = rhor_paw + rhor - nhat
    else  ! Spin-polarised case: rhor_paw contains rhor_paw(spin_up,spin_down) but we need rhor_paw(total,spin_up)
-     ABI_ALLOCATE(tot_rhor,(pawfgr%nfft))
+     ABI_MALLOC(tot_rhor,(pawfgr%nfft))
 !
 !      AE rhor
      tot_rhor(:) = SUM(rhor_paw,DIM=2)
@@ -708,7 +708,7 @@ end subroutine pawmkrho
      rhor_nt_one(:,2) = rhor_nt_one(:,1)
      rhor_nt_one(:,1) = tot_rhor
 
-     ABI_DEALLOCATE(tot_rhor)
+     ABI_FREE(tot_rhor)
    end if
 
  case (2)
@@ -726,7 +726,7 @@ end subroutine pawmkrho
 !end if
 
  if (present(abs_n_tilde_nt_diff).AND.present(znucl)) then
-   ABI_ALLOCATE(rhor_tmp,(pawfgr%nfft,nspden))
+   ABI_MALLOC(rhor_tmp,(pawfgr%nfft,nspden))
    do ispden=1,nspden
      rhor_tmp(:,ispden) = zero
      do iatom=1,my_natom
@@ -759,7 +759,7 @@ end subroutine pawmkrho
        call wrtout(std_out,message,'COLL')
      end do
    end if
-   ABI_DEALLOCATE(rhor_tmp)
+   ABI_FREE(rhor_tmp)
 
  else if ((present(abs_n_tilde_nt_diff).AND.(.NOT.present(znucl))) &
 &   .OR.(.NOT.present(abs_n_tilde_nt_diff).AND.(present(znucl)))) then

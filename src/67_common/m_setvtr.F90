@@ -395,16 +395,16 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !Local ionic potential by method 2
  if (vloc_method==2) then
    option=1
-   ABI_ALLOCATE(gr_dum,(3,dtset%natom))
-   ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
-   ABI_ALLOCATE(rhog_dum,(2,nfft))
+   ABI_MALLOC(gr_dum,(3,dtset%natom))
+   ABI_MALLOC(dyfr_dum,(3,3,dtset%natom))
+   ABI_MALLOC(rhog_dum,(2,nfft))
    call mklocl(dtset,dyfr_dum,energies%e_localpsp,gmet,gprimd,&
 &   gr_dum,gsqcut,dummy6,mgfft,mpi_enreg,dtset%natom,nattyp,&
 &   nfft,ngfft,dtset%nspden,ntypat,option,pawtab,ph1d,psps,&
 &   dtset%qprtrb,rhog_dum,rhor,rprimd,ucvol,dtset%vprtrb,vpsp,wvl%descr,wvl%den,xred)
-   ABI_DEALLOCATE(gr_dum)
-   ABI_DEALLOCATE(dyfr_dum)
-   ABI_DEALLOCATE(rhog_dum)
+   ABI_FREE(gr_dum)
+   ABI_FREE(dyfr_dum)
+   ABI_FREE(rhog_dum)
  end if
 
 !3D pseudo core electron density xccc3d by method 2
@@ -412,8 +412,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    call timab(91,2,tsec)
    call timab(92,1,tsec)
    option=1
-   ABI_ALLOCATE(gr_dum,(3,dtset%natom))
-   ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
+   ABI_MALLOC(gr_dum,(3,dtset%natom))
+   ABI_MALLOC(dyfr_dum,(3,3,dtset%natom))
    if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
      call mkcore(dummy6,dyfr_dum,gr_dum,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
 &     ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,&
@@ -435,8 +435,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &     psps%xcccrc,xred,wvl%den,wvl%descr,mpi_comm_wvl=mpi_enreg%comm_wvl)
 #endif
    end if
-   ABI_DEALLOCATE(gr_dum)
-   ABI_DEALLOCATE(dyfr_dum)
+   ABI_FREE(gr_dum)
+   ABI_FREE(dyfr_dum)
    call timab(92,2,tsec)
    call timab(91,1,tsec)
  end if
@@ -444,23 +444,23 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    call timab(91,2,tsec)
    call timab(92,1,tsec)
    option=1
-   ABI_ALLOCATE(gr_dum,(3,dtset%natom))
-   ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
+   ABI_MALLOC(gr_dum,(3,dtset%natom))
+   ABI_MALLOC(dyfr_dum,(3,3,dtset%natom))
    call mkcore_alt(atindx1,dummy6,dyfr_dum,gr_dum,dtset%icoulomb,mpi_enreg,dtset%natom,&
 &   nfft,dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
 &   ucvol,vxc,psps%xcccrc,psps%xccc1d,xcctau3d,xred,pawrad,pawtab,psps%usepaw,&
 &   usekden=.true.)
-   ABI_DEALLOCATE(gr_dum)
-   ABI_DEALLOCATE(dyfr_dum)
+   ABI_FREE(gr_dum)
+   ABI_FREE(dyfr_dum)
    call timab(92,2,tsec)
    call timab(91,1,tsec)
  end if
 
 !Adds the jellium potential to the local part of ionic potential
  if (dtset%jellslab/=0) then
-   ABI_ALLOCATE(vjell,(nfft))
-   ABI_ALLOCATE(rhojellg,(2,nfft))
-   ABI_ALLOCATE(rhojellr,(nfft))
+   ABI_MALLOC(vjell,(nfft))
+   ABI_MALLOC(rhojellg,(2,nfft))
+   ABI_MALLOC(rhojellr,(nfft))
    option=1
    call jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,dtset%nspden,option,&
 &   dtset%slabwsrad,rhojellg,rhojellr,rprimd,vjell,dtset%slabzbeg,dtset%slabzend)
@@ -479,7 +479,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &     'has to be verified in the PAW formalism.'
      ABI_WARNING(message)
 
-     ABI_ALLOCATE(grtn,(3,dtset%natom))
+     ABI_MALLOC(grtn,(3,dtset%natom))
      optatm=0;optdyfr=0;opteltfr=0;optgr=1;optstr=0;optv=1;optn=0;optn2=1
      call atm2fft(atindx1,dummy_out1,vpsp,dummy_out2,dummy_out3,dummy_out4,dummy_in,&
 &     gmet,gprimd,dummy_out5,grtn,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
@@ -492,11 +492,11 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      do iatom=1,dtset%natom
        grewtn(1:3,iatom)=grewtn(1:3,iatom)+grtn(1:3,iatom)
      end do
-     ABI_DEALLOCATE(grtn)
+     ABI_FREE(grtn)
    else ! of usepaw==1
      option=2
-     ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
-     ABI_ALLOCATE(grtn,(3,dtset%natom))
+     ABI_MALLOC(dyfr_dum,(3,3,dtset%natom))
+     ABI_MALLOC(grtn,(3,dtset%natom))
      call mklocl(dtset,dyfr_dum,energies%e_localpsp,gmet,gprimd,&
 &     grtn,gsqcut,dummy6,mgfft,mpi_enreg,dtset%natom,nattyp,&
 &     nfft,ngfft,1,ntypat,option,pawtab,ph1d,psps,dtset%qprtrb,rhojellg,&
@@ -505,13 +505,13 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      do iatom=1,dtset%natom
        grewtn(1:3,atindx1(iatom))=grewtn(1:3,atindx1(iatom))+grtn(1:3,iatom)
      end do
-     ABI_DEALLOCATE(dyfr_dum)
-     ABI_DEALLOCATE(grtn)
+     ABI_FREE(dyfr_dum)
+     ABI_FREE(grtn)
    end if ! of usepaw==1
    vpsp(:)=vpsp(:)+vjell(:)
-   ABI_DEALLOCATE(vjell)
-   ABI_DEALLOCATE(rhojellg)
-   ABI_DEALLOCATE(rhojellr)
+   ABI_FREE(vjell)
+   ABI_FREE(rhojellg)
+   ABI_FREE(rhojellr)
  end if
 
 !Additional stuff for electron-positron calculation
@@ -674,7 +674,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    call denspot_set_history(wvl%den%denspot,dtset%iscf,dtset%nsppol, &
 &   wvl%den%denspot%dpbox%ndims(1),wvl%den%denspot%dpbox%ndims(2))
 #endif
-   ABI_ALLOCATE(xcart,(3, dtset%natom))
+   ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
    call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
 &   energies%e_kinetic, energies%e_localpsp, energies%e_nlpsp_vfock, energies%e_sicdc, &
@@ -682,7 +682,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &   rpnrm, .true.,evxc, wvl,.true., xcart, strsxc,&
 &   vtrial, vxc)
    if (optene==3.or.optene==4) energies%e_xcdc=evxc
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
 
  end if
 
@@ -716,7 +716,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
 &    mpi_enreg,dtset%natom,dtset%nfft,dtset%ngfft,dtset%nspden,dtset%ntypat,dtset%ratsm,&
 &    dtset%ratsph,rprimd,dtset%spinat,dtset%typat,xred,dtset%ziontypat)
-   ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
+   ABI_MALLOC(v_constr_dft_r, (nfft,dtset%nspden))
    v_constr_dft_r = zero
    call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
    if(dtset%nspden==4)then
@@ -734,7 +734,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        vtrial(ifft,2) = vtrial(ifft,2) + v_constr_dft_r(ifft,2)
      end do !ifft
    end if
-   ABI_DEALLOCATE(v_constr_dft_r)
+   ABI_FREE(v_constr_dft_r)
    call constrained_dft_free(constrained_dft)
  end if
 
@@ -779,11 +779,11 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
        call dotprod_vn(1,rhor,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol_local,&
 &       mpi_comm_sphgrid=mpi_comm_sphgrid)
      else
-       ABI_ALLOCATE(rhowk,(nfft,dtset%nspden))
+       ABI_MALLOC(rhowk,(nfft,dtset%nspden))
        rhowk=rhor-nhat
        call dotprod_vn(1,rhowk,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol_local,&
 &                      mpi_comm_sphgrid=mpi_comm_sphgrid)
-       ABI_DEALLOCATE(rhowk)
+       ABI_FREE(rhowk)
      end if
      if (with_vxctau) then
        call dotprod_vn(1,taur,e_xcdc_vxctau,doti,nfft,nfftot,dtset%nspden,1,vxctau(:,:,1),&
@@ -986,7 +986,7 @@ subroutine ionion_realSpace(dtset, eew, grewtn, rprimd, xred, zion)
 ! *************************************************************************
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, dtset%natom))
+ ABI_MALLOC(xcart,(3, dtset%natom))
  call xred2xcart(dtset%natom, rprimd, xcart, xred)
 
 !Summing the interaction between ions.
@@ -1001,7 +1001,7 @@ subroutine ionion_realSpace(dtset, eew, grewtn, rprimd, xred, zion)
  end do
 
 !Allocate temporary array to store cartesian gradients.
- ABI_ALLOCATE(grew_cart,(3, dtset%natom))
+ ABI_MALLOC(grew_cart,(3, dtset%natom))
 
 !Summing the forces for each atom
  do ia1 = 1, dtset%natom, 1
@@ -1019,7 +1019,7 @@ subroutine ionion_realSpace(dtset, eew, grewtn, rprimd, xred, zion)
    end do
  end do
 
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
 !Transform cartesian gradients to reduced gradients.
  do iatom = 1, dtset%natom, 1
@@ -1029,7 +1029,7 @@ subroutine ionion_realSpace(dtset, eew, grewtn, rprimd, xred, zion)
 &     rprimd(3, igeo) * grew_cart(3, iatom)
    end do
  end do
- ABI_DEALLOCATE(grew_cart)
+ ABI_FREE(grew_cart)
 
 end subroutine ionion_realSpace
 !!***
@@ -1096,7 +1096,7 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
 ! *************************************************************************
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, dtset%natom))
+ ABI_MALLOC(xcart,(3, dtset%natom))
  call xred2xcart(dtset%natom, rprimd, xcart, xred)
 
  nullify(fdisp)
@@ -1111,11 +1111,11 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
 & wvl_den%denspot%V_ext, wvl_den%denspot%pkernel,psoffset)
 
  if (associated(fdisp)) then
-   ABI_DEALLOCATE(fdisp)
+   ABI_FREE(fdisp)
  end if
 #endif
 
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
 !Transform cartesian gradients to reduced gradients.
  do iatom = 1, dtset%natom, 1
@@ -1126,7 +1126,7 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
    end do
  end do
  if (associated(grew_cart)) then
-   ABI_DEALLOCATE(grew_cart)
+   ABI_FREE(grew_cart)
  end if
 
 #if !defined HAVE_BIGDFT

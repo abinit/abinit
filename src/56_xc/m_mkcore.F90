@@ -204,7 +204,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  delta2div6=delta**2/6.0d0
 
  if (option>=2) then
-   ABI_ALLOCATE(work,(n1,n2,n3))
+   ABI_MALLOC(work,(n1,n2,n3))
 !  For spin-polarization, replace vxc by (1/2)*(vxc(up)+vxc(down))
 !  For non-collinear magnetism, replace vxc by (1/2)*(vxc^{11}+vxc^{22})
    if (nspden>=2) then
@@ -272,8 +272,8 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 
 !  Allocate arrays that depends on the range
    mrange=maxval(irange(1:3))
-   ABI_ALLOCATE(ii,(2*mrange+1,3))
-   ABI_ALLOCATE(rrdiff,(2*mrange+1,3))
+   ABI_MALLOC(ii,(2*mrange+1,3))
+   ABI_MALLOC(rrdiff,(2*mrange+1,3))
 
 !  Set up counters that explore the relevant range
 !  of points around the atom
@@ -447,8 +447,8 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
      end do ! End loop on ishift2
    end do ! End loop on ishift3
 
-   ABI_DEALLOCATE(ii)
-   ABI_DEALLOCATE(rrdiff)
+   ABI_FREE(ii)
+   ABI_FREE(rrdiff)
 
    if(option==2)then
      fact=-(ucvol/dble(nfftot))/range
@@ -507,7 +507,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  end if
 
  if(option>=2)  then
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
 
  if(mpi_enreg%nproc_fft > 1) then
@@ -735,7 +735,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !  For spin-polarization, replace vxc by (1/2)*(vxc(up)+vxc(down))
 !  For non-collinear magnetism, replace vxc by (1/2)*(vxc^{11}+vxc^{22})
    if (nspden>=2) then
-     ABI_ALLOCATE(vxc_eff,(nfft))
+     ABI_MALLOC(vxc_eff,(nfft))
      do jj=1,nfft
        vxc_eff(jj)=half*(vxc(jj,1)+vxc(jj,2))
      end do
@@ -759,7 +759,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
    if (usepaw==1) then
      if (usekden_) then
        msz=pawtab(itypat)%coretau_mesh_size
-       ABI_ALLOCATE(tcoretau,(msz,1))
+       ABI_MALLOC(tcoretau,(msz,1))
        tcoretau(:,1)=pawtab(itypat)%coretau(:)
        corespl => tcoretau
      else
@@ -791,8 +791,8 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 
 !    Allocate arrays that depends on the range
      mrange=maxval(irange(1:3))
-     ABI_ALLOCATE(ii,(2*mrange+1,3))
-     ABI_ALLOCATE(rrdiff,(2*mrange+1,3))
+     ABI_MALLOC(ii,(2*mrange+1,3))
+     ABI_MALLOC(rrdiff,(2*mrange+1,3))
 
 !    Set up counters that explore the relevant range of points around the atom
      if (geocode=='P') then
@@ -821,18 +821,18 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
        end do
      end if
      npts12=ishiftmax(1)*ishiftmax(2)
-     ABI_ALLOCATE(indx1,(npts12))
-     ABI_ALLOCATE(indx2,(npts12))
-     ABI_ALLOCATE(iindex,(npts12))
-     ABI_ALLOCATE(rnorm,(npts12))
+     ABI_MALLOC(indx1,(npts12))
+     ABI_MALLOC(indx2,(npts12))
+     ABI_MALLOC(iindex,(npts12))
+     ABI_MALLOC(rnorm,(npts12))
      if (option==1.or.option==3) then
-       ABI_ALLOCATE(tcore,(npts12))
+       ABI_MALLOC(tcore,(npts12))
      end if
      if (option>=2) then
-       ABI_ALLOCATE(dtcore,(npts12))
+       ABI_MALLOC(dtcore,(npts12))
      end if
      if (option==4) then
-       ABI_ALLOCATE(d2tcore,(npts12))
+       ABI_MALLOC(d2tcore,(npts12))
      end if
 
 !    Conduct loop over restricted range of grid points for iatom
@@ -989,23 +989,23 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 
      end do ! Loop on ishift3
 
-     ABI_DEALLOCATE(ii)
-     ABI_DEALLOCATE(rrdiff)
-     ABI_DEALLOCATE(indx1)
-     ABI_DEALLOCATE(indx2)
-     ABI_DEALLOCATE(iindex)
-     ABI_DEALLOCATE(rnorm)
+     ABI_FREE(ii)
+     ABI_FREE(rrdiff)
+     ABI_FREE(indx1)
+     ABI_FREE(indx2)
+     ABI_FREE(iindex)
+     ABI_FREE(rnorm)
      if (allocated(tcore)) then
-       ABI_DEALLOCATE(tcore)
+       ABI_FREE(tcore)
      end if
      if (allocated(tcoretau)) then
-       ABI_DEALLOCATE(tcoretau)
+       ABI_FREE(tcoretau)
      end if
      if (allocated(dtcore)) then
-       ABI_DEALLOCATE(dtcore)
+       ABI_FREE(dtcore)
      end if
      if (allocated(d2tcore)) then
-       ABI_DEALLOCATE(d2tcore)
+       ABI_FREE(d2tcore)
      end if
 
      if (option==2) then
@@ -1024,7 +1024,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  end do
 
  if(option>=2.and.nspden>=2)  then
-   ABI_DEALLOCATE(vxc_eff)
+   ABI_FREE(vxc_eff)
  end if
 
 !Forces: translate into reduced coordinates
@@ -1307,8 +1307,8 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 
 !    Allocate arrays that depends on the range
      mrange=maxval(irange(1:3))
-     ABI_ALLOCATE(ii,(2*mrange+1,3))
-     ABI_ALLOCATE(rrdiff,(2*mrange+1,3))
+     ABI_MALLOC(ii,(2*mrange+1,3))
+     ABI_MALLOC(rrdiff,(2*mrange+1,3))
 
 !    Consider each component in turn
      do mu=1,3
@@ -1438,8 +1438,8 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 !      End loop on ishift3
      end do
 
-     ABI_DEALLOCATE(ii)
-     ABI_DEALLOCATE(rrdiff)
+     ABI_FREE(ii)
+     ABI_FREE(rrdiff)
 !    End loop on atoms
    end do
 

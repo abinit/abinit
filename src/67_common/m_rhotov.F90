@@ -252,7 +252,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !allocate vnew here.
 !In wvl: vnew is used at call to wvl_psitohpsi
  if (optres==0) then
-   ABI_ALLOCATE(vnew,(nfft,dtset%nspden))
+   ABI_MALLOC(vnew,(nfft,dtset%nspden))
    vmean(:)=zero ; vnew_mean(:)=zero
  end if
 
@@ -362,11 +362,11 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
        call dotprod_vn(1,rhor,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol,&
 &       mpi_comm_sphgrid=mpi_comm_sphgrid)
      else
-       ABI_ALLOCATE(rhowk,(nfft,dtset%nspden))
+       ABI_MALLOC(rhowk,(nfft,dtset%nspden))
        rhowk=rhor-nhat
        call dotprod_vn(1,rhowk,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol,&
 &       mpi_comm_sphgrid=mpi_comm_sphgrid)
-       ABI_DEALLOCATE(rhowk)
+       ABI_FREE(rhowk)
      end if
      if (with_vxctau)then
        call dotprod_vn(1,taur,e_xcdc_vxctau,doti,nfft,nfftot,dtset%nspden,1,vxctau(:,:,1),&
@@ -389,7 +389,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !EB <-- vzeeman might have to be allocated correctly --> to be checked
 ! vzeeman = 1/2 ( -B_z, -B_x + iB_y ; -B_x - iB_y , B_z)
  vzeeman(:) = zero
-! ABI_ALLOCATE(vzeemanHarm,(nfft,dtset%nspden))  ! SPr: debug stuff
+! ABI_MALLOC(vzeemanHarm,(nfft,dtset%nspden))  ! SPr: debug stuff
 ! vzeemanHarm(:,:) = zero                        !
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    if(dtset%nspden==2)then
@@ -454,7 +454,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  end if
 
 !Compute the constrained potential for the magnetic moments
- ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
+ ABI_MALLOC(v_constr_dft_r, (nfft,dtset%nspden))
  v_constr_dft_r = zero
  if (dtset%magconon==1.or.dtset%magconon==2) then
    call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
@@ -506,7 +506,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
    else
 !    Compute with covering comms the different part of the potential.
 !    only for wvlbigdft
-     ABI_ALLOCATE(xcart,(3, dtset%natom))
+     ABI_MALLOC(xcart,(3, dtset%natom))
      call xred2xcart(dtset%natom, rprimd, xcart, xred)
      call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
 &     energies%e_kinetic, energies%e_localpsp, energies%e_nlpsp_vfock, energies%e_sicdc, &
@@ -514,7 +514,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 &     mpi_enreg%nproc_wvl, dtset%nspden, &
 &     vres2, .true., energies%e_xcdc, wvl,&
 &     wvlbigdft, xcart, strsxc,vtrial=vnew,vxc=vxc)
-     ABI_DEALLOCATE(xcart)
+     ABI_FREE(xcart)
 
      vresidnew = vnew - vtrial
      vtrial = vnew
@@ -531,7 +531,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
    call mean_fftr(vresidnew(1+offset, 1),vmean,nfft,nfftot,dtset%nspden,&
 &   mpi_comm_sphgrid=mpi_comm_sphgrid)
 
-   ABI_DEALLOCATE(vnew)
+   ABI_FREE(vnew)
 
 !  Subtract the mean of the residual
 !  Must take into account fixed occupation number in case of spin-polarized
@@ -586,7 +586,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      end if
    else
 !    Compute with covering comms the different part of the potential.
-     ABI_ALLOCATE(xcart,(3, dtset%natom))
+     ABI_MALLOC(xcart,(3, dtset%natom))
      call xred2xcart(dtset%natom, rprimd, xcart, xred)
      call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
 &     energies%e_kinetic, energies%e_localpsp, energies%e_nlpsp_vfock, energies%e_sicdc, &
@@ -594,7 +594,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 &     dtset%natom, dtset%nfft, mpi_enreg%nproc_wvl,&
 &     dtset%nspden,vres2, .true.,energies%e_xcdc,  wvl,&
 &     wvlbigdft, xcart, strsxc, vtrial, vxc)
-     ABI_DEALLOCATE(xcart)
+     ABI_FREE(xcart)
 !    Compute vxcavg
      call mean_fftr(vxc, vmean(1:1), nfft, nfftot, dtset%nspden,&
 &     mpi_comm_sphgrid=mpi_comm_sphgrid)
@@ -603,8 +603,8 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 
  end if
 
- ABI_DEALLOCATE(v_constr_dft_r)
- !ABI_DEALLOCATE(vzeemanHarm) !SPr: debug for q/=0 magnetic field
+ ABI_FREE(v_constr_dft_r)
+ !ABI_FREE(vzeemanHarm) !SPr: debug for q/=0 magnetic field
 
  call timab(945,2,tsec)
  call timab(940,2,tsec)

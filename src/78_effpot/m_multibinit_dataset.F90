@@ -454,13 +454,13 @@ multibinit_dtset%slc_coupling=0
  multibinit_dtset%spin_sia_k1dir(:)=(/0.0,0.0,1.0/)
 
 
- ABI_ALLOCATE(multibinit_dtset%atifc,(natom))
+ ABI_MALLOC(multibinit_dtset%atifc,(natom))
  multibinit_dtset%atifc(:)=0
- ABI_ALLOCATE(multibinit_dtset%conf_cutoff_disp,(multibinit_dtset%natom))
+ ABI_MALLOC(multibinit_dtset%conf_cutoff_disp,(multibinit_dtset%natom))
  multibinit_dtset%conf_cutoff_disp(:)=zero
- ABI_ALLOCATE(multibinit_dtset%q1shft,(3,multibinit_dtset%nqshft))
+ ABI_MALLOC(multibinit_dtset%q1shft,(3,multibinit_dtset%nqshft))
  multibinit_dtset%q1shft(:,:) = zero
- ABI_ALLOCATE(multibinit_dtset%iatfix,(3,natom))
+ ABI_MALLOC(multibinit_dtset%iatfix,(3,natom))
 
 ! multibinit_dtset%latt_mask(:) = 0
 
@@ -498,59 +498,59 @@ subroutine multibinit_dtset_free(multibinit_dtset)
 ! *************************************************************************
 
  if (allocated(multibinit_dtset%atifc))  then
-   ABI_DEALLOCATE(multibinit_dtset%atifc)
+   ABI_FREE(multibinit_dtset%atifc)
  end if
  if (allocated(multibinit_dtset%conf_cutoff_disp))  then
-   ABI_DEALLOCATE(multibinit_dtset%conf_cutoff_disp)
+   ABI_FREE(multibinit_dtset%conf_cutoff_disp)
  end if
  if (allocated(multibinit_dtset%fit_fixcoeff))  then
-   ABI_DEALLOCATE(multibinit_dtset%fit_fixcoeff)
+   ABI_FREE(multibinit_dtset%fit_fixcoeff)
  end if
  if (allocated(multibinit_dtset%fit_bancoeff))  then
-   ABI_DEALLOCATE(multibinit_dtset%fit_bancoeff)
+   ABI_FREE(multibinit_dtset%fit_bancoeff)
  end if
  if (allocated(multibinit_dtset%opt_coeff))  then
-   ABI_DEALLOCATE(multibinit_dtset%opt_coeff)
+   ABI_FREE(multibinit_dtset%opt_coeff)
  end if
  if (allocated(multibinit_dtset%qmass))  then
-   ABI_DEALLOCATE(multibinit_dtset%qmass)
+   ABI_FREE(multibinit_dtset%qmass)
  end if
  if (allocated(multibinit_dtset%coefficients))  then
-   ABI_DEALLOCATE(multibinit_dtset%coefficients)
+   ABI_FREE(multibinit_dtset%coefficients)
  end if
  if (allocated(multibinit_dtset%qnrml1))  then
-   ABI_DEALLOCATE(multibinit_dtset%qnrml1)
+   ABI_FREE(multibinit_dtset%qnrml1)
  end if
  if (allocated(multibinit_dtset%qnrml2))  then
-   ABI_DEALLOCATE(multibinit_dtset%qnrml2)
+   ABI_FREE(multibinit_dtset%qnrml2)
  end if
  if (allocated(multibinit_dtset%qph1l))  then
-   ABI_DEALLOCATE(multibinit_dtset%qph1l)
+   ABI_FREE(multibinit_dtset%qph1l)
  end if
  if (allocated(multibinit_dtset%qph2l))  then
-   ABI_DEALLOCATE(multibinit_dtset%qph2l)
+   ABI_FREE(multibinit_dtset%qph2l)
  end if
  if(allocated(multibinit_dtset%q1shft))then
-   ABI_DEALLOCATE(multibinit_dtset%q1shft)
+   ABI_FREE(multibinit_dtset%q1shft)
  end if
  if(allocated(multibinit_dtset%iatfix))then 
-   ABI_DEALLOCATE(multibinit_dtset%iatfix)
+   ABI_FREE(multibinit_dtset%iatfix)
  end if
 
 
  !if (allocated(multibinit_dtset%gilbert_damping))  then
- !  ABI_DEALLOCATE(multibinit_dtset%gilbert_damping)
+ !  ABI_FREE(multibinit_dtset%gilbert_damping)
  !end if
 
  !if (allocated(multibinit_dtset%gyro_ratio))  then
- !  ABI_DEALLOCATE(multibinit_dtset%gyro_ratio)
+ !  ABI_FREE(multibinit_dtset%gyro_ratio)
  !end if
 
  !if (allocated(multibinit_dtset%qph1l_spin))  then
- !  ABI_DEALLOCATE(multibinit_dtset%qph1l_spin)
+ !  ABI_FREE(multibinit_dtset%qph1l_spin)
  !end if
  !if (allocated(multibinit_dtset%qph2l_spin))  then
- !  ABI_DEALLOCATE(multibinit_dtset%qph2l_spin)
+ !  ABI_FREE(multibinit_dtset%qph2l_spin)
  !end if
 
 !=====================================================================
@@ -612,8 +612,8 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 !*********************************************************************
  marr=30
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
  jdtset=1
 
@@ -1391,10 +1391,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_mag_field= zero
  if(3>marr)then
     marr=3
-    ABI_DEALLOCATE(intarr)
-    ABI_DEALLOCATE(dprarr)
-    ABI_ALLOCATE(intarr,(marr))
-    ABI_ALLOCATE(dprarr,(marr))
+    ABI_FREE(intarr)
+    ABI_FREE(dprarr)
+    ABI_MALLOC(intarr,(marr))
+    ABI_MALLOC(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_mag_field',tread,'BFI')
  if(tread==1) multibinit_dtset%spin_mag_field(1:3)= dprarr(1:3)
@@ -1455,10 +1455,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_init_orientation= [0.0, 0.0, 1.0]
  if(3>marr)then
     marr=3
-    ABI_DEALLOCATE(intarr)
-    ABI_DEALLOCATE(dprarr)
-    ABI_ALLOCATE(intarr,(marr))
-    ABI_ALLOCATE(dprarr,(marr))
+    ABI_FREE(intarr)
+    ABI_FREE(dprarr)
+    ABI_MALLOC(intarr,(marr))
+    ABI_MALLOC(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_init_orientation',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_init_orientation(1:3)= dprarr(1:3)
@@ -1466,10 +1466,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_projection_qpoint= zero
  if(3>marr)then
     marr=3
-    ABI_DEALLOCATE(intarr)
-    ABI_DEALLOCATE(dprarr)
-    ABI_ALLOCATE(intarr,(marr))
-    ABI_ALLOCATE(dprarr,(marr))
+    ABI_FREE(intarr)
+    ABI_FREE(dprarr)
+    ABI_MALLOC(intarr,(marr))
+    ABI_MALLOC(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_projection_qpoint',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_projection_qpoint(1:3)= dprarr(1:3)
@@ -1477,10 +1477,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_init_qpoint= zero
  if(3>marr)then
     marr=3
-    ABI_DEALLOCATE(intarr)
-    ABI_DEALLOCATE(dprarr)
-    ABI_ALLOCATE(intarr,(marr))
-    ABI_ALLOCATE(dprarr,(marr))
+    ABI_FREE(intarr)
+    ABI_FREE(dprarr)
+    ABI_MALLOC(intarr,(marr))
+    ABI_MALLOC(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_init_qpoint',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_init_qpoint(1:3)= dprarr(1:3)
@@ -1488,10 +1488,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_init_rotate_axis= [1.0, 0.0, 0.0]
  if(3>marr)then
     marr=3
-    ABI_DEALLOCATE(intarr)
-    ABI_DEALLOCATE(dprarr)
-    ABI_ALLOCATE(intarr,(marr))
-    ABI_ALLOCATE(dprarr,(marr))
+    ABI_FREE(intarr)
+    ABI_FREE(dprarr)
+    ABI_MALLOC(intarr,(marr))
+    ABI_MALLOC(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_init_rotate_axis',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_init_rotate_axis(1:3)= dprarr(1:3)
@@ -1513,10 +1513,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_sia_k1dir(:)= [0.0,0.0,1.0]
  if(3>marr)then
     marr=3
-    ABI_DEALLOCATE(intarr)
-    ABI_DEALLOCATE(dprarr)
-    ABI_ALLOCATE(intarr,(marr))
-    ABI_ALLOCATE(dprarr,(marr))
+    ABI_FREE(intarr)
+    ABI_FREE(dprarr)
+    ABI_MALLOC(intarr,(marr))
+    ABI_MALLOC(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_sia_k1dir',tread,'DPR')
  if(tread==1) then
@@ -1733,10 +1733,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%acell= one
  if(3>marr)then
    marr=3
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
-   ABI_ALLOCATE(intarr,(marr))
-   ABI_ALLOCATE(dprarr,(marr))
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tread,'DPR')
  if(tread==1) multibinit_dtset%acell(1:3)= dprarr(1:3)
@@ -1749,25 +1749,25 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
  if(6>marr)then
    marr=6
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
-   ABI_ALLOCATE(intarr,(marr))
-   ABI_ALLOCATE(dprarr,(marr))
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
  end if
  multibinit_dtset%strtarget(1:6) = zero
  call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'strtarget',tread,'DPR')
  if(tread==1) multibinit_dtset%strtarget(1:6)=dprarr(1:6)
 
 
- ABI_ALLOCATE(multibinit_dtset%atifc,(natom))
+ ABI_MALLOC(multibinit_dtset%atifc,(natom))
  multibinit_dtset%atifc(:)=0
  if(multibinit_dtset%natifc>=1)then
    if(multibinit_dtset%natifc>marr)then
      marr=multibinit_dtset%natifc
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%natifc,string(1:lenstr),'atifc',tread,'INT')
    if(tread==1) then
@@ -1798,14 +1798,14 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !B
 
 !C
- ABI_ALLOCATE(multibinit_dtset%coefficients,(multibinit_dtset%ncoeff))
+ ABI_MALLOC(multibinit_dtset%coefficients,(multibinit_dtset%ncoeff))
  if (multibinit_dtset%ncoeff/=0)then
    if(multibinit_dtset%ncoeff>marr)then
      marr=multibinit_dtset%ncoeff
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    multibinit_dtset%coefficients(:)=zero
    call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%ncoeff,&
@@ -1817,14 +1817,14 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    end if
  end if
 
- ABI_ALLOCATE(multibinit_dtset%conf_cutoff_disp,(multibinit_dtset%natom))
+ ABI_MALLOC(multibinit_dtset%conf_cutoff_disp,(multibinit_dtset%natom))
  if (multibinit_dtset%natom/=0)then
    if(multibinit_dtset%natom>marr)then
      marr=multibinit_dtset%natom
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    multibinit_dtset%conf_cutoff_disp(:)=zero
    call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%natom,&
@@ -1844,10 +1844,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
  if(6>marr)then
    marr=6
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
-   ABI_ALLOCATE(intarr,(marr))
-   ABI_ALLOCATE(dprarr,(marr))
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
  end if
  multibinit_dtset%conf_cutoff_strain(1:6) = zero
  call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'conf_cutoff_strain',tread,'DPR')
@@ -2145,12 +2145,12 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !M
 !N
 
- ABI_ALLOCATE(multibinit_dtset%fit_bancoeff,(multibinit_dtset%fit_nbancoeff))
+ ABI_MALLOC(multibinit_dtset%fit_bancoeff,(multibinit_dtset%fit_nbancoeff))
  if (multibinit_dtset%fit_nbancoeff >0)then
    if(multibinit_dtset%fit_nbancoeff>marr)then
      marr=multibinit_dtset%fit_nbancoeff
-     ABI_DEALLOCATE(intarr)
-     ABI_ALLOCATE(intarr,(marr))
+     ABI_FREE(intarr)
+     ABI_MALLOC(intarr,(marr))
    end if
    multibinit_dtset%fit_bancoeff(:)=0
    call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%fit_nbancoeff,&
@@ -2162,12 +2162,12 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    end if
  end if
 
- ABI_ALLOCATE(multibinit_dtset%fit_fixcoeff,(multibinit_dtset%fit_nfixcoeff))
+ ABI_MALLOC(multibinit_dtset%fit_fixcoeff,(multibinit_dtset%fit_nfixcoeff))
  if (multibinit_dtset%fit_nfixcoeff >0)then
    if(multibinit_dtset%fit_nfixcoeff>marr)then
      marr=multibinit_dtset%fit_nfixcoeff
-     ABI_DEALLOCATE(intarr)
-     ABI_ALLOCATE(intarr,(marr))
+     ABI_FREE(intarr)
+     ABI_MALLOC(intarr,(marr))
    end if
    multibinit_dtset%fit_fixcoeff(:)=0
    call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%fit_nfixcoeff,&
@@ -2181,12 +2181,12 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 !O
 
- ABI_ALLOCATE(multibinit_dtset%opt_coeff,(multibinit_dtset%opt_ncoeff))
+ ABI_MALLOC(multibinit_dtset%opt_coeff,(multibinit_dtset%opt_ncoeff))
  if (multibinit_dtset%opt_ncoeff >0)then
    if(multibinit_dtset%opt_ncoeff>marr)then
      marr=multibinit_dtset%opt_ncoeff
-     ABI_DEALLOCATE(intarr)
-     ABI_ALLOCATE(intarr,(marr))
+     ABI_FREE(intarr)
+     ABI_MALLOC(intarr,(marr))
    end if
    multibinit_dtset%opt_coeff(:)=0
    call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%opt_ncoeff,&
@@ -2201,15 +2201,15 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !P
 
 !Q
- ABI_ALLOCATE(multibinit_dtset%qmass,(multibinit_dtset%nnos))
+ ABI_MALLOC(multibinit_dtset%qmass,(multibinit_dtset%nnos))
  multibinit_dtset%qmass(:)= zero
  if(multibinit_dtset%nnos>=1)then
    if(multibinit_dtset%nnos>marr)then
      marr=multibinit_dtset%nnos
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%nnos,string(1:lenstr),'qmass',tread,'DPR')
    if(tread==1) multibinit_dtset%qmass(:)=dprarr(1:multibinit_dtset%nnos)
@@ -2218,27 +2218,27 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if (multibinit_dtset%nqshft/=0)then
    if(3*multibinit_dtset%nqshft>marr)then
      marr=3*multibinit_dtset%nqshft
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
-   ABI_ALLOCATE(multibinit_dtset%q1shft,(3,multibinit_dtset%nqshft))
+   ABI_MALLOC(multibinit_dtset%q1shft,(3,multibinit_dtset%nqshft))
    multibinit_dtset%q1shft(:,:)=zero
    call intagm(dprarr,intarr,jdtset,marr,3*multibinit_dtset%nqshft, string(1:lenstr),'q1shft',tread,'DPR')
    if(tread==1) multibinit_dtset%q1shft(1:3,1:multibinit_dtset%nqshft)=&
 &   reshape(dprarr(1:3*multibinit_dtset%nqshft),(/3,multibinit_dtset%nqshft/))
  end if
 
- ABI_ALLOCATE(multibinit_dtset%qph1l,(3,multibinit_dtset%nph1l))
- ABI_ALLOCATE(multibinit_dtset%qnrml1,(multibinit_dtset%nph1l))
+ ABI_MALLOC(multibinit_dtset%qph1l,(3,multibinit_dtset%nph1l))
+ ABI_MALLOC(multibinit_dtset%qnrml1,(multibinit_dtset%nph1l))
  if (multibinit_dtset%nph1l/=0)then
    if(4*multibinit_dtset%nph1l>marr)then
      marr=4*multibinit_dtset%nph1l
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    multibinit_dtset%qph1l(:,:)=zero
    multibinit_dtset%qnrml1(:)=zero
@@ -2259,15 +2259,15 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    end if
  end if
 
- ABI_ALLOCATE(multibinit_dtset%qph2l,(3,multibinit_dtset%nph2l))
- ABI_ALLOCATE(multibinit_dtset%qnrml2,(multibinit_dtset%nph2l))
+ ABI_MALLOC(multibinit_dtset%qph2l,(3,multibinit_dtset%nph2l))
+ ABI_MALLOC(multibinit_dtset%qnrml2,(multibinit_dtset%nph2l))
  if (multibinit_dtset%nph2l/=0)then
    if(4*multibinit_dtset%nph2l>marr)then
      marr=4*multibinit_dtset%nph2l
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    multibinit_dtset%qph2l(:,:)=zero
    multibinit_dtset%qnrml2(:)=zero
@@ -2291,10 +2291,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !R
  if(9>marr)then
    marr=9
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
-   ABI_ALLOCATE(intarr,(marr))
-   ABI_ALLOCATE(dprarr,(marr))
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
  end if
  multibinit_dtset%rprim(:,:)= zero
  call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'rprim',tread,'DPR')
@@ -2313,10 +2313,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
  if(6>marr)then
    marr=6
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
-   ABI_ALLOCATE(intarr,(marr))
-   ABI_ALLOCATE(dprarr,(marr))
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
  end if
  multibinit_dtset%strten_reference(:)= zero
  call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'strten_reference',tread,'DPR')
@@ -2341,7 +2341,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !=======================================================================
 
  natom_sc = natom*multibinit_dtset%ncell(1)*multibinit_dtset%ncell(2)*multibinit_dtset%ncell(3)
- ABI_ALLOCATE(multibinit_dtset%iatfix,(3,natom_sc))
+ ABI_MALLOC(multibinit_dtset%iatfix,(3,natom_sc))
  multibinit_dtset%iatfix(:,:)=0
 
  do idir=0,3
@@ -2360,10 +2360,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    natfix=0
    if(tread==1)then 
       natfix=intarr(1)        
-      ABI_DEALLOCATE(intarr)
-      ABI_DEALLOCATE(dprarr)
-      ABI_ALLOCATE(intarr,(natfix))
-      ABI_ALLOCATE(dprarr,(natfix))
+      ABI_FREE(intarr)
+      ABI_FREE(dprarr)
+      ABI_MALLOC(intarr,(natfix))
+      ABI_MALLOC(dprarr,(natfix))
       marr = natfix
    endif 
 
@@ -2436,8 +2436,8 @@ call invars10scup(multibinit_dtset%scup_dtset,lenstr,string)
 !Finished reading in variables - deallocate
 !=======================================================================
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
 
 !=======================================================================
 !Check consistency of input variables:

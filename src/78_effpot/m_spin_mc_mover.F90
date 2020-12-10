@@ -81,7 +81,7 @@
       real(dp), intent(in) :: angle, temperature
       self%nspin=nspin
       self%nstep=self%nspin
-      ABI_ALLOCATE(self%S, (3, self%nspin))
+      ABI_MALLOC(self%S, (3, self%nspin))
       self%angle=angle
       self%temperature=temperature
       self%beta=1.0/temperature ! Kb in a.u. is 1.
@@ -95,7 +95,7 @@
     subroutine finalize(self)
       class(spin_mc_t), intent(inout) :: self
       if (allocated(self%S)) then
-         ABI_DEALLOCATE(self%S)
+         ABI_FREE(self%S)
       end if
       self%Sold=zero
       self%Snew=zero

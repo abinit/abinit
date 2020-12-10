@@ -181,9 +181,9 @@ subroutine pawuj_ini(dtpawuj,ndtset)
    dtpawuj(iuj)%pawrad=20.0_dp
    !Allocate arrays
    !write(std_out,*)'pawuj_ini before arrays'
-   ABI_ALLOCATE(dtpawuj(iuj)%rprimd,(3,3))
-   ABI_ALLOCATE(dtpawuj(iuj)%scdim,(3))
-   ABI_ALLOCATE(dtpawuj(iuj)%wfchr,(nwfchr))
+   ABI_MALLOC(dtpawuj(iuj)%rprimd,(3,3))
+   ABI_MALLOC(dtpawuj(iuj)%scdim,(3))
+   ABI_MALLOC(dtpawuj(iuj)%wfchr,(nwfchr))
    dtpawuj(iuj)%rprimd=reshape((/ 1,0,0,0,1,0,0,0,1/),(/ 3,3 /))
    dtpawuj(iuj)%scdim=reshape((/ 250,0,0 /),(/3 /))
    dtpawuj(iuj)%wfchr=(/ (0,im1=1,nwfchr) /)
@@ -225,25 +225,25 @@ subroutine pawuj_free(dtpawuj)
 ! *********************************************************************
 
  if (allocated(dtpawuj%scdim))    then
-   ABI_DEALLOCATE(dtpawuj%scdim)
+   ABI_FREE(dtpawuj%scdim)
  end if
  if (allocated(dtpawuj%occ))      then
-   ABI_DEALLOCATE(dtpawuj%occ)
+   ABI_FREE(dtpawuj%occ)
  end if
  if (allocated(dtpawuj%rprimd))   then
-   ABI_DEALLOCATE(dtpawuj%rprimd)
+   ABI_FREE(dtpawuj%rprimd)
  end if
  if (allocated(dtpawuj%vsh))      then
-   ABI_DEALLOCATE(dtpawuj%vsh)
+   ABI_FREE(dtpawuj%vsh)
  end if
  if (allocated(dtpawuj%xred))     then
-   ABI_DEALLOCATE(dtpawuj%xred)
+   ABI_FREE(dtpawuj%xred)
  end if
  if (allocated(dtpawuj%wfchr))    then
-   ABI_DEALLOCATE(dtpawuj%wfchr)
+   ABI_FREE(dtpawuj%wfchr)
  end if
  if (allocated(dtpawuj%zioneff))  then
-   ABI_DEALLOCATE(dtpawuj%zioneff)
+   ABI_FREE(dtpawuj%zioneff)
  end if
 
 end subroutine pawuj_free
@@ -314,7 +314,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 
 !Initializations
  ndtuj=count(dtpawuj(:)%iuj/=-1)-1 ! number of datasets initialized by pawuj_red
- ABI_ALLOCATE(jdtset_,(0:ndtuj))
+ ABI_MALLOC(jdtset_,(0:ndtuj))
  jdtset_(0:ndtuj)=pack(dtpawuj(:)%iuj,dtpawuj(:)%iuj/=-1)
  jdtset=maxval(dtpawuj(:)%iuj)
 
@@ -339,19 +339,19 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  if (dmatpuopt==1) eyp=eyp+3.0_dp
  if (dmatpuopt>=3) eyp=(eyp+3.0_dp-dmatpuopt)
 
- ABI_ALLOCATE(chih,(ndtpawuj,nat_org))
- ABI_ALLOCATE(idum2,(marr,0:ndtuj))
- ABI_ALLOCATE(drarr,(marr,0:ndtuj))
- ABI_ALLOCATE(magv_org,(nat_org))
- ABI_ALLOCATE(xred_org,(3,nat_org))
- ABI_ALLOCATE(chi0_org,(nat_org))
- ABI_ALLOCATE(chi_org,(nat_org))
- ABI_ALLOCATE(dparr,(marr,0:ndtuj))
- ABI_ALLOCATE(dparrr,(marr,0:ndtuj))
- ABI_ALLOCATE(dqarr,(marr,0:ndtuj))
- ABI_ALLOCATE(dqarrr,(marr,0:ndtuj))
- ABI_ALLOCATE(distv_org,(nat_org))
- ABI_ALLOCATE(narrm,(0:ndtuj))
+ ABI_MALLOC(chih,(ndtpawuj,nat_org))
+ ABI_MALLOC(idum2,(marr,0:ndtuj))
+ ABI_MALLOC(drarr,(marr,0:ndtuj))
+ ABI_MALLOC(magv_org,(nat_org))
+ ABI_MALLOC(xred_org,(3,nat_org))
+ ABI_MALLOC(chi0_org,(nat_org))
+ ABI_MALLOC(chi_org,(nat_org))
+ ABI_MALLOC(dparr,(marr,0:ndtuj))
+ ABI_MALLOC(dparrr,(marr,0:ndtuj))
+ ABI_MALLOC(dqarr,(marr,0:ndtuj))
+ ABI_MALLOC(dqarrr,(marr,0:ndtuj))
+ ABI_MALLOC(distv_org,(nat_org))
+ ABI_MALLOC(narrm,(0:ndtuj))
  dparr=-one ;  dparrr=-one ;  dqarr=-one ;  dqarrr=-one
 !DEBUG
 !write(message,fmt='((a,i3,a))')'pawuj_det init sg'
@@ -461,7 +461,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  call prttagm(dqarrr,idum2,ab_out,jdtset_,2,marr,3*3,narrm,ncid,ndtuj,'rprimd'//trim(hstr),'DPR',0)
  call prttagm(dqarrr,idum2,ab_out,jdtset_,2,marr,3,narrm,ncid,ndtuj,'scdim'//trim(hstr),'INT',0)
  call prttagm(drarr,idum2,ab_out,jdtset_,2,marr,nwfchr,narrm,ncid,ndtuj,'wfchr'//trim(hstr),'DPR',0)
- ABI_DEALLOCATE(narrm)
+ ABI_FREE(narrm)
 
  write(message, '( 15a )'  ) ch10,' # further possible options: ',ch10,&
 & ' #    scdim    2 2 2 ',ch10,&
@@ -632,8 +632,8 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 
 !Analize shell structure of primitive cell
 !and atomic distances in primitive cell
- ABI_ALLOCATE(smult_org,(nat_org))
- ABI_ALLOCATE(sdistv_org,(nat_org))
+ ABI_MALLOC(smult_org,(nat_org))
+ ABI_MALLOC(sdistv_org,(nat_org))
  call shellstruct(dtpawuj(1)%xred,dtpawuj(1)%rprimd,nat_org,&
 & int(magv_org),distv_org,smult_org,sdistv_org,nsh_org,pawujat,pawprtvol)
 
@@ -674,13 +674,13 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 !END DEBUG
 
  do while (nat_sc<=maxnat)
-   ABI_ALLOCATE(chi0_sc,(nat_sc))
-   ABI_ALLOCATE(chi_sc,(nat_sc))
-   ABI_ALLOCATE(distv_sc,(nat_sc))
-   ABI_ALLOCATE(magv_sc,(nat_sc))
-   ABI_ALLOCATE(sdistv_sc,(nat_sc))
-   ABI_ALLOCATE(smult_sc,(nat_sc))
-   ABI_ALLOCATE(xred_sc,(3,nat_sc))
+   ABI_MALLOC(chi0_sc,(nat_sc))
+   ABI_MALLOC(chi_sc,(nat_sc))
+   ABI_MALLOC(distv_sc,(nat_sc))
+   ABI_MALLOC(magv_sc,(nat_sc))
+   ABI_MALLOC(sdistv_sc,(nat_sc))
+   ABI_MALLOC(smult_sc,(nat_sc))
+   ABI_MALLOC(xred_sc,(3,nat_sc))
 
 !  Determine positions=xred_sc and supercell dimensions=rpimd_sc
    call mksupercell(dtpawuj(1)%xred,int(magv_org),dtpawuj(1)%rprimd,nat_org,&
@@ -729,13 +729,13 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
-   ABI_DEALLOCATE(chi0_sc)
-   ABI_DEALLOCATE(chi_sc)
-   ABI_DEALLOCATE(distv_sc)
-   ABI_DEALLOCATE(magv_sc)
-   ABI_DEALLOCATE(sdistv_sc)
-   ABI_DEALLOCATE(smult_sc)
-   ABI_DEALLOCATE(xred_sc)
+   ABI_FREE(chi0_sc)
+   ABI_FREE(chi_sc)
+   ABI_FREE(distv_sc)
+   ABI_FREE(magv_sc)
+   ABI_FREE(sdistv_sc)
+   ABI_FREE(smult_sc)
+   ABI_FREE(xred_sc)
 
    if (product(dtpawuj(1)%scdim(:))==0) then
      ext=(/ii, ii, ii/)
@@ -756,21 +756,21 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  write(message, '(3a)' )ch10,' ---------- calculate U, (J) end -------------- ',ch10
  call wrtout(ab_out,message,'COLL')
 
- ABI_DEALLOCATE(dparrr)
- ABI_DEALLOCATE(dqarr)
- ABI_DEALLOCATE(dqarrr)
- ABI_DEALLOCATE(jdtset_)
- ABI_DEALLOCATE(chi_org)
- ABI_DEALLOCATE(chi0_org)
- ABI_DEALLOCATE(smult_org)
- ABI_DEALLOCATE(sdistv_org)
- ABI_DEALLOCATE(chih)
- ABI_DEALLOCATE(idum2)
- ABI_DEALLOCATE(drarr)
- ABI_DEALLOCATE(dparr)
- ABI_DEALLOCATE(magv_org)
- ABI_DEALLOCATE(xred_org)
- ABI_DEALLOCATE(distv_org)
+ ABI_FREE(dparrr)
+ ABI_FREE(dqarr)
+ ABI_FREE(dqarrr)
+ ABI_FREE(jdtset_)
+ ABI_FREE(chi_org)
+ ABI_FREE(chi0_org)
+ ABI_FREE(smult_org)
+ ABI_FREE(sdistv_org)
+ ABI_FREE(chih)
+ ABI_FREE(idum2)
+ ABI_FREE(drarr)
+ ABI_FREE(dparr)
+ ABI_FREE(magv_org)
+ ABI_FREE(xred_org)
+ ABI_FREE(distv_org)
 
  DBG_EXIT("COLL")
 
@@ -850,10 +850,10 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
  natvshift=dtset%natvshift
  pawujat=dtset%pawujat
  natpawu=dtset%natpawu   ; ndtset=dtset%ndtset
- ABI_ALLOCATE(atvshift,(natvshift,nspden,natom))
- ABI_ALLOCATE(atvshmusk,(natvshift,nspden,natom))
- ABI_ALLOCATE(dmusk,(nspden,natom))
- ABI_ALLOCATE(nnocctot,(nspden,natom))
+ ABI_MALLOC(atvshift,(natvshift,nspden,natom))
+ ABI_MALLOC(atvshmusk,(natvshift,nspden,natom))
+ ABI_MALLOC(dmusk,(nspden,natom))
+ ABI_MALLOC(nnocctot,(nspden,natom))
  musk=.false.; dmusk=.false.
  atvshift=fatvshift*dtset%atvshift
  atvshmusk=.false.
@@ -905,22 +905,22 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
    ! TODO: check that this is correct: this point is passed several times
    ! for a given value of iuj - should the stuff be accumulated instead of replaced?
    if(allocated(dtpawuj(iuj)%vsh))  then
-     ABI_DEALLOCATE(dtpawuj(iuj)%vsh)
+     ABI_FREE(dtpawuj(iuj)%vsh)
    end if
-   ABI_ALLOCATE(dtpawuj(iuj)%vsh,(nspden,nnat))
+   ABI_MALLOC(dtpawuj(iuj)%vsh,(nspden,nnat))
    if(allocated(dtpawuj(iuj)%occ))  then
-     ABI_DEALLOCATE(dtpawuj(iuj)%occ)
+     ABI_FREE(dtpawuj(iuj)%occ)
    end if
-   ABI_ALLOCATE(dtpawuj(iuj)%occ,(nspden,nnat))
+   ABI_MALLOC(dtpawuj(iuj)%occ,(nspden,nnat))
    if(allocated(dtpawuj(iuj)%xred))  then
-     ABI_DEALLOCATE(dtpawuj(iuj)%xred)
+     ABI_FREE(dtpawuj(iuj)%xred)
    end if
-   ABI_ALLOCATE(dtpawuj(iuj)%xred,(3,nnat))
+   ABI_MALLOC(dtpawuj(iuj)%xred,(3,nnat))
 
    if (iuj==1) then
-     ABI_ALLOCATE(dtpawuj(0)%vsh,(nspden,nnat))
-     ABI_ALLOCATE(dtpawuj(0)%occ,(nspden,nnat))
-     ABI_ALLOCATE(dtpawuj(0)%xred,(3,nnat))
+     ABI_MALLOC(dtpawuj(0)%vsh,(nspden,nnat))
+     ABI_MALLOC(dtpawuj(0)%occ,(nspden,nnat))
+     ABI_MALLOC(dtpawuj(0)%xred,(3,nnat))
      dtpawuj(0)%vsh=0
      dtpawuj(0)%occ=0
      dtpawuj(0)%xred=0
@@ -1000,10 +1000,10 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
    call wrtout(std_out,message,'COLL')
  end if !usepawu
 
- ABI_DEALLOCATE(nnocctot)
- ABI_DEALLOCATE(dmusk)
- ABI_DEALLOCATE(atvshift)
- ABI_DEALLOCATE(atvshmusk)
+ ABI_FREE(nnocctot)
+ ABI_FREE(dmusk)
+ ABI_FREE(atvshift)
+ ABI_FREE(atvshmusk)
 
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -1200,9 +1200,9 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
  end if
 
 
- ABI_ALLOCATE(hma,(nnat,nnat))
- ABI_ALLOCATE(work,(nnat))
- ABI_ALLOCATE(ipvt,(nnat))
+ ABI_MALLOC(hma,(nnat,nnat))
+ ABI_MALLOC(work,(nnat))
+ ABI_MALLOC(ipvt,(nnat))
  work=0_dp
  hma(:,:)=oumat
 
@@ -1219,9 +1219,9 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
  write(message,fmt='(2a,a)')' ('//trim(nam)//trim(bastrin)//trim(gastrin)//')^(-1)'
  call lprtmat(message,1,prtvol,oumat,nnat)
 
- ABI_DEALLOCATE(hma)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(ipvt)
+ ABI_FREE(hma)
+ ABI_FREE(work)
+ ABI_FREE(ipvt)
 
 end subroutine linvmat
 !!***
@@ -1378,7 +1378,7 @@ subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
    nnatom=natom
  end if
 
- ABI_ALLOCATE(tab,(4,nnatom,nnatom))
+ ABI_MALLOC(tab,(4,nnatom,nnatom))
 
  call ioniondist(natom,rprimd,xred,tab(1,1:natom,1:natom),3,chi0,magv,pawujat,prtvoll)
  call ioniondist(natom,rprimd,xred,tab(2,1:natom,1:natom),3,chi,magv,pawujat,prtvoll)
@@ -1397,7 +1397,7 @@ subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
 
  ures=tab(1,1,pawujat)
 
- ABI_DEALLOCATE(tab)
+ ABI_FREE(tab)
 
 end subroutine lcalcu
 !!***

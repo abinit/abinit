@@ -143,25 +143,25 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 
  if(iexit/=0)then
    if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
+     ABI_FREE(vout_prev)
    end if
    if (allocated(vinres))  then
-     ABI_DEALLOCATE(vinres)
+     ABI_FREE(vinres)
    end if
    if (allocated(vin1))  then
-     ABI_DEALLOCATE(vin1)
+     ABI_FREE(vin1)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
    return
  end if
@@ -202,35 +202,35 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !From a previous dataset with a different ndim
  if(itime==1)then
    if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
+     ABI_FREE(vout_prev)
    end if
    if (allocated(vinres))  then
-     ABI_DEALLOCATE(vinres)
+     ABI_FREE(vinres)
    end if
    if (allocated(vin1))  then
-     ABI_DEALLOCATE(vin1)
+     ABI_FREE(vin1)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
    if(npul>1) then
-     ABI_ALLOCATE(vinres,(npul+1,ndim))
-     ABI_ALLOCATE(vin1,(npul+1,ndim))
+     ABI_MALLOC(vinres,(npul+1,ndim))
+     ABI_MALLOC(vin1,(npul+1,ndim))
    end if
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vout_prev,(ndim))
-   ABI_ALLOCATE(hessin,(ndim,ndim))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vout_prev,(ndim))
+   ABI_MALLOC(hessin,(ndim,ndim))
  end if
 
 !write(std_out,*) 'bfgs 04'
@@ -421,11 +421,11 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
    end if
 
    if (nitpul>1) then
-     ABI_ALLOCATE(alpha,(nitpul,ndim))
+     ABI_MALLOC(alpha,(nitpul,ndim))
      alpha=zero
      do kk=1,ndim
-       ABI_ALLOCATE(amat,(nitpul,nitpul))
-       ABI_ALLOCATE(amatinv,(nitpul,nitpul))
+       ABI_MALLOC(amat,(nitpul,nitpul))
+       ABI_MALLOC(amatinv,(nitpul,nitpul))
        amat=zero;amatinv=zero
        do ii=1,nitpul
          do jj=ii,nitpul
@@ -437,14 +437,14 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
        if (abs(vin(kk)-vin_prev(kk))<tol10) then
          alpha(:,kk)=zero
        else
-         ABI_ALLOCATE(ipiv,(nitpul))
-         ABI_ALLOCATE(rwork,(nitpul))
+         ABI_MALLOC(ipiv,(nitpul))
+         ABI_MALLOC(rwork,(nitpul))
 !          amatinv=1.d5*amatinv
          call dgetrf(nitpul,nitpul,amatinv,nitpul,ipiv,ierr)
          call dgetri(nitpul,amatinv,nitpul,ipiv,rwork,nitpul,ierr)
 !          amatinv=1.d5*amatinv
-         ABI_DEALLOCATE(ipiv)
-         ABI_DEALLOCATE(rwork)
+         ABI_FREE(ipiv)
+         ABI_FREE(rwork)
          det=zero
          do ii=1,nitpul
            do jj=1,nitpul
@@ -455,14 +455,14 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
          alpha(:,kk)=alpha(:,kk)/det
        end if
      end do
-     ABI_DEALLOCATE(amat)
-     ABI_DEALLOCATE(amatinv)
+     ABI_FREE(amat)
+     ABI_FREE(amatinv)
      vin(:)=vin1(nitpul,:)+alpha0*(vin1(nitpul+1,:)-vin1(nitpul,:))
      vin=zero
      do ii=1,nitpul
        vin(:)=vin(:)+ alpha(ii,:)*(vin1(ii,:))
      end do
-     ABI_DEALLOCATE(alpha)
+     ABI_FREE(alpha)
    end if
 
 
@@ -641,25 +641,25 @@ real(dp) :: strten(6)
    call lbfgs_destroy()
 
    if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
+     ABI_FREE(vout_prev)
    end if
    if (allocated(vinres))  then
-     ABI_DEALLOCATE(vinres)
+     ABI_FREE(vinres)
    end if
    if (allocated(vin1))  then
-     ABI_DEALLOCATE(vin1)
+     ABI_FREE(vin1)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
    return
  end if
@@ -700,35 +700,35 @@ real(dp) :: strten(6)
 !From a previous dataset with a different ndim
  if(itime==1)then
    if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
+     ABI_FREE(vout_prev)
    end if
    if (allocated(vinres))  then
-     ABI_DEALLOCATE(vinres)
+     ABI_FREE(vinres)
    end if
    if (allocated(vin1))  then
-     ABI_DEALLOCATE(vin1)
+     ABI_FREE(vin1)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
    if(npul>1) then
-     ABI_ALLOCATE(vinres,(npul+1,ndim))
-     ABI_ALLOCATE(vin1,(npul+1,ndim))
+     ABI_MALLOC(vinres,(npul+1,ndim))
+     ABI_MALLOC(vin1,(npul+1,ndim))
    end if
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vout_prev,(ndim))
-   ABI_ALLOCATE(hessin,(ndim,ndim))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vout_prev,(ndim))
+   ABI_MALLOC(hessin,(ndim,ndim))
  end if
 
 !write(std_out,*) 'bfgs 04'
@@ -812,7 +812,7 @@ real(dp) :: strten(6)
 !Initialise the Hessian matrix using gmet
  if (itime==1)then
 
-   ABI_ALLOCATE(diag,(ndim))
+   ABI_MALLOC(diag,(ndim))
    do ii=1,3*ab_mover%natom
 !      diag(ii) = 1.00_dp / rprimd(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)**2
      diag(ii) = gmet(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)
@@ -826,7 +826,7 @@ real(dp) :: strten(6)
    end if
 
    call lbfgs_init(ndim,5,diag)
-   ABI_DEALLOCATE(diag)
+   ABI_FREE(diag)
 
    if (ab_mover%restartxf/=0) then
 

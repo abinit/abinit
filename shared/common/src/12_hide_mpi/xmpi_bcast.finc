@@ -1676,7 +1676,7 @@ subroutine xmpi_bcast_coeffi2_1d(xval,master,comm,ier)
 
 !  Broadcast xval%value sizes
    n0=size(xval)
-   ABI_STAT_ALLOCATE(siz,(2,n0), ier)
+   ABI_STAT_MALLOC(siz,(2,n0), ier)
    if (ier/= 0) call xmpi_abort(msg='error allocating siz in xmpi_bcast')
    if (me==master) then
      do ii=1,n0
@@ -1691,7 +1691,7 @@ subroutine xmpi_bcast_coeffi2_1d(xval,master,comm,ier)
    end do
 
 !  Fill in the buffer
-   ABI_STAT_ALLOCATE(mpibuf,(siztot), ier)
+   ABI_STAT_MALLOC(mpibuf,(siztot), ier)
    if (ier/= 0) call xmpi_abort(msg='error allocating mpibuf in xmpi_bcast')
    if (me==master) then
      jj=0
@@ -1712,7 +1712,7 @@ subroutine xmpi_bcast_coeffi2_1d(xval,master,comm,ier)
    do ii=1,n0
      n1=siz(1,ii);n2=siz(2,ii)
      if (.not.allocated(xval(ii)%value)) then
-       ABI_STAT_ALLOCATE(xval(ii)%value,(n1,n2), ier)
+       ABI_STAT_MALLOC(xval(ii)%value,(n1,n2), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xval%value in xmpi_bcast')
      end if
      do kk=1,n2
@@ -1720,8 +1720,8 @@ subroutine xmpi_bcast_coeffi2_1d(xval,master,comm,ier)
        jj=jj+n1
      end do
    end do
-   ABI_DEALLOCATE(siz)
-   ABI_DEALLOCATE(mpibuf)
+   ABI_FREE(siz)
+   ABI_FREE(mpibuf)
 
  end if
 #endif
@@ -1772,7 +1772,7 @@ subroutine xmpi_bcast_coeff2_1d(xval,master,comm,ier)
 
 !  Broadcast xval%value sizes
    n0=size(xval)
-   ABI_STAT_ALLOCATE(siz,(2,n0), ier)
+   ABI_STAT_MALLOC(siz,(2,n0), ier)
    if (ier/= 0) call xmpi_abort(msg='error allocating siz in xmpi_bcast')
    if (me==master) then
      do ii=1,n0
@@ -1787,7 +1787,7 @@ subroutine xmpi_bcast_coeff2_1d(xval,master,comm,ier)
    end do
 
 !  Fill in the buffer
-   ABI_STAT_ALLOCATE(mpibuf,(siztot), ier)
+   ABI_STAT_MALLOC(mpibuf,(siztot), ier)
    if (ier/= 0) call xmpi_abort(msg='error allocating mpibuf in xmpi_bcast')
    if (me==master) then
      jj=0
@@ -1808,7 +1808,7 @@ subroutine xmpi_bcast_coeff2_1d(xval,master,comm,ier)
    do ii=1,n0
      n1=siz(1,ii);n2=siz(2,ii)
      if (.not.allocated(xval(ii)%value)) then
-       ABI_STAT_ALLOCATE(xval(ii)%value,(n1,n2), ier)
+       ABI_STAT_MALLOC(xval(ii)%value,(n1,n2), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xval%value in xmpi_bcast')
      end if
      do kk=1,n2
@@ -1816,8 +1816,8 @@ subroutine xmpi_bcast_coeff2_1d(xval,master,comm,ier)
        jj=jj+n1
      end do
    end do
-   ABI_DEALLOCATE(siz)
-   ABI_DEALLOCATE(mpibuf)
+   ABI_FREE(siz)
+   ABI_FREE(mpibuf)
 
  end if
 #endif

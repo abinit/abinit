@@ -137,11 +137,11 @@ subroutine init_energy(cryst_struc,energies_dmft)
 !Local variables ------------------------------------
 !************************************************************************
 
- ABI_ALLOCATE(energies_dmft%e_dc,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu_dftu,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu_mig,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu_qmc,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_dc,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu_dftu,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu_mig,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu_qmc,(cryst_struc%natom))
  energies_dmft%e_dc=zero
  energies_dmft%e_hu=zero
  energies_dmft%e_hu_dftu=zero
@@ -190,19 +190,19 @@ subroutine destroy_energy(energies_dmft,paw_dmft)
 ! *********************************************************************
   paw_dmft%edmft=energies_dmft%edmft
  if ( allocated(energies_dmft%e_dc) )   then
-   ABI_DEALLOCATE(energies_dmft%e_dc)
+   ABI_FREE(energies_dmft%e_dc)
  end if
  if ( allocated(energies_dmft%e_hu) )   then
-   ABI_DEALLOCATE(energies_dmft%e_hu)
+   ABI_FREE(energies_dmft%e_hu)
  end if
  if ( allocated(energies_dmft%e_hu_dftu) )  then
-   ABI_DEALLOCATE(energies_dmft%e_hu_dftu)
+   ABI_FREE(energies_dmft%e_hu_dftu)
  end if
  if ( allocated(energies_dmft%e_hu_mig) )  then
-   ABI_DEALLOCATE(energies_dmft%e_hu_mig)
+   ABI_FREE(energies_dmft%e_hu_mig)
  end if
   if ( allocated(energies_dmft%e_hu_qmc) )  then
-   ABI_DEALLOCATE(energies_dmft%e_hu_qmc)
+   ABI_FREE(energies_dmft%e_hu_qmc)
  end if
 
 
@@ -395,13 +395,13 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 
 ! == Compute Correlation energy from Migdal formula
 ! -----------------------------------------------------------------------
-   ABI_ALLOCATE(e_hu_migdal,(cryst_struc%natom))
+   ABI_MALLOC(e_hu_migdal,(cryst_struc%natom))
    e_hu_migdal(:) = zero
    call compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,pawprtvol,self)
    energies_dmft%e_hu_mig(:)= e_hu_migdal(:)
    energies_dmft%e_hu_mig_tot = e_hu_migdal_tot
 ! write(std_out,*) "MIGDAL",e_hu_migdal_tot,e_hu_migdal
-   ABI_DEALLOCATE(e_hu_migdal)
+   ABI_FREE(e_hu_migdal)
 
 ! == Compute Correlation energy from QMC correlations.
 ! -----------------------------------------------------------------------
@@ -821,8 +821,8 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
 
-     ABI_ALLOCATE(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
-     ABI_ALLOCATE(nocctot,(nocc))
+     ABI_MALLOC(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
+     ABI_MALLOC(nocctot,(nocc))
      noccmmp(:,:,:,:)=zero ; nocctot(:)=zero
 
 ! - Setup nocctot and noccmmp
@@ -905,8 +905,8 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
      energies_dmft%e_dc(iatom)=e_dc-xe1
      energies_dmft%e_hu_dftu(iatom)=e_ee-xe2
 
-     ABI_DEALLOCATE(noccmmp)
-     ABI_DEALLOCATE(nocctot)
+     ABI_FREE(noccmmp)
+     ABI_FREE(nocctot)
    endif ! lpawu/=-1
  enddo
 

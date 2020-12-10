@@ -409,13 +409,13 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    call WffOpen(iomode,spaceComm,filnam,ierr,wff2,master,me0,unwff2,spaceComm_io)
    ! Conduct wavefunction output to wff2
 
-   ABI_ALLOCATE(kg_disk,(3,mpw))
+   ABI_MALLOC(kg_disk,(3,mpw))
 
    mcg_disk=mpw*my_nspinor*mband
    formeig=0; if (response==1) formeig=1
 
-   ABI_ALLOCATE(eig_k,( (2*mband)**formeig * mband))
-   ABI_ALLOCATE(occ_k,(mband))
+   ABI_MALLOC(eig_k,( (2*mband)**formeig * mband))
+   ABI_MALLOC(occ_k,(mband))
 
 #ifdef HAVE_MPI
    call xmpi_barrier(spaceComm)
@@ -644,13 +644,13 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      end do ! ikpt
    end do ! spin
 
-   ABI_DEALLOCATE(kg_disk)
+   ABI_FREE(kg_disk)
 #ifdef HAVE_MPI
-   ABI_DEALLOCATE(cg_disk)
+   ABI_FREE(cg_disk)
 #endif
 
-   ABI_DEALLOCATE(eig_k)
-   ABI_DEALLOCATE(occ_k)
+   ABI_FREE(eig_k)
+   ABI_FREE(occ_k)
 
 !  Close the wavefunction file (and do NOT delete it !)
    !if (wff2%iomode /= IO_MODE_NETCDF) then

@@ -544,11 +544,11 @@ subroutine cgqf ( nt, gaussian_kind, alpha, beta, a, b, t, wts )
 !  Prepare to scale the quadrature formula to other weight function with
 !  valid A and B.
 !
-  ABI_ALLOCATE ( mlt, (1:nt) )
+  ABI_MALLOC( mlt, (1:nt) )
 
   mlt(1:nt) = 1
 
-  ABI_ALLOCATE ( ndx, (1:nt) )
+  ABI_MALLOC( ndx, (1:nt) )
 
   do i = 1, nt
     ndx(i) = i
@@ -556,8 +556,8 @@ subroutine cgqf ( nt, gaussian_kind, alpha, beta, a, b, t, wts )
 
   call scqf ( nt, t, mlt, wts, nt, ndx, wts, t, gaussian_kind, alpha, beta, a, b )
 
-  ABI_DEALLOCATE ( mlt )
-  ABI_DEALLOCATE ( ndx )
+  ABI_FREE( mlt )
+  ABI_FREE( ndx )
 
   return
 end subroutine cgqf

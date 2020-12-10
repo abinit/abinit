@@ -184,7 +184,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
    else
      oper%wtk=>wtk
    endif
-   ABI_ALLOCATE(oper%ks,(paw_dmft%nsppol,oper%nkpt,paw_dmft%mbandc,paw_dmft%mbandc))
+   ABI_MALLOC(oper%ks,(paw_dmft%nsppol,oper%nkpt,paw_dmft%mbandc,paw_dmft%mbandc))
    oper%has_operks=1
    oper%ks=czero
  endif
@@ -194,7 +194,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
 ! ===================
  if(optksloc==2.or.optksloc==3) then
    oper%has_opermatlu=0
-   ABI_DATATYPE_ALLOCATE(oper%matlu,(oper%natom))
+   ABI_MALLOC(oper%matlu,(oper%natom))
    oper%has_opermatlu=1
    call init_matlu(oper%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,oper%matlu)
    do iatom=1,oper%natom
@@ -250,11 +250,11 @@ subroutine destroy_oper(oper)
    ABI_ERROR(message)
  endif
  if ( allocated(oper%matlu))  then
-   ABI_DATATYPE_DEALLOCATE(oper%matlu)
+   ABI_FREE(oper%matlu)
    oper%has_opermatlu=0
  endif
  if ( allocated(oper%ks)) then
-   ABI_DEALLOCATE(oper%ks)
+   ABI_FREE(oper%ks)
    oper%has_operks=0
  endif
  oper%wtk => null()
@@ -513,7 +513,7 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
 ! *********************************************************************
  DBG_ENTER("COLL")
  if(option==2.or.option==3) then
-   ABI_ALLOCATE(procb2,(oper%nkpt))
+   ABI_MALLOC(procb2,(oper%nkpt))
  endif
 !  if option=1 do inversion in local space
 !  if option=2 do inversion in KS band space
@@ -534,7 +534,7 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
  if(option==1.or.option==3) then
    call inverse_matlu(oper%matlu,oper%natom,prtopt)
  else if(option==2.or.option==3) then
-   ABI_ALLOCATE(matrix,(oper%mbandc,oper%mbandc))
+   ABI_MALLOC(matrix,(oper%mbandc,oper%mbandc))
      do isppol=1,oper%nsppol
        do ikpt=1,oper%nkpt
         if ((paral==1.and.(procb2(ikpt)==iproc)).or.(paral==0)) then
@@ -547,11 +547,11 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
         endif
        enddo ! ikpt
      enddo ! isppol
-   ABI_DEALLOCATE(matrix)
+   ABI_FREE(matrix)
  endif
 
  if(option==2.or.option==3) then
-   ABI_DEALLOCATE(procb2)
+   ABI_FREE(procb2)
  endif
  DBG_EXIT("COLL")
 end subroutine inverse_oper
@@ -597,7 +597,7 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  logical lvz  !vz_d
 ! *********************************************************************
  DBG_ENTER("COLL")
- ABI_ALLOCATE(procb2,(oper%nkpt))
+ ABI_MALLOC(procb2,(oper%nkpt))
  if((oper%has_opermatlu==0).or.(oper%has_operks==0)) then
    message = " Operator is not defined to be used in loc_oper"
    ABI_ERROR(message)
@@ -661,7 +661,7 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
    endif
   enddo ! ikpt
  enddo ! isppol
- ABI_DEALLOCATE(procb2)
+ ABI_FREE(procb2)
 
 
 
@@ -711,7 +711,7 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
 ! *********************************************************************
 
  ABI_UNUSED(prt)
- ABI_ALLOCATE(procb2,(oper%nkpt))
+ ABI_MALLOC(procb2,(oper%nkpt))
  if(present(procb).and.present(iproc)) then
    paral=1
    procb2=procb
@@ -780,7 +780,7 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
     endif
    enddo ! ikpt
  enddo ! isppol
- ABI_DEALLOCATE(procb2)
+ ABI_FREE(procb2)
 
  DBG_EXIT("COLL")
 end subroutine upfold_oper

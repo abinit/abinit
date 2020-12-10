@@ -140,10 +140,10 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
  if(iexit/=0)then
    if (allocated(fcart_m))       then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    if (allocated(vel_nexthalf))  then
-     ABI_DEALLOCATE(vel_nexthalf)
+     ABI_FREE(vel_nexthalf)
    end if
    return
  end if
@@ -167,18 +167,18 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
  if(itime==1)then
    if (allocated(fcart_m))       then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    if (allocated(vel_nexthalf))  then
-     ABI_DEALLOCATE(vel_nexthalf)
+     ABI_FREE(vel_nexthalf)
    end if
  end if
 
  if (.not.allocated(fcart_m))       then
-   ABI_ALLOCATE(fcart_m,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_m,(3,ab_mover%natom))
  end if
  if (.not.allocated(vel_nexthalf))  then
-   ABI_ALLOCATE(vel_nexthalf,(3,ab_mover%natom))
+   ABI_MALLOC(vel_nexthalf,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'isothermal 02'
@@ -668,9 +668,9 @@ subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
 !Beginning of executable session
 !***************************************************************************
 
- ABI_ALLOCATE(glogs,(nnos))
- ABI_ALLOCATE(vlogs,(nnos))
- ABI_ALLOCATE(xlogs,(nnos))
+ ABI_MALLOC(glogs,(nnos))
+ ABI_MALLOC(vlogs,(nnos))
+ ABI_MALLOC(xlogs,(nnos))
  glogs(:)=mttk_vars%glogs(:)
  vlogs(:)=mttk_vars%vlogs(:)
  xlogs(:)=mttk_vars%xlogs(:)
@@ -734,9 +734,9 @@ subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
  mttk_vars%glogs(:)=glogs(:)
  mttk_vars%vlogs(:)=vlogs(:)
  mttk_vars%xlogs(:)=xlogs(:)
- ABI_DEALLOCATE(glogs)
- ABI_DEALLOCATE(vlogs)
- ABI_DEALLOCATE(xlogs)
+ ABI_FREE(glogs)
+ ABI_FREE(vlogs)
+ ABI_FREE(xlogs)
 !DEBUG
 !write(std_out,*)'ekin added',half*qmass(1)*vlogs(1)**2,xlogs(1)*(nfree)*ktemp
 !ENDEBUG
@@ -822,9 +822,9 @@ end subroutine isotemp
    write(std_out,*)' ucvol=',ucvol
  end if
 
- ABI_ALLOCATE(glogs,(nnos))
- ABI_ALLOCATE(vlogs,(nnos))
- ABI_ALLOCATE(xlogs,(nnos))
+ ABI_MALLOC(glogs,(nnos))
+ ABI_MALLOC(vlogs,(nnos))
+ ABI_MALLOC(xlogs,(nnos))
  glogs(:)=mttk_vars%glogs(:)
  vlogs(:)=mttk_vars%vlogs(:)
  xlogs(:)=mttk_vars%xlogs(:)
@@ -904,9 +904,9 @@ end subroutine isotemp
  end do
 !Barostat
  ekin=ekin+half*bmass*vlogv**2+prtarget*ucvol
- ABI_DEALLOCATE(glogs)
- ABI_DEALLOCATE(vlogs)
- ABI_DEALLOCATE(xlogs)
+ ABI_FREE(glogs)
+ ABI_FREE(vlogs)
+ ABI_FREE(xlogs)
 
 !DEBUG
 !write(std_out,*) 'EKIN',ekin
@@ -999,9 +999,9 @@ end subroutine isopress
    write(std_out,*)' ucvol=',ucvol
  end if
 
- ABI_ALLOCATE(glogs,(nnos))
- ABI_ALLOCATE(vlogs,(nnos))
- ABI_ALLOCATE(xlogs,(nnos))
+ ABI_MALLOC(glogs,(nnos))
+ ABI_MALLOC(vlogs,(nnos))
+ ABI_MALLOC(xlogs,(nnos))
  glogs(:)=mttk_vars%glogs(:)
  vlogs(:)=mttk_vars%vlogs(:)
  xlogs(:)=mttk_vars%xlogs(:)
@@ -1186,9 +1186,9 @@ end subroutine isopress
  mttk_vars%glogs(:)=glogs(:)
  mttk_vars%vlogs(:)=vlogs(:)
  mttk_vars%xlogs(:)=xlogs(:)
- ABI_DEALLOCATE(glogs)
- ABI_DEALLOCATE(vlogs)
- ABI_DEALLOCATE(xlogs)
+ ABI_FREE(glogs)
+ ABI_FREE(vlogs)
+ ABI_FREE(xlogs)
 
  if(DEBUG) then
 !  write(std_out,*)'ekin added T',half*qmass(:)*vlogs(:)**2,xlogs(:)*(nfree)*ktemp

@@ -148,22 +148,22 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
  if(iexit/=0)then
    if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
+     ABI_FREE(vout_prev)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
    if (allocated(u_matrix))     then
-     ABI_DEALLOCATE(u_matrix)
+     ABI_FREE(u_matrix)
    end if
    return
  end if
@@ -208,25 +208,25 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !From a previous dataset with a different ndim
  if(itime==1)then
    if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
+     ABI_FREE(vout_prev)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vout_prev,(ndim))
-   ABI_ALLOCATE(hessin,(ndim,ndim))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vout_prev,(ndim))
+   ABI_MALLOC(hessin,(ndim,ndim))
 
  end if
 
@@ -294,7 +294,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
    call make_prim_internals(deloc,ab_mover%natom,&
 &   ab_mover%ntypat,rprimd,ab_mover%typat,xcart,ab_mover%znucl)
 
-   ABI_ALLOCATE(prim_int,(deloc%ninternal))
+   ABI_MALLOC(prim_int,(deloc%ninternal))
 
    if(DEBUG)then
      write (message,'(a,i6)') 'Number of primitive internal coordinates (ninternal): ',deloc%ninternal
@@ -302,9 +302,9 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
    end if
 
    if (allocated(u_matrix))  then
-     ABI_DEALLOCATE(u_matrix)
+     ABI_FREE(u_matrix)
    end if
-   ABI_ALLOCATE(u_matrix,(deloc%ninternal,ndeloc))
+   ABI_MALLOC(u_matrix,(deloc%ninternal,ndeloc))
 
    call calc_prim_int(deloc,ab_mover%natom,rprimd,xcart,prim_int)
 
@@ -340,7 +340,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
      end do
    end if
 
-   ABI_DEALLOCATE(prim_int)
+   ABI_FREE(prim_int)
 
 !  equal weight on all internal coordinates as a starting point.
    u_matrix(:,:) = one / dble (ndeloc)
@@ -350,7 +350,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
  end if
 
- ABI_ALLOCATE(prim_int,(deloc%ninternal))
+ ABI_MALLOC(prim_int,(deloc%ninternal))
 
 !write(std_out,*) 'delocint 06'
 !##########################################################
@@ -459,7 +459,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
  end if
 
- ABI_DEALLOCATE(prim_int)
+ ABI_FREE(prim_int)
 
  if(itime>1)then
 !  Update the hessian matrix, by taking into account the
@@ -1601,12 +1601,12 @@ end subroutine xcart2deloc
 & b_matrix,ninternal,b_matrix,ninternal,zero,f_matrix,3*natom)
 
  lwork = max(1,3*3*natom-1)
- ABI_ALLOCATE(work,(lwork))
+ ABI_MALLOC(work,(lwork))
  s_matrix(:,:) = f_matrix(:,:)
 
  call dsyev('V','L',3*natom,s_matrix,3*natom,f_eigs,work,lwork,info)
 
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
  if (abs(f_eigs(1)) + abs(f_eigs(2)) + abs(f_eigs(3)) > tol10 ) then
    write(std_out,*) 'Error: 3 lowest eigenvalues are not zero'

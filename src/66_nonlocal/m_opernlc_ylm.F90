@@ -187,12 +187,12 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
    gxfac_ => gxfac ; dgxdtfac_ => dgxdtfac ; d2gxdtfac_ => d2gxdtfac
   else
    ABI_CHECK(cplex_fac==2,"BUG: invalid cplex_fac==1 when dimekbq=2!")
-   ABI_ALLOCATE(gxfac_,(cplex_fac,nlmn,nincat,nspinor))
+   ABI_MALLOC(gxfac_,(cplex_fac,nlmn,nincat,nspinor))
    if (optder>=1) then
-    ABI_ALLOCATE(dgxdtfac_,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor))
+    ABI_MALLOC(dgxdtfac_,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor))
    end if
    if (optder>=2) then
-    ABI_ALLOCATE(d2gxdtfac_,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor))
+    ABI_MALLOC(d2gxdtfac_,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor))
    end if
   end if
   gxfac_=zero
@@ -475,7 +475,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
    else if (nspinortot==2.and.nspinor/=nspinortot) then
      ABI_CHECK(cplex_enl==2,"BUG: invalid cplex_enl/=2!")
      ABI_CHECK(cplex_fac==2,"BUG: invalid cplex_fac/=2!")
-     ABI_ALLOCATE(gxfac_offdiag,(cplex_fac,nlmn,nincat,nspinortot))
+     ABI_MALLOC(gxfac_offdiag,(cplex_fac,nlmn,nincat,nspinortot))
 !$OMP WORKSHARE
      gxfac_offdiag(:,:,:,:)=zero
 !$OMP END WORKSHARE
@@ -522,7 +522,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END PARALLEL
      call xmpi_sum(gxfac_offdiag,mpi_enreg%comm_spinor,ierr)
      gxfac_(:,:,:,1)=gxfac_(:,:,:,1)+gxfac_offdiag(:,:,:,ispinor_index)
-     ABI_DEALLOCATE(gxfac_offdiag)
+     ABI_FREE(gxfac_offdiag)
    end if
 
   end if !paw_opt
@@ -563,7 +563,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
    if (cplex_enl==1) then
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,enl_,mu,gxfj,ilmn,ijlmn,gxfi)
-     ABI_ALLOCATE(gxfj,(cplex,ndgxdtfac))
+     ABI_MALLOC(gxfj,(cplex,ndgxdtfac))
      do ispinor=1,nspinor
        ispinor_index=ispinor+shift
        do ia=1,nincat
@@ -608,7 +608,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
        end do
      end do
-     ABI_DEALLOCATE(gxfj)
+     ABI_FREE(gxfj)
 !$OMP END PARALLEL
 
 !    2-Enl is complex  ===== D^ss'_ij=D^s's_ji^*
@@ -619,7 +619,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 
 !$OMP PARALLEL &
 !$OMP PRIVATE(ia,index_enl,jlmn,j0lmn,jjlmn,enl_,mu,gxfj,ilmn,ijlmn,gxfi)
-       ABI_ALLOCATE(gxfj,(cplex,ndgxdtfac))
+       ABI_MALLOC(gxfj,(cplex,ndgxdtfac))
        do ia=1,nincat
          index_enl=atindx1(iatm+ia)
 !$OMP DO
@@ -689,7 +689,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
          end do
 !$OMP END DO
        end do
-       ABI_DEALLOCATE(gxfj)
+       ABI_FREE(gxfj)
 !$OMP END PARALLEL
 
      else ! -------------> SPINORIAL CASE
@@ -699,7 +699,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,mu,gxfj,ilmn,ijlmn,gxfi)
-       ABI_ALLOCATE(gxfj,(cplex,ndgxdtfac))
+       ABI_MALLOC(gxfj,(cplex,ndgxdtfac))
        do ispinor=1,nspinor
          ispinor_index = ispinor + shift
          do ia=1,nincat
@@ -772,7 +772,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
          end do
        end do
-       ABI_DEALLOCATE(gxfj)
+       ABI_FREE(gxfj)
 !$OMP END PARALLEL
      end if !nspinortot
    end if !complex
@@ -786,7 +786,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,jspinor,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,mu,gxfi,gxfj,ilmn,ijlmn)
-     ABI_ALLOCATE(gxfj,(cplex,ndgxdtfac))
+     ABI_MALLOC(gxfj,(cplex,ndgxdtfac))
      do ispinor=1,nspinor
        jspinor=3-ispinor
        do ia=1,nincat
@@ -864,14 +864,14 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
        end do !ia
      end do !ispinor
-     ABI_DEALLOCATE(gxfj)
+     ABI_FREE(gxfj)
 !$OMP END PARALLEL
 
 !    --- Parallelization over spinors ---
    else if (nspinortot==2.and.nspinor/=nspinortot) then
      ABI_CHECK(cplex_enl==2,"BUG: opernlc_ylm: invalid cplex_enl/=2!")
      ABI_CHECK(cplex_fac==2,"BUG: opernlc_ylm: invalid cplex_fac/=2!")
-     ABI_ALLOCATE(dgxdtfac_offdiag,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinortot))
+     ABI_MALLOC(dgxdtfac_offdiag,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinortot))
 !$OMP PARALLEL &
 !$OMP PRIVATE(ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,ilmn,i0lmn,ijlmn,enl_,jilmn,mu,gxfi)
@@ -931,7 +931,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      dgxdtfac_(:,:,:,:,1)=dgxdtfac_(:,:,:,:,1)+dgxdtfac_offdiag(:,:,:,:,ispinor_index)
 !$OMP END WORKSHARE
 !$OMP END PARALLEL
-     ABI_DEALLOCATE(dgxdtfac_offdiag)
+     ABI_FREE(dgxdtfac_offdiag)
    end if !nspinortot
 
   end if ! pawopt & optder
@@ -972,7 +972,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
    if (cplex_enl==1) then
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,enl_,mu,gxfj,ilmn,ijlmn,gxfi)
-     ABI_ALLOCATE(gxfj,(cplex,nd2gxdtfac))
+     ABI_MALLOC(gxfj,(cplex,nd2gxdtfac))
      do ispinor=1,nspinor
        ispinor_index=ispinor+shift
        do ia=1,nincat
@@ -1017,7 +1017,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
        end do
      end do
-     ABI_DEALLOCATE(gxfj)
+     ABI_FREE(gxfj)
 !$OMP END PARALLEL
 
 !    2-Enl is complex  ===== D^ss'_ij=D^s's_ji^*
@@ -1028,7 +1028,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 
 !$OMP PARALLEL &
 !$OMP PRIVATE(ia,index_enl,jlmn,j0lmn,jjlmn,enl_,mu,gxfj,ilmn,ijlmn,gxfi)
-       ABI_ALLOCATE(gxfj,(cplex,nd2gxdtfac))
+       ABI_MALLOC(gxfj,(cplex,nd2gxdtfac))
        do ia=1,nincat
          index_enl=atindx1(iatm+ia)
 !$OMP DO
@@ -1098,7 +1098,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
          end do
 !$OMP END DO
        end do
-       ABI_DEALLOCATE(gxfj)
+       ABI_FREE(gxfj)
 !$OMP END PARALLEL
 
      else ! -------------> SPINORIAL CASE
@@ -1108,7 +1108,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ispinor_index,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,mu,gxfj,ilmn,ijlmn,gxfi)
-       ABI_ALLOCATE(gxfj,(cplex,nd2gxdtfac))
+       ABI_MALLOC(gxfj,(cplex,nd2gxdtfac))
        do ispinor=1,nspinor
          ispinor_index = ispinor + shift
          do ia=1,nincat
@@ -1181,7 +1181,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
          end do
        end do
-       ABI_DEALLOCATE(gxfj)
+       ABI_FREE(gxfj)
 !$OMP END PARALLEL
      end if !nspinortot
    end if !complex
@@ -1195,7 +1195,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,jspinor,ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,enl_,mu,gxfi,gxfj,ilmn,ijlmn)
-     ABI_ALLOCATE(gxfj,(cplex,nd2gxdtfac))
+     ABI_MALLOC(gxfj,(cplex,nd2gxdtfac))
      do ispinor=1,nspinor
        jspinor=3-ispinor
        do ia=1,nincat
@@ -1273,14 +1273,14 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
        end do !ia
      end do !ispinor
-     ABI_DEALLOCATE(gxfj)
+     ABI_FREE(gxfj)
 !$OMP END PARALLEL
 
 !    --- Parallelization over spinors ---
    else if (nspinortot==2.and.nspinor/=nspinortot) then
      ABI_CHECK(cplex_enl==2,"BUG: opernlc_ylm: invalid cplex_enl/=2!")
      ABI_CHECK(cplex_fac==2,"BUG: opernlc_ylm: invalid cplex_fac/=2!")
-     ABI_ALLOCATE(d2gxdtfac_offdiag,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinortot))
+     ABI_MALLOC(d2gxdtfac_offdiag,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinortot))
 !$OMP PARALLEL &
 !$OMP PRIVATE(ia,index_enl), &
 !$OMP PRIVATE(jlmn,j0lmn,ilmn,i0lmn,ijlmn,enl_,jilmn,mu,gxfi)
@@ -1340,7 +1340,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
      d2gxdtfac_(:,:,:,:,1)=d2gxdtfac_(:,:,:,:,1)+d2gxdtfac_offdiag(:,:,:,:,ispinor_index)
 !$OMP END WORKSHARE
 !$OMP END PARALLEL
-     ABI_DEALLOCATE(d2gxdtfac_offdiag)
+     ABI_FREE(d2gxdtfac_offdiag)
    end if !nspinortot
 
   end if ! pawopt & optder
@@ -1361,7 +1361,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
         end do
       end do
     end do
-    ABI_DEALLOCATE(gxfac_)
+    ABI_FREE(gxfac_)
     if (optder>=1) then
 !$OMP DO COLLAPSE(4)
       do ispinor=1,nspinor
@@ -1374,7 +1374,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
           end do
         end do
       end do
-      ABI_DEALLOCATE(dgxdtfac_)
+      ABI_FREE(dgxdtfac_)
     end if
     if (optder>=2) then
 !$OMP DO COLLAPSE(4)
@@ -1388,7 +1388,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
           end do
         end do
       end do
-      ABI_DEALLOCATE(d2gxdtfac_)
+      ABI_FREE(d2gxdtfac_)
     end if
 !$OMP END PARALLEL
   end if
@@ -1454,7 +1454,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ia), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,sijr,mu,gxfj,ilmn,ijlmn,gxfi)
-   ABI_ALLOCATE(gxfj,(cplex,ndgxdtfac))
+   ABI_MALLOC(gxfj,(cplex,ndgxdtfac))
 !$OMP WORKSHARE
    dgxdtfac_sij(1:cplex,1:ndgxdtfac,1:nlmn,1:nincat,1:nspinor)=zero
 !$OMP END WORKSHARE
@@ -1497,7 +1497,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
      end do
    end do
-   ABI_DEALLOCATE(gxfj)
+   ABI_FREE(gxfj)
 !$OMP END PARALLEL
  end if
 
@@ -1507,7 +1507,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP PARALLEL &
 !$OMP PRIVATE(ispinor,ia), &
 !$OMP PRIVATE(jlmn,j0lmn,jjlmn,sijr,mu,gxfj,ilmn,ijlmn,gxfi)
-   ABI_ALLOCATE(gxfj,(cplex,nd2gxdtfac))
+   ABI_MALLOC(gxfj,(cplex,nd2gxdtfac))
 !$OMP WORKSHARE
    d2gxdtfac_sij(1:cplex,1:nd2gxdtfac,1:nlmn,1:nincat,1:nspinor)=zero
 !$OMP END WORKSHARE
@@ -1554,7 +1554,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 !$OMP END DO
      end do
    end do
-   ABI_DEALLOCATE(gxfj)
+   ABI_FREE(gxfj)
 !$OMP END PARALLEL
  end if
 

@@ -256,15 +256,15 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  kinpw1 => gs_hamkq%kinpw_kp
 
  ! Memory allocations
- ABI_ALLOCATE(gh1c,(2,npw1*nspinor))
- ABI_ALLOCATE(pcon,(npw1))
- ABI_ALLOCATE(scprod,(2,nband))
+ ABI_MALLOC(gh1c,(2,npw1*nspinor))
+ ABI_MALLOC(pcon,(npw1))
+ ABI_MALLOC(scprod,(2,nband))
 
  if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. berryopt==14.or.berryopt==16.or.berryopt==17) then
-   ABI_ALLOCATE(gberry,(2,npw1*nspinor))
+   ABI_MALLOC(gberry,(2,npw1*nspinor))
    gberry(:,1:npw1*nspinor)=grad_berry(:,1:npw1*nspinor,band)
  else
-   ABI_ALLOCATE(gberry,(0,0))
+   ABI_MALLOC(gberry,(0,0))
  end if
 
  shift_band=(band-1)*npw1*nspinor
@@ -274,8 +274,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    write(msg,'(a)') " ** cgwf3 : debugging mode, tests will be done"
    ! Search CGWF3_WARNING in the log file to find errors (if any)
    call wrtout(std_out,msg)
-   ABI_ALLOCATE(work,(2,npw1*nspinor))
-   ABI_ALLOCATE(work1,(2,npw1*nspinor))
+   ABI_MALLOC(work,(2,npw1*nspinor))
+   ABI_MALLOC(work1,(2,npw1*nspinor))
    !  ===== Check <Psi_k+q^(0)|S(0)|Psi_k+q^(0)>=delta
    if (.not.gen_eigenpb) work1(:,:)=cgq(:,1+npw1*nspinor*(band-1)+icgq:npw1*nspinor*band+icgq)
    if (     gen_eigenpb) work1(:,:)=gscq(:,1+npw1*nspinor*(band-1)+igscq:npw1*nspinor*band+igscq)
@@ -338,8 +338,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        end if
      end do
    end if
-   ABI_DEALLOCATE(work)
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work)
+   ABI_FREE(work1)
  end if
 
  !======================================================================
@@ -353,14 +353,14 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    ! Compute H(1) applied to GS wavefunction Psi(0)
    if (gen_eigenpb) then
      sij_opt=1
-     ABI_ALLOCATE(gs1c,(2,npw1*nspinor))
+     ABI_MALLOC(gs1c,(2,npw1*nspinor))
    else
-     ABI_ALLOCATE(gs1c,(0,0))
+     ABI_MALLOC(gs1c,(0,0))
      sij_opt=0
    end if
    usevnl=1; optlocal=1; optnl=2
    if (prtvol==-level.or.prtvol==-19) then
-     ABI_ALLOCATE(gvnlx1_saved,(2,npw1*nspinor))
+     ABI_MALLOC(gvnlx1_saved,(2,npw1*nspinor))
      gvnlx1_saved(:,:) = gvnlx1(:,:)
    end if
    call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,&
@@ -401,25 +401,25 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
  if (prtvol==-level.and.usedcwavef==2) then
    !Check that Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1) is zero ! This is a consequence of P_c delta_Psi^(1) = 0
-   ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
+   ABI_MALLOC(cwwork,(2,npw1*nspinor))
    cwwork=dcwavef
    !  - Apply H^(0)-E.S^(0) to delta_Psi^(1)
    sij_opt=0;if (gen_eigenpb) sij_opt=-1
    cpopt=-1
-   ABI_ALLOCATE(work,(2,npw1*nspinor))
-   ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
-   ABI_ALLOCATE(work2,(2,npw1*nspinor))
+   ABI_MALLOC(work,(2,npw1*nspinor))
+   ABI_MALLOC(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
+   ABI_MALLOC(work2,(2,npw1*nspinor))
    call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,mpi_enreg,&
      1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
    cwwork=work
-   ABI_DEALLOCATE(work)
-   ABI_DEALLOCATE(work1)
-   ABI_DEALLOCATE(work2)
+   ABI_FREE(work)
+   ABI_FREE(work1)
+   ABI_FREE(work2)
    ! -Apply Pc^*
    call projbd(gscq,cwwork,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband,npw1,nspinor,&
      cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
    call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
-   ABI_DEALLOCATE(cwwork)
+   ABI_FREE(cwwork)
    if(sqrt(dotr)>tol12) then
      write(msg,'(a,i3,a,es22.15)') 'CGWF3_WARNING : |Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1)| (band ',band,')=',sqrt(dotr)
      call wrtout(std_out,msg)
@@ -467,7 +467,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    end if
 
    ! No more need of gs1c
-   ABI_DEALLOCATE(gs1c)
+   ABI_FREE(gs1c)
  end if
 
  ! Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
@@ -520,15 +520,15 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
  else
    ! If not a buffer band, perform the optimisation
-   ABI_ALLOCATE(conjgr,(2,npw1*nspinor))
-   ABI_ALLOCATE(direc,(2,npw1*nspinor))
-   ABI_ALLOCATE(gresid,(2,npw1*nspinor))
-   ABI_ALLOCATE(cwaveq,(2,npw1*nspinor))
+   ABI_MALLOC(conjgr,(2,npw1*nspinor))
+   ABI_MALLOC(direc,(2,npw1*nspinor))
+   ABI_MALLOC(gresid,(2,npw1*nspinor))
+   ABI_MALLOC(cwaveq,(2,npw1*nspinor))
    if (usepaw==1) then
-     ABI_DATATYPE_ALLOCATE(conjgrprj,(natom,nspinor))
+     ABI_MALLOC(conjgrprj,(natom,nspinor))
      call pawcprj_alloc(conjgrprj,0,gs_hamkq%dimcprj)
    else
-     ABI_DATATYPE_ALLOCATE(conjgrprj,(0,0))
+     ABI_MALLOC(conjgrprj,(0,0))
    end if
 
    cwaveq(:,:)=cgq(:,1+npw1*nspinor*(band-1)+icgq:npw1*nspinor*band+icgq)
@@ -773,12 +773,12 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      call dotprod_g(dedt,doti,istwf_k,npw1*nspinor,1,conjgr,gresid,me_g0,mpi_enreg%comm_spinorfft)
      dedt=-two*two*dedt
      if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) call wrtout(std_out,' CGWF3_WARNING : dedt>0')
-     ABI_ALLOCATE(gvnlx_direc,(2,npw1*nspinor))
-     ABI_ALLOCATE(gh_direc,(2,npw1*nspinor))
+     ABI_MALLOC(gvnlx_direc,(2,npw1*nspinor))
+     ABI_MALLOC(gh_direc,(2,npw1*nspinor))
      if (gen_eigenpb)  then
-       ABI_ALLOCATE(sconjgr,(2,npw1*nspinor))
+       ABI_MALLOC(sconjgr,(2,npw1*nspinor))
      else
-       ABI_ALLOCATE(sconjgr,(0,0))
+       ABI_MALLOC(sconjgr,(0,0))
      end if
      sij_opt=0;if (gen_eigenpb) sij_opt=1
      cpopt=-1+usepaw
@@ -863,9 +863,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        call pawcprj_axpby(theta,one,conjgrprj,cwaveprj)
      end if
 
-     ABI_DEALLOCATE(gh_direc)
-     ABI_DEALLOCATE(gvnlx_direc)
-     ABI_DEALLOCATE(sconjgr)
+     ABI_FREE(gh_direc)
+     ABI_FREE(gvnlx_direc)
+     ABI_FREE(sconjgr)
 
      ! ======================================================================
      ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
@@ -900,9 +900,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    ! Check that final cwavef (Psi^(1)) satisfies the orthogonality condition
    if (prtvol==-level.or.prtvol==-19) then
      sij_opt=0 ; usevnl=1 ; optlocal=1 ; optnl=2 ; if (gen_eigenpb)  sij_opt=1
-     ABI_ALLOCATE(work,(2,npw1*nspinor))
-     ABI_ALLOCATE(work1,(2,npw1*nspinor))
-     ABI_ALLOCATE(work2,(2,npw1*nspinor*sij_opt))
+     ABI_MALLOC(work,(2,npw1*nspinor))
+     ABI_MALLOC(work1,(2,npw1*nspinor))
+     ABI_MALLOC(work2,(2,npw1*nspinor*sij_opt))
      do iband=1,nband
        if (gen_eigenpb) then
          work(:,:)=gscq(:,1+npw1*nspinor*(iband-1)+igscq:npw1*nspinor*iband+igscq)
@@ -941,17 +941,17 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
          call wrtout(std_out,msg)
        end if
      end do
-     ABI_DEALLOCATE(work)
-     ABI_DEALLOCATE(work1)
-     ABI_DEALLOCATE(work2)
+     ABI_FREE(work)
+     ABI_FREE(work1)
+     ABI_FREE(work2)
      if (ipert/=natom+10.and.ipert/=natom+11) then
-       ABI_DEALLOCATE(gvnlx1_saved)
+       ABI_FREE(gvnlx1_saved)
      end if
    end if
 
    if (prtvol==-level.or.prtvol==-19)then
      !  Check that final cwavef Psi^(1) is Pc.Psi^(1)+delta_Psi^(1)
-     ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
+     ABI_MALLOC(cwwork,(2,npw1*nspinor))
      cwwork=cwavef
      ! -Apply Pc to Psi^(1)
      if (gen_eigenpb) then
@@ -967,7 +967,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      ! -Compare to Psi^(1)
      cwwork=cwwork-cwavef
      call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
-     ABI_DEALLOCATE(cwwork)
+     ABI_FREE(cwwork)
      if(sqrt(dotr)>tol10) then
 !       if (gen_eigenpb) then
 !         write(msg,'(a,i3,a,es22.15)') &
@@ -981,7 +981,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
    if(prtvol==-level.or.prtvol==-19.or.prtvol==-20)then
      ! Check that final cwavef (Psi^(1)) solves the Sternheimer equation
-     ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
+     ABI_MALLOC(cwwork,(2,npw1*nspinor))
      cwwork=cwavef
      ! -Apply Pc to Psi^(1)
      if (gen_eigenpb) then
@@ -994,9 +994,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      ! - Apply H^(0)-E.S^(0)
      sij_opt=0;if (gen_eigenpb) sij_opt=1
      cpopt=-1
-     ABI_ALLOCATE(work,(2,npw1*nspinor))
-     ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
-     ABI_ALLOCATE(work2,(2,npw1*nspinor))
+     ABI_MALLOC(work,(2,npw1*nspinor))
+     ABI_MALLOC(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
+     ABI_MALLOC(work2,(2,npw1*nspinor))
      call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,&
        mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
      if (gen_eigenpb) then
@@ -1004,9 +1004,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      else
        cwwork=work-eshift*cwwork
      end if
-     ABI_DEALLOCATE(work)
-     ABI_DEALLOCATE(work1)
-     ABI_DEALLOCATE(work2)
+     ABI_FREE(work)
+     ABI_FREE(work1)
+     ABI_FREE(work2)
      ! The following is not mandatory, as Pc has been already applied to Psi^(1)
      ! and Pc^* H^(0) Pc = Pc^* H^(0) = H^(0) Pc (same for S^(0)).
      ! However, in PAW, to apply Pc^* here seems to reduce the numerical error
@@ -1021,7 +1021,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      ! - Add Pc^*(H^(1)-E.S^(1)).Psi^(0)
      cwwork=cwwork+gh1c
      call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
-     ABI_DEALLOCATE(cwwork)
+     ABI_FREE(cwwork)
      write(msg,'(a,i3,a,es22.15,2a,i4)') &
        '*** CGWF3 Sternheimer equation test for band ',band,'=',sqrt(dotr),ch10,&
        'It should go to zero for large nline : nlines_done = ',nlines_done
@@ -1030,14 +1030,14 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
    if(prtvol==-level.or.prtvol==-19.or.prtvol==-20)then
      ! Check that < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is in agreement with eig^(1)
-     ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
+     ABI_MALLOC(cwwork,(2,npw1*nspinor))
      cwwork=cwavef
      ! - Apply H^(0)-E.S^(0)
      sij_opt=0;if (gen_eigenpb) sij_opt=1
      cpopt=-1
-     ABI_ALLOCATE(work,(2,npw1*nspinor))
-     ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
-     ABI_ALLOCATE(work2,(2,npw1*nspinor))
+     ABI_MALLOC(work,(2,npw1*nspinor))
+     ABI_MALLOC(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
+     ABI_MALLOC(work2,(2,npw1*nspinor))
      call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,&
        mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
      if (gen_eigenpb) then
@@ -1045,8 +1045,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      else
        cwwork=work-eshift*cwwork
      end if
-     ABI_DEALLOCATE(work1)
-     ABI_DEALLOCATE(work2)
+     ABI_FREE(work1)
+     ABI_FREE(work2)
      cwwork=cwwork+gh1c_n
      jband=(band-1)*2*nband
      do iband=1,nband
@@ -1063,24 +1063,24 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        end if
      end do
      !write(std_out,'(a)') '< Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is done.'
-     ABI_DEALLOCATE(work)
-     ABI_DEALLOCATE(cwwork)
+     ABI_FREE(work)
+     ABI_FREE(cwwork)
    end if
 
    if (allocated(gh_direc))  then
-     ABI_DEALLOCATE(gh_direc)
+     ABI_FREE(gh_direc)
    end if
    if (allocated(gvnlx_direc))  then
-     ABI_DEALLOCATE(gvnlx_direc)
+     ABI_FREE(gvnlx_direc)
    end if
-   ABI_DEALLOCATE(conjgr)
-   ABI_DEALLOCATE(cwaveq)
-   ABI_DEALLOCATE(direc)
-   ABI_DEALLOCATE(gresid)
+   ABI_FREE(conjgr)
+   ABI_FREE(cwaveq)
+   ABI_FREE(direc)
+   ABI_FREE(gresid)
    if (usepaw==1) then
      call pawcprj_free(conjgrprj)
    end if
-   ABI_DATATYPE_DEALLOCATE(conjgrprj)
+   ABI_FREE(conjgrprj)
 
  end if ! End condition of not being a buffer band
 
@@ -1090,10 +1090,10 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    call wrtout(std_out,msg)
  end if
 
- ABI_DEALLOCATE(gh1c)
- ABI_DEALLOCATE(pcon)
- ABI_DEALLOCATE(scprod)
- ABI_DEALLOCATE(gberry)
+ ABI_FREE(gh1c)
+ ABI_FREE(pcon)
+ ABI_FREE(scprod)
+ ABI_FREE(gberry)
 
  call timab(122,2,tsec)
 

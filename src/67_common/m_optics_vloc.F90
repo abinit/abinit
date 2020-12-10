@@ -147,7 +147,7 @@ contains
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
 !Initialize main variables
- ABI_ALLOCATE(psinablapsi,(2,3,mband,mband))
+ ABI_MALLOC(psinablapsi,(2,3,mband,mband))
  psinablapsi=zero
 
  iomode= IO_MODE_FORTRAN_MASTER
@@ -170,7 +170,7 @@ contains
      nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
      etiq=ikpt+(isppol-1)*nkpt
      if (me==0) then
-       ABI_ALLOCATE(eig0_k,(nband_k))
+       ABI_MALLOC(eig0_k,(nband_k))
        eig0_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
      end if
 
@@ -184,8 +184,8 @@ contains
        istwf_k=dtset%istwfk(ikpt)
        npw_k=npwarr(ikpt)
        cplex=2;if (istwf_k>1) cplex=1
-       ABI_ALLOCATE(kg_k,(3,npw_k))
-       ABI_ALLOCATE(kpg_k,(npw_k*dtset%nspinor,3))
+       ABI_MALLOC(kg_k,(3,npw_k))
+       ABI_MALLOC(kpg_k,(npw_k*dtset%nspinor,3))
 
 !      Get G-vectors for this k-point
        kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
@@ -205,13 +205,13 @@ contains
        end do !ipw
        kpg_k=two_pi*kpg_k
        if (dtset%nspinor==2) kpg_k(npw_k+1:2*npw_k,1:3)=kpg_k(1:npw_k,1:3)
-       ABI_DEALLOCATE(kg_k)
+       ABI_FREE(kg_k)
 
 !      2-A Computation of <psi_tild_n|-i.nabla|psi_tild_m>
 !      ----------------------------------------------------------------------------------
 !      Computation of (C_nk^*)*C_mk*(k+g) in cartesian coordinates
 
-       ABI_ALLOCATE(tnm,(2,3,nband_k,nband_k))
+       ABI_MALLOC(tnm,(2,3,nband_k,nband_k))
        tnm=zero
 
 !      Loops on bands
@@ -261,13 +261,13 @@ contains
 
        psinablapsi(:,:,:,:)=tnm(:,:,:,:)
 
-       ABI_DEALLOCATE(tnm)
+       ABI_FREE(tnm)
 
        if (mkmem/=0) then
          icg = icg + npw_k*my_nspinor*nband_k
        end if
 
-       ABI_DEALLOCATE(kpg_k)
+       ABI_FREE(kpg_k)
 
        if (me==0) then
          write(ount)(eig0_k(ib),ib=1,nband_k)
@@ -289,7 +289,7 @@ contains
 
      bdtot_index=bdtot_index+nband_k
      if (me==0)  then
-       ABI_DEALLOCATE(eig0_k)
+       ABI_FREE(eig0_k)
      end if
 !    End loop on spin,kpt
    end do ! ikpt
@@ -299,7 +299,7 @@ contains
  call WffClose(wff1,ierr)
 
 !Datastructures deallocations
- ABI_DEALLOCATE(psinablapsi)
+ ABI_FREE(psinablapsi)
 
  DBG_EXIT("COLL")
 

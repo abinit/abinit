@@ -200,14 +200,14 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
- ABI_ALLOCATE(psps%filpsp,(npsp))
- ABI_ALLOCATE(psps%pspcod,(npsp))
- ABI_ALLOCATE(psps%pspdat,(npsp))
- ABI_ALLOCATE(psps%pspso,(npsp))
- ABI_ALLOCATE(psps%pspxc,(npsp))
- ABI_ALLOCATE(psps%title,(npsp))
- ABI_ALLOCATE(psps%zionpsp,(npsp))
- ABI_ALLOCATE(psps%znuclpsp,(npsp))
+ ABI_MALLOC(psps%filpsp,(npsp))
+ ABI_MALLOC(psps%pspcod,(npsp))
+ ABI_MALLOC(psps%pspdat,(npsp))
+ ABI_MALLOC(psps%pspso,(npsp))
+ ABI_MALLOC(psps%pspxc,(npsp))
+ ABI_MALLOC(psps%title,(npsp))
+ ABI_MALLOC(psps%zionpsp,(npsp))
+ ABI_MALLOC(psps%znuclpsp,(npsp))
  call psp2params_init(psps%gth_params, npsp)
 
  psps%filpsp(1:npsp)=pspheads(1:npsp)%filpsp
@@ -220,7 +220,7 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
  psps%znuclpsp(1:npsp)=pspheads(1:npsp)%znuclpsp
 
  ! Transfer md5 checksum
- ABI_ALLOCATE(psps%md5_pseudos, (npsp))
+ ABI_MALLOC(psps%md5_pseudos, (npsp))
  psps%md5_pseudos = pspheads(1:npsp)%md5_checksum
 !Set values independant from dtset
  psps%npsp   = npsp
@@ -335,14 +335,14 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
 
  if (idtset > 1) then
    if (allocated(psps%algalch))  then
-     ABI_DEALLOCATE(psps%algalch)
+     ABI_FREE(psps%algalch)
    end if
    if (allocated(psps%mixalch))  then
-     ABI_DEALLOCATE(psps%mixalch)
+     ABI_FREE(psps%mixalch)
    end if
  end if
- ABI_ALLOCATE(psps%algalch,(psps%ntypalch))
- ABI_ALLOCATE(psps%mixalch,(psps%npspalch,psps%ntypalch))
+ ABI_MALLOC(psps%algalch,(psps%ntypalch))
+ ABI_MALLOC(psps%mixalch,(psps%npspalch,psps%ntypalch))
  psps%algalch(1:psps%ntypalch)=dtset%algalch(1:psps%ntypalch)
 !This value will be overwritten elsewhere in case there are different images ...
  psps%mixalch(1:psps%npspalch,1:psps%ntypalch)=dtset%mixalch_orig(1:psps%npspalch,1:psps%ntypalch,1)
@@ -406,10 +406,10 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%ekb))  then
-       ABI_DEALLOCATE(psps%ekb)
+       ABI_FREE(psps%ekb)
      end if
    end if
-   ABI_ALLOCATE(psps%ekb,(psps%dimekb,dtset%ntypat*(1-psps%usepaw)))
+   ABI_MALLOC(psps%ekb,(psps%dimekb,dtset%ntypat*(1-psps%usepaw)))
    dimekb_old=psps%dimekb
  end if
 
@@ -417,10 +417,10 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%indlmn))  then
-       ABI_DEALLOCATE(psps%indlmn)
+       ABI_FREE(psps%indlmn)
      end if
    end if
-   ABI_ALLOCATE(psps%indlmn,(6,psps%lmnmax,dtset%ntypat))
+   ABI_MALLOC(psps%indlmn,(6,psps%lmnmax,dtset%ntypat))
    lmnmax_old=psps%lmnmax
  end if
 
@@ -428,14 +428,14 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%ffspl))  then
-       ABI_DEALLOCATE(psps%ffspl)
+       ABI_FREE(psps%ffspl)
      end if
      if (allocated(psps%qgrid_ff))  then
-       ABI_DEALLOCATE(psps%qgrid_ff)
+       ABI_FREE(psps%qgrid_ff)
      end if
    end if
-   ABI_ALLOCATE(psps%ffspl,(psps%mqgrid_ff,2,psps%lnmax,dtset%ntypat))
-   ABI_ALLOCATE(psps%qgrid_ff,(psps%mqgrid_ff))
+   ABI_MALLOC(psps%ffspl,(psps%mqgrid_ff,2,psps%lnmax,dtset%ntypat))
+   ABI_MALLOC(psps%qgrid_ff,(psps%mqgrid_ff))
    mqgridff_old=psps%mqgrid_ff
    lnmax_old=psps%lnmax
  end if
@@ -444,10 +444,10 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%qgrid_vl))  then
-       ABI_DEALLOCATE(psps%qgrid_vl)
+       ABI_FREE(psps%qgrid_vl)
      end if
      if (allocated(psps%vlspl))  then
-       ABI_DEALLOCATE(psps%vlspl)
+       ABI_FREE(psps%vlspl)
      end if
      if (allocated(psps%nctab)) then
        do ii=1,size(psps%nctab)
@@ -458,12 +458,12 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    end if
    if (idtset/=1 .and. .not.psps%vlspl_recipSpace) then
      if (allocated(psps%dvlspl))  then
-       ABI_DEALLOCATE(psps%dvlspl)
+       ABI_FREE(psps%dvlspl)
      end if
    end if
 
-   ABI_ALLOCATE(psps%qgrid_vl,(psps%mqgrid_vl))
-   ABI_ALLOCATE(psps%vlspl,(psps%mqgrid_vl,2,dtset%ntypat))
+   ABI_MALLOC(psps%qgrid_vl,(psps%mqgrid_vl))
+   ABI_MALLOC(psps%vlspl,(psps%mqgrid_vl,2,dtset%ntypat))
 
    if (psps%usepaw == 0) then
      ! If you change usepaw in the input, you will get what you deserve!
@@ -474,7 +474,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    end if
 
    if (.not.psps%vlspl_recipSpace) then
-     ABI_ALLOCATE(psps%dvlspl,(psps%mqgrid_vl,2,dtset%ntypat))
+     ABI_MALLOC(psps%dvlspl,(psps%mqgrid_vl,2,dtset%ntypat))
    end if
    mqgridvl_old=psps%mqgrid_vl
  end if
@@ -483,10 +483,10 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%xccc1d))  then
-       ABI_DEALLOCATE(psps%xccc1d)
+       ABI_FREE(psps%xccc1d)
      end if
    end if
-   ABI_ALLOCATE(psps%xccc1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
+   ABI_MALLOC(psps%xccc1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
    usepaw_old=psps%usepaw
  end if
 
@@ -494,18 +494,18 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%xcccrc))  then
-       ABI_DEALLOCATE(psps%xcccrc)
+       ABI_FREE(psps%xcccrc)
      end if
      if (allocated(psps%ziontypat))  then
-       ABI_DEALLOCATE(psps%ziontypat)
+       ABI_FREE(psps%ziontypat)
      end if
      if (allocated(psps%znucltypat))  then
-       ABI_DEALLOCATE(psps%znucltypat)
+       ABI_FREE(psps%znucltypat)
      end if
    end if
-   ABI_ALLOCATE(psps%xcccrc,(dtset%ntypat))
-   ABI_ALLOCATE(psps%znucltypat,(dtset%ntypat))
-   ABI_ALLOCATE(psps%ziontypat,(dtset%ntypat))
+   ABI_MALLOC(psps%xcccrc,(dtset%ntypat))
+   ABI_MALLOC(psps%znucltypat,(dtset%ntypat))
+   ABI_MALLOC(psps%ziontypat,(dtset%ntypat))
    ntypat_old=dtset%ntypat
  end if
 
@@ -708,9 +708,9 @@ subroutine psps_copy(pspsin, pspsout)
  end if
 
  ! allocate and copy character strings
- ABI_ALLOCATE(pspsout%filpsp,(pspsout%npsp))
- ABI_ALLOCATE(pspsout%title,(pspsout%npsp))
- ABI_ALLOCATE(pspsout%md5_pseudos,(pspsout%npsp))
+ ABI_MALLOC(pspsout%filpsp,(pspsout%npsp))
+ ABI_MALLOC(pspsout%title,(pspsout%npsp))
+ ABI_MALLOC(pspsout%md5_pseudos,(pspsout%npsp))
  do ii=1,pspsout%npsp
    pspsout%filpsp(ii) = pspsin%filpsp(ii)
    pspsout%title(ii) = pspsin%title(ii)
@@ -719,7 +719,7 @@ subroutine psps_copy(pspsin, pspsout)
 
  ! allocate and copy objects
  if (allocated(pspsin%nctab)) then
-   ABI_DATATYPE_ALLOCATE(pspsout%nctab,(pspsout%ntypat))
+   ABI_MALLOC(pspsout%nctab,(pspsout%ntypat))
    do ii=1,pspsout%ntypat
      call nctab_copy(pspsin%nctab(ii), pspsout%nctab(ii))
    end do
@@ -1121,23 +1121,23 @@ subroutine psp2params_init(gth_params, npsp)
 ! *********************************************************************
 
 !Check array, no params are currently set.
- ABI_ALLOCATE(gth_params%set,(npsp))
+ ABI_MALLOC(gth_params%set,(npsp))
  gth_params%set(:) = .false.
 
 !Check array, have geometric information been filled?
- ABI_ALLOCATE(gth_params%hasGeometry,(npsp))
+ ABI_MALLOC(gth_params%hasGeometry,(npsp))
  gth_params%hasGeometry(:) = .false.
 
 !Coefficients for local part and projectors
- ABI_ALLOCATE(gth_params%psppar,(0:4, 0:6, npsp))
+ ABI_MALLOC(gth_params%psppar,(0:4, 0:6, npsp))
  gth_params%psppar = zero
 
 !Coefficients for spin orbit part
- ABI_ALLOCATE(gth_params%psp_k_par,(1:4, 1:3, npsp))
+ ABI_MALLOC(gth_params%psp_k_par,(1:4, 1:3, npsp))
  gth_params%psp_k_par = zero
 
 !Different radii
- ABI_ALLOCATE(gth_params%radii_cf,(npsp, 3))
+ ABI_MALLOC(gth_params%radii_cf,(npsp, 3))
 
 end subroutine psp2params_init
 !!***

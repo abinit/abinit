@@ -103,11 +103,11 @@ contains
     self%supercell=>supercell
     self%label="Lattice Mover"
     self%natom = supercell%lattice%natom
-    ABI_ALLOCATE(self%masses, (self%natom))
-    ABI_ALLOCATE(self%displacement, (3, self%natom))
-    ABI_ALLOCATE(self%current_xcart, (3, self%natom))
-    ABI_ALLOCATE(self%current_vcart, (3, self%natom))
-    ABI_ALLOCATE(self%forces, (3,self%natom))
+    ABI_MALLOC(self%masses, (self%natom))
+    ABI_MALLOC(self%displacement, (3, self%natom))
+    ABI_MALLOC(self%current_xcart, (3, self%natom))
+    ABI_MALLOC(self%current_vcart, (3, self%natom))
+    ABI_MALLOC(self%forces, (3,self%natom))
     self%is_null=.False.
     self%strain(:,:) = 0.0
     self%stress(:,:) = 0.0
@@ -127,11 +127,11 @@ contains
     nullify(self%params)
     self%label="Destroyed lattice mover"
     if (.not.self%is_null) then
-       ABI_DEALLOCATE(self%masses)
-       ABI_DEALLOCATE(self%current_xcart)
-       ABI_DEALLOCATE(self%current_vcart)
-       ABI_DEALLOCATE(self%forces)
-       ABI_DEALLOCATE(self%displacement)
+       ABI_FREE(self%masses)
+       ABI_FREE(self%current_xcart)
+       ABI_FREE(self%current_vcart)
+       ABI_FREE(self%forces)
+       ABI_FREE(self%displacement)
     endif
     self%is_null=.True.
   end subroutine finalize

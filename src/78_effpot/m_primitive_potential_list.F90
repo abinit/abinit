@@ -84,7 +84,7 @@ contains
     ! use a pointer to the specific potential which will be filled
     ! e.g. type(spin_potential_t), pointer :: tmp
     type(abstract_potential_t), pointer :: tmp
-    ABI_DATATYPE_ALLOCATE_SCALAR(abstract_potential_t, tmp)
+    ABI_MALLOC_TYPE_SCALAR(abstract_potential_t, tmp)
     !call tmp%initialize(....)
     ! set tmp
     ABI_UNUSED_A(self)
@@ -147,12 +147,12 @@ contains
     do i=1, self%size
        call self%data(i)%obj%finalize()
        if(associated(self%data(i)%obj)) then
-           ABI_DATATYPE_DEALLOCATE_SCALAR(self%data(i)%obj)
+           ABI_FREE(self%data(i)%obj)
        endif
        nullify(self%data(i)%obj)
     end do
     if(allocated(self%data)) then
-       ABI_DEALLOCATE(self%data)
+       ABI_FREE(self%data)
     end if
     nullify(self%primcell)
     self%size=0
@@ -180,7 +180,7 @@ contains
     self%size=self%size + 1
     if(self%size==1) then
        self%capacity=8
-       ABI_ALLOCATE(self%data, (self%capacity))
+       ABI_MALLOC(self%data, (self%capacity))
     else if ( self%size>self%capacity ) then
        self%capacity = self%size + self%size / 4 + 8
        ABI_MALLOC(temp, (self%capacity))

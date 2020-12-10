@@ -508,7 +508,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      end if
      if (zstop - zstart + 1 > 0) then
 !      Our slab contains (zstop - zstart + 1) elements
-       ABI_ALLOCATE(my_density,((n1*2)*(n2*2)*(zstop-zstart),nspden))
+       ABI_MALLOC(my_density,((n1*2)*(n2*2)*(zstop-zstart),nspden))
 !      We copy the data except the buffer to my_density
        ind = 0
 
@@ -619,7 +619,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
    end if
 
    if (usewvl == 1 .and. associated(my_density)) then
-     ABI_DEALLOCATE(my_density)
+     ABI_FREE(my_density)
    end if
 
    call wrtout(std_out,sjoin(' Data written to disk file:', fildata))

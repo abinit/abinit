@@ -354,8 +354,8 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
  n5half1=(n2half1/2)*2+1
 
 !This sophisticated algorithm allows to decrease the memory needs.
- ABI_ALLOCATE(work1,(2,n4,n5half1,n6))
- ABI_ALLOCATE(work2,(2,n4,n5half1,n6))
+ ABI_MALLOC(work1,(2,n4,n5half1,n6))
+ ABI_MALLOC(work2,(2,n4,n5half1,n6))
 
  if(isign==1)then
 
@@ -390,10 +390,10 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 !$OMP&SHARED(n1,n1half1,n1halfm,n2,n2half1,n3) &
 !$OMP&SHARED(n4,n5,now1,now2,ris,trig1,trig2,work2)
 
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_c,(2,2*n1halfm+1,n5,1))
-   ABI_ALLOCATE(wk2d_d,(2,2*n1halfm+1,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_c,(2,2*n1halfm+1,n5,1))
+   ABI_MALLOC(wk2d_d,(2,2*n1halfm+1,n5,1))
 
 !$OMP DO
    do i3=1,n3
@@ -449,10 +449,10 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 
    end do ! loop over x-y planes
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
-   ABI_DEALLOCATE(wk2d_c)
-   ABI_DEALLOCATE(wk2d_d)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
+   ABI_FREE(wk2d_c)
+   ABI_FREE(wk2d_d)
 !$OMP END PARALLEL
 
  else if(isign==-1)then
@@ -472,10 +472,10 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 !$OMP&SHARED(n1,n1half1,n1halfm,n2,n2half1,n3) &
 !$OMP&SHARED(n4,n5,now1,now2,ris,trig1,trig2,work1,xnorm)
 
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_c,(2,2*n1halfm+1,n5,1))
-   ABI_ALLOCATE(wk2d_d,(2,2*n1halfm+1,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_c,(2,2*n1halfm+1,n5,1))
+   ABI_MALLOC(wk2d_d,(2,2*n1halfm+1,n5,1))
 
 !$OMP DO
    do i3=1,n3
@@ -523,10 +523,10 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 
    end do
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
-   ABI_DEALLOCATE(wk2d_c)
-   ABI_DEALLOCATE(wk2d_d)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
+   ABI_FREE(wk2d_c)
+   ABI_FREE(wk2d_d)
 !$OMP END PARALLEL
 
 !$OMP PARALLEL DO SHARED(aft3,bef3,ind3,ic3,now3,n1,n2half1,n4,n5half1,n6,ris,trig3,work1,work2) PRIVATE(i2)
@@ -564,8 +564,8 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 
  end if ! choice of isign
 
- ABI_DEALLOCATE(work1)
- ABI_DEALLOCATE(work2)
+ ABI_FREE(work1)
+ ABI_FREE(work2)
 
  !DBG_EXIT("COLL")
 
@@ -4127,11 +4127,11 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
  fftcache=ngfft(8)
 
  if(option/=3)then
-   ABI_ALLOCATE(indpw_kin,(4,npwin))
+   ABI_MALLOC(indpw_kin,(4,npwin))
    call indfftrisc(gboundin(3:3+2*mgfft+4,1),indpw_kin,kg_kin,mgfft,ngbin,ngfft,npwin)
  end if
  if(option==2 .or. option==3)then
-   ABI_ALLOCATE(indpw_kout,(4,npwout))
+   ABI_MALLOC(indpw_kout,(4,npwout))
    call indfftrisc(gboundout(3:3+2*mgfft+4,1),indpw_kout,kg_kout,mgfft,ngbout,ngfft,npwout)
  end if
 
@@ -4199,8 +4199,8 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
  if(istwf_k==1)then
 
 !  Note that the z transform will appear as a y transform
-   ABI_ALLOCATE(wk1d_a,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_b,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_a,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_b,(2,mgb,n3,1))
 
    if(option/=3)then
 
@@ -4248,8 +4248,8 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 !$OMP&SHARED(weight_r,weight_i,wk1d_a,wk1d_b)
 
 !  Allocate two 2-dimensional work arrays
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
 !$OMP DO
    do i3=1,n3
 
@@ -4355,8 +4355,8 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 !    End loop on planes
    end do
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
 !$OMP END PARALLEL
 
    if(option==2 .or. option==3)then
@@ -4387,8 +4387,8 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 !$OMP END PARALLEL DO
    end if
 
-   ABI_DEALLOCATE(wk1d_a)
-   ABI_DEALLOCATE(wk1d_b)
+   ABI_FREE(wk1d_a)
+   ABI_FREE(wk1d_b)
 
 !  End general k-point part
  end if
@@ -4404,13 +4404,13 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
    n4half1=(n1half1/2)*2+1
    n5half1=(n2half1/2)*2+1
 !  Note that the z transform will appear as a y transform
-   ABI_ALLOCATE(wk1d_a,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_b,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_a,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_b,(2,mgb,n3,1))
 
    if(istwf_k/=2)then
-     ABI_ALLOCATE(pha1,(2,n1))
-     ABI_ALLOCATE(pha2,(2,n2))
-     ABI_ALLOCATE(pha3,(3,n3))
+     ABI_MALLOC(pha1,(2,n1))
+     ABI_MALLOC(pha2,(2,n2))
+     ABI_MALLOC(pha3,(3,n3))
      do i1=1,n1
        pha1(1,i1)=cos(dble(i1-1)*pi/dble(n1))
        pha1(2,i1)=sin(dble(i1-1)*pi/dble(n1))
@@ -4575,10 +4575,10 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 !$OMP&SHARED(trig2,trig4,trig5,weight_r,weight_i,wk1d_a,wk1d_b)
 
 !  Allocate two 2-dimensional work arrays
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_c,(2,2*n1halfm,n5,1))
-   ABI_ALLOCATE(wk2d_d,(2,2*n1halfm,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_c,(2,2*n1halfm,n5,1))
+   ABI_MALLOC(wk2d_d,(2,2*n1halfm,n5,1))
 !$OMP DO
    do i3=1,n3
 
@@ -4822,10 +4822,10 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
    end do
 
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
-   ABI_DEALLOCATE(wk2d_c)
-   ABI_DEALLOCATE(wk2d_d)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
+   ABI_FREE(wk2d_c)
+   ABI_FREE(wk2d_d)
 !$OMP END PARALLEL
 
    if(option==2 .or. option==3)then
@@ -4873,13 +4873,13 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 
    end if
 
-   ABI_DEALLOCATE(wk1d_a)
-   ABI_DEALLOCATE(wk1d_b)
+   ABI_FREE(wk1d_a)
+   ABI_FREE(wk1d_b)
 
    if(istwf_k/=2)then
-     ABI_DEALLOCATE(pha1)
-     ABI_DEALLOCATE(pha2)
-     ABI_DEALLOCATE(pha3)
+     ABI_FREE(pha1)
+     ABI_FREE(pha2)
+     ABI_FREE(pha3)
    end if
 
  end if !  End time-reversal symmetry
@@ -4887,10 +4887,10 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 !------------------------------------------------------------------
 
  if(option/=3) then
-   ABI_DEALLOCATE(indpw_kin)
+   ABI_FREE(indpw_kin)
  end if
  if(option==2 .or. option==3) then
-   ABI_DEALLOCATE(indpw_kout)
+   ABI_FREE(indpw_kout)
  end if
 
 end subroutine fftrisc_one_nothreadsafe
@@ -5098,11 +5098,11 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
  fftcache=ngfft(8)
 
  if(option/=3)then
-   ABI_ALLOCATE(indpw_kin,(4,npwin))
+   ABI_MALLOC(indpw_kin,(4,npwin))
    call indfftrisc(gboundin(3:3+2*mgfft+4,1),indpw_kin,kg_kin,mgfft,ngbin,ngfft,npwin)
  end if
  if(option==2 .or. option==3)then
-   ABI_ALLOCATE(indpw_kout,(4,npwout))
+   ABI_MALLOC(indpw_kout,(4,npwout))
    call indfftrisc(gboundout(3:3+2*mgfft+4,1),indpw_kout,kg_kout,mgfft,ngbout,ngfft,npwout)
  end if
 
@@ -5170,10 +5170,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
  if(istwf_k==1)then
 
 !  Note that the z transform will appear as a y transform
-   ABI_ALLOCATE(wk1d_a,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_b,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_a_p,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_b_p,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_a,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_b,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_a_p,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_b_p,(2,mgb,n3,1))
 
    if(option/=3)then
 
@@ -5260,10 +5260,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 !$OMP&SHARED(weight_r,weight_i,weight_2,wk1d_a,wk1d_b,wk1d_b_p)
 
 !  Allocate two 2-dimensional work arrays
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_a_p,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b_p,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_a_p,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b_p,(2,n4,n5,1))
 !$OMP DO
    do i3=1,n3
 
@@ -5424,10 +5424,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 !    End loop on planes
    end do
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
-   ABI_DEALLOCATE(wk2d_a_p)
-   ABI_DEALLOCATE(wk2d_b_p)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
+   ABI_FREE(wk2d_a_p)
+   ABI_FREE(wk2d_b_p)
 !$OMP END PARALLEL
 
    if(option==2 .or. option==3)then
@@ -5459,10 +5459,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 !$OMP END PARALLEL DO
    end if
 
-   ABI_DEALLOCATE(wk1d_a)
-   ABI_DEALLOCATE(wk1d_b)
-   ABI_DEALLOCATE(wk1d_a_p)
-   ABI_DEALLOCATE(wk1d_b_p)
+   ABI_FREE(wk1d_a)
+   ABI_FREE(wk1d_b)
+   ABI_FREE(wk1d_a_p)
+   ABI_FREE(wk1d_b_p)
 
 !  End general k-point part
  end if
@@ -5478,13 +5478,13 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
    n4half1=(n1half1/2)*2+1
    n5half1=(n2half1/2)*2+1
 !  Note that the z transform will appear as a y transform
-   ABI_ALLOCATE(wk1d_a,(2,mgb,n3,1))
-   ABI_ALLOCATE(wk1d_b,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_a,(2,mgb,n3,1))
+   ABI_MALLOC(wk1d_b,(2,mgb,n3,1))
 
    if(istwf_k/=2)then
-     ABI_ALLOCATE(pha1,(2,n1))
-     ABI_ALLOCATE(pha2,(2,n2))
-     ABI_ALLOCATE(pha3,(3,n3))
+     ABI_MALLOC(pha1,(2,n1))
+     ABI_MALLOC(pha2,(2,n2))
+     ABI_MALLOC(pha3,(3,n3))
      do i1=1,n1
        pha1(1,i1)=cos(dble(i1-1)*pi/dble(n1))
        pha1(2,i1)=sin(dble(i1-1)*pi/dble(n1))
@@ -5656,10 +5656,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 !$OMP&SHARED(trig2,trig4,trig5,weight_r,weight_i,wk1d_a,wk1d_b)
 
 !  Allocate two 2-dimensional work arrays
-   ABI_ALLOCATE(wk2d_a,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_b,(2,n4,n5,1))
-   ABI_ALLOCATE(wk2d_c,(2,2*n1halfm,n5,1))
-   ABI_ALLOCATE(wk2d_d,(2,2*n1halfm,n5,1))
+   ABI_MALLOC(wk2d_a,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_b,(2,n4,n5,1))
+   ABI_MALLOC(wk2d_c,(2,2*n1halfm,n5,1))
+   ABI_MALLOC(wk2d_d,(2,2*n1halfm,n5,1))
 !$OMP DO
    do i3=1,n3
 
@@ -5907,10 +5907,10 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
    end do
 
 !$OMP END DO
-   ABI_DEALLOCATE(wk2d_a)
-   ABI_DEALLOCATE(wk2d_b)
-   ABI_DEALLOCATE(wk2d_c)
-   ABI_DEALLOCATE(wk2d_d)
+   ABI_FREE(wk2d_a)
+   ABI_FREE(wk2d_b)
+   ABI_FREE(wk2d_c)
+   ABI_FREE(wk2d_d)
 !$OMP END PARALLEL
 
    if(option==2 .or. option==3)then
@@ -5960,23 +5960,23 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 
    end if
 
-   ABI_DEALLOCATE(wk1d_a)
-   ABI_DEALLOCATE(wk1d_b)
+   ABI_FREE(wk1d_a)
+   ABI_FREE(wk1d_b)
 
    if(istwf_k/=2)then
-     ABI_DEALLOCATE(pha1)
-     ABI_DEALLOCATE(pha2)
-     ABI_DEALLOCATE(pha3)
+     ABI_FREE(pha1)
+     ABI_FREE(pha2)
+     ABI_FREE(pha3)
    end if
 
 !  End time-reversal symmetry
  end if
 
  if(option/=3) then
-   ABI_DEALLOCATE(indpw_kin)
+   ABI_FREE(indpw_kin)
  end if
  if(option==2 .or. option==3) then
-   ABI_DEALLOCATE(indpw_kout)
+   ABI_FREE(indpw_kout)
  end if
 
  !DBG_EXIT("COLL")

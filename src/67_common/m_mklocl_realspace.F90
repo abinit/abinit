@@ -184,10 +184,10 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
 !Store cartesian coordinates for each grid points
- ABI_ALLOCATE(gridcart,(3, nfft))
+ ABI_MALLOC(gridcart,(3, nfft))
  call mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
 
 !Check whether all the PSP considered are of type GTH-HGH or PAW
@@ -226,12 +226,12 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
    else if (option == 2) then
 
 !    Compute Hartree potential from rhor
-     ABI_ALLOCATE(vhartr,(nfft))
+     ABI_MALLOC(vhartr,(nfft))
      call psolver_hartree(entmp, (/ hgx, hgy, hgz /), icoulomb, me_fft, comm_fft, nfft, &
 &     (/n1,n2,n3/), nproc_fft, nscforder, nspden, rhor, vhartr, usewvl)
 
 !    Allocate temporary array for forces
-     ABI_ALLOCATE(gxyz,(3, natom))
+     ABI_MALLOC(gxyz,(3, natom))
 
 !    Calculate local part of the forces grtn (inspired from BigDFT routine)
      call local_forces_new(fftn3_distrib,ffti3_local,geocode,me_fft, ntypat, natom, &
@@ -248,8 +248,8 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
      end do
 
 !    Deallocate local variables
-     ABI_DEALLOCATE(vhartr)
-     ABI_DEALLOCATE(gxyz)
+     ABI_FREE(vhartr)
+     ABI_FREE(gxyz)
    end if
 
 !----------------------------------------------------------------------
@@ -273,22 +273,22 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
    else if (option == 2) then
 !    Allocate array to store cartesian gradient computed with
 !    an interpolation of rhor
-     ABI_ALLOCATE(grtn_cart_interpol,(3, natom))
+     ABI_MALLOC(grtn_cart_interpol,(3, natom))
      grtn_cart_interpol(:, :) = 0._dp
 
      n_interpol = nStep ** 3
-     ABI_ALLOCATE(coordRed_interpol,(3, nStep ** 3))
-     ABI_ALLOCATE(coordCart_interpol,(3, nStep ** 3))
+     ABI_MALLOC(coordRed_interpol,(3, nStep ** 3))
+     ABI_MALLOC(coordCart_interpol,(3, nStep ** 3))
 
      if (testing .and. customRho) then
 !      Use a custom rho instead of the self-consistent one.
-       ABI_ALLOCATE(rhor_testing,(nfft))
-       ABI_ALLOCATE(rhog_testing,(2, nfft))
+       ABI_MALLOC(rhor_testing,(nfft))
+       ABI_MALLOC(rhog_testing,(2, nfft))
      end if
 
-     ABI_ALLOCATE(rhor_interpol,(nfft * n_interpol))
-     ABI_ALLOCATE(rhor_work,(nfft * n_interpol))
-     ABI_ALLOCATE(rhog_interpol,(2, nfft * n_interpol))
+     ABI_MALLOC(rhor_interpol,(nfft * n_interpol))
+     ABI_MALLOC(rhor_work,(nfft * n_interpol))
+     ABI_MALLOC(rhog_interpol,(2, nfft * n_interpol))
 
      if (testing .and. customRho) then
 !      Testing only, changing rho with a centered gaussian
@@ -361,7 +361,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
          end do
        end do
      end do
-     ABI_DEALLOCATE(rhor_work)
+     ABI_FREE(rhor_work)
 
 !    Compute grid access in the interpolated volume
      ii = 0
@@ -568,13 +568,13 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 &         rprimd(3, igeo) * grtn_cart_interpol(3, ia)
        end do
      end do
-     ABI_DEALLOCATE(rhor_interpol)
-     ABI_DEALLOCATE(rhog_interpol)
-     ABI_DEALLOCATE(coordRed_interpol)
-     ABI_DEALLOCATE(coordCart_interpol)
+     ABI_FREE(rhor_interpol)
+     ABI_FREE(rhog_interpol)
+     ABI_FREE(coordRed_interpol)
+     ABI_FREE(coordCart_interpol)
      if (testing .and. customRho) then
-       ABI_DEALLOCATE(rhor_testing)
-       ABI_DEALLOCATE(rhog_testing)
+       ABI_FREE(rhor_testing)
+       ABI_FREE(rhog_testing)
      end if
 
      if (testing) then
@@ -590,8 +590,8 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
  end if ! GTH/HGH/PAW psps
 
 !Release temporary memory
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(gridcart)
+ ABI_FREE(xcart)
+ ABI_FREE(gridcart)
 
 !Close timing counters
  if (option==2)then
@@ -1495,8 +1495,8 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
    end if
 
 !  Extract density rhor from bigDFT datastructure
-   ABI_ALLOCATE(rhov,(nfft, nspden))
-   ABI_ALLOCATE(vhartr,(nfft))
+   ABI_MALLOC(rhov,(nfft, nspden))
+   ABI_MALLOC(vhartr,(nfft))
    shift = wvl_den%denspot%dpbox%ndims(1) * wvl_den%denspot%dpbox%ndims(2) &
 &   * wvl_den%denspot%dpbox%i3xcsh
    do i = 1, nfft
@@ -1516,7 +1516,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
    call H_potential('D',wvl_den%denspot%pkernel,vhartr,vhartr,energ,zero,.false.)
 
 !  Allocate temporary array for forces
-   ABI_ALLOCATE(gxyz,(3, natom))
+   ABI_MALLOC(gxyz,(3, natom))
 
 !  Calculate local part of the forces grtn (modified BigDFT routine)
    call local_forces_wvl(me,natom,xcart,&
@@ -1553,9 +1553,9 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
    end do
 
 !  Deallocate local variables
-   ABI_DEALLOCATE(vhartr)
-   ABI_DEALLOCATE(rhov)
-   ABI_DEALLOCATE(gxyz)
+   ABI_FREE(vhartr)
+   ABI_FREE(rhov)
+   ABI_FREE(gxyz)
 
 !----------------------------------------------------------------------
 

@@ -280,7 +280,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 
 
 !Generate the 1-dimensional phases
- ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+ ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
  call getph(atindx,dtset%natom,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),ph1d,xred)
 
 !################# PERTURBATIONS AND q-GRADIENTS LABELLING ############################
@@ -288,7 +288,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 !Determine which atomic displacements and q-gradient directions have to be evaluated
 !taking into account the perturbation symmetries
  matpert=dtset%natom*3
- ABI_ALLOCATE(pert_atdis_tmp,(3,matpert))
+ ABI_MALLOC(pert_atdis_tmp,(3,matpert))
  pert_atdis_tmp=0
  iatpert_cnt=0
  do iatpol=1,matom
@@ -302,14 +302,14 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
    end do
  end do
  natpert=iatpert_cnt
- ABI_ALLOCATE(pert_atdis,(3,natpert))
+ ABI_MALLOC(pert_atdis,(3,natpert))
  do iatpert=1,natpert
    pert_atdis(:,iatpert)=pert_atdis_tmp(:,iatpert)
  end do
- ABI_DEALLOCATE(pert_atdis_tmp)
+ ABI_FREE(pert_atdis_tmp)
 
  !The q2grad is related with the response to the electric field
- ABI_ALLOCATE(q2grad_tmp,(3,3))
+ ABI_MALLOC(q2grad_tmp,(3,3))
  q2grad_tmp=0
  iq2grad_cnt=0
  do iq2grad=1,3
@@ -321,14 +321,14 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
    end if
  end do
  nq2grad=iq2grad_cnt
- ABI_ALLOCATE(q2grad,(3,nq2grad))
+ ABI_MALLOC(q2grad,(3,nq2grad))
  do iq2grad=1,nq2grad
    q2grad(:,iq2grad)=q2grad_tmp(:,iq2grad)
  end do
- ABI_DEALLOCATE(q2grad_tmp)
+ ABI_FREE(q2grad_tmp)
 
  !The q1grad is related with the response to the ddk
- ABI_ALLOCATE(q1grad_tmp,(3,3))
+ ABI_MALLOC(q1grad_tmp,(3,3))
  q1grad_tmp=0
  iq1grad_cnt=0
  do iq1grad=1,3
@@ -340,18 +340,18 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
    end if
  end do
  nq1grad=iq1grad_cnt
- ABI_ALLOCATE(q1grad,(3,nq1grad))
+ ABI_MALLOC(q1grad,(3,nq1grad))
  do iq1grad=1,nq1grad
    q1grad(:,iq1grad)=q1grad_tmp(:,iq1grad)
  end do
- ABI_DEALLOCATE(q1grad_tmp)
+ ABI_FREE(q1grad_tmp)
 
  !For the evaluation of the 2nd order q-gradient, the 9 directios are activated because
  !currently the program calculates by defect all the components of the d2_dkdk perturbation.
  !TODO: This will have to be modified in the future when ABINIT enables to calculate specific
  !components of the d2_dkdk
  nq1q2grad=9
- ABI_ALLOCATE(q1q2grad,(4,nq1q2grad))
+ ABI_MALLOC(q1q2grad,(4,nq1q2grad))
  do iq1q2grad=1,nq1q2grad
    call rf2_getidirs(iq1q2grad,iq1dir,iq2dir)
    if (iq1dir==iq2dir) then
@@ -369,31 +369,31 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 !################# ELECTROSTATIC CONTRIBUTIONS  #######################################
 
 !This is necessary to deactivate paw options in the dfpt_rhotov routine
- ABI_DATATYPE_ALLOCATE(pawrhoij_read,(0))
+ ABI_MALLOC(pawrhoij_read,(0))
  pawread=0
  nhat1grdim=0
- ABI_ALLOCATE(nhat1gr,(0,0,0))
- ABI_ALLOCATE(nhat,(nfft,nspden))
+ ABI_MALLOC(nhat1gr,(0,0,0))
+ ABI_MALLOC(nhat,(nfft,nspden))
  nhat=zero
- ABI_ALLOCATE(nhat1,(cplex*nfft,nspden))
+ ABI_MALLOC(nhat1,(cplex*nfft,nspden))
  nhat1=zero
 
 !Read the electric field density response from a disk file(rhor1_efield), calculates the FFT
 !(rhog1_tmp) and the first order Hartree and xc potentials(vhxc1_efield).
 !TODO: In the call to read_rhor there is a security option that compares with the header
 !hdr. Not activated at this moment.
- ABI_ALLOCATE(rhog1_tmp,(2,nfft))
- ABI_ALLOCATE(rhor1_efield,(nq2grad,cplex*nfft,nspden))
- ABI_ALLOCATE(rhor1_tmp,(cplex*nfft,nspden))
- ABI_ALLOCATE(rhor1_real,(1*nfft,nspden))
- ABI_ALLOCATE(vhartr1,(cplex*nfft))
- ABI_ALLOCATE(vhxc1_efield,(nq2grad,cplex*nfft))
- ABI_ALLOCATE(vpsp1,(cplex*nfft))
- ABI_ALLOCATE(vtrial1,(cplex*nfft,nspden))
- ABI_ALLOCATE(vresid1,(cplex*nfft,nspden))
- ABI_ALLOCATE(vxc1,(cplex*nfft,nspden))
- ABI_ALLOCATE(dum_vxc,(nfft,nspden))
- ABI_ALLOCATE(xccc3d1,(cplex*n3xccc))
+ ABI_MALLOC(rhog1_tmp,(2,nfft))
+ ABI_MALLOC(rhor1_efield,(nq2grad,cplex*nfft,nspden))
+ ABI_MALLOC(rhor1_tmp,(cplex*nfft,nspden))
+ ABI_MALLOC(rhor1_real,(1*nfft,nspden))
+ ABI_MALLOC(vhartr1,(cplex*nfft))
+ ABI_MALLOC(vhxc1_efield,(nq2grad,cplex*nfft))
+ ABI_MALLOC(vpsp1,(cplex*nfft))
+ ABI_MALLOC(vtrial1,(cplex*nfft,nspden))
+ ABI_MALLOC(vresid1,(cplex*nfft,nspden))
+ ABI_MALLOC(vxc1,(cplex*nfft,nspden))
+ ABI_MALLOC(dum_vxc,(nfft,nspden))
+ ABI_MALLOC(xccc3d1,(cplex*n3xccc))
  vpsp1=zero; vtrial1=zero; dum_vxc=zero
  optene=0; optres=1
  do iq2grad=1,nq2grad
@@ -435,8 +435,8 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 
 !Read the atomic displacement density response from a disk file, calculate the FFT
 !(rhog1_atdis) and the first order Hartree and xc potentials(vhxc1_atdis).
- ABI_ALLOCATE(rhog1_atdis,(natpert,2,nfft))
- ABI_ALLOCATE(vhxc1_atdis,(natpert,cplex*nfft))
+ ABI_MALLOC(rhog1_atdis,(natpert,2,nfft))
+ ABI_MALLOC(vhxc1_atdis,(natpert,cplex*nfft))
  vtrial1=zero
  do iatpert= 1, natpert
    iatpol=pert_atdis(1,iatpert)
@@ -477,26 +477,26 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  end do
 
  !These arrays will not be used anymore (for the moment)
- ABI_DEALLOCATE(rhor1_real)
- ABI_DEALLOCATE(rhor1_tmp)
- ABI_DEALLOCATE(vhartr1)
- ABI_DEALLOCATE(vpsp1)
- ABI_DEALLOCATE(vtrial1)
- ABI_DEALLOCATE(vresid1)
- ABI_DEALLOCATE(vxc1)
- ABI_DEALLOCATE(dum_vxc)
- ABI_DEALLOCATE(xccc3d1)
+ ABI_FREE(rhor1_real)
+ ABI_FREE(rhor1_tmp)
+ ABI_FREE(vhartr1)
+ ABI_FREE(vpsp1)
+ ABI_FREE(vtrial1)
+ ABI_FREE(vresid1)
+ ABI_FREE(vxc1)
+ ABI_FREE(dum_vxc)
+ ABI_FREE(xccc3d1)
 
- ABI_DATATYPE_DEALLOCATE(pawrhoij_read)
- ABI_DEALLOCATE(nhat1gr)
- ABI_DEALLOCATE(nhat)
- ABI_DEALLOCATE(nhat1)
+ ABI_FREE(pawrhoij_read)
+ ABI_FREE(nhat1gr)
+ ABI_FREE(nhat)
+ ABI_FREE(nhat1)
 
 !Calculate the electrostatic contribution from the q-gradient of the Hartree potential
- ABI_ALLOCATE(vqgradhart,(2*nfft))
- ABI_ALLOCATE(rhor1_tmp,(2*nfft,nspden))
- ABI_ALLOCATE(eqgradhart,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrflg,(matom,3,3,3))
+ ABI_MALLOC(vqgradhart,(2*nfft))
+ ABI_MALLOC(rhor1_tmp,(2*nfft,nspden))
+ ABI_MALLOC(eqgradhart,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrflg,(matom,3,3,3))
  qdrflg=0
  rhor1_tmp=zero
  do iq1grad=1,nq1grad
@@ -537,10 +537,10 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
    end do
  end do
 
- ABI_DEALLOCATE(rhor1_tmp)
- ABI_DEALLOCATE(rhog1_tmp)
- ABI_DEALLOCATE(rhog1_atdis)
- ABI_DEALLOCATE(rhor1_efield)
+ ABI_FREE(rhor1_tmp)
+ ABI_FREE(rhog1_tmp)
+ ABI_FREE(rhog1_atdis)
+ ABI_FREE(rhor1_efield)
 
 !################# WAVE FUNCTION CONTRIBUTIONS  #######################################
 
@@ -551,31 +551,31 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 !         In a future I will try to activate perturbation dependent symmetries
 !         with littlegroup_pert.F90.
  nsym1 = 1
- ABI_ALLOCATE(indsy1,(4,nsym1,dtset%natom))
- ABI_ALLOCATE(symrc1,(3,3,nsym1))
- ABI_ALLOCATE(symaf1,(nsym1))
- ABI_ALLOCATE(symrl1,(3,3,nsym1))
- ABI_ALLOCATE(tnons1,(3,nsym1))
+ ABI_MALLOC(indsy1,(4,nsym1,dtset%natom))
+ ABI_MALLOC(symrc1,(3,3,nsym1))
+ ABI_MALLOC(symaf1,(nsym1))
+ ABI_MALLOC(symrl1,(3,3,nsym1))
+ ABI_MALLOC(tnons1,(3,nsym1))
  symaf1(1:nsym1)= 1
  symrl1(:,:,nsym1)= dtset%symrel(:,:,1)
  tnons1(:,nsym1)= 0_dp
 
 !Set up corresponding symmetry data
- ABI_ALLOCATE(irrzon1,(dtset%nfft**(1-1/nsym1),2,(nspden/dtset%nsppol)-3*(nspden/4)))
- ABI_ALLOCATE(phnons1,(2,dtset%nfft**(1-1/nsym1),(nspden/dtset%nsppol)-3*(nspden/4)))
+ ABI_MALLOC(irrzon1,(dtset%nfft**(1-1/nsym1),2,(nspden/dtset%nsppol)-3*(nspden/4)))
+ ABI_MALLOC(phnons1,(2,dtset%nfft**(1-1/nsym1),(nspden/dtset%nsppol)-3*(nspden/4)))
  call setsym(indsy1,irrzon1,1,dtset%natom,dtset%nfft,dtset%ngfft,nspden,dtset%nsppol,&
 &nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
 
- ABI_DEALLOCATE(indsy1)
- ABI_DEALLOCATE(symaf1)
- ABI_DEALLOCATE(symrl1)
- ABI_DEALLOCATE(tnons1)
+ ABI_FREE(indsy1)
+ ABI_FREE(symaf1)
+ ABI_FREE(symrl1)
+ ABI_FREE(tnons1)
 
 !Determine the subset of k-points needed in the "reduced Brillouin zone",
 !and initialize other quantities
- ABI_ALLOCATE(indkpt1_tmp,(nkpt))
- ABI_ALLOCATE(wtk_folded,(nkpt))
- ABI_ALLOCATE(bz2ibz_smap,(6, nkpt))
+ ABI_MALLOC(indkpt1_tmp,(nkpt))
+ ABI_MALLOC(wtk_folded,(nkpt))
+ ABI_MALLOC(bz2ibz_smap,(6, nkpt))
  indkpt1_tmp(:)=0
 
  if (dtset%kptopt==2) then
@@ -588,23 +588,23 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
    ABI_BUG(msg)
  end if
- ABI_DEALLOCATE(bz2ibz_smap)
+ ABI_FREE(bz2ibz_smap)
 
- ABI_ALLOCATE(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
- ABI_ALLOCATE(indkpt1,(nkpt_rbz))
- ABI_ALLOCATE(istwfk_rbz,(nkpt_rbz))
- ABI_ALLOCATE(kpt_rbz,(3,nkpt_rbz))
- ABI_ALLOCATE(nband_rbz,(nkpt_rbz*dtset%nsppol))
- ABI_ALLOCATE(occ_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
- ABI_ALLOCATE(wtk_rbz,(nkpt_rbz))
+ ABI_MALLOC(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ ABI_MALLOC(indkpt1,(nkpt_rbz))
+ ABI_MALLOC(istwfk_rbz,(nkpt_rbz))
+ ABI_MALLOC(kpt_rbz,(3,nkpt_rbz))
+ ABI_MALLOC(nband_rbz,(nkpt_rbz*dtset%nsppol))
+ ABI_MALLOC(occ_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ ABI_MALLOC(wtk_rbz,(nkpt_rbz))
  indkpt1(:)=indkpt1_tmp(1:nkpt_rbz)
  do ikpt=1,nkpt_rbz
      istwfk_rbz(ikpt)=dtset%istwfk(indkpt1(ikpt))
      kpt_rbz(:,ikpt)=dtset%kptns(:,indkpt1(ikpt))
      wtk_rbz(ikpt)=wtk_folded(indkpt1(ikpt))
  end do
- ABI_DEALLOCATE(indkpt1_tmp)
- ABI_DEALLOCATE(wtk_folded)
+ ABI_FREE(indkpt1_tmp)
+ ABI_FREE(wtk_folded)
 
 !Transfer occ to occ_rbz
 !NOTE : this takes into account that indkpt1 is ordered
@@ -632,18 +632,18 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_rbz)
 
 !Allocate some k-dependent arrays at k
- ABI_ALLOCATE(kg,(3,mpw*nkpt_rbz))
- ABI_ALLOCATE(kg_k,(3,mpw))
- ABI_ALLOCATE(npwarr,(nkpt_rbz))
- ABI_ALLOCATE(npwtot,(nkpt_rbz))
+ ABI_MALLOC(kg,(3,mpw*nkpt_rbz))
+ ABI_MALLOC(kg_k,(3,mpw))
+ ABI_MALLOC(npwarr,(nkpt_rbz))
+ ABI_MALLOC(npwtot,(nkpt_rbz))
 
 !Determine distribution of k-points/bands over MPI processes
  if (allocated(mpi_enreg%my_kpttab)) then
-   ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+   ABI_FREE(mpi_enreg%my_kpttab)
  end if
- ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
+ ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt_rbz))
  if(xmpi_paral==1) then
-   ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
+   ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
    call distrb2(dtset%mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
  else
    mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
@@ -655,12 +655,12 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Set up the basis sphere of planewaves at k
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
 & kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,mpw,npwarr,npwtot,dtset%nsppol)
- ABI_DEALLOCATE(npwtot)
+ ABI_FREE(npwtot)
 
 !Set up the spherical harmonics (Ylm) and 1st gradients at k
  useylmgr=1; option=1 ; nylmgr=3
- ABI_ALLOCATE(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
- ABI_ALLOCATE(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+ ABI_MALLOC(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
+ ABI_MALLOC(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
  if (psps%useylm==1) then
    call initylmg(gprimd,kg,kpt_rbz,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,nband_rbz,nkpt_rbz,&
 &   npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
@@ -668,15 +668,15 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !Initialize band structure datatype at k
  bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
- ABI_ALLOCATE(eigen0,(bantot_rbz))
+ ABI_MALLOC(eigen0,(bantot_rbz))
  eigen0(:)=zero
  call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 & nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 & dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 & dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
- ABI_DEALLOCATE(eigen0)
+ ABI_FREE(eigen0)
 
- ABI_DEALLOCATE(doccde_rbz)
+ ABI_FREE(doccde_rbz)
 
 !Initialize header, update it with evolving variables
  gscase=0 ! A GS WF file is read
@@ -702,10 +702,10 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 &   'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
    ABI_ERROR(msg)
  end if
- ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
+ ABI_STAT_MALLOC(cg,(2,mcg), ierr)
  ABI_CHECK(ierr==0, "out-of-memory in cg")
 
- ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ ABI_MALLOC(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
  call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
 & formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
 & kpt_rbz,dtset%localrdwf,dtset%mband,mcg,&
@@ -713,7 +713,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 & dtset%nsppol,dtset%nsym,occ_rbz,optorth,dtset%symafm,&
 & dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
 & dtfil%unwffgs,dtfil%fnamewffk,wvl)
- ABI_DEALLOCATE(eigen0)
+ ABI_FREE(eigen0)
 
 !Close wffgs%unwff, if it was ever opened (in inwffil)
  if (ireadwf0==1) then
@@ -731,7 +731,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !==== Initialize response functions files and handlers ====
  !Atomic displacement files
- ABI_ALLOCATE(wfk_t_atdis,(natpert))
+ ABI_MALLOC(wfk_t_atdis,(natpert))
 
  do iatpert=1,natpert
 
@@ -760,7 +760,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end do
 
  !ddk files
- ABI_ALLOCATE(wfk_t_ddk,(nq1grad))
+ ABI_MALLOC(wfk_t_ddk,(nq1grad))
  do iq1grad=1,nq1grad
 
    pertcase=q1grad(3,iq1grad)
@@ -790,7 +790,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end do
 
  !Electric field files
- ABI_ALLOCATE(wfk_t_efield,(nq2grad))
+ ABI_MALLOC(wfk_t_efield,(nq2grad))
  do iq2grad=1,nq2grad
 
    pertcase=q2grad(3,iq2grad)
@@ -820,7 +820,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end do
 
  !d2_dkdk
- ABI_ALLOCATE(wfk_t_dkdk,(nq1q2grad))
+ ABI_MALLOC(wfk_t_dkdk,(nq1q2grad))
  do iq1q2grad=1,nq1q2grad
 
    pertcase=q1q2grad(4,iq1q2grad)
@@ -854,18 +854,18 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end do
 
 !Allocate the quadrupole tensor part depending on the wave functions
- ABI_ALLOCATE(qdrpwf,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_k,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_t1,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_t1_k,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_t2,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_t2_k,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_t3,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_t3_k,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_t4,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_t4_k,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_t5,(2,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(qdrpwf_t5_k,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_k,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_t1,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_t1_k,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_t2,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_t2_k,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_t3,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_t3_k,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_t4,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_t4_k,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_t5,(2,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(qdrpwf_t5_k,(2,natpert,nq2grad,nq1grad))
  qdrpwf=zero
  qdrpwf_t1=zero
  qdrpwf_t2=zero
@@ -896,9 +896,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        cycle ! Skip the rest of the k-point loop
      end if
 
-     ABI_ALLOCATE(occ_k,(nband_k))
-     ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
-     ABI_ALLOCATE(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     ABI_MALLOC(occ_k,(nband_k))
+     ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+     ABI_MALLOC(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
      occ_k(:)=occ_rbz(1+bdtot_index:nband_k+bdtot_index)
      kpoint(:)=kpt_rbz(:,ikpt)
      wtk_k=wtk_rbz(ikpt)
@@ -947,9 +947,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        ikg=ikg+npw_k
      end if
 
-     ABI_DEALLOCATE(occ_k)
-     ABI_DEALLOCATE(ylm_k)
-     ABI_DEALLOCATE(ylmgr_k)
+     ABI_FREE(occ_k)
+     ABI_FREE(ylm_k)
+     ABI_FREE(ylmgr_k)
 
    end do
 !  END BIG FAT k POINT LOOP
@@ -999,51 +999,51 @@ call gs_hamkq%free()
  end if
 
  !Deallocations
- ABI_DEALLOCATE(cg)
- ABI_DEALLOCATE(eqgradhart)
- ABI_DEALLOCATE(indkpt1)
- ABI_DEALLOCATE(istwfk_rbz)
- ABI_DEALLOCATE(kg)
- ABI_DEALLOCATE(kg_k)
- ABI_DEALLOCATE(kpt_rbz)
-! ABI_DEALLOCATE(mpi_enreg%my_kpttab)
-! ABI_DEALLOCATE(mpi_enreg%proc_distrb)
- ABI_DEALLOCATE(nband_rbz)
- ABI_DEALLOCATE(npwarr)
- ABI_DEALLOCATE(occ_rbz)
- ABI_DEALLOCATE(ph1d)
- ABI_DEALLOCATE(pert_atdis)
- ABI_DEALLOCATE(irrzon1)
- ABI_DEALLOCATE(phnons1)
- ABI_DEALLOCATE(qdrflg)
- ABI_DEALLOCATE(qdrpwf)
- ABI_DEALLOCATE(qdrpwf_k)
- ABI_DEALLOCATE(qdrpwf_t1)
- ABI_DEALLOCATE(qdrpwf_t2)
- ABI_DEALLOCATE(qdrpwf_t3)
- ABI_DEALLOCATE(qdrpwf_t4)
- ABI_DEALLOCATE(qdrpwf_t5)
- ABI_DEALLOCATE(qdrpwf_t1_k)
- ABI_DEALLOCATE(qdrpwf_t2_k)
- ABI_DEALLOCATE(qdrpwf_t3_k)
- ABI_DEALLOCATE(qdrpwf_t4_k)
- ABI_DEALLOCATE(qdrpwf_t5_k)
- ABI_DEALLOCATE(q1grad)
- ABI_DEALLOCATE(q1q2grad)
- ABI_DEALLOCATE(q2grad)
- ABI_DEALLOCATE(symrc1)
- ABI_DEALLOCATE(vhxc1_atdis)
- ABI_DEALLOCATE(vhxc1_efield)
- ABI_DEALLOCATE(vqgradhart)
- ABI_DEALLOCATE(wfk_t_atdis)
- ABI_DEALLOCATE(wfk_t_ddk)
- ABI_DEALLOCATE(wfk_t_dkdk)
- ABI_DEALLOCATE(wfk_t_efield)
- ABI_DEALLOCATE(wtk_rbz)
- ABI_DEALLOCATE(ylm)
- ABI_DEALLOCATE(ylmgr)
+ ABI_FREE(cg)
+ ABI_FREE(eqgradhart)
+ ABI_FREE(indkpt1)
+ ABI_FREE(istwfk_rbz)
+ ABI_FREE(kg)
+ ABI_FREE(kg_k)
+ ABI_FREE(kpt_rbz)
+! ABI_FREE(mpi_enreg%my_kpttab)
+! ABI_FREE(mpi_enreg%proc_distrb)
+ ABI_FREE(nband_rbz)
+ ABI_FREE(npwarr)
+ ABI_FREE(occ_rbz)
+ ABI_FREE(ph1d)
+ ABI_FREE(pert_atdis)
+ ABI_FREE(irrzon1)
+ ABI_FREE(phnons1)
+ ABI_FREE(qdrflg)
+ ABI_FREE(qdrpwf)
+ ABI_FREE(qdrpwf_k)
+ ABI_FREE(qdrpwf_t1)
+ ABI_FREE(qdrpwf_t2)
+ ABI_FREE(qdrpwf_t3)
+ ABI_FREE(qdrpwf_t4)
+ ABI_FREE(qdrpwf_t5)
+ ABI_FREE(qdrpwf_t1_k)
+ ABI_FREE(qdrpwf_t2_k)
+ ABI_FREE(qdrpwf_t3_k)
+ ABI_FREE(qdrpwf_t4_k)
+ ABI_FREE(qdrpwf_t5_k)
+ ABI_FREE(q1grad)
+ ABI_FREE(q1q2grad)
+ ABI_FREE(q2grad)
+ ABI_FREE(symrc1)
+ ABI_FREE(vhxc1_atdis)
+ ABI_FREE(vhxc1_efield)
+ ABI_FREE(vqgradhart)
+ ABI_FREE(wfk_t_atdis)
+ ABI_FREE(wfk_t_ddk)
+ ABI_FREE(wfk_t_dkdk)
+ ABI_FREE(wfk_t_efield)
+ ABI_FREE(wtk_rbz)
+ ABI_FREE(ylm)
+ ABI_FREE(ylmgr)
  if(xmpi_paral==1) then
-   ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+   ABI_FREE(mpi_enreg%proc_distrb)
  end if
 
  ! Clean the header
@@ -1164,8 +1164,8 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
  end if
 
 !Gather the different terms in the tensors and print the result
- ABI_ALLOCATE(qdrptens_red,(2,matom,3,3,3))
- ABI_ALLOCATE(dqpol_red,(2,matom,3,3,3))
+ ABI_MALLOC(qdrptens_red,(2,matom,3,3,3))
+ ABI_MALLOC(dqpol_red,(2,matom,3,3,3))
 
  if (kptopt==3) then
 
@@ -1349,15 +1349,15 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
  end if
 
 !Transformation to cartesian coordinates of the quadrupole tensor
- ABI_ALLOCATE(qdrptens_cart,(2,matom,3,3,3))
- ABI_ALLOCATE(dqpol_cart,(2,matom,3,3,3))
- ABI_ALLOCATE(cartflg,(matom,3,3,3))
+ ABI_MALLOC(qdrptens_cart,(2,matom,3,3,3))
+ ABI_MALLOC(dqpol_cart,(2,matom,3,3,3))
+ ABI_MALLOC(cartflg,(matom,3,3,3))
  qdrptens_cart(:,:,:,:,:)=qdrptens_red(:,:,:,:,:)
  dqpol_cart(:,:,:,:,:)=dqpol_red(:,:,:,:,:)
  cartflg=0
 
- ABI_DEALLOCATE(qdrptens_red)
- ABI_DEALLOCATE(dqpol_red)
+ ABI_FREE(qdrptens_red)
+ ABI_FREE(dqpol_red)
 
 !1st transform coordenates of the atomic displacement derivative
  do iq1dir=1,3
@@ -1532,9 +1532,9 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
  end do
  write(ab_out,'(80a)')('=',ii=1,80)
 
- ABI_DEALLOCATE(qdrptens_cart)
- ABI_DEALLOCATE(dqpol_cart)
- ABI_DEALLOCATE(cartflg)
+ ABI_FREE(qdrptens_cart)
+ ABI_FREE(dqpol_cart)
+ ABI_FREE(cartflg)
 
  DBG_EXIT("COLL")
 
@@ -1757,7 +1757,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
  non_magnetic_xc=.true.
 
 !Generate the 1-dimensional phases
- ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+ ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
  call getph(atindx,dtset%natom,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),ph1d,xred)
 
 !################# PERTURBATIONS AND q-GRADIENTS LABELLING ############################
@@ -1768,7 +1768,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
 
 !Atomic displacement
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
-   ABI_ALLOCATE(pert_atdis_tmp,(3,matpert))
+   ABI_MALLOC(pert_atdis_tmp,(3,matpert))
    pert_atdis_tmp=0
    iatpert_cnt=0
    do iatpol=1,matom
@@ -1782,16 +1782,16 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
      end do
    end do
    natpert=iatpert_cnt
-   ABI_ALLOCATE(pert_atdis,(3,natpert))
+   ABI_MALLOC(pert_atdis,(3,natpert))
    do iatpert=1,natpert
      pert_atdis(:,iatpert)=pert_atdis_tmp(:,iatpert)
    end do
-   ABI_DEALLOCATE(pert_atdis_tmp)
+   ABI_FREE(pert_atdis_tmp)
  end if
 
 !Electric field
  if (lw_flexo==1.or.lw_flexo==2) then
-   ABI_ALLOCATE(pert_efield_tmp,(3,3))
+   ABI_MALLOC(pert_efield_tmp,(3,3))
    pert_efield_tmp=0
    iefipert_cnt=0
    do iefipert=1,3
@@ -1803,16 +1803,16 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
      end if
    end do
    nefipert=iefipert_cnt
-   ABI_ALLOCATE(pert_efield,(3,nefipert))
+   ABI_MALLOC(pert_efield,(3,nefipert))
    do iefipert=1,nefipert
      pert_efield(:,iefipert)=pert_efield_tmp(:,iefipert)
    end do
-   ABI_DEALLOCATE(pert_efield_tmp)
+   ABI_FREE(pert_efield_tmp)
  end if
 
 !ddk
  !The q1grad is related with the response to the ddk
- ABI_ALLOCATE(q1grad_tmp,(3,3))
+ ABI_MALLOC(q1grad_tmp,(3,3))
  q1grad_tmp=0
  iq1grad_cnt=0
  do iq1grad=1,3
@@ -1824,11 +1824,11 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
    end if
  end do
  nq1grad=iq1grad_cnt
- ABI_ALLOCATE(q1grad,(3,nq1grad))
+ ABI_MALLOC(q1grad,(3,nq1grad))
  do iq1grad=1,nq1grad
    q1grad(:,iq1grad)=q1grad_tmp(:,iq1grad)
  end do
- ABI_DEALLOCATE(q1grad_tmp)
+ ABI_FREE(q1grad_tmp)
 
 !d2_dkdk
  !For the evaluation of the 2nd order q-gradient, the 9 directios are activated because
@@ -1837,7 +1837,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
  !components of the d2_dkdk
  if (lw_flexo==1.or.lw_flexo==2) then
    nq1q2grad=9
-   ABI_ALLOCATE(q1q2grad,(4,nq1q2grad))
+   ABI_MALLOC(q1q2grad,(4,nq1q2grad))
    do iq1q2grad=1,nq1q2grad
      call rf2_getidirs(iq1q2grad,iq1dir,iq2dir)
      if (iq1dir==iq2dir) then
@@ -1855,7 +1855,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
 
 !Strain perturbation
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
-   ABI_ALLOCATE(pert_strain_tmp,(6,9))
+   ABI_MALLOC(pert_strain_tmp,(6,9))
    pert_strain_tmp=0
    !tmp uniaxial components
    istrpert_cnt=0
@@ -1897,47 +1897,47 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
      end if
    end do
    nstrpert=istrpert_cnt
-   ABI_ALLOCATE(pert_strain,(6,nstrpert))
+   ABI_MALLOC(pert_strain,(6,nstrpert))
    do istrpert=1,nstrpert
      pert_strain(:,istrpert)=pert_strain_tmp(:,istrpert)
    end do
-   ABI_DEALLOCATE(pert_strain_tmp)
+   ABI_FREE(pert_strain_tmp)
 end if
 
 !################# ELECTROSTATIC CONTRIBUTIONS  #######################################
 
 !This is necessary to deactivate paw options in the dfpt_rhotov routine
- ABI_DATATYPE_ALLOCATE(pawrhoij_read,(0))
+ ABI_MALLOC(pawrhoij_read,(0))
  pawread=0
  nhat1grdim=0
- ABI_ALLOCATE(nhat1gr,(0,0,0))
- ABI_ALLOCATE(nhat,(nfft,nspden))
+ ABI_MALLOC(nhat1gr,(0,0,0))
+ ABI_MALLOC(nhat,(nfft,nspden))
  nhat=zero
- ABI_ALLOCATE(nhat1,(cplex*nfft,nspden))
+ ABI_MALLOC(nhat1,(cplex*nfft,nspden))
  nhat1=zero
 
 !Read the first order densities response from a disk file, calculates the FFT
 !(rhog1_tmp) and the first order Hartree and xc potentials(vhxc1_pert).
 !TODO: In the call to read_rhor there is a security option that compares with the header
 !hdr. Not activated at this moment.
- ABI_ALLOCATE(rhog1_tmp,(2,nfft))
- ABI_ALLOCATE(rhor1_tmp,(cplex*nfft,nspden))
- ABI_ALLOCATE(rhor1_real,(1*nfft,nspden))
- ABI_ALLOCATE(vhartr1,(cplex*nfft))
- ABI_ALLOCATE(vpsp1,(cplex*nfft))
- ABI_ALLOCATE(vtrial1,(cplex*nfft,nspden))
- ABI_ALLOCATE(vresid1,(cplex*nfft,nspden))
- ABI_ALLOCATE(vxc1,(cplex*nfft,nspden))
- ABI_ALLOCATE(dum_vxc,(nfft,nspden))
- ABI_ALLOCATE(xccc3d1,(cplex*n3xccc))
+ ABI_MALLOC(rhog1_tmp,(2,nfft))
+ ABI_MALLOC(rhor1_tmp,(cplex*nfft,nspden))
+ ABI_MALLOC(rhor1_real,(1*nfft,nspden))
+ ABI_MALLOC(vhartr1,(cplex*nfft))
+ ABI_MALLOC(vpsp1,(cplex*nfft))
+ ABI_MALLOC(vtrial1,(cplex*nfft,nspden))
+ ABI_MALLOC(vresid1,(cplex*nfft,nspden))
+ ABI_MALLOC(vxc1,(cplex*nfft,nspden))
+ ABI_MALLOC(dum_vxc,(nfft,nspden))
+ ABI_MALLOC(xccc3d1,(cplex*n3xccc))
  vpsp1=zero; dum_vxc=zero
  optene=0; optres=1
 
 !Atomic displacement
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
-   ABI_ALLOCATE(rhor1_atdis,(natpert,cplex*nfft,nspden))
-   ABI_ALLOCATE(rhog1_atdis,(natpert,2,nfft))
-   ABI_ALLOCATE(vhxc1_atdis,(natpert,cplex*nfft))
+   ABI_MALLOC(rhor1_atdis,(natpert,cplex*nfft,nspden))
+   ABI_MALLOC(rhog1_atdis,(natpert,2,nfft))
+   ABI_MALLOC(vhxc1_atdis,(natpert,cplex*nfft))
    vtrial1=zero
    do iatpert= 1, natpert
      iatpol=pert_atdis(1,iatpert)
@@ -1981,8 +1981,8 @@ end if
 
 !Electric field
  if (lw_flexo==1.or.lw_flexo==2) then
-   ABI_ALLOCATE(rhog1_efield,(nefipert,2,nfft))
-   ABI_ALLOCATE(vhxc1_efield,(nefipert,cplex*nfft))
+   ABI_MALLOC(rhog1_efield,(nefipert,2,nfft))
+   ABI_MALLOC(vhxc1_efield,(nefipert,cplex*nfft))
    vtrial1=zero
    do iefipert=1,nefipert
      pertcase=pert_efield(3,iefipert)
@@ -2023,8 +2023,8 @@ endif
 
 !Strain
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
-   ABI_ALLOCATE(rhor1_strain,(nstrpert,cplex*nfft,nspden))
-   ABI_ALLOCATE(vhxc1_strain,(nstrpert,cplex*nfft))
+   ABI_MALLOC(rhor1_strain,(nstrpert,cplex*nfft,nspden))
+   ABI_MALLOC(vhxc1_strain,(nstrpert,cplex*nfft))
    vtrial1=zero
    do istrpert= 1, nstrpert
      istrtype=pert_strain(1,istrpert)
@@ -2066,29 +2066,29 @@ endif
 end if
 
  !These arrays will not be used anymore (for the moment)
- ABI_DEALLOCATE(rhor1_real)
- ABI_DEALLOCATE(rhor1_tmp)
- ABI_DEALLOCATE(vhartr1)
- ABI_DEALLOCATE(vpsp1)
- ABI_DEALLOCATE(vtrial1)
- ABI_DEALLOCATE(vresid1)
- ABI_DEALLOCATE(vxc1)
- ABI_DEALLOCATE(dum_vxc)
- ABI_DEALLOCATE(xccc3d1)
+ ABI_FREE(rhor1_real)
+ ABI_FREE(rhor1_tmp)
+ ABI_FREE(vhartr1)
+ ABI_FREE(vpsp1)
+ ABI_FREE(vtrial1)
+ ABI_FREE(vresid1)
+ ABI_FREE(vxc1)
+ ABI_FREE(dum_vxc)
+ ABI_FREE(xccc3d1)
 
- ABI_DATATYPE_DEALLOCATE(pawrhoij_read)
- ABI_DEALLOCATE(nhat1gr)
- ABI_DEALLOCATE(nhat)
- ABI_DEALLOCATE(nhat1)
+ ABI_FREE(pawrhoij_read)
+ ABI_FREE(nhat1gr)
+ ABI_FREE(nhat)
+ ABI_FREE(nhat1)
 
 !!Calculate the electrostatic term from the q-gradient of the Hartree potential
- ABI_ALLOCATE(vqgradhart,(2*nfft))
- ABI_ALLOCATE(rhor1_tmp,(2*nfft,nspden))
+ ABI_MALLOC(vqgradhart,(2*nfft))
+ ABI_MALLOC(rhor1_tmp,(2*nfft,nspden))
 
 !Electronic contribution
  if (lw_flexo==1.or.lw_flexo==2) then
-   ABI_ALLOCATE(elqgradhart,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexoflg,(3,3,3,3))
+   ABI_MALLOC(elqgradhart,(2,3,3,3,3))
+   ABI_MALLOC(elflexoflg,(3,3,3,3))
    elflexoflg=0
    rhor1_tmp=zero
    do iq1grad=1,nq1grad
@@ -2132,8 +2132,8 @@ end if
 
 !1st q-gradient of DM contribution
  if (lw_flexo==1.or.lw_flexo==3) then
-   ABI_ALLOCATE(ddmdq_qgradhart,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdq_flg,(matom,3,matom,3,3))
+   ABI_MALLOC(ddmdq_qgradhart,(2,natpert,natpert,nq1grad))
+   ABI_MALLOC(ddmdq_flg,(matom,3,matom,3,3))
    ddmdq_flg=0
    rhor1_tmp=zero
    do iq1grad=1,nq1grad
@@ -2173,8 +2173,8 @@ end if
 
 !1st g-gradient of internal strain tensor contribution
  if (lw_flexo==1.or.lw_flexo==4) then
-   ABI_ALLOCATE(isdq_qgradhart,(2,matom,3,3,3,3))
-   ABI_ALLOCATE(isdq_flg,(matom,3,3,3,3))
+   ABI_MALLOC(isdq_qgradhart,(2,matom,3,3,3,3))
+   ABI_MALLOC(isdq_flg,(matom,3,3,3,3))
    isdq_flg=0
    rhor1_tmp=zero
    do iq1grad=1,nq1grad
@@ -2214,15 +2214,15 @@ end if
    end do
  end if
 
- ABI_DEALLOCATE(rhor1_tmp)
- ABI_DEALLOCATE(rhog1_tmp)
- ABI_DEALLOCATE(vqgradhart)
+ ABI_FREE(rhor1_tmp)
+ ABI_FREE(rhog1_tmp)
+ ABI_FREE(vqgradhart)
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
-   ABI_DEALLOCATE(rhog1_atdis)
-   ABI_DEALLOCATE(rhor1_atdis)
+   ABI_FREE(rhog1_atdis)
+   ABI_FREE(rhor1_atdis)
  end if
- if (lw_flexo==1.or.lw_flexo==2) ABI_DEALLOCATE(rhog1_efield)
- if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) ABI_DEALLOCATE(rhor1_strain)
+ if (lw_flexo==1.or.lw_flexo==2) ABI_FREE(rhog1_efield)
+ if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) ABI_FREE(rhor1_strain)
 
 !################# WAVE FUNCTION CONTRIBUTIONS  #######################################
 
@@ -2233,31 +2233,31 @@ end if
 !         In a future I will try to activate perturbation dependent symmetries
 !         with littlegroup_pert.F90.
  nsym1 = 1
- ABI_ALLOCATE(indsy1,(4,nsym1,dtset%natom))
- ABI_ALLOCATE(symrc1,(3,3,nsym1))
- ABI_ALLOCATE(symaf1,(nsym1))
- ABI_ALLOCATE(symrl1,(3,3,nsym1))
- ABI_ALLOCATE(tnons1,(3,nsym1))
+ ABI_MALLOC(indsy1,(4,nsym1,dtset%natom))
+ ABI_MALLOC(symrc1,(3,3,nsym1))
+ ABI_MALLOC(symaf1,(nsym1))
+ ABI_MALLOC(symrl1,(3,3,nsym1))
+ ABI_MALLOC(tnons1,(3,nsym1))
  symaf1(1:nsym1)= 1
  symrl1(:,:,nsym1)= dtset%symrel(:,:,1)
  tnons1(:,nsym1)= 0_dp
 
 !Set up corresponding symmetry data
- ABI_ALLOCATE(irrzon1,(dtset%nfft**(1-1/nsym1),2,(nspden/dtset%nsppol)-3*(nspden/4)))
- ABI_ALLOCATE(phnons1,(2,dtset%nfft**(1-1/nsym1),(nspden/dtset%nsppol)-3*(nspden/4)))
+ ABI_MALLOC(irrzon1,(dtset%nfft**(1-1/nsym1),2,(nspden/dtset%nsppol)-3*(nspden/4)))
+ ABI_MALLOC(phnons1,(2,dtset%nfft**(1-1/nsym1),(nspden/dtset%nsppol)-3*(nspden/4)))
  call setsym(indsy1,irrzon1,1,dtset%natom,dtset%nfft,dtset%ngfft,nspden,dtset%nsppol,&
 &nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
 
- ABI_DEALLOCATE(indsy1)
- ABI_DEALLOCATE(symaf1)
- ABI_DEALLOCATE(symrl1)
- ABI_DEALLOCATE(tnons1)
+ ABI_FREE(indsy1)
+ ABI_FREE(symaf1)
+ ABI_FREE(symrl1)
+ ABI_FREE(tnons1)
 
 !Determine the subset of k-points needed in the "reduced Brillouin zone",
 !and initialize other quantities
- ABI_ALLOCATE(indkpt1_tmp,(nkpt))
- ABI_ALLOCATE(wtk_folded,(nkpt))
- ABI_ALLOCATE(bz2ibz_smap,(6, nkpt))
+ ABI_MALLOC(indkpt1_tmp,(nkpt))
+ ABI_MALLOC(wtk_folded,(nkpt))
+ ABI_MALLOC(bz2ibz_smap,(6, nkpt))
  indkpt1_tmp(:)=0
 
  if (dtset%kptopt==2) then
@@ -2270,23 +2270,23 @@ end if
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
    ABI_BUG(msg)
  end if
- ABI_DEALLOCATE(bz2ibz_smap)
+ ABI_FREE(bz2ibz_smap)
 
- ABI_ALLOCATE(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
- ABI_ALLOCATE(indkpt1,(nkpt_rbz))
- ABI_ALLOCATE(istwfk_rbz,(nkpt_rbz))
- ABI_ALLOCATE(kpt_rbz,(3,nkpt_rbz))
- ABI_ALLOCATE(nband_rbz,(nkpt_rbz*dtset%nsppol))
- ABI_ALLOCATE(occ_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
- ABI_ALLOCATE(wtk_rbz,(nkpt_rbz))
+ ABI_MALLOC(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ ABI_MALLOC(indkpt1,(nkpt_rbz))
+ ABI_MALLOC(istwfk_rbz,(nkpt_rbz))
+ ABI_MALLOC(kpt_rbz,(3,nkpt_rbz))
+ ABI_MALLOC(nband_rbz,(nkpt_rbz*dtset%nsppol))
+ ABI_MALLOC(occ_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ ABI_MALLOC(wtk_rbz,(nkpt_rbz))
  indkpt1(:)=indkpt1_tmp(1:nkpt_rbz)
  do ikpt=1,nkpt_rbz
      istwfk_rbz(ikpt)=dtset%istwfk(indkpt1(ikpt))
      kpt_rbz(:,ikpt)=dtset%kptns(:,indkpt1(ikpt))
      wtk_rbz(ikpt)=wtk_folded(indkpt1(ikpt))
  end do
- ABI_DEALLOCATE(indkpt1_tmp)
- ABI_DEALLOCATE(wtk_folded)
+ ABI_FREE(indkpt1_tmp)
+ ABI_FREE(wtk_folded)
 
 !Transfer occ to occ_rbz
 !NOTE : this takes into account that indkpt1 is ordered
@@ -2314,18 +2314,18 @@ end if
 call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_rbz)
 
 !Allocate some k-dependent arrays at k
- ABI_ALLOCATE(kg,(3,mpw*nkpt_rbz))
- ABI_ALLOCATE(kg_k,(3,mpw))
- ABI_ALLOCATE(npwarr,(nkpt_rbz))
- ABI_ALLOCATE(npwtot,(nkpt_rbz))
+ ABI_MALLOC(kg,(3,mpw*nkpt_rbz))
+ ABI_MALLOC(kg_k,(3,mpw))
+ ABI_MALLOC(npwarr,(nkpt_rbz))
+ ABI_MALLOC(npwtot,(nkpt_rbz))
 
 !Determine distribution of k-points/bands over MPI processes
  if (allocated(mpi_enreg%my_kpttab)) then
-   ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+   ABI_FREE(mpi_enreg%my_kpttab)
  end if
- ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
+ ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt_rbz))
  if(xmpi_paral==1) then
-   ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
+   ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
    call distrb2(dtset%mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
  else
    mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
@@ -2337,12 +2337,12 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Set up the basis sphere of planewaves at k
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
 & kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,mpw,npwarr,npwtot,dtset%nsppol)
- ABI_DEALLOCATE(npwtot)
+ ABI_FREE(npwtot)
 
 !Set up the spherical harmonics (Ylm) and 1st gradients at k
  useylmgr=1; option=2 ; nylmgr=9
- ABI_ALLOCATE(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
- ABI_ALLOCATE(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+ ABI_MALLOC(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
+ ABI_MALLOC(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
  if (psps%useylm==1) then
    call initylmg(gprimd,kg,kpt_rbz,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,nband_rbz,nkpt_rbz,&
 &   npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
@@ -2350,14 +2350,14 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !Initialize band structure datatype at k
  bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
- ABI_ALLOCATE(eigen0,(bantot_rbz))
+ ABI_MALLOC(eigen0,(bantot_rbz))
  eigen0(:)=zero
  call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 & nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 & dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 & dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(doccde_rbz)
+ ABI_FREE(eigen0)
+ ABI_FREE(doccde_rbz)
 
 !Initialize header, update it with evolving variables
  gscase=0 ! A GS WF file is read
@@ -2383,10 +2383,10 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 &   'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
    ABI_ERROR(msg)
  end if
- ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
+ ABI_STAT_MALLOC(cg,(2,mcg), ierr)
  ABI_CHECK(ierr==0, "out-of-memory in cg")
 
- ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ ABI_MALLOC(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
  call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
 & formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
 & kpt_rbz,dtset%localrdwf,dtset%mband,mcg,&
@@ -2394,7 +2394,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 & dtset%nsppol,dtset%nsym,occ_rbz,optorth,dtset%symafm,&
 & dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
 & dtfil%unwffgs,dtfil%fnamewffk,wvl)
- ABI_DEALLOCATE(eigen0)
+ ABI_FREE(eigen0)
 !Close wffgs%unwff, if it was ever opened (in inwffil)
  if (ireadwf0==1) then
    call WffClose(wffgs,ierr)
@@ -2412,7 +2412,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !==== Initialize response functions files and handlers ====
  !Atomic displacement
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
-   ABI_ALLOCATE(wfk_t_atdis,(natpert))
+   ABI_MALLOC(wfk_t_atdis,(natpert))
    do iatpert=1,natpert
      pertcase=pert_atdis(3,iatpert)
      call appdig(pertcase,dtfil%fnamewff1,fiwfatdis)
@@ -2441,7 +2441,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end if
 
  !ddk files
- ABI_ALLOCATE(wfk_t_ddk,(nq1grad))
+ ABI_MALLOC(wfk_t_ddk,(nq1grad))
  do iq1grad=1,nq1grad
    pertcase=q1grad(3,iq1grad)
    call appdig(pertcase,dtfil%fnamewffddk,fiwfddk)
@@ -2470,7 +2470,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
  !Electric field files
  if (lw_flexo==1.or.lw_flexo==2) then
-   ABI_ALLOCATE(wfk_t_efield,(nefipert))
+   ABI_MALLOC(wfk_t_efield,(nefipert))
    do iefipert=1,nefipert
      pertcase=pert_efield(3,iefipert)
      call appdig(pertcase,dtfil%fnamewff1,fiwfefield)
@@ -2500,7 +2500,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
  !Strain files
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
-   ABI_ALLOCATE(wfk_t_strain,(3,3))
+   ABI_MALLOC(wfk_t_strain,(3,3))
    do istrpert=1,nstrpert
      pertcase=pert_strain(5,istrpert)
      ka=pert_strain(3,istrpert)
@@ -2537,7 +2537,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
  !d2_dkdk
  if (lw_flexo==1.or.lw_flexo==2) then
-   ABI_ALLOCATE(wfk_t_dkdk,(nq1q2grad))
+   ABI_MALLOC(wfk_t_dkdk,(nq1q2grad))
    do iq1q2grad=1,nq1q2grad
 
      pertcase=q1q2grad(4,iq1q2grad)
@@ -2572,18 +2572,18 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !Allocate the electronic flexoelectric tensor part depending on the wave functions
  if (lw_flexo==1.or.lw_flexo==2) then
-   ABI_ALLOCATE(elflexowf,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_k,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_t1,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_t1_k,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_t2,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_t2_k,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_t3,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_t3_k,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_t4,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_t4_k,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_t5,(2,3,3,3,3))
-   ABI_ALLOCATE(elflexowf_t5_k,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_k,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_t1,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_t1_k,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_t2,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_t2_k,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_t3,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_t3_k,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_t4,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_t4_k,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_t5,(2,3,3,3,3))
+   ABI_MALLOC(elflexowf_t5_k,(2,3,3,3,3))
    elflexowf=zero
    elflexowf_t1=zero
    elflexowf_t2=zero
@@ -2594,14 +2594,14 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !Allocate arrays for wf contributions to the first q-gradient of the dynamical matrix
  if (lw_flexo==1.or.lw_flexo==3) then
-   ABI_ALLOCATE(ddmdqwf,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_k,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_t1,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_t1_k,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_t2,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_t2_k,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_t3,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_t3_k,(2,natpert,natpert,nq1grad))
+   ABI_MALLOC(ddmdqwf,(2,natpert,natpert,nq1grad))
+   ABI_MALLOC(ddmdqwf_k,(2,natpert,natpert,nq1grad))
+   ABI_MALLOC(ddmdqwf_t1,(2,natpert,natpert,nq1grad))
+   ABI_MALLOC(ddmdqwf_t1_k,(2,natpert,natpert,nq1grad))
+   ABI_MALLOC(ddmdqwf_t2,(2,natpert,natpert,nq1grad))
+   ABI_MALLOC(ddmdqwf_t2_k,(2,natpert,natpert,nq1grad))
+   ABI_MALLOC(ddmdqwf_t3,(2,natpert,natpert,nq1grad))
+   ABI_MALLOC(ddmdqwf_t3_k,(2,natpert,natpert,nq1grad))
    ddmdqwf=zero
    ddmdqwf_t1=zero
    ddmdqwf_t2=zero
@@ -2610,20 +2610,20 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !Allocate arrays for wf contributions to the first q-gradient of the internal strain tensor
  if (lw_flexo==1.or.lw_flexo==4) then
-   ABI_ALLOCATE(frwfdq,(2,matom,3,3,3,nq1grad))
-   ABI_ALLOCATE(frwfdq_k,(2,matom,3,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf,(2,matom,3,nq1grad,3,3))
-   ABI_ALLOCATE(isdqwf_k,(2,matom,3,nq1grad,3,3))
-   ABI_ALLOCATE(isdqwf_t1,(2,matom,3,nq1grad,3,3))
-   ABI_ALLOCATE(isdqwf_t1_k,(2,matom,3,nq1grad,3,3))
-   ABI_ALLOCATE(isdqwf_t2,(2,matom,3,nq1grad,3,3))
-   ABI_ALLOCATE(isdqwf_t2_k,(2,matom,3,nq1grad,3,3))
-   ABI_ALLOCATE(isdqwf_t3,(2,matom,3,nq1grad,3,3))
-   ABI_ALLOCATE(isdqwf_t3_k,(2,matom,3,nq1grad,3,3))
-   ABI_ALLOCATE(isdqwf_t4,(2,matom,3,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_t4_k,(2,matom,3,3,3,nq1grad))
-   ABI_ALLOCATE(isdqwf_t5,(2,matom,3,nq1grad,3,3))
-   ABI_ALLOCATE(isdqwf_t5_k,(2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(frwfdq,(2,matom,3,3,3,nq1grad))
+   ABI_MALLOC(frwfdq_k,(2,matom,3,3,3,nq1grad))
+   ABI_MALLOC(isdqwf,(2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(isdqwf_k,(2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(isdqwf_t1,(2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(isdqwf_t1_k,(2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(isdqwf_t2,(2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(isdqwf_t2_k,(2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(isdqwf_t3,(2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(isdqwf_t3_k,(2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(isdqwf_t4,(2,matom,3,3,3,nq1grad))
+   ABI_MALLOC(isdqwf_t4_k,(2,matom,3,3,3,nq1grad))
+   ABI_MALLOC(isdqwf_t5,(2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(isdqwf_t5_k,(2,matom,3,nq1grad,3,3))
    frwfdq=zero
    isdqwf=zero
    isdqwf_t1=zero
@@ -2656,9 +2656,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        cycle ! Skip the rest of the k-point loop
      end if
 
-     ABI_ALLOCATE(occ_k,(nband_k))
-     ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
-     ABI_ALLOCATE(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     ABI_MALLOC(occ_k,(nband_k))
+     ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+     ABI_MALLOC(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
      occ_k(:)=occ_rbz(1+bdtot_index:nband_k+bdtot_index)
      kpoint(:)=kpt_rbz(:,ikpt)
      wtk_k=wtk_rbz(ikpt)
@@ -2755,9 +2755,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        ikg=ikg+npw_k
      end if
 
-     ABI_DEALLOCATE(occ_k)
-     ABI_DEALLOCATE(ylm_k)
-     ABI_DEALLOCATE(ylmgr_k)
+     ABI_FREE(occ_k)
+     ABI_FREE(ylm_k)
+     ABI_FREE(ylmgr_k)
 
    end do
 !  END BIG FAT k POINT LOOP
@@ -2904,88 +2904,88 @@ call gs_hamkq%free()
 
 !Deallocattions
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
-   ABI_DEALLOCATE(pert_atdis)
-   ABI_DEALLOCATE(vhxc1_atdis)
-   ABI_DEALLOCATE(wfk_t_atdis)
+   ABI_FREE(pert_atdis)
+   ABI_FREE(vhxc1_atdis)
+   ABI_FREE(wfk_t_atdis)
  end if
  if (lw_flexo==1.or.lw_flexo==2) then
-   ABI_DEALLOCATE(pert_efield)
-   ABI_DEALLOCATE(q1q2grad)
-   ABI_DEALLOCATE(vhxc1_efield)
-   ABI_DEALLOCATE(elqgradhart)
-   ABI_DEALLOCATE(elflexoflg)
-   ABI_DEALLOCATE(wfk_t_efield)
-   ABI_DEALLOCATE(wfk_t_dkdk)
-   ABI_DEALLOCATE(elflexowf)
-   ABI_DEALLOCATE(elflexowf_k)
-   ABI_DEALLOCATE(elflexowf_t1)
-   ABI_DEALLOCATE(elflexowf_t1_k)
-   ABI_DEALLOCATE(elflexowf_t2)
-   ABI_DEALLOCATE(elflexowf_t2_k)
-   ABI_DEALLOCATE(elflexowf_t3)
-   ABI_DEALLOCATE(elflexowf_t3_k)
-   ABI_DEALLOCATE(elflexowf_t4)
-   ABI_DEALLOCATE(elflexowf_t4_k)
-   ABI_DEALLOCATE(elflexowf_t5)
-   ABI_DEALLOCATE(elflexowf_t5_k)
+   ABI_FREE(pert_efield)
+   ABI_FREE(q1q2grad)
+   ABI_FREE(vhxc1_efield)
+   ABI_FREE(elqgradhart)
+   ABI_FREE(elflexoflg)
+   ABI_FREE(wfk_t_efield)
+   ABI_FREE(wfk_t_dkdk)
+   ABI_FREE(elflexowf)
+   ABI_FREE(elflexowf_k)
+   ABI_FREE(elflexowf_t1)
+   ABI_FREE(elflexowf_t1_k)
+   ABI_FREE(elflexowf_t2)
+   ABI_FREE(elflexowf_t2_k)
+   ABI_FREE(elflexowf_t3)
+   ABI_FREE(elflexowf_t3_k)
+   ABI_FREE(elflexowf_t4)
+   ABI_FREE(elflexowf_t4_k)
+   ABI_FREE(elflexowf_t5)
+   ABI_FREE(elflexowf_t5_k)
  end if
  if (lw_flexo==1.or.lw_flexo==3) then
-   ABI_DEALLOCATE(ddmdq_qgradhart)
-   ABI_DEALLOCATE(ddmdq_flg)
-   ABI_DEALLOCATE(ddmdqwf)
-   ABI_DEALLOCATE(ddmdqwf_k)
-   ABI_DEALLOCATE(ddmdqwf_t1)
-   ABI_DEALLOCATE(ddmdqwf_t1_k)
-   ABI_DEALLOCATE(ddmdqwf_t2)
-   ABI_DEALLOCATE(ddmdqwf_t2_k)
-   ABI_DEALLOCATE(ddmdqwf_t3)
-   ABI_DEALLOCATE(ddmdqwf_t3_k)
+   ABI_FREE(ddmdq_qgradhart)
+   ABI_FREE(ddmdq_flg)
+   ABI_FREE(ddmdqwf)
+   ABI_FREE(ddmdqwf_k)
+   ABI_FREE(ddmdqwf_t1)
+   ABI_FREE(ddmdqwf_t1_k)
+   ABI_FREE(ddmdqwf_t2)
+   ABI_FREE(ddmdqwf_t2_k)
+   ABI_FREE(ddmdqwf_t3)
+   ABI_FREE(ddmdqwf_t3_k)
  end if
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
-   ABI_DEALLOCATE(pert_strain)
-   ABI_DEALLOCATE(vhxc1_strain)
-   ABI_DEALLOCATE(wfk_t_strain)
+   ABI_FREE(pert_strain)
+   ABI_FREE(vhxc1_strain)
+   ABI_FREE(wfk_t_strain)
  end if
  if (lw_flexo==1.or.lw_flexo==4) then
-   ABI_DEALLOCATE(frwfdq)
-   ABI_DEALLOCATE(frwfdq_k)
-   ABI_DEALLOCATE(isdqwf)
-   ABI_DEALLOCATE(isdqwf_k)
-   ABI_DEALLOCATE(isdqwf_t1)
-   ABI_DEALLOCATE(isdqwf_t1_k)
-   ABI_DEALLOCATE(isdqwf_t2)
-   ABI_DEALLOCATE(isdqwf_t2_k)
-   ABI_DEALLOCATE(isdqwf_t3)
-   ABI_DEALLOCATE(isdqwf_t3_k)
-   ABI_DEALLOCATE(isdqwf_t4)
-   ABI_DEALLOCATE(isdqwf_t4_k)
-   ABI_DEALLOCATE(isdqwf_t5)
-   ABI_DEALLOCATE(isdqwf_t5_k)
-   ABI_DEALLOCATE(isdq_qgradhart)
-   ABI_DEALLOCATE(isdq_flg)
+   ABI_FREE(frwfdq)
+   ABI_FREE(frwfdq_k)
+   ABI_FREE(isdqwf)
+   ABI_FREE(isdqwf_k)
+   ABI_FREE(isdqwf_t1)
+   ABI_FREE(isdqwf_t1_k)
+   ABI_FREE(isdqwf_t2)
+   ABI_FREE(isdqwf_t2_k)
+   ABI_FREE(isdqwf_t3)
+   ABI_FREE(isdqwf_t3_k)
+   ABI_FREE(isdqwf_t4)
+   ABI_FREE(isdqwf_t4_k)
+   ABI_FREE(isdqwf_t5)
+   ABI_FREE(isdqwf_t5_k)
+   ABI_FREE(isdq_qgradhart)
+   ABI_FREE(isdq_flg)
  end if
- ABI_DEALLOCATE(cg)
- ABI_DEALLOCATE(q1grad)
- ABI_DEALLOCATE(ph1d)
- ABI_DEALLOCATE(indkpt1)
- ABI_DEALLOCATE(istwfk_rbz)
- ABI_DEALLOCATE(kpt_rbz)
- ABI_DEALLOCATE(nband_rbz)
- ABI_DEALLOCATE(occ_rbz)
- ABI_DEALLOCATE(wtk_rbz)
- ABI_DEALLOCATE(kg)
- ABI_DEALLOCATE(kg_k)
- ABI_DEALLOCATE(npwarr)
- !ABI_DEALLOCATE(mpi_enreg%my_kpttab)
- !ABI_DEALLOCATE(mpi_enreg%proc_distrb)
- ABI_DEALLOCATE(irrzon1)
- ABI_DEALLOCATE(phnons1)
- ABI_DEALLOCATE(symrc1)
- ABI_DEALLOCATE(ylm)
- ABI_DEALLOCATE(ylmgr)
- ABI_DEALLOCATE(wfk_t_ddk)
+ ABI_FREE(cg)
+ ABI_FREE(q1grad)
+ ABI_FREE(ph1d)
+ ABI_FREE(indkpt1)
+ ABI_FREE(istwfk_rbz)
+ ABI_FREE(kpt_rbz)
+ ABI_FREE(nband_rbz)
+ ABI_FREE(occ_rbz)
+ ABI_FREE(wtk_rbz)
+ ABI_FREE(kg)
+ ABI_FREE(kg_k)
+ ABI_FREE(npwarr)
+ !ABI_FREE(mpi_enreg%my_kpttab)
+ !ABI_FREE(mpi_enreg%proc_distrb)
+ ABI_FREE(irrzon1)
+ ABI_FREE(phnons1)
+ ABI_FREE(symrc1)
+ ABI_FREE(ylm)
+ ABI_FREE(ylmgr)
+ ABI_FREE(wfk_t_ddk)
  if(xmpi_paral==1) then
-   ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+   ABI_FREE(mpi_enreg%proc_distrb)
  end if
 
  ! Clean the header
@@ -3099,7 +3099,7 @@ end subroutine dfpt_flexo
  DBG_ENTER("COLL")
 
 !Gather the different terms in the electronic contribution to the flexoelectric tensor
- ABI_ALLOCATE(elec_flexotens_red,(2,3,3,3,3))
+ ABI_MALLOC(elec_flexotens_red,(2,3,3,3,3))
 ! elec_flexotens_red=zero
  ucvolinv= 1.0_dp/ucvol
 
@@ -3245,17 +3245,17 @@ end subroutine dfpt_flexo
 
 !Transormation to complete cartesian coordinates the flexoelectric tensor
 !and separately the T4 term
- ABI_ALLOCATE(elec_flexotens_cart,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t4_cart,(2,3,3,3,3))
- ABI_ALLOCATE(cartflg_t4,(3,3,3,3))
+ ABI_MALLOC(elec_flexotens_cart,(2,3,3,3,3))
+ ABI_MALLOC(elflexowf_t4_cart,(2,3,3,3,3))
+ ABI_MALLOC(cartflg_t4,(3,3,3,3))
  elec_flexotens_cart=elec_flexotens_red
  elflexowf_t4_cart=elflexowf_t4
  cartflg_t4=0
 
-! ABI_DEALLOCATE(elec_flexotens_red)
+! ABI_FREE(elec_flexotens_red)
 
  if (prtvol>=10) then
-   ABI_ALLOCATE(elflexowf_buffer_cart,(5,2,3,3,3,3))
+   ABI_MALLOC(elflexowf_buffer_cart,(5,2,3,3,3,3))
    elflexowf_buffer_cart(1,:,:,:,:,:)=elflexowf_t1(:,:,:,:,:)
    elflexowf_buffer_cart(2,:,:,:,:,:)=elflexowf_t2(:,:,:,:,:)
    elflexowf_buffer_cart(3,:,:,:,:,:)=elflexowf_t3(:,:,:,:,:)
@@ -3458,15 +3458,15 @@ end subroutine dfpt_flexo
    close(74)
    close(75)
    close(76)
-   ABI_DEALLOCATE(elflexowf_buffer_cart)
+   ABI_FREE(elflexowf_buffer_cart)
  end if
 
 !Calculate the contribution to the d3etot in mixed (reduced/cartesian) coordinates
  elec_flexotens_red=elec_flexotens_cart
- ABI_DEALLOCATE(elec_flexotens_cart)
- ABI_DEALLOCATE(elflexowf_t4_cart)
- ABI_DEALLOCATE(cartflg_t4)
- ABI_ALLOCATE(redflg,(3,3,3,3))
+ ABI_FREE(elec_flexotens_cart)
+ ABI_FREE(elflexowf_t4_cart)
+ ABI_FREE(cartflg_t4)
+ ABI_MALLOC(redflg,(3,3,3,3))
  redflg=0
 
 !1st transform back coordinates of the electric field derivative of the flexoelectric tensor
@@ -3533,8 +3533,8 @@ end subroutine dfpt_flexo
    end do
  end do
 
- ABI_DEALLOCATE(elec_flexotens_red)
- ABI_DEALLOCATE(redflg)
+ ABI_FREE(elec_flexotens_red)
+ ABI_FREE(redflg)
 
 
  DBG_EXIT("COLL")
@@ -3642,7 +3642,7 @@ end subroutine dfpt_ciflexoout
  end if
 
 !Gather the different terms in the tensors and print the result
- ABI_ALLOCATE(ddmdq_red,(2,natpert,natpert,nq1grad))
+ ABI_MALLOC(ddmdq_red,(2,natpert,natpert,nq1grad))
 
  if (kptopt==3) then
 
@@ -3762,9 +3762,9 @@ end subroutine dfpt_ciflexoout
  end if
 
 !Transformation to cartesian coordinates of the ddmdq
- ABI_ALLOCATE(ddmdq_cart,(2,matom,3,matom,3,3))
- ABI_ALLOCATE(ddmdq_cartflg,(matom,3,matom,3,3))
- ABI_ALLOCATE(cartflg,(matom,3,matom,3,3))
+ ABI_MALLOC(ddmdq_cart,(2,matom,3,matom,3,3))
+ ABI_MALLOC(ddmdq_cartflg,(matom,3,matom,3,3))
+ ABI_MALLOC(cartflg,(matom,3,matom,3,3))
  cartflg=0
  do iq1grad=1,nq1grad
    iq1dir=q1grad(2,iq1grad)
@@ -3779,7 +3779,7 @@ end subroutine dfpt_ciflexoout
      end do
    end do
  end do
- ABI_DEALLOCATE(ddmdq_red)
+ ABI_FREE(ddmdq_red)
 
 !1st transform coordenates of the first atomic displacement derivative
  do iq1dir=1,3
@@ -3903,9 +3903,9 @@ end subroutine dfpt_ciflexoout
  end do
  write(ab_out,'(80a)')('=',ii=1,80)
 
- ABI_DEALLOCATE(ddmdq_cart)
- ABI_DEALLOCATE(ddmdq_cartflg)
- ABI_DEALLOCATE(cartflg)
+ ABI_FREE(ddmdq_cart)
+ ABI_FREE(ddmdq_cartflg)
+ ABI_FREE(cartflg)
 
 
  DBG_EXIT("COLL")
@@ -4021,7 +4021,7 @@ end subroutine dfpt_ciflexoout
  DBG_ENTER("COLL")
 
 !Gather the different terms in the q-gradient of the internal strain tensor
- ABI_ALLOCATE(isdqtens_red,(2,matom,3,nq1grad,3,3))
+ ABI_MALLOC(isdqtens_red,(2,matom,3,nq1grad,3,3))
 ! isdqtens_red=zero
 
  if (kptopt==3) then
@@ -4197,11 +4197,11 @@ end subroutine dfpt_ciflexoout
  end if
 
 !Transform to complete cartesian coordinates all the contributions
- ABI_ALLOCATE(isdqtens_cart,(2,matom,3,nq1grad,3,3))
- ABI_ALLOCATE(isdqwf_t4_cart,(2,matom,3,3,3,nq1grad))
- ABI_ALLOCATE(frwfdq_cart,(2,matom,3,3,3,nq1grad))
- ABI_ALLOCATE(dyewdqdq_cart,(2,3,matom,3,3,nq1grad))
- ABI_ALLOCATE(typeI_cartflag,(matom,3,3,3,nq1grad))
+ ABI_MALLOC(isdqtens_cart,(2,matom,3,nq1grad,3,3))
+ ABI_MALLOC(isdqwf_t4_cart,(2,matom,3,3,3,nq1grad))
+ ABI_MALLOC(frwfdq_cart,(2,matom,3,3,3,nq1grad))
+ ABI_MALLOC(dyewdqdq_cart,(2,3,matom,3,3,nq1grad))
+ ABI_MALLOC(typeI_cartflag,(matom,3,3,3,nq1grad))
  isdqtens_cart=isdqtens_red
  isdqwf_t4_cart=isdqwf_t4
  frwfdq_cart=frwfdq
@@ -4209,7 +4209,7 @@ end subroutine dfpt_ciflexoout
  typeI_cartflag=0
 
  if (prtvol>=10) then
-   ABI_ALLOCATE(isdqtens_buffer_cart,(5,2,matom,3,nq1grad,3,3))
+   ABI_MALLOC(isdqtens_buffer_cart,(5,2,matom,3,nq1grad,3,3))
    isdqtens_buffer_cart(1,:,:,:,:,:,:)=isdqwf_t1(:,:,:,:,:,:)
    isdqtens_buffer_cart(2,:,:,:,:,:,:)=isdqwf_t2(:,:,:,:,:,:)
    isdqtens_buffer_cart(3,:,:,:,:,:,:)=isdqwf_t3(:,:,:,:,:,:)
@@ -4589,12 +4589,12 @@ end subroutine dfpt_ciflexoout
 
 !Calculate the contribution to the d3etot in mixed (reduced/cartesian) coordinates
  isdqtens_red=isdqtens_cart
- ABI_DEALLOCATE(isdqtens_cart)
- ABI_DEALLOCATE(isdqwf_t4_cart)
- ABI_DEALLOCATE(frwfdq_cart)
- ABI_DEALLOCATE(dyewdqdq_cart)
- ABI_DEALLOCATE(typeI_cartflag)
- ABI_ALLOCATE(redflg,(matom,3,3,3,3))
+ ABI_FREE(isdqtens_cart)
+ ABI_FREE(isdqwf_t4_cart)
+ ABI_FREE(frwfdq_cart)
+ ABI_FREE(dyewdqdq_cart)
+ ABI_FREE(typeI_cartflag)
+ ABI_MALLOC(redflg,(matom,3,3,3,3))
 
 !1st transform back coordinates of the atomic displacement derivative
  do istr2dir=1,3
@@ -4663,8 +4663,8 @@ end subroutine dfpt_ciflexoout
    end do
  end do
 
- ABI_DEALLOCATE(isdqtens_red)
- ABI_DEALLOCATE(redflg)
+ ABI_FREE(isdqtens_red)
+ ABI_FREE(redflg)
 
  DBG_EXIT("COLL")
  end subroutine dfpt_isdqout

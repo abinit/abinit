@@ -1745,7 +1745,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! So doing it here, even though it is not clean
  Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
  Kmesh%nshift        =Dtset%nshiftk
- ABI_ALLOCATE(Kmesh%shift,(3,Kmesh%nshift))
+ ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
  Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
 
  call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
@@ -2398,10 +2398,10 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
      nomega_re=nomega_re+1
    endif
  enddo
- ABI_ALLOCATE(omega_re,(nomega_re))
- ABI_ALLOCATE(iomega_re,(nomega_re))
- ABI_ALLOCATE(im_epsm1_diag_qbz,(Ep%npwe,Ep%nomega))
- ABI_ALLOCATE(tmp_data,(Ep%nomega))
+ ABI_MALLOC(omega_re,(nomega_re))
+ ABI_MALLOC(iomega_re,(nomega_re))
+ ABI_MALLOC(im_epsm1_diag_qbz,(Ep%npwe,Ep%nomega))
+ ABI_MALLOC(tmp_data,(Ep%nomega))
 
  iomegap=0
  do iomega=1,Ep%nomega
@@ -2526,10 +2526,10 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
    close(unt_rsp)
  end if
 
- ABI_DEALLOCATE(omega_re)
- ABI_DEALLOCATE(iomega_re)
- ABI_DEALLOCATE(im_epsm1_diag_qbz)
- ABI_DEALLOCATE(tmp_data)
+ ABI_FREE(omega_re)
+ ABI_FREE(iomega_re)
+ ABI_FREE(im_epsm1_diag_qbz)
+ ABI_FREE(tmp_data)
 
 end subroutine random_stopping_power
 !!***
@@ -2603,17 +2603,17 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
  qeq0=(normv(Qmesh%ibz(:,iq),gmet,'G')<GW_TOLQ0)
 
  ! Calculate Gauss-Legendre quadrature knots and weights for the omega integration
- ABI_ALLOCATE(zw,(Ep%nomegaei))
- ABI_ALLOCATE(z,(Ep%nomegaei))
+ ABI_MALLOC(zw,(Ep%nomegaei))
+ ABI_MALLOC(z,(Ep%nomegaei))
  call coeffs_gausslegint(zero,one,z,zw,Ep%nomegaei)
 
  ! Calculate Gauss-Legendre quadrature knots and weights for the lambda integration
- ABI_ALLOCATE(zlw,(gwrpacorr))
- ABI_ALLOCATE(zl,(gwrpacorr))
+ ABI_MALLOC(zlw,(gwrpacorr))
+ ABI_MALLOC(zl,(gwrpacorr))
  call coeffs_gausslegint(zero,one,zl,zlw,gwrpacorr)
 
 
- ABI_ALLOCATE(chi0_diag,(Ep%npwe))
+ ABI_MALLOC(chi0_diag,(Ep%npwe))
  ABI_MALLOC_OR_DIE(chitmp,(Ep%npwe,Ep%npwe), ierr)
 
  do io=2,Ep%nomega
@@ -2627,7 +2627,7 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
          chitmp(ig1,ig2) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig2,iq) * chi0(ig1,ig2,io)
        end do !ig1
      end do !ig2
-     ABI_ALLOCATE(eig,(Ep%npwe))
+     ABI_MALLOC(eig,(Ep%npwe))
      call xheev('V','U',Ep%npwe,chitmp,eig)
 
      do ig1=1,Ep%npwe
@@ -2635,7 +2635,7 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 &         - zw(io-1) / ( z(io-1) * z(io-1) ) &
 &              * Qmesh%wt(iq) * (-log( 1.0_dp-eig(ig1) )  - eig(ig1) ) / (2.0_dp * pi )
      end do
-     ABI_DEALLOCATE(eig)
+     ABI_FREE(eig)
 
    else ! numerical integration over the coupling constant
 
@@ -2700,12 +2700,12 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 
  end if
 
- ABI_DEALLOCATE(chi0_diag)
- ABI_DEALLOCATE(chitmp)
- ABI_DEALLOCATE(zl)
- ABI_DEALLOCATE(zlw)
- ABI_DEALLOCATE(z)
- ABI_DEALLOCATE(zw)
+ ABI_FREE(chi0_diag)
+ ABI_FREE(chitmp)
+ ABI_FREE(zl)
+ ABI_FREE(zlw)
+ ABI_FREE(z)
+ ABI_FREE(zw)
 
  DBG_EXIT("COLL")
 

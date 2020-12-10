@@ -550,7 +550,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 ! *******************************************************************************************
  if (ipert == 0) then
 
-   ABI_ALLOCATE(gvnlxc,(2,size_wf))
+   ABI_MALLOC(gvnlxc,(2,size_wf))
    gvnlxc(:,:) = zero
 
 !  Test if < u^(0) | H^(0) | u^(0) > = eig0(jband)
@@ -574,7 +574,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
    cpopt=-1;if (has_cwaveprj) cpopt=2
    call getghc(cpopt,cwave,cwaveprj,h_cwave,s_cwave,gs_hamkq,gvnlxc,zero,mpi_enreg,1,prtvol,&
                sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
-   ABI_DEALLOCATE(gvnlxc)
+   ABI_FREE(gvnlxc)
 
 ! *******************************************************************************************
 ! apply H^(1)
@@ -583,7 +583,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
 !  Test if < u^(0) | ( H^(1) - eps^(0) S^(1) ) | u^(0) > = eig^(1)
    if(debug_mode/=0) then
-     ABI_ALLOCATE(iddk,(2,size_wf))
+     ABI_MALLOC(iddk,(2,size_wf))
      cwave_j => cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,1)
      if (has_cprj_jband) cprj_j => cprj_jband(:,1+(jband-1)*size_cprj:jband*size_cprj)
      iddk(:,:) = zero;if (ipert==natom+2) iddk(:,:)=cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,2)
@@ -607,7 +607,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
          call wrtout(std_out,msg)
        end if
      end do ! end iband
-     ABI_DEALLOCATE(iddk)
+     ABI_FREE(iddk)
    end if ! end tests
 
    call getgh1c(berryopt,cwave,cwaveprj,h_cwave,cwave_empty,s_cwave,gs_hamkq,gvnlx1,idir,ipert,zero,&
@@ -624,13 +624,13 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
      cwave_j => cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,1)
 
-     ABI_ALLOCATE(iddk,(2,size_wf))
+     ABI_MALLOC(iddk,(2,size_wf))
      iddk(:,:) = cwave_j(:,:)
 
      call getgh2c(cwave_j,cprj_empty,h_cwave,s_cwave,gs_hamkq,iddk,idir,ipert,zero,&
                   mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl,&
                   conj=compute_conjugate,optkin=0,enl=enl)
-     ABI_DEALLOCATE(iddk)
+     ABI_FREE(iddk)
 
      call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_j,h_cwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
@@ -667,7 +667,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        if (present(enl)) then
          enl_ptr => enl
        else if (associated(rf_hamk_idir%e1kbfr).and.associated(rf_hamk_idir%e1kbsc).and.optnl==2) then
-         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,rf_hamk_idir%cplex))
+         ABI_MALLOC(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,rf_hamk_idir%cplex))
          enl_temp(:,:,:,:) = rf_hamk_idir%e1kbfr(:,:,:,:) + rf_hamk_idir%e1kbsc(:,:,:,:)
          enl_ptr => enl_temp
        else if (associated(rf_hamk_idir%e1kbfr)) then
@@ -706,7 +706,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        if (present(enl)) then
          enl_ptr => enl
        else if (associated(rf_hamk_idir%e1kbfr).and.associated(rf_hamk_idir%e1kbsc).and.optnl==2) then
-         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,rf_hamk_idir%cplex))
+         ABI_MALLOC(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,rf_hamk_idir%cplex))
          enl_temp(:,:,:,:) = rf_hamk_idir%e1kbfr(:,:,:,:) + rf_hamk_idir%e1kbsc(:,:,:,:)
          enl_ptr => enl_temp
        else if (associated(rf_hamk_idir%e1kbfr)) then
@@ -755,7 +755,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        nullify(enl_ptr)
      end if
      if (allocated(enl_temp)) then
-       ABI_DEALLOCATE(enl_temp)
+       ABI_FREE(enl_temp)
      end if
 
    end if ! end tests
@@ -813,16 +813,16 @@ subroutine rf2_destroy(rf2)
 ! *************************************************************************
 
  if (associated(rf2%RHS_Stern)) then
-   ABI_DEALLOCATE(rf2%RHS_Stern)
+   ABI_FREE(rf2%RHS_Stern)
  end if
  if (allocated(rf2%dcwavef)) then
-   ABI_DEALLOCATE(rf2%dcwavef)
+   ABI_FREE(rf2%dcwavef)
  end if
  if (allocated(rf2%amn)) then
-   ABI_DEALLOCATE(rf2%amn)
+   ABI_FREE(rf2%amn)
  end if
  if (allocated(rf2%lambda_mn)) then
-   ABI_DEALLOCATE(rf2%lambda_mn)
+   ABI_FREE(rf2%lambda_mn)
  end if
 
 end subroutine rf2_destroy

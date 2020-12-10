@@ -121,15 +121,15 @@ subroutine gammapositron(gamma,grhocore2,grhoe2,igamma,ngr,npt,rhocore,rhoer,rho
    ABI_ERROR('Unknown electron-positron correlation !')
  end if
 
- ABI_ALLOCATE(rhor,(npt))
- ABI_ALLOCATE(rsepts,(npt))
+ ABI_MALLOC(rhor,(npt))
+ ABI_MALLOC(rsepts,(npt))
  if (gga)  then
-   ABI_ALLOCATE(grho2,(npt))
+   ABI_MALLOC(grho2,(npt))
  end if
 
 !Eventually compute positronic density radii
  if (igamma==1.or.igamma==4) then
-   ABI_ALLOCATE(rsppts,(npt))
+   ABI_MALLOC(rsppts,(npt))
    call invcb(rhopr(:),rsppts,npt)
    rsppts(:)=rsfac*rsppts(:)
  end if
@@ -250,13 +250,13 @@ subroutine gammapositron(gamma,grhocore2,grhoe2,igamma,ngr,npt,rhocore,rhoer,rho
    end do ! ipt
  end do ! iloop
 
- ABI_DEALLOCATE(rhor)
- ABI_DEALLOCATE(rsepts)
+ ABI_FREE(rhor)
+ ABI_FREE(rsepts)
  if (igamma==1.or.igamma==4)  then
-   ABI_DEALLOCATE(rsppts)
+   ABI_FREE(rsppts)
  end if
  if (gga)  then
-   ABI_DEALLOCATE(grho2)
+   ABI_FREE(grho2)
  end if
 
 !Case usecore=0 (no core density)
@@ -335,9 +335,9 @@ subroutine gammapositron_fft(electronpositron,gamma,gprimd,igamma,mpi_enreg,&
  ngr=0;if (ngrad==2) ngr=nfft
 
 !Allocate several arrays
- ABI_ALLOCATE(rhoe,(nfft,nspden_ep,ngrad**2))
- ABI_ALLOCATE(grhoe2,(ngr))
- ABI_ALLOCATE(grhocore2,(ngr*usecore))
+ ABI_MALLOC(rhoe,(nfft,nspden_ep,ngrad**2))
+ ABI_MALLOC(grhoe2,(ngr))
+ ABI_MALLOC(grhocore2,(ngr*usecore))
 
 !Store electronic density and its gradients
  call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,qphon,rhor_e,rhoe)
@@ -346,10 +346,10 @@ subroutine gammapositron_fft(electronpositron,gamma,gprimd,igamma,mpi_enreg,&
  if (ngrad==2) then
    grhoe2(:)=rhoe(:,1,2)**2+rhoe(:,1,3)**2+rhoe(:,1,4)**2
    if (usecore>0) then
-     ABI_ALLOCATE(rhoc,(nfft,1,ngrad**2))
+     ABI_MALLOC(rhoc,(nfft,1,ngrad**2))
      call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,qphon,xccc3d,rhoc)
      grhocore2(:)=rhoc(:,1,2)**2+rhoc(:,1,3)**2+rhoc(:,1,4)**2
-     ABI_DEALLOCATE(rhoc)
+     ABI_FREE(rhoc)
    end if
  end if
 
@@ -358,9 +358,9 @@ subroutine gammapositron_fft(electronpositron,gamma,gprimd,igamma,mpi_enreg,&
 & rhoe(:,1,1),rhor_p,usecore)
 
 !Release temporary memory
- ABI_DEALLOCATE(rhoe)
- ABI_DEALLOCATE(grhoe2)
- ABI_DEALLOCATE(grhocore2)
+ ABI_FREE(rhoe)
+ ABI_FREE(grhoe2)
+ ABI_FREE(grhocore2)
 
 end subroutine gammapositron_fft
 !!***

@@ -3125,8 +3125,8 @@ subroutine matrginv(a,lda,n)
  nwork=n
 #endif
 
- ABI_ALLOCATE(work,(nwork))
- ABI_ALLOCATE(ipvt,(n))
+ ABI_MALLOC(work,(nwork))
+ ABI_MALLOC(ipvt,(n))
 
 #if defined HAVE_LINALG_ESSL
 
@@ -3188,8 +3188,8 @@ subroutine matrginv(a,lda,n)
 
 #endif
 
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(ipvt)
+ ABI_FREE(work)
+ ABI_FREE(ipvt)
 
 end subroutine matrginv
 !!***

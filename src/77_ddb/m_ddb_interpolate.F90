@@ -383,10 +383,10 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
 
  natom = Crystal%natom
 
- ABI_ALLOCATE(dynmat, (2,3,natom,3,natom))
- ABI_ALLOCATE(dynmat_mask, (3,natom,3,natom))
- ABI_ALLOCATE(born_effective_charge_tensor, (3,natom,3))
- ABI_ALLOCATE(born_effective_charge_tensor_mask, (3,natom,3))
+ ABI_MALLOC(dynmat, (2,3,natom,3,natom))
+ ABI_MALLOC(dynmat_mask, (3,natom,3,natom))
+ ABI_MALLOC(born_effective_charge_tensor, (3,natom,3))
+ ABI_MALLOC(born_effective_charge_tensor_mask, (3,natom,3))
 
  ! Initialize NetCDF file.
  NCF_CHECK(nctk_open_create(ncid, filename, xmpi_comm_self))

@@ -257,7 +257,7 @@ subroutine vtorhorec(dtset,&
    if(.not.(rset%nl%nlpsp)) then
 !    --Local case
 !    --COMPUTATION OF exp( -beta*pot/(4*rtrotter))
-     ABI_ALLOCATE(gcart_loc,(0,0))
+     ABI_MALLOC(gcart_loc,(0,0))
      gcart_loc = 0
      exppot = exp( -(ratio4*vtrial(:,1)))
    else
@@ -265,9 +265,9 @@ subroutine vtorhorec(dtset,&
 !    --COMPUTATION OF exp(-beta*pot/(8*rtrotter))
      exppot = exp( -(ratio8*vtrial(:,1)))
 
-     ABI_ALLOCATE(gcart_loc,(3,dtset%natom))
+     ABI_MALLOC(gcart_loc,(3,dtset%natom))
      gcart_loc = rset%inf%gcart
-     ABI_ALLOCATE(projec,(0:ngfftrec(1)-1,0:ngfftrec(2)-1,0:ngfftrec(3)-1,rset%nl%lmnmax,dtset%natom))
+     ABI_MALLOC(projec,(0:ngfftrec(1)-1,0:ngfftrec(2)-1,0:ngfftrec(3)-1,rset%nl%lmnmax,dtset%natom))
      projec = zero
 
      if(.not.(rset%tronc)) then
@@ -296,9 +296,9 @@ subroutine vtorhorec(dtset,&
 
  if(rset%load == 1)then
 #ifdef HAVE_GPU_CUDA
-   ABI_ALLOCATE(rho_hyb,(1:rset%GPU%par%npt))
-   ABI_ALLOCATE(a_hyb,(0:nrec,1:rset%GPU%par%npt))
-   ABI_ALLOCATE(b2_hyb,(0:nrec,1:rset%GPU%par%npt))
+   ABI_MALLOC(rho_hyb,(1:rset%GPU%par%npt))
+   ABI_MALLOC(a_hyb,(0:nrec,1:rset%GPU%par%npt))
+   ABI_MALLOC(b2_hyb,(0:nrec,1:rset%GPU%par%npt))
    rho_hyb = zero; a_hyb = zero; b2_hyb = zero
    rho_wrk => rho_hyb
    a_wrk   => a_hyb
@@ -330,8 +330,8 @@ subroutine vtorhorec(dtset,&
 #if defined HAVE_GPU_CUDA
    swt_tm = 1;
    call timab(607,1,tsec2)
-   ABI_ALLOCATE(an_dev,(0:recpar%npt-1,0:nrec))
-   ABI_ALLOCATE(bn2_dev,(0:recpar%npt-1,0:nrec))
+   ABI_MALLOC(an_dev,(0:recpar%npt-1,0:nrec))
+   ABI_MALLOC(bn2_dev,(0:recpar%npt-1,0:nrec))
    an_dev = zero
    bn2_dev = zero; bn2_dev(:,0) = one
 
@@ -342,8 +342,8 @@ subroutine vtorhorec(dtset,&
    a_wrk(0:max_rec,1:recpar%npt)  = transpose(an_dev(0:,0:max_rec))
    b2_wrk(0:max_rec,1:recpar%npt) = transpose(bn2_dev(0:,0:max_rec))
 
-   ABI_DEALLOCATE(an_dev)
-   ABI_DEALLOCATE(bn2_dev)
+   ABI_FREE(an_dev)
+   ABI_FREE(bn2_dev)
    call timab(607,2,tsec2)
 
    ipointlocal = recpar%npt+1
@@ -393,7 +393,7 @@ subroutine vtorhorec(dtset,&
        end do
      end do graou1
    else !--We use a troncation
-     ABI_ALLOCATE(exppotloc,(0:nfftrec-1))
+     ABI_MALLOC(exppotloc,(0:nfftrec-1))
      graou2 : do kk = recpar%pt0%z,recpar%pt1%z,dtset%recgratio
        do jj = 0,n2-1,dtset%recgratio
          do ii = 0,n1-1,dtset%recgratio
@@ -438,7 +438,7 @@ subroutine vtorhorec(dtset,&
          end do
        end do
      end do graou2
-     ABI_DEALLOCATE(exppotloc)
+     ABI_FREE(exppotloc)
    end if
 
  end if
@@ -454,8 +454,8 @@ subroutine vtorhorec(dtset,&
 !  --Bufsize contains the values of the number of points calculated
 !  by any proc on the coarse grid; bufsize_f on the fine grid
    call timab(604,1,tsec2) !--start time-counter: transgrid
-   ABI_ALLOCATE(bufsize,(0:rset%mpi%nproc-1))
-   ABI_ALLOCATE(bufdispl,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(bufsize,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(bufdispl,(0:rset%mpi%nproc-1))
    bufsize = 0;
    bufsize(rset%mpi%me) = rset%par%npt
    call xmpi_sum(bufsize,rset%mpi%comm_bandfft,ierr)
@@ -475,10 +475,10 @@ subroutine vtorhorec(dtset,&
 &   rset%mpi%comm_bandfft,ierr)
 
 
-   ABI_ALLOCATE(vcount_0,(0:rset%mpi%nproc-1))
-   ABI_ALLOCATE(displs_0,(0:rset%mpi%nproc-1))
-   ABI_ALLOCATE(vcount_1,(0:rset%mpi%nproc-1))
-   ABI_ALLOCATE(displs_1,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(vcount_0,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(displs_0,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(vcount_1,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(displs_1,(0:rset%mpi%nproc-1))
 
    vcount_0 = 0
    vcount_0(rset%mpi%me) = rset%par%npt*(nrec+1)
@@ -505,13 +505,13 @@ subroutine vtorhorec(dtset,&
 &   rset%mpi%comm_bandfft,ierr)
 
    nullify(rho_wrk,a_wrk,b2_wrk)
-   ABI_DEALLOCATE(rho_hyb)
-   ABI_DEALLOCATE(a_hyb)
-   ABI_DEALLOCATE(b2_hyb)
-   ABI_DEALLOCATE(vcount_0)
-   ABI_DEALLOCATE(displs_0)
-   ABI_DEALLOCATE(vcount_1)
-   ABI_DEALLOCATE(displs_1)
+   ABI_FREE(rho_hyb)
+   ABI_FREE(a_hyb)
+   ABI_FREE(b2_hyb)
+   ABI_FREE(vcount_0)
+   ABI_FREE(displs_0)
+   ABI_FREE(vcount_1)
+   ABI_FREE(displs_1)
    call timab(604,2,tsec2) !--start time-counter: transgrid
  end if
 #endif
@@ -524,13 +524,13 @@ subroutine vtorhorec(dtset,&
    call wrtout(std_out,msg,'COLL')
    call timab(604,1,tsec2) !--start time-counter: transgrid
 
-   ABI_ALLOCATE(rholocal_f,(rset%pawfgr%nfft))
-   ABI_ALLOCATE(rhogf,(2,rset%pawfgr%nfft))
-   ABI_ALLOCATE(rhogc,(2,rset%pawfgr%nfftc))
-   ABI_ALLOCATE(rholoc_2,(1:rset%pawfgr%nfftc))
-   ABI_ALLOCATE(ablocal_2,(1:rset%pawfgr%nfftc,0:nrec,2))
-   ABI_ALLOCATE(ablocal_f,(1:rset%pawfgr%nfft,0:nrec,2))
-   ABI_ALLOCATE(ablocal_1,(1:rset%par%npt,0:nrec,2))
+   ABI_MALLOC(rholocal_f,(rset%pawfgr%nfft))
+   ABI_MALLOC(rhogf,(2,rset%pawfgr%nfft))
+   ABI_MALLOC(rhogc,(2,rset%pawfgr%nfftc))
+   ABI_MALLOC(rholoc_2,(1:rset%pawfgr%nfftc))
+   ABI_MALLOC(ablocal_2,(1:rset%pawfgr%nfftc,0:nrec,2))
+   ABI_MALLOC(ablocal_f,(1:rset%pawfgr%nfft,0:nrec,2))
+   ABI_MALLOC(ablocal_1,(1:rset%par%npt,0:nrec,2))
 
    call destroy_distribfft(rset%mpi%distribfft)
    call init_distribfft(rset%mpi%distribfft,'c',rset%mpi%nproc_fft,rset%pawfgr%ngfftc(2) ,rset%pawfgr%ngfftc(3))
@@ -542,8 +542,8 @@ subroutine vtorhorec(dtset,&
    ablocal_1(:,:,2) = transpose(b2local(:,1:rset%par%npt))
 
    if(get_K_S_G==1 .and. dtset%recgratio>1 ) then
-     ABI_ALLOCATE(aloc_copy,(0:nrec,1:rset%par%npt))
-     ABI_ALLOCATE(b2loc_copy,(0:nrec,1:rset%par%npt))
+     ABI_MALLOC(aloc_copy,(0:nrec,1:rset%par%npt))
+     ABI_MALLOC(b2loc_copy,(0:nrec,1:rset%par%npt))
      aloc_copy = alocal(:,1:rset%par%npt)
      b2loc_copy = b2local(:,1:rset%par%npt)
    end if
@@ -612,13 +612,13 @@ subroutine vtorhorec(dtset,&
        end if
      end do
    end if
-   ABI_DEALLOCATE(ablocal_f)
-   ABI_DEALLOCATE(ablocal_2)
-   ABI_DEALLOCATE(ablocal_1)
-   ABI_DEALLOCATE(rhogf)
-   ABI_DEALLOCATE(rholocal_f)
-   ABI_DEALLOCATE(rhogc)
-   ABI_DEALLOCATE(rholoc_2)
+   ABI_FREE(ablocal_f)
+   ABI_FREE(ablocal_2)
+   ABI_FREE(ablocal_1)
+   ABI_FREE(rhogf)
+   ABI_FREE(rholocal_f)
+   ABI_FREE(rhogc)
+   ABI_FREE(rholoc_2)
 
    call timab(604,2,tsec2) !--stop time-counter: transgrid
  else
@@ -653,14 +653,14 @@ subroutine vtorhorec(dtset,&
 
    if(dtset%recgratio>1) then
 !    --Recgratio>1
-     ABI_ALLOCATE(rhogf,(2,rset%pawfgr%nfft))
-     ABI_ALLOCATE(rhogc,(2,rset%pawfgr%nfftc))
-     ABI_ALLOCATE(entropy_v_f,(rset%pawfgr%nfft,0:4))
-     ABI_ALLOCATE(entropy_v_c,(rset%pawfgr%nfftc,0:4))
-     ABI_ALLOCATE(entropy_v_2,(1:rset%par%npt,0:4))
-     ABI_ALLOCATE(gran_pot_v_f,(rset%pawfgr%nfft,0:4))
-     ABI_ALLOCATE(gran_pot_v_c,(rset%pawfgr%nfftc,0:4))
-     ABI_ALLOCATE(gran_pot_v_2,(1:rset%par%npt,0:4))
+     ABI_MALLOC(rhogf,(2,rset%pawfgr%nfft))
+     ABI_MALLOC(rhogc,(2,rset%pawfgr%nfftc))
+     ABI_MALLOC(entropy_v_f,(rset%pawfgr%nfft,0:4))
+     ABI_MALLOC(entropy_v_c,(rset%pawfgr%nfftc,0:4))
+     ABI_MALLOC(entropy_v_2,(1:rset%par%npt,0:4))
+     ABI_MALLOC(gran_pot_v_f,(rset%pawfgr%nfft,0:4))
+     ABI_MALLOC(gran_pot_v_c,(rset%pawfgr%nfftc,0:4))
+     ABI_MALLOC(gran_pot_v_2,(1:rset%par%npt,0:4))
 
      entropy_v_c = zero; entropy_v_f = zero; entropy_v_2 = zero
      gran_pot_v_c = zero; gran_pot_v_f = zero; gran_pot_v_2 = zero
@@ -685,8 +685,8 @@ subroutine vtorhorec(dtset,&
 &       gran_pot_v_2(ipoint,3),&
 &       gran_pot_v_2(ipoint,4))
      end do
-     ABI_DEALLOCATE(aloc_copy)
-     ABI_DEALLOCATE(b2loc_copy)
+     ABI_FREE(aloc_copy)
+     ABI_FREE(b2loc_copy)
 
      call timab(613+swt_tm,1,tsec2)  !!--start time-counter: sync gpu-cpu
      call xmpi_barrier(rset%mpi%comm_bandfft)
@@ -732,14 +732,14 @@ subroutine vtorhorec(dtset,&
        gran_pot4 = sum(gran_pot_v_f(:,4))
      end if
 
-     ABI_DEALLOCATE(entropy_v_f)
-     ABI_DEALLOCATE(entropy_v_c)
-     ABI_DEALLOCATE(entropy_v_2)
-     ABI_DEALLOCATE(rhogf)
-     ABI_DEALLOCATE(rhogc)
-     ABI_DEALLOCATE(gran_pot_v_f)
-     ABI_DEALLOCATE(gran_pot_v_c)
-     ABI_DEALLOCATE(gran_pot_v_2)
+     ABI_FREE(entropy_v_f)
+     ABI_FREE(entropy_v_c)
+     ABI_FREE(entropy_v_2)
+     ABI_FREE(rhogf)
+     ABI_FREE(rhogc)
+     ABI_FREE(gran_pot_v_f)
+     ABI_FREE(gran_pot_v_c)
+     ABI_FREE(gran_pot_v_2)
 
 
    else
@@ -820,14 +820,14 @@ subroutine vtorhorec(dtset,&
 
 !if(associated(projec))
  if(rset%nl%nlpsp)  then
-   ABI_DEALLOCATE(projec)
+   ABI_FREE(projec)
  end if
  if(associated(gcart_loc))  then
-   ABI_DEALLOCATE(gcart_loc)
+   ABI_FREE(gcart_loc)
  end if
  if((dtset%recgratio/=1 .or. rset%load==1))  then
-   ABI_DEALLOCATE(bufdispl)
-   ABI_DEALLOCATE(bufsize)
+   ABI_FREE(bufdispl)
+   ABI_FREE(bufsize)
  end if
 !------------------------------------------------------------------
 !--Check if the convergence is reached for rho
@@ -2027,12 +2027,12 @@ subroutine nlenergyrec(rset,enlx,exppot,ngfft,natom,typat,tsmear,trotter,tol)
  me_count = 0
  dim_trott = max(0,2*trotter-1)
  nullify(projec)
- ABI_ALLOCATE(projec,(0:rset%ngfftrec(1)-1,0:rset%ngfftrec(2)-1,0:rset%ngfftrec(3)-1,rset%nl%lmnmax,natom))
+ ABI_MALLOC(projec,(0:rset%ngfftrec(1)-1,0:rset%ngfftrec(2)-1,0:rset%ngfftrec(3)-1,rset%nl%lmnmax,natom))
  projec = zero
 
  tronc = rset%tronc  !--True if troncation is used
  if(tronc)   then
-   ABI_ALLOCATE(exppotloc,(0:rset%nfftrec-1))
+   ABI_MALLOC(exppotloc,(0:rset%nfftrec-1))
  end if
 
 
@@ -2123,10 +2123,10 @@ subroutine nlenergyrec(rset,enlx,exppot,ngfft,natom,typat,tsmear,trotter,tol)
  call xmpi_sum(enlx,mpi_loc%comm_bandfft,ierr)
 
  if(associated(projec))  then
-   ABI_DEALLOCATE(projec)
+   ABI_FREE(projec)
  end if
  if(tronc)  then
-   ABI_DEALLOCATE(exppotloc)
+   ABI_FREE(exppotloc)
  end if
 
  if(rset%debug)then
@@ -2251,7 +2251,7 @@ subroutine first_rec(dtset,psps,rset)
 !--COMPUTATION OF THE FOURIER TRANSFORM OF THE GREEN KERNEL (only once)
  write (msg,'(a)')' - green kernel calculation -----------------------'
  call wrtout(std_out,msg,'COLL')
- ABI_ALLOCATE(rset%ZT_p,(1:2,0: nfftrec-1))
+ ABI_MALLOC(rset%ZT_p,(1:2,0: nfftrec-1))
  call timab(601,2,tsec)
  call green_kernel(rset%ZT_p,rset%inf%rmet,rset%inf%ucvol,rtrotter/beta,rset%mpi,ngfftrec,nfftrec)
  call timab(601,1,tsec)
@@ -2282,7 +2282,7 @@ subroutine first_rec(dtset,psps,rset)
      testpts = min(rset%par%npt, 20)
      call timein(tsec2(1),tsec2(2))
      if(rset%tronc) then
-       ABI_ALLOCATE(exppotloc,(0:nfftrec-1))
+       ABI_MALLOC(exppotloc,(0:nfftrec-1))
        do while(ii< testpts)
          trasl = -(/1,2,3/)+ngfftrec(:3)/2
          call reshape_pot(trasl,dtset%nfft,nfftrec,dtset%ngfft(:3),ngfftrec(:3),&
@@ -2299,7 +2299,7 @@ subroutine first_rec(dtset,psps,rset)
 &         6,dtset%natom,dm_projec,0)
          ii=ii+1
        end do
-       ABI_DEALLOCATE(exppotloc)
+       ABI_FREE(exppotloc)
      else
        do while(ii< testpts)
          call recursion(exppot,0,0,0, &
@@ -2328,14 +2328,14 @@ subroutine first_rec(dtset,psps,rset)
 &     rset_test%GPU%par%npt,rset_test%GPU%par)
 
 
-     ABI_ALLOCATE(aloc_cu,(rset_test%GPU%par%npt))
-     ABI_ALLOCATE(b2loc_cu,(rset_test%GPU%par%npt))
+     ABI_MALLOC(aloc_cu,(rset_test%GPU%par%npt))
+     ABI_MALLOC(b2loc_cu,(rset_test%GPU%par%npt))
      call timein(tsec2(1),tsec2(2))
      call cudarec(rset_test, exppot,aloc_cu,b2loc_cu,&
 &     beta,trotter,dtset%rectolden,dtset%recgratio,dtset%ngfft,max_rec)
      call timein(tsec3(1),tsec3(2))
-     ABI_DEALLOCATE(aloc_cu)
-     ABI_DEALLOCATE(b2loc_cu)
+     ABI_FREE(aloc_cu)
+     ABI_FREE(b2loc_cu)
 
      time_cu = (tsec3(1)-tsec2(1))/real(rset_test%GPU%par%npt,dp)
      time_cu = time_cu*time_cu
@@ -2447,7 +2447,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 
  norme = (mult/pi)**(onehalf)
 
- ABI_ALLOCATE(T_p,(0:nfft-1))
+ ABI_MALLOC(T_p,(0:nfft-1))
 
 !n_green should be better chosen for non rectangular cell
  do xx=1, n_green_max
@@ -2502,7 +2502,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
  isign = -1
  call fourdp(1,ZT_p,T_p,isign,mpi_enreg,nfft,1,ngfft,0)
 
- ABI_DEALLOCATE(T_p)
+ ABI_FREE(T_p)
 
  ZT_p(:,:) = real(nfft,dp)*ZT_p
 

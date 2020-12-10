@@ -113,7 +113,7 @@ subroutine make_orbl_paw(idir,natom,ntypat,orbl,pawrad,pawtab,typat)
    indlmn => pawtab(itypat)%indlmn
    
    mesh_size=pawtab(itypat)%mesh_size
-   ABI_ALLOCATE(ff,(mesh_size))
+   ABI_MALLOC(ff,(mesh_size))
 
 !    loop over basis elements for this atom
 !    ----
@@ -143,7 +143,7 @@ subroutine make_orbl_paw(idir,natom,ntypat,orbl,pawrad,pawtab,typat)
       end do ! end loop over ilmn
    end do ! end loop over jlmn
       
-   ABI_DEALLOCATE(ff)
+   ABI_FREE(ff)
 
  end do     ! Loop on atoms
 
@@ -264,12 +264,12 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 !  and therefore nothing to contribute to the on-site electric field gradient
 
    mesh_size=pawtab(itypat)%mesh_size
-   ABI_ALLOCATE(ff,(mesh_size))
+   ABI_MALLOC(ff,(mesh_size))
 
    cplex = pawrhoij(iatom)%qphase
    nspden = pawrhoij(iatom)%nspden
-   ABI_ALLOCATE(lmselectin,(lm_size))
-   ABI_ALLOCATE(lmselectout,(lm_size))
+   ABI_MALLOC(lmselectin,(lm_size))
+   ABI_MALLOC(lmselectout,(lm_size))
    lmselectin = .true. ! compute all moments of densities
    nzlmopt = -1
    opt_compch = 0
@@ -278,9 +278,9 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
    opt_l = -1 ! all moments contribute
    opt_print = 0 ! do not print out moments
 
-   ABI_ALLOCATE(nhat1,(cplex*mesh_size,lm_size,nspden))
-   ABI_ALLOCATE(rho1,(cplex*mesh_size,lm_size,nspden))
-   ABI_ALLOCATE(trho1,(cplex*mesh_size,lm_size,nspden))
+   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,nspden))
+   ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,nspden))
+   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,nspden))
 
 !  loop over spin components
 !  nspden = 1: just a single component
@@ -338,12 +338,12 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
    efg(3,1,iatom_tot) = efg(1,3,iatom_tot)
    efg(3,2,iatom_tot) = efg(2,3,iatom_tot)
 
-   ABI_DEALLOCATE(lmselectin)
-   ABI_DEALLOCATE(lmselectout)
-   ABI_DEALLOCATE(ff)
-   ABI_DEALLOCATE(nhat1)
-   ABI_DEALLOCATE(rho1)
-   ABI_DEALLOCATE(trho1)
+   ABI_FREE(lmselectin)
+   ABI_FREE(lmselectout)
+   ABI_FREE(ff)
+   ABI_FREE(nhat1)
+   ABI_FREE(rho1)
+   ABI_FREE(trho1)
 
  end do     ! Loop on atoms
 

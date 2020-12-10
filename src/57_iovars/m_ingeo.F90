@@ -196,8 +196,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 ! *************************************************************************
 
  marr=max(12,3*natom,9*msym)
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
  ! Try from geo_string
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, 'KEY', key_value=geo_string)
@@ -268,7 +268,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ! Find a tentative Bravais lattice and its point symmetries (might not use them)
  ! Note that the Bravais lattice might not be the correct one yet (because the
  ! actual atomic locations might lower the symmetry obtained from the lattice parameters only)
- ABI_ALLOCATE(ptsymrel,(3,3,msym))
+ ABI_MALLOC(ptsymrel,(3,3,msym))
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
  ! 3) Possibly, initialize a jellium slab
@@ -318,7 +318,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  end if
 
  ! 5) Read the type and initial spin of each atom in the primitive set--------
- ABI_ALLOCATE(typat_read,(natrd))
+ ABI_MALLOC(typat_read,(natrd))
  typat_read(1)=1
 
  if (tread_geo == 0) then
@@ -343,8 +343,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  end do
 
  ! 6) Read coordinates for each atom in the primitive set--------
- ABI_ALLOCATE(xcart_read,(3,natrd))
- ABI_ALLOCATE(xred_read,(3,natrd))
+ ABI_MALLOC(xcart_read,(3,natrd))
+ ABI_MALLOC(xred_read,(3,natrd))
 
  random_atpos=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_atpos',txrandom,'INT')
@@ -419,7 +419,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! Here, allocate the variable that will contain the completed
  ! sets of xcart, after the use of the geometry builder or the symmetry builder
- ABI_ALLOCATE(xcart,(3,natom))
+ ABI_MALLOC(xcart,(3,natom))
 
  !7) Eventually read the symmetries
  !Take care of the symmetries
@@ -732,10 +732,10 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          call xred2xcart(natrd,rprimd,xcart,xred)
          call xcart2xred(natrd,rprimd_new,xcart,xred)
 !        Produce tnons in the new system of coordinates
-         ABI_ALLOCATE(tnons_cart,(3,nsym))
+         ABI_MALLOC(tnons_cart,(3,nsym))
          call xred2xcart(nsym,rprimd,tnons_cart,tnons)
          call xcart2xred(nsym,rprimd_new,tnons_cart,tnons)
-         ABI_DEALLOCATE(tnons_cart)
+         ABI_FREE(tnons_cart)
 
          ! write(std_out,*)' after change of coordinates, nsym =',nsym
          ! write(std_out,*)' Describe the different symmetry operations (index,symrel,tnons,symafm)'
@@ -867,15 +867,15 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        ! symmetrize the atomic positions and recompute the symmetry operations 
        if(tolsym>1.00001e-8)then
          call symmetrize_tnons(nsym,symrel,tnons,tolsym)
-         ABI_ALLOCATE(indsym,(4,natom,nsym))
-         ABI_ALLOCATE(symrec,(3,3,nsym))
+         ABI_MALLOC(indsym,(4,natom,nsym))
+         ABI_MALLOC(symrec,(3,3,nsym))
          do isym=1,nsym
            call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
          end do
          call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
          call symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym=indsym)
-         ABI_DEALLOCATE(indsym)
-         ABI_DEALLOCATE(symrec)
+         ABI_FREE(indsym)
+         ABI_FREE(symrec)
 
          write(msg,'(a,es12.3,11a)')&
           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
@@ -891,12 +891,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
            chrgat=chrgat,nucdipmom=nucdipmom)
 
          !Needs one more resymmetrization, for the tnons
-         ABI_ALLOCATE(tnons_new,(3,nsym))
+         ABI_MALLOC(tnons_new,(3,nsym))
 
          call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
 &          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
          tnons(:,1:nsym)=tnons_new(:,:)
-         ABI_DEALLOCATE(tnons_new)
+         ABI_FREE(tnons_new)
 
        end if
      end if
@@ -907,11 +907,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  end if ! check of existence of an object
 
- ABI_DEALLOCATE(ptsymrel)
- ABI_DEALLOCATE(xcart_read)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xred_read)
- ABI_DEALLOCATE(typat_read)
+ ABI_FREE(ptsymrel)
+ ABI_FREE(xcart_read)
+ ABI_FREE(xcart)
+ ABI_FREE(xred_read)
+ ABI_FREE(typat_read)
 
  call geo%free()
 
@@ -978,11 +978,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      call mkradim(acell,rprim,rprimd)
 
      !Needs one more resymmetrization, for the tnons
-     ABI_ALLOCATE(tnons_new,(3,nsym))
+     ABI_MALLOC(tnons_new,(3,nsym))
      call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
 &          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
      tnons(:,1:nsym)=tnons_new(:,:)
-     ABI_DEALLOCATE(tnons_new)
+     ABI_FREE(tnons_new)
 
    end if
 
@@ -1128,7 +1128,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! amu (needs mixalch to be initialized ...)
  ! Find the default mass
- ABI_ALLOCATE(mass_psp,(npsp))
+ ABI_MALLOC(mass_psp,(npsp))
  do ipsp=1,npsp
    call atomdata_from_znucl(atom,znucl(ipsp))
    amu_default = atom%amu
@@ -1148,14 +1148,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      end do
    end do
  end if
- ABI_DEALLOCATE(mass_psp)
+ ABI_FREE(mass_psp)
 
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'amu',tread,'DPR')
  if(tread==1)amu(:)=dprarr(1:ntypat)
  call intagm_img(amu,iimage,jdtset,lenstr,nimage,ntypat,string,"amu",tread,'DPR')
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 !DEBUG
 !write(std_out,'(a)')' m_ingeo : end ingeo '
@@ -1230,8 +1230,8 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 ! *************************************************************************
 
  marr=max(12,3*natom)
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
 !1) Set up the number of vacancies.
 
@@ -1241,7 +1241,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  if(tread==1) vacnum=intarr(1)
 
  if (vacnum>0)then
-   ABI_ALLOCATE(vaclst,(vacnum))
+   ABI_MALLOC(vaclst,(vacnum))
 !  Read list of atoms to be suppressed to create vacancies
    call intagm(dprarr,intarr,jdtset,marr,vacnum,string(1:lenstr),'vaclst',tread,'INT')
    if(tread==1) vaclst(:)=intarr(1:vacnum)
@@ -1318,7 +1318,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 
 !  Read list of atoms in object a
    call intagm(dprarr,intarr,jdtset,marr,objan,string(1:lenstr),'objaat',tread,'INT')
-   ABI_ALLOCATE(objaat,(objan))
+   ABI_MALLOC(objaat,(objan))
    if(tread==1) objaat(1:objan)=intarr(1:objan)
 
    if(tread/=1)then
@@ -1463,7 +1463,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 
 !  Read list of atoms in object b
    call intagm(dprarr,intarr,jdtset,marr,objbn,string(1:lenstr),'objbat',tread,'INT')
-   ABI_ALLOCATE(objbat,(objbn))
+   ABI_MALLOC(objbat,(objbn))
 
    if(tread==1) objbat(1:objbn)=intarr(1:objbn)
    if(tread/=1)then
@@ -1630,8 +1630,8 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  write(iout,format01160) '      ',xcart_read(:,:)
  write(std_out,format01160) '      ',xcart_read(:,:)
 
- ABI_ALLOCATE(typat_full,(natom+vacnum))
- ABI_ALLOCATE(xcart_full,(3,natom+vacnum))
+ ABI_MALLOC(typat_full,(natom+vacnum))
+ ABI_MALLOC(xcart_full,(3,natom+vacnum))
 
 !Use the work array xcart_full to produce full set of atoms,
 !including those coming from repeated objects.
@@ -1788,19 +1788,19 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  xcart(:,1:natom)=xcart_full(:,1:natom)
  typat(1:natom)=typat_full(1:natom)
 
- ABI_DEALLOCATE(typat_full)
- ABI_DEALLOCATE(xcart_full)
+ ABI_FREE(typat_full)
+ ABI_FREE(xcart_full)
  if(allocated(objaat)) then
-   ABI_DEALLOCATE(objaat)
+   ABI_FREE(objaat)
  end if
  if(allocated(objbat)) then
-   ABI_DEALLOCATE(objbat)
+   ABI_FREE(objbat)
  end if
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
  if (vacnum>0)  then
-   ABI_DEALLOCATE(vaclst)
+   ABI_FREE(vaclst)
  end if
 
 end subroutine ingeobld
@@ -2025,8 +2025,8 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
 
 !Compute the maximum size of arrays intarr and dprarr
  marr=3
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
 !Get metric quantities
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -2044,8 +2044,8 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
    vacuum(1:3)=intarr(1:3)
  else
 !  For each direction, determine whether a vacuum space exists
-   ABI_ALLOCATE(list,(natom))
-   ABI_ALLOCATE(xred_sorted,(natom))
+   ABI_MALLOC(list,(natom))
+   ABI_MALLOC(xred_sorted,(natom))
    do ii=1,3
 !    This is the minimum xred difference needed to have vacwidth
      vacxred=vacwidth*sqrt(sum(gprimd(:,ii)**2))
@@ -2068,16 +2068,16 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
      end if
      if(vacxred<max_diff_xred+tol10)vacuum(ii)=1
    end do
-   ABI_DEALLOCATE(list)
-   ABI_DEALLOCATE(xred_sorted)
+   ABI_FREE(list)
+   ABI_FREE(xred_sorted)
  end if
 
 !DEBUG
 !write(std_out,*)' invacuum : vacuum=',vacuum(1:3)
 !ENDDEBUG
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 end subroutine invacuum
 !!***

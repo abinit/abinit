@@ -252,7 +252,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
 !Determine whether the spin-orbit characteristic has changed
 !Do not forget that the SO is not consistent with alchemy presently
- ABI_ALLOCATE(new_pspso,(npsp))
+ ABI_MALLOC(new_pspso,(npsp))
  if (ifirst==1) pspso_old(:)=-1
  if (ifirst==1) pspso_zero(:)=-1
  do ipsp=1,npsp
@@ -301,7 +301,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    end if
    if (gencond/=0) gencond=1
  end if
- ABI_DEALLOCATE(new_pspso)
+ ABI_FREE(new_pspso)
 
 !-------------------------------------------------------------
 ! Following section is only reached when new computation
@@ -313,14 +313,14 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    write(msg, '(a,a)' ) ch10,'--- Pseudopotential description ------------------------------------------------'
    call wrtout(ab_out,msg)
 
-   ABI_ALLOCATE(ekb,(psps%dimekb*(1-psps%usepaw)))
-   ABI_ALLOCATE(xccc1d,(psps%n1xccc*(1-psps%usepaw),6))
-   ABI_ALLOCATE(ffspl,(psps%mqgrid_ff,2,psps%lnmax))
-   ABI_ALLOCATE(vlspl,(psps%mqgrid_vl,2))
+   ABI_MALLOC(ekb,(psps%dimekb*(1-psps%usepaw)))
+   ABI_MALLOC(xccc1d,(psps%n1xccc*(1-psps%usepaw),6))
+   ABI_MALLOC(ffspl,(psps%mqgrid_ff,2,psps%lnmax))
+   ABI_MALLOC(vlspl,(psps%mqgrid_vl,2))
    if (.not.psps%vlspl_recipSpace) then
-     ABI_ALLOCATE(dvlspl,(psps%mqgrid_vl,2))
+     ABI_MALLOC(dvlspl,(psps%mqgrid_vl,2))
    else
-     ABI_ALLOCATE(dvlspl,(0,0))
+     ABI_MALLOC(dvlspl,(0,0))
    end if
 
 !  PAW: reset flags for optional data
@@ -379,17 +379,17 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
      npspalch=psps%npspalch
      ntyppure=npsp-npspalch
      ntypalch=psps%ntypalch
-     ABI_ALLOCATE(epsatm_alch,(npspalch))
-     ABI_ALLOCATE(ekb_alch,(psps%dimekb,npspalch*(1-psps%usepaw)))
-     ABI_ALLOCATE(ffspl_alch,(psps%mqgrid_ff,2,psps%lnmax,npspalch))
-     ABI_ALLOCATE(xccc1d_alch,(psps%n1xccc*(1-psps%usepaw),6,npspalch))
-     ABI_ALLOCATE(xcccrc_alch,(npspalch))
-     ABI_ALLOCATE(vlspl_alch,(psps%mqgrid_vl,2,npspalch))
+     ABI_MALLOC(epsatm_alch,(npspalch))
+     ABI_MALLOC(ekb_alch,(psps%dimekb,npspalch*(1-psps%usepaw)))
+     ABI_MALLOC(ffspl_alch,(psps%mqgrid_ff,2,psps%lnmax,npspalch))
+     ABI_MALLOC(xccc1d_alch,(psps%n1xccc*(1-psps%usepaw),6,npspalch))
+     ABI_MALLOC(xcccrc_alch,(npspalch))
+     ABI_MALLOC(vlspl_alch,(psps%mqgrid_vl,2,npspalch))
      if (.not.psps%vlspl_recipSpace) then
-       ABI_ALLOCATE(dvlspl_alch,(psps%mqgrid_vl,2,npspalch))
+       ABI_MALLOC(dvlspl_alch,(psps%mqgrid_vl,2,npspalch))
      end if
-     ABI_ALLOCATE(indlmn,(6,psps%lmnmax))
-     ABI_ALLOCATE(indlmn_alch,(6,psps%lmnmax,npspalch))
+     ABI_MALLOC(indlmn,(6,psps%lmnmax))
+     ABI_MALLOC(indlmn_alch,(6,psps%lmnmax,npspalch))
 
      ! Allocate NC tables used for mixing.
      if (psps%usepaw == 0) then
@@ -539,17 +539,17 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
      end do ! itypalch
 
-     ABI_DEALLOCATE(epsatm_alch)
-     ABI_DEALLOCATE(ekb_alch)
-     ABI_DEALLOCATE(ffspl_alch)
-     ABI_DEALLOCATE(xccc1d_alch)
-     ABI_DEALLOCATE(xcccrc_alch)
-     ABI_DEALLOCATE(vlspl_alch)
+     ABI_FREE(epsatm_alch)
+     ABI_FREE(ekb_alch)
+     ABI_FREE(ffspl_alch)
+     ABI_FREE(xccc1d_alch)
+     ABI_FREE(xcccrc_alch)
+     ABI_FREE(vlspl_alch)
      if (.not.psps%vlspl_recipSpace) then
-       ABI_DEALLOCATE(dvlspl_alch)
+       ABI_FREE(dvlspl_alch)
      end if
-     ABI_DEALLOCATE(indlmn_alch)
-     ABI_DEALLOCATE(indlmn)
+     ABI_FREE(indlmn_alch)
+     ABI_FREE(indlmn)
 
      ! Mix NC tables.
      if (psps%usepaw == 0) then
@@ -561,13 +561,13 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
      end if
    end if ! mtypalch
 
-   ABI_DEALLOCATE(ekb)
-   ABI_DEALLOCATE(ffspl)
-   ABI_DEALLOCATE(vlspl)
-   ABI_DEALLOCATE(xccc1d)
+   ABI_FREE(ekb)
+   ABI_FREE(ffspl)
+   ABI_FREE(vlspl)
+   ABI_FREE(xccc1d)
 
    if (.not.psps%vlspl_recipSpace) then
-     ABI_DEALLOCATE(dvlspl)
+     ABI_FREE(dvlspl)
    end if
 
  end if !  End condition of new computation needed
@@ -879,7 +879,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
    !  ----------------------------------------------------------------------------
    !  allocate nproj here: can be read in now for UPF
-   ABI_ALLOCATE(nproj,(psps%mpssoang))
+   ABI_MALLOC(nproj,(psps%mpssoang))
    nproj(:)=0
 
    if (usexml /= 1 .and. useupf /= 1) then
@@ -1073,13 +1073,13 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
 !  -----------------------------------------------------------------------
 !  Set various terms to 0 in case not defined below
-   ABI_ALLOCATE(e990,(psps%mpssoang))
-   ABI_ALLOCATE(e999,(psps%mpssoang))
-   ABI_ALLOCATE(rcpsp,(psps%mpssoang))
-   ABI_ALLOCATE(rms,(psps%mpssoang))
-   ABI_ALLOCATE(epspsp,(psps%mpssoang))
-   ABI_ALLOCATE(ekb1,(psps%mpssoang))
-   ABI_ALLOCATE(ekb2,(psps%mpssoang))
+   ABI_MALLOC(e990,(psps%mpssoang))
+   ABI_MALLOC(e999,(psps%mpssoang))
+   ABI_MALLOC(rcpsp,(psps%mpssoang))
+   ABI_MALLOC(rms,(psps%mpssoang))
+   ABI_MALLOC(epspsp,(psps%mpssoang))
+   ABI_MALLOC(ekb1,(psps%mpssoang))
+   ABI_MALLOC(ekb2,(psps%mpssoang))
    e990(:)=zero ;e999(:)=zero
    rcpsp(:)=zero;rms(:)=zero
    ekb1(:)=zero ;ekb2(:)=zero
@@ -1240,14 +1240,14 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    write(msg,'(3a)') ' pspatm: atomic psp has been read ',' and splines computed',ch10
    call wrtout([std_out, ab_out], msg)
 
-   ABI_DEALLOCATE(e990)
-   ABI_DEALLOCATE(e999)
-   ABI_DEALLOCATE(rcpsp)
-   ABI_DEALLOCATE(rms)
-   ABI_DEALLOCATE(ekb1)
-   ABI_DEALLOCATE(ekb2)
-   ABI_DEALLOCATE(epspsp)
-   ABI_DEALLOCATE(nproj)
+   ABI_FREE(e990)
+   ABI_FREE(e999)
+   ABI_FREE(rcpsp)
+   ABI_FREE(rms)
+   ABI_FREE(ekb1)
+   ABI_FREE(ekb2)
+   ABI_FREE(epspsp)
+   ABI_FREE(nproj)
 
    if (dtset%prtvol > 9 .and. psps%usepaw==0 .and. psps%lmnmax>3) then
 

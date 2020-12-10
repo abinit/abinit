@@ -124,8 +124,8 @@ LR_nseeds = 1      ! only one seed
 
 ! Prepare the algorithm
 
-ABI_ALLOCATE(precondition_C,        (npw_g))
-ABI_ALLOCATE(precondition_one_on_C, (npw_g))
+ABI_MALLOC(precondition_C,        (npw_g))
+ABI_MALLOC(precondition_one_on_C, (npw_g))
 
 
 if ( prec ) then
@@ -140,12 +140,12 @@ else
   precondition_one_on_C(:) = cmplx_1
 end if
 
-ABI_ALLOCATE(LR_alpha,       (LR_nseeds,LR_nseeds,LR_kmax))
-ABI_ALLOCATE(LR_beta ,       (LR_nseeds,LR_nseeds,LR_kmax))
-ABI_ALLOCATE(LR_seeds,       (npw_g,LR_nseeds))
-ABI_ALLOCATE(Hamiltonian_Qk, (npw_g,LR_kmax))
-ABI_ALLOCATE(LR_Hamiltonian_eigenvalues, (LR_kmax))
-ABI_ALLOCATE(LR_M_matrix, (LR_kmax,LR_kmax))
+ABI_MALLOC(LR_alpha,       (LR_nseeds,LR_nseeds,LR_kmax))
+ABI_MALLOC(LR_beta ,       (LR_nseeds,LR_nseeds,LR_kmax))
+ABI_MALLOC(LR_seeds,       (npw_g,LR_nseeds))
+ABI_MALLOC(Hamiltonian_Qk, (npw_g,LR_kmax))
+ABI_MALLOC(LR_Hamiltonian_eigenvalues, (LR_kmax))
+ABI_MALLOC(LR_M_matrix, (LR_kmax,LR_kmax))
 
 end subroutine setup_LanczosResolvents
 !!***
@@ -180,14 +180,14 @@ implicit none
 
 ! *************************************************************************
 
-ABI_DEALLOCATE(precondition_C)
-ABI_DEALLOCATE(precondition_one_on_C)
-ABI_DEALLOCATE(LR_alpha)
-ABI_DEALLOCATE(LR_beta )
-ABI_DEALLOCATE(LR_seeds)
-ABI_DEALLOCATE(Hamiltonian_Qk)
-ABI_DEALLOCATE(LR_Hamiltonian_eigenvalues)
-ABI_DEALLOCATE(LR_M_matrix)
+ABI_FREE(precondition_C)
+ABI_FREE(precondition_one_on_C)
+ABI_FREE(LR_alpha)
+ABI_FREE(LR_beta )
+ABI_FREE(LR_seeds)
+ABI_FREE(Hamiltonian_Qk)
+ABI_FREE(LR_Hamiltonian_eigenvalues)
+ABI_FREE(LR_M_matrix)
 
 end subroutine cleanup_LanczosResolvents
 !!***

@@ -187,14 +187,14 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    npw_filter = bandfft_kpt(ikpt_this_proc)%ndatarecv
    nband_filter = mpi_enreg%bandpp
 
-   ABI_ALLOCATE(cg_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(gsc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(ghc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(gvnlxc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(cg_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(gsc_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(ghc_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(gvnlxc_alltoall2, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(cg_alltoall1, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gsc_alltoall1, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(ghc_alltoall1, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gvnlxc_alltoall1, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(cg_alltoall2, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gsc_alltoall2, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(ghc_alltoall2, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gvnlxc_alltoall2, (2, npw_filter*nspinor*nband_filter))
 
    ! Init tranpose variables
    recvcountsloc=bandfft_kpt(ikpt_this_proc)%recvcounts*2*nspinor*mpi_enreg%bandpp
@@ -247,17 +247,17 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! to whether it's nband x npw (paral_kgb == 0) or ndatarecv*bandpp (paral_kgb = 1)
 
  ! Allocate filter variables for the application of the Chebyshev polynomial
- ABI_ALLOCATE(cg_filter_next, (2, npw_filter*nspinor*nband_filter))
- ABI_ALLOCATE(cg_filter_prev, (2, npw_filter*nspinor*nband_filter))
- ABI_ALLOCATE(gsc_filter_prev, (2, npw_filter*nspinor*nband_filter))
- ABI_ALLOCATE(gsc_filter_next, (2, npw_filter*nspinor*nband_filter))
- ABI_ALLOCATE(gsm1hc_filter, (2, npw_filter*nspinor*nband_filter))
+ ABI_MALLOC(cg_filter_next, (2, npw_filter*nspinor*nband_filter))
+ ABI_MALLOC(cg_filter_prev, (2, npw_filter*nspinor*nband_filter))
+ ABI_MALLOC(gsc_filter_prev, (2, npw_filter*nspinor*nband_filter))
+ ABI_MALLOC(gsc_filter_next, (2, npw_filter*nspinor*nband_filter))
+ ABI_MALLOC(gsm1hc_filter, (2, npw_filter*nspinor*nband_filter))
 
  ! PAW init
  if(paw) then
-   ABI_DATATYPE_ALLOCATE(cwaveprj, (gs_hamk%natom,nspinor*nband_filter))
-   ABI_DATATYPE_ALLOCATE(cwaveprj_next, (gs_hamk%natom,nspinor*nband_filter))
-   ABI_DATATYPE_ALLOCATE(cwaveprj_prev, (gs_hamk%natom,nspinor*nband_filter))
+   ABI_MALLOC(cwaveprj, (gs_hamk%natom,nspinor*nband_filter))
+   ABI_MALLOC(cwaveprj_next, (gs_hamk%natom,nspinor*nband_filter))
+   ABI_MALLOC(cwaveprj_prev, (gs_hamk%natom,nspinor*nband_filter))
    call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
    call pawcprj_alloc(cwaveprj_next,0,gs_hamk%dimcprj)
    call pawcprj_alloc(cwaveprj_prev,0,gs_hamk%dimcprj)
@@ -297,9 +297,9 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  call wrtout(std_out,message,'COLL')
  ! update eigenvalues and residuals
  call timab(timer_update_eigen, 1, tsec)
- ABI_ALLOCATE(resids_filter, (nband_filter))
- ABI_ALLOCATE(residvec_filter, (2, npw_filter*nspinor))
- ABI_ALLOCATE(nline_bands, (nband_filter))
+ ABI_MALLOC(resids_filter, (nband_filter))
+ ABI_MALLOC(residvec_filter, (2, npw_filter*nspinor))
+ ABI_MALLOC(nline_bands, (nband_filter))
  do iband=1, nband_filter
    shift = npw_filter*nspinor*(iband-1)
    call dotprod_g(eig(iband),dprod_i,gs_hamk%istwf_k,npw_filter*nspinor,1,ghc_filter(:, shift+1:shift+npw_filter*nspinor),&
@@ -350,8 +350,8 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! write(message, *) 'Mean nline', REAL(nline_total)/REAL(nband), 'max imbalance (%)', load_imbalance*100
  ! call wrtout(std_out,message,'COLL')
 
- ABI_DEALLOCATE(resids_filter)
- ABI_DEALLOCATE(residvec_filter)
+ ABI_FREE(resids_filter)
+ ABI_FREE(residvec_filter)
 
  !======================================================================================================
  ! Chebyshev polynomial application
@@ -475,16 +475,16 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    call pawcprj_free(cwaveprj)
    call pawcprj_free(cwaveprj_next)
    call pawcprj_free(cwaveprj_prev)
-   ABI_DATATYPE_DEALLOCATE(cwaveprj)
-   ABI_DATATYPE_DEALLOCATE(cwaveprj_next)
-   ABI_DATATYPE_DEALLOCATE(cwaveprj_prev)
+   ABI_FREE(cwaveprj)
+   ABI_FREE(cwaveprj_next)
+   ABI_FREE(cwaveprj_prev)
  end if
- ABI_DEALLOCATE(nline_bands)
- ABI_DEALLOCATE(cg_filter_next)
- ABI_DEALLOCATE(cg_filter_prev)
- ABI_DEALLOCATE(gsc_filter_prev)
- ABI_DEALLOCATE(gsc_filter_next)
- ABI_DEALLOCATE(gsm1hc_filter)
+ ABI_FREE(nline_bands)
+ ABI_FREE(cg_filter_next)
+ ABI_FREE(cg_filter_prev)
+ ABI_FREE(gsc_filter_prev)
+ ABI_FREE(gsc_filter_next)
+ ABI_FREE(gsm1hc_filter)
 
  !======================================================================================================
  ! Filtering done, tranpose back
@@ -503,7 +503,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
      gvnlxc_alltoall1(:,index_wavef_band) = gvnlxc_alltoall2(:,:)
    end if
 
-   ABI_DEALLOCATE(index_wavef_band)
+   ABI_FREE(index_wavef_band)
 
    call timab(timer_sync, 1, tsec)
    call xmpi_barrier(mpi_enreg%comm_band)
@@ -526,14 +526,14 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    call timab(timer_alltoall, 2, tsec)
 
    if(mpi_enreg%paral_kgb == 1) then
-     ABI_DEALLOCATE(cg_alltoall1)
-     ABI_DEALLOCATE(gsc_alltoall1)
-     ABI_DEALLOCATE(ghc_alltoall1)
-     ABI_DEALLOCATE(gvnlxc_alltoall1)
-     ABI_DEALLOCATE(cg_alltoall2)
-     ABI_DEALLOCATE(gsc_alltoall2)
-     ABI_DEALLOCATE(ghc_alltoall2)
-     ABI_DEALLOCATE(gvnlxc_alltoall2)
+     ABI_FREE(cg_alltoall1)
+     ABI_FREE(gsc_alltoall1)
+     ABI_FREE(ghc_alltoall1)
+     ABI_FREE(gvnlxc_alltoall1)
+     ABI_FREE(cg_alltoall2)
+     ABI_FREE(gsc_alltoall2)
+     ABI_FREE(ghc_alltoall2)
+     ABI_FREE(gvnlxc_alltoall2)
    end if
  else
    ! nothing to do, the _filter variables already point to the right ones

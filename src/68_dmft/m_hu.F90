@@ -192,14 +192,14 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2my2d)
      write(message,'(2a,i4)')  ch10,'  -------> For Correlated Species', itypat
      call wrtout(std_out,  message,'COLL')
 !     allocate(hu(itypat)%vee(ndim,ndim,ndim,ndim))
-     ABI_ALLOCATE(hu(itypat)%uqmc,(ndim*(2*ndim-1)))
-     ABI_ALLOCATE(hu(itypat)%udens,(2*ndim,2*ndim))
-     ABI_ALLOCATE(xij,(2*ndim,2*ndim))
+     ABI_MALLOC(hu(itypat)%uqmc,(ndim*(2*ndim-1)))
+     ABI_MALLOC(hu(itypat)%udens,(2*ndim,2*ndim))
+     ABI_MALLOC(xij,(2*ndim,2*ndim))
      if(t2g==0.and.x2my2d==0) then
        hu(itypat)%vee => pawtab(itypat)%vee
 !   t2g case begin
      else if(t2g==1.and.hu(itypat)%lpawu==1) then
-       ABI_ALLOCATE(hu(itypat)%vee,(ndim,ndim,ndim,ndim))
+       ABI_MALLOC(hu(itypat)%vee,(ndim,ndim,ndim,ndim))
        n=0
        do m=1,5
          if((m/=1.and.m/=2.and.m/=4)) cycle
@@ -224,7 +224,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2my2d)
 !   t2g case end
 !   x2my2d case begin
      else if(x2my2d==1.and.hu(itypat)%lpawu==0) then
-       ABI_ALLOCATE(hu(itypat)%vee,(ndim,ndim,ndim,ndim))
+       ABI_MALLOC(hu(itypat)%vee,(ndim,ndim,ndim,ndim))
        hu(itypat)%vee(1,1,1,1)=pawtab(itypat)%upawu
      endif
 !   x2my2d case end
@@ -292,7 +292,7 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2my2d)
      enddo
        write(message,'(5x,a)') "--------------------------------------------------------"
        call wrtout(std_out,  message,'COLL')
-     ABI_DEALLOCATE(xij)
+     ABI_FREE(xij)
    else
      hu(itypat)%upawu=zero
      hu(itypat)%jpawu=zero
@@ -344,15 +344,15 @@ subroutine destroy_hu(hu,ntypat,t2g,x2my2d)
  do itypat=1,ntypat
 !  if ( allocated(hu(itypat)%vee) )  deallocate(hu(itypat)%vee)
   if ( allocated(hu(itypat)%uqmc) )   then
-    ABI_DEALLOCATE(hu(itypat)%uqmc)
+    ABI_FREE(hu(itypat)%uqmc)
   end if
   if ( allocated(hu(itypat)%udens) )   then
-    ABI_DEALLOCATE(hu(itypat)%udens)
+    ABI_FREE(hu(itypat)%udens)
   end if
   if(t2g==1.and.hu(itypat)%lpawu==1) then
-    ABI_DEALLOCATE(hu(itypat)%vee)
+    ABI_FREE(hu(itypat)%vee)
   else if(x2my2d==1.and.hu(itypat)%lpawu==0) then
-    ABI_DEALLOCATE(hu(itypat)%vee)
+    ABI_FREE(hu(itypat)%vee)
   else
     hu(itypat)%vee => null()
   endif
@@ -630,16 +630,16 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        write(message,'(2a,i4)')  ch10,'  -------> For Correlated atom', iatom
        call wrtout(std_out,  message,'COLL')
        tndim=nspinor*ndim
-       ABI_ALLOCATE(veejmj,(tndim,tndim,tndim,tndim))
-       ABI_ALLOCATE(veeslm,(ndim,ndim,ndim,ndim))
-       ABI_ALLOCATE(veetmp_slm,(ndim,ndim,4))
-       ABI_ALLOCATE(veetmp_ylm,(ndim,ndim,4))
-       ABI_ALLOCATE(veetmp,(ndim,ndim,4))
-       ABI_ALLOCATE(veeslm2,(tndim,tndim,tndim,tndim))
-       ABI_ALLOCATE(veeylm,(ndim,ndim,ndim,ndim))
-       ABI_ALLOCATE(veeylm2,(tndim,tndim,tndim,tndim))
-       ABI_ALLOCATE(veerotated,(tndim,tndim,tndim,tndim))
-       ABI_ALLOCATE(fk,(0:lpawu))
+       ABI_MALLOC(veejmj,(tndim,tndim,tndim,tndim))
+       ABI_MALLOC(veeslm,(ndim,ndim,ndim,ndim))
+       ABI_MALLOC(veetmp_slm,(ndim,ndim,4))
+       ABI_MALLOC(veetmp_ylm,(ndim,ndim,4))
+       ABI_MALLOC(veetmp,(ndim,ndim,4))
+       ABI_MALLOC(veeslm2,(tndim,tndim,tndim,tndim))
+       ABI_MALLOC(veeylm,(ndim,ndim,ndim,ndim))
+       ABI_MALLOC(veeylm2,(tndim,tndim,tndim,tndim))
+       ABI_MALLOC(veerotated,(tndim,tndim,tndim,tndim))
+       ABI_MALLOC(fk,(0:lpawu))
        fk(0)=hu(itypat)%upawu
        if (lpawu==1) then
          fk(1)=hu(itypat)%jpawu*5
@@ -664,13 +664,13 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        call vee_ndim2tndim_hu(lpawu,hu(itypat)%vee,veeslm2,1)
 
 !!     veeslm(m1,m2,m3,m4)=cmplx(vee(m1,m2,m3,m4),zero)
-     !  ABI_DEALLOCATE(veeslm)
+     !  ABI_FREE(veeslm)
        veeslm(:,:,:,:)=cmplx(hu(itypat)%vee(:,:,:,:),zero)
-       !ABI_DEALLOCATE(veeslm)! ici cela plante
+       !ABI_FREE(veeslm)! ici cela plante
 
 !!     build udens in the Slm basis and print it
        call vee2udensatom_hu(ndim,nspinor,udens_atoms(iatom)%value,real(veeslm),"slm")
-       !ABI_DEALLOCATE(veeslm) ! ici cela plante
+       !ABI_FREE(veeslm) ! ici cela plante
 
        dim_vee=ndim
        basis_vee='Slm'
@@ -678,7 +678,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        !call printvee_hu(ndim,real(veeslm),1,basis_vee)
        call printvee_hu(tndim,real(veeslm2),1,basis_vee)
 
-      ! ABI_DEALLOCATE(veeslm)
+      ! ABI_FREE(veeslm)
 
 !      ==================================
 !      Then compute veerotated
@@ -796,7 +796,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
 
          endif
        endif
-       ABI_ALLOCATE(veenew,(dim_vee,dim_vee,dim_vee,dim_vee))
+       ABI_MALLOC(veenew,(dim_vee,dim_vee,dim_vee,dim_vee))
        if(rot_type==0) then   ; veenew=veeslm
        else if(rot_type==1) then  ; veenew=veerotated
        else if(rot_type==2) then  ; veenew=veeylm
@@ -818,17 +818,17 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        call vee2udensatom_hu(ndim,nspinor,udens_atoms(iatom)%value,real(veenew),"basis_vee",prtonly=1)
 
 
-       ABI_DEALLOCATE(veenew)
-       ABI_DEALLOCATE(veeslm)
-       ABI_DEALLOCATE(veeslm2)
-       ABI_DEALLOCATE(veeylm)
-       ABI_DEALLOCATE(veeylm2)
-       ABI_DEALLOCATE(veejmj)
-       ABI_DEALLOCATE(veerotated)
-       ABI_DEALLOCATE(veetmp_slm)
-       ABI_DEALLOCATE(veetmp)
-       ABI_DEALLOCATE(veetmp_ylm)
-       ABI_DEALLOCATE(fk)
+       ABI_FREE(veenew)
+       ABI_FREE(veeslm)
+       ABI_FREE(veeslm2)
+       ABI_FREE(veeylm)
+       ABI_FREE(veeylm2)
+       ABI_FREE(veejmj)
+       ABI_FREE(veerotated)
+       ABI_FREE(veetmp_slm)
+       ABI_FREE(veetmp)
+       ABI_FREE(veetmp_ylm)
+       ABI_FREE(fk)
      endif
    enddo
    !ABI_ERROR("Aborting now!")
@@ -869,9 +869,9 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
            endif
          end do
        end do
-       ABI_ALLOCATE(temp_mat,(ndim,ndim))
-       ABI_ALLOCATE(temp_mat2,(ndim,ndim))
-       ABI_ALLOCATE(veetemp,(ndim,ndim,ndim,ndim))
+       ABI_MALLOC(temp_mat,(ndim,ndim))
+       ABI_MALLOC(temp_mat2,(ndim,ndim))
+       ABI_MALLOC(veetemp,(ndim,ndim,ndim,ndim))
        temp_mat(:,:)=czero
        temp_mat2(:,:)=czero
 
@@ -923,8 +923,8 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
            enddo
          enddo
        enddo
-       ABI_DEALLOCATE(temp_mat)
-       ABI_DEALLOCATE(temp_mat2)
+       ABI_FREE(temp_mat)
+       ABI_FREE(temp_mat2)
        xsum=zero
        xsum2=zero
        xsumnew=zero
@@ -997,7 +997,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
 !       enddo
 !       write(message,'(5x,a)') "--------------------------------------------------------"
 !       call wrtout(std_out,  message,'COLL')
-       ABI_DEALLOCATE(veetemp)
+       ABI_FREE(veetemp)
      endif ! lpawu/=1
 !   call print_hu(hu,cryst_struc%ntypat,1)
 
@@ -1280,13 +1280,13 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
    endif
 
    if (present(upawu)) then
-     ABI_ALLOCATE(a2pp,(ndim,ndim))
-     ABI_ALLOCATE(b2pp,(ndim,ndim))
-     ABI_ALLOCATE(b0,(ndim,ndim))
+     ABI_MALLOC(a2pp,(ndim,ndim))
+     ABI_MALLOC(b2pp,(ndim,ndim))
+     ABI_MALLOC(b0,(ndim,ndim))
 
 !     write(message,'(2x,a,3x,14f10.4)') "For check with respect to Slater's paper"
 !     call wrtout(std_out,  message,'COLL')
-!     ABI_ALLOCATE(f0,(ndim,ndim,ndim,ndim))
+!     ABI_MALLOC(f0,(ndim,ndim,ndim,ndim))
 !     write(message,'(2x,a,3x,14f10.4)') "Vee(m1,m2,m1,m2)-F0*ao(m1,m2)"
 !     call wrtout(std_out,  message,'COLL')
 !     write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)
@@ -1311,7 +1311,7 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
 !       write(message,'(2x,i4,3x,14f10.4)') m1,(vee(m1,m2,m2,m1)-f0(m1,m2,m2,m1),m2=1,ndim)
 !       call wrtout(std_out,  message,'COLL')
 !     enddo
-!     ABI_DEALLOCATE(f0)
+!     ABI_FREE(f0)
 
 
      b0=zero
@@ -1326,8 +1326,8 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
        b2pp=b2pp/25*f2+b0
        abcomp=1
      else if(ndim==6.and.present(f2).and.(trim(basis)=='jmj')) then
-       ABI_ALLOCATE(a2pp,(6,6))
-       ABI_ALLOCATE(b2pp,(6,6))
+       ABI_MALLOC(a2pp,(6,6))
+       ABI_MALLOC(b2pp,(6,6))
        a2pp(:,:)=RESHAPE((/0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,-1,-1,1,0,&
 &       0,-1,1,1,-1,0,0,-1,1,1,-1,0,0,1,-1,-1,1/),(/6,6/))
        a2pp=a2pp/25*f2+upawu
@@ -1352,9 +1352,9 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
        enddo
        write(message,'(a)') ch10;  call wrtout(std_out,  message,'COLL')
      endif
-     ABI_DEALLOCATE(a2pp)
-     ABI_DEALLOCATE(b2pp)
-     ABI_DEALLOCATE(b0)
+     ABI_FREE(a2pp)
+     ABI_FREE(b2pp)
+     ABI_FREE(b0)
    endif
 
  endif
@@ -1579,7 +1579,7 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
  end if
 
  ll=lcor
- ABI_ALLOCATE(slm2ylm,(2*ll+1,2*ll+1))
+ ABI_MALLOC(slm2ylm,(2*ll+1,2*ll+1))
  slm2ylm=czero
  mat_out_c=czero
 
@@ -1642,7 +1642,7 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
    end do
  end do
 
- ABI_DEALLOCATE(slm2ylm)
+ ABI_FREE(slm2ylm)
 
 end subroutine vee_slm2ylm_hu
 !!***
@@ -1891,9 +1891,9 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 
 !--------------- Built indices + allocations
  ll=lcor
- ABI_ALLOCATE(mlms2jmj,(2*(2*ll+1),2*(2*ll+1)))
+ ABI_MALLOC(mlms2jmj,(2*(2*ll+1),2*(2*ll+1)))
  mlms2jmj=czero
- ABI_ALLOCATE(ind_msml,(2,-ll:ll))
+ ABI_MALLOC(ind_msml,(2,-ll:ll))
  mlms2jmj=czero
  jc1=0
  do ms1=1,2
@@ -1968,8 +1968,8 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
      end do
    end do
  end do
- ABI_DEALLOCATE(mlms2jmj)
- ABI_DEALLOCATE(ind_msml)
+ ABI_FREE(mlms2jmj)
+ ABI_FREE(ind_msml)
 
  end subroutine vee_ylm2jmj_hu
 !!***
@@ -2029,10 +2029,10 @@ subroutine udens_slatercondon_hu(fk,lcor)
  real(dp), allocatable :: jdens(:,:)
 
 !*********************************************************************
- ABI_ALLOCATE(aklmlmp,(0:lcor,-lcor:lcor,-lcor:lcor)) ! k,m,m'
- ABI_ALLOCATE(bklmlmp,(0:lcor,-lcor:lcor,-lcor:lcor)) ! k,m,m'
- ABI_ALLOCATE(udens,(-lcor:lcor,-lcor:lcor)) ! m,m'
- ABI_ALLOCATE(jdens,(-lcor:lcor,-lcor:lcor)) ! m,m'
+ ABI_MALLOC(aklmlmp,(0:lcor,-lcor:lcor,-lcor:lcor)) ! k,m,m'
+ ABI_MALLOC(bklmlmp,(0:lcor,-lcor:lcor,-lcor:lcor)) ! k,m,m'
+ ABI_MALLOC(udens,(-lcor:lcor,-lcor:lcor)) ! m,m'
+ ABI_MALLOC(jdens,(-lcor:lcor,-lcor:lcor)) ! m,m'
 ! k=2*(lcor)
  aklmlmp=zero
  bklmlmp=zero
@@ -2241,10 +2241,10 @@ subroutine udens_slatercondon_hu(fk,lcor)
    call wrtout(std_out,  message,'COLL')
  enddo
 
- ABI_DEALLOCATE(jdens)
- ABI_DEALLOCATE(udens)
- ABI_DEALLOCATE(aklmlmp)
- ABI_DEALLOCATE(bklmlmp)
+ ABI_FREE(jdens)
+ ABI_FREE(udens)
+ ABI_FREE(aklmlmp)
+ ABI_FREE(bklmlmp)
 
  end subroutine udens_slatercondon_hu
 !!***
@@ -2307,13 +2307,13 @@ subroutine udens_inglis_hu(fk,lcor)
 
 !*********************************************************************
  tndim=2*(2*lcor+1)
- ABI_ALLOCATE(app,(0:lcor,tndim,tndim))
- ABI_ALLOCATE(bpp,(0:lcor,tndim,tndim))
- ABI_ALLOCATE(a2pp,(tndim,tndim))
- ABI_ALLOCATE(b2pp,(tndim,tndim))
+ ABI_MALLOC(app,(0:lcor,tndim,tndim))
+ ABI_MALLOC(bpp,(0:lcor,tndim,tndim))
+ ABI_MALLOC(a2pp,(tndim,tndim))
+ ABI_MALLOC(b2pp,(tndim,tndim))
 
- ABI_ALLOCATE(udens,(tndim,tndim))
- ABI_ALLOCATE(jdens,(tndim,tndim))
+ ABI_MALLOC(udens,(tndim,tndim))
+ ABI_MALLOC(jdens,(tndim,tndim))
  udens=zero
  jdens=zero
  a2pp=zero
@@ -2486,12 +2486,12 @@ subroutine udens_inglis_hu(fk,lcor)
  enddo
 
 
- ABI_DEALLOCATE(jdens)
- ABI_DEALLOCATE(udens)
- ABI_DEALLOCATE(app)
- ABI_DEALLOCATE(bpp)
- ABI_DEALLOCATE(a2pp)
- ABI_DEALLOCATE(b2pp)
+ ABI_FREE(jdens)
+ ABI_FREE(udens)
+ ABI_FREE(app)
+ ABI_FREE(bpp)
+ ABI_FREE(a2pp)
+ ABI_FREE(b2pp)
 
  end subroutine udens_inglis_hu
 !!***

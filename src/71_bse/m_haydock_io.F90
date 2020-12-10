@@ -353,8 +353,8 @@ subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
 
  if(found_q) then
    niter = niter_file
-   ABI_ALLOCATE(aa,(niter))
-   ABI_ALLOCATE(bb,(niter))
+   ABI_MALLOC(aa,(niter))
+   ABI_MALLOC(bb,(niter))
    do inn=1,niter
      read(haydock_file%unt)it,aa(inn),bb(inn)
      if (inn/=it) then

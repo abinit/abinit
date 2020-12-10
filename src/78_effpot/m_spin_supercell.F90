@@ -57,13 +57,13 @@ contains
     if (iam_master) self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
 
-    ABI_ALLOCATE(self%iatoms, (self%nspin))
-    ABI_ALLOCATE(self%pos, (3,self%nspin) )
-    ABI_ALLOCATE(self%ms, (self%nspin))
-    ABI_ALLOCATE(self%ispin_prim, (self%nspin))
-    ABI_ALLOCATE(self%rvec, (3, self%nspin))
-    ABI_ALLOCATE(self%gyro_ratio, (self%nspin))
-    ABI_ALLOCATE(self%gilbert_damping, (self%nspin) )
+    ABI_MALLOC(self%iatoms, (self%nspin))
+    ABI_MALLOC(self%pos, (3,self%nspin) )
+    ABI_MALLOC(self%ms, (self%nspin))
+    ABI_MALLOC(self%ispin_prim, (self%nspin))
+    ABI_MALLOC(self%rvec, (3, self%nspin))
+    ABI_MALLOC(self%gyro_ratio, (self%nspin))
+    ABI_MALLOC(self%gilbert_damping, (self%nspin) )
   end subroutine initialize
 
   subroutine set(self, ispin_prim, rvec, iatoms, pos, ms, gyro_ratio, damping)
@@ -107,29 +107,29 @@ contains
     class(spin_supercell_t), intent(inout) :: self
     self%nspin=0
     if (allocated(self%ms))  then
-       ABI_DEALLOCATE(self%ms)
+       ABI_FREE(self%ms)
     endif
 
     if (allocated(self%pos))  then
-       ABI_DEALLOCATE(self%pos)
+       ABI_FREE(self%pos)
     endif
 
     if (allocated(self%iatoms)) then
-       ABI_DEALLOCATE(self%iatoms)
+       ABI_FREE(self%iatoms)
     endif
     if (allocated(self%ispin_prim)) then
-       ABI_DEALLOCATE(self%ispin_prim)
+       ABI_FREE(self%ispin_prim)
     endif
     if (allocated(self%rvec)) then
-       ABI_DEALLOCATE(self%rvec)
+       ABI_FREE(self%rvec)
     endif
 
     if (allocated(self%gyro_ratio)) then
-       ABI_DEALLOCATE(self%gyro_ratio)
+       ABI_FREE(self%gyro_ratio)
     endif
 
     if (allocated(self%gilbert_damping))  then
-       ABI_DEALLOCATE(self%gilbert_damping)
+       ABI_FREE(self%gilbert_damping)
     endif
 
   end subroutine finalize

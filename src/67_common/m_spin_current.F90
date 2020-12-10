@@ -211,21 +211,21 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
  iocc = 1
 
 !rspace point, cartesian direction, spin pol=x,y,z
- ABI_ALLOCATE(spincurrent,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),3,3))
+ ABI_MALLOC(spincurrent,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),3,3))
  spincurrent = zero
 
- ABI_ALLOCATE(dummy_denpot,(cplex*dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6)))
+ ABI_MALLOC(dummy_denpot,(cplex*dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6)))
 
- ABI_ALLOCATE(gbound,(2*dtset%mgfft+8,2))
+ ABI_MALLOC(gbound,(2*dtset%mgfft+8,2))
 
 !allocate (density_matrix(2,dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%nspinor,&
 !&                           dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%nspinor))
 !density_matrix= zero
- ABI_ALLOCATE(density,(2,dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%nspinor,dtset%nspinor))
+ ABI_MALLOC(density,(2,dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%nspinor,dtset%nspinor))
  density= zero
 
- ABI_ALLOCATE(dpsidr,(2,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),dtset%nspinor,3))
- ABI_ALLOCATE(psi_r,(2,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),dtset%nspinor))
+ ABI_MALLOC(dpsidr,(2,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),dtset%nspinor,3))
+ ABI_MALLOC(psi_r,(2,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),dtset%nspinor))
 
 !loop over kpoints
  do ikpt=1,dtset%nkpt
@@ -234,10 +234,10 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
    npw = hdr%npwarr(ikpt)
 
 !  allocate arrays dep on number of pw
-   ABI_ALLOCATE(kg_k,(3,npw))
-   ABI_ALLOCATE(gpsi,(2,npw,dtset%nspinor,3))
-   ABI_ALLOCATE(psi,(2,npw,dtset%nspinor))
-   ABI_ALLOCATE(kgcart,(3,npw))
+   ABI_MALLOC(kg_k,(3,npw))
+   ABI_MALLOC(gpsi,(2,npw,dtset%nspinor,3))
+   ABI_MALLOC(psi,(2,npw,dtset%nspinor))
+   ABI_MALLOC(kgcart,(3,npw))
 
 !  get cartesian coordinates of k+G vectors around this kpoint
    do ig=1,npw
@@ -395,17 +395,17 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
    ikg=ikg+npw
 
 !  deallocate arrays dep on npw for this kpoint
-   ABI_DEALLOCATE(kg_k)
-   ABI_DEALLOCATE(gpsi)
-   ABI_DEALLOCATE(psi)
-   ABI_DEALLOCATE(kgcart)
+   ABI_FREE(kg_k)
+   ABI_FREE(gpsi)
+   ABI_FREE(psi)
+   ABI_FREE(kgcart)
 
  end do ! ikpt
 
- ABI_DEALLOCATE(dpsidr)
- ABI_DEALLOCATE(psi_r)
- ABI_DEALLOCATE(dummy_denpot)
- ABI_DEALLOCATE(gbound)
+ ABI_FREE(dpsidr)
+ ABI_FREE(psi_r)
+ ABI_FREE(dummy_denpot)
+ ABI_FREE(gbound)
 
 !prefactor for contribution to spin current
 !prefactor is 1/2 * 1/2 * 2 Re(.):
@@ -416,7 +416,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
  spincurrent = half * spincurrent
 
 !make array of positions for all points on grid
- ABI_ALLOCATE(position_op,(3,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3)))
+ ABI_MALLOC(position_op,(3,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3)))
  do i3=1,dtset%ngfft(3)
    do i2=1,dtset%ngfft(2)
      do i1=1,dtset%ngfft(1)
@@ -449,7 +449,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !anticommutator of VSO with position operator
 !--- not needed in local spin current case ---
 
- ABI_ALLOCATE(vso_realspace,(2,dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%nspinor,dtset%nspinor,3))
+ ABI_MALLOC(vso_realspace,(2,dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%nspinor,dtset%nspinor,3))
 
  call vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
 
@@ -459,10 +459,10 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 
 
 
- ABI_DEALLOCATE(density)
+ ABI_FREE(density)
 
  realrecip = 0 ! real space for xsf output
- ABI_ALLOCATE(xcart,(3,dtset%natom))
+ ABI_MALLOC(xcart,(3,dtset%natom))
  call xred2xcart(dtset%natom,hdr%rprimd,xcart,hdr%xred)
 
 !-----------------------------------------------------------------------------------------
@@ -578,11 +578,11 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
  end do ! end ispindir
 
  ABI_FREE(datagrid)
- ABI_DEALLOCATE(vso_realspace)
+ ABI_FREE(vso_realspace)
 !deallocate (vso_realspace_nl)
- ABI_DEALLOCATE(position_op)
- ABI_DEALLOCATE(spincurrent)
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(position_op)
+ ABI_FREE(spincurrent)
+ ABI_FREE(xcart)
 
  write(std_out,*) ' Exiting subroutine spin_current '
 
@@ -676,15 +676,15 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
 !setup radial grid; Should we use a logarithmic grid? The spline functions can
 !take it...
  nradgrid = 201 ! this is heuristic
- ABI_ALLOCATE(radial_grid,(nradgrid))
+ ABI_MALLOC(radial_grid,(nradgrid))
  do iradgrid=1,nradgrid
    radial_grid(iradgrid) = (iradgrid-1)*radial_cutoff/(nradgrid-1)
  end do
 
 !calculate prefactors independent of r
- ABI_ALLOCATE(prefact_ijl,(3,3,0:lmax,psps%npsp))
- ABI_ALLOCATE(offdiag_l_fact,(3,3,0:lmax))
- ABI_ALLOCATE(kpar_matrix,(3,3))
+ ABI_MALLOC(prefact_ijl,(3,3,0:lmax,psps%npsp))
+ ABI_MALLOC(offdiag_l_fact,(3,3,0:lmax))
+ ABI_MALLOC(kpar_matrix,(3,3))
 
 !these factors complete the full 3x3 matrix of k (or h) parameters for the
 !HGH pseudos
@@ -754,14 +754,14 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
    end do
  end do
 
- ABI_DEALLOCATE(kpar_matrix)
- ABI_DEALLOCATE(offdiag_l_fact)
+ ABI_FREE(kpar_matrix)
+ ABI_FREE(offdiag_l_fact)
 
  prefact_ijl = prefact_ijl * two
 
 !calculate v_SO on radial grid
 ! MGNAG Runtime Error: *** Arithmetic exception: Floating invalid operation - aborting
- ABI_ALLOCATE(vso_radial,(nradgrid,psps%npsp))
+ ABI_MALLOC(vso_radial,(nradgrid,psps%npsp))
  vso_radial = zero
  do l=0,lmax
    lfact=(2._dp*l+1._dp)/four/pi
@@ -784,19 +784,19 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
  end do ! lmax
 
 !spline v_SO(radial coord): get second derivative coefficients
- ABI_ALLOCATE(vso_radial_pp,(nradgrid,psps%npsp))
+ ABI_MALLOC(vso_radial_pp,(nradgrid,psps%npsp))
 
- ABI_ALLOCATE(tmp_spline,(nradgrid))
- ABI_ALLOCATE(tmpvso,(nradgrid))
- ABI_ALLOCATE(tmpvso_pp,(nradgrid))
+ ABI_MALLOC(tmp_spline,(nradgrid))
+ ABI_MALLOC(tmpvso,(nradgrid))
+ ABI_MALLOC(tmpvso_pp,(nradgrid))
  do ipsp=1,psps%npsp
    tmpvso = vso_radial(:,ipsp)
    call spline( radial_grid, tmpvso, nradgrid, zero, radial_grid(nradgrid), tmpvso_pp )
    vso_radial_pp(:,ipsp) = tmpvso_pp
  end do
- ABI_DEALLOCATE(tmp_spline)
- ABI_DEALLOCATE(tmpvso)
- ABI_DEALLOCATE(tmpvso_pp)
+ ABI_FREE(tmp_spline)
+ ABI_FREE(tmpvso)
+ ABI_FREE(tmpvso_pp)
 
 !to optimize this I should precalculate the distances which are actually needed by
 !symmetry, or only sum over irreducible points in space and use weights
@@ -857,10 +857,10 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
    end do  ! ir1
  end do ! iatom
 
- ABI_DEALLOCATE(prefact_ijl)
- ABI_DEALLOCATE(vso_radial)
- ABI_DEALLOCATE(vso_radial_pp)
- ABI_DEALLOCATE(radial_grid)
+ ABI_FREE(prefact_ijl)
+ ABI_FREE(vso_radial)
+ ABI_FREE(vso_radial_pp)
+ ABI_FREE(radial_grid)
 
 end subroutine vso_realspace_local
 !!***

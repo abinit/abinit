@@ -226,7 +226,7 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
 
    idt1=lbound(results_out,1);idt2=ubound(results_out,1)
    idt3=idt2;if (option_alloc==2) idt3=idt1
-   ABI_ALLOCATE(nimage,(idt1:idt2))
+   ABI_MALLOC(nimage,(idt1:idt2))
    nimage=0
    mxnimage_=1
    if (option_size==0) then
@@ -235,7 +235,7 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
        if (nimage(ii)>mxnimage_) mxnimage_=nimage(ii)
      end do
      if (option_alloc>0) then
-       ABI_ALLOCATE(img,(mxnimage_,idt1:idt3))
+       ABI_MALLOC(img,(mxnimage_,idt1:idt3))
        img=0
        do ii=idt1,idt3
          do jj=1,nimage(ii)
@@ -249,7 +249,7 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
        if (nimage(ii)>mxnimage_) mxnimage_=nimage(ii)
      end do
      if (option_alloc>0) then
-       ABI_ALLOCATE(img,(mxnimage_,idt1:idt3))
+       ABI_MALLOC(img,(mxnimage_,idt1:idt3))
        img=0
        do ii=idt1,idt3
          do jj=1,nimage(ii)
@@ -261,20 +261,20 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
 
    do ii=idt1,idt2
 
-     ABI_ALLOCATE(results_out(ii)%acell,(3,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%amu,(mxntypat,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%etotal,(mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%fcart,(3,mxnatom,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%fred,(3,mxnatom,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%intgres,(4,mxnatom,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%mixalch,(mxnpsp,mxntypat,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%npwtot,(mxnkpt,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%occ,(mxnband*mxnkpt*mxnsppol,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%rprim,(3,3,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%strten,(6,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%vel,(3,mxnatom,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%vel_cell,(3,3,mxnimage_))
-     ABI_ALLOCATE(results_out(ii)%xred,(3,mxnatom,mxnimage_))
+     ABI_MALLOC(results_out(ii)%acell,(3,mxnimage_))
+     ABI_MALLOC(results_out(ii)%amu,(mxntypat,mxnimage_))
+     ABI_MALLOC(results_out(ii)%etotal,(mxnimage_))
+     ABI_MALLOC(results_out(ii)%fcart,(3,mxnatom,mxnimage_))
+     ABI_MALLOC(results_out(ii)%fred,(3,mxnatom,mxnimage_))
+     ABI_MALLOC(results_out(ii)%intgres,(4,mxnatom,mxnimage_))
+     ABI_MALLOC(results_out(ii)%mixalch,(mxnpsp,mxntypat,mxnimage_))
+     ABI_MALLOC(results_out(ii)%npwtot,(mxnkpt,mxnimage_))
+     ABI_MALLOC(results_out(ii)%occ,(mxnband*mxnkpt*mxnsppol,mxnimage_))
+     ABI_MALLOC(results_out(ii)%rprim,(3,3,mxnimage_))
+     ABI_MALLOC(results_out(ii)%strten,(6,mxnimage_))
+     ABI_MALLOC(results_out(ii)%vel,(3,mxnatom,mxnimage_))
+     ABI_MALLOC(results_out(ii)%vel_cell,(3,3,mxnimage_))
+     ABI_MALLOC(results_out(ii)%xred,(3,mxnatom,mxnimage_))
 
      if ((option_alloc==1).or.(option_alloc==2.and.ii==idt3)) then
        results_out(ii)%nimage=nimage(ii)
@@ -313,12 +313,12 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
            results_out(ii)%vel_cell(:,:,jj)=dtsets(ii)%vel_cell_orig(:,:,kk)
            results_out(ii)%mixalch(:,:,jj) =dtsets(ii)%mixalch_orig(:,:,kk)
            if (natom_>0) then
-             ABI_ALLOCATE(tmp,(3,natom_))
+             ABI_MALLOC(tmp,(3,natom_))
              tmp(1:3,1:natom_)=dtsets(ii)%vel_orig(1:3,1:natom_,kk)
              results_out(ii)%vel(1:3,1:natom_,jj)=tmp(1:3,1:natom_)
              tmp(1:3,1:natom_)=dtsets(ii)%xred_orig(1:3,1:natom_,kk)
              results_out(ii)%xred(1:3,1:natom_,jj)=tmp(1:3,1:natom_)
-             ABI_DEALLOCATE(tmp)
+             ABI_FREE(tmp)
            end if
            if (nocc_>0) then
              results_out(ii)%occ(1:nocc_,jj)=dtsets(ii)%occ_orig(1:nocc_,kk)
@@ -328,10 +328,10 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
      end if
 
    end do
-   ABI_DEALLOCATE(nimage)
+   ABI_FREE(nimage)
    !if (option_size/=0.and.option_alloc==1)  then
    if (allocated(img))  then
-     ABI_DEALLOCATE(img)
+     ABI_FREE(img)
    end if
  end if
 
@@ -382,46 +382,46 @@ subroutine destroy_results_out(results_out)
      results_out(ii)%nkpt=0
      results_out(ii)%nocc=0
      if (associated(results_out(ii)%acell))   then
-       ABI_DEALLOCATE(results_out(ii)%acell)
+       ABI_FREE(results_out(ii)%acell)
      end if
      if (associated(results_out(ii)%amu))   then
-       ABI_DEALLOCATE(results_out(ii)%amu)
+       ABI_FREE(results_out(ii)%amu)
      end if
      if (associated(results_out(ii)%etotal))  then
-       ABI_DEALLOCATE(results_out(ii)%etotal)
+       ABI_FREE(results_out(ii)%etotal)
      end if
      if (associated(results_out(ii)%fcart))   then
-       ABI_DEALLOCATE(results_out(ii)%fcart)
+       ABI_FREE(results_out(ii)%fcart)
      end if
      if (associated(results_out(ii)%fred))    then
-       ABI_DEALLOCATE(results_out(ii)%fred)
+       ABI_FREE(results_out(ii)%fred)
      end if
      if (associated(results_out(ii)%intgres))    then
-       ABI_DEALLOCATE(results_out(ii)%intgres)
+       ABI_FREE(results_out(ii)%intgres)
      end if
      if (associated(results_out(ii)%mixalch))  then
-       ABI_DEALLOCATE(results_out(ii)%mixalch)
+       ABI_FREE(results_out(ii)%mixalch)
      end if
      if (associated(results_out(ii)%npwtot))  then
-       ABI_DEALLOCATE(results_out(ii)%npwtot)
+       ABI_FREE(results_out(ii)%npwtot)
      end if
      if (associated(results_out(ii)%occ))     then
-       ABI_DEALLOCATE(results_out(ii)%occ)
+       ABI_FREE(results_out(ii)%occ)
      end if
      if (associated(results_out(ii)%rprim))   then
-       ABI_DEALLOCATE(results_out(ii)%rprim)
+       ABI_FREE(results_out(ii)%rprim)
      end if
      if (associated(results_out(ii)%strten))  then
-       ABI_DEALLOCATE(results_out(ii)%strten)
+       ABI_FREE(results_out(ii)%strten)
      end if
      if (associated(results_out(ii)%vel))     then
-       ABI_DEALLOCATE(results_out(ii)%vel)
+       ABI_FREE(results_out(ii)%vel)
      end if
      if (associated(results_out(ii)%vel_cell))  then
-       ABI_DEALLOCATE(results_out(ii)%vel_cell)
+       ABI_FREE(results_out(ii)%vel_cell)
      end if
      if (associated(results_out(ii)%xred))    then
-       ABI_DEALLOCATE(results_out(ii)%xred)
+       ABI_FREE(results_out(ii)%xred)
      end if
    end do
 
@@ -483,72 +483,72 @@ subroutine copy_results_out(results_out_in,results_out_out)
 
  if (nimage_>nimage_out) then
    if (associated(results_out_out%acell))   then
-     ABI_DEALLOCATE(results_out_out%acell)
+     ABI_FREE(results_out_out%acell)
    end if
    if (associated(results_out_out%etotal))  then
-     ABI_DEALLOCATE(results_out_out%etotal)
+     ABI_FREE(results_out_out%etotal)
    end if
    if (associated(results_out_out%rprim))   then
-     ABI_DEALLOCATE(results_out_out%rprim)
+     ABI_FREE(results_out_out%rprim)
    end if
    if (associated(results_out_out%strten))  then
-     ABI_DEALLOCATE(results_out_out%strten)
+     ABI_FREE(results_out_out%strten)
    end if
    if (associated(results_out_out%vel_cell))  then
-     ABI_DEALLOCATE(results_out_out%vel_cell)
+     ABI_FREE(results_out_out%vel_cell)
    end if
-   ABI_ALLOCATE(results_out_out%acell,(3,nimage_))
-   ABI_ALLOCATE(results_out_out%etotal,(nimage_))
-   ABI_ALLOCATE(results_out_out%rprim,(3,3,nimage_))
-   ABI_ALLOCATE(results_out_out%strten,(6,nimage_))
-   ABI_ALLOCATE(results_out_out%vel_cell,(3,3,nimage_))
+   ABI_MALLOC(results_out_out%acell,(3,nimage_))
+   ABI_MALLOC(results_out_out%etotal,(nimage_))
+   ABI_MALLOC(results_out_out%rprim,(3,3,nimage_))
+   ABI_MALLOC(results_out_out%strten,(6,nimage_))
+   ABI_MALLOC(results_out_out%vel_cell,(3,3,nimage_))
  end if
  if (nimage_>nimage_out.or.natom_>natom_out) then
    if (associated(results_out_out%fcart))   then
-     ABI_DEALLOCATE(results_out_out%fcart)
+     ABI_FREE(results_out_out%fcart)
    end if
    if (associated(results_out_out%fred))    then
-     ABI_DEALLOCATE(results_out_out%fred)
+     ABI_FREE(results_out_out%fred)
    end if
    if (associated(results_out_out%intgres))    then
-     ABI_DEALLOCATE(results_out_out%intgres)
+     ABI_FREE(results_out_out%intgres)
    end if
    if (associated(results_out_out%vel))     then
-     ABI_DEALLOCATE(results_out_out%vel)
+     ABI_FREE(results_out_out%vel)
    end if
    if (associated(results_out_out%xred))    then
-     ABI_DEALLOCATE(results_out_out%xred)
+     ABI_FREE(results_out_out%xred)
    end if
-   ABI_ALLOCATE(results_out_out%fcart,(3,natom_,nimage_))
-   ABI_ALLOCATE(results_out_out%fred,(3,natom_,nimage_))
-   ABI_ALLOCATE(results_out_out%intgres,(4,natom_,nimage_))
-   ABI_ALLOCATE(results_out_out%vel,(3,natom_,nimage_))
-   ABI_ALLOCATE(results_out_out%xred,(3,natom_,nimage_))
+   ABI_MALLOC(results_out_out%fcart,(3,natom_,nimage_))
+   ABI_MALLOC(results_out_out%fred,(3,natom_,nimage_))
+   ABI_MALLOC(results_out_out%intgres,(4,natom_,nimage_))
+   ABI_MALLOC(results_out_out%vel,(3,natom_,nimage_))
+   ABI_MALLOC(results_out_out%xred,(3,natom_,nimage_))
  end if
  if (nimage_>nimage_out.or.nkpt_>nkpt_out) then
    if (associated(results_out_out%npwtot))  then
-     ABI_DEALLOCATE(results_out_out%npwtot)
+     ABI_FREE(results_out_out%npwtot)
    end if
-   ABI_ALLOCATE(results_out_out%npwtot,(nkpt_,nimage_))
+   ABI_MALLOC(results_out_out%npwtot,(nkpt_,nimage_))
  end if
  if (nimage_>nimage_out.or.nocc_>nocc_out) then
    if (associated(results_out_out%occ))     then
-     ABI_DEALLOCATE(results_out_out%occ)
+     ABI_FREE(results_out_out%occ)
    end if
-   ABI_ALLOCATE(results_out_out%occ,(nocc_,nimage_))
+   ABI_MALLOC(results_out_out%occ,(nocc_,nimage_))
  end if
  if (ntypat_>ntypat_out) then
    if (associated(results_out_out%amu))     then
-     ABI_DEALLOCATE(results_out_out%amu)
+     ABI_FREE(results_out_out%amu)
    end if
-   ABI_ALLOCATE(results_out_out%amu,(ntypat_,nimage_))
+   ABI_MALLOC(results_out_out%amu,(ntypat_,nimage_))
  end if
 
  if (npsp_>npsp_out.or.ntypat_>ntypat_out) then
    if (associated(results_out_out%mixalch))     then
-     ABI_DEALLOCATE(results_out_out%mixalch)
+     ABI_FREE(results_out_out%mixalch)
    end if
-   ABI_ALLOCATE(results_out_out%mixalch,(npsp_,ntypat_,nimage_))
+   ABI_MALLOC(results_out_out%mixalch,(npsp_,ntypat_,nimage_))
  end if
 
  results_out_out%nimage=results_out_in%nimage
@@ -708,7 +708,7 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
        if ((.not.one_per_img).or.(mpi_enregs(ii)%me_cell==master_one_img)) then
 
 !        Gather number of images treated by each proc
-         ABI_ALLOCATE(nimage_all,(mpi_enregs(ii)%nproc_img))
+         ABI_MALLOC(nimage_all,(mpi_enregs(ii)%nproc_img))
          nimage_all=0
          nimage=results_out(ii)%nimage
          call xmpi_allgather(nimage,nimage_all,mpi_enregs(ii)%comm_img,ierr)
@@ -730,16 +730,16 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
          rsize=28+16*results_out(ii)%natom+results_out(ii)%nocc+results_out(ii)%npsp*results_out(ii)%ntypat+results_out(ii)%ntypat
          isize_img=results_out(ii)%nimage*isize
          rsize_img=results_out(ii)%nimage*rsize
-         ABI_ALLOCATE(isize_img_all,(mpi_enregs(ii)%nproc_img))
-         ABI_ALLOCATE(rsize_img_all,(mpi_enregs(ii)%nproc_img))
+         ABI_MALLOC(isize_img_all,(mpi_enregs(ii)%nproc_img))
+         ABI_MALLOC(rsize_img_all,(mpi_enregs(ii)%nproc_img))
          isize_img_all(:)=isize*nimage_all(:)
          rsize_img_all(:)=rsize*nimage_all(:)
-         ABI_DEALLOCATE(nimage_all)
+         ABI_FREE(nimage_all)
 
 !        Compute shifts in buffer arrays for each proc
-         ABI_ALLOCATE(ibufshft,(mpi_enregs(ii)%nproc_img))
+         ABI_MALLOC(ibufshft,(mpi_enregs(ii)%nproc_img))
          ibufshft(1)=0
-         ABI_ALLOCATE(rbufshft,(mpi_enregs(ii)%nproc_img))
+         ABI_MALLOC(rbufshft,(mpi_enregs(ii)%nproc_img))
          rbufshft(1)=0
          do jj=2,mpi_enregs(ii)%nproc_img
            ibufshft(jj)=ibufshft(jj-1)+isize_img_all(jj-1)
@@ -747,8 +747,8 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
          end do
 
 !        Load buffers
-         ABI_ALLOCATE(ibuffer,(isize_img))
-         ABI_ALLOCATE(rbuffer,(rsize_img))
+         ABI_MALLOC(ibuffer,(isize_img))
+         ABI_MALLOC(rbuffer,(rsize_img))
          ibufi=0;ibufr=0
          natom_=results_out(ii)%natom
          nkpt_ =results_out(ii)%nkpt
@@ -793,12 +793,12 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
 
 !        Gather all data
          if (use_results_all)  then
-           ABI_ALLOCATE(ibuffer_all,(isize*nimagetot))
-           ABI_ALLOCATE(rbuffer_all,(rsize*nimagetot))
+           ABI_MALLOC(ibuffer_all,(isize*nimagetot))
+           ABI_MALLOC(rbuffer_all,(rsize*nimagetot))
          end if
          if (.not.use_results_all)  then
-           ABI_ALLOCATE(ibuffer_all,(0))
-           ABI_ALLOCATE(rbuffer_all,(0))
+           ABI_MALLOC(ibuffer_all,(0))
+           ABI_MALLOC(rbuffer_all,(0))
          end if
          if (do_allgather) then
            call xmpi_allgatherv(ibuffer,isize_img,ibuffer_all,isize_img_all,ibufshft,&
@@ -811,14 +811,14 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
            call xmpi_gatherv(rbuffer,rsize_img,rbuffer_all,rsize_img_all,rbufshft,&
 &                            master_img,mpi_enregs(ii)%comm_img,ierr)
          end if
-         ABI_DEALLOCATE(isize_img_all)
-         ABI_DEALLOCATE(rsize_img_all)
-         ABI_DEALLOCATE(ibuffer)
-         ABI_DEALLOCATE(rbuffer)
+         ABI_FREE(isize_img_all)
+         ABI_FREE(rsize_img_all)
+         ABI_FREE(ibuffer)
+         ABI_FREE(rbuffer)
 
 !        Transfer buffers into gathered results_out_all (master proc only)
          if (use_results_all) then
-           ABI_ALLOCATE(iimg,(mpi_enregs(ii)%nproc_img))
+           ABI_MALLOC(iimg,(mpi_enregs(ii)%nproc_img))
            iimg=0
            natom_=results_out_all(ii)%natom
            nkpt_=results_out_all(ii)%nkpt
@@ -865,14 +865,14 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
 &                   reshape(rbuffer_all(ibufr+1:ibufr+3*natom_),(/3,natom_/))
              ibufr=ibufr+3*natom_
            end do
-           ABI_DEALLOCATE(iimg)
+           ABI_FREE(iimg)
          end if
 
 !        Free memory
-         ABI_DEALLOCATE(ibufshft)
-         ABI_DEALLOCATE(rbufshft)
-         ABI_DEALLOCATE(ibuffer_all)
-         ABI_DEALLOCATE(rbuffer_all)
+         ABI_FREE(ibufshft)
+         ABI_FREE(rbufshft)
+         ABI_FREE(ibuffer_all)
+         ABI_FREE(rbuffer_all)
 
        end if
      end if

@@ -57,9 +57,9 @@ module m_hashtable
     new%nbuckets = nbuckets
     new%bucketsize = bucketsize
     new%bucketstep = bucketstep
-    ABI_ALLOCATE(new%buckets,(nbuckets))
+    ABI_MALLOC(new%buckets,(nbuckets))
     do ibucket=1,nbuckets
-      ABI_ALLOCATE(new%buckets(ibucket)%items,(2,new%bucketsize))
+      ABI_MALLOC(new%buckets(ibucket)%items,(2,new%bucketsize))
       new%buckets(ibucket)%nitems = 0
     end do
   end function hashtable_init

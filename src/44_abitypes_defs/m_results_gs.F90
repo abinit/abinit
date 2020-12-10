@@ -285,32 +285,32 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  call energies_init(results_gs%energies)
 
  results_gs%strten=zero
- ABI_ALLOCATE(results_gs%fcart,(3,natom))
+ ABI_MALLOC(results_gs%fcart,(3,natom))
  results_gs%fcart=zero
- ABI_ALLOCATE(results_gs%fred,(3,natom))
+ ABI_MALLOC(results_gs%fred,(3,natom))
  results_gs%fred =zero
- ABI_ALLOCATE(results_gs%gaps,(3,nsppol))
+ ABI_MALLOC(results_gs%gaps,(3,nsppol))
  results_gs%gaps =zero
- ABI_ALLOCATE(results_gs%intgres,(nspden,natom))
+ ABI_MALLOC(results_gs%intgres,(nspden,natom))
  results_gs%intgres=zero
 
  if (full_init) then
    results_gs%pel=zero
    results_gs%pion=zero
 
-   ABI_ALLOCATE(results_gs%grchempottn,(3,natom))
+   ABI_MALLOC(results_gs%grchempottn,(3,natom))
    results_gs%grchempottn=zero
-   ABI_ALLOCATE(results_gs%grcondft,(3,natom))
+   ABI_MALLOC(results_gs%grcondft,(3,natom))
    results_gs%grcondft=zero
-   ABI_ALLOCATE(results_gs%gresid,(3,natom))
+   ABI_MALLOC(results_gs%gresid,(3,natom))
    results_gs%gresid=zero
-   ABI_ALLOCATE(results_gs%grewtn,(3,natom))
+   ABI_MALLOC(results_gs%grewtn,(3,natom))
    results_gs%grewtn=zero
-   ABI_ALLOCATE(results_gs%grvdw,(3,natom))
+   ABI_MALLOC(results_gs%grvdw,(3,natom))
    results_gs%grvdw=zero
-   ABI_ALLOCATE(results_gs%grxc,(3,natom))
+   ABI_MALLOC(results_gs%grxc,(3,natom))
    results_gs%grxc  =zero
-   ABI_ALLOCATE(results_gs%synlgr,(3,natom))
+   ABI_MALLOC(results_gs%synlgr,(3,natom))
    results_gs%synlgr=zero
  end if
 
@@ -389,31 +389,31 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        call energies_init(results_gs(jj,ii)%energies)
 
        results_gs(jj,ii)%strten=zero
-       ABI_ALLOCATE(results_gs(jj,ii)%fcart,(3,natom))
+       ABI_MALLOC(results_gs(jj,ii)%fcart,(3,natom))
        results_gs(jj,ii)%fcart=zero
-       ABI_ALLOCATE(results_gs(jj,ii)%fred,(3,natom))
+       ABI_MALLOC(results_gs(jj,ii)%fred,(3,natom))
        results_gs(jj,ii)%fred =zero
-       ABI_ALLOCATE(results_gs(jj,ii)%gaps,(3,nsppol))
+       ABI_MALLOC(results_gs(jj,ii)%gaps,(3,nsppol))
        results_gs(jj,ii)%gaps =zero
-       ABI_ALLOCATE(results_gs(jj,ii)%intgres,(nspden,natom))
+       ABI_MALLOC(results_gs(jj,ii)%intgres,(nspden,natom))
        results_gs(jj,ii)%intgres =zero
 
        if (full_init) then
          results_gs(jj,ii)%pel=zero
          results_gs(jj,ii)%pion=zero
-         ABI_ALLOCATE(results_gs(jj,ii)%grchempottn,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%grchempottn,(3,natom))
          results_gs(jj,ii)%grchempottn=zero
-         ABI_ALLOCATE(results_gs(jj,ii)%grcondft,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%grcondft,(3,natom))
          results_gs(jj,ii)%grcondft=zero
-         ABI_ALLOCATE(results_gs(jj,ii)%gresid,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%gresid,(3,natom))
          results_gs(jj,ii)%gresid=zero
-         ABI_ALLOCATE(results_gs(jj,ii)%grewtn,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%grewtn,(3,natom))
          results_gs(jj,ii)%grewtn=zero
-         ABI_ALLOCATE(results_gs(jj,ii)%grxc,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%grxc,(3,natom))
          results_gs(jj,ii)%grxc  =zero
-         ABI_ALLOCATE(results_gs(jj,ii)%grvdw,(3,results_gs(jj,ii)%ngrvdw))
+         ABI_MALLOC(results_gs(jj,ii)%grvdw,(3,results_gs(jj,ii)%ngrvdw))
          results_gs(jj,ii)%grvdw  =zero
-         ABI_ALLOCATE(results_gs(jj,ii)%synlgr,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%synlgr,(3,natom))
          results_gs(jj,ii)%synlgr=zero
        end if
 
@@ -601,45 +601,45 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
    ABI_SFREE(results_gs_out%synlgr)
 
    if (allocated(results_gs_in%fcart))   then
-     ABI_ALLOCATE(results_gs_out%fcart,(3,natom_in))
+     ABI_MALLOC(results_gs_out%fcart,(3,natom_in))
    end if
    if (allocated(results_gs_in%fred))    then
-     ABI_ALLOCATE(results_gs_out%fred,(3,natom_in))
+     ABI_MALLOC(results_gs_out%fred,(3,natom_in))
    end if
    if (allocated(results_gs_in%gresid))  then
-     ABI_ALLOCATE(results_gs_out%gresid,(3,natom_in))
+     ABI_MALLOC(results_gs_out%gresid,(3,natom_in))
    end if
    if (allocated(results_gs_in%grchempottn))  then
-     ABI_ALLOCATE(results_gs_out%grchempottn,(3,natom_in))
+     ABI_MALLOC(results_gs_out%grchempottn,(3,natom_in))
    end if
    if (allocated(results_gs_in%grcondft))  then
-     ABI_ALLOCATE(results_gs_out%grcondft,(3,natom_in))
+     ABI_MALLOC(results_gs_out%grcondft,(3,natom_in))
    end if
    if (allocated(results_gs_in%grewtn))  then
-     ABI_ALLOCATE(results_gs_out%grewtn,(3,natom_in))
+     ABI_MALLOC(results_gs_out%grewtn,(3,natom_in))
    end if
    if (allocated(results_gs_in%grvdw))  then
-     ABI_ALLOCATE(results_gs_out%grvdw,(3,ngrvdw_in))
+     ABI_MALLOC(results_gs_out%grvdw,(3,ngrvdw_in))
    end if
    if (allocated(results_gs_in%grxc))    then
-     ABI_ALLOCATE(results_gs_out%grxc,(3,natom_in))
+     ABI_MALLOC(results_gs_out%grxc,(3,natom_in))
    end if
    if (allocated(results_gs_in%synlgr))  then
-     ABI_ALLOCATE(results_gs_out%synlgr,(3,natom_in))
+     ABI_MALLOC(results_gs_out%synlgr,(3,natom_in))
    end if
  end if
 
  if (nsppol_in>nsppol_out) then
    ABI_SFREE(results_gs_out%gaps)
    if (allocated(results_gs_in%gaps))    then
-     ABI_ALLOCATE(results_gs_out%gaps,(3,nsppol_in))
+     ABI_MALLOC(results_gs_out%gaps,(3,nsppol_in))
    end if
  endif
 
  if (nspden_in>nspden_out .or. natom_in>natom_out) then
    ABI_SFREE(results_gs_out%intgres)
    if (allocated(results_gs_in%intgres))    then
-     ABI_ALLOCATE(results_gs_out%intgres,(max(nspden_in,nspden_out),max(natom_in,natom_out)))
+     ABI_MALLOC(results_gs_out%intgres,(max(nspden_in,nspden_out),max(natom_in,natom_out)))
    end if
  endif
 

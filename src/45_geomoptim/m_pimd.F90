@@ -186,10 +186,10 @@ subroutine pimd_init(dtset,pimd_param,is_master)
      end if
    end if
    if(dtset%imgmov==13)then
-     ABI_ALLOCATE(pimd_param%zeta_prev,(3,dtset%natom,dtset%nimage,dtset%nnos))
-     ABI_ALLOCATE(pimd_param%zeta     ,(3,dtset%natom,dtset%nimage,dtset%nnos))
-     ABI_ALLOCATE(pimd_param%zeta_next,(3,dtset%natom,dtset%nimage,dtset%nnos))
-     ABI_ALLOCATE(pimd_param%dzeta    ,(3,dtset%natom,dtset%nimage,dtset%nnos))
+     ABI_MALLOC(pimd_param%zeta_prev,(3,dtset%natom,dtset%nimage,dtset%nnos))
+     ABI_MALLOC(pimd_param%zeta     ,(3,dtset%natom,dtset%nimage,dtset%nnos))
+     ABI_MALLOC(pimd_param%zeta_next,(3,dtset%natom,dtset%nimage,dtset%nnos))
+     ABI_MALLOC(pimd_param%dzeta    ,(3,dtset%natom,dtset%nimage,dtset%nnos))
      pimd_param%zeta_prev=zero
      pimd_param%zeta     =zero
      pimd_param%zeta_next=zero
@@ -810,8 +810,8 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
  end if
 
 !Centroids and wave-packet spatial spreads
- ABI_ALLOCATE(centroid,(3,natom))
- ABI_ALLOCATE(qudeloc,(natom))
+ ABI_MALLOC(centroid,(3,natom))
+ ABI_MALLOC(qudeloc,(natom))
  centroid=zero;qudeloc=zero
  do iimage=1,trotter
    do iatom=1,natom
@@ -836,8 +836,8 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
    write(msg,'(i4,4f18.10)') iatom,centroid(1:3,iatom),qudeloc(iatom)
    call wrtout(std_out,msg,'COLL')
  end do
- ABI_DEALLOCATE(centroid)
- ABI_DEALLOCATE(qudeloc)
+ ABI_FREE(centroid)
+ ABI_FREE(qudeloc)
 
 !Fake statement
  return;ii=prtvolimg
@@ -1343,7 +1343,7 @@ subroutine pimd_energies(eharm,eharm_virial,epot,etotal_img,forces,natom,spring,
 !************************************************************************
 
 !Compute the centroid
- ABI_ALLOCATE(centroid,(3,natom))
+ ABI_MALLOC(centroid,(3,natom))
  centroid=zero
  do iimage=1,trotter
    do iatom=1,natom
@@ -1380,7 +1380,7 @@ subroutine pimd_energies(eharm,eharm_virial,epot,etotal_img,forces,natom,spring,
  end do
  eharm_virial=eharm_virial/dble(two*trotter)
 
- ABI_DEALLOCATE(centroid)
+ ABI_FREE(centroid)
 
 end subroutine pimd_energies
 !!***
@@ -2033,7 +2033,7 @@ subroutine pimd_nosehoover_propagate(dtion,dzeta,mass,natom,nnos,qmass,temperatu
  end if
 
  kt=temperature*kb_HaK
- ABI_ALLOCATE(thermforces,(3,natom,trotter,nnos))
+ ABI_MALLOC(thermforces,(3,natom,trotter,nnos))
 
 !forces on the thermostats
  do inos=1,nnos
@@ -2130,7 +2130,7 @@ subroutine pimd_nosehoover_propagate(dtion,dzeta,mass,natom,nnos,qmass,temperatu
 
  end select
 
- ABI_DEALLOCATE(thermforces)
+ ABI_FREE(thermforces)
 
 end subroutine pimd_nosehoover_propagate
 !!***
@@ -2198,7 +2198,7 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
 
 !  ---------------- From primitive to transformed coordinates ------------
    if (ioption==+1) then
-     ABI_ALLOCATE(array_temp,(3,natom,trotter))
+     ABI_MALLOC(array_temp,(3,natom,trotter))
 
      array_temp(:,:,1)=zero
      do iimage=1,trotter
@@ -2224,13 +2224,13 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
 
      array=array_temp/dble(trotter)
 
-     ABI_DEALLOCATE(array_temp)
+     ABI_FREE(array_temp)
 
 !  ---------------- From transformed to primitive coordinates ------------
    else if (ioption==-1) then
 
-    ABI_ALLOCATE(array_temp,(3,natom,trotter))  !real part
-    ABI_ALLOCATE(nrm,(trotter,trotter))  !real part
+    ABI_MALLOC(array_temp,(3,natom,trotter))  !real part
+    ABI_MALLOC(nrm,(trotter,trotter))  !real part
 
    do iimage=1,trotter
      nrm(iimage,1)=one
@@ -2254,8 +2254,8 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
     end do
     array=array_temp
 
-    ABI_DEALLOCATE(array_temp)
-    ABI_DEALLOCATE(nrm)
+    ABI_FREE(array_temp)
+    ABI_FREE(nrm)
 
    end if ! ioption
 
@@ -2265,7 +2265,7 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
 !  ---------------- From primitive to transformed coordinates ------------
    if (ioption==+1) then
 
-     ABI_ALLOCATE(array_temp,(3,natom,trotter))
+     ABI_MALLOC(array_temp,(3,natom,trotter))
      array_temp=zero
      do iimage=1,trotter
        iimagep=iimage+1;if(iimage==trotter) iimagep=1
@@ -2285,12 +2285,12 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
          end do
        end do
      end if
-     ABI_DEALLOCATE(array_temp)
+     ABI_FREE(array_temp)
 
 !  ---------------- From transformed to primitive coordinates ------------
    else if (ioption==-1) then
 
-     ABI_ALLOCATE(array_temp,(3,natom,trotter))
+     ABI_MALLOC(array_temp,(3,natom,trotter))
      array_temp=zero
      do iimage=1,trotter
        do iatom=1,natom
@@ -2312,7 +2312,7 @@ subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
        end do
      end if
      array(:,:,:)=array_temp(:,:,:)
-     ABI_DEALLOCATE(array_temp)
+     ABI_FREE(array_temp)
 
    end if ! ioption
 
@@ -2390,8 +2390,8 @@ subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
  else if (transform==1) then
 
    !normal mode forces
-   ABI_ALLOCATE(forces_temp,(3,natom,trotter))
-   ABI_ALLOCATE(nrm,(trotter,trotter))
+   ABI_MALLOC(forces_temp,(3,natom,trotter))
+   ABI_MALLOC(nrm,(trotter,trotter))
 
    do iimage=1,trotter
      nrm(iimage,1)=one
@@ -2416,14 +2416,14 @@ subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
 
    forces=forces_temp
 
-   ABI_DEALLOCATE(forces_temp)
-   ABI_DEALLOCATE(nrm)
+   ABI_FREE(forces_temp)
+   ABI_FREE(nrm)
 
 !=== Staging transformation ==============================================
  else if (transform==2) then
 
    !staging forces
-   ABI_ALLOCATE(forces_temp,(3,natom,trotter))
+   ABI_MALLOC(forces_temp,(3,natom,trotter))
    forces_temp=zero
    do iimage=1,trotter
      do iatom=1,natom
@@ -2443,7 +2443,7 @@ subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
      end do
    end if
    forces=forces_temp
-   ABI_DEALLOCATE(forces_temp)
+   ABI_FREE(forces_temp)
 
  end if ! transform
 
@@ -2655,7 +2655,7 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
 !=== Normal mode transformation ==========================================
  else if (transform==1) then
 
-   ABI_ALLOCATE(lambda,(trotter))
+   ABI_MALLOC(lambda,(trotter))
    lambda(1)=zero; lambda(trotter)=four*dble(trotter)
    do kk=2,trotter/2
      lambda(2*kk-2)=four*dble(trotter)* &
@@ -2683,7 +2683,7 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
      mass(:,iimage)=mass(:,iimage)/gammasquare
    end do
 
-   ABI_DEALLOCATE(lambda)
+   ABI_FREE(lambda)
 
 !=== Staging transformation ==============================================
  else if (transform==2) then
@@ -2697,7 +2697,7 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
    end if
 
    !Staging masses (mass_temp)
-   ABI_ALLOCATE(mass_temp,(natom,trotter))
+   ABI_MALLOC(mass_temp,(natom,trotter))
    mass_temp(1:natom,1)=zero
    if (nmass>1) then
      do iimage=2,trotter
@@ -2711,7 +2711,7 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
        spring(1:natom,iimage)=mass_temp(1:natom,iimage)*dble(trotter)*kt*kt
      end do
    end if
-   ABI_DEALLOCATE(mass_temp)
+   ABI_FREE(mass_temp)
 
  end if
 

@@ -126,25 +126,25 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
  if(iexit/=0)then
    if (allocated(pot_perm))    then
-     ABI_DEALLOCATE(pot_perm)
+     ABI_FREE(pot_perm)
    end if
    if (allocated(max_perm))    then
-     ABI_DEALLOCATE(max_perm)
+     ABI_FREE(max_perm)
    end if
    if (allocated(imax_perm))   then
-     ABI_DEALLOCATE(imax_perm)
+     ABI_FREE(imax_perm)
    end if
    if (allocated(ran_force))   then
-     ABI_DEALLOCATE(ran_force)
+     ABI_FREE(ran_force)
    end if
    if (allocated(lang_force))  then
-     ABI_DEALLOCATE(lang_force)
+     ABI_FREE(lang_force)
    end if
    if (allocated(fcart_mold))  then
-     ABI_DEALLOCATE(fcart_mold)
+     ABI_FREE(fcart_mold)
    end if
    if (allocated(fcart_m))     then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    return
  end if
@@ -159,48 +159,48 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
  if(itime==1)then
    if (allocated(pot_perm))    then
-     ABI_DEALLOCATE(pot_perm)
+     ABI_FREE(pot_perm)
    end if
    if (allocated(max_perm))    then
-     ABI_DEALLOCATE(max_perm)
+     ABI_FREE(max_perm)
    end if
    if (allocated(imax_perm))   then
-     ABI_DEALLOCATE(imax_perm)
+     ABI_FREE(imax_perm)
    end if
    if (allocated(ran_force))   then
-     ABI_DEALLOCATE(ran_force)
+     ABI_FREE(ran_force)
    end if
    if (allocated(lang_force))  then
-     ABI_DEALLOCATE(lang_force)
+     ABI_FREE(lang_force)
    end if
    if (allocated(fcart_mold))  then
-     ABI_DEALLOCATE(fcart_mold)
+     ABI_FREE(fcart_mold)
    end if
    if (allocated(fcart_m))     then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
  end if
 
  if (.not.allocated(pot_perm))    then
-   ABI_ALLOCATE(pot_perm,(ab_mover%natom))
+   ABI_MALLOC(pot_perm,(ab_mover%natom))
  end if
  if (.not.allocated(max_perm))    then
-   ABI_ALLOCATE(max_perm,(ab_mover%ntypat))
+   ABI_MALLOC(max_perm,(ab_mover%ntypat))
  end if
  if (.not.allocated(imax_perm))   then
-   ABI_ALLOCATE(imax_perm,(ab_mover%ntypat))
+   ABI_MALLOC(imax_perm,(ab_mover%ntypat))
  end if
  if (.not.allocated(ran_force))   then
-   ABI_ALLOCATE(ran_force,(3,ab_mover%natom))
+   ABI_MALLOC(ran_force,(3,ab_mover%natom))
  end if
  if (.not.allocated(lang_force))  then
-   ABI_ALLOCATE(lang_force,(3,ab_mover%natom))
+   ABI_MALLOC(lang_force,(3,ab_mover%natom))
  end if
  if (.not.allocated(fcart_mold))  then
-   ABI_ALLOCATE(fcart_mold,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_mold,(3,ab_mover%natom))
  end if
  if (.not.allocated(fcart_m))     then
-   ABI_ALLOCATE(fcart_m,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_m,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'langevin 03',jump_end_of_cycle
@@ -464,7 +464,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
  end if ! if (icycle==1)
 
  if (allocated(imax_perm))   then
-   ABI_DEALLOCATE(imax_perm)
+   ABI_FREE(imax_perm)
  end if
 
 !write(std_out,*) 'langevin 05',jump_end_of_cycle

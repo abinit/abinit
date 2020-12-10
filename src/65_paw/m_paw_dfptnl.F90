@@ -175,37 +175,37 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    cplex_3=pawrhoij_3(iatom)%cplex_rhoij
    lm_size_all=paw_an0(iatom)%lm_size
 
-   ABI_ALLOCATE(lmselect_tmp,(lm_size_all))
+   ABI_MALLOC(lmselect_tmp,(lm_size_all))
    lmselect_tmp(:)=.true.
 
 !  Compute on-site 1st-order densities (pert1)
-   ABI_ALLOCATE(lmselect_1,(lm_size_all))
+   ABI_MALLOC(lmselect_1,(lm_size_all))
    lmselect_1(:)=paw_an0(iatom)%lmselect(:)
-   ABI_ALLOCATE(rho1_1,(cplex_1*mesh_size,lm_size_all,nspden))
-   ABI_ALLOCATE(trho1_1,(cplex_1*mesh_size,lm_size_all,nspden))
-   ABI_ALLOCATE(nhat1_1,(cplex_1*mesh_size,lm_size_all,nspden*usexcnhat))
+   ABI_MALLOC(rho1_1,(cplex_1*mesh_size,lm_size_all,nspden))
+   ABI_MALLOC(trho1_1,(cplex_1*mesh_size,lm_size_all,nspden))
+   ABI_MALLOC(nhat1_1,(cplex_1*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_1,iatom_tot,lmselect_tmp,lmselect_1,&
 &   lm_size_all,nhat1_1,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_1(iatom),pawtab(itypat),rho1_1,trho1_1)
 !  Compute on-site 1st-order densities (pert2)
-   ABI_ALLOCATE(lmselect_2,(lm_size_all))
+   ABI_MALLOC(lmselect_2,(lm_size_all))
    lmselect_2(:)=paw_an0(iatom)%lmselect(:)
-   ABI_ALLOCATE(rho1_2,(cplex_2*mesh_size,lm_size_all,nspden))
-   ABI_ALLOCATE(trho1_2,(cplex_2*mesh_size,lm_size_all,nspden))
-   ABI_ALLOCATE(nhat1_2,(cplex_2*mesh_size,lm_size_all,nspden*usexcnhat))
+   ABI_MALLOC(rho1_2,(cplex_2*mesh_size,lm_size_all,nspden))
+   ABI_MALLOC(trho1_2,(cplex_2*mesh_size,lm_size_all,nspden))
+   ABI_MALLOC(nhat1_2,(cplex_2*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_2,iatom_tot,lmselect_tmp,lmselect_2,&
 &   lm_size_all,nhat1_2,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_2(iatom),pawtab(itypat),rho1_2,trho1_2)
 !  Compute on-site 1st-order densities (pert3)
-   ABI_ALLOCATE(lmselect_3,(lm_size_all))
+   ABI_MALLOC(lmselect_3,(lm_size_all))
    lmselect_3(:)=paw_an0(iatom)%lmselect(:)
-   ABI_ALLOCATE(rho1_3,(cplex_3*mesh_size,lm_size_all,nspden))
-   ABI_ALLOCATE(trho1_3,(cplex_3*mesh_size,lm_size_all,nspden))
-   ABI_ALLOCATE(nhat1_3,(cplex_3*mesh_size,lm_size_all,nspden*usexcnhat))
+   ABI_MALLOC(rho1_3,(cplex_3*mesh_size,lm_size_all,nspden))
+   ABI_MALLOC(trho1_3,(cplex_3*mesh_size,lm_size_all,nspden))
+   ABI_MALLOC(nhat1_3,(cplex_3*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_3,iatom_tot,lmselect_tmp,lmselect_3,&
 &   lm_size_all,nhat1_3,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_3(iatom),pawtab(itypat),rho1_3,trho1_3)
-   ABI_DEALLOCATE(lmselect_tmp)
+   ABI_FREE(lmselect_tmp)
 
    call paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,paw_an0(iatom)%k3xc1,lm_size_all,&
 &   lmselect_1,lmselect_2,lmselect_3,nhat1_1,nhat1_2,nhat1_3,&
@@ -219,18 +219,18 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
 &   trho1_1,trho1_2,trho1_3,usexcnhat)
    d3exc = d3exc - d3exc1_iat
 
-   ABI_DEALLOCATE(lmselect_1)
-   ABI_DEALLOCATE(lmselect_2)
-   ABI_DEALLOCATE(lmselect_3)
-   ABI_DEALLOCATE(nhat1_1)
-   ABI_DEALLOCATE(nhat1_2)
-   ABI_DEALLOCATE(nhat1_3)
-   ABI_DEALLOCATE(rho1_1)
-   ABI_DEALLOCATE(rho1_2)
-   ABI_DEALLOCATE(rho1_3)
-   ABI_DEALLOCATE(trho1_1)
-   ABI_DEALLOCATE(trho1_2)
-   ABI_DEALLOCATE(trho1_3)
+   ABI_FREE(lmselect_1)
+   ABI_FREE(lmselect_2)
+   ABI_FREE(lmselect_3)
+   ABI_FREE(nhat1_1)
+   ABI_FREE(nhat1_2)
+   ABI_FREE(nhat1_3)
+   ABI_FREE(rho1_1)
+   ABI_FREE(rho1_2)
+   ABI_FREE(rho1_3)
+   ABI_FREE(trho1_1)
+   ABI_FREE(trho1_2)
+   ABI_FREE(trho1_3)
 
 !  ================ End loop oon atomic sites =======================
  end do
@@ -346,9 +346,9 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
    return
  end if
 
- ABI_ALLOCATE(rho1arr,(cplex_1*nrad,nspden))
- ABI_ALLOCATE(rho2arr,(cplex_2*nrad,nspden))
- ABI_ALLOCATE(rho3arr,(cplex_3*nrad,nspden))
+ ABI_MALLOC(rho1arr,(cplex_1*nrad,nspden))
+ ABI_MALLOC(rho2arr,(cplex_2*nrad,nspden))
+ ABI_MALLOC(rho3arr,(cplex_3*nrad,nspden))
 
 !Restriction : all cplex must be 1
  if (cplex_1/=1.or.cplex_2/=1.or.cplex_3/=1) then
@@ -361,7 +361,7 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
 !   ABI_BUG(msg)
 ! end if
 
- ABI_ALLOCATE(ff,(nrad))
+ ABI_MALLOC(ff,(nrad))
 
 !!----------------------------------------------------------------------
 !!----- Loop on the angular part and inits
@@ -461,10 +461,10 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
 
  d3exc1_iat = d3exc1_iat*four_pi
 
- ABI_DEALLOCATE(ff)
- ABI_DEALLOCATE(rho1arr)
- ABI_DEALLOCATE(rho2arr)
- ABI_DEALLOCATE(rho3arr)
+ ABI_FREE(ff)
+ ABI_FREE(rho1arr)
+ ABI_FREE(rho2arr)
+ ABI_FREE(rho3arr)
 
 end subroutine paw_dfptnl_xc
 !!***

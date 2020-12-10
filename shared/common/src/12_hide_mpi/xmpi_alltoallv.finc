@@ -147,12 +147,12 @@ subroutine xmpi_alltoallv_dp1d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,co
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   ABI_STAT_ALLOCATE(rdispls_on,(size(sendcnts)), ier)
+   ABI_STAT_MALLOC(rdispls_on,(size(sendcnts)), ier)
    if (ier/= 0) call xmpi_abort(msg='error allocating rdispls_on in xmpi_alltoallv')
    rdispls_on = 0
    call MPI_ALLTOALLV(xval,sendcnts,sdispls,MPI_DOUBLE_PRECISION,recvbuf,&
 &   recvcnts,rdispls_on,MPI_DOUBLE_PRECISION,comm,ier)
-   ABI_DEALLOCATE(rdispls_on)
+   ABI_FREE(rdispls_on)
  else if (comm == MPI_COMM_SELF) then
 #endif
    sdr=rdispls;sds=0;if (size(sdispls)>0) sds=sdispls(1)

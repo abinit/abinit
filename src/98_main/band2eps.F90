@@ -165,10 +165,10 @@ program band2eps
  kmaxN=9600
 
 !Allocate dynamique variables
- ABI_ALLOCATE(phfrqqm1,(3*inp%natom))
- ABI_ALLOCATE(phfrq,(3*inp%natom))
- ABI_ALLOCATE(color,(3,3*inp%natom))
- ABI_ALLOCATE(colorAtom,(3,inp%natom))
+ ABI_MALLOC(phfrqqm1,(3*inp%natom))
+ ABI_MALLOC(phfrq,(3*inp%natom))
+ ABI_MALLOC(color,(3,3*inp%natom))
+ ABI_MALLOC(colorAtom,(3,inp%natom))
 !colorAtom(1,1:5) : atoms contributing to red (ex : [1 0 0 0 0])
 !colorAtom(2,1:5) : atoms contributing to green (ex : [0 1 0 0 0])
 !colorAtom(3,1:5) : atoms contributing to blue (ex : [0 0 1 1 1])
@@ -176,7 +176,7 @@ program band2eps
  colorAtom(1,:) = inp%red
  colorAtom(2,:) = inp%green
  colorAtom(3,:) = inp%blue
- ABI_ALLOCATE(displ,(inp%natom,3*inp%natom))
+ ABI_MALLOC(displ,(inp%natom,3*inp%natom))
 !Read end of input file
 
 !Multiplication factor for units (from Hartree to cm-1 or THz)

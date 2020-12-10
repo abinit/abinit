@@ -194,7 +194,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 
 !Compute ionic positions at t+dt in red. coordinates
 !Has to take the boundary conditions into account
- ABI_ALLOCATE(xred_tpdt,(3,dtset%natom))
+ ABI_MALLOC(xred_tpdt,(3,dtset%natom))
  do iatom=1,dtset%natom
    xred_tpdt(1,iatom)=xred_old(1,iatom)+mod(xred_new(1,iatom)-xred_old(1,iatom)+1.5_dp,one)-half
    xred_tpdt(2,iatom)=xred_old(2,iatom)+mod(xred_new(2,iatom)-xred_old(2,iatom)+1.5_dp,one)-half
@@ -229,7 +229,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
    scf_history%xreddiff(1:3,iatom,ind1new)=diff_tpdt(1:3)
 
  end do
- ABI_DEALLOCATE(xred_tpdt)
+ ABI_FREE(xred_tpdt)
  hasmoved=(a11>=tol10.or.a22>=tol10.or.a33>=tol10)
 
 !Compute alpha and beta
@@ -268,7 +268,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 !+ beta .[deltarho(t-dt)-deltarho(t-2dt)]
 !Note: scf_history%deltarhor is updated at the same time
 
- ABI_ALLOCATE(deltarho,(nfft))
+ ABI_MALLOC(deltarho,(nfft))
  do ispden=1,dtset%nspden
 
    if (ispden==1) then
@@ -308,7 +308,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 
  end do
 
- ABI_DEALLOCATE(deltarho)
+ ABI_FREE(deltarho)
 
 !---------------------------------------------------------------
 !----------- Contribution from rho_at(t+dt) to predicted rho(t+dt)
@@ -322,7 +322,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
  if (usepaw==1) usegauss=(minval(pawtab(1:ntypat)%has_tvale)==0)
  if (usegauss) then
    optn2=3
-   ABI_ALLOCATE(gauss,(2,ntypat))
+   ABI_MALLOC(gauss,(2,ntypat))
    do itypat=1,ntypat
      gauss(1,itypat)=zion(itypat)
      gauss(2,itypat) = atom_length(dtset%densty(itypat,1),zion(itypat),znucl(itypat))
@@ -330,7 +330,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
    call wrtout(std_out," Extrapolating rho(t+dt) using gaussian functions as atomic densities", "COLL")
  else
    optn2=2
-   ABI_ALLOCATE(gauss,(2,0))
+   ABI_MALLOC(gauss,(2,0))
    call wrtout(std_out," Extrapolating rho(t+dt) using atomic densities taken from pseudos", "COLL")
  end if
 
@@ -343,21 +343,21 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 & dummy3,dtset%rcut,dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,usepaw,dummy_in,dummy_in,dummy_in,dummy2,dummy_in,&
 & comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 & paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
- ABI_DEALLOCATE(gauss)
+ ABI_FREE(gauss)
 
 !Take eventually into account jellium slab
  if (dtset%jellslab/=0) then
    option=2
-   ABI_ALLOCATE(work1,(nfft))
-   ABI_ALLOCATE(work2,(nfft,1))
-   ABI_ALLOCATE(work3,(2,nfft))
+   ABI_MALLOC(work1,(nfft))
+   ABI_MALLOC(work2,(nfft,1))
+   ABI_MALLOC(work3,(2,nfft))
    work2(:,1)=scf_history%atmrho_last(:)
    call jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,1,option,&
 &   dtset%slabwsrad,work3,work2,rprimd,work1,dtset%slabzbeg,dtset%slabzend)
    scf_history%atmrho_last(:)=work2(:,1)
-   ABI_DEALLOCATE(work1)
-   ABI_DEALLOCATE(work2)
-   ABI_DEALLOCATE(work3)
+   ABI_FREE(work1)
+   ABI_FREE(work2)
+   ABI_FREE(work3)
  end if
 
 !Add rho_at(t+dt) to rho(t+dt)
@@ -386,7 +386,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
      qphase_rhoij=pawrhoij(iatom)%qphase
 
      if (hasmoved) then
-       ABI_ALLOCATE(rhoijtmp,(cplex_rhoij*qphase_rhoij*lmn2_size,nspden_rhoij))
+       ABI_MALLOC(rhoijtmp,(cplex_rhoij*qphase_rhoij*lmn2_size,nspden_rhoij))
        rhoijtmp=zero
 
        do ispden=1,nspden_rhoij
@@ -445,7 +445,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
        call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,pawrhoij(iatom)%nrhoijsel,&
 &                           cplex_rhoij,qphase_rhoij,lmn2_size,nspden_rhoij,&
 &                           rhoij_input=rhoijtmp)
-       ABI_DEALLOCATE(rhoijtmp)
+       ABI_FREE(rhoijtmp)
      end if
 
    end do !iatom
@@ -580,7 +580,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 
 !Useful array
  if (usepaw==1) then
-   ABI_ALLOCATE(dimcprj,(dtset%natom))
+   ABI_MALLOC(dimcprj,(dtset%natom))
    call pawcprj_getdim(dimcprj,dtset%natom,nattyp,ntypat,dtset%typat,pawtab,'O')
  end if
 
@@ -601,7 +601,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
      iatom=0 ; iorder_cprj=0
      call pawcprj_alloc(scf_history%cprj(:,:,ind1),0,dimcprj)
      call pawcprj_alloc(scf_history%cprj(:,:,ind2),0,dimcprj)
-     ABI_ALLOCATE(ylmgr_k,(dtset%mpw,3,0))
+     ABI_MALLOC(ylmgr_k,(dtset%mpw,3,0))
      call ctocprj(atindx,cg,1,scf_history%cprj(:,:,ind1),gmet,gprimd,&
 &     iatom,0,iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,scf_history%mcprj,&
 &     dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
@@ -609,7 +609,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 &     dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
 &     dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,0,&
 &     xred_old,ylm,ylmgr_k)
-     ABI_DEALLOCATE(ylmgr_k)
+     ABI_FREE(ylmgr_k)
 !    call pawcprj_set_zero(scf_history%cprj(:,:,ind2))
      call pawcprj_copy(scf_history%cprj(:,:,ind1),scf_history%cprj(:,:,ind2))
    end if
@@ -632,12 +632,12 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 
 !  Additional statements if band-fft parallelism
    if (nprocband>1) then
-     ABI_ALLOCATE(npw_block,(nprocband))
-     ABI_ALLOCATE(npw_disp,(nprocband))
-     ABI_ALLOCATE(bufsize,(nprocband))
-     ABI_ALLOCATE(bufdisp,(nprocband))
-     ABI_ALLOCATE(bufsize_wf,(nprocband))
-     ABI_ALLOCATE(bufdisp_wf,(nprocband))
+     ABI_MALLOC(npw_block,(nprocband))
+     ABI_MALLOC(npw_disp,(nprocband))
+     ABI_MALLOC(bufsize,(nprocband))
+     ABI_MALLOC(bufdisp,(nprocband))
+     ABI_MALLOC(bufsize_wf,(nprocband))
+     ABI_MALLOC(bufdisp_wf,(nprocband))
    end if
 
    icg=0
@@ -646,10 +646,10 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
    if(usepaw==1) then
 !    WARNING: THIS SECTION IS USELESS; NOW cprj CAN BE READ FROM SCFCV
      call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred_old)
-     ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,scf_history%mcprj))
+     ABI_MALLOC(cprj,(dtset%natom,scf_history%mcprj))
      call pawcprj_alloc(cprj,0,dimcprj)
      iatom=0 ; iorder_cprj=0
-     ABI_ALLOCATE(ylmgr_k,(dtset%mpw,3,0))
+     ABI_MALLOC(ylmgr_k,(dtset%mpw,3,0))
      call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,0,iorder_cprj,&
 &     dtset%istwfk,kg,dtset%kptns,mcg,scf_history%mcprj,dtset%mgfft,&
 &     dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,&
@@ -657,7 +657,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 &     npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,&
 &     ph1d,psps,rmet,dtset%typat,ucvol,0,xred_old,&
 &     ylm,ylmgr_k)
-     ABI_DEALLOCATE(ylmgr_k)
+     ABI_FREE(ylmgr_k)
    end if  ! end usepaw=1
 
 !  LOOP OVER SPINS
@@ -687,8 +687,8 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
        end if
 
 !      Allocate arrays for a wave-function (or a block of WFs)
-       ABI_ALLOCATE(cwavef,(2,npw_nk*my_nspinor))
-       ABI_ALLOCATE(cwavef1,(2,npw_nk*my_nspinor))
+       ABI_MALLOC(cwavef,(2,npw_nk*my_nspinor))
+       ABI_MALLOC(cwavef1,(2,npw_nk*my_nspinor))
        if (nprocband>1) then
          isize=2*my_nspinor;bufsize(:)=isize*npw_block(:);bufdisp(:)=isize*npw_disp(:)
          isize=2*my_nspinor*npw_k;bufsize_wf(:)=isize
@@ -704,24 +704,24 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
        icgb=icg
 
        if(usepaw==1) then
-         ABI_DATATYPE_ALLOCATE( cprj_k,(dtset%natom,my_nspinor*nblockbd))
+         ABI_MALLOC( cprj_k,(dtset%natom,my_nspinor*nblockbd))
          call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimcprj)
          call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
 &         dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         ABI_DATATYPE_ALLOCATE( cprj_k1,(dtset%natom,my_nspinor*nblockbd))
+         ABI_MALLOC( cprj_k1,(dtset%natom,my_nspinor*nblockbd))
          call pawcprj_alloc(cprj_k1,scf_history%cprj(1,1,ind1)%ncpgr,dimcprj)
          call pawcprj_get(atindx1,cprj_k1,scf_history%cprj(:,:,ind1),dtset%natom,1,ibg,ikpt,1,isppol,&
 &         dtset%mband,dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         ABI_DATATYPE_ALLOCATE( cprj_k2,(dtset%natom,my_nspinor*nblockbd))
+         ABI_MALLOC( cprj_k2,(dtset%natom,my_nspinor*nblockbd))
          call pawcprj_alloc(cprj_k2,scf_history%cprj(1,1,ind2)%ncpgr,dimcprj)
          call pawcprj_get(atindx1,cprj_k2,scf_history%cprj(:,:,ind2),dtset%natom,1,ibg,ikpt,1,isppol,&
 &         dtset%mband,dtset%mkmem,dtset%natom,nblockbd,nblockbd,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
        end if  !end usepaw=1
 
-       ABI_ALLOCATE(unm,(2,nblockbd,nblockbd))
+       ABI_MALLOC(unm,(2,nblockbd,nblockbd))
        unm=zero
        icgb2=0
 
@@ -736,13 +736,13 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 !        Extract wavefunction information
          if (nprocband>1) then
 !          Special treatment for band-fft //
-           ABI_ALLOCATE(cwavef_tmp,(2,npw_k*my_nspinor*nprocband))
+           ABI_MALLOC(cwavef_tmp,(2,npw_k*my_nspinor*nprocband))
            do ig=1,npw_k*my_nspinor*nprocband
              cwavef_tmp(1,ig)=cg(1,ig+icgb)
              cwavef_tmp(2,ig)=cg(2,ig+icgb)
            end do
            call xmpi_alltoallv(cwavef_tmp,bufsize_wf,bufdisp_wf,cwavef,bufsize,bufdisp,spaceComm_band,ierr)
-           ABI_DEALLOCATE(cwavef_tmp)
+           ABI_FREE(cwavef_tmp)
          else
            do ig=1,npw_k*my_nspinor
              cwavef(1,ig)=cg(1,ig+icgb)
@@ -764,13 +764,13 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 
            if (nprocband>1) then
 !            Special treatment for band-fft //
-             ABI_ALLOCATE(cwavef_tmp,(2,npw_k*my_nspinor*nprocband))
+             ABI_MALLOC(cwavef_tmp,(2,npw_k*my_nspinor*nprocband))
              do ig=1,npw_k*my_nspinor*nprocband
                cwavef_tmp(1,ig)=scf_history%cg(1,ig+icgb1,ind1)
                cwavef_tmp(2,ig)=scf_history%cg(2,ig+icgb1,ind1)
              end do
              call xmpi_alltoallv(cwavef_tmp,bufsize_wf,bufdisp_wf,cwavef1,bufsize,bufdisp,spaceComm_band,ierr)
-             ABI_DEALLOCATE(cwavef_tmp)
+             ABI_FREE(cwavef_tmp)
            else
              do ig=1,npw_k*my_nspinor
                cwavef1(1,ig)=scf_history%cg(1,ig+icgb1,ind1)
@@ -824,9 +824,9 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 !      end do
 !      11 format(12(1x,f9.5),a)
 !      Compute A=tU^*U
-       ABI_ALLOCATE(unm_tmp,(nblockbd,nblockbd))
-       ABI_ALLOCATE(anm_tmp,(nblockbd,nblockbd))
-       ABI_ALLOCATE(anm,(nblockbd*(nblockbd+1)))
+       ABI_MALLOC(unm_tmp,(nblockbd,nblockbd))
+       ABI_MALLOC(anm_tmp,(nblockbd,nblockbd))
+       ABI_MALLOC(anm,(nblockbd*(nblockbd+1)))
        unm_tmp(:,:)=cmplx(unm(1,:,:),unm(2,:,:),kind=dp)
        call zgemm('C','N',nblockbd,nblockbd,nblockbd,dcmplx(1._dp), unm_tmp,nblockbd, &
 &       unm_tmp,nblockbd,dcmplx(0._dp),anm_tmp,nblockbd)
@@ -853,15 +853,15 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 !      end do
 
 !      Diagonalize A
-       ABI_ALLOCATE(eig,(nblockbd))
-       ABI_ALLOCATE(evec,(2*nblockbd,nblockbd))
-       ABI_ALLOCATE(zhpev1,(2,2*nblockbd-1))
-       ABI_ALLOCATE(zhpev2,(3*nblockbd-2))
+       ABI_MALLOC(eig,(nblockbd))
+       ABI_MALLOC(evec,(2*nblockbd,nblockbd))
+       ABI_MALLOC(zhpev1,(2,2*nblockbd-1))
+       ABI_MALLOC(zhpev2,(3*nblockbd-2))
        call zhpev('V','U',nblockbd,anm,eig,evec,nblockbd,zhpev1,&
 &       zhpev2,ierr)
-       ABI_DEALLOCATE(anm)
-       ABI_DEALLOCATE(zhpev1)
-       ABI_DEALLOCATE(zhpev2)
+       ABI_FREE(anm)
+       ABI_FREE(zhpev1)
+       ABI_FREE(zhpev2)
 !      aa=dcmplx(0._dp)
 !      do iblockbd=1,nblockbd
 !      aa=aa+anm_tmp(1,iblockbd)*cmplx(evec((2*iblockbd-1),1),evec(2*iblockbd,1),kind=dp)
@@ -889,8 +889,8 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 !      end do
 
 !      Wavefunction alignment (istwfk=1 ?)
-       ABI_ALLOCATE(work,(2,npw_nk*my_nspinor*nblockbd))
-       ABI_ALLOCATE(work1,(2,my_nspinor*nblockbd*npw_nk))
+       ABI_MALLOC(work,(2,npw_nk*my_nspinor*nblockbd))
+       ABI_MALLOC(work1,(2,my_nspinor*nblockbd*npw_nk))
        work1(:,:)=scf_history%cg(:,icg+1:icg+my_nspinor*nblockbd*npw_nk,ind1)
        call zgemm('N','N',npw_nk*my_nspinor,nblockbd,nblockbd,dcmplx(1._dp), &
 &       work1,npw_nk*my_nspinor, &
@@ -902,15 +902,15 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 &       work1,npw_nk*my_nspinor, &
 &       anm_tmp,nblockbd,dcmplx(0._dp),work,npw_nk*my_nspinor)
        scf_history%cg(:,1+icg:npw_nk*my_nspinor*nblockbd+icg,ind2)=work(:,:)
-       ABI_DEALLOCATE(work1)
+       ABI_FREE(work1)
 !      If paw, must also align cprj:
        if (usepaw==1) then
 !        New version (MT):
-         ABI_DATATYPE_ALLOCATE(cprj_k3,(dtset%natom,my_nspinor))
-         ABI_DATATYPE_ALLOCATE(cprj_k4,(dtset%natom,my_nspinor))
+         ABI_MALLOC(cprj_k3,(dtset%natom,my_nspinor))
+         ABI_MALLOC(cprj_k4,(dtset%natom,my_nspinor))
          call pawcprj_alloc(cprj_k3,cprj_k1(1,1)%ncpgr,dimcprj)
          call pawcprj_alloc(cprj_k4,cprj_k2(1,1)%ncpgr,dimcprj)
-         ABI_ALLOCATE(al,(2,nblockbd))
+         ABI_MALLOC(al,(2,nblockbd))
          do iblockbd=1,nblockbd
            ii=(iblockbd-1)*my_nspinor
            do iblockbd1=1,nblockbd
@@ -922,7 +922,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
            call pawcprj_copy(cprj_k3,cprj_k1(:,ii+1:ii+my_nspinor))
            call pawcprj_copy(cprj_k4,cprj_k2(:,ii+1:ii+my_nspinor))
          end do
-         ABI_DEALLOCATE(al)
+         ABI_FREE(al)
 !        Old version (FJ):
 !        allocate( cprj_k3(dtset%natom,my_nspinor*nblockbd))
 !        call pawcprj_alloc(cprj_k3,cprj_k1(1,1)%ncpgr,dimcprj)
@@ -941,19 +941,19 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 
          call pawcprj_free(cprj_k3)
          call pawcprj_free(cprj_k4)
-         ABI_DATATYPE_DEALLOCATE(cprj_k3)
-         ABI_DATATYPE_DEALLOCATE(cprj_k4)
+         ABI_FREE(cprj_k3)
+         ABI_FREE(cprj_k4)
        end if
-       ABI_DEALLOCATE(anm_tmp)
-       ABI_DEALLOCATE(unm_tmp)
-       ABI_DEALLOCATE(work)
+       ABI_FREE(anm_tmp)
+       ABI_FREE(unm_tmp)
+       ABI_FREE(work)
 
 !      Wavefunction extrapolation
        ibd=0
        inc=npw_nk*my_nspinor
-       ABI_ALLOCATE(deltawf2,(2,npw_nk*my_nspinor))
-       ABI_ALLOCATE(wf1,(2,npw_nk*my_nspinor))
-       ABI_ALLOCATE(deltawf1,(2,npw_nk*my_nspinor))
+       ABI_MALLOC(deltawf2,(2,npw_nk*my_nspinor))
+       ABI_MALLOC(wf1,(2,npw_nk*my_nspinor))
+       ABI_MALLOC(deltawf1,(2,npw_nk*my_nspinor))
        do iblockbd=1,nblockbd
          deltawf2(:,:)=scf_history%cg(:,1+icg+ibd:icg+ibd+inc,ind2)
          wf1(:,:)=scf_history%cg(:,1+icg+ibd:icg+ibd+inc,ind1)
@@ -1058,21 +1058,21 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
          ibd=ibd+inc
        end do ! end loop on iblockbd
 
-       ABI_DEALLOCATE(deltawf1)
-       ABI_DEALLOCATE(deltawf2)
-       ABI_DEALLOCATE(wf1)
-       ABI_DEALLOCATE(cwavef)
-       ABI_DEALLOCATE(cwavef1)
-       ABI_DEALLOCATE(eig)
-       ABI_DEALLOCATE(evec)
-       ABI_DEALLOCATE(unm)
+       ABI_FREE(deltawf1)
+       ABI_FREE(deltawf2)
+       ABI_FREE(wf1)
+       ABI_FREE(cwavef)
+       ABI_FREE(cwavef1)
+       ABI_FREE(eig)
+       ABI_FREE(evec)
+       ABI_FREE(unm)
        if(usepaw==1) then
          call pawcprj_free(cprj_k)
-         ABI_DATATYPE_DEALLOCATE(cprj_k)
+         ABI_FREE(cprj_k)
          call pawcprj_free(cprj_k1)
-         ABI_DATATYPE_DEALLOCATE(cprj_k1)
+         ABI_FREE(cprj_k1)
          call pawcprj_free(cprj_k2)
-         ABI_DATATYPE_DEALLOCATE(cprj_k2)
+         ABI_FREE(cprj_k2)
        end if
 
        ibg=ibg+my_nspinor*nband_k
@@ -1085,21 +1085,21 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 
    if(usepaw==1) then
      call pawcprj_free(cprj)
-     ABI_DATATYPE_DEALLOCATE(cprj)
+     ABI_FREE(cprj)
    end if
    if (nprocband>1) then
-     ABI_DEALLOCATE(npw_block)
-     ABI_DEALLOCATE(npw_disp)
-     ABI_DEALLOCATE(bufsize)
-     ABI_DEALLOCATE(bufdisp)
-     ABI_DEALLOCATE(bufsize_wf)
-     ABI_DEALLOCATE(bufdisp_wf)
+     ABI_FREE(npw_block)
+     ABI_FREE(npw_disp)
+     ABI_FREE(bufsize)
+     ABI_FREE(bufdisp)
+     ABI_FREE(bufsize_wf)
+     ABI_FREE(bufdisp_wf)
    end if
 
  end if ! istep>=2
 
  if (usepaw==1) then
-   ABI_DEALLOCATE(dimcprj)
+   ABI_FREE(dimcprj)
  end if
 
 end subroutine extrapwf
@@ -1204,7 +1204,7 @@ end subroutine extrapwf
  ibg_hist=0
 
 !Useful array
- ABI_ALLOCATE(dimcprj,(dtset%natom))
+ ABI_MALLOC(dimcprj,(dtset%natom))
  if (usepaw==1) then
    call pawcprj_getdim(dimcprj,dtset%natom,nattyp,ntypat,dtset%typat,pawtab,'O')
  end if
@@ -1216,15 +1216,15 @@ end subroutine extrapwf
  end if
 
  mcprj_k=my_nspinor*nbdmax
- ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,mcprj_k))
- ABI_DATATYPE_ALLOCATE(cprj_kh,(dtset%natom,mcprj_k))
+ ABI_MALLOC(cprj_k,(dtset%natom,mcprj_k))
+ ABI_MALLOC(cprj_kh,(dtset%natom,mcprj_k))
 
  if(usepaw==1) then
    call pawcprj_alloc(cprj_k,0,dimcprj)
    call pawcprj_alloc(cprj_kh,0,dimcprj)
  end if
- ABI_ALLOCATE(smn,(2,nbdmax,nbdmax))
- ABI_ALLOCATE(mmn,(2,nbdmax,nbdmax))
+ ABI_MALLOC(smn,(2,nbdmax,nbdmax))
+ ABI_MALLOC(mmn,(2,nbdmax,nbdmax))
 
 !Explanation for the index for the wavefunction stored in scf_history_wf
 !The reference is the cg+cprj output after the wf optimization at istep 1.
@@ -1290,7 +1290,7 @@ end subroutine extrapwf
        if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) cycle
        istwf_k=dtset%istwfk(ikpt)
        npw_k=npwarr(ikpt)
-       ABI_ALLOCATE(psi_ortho,(2,npw_k*my_nspinor*nbdmix))
+       ABI_MALLOC(psi_ortho,(2,npw_k*my_nspinor*nbdmix))
        psi_ortho=zero
 !      Biorthogonalization
 
@@ -1316,10 +1316,10 @@ end subroutine extrapwf
          mmn(1,kk,kk)=one
        end do
 
-       ABI_ALLOCATE(ipiv,(nbdmix))
+       ABI_MALLOC(ipiv,(nbdmix))
 !      The smn is destroyed by the following inverse call
        call zgesv(nbdmix,nbdmix,smn,nbdmax,ipiv,mmn,nbdmax,ierr)
-       ABI_DEALLOCATE(ipiv)
+       ABI_FREE(ipiv)
 !DEBUG
        if(ierr/=0)then
          ABI_ERROR(' The call to cgesv general inversion routine failed')
@@ -1406,7 +1406,7 @@ end subroutine extrapwf
        ibg_hist=ibg_hist+my_nspinor*nbdmix
        icg=icg+my_nspinor*nband_k*npw_k
        icg_hist=icg_hist+my_nspinor*nbdmix*npw_k
-       ABI_DEALLOCATE(psi_ortho)
+       ABI_FREE(psi_ortho)
 !      End big k point loop
      end do
 !    End loop over spins
@@ -1420,11 +1420,11 @@ end subroutine extrapwf
    call pawcprj_free(cprj_k)
    call pawcprj_free(cprj_kh)
  end if
- ABI_DATATYPE_DEALLOCATE(cprj_k)
- ABI_DATATYPE_DEALLOCATE(cprj_kh)
- ABI_DEALLOCATE(dimcprj)
- ABI_DEALLOCATE(mmn)
- ABI_DEALLOCATE(smn)
+ ABI_FREE(cprj_k)
+ ABI_FREE(cprj_kh)
+ ABI_FREE(dimcprj)
+ ABI_FREE(mmn)
+ ABI_FREE(smn)
 
 
 

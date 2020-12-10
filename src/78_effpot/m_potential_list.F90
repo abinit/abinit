@@ -138,13 +138,13 @@ contains
        call self%list(i)%ptr%finalize()
        ! Intel compiler complains
        if(associated(self%list(i)%ptr)) then
-          ABI_DATATYPE_DEALLOCATE_SCALAR(self%list(i)%ptr)
+          ABI_FREE(self%list(i)%ptr)
        endif 
        
        nullify(self%list(i)%ptr)
     end do
     if (allocated(self%list)) then
-       ABI_DEALLOCATE(self%list)
+       ABI_FREE(self%list)
     end if
     self%size=0
     self%capacity=0

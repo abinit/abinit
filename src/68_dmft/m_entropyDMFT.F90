@@ -223,7 +223,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
     ! Save each value of U and J for each correlated type
     ictypat = 1
-    ABI_ALLOCATE(maptypat,(1:dt%ntypat))
+    ABI_MALLOC(maptypat,(1:dt%ntypat))
     do itypat=1,dt%ntypat
       if ( pawtab(itypat)%lpawu /= -1 ) then
         e_t%lpawu(ictypat) = pawtab(itypat)%lpawu
@@ -248,7 +248,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
         icatom = icatom + 1
       end if
     end do
-    ABI_DEALLOCATE(maptypat)
+    ABI_FREE(maptypat)
 
     write(message,'(a,1x,78a)') ch10,"+",(/ ("-",ilambda=1,76) /), "+"
     call wrtout(std_out,message,"COLL")
@@ -335,25 +335,25 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !Arguments ------------------------------------
     type(entropyDMFT_t), intent(inout) :: e_t
 
-    ABI_ALLOCATE(e_t%index_atom, (1:e_t%natom))
+    ABI_MALLOC(e_t%index_atom, (1:e_t%natom))
     e_t%index_atom = 0
-    ABI_ALLOCATE(e_t%index_typat,(1:e_t%nctypat))
+    ABI_MALLOC(e_t%index_typat,(1:e_t%nctypat))
     e_t%index_atom = 0
-    ABI_ALLOCATE(e_t%typat,      (1:e_t%ncatom))
+    ABI_MALLOC(e_t%typat,      (1:e_t%ncatom))
     e_t%typat      = 0
-    ABI_ALLOCATE(e_t%lpawu,      (1:e_t%nctypat))
+    ABI_MALLOC(e_t%lpawu,      (1:e_t%nctypat))
     e_t%lpawu      = 0
-    ABI_ALLOCATE(e_t%U_input,    (1:e_t%nctypat))
+    ABI_MALLOC(e_t%U_input,    (1:e_t%nctypat))
     e_t%U_input    = zero
-    ABI_ALLOCATE(e_t%J_input,    (1:e_t%nctypat))
+    ABI_MALLOC(e_t%J_input,    (1:e_t%nctypat))
     e_t%J_input    = zero
-    ABI_ALLOCATE(e_t%lambda,     (1:e_t%nlambda))
+    ABI_MALLOC(e_t%lambda,     (1:e_t%nlambda))
     e_t%lambda     = 0
-    ABI_ALLOCATE(e_t%docc,       (1:(14*13)/2,1:e_t%ncatom,1:e_t%nlambda))
+    ABI_MALLOC(e_t%docc,       (1:(14*13)/2,1:e_t%ncatom,1:e_t%nlambda))
     e_t%docc       = zero
-    ABI_ALLOCATE(e_t%e_dc,       (1:e_t%ncatom,1:e_t%nlambda))
+    ABI_MALLOC(e_t%e_dc,       (1:e_t%ncatom,1:e_t%nlambda))
     e_t%e_dc       = zero
-    ABI_ALLOCATE(e_t%uij,        (1:(14*13)/2,1:e_t%nctypat))
+    ABI_MALLOC(e_t%uij,        (1:(14*13)/2,1:e_t%nctypat))
     e_t%uij        = zero
   end subroutine entropyDMFT_allocateAll
 !!***
@@ -688,8 +688,8 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       ! We do nothing but return true to perform scfcv a least once
     else if ( e_t%action == AC_ETOT .and. mylambda <= e_t%nlambda ) then ! we iterate over lambda
       nextstep = .TRUE.
-      ABI_ALLOCATE(upawu,(dt%ntypat))
-      ABI_ALLOCATE(jpawu,(dt%ntypat))
+      ABI_MALLOC(upawu,(dt%ntypat))
+      ABI_MALLOC(jpawu,(dt%ntypat))
       do itypat = 1, e_t%nctypat
         upawu(e_t%index_typat(itypat)) = e_t%lambda(mylambda) * e_t%U_input(itypat)
         jpawu(e_t%index_typat(itypat)) = e_t%lambda(mylambda) * e_t%J_input(itypat)
@@ -720,8 +720,8 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       call pawpuxinit(dt%dmatpuopt,dt%exchmix,dt%f4of2_sla,dt%f6of2_sla,&
 &        is_dfpt,jpawu,dt%lexexch,dt%lpawu,dt%ntypat,pawang,dt%pawprtvol,&
 &        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu)
-      ABI_DEALLOCATE(upawu)
-      ABI_DEALLOCATE(jpawu)
+      ABI_FREE(upawu)
+      ABI_FREE(jpawu)
     end if
 
   end function entropyDMFT_nextLambda
@@ -936,7 +936,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     nlambda = e_t%nlambda
     ncatom  = e_t%ncatom
 
-    ABI_ALLOCATE(integrand,(1:nlambda,1:ncatom))
+    ABI_MALLOC(integrand,(1:nlambda,1:ncatom))
     integrand(1:nlambda,1:ncatom) = zero
 
     if ( e_t%rank == 0 ) then
@@ -977,7 +977,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
     ! Integrate the integrand for all correlated atoms
     call entropyDMFT_integrate(e_t,integrand,integral)
-    ABI_DEALLOCATE(integrand)
+    ABI_FREE(integrand)
 
     write(string,'(a,1x,78a)') ch10,"+",(/ ("-",ilambda=1,76) /), "+"
     call wrtout(std_out,string,"COLL")
@@ -1080,9 +1080,9 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
     Nfit = 1000
 
-    ABI_ALLOCATE(ypp,(1:e_t%nlambda))
-    ABI_ALLOCATE(fitx,(1:Nfit))
-    ABI_ALLOCATE(fity,(1:Nfit))
+    ABI_MALLOC(ypp,(1:e_t%nlambda))
+    ABI_MALLOC(fitx,(1:Nfit))
+    ABI_MALLOC(fity,(1:Nfit))
 
     integral = zero
 
@@ -1119,9 +1119,9 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     end do
     if ( e_t%rank == 0 ) close(unit)
 
-    ABI_DEALLOCATE(ypp)
-    ABI_DEALLOCATE(fitx)
-    ABI_DEALLOCATE(fity)
+    ABI_FREE(ypp)
+    ABI_FREE(fitx)
+    ABI_FREE(fity)
 
   end subroutine entropyDMFT_integrate
 !!***
@@ -1162,34 +1162,34 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     type(entropyDMFT_t), intent(inout) :: e_t
 
     if ( allocated(e_t%index_atom) ) then
-      ABI_DEALLOCATE(e_t%index_atom)
+      ABI_FREE(e_t%index_atom)
     endif
     if ( allocated(e_t%index_typat)) then
-      ABI_DEALLOCATE(e_t%index_typat)
+      ABI_FREE(e_t%index_typat)
     endif
     if ( allocated(e_t%typat     ) ) then
-      ABI_DEALLOCATE(e_t%typat     )
+      ABI_FREE(e_t%typat     )
     endif
     if ( allocated(e_t%lpawu     ) ) then
-      ABI_DEALLOCATE(e_t%lpawu)
+      ABI_FREE(e_t%lpawu)
     endif
     if ( allocated(e_t%U_input   ) ) then
-      ABI_DEALLOCATE(e_t%U_input)
+      ABI_FREE(e_t%U_input)
     endif
     if ( allocated(e_t%J_input   ) ) then
-      ABI_DEALLOCATE(e_t%J_input)
+      ABI_FREE(e_t%J_input)
     endif
     if ( allocated(e_t%lambda    ) ) then
-      ABI_DEALLOCATE(e_t%lambda)
+      ABI_FREE(e_t%lambda)
     endif
     if ( allocated(e_t%docc      ) ) then
-      ABI_DEALLOCATE(e_t%docc)
+      ABI_FREE(e_t%docc)
     endif
     if ( allocated(e_t%e_dc      ) ) then
-      ABI_DEALLOCATE(e_t%e_dc)
+      ABI_FREE(e_t%e_dc)
     endif
     if ( allocated(e_t%uij       ) ) then
-      ABI_DEALLOCATE(e_t%uij)
+      ABI_FREE(e_t%uij)
     endif
     e_t%isset = .FALSE.
   end subroutine entropyDMFT_destroy

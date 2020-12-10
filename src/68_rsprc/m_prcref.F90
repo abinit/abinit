@@ -254,7 +254,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !1) Eventually take care of the forces
 
  if(moved_atm_inside==1)then
-   ABI_ALLOCATE(fcart_pc,(3,dtset%natom))
+   ABI_MALLOC(fcart_pc,(3,dtset%natom))
 
    if(dtset%iprcfc==0)then
      fcart_pc(:,:)=fcart(:,:)
@@ -265,7 +265,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !  Compute preconditioned delta xred from preconditioned fcart and rprimd
    call xcart2xred(dtset%natom,rprimd,fcart_pc,dtn_pc)
 
-   ABI_DEALLOCATE(fcart_pc)
+   ABI_FREE(fcart_pc)
  end if
 
 !#######################################################################
@@ -287,16 +287,16 @@ subroutine prcref(atindx,dielar,dielinv,&
    else
 !    If preconditionning has to be done on a coarse grid,
 !    has to transfer several arrays
-     ABI_ALLOCATE(work1,(nfftprc,dtset%nspden))
-     ABI_ALLOCATE(work3,(nfftprc,dtset%nspden))
-     ABI_ALLOCATE(work,(2*nfftprc))
+     ABI_MALLOC(work1,(nfftprc,dtset%nspden))
+     ABI_MALLOC(work3,(nfftprc,dtset%nspden))
+     ABI_MALLOC(work,(2*nfftprc))
      do ispden=1,dtset%nspden
        work(:)=vresid(:,ispden)
        call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
      if (dtset%iprcel<=78) then
-       ABI_ALLOCATE(rhog_wk,(2,nfftprc))
+       ABI_MALLOC(rhog_wk,(2,nfftprc))
        rhog_wk(:,:)=zero
        if (mpi_enreg%nproc_fft>1.and. mpi_enreg%paral_kgb==1) then
          nfftot=PRODUCT(ngfft(1:3))
@@ -309,11 +309,11 @@ subroutine prcref(atindx,dielar,dielinv,&
        end if
        call zerosym(rhog_wk,2,ngfftprc(1),ngfftprc(2),ngfftprc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-       ABI_ALLOCATE(work,(nfftprc))
+       ABI_MALLOC(work,(nfftprc))
        call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,1,ngfftprc,0)
        call prcrskerker1(dtset,mpi_enreg,nfftprc,dtset%nspden,ngfftprc,dielar,etotal, &
 &       gprimd,work1,work3,work)
-       ABI_DEALLOCATE(work)
+       ABI_FREE(work)
      else
        call prcrskerker2(dtset,nfftprc,dtset%nspden,ngfftprc,dielar,gprimd,rprimd, &
 &       work1,work3,dtset%natom,xred,mpi_enreg,ucvol)
@@ -321,8 +321,8 @@ subroutine prcref(atindx,dielar,dielinv,&
      do ispden=1,dtset%nspden
        call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
-     ABI_DEALLOCATE(work1)
-     ABI_DEALLOCATE(work3)
+     ABI_FREE(work1)
+     ABI_FREE(work3)
    end if
 
  else
@@ -356,8 +356,8 @@ subroutine prcref(atindx,dielar,dielinv,&
        end if
      end if
 
-     ABI_ALLOCATE(work1,(2,nfftprc))
-     ABI_ALLOCATE(work2,(optreal*nfftprc))
+     ABI_MALLOC(work1,(2,nfftprc))
+     ABI_MALLOC(work2,(optreal*nfftprc))
 
 !    Presently, one uses the inverse of the RPA dielectric matrix,
 !    for which spin must be averaged.
@@ -377,9 +377,9 @@ subroutine prcref(atindx,dielar,dielinv,&
 !    Must first copy relevant elements of work1 to a npwdiel-dimensioned array,
 !    then zero work1, operate with the dielinv matrix, and store in work1.
 
-     ABI_ALLOCATE(vres_diel,(2,npwdiel))
-     ABI_ALLOCATE(indpw_prc,(npwdiel))
-     ABI_ALLOCATE(mask,(npwdiel))
+     ABI_MALLOC(vres_diel,(2,npwdiel))
+     ABI_MALLOC(indpw_prc,(npwdiel))
+     ABI_MALLOC(mask,(npwdiel))
      mask(:)=.true.
      call kgindex(indpw_prc,kg_diel,mask,mpi_enreg,ngfftprc,npwdiel)
 
@@ -423,9 +423,9 @@ subroutine prcref(atindx,dielar,dielinv,&
          work1(2,indpw_prc(ipw1))=ai-vres_diel(2,ipw1)
        end if !mask(ipw1)
      end do ! ipw1
-     ABI_DEALLOCATE(vres_diel)
-     ABI_DEALLOCATE(indpw_prc)
-     ABI_DEALLOCATE(mask)
+     ABI_FREE(vres_diel)
+     ABI_FREE(indpw_prc)
+     ABI_FREE(mask)
 !    Fourier transform
      if (optreal==1) then
        call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,1,ngfftprc,0)
@@ -447,8 +447,8 @@ subroutine prcref(atindx,dielar,dielinv,&
        if(dtset%nspden/=1.and.optres==1)vrespc(:,2:dtset%nspden)=vresid(:,2:dtset%nspden)
      end if
 
-     ABI_DEALLOCATE(work1)
-     ABI_DEALLOCATE(work2)
+     ABI_FREE(work1)
+     ABI_FREE(work2)
 
 !    Other choice ?
    else
@@ -541,22 +541,22 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !    Compute the modified density, in rhor_wk
      option=2
-     ABI_ALLOCATE(gresid,(3,dtset%natom))
-     ABI_ALLOCATE(grxc,(3,dtset%natom))
-     ABI_ALLOCATE(rhor_wk,(nfft,dtset%nspden))
-     ABI_ALLOCATE(rhor_wk0,(nfft,dtset%nspden))
-     ABI_ALLOCATE(xred_wk,(3,dtset%natom))
+     ABI_MALLOC(gresid,(3,dtset%natom))
+     ABI_MALLOC(grxc,(3,dtset%natom))
+     ABI_MALLOC(rhor_wk,(nfft,dtset%nspden))
+     ABI_MALLOC(rhor_wk0,(nfft,dtset%nspden))
+     ABI_MALLOC(xred_wk,(3,dtset%natom))
      xred_wk(:,:)=xred(:,:)+dtn_pc(:,:)
      call fresid(dtset,gresid,mpi_enreg,nfft,ngfft,&
 &     ntypat,option,pawtab,rhor,rprimd,&
 &     ucvol,rhor_wk,xred_wk,xred,psps%znuclpsp)
 
 !    Compute up+down rhog_wk(G) by fft
-     ABI_ALLOCATE(work,(nfft))
-     ABI_ALLOCATE(rhog_wk,(2,nfft))
+     ABI_MALLOC(work,(nfft))
+     ABI_MALLOC(rhog_wk,(2,nfft))
      work(:)=rhor_wk(:,1)
      call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,1,ngfft,0)
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
 
 !    Compute structure factor phases for new atomic pos:
      call getph(atindx,dtset%natom,n1,n2,n3,ph1d,xred_wk)
@@ -564,8 +564,8 @@ subroutine prcref(atindx,dielar,dielinv,&
 !    Compute local ionic pseudopotential vpsp:
 !    and core electron density xccc3d, if needed.
      n3xccc=0;if (n1xccc/=0) n3xccc=nfft
-     ABI_ALLOCATE(xccc3d,(n3xccc))
-     ABI_ALLOCATE(vpsp_wk,(nfft))
+     ABI_MALLOC(xccc3d,(n3xccc))
+     ABI_MALLOC(vpsp_wk,(nfft))
      vprtrb(1:2)=zero
 
 !    Determine by which method the local ionic potential and/or
@@ -601,31 +601,31 @@ subroutine prcref(atindx,dielar,dielinv,&
 !    Local ionic potential by method 2
      if (vloc_method==2) then
        option=1
-       ABI_ALLOCATE(dyfrlo_indx,(3,3,dtset%natom))
-       ABI_ALLOCATE(grtn_indx,(3,dtset%natom))
+       ABI_MALLOC(dyfrlo_indx,(3,3,dtset%natom))
+       ABI_MALLOC(grtn_indx,(3,dtset%natom))
        call mklocl(dtset,dyfrlo_indx,eei,gmet,gprimd,grtn_indx,gsqcut,dummy6,&
 &       mgfft,mpi_enreg,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,&
 &       ntypat,option,pawtab,ph1d,psps,qprtrb,rhog_wk,rhor_wk,rprimd,&
 &       ucvol,vprtrb,vpsp_wk,wvl,wvl_den,xred)
-       ABI_DEALLOCATE(dyfrlo_indx)
-       ABI_DEALLOCATE(grtn_indx)
+       ABI_FREE(dyfrlo_indx)
+       ABI_FREE(grtn_indx)
      end if
 
 !    Pseudo core electron density by method 2
      if (coredens_method==2.and.n1xccc/=0) then
        option=1
-       ABI_ALLOCATE(dyfrx2,(3,3,dtset%natom))
-       ABI_ALLOCATE(grxc_indx,(3,dtset%natom))
+       ABI_MALLOC(dyfrx2,(3,3,dtset%natom))
+       ABI_MALLOC(grxc_indx,(3,dtset%natom))
        call mkcore(dummy6,dyfrx2,grxc_indx,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
 &       n1,n1xccc,n2,n3,option,rprimd,dtset%typat,ucvol,vxc,psps%xcccrc,&
 &       psps%xccc1d,xccc3d,xred_wk)
-       ABI_DEALLOCATE(dyfrx2)
-       ABI_DEALLOCATE(grxc_indx)
+       ABI_FREE(dyfrx2)
+       ABI_FREE(grxc_indx)
      end if
 
 !    Compute Hartree+xc potentials
-     ABI_ALLOCATE(vxc_wk,(nfft,dtset%nspden))
-     ABI_ALLOCATE(vhartr_wk,(nfft))
+     ABI_MALLOC(vxc_wk,(nfft,dtset%nspden))
+     ABI_MALLOC(vhartr_wk,(nfft))
      option=1
 
      call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
@@ -637,7 +637,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
 &     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
-     ABI_DEALLOCATE(xccc3d)
+     ABI_FREE(xccc3d)
 
 !    Sum all contributions
      do ispden=1,min(dtset%nspden,2)
@@ -660,27 +660,27 @@ subroutine prcref(atindx,dielar,dielinv,&
      do ispden=1,dtset%nspden
        vrespc(:,ispden)=vrespc(:,ispden)-vmean(ispden)
      end do
-     ABI_DEALLOCATE(gresid)
-     ABI_DEALLOCATE(grxc)
-     ABI_DEALLOCATE(rhog_wk)
-     ABI_DEALLOCATE(rhor_wk)
-     ABI_DEALLOCATE(rhor_wk0)
-     ABI_DEALLOCATE(xred_wk)
-     ABI_DEALLOCATE(vhartr_wk)
-     ABI_DEALLOCATE(vpsp_wk)
-     ABI_DEALLOCATE(vxc_wk)
+     ABI_FREE(gresid)
+     ABI_FREE(grxc)
+     ABI_FREE(rhog_wk)
+     ABI_FREE(rhor_wk)
+     ABI_FREE(rhor_wk0)
+     ABI_FREE(xred_wk)
+     ABI_FREE(vhartr_wk)
+     ABI_FREE(vpsp_wk)
+     ABI_FREE(vxc_wk)
 
    else                 ! Array vresid contains a density residual
 !    -----------------------------------------------------------------
 
 !    Only have to compute the modified preconditionned density residual
      option=2
-     ABI_ALLOCATE(gresid,(3,dtset%natom))
-     ABI_ALLOCATE(grxc,(3,dtset%natom))
-     ABI_ALLOCATE(rhor_new,(nfft,dtset%nspden))
-     ABI_ALLOCATE(rhor_wk,(nfft,dtset%nspden))
-     ABI_ALLOCATE(rhor_wk0,(nfft,dtset%nspden))
-     ABI_ALLOCATE(xred_wk,(3,dtset%natom))
+     ABI_MALLOC(gresid,(3,dtset%natom))
+     ABI_MALLOC(grxc,(3,dtset%natom))
+     ABI_MALLOC(rhor_new,(nfft,dtset%nspden))
+     ABI_MALLOC(rhor_wk,(nfft,dtset%nspden))
+     ABI_MALLOC(rhor_wk0,(nfft,dtset%nspden))
+     ABI_MALLOC(xred_wk,(3,dtset%natom))
      xred_wk(:,:)=xred(:,:)+dtn_pc(:,:)
      rhor_new(:,1)=rhor(:,1)+vrespc(:,1)
      if (dtset%nspden==2) then
@@ -695,12 +695,12 @@ subroutine prcref(atindx,dielar,dielinv,&
 &     ucvol,rhor_wk,xred_wk,xred,psps%znuclpsp)
      vrespc(:,1)=rhor_wk(:,dtset%nspden)-rhor_wk0(:,dtset%nspden)
      if (dtset%nspden==2) vrespc(:,2)=rhor_wk(:,1)-rhor_wk0(:,1)-vrespc(:,1)
-     ABI_DEALLOCATE(gresid)
-     ABI_DEALLOCATE(grxc)
-     ABI_DEALLOCATE(rhor_new)
-     ABI_DEALLOCATE(rhor_wk)
-     ABI_DEALLOCATE(rhor_wk0)
-     ABI_DEALLOCATE(xred_wk)
+     ABI_FREE(gresid)
+     ABI_FREE(grxc)
+     ABI_FREE(rhor_new)
+     ABI_FREE(rhor_wk)
+     ABI_FREE(rhor_wk0)
+     ABI_FREE(xred_wk)
    end if
 
  end if
@@ -902,7 +902,7 @@ end subroutine prcref
 !1) Eventually take care of the forces
 
  if(moved_atm_inside==1)then
-   ABI_ALLOCATE(fcart_pc,(3,dtset%natom))
+   ABI_MALLOC(fcart_pc,(3,dtset%natom))
 
    if(dtset%iprcfc==0)then
      fcart_pc(:,:)=fcart(:,:)
@@ -913,7 +913,7 @@ end subroutine prcref
 !  Compute preconditioned delta xred from preconditioned fcart and rprimd
    call xcart2xred(dtset%natom,rprimd,fcart_pc,dtn_pc)
 
-   ABI_DEALLOCATE(fcart_pc)
+   ABI_FREE(fcart_pc)
  end if
 
 !#######################################################################
@@ -935,16 +935,16 @@ end subroutine prcref
    else
 !    If preconditionning has to be done on a coarse grid,
 !    has to transfer several arrays
-     ABI_ALLOCATE(work1,(nfftprc,dtset%nspden))
-     ABI_ALLOCATE(work3,(nfftprc,dtset%nspden))
-     ABI_ALLOCATE(work,(2*nfftprc))
+     ABI_MALLOC(work1,(nfftprc,dtset%nspden))
+     ABI_MALLOC(work3,(nfftprc,dtset%nspden))
+     ABI_MALLOC(work,(2*nfftprc))
      do ispden=1,dtset%nspden
        work(:)=vresid(:,ispden)
        call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
      if (dtset%iprcel<=78) then
-       ABI_ALLOCATE(rhog_wk,(2,nfftprc))
+       ABI_MALLOC(rhog_wk,(2,nfftprc))
        rhog_wk(:,:)=zero
        if (mpi_enreg%nproc_fft>1.and. mpi_enreg%paral_kgb==1) then
          nfftot=PRODUCT(ngfft(1:3))
@@ -957,11 +957,11 @@ end subroutine prcref
        end if
        call zerosym(rhog_wk,2,ngfftprc(1),ngfftprc(2),ngfftprc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-       ABI_ALLOCATE(work,(nfftprc))
+       ABI_MALLOC(work,(nfftprc))
        call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,1,ngfftprc,0)
        call prcrskerker1(dtset,mpi_enreg,nfftprc,dtset%nspden,ngfftprc,dielar,etotal, &
 &       gprimd,work1,work3,work)
-       ABI_DEALLOCATE(work)
+       ABI_FREE(work)
      else
        call prcrskerker2(dtset,nfftprc,dtset%nspden,ngfftprc,dielar,gprimd,rprimd, &
 &       work1,work3,dtset%natom,xred,mpi_enreg,ucvol)
@@ -969,8 +969,8 @@ end subroutine prcref
      do ispden=1,dtset%nspden
        call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
-     ABI_DEALLOCATE(work1)
-     ABI_DEALLOCATE(work3)
+     ABI_FREE(work1)
+     ABI_FREE(work3)
    end if
 
  else
@@ -1004,8 +1004,8 @@ end subroutine prcref
        end if
      end if
 
-     ABI_ALLOCATE(work1,(2,nfftprc))
-     ABI_ALLOCATE(work2,(optreal*nfftprc))
+     ABI_MALLOC(work1,(2,nfftprc))
+     ABI_MALLOC(work2,(optreal*nfftprc))
 
 !    Presently, one uses the inverse of the RPA dielectric matrix,
 !    for which spin must be averaged.
@@ -1025,9 +1025,9 @@ end subroutine prcref
 !    Must first copy relevant elements of work1 to a npwdiel-dimensioned array,
 !    then zero work1, operate with the dielinv matrix, and store in work1.
 
-     ABI_ALLOCATE(vres_diel,(2,npwdiel))
-     ABI_ALLOCATE(indpw_prc,(npwdiel))
-     ABI_ALLOCATE(mask,(npwdiel))
+     ABI_MALLOC(vres_diel,(2,npwdiel))
+     ABI_MALLOC(indpw_prc,(npwdiel))
+     ABI_MALLOC(mask,(npwdiel))
      mask(:)=.true.
      call kgindex(indpw_prc,kg_diel,mask,mpi_enreg,ngfftprc,npwdiel)
      do ipw1=1,npwdiel
@@ -1059,9 +1059,9 @@ end subroutine prcref
          work1(2,indpw_prc(ipw1))=ai-vres_diel(2,ipw1)
        end if !mask(ipw1)
      end do ! ipw1
-     ABI_DEALLOCATE(vres_diel)
-     ABI_DEALLOCATE(indpw_prc)
-     ABI_DEALLOCATE(mask)
+     ABI_FREE(vres_diel)
+     ABI_FREE(indpw_prc)
+     ABI_FREE(mask)
 
 !    Fourier transform
      if (optreal==1) then
@@ -1082,8 +1082,8 @@ end subroutine prcref
        if(dtset%nspden==4)vrespc(:,3:4)=vresid(:,3:4)
      end if
 
-     ABI_DEALLOCATE(work1)
-     ABI_DEALLOCATE(work2)
+     ABI_FREE(work1)
+     ABI_FREE(work2)
 
 !    Other choice ?
    else
@@ -1167,11 +1167,11 @@ end subroutine prcref
 
 !  Compute the modified density, in rhor_wk
    option=2
-   ABI_ALLOCATE(gresid,(3,dtset%natom))
-   ABI_ALLOCATE(grxc,(3,dtset%natom))
-   ABI_ALLOCATE(rhor_wk,(nfft,dtset%nspden))
-   ABI_ALLOCATE(rhor_wk0,(nfft,dtset%nspden))
-   ABI_ALLOCATE(xred_wk,(3,dtset%natom))
+   ABI_MALLOC(gresid,(3,dtset%natom))
+   ABI_MALLOC(grxc,(3,dtset%natom))
+   ABI_MALLOC(rhor_wk,(nfft,dtset%nspden))
+   ABI_MALLOC(rhor_wk0,(nfft,dtset%nspden))
+   ABI_MALLOC(xred_wk,(3,dtset%natom))
    xred_wk(:,:)=xred(:,:)+dtn_pc(:,:)
 
    call fresid(dtset,gresid,mpi_enreg,nfft,ngfft,&
@@ -1179,11 +1179,11 @@ end subroutine prcref
 &   ucvol,rhor_wk,xred_wk,xred,psps%znuclpsp)
 
 !  Compute up+down rhog_wk(G) by fft
-   ABI_ALLOCATE(work,(nfft))
-   ABI_ALLOCATE(rhog_wk,(2,nfft))
+   ABI_MALLOC(work,(nfft))
+   ABI_MALLOC(rhog_wk,(2,nfft))
    work(:)=rhor_wk(:,1)
    call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,1,ngfft,0)
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 
 !  Compute structure factor phases for new atomic pos:
    call getph(atindx,dtset%natom,n1,n2,n3,ph1d,xred_wk)
@@ -1191,8 +1191,8 @@ end subroutine prcref
 !  Compute local ionic pseudopotential vpsp:
 !  and core electron density xccc3d, if needed.
    n3xccc=0;if (n1xccc/=0) n3xccc=nfft
-   ABI_ALLOCATE(xccc3d,(n3xccc))
-   ABI_ALLOCATE(vpsp_wk,(nfft))
+   ABI_MALLOC(xccc3d,(n3xccc))
+   ABI_MALLOC(vpsp_wk,(nfft))
    vprtrb(1:2)=zero
 
 !  Determine by which method the local ionic potential and/or
@@ -1229,31 +1229,31 @@ end subroutine prcref
 !  Local ionic potential by method 2
    if (vloc_method==2) then
      option=1
-     ABI_ALLOCATE(dyfrlo_indx,(3,3,dtset%natom))
-     ABI_ALLOCATE(grtn_indx,(3,dtset%natom))
+     ABI_MALLOC(dyfrlo_indx,(3,3,dtset%natom))
+     ABI_MALLOC(grtn_indx,(3,dtset%natom))
      call mklocl(dtset,dyfrlo_indx,eei,gmet,gprimd,grtn_indx,gsqcut,dummy6,&
 &     mgfft,mpi_enreg,dtset%natom,nattyp,nfft,ngfft,dtset%nspden,&
 &     ntypat,option,pawtab,ph1d,psps,qprtrb,rhog_wk,rhor_wk,rprimd,&
 &     ucvol,vprtrb,vpsp_wk,wvl%descr,wvl%den,xred)
-     ABI_DEALLOCATE(dyfrlo_indx)
-     ABI_DEALLOCATE(grtn_indx)
+     ABI_FREE(dyfrlo_indx)
+     ABI_FREE(grtn_indx)
    end if
 
 !  Pseudo core electron density by method 2
    if (coredens_method==2.and.n1xccc/=0) then
      option=1
-     ABI_ALLOCATE(dyfrx2,(3,3,dtset%natom))
-     ABI_ALLOCATE(grxc_indx,(3,dtset%natom))
+     ABI_MALLOC(dyfrx2,(3,3,dtset%natom))
+     ABI_MALLOC(grxc_indx,(3,dtset%natom))
      call mkcore(dummy6,dyfrx2,grxc_indx,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
 &     n1,n1xccc,n2,n3,option,rprimd,dtset%typat,ucvol,vxc,psps%xcccrc,&
 &     psps%xccc1d,xccc3d,xred_wk)
-     ABI_DEALLOCATE(dyfrx2)
-     ABI_DEALLOCATE(grxc_indx)
+     ABI_FREE(dyfrx2)
+     ABI_FREE(grxc_indx)
    end if
 
 !  Compute Hartree+xc potentials
-   ABI_ALLOCATE(vxc_wk,(nfft,dtset%nspden))
-   ABI_ALLOCATE(vhartr_wk,(nfft))
+   ABI_MALLOC(vxc_wk,(nfft,dtset%nspden))
+   ABI_MALLOC(vhartr_wk,(nfft))
    option=1
 
    call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
@@ -1262,12 +1262,12 @@ end subroutine prcref
 !  Prepare the call to rhotoxc
    call xcdata_init(xcdata,dtset=dtset)
    nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
-   ABI_ALLOCATE(work,(0))
+   ABI_MALLOC(work,(0))
    call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
 &   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
 &   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
-   ABI_DEALLOCATE(work)
-   ABI_DEALLOCATE(xccc3d)
+   ABI_FREE(work)
+   ABI_FREE(xccc3d)
 
 !  Sum all contributions
    do ispden=1,min(dtset%nspden,2)
@@ -1290,15 +1290,15 @@ end subroutine prcref
    do ispden=1,dtset%nspden
      vrespc(:,ispden)=vrespc(:,ispden)-vmean(ispden)
    end do
-   ABI_DEALLOCATE(gresid)
-   ABI_DEALLOCATE(grxc)
-   ABI_DEALLOCATE(rhog_wk)
-   ABI_DEALLOCATE(rhor_wk)
-   ABI_DEALLOCATE(rhor_wk0)
-   ABI_DEALLOCATE(xred_wk)
-   ABI_DEALLOCATE(vhartr_wk)
-   ABI_DEALLOCATE(vpsp_wk)
-   ABI_DEALLOCATE(vxc_wk)
+   ABI_FREE(gresid)
+   ABI_FREE(grxc)
+   ABI_FREE(rhog_wk)
+   ABI_FREE(rhor_wk)
+   ABI_FREE(rhor_wk0)
+   ABI_FREE(xred_wk)
+   ABI_FREE(vhartr_wk)
+   ABI_FREE(vpsp_wk)
+   ABI_FREE(vxc_wk)
 
  end if
 
@@ -1433,14 +1433,14 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
 
    length2=(two_pi*dielng)**2
    diemac_inv=1.0_dp/diemac
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    if (optreal==1) then
-     ABI_ALLOCATE(work2,(cplex*nfft))
+     ABI_MALLOC(work2,(cplex*nfft))
    end if
 
 !  In order to speed the routine, precompute the components of g
    mg=maxval(ngfft)
-   ABI_ALLOCATE(gq,(3,mg))
+   ABI_MALLOC(gq,(3,mg))
    do ii=1,3
      id(ii)=ngfft(ii)/2+2
      do ing=1,ngfft(ii)
@@ -1535,10 +1535,10 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
 !    End of loop on spin polarizations
    end do
 
-   ABI_DEALLOCATE(gq)
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(gq)
+   ABI_FREE(work1)
    if (optreal==1) then
-     ABI_DEALLOCATE(work2)
+     ABI_FREE(work2)
    end if
 
 !  End condition diemac/=1.0
@@ -1641,7 +1641,7 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
 !Only chi_upup,upup, chi_dndn,dndn, chi_upup,dndn and chi_dndn,upup
 !have to be taken into account (stored, susmat(:,ipw1,1:2,ipw2,1:2)
 
- ABI_ALLOCATE(dielmat,(2,npwdiel,min(nspden,2),npwdiel,min(nspden,2)))
+ ABI_MALLOC(dielmat,(2,npwdiel,min(nspden,2),npwdiel,min(nspden,2)))
 
  if(nspden/=1)then
    if (occopt<3) then
@@ -1740,11 +1740,11 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
 !npwsp=npwdiel*nspden
  npwsp=npwdiel
 
- ABI_ALLOCATE(dielh,(npwsp*(npwsp+1)))
- ABI_ALLOCATE(dielvec,(2,npwsp,npwsp))
- ABI_ALLOCATE(eig_diel,(npwsp))
- ABI_ALLOCATE(zhpev1,(2,2*npwsp-1))
- ABI_ALLOCATE(zhpev2,(3*npwsp-2))
+ ABI_MALLOC(dielh,(npwsp*(npwsp+1)))
+ ABI_MALLOC(dielvec,(2,npwsp,npwsp))
+ ABI_MALLOC(eig_diel,(npwsp))
+ ABI_MALLOC(zhpev1,(2,2*npwsp-1))
+ ABI_MALLOC(zhpev2,(3*npwsp-2))
  ier=0
 !Store the dielectric matrix in proper mode before calling zhpev
  index=1
@@ -1775,8 +1775,8 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
 
  call ZHPEV ('V','U',npwsp,dielh,eig_diel,dielvec,npwdiel,zhpev1,&
 & zhpev2,ier)
- ABI_DEALLOCATE(zhpev1)
- ABI_DEALLOCATE(zhpev2)
+ ABI_FREE(zhpev1)
+ ABI_FREE(zhpev2)
 
  if(prtvol>=10)then
    write(message, '(a,a,a,5es12.4)' )ch10,&
@@ -1830,9 +1830,9 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
    end do
  end do
 
- ABI_DEALLOCATE(dielh)
- ABI_DEALLOCATE(dielvec)
- ABI_DEALLOCATE(eig_diel)
+ ABI_FREE(dielh)
+ ABI_FREE(dielvec)
+ ABI_FREE(eig_diel)
 
 !DEBUG
 !Checks whether the inverse of the hermitian dielectric matrix
@@ -1896,7 +1896,7 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
    end if
  end do
 
- ABI_DEALLOCATE(dielmat)
+ ABI_FREE(dielmat)
 
  call timab(90,2,tsec)
 
@@ -2007,17 +2007,17 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 
 !-Diagonalize the susceptibility matrix
 
- ABI_ALLOCATE(sush,(npwdiel*(npwdiel+1)))
- ABI_ALLOCATE(susvec,(2,npwdiel,npwdiel))
- ABI_ALLOCATE(eig_msusinvsqr,(npwdiel))
- ABI_ALLOCATE(eig_msussqr,(npwdiel))
- ABI_ALLOCATE(eig_sus,(npwdiel))
- ABI_ALLOCATE(zhpev1,(2,2*npwdiel-1))
- ABI_ALLOCATE(zhpev2,(3*npwdiel-2))
- ABI_ALLOCATE(work,(2,npwdiel,nspden,npwdiel,nspden))
- ABI_ALLOCATE(work2,(2,npwdiel,nspden,npwdiel,nspden))
- ABI_ALLOCATE(sqrsus,(2,npwdiel,nspden,npwdiel,nspden))
- ABI_ALLOCATE(invsqrsus,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_MALLOC(sush,(npwdiel*(npwdiel+1)))
+ ABI_MALLOC(susvec,(2,npwdiel,npwdiel))
+ ABI_MALLOC(eig_msusinvsqr,(npwdiel))
+ ABI_MALLOC(eig_msussqr,(npwdiel))
+ ABI_MALLOC(eig_sus,(npwdiel))
+ ABI_MALLOC(zhpev1,(2,2*npwdiel-1))
+ ABI_MALLOC(zhpev2,(3*npwdiel-2))
+ ABI_MALLOC(work,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_MALLOC(work2,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_MALLOC(sqrsus,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_MALLOC(invsqrsus,(2,npwdiel,nspden,npwdiel,nspden))
 
 !At some time, should take care of different spin channels
  do ispden=1,nspden
@@ -2119,16 +2119,16 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 !  End loop over spins
  end do
 
- ABI_DEALLOCATE(eig_msusinvsqr)
- ABI_DEALLOCATE(eig_msussqr)
- ABI_DEALLOCATE(eig_sus)
- ABI_DEALLOCATE(sush)
- ABI_DEALLOCATE(susvec)
+ ABI_FREE(eig_msusinvsqr)
+ ABI_FREE(eig_msussqr)
+ ABI_FREE(eig_sus)
+ ABI_FREE(sush)
+ ABI_FREE(susvec)
 
 !-Compute the Hxc kernel
 
- ABI_ALLOCATE(khxc,(2,npwdiel,nspden,npwdiel,nspden))
- ABI_ALLOCATE(symdielmat,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_MALLOC(khxc,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_MALLOC(symdielmat,(2,npwdiel,nspden,npwdiel,nspden))
 
  khxc(:,:,:,:,:)=0.0_dp
 
@@ -2152,8 +2152,8 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 !Eventually add the xc part
  if(option>=2)then
 
-   ABI_ALLOCATE(wkxc,(nfft))
-   ABI_ALLOCATE(kxcg,(2,nfft))
+   ABI_MALLOC(wkxc,(nfft))
+   ABI_MALLOC(kxcg,(2,nfft))
    wkxc(:)=kxc(:,1)
 !  DEBUG
 !  Used to moderate divergenc effect near rho=0 of the Kxc (see above).
@@ -2196,8 +2196,8 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
      end if
    end do
 
-   ABI_DEALLOCATE(wkxc)
-   ABI_DEALLOCATE(kxcg)
+   ABI_FREE(wkxc)
+   ABI_FREE(kxcg)
 
 !  Endif option 2
  end if
@@ -2239,11 +2239,11 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
    symdielmat(1,ipw2,1,ipw2,1)=1._dp+symdielmat(1,ipw2,1,ipw2,1)
  end do
 
- ABI_DEALLOCATE(khxc)
+ ABI_FREE(khxc)
 
- ABI_ALLOCATE(symh,(npwdiel*(npwdiel+1)))
- ABI_ALLOCATE(symvec,(2,npwdiel,nspden,npwdiel,nspden))
- ABI_ALLOCATE(eig_sym,(npwdiel))
+ ABI_MALLOC(symh,(npwdiel*(npwdiel+1)))
+ ABI_MALLOC(symvec,(2,npwdiel,nspden,npwdiel,nspden))
+ ABI_MALLOC(eig_sym,(npwdiel))
 
 !Store the symmetrized dielectric matrix in proper mode before calling zhpev
  index=1
@@ -2304,9 +2304,9 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 !end do
 !end if
 
- ABI_DEALLOCATE(eig_sym)
- ABI_DEALLOCATE(symh)
- ABI_DEALLOCATE(symvec)
+ ABI_FREE(eig_sym)
+ ABI_FREE(symh)
+ ABI_FREE(symvec)
 
 !DEBUG
 !Checks whether the inverse of the symmetric dielectric matrix
@@ -2335,7 +2335,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 !write(std_out,*)'dieltcel : matrix has been inverted successfully '
 !ENDDEBUG
 
- ABI_DEALLOCATE(symdielmat)
+ ABI_FREE(symdielmat)
 
 !Then get the inverse of the asymmetric
 !dielectric matrix, as required for the preconditioning.
@@ -2368,12 +2368,12 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
    end do
  end do
 
- ABI_DEALLOCATE(invsqrsus)
- ABI_DEALLOCATE(sqrsus)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(work2)
- ABI_DEALLOCATE(zhpev1)
- ABI_DEALLOCATE(zhpev2)
+ ABI_FREE(invsqrsus)
+ ABI_FREE(sqrsus)
+ ABI_FREE(work)
+ ABI_FREE(work2)
+ ABI_FREE(zhpev1)
+ ABI_FREE(zhpev2)
 
  call timab(96,2,tsec)
 

@@ -141,7 +141,7 @@ if(icutcoul.eq.1) then
  grewtn(:,:)=0.0_dp
 
  !Initialize Gcut-off array from m_gtermcutoff
- !ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
+ !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
 !Sum over G space, done shell after shell until all
@@ -352,7 +352,7 @@ if(icutcoul.eq.1) then
    eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
  end if
 
- ABI_DEALLOCATE(gcutoff) 
+ ABI_FREE(gcutoff) 
 
 !DEBUG
 !write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
@@ -748,9 +748,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    exp2piqx(ia) = exp(arga*j_dpc)
  end do
  ng_expxq = 1000
- ABI_ALLOCATE(expx1, (-ng_expxq:ng_expxq, natom))
- ABI_ALLOCATE(expx2, (-ng_expxq:ng_expxq, natom))
- ABI_ALLOCATE(expx3, (-ng_expxq:ng_expxq, natom))
+ ABI_MALLOC(expx1, (-ng_expxq:ng_expxq, natom))
+ ABI_MALLOC(expx2, (-ng_expxq:ng_expxq, natom))
+ ABI_MALLOC(expx3, (-ng_expxq:ng_expxq, natom))
  do ia = 1, natom
    do ig1 = -ng_expxq, ng_expxq
      expx1(ig1, ia) = exp(ig1*two_pi*xred(1,ia)*j_dpc)
@@ -779,14 +779,14 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
    !Diagonalize dielectric matrix
    lwork=-1
-   ABI_ALLOCATE(work,(10))
+   ABI_MALLOC(work,(10))
    call dsyev('N','U',3, wdielt, 3, eig_dielt, work, lwork,info)
    lwork=nint(work(1))
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 
-   ABI_ALLOCATE(work,(lwork))
+   ABI_MALLOC(work,(lwork))
    call dsyev('V','U',3, wdielt, 3, eig_dielt, work, lwork,info)
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 
    !This is a tentative maximum value for the gaussian width in real space
    sigma_max=three
@@ -814,9 +814,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
  inv4eta = one / four / eta
 
- ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
- ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
- ABI_ALLOCATE(dyqqt,(2,3,natom,3,natom,3,3))
+ ABI_MALLOC(dyddt,(2,3,natom,3,natom))
+ ABI_MALLOC(dydqt,(2,3,natom,3,natom,3))
+ ABI_MALLOC(dyqqt,(2,3,natom,3,natom,3,3))
 
  dyddt = zero
  dydqt = zero
@@ -830,16 +830,16 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 ! if needed, update the complex phases for larger G vectors
    if (ng > ng_expxq) then
      !write(std_out,*)"have to realloc"
-     ABI_DEALLOCATE(expx1)
-     ABI_DEALLOCATE(expx2)
-     ABI_DEALLOCATE(expx3)
+     ABI_FREE(expx1)
+     ABI_FREE(expx2)
+     ABI_FREE(expx3)
 
      ng_expxq = ng_expxq*2
 ! TODO: half of this space is not needed, as it contains the complex conjugate of the other half.
 ! present duplication avoids if statements inside the loop, however
-     ABI_ALLOCATE(expx1, (-ng_expxq:ng_expxq, natom))
-     ABI_ALLOCATE(expx2, (-ng_expxq:ng_expxq, natom))
-     ABI_ALLOCATE(expx3, (-ng_expxq:ng_expxq, natom))
+     ABI_MALLOC(expx1, (-ng_expxq:ng_expxq, natom))
+     ABI_MALLOC(expx2, (-ng_expxq:ng_expxq, natom))
+     ABI_MALLOC(expx3, (-ng_expxq:ng_expxq, natom))
      do ia = 1, natom
        do ig1 = -ng_expxq, ng_expxq
          expx1(ig1, ia) = exp(ig1*two_pi*xred(1,ia)*j_dpc)
@@ -1218,12 +1218,12 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    end do
  end do
 
- ABI_DEALLOCATE(expx1)
- ABI_DEALLOCATE(expx2)
- ABI_DEALLOCATE(expx3)
- ABI_DEALLOCATE(dyddt)
- ABI_DEALLOCATE(dydqt)
- ABI_DEALLOCATE(dyqqt)
+ ABI_FREE(expx1)
+ ABI_FREE(expx2)
+ ABI_FREE(expx3)
+ ABI_FREE(dyddt)
+ ABI_FREE(dydqt)
+ ABI_FREE(dyqqt)
 
  !call timab(1749, 2, tsec)
 

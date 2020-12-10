@@ -141,7 +141,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
  end do
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
 
 !Nullify possibly unset pointers
@@ -164,18 +164,18 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
    norbu = norb
    norbd = 0
  end if
- ABI_ALLOCATE(kpt_, (3, nkpt))
+ ABI_MALLOC(kpt_, (3, nkpt))
  do ii = 1, nkpt
    kpt_(:,ii) = kpt(:,ii) / (/ rprimd(1,1), rprimd(2,2), rprimd(3,3) /) * two_pi
  end do
 
  call orbitals_descriptors(me, nproc,norb,norbu,norbd,nsppol,nspinor, &
 & nkpt,kpt_,wtk,wfs%ks%orbs,.false.)
- ABI_DEALLOCATE(kpt_)
+ ABI_FREE(kpt_)
 !We copy occ_orig to wfs%ks%orbs%occup
  wfs%ks%orbs%occup(1:norb * nkpt) = occ(1:norb * nkpt)
 !We allocate the eigen values storage.
- ABI_ALLOCATE(wfs%ks%orbs%eval,(wfs%ks%orbs%norb * wfs%ks%orbs%nkpts))
+ ABI_MALLOC(wfs%ks%orbs%eval,(wfs%ks%orbs%norb * wfs%ks%orbs%nkpts))
 
  write(message, '(a,a)' ) ch10,&
 & ' wvl_wfs_set: Create access keys for wavefunctions.'
@@ -204,7 +204,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 & sum(wfs%ks%comms%ncntt(0:nproc-1)), wfs%ks%orbs%nkptsp, wfs%ks%orbs%nspinor, &
 & wfs%ks%diis)
 
- ABI_DATATYPE_ALLOCATE(wfs%ks%confdatarr, (wfs%ks%orbs%norbp))
+ ABI_MALLOC(wfs%ks%confdatarr, (wfs%ks%orbs%norbp))
  call default_confinement_data(wfs%ks%confdatarr,wfs%ks%orbs%norbp)
 
  call check_linear_and_create_Lzd(me,nproc,INPUT_IG_OFF,wfs%ks%lzd,&
@@ -215,7 +215,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
  call check_communications(me,nproc,wfs%ks%orbs,wfs%ks%Lzd,wfs%ks%comms)
 
 !Deallocations
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
 !DEBUG
  write(std_out,*) 'wvl_wfs_set: TODO, update BigDFT sic_input_variables_default()'
@@ -365,9 +365,9 @@ subroutine wvl_wfs_free(wfs)
  call deallocate_orbs(wfs%ks%orbs)
  call deallocate_comms(wfs%ks%comms)
  if (associated(wfs%ks%orbs%eval))  then
-   ABI_DEALLOCATE(wfs%ks%orbs%eval)
+   ABI_FREE(wfs%ks%orbs%eval)
  end if
- ABI_DATATYPE_DEALLOCATE(wfs%ks%confdatarr)
+ ABI_FREE(wfs%ks%confdatarr)
 
  if (associated(wfs%ks%psi)) then
    call f_free_ptr(wfs%ks%psi)

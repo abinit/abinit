@@ -145,7 +145,7 @@ integer :: ierr
 ! *************************************************************************
 
 
-ABI_ALLOCATE(C,(Qsize,Xsize))
+ABI_MALLOC(C,(Qsize,Xsize))
 
 ! Compute Q^dagger . X
 call ZGEMM(            'C',   & ! Hermitian conjugate the first array
@@ -180,7 +180,7 @@ cmplx_1,   & ! beta constant
 X,   & ! matrix C
 Hsize)     ! LDC
 
-ABI_DEALLOCATE(C)
+ABI_FREE(C)
 
 end subroutine orthogonalize
 !!***
@@ -337,10 +337,10 @@ logical        :: head_node
 
 ! *************************************************************************
 
-ABI_ALLOCATE(check_matrix,(lmax,lmax))
-ABI_ALLOCATE(yl,(Hsize))
-ABI_ALLOCATE(rl,(Hsize))
-ABI_ALLOCATE(Ayl,(Hsize))
+ABI_MALLOC(check_matrix,(lmax,lmax))
+ABI_MALLOC(yl,(Hsize))
+ABI_MALLOC(rl,(Hsize))
+ABI_MALLOC(Ayl,(Hsize))
 
 mpi_rank  = xmpi_comm_rank(mpi_communicator)
 
@@ -437,10 +437,10 @@ if (head_node) then
 end if
 
 
-ABI_DEALLOCATE(check_matrix)
-ABI_DEALLOCATE(yl)
-ABI_DEALLOCATE(rl)
-ABI_DEALLOCATE(Ayl)
+ABI_FREE(check_matrix)
+ABI_FREE(yl)
+ABI_FREE(rl)
+ABI_FREE(Ayl)
 
 
 10 format(A)

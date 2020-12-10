@@ -106,9 +106,9 @@ subroutine radsintr(funr,funq,mqgrid,mrgrid,qgrid,rgrid,yq1,yqn)
    return
  end if
 
- ABI_ALLOCATE(ff,(mrgrid))
- ABI_ALLOCATE(intg,(mrgrid))
- ABI_ALLOCATE(rzf,(mrgrid))
+ ABI_MALLOC(ff,(mrgrid))
+ ABI_MALLOC(intg,(mrgrid))
+ ABI_MALLOC(rzf,(mrgrid))
  ff=zero;rzf=zero
 
 !Is mesh beginning with r=0 ?
@@ -205,9 +205,9 @@ subroutine radsintr(funr,funq,mqgrid,mrgrid,qgrid,rgrid,yq1,yqn)
 !Sum of the three parts
  yqn=(four*pi/qgrid(mqgrid))*(r0tor1+r1torm+rmtoin)
 
- ABI_DEALLOCATE(ff)
- ABI_DEALLOCATE(intg)
- ABI_DEALLOCATE(rzf)
+ ABI_FREE(ff)
+ ABI_FREE(intg)
+ ABI_FREE(rzf)
 
 end subroutine radsintr
 !!***

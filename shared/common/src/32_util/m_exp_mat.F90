@@ -92,8 +92,8 @@ CONTAINS  !===========================================================
   ! *********************************************************************
 
   mat_a_size = max(1,size(mat_a,dim=1))
-  ABI_ALLOCATE(ww,(mat_a_size))
-  ABI_ALLOCATE(uu,(mat_a_size,mat_a_size))
+  ABI_MALLOC(ww,(mat_a_size))
+  ABI_MALLOC(uu,(mat_a_size,mat_a_size))
 
   !Now it calculates the eigenvalues and eigenvectors of the matrix
   call ZGEEV('No left vectors','Vectors (right)',mat_a_size, mat_a, mat_a_size,ww,&
@@ -153,8 +153,8 @@ CONTAINS  !===========================================================
   !(uu.exp(ww*factor)).uu-1
   mat_a = matmul(mat_a,uu)
 
-  ABI_DEALLOCATE(ww)
-  ABI_DEALLOCATE(uu)
+  ABI_FREE(ww)
+  ABI_FREE(uu)
 
  end subroutine exp_mat_cx
  !!***

@@ -586,8 +586,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      dimlmn(iat)=Pawtab(Cryst%typat(iat))%lmn_size
    end do
 
-   ABI_DATATYPE_ALLOCATE(Cprj_b1ks,(Cryst%natom,nspinor))
-   ABI_DATATYPE_ALLOCATE(Cprj_b2ks,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj_b1ks,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj_b2ks,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj_b1ks,0,dimlmn)
    call pawcprj_alloc(Cprj_b2ks,0,dimlmn)
 
@@ -802,9 +802,9 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
    ABI_FREE(dimlmn)
    call pawcprj_free(Cprj_b1ks)
-   ABI_DATATYPE_DEALLOCATE(Cprj_b1ks)
+   ABI_FREE(Cprj_b1ks)
    call pawcprj_free(Cprj_b2ks)
-   ABI_DATATYPE_DEALLOCATE(Cprj_b2ks)
+   ABI_FREE(Cprj_b2ks)
  end if !PAW
 
  ABI_FREE(bbp_ks_distrb)

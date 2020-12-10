@@ -358,7 +358,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
 
 !Initialize the list of perturbations rfpert
- ABI_ALLOCATE(rfpert,(mpert))
+ ABI_MALLOC(rfpert,(mpert))
  rfpert(:)=0
  if(rfphon==1)rfpert(dtset%rfatpol(1):dtset%rfatpol(2))=1
 
@@ -386,18 +386,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  me = xmpi_comm_rank(spaceworld)
 
 !Set up the basis sphere of planewaves
- ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
- ABI_ALLOCATE(npwarr,(dtset%nkpt))
+ ABI_MALLOC(kg,(3,dtset%mpw*dtset%mkmem))
+ ABI_MALLOC(npwarr,(dtset%nkpt))
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg,&
 & dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
 & dtset%nsppol)
 
 !Set up the Ylm for each k point
- ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
+ ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
  if (rfstrs/=0.or.pawbec==1.or.pawpiezo==1.or.dtset%efmas>0) then
-   ABI_ALLOCATE(ylmgr,(dtset%mpw*dtset%mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
+   ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
  else
-   ABI_ALLOCATE(ylmgr,(0,0,psps%useylm))
+   ABI_MALLOC(ylmgr,(0,0,psps%useylm))
  end if
  if (psps%useylm==1) then
    option=0
@@ -421,14 +421,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Initialize PAW atomic occupancies
  if (psps%usepaw==1) then
-   ABI_DATATYPE_ALLOCATE(pawrhoij,(my_natom))
+   ABI_MALLOC(pawrhoij,(my_natom))
    call pawrhoij_nullify(pawrhoij)
    call initrhoij(dtset%pawcpxocc,dtset%lexexch,dtset%lpawu, &
 &   my_natom,natom,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
 &   pawrhoij,dtset%pawspnorb,pawtab,cplex1,dtset%spinat,dtset%typat,&
 &   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
  else
-   ABI_DATATYPE_ALLOCATE(pawrhoij,(0))
+   ABI_MALLOC(pawrhoij,(0))
  end if
 
 !Initialize header
@@ -453,7 +453,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
  ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
- ABI_ALLOCATE(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
@@ -505,13 +505,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end do
 
 !Allocation for forces and atomic positions (should be taken away, also argument ... )
- ABI_ALLOCATE(grxc,(3,natom))
+ ABI_MALLOC(grxc,(3,natom))
 
 !Do symmetry stuff
- ABI_ALLOCATE(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_ALLOCATE(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_ALLOCATE(indsym,(4,dtset%nsym,natom))
- ABI_ALLOCATE(symrec,(3,3,dtset%nsym))
+ ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_MALLOC(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_MALLOC(indsym,(4,dtset%nsym,natom))
+ ABI_MALLOC(symrec,(3,3,dtset%nsym))
  irrzon=0;indsym=0;symrec=0;phnons=zero
 !If the density is to be computed by mkrho, need irrzon and phnons
  iscf_eff=0;if(dtset%getden==0)iscf_eff=1
@@ -523,7 +523,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
 !Examine the symmetries of the q wavevector
- ABI_ALLOCATE(symq,(4,2,dtset%nsym))
+ ABI_MALLOC(symq,(4,2,dtset%nsym))
  timrev=1
 
 ! By default use symmetries.
@@ -537,9 +537,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
- ABI_ALLOCATE(atindx,(natom))
- ABI_ALLOCATE(atindx1,(natom))
- ABI_ALLOCATE(nattyp,(ntypat))
+ ABI_MALLOC(atindx,(natom))
+ ABI_MALLOC(atindx1,(natom))
+ ABI_MALLOC(nattyp,(ntypat))
  indx=1
  do itypat=1,ntypat
    nattyp(itypat)=0
@@ -561,8 +561,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #endif
 
 !Compute structure factor phases for current atomic pos:
- ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*natom))
- ABI_ALLOCATE(ph1df,(2,3*(2*mgfftf+1)*natom))
+ ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*natom))
+ ABI_MALLOC(ph1df,(2,3*(2*mgfftf+1)*natom))
  call getph(atindx,natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred)
 
  if (psps%usepaw==1.and.pawfgr%usefinegrid==1) then
@@ -572,7 +572,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
 !Compute occupation numbers and fermi energy, in case occupation scheme is metallic.
- ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  if( dtset%occopt>=3.and.dtset%occopt<=8 ) then
 
    call newocc(doccde,eigen0,entropy,fermie,dtset%spinmagntarget,dtset%mband,dtset%nband,&
@@ -640,13 +640,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  2-Check overlap
    call chkpawovlp(natom,psps%ntypat,dtset%pawovlp,pawtab,rmet,dtset%typat,xred)
 !  3-Identify FFT points in spheres and compute g_l(r).Y_lm(r) and exp(-i.q.r)
-   ABI_DATATYPE_ALLOCATE(pawfgrtab,(my_natom))
+   ABI_MALLOC(pawfgrtab,(my_natom))
    if (my_natom>0) then
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,dtset%typat,&
 &     mpi_atmtab=mpi_enreg%my_atmtab)
      call pawfgrtab_init(pawfgrtab,1,l_size_atm,pawrhoij(1)%nspden,dtset%typat,&
 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-     ABI_DEALLOCATE(l_size_atm)
+     ABI_FREE(l_size_atm)
    end if
    use_nhat_gga=(dtset%xclevel==2.and.dtset%pawnhatxc>0.and.usexcnhat>0)
    optcut=0;optgr0=dtset%pawstgylm;optgr1=0;optgr2=0;optrad=1-dtset%pawstgylm
@@ -670,17 +670,17 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      do iatom=1,my_natom
        iatom_tot=iatom; if (paral_atom) iatom_tot=mpi_enreg%my_atmtab(iatom)
        if (allocated(pawfgrtab(iatom)%expiqr)) then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%expiqr)
+         ABI_FREE(pawfgrtab(iatom)%expiqr)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%expiqr,(2,pawfgrtab(iatom)%nfgd))
+       ABI_MALLOC(pawfgrtab(iatom)%expiqr,(2,pawfgrtab(iatom)%nfgd))
        call pawexpiqr(pawfgrtab(iatom)%expiqr,gprimd,pawfgrtab(iatom)%nfgd,dtset%qptn,&
 &       pawfgrtab(iatom)%rfgd,xred(:,iatom_tot))
        pawfgrtab(iatom)%expiqr_allocated=1
      end do
    end if
 !  4-Allocate PAW specific arrays
-   ABI_DATATYPE_ALLOCATE(paw_an,(my_natom))
-   ABI_DATATYPE_ALLOCATE(paw_ij,(my_natom))
+   ABI_MALLOC(paw_an,(my_natom))
+   ABI_MALLOC(paw_ij,(my_natom))
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
@@ -701,13 +701,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  else ! PAW vs NCPP
    usexcnhat=0;usecprj=0
    use_nhat_gga=.false.
-   ABI_DATATYPE_ALLOCATE(paw_an,(0))
-   ABI_DATATYPE_ALLOCATE(paw_ij,(0))
-   ABI_DATATYPE_ALLOCATE(pawfgrtab,(0))
+   ABI_MALLOC(paw_an,(0))
+   ABI_MALLOC(paw_ij,(0))
+   ABI_MALLOC(pawfgrtab,(0))
  end if
 
- ABI_ALLOCATE(rhog,(2,nfftf))
- ABI_ALLOCATE(rhor,(nfftf,dtset%nspden))
+ ABI_MALLOC(rhog,(2,nfftf))
+ ABI_MALLOC(rhor,(nfftf,dtset%nspden))
 
 !Read ground-state charge density from diskfile in case getden /= 0
 !or compute it from wfs that were read previously : rhor as well as rhog
@@ -718,14 +718,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
    rdwr=1;rdwrpaw=psps%usepaw;if(ireadwf0/=0) rdwrpaw=0
    if (rdwrpaw/=0) then
-     ABI_DATATYPE_ALLOCATE(pawrhoij_read,(natom))
+     ABI_MALLOC(pawrhoij_read,(natom))
      call pawrhoij_nullify(pawrhoij_read)
      call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
 &              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij_read,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &                        dtset%nsppol,dtset%typat,pawtab=pawtab)
    else
-     ABI_DATATYPE_ALLOCATE(pawrhoij_read,(0))
+     ABI_MALLOC(pawrhoij_read,(0))
    end if
 
 !    MT july 2013: Should we read rhoij from the density file ?
@@ -737,13 +737,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      call pawrhoij_bcast(pawrhoij_read,hdr%pawrhoij,0,spaceworld)
      call pawrhoij_free(pawrhoij_read)
    end if
-   ABI_DATATYPE_DEALLOCATE(pawrhoij_read)
+   ABI_FREE(pawrhoij_read)
 
 !  Compute up+down rho(G) by fft
-   ABI_ALLOCATE(work,(nfftf))
+   ABI_MALLOC(work,(nfftf))
    work(:)=rhor(:,1)
    call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 
  else
    izero=0
@@ -753,13 +753,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
    paw_dmft%use_dmft=0 ! respfn with dmft not implemented
    if (psps%usepaw==1) then
-     ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
-     ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
+     ABI_MALLOC(rhowfg,(2,dtset%nfft))
+     ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
-     ABI_DEALLOCATE(rhowfg)
-     ABI_DEALLOCATE(rhowfr)
+     ABI_FREE(rhowfg)
+     ABI_FREE(rhowfr)
    else
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
@@ -768,16 +768,16 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !In PAW, compensation density has eventually to be added
  nhatgrdim=0;nhatdim=0
- ABI_ALLOCATE(nhatgr,(0,0,0))
+ ABI_MALLOC(nhatgr,(0,0,0))
  if (psps%usepaw==1.and. ((usexcnhat==0).or.(dtset%getden==0).or.dtset%xclevel==2)) then
    nhatdim=1
-   ABI_ALLOCATE(nhat,(nfftf,dtset%nspden))
+   ABI_MALLOC(nhat,(nfftf,dtset%nspden))
    call timab(558,1,tsec)
    nhatgrdim=0;if (dtset%xclevel==2.and.dtset%pawnhatxc>0) nhatgrdim=usexcnhat
    ider=2*nhatgrdim
    if (nhatgrdim>0)  then
-     ABI_DEALLOCATE(nhatgr)
-     ABI_ALLOCATE(nhatgr,(nfftf,dtset%nspden,3))
+     ABI_FREE(nhatgr)
+     ABI_MALLOC(nhatgr,(nfftf,dtset%nspden,3))
    end if
    izero=0;cplex=1;ipert=0;idir=0;qphon(:)=zero
    call pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,my_natom,natom,&
@@ -790,20 +790,20 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
    call timab(558,2,tsec)
  else
-   ABI_ALLOCATE(nhat,(0,0))
+   ABI_MALLOC(nhat,(0,0))
  end if
 
 !The GS irrzon and phnons were only needed to symmetrize the GS density
- ABI_DEALLOCATE(irrzon)
- ABI_DEALLOCATE(phnons)
+ ABI_FREE(irrzon)
+ ABI_FREE(phnons)
 
 !jmb 2012 write(std_out,'(a)')' ' ! needed to make ibm6_xlf12 pass tests. No idea why this works. JWZ 5 Sept 2011
 !Will compute now the total potential
 
 !Compute local ionic pseudopotential vpsp and core electron density xccc3d:
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
- ABI_ALLOCATE(xccc3d,(n3xccc))
- ABI_ALLOCATE(vpsp,(nfftf))
+ ABI_MALLOC(xccc3d,(n3xccc))
+ ABI_MALLOC(vpsp,(nfftf))
 
 !Determine by which method the local ionic potential and/or
 ! the pseudo core charge density have to be computed
@@ -832,30 +832,30 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Local ionic potential by method 2
  if (vloc_method==2) then
    option=1
-   ABI_ALLOCATE(dyfrlo_indx,(3,3,natom))
-   ABI_ALLOCATE(grtn_indx,(3,natom))
+   ABI_MALLOC(dyfrlo_indx,(3,3,natom))
+   ABI_MALLOC(grtn_indx,(3,natom))
    call mklocl(dtset,dyfrlo_indx,eei,gmet,gprimd,&
 &   grtn_indx,gsqcut,dummy6,mgfftf,mpi_enreg,natom,nattyp,&
 &   nfftf,ngfftf,dtset%nspden,ntypat,option,pawtab,ph1df,psps,&
 &   dtset%qprtrb,rhog,rhor,rprimd,ucvol,dtset%vprtrb,vpsp,wvl%descr,wvl%den,xred)
-   ABI_DEALLOCATE(dyfrlo_indx)
-   ABI_DEALLOCATE(grtn_indx)
+   ABI_FREE(dyfrlo_indx)
+   ABI_FREE(grtn_indx)
  end if
 
 !Pseudo core electron density by method 2
  if (coredens_method==2.and.psps%n1xccc/=0) then
    option=1
-   ABI_ALLOCATE(dyfrx2,(3,3,natom))
-   ABI_ALLOCATE(vxc,(0,0)) ! dummy
+   ABI_MALLOC(dyfrx2,(3,3,natom))
+   ABI_MALLOC(vxc,(0,0)) ! dummy
    call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
 &   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
 &   psps%xcccrc,psps%xccc1d,xccc3d,xred)
-   ABI_DEALLOCATE(dyfrx2)
-   ABI_DEALLOCATE(vxc) ! dummy
+   ABI_FREE(dyfrx2)
+   ABI_FREE(vxc) ! dummy
  end if
 
 !Set up hartree and xc potential. Compute kxc here.
- ABI_ALLOCATE(vhartr,(nfftf))
+ ABI_MALLOC(vhartr,(nfftf))
 
  call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfftf,ngfftf,&
              &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
@@ -863,8 +863,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  option=2 ; nk3xc=1
  nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
  call check_kxc(dtset%ixc,dtset%optdriver)
- ABI_ALLOCATE(kxc,(nfftf,nkxc))
- ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
+ ABI_MALLOC(kxc,(nfftf,nkxc))
+ ABI_MALLOC(vxc,(nfftf,dtset%nspden))
 
  _IBM6("Before rhotoxc")
 
@@ -875,7 +875,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Compute local + Hxc potential, and subtract mean potential.
- ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
+ ABI_MALLOC(vtrial,(nfftf,dtset%nspden))
  do ispden=1,min(dtset%nspden,2)
    do ifft=1,nfftf
      vtrial(ifft,ispden)=vhartr(ifft)+vxc(ifft,ispden)+vpsp(ifft)
@@ -888,7 +888,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      end do
    end do
  end if
- ABI_DEALLOCATE(vhartr)
+ ABI_FREE(vhartr)
 
 
  if(dtset%prtvol==-level)then
@@ -923,15 +923,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  dyfr_nondiag=0;if (psps%usepaw==1.and.rfphon==1) dyfr_nondiag=1
  dyfr_cplex=1;if (psps%usepaw==1.and.rfphon==1.and.(.not.qeq0)) dyfr_cplex=2
- ABI_ALLOCATE(dyew,(2,3,natom,3,natom))
- ABI_ALLOCATE(dyewq0,(3,3,natom))
- ABI_ALLOCATE(dyfrlo,(3,3,natom))
- ABI_ALLOCATE(dyfrx2,(3,3,natom))
- ABI_ALLOCATE(dyfrnl,(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag))
- ABI_ALLOCATE(dyfrwf,(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag))
- ABI_ALLOCATE(becfrnl,(3,natom,3*pawbec))
- ABI_ALLOCATE(piezofrnl,(6,3*pawpiezo))
- ABI_ALLOCATE(dyvdw,(2,3,natom,3,natom*usevdw))
+ ABI_MALLOC(dyew,(2,3,natom,3,natom))
+ ABI_MALLOC(dyewq0,(3,3,natom))
+ ABI_MALLOC(dyfrlo,(3,3,natom))
+ ABI_MALLOC(dyfrx2,(3,3,natom))
+ ABI_MALLOC(dyfrnl,(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag))
+ ABI_MALLOC(dyfrwf,(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag))
+ ABI_MALLOC(becfrnl,(3,natom,3*pawbec))
+ ABI_MALLOC(piezofrnl,(6,3*pawpiezo))
+ ABI_MALLOC(dyvdw,(2,3,natom,3,natom*usevdw))
  dyew(:,:,:,:,:)=zero
  dyewq0(:,:,:)=zero
  dyfrnl(:,:,:,:,:)=zero
@@ -942,14 +942,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (pawbec==1) becfrnl(:,:,:)=zero
  if (pawpiezo==1) piezofrnl(:,:)=zero
 
- ABI_ALLOCATE(eltcore,(6,6))
- ABI_ALLOCATE(elteew,(6+3*natom,6))
- ABI_ALLOCATE(eltfrhar,(6,6))
- ABI_ALLOCATE(eltfrnl,(6+3*natom,6))
- ABI_ALLOCATE(eltfrloc,(6+3*natom,6))
- ABI_ALLOCATE(eltfrkin,(6,6))
- ABI_ALLOCATE(eltfrxc,(6+3*natom,6))
- ABI_ALLOCATE(eltvdw,(6+3*natom,6*usevdw))
+ ABI_MALLOC(eltcore,(6,6))
+ ABI_MALLOC(elteew,(6+3*natom,6))
+ ABI_MALLOC(eltfrhar,(6,6))
+ ABI_MALLOC(eltfrnl,(6+3*natom,6))
+ ABI_MALLOC(eltfrloc,(6+3*natom,6))
+ ABI_MALLOC(eltfrkin,(6,6))
+ ABI_MALLOC(eltfrxc,(6+3*natom,6))
+ ABI_MALLOC(eltvdw,(6+3*natom,6*usevdw))
  eltcore(:,:)=zero
  elteew(:,:)=zero
  eltfrnl(:,:)=zero
@@ -974,7 +974,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (rfphon==1.and.psps%usepaw==1.and.(.not.use_nhat_gga)) then
    do iatom=1,my_natom
      if (allocated(pawfgrtab(iatom)%gylmgr2)) then
-       ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr2)
+       ABI_FREE(pawfgrtab(iatom)%gylmgr2)
      end if
      pawfgrtab(iatom)%gylmgr2_allocated=0
    end do
@@ -1081,8 +1081,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  In case of PAW, it misses a term coming from the perturbed overlap operator
  end if
 
- ABI_DEALLOCATE(vpsp)
- ABI_DEALLOCATE(xccc3d)
+ ABI_FREE(vpsp)
+ ABI_FREE(xccc3d)
 
  if(dtset%prtvol==-level)then
    call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.','COLL')
@@ -1131,7 +1131,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  _IBM6("Before irreducible_set_pert")
 
 !Determine the symmetrical perturbations
- ABI_ALLOCATE(pertsy,(3,natom+6))
+ ABI_MALLOC(pertsy,(3,natom+6))
  call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
 
 !MR: Deactivate perturbation symmetries temporarily for a longwave calculation
@@ -1171,7 +1171,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
-   ABI_ALLOCATE(rfpert_nl,(3,natom+2,3,natom+2,3,natom+2))
+   ABI_MALLOC(rfpert_nl,(3,natom+2,3,natom+2,3,natom+2))
    rfpert_nl = 0
    rfpert_nl(:,natom+2,:,natom+2,:,natom+2) = 1
    rfpert_nl(:,1:natom,:,natom+2,:,natom+2) = 1
@@ -1234,10 +1234,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
 !1-order contribution of the xc core correction to the dynamical matrix
- ABI_ALLOCATE(dyfrx1,(2,3,natom,3,natom))
+ ABI_MALLOC(dyfrx1,(2,3,natom,3,natom))
  dyfrx1(:,:,:,:,:)=zero
  if(rfphon==1.and.psps%n1xccc/=0)then
-   ABI_ALLOCATE(blkflgfrx1,(3,natom,3,natom))
+   ABI_MALLOC(blkflgfrx1,(3,natom,3,natom))
 !FR non-collinear magnetism
    if (dtset%nspden==4) then
      call dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,dtset%ixc,kxc,mgfftf,mpert,mpi_enreg,&
@@ -1253,26 +1253,26 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
 !Deallocate the arrays that were needed only for the frozen wavefunction part
- ABI_DEALLOCATE(ph1d)
- ABI_DEALLOCATE(ph1df)
- ABI_DEALLOCATE(cg)
- ABI_DEALLOCATE(kg)
- ABI_DEALLOCATE(npwarr)
+ ABI_FREE(ph1d)
+ ABI_FREE(ph1df)
+ ABI_FREE(cg)
+ ABI_FREE(kg)
+ ABI_FREE(npwarr)
  if(xmpi_paral==1) then
-   ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+   ABI_FREE(mpi_enreg%proc_distrb)
  end if
 
- ABI_ALLOCATE(blkflg,(3,mpert,3,mpert))
- ABI_ALLOCATE(d2eig0,(2,3,mpert,3,mpert))
- ABI_ALLOCATE(d2k0,(2,3,mpert,3,mpert))
- ABI_ALLOCATE(d2lo,(2,3,mpert,3,mpert))
- ABI_ALLOCATE(d2loc0,(2,3,mpert,3,mpert))
- ABI_ALLOCATE(d2nfr,(2,3,mpert,3,mpert))
- ABI_ALLOCATE(d2nl,(2,3,mpert,3,mpert))
- ABI_ALLOCATE(d2nl0,(2,3,mpert,3,mpert))
- ABI_ALLOCATE(d2nl1,(2,3,mpert,3,mpert))
- ABI_ALLOCATE(d2vn,(2,3,mpert,3,mpert))
- ABI_ALLOCATE(d2ovl,(2,3,mpert,3,mpert*psps%usepaw))
+ ABI_MALLOC(blkflg,(3,mpert,3,mpert))
+ ABI_MALLOC(d2eig0,(2,3,mpert,3,mpert))
+ ABI_MALLOC(d2k0,(2,3,mpert,3,mpert))
+ ABI_MALLOC(d2lo,(2,3,mpert,3,mpert))
+ ABI_MALLOC(d2loc0,(2,3,mpert,3,mpert))
+ ABI_MALLOC(d2nfr,(2,3,mpert,3,mpert))
+ ABI_MALLOC(d2nl,(2,3,mpert,3,mpert))
+ ABI_MALLOC(d2nl0,(2,3,mpert,3,mpert))
+ ABI_MALLOC(d2nl1,(2,3,mpert,3,mpert))
+ ABI_MALLOC(d2vn,(2,3,mpert,3,mpert))
+ ABI_MALLOC(d2ovl,(2,3,mpert,3,mpert*psps%usepaw))
  blkflg(:,:,:,:)=0
  d2eig0(:,:,:,:,:)=zero ; d2k0(:,:,:,:,:)=zero
  d2lo(:,:,:,:,:)=zero   ; d2loc0(:,:,:,:,:)=zero
@@ -1282,8 +1282,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (psps%usepaw==1) d2ovl(:,:,:,:,:)=zero
 
  prtbbb=dtset%prtbbb
- ABI_ALLOCATE(d2bbb,(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb))
- ABI_ALLOCATE(d2cart_bbb,(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb))
+ ABI_MALLOC(d2bbb,(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb))
+ ABI_MALLOC(d2cart_bbb,(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb))
  if(prtbbb==1)then
    d2cart_bbb(:,:,:,:,:,:)=zero
    d2bbb(:,:,:,:,:,:)=zero
@@ -1291,10 +1291,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  dim_eig2nkq = 0
  if(dtset%ieig2rf /= 0) dim_eig2nkq = 1
- ABI_ALLOCATE(eig2nkq,(2,dtset%mband*dtset%nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq))
+ ABI_MALLOC(eig2nkq,(2,dtset%mband*dtset%nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq))
  dim_eigbrd=0
  if(dtset%ieig2rf /= 0 .and. dtset%smdelta>0 ) dim_eigbrd = 1
- ABI_ALLOCATE(eigbrd,(2,dtset%mband*dtset%nsppol,dtset%nkpt,3,natom,3,natom*dim_eigbrd))
+ ABI_MALLOC(eigbrd,(2,dtset%mband*dtset%nsppol,dtset%nkpt,3,natom,3,natom*dim_eigbrd))
 
  call timab(137,2,tsec)
 
@@ -1326,14 +1326,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ! People should learn how to program Fort90 before being allowed to change the code!
    ! v5[26] crashes in dfpt_looppert
    ! The best solution would be using a datatype to gather the results!
-   ABI_ALLOCATE(clflg,(3,mpert))
+   ABI_MALLOC(clflg,(3,mpert))
    if(dtset%ieig2rf > 0) then
-     ABI_ALLOCATE(eigen0_pert,(dtset%mband*dtset%nkpt*dtset%nsppol))
-     ABI_ALLOCATE(eigenq_pert,(dtset%mband*dtset%nkpt*dtset%nsppol))
-     ABI_ALLOCATE(occ_rbz_pert,(dtset%mband*dtset%nkpt*dtset%nsppol))
+     ABI_MALLOC(eigen0_pert,(dtset%mband*dtset%nkpt*dtset%nsppol))
+     ABI_MALLOC(eigenq_pert,(dtset%mband*dtset%nkpt*dtset%nsppol))
+     ABI_MALLOC(occ_rbz_pert,(dtset%mband*dtset%nkpt*dtset%nsppol))
    end if
    if(dtset%efmas > 0) then
-     ABI_ALLOCATE(eigen0_pert,(dtset%mband*dtset%nkpt*dtset%nsppol))
+     ABI_MALLOC(eigen0_pert,(dtset%mband*dtset%nkpt*dtset%nsppol))
    end if
 !  Note that kg, cg, eigen0, mpw and npwarr are NOT passed to dfpt_looppert :
 !  they will be reinitialized for each perturbation, with an eventually
@@ -1360,10 +1360,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- ABI_DEALLOCATE(vxc)
+ ABI_FREE(vxc)
 
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
-   ABI_DEALLOCATE(rfpert_nl)
+   ABI_FREE(rfpert_nl)
  end if
 
 !Output of the localization tensor
@@ -1399,8 +1399,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  In case of bbb decomposition
    if(prtbbb==1)then
-     ABI_ALLOCATE(blkflg1,(3,mpert,3,mpert))
-     ABI_ALLOCATE(blkflg2,(3,mpert,3,mpert))
+     ABI_MALLOC(blkflg1,(3,mpert,3,mpert))
+     ABI_MALLOC(blkflg2,(3,mpert,3,mpert))
      blkflg2(:,:,:,:) = blkflg(:,:,:,:)
      do ipert = 1, mpert
        do ipert2 = 1, mpert
@@ -1409,7 +1409,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
          end if
        end do
      end do
-     ABI_ALLOCATE(d2tmp,(2,3,mpert,3,mpert))
+     ABI_MALLOC(d2tmp,(2,3,mpert,3,mpert))
      do iband = 1,dtset%mband
        d2tmp(:,:,:,:,:)=zero
        blkflg1(:,:,:,:) = blkflg2(:,:,:,:)
@@ -1418,9 +1418,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &       symrec,dtset%symrel,timrev,zero_by_symm)
        d2bbb(:,:,:,:,iband,iband) = d2tmp(:,:,natom+2,:,:)
      end do
-     ABI_DEALLOCATE(blkflg1)
-     ABI_DEALLOCATE(blkflg2)
-     ABI_DEALLOCATE(d2tmp)
+     ABI_FREE(blkflg1)
+     ABI_FREE(blkflg2)
+     ABI_FREE(d2tmp)
    end if
 
 !  Complete the d2nfr matrix by symmetrization of the existing elements
@@ -1443,9 +1443,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  (dyfrx1) and the non-frozen part (dynfr) to get the second-order
 !  derivative matrix (d2matr), then
 !  take account of the non-cartesian coordinates (d2cart).
-   ABI_ALLOCATE(d2cart,(2,3,mpert,3,mpert))
-   ABI_ALLOCATE(carflg,(3,mpert,3,mpert))
-   ABI_ALLOCATE(d2matr,(2,3,mpert,3,mpert))
+   ABI_MALLOC(d2cart,(2,3,mpert,3,mpert))
+   ABI_MALLOC(carflg,(3,mpert,3,mpert))
+   ABI_MALLOC(d2matr,(2,3,mpert,3,mpert))
    outd2=1
    call dfpt_gatherdy(becfrnl,dtset%berryopt,blkflg,carflg,&
 &   dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
@@ -1502,10 +1502,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      if (rfpert(natom+2)==0 .or. rfpert(natom+2)==2 .or. sumg0==1 ) analyt=1
 
 !    Diagonalize the analytic part
-     ABI_ALLOCATE(displ,(2*3*natom*3*natom))
-     ABI_ALLOCATE(eigval,(3*natom))
-     ABI_ALLOCATE(eigvec,(2*3*natom*3*natom))
-     ABI_ALLOCATE(phfrq,(3*natom))
+     ABI_MALLOC(displ,(2*3*natom*3*natom))
+     ABI_MALLOC(eigval,(3*natom))
+     ABI_MALLOC(eigvec,(2*3*natom*3*natom))
+     ABI_MALLOC(phfrq,(3*natom))
      qphnrm=one
      call dfpt_phfrq(dtset%amu_orig(:,1),displ,d2cart,eigval,eigvec,indsym,mpert,&
 &     dtset%nsym,natom,dtset%nsym,ntypat,phfrq,qphnrm,qphon,&
@@ -1526,8 +1526,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !    Stuff for parallelism
      if(master /= me) then
-       ABI_ALLOCATE(phfrq,(3*natom))
-       ABI_ALLOCATE(displ,(2*3*natom*3*natom))
+       ABI_MALLOC(phfrq,(3*natom))
+       ABI_MALLOC(displ,(2*3*natom*3*natom))
      end if
      call xmpi_bcast (phfrq,master,mpi_enreg%comm_cell,ierr) !Broadcast phfrq and displ
      call xmpi_bcast (displ,master,mpi_enreg%comm_cell,ierr) !to all processes
@@ -1574,25 +1574,25 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
        end if
      end if
      if (dtset%ieig2rf > 0) then
-       ABI_DEALLOCATE(eigen0_pert)
-       ABI_DEALLOCATE(eigenq_pert)
-       ABI_DEALLOCATE(occ_rbz_pert)
-       ABI_DEALLOCATE(eigen1_pert)
+       ABI_FREE(eigen0_pert)
+       ABI_FREE(eigenq_pert)
+       ABI_FREE(occ_rbz_pert)
+       ABI_FREE(eigen1_pert)
        call hdr0%free()
        if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
 &       (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
          call hdr_fine%free()
-         ABI_DEALLOCATE(eigenq_fine)
+         ABI_FREE(eigenq_fine)
        end if
      end if ! ieig2rf == 3  or %ieig2rf == 4 or %ieig2rf == 5
    end if ! rfphon==1
  end if
  if(dtset%efmas>0) then
-   ABI_DEALLOCATE(eigen0_pert)
-   ABI_DEALLOCATE(eigen1_pert)
+   ABI_FREE(eigen0_pert)
+   ABI_FREE(eigen1_pert)
  end if
 
- ABI_DEALLOCATE(doccde)
+ ABI_FREE(doccde)
 
  if(me==0)then
    if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0 &
@@ -1628,8 +1628,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
          call wrtout(std_out,message,'COLL')
 
 !        Compute and print Fan contribution
-         ABI_ALLOCATE(eigen_fan,(dtset%mband*dtset%nkpt*dtset%nsppol))
-         ABI_ALLOCATE(eigen_fan_mean,(dtset%mband*dtset%nkpt*dtset%nsppol))
+         ABI_MALLOC(eigen_fan,(dtset%mband*dtset%nkpt*dtset%nsppol))
+         ABI_MALLOC(eigen_fan_mean,(dtset%mband*dtset%nkpt*dtset%nsppol))
          call elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_fan,gprimd,&
 &         dtset%mband,natom,dtset%nkpt,dtset%nsppol,1,phfrq,dtset%prtvol)
          call eigen_meandege(eigen0,eigen_fan,eigen_fan_mean,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,2)
@@ -1644,15 +1644,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
            call wrtout(std_out,message,'COLL')
 
 !          Compute and print Diagonal Debye-Waller contribution
-           ABI_ALLOCATE(eigen_ddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
-           ABI_ALLOCATE(eigen_ddw_mean,(dtset%mband*dtset%nkpt*dtset%nsppol))
+           ABI_MALLOC(eigen_ddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
+           ABI_MALLOC(eigen_ddw_mean,(dtset%mband*dtset%nkpt*dtset%nsppol))
            if(qeq0)then
              call elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_ddw,gprimd,&
 &             dtset%mband,natom,dtset%nkpt,dtset%nsppol,2,phfrq,dtset%prtvol)
              if(results_respfn%gam_jdtset == -dtset%jdtset)then
                sz1=dtset%mband*dtset%nsppol
                sz2=natom*dim_eig2nkq
-               ABI_ALLOCATE(results_respfn%gam_eig2nkq,(2,sz1,dtset%nkpt,3,natom,3,sz2))
+               ABI_MALLOC(results_respfn%gam_eig2nkq,(2,sz1,dtset%nkpt,3,natom,3,sz2))
                results_respfn%gam_eig2nkq(:,:,:,:,:,:,:)=eig2nkq(:,:,:,:,:,:,:)
                results_respfn%gam_jdtset=dtset%jdtset
              end if
@@ -1678,20 +1678,20 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
            call wrtout(std_out,message,'COLL')
 
 !          Print sum of mean Fan and DDW
-           ABI_ALLOCATE(eigen_fanddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
+           ABI_MALLOC(eigen_fanddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
            eigen_fanddw=eigen_fan_mean+eigen_ddw_mean
            call prteigrs(eigen_fanddw,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
 &           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,7,0,dtset%prtvol,&
 &           eigen0,zero,zero,dtset%wtk)
 
-           ABI_DEALLOCATE(eigen_ddw)
-           ABI_DEALLOCATE(eigen_ddw_mean)
-           ABI_DEALLOCATE(eigen_fanddw)
+           ABI_FREE(eigen_ddw)
+           ABI_FREE(eigen_ddw_mean)
+           ABI_FREE(eigen_fanddw)
 
          end if
 
-         ABI_DEALLOCATE(eigen_fan)
-         ABI_DEALLOCATE(eigen_fan_mean)
+         ABI_FREE(eigen_fan)
+         ABI_FREE(eigen_fan_mean)
        end if
 
 !      In case of a non-analytical part,
@@ -1718,83 +1718,83 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
          end if
        end if
 
-       ABI_DEALLOCATE(displ)
-       ABI_DEALLOCATE(eigval)
-       ABI_DEALLOCATE(eigvec)
-       ABI_DEALLOCATE(phfrq)
+       ABI_FREE(displ)
+       ABI_FREE(eigval)
+       ABI_FREE(eigvec)
+       ABI_FREE(phfrq)
      end if ! rfphon == 1
-     ABI_DEALLOCATE(carflg)
-     ABI_DEALLOCATE(d2cart)
-     ABI_DEALLOCATE(d2matr)
+     ABI_FREE(carflg)
+     ABI_FREE(d2cart)
+     ABI_FREE(d2matr)
    end if ! End condition on if.not.
  end if ! master node
 
 !Deallocate arrays
  if (allocated(displ)) then
-   ABI_DEALLOCATE(displ)
+   ABI_FREE(displ)
  end if
  if (allocated(eigval)) then
-   ABI_DEALLOCATE(eigval)
+   ABI_FREE(eigval)
  end if
  if (allocated(eigvec)) then
-   ABI_DEALLOCATE(eigvec)
+   ABI_FREE(eigvec)
  end if
  if (allocated(phfrq)) then
-   ABI_DEALLOCATE(phfrq)
+   ABI_FREE(phfrq)
  end if
 
- ABI_DEALLOCATE(clflg)
- ABI_DEALLOCATE(atindx)
- ABI_DEALLOCATE(atindx1)
- ABI_DEALLOCATE(blkflg)
- ABI_DEALLOCATE(dyew)
- ABI_DEALLOCATE(dyewq0)
- ABI_DEALLOCATE(dyfrlo)
- ABI_DEALLOCATE(dyfrnl)
- ABI_DEALLOCATE(dyfrwf)
- ABI_DEALLOCATE(dyfrx1)
- ABI_DEALLOCATE(dyfrx2)
- ABI_DEALLOCATE(dyvdw)
- ABI_DEALLOCATE(d2bbb)
- ABI_DEALLOCATE(d2cart_bbb)
- ABI_DEALLOCATE(d2eig0)
- ABI_DEALLOCATE(d2k0)
- ABI_DEALLOCATE(d2lo)
- ABI_DEALLOCATE(d2loc0)
- ABI_DEALLOCATE(d2nfr)
- ABI_DEALLOCATE(d2nl)
- ABI_DEALLOCATE(d2nl0)
- ABI_DEALLOCATE(d2nl1)
- ABI_DEALLOCATE(d2ovl)
- ABI_DEALLOCATE(d2vn)
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(eig2nkq)
- ABI_DEALLOCATE(eigbrd)
- ABI_DEALLOCATE(eltcore)
- ABI_DEALLOCATE(elteew)
- ABI_DEALLOCATE(eltfrhar)
- ABI_DEALLOCATE(eltfrnl)
- ABI_DEALLOCATE(eltfrloc)
- ABI_DEALLOCATE(eltfrkin)
- ABI_DEALLOCATE(eltfrxc)
- ABI_DEALLOCATE(eltvdw)
- ABI_DEALLOCATE(becfrnl)
- ABI_DEALLOCATE(piezofrnl)
+ ABI_FREE(clflg)
+ ABI_FREE(atindx)
+ ABI_FREE(atindx1)
+ ABI_FREE(blkflg)
+ ABI_FREE(dyew)
+ ABI_FREE(dyewq0)
+ ABI_FREE(dyfrlo)
+ ABI_FREE(dyfrnl)
+ ABI_FREE(dyfrwf)
+ ABI_FREE(dyfrx1)
+ ABI_FREE(dyfrx2)
+ ABI_FREE(dyvdw)
+ ABI_FREE(d2bbb)
+ ABI_FREE(d2cart_bbb)
+ ABI_FREE(d2eig0)
+ ABI_FREE(d2k0)
+ ABI_FREE(d2lo)
+ ABI_FREE(d2loc0)
+ ABI_FREE(d2nfr)
+ ABI_FREE(d2nl)
+ ABI_FREE(d2nl0)
+ ABI_FREE(d2nl1)
+ ABI_FREE(d2ovl)
+ ABI_FREE(d2vn)
+ ABI_FREE(eigen0)
+ ABI_FREE(eig2nkq)
+ ABI_FREE(eigbrd)
+ ABI_FREE(eltcore)
+ ABI_FREE(elteew)
+ ABI_FREE(eltfrhar)
+ ABI_FREE(eltfrnl)
+ ABI_FREE(eltfrloc)
+ ABI_FREE(eltfrkin)
+ ABI_FREE(eltfrxc)
+ ABI_FREE(eltvdw)
+ ABI_FREE(becfrnl)
+ ABI_FREE(piezofrnl)
  call efmasdeg_free_array(efmasdeg)
  call efmasval_free_array(efmasval)
- ABI_DEALLOCATE(grxc)
- ABI_DEALLOCATE(indsym)
- ABI_DEALLOCATE(kxc)
- ABI_DEALLOCATE(nattyp)
- ABI_DEALLOCATE(pertsy)
- ABI_DEALLOCATE(rfpert)
- ABI_DEALLOCATE(rhog)
- ABI_DEALLOCATE(rhor)
- ABI_DEALLOCATE(symq)
- ABI_DEALLOCATE(symrec)
- ABI_DEALLOCATE(vtrial)
- ABI_DEALLOCATE(ylm)
- ABI_DEALLOCATE(ylmgr)
+ ABI_FREE(grxc)
+ ABI_FREE(indsym)
+ ABI_FREE(kxc)
+ ABI_FREE(nattyp)
+ ABI_FREE(pertsy)
+ ABI_FREE(rfpert)
+ ABI_FREE(rhog)
+ ABI_FREE(rhor)
+ ABI_FREE(symq)
+ ABI_FREE(symrec)
+ ABI_FREE(vtrial)
+ ABI_FREE(ylm)
+ ABI_FREE(ylmgr)
  call pawfgr_destroy(pawfgr)
  if (psps%usepaw==1) then
    call pawrhoij_free(pawrhoij)
@@ -1802,14 +1802,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_ij_free(paw_ij)
    call pawfgrtab_free(pawfgrtab)
  end if
- ABI_DEALLOCATE(nhat)
- ABI_DEALLOCATE(nhatgr)
- ABI_DATATYPE_DEALLOCATE(pawrhoij)
- ABI_DATATYPE_DEALLOCATE(paw_an)
- ABI_DATATYPE_DEALLOCATE(paw_ij)
- ABI_DATATYPE_DEALLOCATE(pawfgrtab)
+ ABI_FREE(nhat)
+ ABI_FREE(nhatgr)
+ ABI_FREE(pawrhoij)
+ ABI_FREE(paw_an)
+ ABI_FREE(paw_ij)
+ ABI_FREE(pawfgrtab)
  if(rfphon==1.and.psps%n1xccc/=0)then
-   ABI_DEALLOCATE(blkflgfrx1)
+   ABI_FREE(blkflgfrx1)
  end if
 
  ! Clean the header
@@ -1888,7 +1888,7 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
  if (usepaw==1) return
 
  if(prtbbb==1)then
-   ABI_ALLOCATE(loctenscart_bbb,(2,3,3,mband,mband*prtbbb))
+   ABI_MALLOC(loctenscart_bbb,(2,3,3,mband,mband*prtbbb))
    loctenscart_bbb(:,:,:,:,:)=zero
  end if
 
@@ -1997,7 +1997,7 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
  end if
 
  if (prtbbb == 1) then
-   ABI_DEALLOCATE(loctenscart_bbb)
+   ABI_FREE(loctenscart_bbb)
  end if
 
 end subroutine wrtloctens
@@ -3564,7 +3564,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 !    Make sure relevant columns of output are nulled
      d2matr(:,:,:,:,natom+3:natom+4)=0.0_dp
 !    Accumulate all frozen parts of the elastic tensor
-     ABI_ALLOCATE(elfrtot,(6+3*natom,6))
+     ABI_MALLOC(elfrtot,(6+3*natom,6))
      elfrtot(:,:)=elteew(:,:)+eltfrloc(:,:)+eltfrnl(:,:)+eltfrxc(:,:)
      elfrtot(1:6,1:6)=elfrtot(1:6,1:6)+eltcore(:,:)+eltfrhar(:,:)+eltfrkin(:,:)
      if (usevdw==1) elfrtot(:,:)=elfrtot(:,:)+eltvdw(:,:)
@@ -3608,7 +3608,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
          end do
        end do
      end do
-     ABI_DEALLOCATE(elfrtot)
+     ABI_FREE(elfrtot)
    end if
 !  End section for strain perturbation
 
@@ -3693,8 +3693,8 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 
 !  Band by band decomposition of the Born effective charges
    if(prtbbb==1)then
-     ABI_ALLOCATE(d2work,(2,3,mpert,3,mpert))
-     ABI_ALLOCATE(d2tmp,(2,3,mpert,3,mpert))
+     ABI_MALLOC(d2work,(2,3,mpert,3,mpert))
+     ABI_MALLOC(d2tmp,(2,3,mpert,3,mpert))
      do iband=1,mband
        d2work(:,:,:,:,:)=0.0_dp
        d2tmp(:,:,:,:,:)=0.0_dp
@@ -3713,8 +3713,8 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
        d2cart_bbb(:,:,:,:,iband,iband)=d2tmp(:,:,natom+2,:,:)
 
      end do
-     ABI_DEALLOCATE(d2tmp)
-     ABI_DEALLOCATE(d2work)
+     ABI_FREE(d2tmp)
+     ABI_FREE(d2work)
    end if ! prtbbb==1
 
 !
@@ -3726,12 +3726,12 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 !  Assume that if rfasr/=0, the whole cartesian matrix is correct
  if(rfasr/=0)then
 
-   ABI_ALLOCATE(d2work,(2,3,mpert,3,mpert))
+   ABI_MALLOC(d2work,(2,3,mpert,3,mpert))
    call asria_calc(rfasr,d2work,d2cart,mpert,natom)
 !  The following line imposes ASR:
    call asria_corr(rfasr,d2work,d2cart,mpert,natom)
 
-   ABI_DEALLOCATE(d2work)
+   ABI_FREE(d2work)
 
 !  Imposition of the ASR on the effective charges.
    if(rfpert(natom+2)==1)then
@@ -3991,22 +3991,22 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 !  -----------------------------------------------------------------------
    call timab(563,1,tsec)
    if (n3xccc>0) then
-     ABI_ALLOCATE(v_dum,(nfft))
-     ABI_ALLOCATE(vxctotg,(2,nfft))
+     ABI_MALLOC(v_dum,(nfft))
+     ABI_MALLOC(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
      call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
+     ABI_FREE(v_dum)
    else
-     ABI_ALLOCATE(vxctotg,(0,0))
+     ABI_MALLOC(vxctotg,(0,0))
    end if
    optatm=0;optdyfr=1;optgr=0;optstr=0;optv=1;optn=n3xccc/nfft;optn2=1;opteltfr=0
    call atm2fft(atindx1,dum_atmrho,dum_atmvloc,dyfrxc,dyfrlo,dum_eltfrxc,&
 &   dum_gauss,gmet,gprimd,dum_grn,dum_grv,gsqcut,mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,&
 &   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,qgrid,qprtrb,dtset%rcut,rhog,&
 &   rprimd,dum_strn,dum_strv,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb,vlspl)
-   ABI_DEALLOCATE(vxctotg)
+   ABI_FREE(vxctotg)
    if (n3xccc==0) dyfrxc=zero
  else
 
@@ -4014,9 +4014,9 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 !  and core charge contribution in real space
 !  -----------------------------------------------------------------------
    option=4
-   ABI_ALLOCATE(dyfrlo_tmp1,(3,3,natom))
-   ABI_ALLOCATE(gr_dum,(3,natom))
-   ABI_ALLOCATE(v_dum,(nfft))
+   ABI_MALLOC(dyfrlo_tmp1,(3,3,natom))
+   ABI_MALLOC(gr_dum,(3,natom))
+   ABI_MALLOC(v_dum,(nfft))
    call mklocl_recipspace(dyfrlo_tmp1,eei,gmet,gprimd,&
 &   gr_dum,gsqcut,dtset%icutcoul,dummy6,mgfft,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,dtset%nkpt,&
 &   ntypat,option,ph1d,qgrid,qprtrb,dtset%rcut,rhog,rprimd,ucvol,dtset%vcutgeo,vlspl,vprtrb,v_dum)
@@ -4024,20 +4024,20 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 !    Reestablish correct order of atoms
      dyfrlo(1:3,1:3,atindx1(iatom))=dyfrlo_tmp1(1:3,1:3,iatom)
    end do
-   ABI_DEALLOCATE(dyfrlo_tmp1)
-   ABI_DEALLOCATE(v_dum)
+   ABI_FREE(dyfrlo_tmp1)
+   ABI_FREE(v_dum)
    if(n1xccc/=0)then
      call mkcore(dummy6,dyfrxc,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,&
 &     n1,n1xccc,n2,n3,option,rprimd,typat,ucvol,vxc,xcccrc,xccc1d,xccc3d,xred)
    end if
-   ABI_DEALLOCATE(gr_dum)
+   ABI_FREE(gr_dum)
  end if
 
 !Symmetrize dynamical matrix explicitly for given space group:
 
 !Symmetrize local part of the dynamical matrix dyfrlo:
- ABI_ALLOCATE(dyfrsym_tmp,(1,3,3,natom,1))
- ABI_ALLOCATE(dyfrlo_tmp2,(1,3,3,natom,1))
+ ABI_MALLOC(dyfrsym_tmp,(1,3,3,natom,1))
+ ABI_MALLOC(dyfrlo_tmp2,(1,3,3,natom,1))
  dyfrsym_tmp(1,:,:,:,1)=dyfrlo(:,:,:)
  call dfpt_sydy(1,dyfrsym_tmp,indsym,natom,0,nsym,qphon,dyfrlo_tmp2,symq,symrec)
  dyfrlo(:,:,:)=dyfrlo_tmp2(1,:,:,:,1)
@@ -4046,18 +4046,18 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    call dfpt_sydy(1,dyfrsym_tmp,indsym,natom,0,nsym,qphon,dyfrlo_tmp2,symq,symrec)
    dyfrxc(:,:,:)=dyfrlo_tmp2(1,:,:,:,1)
  end if
- ABI_DEALLOCATE(dyfrsym_tmp)
- ABI_DEALLOCATE(dyfrlo_tmp2)
+ ABI_FREE(dyfrsym_tmp)
+ ABI_FREE(dyfrlo_tmp2)
 
 !Symmetrize nonlocal part of the dynamical matrix dyfrnl:
 !atindx1 is used to reestablish the correct order of atoms
  if (dyfr_nondiag==0) then
-   ABI_ALLOCATE(dyfrsym_tmp,(dyfr_cplex,3,3,natom,1))
+   ABI_MALLOC(dyfrsym_tmp,(dyfr_cplex,3,3,natom,1))
    do iatom=1,natom
      dyfrsym_tmp(:,:,:,atindx1(iatom),1)=dyfrnl(:,:,:,iatom,1)
    end do
  else
-   ABI_ALLOCATE(dyfrsym_tmp,(dyfr_cplex,3,3,natom,natom))
+   ABI_MALLOC(dyfrsym_tmp,(dyfr_cplex,3,3,natom,natom))
    do jatom=1,natom
      do iatom=1,natom
        dyfrsym_tmp(:,:,:,atindx1(iatom),atindx1(jatom))=dyfrnl(:,:,:,iatom,jatom)
@@ -4065,7 +4065,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    end do
  end if
  call dfpt_sydy(dyfr_cplex,dyfrsym_tmp,indsym,natom,dyfr_nondiag,nsym,qphon,dyfrnl,symq,symrec)
- ABI_DEALLOCATE(dyfrsym_tmp)
+ ABI_FREE(dyfrsym_tmp)
 
 !Collect local, nl xc core, and non-local part
 !of the frozen wf dynamical matrix.
@@ -4210,7 +4210,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  dyfrx1(:,:,:,:,:)=zero
 
  cplex=2-timrev ; n3xccc=nfft
- ABI_ALLOCATE(vxc10,(cplex*nfft,nspden))
+ ABI_MALLOC(vxc10,(cplex*nfft,nspden))
 
 
 !Loop on the perturbation j1
@@ -4219,7 +4219,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
    do idir1=1,3
 
 !    Compute the derivative of the core charge with respect to j1
-     ABI_ALLOCATE(xcccwk1,(cplex*n3xccc))
+     ABI_MALLOC(xcccwk1,(cplex*n3xccc))
 
 !    PAW or NC with nc_xccc_gspace: 1st-order core charge in reciprocal space
      if (usepaw==1 .or. psps%nc_xccc_gspace==1) then
@@ -4235,7 +4235,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 
 !    Compute the corresponding potential
      option=0
-     ABI_ALLOCATE(rhor1,(cplex*nfft,nspden))
+     ABI_MALLOC(rhor1,(cplex*nfft,nspden))
      rhor1=zero
 !FR SPr EB Non-collinear magnetism
      if (nspden==4.and.present(rhor).and.present(vxc)) then
@@ -4246,8 +4246,8 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
        call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
 &       nmxc,nspden,n3xccc,option,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
      end if
-     ABI_DEALLOCATE(rhor1)
-     ABI_DEALLOCATE(xcccwk1)
+     ABI_FREE(rhor1)
+     ABI_FREE(xcccwk1)
 
 !    vxc10 will couple with xcccwk2, that behaves like
 !    a total density (ispden=1). Only the spin-up + spin-down
@@ -4267,7 +4267,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 &         (rfpert(iatom2)==1 .and. rfdir(idir2) == 1)    )then
 
 !          Compute the derivative of the core charge with respect to j2
-           ABI_ALLOCATE(xcccwk2,(cplex*n3xccc))
+           ABI_MALLOC(xcccwk2,(cplex*n3xccc))
 
 !          PAW or NC with nc_xccc_gspace: 1st-order core charge in reciprocal space
            if (usepaw==1 .or. psps%nc_xccc_gspace==1) then
@@ -4285,7 +4285,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 
            call dotprod_vn(cplex,xcccwk2,valuer,valuei,nfft,nfftot,1,2,vxc10,ucvol)
 
-           ABI_DEALLOCATE(xcccwk2)
+           ABI_FREE(xcccwk2)
 
            dyfrx1(1,idir1,iatom1,idir2,iatom2)= valuer
            dyfrx1(2,idir1,iatom1,idir2,iatom2)= valuei
@@ -4306,7 +4306,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
    call timab(48,2,tsec)
  end if
 
- ABI_DEALLOCATE(vxc10)
+ ABI_FREE(vxc10)
 
  call timab(182,2,tsec)
 

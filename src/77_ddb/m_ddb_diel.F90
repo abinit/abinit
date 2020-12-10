@@ -143,10 +143,10 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
 ! frdiel(3,3,nfreq)= frequency-dependent dielectric tensor
 ! modez=mode effective charge
- ABI_ALLOCATE(frdiel,(3,3,nfreq))
- ABI_ALLOCATE(oscstr,(2,3,3,3*natom))
- ABI_ALLOCATE(modez,(2,3,3*natom))
- ABI_ALLOCATE(dielt_modedecompo,(3,3,3*natom))
+ ABI_MALLOC(frdiel,(3,3,nfreq))
+ ABI_MALLOC(oscstr,(2,3,3,3*natom))
+ ABI_MALLOC(modez,(2,3,3*natom))
+ ABI_MALLOC(dielt_modedecompo,(3,3,3*natom))
 
 !In case only the electronic dielectric constant should be printed
  if (dieflag==2) then
@@ -374,10 +374,10 @@ if(nph2l/=0 .and. dieflag/=2) then
  end if ! End of the condition of nph2l does not vanish for Lyddane-Sachs-Teller
  
 
- ABI_DEALLOCATE(frdiel)
- ABI_DEALLOCATE(modez)
- ABI_DEALLOCATE(oscstr)
- ABI_DEALLOCATE(dielt_modedecompo)
+ ABI_FREE(frdiel)
+ ABI_FREE(modez)
+ ABI_FREE(oscstr)
+ ABI_FREE(dielt_modedecompo)
 
 end subroutine ddb_diel
 !!***
@@ -534,7 +534,7 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
 !  Examine the degeneracy of each mode. The portability of the echo of the mode effective
 !  charges and oscillator strengths is very hard to guarantee. On the contrary,
 !  the scalar reductions of these quantities are OK.
-   ABI_ALLOCATE(metacharacter,(3*natom))
+   ABI_MALLOC(metacharacter,(3*natom))
    do imode=1,3*natom
 !    The degenerate modes are not portable
      t_degenerate=.false.
@@ -612,7 +612,7 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
 #endif
    end if
 
-   ABI_DEALLOCATE(metacharacter)
+   ABI_FREE(metacharacter)
    
 end subroutine ddb_oscstr
 !!***
@@ -684,12 +684,12 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
 ! *********************************************************************
 
 !Get the oscillator strength and mode effective charge for each mode
- ABI_ALLOCATE(oscstr,(2,3,3*natom))
- ABI_ALLOCATE(modez,(2,3,3*natom))
- ABI_ALLOCATE(modezabs,(3*natom))
- ABI_ALLOCATE(vec,(3*natom,3))
- ABI_ALLOCATE(vect,(3*natom,3))
- ABI_ALLOCATE(deg,(3*natom))
+ ABI_MALLOC(oscstr,(2,3,3*natom))
+ ABI_MALLOC(modez,(2,3,3*natom))
+ ABI_MALLOC(modezabs,(3*natom))
+ ABI_MALLOC(vec,(3*natom,3))
+ ABI_MALLOC(vect,(3*natom,3))
+ ABI_MALLOC(deg,(3*natom))
 
  write(std_out,'(a,a)')ch10,' alignph : before modifying the eigenvectors, mode number and mode effective charges :'
  do imode=1,3*natom
@@ -914,12 +914,12 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
    write(std_out,'(i4,3f16.6)')imode,modez(1,:,imode)
  end do
 
- ABI_DEALLOCATE(deg)
- ABI_DEALLOCATE(oscstr)
- ABI_DEALLOCATE(modez)
- ABI_DEALLOCATE(modezabs)
- ABI_DEALLOCATE(vec)
- ABI_DEALLOCATE(vect)
+ ABI_FREE(deg)
+ ABI_FREE(oscstr)
+ ABI_FREE(modez)
+ ABI_FREE(modezabs)
+ ABI_FREE(vec)
+ ABI_FREE(vect)
 
 end subroutine alignph
 !!***

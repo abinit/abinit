@@ -350,7 +350,7 @@ subroutine wvl_descr_free(wvl)
  call deallocate_atoms_data(wvl%atoms)
 #endif
  if(allocated(wvl%npspcode_paw_init_guess)) then
-   ABI_DEALLOCATE(wvl%npspcode_paw_init_guess)
+   ABI_FREE(wvl%npspcode_paw_init_guess)
  end if
 end subroutine wvl_descr_free
 !!***

@@ -316,7 +316,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
  write(io,'(1x,i3)')dtset%natom
  write(io,"('Atomic numbers and positions of atoms (au)')")
 
- ABI_ALLOCATE(xcart_qmc,(3,dtset%natom))
+ ABI_MALLOC(xcart_qmc,(3,dtset%natom))
  call xred2xcart(dtset%natom,hdr%rprimd,xcart_qmc,hdr%xred)
  do ii=1,dtset%natom
    tmpr=r2s(xcart_qmc(1,ii),'(f24.14)')
@@ -325,7 +325,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
    jj=psps%znucltypat(dtset%typat(ii))
    write(io,'(1x,i2,3(1x,a))')jj,trim(tmpr),trim(tmpr2),trim(tmpr3)
  end do
- ABI_DEALLOCATE(xcart_qmc)
+ ABI_FREE(xcart_qmc)
 
  write(io,"('Primitive lattice vectors (au)')")
  do ii=1,3
@@ -383,7 +383,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
 !The number of xxx_shift's might seem excessive but the re-ordering of the
 !list from (spin, kpt, band, kg) to (kpt, spin, band, kgfull) is quite
 !complicated
- ABI_ALLOCATE(cgfull,(2,nkgfull*dtset%nspinor*dtset%nsppol*dtset%mband*dtset%nkpt))
+ ABI_MALLOC(cgfull,(2,nkgfull*dtset%nspinor*dtset%nsppol*dtset%mband*dtset%nkpt))
  cgfull(1:2,1:nkgfull*dtset%nspinor*dtset%nsppol*dtset%mband*dtset%nkpt)=0
  icg_shift=1
  do isppol=1,dtset%nsppol

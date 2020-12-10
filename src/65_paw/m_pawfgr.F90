@@ -207,8 +207,8 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
   ! === Norm-conserving pseudopotentials ===
   nfftf=Dtset%nfft ; mgfftf=Dtset%mgfft ; ngfftf(:)=Dtset%ngfft(:)
   Pawfgr%usefinegrid=0
-  ABI_ALLOCATE(Pawfgr%coatofin,(0))
-  ABI_ALLOCATE(Pawfgr%fintocoa,(0))
+  ABI_MALLOC(Pawfgr%coatofin,(0))
+  ABI_MALLOC(Pawfgr%fintocoa,(0))
   ecut_eff  =Dtset%ecut*Dtset%dilatmx**2
   ecutdg_eff=ecut_eff
 
@@ -221,15 +221,15 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
    nfftc_tot =ngfftc(1)*ngfftc(2)*ngfftc(3)
    nfftf_tot =ngfftf(1)*ngfftf(2)*ngfftf(3)
    Pawfgr%usefinegrid=1
-   ABI_ALLOCATE(Pawfgr%coatofin,(nfftc_tot))
-   ABI_ALLOCATE(Pawfgr%fintocoa,(nfftf_tot))
+   ABI_MALLOC(Pawfgr%coatofin,(nfftc_tot))
+   ABI_MALLOC(Pawfgr%fintocoa,(nfftf_tot))
    call indgrid(Pawfgr%coatofin,Pawfgr%fintocoa,nfftc_tot,nfftf_tot,ngfftc,ngfftf)
   else
    ! * Do not use fine FFT mesh. Simple transfer that can be done in parallel with only local info.
    nfftf=Dtset%nfft ; mgfftf=Dtset%mgfft ; ngfftf(:)=Dtset%ngfft(:)
    Pawfgr%usefinegrid=0
-   ABI_ALLOCATE(Pawfgr%coatofin,(Dtset%nfft))
-   ABI_ALLOCATE(Pawfgr%fintocoa,(Dtset%nfft))
+   ABI_MALLOC(Pawfgr%coatofin,(Dtset%nfft))
+   ABI_MALLOC(Pawfgr%fintocoa,(Dtset%nfft))
    do ii=1,Dtset%nfft
     Pawfgr%coatofin(ii)=ii ; Pawfgr%fintocoa(ii)=ii
    end do
@@ -317,10 +317,10 @@ subroutine pawfgr_destroy(Pawfgr)
 !@Pawfgr_type
 
  if (associated(Pawfgr%coatofin))  then
-   ABI_DEALLOCATE(Pawfgr%coatofin)
+   ABI_FREE(Pawfgr%coatofin)
  end if
  if (associated(Pawfgr%fintocoa))  then
-   ABI_DEALLOCATE(Pawfgr%fintocoa)
+   ABI_FREE(Pawfgr%fintocoa)
  end if
 
  Pawfgr%usefinegrid=0
@@ -436,7 +436,7 @@ subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
  n1c=ngfftc(1);n2c=ngfftc(2);n3c=ngfftc(3)
  n1f=ngfftf(1);n2f=ngfftf(2);n3f=ngfftf(3)
 
- ABI_ALLOCATE(gc,(3,max(n1c,n2c,n3c)))
+ ABI_MALLOC(gc,(3,max(n1c,n2c,n3c)))
  do ii=1,3
    id(ii)=ngfftc(ii)/2+2
    do ing=1,ngfftc(ii)
@@ -444,7 +444,7 @@ subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
    end do
  end do
 
- ABI_ALLOCATE(gf,(3,max(n1f,n2f,n3f)))
+ ABI_MALLOC(gf,(3,max(n1f,n2f,n3f)))
  do ii=1,3
    id(ii)=ngfftf(ii)/2+2
    do ing=1,ngfftf(ii)
@@ -487,8 +487,8 @@ subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
    end if
  end do
 
- ABI_DEALLOCATE(gf)
- ABI_DEALLOCATE(gc)
+ ABI_FREE(gf)
+ ABI_FREE(gc)
 
  DBG_EXIT("COLL")
 

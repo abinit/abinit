@@ -115,14 +115,14 @@ contains
   !--initialize potential energy :
    epotlotf = zero
 
-   ABI_ALLOCATE(fcartfit,(3,natom))
-   ABI_ALLOCATE(xcartfit,(3,natom))
-   ABI_ALLOCATE(velfit,(3,natom))
+   ABI_MALLOC(fcartfit,(3,natom))
+   ABI_MALLOC(xcartfit,(3,natom))
+   ABI_MALLOC(velfit,(3,natom))
 
-   ABI_ALLOCATE(neighl,(lotfvar%nneigx,natom))
-   ABI_ALLOCATE(nneig,(lotfvar%nneigx))
-   ABI_ALLOCATE(neighl_old,(lotfvar%nneigx,natom))
-   ABI_ALLOCATE(nneig_old,(lotfvar%nneigx))
+   ABI_MALLOC(neighl,(lotfvar%nneigx,natom))
+   ABI_MALLOC(nneig,(lotfvar%nneigx))
+   ABI_MALLOC(neighl_old,(lotfvar%nneigx,natom))
+   ABI_MALLOC(nneig_old,(lotfvar%nneigx))
    neighl = 0
    nneig = 0
    neighl_old = 0
@@ -177,9 +177,9 @@ contains
    call bond_matrix_set(nneig,neighl)
 
   !--initialize bond parms alpha
-   ABI_ALLOCATE(alpha,(3,nbondex))
-   ABI_ALLOCATE(alpha_in,(3,nbondex))
-   ABI_ALLOCATE(alpha_end,(3,nbondex))
+   ABI_MALLOC(alpha,(3,nbondex))
+   ABI_MALLOC(alpha_in,(3,nbondex))
+   ABI_MALLOC(alpha_end,(3,nbondex))
    alpha = zero
    alpha_in = zero
    alpha_end = zero
@@ -216,14 +216,14 @@ contains
 
   !--init_lotf
 ! *************************************************************************
-   ABI_DEALLOCATE(alpha)
-   ABI_DEALLOCATE(alpha_in)
-   ABI_DEALLOCATE(alpha_end)
-   ABI_DEALLOCATE(nneig)
-   ABI_DEALLOCATE(neighl)
-   ABI_DEALLOCATE(fcartfit)
-   ABI_DEALLOCATE(xcartfit)
-   ABI_DEALLOCATE(velfit)
+   ABI_FREE(alpha)
+   ABI_FREE(alpha_in)
+   ABI_FREE(alpha_end)
+   ABI_FREE(nneig)
+   ABI_FREE(neighl)
+   ABI_FREE(fcartfit)
+   ABI_FREE(xcartfit)
+   ABI_FREE(velfit)
 
   !--deallocate LOTF internal variables
    call work_var_dealloc()
@@ -321,8 +321,8 @@ contains
 
    iwrdri = 0
 
-   ABI_ALLOCATE(fspare,(3,nbondex))
-   ABI_ALLOCATE(alpha_fce,(3,2,nbondex,1))
+   ABI_MALLOC(fspare,(3,nbondex))
+   ABI_MALLOC(alpha_fce,(3,2,nbondex,1))
 
   !--(0,-2) initialises a few parameters
    rcut_fit_int = rcut
@@ -372,8 +372,8 @@ contains
    call wrtout(std_out,message,'COLL')
 
 
-   ABI_ALLOCATE(alpha_dum,(3,nbondex))
-   ABI_ALLOCATE(alpha_old,(3,nbondex))
+   ABI_MALLOC(alpha_dum,(3,nbondex))
+   ABI_MALLOC(alpha_old,(3,nbondex))
    alpha_dum = zero
    alpha_old = zero
 
@@ -793,9 +793,9 @@ contains
   !--prepares "true" updated parameters
    alpha_tr(:,:ibn_tots) = alpha_dum(:,:ibn_tots)
 
-   ABI_DEALLOCATE(alpha_fce)
-   ABI_DEALLOCATE(alpha_dum)
-   ABI_DEALLOCATE(alpha_old)
+   ABI_FREE(alpha_fce)
+   ABI_FREE(alpha_dum)
+   ABI_FREE(alpha_old)
   !-----------------------------------------------------------
 
  end subroutine fitclus

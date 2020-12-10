@@ -179,9 +179,9 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !vpspll(:,1),...,vpspll(:,4)=nonlocal pseudopotentials
 !wfll(:,1),...,wfll(:,4)=reference config. wavefunctions
 
- ABI_ALLOCATE(rad,(mmax))
- ABI_ALLOCATE(vpspll,(mmax,mpsang))
- ABI_ALLOCATE(wfll,(mmax,mpsang))
+ ABI_MALLOC(rad,(mmax))
+ ABI_MALLOC(vpspll,(mmax,mpsang))
+ ABI_MALLOC(wfll,(mmax,mpsang))
 
 !Read atomic pseudopotential for each l, filling up arrays vpspll
 !and wfll. Also set up rad array (actually read more than once)
@@ -225,7 +225,7 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  al=log(ratio)/dble(mmax-1)
 
 !vloc(:)=Vlocal(r), lloc=0, 1, or 2 or -1 for avg.
- ABI_ALLOCATE(vloc,(mmax))
+ ABI_MALLOC(vloc,(mmax))
 !Copy appropriate nonlocal psp for use as local one
  vloc( 1:mmax ) = vpspll( 1:mmax , lloc+1 )
 
@@ -237,18 +237,18 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 & vlspl(:,1),rad,vloc,yp1,ypn,zion)
 
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_ALLOCATE(work_space,(mqgrid))
- ABI_ALLOCATE(work_spl,(mqgrid))
+ ABI_MALLOC(work_space,(mqgrid))
+ ABI_MALLOC(work_spl,(mqgrid))
  call spline (qgrid,vlspl(:,1),mqgrid,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
- ABI_DEALLOCATE(work_space)
- ABI_DEALLOCATE(work_spl)
+ ABI_FREE(work_space)
+ ABI_FREE(work_spl)
 
 !--------------------------------------------------------------------
 !Take care of non-local part
 
- ABI_ALLOCATE(ekb_tmp,(mpsang))
- ABI_ALLOCATE(ffspl_tmp,(mqgrid,2,mpsang))
+ ABI_MALLOC(ekb_tmp,(mpsang))
+ ABI_MALLOC(ffspl_tmp,(mqgrid,2,mpsang))
 
 !Zero out all Kleinman-Bylander energies to initialize
  ekb_tmp(:)=zero
@@ -314,12 +314,12 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    end if
  end do
 
- ABI_DEALLOCATE(ekb_tmp)
- ABI_DEALLOCATE(ffspl_tmp)
- ABI_DEALLOCATE(vpspll)
- ABI_DEALLOCATE(rad)
- ABI_DEALLOCATE(vloc)
- ABI_DEALLOCATE(wfll)
+ ABI_FREE(ekb_tmp)
+ ABI_FREE(ffspl_tmp)
+ ABI_FREE(vpspll)
+ ABI_FREE(rad)
+ ABI_FREE(vloc)
+ ABI_FREE(wfll)
 
  return
 
@@ -384,18 +384,18 @@ subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
 
 !**********************************************************************
 
- ABI_ALLOCATE(ff,(mmax))
- ABI_ALLOCATE(ff1,(mmax))
- ABI_ALLOCATE(ff2,(mmax))
- ABI_ALLOCATE(ff3,(mmax))
- ABI_ALLOCATE(rad,(mmax))
- ABI_ALLOCATE(gg,(n1xccc))
- ABI_ALLOCATE(gg1,(n1xccc))
- ABI_ALLOCATE(gg2,(n1xccc))
- ABI_ALLOCATE(gg3,(n1xccc))
- ABI_ALLOCATE(gg4,(n1xccc))
- ABI_ALLOCATE(work,(n1xccc))
- ABI_ALLOCATE(xx,(n1xccc))
+ ABI_MALLOC(ff,(mmax))
+ ABI_MALLOC(ff1,(mmax))
+ ABI_MALLOC(ff2,(mmax))
+ ABI_MALLOC(ff3,(mmax))
+ ABI_MALLOC(rad,(mmax))
+ ABI_MALLOC(gg,(n1xccc))
+ ABI_MALLOC(gg1,(n1xccc))
+ ABI_MALLOC(gg2,(n1xccc))
+ ABI_MALLOC(gg3,(n1xccc))
+ ABI_MALLOC(gg4,(n1xccc))
+ ABI_MALLOC(work,(n1xccc))
+ ABI_MALLOC(xx,(n1xccc))
 
 !read from pp file the model core charge (ff) and first (ff1) and
 !second (ff2) derivative on logarithmic mesh mmax; rad is the radial grid
@@ -410,11 +410,11 @@ subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
 
 !Optional output: VHartree(tild_[n_Z+n_core])
  if (present(vh_tnzc)) then
-   ABI_ALLOCATE(nc,(mmax))
+   ABI_MALLOC(nc,(mmax))
    nc=ff ! n_core
    call psden(1,ff,mmax,nc,rchrg,rad,ff1=ff1,ff2=ff2)
    call vhtnzc(ff,rchrg,vh_tnzc,mmax,rad,znucl)
-   ABI_DEALLOCATE(nc)
+   ABI_FREE(nc)
  end if
 
  rad(1)=zero
@@ -503,18 +503,18 @@ subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
 !stop
 !ENDDEBUG
 
- ABI_DEALLOCATE(ff)
- ABI_DEALLOCATE(ff1)
- ABI_DEALLOCATE(ff2)
- ABI_DEALLOCATE(ff3)
- ABI_DEALLOCATE(gg)
- ABI_DEALLOCATE(gg1)
- ABI_DEALLOCATE(gg2)
- ABI_DEALLOCATE(gg3)
- ABI_DEALLOCATE(gg4)
- ABI_DEALLOCATE(rad)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(xx)
+ ABI_FREE(ff)
+ ABI_FREE(ff1)
+ ABI_FREE(ff2)
+ ABI_FREE(ff3)
+ ABI_FREE(gg)
+ ABI_FREE(gg1)
+ ABI_FREE(gg2)
+ ABI_FREE(gg3)
+ ABI_FREE(gg4)
+ ABI_FREE(rad)
+ ABI_FREE(work)
+ ABI_FREE(xx)
 
  return
 
@@ -582,7 +582,7 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
 
  rc1=rc/four
 
- ABI_ALLOCATE(fpir,(mesh))
+ ABI_MALLOC(fpir,(mesh))
  fpir(1:mesh)=four_pi*rad(1:mesh)**2
  if (ilog==1) fpir(1:mesh)=fpir(1:mesh)*rad(1:mesh)
 
@@ -651,14 +651,14 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
  if (present(ff2)) ff2(1:nc1)=-(two*bb+12.0_dp*cc*rad(1:nc1)**2)*ff(1:nc1) &
 & +(two*bb*rad(1:nc1)+four*cc*rad(1:nc1)**3)**2*ff(1:nc1)
 
- ABI_ALLOCATE(gg,(mesh))
+ ABI_MALLOC(gg,(mesh))
  gg(1:mesh)=fpir(1:mesh)*ff(1:mesh)
  call ctrap(mesh,gg(1:mesh),step,norm1)
  if (ilog==1) norm1=norm1+half*gg(1)
  !write(std_out,*) 'psden: tild_nc integral= ',norm1
- ABI_DEALLOCATE(gg)
+ ABI_FREE(gg)
 
- ABI_DEALLOCATE(fpir)
+ ABI_FREE(fpir)
 
 end subroutine psden
 !!***
@@ -716,28 +716,28 @@ subroutine vhtnzc(nc,rc,vh_tnzc,mesh,rad,znucl)
  nc1=int(log(rc1/rad(1))/step)+1
  rc1=rad(nc1)
 
- ABI_ALLOCATE(shapefunc,(mesh))
+ ABI_MALLOC(shapefunc,(mesh))
  shapefunc(1)=one
  shapefunc(2:nc1)=(sin(pi*rad(2:nc1)/rc1)/(pi*rad(2:nc1)/rc1))**2
  if (nc1<mesh) shapefunc(nc1+1:mesh)=zero
 
- ABI_ALLOCATE(den1,(mesh))
+ ABI_MALLOC(den1,(mesh))
  den1(1:mesh)=four_pi*shapefunc(1:mesh)*rad(1:mesh)**3
  call ctrap(mesh,den1,step,gnorm)
  gnorm =one/gnorm
- ABI_DEALLOCATE(den1)
+ ABI_FREE(den1)
 
- ABI_ALLOCATE(nzc,(mesh))
+ ABI_MALLOC(nzc,(mesh))
  nzc(1:mesh)=four*pi*nc(1:mesh)*rad(1:mesh)**2-four_pi*shapefunc(1:mesh)*rad(1:mesh)**2*znucl*gnorm
- ABI_DEALLOCATE(shapefunc)
+ ABI_FREE(shapefunc)
 
- ABI_ALLOCATE(rvhn,(mesh))
+ ABI_MALLOC(rvhn,(mesh))
  rvhn(1)=zero
 
- ABI_ALLOCATE(den1,(mesh))
- ABI_ALLOCATE(den2,(mesh))
- ABI_ALLOCATE(den3,(mesh))
- ABI_ALLOCATE(den4,(mesh))
+ ABI_MALLOC(den1,(mesh))
+ ABI_MALLOC(den2,(mesh))
+ ABI_MALLOC(den3,(mesh))
+ ABI_MALLOC(den4,(mesh))
 
  den1(1)=zero;den2(1)=zero
  do ir=2,mesh
@@ -756,10 +756,10 @@ subroutine vhtnzc(nc,rc,vh_tnzc,mesh,rad,znucl)
    rvhn(ir)=den3(ir)+rad(ir)*(den4(mesh)-den4(ir))
  end do
 
- ABI_DEALLOCATE(den1)
- ABI_DEALLOCATE(den2)
- ABI_DEALLOCATE(den3)
- ABI_DEALLOCATE(den4)
+ ABI_FREE(den1)
+ ABI_FREE(den2)
+ ABI_FREE(den3)
+ ABI_FREE(den4)
 
  vh_tnzc(2:mesh)=rvhn(2:mesh)/rad(2:mesh)
  yp2=(vh_tnzc(3)-vh_tnzc(2))/(rad(3)-rad(2))
@@ -767,8 +767,8 @@ subroutine vhtnzc(nc,rc,vh_tnzc,mesh,rad,znucl)
  yp1=yp2+(yp2-yp3)*rad(2)/(rad(3)-rad(2))
  vh_tnzc(1)=vh_tnzc(2)-(yp1+yp2)*rad(2)
 
- ABI_DEALLOCATE(nzc)
- ABI_DEALLOCATE(rvhn)
+ ABI_FREE(nzc)
+ ABI_FREE(rvhn)
 
 end subroutine vhtnzc
 !!***
@@ -823,10 +823,10 @@ subroutine psp6cc_drh(mmax,n1xccc,rchrg,xccc1d)
 
 !**********************************************************************
 
- ABI_ALLOCATE(ff,(mmax))
- ABI_ALLOCATE(ff1,(mmax))
- ABI_ALLOCATE(ff2,(mmax))
- ABI_ALLOCATE(rad,(mmax))
+ ABI_MALLOC(ff,(mmax))
+ ABI_MALLOC(ff1,(mmax))
+ ABI_MALLOC(ff2,(mmax))
+ ABI_MALLOC(rad,(mmax))
 
 !
 !read from pp file the model core charge (ff) and first (ff1) and
@@ -844,10 +844,10 @@ subroutine psp6cc_drh(mmax,n1xccc,rchrg,xccc1d)
 
  call cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
 
- ABI_DEALLOCATE(ff)
- ABI_DEALLOCATE(ff1)
- ABI_DEALLOCATE(ff2)
- ABI_DEALLOCATE(rad)
+ ABI_FREE(ff)
+ ABI_FREE(ff1)
+ ABI_FREE(ff2)
+ ABI_FREE(rad)
 
  return
 

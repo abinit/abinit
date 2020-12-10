@@ -173,7 +173,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  write(msg, '(3f20.14,t64,a)' ) rchrg,fchrg,qchrg,'rchrg,fchrg,qchrg'
  call wrtout([std_out, ab_out], msg)
 
- ABI_ALLOCATE(nproj_tmp,(mpssoang))
+ ABI_MALLOC(nproj_tmp,(mpssoang))
 
  nproj_tmp(:)=0
  read (tmp_unit,*, err=10, iomsg=errmsg) nproj_tmp(1:lmax+1)
@@ -266,9 +266,9 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  end if
 
 !Can now allocate grids, potentials and projectors
- ABI_ALLOCATE(rad,(mmax))
- ABI_ALLOCATE(vloc,(mmax))
- ABI_ALLOCATE(vpspll,(mmax,lnmax))
+ ABI_MALLOC(rad,(mmax))
+ ABI_MALLOC(vloc,(mmax))
+ ABI_MALLOC(vpspll,(mmax,lnmax))
 
 !Will now proceed at the reading of pots and projectors
 
@@ -377,10 +377,10 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  call psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,vlspl(:,1),rad,vloc,yp1,ypn,zion)
 
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_ALLOCATE(work_spl,(mqgrid))
+ ABI_MALLOC(work_spl,(mqgrid))
  call spline (qgrid,vlspl(:,1),mqgrid,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
- ABI_DEALLOCATE(work_spl)
+ ABI_FREE(work_spl)
 
 !!  DEBUG
 ! write(std_out,*)'# Vlocal = '
@@ -478,10 +478,10 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    call pawrad_free(mesh)
  end if
 
- ABI_DEALLOCATE(vpspll)
- ABI_DEALLOCATE(vloc)
- ABI_DEALLOCATE(rad)
- ABI_DEALLOCATE(nproj_tmp)
+ ABI_FREE(vpspll)
+ ABI_FREE(vloc)
+ ABI_FREE(rad)
+ ABI_FREE(nproj_tmp)
 
  return
 
@@ -538,8 +538,8 @@ subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
 
 !**********************************************************************
 
- ABI_ALLOCATE(ff,(mmax,5))
- ABI_ALLOCATE(rad,(mmax))
+ ABI_MALLOC(ff,(mmax,5))
+ ABI_MALLOC(rad,(mmax))
 
  pi4i=quarter/pi
 !
@@ -617,8 +617,8 @@ subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
 !5th derivative is apparently not in use, so set to zero
  xccc1d(:,6)=zero
 
- ABI_DEALLOCATE(ff)
- ABI_DEALLOCATE(rad)
+ ABI_FREE(ff)
+ ABI_FREE(rad)
 
  return
 

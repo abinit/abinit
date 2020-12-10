@@ -101,10 +101,10 @@ integer :: nwork
  lbfgs_plan%iter   = 0
  lbfgs_plan%ndim = ndim
  lbfgs_plan%history_record = history_record
- ABI_ALLOCATE(lbfgs_plan%diag,(ndim))
+ ABI_MALLOC(lbfgs_plan%diag,(ndim))
 
  nwork = ndim * ( 2 * history_record + 1 ) + 2 * history_record
- ABI_ALLOCATE(lbfgs_plan%work,(nwork))
+ ABI_MALLOC(lbfgs_plan%work,(nwork))
 
  lbfgs_plan%gtol = 0.9
  lbfgs_plan%line_stpmin = 1.0e-20
@@ -140,10 +140,10 @@ end subroutine lbfgs_init
 subroutine lbfgs_destroy()
 
  if(allocated (lbfgs_plan%work)) then
-   ABI_DEALLOCATE(lbfgs_plan%work)
+   ABI_FREE(lbfgs_plan%work)
  end if
  if(allocated (lbfgs_plan%diag)) then
-   ABI_DEALLOCATE(lbfgs_plan%diag)
+   ABI_FREE(lbfgs_plan%diag)
  end if
 
 end subroutine lbfgs_destroy

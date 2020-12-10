@@ -264,7 +264,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !Save eshift
  if(wfoptalg==3)then
    eshift=zshift(1)
-   ABI_ALLOCATE(eig_save,(nband_k))
+   ABI_MALLOC(eig_save,(nband_k))
    eig_save(:)=eshift
  end if
 
@@ -288,34 +288,34 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then
    !chebfi already does this stuff inside
-   ABI_ALLOCATE(evec,(2*nband_k,nband_k))
-   ABI_ALLOCATE(subham,(nband_k*(nband_k+1)))
+   ABI_MALLOC(evec,(2*nband_k,nband_k))
+   ABI_MALLOC(subham,(nband_k*(nband_k+1)))
 
-   ABI_ALLOCATE(subvnlx,(0))
-   ABI_ALLOCATE(totvnlx,(0,0))
+   ABI_MALLOC(subvnlx,(0))
+   ABI_MALLOC(totvnlx,(0,0))
    if (wfopta10==4) then
 !    Later, will have to generalize to Fock case, like when wfopta10/=4
      if (gs_hamk%usepaw==0) then
-       ABI_DEALLOCATE(totvnlx)
+       ABI_FREE(totvnlx)
        if (istwf_k==1) then
-         ABI_ALLOCATE(totvnlx,(2*nband_k,nband_k))
+         ABI_MALLOC(totvnlx,(2*nband_k,nband_k))
        else if (istwf_k==2) then
-         ABI_ALLOCATE(totvnlx,(nband_k,nband_k))
+         ABI_MALLOC(totvnlx,(nband_k,nband_k))
        end if
        use_totvnlx=1
      endif
    else
      if (gs_hamk%usepaw==0 .or. has_fock) then
-       ABI_DEALLOCATE(subvnlx)
-       ABI_ALLOCATE(subvnlx,(nband_k*(nband_k+1)))
+       ABI_FREE(subvnlx)
+       ABI_MALLOC(subvnlx,(nband_k*(nband_k+1)))
        use_subvnlx=1
      end if
    end if
 
    if (use_subovl==1) then
-     ABI_ALLOCATE(subovl,(nband_k*(nband_k+1)))
+     ABI_MALLOC(subovl,(nband_k*(nband_k+1)))
    else
-     ABI_ALLOCATE(subovl,(0))
+     ABI_MALLOC(subovl,(0))
    end if
  end if
 
@@ -578,7 +578,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  if(iscf>0 .and. fixed_occ)  then
-   ABI_ALLOCATE(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
+   ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
  end if
 
 !"nonlop" routine input parameters
@@ -598,19 +598,19 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
- ABI_ALLOCATE(enlout,(nnlout*blocksize))
+ ABI_MALLOC(enlout,(nnlout*blocksize))
 
 !Allocation of memory space for one WF
- ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
+ ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
  if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
    iorder_cprj=0
    nband_k_cprj=nband_k*(mband_cprj/dtset%mband)
    bandpp_cprj=mpi_enreg%bandpp
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp_cprj))
+   ABI_MALLOC(cwaveprj,(natom,my_nspinor*bandpp_cprj))
    ncpgr=0;if (cpopt==1) ncpgr=cprj(1,1)%ncpgr
    call pawcprj_alloc(cwaveprj,ncpgr,gs_hamk%dimcprj)
  else
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
+   ABI_MALLOC(cwaveprj,(0,0))
  end if
 
 !The code below is more efficient if paral_kgb==1 (less MPI communications)
@@ -661,7 +661,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &         tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
          if(dtset%nspinor==2)then
-           ABI_ALLOCATE(cwavef1,(2,npw_k))
+           ABI_MALLOC(cwavef1,(2,npw_k))
            cwavef1(:,:)=cwavef(:,1+npw_k:2*npw_k) ! EB FR spin dn part and used for m_z component (cwavef_z)
 
            if(dtset%nspden==1) then
@@ -677,8 +677,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
              ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
              ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
-             ABI_ALLOCATE(cwavef_x,(2,npw_k))
-             ABI_ALLOCATE(cwavef_y,(2,npw_k))
+             ABI_MALLOC(cwavef_x,(2,npw_k))
+             ABI_MALLOC(cwavef_y,(2,npw_k))
              !$(\Psi^{1}+\Psi^{2})$
              cwavef_x(:,:)=cwavef(:,1:npw_k)+cwavef1(:,1:npw_k)
              !$(\Psi^{1}-i \Psi^{2})$
@@ -700,11 +700,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
 &             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
-             ABI_DEALLOCATE(cwavef_x)
-             ABI_DEALLOCATE(cwavef_y)
+             ABI_FREE(cwavef_x)
+             ABI_FREE(cwavef_y)
 
            end if ! dtset%nspden/=4
-           ABI_DEALLOCATE(cwavef1)
+           ABI_FREE(cwavef1)
          end if
        else
          nskip=nskip+1
@@ -721,7 +721,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &         1,gs_hamk%ucvol,wtk,use_gpu_cuda=dtset%use_gpu_cuda)
          call timab(537,2,tsec)
        else if (dtset%nspinor==2) then
-         ABI_ALLOCATE(cwavefb,(2,npw_k*blocksize,2))
+         ABI_MALLOC(cwavefb,(2,npw_k*blocksize,2))
          ibs=(iblock-1)*npw_k*my_nspinor*blocksize+icg
 !        --- No parallelization over spinors ---
          if (mpi_enreg%paral_spinor==0) then
@@ -754,8 +754,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &             gs_hamk%ucvol,wtk,use_gpu_cuda=dtset%use_gpu_cuda)
            end if
          else if(dtset%nspden==4) then
-           ABI_ALLOCATE(cwavef_x,(2,npw_k*blocksize))
-           ABI_ALLOCATE(cwavef_y,(2,npw_k*blocksize))
+           ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
+           ABI_MALLOC(cwavef_y,(2,npw_k*blocksize))
            cwavef_x(:,:)=cwavefb(:,1:npw_k*blocksize,1)+cwavefb(:,:,2)
            cwavef_y(1,:)=cwavefb(1,1:npw_k*blocksize,1)+cwavefb(2,:,2)
            cwavef_y(2,:)=cwavefb(2,:,1)-cwavefb(1,:,2)
@@ -775,11 +775,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &             npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
 &             use_gpu_cuda=dtset%use_gpu_cuda)
            end if
-           ABI_DEALLOCATE(cwavef_x)
-           ABI_DEALLOCATE(cwavef_y)
+           ABI_FREE(cwavef_x)
+           ABI_FREE(cwavef_y)
          end if
          call timab(537,2,tsec)
-         ABI_DEALLOCATE(cwavefb)
+         ABI_FREE(cwavefb)
        end if
      end if
    end if ! End of SCF calculation
@@ -839,16 +839,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end do !  End of loop on blocks
  !call cwtime_report(" Block loop", cpu, wall, gflops)
 
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(enlout)
+ ABI_FREE(cwavef)
+ ABI_FREE(enlout)
 
  if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
    call pawcprj_free(cwaveprj)
  end if
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
+ ABI_FREE(cwaveprj)
 
  if (fixed_occ.and.iscf>0) then
-   ABI_DEALLOCATE(wfraug)
+   ABI_FREE(wfraug)
  end if
 
 !Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers
@@ -928,17 +928,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
  if(wfopta10 /= 1 .and. .not. newlobpcg) then
-   ABI_DEALLOCATE(evec)
-   ABI_DEALLOCATE(subham)
-   ABI_DEALLOCATE(totvnlx)
-   ABI_DEALLOCATE(subvnlx)
-   ABI_DEALLOCATE(subovl)
+   ABI_FREE(evec)
+   ABI_FREE(subham)
+   ABI_FREE(totvnlx)
+   ABI_FREE(subvnlx)
+   ABI_FREE(subovl)
  end if
 
  ABI_SFREE(gsc)
 
  if(wfoptalg==3) then
-   ABI_DEALLOCATE(eig_save)
+   ABI_FREE(eig_save)
  end if
 
  if (prtvol==-level) then

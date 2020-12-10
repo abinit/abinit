@@ -137,10 +137,10 @@ subroutine dftu_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
    pawtab_ => pawtab(cryst_struc%typat(iatom))
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
-     ABI_ALLOCATE(vpawu,(2,ldim,ldim,nocc))
+     ABI_MALLOC(vpawu,(2,ldim,ldim,nocc))
 
-     ABI_ALLOCATE(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
-     ABI_ALLOCATE(nocctot,(nocc))
+     ABI_MALLOC(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
+     ABI_MALLOC(nocctot,(nocc))
      noccmmp(:,:,:,:)=zero ; nocctot(:)=zero ! contains nmmp in the n m representation
 
 !    ===============================
@@ -255,14 +255,14 @@ subroutine dftu_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
 
      end do ! idijeff
 !    write(std_out,*) "check im,im1 in vpawu",iatom
-     ABI_DEALLOCATE(vpawu)
+     ABI_FREE(vpawu)
 
 !    ===============================
 !    Compute energy
 !    ===============================
 
-     ABI_DEALLOCATE(noccmmp)
-     ABI_DEALLOCATE(nocctot)
+     ABI_FREE(noccmmp)
+     ABI_FREE(nocctot)
    end if
  end do
 

@@ -170,10 +170,10 @@ subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu)
   lpawu=lpawu_natom(iatom)
   matlu(iatom)%lpawu=lpawu
   if(lpawu.ne.-1) then
-   ABI_ALLOCATE(matlu(iatom)%mat,(2*lpawu+1,2*lpawu+1,nsppol,nspinor,nspinor))
+   ABI_MALLOC(matlu(iatom)%mat,(2*lpawu+1,2*lpawu+1,nsppol,nspinor,nspinor))
    matlu(iatom)%mat=czero
   else
-   ABI_ALLOCATE(matlu(iatom)%mat,(0,0,nsppol,nspinor,nspinor))
+   ABI_MALLOC(matlu(iatom)%mat,(0,0,nsppol,nspinor,nspinor))
   endif
  enddo
 
@@ -283,7 +283,7 @@ subroutine destroy_matlu(matlu,natom)
 
  do iatom=1,natom
   if ( allocated(matlu(iatom)%mat) )   then
-    ABI_DEALLOCATE(matlu(iatom)%mat)
+    ABI_FREE(matlu(iatom)%mat)
   end if
  enddo
 
@@ -506,7 +506,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
          end do ! ispinor1
        end do ! ispinor
        if(nspinor==2.and.prtopt>=5) then
-         ABI_DATATYPE_ALLOCATE(matlu_tmp,(0:natom))
+         ABI_MALLOC(matlu_tmp,(0:natom))
          call init_matlu(natom,nspinor,nsppol,matlu(1:natom)%lpawu,matlu_tmp)
          matlu_tmp(iatom)%mat(m1,m,isppol,1,1)= matlu(iatom)%mat(m1,m,isppol,1,1)+matlu(iatom)%mat(m1,m,isppol,2,2)
          matlu_tmp(iatom)%mat(m1,m,isppol,2,2)= matlu(iatom)%mat(m1,m,isppol,1,1)+matlu(iatom)%mat(m1,m,isppol,2,2)
@@ -522,7 +522,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
            end do ! ispinor1
          end do ! ispinor
          call destroy_matlu(matlu_tmp,natom)
-         ABI_DATATYPE_DEALLOCATE(matlu_tmp)
+         ABI_FREE(matlu_tmp)
        endif
      enddo ! isppol
 !     if(nsppol==1.and.nspinor==1) then
@@ -614,9 +614,9 @@ end subroutine print_matlu
  nsppol=gloc(1)%nsppol
  natom=cryst_struc%natom
 
- ABI_DATATYPE_ALLOCATE(glocnm,(natom))
- ABI_DATATYPE_ALLOCATE(glocnms,(natom))
- ABI_DATATYPE_ALLOCATE(glocsym,(natom))
+ ABI_MALLOC(glocnm,(natom))
+ ABI_MALLOC(glocnms,(natom))
+ ABI_MALLOC(glocsym,(natom))
  call init_matlu(natom,nspinor,nsppol,gloc(1:natom)%lpawu,glocnm)
  call init_matlu(natom,nspinor,nsppol,gloc(1:natom)%lpawu,glocnms)
  call init_matlu(natom,nspinor,nsppol,gloc(1:natom)%lpawu,glocsym)
@@ -690,15 +690,15 @@ end subroutine print_matlu
   do iatom=1,cryst_struc%natom
    if(gloc(iatom)%lpawu/=-1) then
     ndim=2*gloc(iatom)%lpawu+1
-    ABI_DEALLOCATE(glocnm(iatom)%mat)
-    ABI_DEALLOCATE(glocnms(iatom)%mat)
-    ABI_DEALLOCATE(glocsym(iatom)%mat)
-    ABI_ALLOCATE(glocnm(iatom)%mat,(ndim,ndim,nsppol,4,1))
-    ABI_ALLOCATE(glocnms(iatom)%mat,(ndim,ndim,nsppol,4,1))
-    ABI_ALLOCATE(glocsym(iatom)%mat,(ndim,ndim,nsppol,2,2))
+    ABI_FREE(glocnm(iatom)%mat)
+    ABI_FREE(glocnms(iatom)%mat)
+    ABI_FREE(glocsym(iatom)%mat)
+    ABI_MALLOC(glocnm(iatom)%mat,(ndim,ndim,nsppol,4,1))
+    ABI_MALLOC(glocnms(iatom)%mat,(ndim,ndim,nsppol,4,1))
+    ABI_MALLOC(glocsym(iatom)%mat,(ndim,ndim,nsppol,2,2))
    endif
   enddo
-  ABI_ALLOCATE(symrec_cart,(3,3,cryst_struc%nsym))
+  ABI_MALLOC(symrec_cart,(3,3,cryst_struc%nsym))
 
 !==  Compute symrec_cart
   do irot=1,cryst_struc%nsym
@@ -788,15 +788,15 @@ end subroutine print_matlu
     endif
   end do ! iatom
 
-  ABI_DEALLOCATE(symrec_cart)
+  ABI_FREE(symrec_cart)
  endif
 
  call destroy_matlu(glocnm,cryst_struc%natom)
  call destroy_matlu(glocnms,cryst_struc%natom)
  call destroy_matlu(glocsym,cryst_struc%natom)
- ABI_DATATYPE_DEALLOCATE(glocnm)
- ABI_DATATYPE_DEALLOCATE(glocnms)
- ABI_DATATYPE_DEALLOCATE(glocsym)
+ ABI_FREE(glocnm)
+ ABI_FREE(glocnms)
+ ABI_FREE(glocsym)
 !==============end of nspinor==2 case ===========
 
 
@@ -860,11 +860,11 @@ end subroutine print_matlu
  nsppol=matlu(1)%nsppol
  if(prtopt>0) then
  endif
- ABI_DATATYPE_ALLOCATE(gathermatlu,(natom))
+ ABI_MALLOC(gathermatlu,(natom))
  do iatom=1,natom
    if(matlu(iatom)%lpawu.ne.-1) then
      tndim=nsppol*nspinor*(2*matlu(iatom)%lpawu+1)
-     ABI_ALLOCATE(gathermatlu(iatom)%value,(tndim,tndim))
+     ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
      gathermatlu(iatom)%value=czero
    endif
  enddo
@@ -881,10 +881,10 @@ end subroutine print_matlu
 
  do iatom=1,natom
    if(matlu(iatom)%lpawu.ne.-1) then
-     ABI_DEALLOCATE(gathermatlu(iatom)%value)
+     ABI_FREE(gathermatlu(iatom)%value)
    endif
  enddo
- ABI_DATATYPE_DEALLOCATE(gathermatlu)
+ ABI_FREE(gathermatlu)
  end subroutine inverse_matlu
 !!***
 
@@ -1231,7 +1231,7 @@ end subroutine add_matlu
  if(present(trace_loc)) then
    traceloc=>trace_loc
  else
-   ABI_ALLOCATE(traceloc,(natom,matlu(1)%nsppol+1))
+   ABI_MALLOC(traceloc,(natom,matlu(1)%nsppol+1))
  endif
 
  traceloc=zero
@@ -1280,7 +1280,7 @@ end subroutine add_matlu
    endif
  enddo
  if(.not.present(trace_loc)) then
-  ABI_DEALLOCATE(traceloc)
+  ABI_FREE(traceloc)
   traceloc => null()
  endif
 
@@ -1553,11 +1553,11 @@ end subroutine add_matlu
 ! ===========================
 ! Define gathermatlu
 ! ===========================
-   ABI_DATATYPE_ALLOCATE(gathermatlu,(natom))
+   ABI_MALLOC(gathermatlu,(natom))
    do iatom=1,natom
      if(matlu(iatom)%lpawu.ne.-1) then
        tndim=nspinor*(2*matlu(iatom)%lpawu+1)
-       ABI_ALLOCATE(gathermatlu(iatom)%value,(tndim,tndim))
+       ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
        gathermatlu(iatom)%value=czero
      endif
    enddo
@@ -1584,22 +1584,22 @@ end subroutine add_matlu
 !debug       allocate(temp_mat2(tndim,tndim))
 !debug       temp_mat2=zero
          lwork=2*tndim-1
-         ABI_ALLOCATE(rwork,(3*tndim-2))
+         ABI_MALLOC(rwork,(3*tndim-2))
          rwork = zero
 
          lworkr=tndim*(tndim+2)*2
-         ABI_ALLOCATE(work,(lworkr))
+         ABI_MALLOC(work,(lworkr))
          work = zero
-         ABI_ALLOCATE(valuer,(tndim,tndim))
-!         ABI_ALLOCATE(valuer2,(tndim,tndim))
-!         ABI_ALLOCATE(valuer3,(tndim,tndim))
-!         ABI_ALLOCATE(valuer4,(tndim,tndim))
-         ABI_ALLOCATE(zwork,(lwork))
+         ABI_MALLOC(valuer,(tndim,tndim))
+!         ABI_MALLOC(valuer2,(tndim,tndim))
+!         ABI_MALLOC(valuer3,(tndim,tndim))
+!         ABI_MALLOC(valuer4,(tndim,tndim))
+         ABI_MALLOC(zwork,(lwork))
 !         valuer2=zero
 !         valuer3=zero
 !         valuer4=zero
          zwork = czero
-         ABI_ALLOCATE(eig,(tndim))
+         ABI_MALLOC(eig,(tndim))
          eig = zero
          info = 0
          if(prtopt>=4) then
@@ -1745,14 +1745,14 @@ end subroutine add_matlu
            !call wrtout(std_out,message,'COLL')
             !write(std_out,*) "EIG", eig
          endif
-         ABI_DEALLOCATE(zwork)
-         ABI_DEALLOCATE(rwork)
-         ABI_DEALLOCATE(work)
-         ABI_DEALLOCATE(valuer)
-!         ABI_DEALLOCATE(valuer2)
-!         ABI_DEALLOCATE(valuer3)
-!         ABI_DEALLOCATE(valuer4)
-         ABI_DEALLOCATE(eig)
+         ABI_FREE(zwork)
+         ABI_FREE(rwork)
+         ABI_FREE(work)
+         ABI_FREE(valuer)
+!         ABI_FREE(valuer2)
+!         ABI_FREE(valuer3)
+!         ABI_FREE(valuer4)
+         ABI_FREE(eig)
 !     endif
 !   enddo
 ! ===========================
@@ -1777,8 +1777,8 @@ end subroutine add_matlu
 ! rotation matrix: it have to be checked afterwards that the matrix is
 ! diagonal
 ! ===================================================================
-         ABI_ALLOCATE(temp_mat,(tndim,tndim))
-         ABI_ALLOCATE(temp_mat2,(tndim,tndim))
+         ABI_MALLOC(temp_mat,(tndim,tndim))
+         ABI_MALLOC(temp_mat2,(tndim,tndim))
          temp_mat(:,:)=czero
 !        input matrix: gathermatlu
 !        rotation matrix: eigvectmatlu
@@ -1839,8 +1839,8 @@ end subroutine add_matlu
              ABI_ERROR("iatom==2")
            end if
          endif
-         ABI_DEALLOCATE(temp_mat)
-         ABI_DEALLOCATE(temp_mat2)
+         ABI_FREE(temp_mat)
+         ABI_FREE(temp_mat2)
        endif
 
 
@@ -1885,10 +1885,10 @@ end subroutine add_matlu
    do iatom=1,natom
      if(matlu(iatom)%lpawu.ne.-1) then
 !debug       deallocate(temp_mat2)
-       ABI_DEALLOCATE(gathermatlu(iatom)%value)
+       ABI_FREE(gathermatlu(iatom)%value)
      endif
    enddo
-   ABI_DATATYPE_DEALLOCATE(gathermatlu)
+   ABI_FREE(gathermatlu)
  enddo ! isppol
 
  end subroutine diag_matlu
@@ -1954,23 +1954,23 @@ end subroutine add_matlu
  endif
  nsppol=matlu(1)%nsppol
  nspinor=matlu(1)%nspinor
-! ABI_DATATYPE_ALLOCATE(rot_mat_orig,(natom,matlu(1)%nsppol))
+! ABI_MALLOC(rot_mat_orig,(natom,matlu(1)%nsppol))
 
  do isppol=1,nsppol
 
 ! ===========================
 ! Define gathermatlu and rot_mat_orig and allocate
 ! ===========================
-   ABI_DATATYPE_ALLOCATE(rot_mat_orig,(natom))
-   ABI_DATATYPE_ALLOCATE(gathermatlu,(natom))
+   ABI_MALLOC(rot_mat_orig,(natom))
+   ABI_MALLOC(gathermatlu,(natom))
    do iatom=1,natom
      if(matlu(iatom)%lpawu.ne.-1) then
        tndim=nspinor*(2*matlu(iatom)%lpawu+1)
-       ABI_ALLOCATE(gathermatlu(iatom)%value,(tndim,tndim))
+       ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
        gathermatlu(iatom)%value=czero
-!       ABI_ALLOCATE(rot_mat_orig(iatom,isppol)%value,(tndim,tndim))
+!       ABI_MALLOC(rot_mat_orig(iatom,isppol)%value,(tndim,tndim))
 !       rot_mat_orig(iatom,isppol)%value(:,:)=rot_mat(iatom,isppol)%value(:,:)
-       ABI_ALLOCATE(rot_mat_orig(iatom)%value,(tndim,tndim))
+       ABI_MALLOC(rot_mat_orig(iatom)%value,(tndim,tndim))
        rot_mat_orig(iatom)%value(:,:)=rot_mat(iatom,isppol)%value(:,:)
      endif
    enddo
@@ -2026,7 +2026,7 @@ end subroutine add_matlu
 ! ===========================
 ! Rotate
 ! ===========================
-   ABI_ALLOCATE(temp_mat,(tndim,tndim))
+   ABI_MALLOC(temp_mat,(tndim,tndim))
    do iatom=1,natom
      if(matlu(iatom)%lpawu.ne.-1) then
        tndim=nspinor*(2*matlu(iatom)%lpawu+1)
@@ -2063,7 +2063,7 @@ end subroutine add_matlu
    !    end do
    !  endif
    !enddo
-   ABI_DEALLOCATE(temp_mat)
+   ABI_FREE(temp_mat)
      !ABI_ERROR("Aborting now")
 
 ! Choose inverse rotation: reconstruct correct rot_mat from rot_mat_orig
@@ -2103,13 +2103,13 @@ end subroutine add_matlu
 ! ===========================
    do iatom=1,natom
      if(matlu(iatom)%lpawu.ne.-1) then
-       ABI_DEALLOCATE(gathermatlu(iatom)%value)
-!       ABI_DEALLOCATE(rot_mat_orig(iatom,isppol)%value)
-       ABI_DEALLOCATE(rot_mat_orig(iatom)%value)
+       ABI_FREE(gathermatlu(iatom)%value)
+!       ABI_FREE(rot_mat_orig(iatom,isppol)%value)
+       ABI_FREE(rot_mat_orig(iatom)%value)
      endif
    enddo
-   ABI_DATATYPE_DEALLOCATE(gathermatlu)
-   ABI_DATATYPE_DEALLOCATE(rot_mat_orig)
+   ABI_FREE(gathermatlu)
+   ABI_FREE(rot_mat_orig)
  enddo ! isppol
 
  end subroutine rotate_matlu
@@ -2643,7 +2643,7 @@ end subroutine add_matlu
    lpawu=matlu(iatom)%lpawu
    if(lpawu.ne.-1) then
      ll=lpawu
-     ABI_ALLOCATE(slm2ylm,(2*ll+1,2*ll+1))
+     ABI_MALLOC(slm2ylm,(2*ll+1,2*ll+1))
      slm2ylm=czero
      do im=1,2*ll+1
        mm=im-ll-1;jm=-mm+ll+1
@@ -2672,8 +2672,8 @@ end subroutine add_matlu
      do isppol=1,matlu(1)%nsppol
        do ispinor=1,matlu(1)%nspinor
          do ispinor2=1,matlu(1)%nspinor
-           ABI_ALLOCATE(mat_out_c,(2*ll+1,2*ll+1))
-           ABI_ALLOCATE(mat_inp_c,(2*ll+1,2*ll+1))
+           ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1))
+           ABI_MALLOC(mat_inp_c,(2*ll+1,2*ll+1))
            mat_inp_c(:,:) = matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)
            mat_out_c=czero
 
@@ -2716,12 +2716,12 @@ end subroutine add_matlu
            endif
 
            matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)=mat_out_c(:,:)
-           ABI_DEALLOCATE(mat_out_c)
-           ABI_DEALLOCATE(mat_inp_c)
+           ABI_FREE(mat_out_c)
+           ABI_FREE(mat_inp_c)
          enddo ! im
        enddo ! ispinor
      enddo ! isppol
-     ABI_DEALLOCATE(slm2ylm)
+     ABI_FREE(slm2ylm)
    endif ! lpawu
  enddo ! iatom
 

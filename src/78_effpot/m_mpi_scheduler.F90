@@ -147,15 +147,15 @@ contains
     self%ntasks = ntasks
     call xmpi_bcast(self%ntasks, self%master, comm, ierr )
     if (.not. allocated(self%istart_list)) then
-       ABI_ALLOCATE(self%istart_list, (self%nproc))
+       ABI_MALLOC(self%istart_list, (self%nproc))
     end if
 
     if (.not. allocated(self%iend_list)) then
-       ABI_ALLOCATE(self%iend_list, (self%nproc) )
+       ABI_MALLOC(self%iend_list, (self%nproc) )
     end if
 
     if (.not. allocated(self%ntask_list)) then
-       ABI_ALLOCATE(self%ntask_list, (self%nproc))
+       ABI_MALLOC(self%ntask_list, (self%nproc))
     endif
 
     ! number of procs which has one more
@@ -369,13 +369,13 @@ contains
   subroutine mpi_scheduler_t_finalize(self)
     class(mpi_scheduler_t), intent(inout) :: self
     if (allocated(self%istart_list)) then
-       ABI_DEALLOCATE(self%istart_list)
+       ABI_FREE(self%istart_list)
     endif
     if (allocated(self%iend_list)) then
-       ABI_DEALLOCATE(self%iend_list)
+       ABI_FREE(self%iend_list)
     endif
     if (allocated(self%ntask_list)) then
-       ABI_DEALLOCATE(self%ntask_list)
+       ABI_FREE(self%ntask_list)
     endif
   end subroutine mpi_scheduler_t_finalize
 

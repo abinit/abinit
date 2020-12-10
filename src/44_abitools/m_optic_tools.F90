@@ -532,15 +532,15 @@ complex(dpc), allocatable :: eps(:)
  do_linewidth = allocated(EPBSt%linewidth)
 ! TODO: activate this, and remove do_linewidth - always add it in even if 0.
 ! if (.not. allocated(EPBSt%linewidth)) then
-!   ABI_ALLOCATE(EPBSt%linewidth, (1, nstval, my_k2-my_k1+1, nspin))
+!   ABI_MALLOC(EPBSt%linewidth, (1, nstval, my_k2-my_k1+1, nspin))
 !   EPBSt%linewidth = zero
 ! end if
 
 !allocate local arrays
- ABI_ALLOCATE(chi,(nmesh,nspin))
- ABI_ALLOCATE(eps,(nmesh))
- ABI_ALLOCATE(im_refract,(nmesh))
- ABI_ALLOCATE(re_refract,(nmesh))
+ ABI_MALLOC(chi,(nmesh,nspin))
+ ABI_MALLOC(eps,(nmesh))
+ ABI_MALLOC(im_refract,(nmesh))
+ ABI_MALLOC(re_refract,(nmesh))
  ieta=(0._dp,1._dp)*brod
  renorm_factor=1._dp/(omega*dble(nsymcrys))
  ha2ev=13.60569172*2._dp
@@ -960,15 +960,15 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  end if
 
  !allocate local arrays
- ABI_ALLOCATE(px,(nstval,nstval,3,3,3))
- ABI_ALLOCATE(py,(nstval,nstval,3,3,3))
- ABI_ALLOCATE(pz,(nstval,nstval,3,3,3))
- ABI_ALLOCATE(inter2w,(nmesh))
- ABI_ALLOCATE(inter1w,(nmesh))
- ABI_ALLOCATE(intra2w,(nmesh))
- ABI_ALLOCATE(intra1w,(nmesh))
- ABI_ALLOCATE(intra1wS,(nmesh))
- ABI_ALLOCATE(delta,(nstval,nstval,3))
+ ABI_MALLOC(px,(nstval,nstval,3,3,3))
+ ABI_MALLOC(py,(nstval,nstval,3,3,3))
+ ABI_MALLOC(pz,(nstval,nstval,3,3,3))
+ ABI_MALLOC(inter2w,(nmesh))
+ ABI_MALLOC(inter1w,(nmesh))
+ ABI_MALLOC(intra2w,(nmesh))
+ ABI_MALLOC(intra1w,(nmesh))
+ ABI_MALLOC(intra1wS,(nmesh))
+ ABI_MALLOC(delta,(nstval,nstval,3))
 
 !generate the symmetrizing tensor
  sym(:,:,:)=0._dp
@@ -1500,15 +1500,15 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  end if
 
  ! deallocate local arrays
- ABI_DEALLOCATE(px)
- ABI_DEALLOCATE(py)
- ABI_DEALLOCATE(pz)
- ABI_DEALLOCATE(inter2w)
- ABI_DEALLOCATE(inter1w)
- ABI_DEALLOCATE(intra2w)
- ABI_DEALLOCATE(intra1w)
- ABI_DEALLOCATE(intra1wS)
- ABI_DEALLOCATE(delta)
+ ABI_FREE(px)
+ ABI_FREE(py)
+ ABI_FREE(pz)
+ ABI_FREE(inter2w)
+ ABI_FREE(inter1w)
+ ABI_FREE(intra2w)
+ ABI_FREE(intra1w)
+ ABI_FREE(intra1wS)
+ ABI_FREE(delta)
 
 end subroutine nlinopt
 !!***

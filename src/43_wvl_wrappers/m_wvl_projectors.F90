@@ -133,7 +133,7 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
  end if
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
  call createProjectorsArrays(wfs%ks%Lzd%Glr,xcart,wvl%atoms,wfs%ks%orbs,&
  psps%gth_params%radii_cf,wvl_frmult,wvl_frmult,wvl%h(1),wvl%h(2),&
@@ -144,7 +144,7 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
  call wrtout(std_out,message,'COLL')
 
 !Deallocations
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
  if (wvl_debug) then
    call wvl_timing(me,'CrtProjectors ','OF')
@@ -211,22 +211,22 @@ subroutine wvl_projectors_free(proj)
 !    without f_malloc (without memory profiling).
 !    call deallocate_gwf(proj%G(ii))
      if (associated(proj%G(ii)%ndoc)) then
-       ABI_DEALLOCATE(proj%G(ii)%ndoc)
+       ABI_FREE(proj%G(ii)%ndoc)
      end if
      if (associated(proj%G(ii)%nam)) then
-       ABI_DEALLOCATE(proj%G(ii)%nam)
+       ABI_FREE(proj%G(ii)%nam)
      end if
      if (associated(proj%G(ii)%nshell)) then
-       ABI_DEALLOCATE(proj%G(ii)%nshell)
+       ABI_FREE(proj%G(ii)%nshell)
      end if
      if (associated(proj%G(ii)%psiat)) then
-       ABI_DEALLOCATE(proj%G(ii)%psiat)
+       ABI_FREE(proj%G(ii)%psiat)
      end if
      if (associated(proj%G(ii)%xp)) then
-       ABI_DEALLOCATE(proj%G(ii)%xp)
+       ABI_FREE(proj%G(ii)%xp)
      end if
    end do
-   ABI_DATATYPE_DEALLOCATE(proj%G)
+   ABI_FREE(proj%G)
  end if
 
 #else

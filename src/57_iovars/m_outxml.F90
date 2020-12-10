@@ -303,7 +303,7 @@ subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
  write(spacer, "(A,I0)") "A", 2 * level
  write(ab_xml_out, "("//trim(spacer)//",A)") " ", '<geometry>'
 !Compute the cartesian coordinates of atoms
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
 !Ouput the rprimd matrix
  write(ab_xml_out, "("//trim(spacer)//",A)", advance = "NO") " ", '  <rprimd'
@@ -324,7 +324,7 @@ subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
    end do
    write(ab_xml_out, "(A)") ' />'
  end do
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
  write(ab_xml_out, "("//trim(spacer)//",A)") " ", '</geometry>'
 
 end subroutine out_geometry_XML

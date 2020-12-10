@@ -2109,7 +2109,7 @@ endif
        &dtset%nsppol,dtset%wtk,wanibz_in)
      call get_plowannier(wanibz_in,wanibz,dtset)
      call fullbz_plowannier(dtset,kmesh,cryst,pawang,wanibz,wanbz)
-     ABI_DATATYPE_ALLOCATE(rhot1,(sigp%npwx,Qmesh%nibz))
+     ABI_MALLOC(rhot1,(sigp%npwx,Qmesh%nibz))
      do pwx=1,sigp%npwx
        do ibz=1,Qmesh%nibz
          call init_operwan_realspace(wanbz,rhot1(pwx,ibz))
@@ -2196,7 +2196,7 @@ endif
      !   enddo!spin
      ! enddo!ibz
      ! enddo!pwx
-     ! ABI_ALLOCATE(buffer,(dim))
+     ! ABI_MALLOC(buffer,(dim))
      ! nnn=0
      ! do pwx=1,sigp%npwx
      ! do ibz=1,Qmesh%nibz
@@ -2260,7 +2260,7 @@ endif
      !   enddo!spin
      ! enddo!ibz
      ! enddo!pwx
-     ! ABI_DEALLOCATE(buffer)
+     ! ABI_FREE(buffer)
    endif
 
    !close(67)
@@ -2320,7 +2320,7 @@ endif
          call destroy_operwan_realspace(wanbz,rhot1(pwx,ibz))
        enddo
      enddo
-     ABI_DATATYPE_DEALLOCATE(rhot1)
+     ABI_FREE(rhot1)
      call destroy_plowannier(wanbz)
    endif
    ABI_FREE(rhot1_q_m)
@@ -2368,7 +2368,7 @@ endif
 &         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
-       ABI_DEALLOCATE(sigcme_k)
+       ABI_FREE(sigcme_k)
 
      end do
    end if
@@ -2396,7 +2396,7 @@ endif
 
 !    call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_p,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
      call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_k,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
-     ABI_DEALLOCATE(sigcme_k)
+     ABI_FREE(sigcme_k)
      !
      ! Calculate direct gap for each spin and print out final results.
      ! We use the valence index of the KS system because we still do not know
@@ -4086,7 +4086,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 &      + Dtset%rhoqpmix * (QP_pawrhoij(iat)%rhoij_ - prev_pawrhoij(iat)%rhoij_)
 
      prev_pawrhoij(iat)%use_rhoij_=0
-     ABI_DEALLOCATE(prev_pawrhoij(iat)%rhoij_)
+     ABI_FREE(prev_pawrhoij(iat)%rhoij_)
    end do
    !
    ! * Re-Symmetrize mixed QP $\rho_{ij}$.
@@ -4098,7 +4098,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 
  do iat=1,Cryst%natom
    QP_pawrhoij(iat)%use_rhoij_=0
-   ABI_DEALLOCATE(QP_pawrhoij(iat)%rhoij_)
+   ABI_FREE(QP_pawrhoij(iat)%rhoij_)
  end do
  !
  ! =================================================================================

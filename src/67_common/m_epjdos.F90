@@ -954,10 +954,10 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  values = czero
 
  my_nspinor = max(1,nspinor/mpi_enreg%nproc_spinor)
- ABI_ALLOCATE(tmppsia, (npw_k,my_nspinor))
- ABI_ALLOCATE(tmppsim, (npw_k,my_nspinor))
- ABI_ALLOCATE(dotc, (my_nspinor))
- ABI_ALLOCATE(ispinors, (my_nspinor))
+ ABI_MALLOC(tmppsia, (npw_k,my_nspinor))
+ ABI_MALLOC(tmppsim, (npw_k,my_nspinor))
+ ABI_MALLOC(dotc, (my_nspinor))
+ ABI_MALLOC(ispinors, (my_nspinor))
  if (my_nspinor == 2) then
    ispinors(1) = 1
    ispinors(2) = 2
@@ -1106,10 +1106,10 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
    end do ! ilm
  end do ! iat
 
- ABI_DEALLOCATE(tmppsia)
- ABI_DEALLOCATE(tmppsim)
- ABI_DEALLOCATE(dotc)
- ABI_DEALLOCATE(ispinors)
+ ABI_FREE(tmppsia)
+ ABI_FREE(tmppsim)
+ ABI_FREE(dotc)
+ ABI_FREE(ispinors)
 
  ! Collect results in comm_pw (data are distributed over plane waves)
  call xmpi_sum(values, mpi_enreg%comm_bandfft, ierr)
@@ -1315,21 +1315,21 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !-----------------------------------------------------------------
 !inverse FFT of wavefunction to real space => density in real space
 !-----------------------------------------------------------------
- ABI_ALLOCATE(gbound,(2*mgfft+8,2))
+ ABI_MALLOC(gbound,(2*mgfft+8,2))
  call sphereboundary(gbound,istwfk,kg_k,mgfft,npw_k)
 
  weight = one
  cplex=1
- ABI_ALLOCATE(denpot,(cplex*n4,n5,n6))
+ ABI_MALLOC(denpot,(cplex*n4,n5,n6))
  denpot(:,:,:)=zero
- ABI_ALLOCATE(fofgout,(2,npw_k))
- ABI_ALLOCATE(fofr,(2,n4,n5,n6))
+ ABI_MALLOC(fofgout,(2,npw_k))
+ ABI_MALLOC(fofr,(2,n4,n5,n6))
  call fourwf(cplex,denpot,cg,fofgout,fofr,gbound,gbound, &
 & istwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft_here,npw_k,&
 & npw_k,n4,n5,n6,1,tim_fourwf,weight,weight)
- ABI_DEALLOCATE(fofgout)
- ABI_DEALLOCATE(fofr)
- ABI_DEALLOCATE(gbound)
+ ABI_FREE(fofgout)
+ ABI_FREE(fofr)
+ ABI_FREE(gbound)
 
  norm = sum(denpot(:,:,:))/nfftot
  if (abs(one-norm) > tol6) then
@@ -1341,14 +1341,14 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !-----------------------------------------------------------------
 
 !Change the packing of the reciprocal space density
- ABI_ALLOCATE(rhor,(nfft))
+ ABI_MALLOC(rhor,(nfft))
  call fftpac(1,mpi_enreg,1,n1,n2,n3,n4,n5,n6,ngfft,rhor,denpot,1)
 
- ABI_ALLOCATE(rhog,(2,nfft))
+ ABI_MALLOC(rhog,(2,nfft))
  call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
 
- ABI_DEALLOCATE(rhor)
- ABI_DEALLOCATE(denpot)
+ ABI_FREE(rhor)
+ ABI_FREE(denpot)
 
  do ifft=1,nfft
    rhog(:,ifft) = rhog(:,ifft) / ucvol
@@ -1358,8 +1358,8 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !calculate norms of G vectors
 !-----------------------------------------------------------------
 
- ABI_ALLOCATE(garr,(3,nfft))
- ABI_ALLOCATE(gnorm,(nfft))
+ ABI_MALLOC(garr,(3,nfft))
+ ABI_MALLOC(gnorm,(nfft))
  id3=ngfft(3)/2+2 ; id2=ngfft(2)/2+2 ; id1=ngfft(1)/2+2
  do i3=1,n3
    g3=i3-(i3/(id3))*ngfft(3)-one
@@ -1389,11 +1389,11 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !-----------------------------------------------------------------
 
 !largest mem occupation = nfft * (2(sphrog) +2*1(ph3d) +3(garr) +2(rhog) +1(gnorm)) = nfft * 10
- ABI_ALLOCATE(sphrhog,(2,nfft))
- ABI_ALLOCATE(phkxred,(2,natom))
+ ABI_MALLOC(sphrhog,(2,nfft))
+ ABI_MALLOC(phkxred,(2,natom))
  phkxred(1,:)=one
  phkxred(2,:)=zero
- ABI_ALLOCATE(ph3d,(2,nfft,1))
+ ABI_MALLOC(ph3d,(2,nfft,1))
 
  do iatom=1,natom
 
@@ -1414,12 +1414,12 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !  write(std_out,'(a,i4,a,es14.6,a,es12.6)' )' dens_in_sph : At ', iatom, ' has ',cmaxr, ' el.s in a sphere of rad ', rmax
  end do
 
- ABI_DEALLOCATE(rhog)
- ABI_DEALLOCATE(gnorm)
- ABI_DEALLOCATE(garr)
- ABI_DEALLOCATE(sphrhog)
- ABI_DEALLOCATE(ph3d)
- ABI_DEALLOCATE(phkxred)
+ ABI_FREE(rhog)
+ ABI_FREE(gnorm)
+ ABI_FREE(garr)
+ ABI_FREE(sphrhog)
+ ABI_FREE(ph3d)
+ ABI_FREE(phkxred)
 
 end subroutine dens_in_sph
 !!***
@@ -1605,7 +1605,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  call wrtout(std_out,msg,'COLL')
 
 !--------------  OPEN AND NAME FILES FOR FATBANDS
- ABI_ALLOCATE(unitfatbands_arr,(natsph*inbfatbands,dtset%nsppol))
+ ABI_MALLOC(unitfatbands_arr,(natsph*inbfatbands,dtset%nsppol))
  unitfatbands_arr = -3
 
  do iat=1,natsph
@@ -1670,7 +1670,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
 !--------------  WRITE FATBANDS IN FILES
  if (pawfatbnd>0) then
    ! Store eigenvalues with nkpt as first dimension for efficiency reasons
-   ABI_ALLOCATE(eigenvalues,(nkpt,mband,dtset%nsppol))
+   ABI_MALLOC(eigenvalues,(nkpt,mband,dtset%nsppol))
    do isppol=1,dtset%nsppol
      do ikpt=1,nkpt
        nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
@@ -1708,7 +1708,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
        end if
      end do ! il
    end do ! iat
-   ABI_DEALLOCATE(eigenvalues)
+   ABI_FREE(eigenvalues)
  end if
 
  do isppol=1,size(unitfatbands_arr, dim=2)
@@ -1717,7 +1717,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
    end do
  end do
 
- ABI_DEALLOCATE(unitfatbands_arr)
+ ABI_FREE(unitfatbands_arr)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" prtfatbands: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
@@ -2062,13 +2062,13 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  if (dos%partial_dos_flag == 1) then
    natsph_tot = dtset%natsph + dtset%natsph_extra
 
-   ABI_ALLOCATE(iatsph, (natsph_tot))
-   ABI_ALLOCATE(typat_extra, (natsph_tot))
-   ABI_ALLOCATE(ratsph, (natsph_tot))
-   ABI_ALLOCATE(znucl_sph, (natsph_tot))
-   ABI_ALLOCATE(nradint, (natsph_tot))
-   ABI_ALLOCATE(atindx, (natsph_tot))
-   ABI_ALLOCATE(phkxred, (2,natsph_tot))
+   ABI_MALLOC(iatsph, (natsph_tot))
+   ABI_MALLOC(typat_extra, (natsph_tot))
+   ABI_MALLOC(ratsph, (natsph_tot))
+   ABI_MALLOC(znucl_sph, (natsph_tot))
+   ABI_MALLOC(nradint, (natsph_tot))
+   ABI_MALLOC(atindx, (natsph_tot))
+   ABI_MALLOC(phkxred, (2,natsph_tot))
 
    ! initialize atindx
    do iatom=1,natsph_tot
@@ -2094,9 +2094,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    end do
 
    ! init bessel function integral for recip_ylm max ang mom + 1
-   ABI_ALLOCATE(sum_1ll_1atom,(dtset%nspinor**2,dos%mbesslang,natsph_tot))
-   ABI_ALLOCATE(sum_1lm_1atom,(dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
-   ABI_ALLOCATE(cplx_1lm_1atom,(2,dtset%nspinor,dos%mbesslang**2,natsph_tot))
+   ABI_MALLOC(sum_1ll_1atom,(dtset%nspinor**2,dos%mbesslang,natsph_tot))
+   ABI_MALLOC(sum_1lm_1atom,(dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
+   ABI_MALLOC(cplx_1lm_1atom,(2,dtset%nspinor,dos%mbesslang**2,natsph_tot))
 
    ! Note ecuteff instead of ecut.
    kpgmax = sqrt(dtset%ecut * dtset%dilatmx**2)
@@ -2114,13 +2114,13 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    mbess = nradintmax
    bessargmax = bessint_delta*mbess
 
-   ABI_ALLOCATE(rint,(nradintmax))
-   ABI_ALLOCATE(bess_fit,(dtset%mpw,nradintmax,dos%mbesslang))
+   ABI_MALLOC(rint,(nradintmax))
+   ABI_MALLOC(bess_fit,(dtset%mpw,nradintmax,dos%mbesslang))
 
    ! initialize general Bessel function array on uniform grid xx, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
    jlspl = jlspline_new(mbess, bessint_delta, dos%mbesslang)
 
-   ABI_ALLOCATE(xred_sph, (3, natsph_tot))
+   ABI_MALLOC(xred_sph, (3, natsph_tot))
    do iatom=1,dtset%natsph
      xred_sph(:,iatom) = crystal%xred(:,iatsph(iatom))
    end do
@@ -2128,7 +2128,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
      xred_sph(:,dtset%natsph+iatom) = dtset%xredsph_extra(:, iatom)
    end do
 
-   ABI_ALLOCATE(ph1d,(2,(2*n1+1 + 2*n2+1 + 2*n3+1)*natsph_tot))
+   ABI_MALLOC(ph1d,(2,(2*n1+1 + 2*n2+1 + 2*n3+1)*natsph_tot))
    call getph(atindx,natsph_tot,n1,n2,n3,ph1d,xred_sph)
 
    ! Fake MPI data to be used for sequential call to initylmg.
@@ -2165,7 +2165,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
        kg_k = kg(:,ioffkg+1:ioffkg+npw_k)
 
        ! kpgnorm contains norms only for kpoints used by this processor
-       ABI_ALLOCATE(kpgnorm, (npw_k))
+       ABI_MALLOC(kpgnorm, (npw_k))
        call getkpgnorm(crystal%gprimd, kpoint, kg_k, kpgnorm, npw_k)
 
        ! Now get Ylm(k, G) factors: returns "real Ylms", which are real (+m) and
@@ -2177,7 +2177,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
        npw_k,nband_tmp,1,npwarr_tmp,1,0,crystal%rprimd,ylm_k,ylmgr_dum)
 
        ! get phases exp (2 pi i (k+G).x_tau) in ph3d
-       ABI_ALLOCATE(ph3d,(2,npw_k,natsph_tot))
+       ABI_MALLOC(ph3d,(2,npw_k,natsph_tot))
        call ph1d3d(1,natsph_tot,kg_k,natsph_tot,natsph_tot,npw_k,n1,n2,n3,phkxred,ph1d,ph3d)
 
        ! get Bessel function factors on array of |k+G|*r distances
@@ -2301,7 +2301,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
        ABI_FREE(kg_k)
        ABI_FREE(kpgnorm)
        ABI_FREE(ylm_k)
-       ABI_DEALLOCATE(ph3d)
+       ABI_FREE(ph3d)
      end do ! ikpt
    end do ! isppol
 
@@ -2317,20 +2317,20 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 !     end if
    end if
 
-   ABI_DEALLOCATE(atindx)
-   ABI_DEALLOCATE(bess_fit)
-   ABI_DEALLOCATE(iatsph)
-   ABI_DEALLOCATE(typat_extra)
-   ABI_DEALLOCATE(nradint)
-   ABI_DEALLOCATE(ph1d)
-   ABI_DEALLOCATE(phkxred)
-   ABI_DEALLOCATE(ratsph)
-   ABI_DEALLOCATE(rint)
-   ABI_DEALLOCATE(sum_1ll_1atom)
-   ABI_DEALLOCATE(sum_1lm_1atom)
-   ABI_DEALLOCATE(cplx_1lm_1atom)
-   ABI_DEALLOCATE(xred_sph)
-   ABI_DEALLOCATE(znucl_sph)
+   ABI_FREE(atindx)
+   ABI_FREE(bess_fit)
+   ABI_FREE(iatsph)
+   ABI_FREE(typat_extra)
+   ABI_FREE(nradint)
+   ABI_FREE(ph1d)
+   ABI_FREE(phkxred)
+   ABI_FREE(ratsph)
+   ABI_FREE(rint)
+   ABI_FREE(sum_1ll_1atom)
+   ABI_FREE(sum_1lm_1atom)
+   ABI_FREE(cplx_1lm_1atom)
+   ABI_FREE(xred_sph)
+   ABI_FREE(znucl_sph)
 
    call jlspline_free(jlspl)
    call destroy_mpi_enreg(mpi_enreg_seq)
@@ -2353,7 +2353,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
    ! FIXME: We should not allocate such a large chunk of memory!
    mcg_disk = dtset%mpw*my_nspinor*dtset%mband
-   ABI_ALLOCATE(cg_1kpt,(2,mcg_disk))
+   ABI_MALLOC(cg_1kpt,(2,mcg_disk))
    shift_sk = 0
    isppol = 1
 
@@ -2363,7 +2363,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
      npw_k = npwarr(ikpt)
 
      cg_1kpt(:,:) = cg(:,shift_sk+1:shift_sk+mcg_disk)
-     ABI_ALLOCATE(cg_1band,(2,2*npw_k))
+     ABI_MALLOC(cg_1band,(2,2*npw_k))
      shift_b=0
      do iband=1,nband_k
        if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
@@ -2389,10 +2389,10 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
        shift_b = shift_b + 2*npw_k
      end do
-     ABI_DEALLOCATE(cg_1band)
+     ABI_FREE(cg_1band)
      shift_sk = shift_sk + nband_k*2*npw_k
    end do
-   ABI_DEALLOCATE(cg_1kpt)
+   ABI_FREE(cg_1kpt)
 
    ! Gather all contributions from different processors
    if (collect == 1) then
@@ -2528,9 +2528,9 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
      basis_size=max(basis_size,pawtab(itypat)%basis_size)
    end do
  end if
- ABI_ALLOCATE(int1  ,(basis_size*(basis_size+1)/2,dtset%natsph))
- ABI_ALLOCATE(int2,(basis_size*(basis_size+1)/2,dtset%natsph))
- ABI_ALLOCATE(int1m2,(basis_size*(basis_size+1)/2,dtset%natsph))
+ ABI_MALLOC(int1  ,(basis_size*(basis_size+1)/2,dtset%natsph))
+ ABI_MALLOC(int2,(basis_size*(basis_size+1)/2,dtset%natsph))
+ ABI_MALLOC(int1m2,(basis_size*(basis_size+1)/2,dtset%natsph))
  int1=zero;int2=zero;int1m2=zero
  do iat=1,dtset%natsph
    iatom=dtset%iatsph(iat)
@@ -2617,13 +2617,13 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
      cplex=2;if (dtset%istwfk(ikpt)>1) cplex=1
      nband_cprj_k=nband_k/nprocband
-     ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natsph,my_nspinor*nband_cprj_k))
-     ABI_ALLOCATE(dimcprj_atsph,(dtset%natsph))
+     ABI_MALLOC(cprj_k,(dtset%natsph,my_nspinor*nband_cprj_k))
+     ABI_MALLOC(dimcprj_atsph,(dtset%natsph))
      do iat=1,dtset%natsph
        dimcprj_atsph(iat)=dimcprj(dtset%iatsph(iat))
      end do
      call pawcprj_alloc(cprj_k,0,dimcprj_atsph)
-     ABI_DEALLOCATE(dimcprj_atsph)
+     ABI_FREE(dimcprj_atsph)
 
 !    Extract cprj for this k-point.
      ibsp=0
@@ -2709,13 +2709,13 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
      if (mkmem/=0) ibg = ibg + my_nspinor*nband_cprj_k
      call pawcprj_free(cprj_k)
-     ABI_DATATYPE_DEALLOCATE(cprj_k)
+     ABI_FREE(cprj_k)
    end do ! ikpt
  end do ! isppol
 
- ABI_DEALLOCATE(int1)
- ABI_DEALLOCATE(int2)
- ABI_DEALLOCATE(int1m2)
+ ABI_FREE(int1)
+ ABI_FREE(int2)
+ ABI_FREE(int1m2)
 
 !Reduce data in case of parallelism
  call timab(48,1,tsec)

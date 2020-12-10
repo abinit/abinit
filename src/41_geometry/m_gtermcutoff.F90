@@ -177,10 +177,10 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  ! Initialize container
- ABI_ALLOCATE(gvec,(3,MAX(n1,n2,n3)))
- ABI_ALLOCATE(gpq,(nfft))
- ABI_ALLOCATE(gpq2,(nfft))
- ABI_ALLOCATE(gcutoff,(nfft))
+ ABI_MALLOC(gvec,(3,MAX(n1,n2,n3)))
+ ABI_MALLOC(gpq,(nfft))
+ ABI_MALLOC(gpq2,(nfft))
+ ABI_MALLOC(gcutoff,(nfft))
  gcart(:) = zero ; gpq = zero ; gpq2 = zero ; gcutoff = zero
 
  !In order to speed the routine, precompute the components of gvectors
@@ -631,10 +631,10 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      !ABI_WARNING(msg)
  END SELECT
 
- ABI_DEALLOCATE(gvec)
- ABI_DEALLOCATE(gpq)
- ABI_DEALLOCATE(gpq2)
-! ABI_DEALLOCATE(gcutoff)
+ ABI_FREE(gvec)
+ ABI_FREE(gpq)
+ ABI_FREE(gpq2)
+! ABI_FREE(gcutoff)
 
 end subroutine termcutoff
 !!***

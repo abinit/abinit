@@ -204,31 +204,31 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  occopt = ddb%occopt
  usepaw = ddb_hdr%usepaw
 
- ABI_ALLOCATE(typat, (natom))
- ABI_ALLOCATE(atifc, (natom))
- ABI_ALLOCATE(zion, (ntypat))
- ABI_ALLOCATE(amu, (ntypat))
+ ABI_MALLOC(typat, (natom))
+ ABI_MALLOC(atifc, (natom))
+ ABI_MALLOC(zion, (ntypat))
+ ABI_MALLOC(amu, (ntypat))
 
- ABI_ALLOCATE(xcart,(3,natom))
- ABI_ALLOCATE(xred,(3,natom))
+ ABI_MALLOC(xcart,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
 
- ABI_ALLOCATE(symafm, (nsym))
- ABI_ALLOCATE(spinat,(3,natom))
+ ABI_MALLOC(symafm, (nsym))
+ ABI_MALLOC(spinat,(3,natom))
 
- ABI_ALLOCATE(symrel, (3,3,nsym))
- ABI_ALLOCATE(symrec, (3,3,nsym))
- ABI_ALLOCATE(tnons, (3,nsym))
- ABI_ALLOCATE(indsym, (4,nsym,natom))
+ ABI_MALLOC(symrel, (3,3,nsym))
+ ABI_MALLOC(symrec, (3,3,nsym))
+ ABI_MALLOC(tnons, (3,nsym))
+ ABI_MALLOC(indsym, (4,nsym,natom))
 
- ABI_ALLOCATE(deigi, (mband,nkpt))
- ABI_ALLOCATE(deigr, (mband,nkpt))
- ABI_ALLOCATE(dwtermi, (mband,nkpt))
- ABI_ALLOCATE(dwtermr, (mband,nkpt))
- ABI_ALLOCATE(multi, (mband,nkpt))
- ABI_ALLOCATE(multr, (mband,nkpt))
- ABI_ALLOCATE(slope, (2,mband,nkpt))
- ABI_ALLOCATE(thmeigen, (2,mband,nkpt))
- ABI_ALLOCATE(zeropoint, (2,mband,nkpt))
+ ABI_MALLOC(deigi, (mband,nkpt))
+ ABI_MALLOC(deigr, (mband,nkpt))
+ ABI_MALLOC(dwtermi, (mband,nkpt))
+ ABI_MALLOC(dwtermr, (mband,nkpt))
+ ABI_MALLOC(multi, (mband,nkpt))
+ ABI_MALLOC(multr, (mband,nkpt))
+ ABI_MALLOC(slope, (2,mband,nkpt))
+ ABI_MALLOC(thmeigen, (2,mband,nkpt))
+ ABI_MALLOC(zeropoint, (2,mband,nkpt))
 
 !At present, only atom-type perturbations are allowed for eig2 type matrix elements.
  mpert_eig2=natom
@@ -236,11 +236,11 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
  call ddb_eig2%malloc(msize2,nblok2,natom,ntypat)
 
- ABI_ALLOCATE(blkval2,(2,msize2,mband,nkpt))
- ABI_ALLOCATE(blkval2gqpt,(2,msize2,mband,nkpt))
+ ABI_MALLOC(blkval2,(2,msize2,mband,nkpt))
+ ABI_MALLOC(blkval2gqpt,(2,msize2,mband,nkpt))
 
- ABI_ALLOCATE(eigvec,(2,3,natom,3*natom))
- ABI_ALLOCATE(phfreq,(3*natom,ddb%nblok))
+ ABI_MALLOC(eigvec,(2,3,natom,3*natom))
+ ABI_MALLOC(phfreq,(3*natom,ddb%nblok))
 
  atifc = inp%atifc
 
@@ -293,8 +293,8 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
  blkval2gqpt(:,:,:,:)=zero
 
- ABI_ALLOCATE(carflg_eig2,(3,mpert_eig2,3,mpert_eig2))
- ABI_ALLOCATE(kpnt,(3,nkpt,1))
+ ABI_MALLOC(carflg_eig2,(3,mpert_eig2,3,mpert_eig2))
+ ABI_MALLOC(kpnt,(3,nkpt,1))
 
  ! Copy a bunch of stuff back into crystal (to retain old behavior)
  ! TODO comment these: doesnt make a difference
@@ -358,11 +358,11 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
 !  Use the first list of q wavevectors
    nqpt=inp%nph1l
-   ABI_ALLOCATE(spqpt,(3,nqpt))
+   ABI_MALLOC(spqpt,(3,nqpt))
    do iqpt=1,inp%nph1l
      spqpt(:,iqpt)=inp%qph1l(:,iqpt)/inp%qnrml1(iqpt)
    end do
-   ABI_ALLOCATE(wghtq,(nqpt))
+   ABI_MALLOC(wghtq,(nqpt))
    wghtq(:)=one/nqpt
 
  else if(thmflag>=5 .and. thmflag<=8)then
@@ -375,10 +375,10 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    qptrlatt(2,2)=ngqpt(2)
    qptrlatt(3,3)=ngqpt(3)
 
-   ABI_ALLOCATE(ptsymrel,(3,3,msym))
-   ABI_ALLOCATE(symafm_new,(msym))
-   ABI_ALLOCATE(symrel_new,(3,3,msym))
-   ABI_ALLOCATE(tnons_new,(3,msym))
+   ABI_MALLOC(ptsymrel,(3,3,msym))
+   ABI_MALLOC(symafm_new,(msym))
+   ABI_MALLOC(symrel_new,(3,3,msym))
+   ABI_MALLOC(tnons_new,(3,msym))
    if(thmflag==7 .or. thmflag==8) then
 !    Re-generate symmetry operations from the lattice and atomic coordinates
      tolsym=tol8
@@ -412,16 +412,16 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    call getkgrid(chksymbreak,0,iscf_fake,dummy2,qptopt,qptrlatt,qptrlen,&
 &   nsym_new,0,nqpt,nqshft,nsym_new,rprimd,&
 &   shiftq,symafm_new,symrel_new,vacuum,dummy)
-   ABI_ALLOCATE(spqpt,(3,nqpt))
-   ABI_ALLOCATE(wghtq,(nqpt))
+   ABI_MALLOC(spqpt,(3,nqpt))
+   ABI_MALLOC(wghtq,(nqpt))
    call getkgrid(chksymbreak,iout,iscf_fake,spqpt,qptopt,qptrlatt,qptrlen,&
 &   nsym_new,nqpt,nqpt_computed,nqshft,nsym_new,rprimd,&
 &   shiftq,symafm_new,symrel_new,vacuum,wghtq)
 
-   ABI_DEALLOCATE(ptsymrel)
-   ABI_DEALLOCATE(symafm_new)
-   ABI_DEALLOCATE(symrel_new)
-   ABI_DEALLOCATE(tnons_new)
+   ABI_FREE(ptsymrel)
+   ABI_FREE(symafm_new)
+   ABI_FREE(symrel_new)
+   ABI_FREE(tnons_new)
 
  end if
 
@@ -438,13 +438,13 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  end do
 
  if(.not.allocated(indqpt))then
-   ABI_ALLOCATE(indqpt,(nqpt))
+   ABI_MALLOC(indqpt,(nqpt))
  end if
- ABI_ALLOCATE(dedni,(mband,nkpt,3*natom,nqpt))
- ABI_ALLOCATE(dednr,(mband,nkpt,3*natom,nqpt))
- ABI_ALLOCATE(eigen_in,(nqpt))
- ABI_ALLOCATE(qpt_full,(3,nqpt))
- ABI_ALLOCATE(qptnrm,(nqpt))
+ ABI_MALLOC(dedni,(mband,nkpt,3*natom,nqpt))
+ ABI_MALLOC(dednr,(mband,nkpt,3*natom,nqpt))
+ ABI_MALLOC(eigen_in,(nqpt))
+ ABI_MALLOC(qpt_full,(3,nqpt))
+ ABI_MALLOC(qptnrm,(nqpt))
 
  dednr(:,:,:,:) = zero
  dedni(:,:,:,:) = zero
@@ -480,7 +480,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
      ABI_ERROR(message)
    end if
 
-   ABI_ALLOCATE(d2cart,(2,msize))
+   ABI_MALLOC(d2cart,(2,msize))
 !  Copy the dynamical matrix in d2cart
    d2cart(:,1:msize)=ddb%val(:,:,iblok)
 
@@ -492,14 +492,14 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
 !  Calculation of the eigenvectors and eigenvalues
 !  of the dynamical matrix
-   ABI_ALLOCATE(displ,(2*3*natom*3*natom))
-   ABI_ALLOCATE(eigval,(3,natom))
+   ABI_MALLOC(displ,(2*3*natom*3*natom))
+   ABI_MALLOC(eigval,(3,natom))
    call dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 &   mpert,msym,natom,nsym,ntypat,phfreq(:,iqpt),qphnrm(1),spqpt(:,iqpt),rprimd,inp%symdynmat,&
 &   symrel,symafm,typat,ucvol)
-   ABI_DEALLOCATE(displ)
-   ABI_DEALLOCATE(eigval)
-   ABI_DEALLOCATE(d2cart)
+   ABI_FREE(displ)
+   ABI_FREE(eigval)
+   ABI_FREE(d2cart)
 
 
 !  Read the next bloks to find the next q point.
@@ -649,10 +649,10 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
      end do
    end do
 
-   ABI_ALLOCATE(dos_phon,(ng2f))
-   ABI_ALLOCATE(g2f,(mband,nkpt,ng2f))
-   ABI_ALLOCATE(tmpg2f,(mband,nkpt,ng2f))
-   ABI_ALLOCATE(tmpphondos,(ng2f))
+   ABI_MALLOC(dos_phon,(ng2f))
+   ABI_MALLOC(g2f,(mband,nkpt,ng2f))
+   ABI_MALLOC(tmpg2f,(mband,nkpt,ng2f))
+   ABI_MALLOC(tmpphondos,(ng2f))
 
    write(std_out,'(a,es13.6)') 'omega_min :', omega_min
    write(std_out,'(a,es13.6)') 'omega_max :', omega_max
@@ -697,10 +697,10 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    call outphdos(domega,dos_phon,omega_min,omega_max,elph_base_name,g2fsmear,ng2f,nqpt,1,telphint,unit_g2f)
 
 
-   ABI_DEALLOCATE(dos_phon)
-   ABI_DEALLOCATE(g2f)
-   ABI_DEALLOCATE(tmpg2f)
-   ABI_DEALLOCATE(tmpphondos)
+   ABI_FREE(dos_phon)
+   ABI_FREE(g2f)
+   ABI_FREE(tmpg2f)
+   ABI_FREE(tmpphondos)
 
  end if !telphint
 
@@ -791,10 +791,10 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 !  enemin = elph_ds%fermie - dble(ifermi)*deltaene
 !  enemax = elph_ds%fermie + dble(nene-ifermi-1)*deltaene
 
-   ABI_ALLOCATE(tweight,(nqpt,nene))
-   ABI_ALLOCATE(dtweightde,(nqpt,nene))
-   ABI_ALLOCATE(intweight,(3*natom,nqpt,nene))
-   ABI_ALLOCATE(indtweightde,(3*natom,nqpt,nene))
+   ABI_MALLOC(tweight,(nqpt,nene))
+   ABI_MALLOC(dtweightde,(nqpt,nene))
+   ABI_MALLOC(intweight,(3*natom,nqpt,nene))
+   ABI_MALLOC(indtweightde,(3*natom,nqpt,nene))
 
    do iband=1,3*natom
      eigen_in(:) = phfreq(iband,:)
@@ -813,8 +813,8 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 !  intdtweightse(nband,nqpt,nene) represents the weight in each energy bin for every kpt and every band
 !  So phonon DOS is calculated (neglecting the non-analyticity contribution for now !!!)
 
-   ABI_ALLOCATE(total_dos,(nene))
-   ABI_ALLOCATE(g2f,(mband,nkpt,nene))
+   ABI_MALLOC(total_dos,(nene))
+   ABI_MALLOC(g2f,(mband,nkpt,nene))
 
    total_dos(:) = zero
    do iband=1,3*natom
@@ -845,12 +845,12 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    unit_phdos = 108
    call outphdos(deltaene,total_dos,enemin,enemax,elph_base_name,g2fsmear,nene,nqpt,tetrahedra%ntetra,telphint,unit_g2f)
 
-   ABI_DEALLOCATE(tweight)
-   ABI_DEALLOCATE(dtweightde)
-   ABI_DEALLOCATE(intweight)
-   ABI_DEALLOCATE(indtweightde)
-   ABI_DEALLOCATE(total_dos)
-   ABI_DEALLOCATE(g2f)
+   ABI_FREE(tweight)
+   ABI_FREE(dtweightde)
+   ABI_FREE(intweight)
+   ABI_FREE(indtweightde)
+   ABI_FREE(total_dos)
+   ABI_FREE(g2f)
  end if !telphint
 
 !=======================================================================
@@ -943,45 +943,45 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    end do
  end do
 
- ABI_DEALLOCATE(typat)
- ABI_DEALLOCATE(atifc)
- ABI_DEALLOCATE(zion)
- ABI_DEALLOCATE(amu)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xred)
- ABI_DEALLOCATE(symafm)
- ABI_DEALLOCATE(spinat)
- ABI_DEALLOCATE(symrel)
- ABI_DEALLOCATE(symrec)
- ABI_DEALLOCATE(indsym)
- ABI_DEALLOCATE(tnons)
- ABI_DEALLOCATE(deigi)
- ABI_DEALLOCATE(deigr)
- ABI_DEALLOCATE(dwtermi)
- ABI_DEALLOCATE(dwtermr)
- ABI_DEALLOCATE(multi)
- ABI_DEALLOCATE(multr)
- ABI_DEALLOCATE(slope)
- ABI_DEALLOCATE(thmeigen)
- ABI_DEALLOCATE(zeropoint)
+ ABI_FREE(typat)
+ ABI_FREE(atifc)
+ ABI_FREE(zion)
+ ABI_FREE(amu)
+ ABI_FREE(xcart)
+ ABI_FREE(xred)
+ ABI_FREE(symafm)
+ ABI_FREE(spinat)
+ ABI_FREE(symrel)
+ ABI_FREE(symrec)
+ ABI_FREE(indsym)
+ ABI_FREE(tnons)
+ ABI_FREE(deigi)
+ ABI_FREE(deigr)
+ ABI_FREE(dwtermi)
+ ABI_FREE(dwtermr)
+ ABI_FREE(multi)
+ ABI_FREE(multr)
+ ABI_FREE(slope)
+ ABI_FREE(thmeigen)
+ ABI_FREE(zeropoint)
 
- ABI_DEALLOCATE(dedni)
- ABI_DEALLOCATE(dednr)
+ ABI_FREE(dedni)
+ ABI_FREE(dednr)
  if(allocated(indqpt)) then
-   ABI_DEALLOCATE(indqpt)
+   ABI_FREE(indqpt)
  end if
- ABI_DEALLOCATE(eigen_in)
- ABI_DEALLOCATE(qpt_full)
- ABI_DEALLOCATE(qptnrm)
- ABI_DEALLOCATE(wghtq)
- ABI_DEALLOCATE(spqpt)
- ABI_DEALLOCATE(eigvec)
- ABI_DEALLOCATE(phfreq)
+ ABI_FREE(eigen_in)
+ ABI_FREE(qpt_full)
+ ABI_FREE(qptnrm)
+ ABI_FREE(wghtq)
+ ABI_FREE(spqpt)
+ ABI_FREE(eigvec)
+ ABI_FREE(phfreq)
 
- ABI_DEALLOCATE(blkval2)
- ABI_DEALLOCATE(blkval2gqpt)
- ABI_DEALLOCATE(kpnt)
- ABI_DEALLOCATE(carflg_eig2)
+ ABI_FREE(blkval2)
+ ABI_FREE(blkval2gqpt)
+ ABI_FREE(kpnt)
+ ABI_FREE(carflg_eig2)
 
  call ddb_eig2%free()
  call destroy_tetra(tetrahedra)

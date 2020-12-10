@@ -237,7 +237,7 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
 
  if (dtset%positron/=0) then
 
-  ABI_DATATYPE_ALLOCATE(electronpositron,)
+  ABI_MALLOC(electronpositron,)
 
   electronpositron%calctype=0
   electronpositron%particle=-1
@@ -271,9 +271,9 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
   electronpositron%lambda=zero
   electronpositron%lifetime=zero
 
-  ABI_ALLOCATE(electronpositron%rhor_ep,(nfft,dtset%nspden))
-  ABI_ALLOCATE(electronpositron%vha_ep,(nfft))
-  ABI_DATATYPE_ALLOCATE(electronpositron%pawrhoij_ep,(mpi_enreg%my_natom*dtset%usepaw))
+  ABI_MALLOC(electronpositron%rhor_ep,(nfft,dtset%nspden))
+  ABI_MALLOC(electronpositron%vha_ep,(nfft))
+  ABI_MALLOC(electronpositron%pawrhoij_ep,(mpi_enreg%my_natom*dtset%usepaw))
 
   if (dtset%usepaw==1) then
    electronpositron%has_pawrhoij_ep=1
@@ -289,9 +289,9 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
    do ii=1,dtset%ntypat
     electronpositron%lmmax=max(electronpositron%lmmax,pawtab(ii)%lcut_size**2)
    end do
-   ABI_ALLOCATE(electronpositron%lmselect_ep,(electronpositron%lmmax,mpi_enreg%my_natom))
+   ABI_MALLOC(electronpositron%lmselect_ep,(electronpositron%lmmax,mpi_enreg%my_natom))
    if (maxval(pawtab(1:dtset%ntypat)%usexcnhat)==0.or.(.not.include_nhat_in_gamma)) then
-     ABI_ALLOCATE(electronpositron%nhat_ep,(nfft,dtset%nspden))
+     ABI_MALLOC(electronpositron%nhat_ep,(nfft,dtset%nspden))
    end if
   else
    electronpositron%has_pawrhoij_ep=0
@@ -303,22 +303,22 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
    electronpositron%dimcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
    electronpositron%dimocc=dtset%mband*dtset%nkpt*dtset%nsppol
    electronpositron%dimeigen=dtset%mband*dtset%nkpt*dtset%nsppol
-   ABI_ALLOCATE(electronpositron%cg_ep,(2,electronpositron%dimcg))
-   ABI_ALLOCATE(electronpositron%eigen_ep,(electronpositron%dimeigen))
-   ABI_ALLOCATE(electronpositron%occ_ep,(electronpositron%dimocc))
+   ABI_MALLOC(electronpositron%cg_ep,(2,electronpositron%dimcg))
+   ABI_MALLOC(electronpositron%eigen_ep,(electronpositron%dimeigen))
+   ABI_MALLOC(electronpositron%occ_ep,(electronpositron%dimocc))
    electronpositron%dimcprj=0
 !  if (.false.) then !TEMPORARY: will be activated later
    if (dtset%usepaw==1.and.dtset%pawusecp>0.and.dtset%posdoppler>0) then
     electronpositron%dimcprj=my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
     if (mpi_enreg%paral_kgb/=0) electronpositron%dimcprj=electronpositron%dimcprj/mpi_enreg%nproc_band
-    ABI_DATATYPE_ALLOCATE(electronpositron%cprj_ep,(dtset%natom,electronpositron%dimcprj))
-    ABI_ALLOCATE(nlmn,(dtset%natom))
+    ABI_MALLOC(electronpositron%cprj_ep,(dtset%natom,electronpositron%dimcprj))
+    ABI_MALLOC(nlmn,(dtset%natom))
     ncpgr=0
     do ii=1,dtset%natom;nlmn(ii)=pawtab(dtset%typat(ii))%lmn_size;end do
     call pawcprj_alloc(electronpositron%cprj_ep,ncpgr,nlmn)
-    ABI_DEALLOCATE(nlmn)
+    ABI_FREE(nlmn)
    else
-    ABI_DATATYPE_ALLOCATE(electronpositron%cprj_ep,(dtset%natom,electronpositron%dimcprj))
+    ABI_MALLOC(electronpositron%cprj_ep,(dtset%natom,electronpositron%dimcprj))
    end if
   else
    electronpositron%dimcg   =0
@@ -332,12 +332,12 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
   if (dtset%optstress>0.and.dtset%iscf>0.and.(dtset%nstep>0.or.ireadwf==1)) optstr=1
 
   if (optfor>0) then
-   ABI_ALLOCATE(electronpositron%fred_ep,(3,dtset%natom))
+   ABI_MALLOC(electronpositron%fred_ep,(3,dtset%natom))
    electronpositron%fred_ep(:,:)=zero
   end if
 
   if (optstr>0) then
-   ABI_ALLOCATE(electronpositron%stress_ep,(6))
+   ABI_MALLOC(electronpositron%stress_ep,(6))
    electronpositron%stress_ep(:)=zero
   end if
 
@@ -381,45 +381,45 @@ subroutine destroy_electronpositron(electronpositron)
  if (associated(electronpositron)) then
 
   if (allocated(electronpositron%cg_ep))        then
-    ABI_DEALLOCATE(electronpositron%cg_ep)
+    ABI_FREE(electronpositron%cg_ep)
   end if
   if (allocated(electronpositron%eigen_ep))     then
-    ABI_DEALLOCATE(electronpositron%eigen_ep)
+    ABI_FREE(electronpositron%eigen_ep)
   end if
   if (allocated(electronpositron%occ_ep))       then
-    ABI_DEALLOCATE(electronpositron%occ_ep)
+    ABI_FREE(electronpositron%occ_ep)
   end if
   if (allocated(electronpositron%rhor_ep))      then
-    ABI_DEALLOCATE(electronpositron%rhor_ep)
+    ABI_FREE(electronpositron%rhor_ep)
   end if
   if (allocated(electronpositron%nhat_ep))      then
-    ABI_DEALLOCATE(electronpositron%nhat_ep)
+    ABI_FREE(electronpositron%nhat_ep)
   end if
   if (allocated(electronpositron%vha_ep))       then
-    ABI_DEALLOCATE(electronpositron%vha_ep)
+    ABI_FREE(electronpositron%vha_ep)
   end if
   if (allocated(electronpositron%lmselect_ep))  then
-    ABI_DEALLOCATE(electronpositron%lmselect_ep)
+    ABI_FREE(electronpositron%lmselect_ep)
   end if
   if (allocated(electronpositron%fred_ep))      then
-    ABI_DEALLOCATE(electronpositron%fred_ep)
+    ABI_FREE(electronpositron%fred_ep)
   end if
   if (allocated(electronpositron%stress_ep))    then
-    ABI_DEALLOCATE(electronpositron%stress_ep)
+    ABI_FREE(electronpositron%stress_ep)
   end if
 
   if (electronpositron%has_pawrhoij_ep/=0) then
    call pawrhoij_free(electronpositron%pawrhoij_ep)
   end if
   if (allocated(electronpositron%pawrhoij_ep))  then
-    ABI_DATATYPE_DEALLOCATE(electronpositron%pawrhoij_ep)
+    ABI_FREE(electronpositron%pawrhoij_ep)
   end if
 
   if (electronpositron%dimcprj/=0) then
    call pawcprj_free(electronpositron%cprj_ep)
   end if
   if (allocated(electronpositron%cprj_ep))  then
-    ABI_DATATYPE_DEALLOCATE(electronpositron%cprj_ep)
+    ABI_FREE(electronpositron%cprj_ep)
   end if
 
   electronpositron%calctype       =0
@@ -436,7 +436,7 @@ subroutine destroy_electronpositron(electronpositron)
   electronpositron%posdensity0_limit=.false.
   electronpositron%scf_converged=.false.
 
-  ABI_DATATYPE_DEALLOCATE(electronpositron)
+  ABI_FREE(electronpositron)
 
  end if
 
@@ -566,9 +566,9 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
    call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
    if (dtset%usepaw==1.and.my_natom>0) then
     if (electronpositron%has_pawrhoij_ep==1) then
-      ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
-      ABI_ALLOCATE(typ,(my_natom))
-      ABI_ALLOCATE(nlmn,(my_natom))
+      ABI_MALLOC(pawrhoij_tmp,(my_natom))
+      ABI_MALLOC(typ,(my_natom))
+      ABI_MALLOC(nlmn,(my_natom))
       do iatom=1,my_natom
         typ(iatom)=iatom
         nlmn(iatom)=pawrhoij(iatom)%lmn_size
@@ -579,8 +579,8 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
 &                      lmnsize=nlmn,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
 &                      qphase=pawrhoij(1)%qphase,use_rhoij_=pawrhoij(1)%use_rhoij_,&
 &                      use_rhoijres=pawrhoij(1)%use_rhoijres)
-      ABI_DEALLOCATE(typ)
-      ABI_DEALLOCATE(nlmn)
+      ABI_FREE(typ)
+      ABI_FREE(nlmn)
       call pawrhoij_copy(pawrhoij,pawrhoij_tmp)
       call pawrhoij_copy(electronpositron%pawrhoij_ep,pawrhoij)
       call pawrhoij_copy(pawrhoij_tmp,electronpositron%pawrhoij_ep)
@@ -589,7 +589,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
           sz1=pawrhoij_tmp(iatom)%ngrhoij
           sz2=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz3=pawrhoij_tmp(iatom)%nspden
-          ABI_ALLOCATE(pawrhoij(iatom)%grhoij,(sz1,sz2,sz3))
+          ABI_MALLOC(pawrhoij(iatom)%grhoij,(sz1,sz2,sz3))
           pawrhoij(iatom)%grhoij(:,:,:)=pawrhoij_tmp(iatom)%grhoij(:,:,:)
         end do
       end if
@@ -597,7 +597,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
         do iatom=1,my_natom
           sz1=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz2=pawrhoij_tmp(iatom)%nspden
-          ABI_ALLOCATE(pawrhoij(iatom)%rhoijres,(sz1,sz2))
+          ABI_MALLOC(pawrhoij(iatom)%rhoijres,(sz1,sz2))
           pawrhoij(iatom)%rhoijres(:,:)=pawrhoij_tmp(iatom)%rhoijres(:,:)
         end do
       end if
@@ -605,18 +605,18 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
         do iatom=1,my_natom
           sz1=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz2=pawrhoij_tmp(iatom)%nspden
-          ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(sz1,sz2))
+          ABI_MALLOC(pawrhoij(iatom)%rhoij_,(sz1,sz2))
           pawrhoij(iatom)%rhoij_(:,:)=pawrhoij_tmp(iatom)%rhoij_(:,:)
         end do
       end if
       if (pawrhoij_tmp(1)%lmnmix_sz>0.and.pawrhoij(1)%lmnmix_sz==0) then
         do iatom=1,my_natom
-          ABI_ALLOCATE(pawrhoij(iatom)%kpawmix,(pawrhoij_tmp(iatom)%lmnmix_sz))
+          ABI_MALLOC(pawrhoij(iatom)%kpawmix,(pawrhoij_tmp(iatom)%lmnmix_sz))
           pawrhoij(iatom)%kpawmix(:)=pawrhoij_tmp(iatom)%kpawmix(:)
         end do
       end if
       call pawrhoij_free(pawrhoij_tmp)
-      ABI_DATATYPE_DEALLOCATE(pawrhoij_tmp)
+      ABI_FREE(pawrhoij_tmp)
     else
       do iatom=1,my_natom
         pawrhoij(iatom)%rhoijp=zero
@@ -678,16 +678,16 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
    end if
    if (dtset%usepaw==1) then
     if(electronpositron%dimcprj>0) then
-     ABI_ALLOCATE(nlmn,(dtset%natom))
-     ABI_DATATYPE_ALLOCATE(cprj_tmp,(dtset%natom,electronpositron%dimcprj))
+     ABI_MALLOC(nlmn,(dtset%natom))
+     ABI_MALLOC(cprj_tmp,(dtset%natom,electronpositron%dimcprj))
      do iatom=1,dtset%natom;nlmn(iatom)=cprj(iatom,1)%nlmn;end do
      call pawcprj_alloc(cprj_tmp,cprj(1,1)%ncpgr,nlmn)
-     ABI_DEALLOCATE(nlmn)
+     ABI_FREE(nlmn)
      call pawcprj_copy(electronpositron%cprj_ep,cprj_tmp)
      call pawcprj_copy(cprj,electronpositron%cprj_ep)
      call pawcprj_copy(cprj_tmp,cprj)
      call pawcprj_free(cprj_tmp)
-     ABI_DATATYPE_DEALLOCATE(cprj_tmp)
+     ABI_FREE(cprj_tmp)
     else
 !TO BE ACTIVATED WHEN cprj IS PRESENT
 !    call pawcprj_set_zero(cprj)
@@ -861,24 +861,24 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
 !Some allocations/inits
  ngrad=1;if (electronpositron%ixcpositron==3.or.electronpositron%ixcpositron==31) ngrad=2
  ngr=0;if (ngrad==2) ngr=nfft
- ABI_ALLOCATE(fxcapn,(nfft))
- ABI_ALLOCATE(grho2apn,(ngr))
+ ABI_MALLOC(fxcapn,(nfft))
+ ABI_MALLOC(grho2apn,(ngr))
  nspden_ep=1;cplex=1;ishift=0
  iwarn=0;iwarnp=1
 
 !Compute total electronic density
- ABI_ALLOCATE(rhotote,(nfft))
+ ABI_MALLOC(rhotote,(nfft))
  rhotote(:)=electronpositron%rhor_ep(:,1)
  if (n3xccc>0) rhotote(:)=rhotote(:)+xccc3d(:)
  if (usepaw==1.and.usexcnhat==0) rhotote(:)=rhotote(:)-electronpositron%nhat_ep(:,1)
 
 !Extra total electron/positron densities; compute gradients for GGA
- ABI_ALLOCATE(rhoe,(nfft,nspden_ep,ngrad**2))
- ABI_ALLOCATE(rhop,(nfft,nspden_ep))
+ ABI_MALLOC(rhoe,(nfft,nspden_ep,ngrad**2))
+ ABI_MALLOC(rhop,(nfft,nspden_ep))
  call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,qphon,rhotote,rhoe)
  if (ngrad==2) grho2apn(:)=rhoe(:,1,2)**2+rhoe(:,1,3)**2+rhoe(:,1,4)**2
  rhop(:,1)=rhor(:,1);if (usepaw==1.and.usexcnhat==0) rhop(:,1)=rhop(:,1)-nhat(:,1)
- ABI_DEALLOCATE(rhotote)
+ ABI_FREE(rhotote)
 
 !Make the densities positive
  call mkdenpos(iwarn ,nfft,nspden_ep,1,rhoe(:,1,1),xc_denpos)
@@ -887,8 +887,8 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
  end if
 
 !Compute electron-positron Vxc_pos, Vxc_el, Fxc, Kxc, ...
- ABI_ALLOCATE(vxc_ep,(nfft))
- ABI_ALLOCATE(vxcgr_ep,(ngr))
+ ABI_MALLOC(vxc_ep,(nfft))
+ ABI_MALLOC(vxcgr_ep,(ngr))
  if (nkxc==0) then
    call xcpositron(fxcapn,grho2apn,electronpositron%ixcpositron,ngr,nfft,electronpositron%posdensity0_limit,&
 &   rhoe(:,1,1),rhop(:,1),vxc_ep,vxcgr_ep,vxcapn)
@@ -896,10 +896,10 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
    call xcpositron(fxcapn,grho2apn,electronpositron%ixcpositron,ngr,nfft,electronpositron%posdensity0_limit,&
 &   rhoe(:,1,1),rhop(:,1),vxc_ep,vxcgr_ep,vxcapn,dvxce=kxcapn)
  end if
- ABI_DEALLOCATE(rhoe)
- ABI_DEALLOCATE(vxc_ep)
- ABI_DEALLOCATE(vxcgr_ep)
- ABI_DEALLOCATE(grho2apn)
+ ABI_FREE(rhoe)
+ ABI_FREE(vxc_ep)
+ ABI_FREE(vxcgr_ep)
+ ABI_FREE(grho2apn)
 
 !Store Vxc and Kxc according to spin components
  if (nspden>=2) vxcapn(:,2)=vxcapn(:,1)
@@ -929,8 +929,8 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
  electronpositron%e_xc  =electronpositron%e_xc  *ucvol/dble(nfftot)
  electronpositron%e_xcdc=electronpositron%e_xcdc*ucvol/dble(nfftot)
  strdiag=strdiag/dble(nfftot)
- ABI_DEALLOCATE(fxcapn)
- ABI_DEALLOCATE(rhop)
+ ABI_FREE(fxcapn)
+ ABI_FREE(rhop)
 
 !Reduction in case of parallelism
  if(mpi_enreg%paral_kgb==1)then

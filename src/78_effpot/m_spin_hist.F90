@@ -200,17 +200,17 @@ contains
     self%natoms=0
     self%has_latt=has_latt
 
-    ABI_ALLOCATE(self%heff, (3, nspin, mxhist))
-    ABI_ALLOCATE(self%snorm, (nspin, mxhist))
-    ABI_ALLOCATE(self%S, (3, nspin, mxhist))
-    ABI_ALLOCATE(self%dSdt, (3, nspin, mxhist))
+    ABI_MALLOC(self%heff, (3, nspin, mxhist))
+    ABI_MALLOC(self%snorm, (nspin, mxhist))
+    ABI_MALLOC(self%S, (3, nspin, mxhist))
+    ABI_MALLOC(self%dSdt, (3, nspin, mxhist))
 
-    ABI_ALLOCATE(self%etot, (mxhist))
-    ABI_ALLOCATE(self%entropy, (mxhist))
-    ABI_ALLOCATE(self%time, (mxhist))
-    ABI_ALLOCATE(self%itime, (mxhist))
+    ABI_MALLOC(self%etot, (mxhist))
+    ABI_MALLOC(self%entropy, (mxhist))
+    ABI_MALLOC(self%time, (mxhist))
+    ABI_MALLOC(self%itime, (mxhist))
 
-    ABI_ALLOCATE(self%ihist_latt, (mxhist))
+    ABI_MALLOC(self%ihist_latt, (mxhist))
 
     ! TODO: add observable allocation here.
 
@@ -287,10 +287,10 @@ contains
     integer, intent(in):: spin_index(:), ntypat, typat(:)
     integer :: natoms
     natoms=size(typat)
-    ABI_ALLOCATE(self%xred, (3, natoms))
-    ABI_ALLOCATE(self%spin_index, (natoms))
-    ABI_ALLOCATE(self%typat,(ntypat))
-    ABI_ALLOCATE(self%znucl, (ntypat))
+    ABI_MALLOC(self%xred, (3, natoms))
+    ABI_MALLOC(self%spin_index, (natoms))
+    ABI_MALLOC(self%typat,(ntypat))
+    ABI_MALLOC(self%znucl, (ntypat))
 
     self%acell(:)=acell(:)
     self%rprimd(:,:)=rprimd(:,:)
@@ -359,43 +359,43 @@ contains
     class(spin_hist_t) , intent(inout) :: self 
 
     if (allocated(self%xred)) then
-       ABI_DEALLOCATE(self%xred)
+       ABI_FREE(self%xred)
     end if
     if (allocated(self%typat)) then
-       ABI_DEALLOCATE(self%typat)
+       ABI_FREE(self%typat)
     end if
     if (allocated(self%znucl)) then
-       ABI_DEALLOCATE(self%znucl)
+       ABI_FREE(self%znucl)
     end if
     if (allocated(self%spin_index)) then
-       ABI_DEALLOCATE(self%spin_index)
+       ABI_FREE(self%spin_index)
     end if
     if (allocated(self%heff)) then
-       ABI_DEALLOCATE(self%heff)
+       ABI_FREE(self%heff)
     end if
     if (allocated(self%snorm)) then
-       ABI_DEALLOCATE(self%snorm)
+       ABI_FREE(self%snorm)
     end if
     if (allocated(self%S)) then
-       ABI_DEALLOCATE(self%S)
+       ABI_FREE(self%S)
     end if
     if (allocated(self%dSdt)) then
-       ABI_DEALLOCATE(self%dSdt)
+       ABI_FREE(self%dSdt)
     end if
     if (allocated(self%etot)) then
-       ABI_DEALLOCATE(self%etot)
+       ABI_FREE(self%etot)
     end if
     if (allocated(self%entropy)) then
-       ABI_DEALLOCATE(self%entropy)
+       ABI_FREE(self%entropy)
     end if
     if (allocated(self%time)) then
-       ABI_DEALLOCATE(self%time)
+       ABI_FREE(self%time)
     end if
     if (allocated(self%itime)) then
-       ABI_DEALLOCATE(self%itime)
+       ABI_FREE(self%itime)
     end if
     if (allocated(self%ihist_latt)) then
-       ABI_DEALLOCATE(self%ihist_latt)
+       ABI_FREE(self%ihist_latt)
     end if
 
   end subroutine finalize

@@ -247,26 +247,26 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
  green%dmft_nwli=paw_dmft%dmft_nwli
  green%charge_ks=zero
  green%has_charge_matlu=0
- ABI_ALLOCATE(green%charge_matlu,(paw_dmft%natom,paw_dmft%nsppol+1))
+ ABI_MALLOC(green%charge_matlu,(paw_dmft%natom,paw_dmft%nsppol+1))
  green%charge_matlu=zero
  green%has_charge_matlu=1
  green%has_greenmatlu_xsum=0
 
  green%has_charge_matlu_solver=0
- ABI_ALLOCATE(green%charge_matlu_solver,(paw_dmft%natom,paw_dmft%nsppol+1))
+ ABI_MALLOC(green%charge_matlu_solver,(paw_dmft%natom,paw_dmft%nsppol+1))
  green%charge_matlu_solver=zero
  green%has_charge_matlu_solver=1
 
  green%has_charge_matlu_prev=0
- ABI_ALLOCATE(green%charge_matlu_prev,(paw_dmft%natom,paw_dmft%nsppol+1))
+ ABI_MALLOC(green%charge_matlu_prev,(paw_dmft%natom,paw_dmft%nsppol+1))
  green%charge_matlu_prev=zero
  green%has_charge_matlu_prev=1
 
  call init_oper(paw_dmft,green%occup,opt_ksloc=3)
 
 !  built simple arrays to distribute the tasks in compute_green.
- ABI_ALLOCATE(green%procb,(nw,paw_dmft%nkpt))
- ABI_ALLOCATE(green%proct,(nw,0:paw_dmft%nproc-1))
+ ABI_MALLOC(green%procb,(nw,paw_dmft%nkpt))
+ ABI_MALLOC(green%proct,(nw,0:paw_dmft%nproc-1))
 
  call distrib_paral(paw_dmft%nkpt,paw_dmft%nproc,nw,nw_perproc,green%procb,green%proct)
  green%nw=nw
@@ -274,7 +274,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
 !  need to distribute memory over frequencies
 
 !!  begin of temporary modificatios
-! ABI_DATATYPE_ALLOCATE(green%oper,(green%nw_perproc))
+! ABI_MALLOC(green%oper,(green%nw_perproc))
 ! do ifreq=1,green%nw_perproc
 !  call init_oper(paw_dmft,green%oper(ifreq),opt_ksloc=optoper_ksloc)
 ! enddo
@@ -290,7 +290,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
 !
 !
 !!  end of temporary modificatios
- ABI_DATATYPE_ALLOCATE(green%oper,(green%nw))
+ ABI_MALLOC(green%oper,(green%nw))
  do ifreq=1,green%nw
   call init_oper(paw_dmft,green%oper(ifreq),opt_ksloc=optoper_ksloc)
  enddo
@@ -298,7 +298,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
  green%ichargeloc_cv=0
 
  if(paw_dmft%dmft_solv>=4) then
-   ABI_ALLOCATE(green%ecorr_qmc,(paw_dmft%natom))
+   ABI_MALLOC(green%ecorr_qmc,(paw_dmft%natom))
  end if
  if(paw_dmft%dmft_solv>=4) green%ecorr_qmc(:)=zero
 
@@ -355,14 +355,14 @@ subroutine init_green_tau(green,paw_dmft,opt_ksloc)
  endif
 
  green%dmftqmc_l=paw_dmft%dmftqmc_l
- ABI_ALLOCATE(green%tau,(green%dmftqmc_l))
+ ABI_MALLOC(green%tau,(green%dmftqmc_l))
  do itau=1,green%dmftqmc_l
   green%tau(itau)=float(itau-1)/float(green%dmftqmc_l)/paw_dmft%temp
  enddo
 
  call init_oper(paw_dmft,green%occup_tau,optksloc)
 
- ABI_DATATYPE_ALLOCATE(green%oper_tau,(paw_dmft%dmftqmc_l))
+ ABI_MALLOC(green%oper_tau,(paw_dmft%dmftqmc_l))
  do itau=1,green%dmftqmc_l
   call init_oper(paw_dmft,green%oper_tau(itau),optksloc)
  enddo
@@ -405,31 +405,31 @@ subroutine destroy_green(green)
    do ifreq=1,green%nw
     call destroy_oper(green%oper(ifreq))
    enddo
-   ABI_DATATYPE_DEALLOCATE(green%oper)
+   ABI_FREE(green%oper)
  end if
  if ( allocated(green%charge_matlu))       then
-   ABI_DEALLOCATE(green%charge_matlu)
+   ABI_FREE(green%charge_matlu)
  end if
  green%has_charge_matlu=0
 
  if ( allocated(green%charge_matlu_prev))       then
-   ABI_DEALLOCATE(green%charge_matlu_prev)
+   ABI_FREE(green%charge_matlu_prev)
  end if
  green%has_charge_matlu_prev=0
 
  if ( allocated(green%charge_matlu_solver))       then
-   ABI_DEALLOCATE(green%charge_matlu_solver)
+   ABI_FREE(green%charge_matlu_solver)
  end if
  green%has_charge_matlu_solver=0
 
  if ( allocated(green%ecorr_qmc))   then
-    ABI_DEALLOCATE(green%ecorr_qmc)
+    ABI_FREE(green%ecorr_qmc)
  end if
  if ( allocated(green%procb))   then
-    ABI_DEALLOCATE(green%procb)
+    ABI_FREE(green%procb)
  end if
  if ( allocated(green%proct))   then
-    ABI_DEALLOCATE(green%proct)
+    ABI_FREE(green%proct)
  end if
  green%omega => null()
 
@@ -477,10 +477,10 @@ subroutine destroy_green_tau(green)
    do itau=1,green%dmftqmc_l
     call destroy_oper(green%oper_tau(itau))
    enddo
-   ABI_DATATYPE_DEALLOCATE(green%oper_tau)
+   ABI_FREE(green%oper_tau)
  end if
  if ( allocated(green%tau))            then
-   ABI_DEALLOCATE(green%tau)
+   ABI_FREE(green%tau)
  end if
 
 end subroutine destroy_green_tau
@@ -718,7 +718,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 
 !  == Print local Green Function
  if(option==1.or.option==3) then
-   ABI_ALLOCATE(unitgreenfunc_arr,(natom*nsppol*nspinor))
+   ABI_MALLOC(unitgreenfunc_arr,(natom*nsppol*nspinor))
    iall=0
    do iatom=1,natom
      if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
@@ -793,12 +793,12 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo ! isppol
      endif ! lpawu=/-1
    enddo ! iatom
-   ABI_DEALLOCATE(unitgreenfunc_arr)
+   ABI_FREE(unitgreenfunc_arr)
  endif
 
 !  == Print ks green function
  if((option==2.or.option==3).and.green%oper(1)%has_operks==1) then
-   ABI_ALLOCATE(unitgreenloc_arr,(nsppol*nkpt))
+   ABI_MALLOC(unitgreenloc_arr,(nsppol*nkpt))
    iall=0
    do isppol = 1 , nsppol
      write(tag_is,'(i1)')isppol
@@ -860,7 +860,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo
      enddo ! ikpt
    enddo ! isppol
-   ABI_DEALLOCATE(unitgreenloc_arr)
+   ABI_FREE(unitgreenloc_arr)
  endif
 
  if((green%w_type=="real".and.option>=4).and.green%oper(1)%has_operks==1) then
@@ -878,8 +878,8 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        ABI_ERROR(message)
      end if
    endif
-   ABI_ALLOCATE(sf,(green%nw))
-   ABI_ALLOCATE(sf_corr,(green%nw))
+   ABI_MALLOC(sf,(green%nw))
+   ABI_MALLOC(sf_corr,(green%nw))
    iall=0
    if (option==5) then
        do ikpt = 1, nkpt
@@ -964,8 +964,8 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
      enddo
    endif
    close(spf_unt)
-   ABI_DEALLOCATE(sf)
-   ABI_DEALLOCATE(sf_corr)
+   ABI_FREE(sf)
+   ABI_FREE(sf_corr)
  endif
 
  if(optwt==2.and.(option==1.or.option==3)) then
@@ -1092,7 +1092,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 ! ==============================
 ! Initialise Identity
 ! ==============================
- ABI_ALLOCATE(Id,(paw_dmft%mbandc,paw_dmft%mbandc))
+ ABI_MALLOC(Id,(paw_dmft%mbandc,paw_dmft%mbandc))
  Id=zero
  do ib=1, paw_dmft%mbandc
    Id(ib,ib)=one
@@ -1133,7 +1133,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 ! == Compute Green function G(k)
 ! ================================
  green%occup%ks=czero
- ABI_ALLOCATE(procb_ifreq,(paw_dmft%nkpt))
+ ABI_MALLOC(procb_ifreq,(paw_dmft%nkpt))
  do ifreq=1,green%nw
    !if(present(iii)) write(6,*) ch10,'ifreq  self', ifreq,self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
 !   ====================================================
@@ -1278,7 +1278,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 ! call flush(std_out)
    endif ! parallelisation
  enddo ! ifreq
- ABI_DEALLOCATE(procb_ifreq)
+ ABI_FREE(procb_ifreq)
 
 ! =============================================
 ! built total green function (sum over procs).
@@ -1341,7 +1341,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
  endif
 ! call flush(std_out)
 
- ABI_DEALLOCATE(Id)
+ ABI_FREE(Id)
  call timab(624,2,tsec)
 
 end subroutine compute_green
@@ -1474,10 +1474,10 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  endif
 
 ! Allocations
- ABI_DATATYPE_ALLOCATE(matlu_temp,(natom))
+ ABI_MALLOC(matlu_temp,(natom))
  call init_matlu(natom,nspinor,nsppol,green%oper(1)%matlu(:)%lpawu,matlu_temp)
 
- ABI_ALLOCATE(ff,(green%nw))
+ ABI_MALLOC(ff,(green%nw))
 
 ! =================================================
 ! == Integrate Local Green function ===============
@@ -1801,9 +1801,9 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  endif
 
 
- ABI_DEALLOCATE(ff)
+ ABI_FREE(ff)
  call destroy_matlu(matlu_temp,natom)
- ABI_DATATYPE_DEALLOCATE(matlu_temp)
+ ABI_FREE(matlu_temp)
 ! deallocate(charge_loc_old)
  call timab(625,2,tsec)
  DBG_EXIT("COLL")
@@ -1985,8 +1985,8 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
  call init_green_tau(green_temp,paw_dmft)
 
  !green%oper(:)%matlu(1)%mat(1,1,1,1,1)
- ABI_ALLOCATE(fw,(green%nw))
- ABI_ALLOCATE(ft,(green%dmftqmc_l))
+ ABI_MALLOC(fw,(green%nw))
+ ABI_MALLOC(ft,(green%dmftqmc_l))
 
 !==============================================
 ! == Inverse fourier transformation ===========
@@ -2189,8 +2189,8 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
      enddo
    endif ! opt_ksloc=2
  endif ! opt_tw==-1
- ABI_DEALLOCATE(fw)
- ABI_DEALLOCATE(ft)
+ ABI_FREE(fw)
+ ABI_FREE(ft)
  call destroy_green_tau(green_temp)
  call destroy_green(green_temp)
 
@@ -2486,7 +2486,7 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
  character(len=500) :: message
  integer :: ifreq
 ! *********************************************************************
- ABI_ALLOCATE(procb2,(paw_dmft%dmft_nwlo))
+ ABI_MALLOC(procb2,(paw_dmft%dmft_nwlo))
  if(present(procb).and.present(myproc)) then
    do ifreq=1,paw_dmft%dmft_nwlo
     procb2(ifreq)=(procb(ifreq)==myproc)
@@ -2558,7 +2558,7 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
     enddo
   endif
  endif  ! ldiag
- ABI_DEALLOCATE(procb2)
+ ABI_FREE(procb2)
 
 end subroutine int_fct
 !!***
@@ -2625,25 +2625,25 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 ! == inverse fourier transform
  if(opt_four==-1) then
 
-   ABI_ALLOCATE(splined_li,(paw_dmft%dmft_nwli))
+   ABI_MALLOC(splined_li,(paw_dmft%dmft_nwli))
 !   allocate(fw1(0:paw_dmft%dmft_nwlo-1))
    if(paw_dmft%dmft_log_freq==1) then
-     ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
+     ABI_MALLOC(omega_li,(1:paw_dmft%dmft_nwli))
      call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
      call spline_c(paw_dmft%dmft_nwlo,paw_dmft%dmft_nwli,paw_dmft%omega_lo,&
 &                   omega_li,splined_li,fw)
-     ABI_DEALLOCATE(omega_li)
+     ABI_FREE(omega_li)
    else
      splined_li=fw
    endif
    call invfourier(splined_li,ft,paw_dmft%dmft_nwli,ltau,iflag,beta)
 !   deallocate(fw1)
-   ABI_DEALLOCATE(splined_li)
+   ABI_FREE(splined_li)
 
 ! == direct fourier transform
  else if(opt_four==1) then
 
-   ABI_ALLOCATE(ftr,(ltau))
+   ABI_MALLOC(ftr,(ltau))
 
    iwarn=0
    do itau=1,ltau
@@ -2663,7 +2663,7 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 !       write(std_out,*) itau,ftr(itau)
    enddo
 
-   ABI_ALLOCATE(tospline_li,(paw_dmft%dmft_nwli))
+   ABI_MALLOC(tospline_li,(paw_dmft%dmft_nwli))
    if (log_direct==1) then
 !   do not have a physical meaning..because the log frequency is not
 !   one of the linear frequency.
@@ -2678,19 +2678,19 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
         !write(1112,*) paw_dmft%omega_li(ifreq),real(tospline_li(ifreq)),aimag(tospline_li(ifreq))
      enddo
      if(paw_dmft%dmft_log_freq==1) then
-       ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
+       ABI_MALLOC(omega_li,(1:paw_dmft%dmft_nwli))
        call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
        call spline_c(paw_dmft%dmft_nwli,paw_dmft%dmft_nwlo,omega_li,&
 &                 paw_dmft%omega_lo,fw,tospline_li)
-       ABI_DEALLOCATE(omega_li)
+       ABI_FREE(omega_li)
      else
        fw=tospline_li
      endif
    endif
 
-   ABI_DEALLOCATE(tospline_li)
+   ABI_FREE(tospline_li)
 
-   ABI_DEALLOCATE(ftr)
+   ABI_FREE(ftr)
    if(iwarn>0) then
      write(message,'(a,a,2(e15.4))') ch10,&
 &     "WARNING: off-diag green function is not real in imaginary time space",xsto
@@ -2757,11 +2757,11 @@ subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
 !   allocate(fw1(0:paw_dmft%dmft_nwlo-1))
    if(paw_dmft%dmft_log_freq==1) then
-     ABI_ALLOCATE(omega_li,(1:size_fw2))
+     ABI_MALLOC(omega_li,(1:size_fw2))
      call construct_nwli_dmft(paw_dmft,size_fw2,omega_li)
      call spline_c(size_fw1,size_fw2,paw_dmft%omega_lo(1:size_fw1),&
 &                   omega_li(1:size_fw2),fw2,fw1)
-     ABI_DEALLOCATE(omega_li)
+     ABI_FREE(omega_li)
    else
      fw2=fw1
    endif
@@ -2771,11 +2771,11 @@ subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
 
    if(paw_dmft%dmft_log_freq==1) then
-     ABI_ALLOCATE(omega_li,(1:size_fw2))
+     ABI_MALLOC(omega_li,(1:size_fw2))
      call construct_nwli_dmft(paw_dmft,size_fw2,omega_li)
      call spline_c(size_fw2,size_fw1,omega_li(1:size_fw2),&
 &                 paw_dmft%omega_lo(1:size_fw1),fw1,fw2)
-     ABI_DEALLOCATE(omega_li)
+     ABI_FREE(omega_li)
    else
      fw1=fw2
    endif
@@ -2816,7 +2816,7 @@ subroutine occup_green_tau(green)
  complex(dpc), allocatable :: shift(:)
 ! *********************************************************************
 
- ABI_ALLOCATE(shift,(green%oper_tau(1)%natom))
+ ABI_MALLOC(shift,(green%oper_tau(1)%natom))
  do iatom=1,green%oper_tau(1)%natom
    shift(iatom)=-cone
    lpawu=green%oper_tau(1)%matlu(iatom)%lpawu
@@ -2827,7 +2827,7 @@ subroutine occup_green_tau(green)
    endif
  enddo
  call shift_matlu(green%occup_tau%matlu,green%occup_tau%natom,shift)
- ABI_DEALLOCATE(shift)
+ ABI_FREE(shift)
 
 
 end subroutine occup_green_tau
@@ -2915,7 +2915,7 @@ end subroutine occup_green_tau
  if(nproc.ge.2*nw) then
  !write(6,*) "AA"
    ratio=nproc/nw
-   ABI_ALLOCATE(proca,(nw,nproc/nw))
+   ABI_MALLOC(proca,(nw,nproc/nw))
    do ir=1,ratio
      do iw=1,nw
        proca(iw,ir)=iw+(ir-1)*nw-1
@@ -2942,7 +2942,7 @@ end subroutine occup_green_tau
      enddo
    enddo
    nw_perproc=1
-   ABI_DEALLOCATE(proca)
+   ABI_FREE(proca)
 
  else if (nproc.ge.nw) then
  !write(6,*) "BB"
@@ -3653,7 +3653,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
  nkpt=paw_dmft%nkpt
  nsppol=paw_dmft%nsppol
  ltau=128
- ABI_ALLOCATE(tau,(ltau))
+ ABI_MALLOC(tau,(ltau))
  do itau=1,ltau
    tau(itau)=float(itau-1)/float(ltau)/paw_dmft%temp
  end do
@@ -3669,7 +3669,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 !Compute local band ks green function
 ! should be computed in compute_green: it would be less costly in memory.
 !=========================================
- ABI_ALLOCATE(loc_ks,(nsppol,mbandc,paw_dmft%dmft_nwlo))
+ ABI_MALLOC(loc_ks,(nsppol,mbandc,paw_dmft%dmft_nwlo))
  if(green%oper(1)%has_operks==1) then
    loc_ks(:,:,:)=czero
    do isppol=1,nsppol
@@ -3691,9 +3691,9 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 !Compute fourier transformation
 !=========================================
 
- ABI_ALLOCATE(loc_ks_tau,(nsppol,mbandc,ltau))
- ABI_ALLOCATE(fw,(paw_dmft%dmft_nwlo))
- ABI_ALLOCATE(ft,(ltau))
+ ABI_MALLOC(loc_ks_tau,(nsppol,mbandc,ltau))
+ ABI_MALLOC(fw,(paw_dmft%dmft_nwlo))
+ ABI_MALLOC(ft,(ltau))
  loc_ks_tau(:,:,:)=czero
  do isppol=1,nsppol
    do iband=1,mbandc
@@ -3706,8 +3706,8 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
      end do
    end do
  end do
- ABI_DEALLOCATE(fw)
- ABI_DEALLOCATE(ft)
+ ABI_FREE(fw)
+ ABI_FREE(ft)
  do isppol=1,nsppol
    do iband=1,mbandc
      do itau=1,ltau
@@ -3720,7 +3720,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 !Print out ksloc green function
 !=========================================
  if(abs(prtopt)==1) then
-   ABI_ALLOCATE(unitgreenlocks_arr,(nsppol))
+   ABI_MALLOC(unitgreenlocks_arr,(nsppol))
    do isppol=1,nsppol
      write(tag_is,'(i1)')isppol
      tmpfil = trim(paw_dmft%filapp)//'Gtau_locks_isppol'//tag_is
@@ -3750,13 +3750,13 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
      end do
 !    call flush(unitgreenlocks_arr(isppol))
    end do
-   ABI_DEALLOCATE(unitgreenlocks_arr)
+   ABI_FREE(unitgreenlocks_arr)
  end if
 
 !Deallocations
- ABI_DEALLOCATE(loc_ks)
- ABI_DEALLOCATE(loc_ks_tau)
- ABI_DEALLOCATE(tau)
+ ABI_FREE(loc_ks)
+ ABI_FREE(loc_ks_tau)
+ ABI_FREE(tau)
 
 end subroutine local_ks_green
 !!***

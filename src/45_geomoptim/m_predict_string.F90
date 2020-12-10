@@ -127,16 +127,16 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
 
 ! *************************************************************************
 
- ABI_ALLOCATE(xred,(3,natom,nimage))
+ ABI_MALLOC(xred,(3,natom,nimage))
 
 !Parallelism over images: only one process per image of the cell
  if (mpi_enreg%me_cell==0) then
 
 !  Retrieve positions and forces
-   ABI_ALLOCATE(etotal,(nimage))
-   ABI_ALLOCATE(xcart,(3,natom,nimage))
-   ABI_ALLOCATE(fcart,(3,natom,nimage))
-   ABI_ALLOCATE(rprimd,(3,3,nimage))
+   ABI_MALLOC(etotal,(nimage))
+   ABI_MALLOC(xcart,(3,natom,nimage))
+   ABI_MALLOC(fcart,(3,natom,nimage))
+   ABI_MALLOC(rprimd,(3,3,nimage))
    call get_geometry_img(etotal,natom,nimage,results_img(:,itimimage_eff),&
 &   fcart,rprimd,xcart,xred)
 
@@ -160,11 +160,11 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
 
 !    Parallelism: gather data of all images
      if (mpi_enreg%paral_img==1) then
-       ABI_ALLOCATE(buffer,(6*natom+1,nimage))
-       ABI_ALLOCATE(buffer_all,(6*natom+1,nimage_tot))
-       ABI_ALLOCATE(xred_all,(3,natom,nimage_tot))
-       ABI_ALLOCATE(xcart_all,(3,natom,nimage_tot))
-       ABI_ALLOCATE(etotal_all,(nimage_tot))
+       ABI_MALLOC(buffer,(6*natom+1,nimage))
+       ABI_MALLOC(buffer_all,(6*natom+1,nimage_tot))
+       ABI_MALLOC(xred_all,(3,natom,nimage_tot))
+       ABI_MALLOC(xcart_all,(3,natom,nimage_tot))
+       ABI_MALLOC(etotal_all,(nimage_tot))
        buffer=zero;ii=0
        buffer(ii+1:ii+3*natom,1:nimage)=reshape(xred ,(/3*natom,nimage/));ii=3*natom
        buffer(ii+1:ii+3*natom,1:nimage)=reshape(xcart,(/3*natom,nimage/));ii=6*natom
@@ -173,8 +173,8 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
        xred_all(:,:,:) =reshape(buffer_all(ii+1:ii+3*natom,1:nimage_tot),(/3,natom,nimage_tot/));ii=3*natom
        xcart_all(:,:,:)=reshape(buffer_all(ii+1:ii+3*natom,1:nimage_tot),(/3,natom,nimage_tot/));ii=6*natom
        etotal_all(:)=buffer_all(ii+1,1:nimage_tot);ii=0
-       ABI_DEALLOCATE(buffer)
-       ABI_DEALLOCATE(buffer_all)
+       ABI_FREE(buffer)
+       ABI_FREE(buffer_all)
      else
        xred_all   => xred
        xcart_all  => xcart
@@ -184,9 +184,9 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
 !    dimage is the distance between two images
 !    darc is the parametrization on the string
 !    wimage is the weight
-     ABI_ALLOCATE(darc,(nimage_tot))
-     ABI_ALLOCATE(dimage,(nimage_tot))
-     ABI_ALLOCATE(wimage,(nimage_tot))
+     ABI_MALLOC(darc,(nimage_tot))
+     ABI_MALLOC(dimage,(nimage_tot))
+     ABI_MALLOC(wimage,(nimage_tot))
 
 !    === Weights for equal arc length
      if (mep_param%string_algo/=2) then
@@ -205,7 +205,7 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
 !    The distance between images is calculated
 !    and normalized to a string length of 1.0
      dimage=zero
-     ABI_ALLOCATE(vect,(3,natom))
+     ABI_MALLOC(vect,(3,natom))
      do iimage=2,nimage_tot
        dimage(iimage)=dimage(iimage-1)
 !      MT april 2012: distance must be computed with cartesian coordinates
@@ -214,7 +214,7 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
        dimage(iimage)=dimage(iimage)+wimage(iimage)*mep_img_norm(vect)
      end do
      dimage(:)=dimage(:)/dimage(nimage_tot)
-     ABI_DEALLOCATE(vect)
+     ABI_FREE(vect)
 
 !    Arc lengths
      darc(1)=zero
@@ -224,15 +224,15 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
      end do
 
 !    New image coordinates are calculated and such that now the mesh is uniform
-     ABI_ALLOCATE(x,(nimage_tot))
-     ABI_ALLOCATE(y,(nimage_tot))
-     ABI_ALLOCATE(z,(nimage_tot))
-     ABI_ALLOCATE(x2,(nimage_tot))
-     ABI_ALLOCATE(y2,(nimage_tot))
-     ABI_ALLOCATE(z2,(nimage_tot))
-     ABI_ALLOCATE(xout,(nimage_tot))
-     ABI_ALLOCATE(yout,(nimage_tot))
-     ABI_ALLOCATE(zout,(nimage_tot))
+     ABI_MALLOC(x,(nimage_tot))
+     ABI_MALLOC(y,(nimage_tot))
+     ABI_MALLOC(z,(nimage_tot))
+     ABI_MALLOC(x2,(nimage_tot))
+     ABI_MALLOC(y2,(nimage_tot))
+     ABI_MALLOC(z2,(nimage_tot))
+     ABI_MALLOC(xout,(nimage_tot))
+     ABI_MALLOC(yout,(nimage_tot))
+     ABI_MALLOC(zout,(nimage_tot))
      do iatom=1,natom
        do iimage=1,nimage_tot
          x(iimage)=xred_all(1,iatom,iimage)
@@ -257,32 +257,32 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
      end do  ! iatom
 
 !    Free memory
-     ABI_DEALLOCATE(x)
-     ABI_DEALLOCATE(y)
-     ABI_DEALLOCATE(z)
-     ABI_DEALLOCATE(x2)
-     ABI_DEALLOCATE(y2)
-     ABI_DEALLOCATE(z2)
-     ABI_DEALLOCATE(xout)
-     ABI_DEALLOCATE(yout)
-     ABI_DEALLOCATE(zout)
-     ABI_DEALLOCATE(darc)
-     ABI_DEALLOCATE(dimage)
-     ABI_DEALLOCATE(wimage)
+     ABI_FREE(x)
+     ABI_FREE(y)
+     ABI_FREE(z)
+     ABI_FREE(x2)
+     ABI_FREE(y2)
+     ABI_FREE(z2)
+     ABI_FREE(xout)
+     ABI_FREE(yout)
+     ABI_FREE(zout)
+     ABI_FREE(darc)
+     ABI_FREE(dimage)
+     ABI_FREE(wimage)
      if (mpi_enreg%paral_img==1)  then
-       ABI_DEALLOCATE(xred_all)
-       ABI_DEALLOCATE(xcart_all)
-       ABI_DEALLOCATE(etotal_all)
+       ABI_FREE(xred_all)
+       ABI_FREE(xcart_all)
+       ABI_FREE(etotal_all)
      end if
 
    end if ! Reparametrization
 
 !  ===============================================
 
-   ABI_DEALLOCATE(etotal)
-   ABI_DEALLOCATE(xcart)
-   ABI_DEALLOCATE(fcart)
-   ABI_DEALLOCATE(rprimd)
+   ABI_FREE(etotal)
+   ABI_FREE(xcart)
+   ABI_FREE(fcart)
+   ABI_FREE(rprimd)
  end if ! mpi_enreg%me_cell==0
 
 !Store acell, rprim, xred and vel for the new iteration
@@ -296,7 +296,7 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
    results_img(iimage,next_itimimage)%vel(:,:)     =results_img(iimage,itimimage_eff)%vel(:,:)
    results_img(iimage,next_itimimage)%vel_cell(:,:)=results_img(iimage,itimimage_eff)%vel_cell(:,:)
  end do
- ABI_DEALLOCATE(xred)
+ ABI_FREE(xred)
 
 end subroutine predict_string
 !!***

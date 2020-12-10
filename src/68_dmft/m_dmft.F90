@@ -268,7 +268,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtv
  call wrtout(std_out,message,'COLL')
 !== define Interaction from input upawu and jpawu
 !----------------------------------------------------------------------
- ABI_DATATYPE_ALLOCATE(hu,(cryst_struc%ntypat))
+ ABI_MALLOC(hu,(cryst_struc%ntypat))
  call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call initialize_self(self,paw_dmft)
 
@@ -549,7 +549,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtv
 & '========'
  call wrtout(std_out,message,'COLL')
 
- ABI_DATATYPE_DEALLOCATE(hu)
+ ABI_FREE(hu)
 
  DBG_EXIT("COLL")
 

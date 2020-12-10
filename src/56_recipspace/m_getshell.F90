@@ -162,7 +162,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
  if (kptopt == 3) then
 
-   ABI_ALLOCATE(wtk3,(nkpt3))
+   ABI_MALLOC(wtk3,(nkpt3))
    kpt3(:,:) = kpt2(:,:)
    wtk3(:) = wtk2(:)
    do ikpt = 1,nkpt3
@@ -172,15 +172,15 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
  else if (kptopt == 2) then
 
-   ABI_ALLOCATE(wtk3,(nkpt3))
+   ABI_MALLOC(wtk3,(nkpt3))
    ii = 5 ; kptopt_used = 3
    symafm_dummy(1) = 1
    shiftk_(:,:) = 0._dp
    shiftk_(:,1:nshiftk) = shiftk(:,1:nshiftk)
 
    nsym1 = 1
-   ABI_ALLOCATE(symrel1,(3,3,nsym1))
-   ABI_ALLOCATE(tnons1,(3,nsym1))
+   ABI_MALLOC(symrel1,(3,3,nsym1))
+   ABI_MALLOC(tnons1,(3,nsym1))
    symrel1(:,:,1) = 0
    symrel1(1,1,1) = 1 ; symrel1(2,2,1) = 1 ; symrel1(3,3,1) = 1
    tnons1(:,:) = 0._dp
@@ -729,13 +729,13 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
  end if
 
  if (allocated(tnons1))  then
-   ABI_DEALLOCATE(tnons1)
+   ABI_FREE(tnons1)
  end if
  if (allocated(symrel1))  then
-   ABI_DEALLOCATE(symrel1)
+   ABI_FREE(symrel1)
  end if
 
- ABI_DEALLOCATE(wtk3)
+ ABI_FREE(wtk3)
 
 end subroutine getshell
 !!***

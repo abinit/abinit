@@ -134,21 +134,21 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
  end if
 
  if (usepaw==1.and.usexcnhat==0) then
-   ABI_ALLOCATE(rhor_,(nfft,nspden))
+   ABI_MALLOC(rhor_,(nfft,nspden))
    rhor_(:,:)=rhor(:,:)-nhat(:,:)
  else
    rhor_ => rhor
  end if
 
  if (usepaw==1.and.usexcnhat==0.and.option==1) then
-   ABI_ALLOCATE(rhor1_,(nfft,nspden))
+   ABI_MALLOC(rhor1_,(nfft,nspden))
    rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
  else
    rhor1_ => rhor1
  end if
 
 !Inhomogeneous term for diagonal strain
- ABI_ALLOCATE(rhowk1,(nfft,nspden))
+ ABI_MALLOC(rhowk1,(nfft,nspden))
  if(option==0 .or. option==2) then
    if(ipert==natom+3) then
      rhowk1(:,:)=-rhor_(:,:)
@@ -226,7 +226,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
    str_scale=one;if(option==2) str_scale=two
 
 !  Transfer the data to spin-polarized storage
-   ABI_ALLOCATE(rhor1tmp,(cplex*nfft,nspden))
+   ABI_MALLOC(rhor1tmp,(cplex*nfft,nspden))
    if(nspden==1)then
      do ir=1,cplex*nfft
        rhor1tmp(ir,1)=rhowk1(ir,1)
@@ -249,7 +249,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 
    call dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,nkxc,&
 &   nspden,qphon,rhor1tmp,str_scale,vxc1)
-   ABI_DEALLOCATE(rhor1tmp)
+   ABI_FREE(rhor1tmp)
 
  else
    ABI_BUG('Invalid nkxc!')
@@ -257,13 +257,13 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
  end if ! LDA or GGA
 
  if (usepaw==1.and.usexcnhat==0) then
-   ABI_DEALLOCATE(rhor_)
+   ABI_FREE(rhor_)
  end if
  if (usepaw==1.and.usexcnhat==0.and.option==1) then
-   ABI_DEALLOCATE(rhor1_)
+   ABI_FREE(rhor1_)
  end if
 
- ABI_DEALLOCATE(rhowk1)
+ ABI_FREE(rhowk1)
 
  call timab(181,2,tsec)
 
@@ -387,7 +387,7 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 !rho1now(:,:,1) contains the first-order density, and
 !rho1now(:,:,2:4) contains the gradients of the first-order density
  ishift=0 ; ngrad=2
- ABI_ALLOCATE(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
+ ABI_MALLOC(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
  call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1tmp,rho1now)
 
 !Calculate the 1st-order contribution to grad(n) from the strain derivative
@@ -396,7 +396,7 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 !   (dGprim/ds_alpha_beta)(i,j) = -half.( delta_alpha,i Gprim(beta,j) + delta_beta,i Gprim(alpha,j) )
 !To finally get:
 !   (nabla)^(alpha,beta)_i[n] = -half ( delta_alpha,i nabla_beta[n] + delta_beta,i nabla_alpha[n] )
- ABI_ALLOCATE(rhodgnow,(cplex*nfft,nspden,3))
+ ABI_MALLOC(rhodgnow,(cplex*nfft,nspden,3))
  rhodgnow(1:nfft,1:nspden,1:3)=zero
  if (nspden==1) then
    if (istr==1) rhodgnow(1:nfft,1,1)=-     kxc(1:nfft,5)
@@ -441,7 +441,7 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 
 !Apply the XC kernel
  nspgrad=2; if (nspden==2) nspgrad=5
- ABI_ALLOCATE(dnexcdn,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dnexcdn,(cplex*nfft,nspgrad))
 
 !== Non polarized
  if (nspden==1) then
@@ -502,7 +502,7 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
    end do
 
  end if ! nspden
- ABI_DEALLOCATE(rhodgnow)
+ ABI_FREE(rhodgnow)
 
  vxc1(:,:)=zero
  call xcpot(cplex,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
@@ -512,8 +512,8 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 !the original function call to pass in gmet and gsqcut
 !call filterpot(cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)
 
- ABI_DEALLOCATE(dnexcdn)
- ABI_DEALLOCATE(rho1now)
+ ABI_FREE(dnexcdn)
+ ABI_FREE(rho1now)
 
 end subroutine dfpt_mkvxcstrgga
 !!***

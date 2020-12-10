@@ -287,8 +287,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  end if
 
 !allocate(pwind_k(mpw))
- ABI_ALLOCATE(pwnsfac_k,(4,mpw))
- ABI_ALLOCATE(sflag_k,(dtefield%mband_occ))
+ ABI_MALLOC(pwnsfac_k,(4,mpw))
+ ABI_MALLOC(sflag_k,(dtefield%mband_occ))
 !pwind_k(:) = 0
  pwnsfac_k(1,:) = 1.0_dp ! bra real
  pwnsfac_k(2,:) = 0.0_dp ! bra imag
@@ -316,23 +316,23 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  mcg1_k = mpw*mband
  shiftbd = 1
  if (ddkflag==1) then
-   ABI_ALLOCATE(cg1,(2,mcg))
-   ABI_ALLOCATE(eig_dum,(2*mband*mband*nkpt*nsppol))
-   ABI_ALLOCATE(occ_dum,(mband*nkpt*nsppol))
+   ABI_MALLOC(cg1,(2,mcg))
+   ABI_MALLOC(eig_dum,(2*mband*mband*nkpt*nsppol))
+   ABI_MALLOC(occ_dum,(mband*nkpt*nsppol))
    eig_dum(:) = zero
    occ_dum(:) = dtefield%sdeg
  end if
 
 !initialize variable tied to multiple step computation
  berrystep=dtset%berrystep
- ABI_ALLOCATE(ikpt3,(berrystep))
- ABI_ALLOCATE(ikpt3i,(berrystep))
- ABI_ALLOCATE(sflag_k_mult,(dtefield%mband_occ,berrystep))
- ABI_ALLOCATE(npw_k3,(berrystep))
- ABI_ALLOCATE(pwind_k_mult,(mpw,berrystep))
- ABI_ALLOCATE(itrs_mult,(berrystep))
- ABI_ALLOCATE(coef,(berrystep,berrystep))
- ABI_ALLOCATE(polb_mult,(nsppol,berrystep))
+ ABI_MALLOC(ikpt3,(berrystep))
+ ABI_MALLOC(ikpt3i,(berrystep))
+ ABI_MALLOC(sflag_k_mult,(dtefield%mband_occ,berrystep))
+ ABI_MALLOC(npw_k3,(berrystep))
+ ABI_MALLOC(pwind_k_mult,(mpw,berrystep))
+ ABI_MALLOC(itrs_mult,(berrystep))
+ ABI_MALLOC(coef,(berrystep,berrystep))
+ ABI_MALLOC(polb_mult,(nsppol,berrystep))
 !coefficient for berryphase computation
  coef(:,:) = 0.0_dp
  do jstep = 1, berrystep
@@ -355,30 +355,30 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !ENDDEBUG
 
 !allocate(dtm(2,dtefield%fnkpt*nsppol))
- ABI_ALLOCATE(dtm_mult,(2,dtefield%fnkpt*nsppol,berrystep))
- ABI_ALLOCATE(cg1_k,(2,mcg1_k))
+ ABI_MALLOC(dtm_mult,(2,dtefield%fnkpt*nsppol,berrystep))
+ ABI_MALLOC(cg1_k,(2,mcg1_k))
 
  if (usepaw == 1) then ! cprj allocation
    ncpgr = cprj(1,1)%ncpgr
    if ( calc_epaw3_force ) then
-     ABI_ALLOCATE(dsdr_sum,(natom,3,dtefield%fnkpt*nsppol))
-     ABI_ALLOCATE(epawf3_str,(natom,3,3))
+     ABI_MALLOC(dsdr_sum,(natom,3,dtefield%fnkpt*nsppol))
+     ABI_MALLOC(epawf3_str,(natom,3,3))
    end if
    if ( calc_epaw3_stress ) then
-     ABI_ALLOCATE(dsds_sum,(natom,6,dtefield%fnkpt*nsppol))
-     ABI_ALLOCATE(epaws3_str,(natom,3,6))
+     ABI_MALLOC(dsds_sum,(natom,6,dtefield%fnkpt*nsppol))
+     ABI_MALLOC(epaws3_str,(natom,3,6))
    end if
-   ABI_ALLOCATE(dimlmn,(natom))
+   ABI_MALLOC(dimlmn,(natom))
    call pawcprj_getdim(dimlmn,natom,nattyp_dum,ntypat,typat,pawtab,'R')
-   ABI_DATATYPE_ALLOCATE(cprj_k,(natom,dtefield%nspinor*mband))
-   ABI_DATATYPE_ALLOCATE(cprj_kb,(natom,dtefield%nspinor*mband))
-   ABI_DATATYPE_ALLOCATE(cprj_gat,(natom,nproc*dtefield%nspinor*mband))
+   ABI_MALLOC(cprj_k,(natom,dtefield%nspinor*mband))
+   ABI_MALLOC(cprj_kb,(natom,dtefield%nspinor*mband))
+   ABI_MALLOC(cprj_gat,(natom,nproc*dtefield%nspinor*mband))
    call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
    call pawcprj_alloc(cprj_kb,ncpgr,dimlmn)
    call pawcprj_alloc(cprj_gat,ncpgr,dimlmn)
    if (dtset%kptopt /= 3) then
-     ABI_DATATYPE_ALLOCATE(cprj_ikn,(natom,dtefield%nspinor*mband))
-     ABI_DATATYPE_ALLOCATE(cprj_fkn,(natom,dtefield%nspinor*mband))
+     ABI_MALLOC(cprj_ikn,(natom,dtefield%nspinor*mband))
+     ABI_MALLOC(cprj_fkn,(natom,dtefield%nspinor*mband))
      call pawcprj_alloc(cprj_ikn,ncpgr,dimlmn)
      call pawcprj_alloc(cprj_fkn,ncpgr,dimlmn)
    end if
@@ -386,7 +386,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
    n2dim = dtefield%nspinor*mband
    ntotcp = n2dim*SUM(dimlmn(:))
    if (nproc>1) then
-     ABI_DATATYPE_ALLOCATE(cprj_buf,(natom,dtefield%nspinor*mband))
+     ABI_MALLOC(cprj_buf,(natom,dtefield%nspinor*mband))
      call pawcprj_alloc(cprj_buf,ncpgr,dimlmn)
    end if
 
@@ -410,7 +410,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
          ikpt_loc = ikpt_loc + 1
 
-         ABI_ALLOCATE(ikpt1_recv,(nproc))
+         ABI_MALLOC(ikpt1_recv,(nproc))
          call xmpi_allgather(ikpt1,ikpt1_recv,spaceComm,ierr)
          call pawcprj_get(atindx1,cprj_k,cprj,natom,1,(ikpt_loc-1)*nband_k*my_nspinor,ikpt1,0,isppol,mband,&
 &         mkmem,natom,nband_k,nband_k,my_nspinor,nsppol,0,&
@@ -426,7 +426,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &           mband,dtefield%fnkpt,natom,nband_k,nband_k,dimlmn,my_nspinor,nsppol,0,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
          end do
-         ABI_DEALLOCATE(ikpt1_recv)
+         ABI_FREE(ikpt1_recv)
 
        end do ! close loop over k-points
 
@@ -443,8 +443,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !npw_k = npwarr(ikpt)
 !isppol = 1
 !nband_k = dtefield%mband_occ
-!ABI_ALLOCATE(bra,(2,npw_k*my_nspinor))
-!ABI_ALLOCATE(ket,(2,npw_k*my_nspinor))
+!ABI_MALLOC(bra,(2,npw_k*my_nspinor))
+!ABI_MALLOC(ket,(2,npw_k*my_nspinor))
 !max_err_ovlp=0.0
 !call pawcprj_get(atindx1,cprj_k,cprj,natom,1,dtefield%cprjindex(ikpt,isppol),ikpt,0,isppol,mband,&
 !&         mkmem,natom,nband_k,nband_k,my_nspinor,nsppol,0)
@@ -499,8 +499,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !end do ! end loop over bband
 !write(std_out,'(a,i4,es16.8)')' JWZ Debug: berrphase_new ikpt ovlp err : ',&
 !&           ikpt,max_err_ovlp
-!ABI_DEALLOCATE(bra)
-!ABI_DEALLOCATE(ket)
+!ABI_FREE(bra)
+!ABI_FREE(ket)
 !
 !!=========================================
 !! end code to test orthonormality of cg_k
@@ -616,11 +616,11 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !    for each pair of k-points < u_nk | u_nk+dk >
 
      icg = 0 ; icg1 = 0
-     ABI_ALLOCATE(smat_k,(2,dtefield%mband_occ,dtefield%mband_occ))
-     ABI_ALLOCATE(smat_inv,(2,dtefield%mband_occ,dtefield%mband_occ))
-     ABI_ALLOCATE(smat_k_paw,(2,usepaw*dtefield%mband_occ,usepaw*dtefield%mband_occ))
+     ABI_MALLOC(smat_k,(2,dtefield%mband_occ,dtefield%mband_occ))
+     ABI_MALLOC(smat_inv,(2,dtefield%mband_occ,dtefield%mband_occ))
+     ABI_MALLOC(smat_k_paw,(2,usepaw*dtefield%mband_occ,usepaw*dtefield%mband_occ))
      if (calc_epaw3_force .or. calc_epaw3_stress) then ! dsdr needed for forces and stresses in electric field with PAW
-       ABI_ALLOCATE(dsdr,(2,natom,ncpgr,usepaw*dtefield%mband_occ,usepaw*dtefield%mband_occ))
+       ABI_MALLOC(dsdr,(2,natom,ncpgr,usepaw*dtefield%mband_occ,usepaw*dtefield%mband_occ))
        dsdr = zero
      end if
 
@@ -771,7 +771,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
          if (ikpt1 > 0 .and. isppol > 0) then ! I currently have a true kpt to use
 
            count = npw_k3(istep)*my_nspinor*nband_k
-           ABI_ALLOCATE(cgq,(2,count))
+           ABI_MALLOC(cgq,(2,count))
            cgq = zero
            source = me
            if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt3i(istep),1,nband_k,isppol,me)) then
@@ -830,12 +830,12 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !              ENDDEBUG
 
 !              receive pwnsfac
-               ABI_ALLOCATE(buffer,(2,npw_k3(istep)))
+               ABI_MALLOC(buffer,(2,npw_k3(istep)))
                tag = ikpt3(istep) + (isppol - 1)*dtefield%fnkpt
                call xmpi_recv(buffer,source,tag,spaceComm,ierr)
                pwnsfac_k(3,1:npw_k3(istep)) = buffer(1,1:npw_k3(istep))
                pwnsfac_k(4,1:npw_k3(istep)) = buffer(2,1:npw_k3(istep))
-               ABI_DEALLOCATE(buffer)
+               ABI_FREE(buffer)
 
 !              receive cgq (and cprj)
                tag = ikpt3i(istep) + (isppol - 1)*nkpt
@@ -871,12 +871,12 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !                pwnsfac
                  tag = jkpt2 + (jsppol - 1)*dtefield%fnkpt
                  count1 = npwarr(jkpt2i)
-                 ABI_ALLOCATE(buffer,(2,count1))
+                 ABI_MALLOC(buffer,(2,count1))
                  idum = dtefield%fkgindex(jkpt2)
                  buffer(1,1:count1)  = pwnsfac(1,idum+1:idum+count1)
                  buffer(2,1:count1)  = pwnsfac(2,idum+1:idum+count1)
                  call xmpi_send(buffer,dest,tag,spaceComm,ierr)
-                 ABI_DEALLOCATE(buffer)
+                 ABI_FREE(buffer)
 
 !                cgq (and cprj)
                  icg1 = dtefield%cgindex(jkpt2i,jsppol)
@@ -891,10 +891,10 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
                  tag = jkpt2i + (jsppol - 1)*nkpt
                  count1 = npwarr(jkpt2i)*my_nspinor*nband_k
-                 ABI_ALLOCATE(buffer,(2,count1))
+                 ABI_MALLOC(buffer,(2,count1))
                  buffer(:,1:count1)  = cg(:,icg1+1:icg1+count1)
                  call xmpi_send(buffer,dest,tag,spaceComm,ierr)
-                 ABI_DEALLOCATE(buffer)
+                 ABI_FREE(buffer)
 
                  if (usepaw == 1 ) then
                    call pawcprj_mpi_send(natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
@@ -1028,7 +1028,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
              dkinv*cg1_k(:,1:npw_k1*my_nspinor*nband_k)
            end if
 
-           ABI_DEALLOCATE(cgq)
+           ABI_FREE(cgq)
 
          end if ! end if ikpt1 > 0 and isppol > 0
 
@@ -1039,11 +1039,11 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
      end do ! close loop over ikpt_loc (k-points, isppol)
 
-     ABI_DEALLOCATE(smat_inv)
-     ABI_DEALLOCATE(smat_k)
-     ABI_DEALLOCATE(smat_k_paw)
+     ABI_FREE(smat_inv)
+     ABI_FREE(smat_k)
+     ABI_FREE(smat_k_paw)
      if (calc_epaw3_force .or. calc_epaw3_stress) then
-       ABI_DEALLOCATE(dsdr)
+       ABI_FREE(dsdr)
      end if
 
    end do   ! close loop over ifor
@@ -1051,32 +1051,32 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !  MPI communicate stuff between everyone
    if (nproc>1) then
      count = 2*dtefield%fnkpt*nsppol*berrystep
-     ABI_ALLOCATE(buffer1,(count))
-     ABI_ALLOCATE(buffer2,(count))
+     ABI_MALLOC(buffer1,(count))
+     ABI_MALLOC(buffer2,(count))
      buffer1(:) = reshape(dtm_mult(:,:,:),(/count/))
      call xmpi_sum(buffer1,buffer2,count,spaceComm,ierr)
      dtm_mult(:,:,:) = reshape(buffer2(:),(/2,dtefield%fnkpt*nsppol,berrystep/))
-     ABI_DEALLOCATE(buffer1)
-     ABI_DEALLOCATE(buffer2)
+     ABI_FREE(buffer1)
+     ABI_FREE(buffer2)
      if (calc_epaw3_force) then
        count = natom*3*dtefield%fnkpt*nsppol
-       ABI_ALLOCATE(buffer1,(count))
-       ABI_ALLOCATE(buffer2,(count))
+       ABI_MALLOC(buffer1,(count))
+       ABI_MALLOC(buffer2,(count))
        buffer1(:) = reshape(dsdr_sum(:,:,:),(/count/))
        call xmpi_sum(buffer1,buffer2,count,spaceComm,ierr)
        dsdr_sum(:,:,:) = reshape(buffer2(:),(/natom,3,dtefield%fnkpt*nsppol/))
-       ABI_DEALLOCATE(buffer1)
-       ABI_DEALLOCATE(buffer2)
+       ABI_FREE(buffer1)
+       ABI_FREE(buffer2)
      end if
      if (calc_epaw3_stress) then
        count = natom*6*dtefield%fnkpt*nsppol
-       ABI_ALLOCATE(buffer1,(count))
-       ABI_ALLOCATE(buffer2,(count))
+       ABI_MALLOC(buffer1,(count))
+       ABI_MALLOC(buffer2,(count))
        buffer1(:) = reshape(dsds_sum(:,:,:),(/count/))
        call xmpi_sum(buffer1,buffer2,count,spaceComm,ierr)
        dsds_sum(:,:,:) = reshape(buffer2(:),(/natom,6,dtefield%fnkpt*nsppol/))
-       ABI_DEALLOCATE(buffer1)
-       ABI_DEALLOCATE(buffer2)
+       ABI_FREE(buffer1)
+       ABI_FREE(buffer2)
      end if
    end if ! if parallel
 
@@ -1109,7 +1109,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
      pertcase = idir + 3*natom
      response = 1
      call appdig(pertcase,dtfil%fnameabo_1wf,fiwf1o)
-     ABI_ALLOCATE(resid,(mband*nkpt*nsppol))
+     ABI_MALLOC(resid,(mband*nkpt*nsppol))
      resid(:) = zero
 
      call outwf(cg1,dtset,psps,eig_dum,fiwf1o,hdr,kg,dtset%kptns,&
@@ -1117,7 +1117,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &     nkpt,npwarr,nsppol,&
 &     occ_dum,resid,response,dtfil%unwff2,wfs,wvl)
 
-     ABI_DEALLOCATE(resid)
+     ABI_FREE(resid)
    end if  ! ddkflag == 1
 ! end of ddk part for this idir
 
@@ -1173,7 +1173,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
          call wrtout(std_out,message,'COLL')
          call wrtout(ab_out,message,'COLL')
 
-         ABI_ALLOCATE(idxkstr_mult,(nkstr,nstr))
+         ABI_MALLOC(idxkstr_mult,(nkstr,nstr))
          iunmark = 1
          kpt_mark(:)=0
          do istr=1,nstr
@@ -1195,7 +1195,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
        else
          nstr = dtefield%nstr(idir)
          nkstr = dtefield%nkstr(idir)
-         ABI_ALLOCATE(idxkstr_mult,(nkstr,nstr))
+         ABI_MALLOC(idxkstr_mult,(nkstr,nstr))
          idxkstr_mult(:,:) = dtefield%idxkstr(1:nkstr,1:nstr,idir)
        end if
 !      DEBUG
@@ -1204,8 +1204,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !      end do
 !      ENDBEBUG
 
-       ABI_ALLOCATE(det_string,(2,nstr))
-       ABI_ALLOCATE(polberry,(nstr))
+       ABI_MALLOC(det_string,(2,nstr))
+       ABI_MALLOC(polberry,(nstr))
        write(message,'(a,10x,a,10x,a)')ch10,&
 &       'istr','polberry(istr)'
        call wrtout(std_out,message,'COLL')
@@ -1282,7 +1282,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
 
 !        correction to obtain a smouth logarithm of the determinant
-         ABI_ALLOCATE(str_flag,(nstr))
+         ABI_MALLOC(str_flag,(nstr))
 !        DEBUG
 !        since we don't have any case of non-nul Chern number,
 !        we must change the det_string value "by brute force" if we want debug this
@@ -1348,7 +1348,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
              end do
            end do
          end if
-         ABI_DEALLOCATE(str_flag)
+         ABI_FREE(str_flag)
 !        DEBUG
 !        deallocate(dist_str)
 !        det_string(:,:)=det_string_test(:,:)
@@ -1404,8 +1404,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !      Fold into interval [-1,1]
        polbtot = polbtot - 2_dp*nint(polbtot/2_dp)
 
-       ABI_DEALLOCATE(det_string)
-       ABI_DEALLOCATE(polberry)
+       ABI_FREE(det_string)
+       ABI_FREE(polberry)
 
 !      ==========================================================================
 
@@ -1601,7 +1601,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
        end if
 
 
-       ABI_DEALLOCATE(idxkstr_mult)
+       ABI_FREE(idxkstr_mult)
 
      end do !istep
 
@@ -1651,54 +1651,54 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  end if
 
 !deallocate(pwind_k, dtm)
- ABI_DEALLOCATE(pwnsfac_k)
- ABI_DEALLOCATE(sflag_k)
- ABI_DEALLOCATE(cg1_k)
+ ABI_FREE(pwnsfac_k)
+ ABI_FREE(sflag_k)
+ ABI_FREE(cg1_k)
  if (ddkflag == 1)  then
-   ABI_DEALLOCATE(cg1)
-   ABI_DEALLOCATE(eig_dum)
-   ABI_DEALLOCATE(occ_dum)
+   ABI_FREE(cg1)
+   ABI_FREE(eig_dum)
+   ABI_FREE(occ_dum)
  end if
 
  if (usepaw == 1) then
-   ABI_DEALLOCATE(dimlmn)
+   ABI_FREE(dimlmn)
    call pawcprj_free(cprj_k)
    call pawcprj_free(cprj_kb)
    call pawcprj_free(cprj_gat)
-   ABI_DATATYPE_DEALLOCATE(cprj_k)
-   ABI_DATATYPE_DEALLOCATE(cprj_kb)
-   ABI_DATATYPE_DEALLOCATE(cprj_gat)
+   ABI_FREE(cprj_k)
+   ABI_FREE(cprj_kb)
+   ABI_FREE(cprj_gat)
    if (dtset%kptopt /= 3) then
      call pawcprj_free(cprj_ikn)
      call pawcprj_free(cprj_fkn)
-     ABI_DATATYPE_DEALLOCATE(cprj_ikn)
-     ABI_DATATYPE_DEALLOCATE(cprj_fkn)
+     ABI_FREE(cprj_ikn)
+     ABI_FREE(cprj_fkn)
    end if
    if (calc_epaw3_force) then
-     ABI_DEALLOCATE(dsdr_sum)
-     ABI_DEALLOCATE(epawf3_str)
+     ABI_FREE(dsdr_sum)
+     ABI_FREE(epawf3_str)
    end if
    if (calc_epaw3_stress) then
-     ABI_DEALLOCATE(dsds_sum)
-     ABI_DEALLOCATE(epaws3_str)
+     ABI_FREE(dsds_sum)
+     ABI_FREE(epaws3_str)
    end if
 
    if (nproc>1) then
      call pawcprj_free(cprj_buf)
-     ABI_DATATYPE_DEALLOCATE(cprj_buf)
+     ABI_FREE(cprj_buf)
    end if
 
  end if
 
- ABI_DEALLOCATE(ikpt3)
- ABI_DEALLOCATE(ikpt3i)
- ABI_DEALLOCATE(sflag_k_mult)
- ABI_DEALLOCATE(npw_k3)
- ABI_DEALLOCATE(pwind_k_mult)
- ABI_DEALLOCATE(itrs_mult)
- ABI_DEALLOCATE(coef)
- ABI_DEALLOCATE(polb_mult)
- ABI_DEALLOCATE(dtm_mult)
+ ABI_FREE(ikpt3)
+ ABI_FREE(ikpt3i)
+ ABI_FREE(sflag_k_mult)
+ ABI_FREE(npw_k3)
+ ABI_FREE(pwind_k_mult)
+ ABI_FREE(itrs_mult)
+ ABI_FREE(coef)
+ ABI_FREE(polb_mult)
+ ABI_FREE(dtm_mult)
 
 !DEBUG
 !write(std_out,*)'berryphase_new exit'
@@ -1862,7 +1862,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
   ncpgr = 0
   ctocprj_choice = 1 ! no derivs
   if ( efield .and. psps%usepaw == 1) then
-     ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
+     ABI_MALLOC(cprj,(dtset%natom,mcprj))
      !  finite electric field may need gradients for forces, stress
      if (calc_epaw3_force .and. .not. calc_epaw3_stress) then
         ncpgr = 3; ctocprj_choice = 2 ! derivs w.r.t. position
@@ -1874,7 +1874,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
      call pawcprj_alloc(cprj,ncpgr,dimcprj)
      iatom=0 ; iorder_cprj=1 ! retain ordering of input list
      !  all arguments to ctocprj are defined already except ph1d, do that here
-     ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+     ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
      call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred)
      call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,iorder_cprj,&
           &   dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
@@ -1882,9 +1882,9 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
           &   dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
           &   dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&
           &   dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
-     ABI_DEALLOCATE(ph1d)
+     ABI_FREE(ph1d)
   else
-     ABI_DATATYPE_ALLOCATE(cprj,(0,0))
+     ABI_MALLOC(cprj,(0,0))
   end if ! end update of cprj
 
   if ( efield ) then ! compute polarization and if necessary store cprj in efield
@@ -2259,7 +2259,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
   if ( efield .and. psps%usepaw == 1) then
      call pawcprj_free(cprj)
   end if
-  ABI_DATATYPE_DEALLOCATE(cprj)
+  ABI_FREE(cprj)
 
 end subroutine update_e_field_vars
 !!***
@@ -2761,8 +2761,8 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
   if (.not. initfield .and. dtset%orbmag == 0) then
      ! initorbmag.F90 also allocates pwind and pwnsfac
      pwind_alloc = 1
-     ABI_ALLOCATE(pwind,(pwind_alloc,2,3))
-     ABI_ALLOCATE(pwnsfac,(2,pwind_alloc))
+     ABI_MALLOC(pwind,(pwind_alloc,2,3))
+     ABI_MALLOC(pwnsfac,(2,pwind_alloc))
      pwind(:,:,:)=0
      pwnsfac(:,:)=zero
   end if
@@ -2937,15 +2937,15 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      option = 0
      brav = 1
      mkpt=nkptlatt*dtset%nshiftk
-     ABI_ALLOCATE(spkpt,(3,mkpt))
+     ABI_MALLOC(spkpt,(3,mkpt))
      call smpbz(1,ab_out,dtset%kptrlatt,mkpt,fnkpt_computed,dtset%nshiftk,option,dtset%shiftk,spkpt)
      dtefield%fnkpt = fnkpt_computed
-     ABI_ALLOCATE(dtefield%fkptns,(3,dtefield%fnkpt))
+     ABI_MALLOC(dtefield%fkptns,(3,dtefield%fnkpt))
      dtefield%fkptns(:,:)=spkpt(:,1:dtefield%fnkpt)
-     ABI_DEALLOCATE(spkpt)
+     ABI_FREE(spkpt)
   else if(dtset%kptopt==3.or.dtset%kptopt==0)then
      dtefield%fnkpt=nkpt
-     ABI_ALLOCATE(dtefield%fkptns,(3,dtefield%fnkpt))
+     ABI_MALLOC(dtefield%fkptns,(3,dtefield%fnkpt))
      dtefield%fkptns(1:3,1:dtefield%fnkpt)=dtset%kpt(1:3,1:dtefield%fnkpt)
      if(dtset%kptopt==0)then
         write(message,'(10a)') ch10,&
@@ -2959,7 +2959,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
   !call listkk to get mapping from FBZ to IBZ
   rdum=1.0d-5  ! cutoff distance to decide when two k points match
-  ABI_ALLOCATE(dtefield%indkk_f2ibz,(dtefield%fnkpt,6))
+  ABI_MALLOC(dtefield%indkk_f2ibz,(dtefield%fnkpt,6))
 
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
@@ -2981,7 +2981,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   call timab(1004,1,tsec)
 
   !Construct i2fbz and f2ibz
-  ABI_ALLOCATE(dtefield%i2fbz,(nkpt))
+  ABI_MALLOC(dtefield%i2fbz,(nkpt))
   idum=0
   do ikpt=1,dtefield%fnkpt
      if (dtefield%indkk_f2ibz(ikpt,2)==1 .and. &
@@ -3015,8 +3015,8 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      dtefield%natom    = natom
      dtefield%my_natom = mpi_enreg%my_natom
 
-     ABI_ALLOCATE(dtefield%lmn_size,(ntypat))
-     ABI_ALLOCATE(dtefield%lmn2_size,(ntypat))
+     ABI_MALLOC(dtefield%lmn_size,(ntypat))
+     ABI_MALLOC(dtefield%lmn2_size,(ntypat))
      do itypat = 1, ntypat
         dtefield%lmn_size(itypat) = pawtab(itypat)%lmn_size
         dtefield%lmn2_size(itypat) = pawtab(itypat)%lmn2_size
@@ -3027,14 +3027,14 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
      ! expibi and qijb_kk are NOT parallelized over atoms
      ! this may change in the future (JZwanziger 18 March 2014)
-     ABI_ALLOCATE(dtefield%qijb_kk,(2,lmn2_size_max,dtefield%natom,3))
-     ABI_ALLOCATE(dtefield%expibi,(2,dtefield%natom,3))
+     ABI_MALLOC(dtefield%qijb_kk,(2,lmn2_size_max,dtefield%natom,3))
+     ABI_MALLOC(dtefield%expibi,(2,dtefield%natom,3))
      dtefield%has_expibi = 1
      dtefield%has_qijb = 1
 
      if ( fieldflag .and. dtefield%has_rij==0) then
         lmn2_size_max = psps%lmnmax*(psps%lmnmax+1)/2
-        ABI_ALLOCATE(dtefield%rij,(lmn2_size_max,ntypat,3))
+        ABI_MALLOC(dtefield%rij,(lmn2_size_max,ntypat,3))
         dtefield%has_rij = 1
      end if
 
@@ -3042,37 +3042,37 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      ! might also apply for other displacement-type field calculations, but not sure yet
      ! JZwanziger 4 April 2014
      if ( calc_epaw3_force ) then
-        ABI_ALLOCATE(dtefield%epawf3,(dtefield%natom,3,3))
+        ABI_MALLOC(dtefield%epawf3,(dtefield%natom,3,3))
         dtefield%has_epawf3 = 1
      end if
      if ( calc_epaw3_stress ) then
-        ABI_ALLOCATE(dtefield%epaws3,(dtefield%natom,3,6))
+        ABI_MALLOC(dtefield%epaws3,(dtefield%natom,3,6))
         dtefield%has_epaws3 = 1
      end if
 
      ncpgr = 0
      if ( fieldflag .and. dtefield%usecprj == 0) then
-        ABI_ALLOCATE(dimlmn,(natom))
+        ABI_MALLOC(dimlmn,(natom))
         call pawcprj_getdim(dimlmn,natom,nattyp_dum,ntypat,typat,pawtab,'R')
         !    allocate space for cprj at kpts in BZ (IBZ or FBZ)
-        ABI_DATATYPE_ALLOCATE(dtefield%cprj,(natom, mband*dtset%nspinor*dtset%nkpt*nsppol))
+        ABI_MALLOC(dtefield%cprj,(natom, mband*dtset%nspinor*dtset%nkpt*nsppol))
         !    write(std_out,*) "initberry alloc of cprj ", shape(dtefield%cprj)
         if (calc_epaw3_force .and. .not. calc_epaw3_stress) ncpgr = 3
         if (.not. calc_epaw3_force .and. calc_epaw3_stress) ncpgr = 6
         if (calc_epaw3_force .and. calc_epaw3_stress) ncpgr = 9
         call pawcprj_alloc(dtefield%cprj,ncpgr,dimlmn)
         dtefield%usecprj = 1
-        ABI_DEALLOCATE(dimlmn)
+        ABI_FREE(dimlmn)
      end if
 
-     ABI_ALLOCATE(dtefield%cprjindex,(nkpt,nsppol))
+     ABI_MALLOC(dtefield%cprjindex,(nkpt,nsppol))
      dtefield%cprjindex(:,:) = 0
 
      if (dtset%kptopt /= 3) then
-        ABI_ALLOCATE(dtefield%atom_indsym,(4,nsym,natom))
+        ABI_MALLOC(dtefield%atom_indsym,(4,nsym,natom))
         call symatm(dtefield%atom_indsym,natom,nsym,symrec,dtset%tnons,tol8,typat,xred)
         lmax = psps%mpsang - 1
-        ABI_ALLOCATE(dtefield%zarot,(2*lmax+1,2*lmax+1,lmax+1,nsym))
+        ABI_MALLOC(dtefield%zarot,(2*lmax+1,2*lmax+1,lmax+1,nsym))
         call setsym_ylm(gprimd,lmax,nsym,1,rprimd,symrec,dtefield%zarot)
         dtefield%nsym = nsym
         dtefield%lmax = lmax
@@ -3109,24 +3109,24 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      call xmpi_max(mkmem_,dtefield%mkmem_max,spaceComm,ierr)
   end if
 
-  ABI_ALLOCATE(mpi_enreg%kpt_loc2fbz_sp,(0:nproc-1,1:dtefield%fmkmem_max*nsppol, 1:2))
-  ABI_ALLOCATE(mpi_enreg%kpt_loc2ibz_sp,(0:nproc-1,1:dtefield%mkmem_max*nsppol, 1:2))
-  ABI_ALLOCATE(mpi_enreg%kptdstrb,(nproc,6,dtefield%fmkmem_max*nsppol*2))
-  ABI_ALLOCATE(mpi_enreg%mkmem,(0:nproc-1))
+  ABI_MALLOC(mpi_enreg%kpt_loc2fbz_sp,(0:nproc-1,1:dtefield%fmkmem_max*nsppol, 1:2))
+  ABI_MALLOC(mpi_enreg%kpt_loc2ibz_sp,(0:nproc-1,1:dtefield%mkmem_max*nsppol, 1:2))
+  ABI_MALLOC(mpi_enreg%kptdstrb,(nproc,6,dtefield%fmkmem_max*nsppol*2))
+  ABI_MALLOC(mpi_enreg%mkmem,(0:nproc-1))
   mpi_enreg%kpt_loc2fbz_sp(:,:,:) = 0
   mpi_enreg%kpt_loc2ibz_sp(:,:,:) = 0
   mpi_enreg%kptdstrb(:,:,:)       = 0
   mpi_enreg%mkmem(:)              = 0
 
   if (fieldflag) then
-     ABI_ALLOCATE(dtefield%cgqindex,(3,6,nkpt*nsppol))
-     ABI_ALLOCATE(dtefield%nneigh,(nkpt))
+     ABI_MALLOC(dtefield%cgqindex,(3,6,nkpt*nsppol))
+     ABI_MALLOC(dtefield%nneigh,(nkpt))
      dtefield%cgqindex(:,:,:) = 0 ; dtefield%nneigh(:) = 0
   end if
 
   pwind_alloc = mpw*dtefield%fmkmem_max
-  ABI_ALLOCATE(pwind,(pwind_alloc,2,3))
-  ABI_ALLOCATE(pwnsfac,(2,pwind_alloc))
+  ABI_MALLOC(pwind,(pwind_alloc,2,3))
+  ABI_MALLOC(pwnsfac,(2,pwind_alloc))
 
   !------------------------------------------------------------------------------
   !---------------------- Compute efield_type variables -------------------------
@@ -3138,14 +3138,14 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   dtefield%dkvecs(:,:) = zero
   dtefield%maxnstr = 0    ; dtefield%maxnkstr  = 0
   dtefield%nstr(:) = 0    ; dtefield%nkstr(:) = 0
-  ABI_ALLOCATE(dtefield%ikpt_dk,(dtefield%fnkpt,2,3))
-  ABI_ALLOCATE(dtefield%cgindex,(nkpt,nsppol))
-  ABI_ALLOCATE(dtefield%kgindex,(nkpt))
-  ABI_ALLOCATE(dtefield%fkgindex,(dtefield%fnkpt))
+  ABI_MALLOC(dtefield%ikpt_dk,(dtefield%fnkpt,2,3))
+  ABI_MALLOC(dtefield%cgindex,(nkpt,nsppol))
+  ABI_MALLOC(dtefield%kgindex,(nkpt))
+  ABI_MALLOC(dtefield%fkgindex,(dtefield%fnkpt))
   dtefield%ikpt_dk(:,:,:) = 0
   dtefield%cgindex(:,:) = 0
   dtefield%mband_occ = 0
-  ABI_ALLOCATE(dtefield%nband_occ,(nsppol))
+  ABI_MALLOC(dtefield%nband_occ,(nsppol))
   dtefield%kgindex(:) = 0
   dtefield%fkgindex(:) = 0
 
@@ -3200,12 +3200,12 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   end do                ! close loop over isppol
 
   if (fieldflag) then
-     ABI_ALLOCATE(dtefield%smat,(2,dtefield%mband_occ,dtefield%mband_occ,nkpt*nsppol,2,3))
+     ABI_MALLOC(dtefield%smat,(2,dtefield%mband_occ,dtefield%mband_occ,nkpt*nsppol,2,3))
 
      dtefield%smat(:,:,:,:,:,:) = zero
   end if
 
-  ABI_ALLOCATE(dtefield%sflag,(dtefield%mband_occ,nkpt*nsppol,2,3))
+  ABI_MALLOC(dtefield%sflag,(dtefield%mband_occ,nkpt*nsppol,2,3))
   dtefield%sflag(:,:,:,:) = 0
 
   !Compute the location of each wavefunction
@@ -3493,13 +3493,13 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
   dtefield%maxnstr  = maxval(dtefield%nstr(:))
   dtefield%maxnkstr = maxval(dtefield%nkstr(:))
-  ABI_ALLOCATE(dtefield%idxkstr,(dtefield%maxnkstr,dtefield%maxnstr,3))
+  ABI_MALLOC(dtefield%idxkstr,(dtefield%maxnkstr,dtefield%maxnstr,3))
   dtefield%idxkstr(:,:,:) = 0
 
   !for the geometry of the string space :
-  ABI_ALLOCATE(dtefield%coord_str,(2,dtefield%maxnstr,3))
-  ABI_ALLOCATE(dtefield%str_neigh,(-2:2,dtefield%maxnstr,3))
-  ABI_ALLOCATE(dtefield%strg_neigh,(-2:2,dtefield%maxnstr,2,3))
+  ABI_MALLOC(dtefield%coord_str,(2,dtefield%maxnstr,3))
+  ABI_MALLOC(dtefield%str_neigh,(-2:2,dtefield%maxnstr,3))
+  ABI_MALLOC(dtefield%strg_neigh,(-2:2,dtefield%maxnstr,2,3))
   dtefield%coord_str(:,:,:) = 0.d0
   dtefield%str_neigh(:,:,:)=0
   dtefield%strg_neigh(:,:,:,:)=0
@@ -3509,7 +3509,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   !---------------------- Build the strings -------------------------------------
   !------------------------------------------------------------------------------
 
-  ABI_ALLOCATE(kpt_mark,(dtefield%fnkpt))
+  ABI_MALLOC(kpt_mark,(dtefield%fnkpt))
   do idir = 1, 3
 
      if (dtset%rfdir(idir) == 1) then
@@ -3686,7 +3686,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
   end do           ! close loop over idir
 
-  ABI_DEALLOCATE(kpt_mark)
+  ABI_FREE(kpt_mark)
 
   call timab(1006,2,tsec)
   call timab(1007,1,tsec)
@@ -3696,7 +3696,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   !------------------------------------------------------------------------------
 
   if (usepaw == 1 .and. dtefield%has_expibi == 1) then
-     ABI_ALLOCATE(calc_expibi,(2,natom))
+     ABI_MALLOC(calc_expibi,(2,natom))
      do idir = 1, 3
         dk = dtefield%dkvecs(1:3,idir)
         calc_expibi = zero
@@ -3705,11 +3705,11 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      end do
      !   call expibi(dtefield%expibi,dtefield%dkvecs,natom,xred)
      dtefield%has_expibi = 2
-     ABI_DEALLOCATE(calc_expibi)
+     ABI_FREE(calc_expibi)
   end if
 
   if (usepaw == 1 .and. dtefield%has_qijb == 1) then
-     ABI_ALLOCATE(calc_qijb,(2,dtefield%lmn2max,natom))
+     ABI_MALLOC(calc_qijb,(2,dtefield%lmn2max,natom))
 
      do idir = 1, 3
         dk = dtefield%dkvecs(1:3,idir)
@@ -3721,7 +3721,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
         ! &   gprimd,dtefield%lmn2max,natom,ntypat,pawang,pawrad,pawtab,typat)
      end do
      dtefield%has_qijb = 2
-     ABI_DEALLOCATE(calc_qijb)
+     ABI_FREE(calc_qijb)
   end if
 
   if (usepaw == 1 .and. dtefield%has_rij == 1) then
@@ -3749,7 +3749,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   pwind(:,:,:) = 0
   pwnsfac(1,:) = 1.0_dp
   pwnsfac(2,:) = 0.0_dp
-  ABI_ALLOCATE(kg1_k,(3,mpw))
+  ABI_MALLOC(kg1_k,(3,mpw))
 
   ipwnsfac = 0
 
@@ -4150,7 +4150,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
   end if
 
-  ABI_DEALLOCATE(kg1_k)
+  ABI_FREE(kg1_k)
 
   call timab(1009,2,tsec)
   call timab(1001,2,tsec)

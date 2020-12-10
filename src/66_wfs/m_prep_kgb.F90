@@ -193,10 +193,10 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 
  ikpt_this_proc=bandfft_kpt_get_ikpt()
 
- ABI_ALLOCATE(sendcountsloc,(nproc_band))
- ABI_ALLOCATE(sdisplsloc   ,(nproc_band))
- ABI_ALLOCATE(recvcountsloc,(nproc_band))
- ABI_ALLOCATE(rdisplsloc   ,(nproc_band))
+ ABI_MALLOC(sendcountsloc,(nproc_band))
+ ABI_MALLOC(sdisplsloc   ,(nproc_band))
+ ABI_MALLOC(recvcountsloc,(nproc_band))
+ ABI_MALLOC(rdisplsloc   ,(nproc_band))
 
  recvcounts   =>bandfft_kpt(ikpt_this_proc)%recvcounts(:)
  sendcounts   =>bandfft_kpt(ikpt_this_proc)%sendcounts(:)
@@ -222,19 +222,19 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 
  if ( ((.not.flag_inv_sym) .and. bandpp==1 .and. mpi_enreg%paral_spinor==0 .and. my_nspinor==2 ).or. &
 & ((.not.flag_inv_sym) .and. bandpp>1) .or.  flag_inv_sym  ) then
-   ABI_ALLOCATE(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
-   ABI_ALLOCATE(gwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
-   ABI_ALLOCATE(swavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
-   ABI_ALLOCATE(gvnlxc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+   ABI_MALLOC(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+   ABI_MALLOC(gwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+   ABI_MALLOC(swavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+   ABI_MALLOC(gvnlxc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    swavef_alltoall1(:,:)=zero
    gvnlxc_alltoall1(:,:)=zero
    cwavef_alltoall1(:,:)=zero
    gwavef_alltoall1(:,:)=zero
  end if
- ABI_ALLOCATE(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- ABI_ALLOCATE(gwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- ABI_ALLOCATE(swavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- ABI_ALLOCATE(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ ABI_MALLOC(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ ABI_MALLOC(gwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ ABI_MALLOC(swavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ ABI_MALLOC(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  swavef_alltoall2(:,:)=zero
  gvnlxc_alltoall2(:,:)=zero
  cwavef_alltoall2(:,:)=zero
@@ -292,7 +292,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      gwavef_alltoall1(:,index_wavef_spband)=gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_spband)=swavef_alltoall2(:,:)
      gvnlxc_alltoall1(:,index_wavef_spband)=gvnlxc_alltoall2(:,:)
-     ABI_DEALLOCATE(index_wavef_spband)
+     ABI_FREE(index_wavef_spband)
      call timab(634,2,tsec)
    end if
 
@@ -328,7 +328,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
      gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
-     ABI_DEALLOCATE(index_wavef_band)
+     ABI_FREE(index_wavef_band)
      call timab(634,2,tsec)
    end if
 
@@ -366,9 +366,9 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 !  ------------------------------------------------------------
 !  Allocation
 !  ------------------------------------------------------------
-   ABI_ALLOCATE(gwavef_alltoall_sym,(2,ndatarecv_tot*bandpp_sym))
-   ABI_ALLOCATE(swavef_alltoall_sym,(2,(ndatarecv_tot*bandpp_sym)*iscalc))
-   ABI_ALLOCATE(gvnlxc_alltoall_sym ,(2,ndatarecv_tot*bandpp_sym))
+   ABI_MALLOC(gwavef_alltoall_sym,(2,ndatarecv_tot*bandpp_sym))
+   ABI_MALLOC(swavef_alltoall_sym,(2,(ndatarecv_tot*bandpp_sym)*iscalc))
+   ABI_MALLOC(gvnlxc_alltoall_sym ,(2,ndatarecv_tot*bandpp_sym))
 
    gwavef_alltoall_sym(:,:)=zero
    swavef_alltoall_sym(:,:)=zero
@@ -418,11 +418,11 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 &   gvnlxc_alltoall_sym,&
 &   index_wavef_send)
 
-   ABI_DEALLOCATE(ewavef_alltoall_sym)
-   ABI_DEALLOCATE(index_wavef_send)
-   ABI_DEALLOCATE(gwavef_alltoall_sym)
-   ABI_DEALLOCATE(swavef_alltoall_sym)
-   ABI_DEALLOCATE(gvnlxc_alltoall_sym)
+   ABI_FREE(ewavef_alltoall_sym)
+   ABI_FREE(index_wavef_send)
+   ABI_FREE(gwavef_alltoall_sym)
+   ABI_FREE(swavef_alltoall_sym)
+   ABI_FREE(gvnlxc_alltoall_sym)
 
 !  -------------------------------------------
 !  We call getghc to calculate the nl matrix elements.
@@ -456,7 +456,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
      gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
-     ABI_DEALLOCATE(index_wavef_band)
+     ABI_FREE(index_wavef_band)
      call timab(634,2,tsec)
    end if
 
@@ -503,21 +503,21 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    gs_hamk%istwf_k = 2
  end if
 !====================================================================
- ABI_DEALLOCATE(sendcountsloc)
- ABI_DEALLOCATE(sdisplsloc)
- ABI_DEALLOCATE(recvcountsloc)
- ABI_DEALLOCATE(rdisplsloc)
- ABI_DEALLOCATE(cwavef_alltoall2)
- ABI_DEALLOCATE(gwavef_alltoall2)
- ABI_DEALLOCATE(gvnlxc_alltoall2)
- ABI_DEALLOCATE(swavef_alltoall2)
+ ABI_FREE(sendcountsloc)
+ ABI_FREE(sdisplsloc)
+ ABI_FREE(recvcountsloc)
+ ABI_FREE(rdisplsloc)
+ ABI_FREE(cwavef_alltoall2)
+ ABI_FREE(gwavef_alltoall2)
+ ABI_FREE(gvnlxc_alltoall2)
+ ABI_FREE(swavef_alltoall2)
 
  if ( ((.not.flag_inv_sym) .and. bandpp==1 .and. mpi_enreg%paral_spinor==0 .and. my_nspinor==2 ).or. &
 & ((.not.flag_inv_sym) .and. bandpp>1) .or.  flag_inv_sym  ) then
-   ABI_DEALLOCATE(cwavef_alltoall1)
-   ABI_DEALLOCATE(gwavef_alltoall1)
-   ABI_DEALLOCATE(gvnlxc_alltoall1)
-   ABI_DEALLOCATE(swavef_alltoall1)
+   ABI_FREE(cwavef_alltoall1)
+   ABI_FREE(gwavef_alltoall1)
+   ABI_FREE(gvnlxc_alltoall1)
+   ABI_FREE(swavef_alltoall1)
  end if
 
  call timab(630,2,tsec)
@@ -669,10 +669,10 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    end if
  end if
 
- ABI_ALLOCATE(sendcountsloc,(nproc_band))
- ABI_ALLOCATE(sdisplsloc   ,(nproc_band))
- ABI_ALLOCATE(recvcountsloc,(nproc_band))
- ABI_ALLOCATE(rdisplsloc   ,(nproc_band))
+ ABI_MALLOC(sendcountsloc,(nproc_band))
+ ABI_MALLOC(sdisplsloc   ,(nproc_band))
+ ABI_MALLOC(recvcountsloc,(nproc_band))
+ ABI_MALLOC(rdisplsloc   ,(nproc_band))
 
  ikpt_this_proc=bandfft_kpt_get_ikpt()
 
@@ -682,23 +682,23 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  sdispls      => bandfft_kpt(ikpt_this_proc)%sdispls   (:)
  ndatarecv    =  bandfft_kpt(ikpt_this_proc)%ndatarecv
 
- ABI_ALLOCATE(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- ABI_ALLOCATE(gsc_alltoall2,(2,ndatarecv*my_nspinor*(paw_opt/3)*bandpp))
- ABI_ALLOCATE(gvnlc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ ABI_MALLOC(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ ABI_MALLOC(gsc_alltoall2,(2,ndatarecv*my_nspinor*(paw_opt/3)*bandpp))
+ ABI_MALLOC(gvnlc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
 
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
-   ABI_ALLOCATE(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+   ABI_MALLOC(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    if(signs==2)then
      if (paw_opt/=3) then
-       ABI_ALLOCATE(gvnlc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+       ABI_MALLOC(gvnlc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
      end if
      if (paw_opt==3.or.paw_opt==4) then
-       ABI_ALLOCATE(gsc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+       ABI_MALLOC(gsc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
      end if
    end if
  end if
 
- ABI_ALLOCATE(enlout,(nnlout*bandpp))
+ ABI_MALLOC(enlout,(nnlout*bandpp))
  enlout = zero
 
  recvcountsloc(:)=recvcounts(:)*2*my_nspinor*bandpp
@@ -786,7 +786,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !  Deallocation
 !  -------------------------------------------------------
  if (allocated(index_wavef_band)) then
-   ABI_DEALLOCATE(index_wavef_band)
+   ABI_FREE(index_wavef_band)
  end if
 
 !Transpose the gsc_alltoall or gvlnc_alltoall tabs
@@ -824,22 +824,22 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  if (nnlout>0) then
    call xmpi_allgather(enlout,nnlout*bandpp,enlout_block,spaceComm,ier)
  end if
- ABI_DEALLOCATE(enlout)
- ABI_DEALLOCATE(sendcountsloc)
- ABI_DEALLOCATE(sdisplsloc)
- ABI_DEALLOCATE(recvcountsloc)
- ABI_DEALLOCATE(rdisplsloc)
- ABI_DEALLOCATE(cwavef_alltoall2)
- ABI_DEALLOCATE(gvnlc_alltoall2)
- ABI_DEALLOCATE(gsc_alltoall2)
+ ABI_FREE(enlout)
+ ABI_FREE(sendcountsloc)
+ ABI_FREE(sdisplsloc)
+ ABI_FREE(recvcountsloc)
+ ABI_FREE(rdisplsloc)
+ ABI_FREE(cwavef_alltoall2)
+ ABI_FREE(gvnlc_alltoall2)
+ ABI_FREE(gsc_alltoall2)
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
-   ABI_DEALLOCATE(cwavef_alltoall1)
+   ABI_FREE(cwavef_alltoall1)
    if(signs==2)then
      if (paw_opt/=3) then
-       ABI_DEALLOCATE(gvnlc_alltoall1)
+       ABI_FREE(gvnlc_alltoall1)
      end if
      if (paw_opt==3.or.paw_opt==4) then
-       ABI_DEALLOCATE(gsc_alltoall1)
+       ABI_FREE(gsc_alltoall1)
      end if
    end if
  end if
@@ -977,10 +977,10 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  end if
 
 !====================================================================================
- ABI_ALLOCATE(sendcountsloc,(nproc_band))
- ABI_ALLOCATE(sdisplsloc   ,(nproc_band))
- ABI_ALLOCATE(recvcountsloc,(nproc_band))
- ABI_ALLOCATE(rdisplsloc   ,(nproc_band))
+ ABI_MALLOC(sendcountsloc,(nproc_band))
+ ABI_MALLOC(sdisplsloc   ,(nproc_band))
+ ABI_MALLOC(recvcountsloc,(nproc_band))
+ ABI_MALLOC(rdisplsloc   ,(nproc_band))
 
  recvcounts   =>bandfft_kpt_ptr%recvcounts(:)
  sendcounts   =>bandfft_kpt_ptr%sendcounts(:)
@@ -1005,9 +1005,9 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
    tab_proc             =>bandfft_kpt_ptr%tab_proc(:)
  end if
 
- ABI_ALLOCATE(cwavef_alltoall2,(2,ndatarecv*bandpp))
+ ABI_MALLOC(cwavef_alltoall2,(2,ndatarecv*bandpp))
  if ( ((.not.flag_inv_sym) .and. (bandpp>1) ) .or. flag_inv_sym )then
-   ABI_ALLOCATE(cwavef_alltoall1,(2,ndatarecv*bandpp))
+   ABI_MALLOC(cwavef_alltoall1,(2,ndatarecv*bandpp))
  end if
 
  recvcountsloc(:)=recvcounts(:)*2*bandpp
@@ -1038,10 +1038,10 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
    recvdisp_fft   => bandfft_kpt_ptr%recvdisp_fft(:)
    indices_pw_fft => bandfft_kpt_ptr%indices_pw_fft(:)
    kg_k_fft       => bandfft_kpt_ptr%kg_k_fft(:,:)
-   ABI_ALLOCATE( buff_wf, (2,ndatarecv*bandpp) ) ! for sorting cgwavef
-   ABI_ALLOCATE( cwavef_fft, (2,npw_fft*bandpp) )
+   ABI_MALLOC( buff_wf, (2,ndatarecv*bandpp) ) ! for sorting cgwavef
+   ABI_MALLOC( cwavef_fft, (2,npw_fft*bandpp) )
    if(bandpp>1) then
-     ABI_ALLOCATE( cwavef_fft_tr, (2,npw_fft*bandpp))
+     ABI_MALLOC( cwavef_fft_tr, (2,npw_fft*bandpp))
    end if
  end if
 
@@ -1123,7 +1123,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  -------------------
 !  Cuda version
    if(use_gpu_cuda_==1) then
-     ABI_ALLOCATE(weight_t,(bandpp))
+     ABI_MALLOC(weight_t,(bandpp))
      do iibandpp=1,bandpp
 !      Compute the index of the band
        ind_occ = (iblock-1)*blocksize + (mpi_enreg%me_band * bandpp) + iibandpp
@@ -1142,7 +1142,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &     tim_fourwf,weight_t,weight_t)
 #endif
      call timab(240+tim_fourwf,2,tsec)
-     ABI_DEALLOCATE(weight_t)
+     ABI_FREE(weight_t)
 
 !  Standard version
    else
@@ -1188,7 +1188,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  Sorting waves functions below the processors
 !  -----------------------------------------------------
 !  cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
-   ABI_DEALLOCATE(index_wavef_band)
+   ABI_FREE(index_wavef_band)
 
 !====================================================================
  else if (flag_inv_sym) then
@@ -1223,8 +1223,8 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  ------------------------------------------------------------
 !  Cuda version
    if (use_gpu_cuda_==1) then
-     ABI_ALLOCATE(weight1_t,(bandpp_sym))
-     ABI_ALLOCATE(weight2_t,(bandpp_sym))
+     ABI_MALLOC(weight1_t,(bandpp_sym))
+     ABI_MALLOC(weight2_t,(bandpp_sym))
      do iibandpp=1,bandpp_sym
        if (bandpp/=1) then
          ind_occ1 = (iblock-1)*blocksize + (mpi_enreg%me_band * bandpp) + (2*iibandpp-1)
@@ -1246,13 +1246,13 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &     tim_fourwf,weight1_t,weight2_t)
 #endif
      call timab(240+tim_fourwf,2,tsec)
-     ABI_DEALLOCATE(weight1_t)
-     ABI_DEALLOCATE(weight2_t)
+     ABI_FREE(weight1_t)
+     ABI_FREE(weight2_t)
 
 !  Standard version
    else
      if (option_fourwf==0.and.bandpp>1) then
-       ABI_ALLOCATE(wfraug_ptr,(2,n4,n5,n6))
+       ABI_MALLOC(wfraug_ptr,(2,n4,n5,n6))
      else
        wfraug_ptr => wfraug
      end if
@@ -1291,7 +1291,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        end if
      end do
      if (option_fourwf==0.and.bandpp>1) then
-       ABI_DEALLOCATE(wfraug_ptr)
+       ABI_FREE(wfraug_ptr)
      end if
    end if ! (use_gpu_cuda==1)
 
@@ -1308,34 +1308,34 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &   ewavef_alltoall_sym,&
 &   index_wavef_send)
 
-   ABI_DEALLOCATE(ewavef_alltoall_sym)
-   ABI_DEALLOCATE(index_wavef_send)
+   ABI_FREE(ewavef_alltoall_sym)
+   ABI_FREE(index_wavef_send)
 
 !  -------------------------------------------------------
 !  Sorting waves functions below the processors
 !  -------------------------------------------------------
 !  cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:) ! NOT NEEDED
 
-   ABI_DEALLOCATE(index_wavef_band)
+   ABI_FREE(index_wavef_band)
 
  end if
 
 !====================================================================
  if (me_fft==0) mpi_enreg%me_g0=old_me_g0
  if(have_to_reequilibrate) then
-   ABI_DEALLOCATE(buff_wf)
-   ABI_DEALLOCATE(cwavef_fft)
+   ABI_FREE(buff_wf)
+   ABI_FREE(cwavef_fft)
    if(bandpp > 1) then
-     ABI_DEALLOCATE(cwavef_fft_tr)
+     ABI_FREE(cwavef_fft_tr)
    end if
  end if
- ABI_DEALLOCATE(sendcountsloc)
- ABI_DEALLOCATE(sdisplsloc)
- ABI_DEALLOCATE(recvcountsloc)
- ABI_DEALLOCATE(rdisplsloc)
- ABI_DEALLOCATE(cwavef_alltoall2)
+ ABI_FREE(sendcountsloc)
+ ABI_FREE(sdisplsloc)
+ ABI_FREE(recvcountsloc)
+ ABI_FREE(rdisplsloc)
+ ABI_FREE(cwavef_alltoall2)
  if ( ((.not.flag_inv_sym) .and. (bandpp>1) ) .or. flag_inv_sym ) then
-   ABI_DEALLOCATE(cwavef_alltoall1)
+   ABI_FREE(cwavef_alltoall1)
  end if
 
 end subroutine prep_fourwf
@@ -1446,15 +1446,15 @@ subroutine prep_wavef_sym_do(mpi_enreg,bandpp,nspinor,&
 !---------------------------------------------
 !Allocation
 !---------------------------------------------
- ABI_ALLOCATE(ewavef_alltoall_sym     ,(2,ndatarecv_tot*bandpp_sym))
- ABI_ALLOCATE(ewavef_alltoall_loc     ,(2,ndatarecv    *bandpp_sym))
- ABI_ALLOCATE(ewavef_alltoall_send    ,(2,ndatasend_sym*bandpp_sym))
- ABI_ALLOCATE(index_wavef_send        ,(  ndatasend_sym*bandpp_sym))
+ ABI_MALLOC(ewavef_alltoall_sym     ,(2,ndatarecv_tot*bandpp_sym))
+ ABI_MALLOC(ewavef_alltoall_loc     ,(2,ndatarecv    *bandpp_sym))
+ ABI_MALLOC(ewavef_alltoall_send    ,(2,ndatasend_sym*bandpp_sym))
+ ABI_MALLOC(index_wavef_send        ,(  ndatasend_sym*bandpp_sym))
 
- ABI_ALLOCATE(sendcounts_sym_loc    ,(nproc_fft))
- ABI_ALLOCATE(sdispls_sym_loc       ,(nproc_fft))
- ABI_ALLOCATE(recvcounts_sym_loc    ,(nproc_fft))
- ABI_ALLOCATE(rdispls_sym_loc       ,(nproc_fft))
+ ABI_MALLOC(sendcounts_sym_loc    ,(nproc_fft))
+ ABI_MALLOC(sdispls_sym_loc       ,(nproc_fft))
+ ABI_MALLOC(recvcounts_sym_loc    ,(nproc_fft))
+ ABI_MALLOC(rdispls_sym_loc       ,(nproc_fft))
 
 
 !Initialisation
@@ -1598,13 +1598,13 @@ subroutine prep_wavef_sym_do(mpi_enreg,bandpp,nspinor,&
 !Desallocation
 !-----------------------
 
- ABI_DEALLOCATE(sendcounts_sym_loc)
- ABI_DEALLOCATE(recvcounts_sym_loc)
- ABI_DEALLOCATE(sdispls_sym_loc)
- ABI_DEALLOCATE(rdispls_sym_loc)
+ ABI_FREE(sendcounts_sym_loc)
+ ABI_FREE(recvcounts_sym_loc)
+ ABI_FREE(sdispls_sym_loc)
+ ABI_FREE(rdispls_sym_loc)
 
- ABI_DEALLOCATE(ewavef_alltoall_loc)
- ABI_DEALLOCATE(ewavef_alltoall_send)
+ ABI_FREE(ewavef_alltoall_loc)
+ ABI_FREE(ewavef_alltoall_send)
 
 end subroutine prep_wavef_sym_do
 !!***
@@ -1711,13 +1711,13 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
 !---------------------------------------------
 !Allocation
 !---------------------------------------------
- ABI_ALLOCATE(gwavef_alltoall_loc     ,(2,ndatarecv     *bandpp_sym))
- ABI_ALLOCATE(gwavef_alltoall_rcv     ,(2,ndatasend_sym *bandpp_sym))
+ ABI_MALLOC(gwavef_alltoall_loc     ,(2,ndatarecv     *bandpp_sym))
+ ABI_MALLOC(gwavef_alltoall_rcv     ,(2,ndatasend_sym *bandpp_sym))
 
- ABI_ALLOCATE(sendcounts_sym_loc    ,(nproc_fft))
- ABI_ALLOCATE(sdispls_sym_loc       ,(nproc_fft))
- ABI_ALLOCATE(recvcounts_sym_loc    ,(nproc_fft))
- ABI_ALLOCATE(rdispls_sym_loc       ,(nproc_fft))
+ ABI_MALLOC(sendcounts_sym_loc    ,(nproc_fft))
+ ABI_MALLOC(sdispls_sym_loc       ,(nproc_fft))
+ ABI_MALLOC(recvcounts_sym_loc    ,(nproc_fft))
+ ABI_MALLOC(rdispls_sym_loc       ,(nproc_fft))
 
 
 !---------------------------------------------
@@ -1839,13 +1839,13 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
 !Desallocation
 !-----------------------
 
- ABI_DEALLOCATE(sendcounts_sym_loc)
- ABI_DEALLOCATE(recvcounts_sym_loc)
- ABI_DEALLOCATE(sdispls_sym_loc)
- ABI_DEALLOCATE(rdispls_sym_loc)
+ ABI_FREE(sendcounts_sym_loc)
+ ABI_FREE(recvcounts_sym_loc)
+ ABI_FREE(sdispls_sym_loc)
+ ABI_FREE(rdispls_sym_loc)
 
- ABI_DEALLOCATE(gwavef_alltoall_loc)
- ABI_DEALLOCATE(gwavef_alltoall_rcv)
+ ABI_FREE(gwavef_alltoall_loc)
+ ABI_FREE(gwavef_alltoall_rcv)
 
 end subroutine prep_wavef_sym_undo
 !!***
@@ -1908,7 +1908,7 @@ subroutine prep_index_wavef_bandpp(nproc_band,bandpp,&
 !---------------------------------------------
 !Allocation
 !---------------------------------------------
- ABI_ALLOCATE(index_wavef_band ,(bandpp*nspinor*ndatarecv))
+ ABI_MALLOC(index_wavef_band ,(bandpp*nspinor*ndatarecv))
  index_wavef_band(:)   =0
 
 !---------------------------------------------
@@ -1983,10 +1983,10 @@ subroutine prep_sort_wavef_spin(nproc_band,nspinor,ndatarecv,recvcounts,rdispls,
 
 ! *********************************************************************
 
- ABI_ALLOCATE(index_wavef,(ndatarecv*nspinor))
+ ABI_MALLOC(index_wavef,(ndatarecv*nspinor))
 
- ABI_ALLOCATE(recvcountsloc,(nproc_band))
- ABI_ALLOCATE(rdisplsloc,(nproc_band))
+ ABI_MALLOC(recvcountsloc,(nproc_band))
+ ABI_MALLOC(rdisplsloc,(nproc_band))
  recvcountsloc(:)=recvcounts(:)*2*nspinor
  rdisplsloc(:)=rdispls(:)*2*nspinor
 
@@ -2021,8 +2021,8 @@ subroutine prep_sort_wavef_spin(nproc_band,nspinor,ndatarecv,recvcounts,rdispls,
 
  end do
 
- ABI_DEALLOCATE(recvcountsloc)
- ABI_DEALLOCATE(rdisplsloc)
+ ABI_FREE(recvcountsloc)
+ ABI_FREE(rdisplsloc)
 
 end subroutine prep_sort_wavef_spin
 !!***

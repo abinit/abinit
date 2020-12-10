@@ -1654,7 +1654,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !
 !=== In case of PAW distributed atomic sites, need to retrieve the full paw_ij%dij ===
  if (do_diago.and.Psps%usepaw==1.and.MPI_enreg%nproc_atom>1) then
-   ABI_DATATYPE_ALLOCATE(Paw_ij_all,(dtset%natom))
+   ABI_MALLOC(Paw_ij_all,(dtset%natom))
    call paw_ij_gather(Paw_ij,Paw_ij_all,-1,MPI_enreg%comm_atom)
  else
    paw_ij_all => paw_ij
@@ -1713,14 +1713,14 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !    ==== Transfer data between master and the working proc ====
 !    ===========================================================
      call timab(937,1,tsec) !outkss(MPI_exch)
-     ABI_DATATYPE_ALLOCATE(Cprjnk_k,(0,0))
+     ABI_MALLOC(Cprjnk_k,(0,0))
      if (nprocs==1) then
 
        if (Psps%usepaw==1) then ! Copy projectors for this k-point
          n2dim=min(nbandksseff*dtset%nspinor,onband_diago)
          if (kssform==3) n2dim=nband_k*dtset%nspinor
-         ABI_DATATYPE_DEALLOCATE(Cprjnk_k)
-         ABI_DATATYPE_ALLOCATE(Cprjnk_k,(natom,n2dim))
+         ABI_FREE(Cprjnk_k)
+         ABI_MALLOC(Cprjnk_k,(natom,n2dim))
          call pawcprj_alloc(Cprjnk_k,0,dimlmn)
          if (kssform==3) then
            call pawcprj_copy(Cprj(:,ibg+1:ibg+dtset%nspinor*nband_k),Cprjnk_k)
@@ -1761,8 +1761,8 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
            if (Psps%usepaw==1) then
              n2dim=min(nbandksseff*dtset%nspinor,onband_diago)
              if (kssform==3) n2dim=nband_k*dtset%nspinor
-             ABI_DATATYPE_DEALLOCATE(Cprjnk_k)
-             ABI_DATATYPE_ALLOCATE(Cprjnk_k,(natom,n2dim))
+             ABI_FREE(Cprjnk_k)
+             ABI_MALLOC(Cprjnk_k,(natom,n2dim))
              call pawcprj_alloc(Cprjnk_k,0,dimlmn)
              if (my_rank==sender) then
                if (kssform==3) then
@@ -1945,7 +1945,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
        ABI_SFREE_PTR(eig_vec)
        if (Psps%usepaw==1) call pawcprj_free(Cprjnk_k)
      end if
-     ABI_DATATYPE_DEALLOCATE(Cprjnk_k)
+     ABI_FREE(Cprjnk_k)
      ABI_SFREE(kg_k)
 
 !    if (MPI_enreg%paral_compil_kpt==1) then !cannot be used in seq run!
@@ -1977,7 +1977,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  if (Psps%usepaw==1)  then
    ABI_FREE(dimlmn)
    if (do_diago.and.MPI_enreg%nproc_atom>1) then
-     ABI_DATATYPE_DEALLOCATE(Paw_ij_all)
+     ABI_FREE(Paw_ij_all)
    end if
  end if
 !
@@ -1993,7 +1993,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 
  if (associated(Cprj_diago_k)) then
    call pawcprj_free(Cprj_diago_k)
-   ABI_DATATYPE_DEALLOCATE(Cprj_diago_k)
+   ABI_FREE(Cprj_diago_k)
  end if
 
  if (lhack)  then

@@ -103,11 +103,11 @@ subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
  t_atprj%natprj_bs = natprj_bs
  t_atprj%natom = natom
 
- ABI_ALLOCATE(t_atprj%iatprj_bs,(natprj_bs))
+ ABI_MALLOC(t_atprj%iatprj_bs,(natprj_bs))
  t_atprj%iatprj_bs = iatprj_bs
 
 ! for each phonon mode and atom for projection, open a file
- ABI_ALLOCATE(t_atprj%filename ,(3*natom,natprj_bs))
+ ABI_MALLOC(t_atprj%filename ,(3*natom,natprj_bs))
  iunit = get_unit()
  do imode = 1, 3*natom
    call int2char4(imode, imodestring)
@@ -219,11 +219,11 @@ subroutine atprj_destroy(t_atprj)
  type(atprj_type), intent(inout) :: t_atprj
 
  if (allocated(t_atprj%iatprj_bs)) then
-   ABI_DEALLOCATE(t_atprj%iatprj_bs)
+   ABI_FREE(t_atprj%iatprj_bs)
  end if
 
  if (allocated(t_atprj%filename)) then
-   ABI_DEALLOCATE(t_atprj%filename)
+   ABI_FREE(t_atprj%filename)
  end if
 
 end subroutine atprj_destroy

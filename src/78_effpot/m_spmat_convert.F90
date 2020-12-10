@@ -284,8 +284,8 @@ contains
     call dense_to_csr(mat, csr)
     call coo%group_by_1dim(ngroup, i1list, ise)
     call coo%sum_duplicates()
-    if(allocated(i1list)) ABI_DEALLOCATE(i1list)
-    if(allocated(ise)) ABI_DEALLOCATE(ise)
+    if(allocated(i1list)) ABI_FREE(i1list)
+    if(allocated(ise)) ABI_FREE(ise)
     call coo_to_csr(coo, csr2)
 
     x=[1,2,3,4]

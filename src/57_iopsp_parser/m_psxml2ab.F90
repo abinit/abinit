@@ -131,8 +131,8 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    call wrtout(std_out,  message,'COLL')
  end if
 
- ABI_ALLOCATE(zeld, (nvshells))
- ABI_ALLOCATE(zelu, (nvshells))
+ ABI_MALLOC(zeld, (nvshells))
+ ABI_MALLOC(zelu, (nvshells))
  zeld = zero
  zelu = zero
  frmt_str="(a"
@@ -359,8 +359,8 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    end select
  end if
 
- ABI_DEALLOCATE(zeld)
- ABI_DEALLOCATE(zelu)
+ ABI_FREE(zeld)
+ ABI_FREE(zelu)
 
  if (allocated(idx_sr)) then
    ABI_FREE_NOCOUNT(idx_sr)

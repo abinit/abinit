@@ -81,7 +81,7 @@ subroutine contstr21(istr1,istr2,rank,gm,gprimd,e2nl,aa,bb)
  real(dp),allocatable :: cm(:,:)
 
 ! *************************************************************************
- ABI_ALLOCATE(cm,(((mrank+1)*(mrank+2))/2,((mrank+5)*(mrank+6))/2))
+ ABI_MALLOC(cm,(((mrank+1)*(mrank+2))/2,((mrank+5)*(mrank+6))/2))
 
  ka=idx(2*istr1-1);kb=idx(2*istr1);kg=idx(2*istr2-1);kd=idx(2*istr2)
 
@@ -5811,7 +5811,7 @@ subroutine contstr21(istr1,istr2,rank,gm,gprimd,e2nl,aa,bb)
 !factor of 2 multiplied in along with dropping call to conjugate contraction
  e2nl=0.5d0*e2nl
 
- ABI_DEALLOCATE(cm)
+ ABI_FREE(cm)
 
 end subroutine contstr21
 !!***

@@ -340,7 +340,7 @@ subroutine ddb_hdr_malloc(ddb_hdr)
  ABI_MALLOC(ddb_hdr%znucl,(ddb_hdr%mtypat))
 
  ! types
- ABI_DATATYPE_ALLOCATE(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
+ ABI_MALLOC(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
  call pawtab_nullify(ddb_hdr%pawtab)
 
 end subroutine ddb_hdr_malloc
@@ -550,9 +550,9 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
  ! Allocate the memory
  call ddb_hdr%malloc()
 
- ABI_ALLOCATE(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
- ABI_ALLOCATE(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
- ABI_ALLOCATE(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
+ ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
+ ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
+ ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
 
  ! This is needed to read the DDBs in the old format
  ! GA : Not sure why this is required
@@ -2739,7 +2739,7 @@ subroutine compare_ddb_variables(&
        pawtab(itypat)%shape_type =pawtab8(itypat)%shape_type
        if (pawtab8(itypat)%lmn2_size>0) then
          if (pawtab(itypat)%lmn2_size==0)  then
-           ABI_ALLOCATE(pawtab(itypat)%dij0,(pawtab8(itypat)%lmn2_size))
+           ABI_MALLOC(pawtab(itypat)%dij0,(pawtab8(itypat)%lmn2_size))
          end if
          do ii=1,pawtab8(itypat)%lmn2_size
            pawtab(itypat)%dij0(ii)=pawtab8(itypat)%dij0(ii)

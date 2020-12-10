@@ -116,7 +116,7 @@ contains
 ! *************************************************************************
 
   ! TODO only allocate the number of kpt treated by this proc
-  ABI_DATATYPE_ALLOCATE(gemm_nonlop_kpt, (nkpt))
+  ABI_MALLOC(gemm_nonlop_kpt, (nkpt))
   do ikpt=1,nkpt
     gemm_nonlop_kpt(ikpt)%nprojs = -1
   end do
@@ -151,14 +151,14 @@ contains
   ! TODO add cycling if kpt parallelism
   do ikpt = 1,nkpt
     if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
-      ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs)
-      ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs_r)
-      ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs_i)
+      ABI_FREE(gemm_nonlop_kpt(ikpt)%projs)
+      ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_r)
+      ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_i)
       gemm_nonlop_kpt(ikpt)%nprojs = -1
     end if
   end do
 
-  ABI_DATATYPE_DEALLOCATE(gemm_nonlop_kpt)
+  ABI_FREE(gemm_nonlop_kpt)
 
  end subroutine destroy_gemm_nonlop
 !!***
@@ -208,9 +208,9 @@ contains
 
   if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
     ! We have been here before, cleanup before remaking
-    ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs)
-    ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs_r)
-    ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs_i)
+    ABI_FREE(gemm_nonlop_kpt(ikpt)%projs)
+    ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_r)
+    ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_i)
     gemm_nonlop_kpt(ikpt)%nprojs = -1
   end if
 
@@ -222,18 +222,18 @@ contains
 
   gemm_nonlop_kpt(ikpt)%nprojs = nprojs
 
-  ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs, (2, npw, gemm_nonlop_kpt(ikpt)%nprojs))
+  ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs, (2, npw, gemm_nonlop_kpt(ikpt)%nprojs))
   gemm_nonlop_kpt(ikpt)%projs = zero
   if(istwf_k > 1) then
     ! We still allocate the complex matrix, in case we need it for spinors. TODO could be avoided
-    ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs_r, (1, npw, gemm_nonlop_kpt(ikpt)%nprojs))
-    ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs_i, (1, npw, gemm_nonlop_kpt(ikpt)%nprojs))
+    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_r, (1, npw, gemm_nonlop_kpt(ikpt)%nprojs))
+    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_i, (1, npw, gemm_nonlop_kpt(ikpt)%nprojs))
     gemm_nonlop_kpt(ikpt)%projs_r = zero
     gemm_nonlop_kpt(ikpt)%projs_i = zero
   else
     ! Still allocate so we can deallocate it in destroy_gemm_nonlop
-    ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs_r, (1, 1, 1))
-    ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs_i, (1, 1, 1))
+    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_r, (1, 1, 1))
+    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_i, (1, 1, 1))
   end if
 
   shift = 0
@@ -376,9 +376,9 @@ contains
   nprojs = gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
-  ABI_ALLOCATE(projections,(cplex, nprojs,nspinor*ndat))
-  ABI_ALLOCATE(s_projections,(cplex, nprojs,nspinor*ndat))
-  ABI_ALLOCATE(vnl_projections,(cplex_fac, nprojs,nspinor*ndat))
+  ABI_MALLOC(projections,(cplex, nprojs,nspinor*ndat))
+  ABI_MALLOC(s_projections,(cplex, nprojs,nspinor*ndat))
+  ABI_MALLOC(vnl_projections,(cplex_fac, nprojs,nspinor*ndat))
   projections = zero
   s_projections = zero
   vnl_projections = zero
@@ -407,7 +407,7 @@ contains
 &                gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwin,&
 &                vectin, npwin, czero, projections, nprojs)
     else
-       ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
+       ABI_MALLOC(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
       ! only compute real part of projections = P^* psi => projections_r = P_r^T psi_r + P_i^T psi_i
       temp_realvec(1:npwin*nspinor*ndat) = vectin(1,1:npwin*nspinor*ndat)
       if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
@@ -428,7 +428,7 @@ contains
 &                gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwin, &
 &                temp_realvec, npwin, one , projections, nprojs)
       projections = projections * 2
-      ABI_DEALLOCATE(temp_realvec)
+      ABI_FREE(temp_realvec)
     end if
     call xmpi_sum(projections,mpi_enreg%comm_fft,ierr)
 
@@ -457,7 +457,7 @@ contains
       optder = 0
 
       shift = 0
-      ABI_ALLOCATE(sij_typ,(((paw_opt+1)/3)*lmnmax*(lmnmax+1)/2))
+      ABI_MALLOC(sij_typ,(((paw_opt+1)/3)*lmnmax*(lmnmax+1)/2))
       do itypat=1, ntypat
         nlmn=count(indlmn(3,:,itypat)>0)
         if (paw_opt>=2) then
@@ -488,7 +488,7 @@ contains
         shift = shift + nattyp(itypat)*nlmn
         iatm = iatm+nattyp(itypat)
       end do
-      ABI_DEALLOCATE(sij_typ)
+      ABI_FREE(sij_typ)
     else
       s_projections = projections
     end if
@@ -501,7 +501,7 @@ contains
 &                      gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, &
 &                      s_projections, nprojs, czero, svectout, npwout)
       else
-        ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
+        ABI_MALLOC(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
         call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs, one, &
 &                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwout, &
 &                  s_projections, nprojs, zero, temp_realvec, npwout)
@@ -510,7 +510,7 @@ contains
 &                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwout,&
 &                  s_projections, nprojs, zero, temp_realvec, npwout)
         svectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-        ABI_DEALLOCATE(temp_realvec)
+        ABI_FREE(temp_realvec)
       end if
       if(choice /= 7) svectout = svectout + vectin ! TODO understand this
     end if
@@ -521,7 +521,7 @@ contains
 &                      gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, &
 &                      vnl_projections, nprojs, czero, vectout, npwout)
       else
-        ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
+        ABI_MALLOC(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
         call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs, one, &
 &                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwout, &
 &                  vnl_projections, nprojs, zero, temp_realvec, npwout)
@@ -530,14 +530,14 @@ contains
 &                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwout, &
 &                  vnl_projections, nprojs, zero, temp_realvec, npwout)
         vectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-        ABI_DEALLOCATE(temp_realvec)
+        ABI_FREE(temp_realvec)
       end if
     end if
   end if
 
-  ABI_DEALLOCATE(projections)
-  ABI_DEALLOCATE(s_projections)
-  ABI_DEALLOCATE(vnl_projections)
+  ABI_FREE(projections)
+  ABI_FREE(s_projections)
+  ABI_FREE(vnl_projections)
  end subroutine gemm_nonlop
 !***
 

@@ -110,7 +110,7 @@ contains
     call xmpi_bcast(self%scmat, master, comm, ierr)
     self%ncells=abs(mat33det(self%scmat))
     ! call xmpi_bcast(self%ncells, master, comm, ierr)
-    ABI_ALLOCATE(self%rvecs, (3, self%ncells))
+    ABI_MALLOC(self%rvecs, (3, self%ncells))
     ! Why transpose?
     tmp(:,:)=transpose(self%scmat)
 
@@ -130,7 +130,7 @@ contains
     self%scmat=0
     self%ncells=0
     if (allocated(self%rvecs)) then
-       ABI_DEALLOCATE(self%rvecs)
+       ABI_FREE(self%rvecs)
     end if
   end subroutine finalize
 
@@ -207,7 +207,7 @@ contains
     integer :: npos, icell, ipos, counter=0
     npos=size(xred, dim=2)
     if (.not. allocated(scxred)) then
-       ABI_ALLOCATE(scxred, (3,size(xred, dim=2)*self%ncells))
+       ABI_MALLOC(scxred, (3,size(xred, dim=2)*self%ncells))
     end if
     do icell = 1, self%ncells
        do ipos=1 , npos
@@ -233,7 +233,7 @@ contains
     counter =0
     npos=size(xcart, dim=2)
     if (.not. allocated(scxcart)) then
-       ABI_ALLOCATE(scxcart, (3,npos*self%ncells))
+       ABI_MALLOC(scxcart, (3,npos*self%ncells))
     end if
     do icell = 1, self%ncells
        do ipos=1 , npos
@@ -282,7 +282,7 @@ contains
     real(dp), allocatable, intent(inout) :: A_sc(:)
     integer :: i
     if(.not. allocated(A_sc)) then
-       ABI_ALLOCATE(A_sc, (self%ncells))
+       ABI_MALLOC(A_sc, (self%ncells))
     end if
     do i=1, self%ncells
        A_sc(i) = real(A*exp(cmplx(0.0,two_pi, kind=dp) * &
@@ -305,7 +305,7 @@ contains
     integer :: icell, iA, nA, counter
     nA=size(A)
     if(.not. allocated(A_sc)) then
-       ABI_ALLOCATE(A_sc, (nA*self%ncells))
+       ABI_MALLOC(A_sc, (nA*self%ncells))
     end if
     counter=0
     do icell = 1, self%ncells
@@ -336,7 +336,7 @@ contains
     ndim=size(A, 1)
     nA=size(A,2)
     if(.not. allocated(A_sc)) then
-       ABI_ALLOCATE(A_sc, (ndim, nA*self%ncells))
+       ABI_MALLOC(A_sc, (ndim, nA*self%ncells))
     end if
     counter=0
     do icell = 1, self%ncells
@@ -369,7 +369,7 @@ contains
     ndim=size(A, 1)
     nA=size(A,2)
     if(.not. allocated(A_sc)) then
-       ABI_ALLOCATE(A_sc, (ndim, nA*self%ncells))
+       ABI_MALLOC(A_sc, (ndim, nA*self%ncells))
     end if
     counter=0
     do icell = 1, self%ncells
@@ -396,7 +396,7 @@ contains
     integer, intent(in) :: i, nbasis
     integer, allocatable, intent(inout) :: i_sc(:)
     if(.not. allocated(i_sc)) then
-       ABI_ALLOCATE(i_sc, (self%ncells))
+       ABI_MALLOC(i_sc, (self%ncells))
     end if
     call self%trans_i_noalloc(nbasis, i, i_sc)
   end subroutine trans_i
@@ -436,7 +436,7 @@ contains
     integer, allocatable,  intent(inout) :: ilist_sc(:)
     integer :: i
     if(.not. allocated(ilist_sc)) then
-       ABI_ALLOCATE(ilist_sc, (size(ilist)*self%ncells))
+       ABI_MALLOC(ilist_sc, (size(ilist)*self%ncells))
     end if
     do i =1, size(ilist)
        call trans_i_noalloc(self,nbasis, ilist(i), ilist_sc(self%ncells*(i-1)+1:self%ncells*i ))
@@ -462,10 +462,10 @@ contains
     integer, intent(in) :: j, Rj(3), nbasis
     integer, allocatable , intent(inout) :: j_sc(:), Rj_sc(:, :)
     if(.not. allocated(j_sc)) then
-       ABI_ALLOCATE(j_sc, (self%ncells))
+       ABI_MALLOC(j_sc, (self%ncells))
     endif
     if(.not. allocated(Rj_sc)) then
-       ABI_ALLOCATE(Rj_sc, (3, self%ncells))
+       ABI_MALLOC(Rj_sc, (3, self%ncells))
     endif
     call self%trans_j_and_Rj_noalloc(nbasis, j, Rj, j_sc, Rj_sc)
   end subroutine trans_j_and_Rj
@@ -494,10 +494,10 @@ contains
     integer, allocatable, intent(inout) :: ind_sc(:), R_sc(:,:)
     integer :: i,jj, counter, indj
     if (.not. allocated(ind_sc)) then
-       ABI_ALLOCATE(ind_sc, (self%ncells*size(jlist)) )
+       ABI_MALLOC(ind_sc, (self%ncells*size(jlist)) )
     endif
     if (.not. allocated(R_sc)) then
-       ABI_ALLOCATE(R_sc, (3, self%ncells))
+       ABI_MALLOC(R_sc, (3, self%ncells))
     endif
     counter=0
     do i =1, self%ncells
@@ -523,7 +523,7 @@ contains
     integer :: n, i
     n=size(a)
     if (.not. allocated(ret)) then
-       ABI_ALLOCATE(ret, (n*self%ncells))
+       ABI_MALLOC(ret, (n*self%ncells))
     end if
     do i =1, self%ncells
        ret((i-1)*n+1: i*n) = a(:)
@@ -560,7 +560,7 @@ contains
     integer :: n, i
     n=size(a)
     if (.not. allocated(ret)) then
-       ABI_ALLOCATE(ret, (n*self%ncells))
+       ABI_MALLOC(ret, (n*self%ncells))
     end if
     do i =1, self%ncells
        ret((i-1)*n+1: i*n) = a(:)
@@ -581,7 +581,7 @@ contains
     n1=size(a, dim=1)
     n2=size(a,dim=2)
     if (.not. allocated(ret)) then
-       ABI_ALLOCATE(ret, (n1, n2*self%ncells))
+       ABI_MALLOC(ret, (n1, n2*self%ncells))
     end if
     do i =1, self%ncells
        ret(:,(i-1)*n2+1: i*n2) = a(:,:)
@@ -601,7 +601,7 @@ contains
     integer :: n,  i
     n=size(a, 3)
     if (.not. allocated(ret)) then
-       ABI_ALLOCATE(ret, (size(a, dim=1), size(a, dim=2), n*self%ncells))
+       ABI_MALLOC(ret, (size(a, dim=1), size(a, dim=2), n*self%ncells))
     end if
     do i=1, self%ncells
        ret(:,:,(i-1)*n+1: i*n)=a(:, :, :)
@@ -620,7 +620,7 @@ contains
     integer, allocatable, intent(inout) :: ret(:,:)
     integer :: icell, ibasis
     if (.not. allocated(ret)) then
-       ABI_ALLOCATE(ret, (3, nbasis*self%ncells))
+       ABI_MALLOC(ret, (3, nbasis*self%ncells))
     end if
     do icell=1, self%ncells
        do ibasis=1, nbasis
@@ -656,9 +656,9 @@ contains
        ABI_ERROR("Wrong trans_j_and_Rj")
        err=1
     end if
-    ABI_DEALLOCATE(ind_sc)
-    ABI_DEALLOCATE(j_sc)
-    ABI_DEALLOCATE(R_sc3)
+    ABI_FREE(ind_sc)
+    ABI_FREE(j_sc)
+    ABI_FREE(R_sc3)
   end function test1
 
   function test2() result(err)

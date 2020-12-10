@@ -186,27 +186,27 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !*Initialization of local pointers
 !*Initialization of the array cwavef_r
 !*cwavef_r = current wavefunction in r-space
- ABI_ALLOCATE(cwavef_r,(2,n4f,n5f,n6f))
+ ABI_MALLOC(cwavef_r,(2,n4f,n5f,n6f))
 !*rhormunu = overlap matrix between cwavef and (jkpt,mu) in R-space
- ABI_ALLOCATE(rhor_munu,(cplex_fock,nfftf))
+ ABI_MALLOC(rhor_munu,(cplex_fock,nfftf))
 !*rhogmunu = overlap matrix between cwavef and (jkpt,mu) in G-space
- ABI_ALLOCATE(rhog_munu,(2,nfftf))
+ ABI_MALLOC(rhog_munu,(2,nfftf))
 !*dummytab = variables for fourwf
- ABI_ALLOCATE(dummytab,(2,nfft))
+ ABI_MALLOC(dummytab,(2,nfft))
 !*vfock = Fock potential
- ABI_ALLOCATE(vfock,(cplex_fock*nfftf))
+ ABI_MALLOC(vfock,(cplex_fock*nfftf))
 !*vqg = 4pi/(G+q)**2
- ABI_ALLOCATE(vqg,(nfftf))
+ ABI_MALLOC(vqg,(nfftf))
 
 !*Initialization of the array ghc1
 !*ghc1 will contain the exact exchange contribution to the Hamiltonian
- ABI_ALLOCATE(ghc1,(2,npw))
- ABI_ALLOCATE(ghc2,(2,npw))
+ ABI_MALLOC(ghc1,(2,npw))
+ ABI_MALLOC(ghc2,(2,npw))
  ghc1=zero
  ghc2=zero
 !*Initialization of the array vlocpsi_r
 !*vlocpsi_r = partial local Fock operator applied to cwavef in r-space and summed over all occupied (jkpt,mu)
- ABI_ALLOCATE(vlocpsi_r,(cplex_fock*nfftf))
+ ABI_MALLOC(vlocpsi_r,(cplex_fock*nfftf))
  vlocpsi_r=zero
 
 !*Additional arrays in case of paw
@@ -214,21 +214,21 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    nhat12_grdim=0
    if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
      ider=3
-     ABI_ALLOCATE(strout,(2,npw*nspinor))
+     ABI_MALLOC(strout,(2,npw*nspinor))
    end if
    if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
      ider=3
-     ABI_ALLOCATE(forout,(2,npw*nspinor))
-     ABI_ALLOCATE(forikpt,(3,natom))
+     ABI_MALLOC(forout,(2,npw*nspinor))
+     ABI_MALLOC(forikpt,(3,natom))
      forikpt=zero
    end if
-   ABI_ALLOCATE(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3)))
-   ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
-   ABI_ALLOCATE(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim))
+   ABI_MALLOC(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3)))
+   ABI_MALLOC(gvnlxc,(2,npw*nspinor))
+   ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim))
  end if
 
  if (fockcommon%usepaw==1.or.fockcommon%optstr) then
-   ABI_ALLOCATE(gboundf,(2*mgfftf+8,2))
+   ABI_MALLOC(gboundf,(2*mgfftf+8,2))
    call sphereboundary(gboundf,gs_ham%istwf_k,gs_ham%kg_k,mgfftf,npw)
  else
    gboundf=>gs_ham%gbound_k
@@ -288,16 +288,16 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !  Note: ffnl_kp / ph3d_kp / gbound_kp are not used
 
    if (associated(gs_ham%ph3d_kp)) then
-     ABI_ALLOCATE(gs_ham%ph3d_kp,(2,npwj,gs_ham%matblk))
+     ABI_MALLOC(gs_ham%ph3d_kp,(2,npwj,gs_ham%matblk))
    end if
 
    call gs_ham%load_kprime(kpt_kp=fockbz%kptns_bz(:,jkpt),&
 &   istwf_kp=jstwfk,npw_kp=npwj,kg_kp=fockbz%kg_bz(:,1+jkg:npwj+jkg))
 !* Some temporary allocations needed for PAW
    if (fockcommon%usepaw==1) then
-     ABI_ALLOCATE(vectin_dum,(2,npwj*nspinor))
+     ABI_MALLOC(vectin_dum,(2,npwj*nspinor))
      vectin_dum=zero
-     ABI_ALLOCATE(ffnl_kp_dum,(npwj,0,gs_ham%lmnmax,gs_ham%ntypat))
+     ABI_MALLOC(ffnl_kp_dum,(npwj,0,gs_ham%lmnmax,gs_ham%ntypat))
      call gs_ham%load_kprime(ffnl_kp=ffnl_kp_dum)
    end if
    call timab(1515,2,tsec)
@@ -333,7 +333,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      if (allocated(fockbz%cwaveocc_bz)) then
        cwaveocc_r => fockbz%cwaveocc_bz(:,:,:,:,jband+jbg,my_jsppol)
      else
-       ABI_ALLOCATE(cwaveocc_r,(2,n4f,n5f,n6f))
+       ABI_MALLOC(cwaveocc_r,(2,n4f,n5f,n6f))
        cwaveocc_r=zero
        call timab(840+tim_fourwf0,1,tsec)
        call fourwf(1,rhodum0,fockbz%cgocc(:,1+jcg+npwj*(jband-1):jcg+jband*npwj,my_jsppol),rhodum,cwaveocc_r, &
@@ -374,7 +374,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      if (fockcommon%usepaw==1) then
        iband_cprj=(my_jsppol-1)*fockbz%mkptband+jbg+jband
 
-       ABI_ALLOCATE(rho12,(2,nfftf,nspinor**2))
+       ABI_MALLOC(rho12,(2,nfftf,nspinor**2))
 
        cwaveocc_prj=>fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1)
 
@@ -398,7 +398,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        fockcommon%stress_ikpt(:,fockcommon%ieigen)=fockcommon%stress_ikpt(:,fockcommon%ieigen)+fockstr(:)*occ*wtk
        if (fockcommon%usepaw==0.and.(.not.need_ghc)) then
          if (allocated(fockbz%cgocc)) then
-           ABI_DEALLOCATE(cwaveocc_r)
+           ABI_FREE(cwaveocc_r)
          end if
          cycle
        end if
@@ -440,12 +440,12 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        call timab(1515,1,tsec)
        qphon=qvec_j;nfftotf=product(ngfftf(1:3))
        cplex_dij=1;ndij=nspden_fock
-       ABI_ALLOCATE(dijhat,(cplex_dij*gs_ham%dimekb1,natom,ndij,cplex_fock))
+       ABI_MALLOC(dijhat,(cplex_dij*gs_ham%dimekb1,natom,ndij,cplex_fock))
        dijhat=zero
        do iatom=1,natom
          itypat=gs_ham%typat(iatom)
          lmn2_size=fockcommon%pawtab(itypat)%lmn2_size
-         ABI_ALLOCATE(dijhat_tmp,(cplex_fock*cplex_dij*lmn2_size,ndij))
+         ABI_MALLOC(dijhat_tmp,(cplex_fock*cplex_dij*lmn2_size,ndij))
          dijhat_tmp=zero
          call pawdijhat(dijhat_tmp,cplex_dij,cplex_fock,gs_ham%gprimd,iatom,&
 &         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
@@ -454,7 +454,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
            ind=(ii-1)*lmn2_size
            dijhat(1:cplex_dij*lmn2_size,iatom,:,ii)=dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,:)
          end do
-         ABI_DEALLOCATE(dijhat_tmp)
+         ABI_FREE(dijhat_tmp)
        end do
        signs=2; cpopt=2;idir=0; paw_opt=1;nnlout=1;tim_nonlop=1
        
@@ -549,8 +549,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !         fockcommon%stress_ikpt(1:3,fockcommon%ieigen)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen)+doti/nfftf*occ*wtk*half
        end if ! end stresses
 
-       ABI_DEALLOCATE(dijhat)
-       ABI_DEALLOCATE(rho12)
+       ABI_FREE(dijhat)
+       ABI_FREE(rho12)
      end if !end PAW
 
 ! =============================================================
@@ -573,7 +573,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      end do
      call timab(1507,2,tsec)
      if (allocated(fockbz%cgocc)) then
-       ABI_DEALLOCATE(cwaveocc_r)
+       ABI_FREE(cwaveocc_r)
      end if
 
    end do ! jband
@@ -587,11 +587,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    bdtot_jindex=bdtot_jindex+nband_k
    jkg=jkg+npwj
    if (fockcommon%usepaw==1) then
-     ABI_DEALLOCATE(vectin_dum)
-     ABI_DEALLOCATE(ffnl_kp_dum)
+     ABI_FREE(vectin_dum)
+     ABI_FREE(ffnl_kp_dum)
    end if
    if (associated(gs_ham%ph3d_kp)) then
-     ABI_DEALLOCATE(gs_ham%ph3d_kp)
+     ABI_FREE(gs_ham%ph3d_kp)
    end if
  end do ! jkpt
 
@@ -613,34 +613,34 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! ===============================
 ! === Deallocate local arrays ===
 ! ===============================
-   ABI_DEALLOCATE(cwavef_r)
-   ABI_DEALLOCATE(ghc1)
-   ABI_DEALLOCATE(ghc2)
-   ABI_DEALLOCATE(rhor_munu)
-   ABI_DEALLOCATE(rhog_munu)
-   ABI_DEALLOCATE(vlocpsi_r)
-   ABI_DEALLOCATE(dummytab)
-   ABI_DEALLOCATE(vfock)
-   ABI_DEALLOCATE(vqg)
+   ABI_FREE(cwavef_r)
+   ABI_FREE(ghc1)
+   ABI_FREE(ghc2)
+   ABI_FREE(rhor_munu)
+   ABI_FREE(rhog_munu)
+   ABI_FREE(vlocpsi_r)
+   ABI_FREE(dummytab)
+   ABI_FREE(vfock)
+   ABI_FREE(vqg)
    if (fockcommon%usepaw==1) then
-     ABI_DEALLOCATE(gvnlxc)
-     ABI_DEALLOCATE(grnhat12)
+     ABI_FREE(gvnlxc)
+     ABI_FREE(grnhat12)
      if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
-       ABI_DEALLOCATE(forikpt)
-       ABI_DEALLOCATE(forout)
+       ABI_FREE(forikpt)
+       ABI_FREE(forout)
      end if
      if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-       ABI_DEALLOCATE(strout)
+       ABI_FREE(strout)
      end if
-     ABI_DEALLOCATE(grnhat_12)
+     ABI_FREE(grnhat_12)
    end if
    if(fockcommon%usepaw==1.or.fockcommon%optstr) then
-     ABI_DEALLOCATE(gboundf)
+     ABI_FREE(gboundf)
    end if
 !*Restore gs_ham datastructure
 
    if (associated(gs_ham%ph3d_kp)) then
-     ABI_ALLOCATE(gs_ham%ph3d_kp,(2,gs_ham%npw_k,gs_ham%matblk))
+     ABI_MALLOC(gs_ham%ph3d_kp,(2,gs_ham%npw_k,gs_ham%matblk))
    end if
    call gs_ham%load_kprime(kpt_kp=gs_ham%kpt_k,istwf_kp=gs_ham%istwf_k,&
 &   npw_kp=gs_ham%npw_k,kg_kp=gs_ham%kg_k,ffnl_kp=gs_ham%ffnl_k,ph3d_kp=gs_ham%ph3d_k)
@@ -655,13 +655,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !*Restore gs_ham datastructure
 
  if (associated(gs_ham%ph3d_kp)) then
-   ABI_ALLOCATE(gs_ham%ph3d_kp,(2,gs_ham%npw_k,gs_ham%matblk))
+   ABI_MALLOC(gs_ham%ph3d_kp,(2,gs_ham%npw_k,gs_ham%matblk))
  end if
  call gs_ham%load_kprime(kpt_kp=gs_ham%kpt_k,istwf_kp=gs_ham%istwf_k,&
 & npw_kp=gs_ham%npw_k,kg_kp=gs_ham%kg_k,ffnl_kp=gs_ham%ffnl_k,ph3d_kp=gs_ham%ph3d_k)
 
 !* Perform an FFT using fourwf to get ghc1 = FFT^-1(vlocpsi_r)
- ABI_ALLOCATE(psilocal,(cplex_fock*n4f,n5f,n6f))
+ ABI_MALLOC(psilocal,(cplex_fock*n4f,n5f,n6f))
  call fftpac(1,mpi_enreg,nspden_fock,cplex_fock*n1f,n2f,n3f,cplex_fock*n4f,n5f,n6f,ngfft,vlocpsi_r,psilocal,2)
 
  call timab(1515,2,tsec)
@@ -671,7 +671,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 & mgfftf,mpi_enreg,ndat1,ngfftf,1,npw,n4f,n5f,n6f,3,tim_fourwf0,weight1,weight1,&
 & use_gpu_cuda=gs_ham%use_gpu_cuda)
  call timab(840+tim_fourwf0,2,tsec)
- ABI_DEALLOCATE(psilocal)
+ ABI_FREE(psilocal)
 
  ghc1=ghc1*sqrt(gs_ham%ucvol)+ghc2
 
@@ -688,19 +688,19 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! ===============================
  call timab(1515,1,tsec)
  if (fockcommon%usepaw==1) then
-   ABI_DEALLOCATE(gvnlxc)
-   ABI_DEALLOCATE(grnhat12)
+   ABI_FREE(gvnlxc)
+   ABI_FREE(grnhat12)
    if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
-     ABI_DEALLOCATE(forikpt)
-     ABI_DEALLOCATE(forout)
+     ABI_FREE(forikpt)
+     ABI_FREE(forout)
    end if
    if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-     ABI_DEALLOCATE(strout)
+     ABI_FREE(strout)
    end if
-   ABI_DEALLOCATE(grnhat_12)
+   ABI_FREE(grnhat_12)
  end if
  if(fockcommon%usepaw==1.or.fockcommon%optstr) then
-   ABI_DEALLOCATE(gboundf)
+   ABI_FREE(gboundf)
  end if
  call timab(1515,2,tsec)
 ! ============================================
@@ -730,15 +730,15 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! ===============================
 ! === Deallocate local arrays ===
 ! ===============================
- ABI_DEALLOCATE(cwavef_r)
- ABI_DEALLOCATE(ghc1)
- ABI_DEALLOCATE(ghc2)
- ABI_DEALLOCATE(rhor_munu)
- ABI_DEALLOCATE(rhog_munu)
- ABI_DEALLOCATE(vlocpsi_r)
- ABI_DEALLOCATE(dummytab)
- ABI_DEALLOCATE(vfock)
- ABI_DEALLOCATE(vqg)
+ ABI_FREE(cwavef_r)
+ ABI_FREE(ghc1)
+ ABI_FREE(ghc2)
+ ABI_FREE(rhor_munu)
+ ABI_FREE(rhog_munu)
+ ABI_FREE(vlocpsi_r)
+ ABI_FREE(dummytab)
+ ABI_FREE(vfock)
+ ABI_FREE(vqg)
 
  call timab(1504,2,tsec)
  call timab(1515,2,tsec)
@@ -944,22 +944,22 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      mband_cprj=mband/mpi_enreg%nproc_band
      nband_cprj_k=nband_k/mpi_enreg%nproc_band
 
-     ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
+     ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
      if (psps%usepaw==1) then
-       ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp))
+       ABI_MALLOC(cwaveprj,(natom,my_nspinor*bandpp))
        call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
      else
-       ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
+       ABI_MALLOC(cwaveprj,(0,0))
      end if
 
-     ABI_ALLOCATE(kg_k,(3,mpw))
+     ABI_MALLOC(kg_k,(3,mpw))
 !$OMP PARALLEL DO
      do ipw=1,npw_k
        kg_k(:,ipw)=kg(:,ipw+ikg)
      end do
 
-     ABI_ALLOCATE(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
-     ABI_ALLOCATE(ylmgr_k,(0,0,0))
+     ABI_MALLOC(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
+     ABI_MALLOC(ylmgr_k,(0,0,0))
      if (psps%useylm==1) then
 !$OMP PARALLEL DO COLLAPSE(2)
        do ilm=1,mpsang*mpsang
@@ -971,7 +971,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 !    Compute (k+G) vectors
      nkpg=3*nloalg(3)
-     ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
+     ABI_MALLOC(kpg_k,(npw_k,nkpg))
      if (nkpg>0) then
        call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
      end if
@@ -979,7 +979,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 !    Compute nonlocal form factors ffnl at all (k+G)
      ider=0;idir=0;dimffnl=1
-     ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
+     ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
      call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &     ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
 &     nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
@@ -989,7 +989,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !     - Prepare various tabs in case of band-FFT parallelism
 !     - Load k-dependent quantities in the Hamiltonian
 
-     ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
+     ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
      call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_gbound=compute_gbound,compute_ph3d=.true.)
 
@@ -1010,17 +1010,17 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !    blocksize= bandpp (JB 2016/04/16)
 !    Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
 !
-     ABI_ALLOCATE(occblock,(blocksize))
-     ABI_ALLOCATE(weight,(blocksize))
+     ABI_MALLOC(occblock,(blocksize))
+     ABI_MALLOC(weight,(blocksize))
      occblock=zero;weight=zero
 
      if (fockcommon%optfor) then
        fockcommon%forces_ikpt=zero
      end if
 
-     ABI_ALLOCATE(wi,(2,npw_k*my_nspinor*blocksize,nblockbd))
+     ABI_MALLOC(wi,(2,npw_k*my_nspinor*blocksize,nblockbd))
      wi=zero
-     ABI_ALLOCATE(mkl,(2,nband_k,nband_k))
+     ABI_MALLOC(mkl,(2,nband_k,nband_k))
      mkl=zero
 ! Calculate all the Wi for the current k-point
 
@@ -1072,7 +1072,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      end do ! End of loop on block of bands
 
 ! Calculate Mkl for the current k-point
-     ABI_ALLOCATE(cwavefk,(2,npw_k*my_nspinor))
+     ABI_MALLOC(cwavefk,(2,npw_k*my_nspinor))
      do iblock=1,nblockbd
        cwavef(:,1:npw_k*my_nspinor*blocksize)=&
 &       cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
@@ -1091,14 +1091,14 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        end do
      end do ! End of loop on block of bands
 
-     ABI_DEALLOCATE(cwavefk)
+     ABI_FREE(cwavefk)
      mkl=-mkl
 
 ! Cholesky factorisation of -mkl=Lx(trans(L)*. On output mkl=L
      call zpotrf("L",nband_k,mkl,nband_k,info)
 
 ! calculate trans(L-1)
-     ABI_ALLOCATE(bb,(2,nband_k,nband_k))
+     ABI_MALLOC(bb,(2,nband_k,nband_k))
      bb=zero
      do kk=1,nband_k
        bb(1,kk,kk)=one
@@ -1125,8 +1125,8 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !    fock%fockACE(ikpt,isppol)%xi=zero
 !    ENDDEBUG
 
-     ABI_DEALLOCATE(wi)
-     ABI_DEALLOCATE(mkl)
+     ABI_FREE(wi)
+     ABI_FREE(mkl)
 
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
@@ -1144,17 +1144,17 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      if (psps%usepaw==1) then
        call pawcprj_free(cwaveprj)
      end if
-     ABI_DATATYPE_DEALLOCATE(cwaveprj)
-     ABI_DEALLOCATE(cwavef)
-     ABI_DEALLOCATE(bb)
-     ABI_DEALLOCATE(occblock)
-     ABI_DEALLOCATE(weight)
-     ABI_DEALLOCATE(ffnl)
-     ABI_DEALLOCATE(kg_k)
-     ABI_DEALLOCATE(kpg_k)
-     ABI_DEALLOCATE(ylm_k)
-     ABI_DEALLOCATE(ylmgr_k)
-     ABI_DEALLOCATE(ph3d)
+     ABI_FREE(cwaveprj)
+     ABI_FREE(cwavef)
+     ABI_FREE(bb)
+     ABI_FREE(occblock)
+     ABI_FREE(weight)
+     ABI_FREE(ffnl)
+     ABI_FREE(kg_k)
+     ABI_FREE(kpg_k)
+     ABI_FREE(ylm_k)
+     ABI_FREE(ylmgr_k)
+     ABI_FREE(ph3d)
    end do ! End k point loop
  end do ! End loop over spins
 
@@ -1248,9 +1248,9 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
 !*Initialization of the array ghc1
 !*ghc1 will contain the exact exchange contribution to the Hamiltonian
- ABI_ALLOCATE(ghc1,(2,npw*my_nspinor))
+ ABI_MALLOC(ghc1,(2,npw*my_nspinor))
  ghc1=zero
- ABI_ALLOCATE(xi,(2,npw*my_nspinor))
+ ABI_MALLOC(xi,(2,npw*my_nspinor))
 
  do iband=1, nband_k
    xi(1,:)=gs_ham%fockACE_k%xi(1,:,iband)
@@ -1261,7 +1261,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
    ghc1(1,:)=ghc1(1,:)-(dotr*gs_ham%fockACE_k%xi(1,:,iband)-doti*gs_ham%fockACE_k%xi(2,:,iband))
    ghc1(2,:)=ghc1(2,:)-(dotr*gs_ham%fockACE_k%xi(2,:,iband)+doti*gs_ham%fockACE_k%xi(1,:,iband))
  end do
- ABI_DEALLOCATE(xi)
+ ABI_FREE(xi)
 
 !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
 ! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_kpt + ghc1(:,:)
@@ -1296,7 +1296,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
 ! === Deallocate local arrays ===
 ! ===============================
 
- ABI_DEALLOCATE(ghc1)
+ ABI_FREE(ghc1)
 
 end subroutine fock_ACE_getghc
 !!***

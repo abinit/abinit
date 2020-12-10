@@ -696,7 +696,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
  Dctl%prtvol = 0; if (PRESENT(prtvol)) Dctl%prtvol = prtvol
  Dctl%abstol = -tol8; if (PRESENT(abstol)) Dctl%abstol = abstol
 
- ABI_ALLOCATE(kg_k,(3,0))
+ ABI_MALLOC(kg_k,(3,0))
 
  ! Total number of G-vectors for this k-point with istwf_k=1.
  call kpgsph(ecut,0,gmet,0,0,1,kg_k,kpoint,0,MPI_enreg_seq,0,Dctl%npwtot)
@@ -705,7 +705,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
  call kpgsph(ecut,0,gmet,0,0,istwf_k,kg_k,kpoint,0,MPI_enreg_seq,0,npw_k)
 
  Dctl%npw_k = npw_k
- ABI_DEALLOCATE(kg_k)
+ ABI_FREE(kg_k)
 
  Dctl%do_full_diago = .FALSE.
 

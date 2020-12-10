@@ -1446,9 +1446,9 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
 !  fix small window around fermie for tetrahedron weight calculation
    deltaene = (enemax-enemin)/dble(nene-1)
 
-   ABI_ALLOCATE(tmp_eigen,(k_obj%nkpt))
-   ABI_ALLOCATE(tweight,(k_obj%nkpt,nene))
-   ABI_ALLOCATE(dtweightde,(k_obj%nkpt,nene))
+   ABI_MALLOC(tmp_eigen,(k_obj%nkpt))
+   ABI_MALLOC(tweight,(k_obj%nkpt,nene))
+   ABI_MALLOC(dtweightde,(k_obj%nkpt,nene))
 
    do iband = 1,nFSband
 !    for each spin pol
@@ -1468,9 +1468,9 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
        tmp_wtk(iband,:,isppol,:) = dtweightde(:,:)*k_obj%nkpt
      end do
    end do
-   ABI_DEALLOCATE(tmp_eigen)
-   ABI_DEALLOCATE(tweight)
-   ABI_DEALLOCATE(dtweightde)
+   ABI_FREE(tmp_eigen)
+   ABI_FREE(tweight)
+   ABI_FREE(dtweightde)
 
    call destroy_tetra(tetrahedra)
    !call tetrahedra%free()
@@ -1695,9 +1695,9 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
    enemin = fermie - dble(ifermi-1)*deltaene
    enemax = enemin + dble(nene-1)*deltaene
 
-   ABI_ALLOCATE(tmp_eigen,(k_obj%nkpt))
-   ABI_ALLOCATE(tweight,(k_obj%nkpt,nene))
-   ABI_ALLOCATE(dtweightde,(k_obj%nkpt,nene))
+   ABI_MALLOC(tmp_eigen,(k_obj%nkpt))
+   ABI_MALLOC(tweight,(k_obj%nkpt,nene))
+   ABI_MALLOC(dtweightde,(k_obj%nkpt,nene))
 
    do iband = 1,nFSband
 !    for each spin pol
@@ -1718,9 +1718,9 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
      end do
 
    end do
-   ABI_DEALLOCATE(tmp_eigen)
-   ABI_DEALLOCATE(tweight)
-   ABI_DEALLOCATE(dtweightde)
+   ABI_FREE(tmp_eigen)
+   ABI_FREE(tweight)
+   ABI_FREE(dtweightde)
 
    call destroy_tetra(tetrahedra)
 
@@ -1906,8 +1906,8 @@ subroutine ep_ph_weights(phfrq,elphsmear,omega_min,omega_max,nomega,gprimd,kptrl
 
 !  do all the omega points for tetrahedron weight calculation
 
-   ABI_ALLOCATE(tweight,(k_obj%nkpt,nomega))
-   ABI_ALLOCATE(dtweightde,(k_obj%nkpt,nomega))
+   ABI_MALLOC(tweight,(k_obj%nkpt,nomega))
+   ABI_MALLOC(dtweightde,(k_obj%nkpt,nomega))
 
    do ibranch = 1,nbranch
      call get_tetra_weight(phfrq(ibranch,:),omega_min,omega_max,&
@@ -1916,8 +1916,8 @@ subroutine ep_ph_weights(phfrq,elphsmear,omega_min,omega_max,nomega,gprimd,kptrl
 
      tmp_wtq(ibranch,:,:) = dtweightde(:,:)*k_obj%nkpt
    end do
-   ABI_DEALLOCATE(tweight)
-   ABI_DEALLOCATE(dtweightde)
+   ABI_FREE(tweight)
+   ABI_FREE(dtweightde)
 
    call destroy_tetra(tetrahedra)
 

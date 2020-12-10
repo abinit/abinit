@@ -121,16 +121,16 @@ subroutine paw2wvl(pawtab,proj,wvl)
  end if
 
 !Find max mesh size
- ABI_ALLOCATE(msz,(ntypat))
+ ABI_MALLOC(msz,(ntypat))
  do itypat=1,ntypat
    msz(itypat)=pawtab(itypat)%wvl%rholoc%msz
  end do
  maxmsz=maxval(msz(1:ntypat))
 
- ABI_ALLOCATE(wvl%rholoc%msz,(ntypat))
- ABI_ALLOCATE(wvl%rholoc%d,(maxmsz,4,ntypat))
- ABI_ALLOCATE(wvl%rholoc%rad,(maxmsz,ntypat))
- ABI_ALLOCATE(wvl%rholoc%radius,(ntypat))
+ ABI_MALLOC(wvl%rholoc%msz,(ntypat))
+ ABI_MALLOC(wvl%rholoc%d,(maxmsz,4,ntypat))
+ ABI_MALLOC(wvl%rholoc%rad,(maxmsz,ntypat))
+ ABI_MALLOC(wvl%rholoc%radius,(ntypat))
 
  do itypat=1,ntypat
    msz1=pawtab(itypat)%wvl%rholoc%msz
@@ -140,11 +140,11 @@ subroutine paw2wvl(pawtab,proj,wvl)
    wvl%rholoc%rad(1:msz1,itypat)=pawtab(itypat)%wvl%rholoc%rad(1:msz1)
    wvl%rholoc%radius(itypat)=pawtab(itypat)%rpaw
  end do
- ABI_DEALLOCATE(msz)
+ ABI_FREE(msz)
 !
 !Now fill projectors type:
 !
- ABI_DATATYPE_ALLOCATE(proj%G,(ntypat))
+ ABI_MALLOC(proj%G,(ntypat))
 !
 !nullify all for security:
 !do itypat=1,ntypat
@@ -170,10 +170,10 @@ subroutine paw2wvl(pawtab,proj,wvl)
 !
 !Allocations
  do itypat=1,ntypat
-   ABI_ALLOCATE(proj%G(itypat)%ndoc ,(proj%G(itypat)%nshltot))
-   ABI_ALLOCATE(proj%G(itypat)%nam  ,(proj%G(itypat)%nshltot))
-   ABI_ALLOCATE(proj%G(itypat)%xp   ,(proj%G(itypat)%ncplx,proj%G(itypat)%nexpo))
-   ABI_ALLOCATE(proj%G(itypat)%psiat,(proj%G(itypat)%ncplx,proj%G(itypat)%nexpo))
+   ABI_MALLOC(proj%G(itypat)%ndoc ,(proj%G(itypat)%nshltot))
+   ABI_MALLOC(proj%G(itypat)%nam  ,(proj%G(itypat)%nshltot))
+   ABI_MALLOC(proj%G(itypat)%xp   ,(proj%G(itypat)%ncplx,proj%G(itypat)%nexpo))
+   ABI_MALLOC(proj%G(itypat)%psiat,(proj%G(itypat)%ncplx,proj%G(itypat)%nexpo))
  end do
 
 !jb=0
@@ -200,10 +200,10 @@ subroutine paw2wvl(pawtab,proj,wvl)
 
 !debug
 !write(*,*)'paw2wvl 178: erase me set gaussians real equal to hgh (for Li)'
-!ABI_DEALLOCATE(proj%G(1)%xp)
-!ABI_DEALLOCATE(proj%G(1)%psiat)
-!ABI_ALLOCATE(proj%G(1)%psiat,(2,2))
-!ABI_ALLOCATE(proj%G(1)%xp,(2,2))
+!ABI_FREE(proj%G(1)%xp)
+!ABI_FREE(proj%G(1)%psiat)
+!ABI_MALLOC(proj%G(1)%psiat,(2,2))
+!ABI_MALLOC(proj%G(1)%xp,(2,2))
 !proj%G(1)%ndoc(:)=1 !1 gaussian per shell
 !proj%G(1)%nexpo=2 ! two gaussians in total
 !proj%G(1)%xp=zero
@@ -219,9 +219,9 @@ subroutine paw2wvl(pawtab,proj,wvl)
 !and comment out variables
 !rmax=2.d0
 !nr=rmax/(0.0001d0)
-!ABI_ALLOCATE(r,(nr))
-!ABI_ALLOCATE(f,(nr))
-!ABI_ALLOCATE(y,(nr))
+!ABI_MALLOC(r,(nr))
+!ABI_MALLOC(f,(nr))
+!ABI_MALLOC(y,(nr))
 !step=rmax/real(nr-1,dp)
 !do ir=1,nr
 !r(ir)=real(ir-1,dp)*step
@@ -234,7 +234,7 @@ subroutine paw2wvl(pawtab,proj,wvl)
 !unitp=unitp+1
 !f(:)=czero
 !ng=proj%G(itypat)%ndoc(i_shell)
-!ABI_ALLOCATE(g,(nr,ng))
+!ABI_MALLOC(g,(nr,ng))
 !do ii=1,ng
 !ig=ig+1
 !fac=cmplx(proj%G(itypat)%psiat(1,ig),proj%G(itypat)%psiat(2,ig))
@@ -247,12 +247,12 @@ subroutine paw2wvl(pawtab,proj,wvl)
 !write(unitp,'(9999f16.7)')r(ir),real(f(ir)),(real(g(ir,ii)),&
 !&    ii=1,ng)
 !end do
-!ABI_DEALLOCATE(g)
+!ABI_FREE(g)
 !end do
 !end do
-!ABI_DEALLOCATE(r)
-!ABI_DEALLOCATE(f)
-!ABI_DEALLOCATE(y)
+!ABI_FREE(r)
+!ABI_FREE(f)
+!ABI_FREE(y)
 !stop
 !end debug
 
@@ -286,7 +286,7 @@ subroutine paw2wvl(pawtab,proj,wvl)
 
 !now the index l,m,n objects:
  lmnmax=maxval(pawtab(:)%lmn_size)
- ABI_ALLOCATE(wvl%paw%indlmn,(6,lmnmax,ntypat))
+ ABI_MALLOC(wvl%paw%indlmn,(6,lmnmax,ntypat))
  wvl%paw%lmnmax=lmnmax
  wvl%paw%ntypes=ntypat
  wvl%paw%indlmn=0
@@ -298,22 +298,22 @@ subroutine paw2wvl(pawtab,proj,wvl)
 !allocate and copy sij
 !max_lmn2_size=max(pawtab(:)%lmn2_size,1)
  max_lmn2_size=lmnmax*(lmnmax+1)/2
- ABI_ALLOCATE(wvl%paw%sij,(max_lmn2_size,ntypat))
+ ABI_MALLOC(wvl%paw%sij,(max_lmn2_size,ntypat))
 !sij is not yet calculated here.
 !We copy this in gstate after call to pawinit
 !do itypat=1,ntypat
 !wvl%paw%sij(1:pawtab(itypat)%lmn2_size,itypat)=pawtab(itypat)%sij(:)
 !end do
 
- ABI_ALLOCATE(wvl%paw%rpaw,(ntypat))
+ ABI_MALLOC(wvl%paw%rpaw,(ntypat))
  do itypat=1,ntypat
    wvl%paw%rpaw(itypat)= pawtab(itypat)%rpaw
  end do
 
  if(allocated(wvl%npspcode_paw_init_guess)) then
-   ABI_DEALLOCATE(wvl%npspcode_paw_init_guess)
+   ABI_FREE(wvl%npspcode_paw_init_guess)
  end if
- ABI_ALLOCATE(wvl%npspcode_paw_init_guess,(ntypat))
+ ABI_MALLOC(wvl%npspcode_paw_init_guess,(ntypat))
  do itypat=1,ntypat
    wvl%npspcode_paw_init_guess(itypat)=pawtab(itypat)%wvl%npspcode_init_guess
  end do
@@ -381,7 +381,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
 
 !Option==1: allocate and copy
  if(option==1) then
-   ABI_DATATYPE_ALLOCATE(wvl%paw%paw_ij,(my_natom))
+   ABI_MALLOC(wvl%paw%paw_ij,(my_natom))
    do iatom=1,my_natom
      call nullify_paw_ij_objects(wvl%paw%paw_ij(iatom))
      wvl%paw%paw_ij(iatom)%cplex          =paw_ij(iatom)%qphase
@@ -403,7 +403,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
      wvl%paw%paw_ij(iatom)%nsppol         =paw_ij(iatom)%nsppol
      if (paw_ij(iatom)%has_dij/=0) then
        iaux=paw_ij(iatom)%cplex_dij*paw_ij(iatom)%lmn2_size
-       ABI_ALLOCATE(wvl%paw%paw_ij(iatom)%dij,(iaux,paw_ij(iatom)%ndij))
+       ABI_MALLOC(wvl%paw%paw_ij(iatom)%dij,(iaux,paw_ij(iatom)%ndij))
        wvl%paw%paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)
      end if
    end do
@@ -413,10 +413,10 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
    do iatom=1,my_natom
      wvl%paw%paw_ij(iatom)%has_dij=0
      if (associated(wvl%paw%paw_ij(iatom)%dij)) then
-       ABI_DEALLOCATE(wvl%paw%paw_ij(iatom)%dij)
+       ABI_FREE(wvl%paw%paw_ij(iatom)%dij)
      end if
    end do
-   ABI_DATATYPE_DEALLOCATE(wvl%paw%paw_ij)
+   ABI_FREE(wvl%paw%paw_ij)
 
 !  Option==3: only copy
  elseif(option==3) then
@@ -487,30 +487,30 @@ subroutine wvl_paw_free(wvl)
 
 !PAW objects
  if( associated(wvl%paw%spsi)) then
-   ABI_DEALLOCATE(wvl%paw%spsi)
+   ABI_FREE(wvl%paw%spsi)
  end if
  if( associated(wvl%paw%indlmn)) then
-   ABI_DEALLOCATE(wvl%paw%indlmn)
+   ABI_FREE(wvl%paw%indlmn)
  end if
  if( associated(wvl%paw%sij)) then
-   ABI_DEALLOCATE(wvl%paw%sij)
+   ABI_FREE(wvl%paw%sij)
  end if
  if( associated(wvl%paw%rpaw)) then
-   ABI_DEALLOCATE(wvl%paw%rpaw)
+   ABI_FREE(wvl%paw%rpaw)
  end if
 
 !rholoc
  if( associated(wvl%rholoc%msz )) then
-   ABI_DEALLOCATE(wvl%rholoc%msz)
+   ABI_FREE(wvl%rholoc%msz)
  end if
  if( associated(wvl%rholoc%d )) then
-   ABI_DEALLOCATE(wvl%rholoc%d)
+   ABI_FREE(wvl%rholoc%d)
  end if
  if( associated(wvl%rholoc%rad)) then
-   ABI_DEALLOCATE(wvl%rholoc%rad)
+   ABI_FREE(wvl%rholoc%rad)
  end if
  if( associated(wvl%rholoc%radius)) then
-   ABI_DEALLOCATE(wvl%rholoc%radius)
+   ABI_FREE(wvl%rholoc%radius)
  end if
 
 #else
@@ -595,13 +595,13 @@ subroutine wvl_cprjreorder(wvl,atm_indx)
  end do
  if (iexit==1) return
 
- ABI_ALLOCATE(nlmn,(n1cprj))
+ ABI_MALLOC(nlmn,(n1cprj))
  do ii=1,n1cprj
    nlmn(ii)=cprj(ii,1)%nlmn
  end do
  ncpgr=cprj(1,1)%ncpgr
 
- ABI_DATATYPE_ALLOCATE(cprj_tmp,(n1cprj,n2cprj))
+ ABI_MALLOC(cprj_tmp,(n1cprj,n2cprj))
  call cprj_paw_alloc(cprj_tmp,ncpgr,nlmn)
  do jj=1,n2cprj
    do ii=1,n1cprj
@@ -629,8 +629,8 @@ subroutine wvl_cprjreorder(wvl,atm_indx)
  end do
 
  call cprj_clean(cprj_tmp)
- ABI_DATATYPE_DEALLOCATE(cprj_tmp)
- ABI_DEALLOCATE(nlmn)
+ ABI_FREE(cprj_tmp)
+ ABI_FREE(nlmn)
 
 #else
  if (.false.) write(std_out,*) atm_indx(1),wvl%h(1)

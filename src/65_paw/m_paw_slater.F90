@@ -779,13 +779,13 @@ subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc
  lnc_size  = Atm%ln_size
  lc_max    = Atm%l_max
 
- ABI_DATATYPE_ALLOCATE(Slatang3l,(lm2_size))
+ ABI_MALLOC(Slatang3l,(lm2_size))
  call slatang_cshell_init(Slatang3l,l_max,lm2_size,lc_max,klm2lm)
 
  ABI_FREE(klm2lm)
 
  ! * Integrate radial part.
- ABI_DATATYPE_ALLOCATE(Slatrad3l,(ln2_size))
+ ABI_MALLOC(Slatrad3l,(ln2_size))
 
  call slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad)
 
@@ -893,8 +893,8 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
 
 ! *************************************************************************
 
- ABI_DATATYPE_ALLOCATE(Atm,(Cryst%ntypat))
- ABI_DATATYPE_ALLOCATE(Radatm,(Cryst%ntypat))
+ ABI_MALLOC(Atm,(Cryst%ntypat))
+ ABI_MALLOC(Radatm,(Cryst%ntypat))
 
  ABI_CHECK(ndij==1     ,"spinor+HF not available")
  ABI_CHECK(cplex_dij==1,"spinor+HF not available")
@@ -948,8 +948,8 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
    call destroy_atomorb(Atm(itypat))
  end do
 
- ABI_DATATYPE_DEALLOCATE(Atm)
- ABI_DATATYPE_DEALLOCATE(Radatm)
+ ABI_FREE(Atm)
+ ABI_FREE(Radatm)
 
 end subroutine paw_mkdijexc_core
 !!****
@@ -1388,7 +1388,7 @@ subroutine paw_dijhf(ndij,cplex_dij,qphase,lmn2_size_max,my_natom,ntypat,Pawtab,
    ! Calculate Slater integral for this atom type.
    ! TODO obviously these tables should be stored in Pawtab!
    ln2_size = Pawtab(itypat)%ij_size
-   ABI_DATATYPE_ALLOCATE(Slatrad4,(ln2_size*(ln2_size+1)/2))
+   ABI_MALLOC(Slatrad4,(ln2_size*(ln2_size+1)/2))
    which_intg=3
    call slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad(itypat),Pawtab(itypat))
 
@@ -1464,7 +1464,7 @@ subroutine paw_dijhf(ndij,cplex_dij,qphase,lmn2_size_max,my_natom,ntypat,Pawtab,
    end if
 
    call slatrad_free(Slatrad4)
-   ABI_DATATYPE_DEALLOCATE(Slatrad4)
+   ABI_FREE(Slatrad4)
  end do ! iatom
 
  ! Factor half cancels in the derivation wrt rho_ij.

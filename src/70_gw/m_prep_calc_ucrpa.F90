@@ -343,9 +343,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
    ABI_CHECK(nspinor==1,'Symmetrization with nspinor=2 not implemented')
  end if
 
- ABI_ALLOCATE(rhotwg_ki,(Sigp%npwx*nspinor,minbnd:maxbnd))
+ ABI_MALLOC(rhotwg_ki,(Sigp%npwx*nspinor,minbnd:maxbnd))
  rhotwg_ki=czero_gw
- ABI_ALLOCATE(vc_sqrt_qbz,(Sigp%npwx))
+ ABI_MALLOC(vc_sqrt_qbz,(Sigp%npwx))
  !
  ! === Normalization of theta_mu_minus_esum ===
  ! * If nsppol==2, qp_occ $\in [0,1]$
@@ -362,7 +362,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  END SELECT
 
  ! Remove empty states from the list of states that will be distributed.
- ABI_ALLOCATE(bks_mask,(Wfd%mband,Kmesh%nbz,nsppol))
+ ABI_MALLOC(bks_mask,(Wfd%mband,Kmesh%nbz,nsppol))
  bks_mask=.FALSE.
  do spin=1,nsppol
    do ik_bz=1,Kmesh%nbz
@@ -373,7 +373,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
    end do
  end do
 
-! ABI_ALLOCATE(proc_distrb,(Wfd%mband,Kmesh%nbz,nsppol))
+! ABI_MALLOC(proc_distrb,(Wfd%mband,Kmesh%nbz,nsppol))
 ! call sigma_distribution(Wfd,Kmesh,Ltg_k,Qmesh,nsppol,can_symmetrize,kgw,Sigp%mg0,my_nbks,proc_distrb,bks_mask=bks_mask)
 ! call sigma_distribute_bks(Wfd,Kmesh,Ltg_k,Qmesh,nsppol,can_symmetrize,kgw,Sigp%mg0,my_nbks,proc_distrb,bks_mask=bks_mask)
 ! write(6,*)"lim", ib1,ib2
@@ -383,7 +383,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !   enddo
 ! enddo
 
- ABI_DEALLOCATE(bks_mask)
+ ABI_FREE(bks_mask)
 
  write(msg,'(a,i8)')" Will sum all (b,k,s) occupied states in Sigma_x for k-point",ikcalc
  call wrtout(std_out,msg,'PERS')
@@ -391,53 +391,53 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  ! The index of G-G0 in the FFT mesh the oscillators ===
  ! * Sigp%mG0 gives the MAX G0 component to account for umklapp.
  ! * Note the size MAX(Sigp%npwx,Sigp%npwc).
- ABI_ALLOCATE(igfftxg0,(Gsph_x%ng))
+ ABI_MALLOC(igfftxg0,(Gsph_x%ng))
  !
  ! === Precalculate the FFT index of $ R^{-1}(r-\tau) $ ===
  ! * S=\transpose R^{-1} and k_BZ = S k_IBZ
  ! * irottb is the FFT index of $R^{-1} (r-\tau)$ used to symmetrize u_Sk.
  gwx_nfftot = PRODUCT(gwx_ngfft(1:3))
- ABI_ALLOCATE(irottb,(gwx_nfftot,Cryst%nsym))
+ ABI_MALLOC(irottb,(gwx_nfftot,Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,gwx_ngfft,irottb,iscompatibleFFT)
  if (.not.iscompatibleFFT) then
    msg = "FFT mesh is not compatible with symmetries. Results might be affected by large errors!"
    ABI_WARNING(msg)
  end if
 
- ABI_ALLOCATE(ktabr,(gwx_nfftot,Kmesh%nbz))
+ ABI_MALLOC(ktabr,(gwx_nfftot,Kmesh%nbz))
  do ik_bz=1,Kmesh%nbz
    isym=Kmesh%tabo(ik_bz)
    do ifft=1,gwx_nfftot
      ktabr(ifft,ik_bz)=irottb(ifft,isym)
    end do
  end do
- ABI_DEALLOCATE(irottb)
+ ABI_FREE(irottb)
 
  if (Psps%usepaw==1 .and. pawcross==1) then
    nfftf = PRODUCT(ngfftf(1:3))
-   ABI_ALLOCATE(irottb,(nfftf,Cryst%nsym))
+   ABI_MALLOC(irottb,(nfftf,Cryst%nsym))
    call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,ngfftf,irottb,iscompatibleFFT)
 
-   ABI_ALLOCATE(ktabrf,(nfftf,Kmesh%nbz))
+   ABI_MALLOC(ktabrf,(nfftf,Kmesh%nbz))
    do ik_bz=1,Kmesh%nbz
      isym=Kmesh%tabo(ik_bz)
      do ifft=1,nfftf
        ktabrf(ifft,ik_bz)=irottb(ifft,isym)
      end do
    end do
-   ABI_DEALLOCATE(irottb)
+   ABI_FREE(irottb)
  end if
  !
  ! === Additional allocations for PAW ===
  if (Psps%usepaw==1) then
-   ABI_DATATYPE_ALLOCATE(Cprj_ksum,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj_ksum,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj_ksum,0,Wfd%nlmn_atm)
 
    nhat12_grdim=0
    if (use_pawnhat==1) then ! Compensation charge for \phi_a^*\phi_b
      call wrtout(std_out,"Using nhat12","COLL")
-     ABI_ALLOCATE(nhat12  ,(2,gwx_nfftot,nspinor**2))
-     ABI_ALLOCATE(grnhat12,(2,gwx_nfftot,nspinor**2,3*nhat12_grdim))
+     ABI_MALLOC(nhat12  ,(2,gwx_nfftot,nspinor**2))
+     ABI_MALLOC(grnhat12,(2,gwx_nfftot,nspinor**2,3*nhat12_grdim))
    end if
  end if ! usepaw==1
  !
@@ -472,11 +472,11 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !   end if
  end if !symsigma
 
- ABI_ALLOCATE(wfr_sum,(gwx_nfftot*nspinor))
+ ABI_MALLOC(wfr_sum,(gwx_nfftot*nspinor))
  if (pawcross==1) then
-   ABI_ALLOCATE(ur_ae_sum,(nfftf*nspinor))
-   ABI_ALLOCATE(ur_ae_onsite_sum,(nfftf*nspinor))
-   ABI_ALLOCATE(ur_ps_onsite_sum,(nfftf*nspinor))
+   ABI_MALLOC(ur_ae_sum,(nfftf*nspinor))
+   ABI_MALLOC(ur_ae_onsite_sum,(nfftf*nspinor))
+   ABI_MALLOC(ur_ps_onsite_sum,(nfftf*nspinor))
  end if
 
 !!*******************************************
@@ -534,7 +534,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !   write(6,*) "AA",Wfd%my_rank,spin
    !
    ! * Load wavefunctions for GW corrections.
-   ABI_STAT_ALLOCATE(wfr_bdgw,(gwx_nfftot*nspinor,ib1:ib2), ierr)
+   ABI_STAT_MALLOC(wfr_bdgw,(gwx_nfftot*nspinor,ib1:ib2), ierr)
    ABI_CHECK(ierr==0, "out of memory in wfr_bdgw")
    do jb=ib1,ib2
      call wfd%get_ur(jb,jk_ibz,spin,wfr_bdgw(:,jb))
@@ -543,7 +543,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
    if (Wfd%usepaw==1) then ! * Load cprj for GW states, note the indexing.
      dimcprj_gw=nspinor*(ib2-ib1+1)
-     ABI_DATATYPE_ALLOCATE(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
+     ABI_MALLOC(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
      ibsp=ib1
      do jb=ib1,ib2
@@ -553,9 +553,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
        ibsp=ibsp+nspinor
      end do
      if (pawcross==1) then
-       ABI_ALLOCATE(ur_ae_bdgw,(nfftf*nspinor,ib1:ib2))
-       ABI_ALLOCATE(ur_ae_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
-       ABI_ALLOCATE(ur_ps_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
+       ABI_MALLOC(ur_ae_bdgw,(nfftf*nspinor,ib1:ib2))
+       ABI_MALLOC(ur_ae_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
+       ABI_MALLOC(ur_ps_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        do jb=ib1,ib2
          call wfdf%paw_get_aeur(jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &          ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
@@ -640,7 +640,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      !
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of the G-G0.
-     ABI_ALLOCATE(gwx_gbound,(2*gwx_mgfft+8,2))
+     ABI_MALLOC(gwx_gbound,(2*gwx_mgfft+8,2))
      call gsph_fft_tabs(Gsph_x,g0,gwx_mgfft,gwx_ngfft,use_padfft,gwx_gbound,igfftxg0)
 
      if ( ANY(gwx_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
@@ -649,18 +649,18 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  use_padfft = 0
 #endif
      if (use_padfft==0) then
-       ABI_DEALLOCATE(gwx_gbound)
-       ABI_ALLOCATE(gwx_gbound,(2*gwx_mgfft+8,2*use_padfft))
+       ABI_FREE(gwx_gbound)
+       ABI_MALLOC(gwx_gbound,(2*gwx_mgfft+8,2*use_padfft))
      end if
 
      if (pawcross==1) then
-       ABI_ALLOCATE(gboundf,(2*mgfftf+8,2))
-       ABI_ALLOCATE(igfftfxg0,(Gsph_x%ng))
+       ABI_MALLOC(gboundf,(2*mgfftf+8,2))
+       ABI_MALLOC(igfftfxg0,(Gsph_x%ng))
        call gsph_fft_tabs(Gsph_x,g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftfxg0)
        if ( ANY(gwx_fftalga == (/2,4/)) ) use_padfftf=0
        if (use_padfftf==0) then
-         ABI_DEALLOCATE(gboundf)
-         ABI_ALLOCATE(gboundf,(2*mgfftf+8,2*use_padfftf))
+         ABI_FREE(gboundf)
+         ABI_MALLOC(gboundf,(2*mgfftf+8,2*use_padfftf))
        end if
      end if
      !
@@ -668,7 +668,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      ! * $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form.
      if (Psps%usepaw==1.and.use_pawnhat==0) then
        q0 = qbz !;if (q_is_gamma) q0 = (/0.00001_dp,0.00001_dp,0.00001_dp/) ! GW_Q0_DEFAULT
-       ABI_DATATYPE_ALLOCATE(Pwij_qg,(Psps%ntypat))
+       ABI_MALLOC(Pwij_qg,(Psps%ntypat))
        call pawpwij_init(Pwij_qg,Sigp%npwx,q0,Gsph_x%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
      end if
      !
@@ -921,33 +921,33 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      end do !ib_sum
      !
      ! Deallocate k-dependent quantities.
-     ABI_DEALLOCATE(gwx_gbound)
+     ABI_FREE(gwx_gbound)
      if (pawcross==1) then
-       ABI_DEALLOCATE(gboundf)
+       ABI_FREE(gboundf)
      end if
 
      if (Psps%usepaw==1.and.use_pawnhat==0) then
        call pawpwij_free(Pwij_qg)
-       ABI_DATATYPE_DEALLOCATE(Pwij_qg)
+       ABI_FREE(Pwij_qg)
      end if
 
    end do !ik_bz Got all diagonal (off-diagonal) matrix elements.
 
-   ABI_DEALLOCATE(wfr_bdgw)
+   ABI_FREE(wfr_bdgw)
    if (Wfd%usepaw==1) then
      call pawcprj_free(Cprj_kgw )
-     ABI_DATATYPE_DEALLOCATE(Cprj_kgw)
+     ABI_FREE(Cprj_kgw)
      if (pawcross==1) then
-       ABI_DEALLOCATE(ur_ae_bdgw)
-       ABI_DEALLOCATE(ur_ae_onsite_bdgw)
-       ABI_DEALLOCATE(ur_ps_onsite_bdgw)
+       ABI_FREE(ur_ae_bdgw)
+       ABI_FREE(ur_ae_onsite_bdgw)
+       ABI_FREE(ur_ps_onsite_bdgw)
      end if
    end if
  end do !spin
 
- ABI_DEALLOCATE(igfftxg0)
+ ABI_FREE(igfftxg0)
  if (pawcross==1) then
-   ABI_DEALLOCATE(igfftfxg0)
+   ABI_FREE(igfftfxg0)
  end if
  !
  ! Gather contributions from all the CPUs.
@@ -957,33 +957,33 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  ! ===========================
  if (Psps%usepaw==1) then
    if (allocated(gwx_gfft))  then
-     ABI_DEALLOCATE(gwx_gfft)
+     ABI_FREE(gwx_gfft)
    end if
    call pawcprj_free(Cprj_ksum)
-   ABI_DATATYPE_DEALLOCATE(Cprj_ksum)
+   ABI_FREE(Cprj_ksum)
    if (allocated(Pwij_fft)) then
      call pawpwij_free(Pwij_fft)
-     ABI_DATATYPE_DEALLOCATE(Pwij_fft)
+     ABI_FREE(Pwij_fft)
    end if
    if (use_pawnhat==1) then
-     ABI_DEALLOCATE(nhat12)
-     ABI_DEALLOCATE(grnhat12)
+     ABI_FREE(nhat12)
+     ABI_FREE(grnhat12)
    end if
    if (pawcross==1) then
-     ABI_DEALLOCATE(ur_ae_sum)
-     ABI_DEALLOCATE(ur_ae_onsite_sum)
-     ABI_DEALLOCATE(ur_ps_onsite_sum)
-     ABI_DEALLOCATE(ktabrf)
+     ABI_FREE(ur_ae_sum)
+     ABI_FREE(ur_ae_onsite_sum)
+     ABI_FREE(ur_ps_onsite_sum)
+     ABI_FREE(ktabrf)
    end if
  end if
 
- ABI_DEALLOCATE(wfr_sum)
- ABI_DEALLOCATE(rhotwg_ki)
- ABI_DEALLOCATE(vc_sqrt_qbz)
- ABI_DEALLOCATE(ktabr)
-! ABI_DEALLOCATE(proc_distrb)
+ ABI_FREE(wfr_sum)
+ ABI_FREE(rhotwg_ki)
+ ABI_FREE(vc_sqrt_qbz)
+ ABI_FREE(ktabr)
+! ABI_FREE(proc_distrb)
  if (plowan_compute<10) then
-   ABI_DEALLOCATE(coeffW_BZ)
+   ABI_FREE(coeffW_BZ)
  endif
 
 

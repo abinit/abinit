@@ -100,15 +100,15 @@ contains
 
     self%nnz=nnz
     if(.not. allocated(self%icol)) then
-       ABI_ALLOCATE(self%icol, (self%nnz))
+       ABI_MALLOC(self%icol, (self%nnz))
     endif
 
     if(.not. allocated(self%row_shift)) then
-       ABI_ALLOCATE(self%row_shift, (self%nrow+1))
+       ABI_MALLOC(self%row_shift, (self%nrow+1))
     endif
 
     if(.not. allocated(self%val)) then
-       ABI_ALLOCATE(self%val, (self%nnz))
+       ABI_MALLOC(self%val, (self%nnz))
     endif
 
     if (present(icol)) then
@@ -144,18 +144,18 @@ contains
     call self%mps%initialize(self%nrow/nblock, master, comm, nblock)
     if (.not. self%mps%irank==master) then
        if(.not. allocated(self%mshape)) then
-          ABI_ALLOCATE(self%mshape, (self%ndim))
+          ABI_MALLOC(self%mshape, (self%ndim))
        endif
 
        if(.not. allocated(self%icol)) then
-          ABI_ALLOCATE(self%icol, (self%nnz))
+          ABI_MALLOC(self%icol, (self%nnz))
        endif
 
        if(.not. allocated(self%row_shift)) then
-          ABI_ALLOCATE(self%row_shift, (self%nrow+1))
+          ABI_MALLOC(self%row_shift, (self%nrow+1))
        endif
        if(.not. allocated(self%val)) then
-          ABI_ALLOCATE(self%val, (self%nnz))
+          ABI_MALLOC(self%val, (self%nnz))
        endif
     end if
 
@@ -179,16 +179,16 @@ contains
     self%ndim=0
     call self%mps%finalize()
     if(allocated(self%icol)) then
-       ABI_DEALLOCATE(self%icol)
+       ABI_FREE(self%icol)
     endif
     if(allocated(self%row_shift)) then
-       ABI_DEALLOCATE(self%row_shift)
+       ABI_FREE(self%row_shift)
     endif
     if(allocated(self%val)) then
-       ABI_DEALLOCATE(self%val)
+       ABI_FREE(self%val)
     endif
     if(allocated(self%mshape)) then
-       ABI_DEALLOCATE(self%mshape)
+       ABI_FREE(self%mshape)
     endif
   end subroutine CSR_mat_t_finalize
 

@@ -146,8 +146,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  Read parallel input parameters
    marr=max(5,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
-   ABI_ALLOCATE(intarr,(marr))
-   ABI_ALLOCATE(dprarr,(marr))
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
    nkpt  =dtsets(idtset)%nkpt
    nsppol=dtsets(idtset)%nsppol
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
@@ -249,8 +249,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    ! Dump the list of irreducible perturbations and exit.
    if (dtsets(idtset)%paral_rf==-1.and.optdriver/=RUNL_NONLINEAR) then
      call dtsets(idtset)%get_npert_rbz(nband_rbz, nkpt_rbz, npert)
-     ABI_DEALLOCATE(nband_rbz)
-     ABI_DEALLOCATE(nkpt_rbz)
+     ABI_FREE(nband_rbz)
+     ABI_FREE(nkpt_rbz)
      iexit = iexit + 1
    end if
 
@@ -342,8 +342,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  Cycle if the processor is not used
    if (mpi_enregs(idtset)%me<0.or.iexit>0) then
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
      cycle
    end if
 
@@ -534,8 +534,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      end if
 !    Cycle if the processor is not used
      if (mpi_enregs(idtset)%me<0) then
-       ABI_DEALLOCATE(intarr)
-       ABI_DEALLOCATE(dprarr)
+       ABI_FREE(intarr)
+       ABI_FREE(dprarr)
        cycle
      end if
 
@@ -544,15 +544,15 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if(dtsets(idtset)%usewvl==1) mpi_enregs(idtset)%comm_fft=mpi_enregs(idtset)%comm_cell
 
 !    Initialize tabs used for k/spin parallelism (with sequential-type values)
-     ABI_ALLOCATE(mpi_enregs(idtset)%proc_distrb,(nkpt,mband_upper,nsppol))
-     ABI_ALLOCATE(mpi_enregs(idtset)%my_kpttab,(nkpt))
+     ABI_MALLOC(mpi_enregs(idtset)%proc_distrb,(nkpt,mband_upper,nsppol))
+     ABI_MALLOC(mpi_enregs(idtset)%my_kpttab,(nkpt))
      mpi_enregs(idtset)%proc_distrb(:,:,:)=0
      mpi_enregs(idtset)%my_kpttab(:)=(/(ii,ii=1,nkpt)/)
      mpi_enregs(idtset)%my_isppoltab(:)=1;if (dtsets(idtset)%nsppol==1) mpi_enregs(idtset)%my_isppoltab(2)=0
 
 !    HF or hybrid calculation : initialization of the array distrb_hf
      if (dtsets(idtset)%usefock==1) then
-       ABI_ALLOCATE(mpi_enregs(idtset)%distrb_hf,(dtsets(idtset)%nkpthf,dtsets(idtset)%nbandhf,1))
+       ABI_MALLOC(mpi_enregs(idtset)%distrb_hf,(dtsets(idtset)%nkpthf,dtsets(idtset)%nbandhf,1))
 !      The dimension of distrb_hf are given by %nkpthf and %nbandhf.
 !      We assume that there will be no dependence in spinpol for all the occupied states.
        mpi_enregs(idtset)%distrb_hf=0
@@ -796,8 +796,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if
 
 !  Compute mgfft,mpw,nfft for this data set (it is dependent of mpi_enreg)
-   ABI_ALLOCATE(istwfk,(nkpt))
-   ABI_ALLOCATE(kpt_with_shift,(3,nkpt))
+   ABI_MALLOC(istwfk,(nkpt))
+   ABI_MALLOC(kpt_with_shift,(3,nkpt))
 
    ! Set the default value of fftalg for given npfft but allow the user to override it.
    ! Warning: If you need to change npfft, **DO IT** before this point so that here we get the correct fftalg
@@ -822,7 +822,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    nqpt=dtsets(idtset)%nqpt
    qphon(:)=zero;if(nqpt/=0) qphon(:)=dtsets(idtset)%qptn(:)
 
-   ABI_ALLOCATE(symrel,(3,3,nsym))
+   ABI_MALLOC(symrel,(3,3,nsym))
    symrel(:,:,1:nsym)=dtsets(idtset)%symrel(:,:,1:nsym)
    ecut_eff=ecut*dilatmx**2
 
@@ -859,7 +859,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      ! Allocate tables for parallel IO of the wavefunctions.
      if( xmpi_mpiio==1 .and. mpi_enregs(idtset)%paral_kgb == 1 .and. &
 &     any(dtsets(idtset)%iomode == [IO_MODE_MPI, IO_MODE_ETSF])) then
-       ABI_ALLOCATE(mpi_enregs(idtset)%my_kgtab,(mpw,dtsets(idtset)%mkmem))
+       ABI_MALLOC(mpi_enregs(idtset)%my_kgtab,(mpw,dtsets(idtset)%mkmem))
      end if
    else
      mpw = 0
@@ -898,11 +898,11 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if
 
    dtsets(idtset)%mpw=mpw
-   ABI_DEALLOCATE(symrel)
-   ABI_DEALLOCATE(istwfk)
-   ABI_DEALLOCATE(kpt_with_shift)
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
+   ABI_FREE(symrel)
+   ABI_FREE(istwfk)
+   ABI_FREE(kpt_with_shift)
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
 
 !  Initialize data for the parallelization over atomic sites (PAW)
    if (dtsets(idtset)%natom==1) dtsets(idtset)%paral_atom=0
@@ -1181,8 +1181,8 @@ end subroutine mpi_setup
      end if
      npk_min=1
      npk_max=min(nproc,nkpt_eff)
-     ABI_DEALLOCATE(nkpt_rbz)
-     ABI_DEALLOCATE(nband_rbz)
+     ABI_FREE(nkpt_rbz)
+     ABI_FREE(nband_rbz)
    else
      nkpt_eff=nproc
      npk_min=nproc-5
@@ -1253,10 +1253,10 @@ end subroutine mpi_setup
      if (.not.dtset_found) then
        !Retrieve file name
        suffix='_DEN';if (dtset%nimage>1) suffix='_IMG1_DEN'
-       ABI_ALLOCATE(jdtset_,(0:ndtset_alloc))
+       ABI_MALLOC(jdtset_,(0:ndtset_alloc))
        jdtset_=0;if(ndtset_alloc/=0) jdtset_(0:ndtset_alloc)=dtsets(0:ndtset_alloc)%jdtset
        call mkfilename(filnam,filden,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset_alloc,suffix,'den',ii)
-       ABI_DEALLOCATE(jdtset_)
+       ABI_FREE(jdtset_)
        !Retrieve ngfft from file header
        idum3=0
        if (mpi_enreg%me==0) then
@@ -1315,9 +1315,9 @@ end subroutine mpi_setup
  with_thread=(nthreads>1)
 
 !Allocate lists
- ABI_ALLOCATE(my_distp,(10,MAXCOUNT))
- ABI_ALLOCATE(weight,(MAXCOUNT))
- ABI_ALLOCATE(my_algo,(MAXCOUNT))
+ ABI_MALLOC(my_distp,(10,MAXCOUNT))
+ ABI_MALLOC(weight,(MAXCOUNT))
+ ABI_MALLOC(my_algo,(MAXCOUNT))
  my_distp(1:7,:)=0;weight(:)=zero
  my_distp(8,:)=dtset%use_slk
  my_distp(9,:)=dtset%np_slk
@@ -1520,7 +1520,7 @@ end subroutine mpi_setup
 
 !Sort data by increasing weight
  if (mcount>0) then
-   ABI_ALLOCATE(isort,(mcount))
+   ABI_MALLOC(isort,(mcount))
    isort=(/(ii,ii=1,mcount)/)
    call sort_dp(mcount,weight,isort,tol6)
    ncount=min(mcount,MAXPRINT)
@@ -1711,8 +1711,8 @@ end subroutine mpi_setup
    call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
    ib1=mband-int(mband*relative_nband_range);if (my_algo(icount)==ALGO_CHEBFI) ib1=mband
    ib2=mband+int(mband*relative_nband_range)
-   ABI_ALLOCATE(nproc_best,(1+ib2-ib1))
-   ABI_ALLOCATE(nband_best,(1+ib2-ib1))
+   ABI_MALLOC(nproc_best,(1+ib2-ib1))
+   ABI_MALLOC(nband_best,(1+ib2-ib1))
    nproc_best(:)=1
    nband_best=(/(ii,ii=ib1,ib2)/)
    bpp=merge(1,nthreads,my_algo(icount)==ALGO_CHEBFI)
@@ -1743,8 +1743,8 @@ end subroutine mpi_setup
      end if
      call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
    end if
-   ABI_DEALLOCATE(nproc_best)
-   ABI_DEALLOCATE(nband_best)
+   ABI_FREE(nproc_best)
+   ABI_FREE(nband_best)
  end if
 
  if (optdriver==RUNL_GSTATE.and.(any(my_algo(1:mcount)==ALGO_CHEBFI))) then
@@ -1874,11 +1874,11 @@ end subroutine mpi_setup
  end if
 
  if (mcount>0) then
-   ABI_DEALLOCATE(isort)
+   ABI_FREE(isort)
  end if
- ABI_DEALLOCATE(my_distp)
- ABI_DEALLOCATE(my_algo)
- ABI_DEALLOCATE(weight)
+ ABI_FREE(my_distp)
+ ABI_FREE(my_algo)
+ ABI_FREE(weight)
 
 !Final line
  write(msg,'(a,100("="),2a)') " ",ch10,ch10
@@ -1976,10 +1976,10 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !Create local communicator for test
  if (xmpi_paral==1) then
    nranks=npfft*npband
-   ABI_ALLOCATE(ranks,(nranks))
+   ABI_MALLOC(ranks,(nranks))
    ranks=(/((my_rank-1),my_rank=1,nranks)/)
    kgb_comm=xmpi_subcomm(glb_comm,nranks,ranks,my_rank_in_group=my_rank)
-   ABI_DEALLOCATE(ranks)
+   ABI_FREE(ranks)
  else
    kgb_comm=xmpi_comm_self
    my_rank=0
@@ -1994,13 +1994,13 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
    vectsize=max(1+mpw/(npband*npfft),blocksize)
    bigorder=3*blocksize
 
-   ABI_ALLOCATE(blockvectorx,(vectsize,blocksize))
-   ABI_ALLOCATE(blockvectorbx,(vectsize,blocksize))
-   ABI_ALLOCATE(sqgram,(blocksize,blocksize))
-   ABI_ALLOCATE(grama,(2*bigorder,bigorder))
-   ABI_ALLOCATE(gramb,(2*bigorder,bigorder))
-   ABI_ALLOCATE(eigen,(bigorder))
-   ABI_ALLOCATE(val_npslk,(max_number_of_npslk)) ! not too much values tested
+   ABI_MALLOC(blockvectorx,(vectsize,blocksize))
+   ABI_MALLOC(blockvectorbx,(vectsize,blocksize))
+   ABI_MALLOC(sqgram,(blocksize,blocksize))
+   ABI_MALLOC(grama,(2*bigorder,bigorder))
+   ABI_MALLOC(gramb,(2*bigorder,bigorder))
+   ABI_MALLOC(eigen,(bigorder))
+   ABI_MALLOC(val_npslk,(max_number_of_npslk)) ! not too much values tested
 
    min_eigen=greatest_real
    min_ortho=greatest_real
@@ -2115,13 +2115,13 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
    npslk=max(np_slk_best,1)
    uselinalggpu=keep_gpu
 
-   ABI_DEALLOCATE(blockvectorx)
-   ABI_DEALLOCATE(blockvectorbx)
-   ABI_DEALLOCATE(sqgram)
-   ABI_DEALLOCATE(grama)
-   ABI_DEALLOCATE(gramb)
-   ABI_DEALLOCATE(eigen)
-   ABI_DEALLOCATE(val_npslk)
+   ABI_FREE(blockvectorx)
+   ABI_FREE(blockvectorbx)
+   ABI_FREE(sqgram)
+   ABI_FREE(grama)
+   ABI_FREE(gramb)
+   ABI_FREE(eigen)
+   ABI_FREE(val_npslk)
 
  end if ! my_rank in group
 

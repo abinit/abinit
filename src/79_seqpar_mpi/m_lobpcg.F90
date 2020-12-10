@@ -128,10 +128,10 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
    call cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 &    npw,nspinor,mpi_enreg%me_g0,optekin,optpcon,pcon,ghc,vect,vectsize,mpi_enreg%comm_bandspinorfft)
  else
-   ABI_ALLOCATE(z_cg,(vectsize,blocksize))
-   ABI_ALLOCATE(z_eval,(blocksize,blocksize))
-   ABI_ALLOCATE(z_ghc,(vectsize,blocksize))
-   ABI_ALLOCATE(z_vect,(vectsize,blocksize))
+   ABI_MALLOC(z_cg,(vectsize,blocksize))
+   ABI_MALLOC(z_eval,(blocksize,blocksize))
+   ABI_MALLOC(z_ghc,(vectsize,blocksize))
+   ABI_MALLOC(z_vect,(vectsize,blocksize))
 
    call abi_xcopy(x_cplx*vectsize*blocksize,cg,1,z_cg,1)
    call abi_xcopy(x_cplx*vectsize*blocksize,ghc,1,z_ghc,1)
@@ -146,10 +146,10 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
    call abi_xcopy(x_cplx*vectsize*blocksize,z_vect,1,vect,1)
    call abi_xcopy(x_cplx*blocksize*blocksize,z_eval,1,eval,1)
 
-   ABI_DEALLOCATE(z_cg)
-   ABI_DEALLOCATE(z_eval)
-   ABI_DEALLOCATE(z_ghc)
-   ABI_DEALLOCATE(z_vect)
+   ABI_FREE(z_cg)
+   ABI_FREE(z_eval)
+   ABI_FREE(z_ghc)
+   ABI_FREE(z_vect)
  endif
 
  if (present(tim_xprecon).and.present(timopt)) then

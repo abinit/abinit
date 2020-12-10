@@ -180,8 +180,8 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 
 !*********************************************************************
  marr=3
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
  jdtset=1
 
@@ -239,9 +239,9 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'max',tread,'DPR')
  if(tread==1) band2eps_dtset%max=dprarr(1)
 
- ABI_ALLOCATE(band2eps_dtset%red,(band2eps_dtset%natom))
- ABI_ALLOCATE(band2eps_dtset%blue,(band2eps_dtset%natom))
- ABI_ALLOCATE(band2eps_dtset%green,(band2eps_dtset%natom))
+ ABI_MALLOC(band2eps_dtset%red,(band2eps_dtset%natom))
+ ABI_MALLOC(band2eps_dtset%blue,(band2eps_dtset%natom))
+ ABI_MALLOC(band2eps_dtset%green,(band2eps_dtset%natom))
  band2eps_dtset%red(:) = 0
  band2eps_dtset%blue(:) = 0
  band2eps_dtset%green(:) = 0
@@ -260,10 +260,10 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 !natom dimension
  if(band2eps_dtset%natom > marr)then
    marr = band2eps_dtset%natom
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
-   ABI_ALLOCATE(intarr,(marr))
-   ABI_ALLOCATE(dprarr,(marr))
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,band2eps_dtset%natom,string(1:lenstr),'red',tread,'INT')
  if(tread==1) band2eps_dtset%red(1:band2eps_dtset%natom) = intarr(1:band2eps_dtset%natom)
@@ -275,17 +275,17 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  if(tread==1) band2eps_dtset%green(1:band2eps_dtset%natom) = intarr(1:band2eps_dtset%natom)
 
 !nlines dimenstion
- ABI_ALLOCATE(band2eps_dtset%nqline,(band2eps_dtset%nlines))
- ABI_ALLOCATE(band2eps_dtset%scale,(band2eps_dtset%nlines))
+ ABI_MALLOC(band2eps_dtset%nqline,(band2eps_dtset%nlines))
+ ABI_MALLOC(band2eps_dtset%scale,(band2eps_dtset%nlines))
  band2eps_dtset%nqline(:) = 0
  band2eps_dtset%scale(:) = zero
 
  if(band2eps_dtset%nlines > marr)then
    marr = band2eps_dtset%nlines
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
-   ABI_ALLOCATE(intarr,(marr))
-   ABI_ALLOCATE(dprarr,(marr))
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,band2eps_dtset%nlines,string(1:lenstr),'nqline',tread,'INT')
@@ -297,7 +297,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  if(tread==1) band2eps_dtset%scale(1:band2eps_dtset%nlines) = dprarr(1:band2eps_dtset%nlines)
 
 !nline+1 dimension
- ABI_ALLOCATE(band2eps_dtset%qpoint_name,(band2eps_dtset%nlines+1))
+ ABI_MALLOC(band2eps_dtset%qpoint_name,(band2eps_dtset%nlines+1))
  band2eps_dtset%qpoint_name(:) = ""
  position = index(string(1:lenstr),trim("QPOINT_NAME")) + 11
  name_qpoint = trim(string(position:(position + &

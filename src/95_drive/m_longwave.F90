@@ -230,8 +230,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !the possible permutations
 !  -> natom+8 refers to ddq perturbation
  mpert=natom+8
- ABI_ALLOCATE(blkflg,(3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3etot,(2,3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(blkflg,(3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(d3etot,(2,3,mpert,3,mpert,3,mpert))
  blkflg=0
  d3etot=zero
 
@@ -249,8 +249,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
 
 !Set up the basis sphere of planewaves
- ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
- ABI_ALLOCATE(npwarr,(dtset%nkpt))
+ ABI_MALLOC(kg,(3,dtset%mpw*dtset%mkmem))
+ ABI_MALLOC(npwarr,(dtset%nkpt))
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg,&
 & dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
 & dtset%nsppol)
@@ -264,7 +264,7 @@ ecore=zero
  bstruct = ebands_from_dtset(dtset, npwarr)
 
 !Initialize PAW atomic occupancies to zero
- ABI_DATATYPE_ALLOCATE(pawrhoij,(0))
+ ABI_MALLOC(pawrhoij,(0))
 
 !Initialize header
  gscase=0
@@ -286,10 +286,10 @@ ecore=zero
  ireadwf0=1
 
  mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
- ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
+ ABI_STAT_MALLOC(cg,(2,mcg), ierr)
  ABI_CHECK(ierr==0, "out-of-memory in cg")
 
- ABI_ALLOCATE(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
@@ -308,10 +308,10 @@ ecore=zero
  end if
 
 !Do symmetry stuff
- ABI_ALLOCATE(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_ALLOCATE(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_ALLOCATE(indsym,(4,dtset%nsym,natom))
- ABI_ALLOCATE(symrec,(3,3,dtset%nsym))
+ ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_MALLOC(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_MALLOC(indsym,(4,dtset%nsym,natom))
+ ABI_MALLOC(symrec,(3,3,dtset%nsym))
  irrzon=0;indsym=0;symrec=0;phnons=zero
 !If the density is to be computed by mkrho, need irrzon and phnons
  iscf_eff=0;if(dtset%getden==0)iscf_eff=1
@@ -324,9 +324,9 @@ ecore=zero
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
- ABI_ALLOCATE(atindx,(natom))
- ABI_ALLOCATE(atindx1,(natom))
- ABI_ALLOCATE(nattyp,(ntypat))
+ ABI_MALLOC(atindx,(natom))
+ ABI_MALLOC(atindx1,(natom))
+ ABI_MALLOC(nattyp,(ntypat))
  indx=1
  do itypat=1,ntypat
    nattyp(itypat)=0
@@ -341,34 +341,34 @@ ecore=zero
  end do
 
 !Derivative of occupations is always zero for non metallic systems
- ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde(:)=zero
 
 !Read ground-state charge density from diskfile in case getden /= 0
 !or compute it from wfs that were read previously : rhor
 
- ABI_ALLOCATE(rhog,(2,nfftf))
- ABI_ALLOCATE(rhor,(nfftf,dtset%nspden))
+ ABI_MALLOC(rhog,(2,nfftf))
+ ABI_MALLOC(rhor,(nfftf,dtset%nspden))
 
  if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
    ! Read rho1(r) from a disk file and broadcast data.
    ! This part is not compatible with MPI-FFT (note single_proc=.True. below)
 
    rdwrpaw=psps%usepaw
-   ABI_DATATYPE_ALLOCATE(pawrhoij_read,(0))
+   ABI_MALLOC(pawrhoij_read,(0))
 
 !  MT july 2013: Should we read rhoij from the density file ?
    call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
    hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
    etotal = hdr_den%etot; call hdr_den%free()
 
-   ABI_DATATYPE_DEALLOCATE(pawrhoij_read)
+   ABI_FREE(pawrhoij_read)
 
 !  Compute up+down rho(G) by fft
-   ABI_ALLOCATE(work,(nfftf))
+   ABI_MALLOC(work,(nfftf))
    work(:)=rhor(:,1)
    call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  else
 !  Obtain the charge density from read wfs
 !  Be careful: in PAW, compensation density has to be added !
@@ -379,25 +379,25 @@ ecore=zero
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
  end if ! getden
- ABI_DEALLOCATE(cg)
+ ABI_FREE(cg)
 
 !Pseudo core electron density by method 2
 !TODO: The code is not still adapted to consider n3xccc in the long-wave
 !driver.
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
- ABI_ALLOCATE(xccc3d,(n3xccc))
+ ABI_MALLOC(xccc3d,(n3xccc))
  coredens_method=2
  if (coredens_method==2.and.psps%n1xccc/=0) then
    option=1
-   ABI_ALLOCATE(dummy_dyfrx2,(3,3,natom)) ! dummy
-   ABI_ALLOCATE(vxc,(0,0)) ! dummy
-   ABI_ALLOCATE(grxc,(3,natom))
+   ABI_MALLOC(dummy_dyfrx2,(3,3,natom)) ! dummy
+   ABI_MALLOC(vxc,(0,0)) ! dummy
+   ABI_MALLOC(grxc,(3,natom))
    call mkcore(dummy6,dummy_dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
 &   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
 &   psps%xcccrc,psps%xccc1d,xccc3d,xred)
-   ABI_DEALLOCATE(dummy_dyfrx2) ! dummy
-   ABI_DEALLOCATE(vxc) ! dummy
-   ABI_DEALLOCATE(grxc) ! dummy
+   ABI_FREE(dummy_dyfrx2) ! dummy
+   ABI_FREE(vxc) ! dummy
+   ABI_FREE(grxc) ! dummy
  end if
 
 !Set up xc potential. Compute kxc here.
@@ -405,14 +405,14 @@ ecore=zero
  option=2 ; nk3xc=1
  nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
  call check_kxc(dtset%ixc,dtset%optdriver)
- ABI_ALLOCATE(kxc,(nfftf,nkxc))
- ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
+ ABI_MALLOC(kxc,(nfftf,nkxc))
+ ABI_MALLOC(vxc,(nfftf,dtset%nspden))
 
  nhatgrdim=0;nhatdim=0
- ABI_ALLOCATE(nhat,(0,0))
- ABI_ALLOCATE(nhatgr,(0,0,0))
+ ABI_MALLOC(nhat,(0,0))
+ ABI_MALLOC(nhatgr,(0,0,0))
 ! n3xccc=0
-! ABI_ALLOCATE(xccc3d,(n3xccc))
+! ABI_MALLOC(xccc3d,(n3xccc))
  non_magnetic_xc=.false.
 
  enxc=zero; usexcnhat=0
@@ -426,7 +426,7 @@ ecore=zero
 !      for each perturbation. This development is temporarily frozen.
 !Initialize the list of perturbations rfpert
 ! mpert=natom+11
-! ABI_ALLOCATE(rfpert,(mpert))
+! ABI_MALLOC(rfpert,(mpert))
 ! rfpert(:)=0
 ! rfpert(natom+1)=1
 ! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4 &
@@ -446,7 +446,7 @@ ecore=zero
 ! endif
 !
 !!Determine which directions treat for each type of perturbation
-! ABI_ALLOCATE(pertsy,(3,natom+6))
+! ABI_MALLOC(pertsy,(3,natom+6))
 ! pertsy(:,:)=0
 ! !atomic displacement
 ! do ipert=1,natom
@@ -479,12 +479,12 @@ ecore=zero
 !........
 
 ! All perturbations and directions are temporarily activated
- ABI_ALLOCATE(pertsy,(3,natom+6))
+ ABI_MALLOC(pertsy,(3,natom+6))
  pertsy(:,:)=1
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then
-   ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+   ABI_FREE(mpi_enreg%proc_distrb)
  end if
 
 !#############  SPATIAL-DISPERSION POPERTIES CALCULATION  ###########################
@@ -492,7 +492,7 @@ ecore=zero
 !Calculate the nonvariational terms
 !1st q-gradient of Ewald contribution to the dynamical matrix
  if (dtset%lw_flexo/=0) then
-   ABI_ALLOCATE(dyewdq,(2,3,natom,3,natom,3))
+   ABI_MALLOC(dyewdq,(2,3,natom,3,natom,3))
    dyewdq(:,:,:,:,:,:)=zero
    if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
      sumg0=0;qphon(:)=zero
@@ -503,7 +503,7 @@ ecore=zero
 
 !2nd q-gradient of Ewald contribution to the dynamical matrix
  if (dtset%lw_flexo/=0) then
-   ABI_ALLOCATE(dyewdqdq,(2,3,natom,3,3,3))
+   ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
    dyewdqdq(:,:,:,:,:,:)=zero
    if (dtset%lw_flexo==1.or.dtset%lw_flexo==4) then
      sumg0=1;qphon(:)=zero
@@ -549,27 +549,27 @@ ecore=zero
  end if
 
 !Deallocate arrays
- ABI_DEALLOCATE(atindx)
- ABI_DEALLOCATE(atindx1)
- ABI_DEALLOCATE(blkflg)
- ABI_DEALLOCATE(doccde)
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(indsym)
- ABI_DEALLOCATE(irrzon)
- ABI_DEALLOCATE(nattyp)
- ABI_DEALLOCATE(kg)
- ABI_DEALLOCATE(kxc)
- ABI_DEALLOCATE(npwarr)
- ABI_DEALLOCATE(phnons)
- ABI_DEALLOCATE(rhog)
- ABI_DEALLOCATE(rhor)
- ABI_DEALLOCATE(symrec)
- ABI_DEALLOCATE(vxc)
- ABI_DEALLOCATE(d3etot)
- ABI_DEALLOCATE(pertsy)
+ ABI_FREE(atindx)
+ ABI_FREE(atindx1)
+ ABI_FREE(blkflg)
+ ABI_FREE(doccde)
+ ABI_FREE(eigen0)
+ ABI_FREE(indsym)
+ ABI_FREE(irrzon)
+ ABI_FREE(nattyp)
+ ABI_FREE(kg)
+ ABI_FREE(kxc)
+ ABI_FREE(npwarr)
+ ABI_FREE(phnons)
+ ABI_FREE(rhog)
+ ABI_FREE(rhor)
+ ABI_FREE(symrec)
+ ABI_FREE(vxc)
+ ABI_FREE(d3etot)
+ ABI_FREE(pertsy)
  if (dtset%lw_flexo/=0) then
-   ABI_DEALLOCATE(dyewdq)
-   ABI_DEALLOCATE(dyewdqdq)
+   ABI_FREE(dyewdq)
+   ABI_FREE(dyewdqdq)
  end if
 
  ! Clean the header

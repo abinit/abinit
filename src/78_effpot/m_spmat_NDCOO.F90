@@ -100,7 +100,7 @@ contains
     class(ndcoo_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
     self%ndim=size(mshape)
-    ABI_ALLOCATE(self%mshape, (self%ndim))
+    ABI_MALLOC(self%mshape, (self%ndim))
     self%mshape=mshape
     self%nnz=0
     self%is_sorted=.False.
@@ -126,7 +126,7 @@ contains
     self%is_pair_grouped = .False.
 
     if (allocated(self%mshape)) then
-       ABI_DEALLOCATE(self%mshape)
+       ABI_FREE(self%mshape)
     endif
     call self%ind%finalize()
     call self%val%finalize()
@@ -301,8 +301,8 @@ contains
     end if
     ngroup=j1%size
     if(ngroup>0) then
-      ABI_ALLOCATE(i1_list, (ngroup))
-      ABI_ALLOCATE(istartend, (ngroup+1))
+      ABI_MALLOC(i1_list, (ngroup))
+      ABI_MALLOC(istartend, (ngroup+1))
       i1_list(:)=j1%data(1: j1%size)
       istartend(:)=jstartend%data(1: jstartend%size)
     end if
@@ -538,8 +538,8 @@ contains
     !print *,  "ngroup: ", ngroup
     !print *, "i1list: ", i1list
     !print *, "ise: ", ise
-    if(allocated(i1list)) ABI_DEALLOCATE(i1list)
-    if(allocated(ise)) ABI_DEALLOCATE(ise)
+    if(allocated(i1list)) ABI_FREE(i1list)
+    if(allocated(ise)) ABI_FREE(ise)
   end subroutine test_ndcoo
 
 end module m_spmat_NDCOO

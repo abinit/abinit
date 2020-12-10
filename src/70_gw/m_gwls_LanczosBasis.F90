@@ -108,10 +108,10 @@ integer, intent(in) :: lmax, lmax_model
 
 ! *************************************************************************
 
-ABI_ALLOCATE(Lbasis_lanczos,(npw_k,lmax))
+ABI_MALLOC(Lbasis_lanczos,(npw_k,lmax))
 
 if (lmax_model > 0) then
-  ABI_ALLOCATE(Lbasis_model_lanczos,(npw_k,lmax_model))
+  ABI_MALLOC(Lbasis_model_lanczos,(npw_k,lmax_model))
 end if
 
 end subroutine setup_Lanczos_basis
@@ -141,15 +141,15 @@ subroutine cleanup_Lanczos_basis()
 
 ! *************************************************************************
 
-! if(allocated()) ABI_DEALLOCATE() can cause a segfault if used in this form, without the THEN.
+! if(allocated()) ABI_FREE() can cause a segfault if used in this form, without the THEN.
 ! This is because ABI_ALLOCATE is expanded at compilation time in many statements; and the if() can only prevent the execution of
 ! the first.
 ! So, the deallocation takes place even if allocated() returns .false. without the THEN.
 if (allocated(Lbasis_lanczos))  then
-  ABI_DEALLOCATE(Lbasis_lanczos)
+  ABI_FREE(Lbasis_lanczos)
 end if
 if (allocated(Lbasis_model_lanczos))  then
-  ABI_DEALLOCATE(Lbasis_model_lanczos)
+  ABI_FREE(Lbasis_model_lanczos)
 end if
 
 end subroutine cleanup_Lanczos_basis
@@ -191,10 +191,10 @@ integer   :: l, mb
 
 ! *************************************************************************
 
-ABI_ALLOCATE(psik_wrk  ,(2,npw_k))
-ABI_ALLOCATE(psikb_wrk ,(2,npw_kb))
-ABI_ALLOCATE(psikg_wrk ,(2,npw_g))
-ABI_ALLOCATE(psikg_e ,(2,npw_g))
+ABI_MALLOC(psik_wrk  ,(2,npw_k))
+ABI_MALLOC(psikb_wrk ,(2,npw_kb))
+ABI_MALLOC(psikg_wrk ,(2,npw_g))
+ABI_MALLOC(psikg_e ,(2,npw_g))
 
 ! copy the valence state on every row of FFT processors
 do mb = 1, blocksize
@@ -312,10 +312,10 @@ end do ! mb
 
 end do
 
-ABI_DEALLOCATE(psik_wrk  )
-ABI_DEALLOCATE(psikb_wrk )
-ABI_DEALLOCATE(psikg_wrk )
-ABI_DEALLOCATE(psikg_e )
+ABI_FREE(psik_wrk  )
+ABI_FREE(psikb_wrk )
+ABI_FREE(psikg_wrk )
+ABI_FREE(psikg_e )
 
 
 end subroutine modify_Lbasis_Coulomb

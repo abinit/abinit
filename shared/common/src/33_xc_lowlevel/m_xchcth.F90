@@ -269,9 +269,9 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
    factfpp_zeta= third * factfp_zeta * alpha_zeta2
  end if
 
- ABI_ALLOCATE(rhoarr,(npts))
- ABI_ALLOCATE(rhom1_3,(npts))
- ABI_ALLOCATE(rho_updnm1_3,(npts,2))
+ ABI_MALLOC(rhoarr,(npts))
+ ABI_MALLOC(rhom1_3,(npts))
+ ABI_MALLOC(rho_updnm1_3,(npts,2))
  do ispden=1,nspden
    call invcb(rho_updn(:,ispden),rho_updnm1_3(:,ispden),npts)
  end do
@@ -282,10 +282,10 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
  else
    rhoarr(:)=rho_updn(:,1)+rho_updn(:,2)
    call invcb(rhoarr,rhom1_3,npts)
-   ABI_ALLOCATE(zetm,(npts))
-   ABI_ALLOCATE(zetmm1_3,(npts))
-   ABI_ALLOCATE(zetp,(npts))
-   ABI_ALLOCATE(zetpm1_3,(npts))
+   ABI_MALLOC(zetm,(npts))
+   ABI_MALLOC(zetmm1_3,(npts))
+   ABI_MALLOC(zetp,(npts))
+   ABI_MALLOC(zetpm1_3,(npts))
    do ipts=1,npts
      rhotmot=rhom1_3(ipts)
      rhotot_inv=rhotmot*rhotmot*rhotmot
@@ -1203,14 +1203,14 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
 !end if
 !ENDDEBUG
 
- ABI_DEALLOCATE(rhoarr)
- ABI_DEALLOCATE(rhom1_3)
- ABI_DEALLOCATE(rho_updnm1_3)
+ ABI_FREE(rhoarr)
+ ABI_FREE(rhom1_3)
+ ABI_FREE(rho_updnm1_3)
  if(nspden==2) then
-   ABI_DEALLOCATE(zetm)
-   ABI_DEALLOCATE(zetmm1_3)
-   ABI_DEALLOCATE(zetp)
-   ABI_DEALLOCATE(zetpm1_3)
+   ABI_FREE(zetm)
+   ABI_FREE(zetmm1_3)
+   ABI_FREE(zetp)
+   ABI_FREE(zetpm1_3)
  end if
 
 !DEBUG

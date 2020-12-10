@@ -132,8 +132,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  !write(std_out,"(3a)")"invars1 with string:", ch10, trim(string)
 
  marr=max(9,ndtset_alloc,2)
- ABI_ALLOCATE(dprarr,(marr))
- ABI_ALLOCATE(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
 
  ! Set up jdtset
  if (ndtset/=0) then
@@ -593,54 +593,54 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 #endif
  end if
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
 
  ! We allocate the internal array, depending on the computed values.
  ! WARNING: do not forget to deallocate these arrays in the routine dtset_free
  ! (should make a separate subroutine for allocating/deallocating these records)
  do idtset=0,ndtset_alloc
-   ABI_ALLOCATE(dtsets(idtset)%acell_orig,(3,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%algalch,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%chrgat,(mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%constraint_kind,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%corecs,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%densty,(mxntypat,4))
-   ABI_ALLOCATE(dtsets(idtset)%dynimage,(mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%iatfix,(3,mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%f4of2_sla,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%f6of2_sla,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%kberry,(3,20))
-   ABI_ALLOCATE(dtsets(idtset)%lexexch,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%ldaminushalf,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%lpawu,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%mixalch_orig,(npsp,mxntypat,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%mixesimgf,(mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%nucdipmom,(3,mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%pimass,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%ptcharge,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%prtatlist,(mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%quadmom,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%ratsph,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%rprim_orig,(3,3,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%rprimd_orig,(3,3,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%so_psp,(npsp))
-   ABI_ALLOCATE(dtsets(idtset)%spinat,(3,mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%shiftk,(3,MAX_NSHIFTK))
-   ABI_ALLOCATE(dtsets(idtset)%typat,(mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%upawu,(mxntypat,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%plowan_iatom,(mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%plowan_it,(100*3))
-   ABI_ALLOCATE(dtsets(idtset)%plowan_nbl,(mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%plowan_lcalc,(12*mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%plowan_projcalc,(12*mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%vel_orig,(3,mxnatom,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%vel_cell_orig,(3,3,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%xred_orig,(3,mxnatom,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%ziontypat,(mxntypat))
-   ABI_ALLOCATE(dtsets(idtset)%znucl,(npsp))
+   ABI_MALLOC(dtsets(idtset)%acell_orig,(3,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%algalch,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%chrgat,(mxnatom))
+   ABI_MALLOC(dtsets(idtset)%constraint_kind,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%corecs,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%densty,(mxntypat,4))
+   ABI_MALLOC(dtsets(idtset)%dynimage,(mxnimage))
+   ABI_MALLOC(dtsets(idtset)%iatfix,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%f4of2_sla,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%f6of2_sla,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%kberry,(3,20))
+   ABI_MALLOC(dtsets(idtset)%lexexch,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%ldaminushalf,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%lpawu,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%mixalch_orig,(npsp,mxntypat,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%mixesimgf,(mxnimage))
+   ABI_MALLOC(dtsets(idtset)%nucdipmom,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%pimass,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%ptcharge,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%prtatlist,(mxnatom))
+   ABI_MALLOC(dtsets(idtset)%quadmom,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%ratsph,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%rprim_orig,(3,3,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%rprimd_orig,(3,3,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%so_psp,(npsp))
+   ABI_MALLOC(dtsets(idtset)%spinat,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%shiftk,(3,MAX_NSHIFTK))
+   ABI_MALLOC(dtsets(idtset)%typat,(mxnatom))
+   ABI_MALLOC(dtsets(idtset)%upawu,(mxntypat,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%plowan_iatom,(mxnatom))
+   ABI_MALLOC(dtsets(idtset)%plowan_it,(100*3))
+   ABI_MALLOC(dtsets(idtset)%plowan_nbl,(mxnatom))
+   ABI_MALLOC(dtsets(idtset)%plowan_lcalc,(12*mxnatom))
+   ABI_MALLOC(dtsets(idtset)%plowan_projcalc,(12*mxnatom))
+   ABI_MALLOC(dtsets(idtset)%vel_orig,(3,mxnatom,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%vel_cell_orig,(3,3,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%xred_orig,(3,mxnatom,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%ziontypat,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%znucl,(npsp))
  end do
 
 !DEBUG
@@ -715,12 +715,12 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
 !******************************************************************
 
  ! Here, allocation of the arrays that depend on msym.
- ABI_ALLOCATE(symrel_,(3,3,msym,0:ndtset_alloc))
- ABI_ALLOCATE(symafm_,(msym,0:ndtset_alloc))
- ABI_ALLOCATE(tnons_,(3,msym,0:ndtset_alloc))
- ABI_ALLOCATE(symafm,(msym))
- ABI_ALLOCATE(symrel,(3,3,msym))
- ABI_ALLOCATE(tnons,(3,msym))
+ ABI_MALLOC(symrel_,(3,3,msym,0:ndtset_alloc))
+ ABI_MALLOC(symafm_,(msym,0:ndtset_alloc))
+ ABI_MALLOC(tnons_,(3,msym,0:ndtset_alloc))
+ ABI_MALLOC(symafm,(msym))
+ ABI_MALLOC(symrel,(3,3,msym))
+ ABI_MALLOC(tnons,(3,msym))
 
  ! Set up default values (note that the default acell, amu mkmem, mkmem1,mkqmem, and nkpt must be overcome
  do idtset=0,ndtset_alloc
@@ -833,45 +833,45 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  end do
 
  do idtset=0,ndtset_alloc
-   ABI_ALLOCATE(dtsets(idtset)%atvshift, (mx%natvshift, mx%nsppol, mx%natom))
-   ABI_ALLOCATE(dtsets(idtset)%bs_loband,(mx%nsppol))
-   ABI_ALLOCATE(dtsets(idtset)%bdgw,(2, mx%nkptgw, mx%nsppol))
-   ABI_ALLOCATE(dtsets(idtset)%cd_imfrqs,(mx%nimfrqs))
-   ABI_ALLOCATE(dtsets(idtset)%chempot,(3, mx%nzchempot, mx%ntypat))
+   ABI_MALLOC(dtsets(idtset)%atvshift, (mx%natvshift, mx%nsppol, mx%natom))
+   ABI_MALLOC(dtsets(idtset)%bs_loband,(mx%nsppol))
+   ABI_MALLOC(dtsets(idtset)%bdgw,(2, mx%nkptgw, mx%nsppol))
+   ABI_MALLOC(dtsets(idtset)%cd_imfrqs,(mx%nimfrqs))
+   ABI_MALLOC(dtsets(idtset)%chempot,(3, mx%nzchempot, mx%ntypat))
    nsp = max(mx%nsppol, mx%nspinor); nat = mx%natpawu*dmatpuflag
-   ABI_ALLOCATE(dtsets(idtset)%dmatpawu,(2*mx%lpawu+1,2*mx%lpawu+1,nsp,nat, mx%nimage))
-   ABI_ALLOCATE(dtsets(idtset)%efmas_bands,(2, mx%nkpt))
-   ABI_ALLOCATE(dtsets(idtset)%efmas_dirs,(3, mx%n_efmas_dirs))
-   ABI_ALLOCATE(dtsets(idtset)%gw_freqsp, (mx%nfreqsp))
-   ABI_ALLOCATE(dtsets(idtset)%gwls_list_proj_freq, (mx%n_projection_frequencies))
-   ABI_ALLOCATE(dtsets(idtset)%gw_qlwl,(3,mx%gw_nqlwl))
-   ABI_ALLOCATE(dtsets(idtset)%kpt,(3, mx%nkpt))
-   ABI_ALLOCATE(dtsets(idtset)%kptgw,(3, mx%nkptgw))
-   ABI_ALLOCATE(dtsets(idtset)%kptns,(3, mx%nkpt))
-   ABI_ALLOCATE(dtsets(idtset)%kptns_hf,(3, mx%nkpthf))
-   ABI_ALLOCATE(dtsets(idtset)%iatsph,(mx%natsph))
-   ABI_ALLOCATE(dtsets(idtset)%istwfk, (mx%nkpt))
-   ABI_ALLOCATE(dtsets(idtset)%nband, (mx%nkpt*mx%nsppol))
-   ABI_ALLOCATE(dtsets(idtset)%occ_orig,(mx%mband_upper*mx%nkpt*mx%nsppol, mx%nimage))
-   ABI_ALLOCATE(dtsets(idtset)%qmass, (mx%nnos))
-   ABI_ALLOCATE(dtsets(idtset)%qptdm,(3, mx%nqptdm))
-   ABI_ALLOCATE(dtsets(idtset)%symafm, (mx%nsym))
-   ABI_ALLOCATE(dtsets(idtset)%symrel,(3,3,mx%nsym))
-   ABI_ALLOCATE(dtsets(idtset)%tnons,(3,mx%nsym))
-   ABI_ALLOCATE(dtsets(idtset)%wtatcon,(3,mx%natom, mx%nconeq))
-   ABI_ALLOCATE(dtsets(idtset)%wtk, (mx%nkpt))
-   ABI_ALLOCATE(dtsets(idtset)%xredsph_extra,(3, mx%natsph_extra))
+   ABI_MALLOC(dtsets(idtset)%dmatpawu,(2*mx%lpawu+1,2*mx%lpawu+1,nsp,nat, mx%nimage))
+   ABI_MALLOC(dtsets(idtset)%efmas_bands,(2, mx%nkpt))
+   ABI_MALLOC(dtsets(idtset)%efmas_dirs,(3, mx%n_efmas_dirs))
+   ABI_MALLOC(dtsets(idtset)%gw_freqsp, (mx%nfreqsp))
+   ABI_MALLOC(dtsets(idtset)%gwls_list_proj_freq, (mx%n_projection_frequencies))
+   ABI_MALLOC(dtsets(idtset)%gw_qlwl,(3,mx%gw_nqlwl))
+   ABI_MALLOC(dtsets(idtset)%kpt,(3, mx%nkpt))
+   ABI_MALLOC(dtsets(idtset)%kptgw,(3, mx%nkptgw))
+   ABI_MALLOC(dtsets(idtset)%kptns,(3, mx%nkpt))
+   ABI_MALLOC(dtsets(idtset)%kptns_hf,(3, mx%nkpthf))
+   ABI_MALLOC(dtsets(idtset)%iatsph,(mx%natsph))
+   ABI_MALLOC(dtsets(idtset)%istwfk, (mx%nkpt))
+   ABI_MALLOC(dtsets(idtset)%nband, (mx%nkpt*mx%nsppol))
+   ABI_MALLOC(dtsets(idtset)%occ_orig,(mx%mband_upper*mx%nkpt*mx%nsppol, mx%nimage))
+   ABI_MALLOC(dtsets(idtset)%qmass, (mx%nnos))
+   ABI_MALLOC(dtsets(idtset)%qptdm,(3, mx%nqptdm))
+   ABI_MALLOC(dtsets(idtset)%symafm, (mx%nsym))
+   ABI_MALLOC(dtsets(idtset)%symrel,(3,3,mx%nsym))
+   ABI_MALLOC(dtsets(idtset)%tnons,(3,mx%nsym))
+   ABI_MALLOC(dtsets(idtset)%wtatcon,(3,mx%natom, mx%nconeq))
+   ABI_MALLOC(dtsets(idtset)%wtk, (mx%nkpt))
+   ABI_MALLOC(dtsets(idtset)%xredsph_extra,(3, mx%natsph_extra))
    dtsets(idtset)%symrel(:,:,:)=symrel_(:,:,1:mx%nsym,idtset)
    dtsets(idtset)%symafm(:)    =symafm_(1:mx%nsym,idtset)
    dtsets(idtset)%tnons (:,:)  =tnons_ (:,1:mx%nsym,idtset)
  end do
 
- ABI_DEALLOCATE(symafm_)
- ABI_DEALLOCATE(symrel_)
- ABI_DEALLOCATE(tnons_)
- ABI_DEALLOCATE(symafm)
- ABI_DEALLOCATE(symrel)
- ABI_DEALLOCATE(tnons)
+ ABI_FREE(symafm_)
+ ABI_FREE(symrel_)
+ ABI_FREE(tnons_)
+ ABI_FREE(symafm)
+ ABI_FREE(symrel)
+ ABI_FREE(tnons)
 
 end subroutine invars1m
 !!***
@@ -1163,8 +1163,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! Read parameters
  marr=dtset%npsp;if (dtset%npsp<3) marr=3
  marr=max(marr,dtset%nimage)
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
 !---------------------------------------------------------------------------
 
@@ -1244,7 +1244,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      dtset%ratsph(ii)=dprarr(ii)
    end do
  end if
- ABI_ALLOCATE(ratsph,(dtset%ntypat))
+ ABI_MALLOC(ratsph,(dtset%ntypat))
  do ii=1,dtset%ntypat
    ratsph(ii)=dtset%ratsph(ii)
  end do
@@ -1444,11 +1444,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%zeemanfield(1:3) = dprarr(1:3)
  end if
 
- ABI_ALLOCATE(amu,(ntypat))
- ABI_ALLOCATE(mixalch,(npspalch,ntypalch))
- ABI_ALLOCATE(vel,(3,natom))
- ABI_ALLOCATE(vel_cell,(3,3))
- ABI_ALLOCATE(xred,(3,natom))
+ ABI_MALLOC(amu,(ntypat))
+ ABI_MALLOC(mixalch,(npspalch,ntypalch))
+ ABI_MALLOC(vel,(3,natom))
+ ABI_MALLOC(vel_cell,(3,3))
+ ABI_MALLOC(xred,(3,natom))
  intimage=2 ; if(dtset%nimage==1)intimage=1
  do ii=1,dtset%nimage+1
    iimage=ii
@@ -1470,12 +1470,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    vel=dtset%vel_orig(1:3,1:natom,iimage)
    vel_cell=dtset%vel_cell_orig(1:3,1:3,iimage)
    xred=dtset%xred_orig(1:3,1:natom,iimage)
-   ABI_ALLOCATE(chrgat,(natom))
-   ABI_ALLOCATE(iatfix,(3,natom))
-   ABI_ALLOCATE(nucdipmom,(3,natom))
-   ABI_ALLOCATE(spinat,(3,natom))
-   ABI_ALLOCATE(typat,(natom))
-   ABI_ALLOCATE(znucl,(dtset%npsp))
+   ABI_MALLOC(chrgat,(natom))
+   ABI_MALLOC(iatfix,(3,natom))
+   ABI_MALLOC(nucdipmom,(3,natom))
+   ABI_MALLOC(spinat,(3,natom))
+   ABI_MALLOC(typat,(natom))
+   ABI_MALLOC(znucl,(dtset%npsp))
    chrgat(1:natom)=dtset%chrgat(1:natom)
    nucdipmom(1:3,1:natom)=dtset%nucdipmom(1:3,1:natom)
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
@@ -1495,12 +1495,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%nucdipmom(1:3,1:natom)=nucdipmom(1:3,1:natom)
    dtset%spinat(1:3,1:natom)=spinat(1:3,1:natom)
    dtset%typat(1:natom)=typat(1:natom)
-   ABI_DEALLOCATE(chrgat)
-   ABI_DEALLOCATE(iatfix)
-   ABI_DEALLOCATE(nucdipmom)
-   ABI_DEALLOCATE(spinat)
-   ABI_DEALLOCATE(typat)
-   ABI_DEALLOCATE(znucl)
+   ABI_FREE(chrgat)
+   ABI_FREE(iatfix)
+   ABI_FREE(nucdipmom)
+   ABI_FREE(spinat)
+   ABI_FREE(typat)
+   ABI_FREE(znucl)
    dtset%acell_orig(1:3,iimage)=acell
    dtset%amu_orig(1:ntypat,iimage)=amu
    dtset%mixalch_orig(1:npspalch,1:ntypalch,iimage)=mixalch
@@ -1511,11 +1511,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call mkrdim(dtset%acell_orig(1:3,iimage),dtset%rprim_orig(1:3,1:3,iimage),dtset%rprimd_orig(1:3,1:3,iimage))
  end do
 
- ABI_DEALLOCATE(amu)
- ABI_DEALLOCATE(mixalch)
- ABI_DEALLOCATE(vel)
- ABI_DEALLOCATE(vel_cell)
- ABI_DEALLOCATE(xred)
+ ABI_FREE(amu)
+ ABI_FREE(mixalch)
+ ABI_FREE(vel)
+ ABI_FREE(vel_cell)
+ ABI_FREE(xred)
 
  ! Examine whether there is some vacuum space in the unit cell
  call invacuum(jdtset,lenstr,natom,dtset%rprimd_orig(1:3,1:3,intimage),string,vacuum,&
@@ -1613,10 +1613,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! Set up dummy arrays istwfk, kpt, wtk
 
  if(nkpt/=0 .or. dtset%kptopt/=0)then
-   ABI_ALLOCATE(istwfk,(nkpt))
-   ABI_ALLOCATE(kpt,(3,nkpt))
-   ABI_ALLOCATE(kpthf,(3,nkpthf))
-   ABI_ALLOCATE(wtk,(nkpt))
+   ABI_MALLOC(istwfk,(nkpt))
+   ABI_MALLOC(kpt,(3,nkpt))
+   ABI_MALLOC(kpthf,(3,nkpthf))
+   ABI_MALLOC(wtk,(nkpt))
    ! Here, occopt is also a dummy argument
    occopt=1; dtset%nshiftk=1; dtset%kptrlatt(:,:)=0
 
@@ -1655,10 +1655,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
      string,symafm,symrel,vacuum,wtk,comm)
 
-   ABI_DEALLOCATE(istwfk)
-   ABI_DEALLOCATE(kpt)
-   ABI_DEALLOCATE(kpthf)
-   ABI_DEALLOCATE(wtk)
+   ABI_FREE(istwfk)
+   ABI_FREE(kpt)
+   ABI_FREE(kpthf)
+   ABI_FREE(wtk)
 
    ! nkpt and nkpthf have been computed, as well as the k point grid, if needed
    dtset%nkpt=nkpt
@@ -1787,7 +1787,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_ERROR(msg)
  end if
 
- ABI_ALLOCATE(nband,(nkpt*nsppol))
+ ABI_MALLOC(nband,(nkpt*nsppol))
  tnband=0
 
  ! Compute ziontypat
@@ -1852,14 +1852,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    nband(:)=mband_upper
 
  else if (occopt==2) then
-   ABI_ALLOCATE(reaalloc,(nkpt*nsppol))
+   ABI_MALLOC(reaalloc,(nkpt*nsppol))
    call intagm(reaalloc,nband,jdtset,nkpt*nsppol,nkpt*nsppol,string(1:lenstr),'nband',tnband,'INT')
    if(tnband==1)then
      do ikpt=1,nkpt*nsppol
        if (nband(ikpt)>mband_upper) mband_upper=nband(ikpt)
      end do
    end if
-   ABI_DEALLOCATE(reaalloc)
+   ABI_FREE(reaalloc)
  else
    write(msg, '(a,i0,3a)' )'occopt=',occopt,' is not an allowed value.',ch10,'Action: correct your input file.'
    ABI_ERROR(msg)
@@ -1978,10 +1978,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'constraint_kind',tread,'INT')
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
- ABI_DEALLOCATE(nband)
- ABI_DEALLOCATE(ratsph)
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(nband)
+ ABI_FREE(ratsph)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 end subroutine invars1
 !!***

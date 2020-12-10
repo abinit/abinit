@@ -79,7 +79,7 @@ contains
 
 ! *************************************************************************
 
-   ABI_ALLOCATE(tafit,(nax))
+   ABI_MALLOC(tafit,(nax))
 
   !--MMANCINI strange!!!!!
   !  tafit(:nax) = tquant(:nax)
@@ -129,8 +129,8 @@ contains
 
   !--Now find initial numbers of active/border bonds :
   !  (0)        CLEARS THE BOND(atom) MATRIX :
-   ABI_ALLOCATE(ibnd_mat,(2,nbondex))
-   ABI_ALLOCATE(ibnd_dum,(2,nfitmax*6))
+   ABI_MALLOC(ibnd_mat,(2,nbondex))
+   ABI_MALLOC(ibnd_dum,(2,nfitmax*6))
    ibnd_mat = 0
    ibnd_dum = 0
 
@@ -170,7 +170,7 @@ contains
    end do
 
 
-   ABI_DEALLOCATE(ibnd_dum)
+   ABI_FREE(ibnd_dum)
  end subroutine bond_atom_init
  !!***
 
@@ -201,9 +201,9 @@ contains
 
 ! *************************************************************************
 
-   ABI_ALLOCATE(ibmat,(nneigx,0:nfitmax))
-   ABI_ALLOCATE(ibmat_large,(nfitmax,nfitmax))
-   ABI_ALLOCATE(imat,(nax))
+   ABI_MALLOC(ibmat,(nneigx,0:nfitmax))
+   ABI_MALLOC(ibmat_large,(nfitmax,nfitmax))
+   ABI_MALLOC(imat,(nax))
  end subroutine bond_matrix_alloc
  !!***
 
@@ -302,7 +302,7 @@ contains
 
 ! *************************************************************************
 
-   ABI_ALLOCATE(ibnd_dum,(2,nfitmax*6))
+   ABI_MALLOC(ibnd_dum,(2,nfitmax*6))
    ibnd_dum(:,:) = 0
    ibn_tot  = 0    ! bonds between the fitted atoms
    ibn_tot2 = 0    ! existing but non optimized bonds with border atoms
@@ -378,7 +378,7 @@ contains
 
    if(.not. allocated(ifit)) then
      nfitmax = nfitdum + 1000
-     ABI_ALLOCATE(ifit,(nfitmax))
+     ABI_MALLOC(ifit,(nfitmax))
    elseif(nfitdum > nfitmax) then
      write(msg,'(a)')' BOND_FIT_SET : PROBLEM OF dimensionS !! '
      ABI_ERROR(msg)
@@ -415,12 +415,12 @@ contains
  subroutine  bond_dealloc()
 
 ! *************************************************************************
-   ABI_DEALLOCATE(ibnd_mat)
-   ABI_DEALLOCATE(tafit)
-   ABI_DEALLOCATE(ifit)
-   ABI_DEALLOCATE(ibmat)
-   ABI_DEALLOCATE(ibmat_large)
-   ABI_DEALLOCATE(imat)
+   ABI_FREE(ibnd_mat)
+   ABI_FREE(tafit)
+   ABI_FREE(ifit)
+   ABI_FREE(ibmat)
+   ABI_FREE(ibmat_large)
+   ABI_FREE(imat)
  end subroutine bond_dealloc
 
 end module bond_lotf

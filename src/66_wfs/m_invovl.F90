@@ -114,7 +114,7 @@ CONTAINS
 
 ! *************************************************************************
 
-  ABI_DATATYPE_ALLOCATE(invovl_kpt, (nkpt))
+  ABI_MALLOC(invovl_kpt, (nkpt))
   ! TODO add cycling if kpt parallelism
   do ikpt=1,nkpt
     invovl_kpt(ikpt)%nprojs = -1
@@ -154,13 +154,13 @@ CONTAINS
       cycle
     end if
 
-    ABI_DEALLOCATE(invovl_kpt(ikpt)%gram_projs)
-    ABI_DEALLOCATE(invovl_kpt(ikpt)%inv_sij)
-    ABI_DEALLOCATE(invovl_kpt(ikpt)%inv_s_approx)
+    ABI_FREE(invovl_kpt(ikpt)%gram_projs)
+    ABI_FREE(invovl_kpt(ikpt)%inv_sij)
+    ABI_FREE(invovl_kpt(ikpt)%inv_s_approx)
     invovl_kpt(ikpt)%nprojs = -1
   end do
 
-  ABI_DATATYPE_DEALLOCATE(invovl_kpt)
+  ABI_FREE(invovl_kpt)
 
  end subroutine destroy_invovl
 !!***
@@ -234,9 +234,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  if(invovl%nprojs /= -1) then
    ! We have been here before, cleanup before remaking
-   ABI_DEALLOCATE(invovl%gram_projs)
-   ABI_DEALLOCATE(invovl%inv_sij)
-   ABI_DEALLOCATE(invovl%inv_s_approx)
+   ABI_FREE(invovl%gram_projs)
+   ABI_FREE(invovl%inv_sij)
+   ABI_FREE(invovl%inv_s_approx)
    invovl%nprojs = -1
  end if
 
@@ -251,12 +251,12 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    invovl%nprojs = invovl%nprojs + count(ham%indlmn(3,:,itypat)>0)*ham%nattyp(itypat)
  end do
 
- ABI_ALLOCATE(projs, (2, ham%npw_k, invovl%nprojs))
- ABI_ALLOCATE(invovl%inv_sij, (cplx, ham%lmnmax, ham%lmnmax, ham%ntypat))
- ABI_ALLOCATE(invovl%inv_s_approx, (cplx, ham%lmnmax, ham%lmnmax, ham%ntypat))
+ ABI_MALLOC(projs, (2, ham%npw_k, invovl%nprojs))
+ ABI_MALLOC(invovl%inv_sij, (cplx, ham%lmnmax, ham%lmnmax, ham%ntypat))
+ ABI_MALLOC(invovl%inv_s_approx, (cplx, ham%lmnmax, ham%lmnmax, ham%ntypat))
  ! workspace for inversion
- ABI_ALLOCATE(ipiv, (ham%lmnmax))
- ABI_ALLOCATE(work, (64*ham%lmnmax))
+ ABI_MALLOC(ipiv, (ham%lmnmax))
+ ABI_MALLOC(work, (64*ham%lmnmax))
 
  projs = zero
  invovl%inv_sij = zero
@@ -350,12 +350,12 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
        ! D^-1
        invovl%inv_s_approx(1, :, :, itypat) = invovl%inv_sij(1, :, :, itypat)
        ! + PtP
-       ABI_ALLOCATE(gram_proj, (cplx, nlmn, nlmn))
+       ABI_MALLOC(gram_proj, (cplx, nlmn, nlmn))
        call abi_xgemm(blas_transpose,'N', nlmn, nlmn, (3-cplx)*ham%npw_k, cone, atom_projs(:,:,1), (3-cplx)*ham%npw_k, &
 &                     atom_projs(:,:,1), (3-cplx)*ham%npw_k, czero, gram_proj(:,:,1), nlmn,x_cplx=cplx)
        call xmpi_sum(gram_proj,mpi_enreg%comm_bandspinorfft,ierr)
        invovl%inv_s_approx(:,1:nlmn,1:nlmn,itypat) = invovl%inv_s_approx(:,1:nlmn,1:nlmn,itypat) + gram_proj(:,:,:)
-       ABI_DEALLOCATE(gram_proj)
+       ABI_FREE(gram_proj)
        ! ^-1
        if(cplx == 2) then
          call ZHETRF('U', nlmn, invovl%inv_s_approx(:,:,:,itypat), ham%lmnmax, ipiv, work, (64*nlmn), info)
@@ -378,8 +378,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
      iaph3d = iaph3d + 1
    end do
  end do
- ABI_DEALLOCATE(ipiv)
- ABI_DEALLOCATE(work)
+ ABI_FREE(ipiv)
+ ABI_FREE(work)
 
  call timab(timer_mkinvovl_build_d, 2, tsec)
  call timab(timer_mkinvovl_build_ptp, 1, tsec)
@@ -394,12 +394,12 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  else
    array_nprojs_pp = invovl%nprojs
  end if
- ABI_ALLOCATE(invovl%gram_projs, (cplx,invovl%nprojs,array_nprojs_pp(mpi_enreg%me_fft+1)))
+ ABI_MALLOC(invovl%gram_projs, (cplx,invovl%nprojs,array_nprojs_pp(mpi_enreg%me_fft+1)))
  shift = 0
  do iproc = 1, mpi_enreg%nproc_fft
    ! compute local contribution to slice iproc of gram_projs
    slice_size = array_nprojs_pp(iproc)
-   ABI_ALLOCATE(gramwork, (cplx,invovl%nprojs,slice_size))
+   ABI_MALLOC(gramwork, (cplx,invovl%nprojs,slice_size))
    call abi_xgemm(blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, projs(:,:,1), (3-cplx)*ham%npw_k, &
 &                      projs(:, :, shift+1), (3-cplx)*ham%npw_k, czero, gramwork(:,:,1), invovl%nprojs,x_cplx=cplx)
    shift = shift + slice_size
@@ -408,14 +408,14 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    if(iproc == mpi_enreg%me_fft+1) then
      invovl%gram_projs = gramwork
    end if
-   ABI_DEALLOCATE(gramwork)
+   ABI_FREE(gramwork)
  end do
  call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 
  call timab(timer_mkinvovl_build_ptp, 2, tsec)
  call timab(timer_mkinvovl,2,tsec)
 
- ABI_DEALLOCATE(projs)
+ ABI_FREE(projs)
 
  write(message,*) 'Invovl built'
  call wrtout(std_out,message,'COLL')
@@ -484,9 +484,9 @@ end subroutine make_invovl
    blas_transpose = 't'
  end if
 
- ABI_ALLOCATE(proj, (cplx,invovl%nprojs,nspinor*ndat))
- ABI_ALLOCATE(sm1proj, (cplx,invovl%nprojs,nspinor*ndat))
- ABI_ALLOCATE(PtPsm1proj, (cplx,invovl%nprojs,nspinor*ndat))
+ ABI_MALLOC(proj, (cplx,invovl%nprojs,nspinor*ndat))
+ ABI_MALLOC(sm1proj, (cplx,invovl%nprojs,nspinor*ndat))
+ ABI_MALLOC(PtPsm1proj, (cplx,invovl%nprojs,nspinor*ndat))
  proj = zero
  sm1proj = zero
  PtPsm1proj = zero
@@ -565,9 +565,9 @@ end subroutine make_invovl
  call pawcprj_axpby(one, one, cwaveprj_in, cwaveprj)
  call pawcprj_free(cwaveprj_in)
 
- ABI_DEALLOCATE(proj)
- ABI_DEALLOCATE(sm1proj)
- ABI_DEALLOCATE(PtPsm1proj)
+ ABI_FREE(proj)
+ ABI_FREE(sm1proj)
+ ABI_FREE(PtPsm1proj)
 
 end subroutine apply_invovl
 !!***
@@ -631,7 +631,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
    nlmntot_this_proc = nprojs
  end if
 
- ABI_ALLOCATE(temp_proj, (cplx, nlmntot_this_proc,ndat))
+ ABI_MALLOC(temp_proj, (cplx, nlmntot_this_proc,ndat))
 
  ! first guess for sm1proj
  call apply_block(ham, cplx, invovl%inv_s_approx, nprojs, ndat, proj, sm1proj)
@@ -679,7 +679,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
    ! call wrtout(std_out,message,'COLL')
  end if
 
- ABI_DEALLOCATE(temp_proj)
+ ABI_FREE(temp_proj)
 
 end subroutine solve_inner
 !!***

@@ -78,8 +78,8 @@ contains
        call self%icol(i)%finalize()
        call self%val(i)%finalize()
     end do
-    if(allocated(self%icol)) ABI_DEALLOCATE(self%icol)
-    if(allocated(self%val)) ABI_DEALLOCATE(self%val)
+    if(allocated(self%icol)) ABI_FREE(self%icol)
+    if(allocated(self%val)) ABI_FREE(self%val)
     self%nnz=0
     call self%base_mat2d_t%finalize()
   end subroutine finalize
@@ -141,10 +141,10 @@ contains
     do irow=1, self%nrow
        associate(indcol=>self%icol(irow))
          associate(val=>self%val(irow))
-           ABI_ALLOCATE(order, (indcol%size))
+           ABI_MALLOC(order, (indcol%size))
            call indcol%sort(order=order)
            val%data(1:val%size) =val%data(order)
-           ABI_DEALLOCATE(order)
+           ABI_FREE(order)
          end associate
        end associate
     end do

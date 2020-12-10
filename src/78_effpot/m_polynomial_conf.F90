@@ -147,7 +147,7 @@ subroutine polynomial_conf_init(cutoff_disp,cutoff_strain,factor_disp,factor_str
  polynomial_conf%need_confinement = .FALSE.
 
  polynomial_conf%ndisp   = ndisp
- ABI_ALLOCATE(polynomial_conf%cutoff_disp,(polynomial_conf%ndisp))
+ ABI_MALLOC(polynomial_conf%cutoff_disp,(polynomial_conf%ndisp))
  polynomial_conf%cutoff_disp(:) = cutoff_disp(:)
 
  polynomial_conf%cutoff_strain = cutoff_strain(:)
@@ -194,7 +194,7 @@ subroutine polynomial_conf_free(polynomial_conf)
 ! *************************************************************************
 
  if(allocated(polynomial_conf%cutoff_disp))then
-   ABI_DEALLOCATE(polynomial_conf%cutoff_disp)
+   ABI_FREE(polynomial_conf%cutoff_disp)
  end if
 
  polynomial_conf%power_disp    = 0

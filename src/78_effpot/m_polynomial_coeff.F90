@@ -221,7 +221,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
  polynomial_coeff%name = name_tmp
  polynomial_coeff%nterm = nterm_tmp
  polynomial_coeff%coefficient = coefficient_tmp
- ABI_DATATYPE_ALLOCATE(polynomial_coeff%terms,(polynomial_coeff%nterm))
+ ABI_MALLOC(polynomial_coeff%terms,(polynomial_coeff%nterm))
  iterm1 = 0
  do ii = 1,nterm
    if(abs(weights(ii)) > tol16)then
@@ -276,7 +276,7 @@ subroutine polynomial_coeff_free(polynomial_coeff)
    do ii = 1,polynomial_coeff%nterm
      call polynomial_term_free(polynomial_coeff%terms(ii))
    end do
-   ABI_DATATYPE_DEALLOCATE(polynomial_coeff%terms)
+   ABI_FREE(polynomial_coeff%terms)
  end if
  polynomial_coeff%name = ""
  polynomial_coeff%nterm = 0
@@ -328,7 +328,7 @@ subroutine polynomial_coeff_list_free(polynomial_coeff_list)
       !if(allocated(polynomial_coeff_list(i)%terms))write(std_out,*) "This shit is allocated!"
       call polynomial_coeff_free(polynomial_coeff_list(i))
    enddo
-   ABI_DATATYPE_DEALLOCATE(polynomial_coeff_list)
+   ABI_FREE(polynomial_coeff_list)
  endif
 
 end subroutine polynomial_coeff_list_free
@@ -611,7 +611,7 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
 
  !Allocate arrays on the other nodes.
   if (xmpi_comm_rank(comm) /= source) then
-    ABI_DATATYPE_ALLOCATE(coefficients%terms,(coefficients%nterm))
+    ABI_MALLOC(coefficients%terms,(coefficients%nterm))
     do ii=1,coefficients%nterm
       call polynomial_term_free(coefficients%terms(ii))
     end do
@@ -625,13 +625,13 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
 ! Allocate arrays on the other nodes
   if (xmpi_comm_rank(comm) /= source) then
     do ii = 1,coefficients%nterm
-      ABI_ALLOCATE(coefficients%terms(ii)%atindx,(2,coefficients%terms(ii)%ndisp))
+      ABI_MALLOC(coefficients%terms(ii)%atindx,(2,coefficients%terms(ii)%ndisp))
       coefficients%terms(ii)%atindx = 0
-      ABI_ALLOCATE(coefficients%terms(ii)%direction,(coefficients%terms(ii)%ndisp))
-      ABI_ALLOCATE(coefficients%terms(ii)%cell,(3,2,coefficients%terms(ii)%ndisp))
-      ABI_ALLOCATE(coefficients%terms(ii)%power_disp,(coefficients%terms(ii)%ndisp))
-      ABI_ALLOCATE(coefficients%terms(ii)%power_strain,(coefficients%terms(ii)%nstrain))
-      ABI_ALLOCATE(coefficients%terms(ii)%strain,(coefficients%terms(ii)%nstrain))
+      ABI_MALLOC(coefficients%terms(ii)%direction,(coefficients%terms(ii)%ndisp))
+      ABI_MALLOC(coefficients%terms(ii)%cell,(3,2,coefficients%terms(ii)%ndisp))
+      ABI_MALLOC(coefficients%terms(ii)%power_disp,(coefficients%terms(ii)%ndisp))
+      ABI_MALLOC(coefficients%terms(ii)%power_strain,(coefficients%terms(ii)%nstrain))
+      ABI_MALLOC(coefficients%terms(ii)%strain,(coefficients%terms(ii)%nstrain))
     end do
   end if
 
@@ -767,7 +767,7 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
   call xmpi_recv(coefficients%coefficient, source, 9*tag+2, comm, ierr)
 
  !Allocate arrays on the other nodes.
-  ABI_DATATYPE_ALLOCATE(coefficients%terms,(coefficients%nterm))
+  ABI_MALLOC(coefficients%terms,(coefficients%nterm))
   do ii=1,coefficients%nterm
     call polynomial_term_free(coefficients%terms(ii))
   end do
@@ -780,13 +780,13 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
 
 ! Allocate arrays on the other nodes
   do ii = 1,coefficients%nterm
-    ABI_ALLOCATE(coefficients%terms(ii)%atindx,(2,coefficients%terms(ii)%ndisp))
+    ABI_MALLOC(coefficients%terms(ii)%atindx,(2,coefficients%terms(ii)%ndisp))
     coefficients%terms(ii)%atindx = 0
-    ABI_ALLOCATE(coefficients%terms(ii)%direction,(coefficients%terms(ii)%ndisp))
-    ABI_ALLOCATE(coefficients%terms(ii)%cell,(3,2,coefficients%terms(ii)%ndisp))
-    ABI_ALLOCATE(coefficients%terms(ii)%power_disp,(coefficients%terms(ii)%ndisp))
-    ABI_ALLOCATE(coefficients%terms(ii)%power_strain,(coefficients%terms(ii)%nstrain))
-    ABI_ALLOCATE(coefficients%terms(ii)%strain,(coefficients%terms(ii)%nstrain))
+    ABI_MALLOC(coefficients%terms(ii)%direction,(coefficients%terms(ii)%ndisp))
+    ABI_MALLOC(coefficients%terms(ii)%cell,(3,2,coefficients%terms(ii)%ndisp))
+    ABI_MALLOC(coefficients%terms(ii)%power_disp,(coefficients%terms(ii)%ndisp))
+    ABI_MALLOC(coefficients%terms(ii)%power_strain,(coefficients%terms(ii)%nstrain))
+    ABI_MALLOC(coefficients%terms(ii)%strain,(coefficients%terms(ii)%nstrain))
   end do
 
 ! Transfert value
@@ -1354,8 +1354,8 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  irpt_sym = 0
  nsym   = crystal%nsym
  rprimd = crystal%rprimd
- ABI_ALLOCATE(xcart,(3,natom))
- ABI_ALLOCATE(xred,(3,natom))
+ ABI_MALLOC(xcart,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
  xcart(:,:) = crystal%xcart(:,:)
  xred(:,:)  = crystal%xred(:,:)
  ncoeff_max = nrpt*natom*natom*3*3
@@ -1394,10 +1394,10 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  end if
 
 !Obtain a list of rotated atom labels:
- ABI_ALLOCATE(indsym,(4,nsym,natom))
- ABI_ALLOCATE(symrec,(3,3,nsym))
- ABI_ALLOCATE(symrel,(3,3,nsym))
- ABI_ALLOCATE(tnons,(3,nsym))
+ ABI_MALLOC(indsym,(4,nsym,natom))
+ ABI_MALLOC(symrec,(3,3,nsym))
+ ABI_MALLOC(symrel,(3,3,nsym))
+ ABI_MALLOC(tnons,(3,nsym))
  symrec = crystal%symrec
  symrel = crystal%symrel
  tnons  = crystal%tnons
@@ -1405,13 +1405,13 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
  tolsym8=tol13
  call symatm(indsym,natom,nsym,symrec,tnons,&
 &            tolsym8,crystal%typat,crystal%xred)
- ABI_ALLOCATE(blkval,(3,natom,3,natom,nrpt))
- ABI_ALLOCATE(list,(natom*nrpt))
- ABI_ALLOCATE(list_symcoeff_tmp,(5,ncoeff_max,nsym))
- ABI_ALLOCATE(wkdist,(natom*nrpt))
+ ABI_MALLOC(blkval,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(list,(natom*nrpt))
+ ABI_MALLOC(list_symcoeff_tmp,(5,ncoeff_max,nsym))
+ ABI_MALLOC(wkdist,(natom*nrpt))
 
 !1-Fill strain list
- ABI_ALLOCATE(list_symstr_tmp,(6,nsym,2))
+ ABI_MALLOC(list_symstr_tmp,(6,nsym,2))
  list_symstr_tmp = 1
  do ia=1,6
    if(list_symstr_tmp(ia,1,1)==0)cycle
@@ -1468,9 +1468,9 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
   end do
 
  if(allocated(list_symstr))then
-   ABI_DEALLOCATE(list_symstr)
+   ABI_FREE(list_symstr)
  end if
- ABI_ALLOCATE(list_symstr,(nstr_sym,nsym,2))
+ ABI_MALLOC(list_symstr,(nstr_sym,nsym,2))
 
  icoeff_tmp = 1
  do ia=1,6
@@ -1483,7 +1483,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 
 !Compute the distance between each atoms. Indeed the dist array contains the difference of
 !cartesian coordinate for each direction
- ABI_ALLOCATE(distance,(natom,natom,nrpt))
+ ABI_MALLOC(distance,(natom,natom,nrpt))
  do ia=1,natom
    do ib=1,natom
      do irpt=1,nrpt
@@ -1650,10 +1650,10 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 
 !Reset the output
  if(allocated(list_symcoeff))then
-   ABI_DEALLOCATE(list_symcoeff)
+   ABI_FREE(list_symcoeff)
  end if
 
- ABI_DEALLOCATE(distance)
+ ABI_FREE(distance)
 
 !Transfert the final array with all the coefficients
 !With this array, we can access to all the terms presents
@@ -1676,7 +1676,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
    end if
  end do
 
- ABI_ALLOCATE(list_symcoeff_tmp2,(6,ncoeff,nsym))
+ ABI_MALLOC(list_symcoeff_tmp2,(6,ncoeff,nsym))
  list_symcoeff_tmp2 = 0
  icoeff = 0
  do icoeff_tmp = 1,ncoeff_max
@@ -1827,8 +1827,8 @@ end do
 !write(std_out,*) "DEBUG ncoeff after 2.5.3: ", ncoeff
 !write(std_out,*) "DEBUG ncoeff2 after 2.5.3: ", ncoeff2
 
- ABI_DEALLOCATE(list_symcoeff_tmp)
- ABI_ALLOCATE(list_symcoeff_tmp,(6,ncoeff,nsym))
+ ABI_FREE(list_symcoeff_tmp)
+ ABI_MALLOC(list_symcoeff_tmp,(6,ncoeff,nsym))
  list_symcoeff_tmp = list_symcoeff_tmp2
 
 !4.1 Count irreducible terms
@@ -1851,8 +1851,8 @@ ncoeff3 = 0
 
 !4.2 Put irreducible terms in front of list_symcoeff_tmp3
 !    Store index of irreducible terms
- ABI_ALLOCATE(list_symcoeff_tmp3,(6,ncoeff2,nsym))
- ABI_ALLOCATE(index_irred,(ncoeff3))
+ ABI_MALLOC(list_symcoeff_tmp3,(6,ncoeff2,nsym))
+ ABI_MALLOC(index_irred,(ncoeff3))
 icoeff_tmp = 0
 do icoeff = 1,ncoeff
    if(.not.(all(list_symcoeff_tmp(:,icoeff,1)==0)))then
@@ -1874,12 +1874,12 @@ do icoeff = 1,ncoeff
 enddo
 
 !4.4 A little copy round
-ABI_DEALLOCATE(list_symcoeff_tmp)
- ABI_ALLOCATE(list_symcoeff_tmp,(6,ncoeff2,nsym))
+ABI_FREE(list_symcoeff_tmp)
+ ABI_MALLOC(list_symcoeff_tmp,(6,ncoeff2,nsym))
 list_symcoeff_tmp = list_symcoeff_tmp3
 
 !5/ Final transfert
- ABI_ALLOCATE(list_symcoeff,(6,ncoeff2,nsym))
+ ABI_MALLOC(list_symcoeff,(6,ncoeff2,nsym))
  list_symcoeff = 0
  icoeff = 0
  do icoeff = 1,ncoeff2
@@ -1909,20 +1909,20 @@ list_symcoeff_tmp = list_symcoeff_tmp3
  ncoeff_sym = ncoeff3
 
 !Deallocation
- ABI_DEALLOCATE(blkval)
- ABI_DEALLOCATE(list)
- ABI_DEALLOCATE(list_symcoeff_tmp)
- ABI_DEALLOCATE(list_symcoeff_tmp2)
- ABI_DEALLOCATE(list_symcoeff_tmp3)
- ABI_DEALLOCATE(list_symstr_tmp)
- ABI_DEALLOCATE(index_irred)
- ABI_DEALLOCATE(indsym)
- ABI_DEALLOCATE(symrec)
- ABI_DEALLOCATE(symrel)
- ABI_DEALLOCATE(tnons)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xred )
- ABI_DEALLOCATE(wkdist)
+ ABI_FREE(blkval)
+ ABI_FREE(list)
+ ABI_FREE(list_symcoeff_tmp)
+ ABI_FREE(list_symcoeff_tmp2)
+ ABI_FREE(list_symcoeff_tmp3)
+ ABI_FREE(list_symstr_tmp)
+ ABI_FREE(index_irred)
+ ABI_FREE(indsym)
+ ABI_FREE(symrec)
+ ABI_FREE(symrel)
+ ABI_FREE(tnons)
+ ABI_FREE(xcart)
+ ABI_FREE(xred )
+ ABI_FREE(wkdist)
 
 end subroutine polynomial_coeff_getList
 !!***
@@ -2033,7 +2033,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    do ii =1,size(coefficients)
      call polynomial_coeff_free(coefficients(ii))
    end do
-   ABI_DEALLOCATE(coefficients)
+   ABI_FREE(coefficients)
  end if
 
 !Check
@@ -2079,8 +2079,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  nsym   = crystal%nsym
  rprimd = crystal%rprimd
 
- ABI_ALLOCATE(xcart,(3,natom))
- ABI_ALLOCATE(xred,(3,natom))
+ ABI_MALLOC(xcart,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
  xcart(:,:) = crystal%xcart(:,:)
  xred(:,:)  = crystal%xred(:,:)
 
@@ -2107,8 +2107,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  ncell(3) = 2*lim3+1
 
  !Build the rpt point
- ABI_ALLOCATE(rpt,(3,nrpt))
- ABI_ALLOCATE(cell,(3,nrpt))
+ ABI_MALLOC(rpt,(3,nrpt))
+ ABI_MALLOC(cell,(3,nrpt))
 
 !WARNING:
 !Put the reference cell into the first element
@@ -2133,13 +2133,13 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    end do
  end do
 
- ABI_ALLOCATE(symbols,(natom))
+ ABI_MALLOC(symbols,(natom))
  call symbols_crystal(crystal%natom,crystal%ntypat,crystal%npsp,&
 &                     symbols,crystal%typat,crystal%znucl)
 
 !Compute the distances between atoms
 !Now dist(3,ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
- ABI_ALLOCATE(dist,(3,natom,natom,nrpt))
+ ABI_MALLOC(dist,(3,natom,natom,nrpt))
  dist = zero
  do ia=1,natom
    do ib=1,natom
@@ -2170,8 +2170,8 @@ call xmpi_bcast(shape_listsymstr, master, comm, ierr)
 call xmpi_bcast(nstr_sym, master, comm, ierr)
 call xmpi_bcast(ncoeff_sym, master, comm, ierr)
 if(.not. iam_master )then
-  ABI_ALLOCATE(list_symcoeff,(shape_listsymcoeff(1),shape_listsymcoeff(2),shape_listsymcoeff(3)))
-  ABI_ALLOCATE(list_symstr,(shape_listsymstr(1),shape_listsymstr(2),shape_listsymstr(3)))
+  ABI_MALLOC(list_symcoeff,(shape_listsymcoeff(1),shape_listsymcoeff(2),shape_listsymcoeff(3)))
+  ABI_MALLOC(list_symstr,(shape_listsymstr(1),shape_listsymstr(2),shape_listsymstr(3)))
 endif 
 call xmpi_bcast(list_symcoeff, master, comm, ierr)
 call xmpi_bcast(list_symstr, master, comm, ierr)
@@ -2186,7 +2186,7 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
 !Check the distanceance bewteen coefficients and store integer:
 ! 0: the mix between these coefficient is not possible
 ! 1: the mix between these coefficient is possible
-   ABI_ALLOCATE(compatibleCoeffs,(ncoeff_symsym+nstr_sym,ncoeff_symsym+nstr_sym))
+   ABI_MALLOC(compatibleCoeffs,(ncoeff_symsym+nstr_sym,ncoeff_symsym+nstr_sym))
    compatibleCoeffs(:,:) = 1
 
    if(need_verbose)then
@@ -2235,16 +2235,16 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
      end do !end  icoeff
    end do !icoeff2
 
- ABI_DEALLOCATE(dist)
- ABI_DEALLOCATE(rpt)
+ ABI_FREE(dist)
+ ABI_FREE(rpt)
 !  Compute all the combination of coefficient up to the given order  (get the number)
    if(need_verbose)then
      write(message,'(1a)')' Compute the number of possible combinations'
      call wrtout(std_out,message,'COLL')
    end if
 
-   ABI_ALLOCATE(list_coeff,(0))
-   ABI_ALLOCATE(list_combination,(0,0))
+   ABI_MALLOC(list_coeff,(0))
+   ABI_MALLOC(list_combination,(0,0))
    icoeff  = 1
    icoeff2 = 0
    nirred_comb = 0
@@ -2254,8 +2254,8 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
 &                   ncoeff_symsym,iirred_comb,nirred_comb,nstr_sym,icoeff,nrpt,nsym,1,power_disps(1),power_disps(2),symbols,comm,&
 &                   nbody=option,compute=.false.,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
 &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
-   ABI_DEALLOCATE(list_coeff)
-   ABI_DEALLOCATE(list_combination)
+   ABI_FREE(list_coeff)
+   ABI_FREE(list_combination)
 
 !  Output how much we found
    if(need_verbose)then
@@ -2268,8 +2268,8 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
      write(message,'(a,a)') ch10,' Compute the combinations of irreducible pairs'
      call wrtout(std_out,message,'COLL')
    end if
-   ABI_ALLOCATE(list_coeff,(0))
-   ABI_ALLOCATE(list_combination_tmp,(power_disps(2),nirred_comb))
+   ABI_MALLOC(list_coeff,(0))
+   ABI_MALLOC(list_combination_tmp,(power_disps(2),nirred_comb))
    icoeff  = 1
    icoeff2 = 0
    iirred_comb = 0
@@ -2281,7 +2281,7 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
 &                   power_disps(2),symbols,comm,nbody=option,compute=.true.,&
 &                   anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
 &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
-   ABI_DEALLOCATE(list_coeff)
+   ABI_FREE(list_coeff)
    nirred_comb = size(list_combination_tmp,2)
 
 ! If we want to compute equivalent symmetric combinations go here.
@@ -2331,17 +2331,17 @@ if(need_compute_symmetric)then
 
   !COPY IRREDUCIBLE COMBINTATIONS TO BE DONE TO EACH PROCESSOR
   !my_nirred = my_ncombi_end - my_ncombi_start + 1
-  ABI_ALLOCATE(my_list_combination_tmp,(power_disps(2),my_nirred))
+  ABI_MALLOC(my_list_combination_tmp,(power_disps(2),my_nirred))
   if(my_nirred /= 0)my_list_combination_tmp(:,:) = list_combination_tmp(:,my_ncombi_start:my_ncombi_end)
-  ABI_ALLOCATE(my_index_irredcomb,(my_nirred))
+  ABI_MALLOC(my_index_irredcomb,(my_nirred))
   !DEALLOCATE list_combination_tmp
-  ABI_DEALLOCATE(list_combination_tmp)
+  ABI_FREE(list_combination_tmp)
 
   !COUNT SYMMETRIC COMBINATIONS TO IRREDUCIBLE COMBINATIONS ON EACH PROCESSOR
   my_ncombi = 0
   do i=1,my_nirred
-       ABI_ALLOCATE(dummylist,(0))
-       ABI_ALLOCATE(index_irred,(1))
+       ABI_MALLOC(dummylist,(0))
+       ABI_MALLOC(index_irred,(1))
        ndisp = 0
        nstrain = 0
        index_irred = 1
@@ -2367,27 +2367,27 @@ if(need_compute_symmetric)then
        endif
        !write(std_out,*) "my_ncombi:", my_ncombi 
        !write(std_out,*) "my_index_irredcomb(i)", my_index_irredcomb(i)
-       ABI_DEALLOCATE(dummylist)
-       ABI_DEALLOCATE(index_irred)
+       ABI_FREE(dummylist)
+       ABI_FREE(index_irred)
   enddo !i=1,my_nirred
   
   !Copy irreducible combinations from list_combination tmp into my_list_combination on rank i 
   !Make my_list_combination large enough for all symmetric combinations
-  ABI_ALLOCATE(my_list_combination,(power_disps(2),my_ncombi))
+  ABI_MALLOC(my_list_combination,(power_disps(2),my_ncombi))
   my_list_combination = 0
-  !ABI_ALLOCATE(my_index_irredcomb,(my_ncombi_end-my_ncombi_start+1))
+  !ABI_MALLOC(my_index_irredcomb,(my_ncombi_end-my_ncombi_start+1))
   if(my_ncombi /= 0)then
     do i=1,my_nirred
        my_list_combination(:,my_index_irredcomb(i)) = my_list_combination_tmp(:,i)
     end do
   endif
   !FOREGET ABOUT MY_LIST_COMBINATION_TMP
-  ABI_DEALLOCATE(my_list_combination_tmp)
+  ABI_FREE(my_list_combination_tmp)
   !COMPUTE SYMMETRIC COMBINATIONS
   if(my_ncombi /= 0)then
     do i=1,my_nirred
-       ABI_ALLOCATE(dummylist,(0))
-       ABI_ALLOCATE(index_irred,(1))
+       ABI_MALLOC(dummylist,(0))
+       ABI_MALLOC(index_irred,(1))
        index_irred = 1
        ! Get number of strain and displacements for this term
        ndisp = 0
@@ -2406,8 +2406,8 @@ if(need_compute_symmetric)then
 &                                        dummylist,my_list_combination(:ndisp+nstrain,my_index_irredcomb(i)),power_disps(2),&
 &                                        my_ncombi,ncoeff_symsym,nstr_sym,nstrain,my_index_irredcomb(i),&
 &                                        compatibleCoeffs,index_irred,compute_sym,comm,only_even=need_only_even_power)
-       ABI_DEALLOCATE(dummylist)
-       ABI_DEALLOCATE(index_irred)
+       ABI_FREE(dummylist)
+       ABI_FREE(index_irred)
     enddo
   endif
 
@@ -2420,41 +2420,41 @@ if(need_compute_symmetric)then
 
   ! Gather the Results into list_combination_tmp
   my_ncombi = size(my_list_combination,2)
-  ABI_ALLOCATE(irank_ncombi,(nproc))
+  ABI_MALLOC(irank_ncombi,(nproc))
   call xmpi_allgather(my_ncombi,irank_ncombi,comm,ierr)
   if(need_verbose)then
     write(message,'(1a)')' Reduction on all processors finished. Gather results.'
     call wrtout(std_out,message,'COLL')
   endif
-  ABI_ALLOCATE(list_combination_tmp,(power_disps(2),sum(irank_ncombi)))
-  ABI_ALLOCATE(offsets,(nproc))
+  ABI_MALLOC(list_combination_tmp,(power_disps(2),sum(irank_ncombi)))
+  ABI_MALLOC(offsets,(nproc))
   offsets(1) = 0
   do i=1,nproc
     offsets(i) = sum(irank_ncombi(:i-1))*power_disps(2)
   enddo
 
   list_combination_tmp = 0
-  ABI_ALLOCATE(buffsize,(nproc))
+  ABI_MALLOC(buffsize,(nproc))
   do i = 1,nproc
     buffsize(i) = irank_ncombi(i)*power_disps(2)
   enddo
   call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
   !Deallocation of variables inside need_symmetric
-  ABI_DEALLOCATE(buffsize)
-  ABI_DEALLOCATE(my_list_combination)
-  ABI_DEALLOCATE(my_index_irredcomb)
-  ABI_DEALLOCATE(irank_ncombi)
-  ABI_DEALLOCATE(offsets)
+  ABI_FREE(buffsize)
+  ABI_FREE(my_list_combination)
+  ABI_FREE(my_index_irredcomb)
+  ABI_FREE(irank_ncombi)
+  ABI_FREE(offsets)
 endif !compute_symmetric
 
 !Deallocation of arrays outside need_symmetric
-ABI_DEALLOCATE(compatibleCoeffs)
+ABI_FREE(compatibleCoeffs)
 
 if(iam_master)then
   call reduce_zero_combinations(list_combination_tmp)
   ncombination = size(list_combination_tmp,2)
-  ABI_ALLOCATE(index_irred,(1))
+  ABI_MALLOC(index_irred,(1))
   index_irred = 1
   if(need_spcoupling)then !Check irreducibility of strain-phonon terms
    if(need_verbose)then
@@ -2471,7 +2471,7 @@ if(iam_master)then
    call reduce_zero_combinations(list_combination_tmp)
    ncombination = size(list_combination_tmp,2)
   endif
-  ABI_DEALLOCATE(index_irred)
+  ABI_FREE(index_irred)
 end if !iam_master
 if(need_verbose)then
   write(message,'(1x,I0,1a)') ncombination,' irreducible combinations generated '
@@ -2480,8 +2480,8 @@ if(need_verbose)then
   call wrtout(std_out,message,'COLL')
 endif
 
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xred)
+ ABI_FREE(xcart)
+ ABI_FREE(xred)
 
 !MPI
  if(need_verbose .and. nproc > 1)then
@@ -2499,8 +2499,8 @@ endif
  end if
 
 !Set the buffsize for mpi scatterv
- ABI_ALLOCATE(buffsize,(nproc))
- ABI_ALLOCATE(buffdispl,(nproc))
+ ABI_MALLOC(buffsize,(nproc))
+ ABI_MALLOC(buffdispl,(nproc))
  do ii = 1,nproc
    buffsize(ii) = int(aint(real(ncombination,sp)/(nproc))*power_disps(2))
    if(ii > (nproc-ncoeff_alone)) then
@@ -2513,16 +2513,16 @@ endif
    buffdispl(ii) = buffdispl(ii-1) + buffsize(ii-1)
  end do
 
- ABI_ALLOCATE(list_combination,(power_disps(2),my_ncoeff))
+ ABI_MALLOC(list_combination,(power_disps(2),my_ncoeff))
  list_combination = 0
 
  my_size = my_ncoeff*power_disps(2)
  call xmpi_scatterv(list_combination_tmp,buffsize,buffdispl,list_combination,my_size,master,&
 &                   comm,ierr)
 
- ABI_DEALLOCATE(buffdispl)
- ABI_DEALLOCATE(buffsize)
- ABI_DEALLOCATE(list_combination_tmp)
+ ABI_FREE(buffdispl)
+ ABI_FREE(buffsize)
+ ABI_FREE(list_combination_tmp)
 
 !write(std_out,*) "DEBUG shape list_symcoeff(:,:,:) before termsfromlist:", shape(list_symcoeff)
  !Compute the coefficients from the list of combination
@@ -2530,11 +2530,11 @@ endif
    write(message,'(1a)')' Compute the coefficients'
    call wrtout(std_out,message,'COLL')
  end if
- ABI_ALLOCATE(coeffs_tmp,(my_ncoeff))
+ ABI_MALLOC(coeffs_tmp,(my_ncoeff))
  nterm      = nsym
  ndisp_max  = power_disps(2)
  ncoeff_max = my_ncoeff
- ABI_ALLOCATE(terms,(nterm))
+ ABI_MALLOC(terms,(nterm))
  do ii=1,my_ncoeff
    !write(std_out,*) "DEBUG list_combination(:,",ii,"): ", list_combination(:,ii)
    call generateTermsFromList(cell,list_combination(:,ii),list_symcoeff,list_symstr,ncoeff_symsym,&
@@ -2545,13 +2545,13 @@ endif
      call polynomial_term_free(terms(iterm))
    end do
  end do
- ABI_DEALLOCATE(terms)
- ABI_DEALLOCATE(cell)
+ ABI_FREE(terms)
+ ABI_FREE(cell)
 
 
- ABI_DEALLOCATE(list_combination)
- ABI_DEALLOCATE(list_symcoeff)
- ABI_DEALLOCATE(list_symstr)
+ ABI_FREE(list_combination)
+ ABI_FREE(list_symcoeff)
+ ABI_FREE(list_symstr)
 
 !Final tranfert
 !1- Count the total number of coefficient
@@ -2580,12 +2580,12 @@ endif
    call wrtout(std_out,message,'COLL')
  end if
 
- ABI_ALLOCATE(buffdispl,(nproc))
+ ABI_MALLOC(buffdispl,(nproc))
  buffdispl = 0
  buffdispl(my_rank+1) = my_ncoeff
  call xmpi_sum(buffdispl,comm,ierr)
- ABI_ALLOCATE(my_coeffindexes,(my_ncoeff))
- ABI_ALLOCATE(my_coefflist,(my_ncoeff))
+ ABI_MALLOC(my_coeffindexes,(my_ncoeff))
+ ABI_MALLOC(my_coefflist,(my_ncoeff))
  my_coeffindexes = 0
  my_coefflist = 0
  do icoeff=1,my_ncoeff
@@ -2596,7 +2596,7 @@ endif
      my_coeffindexes(icoeff) = sum(buffdispl(1:my_rank)) + icoeff
    end if
  end do
- ABI_DEALLOCATE(buffdispl)
+ ABI_FREE(buffdispl)
 
 !Compute the new number of coefficient per CPU
  if(need_distributed) then
@@ -2613,7 +2613,7 @@ endif
 
 !2:compute the number of coefficients and the list of the corresponding
 !  coefficients for each CPU.
- ABI_ALLOCATE(my_newcoeffindexes,(my_newncoeff))
+ ABI_MALLOC(my_newcoeffindexes,(my_newncoeff))
  if(need_distributed) then
    do icoeff=1,my_newncoeff
      if(my_rank >= (nproc-ncoeff_alone))then
@@ -2632,7 +2632,7 @@ endif
 !2- Transfer
  if(.not.need_distributed)then
    if(.not.allocated(coefficients))then
-     ABI_DATATYPE_ALLOCATE(coefficients,(my_newncoeff))
+     ABI_MALLOC(coefficients,(my_newncoeff))
    end if
  end if
  icoeff  = 0! icoeff is the current index in the total list of coefficients
@@ -2675,7 +2675,7 @@ endif
 
    if(need_distributed.and.rank_to_send /= rank_to_send_save) then
      if(my_rank == rank_to_send_save)then
-       ABI_DATATYPE_DEALLOCATE(coeffs_tmp)!Free memory if the current CPU has already distribute
+       ABI_FREE(coeffs_tmp)!Free memory if the current CPU has already distribute
                                           !all its own coefficients
      end if
      rank_to_send_save = rank_to_send
@@ -2683,7 +2683,7 @@ endif
 
    if(need_distributed.and.my_rank == rank_to_receive)then
      if(.not.allocated(coefficients))then
-       ABI_DATATYPE_ALLOCATE(coefficients,(my_newncoeff))
+       ABI_MALLOC(coefficients,(my_newncoeff))
      end if
    end if
 
@@ -2738,12 +2738,12 @@ endif
 
 
 !Final deallocation
- ABI_DEALLOCATE(symbols)
- ABI_DEALLOCATE(my_coeffindexes)
- ABI_DEALLOCATE(my_newcoeffindexes)
- ABI_DEALLOCATE(my_coefflist)
+ ABI_FREE(symbols)
+ ABI_FREE(my_coeffindexes)
+ ABI_FREE(my_newcoeffindexes)
+ ABI_FREE(my_coefflist)
  if(allocated(coeffs_tmp))then
-   ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
+   ABI_FREE(coeffs_tmp)
  end if
 
 end subroutine polynomial_coeff_getNorder
@@ -2858,9 +2858,9 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
    ncoeff_max = (ncoeff+nstr)
    ndisp_max = power_disp
    icoeff_tmp = 0
-   ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
-   ABI_ALLOCATE(terms,(nterm_max))
-   ABI_ALLOCATE(index_coeff,(power_disp))
+   ABI_MALLOC(coeffs_tmp,(ncoeff_max))
+   ABI_MALLOC(terms,(nterm_max))
+   ABI_MALLOC(index_coeff,(power_disp))
 
    index_coeff(1:power_disp-1) = index_coeff_in(:)
 
@@ -2963,8 +2963,8 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
      end if
    end do
 
-   ABI_DEALLOCATE(terms)
-   ABI_DEALLOCATE(index_coeff)
+   ABI_FREE(terms)
+   ABI_FREE(index_coeff)
 
 !  Transfer in the final array
    icoeff1 = 0
@@ -2986,7 +2986,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
    do icoeff1=1,ncoeff_max
      call polynomial_coeff_free(coeffs_tmp(icoeff1))
    end do
-   ABI_DEALLOCATE(coeffs_tmp)
+   ABI_FREE(coeffs_tmp)
  end if
 
 end subroutine computeNorder
@@ -3106,7 +3106,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
  if(power_disp <= power_disp_max)then
 
 !  Initialisation of variables
-   ABI_ALLOCATE(index_coeff,(power_disp))
+   ABI_MALLOC(index_coeff,(power_disp))
    index_coeff(1:power_disp-1) = index_coeff_in(:)
 !   write(std_out,*) "DEBUG index_coff in recursive CCL: ", index_coeff
 !  Loop over ncoeff+nstr
@@ -3250,7 +3250,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 &                                     only_even_power=need_only_even_power)
      end if
    end do
-   ABI_DEALLOCATE(index_coeff)
+   ABI_FREE(index_coeff)
  end if
 
 end subroutine computeCombinationFromList
@@ -3335,7 +3335,7 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
   need_compute = compute
   !Allocate index_isym
   !Copy index of symmetries done before. Symmetry of first term is always one
-  ABI_ALLOCATE(index_isym,(idisp_in))
+  ABI_MALLOC(index_isym,(idisp_in))
   index_isym(1) = 1
   if(idisp_in > 2)then
     index_isym(2:idisp_in) = index_isym_in
@@ -3424,7 +3424,7 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
 &                                      only_even=need_only_even)
 
   enddo !isym=isym_in,nsym
-  ABI_DEALLOCATE(index_isym)
+  ABI_FREE(index_isym)
 endif!(isym <= nsym)
 
 end subroutine computeSymmetricCombinations
@@ -3679,17 +3679,17 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
  ncoeff_max = ncoeff
  ndisp = 1
  nstrain = 0
- ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
- ABI_ALLOCATE(terms,(nterm_max))
+ ABI_MALLOC(coeffs_tmp,(ncoeff_max))
+ ABI_MALLOC(terms,(nterm_max))
 
 
  icoeff_tmp = 0
- ABI_ALLOCATE(atindx,(2,ndisp))
- ABI_ALLOCATE(cells,(3,2,ndisp))
- ABI_ALLOCATE(dir_int,(ndisp))
- ABI_ALLOCATE(power_disps,(ndisp))
- ABI_ALLOCATE(power_strain,(nstrain))
- ABI_ALLOCATE(strain,(nstrain))
+ ABI_MALLOC(atindx,(2,ndisp))
+ ABI_MALLOC(cells,(3,2,ndisp))
+ ABI_MALLOC(dir_int,(ndisp))
+ ABI_MALLOC(power_disps,(ndisp))
+ ABI_MALLOC(power_strain,(nstrain))
+ ABI_MALLOC(strain,(nstrain))
 
 !Found the ref cell
  irpt_ref = 1
@@ -3739,13 +3739,13 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
    end do
  end do!end do coeff_sym
 
- ABI_DEALLOCATE(terms)
- ABI_DEALLOCATE(atindx)
- ABI_DEALLOCATE(cells)
- ABI_DEALLOCATE(dir_int)
- ABI_DEALLOCATE(power_disps)
- ABI_DEALLOCATE(power_strain)
- ABI_DEALLOCATE(strain)
+ ABI_FREE(terms)
+ ABI_FREE(atindx)
+ ABI_FREE(cells)
+ ABI_FREE(dir_int)
+ ABI_FREE(power_disps)
+ ABI_FREE(power_strain)
+ ABI_FREE(strain)
 
 !Count the number of terms
  ncoeff_out = 0
@@ -3756,7 +3756,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
  end do
 
 !Transfer in the final array
- ABI_ALLOCATE(coeffs_out,(ncoeff_out))
+ ABI_MALLOC(coeffs_out,(ncoeff_out))
  icoeff = 0
  do icoeff_tmp=1,ncoeff_max
    if (abs(coeffs_tmp(icoeff_tmp)%coefficient) > tol16)then
@@ -3799,7 +3799,7 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
  do icoeff=1,ncoeff_max
    call polynomial_coeff_free(coeffs_tmp(icoeff))
  end do
- ABI_DEALLOCATE(coeffs_tmp)
+ ABI_FREE(coeffs_tmp)
 
 end subroutine polynomial_coeff_getOrder1
 !!***
@@ -3868,7 +3868,7 @@ call polynomial_coeff_getNorder(strain_terms_tmp,crystal,cutoff,ncoeff,ncoeff_ou
 
 !TODO Probably put in one routine
 !Get irreducible strain
-ABI_ALLOCATE(same,(ncoeff_out))
+ABI_MALLOC(same,(ncoeff_out))
 same = .false.
 do icoeff1 =1,ncoeff_out
         start = icoeff1 + 1
@@ -3880,7 +3880,7 @@ do icoeff1 =1,ncoeff_out
 enddo
 
 irred_ncoeff = ncoeff_out - count(same)
-ABI_DATATYPE_ALLOCATE(strain_terms,(irred_ncoeff))
+ABI_MALLOC(strain_terms,(irred_ncoeff))
 
 !Transfer irreducible strain to output array
 icoeff2=0
@@ -3901,7 +3901,7 @@ enddo
 
 !Deallocateion
 call polynomial_coeff_list_free(strain_terms_tmp)
-ABI_DEALLOCATE(same)
+ABI_FREE(same)
 
 end subroutine polynomial_coeff_getEvenAnhaStrain
 !!***
@@ -3933,9 +3933,9 @@ function coeffs_compare(c1,c2) result (res)
 ! *************************************************************************
 
   if(c1%nterm >= c2%nterm)then
-    ABI_ALLOCATE(blkval,(2,c1%nterm))
+    ABI_MALLOC(blkval,(2,c1%nterm))
   else
-    ABI_ALLOCATE(blkval,(2,c2%nterm))
+    ABI_MALLOC(blkval,(2,c2%nterm))
   endif
 
   res = .false.
@@ -3952,7 +3952,7 @@ function coeffs_compare(c1,c2) result (res)
   end do
   if(.not.any(blkval(:,:)==0))res = .true.
 
-  ABI_DEALLOCATE(blkval)
+  ABI_FREE(blkval)
 
 end function coeffs_compare
 !!***
@@ -3990,7 +3990,7 @@ function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
  ncoeff2 = size(coeff_list2)
  ncoeff_out = ncoeff1 + ncoeff2
 
- ABI_ALLOCATE(coeff_list_out,(ncoeff_out))
+ ABI_MALLOC(coeff_list_out,(ncoeff_out))
  do i=1,ncoeff_out
     if(i<=ncoeff1)then
        call polynomial_coeff_init(coeff_list1(i)%coefficient,coeff_list1(i)%nterm,coeff_list_out(i),coeff_list1(i)%terms,&
@@ -4258,12 +4258,12 @@ function check_irreducibility(combination,list_combination,list_symcoeff,list_sy
 end do !i=1,ncombination
 
 !If no equivalent found put ncombination +1 to index of irreducible combis
-ABI_ALLOCATE(index_irred_tmp,(size(index_irred)))
+ABI_MALLOC(index_irred_tmp,(size(index_irred)))
 index_irred_tmp = index_irred
-ABI_DEALLOCATE(index_irred)
-ABI_ALLOCATE(index_irred,(size(index_irred_tmp)+1))
+ABI_FREE(index_irred)
+ABI_MALLOC(index_irred,(size(index_irred_tmp)+1))
 index_irred(:size(index_irred_tmp)) = index_irred_tmp
-ABI_DEALLOCATE(index_irred_tmp)
+ABI_FREE(index_irred_tmp)
 index_irred(size(index_irred)) = ncombination + 1
 !write(std_out,*) "DEBUG: index_irred", index_irred
 return
@@ -4313,7 +4313,7 @@ subroutine reduce_zero_combinations(combination_list)
    endif
  enddo
 
- ABI_ALLOCATE(combination_list_tmp,(size(combination_list,1),i))
+ ABI_MALLOC(combination_list_tmp,(size(combination_list,1),i))
  i = 0
  do j=1,size(combination_list,2)
    if(any(combination_list(:,j) /= 0))then
@@ -4321,10 +4321,10 @@ subroutine reduce_zero_combinations(combination_list)
       combination_list_tmp(:,i) = combination_list(:,j)
    endif
  enddo
- ABI_DEALLOCATE(combination_list)
- ABI_ALLOCATE(combination_list,(size(combination_list_tmp,1),i))
+ ABI_FREE(combination_list)
+ ABI_MALLOC(combination_list,(size(combination_list_tmp,1),i))
  combination_list = combination_list_tmp
- ABI_DEALLOCATE(combination_list_tmp)
+ ABI_FREE(combination_list_tmp)
 
 end subroutine reduce_zero_combinations
 !!***

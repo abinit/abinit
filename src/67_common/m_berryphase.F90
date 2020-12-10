@@ -218,11 +218,11 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 !change8: set up the whole k point grid in the case where kptopt = 2
  if (kptopt==3) then
    nkpt = nkpt_
-   ABI_ALLOCATE(kpt,(3,nkpt))
+   ABI_MALLOC(kpt,(3,nkpt))
    kpt(:,:)=kpt_(:,:)
  else if (kptopt==2) then
    nkpt = nkpt_*2
-   ABI_ALLOCATE(kpt,(3,nkpt))
+   ABI_MALLOC(kpt,(3,nkpt))
    do ikpt = 1,nkpt/2
      kpt_flag(ikpt) = 0
      kpt(:,ikpt)=kpt_(:,ikpt)
@@ -252,8 +252,8 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 
 !change8
 
- ABI_ALLOCATE(shift_g,(nkpt))
- ABI_ALLOCATE(kg_dum,(3,0))
+ ABI_MALLOC(shift_g,(nkpt))
+ ABI_MALLOC(kg_dum,(3,0))
 
 !Compute primitive vectors of the k point lattice
 !Copy to real(dp)
@@ -278,7 +278,7 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 
 !  For each k point, find k_prim such that k_prim= k + dk mod(G)
 !  where G is a vector of the reciprocal lattice
-   ABI_ALLOCATE(ikpt_dk,(nkpt))
+   ABI_MALLOC(ikpt_dk,(nkpt))
    shift_g(:)= .false.
    do ikpt=1,nkpt
      do ikpt2=1,nkpt
@@ -352,7 +352,7 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 !  ENDDEBUG
 
 !  Build the different strings
-   ABI_ALLOCATE(ikstr,(nkstr,nstr))
+   ABI_MALLOC(ikstr,(nkstr,nstr))
 
    iunmark=1
    kpt_mark(:)=0
@@ -380,7 +380,7 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 !  end do
 !  ENDDEBUG
 
-   ABI_DEALLOCATE(ikpt_dk)
+   ABI_FREE(ikpt_dk)
 !  DEBUG!
 !  write(100,*) 'list all the k points strings:'
 !  do istr=1,nstr
@@ -390,7 +390,7 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 
 !  *****************************************************************************
 !  Find the location of each wavefunction
-   ABI_ALLOCATE(cg_index,(mband,nkpt,nsppol))
+   ABI_MALLOC(cg_index,(mband,nkpt,nsppol))
 
    icg = 0
    do isppol=1,nsppol
@@ -407,7 +407,7 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 !  change5
    if (mkmem/=0) then
 !    Find the planewave vectors and their indexes for each k point
-     ABI_ALLOCATE(kg_kpt,(3,mpw*nspinor,nkpt_))
+     ABI_MALLOC(kg_kpt,(3,mpw*nspinor,nkpt_))
      kg_kpt(:,:,:) = 0
      index1 = 0
      do ikpt=1,nkpt_
@@ -419,9 +419,9 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
      end do
    end if            !change5
 !  *****************************************************************************
-   ABI_ALLOCATE(det_string,(2, nstr))
-   ABI_ALLOCATE(det_tmp,(2, nstr))
-   ABI_ALLOCATE(polberry,(nstr))
+   ABI_MALLOC(det_string,(2, nstr))
+   ABI_MALLOC(det_tmp,(2, nstr))
+   ABI_MALLOC(polberry,(nstr))
 
 !  Initialize berry phase polarization for each spin and the total one
    polb(1:nsppol) = 0.0_dp
@@ -463,11 +463,11 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 !      ENDDEBUG!
 
 !      Loop over k points per string
-       ABI_ALLOCATE(determinant,(2, nkstr))
+       ABI_MALLOC(determinant,(2, nkstr))
 
        do jkstr=1,nkstr
 
-         ABI_ALLOCATE(cmatrix,(2,maxband,maxband))
+         ABI_MALLOC(cmatrix,(2,maxband,maxband))
          if(jkstr < nkstr) then
            lkstr=jkstr+1
          else
@@ -603,15 +603,15 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 
          band_in = maxband - minband + 1
 
-         ABI_ALLOCATE(ipvt,(maxband))
-         ABI_ALLOCATE(zgwork,(2,1:maxband))
+         ABI_MALLOC(ipvt,(maxband))
+         ABI_MALLOC(zgwork,(2,1:maxband))
 
 !        Last argument of zgedi means calculate determinant only.
          call dzgefa(cmatrix(1,minband,minband),maxband, band_in,ipvt,info)
          call dzgedi(cmatrix(1,minband,minband),maxband, band_in,ipvt,det,zgwork,10)
 
-         ABI_DEALLOCATE(zgwork)
-         ABI_DEALLOCATE(ipvt)
+         ABI_FREE(zgwork)
+         ABI_FREE(ipvt)
 
          fac=exp(log(10._dp)*det(1,2))
          determinant(1, jkstr) = fac*(det(1,1)*cos(log(10._dp)*det(2,2)) - &
@@ -628,7 +628,7 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 &         det_string(2,istr)*determinant(1,jkstr)
          det_string(1:2,istr) = det_tmp(1:2,istr)
 
-         ABI_DEALLOCATE(cmatrix)
+         ABI_FREE(cmatrix)
 
 !        Close loop over k points along string
          read_k = -1*read_k + 3             ! read_k=2 <-> read_k=1
@@ -642,7 +642,7 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
        det_average(1) = det_average(1) + det_string(1,istr)/nstr
        det_average(2) = det_average(2) + det_string(2,istr)/nstr
 
-       ABI_DEALLOCATE(determinant)
+       ABI_FREE(determinant)
 
 !      Close loop over strings
      end do
@@ -687,19 +687,19 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 
    end do ! isppol
 
-   ABI_DEALLOCATE(polberry)
-   ABI_DEALLOCATE(det_tmp)
-   ABI_DEALLOCATE(det_string)
-   ABI_DEALLOCATE(ikstr)
-   ABI_DEALLOCATE(cg_index)
+   ABI_FREE(polberry)
+   ABI_FREE(det_tmp)
+   ABI_FREE(det_string)
+   ABI_FREE(ikstr)
+   ABI_FREE(cg_index)
 !  change6
    if (mkmem /=0)  then
-     ABI_DEALLOCATE(kg_kpt)
+     ABI_FREE(kg_kpt)
    end if
 !  *****************************************************************************
 !  Reindex xcart according to atom and type
    call xred2xcart(natom,rprimd,xcart,xred)
-   ABI_ALLOCATE(xcart_reindex,(3,natom,ntypat))
+   ABI_MALLOC(xcart_reindex,(3,natom,ntypat))
    index=1
    do itypat=1,ntypat
      do iattyp=1,nattyp(itypat)
@@ -736,7 +736,7 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
    write(message,'(9x,a,7x,es19.9)') 'total',politot
    call wrtout(std_out,message,'COLL')
 
-   ABI_DEALLOCATE(xcart_reindex)
+   ABI_FREE(xcart_reindex)
 
 !  Compute the total polarizations
 
@@ -782,9 +782,9 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 
  end do ! iberry
 
- ABI_DEALLOCATE(shift_g)
- ABI_DEALLOCATE(kpt)
- ABI_DEALLOCATE(kg_dum)
+ ABI_FREE(shift_g)
+ ABI_FREE(kpt)
+ ABI_FREE(kg_dum)
 
 end subroutine berryphase
 !!***

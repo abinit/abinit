@@ -566,7 +566,7 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%gbound_kp,Ham%gbound_k)) then
    nullify(Ham%gbound_kp)
  else if (associated(Ham%gbound_kp)) then
-   ABI_DEALLOCATE(Ham%gbound_kp)
+   ABI_FREE(Ham%gbound_kp)
  end if
 
 ! Integer arrays
@@ -583,7 +583,7 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%phkpxred,Ham%phkxred)) then
    nullify(Ham%phkpxred)
  else if (associated(Ham%phkpxred)) then
-   ABI_DEALLOCATE(Ham%phkpxred)
+   ABI_FREE(Ham%phkpxred)
  end if
  ABI_SFREE(Ham%phkxred)
  if (associated(Ham%ekb)) nullify(Ham%ekb)
@@ -729,14 +729,14 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ABI_CHECK(mgfft==MAXVAL(ngfft(1:3)),"Wrong mgfft")
 
 !Allocate the arrays of the Hamiltonian whose dimensions do not depend on k
- ABI_ALLOCATE(ham%atindx,(natom))
- ABI_ALLOCATE(ham%atindx1,(natom))
- ABI_ALLOCATE(ham%typat,(natom))
- ABI_ALLOCATE(ham%indlmn,(6,psps%lmnmax,psps%ntypat))
- ABI_ALLOCATE(ham%nattyp,(psps%ntypat))
- ABI_ALLOCATE(ham%nucdipmom,(3,natom))
- ABI_ALLOCATE(ham%ph1d,(2,3*(2*mgfft+1)*natom))
- ABI_ALLOCATE(ham%pspso,(psps%ntypat))
+ ABI_MALLOC(ham%atindx,(natom))
+ ABI_MALLOC(ham%atindx1,(natom))
+ ABI_MALLOC(ham%typat,(natom))
+ ABI_MALLOC(ham%indlmn,(6,psps%lmnmax,psps%ntypat))
+ ABI_MALLOC(ham%nattyp,(psps%ntypat))
+ ABI_MALLOC(ham%nucdipmom,(3,natom))
+ ABI_MALLOC(ham%ph1d,(2,3*(2*mgfft+1)*natom))
+ ABI_MALLOC(ham%pspso,(psps%ntypat))
 
 !Initialize most of the Hamiltonian
  indx=1
@@ -807,12 +807,12 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
  if (ham%usepaw==1) then
    ham%usecprj=0;if (present(usecprj)) ham%usecprj=usecprj
-   ABI_ALLOCATE(ham%dimcprj,(natom))
+   ABI_MALLOC(ham%dimcprj,(natom))
    !Be carefull cprj are ordered by atom type (used in non-local operator)
    call pawcprj_getdim(ham%dimcprj,natom,ham%nattyp,ham%ntypat,ham%typat,pawtab,'O')
  else
    ham%usecprj=0
-   ABI_ALLOCATE(ham%dimcprj,(0))
+   ABI_MALLOC(ham%dimcprj,(0))
  end if
 
 ! ===========================
@@ -824,9 +824,9 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    ham%dimekb1=psps%dimekb
    ham%dimekb2=psps%ntypat
    ham%dimekbq=1
-   ABI_ALLOCATE(ham%ekb_spin,(psps%dimekb,psps%ntypat,nspinor**2,1,1))
+   ABI_MALLOC(ham%ekb_spin,(psps%dimekb,psps%ntypat,nspinor**2,1,1))
    ham%ekb => ham%ekb_spin(:,:,:,:,1)
-   ABI_ALLOCATE(ham%sij,(0,0))
+   ABI_MALLOC(ham%sij,(0,0))
    ham%ekb(:,:,1,1)=psps%ekb(:,:)
    if (nspinor==2) then
      ham%ekb(:,:,2,1)=psps%ekb(:,:)
@@ -855,7 +855,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    if (present(paw_ij)) then
      if (size(paw_ij)>0) ham%dimekbq=paw_ij(1)%qphase
    end if
-   ABI_ALLOCATE(ham%sij,(ham%dimekb1,psps%ntypat))
+   ABI_MALLOC(ham%sij,(ham%dimekb1,psps%ntypat))
    do itypat=1,psps%ntypat
      if (cplex_dij==1) then
        ham%sij(1:pawtab(itypat)%lmn2_size,itypat)=pawtab(itypat)%sij(:)
@@ -871,11 +871,11 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    end do
    !We preload here PAW non-local factors in order to avoid a communication over atoms
    ! inside the loop over spins.
-   ABI_ALLOCATE(ham%ekb_spin,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq,my_nsppol))
+   ABI_MALLOC(ham%ekb_spin,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq,my_nsppol))
    ham%ekb_spin=zero
    if (present(paw_ij)) then
      if (my_nsppol<ham%nsppol) then
-       ABI_ALLOCATE(ekb_tmp,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq))
+       ABI_MALLOC(ekb_tmp,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq))
      end if
      jsp=0
      do isp=1,ham%nsppol
@@ -891,7 +891,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
        end if
      end do
      if (my_nsppol<ham%nsppol) then
-       ABI_DEALLOCATE(ekb_tmp)
+       ABI_FREE(ekb_tmp)
      end if
    end if
    nullify(ham%ekb)
@@ -1022,10 +1022,10 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
 !Compute exp(i.k.R) for each atom
  if (present(kpt_k)) then
    if (associated(Ham%phkpxred).and.(.not.associated(Ham%phkpxred,Ham%phkxred))) then
-     ABI_DEALLOCATE(Ham%phkpxred)
+     ABI_FREE(Ham%phkpxred)
    end if
    ABI_SFREE(ham%phkxred)
-   ABI_ALLOCATE(ham%phkxred,(2,ham%natom))
+   ABI_MALLOC(ham%phkxred,(2,ham%natom))
    do iat=1,ham%natom
      iatom=ham%atindx(iat)
      arg=two_pi*DOT_PRODUCT(kpt_k,ham%xred(:,iat))
@@ -1042,12 +1042,12 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    if (associated(Ham%gbound_kp,Ham%gbound_k)) then
      nullify(Ham%gbound_kp)
    else if (associated(Ham%gbound_kp)) then
-     ABI_DEALLOCATE(Ham%gbound_kp)
+     ABI_FREE(Ham%gbound_kp)
    end if
    ABI_SFREE(ham%gbound_k)
  end if
  if (.not.allocated(ham%gbound_k)) then
-   ABI_ALLOCATE(ham%gbound_k,(2*ham%mgfft+8,2))
+   ABI_MALLOC(ham%gbound_k,(2*ham%mgfft+8,2))
    ham%gbound_k(:,:)=0
    ham%gbound_kp => ham%gbound_k
  end if
@@ -1168,9 +1168,9 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
    if (associated(ham%phkpxred,ham%phkxred)) then
      nullify(ham%phkpxred)
    else if (associated(ham%phkpxred)) then
-     ABI_DEALLOCATE(ham%phkpxred)
+     ABI_FREE(ham%phkpxred)
    end if
-   ABI_ALLOCATE(ham%phkpxred,(2,ham%natom))
+   ABI_MALLOC(ham%phkpxred,(2,ham%natom))
    do iat=1,ham%natom
      iatom=ham%atindx(iat)
      arg=two_pi*DOT_PRODUCT(kpt_kp,ham%xred(:,iat))
@@ -1187,7 +1187,7 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
    if (associated(ham%gbound_kp,ham%gbound_k)) then
      nullify(ham%gbound_kp)
    else if (associated(ham%gbound_kp)) then
-     ABI_DEALLOCATE(ham%gbound_kp)
+     ABI_FREE(ham%gbound_kp)
    end if
    if (present(gbound_kp)) then
      ham%gbound_kp(:,:)=gbound_kp(:,:)
@@ -1195,7 +1195,7 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
      if (.not.associated(ham%kg_kp)) then
        ABI_BUG('Something is missing for gbound_kp computation!')
      end if
-     ABI_ALLOCATE(ham%gbound_kp,(2*ham%mgfft+8,2))
+     ABI_MALLOC(ham%gbound_kp,(2*ham%mgfft+8,2))
      call sphereboundary(ham%gbound_kp,ham%istwf_kp,ham%kg_kp,ham%mgfft,ham%npw_kp)
    end if
  end if
@@ -1304,46 +1304,46 @@ subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
  gs_hamk_out%kpt_k = gs_hamk_in%kpt_k
  gs_hamk_out%kpt_kp = gs_hamk_in%kpt_kp
 
- ABI_ALLOCATE(gs_hamk_out%atindx,(gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%atindx,(gs_hamk_out%natom))
  gs_hamk_out%atindx = gs_hamk_in%atindx
- ABI_ALLOCATE(gs_hamk_out%atindx1,(gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%atindx1,(gs_hamk_out%natom))
  gs_hamk_out%atindx1 = gs_hamk_in%atindx1
- ABI_ALLOCATE(gs_hamk_out%dimcprj,(gs_hamk_out%natom*gs_hamk_out%usepaw))
+ ABI_MALLOC(gs_hamk_out%dimcprj,(gs_hamk_out%natom*gs_hamk_out%usepaw))
  if (gs_hamk_out%usepaw==1) gs_hamk_out%dimcprj = gs_hamk_in%dimcprj
- ABI_ALLOCATE(gs_hamk_out%typat,(gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%typat,(gs_hamk_out%natom))
  gs_hamk_out%typat = gs_hamk_in%typat
- ABI_ALLOCATE(gs_hamk_out%gbound_k,(2*gs_hamk_out%mgfft+8,2))
+ ABI_MALLOC(gs_hamk_out%gbound_k,(2*gs_hamk_out%mgfft+8,2))
  gs_hamk_out%gbound_k = gs_hamk_in%gbound_k
- ABI_ALLOCATE(gs_hamk_out%indlmn,(6,gs_hamk_out%lmnmax,gs_hamk_out%ntypat))
+ ABI_MALLOC(gs_hamk_out%indlmn,(6,gs_hamk_out%lmnmax,gs_hamk_out%ntypat))
  gs_hamk_out%indlmn = gs_hamk_in%indlmn
- ABI_ALLOCATE(gs_hamk_out%nattyp,(gs_hamk_out%ntypat))
+ ABI_MALLOC(gs_hamk_out%nattyp,(gs_hamk_out%ntypat))
  gs_hamk_out%nattyp = gs_hamk_in%nattyp
- ABI_ALLOCATE(gs_hamk_out%nucdipmom,(3,gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%nucdipmom,(3,gs_hamk_out%natom))
  gs_hamk_out%nucdipmom = gs_hamk_in%nucdipmom
- ABI_ALLOCATE(gs_hamk_out%phkxred,(2,gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%phkxred,(2,gs_hamk_out%natom))
  gs_hamk_out%phkxred = gs_hamk_in%phkxred
- ABI_ALLOCATE(gs_hamk_out%ph1d,(2,3*(2*gs_hamk_out%mgfft+1)*gs_hamk_out%natom))
+ ABI_MALLOC(gs_hamk_out%ph1d,(2,3*(2*gs_hamk_out%mgfft+1)*gs_hamk_out%natom))
  gs_hamk_out%ph1d = gs_hamk_in%ph1d
- ABI_ALLOCATE(gs_hamk_out%pspso,(gs_hamk_out%ntypat))
+ ABI_MALLOC(gs_hamk_out%pspso,(gs_hamk_out%ntypat))
  gs_hamk_out%pspso = gs_hamk_in%pspso
  tmp2i(1:5)=shape(gs_hamk_in%ekb_spin)
- ABI_ALLOCATE(gs_hamk_out%ekb_spin,(tmp2i(1),tmp2i(2),tmp2i(3),tmp2i(4),tmp2i(5)))
+ ABI_MALLOC(gs_hamk_out%ekb_spin,(tmp2i(1),tmp2i(2),tmp2i(3),tmp2i(4),tmp2i(5)))
  gs_hamk_out%ekb_spin = gs_hamk_in%ekb_spin
  gs_hamk_out%ekb => gs_hamk_out%ekb_spin(:,:,:,:,1)
  tmp2i(1:2)=shape(gs_hamk_in%sij)
- ABI_ALLOCATE(gs_hamk_out%sij,(tmp2i(1),tmp2i(2)))
+ ABI_MALLOC(gs_hamk_out%sij,(tmp2i(1),tmp2i(2)))
  gs_hamk_out%sij = gs_hamk_in%sij
 
  if (associated(gs_hamk_in%gbound_kp,gs_hamk_in%gbound_k)) then
    gs_hamk_out%gbound_kp => gs_hamk_out%gbound_k
  else
-   ABI_ALLOCATE(gs_hamk_out%gbound_kp,(2,gs_hamk_out%natom))
+   ABI_MALLOC(gs_hamk_out%gbound_kp,(2,gs_hamk_out%natom))
    gs_hamk_out%gbound_kp = gs_hamk_in%gbound_kp
  end if
  if (associated(gs_hamk_in%phkpxred,gs_hamk_in%phkxred)) then
    gs_hamk_out%phkpxred => gs_hamk_out%phkxred
  else
-   ABI_ALLOCATE(gs_hamk_out%phkpxred,(2,gs_hamk_out%natom))
+   ABI_MALLOC(gs_hamk_out%phkpxred,(2,gs_hamk_out%natom))
    gs_hamk_out%phkpxred = gs_hamk_in%phkpxred
  end if
 
@@ -1625,17 +1625,17 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
    if ((ipert>=1.and.ipert<=gs_Ham%natom).or.ipert==gs_Ham%natom+2.or.&
         ipert==gs_Ham%natom+3.or.ipert==gs_Ham%natom+4.or.ipert==gs_Ham%natom+11) then
 
-     ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
+     ABI_MALLOC(rf_Ham%e1kbfr_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
      rf_Ham%e1kbfr_spin=zero
      if (has_e1kbsc_) then
-       ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
+       ABI_MALLOC(rf_Ham%e1kbsc_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex,my_nsppol))
        rf_Ham%e1kbsc_spin=zero
      end if
 
      if (present(paw_ij1)) then
 
        if (my_nsppol<rf_Ham%nsppol) then
-         ABI_ALLOCATE(e1kb_tmp,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex))
+         ABI_MALLOC(e1kb_tmp,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex))
        end if
 
 !      === Frozen term
@@ -1671,7 +1671,7 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
        end if
 
        if (my_nsppol<rf_Ham%nsppol) then
-         ABI_DEALLOCATE(e1kb_tmp)
+         ABI_FREE(e1kb_tmp)
        end if
 
      end if
@@ -1679,10 +1679,10 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  end if
 
  if (.not.allocated(rf_Ham%e1kbfr_spin)) then
-   ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(0,0,0,0,0))
+   ABI_MALLOC(rf_Ham%e1kbfr_spin,(0,0,0,0,0))
  end if
  if (.not.allocated(rf_Ham%e1kbsc_spin)) then
-   ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(0,0,0,0,0))
+   ABI_MALLOC(rf_Ham%e1kbsc_spin,(0,0,0,0,0))
  end if
  nullify(rf_Ham%e1kbfr)
  nullify(rf_Ham%e1kbsc)

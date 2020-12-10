@@ -214,33 +214,33 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 #endif
 
  if (paw_opt/=3) then
-   ABI_ALLOCATE(gxfac_,(2,nlmn))
+   ABI_MALLOC(gxfac_,(2,nlmn))
    gxfac_(:,:)=zero
    if (choice>1) then
-     ABI_ALLOCATE(dgxdtfac_,(2,ndgxdtfac,nlmn))
+     ABI_MALLOC(dgxdtfac_,(2,ndgxdtfac,nlmn))
      if(ndgxdtfac>0) dgxdtfac_(:,:,:)=zero
    end if
    if (choice==54.or.choice==8.or.choice==81.or.choice==33) then
-     ABI_ALLOCATE(d2gxdtfac_,(2,nd2gxdtfac,nlmn))
+     ABI_MALLOC(d2gxdtfac_,(2,nd2gxdtfac,nlmn))
      if(nd2gxdtfac>0) d2gxdtfac_(:,:,:)=zero
    end if
  end if
  if (paw_opt>=3) then
-   ABI_ALLOCATE(gxfacs_,(2,nlmn))
+   ABI_MALLOC(gxfacs_,(2,nlmn))
    gxfacs_(:,:)=zero
    if (choice>1) then
-     ABI_ALLOCATE(dgxdtfacs_,(2,ndgxdtfac,nlmn))
+     ABI_MALLOC(dgxdtfacs_,(2,ndgxdtfac,nlmn))
      if (ndgxdtfac>0) dgxdtfacs_(:,:,:)=zero
    end if
    if (choice==54.or.choice==8.or.choice==81) then
-     ABI_ALLOCATE(d2gxdtfacs_,(2,nd2gxdtfac,nlmn))
+     ABI_MALLOC(d2gxdtfacs_,(2,nd2gxdtfac,nlmn))
      if (nd2gxdtfac>0) d2gxdtfacs_(:,:,:)=zero
    end if
  end if
 
 if (choice==33) two_piinv=1.0_dp/two_pi
 
- ABI_ALLOCATE(ztab,(npw))
+ ABI_MALLOC(ztab,(npw))
 
 !==========================================================================
 !========== STANDARD VERSION ==============================================
@@ -1396,24 +1396,24 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !  ==========================================================================
  end if
 
- ABI_DEALLOCATE(ztab)
+ ABI_FREE(ztab)
 
  if (paw_opt/=3) then
-   ABI_DEALLOCATE(gxfac_)
+   ABI_FREE(gxfac_)
    if (choice>1) then
-     ABI_DEALLOCATE(dgxdtfac_)
+     ABI_FREE(dgxdtfac_)
    end if
    if (choice==54.or.choice==8.or.choice==81.or.choice==33) then
-     ABI_DEALLOCATE(d2gxdtfac_)
+     ABI_FREE(d2gxdtfac_)
    end if
  end if
  if (paw_opt>=3) then
-   ABI_DEALLOCATE(gxfacs_)
+   ABI_FREE(gxfacs_)
    if (choice>1) then
-     ABI_DEALLOCATE(dgxdtfacs_)
+     ABI_FREE(dgxdtfacs_)
    end if
    if (choice==54.or.choice==8.or.choice==81) then
-     ABI_DEALLOCATE(d2gxdtfacs_)
+     ABI_FREE(d2gxdtfacs_)
    end if
  end if
 

@@ -170,12 +170,12 @@ subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
     end if
     distribfft_arg%n2_coarse = n2
     ! Initialisation of fft distrib tab
-    ABI_ALLOCATE(distribfft_arg%tab_fftwf2_distrib,(n2))
-    ABI_ALLOCATE(distribfft_arg%tab_fftwf2_local,(n2))
-    ABI_ALLOCATE(distribfft_arg%tab_fftdp2_distrib,(n2))
-    ABI_ALLOCATE(distribfft_arg%tab_fftdp2_local,(n2))
-    ABI_ALLOCATE(distribfft_arg%tab_fftdp3_distrib,(n3))
-    ABI_ALLOCATE(distribfft_arg%tab_fftdp3_local,(n3))
+    ABI_MALLOC(distribfft_arg%tab_fftwf2_distrib,(n2))
+    ABI_MALLOC(distribfft_arg%tab_fftwf2_local,(n2))
+    ABI_MALLOC(distribfft_arg%tab_fftdp2_distrib,(n2))
+    ABI_MALLOC(distribfft_arg%tab_fftdp2_local,(n2))
+    ABI_MALLOC(distribfft_arg%tab_fftdp3_distrib,(n3))
+    ABI_MALLOC(distribfft_arg%tab_fftdp3_local,(n3))
     do i2=1, n2
       ! Cyclic distribution of ig2 planes over fft processors
       distribfft_arg%tab_fftwf2_distrib(i2) = modulo((i2-1),nproc_fft)
@@ -201,12 +201,12 @@ subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
     endif
     distribfft_arg%n2_fine = n2
     ! Updating information about fine fft grid
-    ABI_ALLOCATE(distribfft_arg%tab_fftwf2dg_distrib,(n2))
-    ABI_ALLOCATE(distribfft_arg%tab_fftwf2dg_local,(n2))
-    ABI_ALLOCATE(distribfft_arg%tab_fftdp2dg_distrib,(n2))
-    ABI_ALLOCATE(distribfft_arg%tab_fftdp2dg_local,(n2))
-    ABI_ALLOCATE(distribfft_arg%tab_fftdp3dg_distrib,(n3))
-    ABI_ALLOCATE(distribfft_arg%tab_fftdp3dg_local,(n3))
+    ABI_MALLOC(distribfft_arg%tab_fftwf2dg_distrib,(n2))
+    ABI_MALLOC(distribfft_arg%tab_fftwf2dg_local,(n2))
+    ABI_MALLOC(distribfft_arg%tab_fftdp2dg_distrib,(n2))
+    ABI_MALLOC(distribfft_arg%tab_fftdp2dg_local,(n2))
+    ABI_MALLOC(distribfft_arg%tab_fftdp3dg_distrib,(n3))
+    ABI_MALLOC(distribfft_arg%tab_fftdp3dg_local,(n3))
     do i2=1, n2
       ! Cyclic distribution of ig2 planes over fft processors
       distribfft_arg%tab_fftwf2dg_distrib(i2) = modulo((i2-1),nproc_fft)
@@ -286,33 +286,33 @@ subroutine init_distribfft_seq(distribfft_arg,grid_type,n2,n3,type_four)
    distribfft_arg%n2_coarse = n2
    if (type_four=='fourwf'.or.type_four(1:3)=='all') then
      if (allocated(distribfft_arg%tab_fftwf2_distrib)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftwf2_distrib)
+       ABI_FREE(distribfft_arg%tab_fftwf2_distrib)
      end if
      if (allocated(distribfft_arg%tab_fftwf2_local)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftwf2_local)
+       ABI_FREE(distribfft_arg%tab_fftwf2_local)
      end if
-     ABI_ALLOCATE(distribfft_arg%tab_fftwf2_distrib,(n2))
-     ABI_ALLOCATE(distribfft_arg%tab_fftwf2_local,(n2))
+     ABI_MALLOC(distribfft_arg%tab_fftwf2_distrib,(n2))
+     ABI_MALLOC(distribfft_arg%tab_fftwf2_local,(n2))
      distribfft_arg%tab_fftwf2_distrib=0
      distribfft_arg%tab_fftwf2_local=(/(ii,ii=1,n2)/)
    end if
    if (type_four=='fourdp'.or.type_four(1:3)=='all') then
      if (allocated(distribfft_arg%tab_fftdp2_distrib)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftdp2_distrib)
+       ABI_FREE(distribfft_arg%tab_fftdp2_distrib)
      end if
      if (allocated(distribfft_arg%tab_fftdp2_local)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftdp2_local)
+       ABI_FREE(distribfft_arg%tab_fftdp2_local)
      end if
      if (allocated(distribfft_arg%tab_fftdp3_distrib)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftdp3_distrib)
+       ABI_FREE(distribfft_arg%tab_fftdp3_distrib)
      end if
      if (allocated(distribfft_arg%tab_fftdp3_local)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftdp3_local)
+       ABI_FREE(distribfft_arg%tab_fftdp3_local)
      end if
-     ABI_ALLOCATE(distribfft_arg%tab_fftdp2_distrib,(n2))
-     ABI_ALLOCATE(distribfft_arg%tab_fftdp2_local,(n2))
-     ABI_ALLOCATE(distribfft_arg%tab_fftdp3_distrib,(n3))
-     ABI_ALLOCATE(distribfft_arg%tab_fftdp3_local,(n3))
+     ABI_MALLOC(distribfft_arg%tab_fftdp2_distrib,(n2))
+     ABI_MALLOC(distribfft_arg%tab_fftdp2_local,(n2))
+     ABI_MALLOC(distribfft_arg%tab_fftdp3_distrib,(n3))
+     ABI_MALLOC(distribfft_arg%tab_fftdp3_local,(n3))
      distribfft_arg%tab_fftdp2_distrib=0
      distribfft_arg%tab_fftdp3_distrib=0
      distribfft_arg%tab_fftdp2_local=(/(ii,ii=1,n2)/)
@@ -323,33 +323,33 @@ subroutine init_distribfft_seq(distribfft_arg,grid_type,n2,n3,type_four)
    distribfft_arg%n2_fine = n2
    if (type_four=='fourwf'.or.type_four(1:3)=='all') then
      if (allocated(distribfft_arg%tab_fftwf2dg_distrib)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftwf2dg_distrib)
+       ABI_FREE(distribfft_arg%tab_fftwf2dg_distrib)
      end if
      if (allocated(distribfft_arg%tab_fftwf2dg_local)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftwf2dg_local)
+       ABI_FREE(distribfft_arg%tab_fftwf2dg_local)
      end if
-     ABI_ALLOCATE(distribfft_arg%tab_fftwf2dg_distrib,(n2))
-     ABI_ALLOCATE(distribfft_arg%tab_fftwf2dg_local,(n2))
+     ABI_MALLOC(distribfft_arg%tab_fftwf2dg_distrib,(n2))
+     ABI_MALLOC(distribfft_arg%tab_fftwf2dg_local,(n2))
      distribfft_arg%tab_fftwf2dg_distrib=0
      distribfft_arg%tab_fftwf2dg_local=(/(ii,ii=1,n2)/)
    end if
    if (type_four=='fourdp'.or.type_four(1:3)=='all') then
      if (allocated(distribfft_arg%tab_fftdp2dg_distrib)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftdp2dg_distrib)
+       ABI_FREE(distribfft_arg%tab_fftdp2dg_distrib)
      end if
      if (allocated(distribfft_arg%tab_fftdp2dg_local)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftdp2dg_local)
+       ABI_FREE(distribfft_arg%tab_fftdp2dg_local)
      end if
      if (allocated(distribfft_arg%tab_fftdp3dg_distrib)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftdp3dg_distrib)
+       ABI_FREE(distribfft_arg%tab_fftdp3dg_distrib)
      end if
      if (allocated(distribfft_arg%tab_fftdp3dg_local)) then
-       ABI_DEALLOCATE(distribfft_arg%tab_fftdp3dg_local)
+       ABI_FREE(distribfft_arg%tab_fftdp3dg_local)
      end if
-     ABI_ALLOCATE(distribfft_arg%tab_fftdp2dg_distrib,(n2))
-     ABI_ALLOCATE(distribfft_arg%tab_fftdp2dg_local,(n2))
-     ABI_ALLOCATE(distribfft_arg%tab_fftdp3dg_distrib,(n3))
-     ABI_ALLOCATE(distribfft_arg%tab_fftdp3dg_local,(n3))
+     ABI_MALLOC(distribfft_arg%tab_fftdp2dg_distrib,(n2))
+     ABI_MALLOC(distribfft_arg%tab_fftdp2dg_local,(n2))
+     ABI_MALLOC(distribfft_arg%tab_fftdp3dg_distrib,(n3))
+     ABI_MALLOC(distribfft_arg%tab_fftdp3dg_local,(n3))
      distribfft_arg%tab_fftdp2dg_distrib=0
      distribfft_arg%tab_fftdp3dg_distrib=0
      distribfft_arg%tab_fftdp2dg_local=(/(ii,ii=1,n2)/)
@@ -399,43 +399,43 @@ subroutine destroy_distribfft(distribfft_arg)
  distribfft_arg%n2_fine  =0
 
  if (allocated(distribfft_arg%tab_fftwf2_distrib)) then
-   ABI_DEALLOCATE(distribfft_arg%tab_fftwf2_distrib)
+   ABI_FREE(distribfft_arg%tab_fftwf2_distrib)
  end if
 
  if (allocated(distribfft_arg%tab_fftdp2_distrib)) then
-   ABI_DEALLOCATE(distribfft_arg%tab_fftdp2_distrib)
+   ABI_FREE(distribfft_arg%tab_fftdp2_distrib)
  end if
  if (allocated(distribfft_arg%tab_fftdp3_distrib)) then
-   ABI_DEALLOCATE(distribfft_arg%tab_fftdp3_distrib)
+   ABI_FREE(distribfft_arg%tab_fftdp3_distrib)
  end if
  if (allocated(distribfft_arg%tab_fftwf2dg_distrib)) then
-  ABI_DEALLOCATE(distribfft_arg%tab_fftwf2dg_distrib)
+  ABI_FREE(distribfft_arg%tab_fftwf2dg_distrib)
  end if
  if (allocated(distribfft_arg%tab_fftdp2dg_distrib)) then
-  ABI_DEALLOCATE(distribfft_arg%tab_fftdp2dg_distrib)
+  ABI_FREE(distribfft_arg%tab_fftdp2dg_distrib)
  end if
  if (allocated(distribfft_arg%tab_fftdp3dg_distrib)) then
-  ABI_DEALLOCATE(distribfft_arg%tab_fftdp3dg_distrib)
+  ABI_FREE(distribfft_arg%tab_fftdp3dg_distrib)
  end if
 
  if (allocated(distribfft_arg%tab_fftwf2_local)) then
-  ABI_DEALLOCATE(distribfft_arg%tab_fftwf2_local)
+  ABI_FREE(distribfft_arg%tab_fftwf2_local)
  end if
 
  if (allocated(distribfft_arg%tab_fftdp2_local)) then
-  ABI_DEALLOCATE(distribfft_arg%tab_fftdp2_local)
+  ABI_FREE(distribfft_arg%tab_fftdp2_local)
  end if
  if (allocated(distribfft_arg%tab_fftdp3_local)) then
-  ABI_DEALLOCATE(distribfft_arg%tab_fftdp3_local)
+  ABI_FREE(distribfft_arg%tab_fftdp3_local)
  end if
  if (allocated(distribfft_arg%tab_fftwf2dg_local)) then
-  ABI_DEALLOCATE(distribfft_arg%tab_fftwf2dg_local)
+  ABI_FREE(distribfft_arg%tab_fftwf2dg_local)
  end if
  if (allocated(distribfft_arg%tab_fftdp2dg_local)) then
-   ABI_DEALLOCATE(distribfft_arg%tab_fftdp2dg_local)
+   ABI_FREE(distribfft_arg%tab_fftdp2dg_local)
  end if
  if (allocated(distribfft_arg%tab_fftdp3dg_local)) then
-   ABI_DEALLOCATE(distribfft_arg%tab_fftdp3dg_local)
+   ABI_FREE(distribfft_arg%tab_fftdp3dg_local)
  end if
 
  DBG_EXIT("COLL")
@@ -477,62 +477,62 @@ subroutine copy_distribfft(distribfft_src, distribfft_dst)
  distribfft_dst%n2_fine  =  distribfft_src%n2_fine
 
  if (allocated(distribfft_src%tab_fftwf2_distrib)) then
-   ABI_ALLOCATE(distribfft_dst%tab_fftwf2_distrib,(size(distribfft_src%tab_fftwf2_distrib)))
+   ABI_MALLOC(distribfft_dst%tab_fftwf2_distrib,(size(distribfft_src%tab_fftwf2_distrib)))
    distribfft_dst%tab_fftwf2_distrib=distribfft_src%tab_fftwf2_distrib
  end if
 
  if (allocated(distribfft_src%tab_fftdp2_distrib)) then
-  ABI_ALLOCATE(distribfft_dst%tab_fftdp2_distrib,(size(distribfft_src%tab_fftdp2_distrib)))
+  ABI_MALLOC(distribfft_dst%tab_fftdp2_distrib,(size(distribfft_src%tab_fftdp2_distrib)))
   distribfft_dst%tab_fftdp2_distrib=distribfft_src%tab_fftdp2_distrib
  end if
 
  if (allocated(distribfft_src%tab_fftdp3_distrib)) then
-  ABI_ALLOCATE(distribfft_dst%tab_fftdp3_distrib,(size(distribfft_src%tab_fftdp3_distrib)))
+  ABI_MALLOC(distribfft_dst%tab_fftdp3_distrib,(size(distribfft_src%tab_fftdp3_distrib)))
   distribfft_dst%tab_fftdp3_distrib=distribfft_src%tab_fftdp3_distrib
  end if
 
  if (allocated(distribfft_src%tab_fftwf2dg_distrib)) then
-   ABI_ALLOCATE(distribfft_dst%tab_fftwf2dg_distrib,(size(distribfft_src%tab_fftwf2dg_distrib)))
+   ABI_MALLOC(distribfft_dst%tab_fftwf2dg_distrib,(size(distribfft_src%tab_fftwf2dg_distrib)))
    distribfft_dst%tab_fftwf2dg_distrib=distribfft_src%tab_fftwf2dg_distrib
  end if
 
  if (allocated(distribfft_src%tab_fftdp2dg_distrib)) then
-   ABI_ALLOCATE(distribfft_dst%tab_fftdp2dg_distrib,(size(distribfft_src%tab_fftdp2dg_distrib)))
+   ABI_MALLOC(distribfft_dst%tab_fftdp2dg_distrib,(size(distribfft_src%tab_fftdp2dg_distrib)))
    distribfft_dst%tab_fftdp2dg_distrib=distribfft_src%tab_fftdp2dg_distrib
  end if
 
  if (allocated(distribfft_src%tab_fftdp3dg_distrib)) then
-   ABI_ALLOCATE(distribfft_dst%tab_fftdp3dg_distrib,(size(distribfft_src%tab_fftdp3dg_distrib)))
+   ABI_MALLOC(distribfft_dst%tab_fftdp3dg_distrib,(size(distribfft_src%tab_fftdp3dg_distrib)))
    distribfft_dst%tab_fftdp3dg_distrib=distribfft_src%tab_fftdp3dg_distrib
  end if
 
  if (allocated(distribfft_src%tab_fftwf2_local)) then
-   ABI_ALLOCATE(distribfft_dst%tab_fftwf2_local,(size(distribfft_src%tab_fftwf2_local)))
+   ABI_MALLOC(distribfft_dst%tab_fftwf2_local,(size(distribfft_src%tab_fftwf2_local)))
    distribfft_dst%tab_fftwf2_local=distribfft_src%tab_fftwf2_local
  end if
 
  if (allocated(distribfft_src%tab_fftdp2_local)) then
-   ABI_ALLOCATE(distribfft_dst%tab_fftdp2_local,(size(distribfft_src%tab_fftdp2_local)))
+   ABI_MALLOC(distribfft_dst%tab_fftdp2_local,(size(distribfft_src%tab_fftdp2_local)))
    distribfft_dst%tab_fftdp2_local=distribfft_src%tab_fftdp2_local
  end if
 
  if (allocated(distribfft_src%tab_fftdp3_local)) then
-   ABI_ALLOCATE(distribfft_dst%tab_fftdp3_local,(size(distribfft_src%tab_fftdp3_local)))
+   ABI_MALLOC(distribfft_dst%tab_fftdp3_local,(size(distribfft_src%tab_fftdp3_local)))
    distribfft_dst%tab_fftdp3_local=distribfft_src%tab_fftdp3_local
  end if
 
  if (allocated(distribfft_src%tab_fftwf2dg_local)) then
-   ABI_ALLOCATE(distribfft_dst%tab_fftwf2dg_local,(size(distribfft_src%tab_fftwf2dg_local)))
+   ABI_MALLOC(distribfft_dst%tab_fftwf2dg_local,(size(distribfft_src%tab_fftwf2dg_local)))
    distribfft_dst%tab_fftwf2dg_local=distribfft_src%tab_fftwf2dg_local
  end if
 
  if (allocated(distribfft_src%tab_fftdp2dg_local)) then
-   ABI_ALLOCATE(distribfft_dst%tab_fftdp2dg_local,(size(distribfft_src%tab_fftdp2dg_local)))
+   ABI_MALLOC(distribfft_dst%tab_fftdp2dg_local,(size(distribfft_src%tab_fftdp2dg_local)))
    distribfft_dst%tab_fftdp2dg_local=distribfft_src%tab_fftdp2dg_local
  end if
 
  if (allocated(distribfft_src%tab_fftdp3dg_local)) then
-   ABI_ALLOCATE(distribfft_dst%tab_fftdp3dg_local,(size(distribfft_src%tab_fftdp3dg_local)))
+   ABI_MALLOC(distribfft_dst%tab_fftdp3dg_local,(size(distribfft_src%tab_fftdp3dg_local)))
    distribfft_dst%tab_fftdp3dg_local=distribfft_src%tab_fftdp3dg_local
  end if
 

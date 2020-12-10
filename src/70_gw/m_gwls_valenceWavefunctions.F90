@@ -96,9 +96,9 @@ implicit none
 
 
 ! old code, broken because fftpac isn't invertible !
-! ABI_ALLOCATE(valence_wfr_fftpac,(2,nfft,nbandv)) ! nfft is a public variable from the gwls_hamiltonian module
+! ABI_MALLOC(valence_wfr_fftpac,(2,nfft,nbandv)) ! nfft is a public variable from the gwls_hamiltonian module
 
-! ABI_ALLOCATE(psir,(2,n4,n5,n6))
+! ABI_MALLOC(psir,(2,n4,n5,n6))
 ! psir = zero
 ! do v=1,nbandv
 !        kmin = 1+(v-1)*npw_k
@@ -110,10 +110,10 @@ implicit none
 !       ! pack the real-space wavefunction in the purpose-made array
 !       call sg_to_dg(valence_wfr_fftpac(:,:,v), psir)
 ! end do
-! ABI_DEALLOCATE(psir)
+! ABI_FREE(psir)
 
 ! old code!
-!ABI_ALLOCATE(valence_wfr,(2,n4,n5,n6,nbandv))
+!ABI_MALLOC(valence_wfr,(2,n4,n5,n6,nbandv))
 !valence_wfr = zero
 
 !do v=1,nbandv
@@ -153,8 +153,8 @@ implicit none
 
 ! *************************************************************************
 
-!if (allocated(valence_wfr)) ABI_DEALLOCATE(valence_wfr)
-!if (allocated(valence_wfr_fftpac)) ABI_DEALLOCATE(valence_wfr_fftpac)
+!if (allocated(valence_wfr)) ABI_FREE(valence_wfr)
+!if (allocated(valence_wfr_fftpac)) ABI_FREE(valence_wfr_fftpac)
 
 end subroutine cleanupValenceWavefunctions
 !!***

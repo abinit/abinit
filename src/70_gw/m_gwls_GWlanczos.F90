@@ -108,11 +108,11 @@ integer  :: i, j, nsblk
 ! *************************************************************************
 
 ! Generate the seeds for the Lanczos algorithm
-ABI_ALLOCATE(psik_out,(2,npw_k))
-ABI_ALLOCATE(psikb_e,(2,npw_kb))
-ABI_ALLOCATE(psig_e,(2,npw_g))
-ABI_ALLOCATE(psikb_s,(2,npw_kb))
-ABI_ALLOCATE(psig_s,(2,npw_g))
+ABI_MALLOC(psik_out,(2,npw_k))
+ABI_MALLOC(psikb_e,(2,npw_kb))
+ABI_MALLOC(psig_e,(2,npw_g))
+ABI_MALLOC(psikb_s,(2,npw_kb))
+ABI_MALLOC(psig_s,(2,npw_g))
 
 nsblk = ceiling(1.0*nseeds/blocksize)
 
@@ -156,11 +156,11 @@ end if
 end do
 end do
 
-ABI_DEALLOCATE(psik_out)
-ABI_DEALLOCATE(psikb_e)
-ABI_DEALLOCATE(psig_e)
-ABI_DEALLOCATE(psikb_s)
-ABI_DEALLOCATE(psig_s)
+ABI_FREE(psik_out)
+ABI_FREE(psikb_e)
+ABI_FREE(psig_e)
+ABI_FREE(psikb_s)
+ABI_FREE(psig_s)
 
 end subroutine get_seeds
 !!***
@@ -272,7 +272,7 @@ call cpu_time(total_time1)
 
 
 ntime = 7
-ABI_ALLOCATE(list_time,(ntime))
+ABI_MALLOC(list_time,(ntime))
 list_time(:) = zero
 
 if(present(Qk)) then
@@ -280,9 +280,9 @@ if(present(Qk)) then
   lk    = dum(2)
 end if
 
-ABI_ALLOCATE( xk,  (Hsize,nseeds))
-ABI_ALLOCATE( xkm1,(Hsize,nseeds))
-ABI_ALLOCATE( rk  ,(Hsize,nseeds))
+ABI_MALLOC( xk,  (Hsize,nseeds))
+ABI_MALLOC( xkm1,(Hsize,nseeds))
+ABI_MALLOC( rk  ,(Hsize,nseeds))
 
 
 alpha = cmplx_0
@@ -454,16 +454,16 @@ end do !end loop on k
 ! overwrite the seeds with the last vector block.
 seeds(:,:) = xk(:,:)
 
-ABI_DEALLOCATE( xk  )
-ABI_DEALLOCATE( xkm1)
-ABI_DEALLOCATE( rk  )
+ABI_FREE( xk  )
+ABI_FREE( xkm1)
+ABI_FREE( rk  )
 call cpu_time(total_time2)
 
 list_time(7) = total_time2-total_time1
 
 call write_block_lanczos_timing_log(list_time,ntime)
 
-ABI_DEALLOCATE(list_time)
+ABI_FREE(list_time)
 
 end subroutine block_lanczos_algorithm
 !!***
@@ -544,8 +544,8 @@ character(50)  :: debug_filename
 kd   = nseeds
 ldab = kd + 1
 
-ABI_ALLOCATE(      band_storage_matrix, (ldab,nseeds*kmax))
-ABI_ALLOCATE(saved_band_storage_matrix, (ldab,nseeds*kmax))
+ABI_MALLOC(      band_storage_matrix, (ldab,nseeds*kmax))
+ABI_MALLOC(saved_band_storage_matrix, (ldab,nseeds*kmax))
 !---------------------------------------------------------
 ! Store banded matrix in banded format
 !---------------------------------------------------------
@@ -591,10 +591,10 @@ saved_band_storage_matrix(:,:) = band_storage_matrix(:,:)
 ! Diagonalize the banded matrix
 !-----------------------------------------
 
-ABI_ALLOCATE(eigenvectors, (nseeds*kmax,nseeds*kmax))
+ABI_MALLOC(eigenvectors, (nseeds*kmax,nseeds*kmax))
 
-ABI_ALLOCATE(work,(nseeds*kmax))
-ABI_ALLOCATE(rwork,(3*nseeds*kmax-2))
+ABI_MALLOC(work,(nseeds*kmax))
+ABI_MALLOC(rwork,(3*nseeds*kmax-2))
 
 call ZHBEV(                     'V',      & ! compute eigenvalues and eigenvectors
 'L',      & ! lower triangular part of matrix is stored in banded_matrix
@@ -646,7 +646,7 @@ end if
 ! Lbasis = matmul(Lbasis,eigenvectors)
 
 ! use temporary array, which is PROPERLY ALLOCATED, to perform matrix multiplication
-ABI_ALLOCATE(Lbasis_tmp, (Hsize,nseeds*kmax))
+ABI_MALLOC(Lbasis_tmp, (Hsize,nseeds*kmax))
 
 ! Compute C = A * B, where A = Lbasis, B = eigenvectors, and C = Lbasis_tmp
 call ZGEMM(     'N',     & ! leave array A as is
@@ -667,7 +667,7 @@ Hsize)       ! LDC
 Lbasis(:,:) = Lbasis_tmp(:,:)
 
 
-ABI_DEALLOCATE(Lbasis_tmp)
+ABI_FREE(Lbasis_tmp)
 
 if ( debug .and. mpi_enreg%me == 0)  then
   !----------------------------------------------------------------------------------
@@ -745,11 +745,11 @@ end if
 
 
 ! clean up memory
-ABI_DEALLOCATE(eigenvectors)
-ABI_DEALLOCATE( work)
-ABI_DEALLOCATE(rwork)
-ABI_DEALLOCATE(band_storage_matrix)
-ABI_DEALLOCATE(saved_band_storage_matrix)
+ABI_FREE(eigenvectors)
+ABI_FREE( work)
+ABI_FREE(rwork)
+ABI_FREE(band_storage_matrix)
+ABI_FREE(saved_band_storage_matrix)
 
 
 10 format(A)

@@ -107,14 +107,14 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
 !! Get diagonal occupations and associeted base
 
 ! Compute the optimal working array size
-  ABI_ALLOCATE(work,(1))
+  ABI_MALLOC(work,(1))
   work = czero
   call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, -1, rwork, info)
   lwork = int(work(1))
-  ABI_DEALLOCATE(work)
+  ABI_FREE(work)
 
 ! Compute the eigenvalues (occ_diag) and vectors
-  ABI_ALLOCATE(work,(lwork))
+  ABI_MALLOC(work,(lwork))
   work = czero
 
   call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, lwork, rwork, info)
@@ -122,7 +122,7 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
 !! obtain the true eigen values of occupation matrix in descending order
   occ_diag = -occ_diag
 
-  ABI_DEALLOCATE(work)
+  ABI_FREE(work)
 
   if (info > 0) then
     message=""

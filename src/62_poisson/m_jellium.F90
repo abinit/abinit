@@ -133,11 +133,11 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
  nfftot=n1*n2*n3
  cutoff=gsqcut*tolfix
 
- ABI_ALLOCATE(rhjg,(2,nfft))
- ABI_ALLOCATE(rhjr,(nfft))
+ ABI_MALLOC(rhjg,(2,nfft))
+ ABI_MALLOC(rhjr,(nfft))
  rhjg(:,:)=zero
  if(option==1) then
-   ABI_ALLOCATE(vjelg,(2,nfft))
+   ABI_MALLOC(vjelg,(2,nfft))
    vjelg(:,:)=zero
  end if
 
@@ -206,10 +206,10 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
    end do
  end if
 
- ABI_DEALLOCATE(rhjg)
- ABI_DEALLOCATE(rhjr)
+ ABI_FREE(rhjg)
+ ABI_FREE(rhjr)
  if(option==1) then
-   ABI_DEALLOCATE(vjelg)
+   ABI_FREE(vjelg)
  end if
 
 !DEBUG

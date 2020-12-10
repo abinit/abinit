@@ -275,7 +275,7 @@ subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
 !npwave=nint(ucvol*(2.0_dp*ecut)**1.5_dp/(6.0_dp*pi**2))
 !npwwrk=nint(dble(npwave)*scale)+pad
 
- ABI_ALLOCATE(kg,(3,100))
+ ABI_MALLOC(kg,(3,100))
 
 !set mpw to zero, as needed for only counting in kpgsph
  mpw = 0
@@ -292,7 +292,7 @@ subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
  write(msg,'(a,i0)') ' getmpw: optimal value of mpw= ',mpw
  call wrtout(std_out,msg)
 
- ABI_DEALLOCATE(kg)
+ ABI_FREE(kg)
 
 end subroutine getmpw
 !!***
@@ -680,7 +680,7 @@ subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d
    ABI_BUG(msg)
  end if
 
- ABI_ALLOCATE(ph1kxred,(2,-n1:n1))
+ ABI_MALLOC(ph1kxred,(2,-n1:n1))
 
  ! ia runs from iatom to jatom
  do ia=iatom,jatom
@@ -715,7 +715,7 @@ subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d
 !$OMP END PARALLEL DO
  end do
 
- ABI_DEALLOCATE(ph1kxred)
+ ABI_FREE(ph1kxred)
 
 end subroutine ph1d3d
 !!***
@@ -1086,13 +1086,13 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 
   ! Build basis sphere of plane waves for the k-point
   ! we avoid using the global kg data because of difficulties in parallel-ism
-  ABI_ALLOCATE(kg_k,(3,dtset%mpw))
+  ABI_MALLOC(kg_k,(3,dtset%mpw))
   kg_k(:,:) = 0
   kpt(:) = dtset%kptns(:,ikpti)
   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpt,1,mpi_enreg,dtset%mpw,npw_k)
 
   ! Build basis sphere of plane waves for the nearest neighbour of the k-point
-  ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
+  ABI_MALLOC(kg1_k,(3,dtset%mpw))
   kg1_k(:,:) = 0
   kpt1(:) = dtset%kptns(:,ikpt1i)
   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
@@ -1162,8 +1162,8 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
      end do
   end do
 
-  ABI_DEALLOCATE(kg_k)
-  ABI_DEALLOCATE(kg1_k)
+  ABI_FREE(kg_k)
+  ABI_FREE(kg1_k)
 
 end subroutine mkpwind_k
 !!***
@@ -1225,7 +1225,7 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
  end if
 
 !-- Compute (k+G) --
- ABI_ALLOCATE(kpg,(npw,nkpg))
+ ABI_MALLOC(kpg,(npw,nkpg))
 !$OMP PARALLEL DO COLLAPSE(2) &
 !$OMP PRIVATE(mu,ipw)
  do ipw=1,npw
@@ -1243,7 +1243,7 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
    kpgcar(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
  end do
 !$OMP END PARALLEL DO
- ABI_DEALLOCATE(kpg)
+ ABI_FREE(kpg)
 
  DBG_EXIT("COLL")
 

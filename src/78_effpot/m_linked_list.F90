@@ -232,8 +232,8 @@ module m_linked_list
     integer, allocatable, intent(inout)::ilist(:)
     real(dp),allocatable, intent(inout)::vallist(:)
     integer::ind=1
-    ABI_ALLOCATE(ilist,(self%length))
-    ABI_ALLOCATE(vallist, (self%length))
+    ABI_MALLOC(ilist,(self%length))
+    ABI_MALLOC(vallist, (self%length))
     call llist_iter_restart(self)
     do while(associated(self%iter))
        ilist(ind)=self%iter%i

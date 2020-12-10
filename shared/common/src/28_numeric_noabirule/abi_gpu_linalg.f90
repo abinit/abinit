@@ -438,10 +438,10 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
  if ( x_cplx == 1 ) then
    tr='t'
-   ABI_ALLOCATE(d_sqgram,(blocksize,blocksize))
+   ABI_MALLOC(d_sqgram,(blocksize,blocksize))
  else
    tr='c'
-   ABI_ALLOCATE(z_sqgram,(blocksize,blocksize))
+   ABI_MALLOC(z_sqgram,(blocksize,blocksize))
  end if
 
  call gpu_xgemm(x_cplx,tr,'n',blocksize,blocksize,vectsize, &
@@ -468,9 +468,9 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 &               blockvectorx_gpu,vectsize)
 
  if(x_cplx==1) then
-   ABI_DEALLOCATE(d_sqgram)
+   ABI_FREE(d_sqgram)
  else
-   ABI_DEALLOCATE(z_sqgram)
+   ABI_FREE(z_sqgram)
  end if
  if (present(tim_xortho).and.present(timopt)) then
    if(abs(timopt)==3) then

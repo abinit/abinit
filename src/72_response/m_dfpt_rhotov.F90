@@ -175,18 +175,18 @@ contains
  if (vhartr1_allocated) then
    vhartr1_ => vhartr1
  else
-   ABI_ALLOCATE(vhartr1_,(cplex*nfft))
+   ABI_MALLOC(vhartr1_,(cplex*nfft))
  end if
  vxc1_allocated=(size(vxc1)>0)
  if (vxc1_allocated) then
    vxc1_ => vxc1
  else
-   ABI_ALLOCATE(vxc1_,(cplex*nfft,nspden))
+   ABI_MALLOC(vxc1_,(cplex*nfft,nspden))
  end if
 
 !If needed, store pseudo density without charge compensation
  if (usepaw==1.and.usexcnhat==0) then
-   ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
+   ABI_MALLOC(rhor1_,(cplex*nfft,nspden))
    rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
  else
    rhor1_ => rhor1
@@ -194,7 +194,7 @@ contains
 
 
  if(ipert==natom+5)then
-   ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
+   ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
    call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  end if
 
@@ -208,7 +208,7 @@ contains
 
  if (optene>0) ehart01=zero
  if(ipert==natom+3 .or. ipert==natom+4) then
-   ABI_ALLOCATE(vhartr01,(cplex*nfft))
+   ABI_MALLOC(vhartr01,(cplex*nfft))
    call hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vhartr01)
    if (optene>0) then
      call dotprod_vn(cplex,rhor1,ehart01,doti,nfft,nfftot,1,1,vhartr01,ucvol)
@@ -218,7 +218,7 @@ contains
 !  Note that there is a factor 2.0_dp difference with the similar GS formula
    vhartr1_(:)=vhartr1_(:)+vhartr01(:)
 
-   ABI_DEALLOCATE(vhartr01)
+   ABI_FREE(vhartr01)
  end if
 
 !------ Compute 1st-order XC potential (and energy) ----------------------
@@ -256,11 +256,11 @@ contains
      end if
    else
      if (usexcnhat/=0) then
-       ABI_ALLOCATE(rhor1_nohat,(cplex*nfft,1))
+       ABI_MALLOC(rhor1_nohat,(cplex*nfft,1))
        rhor1_nohat(:,1)=rhor1(:,1)-nhat1(:,1)
        call dotprod_vn(cplex,rhor1      ,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
        call dotprod_vn(cplex,rhor1_nohat,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
-       ABI_DEALLOCATE(rhor1_nohat)
+       ABI_FREE(rhor1_nohat)
      else
        call dotprod_vn(cplex,rhor1_,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
        call dotprod_vn(cplex,rhor1_,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
@@ -274,7 +274,7 @@ contains
 
 !Compute XC valence contribution exc1 and complete eventually Vxc^(1)
  if (optene>0) then
-   ABI_ALLOCATE(vxc1val,(cplex*nfft,nspden))
+   ABI_MALLOC(vxc1val,(cplex*nfft,nspden))
    vxc1val=zero
    option=2
 !FR SPr EB non-collinear magnetism
@@ -289,11 +289,11 @@ contains
    end if !nspden==4
    vxc1_(:,:)=vxc1_(:,:)+vxc1val(:,:)
    call dotprod_vn(cplex,rhor1_,exc1,doti,nfft,nfftot,nspden,1,vxc1val,ucvol)
-   ABI_DEALLOCATE(vxc1val)
+   ABI_FREE(vxc1val)
  end if
 
  if (usepaw==1.and.usexcnhat==0) then
-   ABI_DEALLOCATE(rhor1_)
+   ABI_FREE(rhor1_)
  end if
 
 !DEBUG (do not take away)
@@ -365,14 +365,14 @@ contains
 
 !Release temporary memory space
  if (.not.vhartr1_allocated) then
-   ABI_DEALLOCATE(vhartr1_)
+   ABI_FREE(vhartr1_)
  end if
  if (.not.vxc1_allocated) then
-   ABI_DEALLOCATE(vxc1_)
+   ABI_FREE(vxc1_)
  end if
 
  if (ipert==natom+5) then
-   ABI_DEALLOCATE(v1zeeman)
+   ABI_FREE(v1zeeman)
  end if
 
  call timab(157,2,tsec)

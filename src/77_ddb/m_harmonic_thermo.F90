@@ -180,31 +180,31 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
  nwchan=anaddb_dtset%nwchan
  ngrids=anaddb_dtset%ngrids
 
- ABI_ALLOCATE(bbij,(6,natom,ntemper))
- ABI_ALLOCATE(bij,(6,natom,ntemper))
- ABI_ALLOCATE(vij,(6,natom,ntemper))
- ABI_ALLOCATE(energy,(ntemper))
- ABI_ALLOCATE(energy0,(ntemper))
- ABI_ALLOCATE(entropy,(ntemper))
- ABI_ALLOCATE(entropy0,(ntemper))
- ABI_ALLOCATE(free,(ntemper))
- ABI_ALLOCATE(free0,(ntemper))
+ ABI_MALLOC(bbij,(6,natom,ntemper))
+ ABI_MALLOC(bij,(6,natom,ntemper))
+ ABI_MALLOC(vij,(6,natom,ntemper))
+ ABI_MALLOC(energy,(ntemper))
+ ABI_MALLOC(energy0,(ntemper))
+ ABI_MALLOC(entropy,(ntemper))
+ ABI_MALLOC(entropy0,(ntemper))
+ ABI_MALLOC(free,(ntemper))
+ ABI_MALLOC(free0,(ntemper))
 !Doubling the size (nchan) of gg_sum is needed, because the maximum sum frequency is the double
 !the for maximum frequency. However, for the write statement, it is better to double
 !also the size of the other arrays ...
- ABI_ALLOCATE(gdos,(2*nchan,nwchan))
- ABI_ALLOCATE(gg,(2*nchan,nwchan))
- ABI_ALLOCATE(gg_sum,(2*nchan,nwchan))
- ABI_ALLOCATE(gg_rest,(2*nchan,nwchan))
- ABI_ALLOCATE(ggij,(6,natom,nchan,nwchan))
- ABI_ALLOCATE(gij,(6,natom,nchan,nwchan))
- ABI_ALLOCATE(nchan2,(nwchan))
- ABI_ALLOCATE(spheat,(ntemper))
- ABI_ALLOCATE(spheat0,(ntemper))
- ABI_ALLOCATE(wgcnv,(nwchan))
- ABI_ALLOCATE(wgijcnv,(nwchan))
- ABI_ALLOCATE(wme,(ntemper))
- ABI_ALLOCATE(gw,(nchan,nwchan))
+ ABI_MALLOC(gdos,(2*nchan,nwchan))
+ ABI_MALLOC(gg,(2*nchan,nwchan))
+ ABI_MALLOC(gg_sum,(2*nchan,nwchan))
+ ABI_MALLOC(gg_rest,(2*nchan,nwchan))
+ ABI_MALLOC(ggij,(6,natom,nchan,nwchan))
+ ABI_MALLOC(gij,(6,natom,nchan,nwchan))
+ ABI_MALLOC(nchan2,(nwchan))
+ ABI_MALLOC(spheat,(ntemper))
+ ABI_MALLOC(spheat0,(ntemper))
+ ABI_MALLOC(wgcnv,(nwchan))
+ ABI_MALLOC(wgijcnv,(nwchan))
+ ABI_MALLOC(wme,(ntemper))
+ ABI_MALLOC(gw,(nchan,nwchan))
 
 
 !initialize ii and jj arrays
@@ -253,8 +253,8 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
    igqpt2(:)=max((anaddb_dtset%ng2qpt(:)*igrid)/ngrids, 1)
    mqpt2=(igqpt2(1)*igqpt2(2)*igqpt2(3))/facbrv
-   ABI_ALLOCATE(qpt2,(3,mqpt2))
-   ABI_ALLOCATE(spqpt2,(3,mqpt2))
+   ABI_MALLOC(qpt2,(3,mqpt2))
+   ABI_MALLOC(spqpt2,(3,mqpt2))
 
    option=1
    qptrlatt(:,:)=0
@@ -263,10 +263,10 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
    qptrlatt(3,3)=igqpt2(3)
    call smpbz(anaddb_dtset%brav,iout,qptrlatt,mqpt2,nspqpt,1,option,anaddb_dtset%q2shft,spqpt2)
 
-   ABI_ALLOCATE(indqpt1,(nspqpt))
-   ABI_ALLOCATE(wtq,(nspqpt))
-   ABI_ALLOCATE(wtq_folded,(nspqpt))
-   ABI_ALLOCATE(bz2ibz_smap,(6, nspqpt))
+   ABI_MALLOC(indqpt1,(nspqpt))
+   ABI_MALLOC(wtq,(nspqpt))
+   ABI_MALLOC(wtq_folded,(nspqpt))
+   ABI_MALLOC(bz2ibz_smap,(6, nspqpt))
 
 !  Reduce the number of such points by symmetrization
    wtq(:)=1.0_dp
@@ -275,15 +275,15 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
    call symkpt(0,Crystal%gmet,indqpt1,ab_out,spqpt2,nspqpt,nqpt2,Crystal%nsym,symrec,timrev,wtq,wtq_folded, &
      bz2ibz_smap, xmpi_comm_self)
 
-   ABI_DEALLOCATE(bz2ibz_smap)
+   ABI_FREE(bz2ibz_smap)
 
-   ABI_ALLOCATE(wtq2,(nqpt2))
+   ABI_MALLOC(wtq2,(nqpt2))
    do iqpt2=1,nqpt2
      wtq2(iqpt2)=wtq_folded(indqpt1(iqpt2))
      qpt2(:,iqpt2)=spqpt2(:,indqpt1(iqpt2))
      !write(std_out,*)' harmonic_thermo : iqpt2, wtq2 :',iqpt2,wtq2(iqpt2)
    end do
-   ABI_DEALLOCATE(wtq_folded)
+   ABI_FREE(wtq_folded)
 
 !  Temporary counters are put zero.
 
@@ -539,7 +539,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
          nomega = nchan2(iwchan)
          dosinc=dble(iwchan)
 
-         ABI_ALLOCATE(phon_dos,(nomega))
+         ABI_MALLOC(phon_dos,(nomega))
          phon_dos = gdos(1:nomega,iwchan)
 
 !Put zeroes for F, E, S, Cv
@@ -580,7 +580,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
            if (abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
          end do ! itemper
-         ABI_DEALLOCATE(phon_dos)
+         ABI_FREE(phon_dos)
 
 !        Check if the thermodynamic functions change within tolerance,
          if (ngrids>1) then
@@ -937,51 +937,51 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
    if(part1.and.part2)exit
 
-   ABI_DEALLOCATE(indqpt1)
-   ABI_DEALLOCATE(qpt2)
-   ABI_DEALLOCATE(spqpt2)
-   ABI_DEALLOCATE(wtq)
-   ABI_DEALLOCATE(wtq2)
+   ABI_FREE(indqpt1)
+   ABI_FREE(qpt2)
+   ABI_FREE(spqpt2)
+   ABI_FREE(wtq)
+   ABI_FREE(wtq2)
 
  end do ! End of the Loop on the q point grids
 
- ABI_DEALLOCATE(bbij)
- ABI_DEALLOCATE(bij)
- ABI_DEALLOCATE(energy)
- ABI_DEALLOCATE(energy0)
- ABI_DEALLOCATE(entropy)
- ABI_DEALLOCATE(entropy0)
- ABI_DEALLOCATE(free)
- ABI_DEALLOCATE(free0)
- ABI_DEALLOCATE(gdos)
- ABI_DEALLOCATE(gg)
- ABI_DEALLOCATE(gg_sum)
- ABI_DEALLOCATE(gg_rest)
- ABI_DEALLOCATE(ggij)
- ABI_DEALLOCATE(gij)
- ABI_DEALLOCATE(nchan2)
- ABI_DEALLOCATE(spheat)
- ABI_DEALLOCATE(spheat0)
- ABI_DEALLOCATE(vij)
- ABI_DEALLOCATE(wgcnv)
- ABI_DEALLOCATE(wgijcnv)
+ ABI_FREE(bbij)
+ ABI_FREE(bij)
+ ABI_FREE(energy)
+ ABI_FREE(energy0)
+ ABI_FREE(entropy)
+ ABI_FREE(entropy0)
+ ABI_FREE(free)
+ ABI_FREE(free0)
+ ABI_FREE(gdos)
+ ABI_FREE(gg)
+ ABI_FREE(gg_sum)
+ ABI_FREE(gg_rest)
+ ABI_FREE(ggij)
+ ABI_FREE(gij)
+ ABI_FREE(nchan2)
+ ABI_FREE(spheat)
+ ABI_FREE(spheat0)
+ ABI_FREE(vij)
+ ABI_FREE(wgcnv)
+ ABI_FREE(wgijcnv)
  if(allocated(indqpt1)) then
-   ABI_DEALLOCATE(indqpt1)
+   ABI_FREE(indqpt1)
  end if
  if(allocated(qpt2)) then
-   ABI_DEALLOCATE(qpt2)
+   ABI_FREE(qpt2)
  end if
  if(allocated(spqpt2)) then
-   ABI_DEALLOCATE(spqpt2)
+   ABI_FREE(spqpt2)
  end if
  if(allocated(wtq)) then
-   ABI_DEALLOCATE(wtq)
+   ABI_FREE(wtq)
  end if
  if(allocated(wtq2)) then
-   ABI_DEALLOCATE(wtq2)
+   ABI_FREE(wtq2)
  end if
- ABI_DEALLOCATE(gw)
- ABI_DEALLOCATE(wme)
+ ABI_FREE(gw)
+ ABI_FREE(wme)
 
  if(.not.part1)then
    write(msg, '(a,a,a,a,a,a,a,a,a)' )&

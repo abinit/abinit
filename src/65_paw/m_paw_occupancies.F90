@@ -193,18 +193,18 @@ CONTAINS  !=====================================================================
  end if
 
 !Allocate temporary cwaveprj storage
- ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,nspinor))
+ ABI_MALLOC(cwaveprj,(natom,nspinor))
  call pawcprj_alloc(cwaveprj,0,dimcprj)
  if(paw_dmft%use_sc_dmft/=0) then
-   ABI_DATATYPE_ALLOCATE(cwaveprjb,(natom,nspinor))
+   ABI_MALLOC(cwaveprjb,(natom,nspinor))
    call pawcprj_alloc(cwaveprjb,0,dimcprj)
  end if
 
  if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) then
    if(paw_dmft%use_bandc(mpi_enreg%me_band+1)) then
      n2buff = nspinor*sum(dimcprj)
-     ABI_ALLOCATE(buffer_cprj_correl,(2,n2buff,nbandc1))
-     ABI_ALLOCATE(req_correl,(nbandc1, nkpt, nsppol))
+     ABI_MALLOC(buffer_cprj_correl,(2,n2buff,nbandc1))
+     ABI_MALLOC(req_correl,(nbandc1, nkpt, nsppol))
      req_correl(:,:,:) = 0
    end if
  end if
@@ -217,7 +217,7 @@ CONTAINS  !=====================================================================
 
 !If pawrhoij is MPI-distributed over atomic sites, gather it
  if (paral_atom) then
-   ABI_DATATYPE_ALLOCATE(pawrhoij_all,(natom))
+   ABI_MALLOC(pawrhoij_all,(natom))
  else
    pawrhoij_all => pawrhoij
  end if
@@ -245,8 +245,8 @@ CONTAINS  !=====================================================================
 !    In case of spinors parallelism, need some extra storage
      if (mpi_enreg%paral_spinor==1) then
        nband_k_cprj_used=min(max_nband_cprj,nband_k_cprj)
-       ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,my_nspinor*nband_k_cprj_used))
-       ABI_DATATYPE_ALLOCATE(cprj_ptr,(natom,   nspinor*nband_k_cprj_used))
+       ABI_MALLOC(cprj_tmp,(natom,my_nspinor*nband_k_cprj_used))
+       ABI_MALLOC(cprj_ptr,(natom,   nspinor*nband_k_cprj_used))
        call pawcprj_alloc(cprj_tmp,0,dimcprj)
        call pawcprj_alloc(cprj_ptr,0,dimcprj)
      else
@@ -437,8 +437,8 @@ CONTAINS  !=====================================================================
      if (mpi_enreg%paral_spinor==1) then
        call pawcprj_free(cprj_tmp)
        call pawcprj_free(cprj_ptr)
-       ABI_DATATYPE_DEALLOCATE(cprj_tmp)
-       ABI_DATATYPE_DEALLOCATE(cprj_ptr)
+       ABI_FREE(cprj_tmp)
+       ABI_FREE(cprj_ptr)
      else
        nullify(cprj_ptr)
      end if
@@ -459,16 +459,16 @@ CONTAINS  !=====================================================================
 
 !deallocate temporary cwaveprj/cprj storage
  call pawcprj_free(cwaveprj)
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
+ ABI_FREE(cwaveprj)
 
  if(paw_dmft%use_sc_dmft/=0) then
    call pawcprj_free(cwaveprjb)
-   ABI_DATATYPE_DEALLOCATE(cwaveprjb)
+   ABI_FREE(cwaveprjb)
  end if
 
  if (allocated(buffer_cprj_correl)) then
-   ABI_DEALLOCATE(buffer_cprj_correl)
-   ABI_DEALLOCATE(req_correl)
+   ABI_FREE(buffer_cprj_correl)
+   ABI_FREE(req_correl)
  end if
 
 !MPI: need to exchange rhoij_ between procs
@@ -485,7 +485,7 @@ CONTAINS  !=====================================================================
      pawrhoij(iatom)%rhoij_(:,:)=pawrhoij_all(iatom_tot)%rhoij_(:,:)
    end do
    call pawrhoij_free(pawrhoij_all)
-   ABI_DATATYPE_DEALLOCATE(pawrhoij_all)
+   ABI_FREE(pawrhoij_all)
  end if
 
  DBG_EXIT("COLL")
@@ -1227,11 +1227,11 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
    iatom=iatom_rhoij;if (paral_atom) iatom=my_atmtab(iatom_rhoij)
    itypat=typat(iatom)
    nselect=0
-   ABI_ALLOCATE(lnspinat,(pawtab(itypat)%basis_size))
+   ABI_MALLOC(lnspinat,(pawtab(itypat)%basis_size))
    lnspinat=-1
 ! Determine occupancies of each orbital
    if (nspden_rhoij==2) then
-     ABI_ALLOCATE(occ,(pawtab(itypat)%basis_size))
+     ABI_MALLOC(occ,(pawtab(itypat)%basis_size))
      occ=zero
      do jlmn=1,pawtab(itypat)%lmn_size
        ln=pawtab(itypat)%indlmn(5,jlmn)
@@ -1244,7 +1244,7 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
        if(pawtab(itypat)%orbitals(ln)==2.and.(occ(ln)>=1.and.occ(ln)<=9)) lnspinat(ln)=ln
        if(pawtab(itypat)%orbitals(ln)==3.and.(occ(ln)>=1.and.occ(ln)<=13)) lnspinat(ln)=ln
      end do
-     ABI_DEALLOCATE(occ)
+     ABI_FREE(occ)
    end if
    lnspinat0=maxval(lnspinat)
    lnspinat0=-1
@@ -1337,7 +1337,7 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
 !   if (pawrhoij(iatom_rhoij)%nspden==4.and.spinat_zero) then
 !     pawrhoij(iatom_rhoij)%rhoijp(:,4)=pawrhoij(iatom_rhoij)%rhoijp(:,4)+tol10
 !   end if
-   ABI_DEALLOCATE(lnspinat)
+   ABI_FREE(lnspinat)
  end do ! iatom_rhoij
 
 !Destroy atom table used for parallelism

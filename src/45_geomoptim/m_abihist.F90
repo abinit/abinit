@@ -205,17 +205,17 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  hist%isARused=isARUsed
 
 !Allocate all the histories
- ABI_ALLOCATE(hist%acell,(3,mxhist))
- ABI_ALLOCATE(hist%rprimd,(3,3,mxhist))
- ABI_ALLOCATE(hist%xred,(3,natom,mxhist))
- ABI_ALLOCATE(hist%fcart,(3,natom,mxhist))
- ABI_ALLOCATE(hist%strten,(6,mxhist))
- ABI_ALLOCATE(hist%vel,(3,natom,mxhist))
- ABI_ALLOCATE(hist%vel_cell,(3,3,mxhist))
- ABI_ALLOCATE(hist%etot,(mxhist))
- ABI_ALLOCATE(hist%ekin,(mxhist))
- ABI_ALLOCATE(hist%entropy,(mxhist))
- ABI_ALLOCATE(hist%time,(mxhist))
+ ABI_MALLOC(hist%acell,(3,mxhist))
+ ABI_MALLOC(hist%rprimd,(3,3,mxhist))
+ ABI_MALLOC(hist%xred,(3,natom,mxhist))
+ ABI_MALLOC(hist%fcart,(3,natom,mxhist))
+ ABI_MALLOC(hist%strten,(6,mxhist))
+ ABI_MALLOC(hist%vel,(3,natom,mxhist))
+ ABI_MALLOC(hist%vel_cell,(3,3,mxhist))
+ ABI_MALLOC(hist%etot,(mxhist))
+ ABI_MALLOC(hist%ekin,(mxhist))
+ ABI_MALLOC(hist%entropy,(mxhist))
+ ABI_MALLOC(hist%time,(mxhist))
 
  hist%etot(1)=zero
  hist%ekin(1)=zero
@@ -401,7 +401,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
  rank=xmpi_comm_rank(comm)
 
 !=== Broadcast integers and logicals
- ABI_ALLOCATE(buffer_i,(4))
+ ABI_MALLOC(buffer_i,(4))
  if (rank==master) then
    buffer_i(1)=hist%ihist
    buffer_i(2)=hist%mxhist
@@ -415,13 +415,13 @@ subroutine abihist_bcast_0D(hist,master,comm)
    hist%isVused  =(buffer_i(3)==1)
    hist%isARused =(buffer_i(4)==1)
  end if
- ABI_DEALLOCATE(buffer_i)
+ ABI_FREE(buffer_i)
 
 !If history is empty, return
  if (hist%mxhist==0.or.hist%ihist==0) return
 
 !=== Broadcast sizes of arrays
- ABI_ALLOCATE(buffer_i,(23))
+ ABI_MALLOC(buffer_i,(23))
  if (rank==master) then
    sizeA1=size(hist%acell,1);sizeA2=size(hist%acell,2)
    sizeEt=size(hist%etot,1);sizeEk=size(hist%ekin,1);
@@ -461,14 +461,14 @@ subroutine abihist_bcast_0D(hist,master,comm)
    sizeF1 =buffer_i(21);sizeF2 =buffer_i(22)
    sizeF3 =buffer_i(23)
  end if
- ABI_DEALLOCATE(buffer_i)
+ ABI_FREE(buffer_i)
 
 !=== Broadcast reals
  sizeA=sizeA1*sizeA2;sizeR=sizeR1*sizeR2*sizeR3;sizeS=sizeS1*sizeS2
  sizeV=sizeV1*sizeV2*sizeV3;sizeVc=sizeVc1*sizeVc2*sizeVc3;
  sizeX=sizeX1*sizeX2*sizeX3;sizeF=sizeF1*sizeF2*sizeF3
  bufsize=sizeA+sizeEt+sizeEk+sizeEnt+sizeT+sizeR+sizeS+sizeV+sizeVc+sizeX+sizeF
- ABI_ALLOCATE(buffer_r,(bufsize))
+ ABI_MALLOC(buffer_r,(bufsize))
  if (rank==master) then
    indx=0
    buffer_r(indx+1:indx+sizeA)=reshape(hist%acell(1:sizeA1,1:sizeA2),(/sizeA/))
@@ -494,17 +494,17 @@ subroutine abihist_bcast_0D(hist,master,comm)
    buffer_r(indx+1:indx+sizeF)=reshape(hist%fcart(1:sizeF1,1:sizeF2,1:sizeF3),(/sizeF/))
  else
    call abihist_free(hist)
-   ABI_ALLOCATE(hist%acell,(sizeA1,sizeA2))
-   ABI_ALLOCATE(hist%etot,(sizeEt))
-   ABI_ALLOCATE(hist%ekin,(sizeEk))
-   ABI_ALLOCATE(hist%entropy,(sizeEnt))
-   ABI_ALLOCATE(hist%time,(sizeT))
-   ABI_ALLOCATE(hist%rprimd,(sizeR1,sizeR2,sizeR3))
-   ABI_ALLOCATE(hist%strten,(sizeS1,sizeS2))
-   ABI_ALLOCATE(hist%vel,(sizeV1,sizeV2,sizeV3))
-   ABI_ALLOCATE(hist%vel_cell,(sizeVc1,sizeVc2,sizeVc3))
-   ABI_ALLOCATE(hist%xred,(sizeX1,sizeX2,sizeX3))
-   ABI_ALLOCATE(hist%fcart,(sizeF1,sizeF2,sizeF3))
+   ABI_MALLOC(hist%acell,(sizeA1,sizeA2))
+   ABI_MALLOC(hist%etot,(sizeEt))
+   ABI_MALLOC(hist%ekin,(sizeEk))
+   ABI_MALLOC(hist%entropy,(sizeEnt))
+   ABI_MALLOC(hist%time,(sizeT))
+   ABI_MALLOC(hist%rprimd,(sizeR1,sizeR2,sizeR3))
+   ABI_MALLOC(hist%strten,(sizeS1,sizeS2))
+   ABI_MALLOC(hist%vel,(sizeV1,sizeV2,sizeV3))
+   ABI_MALLOC(hist%vel_cell,(sizeVc1,sizeVc2,sizeVc3))
+   ABI_MALLOC(hist%xred,(sizeX1,sizeX2,sizeX3))
+   ABI_MALLOC(hist%fcart,(sizeF1,sizeF2,sizeF3))
  end if
  call xmpi_bcast(buffer_r,master,comm,ierr)
 
@@ -539,7 +539,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
    hist%fcart(1:sizeF1,1:sizeF2,1:sizeF3)=reshape(buffer_r(indx+1:indx+sizeF), &
 &                                                (/sizeF1,sizeF2,sizeF3/))
  end if
- ABI_DEALLOCATE(buffer_r)
+ ABI_FREE(buffer_r)
 
 end subroutine abihist_bcast_0D
 !!***
@@ -1260,7 +1260,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
  my_comm_img=xmpi_comm_self;if(present(comm_img)) my_comm_img=comm_img
  nproc_img=xmpi_comm_size(my_comm_img)
  me_img=xmpi_comm_rank(my_comm_img)
- ABI_ALLOCATE(my_imgtab,(my_nimage))
+ ABI_MALLOC(my_imgtab,(my_nimage))
  if (present(imgtab)) then
   if (size(my_imgtab)/=my_nimage) then
     ABI_BUG('Inconsistency between hist and imgtab!')
@@ -1314,7 +1314,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
 !    ##### Close the file
      ncerr = nf90_close(ncid)
      NCF_CHECK_MSG(ncerr," close netcdf history file")
-     ABI_DEALLOCATE(my_imgtab)
+     ABI_FREE(my_imgtab)
 
 !  End loop on MPI processes
    end if
@@ -1491,7 +1491,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
  !Manage multiple images of the cell
  my_nimage=size(hist)
  if (my_nimage==0) return
- ABI_ALLOCATE(my_imgtab,(my_nimage))
+ ABI_MALLOC(my_imgtab,(my_nimage))
  if (present(imgtab)) then
   if (size(my_imgtab)/=my_nimage) then
     ABI_BUG('Inconsistency between hist and imgtab!')
@@ -1532,7 +1532,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
  ncerr = nf90_close(ncid)
  NCF_CHECK_MSG(ncerr," close netcdf history file")
 
- ABI_DEALLOCATE(my_imgtab)
+ ABI_FREE(my_imgtab)
 
 #endif
 
@@ -2129,7 +2129,7 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
 
 !Variables depending on images
 
- ABI_ALLOCATE(conv,(3,natom))
+ ABI_MALLOC(conv,(3,natom))
 
 !xcart,xred,fcart,fred,vel
  if (has_nimage) then
@@ -2162,7 +2162,7 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
    NCF_CHECK_MSG(ncerr," write variable vel")
  end if
 
- ABI_DEALLOCATE(conv)
+ ABI_FREE(conv)
 
 !rprimd,vel_cell
  if (has_nimage) then

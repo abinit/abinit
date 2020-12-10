@@ -619,9 +619,9 @@ contains
 
 !Initialize output arrays
  if (signs==1) then
-   ABI_ALLOCATE(fnlk,(3*natom))
-   ABI_ALLOCATE(ddkk,(6))
-   ABI_ALLOCATE(strnlk,(6))
+   ABI_MALLOC(fnlk,(3*natom))
+   ABI_MALLOC(ddkk,(6))
+   ABI_MALLOC(strnlk,(6))
    enlk=zero;fnlk=zero;ddkk=zero;strnlk=zero
    enlout(:)=zero
  end if
@@ -644,7 +644,7 @@ contains
    if (choice==55) nkpgin_=3
  end if
  if (nkpgin<nkpgin_) then
-   ABI_ALLOCATE(kpgin_,(npwin,nkpgin_))
+   ABI_MALLOC(kpgin_,(npwin,nkpgin_))
 
    !For the metric derivatives we need kpg in Cartesian coordinates
    if (choice==33) then
@@ -661,7 +661,7 @@ contains
  nkpgout_=0
  if ((choice==2.or.choice==22.or.choice==25.or.choice==3.or.choice==33.or.choice==54).and.signs==2) nkpgout_=3
  if (nkpgout<nkpgout_) then
-   ABI_ALLOCATE(kpgout_,(npwout,nkpgout_))
+   ABI_MALLOC(kpgout_,(npwout,nkpgout_))
 
    !For the metric derivatives we need kpg in Cartesian coordinates
    if (choice==33) then
@@ -701,7 +701,7 @@ contains
        ffnlout_typ => ffnlout(:,:,:,itypat)
      end if
      if (paw_opt>=2) then
-       ABI_ALLOCATE(sij_typ,(nlmn*(nlmn+1)/2))
+       ABI_MALLOC(sij_typ,(nlmn*(nlmn+1)/2))
        if (cplex_enl==1) then
          do ilmn=1,nlmn*(nlmn+1)/2
            sij_typ(ilmn)=sij(ilmn,itypat)
@@ -712,7 +712,7 @@ contains
          end do
        end if
      else
-       ABI_ALLOCATE(sij_typ,(0))
+       ABI_MALLOC(sij_typ,(0))
      end if
 
 !    Loop over atoms of the same type
@@ -733,35 +733,35 @@ contains
        end if
 
 !      Allocate memory for projected scalars
-       ABI_ALLOCATE(gx,(cplex,nlmn,nincat,nspinor))
-       ABI_ALLOCATE(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor))
-       ABI_ALLOCATE(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor))
-       ABI_ALLOCATE(d2gxdtfac,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor))
-       ABI_ALLOCATE(dgxdtfac,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor))
-       ABI_ALLOCATE(gxfac,(cplex_fac,nlmn,nincat,nspinor))
+       ABI_MALLOC(gx,(cplex,nlmn,nincat,nspinor))
+       ABI_MALLOC(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor))
+       ABI_MALLOC(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor))
+       ABI_MALLOC(d2gxdtfac,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor))
+       ABI_MALLOC(dgxdtfac,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor))
+       ABI_MALLOC(gxfac,(cplex_fac,nlmn,nincat,nspinor))
        gx(:,:,:,:)=zero;gxfac(:,:,:,:)=zero
        if (ndgxdt>0) dgxdt(:,:,:,:,:)=zero
        if (ndgxdtfac>0) dgxdtfac(:,:,:,:,:)=zero
        if (nd2gxdt>0) d2gxdt(:,:,:,:,:)=zero
        if (nd2gxdtfac>0) d2gxdtfac(:,:,:,:,:)=zero
        if (paw_opt>=3) then
-         ABI_ALLOCATE(gxfac_sij,(cplex,nlmn,nincat,nspinor))
-         ABI_ALLOCATE(dgxdtfac_sij,(cplex,ndgxdtfac,nlmn,nincat,nspinor))
-         ABI_ALLOCATE(d2gxdtfac_sij,(cplex,nd2gxdtfac,nlmn,nincat,nspinor))
+         ABI_MALLOC(gxfac_sij,(cplex,nlmn,nincat,nspinor))
+         ABI_MALLOC(dgxdtfac_sij,(cplex,ndgxdtfac,nlmn,nincat,nspinor))
+         ABI_MALLOC(d2gxdtfac_sij,(cplex,nd2gxdtfac,nlmn,nincat,nspinor))
          gxfac_sij(:,:,:,:)=zero
          if (ndgxdtfac>0) dgxdtfac_sij(:,:,:,:,:)=zero
          if (nd2gxdtfac>0) d2gxdtfac_sij(:,:,:,:,:) = zero
        else
-         ABI_ALLOCATE(gxfac_sij,(0,0,0,0))
-         ABI_ALLOCATE(dgxdtfac_sij,(0,0,0,0,0))
-         ABI_ALLOCATE(d2gxdtfac_sij,(0,0,0,0,0))
+         ABI_MALLOC(gxfac_sij,(0,0,0,0))
+         ABI_MALLOC(dgxdtfac_sij,(0,0,0,0,0))
+         ABI_MALLOC(d2gxdtfac_sij,(0,0,0,0,0))
        end if
 
 !      When istwf_k > 1, gx derivatives can be real or pure imaginary
 !      cplex_dgxdt(i)  = 1 if dgxdt(1,i,:,:)  is real, 2 if it is pure imaginary
 !      cplex_d2gxdt(i) = 1 if d2gxdt(1,i,:,:) is real, 2 if it is pure imaginary
-       ABI_ALLOCATE(cplex_dgxdt,(ndgxdt))
-       ABI_ALLOCATE(cplex_d2gxdt,(nd2gxdt))
+       ABI_MALLOC(cplex_dgxdt,(ndgxdt))
+       ABI_MALLOC(cplex_d2gxdt,(nd2gxdt))
        cplex_dgxdt(:) = 1 ; cplex_d2gxdt(:) = 1
        if(ndgxdt > 0) then
          if (choice==5.or.choice==51.or.choice==52.or.choice==53.or. &
@@ -909,7 +909,7 @@ contains
 &             enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
 &             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
            else
-             ABI_ALLOCATE(gx_left,(cplex,nlmn,nincat,nspinor))
+             ABI_MALLOC(gx_left,(cplex,nlmn,nincat,nspinor))
 !            Retrieve <p_lmn|c> coeffs
              do ispinor=1,nspinor
                do ia=1,nincat
@@ -927,7 +927,7 @@ contains
              call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &             enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
 &             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
-             ABI_DEALLOCATE(gx_left)
+             ABI_FREE(gx_left)
            end if
          end if
 
@@ -948,23 +948,23 @@ contains
        end if ! choice==0
 
 !      Deallocate temporary projected scalars
-       ABI_DEALLOCATE(gx)
-       ABI_DEALLOCATE(gxfac)
-       ABI_DEALLOCATE(dgxdt)
-       ABI_DEALLOCATE(dgxdtfac)
-       ABI_DEALLOCATE(d2gxdt)
-       ABI_DEALLOCATE(d2gxdtfac)
-       ABI_DEALLOCATE(dgxdtfac_sij)
-       ABI_DEALLOCATE(d2gxdtfac_sij)
-       ABI_DEALLOCATE(gxfac_sij)
-       ABI_DEALLOCATE(cplex_dgxdt)
-       ABI_DEALLOCATE(cplex_d2gxdt)
+       ABI_FREE(gx)
+       ABI_FREE(gxfac)
+       ABI_FREE(dgxdt)
+       ABI_FREE(dgxdtfac)
+       ABI_FREE(d2gxdt)
+       ABI_FREE(d2gxdtfac)
+       ABI_FREE(dgxdtfac_sij)
+       ABI_FREE(d2gxdtfac_sij)
+       ABI_FREE(gxfac_sij)
+       ABI_FREE(cplex_dgxdt)
+       ABI_FREE(cplex_d2gxdt)
 
 !      End sum on atom subset loop
        iatm=iatm+nincat;ia5=ia5+nincat
      end do
      !if (paw_opt>=2)  then
-     ABI_DEALLOCATE(sij_typ)
+     ABI_FREE(sij_typ)
      !end if
 
 !    End condition of existence of a non-local part
@@ -1020,7 +1020,7 @@ contains
  if ((signs==1.and.paw_opt<=3).and. &
 & (choice==5 .or.choice==51.or.choice==52.or.choice==53.or.&
 & choice==54.or.choice==55)) then
-   ABI_ALLOCATE(gmet,(3,3))
+   ABI_MALLOC(gmet,(3,3))
    gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
  end if
 
@@ -1029,26 +1029,26 @@ contains
 ! - substract volume contribution
  if ((choice==3.or.choice==23).and.signs==1.and.paw_opt<=3) then
    mu0=0 ! Shift to be applied in enlout array
-   ABI_ALLOCATE(work1,(6))
+   ABI_MALLOC(work1,(6))
    work1(1:6)=enlout(mu0+1:mu0+6)
    call strconv(work1,gprimd,work1)
    enlout(mu0+1:mu0+3)=(work1(1:3)-enlk)
    enlout(mu0+4:mu0+6)= work1(4:6)
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
  end if
 
 !1st derivative wrt to k wave vector (ddk):
 ! - convert from cartesian to reduced coordinates
  if ((choice==5.or.choice==53).and.signs==1.and.paw_opt<=3) then
    mu0=0 ! Shift to be applied in enlout array
-   ABI_ALLOCATE(work1,(3))
+   ABI_MALLOC(work1,(3))
    work1(:)=enlout(mu0+1:mu0+3)
    enlout(mu0+1:mu0+3)=gmet(:,1)*work1(1)+gmet(:,2)*work1(2)+gmet(:,3)*work1(3)
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
  end if
  if ((choice==51.or.choice==52).and.signs==1.and.paw_opt<=3) then
    mu0=0 ! Shift to be applied in enlout array
-   ABI_ALLOCATE(work1,(3))
+   ABI_MALLOC(work1,(3))
    do mu=1,2 ! Loop for Re,Im
      work1(1:3)=(/enlout(mu0+1),enlout(mu0+3),enlout(mu0+5)/)
      enlout(mu0+1)=gmet(1,1)*work1(1)+gmet(1,2)*work1(2)+gmet(1,3)*work1(3)
@@ -1056,15 +1056,15 @@ contains
      enlout(mu0+5)=gmet(3,1)*work1(1)+gmet(3,2)*work1(2)+gmet(3,3)*work1(3)
      mu0=mu0+1
    end do
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
  end if
 
 !2nd derivative wrt to k wave vector and atomic position (effective charges):
 ! - convert from cartesian to reduced coordinates
  if (choice==54.and.signs==1.and.paw_opt<=3) then
    mu0=0 ! Shift to be applied in enlout array
-   ABI_ALLOCATE(work1,(3))
-   ABI_ALLOCATE(work2,(3))
+   ABI_MALLOC(work1,(3))
+   ABI_MALLOC(work2,(3))
    do mu=1,3*natom
 !    First, real part
      work1(1)=enlout(mu0+1);work1(2)=enlout(mu0+3);work1(3)=enlout(mu0+5)
@@ -1076,8 +1076,8 @@ contains
      enlout(mu0+2)=work2(1);enlout(mu0+4)=work2(2);enlout(mu0+6)=work2(3)
      mu0=mu0+6
    end do
-   ABI_DEALLOCATE(work1)
-   ABI_DEALLOCATE(work2)
+   ABI_FREE(work1)
+   ABI_FREE(work2)
  end if
 
 !2nd derivative wrt to k wave vector and strain (piezoelectric tensor):
@@ -1086,11 +1086,11 @@ contains
 ! - substract volume contribution
 ! - symetrize strain components
  if (choice==55.and.signs==1.and.paw_opt<=3) then
-   ABI_ALLOCATE(work3,(2,3))
-   ABI_ALLOCATE(work4,(2,3))
-   ABI_ALLOCATE(work5,(2,3,6))
-   ABI_ALLOCATE(work7,(2,3,6))
-   ABI_ALLOCATE(work6,(2,3,3))
+   ABI_MALLOC(work3,(2,3))
+   ABI_MALLOC(work4,(2,3))
+   ABI_MALLOC(work5,(2,3,6))
+   ABI_MALLOC(work7,(2,3,6))
+   ABI_MALLOC(work6,(2,3,3))
    do ic=1,3 ! gamma
      work5=zero
      do jc=1,3 ! nu
@@ -1147,20 +1147,20 @@ contains
        enlout(2*mu0  )=work7(2,nu,mu)
      end do
    end do
-   ABI_DEALLOCATE(gmet)
-   ABI_DEALLOCATE(work3)
-   ABI_DEALLOCATE(work4)
-   ABI_DEALLOCATE(work5)
-   ABI_DEALLOCATE(work6)
-   ABI_DEALLOCATE(work7)
+   ABI_FREE(gmet)
+   ABI_FREE(work3)
+   ABI_FREE(work4)
+   ABI_FREE(work5)
+   ABI_FREE(work6)
+   ABI_FREE(work7)
  end if
 
 !2nd derivative wrt to 2 k wave vectors (effective mass):
 ! - convert from cartesian to reduced coordinates
  if ((choice==8.or.choice==81).and.signs==1.and.paw_opt<=3) then
    mu0=0 ! Shift to be applied in enlout array
-   ABI_ALLOCATE(work3,(3,3))
-   ABI_ALLOCATE(work4,(3,3))
+   ABI_MALLOC(work3,(3,3))
+   ABI_MALLOC(work4,(3,3))
    mua=1;if (choice==81) mua=2
    do ii=1,mua ! Loop Re,Im
      if (choice==8) then ! enlout is real in Voigt notation
@@ -1194,8 +1194,8 @@ contains
      end if
      mu0=mu0+1
    end do
-   ABI_DEALLOCATE(work3)
-   ABI_DEALLOCATE(work4)
+   ABI_FREE(work3)
+   ABI_FREE(work4)
  end if
 
 !2nd derivative wrt to 2 strains (elastic tensor):
@@ -1203,9 +1203,9 @@ contains
 ! - substract volume contribution
  if (choice==6.and.signs==1.and.paw_opt<=3) then
    mu0=0 ! Shift to be applied in enlout array
-   ABI_ALLOCATE(work1,(6))
-   ABI_ALLOCATE(work2,(6))
-   ABI_ALLOCATE(work3,(6+3*natom,6))
+   ABI_MALLOC(work1,(6))
+   ABI_MALLOC(work2,(6))
+   ABI_MALLOC(work3,(6+3*natom,6))
    work3(:,:)=reshape(enlout(mu0+1:mu0+6*(6+3*natom)),(/6+3*natom,6/))
    do mu=1,6
      call strconv(work3(1:6,mu),gprimd,work3(1:6,mu))
@@ -1216,9 +1216,9 @@ contains
      work3(mu,1:6)=work2(1:6)
    end do
    enlout(mu0+1:mu0+6*(6+3*natom))=reshape(work3(:,:),(/6*(6+3*natom)/))
-   ABI_DEALLOCATE(work1)
-   ABI_DEALLOCATE(work2)
-   ABI_DEALLOCATE(work3)
+   ABI_FREE(work1)
+   ABI_FREE(work2)
+   ABI_FREE(work3)
    call strconv(strnlk,gprimd,strnlk)
    do mub=1,6
      nub1=alpha(mub);nub2=beta(mub)
@@ -1243,23 +1243,23 @@ contains
  end if
 
  if (allocated(gmet)) then
-   ABI_DEALLOCATE(gmet)
+   ABI_FREE(gmet)
  end if
 
 !Final deallocations
 !==============================================================
 
  if (signs==1)  then
-   ABI_DEALLOCATE(fnlk)
-   ABI_DEALLOCATE(ddkk)
-   ABI_DEALLOCATE(strnlk)
+   ABI_FREE(fnlk)
+   ABI_FREE(ddkk)
+   ABI_FREE(strnlk)
  end if
 
  if (nkpgin<nkpgin_) then
-   ABI_DEALLOCATE(kpgin_)
+   ABI_FREE(kpgin_)
  end if
  if (nkpgout<nkpgout_) then
-   ABI_DEALLOCATE(kpgout_)
+   ABI_FREE(kpgout_)
  end if
 
  DBG_EXIT("COLL")

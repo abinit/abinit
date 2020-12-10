@@ -72,11 +72,11 @@ integer, intent(in) :: nfft
 ! *********************************************************************
 
    if (.not. allocated(rdiemac))  then
-     ABI_ALLOCATE(rdiemac,(nfft))
+     ABI_MALLOC(rdiemac,(nfft))
    end if
    if(nfft.ne.size(rdiemac)) then ! This steps should be done over "istep" instead
-     ABI_DEALLOCATE(rdiemac)
-     ABI_ALLOCATE(rdiemac,(nfft))
+     ABI_FREE(rdiemac)
+     ABI_MALLOC(rdiemac,(nfft))
      cycle=0
    end if
 
@@ -104,7 +104,7 @@ implicit none
 ! *********************************************************************
 
    if (allocated(rdiemac))  then
-     ABI_DEALLOCATE(rdiemac)
+     ABI_FREE(rdiemac)
    end if
 
  end subroutine prc_mem_free

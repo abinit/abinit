@@ -316,21 +316,21 @@ end subroutine find_maxmin_proc
  ! write(std_out,*)'start cpu_distribution'
 
  nullify(proc_pt_dev)
- ABI_ALLOCATE(proc_pt_dev,(2,0:rset%mpi%nproc-1))
+ ABI_MALLOC(proc_pt_dev,(2,0:rset%mpi%nproc-1))
 
  nfft = product(ngfft)
  call H_D_distrib(rset,nfft,gratio,proc_pt_dev,beta_coeff)
 
  nullify(recpar)
  if(rset%load == 0)then
-   ABI_ALLOCATE(rset%par%displs,(0:rset%mpi%nproc-1))
-   ABI_ALLOCATE(rset%par%vcount,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(rset%par%displs,(0:rset%mpi%nproc-1))
+   ABI_MALLOC(rset%par%vcount,(0:rset%mpi%nproc-1))
    recpar => rset%par
 #if defined HAVE_GPU_CUDA
  else
    if(rset%tp==4)then
-     ABI_ALLOCATE(rset%GPU%par%displs,(0:rset%mpi%nproc-1))
-     ABI_ALLOCATE(rset%GPU%par%vcount,(0:rset%mpi%nproc-1))
+     ABI_MALLOC(rset%GPU%par%displs,(0:rset%mpi%nproc-1))
+     ABI_MALLOC(rset%GPU%par%vcount,(0:rset%mpi%nproc-1))
    endif
    recpar => rset%GPU%par
 #endif
@@ -393,7 +393,7 @@ end subroutine find_maxmin_proc
 
  nullify(recpar)
  if(associated(proc_pt_dev))  then
-   ABI_DEALLOCATE(proc_pt_dev)
+   ABI_FREE(proc_pt_dev)
  end if
 
 ! write(std_out,*)'exit from cpu_distribution'
@@ -475,9 +475,9 @@ subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
  !  If non-local psps then it allocates the atoms positions
  !   on the grid
  if(rset%nl%nlpsp)  then
-  ABI_ALLOCATE(rset%inf%gcart,(3,dtset%natom))
+  ABI_MALLOC(rset%inf%gcart,(3,dtset%natom))
  else
-  ABI_ALLOCATE(rset%inf%gcart,(0,0))
+  ABI_MALLOC(rset%inf%gcart,(0,0))
  end if
  rset%inf%gcart = 0
 
@@ -554,8 +554,8 @@ subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
    rset%pawfgr%nfftc = product(rset%pawfgr%ngfftc(1:3))
 
    rset%pawfgr%usefinegrid = 1
-   ABI_ALLOCATE(rset%pawfgr%fintocoa,(rset%pawfgr%nfft))
-   ABI_ALLOCATE(rset%pawfgr%coatofin,(rset%pawfgr%nfftc))
+   ABI_MALLOC(rset%pawfgr%fintocoa,(rset%pawfgr%nfft))
+   ABI_MALLOC(rset%pawfgr%coatofin,(rset%pawfgr%nfftc))
    call indgrid(rset%pawfgr%coatofin,rset%pawfgr%fintocoa,&
      rset%pawfgr%nfftc,rset%pawfgr%nfft,&
      rset%pawfgr%ngfftc,rset%pawfgr%ngfft)
@@ -696,7 +696,7 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
    ABI_WARNING(msg)
    nlrec%nlpsp = .False.
    if (allocated(metrec%gcart))  then
-     ABI_DEALLOCATE(metrec%gcart)
+     ABI_FREE(metrec%gcart)
    end if
  end if
 
@@ -705,12 +705,12 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
   nlrec%nlpsp = .True.
   nlrec%npsp  = psps%npsp
   nlrec%lmnmax = count(psps%indlmn(3,:,psps%npsp)/=0)
-  ABI_ALLOCATE(nlrec%mat_exp_psp_nl,(3,3,psps%mpsang,psps%npsp))
-  ABI_ALLOCATE(nlrec%eival,(3,psps%mpsang,psps%npsp))
-  ABI_ALLOCATE(nlrec%eivec,(3,3,psps%mpsang,psps%npsp))
-  ABI_ALLOCATE(nlrec%pspinfo,(psps%mpsang,psps%npsp))
-  ABI_ALLOCATE(nlrec%radii,(psps%mpsang,psps%npsp))
-  ABI_ALLOCATE(nlrec%indlmn,(6,nlrec%lmnmax,psps%npsp))
+  ABI_MALLOC(nlrec%mat_exp_psp_nl,(3,3,psps%mpsang,psps%npsp))
+  ABI_MALLOC(nlrec%eival,(3,psps%mpsang,psps%npsp))
+  ABI_MALLOC(nlrec%eivec,(3,3,psps%mpsang,psps%npsp))
+  ABI_MALLOC(nlrec%pspinfo,(psps%mpsang,psps%npsp))
+  ABI_MALLOC(nlrec%radii,(psps%mpsang,psps%npsp))
+  ABI_MALLOC(nlrec%indlmn,(6,nlrec%lmnmax,psps%npsp))
   nlrec%indlmn(:,:,:) = psps%indlmn(:,:nlrec%lmnmax,:)
   nlrec%mat_exp_psp_nl(:,:,:,:) = zero
   nlrec%eivec(:,:,:,:) = zero
@@ -745,11 +745,11 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
  else !--Only local pseudo potentials
   nlrec%nlpsp = .False.
   nlrec%npsp  = psps%npsp
-  ABI_ALLOCATE(nlrec%mat_exp_psp_nl,(0,0,0,0))
-  ABI_ALLOCATE(nlrec%pspinfo,(0,0))
-  ABI_ALLOCATE(nlrec%radii,(0,0))
-  ABI_ALLOCATE(nlrec%indlmn,(0,0,0))
-  ABI_ALLOCATE(nlrec%projec,(0,0,0))
+  ABI_MALLOC(nlrec%mat_exp_psp_nl,(0,0,0,0))
+  ABI_MALLOC(nlrec%pspinfo,(0,0))
+  ABI_MALLOC(nlrec%radii,(0,0))
+  ABI_MALLOC(nlrec%indlmn,(0,0,0))
+  ABI_MALLOC(nlrec%projec,(0,0,0))
  endif
 
 end subroutine Init_nlpspRec
@@ -789,37 +789,37 @@ subroutine CleanRec(rset)
  ! @recursion_type
 
  if (allocated(rset%ZT_p))  then
-   ABI_DEALLOCATE(rset%ZT_p)
+   ABI_FREE(rset%ZT_p)
  end if
  if (allocated(rset%par%displs))  then
-   ABI_DEALLOCATE(rset%par%displs)
+   ABI_FREE(rset%par%displs)
  end if
  if (allocated(rset%par%vcount))  then
-   ABI_DEALLOCATE(rset%par%vcount)
+   ABI_FREE(rset%par%vcount)
  end if
  if (allocated(rset%nl%mat_exp_psp_nl))  then
-   ABI_DEALLOCATE(rset%nl%mat_exp_psp_nl)
+   ABI_FREE(rset%nl%mat_exp_psp_nl)
  end if
  if (allocated(rset%nl%eival))  then
-   ABI_DEALLOCATE(rset%nl%eival)
+   ABI_FREE(rset%nl%eival)
  end if
  if (allocated(rset%nl%eivec))  then
-   ABI_DEALLOCATE(rset%nl%eivec)
+   ABI_FREE(rset%nl%eivec)
  end if
  if (allocated(rset%nl%pspinfo))  then
-   ABI_DEALLOCATE(rset%nl%pspinfo)
+   ABI_FREE(rset%nl%pspinfo)
  end if
  if (allocated(rset%nl%radii))  then
-   ABI_DEALLOCATE(rset%nl%radii)
+   ABI_FREE(rset%nl%radii)
  end if
  if (allocated(rset%nl%indlmn))  then
-   ABI_DEALLOCATE(rset%nl%indlmn)
+   ABI_FREE(rset%nl%indlmn)
  end if
  if (allocated(rset%nl%projec))  then
-   ABI_DEALLOCATE(rset%nl%projec)
+   ABI_FREE(rset%nl%projec)
  end if
  if (allocated(rset%inf%gcart))  then
-   ABI_DEALLOCATE(rset%inf%gcart)
+   ABI_FREE(rset%inf%gcart)
  end if
 
  call pawfgr_destroy(rset%pawfgr)
@@ -985,8 +985,8 @@ real(dp) :: inf_rmet(3,3)
      maxpow7=0
      maxpow11=0
      mmsrch=(maxpow2+1)*(maxpow3+1)*(maxpow5+1)*(maxpow7+1)*(maxpow11+1)
-     ABI_ALLOCATE(srch,(mmsrch))
-     ABI_ALLOCATE(iperm,(mmsrch))
+     ABI_MALLOC(srch,(mmsrch))
+     ABI_MALLOC(iperm,(mmsrch))
 !    Factors of 2
      srch(1)=1
      do ii=1,maxpow2
@@ -1023,7 +1023,7 @@ real(dp) :: inf_rmet(3,3)
 !    srch is the set of allowed ngfftrec values
 
      call sort_int(mmsrch,srch,iperm)
-     ABI_DEALLOCATE(iperm)
+     ABI_FREE(iperm)
 
      do ii=1,3
        if(get_ngfftrec(ii)==1)then
@@ -1160,7 +1160,7 @@ real(dp) :: inf_rmet(3,3)
    end do
 
    if (allocated(srch)) then
-     ABI_DEALLOCATE(srch)
+     ABI_FREE(srch)
    end if
 
 !  if(mod(ngfftrec(1),16)/=0) then
@@ -1338,11 +1338,11 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 !--Cration of the exponential*projectors*ylm matrix
 
 !--Initialisation
- ABI_ALLOCATE(nlrec%projec,(nfftrec,lmnmax,nlrec%npsp))
+ ABI_MALLOC(nlrec%projec,(nfftrec,lmnmax,nlrec%npsp))
  nlrec%projec = zero
- ABI_ALLOCATE(radloc,(3,nfftrec))
+ ABI_MALLOC(radloc,(3,nfftrec))
  radloc = zero
- ABI_ALLOCATE(nrm,(nfftrec))
+ ABI_MALLOC(nrm,(nfftrec))
  nrm = zero
 
 !--Loop on pseudo types
@@ -1352,8 +1352,8 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 !  --Vector which stores localy the upper part of symmetrical
 !  matrix of the exponential of the non-local operator
    mpsang = maxval(nlrec%indlmn(1,:,ipsp))+1
-   ABI_ALLOCATE(proj_arr,(nfftrec,maxval(nlrec%pspinfo(:,ipsp)),mpsang))
-   ABI_ALLOCATE(ylmr,(mpsang*mpsang,nfftrec))
+   ABI_MALLOC(proj_arr,(nfftrec,maxval(nlrec%pspinfo(:,ipsp)),mpsang))
+   ABI_MALLOC(ylmr,(mpsang*mpsang,nfftrec))
    proj_arr = zero
    ylmr = zero
 
@@ -1400,13 +1400,13 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
      nlrec%projec(:,ilmn,ipsp) = ylmr(ilm,:)*proj_arr(:,in,il)
    end do
 
-   ABI_DEALLOCATE(ylmr)
-   ABI_DEALLOCATE(proj_arr)
+   ABI_FREE(ylmr)
+   ABI_FREE(proj_arr)
  end do pseudodo !--end loop on pseudo types
 
 
- ABI_DEALLOCATE(radloc)
- ABI_DEALLOCATE(nrm)
+ ABI_FREE(radloc)
+ ABI_FREE(nrm)
 
  if(debug)then
    write(msg,'(80a,a,a)') ('=',ii=1,80),ch10,' pspnl_operat_rec : exit '
@@ -1556,7 +1556,7 @@ subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
      call wrtout(std_out,msg,'COLL')
      if (g_mat_size>0) then
 !      --Identity matrix
-       ABI_ALLOCATE(identity,(g_mat_size,g_mat_size))
+       ABI_MALLOC(identity,(g_mat_size,g_mat_size))
        call set2unit(identity)
 !      identity = zero
 !      identity(:,1) = one
@@ -1565,8 +1565,8 @@ subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
 
 !      ############## CALCULOUS OF THE EIGEN_SPACE OF THE PROJECTORS STRENGTHS ##################
 !      --Inverse of the matrix h
-       ABI_ALLOCATE(eig_val_h,(g_mat_size))
-       ABI_ALLOCATE(u_mat,(g_mat_size,g_mat_size))
+       ABI_MALLOC(eig_val_h,(g_mat_size))
+       ABI_MALLOC(u_mat,(g_mat_size,g_mat_size))
 !      --u-mat will contain the eigenvectors of h_mat_init
        u_mat = h_mat_init(:g_mat_size,:g_mat_size)
 
@@ -1584,15 +1584,15 @@ subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
 
        nlrec%eival(:g_mat_size,1+iangol,ipseudo) = eig_val_h
        nlrec%eivec(:g_mat_size,:g_mat_size,1+iangol,ipseudo) = u_mat
-       ABI_DEALLOCATE(eig_val_h)
-       ABI_DEALLOCATE(u_mat)
+       ABI_FREE(eig_val_h)
+       ABI_FREE(u_mat)
 
 !      ##########END  CALCULOUS OF THE EIGEN_SPACE OF THE PROJECTORS STRENGTHS ##################
 
-       ABI_ALLOCATE(g_mat,(g_mat_size,g_mat_size))
-       ABI_ALLOCATE(inv_g_mat,(g_mat_size,g_mat_size))
-       ABI_ALLOCATE(h_mat,(g_mat_size,g_mat_size))
-       ABI_ALLOCATE(hg_mat,(g_mat_size,g_mat_size))
+       ABI_MALLOC(g_mat,(g_mat_size,g_mat_size))
+       ABI_MALLOC(inv_g_mat,(g_mat_size,g_mat_size))
+       ABI_MALLOC(h_mat,(g_mat_size,g_mat_size))
+       ABI_MALLOC(hg_mat,(g_mat_size,g_mat_size))
 
        g_mat(:,:) = one
        h_mat(:,:) = zero
@@ -1639,11 +1639,11 @@ subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
 
 !      write(std_out,*) nlrec%mat_exp_psp_nl(:g_mat_size,:g_mat_size,1+iangol,ipseudo)
 
-       ABI_DEALLOCATE(g_mat)
-       ABI_DEALLOCATE(hg_mat)
-       ABI_DEALLOCATE(h_mat)
-       ABI_DEALLOCATE(inv_g_mat)
-       ABI_DEALLOCATE(identity)
+       ABI_FREE(g_mat)
+       ABI_FREE(hg_mat)
+       ABI_FREE(h_mat)
+       ABI_FREE(inv_g_mat)
+       ABI_FREE(identity)
      end if
 
    end do !enddo on angular moment

@@ -264,15 +264,15 @@ contains
    call timab(551,1,tsec)
 !  Compute Vxc in reciprocal space
    if (coredens_method==1.and.n3xccc>0) then
-     ABI_ALLOCATE(v_dum,(nfft))
-     ABI_ALLOCATE(vxctotg,(2,nfft))
+     ABI_MALLOC(v_dum,(nfft))
+     ABI_MALLOC(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
      call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
+     ABI_FREE(v_dum)
    else
-     ABI_ALLOCATE(vxctotg,(0,0))
+     ABI_MALLOC(vxctotg,(0,0))
    end if
 !  Compute contribution to stresses from Vloc and/or pseudo core density
    optv=0;if (vloc_method==1) optv=1
@@ -287,17 +287,17 @@ contains
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    end if
    if (n3xccc==0.and.coredens_method==1) corstr=zero
-   ABI_DEALLOCATE(vxctotg)
+   ABI_FREE(vxctotg)
    if (usekden==1.and.coretau_method==1..and.n3xccc>0) then
 !    Compute contribution to stresses from pseudo kinetic energy core density
      optv=0;optn=1;optn2=4
-     ABI_ALLOCATE(v_dum,(nfft))
-     ABI_ALLOCATE(vxctotg,(2,nfft))
+     ABI_MALLOC(v_dum,(nfft))
+     ABI_MALLOC(vxctotg,(2,nfft))
      v_dum(:)=vxctau(:,1,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxctau(:,2,1))
      call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
+     ABI_FREE(v_dum)
      call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 &     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
 &     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
@@ -312,15 +312,15 @@ contains
 !Local ionic potential by method 2
  if (vloc_method==2) then
    option=3
-   ABI_ALLOCATE(dyfr_dum,(3,3,natom))
-   ABI_ALLOCATE(gr_dum,(3,natom))
-   ABI_ALLOCATE(v_dum,(nfft))
+   ABI_MALLOC(dyfr_dum,(3,3,natom))
+   ABI_MALLOC(gr_dum,(3,natom))
+   ABI_MALLOC(v_dum,(nfft))
    call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,icutcoul,lpsstr,mgfft,&
 &   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,ntypat,option,ph1d,qgrid,&
 &   qprtrb_dum,dum_rcut,rhog,rprimd,ucvol,vcutgeo,vlspl,vprtrb_dum,v_dum)
-   ABI_DEALLOCATE(dyfr_dum)
-   ABI_DEALLOCATE(gr_dum)
-   ABI_DEALLOCATE(v_dum)
+   ABI_FREE(dyfr_dum)
+   ABI_FREE(gr_dum)
+   ABI_FREE(v_dum)
  end if
 
 !Pseudo core electron density by method 2
@@ -328,9 +328,9 @@ contains
    if (n1xccc/=0) then
      call timab(55,1,tsec)
      option=3
-     ABI_ALLOCATE(dyfr_dum,(3,3,natom))
-     ABI_ALLOCATE(gr_dum,(3,natom))
-     ABI_ALLOCATE(v_dum,(nfft))
+     ABI_MALLOC(dyfr_dum,(3,3,natom))
+     ABI_MALLOC(gr_dum,(3,natom))
+     ABI_MALLOC(v_dum,(nfft))
      if (coredens_method==2) then
        if (psps%usewvl==0.and.usepaw==0.and.icoulomb==0) then
          if(opt_hybr==0) then
@@ -355,9 +355,9 @@ contains
 &       usekden=.true.)
 
      end if
-     ABI_DEALLOCATE(dyfr_dum)
-     ABI_DEALLOCATE(gr_dum)
-     ABI_DEALLOCATE(v_dum)
+     ABI_FREE(dyfr_dum)
+     ABI_FREE(gr_dum)
+     ABI_FREE(v_dum)
      call timab(55,2,tsec)
    else
      corstr(:)=zero
@@ -561,14 +561,14 @@ contains
    if (vdw_xc>=5.and.vdw_xc<=7) vdwstr(:)=zero
  end if
  if (abs(ipositron)==2) then
-   ABI_ALLOCATE(rhog_ep,(2,nfft))
-   ABI_ALLOCATE(dummy,(6))
+   ABI_MALLOC(rhog_ep,(2,nfft))
+   ABI_MALLOC(dummy,(6))
    call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    rhog_ep=-rhog_ep
    call strhar(electronpositron%e_hartree,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,rprimd)
    strten(:)=strten(:)+dummy(:);harstr(:)=harstr(:)+dummy(:)
-   ABI_DEALLOCATE(rhog_ep)
-   ABI_DEALLOCATE(dummy)
+   ABI_FREE(rhog_ep)
+   ABI_FREE(dummy)
  end if
  if (ipositron>0) strten(:)=strten(:)+electronpositron%stress_ep(:)
 

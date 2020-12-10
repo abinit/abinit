@@ -1339,7 +1339,7 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
  wpu(4)=116.1084531_dp; wpu(5)=-250.4543147_dp
  wpu(6)=281.433688_dp; wpu(7)=-128.8784806_dp
 
- ABI_ALLOCATE(rho_updnm1_3,(npts,2))
+ ABI_MALLOC(rho_updnm1_3,(npts,2))
 
  call invcb(rho_updn(:,1),rho_updnm1_3(:,1),npts)
 
@@ -1390,7 +1390,7 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
 
  end do
 
- ABI_DEALLOCATE(rho_updnm1_3)
+ ABI_FREE(rho_updnm1_3)
 
 end subroutine xctfw
 !!***

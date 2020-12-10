@@ -81,7 +81,7 @@ subroutine contstr25(istr1,istr2,rank,gm,gprimd,e2nl,aa,bb)
  real(dp),allocatable :: cm(:,:)
 
 ! *************************************************************************
- ABI_ALLOCATE(cm,(((mrank+3)*(mrank+4))/2,((mrank+3)*(mrank+4))/2))
+ ABI_MALLOC(cm,(((mrank+3)*(mrank+4))/2,((mrank+3)*(mrank+4))/2))
 
  ka=idx(2*istr1-1);kb=idx(2*istr1);kg=idx(2*istr2-1);kd=idx(2*istr2)
 
@@ -1995,7 +1995,7 @@ subroutine contstr25(istr1,istr2,rank,gm,gprimd,e2nl,aa,bb)
  end do
  e2nl=0.25d0*e2nl
 
- ABI_DEALLOCATE(cm)
+ ABI_FREE(cm)
 
 end subroutine contstr25
 !!***

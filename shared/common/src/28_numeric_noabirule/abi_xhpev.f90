@@ -66,7 +66,7 @@
 #if defined HAVE_LINALG_SCALAPACK
    ! if istwfk=1, then dim_evec1=2*n and if istwfk=2, dim_evec1=n
    dim_evec1= 2*n/istwf_k_
-   ABI_ALLOCATE(tmp_evec,(dim_evec1,n))
+   ABI_MALLOC(tmp_evec,(dim_evec1,n))
    tmp_evec = zero
    call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_, tbloc=10)
    call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_, tbloc=10)
@@ -81,7 +81,7 @@
    call xmpi_sum(tmp_evec,z,dim_evec1*n,slk_communicator,ierr)
    call sca_a%free()
    call sca_ev%free()
-   ABI_DEALLOCATE(tmp_evec)
+   ABI_FREE(tmp_evec)
 #endif
 
 !===== LAPACK
@@ -137,17 +137,17 @@ end subroutine abi_dhpev
 
 !===== LAPACK
  if (eigen_c_lwork==0) then
-   ABI_ALLOCATE(work,(2*n-1))
+   ABI_MALLOC(work,(2*n-1))
  end if
  if (eigen_c_lrwork==0) then
-   ABI_ALLOCATE(rwork,(3*n-2))
+   ABI_MALLOC(rwork,(3*n-2))
  end if
  call chpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
  if (eigen_c_lwork==0) then
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
  if (eigen_c_lrwork==0) then
-   ABI_DEALLOCATE(rwork)
+   ABI_FREE(rwork)
  end if
 
  ABI_CHECK(info==0,"abi_chpev returned info!=0!")
@@ -194,17 +194,17 @@ end subroutine abi_chpev
 
 !===== LAPACK
  if (eigen_z_lwork==0) then
-   ABI_ALLOCATE(work,(2*n-1))
+   ABI_MALLOC(work,(2*n-1))
  end if
  if (eigen_z_lrwork==0) then
-   ABI_ALLOCATE(rwork,(3*n-2))
+   ABI_MALLOC(rwork,(3*n-2))
  end if
  call zhpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
  if (eigen_z_lwork==0) then
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
  if (eigen_z_lrwork==0) then
-   ABI_DEALLOCATE(rwork)
+   ABI_FREE(rwork)
  end if
 
  ABI_CHECK(info==0,"abi_zhpev returned info!=0!")

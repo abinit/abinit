@@ -345,7 +345,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (paral_atom) then
    call get_my_atmtab(mpi_enreg%comm_atom, my_atmtab, my_atmtab_allocated, paral_atom,natom,my_natom_ref=my_natom)
  else
-   ABI_ALLOCATE(my_atmtab, (natom))
+   ABI_MALLOC(my_atmtab, (natom))
    my_atmtab = (/ (iatom, iatom=1, natom) /)
    my_atmtab_allocated = .true.
  end if
@@ -406,7 +406,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  else if (dtset%prtwant==3) then
 
 !  Convert cg and eigen to GW quasiparticle wave functions and eigenvalues in mlwfovlp_qp
-   ABI_ALLOCATE(eigen2,(mband*nkpt*nsppol))
+   ABI_MALLOC(eigen2,(mband*nkpt*nsppol))
    eigen2=eigen
 
    call mlwfovlp_qp(cg,cprj,dtset,dtfil,eigen2,mband,mcg,mcprj,mkmem,mpw,natom,&
@@ -421,7 +421,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !  this is the old implementation, risky due to unpredictable size effects
 !  now eigen is not overwritten, one should use other ways to print the GW corrections
 !  eigen=eigen2
-   ABI_DEALLOCATE(eigen2)
+   ABI_FREE(eigen2)
  end if !prtwant
  call timab(951,2,tsec)
 
@@ -483,13 +483,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !  "     5 --> options 2+3
 !  "     6 --> output all individual PAW density contributions
    if (pawprtden/=3) then ! calc PAW valence density
-     ABI_ALLOCATE(rhor_paw,(pawfgr%nfft,nspden))
-     ABI_ALLOCATE(rhor_n_one,(pawfgr%nfft,nspden))
-     ABI_ALLOCATE(rhor_nt_one,(pawfgr%nfft,nspden))
+     ABI_MALLOC(rhor_paw,(pawfgr%nfft,nspden))
+     ABI_MALLOC(rhor_n_one,(pawfgr%nfft,nspden))
+     ABI_MALLOC(rhor_nt_one,(pawfgr%nfft,nspden))
 !    If the communicator used for denfgr is kpt_comm, it is not compatible with paral_atom
      if (mpi_enreg%paral_kgb==0.and.my_natom/=natom) then
        my_natom_tmp=natom
-       ABI_DATATYPE_ALLOCATE(pawrhoij_all,(natom))
+       ABI_MALLOC(pawrhoij_all,(natom))
        call pawrhoij_nullify(pawrhoij_all)
        call pawrhoij_copy(pawrhoij,pawrhoij_all,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &       keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
@@ -511,7 +511,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end if
      if (mpi_enreg%paral_kgb==0.and.my_natom/=natom) then
        call pawrhoij_free(pawrhoij_all)
-       ABI_DATATYPE_DEALLOCATE(pawrhoij_all)
+       ABI_FREE(pawrhoij_all)
      end if
 
      if (prtvol>9) then  ! Check normalisation
@@ -523,7 +523,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
    if (pawprtden>1.AND.pawprtden<6) then ! We will need the core density
-     ABI_ALLOCATE(rhor_paw_core,(pawfgr%nfft,nspden))
+     ABI_MALLOC(rhor_paw_core,(pawfgr%nfft,nspden))
      call read_atomden(mpi_enreg,natom,pawfgr%nfft,pawfgr%ngfft,nspden,ntypat,rhor_paw_core,&
 &     dtset%typat,rprimd,xred,prtvol,file_prefix='core   ')
 
@@ -536,7 +536,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
    if (pawprtden>2.AND.pawprtden<6) then ! We will need the valence protodensity
-     ABI_ALLOCATE(rhor_paw_val,(pawfgr%nfft,nspden))
+     ABI_MALLOC(rhor_paw_val,(pawfgr%nfft,nspden))
      call read_atomden(mpi_enreg,natom,pawfgr%nfft,pawfgr%ngfft,nspden,ntypat,rhor_paw_val,&
 &     dtset%typat,rprimd,xred,prtvol,file_prefix='valence')
 
@@ -575,7 +575,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        ! N_TILDE - N_HAT
        ! Use rhor_paw_val as temporary array
        if (.not.allocated(rhor_paw_val))  then
-         ABI_ALLOCATE(rhor_paw_val,(pawfgr%nfft,nspden))
+         ABI_MALLOC(rhor_paw_val,(pawfgr%nfft,nspden))
        end if
        rhor_paw_val = rhor - nhat
 
@@ -625,7 +625,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! The PAW correction has to be computed here (all processors contribute)
  if (psps%usepaw > 0 .AND. dtset%prtvclmb>0) then
    nradint = 1000 ! radial integration grid density
-   ABI_ALLOCATE(vpaw,(nfft,nspden))
+   ABI_MALLOC(vpaw,(nfft,nspden))
    vpaw(:,:)=zero
    if (me == master .and. my_natom > 0) then
      if (paw_an(1)%cplex > 1) then
@@ -640,11 +640,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        iatom_tot=iatom;if (paral_atom) iatom_tot=mpi_enreg%my_atmtab(iatom)
        itypat=dtset%typat(iatom_tot)
 
-       ABI_ALLOCATE(vh1spl,(paw_an(iatom)%mesh_size))
-       ABI_ALLOCATE(vh1_corrector,(paw_an(iatom)%mesh_size))
-       ABI_ALLOCATE(vh1_interp,(pawfgrtab(iatom)%nfgd))
-       ABI_ALLOCATE(radii,(pawfgrtab(iatom)%nfgd))
-       ABI_ALLOCATE(isort,(pawfgrtab(iatom)%nfgd))
+       ABI_MALLOC(vh1spl,(paw_an(iatom)%mesh_size))
+       ABI_MALLOC(vh1_corrector,(paw_an(iatom)%mesh_size))
+       ABI_MALLOC(vh1_interp,(pawfgrtab(iatom)%nfgd))
+       ABI_MALLOC(radii,(pawfgrtab(iatom)%nfgd))
+       ABI_MALLOC(isort,(pawfgrtab(iatom)%nfgd))
        ! vh1 vht1 contain the spherical first moments of the Hartree potentials, so re-divide by Y_00 = sqrt(four_pi)
        vh1_corrector(:) = (paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)) / sqrt(four_pi)
 
@@ -680,13 +680,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        end if
 
        ! get integral of correction term in whole sphere
-       ABI_DEALLOCATE(radii)
-       ABI_DEALLOCATE(vh1_interp)
+       ABI_FREE(radii)
+       ABI_FREE(vh1_interp)
 
-       ABI_ALLOCATE(radii,(nradint))
-       ABI_ALLOCATE(vh1_interp,(nradint))
+       ABI_MALLOC(radii,(nradint))
+       ABI_MALLOC(vh1_interp,(nradint))
 
-       ABI_ALLOCATE(vh1_integ,(nradint))
+       ABI_MALLOC(vh1_integ,(nradint))
        dr = pawrad(itypat)%rad(paw_an(iatom)%mesh_size) / dble(nradint)
        do ifgd = 1, nradint
          radii(ifgd) = dble(ifgd-1)*dr
@@ -705,17 +705,17 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &       ' = ', vh1_integ(nradint)*four*pi
        call wrtout(std_out, msg)
 
-       ABI_DEALLOCATE(vh1spl)
-       ABI_DEALLOCATE(vh1_corrector)
-       ABI_DEALLOCATE(vh1_interp)
-       ABI_DEALLOCATE(vh1_integ)
-       ABI_DEALLOCATE(radii)
-       ABI_DEALLOCATE(isort)
+       ABI_FREE(vh1spl)
+       ABI_FREE(vh1_corrector)
+       ABI_FREE(vh1_interp)
+       ABI_FREE(vh1_integ)
+       ABI_FREE(radii)
+       ABI_FREE(isort)
      end do ! iatom
    end do !ispden
    call xmpi_sum_master(vpaw,master,mpi_enreg%comm_atom,ierr)
    if (.not.iwrite_fftdatar(mpi_enreg)) then
-     ABI_DEALLOCATE(vpaw)
+     ABI_FREE(vpaw)
    end if
  end if ! if paw - add all electron vhartree in spheres
 
@@ -727,7 +727,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      crystal,ngfft,cplex1,nfft,nspden,elfr,mpi_enreg,ebands=ebands)
 
      if (nspden==2)then
-       ABI_ALLOCATE(elfr_up,(nfft,nspden))
+       ABI_MALLOC(elfr_up,(nfft,nspden))
        elfr_up(:,:) = zero
        do ifft=1,nfft
          elfr_up(ifft,1) = elfr(ifft,2)
@@ -736,7 +736,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call fftdatar_write("elfr_up",dtfil%fnameabo_app_elf_up,dtset%iomode,hdr,&
        crystal,ngfft,cplex1,nfft,nspden,elfr_up,mpi_enreg,ebands=ebands)
 
-       ABI_ALLOCATE(elfr_down,(nfft,nspden))
+       ABI_MALLOC(elfr_down,(nfft,nspden))
        elfr_down(:,:) = zero
        do ifft=1,nfft
          elfr_down(ifft,1) = elfr(ifft,3)
@@ -745,8 +745,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call fftdatar_write("elfr_down",dtfil%fnameabo_app_elf_down,dtset%iomode,hdr,&
        crystal,ngfft,cplex1,nfft,nspden,elfr_down,mpi_enreg,ebands=ebands)
 
-       ABI_DEALLOCATE(elfr_up)
-       ABI_DEALLOCATE(elfr_down)
+       ABI_FREE(elfr_up)
+       ABI_FREE(elfr_down)
      end if
    end if
 
@@ -820,7 +820,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !  VHA
    if (dtset%prtvha>0) then
-     ABI_ALLOCATE(vwork,(nfft,nspden))
+     ABI_MALLOC(vwork,(nfft,nspden))
      do ispden=1,nspden
        vwork(:,ispden)=vhartr(:)
      end do
@@ -828,12 +828,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fftdatar_write("vhartree",dtfil%fnameabo_app_vha,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
-     ABI_DEALLOCATE(vwork)
+     ABI_FREE(vwork)
    end if
 
 !  VPSP
    if (dtset%prtvpsp>0) then
-     ABI_ALLOCATE(vwork,(nfft,nspden))
+     ABI_MALLOC(vwork,(nfft,nspden))
      do ispden=1,nspden
        vwork(:,ispden)=vpsp(:)
      end do
@@ -841,13 +841,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fftdatar_write("vpsp",dtfil%fnameabo_app_vpsp,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
-     ABI_DEALLOCATE(vwork)
+     ABI_FREE(vwork)
    end if
 
 ! VCouLoMB
    if (dtset%prtvclmb>0) then
 
-     ABI_ALLOCATE(vwork,(nfft,nspden))
+     ABI_MALLOC(vwork,(nfft,nspden))
      do ispden=1,nspden
        vwork(:,ispden)=vpsp(:)+vhartr(:)
      end do
@@ -855,7 +855,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        do ispden=1,nspden
          vwork(:,ispden)=vwork(:,ispden)+vpaw(:,ispden)
        end do
-       ABI_DEALLOCATE(vpaw)
+       ABI_FREE(vpaw)
      end if
 
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
@@ -873,13 +873,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !      * 0.5291772083e-10*27.2113834 to get to SI
 !      * CE factor above
 !   should be done for each plane perpendicular to the axes...
-     ABI_DEALLOCATE(vwork)
+     ABI_FREE(vwork)
    end if ! prtvclmb
 
 
 !  VHXC
    if (dtset%prtvhxc>0) then
-     ABI_ALLOCATE(vwork,(nfft,nspden))
+     ABI_MALLOC(vwork,(nfft,nspden))
      do ispden=1,nspden
        vwork(:,ispden)=vhartr(:)+vxc(:,ispden)
      end do
@@ -887,7 +887,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fftdatar_write("vhxc",dtfil%fnameabo_app_vhxc,dtset%iomode,hdr,&
 &     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
-     ABI_DEALLOCATE(vwork)
+     ABI_FREE(vwork)
    end if
 
 !  VXC
@@ -1058,7 +1058,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !Optionally provide output for AE wavefunctions (only for PAW)
  if (psps%usepaw==1 .and. dtset%pawprtwf==1) then
-   ABI_ALLOCATE(ps_norms,(nsppol,nkpt,mband))
+   ABI_MALLOC(ps_norms,(nsppol,nkpt,mband))
 
    call pawmkaewf(dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkmem,nsppol,Dtset%nband,&
 &   Dtset%istwfk,npwarr,Dtset%kptns,Dtset%ngfftdg,kg,dimcprj,pawfgrtab,&
@@ -1101,7 +1101,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end do
      close(tmp_unt)
    end if
-   ABI_DEALLOCATE(ps_norms)
+   ABI_FREE(ps_norms)
  end if
 
  call timab(963,2,tsec)

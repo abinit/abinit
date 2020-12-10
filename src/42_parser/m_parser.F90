@@ -730,7 +730,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
        ABI_ERROR(msg)
      end if
      ! Read included file (warning: recursive call !)
-     ABI_ALLOCATE(string_inc,)
+     ABI_MALLOC(string_inc,)
      call instrng(trim(filnam_inc),lenstr_inc,option,strln-lenstr,string_inc)
      ! Check resulting total string length
      if (lenstr+lenstr_inc>strln) then
@@ -1613,10 +1613,10 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  else if(opttoken>=2) then
 
    ! write(std_out,*)' intagm : opttoken>=2 , token has been found, will read '
-   ABI_ALLOCATE(dpr1,(narr))
-   ABI_ALLOCATE(dpr2,(narr))
-   ABI_ALLOCATE(int1,(narr))
-   ABI_ALLOCATE(int2,(narr))
+   ABI_MALLOC(dpr1,(narr))
+   ABI_MALLOC(dpr2,(narr))
+   ABI_MALLOC(int1,(narr))
+   ABI_MALLOC(int2,(narr))
 
    ! Absolute location in string of blank which follows token//':':
    b1=itoken_colon+cslen-1
@@ -1740,8 +1740,8 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
  if (nimage<=1) return
 
  marr=size1
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
 !First, try to read data for current image
  tread_current=0
@@ -1767,8 +1767,8 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
  if (tread_current==0) then
 
 !  The current image is not directly defined in the input string
-   ABI_ALLOCATE(dp_data_before,(size1))
-   ABI_ALLOCATE(dp_data_after,(size1))
+   ABI_MALLOC(dp_data_before,(size1))
+   ABI_MALLOC(dp_data_after,(size1))
 
 !  Find the nearest previous defined image
    tread_before=0;iimage_before=iimage
@@ -1814,13 +1814,13 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
      tread_ok=1
    end if
 
-   ABI_DEALLOCATE(dp_data_before)
-   ABI_DEALLOCATE(dp_data_after)
+   ABI_FREE(dp_data_before)
+   ABI_FREE(dp_data_after)
 
  end if
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 end subroutine intagm_img_1D
 !!***
@@ -1871,8 +1871,8 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
  if (nimage<=1) return
 
  marr=size1*size2
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
 !First, try to read data for current image
  tread_current=0
@@ -1898,8 +1898,8 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
  if (tread_current==0) then
 
 !  The current image is not directly defined in the input string
-   ABI_ALLOCATE(dp_data_before,(size1,size2))
-   ABI_ALLOCATE(dp_data_after,(size1,size2))
+   ABI_MALLOC(dp_data_before,(size1,size2))
+   ABI_MALLOC(dp_data_after,(size1,size2))
 
 !  Find the nearest previous defined image
    tread_before=0;iimage_before=iimage
@@ -1948,13 +1948,13 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
      tread_ok=1
    end if
 
-   ABI_DEALLOCATE(dp_data_before)
-   ABI_DEALLOCATE(dp_data_after)
+   ABI_FREE(dp_data_before)
+   ABI_FREE(dp_data_after)
 
  end if
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 end subroutine intagm_img_2D
 !!***
@@ -2365,8 +2365,8 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  lenstr_new=lenstr_new+7+len_trim(dtset_char)+1+5
  string(lenstr_old+1:lenstr_new)=" _NATOM"//trim(dtset_char)//blank//string5
 
- ABI_ALLOCATE(xcart,(3,natom))
- ABI_ALLOCATE(elementtype,(natom))
+ ABI_MALLOC(xcart,(3,natom))
+ ABI_MALLOC(elementtype,(natom))
 
  ! read dummy line
  read(unitxyz,*)
@@ -2815,7 +2815,7 @@ subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
  minmax_flag=1
  if(input_value>=minmax_value)ok=1
  list_number=1
- ABI_ALLOCATE(list_values,(1))
+ ABI_MALLOC(list_values,(1))
  list_values=minmax_value
 
  !If there is something wrong, compose the message, and print it
@@ -2903,7 +2903,7 @@ subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
  !write(std_out,*)' chkint_le : input_value,minmax_value=',input_value,minmax_value
 
  list_number=1
- ABI_ALLOCATE(list_values,(1))
+ ABI_MALLOC(list_values,(1))
  list_values=minmax_value
 
  !If there is something wrong, compose the message, and print it
@@ -3630,8 +3630,8 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
  if(.not.test_multiimages)then
 
    narr=narrm(1)
-   ABI_ALLOCATE(intarr,(marr,0:ndtset_alloc))
-   ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
+   ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
+   ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
    do idtset=0,ndtset_alloc
      dprarr(1:narrm(idtset),idtset)=dprarr_images(1:narrm(idtset),1,idtset)
    end do

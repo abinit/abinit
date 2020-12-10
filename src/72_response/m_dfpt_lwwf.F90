@@ -247,14 +247,14 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  tim_getgh1c=0
 
 !Additional allocations
- ABI_ALLOCATE(cwave0i,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cwave0j,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gv1c,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(dum_vpsp,(nfft))
- ABI_ALLOCATE(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(vpsp1,(cplex*nfft))
- ABI_DATATYPE_ALLOCATE(dum_cwaveprj,(0,0))
+ ABI_MALLOC(cwave0i,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cwave0j,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gv1c,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(dum_vpsp,(nfft))
+ ABI_MALLOC(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(vpsp1,(cplex*nfft))
+ ABI_MALLOC(dum_cwaveprj,(0,0))
 
 
 !--------------------------------------------------------------------------------------
@@ -269,8 +269,8 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  berryopt=0;optlocal=1;optnl=0;usevnl=0;opt_gvnl1=1;sij_opt=0
 
 !Specific allocations
- ABI_ALLOCATE(cj_vefield_ci,(2,nq2grad,nband_k,nband_k))
- ABI_ALLOCATE(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ ABI_MALLOC(cj_vefield_ci,(2,nq2grad,nband_k,nband_k))
+ ABI_MALLOC(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
 
 !LOOP OVER ELECTRIC FIELD PERTURBATIONS
@@ -327,19 +327,19 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do !iq2grad
 !End loop over electric field perturbations
 
 !Deallocations
- ABI_DEALLOCATE(dum_ylmgr1_k)
+ ABI_FREE(dum_ylmgr1_k)
 
 !-----------------------------------------------------------------------------------------------
 !  Atomic displacement 1st order hamiltonian + 1st order potential matrix element:
@@ -355,8 +355,8 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  berryopt=0;optlocal=1;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
 
 !Specific allocations
- ABI_ALLOCATE(ci_h1vatdisdag_cj,(2,natpert,nband_k,nband_k))
- ABI_ALLOCATE(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ ABI_MALLOC(ci_h1vatdisdag_cj,(2,natpert,nband_k,nband_k))
+ ABI_MALLOC(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
  do iatpert= 1, natpert
@@ -419,46 +419,46 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do !iatpert
 !End loop over atomic displacement perturbations
 
 !Deallocations
- ABI_DEALLOCATE(dum_ylmgr1_k)
- ABI_DEALLOCATE(cwave0j)
- ABI_DEALLOCATE(vpsp1)
- ABI_DEALLOCATE(vlocal1)
+ ABI_FREE(dum_ylmgr1_k)
+ ABI_FREE(cwave0j)
+ ABI_FREE(vpsp1)
+ ABI_FREE(vlocal1)
 
 !----------------------------------------------------------------------------------------
 ! Terms that involve first order response functions
 !----------------------------------------------------------------------------------------
 
 !Allocation of bks (band, k-point and spin) dependent terms
- ABI_ALLOCATE(c1atdis_dQVefield_c0_bks,(2,nband_k,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(c1atdis_dQVefield_c0_bks,(2,nband_k,natpert,nq2grad,nq1grad))
 !TODO:For the moment c1atdis_c1dkdk_bks is allocated for all three directions, i.e.,
 !nq2grad=3. This will have to be modified in the future when ABINIT enables to calculate specific
 !components of the d2_dkdk
  nq2grad_3d=3
- ABI_ALLOCATE(c1atdis_c1dkdk_bks,(2,nband_k,natpert,nq2grad_3d,nq1grad))
- ABI_ALLOCATE(c0_calHatdisdagdQ_c1efield_bks,(2,nband_k,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(c1atdis_q1gradH0_c1efield_bks,(2,nband_k,natpert,nq2grad,nq1grad))
- ABI_ALLOCATE(c0_Hatdisdq_c1efield_bks,(2,nband_k,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(c1atdis_c1dkdk_bks,(2,nband_k,natpert,nq2grad_3d,nq1grad))
+ ABI_MALLOC(c0_calHatdisdagdQ_c1efield_bks,(2,nband_k,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(c1atdis_q1gradH0_c1efield_bks,(2,nband_k,natpert,nq2grad,nq1grad))
+ ABI_MALLOC(c0_Hatdisdq_c1efield_bks,(2,nband_k,natpert,nq2grad,nq1grad))
  c1atdis_dQVefield_c0_bks=zero
  c0_calHatdisdagdQ_c1efield_bks=zero
 
 !Allocation of wf1s
- ABI_ALLOCATE(cg1_atdis,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_efield,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_ddk,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_dkdk,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_dkdk_ar,(nq1q2grad,2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_atdis,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_efield,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_ddk,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_dkdk,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_dkdk_ar,(nq1q2grad,2,npw_k*dtset%nspinor))
 
 !Check correspondance with the data in wf1 files
  !Atomic displacements
@@ -531,7 +531,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 !--------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
 
 !Specific definitions
  vlocal1=zero
@@ -597,20 +597,20 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do !iq1grad
 
 !Deallocations
- ABI_DEALLOCATE(gv1c)
- ABI_DEALLOCATE(vlocal1)
- !ABI_DEALLOCATE(ph3d1) !it is only allocated if kpt and kpq are different. Not the case.
+ ABI_FREE(gv1c)
+ ABI_FREE(vlocal1)
+ !ABI_FREE(ph3d1) !it is only allocated if kpt and kpq are different. Not the case.
 
 !--------------------------------------------------------------------------------------
 !Other three therms
@@ -744,11 +744,11 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 !--------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(vpsp1dq,(2*nfft))
- ABI_ALLOCATE(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(gh1dqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvloc1dqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvnl1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(vpsp1dq,(2*nfft))
+ ABI_MALLOC(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(gh1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvloc1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvnl1dqc,(2,npw_k*dtset%nspinor))
 
 !Specific definitions
  useylmgr1=1;optlocal=1;optnl=1
@@ -821,27 +821,27 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      call rf_hamkq%free()
 
      !Deallocations
-     ABI_DEALLOCATE(kpg_k)
-     ABI_DEALLOCATE(kpg1_k)
-     ABI_DEALLOCATE(dkinpw)
-     ABI_DEALLOCATE(kinpw1)
-     ABI_DEALLOCATE(ffnlk)
-     ABI_DEALLOCATE(ffnl1)
-     ABI_DEALLOCATE(ph3d)
+     ABI_FREE(kpg_k)
+     ABI_FREE(kpg1_k)
+     ABI_FREE(dkinpw)
+     ABI_FREE(kinpw1)
+     ABI_FREE(ffnlk)
+     ABI_FREE(ffnl1)
+     ABI_FREE(ph3d)
 
    end do !iq1grad
 
  end do !iatpert
 
 !Deallocations
- ABI_DEALLOCATE(dum_cwaveprj)
- ABI_DEALLOCATE(gh1dqc)
- ABI_DEALLOCATE(gvloc1dqc)
- ABI_DEALLOCATE(gvnl1dqc)
- ABI_DEALLOCATE(vpsp1dq)
- ABI_DEALLOCATE(vlocal1dq)
- ABI_DEALLOCATE(dum_vpsp)
- ABI_DEALLOCATE(dum_vlocal)
+ ABI_FREE(dum_cwaveprj)
+ ABI_FREE(gh1dqc)
+ ABI_FREE(gvloc1dqc)
+ ABI_FREE(gvnl1dqc)
+ ABI_FREE(vpsp1dq)
+ ABI_FREE(vlocal1dq)
+ ABI_FREE(dum_vpsp)
+ ABI_FREE(dum_vlocal)
 
 
 !--------------------------------------------------------------------------------------
@@ -930,19 +930,19 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 
 
 !Deallocations
- ABI_DEALLOCATE(cj_vefield_ci)
- ABI_DEALLOCATE(ci_h1vatdisdag_cj)
- ABI_DEALLOCATE(c1atdis_dQVefield_c0_bks)
- ABI_DEALLOCATE(c1atdis_c1dkdk_bks)
- ABI_DEALLOCATE(c0_calHatdisdagdQ_c1efield_bks)
- ABI_DEALLOCATE(c1atdis_q1gradH0_c1efield_bks)
- ABI_DEALLOCATE(c0_Hatdisdq_c1efield_bks)
- ABI_DEALLOCATE(cwave0i)
- ABI_DEALLOCATE(cg1_atdis)
- ABI_DEALLOCATE(cg1_efield)
- ABI_DEALLOCATE(cg1_ddk)
- ABI_DEALLOCATE(cg1_dkdk)
- ABI_DEALLOCATE(cg1_dkdk_ar)
+ ABI_FREE(cj_vefield_ci)
+ ABI_FREE(ci_h1vatdisdag_cj)
+ ABI_FREE(c1atdis_dQVefield_c0_bks)
+ ABI_FREE(c1atdis_c1dkdk_bks)
+ ABI_FREE(c0_calHatdisdagdQ_c1efield_bks)
+ ABI_FREE(c1atdis_q1gradH0_c1efield_bks)
+ ABI_FREE(c0_Hatdisdq_c1efield_bks)
+ ABI_FREE(cwave0i)
+ ABI_FREE(cg1_atdis)
+ ABI_FREE(cg1_efield)
+ ABI_FREE(cg1_ddk)
+ ABI_FREE(cg1_dkdk)
+ ABI_FREE(cg1_dkdk_ar)
 
  DBG_EXIT("COLL")
 
@@ -1135,14 +1135,14 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
  tim_getgh1c=0
 
 !Additional allocations
- ABI_ALLOCATE(cwave0i,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cwave0j,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gv1c,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(dum_vpsp,(nfft))
- ABI_ALLOCATE(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(vpsp1,(cplex*nfft))
- ABI_DATATYPE_ALLOCATE(dum_cwaveprj,(0,0))
+ ABI_MALLOC(cwave0i,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cwave0j,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gv1c,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(dum_vpsp,(nfft))
+ ABI_MALLOC(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(vpsp1,(cplex*nfft))
+ ABI_MALLOC(dum_cwaveprj,(0,0))
 
 !--------------------------------------------------------------------------------------
 !Calculate first terms involving only ground state wavefunctions
@@ -1161,8 +1161,8 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
  berryopt=0;optlocal=1;optnl=0;usevnl=0;opt_gvnl1=1;sij_opt=0
 
 !Specific allocations
- ABI_ALLOCATE(ci_vefielddag_cj,(2,nefipert,nband_k,nband_k))
- ABI_ALLOCATE(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ ABI_MALLOC(ci_vefielddag_cj,(2,nefipert,nband_k,nband_k))
+ ABI_MALLOC(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
  do iefipert=1,nefipert
    ipert=pert_efield(1,iefipert)
@@ -1217,19 +1217,19 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do
 !End loop over electric field perturbations
 
 !Deallocations
- ABI_DEALLOCATE(dum_ylmgr1_k)
+ ABI_FREE(dum_ylmgr1_k)
 
 !-----------------------------------------------------------------------------------------------
 !  Strain 1st order hamiltonian + 1st order potential matrix element:
@@ -1244,8 +1244,8 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
  g0term=1
 
 !Specific allocations
- ABI_ALLOCATE(cj_h1vstrain_ci,(2,nstrpert,nband_k,nband_k))
- ABI_ALLOCATE(part_ylmgr_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ ABI_MALLOC(cj_h1vstrain_ci,(2,nstrpert,nband_k,nband_k))
+ ABI_MALLOC(part_ylmgr_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
  part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3+6*((ipert-dtset%natom)/10),:)
 
 !LOOP OVER STRAIN PERTURBATIONS
@@ -1309,21 +1309,21 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do !istrpert
 !End loop over strain perturbations
 
 !Deallocations
- ABI_DEALLOCATE(cwave0j)
- ABI_DEALLOCATE(vpsp1)
- ABI_DEALLOCATE(vlocal1)
+ ABI_FREE(cwave0j)
+ ABI_FREE(vpsp1)
+ ABI_FREE(vlocal1)
 
 
 !----------------------------------------------------------------------------------------
@@ -1331,21 +1331,21 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
 !----------------------------------------------------------------------------------------
 
 !Allocation of bks (band, k-point and spin) dependent terms
-ABI_ALLOCATE(c1efield_q1gradH0_c1strain_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
-ABI_ALLOCATE(c1efield_dQcalHstrain_c0_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
-ABI_ALLOCATE(c0_VefielddQ_c1strain_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
-ABI_ALLOCATE(c1dkdk_c1strain_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
-ABI_ALLOCATE(c1efield_Hmetricdqdq_c0_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
+ABI_MALLOC(c1efield_q1gradH0_c1strain_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
+ABI_MALLOC(c1efield_dQcalHstrain_c0_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
+ABI_MALLOC(c0_VefielddQ_c1strain_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
+ABI_MALLOC(c1dkdk_c1strain_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
+ABI_MALLOC(c1efield_Hmetricdqdq_c0_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
 c1efield_dQcalHstrain_c0_bks=zero
 c0_VefielddQ_c1strain_bks=zero
 
 !Allocation of wf1s
- ABI_ALLOCATE(cg1_strain,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_strain_ar,(3,3,2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_efield,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_ddk,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_dkdk,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_dkdk_ar,(nq1q2grad,2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_strain,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_strain_ar,(3,3,2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_efield,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_ddk,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_dkdk,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_dkdk_ar,(nq1q2grad,2,npw_k*dtset%nspinor))
 
 
 !Check correspondance with the data in wf1 files
@@ -1421,7 +1421,7 @@ c0_VefielddQ_c1strain_bks=zero
 !--------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
 
 !Specific definitions
  vlocal1=zero
@@ -1494,21 +1494,21 @@ c0_VefielddQ_c1strain_bks=zero
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do !iq1grad
 
 !Deallocations
- ABI_DEALLOCATE(gv1c)
- ABI_DEALLOCATE(vlocal1)
- !ABI_DEALLOCATE(ph3d1) !it is only allocated if kpt and kpq are different. Not the case.
- ABI_DEALLOCATE(part_ylmgr_k)
+ ABI_FREE(gv1c)
+ ABI_FREE(vlocal1)
+ !ABI_FREE(ph3d1) !it is only allocated if kpt and kpq are different. Not the case.
+ ABI_FREE(part_ylmgr_k)
 
 !--------------------------------------------------------------------------------------
 !Other three terms
@@ -1639,13 +1639,13 @@ c0_VefielddQ_c1strain_bks=zero
  end do !iband
 
 !Deallocations
- ABI_DEALLOCATE(ci_vefielddag_cj)
- ABI_DEALLOCATE(cj_h1vstrain_ci)
- ABI_DEALLOCATE(cg1_strain)
- ABI_DEALLOCATE(cg1_strain_ar)
- ABI_DEALLOCATE(cg1_ddk)
- ABI_DEALLOCATE(cg1_dkdk)
- ABI_DEALLOCATE(cg1_dkdk_ar)
+ ABI_FREE(ci_vefielddag_cj)
+ ABI_FREE(cj_h1vstrain_ci)
+ ABI_FREE(cg1_strain)
+ ABI_FREE(cg1_strain_ar)
+ ABI_FREE(cg1_ddk)
+ ABI_FREE(cg1_dkdk)
+ ABI_FREE(cg1_dkdk_ar)
 
 !--------------------------------------------------------------------------------------
 ! q1-gradient of the strain first order Hamiltonian:
@@ -1655,12 +1655,12 @@ c0_VefielddQ_c1strain_bks=zero
 !--------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(vhart1dqdq,(2*nfft))
- ABI_ALLOCATE(vpsp1dqdq,(2*nfft))
- ABI_ALLOCATE(vlocal1dqdq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(gh1dqdqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvloc1dqdqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvnl1dqdqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(vhart1dqdq,(2*nfft))
+ ABI_MALLOC(vpsp1dqdq,(2*nfft))
+ ABI_MALLOC(vlocal1dqdq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(gh1dqdqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvloc1dqdqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvnl1dqdqc,(2,npw_k*dtset%nspinor))
 
 !Specific definitions
  useylmgr1=1;optlocal=1;optnl=1;opthartdqdq=1;
@@ -1733,30 +1733,30 @@ c0_VefielddQ_c1strain_bks=zero
      call rf_hamkq%free()
 
      !Deallocations
-     ABI_DEALLOCATE(kpg_k)
-     ABI_DEALLOCATE(kpg1_k)
-     ABI_DEALLOCATE(dkinpw)
-     ABI_DEALLOCATE(kinpw1)
-     ABI_DEALLOCATE(ffnlk)
-     ABI_DEALLOCATE(ffnl1)
-     ABI_DEALLOCATE(ph3d)
+     ABI_FREE(kpg_k)
+     ABI_FREE(kpg1_k)
+     ABI_FREE(dkinpw)
+     ABI_FREE(kinpw1)
+     ABI_FREE(ffnlk)
+     ABI_FREE(ffnl1)
+     ABI_FREE(ph3d)
 
    end do !iq1grad
 
  end do !istrpert
 
 !Deallocations
- ABI_DEALLOCATE(dum_cwaveprj)
- ABI_DEALLOCATE(gh1dqdqc)
- ABI_DEALLOCATE(gvloc1dqdqc)
- ABI_DEALLOCATE(gvnl1dqdqc)
- ABI_DEALLOCATE(vpsp1dqdq)
- ABI_DEALLOCATE(vlocal1dqdq)
- ABI_DEALLOCATE(dum_vpsp)
- ABI_DEALLOCATE(dum_vlocal)
- ABI_DEALLOCATE(cwave0i)
- ABI_DEALLOCATE(cg1_efield)
- ABI_DEALLOCATE(vhart1dqdq)
+ ABI_FREE(dum_cwaveprj)
+ ABI_FREE(gh1dqdqc)
+ ABI_FREE(gvloc1dqdqc)
+ ABI_FREE(gvnl1dqdqc)
+ ABI_FREE(vpsp1dqdq)
+ ABI_FREE(vlocal1dqdq)
+ ABI_FREE(dum_vpsp)
+ ABI_FREE(dum_vlocal)
+ ABI_FREE(cwave0i)
+ ABI_FREE(cg1_efield)
+ ABI_FREE(vhart1dqdq)
 
 !--------------------------------------------------------------------------------------
 ! Acumulates all the wf dependent terms of the flexoelectric tensor
@@ -1839,11 +1839,11 @@ end do
  elflexowf_k=elflexowf_k * wtk_k
 
 !Deallocations
- ABI_DEALLOCATE(c1efield_q1gradH0_c1strain_bks)
- ABI_DEALLOCATE(c1efield_dQcalHstrain_c0_bks)
- ABI_DEALLOCATE(c0_VefielddQ_c1strain_bks)
- ABI_DEALLOCATE(c1efield_Hmetricdqdq_c0_bks)
- ABI_DEALLOCATE(c1dkdk_c1strain_bks)
+ ABI_FREE(c1efield_q1gradH0_c1strain_bks)
+ ABI_FREE(c1efield_dQcalHstrain_c0_bks)
+ ABI_FREE(c0_VefielddQ_c1strain_bks)
+ ABI_FREE(c1efield_Hmetricdqdq_c0_bks)
+ ABI_FREE(c1dkdk_c1strain_bks)
 
 
  DBG_EXIT("COLL")
@@ -2014,14 +2014,14 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  tim_getgh1c=0
 
 !Additional allocations
- ABI_ALLOCATE(cwave0i,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cwave0j,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gv1c,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(dum_vpsp,(nfft))
- ABI_ALLOCATE(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(vpsp1,(cplex*nfft))
- ABI_DATATYPE_ALLOCATE(dum_cwaveprj,(0,0))
+ ABI_MALLOC(cwave0i,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cwave0j,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gv1c,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(dum_vpsp,(nfft))
+ ABI_MALLOC(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(vpsp1,(cplex*nfft))
+ ABI_MALLOC(dum_cwaveprj,(0,0))
 
 !-----------------------------------------------------------------------------------------------
 !  Atomic displacement 1st order hamiltonian + 1st order potential matrix element:
@@ -2035,8 +2035,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  berryopt=0;optlocal=1;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
 
 !Specific allocations
- ABI_ALLOCATE(ci_h1vatdis_cj,(2,natpert,nband_k,nband_k))
- ABI_ALLOCATE(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ ABI_MALLOC(ci_h1vatdis_cj,(2,natpert,nband_k,nband_k))
+ ABI_MALLOC(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
  do iatpert= 1, natpert
@@ -2099,35 +2099,35 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do !iatpert
 
 !Deallocations
- ABI_DEALLOCATE(dum_ylmgr1_k)
- ABI_DEALLOCATE(cwave0j)
- ABI_DEALLOCATE(vpsp1)
- ABI_DEALLOCATE(vlocal1)
+ ABI_FREE(dum_ylmgr1_k)
+ ABI_FREE(cwave0j)
+ ABI_FREE(vpsp1)
+ ABI_FREE(vlocal1)
 
 !----------------------------------------------------------------------------------------
 ! Terms that involve first order response functions
 !----------------------------------------------------------------------------------------
 !Allocation of bks (band, k-point and spin) dependent terms
- ABI_ALLOCATE(c1atdis_q1gradH0_c1atdis_bks,(2,nband_k,natpert,natpert,nq1grad))
- ABI_ALLOCATE(c1atdis_dQHatdis_c0_bks,(2,nband_k,natpert,natpert,nq1grad))
- ABI_ALLOCATE(c1atdis_Hatdisdq_c0_bks,(2,nband_k,natpert,natpert,nq1grad))
+ ABI_MALLOC(c1atdis_q1gradH0_c1atdis_bks,(2,nband_k,natpert,natpert,nq1grad))
+ ABI_MALLOC(c1atdis_dQHatdis_c0_bks,(2,nband_k,natpert,natpert,nq1grad))
+ ABI_MALLOC(c1atdis_Hatdisdq_c0_bks,(2,nband_k,natpert,natpert,nq1grad))
  c1atdis_dQHatdis_c0_bks=zero
 
 !Allocation of wf1s
- ABI_ALLOCATE(cg1_iatdis,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_jatdis,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_ddk,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_iatdis,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_jatdis,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_ddk,(2,npw_k*dtset%nspinor))
 
 !Check correspondance with the data in wf1 files
  !Atomic displacements
@@ -2170,8 +2170,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
 !Specific allocations
  ipert=dtset%natom+1
- ABI_ALLOCATE(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(part_ylmgr_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+ ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(part_ylmgr_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
  part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3+6*((ipert-dtset%natom)/10),:)
 
 !Specific definitions
@@ -2238,20 +2238,20 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do !iq1grad
 
 !Deallocations
- ABI_DEALLOCATE(cg1_jatdis)
- ABI_DEALLOCATE(gv1c)
- ABI_DEALLOCATE(vlocal1)
+ ABI_FREE(cg1_jatdis)
+ ABI_FREE(gv1c)
+ ABI_FREE(vlocal1)
 
 !---------------------------------------------------------------------------------------------------
 ! < u_{i,k}^{\tau_{\kappa\alpha}} | \partial_{gamma} \hat(Q)H^{\tau_{\kappa'\beta}} | u_{i,k}^{(0)} >
@@ -2314,11 +2314,11 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !--------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(vpsp1dq,(2*nfft))
- ABI_ALLOCATE(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(gh1dqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvloc1dqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvnl1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(vpsp1dq,(2*nfft))
+ ABI_MALLOC(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(gh1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvloc1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvnl1dqc,(2,npw_k*dtset%nspinor))
 
 !Specific definitions
  useylmgr1=1;optlocal=1;optnl=1
@@ -2388,28 +2388,28 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      call rf_hamkq%free()
 
      !Deallocations
-     ABI_DEALLOCATE(kpg_k)
-     ABI_DEALLOCATE(kpg1_k)
-     ABI_DEALLOCATE(dkinpw)
-     ABI_DEALLOCATE(kinpw1)
-     ABI_DEALLOCATE(ffnlk)
-     ABI_DEALLOCATE(ffnl1)
-     ABI_DEALLOCATE(ph3d)
+     ABI_FREE(kpg_k)
+     ABI_FREE(kpg1_k)
+     ABI_FREE(dkinpw)
+     ABI_FREE(kinpw1)
+     ABI_FREE(ffnlk)
+     ABI_FREE(ffnl1)
+     ABI_FREE(ph3d)
 
    end do !iq1grad
 
  end do !jatpert
 
 !Deallocations
- ABI_DEALLOCATE(dum_cwaveprj)
- ABI_DEALLOCATE(gh1dqc)
- ABI_DEALLOCATE(gvloc1dqc)
- ABI_DEALLOCATE(gvnl1dqc)
- ABI_DEALLOCATE(vpsp1dq)
- ABI_DEALLOCATE(vlocal1dq)
- ABI_DEALLOCATE(dum_vpsp)
- ABI_DEALLOCATE(dum_vlocal)
- ABI_DEALLOCATE(part_ylmgr_k)
+ ABI_FREE(dum_cwaveprj)
+ ABI_FREE(gh1dqc)
+ ABI_FREE(gvloc1dqc)
+ ABI_FREE(gvnl1dqc)
+ ABI_FREE(vpsp1dq)
+ ABI_FREE(vlocal1dq)
+ ABI_FREE(dum_vpsp)
+ ABI_FREE(dum_vlocal)
+ ABI_FREE(part_ylmgr_k)
 
 !--------------------------------------------------------------------------------------
 ! Acumulates all the wf dependent terms of the quadrupole tensor
@@ -2481,13 +2481,13 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  end do
 
 !Deallocations
- ABI_DEALLOCATE(ci_h1vatdis_cj)
- ABI_DEALLOCATE(c1atdis_q1gradH0_c1atdis_bks)
- ABI_DEALLOCATE(c1atdis_dQHatdis_c0_bks)
- ABI_DEALLOCATE(c1atdis_Hatdisdq_c0_bks)
- ABI_DEALLOCATE(cwave0i)
- ABI_DEALLOCATE(cg1_iatdis)
- ABI_DEALLOCATE(cg1_ddk)
+ ABI_FREE(ci_h1vatdis_cj)
+ ABI_FREE(c1atdis_q1gradH0_c1atdis_bks)
+ ABI_FREE(c1atdis_dQHatdis_c0_bks)
+ ABI_FREE(c1atdis_Hatdisdq_c0_bks)
+ ABI_FREE(cwave0i)
+ ABI_FREE(cg1_iatdis)
+ ABI_FREE(cg1_ddk)
 
  DBG_EXIT("COLL")
 
@@ -2676,14 +2676,14 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  tim_getgh1c=0
 
 !Additional allocations
- ABI_ALLOCATE(cwave0i,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cwave0j,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gv1c,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(dum_vpsp,(nfft))
- ABI_ALLOCATE(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(vpsp1,(cplex*nfft))
- ABI_DATATYPE_ALLOCATE(dum_cwaveprj,(0,0))
+ ABI_MALLOC(cwave0i,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cwave0j,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gv1c,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(dum_vpsp,(nfft))
+ ABI_MALLOC(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(vpsp1,(cplex*nfft))
+ ABI_MALLOC(dum_cwaveprj,(0,0))
 
 !--------------------------------------------------------------------------------------
 !Calculate first terms involving only ground state wavefunctions
@@ -2702,8 +2702,8 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  g0term=1
 
 !Specific allocations
- ABI_ALLOCATE(cj_h1vstrain_ci,(2,nstrpert,nband_k,nband_k))
- ABI_ALLOCATE(part_ylmgr_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ ABI_MALLOC(cj_h1vstrain_ci,(2,nstrpert,nband_k,nband_k))
+ ABI_MALLOC(part_ylmgr_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
  part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3+6*((ipert-dtset%natom)/10),:)
 
 !LOOP OVER STRAIN PERTURBATIONS
@@ -2767,13 +2767,13 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do !istrpert
 
@@ -2791,8 +2791,8 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  berryopt=0;optlocal=1;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
 
 !Specific allocations
- ABI_ALLOCATE(ci_h1vatdisdag_cj,(2,natpert,nband_k,nband_k))
- ABI_ALLOCATE(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ ABI_MALLOC(ci_h1vatdisdag_cj,(2,natpert,nband_k,nband_k))
+ ABI_MALLOC(dum_ylmgr1_k,(npw_k,3+6*((ipert-dtset%natom)/10), psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
  do iatpert= 1, natpert
@@ -2855,21 +2855,21 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do !iatpert
 
 !Deallocations
- ABI_DEALLOCATE(dum_ylmgr1_k)
- ABI_DEALLOCATE(cwave0j)
- ABI_DEALLOCATE(vpsp1)
- ABI_DEALLOCATE(vlocal1)
+ ABI_FREE(dum_ylmgr1_k)
+ ABI_FREE(cwave0j)
+ ABI_FREE(vpsp1)
+ ABI_FREE(vlocal1)
 
 
 !----------------------------------------------------------------------------------------
@@ -2877,19 +2877,19 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 !----------------------------------------------------------------------------------------
 
 !Allocation of bks (band, k-point and spin) dependent terms
-ABI_ALLOCATE(c1atdis_q1gradH0_c1strain_bks,(2,nband_k,natpert,nq1grad,nstrpert))
-ABI_ALLOCATE(c1atdis_dQcalHstrain_c0_bks,(2,nband_k,natpert,nq1grad,nstrpert))
-ABI_ALLOCATE(c0_HatdisdagdQ_c1strain_bks,(2,nband_k,natpert,nq1grad,nstrpert))
-ABI_ALLOCATE(c0_Hatdisdqdag_c1strain_bks,(2,nband_k,natpert,nq1grad,nstrpert))
-ABI_ALLOCATE(c1atdis_Hmetricdqdq_c0_bks,(2,nband_k,natpert,nq1grad,nstrpert))
+ABI_MALLOC(c1atdis_q1gradH0_c1strain_bks,(2,nband_k,natpert,nq1grad,nstrpert))
+ABI_MALLOC(c1atdis_dQcalHstrain_c0_bks,(2,nband_k,natpert,nq1grad,nstrpert))
+ABI_MALLOC(c0_HatdisdagdQ_c1strain_bks,(2,nband_k,natpert,nq1grad,nstrpert))
+ABI_MALLOC(c0_Hatdisdqdag_c1strain_bks,(2,nband_k,natpert,nq1grad,nstrpert))
+ABI_MALLOC(c1atdis_Hmetricdqdq_c0_bks,(2,nband_k,natpert,nq1grad,nstrpert))
 c1atdis_dQcalHstrain_c0_bks=zero
 c0_HatdisdagdQ_c1strain_bks=zero
 
 !Allocation of wf1s
- ABI_ALLOCATE(cg1_strain,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_strain_ar,(3,3,2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_atdis,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cg1_ddk,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_strain,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_strain_ar,(3,3,2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_atdis,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cg1_ddk,(2,npw_k*dtset%nspinor))
 
 !Check correspondance with the data in wf1 files
  !Atomic displacements
@@ -2948,7 +2948,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
 !--------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
 
 !Specific definitions
  vlocal1=zero
@@ -3021,20 +3021,20 @@ c0_HatdisdagdQ_c1strain_bks=zero
    call rf_hamkq%free()
 
    !Deallocations
-   ABI_DEALLOCATE(kpg_k)
-   ABI_DEALLOCATE(kpg1_k)
-   ABI_DEALLOCATE(dkinpw)
-   ABI_DEALLOCATE(kinpw1)
-   ABI_DEALLOCATE(ffnlk)
-   ABI_DEALLOCATE(ffnl1)
-   ABI_DEALLOCATE(ph3d)
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
 
  end do !iq1grad
 
 !Deallocations
- ABI_DEALLOCATE(gv1c)
- ABI_DEALLOCATE(vlocal1)
- !ABI_DEALLOCATE(ph3d1) !it is only allocated if kpt and kpq are different. Not the case.
+ ABI_FREE(gv1c)
+ ABI_FREE(vlocal1)
+ !ABI_FREE(ph3d1) !it is only allocated if kpt and kpq are different. Not the case.
 
 !--------------------------------------------------------------------------------------
 !Two terms involving a q-gradient of projector operators
@@ -3143,9 +3143,9 @@ c0_HatdisdagdQ_c1strain_bks=zero
  end do !iband
 
 !Deallocations
- ABI_DEALLOCATE(ci_h1vatdisdag_cj)
- ABI_DEALLOCATE(cj_h1vstrain_ci)
- ABI_DEALLOCATE(cg1_ddk)
+ ABI_FREE(ci_h1vatdisdag_cj)
+ ABI_FREE(cj_h1vstrain_ci)
+ ABI_FREE(cg1_ddk)
 
 !--------------------------------------------------------------------------------------
 !Two terms involving a q-gradient of first order Hamiltonians
@@ -3159,12 +3159,12 @@ c0_HatdisdagdQ_c1strain_bks=zero
 !--------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(vhart1dqdq,(2*nfft))
- ABI_ALLOCATE(vpsp1dqdq,(2*nfft))
- ABI_ALLOCATE(vlocal1dqdq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(gh1dqdqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvloc1dqdqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvnl1dqdqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(vhart1dqdq,(2*nfft))
+ ABI_MALLOC(vpsp1dqdq,(2*nfft))
+ ABI_MALLOC(vlocal1dqdq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(gh1dqdqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvloc1dqdqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvnl1dqdqc,(2,npw_k*dtset%nspinor))
 
 !Specific definitions
  useylmgr1=1;optlocal=1;optnl=1;opthartdqdq=1;
@@ -3237,26 +3237,26 @@ c0_HatdisdagdQ_c1strain_bks=zero
      call rf_hamkq%free()
 
      !Deallocations
-     ABI_DEALLOCATE(kpg_k)
-     ABI_DEALLOCATE(kpg1_k)
-     ABI_DEALLOCATE(dkinpw)
-     ABI_DEALLOCATE(kinpw1)
-     ABI_DEALLOCATE(ffnlk)
-     ABI_DEALLOCATE(ffnl1)
-     ABI_DEALLOCATE(ph3d)
+     ABI_FREE(kpg_k)
+     ABI_FREE(kpg1_k)
+     ABI_FREE(dkinpw)
+     ABI_FREE(kinpw1)
+     ABI_FREE(ffnlk)
+     ABI_FREE(ffnl1)
+     ABI_FREE(ph3d)
 
    end do !iq1grad
 
  end do !istrpert
 
 !Deallocations
- ABI_DEALLOCATE(cg1_atdis)
- ABI_DEALLOCATE(vhart1dqdq)
- ABI_DEALLOCATE(gh1dqdqc)
- ABI_DEALLOCATE(gvloc1dqdqc)
- ABI_DEALLOCATE(gvnl1dqdqc)
- ABI_DEALLOCATE(vpsp1dqdq)
- ABI_DEALLOCATE(vlocal1dqdq)
+ ABI_FREE(cg1_atdis)
+ ABI_FREE(vhart1dqdq)
+ ABI_FREE(gh1dqdqc)
+ ABI_FREE(gvloc1dqdqc)
+ ABI_FREE(gvnl1dqdqc)
+ ABI_FREE(vpsp1dqdq)
+ ABI_FREE(vlocal1dqdq)
 
 !--------------------------------------------------------------------------------------
 ! q1-gradient of atomic displacement 1st-order Hamiltonian:
@@ -3266,11 +3266,11 @@ c0_HatdisdagdQ_c1strain_bks=zero
 !--------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(vpsp1dq,(2*nfft))
- ABI_ALLOCATE(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(gh1dqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvloc1dqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvnl1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(vpsp1dq,(2*nfft))
+ ABI_MALLOC(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(gh1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvloc1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvnl1dqc,(2,npw_k*dtset%nspinor))
 
 !Specific definitions
  useylmgr1=1;nylmgrpart=3;optlocal=1;optnl=1
@@ -3349,30 +3349,30 @@ c0_HatdisdagdQ_c1strain_bks=zero
      call rf_hamkq%free()
 
      !Deallocations
-     ABI_DEALLOCATE(kpg_k)
-     ABI_DEALLOCATE(kpg1_k)
-     ABI_DEALLOCATE(dkinpw)
-     ABI_DEALLOCATE(kinpw1)
-     ABI_DEALLOCATE(ffnlk)
-     ABI_DEALLOCATE(ffnl1)
-     ABI_DEALLOCATE(ph3d)
+     ABI_FREE(kpg_k)
+     ABI_FREE(kpg1_k)
+     ABI_FREE(dkinpw)
+     ABI_FREE(kinpw1)
+     ABI_FREE(ffnlk)
+     ABI_FREE(ffnl1)
+     ABI_FREE(ph3d)
 
    end do !iq1grad
 
  end do !iatpert
 
 !Deallocations
- ABI_DEALLOCATE(cg1_strain)
- ABI_DEALLOCATE(cg1_strain_ar)
- ABI_DEALLOCATE(part_ylmgr_k)
- ABI_DEALLOCATE(dum_cwaveprj)
- ABI_DEALLOCATE(gh1dqc)
- ABI_DEALLOCATE(gvloc1dqc)
- ABI_DEALLOCATE(gvnl1dqc)
- ABI_DEALLOCATE(vpsp1dq)
- ABI_DEALLOCATE(vlocal1dq)
- ABI_DEALLOCATE(dum_vpsp)
- ABI_DEALLOCATE(dum_vlocal)
+ ABI_FREE(cg1_strain)
+ ABI_FREE(cg1_strain_ar)
+ ABI_FREE(part_ylmgr_k)
+ ABI_FREE(dum_cwaveprj)
+ ABI_FREE(gh1dqc)
+ ABI_FREE(gvloc1dqc)
+ ABI_FREE(gvnl1dqc)
+ ABI_FREE(vpsp1dq)
+ ABI_FREE(vlocal1dq)
+ ABI_FREE(dum_vpsp)
+ ABI_FREE(dum_vlocal)
 
 !--------------------------------------------------------------------------------------
 ! Acumulate all the wf dependent terms of the flexoelectric tensor
@@ -3456,12 +3456,12 @@ end do
  isdqwf_k=isdqwf_k * wtk_k
 
 !Deallocations
- ABI_DEALLOCATE(c1atdis_q1gradH0_c1strain_bks)
- ABI_DEALLOCATE(c1atdis_dQcalHstrain_c0_bks)
- ABI_DEALLOCATE(c0_HatdisdagdQ_c1strain_bks)
- ABI_DEALLOCATE(c1atdis_Hmetricdqdq_c0_bks)
- ABI_DEALLOCATE(c0_Hatdisdqdag_c1strain_bks)
- ABI_DEALLOCATE(cwave0i)
+ ABI_FREE(c1atdis_q1gradH0_c1strain_bks)
+ ABI_FREE(c1atdis_dQcalHstrain_c0_bks)
+ ABI_FREE(c0_HatdisdagdQ_c1strain_bks)
+ ABI_FREE(c1atdis_Hmetricdqdq_c0_bks)
+ ABI_FREE(c0_Hatdisdqdag_c1strain_bks)
+ ABI_FREE(cwave0i)
 
  DBG_EXIT("COLL")
 
@@ -3599,15 +3599,15 @@ subroutine dfpt_isdqfr(atindx,cg,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
  tim_getgh1c=0
 
 !Additional allocations
- ABI_ALLOCATE(cwave0i,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(dum_vpsp,(nfft))
- ABI_ALLOCATE(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_DATATYPE_ALLOCATE(dum_cwaveprj,(0,0))
- ABI_ALLOCATE(vpsp1dq,(2*nfft))
- ABI_ALLOCATE(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(gh1dqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvloc1dqc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(gvnl1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cwave0i,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(dum_vpsp,(nfft))
+ ABI_MALLOC(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(dum_cwaveprj,(0,0))
+ ABI_MALLOC(vpsp1dq,(2*nfft))
+ ABI_MALLOC(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(gh1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvloc1dqc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(gvnl1dqc,(2,npw_k*dtset%nspinor))
 
 !Additional definitions
  useylmgr1=1;optlocal=1;optnl=1
@@ -3618,8 +3618,8 @@ subroutine dfpt_isdqfr(atindx,cg,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
 !-----------------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(c0_hatdisdq_c0_bks,(2,nband_k,3,natpert))
- ABI_ALLOCATE(part_ylmgr_k,(npw_k,3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ ABI_MALLOC(c0_hatdisdq_c0_bks,(2,nband_k,3,natpert))
+ ABI_MALLOC(part_ylmgr_k,(npw_k,3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
  part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3,:)
 
 !Specific definitions
@@ -3680,19 +3680,19 @@ subroutine dfpt_isdqfr(atindx,cg,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
      call rf_hamkq%free()
 
      !Deallocations
-     ABI_DEALLOCATE(kpg_k)
-     ABI_DEALLOCATE(kpg1_k)
-     ABI_DEALLOCATE(dkinpw)
-     ABI_DEALLOCATE(kinpw1)
-     ABI_DEALLOCATE(ffnlk)
-     ABI_DEALLOCATE(ffnl1)
-     ABI_DEALLOCATE(ph3d)
+     ABI_FREE(kpg_k)
+     ABI_FREE(kpg1_k)
+     ABI_FREE(dkinpw)
+     ABI_FREE(kinpw1)
+     ABI_FREE(ffnlk)
+     ABI_FREE(ffnl1)
+     ABI_FREE(ph3d)
 
    end do !iq1grad
 
  end do !iatpert
 
- ABI_DEALLOCATE(part_ylmgr_k)
+ ABI_FREE(part_ylmgr_k)
 
 !-----------------------------------------------------------------------------------------------
 !  2nd q-gradient of atomic displacement 1st order hamiltonian * momentum operator :
@@ -3700,12 +3700,12 @@ subroutine dfpt_isdqfr(atindx,cg,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
 !-----------------------------------------------------------------------------------------------
 
 !Specific allocations
- ABI_ALLOCATE(gh1dqpkc,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(c0_ghatdisdqdq_pk_c0,(2,nband_k,3,3,3,natpert))
+ ABI_MALLOC(gh1dqpkc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(c0_ghatdisdqdq_pk_c0,(2,nband_k,3,3,3,natpert))
 
 !Generate k+G vectors
  nkpg=3
- ABI_ALLOCATE(kpg_pk,(npw_k,nkpg))
+ ABI_MALLOC(kpg_pk,(npw_k,nkpg))
  call mkkpg(kg_k,kpg_pk,kpt,nkpg,npw_k)
 
 !LOOP OVER ATOMIC DISPLACEMENT PERTURBATIONS
@@ -3772,13 +3772,13 @@ subroutine dfpt_isdqfr(atindx,cg,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
        call rf_hamkq%free()
 
        !Deallocations
-       ABI_DEALLOCATE(kpg_k)
-       ABI_DEALLOCATE(kpg1_k)
-       ABI_DEALLOCATE(dkinpw)
-       ABI_DEALLOCATE(kinpw1)
-       ABI_DEALLOCATE(ffnlk)
-       ABI_DEALLOCATE(ffnl1)
-       ABI_DEALLOCATE(ph3d)
+       ABI_FREE(kpg_k)
+       ABI_FREE(kpg1_k)
+       ABI_FREE(dkinpw)
+       ABI_FREE(kinpw1)
+       ABI_FREE(ffnlk)
+       ABI_FREE(ffnl1)
+       ABI_FREE(ph3d)
 
      end do !iq2grad
 
@@ -3787,24 +3787,24 @@ subroutine dfpt_isdqfr(atindx,cg,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
  end do !iatpert
 
 !Deallocations
- ABI_DEALLOCATE(dum_cwaveprj)
- ABI_DEALLOCATE(gh1dqc)
- ABI_DEALLOCATE(gh1dqpkc)
- ABI_DEALLOCATE(gvloc1dqc)
- ABI_DEALLOCATE(gvnl1dqc)
- ABI_DEALLOCATE(vpsp1dq)
- ABI_DEALLOCATE(vlocal1dq)
- ABI_DEALLOCATE(dum_vpsp)
- ABI_DEALLOCATE(dum_vlocal)
- ABI_DEALLOCATE(kpg_pk)
- ABI_DEALLOCATE(cwave0i)
+ ABI_FREE(dum_cwaveprj)
+ ABI_FREE(gh1dqc)
+ ABI_FREE(gh1dqpkc)
+ ABI_FREE(gvloc1dqc)
+ ABI_FREE(gvnl1dqc)
+ ABI_FREE(vpsp1dq)
+ ABI_FREE(vlocal1dq)
+ ABI_FREE(dum_vpsp)
+ ABI_FREE(dum_vlocal)
+ ABI_FREE(kpg_pk)
+ ABI_FREE(cwave0i)
 
 !--------------------------------------------------------------------------------------
 ! Acumulates the three frozen wf terms of the q-gradient of the internal strain
 !--------------------------------------------------------------------------------------
 
 !Specific allocations and definitions
- ABI_ALLOCATE(frwfdq_bks,(2,nband_k,matom,3,3,3,nq1grad))
+ ABI_MALLOC(frwfdq_bks,(2,nband_k,matom,3,3,3,nq1grad))
 ! fac=pi*pi/ucvol
 
 
@@ -3888,9 +3888,9 @@ subroutine dfpt_isdqfr(atindx,cg,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
  frwfdq_k=frwfdq_k * wtk_k
 
 !Deallocations
- ABI_DEALLOCATE(c0_hatdisdq_c0_bks)
- ABI_DEALLOCATE(c0_ghatdisdqdq_pk_c0)
- ABI_DEALLOCATE(frwfdq_bks)
+ ABI_FREE(c0_hatdisdq_c0_bks)
+ ABI_FREE(c0_ghatdisdqdq_pk_c0)
+ ABI_FREE(frwfdq_bks)
 
 
  DBG_EXIT("COLL")

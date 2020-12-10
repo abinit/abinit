@@ -91,11 +91,11 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
  nrefs=40
- ABI_ALLOCATE(cite,(nrefs))
- ABI_ALLOCATE(ref,(nrefs))
- ABI_ALLOCATE(comment,(nrefs))
+ ABI_MALLOC(cite,(nrefs))
+ ABI_MALLOC(ref,(nrefs))
+ ABI_MALLOC(comment,(nrefs))
 
- ABI_ALLOCATE(priority,(nrefs))
+ ABI_MALLOC(priority,(nrefs))
 !The highest, the best, except that one from -1 and -2 should be cited.
 !0 means, cite if there are less than five papers total, otherwise forget, and any case, mention that it is optional.
 !1-19 means specific papers, that must be cited. However, they might not appear in the top list of papers.
@@ -623,10 +623,10 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  end do
 
 !Cleaning
- ABI_DEALLOCATE(cite)
- ABI_DEALLOCATE(ref)
- ABI_DEALLOCATE(comment)
- ABI_DEALLOCATE(priority)
+ ABI_FREE(cite)
+ ABI_FREE(ref)
+ ABI_FREE(comment)
+ ABI_FREE(priority)
 
 end subroutine out_acknowl
 !!***

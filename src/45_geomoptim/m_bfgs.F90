@@ -379,9 +379,9 @@ subroutine brdene(etotal,etotal_prev,hessin,ndim,vin,vin_prev,vout,vout_prev)
 
 !***************************************************************************
 
- ABI_ALLOCATE(dvin,(ndim))
- ABI_ALLOCATE(vin_min,(ndim))
- ABI_ALLOCATE(vout_min,(ndim))
+ ABI_MALLOC(dvin,(ndim))
+ ABI_MALLOC(vin_min,(ndim))
+ ABI_MALLOC(vout_min,(ndim))
 
  lambda_1=1.0_dp       ; lambda_2=0.0_dp
  etotal_1=etotal      ; etotal_2=etotal_prev
@@ -419,9 +419,9 @@ subroutine brdene(etotal,etotal_prev,hessin,ndim,vin,vin_prev,vout,vout_prev)
 !Previous atomic forces
  vout_prev(:)=vout(:)
 
- ABI_DEALLOCATE(dvin)
- ABI_DEALLOCATE(vin_min)
- ABI_DEALLOCATE(vout_min)
+ ABI_FREE(dvin)
+ ABI_FREE(vin_min)
+ ABI_FREE(vout_min)
 
 end subroutine brdene
 !!***

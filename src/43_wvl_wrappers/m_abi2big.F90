@@ -1107,10 +1107,10 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
 
  if (hmem.and.nspden==2) then
    if (opt==1) then
-     ABI_ALLOCATE(rhoup,(nfft))
-     ABI_ALLOCATE(rhodn,(nfft))
+     ABI_MALLOC(rhoup,(nfft))
+     ABI_MALLOC(rhodn,(nfft))
    else if (opt==2)  then
-     ABI_ALLOCATE(rhotot,(nfft))
+     ABI_MALLOC(rhotot,(nfft))
    end if
  end if
 
@@ -1173,10 +1173,10 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
 
  if (hmem.and.nspden==2) then
    if (opt==1) then
-     ABI_DEALLOCATE(rhoup)
-     ABI_DEALLOCATE(rhodn)
+     ABI_FREE(rhoup)
+     ABI_FREE(rhodn)
    else if (opt==2) then
-     ABI_DEALLOCATE(rhotot)
+     ABI_FREE(rhotot)
    end if !opt
  end if
 
@@ -1361,7 +1361,7 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
  end if
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, wvl%atoms%astruct%nat))
+ ABI_MALLOC(xcart,(3, wvl%atoms%astruct%nat))
  call xred2xcart(wvl%atoms%astruct%nat, rprimd, xcart, xred)
 
  call nullify_locreg_descriptors(wvl%Glr)
@@ -1390,7 +1390,7 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
 
 !Save shifted atom positions into xred
  call xcart2xred(wvl%atoms%astruct%nat, rprimd, xcart, xred)
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
  if (prtvol == 0) then
    write(message, '(a,3I12)' ) &

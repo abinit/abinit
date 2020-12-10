@@ -49,11 +49,11 @@ subroutine xmpi_sum_int(xval,comm,ier)
    if (xmpi_use_inplace_operations) then
      call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
    else
-     ABI_STAT_ALLOCATE(xsum,(n1), ier)
+     ABI_STAT_MALLOC(xsum,(n1), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int')
      call MPI_ALLREDUCE(xval,xsum,n1,MPI_INTEGER,MPI_SUM,comm,ier)
      xval (:) = xsum(:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
 
  end if
@@ -202,11 +202,11 @@ subroutine xmpi_sum_intn(xval,n1,comm,ier)
      if (xmpi_use_inplace_operations) then
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1), ier)
+       ABI_STAT_MALLOC(xsum,(n1), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_intn')
        call MPI_ALLREDUCE(xval,xsum,n1,MPI_INTEGER,MPI_SUM,comm,ier)
        xval (:) = xsum(:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
    end if
@@ -326,11 +326,11 @@ subroutine xmpi_sum_int2d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2), ier)
        if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int2d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:) = xsum(:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      end if
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -403,11 +403,11 @@ subroutine xmpi_sum_int3d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int3d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:) = xsum(:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      end if
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -481,11 +481,11 @@ subroutine xmpi_sum_int4d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_int4d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:) = xsum(:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      end if
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -544,11 +544,11 @@ subroutine xmpi_sum_dp(xval,comm,ier)
      if (xmpi_use_inplace_operations) then
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1), ier)
+       ABI_STAT_MALLOC(xsum,(n1), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp')
        call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
        xval (:) = xsum(:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      end if
 
    end if
@@ -717,11 +717,11 @@ subroutine xmpi_sum_dpn(xval,n1,comm,ier)
      if (xmpi_use_inplace_operations) then
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1), ier)
+       ABI_STAT_MALLOC(xsum,(n1), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dpn')
        call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
        xval (:) = xsum(:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      end if
 
    end if
@@ -792,11 +792,11 @@ subroutine xmpi_sum_sp2d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp2d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:) = xsum(:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
     end if
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -869,11 +869,11 @@ subroutine xmpi_sum_sp3d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp3d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:) = xsum(:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      end if
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -946,11 +946,11 @@ subroutine xmpi_sum_sp4d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp4d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:) = xsum(:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -1024,11 +1024,11 @@ subroutine xmpi_sum_sp5d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp5d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:,:) = xsum(:,:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -1103,11 +1103,11 @@ subroutine xmpi_sum_sp6d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6), ier)
        if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp6d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:,:,:) = xsum(:,:,:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      end if
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -1182,11 +1182,11 @@ subroutine xmpi_sum_sp7d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_sp7d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:,:,:,:) = xsum(:,:,:,:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -1260,11 +1260,11 @@ subroutine xmpi_sum_dp2d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp2d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:) = xsum(:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -1337,11 +1337,11 @@ subroutine xmpi_sum_dp3d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp3d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:) = xsum(:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -1415,11 +1415,11 @@ subroutine xmpi_sum_dp4d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp4d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:) = xsum(:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -1494,11 +1494,11 @@ subroutine xmpi_sum_dp5d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp5d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:,:) = xsum(:,:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -1573,11 +1573,11 @@ subroutine xmpi_sum_dp6d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6), ier)
        if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp6d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:,:,:) = xsum(:,:,:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -1653,11 +1653,11 @@ subroutine xmpi_sum_dp7d(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_dp7d')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:,:,:,:) = xsum(:,:,:,:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -1963,11 +1963,11 @@ subroutine xmpi_sum_c1dc(xval,comm,ier)
      if (xmpi_use_inplace_operations) then
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1), ier)
+       ABI_STAT_MALLOC(xsum,(n1), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c1dc')
        call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_COMPLEX,MPI_SUM,comm,ier)
        xval (:) = xsum(:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
    end if
@@ -2038,11 +2038,11 @@ subroutine xmpi_sum_c2dc(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c2dc')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:) = xsum(:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      end if
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -2115,11 +2115,11 @@ subroutine xmpi_sum_c3dc(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c3dc')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:) = xsum(:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      end if
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -2193,11 +2193,11 @@ subroutine xmpi_sum_c4dc(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c4dc')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:) = xsum(:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -2271,11 +2271,11 @@ subroutine xmpi_sum_c5dc(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
        if (ier/=0) call xmpi_abort(comm,msg='error allocating xsum in xmpi_sum_c5dc')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:,:) = xsum(:,:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -2350,11 +2350,11 @@ subroutine xmpi_sum_c6dc(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6), ier)
        if (ier/=0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c6dc')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval = xsum
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -2430,13 +2430,13 @@ subroutine xmpi_sum_c7dc(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7),ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6,n7),ier)
        if (ier/=0) then
          call xmpi_abort(comm=comm,msg='error allocating xsum in xmpi_sum_c7dc')
        end if
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval = xsum
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -2495,11 +2495,11 @@ subroutine xmpi_sum_c1cplx(xval,comm,ier)
      if (xmpi_use_inplace_operations) then
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_COMPLEX,MPI_SUM,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1), ier)
+       ABI_STAT_MALLOC(xsum,(n1), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c1cplx')
        call MPI_ALLREDUCE(xval,xsum,n1,MPI_COMPLEX,MPI_SUM,comm,ier)
        xval (:) = xsum(:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
    end if
@@ -2570,11 +2570,11 @@ subroutine xmpi_sum_c2cplx(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c2cplx')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:) = xsum(:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -2652,11 +2652,11 @@ subroutine xmpi_sum_c3cplx(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c3cplx')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:) = xsum(:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -2735,11 +2735,11 @@ subroutine xmpi_sum_c4cplx(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c4cplx')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:) = xsum(:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -2814,11 +2814,11 @@ subroutine xmpi_sum_c5cplx(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c5cplx')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval (:,:,:,:,:) = xsum(:,:,:,:,:)
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)
@@ -2893,11 +2893,11 @@ subroutine xmpi_sum_c6cplx(xval,comm,ier)
        if (my_op/=MPI_SUM) call xmpi_abort(msg="Too many data for in-place reductions!")
        call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
      else
-       ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
+       ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum_c6cplx')
        call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
        xval = xsum
-       ABI_DEALLOCATE(xsum)
+       ABI_FREE(xsum)
      endif
 
      if (ntot>xmpi_maxint32_64) call xmpi_largetype_free(my_dt,my_op)

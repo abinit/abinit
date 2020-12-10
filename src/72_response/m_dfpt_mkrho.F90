@@ -194,14 +194,14 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6) !n4,n5,n6 are FFT dimensions, modified to avoid cache trashing
 
 !Note that the dimensioning of cwavef and cwavef1 does not include nspinor
- ABI_ALLOCATE(cwavef,(2,mpw))
- ABI_ALLOCATE(cwavef1,(2,mpw1))
+ ABI_MALLOC(cwavef,(2,mpw))
+ ABI_MALLOC(cwavef1,(2,mpw1))
 !Actually, rhoaug is not needed, except for strong dimensioning requirement
- ABI_ALLOCATE(dummy,(2,1))
- ABI_ALLOCATE(rhoaug,(n4,n5,n6,nspinor**2))
- ABI_ALLOCATE(rhoaug1,(cplex*n4,n5,n6,nspinor**2))
- ABI_ALLOCATE(wfraug,(2,n4,n5,n6))
- ABI_ALLOCATE(wfraug1,(2,n4,n5,n6))
+ ABI_MALLOC(dummy,(2,1))
+ ABI_MALLOC(rhoaug,(n4,n5,n6,nspinor**2))
+ ABI_MALLOC(rhoaug1,(cplex*n4,n5,n6,nspinor**2))
+ ABI_MALLOC(wfraug,(2,n4,n5,n6))
+ ABI_MALLOC(wfraug1,(2,n4,n5,n6))
 
 ! EB FR Separate collinear and non-collinear magnetism
  if (nspden /= 4) then  ! EB FR nspden check
@@ -223,10 +223,10 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
          cycle
        end if
 
-       ABI_ALLOCATE(gbound,(2*mgfft+8,2))
-       ABI_ALLOCATE(kg_k,(3,npw_k))
-       ABI_ALLOCATE(gbound1,(2*mgfft+8,2))
-       ABI_ALLOCATE(kg1_k,(3,npw1_k))
+       ABI_MALLOC(gbound,(2*mgfft+8,2))
+       ABI_MALLOC(kg_k,(3,npw_k))
+       ABI_MALLOC(gbound1,(2*mgfft+8,2))
+       ABI_MALLOC(kg1_k,(3,npw1_k))
 
        kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
        call sphereboundary(gbound,istwf_k,kg_k,mgfft,npw_k)
@@ -291,10 +291,10 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
          end if ! abs(occ_rbz(iband+bdtot_index))>tol8
        end do ! iband
 
-       ABI_DEALLOCATE(gbound)
-       ABI_DEALLOCATE(kg_k)
-       ABI_DEALLOCATE(gbound1)
-       ABI_DEALLOCATE(kg1_k)
+       ABI_FREE(gbound)
+       ABI_FREE(kg_k)
+       ABI_FREE(gbound1)
+       ABI_FREE(kg1_k)
 
        bdtot_index=bdtot_index+nband_k
 
@@ -343,10 +343,10 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
        cycle
      end if
 
-     ABI_ALLOCATE(gbound,(2*mgfft+8,2))
-     ABI_ALLOCATE(kg_k,(3,npw_k))
-     ABI_ALLOCATE(gbound1,(2*mgfft+8,2))
-     ABI_ALLOCATE(kg1_k,(3,npw1_k))
+     ABI_MALLOC(gbound,(2*mgfft+8,2))
+     ABI_MALLOC(kg_k,(3,npw_k))
+     ABI_MALLOC(gbound1,(2*mgfft+8,2))
+     ABI_MALLOC(kg1_k,(3,npw1_k))
 
      kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
      call sphereboundary(gbound,istwf_k,kg_k,mgfft,npw_k)
@@ -364,14 +364,14 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 
 ! Build the four components of rho. We use only norm quantities and, so fourwf.
 
-         ABI_ALLOCATE(wfraug_up,(2,n4,n5,n6))
-         ABI_ALLOCATE(wfraug_down,(2,n4,n5,n6))
-         ABI_ALLOCATE(wfraug1_up,(2,n4,n5,n6))
-         ABI_ALLOCATE(wfraug1_down,(2,n4,n5,n6))
-         ABI_ALLOCATE(cwave0_up,(2,mpw))
-         ABI_ALLOCATE(cwave0_down,(2,mpw))
-         ABI_ALLOCATE(cwave1_up,(2,mpw1))
-         ABI_ALLOCATE(cwave1_down,(2,mpw1))
+         ABI_MALLOC(wfraug_up,(2,n4,n5,n6))
+         ABI_MALLOC(wfraug_down,(2,n4,n5,n6))
+         ABI_MALLOC(wfraug1_up,(2,n4,n5,n6))
+         ABI_MALLOC(wfraug1_down,(2,n4,n5,n6))
+         ABI_MALLOC(cwave0_up,(2,mpw))
+         ABI_MALLOC(cwave0_down,(2,mpw))
+         ABI_MALLOC(cwave1_up,(2,mpw1))
+         ABI_MALLOC(cwave1_down,(2,mpw1))
 
 ! EB FR build spinorial wavefunctions
 ! Obtain Fourier transform in fft box and accumulate the density
@@ -459,22 +459,22 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
              end do
            end do
          end if
-         ABI_DEALLOCATE(wfraug_up)
-         ABI_DEALLOCATE(wfraug_down)
-         ABI_DEALLOCATE(wfraug1_up)
-         ABI_DEALLOCATE(wfraug1_down)
-         ABI_DEALLOCATE(cwave0_up)
-         ABI_DEALLOCATE(cwave0_down)
-         ABI_DEALLOCATE(cwave1_up)
-         ABI_DEALLOCATE(cwave1_down)
+         ABI_FREE(wfraug_up)
+         ABI_FREE(wfraug_down)
+         ABI_FREE(wfraug1_up)
+         ABI_FREE(wfraug1_down)
+         ABI_FREE(cwave0_up)
+         ABI_FREE(cwave0_down)
+         ABI_FREE(cwave1_up)
+         ABI_FREE(cwave1_down)
 
        end if ! occupied states
      end do ! End loop on iband
 
-     ABI_DEALLOCATE(gbound)
-     ABI_DEALLOCATE(kg_k)
-     ABI_DEALLOCATE(gbound1)
-     ABI_DEALLOCATE(kg1_k)
+     ABI_FREE(gbound)
+     ABI_FREE(kg_k)
+     ABI_FREE(gbound1)
+     ABI_FREE(kg1_k)
 
      bdtot_index=bdtot_index+nband_k
 
@@ -507,13 +507,13 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !call timab(63,2,tsec)
 !end if
 
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(cwavef1)
- ABI_DEALLOCATE(dummy)
- ABI_DEALLOCATE(rhoaug)
- ABI_DEALLOCATE(rhoaug1)
- ABI_DEALLOCATE(wfraug)
- ABI_DEALLOCATE(wfraug1)
+ ABI_FREE(cwavef)
+ ABI_FREE(cwavef1)
+ ABI_FREE(dummy)
+ ABI_FREE(rhoaug)
+ ABI_FREE(rhoaug1)
+ ABI_FREE(wfraug)
+ ABI_FREE(wfraug1)
 
 !Recreate full rhor1 on all proc.
  call timab(48,1,tsec)
@@ -646,7 +646,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  if (option/=1.and.option/=2.and.option/=3) return
 
 !Initializations
- ABI_ALLOCATE(rhoaug,(gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc))
+ ABI_MALLOC(rhoaug,(gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc))
  n1=gs_hamkq%ngfft(1);n2=gs_hamkq%ngfft(2);n3=gs_hamkq%ngfft(3)
  if (option==2.or.option==3) eloc0_k=zero
  if (option==2.or.option==3) vlocal => gs_hamkq%vlocal
@@ -654,7 +654,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Loop on spinorial components
 ! TODO : double loop on spinors for full rhoaug1 matrix if nspden =4
  if (gs_hamkq%nvloc/=4) then  ! see later EB FR
-   ABI_ALLOCATE(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+   ABI_MALLOC(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
    do ispinor=1,nspinor
 
@@ -715,7 +715,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
 !    Compute 0-order WF in real space
 ! TODO: add loop over ispinor_prime here
-       ABI_ALLOCATE(wfraug,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+       ABI_MALLOC(wfraug,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
        if (ispinor==1) then
          cwavef_sp => cwave0(:,1:npw_k)
        else
@@ -753,17 +753,17 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
            end do
          end do
        end if
-       ABI_DEALLOCATE(wfraug)
+       ABI_FREE(wfraug)
      end if ! option
 
    end do ! Loop on spinorial components if nspden=1 or 2
 
-   ABI_DEALLOCATE(wfraug1)
+   ABI_FREE(wfraug1)
  else ! nvloc = 4
 ! The same lines of code are in 72_response/dfpt_mkrho.F90
 ! TODO merge these lines in a single routine??!!
-   ABI_ALLOCATE(wfraug1_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
-   ABI_ALLOCATE(wfraug1_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+   ABI_MALLOC(wfraug1_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+   ABI_MALLOC(wfraug1_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
    wfraug1_up(:,:,:,:)=zero
    wfraug1_down(:,:,:,:)=zero
@@ -841,8 +841,8 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 ! zero order
      cwave0_up => cwave0(:,1:npw_k)
      cwave0_down => cwave0(:,1+npw_k:2*npw_k)
-     ABI_ALLOCATE(wfraug_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
-     ABI_ALLOCATE(wfraug_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+     ABI_MALLOC(wfraug_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+     ABI_MALLOC(wfraug_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
      wfraug_up(:,:,:,:)=zero
      wfraug_down(:,:,:,:)=zero
 !
@@ -919,17 +919,17 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
        end do
      end if !cplex
 
-     ABI_DEALLOCATE(wfraug_up)
-     ABI_DEALLOCATE(wfraug_down)
+     ABI_FREE(wfraug_up)
+     ABI_FREE(wfraug_down)
 
    end if ! option
 
-   ABI_DEALLOCATE(wfraug1_up)
-   ABI_DEALLOCATE(wfraug1_down)
+   ABI_FREE(wfraug1_up)
+   ABI_FREE(wfraug1_down)
 
  end if ! nvloc /= 4
 
- ABI_DEALLOCATE(rhoaug)
+ ABI_FREE(rhoaug)
 
 !Part devoted to the accumulation of the 1st-order occupation matrix in PAW case
 ! TODO: parse for more nspden 4 dependencies on spinors
@@ -953,7 +953,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &     my_natom,natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,usetimerev,wtk_k,&
 &     comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
    else
-     ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,nspinor))
+     ABI_MALLOC(cwaveprj_tmp,(natom,nspinor))
      call pawcprj_alloc(cwaveprj_tmp,ncpgr,gs_hamkq%dimcprj)
      choice=2
      call getcprj(choice,0,cwave0,cwaveprj_tmp,&
@@ -966,7 +966,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &     my_natom,gs_hamkq%natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,usetimerev,wtk_k, &
 &     comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
      call pawcprj_free(cwaveprj_tmp)
-     ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
+     ABI_FREE(cwaveprj_tmp)
    end if
 
  end if

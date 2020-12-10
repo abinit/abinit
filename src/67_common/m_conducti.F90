@@ -204,9 +204,9 @@ contains
  ntypat=hdr%ntypat
  occopt=hdr%occopt
  rprimd(:,:)=hdr%rprimd(:,:)
- ABI_ALLOCATE(nband,(nkpt*nsppol))
- ABI_ALLOCATE(occ,(bantot))
- ABI_ALLOCATE(wtk,(nkpt))
+ ABI_MALLOC(nband,(nkpt*nsppol))
+ ABI_MALLOC(occ,(bantot))
+ ABI_MALLOC(wtk,(nkpt))
  fermie=hdr%fermie
  tsmear=hdr%tsmear
  occ(1:bantot)=hdr%occ(1:bantot)
@@ -227,7 +227,7 @@ contains
  Tatm=tsmear*Ha_K
  write(std_out,'(a,f12.5,a,f12.5,a)') ' Temp              =',tsmear,' Ha ',Tatm,' Kelvin'
 
- ABI_ALLOCATE(eigen0,(mband*nkpt*nsppol))
+ ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
  read(opt_unt)(eigen0(iband),iband=1,mband*nkpt*nsppol)
 !
 !
@@ -237,7 +237,7 @@ contains
 
 !---------------------------------------------------------------------------------
 !derivative of occupation wrt the energy.
- ABI_ALLOCATE(doccde,(mband*nkpt*nsppol))
+ ABI_MALLOC(doccde,(mband*nkpt*nsppol))
  if (occopt==1) then
    write(std_out,'(a,i4)')  ' occopt            =',occopt
    doccde=zero
@@ -248,27 +248,27 @@ contains
 !---------------------------------------------------------------------------------
 !size of the frequency range
  del=(omax-omin)/(mom-1)
- ABI_ALLOCATE(oml1,(mom))
+ ABI_MALLOC(oml1,(mom))
  do iom=1,mom
    oml1(iom)=omin+dble(iom-1)*del
  end do
- ABI_ALLOCATE(cond_nd,(mom,3,3))
- ABI_ALLOCATE(kin11,(mom,nsppol))
- ABI_ALLOCATE(kin12,(mom))
- ABI_ALLOCATE(kin21,(mom))
- ABI_ALLOCATE(kin22,(mom))
- ABI_ALLOCATE(sig_abs,(mom))
- ABI_ALLOCATE(kin11_k,(mom))
- ABI_ALLOCATE(kin12_k,(mom))
- ABI_ALLOCATE(kin21_k,(mom))
- ABI_ALLOCATE(kin22_k,(mom))
- ABI_ALLOCATE(Kth,(mom))
- ABI_ALLOCATE(Stp,(mom))
+ ABI_MALLOC(cond_nd,(mom,3,3))
+ ABI_MALLOC(kin11,(mom,nsppol))
+ ABI_MALLOC(kin12,(mom))
+ ABI_MALLOC(kin21,(mom))
+ ABI_MALLOC(kin22,(mom))
+ ABI_MALLOC(sig_abs,(mom))
+ ABI_MALLOC(kin11_k,(mom))
+ ABI_MALLOC(kin12_k,(mom))
+ ABI_MALLOC(kin21_k,(mom))
+ ABI_MALLOC(kin22_k,(mom))
+ ABI_MALLOC(Kth,(mom))
+ ABI_MALLOC(Stp,(mom))
 
 !---------------------------------------------------------------------------------
 !Conductivity -------
 !
- ABI_ALLOCATE(psinablapsi,(2,3,mband,mband))
+ ABI_MALLOC(psinablapsi,(2,3,mband,mband))
  kin11   = zero
  kin12   = zero
  kin21   = zero
@@ -284,11 +284,11 @@ contains
  do isppol=1,nsppol
    do ikpt=1,nkpt
      nband_k=nband(ikpt+(isppol-1)*nkpt)
-     ABI_ALLOCATE(eig0_k,(nband_k))
-     ABI_ALLOCATE(occ_k,(nband_k))
-     ABI_ALLOCATE(doccde_k,(nband_k))
-     ABI_ALLOCATE(dhdk2_r,(nband_k,nband_k,3,3))
-     ABI_ALLOCATE(dhdk2_g,(natom,nband_k,nband_k))
+     ABI_MALLOC(eig0_k,(nband_k))
+     ABI_MALLOC(occ_k,(nband_k))
+     ABI_MALLOC(doccde_k,(nband_k))
+     ABI_MALLOC(dhdk2_r,(nband_k,nband_k,3,3))
+     ABI_MALLOC(dhdk2_g,(natom,nband_k,nband_k))
 
      cond_nd   = zero
      kin11_k   = zero
@@ -387,11 +387,11 @@ contains
      deltae=deltae+(eig0_k(nband_k)-fermie)
 
      bdtot_index=bdtot_index+nband_k
-     ABI_DEALLOCATE(eig0_k)
-     ABI_DEALLOCATE(occ_k)
-     ABI_DEALLOCATE(doccde_k)
-     ABI_DEALLOCATE(dhdk2_r)
-     ABI_DEALLOCATE(dhdk2_g)
+     ABI_FREE(eig0_k)
+     ABI_FREE(occ_k)
+     ABI_FREE(doccde_k)
+     ABI_FREE(dhdk2_r)
+     ABI_FREE(dhdk2_g)
 !    End loop over k
    end do
 !  End loop over Spin
@@ -486,25 +486,25 @@ contains
 
  call WffClose(wff1,ierr)
 
- ABI_DEALLOCATE(psinablapsi)
- ABI_DEALLOCATE(kin11)
- ABI_DEALLOCATE(kin22)
- ABI_DEALLOCATE(kin12)
- ABI_DEALLOCATE(kin21)
- ABI_DEALLOCATE(kin11_k)
- ABI_DEALLOCATE(kin22_k)
- ABI_DEALLOCATE(kin12_k)
- ABI_DEALLOCATE(kin21_k)
- ABI_DEALLOCATE(Stp)
- ABI_DEALLOCATE(Kth)
- ABI_DEALLOCATE(cond_nd)
- ABI_DEALLOCATE(sig_abs)
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(nband)
- ABI_DEALLOCATE(oml1)
- ABI_DEALLOCATE(occ)
- ABI_DEALLOCATE(doccde)
- ABI_DEALLOCATE(wtk)
+ ABI_FREE(psinablapsi)
+ ABI_FREE(kin11)
+ ABI_FREE(kin22)
+ ABI_FREE(kin12)
+ ABI_FREE(kin21)
+ ABI_FREE(kin11_k)
+ ABI_FREE(kin22_k)
+ ABI_FREE(kin12_k)
+ ABI_FREE(kin21_k)
+ ABI_FREE(Stp)
+ ABI_FREE(Kth)
+ ABI_FREE(cond_nd)
+ ABI_FREE(sig_abs)
+ ABI_FREE(eigen0)
+ ABI_FREE(nband)
+ ABI_FREE(oml1)
+ ABI_FREE(occ)
+ ABI_FREE(doccde)
+ ABI_FREE(wtk)
 
  call hdr%free()
 
@@ -645,9 +645,9 @@ end subroutine conducti_paw
  ntypat=hdr%ntypat
  occopt=hdr%occopt
  rprimd(:,:)=hdr%rprimd(:,:)
- ABI_ALLOCATE(nband,(nkpt*nsppol))
- ABI_ALLOCATE(occ,(bantot))
- ABI_ALLOCATE(wtk,(nkpt))
+ ABI_MALLOC(nband,(nkpt*nsppol))
+ ABI_MALLOC(occ,(bantot))
+ ABI_MALLOC(wtk,(nkpt))
  fermie=hdr%fermie
  tsmear=hdr%tsmear
  occ(1:bantot)=hdr%occ(1:bantot)
@@ -668,15 +668,15 @@ end subroutine conducti_paw
  Tatm=tsmear*Ha_K
  write(std_out,'(a,f12.5,a,f12.5,a)') ' Temp              =',tsmear,' Ha ',Tatm,' Kelvin'
 
- ABI_ALLOCATE(eigen0,(mband*nkpt*nsppol))
+ ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
  read(opt2_unt)(eigen0(iband),iband=1,mband*nkpt*nsppol)
 !
  write(std_out,'(a)')'--------------------------------------------'
  read(opt2_unt) nphicor
  write(std_out,'(a,i4)') 'Number of core orbitals nc=',nphicor
- ABI_ALLOCATE(ncor,(nphicor))
- ABI_ALLOCATE(lcor,(nphicor))
- ABI_ALLOCATE(energy_cor,(nphicor))
+ ABI_MALLOC(ncor,(nphicor))
+ ABI_MALLOC(lcor,(nphicor))
+ ABI_MALLOC(energy_cor,(nphicor))
  do icor=1,nphicor
    read(opt2_unt) ncor(icor),lcor(icor),energy_cor(icor)
    write(std_out,'(a,2i4,f10.5)') ' n, l, Energy (Ha): ',ncor(icor),lcor(icor),energy_cor(icor)
@@ -690,17 +690,17 @@ end subroutine conducti_paw
 !---------------------------------------------------------------------------------
 !size of the frequency range
  del=(omax-omin)/(mom-1)
- ABI_ALLOCATE(oml1,(mom))
+ ABI_MALLOC(oml1,(mom))
  do iom=1,mom
    oml1(iom)=omin+dble(iom-1)*del
  end do
 
- ABI_ALLOCATE(sigx,(natom,mom,nphicor))
- ABI_ALLOCATE(sigx_av,(mom,nphicor))
+ ABI_MALLOC(sigx,(natom,mom,nphicor))
+ ABI_MALLOC(sigx_av,(mom,nphicor))
 !---------------------------------------------------------------------------------
 !SpectroX  -------
 !
- ABI_ALLOCATE(psinablapsi2,(2,3,mband,nphicor,natom))
+ ABI_MALLOC(psinablapsi2,(2,3,mband,nphicor,natom))
  sigx=zero
  sigx_av=zero
  bdtot_index = 0
@@ -711,9 +711,9 @@ end subroutine conducti_paw
 !  LOOP OVER K-POINTS
    do ikpt=1,nkpt
      nband_k=nband(ikpt+(isppol-1)*nkpt)
-     ABI_ALLOCATE(eig0_k,(nband_k))
-     ABI_ALLOCATE(occ_k,(nband_k))
-     ABI_ALLOCATE(dhdk2_g,(natom,nband_k,nphicor))
+     ABI_MALLOC(eig0_k,(nband_k))
+     ABI_MALLOC(occ_k,(nband_k))
+     ABI_MALLOC(dhdk2_g,(natom,nband_k,nphicor))
 
      dhdk2_g   = zero
      psinablapsi2=zero
@@ -754,14 +754,14 @@ end subroutine conducti_paw
        end do  !iband
      end do !iatom
      bdtot_index=bdtot_index+nband_k
-     ABI_DEALLOCATE(eig0_k)
-     ABI_DEALLOCATE(occ_k)
-     ABI_DEALLOCATE(dhdk2_g)
+     ABI_FREE(eig0_k)
+     ABI_FREE(occ_k)
+     ABI_FREE(dhdk2_g)
 !    end loop over k
    end do
 !  end loop over spins
  end do
- ABI_DEALLOCATE(psinablapsi2)
+ ABI_FREE(psinablapsi2)
 
  do iatom=1,natom
    do icor=1,nphicor
@@ -795,16 +795,16 @@ end subroutine conducti_paw
 
  call WffClose(wff2,ierr)
 
- ABI_DEALLOCATE(sigx)
- ABI_DEALLOCATE(sigx_av)
- ABI_DEALLOCATE(ncor)
- ABI_DEALLOCATE(lcor)
- ABI_DEALLOCATE(energy_cor)
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(nband)
- ABI_DEALLOCATE(oml1)
- ABI_DEALLOCATE(occ)
- ABI_DEALLOCATE(wtk)
+ ABI_FREE(sigx)
+ ABI_FREE(sigx_av)
+ ABI_FREE(ncor)
+ ABI_FREE(lcor)
+ ABI_FREE(energy_cor)
+ ABI_FREE(eigen0)
+ ABI_FREE(nband)
+ ABI_FREE(oml1)
+ ABI_FREE(occ)
+ ABI_FREE(wtk)
 
  call hdr%free()
 
@@ -976,8 +976,8 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  ntypat=hdr%ntypat
  occopt=hdr%occopt
  rprimd(:,:)=hdr%rprimd(:,:)
- ABI_ALLOCATE(nband,(nkpt*nsppol))
- ABI_ALLOCATE(occ,(bantot))
+ ABI_MALLOC(nband,(nkpt*nsppol))
+ ABI_MALLOC(occ,(bantot))
  fermie=hdr%fermie
  occ(1:bantot)=hdr%occ(1:bantot)
  nband(1:nkpt*nsppol)=hdr%nband(1:nkpt*nsppol)
@@ -995,14 +995,14 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  write(std_out,'(a,f10.5,a,f10.5,a)' )' fermie            =',fermie,' Ha',fermie*Ha_eV,' eV'
 
 !Prepare the reading of ddk Wff files
- ABI_ALLOCATE(eigtmp,(2*mband*mband))
- ABI_ALLOCATE(eig0tmp,(mband))
+ ABI_MALLOC(eigtmp,(2*mband*mband))
+ ABI_MALLOC(eig0tmp,(mband))
 
 !Read the eigenvalues of ground-state and ddk files
- ABI_ALLOCATE(eigen0,(mband*nkpt*nsppol))
- ABI_ALLOCATE(eigen11,(2*mband*mband*nkpt*nsppol))
- ABI_ALLOCATE(eigen12,(2*mband*mband*nkpt*nsppol))
- ABI_ALLOCATE(eigen13,(2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
+ ABI_MALLOC(eigen11,(2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen12,(2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen13,(2*mband*mband*nkpt*nsppol))
  bdtot0_index=0 ; bdtot_index=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
@@ -1030,8 +1030,8 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  call ddk2%close()
  call ddk3%close()
 
- ABI_DEALLOCATE(eigtmp)
- ABI_DEALLOCATE(eig0tmp)
+ ABI_FREE(eigtmp)
+ ABI_FREE(eig0tmp)
 
 !---------------------------------------------------------------------------------
 !gmet inversion
@@ -1041,8 +1041,8 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
 !---------------------------------------------------------------------------------
 !derivative of occupation wrt the energy.
- ABI_ALLOCATE(doccde,(mband*nkpt*nsppol))
- ABI_ALLOCATE(wtk,(nkpt))
+ ABI_MALLOC(doccde,(mband*nkpt*nsppol))
+ ABI_MALLOC(wtk,(nkpt))
 
  read(iunt,*)tsmear
  Tatm=tsmear*Ha_K
@@ -1077,29 +1077,29 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  read(iunt,*)dom,wind
  close(iunt)
  mom=int(wind/dom)
- ABI_ALLOCATE(oml1,(mom))
+ ABI_MALLOC(oml1,(mom))
  do iom=1,mom
    oml1(iom)=tol10*1000.0d0+dble(iom)*dom
  end do
 
- ABI_ALLOCATE(cond_nd,(mom,3,3))
- ABI_ALLOCATE(cond_kg,(mom,3,3))
- ABI_ALLOCATE(cond_kg_cart,(mom,3,3))
- ABI_ALLOCATE(cond_kg_xx,(mom))
- ABI_ALLOCATE(cond_kg_yy,(mom))
- ABI_ALLOCATE(trace,(mom))
- ABI_ALLOCATE(cond_kg_zz,(mom))
- ABI_ALLOCATE(cond_tot,(mom))
- ABI_ALLOCATE(kin11,(mom))
- ABI_ALLOCATE(kin12,(mom))
- ABI_ALLOCATE(kin21,(mom))
- ABI_ALLOCATE(kin22,(mom))
- ABI_ALLOCATE(kin11_k,(mom))
- ABI_ALLOCATE(kin12_k,(mom))
- ABI_ALLOCATE(kin21_k,(mom))
- ABI_ALLOCATE(kin22_k,(mom))
- ABI_ALLOCATE(Kth,(mom))
- ABI_ALLOCATE(Stp,(mom))
+ ABI_MALLOC(cond_nd,(mom,3,3))
+ ABI_MALLOC(cond_kg,(mom,3,3))
+ ABI_MALLOC(cond_kg_cart,(mom,3,3))
+ ABI_MALLOC(cond_kg_xx,(mom))
+ ABI_MALLOC(cond_kg_yy,(mom))
+ ABI_MALLOC(trace,(mom))
+ ABI_MALLOC(cond_kg_zz,(mom))
+ ABI_MALLOC(cond_tot,(mom))
+ ABI_MALLOC(kin11,(mom))
+ ABI_MALLOC(kin12,(mom))
+ ABI_MALLOC(kin21,(mom))
+ ABI_MALLOC(kin22,(mom))
+ ABI_MALLOC(kin11_k,(mom))
+ ABI_MALLOC(kin12_k,(mom))
+ ABI_MALLOC(kin21_k,(mom))
+ ABI_MALLOC(kin22_k,(mom))
+ ABI_MALLOC(Kth,(mom))
+ ABI_MALLOC(Stp,(mom))
  write(std_out,'(a,i8,2f10.5,a)')' mom,wind,dom      =',mom,wind,dom,' Ha'
 
 !---------------------------------------------------------------------------------
@@ -1127,12 +1127,12 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 !
      nband_k=nband(ikpt+(isppol-1)*nkpt)
 !
-     ABI_ALLOCATE(eig0_k,(nband_k))
-     ABI_ALLOCATE(eig1_k,(2*nband_k**2,3))
-     ABI_ALLOCATE(occ_k,(nband_k))
-     ABI_ALLOCATE(doccde_k,(nband_k))
-     ABI_ALLOCATE(dhdk2_r,(nband_k,nband_k,3,3))
-     ABI_ALLOCATE(dhdk2_g,(nband_k,nband_k))
+     ABI_MALLOC(eig0_k,(nband_k))
+     ABI_MALLOC(eig1_k,(2*nband_k**2,3))
+     ABI_MALLOC(occ_k,(nband_k))
+     ABI_MALLOC(doccde_k,(nband_k))
+     ABI_MALLOC(dhdk2_r,(nband_k,nband_k,3,3))
+     ABI_MALLOC(dhdk2_g,(nband_k,nband_k))
 
      cond_nd   = 0.0d0
      kin11_k   = 0.0d0
@@ -1264,12 +1264,12 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
      bd2tot_index=bd2tot_index+2*nband_k**2
      bdtot_index=bdtot_index+nband_k
-     ABI_DEALLOCATE(eig0_k)
-     ABI_DEALLOCATE(eig1_k)
-     ABI_DEALLOCATE(occ_k)
-     ABI_DEALLOCATE(doccde_k)
-     ABI_DEALLOCATE(dhdk2_r)
-     ABI_DEALLOCATE(dhdk2_g)
+     ABI_FREE(eig0_k)
+     ABI_FREE(eig1_k)
+     ABI_FREE(occ_k)
+     ABI_FREE(doccde_k)
+     ABI_FREE(dhdk2_r)
+     ABI_FREE(dhdk2_g)
 !    End loop over k
    end do
 
@@ -1438,33 +1438,33 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  close(kth_unt)
  close(ocond_unt)
 
- ABI_DEALLOCATE(nband)
- ABI_DEALLOCATE(oml1)
- ABI_DEALLOCATE(occ)
- ABI_DEALLOCATE(eigen11)
- ABI_DEALLOCATE(eigen12)
- ABI_DEALLOCATE(eigen13)
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(doccde)
- ABI_DEALLOCATE(wtk)
- ABI_DEALLOCATE(cond_nd)
- ABI_DEALLOCATE(cond_kg)
- ABI_DEALLOCATE(cond_kg_cart)
- ABI_DEALLOCATE(cond_kg_xx)
- ABI_DEALLOCATE(cond_kg_yy)
- ABI_DEALLOCATE(trace)
- ABI_DEALLOCATE(cond_kg_zz)
- ABI_DEALLOCATE(cond_tot)
- ABI_DEALLOCATE(kin11)
- ABI_DEALLOCATE(kin22)
- ABI_DEALLOCATE(kin12)
- ABI_DEALLOCATE(kin21)
- ABI_DEALLOCATE(kin11_k)
- ABI_DEALLOCATE(kin22_k)
- ABI_DEALLOCATE(kin12_k)
- ABI_DEALLOCATE(kin21_k)
- ABI_DEALLOCATE(Stp)
- ABI_DEALLOCATE(Kth)
+ ABI_FREE(nband)
+ ABI_FREE(oml1)
+ ABI_FREE(occ)
+ ABI_FREE(eigen11)
+ ABI_FREE(eigen12)
+ ABI_FREE(eigen13)
+ ABI_FREE(eigen0)
+ ABI_FREE(doccde)
+ ABI_FREE(wtk)
+ ABI_FREE(cond_nd)
+ ABI_FREE(cond_kg)
+ ABI_FREE(cond_kg_cart)
+ ABI_FREE(cond_kg_xx)
+ ABI_FREE(cond_kg_yy)
+ ABI_FREE(trace)
+ ABI_FREE(cond_kg_zz)
+ ABI_FREE(cond_tot)
+ ABI_FREE(kin11)
+ ABI_FREE(kin22)
+ ABI_FREE(kin12)
+ ABI_FREE(kin21)
+ ABI_FREE(kin11_k)
+ ABI_FREE(kin22_k)
+ ABI_FREE(kin12_k)
+ ABI_FREE(kin21_k)
+ ABI_FREE(Stp)
+ ABI_FREE(Kth)
 
  call hdr%free()
 
@@ -1554,21 +1554,21 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
  end if
  write(abs_unt,'(a)')'#energy(eV),nomega,komega,refl.,abso.(cm-1)'
 
- ABI_ALLOCATE(fct,(npt))
- ABI_ALLOCATE(fct2,(npt))
- ABI_ALLOCATE(fct3,(npt))
- ABI_ALLOCATE(fct4,(npt))
- ABI_ALLOCATE(fct5,(npt))
- ABI_ALLOCATE(fp,(npt))
- ABI_ALLOCATE(fpp,(npt))
- ABI_ALLOCATE(fppp,(npt))
- ABI_ALLOCATE(x1,(npt))
- ABI_ALLOCATE(x2,(npt))
- ABI_ALLOCATE(fct1,(npt))
- ABI_ALLOCATE(ppsig,(npt))
- ABI_ALLOCATE(fctii,(npt))
- ABI_ALLOCATE(abso,(npt))
- ABI_ALLOCATE(nomega,(npt))
+ ABI_MALLOC(fct,(npt))
+ ABI_MALLOC(fct2,(npt))
+ ABI_MALLOC(fct3,(npt))
+ ABI_MALLOC(fct4,(npt))
+ ABI_MALLOC(fct5,(npt))
+ ABI_MALLOC(fp,(npt))
+ ABI_MALLOC(fpp,(npt))
+ ABI_MALLOC(fppp,(npt))
+ ABI_MALLOC(x1,(npt))
+ ABI_MALLOC(x2,(npt))
+ ABI_MALLOC(fct1,(npt))
+ ABI_MALLOC(ppsig,(npt))
+ ABI_MALLOC(fctii,(npt))
+ ABI_MALLOC(abso,(npt))
+ ABI_MALLOC(nomega,(npt))
 
 !loop on the initial energy grid
  do ip=1,npti
@@ -1671,21 +1671,21 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
  close(eps_unt)
  close(abs_unt)
 
- ABI_DEALLOCATE(fct)
- ABI_DEALLOCATE(x1)
- ABI_DEALLOCATE(x2)
- ABI_DEALLOCATE(fct2)
- ABI_DEALLOCATE(fct3)
- ABI_DEALLOCATE(fct4)
- ABI_DEALLOCATE(fct5)
- ABI_DEALLOCATE(fp)
- ABI_DEALLOCATE(fpp)
- ABI_DEALLOCATE(fppp)
- ABI_DEALLOCATE(fct1)
- ABI_DEALLOCATE(ppsig)
- ABI_DEALLOCATE(fctii)
- ABI_DEALLOCATE(abso)
- ABI_DEALLOCATE(nomega)
+ ABI_FREE(fct)
+ ABI_FREE(x1)
+ ABI_FREE(x2)
+ ABI_FREE(fct2)
+ ABI_FREE(fct3)
+ ABI_FREE(fct4)
+ ABI_FREE(fct5)
+ ABI_FREE(fp)
+ ABI_FREE(fpp)
+ ABI_FREE(fppp)
+ ABI_FREE(fct1)
+ ABI_FREE(ppsig)
+ ABI_FREE(fctii)
+ ABI_FREE(abso)
+ ABI_FREE(nomega)
 
 end subroutine msig
 !!***
@@ -1825,9 +1825,9 @@ end subroutine msig
  ntypat=hdr%ntypat
  occopt=hdr%occopt
  rprimd(:,:)=hdr%rprimd(:,:)
- ABI_ALLOCATE(nband,(nkpt*nsppol))
- ABI_ALLOCATE(occ,(bantot))
- ABI_ALLOCATE(wtk,(nkpt))
+ ABI_MALLOC(nband,(nkpt*nsppol))
+ ABI_MALLOC(occ,(bantot))
+ ABI_MALLOC(wtk,(nkpt))
  fermie=hdr%fermie
  tsmear=hdr%tsmear
  occ(1:bantot)=hdr%occ(1:bantot)
@@ -1848,15 +1848,15 @@ end subroutine msig
  Tatm=tsmear*Ha_K
  write(std_out,'(a,f12.5,a,f12.5,a)') ' Temp              =',tsmear,' Ha ',Tatm,' Kelvin'
 
- ABI_ALLOCATE(eigen0,(mband*nkpt*nsppol))
+ ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
  read(opt2_unt)(eigen0(iband),iband=1,mband*nkpt*nsppol)
 
  write(std_out,'(a)')'--------------------------------------------'
  read(opt2_unt) nphicor
  write(std_out,'(a,i4)') 'Number of core orbitals nc=',nphicor
- ABI_ALLOCATE(ncor,(nphicor))
- ABI_ALLOCATE(lcor,(nphicor))
- ABI_ALLOCATE(energy_cor,(nphicor))
+ ABI_MALLOC(ncor,(nphicor))
+ ABI_MALLOC(lcor,(nphicor))
+ ABI_MALLOC(energy_cor,(nphicor))
  do icor=1,nphicor
    read(opt2_unt) ncor(icor),lcor(icor),energy_cor(icor)
    write(std_out,'(a,2i4,f10.5)') ' n, l, Energy (Ha): ',ncor(icor),lcor(icor),energy_cor(icor)
@@ -1882,17 +1882,17 @@ end subroutine msig
  end do
  omin=eigen0(1)
  del=(omax-omin)/(mom-1)
- ABI_ALLOCATE(oml1,(mom))
+ ABI_MALLOC(oml1,(mom))
  do iom=1,mom
    oml1(iom)=omin+dble(iom-1)*del
  end do
  write(std_out,*) 'Valence state orbital energies: omin,omax',omin,omax
- ABI_ALLOCATE(sigx,(natom,mom,nphicor))
- ABI_ALLOCATE(sigx_av,(mom,nphicor))
+ ABI_MALLOC(sigx,(natom,mom,nphicor))
+ ABI_MALLOC(sigx_av,(mom,nphicor))
 !---------------------------------------------------------------------------------
 !emission X  -------
 !
- ABI_ALLOCATE(psinablapsi2,(2,3,mband,nphicor,natom))
+ ABI_MALLOC(psinablapsi2,(2,3,mband,nphicor,natom))
  sigx=zero
  sigx_av=zero
  bdtot_index = 0
@@ -1903,9 +1903,9 @@ end subroutine msig
 !  LOOP OVER K-POINTS
    do ikpt=1,nkpt
      nband_k=nband(ikpt+(isppol-1)*nkpt)
-     ABI_ALLOCATE(eig0_k,(nband_k))
-     ABI_ALLOCATE(occ_k,(nband_k))
-     ABI_ALLOCATE(dhdk2_g,(natom,nband_k,nphicor))
+     ABI_MALLOC(eig0_k,(nband_k))
+     ABI_MALLOC(occ_k,(nband_k))
+     ABI_MALLOC(dhdk2_g,(natom,nband_k,nphicor))
 
      dhdk2_g   = zero
      psinablapsi2=zero
@@ -1944,14 +1944,14 @@ end subroutine msig
        end do  !iband
      end do !iatom
      bdtot_index=bdtot_index+nband_k
-     ABI_DEALLOCATE(eig0_k)
-     ABI_DEALLOCATE(occ_k)
-     ABI_DEALLOCATE(dhdk2_g)
+     ABI_FREE(eig0_k)
+     ABI_FREE(occ_k)
+     ABI_FREE(dhdk2_g)
 !    end loop over k
    end do
 !  end loop over spins
  end do
- ABI_DEALLOCATE(psinablapsi2)
+ ABI_FREE(psinablapsi2)
 
  do iatom=1,natom
    do icor=1,nphicor
@@ -1985,16 +1985,16 @@ end subroutine msig
 
  call WffClose(wff2,ierr)
 
- ABI_DEALLOCATE(sigx)
- ABI_DEALLOCATE(sigx_av)
- ABI_DEALLOCATE(ncor)
- ABI_DEALLOCATE(lcor)
- ABI_DEALLOCATE(energy_cor)
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(nband)
- ABI_DEALLOCATE(oml1)
- ABI_DEALLOCATE(occ)
- ABI_DEALLOCATE(wtk)
+ ABI_FREE(sigx)
+ ABI_FREE(sigx_av)
+ ABI_FREE(ncor)
+ ABI_FREE(lcor)
+ ABI_FREE(energy_cor)
+ ABI_FREE(eigen0)
+ ABI_FREE(nband)
+ ABI_FREE(oml1)
+ ABI_FREE(occ)
+ ABI_FREE(wtk)
 
  call hdr%free()
 

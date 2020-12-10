@@ -153,11 +153,11 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
    end if
  end if
 
- ABI_ALLOCATE(cwavef1,(2,npw*nspinor))
- ABI_ALLOCATE(cwavef2,(2,npw*nspinor))
+ ABI_MALLOC(cwavef1,(2,npw*nspinor))
+ ABI_MALLOC(cwavef2,(2,npw*nspinor))
  if(usepaw==1) then
-   ABI_DATATYPE_ALLOCATE(cprj1_k,(natom,nspinor*nbd1))
-   ABI_DATATYPE_ALLOCATE(cprj2_k,(natom,nspinor*nbd2))
+   ABI_MALLOC(cprj1_k,(natom,nspinor*nbd1))
+   ABI_MALLOC(cprj2_k,(natom,nspinor*nbd2))
    iorder=0 ! There is no change of ordering of cprj when copying wavefunctions
  end if
  if(usepaw==1 .and. ibg1/=0) then
@@ -318,7 +318,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 !Compute the eigenvalues of the projector S herm(S) or herm(S) S, depending on which has lowest dimension.
 !write(std_out,*)' dotprod_set_cgcprj : compute the projector matrix '
    nbd=min(nbd1,nbd2)
-   ABI_ALLOCATE(proj,(2,nbd,nbd))
+   ABI_MALLOC(proj,(2,nbd,nbd))
    proj(:,:,:)=zero
    if(nbd1<=nbd2)then
      do ibd1=1,nbd1
@@ -339,7 +339,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 !write(std_out,*)' proj=',proj
 
 !write(std_out,*)' dotprod_set_cgcprj : compute the eigenvalues of the projector '
-   ABI_ALLOCATE(matrx,(2,(nbd*(nbd+1))/2))
+   ABI_MALLOC(matrx,(2,(nbd*(nbd+1))/2))
    ii=1
    do i2=1,nbd
      do i1=1,i2
@@ -349,29 +349,29 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
      end do
    end do
 
-   ABI_ALLOCATE(zhpev1,(2,2*nbd-1))
-   ABI_ALLOCATE(zhpev2,(3*nbd-2))
-   ABI_ALLOCATE(eigval,(nbd))
-   ABI_ALLOCATE(eigvec,(2,nbd,nbd))
+   ABI_MALLOC(zhpev1,(2,2*nbd-1))
+   ABI_MALLOC(zhpev2,(3*nbd-2))
+   ABI_MALLOC(eigval,(nbd))
+   ABI_MALLOC(eigvec,(2,nbd,nbd))
 
    call ZHPEV ('V','U',nbd,matrx,eigval,eigvec,nbd,zhpev1,zhpev2,ier)
 
 !write(std_out,*)' eigval=',eigval
 
-   ABI_DEALLOCATE(matrx)
-   ABI_DEALLOCATE(zhpev1)
-   ABI_DEALLOCATE(zhpev2)
-   ABI_DEALLOCATE(eigval)
-   ABI_DEALLOCATE(eigvec)
+   ABI_FREE(matrx)
+   ABI_FREE(zhpev1)
+   ABI_FREE(zhpev2)
+   ABI_FREE(eigval)
+   ABI_FREE(eigvec)
 
-   ABI_DEALLOCATE(proj)
+   ABI_FREE(proj)
 !stop
 !ENDDEBUG
  end if
 !====== End of debugging section ==========
 
- ABI_DEALLOCATE(cwavef1)
- ABI_DEALLOCATE(cwavef2)
+ ABI_FREE(cwavef1)
+ ABI_FREE(cwavef2)
  if(usepaw==1) then
    if(ibg1/=0)then
      call pawcprj_free(cprj1_k)
@@ -379,8 +379,8 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
    if(ibg2/=0)then
      call pawcprj_free(cprj2_k)
    end if
-   ABI_DATATYPE_DEALLOCATE(cprj1_k)
-   ABI_DATATYPE_DEALLOCATE(cprj2_k)
+   ABI_FREE(cprj1_k)
+   ABI_FREE(cprj2_k)
  end if
 
 end subroutine dotprod_set_cgcprj
@@ -483,11 +483,11 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 !call flush(std_out)
 !ENDDEBUG
 
- ABI_ALLOCATE(cwavef1,(2,npw*nspinor))
- ABI_ALLOCATE(cwavef2,(2,npw*nspinor))
+ ABI_MALLOC(cwavef1,(2,npw*nspinor))
+ ABI_MALLOC(cwavef2,(2,npw*nspinor))
  if(usepaw==1) then
-   ABI_DATATYPE_ALLOCATE(cprj1_k,(natom,nspinor*nbd))
-   ABI_DATATYPE_ALLOCATE(cprj2_k,(natom,nspinor*nbd))
+   ABI_MALLOC(cprj1_k,(natom,nspinor*nbd))
+   ABI_MALLOC(cprj2_k,(natom,nspinor*nbd))
    iorder=0 ! There is no change of ordering in the copy of wavefunctions
    call pawcprj_alloc(cprj1_k,cprj_set(1,1,1)%ncpgr,dimcprj)
  end if
@@ -613,13 +613,13 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
    end do
  end do
 
- ABI_DEALLOCATE(cwavef1)
- ABI_DEALLOCATE(cwavef2)
+ ABI_FREE(cwavef1)
+ ABI_FREE(cwavef2)
  if(usepaw==1) then
    call pawcprj_free(cprj1_k)
    call pawcprj_free(cprj2_k)
-   ABI_DATATYPE_DEALLOCATE(cprj1_k)
-   ABI_DATATYPE_DEALLOCATE(cprj2_k)
+   ABI_FREE(cprj1_k)
+   ABI_FREE(cprj2_k)
  end if
 
 end subroutine dotprodm_sumdiag_cgcprj
@@ -726,7 +726,7 @@ end subroutine dotprodm_sumdiag_cgcprj
  end if
 
 !Take care of the plane wave part
- ABI_ALLOCATE(cgout_,(2,npw*nspinor*nband_out))
+ ABI_MALLOC(cgout_,(2,npw*nspinor*nband_out))
 
  call zgemm('N','N',npw*nspinor,nband_out,nband_in,dcmplx(1._dp), &
 & cg(:,icg+1:icg+npw*nspinor*nband_in),npw*nspinor, &
@@ -737,14 +737,14 @@ end subroutine dotprodm_sumdiag_cgcprj
  else
    cgout(:,icgout+1:icgout+npw*nspinor*nband_out)=cgout_
  end if
- ABI_DEALLOCATE(cgout_)
+ ABI_FREE(cgout_)
 
 !Take care of the cprj part
  if(usepaw==1) then
 
-   ABI_DATATYPE_ALLOCATE(cprjout_,(natom,nspinor*nband_out))
+   ABI_MALLOC(cprjout_,(natom,nspinor*nband_out))
    call pawcprj_alloc(cprjout_,cprj(1,1)%ncpgr,dimcprj)
-   ABI_ALLOCATE(al,(2,nband_in))
+   ABI_MALLOC(al,(2,nband_in))
    do iband_out=1,nband_out
      ii=(iband_out-1)*nspinor
      do iband_in=1,nband_in
@@ -753,7 +753,7 @@ end subroutine dotprodm_sumdiag_cgcprj
      end do
      call pawcprj_lincom(al,cprj,cprjout_(:,ii+1:ii+nspinor),nband_in)
    end do
-   ABI_DEALLOCATE(al)
+   ABI_FREE(al)
 
    if(inplace==1)then
      cprj=cprjout_
@@ -761,7 +761,7 @@ end subroutine dotprodm_sumdiag_cgcprj
      cprjout=cprjout_
    end if
    call pawcprj_free(cprjout_)
-   ABI_DATATYPE_DEALLOCATE(cprjout_)
+   ABI_FREE(cprjout_)
 
  end if
 
@@ -833,8 +833,8 @@ end subroutine lincom_cgcprj
 
 ! *************************************************************************
 
- ABI_ALLOCATE(smn,(2,nband,nband))
- ABI_ALLOCATE(dmn,(2,nband,nband))
+ ABI_MALLOC(smn,(2,nband,nband))
+ ABI_MALLOC(dmn,(2,nband,nband))
 
  hermitian=1
  call dotprod_set_cgcprj(atindx1,cg,cg,cprj_k,cprj_k,dimcprj,hermitian,&
@@ -857,8 +857,8 @@ end subroutine lincom_cgcprj
  call lincom_cgcprj(dmn,cg,cprj_k,dimcprj,&
 & icg,inplace,mcg,mcprj,natom,nband,nband,npw,nspinor,usepaw)
 
- ABI_DEALLOCATE(smn)
- ABI_DEALLOCATE(dmn)
+ ABI_FREE(smn)
+ ABI_FREE(dmn)
 
 end subroutine cgcprj_cholesky
 !!***

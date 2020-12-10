@@ -215,7 +215,7 @@ subroutine destroy_mpi_enreg(MPI_enreg)
 
  if (associated(mpi_enreg%distribfft)) then
    call destroy_distribfft(mpi_enreg%distribfft)
-   ABI_DATATYPE_DEALLOCATE(mpi_enreg%distribfft)
+   ABI_FREE(mpi_enreg%distribfft)
    nullify(mpi_enreg%distribfft)
  end if
 
@@ -226,7 +226,7 @@ subroutine destroy_mpi_enreg(MPI_enreg)
  ABI_SFREE(mpi_enreg%mkmem)
  ABI_SFREE(mpi_enreg%my_kpttab)
  if (associated(mpi_enreg%my_atmtab)) then
-   ABI_DEALLOCATE(mpi_enreg%my_atmtab)
+   ABI_FREE(mpi_enreg%my_atmtab)
    nullify(mpi_enreg%my_atmtab)
  end if
  ABI_SFREE(mpi_enreg%distrb_pert)
@@ -327,7 +327,7 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
 !pointers
  if (associated(mpi_enreg1%distribfft)) then
    if (.not.associated(mpi_enreg2%distribfft)) then
-     ABI_DATATYPE_ALLOCATE(mpi_enreg2%distribfft,)
+     ABI_MALLOC(mpi_enreg2%distribfft,)
    end if
    call copy_distribfft(mpi_enreg1%distribfft,mpi_enreg2%distribfft)
  end if
@@ -336,36 +336,36 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
    sz1=size(mpi_enreg1%proc_distrb,1)
    sz2=size(mpi_enreg1%proc_distrb,2)
    sz3=size(mpi_enreg1%proc_distrb,3)
-   ABI_ALLOCATE(mpi_enreg2%proc_distrb,(sz1,sz2,sz3))
+   ABI_MALLOC(mpi_enreg2%proc_distrb,(sz1,sz2,sz3))
    mpi_enreg2%proc_distrb=mpi_enreg1%proc_distrb
  end if
  if (allocated(mpi_enreg1%kptdstrb)) then
    sz1=size(mpi_enreg1%kptdstrb,1)
    sz2=size(mpi_enreg1%kptdstrb,2)
    sz3=size(mpi_enreg1%kptdstrb,3)
-   ABI_ALLOCATE(mpi_enreg2%kptdstrb,(sz1,sz2,sz3))
+   ABI_MALLOC(mpi_enreg2%kptdstrb,(sz1,sz2,sz3))
    mpi_enreg2%kptdstrb=mpi_enreg1%kptdstrb
  end if
  if (allocated(mpi_enreg1%kpt_loc2fbz_sp)) then
    sz1=size(mpi_enreg1%kpt_loc2fbz_sp,1)-1
    sz2=size(mpi_enreg1%kpt_loc2fbz_sp,2)
    sz3=size(mpi_enreg1%kpt_loc2fbz_sp,3)
-   ABI_ALLOCATE(mpi_enreg2%kpt_loc2fbz_sp,(0:sz1,1:sz2,1:sz3))
+   ABI_MALLOC(mpi_enreg2%kpt_loc2fbz_sp,(0:sz1,1:sz2,1:sz3))
    mpi_enreg2%kpt_loc2fbz_sp=mpi_enreg1%kpt_loc2fbz_sp
  end if
  if (allocated(mpi_enreg1%kpt_loc2ibz_sp)) then
    sz1=size(mpi_enreg1%kpt_loc2ibz_sp,1)-1
    sz2=size(mpi_enreg1%kpt_loc2ibz_sp,2)
    sz3=size(mpi_enreg1%kpt_loc2ibz_sp,3)
-   ABI_ALLOCATE(mpi_enreg2%kpt_loc2ibz_sp,(0:sz1,1:sz2,1:sz3))
+   ABI_MALLOC(mpi_enreg2%kpt_loc2ibz_sp,(0:sz1,1:sz2,1:sz3))
    mpi_enreg2%kpt_loc2ibz_sp=mpi_enreg1%kpt_loc2ibz_sp
  end if
  if (allocated(mpi_enreg1%mkmem)) then
-   ABI_ALLOCATE(mpi_enreg2%mkmem,(0:size(mpi_enreg1%mkmem,1)-1))
+   ABI_MALLOC(mpi_enreg2%mkmem,(0:size(mpi_enreg1%mkmem,1)-1))
    mpi_enreg2%mkmem=mpi_enreg1%mkmem
  end if
  if (associated(mpi_enreg1%my_atmtab)) then
-   ABI_ALLOCATE(mpi_enreg2%my_atmtab,(size(mpi_enreg1%my_atmtab)))
+   ABI_MALLOC(mpi_enreg2%my_atmtab,(size(mpi_enreg1%my_atmtab)))
    mpi_enreg2%my_atmtab=mpi_enreg1%my_atmtab
  else
    nullify(mpi_enreg2%my_atmtab)
@@ -373,32 +373,32 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  if (allocated(mpi_enreg1%my_kgtab)) then
    sz1=size(mpi_enreg1%my_kgtab,1)
    sz2=size(mpi_enreg1%my_kgtab,2)
-   ABI_ALLOCATE(mpi_enreg2%my_kgtab,(sz1,sz2))
+   ABI_MALLOC(mpi_enreg2%my_kgtab,(sz1,sz2))
    mpi_enreg2%my_kgtab=mpi_enreg1%my_kgtab
  end if
  if (allocated(mpi_enreg1%distrb_pert)) then
-   ABI_ALLOCATE(mpi_enreg2%distrb_pert,(size(mpi_enreg1%distrb_pert)))
+   ABI_MALLOC(mpi_enreg2%distrb_pert,(size(mpi_enreg1%distrb_pert)))
    mpi_enreg2%distrb_pert=mpi_enreg1%distrb_pert
  end if
  if (allocated(mpi_enreg1%distrb_img)) then
-   ABI_ALLOCATE(mpi_enreg2%distrb_img,(size(mpi_enreg1%distrb_img)))
+   ABI_MALLOC(mpi_enreg2%distrb_img,(size(mpi_enreg1%distrb_img)))
    mpi_enreg2%distrb_img=mpi_enreg1%distrb_img
  end if
  if (allocated(mpi_enreg1%my_imgtab)) then
-   ABI_ALLOCATE(mpi_enreg2%my_imgtab,(size(mpi_enreg1%my_imgtab)))
+   ABI_MALLOC(mpi_enreg2%my_imgtab,(size(mpi_enreg1%my_imgtab)))
    mpi_enreg2%my_imgtab=mpi_enreg1%my_imgtab
  end if
  if (allocated(mpi_enreg1%distrb_hf)) then
    sz1=size(mpi_enreg1%distrb_hf,1)
    sz2=size(mpi_enreg1%distrb_hf,2)
    sz3=size(mpi_enreg1%distrb_hf,3)
-   ABI_ALLOCATE(mpi_enreg2%distrb_hf,(sz1,sz2,sz3))
+   ABI_MALLOC(mpi_enreg2%distrb_hf,(sz1,sz2,sz3))
    mpi_enreg2%distrb_hf=mpi_enreg1%distrb_hf
  end if
 
 !Optional pointers
  if (allocated(mpi_enreg1%my_kpttab)) then
-   ABI_ALLOCATE(mpi_enreg2%my_kpttab,(size(mpi_enreg1%my_kpttab)))
+   ABI_MALLOC(mpi_enreg2%my_kpttab,(size(mpi_enreg1%my_kpttab)))
    mpi_enreg2%my_kpttab=mpi_enreg1%my_kpttab
  end if
 
@@ -451,7 +451,7 @@ subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
  mpi_enreg%me_fft=xmpi_comm_rank(comm_fft)
  if (associated(mpi_enreg%distribfft)) then
    call destroy_distribfft(mpi_enreg%distribfft)
-   ABI_DATATYPE_DEALLOCATE(mpi_enreg%distribfft)
+   ABI_FREE(mpi_enreg%distribfft)
  end if
  mpi_enreg%distribfft => distribfft
 
@@ -799,10 +799,10 @@ subroutine initmpi_world(mpi_enreg,nproc)
 
  if(nproc==mpi_enreg%nproc) return
 
- ABI_ALLOCATE(ranks,(0:nproc-1))
+ ABI_MALLOC(ranks,(0:nproc-1))
  ranks(0:nproc-1)=(/((ii),ii=0,nproc-1)/)
  mpi_enreg%comm_world=xmpi_subcomm(xmpi_world,nproc,ranks)
- ABI_DEALLOCATE(ranks)
+ ABI_FREE(ranks)
 
  if(mpi_enreg%me<nproc)  then
    mpi_enreg%me=xmpi_comm_rank(mpi_enreg%comm_world)
@@ -912,7 +912,7 @@ subroutine initmpi_seq(mpi_enreg)
 !Allocate and nullify distribfft datastructure
 ! This is not good since distribfft is not initialized here (even with 0s).
 ! It can be dangerous if use with no care (Valgrind might complain)
- ABI_DATATYPE_ALLOCATE(mpi_enreg%distribfft,)
+ ABI_MALLOC(mpi_enreg%distribfft,)
 
  DBG_EXIT("COLL")
 
@@ -965,13 +965,13 @@ subroutine initmpi_atom(dtset,mpi_enreg)
  mpi_enreg%comm_atom=xmpi_comm_self
  mpi_enreg%my_natom=dtset%natom
  if (associated(mpi_enreg%my_atmtab))then
-   ABI_DEALLOCATE(mpi_enreg%my_atmtab)
+   ABI_FREE(mpi_enreg%my_atmtab)
  end if
  nullify(mpi_enreg%my_atmtab)
 
  if (xmpi_paral==0) then
    mpi_enreg%nproc_atom=0
-   ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+   ABI_MALLOC(mpi_enreg%my_atmtab,(0))
    return
  end if
 
@@ -993,7 +993,7 @@ subroutine initmpi_atom(dtset,mpi_enreg)
 
  if (mpi_enreg%comm_atom==xmpi_comm_null) then
    mpi_enreg%nproc_atom=0;mpi_enreg%my_natom=0
-   ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+   ABI_MALLOC(mpi_enreg%my_atmtab,(0))
    return
  end if
 
@@ -1019,10 +1019,10 @@ subroutine initmpi_atom(dtset,mpi_enreg)
      call get_my_atmtab(mpi_enreg%comm_atom,mpi_enreg%my_atmtab,my_atmtab_allocated, &
 &     paral_atom,dtset%natom)
    else if (.not.paral_atom) then
-     ABI_ALLOCATE(mpi_enreg%my_atmtab,(dtset%natom))
+     ABI_MALLOC(mpi_enreg%my_atmtab,(dtset%natom))
      mpi_enreg%my_atmtab(1:dtset%natom)=(/(iatom, iatom=1,dtset%natom)/)
    else if (mpi_enreg%my_natom==0) then
-     ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+     ABI_MALLOC(mpi_enreg%my_atmtab,(0))
    end if
 
  end if
@@ -1068,7 +1068,7 @@ subroutine clnmpi_atom(mpi_enreg)
  end if
 
  if(associated(mpi_enreg%my_atmtab)) then
-   ABI_DEALLOCATE(mpi_enreg%my_atmtab)
+   ABI_FREE(mpi_enreg%my_atmtab)
  end if
 
  mpi_enreg%nproc_atom=1
@@ -1197,8 +1197,8 @@ subroutine initmpi_grid(mpi_enreg)
      !  valgrind claims this is not deallocated in test v5/72
      !  Can someone knowledgable check?
      dimcart=4
-     ABI_ALLOCATE(sizecart,(dimcart))
-     ABI_ALLOCATE(periode,(dimcart))
+     ABI_MALLOC(sizecart,(dimcart))
+     ABI_MALLOC(periode,(dimcart))
 !    MT 2012-june: change the order of the indexes; not sure this is efficient
 !    (not efficient on TGCC-Curie).
      sizecart(1)=mpi_enreg%nproc_kpt  ! mpi_enreg%nproc_kpt
@@ -1207,20 +1207,20 @@ subroutine initmpi_grid(mpi_enreg)
      sizecart(4)=mpi_enreg%nproc_fft  ! mpi_enreg%nproc_fft
      periode(:)=.false.;reorder=.false.
      call MPI_CART_CREATE(spacecomm,dimcart,sizecart,periode,reorder,commcart_4d,ierr)
-     ABI_DEALLOCATE(periode)
-     ABI_DEALLOCATE(sizecart)
+     ABI_FREE(periode)
+     ABI_FREE(sizecart)
 
 !    Find the index and coordinates of the current processor
      call MPI_COMM_RANK(commcart_4d, me_cart_4d, ierr)
-     ABI_ALLOCATE(coords,(dimcart))
+     ABI_MALLOC(coords,(dimcart))
      call MPI_CART_COORDS(commcart_4d, me_cart_4d,dimcart,coords,ierr)
      mpi_enreg%me_kpt =coords(1)
      mpi_enreg%me_band=coords(2)
      mpi_enreg%me_spinor=coords(3)
      mpi_enreg%me_fft =coords(4)
-     ABI_DEALLOCATE(coords)
+     ABI_FREE(coords)
 
-     ABI_ALLOCATE(keepdim,(dimcart))
+     ABI_MALLOC(keepdim,(dimcart))
 
 !    Create the communicator for fft distribution
      keepdim(1)=.false.
@@ -1288,7 +1288,7 @@ subroutine initmpi_grid(mpi_enreg)
      keepdim(4)=.true.
      call MPI_CART_SUB(commcart_4d, keepdim, mpi_enreg%comm_bandspinorfft,ierr)
 
-     ABI_DEALLOCATE(keepdim)
+     ABI_FREE(keepdim)
      call xmpi_comm_free(commcart_4d)
    end if
 
@@ -1318,24 +1318,24 @@ subroutine initmpi_grid(mpi_enreg)
 
 !* Create the global cartesian 2D- communicator
    dimcart=2
-   ABI_ALLOCATE(sizecart,(dimcart))
-   ABI_ALLOCATE(periode,(dimcart))
+   ABI_MALLOC(sizecart,(dimcart))
+   ABI_MALLOC(periode,(dimcart))
    sizecart(1)=mpi_enreg%nproc_kpt  ! mpi_enreg%nproc_kpt
    sizecart(2)=mpi_enreg%nproc_hf   ! mpi_enreg%nproc_hf
    periode(:)=.false.;reorder=.false.
    call MPI_CART_CREATE(spacecomm,dimcart,sizecart,periode,reorder,commcart_2d,ierr)
-   ABI_DEALLOCATE(periode)
-   ABI_DEALLOCATE(sizecart)
+   ABI_FREE(periode)
+   ABI_FREE(sizecart)
 
 !* Find the index and coordinates of the current processor
    call MPI_COMM_RANK(commcart_2d, me_cart_2d, ierr)
-   ABI_ALLOCATE(coords,(dimcart))
+   ABI_MALLOC(coords,(dimcart))
    call MPI_CART_COORDS(commcart_2d, me_cart_2d,dimcart,coords,ierr)
    mpi_enreg%me_kpt =coords(1)
    mpi_enreg%me_hf=coords(2)
-   ABI_DEALLOCATE(coords)
+   ABI_FREE(coords)
 
-   ABI_ALLOCATE(keepdim,(dimcart))
+   ABI_MALLOC(keepdim,(dimcart))
 
 !* Create the communicator for kpt distribution
    keepdim(1)=.true.
@@ -1347,7 +1347,7 @@ subroutine initmpi_grid(mpi_enreg)
    keepdim(2)=.true.
    call MPI_CART_SUB(commcart_2d, keepdim, mpi_enreg%comm_hf,ierr)
 
-   ABI_DEALLOCATE(keepdim)
+   ABI_FREE(keepdim)
    call xmpi_comm_free(commcart_2d)
 
 !* Write some data
@@ -1551,7 +1551,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
    if (option==1.or.option==-1) then
 !    Indexes of images treated by current proc
      if (mpi_enreg%me<=iprocmax) then
-       ABI_ALLOCATE(mpi_enreg%my_imgtab,(mpi_enreg%my_nimage))
+       ABI_MALLOC(mpi_enreg%my_imgtab,(mpi_enreg%my_nimage))
        nrank=0
        imod=mpi_enreg%me/nproc_per_image+1;imod=mod(imod,dtset%npimage)
 !      Dynamic images
@@ -1580,21 +1580,21 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
          ABI_BUG('Error on nrank !')
        end if
 !      Sort images by increasing index (this step is MANDATORY !!)
-       ABI_ALLOCATE(ranks,(nrank))
+       ABI_MALLOC(ranks,(nrank))
        call sort_int(nrank,mpi_enreg%my_imgtab,ranks)
-       ABI_DEALLOCATE(ranks)
+       ABI_FREE(ranks)
      else
-       ABI_ALLOCATE(mpi_enreg%my_imgtab,(0))
+       ABI_MALLOC(mpi_enreg%my_imgtab,(0))
      end if
    end if
    if (option==2.or.option==3.or.option==-1) then
 !    Communicator over one image
      if (mpi_enreg%me<=iprocmax) then
-       ABI_ALLOCATE(ranks,(nproc_per_image))
+       ABI_MALLOC(ranks,(nproc_per_image))
        iprocmin=(mpi_enreg%me/nproc_per_image)*nproc_per_image
        ranks=(/((iprocmin+irank-1),irank=1,nproc_per_image)/)
        mpi_enreg%comm_cell=xmpi_subcomm(mpi_enreg%comm_world,nproc_per_image,ranks)
-       ABI_DEALLOCATE(ranks)
+       ABI_FREE(ranks)
        mpi_enreg%me_cell=xmpi_comm_rank(mpi_enreg%comm_cell)
        mpi_enreg%nproc_cell=nproc_per_image
        if (mpi_enreg%me_cell==0.and.mod(mpi_enreg%me,nproc_per_image)/=0) then
@@ -1609,17 +1609,17 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
    if (option==3.or.option==-1) then
 !    Communicator over all images
      if (mpi_enreg%me<=iprocmax) then
-       ABI_ALLOCATE(ranks,(dtset%npimage))
+       ABI_MALLOC(ranks,(dtset%npimage))
        iprocmin=mod(mpi_enreg%me,nproc_per_image)
        ranks=(/((iprocmin+(irank-1)*nproc_per_image),irank=1,dtset%npimage)/)
        mpi_enreg%comm_img=xmpi_subcomm(mpi_enreg%comm_world,dtset%npimage,ranks)
-       ABI_DEALLOCATE(ranks)
+       ABI_FREE(ranks)
        mpi_enreg%me_img=xmpi_comm_rank(mpi_enreg%comm_img)
        mpi_enreg%nproc_img=dtset%npimage
        if (iprocmin==0.and.mpi_enreg%me_img==0.and.mpi_enreg%me/=0) then
          ABI_BUG('Error on me_img!')
        end if
-       ABI_ALLOCATE(mpi_enreg%distrb_img,(dtset%nimage))
+       ABI_MALLOC(mpi_enreg%distrb_img,(dtset%nimage))
 !      Dynamic images
        nrank=0
        do irank=1,dtset%nimage
@@ -1642,7 +1642,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
        mpi_enreg%comm_img=xmpi_comm_null
        mpi_enreg%nproc_img=0
        mpi_enreg%me_img=-1
-       ABI_ALLOCATE(mpi_enreg%distrb_img,(0))
+       ABI_MALLOC(mpi_enreg%distrb_img,(0))
      end if
    end if
 
@@ -1738,7 +1738,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
    end if
 !  Indexes of images treated by current proc
    if (option==1.or.option==-1) then
-     ABI_ALLOCATE(mpi_enreg%my_imgtab,(mpi_enreg%my_nimage))
+     ABI_MALLOC(mpi_enreg%my_imgtab,(mpi_enreg%my_nimage))
      mpi_enreg%my_imgtab=(/(irank,irank=1,mpi_enreg%my_nimage)/)
    end if
 !  Communicator over all images
@@ -1752,7 +1752,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
      mpi_enreg%nproc_img=1
      mpi_enreg%comm_img=xmpi_comm_self
      mpi_enreg%me_img=0
-     ABI_ALLOCATE(mpi_enreg%distrb_img,(dtset%nimage))
+     ABI_MALLOC(mpi_enreg%distrb_img,(dtset%nimage))
      mpi_enreg%distrb_img(:)=0
    end if
  end if
@@ -1800,10 +1800,10 @@ subroutine clnmpi_img(mpi_enreg)
  end if
 
  if (allocated(mpi_enreg%my_imgtab))  then
-   ABI_DEALLOCATE(mpi_enreg%my_imgtab)
+   ABI_FREE(mpi_enreg%my_imgtab)
  end if
  if (allocated(mpi_enreg%distrb_img))  then
-   ABI_DEALLOCATE(mpi_enreg%distrb_img)
+   ABI_FREE(mpi_enreg%distrb_img)
  end if
 
  mpi_enreg%paral_img=0
@@ -1876,18 +1876,18 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 
    if (mpi_enreg%me>=0) then
      nproc_per_cell=mpi_enreg%nproc/dtset%nppert
-     ABI_ALLOCATE(ranks,(dtset%nppert))
+     ABI_MALLOC(ranks,(dtset%nppert))
      iprocmin=mod(mpi_enreg%me,nproc_per_cell)
      ranks=(/((iprocmin+(irank-1)*nproc_per_cell),irank=1,dtset%nppert)/)
      mpi_enreg%comm_pert=xmpi_subcomm(mpi_enreg%comm_world,dtset%nppert,ranks)
-     ABI_DEALLOCATE(ranks)
+     ABI_FREE(ranks)
      mpi_enreg%me_pert=xmpi_comm_rank(mpi_enreg%comm_pert)
      mpi_enreg%nproc_pert=dtset%nppert
      if (iprocmin==0.and.mpi_enreg%me_pert==0.and.mpi_enreg%me/=0) then
        ABI_BUG('Error on me_pert!')
      end if
 !    Define mpi_enreg%distrb_pert
-     ABI_ALLOCATE(mpi_enreg%distrb_pert,(npert))
+     ABI_MALLOC(mpi_enreg%distrb_pert,(npert))
      nrank=0
      do irank=1,npert
        nrank=nrank+1
@@ -1908,23 +1908,23 @@ subroutine initmpi_pert(dtset,mpi_enreg)
        end do
      end if
 !    Communicator over one cell
-     ABI_ALLOCATE(ranks,(nproc_per_cell))
+     ABI_MALLOC(ranks,(nproc_per_cell))
      iprocmin=(mpi_enreg%me/nproc_per_cell)*nproc_per_cell
      ranks=(/((iprocmin+irank-1),irank=1,nproc_per_cell)/)
      mpi_enreg%comm_cell_pert=xmpi_subcomm(mpi_enreg%comm_world,nproc_per_cell,ranks)
-     ABI_DEALLOCATE(ranks)
+     ABI_FREE(ranks)
    end if
 
  else  !nppert<=1
    mpi_enreg%nproc_pert=1
    mpi_enreg%comm_pert=xmpi_comm_self
    mpi_enreg%me_pert=0
-   ABI_ALLOCATE(mpi_enreg%distrb_pert,(npert))
+   ABI_MALLOC(mpi_enreg%distrb_pert,(npert))
    mpi_enreg%distrb_pert(:)=0
  end if
 
- ABI_DEALLOCATE(nband_rbz)
- ABI_DEALLOCATE(nkpt_rbz)
+ ABI_FREE(nband_rbz)
+ ABI_FREE(nkpt_rbz)
 
 end subroutine initmpi_pert
 !!***
@@ -1967,7 +1967,7 @@ subroutine clnmpi_pert(mpi_enreg)
    end if
 
    if (allocated(mpi_enreg%distrb_pert))  then
-     ABI_DEALLOCATE(mpi_enreg%distrb_pert)
+     ABI_FREE(mpi_enreg%distrb_pert)
    end if
 
    mpi_enreg%me_pert=0
@@ -2049,7 +2049,7 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
            if ((me>=iproc_min).and.(me<=iproc_max)) then
              nrank=iproc_max-iproc_min+1
              if (.not.allocated(ranks)) then
-               ABI_ALLOCATE(ranks,(nrank))
+               ABI_MALLOC(ranks,(nrank))
                if (nrank>0) ranks=(/((iproc_min+irank-1),irank=1,nrank)/)
              else if (nrank/=size(ranks)) then
                msg='Number of bands per proc should be the same for all k-points!'
@@ -2060,12 +2060,12 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
        end do
      end do
      if (.not.allocated(ranks)) then
-       ABI_ALLOCATE(ranks,(0))
+       ABI_MALLOC(ranks,(0))
      end if
 
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks)
 
-     ABI_DEALLOCATE(ranks)
+     ABI_FREE(ranks)
    end if
  end if
 

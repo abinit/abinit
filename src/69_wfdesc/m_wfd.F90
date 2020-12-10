@@ -6014,7 +6014,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  DBG_ENTER("COLL")
 
  ! Allocate temporary cwaveprj storage (sorted by atom type)
- ABI_DATATYPE_ALLOCATE(cwaveprj,(Wfd%natom,Wfd%nspinor))
+ ABI_MALLOC(cwaveprj,(Wfd%natom,Wfd%nspinor))
  call pawcprj_alloc(cwaveprj,0,Wfd%nlmn_sort)
 
  ! Initialize output quantities if not already done.
@@ -6024,7 +6024,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
      qphase     = pawrhoij(iatom)%qphase
      lmn2_size  = pawrhoij(iatom)%lmn2_size
      nspden     = pawrhoij(iatom)%nspden
-     ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(cplex_rhoij*qphase*lmn2_size,nspden))
+     ABI_MALLOC(pawrhoij(iatom)%rhoij_,(cplex_rhoij*qphase*lmn2_size,nspden))
      pawrhoij(iatom)%use_rhoij_=1
    end if
    pawrhoij(iatom)%rhoij_=zero

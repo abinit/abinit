@@ -160,11 +160,11 @@ real(dp),allocatable ::  G_array(:)
 ! *************************************************************************
 
 if (.not. allocated(psir_model)) then
-  ABI_ALLOCATE(psir_model, (2,n4,n5,n6))
+  ABI_MALLOC(psir_model, (2,n4,n5,n6))
 end if
 
 if (.not. allocated(psir_ext_model)) then
-  ABI_ALLOCATE(psir_ext_model, (2,n4,n5,n6))
+  ABI_MALLOC(psir_ext_model, (2,n4,n5,n6))
 end if
 
 R_omega = 2.0_dp*sqrt(epsilon_0**2+omega**2)
@@ -179,18 +179,18 @@ y = sqrt(R_omega)*sin(0.5_dp*theta)
 
 
 if (.not. allocated(model_Y)) then
-  ABI_ALLOCATE(model_Y, (npw_g))
+  ABI_MALLOC(model_Y, (npw_g))
 end if
 
 if (.not. allocated(model_Y_LA)) then
-  ABI_ALLOCATE(model_Y_LA, (npw_k))
+  ABI_MALLOC(model_Y_LA, (npw_k))
 end if
 
 !================================================================================
 ! Compute model_Y, in FFT configuration
 !================================================================================
 
-ABI_ALLOCATE(G_array,(npw_g))
+ABI_MALLOC(G_array,(npw_g))
 G_array(:) = sqrt(2.0_dp*kinpw_gather(:))
 
 model_Y(:) = zero
@@ -213,13 +213,13 @@ else
 end if
 end do ! ig
 
-ABI_DEALLOCATE(G_array)
+ABI_FREE(G_array)
 
 !================================================================================
 ! Compute model_Y_LA, in LA configuration
 !================================================================================
 
-ABI_ALLOCATE(G_array,(npw_k))
+ABI_MALLOC(G_array,(npw_k))
 G_array(:) = sqrt(2.0_dp*kinpw(:))
 
 model_Y_LA(:) = zero
@@ -241,7 +241,7 @@ else
 end if
 end do ! ig
 
-ABI_DEALLOCATE(G_array)
+ABI_FREE(G_array)
 
 
 
@@ -249,7 +249,7 @@ if (dielectric_model_type == 2) then
 
   ABI_BUG('dielectric_model_type == 2 not properly implemented. Review code or input!')
 
-  !ABI_ALLOCATE(sqrt_density,(2,n4,n5,n6))
+  !ABI_MALLOC(sqrt_density,(2,n4,n5,n6))
   !sqrt_density(:,:,:,:) = zero
   !do v= 1, nbandv
   !        sqrt_density(1,:,:,:) = sqrt_density(1,:,:,:) + valence_wfr(1,:,:,:,v)**2+valence_wfr(2,:,:,:,v)**2
@@ -288,25 +288,25 @@ implicit none
 ! *************************************************************************
 
 if (allocated(model_Y)) then
-  ABI_DEALLOCATE(model_Y)
+  ABI_FREE(model_Y)
 end if
 
 if (allocated(model_Y_LA)) then
-  ABI_DEALLOCATE(model_Y_LA)
+  ABI_FREE(model_Y_LA)
 end if
 
 
 
 if (allocated(sqrt_density)) then
-  ABI_DEALLOCATE(sqrt_density)
+  ABI_FREE(sqrt_density)
 end if
 
 if ( allocated(psir_model)) then
-  ABI_DEALLOCATE(psir_model)
+  ABI_FREE(psir_model)
 end if
 
 if (allocated(psir_ext_model)) then
-  ABI_DEALLOCATE(psir_ext_model)
+  ABI_FREE(psir_ext_model)
 end if
 
 end subroutine cleanup_Pk_model
@@ -417,8 +417,8 @@ OPTION_TIMAB = 1
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 
-ABI_ALLOCATE(psik,           (2,npw_kb))
-ABI_ALLOCATE(psik_g,         (2,npw_g))
+ABI_MALLOC(psik,           (2,npw_kb))
+ABI_MALLOC(psik_g,         (2,npw_g))
 
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
@@ -597,8 +597,8 @@ GWLS_TIMAB   = 1535
 OPTION_TIMAB = 1
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
-ABI_DEALLOCATE(psik)
-ABI_DEALLOCATE(psik_g)
+ABI_FREE(psik)
+ABI_FREE(psik_g)
 
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)

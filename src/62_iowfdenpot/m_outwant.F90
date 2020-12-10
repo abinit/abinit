@@ -273,7 +273,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 
 !End counting/assigning no of kpts/direction
 !Reordering the coordinates of all atoms - xcoord array
- ABI_ALLOCATE(tpat,(dtset%ntypat))
+ ABI_MALLOC(tpat,(dtset%ntypat))
  tpat(:)=zero
  do i=1,dtset%natom
    do j=1,dtset%ntypat
@@ -281,7 +281,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
    end do
  end do
  maxat=maxval(tpat(:))
- ABI_ALLOCATE(xcoord,(3,maxat,dtset%ntypat))
+ ABI_MALLOC(xcoord,(3,maxat,dtset%ntypat))
  index=1
  do i=1, dtset%ntypat
    do k=1,tpat(i)
@@ -298,8 +298,8 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 !ONLY if they are not allready in the list. An index is associated
 !for each kg_tmp which allow us to recover kg(3,mpw*nkpt) from
 !the smaller list kg_tmp(3, imax)
- ABI_ALLOCATE(kg_tmp,(3,mpw*nkpt))
- ABI_ALLOCATE(iwfi,(nkpt,mpw))
+ ABI_MALLOC(kg_tmp,(3,mpw*nkpt))
+ ABI_MALLOC(iwfi,(nkpt,mpw))
  kg_tmp(:,:)=zero
  iwfi(:,:)=zero
  imax=npwarr(1)
@@ -358,8 +358,8 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 !  write(std_out,*) tpat(i), nameat
 !  write(std_out,*) ((xcoord(j,k,i),j=1,3),k=1,tpat(i)), 'XCART'
  end do
- ABI_DEALLOCATE(tpat)
- ABI_DEALLOCATE(xcoord)
+ ABI_FREE(tpat)
+ ABI_FREE(xcoord)
 
 !energy cut-off in Rydberg (WANT option)
  write (unitwnt) 2._dp*dtset%ecut, mband
@@ -373,7 +373,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
  do i=1, nkpt
    write(unitwnt) (iwfi(i,j), j=1,mpw)
  end do
- ABI_DEALLOCATE(kg_tmp)
+ ABI_FREE(kg_tmp)
 
 !Eigenvalues in HARTREE
  write (unitwnt)  ( eig( i ), i = 1, bandtot)
@@ -416,7 +416,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 !!!!!!!!!!!!!!!!!!!!!!!!!!
  iwf = 1
  iwf_k=1
- ABI_ALLOCATE(wfc,(imax))
+ ABI_MALLOC(wfc,(imax))
 
 !Loop over k-pt
  do nkp=1,nkpt
@@ -457,8 +457,8 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 !  End loop over k-pts
  end do
 
- ABI_DEALLOCATE(iwfi)
- ABI_DEALLOCATE(wfc)
+ ABI_FREE(iwfi)
+ ABI_FREE(wfc)
 
  call wrtout(std_out,'Closing file','COLL')
  close(unit=unitwnt)

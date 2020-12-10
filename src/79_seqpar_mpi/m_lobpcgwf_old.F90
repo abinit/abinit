@@ -257,41 +257,41 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    bblocksize=(iblock-1)*blocksize
 
 !  allocations
-   ABI_ALLOCATE(pcon,(npw_k,blocksize))
-   ABI_ALLOCATE(blockvectorx,(cplx*vectsize,blocksize))
-   ABI_ALLOCATE(blockvectorax,(cplx*vectsize,blocksize))
-   ABI_ALLOCATE(blockvectorbx,(cplx*vectsize,blocksize))
-   ABI_ALLOCATE(blockvectorr,(cplx*vectsize,blocksize))
-   ABI_ALLOCATE(blockvectorar,(cplx*vectsize,blocksize))
-   ABI_ALLOCATE(blockvectorbr,(cplx*vectsize,blocksize))
-   ABI_ALLOCATE(blockvectorp,(cplx*vectsize,blocksize))
-   ABI_ALLOCATE(blockvectorap,(cplx*vectsize,blocksize))
-   ABI_ALLOCATE(blockvectorbp,(cplx*vectsize,blocksize))
-   ABI_ALLOCATE(blockvectordumm,(cplx*vectsize,blocksize))
-   ABI_ALLOCATE(gramxax,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(gramxar,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(gramxap,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(gramrar,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(gramrap,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(grampap,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(gramxbx,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(gramxbr,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(gramxbp,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(gramrbr,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(gramrbp,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(grampbp,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(transf3,(cplx*blocksize,blocksize,3))
-   ABI_ALLOCATE(transf5,(cplx*blocksize,blocksize,5))
-   ABI_ALLOCATE(lambda,(cplx*blocksize,blocksize))
-   ABI_ALLOCATE(residualnorms,(blocksize))
+   ABI_MALLOC(pcon,(npw_k,blocksize))
+   ABI_MALLOC(blockvectorx,(cplx*vectsize,blocksize))
+   ABI_MALLOC(blockvectorax,(cplx*vectsize,blocksize))
+   ABI_MALLOC(blockvectorbx,(cplx*vectsize,blocksize))
+   ABI_MALLOC(blockvectorr,(cplx*vectsize,blocksize))
+   ABI_MALLOC(blockvectorar,(cplx*vectsize,blocksize))
+   ABI_MALLOC(blockvectorbr,(cplx*vectsize,blocksize))
+   ABI_MALLOC(blockvectorp,(cplx*vectsize,blocksize))
+   ABI_MALLOC(blockvectorap,(cplx*vectsize,blocksize))
+   ABI_MALLOC(blockvectorbp,(cplx*vectsize,blocksize))
+   ABI_MALLOC(blockvectordumm,(cplx*vectsize,blocksize))
+   ABI_MALLOC(gramxax,(cplx*blocksize,blocksize))
+   ABI_MALLOC(gramxar,(cplx*blocksize,blocksize))
+   ABI_MALLOC(gramxap,(cplx*blocksize,blocksize))
+   ABI_MALLOC(gramrar,(cplx*blocksize,blocksize))
+   ABI_MALLOC(gramrap,(cplx*blocksize,blocksize))
+   ABI_MALLOC(grampap,(cplx*blocksize,blocksize))
+   ABI_MALLOC(gramxbx,(cplx*blocksize,blocksize))
+   ABI_MALLOC(gramxbr,(cplx*blocksize,blocksize))
+   ABI_MALLOC(gramxbp,(cplx*blocksize,blocksize))
+   ABI_MALLOC(gramrbr,(cplx*blocksize,blocksize))
+   ABI_MALLOC(gramrbp,(cplx*blocksize,blocksize))
+   ABI_MALLOC(grampbp,(cplx*blocksize,blocksize))
+   ABI_MALLOC(transf3,(cplx*blocksize,blocksize,3))
+   ABI_MALLOC(transf5,(cplx*blocksize,blocksize,5))
+   ABI_MALLOC(lambda,(cplx*blocksize,blocksize))
+   ABI_MALLOC(residualnorms,(blocksize))
 
-   ABI_ALLOCATE(blockvectory,(cplx*vectsize,bblocksize))
-   ABI_ALLOCATE(blockvectorby,(cplx*vectsize,bblocksize))
-   ABI_ALLOCATE(gramyx,(cplx*bblocksize,blocksize))
+   ABI_MALLOC(blockvectory,(cplx*vectsize,bblocksize))
+   ABI_MALLOC(blockvectorby,(cplx*vectsize,bblocksize))
+   ABI_MALLOC(gramyx,(cplx*bblocksize,blocksize))
    if (gs_hamk%usepaw==0) then
-     ABI_ALLOCATE(blockvectorvx,(cplx*vectsize,blocksize))
-     ABI_ALLOCATE(blockvectorvr,(cplx*vectsize,blocksize))
-     ABI_ALLOCATE(blockvectorvp,(cplx*vectsize,blocksize))
+     ABI_MALLOC(blockvectorvx,(cplx*vectsize,blocksize))
+     ABI_MALLOC(blockvectorvr,(cplx*vectsize,blocksize))
+     ABI_MALLOC(blockvectorvp,(cplx*vectsize,blocksize))
    end if
 
    if(use_linalg_gpu==1) then
@@ -344,10 +344,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    end if
 !  !!!!!!!!!!!!!!!!!!!!!!!! End if iblock /=1 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-   ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
-   ABI_ALLOCATE(gwavef,(2,npw_k*my_nspinor*blocksize))
-   ABI_ALLOCATE(gvnlxc,(2,npw_k*my_nspinor*blocksize))
-   ABI_ALLOCATE(swavef,(2,npw_k*my_nspinor*blocksize))
+   ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
+   ABI_MALLOC(gwavef,(2,npw_k*my_nspinor*blocksize))
+   ABI_MALLOC(gvnlxc,(2,npw_k*my_nspinor*blocksize))
+   ABI_MALLOC(swavef,(2,npw_k*my_nspinor*blocksize))
 
    call wfcopy('I',vectsize*blocksize,blockvectorx,1,cwavef,1,blocksize,iblock,'W',withbbloc=.false.,&
 &   timopt=timopt,tim_wfcopy=tim_wfcopy)
@@ -387,10 +387,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    call wfcopy('D',vectsize*blocksize,gwavef,1,blockvectorax,1,blocksize,iblock,'W',withbbloc=.false.,&
 &   timopt=timopt,tim_wfcopy=tim_wfcopy)
 
-   ABI_DEALLOCATE(cwavef)
-   ABI_DEALLOCATE(gwavef)
-   ABI_DEALLOCATE(gvnlxc)
-   ABI_DEALLOCATE(swavef)
+   ABI_FREE(cwavef)
+   ABI_FREE(gwavef)
+   ABI_FREE(gvnlxc)
+   ABI_FREE(swavef)
 
    call abi_xorthonormalize(blockvectorx,blockvectorbx,blocksize,mpi_enreg%comm_bandspinorfft,gramxbx,vectsize,&
 &   x_cplx,timopt=timopt,tim_xortho=tim_xortho)
@@ -414,7 +414,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    if(abs(dtset%timopt)==3) then
      call timab(533,2,tsec)
    end if
-   ABI_ALLOCATE(eigen,(blocksize))
+   ABI_MALLOC(eigen,(blocksize))
 
    call abi_xheev('v','u',blocksize,gramxax,blocksize,eigen,x_cplx=cplx,istwf_k=istwf_k, &
    timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
@@ -445,7 +445,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      zvar=(/eigen(iblocksize),zero/)
      call abi_xcopy(1,zvar,1,lambda(cplx*(iblocksize-1)+1:cplx*iblocksize,iblocksize),1,x_cplx=x_cplx)
    end do
-   ABI_DEALLOCATE(eigen)
+   ABI_FREE(eigen)
 
    if(abs(dtset%timopt)==4) then
      call timab(522,2,tsec)
@@ -560,10 +560,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &       vectsize,gramxax,blocksize,cone,blockvectorr,vectsize,x_cplx=x_cplx)
      end if
 
-     ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
-     ABI_ALLOCATE(gwavef,(2,npw_k*my_nspinor*blocksize))
-     ABI_ALLOCATE(gvnlxc,(2,npw_k*my_nspinor*blocksize))
-     ABI_ALLOCATE(swavef,(2,npw_k*my_nspinor*blocksize))
+     ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
+     ABI_MALLOC(gwavef,(2,npw_k*my_nspinor*blocksize))
+     ABI_MALLOC(gvnlxc,(2,npw_k*my_nspinor*blocksize))
+     ABI_MALLOC(swavef,(2,npw_k*my_nspinor*blocksize))
 
      call wfcopy('I',vectsize*blocksize,blockvectorr,1,cwavef,1,blocksize,iblock,'W',withbbloc=.false.,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
@@ -604,10 +604,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      call wfcopy('D',vectsize*blocksize,gwavef,1,blockvectorar,1,blocksize,iblock,'W',withbbloc=.false.,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
 
-     ABI_DEALLOCATE(cwavef)
-     ABI_DEALLOCATE(gwavef)
-     ABI_DEALLOCATE(gvnlxc)
-     ABI_DEALLOCATE(swavef)
+     ABI_FREE(cwavef)
+     ABI_FREE(gwavef)
+     ABI_FREE(gvnlxc)
+     ABI_FREE(swavef)
 
      if(use_linalg_gpu==1) then
        call copy_on_gpu(blockvectorbr,blockvectorbr_gpu,cplx*dp*vectsize*blocksize)
@@ -802,13 +802,13 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
            call abi_xcopy(1,zvar,1,grampbp(cplx*(iblocksize-1)+1:cplx*iblocksize,iblocksize),1,x_cplx=x_cplx)
          end do
          bigorder=i4
-         ABI_ALLOCATE(grama,(cplx*i4,i4))
-         ABI_ALLOCATE(gramb,(cplx*i4,i4))
-         ABI_ALLOCATE(eigen,(i4))
-!        ABI_ALLOCATE(coordx,(cplx*i4,blocksize))
-         ABI_ALLOCATE(coordx1,(cplx*blocksize,blocksize))
-         ABI_ALLOCATE(coordx2,(cplx*blocksize,blocksize))
-         ABI_ALLOCATE(coordx3,(cplx*blocksize,blocksize))
+         ABI_MALLOC(grama,(cplx*i4,i4))
+         ABI_MALLOC(gramb,(cplx*i4,i4))
+         ABI_MALLOC(eigen,(i4))
+!        ABI_MALLOC(coordx,(cplx*i4,blocksize))
+         ABI_MALLOC(coordx1,(cplx*blocksize,blocksize))
+         ABI_MALLOC(coordx2,(cplx*blocksize,blocksize))
+         ABI_MALLOC(coordx3,(cplx*blocksize,blocksize))
          grama(:,:)=zero;gramb(:,:)=zero
          grama(gramindex(i1+1):gramindex(i2)+cplx-1,i1+1:i2)=gramxax
          grama(gramindex(i1+1):gramindex(i2)+cplx-1,i2+1:i3)=gramxar
@@ -824,12 +824,12 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
          gramb(gramindex(i3+1):gramindex(i4)+cplx-1,i3+1:i4)=grampbp
        else
          bigorder=i3
-         ABI_ALLOCATE(grama,(cplx*i3,i3))
-         ABI_ALLOCATE(gramb,(cplx*i3,i3))
-         ABI_ALLOCATE(eigen,(i3))
-!        ABI_ALLOCATE(coordx,(cplx*i3,blocksize))
-         ABI_ALLOCATE(coordx1,(cplx*blocksize,blocksize))
-         ABI_ALLOCATE(coordx2,(cplx*blocksize,blocksize))
+         ABI_MALLOC(grama,(cplx*i3,i3))
+         ABI_MALLOC(gramb,(cplx*i3,i3))
+         ABI_MALLOC(eigen,(i3))
+!        ABI_MALLOC(coordx,(cplx*i3,blocksize))
+         ABI_MALLOC(coordx1,(cplx*blocksize,blocksize))
+         ABI_MALLOC(coordx2,(cplx*blocksize,blocksize))
          grama(:,:)=zero;gramb(:,:)=zero
          grama(gramindex(i1+1):gramindex(i2)+cplx-1,i1+1:i2)=gramxax
          grama(gramindex(i1+1):gramindex(i2)+cplx-1,i2+1:i3)=gramxar
@@ -839,28 +839,28 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
          gramb(gramindex(i2+1):gramindex(i3)+cplx-1,i2+1:i3)=gramrbr
        end if
 
-       ABI_ALLOCATE(tmpgramb,(cplx*bigorder,bigorder))
-       ABI_ALLOCATE(tmpeigen,(bigorder))
+       ABI_MALLOC(tmpgramb,(cplx*bigorder,bigorder))
+       ABI_MALLOC(tmpeigen,(bigorder))
        tmpgramb=gramb
 
        call abi_xheev('v','u',bigorder,tmpgramb,bigorder,tmpeigen,x_cplx=cplx,istwf_k=istwf_k, &
 &       timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
 
        condestgramb=tmpeigen(bigorder)/tmpeigen(1)
-       ABI_DEALLOCATE(tmpgramb)
-       ABI_DEALLOCATE(tmpeigen)
+       ABI_FREE(tmpgramb)
+       ABI_FREE(tmpeigen)
 
        if (condestgramb.gt.1d+5.or.condestgramb.lt.0.d0.or.info/=0) then
          write(std_out,*)'condition number of the Gram matrix = ',condestgramb
          if (cond_try==1.and.restart==0) then
-           ABI_DEALLOCATE(grama)
-           ABI_DEALLOCATE(gramb)
-           ABI_DEALLOCATE(eigen)
-!          ABI_DEALLOCATE(coordx)
-           ABI_DEALLOCATE(coordx1)
-           ABI_DEALLOCATE(coordx2)
+           ABI_FREE(grama)
+           ABI_FREE(gramb)
+           ABI_FREE(eigen)
+!          ABI_FREE(coordx)
+           ABI_FREE(coordx1)
+           ABI_FREE(coordx2)
            if(bigorder==i4) then
-             ABI_DEALLOCATE(coordx3)
+             ABI_FREE(coordx3)
            end if
            if (nrestart.gt.1) then
              ABI_WARNING('the minimization is stopped for this block')
@@ -912,9 +912,9 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
        end if
      end if
 
-     ABI_DEALLOCATE(grama)
-     ABI_DEALLOCATE(gramb)
-     ABI_DEALLOCATE(eigen)
+     ABI_FREE(grama)
+     ABI_FREE(gramb)
+     ABI_FREE(eigen)
      if (restart==0 .and. iterationnumber >1) then
 
 !      blockvectorp=matmul(blockvectorr,coordx(i2+1:i3,:))+&
@@ -1094,11 +1094,11 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      end if
      blockvectorbx = blockvectordumm+blockvectorbp
 
-!    ABI_DEALLOCATE(coordx)
-     ABI_DEALLOCATE(coordx1)
-     ABI_DEALLOCATE(coordx2)
+!    ABI_FREE(coordx)
+     ABI_FREE(coordx1)
+     ABI_FREE(coordx2)
      if(bigorder==i4) then
-       ABI_DEALLOCATE(coordx3)
+       ABI_FREE(coordx3)
      end if
 
 !    Check convergence on energy and eventually exit
@@ -1171,13 +1171,13 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    iwavef=iblock*blocksize
    isubh=1+2*bblocksize*(bblocksize+1)/2
 
-   ABI_ALLOCATE(blockvectorz,(cplx*vectsize,iwavef))
+   ABI_MALLOC(blockvectorz,(cplx*vectsize,iwavef))
    if(bblocksize > 0 ) then
      call abi_xcopy(bblocksize*vectsize,blockvectory(:,1:bblocksize),1,blockvectorz(:,1:bblocksize),1,x_cplx=x_cplx)
    end if
    call abi_xcopy( blocksize*vectsize,blockvectorx(:,1:blocksize) ,1,blockvectorz(:,bblocksize+1:iwavef),1,x_cplx=x_cplx)
 
-   ABI_ALLOCATE(tsubham,(cplx*iwavef,blocksize))
+   ABI_MALLOC(tsubham,(cplx*iwavef,blocksize))
    tsubham(:,:)=zero
    call abi_xgemm(cparam(cplx),'n',iwavef,blocksize,vectsize,cone,blockvectorz,vectsize,&
 &   blockvectorax,vectsize,czero,tsubham,iwavef,x_cplx=x_cplx)
@@ -1200,45 +1200,45 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
        isubh=isubh+2
      end do
    end do
-   ABI_DEALLOCATE(tsubham)
-   ABI_DEALLOCATE(blockvectorz)
+   ABI_FREE(tsubham)
+   ABI_FREE(blockvectorz)
 !  comm for subham and subvnlx are made in vtowfk
 
-   ABI_DEALLOCATE(pcon)
-   ABI_DEALLOCATE(blockvectory)
-   ABI_DEALLOCATE(blockvectorby)
-   ABI_DEALLOCATE(gramyx)
-   ABI_DEALLOCATE(blockvectorx)
-   ABI_DEALLOCATE(blockvectorax)
-   ABI_DEALLOCATE(blockvectorbx)
-   ABI_DEALLOCATE(blockvectorr)
-   ABI_DEALLOCATE(blockvectorar)
-   ABI_DEALLOCATE(blockvectorbr)
-   ABI_DEALLOCATE(blockvectorp)
-   ABI_DEALLOCATE(blockvectorap)
-   ABI_DEALLOCATE(blockvectorbp)
+   ABI_FREE(pcon)
+   ABI_FREE(blockvectory)
+   ABI_FREE(blockvectorby)
+   ABI_FREE(gramyx)
+   ABI_FREE(blockvectorx)
+   ABI_FREE(blockvectorax)
+   ABI_FREE(blockvectorbx)
+   ABI_FREE(blockvectorr)
+   ABI_FREE(blockvectorar)
+   ABI_FREE(blockvectorbr)
+   ABI_FREE(blockvectorp)
+   ABI_FREE(blockvectorap)
+   ABI_FREE(blockvectorbp)
    if (gs_hamk%usepaw==0) then
-     ABI_DEALLOCATE(blockvectorvx)
-     ABI_DEALLOCATE(blockvectorvp)
-     ABI_DEALLOCATE(blockvectorvr)
+     ABI_FREE(blockvectorvx)
+     ABI_FREE(blockvectorvp)
+     ABI_FREE(blockvectorvr)
    end if
-   ABI_DEALLOCATE(blockvectordumm)
-   ABI_DEALLOCATE(gramxax)
-   ABI_DEALLOCATE(gramxar)
-   ABI_DEALLOCATE(gramxap)
-   ABI_DEALLOCATE(gramrar)
-   ABI_DEALLOCATE(gramrap)
-   ABI_DEALLOCATE(grampap)
-   ABI_DEALLOCATE(gramxbx)
-   ABI_DEALLOCATE(gramxbr)
-   ABI_DEALLOCATE(gramxbp)
-   ABI_DEALLOCATE(gramrbr)
-   ABI_DEALLOCATE(gramrbp)
-   ABI_DEALLOCATE(grampbp)
-   ABI_DEALLOCATE(transf3)
-   ABI_DEALLOCATE(transf5)
-   ABI_DEALLOCATE(lambda)
-   ABI_DEALLOCATE(residualnorms)
+   ABI_FREE(blockvectordumm)
+   ABI_FREE(gramxax)
+   ABI_FREE(gramxar)
+   ABI_FREE(gramxap)
+   ABI_FREE(gramrar)
+   ABI_FREE(gramrap)
+   ABI_FREE(grampap)
+   ABI_FREE(gramxbx)
+   ABI_FREE(gramxbr)
+   ABI_FREE(gramxbp)
+   ABI_FREE(gramrbr)
+   ABI_FREE(gramrbp)
+   ABI_FREE(grampbp)
+   ABI_FREE(transf3)
+   ABI_FREE(transf5)
+   ABI_FREE(lambda)
+   ABI_FREE(residualnorms)
    if(use_linalg_gpu==1) then
      call dealloc_on_gpu(bblockvector_gpu)
      call dealloc_on_gpu(gram_gpu)

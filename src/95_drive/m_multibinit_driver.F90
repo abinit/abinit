@@ -582,12 +582,12 @@ elec_eval = .FALSE.
     ! just for TEST
     !   if(inp%prt_phfrq > 0) then
     !      natom_sp = reference_effective_potential%supercell%natom_supercell
-    !      ABI_ALLOCATE(dynmat,(2,3,natom_sp,3,natom_sp))
+    !      ABI_MALLOC(dynmat,(2,3,natom_sp,3,natom_sp))
     !      call effective_potential_effpot2dynmat(dynmat,inp%delta_df,reference_effective_potential,&
     ! &                                           reference_effective_potential%supercell%natom_supercell,&
     ! &                                           int(reference_effective_potential%supercell%qphon),3)
 
-    !      ABI_DEALLOCATE(dynmat)
+    !      ABI_FREE(dynmat)
     !    end if
     ! end if
     !TEST_AM SECTION

@@ -140,13 +140,13 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
  dtefield%dkvecs(:,:) = zero
  dtefield%maxnstr = 0    ; dtefield%maxnkstr  = 0
  dtefield%nstr(:) = 0    ; dtefield%nkstr(:) = 0
- ABI_ALLOCATE(dtefield%ikpt_dk,(nkpt,9,3))
- ABI_ALLOCATE(dtefield%cgindex,(nkpt,nsppol*2))
- ABI_ALLOCATE(dtefield%kgindex,(nkpt))
+ ABI_MALLOC(dtefield%ikpt_dk,(nkpt,9,3))
+ ABI_MALLOC(dtefield%cgindex,(nkpt,nsppol*2))
+ ABI_MALLOC(dtefield%kgindex,(nkpt))
  dtefield%ikpt_dk(:,:,:) = 0
  dtefield%cgindex(:,:) = 0
  dtefield%mband_occ = 0
- ABI_ALLOCATE(dtefield%nband_occ,(nsppol))
+ ABI_MALLOC(dtefield%nband_occ,(nsppol))
  dtefield%nband_occ = 0
  pwindall(:,:,:) = 0
 
@@ -380,13 +380,13 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 
  dtefield%maxnstr  = maxval(dtefield%nstr(:))
  dtefield%maxnkstr = maxval(dtefield%nkstr(:))
- ABI_ALLOCATE(dtefield%idxkstr,(dtefield%maxnkstr,dtefield%maxnstr,3))
+ ABI_MALLOC(dtefield%idxkstr,(dtefield%maxnkstr,dtefield%maxnstr,3))
  dtefield%idxkstr(:,:,:) = 0
 
 
 !Build the different strings------------------------------------------
 
- ABI_ALLOCATE(kpt_mark,(nkpt))
+ ABI_MALLOC(kpt_mark,(nkpt))
  do idir = 1, 3
 
    if (dtset%rfdir(idir) == 1) then
@@ -413,16 +413,16 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 
  end do           ! close loop over idir
 
- ABI_DEALLOCATE(kpt_mark)
+ ABI_FREE(kpt_mark)
 
 
 !Build the array pwindall that is needed to compute the different overlap matrices
 !at k +- dk
 
- ABI_ALLOCATE(kg_tmp,(3,max(mpw,mpw1)*mkmem))
- ABI_ALLOCATE(kpt1,(3,nkpt))
- ABI_ALLOCATE(npwarr_tmp,(nkpt))
- ABI_ALLOCATE(npwtot,(nkpt))
+ ABI_MALLOC(kg_tmp,(3,max(mpw,mpw1)*mkmem))
+ ABI_MALLOC(kpt1,(3,nkpt))
+ ABI_MALLOC(npwarr_tmp,(nkpt))
+ ABI_MALLOC(npwtot,(nkpt))
  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
 
  do idir = 1, 3
@@ -684,10 +684,10 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
    end if      ! rfdir(idir) == 1
  end do        ! close loop over idir====================================================================
 
- ABI_DEALLOCATE(kg_tmp)
- ABI_DEALLOCATE(kpt1)
- ABI_DEALLOCATE(npwarr_tmp)
- ABI_DEALLOCATE(npwtot)
+ ABI_FREE(kg_tmp)
+ ABI_FREE(kpt1)
+ ABI_FREE(npwarr_tmp)
+ ABI_FREE(npwtot)
 
 end subroutine dfptff_initberry
 !!***
@@ -776,12 +776,12 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 ! *************************************************************************
 
  mpw_tmp=max(mpw,mpw1)
- ABI_ALLOCATE(vect1,(2,0:mpw_tmp))
- ABI_ALLOCATE(vect2,(2,0:mpw_tmp))
- ABI_ALLOCATE(s1mat,(2,dtefield%mband_occ,dtefield%mband_occ))
- ABI_ALLOCATE(pwind_tmp,(mpw_tmp))
- ABI_ALLOCATE(Amat,(2,dtefield%mband_occ,dtefield%mband_occ))
- ABI_ALLOCATE(Bmat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(vect1,(2,0:mpw_tmp))
+ ABI_MALLOC(vect2,(2,0:mpw_tmp))
+ ABI_MALLOC(s1mat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(pwind_tmp,(mpw_tmp))
+ ABI_MALLOC(Amat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(Bmat,(2,dtefield%mband_occ,dtefield%mband_occ))
  vect1(:,0) = zero ; vect2(:,0) = zero
  s1mat(:,:,:)=zero
  grad_berry(:,:,:) = zero
@@ -1130,12 +1130,12 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
  end do !idir
 
- ABI_DEALLOCATE(vect1)
- ABI_DEALLOCATE(vect2)
- ABI_DEALLOCATE(s1mat)
- ABI_DEALLOCATE(Amat)
- ABI_DEALLOCATE(Bmat)
- ABI_DEALLOCATE(pwind_tmp)
+ ABI_FREE(vect1)
+ ABI_FREE(vect2)
+ ABI_FREE(s1mat)
+ ABI_FREE(Amat)
+ ABI_FREE(Bmat)
+ ABI_FREE(pwind_tmp)
 
 end subroutine dfptff_gradberry
 !!***
@@ -1219,12 +1219,12 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
 ! *************************************************************************
 
  mpw_tmp=max(mpw,mpw1)
- ABI_ALLOCATE(vect1,(2,0:mpw_tmp))
- ABI_ALLOCATE(vect2,(2,0:mpw_tmp))
- ABI_ALLOCATE(s1mat,(2,dtefield%mband_occ,dtefield%mband_occ))
- ABI_ALLOCATE(pwind_tmp,(mpw_tmp))
- ABI_ALLOCATE(Amat,(2,dtefield%mband_occ,dtefield%mband_occ))
- ABI_ALLOCATE(Bmat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(vect1,(2,0:mpw_tmp))
+ ABI_MALLOC(vect2,(2,0:mpw_tmp))
+ ABI_MALLOC(s1mat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(pwind_tmp,(mpw_tmp))
+ ABI_MALLOC(Amat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(Bmat,(2,dtefield%mband_occ,dtefield%mband_occ))
  vect1(:,0) = zero ; vect2(:,0) = zero
  s1mat(:,:,:)=zero
  grad_berry(:,:,:) = zero
@@ -1573,12 +1573,12 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
 
  end do !idir
 
- ABI_DEALLOCATE(vect1)
- ABI_DEALLOCATE(vect2)
- ABI_DEALLOCATE(s1mat)
- ABI_DEALLOCATE(Amat)
- ABI_DEALLOCATE(Bmat)
- ABI_DEALLOCATE(pwind_tmp)
+ ABI_FREE(vect1)
+ ABI_FREE(vect2)
+ ABI_FREE(s1mat)
+ ABI_FREE(Amat)
+ ABI_FREE(Bmat)
+ ABI_FREE(pwind_tmp)
 
 end subroutine dfptff_gbefd
 !!***
@@ -1661,11 +1661,11 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
 
 !calculate 4 matrices -----------------------------
  mpw_tmp=max(mpw,mpw1)
- ABI_ALLOCATE(umat,(2,dtefield%mband_occ,dtefield%mband_occ,4))
- ABI_ALLOCATE(vect1,(2,0:mpw_tmp))
- ABI_ALLOCATE(vect2,(2,0:mpw_tmp))
- ABI_ALLOCATE(pwind_tmp,(mpw_tmp))
- ABI_ALLOCATE(Amat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(umat,(2,dtefield%mband_occ,dtefield%mband_occ,4))
+ ABI_MALLOC(vect1,(2,0:mpw_tmp))
+ ABI_MALLOC(vect2,(2,0:mpw_tmp))
+ ABI_MALLOC(pwind_tmp,(mpw_tmp))
+ ABI_MALLOC(Amat,(2,dtefield%mband_occ,dtefield%mband_occ))
  vect1(:,0) = zero ; vect2(:,0) = zero
  eberry=zero
 
@@ -1902,11 +1902,11 @@ subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mkmem,&
    end do !end idir
  end do !end ikpt
 
- ABI_DEALLOCATE(umat)
- ABI_DEALLOCATE(vect1)
- ABI_DEALLOCATE(vect2)
- ABI_DEALLOCATE(pwind_tmp)
- ABI_DEALLOCATE(Amat)
+ ABI_FREE(umat)
+ ABI_FREE(vect1)
+ ABI_FREE(vect2)
+ ABI_FREE(pwind_tmp)
+ ABI_FREE(Amat)
 
 end subroutine dfptff_edie
 !!***
@@ -1987,11 +1987,11 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
 
 !calculate 4 matrices -----------------------------
  mpw_tmp=max(mpw,mpw1)
- ABI_ALLOCATE(umat,(2,dtefield%mband_occ,dtefield%mband_occ,4))
- ABI_ALLOCATE(vect1,(2,0:mpw_tmp))
- ABI_ALLOCATE(vect2,(2,0:mpw_tmp))
- ABI_ALLOCATE(pwind_tmp,(mpw_tmp))
- ABI_ALLOCATE(Amat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(umat,(2,dtefield%mband_occ,dtefield%mband_occ,4))
+ ABI_MALLOC(vect1,(2,0:mpw_tmp))
+ ABI_MALLOC(vect2,(2,0:mpw_tmp))
+ ABI_MALLOC(pwind_tmp,(mpw_tmp))
+ ABI_MALLOC(Amat,(2,dtefield%mband_occ,dtefield%mband_occ))
  vect1(:,0) = zero ; vect2(:,0) = zero
  eberry=zero
 
@@ -2186,11 +2186,11 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mkmem,&
    end do !end idir
  end do !end ikpt
 
- ABI_DEALLOCATE(umat)
- ABI_DEALLOCATE(vect1)
- ABI_DEALLOCATE(vect2)
- ABI_DEALLOCATE(pwind_tmp)
- ABI_DEALLOCATE(Amat)
+ ABI_FREE(umat)
+ ABI_FREE(vect1)
+ ABI_FREE(vect2)
+ ABI_FREE(pwind_tmp)
+ ABI_FREE(Amat)
 
 end subroutine dfptff_ebp
 !!***
@@ -2272,10 +2272,10 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
 
 !calculate s1 matrices -----------------------------
  mpw_tmp=max(mpw,mpw1)
- ABI_ALLOCATE(s1mat,(2,dtefield%mband_occ,dtefield%mband_occ))
- ABI_ALLOCATE(vect1,(2,0:mpw_tmp))
- ABI_ALLOCATE(vect2,(2,0:mpw_tmp))
- ABI_ALLOCATE(pwind_tmp,(mpw_tmp))
+ ABI_MALLOC(s1mat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(vect1,(2,0:mpw_tmp))
+ ABI_MALLOC(vect2,(2,0:mpw_tmp))
+ ABI_MALLOC(pwind_tmp,(mpw_tmp))
  vect1(:,0) = zero ; vect2(:,0) = zero
 
  edir(:)=zero
@@ -2360,10 +2360,10 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mkmem,&
 
  d2lo(1,1:3,ipert,idirpert,ipert)=edir(:)
 
- ABI_DEALLOCATE(s1mat)
- ABI_DEALLOCATE(vect1)
- ABI_DEALLOCATE(vect2)
- ABI_DEALLOCATE(pwind_tmp)
+ ABI_FREE(s1mat)
+ ABI_FREE(vect1)
+ ABI_FREE(vect2)
+ ABI_FREE(pwind_tmp)
 
 end subroutine dfptff_die
 !!***
@@ -2445,10 +2445,10 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
 
 !calculate s1 matrices -----------------------------
  mpw_tmp=max(mpw,mpw1)
- ABI_ALLOCATE(s1mat,(2,dtefield%mband_occ,dtefield%mband_occ))
- ABI_ALLOCATE(vect1,(2,0:mpw_tmp))
- ABI_ALLOCATE(vect2,(2,0:mpw_tmp))
- ABI_ALLOCATE(pwind_tmp,(mpw_tmp))
+ ABI_MALLOC(s1mat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(vect1,(2,0:mpw_tmp))
+ ABI_MALLOC(vect2,(2,0:mpw_tmp))
+ ABI_MALLOC(pwind_tmp,(mpw_tmp))
  vect1(:,0) = zero ; vect2(:,0) = zero
 
  edir(:)=zero
@@ -2533,10 +2533,10 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mkmem,&
 
  d2lo(1,1:3,natom+2,idirpert,ipert)=edir(:)
 
- ABI_DEALLOCATE(s1mat)
- ABI_DEALLOCATE(vect1)
- ABI_DEALLOCATE(vect2)
- ABI_DEALLOCATE(pwind_tmp)
+ ABI_FREE(s1mat)
+ ABI_FREE(vect1)
+ ABI_FREE(vect2)
+ ABI_FREE(pwind_tmp)
 
 end subroutine dfptff_bec
 !!***
@@ -2602,13 +2602,13 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
 
 ! *************************************************************************
 
- ABI_ALLOCATE(ipvt,(dtefield%mband_occ))
- ABI_ALLOCATE(sinv,(2,dtefield%mband_occ,dtefield%mband_occ))
- ABI_ALLOCATE(zgwork,(2,dtefield%mband_occ))
- ABI_ALLOCATE(vect1,(2,0:mpw))
- ABI_ALLOCATE(vect2,(2,0:mpw))
- ABI_ALLOCATE(smat_k,(2,dtefield%mband_occ,dtefield%mband_occ))
- ABI_ALLOCATE(pwind_k,(max(mpw,mpw1)))
+ ABI_MALLOC(ipvt,(dtefield%mband_occ))
+ ABI_MALLOC(sinv,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(zgwork,(2,dtefield%mband_occ))
+ ABI_MALLOC(vect1,(2,0:mpw))
+ ABI_MALLOC(vect2,(2,0:mpw))
+ ABI_MALLOC(smat_k,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_MALLOC(pwind_k,(max(mpw,mpw1)))
  vect1(:,0) = zero ; vect2(:,0) = zero
 
  job = 11
@@ -2653,13 +2653,13 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
    end do  !end loop over k
  end do
 
- ABI_DEALLOCATE(ipvt)
- ABI_DEALLOCATE(sinv)
- ABI_DEALLOCATE(zgwork)
- ABI_DEALLOCATE(vect1)
- ABI_DEALLOCATE(vect2)
- ABI_DEALLOCATE(smat_k)
- ABI_DEALLOCATE(pwind_k)
+ ABI_FREE(ipvt)
+ ABI_FREE(sinv)
+ ABI_FREE(zgwork)
+ ABI_FREE(vect1)
+ ABI_FREE(vect2)
+ ABI_FREE(smat_k)
+ ABI_FREE(pwind_k)
 
 end subroutine qmatrix
 !!***

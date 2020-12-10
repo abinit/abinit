@@ -200,8 +200,8 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 
  grid%nbz_coarse = Kmesh_coarse%nbz
 
- ABI_ALLOCATE(grid%shiftk_coarse,(3,grid%nshiftk_coarse))
- ABI_ALLOCATE(grid%shiftk_dense,(3,grid%nshiftk_dense))
+ ABI_MALLOC(grid%shiftk_coarse,(3,grid%nshiftk_coarse))
+ ABI_MALLOC(grid%shiftk_dense,(3,grid%nshiftk_dense))
 
  grid%shiftk_coarse(:,:) = Kmesh_coarse%shift(:,:)
  grid%shiftk_dense(:,:) = Kmesh_dense%shift(:,:)
@@ -217,10 +217,10 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
  grid%kmult(:) = kmult(:)
  grid%ndiv = kmult(1)*kmult(2)*kmult(3)
 
- ABI_ALLOCATE(grid%indices_dense,(6,Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%g0_dense,(3,Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%iktoint_dense,(Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%inttoik_dense,(Kmesh_dense%nbz))
+ ABI_MALLOC(grid%indices_dense,(6,Kmesh_dense%nbz))
+ ABI_MALLOC(grid%g0_dense,(3,Kmesh_dense%nbz))
+ ABI_MALLOC(grid%iktoint_dense,(Kmesh_dense%nbz))
+ ABI_MALLOC(grid%inttoik_dense,(Kmesh_dense%nbz))
 
  grid%maxcomp_coarse(:) = -1
 
@@ -236,10 +236,10 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
    grid%nbz_closedcoarse = grid%nbz_closedcoarse*(grid%maxcomp_coarse(ii)+1)
  end do
 
- ABI_ALLOCATE(grid%indices_coarse,(3,grid%nbz_closedcoarse))
- ABI_ALLOCATE(grid%g0_coarse,(3,grid%nbz_closedcoarse))
- ABI_ALLOCATE(grid%iktoint_coarse,(Kmesh_coarse%nbz))
- ABI_ALLOCATE(grid%inttoik_coarse,(grid%nbz_closedcoarse))
+ ABI_MALLOC(grid%indices_coarse,(3,grid%nbz_closedcoarse))
+ ABI_MALLOC(grid%g0_coarse,(3,grid%nbz_closedcoarse))
+ ABI_MALLOC(grid%iktoint_coarse,(Kmesh_coarse%nbz))
+ ABI_MALLOC(grid%inttoik_coarse,(grid%nbz_closedcoarse))
 
  ! We should pass 'grid' at this stage !
 
@@ -251,8 +251,8 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 &    grid%nshiftk_dense, grid%shiftk_dense, grid%kmult, grid%indices_dense, grid%g0_dense, grid%iktoint_dense, &
 &    grid%inttoik_dense)
 
- ABI_ALLOCATE(grid%dense_to_coarse,(Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%coarse_to_dense,(Kmesh_coarse%nbz,grid%ndiv))
+ ABI_MALLOC(grid%dense_to_coarse,(Kmesh_dense%nbz))
+ ABI_MALLOC(grid%coarse_to_dense,(Kmesh_coarse%nbz,grid%ndiv))
 
  call compute_neighbours(grid%nbz_dense, grid%iktoint_dense, grid%indices_dense, &
 & grid%maxcomp_coarse, grid%inttoik_coarse, grid%g0_coarse, grid%nbz_closedcoarse, grid%nbz_coarse,&
@@ -816,8 +816,8 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
 
 ! *************************************************************************
 
- ABI_ALLOCATE(kpt_fine_sub_tmp,(nkpt_fine))
- ABI_ALLOCATE(wgt_sub_tmp,(nkpt_fine))
+ ABI_MALLOC(kpt_fine_sub_tmp,(nkpt_fine))
+ ABI_MALLOC(wgt_sub_tmp,(nkpt_fine))
 
 !It is easier to work in real space using the qptrlatt matrices because in this
 !referential any k-points sampling will be cast into an orthorhombic shape.
@@ -857,8 +857,8 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
  end do
 
  nkpt_sub = ii-1
- ABI_ALLOCATE(kpt_fine_sub,(nkpt_sub))
- ABI_ALLOCATE(wgt_sub,(nkpt_sub))
+ ABI_MALLOC(kpt_fine_sub,(nkpt_sub))
+ ABI_MALLOC(wgt_sub,(nkpt_sub))
 
  do jj=1,nkpt_sub
    kpt_fine_sub(jj) = kpt_fine_sub_tmp(jj)
@@ -908,8 +908,8 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
    end do
  end do
 
- ABI_DEALLOCATE(kpt_fine_sub_tmp)
- ABI_DEALLOCATE(wgt_sub_tmp)
+ ABI_FREE(kpt_fine_sub_tmp)
+ ABI_FREE(wgt_sub_tmp)
 
 end subroutine kptfine_av
 !!***

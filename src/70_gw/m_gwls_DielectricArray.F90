@@ -144,14 +144,14 @@ integer     :: i
 
 ! *************************************************************************
 
-ABI_ALLOCATE(list_omega_tmp,   (npt_gauss))
-ABI_ALLOCATE(list_weights_tmp, (npt_gauss))
+ABI_MALLOC(list_omega_tmp,   (npt_gauss))
+ABI_MALLOC(list_weights_tmp, (npt_gauss))
 
 call get_frequencies_and_weights_legendre(npt_gauss,list_omega_tmp,list_weights_tmp)
 
 
-ABI_ALLOCATE(list_omega,   (npt_gauss+1))
-ABI_ALLOCATE(list_weights, (npt_gauss+1))
+ABI_MALLOC(list_omega,   (npt_gauss+1))
+ABI_MALLOC(list_weights, (npt_gauss+1))
 
 ! make sure the first frequency in zero!
 list_omega(1)   = zero
@@ -167,8 +167,8 @@ list_weights(i+1) = list_weights_tmp(npt_gauss+1-i)
 end do
 
 
-ABI_DEALLOCATE(list_omega_tmp)
-ABI_DEALLOCATE(list_weights_tmp)
+ABI_FREE(list_omega_tmp)
+ABI_FREE(list_weights_tmp)
 
 
 end subroutine generate_frequencies_and_weights
@@ -229,9 +229,9 @@ call write_text_block_in_Timing_log(timing_string)
 
 call cpu_time(time1)
 ! Allocate the module array
-ABI_ALLOCATE(eps_m1_minus_eps_model_m1, (lmax,lmax,npt_gauss+1))
-ABI_ALLOCATE(dummy_matrix, (lmax,lmax))
-ABI_ALLOCATE(iden, (lmax,lmax))
+ABI_MALLOC(eps_m1_minus_eps_model_m1, (lmax,lmax,npt_gauss+1))
+ABI_MALLOC(dummy_matrix, (lmax,lmax))
+ABI_MALLOC(iden, (lmax,lmax))
 
 
 iden = cmplx_0
@@ -265,13 +265,13 @@ end do
 
 
 ! Deallocate the arrays which are no longer needed
-ABI_DEALLOCATE(model_dielectric_Lanczos_basis)
-ABI_DEALLOCATE(projected_dielectric_Lanczos_basis)
+ABI_FREE(model_dielectric_Lanczos_basis)
+ABI_FREE(projected_dielectric_Lanczos_basis)
 
 
 
-ABI_DEALLOCATE(dummy_matrix)
-ABI_DEALLOCATE(iden)
+ABI_FREE(dummy_matrix)
+ABI_FREE(iden)
 
 
 
@@ -345,10 +345,10 @@ call cpu_time(time1)
 
 ! The array eps_m1_minus_eps_model_m1 will be used to store
 ! eps^{-1}-1; we can think of eps_model = I in this case.
-ABI_ALLOCATE(eps_m1_minus_eps_model_m1, (lmax,lmax,npt_gauss+1))
+ABI_MALLOC(eps_m1_minus_eps_model_m1, (lmax,lmax,npt_gauss+1))
 
-ABI_ALLOCATE(dummy_matrix, (lmax,lmax))
-ABI_ALLOCATE(iden, (lmax,lmax))
+ABI_MALLOC(dummy_matrix, (lmax,lmax))
+ABI_MALLOC(iden, (lmax,lmax))
 
 iden = cmplx_0
 
@@ -369,10 +369,10 @@ end do
 
 
 ! Deallocate the arrays which are no longer needed
-ABI_DEALLOCATE(projected_dielectric_Lanczos_basis)
+ABI_FREE(projected_dielectric_Lanczos_basis)
 
-ABI_DEALLOCATE(dummy_matrix)
-ABI_DEALLOCATE(iden)
+ABI_FREE(dummy_matrix)
+ABI_FREE(iden)
 
 call cpu_time(time2)
 time = time2-time1
@@ -558,8 +558,8 @@ if (modulo(lmax_model,mpi_nproc) /= 0) blocksize_epsilon = blocksize_epsilon + 1
 
 ! attribute blocks to every nodes, and tabulate ownership in logical array
 ! This is not *the most efficient* implementation possible, but it is convenient
-ABI_ALLOCATE( model_lanczos_vector_belongs_to_this_node, (lmax_model))
-ABI_ALLOCATE( model_lanczos_vector_index, (lmax_model))
+ABI_MALLOC( model_lanczos_vector_belongs_to_this_node, (lmax_model))
+ABI_MALLOC( model_lanczos_vector_index, (lmax_model))
 
 
 model_lanczos_vector_index = 0
@@ -577,11 +577,11 @@ end do
 !flush(100+mpi_rank)
 
 ! Prepare the array that will contain the matrix elements of the model operator
-ABI_ALLOCATE(VPV, (lmax_model,blocksize_epsilon,npt_gauss+1))
+ABI_MALLOC(VPV, (lmax_model,blocksize_epsilon,npt_gauss+1))
 
 VPV(:,:,:) = cmplx_0
 
-ABI_ALLOCATE(vpv_row, (lmax_model))
+ABI_MALLOC(vpv_row, (lmax_model))
 
 
 ! various working arrays
@@ -589,17 +589,17 @@ GWLS_TIMAB   = 1542
 OPTION_TIMAB = 1
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
-ABI_ALLOCATE(psikg_valence,(2,npw_g))
-ABI_ALLOCATE(psir_valence ,(2,n4,n5,n6))
+ABI_MALLOC(psikg_valence,(2,npw_g))
+ABI_MALLOC(psir_valence ,(2,n4,n5,n6))
 
 
-ABI_ALLOCATE(psik_wrk,  (2,npw_k))
-ABI_ALLOCATE(psikb_wrk, (2,npw_kb))
-ABI_ALLOCATE(psikg_wrk, (2,npw_g))
-ABI_ALLOCATE(psikg_tmp, (2,npw_g))
+ABI_MALLOC(psik_wrk,  (2,npw_k))
+ABI_MALLOC(psikb_wrk, (2,npw_kb))
+ABI_MALLOC(psikg_wrk, (2,npw_g))
+ABI_MALLOC(psikg_tmp, (2,npw_g))
 
-ABI_ALLOCATE(local_Lbasis_conjugated,(npw_k,lmax_model))
-ABI_ALLOCATE(YL,(npw_k))
+ABI_MALLOC(local_Lbasis_conjugated,(npw_k,lmax_model))
+ABI_MALLOC(YL,(npw_k))
 
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
@@ -777,15 +777,15 @@ call write_timing_log(timing_string,prod_time)
 GWLS_TIMAB   = 1542
 OPTION_TIMAB = 1
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
-ABI_DEALLOCATE(local_Lbasis_conjugated)
-ABI_DEALLOCATE(YL)
-ABI_DEALLOCATE(psikg_valence)
-ABI_DEALLOCATE(psir_valence)
-ABI_DEALLOCATE(psik_wrk)
-ABI_DEALLOCATE(psikb_wrk)
-ABI_DEALLOCATE(psikg_wrk)
-ABI_DEALLOCATE(psikg_tmp)
-ABI_DEALLOCATE(vpv_row)
+ABI_FREE(local_Lbasis_conjugated)
+ABI_FREE(YL)
+ABI_FREE(psikg_valence)
+ABI_FREE(psir_valence)
+ABI_FREE(psik_wrk)
+ABI_FREE(psikb_wrk)
+ABI_FREE(psikg_wrk)
+ABI_FREE(psikg_tmp)
+ABI_FREE(vpv_row)
 
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
@@ -807,9 +807,9 @@ call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 !--------------------------------------------------------------------------------
 
 
-ABI_ALLOCATE(eps_model_m1_minus_one_DISTR, (lmax_model,blocksize_epsilon,npt_gauss+1))
-ABI_ALLOCATE(re_buffer, (lmax_model,blocksize_epsilon))
-ABI_ALLOCATE(im_buffer, (lmax_model,blocksize_epsilon))
+ABI_MALLOC(eps_model_m1_minus_one_DISTR, (lmax_model,blocksize_epsilon,npt_gauss+1))
+ABI_MALLOC(re_buffer, (lmax_model,blocksize_epsilon))
+ABI_MALLOC(im_buffer, (lmax_model,blocksize_epsilon))
 
 eps_model_m1_minus_one_DISTR(:,:,:) = cmplx_0
 
@@ -820,8 +820,8 @@ head = mpi_rank == mpi_head_rank
 sendcount = lmax_model*blocksize_epsilon
 recvcount = lmax_model*blocksize_epsilon
 
-ABI_ALLOCATE(sendcounts,(mpi_nproc))
-ABI_ALLOCATE(displs    ,(mpi_nproc))
+ABI_MALLOC(sendcounts,(mpi_nproc))
+ABI_MALLOC(displs    ,(mpi_nproc))
 sendcounts(:) = sendcount 
 
 do l =1, mpi_nproc
@@ -831,16 +831,16 @@ end do
 if (head) then
   ! build and invert the dielectric array
   ! careful!  lmax_model not necessarily equal to blocksize_epsilon*nbdblock_epsilon
-  ABI_ALLOCATE(re_BUFFER_head, (lmax_model, blocksize_epsilon*nbdblock_epsilon))
-  ABI_ALLOCATE(im_BUFFER_head, (lmax_model, blocksize_epsilon*nbdblock_epsilon))
-  ABI_ALLOCATE(epsilon_head, (lmax_model, lmax_model))
+  ABI_MALLOC(re_BUFFER_head, (lmax_model, blocksize_epsilon*nbdblock_epsilon))
+  ABI_MALLOC(im_BUFFER_head, (lmax_model, blocksize_epsilon*nbdblock_epsilon))
+  ABI_MALLOC(epsilon_head, (lmax_model, lmax_model))
 else
   !This looks superfluous and it is on large number of systems, but sending these 
   !unallocated in xmpi_scatterv caused 'cannot allocate memory' cryptic errors on 
   !several parallel test farm computers (cronos_gcc46_paral, petrus_nag, inca_gcc44_sdebug)
-  ABI_ALLOCATE(re_BUFFER_head, (1,1))
-  ABI_ALLOCATE(im_BUFFER_head, (1,1))
-  ABI_ALLOCATE(epsilon_head, (1,1))
+  ABI_MALLOC(re_BUFFER_head, (1,1))
+  ABI_MALLOC(im_BUFFER_head, (1,1))
+  ABI_MALLOC(epsilon_head, (1,1))
 end if
 
 ! Do  one frequency at a time, to avoid overflowing the RAM
@@ -904,9 +904,9 @@ eps_model_m1_minus_one_DISTR(:,:,iw) = cmplx_1*re_buffer(:,:) + cmplx_i*im_buffe
 
 end do
 
-ABI_DEALLOCATE(re_BUFFER_head)
-ABI_DEALLOCATE(im_BUFFER_head)
-ABI_DEALLOCATE(epsilon_head)
+ABI_FREE(re_BUFFER_head)
+ABI_FREE(im_BUFFER_head)
+ABI_FREE(epsilon_head)
 
 
 
@@ -921,7 +921,7 @@ if (.false.) then
   ! Prepare the array that will contain the matrix elements of the model operator
   ! THIS IS ONLY FOR THE REST OF THE CODE TO WORK; WE WILL REMOVE THIS 
   ! TO SAVE RAM LATER
-  ABI_ALLOCATE(eps_model_m1_minus_one, (lmax_model,lmax_model,npt_gauss+1))
+  ABI_MALLOC(eps_model_m1_minus_one, (lmax_model,lmax_model,npt_gauss+1))
 
   ! initialize the array with zeros
   eps_model_m1_minus_one = cmplx_0
@@ -931,8 +931,8 @@ if (.false.) then
   recvcount = lmax_model*blocksize_epsilon*nbdblock_epsilon
 
 
-  ABI_ALLOCATE(re_BUFFER_head, (lmax_model,blocksize_epsilon*nbdblock_epsilon))
-  ABI_ALLOCATE(im_BUFFER_head, (lmax_model,blocksize_epsilon*nbdblock_epsilon))
+  ABI_MALLOC(re_BUFFER_head, (lmax_model,blocksize_epsilon*nbdblock_epsilon))
+  ABI_MALLOC(im_BUFFER_head, (lmax_model,blocksize_epsilon*nbdblock_epsilon))
 
   do iw = 1, npt_gauss+1
 
@@ -947,8 +947,8 @@ if (.false.) then
   end do
   end do
 
-  ABI_DEALLOCATE(re_BUFFER_head)
-  ABI_DEALLOCATE(im_BUFFER_head)
+  ABI_FREE(re_BUFFER_head)
+  ABI_FREE(im_BUFFER_head)
 end if
 
 call cpu_time(time2)
@@ -967,11 +967,11 @@ call write_timing_log(timing_string,time)
 
 
 
-ABI_DEALLOCATE(re_buffer )
-ABI_DEALLOCATE(im_buffer )
-ABI_DEALLOCATE(sendcounts)
-ABI_DEALLOCATE(displs    )
-ABI_DEALLOCATE(VPV       )
+ABI_FREE(re_buffer )
+ABI_FREE(im_buffer )
+ABI_FREE(sendcounts)
+ABI_FREE(displs    )
+ABI_FREE(VPV       )
 
 
 
@@ -1011,31 +1011,31 @@ implicit none
 ! *************************************************************************
 
 if(allocated(projected_epsilon_M_matrix)) then
-  ABI_DEALLOCATE(projected_epsilon_M_matrix)
+  ABI_FREE(projected_epsilon_M_matrix)
 end if
 if(allocated(projected_epsilon_B_matrix)) then
-  ABI_DEALLOCATE(projected_epsilon_B_matrix)
+  ABI_FREE(projected_epsilon_B_matrix)
 end if
 if(allocated(projected_epsilon_G_matrix)) then
-  ABI_DEALLOCATE(projected_epsilon_G_matrix)
+  ABI_FREE(projected_epsilon_G_matrix)
 end if
 if(allocated(eps_m1_minus_eps_model_m1)) then
-  ABI_DEALLOCATE(eps_m1_minus_eps_model_m1)
+  ABI_FREE(eps_m1_minus_eps_model_m1)
 end if
 if(allocated(list_omega)) then
-  ABI_DEALLOCATE(list_omega)
+  ABI_FREE(list_omega)
 end if
 if(allocated(list_weights)) then
-  ABI_DEALLOCATE(list_weights)
+  ABI_FREE(list_weights)
 end if
 if(allocated(eps_model_m1_minus_one_DISTR)) then
-  ABI_DEALLOCATE(eps_model_m1_minus_one_DISTR)
+  ABI_FREE(eps_model_m1_minus_one_DISTR)
 end if
 if(allocated(model_lanczos_vector_belongs_to_this_node)) then
-  ABI_DEALLOCATE(model_lanczos_vector_belongs_to_this_node)
+  ABI_FREE(model_lanczos_vector_belongs_to_this_node)
 end if
 if(allocated(model_lanczos_vector_index)) then
-  ABI_DEALLOCATE(model_lanczos_vector_index)
+  ABI_FREE(model_lanczos_vector_index)
 end if
 
 
@@ -1251,7 +1251,7 @@ timing_string = "#"
 call write_text_block_in_Timing_log(timing_string)
 
 ! Allocate the module array
-ABI_ALLOCATE(projected_dielectric_Lanczos_basis, (lmax,lmax,npt_gauss+1))
+ABI_MALLOC(projected_dielectric_Lanczos_basis, (lmax,lmax,npt_gauss+1))
 
 projected_dielectric_Lanczos_basis(:,:,:) = cmplx_0
 
@@ -1291,7 +1291,7 @@ end if
 
 if (model) then
   ! Prepare the array that will contain the matrix elements of the model operator
-  ABI_ALLOCATE(model_dielectric_Lanczos_basis, (lmax,lmax,npt_gauss+1))
+  ABI_MALLOC(model_dielectric_Lanczos_basis, (lmax,lmax,npt_gauss+1))
 
   ! initialize with zero. NOT with the identity, in order to avoid extra communications
   ! (see below)
@@ -1301,26 +1301,26 @@ end if
 
 ! various working arrays
 
-ABI_ALLOCATE(psikg_valence    ,(2,npw_g))
-ABI_ALLOCATE(psir_valence     ,(2,n4,n5,n6))
+ABI_MALLOC(psikg_valence    ,(2,npw_g))
+ABI_MALLOC(psir_valence     ,(2,n4,n5,n6))
 
 
-ABI_ALLOCATE(psikg_VL ,(2,npw_g))
+ABI_MALLOC(psikg_VL ,(2,npw_g))
 
 
-ABI_ALLOCATE(psik_wrk         ,(2,npw_k))
-ABI_ALLOCATE(psikb_wrk        ,(2,npw_kb))
-ABI_ALLOCATE(psikg_wrk        ,(2,npw_g))
+ABI_MALLOC(psik_wrk         ,(2,npw_k))
+ABI_MALLOC(psikb_wrk        ,(2,npw_kb))
+ABI_MALLOC(psikg_wrk        ,(2,npw_g))
 
 
-ABI_ALLOCATE(psi_gamma_l1     ,(2,npw_k))
-ABI_ALLOCATE(psi_gamma_l2     ,(2,npw_k))
+ABI_MALLOC(psi_gamma_l1     ,(2,npw_k))
+ABI_MALLOC(psi_gamma_l2     ,(2,npw_k))
 
-ABI_ALLOCATE(psi_rhs          ,(2,npw_k,lmax))
+ABI_MALLOC(psi_rhs          ,(2,npw_k,lmax))
 
 
-ABI_ALLOCATE(psikg_in   ,(2,npw_g))
-ABI_ALLOCATE(psikg_out  ,(2,npw_g))
+ABI_MALLOC(psikg_in   ,(2,npw_g))
+ABI_MALLOC(psikg_out  ,(2,npw_g))
 
 
 ! maximal possible dimension of the solution space
@@ -1333,19 +1333,19 @@ end if
 lsolutions_max = lmax*(nfrequencies+i)
 
 
-ABI_ALLOCATE(local_Lbasis,           (npw_k,lmax))
-ABI_ALLOCATE(local_Lbasis_conjugated,(npw_k,lmax))
-ABI_ALLOCATE(YL,(npw_k))
+ABI_MALLOC(local_Lbasis,           (npw_k,lmax))
+ABI_MALLOC(local_Lbasis_conjugated,(npw_k,lmax))
+ABI_MALLOC(YL,(npw_k))
 
-ABI_ALLOCATE(c_sternheimer_solutions,(npw_k,lsolutions_max))
-ABI_ALLOCATE(QR_orthonormal_basis   ,(npw_k,lsolutions_max))
+ABI_MALLOC(c_sternheimer_solutions,(npw_k,lsolutions_max))
+ABI_MALLOC(QR_orthonormal_basis   ,(npw_k,lsolutions_max))
 
 
 omega_is_imaginary = .true.
 
 
-ABI_ALLOCATE(svd_matrix,(npw_k,lsolutions_max))
-ABI_ALLOCATE(svd_values,(lsolutions_max))
+ABI_MALLOC(svd_matrix,(npw_k,lsolutions_max))
+ABI_MALLOC(svd_values,(lsolutions_max))
 
 
 ! Prepare files for writing
@@ -1381,8 +1381,8 @@ if ( write_debug ) then
 end if
 
 if (debug) then
-  ABI_ALLOCATE(check_matrix ,(lsolutions_max,lsolutions_max))
-  ABI_ALLOCATE(check_matrix2,(lsolutions_max,lsolutions_max))
+  ABI_MALLOC(check_matrix ,(lsolutions_max,lsolutions_max))
+  ABI_MALLOC(check_matrix2,(lsolutions_max,lsolutions_max))
 end if
 
 !================================================================================
@@ -1839,10 +1839,10 @@ if (debug) then
   end do
 end if
 
-ABI_ALLOCATE(ipiv                ,(lsolutions))
-ABI_ALLOCATE(sternheimer_A0      ,(lsolutions,lsolutions))
-ABI_ALLOCATE(sternheimer_B       ,(lsolutions,lmax))
-ABI_ALLOCATE(sternheimer_G       ,(lmax,lsolutions))
+ABI_MALLOC(ipiv                ,(lsolutions))
+ABI_MALLOC(sternheimer_A0      ,(lsolutions,lsolutions))
+ABI_MALLOC(sternheimer_B       ,(lsolutions,lmax))
+ABI_MALLOC(sternheimer_G       ,(lmax,lsolutions))
 
 ! Compute the X matrix and the check_matrix
 do l1 = 1, lsolutions
@@ -1940,8 +1940,8 @@ end do ! iblk_solutions
 if (debug) then
   ! HERE we use a dummy variable to avoid operations which might blow the stack!
   ! Stack overflows lead to hard-to-find bugs; let's avoid putting them in here.
-  ABI_ALLOCATE(dummy_tmp_1,(lsolutions,lsolutions))
-  ABI_ALLOCATE(dummy_tmp_2,(lsolutions,lsolutions))
+  ABI_MALLOC(dummy_tmp_1,(lsolutions,lsolutions))
+  ABI_MALLOC(dummy_tmp_2,(lsolutions,lsolutions))
 
 
   dummy_tmp_1(:,:)= transpose(sternheimer_A0(:,:))
@@ -1949,8 +1949,8 @@ if (debug) then
 
   check_matrix2(:,:) = sternheimer_A0(:,:)-dummy_tmp_2(:,:)
 
-  ABI_DEALLOCATE(dummy_tmp_1)
-  ABI_DEALLOCATE(dummy_tmp_2)
+  ABI_FREE(dummy_tmp_1)
+  ABI_FREE(dummy_tmp_2)
 end if
 
 write(io_unit_log,10) '   - Compute the GAMMA matrix...'
@@ -2005,8 +2005,8 @@ flush(io_unit_log)
 
 
 
-ABI_ALLOCATE(sternheimer_A ,(lsolutions,lsolutions))
-ABI_ALLOCATE(sternheimer_X       ,(lsolutions,lmax))
+ABI_MALLOC(sternheimer_A ,(lsolutions,lsolutions))
+ABI_MALLOC(sternheimer_X       ,(lsolutions,lmax))
 do iw = 2, npt_gauss + 1
 
 write(io_unit_log,23) '        -- iw = ',iw,' / ',npt_gauss+1
@@ -2054,7 +2054,7 @@ flush(io_unit_log)
 
 
 
-ABI_ALLOCATE(dummy_tmp_1,(lsolutions,lmax))
+ABI_MALLOC(dummy_tmp_1,(lsolutions,lmax))
 dummy_tmp_1(:,:) = conjg(sternheimer_X) ! DO THIS to avoid potential stack problems
 
 call cpu_time(time1)
@@ -2072,7 +2072,7 @@ cmplx_1,    & ! beta  is one
 projected_dielectric_Lanczos_basis(:,:,iw),    & ! C matrix
 lmax)      ! leading dimension of C
 
-ABI_DEALLOCATE(dummy_tmp_1)
+ABI_FREE(dummy_tmp_1)
 
 call cpu_time(time2)
 time_exact = time_exact + time2-time1
@@ -2085,12 +2085,12 @@ flush(io_unit_log)
 
 
 
-ABI_DEALLOCATE(ipiv           )
-ABI_DEALLOCATE(sternheimer_A  )
-ABI_DEALLOCATE(sternheimer_A0 )
-ABI_DEALLOCATE(sternheimer_B  )
-ABI_DEALLOCATE(sternheimer_X  )
-ABI_DEALLOCATE(sternheimer_G  )
+ABI_FREE(ipiv           )
+ABI_FREE(sternheimer_A  )
+ABI_FREE(sternheimer_A0 )
+ABI_FREE(sternheimer_B  )
+ABI_FREE(sternheimer_X  )
+ABI_FREE(sternheimer_G  )
 
 end do ! v
 
@@ -2108,8 +2108,8 @@ timing_string = "#        Exact Sector :   "
 call write_timing_log(timing_string,time_exact)
 
 
-ABI_ALLOCATE(dummy_tmp_1,(lmax,lmax))
-ABI_ALLOCATE(dummy_tmp_2,(lmax,lmax))
+ABI_MALLOC(dummy_tmp_1,(lmax,lmax))
+ABI_MALLOC(dummy_tmp_2,(lmax,lmax))
 
 do iw = 2, npt_gauss+1
 ! finally, make sure matrix is hermitian
@@ -2122,8 +2122,8 @@ dummy_tmp_1(:,:) = dummy_tmp_2(:,:) +0.5_dp*projected_dielectric_Lanczos_basis(:
 projected_dielectric_Lanczos_basis(:,:,iw) =    dummy_tmp_1(:,:)
 end do
 
-ABI_DEALLOCATE(dummy_tmp_1)
-ABI_DEALLOCATE(dummy_tmp_2)
+ABI_FREE(dummy_tmp_1)
+ABI_FREE(dummy_tmp_2)
 
 
 
@@ -2190,38 +2190,38 @@ flush(io_unit_log)
 
 
 if (debug) then
-  ABI_DEALLOCATE(check_matrix)
-  ABI_DEALLOCATE(check_matrix2)
+  ABI_FREE(check_matrix)
+  ABI_FREE(check_matrix2)
 end if
 
 
-ABI_DEALLOCATE(psikg_valence)
-ABI_DEALLOCATE(psir_valence)
-ABI_DEALLOCATE(psikg_VL)
+ABI_FREE(psikg_valence)
+ABI_FREE(psir_valence)
+ABI_FREE(psikg_VL)
 
 
-ABI_DEALLOCATE(YL)
+ABI_FREE(YL)
 
-ABI_DEALLOCATE(local_Lbasis_conjugated)
-ABI_DEALLOCATE(local_Lbasis)
+ABI_FREE(local_Lbasis_conjugated)
+ABI_FREE(local_Lbasis)
 
 
-ABI_DEALLOCATE(svd_matrix)
-ABI_DEALLOCATE(svd_values)
-ABI_DEALLOCATE(psi_gamma_l1)
-ABI_DEALLOCATE(psi_gamma_l2)
+ABI_FREE(svd_matrix)
+ABI_FREE(svd_values)
+ABI_FREE(psi_gamma_l1)
+ABI_FREE(psi_gamma_l2)
 
-ABI_DEALLOCATE(psikg_in)
-ABI_DEALLOCATE(psikg_out)
+ABI_FREE(psikg_in)
+ABI_FREE(psikg_out)
 
-ABI_DEALLOCATE(psi_rhs)
+ABI_FREE(psi_rhs)
 
-ABI_DEALLOCATE(c_sternheimer_solutions)
-ABI_DEALLOCATE(QR_orthonormal_basis)
+ABI_FREE(c_sternheimer_solutions)
+ABI_FREE(QR_orthonormal_basis)
 
-ABI_DEALLOCATE(psik_wrk)
-ABI_DEALLOCATE(psikb_wrk)
-ABI_DEALLOCATE(psikg_wrk)
+ABI_FREE(psik_wrk)
+ABI_FREE(psikb_wrk)
+ABI_FREE(psikg_wrk)
 
 
 close(io_unit_log)

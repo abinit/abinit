@@ -340,10 +340,10 @@ contains
 !Use a simple storage mode, to be improved in the future.
  ii=max(nband_occ(1),nband_occ(nsppol))
  jj=max(nband_unocc(1),nband_unocc(nsppol))
- ABI_ALLOCATE(omega_tddft_casida,(ii,jj,nsppol,ii,jj,nsppol,2/nsppol))
- ABI_ALLOCATE(eexcit,(nexcit))
- ABI_ALLOCATE(sqrtks,(nexcit))
- ABI_ALLOCATE(flag_state_win,(nstate_k))
+ ABI_MALLOC(omega_tddft_casida,(ii,jj,nsppol,ii,jj,nsppol,2/nsppol))
+ ABI_MALLOC(eexcit,(nexcit))
+ ABI_MALLOC(sqrtks,(nexcit))
+ ABI_MALLOC(flag_state_win,(nstate_k))
  omega_tddft_casida(:,:,:,:,:,:,:)=zero
 
 
@@ -368,7 +368,7 @@ contains
 
 
 !Sort the excitation energies : note that the array eexcit is reordered
- ABI_ALLOCATE(indarr,(nexcit))
+ ABI_MALLOC(indarr,(nexcit))
  indarr(:)=(/ (ii,ii=1,nexcit) /)
  call sort_dp(nexcit,eexcit,indarr,tol14)
 
@@ -435,7 +435,7 @@ contains
 !Setup the positions in real space for later integration
  call matr3inv(gprimd,rprimd)
 
- ABI_ALLOCATE(pos,(max(ndiel1,ndiel2,ndiel3),3))
+ ABI_MALLOC(pos,(max(ndiel1,ndiel2,ndiel3),3))
 
 !Select the reduced position of the point with respect to the box center,
 !in the interval ]-0.5,0.5].
@@ -496,17 +496,17 @@ contains
 
  if(am_master)then
 #if defined HAVE_MPI
-   ABI_ALLOCATE(cg_tmp,(2,mpw*nspinor*mband*nsppol))
+   ABI_MALLOC(cg_tmp,(2,mpw*nspinor*mband*nsppol))
 #endif
  end if
 
- ABI_ALLOCATE(kg_disk,(3,mpw))
+ ABI_MALLOC(kg_disk,(3,mpw))
  mcg_disk=mpw*nspinor*mband
  formeig=0
 
 #if defined HAVE_MPI
  call xmpi_barrier(spaceComm)
- ABI_ALLOCATE(cg_disk,(2,mcg_disk))
+ ABI_MALLOC(cg_disk,(2,mcg_disk))
 #endif
 
  icg=0
@@ -664,9 +664,9 @@ contains
 
    end do ! ikpt
  end do ! isppol
- ABI_DEALLOCATE(kg_disk)
+ ABI_FREE(kg_disk)
 #if defined HAVE_MPI
- ABI_DEALLOCATE(cg_disk)
+ ABI_FREE(cg_disk)
 #endif
 !!!!!!!end of collecting wavefunction to master!!!!!!
 
@@ -675,8 +675,8 @@ contains
 !  -----------------------------------------------------------
 !  The disk access is only done by master...
 
-   ABI_ALLOCATE(gbound,(2*mgfftdiel+8,2))
-   ABI_ALLOCATE(kg_k,(3,npw_k))
+   ABI_MALLOC(gbound,(2*mgfftdiel+8,2))
+   ABI_MALLOC(kg_k,(3,npw_k))
 
    ikpt=1
 !  Only one k point
@@ -693,14 +693,14 @@ contains
 
 !Use a simple implementation for the computation of the kernel elements
  if (am_master) then
-   ABI_ALLOCATE(cwavef,(2,mpw))
-   ABI_ALLOCATE(rhoaug,(ndiel4,ndiel5,ndiel6))
-   ABI_ALLOCATE(wfraug,(2,ndiel4,ndiel5,ndiel6))
+   ABI_MALLOC(cwavef,(2,mpw))
+   ABI_MALLOC(rhoaug,(ndiel4,ndiel5,ndiel6))
+   ABI_MALLOC(wfraug,(2,ndiel4,ndiel5,ndiel6))
  end if
- ABI_ALLOCATE(index_state,(nstate_k))
+ ABI_MALLOC(index_state,(nstate_k))
 
 ! all real-space states are kept in memory
- ABI_ALLOCATE(wfrspa,(ndiel4,ndiel5,ndiel6,nstate_win))
+ ABI_MALLOC(wfrspa,(ndiel4,ndiel5,ndiel6,nstate_win))
 
 !DEBUG
 !write(message,'(a)') 'After allocating wfrspa'
@@ -777,17 +777,17 @@ contains
  end do
 
  if (am_master) then
-   ABI_DEALLOCATE(gbound)
-   ABI_DEALLOCATE(kg_k)
-   ABI_DEALLOCATE(cwavef)
-   ABI_DEALLOCATE(rhoaug)
-   ABI_DEALLOCATE(wfraug)
+   ABI_FREE(gbound)
+   ABI_FREE(kg_k)
+   ABI_FREE(cwavef)
+   ABI_FREE(rhoaug)
+   ABI_FREE(wfraug)
 #if defined HAVE_MPI
-   ABI_DEALLOCATE(cg_tmp)
+   ABI_FREE(cg_tmp)
 #else
 #endif
  end if
- ABI_DEALLOCATE(flag_state_win)
+ ABI_FREE(flag_state_win)
 
 ! send wfrspa from master to world
  call xmpi_bcast(wfrspa,master,spaceComm,ierr)
@@ -815,7 +815,7 @@ contains
 !stop
 !ENDDEBUG
 
- ABI_ALLOCATE(kxc_for_tddft,(ndiel1,ndiel2,ndiel3,nsppol,nsppol,2/nsppol))
+ ABI_MALLOC(kxc_for_tddft,(ndiel1,ndiel2,ndiel3,nsppol,nsppol,2/nsppol))
  if(dtset%ixc/=22)then
    do isppol=1,nsppol
      do jsppol=1,nsppol
@@ -855,13 +855,13 @@ contains
 
  pole_approx=0
 
- ABI_ALLOCATE(excit_coords,(nexcit_win**2,2))
+ ABI_MALLOC(excit_coords,(nexcit_win**2,2))
 
 #if defined HAVE_MPI
- ABI_ALLOCATE(counts,(0:nproc_loc-1))
- ABI_ALLOCATE(displs,(0:nproc_loc-1))
- ABI_ALLOCATE(recvcounts,(0:nproc_loc-1))
- ABI_ALLOCATE(recvbuf,(5-nsppol,nproc_loc-1))
+ ABI_MALLOC(counts,(0:nproc_loc-1))
+ ABI_MALLOC(displs,(0:nproc_loc-1))
+ ABI_MALLOC(recvcounts,(0:nproc_loc-1))
+ ABI_MALLOC(recvbuf,(5-nsppol,nproc_loc-1))
 #endif
 
 !DEBUG
@@ -883,7 +883,7 @@ contains
    temp_unit2 = get_unit()
    open(temp_unit2, file=trim(dtfil%fnametmp_tdexcit),form='unformatted', recl=recl, access='DIRECT')
 
-   ABI_ALLOCATE(done_excit,(nexcit_win,nexcit_win))
+   ABI_MALLOC(done_excit,(nexcit_win,nexcit_win))
 
    if(file_exist)then
      write(std_out,*)'TDDFT continues from a previous run'
@@ -945,7 +945,7 @@ contains
      end do
    end do
 
-   ABI_DEALLOCATE(done_excit)
+   ABI_FREE(done_excit)
 
 
 
@@ -975,24 +975,24 @@ contains
 
 #if defined HAVE_MPI
 !Need to dispatch the elements to compute to the different processes
- ABI_ALLOCATE(tmpbuf,(nexcit_win**2))
+ ABI_MALLOC(tmpbuf,(nexcit_win**2))
  tmpbuf=0
  call MPI_Scatterv(excit_coords(1,1),counts,displs,MPI_INTEGER,tmpbuf,count,MPI_INTEGER,0,spaceComm,ierr)
  excit_coords(:,1)=tmpbuf(:)
  tmpbuf=0
  call MPI_Scatterv(excit_coords(1,2),counts,displs,MPI_INTEGER,tmpbuf,count,MPI_INTEGER,0,spaceComm,ierr)
  excit_coords(:,2)=tmpbuf(:)
- ABI_DEALLOCATE(tmpbuf)
+ ABI_FREE(tmpbuf)
 #endif
 
  nfftdiel=ndiel1*ndiel2*ndiel3
- ABI_ALLOCATE(wfprod,(ndiel1,ndiel2,ndiel3))
- ABI_ALLOCATE(work,(nfftdiel))
- ABI_ALLOCATE(sexc,(3,nexcit_win))
- ABI_ALLOCATE(done_sexc,(nexcit_win))
- ABI_ALLOCATE(done_sexc2,(nexcit_win))
- ABI_ALLOCATE(rhog,(2,nfftdiel))
- ABI_ALLOCATE(vhartr,(nfftdiel))
+ ABI_MALLOC(wfprod,(ndiel1,ndiel2,ndiel3))
+ ABI_MALLOC(work,(nfftdiel))
+ ABI_MALLOC(sexc,(3,nexcit_win))
+ ABI_MALLOC(done_sexc,(nexcit_win))
+ ABI_MALLOC(done_sexc2,(nexcit_win))
+ ABI_MALLOC(rhog,(2,nfftdiel))
+ ABI_MALLOC(vhartr,(nfftdiel))
 
  sexc(:,:)=zero
  done_sexc(:)=.false.
@@ -1306,15 +1306,15 @@ contains
    end do
  end if
 
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(rhog)
- ABI_DEALLOCATE(pos)
- ABI_DEALLOCATE(vhartr)
- ABI_DEALLOCATE(kxc_for_tddft)
- ABI_DEALLOCATE(wfprod)
- ABI_DEALLOCATE(index_state)
- ABI_DEALLOCATE(excit_coords)
- ABI_DEALLOCATE(wfrspa)
+ ABI_FREE(work)
+ ABI_FREE(rhog)
+ ABI_FREE(pos)
+ ABI_FREE(vhartr)
+ ABI_FREE(kxc_for_tddft)
+ ABI_FREE(wfprod)
+ ABI_FREE(index_state)
+ ABI_FREE(excit_coords)
+ ABI_FREE(wfrspa)
 
 !Write the first excitation energies
  write(message, '(a,a,es18.8,a,a,a,a,a,a,a,a,a)' )ch10,&
@@ -1327,15 +1327,15 @@ contains
  call wrtout(std_out,message,'COLL')
 
 #if defined HAVE_MPI
- ABI_DEALLOCATE(counts)
- ABI_DEALLOCATE(displs)
- ABI_DEALLOCATE(recvbuf)
- ABI_DEALLOCATE(recvcounts)
+ ABI_FREE(counts)
+ ABI_FREE(displs)
+ ABI_FREE(recvbuf)
+ ABI_FREE(recvcounts)
 #endif
 
  if (am_master) then
 
-   ABI_ALLOCATE(osc_str,(7,nexcit))
+   ABI_MALLOC(osc_str,(7,nexcit))
 
    do iexcit=1,nexcit_win
      iexcit2 = indarr(iexcit)
@@ -1387,16 +1387,16 @@ contains
 
 !  -Diagonalize the excitation matrices----------------------------
 
-   ABI_ALLOCATE(eexcit2,(nexcit_win))
-   ABI_ALLOCATE(vec,(2,nexcit_win,nexcit_win))
+   ABI_MALLOC(eexcit2,(nexcit_win))
+   ABI_MALLOC(vec,(2,nexcit_win,nexcit_win))
 
    do sing_trip=1,2/nsppol
 
      if(pole_approx==0)then
 
-       ABI_ALLOCATE(matr,(nexcit_win*(nexcit_win+1)))
-       ABI_ALLOCATE(zhpev1,(2,2*nexcit_win-1))
-       ABI_ALLOCATE(zhpev2,(3*nexcit_win-2))
+       ABI_MALLOC(matr,(nexcit_win*(nexcit_win+1)))
+       ABI_MALLOC(zhpev1,(2,2*nexcit_win-1))
+       ABI_MALLOC(zhpev2,(3*nexcit_win-2))
        matr(:)=zero
        ier=0
 !      DEBUG
@@ -1432,9 +1432,9 @@ contains
        call ZHPEV ('V','U',nexcit_win,matr,eexcit2,vec,nexcit_win,zhpev1,&
 &       zhpev2,ier)
 
-       ABI_DEALLOCATE(matr)
-       ABI_DEALLOCATE(zhpev1)
-       ABI_DEALLOCATE(zhpev2)
+       ABI_FREE(matr)
+       ABI_FREE(zhpev1)
+       ABI_FREE(zhpev2)
 !      DEBUG
 !      write(std_out,*)' after deallocating matrices     '
 !      ENDDEBUG
@@ -1458,8 +1458,8 @@ contains
 !    Compute the excitation energies from the square root of eexcit2
 !    eexcit(:)=sqrt(eexcit2(:)
 
-     ABI_DEALLOCATE(eexcit)
-     ABI_ALLOCATE(eexcit,(nexcit_win))
+     ABI_FREE(eexcit)
+     ABI_MALLOC(eexcit,(nexcit_win))
 
      eexcit(:)=sqrt(dabs(eexcit2(:))+tol10**2)
 !    Write the first excitation energies
@@ -1665,22 +1665,22 @@ contains
 !    End the loop on singlet or triplet
    end do
 
-   ABI_DEALLOCATE(eexcit2)
-   ABI_DEALLOCATE(vec)
-   ABI_DEALLOCATE(osc_str)
+   ABI_FREE(eexcit2)
+   ABI_FREE(vec)
+   ABI_FREE(osc_str)
 
 !! The temporary files should be deleted at the end of this routine
    close(temp_unit2,status='delete')
    call timab(95,2,tsec)
  end if  ! end of am_master
 
- ABI_DEALLOCATE(omega_tddft_casida)
- ABI_DEALLOCATE(eexcit)
- ABI_DEALLOCATE(sqrtks)
- ABI_DEALLOCATE(sexc)
- ABI_DEALLOCATE(done_sexc)
- ABI_DEALLOCATE(indarr)
- ABI_DEALLOCATE(done_sexc2)
+ ABI_FREE(omega_tddft_casida)
+ ABI_FREE(eexcit)
+ ABI_FREE(sqrtks)
+ ABI_FREE(sexc)
+ ABI_FREE(done_sexc)
+ ABI_FREE(indarr)
+ ABI_FREE(done_sexc2)
 
 end subroutine tddft
 !!***

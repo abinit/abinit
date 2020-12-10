@@ -163,15 +163,15 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
 
  if(ishift==1 .or. ngrad==2)then
 
-   ABI_ALLOCATE(wkcmpx,(2,nfft))
-   ABI_ALLOCATE(work,(cplex*nfft))
+   ABI_MALLOC(wkcmpx,(2,nfft))
+   ABI_MALLOC(work,(cplex*nfft))
 
    if(ishift==1)then
 !    Precompute phases (The phases correspond to a shift of density on real space
 !    grid from center at 0 0 0 to (1/2)*(1/n1,1/n2,1/n3).)
-     ABI_ALLOCATE(ph1,(2*n1))
-     ABI_ALLOCATE(ph2,(2*n2))
-     ABI_ALLOCATE(ph3,(2*n3))
+     ABI_MALLOC(ph1,(2*n1))
+     ABI_MALLOC(ph2,(2*n2))
+     ABI_MALLOC(ph3,(2*n3))
      call phase(n1,ph1)
      call phase(n2,ph2)
      call phase(n3,ph3)
@@ -230,12 +230,12 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
 !    If gradient of the density is required, take care of the three components now
 !    Note : this operation is applied on the eventually shifted rho(G)
      if(ngrad==2)then
-       ABI_ALLOCATE(gcart1,(n1))
-       ABI_ALLOCATE(gcart2,(n2))
-       ABI_ALLOCATE(gcart3,(n3))
-       ABI_ALLOCATE(workgr,(2,nfft))
+       ABI_MALLOC(gcart1,(n1))
+       ABI_MALLOC(gcart2,(n2))
+       ABI_MALLOC(gcart3,(n3))
+       ABI_MALLOC(workgr,(2,nfft))
        if (present(lrhonow)) then
-         ABI_ALLOCATE(worklp,(2,nfft))
+         ABI_MALLOC(worklp,(2,nfft))
          lrhonow(:,ispden)=zero
        end if
        do idir=1,3
@@ -296,24 +296,24 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
          end if
 
        end do
-       ABI_DEALLOCATE(gcart1)
-       ABI_DEALLOCATE(gcart2)
-       ABI_DEALLOCATE(gcart3)
-       ABI_DEALLOCATE(workgr)
+       ABI_FREE(gcart1)
+       ABI_FREE(gcart2)
+       ABI_FREE(gcart3)
+       ABI_FREE(workgr)
        if (allocated(worklp))  then
-         ABI_DEALLOCATE(worklp)
+         ABI_FREE(worklp)
        end if
      end if
 
    end do  ! End loop on spins
    if (allocated(wkcmpx))  then
-     ABI_DEALLOCATE(wkcmpx)
+     ABI_FREE(wkcmpx)
    end if
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
    if(ishift==1) then
-     ABI_DEALLOCATE(ph1)
-     ABI_DEALLOCATE(ph2)
-     ABI_DEALLOCATE(ph3)
+     ABI_FREE(ph1)
+     ABI_FREE(ph2)
+     ABI_FREE(ph3)
    end if
 
  end if  ! End condition on ishift and ngrad
@@ -468,16 +468,16 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
  if(ishift==1 .or. ngrad==2)then
 
    if(with_vxc.or.with_vxctau) then
-     ABI_ALLOCATE(work,(cplex*nfft))
+     ABI_MALLOC(work,(cplex*nfft))
    end if
    if (with_vxc) then
-     ABI_ALLOCATE(wkcmpx,(2,nfft))
+     ABI_MALLOC(wkcmpx,(2,nfft))
    end if
 
    if(ishift==1)then
-     ABI_ALLOCATE(ph1,(2*n1))
-     ABI_ALLOCATE(ph2,(2*n2))
-     ABI_ALLOCATE(ph3,(2*n3))
+     ABI_MALLOC(ph1,(2*n1))
+     ABI_MALLOC(ph2,(2*n2))
+     ABI_MALLOC(ph3,(2*n3))
 !    Precompute phases (The phases correspond to a shift of density on real space
 !    grid from center at 0 0 0 to (1/2)*(1/n1,1/n2,1/n3).)
      call phase(n1,ph1)
@@ -509,18 +509,18 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
 !    If gradient correction is present, take care of the three components now
 !    Note : this operation is done on the eventually shifted grid
      if (ngrad==2) then
-       ABI_ALLOCATE(gcart1,(n1))
-       ABI_ALLOCATE(gcart2,(n2))
-       ABI_ALLOCATE(gcart3,(n3))
+       ABI_MALLOC(gcart1,(n1))
+       ABI_MALLOC(gcart2,(n2))
+       ABI_MALLOC(gcart3,(n3))
        if (with_vxc) then
-         ABI_ALLOCATE(workgr,(2,nfft))
+         ABI_MALLOC(workgr,(2,nfft))
          if (use_laplacian==1) then
-           ABI_ALLOCATE(worklp,(2,nfft))
+           ABI_MALLOC(worklp,(2,nfft))
          end if
       end if
       if  (with_vxctau)  then
-        ABI_ALLOCATE(worktau,(2,nfft))
-        ABI_ALLOCATE(wkcmpxtau,(2,nfft))
+        ABI_MALLOC(worktau,(2,nfft))
+        ABI_MALLOC(wkcmpxtau,(2,nfft))
       end if
 
        do idir=1,3
@@ -619,18 +619,18 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
 
        end do ! enddo idir
 
-       ABI_DEALLOCATE(gcart1)
-       ABI_DEALLOCATE(gcart2)
-       ABI_DEALLOCATE(gcart3)
+       ABI_FREE(gcart1)
+       ABI_FREE(gcart2)
+       ABI_FREE(gcart3)
        if (with_vxc) then
-         ABI_DEALLOCATE(workgr)
+         ABI_FREE(workgr)
          if (use_laplacian==1) then
-           ABI_DEALLOCATE(worklp)
+           ABI_FREE(worklp)
          end if
        end if
        if (with_vxctau) then
-         ABI_DEALLOCATE(worktau)
-         ABI_DEALLOCATE(wkcmpxtau)
+         ABI_FREE(worktau)
+         ABI_FREE(wkcmpxtau)
        end if
 
      end if
@@ -680,15 +680,15 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
    end do ! End loop on spins
 
    if(ishift==1)  then
-     ABI_DEALLOCATE(ph1)
-     ABI_DEALLOCATE(ph2)
-     ABI_DEALLOCATE(ph3)
+     ABI_FREE(ph1)
+     ABI_FREE(ph2)
+     ABI_FREE(ph3)
    end if
    if(with_vxc) then
-     ABI_DEALLOCATE(wkcmpx)
+     ABI_FREE(wkcmpx)
    end if
    if(with_vxc.or.with_vxctau) then
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
    end if
 
  end if ! End condition on ishift/ngrad

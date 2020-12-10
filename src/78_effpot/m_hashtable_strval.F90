@@ -101,7 +101,7 @@ CONTAINS
        END IF
     ELSE
        IF (.NOT. ALLOCATED(list%key)) &
-            ABI_DATATYPE_ALLOCATE_SCALAR(CHARACTER(len=keylen), list%key)
+            ABI_MALLOC_TYPE_SCALAR(CHARACTER(len=keylen), list%key)
        list%key = key
        list%val = val
     END IF
@@ -297,7 +297,7 @@ CONTAINS
        DO i=low,high
           CALL tbl%vec(i)%free()
        END DO
-       ABI_DEALLOCATE(tbl%vec)
+       ABI_FREE(tbl%vec)
     END IF
     tbl%is_init = .FALSE.
   END SUBROUTINE free_hash_table_t

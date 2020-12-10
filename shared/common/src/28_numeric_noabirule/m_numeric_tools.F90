@@ -4355,7 +4355,7 @@ subroutine remove_copies(n_in,set_in,n_out,is_equal)
 
 ! *************************************************************************
 
- ABI_DATATYPE_ALLOCATE(Ap,(n_in))
+ ABI_MALLOC(Ap,(n_in))
  Ap(1)%idx = 1
  Ap(1)%rpt => set_in(:,1)
 
@@ -4386,7 +4386,7 @@ subroutine remove_copies(n_in,set_in,n_out,is_equal)
    end do
  end if
 
- ABI_DATATYPE_DEALLOCATE(Ap)
+ ABI_FREE(Ap)
 
 end subroutine remove_copies
 !!***

@@ -151,12 +151,12 @@ contains
 !###########################################################
 !### 01. Initial allocations and initialisations.
 
- ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
- ABI_ALLOCATE(intarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(narrm,(0:ndtset_alloc))
- ABI_ALLOCATE(nimagem,(0:ndtset_alloc))
- ABI_ALLOCATE(prtimg,(mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(narrm,(0:ndtset_alloc))
+ ABI_MALLOC(nimagem,(0:ndtset_alloc))
+ ABI_MALLOC(prtimg,(mxvals%nimage,0:ndtset_alloc))
 
  do idtset=0,ndtset_alloc
    nimagem(idtset)=dtsets(idtset)%nimage
@@ -175,15 +175,15 @@ contains
 !### 02. Specific treatment for occopt, xangst, xcart, xred
 
 !Must compute xangst and xcart
- ABI_ALLOCATE(xangst_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
- ABI_ALLOCATE(xcart_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(xangst_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(xcart_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
  xangst_(:,:,:,:)=0.0_dp ; xcart_(:,:,:,:)=0.0_dp
 
  do idtset=1,ndtset_alloc
    natom=dtsets(idtset)%natom
-   ABI_ALLOCATE(xred,(3,natom))
-   ABI_ALLOCATE(xangst,(3,natom))
-   ABI_ALLOCATE(xcart,(3,natom))
+   ABI_MALLOC(xred,(3,natom))
+   ABI_MALLOC(xangst,(3,natom))
+   ABI_MALLOC(xcart,(3,natom))
    do iimage=1,dtsets(idtset)%nimage
      xred(:,1:natom)=results_out(idtset)%xred(:,1:natom,iimage)
      call mkrdim(results_out(idtset)%acell(:,iimage),results_out(idtset)%rprim(:,:,iimage),rprimd)
@@ -199,9 +199,9 @@ contains
      xangst_(1:3,1:natom,dtsets(idtset)%nimage+1:mxvals%nimage,idtset)=zero
      xcart_(1:3,1:natom,dtsets(idtset)%nimage+1:mxvals%nimage,idtset)=zero
    end if
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(xangst)
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xred)
+   ABI_FREE(xangst)
+   ABI_FREE(xcart)
  end do
 
 !###########################################################
@@ -1533,14 +1533,14 @@ contains
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(narrm)
- ABI_DEALLOCATE(nimagem)
- ABI_DEALLOCATE(dprarr_images)
- ABI_DEALLOCATE(prtimg)
- ABI_DEALLOCATE(xangst_)
- ABI_DEALLOCATE(xcart_)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(narrm)
+ ABI_FREE(nimagem)
+ ABI_FREE(dprarr_images)
+ ABI_FREE(prtimg)
+ ABI_FREE(xangst_)
+ ABI_FREE(xcart_)
 
 contains
 !!***
@@ -1842,7 +1842,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    end do
  end if
 
- ABI_DEALLOCATE(test_multiimages)
+ ABI_FREE(test_multiimages)
 
 end subroutine prtocc
 !!***

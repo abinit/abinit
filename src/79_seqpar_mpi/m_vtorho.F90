@@ -473,16 +473,16 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  end if
 
  if(dtset%usewvl==0) then
-   ABI_ALLOCATE(eknk,(mbdkpsp))
-   ABI_ALLOCATE(enlxnk,(mbdkpsp))
-   ABI_ALLOCATE(eknk_nd,(dtset%nsppol,dtset%nkpt,2,dtset%mband,dtset%mband*paw_dmft%use_dmft))
-   ABI_ALLOCATE(EigMin,(2,dtset%mband))
-   ABI_ALLOCATE(grnlnk,(3*natom,mbdkpsp*optforces))
+   ABI_MALLOC(eknk,(mbdkpsp))
+   ABI_MALLOC(enlxnk,(mbdkpsp))
+   ABI_MALLOC(eknk_nd,(dtset%nsppol,dtset%nkpt,2,dtset%mband,dtset%mband*paw_dmft%use_dmft))
+   ABI_MALLOC(EigMin,(2,dtset%mband))
+   ABI_MALLOC(grnlnk,(3*natom,mbdkpsp*optforces))
    if (usefock) then
-     ABI_ALLOCATE(focknk,(mbdkpsp))
+     ABI_MALLOC(focknk,(mbdkpsp))
      focknk=zero
      if (optforces>0)then
-       ABI_ALLOCATE(fockfornk,(3,natom,mbdkpsp))
+       ABI_MALLOC(fockfornk,(3,natom,mbdkpsp))
        fockfornk=zero
      end if
    end if
@@ -501,10 +501,10 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
      rhor=zero ; taur=zero
 !  PAW
    else if(psps%usepaw==1) then
-     ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
-     ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
-     ABI_ALLOCATE(tauwfr,(dtset%nfft,dtset%nspden*dtset%usekden))
-     ABI_ALLOCATE(tauwfg,(2,dtset%nfft*dtset%usekden))
+     ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
+     ABI_MALLOC(rhowfg,(2,dtset%nfft))
+     ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden*dtset%usekden))
+     ABI_MALLOC(tauwfg,(2,dtset%nfft*dtset%usekden))
      rhowfr(:,:)=zero ; tauwfr(:,:)=zero
    end if
  end if
@@ -579,9 +579,9 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
      if (allocated(cprj_local)) then
        !Was allocated in scfcv so we just destroy and reconstruct it as desired
        call pawcprj_free(cprj_local)
-       ABI_DATATYPE_DEALLOCATE(cprj_local)
+       ABI_FREE(cprj_local)
      end if
-     ABI_DATATYPE_ALLOCATE(cprj_local,(dtset%natom,mcprj_local))
+     ABI_MALLOC(cprj_local,(dtset%natom,mcprj_local))
      call pawcprj_alloc(cprj_local,0,gs_hamk%dimcprj)
      cprj=> cprj_local
    end if
@@ -602,7 +602,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
    if (     wvlbigdft) do_last_ortho=(dtset%iscf/=0)
    if (.not.wvlbigdft) do_last_ortho=(.true.)
 
-   ABI_ALLOCATE(xcart,(3, dtset%natom))
+   ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
 
    if(wvlbigdft) then
@@ -655,7 +655,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
    if (dtset%iscf>=0) then !(dtset%iscf>=0 .and. .not. wvlbigdft ) then
      call wvl_mkrho(dtset,irrzon,mpi_enreg,phnons,rhor,wvl%wfs,wvl%den)
    end if
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
 
 !  Note in WVL+NC: the rest will be skipped.
 !  For PAW: we will compute Rho_ij at the end.
@@ -670,20 +670,20 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 !  Electric field: allocate dphasek
    nkpt1 = dtset%nkpt
    if ( berryflag ) then
-     ABI_ALLOCATE(dphasek,(3,dtset%nkpt*dtset%nsppol))
+     ABI_MALLOC(dphasek,(3,dtset%nkpt*dtset%nsppol))
      dphasek(:,:) = zero
      nkpt1 = dtefield%mkmem_max
    end if
 
-   ABI_ALLOCATE(rhoaug,(n4,n5,n6,gs_hamk%nvloc))
-   ABI_ALLOCATE(vlocal,(n4,n5,n6,gs_hamk%nvloc))
+   ABI_MALLOC(rhoaug,(n4,n5,n6,gs_hamk%nvloc))
+   ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamk%nvloc))
    if(with_vxctau) then
-     ABI_ALLOCATE(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
+     ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
    end if
 
    has_vectornd = (with_vectornd .EQ. 1)
    if(has_vectornd) then
-      ABI_ALLOCATE(vectornd_pac,(n4,n5,n6,gs_hamk%nvloc,3))
+      ABI_MALLOC(vectornd_pac,(n4,n5,n6,gs_hamk%nvloc,3))
    end if
 
 !  LOOP OVER SPINS
@@ -713,10 +713,10 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
      if(has_vectornd) then
         do idir = 1, 3
-          ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+          ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
           call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
-          ABI_DEALLOCATE(cgrvtrial)
+          ABI_FREE(cgrvtrial)
         end do
         call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
      end if
@@ -778,15 +778,15 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 !      build the cgq array that stores the wavefunctions for the
 !      neighbours of ikpt, and the pwnsfacq array that stores the
 !      corresponding phase factors (in case of tnons)
-       ABI_ALLOCATE(cgq,(2,mcgq))
-       ABI_ALLOCATE(pwnsfacq,(2,mkgq))
+       ABI_MALLOC(cgq,(2,mcgq))
+       ABI_MALLOC(pwnsfacq,(2,mkgq))
        if ( berryflag ) then
          call cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,mcgq,&
 &         me_distrb,mkgq,mpi_enreg,my_nspinor,nband_k,nproc_distrb,&
 &         npwarr,pwnsfac,pwnsfacq,pwind_alloc,spaceComm_distrb)
          if (ikpt_loc > dtset%mkmem) then
-           ABI_DEALLOCATE(cgq)
-           ABI_DEALLOCATE(pwnsfacq)
+           ABI_FREE(cgq)
+           ABI_FREE(pwnsfacq)
            cycle
          end if
        end if !berryopt
@@ -802,14 +802,14 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 !         call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
 !       end if
 
-       ABI_ALLOCATE(eig_k,(nband_k))
-       ABI_ALLOCATE(ek_k,(nband_k))
-       ABI_ALLOCATE(enlx_k,(nband_k))
-       ABI_ALLOCATE(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
-       ABI_ALLOCATE(occ_k,(nband_k))
-       ABI_ALLOCATE(resid_k,(nband_k))
-       ABI_ALLOCATE(zshift,(nband_k))
-       ABI_ALLOCATE(grnl_k,(3*natom,nband_k*optforces))
+       ABI_MALLOC(eig_k,(nband_k))
+       ABI_MALLOC(ek_k,(nband_k))
+       ABI_MALLOC(enlx_k,(nband_k))
+       ABI_MALLOC(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
+       ABI_MALLOC(occ_k,(nband_k))
+       ABI_MALLOC(resid_k,(nband_k))
+       ABI_MALLOC(zshift,(nband_k))
+       ABI_MALLOC(grnl_k,(3*natom,nband_k*optforces))
 
        eig_k(:)=zero
        ek_k(:)=zero
@@ -822,8 +822,8 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        !resid_k(:)=zero
        zshift(:)=dtset%eshift
 
-       ABI_ALLOCATE(kg_k,(3,npw_k))
-       ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+       ABI_MALLOC(kg_k,(3,npw_k))
+       ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
        kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
        if (psps%useylm==1) then
          do ilm=1,psps%mpsang*psps%mpsang
@@ -834,17 +834,17 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 !      Set up remaining of the Hamiltonian
 
 !      Compute (1/2) (2 Pi)**2 (k+G)**2:
-       ABI_ALLOCATE(kinpw,(npw_k))
+       ABI_MALLOC(kinpw,(npw_k))
        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !      Compute (k+G) vectors (only if useylm=1)
        nkpg=3*optforces*dtset%nloalg(3)
-       ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
+       ABI_MALLOC(kpg_k,(npw_k,nkpg))
        if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
 
 !      Compute nonlocal form factors ffnl at all (k+G):
        ider=0;idir=0;dimffnl=1
-       ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
+       ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
        if (mpi_enreg%paral_kgb/=1.or.istep<=1) then
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
 &         gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
@@ -857,7 +857,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 !       - Compute 3D phase factors
 !       - Prepare various tabs in case of band-FFT parallelism
 !       - Load k-dependent quantities in the Hamiltonian
-       ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
+       ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
 
        if(usefock_ACE/=0) then
          call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
@@ -929,17 +929,17 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 #if defined HAVE_GPU_CUDA
        if(dtset%use_gpu_cuda==1) call gpu_finalize_ffnl_ph3d()
 #endif
-       ABI_DEALLOCATE(ffnl)
-       ABI_DEALLOCATE(kinpw)
-       ABI_DEALLOCATE(kg_k)
-       ABI_DEALLOCATE(kpg_k)
+       ABI_FREE(ffnl)
+       ABI_FREE(kinpw)
+       ABI_FREE(kg_k)
+       ABI_FREE(kpg_k)
        if(allocated(nucdipmom_k)) then
-         ABI_DEALLOCATE(nucdipmom_k)
+         ABI_FREE(nucdipmom_k)
        end if
-       ABI_DEALLOCATE(ylm_k)
-       ABI_DEALLOCATE(ph3d)
-       ABI_DEALLOCATE(cgq)
-       ABI_DEALLOCATE(pwnsfacq)
+       ABI_FREE(ylm_k)
+       ABI_FREE(ph3d)
+       ABI_FREE(cgq)
+       ABI_FREE(pwnsfacq)
 
 !      electric field
        if (berryflag) then
@@ -995,14 +995,14 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 
        call timab(985,2,tsec)
 
-       ABI_DEALLOCATE(eig_k)
-       ABI_DEALLOCATE(ek_k)
-       ABI_DEALLOCATE(ek_k_nd)
-       ABI_DEALLOCATE(grnl_k)
-       ABI_DEALLOCATE(occ_k)
-       ABI_DEALLOCATE(resid_k)
-       ABI_DEALLOCATE(zshift)
-       ABI_DEALLOCATE(enlx_k)
+       ABI_FREE(eig_k)
+       ABI_FREE(ek_k)
+       ABI_FREE(ek_k_nd)
+       ABI_FREE(grnl_k)
+       ABI_FREE(occ_k)
+       ABI_FREE(resid_k)
+       ABI_FREE(zshift)
+       ABI_FREE(enlx_k)
 
 !      Keep track of total number of bands (all k points so far, even for k points not treated by me)
        bdtot_index=bdtot_index+nband_k
@@ -1058,20 +1058,20 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
      dphase(:) = zero
 !    In case of MPI // of a finite field calculation, send dphasek to all cpus
      call xmpi_sum(dphasek,spaceComm_distrb,ierr)
-     ABI_DEALLOCATE(dphasek)
+     ABI_FREE(dphasek)
    end if ! berryflag
-   ABI_DEALLOCATE(rhoaug)
-   ABI_DEALLOCATE(vlocal)
+   ABI_FREE(rhoaug)
+   ABI_FREE(vlocal)
    if(with_vxctau) then
-     ABI_DEALLOCATE(vxctaulocal)
+     ABI_FREE(vxctaulocal)
    end if
    if(has_vectornd) then
-      ABI_DEALLOCATE(vectornd_pac)
+      ABI_FREE(vectornd_pac)
    end if
 
    call timab(988,2,tsec)
 
-   ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
    doccde(:)=zero
 
 !  Treat now varying occupation numbers, in the self-consistent case
@@ -1083,9 +1083,9 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        call timab(989,1,tsec)
 
 !      If needed, exchange the values of eigen,resid,eknk,enlxnk,grnlnk
-       ABI_ALLOCATE(buffer1,((4+3*natom*optforces+dtset%usefock+3*natom*dtset%usefock*optforces)*mbdkpsp))
+       ABI_MALLOC(buffer1,((4+3*natom*optforces+dtset%usefock+3*natom*dtset%usefock*optforces)*mbdkpsp))
        if(paw_dmft%use_dmft==1) then
-         ABI_ALLOCATE(buffer2,(mb2dkpsp*paw_dmft%use_dmft))
+         ABI_MALLOC(buffer2,(mb2dkpsp*paw_dmft%use_dmft))
        end if
 !      Pack eigen,resid,eknk,enlxnk,grnlnk in buffer1
        buffer1(1          :  mbdkpsp)=eigen(:)
@@ -1162,9 +1162,9 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
          end do
        end if
        if(allocated(buffer2))  then
-         ABI_DEALLOCATE(buffer2)
+         ABI_FREE(buffer2)
        end if
-       ABI_DEALLOCATE(buffer1)
+       ABI_FREE(buffer1)
        call timab(989,2,tsec)
 
      end if ! nproc_kpt>1
@@ -1453,7 +1453,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
          if (optforces>0) nbuf=nbuf+3*natom
        end if
        if(iscf==-1 .or. iscf==-2)nbuf=2*mbdkpsp
-       ABI_ALLOCATE(buffer1,(nbuf))
+       ABI_MALLOC(buffer1,(nbuf))
        ! Pack eigen,resid,rho[wf]r,grnl,enl,ek
        buffer1(1:mbdkpsp)=eigen(:)
        buffer1(1+mbdkpsp:2*mbdkpsp)=resid(:)
@@ -1524,7 +1524,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
          end if
          if (optforces>0) grnl(1:3*natom)=buffer1(index1+1:index1+3*natom)
        end if
-       ABI_DEALLOCATE(buffer1)
+       ABI_FREE(buffer1)
        call timab(989,2,tsec)
 
      end if ! nproc_kpt>1
@@ -1582,16 +1582,16 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
      end if
    end if
 
-   ABI_DEALLOCATE(eknk)
+   ABI_FREE(eknk)
    if (usefock) then
-     ABI_DEALLOCATE(focknk)
+     ABI_FREE(focknk)
      if (optforces>0)then
-       ABI_DEALLOCATE(fockfornk)
+       ABI_FREE(fockfornk)
      end if
    end if
-   ABI_DEALLOCATE(eknk_nd)
-   ABI_DEALLOCATE(grnlnk)
-   ABI_DEALLOCATE(enlxnk)
+   ABI_FREE(eknk_nd)
+   ABI_FREE(grnlnk)
+   ABI_FREE(enlxnk)
 
 !  In the non-self-consistent case, print eigenvalues and residuals
    if(iscf<=0 .and. me_distrb==0)then
@@ -1662,7 +1662,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
    if (psps%usepaw==1) then
      call timab(555,1,tsec)
      if (paral_atom) then
-       ABI_DATATYPE_ALLOCATE(pawrhoij_unsym,(natom))
+       ABI_MALLOC(pawrhoij_unsym,(natom))
        call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
 &                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
        call pawrhoij_alloc(pawrhoij_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
@@ -1676,7 +1676,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 &       occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,dtset%usewvl,dtset%wtk)
      else
        mcprj_tmp=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
-       ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,mcprj_tmp))
+       ABI_MALLOC(cprj_tmp,(natom,mcprj_tmp))
        call pawcprj_alloc(cprj_tmp,0,gs_hamk%dimcprj)
        call ctocprj(atindx,cg,1,cprj_tmp,gmet,gprimd,0,0,0,dtset%istwfk,kg,dtset%kptns,&
 &       mcg,mcprj_tmp,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
@@ -1688,7 +1688,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 &       dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,&
 &       dtset%usewvl,dtset%wtk)
        call pawcprj_free(cprj_tmp)
-       ABI_DATATYPE_DEALLOCATE(cprj_tmp)
+       ABI_FREE(cprj_tmp)
      end if
      call timab(555,2,tsec)
 !    Build symetrized packed rhoij and compensated pseudo density
@@ -1713,7 +1713,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
      end if
      if (paral_atom) then
        call pawrhoij_free(pawrhoij_unsym)
-       ABI_DATATYPE_DEALLOCATE(pawrhoij_unsym)
+       ABI_FREE(pawrhoij_unsym)
      end if
    end if
 
@@ -1744,11 +1744,11 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  end if ! iscf>0 or iscf=-3
 
  if(psps%usepaw==1.and.(iscf>=0.or.iscf==-3))  then
-   ABI_DEALLOCATE(rhowfr)
-   ABI_DEALLOCATE(rhowfg)
+   ABI_FREE(rhowfr)
+   ABI_FREE(rhowfg)
    if (dtset%usekden==1) then
-     ABI_DEALLOCATE(tauwfr)
-     ABI_DEALLOCATE(tauwfg)
+     ABI_FREE(tauwfr)
+     ABI_FREE(tauwfg)
    end if
  end if
 
@@ -1759,14 +1759,14 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
    call timab(995,1,tsec)
    if (psps%usepaw==1) then
 !    In case of PAW calculation, have to transfer kxc from the fine to the coarse grid:
-     ABI_ALLOCATE(cgrkxc,(dtset%nfft,nkxc))
+     ABI_MALLOC(cgrkxc,(dtset%nfft,nkxc))
      do ikxc=1,nkxc
        call transgrid(1,mpi_enreg,1,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrkxc(:,ikxc),kxc(:,ikxc))
      end do
      call tddft(cg,dtfil,dtset,eigen,etotal,gmet,gprimd,gsqcut,&
 &     kg,cgrkxc,dtset%mband,mgfftdiel,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%nfft,&
 &     ngfftdiel,dtset%nkpt,nkxc,npwarr,dtset%nspinor,dtset%nsppol,occ,ucvol,wffnew)
-     ABI_DEALLOCATE(cgrkxc)
+     ABI_FREE(cgrkxc)
    else
      call tddft(cg,dtfil,dtset,eigen,etotal,gmet,gprimd,gsqcut,&
 &     kg,kxc,dtset%mband,mgfftdiel,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%nfft,&
@@ -1806,13 +1806,13 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  if (psps%usepaw==1) then
    if (usecprj==0) then
      call pawcprj_free(cprj_local)
-     ABI_DATATYPE_DEALLOCATE(cprj_local)
+     ABI_FREE(cprj_local)
    end if
  end if
 
  if(dtset%usewvl==0) then
-   ABI_DEALLOCATE(EigMin)
-   ABI_DEALLOCATE(doccde)
+   ABI_FREE(EigMin)
+   ABI_FREE(doccde)
 #if defined HAVE_GPU_CUDA
    if(dtset%use_gpu_cuda==1) call gpu_finalize_ham_data()
 #endif
@@ -2330,9 +2330,9 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
 
 !Test compatbility of berryflag
  if (berryflag) then
-   ABI_ALLOCATE(flag_send,(0:nproc_distrb-1,dtefield%fnkpt))
+   ABI_MALLOC(flag_send,(0:nproc_distrb-1,dtefield%fnkpt))
  end if
- ABI_ALLOCATE(flag_receive,(dtset%nkpt))
+ ABI_MALLOC(flag_receive,(dtset%nkpt))
  flag_send(:,:) = 0
  flag_receive(:) = 0
 
@@ -2379,19 +2379,19 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
              tag = ikpt1f + (isppol - 1)*dtefield%fnkpt
              ikg1 = dtefield%cgqindex(3,ifor+2*(idir-1),ikpt+(isppol-1)*dtset%nkpt)
            end if
-           ABI_ALLOCATE(buffer,(2,npw_k1))
+           ABI_MALLOC(buffer,(2,npw_k1))
            call xmpi_recv(buffer,my_source,tag,spaceComm_distrb,ierr)
            pwnsfacq(:,ikg1+1:ikg1+npw_k1) = buffer(:,1:npw_k1)
-           ABI_DEALLOCATE(buffer)
+           ABI_FREE(buffer)
 
 !          receive cgq if necessary
            if(flag_receive(ikpt1i) == 0) then
-             ABI_ALLOCATE(buffer,(2,count))
+             ABI_MALLOC(buffer,(2,count))
              tag = ikpt1i + (isppol - 1)*dtset%nkpt
              call xmpi_recv(buffer,my_source,tag,spaceComm_distrb,ierr)
              if(berryflag) icg1 = dtefield%cgqindex(2,ifor+2*(idir-1),ikpt+(isppol-1)*dtset%nkpt)
              cgq(:,icg1+1:icg1+count) = buffer(:,1:count)
-             ABI_DEALLOCATE(buffer)
+             ABI_FREE(buffer)
              flag_receive(ikpt1i) = 1
            end if ! end if flag_receive == 0
          end if ! end tasks if I am the destination
@@ -2421,20 +2421,20 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
                tag = jkpt1f + (jsppol - 1)*dtefield%fnkpt
              end if
              count1 = npwarr(jkpt1i)
-             ABI_ALLOCATE(buffer,(2,count1))
+             ABI_MALLOC(buffer,(2,count1))
              buffer(:,1:count1)  = pwnsfac(:,ikg1+1:ikg1+count1)
              call xmpi_send(buffer,dest,tag,spaceComm_distrb,ierr)
-             ABI_DEALLOCATE(buffer)
+             ABI_FREE(buffer)
 
 !            send cgq if necessary
              if(flag_send(dest, jkpt1i)==0) then
                if(berryflag) icg1 = dtefield%cgindex(jkpt1i,jsppol)
                tag = jkpt1i + (jsppol - 1)*dtset%nkpt
                count1 = npwarr(jkpt1i)*nband_k*my_nspinor
-               ABI_ALLOCATE(buffer,(2,count1))
+               ABI_MALLOC(buffer,(2,count1))
                buffer(:,1:count1)  = cg(:,icg1+1:icg1+count1)
                call xmpi_send(buffer,dest,tag,spaceComm_distrb,ierr)
-               ABI_DEALLOCATE(buffer)
+               ABI_FREE(buffer)
                flag_send(dest, jkpt1i)=1
              end if ! if send cgq
 
@@ -2452,8 +2452,8 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
 
  call timab(983,2,tsec)
 
- ABI_DEALLOCATE(flag_send)
- ABI_DEALLOCATE(flag_receive)
+ ABI_FREE(flag_send)
+ ABI_FREE(flag_receive)
 
 end subroutine cgq_builder
 !!***

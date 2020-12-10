@@ -777,7 +777,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    call ddb_hdr_open_read(ddb_hdr,filename,2,DDB_VERSION,comm,dimonly=1)
 
    natom = ddb_hdr%natom
-   ABI_ALLOCATE(atifc,(ddb_hdr%natom))
+   ABI_MALLOC(atifc,(ddb_hdr%natom))
    do i=1,ddb_hdr%natom
      atifc(i)=i
    end do
@@ -791,7 +791,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
- ABI_ALLOCATE(zeff,(3,3,natom))
+ ABI_MALLOC(zeff,(3,3,natom))
  iblok = ddb%get_dielt_zeff(ucell_ddb,1,1,0,dielt,zeff)
 
  ! Try to get dielt, in case just the DDE are present
@@ -799,7 +799,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    iblok_tmp = ddb%get_dielt(1,dielt)
  end if
 
- ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
+ ABI_MALLOC(qdrp_cart,(3,3,3,natom))
  iblok = ddb%get_quadrupoles(1,3,qdrp_cart)
 
  ! ifc to be calculated for interpolation
@@ -814,7 +814,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  call ifc_init(Ifc,ucell_ddb,ddb,1,1,1,dipdip,1,ngqpt,nqshift,qshift,dielt,zeff,qdrp_cart,0,0.0_dp,0,1,comm)
 
  ! Free them all
- ABI_DEALLOCATE(atifc)
+ ABI_FREE(atifc)
  call ddb%free()
  call ddb_hdr%free()
 
@@ -2629,9 +2629,9 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
  end do !irred q-points
  close (unit_btrap)
 
- ABI_DEALLOCATE(qibz)
- ABI_DEALLOCATE(qbz)
- ABI_DEALLOCATE(wtq)
+ ABI_FREE(qibz)
+ ABI_FREE(qbz)
+ ABI_FREE(wtq)
 
  DBG_EXIT("COLL")
 

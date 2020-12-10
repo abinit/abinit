@@ -156,10 +156,10 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
  ABI_MALLOC_OR_DIE(h1_mat_el_sq,(2, nFSband**2, nbranch**2,elph_ds%k_phon%my_nkpt, nsppol), ierr)
  h1_mat_el_sq = zero
 
- ABI_ALLOCATE(elph_ds%qirredtofull,(elph_ds%nqptirred))
+ ABI_MALLOC(elph_ds%qirredtofull,(elph_ds%nqptirred))
 
 !MG array to store the e-ph quantities calculated over the input Q-grid
- ABI_ALLOCATE(qdata_tmp,(elph_ds%nqptirred,nbranch,nsppol,3))
+ ABI_MALLOC(qdata_tmp,(elph_ds%nqptirred,nbranch,nsppol,3))
  qdata_tmp=zero
 
  nqptirred_local=0 !zero number of irred q-points found
@@ -176,7 +176,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
    do iqptirred=1,elph_ds%nqptirred*elph_ds%k_phon%nkpt
      write (elph_ds%unitgkq,REC=iqptirred) gkk_qpt_tmp
    end do
-   ABI_DEALLOCATE(gkk_qpt_tmp)
+   ABI_FREE(gkk_qpt_tmp)
 
  else
    write (msg,'(a,i0)')' Wrong values for gkqwrite = ',elph_ds%gkqwrite
@@ -192,7 +192,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 !MG: this task should be performed in mrggkk
 !===========================================================
 
- ABI_ALLOCATE(eigen1,(2,nband,nband))
+ ABI_MALLOC(eigen1,(2,nband,nband))
  do i1wf=1,n1wf
 
    if (master == me) then
@@ -612,7 +612,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
      call wrtout(std_out,' read_gkk : enter normsq_gkq',"COLL")
 
 !    MG temporary array to save ph-linewidths before Fourier interpolation
-     ABI_ALLOCATE(qdata,(nbranch,nsppol,3))
+     ABI_MALLOC(qdata,(nbranch,nsppol,3))
      qdata(:,:,:)=zero
 
      call normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
@@ -636,7 +636,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
      end if
 
      qdata_tmp(iqptirred,:,:,:)=qdata(:,:,:)
-     ABI_DEALLOCATE(qdata)
+     ABI_FREE(qdata)
    end if
 
    call hdr1%free()
@@ -645,9 +645,9 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
 !got all the gkk perturbations
 
- ABI_DEALLOCATE(eigen1)
- ABI_DEALLOCATE(h1_mat_el)
- ABI_DEALLOCATE(h1_mat_el_sq)
+ ABI_FREE(eigen1)
+ ABI_FREE(h1_mat_el)
+ ABI_FREE(h1_mat_el_sq)
 
  if (nqptirred_local /= elph_ds%nqptirred) then
    write (msg, '(3a,i0,i0)') &
@@ -678,13 +678,13 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
  call wrtout(std_out,'read_gkk : done completing the perturbations (and checked!)','COLL')
 
 !MG save phonon frequencies, ph-linewidths and lambda(q,n) values before Fourier interpolation
- ABI_ALLOCATE(elph_ds%qgrid_data,(elph_ds%nqptirred,nbranch,nsppol,3))
+ ABI_MALLOC(elph_ds%qgrid_data,(elph_ds%nqptirred,nbranch,nsppol,3))
 
  do iqptirred=1,elph_ds%nqptirred
    elph_ds%qgrid_data(iqptirred,:,:,:)=qdata_tmp(iqptirred,:,:,:)
  end do
 
- ABI_DEALLOCATE(qdata_tmp)
+ ABI_FREE(qdata_tmp)
 
 end subroutine read_gkk
 !!***
@@ -772,7 +772,7 @@ subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phas
 
 !output RF eigenvalues
  mband = maxval(hdr1%nband(:))
- ABI_ALLOCATE(tmpeig,(2*mband**2))
+ ABI_MALLOC(tmpeig,(2*mband**2))
  iband_off = 0
  tmpeig(1) = phasecg(1, 1)
  do isppol = 1, hdr1%nsppol
@@ -786,7 +786,7 @@ subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phas
      iband_off = iband_off + hdr1%nband(ikpt)**2
    end do
  end do
- ABI_DEALLOCATE(tmpeig)
+ ABI_FREE(tmpeig)
 
 !close gkk file
  close (unitout)
@@ -1095,7 +1095,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  write(std_out,'(a, f10.5,a)' )      ' ecut                 =',hdr1%ecut,' Ha'
  write(std_out,'(a,e15.5,a,e15.5,a)' )' fermie               =',hdr1%fermie,' Ha ',hdr1%fermie*Ha_eV,' eV'
 
- ABI_ALLOCATE(eig1_k,(2*nband_in**2,3))
+ ABI_MALLOC(eig1_k,(2*nband_in**2,3))
  bd2tot_index = 0
  elph_tr_ds%el_veloc=zero
 
@@ -1134,10 +1134,10 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  end do ! end isppol
 
  call krank%free()
- ABI_DEALLOCATE(eig1_k)
- ABI_DEALLOCATE(eigen11)
- ABI_DEALLOCATE(eigen12)
- ABI_DEALLOCATE(eigen13)
+ ABI_FREE(eig1_k)
+ ABI_FREE(eigen11)
+ ABI_FREE(eigen12)
+ ABI_FREE(eigen13)
 
  call hdr1%free()
 
@@ -1200,7 +1200,7 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
  ABI_CHECK(fform /= 0, "hdr_fort_read returned fform == 0")
 
  mband = maxval(hdr0%nband(:))
- ABI_ALLOCATE(eigen,(mband))
+ ABI_MALLOC(eigen,(mband))
  call wrtout(std_out,'inpgkk : try to reread GS eigenvalues','COLL')
 
  do isppol=1,hdr0%nsppol
@@ -1213,7 +1213,7 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
  read(unitgkk,IOSTAT=ierr) n1wf
  ABI_CHECK(ierr==0,"reading n1wf from gkk file")
 
- ABI_DEALLOCATE(eigen)
+ ABI_FREE(eigen)
  call hdr0%free()
 
  if (n1wf > 1) then
@@ -1231,7 +1231,7 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
  end if
 
  bantot1 = 2*hdr1%nsppol*hdr1%nkpt*mband**2
- ABI_ALLOCATE(eigen1, (bantot1))
+ ABI_MALLOC(eigen1, (bantot1))
 
 
 !retrieve 1WF <psi_k+q | H | psi_k> from gkk file and echo to output
@@ -1317,8 +1317,8 @@ subroutine completeperts(Cryst,nbranch,nFSband,nkpt,nsppol,gkk_flag,h1_mat_el,h1
  natom = Cryst%natom
  mpert = natom+2
 
- ABI_ALLOCATE(tmpflg,(3,mpert,3,mpert))
- ABI_ALLOCATE(tmpval,(2,3,mpert,3,mpert))
+ ABI_MALLOC(tmpflg,(3,mpert,3,mpert))
+ ABI_MALLOC(tmpval,(2,3,mpert,3,mpert))
 
  h1_mat_el_sq = zero
 
@@ -1397,8 +1397,8 @@ subroutine completeperts(Cryst,nbranch,nFSband,nkpt,nsppol,gkk_flag,h1_mat_el,h1
    end do !end kpt_phon do
  end do !end sppol do
 
- ABI_DEALLOCATE(tmpflg)
- ABI_DEALLOCATE(tmpval)
+ ABI_FREE(tmpflg)
+ ABI_FREE(tmpval)
 
 end subroutine completeperts
 !!***
@@ -1571,7 +1571,7 @@ subroutine normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
 !    Diagonalize gamma matrix at qpoint (complex matrix). Copied from dfpt_phfrq
      ier=0
      ii=1
-     ABI_ALLOCATE(matrx,(2,(elph_ds%nbranch*(elph_ds%nbranch+1))/2))
+     ABI_MALLOC(matrx,(2,(elph_ds%nbranch*(elph_ds%nbranch+1))/2))
      do i2=1,elph_ds%nbranch
        do i1=1,i2
          matrx(1,ii)=accum_mat2(1,i1,i2,isppol)
@@ -1579,19 +1579,19 @@ subroutine normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
          ii=ii+1
        end do
      end do
-     ABI_ALLOCATE(zhpev1,(2,2*elph_ds%nbranch-1))
-     ABI_ALLOCATE(zhpev2,(3*elph_ds%nbranch-2))
-     ABI_ALLOCATE(val,(elph_ds%nbranch))
-     ABI_ALLOCATE(vec,(2,elph_ds%nbranch,elph_ds%nbranch))
+     ABI_MALLOC(zhpev1,(2,2*elph_ds%nbranch-1))
+     ABI_MALLOC(zhpev2,(3*elph_ds%nbranch-2))
+     ABI_MALLOC(val,(elph_ds%nbranch))
+     ABI_MALLOC(vec,(2,elph_ds%nbranch,elph_ds%nbranch))
      call ZHPEV ('V','U',elph_ds%nbranch,matrx,val,vec,elph_ds%nbranch,zhpev1,zhpev2,ier)
 
      write (std_out,*) ' normsq_gkq : accumulated eigenvalues isppol ',isppol, ' = '
      write (std_out,'(3E18.6)') val
-     ABI_DEALLOCATE(matrx)
-     ABI_DEALLOCATE(zhpev1)
-     ABI_DEALLOCATE(zhpev2)
-     ABI_DEALLOCATE(vec)
-     ABI_DEALLOCATE(val)
+     ABI_FREE(matrx)
+     ABI_FREE(zhpev1)
+     ABI_FREE(zhpev2)
+     ABI_FREE(vec)
+     ABI_FREE(val)
    end do ! isppol
 
  else if (elph_ds%ep_scalprod == 0) then
@@ -1838,7 +1838,7 @@ subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpq
 !accum_mat and accum_mat2 are real, the imaginary part is used for debugging purpose
 !accum_mat2 is used to store the phonon-linewidhts before interpolation
 
- ABI_ALLOCATE(zgemm_tmp_mat ,(2,elph_ds%nbranch,elph_ds%nbranch))
+ ABI_MALLOC(zgemm_tmp_mat ,(2,elph_ds%nbranch,elph_ds%nbranch))
 
  do isppol=1,elph_ds%nsppol
    do ik_this_proc =1, elph_ds%k_phon%my_nkpt
@@ -1917,7 +1917,7 @@ subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpq
  end do
 !END loop over sppol
 
- ABI_DEALLOCATE(zgemm_tmp_mat)
+ ABI_FREE(zgemm_tmp_mat)
 
 end subroutine nmsq_gam_sumFS
 !!***

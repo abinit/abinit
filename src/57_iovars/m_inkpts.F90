@@ -177,8 +177,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 
  ! Compute the maximum size of arrays intarr and dprarr
  marr = max(3*nkpt,3*MAX_NSHIFTK)
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
  ! Use zero to signal that these values have not been read.
  ngkpt = 0
@@ -298,14 +298,14 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 
    if(marr<3*nsegment+3)then
      marr=3*nsegment+3
-     ABI_DEALLOCATE(dprarr)
-     ABI_DEALLOCATE(intarr)
-     ABI_ALLOCATE(dprarr,(marr))
-     ABI_ALLOCATE(intarr,(marr))
+     ABI_FREE(dprarr)
+     ABI_FREE(intarr)
+     ABI_MALLOC(dprarr,(marr))
+     ABI_MALLOC(intarr,(marr))
    end if
 
-   ABI_ALLOCATE(kptbounds,(3,nsegment+1))
-   ABI_ALLOCATE(ndivk,(nsegment))
+   ABI_MALLOC(kptbounds,(3,nsegment+1))
+   ABI_MALLOC(ndivk,(nsegment))
 
    call intagm(dprarr,intarr,jdtset,marr,3*nsegment+3,string(1:lenstr),'kptbounds',tread,'DPR')
 
@@ -391,8 +391,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptnrm',tread,'DPR')
    if(tread==1) kptnrm=dprarr(1)
 
-   ABI_DEALLOCATE(kptbounds)
-   ABI_DEALLOCATE(ndivk)
+   ABI_FREE(kptbounds)
+   ABI_FREE(ndivk)
 
  else if (kptopt>=1 .and. kptopt<=4) then
    ! Read ngkpt
@@ -538,8 +538,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  ! If nkpt was to be computed, transfer it from nkpt_computed
  if (nkpt == 0) nkpt = nkpt_computed
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
  call timab(192,2,tsec)
 
@@ -611,8 +611,8 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 
  ! Compute the maximum size of arrays intarr and dprarr (nshiftq is MAX_NSHIFTK at maximum)
  marr=630
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
  tread_q_sum=0
 
  ! Find the method to generate the q-points
@@ -716,10 +716,10 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    ! Re-generate symmetry operations from the lattice and atomic coordinates
    ! This is a fundamental difference with respect to the k point generation.
    tolsym=tol8
-   ABI_ALLOCATE(ptsymrel,(3,3,msym))
-   ABI_ALLOCATE(symafm_new,(msym))
-   ABI_ALLOCATE(symrel_new,(3,3,msym))
-   ABI_ALLOCATE(tnons_new,(3,msym))
+   ABI_MALLOC(ptsymrel,(3,3,msym))
+   ABI_MALLOC(symafm_new,(msym))
+   ABI_MALLOC(symrel_new,(3,3,msym))
+   ABI_MALLOC(tnons_new,(3,msym))
    call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -731,15 +731,15 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 
    ! Compute the maximum number of q points
    nqpt_max=0
-   ABI_ALLOCATE(qpts,(3,nqpt_max))
-   ABI_ALLOCATE(wtq,(nqpt_max))
+   ABI_MALLOC(qpts,(3,nqpt_max))
+   ABI_MALLOC(wtq,(nqpt_max))
    call getkgrid(chksymbreak,0,iscf_fake,qpts,qptopt,qptrlatt,qptrlen,&
      msym,nqpt_max,nqpt_computed,nshiftq,nsym_new,rprimd,&
      shiftq,symafm_new,symrel_new,vacuum,wtq)
 
    nqpt_max=nqpt_computed
-   ABI_DEALLOCATE(qpts)
-   ABI_DEALLOCATE(wtq)
+   ABI_FREE(qpts)
+   ABI_FREE(wtq)
 
    ! Find the index of the q point within the set of q points that will be generated
    iqpt=0
@@ -766,8 +766,8 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    end if
 
    ! Compute the q-point grid in the BZ or the IBZ
-   ABI_ALLOCATE(qpts,(3,nqpt_max))
-   ABI_ALLOCATE(wtq,(nqpt_max))
+   ABI_MALLOC(qpts,(3,nqpt_max))
+   ABI_MALLOC(wtq,(nqpt_max))
 
    call getkgrid(chksymbreak,iout,iscf_fake,qpts,qptopt,qptrlatt,qptrlen,&
     msym,nqpt_max,nqpt_computed,nshiftq,nsym_new,rprimd,&
@@ -780,12 +780,12 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      wtqc = wtq(iqpt)
    end if
 
-   ABI_DEALLOCATE(ptsymrel)
-   ABI_DEALLOCATE(symafm_new)
-   ABI_DEALLOCATE(symrel_new)
-   ABI_DEALLOCATE(tnons_new)
-   ABI_DEALLOCATE(qpts)
-   ABI_DEALLOCATE(wtq)
+   ABI_FREE(ptsymrel)
+   ABI_FREE(symafm_new)
+   ABI_FREE(symrel_new)
+   ABI_FREE(tnons_new)
+   ABI_FREE(qpts)
+   ABI_FREE(wtq)
 
  else
    write(msg, '(3a,i0,3a)' ) &
@@ -804,8 +804,8 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 !  ABI_ERROR(msg)
 !endif
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 end subroutine inqpt
 !!***

@@ -497,11 +497,11 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  dimffnlin=size(ffnlin,2);dimffnlout=size(ffnlout,2)
  kpgin_allocated=(.not.associated(kpgin))
  if (kpgin_allocated) then
-   ABI_ALLOCATE(kpgin,(npwin,0))
+   ABI_MALLOC(kpgin,(npwin,0))
  end if
  kpgout_allocated=(.not.associated(kpgout))
  if (kpgout_allocated) then
-   ABI_ALLOCATE(kpgout,(npwout,0))
+   ABI_MALLOC(kpgout,(npwout,0))
  end if
 
 !Check some sizes for safety
@@ -559,35 +559,35 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    iatm=hamk%atindx(iatom_only_);itypat=hamk%typat(iatom_only_)
    natom_=1 ; ntypat_=1 ; dimenl2_=1 ; matblk_=1
    nloalg_(:)=hamk%nloalg(:)
-   ABI_ALLOCATE(atindx1_,(1))
-   ABI_ALLOCATE(nattyp_,(1))
+   ABI_MALLOC(atindx1_,(1))
+   ABI_MALLOC(nattyp_,(1))
    atindx1_(1)=1 ; nattyp_(1)=1
 !  Store at the right place the 1d phases
    n1=hamk%ngfft(1);n2=hamk%ngfft(2);n3=hamk%ngfft(3)
-   ABI_ALLOCATE(ph1d_,(2,(2*n1+1)+(2*n2+1)+(2*n3+1)))
+   ABI_MALLOC(ph1d_,(2,(2*n1+1)+(2*n2+1)+(2*n3+1)))
    shift1=(iatm-1)*(2*n1+1)
    ph1d_(:,1:2*n1+1)=hamk%ph1d(:,1+shift1:2*n1+1+shift1)
    shift2=(iatm-1)*(2*n2+1)+hamk%natom*(2*n1+1)
    ph1d_(:,1+2*n1+1:2*n2+1+2*n1+1)=hamk%ph1d(:,1+shift2:2*n2+1+shift2)
    shift3=(iatm-1)*(2*n3+1)+hamk%natom*(2*n1+1+2*n2+1)
    ph1d_(:,1+2*n1+1+2*n2+1:2*n3+1+2*n2+1+2*n1+1)=hamk%ph1d(:,1+shift3:2*n3+1+shift3)
-   ABI_ALLOCATE(phkxredin_,(2,1))
-   ABI_ALLOCATE(phkxredout_,(2,1))
+   ABI_MALLOC(phkxredin_,(2,1))
+   ABI_MALLOC(phkxredout_,(2,1))
    phkxredin_(:,1)=phkxredin(:,iatm)
    phkxredout_(:,1)=phkxredout(:,iatm)
-   ABI_ALLOCATE(ph3din_,(2,npwin,1))
-   ABI_ALLOCATE(ph3dout_,(2,npwout,1))
+   ABI_MALLOC(ph3din_,(2,npwin,1))
+   ABI_MALLOC(ph3dout_,(2,npwout,1))
    if (force_recompute_ph3d.or.hamk%matblk<hamk%natom) then
      nloalg_(2)=-abs(nloalg_(2)) !Will compute the 3D phase factors inside nonlop
    else
      ph3din_(:,1:npwin,1)=ph3din(:,1:npwin,iatm)
      ph3dout_(:,1:npwout,1)=ph3dout(:,1:npwout,iatm)
    end if
-   ABI_ALLOCATE(ffnlin_,(npwin,dimffnlin,hamk%lmnmax,1))
-   ABI_ALLOCATE(ffnlout_,(npwout,dimffnlout,hamk%lmnmax,1))
+   ABI_MALLOC(ffnlin_,(npwin,dimffnlin,hamk%lmnmax,1))
+   ABI_MALLOC(ffnlout_,(npwout,dimffnlout,hamk%lmnmax,1))
    ffnlin_(:,:,:,1)=ffnlin(:,:,:,itypat)
    ffnlout_(:,:,:,1)=ffnlout(:,:,:,itypat)
-   ABI_DATATYPE_ALLOCATE(cprjin_,(1,my_nspinor*((cpopt+5)/5)))
+   ABI_MALLOC(cprjin_,(1,my_nspinor*((cpopt+5)/5)))
    if (cpopt>=0) then
      nlmn_atm(1)=cprjin(iatm,1)%nlmn
      ncpgr_atm=cprjin(iatm,1)%ncpgr
@@ -600,7 +600,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      end do
    end if
    if (size(enl_ptr)>0) then
-     ABI_ALLOCATE(enl_,(size(enl_ptr,1),1,hamk%nspinor**2,size(enl_ptr,4)))
+     ABI_MALLOC(enl_,(size(enl_ptr,1),1,hamk%nspinor**2,size(enl_ptr,4)))
      do ii=1,size(enl_ptr,4)
        do ispden=1,hamk%nspinor**2
          if (dimenl2==hamk%natom .and. hamk%usepaw==1) then
@@ -613,18 +613,18 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
        end do
      end do
    else
-     ABI_ALLOCATE(enl_,(0,0,0,0))
+     ABI_MALLOC(enl_,(0,0,0,0))
    end if
    if (allocated(hamk%sij)) then
      dimsij=size(hamk%sij,1)
-     ABI_ALLOCATE(sij_,(dimsij,1))
+     ABI_MALLOC(sij_,(dimsij,1))
      if (size(hamk%sij,2)==hamk%ntypat) then
        sij_(:,1)=hamk%sij(:,itypat)
      else if (size(hamk%sij)>0) then
        sij_(:,1)=hamk%sij(:,1)
      end if
    end if
-   ABI_ALLOCATE(indlmn_,(6,hamk%lmnmax,1))
+   ABI_MALLOC(indlmn_,(6,hamk%lmnmax,1))
    indlmn_(:,:,1)=hamk%indlmn(:,:,itypat)
 
  else
@@ -645,8 +645,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    indlmn_     => hamk%indlmn
    if (force_recompute_ph3d) then
      nloalg_(2)=-abs(nloalg_(2)) !Will compute the 3D phase factors inside nonlop
-     ABI_ALLOCATE(ph3din_,(2,npwin,hamk%matblk))
-     ABI_ALLOCATE(ph3dout_,(2,npwout,hamk%matblk))
+     ABI_MALLOC(ph3din_,(2,npwin,hamk%matblk))
+     ABI_MALLOC(ph3dout_,(2,npwout,hamk%matblk))
    else
      ph3din_     => ph3din
      ph3dout_    => ph3dout
@@ -761,30 +761,30 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if (cpopt>=0) then
      call pawcprj_free(cprjin_)
    end if
-   ABI_DEALLOCATE(atindx1_)
-   ABI_DEALLOCATE(nattyp_)
-   ABI_DEALLOCATE(ph1d_)
-   ABI_DEALLOCATE(ph3din_)
-   ABI_DEALLOCATE(ph3dout_)
-   ABI_DEALLOCATE(phkxredin_)
-   ABI_DEALLOCATE(phkxredout_)
-   ABI_DEALLOCATE(ffnlin_)
-   ABI_DEALLOCATE(ffnlout_)
-   ABI_DEALLOCATE(enl_)
-   ABI_DEALLOCATE(indlmn_)
-   ABI_DATATYPE_DEALLOCATE(cprjin_)
+   ABI_FREE(atindx1_)
+   ABI_FREE(nattyp_)
+   ABI_FREE(ph1d_)
+   ABI_FREE(ph3din_)
+   ABI_FREE(ph3dout_)
+   ABI_FREE(phkxredin_)
+   ABI_FREE(phkxredout_)
+   ABI_FREE(ffnlin_)
+   ABI_FREE(ffnlout_)
+   ABI_FREE(enl_)
+   ABI_FREE(indlmn_)
+   ABI_FREE(cprjin_)
    if (allocated(hamk%sij)) then
-     ABI_DEALLOCATE(sij_)
+     ABI_FREE(sij_)
    end if
  else if (force_recompute_ph3d) then
-   ABI_DEALLOCATE(ph3din_)
-   ABI_DEALLOCATE(ph3dout_)
+   ABI_FREE(ph3din_)
+   ABI_FREE(ph3dout_)
  end if
  if (kpgin_allocated) then
-   ABI_DEALLOCATE(kpgin)
+   ABI_FREE(kpgin)
  end if
  if (kpgout_allocated) then
-   ABI_DEALLOCATE(kpgout)
+   ABI_FREE(kpgout)
  end if
 
  call timab(220+tim_nonlop,2,tsec)
@@ -1001,15 +1001,15 @@ end subroutine nonlop
  end if
 
  if ((cpopt==0).or.(cpopt==1))  then
-   ABI_ALLOCATE(proj,(2,lmnmax*natom))
+   ABI_MALLOC(proj,(2,lmnmax*natom))
    proj=zero;
  end if
 
 !Workaround to get choice=1/signs=1 working
  if (choice==1.and.signs==1) then
    signs_=2
-   ABI_ALLOCATE(vectout_,(2,npwin*nspinor))
-   ABI_ALLOCATE(svectout_,(2,npwin*nspinor*(paw_opt/3)))
+   ABI_MALLOC(vectout_,(2,npwin*nspinor))
+   ABI_MALLOC(svectout_,(2,npwin*nspinor*(paw_opt/3)))
  else
    signs_=signs;vectout_=>vectout;svectout_=>svectout
  end if
@@ -1031,8 +1031,8 @@ end subroutine nonlop
    else
      call dotprod_g(enlout(1),doti,istwf_k,npwin*nspinor,1,vectin,svectout_,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
    end if
-   ABI_DEALLOCATE(vectout_)
-   ABI_DEALLOCATE(svectout_)
+   ABI_FREE(vectout_)
+   ABI_FREE(svectout_)
  else
    nullify(vectout_,svectout_)
  end if
@@ -1050,7 +1050,7 @@ end subroutine nonlop
        end do
      end do
    end do
-   ABI_DEALLOCATE(proj)
+   ABI_FREE(proj)
  end if
 
  DBG_EXIT("COLL")

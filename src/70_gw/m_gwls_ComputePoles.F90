@@ -164,8 +164,8 @@ end do
 ! Allocate the array which will contain the indices of the degenerate
 ! states, and populate it.
 !--------------------------------------------------------------------------------
-ABI_ALLOCATE(degeneracy_table,            (number_of_denerate_sets,largest_degeneracy))
-ABI_ALLOCATE(number_of_degenerate_states, (number_of_denerate_sets))
+ABI_MALLOC(degeneracy_table,            (number_of_denerate_sets,largest_degeneracy))
+ABI_MALLOC(number_of_degenerate_states, (number_of_denerate_sets))
 
 degeneracy_table(:,:) = 0
 
@@ -276,10 +276,10 @@ subroutine clean_degeneracy_table_for_poles()
 ! *************************************************************************
 
 if(allocated(degeneracy_table)) then
-  ABI_DEALLOCATE(degeneracy_table)
+  ABI_FREE(degeneracy_table)
 end if
 if(allocated(number_of_degenerate_states)) then
-  ABI_DEALLOCATE(number_of_degenerate_states)
+  ABI_FREE(number_of_degenerate_states)
 end if
 
 end subroutine clean_degeneracy_table_for_poles
@@ -553,7 +553,7 @@ end if
 
 number_of_seeds = number_of_degenerate_states(i_set)
 
-ABI_ALLOCATE(seeds, (npw_k,number_of_seeds))
+ABI_MALLOC(seeds, (npw_k,number_of_seeds))
 
 call get_seeds(n, number_of_seeds, seeds) !Missing wrappers
 
@@ -580,7 +580,7 @@ end if
 
 
 compute_Poles = compute_Poles + prefactor*pole_contribution
-ABI_DEALLOCATE(seeds)
+ABI_FREE(seeds)
 end do
 
 if (debug .and. mpi_enreg%me == 0) then
@@ -661,11 +661,11 @@ integer :: ierr
 ! *************************************************************************
 
 ! compute the Lanczos basis
-ABI_ALLOCATE(alpha,(nseeds,nseeds,kmax))
-ABI_ALLOCATE(beta ,(nseeds,nseeds,kmax))
-ABI_ALLOCATE(Lbasis,(npw_k,nseeds*kmax))
-ABI_ALLOCATE(local_seeds,(npw_k,nseeds))
-ABI_ALLOCATE(epsilon_eigenvalues, (nseeds*kmax))
+ABI_MALLOC(alpha,(nseeds,nseeds,kmax))
+ABI_MALLOC(beta ,(nseeds,nseeds,kmax))
+ABI_MALLOC(Lbasis,(npw_k,nseeds*kmax))
+ABI_MALLOC(local_seeds,(npw_k,nseeds))
+ABI_MALLOC(epsilon_eigenvalues, (nseeds*kmax))
 
 
 mpi_communicator = mpi_enreg%comm_bandfft !Missing maybe something for easy access of LA and FFT comms?
@@ -691,7 +691,7 @@ end do
 write(std_out,*) " "
 end do
 
-ABI_DEALLOCATE(local_seeds)
+ABI_FREE(local_seeds)
 
 ! Diagonalize the epsilon matrix, which is banded
 call diagonalize_lanczos_banded(kmax,nseeds,npw_k,alpha,beta,Lbasis,epsilon_eigenvalues,debug)
@@ -724,10 +724,10 @@ end do
 
 
 
-ABI_DEALLOCATE(alpha)
-ABI_DEALLOCATE(beta)
-ABI_DEALLOCATE(Lbasis)
-ABI_DEALLOCATE(epsilon_eigenvalues)
+ABI_FREE(alpha)
+ABI_FREE(beta)
+ABI_FREE(Lbasis)
+ABI_FREE(epsilon_eigenvalues)
 
 end function compute_pole_contribution
 

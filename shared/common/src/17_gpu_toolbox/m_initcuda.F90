@@ -183,7 +183,7 @@ CONTAINS !===========================================================
  if(device>-1)then
    !--Get the number of device for this proc
    gpuinfo%ndevice = 1
-   ABI_ALLOCATE(gpuinfo%maxmemdev,(0:1))
+   ABI_MALLOC(gpuinfo%maxmemdev,(0:1))
    call get_GPU_max_mem(device,locmax)
    gpuinfo%maxmemdev(0:1) = locmax
    call  prt_device_info(device)
@@ -283,7 +283,7 @@ end subroutine Get_Mem_Dev
 ! *********************************************************************
 #if defined HAVE_GPU_CUDA
  if (allocated(gpuinfo%maxmemdev))  then
-   ABI_DEALLOCATE(gpuinfo%maxmemdev)
+   ABI_FREE(gpuinfo%maxmemdev)
  end if
 #endif
 
@@ -347,10 +347,10 @@ end subroutine Get_Mem_Dev
    if(nb_devices==1) then
      device=0
    else if(all(gpu_devices_node(1:nb_devices)==-1)) then
-     ABI_ALLOCATE(fastest_devices,(0:nproc-1))
+     ABI_MALLOC(fastest_devices,(0:nproc-1))
      call get_fastest_devices(fastest_devices,nb_devices)
      device=fastest_devices(me)
-     ABI_DEALLOCATE(fastest_devices)
+     ABI_FREE(fastest_devices)
    else
      jj=nb_devices
      do ii=jj,2,-1
@@ -479,8 +479,8 @@ end subroutine Get_Mem_Dev
 
 #if defined HAVE_GPU_CUDA
 !Check device(s) properties
- ABI_ALLOCATE(flops,(nb_devices))
- ABI_ALLOCATE(mem,  (nb_devices))
+ ABI_MALLOC(flops,(nb_devices))
+ ABI_MALLOC(mem,  (nb_devices))
  do ii=0,nb_devices-1
    call set_dev(ii)
    call get_dev_info(ii,name,lenname,vers,globalmem,clockRate,gflops,constmem,&
@@ -494,7 +494,7 @@ end subroutine Get_Mem_Dev
  end do
 
 !Sort devices (first by flops, then by memory)
- ABI_ALLOCATE(isort,(nb_devices))
+ ABI_MALLOC(isort,(nb_devices))
  isort(:)=(/(ii,ii=1,nb_devices)/)
  call my_sort(flops,mem,isort)
 
@@ -504,9 +504,9 @@ end subroutine Get_Mem_Dev
    devices(ii+1) = isort(jj+1)-1
  end do
 
- ABI_DEALLOCATE(isort)
- ABI_DEALLOCATE(flops)
- ABI_DEALLOCATE(mem)
+ ABI_FREE(isort)
+ ABI_FREE(flops)
+ ABI_FREE(mem)
 #endif
 
 contains
@@ -545,7 +545,7 @@ contains
 ! *********************************************************************
 
  nn=size(iperm)
- ABI_ALLOCATE(llist,(nn))
+ ABI_MALLOC(llist,(nn))
  llist(:)=list1(:)
  do ll=1,nn-1
    do mm=ll+1,nn
@@ -565,7 +565,7 @@ contains
      end if
    end do
  end do
- ABI_DEALLOCATE(llist)
+ ABI_FREE(llist)
 
  end subroutine my_sort
 !!***

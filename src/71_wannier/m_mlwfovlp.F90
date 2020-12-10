@@ -297,20 +297,20 @@ contains
 !Allocations.
 !
  num_nnmax=12 !limit fixed for compact structure in wannier_setup.
- ABI_ALLOCATE(g1,(3,nkpt,num_nnmax))
- ABI_ALLOCATE(ovikp,(nkpt,num_nnmax))
- ABI_ALLOCATE(atom_symbols,(natom))
- ABI_ALLOCATE(xcart,(3,natom))
- ABI_ALLOCATE(band_in,(mband,nsppol))
- ABI_ALLOCATE(proj_site,(3,mband,nsppol))
- ABI_ALLOCATE(proj_l,(mband,nsppol))
- ABI_ALLOCATE(proj_m,(mband,nsppol))
- ABI_ALLOCATE(proj_radial,(mband,nsppol))
- ABI_ALLOCATE(proj_x,(3,mband,nsppol))
- ABI_ALLOCATE(proj_s_loc,(mband))
- ABI_ALLOCATE(proj_s_qaxis_loc,(3,mband))
- ABI_ALLOCATE(proj_z,(3,mband,nsppol))
- ABI_ALLOCATE(proj_zona,(mband,nsppol))
+ ABI_MALLOC(g1,(3,nkpt,num_nnmax))
+ ABI_MALLOC(ovikp,(nkpt,num_nnmax))
+ ABI_MALLOC(atom_symbols,(natom))
+ ABI_MALLOC(xcart,(3,natom))
+ ABI_MALLOC(band_in,(mband,nsppol))
+ ABI_MALLOC(proj_site,(3,mband,nsppol))
+ ABI_MALLOC(proj_l,(mband,nsppol))
+ ABI_MALLOC(proj_m,(mband,nsppol))
+ ABI_MALLOC(proj_radial,(mband,nsppol))
+ ABI_MALLOC(proj_x,(3,mband,nsppol))
+ ABI_MALLOC(proj_s_loc,(mband))
+ ABI_MALLOC(proj_s_qaxis_loc,(3,mband))
+ ABI_MALLOC(proj_z,(3,mband,nsppol))
+ ABI_MALLOC(proj_zona,(mband,nsppol))
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !2) Call to  Wannier setup
@@ -338,10 +338,10 @@ contains
 !
  max_num_bands=maxval(num_bands(:))
  mwan=maxval(nwan(:))
- ABI_ALLOCATE(eigenvalues_w,(max_num_bands,nkpt,nsppol))
- ABI_ALLOCATE(M_matrix,(max_num_bands,max_num_bands,nntot,nkpt,nsppol))
- ABI_ALLOCATE(A_matrix,(max_num_bands,mwan,nkpt,nsppol))
- ABI_ALLOCATE(iwav,(mband,nkpt,nsppol))
+ ABI_MALLOC(eigenvalues_w,(max_num_bands,nkpt,nsppol))
+ ABI_MALLOC(M_matrix,(max_num_bands,max_num_bands,nntot,nkpt,nsppol))
+ ABI_MALLOC(A_matrix,(max_num_bands,mwan,nkpt,nsppol))
+ ABI_MALLOC(iwav,(mband,nkpt,nsppol))
 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -403,7 +403,7 @@ contains
 !(here mband is not used, because shifts are internal variables of abinit)
 !----------------------------------------------------------------------
 !write(std_out,*) mpw*dtset%nspinor*mband*mkmem*nsppol
- ABI_ALLOCATE(icg,(nsppol,nkpt))
+ ABI_MALLOC(icg,(nsppol,nkpt))
  icg=0
  icgtemp=0
  iwav(:,:,:)=0
@@ -435,7 +435,7 @@ contains
    end do  ! ikpt
  end do   ! isppol
 !write(std_out,*) "shift for cg computed"
- ABI_DEALLOCATE(icg)
+ ABI_FREE(icg)
 !
 !Shifts computed.
 !
@@ -523,7 +523,7 @@ contains
 !  End of MPI preliminarities
 !  Calculate PW contribution of overlaps
 !
-   ABI_ALLOCATE(cm1,(2,mband,mband,nntot,nkpt,nsppol))
+   ABI_MALLOC(cm1,(2,mband,mband,nntot,nkpt,nsppol))
    ! this loops over spin internally
    call mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,&
 &   mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
@@ -538,7 +538,7 @@ contains
      write(message, '(a,a)' ) ch10,&
 &     '** smatrix_pawinit : PAW part of overlap  '
      call wrtout(std_out,  message,'COLL')
-     ABI_ALLOCATE(cm2_paw,(2,mband,mband))
+     ABI_MALLOC(cm2_paw,(2,mband,mband))
      do isppol=1,nsppol
        do ikpt1=1,nkpt
 !
@@ -571,7 +571,7 @@ contains
          end do ! intot
        end do ! ikpt1
      end do ! isppol
-     ABI_DEALLOCATE(cm2_paw)
+     ABI_FREE(cm2_paw)
      write(message, '(a,a)' ) ch10,&
 &     '   mlwfovlp : PAW part of overlap computed '
      call wrtout(std_out,  message,'COLL')
@@ -622,7 +622,7 @@ contains
      end if !rank==master
    end do !isppol
 !
-   ABI_DEALLOCATE(cm1)
+   ABI_FREE(cm1)
 !
 !  Write down part of the matrix to the output file
 !  This is for the automatic tests
@@ -718,8 +718,8 @@ contains
 !
 !Deallocate arrays  no longer used
 !
- ABI_DEALLOCATE(ovikp)
- ABI_DEALLOCATE(g1)
+ ABI_FREE(ovikp)
+ ABI_FREE(g1)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !5) Calculate initial projections
@@ -739,7 +739,7 @@ contains
    lproj=dtset%w90iniprj
    if(dtset%w90iniprj == 5 ) lproj=2 ! Necessary to calculate PW contribution
 !
-   ABI_ALLOCATE(just_augmentation,(mwan,nsppol))
+   ABI_MALLOC(just_augmentation,(mwan,nsppol))
    just_augmentation(:,:)=.false.
 
    if( psps%usepaw==1 .and. (dtset%w90iniprj==2 .or. dtset%w90iniprj>4)) then
@@ -780,7 +780,7 @@ contains
 !  Calculate inside-sphere part of projections (PAW)
 !
    if (psps%usepaw ==1 .and. ( dtset%w90iniprj>4)) then
-     ABI_ALLOCATE(A_paw,(max_num_bands,mwan,nkpt,nsppol))
+     ABI_MALLOC(A_paw,(max_num_bands,mwan,nkpt,nsppol))
      call mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,mband,mkmem,&
 &     mwan,natom,dtset%nband,nkpt,&
 &     dtset%nspinor,nsppol,dtset%ntypat,nwan,pawrad,pawtab,&
@@ -805,10 +805,10 @@ contains
 !
 !    deallocations
 !
-     ABI_DEALLOCATE(A_paw)
+     ABI_FREE(A_paw)
    end if !usepaw==1
 
-   ABI_DEALLOCATE(just_augmentation)
+   ABI_FREE(just_augmentation)
 !
    call xmpi_barrier(spaceComm)
    call xmpi_sum(A_matrix,spaceComm,ierr)
@@ -930,15 +930,15 @@ contains
 !
 !Deallocations
 !
- ABI_DEALLOCATE(proj_site)
- ABI_DEALLOCATE(proj_l)
- ABI_DEALLOCATE(proj_m)
- ABI_DEALLOCATE(proj_radial)
- ABI_DEALLOCATE(proj_x)
- ABI_DEALLOCATE(proj_z)
- ABI_DEALLOCATE(proj_zona)
- ABI_DEALLOCATE(proj_s_loc)
- ABI_DEALLOCATE(proj_s_qaxis_loc)
+ ABI_FREE(proj_site)
+ ABI_FREE(proj_l)
+ ABI_FREE(proj_m)
+ ABI_FREE(proj_radial)
+ ABI_FREE(proj_x)
+ ABI_FREE(proj_z)
+ ABI_FREE(proj_zona)
+ ABI_FREE(proj_s_loc)
+ ABI_FREE(proj_s_qaxis_loc)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !6) write files for wannier function plot
@@ -961,7 +961,7 @@ contains
 &   "   at every ", spacing," records.",ch10
    call wrtout(std_out,  message,'COLL')
 !
-   ABI_ALLOCATE(kg_k,(3,mpw))
+   ABI_MALLOC(kg_k,(3,mpw))
    n1=ngfft(1)
    n2=ngfft(2)
    n3=ngfft(3)
@@ -982,11 +982,11 @@ contains
 !
        npw_k=npwarr(ikpt)
        kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
-       ABI_ALLOCATE(denpot,(cplex*n4,n5,n6))
-       ABI_ALLOCATE(cwavef,(2,npw_k))
-       ABI_ALLOCATE(fofr,(2,n4,n5,n6))
-       ABI_ALLOCATE(gbound,(2*mgfft+8,2))
-       ABI_ALLOCATE(fofgout,(2,npw_k))
+       ABI_MALLOC(denpot,(cplex*n4,n5,n6))
+       ABI_MALLOC(cwavef,(2,npw_k))
+       ABI_MALLOC(fofr,(2,n4,n5,n6))
+       ABI_MALLOC(gbound,(2*mgfft+8,2))
+       ABI_MALLOC(fofgout,(2,npw_k))
        iun_plot=1000+ikpt+ikpt*(isppol-1)
        write(wfnname,'("UNK",I5.5,".",I1)') ikpt, isppol
 !      open (unit=iun_plot, file=wfnname,form='formatted')
@@ -1035,34 +1035,34 @@ contains
 &           jj1=1,n1,spacing),jj2=1,n2,spacing),jj3=1,n3,spacing)
          end if !iband
        end do ! iband
-       ABI_DEALLOCATE(cwavef)
-       ABI_DEALLOCATE(fofr)
-       ABI_DEALLOCATE(gbound)
-       ABI_DEALLOCATE(denpot)
-       ABI_DEALLOCATE(fofgout)
+       ABI_FREE(cwavef)
+       ABI_FREE(fofr)
+       ABI_FREE(gbound)
+       ABI_FREE(denpot)
+       ABI_FREE(fofgout)
        ikg=ikg+npw_k
        close(iun_plot)
      end do  ! ikpt
    end do  ! nsppol
-   ABI_DEALLOCATE(kg_k)
+   ABI_FREE(kg_k)
 !
    write(message, '(4a)' )ch10, &
 &   '   ','UNK files written',ch10
    call wrtout(std_out,  message,'COLL')
  end if !dtset%w90prtunk
 !
- ABI_DEALLOCATE(iwav)
+ ABI_FREE(iwav)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !7) Call to  Wannier90
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  if(lwannierrun) then
    if(lwanniersetup.ne.1) ABI_ERROR("lwanniersetup.ne.1")
-   ABI_ALLOCATE(U_matrix,(mwan,mwan,nkpt,nsppol))
-   ABI_ALLOCATE(U_matrix_opt,(max_num_bands,mwan,nkpt,nsppol))
-   ABI_ALLOCATE(lwindow,(max_num_bands,nkpt,nsppol))
-   ABI_ALLOCATE(wann_centres,(3,mwan,nsppol))
-   ABI_ALLOCATE(wann_spreads,(mwan,nsppol))
+   ABI_MALLOC(U_matrix,(mwan,mwan,nkpt,nsppol))
+   ABI_MALLOC(U_matrix_opt,(max_num_bands,mwan,nkpt,nsppol))
+   ABI_MALLOC(lwindow,(max_num_bands,nkpt,nsppol))
+   ABI_MALLOC(wann_centres,(3,mwan,nsppol))
+   ABI_MALLOC(wann_spreads,(mwan,nsppol))
 !  Initialize
    U_matrix(:,:,:,:)=czero
    U_matrix_opt(:,:,:,:)=czero
@@ -1232,9 +1232,9 @@ contains
      end do
      write(std_out,*) 'mwan=', mwan, ch10
 
-     ABI_ALLOCATE(occ_arr,(mband,nkpt,isppol))
-     ABI_ALLOCATE(occ_wan,(mwan,nkpt,nsppol))
-     ABI_ALLOCATE(tdocc_wan,(mwan,nsppol))
+     ABI_MALLOC(occ_arr,(mband,nkpt,isppol))
+     ABI_MALLOC(occ_wan,(mwan,nkpt,nsppol))
+     ABI_MALLOC(tdocc_wan,(mwan,nsppol))
 
      occ_arr(:,:,:)=zero
      occ_wan(:,:,:)=zero
@@ -1294,37 +1294,37 @@ contains
        write(std_out,*) (tdocc_wan(iwan,jj),iwan=1,nwan(jj)),jj
      end do
 
-     ABI_ALLOCATE(csix,(mwan,mwan,nsppol,nsppol))
+     ABI_MALLOC(csix,(mwan,mwan,nsppol,nsppol))
 
      call evdw_wannier(csix,corrvdw,mwan,natom,nsppol,nwan,tdocc_wan,dtset%vdw_nfrag,&
 &     dtset%vdw_supercell,dtset%vdw_typfrag,dtset%vdw_xc,rprimd,wann_centres,wann_spreads,xcart)
 
-     ABI_DEALLOCATE(csix)
-     ABI_DEALLOCATE(occ_arr)
-     ABI_DEALLOCATE(occ_wan)
-     ABI_DEALLOCATE(tdocc_wan)
+     ABI_FREE(csix)
+     ABI_FREE(occ_arr)
+     ABI_FREE(occ_wan)
+     ABI_FREE(tdocc_wan)
    end if
 #else
    ABI_UNUSED(occ)
 #endif
 !  FIXME: looks like there is no automatic test which goes through here: g95 bot did not catch
 !  the missing deallocations
-   ABI_DEALLOCATE(wann_centres)
-   ABI_DEALLOCATE(wann_spreads)
-   ABI_DEALLOCATE(U_matrix)
-   ABI_DEALLOCATE(U_matrix_opt)
-   ABI_DEALLOCATE(lwindow)
+   ABI_FREE(wann_centres)
+   ABI_FREE(wann_spreads)
+   ABI_FREE(U_matrix)
+   ABI_FREE(U_matrix_opt)
+   ABI_FREE(lwindow)
 
  end if !lwannierrun
 !
 !deallocation
 !
- ABI_DEALLOCATE(band_in)
- ABI_DEALLOCATE(atom_symbols)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(eigenvalues_w)
- ABI_DEALLOCATE(M_matrix)
- ABI_DEALLOCATE(A_matrix)
+ ABI_FREE(band_in)
+ ABI_FREE(atom_symbols)
+ ABI_FREE(xcart)
+ ABI_FREE(eigenvalues_w)
+ ABI_FREE(M_matrix)
+ ABI_FREE(A_matrix)
 
 contains
 !!***
@@ -1958,7 +1958,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
  me=MPI_enreg%me_kpt
 
  if(nprocs>1) then
-   ABI_ALLOCATE(cg_read,(2,nspinor*mpw*mband))
+   ABI_MALLOC(cg_read,(2,nspinor*mpw*mband))
  end if
 
 
@@ -1979,9 +1979,9 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
  call wrtout(std_out,  message,'COLL')
 !
 !Allocations
- ABI_ALLOCATE(kg_k,(3,mpw))
- ABI_ALLOCATE(indpwk,(nkpt,mpw))
- ABI_ALLOCATE(invpwk,(nkpt,nfft))
+ ABI_MALLOC(kg_k,(3,mpw))
+ ABI_MALLOC(indpwk,(nkpt,mpw))
+ ABI_MALLOC(invpwk,(nkpt,nfft))
 !
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
  invpwk=0
@@ -2068,8 +2068,8 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !end do
 
 !Deallocate unused variables
- ABI_DEALLOCATE(kg_k)
- ABI_DEALLOCATE(indpwk)
+ ABI_FREE(kg_k)
+ ABI_FREE(indpwk)
 
 !***********************************************************************
 !**calculate overlap M_{mn}(k,b)=<\Psi_{k,m}|e^{-ibr}|\Psi_{k+b,n}>*****
@@ -2208,9 +2208,9 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !Deallocations
 !
- ABI_DEALLOCATE(invpwk)
+ ABI_FREE(invpwk)
  if(nprocs>1)  then
-   ABI_DEALLOCATE(cg_read)
+   ABI_FREE(cg_read)
  end if
 
  end subroutine mlwfovlp_pw
@@ -2358,7 +2358,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
  if(lproj==1) then
    idum=123456
 !  Compute random projections
-   ABI_ALLOCATE(amn,(2,mband,mwan,nkpt,nsppol))
+   ABI_MALLOC(amn,(2,mband,mwan,nkpt,nsppol))
    amn=zero
    do isppol=1,nsppol
      do ikpt=1,nkpt
@@ -2410,7 +2410,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
        end do !iband2
      end do !ikpt
    end do !isppol
-   ABI_DEALLOCATE(amn)
+   ABI_FREE(amn)
  end if
 
 !********************* Projection on atomic orbitals based on .win file
@@ -2432,7 +2432,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
    max_lmax=maxval(lmax(:))
    max_lmax2=maxval(lmax2(:))
 !  Allocate arrays
-   ABI_ALLOCATE(ylmc_fac,(max_lmax2,mproj,nsppol))
+   ABI_MALLOC(ylmc_fac,(max_lmax2,mproj,nsppol))
 !
 !  get ylmfac, factor used for rotations and hybrid orbitals
    do isppol=1,nsppol
@@ -2448,12 +2448,12 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !    Allocate arrays
 !      this has to be done this way because the variable icg changes at the end of the
 !      cycle. We cannot just skip the hole cycle.
-     ABI_ALLOCATE(gf,(mpw,nproj(isppol)))
-     ABI_ALLOCATE(gft_lm,(lmax2(isppol)))
-     ABI_ALLOCATE(gsum2,(nproj(isppol)))
-     ABI_ALLOCATE(kpg2,(mpw))
-     ABI_ALLOCATE(radial,(lmax2(isppol)))
-     ABI_ALLOCATE(ylmcp,(lmax2(isppol)))
+     ABI_MALLOC(gf,(mpw,nproj(isppol)))
+     ABI_MALLOC(gft_lm,(lmax2(isppol)))
+     ABI_MALLOC(gsum2,(nproj(isppol)))
+     ABI_MALLOC(kpg2,(mpw))
+     ABI_MALLOC(radial,(lmax2(isppol)))
+     ABI_MALLOC(ylmcp,(lmax2(isppol)))
 !
      ikg=0
      do ikpt=1, nkpt
@@ -2577,12 +2577,12 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
        ikg=ikg+npw_k
      end do !ikpt
 !    Deallocations
-     ABI_DEALLOCATE(gf)
-     ABI_DEALLOCATE(gft_lm)
-     ABI_DEALLOCATE(gsum2)
-     ABI_DEALLOCATE(kpg2)
-     ABI_DEALLOCATE(radial)
-     ABI_DEALLOCATE(ylmcp)
+     ABI_FREE(gf)
+     ABI_FREE(gft_lm)
+     ABI_FREE(gsum2)
+     ABI_FREE(kpg2)
+     ABI_FREE(radial)
+     ABI_FREE(ylmcp)
    end do !isppol
 !
 !  if(isppol==1) then
@@ -2605,7 +2605,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !  !Deallocate
 !  deallocate(ylmc_fac)
 !
-   ABI_DEALLOCATE(ylmc_fac)
+   ABI_FREE(ylmc_fac)
  end if !lproj==2
 
 
@@ -2620,10 +2620,10 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
      ABI_ERROR("natprjn/=1")
    end if
    nbprjn=2
-   ABI_ALLOCATE(lprjn,(nbprjn))
+   ABI_MALLOC(lprjn,(nbprjn))
    lprjn(1)=0
    lprjn(2)=1
-   ABI_ALLOCATE(npprjn,(0:lprjn(nbprjn)))
+   ABI_MALLOC(npprjn,(0:lprjn(nbprjn)))
    npprjn(0)=1
    npprjn(1)=1
 !  --- test coherence of nbprjn and nwan
@@ -2640,7 +2640,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
      ABI_ERROR("Aborting now")
    end if
 !  --- end test of coherence
-   ABI_ALLOCATE(amn2,(2,natom,nsppol,nkpt,mband,nspinor,nwan(1)))
+   ABI_MALLOC(amn2,(2,natom,nsppol,nkpt,mband,nspinor,nwan(1)))
    if(psps%usepaw==1) then
      amn2=zero
      ibg=0
@@ -2707,9 +2707,9 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
        end do
      end do
    end if !usepaw
-   ABI_DEALLOCATE(amn2)
-   ABI_DEALLOCATE(npprjn)
-   ABI_DEALLOCATE(lprjn)
+   ABI_FREE(amn2)
+   ABI_FREE(npprjn)
+   ABI_FREE(lprjn)
 
  end if ! lproj==3
 
@@ -2866,7 +2866,7 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 !
 !get ylmfac, factor used for rotations and hybrid orbitals
 !
- ABI_ALLOCATE(ylmr_fac,(max_lmax2,mwan,nsppol))
+ ABI_MALLOC(ylmr_fac,(max_lmax2,mwan,nsppol))
 
 
  do isppol=1,nsppol
@@ -2896,10 +2896,10 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 !
 !  Radial part
    mesh_size= nint((rmax - xmin ) / dx + 1)
-   ABI_ALLOCATE( ff,(mesh_size))
-   ABI_ALLOCATE(r,(mesh_size))
-   ABI_ALLOCATE(rad_int,(mesh_size))
-   ABI_ALLOCATE(aux,(mesh_size))
+   ABI_MALLOC( ff,(mesh_size))
+   ABI_MALLOC(r,(mesh_size))
+   ABI_MALLOC(rad_int,(mesh_size))
+   ABI_MALLOC(aux,(mesh_size))
    do ir=1, mesh_size
      x=xmin+DBLE(ir-1)*dx
      r(ir)=x
@@ -2947,10 +2947,10 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
      end do
      norm(iwan,isppol)=sqrt(prod_real)
    end do !iwan
-   ABI_DEALLOCATE(ff)
-   ABI_DEALLOCATE(r)
-   ABI_DEALLOCATE(rad_int)
-   ABI_DEALLOCATE(aux)
+   ABI_FREE(ff)
+   ABI_FREE(r)
+   ABI_FREE(rad_int)
+   ABI_FREE(aux)
 !
 !  Now that we found our guiding functions
 !  We proceed with the internal product of
@@ -2991,9 +2991,9 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
        lmn_size=pawtab(itypat)%lmn_size
        basis_size=pawtab(itypat)%basis_size
        mesh_size=pawtab(itypat)%mesh_size
-       ABI_ALLOCATE(int_rad,(basis_size))
-       ABI_ALLOCATE(ff,(mesh_size))
-       ABI_ALLOCATE(aux,(mesh_size))
+       ABI_MALLOC(int_rad,(basis_size))
+       ABI_MALLOC(ff,(mesh_size))
+       ABI_MALLOC(aux,(mesh_size))
 
 !
 !      Integrate first the radial part
@@ -3047,8 +3047,8 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 !        if( iwan==1 ) write(unit_ln,*)pawrad(itypat)%rad(ii),ff(ii),int_rad(ln)
 !        end do
        end do !ln
-       ABI_DEALLOCATE(ff)
-       ABI_DEALLOCATE(aux)
+       ABI_FREE(ff)
+       ABI_FREE(aux)
 !
 !      Now integrate the angular part
 !      Cycle on i indices
@@ -3093,13 +3093,13 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
            end if !lm<=lmax2
          end if  ! abs(wan_lm_fac) > 0.0d0
        end do !ilmn=1, lmn_size
-       ABI_DEALLOCATE(int_rad)
+       ABI_FREE(int_rad)
      end do !iatom
    end do !iwan
  end do !isppol
 
 !Deallocate quantities
- ABI_DEALLOCATE(ylmr_fac)
+ ABI_FREE(ylmr_fac)
 
 end subroutine mlwfovlp_projpaw
 !!***
@@ -3169,13 +3169,13 @@ subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
 
 !  mesh
    mesh= nint((rmax - xmin ) / dx + 1)
-   ABI_ALLOCATE( bes,(mesh))
-   ABI_ALLOCATE(func_r,(mesh))
-   ABI_ALLOCATE(r,(mesh))
-   ABI_ALLOCATE(rad_int,(mesh))
-   ABI_ALLOCATE( aux,(mesh))
-   ABI_ALLOCATE(cosr,(mesh))
-   ABI_ALLOCATE(sinr,(mesh))
+   ABI_MALLOC( bes,(mesh))
+   ABI_MALLOC(func_r,(mesh))
+   ABI_MALLOC(r,(mesh))
+   ABI_MALLOC(rad_int,(mesh))
+   ABI_MALLOC( aux,(mesh))
+   ABI_MALLOC(cosr,(mesh))
+   ABI_MALLOC(sinr,(mesh))
    do ir=1, mesh
      x=xmin+DBLE(ir-1)*dx
      r(ir)=x
@@ -3206,13 +3206,13 @@ subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
        radial(lm)=rtmp
      end do !mm
    end do !ll
-   ABI_DEALLOCATE(bes)
-   ABI_DEALLOCATE(func_r)
-   ABI_DEALLOCATE(r)
-   ABI_DEALLOCATE(aux)
-   ABI_DEALLOCATE(rad_int)
-   ABI_DEALLOCATE(cosr)
-   ABI_DEALLOCATE(sinr)
+   ABI_FREE(bes)
+   ABI_FREE(func_r)
+   ABI_FREE(r)
+   ABI_FREE(aux)
+   ABI_FREE(rad_int)
+   ABI_FREE(cosr)
+   ABI_FREE(sinr)
 
 !  Radial part in the form of Gaussian functions of a given width
 !  Taken by code of made by drh.
@@ -3670,14 +3670,14 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
        r(ii,ir) = uniformrandom(idum)-0.5d0
      end do !ii
    end do !ir
-   ABI_ALLOCATE(nrm,(lmax2))
+   ABI_MALLOC(nrm,(lmax2))
    nrm(:)=sqrt(r(1,:)**2+r(2,:)**2+r(3,:)**2)**0.5
    call initylmr(lmax+1,1,lmax2,nrm,1,r(:,:),ylmr_rr_save(:,:),dummy)
    ylmr_rr(:,:)=ylmr_rr_save(:,:)
    do ir=1,lmax2
      ylmr_rr_save(ir,:)=ylmr_rr(:,ir)
    end do
-   ABI_DEALLOCATE(nrm)
+   ABI_FREE(nrm)
 
    ylmr_rrinv(:,:)=0.d0
    do ii=1,lmax2
@@ -3727,14 +3727,14 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
      end if !inversion_flag
 
 !    get the ylm representation of the rotated vetors
-     ABI_ALLOCATE(nrm,(lmax2))
+     ABI_MALLOC(nrm,(lmax2))
      nrm(:)=sqrt(rp(1,:)**2+rp(2,:)**2+rp(3,:)**2)**0.5
      call initylmr(lmax+1,1,lmax2,nrm,1,rp(:,:),ylmr_rp(:,:),dummy)
      ylmr_rr(:,:)=ylmr_rp(:,:)
      do ir=1,lmax2
        ylmr_rp(ir,:)=ylmr_rr(:,ir)
      end do
-     ABI_DEALLOCATE(nrm)
+     ABI_FREE(nrm)
 !    the matrix product sum(ir) ylmr_rrinv(lm,ir)*ylmr_rp(ir,lm') gives the
 !    the  lmXlm matrix representation of the coordinate rotation
 

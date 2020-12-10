@@ -253,16 +253,16 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !vtorho, mkrho, prep_nonlop, prep_fourwf, prep_getghc...
 !=============================================================================
 
- ABI_DATATYPE_ALLOCATE(bandfft_kpt_in,(mkmem))
+ ABI_MALLOC(bandfft_kpt_in,(mkmem))
 
- ABI_ALLOCATE(sdispls       ,(nproc_band))
- ABI_ALLOCATE(sendcounts    ,(nproc_band))
- ABI_ALLOCATE(rdispls       ,(nproc_band))
- ABI_ALLOCATE(recvcounts    ,(nproc_band))
- ABI_ALLOCATE(sendcounts_fft,(nproc_fft))
- ABI_ALLOCATE(senddisp_fft  ,(nproc_fft))
- ABI_ALLOCATE(recvcounts_fft,(nproc_fft))
- ABI_ALLOCATE(recvdisp_fft  ,(nproc_fft))
+ ABI_MALLOC(sdispls       ,(nproc_band))
+ ABI_MALLOC(sendcounts    ,(nproc_band))
+ ABI_MALLOC(rdispls       ,(nproc_band))
+ ABI_MALLOC(recvcounts    ,(nproc_band))
+ ABI_MALLOC(sendcounts_fft,(nproc_fft))
+ ABI_MALLOC(senddisp_fft  ,(nproc_fft))
+ ABI_MALLOC(recvcounts_fft,(nproc_fft))
+ ABI_MALLOC(recvdisp_fft  ,(nproc_fft))
 
  bandfft_kpt_in(:)%flag1_is_allocated=0
  bandfft_kpt_in(:)%flag2_is_allocated=0
@@ -281,11 +281,11 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
        ABI_ERROR(message)
      end if
      if (bandfft_kpt_in(ikpt_this_proc)%flag1_is_allocated==0) then
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%gbound    ,(2*mgfft+8,2))
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%recvcounts,(nproc_band))
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%sendcounts,(nproc_band))
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%rdispls   ,(nproc_band))
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%sdispls   ,(nproc_band))
+       ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%gbound    ,(2*mgfft+8,2))
+       ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%recvcounts,(nproc_band))
+       ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%sendcounts,(nproc_band))
+       ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%rdispls   ,(nproc_band))
+       ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%sdispls   ,(nproc_band))
        bandfft_kpt_in(ikpt_this_proc)%flag1_is_allocated=1
      end if
 
@@ -301,8 +301,8 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
      end do
      ndatarecv=rdispls(nproc_band)+recvcounts(nproc_band)
 
-     ABI_ALLOCATE(kg_k_gather,(3,ndatarecv))
-     ABI_ALLOCATE(kg_k,(3,npw_k))
+     ABI_MALLOC(kg_k_gather,(3,ndatarecv))
+     ABI_MALLOC(kg_k,(3,npw_k))
      kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
      call xmpi_allgatherv(kg_k,3*npw_k,kg_k_gather,3*recvcounts(:),3*rdispls(:),comm_band,ierr)
 
@@ -315,9 +315,9 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !    Here we compute gbound, as well for istwf_k=1 as for istwf_k=2 and store it
 !    ============================================================================
      !MG: Why don't we compute gbound locally by just computing the full G-sphere from ecut
-     ABI_ALLOCATE(npw_per_proc,(nproc_fft))
-     ABI_ALLOCATE(rdispls_all,(nproc_fft))
-     ABI_ALLOCATE(gbound,(2*mgfft+8,2))
+     ABI_MALLOC(npw_per_proc,(nproc_fft))
+     ABI_MALLOC(rdispls_all,(nproc_fft))
+     ABI_MALLOC(gbound,(2*mgfft+8,2))
      if (mgfft>0) gbound(:,:)=0
      if (istwf_k==1) then
        call xmpi_allgather(ndatarecv,npw_per_proc,mpi_enreg%comm_fft,ierr)
@@ -326,7 +326,7 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
          rdispls_all(iproc)=rdispls_all(iproc-1)+npw_per_proc(iproc-1)
        end do
        npw_tot=rdispls_all(nproc_fft)+npw_per_proc(nproc_fft)
-       ABI_ALLOCATE(kg_k_gather_all,(3,npw_tot))
+       ABI_MALLOC(kg_k_gather_all,(3,npw_tot))
        call xmpi_allgatherv(kg_k_gather,&
 &       3*ndatarecv,kg_k_gather_all,3*npw_per_proc(:),3*rdispls_all,mpi_enreg%comm_fft,ierr)
        if (mgfft>0) then
@@ -341,17 +341,17 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !      ============================================================================
 
 !      Allocation
-       ABI_ALLOCATE(tab_proc          ,(ndatarecv))
-       ABI_ALLOCATE(sendcounts_sym    ,(nproc_fft))
-       ABI_ALLOCATE(sendcounts_sym_all,(nproc_fft*nproc_fft))
-       ABI_ALLOCATE(sdispls_sym       ,(nproc_fft))
-       ABI_ALLOCATE(recvcounts_sym    ,(nproc_fft))
-       ABI_ALLOCATE(recvcounts_sym_tot,(nproc_fft))
-       ABI_ALLOCATE(rdispls_sym       ,(nproc_fft))
-       ABI_ALLOCATE(sendcounts_sym_loc,(nproc_fft))
-       ABI_ALLOCATE(sdispls_sym_loc   ,(nproc_fft))
-       ABI_ALLOCATE(recvcounts_sym_loc,(nproc_fft))
-       ABI_ALLOCATE(rdispls_sym_loc   ,(nproc_fft))
+       ABI_MALLOC(tab_proc          ,(ndatarecv))
+       ABI_MALLOC(sendcounts_sym    ,(nproc_fft))
+       ABI_MALLOC(sendcounts_sym_all,(nproc_fft*nproc_fft))
+       ABI_MALLOC(sdispls_sym       ,(nproc_fft))
+       ABI_MALLOC(recvcounts_sym    ,(nproc_fft))
+       ABI_MALLOC(recvcounts_sym_tot,(nproc_fft))
+       ABI_MALLOC(rdispls_sym       ,(nproc_fft))
+       ABI_MALLOC(sendcounts_sym_loc,(nproc_fft))
+       ABI_MALLOC(sdispls_sym_loc   ,(nproc_fft))
+       ABI_MALLOC(recvcounts_sym_loc,(nproc_fft))
+       ABI_MALLOC(rdispls_sym_loc   ,(nproc_fft))
 
 !      Initialisation
        tab_proc(:)            = 0
@@ -362,7 +362,7 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
        recvcounts_sym_tot(:)  = 0
 
 !      Localisation of kg_k==[0 0 0]
-       ABI_ALLOCATE(sum_kg,(ndatarecv))
+       ABI_MALLOC(sum_kg,(ndatarecv))
        idatarecv0    = -1
        ndatasend_sym = ndatarecv
        sum_kg=sum(abs(kg_k_gather),1)
@@ -406,12 +406,12 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
        ndatarecv_tot = ndatarecv+recvcounts_sym_tot(me_fft+1)
 
 !      Intialize kg_k_gather_sym
-       ABI_ALLOCATE(kg_k_gather_sym,(3,ndatarecv_tot))
+       ABI_MALLOC(kg_k_gather_sym,(3,ndatarecv_tot))
        kg_k_gather_sym(:,:)=0
        kg_k_gather_sym(:,1:ndatarecv) = kg_k_gather(:,:)
 
 !      Allocation and initialisation
-       ABI_ALLOCATE(kg_k_gather_send,(3,ndatasend_sym))
+       ABI_MALLOC(kg_k_gather_send,(3,ndatasend_sym))
        kg_k_gather_send(:,:)=0
 
 !      The values are sorted in blocks
@@ -450,14 +450,14 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !      Store the following data in the bandfft_kpt_in data_struc
        ikpt_this_proc=mpi_enreg%my_kpttab(ikpt)
        if (bandfft_kpt_in(ikpt_this_proc)%flag3_is_allocated==0) then
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather_sym,(3,ndatarecv_tot))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%rdispls_sym,(nproc_fft))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%recvcounts_sym,(nproc_fft))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%recvcounts_sym_tot,(nproc_fft))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%sdispls_sym,(nproc_fft))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%sendcounts_sym,(nproc_fft))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%sendcounts_sym_all,(nproc_fft*nproc_fft))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%tab_proc,(ndatarecv))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather_sym,(3,ndatarecv_tot))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%rdispls_sym,(nproc_fft))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%recvcounts_sym,(nproc_fft))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%recvcounts_sym_tot,(nproc_fft))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%sdispls_sym,(nproc_fft))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%sendcounts_sym,(nproc_fft))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%sendcounts_sym_all,(nproc_fft*nproc_fft))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%tab_proc,(ndatarecv))
          bandfft_kpt_in(ikpt_this_proc)%flag3_is_allocated=1
        end if
 
@@ -473,20 +473,20 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
        bandfft_kpt_in(ikpt_this_proc)%sendcounts_sym_all(:)=sendcounts_sym_all(:)
        bandfft_kpt_in(ikpt_this_proc)%tab_proc(:)          =tab_proc(:)
 
-       ABI_DEALLOCATE(tab_proc)
-       ABI_DEALLOCATE(sendcounts_sym)
-       ABI_DEALLOCATE(sendcounts_sym_all)
-       ABI_DEALLOCATE(sdispls_sym)
-       ABI_DEALLOCATE(recvcounts_sym)
-       ABI_DEALLOCATE(recvcounts_sym_tot)
-       ABI_DEALLOCATE(rdispls_sym)
-       ABI_DEALLOCATE(kg_k_gather_sym)
-       ABI_DEALLOCATE(sendcounts_sym_loc)
-       ABI_DEALLOCATE(recvcounts_sym_loc)
-       ABI_DEALLOCATE(sdispls_sym_loc)
-       ABI_DEALLOCATE(rdispls_sym_loc)
-       ABI_DEALLOCATE(kg_k_gather_send)
-       ABI_DEALLOCATE(sum_kg)
+       ABI_FREE(tab_proc)
+       ABI_FREE(sendcounts_sym)
+       ABI_FREE(sendcounts_sym_all)
+       ABI_FREE(sdispls_sym)
+       ABI_FREE(recvcounts_sym)
+       ABI_FREE(recvcounts_sym_tot)
+       ABI_FREE(rdispls_sym)
+       ABI_FREE(kg_k_gather_sym)
+       ABI_FREE(sendcounts_sym_loc)
+       ABI_FREE(recvcounts_sym_loc)
+       ABI_FREE(sdispls_sym_loc)
+       ABI_FREE(rdispls_sym_loc)
+       ABI_FREE(kg_k_gather_send)
+       ABI_FREE(sum_kg)
 
 !      Then compute gbound
        call xmpi_allgather(ndatarecv_tot,npw_per_proc,mpi_enreg%comm_fft,ierr)
@@ -495,7 +495,7 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
          rdispls_all(iproc)=rdispls_all(iproc-1)+npw_per_proc(iproc-1)
        end do
        npw_tot=rdispls_all(nproc_fft)+npw_per_proc(nproc_fft)
-       ABI_ALLOCATE(kg_k_gather_all,(3,npw_tot))
+       ABI_MALLOC(kg_k_gather_all,(3,npw_tot))
        call xmpi_allgatherv(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather_sym,&
 &       3*ndatarecv_tot,kg_k_gather_all,3*npw_per_proc(:),3*rdispls_all,mpi_enreg%comm_fft,ierr)
        if (mgfft>0) then
@@ -507,9 +507,9 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
        write(message, '(a,i0,a)' )' the value istwfk=',istwf_k,' is not allowed in case of bandfft parallelization!'
        ABI_BUG(message)
      end if
-     ABI_DEALLOCATE(kg_k_gather_all)
-     ABI_DEALLOCATE(npw_per_proc)
-     ABI_DEALLOCATE(rdispls_all)
+     ABI_FREE(kg_k_gather_all)
+     ABI_FREE(npw_per_proc)
+     ABI_FREE(rdispls_all)
 !    ============================================================================
 !    End of gbound
 !    ============================================================================
@@ -548,9 +548,9 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
           recvdisp_fft(iproc) =  recvdisp_fft(iproc - 1)  + recvcounts_fft(iproc-1)
        end do
        npw_fft = recvdisp_fft(nproc_fft) + recvcounts_fft(nproc_fft) ! nb plane wave for fourwf call
-       ABI_ALLOCATE(buff_kg,(3,ndatarecv)) ! for sorting kg_k
-       ABI_ALLOCATE(kg_k_fft,(3,npw_fft))
-       ABI_ALLOCATE(indices_pw_fft,(ndatarecv))
+       ABI_MALLOC(buff_kg,(3,ndatarecv)) ! for sorting kg_k
+       ABI_MALLOC(kg_k_fft,(3,npw_fft))
+       ABI_MALLOC(indices_pw_fft,(ndatarecv))
        !filling of sorted send buffers
        sendcounts_fft(:) = 0
        do idatarecv = 1 ,ndatarecv
@@ -564,12 +564,12 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 &            kg_k_fft,3*recvcounts_fft, 3*recvdisp_fft, mpi_enreg%comm_fft,ierr)
 
        if (.not.reequilibrate_allocated) then
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kg_k_fft, (3,npw_fft) )
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%indices_pw_fft, (ndatarecv))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%sendcount_fft, (nproc_fft))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%senddisp_fft, (nproc_fft))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%recvcount_fft, (nproc_fft))
-         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%recvdisp_fft, (nproc_fft))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%kg_k_fft, (3,npw_fft) )
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%indices_pw_fft, (ndatarecv))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%sendcount_fft, (nproc_fft))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%senddisp_fft, (nproc_fft))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%recvcount_fft, (nproc_fft))
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%recvdisp_fft, (nproc_fft))
        end if
        bandfft_kpt_in(ikpt_this_proc)%npw_fft           = npw_fft
        bandfft_kpt_in(ikpt_this_proc)%indices_pw_fft(:) = indices_pw_fft(:)
@@ -578,14 +578,14 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
        bandfft_kpt_in(ikpt_this_proc)%recvcount_fft(:)  = recvcounts_fft(:)
        bandfft_kpt_in(ikpt_this_proc)%recvdisp_fft(:)   = recvdisp_fft(:)
        bandfft_kpt_in(ikpt_this_proc)%kg_k_fft(:,:)     = kg_k_fft(:,:)
-       ABI_DEALLOCATE(buff_kg )
-       ABI_DEALLOCATE(kg_k_fft)
-       ABI_DEALLOCATE(indices_pw_fft)
+       ABI_FREE(buff_kg )
+       ABI_FREE(kg_k_fft)
+       ABI_FREE(indices_pw_fft)
      end if
 
 !    Tabs which are common to istwf_k=1 and 2
      if (.not. allocated(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather)) then
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather,(3,ndatarecv))
+       ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather,(3,ndatarecv))
      end if
      bandfft_kpt_in(ikpt_this_proc)%recvcounts(:)   =recvcounts(:)
      bandfft_kpt_in(ikpt_this_proc)%sendcounts(:)   =sendcounts(:)
@@ -596,21 +596,21 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
      bandfft_kpt_in(ikpt_this_proc)%ndatarecv       =ndatarecv
      bandfft_kpt_in(ikpt_this_proc)%istwf_k         =istwf_k
      bandfft_kpt_in(ikpt_this_proc)%npw_tot         =npw_tot
-     ABI_DEALLOCATE(kg_k_gather)
-     ABI_DEALLOCATE(kg_k)
-     ABI_DEALLOCATE(gbound)
+     ABI_FREE(kg_k_gather)
+     ABI_FREE(kg_k)
+     ABI_FREE(gbound)
 
      ikg=ikg+npw_k
    end do
  end do
- ABI_DEALLOCATE(recvcounts)
- ABI_DEALLOCATE(sendcounts)
- ABI_DEALLOCATE(rdispls)
- ABI_DEALLOCATE(sdispls)
- ABI_DEALLOCATE(sendcounts_fft)
- ABI_DEALLOCATE(senddisp_fft)
- ABI_DEALLOCATE(recvcounts_fft)
- ABI_DEALLOCATE(recvdisp_fft)
+ ABI_FREE(recvcounts)
+ ABI_FREE(sendcounts)
+ ABI_FREE(rdispls)
+ ABI_FREE(sdispls)
+ ABI_FREE(sendcounts_fft)
+ ABI_FREE(senddisp_fft)
+ ABI_FREE(recvcounts_fft)
+ ABI_FREE(recvdisp_fft)
 
 !=============================================================================
 !End of computation and storage of the bandfft_kpt(ikpt) data_struc
@@ -667,43 +667,43 @@ subroutine bandfft_kpt_init2(bandfft_kpt_in,dimffnl,ffnl_gather,ikpt_this_proc,k
 ! *********************************************************************
 
  if (allocated(bandfft_kpt_in(ikpt_this_proc)%ffnl_gather)) then
-   ABI_DEALLOCATE(bandfft_kpt_in(ikpt_this_proc)%ffnl_gather)
+   ABI_FREE(bandfft_kpt_in(ikpt_this_proc)%ffnl_gather)
  end if
  if (size(ffnl_gather)>0) then
-   ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%ffnl_gather,(ndatarecv,dimffnl,lmnmax,ntypat))
+   ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%ffnl_gather,(ndatarecv,dimffnl,lmnmax,ntypat))
    bandfft_kpt_in(ikpt_this_proc)%ffnl_gather(:,:,:,:)=ffnl_gather(:,:,:,:)
  else
-   ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%ffnl_gather,(0,0,0,0))
+   ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%ffnl_gather,(0,0,0,0))
  end if
 
  if (allocated(bandfft_kpt_in(ikpt_this_proc)%ph3d_gather)) then
-   ABI_DEALLOCATE(bandfft_kpt_in(ikpt_this_proc)%ph3d_gather)
+   ABI_FREE(bandfft_kpt_in(ikpt_this_proc)%ph3d_gather)
  end if
  if (size(ph3d_gather)>0) then
-   ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%ph3d_gather,(2,ndatarecv,matblk))
+   ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%ph3d_gather,(2,ndatarecv,matblk))
    bandfft_kpt_in(ikpt_this_proc)%ph3d_gather(:,:,:)  =ph3d_gather(:,:,:)
  else
-   ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%ph3d_gather,(0,0,0))
+   ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%ph3d_gather,(0,0,0))
  end if
 
  if (allocated(bandfft_kpt_in(ikpt_this_proc)%kpg_k_gather)) then
-   ABI_DEALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kpg_k_gather)
+   ABI_FREE(bandfft_kpt_in(ikpt_this_proc)%kpg_k_gather)
  end if
  if (size(kpg_k_gather)>0) then
-   ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kpg_k_gather,(ndatarecv,nkpg))
+   ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%kpg_k_gather,(ndatarecv,nkpg))
    bandfft_kpt_in(ikpt_this_proc)%kpg_k_gather(:,:)   =kpg_k_gather(:,:)
  else
-   ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kpg_k_gather,(0,0))
+   ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%kpg_k_gather,(0,0))
  end if
 
  if (allocated(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather)) then
-   ABI_DEALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather)
+   ABI_FREE(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather)
  end if
  if (size(kinpw_gather)>0) then
-   ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather,(ndatarecv))
+   ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather,(ndatarecv))
    bandfft_kpt_in(ikpt_this_proc)%kinpw_gather(:)     =kinpw_gather(:)
  else
-   ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather,(0))
+   ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather,(0))
  end if
 
  bandfft_kpt_in(ikpt_this_proc)%flag2_is_allocated=1
@@ -789,76 +789,76 @@ subroutine bandfft_kpt_destroy(bandfft_kpt_in)
  bandfft_kpt_in%have_to_reequilibrate=.false.
 
  if (allocated(bandfft_kpt_in%kg_k_gather)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%kg_k_gather)
+   ABI_FREE(bandfft_kpt_in%kg_k_gather)
  end if
  if (allocated(bandfft_kpt_in%gbound)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%gbound)
+   ABI_FREE(bandfft_kpt_in%gbound)
  end if
  if (allocated(bandfft_kpt_in%recvcounts)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%recvcounts)
+   ABI_FREE(bandfft_kpt_in%recvcounts)
  end if
  if (allocated(bandfft_kpt_in%sendcounts)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%sendcounts)
+   ABI_FREE(bandfft_kpt_in%sendcounts)
  end if
  if (allocated(bandfft_kpt_in%rdispls)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%rdispls)
+   ABI_FREE(bandfft_kpt_in%rdispls)
  end if
  if (allocated(bandfft_kpt_in%sdispls)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%sdispls)
+   ABI_FREE(bandfft_kpt_in%sdispls)
  end if
  if (allocated(bandfft_kpt_in%ffnl_gather)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%ffnl_gather)
+   ABI_FREE(bandfft_kpt_in%ffnl_gather)
  end if
  if (allocated(bandfft_kpt_in%kinpw_gather)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%kinpw_gather)
+   ABI_FREE(bandfft_kpt_in%kinpw_gather)
  end if
  if (allocated(bandfft_kpt_in%kpg_k_gather)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%kpg_k_gather)
+   ABI_FREE(bandfft_kpt_in%kpg_k_gather)
  end if
  if (allocated(bandfft_kpt_in%ph3d_gather)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%ph3d_gather)
+   ABI_FREE(bandfft_kpt_in%ph3d_gather)
  end if
  if (allocated(bandfft_kpt_in%kg_k_gather_sym)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%kg_k_gather_sym)
+   ABI_FREE(bandfft_kpt_in%kg_k_gather_sym)
  end if
  if (allocated(bandfft_kpt_in%rdispls_sym)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%rdispls_sym)
+   ABI_FREE(bandfft_kpt_in%rdispls_sym)
  end if
  if (allocated(bandfft_kpt_in%recvcounts_sym)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%recvcounts_sym)
+   ABI_FREE(bandfft_kpt_in%recvcounts_sym)
  end if
  if (allocated(bandfft_kpt_in%recvcounts_sym_tot)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%recvcounts_sym_tot)
+   ABI_FREE(bandfft_kpt_in%recvcounts_sym_tot)
  end if
  if (allocated(bandfft_kpt_in%sdispls_sym)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%sdispls_sym)
+   ABI_FREE(bandfft_kpt_in%sdispls_sym)
  end if
  if (allocated(bandfft_kpt_in%sendcounts_sym)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%sendcounts_sym)
+   ABI_FREE(bandfft_kpt_in%sendcounts_sym)
  end if
  if (allocated(bandfft_kpt_in%sendcounts_sym_all)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%sendcounts_sym_all)
+   ABI_FREE(bandfft_kpt_in%sendcounts_sym_all)
  end if
  if (allocated(bandfft_kpt_in%tab_proc)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%tab_proc)
+   ABI_FREE(bandfft_kpt_in%tab_proc)
  end if
  if (allocated(bandfft_kpt_in%indices_pw_fft)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%indices_pw_fft)
+   ABI_FREE(bandfft_kpt_in%indices_pw_fft)
  end if
  if (allocated(bandfft_kpt_in%sendcount_fft)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%sendcount_fft)
+   ABI_FREE(bandfft_kpt_in%sendcount_fft)
  end if
  if (allocated(bandfft_kpt_in%senddisp_fft)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%senddisp_fft)
+   ABI_FREE(bandfft_kpt_in%senddisp_fft)
  end if
  if (allocated(bandfft_kpt_in%recvcount_fft)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%recvcount_fft)
+   ABI_FREE(bandfft_kpt_in%recvcount_fft)
  end if
  if (allocated(bandfft_kpt_in%recvdisp_fft)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%recvdisp_fft)
+   ABI_FREE(bandfft_kpt_in%recvdisp_fft)
  end if
  if (allocated(bandfft_kpt_in%kg_k_fft)) then
-   ABI_DEALLOCATE(bandfft_kpt_in%kg_k_fft)
+   ABI_FREE(bandfft_kpt_in%kg_k_fft)
  end if
 
 end subroutine bandfft_kpt_destroy
@@ -928,7 +928,7 @@ subroutine bandfft_kpt_destroy_array(bandfft_kpt_in,mpi_enreg)
        call bandfft_kpt_destroy(bandfft_kpt_in(ikpt_this_proc))
      end do
    end do
-   ABI_DATATYPE_DEALLOCATE(bandfft_kpt_in)
+   ABI_FREE(bandfft_kpt_in)
    nullify(bandfft_kpt_in)
  end if
 
@@ -977,7 +977,7 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
    nullify(bandfft_kpt_out)
  else if (opt_bandfft==1) then
    if (associated(bandfft_kpt_in)) then
-     ABI_DATATYPE_ALLOCATE(bandfft_kpt_out,(size(bandfft_kpt_in)))
+     ABI_MALLOC(bandfft_kpt_out,(size(bandfft_kpt_in)))
      do isppol=1,size(mpi_enreg1%proc_distrb,3)
        do ikpt=1,size(mpi_enreg1%proc_distrb,1)
          sz1=size(mpi_enreg1%proc_distrb,2)
@@ -987,14 +987,14 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
          jkpt=mpi_enreg1%my_kpttab(ikpt)
 !          if (allocated(bandfft_kpt_in(jkpt)%ind_kg_mpi_to_seq)) then
 !            sz1=size(bandfft_kpt_in(jkpt)%ind_kg_mpi_to_seq)
-!            ABI_ALLOCATE(bandfft_kpt_out(jkpt)%ind_kg_mpi_to_seq,(sz1))
+!            ABI_MALLOC(bandfft_kpt_out(jkpt)%ind_kg_mpi_to_seq,(sz1))
 !            bandfft_kpt_out(jkpt)%ind_kg_mpi_to_seq= &
 ! &           bandfft_kpt_in(jkpt)%ind_kg_mpi_to_seq
 !          end if
          if (allocated(bandfft_kpt_in(jkpt)%kg_k_gather)) then
            sz1=size(bandfft_kpt_in(jkpt)%kg_k_gather,1)
            sz2=size(bandfft_kpt_in(jkpt)%kg_k_gather,2)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%kg_k_gather,(sz1,sz2))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%kg_k_gather,(sz1,sz2))
            bandfft_kpt_out(jkpt)%kg_k_gather= &
 &           bandfft_kpt_in(jkpt)%kg_k_gather
          end if
@@ -1002,28 +1002,28 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
          if (allocated(bandfft_kpt_in(jkpt)%gbound)) then
            sz1=size(bandfft_kpt_in(jkpt)%gbound,1)
            sz2=size(bandfft_kpt_in(jkpt)%gbound,2)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%gbound,(sz1,sz2))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%gbound,(sz1,sz2))
            bandfft_kpt_out(jkpt)%gbound= &
 &           bandfft_kpt_in(jkpt)%gbound
          end if
          if (allocated(bandfft_kpt_in(jkpt)%recvcounts)) then
            sz1=size(bandfft_kpt_in(jkpt)%recvcounts)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%recvcounts,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%recvcounts,(sz1))
            bandfft_kpt_out(jkpt)%recvcounts= &
 &           bandfft_kpt_in(jkpt)%recvcounts
          end if
          if (allocated(bandfft_kpt_in(jkpt)%sendcounts)) then
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%sendcounts,(size(bandfft_kpt_in(jkpt)%sendcounts)))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%sendcounts,(size(bandfft_kpt_in(jkpt)%sendcounts)))
            bandfft_kpt_out(jkpt)%sendcounts= &
 &           bandfft_kpt_in(jkpt)%sendcounts
          end if
          if (allocated(bandfft_kpt_in(jkpt)%rdispls)) then
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%rdispls,(size(bandfft_kpt_in(jkpt)%rdispls)))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%rdispls,(size(bandfft_kpt_in(jkpt)%rdispls)))
            bandfft_kpt_out(jkpt)%rdispls= &
 &           bandfft_kpt_in(jkpt)%rdispls
          end if
          if (allocated(bandfft_kpt_in(jkpt)%sdispls)) then
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%sdispls,(size(bandfft_kpt_in(jkpt)%sdispls)))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%sdispls,(size(bandfft_kpt_in(jkpt)%sdispls)))
            bandfft_kpt_out(jkpt)%sdispls= &
 &           bandfft_kpt_in(jkpt)%sdispls
          end if
@@ -1033,13 +1033,13 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
            sz2=size(bandfft_kpt_in(jkpt)%ffnl_gather,2)
            sz3=size(bandfft_kpt_in(jkpt)%ffnl_gather,3)
            sz4=size(bandfft_kpt_in(jkpt)%ffnl_gather,4)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%ffnl_gather,(sz1,sz2,sz3,sz4))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%ffnl_gather,(sz1,sz2,sz3,sz4))
            bandfft_kpt_out(jkpt)%ffnl_gather= &
 &           bandfft_kpt_in(jkpt)%ffnl_gather
          end if
          if (allocated(bandfft_kpt_in(jkpt)%kinpw_gather)) then
            sz1=size(bandfft_kpt_in(jkpt)%kinpw_gather)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%kinpw_gather,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%kinpw_gather,(sz1))
            bandfft_kpt_out(jkpt)%kinpw_gather= &
 &           bandfft_kpt_in(jkpt)%kinpw_gather
          end if
@@ -1047,14 +1047,14 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
            sz1=size(bandfft_kpt_in(jkpt)%ph3d_gather,1)
            sz2=size(bandfft_kpt_in(jkpt)%ph3d_gather,2)
            sz3=size(bandfft_kpt_in(jkpt)%ph3d_gather,3)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%ph3d_gather,(sz1,sz2,sz3))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%ph3d_gather,(sz1,sz2,sz3))
            bandfft_kpt_out(jkpt)%ph3d_gather= &
 &           bandfft_kpt_in(jkpt)%ph3d_gather
          end if
          if (allocated(bandfft_kpt_in(jkpt)%kpg_k_gather)) then
            sz1=size(bandfft_kpt_in(jkpt)%kpg_k_gather,1)
            sz2=size(bandfft_kpt_in(jkpt)%kpg_k_gather,2)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%kpg_k_gather,(sz1,sz2))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%kpg_k_gather,(sz1,sz2))
            bandfft_kpt_out(jkpt)%kpg_k_gather= &
 &           bandfft_kpt_in(jkpt)%kpg_k_gather
          end if
@@ -1062,49 +1062,49 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
          if (allocated(bandfft_kpt_in(jkpt)%kg_k_gather_sym)) then
            sz1=size(bandfft_kpt_in(jkpt)%kg_k_gather_sym,1)
            sz2=size(bandfft_kpt_in(jkpt)%kg_k_gather_sym,2)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%kg_k_gather_sym,(sz1,sz2))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%kg_k_gather_sym,(sz1,sz2))
            bandfft_kpt_out(jkpt)%kg_k_gather_sym= &
 &           bandfft_kpt_in(jkpt)%kg_k_gather_sym
          end if
          if (allocated(bandfft_kpt_in(jkpt)%rdispls_sym)) then
            sz1=size(bandfft_kpt_in(jkpt)%rdispls_sym)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%rdispls_sym,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%rdispls_sym,(sz1))
            bandfft_kpt_out(jkpt)%rdispls_sym= &
 &           bandfft_kpt_in(jkpt)%rdispls_sym
          end if
          if (allocated(bandfft_kpt_in(jkpt)%recvcounts_sym)) then
            sz1=size(bandfft_kpt_in(jkpt)%recvcounts_sym)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%recvcounts_sym,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%recvcounts_sym,(sz1))
            bandfft_kpt_out(jkpt)%recvcounts_sym= &
 &           bandfft_kpt_in(jkpt)%recvcounts_sym
          end if
          if (allocated(bandfft_kpt_in(jkpt)%recvcounts_sym_tot)) then
            sz1=size(bandfft_kpt_in(jkpt)%recvcounts_sym_tot)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%recvcounts_sym_tot,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%recvcounts_sym_tot,(sz1))
            bandfft_kpt_out(jkpt)%recvcounts_sym_tot= &
 &           bandfft_kpt_in(jkpt)%recvcounts_sym_tot
          end if
          if (allocated(bandfft_kpt_in(jkpt)%sdispls_sym)) then
            sz1=size(bandfft_kpt_in(jkpt)%sdispls_sym)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%sdispls_sym,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%sdispls_sym,(sz1))
            bandfft_kpt_out(jkpt)%sdispls_sym= &
 &           bandfft_kpt_in(jkpt)%sdispls_sym
          end if
          if (allocated(bandfft_kpt_in(jkpt)%sendcounts_sym)) then
            sz1=size(bandfft_kpt_in(jkpt)%sendcounts_sym)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%sendcounts_sym,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%sendcounts_sym,(sz1))
            bandfft_kpt_out(jkpt)%sendcounts_sym= &
 &           bandfft_kpt_in(jkpt)%sendcounts_sym
          end if
          if (allocated(bandfft_kpt_in(jkpt)%sendcounts_sym_all)) then
            sz1=size(bandfft_kpt_in(jkpt)%sendcounts_sym_all)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%sendcounts_sym_all,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%sendcounts_sym_all,(sz1))
            bandfft_kpt_out(jkpt)%sendcounts_sym_all= &
 &           bandfft_kpt_in(jkpt)%sendcounts_sym_all
          end if
          if (allocated(bandfft_kpt_in(jkpt)%tab_proc)) then
            sz1=size(bandfft_kpt_in(jkpt)%tab_proc)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%tab_proc,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%tab_proc,(sz1))
            bandfft_kpt_out(jkpt)%tab_proc= &
            bandfft_kpt_in(jkpt)%tab_proc
          end if
@@ -1112,23 +1112,23 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
            bandfft_kpt_out(jkpt)%have_to_reequilibrate = .true.
            bandfft_kpt_out(jkpt)%npw_fft = bandfft_kpt_in(jkpt)%npw_fft
            sz1=size(bandfft_kpt_in(jkpt)%indices_pw_fft)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%indices_pw_fft,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%indices_pw_fft,(sz1))
            bandfft_kpt_out(jkpt)%indices_pw_fft=bandfft_kpt_in(jkpt)%indices_pw_fft
            sz1=size(bandfft_kpt_in(jkpt)%sendcount_fft)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%sendcount_fft,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%sendcount_fft,(sz1))
            bandfft_kpt_out(jkpt)%sendcount_fft=bandfft_kpt_in(jkpt)%sendcount_fft
            sz1=size(bandfft_kpt_in(jkpt)%senddisp_fft)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%senddisp_fft,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%senddisp_fft,(sz1))
            bandfft_kpt_out(jkpt)%senddisp_fft=bandfft_kpt_in(jkpt)%senddisp_fft
            sz1=size(bandfft_kpt_in(jkpt)%recvcount_fft)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%recvcount_fft,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%recvcount_fft,(sz1))
            bandfft_kpt_out(jkpt)%recvcount_fft=bandfft_kpt_in(jkpt)%recvcount_fft
            sz1=size(bandfft_kpt_in(jkpt)%recvdisp_fft)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%recvdisp_fft,(sz1))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%recvdisp_fft,(sz1))
            bandfft_kpt_out(jkpt)%recvdisp_fft=bandfft_kpt_in(jkpt)%recvdisp_fft
            sz1=size(bandfft_kpt_in(jkpt)%kg_k_fft,1)
            sz2=size(bandfft_kpt_in(jkpt)%kg_k_fft,2)
-           ABI_ALLOCATE(bandfft_kpt_out(jkpt)%kg_k_fft,(sz1,sz2))
+           ABI_MALLOC(bandfft_kpt_out(jkpt)%kg_k_fft,(sz1,sz2))
            bandfft_kpt_out(jkpt)%kg_k_fft=bandfft_kpt_in(jkpt)%kg_k_fft
          end if
        end do
@@ -1268,7 +1268,7 @@ subroutine bandfft_kpt_mpi_send(input,receiver,tag,spaceComm,ierr,profile)
 
 !=== Send flags and array sizes ====
  nsize=45
- ABI_ALLOCATE(buffer_int,(nsize))
+ ABI_MALLOC(buffer_int,(nsize))
  buffer_int(1)=input%flag1_is_allocated
  buffer_int(2)=input%flag2_is_allocated
  buffer_int(3)=input%flag3_is_allocated
@@ -1315,12 +1315,12 @@ subroutine bandfft_kpt_mpi_send(input,receiver,tag,spaceComm,ierr,profile)
  buffer_int(44)=size_sendcounts_sym_all
  buffer_int(45)=size_tab_proc
  call xmpi_send(buffer_int,receiver,3*tag-2,spaceComm,ierr)
- ABI_DEALLOCATE(buffer_int)
+ ABI_FREE(buffer_int)
 
 !=== Pack and send integer data ====
  if (size_int>0) then
    ipck=0
-   ABI_ALLOCATE(buffer_int,(size_int))
+   ABI_MALLOC(buffer_int,(size_int))
    if (size1_kg_k_gather*size2_kg_k_gather>0) then
      nsize=size1_kg_k_gather*size2_kg_k_gather
      buffer_int(ipck+1:ipck+nsize)=reshape(input%kg_k_gather(:,:),(/nsize/))
@@ -1406,13 +1406,13 @@ subroutine bandfft_kpt_mpi_send(input,receiver,tag,spaceComm,ierr,profile)
      ipck=ipck+nsize
    end if
    call xmpi_send(buffer_int,receiver,3*tag-1,spaceComm,ierr)
-   ABI_DEALLOCATE(buffer_int)
+   ABI_FREE(buffer_int)
  end if
 
 !=== Pack and send real data ====
  if (size_dp>0) then
    ipck=0
-   ABI_ALLOCATE(buffer_dp,(size_dp))
+   ABI_MALLOC(buffer_dp,(size_dp))
    if (size1_ffnl_gather*size2_ffnl_gather*size3_ffnl_gather*size4_ffnl_gather>0) then
      nsize=size1_ffnl_gather*size2_ffnl_gather*size3_ffnl_gather*size4_ffnl_gather
      buffer_dp(ipck+1:ipck+nsize)=reshape(input%ffnl_gather(:,:,:,:),(/nsize/))
@@ -1433,7 +1433,7 @@ subroutine bandfft_kpt_mpi_send(input,receiver,tag,spaceComm,ierr,profile)
      ipck=ipck+nsize
    end if
    call xmpi_send(buffer_dp,receiver,3*tag,spaceComm,ierr)
-   ABI_DEALLOCATE(buffer_dp)
+   ABI_FREE(buffer_dp)
  end if
 
 end subroutine bandfft_kpt_mpi_send
@@ -1497,7 +1497,7 @@ subroutine bandfft_kpt_mpi_recv(output,sender,tag,spaceComm,ierr)
 
 !=== Receive flags and array sizes ====
  nsize=45
- ABI_ALLOCATE(buffer_int,(nsize))
+ ABI_MALLOC(buffer_int,(nsize))
  call xmpi_recv(buffer_int,sender,3*tag-2,spaceComm,ierr)
  output%flag1_is_allocated=buffer_int(1)
  output%flag2_is_allocated=buffer_int(2)
@@ -1544,7 +1544,7 @@ subroutine bandfft_kpt_mpi_recv(output,sender,tag,spaceComm,ierr)
  size_sendcounts_sym=buffer_int(43)
  size_sendcounts_sym_all=buffer_int(44)
  size_tab_proc=buffer_int(45)
- ABI_DEALLOCATE(buffer_int)
+ ABI_FREE(buffer_int)
 
 !=== Compute amount of transmitted data ====
  size_int=size1_kg_k_gather*size2_kg_k_gather &
@@ -1565,223 +1565,223 @@ subroutine bandfft_kpt_mpi_recv(output,sender,tag,spaceComm,ierr)
 !=== Receive and unpack integer data ====
  if (size_int>0) then
    ipck=0
-   ABI_ALLOCATE(buffer_int,(size_int))
+   ABI_MALLOC(buffer_int,(size_int))
    call xmpi_recv(buffer_int,sender,3*tag-1,spaceComm,ierr)
    if (allocated(output%kg_k_gather)) then
-     ABI_DEALLOCATE(output%kg_k_gather)
+     ABI_FREE(output%kg_k_gather)
    end if
    if (size1_kg_k_gather*size2_kg_k_gather>0) then
      nsize=size1_kg_k_gather*size2_kg_k_gather
      sz1=size1_kg_k_gather;sz2=size2_kg_k_gather
-     ABI_ALLOCATE(output%kg_k_gather,(sz1,sz2))
+     ABI_MALLOC(output%kg_k_gather,(sz1,sz2))
      output%kg_k_gather(:,:)=reshape(buffer_int(ipck+1:ipck+nsize),(/sz1,sz2/))
      ipck=ipck+nsize
    end if
    if (allocated(output%recvcounts)) then
-     ABI_DEALLOCATE(output%recvcounts)
+     ABI_FREE(output%recvcounts)
    end if
    if (size_recvcounts>0) then
-     ABI_ALLOCATE(output%recvcounts,(size_recvcounts))
+     ABI_MALLOC(output%recvcounts,(size_recvcounts))
      output%recvcounts(:)=buffer_int(ipck+1:ipck+size_recvcounts)
      ipck=ipck+size_recvcounts
    end if
    if (allocated(output%sendcounts)) then
-     ABI_DEALLOCATE(output%sendcounts)
+     ABI_FREE(output%sendcounts)
    end if
    if (size_sendcounts>0) then
-     ABI_ALLOCATE(output%sendcounts,(size_sendcounts))
+     ABI_MALLOC(output%sendcounts,(size_sendcounts))
      output%sendcounts(:)=buffer_int(ipck+1:ipck+size_sendcounts)
      ipck=ipck+size_sendcounts
    end if
    if (allocated(output%rdispls)) then
-     ABI_DEALLOCATE(output%rdispls)
+     ABI_FREE(output%rdispls)
    end if
    if (size_rdispls>0) then
-     ABI_ALLOCATE(output%rdispls,(size_rdispls))
+     ABI_MALLOC(output%rdispls,(size_rdispls))
      output%rdispls(:)=buffer_int(ipck+1:ipck+size_rdispls)
      ipck=ipck+size_rdispls
    end if
    if (allocated(output%sdispls)) then
-     ABI_DEALLOCATE(output%sdispls)
+     ABI_FREE(output%sdispls)
    end if
    if (size_sdispls>0) then
-     ABI_ALLOCATE(output%sdispls,(size_sdispls))
+     ABI_MALLOC(output%sdispls,(size_sdispls))
      output%sdispls(:)=buffer_int(ipck+1:ipck+size_sdispls)
      ipck=ipck+size_sdispls
    end if
    if (allocated(output%gbound)) then
-     ABI_DEALLOCATE(output%gbound)
+     ABI_FREE(output%gbound)
    end if
    if (size1_gbound*size2_gbound>0) then
      nsize=size1_gbound*size2_gbound
      sz1=size1_gbound;sz2=size2_gbound
-     ABI_ALLOCATE(output%gbound,(sz1,sz2))
+     ABI_MALLOC(output%gbound,(sz1,sz2))
      output%gbound(:,:)=reshape(buffer_int(ipck+1:ipck+nsize),(/sz1,sz2/))
      ipck=ipck+nsize
    end if
    if (allocated(output%kg_k_gather_sym)) then
-     ABI_DEALLOCATE(output%kg_k_gather_sym)
+     ABI_FREE(output%kg_k_gather_sym)
    end if
    if (size1_kg_k_gather_sym*size2_kg_k_gather_sym>0) then
      nsize=size1_kg_k_gather_sym*size2_kg_k_gather_sym
      sz1=size1_kg_k_gather_sym;sz2=size2_kg_k_gather_sym
-     ABI_ALLOCATE(output%kg_k_gather_sym,(sz1,sz2))
+     ABI_MALLOC(output%kg_k_gather_sym,(sz1,sz2))
      output%kg_k_gather_sym(:,:)=reshape(buffer_int(ipck+1:ipck+nsize),(/sz1,sz2/))
      ipck=ipck+nsize
    end if
    if (allocated(output%rdispls_sym)) then
-     ABI_DEALLOCATE(output%rdispls_sym)
+     ABI_FREE(output%rdispls_sym)
    end if
    if (size_rdispls_sym>0) then
-     ABI_ALLOCATE(output%rdispls_sym,(size_rdispls_sym))
+     ABI_MALLOC(output%rdispls_sym,(size_rdispls_sym))
      output%rdispls_sym(:)=buffer_int(ipck+1:ipck+size_rdispls_sym)
      ipck=ipck+size_rdispls_sym
    end if
    if (allocated(output%sdispls_sym)) then
-     ABI_DEALLOCATE(output%sdispls_sym)
+     ABI_FREE(output%sdispls_sym)
    end if
    if (size_sdispls_sym>0) then
-     ABI_ALLOCATE(output%sdispls_sym,(size_sdispls_sym))
+     ABI_MALLOC(output%sdispls_sym,(size_sdispls_sym))
      output%sdispls_sym(:)=buffer_int(ipck+1:ipck+size_sdispls_sym)
      ipck=ipck+size_sdispls_sym
    end if
    if (allocated(output%recvcounts_sym)) then
-     ABI_DEALLOCATE(output%recvcounts_sym)
+     ABI_FREE(output%recvcounts_sym)
    end if
    if (size_recvcounts_sym>0) then
-     ABI_ALLOCATE(output%recvcounts_sym,(size_recvcounts_sym))
+     ABI_MALLOC(output%recvcounts_sym,(size_recvcounts_sym))
      output%recvcounts_sym(:)=buffer_int(ipck+1:ipck+size_recvcounts_sym)
      ipck=ipck+size_recvcounts_sym
    end if
    if (allocated(output%recvcounts_sym_tot)) then
-     ABI_DEALLOCATE(output%recvcounts_sym_tot)
+     ABI_FREE(output%recvcounts_sym_tot)
    end if
    if (size_recvcounts_sym_tot>0) then
-     ABI_ALLOCATE(output%recvcounts_sym_tot,(size_recvcounts_sym_tot))
+     ABI_MALLOC(output%recvcounts_sym_tot,(size_recvcounts_sym_tot))
      output%recvcounts_sym_tot(:)=buffer_int(ipck+1:ipck+size_recvcounts_sym_tot)
      ipck=ipck+size_recvcounts_sym_tot
    end if
    if (allocated(output%sendcounts_sym)) then
-     ABI_DEALLOCATE(output%sendcounts_sym)
+     ABI_FREE(output%sendcounts_sym)
    end if
    if (size_sendcounts_sym>0) then
-     ABI_ALLOCATE(output%sendcounts_sym,(size_sendcounts_sym))
+     ABI_MALLOC(output%sendcounts_sym,(size_sendcounts_sym))
      output%sendcounts_sym(:)=buffer_int(ipck+1:ipck+size_sendcounts_sym)
      ipck=ipck+size_sendcounts_sym
    end if
    if (allocated(output%sendcounts_sym_all)) then
-     ABI_DEALLOCATE(output%sendcounts_sym_all)
+     ABI_FREE(output%sendcounts_sym_all)
    end if
    if (size_sendcounts_sym_all>0) then
-     ABI_ALLOCATE(output%sendcounts_sym_all,(size_sendcounts_sym_all))
+     ABI_MALLOC(output%sendcounts_sym_all,(size_sendcounts_sym_all))
      output%sendcounts_sym_all(:)=buffer_int(ipck+1:ipck+size_sendcounts_sym_all)
      ipck=ipck+size_sendcounts_sym_all
    end if
    if (allocated(output%tab_proc)) then
-     ABI_DEALLOCATE(output%tab_proc)
+     ABI_FREE(output%tab_proc)
    end if
    if (size_tab_proc>0) then
-     ABI_ALLOCATE(output%tab_proc,(size_tab_proc))
+     ABI_MALLOC(output%tab_proc,(size_tab_proc))
      output%tab_proc(:)=buffer_int(ipck+1:ipck+size_tab_proc)
      ipck=ipck+size_tab_proc
    end if
    if (allocated(output%indices_pw_fft)) then
-     ABI_DEALLOCATE(output%indices_pw_fft)
+     ABI_FREE(output%indices_pw_fft)
    end if
    if (size_indices_pw_fft>0) then
-     ABI_ALLOCATE(output%indices_pw_fft,(size_indices_pw_fft))
+     ABI_MALLOC(output%indices_pw_fft,(size_indices_pw_fft))
      output%indices_pw_fft(:)=buffer_int(ipck+1:ipck+size_indices_pw_fft)
      ipck=ipck+size_indices_pw_fft
    end if
    if (allocated(output%sendcount_fft)) then
-     ABI_DEALLOCATE(output%sendcount_fft)
+     ABI_FREE(output%sendcount_fft)
    end if
    if (size_sendcount_fft>0) then
-     ABI_ALLOCATE(output%sendcount_fft,(size_sendcount_fft))
+     ABI_MALLOC(output%sendcount_fft,(size_sendcount_fft))
      output%sendcount_fft(:)=buffer_int(ipck+1:ipck+size_sendcount_fft)
      ipck=ipck+size_sendcount_fft
    end if
    if (allocated(output%senddisp_fft)) then
-     ABI_DEALLOCATE(output%senddisp_fft)
+     ABI_FREE(output%senddisp_fft)
    end if
    if (size_senddisp_fft>0) then
-     ABI_ALLOCATE(output%senddisp_fft,(size_senddisp_fft))
+     ABI_MALLOC(output%senddisp_fft,(size_senddisp_fft))
      output%senddisp_fft(:)=buffer_int(ipck+1:ipck+size_senddisp_fft)
      ipck=ipck+size_senddisp_fft
    end if
    if (allocated(output%recvcount_fft)) then
-     ABI_DEALLOCATE(output%recvcount_fft)
+     ABI_FREE(output%recvcount_fft)
    end if
    if (size_recvcount_fft>0) then
-     ABI_ALLOCATE(output%recvcount_fft,(size_recvcount_fft))
+     ABI_MALLOC(output%recvcount_fft,(size_recvcount_fft))
      output%recvcount_fft(:)=buffer_int(ipck+1:ipck+size_recvcount_fft)
      ipck=ipck+size_recvcount_fft
    end if
    if (allocated(output%recvdisp_fft)) then
-     ABI_DEALLOCATE(output%recvdisp_fft)
+     ABI_FREE(output%recvdisp_fft)
    end if
    if (size_recvdisp_fft>0) then
-     ABI_ALLOCATE(output%recvdisp_fft,(size_recvdisp_fft))
+     ABI_MALLOC(output%recvdisp_fft,(size_recvdisp_fft))
      output%recvdisp_fft(:)=buffer_int(ipck+1:ipck+size_recvdisp_fft)
      ipck=ipck+size_recvdisp_fft
    end if
    if (allocated(output%kg_k_fft)) then
-     ABI_DEALLOCATE(output%kg_k_fft)
+     ABI_FREE(output%kg_k_fft)
    end if
    if (size1_kg_k_fft*size2_kg_k_fft>0) then
      nsize=size1_kg_k_fft*size2_kg_k_fft
      sz1=size1_kg_k_fft;sz2=size2_kg_k_fft
-     ABI_ALLOCATE(output%kg_k_fft,(sz1,sz2))
+     ABI_MALLOC(output%kg_k_fft,(sz1,sz2))
      output%kg_k_fft(:,:)=reshape(buffer_int(ipck+1:ipck+nsize),(/sz1,sz2/))
      ipck=ipck+nsize
    end if
-   ABI_DEALLOCATE(buffer_int)
+   ABI_FREE(buffer_int)
  end if
 
 !=== Receive and unpack real data ====
  if (size_dp>0) then
    ipck=0
-   ABI_ALLOCATE(buffer_dp,(size_dp))
+   ABI_MALLOC(buffer_dp,(size_dp))
    call xmpi_recv(buffer_dp,sender,3*tag,spaceComm,ierr)
    if (allocated(output%ffnl_gather)) then
-     ABI_DEALLOCATE(output%ffnl_gather)
+     ABI_FREE(output%ffnl_gather)
    end if
    if (size1_ffnl_gather*size2_ffnl_gather*size3_ffnl_gather*size4_ffnl_gather>0) then
      nsize=size1_ffnl_gather*size2_ffnl_gather*size3_ffnl_gather*size4_ffnl_gather
      sz1=size1_ffnl_gather;sz2=size2_ffnl_gather;sz3=size3_ffnl_gather;sz4=size4_ffnl_gather
-     ABI_ALLOCATE(output%ffnl_gather,(sz1,sz2,sz3,sz4))
+     ABI_MALLOC(output%ffnl_gather,(sz1,sz2,sz3,sz4))
      output%ffnl_gather(:,:,:,:)=reshape(buffer_dp(ipck+1:ipck+nsize),(/sz1,sz2,sz3,sz4/))
      ipck=ipck+nsize
    end if
    if (allocated(output%kinpw_gather)) then
-     ABI_DEALLOCATE(output%kinpw_gather)
+     ABI_FREE(output%kinpw_gather)
    end if
    if (size_kinpw_gather>0) then
-     ABI_ALLOCATE(output%kinpw_gather,(size_kinpw_gather))
+     ABI_MALLOC(output%kinpw_gather,(size_kinpw_gather))
      output%kinpw_gather(:)=buffer_dp(ipck+1:ipck+size_kinpw_gather)
      ipck=ipck+size_kinpw_gather
    end if
    if (allocated(output%ph3d_gather)) then
-     ABI_DEALLOCATE(output%ph3d_gather)
+     ABI_FREE(output%ph3d_gather)
    end if
    if (size1_ph3d_gather*size2_ph3d_gather*size3_ph3d_gather>0) then
      nsize=size1_ph3d_gather*size2_ph3d_gather*size3_ph3d_gather
      sz1=size1_ph3d_gather;sz2=size2_ph3d_gather;sz3=size3_ph3d_gather
-     ABI_ALLOCATE(output%ph3d_gather,(sz1,sz2,sz3))
+     ABI_MALLOC(output%ph3d_gather,(sz1,sz2,sz3))
      output%ph3d_gather(:,:,:)=reshape(buffer_dp(ipck+1:ipck+nsize),(/sz1,sz2,sz3/))
      ipck=ipck+nsize
    end if
    if (allocated(output%kpg_k_gather)) then
-     ABI_DEALLOCATE(output%kpg_k_gather)
+     ABI_FREE(output%kpg_k_gather)
    end if
    if (size1_kpg_k_gather*size2_kpg_k_gather>0) then
      nsize=size1_kpg_k_gather*size2_kpg_k_gather
      sz1=size1_kpg_k_gather;sz2=size2_kpg_k_gather
-     ABI_ALLOCATE(output%kpg_k_gather,(sz1,sz2))
+     ABI_MALLOC(output%kpg_k_gather,(sz1,sz2))
      output%kpg_k_gather(:,:)=reshape(buffer_dp(ipck+1:ipck+nsize),(/sz1,sz2/))
      ipck=ipck+nsize
    end if
-   ABI_DEALLOCATE(buffer_dp)
+   ABI_FREE(buffer_dp)
  end if
 
 end subroutine bandfft_kpt_mpi_recv
@@ -1825,47 +1825,47 @@ subroutine bandfft_kpt_savetabs(bandfft_kpt_in,ffnl,ph3d,kpg,kinpw)
 
  if (present(ffnl)) then
    if (allocated(ffnl)) then
-     ABI_DEALLOCATE(ffnl)
+     ABI_FREE(ffnl)
    end if
    if (allocated(bandfft_kpt_in%ffnl_gather)) then
      is1=size(bandfft_kpt_in%ffnl_gather,1)
      is2=size(bandfft_kpt_in%ffnl_gather,2)
      is3=size(bandfft_kpt_in%ffnl_gather,3)
      is4=size(bandfft_kpt_in%ffnl_gather,4)
-     ABI_ALLOCATE(ffnl,(is1,is2,is3,is4))
+     ABI_MALLOC(ffnl,(is1,is2,is3,is4))
      ffnl(:,:,:,:)=bandfft_kpt_in%ffnl_gather(:,:,:,:)
    end if
  end if
  if (present(ph3d)) then
    if (allocated(ph3d)) then
-     ABI_DEALLOCATE(ph3d)
+     ABI_FREE(ph3d)
    end if
    if (allocated(bandfft_kpt_in%ph3d_gather)) then
      is1=size(bandfft_kpt_in%ph3d_gather,1)
      is2=size(bandfft_kpt_in%ph3d_gather,2)
      is3=size(bandfft_kpt_in%ph3d_gather,3)
-     ABI_ALLOCATE(ph3d,(is1,is2,is3))
+     ABI_MALLOC(ph3d,(is1,is2,is3))
      ph3d(:,:,:)=bandfft_kpt_in%ph3d_gather(:,:,:)
    end if
  end if
  if (present(kpg)) then
    if (allocated(kpg)) then
-     ABI_DEALLOCATE(kpg)
+     ABI_FREE(kpg)
    end if
    if (allocated(bandfft_kpt_in%kpg_k_gather)) then
      is1=size(bandfft_kpt_in%kpg_k_gather,1)
      is2=size(bandfft_kpt_in%kpg_k_gather,2)
-     ABI_ALLOCATE(kpg,(is1,is2))
+     ABI_MALLOC(kpg,(is1,is2))
      kpg(:,:)=bandfft_kpt_in%kpg_k_gather(:,:)
    end if
  end if
  if (present(kinpw)) then
    if (allocated(kinpw)) then
-     ABI_DEALLOCATE(kinpw)
+     ABI_FREE(kinpw)
    end if
    if (allocated(bandfft_kpt_in%kinpw_gather)) then
      is1=size(bandfft_kpt_in%kinpw_gather,1)
-     ABI_ALLOCATE(kinpw,(is1))
+     ABI_MALLOC(kinpw,(is1))
      kinpw(:)=bandfft_kpt_in%kinpw_gather(:)
    end if
  end if
@@ -1914,55 +1914,55 @@ subroutine bandfft_kpt_restoretabs(bandfft_kpt_out,ffnl,ph3d,kpg,kinpw)
 
  if (present(ffnl)) then
    if (allocated(bandfft_kpt_out%ffnl_gather)) then
-     ABI_DEALLOCATE(bandfft_kpt_out%ffnl_gather)
+     ABI_FREE(bandfft_kpt_out%ffnl_gather)
    end if
    if (allocated(ffnl)) then
      is1=size(ffnl,1)
      is2=size(ffnl,2)
      is3=size(ffnl,3)
      is4=size(ffnl,4)
-     ABI_ALLOCATE(bandfft_kpt_out%ffnl_gather,(is1,is2,is3,is4))
+     ABI_MALLOC(bandfft_kpt_out%ffnl_gather,(is1,is2,is3,is4))
      bandfft_kpt_out%ffnl_gather(:,:,:,:)=ffnl(:,:,:,:)
-     ABI_DEALLOCATE(ffnl)
+     ABI_FREE(ffnl)
      bandfft_kpt_out%flag2_is_allocated=1
    end if
  end if
  if (present(ph3d)) then
    if (allocated(bandfft_kpt_out%ph3d_gather)) then
-     ABI_DEALLOCATE(bandfft_kpt_out%ph3d_gather)
+     ABI_FREE(bandfft_kpt_out%ph3d_gather)
    end if
    if (allocated(ph3d)) then
      is1=size(ph3d,1)
      is2=size(ph3d,2)
      is3=size(ph3d,3)
-     ABI_ALLOCATE(bandfft_kpt_out%ph3d_gather,(is1,is2,is3))
+     ABI_MALLOC(bandfft_kpt_out%ph3d_gather,(is1,is2,is3))
      bandfft_kpt_out%ph3d_gather(:,:,:)=ph3d(:,:,:)
-     ABI_DEALLOCATE(ph3d)
+     ABI_FREE(ph3d)
      bandfft_kpt_out%flag2_is_allocated=1
    end if
  end if
  if (present(kpg)) then
    if (allocated(bandfft_kpt_out%kpg_k_gather)) then
-     ABI_DEALLOCATE(bandfft_kpt_out%kpg_k_gather)
+     ABI_FREE(bandfft_kpt_out%kpg_k_gather)
    end if
    if (allocated(kpg)) then
      is1=size(kpg,1)
      is2=size(kpg,2)
-     ABI_ALLOCATE(bandfft_kpt_out%kpg_k_gather,(is1,is2))
+     ABI_MALLOC(bandfft_kpt_out%kpg_k_gather,(is1,is2))
      bandfft_kpt_out%kpg_k_gather(:,:)=kpg(:,:)
-     ABI_DEALLOCATE(kpg)
+     ABI_FREE(kpg)
      bandfft_kpt_out%flag2_is_allocated=1
    end if
  end if
  if (present(kinpw)) then
    if (allocated(bandfft_kpt_out%kinpw_gather)) then
-     ABI_DEALLOCATE(bandfft_kpt_out%kinpw_gather)
+     ABI_FREE(bandfft_kpt_out%kinpw_gather)
    end if
    if (allocated(kinpw)) then
      is1=size(kinpw,1)
-     ABI_ALLOCATE(bandfft_kpt_out%kinpw_gather,(is1))
+     ABI_MALLOC(bandfft_kpt_out%kinpw_gather,(is1))
      bandfft_kpt_out%kinpw_gather(:)=kinpw(:)
-     ABI_DEALLOCATE(kinpw)
+     ABI_FREE(kinpw)
    end if
  end if
 
@@ -2110,10 +2110,10 @@ subroutine prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
  dimffnl=size(gs_hamk%ffnl_k,2)
  nkpg=size(gs_hamk%kpg_k,2)
 
- ABI_ALLOCATE(rdispls,(mpi_enreg%nproc_band))
- ABI_ALLOCATE(recvcounts,(mpi_enreg%nproc_band))
- ABI_ALLOCATE(rdisplsloc,(mpi_enreg%nproc_band))
- ABI_ALLOCATE(recvcountsloc,(mpi_enreg%nproc_band))
+ ABI_MALLOC(rdispls,(mpi_enreg%nproc_band))
+ ABI_MALLOC(recvcounts,(mpi_enreg%nproc_band))
+ ABI_MALLOC(rdisplsloc,(mpi_enreg%nproc_band))
+ ABI_MALLOC(recvcountsloc,(mpi_enreg%nproc_band))
 
  spaceComm    =mpi_enreg%comm_band
  ndatarecv    =bandfft_kpt(ikpt_this_proc)%ndatarecv
@@ -2122,9 +2122,9 @@ subroutine prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
 
 !---- Process FFNL
  if (associated(gs_hamk%ffnl_k)) then
-   ABI_ALLOCATE(ffnl_gather,(ndatarecv,dimffnl,lmnmax,ntypat))
-   ABI_ALLOCATE(ffnl_little,(dimffnl,lmnmax,ntypat,npw_k))
-   ABI_ALLOCATE(ffnl_little_gather,(dimffnl,lmnmax,ntypat,ndatarecv))
+   ABI_MALLOC(ffnl_gather,(ndatarecv,dimffnl,lmnmax,ntypat))
+   ABI_MALLOC(ffnl_little,(dimffnl,lmnmax,ntypat,npw_k))
+   ABI_MALLOC(ffnl_little_gather,(dimffnl,lmnmax,ntypat,ndatarecv))
    do ipw=1,npw_k
      ffnl_little(:,:,:,ipw)=gs_hamk%ffnl_k(ipw,:,:,:)
    end do
@@ -2135,17 +2135,17 @@ subroutine prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
    do ipw=1,ndatarecv
      ffnl_gather(ipw,:,:,:)=ffnl_little_gather(:,:,:,ipw)
    end do
-   ABI_DEALLOCATE(ffnl_little)
-   ABI_DEALLOCATE(ffnl_little_gather)
+   ABI_FREE(ffnl_little)
+   ABI_FREE(ffnl_little_gather)
  else
-   ABI_ALLOCATE(ffnl_gather,(0,0,0,0))
+   ABI_MALLOC(ffnl_gather,(0,0,0,0))
  end if
 
 !---- Process PH3D
  if (associated(gs_hamk%ph3d_k)) then
-   ABI_ALLOCATE(ph3d_gather,(2,ndatarecv,matblk))
-   ABI_ALLOCATE(ph3d_little,(2,matblk,npw_k))
-   ABI_ALLOCATE(ph3d_little_gather,(2,matblk,ndatarecv))
+   ABI_MALLOC(ph3d_gather,(2,ndatarecv,matblk))
+   ABI_MALLOC(ph3d_little,(2,matblk,npw_k))
+   ABI_MALLOC(ph3d_little_gather,(2,matblk,ndatarecv))
    recvcountsloc(:)=recvcounts(:)*2*matblk
    rdisplsloc(:)=rdispls(:)*2*matblk
    do ipw=1,npw_k
@@ -2156,44 +2156,44 @@ subroutine prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
    do ipw=1,ndatarecv
      ph3d_gather(:,ipw,:)=ph3d_little_gather(:,:,ipw)
    end do
-   ABI_DEALLOCATE(ph3d_little_gather)
-   ABI_DEALLOCATE(ph3d_little)
+   ABI_FREE(ph3d_little_gather)
+   ABI_FREE(ph3d_little)
  else
-   ABI_ALLOCATE(ph3d_gather,(0,0,0))
+   ABI_MALLOC(ph3d_gather,(0,0,0))
  end if
 
 !---- Process KPG_K
  if (associated(gs_hamk%kpg_k)) then
-   ABI_ALLOCATE(kpg_k_gather,(ndatarecv,nkpg))
+   ABI_MALLOC(kpg_k_gather,(ndatarecv,nkpg))
    if (nkpg>0) then
      call mkkpg(bandfft_kpt(ikpt_this_proc)%kg_k_gather,kpg_k_gather,gs_hamk%kpt_k,nkpg,ndatarecv)
    end if
  else
-   ABI_ALLOCATE(kpg_k_gather,(0,0))
+   ABI_MALLOC(kpg_k_gather,(0,0))
  end if
 
 !---- Process KINPW
  if (associated(gs_hamk%kinpw_k)) then
-   ABI_ALLOCATE(kinpw_gather,(ndatarecv))
+   ABI_MALLOC(kinpw_gather,(ndatarecv))
    recvcountsloc(:)=recvcounts(:)
    rdisplsloc(:)=rdispls(:)
    call xmpi_allgatherv(gs_hamk%kinpw_k,npw_k,kinpw_gather,recvcountsloc(:),rdisplsloc,spaceComm,ierr)
  else
-   ABI_ALLOCATE(kinpw_gather,(0))
+   ABI_MALLOC(kinpw_gather,(0))
  end if
 
- ABI_DEALLOCATE(recvcounts)
- ABI_DEALLOCATE(rdispls)
- ABI_DEALLOCATE(recvcountsloc)
- ABI_DEALLOCATE(rdisplsloc)
+ ABI_FREE(recvcounts)
+ ABI_FREE(rdispls)
+ ABI_FREE(recvcountsloc)
+ ABI_FREE(rdisplsloc)
 
  call bandfft_kpt_init2(bandfft_kpt,dimffnl,ffnl_gather,ikpt_this_proc,kinpw_gather,kpg_k_gather,&
 & lmnmax,matblk,mkmem,ndatarecv,nkpg,ntypat,ph3d_gather)
 
- ABI_DEALLOCATE(ffnl_gather)
- ABI_DEALLOCATE(ph3d_gather)
- ABI_DEALLOCATE(kinpw_gather)
- ABI_DEALLOCATE(kpg_k_gather)
+ ABI_FREE(ffnl_gather)
+ ABI_FREE(ph3d_gather)
+ ABI_FREE(kinpw_gather)
+ ABI_FREE(kpg_k_gather)
 
 !---- Store current kpt index
  call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)

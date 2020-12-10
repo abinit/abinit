@@ -212,11 +212,11 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  if ((.not.compute_nhat).and.(.not.compute_grad)) return
  mfgd=zero;if (my_natom>0) mfgd=maxval(pawfgrtab(1:my_natom)%nfgd)
  if (compute_nhat) then
-   ABI_ALLOCATE(pawnhat_atm,(cplex*mfgd))
+   ABI_MALLOC(pawnhat_atm,(cplex*mfgd))
    pawnhat=zero
  end if
  if (compute_grad) then
-   ABI_ALLOCATE(pawgrnhat_atm,(cplex*mfgd,3))
+   ABI_MALLOC(pawgrnhat_atm,(cplex*mfgd,3))
    pawgrnhat=zero
  end if
 
@@ -246,23 +246,23 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      optgr0=0;optgr1=0;optgr2=0
      if ((compute_nhat).and.(pawfgrtab(iatom)%gylm_allocated==0)) then
        if (allocated(pawfgrtab(iatom)%gylm))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%gylm)
+         ABI_FREE(pawfgrtab(iatom)%gylm)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%gylm,(nfgd,pawfgrtab(iatom)%l_size**2))
+       ABI_MALLOC(pawfgrtab(iatom)%gylm,(nfgd,pawfgrtab(iatom)%l_size**2))
        pawfgrtab(iatom)%gylm_allocated=2;optgr0=1
      end if
      if ((compute_grad).and.(pawfgrtab(iatom)%gylmgr_allocated==0)) then
        if (allocated(pawfgrtab(iatom)%gylmgr))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr)
+         ABI_FREE(pawfgrtab(iatom)%gylmgr)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr,(3,nfgd,pawfgrtab(iatom)%l_size**2))
+       ABI_MALLOC(pawfgrtab(iatom)%gylmgr,(3,nfgd,pawfgrtab(iatom)%l_size**2))
        pawfgrtab(iatom)%gylmgr_allocated=2;optgr1=1
      end if
      if ((compute_grad.and.need_frozen).and.(pawfgrtab(iatom)%gylmgr2_allocated==0)) then
        if (allocated(pawfgrtab(iatom)%gylmgr2))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr2)
+         ABI_FREE(pawfgrtab(iatom)%gylmgr2)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr2,(6,nfgd,pawfgrtab(iatom)%l_size**2))
+       ABI_MALLOC(pawfgrtab(iatom)%gylmgr2,(6,nfgd,pawfgrtab(iatom)%l_size**2))
        pawfgrtab(iatom)%gylmgr2_allocated=2;optgr2=1
      end if
      if (optgr0+optgr1+optgr2>0) then
@@ -275,9 +275,9 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !  Eventually compute exp(-i.q.r) factors for the current atom (if not already done)
    if (compute_phonons.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated==0) then
      if (allocated(pawfgrtab(iatom)%expiqr))  then
-       ABI_DEALLOCATE(pawfgrtab(iatom)%expiqr)
+       ABI_FREE(pawfgrtab(iatom)%expiqr)
      end if
-     ABI_ALLOCATE(pawfgrtab(iatom)%expiqr,(2,nfgd))
+     ABI_MALLOC(pawfgrtab(iatom)%expiqr,(2,nfgd))
      call pawexpiqr(pawfgrtab(iatom)%expiqr,gprimd,nfgd,qphon,&
 &     pawfgrtab(iatom)%rfgd,xred(:,iatom_tot))
      pawfgrtab(iatom)%expiqr_allocated=2
@@ -288,16 +288,16 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
    if ((need_frozen).and.((pawfgrtab(iatom)%nhatfr_allocated==0).or.&
 &   (compute_grad.and.pawfgrtab(iatom)%nhatfrgr_allocated==0))) then
      if (allocated(pawfgrtab(iatom)%nhatfr))  then
-       ABI_DEALLOCATE(pawfgrtab(iatom)%nhatfr)
+       ABI_FREE(pawfgrtab(iatom)%nhatfr)
      end if
-     ABI_ALLOCATE(pawfgrtab(iatom)%nhatfr,(nfgd,pawfgrtab(iatom)%nspden))
+     ABI_MALLOC(pawfgrtab(iatom)%nhatfr,(nfgd,pawfgrtab(iatom)%nspden))
      option=0;pawfgrtab(iatom)%nhatfr_allocated=2
      if (compute_grad) then
        option=1
        if (allocated(pawfgrtab(iatom)%nhatfrgr))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%nhatfrgr)
+         ABI_FREE(pawfgrtab(iatom)%nhatfrgr)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%nhatfrgr,(3,nfgd,pawfgrtab(iatom)%nspden))
+       ABI_MALLOC(pawfgrtab(iatom)%nhatfrgr,(3,nfgd,pawfgrtab(iatom)%nspden))
        pawfgrtab(iatom)%nhatfrgr_allocated=2
      end if
      call pawnhatfr(option,idir,ipert,1,natom,nspden,ntypat,pawang,pawfgrtab(iatom),&
@@ -517,33 +517,33 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
    end do
 
    if (pawfgrtab(iatom)%gylm_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%gylm)
-     ABI_ALLOCATE(pawfgrtab(iatom)%gylm,(0,0))
+     ABI_FREE(pawfgrtab(iatom)%gylm)
+     ABI_MALLOC(pawfgrtab(iatom)%gylm,(0,0))
      pawfgrtab(iatom)%gylm_allocated=0
    end if
    if (pawfgrtab(iatom)%gylmgr_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr)
-     ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr,(0,0,0))
+     ABI_FREE(pawfgrtab(iatom)%gylmgr)
+     ABI_MALLOC(pawfgrtab(iatom)%gylmgr,(0,0,0))
      pawfgrtab(iatom)%gylmgr_allocated=0
    end if
    if (pawfgrtab(iatom)%gylmgr2_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr2)
-     ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr2,(0,0,0))
+     ABI_FREE(pawfgrtab(iatom)%gylmgr2)
+     ABI_MALLOC(pawfgrtab(iatom)%gylmgr2,(0,0,0))
      pawfgrtab(iatom)%gylmgr2_allocated=0
    end if
    if (pawfgrtab(iatom)%nhatfr_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%nhatfr)
-     ABI_ALLOCATE(pawfgrtab(iatom)%nhatfr,(0,0))
+     ABI_FREE(pawfgrtab(iatom)%nhatfr)
+     ABI_MALLOC(pawfgrtab(iatom)%nhatfr,(0,0))
      pawfgrtab(iatom)%nhatfr_allocated=0
    end if
    if (pawfgrtab(iatom)%nhatfrgr_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%nhatfrgr)
-     ABI_ALLOCATE(pawfgrtab(iatom)%nhatfrgr,(0,0,0))
+     ABI_FREE(pawfgrtab(iatom)%nhatfrgr)
+     ABI_MALLOC(pawfgrtab(iatom)%nhatfrgr,(0,0,0))
      pawfgrtab(iatom)%nhatfrgr_allocated=0
    end if
    if (pawfgrtab(iatom)%expiqr_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%expiqr)
-     ABI_ALLOCATE(pawfgrtab(iatom)%expiqr,(0,0))
+     ABI_FREE(pawfgrtab(iatom)%expiqr)
+     ABI_MALLOC(pawfgrtab(iatom)%expiqr,(0,0))
      pawfgrtab(iatom)%expiqr_allocated=0
    end if
 
@@ -554,10 +554,10 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 
 !----- Free some memory
  if (compute_nhat) then
-   ABI_DEALLOCATE(pawnhat_atm)
+   ABI_FREE(pawnhat_atm)
  end if
  if (compute_grad) then
-   ABI_DEALLOCATE(pawgrnhat_atm)
+   ABI_FREE(pawgrnhat_atm)
  end if
 
 !----- Reduction in case of parallelism
@@ -578,11 +578,11 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
    if (present(distribfft)) then
      my_distribfft => distribfft
    else
-     ABI_DATATYPE_ALLOCATE(my_distribfft,)
+     ABI_MALLOC(my_distribfft,)
      call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
-   ABI_DATATYPE_DEALLOCATE(mpi_enreg_fft%distribfft)
+   ABI_FREE(mpi_enreg_fft%distribfft)
    if (present(comm_fft)) then
      call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
      my_comm_fft=comm_fft;paral_kgb_fft=paral_kgb
@@ -591,18 +591,18 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      mpi_enreg_fft%distribfft => my_distribfft
    end if
 !  do FFT
-   ABI_ALLOCATE(work,(2,nfft))
+   ABI_MALLOC(work,(2,nfft))
    do ispden=1,min(2,nspden)
      call fourdp(cplex,work,pawnhat(:,ispden),-1,mpi_enreg_fft,nfft,1,ngfft,0)
      call zerosym(work,2,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
      call fourdp(cplex,work,pawnhat(:,ispden),+1,mpi_enreg_fft,nfft,1,ngfft,0)
    end do
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
      call destroy_distribfft(my_distribfft)
-     ABI_DATATYPE_DEALLOCATE(my_distribfft)
+     ABI_FREE(my_distribfft)
    end if
  end if
 
@@ -772,7 +772,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
    lm_size   = pawfgrtab(iatom)%l_size**2
    lmn_size  = pawtab(itypat)%lmn_size
    lmn2_size = pawtab(itypat)%lmn2_size
-   ABI_ALLOCATE(qijl,(lm_size,lmn2_size))
+   ABI_MALLOC(qijl,(lm_size,lmn2_size))
    qijl=zero
    qijl=pawtab(itypat)%qijl
    if (compute_nhat) nhat12_atm=zero
@@ -783,16 +783,16 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
      optgr0=0; optgr1=0
      if ((compute_nhat).and.(pawfgrtab(iatom)%gylm_allocated==0)) then
        if (allocated(pawfgrtab(iatom)%gylm))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%gylm)
+         ABI_FREE(pawfgrtab(iatom)%gylm)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%gylm,(pawfgrtab(iatom)%nfgd,pawfgrtab(iatom)%l_size**2))
+       ABI_MALLOC(pawfgrtab(iatom)%gylm,(pawfgrtab(iatom)%nfgd,pawfgrtab(iatom)%l_size**2))
        pawfgrtab(iatom)%gylm_allocated=2;optgr0=1
      end if
      if (((compute_grad).or.(compute_grad1)).and.(pawfgrtab(iatom)%gylmgr_allocated==0)) then
        if (allocated(pawfgrtab(iatom)%gylmgr))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr)
+         ABI_FREE(pawfgrtab(iatom)%gylmgr)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr,(3,pawfgrtab(iatom)%nfgd,pawfgrtab(iatom)%l_size**2))
+       ABI_MALLOC(pawfgrtab(iatom)%gylmgr,(3,pawfgrtab(iatom)%nfgd,pawfgrtab(iatom)%l_size**2))
        pawfgrtab(iatom)%gylmgr_allocated=2;optgr1=1
      end if
      if (optgr0+optgr1>0) then
@@ -804,9 +804,9 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
    end if
    if (compute_phonon.and.(.not.qeq0).and.(pawfgrtab(iatom)%expiqr_allocated==0)) then
      if (allocated(pawfgrtab(iatom)%expiqr))  then
-       ABI_DEALLOCATE(pawfgrtab(iatom)%expiqr)
+       ABI_FREE(pawfgrtab(iatom)%expiqr)
      end if
-     ABI_ALLOCATE(pawfgrtab(iatom)%expiqr,(2,pawfgrtab(iatom)%nfgd))
+     ABI_MALLOC(pawfgrtab(iatom)%expiqr,(2,pawfgrtab(iatom)%nfgd))
      call pawexpiqr(pawfgrtab(iatom)%expiqr,gprimd,pawfgrtab(iatom)%nfgd,qphon,&
 &     pawfgrtab(iatom)%rfgd,xred(:,iatom_tot))
      pawfgrtab(iatom)%expiqr_allocated=2
@@ -960,19 +960,19 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
    if (compute_nhat) nhat12=nhat12+nhat12_atm
 
    if (pawfgrtab(iatom)%gylm_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%gylm)
-     ABI_ALLOCATE(pawfgrtab(iatom)%gylm,(0,0))
+     ABI_FREE(pawfgrtab(iatom)%gylm)
+     ABI_MALLOC(pawfgrtab(iatom)%gylm,(0,0))
      pawfgrtab(iatom)%gylm_allocated=0
    end if
    if (pawfgrtab(iatom)%gylmgr_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr)
-     ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr,(0,0,0))
+     ABI_FREE(pawfgrtab(iatom)%gylmgr)
+     ABI_MALLOC(pawfgrtab(iatom)%gylmgr,(0,0,0))
      pawfgrtab(iatom)%gylmgr_allocated=0
    end if
-   ABI_DEALLOCATE(qijl)
+   ABI_FREE(qijl)
    if (pawfgrtab(iatom)%expiqr_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%expiqr)
-     ABI_ALLOCATE(pawfgrtab(iatom)%expiqr,(0,0))
+     ABI_FREE(pawfgrtab(iatom)%expiqr)
+     ABI_MALLOC(pawfgrtab(iatom)%expiqr,(0,0))
      pawfgrtab(iatom)%expiqr_allocated=0
    end if
 
@@ -1002,11 +1002,11 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
    if (present(distribfft)) then
      my_distribfft => distribfft
    else
-     ABI_DATATYPE_ALLOCATE(my_distribfft,)
+     ABI_MALLOC(my_distribfft,)
      call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
-   ABI_DATATYPE_DEALLOCATE(mpi_enreg_fft%distribfft)
+   ABI_FREE(mpi_enreg_fft%distribfft)
    if (present(comm_fft)) then
      call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
      my_comm_fft=comm_fft;paral_kgb_fft=paral_kgb
@@ -1015,19 +1015,19 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
      mpi_enreg_fft%distribfft => my_distribfft
    end if
 !  Do FFT
-   ABI_ALLOCATE(work,(2,nfft))
+   ABI_MALLOC(work,(2,nfft))
    cplex=2
    do isp1=1,MIN(2,nspinor**2)
      call fourdp(cplex,work,nhat12(:,:,isp1),-1,mpi_enreg_fft,nfft,1,ngfft,0)
      call zerosym(work,cplex,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
      call fourdp(cplex,work,nhat12(:,:,isp1),+1,mpi_enreg_fft,nfft,1,ngfft,0)
    end do
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
      call destroy_distribfft(my_distribfft)
-     ABI_DATATYPE_DEALLOCATE(my_distribfft)
+     ABI_FREE(my_distribfft)
    end if
  end if
 
@@ -1153,16 +1153,16 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
    if (my_pert) then
      if (pawfgrtab(iatom)%nhatfr_allocated==0) then
        if (allocated(pawfgrtab(iatom)%nhatfr))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%nhatfr)
+         ABI_FREE(pawfgrtab(iatom)%nhatfr)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%nhatfr,(pawfgrtab(iatom)%nfgd,nspden))
+       ABI_MALLOC(pawfgrtab(iatom)%nhatfr,(pawfgrtab(iatom)%nfgd,nspden))
        pawfgrtab(iatom)%nhatfr_allocated=1
      end if
      if (ider==1.and.pawfgrtab(iatom)%nhatfrgr_allocated==0) then
        if (allocated(pawfgrtab(iatom)%nhatfrgr))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%nhatfrgr)
+         ABI_FREE(pawfgrtab(iatom)%nhatfrgr)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%nhatfrgr,(3,pawfgrtab(iatom)%nfgd,nspden))
+       ABI_MALLOC(pawfgrtab(iatom)%nhatfrgr,(3,pawfgrtab(iatom)%nfgd,nspden))
        pawfgrtab(iatom)%nhatfrgr_allocated=1
      end if
    end if
@@ -1183,24 +1183,24 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
      if(ipert==natom+3.or.ipert==natom+4)then
        if (pawfgrtab(iatom)%gylm_allocated==0) then
          if (allocated(pawfgrtab(iatom)%gylm))  then
-           ABI_DEALLOCATE(pawfgrtab(iatom)%gylm)
+           ABI_FREE(pawfgrtab(iatom)%gylm)
          end if
-         ABI_ALLOCATE(pawfgrtab(iatom)%gylm,(nfgd,lm_size))
+         ABI_MALLOC(pawfgrtab(iatom)%gylm,(nfgd,lm_size))
          pawfgrtab(iatom)%gylm_allocated=2;optgr0=1
        end if
      end if
      if (pawfgrtab(iatom)%gylmgr_allocated==0) then
        if (allocated(pawfgrtab(iatom)%gylmgr))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr)
+         ABI_FREE(pawfgrtab(iatom)%gylmgr)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr,(3,nfgd,lm_size))
+       ABI_MALLOC(pawfgrtab(iatom)%gylmgr,(3,nfgd,lm_size))
        pawfgrtab(iatom)%gylmgr_allocated=2;optgr1=1
      end if
      if (ider==1.and.pawfgrtab(iatom)%gylmgr2_allocated==0) then
        if (allocated(pawfgrtab(iatom)%gylmgr2))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr2)
+         ABI_FREE(pawfgrtab(iatom)%gylmgr2)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr2,(6,nfgd,lm_size))
+       ABI_MALLOC(pawfgrtab(iatom)%gylmgr2,(6,nfgd,lm_size))
        pawfgrtab(iatom)%gylmgr2_allocated=2;optgr2=1
      end if
      if (optgr0+optgr1+optgr2>0) then
@@ -1216,10 +1216,10 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
 !    Loop over spin components
      do ispden=1,nspden
 
-       ABI_ALLOCATE(nhatfr_tmp,(3,nfgd))
+       ABI_MALLOC(nhatfr_tmp,(3,nfgd))
        nhatfr_tmp=zero
        if (ider==1) then
-         ABI_ALLOCATE(nhatfrgr_tmp,(3,nfgd,3))
+         ABI_MALLOC(nhatfrgr_tmp,(3,nfgd,3))
          nhatfrgr_tmp=zero
        end if
 
@@ -1287,9 +1287,9 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
            end do
          end do
        end if
-       ABI_DEALLOCATE(nhatfr_tmp)
+       ABI_FREE(nhatfr_tmp)
        if (ider==1) then
-         ABI_DEALLOCATE(nhatfrgr_tmp)
+         ABI_FREE(nhatfrgr_tmp)
        end if
 !      End loop over spin components
      end do ! ispden
@@ -1358,13 +1358,13 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
 
 !  Eventually free temporary space for g_l(r).Y_lm(r) gradients and exp(-i.q.r)
    if (pawfgrtab(iatom)%gylmgr_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr)
-     ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr,(0,0,0))
+     ABI_FREE(pawfgrtab(iatom)%gylmgr)
+     ABI_MALLOC(pawfgrtab(iatom)%gylmgr,(0,0,0))
      pawfgrtab(iatom)%gylmgr_allocated=0
    end if
    if (pawfgrtab(iatom)%gylmgr2_allocated==2) then
-     ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr2)
-     ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr2,(0,0,0))
+     ABI_FREE(pawfgrtab(iatom)%gylmgr2)
+     ABI_MALLOC(pawfgrtab(iatom)%gylmgr2,(0,0,0))
      pawfgrtab(iatom)%gylmgr2_allocated=0
    end if
 
@@ -1498,7 +1498,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
  my_natom=natom;if (paral_atom) my_natom=size(my_atmtab)
 
  cplex=1;if (istwf_k>1) cplex=2
- ABI_ALLOCATE(wfprod_paw,(2,npwdiel))
+ ABI_MALLOC(wfprod_paw,(2,npwdiel))
  wfprod_paw(:,:)=zero
  ibsp1=(iband1-1)*nspinor+ispinor1
  ibsp2=(iband2-1)*nspinor+ispinor2
@@ -1614,11 +1614,11 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
    if (present(distribfft)) then
      my_distribfft => distribfft
    else
-     ABI_DATATYPE_ALLOCATE(my_distribfft,)
+     ABI_MALLOC(my_distribfft,)
      call init_distribfft_seq(my_distribfft,'c',ngfftdiel(2),ngfftdiel(3),'fourwf')
    end if
    call initmpi_seq(mpi_enreg_fft)
-   ABI_DATATYPE_DEALLOCATE(mpi_enreg_fft%distribfft)
+   ABI_FREE(mpi_enreg_fft%distribfft)
    if (present(comm_fft)) then
      call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
      my_comm_fft=comm_fft
@@ -1629,20 +1629,20 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
      mpi_enreg_fft%distribfft => my_distribfft
    end if
 !  do FFT
-   ABI_ALLOCATE(wfraug_paw,(2,ndiel4,ndiel5,ndiel6))
+   ABI_MALLOC(wfraug_paw,(2,ndiel4,ndiel5,ndiel6))
    call fourwf(1,dummy,wfprod_paw,dummy,wfraug_paw,gbound_diel,gbound_diel,&
 &   istwf_k,kg_diel,kg_diel,mgfftdiel,mpi_enreg_fft,1,ngfftdiel,1,npwdiel,&
 &   ndiel4,ndiel5,ndiel6,0,tim_fourwf,weight_dum,weight_dum)
    wfraug(:,:,:,:)=wfraug(:,:,:,:)+wfraug_paw(:,:,:,:)
-   ABI_DEALLOCATE(wfraug_paw)
+   ABI_FREE(wfraug_paw)
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
      call destroy_distribfft(my_distribfft)
-     ABI_DATATYPE_DEALLOCATE(my_distribfft)
+     ABI_FREE(my_distribfft)
    end if
  end if
 
- ABI_DEALLOCATE(wfprod_paw)
+ ABI_FREE(wfprod_paw)
 
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -1767,8 +1767,8 @@ subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,&
 & my_natom_ref=my_natom)
  if (paral_atom) then
-   ABI_ALLOCATE(my_atindx1,(natom))
-   ABI_ALLOCATE(my_nattyp,(ntypat))
+   ABI_MALLOC(my_atindx1,(natom))
+   ABI_MALLOC(my_nattyp,(ntypat))
    my_atindx1(:)=0;my_nattyp(:)=0
    iat=1
    do itypat=1,ntypat
@@ -1810,8 +1810,8 @@ subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
      ABI_BUG(msg)
    end if
  else
-   ABI_ALLOCATE(fftn3_distrib,(n3))
-   ABI_ALLOCATE(ffti3_local,(n3))
+   ABI_MALLOC(fftn3_distrib,(n3))
+   ABI_MALLOC(ffti3_local,(n3))
    fftn3_distrib=0;ffti3_local=(/(i3,i3=1,n3)/)
  end if
 
@@ -1843,42 +1843,42 @@ subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
 
 !    Allocate arrays defining sphere (and related data) around current atom
      if (allocated(pawfgrtab(iatom_)%ifftsph)) then
-       ABI_DEALLOCATE(pawfgrtab(iatom_)%ifftsph)
+       ABI_FREE(pawfgrtab(iatom_)%ifftsph)
      end if
-     ABI_ALLOCATE(pawfgrtab(iatom_)%ifftsph,(nfgd))
+     ABI_MALLOC(pawfgrtab(iatom_)%ifftsph,(nfgd))
      pawfgrtab(iatom_)%nfgd=nfgd
      pawfgrtab(iatom_)%ifftsph(1:nfgd)=ifftsph_tmp(1:nfgd)
 
      if (optrad==1) then
        if (allocated(pawfgrtab(iatom_)%rfgd))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom_)%rfgd)
+         ABI_FREE(pawfgrtab(iatom_)%rfgd)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom_)%rfgd,(3,nfgd))
+       ABI_MALLOC(pawfgrtab(iatom_)%rfgd,(3,nfgd))
        pawfgrtab(iatom_)%rfgd_allocated=1
        pawfgrtab(iatom_)%rfgd(1:3,1:nfgd)=rfgd_tmp(1:3,1:nfgd)
      end if
 
      if (optgr0==1) then
        if (allocated(pawfgrtab(iatom_)%gylm))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom_)%gylm)
+         ABI_FREE(pawfgrtab(iatom_)%gylm)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom_)%gylm,(nfgd,lm_size))
+       ABI_MALLOC(pawfgrtab(iatom_)%gylm,(nfgd,lm_size))
        pawfgrtab(iatom_)%gylm_allocated=1
      end if
 
      if (optgr1==1) then
        if (allocated(pawfgrtab(iatom_)%gylmgr))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom_)%gylmgr)
+         ABI_FREE(pawfgrtab(iatom_)%gylmgr)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom_)%gylmgr,(3,nfgd,lm_size))
+       ABI_MALLOC(pawfgrtab(iatom_)%gylmgr,(3,nfgd,lm_size))
        pawfgrtab(iatom_)%gylmgr_allocated=1
      end if
 
      if (optgr2==1) then
        if (allocated(pawfgrtab(iatom_)%gylmgr2))  then
-         ABI_DEALLOCATE(pawfgrtab(iatom_)%gylmgr2)
+         ABI_FREE(pawfgrtab(iatom_)%gylmgr2)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom_)%gylmgr2,(6,nfgd,lm_size))
+       ABI_MALLOC(pawfgrtab(iatom_)%gylmgr2,(6,nfgd,lm_size))
        pawfgrtab(iatom_)%gylmgr2_allocated=1
      end if
 
@@ -1892,21 +1892,21 @@ subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
 
 !    End loops over types/atoms
 !    -------------------------------------------
-     ABI_DEALLOCATE(ifftsph_tmp)
-     ABI_DEALLOCATE(rfgd_tmp)
+     ABI_FREE(ifftsph_tmp)
+     ABI_FREE(rfgd_tmp)
    end do
  end do
 
 !Destroy atom tables used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
  if (paral_atom) then
-   ABI_DEALLOCATE(my_atindx1)
-   ABI_DEALLOCATE(my_nattyp)
+   ABI_FREE(my_atindx1)
+   ABI_FREE(my_nattyp)
  end if
 
  if (.not.present(distribfft)) then
-   ABI_DEALLOCATE(fftn3_distrib)
-   ABI_DEALLOCATE(ffti3_local)
+   ABI_FREE(fftn3_distrib)
+   ABI_FREE(ffti3_local)
  end if
 
  call timab(559,2,tsec)
@@ -2038,42 +2038,42 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 
 !    Allocate arrays defining sphere (and related data) around current atom
      if (allocated(pawfgrtab(iatom)%ifftsph)) then
-       ABI_DEALLOCATE(pawfgrtab(iatom)%ifftsph)
+       ABI_FREE(pawfgrtab(iatom)%ifftsph)
      end if
-     ABI_ALLOCATE(pawfgrtab(iatom)%ifftsph,(nfgd))
+     ABI_MALLOC(pawfgrtab(iatom)%ifftsph,(nfgd))
      pawfgrtab(iatom)%nfgd=nfgd
      pawfgrtab(iatom)%ifftsph(1:nfgd)=ifftsph_tmp(1:nfgd)
 
      if (optrad==1) then
        if (allocated(pawfgrtab(iatom)%rfgd)) then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%rfgd)
+         ABI_FREE(pawfgrtab(iatom)%rfgd)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%rfgd,(3,nfgd))
+       ABI_MALLOC(pawfgrtab(iatom)%rfgd,(3,nfgd))
        pawfgrtab(iatom)%rfgd_allocated=1
        pawfgrtab(iatom)%rfgd(1:3,1:nfgd)=rfgd_tmp(1:3,1:nfgd)
      end if
 
      if (optgr0==1) then
        if (allocated(pawfgrtab(iatom)%gylm)) then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%gylm)
+         ABI_FREE(pawfgrtab(iatom)%gylm)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%gylm,(nfgd,lm_size))
+       ABI_MALLOC(pawfgrtab(iatom)%gylm,(nfgd,lm_size))
        pawfgrtab(iatom)%gylm_allocated=1
      end if
 
      if (optgr1==1) then
        if (allocated(pawfgrtab(iatom)%gylmgr)) then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr)
+         ABI_FREE(pawfgrtab(iatom)%gylmgr)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr,(3,nfgd,lm_size))
+       ABI_MALLOC(pawfgrtab(iatom)%gylmgr,(3,nfgd,lm_size))
        pawfgrtab(iatom)%gylmgr_allocated=1
      end if
 
      if (optgr2==1) then
        if (allocated(pawfgrtab(iatom)%gylmgr2)) then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr2)
+         ABI_FREE(pawfgrtab(iatom)%gylmgr2)
        end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr2,(6,nfgd,lm_size))
+       ABI_MALLOC(pawfgrtab(iatom)%gylmgr2,(6,nfgd,lm_size))
        pawfgrtab(iatom)%gylmgr2_allocated=1
      end if
 
@@ -2084,8 +2084,8 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
      end if
 
 !    End loops over types/atoms
-     ABI_DEALLOCATE(ifftsph_tmp)
-     ABI_DEALLOCATE(rfgd_tmp)
+     ABI_FREE(ifftsph_tmp)
+     ABI_FREE(rfgd_tmp)
    end do
  end do
 

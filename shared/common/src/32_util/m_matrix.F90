@@ -99,13 +99,13 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
  DBG_ENTER("COLL")
  pawprtvol=2
 
- ABI_ALLOCATE(initialmatrix,(tndim,tndim))
+ ABI_MALLOC(initialmatrix,(tndim,tndim))
  initialmatrix=matrix
 !  == First diagonalize matrix and keep the matrix for the change of basis
  lwork=2*tndim-1
- ABI_ALLOCATE(rwork,(3*tndim-2))
- ABI_ALLOCATE(zwork,(lwork))
- ABI_ALLOCATE(eig,(tndim))
+ ABI_MALLOC(rwork,(3*tndim-2))
+ ABI_MALLOC(zwork,(lwork))
+ ABI_MALLOC(eig,(tndim))
  
  call zheev('v','u',tndim,matrix,tndim,eig,zwork,lwork,rwork,info)
  if(pawprtvol>3) then
@@ -120,15 +120,15 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
  endif
  
  
- ABI_DEALLOCATE(zwork)
- ABI_DEALLOCATE(rwork)
+ ABI_FREE(zwork)
+ ABI_FREE(rwork)
  if(info/=0) then
   message = 'Error in diagonalization of zmat (zheev) ! - '
   ABI_ERROR(message)
  end if
 
 !  == Secondly Compute sqrt(diagonalized matrix)
- ABI_ALLOCATE(diag,(tndim,tndim))
+ ABI_MALLOC(diag,(tndim,tndim))
  diag=czero
  nb_of_zero=0
  do im=1,tndim
@@ -149,14 +149,14 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
    endif
  enddo
  force_diag=nb_of_zero
- ABI_DEALLOCATE(eig)
+ ABI_FREE(eig)
 ! write(std_out,*) "sqrt(eig)                , diag(1,1)",sqrt(eig(1)),diag(1,1)
 ! write(std_out,*) "cmplx(sqrt(eig(1)),zero,dp) , diag(1,1)",cmplx(sqrt(eig(1)),zero,dp),diag(1,1)
 ! write(std_out,*) "sqrt(cmplx(eig(1),zero,dp)) , diag(1,1)",sqrt(cmplx(eig(1),zero,dp)),diag(1,1)
 
 !  == Thirdly Multiply by  matrix for the change of basis
- ABI_ALLOCATE(sqrtmat,(tndim,tndim))
- ABI_ALLOCATE(zhdp2,(tndim,tndim))
+ ABI_MALLOC(sqrtmat,(tndim,tndim))
+ ABI_MALLOC(zhdp2,(tndim,tndim))
  if(pawprtvol>3) then
    write(message,'(2a)') ch10,'  - 1.0/sqrt(Eigenmatrix) - '
    call wrtout(std_out,message,'COLL')
@@ -181,12 +181,12 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
    end do
  endif
 ! endif
- ABI_DEALLOCATE(diag)
+ ABI_FREE(diag)
 
 !  == Forthly Compute the inverse of the square root
 ! call matcginv_dpc(sqrtmat,tndim,tndim)
  !call xginv(sqrtmat,tndim)
- ABI_ALLOCATE(sqrtmatinv,(tndim,tndim))
+ ABI_MALLOC(sqrtmatinv,(tndim,tndim))
  sqrtmatinv=sqrtmat
  if(pawprtvol>3) then
    write(message,'(2a)') ch10,"  - inverse Sqrt root of matrix is - "
@@ -197,7 +197,7 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
      call wrtout(std_out,message,'COLL')
    end do
  endif
- ABI_DEALLOCATE(sqrtmat)
+ ABI_FREE(sqrtmat)
 
 !  == Fifthly Check that O^{-0/5} O O{-0/5}=I
 !  zgemm(A,B,C) : C = op(A) op(B)
@@ -213,10 +213,10 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
      call wrtout(std_out,message,'COLL')
    end do
  endif
- ABI_DEALLOCATE(zhdp2)
+ ABI_FREE(zhdp2)
  matrix=sqrtmatinv
- ABI_DEALLOCATE(sqrtmatinv)
- ABI_DEALLOCATE(initialmatrix)
+ ABI_FREE(sqrtmatinv)
+ ABI_FREE(initialmatrix)
 
  DBG_EXIT("COLL")
 
@@ -276,13 +276,13 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  DBG_ENTER("COLL")
 
  lwork=10*tndim
- ABI_ALLOCATE(work,(lwork))
+ ABI_MALLOC(work,(lwork))
  work = zero
 
- ABI_ALLOCATE(matrix_save,(tndim,tndim))
+ ABI_MALLOC(matrix_save,(tndim,tndim))
  matrix_save=matrix
  
- ABI_ALLOCATE(Permutcol,(tndim,tndim))
+ ABI_MALLOC(Permutcol,(tndim,tndim))
 
  Permutcol=zero
  do im1=1,tndim
@@ -291,7 +291,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
 
  prtopt=0
 
- ABI_ALLOCATE(nonnul,(tndim))
+ ABI_MALLOC(nonnul,(tndim))
  do im1=1,tndim
    if(im1==1) nonnul(im1)=0
    if(im1>1) nonnul(im1)=nonnul(im1-1)
@@ -324,7 +324,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
    end do
  endif
 
- ABI_ALLOCATE(Apermutcol,(tndim,tndim))
+ ABI_MALLOC(Apermutcol,(tndim,tndim))
  if(prtopt==1) then
    write(std_out,*) "Check product of original matrix by permutation matrix "
  endif 
@@ -347,7 +347,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  
 
 
- ABI_ALLOCATE(Permutline,(tndim,tndim))
+ ABI_MALLOC(Permutline,(tndim,tndim))
  Permutline=zero
  do im1=1,tndim
    Permutline(im1,im1)=1.d0
@@ -390,7 +390,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  if(prtopt==1) then
    write(std_out,*) "Check product of Apermutcol matrix by permutation matrix of the line "
  endif
- ABI_ALLOCATE(Apermutline,(tndim,tndim))
+ ABI_MALLOC(Apermutline,(tndim,tndim))
  Apermutline=zero
  do im1=1,tndim
   do im2=1,tndim
@@ -445,7 +445,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
 
 
 !! REORDER EIGENVECTORS
- ABI_ALLOCATE(nonnuldege,(tndim))
+ ABI_MALLOC(nonnuldege,(tndim))
  newstarting=1
  current_dege=1
  do im4=2,tndim
@@ -499,7 +499,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
      current_dege=1
   endif
  enddo
- ABI_DEALLOCATE(nonnuldege)
+ ABI_FREE(nonnuldege)
  if(prtopt==1) then
    write(std_out,*) "Ordered Eigenvectors"
    do im1=1,tndim
@@ -510,7 +510,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  if(prtopt==1) then
    write(std_out,*) "inverse operation: reconstitute original matrix: only the line here"
  endif
- ABI_ALLOCATE(Apermutlineback,(tndim,tndim))
+ ABI_MALLOC(Apermutlineback,(tndim,tndim))
  Apermutlineback=zero
  do im1=1,tndim
   do im2=1,tndim
@@ -568,14 +568,14 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
 ! end do
 
 
- ABI_DEALLOCATE(Apermutlineback)
- ABI_DEALLOCATE(Apermutline)
- ABI_DEALLOCATE(matrix_save)
- ABI_DEALLOCATE(Apermutcol)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(Permutcol)
- ABI_DEALLOCATE(nonnul)
- ABI_DEALLOCATE(Permutline)
+ ABI_FREE(Apermutlineback)
+ ABI_FREE(Apermutline)
+ ABI_FREE(matrix_save)
+ ABI_FREE(Apermutcol)
+ ABI_FREE(work)
+ ABI_FREE(Permutcol)
+ ABI_FREE(nonnul)
+ ABI_FREE(Permutline)
 
  DBG_EXIT("COLL")
 
@@ -634,13 +634,13 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  DBG_ENTER("COLL")
 
  lwork=10*tndim
- ABI_ALLOCATE(work,(lwork))
- ABI_ALLOCATE(rwork,(3*tndim-2))
+ ABI_MALLOC(work,(lwork))
+ ABI_MALLOC(rwork,(3*tndim-2))
 
- ABI_ALLOCATE(matrix_save,(tndim,tndim))
+ ABI_MALLOC(matrix_save,(tndim,tndim))
  matrix_save=matrix
  
- ABI_ALLOCATE(Permutcol,(tndim,tndim))
+ ABI_MALLOC(Permutcol,(tndim,tndim))
 
  Permutcol=zero
  do im1=1,tndim
@@ -651,7 +651,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
     write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (matrix_save(im1,im2),im2=1,tndim)
  end do
 
- ABI_ALLOCATE(nonnul,(tndim))
+ ABI_MALLOC(nonnul,(tndim))
  do im1=1,tndim
    if(im1==1) nonnul(im1)=0
    if(im1>1) nonnul(im1)=nonnul(im1-1)
@@ -682,7 +682,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
     write(std_out,'(2(1x,30(1x,f22.18,f22.18)))') (Permutcol(im1,im2),im2=1,tndim)
  end do
 
- ABI_ALLOCATE(Apermutcol,(tndim,tndim))
+ ABI_MALLOC(Apermutcol,(tndim,tndim))
  write(std_out,*) "Check product of original matrix by permutation matrix "
  Apermutcol=czero
  do im1=1,tndim
@@ -701,7 +701,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  
 
 
- ABI_ALLOCATE(Permutline,(tndim,tndim))
+ ABI_MALLOC(Permutline,(tndim,tndim))
  Permutline=zero
  do im1=1,tndim
    Permutline(im1,im1)=1.d0
@@ -740,7 +740,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  end do
 
  write(std_out,*) "Check product of Apermutcol matrix by permutation matrix of the line "
- ABI_ALLOCATE(Apermutline,(tndim,tndim))
+ ABI_MALLOC(Apermutline,(tndim,tndim))
  Apermutline=czero
  do im1=1,tndim
   do im2=1,tndim
@@ -788,7 +788,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  end do
 
  write(std_out,*) "inverse operation: reconstitute original matrix: first the line"
- ABI_ALLOCATE(Apermutlineback,(tndim,tndim))
+ ABI_MALLOC(Apermutlineback,(tndim,tndim))
  Apermutlineback=czero
  do im1=1,tndim
   do im2=1,tndim
@@ -822,15 +822,15 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 ! end do
 
 
- ABI_DEALLOCATE(Apermutlineback)
- ABI_DEALLOCATE(Apermutline)
- ABI_DEALLOCATE(matrix_save)
- ABI_DEALLOCATE(Apermutcol)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(Permutcol)
- ABI_DEALLOCATE(nonnul)
- ABI_DEALLOCATE(Permutline)
- ABI_DEALLOCATE(rwork)
+ ABI_FREE(Apermutlineback)
+ ABI_FREE(Apermutline)
+ ABI_FREE(matrix_save)
+ ABI_FREE(Apermutcol)
+ ABI_FREE(work)
+ ABI_FREE(Permutcol)
+ ABI_FREE(nonnul)
+ ABI_FREE(Permutline)
+ ABI_FREE(rwork)
 
  DBG_EXIT("COLL")
 

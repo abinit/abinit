@@ -252,27 +252,27 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  cpopt=-1
  kinpw => gs_hamk%kinpw_k
 
- ABI_ALLOCATE(pcon,(npw))
- ABI_ALLOCATE(ghc,(2,npw*nspinor))
- ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
- ABI_ALLOCATE(conjgr,(2,npw*nspinor))
- ABI_ALLOCATE(cwavef,(2,npw*nspinor))
- ABI_ALLOCATE(direc,(2,npw*nspinor))
- ABI_ALLOCATE(scprod,(2,nband))
+ ABI_MALLOC(pcon,(npw))
+ ABI_MALLOC(ghc,(2,npw*nspinor))
+ ABI_MALLOC(gvnlxc,(2,npw*nspinor))
+ ABI_MALLOC(conjgr,(2,npw*nspinor))
+ ABI_MALLOC(cwavef,(2,npw*nspinor))
+ ABI_MALLOC(direc,(2,npw*nspinor))
+ ABI_MALLOC(scprod,(2,nband))
 
- ABI_ALLOCATE(gh_direc,(2,npw*nspinor))
- ABI_ALLOCATE(gvnlx_direc,(2,npw*nspinor))
- ABI_ALLOCATE(vresid,(2,npw*nspinor))
+ ABI_MALLOC(gh_direc,(2,npw*nspinor))
+ ABI_MALLOC(gvnlx_direc,(2,npw*nspinor))
+ ABI_MALLOC(vresid,(2,npw*nspinor))
 
  if (gen_eigenpb)  then
-   ABI_ALLOCATE(gs_direc,(2,npw*nspinor))
+   ABI_MALLOC(gs_direc,(2,npw*nspinor))
  else
-   ABI_ALLOCATE(gs_direc,(0,0))
+   ABI_MALLOC(gs_direc,(0,0))
  end if
 
  if (gen_eigenpb) then
-   ABI_ALLOCATE(scwavef,(2,npw*nspinor))
-   ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
+   ABI_MALLOC(scwavef,(2,npw*nspinor))
+   ABI_MALLOC(direc_tmp,(2,npw*nspinor))
  end if
 
  if (gen_eigenpb.and.(inonsc==1))  then
@@ -280,21 +280,21 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  end if
 
  if (wfopta10==2.or.wfopta10==3)  then
-   ABI_ALLOCATE(work,(2,npw*nspinor))
+   ABI_MALLOC(work,(2,npw*nspinor))
  end if
 
  if (gen_eigenpb.and.(wfopta10==2.or.wfopta10==3))  then
-   ABI_ALLOCATE(swork,(2,npw*nspinor))
+   ABI_MALLOC(swork,(2,npw*nspinor))
  else
-   ABI_ALLOCATE(swork,(0,0))
+   ABI_MALLOC(swork,(0,0))
  end if
 
  if (wfopta10==2 .or. wfopta10==3) then
-   ABI_ALLOCATE(ghcws,(2,npw*nspinor))
-   ABI_ALLOCATE(gh_direcws,(2,npw*nspinor))
-   ABI_ALLOCATE(gvnlx_dummy,(2,npw*nspinor))
+   ABI_MALLOC(ghcws,(2,npw*nspinor))
+   ABI_MALLOC(gh_direcws,(2,npw*nspinor))
+   ABI_MALLOC(gvnlx_dummy,(2,npw*nspinor))
  else
-   ABI_ALLOCATE(gvnlx_dummy,(0,0))
+   ABI_MALLOC(gvnlx_dummy,(0,0))
  end if
 
 !if "generalized eigenproblem", not sure of wfoptalg=2,3 algorithms
@@ -329,20 +329,20 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    ikptf = dtefield%i2fbz(ikpt)
    ikgf = dtefield%fkgindex(ikptf)  ! this is the shift for pwind
    mcg_q = mpw*mband*nspinor
-   ABI_ALLOCATE(detovc,(2,2,3))
-   ABI_ALLOCATE(detovd,(2,2,3))
-   ABI_ALLOCATE(grad_berry,(2,npw*nspinor))
-   ABI_ALLOCATE(cg1_k,(2,mpw))
-   ABI_ALLOCATE(cgq_k,(2,mcg_q))
-   ABI_ALLOCATE(grad_total,(2,npw*nspinor))
-   ABI_ALLOCATE(sflag_k,(mband))
-   ABI_ALLOCATE(pwind_k,(mpw))
-   ABI_ALLOCATE(pwnsfac_k,(4,mpw))
-   ABI_ALLOCATE(smat_k,(2,mband,mband))
-   ABI_ALLOCATE(smat_inv,(2,mband,mband))
+   ABI_MALLOC(detovc,(2,2,3))
+   ABI_MALLOC(detovd,(2,2,3))
+   ABI_MALLOC(grad_berry,(2,npw*nspinor))
+   ABI_MALLOC(cg1_k,(2,mpw))
+   ABI_MALLOC(cgq_k,(2,mcg_q))
+   ABI_MALLOC(grad_total,(2,npw*nspinor))
+   ABI_MALLOC(sflag_k,(mband))
+   ABI_MALLOC(pwind_k,(mpw))
+   ABI_MALLOC(pwnsfac_k,(4,mpw))
+   ABI_MALLOC(smat_k,(2,mband,mband))
+   ABI_MALLOC(smat_inv,(2,mband,mband))
 !  now the special features if using PAW
    if (gs_hamk%usepaw /= 0) then
-     ABI_ALLOCATE(smat_k_paw,(2,gs_hamk%usepaw*mband,gs_hamk%usepaw*mband))
+     ABI_MALLOC(smat_k_paw,(2,gs_hamk%usepaw*mband,gs_hamk%usepaw*mband))
      smat_k_paw(:,:,:) = zero
 !    the following are arguments to nonlop used to apply the on-site dipole to direc vector
      choice = 1 ! only apply projectors
@@ -353,12 +353,12 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      dimenlr1 = gs_hamk%lmnmax*(gs_hamk%lmnmax+1)/2
      dimenl2 = natom
 !    cprj structures for finite_field case
-     ABI_ALLOCATE(dimlmn,(natom))
+     ABI_MALLOC(dimlmn,(natom))
      do iatom = 1, natom
        itypat = gs_hamk%typat(iatom)
        dimlmn(iatom)=dtefield%lmn_size(itypat)
      end do
-     ABI_ALLOCATE(dimlmn_srt,(natom))
+     ABI_MALLOC(dimlmn_srt,(natom))
      iatom = 0
      do itypat = 1, gs_hamk%ntypat
        do iat = 1, gs_hamk%nattyp(itypat)
@@ -366,33 +366,33 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          dimlmn_srt(iatom) = dtefield%lmn_size(itypat)
        end do
      end do
-     ABI_ALLOCATE(ikptf_recv,(nproc_distrb))
-     ABI_DATATYPE_ALLOCATE(cprj_k,(natom,mband*nspinor))
-     ABI_DATATYPE_ALLOCATE(cprj_kb,(natom,mband*nspinor))
-     ABI_DATATYPE_ALLOCATE(cprj_direc,(natom,mband*nspinor))
-     ABI_DATATYPE_ALLOCATE(cprj_band_srt,(natom,nspinor))
-     ABI_DATATYPE_ALLOCATE(cprj_gat,(natom,mband*nspinor*nproc_distrb))
+     ABI_MALLOC(ikptf_recv,(nproc_distrb))
+     ABI_MALLOC(cprj_k,(natom,mband*nspinor))
+     ABI_MALLOC(cprj_kb,(natom,mband*nspinor))
+     ABI_MALLOC(cprj_direc,(natom,mband*nspinor))
+     ABI_MALLOC(cprj_band_srt,(natom,nspinor))
+     ABI_MALLOC(cprj_gat,(natom,mband*nspinor*nproc_distrb))
      call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
      call pawcprj_alloc(cprj_kb,ncpgr,dimlmn)
      call pawcprj_alloc(cprj_direc,ncpgr,dimlmn)
      call pawcprj_alloc(cprj_band_srt,ncpgr,dimlmn_srt)
      call pawcprj_alloc(cprj_gat,ncpgr,dimlmn)
      if (nkpt /= dtefield%fnkpt) then
-       ABI_DATATYPE_ALLOCATE(cprj_fkn,(natom,mband*nspinor))
-       ABI_DATATYPE_ALLOCATE(cprj_ikn,(natom,mband*nspinor))
+       ABI_MALLOC(cprj_fkn,(natom,mband*nspinor))
+       ABI_MALLOC(cprj_ikn,(natom,mband*nspinor))
        call pawcprj_alloc(cprj_fkn,ncpgr,dimlmn)
        call pawcprj_alloc(cprj_ikn,ncpgr,dimlmn)
      end if
    else
-     ABI_ALLOCATE(smat_k_paw,(0,0,0))
-     ABI_ALLOCATE(dimlmn,(0))
-     ABI_ALLOCATE(dimlmn_srt,(0))
-     ABI_ALLOCATE(ikptf_recv,(0))
-     ABI_DATATYPE_ALLOCATE(cprj_k,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_kb,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_direc,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_band_srt,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_gat,(0,0))
+     ABI_MALLOC(smat_k_paw,(0,0,0))
+     ABI_MALLOC(dimlmn,(0))
+     ABI_MALLOC(dimlmn_srt,(0))
+     ABI_MALLOC(ikptf_recv,(0))
+     ABI_MALLOC(cprj_k,(0,0))
+     ABI_MALLOC(cprj_kb,(0,0))
+     ABI_MALLOC(cprj_direc,(0,0))
+     ABI_MALLOC(cprj_band_srt,(0,0))
+     ABI_MALLOC(cprj_gat,(0,0))
    end if
  end if ! finite_field
 
@@ -1207,7 +1207,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  end do ! iblock End loop over block of bands
 
  if (allocated(dimlmn_srt)) then
-   ABI_DEALLOCATE(dimlmn_srt)
+   ABI_FREE(dimlmn_srt)
  end if
 
  if (finite_field .and. gs_hamk%usepaw == 1) then ! store updated cprjs for this kpt
@@ -1250,51 +1250,51 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ! ===================
  ! FINAL DEALLOCATIONS
  ! ===================
- ABI_DEALLOCATE(conjgr)
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(direc)
- ABI_DEALLOCATE(pcon)
- ABI_DEALLOCATE(scprod)
- ABI_DEALLOCATE(ghc)
- ABI_DEALLOCATE(gvnlxc)
- ABI_DEALLOCATE(gh_direc)
- ABI_DEALLOCATE(gvnlx_direc)
- ABI_DEALLOCATE(vresid)
- ABI_DEALLOCATE(gs_direc)
+ ABI_FREE(conjgr)
+ ABI_FREE(cwavef)
+ ABI_FREE(direc)
+ ABI_FREE(pcon)
+ ABI_FREE(scprod)
+ ABI_FREE(ghc)
+ ABI_FREE(gvnlxc)
+ ABI_FREE(gh_direc)
+ ABI_FREE(gvnlx_direc)
+ ABI_FREE(vresid)
+ ABI_FREE(gs_direc)
 
  if (gen_eigenpb)  then
-   ABI_DEALLOCATE(scwavef)
-   ABI_DEALLOCATE(direc_tmp)
+   ABI_FREE(scwavef)
+   ABI_FREE(direc_tmp)
  end if
 
  if (gen_eigenpb.and.(inonsc==1))  then
-   ABI_DEALLOCATE(ghc_all)
+   ABI_FREE(ghc_all)
  end if
 
  if(wfopta10==2.or.wfopta10==3)  then
-   ABI_DEALLOCATE(ghcws)
-   ABI_DEALLOCATE(gh_direcws)
+   ABI_FREE(ghcws)
+   ABI_FREE(gh_direcws)
  end if
- ABI_DEALLOCATE(gvnlx_dummy)
+ ABI_FREE(gvnlx_dummy)
 
  if(wfopta10==2.or.wfopta10==3)  then
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
 
- ABI_DEALLOCATE(swork)
+ ABI_FREE(swork)
 
  if (finite_field) then
-   ABI_DEALLOCATE(cg1_k)
-   ABI_DEALLOCATE(cgq_k)
-   ABI_DEALLOCATE(detovc)
-   ABI_DEALLOCATE(detovd)
-   ABI_DEALLOCATE(grad_berry)
-   ABI_DEALLOCATE(sflag_k)
-   ABI_DEALLOCATE(smat_inv)
-   ABI_DEALLOCATE(smat_k)
-   ABI_DEALLOCATE(pwind_k)
-   ABI_DEALLOCATE(pwnsfac_k)
-   ABI_DEALLOCATE(grad_total)
+   ABI_FREE(cg1_k)
+   ABI_FREE(cgq_k)
+   ABI_FREE(detovc)
+   ABI_FREE(detovd)
+   ABI_FREE(grad_berry)
+   ABI_FREE(sflag_k)
+   ABI_FREE(smat_inv)
+   ABI_FREE(smat_k)
+   ABI_FREE(pwind_k)
+   ABI_FREE(pwnsfac_k)
+   ABI_FREE(grad_total)
    if (gs_hamk%usepaw /= 0) then
      call pawcprj_free(cprj_k)
      call pawcprj_free(cprj_kb)
@@ -1304,18 +1304,18 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      if (nkpt /= dtefield%fnkpt) then
        call pawcprj_free(cprj_fkn)
        call pawcprj_free(cprj_ikn)
-       ABI_DATATYPE_DEALLOCATE(cprj_fkn)
-       ABI_DATATYPE_DEALLOCATE(cprj_ikn)
+       ABI_FREE(cprj_fkn)
+       ABI_FREE(cprj_ikn)
      end if
    end if
-   ABI_DEALLOCATE(smat_k_paw)
-   ABI_DEALLOCATE(dimlmn)
-   ABI_DATATYPE_DEALLOCATE(cprj_k)
-   ABI_DATATYPE_DEALLOCATE(cprj_kb)
-   ABI_DATATYPE_DEALLOCATE(cprj_direc)
-   ABI_DATATYPE_DEALLOCATE(cprj_gat)
-   ABI_DEALLOCATE(ikptf_recv)
-   ABI_DATATYPE_DEALLOCATE(cprj_band_srt)
+   ABI_FREE(smat_k_paw)
+   ABI_FREE(dimlmn)
+   ABI_FREE(cprj_k)
+   ABI_FREE(cprj_kb)
+   ABI_FREE(cprj_direc)
+   ABI_FREE(cprj_gat)
+   ABI_FREE(ikptf_recv)
+   ABI_FREE(cprj_band_srt)
  end if
 
 ! Do not delete this line, needed to run with open MP
@@ -2115,35 +2115,35 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
 
   if (gs_hamk%usepaw /= 0) then
      dimenlr1 = gs_hamk%lmnmax*(gs_hamk%lmnmax+1)/2
-     ABI_ALLOCATE(qijbkk,(dimenlr1,natom,nspinor**2,2))
-     ABI_ALLOCATE(enl_rij,(nspinor*dimenlr1,natom,nspinor**2,1))
-     ABI_ALLOCATE(smat_k_paw,(2,nbo,nbo))
-     ABI_ALLOCATE(grad_berry_ev,(2,npw*nspinor))
+     ABI_MALLOC(qijbkk,(dimenlr1,natom,nspinor**2,2))
+     ABI_MALLOC(enl_rij,(nspinor*dimenlr1,natom,nspinor**2,1))
+     ABI_MALLOC(smat_k_paw,(2,nbo,nbo))
+     ABI_MALLOC(grad_berry_ev,(2,npw*nspinor))
      enl_rij = zero
      qijbkk = zero
      smat_k_paw = zero
-     ABI_DATATYPE_ALLOCATE(cprj_kb,(natom,nbo*nspinor))
+     ABI_MALLOC(cprj_kb,(natom,nbo*nspinor))
      call pawcprj_alloc(cprj_kb,0,dimlmn)
-     ABI_DATATYPE_ALLOCATE(cprj_band_srt,(natom,nspinor))
+     ABI_MALLOC(cprj_band_srt,(natom,nspinor))
      call pawcprj_alloc(cprj_band_srt,0,dimlmn_srt)
      if (nkpt /= dtefield%fnkpt) then
-        ABI_DATATYPE_ALLOCATE(cprj_fkn,(natom,nbo*nspinor))
-        ABI_DATATYPE_ALLOCATE(cprj_ikn,(natom,nbo*nspinor))
+        ABI_MALLOC(cprj_fkn,(natom,nbo*nspinor))
+        ABI_MALLOC(cprj_ikn,(natom,nbo*nspinor))
         call pawcprj_alloc(cprj_fkn,0,dimlmn)
         call pawcprj_alloc(cprj_ikn,0,dimlmn)
      else
-        ABI_DATATYPE_ALLOCATE(cprj_fkn,(0,0))
-        ABI_DATATYPE_ALLOCATE(cprj_ikn,(0,0))
+        ABI_MALLOC(cprj_fkn,(0,0))
+        ABI_MALLOC(cprj_ikn,(0,0))
      end if
   else
-     ABI_ALLOCATE(qijbkk,(0,0,0,0))
-     ABI_ALLOCATE(enl_rij,(0,0,0,0))
-     ABI_ALLOCATE(smat_k_paw,(0,0,0))
-     ABI_ALLOCATE(grad_berry_ev,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_kb,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_band_srt,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_fkn,(0,0))
-     ABI_DATATYPE_ALLOCATE(cprj_ikn,(0,0))
+     ABI_MALLOC(qijbkk,(0,0,0,0))
+     ABI_MALLOC(enl_rij,(0,0,0,0))
+     ABI_MALLOC(smat_k_paw,(0,0,0))
+     ABI_MALLOC(grad_berry_ev,(0,0))
+     ABI_MALLOC(cprj_kb,(0,0))
+     ABI_MALLOC(cprj_band_srt,(0,0))
+     ABI_MALLOC(cprj_fkn,(0,0))
+     ABI_MALLOC(cprj_ikn,(0,0))
   end if
 
   ikptf = dtefield%i2fbz(ikpt)
@@ -2165,7 +2165,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
         end if
         ikpt2 = dtefield%indkk_f2ibz(ikpt2f,1)
         npw_k2 = npwarr(ikpt2)
-        ABI_ALLOCATE(cgq_k,(2,nbo*nspinor*npw_k2))
+        ABI_MALLOC(cgq_k,(2,nbo*nspinor*npw_k2))
         pwind_k(1:npw) = pwind(ikgf+1:ikgf+npw,ifor,idir)
         pwnsfac_k(1:2,1:npw) = pwnsfac(1:2,ikgf+1:ikgf+npw)
         sflag_k(:) = dtefield%sflag(:,ikpt+(isppol-1)*nkpt,ifor,idir)
@@ -2205,7 +2205,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
              &     job,iband,mcg,mcg_q,mcg1_k,iband,mpw,nbo,dtefield%nband_occ(isppol),&
              &     npw,npw_k2,nspinor,pwind_k,pwnsfac_k,sflag_k,&
              &     shiftbd,smat_inv,smat_k,smat_k_paw,gs_hamk%usepaw)
-        ABI_DEALLOCATE(cgq_k)
+        ABI_FREE(cgq_k)
         detovc(:,ifor,idir) = dtm_k(:) !store the determinant of the overlap
         if (sqrt(dtm_k(1)*dtm_k(1) + dtm_k(2)*dtm_k(2)) < tol12) then
            write(message,'(3a,i5,a,i3,a,a,a)') &
@@ -2311,14 +2311,14 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
         call pawcprj_free(cprj_ikn)
      end if
   end if
-  ABI_DEALLOCATE(grad_berry_ev)
-  ABI_DEALLOCATE(qijbkk)
-  ABI_DEALLOCATE(enl_rij)
-  ABI_DEALLOCATE(smat_k_paw)
-  ABI_DATATYPE_DEALLOCATE(cprj_kb)
-  ABI_DATATYPE_DEALLOCATE(cprj_band_srt)
-  ABI_DATATYPE_DEALLOCATE(cprj_fkn)
-  ABI_DATATYPE_DEALLOCATE(cprj_ikn)
+  ABI_FREE(grad_berry_ev)
+  ABI_FREE(qijbkk)
+  ABI_FREE(enl_rij)
+  ABI_FREE(smat_k_paw)
+  ABI_FREE(cprj_kb)
+  ABI_FREE(cprj_band_srt)
+  ABI_FREE(cprj_fkn)
+  ABI_FREE(cprj_ikn)
 
   !DBG_EXIT("COLL")
 

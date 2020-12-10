@@ -251,12 +251,12 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
  polynomial_term%nstrain  = nstrain_tmp
  polynomial_term%weight   = weight
 
- ABI_ALLOCATE(polynomial_term%atindx,(2,polynomial_term%ndisp))
- ABI_ALLOCATE(polynomial_term%direction,(polynomial_term%ndisp))
- ABI_ALLOCATE(polynomial_term%cell,(3,2,polynomial_term%ndisp))
- ABI_ALLOCATE(polynomial_term%power_disp,(polynomial_term%ndisp))
- ABI_ALLOCATE(polynomial_term%power_strain,(polynomial_term%nstrain))
- ABI_ALLOCATE(polynomial_term%strain,(polynomial_term%nstrain))
+ ABI_MALLOC(polynomial_term%atindx,(2,polynomial_term%ndisp))
+ ABI_MALLOC(polynomial_term%direction,(polynomial_term%ndisp))
+ ABI_MALLOC(polynomial_term%cell,(3,2,polynomial_term%ndisp))
+ ABI_MALLOC(polynomial_term%power_disp,(polynomial_term%ndisp))
+ ABI_MALLOC(polynomial_term%power_strain,(polynomial_term%nstrain))
+ ABI_MALLOC(polynomial_term%strain,(polynomial_term%nstrain))
 
 !Transfert displacement 
  idisp2 = 0
@@ -327,32 +327,32 @@ subroutine polynomial_term_free(polynomial_term)
 
  if(allocated(polynomial_term%atindx))then
    polynomial_term%atindx(:,:) = 0
-   ABI_DEALLOCATE(polynomial_term%atindx)
+   ABI_FREE(polynomial_term%atindx)
  end if
 
  if(allocated(polynomial_term%cell))then
    polynomial_term%cell(:,:,:) = 0
-   ABI_DEALLOCATE(polynomial_term%cell)
+   ABI_FREE(polynomial_term%cell)
  end if
 
  if(allocated(polynomial_term%direction))then
    polynomial_term%direction(:) = 0
-   ABI_DEALLOCATE(polynomial_term%direction)
+   ABI_FREE(polynomial_term%direction)
  end if
 
  if(allocated(polynomial_term%power_disp))then
    polynomial_term%power_disp(:) = 0
-   ABI_DEALLOCATE(polynomial_term%power_disp)
+   ABI_FREE(polynomial_term%power_disp)
  end if
 
   if(allocated(polynomial_term%power_strain))then
    polynomial_term%power_strain(:) = 0
-   ABI_DEALLOCATE(polynomial_term%power_strain)
+   ABI_FREE(polynomial_term%power_strain)
  end if
 
   if(allocated(polynomial_term%strain))then
    polynomial_term%strain(:) = 0
-   ABI_DEALLOCATE(polynomial_term%strain)
+   ABI_FREE(polynomial_term%strain)
  end if
 
 

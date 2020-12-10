@@ -141,7 +141,7 @@ CONTAINS
          call efmasval_free(efmasval(i,j))
        end do
      end do
-     ABI_DATATYPE_DEALLOCATE(efmasval)
+     ABI_FREE(efmasval)
    end if
 
  end subroutine efmasval_free_array
@@ -218,7 +218,7 @@ CONTAINS
      do i=1,n
        call efmasdeg_free(efmasdeg(i))
      end do
-     ABI_DATATYPE_DEALLOCATE(efmasdeg)
+     ABI_FREE(efmasdeg)
    end if
  end subroutine efmasdeg_free_array
 !!***
@@ -325,13 +325,13 @@ CONTAINS
 
   !timrev = 1
   !if(dtset%istwfk(1)/=1) timrev=2
-  !ABI_ALLOCATE(title,(dtset%ntypat))
+  !ABI_MALLOC(title,(dtset%ntypat))
   !title(:) = "Bloup"
   !call crystal_init(Cryst,dtset%spgroup,dtset%natom,dtset%npsp,dtset%ntypat,dtset%nsym,dtset%rprimd_orig(:,:,1),&
   !&                 dtset%typat,dtset%xred_orig(:,:,1),dtset%ziontypat,dtset%znucl,timrev,.false.,.false.,title,&
   !&                 dtset%symrel,dtset%tnons,dtset%symafm)
   !call crystal_print(Cryst)
-  !ABI_DEALLOCATE(title)
+  !ABI_FREE(title)
   !call esymm_init(Bsym,kpt_rbz(:,ikpt),Cryst,.false.,nspinor,1,mband,tol5,eigen0,dtset%tolsym)
   !write(std_out,*) 'DEBUG : Bsym. ndegs=',Bsym%ndegs
   !do iband=1,Bsym%ndegs
@@ -958,19 +958,19 @@ end subroutine print_efmas
     nband_k = dtset%nband(ikpt)
     nspinor = dtset%nspinor
 
-    ABI_ALLOCATE(cg1_pert2,(2,npw_k*nspinor))
-    ABI_ALLOCATE(cg1_pert1,(2,npw_k*nspinor))
-    ABI_ALLOCATE(gh1c_pert2,(2,npw_k*nspinor))
-    ABI_ALLOCATE(gh1c_pert1,(2,npw_k*nspinor))
-    ABI_ALLOCATE(gh0c1_pert1,(2,npw_k*nspinor))
-    ABI_ALLOCATE(cg0,(2,npw_k*nspinor))
+    ABI_MALLOC(cg1_pert2,(2,npw_k*nspinor))
+    ABI_MALLOC(cg1_pert1,(2,npw_k*nspinor))
+    ABI_MALLOC(gh1c_pert2,(2,npw_k*nspinor))
+    ABI_MALLOC(gh1c_pert1,(2,npw_k*nspinor))
+    ABI_MALLOC(gh0c1_pert1,(2,npw_k*nspinor))
+    ABI_MALLOC(cg0,(2,npw_k*nspinor))
 
     do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
       deg_dim    = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
       degenerate = (deg_dim>1) .and. (dtset%efmas_deg/=0)
       degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
 
-      ABI_ALLOCATE(eigen1_deg,(deg_dim,deg_dim))
+      ABI_MALLOC(eigen1_deg,(deg_dim,deg_dim))
       !!! If treated band degenerate at 0th order, check that we are at extrema.
       if(degenerate) then
         do adir=1,3
@@ -987,10 +987,10 @@ end subroutine print_efmas
           end if
         end do !adir=1,3
       end if !degenerate(1)
-      ABI_DEALLOCATE(eigen1_deg)
+      ABI_FREE(eigen1_deg)
 
-      ABI_ALLOCATE(eig2_diag,(3,3,deg_dim,deg_dim))
-      ABI_ALLOCATE(eig2_diag_cart,(3,3,deg_dim,deg_dim))
+      ABI_MALLOC(eig2_diag,(3,3,deg_dim,deg_dim))
+      ABI_MALLOC(eig2_diag_cart,(3,3,deg_dim,deg_dim))
       eig2_diag = zero
 
       do iband=1,deg_dim
@@ -1096,17 +1096,17 @@ end subroutine print_efmas
         end do !jband
       end do !iband
 
-      ABI_DEALLOCATE(eig2_diag)
-      ABI_DEALLOCATE(eig2_diag_cart)
+      ABI_FREE(eig2_diag)
+      ABI_FREE(eig2_diag_cart)
 
     end do !ideg
 
-    ABI_DEALLOCATE(cg1_pert2)
-    ABI_DEALLOCATE(cg1_pert1)
-    ABI_DEALLOCATE(gh1c_pert2)
-    ABI_DEALLOCATE(gh1c_pert1)
-    ABI_DEALLOCATE(gh0c1_pert1)
-    ABI_DEALLOCATE(cg0)
+    ABI_FREE(cg1_pert2)
+    ABI_FREE(cg1_pert1)
+    ABI_FREE(gh1c_pert2)
+    ABI_FREE(gh1c_pert1)
+    ABI_FREE(gh0c1_pert1)
+    ABI_FREE(cg0)
 
     icg2=icg2+npw_k*dtset%nspinor*nband_k
     bandtot_index=bandtot_index+nband_k
@@ -1229,15 +1229,15 @@ end subroutine print_efmas
 
   gprimd = rprimd
   call dgetrf(mdim,mdim,gprimd,mdim,ipiv,info)
-  ABI_ALLOCATE(rwork,(3))
+  ABI_MALLOC(rwork,(3))
   call dgetri(mdim,gprimd,mdim,ipiv,rwork,3,info)
-  ABI_DEALLOCATE(rwork)
+  ABI_FREE(rwork)
   gprimd = two_pi*transpose(gprimd)
 
   cdirs = dtset%efmas_calc_dirs
   ndirs = mdim
   if(cdirs/=0) ndirs = dtset%efmas_n_dirs
-  ABI_ALLOCATE(dirs,(3,ndirs))
+  ABI_MALLOC(dirs,(3,ndirs))
   if(cdirs==0) then
     dirs = zero
     do adir=1,ndirs
@@ -1262,14 +1262,14 @@ end subroutine print_efmas
   !!! Initialization of integrals for the degenerate case.
   ntheta   = dtset%efmas_ntheta
   nphi     = 2*ntheta
-  ABI_ALLOCATE(gq_points_th,(ntheta))
-  ABI_ALLOCATE(gq_points_costh,(ntheta))
-  ABI_ALLOCATE(gq_points_sinth,(ntheta))
-  ABI_ALLOCATE(gq_weights_th,(ntheta))
-  ABI_ALLOCATE(gq_points_ph,(nphi))
-  ABI_ALLOCATE(gq_points_cosph,(nphi))
-  ABI_ALLOCATE(gq_points_sinph,(nphi))
-  ABI_ALLOCATE(gq_weights_ph,(nphi))
+  ABI_MALLOC(gq_points_th,(ntheta))
+  ABI_MALLOC(gq_points_costh,(ntheta))
+  ABI_MALLOC(gq_points_sinth,(ntheta))
+  ABI_MALLOC(gq_weights_th,(ntheta))
+  ABI_MALLOC(gq_points_ph,(nphi))
+  ABI_MALLOC(gq_points_cosph,(nphi))
+  ABI_MALLOC(gq_points_sinph,(nphi))
+  ABI_MALLOC(gq_weights_ph,(nphi))
   call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
   !XG180501 : TODO : There is no need to make a Gauss-Legendre integral for the phi variable,
   !since the function to be integrated is periodic...
@@ -1283,7 +1283,7 @@ end subroutine print_efmas
     gq_points_sinph(iphi)=sin(gq_points_ph(iphi))
   enddo
 
-  ABI_ALLOCATE(eff_mass,(mdim,mdim))
+  ABI_MALLOC(eff_mass,(mdim,mdim))
 
 !XG20180519 : incoherent, efmasdeg is dimensioned at nkpt_rbz, and not at dtset%nkpt ...
   do ikpt=1,dtset%nkpt
@@ -1294,10 +1294,10 @@ end subroutine print_efmas
      degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
 
      !!! Allocations
-     ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
-     ABI_ALLOCATE(eigenval,(deg_dim))
+     ABI_MALLOC(eigenvec,(deg_dim,deg_dim))
+     ABI_MALLOC(eigenval,(deg_dim))
 
-     ABI_ALLOCATE(eig2_diag_cart,(3,3,deg_dim,deg_dim))
+     ABI_MALLOC(eig2_diag_cart,(3,3,deg_dim,deg_dim))
 
      do iband=1,deg_dim
         write(std_out,*)"  Compute band ",iband  ! This line here to avoid weird
@@ -1314,34 +1314,34 @@ end subroutine print_efmas
             !Compute effective mass tensor from second derivative matrix. Simple inversion.
             eff_mass(:,:) = eig2_diag_cart(1:mdim,1:mdim,iband,jband)
             call zgetrf(mdim,mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,info)
-            ABI_ALLOCATE(work,(3))
+            ABI_MALLOC(work,(3))
             call zgetri(mdim,eff_mass(1:mdim,1:mdim),mdim,ipiv,work,3,info)
-            ABI_DEALLOCATE(work)
+            ABI_FREE(work)
 
             !DIAGONALIZATION
-            ABI_ALLOCATE(transport_eqv_eigvec,(mdim,mdim,deg_dim))
+            ABI_MALLOC(transport_eqv_eigvec,(mdim,mdim,deg_dim))
             transport_eqv_eigvec=zero
-            ABI_ALLOCATE(transport_eqv_eigval,(mdim,deg_dim))
+            ABI_MALLOC(transport_eqv_eigval,(mdim,deg_dim))
             transport_eqv_eigval=zero
             transport_eqv_eigvec(:,:,iband) = real(eff_mass(1:mdim,1:mdim),dp)
             lwork=-1
-            ABI_ALLOCATE(rwork,(1))
+            ABI_MALLOC(rwork,(1))
             call dsyev('V','U',mdim,transport_eqv_eigvec(:,:,iband),mdim,transport_eqv_eigval(:,iband),rwork,lwork,info)
             lwork = max(1, 3*mdim-1) ! lwork >= max(1, 3*mdim-1)
-            ABI_DEALLOCATE(rwork)
+            ABI_FREE(rwork)
 
-            ABI_ALLOCATE(rwork,(lwork))
+            ABI_MALLOC(rwork,(lwork))
             rwork=zero
             call dsyev('V','U',mdim,transport_eqv_eigvec(:,:,iband),mdim,transport_eqv_eigval(:,iband),rwork,lwork,info)
-            ABI_DEALLOCATE(rwork)
+            ABI_FREE(rwork)
             transport_eqv_eigvec(:,:,iband) = transpose(transport_eqv_eigvec(:,:,iband)) !So that lines contain eigenvectors.
 
             !Frohlich average effective mass
-            ABI_ALLOCATE(m_avg,(1))
-            ABI_ALLOCATE(m_avg_frohlich,(1))
-            ABI_ALLOCATE(saddle_warn,(1))
-            ABI_ALLOCATE(unit_r,(mdim))
-            ABI_ALLOCATE(start_eigf3d_pos,(1))
+            ABI_MALLOC(m_avg,(1))
+            ABI_MALLOC(m_avg_frohlich,(1))
+            ABI_MALLOC(saddle_warn,(1))
+            ABI_MALLOC(unit_r,(mdim))
+            ABI_MALLOC(start_eigf3d_pos,(1))
 
             m_avg=zero
             m_avg_frohlich=zero
@@ -1378,7 +1378,7 @@ end subroutine print_efmas
             endif ! mdim==3
 
             !EFMAS_DIRS
-            ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
+            ABI_MALLOC(m_cart,(ndirs,deg_dim))
             m_cart=zero
             do adir=1,ndirs
               m_cart(adir,1)=1.0_dp/dot_product(dirs(:,adir),matmul(real(eig2_diag_cart(:,:,iband,jband),dp),dirs(:,adir)))
@@ -1391,14 +1391,14 @@ end subroutine print_efmas
             call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+iband,1,mdim,ndirs,dirs,m_cart,rprimd,real(eff_mass,dp), &
 &             ntheta,m_avg,m_avg_frohlich,saddle_warn,&
 &             transport_eqv_eigval(:,iband:iband),transport_eqv_eigvec(:,:,iband:iband))
-            ABI_DEALLOCATE(m_cart)
-            ABI_DEALLOCATE(transport_eqv_eigvec)
-            ABI_DEALLOCATE(transport_eqv_eigval)
-            ABI_DEALLOCATE(m_avg)
-            ABI_DEALLOCATE(m_avg_frohlich)
-            ABI_DEALLOCATE(unit_r)
-            ABI_DEALLOCATE(saddle_warn)
-            ABI_DEALLOCATE(start_eigf3d_pos)
+            ABI_FREE(m_cart)
+            ABI_FREE(transport_eqv_eigvec)
+            ABI_FREE(transport_eqv_eigval)
+            ABI_FREE(m_avg)
+            ABI_FREE(m_avg_frohlich)
+            ABI_FREE(unit_r)
+            ABI_FREE(saddle_warn)
+            ABI_FREE(start_eigf3d_pos)
 
           end if !.not.degenerate
         end do !jband
@@ -1406,30 +1406,30 @@ end subroutine print_efmas
 
       !!! EQV_MASS
       if(degenerate .and. mdim==3) then
-        ABI_ALLOCATE(unit_r,(mdim))
-        ABI_ALLOCATE(dr_dth,(mdim))
-        ABI_ALLOCATE(dr_dph,(mdim))
-        ABI_ALLOCATE(f3d,(deg_dim,deg_dim))
-        ABI_ALLOCATE(df3d_dth,(deg_dim,deg_dim))
-        ABI_ALLOCATE(df3d_dph,(deg_dim,deg_dim))
-        ABI_ALLOCATE(unitary_tr,(deg_dim,deg_dim))
-        ABI_ALLOCATE(eigf3d,(deg_dim))
-        ABI_ALLOCATE(saddle_warn,(deg_dim))
-        ABI_ALLOCATE(start_eigf3d_pos,(deg_dim))
-        ABI_ALLOCATE(m_avg,(deg_dim))
-        ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
-        ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
-        ABI_ALLOCATE(deigf3d_dth,(deg_dim))
-        ABI_ALLOCATE(deigf3d_dph,(deg_dim))
-        ABI_ALLOCATE(unit_speed,(mdim,deg_dim))
-        ABI_ALLOCATE(transport_tensor,(mdim,mdim,deg_dim))
-        ABI_ALLOCATE(transport_tensor_eig,(mdim))
-        ABI_ALLOCATE(transport_eqv_m,(mdim,mdim,deg_dim))
-        ABI_ALLOCATE(transport_eqv_eigval,(mdim,deg_dim))
-        ABI_ALLOCATE(transport_eqv_eigvec,(mdim,mdim,deg_dim))
-        ABI_ALLOCATE(prodc,(deg_dim,deg_dim))
-        ABI_ALLOCATE(prodr,(mdim,mdim))
-        !ABI_ALLOCATE(f3dfd,(2,nphi,deg_dim))
+        ABI_MALLOC(unit_r,(mdim))
+        ABI_MALLOC(dr_dth,(mdim))
+        ABI_MALLOC(dr_dph,(mdim))
+        ABI_MALLOC(f3d,(deg_dim,deg_dim))
+        ABI_MALLOC(df3d_dth,(deg_dim,deg_dim))
+        ABI_MALLOC(df3d_dph,(deg_dim,deg_dim))
+        ABI_MALLOC(unitary_tr,(deg_dim,deg_dim))
+        ABI_MALLOC(eigf3d,(deg_dim))
+        ABI_MALLOC(saddle_warn,(deg_dim))
+        ABI_MALLOC(start_eigf3d_pos,(deg_dim))
+        ABI_MALLOC(m_avg,(deg_dim))
+        ABI_MALLOC(m_avg_frohlich,(deg_dim))
+        ABI_MALLOC(m_cart,(ndirs,deg_dim))
+        ABI_MALLOC(deigf3d_dth,(deg_dim))
+        ABI_MALLOC(deigf3d_dph,(deg_dim))
+        ABI_MALLOC(unit_speed,(mdim,deg_dim))
+        ABI_MALLOC(transport_tensor,(mdim,mdim,deg_dim))
+        ABI_MALLOC(transport_tensor_eig,(mdim))
+        ABI_MALLOC(transport_eqv_m,(mdim,mdim,deg_dim))
+        ABI_MALLOC(transport_eqv_eigval,(mdim,deg_dim))
+        ABI_MALLOC(transport_eqv_eigvec,(mdim,mdim,deg_dim))
+        ABI_MALLOC(prodc,(deg_dim,deg_dim))
+        ABI_MALLOC(prodr,(mdim,mdim))
+        !ABI_MALLOC(f3dfd,(2,nphi,deg_dim))
         unit_r=zero
         dr_dth=zero
         dr_dph=zero
@@ -1494,17 +1494,17 @@ end subroutine print_efmas
             !DIAGONALIZATION
             eigenvec = f3d        !IN
             lwork=-1
-            ABI_ALLOCATE(work,(1))
-            ABI_ALLOCATE(rwork,(3*deg_dim-2))
+            ABI_MALLOC(work,(1))
+            ABI_MALLOC(rwork,(3*deg_dim-2))
             call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
             lwork=int(work(1))
-            ABI_DEALLOCATE(work)
+            ABI_FREE(work)
             eigenval = zero
-            ABI_ALLOCATE(work,(lwork))
+            ABI_MALLOC(work,(lwork))
             work=zero; rwork=zero
             call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
-            ABI_DEALLOCATE(rwork)
-            ABI_DEALLOCATE(work)
+            ABI_FREE(rwork)
+            ABI_FREE(work)
             unitary_tr = eigenvec !OUT
             eigf3d = eigenval     !OUT
             if(itheta==1 .and. iphi==1) start_eigf3d_pos = eigf3d > 0
@@ -1604,17 +1604,17 @@ end subroutine print_efmas
           !f3d(:,:) = eig2_diag_cart(adir,adir,:,:)
           eigenvec = f3d        !IN
           lwork=-1
-          ABI_ALLOCATE(work,(1))
-          ABI_ALLOCATE(rwork,(3*deg_dim-2))
+          ABI_MALLOC(work,(1))
+          ABI_MALLOC(rwork,(3*deg_dim-2))
           call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
           lwork=int(work(1))
-          ABI_DEALLOCATE(work)
+          ABI_FREE(work)
           eigenval = zero
-          ABI_ALLOCATE(work,(lwork))
+          ABI_MALLOC(work,(lwork))
           work=zero; rwork=zero
           call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
-          ABI_DEALLOCATE(rwork)
-          ABI_DEALLOCATE(work)
+          ABI_FREE(rwork)
+          ABI_FREE(work)
           unitary_tr = eigenvec !OUT
           eigf3d = eigenval     !OUT
           m_cart(adir,:)=1._dp/eigf3d(:)
@@ -1624,15 +1624,15 @@ end subroutine print_efmas
           !DIAGONALIZATION
           transport_eqv_eigvec(:,:,iband) = transport_tensor(:,:,iband)
           lwork=-1
-          ABI_ALLOCATE(rwork,(1))
+          ABI_MALLOC(rwork,(1))
           call dsyev('V','U',mdim,transport_eqv_eigvec(:,:,iband),mdim,transport_tensor_eig,rwork,lwork,info)
           lwork=int(rwork(1))
-          ABI_DEALLOCATE(rwork)
+          ABI_FREE(rwork)
           transport_tensor_eig = zero
-          ABI_ALLOCATE(rwork,(lwork))
+          ABI_MALLOC(rwork,(lwork))
           rwork=zero
           call dsyev('V','U',mdim,transport_eqv_eigvec(:,:,iband),mdim,transport_tensor_eig,rwork,lwork,info)
-          ABI_DEALLOCATE(rwork)
+          ABI_FREE(rwork)
           transport_eqv_eigvec(:,:,iband) = transpose(transport_eqv_eigvec(:,:,iband)) !So that lines contain eigenvectors.
 
           prodr=MATMUL_(transport_tensor(:,:,iband),transport_eqv_eigvec(:,:,iband),mdim,mdim,transb='t')
@@ -1663,55 +1663,55 @@ end subroutine print_efmas
         call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
 &                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec)
 
-        ABI_DEALLOCATE(unit_r)
-        ABI_DEALLOCATE(dr_dth)
-        ABI_DEALLOCATE(dr_dph)
-        ABI_DEALLOCATE(f3d)
-        ABI_DEALLOCATE(df3d_dth)
-        ABI_DEALLOCATE(df3d_dph)
-        ABI_DEALLOCATE(unitary_tr)
-        ABI_DEALLOCATE(eigf3d)
-        ABI_DEALLOCATE(saddle_warn)
-        ABI_DEALLOCATE(start_eigf3d_pos)
-        ABI_DEALLOCATE(m_avg)
-        ABI_DEALLOCATE(m_avg_frohlich)
-        ABI_DEALLOCATE(m_cart)
-        ABI_DEALLOCATE(deigf3d_dth)
-        ABI_DEALLOCATE(deigf3d_dph)
-        ABI_DEALLOCATE(unit_speed)
-        ABI_DEALLOCATE(transport_tensor)
-        ABI_DEALLOCATE(transport_tensor_eig)
-        ABI_DEALLOCATE(transport_eqv_m)
-        ABI_DEALLOCATE(transport_eqv_eigval)
-        ABI_DEALLOCATE(transport_eqv_eigvec)
-        ABI_DEALLOCATE(prodc)
-        ABI_DEALLOCATE(prodr)
-        !ABI_DEALLOCATE(f3dfd)
+        ABI_FREE(unit_r)
+        ABI_FREE(dr_dth)
+        ABI_FREE(dr_dph)
+        ABI_FREE(f3d)
+        ABI_FREE(df3d_dth)
+        ABI_FREE(df3d_dph)
+        ABI_FREE(unitary_tr)
+        ABI_FREE(eigf3d)
+        ABI_FREE(saddle_warn)
+        ABI_FREE(start_eigf3d_pos)
+        ABI_FREE(m_avg)
+        ABI_FREE(m_avg_frohlich)
+        ABI_FREE(m_cart)
+        ABI_FREE(deigf3d_dth)
+        ABI_FREE(deigf3d_dph)
+        ABI_FREE(unit_speed)
+        ABI_FREE(transport_tensor)
+        ABI_FREE(transport_tensor_eig)
+        ABI_FREE(transport_eqv_m)
+        ABI_FREE(transport_eqv_eigval)
+        ABI_FREE(transport_eqv_eigvec)
+        ABI_FREE(prodc)
+        ABI_FREE(prodr)
+        !ABI_FREE(f3dfd)
 
       elseif (degenerate .and. mdim==2) then
 
-        ABI_ALLOCATE(unit_r,(mdim))
-        ABI_ALLOCATE(dr_dph,(mdim))
-        ABI_ALLOCATE(f3d,(deg_dim,deg_dim))
-        ABI_ALLOCATE(df3d_dph,(deg_dim,deg_dim))
-        ABI_ALLOCATE(unitary_tr,(deg_dim,deg_dim))
-        ABI_ALLOCATE(eigf3d,(deg_dim))
-        ABI_ALLOCATE(saddle_warn,(deg_dim))
-        ABI_ALLOCATE(start_eigf3d_pos,(deg_dim))
-        ABI_ALLOCATE(m_avg,(deg_dim))
-        ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
-        ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
-        ABI_ALLOCATE(deigf3d_dph,(deg_dim))
-        ABI_ALLOCATE(unit_speed,(mdim,deg_dim))
-        ABI_ALLOCATE(transport_tensor,(mdim,mdim,deg_dim))
-        ABI_ALLOCATE(cart_rotation,(mdim,mdim))
-        ABI_ALLOCATE(transport_tensor_eig,(mdim))
-        ABI_ALLOCATE(transport_eqv_m,(mdim,mdim,deg_dim))
-        ABI_ALLOCATE(transport_eqv_eigval,(mdim,deg_dim))
-        ABI_ALLOCATE(transport_eqv_eigvec,(mdim,mdim,deg_dim))
-        ABI_ALLOCATE(transport_tensor_scale,(deg_dim))
-        ABI_ALLOCATE(prodc,(deg_dim,deg_dim))
-        ABI_ALLOCATE(prodr,(mdim,mdim))
+        ABI_MALLOC(unit_r,(mdim))
+        ABI_MALLOC(dr_dph,(mdim))
+        ABI_MALLOC(f3d,(deg_dim,deg_dim))
+        ABI_MALLOC(df3d_dph,(deg_dim,deg_dim))
+        ABI_MALLOC(unitary_tr,(deg_dim,deg_dim))
+        ABI_MALLOC(eigf3d,(deg_dim))
+        ABI_MALLOC(saddle_warn,(deg_dim))
+        ABI_MALLOC(start_eigf3d_pos,(deg_dim))
+        ABI_MALLOC(m_avg,(deg_dim))
+        ABI_MALLOC(m_avg_frohlich,(deg_dim))
+        ABI_MALLOC(m_cart,(ndirs,deg_dim))
+        ABI_MALLOC(deigf3d_dph,(deg_dim))
+        ABI_MALLOC(unit_speed,(mdim,deg_dim))
+        ABI_MALLOC(transport_tensor,(mdim,mdim,deg_dim))
+        ABI_MALLOC(cart_rotation,(mdim,mdim))
+        ABI_MALLOC(transport_tensor_eig,(mdim))
+        ABI_MALLOC(transport_eqv_m,(mdim,mdim,deg_dim))
+        ABI_MALLOC(transport_eqv_eigval,(mdim,deg_dim))
+        ABI_MALLOC(transport_eqv_eigvec,(mdim,mdim,deg_dim))
+        ABI_MALLOC(transport_tensor_scale,(deg_dim))
+        ABI_MALLOC(prodc,(deg_dim,deg_dim))
+        ABI_MALLOC(prodr,(mdim,mdim))
         unit_r=zero
         dr_dph=zero
         f3d=zero
@@ -1755,17 +1755,17 @@ end subroutine print_efmas
           !DIAGONALIZATION
           eigenvec = f3d        !IN
           lwork=-1
-          ABI_ALLOCATE(work,(1))
-          ABI_ALLOCATE(rwork,(3*deg_dim-2))
+          ABI_MALLOC(work,(1))
+          ABI_MALLOC(rwork,(3*deg_dim-2))
           call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
           lwork=int(work(1))
-          ABI_DEALLOCATE(work)
+          ABI_FREE(work)
           eigenval = zero
-          ABI_ALLOCATE(work,(lwork))
+          ABI_MALLOC(work,(lwork))
           work=zero; rwork=zero
           call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
-          ABI_DEALLOCATE(rwork)
-          ABI_DEALLOCATE(work)
+          ABI_FREE(rwork)
+          ABI_FREE(work)
           unitary_tr = eigenvec !OUT
           eigf3d = eigenval     !OUT
           if(iphi==1) start_eigf3d_pos = eigf3d > 0
@@ -1823,17 +1823,17 @@ end subroutine print_efmas
           !f3d(:,:) = eig2_diag_cart(adir,adir,:,:)
           eigenvec = f3d        !IN
           lwork=-1
-          ABI_ALLOCATE(work,(1))
-          ABI_ALLOCATE(rwork,(3*deg_dim-2))
+          ABI_MALLOC(work,(1))
+          ABI_MALLOC(rwork,(3*deg_dim-2))
           call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
           lwork=int(work(1))
-          ABI_DEALLOCATE(work)
+          ABI_FREE(work)
           eigenval = zero
-          ABI_ALLOCATE(work,(lwork))
+          ABI_MALLOC(work,(lwork))
           work=zero; rwork=zero
           call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
-          ABI_DEALLOCATE(rwork)
-          ABI_DEALLOCATE(work)
+          ABI_FREE(rwork)
+          ABI_FREE(work)
           unitary_tr = eigenvec !OUT
           eigf3d = eigenval     !OUT
           m_cart(adir,:)=1._dp/eigf3d(:)
@@ -1843,15 +1843,15 @@ end subroutine print_efmas
             !DIAGONALIZATION
           cart_rotation = transport_tensor(:,:,iband)
           lwork=-1
-          ABI_ALLOCATE(rwork,(1))
+          ABI_MALLOC(rwork,(1))
           call dsyev('V','U',mdim,cart_rotation,mdim,transport_tensor_eig,rwork,lwork,info)
           lwork=int(rwork(1))
-          ABI_DEALLOCATE(rwork)
+          ABI_FREE(rwork)
           transport_tensor_eig = zero
-          ABI_ALLOCATE(rwork,(lwork))
+          ABI_MALLOC(rwork,(lwork))
           rwork=zero
           call dsyev('V','U',mdim,cart_rotation,mdim,transport_tensor_eig,rwork,lwork,info)
-          ABI_DEALLOCATE(rwork)
+          ABI_FREE(rwork)
           transport_eqv_eigvec(:,:,iband) = transpose(cart_rotation(:,:)) !So that lines contain eigenvectors, not columns.
 
           prodr=MATMUL_(transport_tensor(:,:,iband),cart_rotation,mdim,mdim)
@@ -1879,39 +1879,39 @@ end subroutine print_efmas
         call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m, &
 &                        ntheta,m_avg,m_avg_frohlich,saddle_warn,transport_eqv_eigval,transport_eqv_eigvec,transport_tensor_scale)
 
-        ABI_DEALLOCATE(unit_r)
-        ABI_DEALLOCATE(dr_dph)
-        ABI_DEALLOCATE(f3d)
-        ABI_DEALLOCATE(df3d_dph)
-        ABI_DEALLOCATE(unitary_tr)
-        ABI_DEALLOCATE(eigf3d)
-        ABI_DEALLOCATE(saddle_warn)
-        ABI_DEALLOCATE(start_eigf3d_pos)
-        ABI_DEALLOCATE(m_avg)
-        ABI_DEALLOCATE(m_avg_frohlich)
-        ABI_DEALLOCATE(m_cart)
-        ABI_DEALLOCATE(deigf3d_dph)
-        ABI_DEALLOCATE(unit_speed)
-        ABI_DEALLOCATE(transport_tensor)
-        ABI_DEALLOCATE(cart_rotation)
-        ABI_DEALLOCATE(transport_tensor_eig)
-        ABI_DEALLOCATE(transport_eqv_m)
-        ABI_DEALLOCATE(transport_eqv_eigval)
-        ABI_DEALLOCATE(transport_eqv_eigvec)
-        ABI_DEALLOCATE(transport_tensor_scale)
-        ABI_DEALLOCATE(prodc)
-        ABI_DEALLOCATE(prodr)
+        ABI_FREE(unit_r)
+        ABI_FREE(dr_dph)
+        ABI_FREE(f3d)
+        ABI_FREE(df3d_dph)
+        ABI_FREE(unitary_tr)
+        ABI_FREE(eigf3d)
+        ABI_FREE(saddle_warn)
+        ABI_FREE(start_eigf3d_pos)
+        ABI_FREE(m_avg)
+        ABI_FREE(m_avg_frohlich)
+        ABI_FREE(m_cart)
+        ABI_FREE(deigf3d_dph)
+        ABI_FREE(unit_speed)
+        ABI_FREE(transport_tensor)
+        ABI_FREE(cart_rotation)
+        ABI_FREE(transport_tensor_eig)
+        ABI_FREE(transport_eqv_m)
+        ABI_FREE(transport_eqv_eigval)
+        ABI_FREE(transport_eqv_eigvec)
+        ABI_FREE(transport_tensor_scale)
+        ABI_FREE(prodc)
+        ABI_FREE(prodr)
 
       elseif (degenerate .and. mdim==1) then
 
-        ABI_ALLOCATE(f3d,(deg_dim,deg_dim))
-        ABI_ALLOCATE(unitary_tr,(deg_dim,deg_dim))
-        ABI_ALLOCATE(eigf3d,(deg_dim))
-        ABI_ALLOCATE(m_cart,(ndirs,deg_dim))
-        ABI_ALLOCATE(transport_eqv_m,(mdim,mdim,deg_dim))
-        ABI_ALLOCATE(m_avg,(deg_dim))
-        ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
-        ABI_ALLOCATE(saddle_warn,(deg_dim))
+        ABI_MALLOC(f3d,(deg_dim,deg_dim))
+        ABI_MALLOC(unitary_tr,(deg_dim,deg_dim))
+        ABI_MALLOC(eigf3d,(deg_dim))
+        ABI_MALLOC(m_cart,(ndirs,deg_dim))
+        ABI_MALLOC(transport_eqv_m,(mdim,mdim,deg_dim))
+        ABI_MALLOC(m_avg,(deg_dim))
+        ABI_MALLOC(m_avg_frohlich,(deg_dim))
+        ABI_MALLOC(saddle_warn,(deg_dim))
 
 
         f3d=zero
@@ -1928,17 +1928,17 @@ end subroutine print_efmas
         !DIAGONALIZATION
         eigenvec = f3d        !IN
         lwork=-1
-        ABI_ALLOCATE(work,(1))
-        ABI_ALLOCATE(rwork,(3*deg_dim-2))
+        ABI_MALLOC(work,(1))
+        ABI_MALLOC(rwork,(3*deg_dim-2))
         call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
         lwork=int(work(1))
-        ABI_DEALLOCATE(work)
+        ABI_FREE(work)
         eigenval = zero
-        ABI_ALLOCATE(work,(lwork))
+        ABI_MALLOC(work,(lwork))
         work=zero; rwork=zero
         call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
-        ABI_DEALLOCATE(rwork)
-        ABI_DEALLOCATE(work)
+        ABI_FREE(rwork)
+        ABI_FREE(work)
         unitary_tr = eigenvec !OUT
         eigf3d = eigenval     !OUT
 
@@ -1953,17 +1953,17 @@ end subroutine print_efmas
           end do
           eigenvec = f3d        !IN
           lwork=-1
-          ABI_ALLOCATE(work,(1))
-          ABI_ALLOCATE(rwork,(3*deg_dim-2))
+          ABI_MALLOC(work,(1))
+          ABI_MALLOC(rwork,(3*deg_dim-2))
           call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
           lwork=int(work(1))
-          ABI_DEALLOCATE(work)
+          ABI_FREE(work)
           eigenval = zero
-          ABI_ALLOCATE(work,(lwork))
+          ABI_MALLOC(work,(lwork))
           work=zero; rwork=zero
           call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
-          ABI_DEALLOCATE(rwork)
-          ABI_DEALLOCATE(work)
+          ABI_FREE(rwork)
+          ABI_FREE(work)
           eigf3d = eigenval     !OUT
           m_cart(adir,:)=1._dp/eigf3d(:)
         end do
@@ -1973,37 +1973,37 @@ end subroutine print_efmas
         call print_tr_efmas(ab_out, kpt_rbz(:,ikpt),degl+1,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,transport_eqv_m,&
 &          ntheta,m_avg,m_avg_frohlich,saddle_warn)
 
-        ABI_DEALLOCATE(f3d)
-        ABI_DEALLOCATE(unitary_tr)
-        ABI_DEALLOCATE(eigf3d)
-        ABI_DEALLOCATE(m_cart)
-        ABI_DEALLOCATE(transport_eqv_m)
-        ABI_DEALLOCATE(m_avg)
-        ABI_DEALLOCATE(m_avg_frohlich)
-        ABI_DEALLOCATE(saddle_warn)
+        ABI_FREE(f3d)
+        ABI_FREE(unitary_tr)
+        ABI_FREE(eigf3d)
+        ABI_FREE(m_cart)
+        ABI_FREE(transport_eqv_m)
+        ABI_FREE(m_avg)
+        ABI_FREE(m_avg_frohlich)
+        ABI_FREE(saddle_warn)
 
 
       end if !(degenerate)
 
-      ABI_DEALLOCATE(eig2_diag_cart)
+      ABI_FREE(eig2_diag_cart)
 
-      ABI_DEALLOCATE(eigenval)
+      ABI_FREE(eigenval)
 
-      ABI_DEALLOCATE(eigenvec)
+      ABI_FREE(eigenvec)
     end do !ideg
 
   end do !ikpt
 
-  ABI_DEALLOCATE(eff_mass)
-  ABI_DEALLOCATE(dirs)
-  ABI_DEALLOCATE(gq_points_th)
-  ABI_DEALLOCATE(gq_points_costh)
-  ABI_DEALLOCATE(gq_points_sinth)
-  ABI_DEALLOCATE(gq_weights_th)
-  ABI_DEALLOCATE(gq_points_ph)
-  ABI_DEALLOCATE(gq_points_cosph)
-  ABI_DEALLOCATE(gq_points_sinph)
-  ABI_DEALLOCATE(gq_weights_ph)
+  ABI_FREE(eff_mass)
+  ABI_FREE(dirs)
+  ABI_FREE(gq_points_th)
+  ABI_FREE(gq_points_costh)
+  ABI_FREE(gq_points_sinth)
+  ABI_FREE(gq_weights_th)
+  ABI_FREE(gq_points_ph)
+  ABI_FREE(gq_points_cosph)
+  ABI_FREE(gq_points_sinph)
+  ABI_FREE(gq_weights_ph)
 
   write(std_out,'(3a)') ch10,' END OF EFFECTIVE MASSES SECTION',ch10
   write(ab_out, '(3a)') ch10,' END OF EFFECTIVE MASSES SECTION',ch10

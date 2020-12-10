@@ -1707,7 +1707,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
 ! write(std_out,*) 
 !ENDDEBUG
 
-   ABI_ALLOCATE(xredsym,(3,natom))
+   ABI_MALLOC(xredsym,(3,natom))
    xredsym(:,:)=xred(:,1:natom)
 
    if(present(indsym))then 
@@ -1851,7 +1851,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
    end do
 
    if (dissimilar) xred(:,:)=xredsym(:,:)
-   ABI_DEALLOCATE(xredsym)
+   ABI_FREE(xredsym)
 
 !  End condition of nsym/=1
  end if

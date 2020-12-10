@@ -368,7 +368,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !Initializations
  natprt=natmax;if (dtset%natom==1) natprt=1
  if (dtset%pawprtvol<0) natprt=dtset%natom
- ABI_ALLOCATE(jatom,(natprt))
+ ABI_MALLOC(jatom,(natprt))
  if (natprt==1) then
    jatom(1)=1
  else if (natprt==2) then
@@ -399,10 +399,10 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !If atomic data are distributed, retrieve all Dij on master proc
  if (paral_atom) then
    if (me_atom==0) then
-     ABI_DATATYPE_ALLOCATE(paw_ij_all,(dtset%natom))
+     ABI_MALLOC(paw_ij_all,(dtset%natom))
      call paw_ij_nullify(paw_ij_all)
    else
-     ABI_DATATYPE_ALLOCATE(paw_ij_all,(0))
+     ABI_MALLOC(paw_ij_all,(0))
    end if
    call paw_ij_gather(paw_ij,paw_ij_all,0,my_comm_atom)
  else
@@ -446,15 +446,15 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
  end if
  if (paral_atom.and.(.not.usepawu).and.(.not.useexexch)) then
    call paw_ij_free(paw_ij_all)
-   ABI_DATATYPE_DEALLOCATE(paw_ij_all)
+   ABI_FREE(paw_ij_all)
  end if
 
 !If atomic data are distributed, retrieve all Rhoij on master proc
  if (paral_atom) then
    if (me_atom==0) then
-     ABI_DATATYPE_ALLOCATE(pawrhoij_all,(dtset%natom))
+     ABI_MALLOC(pawrhoij_all,(dtset%natom))
    else
-     ABI_DATATYPE_ALLOCATE(pawrhoij_all,(0))
+     ABI_MALLOC(pawrhoij_all,(0))
    end if
    call pawrhoij_nullify(pawrhoij_all)
    call pawrhoij_gather(pawrhoij,pawrhoij_all,0,my_comm_atom,&
@@ -605,9 +605,9 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
          end do
 !        Transformation matrices: real->complex spherical harmonics
          if(paw_ij_all(iatom)%ndij==4) then
-           ABI_ALLOCATE(noccmmp_ylm,(2*ll+1,2*ll+1,paw_ij_all(iatom)%ndij))
+           ABI_MALLOC(noccmmp_ylm,(2*ll+1,2*ll+1,paw_ij_all(iatom)%ndij))
            noccmmp_ylm=czero
-           ABI_ALLOCATE(noccmmp_slm,(2*ll+1,2*ll+1,paw_ij_all(iatom)%ndij))
+           ABI_MALLOC(noccmmp_slm,(2*ll+1,2*ll+1,paw_ij_all(iatom)%ndij))
            noccmmp_slm=czero
 !          Go from real notation for complex noccmmp to complex notation in noccmmp_slm
            noccmmp_slm(:,:,:)=cmplx(paw_ij_all(iatom)%noccmmp(1,:,:,:),paw_ij_all(iatom)%noccmmp(2,:,:,:))
@@ -628,7 +628,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
            write(msg,'(a)') ch10
            call wrtout(unitfi,msg,'COLL')
            if (dtset%pawspnorb>0) then
-             ABI_ALLOCATE(noccmmp_jmj,(2*(2*ll+1),2*(2*ll+1)))
+             ABI_MALLOC(noccmmp_jmj,(2*(2*ll+1),2*(2*ll+1)))
              noccmmp_jmj=czero
              ii=std_out;if (unitfi==ab_out) ii=-1
              call mat_mlms2jmj(ll,noccmmp_ylm,noccmmp_jmj,paw_ij_all(iatom)%ndij,&
@@ -642,10 +642,10 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
              end do
              write(msg,'(a)') ch10
              call wrtout(unitfi,msg,'COLL')
-             ABI_DEALLOCATE(noccmmp_jmj)
+             ABI_FREE(noccmmp_jmj)
            end if ! pawspnorb
-           ABI_DEALLOCATE(noccmmp_ylm)
-           ABI_DEALLOCATE(noccmmp_slm)
+           ABI_FREE(noccmmp_ylm)
+           ABI_FREE(noccmmp_slm)
          end if ! ndij==4
        end if ! ((ll>=0).and.(pawtab(itypat)%usepawu/=0))
      end do
@@ -660,8 +660,8 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      itypat=dtset%typat(iatom);ll=pawtab(itypat)%lexexch
      cplex_dij=paw_ij_all(iatom)%cplex_dij
      if (ll>=0.and.pawtab(itypat)%useexexch/=0) then
-       ABI_ALLOCATE(paw_ij_all(iatom)%noccmmp,(cplex_dij,2*ll+1,2*ll+1,ndij))
-       ABI_ALLOCATE(paw_ij_all(iatom)%nocctot,(nspden))
+       ABI_MALLOC(paw_ij_all(iatom)%noccmmp,(cplex_dij,2*ll+1,2*ll+1,ndij))
+       ABI_MALLOC(paw_ij_all(iatom)%nocctot,(nspden))
      end if
    end do
    call setnoccmmp(1,0,rdum4,0,0,idum3,dtset%natom,dtset%natom,0,1,nsppol,0,dtset%ntypat,&
@@ -700,10 +700,10 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
    end do
    do iatom=1,dtset%natom
      if (allocated(paw_ij_all(iatom)%noccmmp)) then
-       ABI_DEALLOCATE(paw_ij_all(iatom)%noccmmp)
+       ABI_FREE(paw_ij_all(iatom)%noccmmp)
      end if
      if (allocated(paw_ij_all(iatom)%nocctot)) then
-       ABI_DEALLOCATE(paw_ij_all(iatom)%nocctot)
+       ABI_FREE(paw_ij_all(iatom)%nocctot)
      end if
    end do
  end if
@@ -713,14 +713,14 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
  call wrtout(std_out,msg,'COLL')
 
 !Destroy temporary stored atomic data
- ABI_DEALLOCATE(jatom)
+ ABI_FREE(jatom)
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
  if (paral_atom) then
    call pawrhoij_free(pawrhoij_all)
-   ABI_DATATYPE_DEALLOCATE(pawrhoij_all)
+   ABI_FREE(pawrhoij_all)
    if (usepawu.or.useexexch) then
      call paw_ij_free(paw_ij_all)
-     ABI_DATATYPE_DEALLOCATE(paw_ij_all)
+     ABI_FREE(paw_ij_all)
    end if
  end if
 

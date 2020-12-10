@@ -167,13 +167,13 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  libxc_gga_initialized=0 ; nmxc=.false.
 
  nkxc=0;ndim=0;usexcnhat=0;n3xccc_null=0
- ABI_ALLOCATE(kxc_dum,(nfft,nkxc))
- ABI_ALLOCATE(vxc_corr,(nfft,dtset%nspden))
+ ABI_MALLOC(kxc_dum,(nfft,nkxc))
+ ABI_MALLOC(vxc_corr,(nfft,dtset%nspden))
 
  if (present(vxc).and.optstr_loc==0) then
 !Initialize args for rhotoxc
    option=0 ! XC only
-   ABI_ALLOCATE(xccc3d_null,(n3xccc_null))
+   ABI_MALLOC(xccc3d_null,(n3xccc_null))
 !  Compute Vxc^Hybrid(rho_val)
    call rhotoxc(enxc,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,nmxc,&
 &   n3xccc_null,option,rhor,rprimd,&
@@ -216,7 +216,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    strsxc(:)=strsxc(:)-strsxc_corr(:)
 
 !Release memory
-   ABI_DEALLOCATE(xccc3d_null)
+   ABI_FREE(xccc3d_null)
  end if
 
  if (calcgrxc) then
@@ -227,8 +227,8 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
      call libxc_functionals_init(ixc_gga,dtset%nspden,xc_functionals=xc_funcs_gga)
      libxc_gga_initialized=1
    end if
-   ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
-   ABI_ALLOCATE(xccc3d_null,(n3xccc))
+   ABI_MALLOC(dyfrx2_dum,(3,3,dtset%natom))
+   ABI_MALLOC(xccc3d_null,(n3xccc))
    option=1
 ! calculate xccc3d in this case
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
@@ -246,8 +246,8 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
    option=2
    call mkcore(strsxc_corr,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,dtset%ntypat,ngfft(1),n1xccc,ngfft(2),&
 &   ngfft(3),option,rprimd,dtset%typat,ucvol,vxc_corr,xcccrc,xccc1d,xccc3d_null,xred)
-   ABI_DEALLOCATE(dyfrx2_dum)
-   ABI_DEALLOCATE(xccc3d_null)
+   ABI_FREE(dyfrx2_dum)
+   ABI_FREE(xccc3d_null)
  end if
 
  if(optstr_loc==1) then
@@ -273,8 +273,8 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  if(libxc_gga_initialized==1) then
    call libxc_functionals_end(xc_functionals=xc_funcs_gga)
  end if
- ABI_DEALLOCATE(vxc_corr)
- ABI_DEALLOCATE(kxc_dum)
+ ABI_FREE(vxc_corr)
+ ABI_FREE(kxc_dum)
 
  DBG_EXIT("COLL")
 

@@ -198,9 +198,9 @@ contains
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
- ABI_ALLOCATE(k_coord,(nkbz,3))
- ABI_ALLOCATE(q_coord,(nqibz,4))
- ABI_ALLOCATE(eiqr,(nqibz))
+ ABI_MALLOC(k_coord,(nkbz,3))
+ ABI_MALLOC(q_coord,(nqibz,4))
+ ABI_MALLOC(eiqr,(nqibz))
  eiqr=czero
 !==Read k and q==!
 !open(unit=2012,file='ikbz_COORD',form='formatted',status='unknown')
@@ -227,8 +227,8 @@ contains
 ! close(2012)
 
 !==Bijection and array for k-q==!
- ABI_ALLOCATE(bijection,(nkbz))
- ABI_ALLOCATE(ikmq_bz_t,(nkbz,nqibz))
+ ABI_MALLOC(bijection,(nkbz))
+ ABI_MALLOC(ikmq_bz_t,(nkbz,nqibz))
  bijection(:)=.FALSE.
  if (nsym==1) then
  do ik_bz=1,nkbz
@@ -263,7 +263,7 @@ endif
 !  | | | | (_) | |  | | | | | |  __/      | |__| |
 !  |_| |_|\___/|_|  |_| |_| |_|\___|       \_____|
 
- ABI_ALLOCATE(normG,(npw))
+ ABI_MALLOC(normG,(npw))
  if (verbose) then
    write(message,*) 'Read the potential and G norm'
    call wrtout(std_out,message,'COLL')
@@ -380,7 +380,7 @@ endif
 !if (3==4) then
 !!  USELESS START
 !!*******************************************************
-! ABI_ALLOCATE(coeffW_IBZ,(bandinf:bandsup,nkibz,mbband))
+! ABI_MALLOC(coeffW_IBZ,(bandinf:bandsup,nkibz,mbband))
 ! coeffW_IBZ=czero
 !
 !
@@ -405,7 +405,7 @@ endif
 ! call xmpi_barrier(Wfd%comm)
 ! close(2012)
 !
-! ABI_ALLOCATE(coeffW_BZ,(bandinf:bandsup,nkbz,mbband))
+! ABI_MALLOC(coeffW_BZ,(bandinf:bandsup,nkbz,mbband))
 !
 ! if (nkbz==nkibz) then
 !   coeffW_BZ=coeffW_IBZ
@@ -413,7 +413,7 @@ endif
 !   write(message,*) "Reconstruct in full BZ"
 !   call wrtout(std_out,message,'COLL')
 !   call wrtout(ab_out,message,'COLL')
-!   ABI_ALLOCATE(k_coordIBZ,(nkibz,3))
+!   ABI_MALLOC(k_coordIBZ,(nkibz,3))
 !
 !!   k_coordIBZ(:,:)=q_coord(:,1:3)
 !
@@ -445,10 +445,10 @@ endif
 !     call wrtout(std_out,message,'COLL')
 !     call wrtout(ab_out,message,'COLL')
 !   end if
-!   ABI_DEALLOCATE(k_coordIBZ)
+!   ABI_FREE(k_coordIBZ)
 ! end if
 !
-! ABI_DEALLOCATE(coeffW_IBZ)
+! ABI_FREE(coeffW_IBZ)
 !
 ! wk=1.0/nkbz
 !
@@ -560,9 +560,9 @@ endif
 !==Compute V_{m,m'}(q,z): bare interaction in the Wannier basis
 !===============================================================!
 !===============================================================!
- ABI_DEALLOCATE(ikmq_bz_t)
+ ABI_FREE(ikmq_bz_t)
 
- !ABI_ALLOCATE(rhot_q_m,(nspinor,nspinor,mbband,mbband,npw,nqibz))
+ !ABI_MALLOC(rhot_q_m,(nspinor,nspinor,mbband,mbband,npw,nqibz))
 
  ! if (plowan_compute>=10)then
  !   write(message,*)" cRPA calculation using plowan module"
@@ -599,15 +599,15 @@ endif
       do il4=1,wanbz%nbl_atom_wan(iatom4)
       if(il1/=il3 .or. il2/=il4)cycle
       if (wanbz%nsppol/=1)then
-        ABI_ALLOCATE(uspin,(4,nomega))
-        ABI_ALLOCATE(jspin,(4,nomega))
+        ABI_MALLOC(uspin,(4,nomega))
+        ABI_MALLOC(jspin,(4,nomega))
       endif
       if (iatom1==iatom2 .and. pos1==pos2 .and. il1 == il2)then
         one_orbital=1
       else
         one_orbital=0
       endif
-      ABI_ALLOCATE(omega,(nomega))
+      ABI_MALLOC(omega,(nomega))
       do spin1=1,wanbz%nsppol
       do spin2=1,wanbz%nsppol
         cp_paral=0
@@ -615,8 +615,8 @@ endif
         mbband2=2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
         mbband3=2*wanbz%latom_wan(iatom3)%lcalc(il3)+1
         mbband4=2*wanbz%latom_wan(iatom4)%lcalc(il4)+1
-        ABI_ALLOCATE(rhot_q_m1m3,(npw,nqibz,mbband1,mbband3,nspinor,nspinor))
-        ABI_ALLOCATE(rhot_q_m2m4,(npw,nqibz,mbband2,mbband4,nspinor,nspinor))
+        ABI_MALLOC(rhot_q_m1m3,(npw,nqibz,mbband1,mbband3,nspinor,nspinor))
+        ABI_MALLOC(rhot_q_m2m4,(npw,nqibz,mbband2,mbband4,nspinor,nspinor))
         rhot_q_m1m3=czero
         rhot_q_m2m4=czero
         do ispinor1=1,wanbz%nspinor
@@ -666,7 +666,7 @@ endif
 !        \/        |_| |_| |_|
 
 
-        ABI_ALLOCATE(V_m,(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor))
+        ABI_MALLOC(V_m,(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor))
         write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
         write(message,*)  "==Calculation of the bare interaction  V m=="
         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
@@ -757,7 +757,7 @@ endif
         if(nsym>1.and..not.lscr_one) nqalloc=nqibz
         if(nsym==1.or.lscr_one) nqalloc=1
 
-        ABI_ALLOCATE(scr,(npwe,npwe,nomega,nqalloc))
+        ABI_MALLOC(scr,(npwe,npwe,nomega,nqalloc))
         scr=czero
         if(nsym>1.and..not.lscr_one) then
           write(message,*) "==Read the dielectric matrix=="
@@ -827,11 +827,11 @@ endif
         write(message,*)ch10,  " = Start loop over frequency "
         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
 
-        ABI_ALLOCATE(U_m,(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor))
-        ABI_ALLOCATE(rhot_q_m1m3_npwe,(npwe,nqibz,mbband1,mbband3,nspinor,nspinor))
-        ABI_ALLOCATE(rhot_q_m2m4_npwe,(npwe,nqibz,mbband2,mbband4,nspinor,nspinor))
-        ABI_ALLOCATE(trrho,(npwe,nqibz))
-        ABI_ALLOCATE(sumrhorhoeps,(nqibz))
+        ABI_MALLOC(U_m,(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor))
+        ABI_MALLOC(rhot_q_m1m3_npwe,(npwe,nqibz,mbband1,mbband3,nspinor,nspinor))
+        ABI_MALLOC(rhot_q_m2m4_npwe,(npwe,nqibz,mbband2,mbband4,nspinor,nspinor))
+        ABI_MALLOC(trrho,(npwe,nqibz))
+        ABI_MALLOC(sumrhorhoeps,(nqibz))
 
    ! Following lines are only for debug
    !--------------------------------------------
@@ -856,8 +856,8 @@ endif
 
    ! Loop over frequencies to compute cRPA U(w)
    !--------------------------------------------
-        ABI_ALLOCATE(uomega,(nomega))
-        ABI_ALLOCATE(jomega,(nomega))
+        ABI_MALLOC(uomega,(nomega))
+        ABI_MALLOC(jomega,(nomega))
 
         iomega=1
         do iomega=1,nomega
@@ -1031,17 +1031,17 @@ endif
 
 !  END OF LOOP ON ATOMS !!
 
-        ABI_DEALLOCATE(uomega)
-        ABI_DEALLOCATE(jomega)
-        ABI_DEALLOCATE(V_m)
-        ABI_DEALLOCATE(rhot_q_m1m3_npwe)
-        ABI_DEALLOCATE(rhot_q_m2m4_npwe)
-        ABI_DEALLOCATE(trrho)
-        ABI_DEALLOCATE(sumrhorhoeps)
-        ABI_DEALLOCATE(scr)
-        ABI_DEALLOCATE(U_m)
-        ABI_DEALLOCATE(rhot_q_m1m3)
-        ABI_DEALLOCATE(rhot_q_m2m4)
+        ABI_FREE(uomega)
+        ABI_FREE(jomega)
+        ABI_FREE(V_m)
+        ABI_FREE(rhot_q_m1m3_npwe)
+        ABI_FREE(rhot_q_m2m4_npwe)
+        ABI_FREE(trrho)
+        ABI_FREE(sumrhorhoeps)
+        ABI_FREE(scr)
+        ABI_FREE(U_m)
+        ABI_FREE(rhot_q_m1m3)
+        ABI_FREE(rhot_q_m2m4)
 !    Print dielectric matrix
 !   do iq_ibz=1,nqibz
 !       call read_screening(em1_ncname,fname,npwe,1,nomega,scr,IO_MODE_FORTRAN,Wfd%comm,iqiA=iq_ibz)
@@ -1061,10 +1061,10 @@ endif
         call print_uj_spin(nomega,uspin,jspin,omega,one_orbital)
       endif
       if (wanbz%nsppol/=1)then
-        ABI_DEALLOCATE(uspin)
-        ABI_DEALLOCATE(jspin)
+        ABI_FREE(uspin)
+        ABI_FREE(jspin)
       endif
-      ABI_DEALLOCATE(omega)
+      ABI_FREE(omega)
       enddo!il4
       enddo!il3
       enddo!il2
@@ -1077,12 +1077,12 @@ endif
   enddo!iatom3
   enddo!iatom2
   enddo!iatom1
- ABI_DEALLOCATE(k_coord)
- ABI_DEALLOCATE(q_coord)
- ABI_DEALLOCATE(eiqr)
- ABI_DEALLOCATE(bijection)
- ABI_DEALLOCATE(normG)
-! ABI_DEALLOCATE(coeffW_BZ)
+ ABI_FREE(k_coord)
+ ABI_FREE(q_coord)
+ ABI_FREE(eiqr)
+ ABI_FREE(bijection)
+ ABI_FREE(normG)
+! ABI_FREE(coeffW_BZ)
 !++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 !++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

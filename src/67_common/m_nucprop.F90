@@ -156,11 +156,11 @@ contains
     my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
     call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
-    ABI_ALLOCATE(efg,(3,3,natom))
-    ABI_ALLOCATE(efg_el,(3,3,natom))
-    ABI_ALLOCATE(efg_ion,(3,3,natom))
-    ABI_ALLOCATE(efg_paw,(3,3,natom))
-    ABI_ALLOCATE(efg_point_charge,(3,3,natom))
+    ABI_MALLOC(efg,(3,3,natom))
+    ABI_MALLOC(efg_el,(3,3,natom))
+    ABI_MALLOC(efg_ion,(3,3,natom))
+    ABI_MALLOC(efg_paw,(3,3,natom))
+    ABI_MALLOC(efg_point_charge,(3,3,natom))
     efg_el(:,:,:) = zero
     efg_ion(:,:,:) = zero
     efg_paw(:,:,:) = zero
@@ -311,11 +311,11 @@ contains
     write(message,'(3a)')ch10,ch10,ch10
     call wrtout(ab_out,message,'COLL')
 
-    ABI_DEALLOCATE(efg)
-    ABI_DEALLOCATE(efg_el)
-    ABI_DEALLOCATE(efg_ion)
-    ABI_DEALLOCATE(efg_paw)
-    ABI_DEALLOCATE(efg_point_charge)
+    ABI_FREE(efg)
+    ABI_FREE(efg_el)
+    ABI_FREE(efg_ion)
+    ABI_FREE(efg_paw)
+    ABI_FREE(efg_point_charge)
 
     !Destroy atom table used for parallelism
     call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -403,7 +403,7 @@ contains
     call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
     !Initialization
-    ABI_ALLOCATE(fc,(nspden,natom))
+    ABI_MALLOC(fc,(nspden,natom))
 
     !Computation
     if (paral_atom) then
@@ -436,7 +436,7 @@ contains
     call wrtout(ab_out,message,'COLL')
 
     !Memory deallocation
-    ABI_DEALLOCATE(fc)
+    ABI_FREE(fc)
 
     !Destroy atom table used for parallelism
     call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -521,9 +521,9 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
   !write(std_out,*)' make_efg_ion : enter'
   !ENDDEBUG
 
-  ABI_ALLOCATE(efg_g,(3,3,natom))
-  ABI_ALLOCATE(efg_r,(3,3,natom))
-  ABI_ALLOCATE(xcart,(3,natom))
+  ABI_MALLOC(efg_g,(3,3,natom))
+  ABI_MALLOC(efg_r,(3,3,natom))
+  ABI_MALLOC(xcart,(3,natom))
   efg(:,:,:) = zero ! final efg tensor
   efg_g(:,:,:) = zero ! part of tensor accumulated in G space
   efg_r(:,:,:) = zero ! part of tensor accumulated in R space
@@ -660,9 +660,9 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
      call matpointsym(iatom,efg(:,:,iatom),natom,nsym,rprimd,symrel,tnons,xred)
   end do
 
-  ABI_DEALLOCATE(efg_g)
-  ABI_DEALLOCATE(efg_r)
-  ABI_DEALLOCATE(xcart)
+  ABI_FREE(efg_g)
+  ABI_FREE(efg_r)
+  ABI_FREE(xcart)
 
   !DEBUG
   !write(std_out,*)' make_efg_ion : exit '
@@ -749,9 +749,9 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
   !write(std_out,*)' make_efg_el : enter'
   !ENDDEBUG
 
-  ABI_ALLOCATE(fofg,(2,nfft))
-  ABI_ALLOCATE(fofr,(nfft))
-  ABI_ALLOCATE(xcart,(3,natom))
+  ABI_MALLOC(fofg,(2,nfft))
+  ABI_MALLOC(fofr,(nfft))
+  ABI_MALLOC(xcart,(3,natom))
 
   efg(:,:,:) = zero
   call xred2xcart(natom,rprimd,xcart,xred) ! get atomic locations in cartesian coords
@@ -780,7 +780,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
 
   ! In order to speed the routine, precompute the components of g
   ! Also check if the booked space was large enough...
-  ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+  ABI_MALLOC(gq,(3,max(n1,n2,n3)))
   do ii=1,3
      id(ii)=ngfft(ii)/2+2
      do ing=1,ngfft(ii)
@@ -839,10 +839,10 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
      call matpointsym(iatom,efg(:,:,iatom),natom,nsym,rprimd,symrel,tnons,xred)
   end do
 
-  ABI_DEALLOCATE(fofg)
-  ABI_DEALLOCATE(fofr)
-  ABI_DEALLOCATE(xcart)
-  ABI_DEALLOCATE(gq)
+  ABI_FREE(fofg)
+  ABI_FREE(fofr)
+  ABI_FREE(xcart)
+  ABI_FREE(gq)
 
   !DEBUG
   !write(std_out,*)' make_efg_el : exit '

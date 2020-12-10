@@ -182,7 +182,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    else if (associated(rf_hamkq%e1kbfr).and.associated(rf_hamkq%e1kbsc).and.optnl==2) then
      ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: qphase>1!')
      ABI_CHECK(size(rf_hamkq%e1kbsc,4)==1,'BUG in getgh2c: qphase>1!')
-     ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,gs_hamkq%dimekbq))
+     ABI_MALLOC(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,gs_hamkq%dimekbq))
      enl_temp(:,:,:,:) = rf_hamkq%e1kbfr(:,:,:,:) + rf_hamkq%e1kbsc(:,:,:,:)
      enl_ptr => enl_temp
    else if (associated(rf_hamkq%e1kbfr)) then
@@ -282,7 +282,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  if (usevnl==1) then
    gvnl2_ => gvnl2
  else
-   ABI_ALLOCATE(gvnl2_,(2,npw1*my_nspinor))
+   ABI_MALLOC(gvnl2_,(2,npw1*my_nspinor))
  end if
 
  if (has_vnl.and.(optnl>0.or.sij_opt/=0)) then
@@ -296,7 +296,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        if (usecprj==1) then
          cwaveprj_ptr => cwaveprj
        else
-         ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
+         ABI_MALLOC(cwaveprj_tmp,(natom,my_nspinor))
          call pawcprj_alloc(cwaveprj_tmp,0,gs_hamkq%dimcprj)
          cwaveprj_ptr => cwaveprj_tmp
        end if
@@ -306,7 +306,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 &       paw_opt,signs,gs2c,tim_nonlop,cwavef,gvnl2_)
        if (usecprj==0) then
          call pawcprj_free(cwaveprj_tmp)
-         ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
+         ABI_FREE(cwaveprj_tmp)
        end if
        nullify(cwaveprj_ptr)
      else
@@ -319,12 +319,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !  -------------------------------------------
    else if (ipert==natom+11.and.gs_hamkq%usepaw==1) then
 
-     ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
+     ABI_MALLOC(nonlop_out,(2,npw1*my_nspinor))
 
      if (usecprj==1) then
        cwaveprj_ptr => cwaveprj
      else
-       ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
+       ABI_MALLOC(cwaveprj_tmp,(natom,my_nspinor))
        call pawcprj_alloc(cwaveprj_tmp,2,gs_hamkq%dimcprj)
        cwaveprj_ptr => cwaveprj_tmp
      end if
@@ -382,11 +382,11 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        end do
      end if
 
-     ABI_DEALLOCATE(nonlop_out)
+     ABI_FREE(nonlop_out)
      if (sij_opt==1) gs2c=zero
      if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
-       ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
+       ABI_FREE(cwaveprj_tmp)
      end if
      nullify(cwaveprj_ptr)
 
@@ -399,12 +399,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        ABI_BUG(" iatm must be between 1 and natom")
      end if
 
-     ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
+     ABI_MALLOC(nonlop_out,(2,npw1*my_nspinor))
 
      if (usecprj==1) then
        cwaveprj_ptr => cwaveprj
      else
-       ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
+       ABI_MALLOC(cwaveprj_tmp,(natom,my_nspinor))
        call pawcprj_alloc(cwaveprj_tmp,2,gs_hamkq%dimcprj)
        cwaveprj_ptr => cwaveprj_tmp
      end if
@@ -462,11 +462,11 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        end do
      end if
 
-     ABI_DEALLOCATE(nonlop_out)
+     ABI_FREE(nonlop_out)
      if (sij_opt==1) gs2c=zero
      if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
-       ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
+       ABI_FREE(cwaveprj_tmp)
      end if
      nullify(cwaveprj_ptr)
 
@@ -495,7 +495,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    nullify(enl_ptr)
  end if
  if (allocated(enl_temp)) then
-   ABI_DEALLOCATE(enl_temp)
+   ABI_FREE(enl_temp)
  end if
 
 !======================================================================
@@ -564,7 +564,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  if (usevnl==1) then
    nullify(gvnl2_)
  else
-   ABI_DEALLOCATE(gvnl2_)
+   ABI_FREE(gvnl2_)
  end if
 
 !call timab(196+tim_getgh2c,2,tsec)

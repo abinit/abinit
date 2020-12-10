@@ -68,7 +68,7 @@ contains
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
     integer, intent(in) :: order
     integer, intent(in) :: nature(order), mshape(order)
-    ABI_ALLOCATE(self%nature, (order))
+    ABI_MALLOC(self%nature, (order))
     self%nature(:)=nature(:)
     self%order=order
     if (find_int(nature, displacement)/=0) self%has_displacement=.True.
@@ -83,7 +83,7 @@ contains
   subroutine finalize(self)
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
     if (allocated(self%nature)) then
-       ABI_DEALLOCATE(self%nature)
+       ABI_FREE(self%nature)
     end if
     !call self%coeff%finalize()
     self%order=0

@@ -385,7 +385,7 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
  grnl(:, :) = zero
  strtens(:,:)=zero
 
- ABI_ALLOCATE(gxyz,(3, natom))
+ ABI_MALLOC(gxyz,(3, natom))
  gxyz(:,:) = zero
 
 !Add the nonlocal part of the forces to grtn (BigDFT routine)
@@ -410,7 +410,7 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 &     rprimd(3, igeo) * gxyz(3, ia)
    end do
  end do
- ABI_DEALLOCATE(gxyz)
+ ABI_FREE(gxyz)
 
 #else
  BIGDFT_NOTENABLED_ERROR()
@@ -509,7 +509,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 !Calculate energy correction due to finite size effects
 !---reformat potential
  nsize = wvl%descr%Glr%d%n1i * wvl%descr%Glr%d%n2i
- ABI_ALLOCATE(wvl%den%denspot%pot_work, (nsize * wvl%descr%Glr%d%n3i * dtset%nsppol))
+ ABI_MALLOC(wvl%den%denspot%pot_work, (nsize * wvl%descr%Glr%d%n3i * dtset%nsppol))
 
  if (parallel) then
    call xmpi_allgatherv(wvl%den%denspot%rhov, &
@@ -536,7 +536,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 &   wvl%wfs%ks%psi, .false., ekin_sum, epot_sum, eproj_sum)
  end if
 
- ABI_DEALLOCATE(wvl%den%denspot%pot_work)
+ ABI_FREE(wvl%den%denspot%pot_work)
 
  energies%e_kinetic = ekin_sum
  energies%e_localpsp = epot_sum - two * energies%e_hartree

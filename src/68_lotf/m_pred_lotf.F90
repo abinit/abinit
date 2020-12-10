@@ -120,16 +120,16 @@ CONTAINS !===========================================================
 
   if(iexit/=0)then
     if (allocated(fcart_m))       then
-      ABI_DEALLOCATE(fcart_m)
+      ABI_FREE(fcart_m)
     end if
     if (allocated(vel_nexthalf))  then
-      ABI_DEALLOCATE(vel_nexthalf)
+      ABI_FREE(vel_nexthalf)
     end if
     if (allocated(xcart_old))       then
-      ABI_DEALLOCATE(xcart_old)
+      ABI_FREE(xcart_old)
     end if
     if (allocated(vel_old))       then
-      ABI_DEALLOCATE(vel_old)
+      ABI_FREE(vel_old)
     end if
     return
   end if
@@ -153,16 +153,16 @@ CONTAINS !===========================================================
 
 
   if (.not.allocated(fcart_m))       then
-    ABI_ALLOCATE(fcart_m,(3,ab_mover%natom))
+    ABI_MALLOC(fcart_m,(3,ab_mover%natom))
   end if
   if (.not.allocated(vel_nexthalf))  then
-    ABI_ALLOCATE(vel_nexthalf,(3,ab_mover%natom))
+    ABI_MALLOC(vel_nexthalf,(3,ab_mover%natom))
   end if
   if (.not.allocated(vel_old))       then
-    ABI_ALLOCATE(vel_old,(3,ab_mover%natom))
+    ABI_MALLOC(vel_old,(3,ab_mover%natom))
   end if
   if (.not.allocated(xcart_old))  then
-    ABI_ALLOCATE(xcart_old,(3,ab_mover%natom))
+    ABI_MALLOC(xcart_old,(3,ab_mover%natom))
   end if
 
 

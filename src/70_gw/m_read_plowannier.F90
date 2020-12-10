@@ -151,7 +151,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
 
 !Do not dead the bandinf, bandinf redondance information
 
- ABI_ALLOCATE(coeffW_IBZ,(Cryst%nattyp(itypatcor),nsppol,bandinf:bandsup,Kmesh%nibz,nspinor,2*lcor+1))
+ ABI_MALLOC(coeffW_IBZ,(Cryst%nattyp(itypatcor),nsppol,bandinf:bandsup,Kmesh%nibz,nspinor,2*lcor+1))
  coeffW_IBZ=czero
  do spin=1,nsppol
    do ik_ibz=1,Kmesh%nibz
@@ -174,7 +174,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
  end do
  close(unt)
 
- ABI_ALLOCATE(coeffW_BZ,(Cryst%nattyp(itypatcor),nsppol,bandinf:bandsup,Kmesh%nbz,nspinor,2*lcor+1))
+ ABI_MALLOC(coeffW_BZ,(Cryst%nattyp(itypatcor),nsppol,bandinf:bandsup,Kmesh%nbz,nspinor,2*lcor+1))
  coeffW_BZ=czero
 
  if (Kmesh%nbz==Kmesh%nibz) then
@@ -223,7 +223,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
 !     enddo
    enddo
  end if
- ABI_DEALLOCATE(coeffW_IBZ)
+ ABI_FREE(coeffW_IBZ)
 
 
 end subroutine read_plowannier

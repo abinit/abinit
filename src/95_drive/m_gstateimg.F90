@@ -318,7 +318,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 #endif
    hist_filename=trim(dtfil%filnam_ds(4))//'_HIST.nc'
    if (use_hist_prev)then
-     ABI_DATATYPE_ALLOCATE(hist_prev,(nimage))
+     ABI_MALLOC(hist_prev,(nimage))
      if (mpi_enreg%me_cell==0) then
        call read_md_hist_img(hist_filename,hist_prev,isVused,isARused,&
 &       imgtab=mpi_enreg%my_imgtab)
@@ -334,20 +334,20 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end if
      if (.not.use_hist_prev) then
        call abihist_free(hist_prev)
-       ABI_DATATYPE_DEALLOCATE(hist_prev)
+       ABI_FREE(hist_prev)
      end if
    end if
    !Initialize a variable to write the history
-   ABI_DATATYPE_ALLOCATE(hist,(nimage))
+   ABI_MALLOC(hist,(nimage))
    call abihist_init(hist,dtset%natom,ntimimage,isVused,isARused)
  end if ! imgmov/=0
 
 !Allocations
- ABI_ALLOCATE(occ,(nocc))
- ABI_ALLOCATE(vel,(3,dtset%natom))
- ABI_ALLOCATE(xred,(3,dtset%natom))
- ABI_DATATYPE_ALLOCATE(results_img,(nimage,ntimimage_stored))
- ABI_ALLOCATE(list_dynimage,(dtset%ndynimage))
+ ABI_MALLOC(occ,(nocc))
+ ABI_MALLOC(vel,(3,dtset%natom))
+ ABI_MALLOC(xred,(3,dtset%natom))
+ ABI_MALLOC(results_img,(nimage,ntimimage_stored))
+ ABI_MALLOC(list_dynimage,(dtset%ndynimage))
  do itimimage=1,ntimimage_stored
    res_img => results_img(:,itimimage)
    call init_results_img(dtset%natom,dtset%npspalch,dtset%nspden,dtset%nsppol,dtset%ntypalch,&
@@ -372,8 +372,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  end do
 
 !Management of SCF history (density/WF predictions from one time step to another)
- ABI_DATATYPE_ALLOCATE(scf_history,(nimage))
- ABI_ALLOCATE(scf_initialized,(nimage))
+ ABI_MALLOC(scf_history,(nimage))
+ ABI_MALLOC(scf_initialized,(nimage))
  scf_initialized=0
  history_size=-1
  if (dtset%ntimimage<=1) then
@@ -394,7 +394,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 !In some cases, need amass variable
  if (use_hist) then
-   ABI_ALLOCATE(amass,(dtset%natom,nimage))
+   ABI_MALLOC(amass,(dtset%natom,nimage))
    do iimage=1,nimage
      if (any(amu_img(:,iimage)/=amu_img(:,1))) then
        ABI_ERROR('HIST file is not compatible with variable masses!')
@@ -751,31 +751,31 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &   nimage,dtset%nimage,ntimimage_stored,pimd_param,dtset%prtvolimg,results_img)
  endif
 
- ABI_DEALLOCATE(occ)
- ABI_DEALLOCATE(vel)
- ABI_DEALLOCATE(xred)
- ABI_DEALLOCATE(list_dynimage)
+ ABI_FREE(occ)
+ ABI_FREE(vel)
+ ABI_FREE(xred)
+ ABI_FREE(list_dynimage)
 
  if (allocated(amass)) then
-   ABI_DEALLOCATE(amass)
+   ABI_FREE(amass)
  end if
 
  do itimimage=1,ntimimage_stored
    call destroy_results_img(results_img(:,itimimage))
  end do
- ABI_DATATYPE_DEALLOCATE(results_img)
+ ABI_FREE(results_img)
  do iimage=1,nimage
    call scf_history_free(scf_history(iimage))
  end do
- ABI_DATATYPE_DEALLOCATE(scf_history)
- ABI_DEALLOCATE(scf_initialized)
+ ABI_FREE(scf_history)
+ ABI_FREE(scf_initialized)
  if (allocated(hist_prev)) then
    call abihist_free(hist_prev)
-   ABI_DATATYPE_DEALLOCATE(hist_prev)
+   ABI_FREE(hist_prev)
  end if
  if (allocated(hist)) then
    call abihist_free(hist)
-   ABI_DATATYPE_DEALLOCATE(hist)
+   ABI_FREE(hist)
  end if
 
  call mep_destroy(mep_param)
@@ -863,7 +863,7 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
    test_img=(nimage_tot/=1.and.mpi_enreg%paral_img==1)
    if (test_img) then
      if (mpi_enreg%me==0)  then
-       ABI_DATATYPE_ALLOCATE(resimg_all,(nimage_tot))
+       ABI_MALLOC(resimg_all,(nimage_tot))
      end if
      call gather_results_img(mpi_enreg,resimg,resimg_all,master=0,&
 &     allgather=.false.,only_one_per_img=.true.)
@@ -901,24 +901,24 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
        call wrtout(iout,msg,'COLL')
 
 !      Cell parameters
-       ABI_ALLOCATE(rmet_img,(3,3))
-       ABI_ALLOCATE(gmet_img,(3,3))
-       ABI_ALLOCATE(gprimd_img,(3,3))
+       ABI_MALLOC(rmet_img,(3,3))
+       ABI_MALLOC(gmet_img,(3,3))
+       ABI_MALLOC(gprimd_img,(3,3))
        call metric(gmet_img,gprimd_img,iout,rmet_img,resimg_all(ii)%rprim,ucvol_img)
-       ABI_DEALLOCATE(rmet_img)
-       ABI_DEALLOCATE(gmet_img)
-       ABI_DEALLOCATE(gprimd_img)
+       ABI_FREE(rmet_img)
+       ABI_FREE(gmet_img)
+       ABI_FREE(gprimd_img)
 
 !      Positions, forces and velocities
-       ABI_ALLOCATE(iatfix_img,(3,resimg_all(ii)%natom))
-       ABI_ALLOCATE(xcart_img,(3,resimg_all(ii)%natom))
+       ABI_MALLOC(iatfix_img,(3,resimg_all(ii)%natom))
+       ABI_MALLOC(xcart_img,(3,resimg_all(ii)%natom))
        iatfix_img=0
        call xred2xcart(resimg_all(ii)%natom,resimg_all(ii)%rprim,xcart_img,resimg_all(ii)%xred)
        call prtxvf(resimg_all(ii)%results_gs%fcart,resimg_all(ii)%results_gs%fred,&
 &       iatfix_img,iout,resimg_all(ii)%natom,prtvel,&
 &       resimg_all(ii)%vel,xcart_img,resimg_all(ii)%xred)
-       ABI_DEALLOCATE(iatfix_img)
-       ABI_DEALLOCATE(xcart_img)
+       ABI_FREE(iatfix_img)
+       ABI_FREE(xcart_img)
 
 !      Stress tensor
        write(msg, '(a,es12.4,a)' ) &
@@ -959,7 +959,7 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
  if (prtvolimg==1.or.prtvolimg==2) then
    if (test_img.and.mpi_enreg%me==0) then
      call destroy_results_img(resimg_all)
-     ABI_DATATYPE_DEALLOCATE(resimg_all)
+     ABI_FREE(resimg_all)
    end if
    nullify(resimg_all)
  end if
@@ -1280,9 +1280,9 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  natom=m1geo_param%ab_mover%natom
  ihist=m1geo_param%hist_1geo%ihist
 
- ABI_ALLOCATE(fcart,(3,natom))
- ABI_ALLOCATE(vel,(3,natom))
- ABI_ALLOCATE(xred,(3,natom))
+ ABI_MALLOC(fcart,(3,natom))
+ ABI_MALLOC(vel,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
 
 !Of course, assume that the geometry parameters are the same for all images, so take them from the first one.
  xred(:,:)    =results_img(1,itimimage_eff)%xred(:,:)
@@ -1358,9 +1358,9 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 !  results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
  end do
 
- ABI_DEALLOCATE(fcart)
- ABI_DEALLOCATE(vel)
- ABI_DEALLOCATE(xred)
+ ABI_FREE(fcart)
+ ABI_FREE(vel)
+ ABI_FREE(xred)
 
 end subroutine move_1geo
 !!***

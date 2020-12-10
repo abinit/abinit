@@ -204,7 +204,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    end if
  else
 !  Store xcart for each atom
-   ABI_ALLOCATE(xcart,(3, dtset%natom))
+   ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
 !  Eventually retrieve density
 #if defined HAVE_BIGDFT
@@ -217,7 +217,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    call mklocl_wavelets(dtset%efield, grtn, mpi_enreg, dtset%natom, &
 &   nfft, nspden, option, rprimd, vpsp, &
 &   wvl_den, wvl, xcart)
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
  end if
 
 end subroutine mklocl
@@ -356,7 +356,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
 !Zero out array to permit accumulation over atom types below:
  if(option==1)then
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(:,:)=zero
  end if
 
@@ -593,11 +593,11 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
    xnorm=1.0_dp/ucvol
    vpsp(:)=vpsp(:)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
  end if
 
- ABI_DEALLOCATE(gcutoff) 
+ ABI_FREE(gcutoff) 
 
  if(option==2)then
 !  Init mpi_comm
@@ -791,7 +791,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  else
 
 !  (In case of a phonon perturbation)
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
@@ -889,7 +889,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
    xnorm=1.0_dp/ucvol
    vpsp1(1:cplex*nfft)=vpsp1(1:cplex*nfft)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !  End the condition of non-electric-field
  end if
@@ -1096,7 +1096,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Zero out array to permit accumulation over atom types below:
- ABI_ALLOCATE(work1,(2,nfft))
+ ABI_MALLOC(work1,(2,nfft))
  work1(:,:)=0.0_dp
 !
  dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
@@ -1221,7 +1221,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  xnorm=1.0_dp/ucvol
  vpsp1(:)=vpsp1(:)*xnorm
 
- ABI_DEALLOCATE(work1)
+ ABI_FREE(work1)
 
  contains
 
@@ -1411,7 +1411,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  else
 
 !  (In case of a phonon perturbation)
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    cutoff=gsqcut*tolfix
@@ -1500,7 +1500,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    xnorm=1.0_dp/ucvol
    vpsp1dq(1:cplex*nfft)=vpsp1dq(1:cplex*nfft)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !  End the condition of non-electric-field
  end if
@@ -1689,7 +1689,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    if (alpha==gamma) delag=1.0_dp
 
 !  (In case of a phonon perturbation)
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    cutoff=gsqcut*tolfix
@@ -1785,7 +1785,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    xnorm=1.0_dp/ucvol
    vpsp1dqdq(1:cplex*nfft)=vpsp1dqdq(1:cplex*nfft)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !  End the condition of non-electric-field
  end if
@@ -1988,7 +1988,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
    if (beta==gamma) delbg=1.0_dp
    if (delta==gamma) deldg=1.0_dp
 
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    cutoff=gsqcut*tolfix
@@ -2164,7 +2164,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !  End the calculation of the Hartree contribution 
    end if
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !End the condition of non-electric-field
  end if

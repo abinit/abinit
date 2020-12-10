@@ -230,12 +230,12 @@ subroutine wvl_initro(&
      ncmax=1
    end if
 !
-   ABI_ALLOCATE(ifftsph_tmp,(ncmax))
-   ABI_ALLOCATE(iindex,(ncmax))
-   ABI_ALLOCATE(rr,(ncmax))
-   ABI_ALLOCATE(raux,(ncmax))
+   ABI_MALLOC(ifftsph_tmp,(ncmax))
+   ABI_MALLOC(iindex,(ncmax))
+   ABI_MALLOC(rr,(ncmax))
+   ABI_MALLOC(raux,(ncmax))
    if(nspden==2) then
-     ABI_ALLOCATE(raux2,(ncmax))
+     ABI_MALLOC(raux2,(ncmax))
    end if
 
 !  Big loop on atoms
@@ -346,12 +346,12 @@ subroutine wvl_initro(&
 
 !  Deallocate
    call pawrad_free(vale_mesh)
-   ABI_DEALLOCATE(ifftsph_tmp)
-   ABI_DEALLOCATE(iindex)
-   ABI_DEALLOCATE(rr)
-   ABI_DEALLOCATE(raux)
+   ABI_FREE(ifftsph_tmp)
+   ABI_FREE(iindex)
+   ABI_FREE(rr)
+   ABI_FREE(raux)
    if(nspden==2) then
-     ABI_DEALLOCATE(raux2)
+     ABI_FREE(raux2)
    end if
 
  end do !itypat

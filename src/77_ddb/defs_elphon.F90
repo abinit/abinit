@@ -454,32 +454,32 @@ subroutine elph_k_copy(elph_k_in, elph_k_out)
 
  elph_k_out%my_nkpt = elph_k_in%my_nkpt
 
- ABI_ALLOCATE(elph_k_out%my_kpt,(elph_k_out%nkpt))
+ ABI_MALLOC(elph_k_out%my_kpt,(elph_k_out%nkpt))
  elph_k_out%my_kpt = elph_k_in%my_kpt
 
- ABI_ALLOCATE(elph_k_out%my_ikpt,(elph_k_out%my_nkpt))
+ ABI_MALLOC(elph_k_out%my_ikpt,(elph_k_out%my_nkpt))
  elph_k_out%my_ikpt = elph_k_in%my_ikpt
 
- ABI_ALLOCATE(elph_k_out%kptirr,(3,elph_k_out%nkptirr))
+ ABI_MALLOC(elph_k_out%kptirr,(3,elph_k_out%nkptirr))
  elph_k_out%kptirr = elph_k_in%kptirr
- ABI_ALLOCATE(elph_k_out%wtkirr,(elph_k_out%nkptirr))
+ ABI_MALLOC(elph_k_out%wtkirr,(elph_k_out%nkptirr))
  elph_k_out%wtkirr = elph_k_in%wtkirr
 
- ABI_ALLOCATE(elph_k_out%wtk,(elph_k_out%nband,elph_k_out%nkpt,elph_k_out%nsppol))
+ ABI_MALLOC(elph_k_out%wtk,(elph_k_out%nband,elph_k_out%nkpt,elph_k_out%nsppol))
  elph_k_out%wtk = elph_k_in%wtk
- ABI_ALLOCATE(elph_k_out%kpt,(3,elph_k_out%nkpt))
+ ABI_MALLOC(elph_k_out%kpt,(3,elph_k_out%nkpt))
  elph_k_out%kpt = elph_k_in%kpt
 
  elph_k_out%krank = elph_k_in%krank%copy()
 
- ABI_ALLOCATE(elph_k_out%irr2full,(elph_k_out%nkptirr))
+ ABI_MALLOC(elph_k_out%irr2full,(elph_k_out%nkptirr))
  elph_k_out%irr2full = elph_k_in%irr2full
- ABI_ALLOCATE(elph_k_out%full2irr,(3,elph_k_out%nkpt))
+ ABI_MALLOC(elph_k_out%full2irr,(3,elph_k_out%nkpt))
  elph_k_out%full2irr = elph_k_in%full2irr
- ABI_ALLOCATE(elph_k_out%full2full,(2,elph_k_out%nsym,elph_k_out%nkpt))
+ ABI_MALLOC(elph_k_out%full2full,(2,elph_k_out%nsym,elph_k_out%nkpt))
  elph_k_out%full2full = elph_k_in%full2full
 
- ABI_ALLOCATE(elph_k_out%irredtoGS,(elph_k_out%nkptirr))
+ ABI_MALLOC(elph_k_out%irredtoGS,(elph_k_out%nkptirr))
  elph_k_out%irredtoGS = elph_k_in%irredtoGS
 
 end subroutine elph_k_copy
@@ -574,9 +574,9 @@ subroutine elph_k_procs(nproc, elph_k)
 ! *************************************************************************
 
  if (allocated(elph_k%my_kpt)) then
-   ABI_DEALLOCATE (elph_k%my_kpt)
+   ABI_FREE (elph_k%my_kpt)
  end if
- ABI_ALLOCATE (elph_k%my_kpt, (elph_k%nkpt))
+ ABI_MALLOC (elph_k%my_kpt, (elph_k%nkpt))
 
  elph_k%my_kpt = 0
  elph_k%my_nkpt = 0
@@ -588,9 +588,9 @@ subroutine elph_k_procs(nproc, elph_k)
 
 ! create inverse mapping from ik_this_proc to ikpt
  if (allocated(elph_k%my_ikpt)) then
-   ABI_DEALLOCATE (elph_k%my_ikpt)
+   ABI_FREE (elph_k%my_ikpt)
  end if
- ABI_ALLOCATE (elph_k%my_ikpt, (elph_k%my_nkpt))
+ ABI_MALLOC (elph_k%my_ikpt, (elph_k%my_nkpt))
  elph_k%my_ikpt = 0
 
  ik_this_proc = 0
@@ -729,8 +729,8 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
 
  symmetrized_qpt(:) = -1
 
- ABI_ALLOCATE(gkk_qpt_new,(2,nbranch**2,nsppol))
- ABI_ALLOCATE(gkk_qpt_tmp,(2,nbranch**2,nsppol))
+ ABI_MALLOC(gkk_qpt_new,(2,nbranch**2,nsppol))
+ ABI_MALLOC(gkk_qpt_tmp,(2,nbranch**2,nsppol))
 
  do iqpt=1,nqpt_full
 !
@@ -891,8 +891,8 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
    end do !itim
  end do !iqpt
 
- ABI_DEALLOCATE(gkk_qpt_new)
- ABI_DEALLOCATE(gkk_qpt_tmp)
+ ABI_FREE(gkk_qpt_new)
+ ABI_FREE(gkk_qpt_tmp)
 
 end subroutine complete_gamma
 !!***
@@ -989,8 +989,8 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  symmetrized_qpt(:) = -1
 ! isppol=1
 
- ABI_ALLOCATE(gkk_qpt_new,(2,9,nbranch*nbranch, nsppol))
- ABI_ALLOCATE(gkk_qpt_tmp,(2,9,nbranch*nbranch, nsppol))
+ ABI_MALLOC(gkk_qpt_new,(2,9,nbranch*nbranch, nsppol))
+ ABI_MALLOC(gkk_qpt_tmp,(2,9,nbranch*nbranch, nsppol))
 
  do iqpt=1,nqpt_full
 
@@ -1244,8 +1244,8 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  end do
 !end iqpt do
 
- ABI_DEALLOCATE(gkk_qpt_new)
- ABI_DEALLOCATE(gkk_qpt_tmp)
+ ABI_FREE(gkk_qpt_new)
+ ABI_FREE(gkk_qpt_tmp)
 
 end subroutine complete_gamma_tr
 !!***

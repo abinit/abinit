@@ -409,22 +409,22 @@ program optic
  ntypat=hdr%ntypat
  occopt=hdr%occopt
  rprimd(:,:)=hdr%rprimd(:,:)
- ABI_ALLOCATE(nband,(nkpt*nsppol))
- ABI_ALLOCATE(occ,(bantot))
+ ABI_MALLOC(nband,(nkpt*nsppol))
+ ABI_MALLOC(occ,(bantot))
  !fermie=hdr%fermie
  ! YG Fermi energy contained in the header of a NSCF computation is always 0 !!
  occ(1:bantot)=hdr%occ(1:bantot)
  nband(1:nkpt*nsppol)=hdr%nband(1:nkpt*nsppol)
 
  nsym=hdr%nsym
- ABI_ALLOCATE(symrel,(3,3,nsym))
- ABI_ALLOCATE(symrec,(3,3,nsym))
+ ABI_MALLOC(symrel,(3,3,nsym))
+ ABI_MALLOC(symrec,(3,3,nsym))
  symrel(:,:,:) = hdr%symrel(:,:,:)
  do isym=1,nsym
    call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
  end do
 
- ABI_ALLOCATE(kpt,(3,nkpt))
+ ABI_MALLOC(kpt,(3,nkpt))
  kpt(:,:) = hdr%kptns(:,:)
 
 !Get mband, as the maximum value of nband(nkpt)
@@ -452,15 +452,15 @@ program optic
  end if
 
  ! Read the eigenvalues of ground-state and ddk files
- ABI_ALLOCATE(eigen0,(mband*nkpt*nsppol))
+ ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
  ! MG: Do not understand why not [...,3]
- ABI_ALLOCATE(eigen11,(2*mband*mband*nkpt*nsppol))
- ABI_ALLOCATE(eigen12,(2*mband*mband*nkpt*nsppol))
- ABI_ALLOCATE(eigen13,(2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen11,(2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen12,(2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen13,(2*mband*mband*nkpt*nsppol))
 
  if (my_rank == master) then
-   ABI_ALLOCATE(eigtmp,(2*mband*mband))
-   ABI_ALLOCATE(eig0tmp,(mband))
+   ABI_MALLOC(eigtmp,(2*mband*mband))
+   ABI_MALLOC(eig0tmp,(mband))
 
    do ii=1,3
      if (.not. use_ncevk(ii)) cycle
@@ -507,8 +507,8 @@ program optic
      if (.not. use_ncevk(ii)) call wfks(ii)%close()
    end do
 
-   ABI_DEALLOCATE(eigtmp)
-   ABI_DEALLOCATE(eig0tmp)
+   ABI_FREE(eigtmp)
+   ABI_FREE(eig0tmp)
  end if ! master
 
  call xmpi_bcast(eigen0,master,comm,ierr)
@@ -523,17 +523,17 @@ program optic
 
 !---------------------------------------------------------------------------------
 !derivative of occupation wrt the energy.
- ABI_ALLOCATE(wtk,(nkpt))
+ ABI_MALLOC(wtk,(nkpt))
  wtk = hdr%wtk
 
- ABI_ALLOCATE(doccde,(mband*nkpt*nsppol))
+ ABI_MALLOC(doccde,(mband*nkpt*nsppol))
 
  !Recompute fermie from header
  !WARNING no guarantee that it works for other materials than insulators
  nelect = hdr%nelect
  tphysel = zero
- ABI_ALLOCATE(istwfk,(nkpt))
- ABI_ALLOCATE(npwarr,(nkpt))
+ ABI_MALLOC(istwfk,(nkpt))
+ ABI_MALLOC(npwarr,(nkpt))
  istwfk = hdr%istwfk
  npwarr = hdr%npwarr
 
@@ -545,15 +545,15 @@ program optic
  !YG : should we use broadening for ebands_init
  call ebands_update_occ(ks_ebands, -99.99d0)
  fermie = ks_ebands%fermie
- ABI_DEALLOCATE(istwfk)
- ABI_DEALLOCATE(npwarr)
+ ABI_FREE(istwfk)
+ ABI_FREE(npwarr)
 
 !---------------------------------------------------------------------------------
 !size of the frequency range
  nomega=int((maxomega+domega*0.001_dp)/domega)
  maxomega = dble(nomega)*domega
- ABI_ALLOCATE(cond_nd,(nomega))
- ABI_ALLOCATE(cond_kg,(nomega))
+ ABI_MALLOC(cond_nd,(nomega))
+ ABI_MALLOC(cond_kg,(nomega))
 
  optic_ncid = nctk_noid
  if (my_rank == master) then
@@ -654,7 +654,7 @@ program optic
    NCF_CHECK(nctk_set_datamode(optic_ncid))
 
    ! Write wmesh here.
-   ABI_ALLOCATE(wmesh, (nomega))
+   ABI_MALLOC(wmesh, (nomega))
    do ii=1,nomega
      ! This to be consistent with the value used in m_optic_tools
      ! In principle wmesh should be passed to the children and a lot of code
@@ -692,12 +692,12 @@ program optic
 #endif
  end if
 
- ABI_ALLOCATE(symcart,(3,3,nsym))
+ ABI_MALLOC(symcart,(3,3,nsym))
  !YG: we need to transpose gprimd since matrinv give the transpose of the inverse!
  gprimd_trans = transpose(gprimd)
  call sym2cart(gprimd_trans,nsym,rprimd,symrel,symcart)
 
- ABI_ALLOCATE(pmat,(mband,mband,nkpt,3,nsppol))
+ ABI_MALLOC(pmat,(mband,mband,nkpt,3,nsppol))
  call wrtout(std_out," optic : Call pmat2cart","COLL")
 
  call pmat2cart(eigen11,eigen12,eigen13,mband,nkpt,nsppol,pmat,rprimd)
@@ -803,21 +803,21 @@ program optic
 
 !---------------------------------------------------------------------------------
 
- ABI_DEALLOCATE(nband)
- ABI_DEALLOCATE(occ)
- ABI_DEALLOCATE(eigen11)
- ABI_DEALLOCATE(eigen12)
- ABI_DEALLOCATE(eigen13)
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(doccde)
- ABI_DEALLOCATE(wtk)
- ABI_DEALLOCATE(cond_nd)
- ABI_DEALLOCATE(cond_kg)
- ABI_DEALLOCATE(kpt)
- ABI_DEALLOCATE(symrel)
- ABI_DEALLOCATE(symrec)
- ABI_DEALLOCATE(symcart)
- ABI_DEALLOCATE(pmat)
+ ABI_FREE(nband)
+ ABI_FREE(occ)
+ ABI_FREE(eigen11)
+ ABI_FREE(eigen12)
+ ABI_FREE(eigen13)
+ ABI_FREE(eigen0)
+ ABI_FREE(doccde)
+ ABI_FREE(wtk)
+ ABI_FREE(cond_nd)
+ ABI_FREE(cond_kg)
+ ABI_FREE(kpt)
+ ABI_FREE(symrel)
+ ABI_FREE(symrec)
+ ABI_FREE(symcart)
+ ABI_FREE(pmat)
 
  call hdr%free()
  call hdr_ddk(1)%free()

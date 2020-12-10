@@ -5481,8 +5481,8 @@ subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 
  nd2proc=((n2-1)/nproc_fft) +1
  nd3proc=((n6-1)/nproc_fft) +1
- ABI_ALLOCATE(workr,(2,n4,n5,nd3proc,ndat))
- ABI_ALLOCATE(workf,(2,n4,n6,nd2proc,ndat))
+ ABI_MALLOC(workr,(2,n4,n5,nd3proc,ndat))
+ ABI_MALLOC(workf,(2,n4,n6,nd2proc,ndat))
 
  ! Complex to Complex
  ! TODO: Complex to Real
@@ -5508,8 +5508,8 @@ subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
    ABI_BUG("Wrong isign")
  end select
 
- ABI_DEALLOCATE(workr)
- ABI_DEALLOCATE(workf)
+ ABI_FREE(workr)
+ ABI_FREE(workf)
 
 end subroutine fftw3_mpifourdp
 !!***
@@ -5634,11 +5634,11 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(zw,(2,ncache/2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3))
+ ABI_MALLOC(zw,(2,ncache/2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3))
  if (nproc_fft > 1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3))
  end if
 
  lot3=ncache/(2*n3)
@@ -5965,11 +5965,11 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    call dfftw_destroy_plan(fw_plan2_rest)
  end if
 
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft > 1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 #else
@@ -6099,11 +6099,11 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(zw,(2,ncache/2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3))
+ ABI_MALLOC(zw,(2,ncache/2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3))
  if (nproc_fft > 1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3))
  end if
 
  ! Create plans.
@@ -6289,11 +6289,11 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    call dfftw_destroy_plan(bw_plan2_rest)
  end if
 
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft > 1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 #else
@@ -7130,11 +7130,11 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(zw,(2,ncache/2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3,ndat))
+ ABI_MALLOC(zw,(2,ncache/2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3,ndat))
  if (nproc_fft > 1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3,ndat))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3,ndat))
  end if
 
  lot3=ncache/(2*n3)
@@ -7472,11 +7472,11 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    call dfftw_destroy_plan(fw_plan2_rest)
  end if
 
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft > 1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 #else

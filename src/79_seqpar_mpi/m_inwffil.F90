@@ -341,11 +341,11 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    if(nsppol0==1 .and. nsppol==2)sppoldbl=2
  end if
 
- ABI_ALLOCATE(indkk,(nkpt*sppoldbl,6))
- ABI_ALLOCATE(istwfk0,(nkpt0))
- ABI_ALLOCATE(kptns0,(3,nkpt0))
- ABI_ALLOCATE(nband0,(nkpt0*nsppol0))
- ABI_ALLOCATE(npwarr0,(nkpt0))
+ ABI_MALLOC(indkk,(nkpt*sppoldbl,6))
+ ABI_MALLOC(istwfk0,(nkpt0))
+ ABI_MALLOC(kptns0,(3,nkpt0))
+ ABI_MALLOC(nband0,(nkpt0*nsppol0))
+ ABI_MALLOC(npwarr0,(nkpt0))
 
  if(restart==2)then ! restart with translations
 
@@ -364,17 +364,17 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    gmet0=matmul(transpose(gprim0),gprim0)
 
    if ((mpi_enreg%paral_kgb==1).or.(mpi_enreg%paral_hf==1)) then
-     ABI_DATATYPE_ALLOCATE(mpi_enreg0,)
+     ABI_MALLOC(mpi_enreg0,)
      call copy_mpi_enreg(mpi_enreg,mpi_enreg0)
-     ABI_ALLOCATE(kg0,(3,mpw0*nkpt0))
-     ABI_ALLOCATE(npwtot0,(nkpt0))
+     ABI_MALLOC(kg0,(3,mpw0*nkpt0))
+     ABI_MALLOC(npwtot0,(nkpt0))
      message="tmpfil"
      call kpgio(ecut0,dtset%exchn2n3d,gmet0,istwfk0,kg0, &
 &     kptns0,nkpt0,nband0,nkpt0,'PERS',mpi_enreg0,&
 &     mpw0,npwarr0,npwtot0,nsppol0)
 
-     ABI_DEALLOCATE(kg0)
-     ABI_DEALLOCATE(npwtot0)
+     ABI_FREE(kg0)
+     ABI_FREE(npwtot0)
    else
      mpi_enreg0 => mpi_enreg
    end if
@@ -543,7 +543,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 
 !  Compute table of k point associations. Make a trial choice for nkassoc.
    nkassoc=(nkpt/nkpt0+1)*2
-   ABI_ALLOCATE(indkk0,(nkpt0,nkassoc))
+   ABI_MALLOC(indkk0,(nkpt0,nkassoc))
 !  Infinite loops are allowed in F90
    do
      indkk0(:,:)=0
@@ -558,9 +558,9 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
          if(nkassoc==ikassoc)increase_nkassoc=1
        end do
        if(increase_nkassoc==1)then
-         ABI_DEALLOCATE(indkk0)
+         ABI_FREE(indkk0)
          nkassoc=2*nkassoc
-         ABI_ALLOCATE(indkk0,(nkpt0,nkassoc))
+         ABI_MALLOC(indkk0,(nkpt0,nkassoc))
          exit
        end if
      end do
@@ -603,8 +603,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      mband_eff=maxval(nband_eff(1:nkpt*nsppol_eff))
    else if (nsppol2nspinor==1.and.(.not.out_of_core)) then
      nsppol_eff=2;nspinor_eff=1;sppoldbl_eff=1
-     ABI_ALLOCATE(indkk_eff,(nkpt*sppoldbl_eff,6))
-     ABI_ALLOCATE(nband_eff,(nkpt*nsppol_eff))
+     ABI_MALLOC(indkk_eff,(nkpt*sppoldbl_eff,6))
+     ABI_MALLOC(nband_eff,(nkpt*nsppol_eff))
      indkk_eff(1:nkpt,1:6)   =indkk(1:nkpt,1:6)
      nband_eff(1:nkpt)       =nband(1:nkpt)/2
      nband_eff(1+nkpt:2*nkpt)=nband(1:nkpt)/2
@@ -626,20 +626,20 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      ABI_WARNING(message)
 
      nsppol_eff=1;nspinor_eff=2;sppoldbl_eff=1
-     ABI_ALLOCATE(indkk_eff,(nkpt*sppoldbl_eff,6))
-     ABI_ALLOCATE(nband_eff,(nkpt*nsppol_eff))
+     ABI_MALLOC(indkk_eff,(nkpt*sppoldbl_eff,6))
+     ABI_MALLOC(nband_eff,(nkpt*nsppol_eff))
      indkk_eff(1:nkpt,1:6)=indkk(1:nkpt,1:6)
      nband_eff(1:nkpt)    =2*nband(1:nkpt)
      mband_eff=maxval(nband_eff(1:nkpt*nsppol_eff))
-     ABI_ALLOCATE(eigen_eff,((2*mband_eff)**formeig*mband_eff*nkpt*nsppol_eff))
-     ABI_ALLOCATE(cg_eff,(2,mpw0*nspinor_eff*mband_eff*mkmem*nsppol_eff))
+     ABI_MALLOC(eigen_eff,((2*mband_eff)**formeig*mband_eff*nkpt*nsppol_eff))
+     ABI_MALLOC(cg_eff,(2,mpw0*nspinor_eff*mband_eff*mkmem*nsppol_eff))
    end if
 
 !  === nband0 argument definition for wfsinp
    squeeze=0
-   ABI_ALLOCATE(cg_disk,(0,0))
+   ABI_MALLOC(cg_disk,(0,0))
    if(.not.out_of_core)then
-     ABI_ALLOCATE(nband0_rd,(nkpt0*nsppol0))
+     ABI_MALLOC(nband0_rd,(nkpt0*nsppol0))
      nband0_rd(:)=0
      do isppol=1,nsppol_eff
        do ikpt=1,nkpt
@@ -656,14 +656,14 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      end do
      if(squeeze==1)then
        mcg_disk=mpw0*my_nspinor0*mband0_rd
-       ABI_DEALLOCATE(cg_disk)
-       ABI_ALLOCATE(cg_disk,(2,mcg_disk))
+       ABI_FREE(cg_disk)
+       ABI_MALLOC(cg_disk,(2,mcg_disk))
      else
        if(xmpi_paral == 1 .or. mpi_enreg0%paral_kgb == 1 .or. mpi_enreg0%paral_hf == 1)then
          if(localrdwf==0)then
            mcg_disk=mpw0*my_nspinor0*mband0_rd
-           ABI_DEALLOCATE(cg_disk)
-           ABI_ALLOCATE(cg_disk,(2,mcg_disk))
+           ABI_FREE(cg_disk)
+           ABI_MALLOC(cg_disk,(2,mcg_disk))
          end if
        end if
      end if
@@ -682,8 +682,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     nsppol_eff,nsppol0,nsym,occ,optorth,dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,squeeze,&
 &     symrel,tnons,wff1)
      if (nsppol2nspinor/=0)  then
-       ABI_DEALLOCATE(indkk_eff)
-       ABI_DEALLOCATE(nband_eff)
+       ABI_FREE(indkk_eff)
+       ABI_FREE(nband_eff)
      end if
    else
 !    Read wavefunctions from file.
@@ -701,14 +701,14 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    if(squeeze==1)then
      ecut0=ecut_eff
      gmet0(:,:)=gmet(:,:)
-     ABI_DEALLOCATE(kptns0)
-     ABI_DEALLOCATE(istwfk0)
-     ABI_DEALLOCATE(nband0)
-     ABI_DEALLOCATE(npwarr0)
-     ABI_ALLOCATE(kptns0,(3,nkpt))
-     ABI_ALLOCATE(istwfk0,(nkpt))
-     ABI_ALLOCATE(nband0,(nkpt*nsppol))
-     ABI_ALLOCATE(npwarr0,(nkpt))
+     ABI_FREE(kptns0)
+     ABI_FREE(istwfk0)
+     ABI_FREE(nband0)
+     ABI_FREE(npwarr0)
+     ABI_MALLOC(kptns0,(3,nkpt))
+     ABI_MALLOC(istwfk0,(nkpt))
+     ABI_MALLOC(nband0,(nkpt*nsppol))
+     ABI_MALLOC(npwarr0,(nkpt))
      kptns0(:,:)=kptns(:,:)
      istwfk0(:)=istwfk(:)
      npwarr0(:)=npwarr(:)
@@ -735,9 +735,9 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !  The input wavefunctions have been transferred from disk to core memory
    mkmem0=mkmem
 
-   ABI_DEALLOCATE(indkk0)
-   ABI_DEALLOCATE(nband0_rd)
-   ABI_DEALLOCATE(cg_disk)
+   ABI_FREE(indkk0)
+   ABI_FREE(nband0_rd)
+   ABI_FREE(cg_disk)
 
    call timab(715,2,tsec)
 
@@ -767,13 +767,13 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !    Translate the WF and eigenvalues from nsppol=2 to nspinor=2
 !    This is tricky (because we do not want to create a temporary array for cg)
      nsppol_eff=1;nspinor_eff=2;sppoldbl_eff=1
-     ABI_ALLOCATE(indkk_eff,(nkpt*sppoldbl_eff,6))
-     ABI_ALLOCATE(nband_eff,(nkpt0*nsppol_eff))
+     ABI_MALLOC(indkk_eff,(nkpt*sppoldbl_eff,6))
+     ABI_MALLOC(nband_eff,(nkpt0*nsppol_eff))
      indkk_eff(1:nkpt,1:6)=indkk(1:nkpt,1:6)
      nband_eff(1:nkpt0)=2*nband0(1:nkpt0)
 !    Compute some shifts from isspol0=1 to isppol0=2
      imax=0;icgsft=0;ieigsft=0
-     ABI_ALLOCATE(my_kpt,(nkpt0))
+     ABI_MALLOC(my_kpt,(nkpt0))
      do ikpt0=1,nkpt0
        nband0_k=nband0(ikpt0);nband_k=nband(ikpt0)
        my_kpt(ikpt0)=(.not.(proc_distrb_cycle(mpi_enreg0%proc_distrb,ikpt0,1,nband_k,1,me0)))
@@ -785,8 +785,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !    --- First version: no parallelization over spinors
      if (mpi_enreg0%paral_spinor==0) then
 !      Compute some useful indexes
-       ABI_ALLOCATE(indx,(2*imax))
-       ABI_ALLOCATE(npwi,(imax))
+       ABI_MALLOC(indx,(2*imax))
+       ABI_MALLOC(npwi,(imax))
        ii=0;icg=0
        do ikpt0=1,nkpt0
          if(my_kpt(ikpt0)) then
@@ -845,8 +845,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !      --- Second version: parallelization over spinors
      else
 !      Compute some useful indexes
-       ABI_ALLOCATE(indx,(imax))
-       ABI_ALLOCATE(npwi,(imax))
+       ABI_MALLOC(indx,(imax))
+       ABI_MALLOC(npwi,(imax))
        ii=0;icg=0
        do ikpt0=1,nkpt0
          if(my_kpt(ikpt0)) then
@@ -904,16 +904,16 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
          end do
        end if
      end do
-     ABI_DEALLOCATE(indx)
-     ABI_DEALLOCATE(npwi)
-     ABI_DEALLOCATE(my_kpt)
+     ABI_FREE(indx)
+     ABI_FREE(npwi)
+     ABI_FREE(my_kpt)
 
 !    ***** Conversion from spinorial to collinear WF ****
    else if (nsppol2nspinor==-1.and.(.not.out_of_core)) then
 !    In that case parallelization over spinors is never activated
      nsppol_eff=2;nspinor_eff=1;sppoldbl_eff=1
-     ABI_ALLOCATE(indkk_eff,(nkpt*sppoldbl_eff,6))
-     ABI_ALLOCATE(nband_eff,(nkpt0*nsppol_eff))
+     ABI_MALLOC(indkk_eff,(nkpt*sppoldbl_eff,6))
+     ABI_MALLOC(nband_eff,(nkpt0*nsppol_eff))
      indkk_eff(1:nkpt,1:6)=indkk(1:nkpt,1:6)
      nband_eff(1:nkpt0)        =nband0(1:nkpt0)/2
      nband_eff(1+nkpt0:2*nkpt0)=nband0(1:nkpt0)/2
@@ -946,8 +946,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
        end if
        ibg=ibg+(nband0_k/2)*(nband0_k)**formeig
      end do
-     ABI_DEALLOCATE(cg_eff)
-     ABI_DEALLOCATE(eigen_eff)
+     ABI_FREE(cg_eff)
+     ABI_FREE(eigen_eff)
 
    else
      ABI_BUG('unable to interchange nsppol and nspinor when mkmem=0')
@@ -976,21 +976,21 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &   dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,symrel,tnons,unkg,wff1,wffnow)
 
    if (nsppol2nspinor/=0)  then
-     ABI_DEALLOCATE(nband_eff)
+     ABI_FREE(nband_eff)
    end if
 
  end if ! dtset%usewvl == 0
 
 !****************************************************************************
 
- ABI_DEALLOCATE(indkk)
- ABI_DEALLOCATE(istwfk0)
- ABI_DEALLOCATE(kptns0)
- ABI_DEALLOCATE(nband0)
- ABI_DEALLOCATE(npwarr0)
+ ABI_FREE(indkk)
+ ABI_FREE(istwfk0)
+ ABI_FREE(kptns0)
+ ABI_FREE(nband0)
+ ABI_FREE(npwarr0)
  if (restart==2 .and.(mpi_enreg0%paral_kgb==1 .or. mpi_enreg0%paral_hf == 1)) then
    call destroy_mpi_enreg(mpi_enreg0)
-   ABI_DATATYPE_DEALLOCATE(mpi_enreg0)
+   ABI_FREE(mpi_enreg0)
  else
    nullify(mpi_enreg0)
  end if
@@ -1181,10 +1181,10 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 
 #if defined HAVE_MPI
  if(localrdwf==0)then
-   ABI_ALLOCATE(ikpt_me,(nproc_max))
-   ABI_ALLOCATE(nband_k_me,(nproc_max))
-   ABI_ALLOCATE(ikassoc_me,(nproc_max))
-   ABI_ALLOCATE(isppol_me,(nproc_max))
+   ABI_MALLOC(ikpt_me,(nproc_max))
+   ABI_MALLOC(nband_k_me,(nproc_max))
+   ABI_MALLOC(ikassoc_me,(nproc_max))
+   ABI_MALLOC(isppol_me,(nproc_max))
  end if
 #endif
 
@@ -1200,8 +1200,8 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
  nkpt_eff=max(nkpt0,nkpt)
  if( (prtvol==0.or.prtvol==1) .and. nkpt_eff>nkpt_max)nkpt_eff=nkpt_max
 
- ABI_ALLOCATE(icg_k,(nkpt,nsppol))
- ABI_ALLOCATE(band_index_k,(nkpt,nsppol))
+ ABI_MALLOC(icg_k,(nkpt,nsppol))
+ ABI_MALLOC(band_index_k,(nkpt,nsppol))
 
 !write(std_out,*)' wfsinp : me,isppol,ikpt,icg_k,band_index_k'
 
@@ -1246,8 +1246,8 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 
  mgfft=maxval(ngfft(1:3))
  if(squeeze==1)then
-   ABI_ALLOCATE(kg_k,(3,mpw))
-   ABI_ALLOCATE(kg0_k,(3,mpw0))
+   ABI_MALLOC(kg_k,(3,mpw))
+   ABI_MALLOC(kg0_k,(3,mpw0))
  end if
 
  eigen(:)=0.0_dp
@@ -1386,22 +1386,22 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
        nband_rdk=nban_dp_rdk
        if(squeeze==1)nband_rdk=(nban_dp_rdk/nspinor0)*nspinor
        if(formeig==0)then
-         ABI_ALLOCATE(eig_k,(nband_rdk))
-         ABI_ALLOCATE(occ_k,(nband_rdk))
-         ABI_ALLOCATE(eig0_k,(nban_dp_rdk))
-         ABI_ALLOCATE(occ0_k,(nban_dp_rdk))
+         ABI_MALLOC(eig_k,(nband_rdk))
+         ABI_MALLOC(occ_k,(nband_rdk))
+         ABI_MALLOC(eig0_k,(nban_dp_rdk))
+         ABI_MALLOC(occ0_k,(nban_dp_rdk))
          dim_eig_k=nband_rdk
        else if(formeig==1)then
-         ABI_ALLOCATE(eig_k,(2*nband_rdk*nband_rdk))
-         ABI_ALLOCATE(eig0_k,(2*nban_dp_rdk*nban_dp_rdk))
+         ABI_MALLOC(eig_k,(2*nband_rdk*nband_rdk))
+         ABI_MALLOC(eig0_k,(2*nban_dp_rdk*nban_dp_rdk))
          dim_eig_k=2*nband_rdk*nband_rdk
-         ABI_ALLOCATE(occ0_k,(0))
-         ABI_ALLOCATE(occ_k,(0))
+         ABI_MALLOC(occ0_k,(0))
+         ABI_MALLOC(occ_k,(0))
        else
-         ABI_ALLOCATE(occ0_k,(0))
-         ABI_ALLOCATE(eig0_k,(0))
-         ABI_ALLOCATE(occ_k,(0))
-         ABI_ALLOCATE(eig_k,(0))
+         ABI_MALLOC(occ0_k,(0))
+         ABI_MALLOC(eig0_k,(0))
+         ABI_MALLOC(occ_k,(0))
+         ABI_MALLOC(eig_k,(0))
        end if
        eig_k(:)=0.0_dp
        eig0_k(:)=0.0_dp
@@ -1706,11 +1706,11 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 
        call timab(727,2,tsec)
 
-       ABI_DEALLOCATE(eig_k)
-       ABI_DEALLOCATE(eig0_k)
+       ABI_FREE(eig_k)
+       ABI_FREE(eig0_k)
        !if(formeig==0) then
-       ABI_DEALLOCATE(occ_k)
-       ABI_DEALLOCATE(occ0_k)
+       ABI_FREE(occ_k)
+       ABI_FREE(occ0_k)
        !end if
 
      end if  ! End the condition of need of this k point
@@ -1735,10 +1735,10 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 
 
  if(localrdwf==0)then
-   ABI_DEALLOCATE(ikpt_me)
-   ABI_DEALLOCATE(nband_k_me)
-   ABI_DEALLOCATE(ikassoc_me)
-   ABI_DEALLOCATE(isppol_me)
+   ABI_FREE(ikpt_me)
+   ABI_FREE(nband_k_me)
+   ABI_FREE(ikassoc_me)
+   ABI_FREE(isppol_me)
  end if
 
  call timab(67,2,tsec)
@@ -1747,8 +1747,8 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 !****************************************************************************
 
  if(squeeze==1)then
-   ABI_DEALLOCATE(kg_k)
-   ABI_DEALLOCATE(kg0_k)
+   ABI_FREE(kg_k)
+   ABI_FREE(kg0_k)
  end if
 
 
@@ -1779,8 +1779,8 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 !end do
 !ENDDEBUG
 
- ABI_DEALLOCATE(icg_k)
- ABI_DEALLOCATE(band_index_k)
+ ABI_FREE(icg_k)
+ ABI_FREE(band_index_k)
 
  call timab(720,2,tsec)
 
@@ -1882,7 +1882,7 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
  call timab(770,1,tsec)
  call timab(771,1,tsec)
 
- ABI_ALLOCATE(kg_dum,(3,0))
+ ABI_MALLOC(kg_dum,(3,0))
 
 !Skip wavefunctions for k-points not treated by this proc.
 !(from ikptsp_old+1 to ikpt+(spin-1)*nkpt-1)
@@ -1930,7 +1930,7 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 
  ikptsp_old=ikpt+(spin-1)*nkpt
 
- ABI_DEALLOCATE(kg_dum)
+ ABI_FREE(kg_dum)
 
  call timab(772,2,tsec)
  call timab(770,2,tsec)
@@ -2165,9 +2165,9 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 
  mgfft1=maxval(ngfft1(1:3))
  mgfft2=maxval(ngfft2(1:3))
- ABI_ALLOCATE(kg1,(3,mpw1))
- ABI_ALLOCATE(kg2_k,(3,mpw2))
- ABI_ALLOCATE(kg_dum,(3,0))
+ ABI_MALLOC(kg1,(3,mpw1))
+ ABI_MALLOC(kg2_k,(3,mpw2))
+ ABI_MALLOC(kg_dum,(3,0))
 
  if (debug>0) then
    if (me1==0) then
@@ -2346,16 +2346,16 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
        if(nbd1_rd<nbd1)mcg_aux=npw1*my_nspinor1*nbd1_rd
        if( mcg_aux > npw2*my_nspinor2*nbd2 )then
          aux_stor=1 ; icg_aux=0
-         ABI_ALLOCATE(cg_aux,(2,mcg_aux))
+         ABI_MALLOC(cg_aux,(2,mcg_aux))
        end if
      end if
 
      mband_rw=max(nbd1_rd,nbd2)
-     ABI_ALLOCATE(eig_k,(mband_rw*(2*mband_rw)**formeig))
+     ABI_MALLOC(eig_k,(mband_rw*(2*mband_rw)**formeig))
      if(formeig==0) then
-       ABI_ALLOCATE(occ_k,(mband_rw))
+       ABI_MALLOC(occ_k,(mband_rw))
      else
-       ABI_ALLOCATE(occ_k,(0))
+       ABI_MALLOC(occ_k,(0))
      end if
 
      if(mkmem1/=0 .and. ireadwf==1)then
@@ -2488,7 +2488,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
      if(mkmem2/=0)then
        if(aux_stor==1)then
          cg(:,1+icg:npw2*nbd2*my_nspinor2+icg)=cg_aux(:,1:npw2*nbd2*my_nspinor2)
-         ABI_DEALLOCATE(cg_aux)
+         ABI_FREE(cg_aux)
        end if
 
        icg=icg+npw2*nbd2*my_nspinor2
@@ -2504,8 +2504,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
        band_index=band_index+2*nbd2**2
      end if
 
-     ABI_DEALLOCATE(eig_k)
-     ABI_DEALLOCATE(occ_k)
+     ABI_FREE(eig_k)
+     ABI_FREE(occ_k)
 
      call timab(785,2,tsec)
 
@@ -2524,9 +2524,9 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
    call pareigocc(eigen,formeig,localrdwf,mpi_enreg2,mband2,nband2,nkpt2,nsppol2,occ,1)
  end if
 
- ABI_DEALLOCATE(kg1)
- ABI_DEALLOCATE(kg2_k)
- ABI_DEALLOCATE(kg_dum)
+ ABI_FREE(kg1)
+ ABI_FREE(kg2_k)
+ ABI_FREE(kg_dum)
 
  call timab(786,2,tsec)
  call timab(780,2,tsec)
@@ -2825,8 +2825,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
    if(sum(tnons_conv(:)**2)>tol8)then
 !    Need to compute phase factors associated with nonsymmorphic translations.
      conv_tnons=1
-     ABI_ALLOCATE(phase3d,(2,npw1))
-     ABI_ALLOCATE(phase1d,(2,(2*n1+1)+(2*n2+1)+(2*n3+1)))
+     ABI_MALLOC(phase3d,(2,npw1))
+     ABI_MALLOC(phase1d,(2,(2*n1+1)+(2*n2+1)+(2*n3+1)))
 !    Although the routine getph is originally written for
 !    atomic phase factors, it does precisely what we want
      atindx(1)=1
@@ -2898,14 +2898,14 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
      call ph1d3d(1,1,kg1,1,1,npw1,n1,n2,n3,phktnons,phase1d,phase3d)
    end if
 
-   ABI_ALLOCATE(cfft,(2,n4,n5,n6))
-   ABI_ALLOCATE(wavef1,(2,npw1))
-   ABI_ALLOCATE(wavef2,(2,npw2))
+   ABI_MALLOC(cfft,(2,n4,n5,n6))
+   ABI_MALLOC(wavef1,(2,npw1))
+   ABI_MALLOC(wavef2,(2,npw2))
    if(nspinor1==2 .and. nspinor2==2) then
-     ABI_ALLOCATE(wavefspinor,(2,2*npw2))
+     ABI_MALLOC(wavefspinor,(2,2*npw2))
    end if
-   ABI_ALLOCATE(gbound1,(2*mgfft1+8,2))
-   ABI_ALLOCATE(gbound2,(2*mgfft2+8,2))
+   ABI_MALLOC(gbound1,(2*mgfft1+8,2))
+   ABI_MALLOC(gbound2,(2*mgfft2+8,2))
    call sphereboundary(gbound1,istwf1_k,kg1,mgfft1,npw1)
    call sphereboundary(gbound2,istwf2_k,kg2,mgfft2,npw2)
 
@@ -3092,13 +3092,13 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
      end if
    end if
 
-   ABI_DEALLOCATE(cfft)
-   ABI_DEALLOCATE(gbound1)
-   ABI_DEALLOCATE(gbound2)
-   ABI_DEALLOCATE(wavef1)
-   ABI_DEALLOCATE(wavef2)
+   ABI_FREE(cfft)
+   ABI_FREE(gbound1)
+   ABI_FREE(gbound2)
+   ABI_FREE(wavef1)
+   ABI_FREE(wavef2)
    if(nspinor1==2 .and. nspinor2==2) then
-     ABI_DEALLOCATE(wavefspinor)
+     ABI_FREE(wavefspinor)
    end if
 
  else if(convert==0)then
@@ -3115,8 +3115,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  end if ! End of if convert/=0
 
  if(conv_tnons==1) then
-   ABI_DEALLOCATE(phase1d)
-   ABI_DEALLOCATE(phase3d)
+   ABI_FREE(phase1d)
+   ABI_FREE(phase3d)
  end if
 
 
@@ -3242,11 +3242,11 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 !Orthogonalize GS wfs
  if (optorth==1.and.formeig==0.and.(mpi_enreg2%paral_kgb/=1.or.mpi_enreg2%nproc_cell==1)) then
  !if (.True.) then
-   ABI_ALLOCATE(dum,(2,0))
+   ABI_MALLOC(dum,(2,0))
    ortalgo=0 !;ortalgo=3
    call pw_orthon(icg2,0,istwf2_k,mcg2,0,npw2*nspinor2_this_proc,nbd2,ortalgo,dum,0,cg2,&
 &   mpi_enreg2%me_g0,mpi_enreg2%comm_bandspinorfft)
-   ABI_DEALLOCATE(dum)
+   ABI_FREE(dum)
  end if
 
 end subroutine wfconv

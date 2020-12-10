@@ -132,25 +132,25 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 
  if(iexit/=0)then
    if (allocated(vin))           then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vin_next))      then
-     ABI_DEALLOCATE(vin_next)
+     ABI_FREE(vin_next)
    end if
    if (allocated(vout))          then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))      then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vout_prev))     then
-     ABI_DEALLOCATE(vout_prev)
+     ABI_FREE(vout_prev)
    end if
    if (allocated(hessin))        then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
    if (allocated(vel_prevhalf))  then
-     ABI_DEALLOCATE(vel_prevhalf)
+     ABI_FREE(vel_prevhalf)
    end if
    return
  end if
@@ -178,34 +178,34 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !From a previous dataset with a different ndim
  if(itime==1)then
    if (allocated(vin))           then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vin_next))      then
-     ABI_DEALLOCATE(vin_next)
+     ABI_FREE(vin_next)
    end if
    if (allocated(vout))          then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))      then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vout_prev))     then
-     ABI_DEALLOCATE(vout_prev)
+     ABI_FREE(vout_prev)
    end if
    if (allocated(hessin))        then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
    if (allocated(vel_prevhalf))  then
-     ABI_DEALLOCATE(vel_prevhalf)
+     ABI_FREE(vel_prevhalf)
    end if
 
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vin_next,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vout_prev,(ndim))
-   ABI_ALLOCATE(hessin,(ndim,ndim))
-   ABI_ALLOCATE(vel_prevhalf,(3,ab_mover%natom))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vin_next,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vout_prev,(ndim))
+   ABI_MALLOC(hessin,(ndim,ndim))
+   ABI_MALLOC(vel_prevhalf,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'verlet 03'

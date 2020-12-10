@@ -573,13 +573,13 @@ subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_ks_to_qp,dimlmn,Cprj_i
 
  DBG_ENTER("COLL")
 
- ABI_DATATYPE_ALLOCATE(Cprj_ks,(natom,nspinor*nbnds))
+ ABI_MALLOC(Cprj_ks,(natom,nspinor*nbnds))
  call pawcprj_alloc(Cprj_ks,0,dimlmn)
 
- ABI_ALLOCATE(re_p,(nbnds))
- ABI_ALLOCATE(im_p,(nbnds))
- ABI_ALLOCATE(vect,(2,nbnds))
- ABI_ALLOCATE(umat,(2,nbnds,nbnds))
+ ABI_MALLOC(re_p,(nbnds))
+ ABI_MALLOC(im_p,(nbnds))
+ ABI_MALLOC(vect,(2,nbnds))
+ ABI_MALLOC(umat,(2,nbnds,nbnds))
  !
  ! $ \Psi^{QP}_{r,b} = \sum_n \Psi^{KS}_{r,n} M_{n,b} $
  !
@@ -642,13 +642,13 @@ subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_ks_to_qp,dimlmn,Cprj_i
    end do !ik
  end do !is
 
- ABI_DEALLOCATE(re_p)
- ABI_DEALLOCATE(im_p)
- ABI_DEALLOCATE(vect)
- ABI_DEALLOCATE(umat)
+ ABI_FREE(re_p)
+ ABI_FREE(im_p)
+ ABI_FREE(vect)
+ ABI_FREE(umat)
 
  call pawcprj_free(Cprj_ks)
- ABI_DATATYPE_DEALLOCATE(Cprj_ks)
+ ABI_FREE(Cprj_ks)
 
  DBG_EXIT("COLL")
 

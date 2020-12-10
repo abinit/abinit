@@ -153,16 +153,16 @@ subroutine data4entropyDMFT_init(this,natom,typat,lpawu,uset2g,upawu,jpawu)
   enddo
   this%maxlpawu = maxlpawu
 
-  ABI_ALLOCATE(this%docc,(1:2*(2*maxlpawu+1),1:2*(2*maxlpawu+1),1:natom))
+  ABI_MALLOC(this%docc,(1:2*(2*maxlpawu+1),1:2*(2*maxlpawu+1),1:natom))
   this%docc(:,:,:) = zero
 
-  ABI_ALLOCATE(this%hu_dens,(1:2*(2*maxlpawu+1),1:2*(2*maxlpawu+1),1:this%ntypat))
+  ABI_MALLOC(this%hu_dens,(1:2*(2*maxlpawu+1),1:2*(2*maxlpawu+1),1:this%ntypat))
   this%hu_dens(:,:,:) = zero
 
-  ABI_ALLOCATE(this%e_dc,(1:natom))
+  ABI_MALLOC(this%e_dc,(1:natom))
   this%e_dc(:) = zero
 
-  ABI_ALLOCATE(this%J_over_U,(1:natom))
+  ABI_MALLOC(this%J_over_U,(1:natom))
   this%J_over_U(:) = zero
   do iatom=1,natom
     ityp=typat(iatom) ! no need to check since already done once before
@@ -418,16 +418,16 @@ subroutine data4entropyDMFT_destroy(this)
 
   if ( .not. this%isset ) return
   if (allocated(this%docc))  then
-    ABI_DEALLOCATE(this%docc)
+    ABI_FREE(this%docc)
   endif
   if (allocated(this%J_over_U))  then
-    ABI_DEALLOCATE(this%J_over_U)
+    ABI_FREE(this%J_over_U)
   endif
   if (allocated(this%e_dc))  then
-    ABI_DEALLOCATE(this%e_dc)
+    ABI_FREE(this%e_dc)
   endif
   if (allocated(this%hu_dens))  then
-    ABI_DEALLOCATE(this%hu_dens)
+    ABI_FREE(this%hu_dens)
   endif
   this%maxlpawu = 0
   this%natom = 0

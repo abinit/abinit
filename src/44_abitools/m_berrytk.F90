@@ -179,10 +179,10 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !stop
 !ENDDEBUG
 
- ABI_ALLOCATE(ipvt,(nband_occ))
- ABI_ALLOCATE(zgwork,(2,nband_occ))
- ABI_ALLOCATE(vect1,(2,0:mpw*nspinor))
- ABI_ALLOCATE(vect2,(2,0:mpw*nspinor))
+ ABI_MALLOC(ipvt,(nband_occ))
+ ABI_MALLOC(zgwork,(2,nband_occ))
+ ABI_MALLOC(vect1,(2,0:mpw*nspinor))
+ ABI_MALLOC(vect2,(2,0:mpw*nspinor))
  vect1(:,0) = zero ; vect2(:,0) = zero
 
 !Check if the values of ddkflag and job are compatible
@@ -237,7 +237,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !!
 !! debugging based on norm of k1 vector
 !
-!ABI_ALLOCATE(my_pwind_k,(mpw))
+!ABI_MALLOC(my_pwind_k,(mpw))
 !!
 !do iband = 1, nband_occ
 !!
@@ -320,7 +320,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !!
 !end do   ! iband
 !!
-!ABI_DEALLOCATE(my_pwind_k)
+!ABI_FREE(my_pwind_k)
 !!
  do iband = 1, nband_occ
 
@@ -613,10 +613,10 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 
  end if ! end job == 20 .or. job == 21 case
 
- ABI_DEALLOCATE(ipvt)
- ABI_DEALLOCATE(zgwork)
- ABI_DEALLOCATE(vect1)
- ABI_DEALLOCATE(vect2)
+ ABI_FREE(ipvt)
+ ABI_FREE(zgwork)
+ ABI_FREE(vect1)
+ ABI_FREE(vect2)
 
 !DEBUG
 !write(std_out,*)' dtm_k=',dtm_k(:)

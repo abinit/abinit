@@ -197,14 +197,14 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 
  n1xccc = psps%n1xccc
  if(psps%usepaw==0)then
-   ABI_ALLOCATE(xcccrc,(dtset%ntypat))
-   ABI_ALLOCATE(xccc1d,(n1xccc,6,dtset%ntypat))
+   ABI_MALLOC(xcccrc,(dtset%ntypat))
+   ABI_MALLOC(xccc1d,(n1xccc,6,dtset%ntypat))
    xcccrc = psps%xcccrc
    xccc1d = psps%xccc1d
  end if
 
  if (usexcnhat==0.and.dtset%usepaw==1) then
-   ABI_ALLOCATE(rhor_,(nfft,dtset%nspden))
+   ABI_MALLOC(rhor_,(nfft,dtset%nspden))
    rhor_(:,:) = rhor(:,:)-nhat(:,:)
  else
    rhor_ => rhor
@@ -220,15 +220,15 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  fgga=0 ; if(nkxc==7.or.nkxc==19) fgga=1
  nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
- ABI_ALLOCATE(eltfrxc_tmp,(6+3*dtset%natom,6))
- ABI_ALLOCATE(eltfrxc_tmp2,(6+3*dtset%natom,6))
- ABI_ALLOCATE(vxc10,(nfft,dtset%nspden))
- ABI_ALLOCATE(xccc3d1,(cplex*nfft))
+ ABI_MALLOC(eltfrxc_tmp,(6+3*dtset%natom,6))
+ ABI_MALLOC(eltfrxc_tmp2,(6+3*dtset%natom,6))
+ ABI_MALLOC(vxc10,(nfft,dtset%nspden))
+ ABI_MALLOC(xccc3d1,(cplex*nfft))
 
  if(n1xccc/=0) then
-   ABI_ALLOCATE(vxc_core,(nfft))
-   ABI_ALLOCATE(vxc10_core,(nfft))
-   ABI_ALLOCATE(vxc1is_core,(nfft))
+   ABI_MALLOC(vxc_core,(nfft))
+   ABI_MALLOC(vxc10_core,(nfft))
+   ABI_MALLOC(vxc1is_core,(nfft))
 
    if(dtset%nspden==1) then
      vxc_core(:)=vxc(:,1)
@@ -244,13 +244,13 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 !arising from the strain dependence of the gradient operator itself
 
  if(fgga==1) then
-   ABI_ALLOCATE(rho0_redgr,(3,nfft,dtset%nspden))
-   ABI_ALLOCATE(work,(nfft))
-   ABI_ALLOCATE(workgr,(nfft,3))
+   ABI_MALLOC(rho0_redgr,(3,nfft,dtset%nspden))
+   ABI_MALLOC(work,(nfft))
+   ABI_MALLOC(workgr,(nfft,3))
 
 !  Set up metric tensor derivatives
-   ABI_ALLOCATE(dgm,(3,3,6))
-   ABI_ALLOCATE(d2gm,(3,3,6,6))
+   ABI_MALLOC(dgm,(3,3,6))
+   ABI_MALLOC(d2gm,(3,3,6,6))
 !  Loop over 2nd strain index
    do is2=1,6
      kg=idx(2*is2-1);kd=idx(2*is2)
@@ -302,8 +302,8 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
        rho0_redgr(:,ifft,2)=workgr(ifft,:)
      end do
    end if
-   ABI_DEALLOCATE(work)
-   ABI_DEALLOCATE(workgr)
+   ABI_FREE(work)
+   ABI_FREE(workgr)
  end if !GGA
 
 !Null the elastic tensor accumulator
@@ -333,7 +333,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 
      if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
 !      Calculation in Reciprocal space for paw or NC with nc_xccc_gspace
-       ABI_ALLOCATE(xccc3d1_temp,(cplex*nfft,1))
+       ABI_MALLOC(xccc3d1_temp,(cplex*nfft,1))
        xccc3d1_temp = zero
 
        call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,is2,ipert,&
@@ -343,7 +343,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 &       comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &       paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
        xccc3d1(:) = xccc3d1_temp(:,1)
-       ABI_DEALLOCATE(xccc3d1_temp)
+       ABI_FREE(xccc3d1_temp)
 
      else
 !      Calculation in direct space for norm conserving:
@@ -512,9 +512,9 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
      if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
 !      Calculation in Reciprocal space for paw or NC with nc_xccc_gspace
        optatm=0;optdyfr=0;optgr=0;optstr=0;optv=0;optn=n3xccc/nfft;optn2=1;opteltfr=1
-       ABI_ALLOCATE(vxc10_coreg,(2,nfft))
-       ABI_ALLOCATE(vxc_coreg,(2,nfft))
-       ABI_ALLOCATE(vxc1is_coreg,(2,nfft))
+       ABI_MALLOC(vxc10_coreg,(2,nfft))
+       ABI_MALLOC(vxc_coreg,(2,nfft))
+       ABI_MALLOC(vxc1is_coreg,(2,nfft))
 
        vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
 
@@ -532,7 +532,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 &       paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
 
 !       The indexing array atindx is used to reestablish the correct order of atoms
-       ABI_ALLOCATE(elt_work,(6+3*dtset%natom,6))
+       ABI_MALLOC(elt_work,(6+3*dtset%natom,6))
        elt_work(1:6,1:6)=eltfrxc_tmp2(1:6,1:6)
        do ia=1,dtset%natom
          ielt=7+3*(ia-1)
@@ -540,12 +540,12 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
          elt_work(ielt:ielt+2,1:6)=eltfrxc_tmp2(ieltx:ieltx+2,1:6)
        end do
        eltfrxc_tmp2(:,:)=elt_work(:,:)
-       ABI_DEALLOCATE(elt_work)
+       ABI_FREE(elt_work)
 
 
-       ABI_DEALLOCATE(vxc10_coreg)
-       ABI_DEALLOCATE(vxc_coreg)
-       ABI_DEALLOCATE(vxc1is_coreg)
+       ABI_FREE(vxc10_coreg)
+       ABI_FREE(vxc_coreg)
+       ABI_FREE(vxc1is_coreg)
        eltfrxc(:,:)= eltfrxc(:,:) + eltfrxc_tmp2(:,:)
 
      else
@@ -562,11 +562,11 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 &         n1,n1xccc,n2,n3,rprimd,dtset%typat,ucvol,vxc_core,vxc10_core,vxc1is_core,&
 &         xcccrc,xccc1d,xred,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 !        if (is2==1) print*,"elt-frxc from eltxccore",is2,eltfrxc_test1(1,1)*ucvol/dble(nfft)
-         ABI_DATATYPE_ALLOCATE(pawtab_test,(dtset%ntypat))
+         ABI_MALLOC(pawtab_test,(dtset%ntypat))
          call pawtab_nullify(pawtab_test)
          do jj=1,dtset%ntypat
            pawtab_test(jj)%mqgrid=psps%mqgrid_vl
-           ABI_ALLOCATE(pawtab_test(jj)%tcorespl,(pawtab_test(jj)%mqgrid,2))
+           ABI_MALLOC(pawtab_test(jj)%tcorespl,(pawtab_test(jj)%mqgrid,2))
            rstep=xcccrc(jj)/dble(n1xccc-1)
            call pawrad_init(mesh=core_mesh,mesh_size=n1xccc,mesh_type=1,rstep=rstep)
            call pawpsp_cg(pawtab_test(jj)%dncdq0,pawtab_test(jj)%d2ncdq0,psps%mqgrid_vl,psps%qgrid_vl,&
@@ -577,9 +577,9 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 !            do ii=1,psps%mqgrid_vl;write(200+jj,*) psps%qgrid_vl(ii),pawtab_test(jj)%tcorespl(ii,1);enddo
 !          end if
          end do
-         ABI_ALLOCATE(vxc10_coreg,(2,nfft))
-         ABI_ALLOCATE(vxc_coreg,(2,nfft))
-         ABI_ALLOCATE(vxc1is_coreg,(2,nfft))
+         ABI_MALLOC(vxc10_coreg,(2,nfft))
+         ABI_MALLOC(vxc_coreg,(2,nfft))
+         ABI_MALLOC(vxc1is_coreg,(2,nfft))
          vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
          call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,1, ngfft, 0)
          call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,1, ngfft,0)
@@ -590,12 +590,12 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 &         optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab_test,ph1d,psps%qgrid_vl,dtset%qprtrb,&
 &         dtset%rcut,dummy_in,rprimd,corstr,dummy6,ucvol,psps%usepaw,&
 &         vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2)
-         ABI_DEALLOCATE(vxc10_coreg)
-         ABI_DEALLOCATE(vxc_coreg)
-         ABI_DEALLOCATE(vxc1is_coreg)
+         ABI_FREE(vxc10_coreg)
+         ABI_FREE(vxc_coreg)
+         ABI_FREE(vxc1is_coreg)
          call pawrad_free(core_mesh)
          call pawtab_free(pawtab_test)
-         ABI_DATATYPE_DEALLOCATE(pawtab_test)
+         ABI_FREE(pawtab_test)
          eltfrxc(:,:)= eltfrxc(:,:)+eltfrxc_test2(:,:)
 !        if (is2==1) print*,"cor-str from atm2fft",is2,corstr*ucvol
 !        if (is2==1) print*,"elt-frxc from atm2fft  ",is2,eltfrxc_test2(1,1)
@@ -625,28 +625,28 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    eltfrxc(:,:)=eltfrxc_tmp(:,:)+eltfrxc*ucvol/dble(nfft)
  end if
 
- ABI_DEALLOCATE(eltfrxc_tmp)
- ABI_DEALLOCATE(eltfrxc_tmp2)
- ABI_DEALLOCATE(vxc10)
- ABI_DEALLOCATE(xccc3d1)
+ ABI_FREE(eltfrxc_tmp)
+ ABI_FREE(eltfrxc_tmp2)
+ ABI_FREE(vxc10)
+ ABI_FREE(xccc3d1)
  if(psps%usepaw==0)then
-   ABI_DEALLOCATE(xccc1d)
-   ABI_DEALLOCATE(xcccrc)
+   ABI_FREE(xccc1d)
+   ABI_FREE(xcccrc)
  end if
  if (usexcnhat==0.and.dtset%usepaw==1) then
-   ABI_DEALLOCATE(rhor_)
+   ABI_FREE(rhor_)
  end if
 
  if(n1xccc/=0) then
-   ABI_DEALLOCATE(vxc_core)
-   ABI_DEALLOCATE(vxc10_core)
-   ABI_DEALLOCATE(vxc1is_core)
+   ABI_FREE(vxc_core)
+   ABI_FREE(vxc10_core)
+   ABI_FREE(vxc1is_core)
  end if
 
  if(fgga==1) then
-   ABI_DEALLOCATE(rho0_redgr)
-   ABI_DEALLOCATE(dgm)
-   ABI_DEALLOCATE(d2gm)
+   ABI_FREE(rho0_redgr)
+   ABI_FREE(dgm)
+   ABI_FREE(d2gm)
  end if
 
 end subroutine dfpt_eltfrxc
@@ -777,7 +777,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !Compute 1st and 2nd derivatives of metric tensor wrt all strain components
 !and store for use in inner loop below.
 
- ABI_ALLOCATE(d2rm,(3,3,6,6))
+ ABI_MALLOC(d2rm,(3,3,6,6))
 
 !Loop over 2nd strain index
  do is2=1,6
@@ -997,7 +997,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
- ABI_DEALLOCATE(d2rm)
+ ABI_FREE(d2rm)
 
  contains
 
@@ -1095,7 +1095,7 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 !-----
 !Compute 1st and 2nd derivatives of metric tensor wrt all strain components
 !and store for use in inner loop below.
- ABI_ALLOCATE(d2gm,(3,3,6,6))
+ ABI_MALLOC(d2gm,(3,3,6,6))
 
 !Loop over 2nd strain index
  do is2=1,6
@@ -1249,7 +1249,7 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 
 !The indexing array atindx is used to reestablish the correct
 !order of atoms
- ABI_ALLOCATE(elt_work,(6+3*natom,6))
+ ABI_MALLOC(elt_work,(6+3*natom,6))
  elt_work(1:6,1:6)=eltfrloc(1:6,1:6)
  do ia=1,natom
    ielt=7+3*(ia-1)
@@ -1258,8 +1258,8 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
  end do
  eltfrloc(:,:)=elt_work(:,:)
 
- ABI_DEALLOCATE(d2gm)
- ABI_DEALLOCATE(elt_work)
+ ABI_FREE(d2gm)
+ ABI_FREE(elt_work)
 
  contains
 
@@ -1442,9 +1442,9 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
  icg=0
 
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
- ABI_ALLOCATE(kg_k,(3,mpw))
- ABI_ALLOCATE(cwavef,(2,mpw*nspinor))
- ABI_ALLOCATE(eltfrkink,(6,6))
+ ABI_MALLOC(kg_k,(3,mpw))
+ ABI_MALLOC(cwavef,(2,mpw*nspinor))
+ ABI_MALLOC(eltfrkink,(6,6))
 
 !Define k-points distribution
 
@@ -1465,7 +1465,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
        cycle
      end if
 
-     ABI_ALLOCATE(gbound,(2*mgfft+8,2))
+     ABI_MALLOC(gbound,(2*mgfft+8,2))
      kpoint(:)=kptns(:,ikpt)
 
      kg_k(:,:) = 0
@@ -1484,7 +1484,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
      eltfrkink(:,:)=0.0_dp
 
      nkinout=6*6
-     ABI_ALLOCATE(ekinout,(nkinout))
+     ABI_MALLOC(ekinout,(nkinout))
      ekinout(:)=zero
 
      do iband=1,nband_k
@@ -1500,11 +1500,11 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 
      end do !iband
 
-     ABI_DEALLOCATE(ekinout)
+     ABI_FREE(ekinout)
 
      eltfrkin(:,:)=eltfrkin(:,:)+wtk(ikpt)*eltfrkink(:,:)
 
-     ABI_DEALLOCATE(gbound)
+     ABI_FREE(gbound)
 
      bdtot_index=bdtot_index+nband_k
 
@@ -1529,9 +1529,9 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
  call xmpi_sum(eltfrkin,spaceComm,ierr)
  call timab(48,2,tsec)
 
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(eltfrkink)
- ABI_DEALLOCATE(kg_k)
+ ABI_FREE(cwavef)
+ ABI_FREE(eltfrkink)
+ ABI_FREE(kg_k)
 
  DBG_EXIT("COLL")
 
@@ -1796,7 +1796,7 @@ subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
 
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
- ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+ ABI_MALLOC(gq,(3,max(n1,n2,n3)))
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
@@ -1906,7 +1906,7 @@ subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
 !  End loop in istr2
  end do
 
- ABI_DEALLOCATE(gq)
+ ABI_FREE(gq)
 
 !Init mpi_comm
  call timab(48,1,tsec)
@@ -2064,9 +2064,9 @@ eta=1.0_dp
 
 !Conduct reciprocal space summations
  fac=pi**2/eta ; gsum=zero
- ABI_ALLOCATE(d2sumg,(6+3*natom,6))
- ABI_ALLOCATE(drhoisr,(3,natom))
- ABI_ALLOCATE(drhoisi,(3,natom))
+ ABI_MALLOC(d2sumg,(6+3*natom,6))
+ ABI_MALLOC(drhoisr,(3,natom))
+ ABI_MALLOC(drhoisi,(3,natom))
  d2sumg(:,:)=zero
 
 !Sum over G space, done shell after shell until all
@@ -2180,15 +2180,15 @@ eta=1.0_dp
  sumg=gsum/(two_pi*ucvol)
  d2sumg(:,:)=d2sumg(:,:)/(two_pi*ucvol)
 
- ABI_DEALLOCATE(drhoisr)
- ABI_DEALLOCATE(drhoisi)
+ ABI_FREE(drhoisr)
+ ABI_FREE(drhoisi)
 !Stress tensor is now computed elsewhere (ewald2) hence do not need
 !length scale gradients (used to compute them here).
 
 !Conduct real space summations
  reta=sqrt(eta)
  fac=2._dp*sqrt(eta/pi)
- ABI_ALLOCATE(d2sumr,(6+3*natom,6))
+ ABI_MALLOC(d2sumr,(6+3*natom,6))
  sumr=zero;d2sumr(:,:)=zero
 
 !In the following a summation is being conducted over all
@@ -2295,13 +2295,13 @@ eta=1.0_dp
 !In case of parallelism over atoms: communicate
  if (paral_atom) then
    call timab(48,1,tsec)
-   ABI_ALLOCATE(mpibuf,((6+3*natom)*6+1))
+   ABI_MALLOC(mpibuf,((6+3*natom)*6+1))
    mpibuf(1:(6+3*natom)*6)=reshape(d2sumr(:,:),shape=(/((6+3*natom)*6)/))
    mpibuf((6+3*natom)*6+1)=sumr
    call xmpi_sum(mpibuf,my_comm_atom,ierr)
    sumr=mpibuf((6+3*natom)*6+1)
    d2sumr(:,:)=reshape(mpibuf(1:(6+3*natom)*6),shape=(/(6+3*natom),6/))
-   ABI_DEALLOCATE(mpibuf)
+   ABI_FREE(mpibuf)
    call timab(48,2,tsec)
  end if
 
@@ -2324,8 +2324,8 @@ eta=1.0_dp
    end do
  end do
 
- ABI_DEALLOCATE(d2sumg)
- ABI_DEALLOCATE(d2sumr)
+ ABI_FREE(d2sumg)
+ ABI_FREE(d2sumr)
 
 !Output the final values of ng and nr
  write(message, '(a,i4,a,i4)' )' elt_ewald : nr and ng are ',nr,' and ',ng
@@ -3069,7 +3069,7 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
  fac2=2.0_dp*fac
  fac8=4.0_dp*fac2
  fac2sqr=fac2*fac2
- ABI_ALLOCATE(work,(2,3,natom,3,natom,3,3))
+ ABI_MALLOC(work,(2,3,natom,3,natom,3,3))
  work(:,:,:,:,:,:,:)=zero
  ng=0
  do
@@ -3360,7 +3360,7 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
      end do
    end do
  end do
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
  
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)

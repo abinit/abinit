@@ -107,7 +107,7 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rs
 
  iwrite = ab_out > 0
 
- ABI_ALLOCATE(zeff,(3,natom))
+ ABI_MALLOC(zeff,(3,natom))
 
  rsus(:,:,:) = zero
  epsq        = zero
@@ -212,7 +212,7 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rs
 !Examine the degeneracy of each mode. The portability of the echo of the Raman susceptibility
 !for each degenerate mode is very hard to guarantee. On the contrary,
 !the scalar reductions of these quantities are OK.
- ABI_ALLOCATE(metacharacter,(3*natom))
+ ABI_MALLOC(metacharacter,(3*natom))
  do imode=1,3*natom
 !  The degenerate modes are not portable
    t_degenerate=.false.
@@ -251,8 +251,8 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rs
    end if
  end do
 
- ABI_DEALLOCATE(metacharacter)
- ABI_DEALLOCATE(zeff)
+ ABI_FREE(metacharacter)
+ ABI_FREE(zeff)
 
 end subroutine ramansus
 !!***
@@ -335,8 +335,8 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
  voigtindex(5,1) = 1 ; voigtindex(5,2) = 3
  voigtindex(6,1) = 1 ; voigtindex(6,2) = 2
 
- ABI_ALLOCATE(rijk,(3*natom+1,3,3,3))
- ABI_ALLOCATE(rijk_tot,(3,3,3))
+ ABI_MALLOC(rijk,(3*natom+1,3,3,3))
+ ABI_MALLOC(rijk_tot,(3,3,3))
  rijk(:,:,:,:) = 0._dp
  rijk_tot(:,:,:) = 0._dp
 
@@ -502,8 +502,8 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 
  end if  ! flag
 
- ABI_DEALLOCATE(rijk)
- ABI_DEALLOCATE(rijk_tot)
+ ABI_FREE(rijk)
+ ABI_FREE(rijk_tot)
 
 end subroutine electrooptic
 !!***

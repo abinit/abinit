@@ -2080,7 +2080,7 @@ end function libxc_functionals_gga_from_hybrid
      call wrtout(std_out,msg,'COLL')
 !  C is computed
    else
-     ABI_ALLOCATE(gnon,(npts))
+     ABI_MALLOC(gnon,(npts))
      do ipts=1,npts
        if (sum(rho(ipts,:))<=1e-7_dp) then
          gnon(ipts)=zero
@@ -2093,7 +2093,7 @@ end function libxc_functionals_gga_from_hybrid
        end if
      end do
      cc= -0.012_dp + 1.023_dp*sqrt(sum(gnon)/npts)
-     ABI_DEALLOCATE(gnon)
+     ABI_FREE(gnon)
      write(msg,'(2a,f9.6)' ) ch10,'In the mGGA functional TB09, c = ',cc
      call wrtout(std_out,msg,'COLL')
    end if

@@ -418,13 +418,13 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
  end if
 
 
- ABI_ALLOCATE(rhoarr,(npts))
- ABI_ALLOCATE(rhom1_3,(npts))
- ABI_ALLOCATE(rho_updnm1_3,(npts,2))
- ABI_ALLOCATE(zetm,(npts))
- ABI_ALLOCATE(zetmm1_3,(npts))
- ABI_ALLOCATE(zetp,(npts))
- ABI_ALLOCATE(zetpm1_3,(npts))
+ ABI_MALLOC(rhoarr,(npts))
+ ABI_MALLOC(rhom1_3,(npts))
+ ABI_MALLOC(rho_updnm1_3,(npts,2))
+ ABI_MALLOC(zetm,(npts))
+ ABI_MALLOC(zetmm1_3,(npts))
+ ABI_MALLOC(zetp,(npts))
+ ABI_MALLOC(zetpm1_3,(npts))
 
  do ispden=1,nspden
    call invcb(rho_updn(:,ispden),rho_updnm1_3(:,ispden),npts)
@@ -5138,13 +5138,13 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
 !end if
 !ENDDEBUG
 
- ABI_DEALLOCATE(rhoarr)
- ABI_DEALLOCATE(rhom1_3)
- ABI_DEALLOCATE(rho_updnm1_3)
- ABI_DEALLOCATE(zetm)
- ABI_DEALLOCATE(zetmm1_3)
- ABI_DEALLOCATE(zetp)
- ABI_DEALLOCATE(zetpm1_3)
+ ABI_FREE(rhoarr)
+ ABI_FREE(rhom1_3)
+ ABI_FREE(rho_updnm1_3)
+ ABI_FREE(zetm)
+ ABI_FREE(zetmm1_3)
+ ABI_FREE(zetp)
+ ABI_FREE(zetpm1_3)
 
 !DEBUG
 !deallocate(wecrsz,d1wecrsz,d2wecrsz,d3wecrsz)

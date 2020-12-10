@@ -120,7 +120,7 @@ subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
  if (present(distribfft)) then
    my_distribfft => distribfft
  else
-   ABI_DATATYPE_ALLOCATE(my_distribfft,)
+   ABI_MALLOC(my_distribfft,)
    call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
  end if
  fftgrid_found=.false.
@@ -191,7 +191,7 @@ subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
 
  if (.not.present(distribfft)) then
    call destroy_distribfft(my_distribfft)
-   ABI_DATATYPE_DEALLOCATE(my_distribfft)
+   ABI_FREE(my_distribfft)
  end if
 
 end subroutine multipoles_fftr
@@ -417,7 +417,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
  if (me_fft == 0) write(temp_unit,'(a)') message
 
 !Set up a list of character identifiers for all atoms : iden(ia)
- ABI_ALLOCATE(iden,(natom))
+ ABI_MALLOC(iden,(natom))
  do ia=1,natom
    call atomdata_from_znucl(atom,znucl(typat(ia)))
    symbol = atom%symbol
@@ -436,15 +436,15 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
  end do
 
 !Compute cartesian coordinates, and print reduced and cartesian coordinates
- ABI_ALLOCATE(xcart,(3,natom))
+ ABI_MALLOC(xcart,(3,natom))
  call xred2xcart(natom,rprimd,xcart,xred)
  do ia=1,natom
    write(message, '(a,a,3f10.5,a,3f10.5)' ) &
 &   '#   ',iden(ia),xred(1:3,ia),'    ',xcart(1:3,ia)
    if (me_fft == 0) write(temp_unit,'(a)') message
  end do
- ABI_DEALLOCATE(iden)
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(iden)
+ ABI_FREE(xcart)
 
 !Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,ngfft(2),ngfft(3),fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -464,9 +464,9 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
      na=ngfft(1) ; nb=ngfft(2)
    end select
 
-   ABI_ALLOCATE( reduced_coord,(nslice))
-   ABI_ALLOCATE(mean_pot,(nslice))
-   ABI_ALLOCATE(lin_den,(nslice))
+   ABI_MALLOC( reduced_coord,(nslice))
+   ABI_MALLOC(mean_pot,(nslice))
+   ABI_MALLOC(lin_den,(nslice))
 
    do ispden=1,nspden
 
@@ -587,9 +587,9 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 !    End of the loop on spins
    end do
 
-   ABI_DEALLOCATE(reduced_coord)
-   ABI_DEALLOCATE(mean_pot)
-   ABI_DEALLOCATE(lin_den)
+   ABI_FREE(reduced_coord)
+   ABI_FREE(mean_pot)
+   ABI_FREE(lin_den)
 
 !  End of the loops on the three dimensions
  end do

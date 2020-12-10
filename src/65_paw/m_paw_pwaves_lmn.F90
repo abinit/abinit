@@ -414,7 +414,7 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
  !
  !* Free 2nd derivates used for spline.
  call paw_pwaves_lmn_free(Paw_lmn_spline)
- ABI_DATATYPE_DEALLOCATE(Paw_lmn_spline)
+ ABI_FREE(Paw_lmn_spline)
 
  ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)

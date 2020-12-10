@@ -344,11 +344,11 @@ subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband
 !The general case, where a complex phase indeterminacy is present
  if(istwfk==1)then
 
-   ABI_ALLOCATE(cimb,(nband_k))
-   ABI_ALLOCATE(creb,(nband_k))
-   ABI_ALLOCATE(saab,(nband_k))
-   ABI_ALLOCATE(sabb,(nband_k))
-   ABI_ALLOCATE(sbbb,(nband_k))
+   ABI_MALLOC(cimb,(nband_k))
+   ABI_MALLOC(creb,(nband_k))
+   ABI_MALLOC(saab,(nband_k))
+   ABI_MALLOC(sabb,(nband_k))
+   ABI_MALLOC(sbbb,(nband_k))
    cimb(:)=zero ; creb(:)=zero
 
 !  Loop over bands
@@ -501,15 +501,15 @@ subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband
      end if
    end do ! iband
 
-   ABI_DEALLOCATE(cimb)
-   ABI_DEALLOCATE(creb)
-   ABI_DEALLOCATE(saab)
-   ABI_DEALLOCATE(sabb)
-   ABI_DEALLOCATE(sbbb)
+   ABI_FREE(cimb)
+   ABI_FREE(creb)
+   ABI_FREE(saab)
+   ABI_FREE(sabb)
+   ABI_FREE(sbbb)
 
  else  ! if istwfk/=1.  Storages that take into account the time-reversal symmetry : the freedom is only a sign freedom
 
-   ABI_ALLOCATE(creb,(nband_k))
+   ABI_MALLOC(creb,(nband_k))
    creb(:)=zero
 !  XG030513 : MPIWF : this loop should be done only by the master processor of the WF group
 
@@ -558,7 +558,7 @@ subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband
      end if
    end do ! iband
 
-   ABI_DEALLOCATE(creb)
+   ABI_FREE(creb)
  end if ! istwfk
 
 end subroutine cgtk_fixphase

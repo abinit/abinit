@@ -444,7 +444,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !because we need to compute <g|H^(j2)-Eps.S^(j2)|u0> first.
  if (ipert/=dtset%natom+1) then
    mpert1=0
-   ABI_ALLOCATE(jpert1,(mpert))
+   ABI_MALLOC(jpert1,(mpert))
    jpert1 = 0
    if (ipert/=dtset%natom+2.or.has_ddk_file) then
      mpert1=mpert1+1;jpert1(mpert1)=ipert
@@ -460,11 +460,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    end do
  else
    mpert1=1
-   ABI_ALLOCATE(jpert1,(mpert1))
+   ABI_MALLOC(jpert1,(mpert1))
    jpert1(1)=dtset%natom+1
  end if
  mdir1=3
- ABI_ALLOCATE(jdir1,(mdir1))
+ ABI_MALLOC(jdir1,(mdir1))
  jdir1(1:3)= (/ (idir1,idir1=1,3) /)
  jdir1(1)=idir;jdir1(idir)=1
 
@@ -515,18 +515,18 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  is_metal=((dtset%occopt>=3.and.dtset%occopt<=8).or.(abs(arg)>tol8))
  is_metal_or_qne0=((is_metal).or.(qne0))
  nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
- ABI_ALLOCATE(ch1c,(2,dtset%mband,dtset%mband,nkpt_me))
+ ABI_MALLOC(ch1c,(2,dtset%mband,dtset%mband,nkpt_me))
  ch1c(:,:,:,:)=zero
  nzlmopt_ipert=0;nzlmopt_ipert1=0
  if (usepaw==1) then
-   ABI_ALLOCATE(d2ovl_drho,(2,3,mpert,3,mpert))
+   ABI_MALLOC(d2ovl_drho,(2,3,mpert,3,mpert))
    d2ovl_drho=zero
    if (dtset%pawnzlm/=0) then
      nzlmopt_ipert=1;if (dtset%nstep<2) nzlmopt_ipert=-1
      nzlmopt_ipert1=-1
    end if
    if (is_metal_or_qne0) then
-     ABI_ALLOCATE(cs1c,(2,dtset%mband,dtset%mband,nkpt_me))
+     ABI_MALLOC(cs1c,(2,dtset%mband,dtset%mband,nkpt_me))
      cs1c(:,:,:,:)=zero
    end if
  end if
@@ -577,14 +577,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      nfftot=ngfftf(1)*ngfftf(2)*ngfftf(3)
      nvxc1=0;if (ipert1<=dtset%natom.or.ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) nvxc1=nspden
      nvh1=0;if (ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) nvh1=1
-     ABI_ALLOCATE(vxc10,(cplex*nfftf,nvxc1))
-     ABI_ALLOCATE(vhartr01,(cplex*nfftf*nvh1))
+     ABI_MALLOC(vxc10,(cplex*nfftf,nvxc1))
+     ABI_MALLOC(vhartr01,(cplex*nfftf*nvh1))
      need_pawij10=(usepaw==1)
      if (need_pawij10) then
-       ABI_DATATYPE_ALLOCATE(paw_ij10,(my_natom,mdir1))
-       ABI_ALLOCATE(e1kbfr_spin,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,cplex,mdir1,my_nsppol))
+       ABI_MALLOC(paw_ij10,(my_natom,mdir1))
+       ABI_MALLOC(e1kbfr_spin,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,cplex,mdir1,my_nsppol))
      else
-       ABI_DATATYPE_ALLOCATE(paw_ij10,(0,0))
+       ABI_MALLOC(paw_ij10,(0,0))
      end if
 
 !    LOOP OVER PERTURBATION DIRECTIONS
@@ -597,8 +597,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          vpsp1_idir1 => vpsp1
          xccc3d1_idir1 => xccc3d1
        else
-         ABI_ALLOCATE(vpsp1_idir1,(cplex*nfftf))
-         ABI_ALLOCATE(xccc3d1_idir1,(cplex*n3xccc))
+         ABI_MALLOC(vpsp1_idir1,(cplex*nfftf))
+         ABI_MALLOC(xccc3d1_idir1,(cplex*n3xccc))
          if (usepaw==1) then
            call dfpt_atm2fft(gs_hamkq%atindx,cplex,gmet,gprimd,gsqcut,istr1,ipert1,&
 &           mgfftf,psps%mqgrid_vl,dtset%natom,1,nfftf,ngfftf,dtset%ntypat,&
@@ -680,19 +680,19 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          else if (usexcnhat/=0) then
 !          vxc1 is integrated with the total 1st-order density (rhor1 including nhat1)
 !          vpsp1 is integrated with the 1st-order pseudo density (rhor1 without nhat1)
-           ABI_ALLOCATE(rhotmp,(cplex*nfftf,1))
+           ABI_MALLOC(rhotmp,(cplex*nfftf,1))
            rhotmp(:,1)=rhor1(:,1)-nhat1(:,1)
            call dotprod_vn(cplex,rhor1,dot1r,dot1i,nfftf,nfftot,nspden,2,vxc10,ucvol)
            call dotprod_vn(cplex,rhotmp,dot2r,dot2i,nfftf,nfftot,1,2,vpsp1_idir1,ucvol)
-           ABI_DEALLOCATE(rhotmp)
+           ABI_FREE(rhotmp)
          else
 !          vxc1 is integrated with the 1st-order pseudo density (rhor1 without nhat1)
 !          vpsp1 is integrated with the 1st-order pseudo density (rhor1 without nhat1)
-           ABI_ALLOCATE(rhotmp,(cplex*nfftf,nspden))
+           ABI_MALLOC(rhotmp,(cplex*nfftf,nspden))
            rhotmp(:,:)=rhor1(:,:)-nhat1(:,:)
            call dotprod_vn(cplex,rhotmp,dot1r,dot1i,nfftf,nfftot,nspden,2,vxc10,ucvol)
            call dotprod_vn(cplex,rhotmp,dot2r,dot2i,nfftf,nfftot,1,2,vpsp1_idir1,ucvol)
-           ABI_DEALLOCATE(rhotmp)
+           ABI_FREE(rhotmp)
          end if
          if (nvh1>0) then
            call dotprod_vn(cplex,rhor1,dot3r,dot3i,nfftf,nfftot,1,2,vhartr01,ucvol)
@@ -713,21 +713,21 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        end if ! ipert1<=natom
 
        if (ipert/=ipert1.or.idir/=idir1.or.force_recompute)  then
-         ABI_DEALLOCATE(vpsp1_idir1)
-         ABI_DEALLOCATE(xccc3d1_idir1)
+         ABI_FREE(vpsp1_idir1)
+         ABI_FREE(xccc3d1_idir1)
        end if
 
 !      End loop on directions
      end do
 
 !    Free memory
-     ABI_DEALLOCATE(vxc10)
-     ABI_DEALLOCATE(vhartr01)
+     ABI_FREE(vxc10)
+     ABI_FREE(vhartr01)
 
    else ! ddk perturbation
      d2lo(1:2,1:mdir1,ipert1,idir,ipert)=zero
      need_pawij10=.false.
-     ABI_DATATYPE_ALLOCATE(paw_ij10,(0,0))
+     ABI_MALLOC(paw_ij10,(0,0))
    end if
 
 !  Prepare RF PAW files for reading and writing if mkmem, mkqmem or mk1mem==0
@@ -735,11 +735,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !  Allocate arrays used to accumulate density change due to overlap
    if (has_drho) then
-     ABI_ALLOCATE(drhoaug1,(cplex*dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),mdir1))
-     ABI_ALLOCATE(drho1wfr,(cplex*dtset%nfft,dtset%nspden,mdir1))
-     ABI_DATATYPE_ALLOCATE(pawdrhoij1,(my_natom,mdir1))
+     ABI_MALLOC(drhoaug1,(cplex*dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),mdir1))
+     ABI_MALLOC(drho1wfr,(cplex*dtset%nfft,dtset%nspden,mdir1))
+     ABI_MALLOC(pawdrhoij1,(my_natom,mdir1))
      if (paral_atom) then
-       ABI_DATATYPE_ALLOCATE(pawdrhoij1_unsym,(dtset%natom,mdir1))
+       ABI_MALLOC(pawdrhoij1_unsym,(dtset%natom,mdir1))
      else
        pawdrhoij1_unsym => pawdrhoij1
      end if
@@ -772,7 +772,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !  because this needs a communication over comm_atom (=comm_spinkpt)
    if (need_pawij10) then
      if (my_nsppol<nsppol) then
-       ABI_ALLOCATE(e1kb_work,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,cplex))
+       ABI_MALLOC(e1kb_work,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,cplex))
      end if
      ii=0
      do isppol=1,nsppol
@@ -785,7 +785,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        end do
      end do
      if (my_nsppol<nsppol) then
-       ABI_DEALLOCATE(e1kb_work)
+       ABI_FREE(e1kb_work)
      end if
    end if
 
@@ -825,12 +825,12 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        end if
 
 !      Allocate/initialize local arrays and scalars for this k-point
-       ABI_ALLOCATE(d2nl_k,(2,3))
-       ABI_ALLOCATE(d2ovl_k,(2,3))
-       ABI_ALLOCATE(eig_k,(nband_k))
-       ABI_ALLOCATE(eig_kq,(nband_k))
-       ABI_ALLOCATE(eig1_k,(2*nband_k**2))
-       ABI_ALLOCATE(occ_k,(nband_k))
+       ABI_MALLOC(d2nl_k,(2,3))
+       ABI_MALLOC(d2ovl_k,(2,3))
+       ABI_MALLOC(eig_k,(nband_k))
+       ABI_MALLOC(eig_kq,(nband_k))
+       ABI_MALLOC(eig1_k,(2*nband_k**2))
+       ABI_MALLOC(occ_k,(nband_k))
        d2nl_k(:,:)=zero;d2ovl_k(:,:)=zero
        eig_k (:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
        eig_kq(:)=eigenq(1+bdtot_index:nband_k+bdtot_index)
@@ -846,10 +846,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        if (is_metal) then
 !        For each pair of active bands (m,n), generates the ratios
 !        rocceig(m,n)=(occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n))
-         ABI_ALLOCATE(doccde_k,(nband_k))
-         ABI_ALLOCATE(doccde_kq,(nband_k))
-         ABI_ALLOCATE(occ_kq,(nband_k))
-         ABI_ALLOCATE(rocceig,(nband_k,nband_k))
+         ABI_MALLOC(doccde_k,(nband_k))
+         ABI_MALLOC(doccde_kq,(nband_k))
+         ABI_MALLOC(occ_kq,(nband_k))
+         ABI_MALLOC(rocceig,(nband_k,nband_k))
          doccde_k(:)=doccde_rbz(1+bdtot_index:nband_k+bdtot_index)
          doccde_kq(:)=docckqde(1+bdtot_index:nband_k+bdtot_index)
          occ_kq(:)=occkq(1+bdtot_index:nband_k+bdtot_index)
@@ -877,14 +877,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        end if
 
 !      Allocate arrays used for NL form factors
-       ABI_ALLOCATE(kg_k,(3,npw_k))
-       ABI_ALLOCATE(kg1_k,(3,npw1_k))
-       ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
-       ABI_ALLOCATE(ylm1_k,(npw1_k,psps%mpsang*psps%mpsang*psps%useylm))
+       ABI_MALLOC(kg_k,(3,npw_k))
+       ABI_MALLOC(kg1_k,(3,npw1_k))
+       ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+       ABI_MALLOC(ylm1_k,(npw1_k,psps%mpsang*psps%mpsang*psps%useylm))
        if (psps%useylm==1.and.(need_ddk_file.or.ipert1==dtset%natom+1)) need_ylmgr1=1
        if (psps%useylm==1.and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)) need_ylmgr1=1
        dimylmgr1=max(useylmgr1,need_ylmgr1)
-       ABI_ALLOCATE(ylmgr1_k,(npw1_k,3,psps%mpsang*psps%mpsang*psps%useylm*dimylmgr1))
+       ABI_MALLOC(ylmgr1_k,(npw1_k,3,psps%mpsang*psps%mpsang*psps%useylm*dimylmgr1))
 
 !      Get plane-wave vectors and related data at k
        kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
@@ -920,21 +920,21 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !      Compute (k+G) vectors
        nkpg=0;if(ipert1<=dtset%natom) nkpg=3*dtset%nloalg(3)
-       ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
+       ABI_MALLOC(kpg_k,(npw_k,nkpg))
        if (nkpg>0) then
          call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
        end if
 
 !      Compute (k+q+G) vectors
        nkpg1=0;if(ipert1<=dtset%natom.or.need_ylmgr1==1) nkpg1=3*dtset%nloalg(3)
-       ABI_ALLOCATE(kpg1_k,(npw1_k,nkpg1))
+       ABI_MALLOC(kpg1_k,(npw1_k,nkpg1))
        if (nkpg1>0) then
          call mkkpg(kg1_k,kpg1_k,kpq,nkpg1,npw1_k)
        end if
 
 !      Allocate kinetic contributions
-       ABI_ALLOCATE(dkinpw,(npw_k))
-       ABI_ALLOCATE(kinpw1,(npw1_k))
+       ABI_MALLOC(dkinpw,(npw_k))
+       ABI_MALLOC(kinpw1,(npw1_k))
        dkinpw=zero
 !      Compute (1/2) (2 Pi)**2 (k+q+G)**2:
 !       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k)
@@ -943,7 +943,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !      Compute nonlocal form factors ffnl at (k+G), for all atoms
        ider=0;idir0=0
        dimffnl=0;if (ipert1<=dtset%natom) dimffnl=1
-       ABI_ALLOCATE(ffnlk,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
+       ABI_MALLOC(ffnlk,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
        if (ipert1<=dtset%natom) then
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnlk,psps%ffspl,gs_hamkq%gmet,gs_hamkq%gprimd,&
 &         ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,&
@@ -960,7 +960,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          dimffnl1=1;if (ider>=1) dimffnl1=2+2*psps%useylm
          idir0=0;if (ider>0.and.psps%useylm==1) idir0=4
        end if
-       ABI_ALLOCATE(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,psps%ntypat))
+       ABI_MALLOC(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,psps%ntypat))
        call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gs_hamkq%gmet,gs_hamkq%gprimd,&
 &       ider,idir0,psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,&
 &       psps%mqgrid_ff,nkpg1,npw1_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,usepaw,&
@@ -972,7 +972,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          dimffnl1_idir1=dimffnl1
        else
          dimffnl1_idir1=1+ider
-         ABI_ALLOCATE(ffnl1_idir1,(npw1_k,dimffnl1_idir1,psps%lmnmax,psps%ntypat))
+         ABI_MALLOC(ffnl1_idir1,(npw1_k,dimffnl1_idir1,psps%lmnmax,psps%ntypat))
          ii=1;if (psps%useylm==0) ii=1+ider
          do itypat=1,psps%ntypat
            do ilmn=1,psps%lmnmax
@@ -982,7 +982,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        end if
 
 !      Load k-dependent part in the Hamiltonian datastructure
-       ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamkq%matblk))
+       ABI_MALLOC(ph3d,(2,npw_k,gs_hamkq%matblk))
        call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
 &       ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
        if (size(ffnlk)>0) then
@@ -997,7 +997,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &       kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1_idir1,&
 &       compute_gbound=.true.)
        if (qne0) then
-         ABI_ALLOCATE(ph3d1,(2,npw1_k,gs_hamkq%matblk))
+         ABI_MALLOC(ph3d1,(2,npw1_k,gs_hamkq%matblk))
          call gs_hamkq%load_kprime(ph3d_kp=ph3d1,compute_ph3d=.true.)
        end if
 
@@ -1006,21 +1006,21 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !      Allocate memory space for one band
        if (need_wfk)  then
-         ABI_ALLOCATE(cwave0,(2,npw_k*nspinor))
+         ABI_MALLOC(cwave0,(2,npw_k*nspinor))
        end if
        if (need_wf1)  then
-         ABI_ALLOCATE(cwavef,(2,npw1_k*nspinor))
+         ABI_MALLOC(cwavef,(2,npw1_k*nspinor))
        end if
-       ABI_ALLOCATE(gh1,(2,npw1_k*nspinor))
+       ABI_MALLOC(gh1,(2,npw1_k*nspinor))
        nullify(cwaveprj0_idir1)
        if (usecprj==1) then
-         ABI_DATATYPE_ALLOCATE(cwaveprj0,(dtset%natom,nspinor))
+         ABI_MALLOC(cwaveprj0,(dtset%natom,nspinor))
          call pawcprj_alloc(cwaveprj0,ncpgr,gs_hamkq%dimcprj)
        end if
        if (has_dcwf) then
-         ABI_ALLOCATE(gs1,(2,npw1_k*nspinor))
+         ABI_MALLOC(gs1,(2,npw1_k*nspinor))
        else
-         ABI_ALLOCATE(gs1,(0,0))
+         ABI_MALLOC(gs1,(0,0))
        end if
 
 !      LOOP OVER BANDS
@@ -1069,7 +1069,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !            === Atomic displ. perturbation
              if (ipert<=dtset%natom) then
-               ABI_DATATYPE_ALLOCATE(cwaveprj0_idir1,(dtset%natom,nspinor))
+               ABI_MALLOC(cwaveprj0_idir1,(dtset%natom,nspinor))
                call pawcprj_alloc(cwaveprj0_idir1,1,gs_hamkq%dimcprj)
                if (ipert1<=dtset%natom) then
                  call pawcprj_copy(cwaveprj0,cwaveprj0_idir1,icpgr=idir1)
@@ -1095,7 +1095,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !            == Electric field perturbation
              else if (ipert==dtset%natom+2) then
-               ABI_DATATYPE_ALLOCATE(cwaveprj0_idir1,(dtset%natom,nspinor))
+               ABI_MALLOC(cwaveprj0_idir1,(dtset%natom,nspinor))
                call pawcprj_alloc(cwaveprj0_idir1,1,gs_hamkq%dimcprj)
                if (ipert1==dtset%natom+2) then
                  call pawcprj_copy(cwaveprj0,cwaveprj0_idir1,icpgr=idir1)
@@ -1120,7 +1120,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                if ((ipert1==dtset%natom+3.or.ipert1==dtset%natom+4).and.(istr==istr1)) then
                  cwaveprj0_idir1 => cwaveprj0
                else
-                 ABI_DATATYPE_ALLOCATE(cwaveprj0_idir1,(dtset%natom,nspinor))
+                 ABI_MALLOC(cwaveprj0_idir1,(dtset%natom,nspinor))
                  call pawcprj_alloc(cwaveprj0_idir1,ncpgr,gs_hamkq%dimcprj)
                  if (ipert1<=dtset%natom) then
                    idir_cprj=idir1;choice=2
@@ -1158,7 +1158,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          Read DDK wave function (if ipert1=electric field)
            if (ipert1==dtset%natom+2) then
              usevnl=1
-             ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor*usevnl))
+             ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor*usevnl))
              if (need_ddk_file) then
                if (ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
@@ -1179,7 +1179,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              end if
            else
              usevnl=0
-             ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor*usevnl))
+             ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor*usevnl))
            end if
 
 !          Get |H^(j2)-Eps_k_i.S^(j2)|u0_k_i> (VHxc-dependent part not taken into account) and S^(j2)|u0>
@@ -1191,7 +1191,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
            call getgh1c(berryopt,cwave0,cwaveprj0_idir1,gh1,dum1,gs1,gs_hamkq,gvnlx1,idir1,ipert1,&
 &           lambda,mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            if (sij_opt==1.and.optnl==1) gh1=gh1-lambda*gs1
-           ABI_DEALLOCATE(gvnlx1)
+           ABI_FREE(gvnlx1)
 
 !          If needed, compute here <delta_u^(j1)_k_i|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>
 !          with delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
@@ -1203,7 +1203,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          For the next calls, it is re-used.
            if (has_dcwf.or.(ipert==ipert1.and.idir==idir1.and.usepaw==1)) then
 !            note: gvnlx1 used as temporary space
-             ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
+             ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor))
              if (ipert==ipert1.and.idir==idir1) then
                option=0;gvnlx1=gh1
              else
@@ -1225,7 +1225,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                  d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband)*elfd_fact*doti
                end if
              end if
-             ABI_DEALLOCATE(gvnlx1)
+             ABI_FREE(gvnlx1)
            end if
 
 !          If needed, compute here <delta_u^(j1)_k_i|H-Eps_k_i.S|u^(j2)_k_i>
@@ -1240,7 +1240,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          At first call (when j1=j2), cs1c=<u0_k_i|S^(j1)|u0_k+q_j> is stored
 !          For the next calls, it is re-used.
            if (has_dcwf.and.is_metal_or_qne0) then
-             ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
+             ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor))
              dotr=zero;doti=zero
              invocc=zero ; if (abs(occ_k(iband))>tol8) invocc=two/occ_k(iband)
              do jband=1,nband_k
@@ -1278,7 +1278,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !            Note: factor 2 (from d2E/dj1dj2=2E^(j1j2))
              d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*dotr
              d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*doti
-             ABI_DEALLOCATE(gvnlx1)
+             ABI_FREE(gvnlx1)
            end if
 
 !          Build the matrix element <u0_k_i|H^(j1)-Eps_k_i.S^(j1)|u^(j2)_k,q_i>
@@ -1328,8 +1328,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              if (abs(occ_k(iband))>tol8) then
 !              Compute here delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
 !              (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
-               ABI_ALLOCATE(dcwavef,(2,npw1_k*nspinor))
-               ABI_DATATYPE_ALLOCATE(dcwaveprj,(dtset%natom,nspinor))
+               ABI_MALLOC(dcwavef,(2,npw1_k*nspinor))
+               ABI_MALLOC(dcwaveprj,(dtset%natom,nspinor))
                call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
                call getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwf_k,mcgq,&
 &               mcprjq,mpi_enreg,dtset%natom,nband_k,npw1_k,nspinor,1,gs1)
@@ -1341,14 +1341,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &               mpi_enreg,dtset%natom,nband_k,1,npw_k,npw1_k,nspinor,occ_k,option,&
 &               pawdrhoij1_unsym(:,idir1),drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
                call pawcprj_free(dcwaveprj)
-               ABI_DEALLOCATE(dcwavef)
-               ABI_DATATYPE_DEALLOCATE(dcwaveprj)
+               ABI_FREE(dcwavef)
+               ABI_FREE(dcwaveprj)
              end if
            end if
 
            if((usecprj==1).and..not.(associated(cwaveprj0_idir1,cwaveprj0)))then
              call pawcprj_free(cwaveprj0_idir1)
-             ABI_DATATYPE_DEALLOCATE(cwaveprj0_idir1)
+             ABI_FREE(cwaveprj0_idir1)
            end if
 
 !          End of loops
@@ -1360,48 +1360,48 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        if (usepaw==1) d2ovl(:,:,ipert1,idir,ipert)=d2ovl(:,:,ipert1,idir,ipert)+d2ovl_k(:,:)
 
 !      Deallocations of arrays used for this k-point
-       ABI_DEALLOCATE(gh1)
-       ABI_DEALLOCATE(gs1)
+       ABI_FREE(gh1)
+       ABI_FREE(gs1)
        if (need_wfk)  then
-         ABI_DEALLOCATE(cwave0)
+         ABI_FREE(cwave0)
        end if
        if (need_wf1)  then
-         ABI_DEALLOCATE(cwavef)
+         ABI_FREE(cwavef)
        end if
-       ABI_DEALLOCATE(kg_k)
-       ABI_DEALLOCATE(kg1_k)
-       ABI_DEALLOCATE(ylm_k)
-       ABI_DEALLOCATE(ylm1_k)
-       ABI_DEALLOCATE(ylmgr1_k)
-       ABI_DEALLOCATE(kpg_k)
-       ABI_DEALLOCATE(kpg1_k)
-       ABI_DEALLOCATE(d2nl_k)
-       ABI_DEALLOCATE(d2ovl_k)
-       ABI_DEALLOCATE(eig_k)
-       ABI_DEALLOCATE(eig_kq)
-       ABI_DEALLOCATE(eig1_k)
-       ABI_DEALLOCATE(occ_k)
+       ABI_FREE(kg_k)
+       ABI_FREE(kg1_k)
+       ABI_FREE(ylm_k)
+       ABI_FREE(ylm1_k)
+       ABI_FREE(ylmgr1_k)
+       ABI_FREE(kpg_k)
+       ABI_FREE(kpg1_k)
+       ABI_FREE(d2nl_k)
+       ABI_FREE(d2ovl_k)
+       ABI_FREE(eig_k)
+       ABI_FREE(eig_kq)
+       ABI_FREE(eig1_k)
+       ABI_FREE(occ_k)
        if (is_metal)  then
-         ABI_DEALLOCATE(doccde_k)
-         ABI_DEALLOCATE(doccde_kq)
-         ABI_DEALLOCATE(occ_kq)
-         ABI_DEALLOCATE(rocceig)
+         ABI_FREE(doccde_k)
+         ABI_FREE(doccde_kq)
+         ABI_FREE(occ_kq)
+         ABI_FREE(rocceig)
        end if
-       ABI_DEALLOCATE(dkinpw)
-       ABI_DEALLOCATE(kinpw1)
-       ABI_DEALLOCATE(ph3d)
+       ABI_FREE(dkinpw)
+       ABI_FREE(kinpw1)
+       ABI_FREE(ph3d)
        if (allocated(ph3d1)) then
-         ABI_DEALLOCATE(ph3d1)
+         ABI_FREE(ph3d1)
        end if
-       ABI_DEALLOCATE(ffnlk)
-       ABI_DEALLOCATE(ffnl1)
+       ABI_FREE(ffnlk)
+       ABI_FREE(ffnl1)
        if (ipert1>dtset%natom)  then
-         ABI_DEALLOCATE(ffnl1_idir1)
+         ABI_FREE(ffnl1_idir1)
        end if
        nullify(ffnl1_idir1)
        if (usecprj==1) then
          call pawcprj_free(cwaveprj0)
-         ABI_DATATYPE_DEALLOCATE(cwaveprj0)
+         ABI_FREE(cwaveprj0)
        end if
        nullify(cwaveprj0_idir1)
 !      Shift arrays
@@ -1439,16 +1439,16 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !  Free memory used for this type of perturbation
    call rf_hamkq%free()
    if (has_drho)  then
-     ABI_DEALLOCATE(drhoaug1)
+     ABI_FREE(drhoaug1)
    end if
    if (need_pawij10) then
      do kdir1=1,mdir1
        idir1=jdir1(kdir1)
        call paw_ij_free(paw_ij10(:,idir1))
      end do
-     ABI_DEALLOCATE(e1kbfr_spin)
+     ABI_FREE(e1kbfr_spin)
    end if
-   ABI_DATATYPE_DEALLOCATE(paw_ij10)
+   ABI_FREE(paw_ij10)
 
 !  In case of parallelism, sum 1st-order density and occupation matrix over processors
    if (has_drho.and.xmpi_paral==1) then
@@ -1456,11 +1456,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !    Accumulate 1st-order density
      call timab(48,1,tsec)
      bufsz=cplex*dtset%nfft*nspden*mdir1
-     ABI_ALLOCATE(buffer,(bufsz))
+     ABI_MALLOC(buffer,(bufsz))
      buffer(1:bufsz)=reshape(drho1wfr,(/bufsz/))
      call xmpi_sum(buffer,bufsz,spaceworld,ierr)
      drho1wfr(:,:,:)=reshape(buffer(1:bufsz),(/cplex*dtset%nfft,nspden,mdir1/))
-     ABI_DEALLOCATE(buffer)
+     ABI_FREE(buffer)
      call timab(48,2,tsec)
 
 !    Accumulate 1st-order PAW occupancies
@@ -1473,15 +1473,15 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !  Compute second part of overlap contribution (due to VHxc^(j2)(tild_n+hat_n))
    if (has_drho) then
 
-     ABI_ALLOCATE(drhor1,(cplex*nfftf,nspden))
-     ABI_ALLOCATE(dnhat1,(cplex*nfftf,nspden))
+     ABI_MALLOC(drhor1,(cplex*nfftf,nspden))
+     ABI_MALLOC(dnhat1,(cplex*nfftf,nspden))
 
 !    LOOP OVER PERTURBATION DIRECTIONS
      do kdir1=1,mdir1
        idir1=jdir1(kdir1)
 
 !      Build and symmetrize 1st-order density change due to change of overlap
-       ABI_ALLOCATE(drho1wfg,(2,dtset%nfft))
+       ABI_MALLOC(drho1wfg,(2,dtset%nfft))
        call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
 &       nspden,nsppol,nsym1,phnons1,drho1wfg,drho1wfr(:,:,idir1),&
 &       rprimd,symaf1,symrl1,tnons1)
@@ -1496,7 +1496,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &       pawfgr,pawfgrtab,-10001,pawdrhoij1(:,idir1),pawdrhoij1_unsym(:,idir1),pawtab,&
 &       dtset%qptn,drho1wfg,drho1wfr(:,:,idir1),drhor1,rprimd,symaf1,symrc1,dtset%typat,&
 &       ucvol,dtset%usewvl,xred,pawang_sym=pawang1,pawnhat=dnhat1,pawrhoij0=pawrhoij)
-       ABI_DEALLOCATE(drho1wfg)
+       ABI_FREE(drho1wfg)
 
 !      Compute plane-wave contribution to overlap contribution
 !      This is subtle as it is a mix of Eq(79) and Eq(80) of PRB 78, 035105 (2008) [[cite:Audouze2008]]
@@ -1512,12 +1512,12 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        if (usexcnhat/=0) then
          call dotprod_vn(cplex,dnhat1,dot2r,dot2i,nfftf,nfftot,1   ,2,vpsp1,ucvol)
        else
-         ABI_ALLOCATE(vtmp1,(cplex*nfftf,nspden))
+         ABI_MALLOC(vtmp1,(cplex*nfftf,nspden))
          do ispden=1,nspden
            vtmp1(:,ispden)=vtrial1(:,ispden)-vhartr1(:)
          end do
          call dotprod_vn(cplex,dnhat1,dot2r,dot2i,nfftf,nfftot,nspden,2,vtmp1,ucvol)
-         ABI_DEALLOCATE(vtmp1)
+         ABI_FREE(vtmp1)
        end if
        dotr=dot1r-dot2r;doti=dot1i-dot2i
 
@@ -1539,12 +1539,12 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      end do ! End loop over perturbation directions
 
 !    Free no more needed memory
-     ABI_DEALLOCATE(drhor1)
-     ABI_DEALLOCATE(dnhat1)
-     ABI_DEALLOCATE(drho1wfr)
+     ABI_FREE(drhor1)
+     ABI_FREE(dnhat1)
+     ABI_FREE(drho1wfr)
      do iatom=1,my_natom
        if (pawfgrtab(iatom)%nhatfr_allocated>0)  then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%nhatfr)
+         ABI_FREE(pawfgrtab(iatom)%nhatfr)
        end if
        pawfgrtab(iatom)%nhatfr_allocated=0
      end do
@@ -1553,22 +1553,22 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          idir1=jdir1(kdir1)
          call pawrhoij_free(pawdrhoij1_unsym(:,idir1))
        end do
-       ABI_DATATYPE_DEALLOCATE(pawdrhoij1_unsym)
+       ABI_FREE(pawdrhoij1_unsym)
      end if
      do kdir1=1,mdir1
        idir1=jdir1(kdir1)
        call pawrhoij_free(pawdrhoij1(:,idir1))
      end do
-     ABI_DATATYPE_DEALLOCATE(pawdrhoij1)
+     ABI_FREE(pawdrhoij1)
    end if ! has_drho
 
 !  End loop over perturbations (j1)
  end do
 
 !Final deallocations
- ABI_DEALLOCATE(ch1c)
+ ABI_FREE(ch1c)
  if (usepaw==1.and.is_metal_or_qne0) then
-   ABI_DEALLOCATE(cs1c)
+   ABI_FREE(cs1c)
  end if
  call gs_hamkq%free()
 
@@ -1577,7 +1577,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    call timab(161,1,tsec)
    call xmpi_barrier(spaceworld)
    call timab(161,2,tsec)
-   ABI_ALLOCATE(buffer,(6*mpert*(1+usepaw)))
+   ABI_MALLOC(buffer,(6*mpert*(1+usepaw)))
    buffer(1:6*mpert)=reshape(d2nl(:,:,:,idir,ipert),(/6*mpert/))
    if (usepaw==1) buffer(6*mpert+1:6*mpert+6*mpert)=reshape(d2ovl(:,:,:,idir,ipert),(/6*mpert/))
    call timab(48,1,tsec)
@@ -1585,14 +1585,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    call timab(48,2,tsec)
    d2nl (:,:,:,idir,ipert)=reshape(buffer(1:6*mpert),(/2,3,mpert/))
    if (usepaw==1) d2ovl(:,:,:,idir,ipert)=reshape(buffer(6*mpert+1:6*mpert+6*mpert),(/2,3,mpert/))
-   ABI_DEALLOCATE(buffer)
+   ABI_FREE(buffer)
  end if
 
 !Build complete d2ovl matrix
  if (usepaw==1) d2ovl(:,:,:,idir,ipert)=d2ovl(:,:,:,idir,ipert)+d2ovl_drho(:,:,:,idir,ipert)
 
  if (usepaw==1) then
-   ABI_DEALLOCATE(d2ovl_drho)
+   ABI_FREE(d2ovl_drho)
  end if
 
 !Close the ddk WF files
@@ -1602,11 +1602,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      if (ddkfil(idir1)/=0) call ddks(idir1)%close()
    end do
  end if
- ABI_DEALLOCATE(jpert1)
- ABI_DEALLOCATE(jdir1)
+ ABI_FREE(jpert1)
+ ABI_FREE(jdir1)
 
 !Symmetrize the phonons contributions, as was needed for the forces in a GS calculation
- ABI_ALLOCATE(work,(2,3,dtset%natom))
+ ABI_MALLOC(work,(2,3,dtset%natom))
  do ipert1=1,dtset%natom
    do idir1=1,3
      work(:,idir1,ipert1)=d2nl(:,idir1,ipert1,idir,ipert)
@@ -1621,7 +1621,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    end do
    call dfpt_sygra(dtset%natom,d2ovl(:,:,:,idir,ipert),work,indsy1,ipert,nsym1,dtset%qptn,symrc1)
  end if
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
 !In the case of the strain perturbation time-reversal symmetry will always
 !be true so imaginary part of d2nl will be must be set to zero here since
@@ -1638,7 +1638,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Symmetrize the strain perturbation contributions, as was needed for the stresses in a GS calculation
 !if (ipert==dtset%natom+3.or.ipert==dtset%natom+4)then
  if (nsym1>1) then
-   ABI_ALLOCATE(work,(6,1,1))
+   ABI_MALLOC(work,(6,1,1))
    ii=0
    do ipert1=dtset%natom+3,dtset%natom+4
      do idir1=1,3
@@ -1670,7 +1670,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          d2ovl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
        end do
      end do
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
    end if
  end if
 !end if
@@ -1678,7 +1678,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Must also symmetrize the electric field perturbation response !
 !Note: d2ovl is not symetrized because it is zero for electric field perturbation
  if (has_ddk_file) then
-   ABI_ALLOCATE(d2nl_elfd,(2,3))
+   ABI_MALLOC(d2nl_elfd,(2,3))
 !  There should not be any imaginary part, but stay general (for debugging)
    d2nl_elfd (:,:)=d2nl(:,:,dtset%natom+2,idir,ipert)
    do ii=1,3
@@ -1699,7 +1699,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      end do
      d2nl(:,ii,dtset%natom+2,idir,ipert)=sumelfd(:)/dble(nsym1)
    end do
-   ABI_DEALLOCATE(d2nl_elfd)
+   ABI_FREE(d2nl_elfd)
  end if
 
 !Overlap: store the diagonal part of the matrix in the
@@ -1844,40 +1844,40 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  tim_getgh1c=2
 
 !Miscelaneous inits
- ABI_DATATYPE_ALLOCATE(dum_cwaveprj,(0,0))
+ ABI_MALLOC(dum_cwaveprj,(0,0))
  ddk=(ipert==dtset%natom+1.or.ipert==dtset%natom+10.or.ipert==dtset%natom+11)
 
 !Additional allocations
  if (.not.ddk) then
-   ABI_ALLOCATE(dkinpw,(npw_k))
-   ABI_ALLOCATE(kinpw1,(npw1_k))
+   ABI_MALLOC(dkinpw,(npw_k))
+   ABI_MALLOC(kinpw1,(npw1_k))
    kinpw1=zero;dkinpw=zero
  else
-   ABI_ALLOCATE(dkinpw,(0))
-   ABI_ALLOCATE(kinpw1,(0))
+   ABI_MALLOC(dkinpw,(0))
+   ABI_MALLOC(kinpw1,(0))
  end if
- ABI_ALLOCATE(gvnlx1,(2,npw1_k*dtset%nspinor))
- ABI_ALLOCATE(eig2_k,(2*nsppol*dtset%mband**2))
- ABI_ALLOCATE(cwave0,(2,npw_k*dtset%nspinor))
- ABI_ALLOCATE(cwavef,(2,npw1_k*dtset%nspinor))
+ ABI_MALLOC(gvnlx1,(2,npw1_k*dtset%nspinor))
+ ABI_MALLOC(eig2_k,(2*nsppol*dtset%mband**2))
+ ABI_MALLOC(cwave0,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cwavef,(2,npw1_k*dtset%nspinor))
 
 !Compute (k+G) vectors
  nkpg=0;if (.not.ddk) nkpg=3*gs_hamkq%nloalg(3)
- ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
+ ABI_MALLOC(kpg_k,(npw_k,nkpg))
  if (nkpg>0) then
    call mkkpg(kg_k,kpg_k,kpt,nkpg,npw_k)
  end if
 
 !Compute (k+q+G) vectors
  nkpg1=0;if (.not.ddk) nkpg1=3*gs_hamkq%nloalg(3)
- ABI_ALLOCATE(kpg1_k,(npw1_k,nkpg1))
+ ABI_MALLOC(kpg1_k,(npw1_k,nkpg1))
  if (nkpg1>0) then
    call mkkpg(kg1_k,kpg1_k,kpq,nkpg1,npw1_k)
  end if
 
 !Compute nonlocal form factors ffnl at (k+G)
  dimffnl=0;if (.not.ddk) dimffnl=1
- ABI_ALLOCATE(ffnlk,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
+ ABI_MALLOC(ffnlk,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
  if (.not.ddk) then
    ider=0
    call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnlk,psps%ffspl,gs_hamkq%gmet,&
@@ -1888,7 +1888,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 !Compute nonlocal form factors ffnl1 at (k+q+G)
  dimffnl1=0;if (.not.ddk) dimffnl1=1
- ABI_ALLOCATE(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,psps%ntypat))
+ ABI_MALLOC(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,psps%ntypat))
  if (.not.ddk) then
    ider=0
    call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gs_hamkq%gmet,&
@@ -1904,7 +1904,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !Load k+q-dependent part in the Hamiltonian datastructure
 !    Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
  dimph3d=0;if (.not.ddk) dimph3d=gs_hamkq%matblk
- ABI_ALLOCATE(ph3d,(2,npw1_k,dimph3d))
+ ABI_MALLOC(ph3d,(2,npw1_k,dimph3d))
  call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
 & kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,&
 & ph3d_kp=ph3d,compute_ph3d=(.not.ddk))
@@ -1942,9 +1942,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  end if
 
  if(dtset%prtbbb==1)then
-   ABI_ALLOCATE(cwavef_da,(2,npw1_k*dtset%nspinor))
-   ABI_ALLOCATE(cwavef_db,(2,npw1_k*dtset%nspinor))
-   ABI_ALLOCATE(cg_k,(2,npw_k*dtset%nspinor*nband_k))
+   ABI_MALLOC(cwavef_da,(2,npw1_k*dtset%nspinor))
+   ABI_MALLOC(cwavef_db,(2,npw1_k*dtset%nspinor))
+   ABI_MALLOC(cg_k,(2,npw_k*dtset%nspinor*nband_k))
    if ((ipert == dtset%natom + 1).or.(ipert <= dtset%natom).or. &
 &   (ipert == dtset%natom + 2).or.(ipert == dtset%natom + 5)) then
      cg_k(:,:) = cg(:,1+icg:icg+nband_k*npw_k*dtset%nspinor)
@@ -2145,22 +2145,22 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  end do
 
 !Final deallocations
- ABI_DEALLOCATE(cwave0)
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(eig2_k)
- ABI_DEALLOCATE(gvnlx1)
- ABI_DEALLOCATE(ffnlk)
- ABI_DEALLOCATE(ffnl1)
- ABI_DEALLOCATE(dkinpw)
- ABI_DEALLOCATE(kinpw1)
- ABI_DEALLOCATE(kpg_k)
- ABI_DEALLOCATE(kpg1_k)
- ABI_DEALLOCATE(ph3d)
- ABI_DATATYPE_DEALLOCATE(dum_cwaveprj)
+ ABI_FREE(cwave0)
+ ABI_FREE(cwavef)
+ ABI_FREE(eig2_k)
+ ABI_FREE(gvnlx1)
+ ABI_FREE(ffnlk)
+ ABI_FREE(ffnl1)
+ ABI_FREE(dkinpw)
+ ABI_FREE(kinpw1)
+ ABI_FREE(kpg_k)
+ ABI_FREE(kpg1_k)
+ ABI_FREE(ph3d)
+ ABI_FREE(dum_cwaveprj)
  if(dtset%prtbbb==1)  then
-   ABI_DEALLOCATE(cg_k)
-   ABI_DEALLOCATE(cwavef_da)
-   ABI_DEALLOCATE(cwavef_db)
+   ABI_FREE(cg_k)
+   ABI_FREE(cwavef_da)
+   ABI_FREE(cwavef_db)
  end if
 
  call timab(102,2,tsec)

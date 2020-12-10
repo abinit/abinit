@@ -143,11 +143,11 @@ subroutine xmpi_gatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size, &
    if (.not.use_pack) then
 
 !  Prepare communications
-     ABI_ALLOCATE(count_int,(nproc))
-     ABI_ALLOCATE(disp_int,(nproc))
-     ABI_ALLOCATE(count_dp,(nproc))
-     ABI_ALLOCATE(disp_dp,(nproc))
-     ABI_ALLOCATE(count_size,(2*nproc))
+     ABI_MALLOC(count_int,(nproc))
+     ABI_MALLOC(disp_int,(nproc))
+     ABI_MALLOC(count_dp,(nproc))
+     ABI_MALLOC(disp_dp,(nproc))
+     ABI_MALLOC(count_size,(2*nproc))
      buf_size(1)=buf_int_size;buf_size(2)=buf_dp_size
      call xmpi_allgather(buf_size,2, count_size,comm,ier)
      do iproc=1,nproc
@@ -161,9 +161,9 @@ subroutine xmpi_gatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size, &
      end do
      buf_int_size_all=sum(count_int)
      buf_dp_size_all =sum(count_dp)
-     ABI_STAT_ALLOCATE(buf_int_all,(buf_int_size_all), ier)
+     ABI_STAT_MALLOC(buf_int_all,(buf_int_size_all), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating buf_int_all in xmpi_gatherv')
-     ABI_STAT_ALLOCATE(buf_dp_all ,(buf_dp_size_all), ier)
+     ABI_STAT_MALLOC(buf_dp_all ,(buf_dp_size_all), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating buf_dp_all in xmpi_gatherv')
 
 !  Communicate (one call for integers, one call for reals)
@@ -171,11 +171,11 @@ subroutine xmpi_gatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size, &
      call xmpi_gatherv(buf_dp,buf_dp_size,buf_dp_all,count_dp,disp_dp,root,comm,ierr)
 
 !  Release the memory
-     ABI_DEALLOCATE(count_int)
-     ABI_DEALLOCATE(disp_int)
-     ABI_DEALLOCATE(count_dp)
-     ABI_DEALLOCATE(disp_dp)
-     ABI_DEALLOCATE(count_size)
+     ABI_FREE(count_int)
+     ABI_FREE(disp_int)
+     ABI_FREE(count_dp)
+     ABI_FREE(disp_dp)
+     ABI_FREE(count_size)
 
 !2nd version: using 1 allgather (with MPI_PACK)
 !-----------------------------------------------------------------
@@ -190,19 +190,19 @@ subroutine xmpi_gatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size, &
 
 !  Pack data to be sent
      position=0;buf_pack_size=lg1+lg2
-     ABI_STAT_ALLOCATE(buf_pack,(buf_pack_size), ier)
+     ABI_STAT_MALLOC(buf_pack,(buf_pack_size), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating buf_pack xmpi_gatherv')
      call MPI_PACK(buf_int,buf_int_size,MPI_INTEGER,buf_pack,buf_pack_size,position,comm,ier)
      call MPI_PACK(buf_dp,buf_dp_size,MPI_DOUBLE_PRECISION,buf_pack,buf_pack_size,position,comm,ier)
 
 !  Gather size of all packed messages
-     ABI_ALLOCATE(pos_all,(nproc*3))
-     ABI_ALLOCATE(counts,(nproc))
-     ABI_ALLOCATE(buf_int_size1,(nproc))
-     ABI_ALLOCATE(buf_dp_size1,(nproc))
-     ABI_ALLOCATE(displ,(nproc))
-     ABI_ALLOCATE(displ_int,(nproc))
-     ABI_ALLOCATE(displ_dp,(nproc))
+     ABI_MALLOC(pos_all,(nproc*3))
+     ABI_MALLOC(counts,(nproc))
+     ABI_MALLOC(buf_int_size1,(nproc))
+     ABI_MALLOC(buf_dp_size1,(nproc))
+     ABI_MALLOC(displ,(nproc))
+     ABI_MALLOC(displ_int,(nproc))
+     ABI_MALLOC(displ_dp,(nproc))
      pos(1)=position;pos(2)=buf_int_size;pos(3)=buf_dp_size
      call MPI_ALLGATHER(pos,3,MPI_INTEGER,pos_all,3,MPI_INTEGER,comm,ier)
      ii=1
@@ -220,20 +220,20 @@ subroutine xmpi_gatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size, &
      end do
 
      totalbufcount=displ(nproc)+counts(nproc)
-     ABI_STAT_ALLOCATE(buf_pack_tot,(totalbufcount), ier)
+     ABI_STAT_MALLOC(buf_pack_tot,(totalbufcount), ier)
      if (ier/= 0) call xmpi_abort(msg='error allocating buf_pack_tot in xmpi_gatherv')
      buf_int_size_all=sum(buf_int_size1)
      buf_dp_size_all=sum(buf_dp_size1)
 
      if (me==root) then
-       ABI_STAT_ALLOCATE(buf_int_all,(buf_int_size_all), ier)
+       ABI_STAT_MALLOC(buf_int_all,(buf_int_size_all), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating buf_int_all in xmpi_gatherv')
-       ABI_STAT_ALLOCATE(buf_dp_all,(buf_dp_size_all), ier)
+       ABI_STAT_MALLOC(buf_dp_all,(buf_dp_size_all), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating buf_int_all in xmpi_gatherv')
      else
-       ABI_STAT_ALLOCATE(buf_int_all,(1), ier)
+       ABI_STAT_MALLOC(buf_int_all,(1), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating buf_int_all in xmpi_gatherv')
-       ABI_STAT_ALLOCATE(buf_dp_all,(1), ier)
+       ABI_STAT_MALLOC(buf_dp_all,(1), ier)
        if (ier/= 0) call xmpi_abort(msg='error allocating buf_int_all in xmpi_gatherv')
      end if
 
@@ -254,24 +254,24 @@ subroutine xmpi_gatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size, &
      end if
 
 !  Release the memory
-     ABI_DEALLOCATE(pos_all)
-     ABI_DEALLOCATE(counts)
-     ABI_DEALLOCATE(buf_int_size1)
-     ABI_DEALLOCATE(buf_dp_size1)
-     ABI_DEALLOCATE(displ)
-     ABI_DEALLOCATE(displ_int)
-     ABI_DEALLOCATE(displ_dp)
-     ABI_DEALLOCATE(buf_pack_tot)
-     ABI_DEALLOCATE(buf_pack)
+     ABI_FREE(pos_all)
+     ABI_FREE(counts)
+     ABI_FREE(buf_int_size1)
+     ABI_FREE(buf_dp_size1)
+     ABI_FREE(displ)
+     ABI_FREE(displ_int)
+     ABI_FREE(displ_dp)
+     ABI_FREE(buf_pack_tot)
+     ABI_FREE(buf_pack)
 
    end if
  else if (comm == MPI_COMM_SELF) then
 #endif
 
 !Sequential version
-   ABI_STAT_ALLOCATE(buf_int_all,(buf_int_size), ier)
+   ABI_STAT_MALLOC(buf_int_all,(buf_int_size), ier)
    if (ier/= 0) call xmpi_abort(msg='error allocating buf_int_all in xmpi_gatherv')
-   ABI_STAT_ALLOCATE(buf_dp_all,(buf_dp_size), ier)
+   ABI_STAT_MALLOC(buf_dp_all,(buf_dp_size), ier)
    if (ier/= 0) call xmpi_abort(msg='error allocating buf_dp_all in xmpi_gatherv')
    buf_int_all(:)=buf_int(:)
    buf_dp_all(:)=buf_dp(:)

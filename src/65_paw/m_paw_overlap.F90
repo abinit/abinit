@@ -128,13 +128,13 @@ CONTAINS  !=====================================================================
  k1k2_paw(:,:,:) = zero
 
  ! obtain the atomic phase factors for the input k vector shift
- ABI_ALLOCATE(calc_expibi,(2,natom))
+ ABI_MALLOC(calc_expibi,(2,natom))
  call expibi(calc_expibi,dk,natom,xred)
 
  ! obtain the onsite PAW terms for the input k vector shift
- ABI_ALLOCATE(calc_qijb,(2,lmn2max,natom))
+ ABI_MALLOC(calc_qijb,(2,lmn2max,natom))
  call qijb_kk(calc_qijb,dk,calc_expibi,gprimd,lmn2max,natom,ntypat,pawang,pawrad,pawtab,typat)
- ABI_DEALLOCATE(calc_expibi)
+ ABI_FREE(calc_expibi)
 
  do iatom = 1, natom
    itypat = typat(iatom)
@@ -161,7 +161,7 @@ CONTAINS  !=====================================================================
 
  end do ! end loop over atoms
 
- ABI_DEALLOCATE(calc_qijb)
+ ABI_FREE(calc_qijb)
 
  end subroutine overlap_k1k2_paw
 !!***
@@ -267,17 +267,17 @@ CONTAINS  !=====================================================================
 !
 !Allocate cprj_k1 and cprj_k2
 !
- ABI_ALLOCATE(dimcprj,(natom))
+ ABI_MALLOC(dimcprj,(natom))
  call pawcprj_getdim(dimcprj,natom,nattyp_dum,ntypat,typat,pawtab,'R')
 
  nband_k=nband(ikpt1)
- ABI_DATATYPE_ALLOCATE(cprj_k1,(natom,nband_k*nspinor))
+ ABI_MALLOC(cprj_k1,(natom,nband_k*nspinor))
  call pawcprj_alloc(cprj_k1,0,dimcprj)
 
  nband_k=nband(ikpt2)
- ABI_DATATYPE_ALLOCATE(cprj_k2,(natom,nband_k*nspinor))
+ ABI_MALLOC(cprj_k2,(natom,nband_k*nspinor))
  call pawcprj_alloc(cprj_k2,0,dimcprj)
- ABI_DEALLOCATE(dimcprj)
+ ABI_FREE(dimcprj)
 
 !mpi initialization
  spaceComm=MPI_enreg%comm_cell
@@ -409,8 +409,8 @@ CONTAINS  !=====================================================================
 !--- Compute intermediate quantities: "b" vector=k2-k1 and its
 !normalized value: bbn (and its norm: bnorm)
 !compute also Ylm(b).
- ABI_ALLOCATE(ylmb,(pawang%l_size_max*pawang%l_size_max))
- ABI_ALLOCATE(ylmrgr_dum,(1,1,0))
+ ABI_MALLOC(ylmb,(pawang%l_size_max*pawang%l_size_max))
+ ABI_MALLOC(ylmrgr_dum,(1,1,0))
  bb(:)=kpt(:,ikpt2)-kpt(:,ikpt1)+g1(:)
  bb1=bb
  xx=gprimd(1,1)*bb(1)+gprimd(1,2)*bb(2)+gprimd(1,3)*bb(3)
@@ -441,10 +441,10 @@ CONTAINS  !=====================================================================
 !write(std_out,*) "bbn",bbn(:)
 !write(std_out,*) "xx,yy,zz",xx,yy,zz
 !write(std_out,*) "bnorm",bnorm
- ABI_DEALLOCATE(ylmrgr_dum)
+ ABI_FREE(ylmrgr_dum)
 
 !------- First Compute Qij(b)-
- ABI_ALLOCATE(sb_out, (pawang%l_size_max))
+ ABI_MALLOC(sb_out, (pawang%l_size_max))
  cm2=zero
 
  do iatom=1,natom
@@ -453,7 +453,7 @@ CONTAINS  !=====================================================================
 !  ---  en coordonnnes reelles cartesiennes (espace reel)
 !  ---  first radial part(see pawinit)
    mesh_size=pawtab(itypat)%mesh_size
-   ABI_ALLOCATE(j_bessel,(mesh_size,pawang%l_size_max))
+   ABI_MALLOC(j_bessel,(mesh_size,pawang%l_size_max))
 
 
 !  ---  compute bessel function for (br) for all angular momenta necessary
@@ -497,12 +497,12 @@ CONTAINS  !=====================================================================
        qijb=zero
        do ll=lmin,lmax,2
          lm0=ll*ll+ll+1
-         ABI_ALLOCATE(ff,(mesh_size))
+         ABI_MALLOC(ff,(mesh_size))
          ff(1:mesh_size)=(pawtab(itypat)%phiphj(1:mesh_size,kln)&
 &         -pawtab(itypat)%tphitphj(1:mesh_size,kln))&
 &         *j_bessel(1:mesh_size,ll+1)
          call simp_gen(intg,ff,pawrad(itypat))
-         ABI_DEALLOCATE(ff)
+         ABI_FREE(ff)
          qijbtemp=zero
          do mm=-ll,ll
            isel=pawang%gntselect(lm0+mm,klm)
@@ -576,15 +576,15 @@ CONTAINS  !=====================================================================
      end do ! ilmn
    end do ! jlmn
 !  write(std_out,*) "final qijtot",qijtot
-   ABI_DEALLOCATE(j_bessel)
+   ABI_FREE(j_bessel)
  end do ! iatom
 
- ABI_DEALLOCATE(sb_out)
- ABI_DEALLOCATE(ylmb)
+ ABI_FREE(sb_out)
+ ABI_FREE(ylmb)
  call pawcprj_free(cprj_k1)
  call pawcprj_free(cprj_k2)
- ABI_DATATYPE_DEALLOCATE(cprj_k1)
- ABI_DATATYPE_DEALLOCATE(cprj_k2)
+ ABI_FREE(cprj_k1)
+ ABI_FREE(cprj_k2)
 
  DBG_EXIT("COLL")
 
@@ -759,16 +759,16 @@ CONTAINS  !=====================================================================
  ylmr_nrm(1) = one ! weight of normed point for initylmr
  ylmr_option = 1 ! compute only ylm's in initylmr
 
- ABI_ALLOCATE(sb_out, (pawang%l_size_max))
+ ABI_MALLOC(sb_out, (pawang%l_size_max))
 
  do iatom = 1, natom
 
    itypat = typat(iatom)
    mesh_size = pawtab(itypat)%mesh_size
 
-   ABI_ALLOCATE(j_bessel,(mesh_size,pawang%l_size_max))
-   ABI_ALLOCATE(ff,(mesh_size))
-   ABI_ALLOCATE(ylmb,(pawang%l_size_max*pawang%l_size_max))
+   ABI_MALLOC(j_bessel,(mesh_size,pawang%l_size_max))
+   ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(ylmb,(pawang%l_size_max*pawang%l_size_max))
 
    !    here is exp(-i b.R) for current atom: recall storage in expibi
    etb = cmplx(expibi(1,iatom),expibi(2,iatom))
@@ -826,12 +826,12 @@ CONTAINS  !=====================================================================
      end do ! end loop on lmin-lmax bessel l values
    end do ! end loop on lmn2_size klmn basis pairs
 
-   ABI_DEALLOCATE(j_bessel)
-   ABI_DEALLOCATE(ff)
-   ABI_DEALLOCATE(ylmb)
+   ABI_FREE(j_bessel)
+   ABI_FREE(ff)
+   ABI_FREE(ylmb)
  end do ! end loop over atoms
 
- ABI_DEALLOCATE(sb_out)
+ ABI_FREE(sb_out)
 
  end subroutine qijb_kk
 !!***

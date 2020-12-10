@@ -431,7 +431,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !  Transform to KS orbitals
 
 !  Need xcart
-   ABI_ALLOCATE(xcart,(3, dtset%natom))
+   ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
    ucvol_local=product(wvl%den%denspot%dpbox%hgrids)*real(product(wvl%den%denspot%dpbox%ndims),dp)
 
@@ -494,12 +494,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !    PAW: has to update cprj, rhoij and compensation charge density
      if (psps%usepaw==1) then
 !      1-Compute cprj
-       ABI_ALLOCATE(hpsi_tmp,(size(wvl%wfs%ks%hpsi)))
+       ABI_MALLOC(hpsi_tmp,(size(wvl%wfs%ks%hpsi)))
        call applyprojectorsonthefly(mpi_enreg%me_wvl,wvl%wfs%ks%orbs,wvl%descr%atoms,wvl%descr%Glr,&
 &       xcart,wvl%descr%h(1),wvl%descr%h(2),wvl%descr%h(3),wvl%wfs%ks%lzd%Glr%wfd,&
 &       wvl%projectors%nlpsp,wvl%wfs%ks%psi,hpsi_tmp,eproj,&
 &       proj_G=wvl%projectors%G,paw=wvl%descr%paw)
-       ABI_DEALLOCATE(hpsi_tmp)
+       ABI_FREE(hpsi_tmp)
        do ii=1,mcprj
          do ia=1,dtset%natom
            !Note that cprj should be allocated (i.e. usepcrj=1 imposed in scfcv)
@@ -507,14 +507,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
          end do
        end do
 !      2-Compute rhoij
-       ABI_ALLOCATE(dimcprj_srt,(dtset%natom))
+       ABI_MALLOC(dimcprj_srt,(dtset%natom))
        call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
        mband_cprj=mcprj/(dtset%nspinor*dtset%mkmem*dtset%nsppol)
        paw_dmft%use_sc_dmft=0 ; paw_dmft%use_dmft=0 ! dmft not used here
        call pawmkrhoij(atindx,atindx1,cprj,dimcprj_srt,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
 &       mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
 &       occ,mpi_enreg%paral_kgb,paw_dmft,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
-       ABI_DEALLOCATE(dimcprj_srt)
+       ABI_FREE(dimcprj_srt)
 !      3-Symetrize rhoij, compute nhat and add it to rhor
        call pawmkrho(1,dum,1,gprimd,0,indsym,0,mpi_enreg,my_natom,dtset%natom,dtset%nspden,dtset%nsym,&
 &       dtset%ntypat,mpi_enreg%paral_kgb,pawang,pawfgr,pawfgrtab,dtset%pawprtvol,pawrhoij,pawrhoij,&
@@ -524,7 +524,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
      end if
    end if
 
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
 
 #else
    BIGDFT_NOTENABLED_ERROR()
@@ -568,10 +568,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    ngrad=2
    cplex=1
    ishift=0
-   ABI_ALLOCATE(rhonow,(nfftf,dtset%nspden,ngrad*ngrad))
+   ABI_MALLOC(rhonow,(nfftf,dtset%nspden,ngrad*ngrad))
    if(dtset%prtlden/=0)then
      nullify(lrhor)
-     ABI_ALLOCATE(lrhor,(nfftf,dtset%nspden))
+     ABI_MALLOC(lrhor,(nfftf,dtset%nspden))
    end if
    write(message,'(a,a)') ch10, " Compute gradient of the electron density"
    call wrtout(ab_out,message,'COLL')
@@ -582,24 +582,24 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    write(message,'(a)') "--------------------------------------------------------------------------------"
    call wrtout(ab_out,message,'COLL')
 
-   ABI_ALLOCATE(qphon,(3))
+   ABI_MALLOC(qphon,(3))
    qphon(:)=zero
    if(dtset%prtlden/=0) then
      call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow,lrhonow=lrhor)
    else
      call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow)
    end if
-   ABI_DEALLOCATE(qphon)
+   ABI_FREE(qphon)
 
 !  Copy gradient which has been output in rhonow to grhor (and free rhonow)
    nullify(grhor)
-   ABI_ALLOCATE(grhor,(nfftf,dtset%nspden,3))
+   ABI_MALLOC(grhor,(nfftf,dtset%nspden,3))
    do ispden=1,dtset%nspden
      do ifft=1,nfftf
        grhor(ifft,ispden,1:3) = rhonow(ifft,ispden,2:4)
      end do
    end do
-   ABI_DEALLOCATE(rhonow)
+   ABI_FREE(rhonow)
 
    if(dtset%prtgden/=0) then
 !    Print result for grhor
@@ -652,8 +652,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !  tauX are reused in outscfcv for output
 !  should be deallocated there
    nullify(taug,taur)
-   ABI_ALLOCATE(taug,(2,nfftf))
-   ABI_ALLOCATE(taur,(nfftf,dtset%nspden))
+   ABI_MALLOC(taug,(2,nfftf))
+   ABI_MALLOC(taur,(nfftf,dtset%nspden))
    tim_mkrho=5
    if(dtset%prtelf/=0) then
      write(message,'(a,a)') ch10, " Compute ELF"
@@ -669,15 +669,15 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
    else
-     ABI_ALLOCATE(tauwfg,(2,dtset%nfft))
-     ABI_ALLOCATE(tauwfr,(dtset%nfft,dtset%nspden))
+     ABI_MALLOC(tauwfg,(2,dtset%nfft))
+     ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden))
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
-     ABI_DEALLOCATE(tauwfg)
-     ABI_DEALLOCATE(tauwfr)
+     ABI_FREE(tauwfg)
+     ABI_FREE(tauwfr)
    end if
-   ABI_DEALLOCATE(taug)
+   ABI_FREE(taug)
  end if
 !Print result
  if(dtset%prtkden/=0) then
@@ -722,30 +722,30 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
      if((dtset%prtgden==0) .and. (dtset%prtlden==0)) then
 !      Compute gradient of the electron density
        ishift=0
-       ABI_ALLOCATE(rhonow,(nfftf,dtset%nspden,ngrad*ngrad))
+       ABI_MALLOC(rhonow,(nfftf,dtset%nspden,ngrad*ngrad))
        write(message,'(a,a)') ch10, " Compute gradient of the electron density"
        call wrtout(ab_out,message,'COLL')
-       ABI_ALLOCATE(qphon,(3))
+       ABI_MALLOC(qphon,(3))
        qphon(:)=zero
        call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow)
-       ABI_DEALLOCATE(qphon)
+       ABI_FREE(qphon)
 !      Copy gradient which has been output in rhonow to grhor (and free rhonow)
-       ABI_ALLOCATE(grhor,(nfftf,dtset%nspden,3))
+       ABI_MALLOC(grhor,(nfftf,dtset%nspden,3))
        do ispden=1,dtset%nspden
          do ifft=1,nfftf
            grhor(ifft,ispden,1:3) = rhonow(ifft,ispden,2:4)
          end do
        end do
-       ABI_DEALLOCATE(rhonow)
+       ABI_FREE(rhonow)
      end if
 !    Compute square norm of gradient of the electron density (|grhor|**2)
      if(dtset%nspden==1)then
-       ABI_ALLOCATE(sqnormgrhor,(nfftf,dtset%nspden))
+       ABI_MALLOC(sqnormgrhor,(nfftf,dtset%nspden))
        do ifft=1,nfftf
          sqnormgrhor(ifft,1) = zero
        end do
      elseif(dtset%nspden==2)then
-       ABI_ALLOCATE(sqnormgrhor,(nfftf,dtset%nspden+1))
+       ABI_MALLOC(sqnormgrhor,(nfftf,dtset%nspden+1))
 !      because we not only want (total and up quantities, but also down)
 !      Indeed after having token the square norm we can not recover the
 !      down quantity by substracting total and up quantities (as we do for usual densities)
@@ -773,9 +773,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
      nullify(elfr)
      if(dtset%nspden==1)then
-       ABI_ALLOCATE(elfr,(nfftf,dtset%nspden))
+       ABI_MALLOC(elfr,(nfftf,dtset%nspden))
      elseif(dtset%nspden==2)then
-       ABI_ALLOCATE(elfr,(nfftf,dtset%nspden+1))
+       ABI_MALLOC(elfr,(nfftf,dtset%nspden+1))
 !      1rst is total elf, 2nd is spin-up elf, and 3rd is spin-down elf. (elf_tot /= elf_up + elf_down)
      end if
      c_fermi = 3.0d0/10.0d0*((3.0d0*pi**2)**(2.0d0/3.0d0))
@@ -858,14 +858,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !    Print result for elfr
      call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,elfr,optrhor=4,ucvol=ucvol)
 
-     ABI_DEALLOCATE(grhor)
-     ABI_DEALLOCATE(sqnormgrhor)
+     ABI_FREE(grhor)
+     ABI_FREE(sqnormgrhor)
 
    else
      message ='ELF is not yet implemented for non collinear spin cases.'
      ABI_WARNING(message)
 
-     ABI_ALLOCATE(elfr,(nfftf,dtset%nspden))
+     ABI_MALLOC(elfr,(nfftf,dtset%nspden))
      do ispden=1,dtset%nspden
        do ifft=1,nfftf
          elfr(ifft,ispden) = -2.0d0
@@ -883,7 +883,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    call wrtout(ab_out,message,'COLL')
 
    if (dtset%usekden==0) then
-     ABI_DEALLOCATE(taur)
+     ABI_FREE(taur)
    end if
 
  end if !endif prtelf/=0
@@ -975,7 +975,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  end if ! prtposcar
 
  if(allocated(qphon))   then
-   ABI_DEALLOCATE(qphon)
+   ABI_FREE(qphon)
  end if
 
 !get current operator on wavefunctions
@@ -1017,7 +1017,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 #ifdef HAVE_LOTF
  if(dtset%ionmov==23 .and. mpi_enreg%nproc_band>1) then
    bufsz=2+2*dtset%natom;if (moved_atm_inside==1) bufsz=bufsz+dtset%natom
-   ABI_ALLOCATE(mpibuf,(3,bufsz))
+   ABI_MALLOC(mpibuf,(3,bufsz))
    mpibuf(:,1:dtset%natom)=fred(:,1:dtset%natom)
    mpibuf(:,dtset%natom+1:2*dtset%natom)=fcart(:,1:dtset%natom)
    if (moved_atm_inside==1) mpibuf(:,2*dtset%natom+1:3*dtset%natom)=xred(:,1:dtset%natom)
@@ -1027,7 +1027,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    fcart(:,1:dtset%natom)=mpibuf(:,dtset%natom+1:2*dtset%natom)/mpi_enreg%nproc_band
    if (moved_atm_inside==1) xred(:,1:dtset%natom)=mpibuf(:,2*dtset%natom+1:3*dtset%natom)/mpi_enreg%nproc_band
    strten(1:6)=reshape(mpibuf(1:3,bufsz-1:bufsz),(/6/))/mpi_enreg%nproc_band
-   ABI_DEALLOCATE(mpibuf)
+   ABI_FREE(mpibuf)
  end if
 #endif
 
@@ -1035,7 +1035,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !to avoid numerical noise
  if (mpi_enreg%nproc_fft>1) then
    bufsz=2+2*dtset%natom;if (moved_atm_inside==1) bufsz=bufsz+dtset%natom
-   ABI_ALLOCATE(mpibuf,(3,bufsz))
+   ABI_MALLOC(mpibuf,(3,bufsz))
    mpibuf(:,1:dtset%natom)=fred(:,1:dtset%natom)
    mpibuf(:,dtset%natom+1:2*dtset%natom)=fcart(:,1:dtset%natom)
    if (moved_atm_inside==1) mpibuf(:,2*dtset%natom+1:3*dtset%natom)=xred(:,1:dtset%natom)
@@ -1045,7 +1045,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    fcart(:,1:dtset%natom)=mpibuf(:,dtset%natom+1:2*dtset%natom)/mpi_enreg%nproc_fft
    if (moved_atm_inside==1) xred(:,1:dtset%natom)=mpibuf(:,2*dtset%natom+1:3*dtset%natom)/mpi_enreg%nproc_fft
    strten(1:6)=reshape(mpibuf(1:3,bufsz-1:bufsz),(/6/))/mpi_enreg%nproc_fft
-   ABI_DEALLOCATE(mpibuf)
+   ABI_FREE(mpibuf)
  end if
 
 !results_gs%energies   = energies

@@ -56,14 +56,13 @@ def replace_string(s):
     """
     old2new = {
          # Malloc/free macros
-         #"ABI_ALLOCATE(": "ABI_MALLOC(",
-         #"ABI_DEALLOCATE(": "ABI_FREE(",
-         #"ABI_DATATYPE_ALLOCATE(": "ABI_MALLOC(",
-         #"ABI_DATATYPE_DEALLOCATE(": "ABI_FREE(",
-         #"ABI_STAT_ALLOCATE(": "ABI_STAT_MALLOC(",
-         #"ABI_DATATYPE_ALLOCATE_SCALAR(": "ABI_MALLOC_TYPE_SCALAR(",
-         #"ABI_DATATYPE_DEALLOCATE_SCALAR(": "ABI_FREE(",
-         #"ABI_STAT_MALLOC(": "ABI_STAT_MALLOC_STAT(",
+         "ABI_ALLOCATE(": "ABI_MALLOC(",
+         "ABI_DEALLOCATE(": "ABI_FREE(",
+         "ABI_DATATYPE_ALLOCATE(": "ABI_MALLOC(",
+         "ABI_DATATYPE_DEALLOCATE(": "ABI_FREE(",
+         "ABI_STAT_ALLOCATE(": "ABI_STAT_MALLOC(",
+         "ABI_DATATYPE_ALLOCATE_SCALAR(": "ABI_MALLOC_TYPE_SCALAR(",
+         "ABI_DATATYPE_DEALLOCATE_SCALAR(": "ABI_FREE(",
          # Logging macros
          "MSG_COMMENT(": "ABI_COMMENT(",
          "MSG_WARNING(": "ABI_WARNING(",

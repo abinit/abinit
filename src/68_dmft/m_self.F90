@@ -168,14 +168,14 @@ subroutine alloc_self(self,paw_dmft,opt_oper,wtype)
  self%iself_cv=0
 
  call init_oper(paw_dmft,self%hdc,opt_ksloc=optoper)
- ABI_DATATYPE_ALLOCATE(self%oper,(self%nw))
+ ABI_MALLOC(self%oper,(self%nw))
  do ifreq=1,self%nw
   call init_oper(paw_dmft,self%oper(ifreq),opt_ksloc=optoper)
  enddo
 
  if(paw_dmft%dmft_solv==4) then
-   ABI_ALLOCATE(self%qmc_shift,(paw_dmft%natom))
-   ABI_ALLOCATE(self%qmc_xmu,(paw_dmft%natom))
+   ABI_MALLOC(self%qmc_shift,(paw_dmft%natom))
+   ABI_MALLOC(self%qmc_xmu,(paw_dmft%natom))
    self%qmc_shift(:)=zero
    self%qmc_xmu(:)=zero
  endif
@@ -279,15 +279,15 @@ subroutine destroy_self(self)
    do ifreq=1,self%nw
     call destroy_oper(self%oper(ifreq))
    enddo
-   ABI_DATATYPE_DEALLOCATE(self%oper)
+   ABI_FREE(self%oper)
  end if
 
  call destroy_oper(self%hdc)
  if (allocated(self%qmc_shift)) then
-   ABI_DEALLOCATE(self%qmc_shift)
+   ABI_FREE(self%qmc_shift)
  end if
  if (allocated(self%qmc_xmu))  then
-   ABI_DEALLOCATE(self%qmc_xmu)
+   ABI_FREE(self%qmc_xmu)
  end if
  self%omega => null()
 
@@ -582,7 +582,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
 !   - For the Tentative rotation of the self-energy file (begin init)
  if(present(pawang)) then
-   ABI_ALLOCATE(unitselfrot,(natom,nsppol,nspinor,7)) ! 7 is the max ndim possible
+   ABI_MALLOC(unitselfrot,(natom,nsppol,nspinor,7)) ! 7 is the max ndim possible
    if(optrw==2) then
      write(message,'(a,2x,a,f13.5)') ch10,&
 &     " == About to print self-energy for MAXENT code "
@@ -592,17 +592,17 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    endif
    call wrtout(std_out,message,'COLL')
 
-   ABI_DATATYPE_ALLOCATE(eigvectmatlu,(natom,nsppol))
+   ABI_MALLOC(eigvectmatlu,(natom,nsppol))
    do iatom=1,natom
      if(paw_dmft%lpawu(iatom)/=-1) then
        tndim=nspinor*(2*paw_dmft%lpawu(iatom)+1)
        do isppol=1,nsppol
-         ABI_ALLOCATE(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
+         ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
        end do
      end if
    end do
-   ABI_DATATYPE_ALLOCATE(level_diag,(natom))
-   ABI_DATATYPE_ALLOCATE(selfrotmatlu,(natom))
+   ABI_MALLOC(level_diag,(natom))
+   ABI_MALLOC(selfrotmatlu,(natom))
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,selfrotmatlu)
    call init_oper(paw_dmft,energy_level,opt_ksloc=3)
@@ -679,13 +679,13 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !   - For the Tentative rotation of the self-energy file (end diag)
 
  if((optrw==2.or.optrw==1).and.myproc==master)then
-   ABI_ALLOCATE(unitselffunc_arr,(natom*nsppol*nspinor))
+   ABI_MALLOC(unitselffunc_arr,(natom*nsppol*nspinor))
    iall=0
    do iatom=1,natom
      if(self%oper(1)%matlu(iatom)%lpawu.ne.-1) then
        ndim=2*self%oper(1)%matlu(iatom)%lpawu+1
-       ABI_ALLOCATE(s_r,(ndim,ndim,nspinor,nspinor))
-       ABI_ALLOCATE(s_i,(ndim,ndim,nspinor,nspinor))
+       ABI_MALLOC(s_r,(ndim,ndim,nspinor,nspinor))
+       ABI_MALLOC(s_i,(ndim,ndim,nspinor,nspinor))
 !       write(std_out,*) "print_self",ndim
        call int2char4(iatom,tag_at)
        ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
@@ -1043,11 +1043,11 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            close(unitselffunc_arr(iall))
 !         enddo ! ispinor
        enddo ! isppol
-       ABI_DEALLOCATE(s_r)
-       ABI_DEALLOCATE(s_i)
+       ABI_FREE(s_r)
+       ABI_FREE(s_i)
      endif ! lpawu=/-1
    enddo ! iatom
-   ABI_DEALLOCATE(unitselffunc_arr)
+   ABI_FREE(unitselffunc_arr)
  endif ! optrw==2.or.myproc==master
 ! call xmpi_barrier(spacecomm)
            !write(std_out,*) "9"
@@ -1056,17 +1056,17 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    call destroy_oper(energy_level)
    call destroy_matlu(level_diag,natom)
    call destroy_matlu(selfrotmatlu,natom)
-   ABI_DATATYPE_DEALLOCATE(level_diag)
-   ABI_DATATYPE_DEALLOCATE(selfrotmatlu)
+   ABI_FREE(level_diag)
+   ABI_FREE(selfrotmatlu)
    do iatom=1,natom
      if(paw_dmft%lpawu(iatom)/=-1) then
        do isppol=1,nsppol
-         ABI_DEALLOCATE(eigvectmatlu(iatom,isppol)%value)
+         ABI_FREE(eigvectmatlu(iatom,isppol)%value)
        end do
      end if
    end do
-   ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
-   ABI_DEALLOCATE(unitselfrot) ! 7 is the max ndim possible
+   ABI_FREE(eigvectmatlu)
+   ABI_FREE(unitselfrot) ! 7 is the max ndim possible
  endif
 !   - For the Tentative rotation of the self-energy file (end destroy)
 
@@ -1127,17 +1127,17 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !   call xmpi_barrier(spacecomm)
 !! lignes 924-928 semblent inutiles puisque la valeur de paw_dmft%fermie creee
 !! en ligne 927 est ecrasee en ligne 992. BA+jmb
-!!     ABI_ALLOCATE(fermie_read2,(1))
+!!     ABI_MALLOC(fermie_read2,(1))
 !!     fermie_read2(1)=fermie_read
 !!     call xmpi_sum(fermie_read2,spacecomm ,ier)
 !!     paw_dmft%fermie=fermie_read2(1)
-!!     ABI_DEALLOCATE(fermie_read2)
+!!     ABI_FREE(fermie_read2)
 
 !  ===========================
 !   bcast to other proc
 !  ===========================
-     ABI_ALLOCATE(buffer,(ncount))
-     ABI_ALLOCATE(fermie_read2,(1))
+     ABI_MALLOC(buffer,(ncount))
+     ABI_MALLOC(fermie_read2,(1))
      buffer(:)=czero
 !! BA+jmb
      fermie_read2=zero
@@ -1225,8 +1225,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          enddo ! isppol
        endif ! lpawu=/-1
      enddo ! iatom
-     ABI_DEALLOCATE(fermie_read2)
-     ABI_DEALLOCATE(buffer)
+     ABI_FREE(fermie_read2)
+     ABI_FREE(buffer)
    endif  ! test read successful
  endif  ! optrw==1
 !   call flush_unit(std_out)
@@ -1539,8 +1539,8 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,filapp)
  character(len=500) :: message
 ! *********************************************************************
  delta=0.0000000
- ABI_ALLOCATE(selftemp_re,(self%nw))
- ABI_ALLOCATE(selftemp_imag,(self%nw))
+ ABI_MALLOC(selftemp_re,(self%nw))
+ ABI_MALLOC(selftemp_imag,(self%nw))
  natom=self%hdc%natom
  nsppol  = self%hdc%nsppol
  nspinor=self%hdc%nspinor
@@ -1647,8 +1647,8 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,filapp)
  close(67)
      !write(6,*) "self1",aimag(self%oper(489)%matlu(1)%mat(1,1,1,1,1))
 
- ABI_DEALLOCATE(selftemp_re)
- ABI_DEALLOCATE(selftemp_imag)
+ ABI_FREE(selftemp_re)
+ ABI_FREE(selftemp_imag)
 
 
 end subroutine kramerskronig_self
@@ -1689,7 +1689,7 @@ subroutine selfreal2imag_self(selfr,self,filapp)
  real(dp) :: delta
 ! *********************************************************************
  delta=0.0000000
- ABI_ALLOCATE(selftempmatsub,(self%nw))
+ ABI_MALLOC(selftempmatsub,(self%nw))
  natom=self%hdc%natom
  nsppol  = self%hdc%nsppol
  nspinor=self%hdc%nspinor
@@ -1731,7 +1731,7 @@ subroutine selfreal2imag_self(selfr,self,filapp)
  enddo ! iatom
  close(672)
 
- ABI_DEALLOCATE(selftempmatsub)
+ ABI_FREE(selftempmatsub)
 
 
 end subroutine selfreal2imag_self

@@ -304,8 +304,8 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 !*********************************************************************
  marr=3
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
 !copy natom to anaddb_dtset
  anaddb_dtset%natom=natom
@@ -587,13 +587,13 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  end if
 
  if (anaddb_dtset%ep_nqpt > 0) then
-   ABI_ALLOCATE(anaddb_dtset%ep_qptlist,(3,anaddb_dtset%ep_nqpt))
+   ABI_MALLOC(anaddb_dtset%ep_qptlist,(3,anaddb_dtset%ep_nqpt))
    if(3*anaddb_dtset%ep_nqpt>marr)then
      marr=3*anaddb_dtset%ep_nqpt
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    anaddb_dtset%ep_qptlist(:,:)=zero
    call intagm(dprarr,intarr,jdtset,marr,3*anaddb_dtset%ep_nqpt,string(1:lenstr),'ep_qptlist',tread,'DPR')
@@ -763,20 +763,20 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%kptrlatt = 0
 !why this test on reading in kptrlatt?
  marr = 9
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
  call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'kptrlatt',tread,'INT')
  if(tread==1)anaddb_dtset%kptrlatt(1:3,1:3)=reshape(intarr(1:9),(/3,3/))
 !NOTE: no a priori way to test the validity of the integers in kptrlatt
 
  anaddb_dtset%kptrlatt_fine(:,:)=0
  marr = 9
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
  call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'kptrlatt_fine',tread,'INT')
  if(tread==1)anaddb_dtset%kptrlatt_fine(1:3,1:3)=reshape(intarr(1:9),(/3,3/))
 
@@ -1291,10 +1291,10 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
  anaddb_dtset%thermal_supercell(:,:)=0
  marr = 9
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
  call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'thermal_supercell',tread,'INT')
  if(tread==1) anaddb_dtset%thermal_supercell(1:3,1:3)=reshape(intarr(1:9),(/3,3/))
  call mati3det(anaddb_dtset%thermal_supercell, idet)
@@ -1393,7 +1393,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 !A
 
- ABI_ALLOCATE(anaddb_dtset%atifc,(natom))
+ ABI_MALLOC(anaddb_dtset%atifc,(natom))
  anaddb_dtset%atifc(:) = 0
  if(anaddb_dtset%natifc>=1)then
    ! default to 1 for first natifc atoms
@@ -1401,10 +1401,10 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
    if(anaddb_dtset%natifc>marr)then
      marr=anaddb_dtset%natifc
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    call intagm(dprarr,intarr,jdtset,marr,anaddb_dtset%natifc,string(1:lenstr),'atifc',tread,'INT')
    if(tread==1) anaddb_dtset%atifc(1:anaddb_dtset%natifc)= intarr(1:anaddb_dtset%natifc)
@@ -1427,15 +1427,15 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 !I
 
- ABI_ALLOCATE(anaddb_dtset%iatfix,(natom))
+ ABI_MALLOC(anaddb_dtset%iatfix,(natom))
  anaddb_dtset%iatfix(:) = 0
  if ((anaddb_dtset%relaxat == 1).and.(anaddb_dtset%natfix > 0)) then
    if(natom > marr)then
      marr = natom
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    call intagm(dprarr,intarr,jdtset,marr,anaddb_dtset%natfix,string(1:lenstr),'iatfix',tread,'INT')
    if(tread==1) anaddb_dtset%iatfix(1:anaddb_dtset%natfix) = intarr(1:anaddb_dtset%natfix)
@@ -1450,13 +1450,13 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !FIXME: need a test on values of istrfix
 
  if (anaddb_dtset%natprj_bs > 0) then
-   ABI_ALLOCATE(anaddb_dtset%iatprj_bs,(anaddb_dtset%natprj_bs))
+   ABI_MALLOC(anaddb_dtset%iatprj_bs,(anaddb_dtset%natprj_bs))
    if(anaddb_dtset%natprj_bs>marr)then
      marr=anaddb_dtset%natprj_bs
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    anaddb_dtset%iatprj_bs(:)=0
    call intagm(dprarr,intarr,jdtset,marr,anaddb_dtset%natprj_bs,string(1:lenstr),'iatprj_bs',tread,'INT')
@@ -1489,10 +1489,10 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  if (anaddb_dtset%nqshft/=0)then
    if(3*anaddb_dtset%nqshft>marr)then
      marr=3*anaddb_dtset%nqshft
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    anaddb_dtset%q1shft(:,:)=zero
    call intagm(dprarr,intarr,jdtset,marr,3*anaddb_dtset%nqshft, string(1:lenstr),'q1shft',tread,'DPR')
@@ -1500,15 +1500,15 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   reshape(dprarr(1:3*anaddb_dtset%nqshft),(/3,anaddb_dtset%nqshft/))
  end if
 
- ABI_ALLOCATE(anaddb_dtset%qph1l,(3,anaddb_dtset%nph1l))
- ABI_ALLOCATE(anaddb_dtset%qnrml1,(anaddb_dtset%nph1l))
+ ABI_MALLOC(anaddb_dtset%qph1l,(3,anaddb_dtset%nph1l))
+ ABI_MALLOC(anaddb_dtset%qnrml1,(anaddb_dtset%nph1l))
  if (anaddb_dtset%nph1l/=0)then
    if(4*anaddb_dtset%nph1l>marr)then
      marr=4*anaddb_dtset%nph1l
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    anaddb_dtset%qph1l(:,:)=zero
    anaddb_dtset%qnrml1(:)=zero
@@ -1529,15 +1529,15 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    end if
  end if
 
- ABI_ALLOCATE(anaddb_dtset%qph2l,(3,anaddb_dtset%nph2l))
- ABI_ALLOCATE(anaddb_dtset%qnrml2,(anaddb_dtset%nph2l))
+ ABI_MALLOC(anaddb_dtset%qph2l,(3,anaddb_dtset%nph2l))
+ ABI_MALLOC(anaddb_dtset%qnrml2,(anaddb_dtset%nph2l))
  if (anaddb_dtset%nph2l/=0)then
    if(4*anaddb_dtset%nph2l>marr)then
      marr=4*anaddb_dtset%nph2l
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    anaddb_dtset%qph2l(:,:)=zero
    anaddb_dtset%qnrml2(:)=zero
@@ -1559,13 +1559,13 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  end if
 
  if (anaddb_dtset%nqpath > 0) then
-   ABI_ALLOCATE(anaddb_dtset%qpath,(3,anaddb_dtset%nqpath))
+   ABI_MALLOC(anaddb_dtset%qpath,(3,anaddb_dtset%nqpath))
    if(3*anaddb_dtset%nqpath>marr)then
      marr=3*anaddb_dtset%nqpath
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
+     ABI_MALLOC(intarr,(marr))
+     ABI_MALLOC(dprarr,(marr))
    end if
    anaddb_dtset%qpath(:,:)=zero
    call intagm(dprarr,intarr,jdtset,marr,3*anaddb_dtset%nqpath,string(1:lenstr),'qpath',tread,'DPR')
@@ -1601,8 +1601,8 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !Finished reading in variables - deallocate
 !=======================================================================
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
 
 !=======================================================================
 !Check consistency of input variables:

@@ -384,7 +384,7 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
     ABI_ERROR("Fatal error")
   end if
 
-  ABI_ALLOCATE(tmp,(n))
+  ABI_MALLOC(tmp,(n))
 
   do i = 1, n-1
     if ( t(i) >= t(i+1) ) then
@@ -437,7 +437,7 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
    ypp(k)=ypp(k)*ypp(k+1)+tmp(k)
   enddo
 
-  ABI_DEALLOCATE(tmp)
+  ABI_FREE(tmp)
 end subroutine spline
 !!***
 
@@ -570,10 +570,10 @@ subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
  ybcbeg=czero
  ybcend=czero
 
- ABI_ALLOCATE(ysplin2_lo,(nomega_lo))
+ ABI_MALLOC(ysplin2_lo,(nomega_lo))
  call spline_complex(omega_lo, tospline_lo, nomega_lo, ybcbeg, ybcend, ysplin2_lo)
  call splint_complex( nomega_lo, omega_lo, tospline_lo,ysplin2_lo, nomega_li, omega_li, splined_li)
- ABI_DEALLOCATE(ysplin2_lo)
+ ABI_FREE(ysplin2_lo)
 
 end subroutine spline_c
 !!***
@@ -629,10 +629,10 @@ subroutine spline_complex( t, y, n, ybcbeg, ybcend, ypp )
  real(dp) :: ybcend_i
  real(dp), allocatable :: ypp_i(:)
 
- ABI_ALLOCATE(y_r,(n))
- ABI_ALLOCATE(ypp_r,(n))
- ABI_ALLOCATE(y_i,(n))
- ABI_ALLOCATE(ypp_i,(n))
+ ABI_MALLOC(y_r,(n))
+ ABI_MALLOC(ypp_r,(n))
+ ABI_MALLOC(y_i,(n))
+ ABI_MALLOC(ypp_i,(n))
  y_r=real(y)
  y_i=aimag(y)    !vz_d
  ybcbeg_r=real(ybcbeg)
@@ -642,10 +642,10 @@ subroutine spline_complex( t, y, n, ybcbeg, ybcend, ypp )
  call spline( t, y_r, n, ybcbeg_r, ybcend_r, ypp_r )
  call spline( t, y_i, n, ybcbeg_i, ybcend_i, ypp_i )
  ypp=cmplx(ypp_r,ypp_i)
- ABI_DEALLOCATE(y_r)
- ABI_DEALLOCATE(ypp_r)
- ABI_DEALLOCATE(y_i)
- ABI_DEALLOCATE(ypp_i)
+ ABI_FREE(y_r)
+ ABI_FREE(ypp_r)
+ ABI_FREE(y_i)
+ ABI_FREE(ypp_i)
 
 end subroutine spline_complex
 !!***
@@ -783,12 +783,12 @@ subroutine splint_complex (nspline,xspline,yspline,ysplin2,nfit,xfit,yfit)
  real(dp), allocatable :: yfit_r(:)
  real(dp), allocatable :: yfit_i(:)
 
- ABI_ALLOCATE(yspline_r,(nspline))
- ABI_ALLOCATE(yspline_i,(nspline))
- ABI_ALLOCATE(ysplin2_r,(nspline))
- ABI_ALLOCATE(ysplin2_i,(nspline))
- ABI_ALLOCATE(yfit_r,(nfit))
- ABI_ALLOCATE(yfit_i,(nfit))
+ ABI_MALLOC(yspline_r,(nspline))
+ ABI_MALLOC(yspline_i,(nspline))
+ ABI_MALLOC(ysplin2_r,(nspline))
+ ABI_MALLOC(ysplin2_i,(nspline))
+ ABI_MALLOC(yfit_r,(nfit))
+ ABI_MALLOC(yfit_i,(nfit))
 
 !local
 
@@ -800,12 +800,12 @@ subroutine splint_complex (nspline,xspline,yspline,ysplin2,nfit,xfit,yfit)
  call splint (nspline,xspline,yspline_r,ysplin2_r,nfit,xfit,yfit_r)
  call splint (nspline,xspline,yspline_i,ysplin2_i,nfit,xfit,yfit_i)
  yfit=cmplx(yfit_r,yfit_i)
- ABI_DEALLOCATE(yspline_r)
- ABI_DEALLOCATE(yspline_i)
- ABI_DEALLOCATE(ysplin2_r)
- ABI_DEALLOCATE(ysplin2_i)
- ABI_DEALLOCATE(yfit_r)
- ABI_DEALLOCATE(yfit_i)
+ ABI_FREE(yspline_r)
+ ABI_FREE(yspline_i)
+ ABI_FREE(ysplin2_r)
+ ABI_FREE(ysplin2_i)
+ ABI_FREE(yfit_r)
+ ABI_FREE(yfit_i)
 
 end subroutine splint_complex
 !!***

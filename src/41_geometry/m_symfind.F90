@@ -176,14 +176,14 @@ contains
 !spinatcl(1:3,iclass) will contain the spinat of the atoms in the class
 !class(1:natomclass(iclass),iclass) will contain the index of the
 !atoms belonging to the class
- ABI_ALLOCATE(class,(natom+3,natom))
- ABI_ALLOCATE(natomcl,(natom))
- ABI_ALLOCATE(typecl,(natom))
- ABI_ALLOCATE(chrgat_,(natom))
- ABI_ALLOCATE(chrgatcl,(natom))
- ABI_ALLOCATE(spinatcl,(3,natom))
- ABI_ALLOCATE(local_nucdipmom,(3,3,natom))
- ABI_ALLOCATE(nucdipmomcl,(3,natom))
+ ABI_MALLOC(class,(natom+3,natom))
+ ABI_MALLOC(natomcl,(natom))
+ ABI_MALLOC(typecl,(natom))
+ ABI_MALLOC(chrgat_,(natom))
+ ABI_MALLOC(chrgatcl,(natom))
+ ABI_MALLOC(spinatcl,(3,natom))
+ ABI_MALLOC(local_nucdipmom,(3,3,natom))
+ ABI_MALLOC(nucdipmomcl,(3,natom))
 
  chrgat_(:)=zero
  if(present(chrgat))then
@@ -323,7 +323,7 @@ contains
 
 !If non-collinear spinat have to be used, transfer them in reduced coordinates
  if (noncoll==1) then
-   ABI_ALLOCATE(spinatred,(3,natom))
+   ABI_MALLOC(spinatred,(3,natom))
    do iatom=1,natom
      do ii=1,3
        spinatred(1:3,iatom)=MATMUL(TRANSPOSE(gprimd),spinat(1:3,iatom))
@@ -348,7 +348,7 @@ contains
 
 
  !represent nuclear dipole moments in reduced coords
- ABI_ALLOCATE(nucdipmomred,(3,3,natom))
+ ABI_MALLOC(nucdipmomred,(3,3,natom))
  do iatom=1,natom
     do ii=1,3
        nucdipmomred(1:3,ii,iatom)=MATMUL(TRANSPOSE(gprimd),local_nucdipmom(1:3,ii,iatom))
@@ -552,17 +552,17 @@ contains
    end do ! End the loop on tentative translations
  end do ! End big loop over each symmetry operation of the Bravais lattice
 
- ABI_DEALLOCATE(class)
- ABI_DEALLOCATE(natomcl)
- ABI_DEALLOCATE(chrgat_)
- ABI_DEALLOCATE(chrgatcl)
- ABI_DEALLOCATE(spinatcl)
- ABI_DEALLOCATE(typecl)
- ABI_DEALLOCATE(local_nucdipmom)
- ABI_DEALLOCATE(nucdipmomcl)
- ABI_DEALLOCATE(nucdipmomred)
+ ABI_FREE(class)
+ ABI_FREE(natomcl)
+ ABI_FREE(chrgat_)
+ ABI_FREE(chrgatcl)
+ ABI_FREE(spinatcl)
+ ABI_FREE(typecl)
+ ABI_FREE(local_nucdipmom)
+ ABI_FREE(nucdipmomcl)
+ ABI_FREE(nucdipmomred)
  if (noncoll==1)   then
-   ABI_DEALLOCATE(spinatred)
+   ABI_FREE(spinatred)
  end if
 
 ! call chkgrp(nsym,symafm,symrel,ierr_)
@@ -674,9 +674,9 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
 !This routine finds the Bravais characteristics, without actually
 !looking at the symmetry operations.
- ABI_ALLOCATE(ptsymrel,(3,3,maxsym))
+ ABI_MALLOC(ptsymrel,(3,3,maxsym))
  call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimd,tolsym)
- ABI_DEALLOCATE(ptsymrel)
+ ABI_FREE(ptsymrel)
 
 !Check whether the cell is primitive or not.
  call chkprimit(chkprim,multi,nsym,symafm,symrel)
@@ -737,8 +737,8 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
 !    Determine nonmagnetic symmetry operations
      nsym_nomagn=nsym/2
-     ABI_ALLOCATE(symrel_nomagn,(3,3,nsym_nomagn))
-     ABI_ALLOCATE(tnons_nomagn,(3,nsym_nomagn))
+     ABI_MALLOC(symrel_nomagn,(3,3,nsym_nomagn))
+     ABI_MALLOC(tnons_nomagn,(3,nsym_nomagn))
      isym_nomagn=0
      do isym=1,nsym
        if(symafm(isym)==1)then
@@ -788,8 +788,8 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
      end if
 
-     ABI_DEALLOCATE(symrel_nomagn)
-     ABI_DEALLOCATE(tnons_nomagn)
+     ABI_FREE(symrel_nomagn)
+     ABI_FREE(tnons_nomagn)
    end if ! Shubnikov groups
 
  end if
@@ -920,7 +920,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
  next_stage=0
  rprimdnow(:,:)=rprimd(:,:)
  rprimdtry(:,:)=rprimd(:,:)
- ABI_ALLOCATE(symrelconv,(3,3,nsym))
+ ABI_MALLOC(symrelconv,(3,3,nsym))
 
 !At most will have to try 65 deformations (13 axes, five stages)
  do ideform=1,65
@@ -932,9 +932,9 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 !ENDDEBUG
 
    maxsym=max(192,msym)
-   ABI_ALLOCATE(ptsymrel,(3,3,maxsym))
+   ABI_MALLOC(ptsymrel,(3,3,maxsym))
    call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimdtry,tolsym)
-   ABI_DEALLOCATE(ptsymrel)
+   ABI_FREE(ptsymrel)
 
 !  Examine the agreement with bravais(1)
 !  Warning : might change Bravais lattice hR to hP, if hexagonal axes
@@ -1103,7 +1103,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
    ABI_BUG(message)
  end if
 
- ABI_DEALLOCATE(symrelconv)
+ ABI_FREE(symrelconv)
 
  if (PRESENT(axis)) then  ! Return symmetry axis.
    axis=(/0,0,0/)
@@ -1228,8 +1228,8 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  nsymconv=nsym
  if(center/=0)nsymconv=2*nsymconv
  if(center==-3)nsymconv=4*nsym
- ABI_ALLOCATE(symrelconv,(3,3,nsymconv))
- ABI_ALLOCATE(tnonsconv,(3,nsymconv))
+ ABI_MALLOC(symrelconv,(3,3,nsymconv))
+ ABI_MALLOC(tnonsconv,(3,nsymconv))
 
 !Produce symrel and tnons in conventional axes,
 !name them symrelconv and tnonsconv
@@ -1255,7 +1255,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  nshift=1
  if(center/=0)nshift=2
  if(center==-3)nshift=4
- ABI_ALLOCATE(shift,(3,nshift))
+ ABI_MALLOC(shift,(3,nshift))
  shift(:,1)=zero
  if(center/=0 .and. center/=-3)then
    shift(:,2)=half
@@ -1282,7 +1282,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 
  n_axes(:)=0
 
- ABI_ALLOCATE(determinant,(nsymconv))
+ ABI_MALLOC(determinant,(nsymconv))
 
 !Get the determinant
  call symdet(determinant,nsymconv,symrelconv)
@@ -1293,7 +1293,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 !Decide which kind of point symmetry operation it is
 !Finally assign tnonsconv order and decide the space symmetry operation
 
- ABI_ALLOCATE(t_axes,(nsymconv))
+ ABI_MALLOC(t_axes,(nsymconv))
 
  do isym=1,nsymconv
 
@@ -1539,11 +1539,11 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
    call wrtout(std_out,message,'COLL')
  end if
 
- ABI_DEALLOCATE(determinant)
- ABI_DEALLOCATE(shift)
- ABI_DEALLOCATE(symrelconv)
- ABI_DEALLOCATE(tnonsconv)
- ABI_DEALLOCATE(t_axes)
+ ABI_FREE(determinant)
+ ABI_FREE(shift)
+ ABI_FREE(symrelconv)
+ ABI_FREE(tnonsconv)
+ ABI_FREE(t_axes)
 
  DBG_EXIT("COLL")
 

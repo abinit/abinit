@@ -2006,7 +2006,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
  call wrtout(temp_unit,msg,'COLL')
 
 !Set up a list of character identifiers for all atoms : iden(ia)
- ABI_ALLOCATE(iden,(natom))
+ ABI_MALLOC(iden,(natom))
  iden(:)='        '
  do ia=1,natom
    ndig=int(log10(dble(ia)+0.5d0))+1
@@ -2026,7 +2026,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 
 !Compute cartesian coordinates, and print reduced and cartesian coordinates
 !then print coordinates in angstrom, with the format neede for xmol
- ABI_ALLOCATE(xcart,(3,natom))
+ ABI_MALLOC(xcart,(3,natom))
  call xred2xcart(natom,rprimd,xcart,xred)
 
  do ia=1,natom
@@ -2047,10 +2047,10 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
    call wrtout(temp_unit,msg,'COLL')
  end do
 
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
- ABI_ALLOCATE(list_neighb,(0:mneighb+1,4,2))
- ABI_ALLOCATE(sqrlength,(0:mneighb+1))
+ ABI_MALLOC(list_neighb,(0:mneighb+1,4,2))
+ ABI_MALLOC(sqrlength,(0:mneighb+1))
 
 !Compute list of neighbors
  do ia=1,natom
@@ -2211,9 +2211,9 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
    end if
  end do !  End big ia loop:
 
- ABI_DEALLOCATE(iden)
- ABI_DEALLOCATE(list_neighb)
- ABI_DEALLOCATE(sqrlength)
+ ABI_FREE(iden)
+ ABI_FREE(list_neighb)
+ ABI_FREE(sqrlength)
 
  close(temp_unit)
 
@@ -2947,8 +2947,8 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
  if (nsym2/=(nsym/2).or.nsym==1) then
    call wrtout(std_out, ' Program uses the original set of symmetries ', 'COLL')
    nsym_out=nsym
-   ABI_ALLOCATE(symrel_out,(3,3,nsym))
-   ABI_ALLOCATE(tnons_out,(3,nsym))
+   ABI_MALLOC(symrel_out,(3,3,nsym))
+   ABI_MALLOC(tnons_out,(3,nsym))
    symrel_out(:,:,:)=symrel(:,:,1:nsym)
    tnons_out(:,:)=tnons(:,1:nsym)
    pinv=1
@@ -2956,8 +2956,8 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
    write(msg,'(a)')' Inversion related operations have been suppressed from symmetries list.'
    call wrtout(std_out,msg,'COLL')
    nsym_out=nsym2
-   ABI_ALLOCATE(symrel_out,(3,3,nsym2))
-   ABI_ALLOCATE(tnons_out,(3,nsym2))
+   ABI_MALLOC(symrel_out,(3,3,nsym2))
+   ABI_MALLOC(tnons_out,(3,nsym2))
    symrel_out(:,:,:)=symrel2(:,:,1:nsym2)
    tnons_out(:,:)=tnons(:,1:nsym2)
    pinv=-1

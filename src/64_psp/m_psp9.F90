@@ -224,7 +224,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! rr1   = .0005d0/z
 ! mmax  = dlog(45.0d0 /rr1)/al
 !
-! ABI_ALLOCATE( rad,(mmax) )
+! ABI_MALLOC( rad,(mmax) )
 !
 ! do ir = 1, mmax
 !   rad(ir) = rr1 * dexp(al*(ir-1))
@@ -377,9 +377,9 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !ENDDEBUG
 
 !Can now allocate grids, potentials and projectors
- ABI_ALLOCATE(rad,(mmax))
- ABI_ALLOCATE(vloc,(mmax))
- ABI_ALLOCATE(vpspll,(mmax,lnmax))
+ ABI_MALLOC(rad,(mmax))
+ ABI_MALLOC(vloc,(mmax))
+ ABI_MALLOC(vpspll,(mmax,lnmax))
 
 !Feb 2015: shifted to Hamann grid for convenience - libpsml interpolates anyway
  do ir=1,mmax
@@ -487,10 +487,10 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 & vlspl(:,1),rad,vloc,yp1,ypn,zion)
 
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_ALLOCATE(work_spl,(mqgrid))
+ ABI_MALLOC(work_spl,(mqgrid))
  call spline (qgrid,vlspl(:,1),mqgrid,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
- ABI_DEALLOCATE(work_spl)
+ ABI_FREE(work_spl)
 
 !!  DEBUG
 ! write(std_out,*)'# Vlocal = '
@@ -629,9 +629,9 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    call pawrad_free(mesh)
  end if
 
- ABI_DEALLOCATE(vpspll)
- ABI_DEALLOCATE(vloc)
- ABI_DEALLOCATE(rad)
+ ABI_FREE(vpspll)
+ ABI_FREE(vloc)
+ ABI_FREE(rad)
  if (allocated(idx_sr)) then
    ABI_FREE_NOCOUNT(idx_sr)
  end if
@@ -737,7 +737,7 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
    ABI_ERROR(message)
  end if
 
- ABI_ALLOCATE(ff,(mmax,5))
+ ABI_MALLOC(ff,(mmax,5))
 
  dri = one / amesh
  pi4i = quarter / pi
@@ -873,7 +873,7 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
 !5th derivative is apparently not in use, so set to zero
  xccc1d(:,6)=zero
 
- ABI_DEALLOCATE(ff)
+ ABI_FREE(ff)
 
 end subroutine psp9cc
 !!***

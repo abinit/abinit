@@ -204,14 +204,14 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 ! **************************************************************************************************
 
 !Allocate work spaces
- ABI_ALLOCATE(eig1_read,(2*nband_k))
- ABI_ALLOCATE(ddk_read,(2,size_wf))
+ ABI_MALLOC(eig1_read,(2*nband_k))
+ ABI_MALLOC(ddk_read,(2,size_wf))
  eig1_read(:)=zero
  ddk_read(:,:)=zero
 
 ! "eig1_k_stored" contains dLambda_{nm}/dpert every bands n and m and ndir (=1 or 2) directions
 ! pert = k_dir (wavevector) or E_dir (electric field)
- ABI_ALLOCATE(eig1_k_stored,(2*rf2%ndir*nband_k**2))
+ ABI_MALLOC(eig1_k_stored,(2*rf2%ndir*nband_k**2))
  eig1_k_stored=zero
 
 ! "dudk" contains du/dpert1 for every bands and ndir (=1 or 2) directions
@@ -219,13 +219,13 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  dudk=zero
  has_dudkprj=.false.
  if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
-   ABI_DATATYPE_ALLOCATE(dudkprj,(natom,rf2%ndir*nband_k*size_cprj))
+   ABI_MALLOC(dudkprj,(natom,rf2%ndir*nband_k*size_cprj))
    ncpgr_loc=1;if(ipert==natom+10.or.ipert==natom+11) ncpgr_loc=3
    call pawcprj_alloc(dudkprj,ncpgr_loc,gs_hamkq%dimcprj)
    choice_cprj=5 ; cpopt_cprj=0
    has_dudkprj=.true.
  else
-   ABI_DATATYPE_ALLOCATE(dudkprj,(natom,0))
+   ABI_MALLOC(dudkprj,(natom,0))
  end if
 
  if (debug_mode/=0) then
@@ -270,16 +270,16 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    end do
  end do
 
- ABI_ALLOCATE(dudkdk,(2,0))
- ABI_ALLOCATE(dudk_dir2,(2,0))
+ ABI_MALLOC(dudkdk,(2,0))
+ ABI_MALLOC(dudk_dir2,(2,0))
 
 !Get dudkdk for ipert==natom+11
  if(ipert==natom+11) then
-   ABI_DEALLOCATE(dudkdk)
-   ABI_ALLOCATE(dudkdk,(2,nband_k*size_wf))
+   ABI_FREE(dudkdk)
+   ABI_MALLOC(dudkdk,(2,nband_k*size_wf))
    if (idir>3) then
-     ABI_DEALLOCATE(dudk_dir2)
-     ABI_ALLOCATE(dudk_dir2,(2,nband_k*size_wf))
+     ABI_FREE(dudk_dir2)
+     ABI_MALLOC(dudk_dir2,(2,nband_k*size_wf))
    end if
    do iband=1,nband_k
      call ddk_f(1)%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
@@ -317,17 +317,17 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    end do !iband
  end if ! ipert=natom+11
 
- ABI_DEALLOCATE(ddk_read)
- ABI_DEALLOCATE(eig1_read)
+ ABI_FREE(ddk_read)
+ ABI_FREE(eig1_read)
 
 ! **************************************************************************************************
 ! COMPUTATION OF "dsusdu", A PART OF "A_mn" AND A PART OF "Lambda_mn" (see defs in m_rf2)
 ! **************************************************************************************************
 
 !Allocate work spaces for one band
- ABI_ALLOCATE(h_cwave,(2,size_wf))
- ABI_ALLOCATE(s_cwave,(2,size_wf))
- ABI_ALLOCATE(gvnlx1,(2,size_wf))
+ ABI_MALLOC(h_cwave,(2,size_wf))
+ ABI_MALLOC(s_cwave,(2,size_wf))
+ ABI_MALLOC(gvnlx1,(2,size_wf))
  h_cwave(:,:) = zero
  s_cwave(:,:) = zero
  gvnlx1(:,:) = zero
@@ -336,16 +336,16 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  ABI_MALLOC_OR_DIE(dsusdu,(2,rf2%ndir*nband_k*size_wf), ierr)
  dsusdu=zero
 
- ABI_ALLOCATE(rf2%amn,(2,nband_k**2))
+ ABI_MALLOC(rf2%amn,(2,nband_k**2))
  rf2%amn=zero
 
- ABI_ALLOCATE(rf2%lambda_mn,(2,nband_k**2))
+ ABI_MALLOC(rf2%lambda_mn,(2,nband_k**2))
  rf2%lambda_mn(:,:)=zero
 
 !Allocate work spaces when debug_mode is activated
  has_cprj_jband=.false.
  if (debug_mode/=0) then ! Only for test purposes
-   ABI_ALLOCATE(cg_jband,(2,size_wf*nband_k,2))
+   ABI_MALLOC(cg_jband,(2,size_wf*nband_k,2))
    cg_jband(:,:,1) = cg(:,1+icg:size_wf*nband_k+icg)
    if (ipert==natom+11) then ! Note the multiplication by "i"
      if (idir<=3) then
@@ -357,14 +357,14 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      end if
    end if
    if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
-     ABI_DATATYPE_ALLOCATE(cprj_jband,(natom,size_cprj*nband_k))
+     ABI_MALLOC(cprj_jband,(natom,size_cprj*nband_k))
      has_cprj_jband=.true.
    else
-     ABI_DATATYPE_ALLOCATE(cprj_jband,(natom,0))
+     ABI_MALLOC(cprj_jband,(natom,0))
    end if
  else
-   ABI_ALLOCATE(cg_jband,(2,0,2))
-   ABI_DATATYPE_ALLOCATE(cprj_jband,(natom,0))
+   ABI_MALLOC(cg_jband,(2,0,2))
+   ABI_MALLOC(cprj_jband,(natom,0))
  end if
 
  factor=one
@@ -504,8 +504,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  if (nproc_band>1) then
 
    my_nband = nband_k/nproc_band;if (mod(nband_k,nproc_band)/=0) my_nband=my_nband+1
-   ABI_ALLOCATE(dsusdu_loc,(2,size_wf*my_nband*rf2%ndir))
-   ABI_ALLOCATE(dsusdu_gather,(2,size_wf*my_nband*rf2%ndir*nproc_band))
+   ABI_MALLOC(dsusdu_loc,(2,size_wf*my_nband*rf2%ndir))
+   ABI_MALLOC(dsusdu_gather,(2,size_wf*my_nband*rf2%ndir*nproc_band))
    dsusdu_loc(:,:) = zero
    dsusdu_gather(:,:) = zero
 
@@ -543,8 +543,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        end do
      end do
    end do
-   ABI_DEALLOCATE(dsusdu_loc)
-   ABI_DEALLOCATE(dsusdu_gather)
+   ABI_FREE(dsusdu_loc)
+   ABI_FREE(dsusdu_gather)
 
  end if
 
@@ -757,19 +757,19 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
  end do ! kdir1
 
- ABI_DEALLOCATE(gvnlx1)
- ABI_DEALLOCATE(h_cwave)
- ABI_DEALLOCATE(s_cwave)
- ABI_DEALLOCATE(cg_jband)
- ABI_DEALLOCATE(dudk)
- ABI_DEALLOCATE(dudkdk)
- ABI_DEALLOCATE(dudk_dir2)
- ABI_DEALLOCATE(dsusdu)
- ABI_DEALLOCATE(eig1_k_stored)
+ ABI_FREE(gvnlx1)
+ ABI_FREE(h_cwave)
+ ABI_FREE(s_cwave)
+ ABI_FREE(cg_jband)
+ ABI_FREE(dudk)
+ ABI_FREE(dudkdk)
+ ABI_FREE(dudk_dir2)
+ ABI_FREE(dsusdu)
+ ABI_FREE(eig1_k_stored)
  if (has_cprj_jband) call pawcprj_free(cprj_jband)
- ABI_DATATYPE_DEALLOCATE(cprj_jband)
+ ABI_FREE(cprj_jband)
  if (has_dudkprj) call pawcprj_free(dudkprj)
- ABI_DATATYPE_DEALLOCATE(dudkprj)
+ ABI_FREE(dudkprj)
 
 ! Compute the part of 2nd order wavefunction that belongs to the space of empty bands
  do jband=1,nband_k
@@ -914,7 +914,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
 ! Deallocations of arrays
  if (debug_mode==0) then
-   ABI_DEALLOCATE(rf2%amn)
+   ABI_FREE(rf2%amn)
  end if
 
  call timab(514,2,tsec)

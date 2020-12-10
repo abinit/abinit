@@ -159,16 +159,16 @@ real(dp),allocatable,save :: vel_ioncell(:)
 
  if(iexit/=0)then
    if (allocated(vin))           then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))          then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))           then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vel_ioncell))          then
-     ABI_DEALLOCATE(vel_ioncell)
+     ABI_FREE(vel_ioncell)
    end if
    return
  end if
@@ -197,22 +197,22 @@ real(dp),allocatable,save :: vel_ioncell(:)
 !From a previous dataset with a different ndim
  if(itime==1)then
    if (allocated(vin))           then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))          then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))           then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vel_ioncell))          then
-     ABI_DEALLOCATE(vel_ioncell)
+     ABI_FREE(vel_ioncell)
    end if
 
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vel_ioncell,(ndim))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vel_ioncell,(ndim))
    vel_ioncell(:)=0.0
  end if
 

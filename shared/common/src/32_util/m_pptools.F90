@@ -870,7 +870,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
  nk3 = kptrlatt(3,3)
  nkptfull=(nk1+1)*(nk2+1)*(nk3+1)
 
- ABI_ALLOCATE(fulltoirred,(nkptfull))
+ ABI_MALLOC(fulltoirred,(nkptfull))
  timrev=0; if (use_tr) timrev=1
 
  !Xcrysden employs C-ordering for the Fermi Surface.
@@ -927,7 +927,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
 
 
  if (ierr/=0) then
-   ABI_DEALLOCATE(fulltoirred)
+   ABI_FREE(fulltoirred)
    RETURN
  end if
 
@@ -957,7 +957,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
 
  ! Dump the results on file ===
  if (open_file(fname,msg,newunit=uvtk,status='unknown',form='formatted') /= 0) then
-   ABI_DEALLOCATE(fulltoirred)
+   ABI_FREE(fulltoirred)
    ABI_WARNING(msg)
    ierr=ierr +1; RETURN
  end if
@@ -1104,7 +1104,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
  end do
 
  close (uvtk)
- ABI_DEALLOCATE(fulltoirred)
+ ABI_FREE(fulltoirred)
 
 end subroutine printvtk
 !!***

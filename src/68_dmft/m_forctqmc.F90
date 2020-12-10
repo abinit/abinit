@@ -188,10 +188,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! ======================================
 ! Allocations: diagonalization and eigenvectors
 ! ======================================
- ABI_DATATYPE_ALLOCATE(udens_atoms,(natom))
- ABI_DATATYPE_ALLOCATE(eigvectmatlu,(natom,nsppol))
- ABI_DATATYPE_ALLOCATE(dmat_diag,(natom))
- ABI_DATATYPE_ALLOCATE(identity,(natom))
+ ABI_MALLOC(udens_atoms,(natom))
+ ABI_MALLOC(eigvectmatlu,(natom,nsppol))
+ ABI_MALLOC(dmat_diag,(natom))
+ ABI_MALLOC(identity,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,dmat_diag)
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,identity)
  call identity_matlu(identity,natom)
@@ -200,9 +200,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    if(lpawu/=-1) then
      tndim=nspinor*(2*lpawu+1)
      do isppol=1,nsppol
-       ABI_ALLOCATE(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
+       ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
      end do
-     ABI_ALLOCATE(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     ABI_MALLOC(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
      dmat_diag(iatom)%mat=czero
    end if
  end do
@@ -350,7 +350,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 ! Diagonalize atomic levels
 ! =================================================================
-     ABI_DATATYPE_ALLOCATE(level_diag,(natom))
+     ABI_MALLOC(level_diag,(natom))
      call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
 
      ! Diagonalise atomic levels (opt_real is necessary, because
@@ -371,7 +371,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
 
      call destroy_matlu(level_diag,natom)
-     ABI_DATATYPE_DEALLOCATE(level_diag)
+     ABI_FREE(level_diag)
 
      ! Print diagonalized levels
      ! --------------------------
@@ -504,7 +504,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! information.
 !====================================================================
  if(opt_diag==1) then
-   ABI_DATATYPE_ALLOCATE(matlu1,(natom))
+   ABI_MALLOC(matlu1,(natom))
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
    call copy_matlu(green%occup%matlu,matlu1,natom)
    if(pawprtvol>=3) then
@@ -533,7 +533,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call print_matlu(matlu1,natom,1,compl=1)
    call checkreal_matlu(matlu1,natom,tol10)
    call destroy_matlu(matlu1,natom)
-   ABI_DATATYPE_DEALLOCATE(matlu1)
+   ABI_FREE(matlu1)
 
  end if
 
@@ -642,7 +642,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =================================================================
 ! Compute analytic limit of hybridization and rotate it
 ! =================================================================
- ABI_DATATYPE_ALLOCATE(hybri_coeff,(paw_dmft%natom))
+ ABI_MALLOC(hybri_coeff,(paw_dmft%natom))
  call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,hybri_coeff)
  !write(6,*)"hybri1",hybri_coeff(1)%mat(1,1,1,1,1),paw_dmft%natom,cryst_struc%natom
 
@@ -762,8 +762,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Compute inverse of weiss  for each Frequency
 ! ----------------------------------------------
  do ifreq=1,paw_dmft%dmft_nwlo
-   ABI_DATATYPE_ALLOCATE(matlu1,(natom))
-   ABI_DATATYPE_ALLOCATE(matlu2,(natom))
+   ABI_MALLOC(matlu1,(natom))
+   ABI_MALLOC(matlu2,(natom))
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu2)
 
@@ -802,8 +802,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    call destroy_matlu(matlu1,natom)
    call destroy_matlu(matlu2,natom)
-   ABI_DATATYPE_DEALLOCATE(matlu1)
-   ABI_DATATYPE_DEALLOCATE(matlu2)
+   ABI_FREE(matlu1)
+   ABI_FREE(matlu2)
  end do
 
  ! Copy weiss_for_rot into weiss
@@ -827,7 +827,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Substract frequency from diagonal part
 ! ======================================
 
- ABI_ALLOCATE(shift,(natom))
+ ABI_MALLOC(shift,(natom))
  do ifreq=1,paw_dmft%dmft_nwlo
    shift(:)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
 
@@ -852,7 +852,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  ! Print -G_0^+1-iw_n=(F-levels) for last freq in the rotated basis"
  ! ------------------------------------------------------------------
- ABI_DEALLOCATE(shift)
+ ABI_FREE(shift)
  if(pawprtvol>=3) then
    write(message,'(a,2x,a,f13.5)') ch10,&  ! debug
 &  " == Print G_0^-1-iw_n=-(F-levels) for last freq in the rotated basis"  ! debug
@@ -864,10 +864,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! ======================================
 
  if(opt_nondiag==1) then
-   ABI_DATATYPE_ALLOCATE(matlu1,(natom))
-   ABI_DATATYPE_ALLOCATE(matlu2,(natom))
-   ABI_DATATYPE_ALLOCATE(matlu3,(natom))
-   ABI_DATATYPE_ALLOCATE(matlu4,(natom))
+   ABI_MALLOC(matlu1,(natom))
+   ABI_MALLOC(matlu2,(natom))
+   ABI_MALLOC(matlu3,(natom))
+   ABI_MALLOC(matlu4,(natom))
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu2)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu3)
@@ -974,10 +974,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call destroy_matlu(matlu2,natom)
    call destroy_matlu(matlu3,natom)
    call destroy_matlu(matlu4,natom)
-   ABI_DATATYPE_DEALLOCATE(matlu1)
-   ABI_DATATYPE_DEALLOCATE(matlu2)
-   ABI_DATATYPE_DEALLOCATE(matlu3)
-   ABI_DATATYPE_DEALLOCATE(matlu4)
+   ABI_FREE(matlu1)
+   ABI_FREE(matlu2)
+   ABI_FREE(matlu3)
+   ABI_FREE(matlu4)
  end if ! if opt_nondiag=1
 
 ! =========================================================================================
@@ -1006,12 +1006,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        end if
      end if
 
-     ABI_ALLOCATE(fw1,(paw_dmft%dmft_nwlo,nflavor))
-     ABI_ALLOCATE(fw1_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor))
-     ABI_ALLOCATE(levels_ctqmc,(nflavor))
-     ABI_ALLOCATE(levels_ctqmc_nd,(nflavor,nflavor))
+     ABI_MALLOC(fw1,(paw_dmft%dmft_nwlo,nflavor))
+     ABI_MALLOC(fw1_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor))
+     ABI_MALLOC(levels_ctqmc,(nflavor))
+     ABI_MALLOC(levels_ctqmc_nd,(nflavor,nflavor))
      levels_ctqmc_nd=czero
-     ABI_ALLOCATE(hybri_limit,(nflavor,nflavor))
+     ABI_MALLOC(hybri_limit,(nflavor,nflavor))
      hybri_limit=czero
      fw1_nd=czero
      fw1=czero
@@ -1135,7 +1135,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      if(testcode>=1) then
        dmft_nwlo=paw_dmft%dmft_nwlo
        paw_dmft%dmft_nwlo=paw_dmft%dmftqmc_l
-       ABI_ALLOCATE(gw1_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor))
+       ABI_MALLOC(gw1_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor))
        gw1_nd=czero
 
        !  Call testcode_ctqmc: built simple hybridization
@@ -1198,7 +1198,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          fw1_nd=gw1_nd
        end if
 
-       ABI_DEALLOCATE(gw1_nd)
+       ABI_FREE(gw1_nd)
        paw_dmft%dmft_nwlo=dmft_nwlo
 
      ! and testcode>1
@@ -1266,14 +1266,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      end if
 
      if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
-       ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor))
+       ABI_MALLOC(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor))
        !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
          open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
        if(paw_dmft%dmft_solv==5) then
-         ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
+         ABI_MALLOC(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
        end if
-       ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
+       ABI_MALLOC(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
        !use  gw_tmp to put freq
        do ifreq=1,paw_dmft%dmft_nwlo
          if(paw_dmft%dmft_solv==5) gw_tmp(ifreq,nflavor+1)=cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
@@ -1281,11 +1281,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        end do
      end if
 
-     ABI_ALLOCATE(gtmp,(paw_dmft%dmftqmc_l,nflavor))
+     ABI_MALLOC(gtmp,(paw_dmft%dmftqmc_l,nflavor))
      ! THIS IS A BACKUP PLAN. USING paw_dmft%hybrid makes a segfault on TIKAL
      ! PSC with MPI only (and max2_open64). paw_dmf%hybrid is corrupted
      ! somewhere but I could not find the place in all DMFT routines
-     ABI_ALLOCATE(gtmp_nd,(paw_dmft%dmftqmc_l,nflavor,nflavor))
+     ABI_MALLOC(gtmp_nd,(paw_dmft%dmftqmc_l,nflavor,nflavor))
      call flush_unit(std_out)
 
      ! =================================================================
@@ -1299,14 +1299,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        ! =================================================================
        if(paw_dmft%dmft_solv==5) then
 
-         ABI_ALLOCATE(docc,(1:nflavor,1:nflavor))
+         ABI_MALLOC(docc,(1:nflavor,1:nflavor))
          docc(:,:) = zero
          call CtqmcInterface_run(hybrid,fw1(1:paw_dmft%dmftqmc_l,:),Gtau=gtmp,&
 &         Gw=gw_tmp,D=docc(:,:),E=green%ecorr_qmc(iatom),&
 !&       matU=hu(itypat)%udens,opt_levels=levels_ctqmc)
 &         matU=udens_atoms(iatom)%value,opt_levels=levels_ctqmc)
          call data4entropyDMFT_setDocc(paw_dmft%forentropyDMFT,iatom,docc)
-         ABI_DEALLOCATE(docc)
+         ABI_FREE(docc)
          !DO iflavor = 1, nflavor
          !  hybrid%Hybrid%Greens(iflavor)%oper(1:this%samples) = gtmp(1:this%samples,iflavor)
          !  CALL GreenHyb_forFourier(this%Greens(iflavor), Gomega=Gw(:,iflavor), omega=Gw(:,this%flavors+1))
@@ -1318,12 +1318,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        else if (paw_dmft%dmft_solv==8) then
        ! =================================================================
 
-         ABI_ALLOCATE(docc,(1:nflavor,1:nflavor))
+         ABI_MALLOC(docc,(1:nflavor,1:nflavor))
          docc(:,:) = zero
          call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
 &        Gw=gw_tmp_nd,D=doccsum,E=green%ecorr_qmc(iatom),&
 &        Noise=noise,matU=udens_atoms(iatom)%value,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
-         ABI_DEALLOCATE(docc)
+         ABI_FREE(docc)
        ! TODO: Handle de luj0 case for entropy
 
        ! =================================================================
@@ -1396,11 +1396,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &       " == Destroy CTQMC done"
        call wrtout(std_out,message,'COLL')
      end if
-     ABI_DEALLOCATE(hybri_limit)
-     ABI_DEALLOCATE(levels_ctqmc_nd)
-     ABI_DEALLOCATE(levels_ctqmc)
-     ABI_DEALLOCATE(fw1)
-     ABI_DEALLOCATE(fw1_nd)
+     ABI_FREE(hybri_limit)
+     ABI_FREE(levels_ctqmc_nd)
+     ABI_FREE(levels_ctqmc)
+     ABI_FREE(fw1)
+     ABI_FREE(fw1_nd)
 
 ! ___________________________________________________________________________________
 !
@@ -1415,11 +1415,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ! Deallocate arrays for CTQMC
      !-----------------------------
      if(paw_dmft%dmft_solv<6) then
-       ABI_DEALLOCATE(gw_tmp)
+       ABI_FREE(gw_tmp)
      endif
-     ABI_DEALLOCATE(gw_tmp_nd)
-     ABI_DEALLOCATE(gtmp)
-     ABI_DEALLOCATE(gtmp_nd)
+     ABI_FREE(gw_tmp_nd)
+     ABI_FREE(gtmp)
+     ABI_FREE(gtmp_nd)
 
 
 
@@ -1454,7 +1454,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! Copy Weiss_for_rot into weiss and rotate back weiss to the original basis
 ! =================================================================
 
-! ABI_ALLOCATE(shift,(natom))
+! ABI_MALLOC(shift,(natom))
 ! do ifreq=1,paw_dmft%dmft_nwlo
 !  ! First weiss_for_rot contains -G_0^-1+iw_n
 !  ! -------------------------------------------
@@ -1482,7 +1482,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !  ! --------------------
 !   call rotate_matlu(weiss_for_rot%oper(ifreq)%matlu,eigvectmatlu,natom,3,0)
 ! end do
-! ABI_DEALLOCATE(shift)
+! ABI_FREE(shift)
 
 ! =================================================================
 ! Here compute Self energy from Dyson and print it
@@ -1603,7 +1603,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  end if
 
 
- ABI_DATATYPE_ALLOCATE(matlu1,(natom))
+ ABI_MALLOC(matlu1,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,matlu1)
  call copy_matlu(green%occup_tau%matlu,matlu1,natom)
  call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
@@ -1618,7 +1618,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  call diff_matlu("CTQMC Occup","CTQMC Occup symetrized",green%occup_tau%matlu,matlu1,natom,0,tol4,ierr)
  call destroy_matlu(matlu1,natom)
- ABI_DATATYPE_DEALLOCATE(matlu1)
+ ABI_FREE(matlu1)
 
 ! =================================================================
 ! Symetrise green function G(tau) and G(ifreq) to recover symetry
@@ -1657,28 +1657,28 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  call destroy_oper(energy_level)
  call destroy_matlu(dmat_diag,natom)
- ABI_DATATYPE_DEALLOCATE(dmat_diag)
+ ABI_FREE(dmat_diag)
  call destroy_matlu(identity,natom)
- ABI_DATATYPE_DEALLOCATE(identity)
+ ABI_FREE(identity)
  do iatom=1,cryst_struc%natom
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu/=-1) then
      do isppol=1,nsppol
-       ABI_DEALLOCATE(eigvectmatlu(iatom,isppol)%value)
-       !ABI_DEALLOCATE(udens_atoms(iatom))
+       ABI_FREE(eigvectmatlu(iatom,isppol)%value)
+       !ABI_FREE(udens_atoms(iatom))
      end do
-     ABI_DEALLOCATE(udens_atoms(iatom)%value)
+     ABI_FREE(udens_atoms(iatom)%value)
    end if
  end do
- ABI_DATATYPE_DEALLOCATE(udens_atoms)
- ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
+ ABI_FREE(udens_atoms)
+ ABI_FREE(eigvectmatlu)
  call destroy_green(weiss_for_rot)
 ! call destroy_green(gw_loc)
 ! call destroy_green(greendft)
 
 !  destroy limit of hybridization
  call destroy_matlu(hybri_coeff,paw_dmft%natom)
- ABI_DATATYPE_DEALLOCATE(hybri_coeff)
+ ABI_FREE(hybri_coeff)
 
 end subroutine qmc_prep_ctqmc
 !!***
@@ -2316,7 +2316,7 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
       end do
       close(unt)
 !      if(paw_dmft%natom==1) then ! If natom>1, it should be moved outside the loop over atoms
-!        ABI_DATATYPE_ALLOCATE(matlu1,(paw_dmft%natom))
+!        ABI_MALLOC(matlu1,(paw_dmft%natom))
 !        call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu1)
 !        do itau=1,paw_dmft%dmftqmc_l
 !          do isppol=1,paw_dmft%nsppol
@@ -2354,7 +2354,7 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 !          end do ! isppol
 !        end do  !itau
 !        call destroy_matlu(matlu1,paw_dmft%natom)
-!        ABI_DATATYPE_DEALLOCATE(matlu1)
+!        ABI_FREE(matlu1)
 !      endif ! if natom=1
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
 &      message, newunit=unt) /= 0) then
@@ -2524,14 +2524,14 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  beta = 1.0/(paw_dmft%temp*Ha_eV)
 
  !Allocation in/output array phase:
- ABI_ALLOCATE(fw1_nd_tmp,(1:nflavor,1:nflavor,1:nfreq)) !column major
- ABI_ALLOCATE(g_iw,(1:nflavor,1:nflavor,1:nfreq)) !column major
- ABI_ALLOCATE(u_mat_ij,(1:nflavor,1:nflavor)) !column major
- ABI_ALLOCATE(u_mat_ijkl,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
- ABI_ALLOCATE(u_mat_ijkl_tmp,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
+ ABI_MALLOC(fw1_nd_tmp,(1:nflavor,1:nflavor,1:nfreq)) !column major
+ ABI_MALLOC(g_iw,(1:nflavor,1:nflavor,1:nfreq)) !column major
+ ABI_MALLOC(u_mat_ij,(1:nflavor,1:nflavor)) !column major
+ ABI_MALLOC(u_mat_ijkl,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
+ ABI_MALLOC(u_mat_ijkl_tmp,(1:nflavor,1:nflavor,1:nflavor,1:nflavor)) !column major
 
  if ( leg_measure ) then !only if functionality is enabled
-   ABI_ALLOCATE(gl_nd,(1:nleg,1:nflavor,1:nflavor)) !column major !nl = 30 by default
+   ABI_MALLOC(gl_nd,(1:nleg,1:nflavor,1:nflavor)) !column major !nl = 30 by default
  end if
 
  !Conversion datas Ha -> eV (some duplications for test...)
@@ -2728,10 +2728,10 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char)
  
   ! Allocating the fortran variables for the results
-  ABI_ALLOCATE(new_re_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
-  ABI_ALLOCATE(new_im_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
-  ABI_ALLOCATE(new_g_tau,(nflavor,nflavor, paw_dmft%dmftqmc_l))
-  ABI_ALLOCATE(new_gl,(nflavor,nflavor, nleg))
+  ABI_MALLOC(new_re_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
+  ABI_MALLOC(new_im_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
+  ABI_MALLOC(new_g_tau,(nflavor,nflavor, paw_dmft%dmftqmc_l))
+  ABI_MALLOC(new_gl,(nflavor,nflavor, nleg))
   i = (0, 1)
   
   ! Check if file exists
@@ -2784,10 +2784,10 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   end do
  
   ! Deallocating
-  ABI_DEALLOCATE(new_re_g_iw)
-  ABI_DEALLOCATE(new_im_g_iw)
-  ABI_DEALLOCATE(new_g_tau)
-  ABI_DEALLOCATE(new_gl) 
+  ABI_FREE(new_re_g_iw)
+  ABI_FREE(new_im_g_iw)
+  ABI_FREE(new_g_tau)
+  ABI_FREE(new_gl) 
 #endif
 #endif
  elseif(paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
@@ -2866,11 +2866,11 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 !    write(490,*) ((gtmp_nd(itau,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
 !  enddo
 ! ndif
- ABI_DEALLOCATE( fw1_nd_tmp )
- ABI_DEALLOCATE( g_iw )
- ABI_DEALLOCATE( u_mat_ijkl )
- ABI_DEALLOCATE( u_mat_ijkl_tmp )
- ABI_DEALLOCATE( u_mat_ij )
+ ABI_FREE( fw1_nd_tmp )
+ ABI_FREE( g_iw )
+ ABI_FREE( u_mat_ijkl )
+ ABI_FREE( u_mat_ijkl_tmp )
+ ABI_FREE( u_mat_ij )
 
 
   !  Compute Green's function in imaginary freq using Legendre coefficients
@@ -2880,7 +2880,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
    call flush_unit(std_out)
    write(message,'(2a)') ch10,"    ==  Compute G(iw_n) from Legendre coefficients"
    call wrtout(std_out,message,'COLL')
-   ABI_ALLOCATE( jbes, (nleg))
+   ABI_MALLOC( jbes, (nleg))
    gw_tmp_nd=czero
 
   !   write(77,*) " TEST OF BESSEL S ROUTINES 0 0"
@@ -2940,7 +2940,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
      end do
   !  write(77,*) "------------------ sum ", gw_tmp_nd(ifreq,1,1)
    end do
-   ABI_DEALLOCATE( jbes )
+   ABI_FREE( jbes )
    call xmpi_barrier(paw_dmft%spacecomm)
    call flush_unit(std_out)
  end if
@@ -2948,7 +2948,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 
 
  if ( leg_measure ) then !only if functionality is enabled
-   ABI_DEALLOCATE(gl_nd)
+   ABI_FREE(gl_nd)
  end if
 
 

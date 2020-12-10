@@ -180,8 +180,8 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
  if(ndiv>1) effpot_mpi%my_ncell = npcell
 
 !Allocation of array
- ABI_ALLOCATE(effpot_mpi%my_cells,(effpot_mpi%my_ncell))
- ABI_ALLOCATE(effpot_mpi%my_index_cells,(4,effpot_mpi%my_ncell))
+ ABI_MALLOC(effpot_mpi%my_cells,(effpot_mpi%my_ncell))
+ ABI_MALLOC(effpot_mpi%my_index_cells,(4,effpot_mpi%my_ncell))
  effpot_mpi%my_cells = 0
  effpot_mpi%my_index_cells = 0
 
@@ -214,7 +214,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
  end do
 
 !TREAT RPT Not yet parallelised
- ABI_ALLOCATE(rpt_list,(nproc))
+ ABI_MALLOC(rpt_list,(nproc))
 
  irpt = 1
 
@@ -228,8 +228,8 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
  virt_rank = rpt_list(my_rank+1)
 
  effpot_mpi%my_nrpt = nprpt
- ABI_ALLOCATE(effpot_mpi%my_rpt,(effpot_mpi%my_nrpt))
- ABI_ALLOCATE(effpot_mpi%my_atmrpt_index,(effpot_mpi%my_nrpt,effpot_mpi%my_ncell))
+ ABI_MALLOC(effpot_mpi%my_rpt,(effpot_mpi%my_nrpt))
+ ABI_MALLOC(effpot_mpi%my_atmrpt_index,(effpot_mpi%my_nrpt,effpot_mpi%my_ncell))
  effpot_mpi%my_rpt = 0
  effpot_mpi%my_atmrpt_index = 0
 
@@ -267,7 +267,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
  end do
 
 
- ABI_DEALLOCATE(rpt_list)
+ ABI_FREE(rpt_list)
 
 end subroutine effpot_mpi_init
 !!***
@@ -312,22 +312,22 @@ subroutine effpot_mpi_free(effpot_mpi)
 
  if (allocated(effpot_mpi%my_cells)) then
    effpot_mpi%my_cells(:) = 0
-   ABI_DEALLOCATE(effpot_mpi%my_cells)
+   ABI_FREE(effpot_mpi%my_cells)
  end if
 
  if (allocated(effpot_mpi%my_index_cells)) then
    effpot_mpi%my_index_cells(:,:) = 0
-   ABI_DEALLOCATE(effpot_mpi%my_index_cells)
+   ABI_FREE(effpot_mpi%my_index_cells)
  end if
 
  if (allocated(effpot_mpi%my_atmrpt_index)) then
    effpot_mpi%my_atmrpt_index(:,:) = 0
-   ABI_DEALLOCATE(effpot_mpi%my_atmrpt_index)
+   ABI_FREE(effpot_mpi%my_atmrpt_index)
  end if
 
  if (allocated(effpot_mpi%my_rpt)) then
    effpot_mpi%my_rpt(:) = 0
-   ABI_DEALLOCATE(effpot_mpi%my_rpt)
+   ABI_FREE(effpot_mpi%my_rpt)
  end if
 
 end subroutine effpot_mpi_free

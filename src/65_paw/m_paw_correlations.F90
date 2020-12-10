@@ -268,9 +268,9 @@ CONTAINS  !=====================================================================
 !    A-define useful indexes
 !    --------------------------------------------------
      if (allocated(pawtab(itypat)%lnproju)) then
-       ABI_DEALLOCATE(pawtab(itypat)%lnproju)
+       ABI_FREE(pawtab(itypat)%lnproju)
      end if
-     ABI_ALLOCATE(pawtab(itypat)%lnproju,(pawtab(itypat)%nproju))
+     ABI_MALLOC(pawtab(itypat)%lnproju,(pawtab(itypat)%nproju))
      icount=0
      do ilmn=1,lmn_size
        if(indlmn(1,ilmn)==lcur) then
@@ -283,9 +283,9 @@ CONTAINS  !=====================================================================
      end do
 
      if (allocated(pawtab(itypat)%klmntomn)) then
-       ABI_DEALLOCATE(pawtab(itypat)%klmntomn)
+       ABI_FREE(pawtab(itypat)%klmntomn)
      end if
-     ABI_ALLOCATE(pawtab(itypat)%klmntomn,(4,lmn2_size))
+     ABI_MALLOC(pawtab(itypat)%klmntomn,(4,lmn2_size))
      do jlmn=1,lmn_size
        jl= indlmn(1,jlmn)
        j0lmn=jlmn*(jlmn-1)/2
@@ -332,17 +332,17 @@ CONTAINS  !=====================================================================
        call wrtout(std_out,message,'COLL')
      end if
 
-     ABI_ALLOCATE(ff,(mesh_size))
+     ABI_MALLOC(ff,(mesh_size))
      ff(:)=zero
 
      if (allocated(pawtab(itypat)%ph0phiint)) then
-       ABI_DEALLOCATE(pawtab(itypat)%ph0phiint)
+       ABI_FREE(pawtab(itypat)%ph0phiint)
      end if
      if (allocated(pawtab(itypat)%zioneff)) then
-       ABI_DEALLOCATE(pawtab(itypat)%zioneff)
+       ABI_FREE(pawtab(itypat)%zioneff)
      end if
-     ABI_ALLOCATE(pawtab(itypat)%ph0phiint,(pawtab(itypat)%nproju))
-     ABI_ALLOCATE(pawtab(itypat)%zioneff,(pawtab(itypat)%nproju))
+     ABI_MALLOC(pawtab(itypat)%ph0phiint,(pawtab(itypat)%nproju))
+     ABI_MALLOC(pawtab(itypat)%zioneff,(pawtab(itypat)%nproju))
 
      icount=0
      do iu=1,pawtab(itypat)%nproju
@@ -381,9 +381,9 @@ CONTAINS  !=====================================================================
      end if
 
      if (allocated(pawtab(itypat)%phiphjint)) then
-       ABI_DEALLOCATE(pawtab(itypat)%phiphjint)
+       ABI_FREE(pawtab(itypat)%phiphjint)
      end if
-     ABI_ALLOCATE(pawtab(itypat)%phiphjint,(pawtab(itypat)%ij_proj))
+     ABI_MALLOC(pawtab(itypat)%phiphjint,(pawtab(itypat)%ij_proj))
 
      icount=0
      do ju=1,pawtab(itypat)%nproju
@@ -412,7 +412,7 @@ CONTAINS  !=====================================================================
        message = ' Error in the loop for calculating phiphjint '
        ABI_ERROR(message)
      end if
-     ABI_DEALLOCATE(ff)
+     ABI_FREE(ff)
      if(abs(pawprtvol)>=2) then
        do icount=1,pawtab(itypat)%ij_proj
          write(message, '(a,a,i2,f9.5,a)' ) ch10,&
@@ -431,7 +431,7 @@ CONTAINS  !=====================================================================
 
 !      a. compute F(k)
 !      ---------------------------------------------
-       ABI_ALLOCATE(fk,(lpawu+1))
+       ABI_MALLOC(fk,(lpawu+1))
        fk(1)=pawtab(itypat)%upawu
 !      cf Slater Physical Review 165, p 665 (1968) [[cite:Slater1958]]
 !      write(std_out,*) "f4of2_sla",pawtab(itypat)%f4of2_sla
@@ -484,10 +484,10 @@ CONTAINS  !=====================================================================
 !      b. Compute ak and vee.
 !      ---------------------------------------------
        if (allocated(pawtab(itypat)%vee)) then
-         ABI_DEALLOCATE(pawtab(itypat)%vee)
+         ABI_FREE(pawtab(itypat)%vee)
        end if
        sz1=2*lpawu+1
-       ABI_ALLOCATE(pawtab(itypat)%vee,(sz1,sz1,sz1,sz1))
+       ABI_MALLOC(pawtab(itypat)%vee,(sz1,sz1,sz1,sz1))
        pawtab(itypat)%vee=zero
        lmpawu=(lpawu-1)**2+2*(lpawu-1)+1  ! number of m value below correlated orbitals
        klm0u=lmpawu*(lmpawu+1)/2          ! value of klmn just below correlated orbitals
@@ -528,7 +528,7 @@ CONTAINS  !=====================================================================
            end do
          end do
        end do
-       ABI_DEALLOCATE(fk)
+       ABI_FREE(fk)
 
      !  testu=0
      !  write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
@@ -562,17 +562,17 @@ CONTAINS  !=====================================================================
        compute_euijkl=(is_dfpt.or.usepawu<0)
        if (compute_euijkl) then
          if (allocated(pawtab(itypat)%euijkl)) then
-           ABI_DEALLOCATE(pawtab(itypat)%euijkl)
+           ABI_FREE(pawtab(itypat)%euijkl)
          end if
-         ABI_ALLOCATE(pawtab(itypat)%euijkl,(2,2,lmn_size,lmn_size,lmn_size,lmn_size))
+         ABI_MALLOC(pawtab(itypat)%euijkl,(2,2,lmn_size,lmn_size,lmn_size,lmn_size))
          pawtab(itypat)%euijkl = zero
          compute_euij_fll = .false.
          euijkl_temp2=zero
          if (abs(usepawu)==1.or.abs(usepawu)==4) then ! Only for FLL
            if (allocated(pawtab(itypat)%euij_fll)) then ! allocate euij_fll for FLL
-             ABI_DEALLOCATE(pawtab(itypat)%euij_fll)
+             ABI_FREE(pawtab(itypat)%euij_fll)
            end if
-           ABI_ALLOCATE(pawtab(itypat)%euij_fll,(lmn2_size))
+           ABI_MALLOC(pawtab(itypat)%euij_fll,(lmn2_size))
            pawtab(itypat)%euij_fll = zero
            compute_euij_fll = .true.
          end if
@@ -701,12 +701,12 @@ CONTAINS  !=====================================================================
 !      a. compute F(k)
 !      ---------------------------------------------
        if (allocated(pawtab(itypat)%fk)) then
-         ABI_DEALLOCATE(pawtab(itypat)%fk)
+         ABI_FREE(pawtab(itypat)%fk)
        end if
-       ABI_ALLOCATE(pawtab(itypat)%fk,(6,4))
+       ABI_MALLOC(pawtab(itypat)%fk,(6,4))
        pawtab(itypat)%fk=zero
-       ABI_ALLOCATE(ff,(mesh_size))
-       ABI_ALLOCATE(gg,(mesh_size))
+       ABI_MALLOC(ff,(mesh_size))
+       ABI_MALLOC(gg,(mesh_size))
        ff(:)=zero;gg(:)=zero
        kln=(pawtab(itypat)%lnproju(1)*( pawtab(itypat)%lnproju(1)+1)/2)
        do ll=1,lexexch+1
@@ -781,16 +781,16 @@ CONTAINS  !=====================================================================
          f4of2=0.6681_dp
          f6of2=0.4943_dp
        end if
-       ABI_DEALLOCATE(ff)
-       ABI_DEALLOCATE(gg)
+       ABI_FREE(ff)
+       ABI_FREE(gg)
 
 !      b. Compute vex.
 !      ---------------------------------------------
        if (allocated(pawtab(itypat)%vex)) then
-         ABI_DEALLOCATE(pawtab(itypat)%vex)
+         ABI_FREE(pawtab(itypat)%vex)
        end if
        sz1=2*lexexch+1
-       ABI_ALLOCATE(pawtab(itypat)%vex,(sz1,sz1,sz1,sz1,4))
+       ABI_MALLOC(pawtab(itypat)%vex,(sz1,sz1,sz1,sz1,4))
        pawtab(itypat)%vex=zero
        lmexexch=(lexexch-1)**2+2*(lexexch-1)+1  ! number of m value below correlated orbitals
        klm0x=lmexexch*(lmexexch+1)/2            ! value of klmn just below correlated orbitals
@@ -948,9 +948,9 @@ CONTAINS  !=====================================================================
  edcdc_opt3=zero
  eks_opt3=zero
 
- ABI_ALLOCATE(n12_sig,(cplex_occ))
- ABI_ALLOCATE(n34_msig,(cplex_occ))
- ABI_ALLOCATE(n34_sig,(cplex_occ))
+ ABI_MALLOC(n12_sig,(cplex_occ))
+ ABI_MALLOC(n34_msig,(cplex_occ))
+ ABI_MALLOC(n34_sig,(cplex_occ))
  do ispden=1,min(nspden,2)
    jspden=min(nspden,2)-ispden+1
 
@@ -1040,9 +1040,9 @@ CONTAINS  !=====================================================================
 
  end do ! ispden
  if (nspden==1) edftutemp=two*edftutemp ! Non-magn. system: sum up and dn energies
- ABI_DEALLOCATE(n12_sig)
- ABI_DEALLOCATE(n34_msig)
- ABI_DEALLOCATE(n34_sig)
+ ABI_FREE(n12_sig)
+ ABI_FREE(n34_msig)
+ ABI_FREE(n34_sig)
 
 !Non-collinear magnetism: add non-diagonal term; see (Eq 3) in PRB 72, 024458 (2005) [[cite:Shurikov2005]]
  if (nspden==4) then
@@ -1494,18 +1494,18 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !If needed, store dmatpu in suitable format in tmp_noccmmp
  if (usepawu/=0.and.impose_dmat/=0) then
    iatpawu=0
-   ABI_DATATYPE_ALLOCATE(tmp_noccmmp,(natom))
+   ABI_MALLOC(tmp_noccmmp,(natom))
    do iatom_tot=1,natom
      itypat=typat(iatom_tot)
      lpawu=pawtab(itypat)%lpawu
      if (lpawu/=-1) then
        iatpawu=iatpawu+1
        if (ndij/=4) then
-         ABI_ALLOCATE(tmp_noccmmp(iatom_tot)%value,(cplex_dij,2*lpawu+1,2*lpawu+1,nsppol))
+         ABI_MALLOC(tmp_noccmmp(iatom_tot)%value,(cplex_dij,2*lpawu+1,2*lpawu+1,nsppol))
          tmp_noccmmp(iatom_tot)%value(1,1:2*lpawu+1,1:2*lpawu+1,1:nsppol)=&
 &         dmatpawu(1:2*lpawu+1,1:2*lpawu+1,1:nsppol,iatpawu)
        else
-         ABI_ALLOCATE(tmp_noccmmp(iatom_tot)%value,(cplex_dij,2*lpawu+1,2*lpawu+1,ndij))
+         ABI_MALLOC(tmp_noccmmp(iatom_tot)%value,(cplex_dij,2*lpawu+1,2*lpawu+1,ndij))
          tmp_noccmmp(iatom_tot)%value=zero
          if(limp==0) then ! default reading
            snorm=sqrt(spinat(1,iatom_tot)**2+spinat(1,iatom_tot)**2+spinat(3,iatom_tot)**2)
@@ -1528,11 +1528,11 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
              end do
            end do
          else if(limp>=1) then
-           ABI_ALLOCATE(noccmmp_ylm,(2*lpawu+1,2*lpawu+1,ndij))
+           ABI_MALLOC(noccmmp_ylm,(2*lpawu+1,2*lpawu+1,ndij))
            noccmmp_ylm=czero
-           ABI_ALLOCATE(noccmmp_slm,(2*lpawu+1,2*lpawu+1,ndij))
+           ABI_MALLOC(noccmmp_slm,(2*lpawu+1,2*lpawu+1,ndij))
            noccmmp_slm=czero
-           ABI_ALLOCATE(noccmmp_jmj,(2*(2*lpawu+1),2*(2*lpawu+1)))
+           ABI_MALLOC(noccmmp_jmj,(2*(2*lpawu+1),2*(2*lpawu+1)))
            noccmmp_jmj=czero
            if(limp==1) then ! read input matrix in J,M_J basis (l-1/2, then l+1/2)
              noccmmp_jmj=czero
@@ -1578,9 +1578,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
              call mat_mlms2jmj(lpawu,noccmmp_ylm,noccmmp_jmj,ndij,1,2,&
 &             pawprtvol,std_out,wrt_mode) !  optspin=1: up spin are first
            end if
-           ABI_DEALLOCATE(noccmmp_ylm)
-           ABI_DEALLOCATE(noccmmp_jmj)
-           ABI_DEALLOCATE(noccmmp_slm)
+           ABI_FREE(noccmmp_ylm)
+           ABI_FREE(noccmmp_jmj)
+           ABI_FREE(noccmmp_slm)
          end if
        end if
      end if
@@ -1629,16 +1629,16 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
        paw_ij(iatom)%noccmmp(:,:,:,:)=zero
 
 !      Loop over spin components
-       ABI_ALLOCATE(noccmmptemp,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
+       ABI_MALLOC(noccmmptemp,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
        noccmmptemp(:,:,:,:)=zero
        if(ndij==4)  then
-         ABI_ALLOCATE(noccmmp2,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
+         ABI_MALLOC(noccmmp2,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
        end if
        if(ndij==4)  then
          if(allocated(nocctot2)) then
-           ABI_DEALLOCATE(nocctot2)
+           ABI_FREE(nocctot2)
          end if
-         ABI_ALLOCATE(nocctot2,(ndij))
+         ABI_MALLOC(nocctot2,(ndij))
        end if
        do ispden=1,ndij
          jrhoij=1
@@ -1691,7 +1691,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            end do
          end do
        end do ! ispden
-       ABI_DEALLOCATE(noccmmptemp)
+       ABI_FREE(noccmmptemp)
 !      Compute noccmmp2, occupation matrix in the spin basis (upup, dndn, updn, dnup)
        if(ndij==4) then
          noccmmp2(:,:,:,:)=zero
@@ -1751,7 +1751,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
              end do
            end do
          end do
-         ABI_DEALLOCATE(noccmmp2)
+         ABI_FREE(noccmmp2)
        end if
 !      Printing of new nocc_mmp
        if ((usepawu/=0.and.abs(usepawu)<10).or.(usepawu>=10.and.pawprtvol>=3)) then
@@ -1814,7 +1814,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
              call wrtout(std_out,message,wrt_mode)
            end if
            if(ndij==4)  then
-             ABI_DEALLOCATE(nocctot2)
+             ABI_FREE(nocctot2)
            end if
          end if
          write(message,'(2a)') ch10,"== Calculated occupation matrix for correlated orbitals:"
@@ -1836,11 +1836,11 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 
 !      Transformation matrices: real->complex spherical harmonics (for test)
        if(ndij==4.and.abs(pawprtvol)>=0) then
-         ABI_ALLOCATE(noccmmp_ylm,(2*lcur+1,2*lcur+1,ndij))
+         ABI_MALLOC(noccmmp_ylm,(2*lcur+1,2*lcur+1,ndij))
          noccmmp_ylm=czero
-         ABI_ALLOCATE(noccmmp_slm,(2*lcur+1,2*lcur+1,ndij))
+         ABI_MALLOC(noccmmp_slm,(2*lcur+1,2*lcur+1,ndij))
          noccmmp_slm=czero
-         ABI_ALLOCATE(noccmmp_jmj,(2*(2*lcur+1),2*(2*lcur+1)))
+         ABI_MALLOC(noccmmp_jmj,(2*(2*lcur+1),2*(2*lcur+1)))
          noccmmp_jmj=czero
 !        go from real notation for complex noccmmp to complex notation in noccmmp_slm
          noccmmp_slm(:,:,:)=cmplx(paw_ij(iatom)%noccmmp(1,:,:,:)&
@@ -1856,9 +1856,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            end do
          end do
          call mat_mlms2jmj(lcur,noccmmp_ylm,noccmmp_jmj,ndij,1,1,pawprtvol,std_out,wrt_mode) !  optspin=1: up spin are first
-         ABI_DEALLOCATE(noccmmp_ylm)
-         ABI_DEALLOCATE(noccmmp_jmj)
-         ABI_DEALLOCATE(noccmmp_slm)
+         ABI_FREE(noccmmp_ylm)
+         ABI_FREE(noccmmp_jmj)
+         ABI_FREE(noccmmp_slm)
        end if !ndij==4
 
      end if ! impose_dmat==0
@@ -1869,9 +1869,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
      if(usepawu/=0.and.dmatudiag_loc>0) then
 
        lpawu=lcur;ldim=2*lpawu+1
-       ABI_ALLOCATE(noccmmp_tmp,(1,ldim,ldim,ndij))
+       ABI_MALLOC(noccmmp_tmp,(1,ldim,ldim,ndij))
        if (ndij==4)  then
-         ABI_ALLOCATE(znoccmmp_tmp,(2*ldim,2*ldim))
+         ABI_MALLOC(znoccmmp_tmp,(2*ldim,2*ldim))
        end if
 
 !      Select noccmmp for this atom
@@ -1895,11 +1895,11 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 
 !      Diagonalize nocc_mmp
        if (ndij/=4) then
-         ABI_ALLOCATE(hdp,(ldim,ldim,ndij))
+         ABI_MALLOC(hdp,(ldim,ldim,ndij))
          hdp=zero
          lwork=3*ldim-1
-         ABI_ALLOCATE(rwork,(lwork))
-         ABI_ALLOCATE(eig,(ldim))
+         ABI_MALLOC(rwork,(lwork))
+         ABI_MALLOC(eig,(ldim))
          do ispden=1,ndij
            call dsyev('v','u',ldim,noccmmp_tmp(1,:,:,ispden),ldim,eig,rwork,lwork,info)
            if(info/=0) then
@@ -1910,15 +1910,15 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
              hdp(ilm,ilm,ispden)=eig(ilm)
            end do
          end do ! ispden
-         ABI_DEALLOCATE(rwork)
-         ABI_DEALLOCATE(eig)
+         ABI_FREE(rwork)
+         ABI_FREE(eig)
        else
-         ABI_ALLOCATE(hdp,(2*ldim,2*ldim,1))
+         ABI_MALLOC(hdp,(2*ldim,2*ldim,1))
          hdp=zero
          lwork=4*ldim-1
-         ABI_ALLOCATE(rwork,(6*ldim-2))
-         ABI_ALLOCATE(zwork,(lwork))
-         ABI_ALLOCATE(eig,(2*ldim))
+         ABI_MALLOC(rwork,(6*ldim-2))
+         ABI_MALLOC(zwork,(lwork))
+         ABI_MALLOC(eig,(2*ldim))
          call zheev('v','u',2*ldim,znoccmmp_tmp,2*ldim,eig,zwork,lwork,rwork,info)
          if(info/=0) then
            message=' Error in diagonalization of znoccmmp_tmp (zheev) !'
@@ -1927,9 +1927,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          do ilm=1,2*ldim
            hdp(ilm,ilm,1)=eig(ilm)
          end do
-         ABI_DEALLOCATE(rwork)
-         ABI_DEALLOCATE(zwork)
-         ABI_DEALLOCATE(eig)
+         ABI_FREE(rwork)
+         ABI_FREE(zwork)
+         ABI_FREE(eig)
        end if
 
 !      Print diagonalized matrix and eigenvectors
@@ -1969,24 +1969,24 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !      Back rotation of diagonalized matrix and printing
        if(abs(pawprtvol)>=1) then
          if (ndij/=4) then
-           ABI_ALLOCATE(hdp2,(ldim,ldim))
+           ABI_MALLOC(hdp2,(ldim,ldim))
            do ispden=1,ndij
              call dgemm('n','t',ldim,ldim,ldim,one,hdp(:,:,ispden),ldim,noccmmp_tmp(1,:,:,ispden),ldim,zero,hdp2,ldim)
              call dgemm('n','n',ldim,ldim,ldim,one,noccmmp_tmp(1,:,:,ispden),ldim,hdp2,ldim,zero,hdp(:,:,ispden),ldim)
              noccmmp_tmp(1,:,:,ispden)=hdp(:,:,ispden)
            end do ! ispden
-           ABI_DEALLOCATE(hdp2)
+           ABI_FREE(hdp2)
          else
-           ABI_ALLOCATE(zhdp,(2*ldim,2*ldim))
-           ABI_ALLOCATE(zhdp2,(2*ldim,2*ldim))
+           ABI_MALLOC(zhdp,(2*ldim,2*ldim))
+           ABI_MALLOC(zhdp2,(2*ldim,2*ldim))
            zhdp(:,:)=cmplx(hdp(:,:,1),zero,kind=dp)
            zhdp2(:,:)=cmplx(zero,zero,kind=dp)
            call zgemm('n','c',2*ldim,2*ldim,2*ldim,cone,zhdp,2*ldim,znoccmmp_tmp,2*ldim,czero,zhdp2,2*ldim)
            zhdp(:,:)=cmplx(zero,zero,kind=dp)
            call zgemm('n','n',2*ldim,2*ldim,2*ldim,cone,znoccmmp_tmp,2*ldim,zhdp2,2*ldim,czero,zhdp,2*ldim)
            znoccmmp_tmp=zhdp
-           ABI_DEALLOCATE(zhdp)
-           ABI_DEALLOCATE(zhdp2)
+           ABI_FREE(zhdp)
+           ABI_FREE(zhdp2)
          end if
          nmat=ndij ; if(ndij==4.and.cplex_dij==2) nmat=1
          do ispden=1,nmat
@@ -2007,7 +2007,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            end do
          end do ! ispden
        end if
-       ABI_DEALLOCATE(hdp)
+       ABI_FREE(hdp)
 
      end if ! dmatudiag_loc
 
@@ -2149,17 +2149,17 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 
 !      Rotation of imposed nocc_mmp
        if (ndij/=4) then
-         ABI_ALLOCATE(hdp2,(ldim,ldim))
+         ABI_MALLOC(hdp2,(ldim,ldim))
          do ispden=1,ndij
            call dgemm('n','t',ldim,ldim,ldim,one,&
 &           paw_ij(iatom)%noccmmp(1,:,:,ispden),ldim,noccmmp_tmp(1,:,:,ispden),ldim,zero,hdp2,ldim)
            call dgemm('n','n',ldim,ldim,ldim,one,&
 &           noccmmp_tmp(1,:,:,ispden),ldim,hdp2,ldim,zero,paw_ij(iatom)%noccmmp(1,:,:,ispden),ldim)
          end do ! ispden
-         ABI_DEALLOCATE(hdp2)
+         ABI_FREE(hdp2)
        else
-         ABI_ALLOCATE(zhdp,(2*ldim,2*ldim))
-         ABI_ALLOCATE(zhdp2,(2*ldim,2*ldim))
+         ABI_MALLOC(zhdp,(2*ldim,2*ldim))
+         ABI_MALLOC(zhdp2,(2*ldim,2*ldim))
          do im2=1,ldim
            do im1=1,ldim
              zhdp(     im1,     im2)=cmplx(paw_ij(iatom)%noccmmp(1,im1,im2,1),zero,kind=dp)  ! to be checked
@@ -2180,8 +2180,8 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
              paw_ij(iatom)%noccmmp(1,ilm,jlm,4)=aimag(znoccmmp_tmp(     ilm,ldim+jlm))  ! to be checked
            end do
          end do
-         ABI_DEALLOCATE(zhdp)
-         ABI_DEALLOCATE(zhdp2)
+         ABI_FREE(zhdp)
+         ABI_FREE(zhdp2)
        end if
 
 !      Printing of rotated imposed matrix
@@ -2202,9 +2202,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
      end if ! dmatudiag_loc==2
 
      if (usepawu/=0.and.dmatudiag_loc>0) then
-       ABI_DEALLOCATE(noccmmp_tmp)
+       ABI_FREE(noccmmp_tmp)
        if (ndij==4)  then
-         ABI_DEALLOCATE(znoccmmp_tmp)
+         ABI_FREE(znoccmmp_tmp)
        end if
      end if
 
@@ -2218,10 +2218,10 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
    do iatom_tot=1,natom
      lpawu=pawtab(typat(iatom_tot))%lpawu
      if (lpawu/=-1)  then
-       ABI_DEALLOCATE(tmp_noccmmp(iatom_tot)%value)
+       ABI_FREE(tmp_noccmmp(iatom_tot)%value)
      end if
    end do
-   ABI_DATATYPE_DEALLOCATE(tmp_noccmmp)
+   ABI_FREE(tmp_noccmmp)
  end if
 
 !Destroy atom table used for parallelism
@@ -2371,7 +2371,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
        rhoijshft=2*ll*ll
 
 !      Uncompress rhoij
-       ABI_ALLOCATE(rhoijtmp,(pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
+       ABI_MALLOC(rhoijtmp,(pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
        do ispden=1,pawrhoij(iatom)%nspden
          rhoijtmp=zero
          do irhoij=1,pawrhoij(iatom)%nrhoijsel
@@ -2380,7 +2380,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
          end do
        end do
 !      Read rhoij from file
-       ABI_ALLOCATE(rhoijtmp1,(rhoijsz,rhoijsz))
+       ABI_MALLOC(rhoijtmp1,(rhoijsz,rhoijsz))
        do ispden=1,pawrhoij(iatom)%nspden
          do ii=1,rhoijsz
            test0=.false.
@@ -2399,7 +2399,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
          end do
 
        end do
-       ABI_DEALLOCATE(rhoijtmp1)
+       ABI_FREE(rhoijtmp1)
 
 !      Compress rhoij
        nselect=0 ; pawrhoij(iatom)%rhoijselect=0
@@ -2414,7 +2414,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
          end if
        end do
        pawrhoij(iatom)%nrhoijsel=nselect
-       ABI_DEALLOCATE(rhoijtmp)
+       ABI_FREE(rhoijtmp)
 
 !      Print new rhoij
        do ispden=1,pawrhoij(iatom)%nspden
@@ -2475,7 +2475,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
    call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
 !  Store number of component for rhoij
-   ABI_ALLOCATE(nspden_tmp,(natom))
+   ABI_MALLOC(nspden_tmp,(natom))
    nspden_tmp(:)=zero
    do iatom=1,my_natom
      iatom_tot=my_atmtab(iatom)
@@ -2484,7 +2484,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
    call xmpi_sum(nspden_tmp,mpi_comm_read,ierr)
 
 !  To be improve if too much memory
-   ABI_ALLOCATE(rhoijtmp2,(natom,4,rhoijsz,rhoijsz))
+   ABI_MALLOC(rhoijtmp2,(natom,4,rhoijsz,rhoijsz))
    rhoijtmp2=zero
 
 !  Read rhoij from file
@@ -2521,7 +2521,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
        rhoijshft=2*ll*ll
 
 !      Uncompress rhoij
-       ABI_ALLOCATE(rhoijtmp,(pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
+       ABI_MALLOC(rhoijtmp,(pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
        do ispden=1,pawrhoij(iatom)%nspden
          rhoijtmp=zero
          do irhoij=1,pawrhoij(iatom)%nrhoijsel
@@ -2551,7 +2551,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
          end if
        end do
        pawrhoij(iatom)%nrhoijsel=nselect
-       ABI_DEALLOCATE(rhoijtmp)
+       ABI_FREE(rhoijtmp)
 
      end if ! useexexch/=0
 
@@ -2572,8 +2572,8 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 !    end loop on atoms
    end do
 
-   ABI_DEALLOCATE(nspden_tmp)
-   ABI_DEALLOCATE(rhoijtmp2)
+   ABI_FREE(nspden_tmp)
+   ABI_FREE(rhoijtmp2)
 
 !  Destroy atom table used for parallelism
    call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -2673,10 +2673,10 @@ end subroutine setrhoijpbe0
  end if
 
  lmn2_size=pawtab%lmn2_size
- ABI_ALLOCATE(ff,(mesh_size))
- ABI_ALLOCATE(gg,(mesh_size))
- ABI_ALLOCATE(phiphj,(mesh_size))
- ABI_ALLOCATE(phiphj1,(mesh_size))
+ ABI_MALLOC(ff,(mesh_size))
+ ABI_MALLOC(gg,(mesh_size))
+ ABI_MALLOC(phiphj,(mesh_size))
+ ABI_MALLOC(phiphj1,(mesh_size))
  do klmn=1,lmn2_size
    ilmn=pawtab%indklmn(7,klmn);jlmn=pawtab%indklmn(8,klmn)
    ! Select lpawu and first projectors il=jl=lpawu and first proj only
@@ -2729,10 +2729,10 @@ end subroutine setrhoijpbe0
      end do
    end if
  end do
- ABI_DEALLOCATE(gg)
- ABI_DEALLOCATE(ff)
- ABI_DEALLOCATE(phiphj)
- ABI_DEALLOCATE(phiphj1)
+ ABI_FREE(gg)
+ ABI_FREE(ff)
+ ABI_FREE(phiphj)
+ ABI_FREE(phiphj1)
 
  write(message,'(a,3(a,f12.4,a),2a,f12.4,a)') ch10," For an atomic wfn truncated at rmax =",r_for_intg,ch10,&
 & "     The norm of the wfn is                    =",norm,ch10,&

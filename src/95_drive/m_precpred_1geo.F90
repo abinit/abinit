@@ -225,7 +225,7 @@ real(dp), allocatable :: xred(:,:)
 
  end do
 
- ABI_ALLOCATE(xred,(3,ab_mover%natom))
+ ABI_MALLOC(xred,(3,ab_mover%natom))
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
  ! check dilatmx here and correct if necessary

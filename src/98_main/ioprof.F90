@@ -245,7 +245,7 @@ program ioprof
  !call wrtout(std_out,ch10//" Analysis completed.","COLL")
 
 !Writes information on file about the memory before ending mpi module, if memory profiling is enabled
- !ABI_ALLOCATE(nband, (2))
+ !ABI_MALLOC(nband, (2))
  call abinit_doctor("__ioprof")
 
  100 call xmpi_end()

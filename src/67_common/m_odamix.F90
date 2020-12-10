@@ -337,7 +337,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    if (dtset%xclevel==2.and.usexcnhat==1) ider=ider+2
    if (ider>0) then
      nhatgrdim=1
-     ABI_ALLOCATE(nhatgr,(nfft,dtset%nspden,3))
+     ABI_MALLOC(nhatgr,(nfft,dtset%nspden,3))
    end if
    if (ider>=0) then
      ider=0;izero=0;cplex=1;ipert=0;idir=0;qpt(:)=zero
@@ -391,7 +391,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    nzlmopt=dtset%pawnzlm; option=2
    do iatom=1,my_natom
      itypat=paw_ij(iatom)%itypat
-     ABI_ALLOCATE(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
+     ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
@@ -399,7 +399,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
-     ABI_DEALLOCATE(paw_ij(iatom)%dijhartree)
+     ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
    end do
  end if
@@ -532,7 +532,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  if (usepaw==1) then
    if (my_natom>0) then
-     ABI_ALLOCATE(rhoijtmp,(pawrhoij(1)%cplex_rhoij*pawrhoij(1)%lmn2_size,pawrhoij(1)%nspden))
+     ABI_MALLOC(rhoijtmp,(pawrhoij(1)%cplex_rhoij*pawrhoij(1)%lmn2_size,pawrhoij(1)%nspden))
    end if
    do iatom=1,my_natom
      rhoijtmp=zero
@@ -575,7 +575,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &                         pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
    end do ! iatom
    if (allocated(rhoijtmp)) then
-     ABI_DEALLOCATE(rhoijtmp)
+     ABI_FREE(rhoijtmp)
    end if
  end if ! usepaw
 
@@ -606,7 +606,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 & usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
  if (nhatgrdim>0)  then
-   ABI_DEALLOCATE(nhatgr)
+   ABI_FREE(nhatgr)
  end if
 
 !------Compute parts of total energy depending on potentials--------
@@ -628,7 +628,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  if (usepaw==1) then
    do iatom=1,my_natom
      itypat=paw_ij(iatom)%itypat
-     ABI_ALLOCATE(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
+     ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom, &
@@ -637,7 +637,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &   dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
-     ABI_DEALLOCATE(paw_ij(iatom)%dijhartree)
+     ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
    end do
    etotal=etotal+energies%e_paw

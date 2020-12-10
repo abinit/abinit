@@ -174,19 +174,19 @@ contains
     call xmpi_bcast(self%temperature, master, comm, ierr)
     call xmpi_bcast(self%method, master, comm, ierr)
 
-    ABI_ALLOCATE(self%ms, (self%nspin) )
-    ABI_ALLOCATE(self%gyro_ratio, (self%nspin) )
-    ABI_ALLOCATE(self%damping, (self%nspin) )
-    ABI_ALLOCATE(self%gamma_l, (self%nspin) )
-    ABI_ALLOCATE(self%H_lang_coeff, (self%nspin) )
+    ABI_MALLOC(self%ms, (self%nspin) )
+    ABI_MALLOC(self%gyro_ratio, (self%nspin) )
+    ABI_MALLOC(self%damping, (self%nspin) )
+    ABI_MALLOC(self%gamma_l, (self%nspin) )
+    ABI_MALLOC(self%H_lang_coeff, (self%nspin) )
 
-    ABI_ALLOCATE(self%Heff_tmp, (3,self%nspin) )
-    ABI_ALLOCATE(self%Htmp, (3,self%nspin) )
-    ABI_ALLOCATE(self%Hrotate, (3,self%nspin) )
-    ABI_ALLOCATE(self%Stmp, (3,self%nspin) )
-    ABI_ALLOCATE(self%Stmp2, (3,self%nspin) )
-    ABI_ALLOCATE(self%buffer, (3,self%nspin) )
-    ABI_ALLOCATE(self%H_lang, (3,self%nspin) )
+    ABI_MALLOC(self%Heff_tmp, (3,self%nspin) )
+    ABI_MALLOC(self%Htmp, (3,self%nspin) )
+    ABI_MALLOC(self%Hrotate, (3,self%nspin) )
+    ABI_MALLOC(self%Stmp, (3,self%nspin) )
+    ABI_MALLOC(self%Stmp2, (3,self%nspin) )
+    ABI_MALLOC(self%buffer, (3,self%nspin) )
+    ABI_MALLOC(self%H_lang, (3,self%nspin) )
 
     self%gamma_l_calculated=.False.
     call self%mps%initialize(ntasks=nspin,master=master, comm=comm)
@@ -357,7 +357,7 @@ contains
            call wrtout(ab_out,msg,'COLL')
            call wrtout(std_out,msg,'COLL')
 
-           ABI_ALLOCATE(Sprim, (3,self%supercell%unitcell%spin%nspin) )
+           ABI_MALLOC(Sprim, (3,self%supercell%unitcell%spin%nspin) )
 
            ! set inital spin state using the input variables
            ! set spin to ferromagnetic along init_orientation then rotate
@@ -953,12 +953,12 @@ contains
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out, msg, "COLL")
 
-       ABI_ALLOCATE(Tlist, (T_nstep))
-       ABI_ALLOCATE(chi_list, (T_nstep))
-       ABI_ALLOCATE(Cv_list, (T_nstep))
-       ABI_ALLOCATE(binderU4_list, (T_nstep))
-       ABI_ALLOCATE(Mst_sub_norm_list, (self%spin_ob%nsublatt, T_nstep))
-       ABI_ALLOCATE( Mst_norm_total_list, (T_nstep))
+       ABI_MALLOC(Tlist, (T_nstep))
+       ABI_MALLOC(chi_list, (T_nstep))
+       ABI_MALLOC(Cv_list, (T_nstep))
+       ABI_MALLOC(binderU4_list, (T_nstep))
+       ABI_MALLOC(Mst_sub_norm_list, (self%spin_ob%nsublatt, T_nstep))
+       ABI_MALLOC( Mst_norm_total_list, (T_nstep))
     end if
 
     call xmpi_bcast(T_nstep, 0, comm, ierr)
@@ -1054,12 +1054,12 @@ contains
        end do
        iostat= close_unit(unit=Tfile, iomsg=iomsg)
 
-       ABI_DEALLOCATE(Tlist)
-       ABI_DEALLOCATE(chi_list)
-       ABI_DEALLOCATE(Cv_list)
-       ABI_DEALLOCATE(binderU4_list)
-       ABI_DEALLOCATE(Mst_sub_norm_list)
-       ABI_DEALLOCATE( Mst_norm_total_list)
+       ABI_FREE(Tlist)
+       ABI_FREE(chi_list)
+       ABI_FREE(Cv_list)
+       ABI_FREE(binderU4_list)
+       ABI_FREE(Mst_sub_norm_list)
+       ABI_FREE( Mst_norm_total_list)
 
     endif
   end subroutine run_MvT
@@ -1121,23 +1121,23 @@ contains
 
     class(spin_mover_t), intent(inout):: self
     if(allocated(self%gyro_ratio) ) then
-       ABI_DEALLOCATE(self%gyro_ratio)
+       ABI_FREE(self%gyro_ratio)
     end if
 
     if(allocated(self%damping) ) then
-       ABI_DEALLOCATE(self%damping)
+       ABI_FREE(self%damping)
     end if
 
     if(allocated(self%gamma_l) ) then
-       ABI_DEALLOCATE(self%gamma_l)
+       ABI_FREE(self%gamma_l)
     end if
 
     if(allocated(self%H_lang_coeff) ) then
-       ABI_DEALLOCATE(self%H_lang_coeff)
+       ABI_FREE(self%H_lang_coeff)
     end if
 
     if(allocated(self%ms) ) then
-       ABI_DEALLOCATE(self%ms)
+       ABI_FREE(self%ms)
     end if
 
 
@@ -1147,32 +1147,32 @@ contains
     end if
 
     if(allocated(self%Stmp)) then
-       ABI_DEALLOCATE(self%Stmp)
+       ABI_FREE(self%Stmp)
     end if
 
     if(allocated(self%Stmp2)) then
-       ABI_DEALLOCATE(self%Stmp2)
+       ABI_FREE(self%Stmp2)
     end if
 
 
     if(allocated(self%Heff_tmp)) then
-       ABI_DEALLOCATE(self%Heff_tmp)
+       ABI_FREE(self%Heff_tmp)
     end if
 
     if(allocated(self%Htmp)) then
-       ABI_DEALLOCATE(self%Htmp)
+       ABI_FREE(self%Htmp)
     end if
 
     if(allocated(self%Hrotate)) then
-       ABI_DEALLOCATE(self%Hrotate)
+       ABI_FREE(self%Hrotate)
     end if
 
     if(allocated(self%H_lang)) then
-       ABI_DEALLOCATE(self%H_lang)
+       ABI_FREE(self%H_lang)
     end if
 
     if(allocated(self%buffer)) then
-       ABI_DEALLOCATE(self%buffer)
+       ABI_FREE(self%buffer)
     end if
 
 

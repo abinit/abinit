@@ -210,9 +210,9 @@ contains
     else
       self%has_bilin=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Liu_number_of_entries", ndata)
-      ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(ulist, (4,ndata))
-      ABI_ALLOCATE(vallist, (ndata))
+      ABI_MALLOC(ilist, (ndata))
+      ABI_MALLOC(ulist, (4,ndata))
+      ABI_MALLOC(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Liu_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
@@ -262,10 +262,10 @@ contains
     else
       self%has_linquad=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Niuv_number_of_entries", ndata)
-      ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(ulist, (4,ndata))
-      ABI_ALLOCATE(vlist, (4,ndata))
-      ABI_ALLOCATE(vallist, (ndata))
+      ABI_MALLOC(ilist, (ndata))
+      ABI_MALLOC(ulist, (4,ndata))
+      ABI_MALLOC(vlist, (4,ndata))
+      ABI_MALLOC(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Niuv_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
@@ -320,10 +320,10 @@ contains
     else
       self%has_quadlin=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Oiju_number_of_entries", ndata)
-      ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(jlist, (4,ndata))
-      ABI_ALLOCATE(ulist, (4,ndata))
-      ABI_ALLOCATE(vallist, (ndata))
+      ABI_MALLOC(ilist, (ndata))
+      ABI_MALLOC(jlist, (4,ndata))
+      ABI_MALLOC(ulist, (4,ndata))
+      ABI_MALLOC(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Oiju_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
@@ -378,11 +378,11 @@ contains
     else
       self%has_biquad=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Tijuv_number_of_entries", ndata)
-      ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(jlist, (4, ndata))
-      ABI_ALLOCATE(ulist, (4, ndata))
-      ABI_ALLOCATE(vlist, (4, ndata))
-      ABI_ALLOCATE(vallist, (ndata))
+      ABI_MALLOC(ilist, (ndata))
+      ABI_MALLOC(jlist, (4, ndata))
+      ABI_MALLOC(ulist, (4, ndata))
+      ABI_MALLOC(vlist, (4, ndata))
+      ABI_MALLOC(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Tijuv_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
@@ -639,7 +639,7 @@ contains
     
     call xmpi_bcast(sc_nspin, master, comm, ierr)
     call xmpi_bcast(sc_natom, master, comm, ierr)
-    ABI_DATATYPE_ALLOCATE_SCALAR(slc_potential_t, scpot)
+    ABI_MALLOC_TYPE_SCALAR(slc_potential_t, scpot)
 
     select type(scpot) ! use select type because properties only defined for slc_potential are used
     type is (slc_potential_t) 

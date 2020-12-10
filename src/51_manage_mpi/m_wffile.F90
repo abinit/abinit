@@ -1788,13 +1788,13 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
 !  Build map; for better performance, map must be in increasing order
    ABI_MALLOC_OR_DIE(map,(2*npwso*nband_block), ierr)
 
-   ABI_STAT_ALLOCATE(buf,(2*npwso*nband_block), ierr)
+   ABI_STAT_MALLOC(buf,(2*npwso*nband_block), ierr)
    ABI_CHECK(ierr==0, "out of memory in wavefunction buffer. Try to decrease MAXBAND in WffReadWrite_mpio")
 
    if (rdwr==1) then
 !    If reading, only build map
      nb=0;loc_depl_band=0
-     ABI_ALLOCATE(tempo_map,(2*npwso))
+     ABI_MALLOC(tempo_map,(2*npwso))
      do iband=ibandmin,ibandmax
        tempo_map(1:2*npwso)=-1
        jj=1;ipw=(iband-1)*npwso+icg
@@ -1815,8 +1815,8 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
    else if (rdwr==2) then
 !    If writing, build map and store cg in a buffer
      nb=0;loc_depl_band=0
-     ABI_ALLOCATE(tempo_map,(2*npwso))
-     ABI_ALLOCATE(tempo_buf,(2*npwso))
+     ABI_MALLOC(tempo_map,(2*npwso))
+     ABI_MALLOC(tempo_buf,(2*npwso))
      do iband=ibandmin,ibandmax
        tempo_map(1:2*npwso)=-1
        jj=1;ipw=(iband-1)*npwso+icg
@@ -1836,14 +1836,14 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
        end do
        loc_depl_band=loc_depl_band+totsize1bandByte ! Location in bytes
      end do
-     ABI_DEALLOCATE(tempo_map)
-     ABI_DEALLOCATE(tempo_buf)
+     ABI_FREE(tempo_map)
+     ABI_FREE(tempo_buf)
    end if  ! rdwr
 
 !  Build and commit MPI datatype
-   ABI_ALLOCATE(BlockLength,(nb+2))
-   ABI_ALLOCATE(BlockDepl,(nb+2))
-   ABI_ALLOCATE(BlockType,(nb+2))
+   ABI_MALLOC(BlockLength,(nb+2))
+   ABI_MALLOC(BlockDepl,(nb+2))
+   ABI_MALLOC(BlockType,(nb+2))
    BlockLength(1)=1;BlockDepl(1)=0;BlockType(1)=MPI_LB
    do ii=2,nb+1
      BlockLength(ii)=1
@@ -1853,9 +1853,9 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
    BlockLength(nb+2)=1;BlockDepl(nb+2)=totsize1bandByte*nband_block;BlockType(nb+2)=MPI_UB
    call xmpio_type_struct(nb+2,BlockLength,BlockDepl,BlockType,filetype,ierr)
    call MPI_TYPE_COMMIT(filetype,ierr)
-   ABI_DEALLOCATE(BlockLength)
-   ABI_DEALLOCATE(BlockDepl)
-   ABI_DEALLOCATE(BlockType)
+   ABI_FREE(BlockLength)
+   ABI_FREE(BlockDepl)
+   ABI_FREE(BlockType)
 
 !  Read/Write data on disk
    call MPI_FILE_SET_VIEW(wfftempo,offset,MPI_BYTE,filetype,"native",MPI_INFO_NULL,ierr)
@@ -1868,7 +1868,7 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
 !  In case of reading, retrieve cg
    if (rdwr==1) then
      nb=0;loc_depl_band=0
-     ABI_ALLOCATE(tempo_buf,(2*npwso))
+     ABI_MALLOC(tempo_buf,(2*npwso))
      do iband=ibandmin,ibandmax
        do ii=1,2*npwso ! Now, elimate holes
          if (tempo_map(ii)/=-1) then
@@ -1883,13 +1883,13 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
        end do
        loc_depl_band=loc_depl_band+totsize1bandByte ! Location in bytes
      end do
-     ABI_DEALLOCATE(tempo_map)
-     ABI_DEALLOCATE(tempo_buf)
+     ABI_FREE(tempo_map)
+     ABI_FREE(tempo_buf)
    end if ! rdwr
 
 !  Free memory
-   ABI_DEALLOCATE(map)
-   ABI_DEALLOCATE(buf)
+   ABI_FREE(map)
+   ABI_FREE(buf)
    call MPI_TYPE_FREE(filetype,ierr)
 
 !  ----------------------------------------------
@@ -1899,9 +1899,9 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
 
 !    Define view for the file
      nb=2*nband_block
-     ABI_ALLOCATE(BlockLength,(nb+2))
-     ABI_ALLOCATE(BlockDepl,(nb+2))
-     ABI_ALLOCATE(BlockType,(nb+2))
+     ABI_MALLOC(BlockLength,(nb+2))
+     ABI_MALLOC(BlockDepl,(nb+2))
+     ABI_MALLOC(BlockType,(nb+2))
      BlockLength(1)=1;BlockDepl(1)=0;BlockType(1)=MPI_LB
      jj=2
      do ii=1,nband_block
@@ -1915,15 +1915,15 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
      call xmpio_type_struct(nb+2,BlockLength,BlockDepl,BlockType,filetype,ierr)
      call MPI_TYPE_COMMIT(filetype,ierr)
      call MPI_FILE_SET_VIEW(wfftempo,offset,MPI_BYTE,filetype,"native",MPI_INFO_NULL,ierr)
-     ABI_DEALLOCATE(BlockLength)
-     ABI_DEALLOCATE(BlockDepl)
-     ABI_DEALLOCATE(BlockType)
+     ABI_FREE(BlockLength)
+     ABI_FREE(BlockDepl)
+     ABI_FREE(BlockType)
 
 !    Read/Write all markers (depend on Fortran marker MPI type)
      if (wff%me_mpiio==0) then
        jerr=0;delim_record=totsize1bandByte-2*wff%nbOct_recMarker
        if (wff%nbOct_recMarker==4) then
-         ABI_ALLOCATE(bufdelim4,(nb))
+         ABI_MALLOC(bufdelim4,(nb))
          if (rdwr==2) bufdelim4(:)=delim_record
          if (rdwr==1) then
            call MPI_FILE_READ (wfftempo,bufdelim4,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
@@ -1931,9 +1931,9 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
          else
            call MPI_FILE_WRITE(wfftempo,bufdelim4,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
          end if
-         ABI_DEALLOCATE(bufdelim4)
+         ABI_FREE(bufdelim4)
        else if (wff%nbOct_recMarker==8) then
-         ABI_ALLOCATE(bufdelim8,(nb))
+         ABI_MALLOC(bufdelim8,(nb))
          if (rdwr==2) bufdelim8(:)=delim_record
          if (rdwr==1) then
            call MPI_FILE_READ (wfftempo,bufdelim8,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
@@ -1941,10 +1941,10 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
          else
            call MPI_FILE_WRITE(wfftempo,bufdelim8,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
          end if
-         ABI_DEALLOCATE(bufdelim8)
+         ABI_FREE(bufdelim8)
 #if defined HAVE_FC_INT_QUAD
        else if (wff%nbOct_recMarker==16) then
-         ABI_ALLOCATE(bufdelim16,(nb))
+         ABI_MALLOC(bufdelim16,(nb))
          if (rdwr==2) bufdelim16(:)=delim_record
          if (rdwr==1) then
            call MPI_FILE_READ (wfftempo,bufdelim16,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
@@ -1952,10 +1952,10 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
          else
            call MPI_FILE_WRITE(wfftempo,bufdelim16,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
          end if
-         ABI_DEALLOCATE(bufdelim16)
+         ABI_FREE(bufdelim16)
 #endif
        else if (wff%nbOct_recMarker==2) then
-         ABI_ALLOCATE(bufdelim2,(nb))
+         ABI_MALLOC(bufdelim2,(nb))
          if (rdwr==2) bufdelim2(:)=delim_record
          if (rdwr==1) then
            call MPI_FILE_READ (wfftempo,bufdelim2,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
@@ -1963,7 +1963,7 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
          else
            call MPI_FILE_WRITE(wfftempo,bufdelim2,2*nband_block,wff%marker_mpi_type,MPI_STATUS_IGNORE,ierr)
          end if
-         ABI_DEALLOCATE(bufdelim2)
+         ABI_FREE(bufdelim2)
        end if
        if (rdwr==1.and.jerr==1) then
          write(unit=msg,fmt='(2a)') 'Error when reading record markers of file ',trim(wff%fname)
@@ -2773,10 +2773,10 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 #if defined HAVE_MPI_IO
  nb=n1*n2
  call xmpi_sum(nb,totsize,spaceComm,ierr)
- ABI_ALLOCATE(depl_val,(0:totsize-1))
- ABI_ALLOCATE(depl,(nb))
- ABI_ALLOCATE(buf_val,(0:totsize-1))
- ABI_ALLOCATE(val,(nb))
+ ABI_MALLOC(depl_val,(0:totsize-1))
+ ABI_MALLOC(depl,(nb))
+ ABI_MALLOC(buf_val,(0:totsize-1))
+ ABI_MALLOC(val,(nb))
 
 !Map displacements
  depl_val(0:totsize-1)=-1
@@ -2796,9 +2796,9 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  end do
 
 !Build MPI datatype for view
- ABI_ALLOCATE(length1,(nbval+2))
- ABI_ALLOCATE(depl1,(nbval+2))
- ABI_ALLOCATE(type1,(nbval+2))
+ ABI_MALLOC(length1,(nbval+2))
+ ABI_MALLOC(depl1,(nbval+2))
+ ABI_MALLOC(type1,(nbval+2))
  length1(1)=1;depl1(1)=0;type1(1)=MPI_LB
  do i1=2,nbval+1
    length1(i1) = 1
@@ -2808,9 +2808,9 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  length1(nbval+2)=1;depl1(nbval+2)=totsize*wff%nbOct_int;type1(nbval+2)=MPI_UB
  call xmpio_type_struct(nbval+2,length1,depl1,type1,filetype,ierr)
  call MPI_TYPE_COMMIT(filetype,ierr)
- ABI_DEALLOCATE(length1)
- ABI_DEALLOCATE(depl1)
- ABI_DEALLOCATE(type1)
+ ABI_FREE(length1)
+ ABI_FREE(depl1)
+ ABI_FREE(type1)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
@@ -2839,10 +2839,10 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Free memory
  call MPI_TYPE_FREE(filetype,ierr)
- ABI_DEALLOCATE(depl)
- ABI_DEALLOCATE(depl_val)
- ABI_DEALLOCATE(buf_val)
- ABI_DEALLOCATE(val)
+ ABI_FREE(depl)
+ ABI_FREE(depl_val)
+ ABI_FREE(buf_val)
+ ABI_FREE(val)
  return
 #endif
 
@@ -2910,10 +2910,10 @@ subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 #if defined HAVE_MPI_IO
  nb=n1*n2
  call xmpi_sum(nb,totsize,spaceComm,ierr)
- ABI_ALLOCATE(depl_val,(0:totsize-1))
- ABI_ALLOCATE(depl,(nb))
- ABI_ALLOCATE(buf_val,(0:totsize-1))
- ABI_ALLOCATE(val,(nb))
+ ABI_MALLOC(depl_val,(0:totsize-1))
+ ABI_MALLOC(depl,(nb))
+ ABI_MALLOC(buf_val,(0:totsize-1))
+ ABI_MALLOC(val,(nb))
 
 !Map displacements
  depl_val(0:totsize-1)=-1
@@ -2933,9 +2933,9 @@ subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  end do
 
 !Build MPI datatype for view
- ABI_ALLOCATE(length1,(nbval+2))
- ABI_ALLOCATE(depl1,(nbval+2))
- ABI_ALLOCATE(type1,(nbval+2))
+ ABI_MALLOC(length1,(nbval+2))
+ ABI_MALLOC(depl1,(nbval+2))
+ ABI_MALLOC(type1,(nbval+2))
  length1(1)=1;depl1(1)=0;type1(1)=MPI_LB
  do i1=2,nbval+1
    length1(i1) = 1
@@ -2945,9 +2945,9 @@ subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  length1(nbval+2)=1;depl1(nbval+2)=totsize*wff%nbOct_dp;type1(nbval+2)=MPI_UB
  call xmpio_type_struct(nbval+2,length1,depl1,type1,filetype,ierr)
  call MPI_TYPE_COMMIT(filetype,ierr)
- ABI_DEALLOCATE(length1)
- ABI_DEALLOCATE(depl1)
- ABI_DEALLOCATE(type1)
+ ABI_FREE(length1)
+ ABI_FREE(depl1)
+ ABI_FREE(type1)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
@@ -2976,10 +2976,10 @@ subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Free memory
  call MPI_TYPE_FREE(filetype,ierr)
- ABI_DEALLOCATE(depl)
- ABI_DEALLOCATE(depl_val)
- ABI_DEALLOCATE(buf_val)
- ABI_DEALLOCATE(val)
+ ABI_FREE(depl)
+ ABI_FREE(depl_val)
+ ABI_FREE(buf_val)
+ ABI_FREE(val)
 #endif
 
 end subroutine xderiveRead_dp2d_displ
@@ -3617,10 +3617,10 @@ subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 #if defined HAVE_MPI_IO
  nb = n1*n2
  call xmpi_sum(nb,totsize,spaceComm,ierr)
- ABI_ALLOCATE(depl_val,(0:totsize-1))
- ABI_ALLOCATE(depl,(nb))
- ABI_ALLOCATE(buf_val,(0:totsize-1))
- ABI_ALLOCATE(val,(nb))
+ ABI_MALLOC(depl_val,(0:totsize-1))
+ ABI_MALLOC(depl,(nb))
+ ABI_MALLOC(buf_val,(0:totsize-1))
+ ABI_MALLOC(val,(nb))
 
 !Map displacements
 !Put xval in a buffer at its position
@@ -3644,9 +3644,9 @@ subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  end do
 
 !Build MPI datatype for view
- ABI_ALLOCATE(length1,(nbval+2))
- ABI_ALLOCATE(depl1,(nbval+2))
- ABI_ALLOCATE(type1,(nbval+2))
+ ABI_MALLOC(length1,(nbval+2))
+ ABI_MALLOC(depl1,(nbval+2))
+ ABI_MALLOC(type1,(nbval+2))
  length1(1)=1;depl1(1)=0;type1(1)=MPI_LB
  do i1=2,nbval+1
    length1(i1) = 1
@@ -3656,9 +3656,9 @@ subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  length1(nbval+2)=1;depl1(nbval+2)=totsize*wff%nbOct_int;type1(nbval+2)=MPI_UB
  call xmpio_type_struct(nbval+2,length1,depl1,type1,filetype,ierr)
  call MPI_TYPE_COMMIT(filetype,ierr)
- ABI_DEALLOCATE(length1)
- ABI_DEALLOCATE(depl1)
- ABI_DEALLOCATE(type1)
+ ABI_FREE(length1)
+ ABI_FREE(depl1)
+ ABI_FREE(type1)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
@@ -3672,10 +3672,10 @@ subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Free memory
  call MPI_TYPE_FREE(filetype,ierr)
- ABI_DEALLOCATE(depl)
- ABI_DEALLOCATE(depl_val)
- ABI_DEALLOCATE(buf_val)
- ABI_DEALLOCATE(val)
+ ABI_FREE(depl)
+ ABI_FREE(depl_val)
+ ABI_FREE(buf_val)
+ ABI_FREE(val)
 #endif
 
 end subroutine xderiveWrite_int2d_displ
@@ -3738,10 +3738,10 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 #if defined HAVE_MPI_IO
  nb = n1*n2
  call xmpi_sum(nb,totsize,spaceComm,ierr)
- ABI_ALLOCATE(depl_val,(0:totsize-1))
- ABI_ALLOCATE(depl,(nb))
- ABI_ALLOCATE(buf_val,(0:totsize-1))
- ABI_ALLOCATE(val,(nb))
+ ABI_MALLOC(depl_val,(0:totsize-1))
+ ABI_MALLOC(depl,(nb))
+ ABI_MALLOC(buf_val,(0:totsize-1))
+ ABI_MALLOC(val,(nb))
 
 !Map displacements
 !Put xval in a buffer at its position
@@ -3765,9 +3765,9 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  end do
 
 !Build MPI datatype for view
- ABI_ALLOCATE(length1,(nbval+2))
- ABI_ALLOCATE(depl1,(nbval+2))
- ABI_ALLOCATE(type1,(nbval+2))
+ ABI_MALLOC(length1,(nbval+2))
+ ABI_MALLOC(depl1,(nbval+2))
+ ABI_MALLOC(type1,(nbval+2))
  length1(1)=1;depl1(1)=0;type1(1)=MPI_LB
  do i1=2,nbval+1
    length1(i1) = 1
@@ -3777,9 +3777,9 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
  length1(nbval+2)=1;depl1(nbval+2)=totsize*wff%nbOct_dp;type1(nbval+2)=MPI_UB
  call xmpio_type_struct(nbval+2,length1,depl1,type1,filetype,ierr)
  call MPI_TYPE_COMMIT(filetype,ierr)
- ABI_DEALLOCATE(length1)
- ABI_DEALLOCATE(depl1)
- ABI_DEALLOCATE(type1)
+ ABI_FREE(length1)
+ ABI_FREE(depl1)
+ ABI_FREE(type1)
 
 !Write data
  call MPI_FILE_OPEN(spaceComm,wff%fname,MPI_MODE_RDWR,MPI_INFO_NULL,wfftempo,ierr)
@@ -3792,10 +3792,10 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
 !Free memory
  call MPI_TYPE_FREE(filetype,ierr)
- ABI_DEALLOCATE(depl)
- ABI_DEALLOCATE(depl_val)
- ABI_DEALLOCATE(buf_val)
- ABI_DEALLOCATE(val)
+ ABI_FREE(depl)
+ ABI_FREE(depl_val)
+ ABI_FREE(buf_val)
+ ABI_FREE(val)
 #endif
 
 end subroutine xderiveWrite_dp2d_displ
@@ -3921,7 +3921,7 @@ subroutine xdefineOff(formeig,wff,mpi_enreg,nband,npwarr,nspinor,nsppol,nkpt)
    nproc=xmpi_comm_size(comm)
    pos_start=wff%offwff
 
-   ABI_ALLOCATE(offproc,(0:nproc))
+   ABI_MALLOC(offproc,(0:nproc))
    offproc = 0
    nbrec =2
    nrecnpw=3+nbrec
@@ -3989,7 +3989,7 @@ subroutine xdefineOff(formeig,wff,mpi_enreg,nband,npwarr,nspinor,nsppol,nkpt)
        wff%offwff=wff%offwff+offproc(iproc)
      end do
    end if
-   ABI_DEALLOCATE(offproc)
+   ABI_FREE(offproc)
 
  end if ! iomode
 #endif

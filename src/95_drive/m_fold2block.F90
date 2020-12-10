@@ -84,10 +84,10 @@ CONTAINS  !===========================================================
 
 ! *************************************************************************
 
- ABI_ALLOCATE(TGroupC,(FX, FY, FZ, NV))
- ABI_ALLOCATE(Sums,(FX*FY*FZ))
- ABI_ALLOCATE(counter,(FX,FY,FZ))
- ABI_ALLOCATE(coefsqr,(NV))
+ ABI_MALLOC(TGroupC,(FX, FY, FZ, NV))
+ ABI_MALLOC(Sums,(FX*FY*FZ))
+ ABI_MALLOC(counter,(FX,FY,FZ))
+ ABI_MALLOC(coefsqr,(NV))
 
  !Convert to sum of squares
  do jj=1, NV
@@ -136,10 +136,10 @@ CONTAINS  !===========================================================
  do jj=1, (FX*FY*FZ)
    Weights(jj)=Sums(jj)/sumtot
  end do
- ABI_DEALLOCATE(TGroupC)
- ABI_DEALLOCATE(Sums)
- ABI_DEALLOCATE(counter)
- ABI_DEALLOCATE(coefsqr)
+ ABI_FREE(TGroupC)
+ ABI_FREE(Sums)
+ ABI_FREE(counter)
+ ABI_FREE(coefsqr)
 
  end subroutine SortC
 !!***
@@ -277,7 +277,7 @@ subroutine getargs(folds, fname)
 
  !get number of args
  num_args=command_argument_count()
- ABI_ALLOCATE(args,(num_args))
+ ABI_MALLOC(args,(num_args))
 
  !Check for errors in arguments
  if (num_args>2) then
@@ -355,7 +355,7 @@ subroutine getargs(folds, fname)
    ABI_ERROR('Number of folds has to be a positive integer greater than 0')
  end if
 
- ABI_DEALLOCATE(args)
+ ABI_FREE(args)
 
 end subroutine getargs
 !!***

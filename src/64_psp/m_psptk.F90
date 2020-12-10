@@ -114,10 +114,10 @@ subroutine psp1cc(fchrg,n1xccc,xccc1d)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(ff,(n1xccc))
- ABI_ALLOCATE(ff2,(n1xccc))
- ABI_ALLOCATE(work,(n1xccc))
- ABI_ALLOCATE(yy,(n1xccc))
+ ABI_MALLOC(ff,(n1xccc))
+ ABI_MALLOC(ff2,(n1xccc))
+ ABI_MALLOC(work,(n1xccc))
+ ABI_MALLOC(yy,(n1xccc))
 
  if(n1xccc > 1)then
    factor=one/dble(n1xccc-1)
@@ -197,10 +197,10 @@ subroutine psp1cc(fchrg,n1xccc,xccc1d)
 !stop
 !ENDDEBUG
 
- ABI_DEALLOCATE(ff)
- ABI_DEALLOCATE(ff2)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(yy)
+ ABI_FREE(ff)
+ ABI_FREE(ff2)
+ ABI_FREE(work)
+ ABI_FREE(yy)
 
 end subroutine psp1cc
 !!***
@@ -533,7 +533,7 @@ subroutine psp5lo(al,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 
 ! *************************************************************************
 
- ABI_ALLOCATE(work,(mmax))
+ ABI_MALLOC(work,(mmax))
 
 !Do q=0 separately (compute epsatm)
 !Do integral from 0 to r1
@@ -633,7 +633,7 @@ subroutine psp5lo(al,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
  call ctrap(mmax,work,al,result)
  ypn=2.0d0 * (ztor1 + result)
 
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
 end subroutine psp5lo
 !!***
@@ -729,10 +729,10 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 !Zero out Kleinman-Bylander energies ekb
  ekb(:)=0.0d0
 
- ABI_ALLOCATE(work1,(mmax))
- ABI_ALLOCATE(work2,(mmax))
- ABI_ALLOCATE(work3,(mmax))
- ABI_ALLOCATE(work4,(mmax))
+ ABI_MALLOC(work1,(mmax))
+ ABI_MALLOC(work2,(mmax))
+ ABI_MALLOC(work3,(mmax))
+ ABI_MALLOC(work4,(mmax))
 
 !Allow for no nonlocal correction (lmax=-1)
  if (lmax/=-1) then
@@ -1118,10 +1118,10 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 !write(std_out,*) 'COSKB=',(ckb(iq),iq=1,3)
 !ENDDEBUG
 
- ABI_DEALLOCATE(work1)
- ABI_DEALLOCATE(work2)
- ABI_DEALLOCATE(work3)
- ABI_DEALLOCATE(work4)
+ ABI_FREE(work1)
+ ABI_FREE(work2)
+ ABI_FREE(work3)
+ ABI_FREE(work4)
 
  contains
 
@@ -1215,8 +1215,8 @@ subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(work,(mmax))
- ABI_ALLOCATE(rvlpz,(mmax))
+ ABI_MALLOC(work,(mmax))
+ ABI_MALLOC(rvlpz,(mmax))
 
 !Do q=0 separately (compute epsatm)
  ztor1=(zion/2.0d0+rad(1)*vloc(1)/3.d0)*rad(1)**2
@@ -1240,8 +1240,8 @@ subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
  mmax_new=mesh_mult*(mmax-1)+1
  amesh_new=amesh/dble(mesh_mult)
 
- ABI_ALLOCATE(rad_new,(mmax_new))
- ABI_ALLOCATE(rvlpz_new,(mmax_new))
+ ABI_MALLOC(rad_new,(mmax_new))
+ ABI_MALLOC(rvlpz_new,(mmax_new))
 
  if(mesh_mult==1) then
    rad_new(:)=rad(:)
@@ -1253,7 +1253,7 @@ subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
 &   -6.d0*rvlpz(5))/(24.d0*amesh)
    fpn=(6.d0*rvlpz(mmax-4)-32.d0*rvlpz(mmax-3)+72.d0*rvlpz(mmax-2)&
 &   -96.d0*rvlpz(mmax-1)+50.d0*rvlpz(mmax))/(24.d0*amesh)
-   ABI_ALLOCATE(sprvlpz,(mmax,2))
+   ABI_MALLOC(sprvlpz,(mmax,2))
    work(:)=zero
 
 !  Spline fit
@@ -1273,9 +1273,9 @@ subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
    ider=0
    call splfit(rad,work,sprvlpz,ider,rad_new,rvlpz_new,mmax,mmax_new)
 
-   ABI_DEALLOCATE(sprvlpz)
-   ABI_DEALLOCATE(work)
-   ABI_ALLOCATE(work,(mmax_new))
+   ABI_FREE(sprvlpz)
+   ABI_FREE(work)
+   ABI_MALLOC(work,(mmax_new))
  end if
 
 !Loop over q values
@@ -1302,10 +1302,10 @@ subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
  ypn=(6.d0*q2vq(mqgrid-4)-32.d0*q2vq(mqgrid-3)+72.d0*q2vq(mqgrid-2)&
 & -96.d0*q2vq(mqgrid-1)+50.d0*q2vq(mqgrid))/(24.d0*qmesh)
 
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(rad_new)
- ABI_DEALLOCATE(rvlpz_new)
- ABI_DEALLOCATE(rvlpz)
+ ABI_FREE(work)
+ ABI_FREE(rad_new)
+ ABI_FREE(rvlpz_new)
+ ABI_FREE(rvlpz)
 
 end subroutine psp8lo
 !!***
@@ -1401,8 +1401,8 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
  mmax_new=mesh_mult*(mmax-1)+1
  amesh_new=amesh/dble(mesh_mult)
 
- ABI_ALLOCATE(rad_new,(mmax_new))
- ABI_ALLOCATE(vpspll_new,(mmax_new,lnmax))
+ ABI_MALLOC(rad_new,(mmax_new))
+ ABI_MALLOC(vpspll_new,(mmax_new,lnmax))
 
  if(mesh_mult==1) then
    rad_new(:)=rad(:)
@@ -1479,7 +1479,7 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
    end if
  end do !irn
 
- ABI_ALLOCATE(work,(mvpspll,lnmax))
+ ABI_MALLOC(work,(mvpspll,lnmax))
 
 !Loop over q values
  do iq=1,mqgrid
@@ -1514,7 +1514,7 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
  end do !iq
 
 !Fit splines for form factors
- ABI_ALLOCATE(work2,(mqgrid))
+ ABI_MALLOC(work2,(mqgrid))
  qmesh=qgrid(2)-qgrid(1)
 
  iln0=0
@@ -1533,10 +1533,10 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
    end if
  end do
 
- ABI_DEALLOCATE(rad_new)
- ABI_DEALLOCATE(vpspll_new)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(work2)
+ ABI_FREE(rad_new)
+ ABI_FREE(vpspll_new)
+ ABI_FREE(work)
+ ABI_FREE(work2)
 
 end subroutine psp8nl
 !!***
@@ -1593,15 +1593,15 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
  real(dp),allocatable :: gg3(:),gg4(:),work(:),xx(:)
 
 ! *************************************************************************
- ABI_ALLOCATE(ff3,(mmax))
- ABI_ALLOCATE(ff4,(mmax))
- ABI_ALLOCATE(gg,(n1xccc))
- ABI_ALLOCATE(gg1,(n1xccc))
- ABI_ALLOCATE(gg2,(n1xccc))
- ABI_ALLOCATE(gg3,(n1xccc))
- ABI_ALLOCATE(gg4,(n1xccc))
- ABI_ALLOCATE(work,(mmax))
- ABI_ALLOCATE(xx,(n1xccc))
+ ABI_MALLOC(ff3,(mmax))
+ ABI_MALLOC(ff4,(mmax))
+ ABI_MALLOC(gg,(n1xccc))
+ ABI_MALLOC(gg1,(n1xccc))
+ ABI_MALLOC(gg2,(n1xccc))
+ ABI_MALLOC(gg3,(n1xccc))
+ ABI_MALLOC(gg4,(n1xccc))
+ ABI_MALLOC(work,(mmax))
+ ABI_MALLOC(xx,(n1xccc))
 
  !write(std_out,*) 'cc_derivatives : enter'
 
@@ -1639,8 +1639,8 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
 !gg2(:)=gg2(:)*rchrg**2
 
 !reallocate work otherwise the calls to spline crash (n1xccc /= mmax)
- ABI_DEALLOCATE(work)
- ABI_ALLOCATE(work,(n1xccc))
+ ABI_FREE(work)
+ ABI_MALLOC(work,(n1xccc))
 
 !recalculate 3rd derivative consistent with spline fit to first derivative
 !on linear grid
@@ -1720,15 +1720,15 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
 !stop
 !ENDDEBUG
 
- ABI_DEALLOCATE(ff3)
- ABI_DEALLOCATE(ff4)
- ABI_DEALLOCATE(gg)
- ABI_DEALLOCATE(gg1)
- ABI_DEALLOCATE(gg2)
- ABI_DEALLOCATE(gg3)
- ABI_DEALLOCATE(gg4)
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(xx)
+ ABI_FREE(ff3)
+ ABI_FREE(ff4)
+ ABI_FREE(gg)
+ ABI_FREE(gg1)
+ ABI_FREE(gg2)
+ ABI_FREE(gg3)
+ ABI_FREE(gg4)
+ ABI_FREE(work)
+ ABI_FREE(xx)
 
 end subroutine cc_derivatives
 !!***

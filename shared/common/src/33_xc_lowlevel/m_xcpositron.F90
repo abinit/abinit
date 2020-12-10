@@ -156,11 +156,11 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
  end if
 
 !Compute density radii for rhor_el, rhor_pos
- ABI_ALLOCATE(rsepts,(npt))
+ ABI_MALLOC(rsepts,(npt))
  call invcb(rhoer(:),rsepts,npt)
  rsepts(:)=rsfac*rsepts(:)
  if (ixcpositron==2) then
-   ABI_ALLOCATE(rsppts,(npt))
+   ABI_MALLOC(rsppts,(npt))
    call invcb(rhopr(:),rsppts,npt)
    rsppts(:)=rsfac*rsppts(:)
  end if
@@ -361,9 +361,9 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
 
  end do ! ipt
 
- ABI_DEALLOCATE(rsepts)
+ ABI_FREE(rsepts)
  if (ixcpositron==2) then
-   ABI_DEALLOCATE(rsppts)
+   ABI_FREE(rsppts)
  end if
 
 !Convert everything in Hartree units

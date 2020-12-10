@@ -294,19 +294,19 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
  ! Allocate new arrays.
  !allocate(mix%i_rhor(mix%n_index), stat = i_stat)
  !call memocc_abi(i_stat, mix%i_rhor, 'mix%i_rhor', subname)
- ABI_DATATYPE_ALLOCATE(mix%i_rhor,(mix%n_index))
+ ABI_MALLOC(mix%i_rhor,(mix%n_index))
  mix%i_rhor(:)=0
  !allocate(mix%i_vtrial(mix%n_index), stat = i_stat)
  !call memocc_abi(i_stat, mix%i_vtrial, 'mix%i_vtrial', subname)
- ABI_DATATYPE_ALLOCATE(mix%i_vtrial,(mix%n_index))
+ ABI_MALLOC(mix%i_vtrial,(mix%n_index))
  mix%i_vtrial(:)=0
  !allocate(mix%i_vresid(mix%n_index), stat = i_stat)
  !call memocc_abi(i_stat, mix%i_vresid, 'mix%i_vresid', subname)
- ABI_DATATYPE_ALLOCATE(mix%i_vresid,(mix%n_index))
+ ABI_MALLOC(mix%i_vresid,(mix%n_index))
  mix%i_vresid(:)=0
  !allocate(mix%i_vrespc(mix%n_index), stat = i_stat)
  !call memocc_abi(i_stat, mix%i_vrespc, 'mix%i_vrespc', subname)
- ABI_DATATYPE_ALLOCATE(mix%i_vrespc,(mix%n_index))
+ ABI_MALLOC(mix%i_vrespc,(mix%n_index))
  mix%i_vrespc(:)=0
 
  ! Setup initial values.
@@ -551,7 +551,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
  if (.not. associated(mix%f_fftgr)) then
    !allocate(mix%f_fftgr(mix%space * mix%nfft,mix%nspden,mix%n_fftgr), stat = i_stat)
    !call memocc_abi(i_stat, mix%f_fftgr, 'mix%f_fftgr', subname)
-   ABI_ALLOCATE(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
+   ABI_MALLOC(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
    mix%f_fftgr(:,:,:)=zero
    if (mix%mffmem == 0 .and. istep_ > 1 .and. mix%n_fftgr>0) then
      call timab(83,1,tsec)
@@ -568,7 +568,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
  if (.not. associated(mix%f_paw)) then
     !allocate(mix%f_paw(mix%n_pawmix,mix%n_fftgr), stat = i_stat)
     !call memocc_abi(i_stat, mix%f_paw, 'mix%f_paw', subname)
-    ABI_ALLOCATE(mix%f_paw,(mix%n_pawmix,mix%n_fftgr))
+    ABI_MALLOC(mix%f_paw,(mix%n_pawmix,mix%n_fftgr))
     if (mix%n_pawmix > 0 .and. mix%n_fftgr>0) then
       mix%f_paw(:,:)=zero
       if (mix%mffmem == 0 .and. istep_ > 1) then
@@ -582,7 +582,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
  if (.not. associated(mix%f_atm)) then
     !allocate(mix%f_atm(3,mix%n_atom,mix%n_fftgr), stat = i_stat)
     !call memocc_abi(i_stat, mix%f_atm, 'mix%f_atm', subname)
-    ABI_ALLOCATE(mix%f_atm,(3,mix%n_atom,mix%n_fftgr))
+    ABI_MALLOC(mix%f_atm,(3,mix%n_atom,mix%n_fftgr))
  end if
 
  end subroutine ab7_mixing_eval_allocate
@@ -643,11 +643,11 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
     close(unit=temp_unit)
     call timab(83,2,tsec)
     if (associated(mix%f_fftgr)) then
-      ABI_DEALLOCATE(mix%f_fftgr)
+      ABI_FREE(mix%f_fftgr)
       nullify(mix%f_fftgr)
     end if
     if (associated(mix%f_paw)) then
-       ABI_DEALLOCATE(mix%f_paw)
+       ABI_FREE(mix%f_paw)
        nullify(mix%f_paw)
     end if
  end if
@@ -797,8 +797,8 @@ end subroutine ab7_mixing_eval_deallocate
        return
     end if
     if (mix%n_atom == 0) then
-       ABI_ALLOCATE(mix%xred,(3,0))
-       ABI_ALLOCATE(mix%dtn_pc,(3,0))
+       ABI_MALLOC(mix%xred,(3,0))
+       ABI_MALLOC(mix%dtn_pc,(3,0))
     end if
     call scfcge(mix%space,dbl_nnsclo,mix%dtn_pc,etotal,mix%f_atm,&
          & mix%f_fftgr,initialized,mix%iscf,isecur_,istep,&
@@ -807,8 +807,8 @@ end subroutine ab7_mixing_eval_deallocate
          & mix%nspden,mix%n_fftgr,mix%n_index,mix%kind,&
          & response_,potden,ucvol,arr,mix%xred, errid, errmess)
     if (mix%n_atom == 0) then
-       ABI_DEALLOCATE(mix%xred)
-       ABI_DEALLOCATE(mix%dtn_pc)
+       ABI_FREE(mix%xred)
+       ABI_FREE(mix%dtn_pc)
     end if
     if (dbl_nnsclo == 1) errid = AB7_ERROR_MIXING_INC_NNSLOOP
  end if
@@ -853,25 +853,25 @@ subroutine ab7_mixing_deallocate(mix)
 ! *************************************************************************
 
  if (associated(mix%i_rhor)) then
-    ABI_DATATYPE_DEALLOCATE(mix%i_rhor)
+    ABI_FREE(mix%i_rhor)
  end if
  if (associated(mix%i_vtrial)) then
-    ABI_DATATYPE_DEALLOCATE(mix%i_vtrial)
+    ABI_FREE(mix%i_vtrial)
  end if
  if (associated(mix%i_vresid)) then
-    ABI_DATATYPE_DEALLOCATE(mix%i_vresid)
+    ABI_FREE(mix%i_vresid)
  end if
  if (associated(mix%i_vrespc)) then
-    ABI_DATATYPE_DEALLOCATE(mix%i_vrespc)
+    ABI_FREE(mix%i_vrespc)
  end if
  if (associated(mix%f_fftgr)) then
-    ABI_DEALLOCATE(mix%f_fftgr)
+    ABI_FREE(mix%f_fftgr)
  end if
  if (associated(mix%f_paw)) then
-    ABI_DEALLOCATE(mix%f_paw)
+    ABI_FREE(mix%f_paw)
  end if
  if (associated(mix%f_atm)) then
-    ABI_DEALLOCATE(mix%f_atm)
+    ABI_FREE(mix%f_atm)
  end if
 
  call nullify_(mix)
@@ -1570,7 +1570,7 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 !      Take care of vtrial
        f_fftgr(:,:,1)=vtrial(:,:)
 
-       ABI_ALLOCATE(tmp_fft1,(cplex*nfft,nspden))
+       ABI_MALLOC(tmp_fft1,(cplex*nfft,nspden))
 !      Take care of vresid
        tmp_fft1(:,:)=f_fftgr(:,:,i_vresid(2))
        f_fftgr(:,:,i_vresid(2))=tmp_fft1(:,:)&
@@ -1591,7 +1591,7 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 &       +ratio*(f_fftgr(:,:,i_vrespc(1))-tmp_fft1(:,:))&
 &       +gamma*(f_fftgr(:,:,i_vrespc(3))-tmp_fft1(:,:))
        f_fftgr(:,:,i_vrespc(3))=tmp_fft1(:,:)
-       ABI_DEALLOCATE(tmp_fft1)
+       ABI_FREE(tmp_fft1)
 
        if(moved_atm_inside==1)then
          do idir=1,3
@@ -2205,7 +2205,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      end do
    end if
    if (usepaw==1.and.pawoptmix==1) then
-     ABI_ALLOCATE(amat_paw,(niter))
+     ABI_MALLOC(amat_paw,(niter))
      amat_paw(:)=zero
      do ii=1,niter
        do index=1,npawmix
@@ -2221,21 +2221,21 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      if (ii<niter) amat(niter,ii)=amat(ii,niter)
    end do
    if (usepaw==1.and.pawoptmix==1)then
-     ABI_DEALLOCATE(amat_paw)
+     ABI_FREE(amat_paw)
    end if
 
 !  Invert "A" matrix
-   ABI_ALLOCATE(amatinv,(niter,niter))
+   ABI_MALLOC(amatinv,(niter,niter))
    amatinv(1:niter,1:niter)=amat(1:niter,1:niter)
-   ABI_ALLOCATE(ipiv,(niter))
-   ABI_ALLOCATE(rwork,(niter))
+   ABI_MALLOC(ipiv,(niter))
+   ABI_MALLOC(rwork,(niter))
    call dgetrf(niter,niter,amatinv,niter,ipiv,ierr)
    call dgetri(niter,amatinv,niter,ipiv,rwork,niter,ierr)
-   ABI_DEALLOCATE(ipiv)
-   ABI_DEALLOCATE(rwork)
+   ABI_FREE(ipiv)
+   ABI_FREE(rwork)
 
 !  Compute "alpha" factors
-   ABI_ALLOCATE(alpha,(niter))
+   ABI_MALLOC(alpha,(niter))
    alpha=zero
    det=zero
    do ii=1,niter
@@ -2245,7 +2245,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      end do
    end do
    alpha(:)=alpha(:)/det
-   ABI_DEALLOCATE(amatinv)
+   ABI_FREE(amatinv)
    write(message,'(a,5(1x,g10.3))')' mixing of old trial potential: alpha(m:m-4)=',(alpha(ii),ii=niter,max(1,niter-4),-1)
    call wrtout(std_out,message,'COLL')
 
@@ -2273,7 +2273,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      f_paw(index,i_vstore)=current
    end do
 
-   ABI_DEALLOCATE(alpha)
+   ABI_FREE(alpha)
 !  _______________________________________________________________
 !  End of choice of optimization method
  end if
@@ -3097,7 +3097,7 @@ subroutine aprxdr(cplex,choice,dedv_mix,dedv_new,dedv_old,&
 
 ! *************************************************************************
 
- ABI_ALLOCATE(ddens,(cplex*nfft,nspden,1))
+ ABI_MALLOC(ddens,(cplex*nfft,nspden,1))
 
 !Compute approximative derivative of the energy
 !with respect to change of potential
@@ -3122,7 +3122,7 @@ subroutine aprxdr(cplex,choice,dedv_mix,dedv_new,dedv_old,&
    dedv_mix = dedv_temp(1)
  end if
 
- ABI_DEALLOCATE(ddens)
+ ABI_FREE(ddens)
 
 !-------------------------------------------------------
 

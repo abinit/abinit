@@ -127,7 +127,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !Some initialisations
  cond_string(1:4)='#####'
  cond_values(1:4)=(/0,0,0,0/)
- ABI_ALLOCATE(ierr_dtset,(ndtset_alloc))
+ ABI_MALLOC(ierr_dtset,(ndtset_alloc))
  ierr_dtset=0
 
 !Do loop on idtset (allocate statements are present)
@@ -411,13 +411,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    if(dt%chksymtnons>0)then
 !    Check the values of tnons
-     ABI_ALLOCATE(tnons_new,(3,dt%nsym))
-     ABI_ALLOCATE(xred,(3,dt%natom))
+     ABI_MALLOC(tnons_new,(3,dt%nsym))
+     ABI_MALLOC(xred,(3,dt%natom))
      xred(:,:)=dt%xred_orig(:,1:dt%natom,1)
 !    Use the largest significant value of tolsym, namely, one.
      call symmetrize_xred(dt%natom,dt%nsym,dt%symrel,dt%tnons,xred,&
 &      fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=one)
-     ABI_DEALLOCATE(tnons_new)
+     ABI_FREE(tnons_new)
 
      if(mismatch_fft_tnons/=0)then
        if(fixed_mismatch==1)then
@@ -464,7 +464,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
                      ! But then simply set chksymtnons=0 ...
        endif
      endif
-     ABI_DEALLOCATE(xred)
+     ABI_FREE(xred)
    end if
 
 !  constraint_kind
@@ -3662,7 +3662,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  Check that two atoms are not on top of each other
    do iimage=1,dt%nimage
      if(natom>1)then
-       ABI_ALLOCATE(frac,(3,natom))
+       ABI_MALLOC(frac,(3,natom))
        do ia=1,natom
 !        Map reduced coordinate xred(mu,ia) into [0,1)
          frac(1,ia)=dt%xred_orig(1,ia,iimage)-aint(dt%xred_orig(1,ia,iimage))+0.5_dp-sign(0.5_dp,dt%xred_orig(1,ia,iimage))
@@ -3687,7 +3687,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
            end if
          end do
        end do
-       ABI_DEALLOCATE(frac)
+       ABI_FREE(frac)
      end if
    end do
 
@@ -3926,7 +3926,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ABI_ERROR(msg)
  end if
 
- ABI_DEALLOCATE(ierr_dtset)
+ ABI_FREE(ierr_dtset)
 
  if (ndtset_alloc /= 1 .and. get_timelimit() > zero) then
    ABI_ERROR("--timelimit option cannot be used when ndtset > 1")

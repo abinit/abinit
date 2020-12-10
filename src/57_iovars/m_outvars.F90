@@ -299,7 +299,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !### 04. Determine whether each dataset is (or not) a response calculation
 !## (should use optdriver, isn't it ?)
 
- ABI_ALLOCATE(response_,(ndtset_alloc))
+ ABI_MALLOC(response_,(ndtset_alloc))
  response_(:)=0
  do idtset=1,ndtset_alloc
    rfddk=dtsets(idtset)%rfddk
@@ -342,7 +342,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !###########################################################
 !### 06. Initialize strimg
 
- ABI_ALLOCATE(strimg,(mxvals%nimage))
+ ABI_MALLOC(strimg,(mxvals%nimage))
  do iimage=1,mxvals%nimage
    if(iimage<10)then
      write(stringimage,'(i1)')iimage
@@ -360,7 +360,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !###########################################################
 !### 07. Initialize jdtset_
 
- ABI_ALLOCATE(jdtset_,(0:ndtset_alloc))
+ ABI_MALLOC(jdtset_,(0:ndtset_alloc))
  jdtset_(0:ndtset_alloc)=dtsets(0:ndtset_alloc)%jdtset
 
 
@@ -381,9 +381,9 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !###########################################################
 !## Deallocations and cleaning
 
- ABI_DEALLOCATE(jdtset_)
- ABI_DEALLOCATE(response_)
- ABI_DEALLOCATE(strimg)
+ ABI_FREE(jdtset_)
+ ABI_FREE(response_)
+ ABI_FREE(strimg)
 
  write(message,'(a,80a)')ch10,('=',mu=1,80)
  call wrtout(iout,message,'COLL')

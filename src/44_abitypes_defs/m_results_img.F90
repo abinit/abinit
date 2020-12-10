@@ -195,22 +195,22 @@ subroutine init_results_img(natom,npspalch,nspden,nsppol,ntypalch,ntypat,results
      results_img(ii)%ntypalch  =ntypalch
      results_img(ii)%ntypat    =ntypat
 
-     ABI_DATATYPE_ALLOCATE(results_img(ii)%results_gs,)
+     ABI_MALLOC(results_img(ii)%results_gs,)
      call init_results_gs(natom,nspden,nsppol,results_img(ii)%results_gs)
 
-     ABI_ALLOCATE(results_img(ii)%acell,(3))
+     ABI_MALLOC(results_img(ii)%acell,(3))
      results_img(ii)%acell=zero
-     ABI_ALLOCATE(results_img(ii)%amu,(ntypat))
+     ABI_MALLOC(results_img(ii)%amu,(ntypat))
      results_img(ii)%amu=zero
-     ABI_ALLOCATE(results_img(ii)%mixalch,(npspalch,ntypalch))
+     ABI_MALLOC(results_img(ii)%mixalch,(npspalch,ntypalch))
      results_img(ii)%mixalch=zero
-     ABI_ALLOCATE(results_img(ii)%rprim,(3,3))
+     ABI_MALLOC(results_img(ii)%rprim,(3,3))
      results_img(ii)%rprim=zero
-     ABI_ALLOCATE(results_img(ii)%xred,(3,natom))
+     ABI_MALLOC(results_img(ii)%xred,(3,natom))
      results_img(ii)%xred =zero
-     ABI_ALLOCATE(results_img(ii)%vel,(3,natom))
+     ABI_MALLOC(results_img(ii)%vel,(3,natom))
      results_img(ii)%vel  =zero
-     ABI_ALLOCATE(results_img(ii)%vel_cell,(3,3))
+     ABI_MALLOC(results_img(ii)%vel_cell,(3,3))
      results_img(ii)%vel_cell=zero
 
    end do
@@ -270,29 +270,29 @@ subroutine destroy_results_img(results_img)
 
      if (associated(results_img(ii)%results_gs)) then
        call destroy_results_gs(results_img(ii)%results_gs)
-       ABI_DATATYPE_DEALLOCATE(results_img(ii)%results_gs)
+       ABI_FREE(results_img(ii)%results_gs)
      end if
 
      if (allocated(results_img(ii)%acell))  then
-       ABI_DEALLOCATE(results_img(ii)%acell)
+       ABI_FREE(results_img(ii)%acell)
      end if
      if (allocated(results_img(ii)%amu))  then
-       ABI_DEALLOCATE(results_img(ii)%amu)
+       ABI_FREE(results_img(ii)%amu)
      end if
      if (allocated(results_img(ii)%mixalch))  then
-       ABI_DEALLOCATE(results_img(ii)%mixalch)
+       ABI_FREE(results_img(ii)%mixalch)
      end if
      if (allocated(results_img(ii)%rprim))  then
-       ABI_DEALLOCATE(results_img(ii)%rprim)
+       ABI_FREE(results_img(ii)%rprim)
      end if
      if (allocated(results_img(ii)%xred))   then
-       ABI_DEALLOCATE(results_img(ii)%xred)
+       ABI_FREE(results_img(ii)%xred)
      end if
      if (allocated(results_img(ii)%vel))    then
-       ABI_DEALLOCATE(results_img(ii)%vel)
+       ABI_FREE(results_img(ii)%vel)
      end if
      if (allocated(results_img(ii)%vel_cell))    then
-       ABI_DEALLOCATE(results_img(ii)%vel_cell)
+       ABI_FREE(results_img(ii)%vel_cell)
      end if
    end do
 
@@ -408,35 +408,35 @@ subroutine copy_results_img(results_img_in,results_img_out)
 
  if (natom_in>natom_out) then
    if (allocated(results_img_out%xred))   then
-     ABI_DEALLOCATE(results_img_out%xred)
+     ABI_FREE(results_img_out%xred)
    end if
    if (allocated(results_img_out%vel))    then
-     ABI_DEALLOCATE(results_img_out%vel)
+     ABI_FREE(results_img_out%vel)
    end if
    if (allocated(results_img_out%vel_cell))    then
-     ABI_DEALLOCATE(results_img_out%vel_cell)
+     ABI_FREE(results_img_out%vel_cell)
    end if
 
    if (allocated(results_img_in%xred))   then
-     ABI_ALLOCATE(results_img_out%xred,(3,natom_in))
+     ABI_MALLOC(results_img_out%xred,(3,natom_in))
    end if
    if (allocated(results_img_in%vel))    then
-     ABI_ALLOCATE(results_img_out%vel,(3,natom_in))
+     ABI_MALLOC(results_img_out%vel,(3,natom_in))
    end if
    if (allocated(results_img_in%vel_cell))    then
-     ABI_ALLOCATE(results_img_out%vel_cell,(3,3))
+     ABI_MALLOC(results_img_out%vel_cell,(3,3))
    end if
  end if
 
  if (npspalch_in>npspalch_out .or. ntypalch_in>ntypalch_out) then
    if (allocated(results_img_out%mixalch))   then
-     ABI_DEALLOCATE(results_img_out%mixalch)
+     ABI_FREE(results_img_out%mixalch)
    end if
  endif
 
  if (ntypat_in>ntypat_out) then
    if (allocated(results_img_in%amu))    then
-     ABI_ALLOCATE(results_img_out%amu,(ntypat_in))
+     ABI_MALLOC(results_img_out%amu,(ntypat_in))
    endif
  endif
 
@@ -548,7 +548,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 
 !  Gather number of images treated by each proc
    nimage=size(results_img,1)
-   ABI_ALLOCATE(nimage_all,(mpi_enreg%nproc_img))
+   ABI_MALLOC(nimage_all,(mpi_enreg%nproc_img))
    call xmpi_allgather(nimage,nimage_all,mpi_enreg%comm_img,ierr)
    nimagetot=sum(nimage_all)
    if (use_results_all) then
@@ -580,19 +580,19 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 !  Compute number of data
    rsize=38+n_energies+(30+nspden)*natom+3*nsppol+ntypat+npspalch*ntypalch+3*ngrvdw
    rsize_img=nimage*rsize
-   ABI_ALLOCATE(rsize_img_all,(mpi_enreg%nproc_img))
+   ABI_MALLOC(rsize_img_all,(mpi_enreg%nproc_img))
    rsize_img_all(:)=rsize*nimage_all(:)
-   ABI_DEALLOCATE(nimage_all)
+   ABI_FREE(nimage_all)
 
 !  Compute shifts in buffer arrays for each proc
-   ABI_ALLOCATE(rbufshft,(mpi_enreg%nproc_img))
+   ABI_MALLOC(rbufshft,(mpi_enreg%nproc_img))
    rbufshft(1)=0
    do jj=2,mpi_enreg%nproc_img
      rbufshft(jj)=rbufshft(jj-1)+rsize_img_all(jj-1)
    end do
 
 !  Load buffers
-   ABI_ALLOCATE(rbuffer,(rsize_img))
+   ABI_MALLOC(rbuffer,(rsize_img))
    ibufr=0
    do jj=1,nimage
      rbuffer(ibufr+1)  =results_img(jj)%results_gs%deltae
@@ -656,10 +656,10 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 
 !  Gather all data
    if (use_results_all)  then
-     ABI_ALLOCATE(rbuffer_all,(rsize*nimagetot))
+     ABI_MALLOC(rbuffer_all,(rsize*nimagetot))
    end if
    if (.not.use_results_all)  then
-     ABI_ALLOCATE(rbuffer_all,(0))
+     ABI_MALLOC(rbuffer_all,(0))
    end if
    if (do_allgather) then
      call xmpi_allgatherv(rbuffer,rsize_img,rbuffer_all,rsize_img_all,rbufshft,&
@@ -668,12 +668,12 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
      call xmpi_gatherv(rbuffer,rsize_img,rbuffer_all,rsize_img_all,rbufshft,&
 &                          master_img,mpi_enreg%comm_img,ierr)
    end if
-   ABI_DEALLOCATE(rbuffer)
-   ABI_DEALLOCATE(rsize_img_all)
+   ABI_FREE(rbuffer)
+   ABI_FREE(rsize_img_all)
 
 !  Transfer buffers into gathered results_img_all (master proc only)
    if (use_results_all) then
-     ABI_ALLOCATE(iimg,(mpi_enreg%nproc_img))
+     ABI_MALLOC(iimg,(mpi_enreg%nproc_img))
      iimg=0
      do jj=1,nimagetot
 !      The following line supposes that images are sorted by increasing index
@@ -748,12 +748,12 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
          ibufr=ibufr+3*ngrvdw
        end if
      end do
-     ABI_DEALLOCATE(iimg)
+     ABI_FREE(iimg)
    end if
 
 !  Free memory
-   ABI_DEALLOCATE(rbufshft)
-   ABI_DEALLOCATE(rbuffer_all)
+   ABI_FREE(rbufshft)
+   ABI_FREE(rbuffer_all)
 
  end if
 
@@ -848,7 +848,7 @@ subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
 
 !  Gather number of images treated by each proc
    nimage=size(array_img,2)
-   ABI_ALLOCATE(nimage_all,(mpi_enreg%nproc_img))
+   ABI_MALLOC(nimage_all,(mpi_enreg%nproc_img))
    call xmpi_allgather(nimage,nimage_all,mpi_enreg%comm_img,ierr)
    nimagetot=sum(nimage_all)
    if (use_array_all) then
@@ -859,19 +859,19 @@ subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
 
 !  Compute number of data
    rsize=size1;rsize_img=nimage*rsize
-   ABI_ALLOCATE(rsize_img_all,(mpi_enreg%nproc_img))
+   ABI_MALLOC(rsize_img_all,(mpi_enreg%nproc_img))
    rsize_img_all(:)=rsize*nimage_all(:)
-   ABI_DEALLOCATE(nimage_all)
+   ABI_FREE(nimage_all)
 
 !  Compute shifts in buffer arrays for each proc
-   ABI_ALLOCATE(rbufshft,(mpi_enreg%nproc_img))
+   ABI_MALLOC(rbufshft,(mpi_enreg%nproc_img))
    rbufshft(1)=0
    do jj=2,mpi_enreg%nproc_img
      rbufshft(jj)=rbufshft(jj-1)+rsize_img_all(jj-1)
    end do
 
 !  Load buffers
-   ABI_ALLOCATE(rbuffer,(rsize_img))
+   ABI_MALLOC(rbuffer,(rsize_img))
    ibufr=0
    do jj=1,nimage
      rbuffer(ibufr+1:ibufr+rsize)=reshape(array_img(1:size1,jj),(/rsize/))
@@ -880,10 +880,10 @@ subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
 
 !  Gather all data
    if (use_array_all)  then
-     ABI_ALLOCATE(rbuffer_all,(rsize*nimagetot))
+     ABI_MALLOC(rbuffer_all,(rsize*nimagetot))
    end if
    if (.not.use_array_all)  then
-     ABI_ALLOCATE(rbuffer_all,(0))
+     ABI_MALLOC(rbuffer_all,(0))
    end if
    if (do_allgather) then
      call xmpi_allgatherv(rbuffer,rsize_img,rbuffer_all,rsize_img_all,rbufshft,&
@@ -892,12 +892,12 @@ subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
      call xmpi_gatherv(rbuffer,rsize_img,rbuffer_all,rsize_img_all,rbufshft,&
 &                      master_img,mpi_enreg%comm_img,ierr)
    end if
-   ABI_DEALLOCATE(rbuffer)
-   ABI_DEALLOCATE(rsize_img_all)
+   ABI_FREE(rbuffer)
+   ABI_FREE(rsize_img_all)
 
 !  Transfer buffers into gathered array_img_all (master proc only)
    if (use_array_all) then
-     ABI_ALLOCATE(iimg,(mpi_enreg%nproc_img))
+     ABI_MALLOC(iimg,(mpi_enreg%nproc_img))
      iimg=0
      do jj=1,nimagetot
 !      The following line supposes that images are sorted by increasing index
@@ -905,12 +905,12 @@ subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
        ibufr=rbufshft(iproc)+(iimg(iproc)-1)*rsize
        array_img_all(1:size1,jj)=reshape(rbuffer_all(ibufr+1:ibufr+rsize),(/size1/))
      end do
-     ABI_DEALLOCATE(iimg)
+     ABI_FREE(iimg)
    end if
 
 !  Free memory
-   ABI_DEALLOCATE(rbufshft)
-   ABI_DEALLOCATE(rbuffer_all)
+   ABI_FREE(rbufshft)
+   ABI_FREE(rbuffer_all)
 
  end if
 
@@ -1005,7 +1005,7 @@ subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
 
 !  Gather number of images treated by each proc
    nimage=size(array_img,3)
-   ABI_ALLOCATE(nimage_all,(mpi_enreg%nproc_img))
+   ABI_MALLOC(nimage_all,(mpi_enreg%nproc_img))
    call xmpi_allgather(nimage,nimage_all,mpi_enreg%comm_img,ierr)
    nimagetot=sum(nimage_all)
    if (use_array_all) then
@@ -1016,19 +1016,19 @@ subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
 
 !  Compute number of data
    rsize=size1*size2;rsize_img=nimage*rsize
-   ABI_ALLOCATE(rsize_img_all,(mpi_enreg%nproc_img))
+   ABI_MALLOC(rsize_img_all,(mpi_enreg%nproc_img))
    rsize_img_all(:)=rsize*nimage_all(:)
-   ABI_DEALLOCATE(nimage_all)
+   ABI_FREE(nimage_all)
 
 !  Compute shifts in buffer arrays for each proc
-   ABI_ALLOCATE(rbufshft,(mpi_enreg%nproc_img))
+   ABI_MALLOC(rbufshft,(mpi_enreg%nproc_img))
    rbufshft(1)=0
    do jj=2,mpi_enreg%nproc_img
      rbufshft(jj)=rbufshft(jj-1)+rsize_img_all(jj-1)
    end do
 
 !  Load buffers
-   ABI_ALLOCATE(rbuffer,(rsize_img))
+   ABI_MALLOC(rbuffer,(rsize_img))
    ibufr=0
    do jj=1,nimage
      rbuffer(ibufr+1:ibufr+rsize)=reshape(array_img(1:size1,1:size2,jj),(/rsize/))
@@ -1037,10 +1037,10 @@ subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
 
 !  Gather all data
    if (use_array_all)  then
-     ABI_ALLOCATE(rbuffer_all,(rsize*nimagetot))
+     ABI_MALLOC(rbuffer_all,(rsize*nimagetot))
    end if
    if (.not.use_array_all)  then
-     ABI_ALLOCATE(rbuffer_all,(0))
+     ABI_MALLOC(rbuffer_all,(0))
    end if
    if (do_allgather) then
      call xmpi_allgatherv(rbuffer,rsize_img,rbuffer_all,rsize_img_all,rbufshft,&
@@ -1049,12 +1049,12 @@ subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
      call xmpi_gatherv(rbuffer,rsize_img,rbuffer_all,rsize_img_all,rbufshft,&
 &                      master_img,mpi_enreg%comm_img,ierr)
    end if
-   ABI_DEALLOCATE(rbuffer)
-   ABI_DEALLOCATE(rsize_img_all)
+   ABI_FREE(rbuffer)
+   ABI_FREE(rsize_img_all)
 
 !  Transfer buffers into gathered array_img_all (master proc only)
    if (use_array_all) then
-     ABI_ALLOCATE(iimg,(mpi_enreg%nproc_img))
+     ABI_MALLOC(iimg,(mpi_enreg%nproc_img))
      iimg=0
      do jj=1,nimagetot
 !      The following line supposes that images are sorted by increasing index
@@ -1062,12 +1062,12 @@ subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
        ibufr=rbufshft(iproc)+(iimg(iproc)-1)*rsize
        array_img_all(1:size1,1:size2,jj)=reshape(rbuffer_all(ibufr+1:ibufr+rsize),(/size1,size2/))
      end do
-     ABI_DEALLOCATE(iimg)
+     ABI_FREE(iimg)
    end if
 
 !  Free memory
-   ABI_DEALLOCATE(rbufshft)
-   ABI_DEALLOCATE(rbuffer_all)
+   ABI_FREE(rbufshft)
+   ABI_FREE(rbuffer_all)
 
  end if
 
@@ -1150,7 +1150,7 @@ subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
 
 !  Compute (by gather operation) total number of images
    nimage=size(array_img,3)
-   ABI_ALLOCATE(nimage_all,(mpi_enreg%nproc_img))
+   ABI_MALLOC(nimage_all,(mpi_enreg%nproc_img))
    call xmpi_allgather(nimage,nimage_all,mpi_enreg%comm_img,ierr)
    nimagetot=sum(nimage_all)
    if (use_array_all) then
@@ -1167,11 +1167,11 @@ subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
 
 !    Compute number of data
      rsize=size1*size2;rsize_img=nimage*rsize
-     ABI_ALLOCATE(rsize_img_all,(mpi_enreg%nproc_img))
+     ABI_MALLOC(rsize_img_all,(mpi_enreg%nproc_img))
      rsize_img_all(:)=rsize*nimage_all(:)
 
 !    Compute shifts in buffer arrays for each proc
-     ABI_ALLOCATE(rbufshft,(mpi_enreg%nproc_img))
+     ABI_MALLOC(rbufshft,(mpi_enreg%nproc_img))
      rbufshft(1)=0
      do jj=2,mpi_enreg%nproc_img
        rbufshft(jj)=rbufshft(jj-1)+rsize_img_all(jj-1)
@@ -1179,13 +1179,13 @@ subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
 
 !    Load buffer
      if (use_array_all)  then
-       ABI_ALLOCATE(rbuffer_all,(rsize*nimagetot))
+       ABI_MALLOC(rbuffer_all,(rsize*nimagetot))
      end if
      if (.not.use_array_all)  then
-       ABI_ALLOCATE(rbuffer_all,(0))
+       ABI_MALLOC(rbuffer_all,(0))
      end if
      if (use_array_all) then
-       ABI_ALLOCATE(iimg,(mpi_enreg%nproc_img))
+       ABI_MALLOC(iimg,(mpi_enreg%nproc_img))
        iimg=0
        do jj=1,nimagetot
 !        The following line supposes that images are sorted by increasing index
@@ -1193,16 +1193,16 @@ subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
          ibufr=rbufshft(iproc)+(iimg(iproc)-1)*rsize
          rbuffer_all(ibufr+1:ibufr+rsize)=reshape(array_img_all(1:size1,1:size2,jj),(/rsize/))
        end do
-       ABI_DEALLOCATE(iimg)
+       ABI_FREE(iimg)
       end if
 
 !    Scatter all data
-     ABI_ALLOCATE(rbuffer,(rsize_img))
+     ABI_MALLOC(rbuffer,(rsize_img))
      call xmpi_scatterv(rbuffer_all,rsize_img_all,rbufshft,rbuffer,rsize_img,&
 &                       master_img,mpi_enreg%comm_img,ierr)
-     ABI_DEALLOCATE(rbuffer_all)
-     ABI_DEALLOCATE(rbufshft)
-     ABI_DEALLOCATE(rsize_img_all)
+     ABI_FREE(rbuffer_all)
+     ABI_FREE(rbufshft)
+     ABI_FREE(rsize_img_all)
 
 !    Transfered distributed buffers into array_img (master proc only)
      ibufr=0
@@ -1210,10 +1210,10 @@ subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
        array_img(1:size1,1:size2,jj)=reshape(rbuffer(ibufr+1:ibufr+rsize),(/size1,size2/))
        ibufr=ibufr+rsize
      end do
-     ABI_DEALLOCATE(rbuffer)
+     ABI_FREE(rbuffer)
 
    end if ! nimagetot<=1
-   ABI_DEALLOCATE(nimage_all)
+   ABI_FREE(nimage_all)
 
 !  Now, is requested dispatch data inside each image
    if (.not.one_per_img) then

@@ -273,19 +273,19 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 
 !  If Vxc potentials are not in memory, compute them
    if (paw_an1(iatom)%has_vxc/=2) then
-     ABI_ALLOCATE(rho1 ,(cplex_a*mesh_size,lm_size_a,nspden))
-     ABI_ALLOCATE(trho1,(cplex_a*mesh_size,lm_size_a,nspden))
-     ABI_ALLOCATE(nhat1,(cplex_a*mesh_size,lm_size_a,nspden*usexcnhat))
-     ABI_ALLOCATE(lmselect_a,(lm_size_a))
+     ABI_MALLOC(rho1 ,(cplex_a*mesh_size,lm_size_a,nspden))
+     ABI_MALLOC(trho1,(cplex_a*mesh_size,lm_size_a,nspden))
+     ABI_MALLOC(nhat1,(cplex_a*mesh_size,lm_size_a,nspden*usexcnhat))
+     ABI_MALLOC(lmselect_a,(lm_size_a))
      lmselect_a(:)=paw_an1(iatom)%lmselect(:)
-     ABI_ALLOCATE(lmselect_tmp,(lm_size_a))
+     ABI_MALLOC(lmselect_tmp,(lm_size_a))
      lmselect_tmp(:)=.true.
      if (nzlmopt_a==1) lmselect_tmp(:)=lmselect_a(:)
 !    Compute on-site 1st-order densities
      call pawdensities(compch,cplex_a,iatom_tot,lmselect_tmp,lmselect_a,&
 &     lm_size_a,nhat1,nspden,nzlmopt_a,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &     pawrad(itypat),pawrhoij_a(iatom),pawtab(itypat),rho1,trho1)
-     ABI_DEALLOCATE(lmselect_tmp)
+     ABI_FREE(lmselect_tmp)
 !    Compute on-site 1st-order xc potentials
      if (pawxcdev/=0) then
        call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxc1,&
@@ -308,30 +308,30 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      end if
 
      paw_an1(iatom)%has_vxc=2
-     ABI_DEALLOCATE(lmselect_a)
-     ABI_DEALLOCATE(rho1)
-     ABI_DEALLOCATE(trho1)
-     ABI_DEALLOCATE(nhat1)
+     ABI_FREE(lmselect_a)
+     ABI_FREE(rho1)
+     ABI_FREE(trho1)
+     ABI_FREE(nhat1)
    end if ! has_vxc
 
 !  Compute contribution to 1st-order (or 2nd-order) energy from 1st-order XC potential
-   ABI_ALLOCATE(rho1 ,(cplex_b*mesh_size,lm_size_b,nspden))
-   ABI_ALLOCATE(trho1,(cplex_b*mesh_size,lm_size_b,nspden))
-   ABI_ALLOCATE(nhat1,(cplex_b*mesh_size,lm_size_b,nspden*usexcnhat))
-   ABI_ALLOCATE(lmselect_b,(lm_size_b))
+   ABI_MALLOC(rho1 ,(cplex_b*mesh_size,lm_size_b,nspden))
+   ABI_MALLOC(trho1,(cplex_b*mesh_size,lm_size_b,nspden))
+   ABI_MALLOC(nhat1,(cplex_b*mesh_size,lm_size_b,nspden*usexcnhat))
+   ABI_MALLOC(lmselect_b,(lm_size_b))
    if (ipert2<=0) lmselect_b(:)=paw_an0(iatom)%lmselect(:)
    if (ipert2> 0) lmselect_b(:)=paw_an1(iatom)%lmselect(:)
-   ABI_ALLOCATE(lmselect_tmp,(lm_size_b))
+   ABI_MALLOC(lmselect_tmp,(lm_size_b))
    lmselect_tmp(:)=.true.
    if (nzlmopt_b==1) lmselect_tmp(:)=lmselect_b(:)
 !  Compute on-site 1st-order densities
    call pawdensities(compch,cplex_b,iatom_tot,lmselect_tmp,lmselect_b,&
 &   lm_size_b,nhat1,nspden,nzlmopt_b,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_b(iatom),pawtab(itypat),rho1,trho1)
-   ABI_DEALLOCATE(lmselect_tmp)
+   ABI_FREE(lmselect_tmp)
 !  Compute contributions to 1st-order (or 2nd-order) energy
    if (pawxcdev/=0) then
-     ABI_ALLOCATE(kxc_dum,(mesh_size,pawang%angl_size,0))
+     ABI_MALLOC(kxc_dum,(mesh_size,pawang%angl_size,0))
      call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
 &     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     rho1,usecore,0,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
@@ -342,11 +342,11 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 &     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     trho1,usetcore,2*usexcnhat,paw_an1(iatom)%vxct1,xclevel,&
 &     d2enxc_im=eexc_im)
-     ABI_DEALLOCATE(kxc_dum)
+     ABI_FREE(kxc_dum)
      delta_energy_xc(1)=delta_energy_xc(1)-eexc
      delta_energy_xc(2)=delta_energy_xc(2)-eexc_im
    else
-     ABI_ALLOCATE(kxc_dum,(mesh_size,lm_size_b,0))
+     ABI_MALLOC(kxc_dum,(mesh_size,lm_size_b,0))
      call pawxc_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
 &     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     rho1,usecore,0,paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
@@ -357,14 +357,14 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 &     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     trho1,usetcore,2*usexcnhat,paw_an0(iatom)%vxct1,paw_an1(iatom)%vxct1,xclevel,&
 &     d2enxc_im=eexc_im)
-     ABI_DEALLOCATE(kxc_dum)
+     ABI_FREE(kxc_dum)
      delta_energy_xc(1)=delta_energy_xc(1)-eexc
      delta_energy_xc(2)=delta_energy_xc(2)-eexc_im
    end if
-   ABI_DEALLOCATE(lmselect_b)
-   ABI_DEALLOCATE(rho1)
-   ABI_DEALLOCATE(trho1)
-   ABI_DEALLOCATE(nhat1)
+   ABI_FREE(lmselect_b)
+   ABI_FREE(rho1)
+   ABI_FREE(trho1)
+   ABI_FREE(nhat1)
 
 !  If Dij_hartree are not in memory, compute them
    if (paw_ij1(iatom)%has_dijhartree/=2) then
@@ -593,7 +593,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
  if (paral_atom) then
-   ABI_ALLOCATE(atm_indx,(natom))
+   ABI_MALLOC(atm_indx,(natom))
    atm_indx=-1
    do iatom=1,my_natom
      atm_indx(my_atmtab(iatom))=iatom
@@ -620,7 +620,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
      my_me_g0=me_g0;my_paral_kgb=paral_kgb
      my_distribfft => distribfft
    else
-     ABI_DATATYPE_ALLOCATE(my_distribfft,)
+     ABI_MALLOC(my_distribfft,)
      call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
    end if
    if (n2 == my_distribfft%n2_coarse) then
@@ -645,7 +645,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !Retrieve local potential according to the use of nhat in XC
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
  if (usexcnhat==0) then
-   ABI_ALLOCATE(vtrial_,(nfft,1))
+   ABI_MALLOC(vtrial_,(nfft,1))
    dimvtrial=1
 !$OMP PARALLEL DO PRIVATE(ic) SHARED(nfft,vtrial,vtrial_,vxc)
    do ic=1,nfft
@@ -661,7 +661,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  ishift_grhoij=0;ishift_gr=0;ishift_gr2=0;ishift_str=0;ishift_str2=0;ishift_str2is=0;ishift2_gr=0
  cplex=1;if (qne0==1) cplex=2
  if (optgr==1) then
-   ABI_ALLOCATE(hatgr,(3*natom))
+   ABI_MALLOC(hatgr,(3*natom))
    hatgr=zero
    ngrad=ngrad+3
    ngrhat=ngrhat+3
@@ -699,28 +699,28 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
  nsploop=nspden;if (dimvtrial<nspden) nsploop=2
  if (optgr2/=1.and.optstr2/=1) then
-   ABI_ALLOCATE(grhat_tmp,(ngrhat,1))
+   ABI_MALLOC(grhat_tmp,(ngrhat,1))
  else
-   ABI_ALLOCATE(grhat_tmp,(ngrhat,natom))
+   ABI_MALLOC(grhat_tmp,(ngrhat,natom))
    grhat_tmp=zero
-   ABI_DATATYPE_ALLOCATE(prod_nondiag,(natom))
-   ABI_DATATYPE_ALLOCATE(prodp_nondiag,(natom))
-   ABI_ALLOCATE(atindx,(natom))
+   ABI_MALLOC(prod_nondiag,(natom))
+   ABI_MALLOC(prodp_nondiag,(natom))
+   ABI_MALLOC(atindx,(natom))
    if(optgr2==1.or.optstr2==1)then
-     ABI_ALLOCATE(vpsp1_gr,(cplex*nfft,3))
+     ABI_MALLOC(vpsp1_gr,(cplex*nfft,3))
      vpsp1_gr(:,:)= zero
    end if
    if (optgr2==1) then
-     ABI_ALLOCATE(dyfr,(dyfr_cplex,3,3,natom,natom))
+     ABI_MALLOC(dyfr,(dyfr_cplex,3,3,natom,natom))
      dyfr=zero
    end if
    if (optstr2==1) then
-     ABI_ALLOCATE(vpsp1_str,(cplex*nfft,6))
-     ABI_ALLOCATE(grhat_tmp2,(18,natom))
-     ABI_ALLOCATE(eltfr,(6+3*natom,6))
+     ABI_MALLOC(vpsp1_str,(cplex*nfft,6))
+     ABI_MALLOC(grhat_tmp2,(18,natom))
+     ABI_MALLOC(eltfr,(6+3*natom,6))
      eltfr=zero
    end if
-   ABI_ALLOCATE(mu4,(4))
+   ABI_MALLOC(mu4,(4))
    atindx(:)=0
    do iatom=1,natom
      iatm=0
@@ -741,16 +741,16 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
      opt1=0;opt2=0;opt3=0
      if (pawfgrtab_jatom%gylm_allocated==0) then
        if (allocated(pawfgrtab_jatom%gylm))  then
-         ABI_DEALLOCATE(pawfgrtab_jatom%gylm)
+         ABI_FREE(pawfgrtab_jatom%gylm)
        end if
-       ABI_ALLOCATE(pawfgrtab_jatom%gylm,(pawfgrtab_jatom%nfgd,lm_sizej))
+       ABI_MALLOC(pawfgrtab_jatom%gylm,(pawfgrtab_jatom%nfgd,lm_sizej))
        pawfgrtab_jatom%gylm_allocated=2;opt1=1
      end if
      if (pawfgrtab_jatom%gylmgr_allocated==0) then
        if (allocated(pawfgrtab_jatom%gylmgr))  then
-         ABI_DEALLOCATE(pawfgrtab_jatom%gylmgr)
+         ABI_FREE(pawfgrtab_jatom%gylmgr)
        end if
-       ABI_ALLOCATE(pawfgrtab_jatom%gylmgr,(3,pawfgrtab_jatom%nfgd,lm_sizej))
+       ABI_MALLOC(pawfgrtab_jatom%gylmgr,(3,pawfgrtab_jatom%nfgd,lm_sizej))
        pawfgrtab_jatom%gylmgr_allocated=2;opt2=1
      end if
      if (opt1+opt2+opt3>0) then
@@ -761,10 +761,10 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
      if (optgr2==1.and.qne0==1) then
        if (pawfgrtab_jatom%expiqr_allocated==0) then
          if (allocated(pawfgrtab_jatom%expiqr))  then
-           ABI_DEALLOCATE(pawfgrtab_jatom%expiqr)
+           ABI_FREE(pawfgrtab_jatom%expiqr)
          end if
          pawfgrtab_jatom%expiqr_allocated=2
-         ABI_ALLOCATE(pawfgrtab_jatom%expiqr,(2,nfgd))
+         ABI_MALLOC(pawfgrtab_jatom%expiqr,(2,nfgd))
          call pawexpiqr(pawfgrtab_jatom%expiqr,gprimd,pawfgrtab_jatom%nfgd,&
 &         qphon,pawfgrtab_jatom%rfgd,xred(:,jatom_tot))
        end if
@@ -774,14 +774,14 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 !The computation of dynamical matrix and elastic tensor might require some communications
  if ((optgr2==1.or.optstr2==1).and.paral_atom.and.paral_atom_pawfgrtab.and.(.not.save_memory)) then
-   ABI_DATATYPE_ALLOCATE(pawfgrtab_tot,(natom))
+   ABI_MALLOC(pawfgrtab_tot,(natom))
    call pawfgrtab_nullify(pawfgrtab_tot)
    call pawfgrtab_gather(pawfgrtab,pawfgrtab_tot,my_comm_atom,ier,mpi_atmtab=my_atmtab)
  else
    pawfgrtab_tot => pawfgrtab
  end if
  if ((optgr2==1.or.optstr2==1).and.paral_atom.and.paral_atom_pawrhoij) then
-   ABI_DATATYPE_ALLOCATE(pawrhoij_tot,(natom))
+   ABI_MALLOC(pawrhoij_tot,(natom))
    call pawrhoij_nullify(pawrhoij_tot)
    call pawrhoij_gather(pawrhoij,pawrhoij_tot,-1,my_comm_atom, &
 &   with_rhoijres=.false.,with_rhoij_=.false.,with_lmnmix=.false.)
@@ -823,19 +823,19 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
      idiag=1;if (optgr2==1.or.optstr2==1) idiag=iatm
      nfgd=pawfgrtab_iatom%nfgd
 
-     ABI_ALLOCATE(vloc,(nfgd))
+     ABI_MALLOC(vloc,(nfgd))
      if (ngrad>0)  then
-       ABI_ALLOCATE(prod,(ngrad,lm_size))
+       ABI_MALLOC(prod,(ngrad,lm_size))
      end if
      if (ngradp>0)  then
-       ABI_ALLOCATE(prodp,(ngradp,lm_size))
+       ABI_MALLOC(prodp,(ngradp,lm_size))
      end if
      if (ngrad_nondiag>0.and.ngradp_nondiag>0) then
        do jatm=1,natom
          jtypat=typat(atindx1(jatm))
          lm_sizej=pawtab(jtypat)%lcut_size**2
-         ABI_ALLOCATE(prod_nondiag(jatm)%value,(ngrad_nondiag,lm_sizej))
-         ABI_ALLOCATE(prodp_nondiag(jatm)%value,(ngradp_nondiag,lm_sizej))
+         ABI_MALLOC(prod_nondiag(jatm)%value,(ngrad_nondiag,lm_sizej))
+         ABI_MALLOC(prodp_nondiag(jatm)%value,(ngradp_nondiag,lm_sizej))
        end do
      end if
 
@@ -849,9 +849,9 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
      if ((optgr==1.or.optstr==1).and.(optgr2/=1).and.(optstr2/=1)) then
        if (pawfgrtab_iatom%gylmgr_allocated==0) then
          if (allocated(pawfgrtab_iatom%gylmgr))  then
-           ABI_DEALLOCATE(pawfgrtab_iatom%gylmgr)
+           ABI_FREE(pawfgrtab_iatom%gylmgr)
          end if
-         ABI_ALLOCATE(pawfgrtab_iatom%gylmgr,(3,pawfgrtab_iatom%nfgd,lm_size))
+         ABI_MALLOC(pawfgrtab_iatom%gylmgr,(3,pawfgrtab_iatom%nfgd,lm_size))
          pawfgrtab_iatom%gylmgr_allocated=2
          call pawgylm(rdum,pawfgrtab_iatom%gylmgr,rdum2,lm_size,pawfgrtab_iatom%nfgd,&
 &         0,1,0,pawtab(itypat),pawfgrtab_iatom%rfgd)
@@ -862,23 +862,23 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
        opt1=0;opt2=0;opt3=0
        if (pawfgrtab_iatom%gylm_allocated==0) then
          if (allocated(pawfgrtab_iatom%gylm))  then
-           ABI_DEALLOCATE(pawfgrtab_iatom%gylm)
+           ABI_FREE(pawfgrtab_iatom%gylm)
          end if
-         ABI_ALLOCATE(pawfgrtab_iatom%gylm,(pawfgrtab_iatom%nfgd,lm_size))
+         ABI_MALLOC(pawfgrtab_iatom%gylm,(pawfgrtab_iatom%nfgd,lm_size))
          pawfgrtab_iatom%gylm_allocated=2;opt1=1
        end if
        if (pawfgrtab_iatom%gylmgr_allocated==0) then
          if (allocated(pawfgrtab_iatom%gylmgr))  then
-           ABI_DEALLOCATE(pawfgrtab_iatom%gylmgr)
+           ABI_FREE(pawfgrtab_iatom%gylmgr)
          end if
-         ABI_ALLOCATE(pawfgrtab_iatom%gylmgr,(3,pawfgrtab_iatom%nfgd,lm_size))
+         ABI_MALLOC(pawfgrtab_iatom%gylmgr,(3,pawfgrtab_iatom%nfgd,lm_size))
          pawfgrtab_iatom%gylmgr_allocated=2;opt2=1
        end if
        if (pawfgrtab_iatom%gylmgr2_allocated==0) then
          if (allocated(pawfgrtab_iatom%gylmgr2))  then
-           ABI_DEALLOCATE(pawfgrtab_iatom%gylmgr2)
+           ABI_FREE(pawfgrtab_iatom%gylmgr2)
          end if
-         ABI_ALLOCATE(pawfgrtab_iatom%gylmgr2,(6,pawfgrtab_iatom%nfgd,lm_size))
+         ABI_MALLOC(pawfgrtab_iatom%gylmgr2,(6,pawfgrtab_iatom%nfgd,lm_size))
          pawfgrtab_iatom%gylmgr2_allocated=2;opt3=1
        end if
        if (opt1+opt2+opt3>0) then
@@ -891,9 +891,9 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !    Eventually compute exp(-i.q.r) factors for the current atom (if not already done)
      if (optgr2==1.and.qne0==1.and.(pawfgrtab_iatom%expiqr_allocated==0)) then
        if (allocated(pawfgrtab_iatom%expiqr))  then
-         ABI_DEALLOCATE(pawfgrtab_iatom%expiqr)
+         ABI_FREE(pawfgrtab_iatom%expiqr)
        end if
-       ABI_ALLOCATE(pawfgrtab_iatom%expiqr,(2,nfgd))
+       ABI_MALLOC(pawfgrtab_iatom%expiqr,(2,nfgd))
        call pawexpiqr(pawfgrtab_iatom%expiqr,gprimd,nfgd,qphon,&
 &       pawfgrtab_iatom%rfgd,xred(:,iatom))
        pawfgrtab_iatom%expiqr_allocated=2
@@ -1171,13 +1171,13 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
              call pawrfgd_fft(ifftsph_tmp,gmet,n1,n2,n3,nfgd_jatom,rcut_jatom,rfgd_tmp,rprimd,&
 &             ucvol,xred(:,jatom_tot),fft_distrib=fftn3_distrib,fft_index=ffti3_local,me_fft=me_fft)
              ifft_jatom => ifftsph_tmp ; rfgd_jatom => rfgd_tmp
-             ABI_ALLOCATE(gylm_jatom,(nfgd_jatom,lm_sizej))
-             ABI_ALLOCATE(gylmgr_jatom,(3,nfgd_jatom,lm_sizej))
+             ABI_MALLOC(gylm_jatom,(nfgd_jatom,lm_sizej))
+             ABI_MALLOC(gylmgr_jatom,(3,nfgd_jatom,lm_sizej))
              opt1=1;opt2=1;opt3=0;gylmgr2_jatom=>gylmgr_jatom
              call pawgylm(gylm_jatom,gylmgr_jatom,gylmgr2_jatom,lm_sizej,nfgd_jatom,&
 &             opt1,opt2,opt3,pawtab(typat(jatom_tot)),rfgd_jatom)
              if (optgr2==1.and.qne0==1) then
-               ABI_ALLOCATE(expiqr_jatom,(2,nfgd_jatom))
+               ABI_MALLOC(expiqr_jatom,(2,nfgd_jatom))
                call pawexpiqr(expiqr_jatom,gprimd,nfgd_jatom,qphon,rfgd_jatom,xred(:,jatom_tot))
              end if
            else
@@ -1293,12 +1293,12 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 !          Release temp memory allocated for atom j
            if (save_memory.and.jatom/=iatom) then
-             ABI_DEALLOCATE(ifftsph_tmp)
-             ABI_DEALLOCATE(rfgd_tmp)
-             ABI_DEALLOCATE(gylm_jatom)
-             ABI_DEALLOCATE(gylmgr_jatom)
+             ABI_FREE(ifftsph_tmp)
+             ABI_FREE(rfgd_tmp)
+             ABI_FREE(gylm_jatom)
+             ABI_FREE(gylmgr_jatom)
              if (optgr2==1.and.qne0==1) then
-               ABI_DEALLOCATE(expiqr_jatom)
+               ABI_FREE(expiqr_jatom)
              end if
            end if
 
@@ -1333,7 +1333,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
              jtypat=typat(atindx1(jatm))
              bufsiz=bufsiz+pawtab(jtypat)%lcut_size**2
            end do
-           ABI_ALLOCATE(buf,(ngrad_nondiag+ngradp_nondiag,bufsiz))
+           ABI_MALLOC(buf,(ngrad_nondiag+ngradp_nondiag,bufsiz))
            do jatm=1,natom
              jtypat=typat(atindx1(jatm))
              lm_sizej=pawtab(jtypat)%lcut_size**2
@@ -1354,7 +1354,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 &             buf(ngrad_nondiag+1:ngrad_nondiag+ngradp_nondiag,bufind+1:bufind+lm_sizej)
              bufind=bufind+lm_sizej*(ngrad_nondiag+ngradp_nondiag)
            end do
-           ABI_DEALLOCATE(buf)
+           ABI_FREE(buf)
          end if
        end if
 
@@ -1624,23 +1624,23 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 !    Eventually free temporary space for g_l(r).Y_lm(r) factors
      if (pawfgrtab_iatom%gylm_allocated==2) then
-       ABI_DEALLOCATE(pawfgrtab_iatom%gylm)
-       ABI_ALLOCATE(pawfgrtab_iatom%gylm,(0,0))
+       ABI_FREE(pawfgrtab_iatom%gylm)
+       ABI_MALLOC(pawfgrtab_iatom%gylm,(0,0))
        pawfgrtab_iatom%gylm_allocated=0
      end if
      if (pawfgrtab_iatom%gylmgr_allocated==2) then
-       ABI_DEALLOCATE(pawfgrtab_iatom%gylmgr)
-       ABI_ALLOCATE(pawfgrtab_iatom%gylmgr,(0,0,0))
+       ABI_FREE(pawfgrtab_iatom%gylmgr)
+       ABI_MALLOC(pawfgrtab_iatom%gylmgr,(0,0,0))
        pawfgrtab_iatom%gylmgr_allocated=0
      end if
      if (pawfgrtab_iatom%gylmgr2_allocated==2) then
-       ABI_DEALLOCATE(pawfgrtab_iatom%gylmgr2)
-       ABI_ALLOCATE(pawfgrtab_iatom%gylmgr2,(0,0,0))
+       ABI_FREE(pawfgrtab_iatom%gylmgr2)
+       ABI_MALLOC(pawfgrtab_iatom%gylmgr2,(0,0,0))
        pawfgrtab_iatom%gylmgr2_allocated=0
      end if
      if (pawfgrtab_iatom%expiqr_allocated==2) then
-       ABI_DEALLOCATE(pawfgrtab_iatom%expiqr)
-       ABI_ALLOCATE(pawfgrtab_iatom%expiqr,(0,0))
+       ABI_FREE(pawfgrtab_iatom%expiqr)
+       ABI_MALLOC(pawfgrtab_iatom%expiqr,(0,0))
        pawfgrtab_iatom%expiqr_allocated=0
      end if
 
@@ -1703,17 +1703,17 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !    ----------------------------------------------------------------
 !    End loops on types and atoms
 
-     ABI_DEALLOCATE(vloc)
+     ABI_FREE(vloc)
      if (ngrad>0)  then
-       ABI_DEALLOCATE(prod)
+       ABI_FREE(prod)
      end if
      if (ngradp>0)  then
-       ABI_DEALLOCATE(prodp)
+       ABI_FREE(prodp)
      end if
      if (optgr2==1.or.optstr2==1) then
        do jatm=1,natom
-         ABI_DEALLOCATE(prod_nondiag(jatm)%value)
-         ABI_DEALLOCATE(prodp_nondiag(jatm)%value)
+         ABI_FREE(prod_nondiag(jatm)%value)
+         ABI_FREE(prodp_nondiag(jatm)%value)
        end do
      end if
    end do
@@ -1725,7 +1725,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
    bufsiz=3*natom*optgr+6*optstr
    if (save_memory) bufsiz=bufsiz+9*dyfr_cplex*natom**2*optgr2+6*(6+3*natom)*optstr2
    if (bufsiz>0) then
-     ABI_ALLOCATE(buf1,(bufsiz))
+     ABI_MALLOC(buf1,(bufsiz))
      if (optgr==1) buf1(1:3*natom)=hatgr(1:3*natom)
      indx=optgr*3*natom
      if (optstr==1) buf1(indx+1:indx+6)=hatstr(1:6)
@@ -1759,45 +1759,45 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
          indx=indx+6*(6+3*natom)
        end if
      end if
-     ABI_DEALLOCATE(buf1)
+     ABI_FREE(buf1)
    end if
  end if
 
 !Deallocate additional memory
- ABI_DEALLOCATE(grhat_tmp)
+ ABI_FREE(grhat_tmp)
  if (optgr2==1.or.optstr2==1) then
-   ABI_DEALLOCATE(mu4)
-   ABI_DEALLOCATE(atindx)
+   ABI_FREE(mu4)
+   ABI_FREE(atindx)
    if (optgr2==1.or.optstr2==1) then
-     ABI_DEALLOCATE(vpsp1_gr)
+     ABI_FREE(vpsp1_gr)
    end if
    if (optstr2==1) then
-     ABI_DEALLOCATE(grhat_tmp2)
-     ABI_DEALLOCATE(vpsp1_str)
+     ABI_FREE(grhat_tmp2)
+     ABI_FREE(vpsp1_str)
    end if
-   ABI_DATATYPE_DEALLOCATE(prod_nondiag)
-   ABI_DATATYPE_DEALLOCATE(prodp_nondiag)
+   ABI_FREE(prod_nondiag)
+   ABI_FREE(prodp_nondiag)
    if (.not.save_memory) then
      do jatom=1,size(pawfgrtab)
        pawfgrtab_jatom => pawfgrtab(jatom)
        if (pawfgrtab(jatom)%gylm_allocated==2) then
-         ABI_DEALLOCATE(pawfgrtab(jatom)%gylm)
-         ABI_ALLOCATE(pawfgrtab(jatom)%gylm,(0,0))
+         ABI_FREE(pawfgrtab(jatom)%gylm)
+         ABI_MALLOC(pawfgrtab(jatom)%gylm,(0,0))
          pawfgrtab(jatom)%gylm_allocated=0
        end if
        if (pawfgrtab(jatom)%gylmgr_allocated==2) then
-         ABI_DEALLOCATE(pawfgrtab(jatom)%gylmgr)
-         ABI_ALLOCATE(pawfgrtab(jatom)%gylmgr,(0,0,0))
+         ABI_FREE(pawfgrtab(jatom)%gylmgr)
+         ABI_MALLOC(pawfgrtab(jatom)%gylmgr,(0,0,0))
          pawfgrtab(jatom)%gylmgr_allocated=0
        end if
        if (pawfgrtab(jatom)%gylmgr2_allocated==2) then
-         ABI_DEALLOCATE(pawfgrtab(jatom)%gylmgr2)
-         ABI_ALLOCATE(pawfgrtab(jatom)%gylmgr2,(0,0,0))
+         ABI_FREE(pawfgrtab(jatom)%gylmgr2)
+         ABI_MALLOC(pawfgrtab(jatom)%gylmgr2,(0,0,0))
          pawfgrtab(jatom)%gylmgr2_allocated=0
        end if
        if (pawfgrtab(jatom)%expiqr_allocated==2) then
-         ABI_DEALLOCATE(pawfgrtab(jatom)%expiqr)
-         ABI_ALLOCATE(pawfgrtab(jatom)%expiqr,(0,0))
+         ABI_FREE(pawfgrtab(jatom)%expiqr)
+         ABI_MALLOC(pawfgrtab(jatom)%expiqr,(0,0))
          pawfgrtab(jatom)%expiqr_allocated=0
        end if
      end do
@@ -1805,11 +1805,11 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
    if (paral_atom) then
      if ((.not.save_memory).and.paral_atom_pawfgrtab) then
        call pawfgrtab_free(pawfgrtab_tot)
-       ABI_DATATYPE_DEALLOCATE(pawfgrtab_tot)
+       ABI_FREE(pawfgrtab_tot)
      end if
      if (paral_atom_pawrhoij) then
        call pawrhoij_free(pawrhoij_tot)
-       ABI_DATATYPE_DEALLOCATE(pawrhoij_tot)
+       ABI_FREE(pawrhoij_tot)
      end if
    end if
  end if
@@ -1820,7 +1820,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !===== Update forces =====
  if (optgr==1) then
    grnl(1:3*natom)=grnl(1:3*natom)+hatgr(1:3*natom)
-   ABI_DEALLOCATE(hatgr)
+   ABI_FREE(hatgr)
  end if
 
 !===== Convert stresses (add diag and off-diag contributions) =====
@@ -1889,13 +1889,13 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
        end do
      end do
    end do
-   ABI_DEALLOCATE(dyfr)
+   ABI_FREE(dyfr)
  end if
 
 !===== Update elastic tensor =====
  if (optstr2==1) then
    eltfrnl(1:6+3*natom,1:6)=eltfrnl(1:6+3*natom,1:6)+eltfr(1:6+3*natom,1:6)
-   ABI_DEALLOCATE(eltfr)
+   ABI_FREE(eltfr)
  end if
 
 !----------------------------------------------------------------------
@@ -1903,19 +1903,19 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 !Destroy temporary space
  if (usexcnhat==0)  then
-   ABI_DEALLOCATE(vtrial_)
+   ABI_FREE(vtrial_)
  end if
 
 !Destroy atom tables used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
  if (paral_atom) then
-   ABI_DEALLOCATE(atm_indx)
+   ABI_FREE(atm_indx)
  end if
 
 !Destroy FFT tables used for parallelism
  if ((optgr2==1.or.optstr2==1).and.(.not.present(comm_fft))) then
    call destroy_distribfft(my_distribfft)
-   ABI_DATATYPE_DEALLOCATE(my_distribfft)
+   ABI_FREE(my_distribfft)
  end if
 
  DBG_ENTER("COLL")
@@ -1966,7 +1966,7 @@ subroutine pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(mu_temp,(4))
+ ABI_MALLOC(mu_temp,(4))
  if (present(eps_gamma).and.present(eps_delta)) then
    mu_temp(1)=eps_alpha
    mu_temp(2)=eps_beta
@@ -1995,7 +1995,7 @@ subroutine pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
      k=k+1
    end do
  end do
- ABI_DEALLOCATE(mu_temp)
+ ABI_FREE(mu_temp)
 
 end subroutine pawgrnl_convert
 ! ------------------------------------------------
