@@ -19,11 +19,12 @@ In the following, when "run ABINIT over nn CPU cores" appears, you have to use
 a specific command line according to the operating system and architecture of
 the computer you are using. This can be for instance:
 
-    mpirun -n nn abinit < abinit.files
+    mpirun -n nn abinit abinit.abi
 
 or the use of a specific submission file.
 
-This tutorial should take about 1.5 hour and requires to have at least a 200 CPU core parallel computer.
+This tutorial should take about 1.5 hour and requires a modern 
+computer cluster of 50 CPU cores or more.
 
 [TUTORIAL_README]
 
@@ -41,20 +42,23 @@ The input files necessary to run the examples related to this tutorial are
 located in the directory *\$ABI_TESTS/tutoparal/Input* .
 We will do most of the actions of this tutorial in this working directory.
 
+Note that the pseudopotentials needed for running the tutorial (Si.psp8 and O.psp8)
+are located in the directory *\$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8*.
+
 In the [first GW tutorial](gw1), we have learned how to
 generate the WFK file with the sequential version of the code.
 Now we will perform a similar calculation taking advantage of the k-point parallelism
 implemented in the ground-state part.
 
-First of all, copy the files file tmbt_1.files in the working directory Work_mbt:
+First of all, copy the file tmbt_1.abi in the working directory Work_mbt:
 
     cd Work_mbt
-    cp ../tmbt_1.files .
+    cp ../tmbt_1.abi .
 
-Now open the input file *\$ABI_TESTS/tutoparal/Input/tmbt_1.in* in your
+Now open the input file *\$ABI_TESTS/tutoparal/Input/tmbt_1.abi* in your
 preferred editor, and look at its structure.
 
-{% dialog tests/tutoparal/Input/tmbt_1.files tests/tutoparal/Input/tmbt_1.in %}
+{% tests/tutoparal/Input/tmbt_1.abi %}
 
 The first dataset performs a rather standard SCF calculation to obtain the
 ground-state density. The second dataset reads the density file and calculates
@@ -80,10 +84,10 @@ wedge) hence the theoretical maximum speedup is 9.
 
 Now run ABINIT over nn CPU cores using
 
-    mpirun -n 9 abinit < tmbt_1.files > tmbt_1.log 2> err &
+    mpirun -n 9 abinit tmbt_1.abi > tmbt_1.log 2> err &
 
 but keep in mind that, to avoid idle processors, the number of CPUs should
-divide 9. At the end of the run, the code will produce the file *tmbt_1o_WFK*
+divide 9. At the end of the run, the code will produce the file *tmbt_1o_DS2_WFK*
 needed for the subsequent GW calculations.
 
 With three nodes, the wall clock time is around 1.5 minutes.
@@ -100,7 +104,7 @@ With three nodes, the wall clock time is around 1.5 minutes.
     +Overall time at end (sec) : cpu=        626.9  wall=        626.9
 
 
-A reference output file is given in *\$ABI_TESTS/tutoparal/Refs*, under the name *tmbt_1.out*.
+A reference output file is given in *\$ABI_TESTS/tutoparal/Refs*, under the name *tmbt_1.abo*.
 
 Note that 150 bands are not enough to obtain converged GW results, you might
 increase the number of bands in proportion to your computing resources.
@@ -111,15 +115,15 @@ In this part of the tutorial, we will compute the RPA polarizability with the
 Adler-Wiser approach. The basic equations are discussed in this
 [[theory:mbt#5-the-rpa-polarizability-in-fourier-space|section]] of the GW notes.
 
-First copy the files file *tmbt_2.file* in the working directory, then create a
+First copy the file *tmbt_2.abi* in the working directory, then create a
 symbolic link pointing to the WFK file we have generated in the previous step:
 
     >>> ln -s tmbt_1o_DS2_WFK tmbt_2i_WFK
 
-Now open the input file *\$ABI_TESTS/tutoparal/Input/tmbt_2.in* so that we can
+Now open the input file *\$ABI_TESTS/tutoparal/Input/tmbt_2.abi* so that we can
 discuss its structure.
 
-{% dialog tests/tutoparal/Input/tmbt_2.in %}
+{% dialog tests/tutoparal/Input/tmbt_2.abi %}
 
 The set of parameters controlling the screening computation is summarized below:
 
@@ -202,16 +206,16 @@ namely the reading of the WFK file and the matrix inversion (qloop).
 At this point, the most important technical details of the implementation have
 been covered, and we can finally run ABINIT over nn CPU cores using
 
-    (mpirun ...) abinit < tmbt_2.files > tmbt_2.log 2> err &
+    (mpirun ...) abinit tmbt_2.abi > tmbt_2.log 2> err &
 
-Run the input file *tmb_2.in* using different number of processors and keep
+Run the input file *tmb_2.abi* using different number of processors and keep
 track of the time for each processor number so that we can test the
 scalability of the implementation. The performance analysis reported in the
 figures above was obtained with PAW using ZnO as tests case, but you should
-observe a similar behavior also in SiO 2.
+observe a similar behavior also in SiO2.
 
-Now let's have a look at the output results. Since this tutorial mainly
-focuses on how to run efficient MPI computations, we won't perform any
+Now let us have a look at the output results. Since this tutorial mainly
+focuses on how to run efficient MPI computations, we will not perform any
 converge study for SiO2. Most of the parameters used in the input files are
 already close to converge, only the k-point sampling and the number of empty
 states should be increased. You might modify the input files to perform the
@@ -284,15 +288,15 @@ frequency mesh. The equations implemented in the code are documented in
 [[theory:mbt#hilbert_transform|in this section]].
 
 
-As usual, we have to copy the files file *tmbt_3.file* in the working directory,
+As usual, we have to copy the file *tmbt_3.abi* in the working directory,
 and then create a symbolic link pointing to the WFK file.
 
     >>> ln -s tmbt_1o_DS2_WFK tmbt_3i_WFK
 
-The input file is *$\ABI_TESTS/tutoparal/Input/tmbt_3.in*.
+The input file is *$\ABI_TESTS/tutoparal/Input/tmbt_3.abi*.
 Open it so that we can have a look at its structure.
 
-{% dialog tests/tutoparal/Input/tmbt_3.in %}
+{% dialog tests/tutoparal/Input/tmbt_3.abi %}
 
 A snapshot of the most important parameters governing the algorithm is reported below.
 
@@ -324,7 +328,7 @@ the number of processors.
 
 Now run ABINIT over nn CPU cores using
 
-    (mpirun ...) abinit < tmbt_3.files > tmbt_3.log 2> err
+    (mpirun ...) abinit tmbt_3.abi > tmbt_3.log 2> err
 
 and test the scaling by varying the number of processors. Keep in mind that,
 also in this case, the distribution of the computing work is well balanced
@@ -350,15 +354,15 @@ In this last paragraph, we discuss how to calculate G0W0 corrections in
 parallel with [[gwpara]] = 2. The basic equations used to compute the self-energy matrix elements are discussed in
 [[theory:mbt#evaluation_gw_sigma|this part]] of the GW notes.
 
-Before running the calculation, copy the files file *tmbt_4.file* in the working
+Before running the calculation, copy the file *tmbt_4.abi* in the working
 directory. Then create two symbolic links for the SCR and the WFK file:
 
     ln -s tmbt_1o_DS2_WFK tmbt_4i_WFK
     ln -s tmbt_2o_SCR     tmbt_4i_SCR
 
-Now open the input file *\$ABI_TESTS/tutoparal/Input/tmbt_4.in*.
+Now open the input file *\$ABI_TESTS/tutoparal/Input/tmbt_4.abi*.
 
-{% dialog tests/tutoparal/Input/tmbt_4.in %}
+{% dialog tests/tutoparal/Input/tmbt_4.abi %}
 
 The most important parameters of the calculation are reported below:
 
@@ -439,7 +443,7 @@ option is controlled by the first digit of [[gwmem]].
 Now that we know how distribute the load efficiently, we can finally run the
 calculation using
 
-    (mpirun ...) abinit < tmbt_4.files > tmbt_4.log 2> err &
+    (mpirun ...) abinit tmbt_4.abi > tmbt_4.log 2> err &
 
 Keep track of the time for each processor number so that we can test the
 scalability of the self-energy part.
@@ -453,7 +457,7 @@ and 800 states in the calculation of the self-energy.
 
 The comparison between the LDA band structure and the G 0W0 energy bands of
 α-quartz SiO2 is reported in the figure below. The direct gap at Γ is opened
-up significantly from the LDA value of 6.4 eV to about 9.5 eV when the one-
+up significantly from the LDA value of 6.1 eV to about 9.4 eV when the one-
 shot G0W0 method is used. You are invited to reproduce this result (take into
 account that this calculation has been performed at the theoretical LDA
 parameters, while the experimental structure is used in all the input files of
@@ -463,7 +467,8 @@ this tutorial).
 
 ## 5 Basic rules for efficient parallel calculations
 
-1. Remember that "Anything that can possibly go wrong, does" so, when writing your input file, try to "Keep It Short and Simple".
+1. Remember that "Anything that can possibly go wrong, does". 
+   So, when writing your input file, try to "Keep It Short and Simple".
 
 2. Do one thing and do it well:
   Avoid using different values of [[optdriver]] in the same input file. Each

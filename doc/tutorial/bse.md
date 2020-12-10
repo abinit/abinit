@@ -27,20 +27,24 @@ This tutorial should take about one hour to be completed.
 *Before starting, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_bs?*
 
-Copy the files file *\$ABI_TESTS/tutorial/Input/tbs_1.files*
+Copy the file *\$ABI_TESTS/tutorial/Input/tbs_1.abi*
 in the working directory *Work_bs*.
+
+Make sure that the Si.psp8 pseudopotential needed for running the tutorial is placed under 
+*\$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8*.
+
 Now run immediately the calculation with the command:
 
-    abinit < tbs_1.files > tbs_1.log 2> err &
+    abinit tbs_1.abi > tbs_1.log 2> err &
 
 so that we can analyze the input file while the code is running.
 
-The input file is located in *\$ABI_TESTS/tutorial/Input/tbs_1.in*.
+The input file is located in *\$ABI_TESTS/tutorial/Input/tbs_1.abi*.
 The header reports a brief description of the calculation so read it carefully.
-Don't worry if some parts are not clear to you as we are going to discuss the
+Do not worry if some parts are not clear to you as we are going to discuss the
 calculation in step by step fashion.
 
-{% dialog tests/tutorial/Input/tbs_1.files tests/tutorial/Input/tbs_1.in %}
+{% dialog tests/tutorial/Input/tbs_1.abi %}
 
 This input file generates the two WFK files and the SCR file needed for
 the subsequent Bethe-Salpeter computations. The first dataset performs a
@@ -67,7 +71,7 @@ It is anticipated that optical spectra **converge slowly** with the BZ sampling,
 **symmetry-breaking k-meshes** lead to faster convergence in [[nkpt]] than the
 standard symmetric k-meshes commonly used for ground-state or GW calculations.
 
-This explains the bizarre shift but still why two WFK files? Why don't we
+This explains the bizarre shift but, still, why two WFK files? Why not 
 simply use the WFK file on the shifted k-mesh to compute the screening?
 
 The reason is that a screening calculation done with many empty bands on the
@@ -87,7 +91,7 @@ constructed with the shifted k-mesh.
 
 After this lengthy discussion needed to clarify this rather technical point,
 we can finally proceed to analyze the screening computation performed in the
-last dataset of *tbs_1.in*.
+last dataset of *tbs_1.abi*.
 
 The SCR file is calculated in dataset 4 using [[nband]] = 100 and [[ecuteps]] = 6.0 Ha.
 In the [first GW tutorial](gw1), these
@@ -107,7 +111,7 @@ CPU time in the screening part, but keep in mind that this SCR file can only
 be used either for Bethe-Salpeter computations or for GW calculations
 employing the plasmon-pole models corresponding to [[ppmodel]] = 3, 4.
 
-At this point the calculation should have completed, but there's still one
+At this point the calculation should have completed, but there is still one
 thing that we have to do before moving to the next paragraph.
 
 As we said, we will need the WFK file on the shifted k-mesh and the SCR file
@@ -129,10 +133,10 @@ rename these precious files using more meaningful names *e.g.*:
 
 This section is intended to show how to perform a standard excitonic
 calculation within the Tamm-Dancoff approximation (TDA) using the Haydock iterative technique.
-The input file is *\$ABI_TESTS/tutorial/tutorial/Input/tbs_2.in*.
+The input file is *\$ABI_TESTS/tutorial/tutorial/Input/tbs_2.abi*.
 
 Before running the job, we have to connect this calculation with the output
-results produced in *tbs_1.in*.
+results produced in *tbs_1.abi*.
 
 Use the Unix commands:
 
@@ -145,18 +149,18 @@ for doing so will be clear afterwards once we discuss the input file.
 This job lasts 1-2 minutes on a modern machine so it is worth running it
 before inspecting the input file.
 
-Copy the files file *\$ABI_TESTS/tutorial/Input/tbs_2.files* in the working
+Copy the file *\$ABI_TESTS/tutorial/Input/tbs_2.abi* in the working
 directory and issue:
 
-    abinit < tbs_2.files > tbs_2.log 2> err &
+    abinit tbs_2.abi > tbs_2.log 2> err &
 
-to put the job in background so that we can examine *tbs_2.in*.
+to put the job in background so that we can examine *tbs_2.abi*.
 
-Now open *\$ABI_TESTS/tutorial/Input/tbs_2.in* in your preferred editor and go
+Now open *\$ABI_TESTS/tutorial/Input/tbs_2.abi* in your preferred editor and go
 to the next section where we discuss the most important variables governing a
 typical BS computation.
 
-{% dialog tests/tutorial/Input/tbs_2.files tests/tutorial/Input/tbs_2.in %}
+{% dialog tests/tutorial/Input/tbs_2.abi %}
 
 ### The structure of the input file
 
@@ -170,9 +174,7 @@ of ABINIT and are used to read the files produced in the previous paragraph
     irdwfk  1  # Read the WFK file produced in tbs_1
     irdscr  1  # Read the SCR file produced in tbs_1
 
-The code expects to find an input WFK file and an input SCR file whose name is
-constructed according to prefix specified in the files file *tbs_2.files*
-(see [[help:abinit#files-file|this section]] of the abinit_help file).
+The code expects to find an input WFK file and an input SCR file.
 This is the reason why we had to create the two symbolic links before running the code.
 
 Then we have a list of five variables specifying how to construct the excitonic Hamiltonian.
@@ -180,7 +182,7 @@ Then we have a list of five variables specifying how to construct the excitonic 
     bs_calctype       1    # L0 constructed with KS orbitals and energies.
     mbpt_sciss   0.8 eV    # Scissors operator used to correct the KS band structure.
     bs_exchange_term  1    # Exchange term included.
-    bs_coulomb_term  11    # Coulomb term included using the full matrix W_GG'
+    bs_coulomb_term  11    # Coulomb term included using the full matrix W_GG''
     bs_coupling       0    # Tamm-Dancoff approximation.
 
 The value [[bs_calctype]] = 1 specifies that the independent-particle
@@ -262,7 +264,7 @@ The k-point sampling is specified by the set of variables.
 
 The last section of the input file
 
-    ecutwfn 8.0   # Cutoff for the wavefunction.
+    ecutwfn 12.0   # Cutoff for the wavefunction.
     ecuteps 2.0   # Cutoff for W and /bare v used to calculate the BS matrix elements.
     inclvkb 2     # The Commutator for the optical limit is correctly evaluated.
 
@@ -275,7 +277,7 @@ can be found in the [[theory:bse|Bether-Salpeter notes]].
 
 ### Output files
 
-The output file, *tbs_2.out*, reports the basic parameters of the calculation
+The output file, *tbs_2.abo*, reports the basic parameters of the calculation
 and eventual WARNINGs that are issued if the iterative method does not converge.
 Please take some time to understand its structure.
 
@@ -340,9 +342,9 @@ First we have a header reporting the basic parameters of the calculation:
 # RESONANT-ONLY calculation
 # Coulomb term constructed with full W(G1,G2)
 # Scissor operator energy =  0.8000 [eV]
-# Tolerance =  0.0500
+# Tolerance =  0.0500 0.0000
 # npweps  = 27
-# npwwfn  = 283
+# npwwfn  = 531
 # nbands  = 8
 # loband  = 2
 # nkibz   = 64
@@ -371,8 +373,8 @@ Then comes the section with the real and the imaginary part of the macroscopic
 dielectric as a function of frequency for the different directions:
 
 ```sh
-# omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ...
-0.000  1.8026E+01  0.0000E+00  1.7992E+01  0.0000E+00  1.4292E+01  0.0000E+00  1.3993E+01 0.0000E+00  1.7117E+01  0.0000E+00  1.7080E+01  0.0000E+00
+# omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ... 
+  0.000   17.9912    0.0000   17.9578    0.0000   14.2584    0.0000   13.9627    0.0000   17.0848    0.0000   17.0421    0.0000
 .... .... ...
 ```
 
@@ -453,7 +455,7 @@ is already able to capture the most important physics.
 * Use the appropriate values for [[bs_exchange_term]] and [[bs_coulomb_term]] to calculate the BS spectrum
   without local field effects. Compare the results obtained with and without local field effects.
 
-* Modify the input file tbs_2.in so that the code reads in the resonant block produced in the previous run
+* Modify the input file tbs_2.abi so that the code reads in the resonant block produced in the previous run
   and calculates the spectrum employing the method based on the direct diagonalization (use [[irdbsreso]]
   to restart the run but remember to rename the file with the resonant block).
   Compare the CPU time needed by the two algorithms as a function of the number of transitions in the transition space.
@@ -507,9 +509,9 @@ study should be done once converged values for the other parameters have been al
 In this section we take advantage of the multi-dataset capabilities of ABINIT
 to perform calculations with different values for [[bs_loband]] and [[nband]]
 
-Before running the test take some time to read the input file *\$ABI_TESTS/tutorial/Input/tbs_3.in*.
+Before running the test take some time to read the input file *\$ABI_TESTS/tutorial/Input/tbs_3.abi*.
 
-{% dialog tests/tutorial/Input/tbs_3.in %}
+{% dialog tests/tutorial/Input/tbs_3.abi %}
 
 The convergence in the number of transitions is performed by defining two
 datasets with different values for [[nband]] and [[bs_loband]]
@@ -520,14 +522,14 @@ datasets with different values for [[nband]] and [[bs_loband]]
 
 
 The parameters defining how to build the excitonic Hamiltonian are similar to
-the ones used in *tbs_2.in*. The only difference is in the value used for [[bs_coulomb_term]], *i.e.*
+the ones used in *tbs_2.abi*. The only difference is in the value used for [[bs_coulomb_term]], *i.e.*
 
     bs_coulomb_term  10  # Coulomb term evaluated within the diagonal approximation.
 
 that allows us to save some CPU time during the computation of the Coulomb term.
 
-Also in this case, before running the test, we have to connect *tbs_3.in* to the
-WFK and the SCR file produced in the first step. Note that *tbs_3.in* uses
+Also in this case, before running the test, we have to connect *tbs_3.abi* to the
+WFK and the SCR file produced in the first step. Note that *tbs_3.abi* uses
 [[irdwfk]] and [[irdscr]] to read the external files, hence we have to create
 symbolic links for each dataset:
 
@@ -540,7 +542,7 @@ ln -s 444_shifted_WFK tbs_3i_DS2_WFK
 
 Now we can finally run the test with
 
-    abinit < tbs_3.files > tbs3.log 2> err &
+    abinit tbs_3.abi > tbs3.log 2> err &
 
 This job should last 3-4 minutes so be patient!
 
@@ -613,9 +615,9 @@ provided that, in the input file, we replace [[irdwfk]] and [[irdscr]] with
 ## Convergence with respect to the number of planewaves in the screening
 
 First of all, before running the calculation, take some time to understand
-what is done in *\$ABI_TESTS/tutorial/Input/tbs_4.in*.
+what is done in *\$ABI_TESTS/tutorial/Input/tbs_4.abi*.
 
-The structure of the input file is very similar to the one of *tbs_3.in*, the
+The structure of the input file is very similar to the one of *tbs_3.abi*, the
 main difference is in the first section:
 
     ndtset    2
@@ -625,7 +627,7 @@ main difference is in the first section:
 that instructs the code to execute two calculations where the direct term is
 constructed using different value of [[ecuteps]]. We also relax the diagonal-only
 approximation for the screening by setting [[bs_coulomb_term]] = 11 so that
-the non-locality of $W(\rr, \rr')$ is correctly taken into account.
+the non-locality of $W(\rr, \rr'')$ is correctly taken into account.
 
 It is important to stress that it is not necessary to recalculate the SCR file
 from scratch just to modify the value of [[ecuteps]] used in the BS run. The
@@ -637,7 +639,7 @@ block of the initial matrix. A WARNING message is issued if the value
 specified in the input file is larger than the one available in the SCR file.
 
 Now we can finally run the calculation. As usual, we have to copy
-*\$ABI_TESTS/tutorial/Input/tbs_4.files* in the working directory *Work_bs*,
+*\$ABI_TESTS/tutorial/Input/tbs_4.abi* in the working directory *Work_bs*,
 then we have to create a bunch of symbolic links for the input WFK and SCR files:
 
     ln -s 444_SCR tbs_4i_DS1_SCR
@@ -647,11 +649,11 @@ then we have to create a bunch of symbolic links for the input WFK and SCR files
 
 Now issue
 
-    abinit < tbs_4.files > tbs4.log 2> err &
+    abinit tbs_4.abi > tbs4.log 2> err &
 
 to execute the test (it should take around 2 minutes).
 
-{% dialog tests/tutorial/Input/tbs_4.in %}
+{% dialog tests/tutorial/Input/tbs_4.abi %}
 
 Once the calculation is completed, plot the spectra obtained with different [[ecuteps]] using |gnuplot|:
 
@@ -689,14 +691,14 @@ part since it requires the generation of new WFK files and of the new SCR file
 for each k-mesh (the list of k-points for the wavefunctions and the set of
 q-points in the screening must be consistent with each other).
 
-The file *\$ABI_TESTS/tutorial/Input/tbs_5.in* gathers the different steps of
+The file *\$ABI_TESTS/tutorial/Input/tbs_5.abi* gathers the different steps of
 a standard BS calculation (generation of two WFK file, screening calculation,
 BS run) into a single input. The calculation is done with the converged
 parameters found in the previous studies, only [[ngkpt]] has been intentionally left undefined.
 
-{% dialog tests/tutorial/Input/tbs_5.in %}
+{% dialog tests/tutorial/Input/tbs_5.abi %}
 
-Use *tbs_5.in* as a template for performing BS calculations with different
+Use *tbs_5.abi* as a template for performing BS calculations with different
 k-meshes. For example, you might try to compare the three meshes 4x4x4, 5x5x5,
 and 6x6x6. To facilitate the analysis of the results, we suggest to run the
 calculations in different directories so that we can keep the output results separated.
