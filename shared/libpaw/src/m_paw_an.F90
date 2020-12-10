@@ -613,7 +613,7 @@ subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
        paw_an_out => paw_an_cpy
      else
        msg=' npaw_an_out should be equal to my_natom !'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    else                            ! Parallelism: the copy operation is a gather
      call get_my_natom(my_comm_atom,my_natom,npaw_an_out)
@@ -621,7 +621,7 @@ subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
        paral_case=2;npaw_an_max=npaw_an_in
      else
        msg=' npaw_ij_in should be equal to my_natom !'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
  end if
@@ -908,7 +908,7 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
 
  if (master/=-1) then
    msg='simple gather (master/=-1) not yet implemented !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  my_natom=size(paw_an_in);natom=size(paw_an_gathered)
@@ -1030,12 +1030,12 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
  if (master==-1) then
    if (natom/=npaw_an_in_sum) then
      msg='Wrong sizes sum[npaw_an_in]/=natom !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  else
    if (me_atom==master.and.natom/=npaw_an_in_sum) then
      msg='(2) paw_an_gathered wrongly allocated !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -1229,11 +1229,11 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
  end do
  if (indx_int/=1+buf_int_size) then
    msg='Error (1) in paw_an_gather: wrong buffer sizes !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (indx_dp/=1+buf_dp_size) then
    msg='Error (2) in paw_an_gather: wrong buffer sizes !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Communicate (1 gather for integers, 1 gather for reals)
@@ -2053,7 +2053,7 @@ subroutine paw_an_isendreceive_getbuffer(paw_an,npaw_an_send,atm_indx_recv,buf_i
  end do ! iat
  if ((indx_int/=1+buf_int_size).or.(indx_dp/=1+buf_dp_size)) then
    write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 end subroutine paw_an_isendreceive_getbuffer
@@ -2308,7 +2308,7 @@ subroutine paw_an_isendreceive_fillbuffer(paw_an, atmtab_send,atm_indx_send,npaw
  if ((indx_int-1/=buf_int_size).or.(indx_dp-1/=buf_dp_size)) then
    write(msg,'(4(a,i10))') 'Wrong buffer sizes: buf_int =',buf_int_size,'/',indx_int-1,&
    &                                           ' buf_dp =',buf_dp_size ,'/',indx_dp-1
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 end subroutine paw_an_isendreceive_fillbuffer

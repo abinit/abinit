@@ -881,7 +881,7 @@ real(dp) :: strten(6)
    write (ionmov22_errmsg, '(a,i0,3a)') &
     'Lbfgs routine failed. Returned value: ', info,ch10, &
     'Restart your calculation from last step or try a different ionmov'
-   MSG_ERROR_CLASS(ionmov22_errmsg, "Ionmov22Error")
+   ABI_ERROR_CLASS(ionmov22_errmsg, "Ionmov22Error")
  end if
 
 !zDEBUG (vin,vout after prediction)

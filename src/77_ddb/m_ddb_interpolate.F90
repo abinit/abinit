@@ -485,7 +485,7 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
  ABI_FREE(born_effective_charge_tensor_mask)
 
 #else
- MSG_ERROR("NETCDF support required to write DDB.nc file.")
+ ABI_ERROR("NETCDF support required to write DDB.nc file.")
 #endif
 
  contains

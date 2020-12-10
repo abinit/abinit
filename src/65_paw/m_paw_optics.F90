@@ -285,7 +285,7 @@ CONTAINS  !=====================================================================
            tmp_shape = shape(mpi_enreg%proc_distrb)
            if (ikpt > tmp_shape(1)) then
              message = ' optics_paw : ikpt out of bounds '
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
 !          MJV 6/12/2008: looks like mpi_enreg may not be completely initialized here
            if (abs(mpi_enreg%proc_distrb(ikpt,jb,isppol)-me_kpt)/=0) cycle
@@ -869,7 +869,7 @@ CONTAINS  !=====================================================================
 
 !Read data file
  if (open_file(filnam,msg,newunit=inpunt,form='formatted') /= 0 ) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  rewind(inpunt)
@@ -885,7 +885,7 @@ CONTAINS  !=====================================================================
  call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
  call hdr%free()
  if (fform1 /= 610) then
-   MSG_ERROR("Abinit8 requires an OPT file with fform = 610")
+   ABI_ERROR("Abinit8 requires an OPT file with fform = 610")
  end if
 
 !Open the conducti optic files
@@ -1039,11 +1039,11 @@ CONTAINS  !=====================================================================
  end do ! end loop over ii
 
  if (open_file(trim(filnam_out)//'_imag',msg,newunit=reunt,form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (open_file(trim(filnam_out)//'_real',msg,unit=imunt,form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(reunt,'(a12,6a13)')' # Energy/Ha ','eps_2_xx','eps_2_yy','eps_2_zz',&

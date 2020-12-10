@@ -288,7 +288,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
      write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
      write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
    end if
-   MSG_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
+   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
  end if
 
 

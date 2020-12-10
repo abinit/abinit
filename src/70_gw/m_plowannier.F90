@@ -503,7 +503,7 @@ subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom
      write(message,'(3a,2i6)') "  Number of wannier functions is larger than" ,&
      &" number of Kohn Sham bands used for Wannier functions: decrease the number of Wannier functions", &
      &" or increase the number of bands ",norbtot,wan%bandf_wan-wan%bandi_wan+1
-     !MSG_ERROR(message)
+     !ABI_ERROR(message)
    endif
    if(plowan_compute==2) then
      write(message,'(3a)')  ch10,' == plowan_compute=2 => off diag blocks in the k-space Wannier Hamiltonian matrix',&
@@ -817,7 +817,7 @@ else
   write(message,*)ch10,"Normalization of plowannier on the sum of the k-points"
 endif
 
-MSG_COMMENT(message)
+ABI_COMMENT(message)
 !opt=1
         ! 0 : normalization k-point by k-point (normal use of plowan)
         ! 1 : normalization of the sum over k-points (use with crpa old keywords)
@@ -846,7 +846,7 @@ MSG_COMMENT(message)
  if(plowan_hybrid>0)   dos=-plowan_hybrid
  if(plowan_hybrid>0.and.plowan_greendos>0) then
    write(message,*) " plowan_hybrid and plowan_greendos cannot be both >0"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
 
  ! GREEN STUDY PARAMETERS (FREQUENCIES)
@@ -904,13 +904,13 @@ MSG_COMMENT(message)
 
  if(usecprj==0) then
    write(message,*) "  usecprj=0 : BUG in init_plowannier",usecprj
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(wan%nspinor/=dtset%nspinor) then
    write(message,*) "  wan%nspinor=/dtset%nspinor, init_plowannier is not working in this case",&
 &   wan%nspinor,dtset%nspinor
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -952,7 +952,7 @@ MSG_COMMENT(message)
  end if
  if(dtset%nstep==0) then
    message = 'nstep should be greater than 1'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 
@@ -966,7 +966,7 @@ MSG_COMMENT(message)
 !*****************   in forlb.eig
  if(me.eq.0.and.abs(dtset%pawprtvol)>=3) then
    if (open_file('forlb.eig',message,newunit=unt,form='formatted',status='unknown') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind(unt)
    write(unt,*) " Number of bands,   spins, and  k-point; and spin-orbit flag"
@@ -1023,7 +1023,7 @@ MSG_COMMENT(message)
      end do
      if (count .eq. 0) then
        write(message,'(a)') " The projector choice is not consistent with the orbital l"
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      else !good choice of projector
        wan%psichi(1,1,iatom)%atom(il)%ph0phiint = zero
        do ilmn2 = 1,lmn_size
@@ -1379,7 +1379,7 @@ MSG_COMMENT(message)
              write(mat_writing,'(a)') " An eigenvalue has an imaginary part: ikpt, atom, l, m, isppol, value"
              write(mat_writing2,'(i0,i0,i0,i0,i0,E15.6)') ikpt, iatom1, il1, im1, isppol, &
   &                   operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(m1,m1,isppol,1,1)
-             MSG_ERROR(message)
+             ABI_ERROR(message)
 
            end if
          end do
@@ -1473,7 +1473,7 @@ endif
    call wrtout(std_out,message,'COLL')
    if (me.eq.0) then
      if (open_file(owrfile, message, newunit=owrunt, form="unformatted", status="unknown", action="write") /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      rewind(owrunt)
      do isppol = 1,wan%nsppol
@@ -1520,7 +1520,7 @@ endif
 
  if (3==4.and.prtint .eq. 1 .and. dtset%plowan_realspace == 1 ) then
    if (open_file(trim(dtfil%filnam_ds(4))//'_inter',message, newunit=unt) /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    write(unt,'(a,i0,a,F7.3)') "# nsppol = ",wan%nsppol," and acell = ",dtset%acell_orig(1,1)
    write(unt,'(a)') "# Interaction between an orbital and another (in Hartree) : isppol iatom1 pos1 iproj1 iatom2 pos2 iproj2 value"
@@ -1598,7 +1598,7 @@ endif
    call wrtout(std_out,message,'COLL')
 
    if (open_file(owrfile, message, newunit=owrunt, form="unformatted", status="old", action="read") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind(owrunt)
    do isppol = 1,wan%nsppol
@@ -1736,7 +1736,7 @@ endif
              operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(:,:,isppol,1,1) = matrix_to_diag(:,:)
            else
              write(message,'(a)') "Error in the normalization of the Wannier eigenvalues" ! BA?
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
          end do
          ABI_DEALLOCATE(matrix_to_diag)
@@ -1793,7 +1793,7 @@ endif
          end do
        else
          write(message,'(a)') "Error in the normalization of the Wannier eigenvalues" ! BA?
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        !Finally, we write the value diagonalized back into operwan
        index_l = 0
@@ -1842,7 +1842,7 @@ endif
      write(x1,i2s) iatom1       ! at the end of the filename
      if (wan%nsppol .eq. 1 .and. me.eq.0 ) then
        if (open_file(trim(dtfil%filnam_ds(4))//"_BANDSTRUCT"//trim(x1),message,newunit=unt) /= 0) then
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        write(unt,'(a,i0)') "#Wannier band structure for the atom ",iatom1
        write(message,'(2a,i2)') ch10," Wannier band structure for atom ",iatom1
@@ -1869,10 +1869,10 @@ endif
        close(unt)
      else if (wan%nsppol .eq. 2) then
        if (open_file(trim(dtfil%filnam_ds(4))//"_BANDSTRUCTUP"//trim(x1),message,newunit=unt) /= 0) then
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        if (open_file(trim(dtfil%filnam_ds(4))//"_BANDSTRUCTDN"//trim(x1),message,newunit=unt2) /= 0) then
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        write(unt,'(a,i0,a)') "#Wannier band structure for the atom ",iatom1, " polarization up"
        write(unt2,'(a,i0,a)') "#Wannier band structure for the atom ",iatom1, " polarization down"
@@ -1918,7 +1918,7 @@ endif
  if (plowan_computegreen .eq. 1 .and. me.eq.0 ) then
    if (dos .ge. 1) then ! compute partial DOS for l=dos
      if (open_file(trim(dtfil%filnam_ds(4))//"_dosfromgreen",message,newunit=dos_unt) /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      write(dos_unt,'(a)') "#DOS function for the first atom computed with the Green function"
      write(dos_unt,'(a,i0,a,i0)') "# l = ",wan%latom_wan(1)%lcalc(dos)," bands ; nsppol = ",wan%nsppol
@@ -1926,7 +1926,7 @@ endif
 
      if(wan%nsppol>=2) then
        if (open_file(trim(dtfil%filnam_ds(4))//"_dosfromgreen_b",message,newunit=dos_unt2) /= 0) then
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        write(dos_unt2,'(a)') "#DOS function for the first atom computed with the Green function"
        write(dos_unt2,'(a,i0,a,i0)') "# l = ",wan%latom_wan(1)%lcalc(dos)," bands ; nsppol = ",wan%nsppol
@@ -1936,14 +1936,14 @@ endif
 
    if (dos .le. -1) then ! compute Hybri for l=|dos|
      if (open_file(trim(dtfil%filnam_ds(4))//"_hybridization",message,newunit=dos_unt) /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      write(dos_unt,'(a)') "#Hybridization obtained from the green function for the bands selected"
      write(dos_unt,'(a,i0,a,i0)') "# l = ",wan%latom_wan(1)%lcalc(abs(dos))," bands ; nsppol = ",wan%nsppol
      write(dos_unt,'(a)') "#isppol, frequency, F(m=0), F(m=1), F(m=2) ..."
      if(wan%nsppol>=2)   then
        if (open_file(trim(dtfil%filnam_ds(4))//"_hybridization_b",message, newunit=dos_unt2) /= 0) then
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        write(dos_unt2,'(a)') "#Hybridization obtained from the green function for the bands selected"
        write(dos_unt2,'(a,i0,a,i0)') "# l = ",wan%latom_wan(1)%lcalc(abs(dos))," bands ; nsppol = ",wan%nsppol
@@ -2353,7 +2353,7 @@ end subroutine compute_coeff_plowannier
 
  !Creation of the data.plowann file
  if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='replace') /= 0) then
-  MSG_ERROR(msg)
+  ABI_ERROR(msg)
  end if
  rewind(unt)
 
@@ -2434,7 +2434,7 @@ end subroutine compute_coeff_plowannier
 
  !Opening of the data.plowann file
  if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='old') /= 0) then
-  MSG_ERROR(msg)
+  ABI_ERROR(msg)
  end if
  rewind(unt)
 
@@ -2454,7 +2454,7 @@ end subroutine compute_coeff_plowannier
  if (natom /= wan_in%natom_wan .OR.&
 & nbl/= sum(wan_in%nbl_atom_wan(:)) .OR. nspin /= wan_in%nsppol .OR. nkpt/=wan_in%nkpt ) then
    write(msg,'(a,3i3)')"Not the same atoms or bands in both datasets",natom,bandi,bandf
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  endif
 
  call init_plowannier(bandf,bandi,dtset%plowan_compute,&
@@ -3167,14 +3167,14 @@ subroutine normalization_plowannier(wan,opt)
                             write(message,'(a,i0,a,F18.11)') 'Normalization error for ikpt =',ikpt,&
                               &' on diag, value = ',&
                               &abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2))
-                            MSG_ERROR(message)
+                            ABI_ERROR(message)
                           end if
                         else
                           if (abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)) > 1d-8) then
                             write(message,'(a,i0,a,F10.3)') 'Normalization error for ikpt =',ikpt,&
                               &' not on diag, value = ',&
                               &abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2))
-                            MSG_ERROR(message)
+                            ABI_ERROR(message)
                           end if
                         end if
                       end if
@@ -3191,7 +3191,7 @@ subroutine normalization_plowannier(wan,opt)
   if (opt==0 .and. nb_zeros_tot/=0) then
     write(message,'(a,i2,a)')"The matrix inversion detects ",nb_zeros_tot,&
     " zero(s) on the diagonals. Take results with caution or modify nkpt and/or bands for plowan"
-    MSG_COMMENT(message)
+    ABI_COMMENT(message)
   end if
 
   !!Uncomment to print the overlap matrix in the log file (for ikpt = 1)
@@ -3285,7 +3285,7 @@ subroutine print_operwan(wan,operwan,name,convert)
   character(len = 500) :: str1,str2,msg
 
   if (open_file(name, msg, newunit=unt) /= 0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   write(unt,'(a)') '\documentclass[11pt,a4paper,landscape]{article}'

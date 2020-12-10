@@ -273,7 +273,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !Local ionic potential and/or pseudo core charge by method 1
  if (vloc_method==1.or.coredens_method==1.or.coretau_method==1) then
    if (psps%nc_xccc_gspace==1.and.psps%usepaw==0.and.is_hybrid_ncpp) then
-     MSG_BUG(' Not yet implemented !')
+     ABI_BUG(' Not yet implemented !')
    end if
    call timab(550,1,tsec)
 !  Allocate (unused) dummy variables, otherwise some compilers complain
@@ -1597,7 +1597,7 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
 &   'Constraint matrix is not positive definite,',ch10,&
 &   'probably because constraints are linearly dependent.',ch10,&
 &   'Action: Check for linear dependence of constraints.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !The solution vector is returned in fvector, so copy it to a more sensible location

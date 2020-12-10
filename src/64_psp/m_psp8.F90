@@ -204,7 +204,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  else
    write(msg, '(a,i0,2a)' ) 'invalid extension_switch: ',extension_switch,ch10,&
 &   'Should be [0,1] for scalar-relativistic psp or [2,3] to include spin-orbit'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if(lloc<4) then
@@ -214,7 +214,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &     'for angular momentum',lloc,' which is the local potential.',ch10,&
 &     'Should be 0 for the local potential',ch10,&
 &     'Action: check your pseudopotential input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -229,12 +229,12 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    if (pspso==0) then
      write (msg, '(3a)') 'You are reading a pseudopotential file with spin orbit projectors',ch10,&
 &     ' but internal variable pspso is 0'
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
  else
    write(msg, '(a,i0,2a)' ) 'invalid extension_switch: ',extension_switch,ch10,&
 &   'Should be [0,1] for scalar-relativistic psp or [2,3] to include spin-orbit'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  pspindex=0;iln=0;indlmn(:,:)=0
@@ -325,7 +325,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &   'or has inconsistent general local potential index',ch10,&
 &   'Expected',ll_err-1,' , got',ll,ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Check that rad grid is linear starting at zero
@@ -339,7 +339,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &   'Pseudopotential input file requires linear radial mesh',ch10,&
 &   'starting at zero.',ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Get core charge function and derivatives, if needed
@@ -469,7 +469,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &     'Pseudopotential input file requires linear radial mesh',ch10,&
 &     'starting at zero.',ch10,&
 &     'Action: check your pseudopotential input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    !  Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
@@ -487,7 +487,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp8in
 !!***
@@ -563,7 +563,7 @@ subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
    'Pseudopotential input file requires linear radial mesh',ch10,&
    'starting at zero.',ch10,&
    'Action: check your pseudopotential input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Check that input rchrg is consistent with last grid point
@@ -572,7 +572,7 @@ subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
    'Pseudopotential input file core charge mesh',ch10,&
    'is inconsistent with rchrg in header.',ch10,&
    'Action: check your pseudopotential input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Factors for unit range scaling
@@ -624,7 +624,7 @@ subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp8cc
 !!***

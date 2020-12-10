@@ -305,7 +305,7 @@ subroutine getRecordMarkerLength_wffile(wff)
     end do
 
     if (ierr/=MPI_SUCCESS) then
-     MSG_BUG("Header problem")
+     ABI_BUG("Header problem")
     end if
 
    if (ii==iimax.and.wff%nbOct_recMarker<=0) then
@@ -326,11 +326,11 @@ subroutine getRecordMarkerLength_wffile(wff)
 &      '  - Quota limit exceeded,',ch10,&
 &      '  - R/W incorrect permissions,',ch10,&
 &      '  - WFK file requested as input (irdwfk=1/getwfk=1) but not existing ...'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      write(msg,'(a,i0)') &
 &     '  MPI/IO accessing FORTRAN file header: detected record mark length=',wff%nbOct_recMarker
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
 
  end if  ! me=master
@@ -440,7 +440,7 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
      call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
      recordmarker = delim_record2(1)
    else
-     MSG_BUG('Wrong record marker length!')
+     ABI_BUG('Wrong record marker length!')
    end if
 
  else if (option==2) then
@@ -459,7 +459,7 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
      delim_record2 = recordmarker
      call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
    else
-     MSG_BUG('Wrong record marker length!')
+     ABI_BUG('Wrong record marker length!')
    end if
 
  else if (option==3) then
@@ -478,7 +478,7 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
      call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
      recordmarker = delim_record2(1)
    else
-     MSG_BUG('Wrong record marker length !')
+     ABI_BUG('Wrong record marker length !')
    end if
 
  else if (option==4) then
@@ -497,11 +497,11 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
      delim_record2 = recordmarker
      call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
    else
-     MSG_BUG('Wrong record marker length!')
+     ABI_BUG('Wrong record marker length!')
    end if
 
  else
-   MSG_BUG('Wrong value for option!')
+   ABI_BUG('Wrong value for option!')
  end if
 
  posit = posit + recordmarker + 2*wff%nbOct_recMarker
@@ -907,7 +907,7 @@ subroutine clsopn(wff)
 &     '  May be due to temporary problem with file, disks or network.',&
 &     '  Action: check whether there might be some external problem,',&
 &     '  then resubmit.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
 
 !    od is a logical variable which is set to true if the specified
 !    unit is connected to a file; otherwise it is set to false.
@@ -919,7 +919,7 @@ subroutine clsopn(wff)
 &     '  May be due to temporary problem with file, disks or network.',&
 &     '  Action: check whether there might be some external problem,',&
 &     '  then resubmit.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
 
 !    nmd is a logical variable assigned the value true if the file
 !    has a name; otherwise false.  A scratch file is not named.
@@ -1097,14 +1097,14 @@ subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
  ier=0
  if (wff%iomode==IO_MODE_FORTRAN) then !  All processors see a local file
    if (open_file(filename, message, unit=unwff, form="unformatted") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind(unwff)
 
  else if (wff%iomode==IO_MODE_FORTRAN_MASTER) then !  Only the master processor see a local file
    if(master==me)then
      if (open_file(filename, message, unit=unwff, form="unformatted") /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      rewind(unwff)
    end if
@@ -1113,7 +1113,7 @@ subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
  else if (wff%iomode==IO_MODE_MPI)then ! In the parallel case, only the master open filename file
    if(master==me)then
      if (open_file(filename, message, unit=unwff, form="unformatted") /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      rewind(unwff)
    end if
@@ -1168,7 +1168,7 @@ subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
 &   'or 3 (only sequential, and if the NetCDF and ETSF_IO libraries have been enabled).',ch10,&
 &   'Its value is iomode= ',wff%iomode,'.',ch10,&
 &   'Action: change iomode or use ABINIT in parallel or enable NetCDF and/or ETSF_IO.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 end subroutine WffOpen
@@ -1435,7 +1435,7 @@ subroutine WffReadDataRec_dp1d(dparray,ierr,ndp,wff)
 #endif
  else
    write(msg,'(a,i0)')"Wrong iomode: ",wff%iomode
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine WffReadDataRec_dp1d
@@ -1493,7 +1493,7 @@ subroutine WffReadDataRec_dp2d(dparray,ierr,n1,n2,wff)
 #endif
  else
    write(msg,'(a,i0)')"Wrong iomode: ",wff%iomode
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine WffReadDataRec_dp2d
@@ -1584,7 +1584,7 @@ subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
    !
    !      if (rank==master) call mpifoo_seq()
 
-   MSG_WARNING("Skipping read in WffReadNpwRec. Keep fingers crossed")
+   ABI_WARNING("Skipping read in WffReadNpwRec. Keep fingers crossed")
    ! MG: Must initialze these values somehow to avoid overflows.
    npw = 0; nspinor = 0; nband_disk = 0
  end if
@@ -1764,7 +1764,7 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
  offset=wff%offwff+nband_disk*totsize1bandByte
  if (offset>Huge(offset)) then
    msg='File is too large for MPI-IO specifications !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Open file
@@ -1967,7 +1967,7 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
        end if
        if (rdwr==1.and.jerr==1) then
          write(unit=msg,fmt='(2a)') 'Error when reading record markers of file ',trim(wff%fname)
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if  ! me_mpiio=0
 
@@ -2052,7 +2052,7 @@ subroutine WffWriteDataRec_int2d(intarray,ierr,n1,n2,wff)
 #endif
  else
    write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine WffWriteDataRec_int2d
@@ -2110,7 +2110,7 @@ subroutine WffWriteDataRec_dp1d(dparray,ierr,ndp,wff)
 #endif
  else
    write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine WffWriteDataRec_dp1d
@@ -2169,7 +2169,7 @@ subroutine WffWriteDataRec_dp2d(dparray,ierr,n1,n2,wff)
 #endif
  else
    write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine WffWriteDataRec_dp2d
@@ -2248,7 +2248,7 @@ subroutine WffWriteNpwRec(ierr,nband_disk,npw,nspinor,wff,&
 #endif
  else
    write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine WffWriteNpwRec
@@ -2306,7 +2306,7 @@ subroutine xderiveRead_int(wff,xval,ierr)
  ABI_UNUSED(wff%me)
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_int
 !!***
@@ -2392,7 +2392,7 @@ subroutine xderiveRead_int1d(wff,xval,n1,spaceComm,ierr)
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_int1d
 !!***
@@ -2479,7 +2479,7 @@ subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_int2d
 !!***
@@ -2537,7 +2537,7 @@ subroutine xderiveRead_dp(wff,xval,ierr)
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_dp
 !!***
@@ -2624,7 +2624,7 @@ end subroutine xderiveRead_dp
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_dp1d
 !!***
@@ -2710,7 +2710,7 @@ subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 end subroutine xderiveRead_dp2d
 !!***
@@ -2847,7 +2847,7 @@ subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 #endif
 
  write(msg,'(a,i0,a)')' The value of wff%iomode=',wff%iomode,' is not allowed.'
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
 
 
 end subroutine xderiveRead_int2d_displ
@@ -3110,13 +3110,13 @@ subroutine xmpi_read_int2d(wff,xval,spaceComm,sc_mode,ierr)
 
      case default
        write(msg,('(a,i0)'))" Wrong value for sc_mode: ",sc_mode
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
    end select
 
    totoct=nboct
  else
    write(msg,('(a,2(i0,1x))'))" delim_record < nboct: ",delim_record,nboct
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=MPI_ERR_UNKNOWN
    totoct=0
  end if

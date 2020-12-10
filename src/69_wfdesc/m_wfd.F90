@@ -571,7 +571,7 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
    ABI_MALLOC(Kdata%kg_k,(3,npw_k))
    Kdata%kg_k = kg_k
  else
-   MSG_ERROR("Either ecut or kg_k must be present")
+   ABI_ERROR("Either ecut or kg_k must be present")
  end if
  Kdata%npw = npw_k
 
@@ -794,7 +794,7 @@ subroutine copy_kdata_1D(Kdata_in, Kdata_out)
 !************************************************************************
 
  if (size(Kdata_in,DIM=1) /= size(Kdata_out,DIM=1)) then
-   MSG_ERROR("copy_kdata_1D: wrong sizes !")
+   ABI_ERROR("copy_kdata_1D: wrong sizes !")
  end if
 
  do ik=LBOUND(Kdata_in,DIM=1),UBOUND(Kdata_in,DIM=1)
@@ -964,7 +964,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  if (.not. iscompatibleFFT) then
    msg = "FFT mesh is not compatible with symmetries. Wavefunction symmetrization might be affected by large errors!"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  ! Is the real space mesh compatible with the rotational part?
@@ -1619,7 +1619,7 @@ subroutine wfd_copy_cg(wfd, band, ik_ibz, spin, cg)
 
  if (.not. wave%has_ug == WFD_STORED) then
    write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band,ik_ibz,spin," is not stored in memory!"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  siz = wfd%npwarr(ik_ibz) * wfd%nspinor
@@ -1692,7 +1692,7 @@ subroutine wfd_get_ur(Wfd, band, ik_ibz, spin, ur)
    ! FFT is required.
    if (.not. wave%has_ug == WFD_STORED) then
      write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band,ik_ibz,spin," is not stored in memory!"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ug => wave%ug
@@ -1716,7 +1716,7 @@ subroutine wfd_get_ur(Wfd, band, ik_ibz, spin, ur)
    call xcopy(nfft*nspinor, wave%ur, 1, ur, 1)
 
  case default
-   MSG_BUG(sjoin("Wrong has_ur:", itoa(wave%has_ur)))
+   ABI_BUG(sjoin("Wrong has_ur:", itoa(wave%has_ur)))
  end select
 
 end subroutine wfd_get_ur
@@ -2099,7 +2099,7 @@ subroutine wave_free(Wave, what)
  my_what="ALL"; if (present(what)) my_what=toupper(what)
 
  if (.not.firstchar(my_what, ["A", "G", "R", "C"] )) then
-   MSG_ERROR(sjoin("Unknow what:", what))
+   ABI_ERROR(sjoin("Unknow what:", what))
  end if
 
  if (firstchar(my_what, ["A", "G"])) then
@@ -2291,12 +2291,12 @@ subroutine wfd_push_ug(Wfd, band, ik_ibz, spin, Cryst, ug, update_ur, update_cpr
 !************************************************************************
 
  if (size(ug) /= Wfd%npwarr(ik_ibz) * Wfd%nspinor) then
-   MSG_ERROR("Wrong size in assumed shape array")
+   ABI_ERROR("Wrong size in assumed shape array")
  end if
 
  if (any(wfd%bks2wfd(:, band, ik_ibz, spin) == 0)) then
    write(msg,'(a,i0,a,3(i0,1x))')" MPI rank ",Wfd%my_rank," doesn't have ug for (band, ik_ibz, spin): ",band,ik_ibz,spin
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ib = wfd%bks2wfd(1, band, ik_ibz, spin)
@@ -2310,7 +2310,7 @@ subroutine wfd_push_ug(Wfd, band, ik_ibz, spin, Cryst, ug, update_ur, update_cpr
  if (Wfd%debug_level>0) then
    if (wave%has_ug == WFD_NOWAVE) then
      write(msg,'(a,i0,a,3(i0,1x))')" MPI rank ",Wfd%my_rank," doesn't have ug for (band, ik_ibz, spin): ",band,ik_ibz,spin
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -2393,11 +2393,11 @@ subroutine wfd_extract_cgblock(Wfd,band_list,ik_ibz,spin,cgblock)
  npw_k = Wfd%npwarr(ik_ibz)
 
  if (size(cgblock, dim=1) /= 2) then
-   MSG_ERROR("Wrong size(1) in assumed shape array")
+   ABI_ERROR("Wrong size(1) in assumed shape array")
  end if
 
  if (size(cgblock, dim=2) /= Wfd%nspinor* npw_k * size(band_list)) then
-   MSG_ERROR("Wrong size in assumed shape array")
+   ABI_ERROR("Wrong size in assumed shape array")
  end if
 
  start = 1
@@ -2406,7 +2406,7 @@ subroutine wfd_extract_cgblock(Wfd,band_list,ik_ibz,spin,cgblock)
    ABI_CHECK(wfd%get_wave_ptr(band, ik_ibz, spin, wave, msg) == 0, msg)
    if (wave%has_ug /= WFD_STORED) then
      write(msg,"(3(a,i0),a)")"u(g) for band: ",band,", ik_ibz: ",ik_ibz,", spin: ",spin," is not stored!"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    istop = start + Wfd%nspinor*npw_k - 1
    cgblock(1,start:istop) = REAL(wave%ug)
@@ -2464,7 +2464,7 @@ function wfd_rank_has_ug(Wfd,rank,band,ik_ibz,spin)
    wfd_rank_has_ug = (Wfd%bks_tab(band,ik_ibz,spin,rank) == bks_flag); RETURN
  else
    nzeros = COUNT(indices==0)
-   if (nzeros==3) MSG_ERROR("All indices are zero!")
+   if (nzeros==3) ABI_ERROR("All indices are zero!")
 
    if (band==0) then
      if (nzeros==1) wfd_rank_has_ug = ANY( Wfd%bks_tab(:,ik_ibz,spin,rank)==bks_flag)
@@ -2767,7 +2767,7 @@ subroutine wfd_get_ug(Wfd, band, ik_ibz, spin, ug)
 
  if (.not. wave%has_ug == WFD_STORED) then
    write(msg,'(a,i0,a,3i0)')" Node ",Wfd%my_rank," doesn't have (band,ik_ibz,spin): ",band,ik_ibz,spin
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  npw_k = Wfd%npwarr(ik_ibz)
@@ -2932,7 +2932,7 @@ subroutine wfd_who_has_ug(Wfd,band,ik_ibz,spin,how_many,proc_ranks)
 
  else
    write(msg,'(a,3(i0,1x))')" Wrong value for (b,k,s): ",band,ik_ibz,spin
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine wfd_who_has_ug
@@ -3084,7 +3084,7 @@ subroutine wfd_set_mpicomm(Wfd)
      Wfd%bks_comm(0,0,spin) = spin_comm
      call xmpi_group_free(spin_group)
    else
-     MSG_WARNING(sjoin("Nobody has spin:",itoa(spin)))
+     ABI_WARNING(sjoin("Nobody has spin:",itoa(spin)))
      Wfd%bks_comm(0,0,spin) = xmpi_comm_null
    end if
 
@@ -3174,7 +3174,7 @@ subroutine wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmask)
      end if
    else
      write(msg,'(a,3(i0,1x))')" No processor has (band, ik_ibz, spin): ",band,ik_ibz,spin
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -3249,7 +3249,7 @@ subroutine wfd_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
      npw_k  = Wfd%npwarr(ik_ibz)
      istwf_k = Wfd%istwfk(ik_ibz)
      if (istwf_k /= 1) then
-       MSG_WARNING("wfd_rotate with istwfk /= 1")
+       ABI_WARNING("wfd_rotate with istwfk /= 1")
      end if
      umat_sk => m_ks_to_qp(:,:,ik_ibz,spin)
 
@@ -3449,7 +3449,7 @@ subroutine wfd_bks_distrb(Wfd, bks_distrb, got, bks_mask)
        else
          call wfd%dump_errinfo()
          write(msg,'(a,3(i0,1x))')" Nobody has (band, ik_ibz, spin): ",band,ik_ibz,spin
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
      end do
@@ -3518,7 +3518,7 @@ subroutine wfd_sanity_check(Wfd)
 
  if (ierr/=0) then
    if (open_file("__WFD_DEBUG__",msg,newunit=unt_dbg,form="formatted") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    do irank=0,Wfd%nproc-1
@@ -3537,7 +3537,7 @@ subroutine wfd_sanity_check(Wfd)
    end do
    close(unt_dbg)
    call xmpi_barrier(Wfd%comm)
-   MSG_ERROR("Sanity check failed. Check WFD_DEBUG")
+   ABI_ERROR("Sanity check failed. Check WFD_DEBUG")
  end if
 
 end subroutine wfd_sanity_check
@@ -3589,7 +3589,7 @@ subroutine wfd_dump_errinfo(Wfd,onfile)
      call int2char10(Wfd%my_rank,strank)
      fname_dbg = "WFD_DEBUG_RANK"//TRIM(strank)
      if (open_file(fname_dbg,msg,newunit=unt_dbg,form="formatted") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
  end if
@@ -3790,7 +3790,7 @@ subroutine wfd_distribute_kb_kpbp(Wfd,ik_ibz,ikp_ibz,spin,allup,my_nbbp,bbp_dist
          else
            call wfd%dump_errinfo()
            write(msg,'(a,5(i0,1x))')" Nobody has (band1, ik_ibz) (band2, ikp_ibz) spin: ",ib1,ik_ibz,ib2,ikp_ibz,spin
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
 
        end if
@@ -3864,7 +3864,7 @@ subroutine wfd_get_cprj(Wfd, band, ik_ibz, spin, Cryst, Cprj_out, sorted)
    ! Have to calculate it!
    if (.not. wave%has_ug == WFD_STORED) then
      write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band,ik_ibz,spin," is not stored in memory!"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! Get cprj.
    call wfd%ug2cprj(band,ik_ibz,spin,choice1,idir0,Wfd%natom,Cryst,Cprj_out,sorted=sorted)
@@ -3889,7 +3889,7 @@ subroutine wfd_get_cprj(Wfd, band, ik_ibz, spin, Cryst, Cprj_out, sorted)
            call pawcprj_copy(Cprj_out(iatom:iatom,:), wave%Cprj(sidx:sidx,:))
          end do
        case default
-         MSG_ERROR(sjoin("Wrong value for want_order:", itoa(want_order)))
+         ABI_ERROR(sjoin("Wrong value for want_order:", itoa(want_order)))
        end select
      end if
    end if
@@ -3912,12 +3912,12 @@ subroutine wfd_get_cprj(Wfd, band, ik_ibz, spin, Cryst, Cprj_out, sorted)
          call pawcprj_copy(wave%Cprj(sidx:sidx,:),Cprj_out(iatom:iatom,:))
        end do
      case default
-       MSG_ERROR(sjoin("Wrong value for want_order:", itoa(want_order)))
+       ABI_ERROR(sjoin("Wrong value for want_order:", itoa(want_order)))
      end select
    end if
 
  case default
-   MSG_BUG(sjoin("Wrong has_cprj: ", itoa(wave%has_cprj)))
+   ABI_BUG(sjoin("Wrong has_cprj: ", itoa(wave%has_cprj)))
  end select
 
 end subroutine wfd_get_cprj
@@ -3997,7 +3997,7 @@ subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,Wfd%ngfft,Wfd%irottb,iscompatibleFFT)
 
  if (.not.iscompatibleFFT) then
-   MSG_WARNING("FFT mesh not compatible with symmetries. Wavefunction symmetrization should not be done in r-space!")
+   ABI_WARNING("FFT mesh not compatible with symmetries. Wavefunction symmetrization should not be done in r-space!")
  end if
 
  ! Is the new real space FFT mesh compatible with the rotational part?
@@ -4333,7 +4333,7 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
    if (my_trans=="C") ur_kbz = GWPC_CONJG(ur_kbz)
 
  CASE (2)
-   MSG_ERROR("Implementation has to be tested")
+   ABI_ERROR("Implementation has to be tested")
 
    nr = Wfd%nfft
    spinrot_k = Cryst%spinrot(:,isym_k)
@@ -4347,7 +4347,7 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
      ur_kbz(1:nr)     = GWPC_CONJG(ur(nr+1:2*nr))
      ur_kbz(nr+1:2*nr)=-GWPC_CONJG(ur(1:nr))
    else
-     MSG_ERROR('Wrong i2 in spinor')
+     ABI_ERROR('Wrong i2 in spinor')
    end if
    !
    ! Rotate wavefunctions in real space.
@@ -4378,7 +4378,7 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
    end if
 
  CASE DEFAULT
-   MSG_ERROR(sjoin("Wrong value for nspinor: ", itoa(Wfd%nspinor)))
+   ABI_ERROR(sjoin("Wrong value for nspinor: ", itoa(Wfd%nspinor)))
  END SELECT
 
  ABI_FREE(ur)
@@ -4552,7 +4552,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
  call wrtout(std_out, sjoin('Writing GS WFK file: ',wfk_fname,", with iomode ",iomode2str(iomode)))
 
  if (nprocs > 1 .and. iomode /= IO_MODE_MPI) then
-   MSG_ERROR("You need MPI-IO to write wavefunctions in parallel")
+   ABI_ERROR("You need MPI-IO to write wavefunctions in parallel")
  end if
  !
  ! Check consistency between Wfd and Header!
@@ -4562,7 +4562,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
  ABI_CHECK(Wfd%nspinor == Hdr%nspinor,"Different number of spinors")
 
  if (any(Wfd%nband /= reshape(Hdr%nband, [Wfd%nkibz, Wfd%nsppol]))) then
-   MSG_ERROR("Wfd%nband /= Hdr%nband")
+   ABI_ERROR("Wfd%nband /= Hdr%nband")
  end if
 
  ! Use bks_tab to decide who will write the data. Remember
@@ -4585,14 +4585,14 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
        if (how_many /= 1) then
          ierr = ierr + 1
          write(msg,'(a,3(i0,1x))')" Found replicated state (b,k,s) ",band,ik_ibz,spin
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
      end do
    end do
  end do
 
  if (ierr /= 0) then
-   MSG_ERROR("Cannot write WFK file when wavefunctions are replicated")
+   ABI_ERROR("Cannot write WFK file when wavefunctions are replicated")
  end if
 
  call cwtime(cpu,wall,gflops,"start")
@@ -4647,7 +4647,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
             kg_k=Wfd%Kdata(ik_ibz)%kg_k,cg_k=cg_k, &
             eig_k=Bands%eig(:,ik_ibz,spin),occ_k=Bands%occ(:,ik_ibz,spin))
        else
-         MSG_ERROR("This should not happen in the present version!")
+         ABI_ERROR("This should not happen in the present version!")
          !call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,cg_k=cg_k(:,1+icg:))
        end if
      end do
@@ -4733,7 +4733,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  call timab(300, 1, tsec)
 
  if (any(iomode == [IO_MODE_NETCDF, IO_MODE_FORTRAN_MASTER])) then
-   MSG_ERROR(sjoin("Unsupported value for iomode: ", itoa(iomode)))
+   ABI_ERROR(sjoin("Unsupported value for iomode: ", itoa(iomode)))
  end if
 
  ! IO_MODE_FORTRAN --> only master reads and broadcasts data.
@@ -4785,7 +4785,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
          my_readmask(band, ik_ibz, spin) = .True.
          all_countks(ik_ibz, spin) = 1
          if (wfd%ihave_ug(band, ik_ibz, spin, how="Stored")) then
-           MSG_ERROR("Wavefunction is already stored!")
+           ABI_ERROR("Wavefunction is already stored!")
          end if
        end if
      end do
@@ -4821,7 +4821,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       if (nband_wfd > nband_disk) then
         write(msg,'(a,2(i0,1x))')&
          " nband_wfd to be read cannot be greater than nband_disk while: ",nband_wfd, nband_disk
-        MSG_ERROR(msg)
+        ABI_ERROR(msg)
       end if
 
       mcg = npw_disk*Wfd%nspinor*nband_wfd
@@ -4849,7 +4849,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       end if
       !if (nmiss/=0) then
       !  write(msg,'(a,2(1x,i0),a,i0)')" For (k,s) ",ik_ibz,spin," the number of missing G is ",nmiss
-      !  MSG_WARNING(msg)
+      !  ABI_WARNING(msg)
       !end if
 
       ! Conversion of the basis set.
@@ -4905,7 +4905,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       if (nband_wfd > nband_disk) then
         write(msg,'(a,2(i0,1x))')&
          "nband_wfd to be read cannot be greater than nband_disk while: ",nband_wfd,nband_disk
-        MSG_ERROR(msg)
+        ABI_ERROR(msg)
       end if
 
       ! Allocate full array for eigenvalues and G-vectors.
@@ -4959,7 +4959,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       end if
       !if (nmiss/=0) then
       !  write(msg,'(a,2(1x,i0),a,i0)')" For (k,s) ",ik_ibz,spin," the number of missing G is ",nmiss
-      !  MSG_WARNING(msg)
+      !  ABI_WARNING(msg)
       !end if
 
       if (change_gsphere .and. any(my_readmask(:,ik_ibz,spin))) then
@@ -5034,7 +5034,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
   end do !spin
 
  else
-   MSG_ERROR(sjoin("Wrong method: ", itoa(method)))
+   ABI_ERROR(sjoin("Wrong method: ", itoa(method)))
  end if
 
  call wfk%close()
@@ -5132,7 +5132,7 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
 
  ! TODO ngfft should be included in pawfgrtab_type
  !% if (ANY(Wfd%ngfft(1:3)/=Pawfgrtab%ngfft(1:3)) then
- !!  MSG_ERROR("Wfd%ngfft(1:3)/=Pawfgrtab%ngfft(1:3)")
+ !!  ABI_ERROR("Wfd%ngfft(1:3)/=Pawfgrtab%ngfft(1:3)")
  !% end if
 
  call wfd%get_ur(band,ik_ibz,spin,ur_ae)
@@ -5297,7 +5297,7 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
  end do
 
  if (Wfd%usepaw==1) then
-   MSG_WARNING("Testing the calculation of AE PAW wavefunctions.")
+   ABI_WARNING("Testing the calculation of AE PAW wavefunctions.")
    ! Use a local pawfgrtab to make sure we use the correction in the paw spheres
    ! the usual pawfgrtab uses r_shape which may not be the same as r_paw.
    cplex=1
@@ -5339,7 +5339,7 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 
      write(xsf_fname,'(3(a,i0),a)') 'PAW_AE_wfk2_sp',spin,'_kpt',ik_ibz,'_bd',band,'.xsf'
      if (open_file(xsf_fname,msg,newunit=funt,status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      call printxsf(n1,n2,n3,data_plot,Cryst%rprimd,(/zero,zero,zero/),&
@@ -5373,7 +5373,7 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 
      write(xsf_fname,'(3(a,i0),a)') 'NC_wfk2_sp',spin,'_kpt',ik_ibz,'_bd',band,'.xsf'
      if (open_file(xsf_fname,msg,newunit=funt,status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call printxsf(n1,n2,n3,data_plot,Cryst%rprimd,(/zero,zero,zero/),&
        Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xcart,Cryst%znucl,funt,0)
@@ -5695,7 +5695,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  myoptcalc=0; if (present(optcalc)) myoptcalc=optcalc
  nalpha=1; if (myoptcalc==1) nalpha=3
  if (myoptcalc == 1 .and. wfd%nspinor == 2) then
-   MSG_ERROR("kinetic energy density with nspinor == 2 not implemented")
+   ABI_ERROR("kinetic energy density with nspinor == 2 not implemented")
  end if
 
  ! Build the iterator that will distribute the states in an automated way.
@@ -5789,7 +5789,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
    rhor(:,:)=half*rhor(:,:)
 
  case default
-   MSG_ERROR(sjoin("Wrong myoptcalc:", itoa(myoptcalc)))
+   ABI_ERROR(sjoin("Wrong myoptcalc:", itoa(myoptcalc)))
  end select
 
  call xmpi_sum(rhor,Wfd%comm,ierr)

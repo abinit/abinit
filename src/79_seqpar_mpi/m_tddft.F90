@@ -245,7 +245,7 @@ contains
 &   'nkpt=',nkpt,', kpt=',dtset%kptns(1:3,1),'.',ch10,&
 &   'Action: in the input file, set nkpt to 1 and kpt to 0 0 0 ,',ch10,&
 &   'or change iscf.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(nspinor/=1)then
@@ -254,7 +254,7 @@ contains
 &   'for the time being to nspinor=1, while input nspinor=2.',ch10,&
 &   'Action: if you want to compute excited states within TDDFT,',ch10,&
 &   'set nsppol to 1 in the input file. Otherwise, do not use iscf=-1.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -266,7 +266,7 @@ contains
 &   'Action: if you want to compute excited states within TDDFT,',ch10,&
 &   'set ixc different from 20 or 22. Otherwise, do not use iscf=-1',ch10,&
 &   'with nsppol=2.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -276,7 +276,7 @@ contains
 &   'with occopt=0, 1, or 2, while input occopt=',dtset%occopt,'.',ch10,&
 &   'Action: if you want to compute excited states within TDDFT,',ch10,&
 &   'set occopt=0, 1, or 2 in the input file. Otherwise, do not use iscf=-1.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Examine the occupation numbers, and determine the number of
@@ -758,9 +758,9 @@ contains
            write(message, '(a,a,a,es20.10,a,i4,a,i2,a)' )&
 &           'The imaginary part of wavefunctions should be practically zero.',ch10,&
 &           'This is not the case, since sbb=',sbb,' for iband=',iband,'with sppol=',1,'.'
-           MSG_WARNING(message)
+           ABI_WARNING(message)
            if(sbb>1.0d-7)then
-             MSG_ERROR("sbb>1.0d-7")
+             ABI_ERROR("sbb>1.0d-7")
            end if
          end if
 

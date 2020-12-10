@@ -172,7 +172,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
    write(message, '(3a)' )&
     ' Linear-response calculations are under construction with nspden=4',ch10,&
     ' Action: modify value of nspden in input file unless you know what you are doing.'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !Init spaceworld

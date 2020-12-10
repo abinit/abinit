@@ -156,10 +156,10 @@ CONTAINS
     integer :: length
 
     if((.not. present(prefix)) .and. (.not. present(label))) then
-      MSG_ERROR('Label and prefix not present.')
+      ABI_ERROR('Label and prefix not present.')
     endif
     if(present(label) .and. present(prefix)) then
-      MSG_ERROR('Label and prefix present, only specify one of the two.')
+      ABI_ERROR('Label and prefix present, only specify one of the two.')
     endif
 
     if(present(prefix)) length=len(prefix)
@@ -204,10 +204,10 @@ CONTAINS
     character(len=80) :: msg
 
     if((.not. present(prefix)) .and. (.not. present(label))) then
-      MSG_ERROR('Label and prefix not present.')
+      ABI_ERROR('Label and prefix not present.')
     endif
     if(present(label) .and. present(prefix)) then
-      MSG_ERROR('Label and prefix present, only specify one of the two.')
+      ABI_ERROR('Label and prefix present, only specify one of the two.')
     endif
 
     if(present(prefix)) then

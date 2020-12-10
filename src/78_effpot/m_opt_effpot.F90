@@ -269,7 +269,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
 &        '     The terms could not be optimized ',ch10,&
 &        '     and the effective potential has not been altered.', ch10,&
 &        '     Action: Change training set or coefficients to be optimized.'
-    MSG_WARNING(message)
+    ABI_WARNING(message)
     do ii=1,opt_ncoeff 
       eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%coefficient = coeff_init_values(ii)       
       call polynomial_coeff_free(my_coeffs(ii))
@@ -926,7 +926,7 @@ if(mod(order_start,2) /= 0 .or. mod(order_end,2) /= 0)then
    write(message,'(4a)' )ch10,&
 &  'Either start or stop order are not even numbers',ch10,&
 &  'Action: change bound_range in input',ch10 
-   MSG_ERROR(message)
+   ABI_ERROR(message)
 endif 
 
 !Initialize Variables 
@@ -1166,7 +1166,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
                       write(message,'(4a)' )ch10,&
 &                     "You're stuck in a while loop.",ch10,&
 &                     'Action: Contact Abinit Group',ch10 
-                      MSG_ERROR(message)   
+                      ABI_ERROR(message)   
                    endif                      
                endif! (icombi_stop - icombi)  
                !write(*,*) 'I was here!'

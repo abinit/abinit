@@ -137,7 +137,7 @@ contains
 &     'LOTF: INIT_LIST: wrong value for lotfvar%classic = ',&
 &     lotfvar%classic,ch10,&
 &     'change lotfvar%classic 5 or 6 '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
   !--Init cell and pbc_lotf
@@ -363,7 +363,7 @@ contains
        ffit(:,i) = forc_in(:,iat)
      end do
    else
-     MSG_ERROR('LOTF : HERE WE SHOULD HAVE THE FORCES ALREADY !! ')
+     ABI_ERROR('LOTF : HERE WE SHOULD HAVE THE FORCES ALREADY !! ')
    end if ! TFOR
 
   !--THE REST OF THE ROUTINE IS THE FIT
@@ -705,7 +705,7 @@ contains
                  alpha_dum(1,ibn_count) = 6.1d0
                elseif(alpha_dum(1,ibn_count)  <  two ) then
                  alpha_dum(1,ibn_count) = two
-                !MSG_ERROR('LOTF: Alpha1 reaches 2 au... Too small value!')
+                !ABI_ERROR('LOTF: Alpha1 reaches 2 au... Too small value!')
                end if
 
              end if   ! tfit(n)
@@ -732,7 +732,7 @@ contains
    end do main_minimization
 
    if(dcost_rms >  prec_lotf) then
-     MSG_ERROR('LOTF: ACHTUNG: REQD.TOLERANCE NOT ACHIEVED IN THE FIT')
+     ABI_ERROR('LOTF: ACHTUNG: REQD.TOLERANCE NOT ACHIEVED IN THE FIT')
    end if
 
    iwrdri = iwrdri + 1
@@ -873,7 +873,7 @@ contains
      jat = ibnd_mat(2,ibn_count)
 
      ifo = imat(iat)    !--imat finds the old atomic 'fitted number'
-     if(iat > jat) MSG_ERROR('UPDLIS 177')
+     if(iat > jat) ABI_ERROR('UPDLIS 177')
 
     !--Set to 0, finds to which old bond (if any) these two correspond
      jb_old = 0               !--atom jat is a new neighbour of atom iat
@@ -914,7 +914,7 @@ contains
    if (ibn_tots > nbondex) then
      write(message,'(2a,2(a,i8))') 'LOTF: ibn_tots > nbondex  ! ',ch10,&
 &     'UPDLIS  stop : IBNTOTS = ',ibn_tots,' NBONDEX = ',nbondex
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 

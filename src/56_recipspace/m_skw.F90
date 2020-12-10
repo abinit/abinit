@@ -391,7 +391,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    write(msg,"(2a,2(a,es12.4),a)") &
      "Large error in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, " (meV)"
    call wrtout(ab_out, msg)
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  call cwtime_report(" skw_new", cpu_tot, wall_tot, gflops_tot, end_str=ch10)

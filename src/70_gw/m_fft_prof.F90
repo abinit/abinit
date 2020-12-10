@@ -826,7 +826,7 @@ subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
      ABI_FREE(ctmp)
    else
      write(msg,'(a,i0)')" Wrong cplex: ",cplex
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -953,7 +953,7 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
      end do
    end do
  else
-   MSG_ERROR("Wrong isign")
+   ABI_ERROR("Wrong isign")
  end if
 
  ! Replicate and scale input data
@@ -986,7 +986,7 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
    end do
  case default
    write(msg,'(a,i0)')" Wrong value for inplace= ",inplace
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end select
 
  call cwtime(cpu_time,wall_time,gflops,"stop")
@@ -1187,7 +1187,7 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
 
  case default
    write(msg,'(a,i0)')" Wrong value for option_fourwf: ",option_fourwf
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end select
 
  call cwtime(cpu_time,wall_time,gflops,"start")
@@ -1246,7 +1246,7 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
            end do
          end do
        else
-         MSG_ERROR("Wrong cplex")
+         ABI_ERROR("Wrong cplex")
        end if
 
      case (2)
@@ -1604,7 +1604,7 @@ subroutine time_fftu(Ftest,isign,header,Ftprof)
 
  else
    write(msg,'(a,i0)')" Wrong isign= ",isign
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call cwtime(cpu_time,wall_time,gflops,"start")
@@ -1703,7 +1703,7 @@ subroutine prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin,rprimd,n
  ! Open file and write header with info.
  write(fname,'(2(a,i1))')"PROF_fourdp_cplex",cplex,"_isign",isign
  if (open_file(fname,msg,newunit=funt) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(msg,'(2(a,i0))')"Benchmark: routine = fourdp, cplex =",cplex,", isign=",isign
@@ -1808,7 +1808,7 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
  ! Open file and write header with info.
  write(fname,'(3(a,i1))')"PROF_fourwf_cplex",cplex,"_option",option,"_istwfk",istwf_k
  if (open_file(fname,msg,newunit=funt) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(msg,'(3(a,i1))')"Benchmark: routine = fourwf, cplex = ",cplex,", option= ",option,", istwfk= ",istwf_k
@@ -1916,7 +1916,7 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
  write(fname,'(2(a,i1))')"PROF_rhotwg_map2sphere",map2sphere,"_use_padfft",use_padfft
 
  if (open_file(fname,msg,newunit=funt) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(msg,'(2(a,i0),a,f5.1)')&

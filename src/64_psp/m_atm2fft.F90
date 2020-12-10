@@ -255,7 +255,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !Check optional arguments
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     MSG_BUG(' Need paral_kgb and me_g0 with comm_fft !')
+     ABI_BUG(' Need paral_kgb and me_g0 with comm_fft !')
    end if
  end if
 
@@ -277,12 +277,12 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
    fftn2_distrib => my_distribfft%tab_fftdp2dg_distrib
    ffti2_local => my_distribfft%tab_fftdp2dg_local
  else
-   MSG_BUG("Unable to find an allocated distrib for this fft grid")
+   ABI_BUG("Unable to find an allocated distrib for this fft grid")
  end if
 
  if (present(is2_in)) then
    if(is2_in<1.or.is2_in>6) then
-     MSG_BUG("is2_in must be between 1 and 6")
+     ABI_BUG("is2_in must be between 1 and 6")
    else
      ndir = 1
    end if
@@ -1061,7 +1061,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !  Check optional arguments
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     MSG_BUG('Need paral_kgb and me_g0 with comm_fft !')
+     ABI_BUG('Need paral_kgb and me_g0 with comm_fft !')
    end if
  end if
 
@@ -1070,7 +1070,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      optn2 = 3
    else
      if(optn2_in/=3)then
-       MSG_BUG('optn2 must be set to 3!')
+       ABI_BUG('optn2 must be set to 3!')
      else
        optn2 = optn2_in
      end if
@@ -1084,7 +1084,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      optn = optn_in
    end if
    if (.not.present(optn2_in)) then
-     MSG_BUG('rho1 calculation need optn2 !')
+     ABI_BUG('rho1 calculation need optn2 !')
    else
      optn2 = optn2_in
    end if
@@ -1098,13 +1098,13 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      optv = 1
    else
      if(optv_in/=1)then
-       MSG_BUG('optv_in must be set to 1!')
+       ABI_BUG('optv_in must be set to 1!')
      else
        optv = optv_in
      end if
    end if
    if(.not.present(vspl))then
-     MSG_BUG('vloc1 calculation need vspl!')
+     ABI_BUG('vloc1 calculation need vspl!')
    end if
  else
    optv  = 0
@@ -1158,7 +1158,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    else if (n2 == my_distribfft%n2_fine) then
      fftn2_distrib => my_distribfft%tab_fftdp2dg_distrib
    else
-     MSG_BUG("Unable to find an allocated distrib for this fft grid")
+     ABI_BUG("Unable to find an allocated distrib for this fft grid")
    end if
 
    qeq0=(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15)
@@ -1167,7 +1167,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 &   abs(abs(qphon(3))-half)<tol12)
 
    if (nproc_fft>1.and.qeq05) then
-     MSG_ERROR('not compatible with FFT parallelism')
+     ABI_ERROR('not compatible with FFT parallelism')
    end if
 
    if (optn2==3)then

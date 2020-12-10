@@ -338,7 +338,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
      write(message,'(a,i3,2a)')&
 &     'Was unable to find the blok for Gamma point in EIG2 DDB file, while thmflag= ',thmflag,ch10,&
 &     'Action: compute the contribution from Gamma, and merge it in your EIG2 DDB file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Put blkval2gqpt in cartesian coordinates
@@ -400,7 +400,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
    if(abs(brav)/=1)then
      message = ' The possibility to have abs(brav)/=1 for thmeig was disabled.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Prepare to compute the q-point grid in the ZB or IZB
@@ -477,7 +477,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
      write(message,'(a,3es16.6,2a)')&
 &     'Was unable to find in DDB file, the blok for point ',spqpt(:,iqpt),ch10,&
 &     'Action: compute the contribution from this point, and merge it in your DDB file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    ABI_ALLOCATE(d2cart,(2,msize))
@@ -543,7 +543,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
        write(message,'(a,3es16.6,2a)')&
 &       'Was unable to find in EIG2 DDB file, the blok for point ',spqpt(:,iqpt),ch10,&
 &       'Action: compute the contribution from this point, and merge it in your EIG2 DDB file.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 
    end if
@@ -755,7 +755,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 &     ' Could not find homogeneous basis vectors for Q point grid ',ch10
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
 
 !  test if qlatt is righthanded and possibly fixe it
@@ -860,7 +860,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 !open TBS file
  outfile = trim(elph_base_name)//"_TBS"
  if (open_file(outfile,message,newunit=unitout,form='formatted',status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  write(unitout,'(a)')'thmeig: Thermal Eigenvalue corrections (eV)'
 
@@ -1061,7 +1061,7 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
    open (unit=unit_phdos,file=outfile,status='replace',iostat=iost)
    if (iost /= 0) then
      write (message,'(3a)')' Opening file ',trim(outfile),' as new'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    write (unit_phdos,'(a)') '#'
@@ -1143,7 +1143,7 @@ subroutine outg2f(deltaene,enemin,enemax,filnam,g2f,g2fsmear,kpnt,mband,nene,nkp
    open (unit=unit_g2f,file=outfile,status='unknown',iostat=iost)
    if (iost /= 0) then
      write (message,'(3a)')' thmeig : ERROR- opening file ',trim(outfile),' as new'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    write(std_out,*) ' g2f function'

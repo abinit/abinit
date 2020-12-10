@@ -541,7 +541,7 @@ subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 &   '  From the calling routine, iprcel=',iprcel,ch10,&
 &   '  For wavelets, the only allowed value is 0.',ch10,&
 &   '  Action : correct your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !call wvl_moddiel  !PENDING

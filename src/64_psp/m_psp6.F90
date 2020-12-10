@@ -170,7 +170,7 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &   'You can only perform positronic ground-state calculations (positron=1)',ch10,&
 &   'using fhi pseudopotentials with a core density (fchrg>0)',ch10,&
 &   'Action: change your psp file (add fchrg>0).'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 !--------------------------------------------------------------------
 !Will now proceed at the reading of pots and wfs
@@ -325,7 +325,7 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp6in
 !!***
@@ -520,7 +520,7 @@ subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp6cc
 !!***
@@ -611,7 +611,7 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
    if (ilog==1) norm1=norm1+half*ff(1)
  end do
  if (ii==100) then
-   MSG_ERROR('Big pb 1 in psden !')
+   ABI_ERROR('Big pb 1 in psden !')
  end if
 
  ii=0;aa2=zero;norm2=c3-one
@@ -624,7 +624,7 @@ subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
    if (ilog==1) norm2=norm2+half*ff(1)
  end do
  if (ii==100) then
-   MSG_ERROR('Big pb 2 in psden !')
+   ABI_ERROR('Big pb 2 in psden !')
  end if
 
  do while (abs(norm2-c3)>tol10)
@@ -853,7 +853,7 @@ subroutine psp6cc_drh(mmax,n1xccc,rchrg,xccc1d)
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp6cc_drh
 !!***

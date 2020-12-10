@@ -145,7 +145,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=0, ndim MUST be equal to 3*natom,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom=',3*natom,'.'
-   MSG_BUG(messagE)
+   ABI_BUG(messagE)
  end if
 
  if( (optcell==1 .or. optcell==4 .or. optcell==5 .or. optcell==6) &
@@ -153,7 +153,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=1,4,5 or 6, ndim MUST be equal to 3*natom+1,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+1=',3*natom+1,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==2 .or. optcell==3) &
@@ -161,14 +161,14 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( optcell>=7 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !##########################################################
@@ -339,7 +339,7 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=0, ndim MUST be equal to 3*natom,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom=',3*natom,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==1 .or. optcell==4 .or. optcell==5 .or. optcell==6) &
@@ -347,7 +347,7 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=1,4,5 or 6, ndim MUST be equal to 3*natom+1,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+1=',3*natom+1,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==2 .or. optcell==3) &
@@ -355,14 +355,14 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( optcell>=7 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !##########################################################
@@ -493,7 +493,7 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=0, ndim MUST be equal to 3*natom,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom=',3*natom,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==1 .or. optcell==4 .or. optcell==5 .or. optcell==6) &
@@ -501,7 +501,7 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=1,4,5 or 6, ndim MUST be equal to 3*natom+1,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+1=',3*natom+1,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==2 .or. optcell==3) &
@@ -509,14 +509,14 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( optcell>=7 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !

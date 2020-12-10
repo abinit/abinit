@@ -214,7 +214,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    gkk_fname = filnam(5)
    ABI_CHECK(len_trim(gkk_fname) > 0, "gkk_fname is not defined")
    if (open_file(gkk_fname,message,newunit=unitgkk,form="unformatted",status="old",action="read") /=0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -304,14 +304,14 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
    if ( ANY( ABS(Cryst%tnons(:,1)) > tol10) ) then
-     MSG_ERROR('nsym==1 but the symmetry is not the identity')
+     ABI_ERROR('nsym==1 but the symmetry is not the identity')
    end if
  end if
 
  if (anaddb_dtset%ifcflag/=1) then
    write(message,'(a,i0)')&
 &   ' ifcflag should be set to 1 since the IFC matrices are supposed to exist but ifcflag= ',anaddb_dtset%ifcflag
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call timein(tcpu,twall)
@@ -509,7 +509,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    elph_ds%ngkkband = elph_ds%nFSband
  else
    write(message,'(a,i0)')' ep_keepbands must be 0 or 1 while it is: ',elph_ds%ep_keepbands
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  write(message,'(a,i0,2x,i0)')' elphon : minFSband, maxFSband = ',elph_ds%minFSband,elph_ds%maxFSband
@@ -537,12 +537,12 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 ! check that kptrlatt is coherent with kpt found here
  nkpt_tmp = elph_ds%kptrlatt(1,1)*elph_ds%kptrlatt(2,2)*elph_ds%kptrlatt(3,3)
  if (sum(abs(elph_ds%kptrlatt(:,:))) /= nkpt_tmp) then
-   MSG_WARNING(' the input kptrlatt is not diagonal... ')
+   ABI_WARNING(' the input kptrlatt is not diagonal... ')
  end if
  if (anaddb_dtset%ifltransport > 1 .and. nkpt_tmp /= elph_ds%k_phon%nkpt) then
    write(message,'(a,i0,a,i0)')&
 &   ' the input kptrlatt is inconsistent  ', nkpt_tmp, " /= ", elph_ds%k_phon%nkpt
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (anaddb_dtset%ifltransport==3 ) then
@@ -579,7 +579,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    end do
    if (ikpt_irr .ne. elph_ds%k_phon%new_nkptirr) then
      write (message,'(a)')' The number of irred nkpt does not match! '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    ABI_DEALLOCATE(indkpt1)
@@ -609,12 +609,12 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
    if (abs(anaddb_dtset%band_gap) < 10.0d0) then
      write (message,'(a)')' Not coded yet when use_k_fine and band_gap are both used'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    if (master == me) then
      if (open_file("densergrid_GKK",message,newunit=unitfskgrid,form="unformatted",status="old") /=0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      !read the header of file
      call hdr_fort_read(hdr1, unitfskgrid, fform)
@@ -746,7 +746,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 &   sum(elph_ds%k_fine%wtk(:,:,2)),elph_ds%k_fine%nkpt
  else
    write (message,'(a,i0)') 'bad value for nsppol ', elph_ds%nsppol
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  ABI_ALLOCATE(elph_ds%gkk_intweight,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,elph_ds%nsppol))
@@ -764,7 +764,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    elph_ds%gkk_intweight(:,:,:) = elph_ds%k_phon%wtk(:,:,:)
  else
    write(message,'(a,i0)')' ep_keepbands must be 0 or 1 while it is : ',elph_ds%ep_keepbands
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  ep_prt_wtk = 0
@@ -788,7 +788,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  if (anaddb_dtset%prtfsurf == 1 .and. master == me) then
    fname=trim(elph_ds%elph_base_name) // '_BXSF'
    if (ebands_write_bxsf(Bst, Cryst, fname) /= 0) then
-     MSG_WARNING("Cannot produce file for Fermi surface, check log file for more info")
+     ABI_WARNING("Cannot produce file for Fermi surface, check log file for more info")
    end if
  end if
 
@@ -885,7 +885,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    write (std_out,*) ' elphon: will perform scalar product with phonon'
    write (std_out,*) '  displacement vectors in read_gkk. ep_scalprod==1'
  else
-   MSG_ERROR('illegal value for ep_scalprod')
+   ABI_ERROR('illegal value for ep_scalprod')
  end if
 
  call timein(tcpu,twall)
@@ -915,7 +915,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !  TODO: should be done at earlier stage of initialization and checking
    if (elph_ds%ngkkband /= elph_ds%nFSband) then
      write (message,'(a)') 'need to keep electron band dependency in memory for transport calculations'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  bxu, moved the allocation from get_veloc_tr to elphon
@@ -1093,7 +1093,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    if (master == me) then
      fname = trim(elph_ds%elph_base_name) // '_EPTS'
      if (open_file(fname,message,newunit=unit_epts,status="unknown") /=0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      do isppol = 1, elph_ds%nsppol
        write(unit_epts,"(a,i6)") '# E, N(E), v^2(E), dE for spin channel ', isppol
@@ -1129,7 +1129,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
      tmp_nenergy = elph_ds%nenergy
    else
      write(message,'(a,i0)')' ep_lova must be 0 or 1 while it is : ', elph_ds%ep_lova
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  This only works for ONE temperature!! for test only
@@ -1437,7 +1437,7 @@ subroutine outelph(elph_ds,enunit,fname)
 
  if ( ALL (enunit /= (/0,1,2/)) )  then
    write(msg,'(a,i0)')' enunit should be 0 or 1 or 2 while it is ',enunit
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  nbranch   = elph_ds%nbranch
@@ -1448,7 +1448,7 @@ subroutine outelph(elph_ds,enunit,fname)
 !write header
 !==========================================================
  if (open_file(fname,msg,newunit=nfile,form="formatted",status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(msg,'(2a,80a,4a,80a)')ch10,' ',('=',ii=1,80),ch10,&
@@ -1472,7 +1472,7 @@ subroutine outelph(elph_ds,enunit,fname)
 &   ' mustar    = ',elph_ds%mustar
    call wrtout(nfile,msg,'COLL')
  else
-   MSG_BUG("bad value for nsppol")
+   ABI_BUG("bad value for nsppol")
  end if
 
  write(msg,'(2a,i10,a,i10,a,i10)')ch10,&
@@ -1795,14 +1795,14 @@ subroutine rchkGSheader (hdr,natom,nband,unitgkk)
  ABI_CHECK(fform/=0," GKK header mis-read. fform == 0")
 
  if (hdr%natom /= natom) then
-   MSG_ERROR('natom in gkk file is different from anaddb input')
+   ABI_ERROR('natom in gkk file is different from anaddb input')
  end if
 
  if (any(hdr%nband(:) /= hdr%nband(1))) then
    write(message,'(3a)')&
 &   'Use the same number of bands for all kpts: ',ch10,&
 &   'could have spurious effects if efermi is too close to the last band '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call hdr%echo(fform, 4, unit=std_out)
@@ -1874,7 +1874,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 
  if(timrev /= 1 .and. timrev /= 0)then
    write (message,'(a,i0)')' timrev must be 1 or 0 but found timrev= ',timrev
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ABI_ALLOCATE(tmpkphon_full2irr,(3,2*elph_k%nkptirr*nsym))
@@ -1947,7 +1947,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  call sort_int(elph_k%nkpt, rankallk, sortindexing)
  do ikpt1=1,elph_k%nkpt
    if (sortindexing(ikpt1) < 1 .or. sortindexing(ikpt1) > elph_k%nkpt) then
-     MSG_BUG('sorted k ranks are out of bounds: 1 to nkpt')
+     ABI_BUG('sorted k ranks are out of bounds: 1 to nkpt')
    end if
    elph_k%kpt(:,ikpt1) = tmpkpt(:,sortindexing(ikpt1))
    elph_k%full2irr(:,ikpt1) = tmpkphon_full2irr(:,sortindexing(ikpt1))
@@ -1997,7 +1997,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
          write(std_out,*) ' mkfskgrid Error: FS kpt ',ikpt1,' has no symmetric under sym', isym,' with itim ',itim
          write(std_out,*) ' redkpt = ', redkpt
          write(std_out,*) ' symrankkpt,ikpt2 = ', symrankkpt,ikpt2
-         MSG_ERROR("Fatal error, cannot continue")
+         ABI_ERROR("Fatal error, cannot continue")
        end if
      end do
    end do
@@ -2143,7 +2143,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  ! only open the file for the first sppol
  fname = trim(base_name) // '_A2F'
  if (open_file(fname,msg,newunit=unit_a2f,status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !write (std_out,*) ' a2f function integrated over the FS'
@@ -2161,7 +2161,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  ! Open file for PH DOS
  fname = trim(base_name) // '_PDS'
  if (open_file(fname,msg,newunit=unit_phdos,status="replace") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! output the phonon DOS header
@@ -2265,7 +2265,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 
          if (abs(imeigval(jbranch)) > tol8) then
            write (msg,'(a,i0,a,es16.8)')" imaginary values  branch = ",jbranch,' imeigval = ',imeigval(jbranch)
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
          end if
 
        end do
@@ -2293,12 +2293,12 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 
        if (diagerr > tol12) then
          write(msg,'(a,es15.8)') 'mka2f: residual in diagonalization of gamma with phon eigenvectors: ', diagerr
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
 
      else
        write (msg,'(a,i0)')' Wrong value for ep_scalprod = ',ep_scalprod
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
 
 !    MG20060603MG
@@ -2621,7 +2621,7 @@ subroutine mka2fQgrid(elph_ds,fname)
  nunit = get_unit()
  open (unit=nunit,file=fname,form='formatted',status='unknown',iostat=iost)
  if (iost /= 0) then
-   MSG_ERROR("Opening file: " //trim(fname))
+   ABI_ERROR("Opening file: " //trim(fname))
  end if
 
  write (msg,'(3a)')&
@@ -2952,7 +2952,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
      if (anaddb_dtset%nqshft /= 1) then
        write (message,'(a,i0)')&
 &       ' multiple qpt shifts not treated yet (should be possible), nqshft= ', anaddb_dtset%nqshft
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end if  ! end multiple shifted qgrid
 
@@ -3134,7 +3134,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !==========================================================
  fname=trim(base_name) // '_LWD'
  if (open_file(fname,msg,newunit=unit_lwd,status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (unit_lwd,'(a)')       '#'
@@ -3164,7 +3164,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !==========================================================
  fname=trim(base_name) // '_BST'
  if (open_file(fname,msg,newunit=unit_bs,status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (unit_bs, '(a)')      '#'
@@ -3186,7 +3186,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !==========================================================
  fname=trim(base_name) // '_LAMBDA'
  if (open_file(fname,msg,newunit=unit_lambda,status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (unit_lambda,'(a)')      '#'
@@ -3273,7 +3273,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 
          if (abs(imeigval(jbranch)) > tol8) then
            write (msg,'(a,i0,a,es16.8)')' imaginary values for branch = ',jbranch,' imeigval = ',imeigval(jbranch)
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
          end if
        end do
 
@@ -3303,12 +3303,12 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 
        if (diagerr > tol12) then
          write (msg,'(a,es14.6)')' Numerical error in diagonalization of gamma with phon eigenvectors: ', diagerr
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
 
      else
        write (msg,'(a,i0)')' Wrong value for elph_ds%ep_scalprod = ',elph_ds%ep_scalprod
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if ! end elph_ds%ep_scalprod if
 !
 !    ==========================================================
@@ -3579,7 +3579,7 @@ subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
 ! *************************************************************************
 
  if (elph_ds%nsppol /= 1) then
-   MSG_ERROR('get_all_gkk2: nsppol>1 not coded yet!')
+   ABI_ERROR('get_all_gkk2: nsppol>1 not coded yet!')
  end if
 
  onediaggkksize = elph_ds%nbranch*elph_ds%k_phon%nkpt*kind(realdp_ex)
@@ -3602,7 +3602,7 @@ subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
    open (unit=elph_ds%unit_gkk2,file='gkk2file',access='direct',&
 &   recl=onediaggkksize,form='unformatted',status='new',iostat=iost)
    if (iost /= 0) then
-     MSG_ERROR('error opening gkk2file as new')
+     ABI_ERROR('error opening gkk2file as new')
    end if
 !  rewind (elph_ds%unit_gkk2)
    write(std_out,*) 'get_all_gkk2 : disk file with gkk^2 created'
@@ -3611,11 +3611,11 @@ subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
    write(std_out,*) ' size = ', 4.0*dble(onediaggkksize)*dble(elph_ds%k_phon%nkpt)/&
 &   1024.0_dp/1024.0_dp, ' Mb'
  else
-   MSG_ERROR('bad value of gkk2write')
+   ABI_ERROR('bad value of gkk2write')
  end if
 
 !here do the actual calculation of |g_kk|^2
- MSG_ERROR("MGNOTE: interpolate_gkk is broken")
+ ABI_ERROR("MGNOTE: interpolate_gkk is broken")
  ABI_UNUSED(kptirr_phon(1,1))
  call interpolate_gkk (crystal,ifc,elph_ds,kpt_phon)
 
@@ -3703,7 +3703,7 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
  gprim = ifc%gprim
 
  if (elph_ds%nsppol /= 1) then
-   MSG_ERROR("interpolate_gkk not coded with nsppol>1 yet")
+   ABI_ERROR("interpolate_gkk not coded with nsppol>1 yet")
  end if
  isppol = 1
 
@@ -3734,7 +3734,7 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
  unit_gkkp = 150
  open (unit=unit_gkkp,file='gkkp_file_ascii',form='formatted',status='unknown',iostat=iost)
  if (iost /= 0) then
-   MSG_ERROR("error opening gkkpfile as new")
+   ABI_ERROR("error opening gkkpfile as new")
  end if
 
 !loop over all FS pairs.
@@ -3981,7 +3981,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
 &   recl=onegkksize,form='unformatted')
    if (iost /= 0) then
      write (message,'(2a)')' get_all_gkq : ERROR- opening file ',trim(fname)
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    write (message,'(5a)')&
@@ -3991,7 +3991,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
 
  else
    write(message,'(a,i0)')' gkqwrite must be 0 or 1 while it is : ',elph_ds%gkqwrite
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if !if gkqwrite
 
 !=====================================================
@@ -4097,7 +4097,7 @@ subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
 &   recl=onegkksize,form='unformatted',&
 &   status='new',iostat=iost)
    if (iost /= 0) then
-     MSG_ERROR('get_all_gkr : error opening gkk_rpt_file as new')
+     ABI_ERROR('get_all_gkr : error opening gkk_rpt_file as new')
    end if
    write(std_out,*) ' get_all_gkr : will write real space gkk to a disk file.'
    write(std_out,*) ' size = ', 4.0*dble(onegkksize)*dble(nrpt)/&
@@ -4738,7 +4738,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
  ABI_DEALLOCATE(tmp_wtk)
 
  if (elph_ds%nenergy .lt. 2) then
-   MSG_ERROR('There are too few energy levels for non-LOVA')
+   ABI_ERROR('There are too few energy levels for non-LOVA')
  end if
 
  sz1=elph_ds%ngkkband;sz2=elph_ds%k_phon%nkpt
@@ -4978,7 +4978,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
      end if
    end do ! ie_all
  else
-   MSG_BUG('check i_metal!')
+   ABI_BUG('check i_metal!')
  end if ! metal or insulator
 
  ABI_DEALLOCATE(dos_e1)
@@ -5266,7 +5266,7 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
    call wrtout(std_out,message,'COLL')
  else
    write (message,'(a,i0)')' Wrong value for gkqwrite = ',elph_ds%gkqwrite
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 
@@ -5393,7 +5393,7 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
  else
    write (message,'(3a,i3)')' integrate_gamma_tr : BUG-',ch10,&
 &   ' Wrong value for gkqwrite = ',elph_ds%gkqwrite
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !allocate temp variables
@@ -5558,7 +5558,7 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
  else
    write (message,'(3a,i3)')' integrate_gamma_tr : BUG-',ch10,&
 &   ' Wrong value for gkqwrite = ',elph_ds%gkqwrite
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !allocate temp variables
@@ -5929,7 +5929,7 @@ subroutine ftgkk (wghatm,gkk_qpt,gkk_rpt,gkqwrite,gkrwrite,gprim,ikpt_phon0,&
    write(message,'(a,a,a,i0,a)' )&
 &   'The only allowed values for qtor are 0 or 1, while',ch10,&
 &   'qtor=',qtor,' has been required.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 end subroutine ftgkk

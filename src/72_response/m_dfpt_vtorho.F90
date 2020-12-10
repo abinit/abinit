@@ -346,7 +346,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
  if ((psps%usepaw==1.and.pawfgr%nfft/=nfftf).or.(psps%usepaw==0.and.dtset%nfft/=nfftf)) then
-   MSG_BUG('wrong values for nfft, nfftf!')
+   ABI_BUG('wrong values for nfft, nfftf!')
  end if
 
 !The value of iscf must be modified if ddk perturbation, see dfpt_looppert.f

@@ -126,7 +126,7 @@ subroutine wvl_hpsitopsi(cprj,dtset,energies,istep,mcprj,mpi_enreg,residm,wvl,xc
  if(wvl%wfs%ks%orthpar%methOrtho .ne. 0) then
    write(message,'(2a)') ch10,&
 &   'wvl_hpsitopsi: the only orthogonalization method supported for PAW+WVL is Cholesky'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write(message, '(a,a)' ) ch10,&

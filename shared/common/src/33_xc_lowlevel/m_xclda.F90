@@ -115,7 +115,7 @@ subroutine xcpzca(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
    write(message, '(a,a,a,i0)' )&
 &   'With Perdew-Zunger Ceperley-Alder xc functional, the only',ch10,&
 &   'allowed values for order are 0, 1 or 2, while it is found to be',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Checks the compatibility between the order and the presence of the optional arguments
@@ -123,7 +123,7 @@ subroutine xcpzca(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
    write(message, '(a,a,a,i0)' )&
 &   'The order chosen does not need the presence',ch10,&
 &   'of the vector dvxc, that is needed only with order=2 , while we have',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !separate cases with respect to order
@@ -297,7 +297,7 @@ subroutine xcspol(exc,npts,nspden,order,rspts,vxc,zeta,ndvxc,& !Mandatory argume
 !Checks the compatibility between the presence of dvxc and ndvxc
  if(ndvxc /=0 .neqv. present(dvxc))then
    message = 'If ndvxc/=0 there must be the optional argument dvxc'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Checks the compatibility between the inputs and the presence of the optional arguments
@@ -305,17 +305,17 @@ subroutine xcspol(exc,npts,nspden,order,rspts,vxc,zeta,ndvxc,& !Mandatory argume
    write(message, '(4a,i0)' )ch10,&
 &   'The order chosen does not need the presence',ch10,&
 &   'of the vector dvxc, that is needed only with |order|>1 , while we have',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(nspden == 1 .and. ndvxc /=0 .and. ndvxc /= 2)then
    write(message,'(a,i0)')' Once nspden=1 we must have ndvxc=2, while we have',ndvxc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(nspden == 2 .and. ndvxc /=0 .and. ndvxc /= 3)then
    write(message, '(a,i0)' )' Once nspden=2 we must have ndvxc=3, while we have',ndvxc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 
@@ -651,7 +651,7 @@ subroutine xcspol(exc,npts,nspden,order,rspts,vxc,zeta,ndvxc,& !Mandatory argume
    write(message, '(3a,i0)' )&
 &   ' Argument nspden must be 1 or 2; ',ch10,&
 &   ' Value provided as argument was ',nspden
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !DEBUG
@@ -781,7 +781,7 @@ subroutine xctetr(exc,npt,order,rhor,rspts,vxc,& !Mandatory arguments
    write(message, '(a,a,a,i6)' )&
 &   'With Teter 91 Ceperley-Alder xc functional, the only',ch10,&
 &   'allowed values for order are 0, 1, 2 or 3, while it is found to be',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Checks the compatibility between the order and the presence of the optional arguments
@@ -789,14 +789,14 @@ subroutine xctetr(exc,npt,order,rhor,rspts,vxc,& !Mandatory arguments
    write(message, '(a,a,a,i6)' )&
 &   'The order chosen does not need the presence',ch10,&
 &   'of the vector d2vxc, that is needed only with order=3, while we have',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(order <= 1 .and. present(dvxc))then
    write(message, '(a,a,a,i6)' )&
 &   'The order chosen does not need the presence',ch10,&
 &   'of the vector dvxc, that is needed with order > 1, while we have',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !separated cases with respect to order
@@ -936,7 +936,7 @@ subroutine xcwign(exc,npt,order,rspts,vxc,& !Mandatory arguments
    write(message, '(a,a,a,i0)' )&
 &   'With Wigner xc functional, the only',ch10,&
 &   'allowed values for order are 0, 1 or 2, while it is found to be',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Checks the compatibility between the order and the presence of the optional arguments
@@ -944,7 +944,7 @@ subroutine xcwign(exc,npt,order,rspts,vxc,& !Mandatory arguments
    write(message, '(a,a,a,i3)' )&
 &   'The order chosen does not need the presence',ch10,&
 &   'of the vector dvxc, that is needed only with order=2 , while we have',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Compute vfac=(3/(2*Pi))^(2/3)
@@ -1045,7 +1045,7 @@ subroutine xchelu(exc,npt,order,rspts,vxc,dvxc)  ! dvxc is optional
    write(message, '(a,a,a,i0)' )&
 &   'With Hedin-Lundqvist xc functional, the only',ch10,&
 &   'allowed values for order are 0, 1 or 2, while it is found to be',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Compute vfac=(3/(2*Pi))^(2/3)
@@ -1140,7 +1140,7 @@ subroutine xcxalp(exc,npt,order,rspts,vxc, dvxc)  ! dvxc is optional
    write(message, '(a,a,a,i3)' )&
 &   'With X-alpha xc functional, the only',ch10,&
 &   'allowed values for order are 0, 1 or 2, while it is found to be',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Compute vfac=(3/(2*Pi))^(2/3)

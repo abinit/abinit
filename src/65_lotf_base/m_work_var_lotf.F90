@@ -167,7 +167,7 @@ contains
      write(message,'(2a,2(a,f12.6))')&
 &     'LOTF: cut off too large : ',ch10,&
 &     ' cut-off (A) is ', rcut_nbl ,  ' min. allowed : ',half/blmin
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end subroutine cutoff_init
  !!***

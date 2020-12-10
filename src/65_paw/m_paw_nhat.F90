@@ -172,28 +172,28 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  qeq0=(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15)
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     MSG_BUG('Need paral_kgb and me_g0 with comm_fft !')
+     ABI_BUG('Need paral_kgb and me_g0 with comm_fft !')
    end if
  end if
  if(ider>0.and.nhatgrdim==0) then
-   MSG_BUG('Gradients of nhat required but not allocated!')
+   ABI_BUG('Gradients of nhat required but not allocated!')
  end if
  if (my_natom>0) then
    if(nspden>1.and.nspden/=pawrhoij(1)%nspden) then
-     MSG_BUG('Wrong values for nspden and pawrhoij%nspden!')
+     ABI_BUG('Wrong values for nspden and pawrhoij%nspden!')
    end if
    if(nspden>1.and.nspden/=pawfgrtab(1)%nspden) then
-     MSG_BUG('Wrong values for nspden and pawfgrtab%nspden!')
+     ABI_BUG('Wrong values for nspden and pawfgrtab%nspden!')
    end if
    if(pawrhoij(1)%qphase<cplex) then
-     MSG_BUG('Must have pawrhoij()%qphase >= cplex!')
+     ABI_BUG('Must have pawrhoij()%qphase >= cplex!')
    end if
    if (compute_phonons.and.(.not.qeq0)) then
      if (pawfgrtab(1)%rfgd_allocated==0) then
-       MSG_BUG('pawfgrtab()%rfgd array must be allocated!')
+       ABI_BUG('pawfgrtab()%rfgd array must be allocated!')
      end if
      if (compute_grad.and.(.not.compute_nhat)) then
-       MSG_BUG('When q<>0, nhat gradients need nhat!')
+       ABI_BUG('When q<>0, nhat gradients need nhat!')
      end if
    end if
  end if
@@ -722,19 +722,19 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !Compatibility tests
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     MSG_BUG('Need paral_kgb and me_g0 with comm_fft!')
+     ABI_BUG('Need paral_kgb and me_g0 with comm_fft!')
    end if
    if (present(paral_kgb)) then
      if (paral_kgb/=0) then
-       MSG_BUG('paral_kgb/=0 not coded!')
+       ABI_BUG('paral_kgb/=0 not coded!')
      end if
    end if
  end if
  if (ider>0.and.nhat12_grdim==0) then
-!   MSG_BUG('Gradients of nhat required but not allocated !')
+!   ABI_BUG('Gradients of nhat required but not allocated !')
  end if
  if (nspinor==2) then
-   MSG_BUG('nspinor==2 not coded!')
+   ABI_BUG('nspinor==2 not coded!')
  end if
 
  compute_phonon=.false.;qeq0=.false.
@@ -758,7 +758,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  if (compute_grad1) grnhat_12=zero
 
  if (compute_grad) then
-!   MSG_BUG('compute_grad not tested!')
+!   ABI_BUG('compute_grad not tested!')
  end if
 
 !------------------------------------------------------------------------
@@ -1132,10 +1132,10 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
  if (my_natom>0) then
    if ((pawfgrtab(1)%gylm_allocated==0.or.pawfgrtab(1)%gylmgr_allocated==0).and. &
 &   pawfgrtab(1)%rfgd_allocated==0) then
-     MSG_BUG('pawnhatfr: pawfgrtab()%rfgd array must be allocated!')
+     ABI_BUG('pawnhatfr: pawfgrtab()%rfgd array must be allocated!')
    end if
    if (pawrhoij(1)%qphase/=1) then
-     MSG_BUG('pawnhatfr: not supposed to be called with qphase=2!')
+     ABI_BUG('pawnhatfr: not supposed to be called with qphase=2!')
    end if
  end if
 
@@ -1337,7 +1337,7 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
                  end do
                end if
                if (ider==1) then
-                 MSG_ERROR("nhatgr not implemented for strain perturbationxs")
+                 ABI_ERROR("nhatgr not implemented for strain perturbationxs")
 !                 do ic=1,nfgd
 !                   do nu=1,6
 !                     do mu=1,6
@@ -1486,7 +1486,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     MSG_BUG('Need paral_kgb and me_g0 with comm_fft !')
+     ABI_BUG('Need paral_kgb and me_g0 with comm_fft !')
    end if
  end if
 
@@ -1807,7 +1807,7 @@ subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
    end if
    if (.not.(grid_found)) then
      msg='Unable to find an allocated distrib for this fft grid!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  else
    ABI_ALLOCATE(fftn3_distrib,(n3))
@@ -2006,7 +2006,7 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 !Pending: parallelism over atoms: see nhatgrid
 
  if (natom_tot<natom) then   ! This test has to be remove when natom_tot is used
-   MSG_BUG(' natom_tot<natom !')
+   ABI_BUG(' natom_tot<natom !')
  end if
 
 !Fine grid

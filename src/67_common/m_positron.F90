@@ -266,15 +266,15 @@ type(fock_type),pointer, intent(inout) :: fock
 
 !Compatibility tests
  if (dtset%positron==0) then
-   MSG_BUG('Not valid for dtset%positron=0!')
+   ABI_BUG('Not valid for dtset%positron=0!')
  end if
 
  if (istep>1.and.nfft/=electronpositron%nfft) then
-   MSG_BUG('Invalid value for nfft!')
+   ABI_BUG('Invalid value for nfft!')
  end if
 
  if (dtset%usewvl==1) then
-   MSG_BUG('Not valid for wavelets!')
+   ABI_BUG('Not valid for wavelets!')
  end if
 
  if (dtset%positron==1) then
@@ -282,7 +282,7 @@ type(fock_type),pointer, intent(inout) :: fock
      do ikpt=1,dtset%nkpt
        if (dtset%nband(ikpt+dtset%nkpt*(isppol-1))/=dtset%nband(1)) then
          message = "dtset%positron needs nband to be the same at each k-point !"
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
      end do
    end do
@@ -835,7 +835,7 @@ type(fock_type),pointer, intent(inout) :: fock
    else if (electronpositron%calctype==2) then
      message = 'Were are now performing an electronic ground-state calculation in presence of a positron...'
    end if
-   MSG_COMMENT(message)
+   ABI_COMMENT(message)
 !  Output message
    if (dtset%positron<0) then
      if (electronpositron%calctype==0) then
@@ -970,12 +970,12 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 !Tests for developers
  if (.not.associated(electronpositron)) then
    msg='electronpositron variable must be associated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (option/=1) then
    if ((.not.present(rhor_dop_el)).or.(.not.present(pawrhoij_dop_el))) then
      msg='when option/=1, rhor_dop_el and pawrhoij_dop_el must be present!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -991,16 +991,16 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
 !Compatibility tests
  if (electronpositron%particle==EP_NOTHING) then
    msg='Not valid for electronpositron%particle=NOTHING!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (electronpositron%nfft/=nfft) then
    msg='nfft/=electronpositron%nfft!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (dtset%usepaw==1) then
    if(dtset%pawxcdev==0.and.ngrad==2) then
      msg='GGA is not implemented for pawxcdev=0 (use dtset%pawxcdev/=0)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -1942,7 +1942,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !Compatibility tests
  if (.not.associated(electronpositron)) then
    msg='electronpositron variable must be associated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (allocated(mpi_enreg%proc_distrb)) then
    do isppol=1,dtset%nsppol
@@ -1950,33 +1950,33 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
        if (any(mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol)/=mpi_enreg%proc_distrb(ikpt,1,isppol))) then
          msg='proc_distrib cannot be distributed over bands!'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
      end do
    end do
  end if
  if (dtset%nspinor==2) then
    msg='Doppler broadening not available for spinorial wave functions (nspinor=2)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (mcprj==0) then
    msg='<p|Psi> (cprj) datastructure must be kept in memory (see pawusecp input keyword)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (dtset%usepaw==0) then
    write(msg,'(5a)') 'Momentum distribution of annihilating electron-positron pairs',ch10,&
 &   'in the Norm-conserving Pseudopotential formalism is incomplete!',ch10,&
 &   'No core contribution is included.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
  if (any(dtset%nband(:)/=dtset%nband(1))) then
    write(msg,'(a)') 'Number of bands has to be the same for all k-points!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (dtset%usepaw==1) then
    if (size(pawrhoij)/=mpi_enreg%my_natom) then
      write(msg,'(a)') 'wrong size for pawrhoij! '
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -2110,7 +2110,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
          if (.not.ex) then
            write(msg,'(4a)') 'Core wave-functions file is missing!',ch10,&
 &                            'Looking for: ',trim(filename)
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
        end if
        call pawpsp_read_corewf(energycor,indlmncor(itypat)%value,lcor,lmncmax(itypat),&
@@ -3385,7 +3385,7 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 !Tests for developers
  if (.not.associated(electronpositron)) then
    msg='electronpositron variable must be associated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 !Constants
  fact=0.0
@@ -3397,13 +3397,13 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
 !Compatibility tests
  if (electronpositron%particle==EP_NOTHING) then
    msg='Not valid for electronpositron%particle=NOTHING!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (dtset%usepaw==1) then
    if(dtset%pawxcdev==0.and.ngrad==2) then
      msg='GGA is not implemented for pawxcdev=0 (use dtset%pawxcdev/=0)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 

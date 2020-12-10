@@ -238,12 +238,12 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
    write (message,'(3a)')&
 &   ' cprj datastructure must be allocated !',ch10,&
 &   ' Action: change pawusecp input keyword.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (mpi_enreg%paral_spinor==1) then
    message = ' not yet allowed for parallelization over spinors !'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Init mpicomm
@@ -777,7 +777,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
    ABI_DEALLOCATE(eig_diel)
    ABI_DEALLOCATE(zhpev1)
    ABI_DEALLOCATE(zhpev2)
-   MSG_ERROR("Stopping here!")
+   ABI_ERROR("Stopping here!")
  end if
 
  call timab(747,2,tsec)
@@ -1575,7 +1575,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 &   '  The number of bands must be larger or equal to 2, in suskmm.',ch10,&
 &   '  It is equal to ',nband_k,'.',ch10,&
 &   '  Action : choose another preconditioner.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Compute the effective number of blocks, and the number of bands in

@@ -362,14 +362,14 @@ module m_lobpcg2
 
     call xgBlock_getSize(eigen,rows_tmp, cols_tmp)
     if ( rows_tmp /= lobpcg%neigenpairs .and. cols_tmp /= 1 ) then
-      MSG_ERROR("Error eigen size")
+      ABI_ERROR("Error eigen size")
     endif
     call xgBlock_getSize(X0,rows_tmp, cols_tmp)
     if ( rows_tmp /= lobpcg%spacedim ) then
-      MSG_ERROR("Error X0 spacedim")
+      ABI_ERROR("Error X0 spacedim")
     endif
     if ( cols_tmp /= lobpcg%neigenpairs ) then
-      MSG_ERROR("Error X0 npairs")
+      ABI_ERROR("Error X0 npairs")
     endif
 
     call xg_init(eigenvalues3N,SPACE_R,blockdim3,1)
@@ -410,7 +410,7 @@ module m_lobpcg2
       do iline = 1, nline
 
         if ( ierr /= 0 ) then
-          !MSG_COMMENT("Consider using more bands and nbdbuf if necessary.")
+          !ABI_COMMENT("Consider using more bands and nbdbuf if necessary.")
           ierr = 0
         end if
 
@@ -472,7 +472,7 @@ module m_lobpcg2
           call xgBlock_zero(lobpcg%BP)
           RR_eig = eigenvalues2N
           if ( ierr /= 0 ) then
-            MSG_COMMENT("This is embarrasing. Let's pray")
+            ABI_COMMENT("This is embarrasing. Let's pray")
           end if
         else
           ! B-orthonormalize P, BP
@@ -495,7 +495,7 @@ module m_lobpcg2
         !RR_eig = eigenvalues3N%self
         call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('E'))
         if ( ierr /= 0 ) then
-          MSG_WARNING("I could not make it. Sorry. However do not stop as at a later step things might work out.")
+          ABI_WARNING("I could not make it. Sorry. However do not stop as at a later step things might work out.")
           exit
         end if
 
@@ -529,7 +529,7 @@ module m_lobpcg2
     call xg_free(eigenvalues3N)
 
     if ( ierr /= 0 ) then
-      MSG_COMMENT("But before that, I want to recalculate H|Psi> and S|Psi>")
+      ABI_COMMENT("But before that, I want to recalculate H|Psi> and S|Psi>")
       call timab(tim_ax_bx,1,tsec)
       call getAX_BX(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self)
       call timab(tim_ax_bx,2,tsec)
@@ -650,7 +650,7 @@ module m_lobpcg2
       AX = lobpcg%AXWP%self
       BX = lobpcg%BXWP%self
     case default
-      MSG_ERROR("Bortho")
+      ABI_ERROR("Bortho")
     end select
 
     call xg_init(buffer,space(X),cols(X),cols(X),lobpcg%spacecom)
@@ -662,7 +662,7 @@ module m_lobpcg2
     call xgBlock_potrf(buffer%self,'u',info)
 
     if ( info /= 0 ) then
-      MSG_COMMENT("An old style abi_xorthonormalize happened but now I'll try to continue ;-)")
+      ABI_COMMENT("An old style abi_xorthonormalize happened but now I'll try to continue ;-)")
       call xg_free(buffer)
       return
     end if
@@ -787,7 +787,7 @@ module m_lobpcg2
       end if
 #endif
     case default
-      MSG_ERROR("RR")
+      ABI_ERROR("RR")
     end select
 
 #ifdef HAVE_LINALG_SCALAPACK
@@ -887,7 +887,7 @@ module m_lobpcg2
         call xgScalapack_heev(scalapack,subA%self,eigenvalues)
         info = 0 ! No error code returned for the moment
       case default
-        MSG_ERROR("Error for Eigen Solver HEEV")
+        ABI_ERROR("Error for Eigen Solver HEEV")
       end select
     else
       ! Solve Hermitian general eigen problem only for first blockdim eigenvalues
@@ -917,7 +917,7 @@ module m_lobpcg2
         call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues)
         info = 0 ! No error code returned for the moment
       case default
-        MSG_ERROR("Error for Eigen Solver HEGV")
+        ABI_ERROR("Error for Eigen Solver HEGV")
       end select
     end if
     if ( eigenSolver == EIGENSLK ) then

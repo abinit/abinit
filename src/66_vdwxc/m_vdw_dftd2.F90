@@ -165,7 +165,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
  if (need_dynmat) then
    if (.not.present(qphon)) then
      msg='Dynamical matrix required without a q-vector'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    qeq0=(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15)
  end if
@@ -181,7 +181,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
    if (ivdw(itypat)<0) then
      write(msg,'(3a)') &
 &     'Van der Waals DFT-D2 correction not available for atom type: ',atom%symbol,' !'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -197,7 +197,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
    vdw_s=vdw_s*vdw_s_tpss
  else
    write(msg,'(a,i8,a)')'  Van der Waals DFT-D2 correction not compatible with ixc=',ixc,' !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  ABI_ALLOCATE(vdw_c6,(ntypat,ntypat))
  ABI_ALLOCATE(vdw_r0,(ntypat,ntypat))

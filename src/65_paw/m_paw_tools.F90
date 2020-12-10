@@ -203,9 +203,9 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
      end if
 
      if (stop_on_error) then
-       MSG_ERROR_NOSTOP(message,ia) !ia is dummy
+       ABI_ERROR_NOSTOP(message,ia) !ia is dummy
      else
-       MSG_WARNING(message)
+       ABI_WARNING(message)
      end if
 
    end if
@@ -215,7 +215,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
      write(message, '(3a)' )&
 &     '  Action: 1- decrease cutoff radius of PAW dataset',ch10,&
 &     '    OR  2- ajust "pawovlp" input variable to allow overlap (risky)'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Print last message if execution continues:
@@ -378,7 +378,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      jatom(iat)=iat
    end do
  else
-   MSG_BUG("invalid value of natprt!")
+   ABI_BUG("invalid value of natprt!")
  end if
  usepawu=(count(pawtab(:)%usepawu/=0)>0)
  useexexch=(count(pawtab(:)%useexexch/=0)>0)
@@ -514,7 +514,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
        ll=-1;if (pawtab(itypat)%usepawu/=0) ll=pawtab(itypat)%lpawu
        llp=-1;if (pawtab(itypat)%useexexch/=0) llp=pawtab(itypat)%lexexch
        if (ll/=llp.and.ll/=-1.and.llp/=-1) then
-         MSG_BUG("lpawu/=lexexch forbidden!")
+         ABI_BUG("lpawu/=lexexch forbidden!")
        end if
        ll=max(ll,llp)
        if (ll>=0) then

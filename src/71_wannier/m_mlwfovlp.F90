@@ -273,7 +273,7 @@ contains
 !
  if(MPI_enreg%paral_spinor==1) then
    message = ' Parallelization over spinorial components not yet available !'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(nsppol==2) then
@@ -291,7 +291,7 @@ contains
  end do
 !
  if(psps%npsp/=psps%ntypat) then
-   MSG_ERROR("prb npsp")
+   ABI_ERROR("prb npsp")
  end if
 !
 !Allocations.
@@ -424,7 +424,7 @@ contains
      do iband=1,nband_k
        if(iband.gt.mband) then
          write(message,'(a,3i0)')" mband",iband,mband,nband_k
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        iwav(iband,ikpt,isppol)= &
 &       (iband-1)*npw_k*dtset%nspinor+icgtemp
@@ -1057,7 +1057,7 @@ contains
 !7) Call to  Wannier90
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  if(lwannierrun) then
-   if(lwanniersetup.ne.1) MSG_ERROR("lwanniersetup.ne.1")
+   if(lwanniersetup.ne.1) ABI_ERROR("lwanniersetup.ne.1")
    ABI_ALLOCATE(U_matrix,(mwan,mwan,nkpt,nsppol))
    ABI_ALLOCATE(U_matrix_opt,(max_num_bands,mwan,nkpt,nsppol))
    ABI_ALLOCATE(lwindow,(max_num_bands,nkpt,nsppol))
@@ -1144,7 +1144,7 @@ contains
    ! Output ABIWAN.nc file
 #ifdef HAVE_NETCDF
    if (dtset%kptopt == 0) then
-     MSG_WARNING("Output of ABIWAN.nc requires kptopt /= 0. ABIWAN.nc file won't be produced!")
+     ABI_WARNING("Output of ABIWAN.nc requires kptopt /= 0. ABIWAN.nc file won't be produced!")
      ! Need kptrlatt in wigner_seitz and client code need to know the k-grid.
    end if
    if (rank == master .and. dtset%kptopt /= 0) then
@@ -1482,7 +1482,7 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
 &     '      ',trim(test_win3),ch10,&
 &     ' Action: read wannier90 tutorial and/or user manual',ch10,&
 &     '  and supply proper *.win file'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do !isppol
 
@@ -1664,7 +1664,7 @@ end subroutine mlwfovlp_seedname
    isppol=1
    filew90_nnkp=trim(seed_name(isppol))//'.nnkp'
    if (open_file(filew90_nnkp,message,newunit=unt,form='formatted',status='old') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    read(unt,*)
    read(unt,*) nntot , mband_, nwan(1)
@@ -1675,19 +1675,19 @@ end subroutine mlwfovlp_seedname
      write(message, '(4a)' )&
 &     'mband_ is not equal to mband ',ch10,&
 &     'Action: check ',trim(filew90_nnkp)
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if(nwan(1)>mband) then
      write(message, '(4a)' )&
 &     'nwan > mband ',ch10,&
 &     'Action: check ',trim(filew90_nnkp)
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if(nwan(1)==0) then
      write(message, '(4a)' )&
 &     'nwan = 0 ',ch10,&
 &     'Action: check ',trim(filew90_nnkp)
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    do ikpt=1,nkpt
      do intot=1,nntot
@@ -1705,7 +1705,7 @@ end subroutine mlwfovlp_seedname
    call wrtout(std_out,message,'COLL')
 
    message = ' exclude bands is not given in this case (not implemented) '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
 
 !  ^^^^^^^^^^^^^^^^^^^^^^^ call wannier_setup begin^^^^^^^^^^^^^^^^^^^^^^^^
  else if (lwanniersetup==1) then
@@ -1850,7 +1850,7 @@ end subroutine mlwfovlp_seedname
      write(message, '(4a)' )&
 &     ' number of bands is lower than the number of wannier functions',ch10,&
 &     ' Action : check input file and ',trim(filew90_win(isppol))
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    else if (num_bands(isppol)==nwan(isppol)) then
      write(message, '(a,a,a,a)' )ch10,&
 &     '   Number of bands is equal to the number of wannier functions',ch10,&
@@ -2002,7 +2002,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
        if(invpwk(ikpt,npoint)/=0 )then
          write(std_out,*) "error0 , invpwk is overwritten"
          write(std_out,*) ikpt,npoint
-         MSG_ERROR("Aborting now")
+         ABI_ERROR("Aborting now")
        end if
      end do
      npw_k=npwarr(ikpt)
@@ -2011,12 +2011,12 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
      do ig=1,npw_k
        if(ig.gt.mpw) then
          write(std_out,*)"error ig",ig,"greater than mpw ",mpw
-         MSG_ERROR("Aborting now")
+         ABI_ERROR("Aborting now")
        end if
        if(indpwk(ikpt,ig)/=0) then
          write(std_out,*) "error, indpwk is overwritten"
          write(std_out,*) ikpt,ig,indpwk(ikpt,ig)
-         MSG_ERROR("Aborting now")
+         ABI_ERROR("Aborting now")
        end if
        ig1=modulo(kg_k(1,ig),n1)
        ig2=modulo(kg_k(2,ig),n2)
@@ -2024,13 +2024,13 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
        indpwk(ikpt,ig)=ig1+1+n1*(ig2+n2*ig3)
        npoint=indpwk(ikpt,ig)
        if(npoint.gt.nfft) then
-         MSG_ERROR("error npoint")
+         ABI_ERROR("error npoint")
        end if
 !      write(std_out,*) ikpt,ig,npoint,invpwk(ikpt,npoint)
        if(invpwk(ikpt,npoint)/=0) then
          write(std_out,*) "error, invpwk is overwritten"
          write(std_out,*) ikpt,ig,npoint,invpwk(ikpt,npoint)
-         MSG_ERROR("Aborting now")
+         ABI_ERROR("Aborting now")
        end if
        invpwk(ikpt,npoint)=ig
 !      write(std_out,*)'ikpt,npoint,invpwk',ikpt,npoint,invpwk(ikpt,npoint)
@@ -2117,7 +2117,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
          open (unit=iunit, file=cg_file,form='unformatted',status='old',iostat=ios)
          if(ios /= 0) then
            write(message,*) " mlwfovlp_pw: file",trim(cg_file), "not found"
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
 !
          do iband2=1,mband
@@ -2140,7 +2140,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
              npoint=ig1+(ig2-1)*n1+(ig3-1)*n2*n1
              if(npoint.gt.nfft) then
                write(std_out,*) "error npoint  b"
-               MSG_ERROR("Aborting now")
+               ABI_ERROR("Aborting now")
              end if
              ig1b=ig1+g1(1,ikpt1,intot)
              ig2b=ig2+g1(2,ikpt1,intot)
@@ -2156,7 +2156,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
              npoint2=ig1b+(ig2b-1)*n1+(ig3b-1)*n2*n1
              if(npoint2.gt.nfft) then
                write(std_out,*)"error npoint  c"
-               MSG_ERROR("Aborting now")
+               ABI_ERROR("Aborting now")
              end if
              igk1=invpwk(ikpt1,npoint)
              igk2=invpwk(ikpt2,npoint2)
@@ -2342,7 +2342,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
    write(message, '(3a)' )&
 &   ' Value of lproj no allowed ',ch10,&
 &   ' Action : change lproj.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write(message, '(a,a)' )ch10,&
@@ -2402,7 +2402,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
                write(message, '(3a)' )&
 &               'Value of jband is above num_bands ',ch10,&
 &               'Action: contact Abinit group'
-               MSG_ERROR(message)
+               ABI_ERROR(message)
              end if
              A_matrix(jband,iband2,ikpt,isppol)=cmplx(amn(1,iband1,iband2,ikpt,isppol),amn(2,iband1,iband2,ikpt,isppol))
            end if
@@ -2617,7 +2617,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !  npprjn: number of projectors for each lprjn
    natprjn=1  ! atoms with wannier functions are first
    if(natprjn/=1) then ! in this case lprjn should depend on iatprjn
-     MSG_ERROR("natprjn/=1")
+     ABI_ERROR("natprjn/=1")
    end if
    nbprjn=2
    ABI_ALLOCATE(lprjn,(nbprjn))
@@ -2637,7 +2637,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
      write(std_out,*) "Number of Wannier orbitals is not equal to number of projections"
      write(std_out,*) "Action: check values of lprjn,npprjn % nwan"
      write(std_out,*) "nwan, sumtmp=",nwan,sumtmp
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
 !  --- end test of coherence
    ABI_ALLOCATE(amn2,(2,natom,nsppol,nkpt,mband,nspinor,nwan(1)))
@@ -2668,7 +2668,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
                              if(jj1>nwan(isppol)) then
                                write(std_out,*) "number of wannier orbitals is lower than lmn_size"
                                write(std_out,*) jj1,nwan(isppol)
-                               MSG_ERROR("Aborting now")
+                               ABI_ERROR("Aborting now")
                              end if
                              amn2(1,iatom,isppol,ikpt,iband,ispinor,jj1)=cprj(iatom,iband+ibg)%cp(1,ilmn)
                              amn2(2,iatom,isppol,ikpt,iband,ispinor,jj1)=cprj(iatom,iband+ibg)%cp(2,ilmn)
@@ -2834,7 +2834,7 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
        write(message,'(a,a,a,i6)')&
 &       '  proj_radial should be between 1 and 4,',ch10,&
 &       '  however, proj_radial=',proj_radial(iwan,isppol)
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end do
  end do
@@ -3232,7 +3232,7 @@ subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
 &   '  Radial function r=',rvalue,ch10,&
 &   '  is not defined',ch10,&
 &   '  Modify .win file',ch10
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if !rvalue
 
 end subroutine mlwfovlp_radial
@@ -3448,7 +3448,7 @@ subroutine mlwfovlp_ylmfac(ylmc_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
 &     '  matrix inversion error for wannier rotations',ch10,&
 &     '  random vectors r(j,1:nr) are not all independent !! ',ch10,&
 &     '  Action : re-seed uniformrandom or maybe just try again'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if !test>tol8
 
 !  end of the preliminaries, now to the rotations of the wannier orbitals
@@ -3702,7 +3702,7 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
 &     '  matrix inversion error for wannier rotations',ch10,&
 &     '  random vetors r(j,1:nr) are not all independent !! ',ch10,&
 &     '  Action : re-seed uniformrandom or maybe just try again'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if !test>tol8
 
 !  end of the preliminaries, now to the rotations of the wannier orbitals

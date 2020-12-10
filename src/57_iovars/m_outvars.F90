@@ -209,7 +209,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
      end if
    end if
  else
-   MSG_COMMENT("output of OUT.nc has been disabled. Too many datasets")
+   ABI_COMMENT("output of OUT.nc has been disabled. Too many datasets")
  end if
 #endif
  !ncid = 0
@@ -393,7 +393,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
    ncerr=nf90_close(abs(ncid))
    if (ncerr/=nf90_NoErr) then
      message='Netcdf Error while closing the OUT.nc file: '//trim(nf90_strerror(ncerr))
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 #endif

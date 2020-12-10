@@ -299,7 +299,7 @@ type(args_t) function args_parser() result(args)
 
     else
       if (firstchar(arg, "-")) then
-        MSG_WARNING("Unsupported option: "//trim(arg))
+        ABI_WARNING("Unsupported option: "//trim(arg))
         args%exit = args%exit + 1
       else
         continue
@@ -364,7 +364,7 @@ logical function parse_yesno(arg, optname, default) result(bool)
    bool = .False.
  case default
    write(std_out,*)"Wrong option ",trim(arg),". Will default to ",bool
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end select
 
 end function parse_yesno

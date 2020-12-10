@@ -116,7 +116,7 @@ subroutine paw2wvl(pawtab,proj,wvl)
      if (pawtab(itypat)%has_wvl==0.or.(.not.associated(pawtab(itypat)%wvl))) test_wvl=.false.
    end do
    if (.not.test_wvl) then
-     MSG_BUG('pawtab%wvl must be allocated!')
+     ABI_BUG('pawtab%wvl must be allocated!')
    end if
  end if
 
@@ -433,7 +433,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
 
  else
    message = 'paw2wvl_ij: option should be equal to 1, 2 or 3'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 #else
@@ -584,7 +584,7 @@ subroutine wvl_cprjreorder(wvl,atm_indx)
  if (n1cprj==0.or.n2cprj==0.or.n1atindx<=1) return
  if (n1cprj/=n1atindx) then
    msg='wrong sizes!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Nothing to do when the atoms are already sorted

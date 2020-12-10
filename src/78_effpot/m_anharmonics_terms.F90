@@ -155,7 +155,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one atom.',ch10,&
 &   'The number of atom is  ',natom,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Allocation of phonon strain coupling array (3rd order)
@@ -187,7 +187,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
    if(ncoeff /= size(coeffs))then
      write(msg, '(a)' )&
 &        ' ncoeff has not the same size than coeffs array, '
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    call anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
  end if
@@ -356,7 +356,7 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
   if(ncoeff /= size(coeffs))then
     write(msg, '(a)' )&
 &        ' ncoeff has not the same size than coeffs array, '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
 ! 1-deallocation of the previous value
@@ -523,7 +523,7 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
 &      phonon_strain(ii)%nrpt < 0)then
       write(msg, '(a)' )&
 &        ' natom or/and nrpt have not the same size than phonon_strain array. '
-      MSG_BUG(msg)
+      ABI_BUG(msg)
     end if
   end do
 
@@ -603,7 +603,7 @@ subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elas
   if(natom /= size(elastic_displacement,4)) then
     write(msg, '(a)' )&
 &        ' natom has not the same size elastic_displacement array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
 ! 1-reinitialise the previous value
@@ -810,7 +810,7 @@ subroutine anharmonics_terms_evaluateIFCStrainCoupling(phonon_strain,disp,energy
 
   if (any(sc_size <= 0)) then
     write(msg,'(a,a)')' sc_size can not be inferior or equal to zero'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
 ! Initialisation of variables

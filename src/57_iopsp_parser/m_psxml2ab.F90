@@ -195,7 +195,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
        psphead%nproj(il) = psphead%nproj(il) + 1
      end do
    else
-     MSG_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
+     ABI_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
    end if
  end if
 
@@ -412,7 +412,7 @@ subroutine psml_die(str)
 
   character(len=*), intent(in) :: str
 
-  MSG_BUG(str)
+  ABI_BUG(str)
 
 end subroutine psml_die
 !!***

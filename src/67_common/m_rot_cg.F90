@@ -128,12 +128,12 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
     message=""
     write(message, "(a,i5)") " something wrong happened with the diagonalisation of &
 &the occupation matrix (did't converge), info=",info
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   else if (info < 0) then
     message=""
     write(message, "(a,i5)") " something wrong happened with the diagonalisation of &
 &the occupation matrix (bad input argument), info=",info
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 
   DBG_EXIT("COLL")
@@ -209,7 +209,7 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, n
 
   if(nband /= blocksize) then
     message = " DMFT in KGB cannot be used with multiple blocks yet. Make sure that bandpp*npband = nband."
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 
 !! Initialisation

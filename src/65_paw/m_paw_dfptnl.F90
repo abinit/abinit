@@ -139,12 +139,12 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
 
  if (pawxcdev/=0) then
    msg="paw_dfptnl_energy is not implemented for pawxcdev/=0"
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (my_natom>0) then
    if (pawrhoij_1(1)%qphase/=1.or.pawrhoij_2(1)%qphase/=1.or.pawrhoij_3(1)%qphase/=1) then
      msg="paw_dfptnl_energy not supposed to be called with q/=0!"
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -342,7 +342,7 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
 !Special case: no XC applied
  if (ixc==0) then
    msg='Note that no xc is applied (ixc=0). Returning'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
@@ -353,12 +353,12 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
 !Restriction : all cplex must be 1
  if (cplex_1/=1.or.cplex_2/=1.or.cplex_3/=1) then
    msg='All cplex must be one (for the moment...)'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 !Restriction : nspden must be 1
 ! if (nkxc>1) then
 !   msg='nkxc must be one (<=> nspden=1) (for the moment...)'
-!   MSG_BUG(msg)
+!   ABI_BUG(msg)
 ! end if
 
  ABI_ALLOCATE(ff,(nrad))
@@ -563,11 +563,11 @@ end subroutine paw_dfptnl_xc
  ncpgr=1
  if (ipert1<0.or.ipert1>natom+2.or.ipert2<0.or.ipert2>natom+2) then
    message = 'paw_dfptnl_accrhoij: Necessary conditions on ipert1 or ipert2: 0<=ipert<=natom+2'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if (pawrhoij(1)%qphase/=1) then
    message="paw_dfptnl_accrhoij not supposed to be called with q/=0!"
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Set up parallelism over atoms
@@ -619,7 +619,7 @@ end subroutine paw_dfptnl_xc
 !     end do
 !   end do
 ! else ! nspinor=2
-!   MSG_BUG("paw_dfptnl_accrhoij is not implemented for nspinor=2")
+!   ABI_BUG("paw_dfptnl_accrhoij is not implemented for nspinor=2")
 ! end if
 
 !Accumulate :   < Psi^(pert1) | p_i^(pert2) > < p_j^(0)     | Psi^(0)     >
@@ -666,7 +666,7 @@ end subroutine paw_dfptnl_xc
        end do
      end do
    else ! nspinor=2
-     MSG_BUG("paw_dfptnl_accrhoij is not implemented for nspinor=2")
+     ABI_BUG("paw_dfptnl_accrhoij is not implemented for nspinor=2")
    end if
  end if
 
@@ -715,7 +715,7 @@ end subroutine paw_dfptnl_xc
      end do
    else ! nspinor=2
      message="paw_dfptnl_accrhoij is not implemented for nspinor=2!"
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 !  End
@@ -754,7 +754,7 @@ end subroutine paw_dfptnl_xc
      end do
    else ! nspinor=2
      message="paw_dfptnl_accrhoij is not implemented for nspinor=2!"
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 

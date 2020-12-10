@@ -175,7 +175,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
    write (message,'(3a)')&
 &   'cprj datastructure must be allocated !',ch10,&
 &   'Action: change pawusecp input keyword.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
@@ -278,7 +278,7 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 &       'pel(1) = ',pel(1),ch10,&
 &       'pel(2) = ',pel(2),ch10,&
 &       'pel(3) = ',pel(3),ch10
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 
 !    Use this (more accurate) value of P to recompute enefield
@@ -524,14 +524,14 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 ! *************************************************************************
 
  if(min(2,(1+mpi_enreg%paral_spinor)*nspinor)==2)then
-   MSG_ERROR('uderiv: does not yet work for nspinor=2')
+   ABI_ERROR('uderiv: does not yet work for nspinor=2')
  end if
 
  if(maxval(istwfk(:))/=1)then
    write(message,'(3a)')&
 &   'Sorry, this routine does not work yet with istwfk/=1.',ch10,&
 &   'This should have been tested previously ...'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (kptopt==3) then
@@ -720,17 +720,17 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 
      if(minband<1)then
        write(message,'(a,i0,a)')'  The band limit minband= ',minband,', is lower than 0.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
      if(maxband<1)then
        write(message,'(a,i0,a)')' The band limit maxband= ',maxband,', is lower than 0.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
      if(maxband<minband)then
        write(message,'(a,i0,a,i0)')' maxband= ',maxband,', is lower than minband= ',minband
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
 !    Loop over k points
@@ -759,7 +759,7 @@ subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 
        if(nband_k<maxband)then
          write(message,'(a,i0,a,i0)')'  maxband=',maxband,', is larger than nband(i,isppol)=',nband_k
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
 
        npw_k=npwarr(ikpt)

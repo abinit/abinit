@@ -149,7 +149,7 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
    else if (mep_param%mep_solver==4) then ! 4th-order Runge-Kutta
      call mep_rk4(fcart,itimimage,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
    else
-     MSG_BUG("Inconsistent solver !")
+     ABI_BUG("Inconsistent solver !")
    end if
 
 !  REPARAMETRIZATION STEP

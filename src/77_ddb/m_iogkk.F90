@@ -180,7 +180,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
  else
    write (msg,'(a,i0)')' Wrong values for gkqwrite = ',elph_ds%gkqwrite
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if !gkqwrite
 
 !===========================================================
@@ -205,7 +205,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
      call hdr_fort_read(hdr1, unitgkk, fform)
      if (fform == 0) then
        write (msg,'(a,i0,a)')' 1WF header number ',i1wf,' was mis-read. fform == 0'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      write(msg,'(a,i4)')' read_gkk : have read 1WF header #',i1wf
@@ -273,7 +273,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
        write (msg, '(a,a,a,i6,i6)') &
 &       'found too many qpoints in GKK file wrt anaddb input ', ch10, &
 &       'nqpt_anaddb nqpt_gkk = ', elph_ds%nqptirred, nqptirred_local
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      qptirred_local(:,nqptirred_local) = hdr1%qptn(:)
      iqptirred = nqptirred_local
@@ -298,12 +298,12 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
        do ik_this_proc=1,elph_ds%k_phon%my_nkpt
          if (gkk_flag(hdr1%pertcase,hdr1%pertcase,ik_this_proc,isppol,elph_ds%qirredtofull(iqptirred)) == -1) then
            write (std_out,*)" hdr1%pertcase,ik_this_proc,iqptirred",hdr1%pertcase,ik_this_proc,iqptirred
-           MSG_ERROR('Partially filled perturbation ')
+           ABI_ERROR('Partially filled perturbation ')
          end if
        end do ! ikpt_phon
      end do ! isppol
 !
-     MSG_WARNING(' gkk perturbation is already filled')
+     ABI_WARNING(' gkk perturbation is already filled')
      write(std_out,*)' hdr1%pertcase,iqptirred,iqptfull = ',hdr1%pertcase,iqptirred,iqptfull,&
 &     gkk_flag(hdr1%pertcase,hdr1%pertcase,1,1,elph_ds%qirredtofull(iqptirred))
      verify = 1
@@ -388,7 +388,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
        ikpt1_phon = elph_ds%k_phon%krank%invrank(symrankkpt)
        if (ikpt1_phon < 0) then
          write (msg,'(a,3es16.6,a)')' irred k ',hdr1%kptns(:,ikpt1),' was not found in full grid'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 !      find correspondence between this kpt_phon and the others
 !      symrc1 conserves perturbation as well as qpoint
@@ -409,7 +409,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
              write (msg,'(a,3es16.6,a,i5,a,i4,a)')&
 &             ' sym equivalent of kpt ',hdr1%kptns(:,ikpt1),' by sym ',&
 &             isym1,' and itime ',itim1,' was not found'
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
            end if
          end do !itim1
        end do !isim1
@@ -442,7 +442,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
 !        if this kpoint has already been filled (overcomplete gkk)
          if (gkk_flag(hdr1%pertcase,hdr1%pertcase,ik_this_proc,isppol,elph_ds%qirredtofull(iqptirred)) /= -1) then
-           MSG_WARNING("gkk element is already filled")
+           ABI_WARNING("gkk element is already filled")
            write(std_out,*)' hdr1%pertcase,ik_this_proc,isppol,iqptirred = ',&
 &           hdr1%pertcase,ik_this_proc,isppol,iqptirred,&
 &           gkk_flag(hdr1%pertcase,hdr1%pertcase,ik_this_proc,isppol,elph_ds%qirredtofull(iqptirred))
@@ -504,7 +504,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
          write(msg,'(a,3es16.6,2a)')&
 &         ' kpt = ',elph_ds%k_phon%kpt(:,ikpt_phon),ch10,&
 &         ' is not the symmetric of one of those found in the GKK file'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do !ikpt_phon
 
@@ -520,7 +520,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 &         ' kpt = ',elph_ds%k_phon%kpt(:,ikpt_phon),ch10,&
 &         ' and isppol ',1,ch10,&
 &         ' was not found by symmetry operations on the irreducible kpoints given'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do !ikpt_phon
    end if ! end elph_ds%tuniformgrid == 1 checks
@@ -565,7 +565,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
      if (ep_prt_yambo==1) then
        if (elph_ds%k_phon%my_nkpt /= elph_ds%k_phon%nkpt) then
          write (msg, '(a)') 'prt_gkk_yambo can not handle parallel anaddb yet'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call prt_gkk_yambo(displ_cart,displ_red,elph_ds%k_phon%kpt,h1_mat_el,iqptirred,&
 &       Cryst%natom,nFSband,elph_ds%k_phon%my_nkpt,phfrq_tmp,hdr1%qptn)
@@ -653,7 +653,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
    write (msg, '(3a,i0,i0)') &
 &   ' Found wrong number of qpoints in GKK file wrt anaddb input ', ch10, &
 &   ' nqpt_anaddb nqpt_gkk = ', elph_ds%nqptirred, nqptirred_local
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !normally at this point we have the gkk for all kpoints on the FS
@@ -668,7 +668,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
            write (msg,'(a,i5,1x,i5,1x,i5,1x,i5,a,a)')&
 &           ' gkk element',ipert,ikpt_phon,isppol,iqptirred,' was not found by symmetry operations ',&
 &           ' on the irreducible perturbations and qpoints given'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
        end do !ipert
      end do !ik_this_proc
@@ -747,7 +747,7 @@ subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phas
 
 !open gkk file
  if (open_file(outfile, msg, newunit=unitout, form='unformatted', status='unknown', action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !output GS header
@@ -1056,7 +1056,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
 
 !Read data file
  if (open_file(elph_tr_ds%ddkfilename,msg,newunit=unit_ddk,form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  rewind(unit_ddk)
@@ -1079,13 +1079,13 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
 
 !Extract info from the header
  if(hdr1%nsppol /= nsppol_in) then
-   MSG_ERROR('nsspol /= input nsppol')
+   ABI_ERROR('nsspol /= input nsppol')
  end if
 
 !Get mband, as the maximum value of nband(nkpt)
  mband=maxval(hdr1%nband(1:hdr1%nkpt))
  if (mband /= nband_in) then
-   MSG_ERROR('nband_in input to read_el_veloc is inconsistent with mband')
+   ABI_ERROR('nband_in input to read_el_veloc is inconsistent with mband')
  end if
 
  write(std_out,*)
@@ -1110,7 +1110,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
      if (ikpt_ddk == -1) then
        write(std_out,*)'read_el_veloc ******** error in correspondence between ddk and gkk kpoint sets'
        write(std_out,*)' kpt sets in gkk and ddk files must agree.'
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      bd2tot_index=2*nband_in**2*(ikpt_ddk-1)
 
@@ -1191,7 +1191,7 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
 ! *************************************************************************
 
  if (open_file(filegkk,message,newunit=unitgkk,form='unformatted',status='old') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -1220,14 +1220,14 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
    write(message,'(3a)')&
 &   'several 1wf records were found in the file,',ch10, &
 &   'which is not allowed for reading with this routine'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !read in header of 1WF file
  call hdr_fort_read(hdr1, unitgkk, fform)
  if (fform == 0) then
    write(message,'(a,i0,a)')' 1WF header number ',i1wf,' was mis-read. fform == 0'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  bantot1 = 2*hdr1%nsppol*hdr1%nkpt*mband**2
@@ -1242,7 +1242,7 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
      ikb = ikb + 2*hdr1%nband(ikpt)**2
      if (ierr /= 0) then
        write(message,'(a,2i0)')'reading eigen1 from gkk file, spin, kpt_idx',isppol,ikpt
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end do
  end do
@@ -1366,7 +1366,7 @@ subroutine completeperts(Cryst,nbranch,nFSband,nkpt,nsppol,gkk_flag,h1_mat_el,h1
          write(msg,'(3a,4i0)')&
 &         'A perturbation is missing after completion with d2sym3',ch10,&
 &         'tmpflg, ikpt_phon, isppol: ',tmpflg,ikpt_phon,isppol
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 !
 !      Save values for calculation of |gkk|^2
@@ -1487,7 +1487,7 @@ subroutine normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
 
    else
      write (message,'(a,i0)')' Wrong value for elph_ds%ep_keepbands = ',elph_ds%ep_keepbands
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 !
  else if (elph_ds%ep_scalprod == 0) then  ! Interpolate on the pure "matrix of matrix elements" and do the scalar products later.
@@ -1504,12 +1504,12 @@ subroutine normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &     h1_mat_el_sq,iqptirred)
    else
      write (message,'(a,i0)')' Wrong value for elph_ds%ep_keepbands = ',elph_ds%ep_keepbands
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 !
  else
    write (message,'(a,i0)')' Wrong value for elph_ds%ep_scalprod = ',elph_ds%ep_scalprod
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 !end if flag for doing scalar product now.
 
@@ -1679,7 +1679,7 @@ subroutine nmsq_gam (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtoful
 
  if (elph_ds%ep_keepbands == 0) then
    write (message,'(a,i0)')' elph_ds%ep_keepbands should be 1 while is ',elph_ds%ep_keepbands
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !MG20060603 NOTE:
@@ -1828,7 +1828,7 @@ subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpq
 
  if (elph_ds%ep_keepbands /= 0) then
    write (message,'(a,i0)')' elph_ds%ep_keepbands should be 0 in order to average over bands!',elph_ds%ep_keepbands
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  iqpt_fullbz = elph_ds%qirredtofull(iqptirred)
@@ -1985,7 +1985,7 @@ subroutine nmsq_pure_gkk(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,&
 
  if (elph_ds%ep_keepbands /= 1) then
    message = ' elph_ds%ep_keepbands should be 1 to keep bands!'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  iqpt_fullbz = elph_ds%qirredtofull(iqptirred)
@@ -2114,7 +2114,7 @@ subroutine nmsq_pure_gkk_sumfs(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqto
 ! *************************************************************************
 
  if (elph_ds%ep_keepbands /= 0) then
-   MSG_BUG('ep_keepbands should be 0 to average over bands!')
+   ABI_BUG('ep_keepbands should be 0 to average over bands!')
  end if
 
  nbranch   = elph_ds%nbranch

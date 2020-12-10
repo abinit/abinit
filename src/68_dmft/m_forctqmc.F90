@@ -254,7 +254,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  end if
 
 
-! if(useylm==1.and.opt_diag/=1) MSG_ERROR("useylm==1 and opt_diag/=0 is not possible")
+! if(useylm==1.and.opt_diag/=1) ABI_ERROR("useylm==1 and opt_diag/=0 is not possible")
  if(hu(1)%jpawu_zero.and.nsppol==2) nsppol_imp=2 ! J=0 and nsppol=2
  if(.not.hu(1)%jpawu_zero.or.nsppol/=2) nsppol_imp=1  ! J/=0 ou nsppol=1
 ! =================================================================
@@ -438,7 +438,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    end if
 
    !if (.not.hu(1)%jpawu_zero) &
-   !MSG_WARNING("In qmc_prep_ctqmc J/=0 and rotation matrix not rotated")
+   !ABI_WARNING("In qmc_prep_ctqmc J/=0 and rotation matrix not rotated")
 !  Rotate interaction.
 !   call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms)
    call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms,rot_type_vee)
@@ -595,7 +595,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    if(paw_dmft%myproc .eq. mod(nproc+1,nproc)) then
      if (open_file(trim(paw_dmft%filapp)//"_atom__G0w_.dat", message, newunit=unt) /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      do ifreq=1,paw_dmft%dmft_nwlo
        write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
@@ -689,7 +689,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    write(message,'(2a)') ch10,' QMC STOP: DEBUG'
    call wrtout(std_out,message,'COLL')
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 ! =================================================================
 ! Check
@@ -1099,10 +1099,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end do
 
          if (open_file('Hybri_cijoveromega',message, newunit=unt, status='unknown', form='formatted') /= 0) then
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          if (open_file('Hybri',message,newunit=unt2,status='unknown',form='formatted') /= 0) then
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          do ifreq=1,paw_dmft%dmft_nwlo
            !  weiss_for_rot is G_0^-1-iw_n=-(F-levels)
@@ -1338,7 +1338,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
          else
            write(message,'(2a)') ch10," Can't launch TRIQS CTHYB solver because dmftqmc_l must be >= 2*dmft_nwli + 1"
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
 
        end if
@@ -1364,11 +1364,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &         levels_ctqmc,hybri_limit,nflavor,2,paw_dmft%temp,testrot,testcode,umod)
 
          write(message,'(2a)') ch10,' testcode end of test calculation'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        if(testcode==2) then
          write(message,'(2a)') ch10,' testcode 2 end of test calculation'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
 
      end if
@@ -1758,11 +1758,11 @@ subroutine testcode_ctqmc_b(energy_level,hybri_coeff,weiss_for_rot,dmftqmc_l,fw1
 
  tmpfil = 'fw1_nd_re'
  !if (open_file(newunit=unt,message,file=trim(tmpfil),status='unknown',form='formatted')/=0) then
- !  MSG_ERROR(message)
+ !  ABI_ERROR(message)
  !end if
  tmpfil = 'fw1_nd_im'
  !if (open_file(newunit=unt2,message,file=trim(tmpfil),status='unknown',form='formatted')/=0) then
- !  MSG_ERROR(message)
+ !  ABI_ERROR(message)
  !end if
  write(std_out,*) "testcode==2",ispa,ispb,ima,imb
  write(std_out,*) "opt_fk==",opt_fk
@@ -1856,7 +1856,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
  if (testcode==0) return
  if (nflavor/=2) then
    write(message,'(2a)') ch10,' testcode nflavor.ne.2'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  simplehyb=2
@@ -1900,7 +1900,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
  !write(6,*) "RR1",RR1
  if(abs(RR1(1,1)-one).gt.tol7.or.abs(RR1(1,2)).gt.tol7.or.abs(RR1(2,2)-one).gt.tol7.or.abs(RR1(2,1)).gt.tol7) then
    write(message,'(2a)') ch10,' testcode error in rotation matrix'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -1933,7 +1933,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
    if(testrot==1.and.(abs(tbi1-tbi2)<tol6)) then
      write(message,'(3a)') ch10,' testrot=1 with tbi1=tbi2 is equivalent' &
      ,'to testrot=0: change testrot'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
    ! Built fw1_nd
    !==============
@@ -2062,7 +2062,7 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
    end do
 
    write(message,'(2a)') ch10,' testcode end of test calculation'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
 
  end if
  close(444)
@@ -2287,7 +2287,7 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 ! < HACK >
   if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
     if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /=0) then
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
     do ifreq=1,paw_dmft%dmft_nwli
       write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),((gw_tmp_nd(ifreq,iflavor,iflavor)), iflavor=1, nflavor)
@@ -2296,7 +2296,7 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
   else
     if(paw_dmft%dmft_solv==5) then
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
-        MSG_ERROR(message)
+        ABI_ERROR(message)
       end if
       do itau=1,paw_dmft%dmftqmc_l
         write(unt,'(29f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
@@ -2308,7 +2308,7 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
     if(paw_dmft%dmft_solv==8) then
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_unsym_"//gtau_iter//".dat",&
 &      message, newunit=unt) /= 0) then
-        MSG_ERROR(message)
+        ABI_ERROR(message)
       end if
       do itau=1,paw_dmft%dmftqmc_l
         write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
@@ -2358,7 +2358,7 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 !      endif ! if natom=1
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
 &      message, newunit=unt) /= 0) then
-        MSG_ERROR(message)
+        ABI_ERROR(message)
       end if
       do itau=1,paw_dmft%dmftqmc_l
         write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
@@ -2371,7 +2371,7 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
     !close(4243)
     if(paw_dmft%dmft_solv==5) then
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gw_"//gtau_iter//".dat", message, newunit=unt) /= 0) then
-        MSG_ERROR(message)
+        ABI_ERROR(message)
       end if
       do ifreq=1,paw_dmft%dmft_nwlo
         write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq), &
@@ -2619,13 +2619,13 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 #ifndef HAVE_NETCDF
   write(message,'(2a)') ch10,' NETCDF requiered! ABINIT communicates with the python script through netcdf.'
   call wrtout(std_out,message,'COLL')
-  MSG_ERROR(message)
+  ABI_ERROR(message)
 #else
 #ifndef HAVE_PYTHON_INVOCATION
   write(message,'(23a)') ch10,' Python invocation flag requiered! You need to install ABINIT with ',&
    'enable_python_invocation = yes" in your "configure.ac" file.'
   call wrtout(std_out,message,'COLL')
-  MSG_ERROR(message)
+  ABI_ERROR(message)
 #else
   ! Creating the NETCDF file
   write(std_out, '(2a)') ch10, "    Creating NETCDF file: abinit_output_for_py.nc"
@@ -2741,7 +2741,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   if(.not. file_exists) then
    write(message,'(4a)') ch10,' Cannot find file ', filename, '! Make sure the python script writes it with the right name and at the right place!'
    call wrtout(std_out,message,'COLL')
-   MSG_ERROR(message)
+   ABI_ERROR(message)
   endif
 
   write(std_out, '(3a)') ch10, "    Reading NETCDF file ", filename

@@ -127,12 +127,12 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rh
 
  if (ishift/=0 .and. ishift/=1) then
    write(message, '(a,i0)' )'ishift must be 0 or 1 ; input was',ishift
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (ngrad/=1 .and. ngrad/=2) then
    write(message, '(a,i0)' )'ngrad must be 1 or 2 ; input was',ngrad
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Keep local copy of fft dimensions
@@ -427,19 +427,19 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
 
  if (ishift/=0 .and. ishift/=1) then
    write(message, '(a,i0)' )' ishift must be 0 or 1 ; input was',ishift
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (ngrad/=1 .and. ngrad/=2 ) then
    write(message, '(a,i0)' )' ngrad must be 1 or 2 ; input was',ngrad
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  with_vxc=present(vxc) ; with_vxctau=present(vxctau)
  if (with_vxc) then
    if ((.not.present(rhonow)).or.(.not.present(depsxc))) then
      message='need rhonow or depsxc!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
  

@@ -205,14 +205,14 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 
  if(nspinor==2)then
    message = ' berryphase : does not yet work for nspinor=2'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(maxval(istwfk(:))/=1)then
    write(message, '(a,a,a)' )&
 &   ' Sorry, this routine does not work yet with istwfk/=1.',ch10,&
 &   ' This should have been tested previously ...'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !change8: set up the whole k point grid in the case where kptopt = 2
@@ -435,17 +435,17 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 
      if(minband<1)then
        write(message,'(a,i0,a)')' The band limit minband=',minband,', is lower than 0.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
      if(maxband<1)then
        write(message,'(a,i0,a)')' The band limit maxband=',maxband,', is lower than 0.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
      if(maxband<minband)then
        write(message,'(a,i0,a,i0)')' maxband=',maxband,', is lower than minband=',minband
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
 !    Initialize det_string and det_average
@@ -506,14 +506,14 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
          nband_k=nband(jkstr_ori+(isppol-1)*nkpt_)
          if(nband_k<maxband)then
            write(message,'(a,i0,a,i0)')' maxband=',maxband,', is larger than nband(j,isppol)=',nband_k
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
 
          nband_k=nband(lkstr_ori+(isppol-1)*nkpt_)
          if(nband_k<maxband)then
            write(message,'(a,i0,a,i0)')&
 &           '  maxband=',maxband,', is larger than nband(l,isppol)=',nband_k
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
 
          if (jkstr==1) read_k = 2

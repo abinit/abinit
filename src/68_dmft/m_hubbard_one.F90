@@ -506,7 +506,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
              if(abs(aimag(level_diag(iatom)%mat(im1,im1,isppol,ispinor,ispinor)))>tol8) then
                message = " Hubbard I: levels are imaginary"
                write(std_out,*) level_diag(iatom)%mat(im1,im1,isppol,ispinor,ispinor)
-               MSG_BUG(message)
+               ABI_BUG(message)
              end if
              if(nsppol==1.and.nspinor==1) then
                elevels(nspinor*(2*lpawu+1)+iacc)=level_diag(iatom)%mat(im1,im1,isppol,ispinor,ispinor)
@@ -532,7 +532,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
          call combin(1,nconfig,nconfig_nelec,nelec,nlevels,occ_level,occup)
          if(nconfig_nelec(nelec)/=nint(permutations(nlevels,nelec)/factorial(nelec))) then
            message = " BUG in hubbard_one/combin"
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
          occ_level(nelec)%ocp=zero
          do iconfig=1,nconfig_nelec(nelec)

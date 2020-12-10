@@ -435,7 +435,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
   end do
   if (idum/=dtset%nkpt)then
      message = ' Found wrong number of k-points in IBZ'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
   end if
 
   !----------------------------------------------------------------------------
@@ -557,7 +557,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
         if (ikpt > 1) then
            if (dtorbmag%nband_occ(isppol) /= mband_occ_k) then
               message = "The number of valence bands is not the same for every k-point of present spin channel"
-              MSG_ERROR(message)
+              ABI_ERROR(message)
            end if
         else
            dtorbmag%mband_occ         = max(dtorbmag%mband_occ, mband_occ_k)

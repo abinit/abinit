@@ -307,7 +307,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      call mep_gbfgs(neb_forces,itimimage,list_dynimage,mep_param,mpi_enreg,natom,ndynimage,&
 &     nimage,nimage_tot,rprimd,xcart,xred)
    else
-     MSG_BUG("Inconsistent solver !")
+     ABI_BUG("Inconsistent solver !")
    end if
 
 !  Free memory

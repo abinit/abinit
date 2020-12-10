@@ -375,10 +375,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    write(message, '(3a,i0)' )&
 &   'Third-order xc kernel can only be computed for ixc = 0, 3, 7 or 8,',ch10,&
 &   'while it is found to be ',ixc
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(nspden==4.and.xcdata%xclevel==2.and.(abs(option)==2))then
-   MSG_BUG('When nspden==4 and GGA, the absolute value of option cannot be 2 !')
+   ABI_BUG('When nspden==4 and GGA, the absolute value of option cannot be 2 !')
  end if
  if(ixc<0) then
    if (present(xc_funcs)) then
@@ -392,7 +392,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &     'The value of ixc specified in input, ixc = ',ixc,ch10,&
 &     'differs from the one used to initialize the functional ',ixc_from_lib,ch10,&
 &     'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -403,29 +403,29 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    if (.not.present(taur)) then
      message=' For mGGA functionals, kinetic energy density is needed. Set input variable usekden to 1.' 
      message=trim(message)//' Also use NC pseudopotentials without non-linear XC core correction.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    else if (size(taur)/=nfft*nspden) then
      message=' Invalid size for taur!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if (present(xcctau3d)) then
      n3xctau=size(xcctau3d)
      if (n3xctau/=0.and.n3xctau/=nfft) then
        message=' Invalid size for xccctau3d!'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end if
    if (with_vxctau) then
      if (size(vxctau)/=nfft*nspden*4) then
        message=' Invalid size for vxctau!'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end if
  end if
  if((usekden==1.or.uselaplacian==1).and.nspden==4)then
    !mGGA en NC-magnetism: how do we rotate tau kinetic energy density?
    message=' At present, meta-GGA (usekden=1 or uselaplacian=1)  is not comptatible with non-collinear magnetism (nspden=4).'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !MPI FFT communicator
@@ -470,7 +470,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
  if ((xcdata%xclevel==0.or.ixc==0).and.(.not.my_add_tfw)) then
 !  No xc at all is applied (usually for testing)
-   MSG_WARNING('Note that no xc is applied (ixc=0).')
+   ABI_WARNING('Note that no xc is applied (ixc=0).')
 
  else if (ixc/=20) then
 
@@ -541,11 +541,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if (electronpositron%ixcpositron==3.or.electronpositron%ixcpositron==31) ngrad_apn=2
      if (ngrad_apn==2.and.xcdata%xclevel<2) then
        message = 'GGA for the positron can only be performed with GGA pseudopotentials for the electron !'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      if (ngrad_apn>1.and.option/=0.and.option/=1.and.option/=10.and.option/=12) then
        message = 'You cannot compute full GGA XC kernel for electrons-positron systems !'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      ABI_ALLOCATE(depsxc_apn,(nfft,ngrad_apn))
    end if
@@ -857,7 +857,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            end if
          else
            message = 'MetaGGA ixc=34 is not yet allowed with a core kinetic energy density!'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
        end if
 
@@ -1226,7 +1226,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      write(message,'(3a)')&
 &     'vdW-DF functionals are not fully operational yet.',ch10,&
 &     'Action : modify vdw_xc'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 #endif
 !  Normalize enxc, strsxc and vxc
@@ -1301,7 +1301,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
    else
 
-     MSG_BUG('When ixc=20,21 or 22, vhartr needs to be present in the call to rhotoxc !')
+     ABI_BUG('When ixc=20,21 or 22, vhartr needs to be present in the call to rhotoxc !')
 
    end if
 

@@ -108,13 +108,13 @@ subroutine d2c_weights(elph_ds,elph_tr_ds)
  nscale2 = dble(nkpt_fine2/nkpt_phon2)
  nscale3 = dble(nkpt_fine3/nkpt_phon3)
  if (abs(INT(nscale1)-nscale1) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  if (abs(INT(nscale2)-nscale2) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  if (abs(INT(nscale3)-nscale3) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  nscale1 = INT(nscale1)
  nscale2 = INT(nscale2)
@@ -947,13 +947,13 @@ subroutine d2c_wtq(elph_ds)
  nscale2 = dble(nkpt_fine2/nkpt_phon2)
  nscale3 = dble(nkpt_fine3/nkpt_phon3)
  if (abs(INT(nscale1)-nscale1) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  if (abs(INT(nscale2)-nscale2) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  if (abs(INT(nscale3)-nscale3) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  nscale1 = INT(nscale1)
  nscale2 = INT(nscale2)
@@ -1561,7 +1561,7 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
 
  else
    write (message,'(a,i0)')" telphint should be between 0 and 3, found: ",telphint
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if ! if telphint
 
 end subroutine ep_el_weights
@@ -1801,7 +1801,7 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
 
  else
    write (message,'(a,i0)')" telphint should be between 0 and 3, found: ",telphint
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if ! if telphint
 
 end subroutine ep_fs_weights

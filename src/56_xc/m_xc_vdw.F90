@@ -343,12 +343,12 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 
   ! Build theta in 3D and g-vectors
   if ( npts_rho /= nr1*nr2*nr3 ) then
-    MSG_WARNING('The 3D reconstruction of the density might be wrong (npts /= nr1*nr2*nr3)')
+    ABI_WARNING('The 3D reconstruction of the density might be wrong (npts /= nr1*nr2*nr3)')
   end if
 #if defined DEBUG_VERBOSE
   write(msg,'(a,1x,i8,1x,a)') "Will now call xc_vdw_energy", &
 &   nr1 * nr2 * nr3,"times"
-  MSG_COMMENT(msg)
+  ABI_COMMENT(msg)
 #endif
 
   ip1 = 1
@@ -391,7 +391,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
     t3dg(:,:,:,iq1) = t3dg(:,:,:,iq1) / (nr1 * nr2 * nr3)
   end do
 #else
-  MSG_ERROR('vdW-DF calculations require FFTW3 support')
+  ABI_ERROR('vdW-DF calculations require FFTW3 support')
 #endif
 
   ! Repack theta
@@ -414,7 +414,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   ! FIXME: get values of G-vectors
   do ip1=1,npts_rho
     if ( (ir3 > nr3) .and. (ir1 /= 1) .and. (ir2 /= 1) ) then
-      MSG_WARNING('buffer overflow reconstructing theta in 3D')
+      ABI_WARNING('buffer overflow reconstructing theta in 3D')
     end if
 
     gtmp = sqrt(sum(gvec(:,ip1)**2))
@@ -503,7 +503,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
     call dfftw_destroy_plan(fftw3_plan)
   end do
 #else
-  MSG_ERROR('vdW-DF calculations require FFTW3 support')
+  ABI_ERROR('vdW-DF calculations require FFTW3 support')
 #endif
 
   ! Repack the integrand
@@ -522,7 +522,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 
 #if defined DEBUG_VERBOSE
   write(msg,'(a,1x,i8.8,1x,a)') "Will now call xc_vdw_energy",npts_rho,"times"
-  MSG_COMMENT(msg)
+  ABI_COMMENT(msg)
 #endif
 
   ! Calculate and integrate vdW corrections at each point
@@ -1365,12 +1365,12 @@ subroutine xc_vdw_libxc_init(ixc_vdw)
     case (3)
       ix = libxc_functionals_getid(x_vdw3)
       ic = libxc_functionals_getid(c_vdw1)
-      MSG_ERROR('[vdW-DF] C09 not available for now')
+      ABI_ERROR('[vdW-DF] C09 not available for now')
     case default
-      MSG_ERROR('[vdW-DF] invalid setting of vdw_xc')
+      ABI_ERROR('[vdW-DF] invalid setting of vdw_xc')
   end select
   if ( (ix == -1) .or. (ic == -1) ) then
-    MSG_ERROR('[vdW-DF] unable to set LibXC parameters')
+    ABI_ERROR('[vdW-DF] unable to set LibXC parameters')
   end if
   ixc = -(ix * 1000 + ic)
 
@@ -1650,7 +1650,7 @@ subroutine xc_vdw_read(filename)
   my_vdw_params%nqpts = nqpts
   my_vdw_params%nrpts = nrpts
 #else
-  MSG_ERROR('reading vdW-DF variables requires NetCDF')
+  ABI_ERROR('reading vdW-DF variables requires NetCDF')
 #endif
 
   DBG_EXIT("COLL")
@@ -2066,7 +2066,7 @@ subroutine xc_vdw_write(filename)
   ! Close file
   NETCDF_VDWXC_CHECK(nf90_close(ncid))
 #else
-  MSG_WARNING('writing vdW-DF variables requires NetCDF - skipping')
+  ABI_WARNING('writing vdW-DF variables requires NetCDF - skipping')
 #endif
 
   DBG_EXIT("COLL")
@@ -2294,7 +2294,7 @@ function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
     ! Note 2: contrary to RS09, deltad is proportional to dsoft.
 
     if ( phisoft < 0 ) then
-      MSG_ERROR('the softened kernel must be positive')
+      ABI_ERROR('the softened kernel must be positive')
     end if
 
     vdw_df_kernel = phisoft
@@ -2714,12 +2714,12 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
         call wrtout(std_out,msg,'COLL')
 #endif
         if (open_file(mesh_file,msg, newunit=unt,status="old",action="read") /= 0) then
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
         end if
         read(unt,'(e20.8)') mesh
         close(unit=unt)
       else
-        MSG_ERROR("  You must specify a mesh file for this mesh type!")
+        ABI_ERROR("  You must specify a mesh file for this mesh type!")
       end if
 
     case(1)
@@ -2760,7 +2760,7 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
         call wrtout(std_out,msg,'COLL')
 #endif
         if ( log_inc < log_tol ) then
-          MSG_WARNING("  The logarithmic increment is very low!")
+          ABI_WARNING("  The logarithmic increment is very low!")
         end if
 
         do im = 1,npts
@@ -2781,7 +2781,7 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
           mesh(npts) = mesh_cutoff
         end if
       else
-        MSG_ERROR("  You must specify a mesh ratio for this mesh type!")
+        ABI_ERROR("  You must specify a mesh ratio for this mesh type!")
       end if
 
       ! Make sure the last point is qcut
@@ -2822,20 +2822,20 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
         call wrtout(std_out,msg,'COLL')
 #endif
         if ( log_inc < log_tol ) then
-          MSG_WARNING("  The logarithmic increment is very low!")
+          ABI_WARNING("  The logarithmic increment is very low!")
         end if
 
         do im = 1,npts
           mesh(im) = exp_ofs / log(exp_inc * (im-1))
         end do
       else
-        MSG_ERROR("  You must specify a mesh ratio for this mesh type!")
+        ABI_ERROR("  You must specify a mesh ratio for this mesh type!")
       end if
 
     case default
 
       write(msg,'(2x,a,1x,i2)') "Unknown mesh type",mesh_type
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
 
   end select
 
@@ -2974,7 +2974,7 @@ function vdw_df_interpolate(d1,d2,sofswt)
       end do
 
     case default
-      MSG_ERROR("  vdW-DF soft switch must be 0 or 1")
+      ABI_ERROR("  vdW-DF soft switch must be 0 or 1")
 
   end select
 

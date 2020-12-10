@@ -149,7 +149,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 
  if(hermitian==1)then
    if(nbd1/=nbd2)then
-     MSG_ERROR(' With hermitian==1, nb1 and nb2 must be equal ')
+     ABI_ERROR(' With hermitian==1, nb1 and nb2 must be equal ')
    end if
  end if
 
@@ -716,11 +716,11 @@ end subroutine dotprodm_sumdiag_cgcprj
 
  if(inplace==0)then
    if(.not.present(cgout))then
-     MSG_ERROR(' inplace==0 while .not.present(cgout) is not permitted ')
+     ABI_ERROR(' inplace==0 while .not.present(cgout) is not permitted ')
    end if
    if(usepaw==1) then
      if(.not.present(cprjout))then
-       MSG_ERROR(' inplace==0 and usepaw==1 while .not.present(cprjout) is not permitted ')
+       ABI_ERROR(' inplace==0 and usepaw==1 while .not.present(cprjout) is not permitted ')
      end if
    end if
  end if

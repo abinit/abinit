@@ -136,7 +136,7 @@ function normv_rdp_vector(xv,met,space) result(res)
  case ('g','G')
    res=two_pi*SQRT(res)
  case default
-   MSG_BUG('Wrong value for space')
+   ABI_BUG('Wrong value for space')
  end select
 
 end function normv_rdp_vector
@@ -180,7 +180,7 @@ function normv_int_vector(xv, met, space) result(res)
  case ('g','G')
    res=two_pi*SQRT(res)
  case default
-   MSG_BUG('Wrong value for space')
+   ABI_BUG('Wrong value for space')
  end select
 
 end function normv_int_vector
@@ -226,7 +226,7 @@ function normv_int_vector_array(xv,met,space) result(res)
  case ('g','G')
    res(:)=two_pi*SQRT(res(:))
  case default
-   MSG_BUG('Wrong value for space')
+   ABI_BUG('Wrong value for space')
  end select
 
 end function normv_int_vector_array
@@ -272,7 +272,7 @@ function normv_rdp_vector_array(xv,met,space) result(res)
  case ('g','G')
    res(:)=two_pi*SQRT(res)
  case default
-   MSG_BUG('Wrong value for space')
+   ABI_BUG('Wrong value for space')
  end select
 
 end function normv_rdp_vector_array
@@ -327,7 +327,7 @@ function vdotw_rr_vector(xv,xw,met,space) result(res)
  case ('g','G')
    res= res * (two_pi**2)
  case default
-   MSG_BUG('Wrong value for space')
+   ABI_BUG('Wrong value for space')
  end select
 
 end function vdotw_rr_vector
@@ -384,7 +384,7 @@ function vdotw_rc_vector(xv,xw,met,space) result(res)
  case ('g','G')
    res= res * (two_pi**2)
  case default
-   MSG_BUG('Wrong value for space')
+   ABI_BUG('Wrong value for space')
  end select
 
 end function vdotw_rc_vector
@@ -625,7 +625,7 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
  if (kptrlatt(1,2) /= 0 .or. kptrlatt(2,1) /= 0 .or. &
      kptrlatt(1,3) /= 0 .or. kptrlatt(3,1) /= 0 .or. &
      kptrlatt(2,3) /= 0 .or. kptrlatt(3,2) /= 0 ) then
-   MSG_ERROR('Off-diagonal elements of kptrlatt must be zero')
+   ABI_ERROR('Off-diagonal elements of kptrlatt must be zero')
  end if
 
  n1 = kptrlatt(1,1); n2 = kptrlatt(2,2); n3 = kptrlatt(3,3)
@@ -692,7 +692,7 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
  end do
  if (ABS(tot-(n1*n2*n3)) > tol8) then
    write(msg,'(a,es16.8,a,i0)')'Something wrong in the generation of WS mesh: tot ',tot,' /= ',n1*n2*n3
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_FREE(dist)
@@ -911,7 +911,7 @@ subroutine getspinrot(rprimd, spinrot, symrel_conv)
 !      Normalize the vector
        scprod=sum(axis(:)**2)
        if(scprod<tol8)then
-         MSG_BUG('Cannot find the rotation axis.')
+         ABI_BUG('Cannot find the rotation axis.')
        end if
      end if
      norminv=one/sqrt(scprod)
@@ -1080,14 +1080,14 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
    write(msg,'(a,a,a,i6)')&
 &   'The module of the xaxis should be greater than 1.d-8,',ch10,&
 &   'however, |xaxis|=',xmod
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(zmod < 1.d-8)then
    write(msg,'(a,a,a,i6)')&
 &   'The module of the zaxis should be greater than 1.d-8,',ch10,&
 &   'however, |zaxis|=',zmod
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !verify that both axis are perpendicular
@@ -1098,7 +1098,7 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
    write(msg,'(a,a,a,i6)')&
 &   'xaxis and zaxis should be perpendicular,',ch10,&
 &   'however, cosine=',cosine
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !new y axis as cross product
@@ -1186,7 +1186,7 @@ subroutine fixsym(iatfix,indsym,natom,nsym)
            'but according to iatfix, iatfixx, iatfixy and iatfixz, they',ch10,&
            'are not fixed along the same directions, which is forbidden.',ch10,&
            'Action: modify either the symmetry or iatfix(x,y,z) and resubmit.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end do
@@ -1297,7 +1297,7 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
      'Input rprim and acell gives vanishing unit cell volume.',ch10,&
      'This indicates linear dependency between primitive lattice vectors',ch10,&
      'Action: correct either rprim or acell in input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (ucvol<zero)then
    write(msg,'(2a,3(a,3es16.6,a),7a)')&
@@ -1309,7 +1309,7 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
      '        exchange two of the input rprim vectors;',ch10,&
      '        if you are optimizing the cell size and shape (optcell/=0),',ch10,&
      '        maybe the move was too large, and you might try to decrease strprecon.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Generate gprimd
@@ -1583,7 +1583,7 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
       'are too large, given the initial rprimd and the accompanying dilatmx: ',dilatmx,ch10,&
       'An adequate value would have been dilatmx_new= ',dilatmx_new,ch10,&
       'As chkdilatmx=0, assume experienced user. Execution will continue.'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
  end if
@@ -1965,7 +1965,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
  call wrtout(std_out,msg,'COLL'); call wrtout(ab_out,msg,'COLL')
 
  if (open_file(fnameabo_app_geo,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  rewind(temp_unit)
 
@@ -2020,7 +2020,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
      write(msg, '(a,i8,a,a)' )&
 &     'bonds_lgth_angles cannot handle more than 9999 atoms, while natom=',natom,ch10,&
 &     'Action: decrease natom, or contact ABINIT group.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -2147,7 +2147,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
        write(msg, '(2a)' )&
 &       'Did not succeed to generate a reliable list of bonds ',&
 &       'since tmax is exceeded.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
 
 !    Copy the new list into the old list.
@@ -2194,7 +2194,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
              thdeg=0.0d0
              if(co < 0.0d0) thdeg=180.0d0
            else
-             MSG_BUG('the evaluation of the angle is wrong.')
+             ABI_BUG('the evaluation of the angle is wrong.')
            end if
          else
            thdeg=acos(co)*180.d0*piinv
@@ -2309,7 +2309,7 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
 &   'However, the number of pseudopotentials ',npsp,', is not equal to the number of type of atoms ',ntypat,ch10,&
 &   'The use of alchemical mixing cannot be combined with the constraint based on the mixing of covalent radii.',ch10,&
 &   'Action: switch to another value of random_atpos.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !random_atpos = 0   Default value, no random initialisation
@@ -2893,7 +2893,7 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 
 ! *********************************************************************
 
- MSG_WARNING('Removing inversion related symmetrie from initial set')
+ ABI_WARNING('Removing inversion related symmetrie from initial set')
 
  ! Find the occurence of the inversion symmetry.
  call set2unit(inversion) ; inversion=-inversion
@@ -3506,7 +3506,7 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 
  if (nsym1<1) then
    write(msg,'(a,i0,a)')' The number of selected symmetries should be > 0, while it is nsym= ',nsym1,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (nsym1 /= 1) then

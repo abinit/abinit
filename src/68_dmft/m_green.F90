@@ -869,13 +869,13 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
    if (option==4) then
      tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
      if (open_file(tmpfil, message, newunit=spf_unt, status='unknown', form='formatted') /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    endif
    if (option==5) then
      tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kresolved_'//trim(char1)
      if (open_file(tmpfil, message, newunit=spfkresolved_unt, status='unknown', form='formatted') /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    endif
    ABI_ALLOCATE(sf,(green%nw))
@@ -933,7 +933,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
          ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
          tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
          if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          write(message,*) "#", nspinor,nsppol,ndim,green%nw
          call wrtout(spcorb_unt,message,'COLL')
@@ -1043,7 +1043,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
  !if(lintegrate.and.green%w_type=="real") then
  !if(green%w_type=="real") then
  !  message = 'integrate_green not implemented for real frequency'
- !  MSG_BUG(message)
+ !  ABI_BUG(message)
  !endif
  call timab(624,1,tsec)
  if(present(opt_self)) then
@@ -1069,7 +1069,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 
  if(self%nw/=green%nw)  then
    message = ' BUG: frequencies for green and self not coherent'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
 ! Initialise spaceComm, myproc, and nproc
@@ -1295,7 +1295,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      call xmpi_sum(green%oper(ifreq)%ks,spacecomm,ierr)
    else if(optnonxsum==0.and.green%oper(ifreq)%has_operks==0) then
      message = 'optnonxsum==0 and green%oper(ifreq)%has_operks==0: not compatible'
-     MSG_BUG(message)
+     ABI_BUG(message)
    endif
 !   endif
 ! enddo ! ifreq
@@ -1422,7 +1422,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  endif
  if(green%w_type=="real") then
    message = 'integrate_green not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
  if(present(opt_nonxsum)) then
    optnonxsum=opt_nonxsum
@@ -1464,13 +1464,13 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  endif
  if(optaftsolv==1.and.abs(optksloc)/=2) then
     message = "integration of ks green function should not be done after call to solver : it has not been computed"
-    MSG_BUG(message)
+    ABI_BUG(message)
  endif
  if(abs(optksloc)>=2.and.green%has_greenmatlu_xsum==0) then
     write(message,'(4a)') ch10,&
 &     "BUG: integrate_green is asked to integrate local green function",ch10,&
 &    " and local green function was non broadcasted in compute_green"
-    MSG_BUG(message)
+    ABI_BUG(message)
  endif
 
 ! Allocations
@@ -1589,7 +1589,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
          write(message,'(a,a,i3)') ch10,&
 &        "  = BUG : has_charge_matlu_solver should be 2 and is",&
 &        green%has_charge_matlu_solver
-         MSG_BUG(message)
+         ABI_BUG(message)
        endif
        if(paw_dmft%dmft_solv<=4) then
          call trace_oper(green%occup,green%charge_ks,green%charge_matlu_solver,2)
@@ -1977,7 +1977,7 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
 ! Only imaginary frequencies here
  if(green%w_type=="real") then
    message = 'fourier_green not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
 ! Initialise temporary green function
@@ -2238,7 +2238,7 @@ subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
 ! Only imaginary frequencies here
  if(green%w_type=="real") then
    message = 'check_fourier_green not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
  call init_green(green_check,paw_dmft)
@@ -2494,11 +2494,11 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
  else if(present(procb).and..not.present(myproc)) then
    write(message,'(a,a,2(e15.4))') ch10,&
 &    "BUG: procb is present and not myproc in int_fct"
-   MSG_BUG(message)
+   ABI_BUG(message)
  else if(.not.present(procb).and.present(myproc)) then
    write(message,'(a,a,2(e15.4))') ch10,&
 &    "BUG: procb is not present and myproc is in int_fct"
-   MSG_BUG(message)
+   ABI_BUG(message)
  else
    do ifreq=1,paw_dmft%dmft_nwlo
      procb2(ifreq)=(1==1)
@@ -2651,7 +2651,7 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
        if(ldiag) then
          write(message,'(a,a,2(e15.4))') ch10,&
 &          "green function is not real in imaginary time space",ft(itau)
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        else
          iwarn=iwarn+1
          ftr(itau)=real(ft(itau))
@@ -3043,7 +3043,7 @@ end subroutine occup_green_tau
 
      !  write(6,*) green%oper(1)%ks(1,1,1,1)
  if(green%oper(1)%has_operks==0) then
-  MSG_ERROR("greendft%oper(1)%ks not allocated")
+  ABI_ERROR("greendft%oper(1)%ks not allocated")
  endif
 
 !======================================
@@ -3662,7 +3662,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 !Only imaginary frequencies here
  if(green%w_type=="real") then
    message = ' compute_energy not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !=========================================
@@ -3684,7 +3684,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
    end do
  else
    message = ' green fct is not computed in ks space'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !=========================================

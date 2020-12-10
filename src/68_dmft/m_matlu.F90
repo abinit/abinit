@@ -975,7 +975,7 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_o
    write(message,'(5a,3x,3a,3x,e12.4,a,e12.4)') ch10,&
 &   'Differences between ',trim(char1),' and ',ch10,trim(char2),' is too large:',&
 &   ch10,matludiff,' is larger than',toldiff
-   MSG_WARNING(message)
+   ABI_WARNING(message)
 !   write(message,'(8a,4x,e12.4,a,e12.4)') ch10,"  Matrix for ",trim(char1)
    write(message,'(a,3x,a)') ch10,trim(char1)
    call wrtout(std_out,message,'COLL')
@@ -994,7 +994,7 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_o
    else 
      if(option==1) then
        call flush_unit(std_out)
-       MSG_ERROR("option==1, aborting now!")
+       ABI_ERROR("option==1, aborting now!")
      end if
    end if
    if(present(ierr)) ierr=-1
@@ -1176,7 +1176,7 @@ end subroutine add_matlu
   end do ! iatom
  else
   message = "stop in chg_repr_matlu"
-  MSG_ERROR(message)
+  ABI_ERROR(message)
  endif
 
 
@@ -1701,7 +1701,7 @@ end subroutine add_matlu
          else
            if(present(optreal).and.maxval(abs(aimag(gathermatlu(iatom)%value(:,:))))>tol8) then
              write(message,'(a)') " Local hamiltonian in correlated basis is complex"
-             MSG_COMMENT(message)
+             ABI_COMMENT(message)
            endif
            call zheev('v','u',tndim,gathermatlu(iatom)%value,tndim,eig,zwork,lwork,rwork,info)
            !call blockdiago_forzheev(gathermatlu(iatom)%value,tndim,eig)
@@ -1836,7 +1836,7 @@ end subroutine add_matlu
              call wrtout(std_out,message,'COLL')
            end do
            if(iatom==2) then
-             MSG_ERROR("iatom==2")
+             ABI_ERROR("iatom==2")
            end if
          endif
          ABI_DEALLOCATE(temp_mat)
@@ -2064,7 +2064,7 @@ end subroutine add_matlu
    !  endif
    !enddo
    ABI_DEALLOCATE(temp_mat)
-     !MSG_ERROR("Aborting now")
+     !ABI_ERROR("Aborting now")
 
 ! Choose inverse rotation: reconstruct correct rot_mat from rot_mat_orig
 ! ========================================================================
@@ -2265,17 +2265,17 @@ end subroutine add_matlu
 &   ' Diagonal part of the occupation matrix is complex: the imaginary part ',&
 &     maximagdiag,' is larger than',tol,ch10  &
 &    , "The calculation cannot handle it : check that your calculation is meaningfull"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  if (maximag>tol) then
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,&
 &   ' Off diag occupation matrix is complex: the imaginary part ',maximag,' is larger than',tol,ch10&
     , "Check that your calculation is meaningfull"
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  else
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,&
 &   ' Occupation matrix is real: the imaginary part ',maximag,' is lower than',tol
-   MSG_COMMENT(message)
+   ABI_COMMENT(message)
  endif
  if (maxoffdiag>tol) then
    write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
@@ -2283,11 +2283,11 @@ end subroutine add_matlu
 &    , "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10&
 &    , "(Except if dmft_solv=8,9 where these elements are taken into accounts)",ch10&
 &    , "This is an approximation"
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  else
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,&
 &   ' Occupation matrix is diagonal : the off-diag part ',maxoffdiag,' is lower than',tol
-   MSG_COMMENT(message)
+   ABI_COMMENT(message)
  endif
 
  end subroutine checkreal_matlu
@@ -2355,8 +2355,8 @@ end subroutine add_matlu
  !                call wrtout(std_out,message,'COLL')
  !                write(message,'(a,3e16.5)')" checkdiag_matlu: Warning ",matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor),tol
  !                call wrtout(std_out,message,'COLL')
- !                if(.not.present(opt)) MSG_ERROR("not present(opt)")
- !                if(matlu(1)%nspinor==1) MSG_ERROR("matlu%nspinor==1")
+ !                if(.not.present(opt)) ABI_ERROR("not present(opt)")
+ !                if(matlu(1)%nspinor==1) ABI_ERROR("matlu%nspinor==1")
  !              endif
 !             endif
              do ispinor1=1,matlu(1)%nspinor
@@ -2371,7 +2371,7 @@ end subroutine add_matlu
                !  call wrtout(std_out,message,'COLL')
                !  write(message,'(5i5)') im,im1,isppol,ispinor,ispinor
                !  call wrtout(std_out,message,'COLL')
-               !  if(matlu(1)%nspinor==1) MSG_ERROR("matlu%nspinor==1")
+               !  if(matlu(1)%nspinor==1) ABI_ERROR("matlu%nspinor==1")
                !endif
              enddo
            enddo ! ispinor
@@ -2574,7 +2574,7 @@ end subroutine add_matlu
            if( real(matlu1(iatom)%mat(im,im,isppol,ispinor,ispinor))<zero) then
              write(message,'(2a,2es13.5,a)') ch10," ln_matlu: PROBLEM " &
 &             , matlu1(iatom)%mat(im,im,isppol,ispinor,ispinor)
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            endif
            matlu1(iatom)%mat(im,im,isppol,ispinor,ispinor)= &
 &           log(matlu1(iatom)%mat(im,im,isppol,ispinor,ispinor))

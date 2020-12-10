@@ -235,7 +235,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !Check the validity of formeig
  if (formeig/=0.and.formeig/=1) then
    write(message,'(a,i0,a)')' formeig = ',formeig,', but the only allowed values are 0 or 1.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Init mpi_comm
@@ -271,7 +271,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      wff1%fname = nctk_ncify(wff1%fname)
    end if
    if (localrdwf/=0 .and. .not. file_exists(wff1%fname)) then
-     MSG_ERROR('Missing data file: '//TRIM(wff1%fname))
+     ABI_ERROR('Missing data file: '//TRIM(wff1%fname))
    end if
  end if
 
@@ -305,7 +305,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      write(message,"(4a)")&
 &     "hdr_io returned fform == 0 while trying to read the wavefunctions from file: ",trim(wff1%fname),ch10,&
 &     "This usually means that the file does not exist or that you don't have enough privileges to read it"
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    call wrtout(std_out,' inwffil: examining the header of disk file: '//trim(wff1%fname),'COLL')
@@ -455,7 +455,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     'present calculation. It was asked that the wavefunctions be accurate,',ch10,&
 &     'but they were not even read.',ch10,&
 &     'Action: use a wf file, with ireadwf/=0.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if(dksqmax>tol12)then
      write(message, '(9a,es16.6,4a)' )&
@@ -465,7 +465,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     'dksqmax=',dksqmax,ch10,&
 &     'Action: check your wf file and k point input variables',ch10,&
 &     '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if(dtset%nspinor/=nspinor0)then
      write(message,'(a,a, a,a,a,a,a, a,a,2i5,a,a)')&
@@ -474,7 +474,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     'nspinor differs in the file from the actual nspinor.',ch10,&
 &     'nspinor,nspinor0=',dtset%nspinor,nspinor0,ch10,&
 &     'Action: check your wf file, and nspinor input variables.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if((nsppol>nsppol0 .and. sppoldbl==1) .or. nsppol<nsppol0 ) then
      write(message,'(a,a, a,a,a,a,a, a,a,3i5,a,a)')&
@@ -483,7 +483,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     'the nsppol variables do not match in the file and in the actual calculation',ch10,&
 &     'nsppol,nsppol,sppoldbl=',dtset%nspinor,nspinor0,sppoldbl,ch10,&
 &     'Action: check your wf file, and nsppol input variables.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Now, check the number of bands
@@ -502,7 +502,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     'present calculation. It was asked that the wavefunctions be accurate,',ch10,&
 &     'but the number of bands differ in the file and in the actual calculation.',ch10,&
 &     'Action: use a wf file with the correct characteristics.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
  end if
@@ -528,7 +528,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 
  if(xmpi_paral == 1 .or. mpi_enreg%paral_kgb == 1 .or. mpi_enreg%paral_hf == 1) then
    if(localrdwf==0 .and. out_of_core)then
-     MSG_BUG('localrdwf==0 and mkmem==0 (out-of-core solution) are not allowed together (yet)')
+     ABI_BUG('localrdwf==0 and mkmem==0 (out-of-core solution) are not allowed together (yet)')
    end if
  end if
 
@@ -590,7 +590,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     'to interchange spin-polarized wfs and spinor wfs.',ch10,&
 &     'Action: use a non-spin-polarized wf to start a spinor wf,',ch10,&
 &     '        and a non-spinor wf to start a spin-polarized wf.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  === Fake arguments definition for wfsinp
@@ -623,7 +623,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     'In the case of spinor WF read from disk and converted into',ch10,&
 &     'spin-polarized non-spinor WF, the WF translator is memory',ch10,&
 &     'consuming (a copy a spinor WF is temporary stored in memory).'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
 
      nsppol_eff=1;nspinor_eff=2;sppoldbl_eff=1
      ABI_ALLOCATE(indkk_eff,(nkpt*sppoldbl_eff,6))
@@ -807,7 +807,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
              do iband=nband0_k,1,-1
                icg0=icg0-npw0
                if (indx(ii)<icg0) then
-                 MSG_BUG("Unable to read WF!")
+                 ABI_BUG("Unable to read WF!")
                end if
                cg(:,indx(ii)+1:indx(ii)+npw0)=cg(:,icg0+1:icg0+npw0)
                ii=ii-1
@@ -866,7 +866,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
            do iband=nband0_k,1,-1
              icg0=icg0-npw0
              if (indx(ii)<icg0) then
-               MSG_BUG("Unable to read WF!")
+               ABI_BUG("Unable to read WF!")
              end if
              cg(:,indx(ii)+1:indx(ii)+npw0)=cg(:,icg0+1:icg0+npw0)
              ii=ii-1
@@ -950,7 +950,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      ABI_DEALLOCATE(eigen_eff)
 
    else
-     MSG_BUG('unable to interchange nsppol and nspinor when mkmem=0')
+     ABI_BUG('unable to interchange nsppol and nspinor when mkmem=0')
    end if
  end if
 
@@ -1191,7 +1191,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 !Check the validity of formeig
  if(formeig/=0.and.formeig/=1)then
    write(message, '(a,i0,a)' )' formeig=',formeig,' , but the only allowed values are 0 or 1.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  my_nspinor =max(1,nspinor /mpi_enreg%nproc_spinor)
@@ -1868,7 +1868,7 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 !stop
 
 #if 0
- MSG_WARNING("Entering new IO section")
+ ABI_WARNING("Entering new IO section")
 !call WffClose(wff1,ierr)
  comm   = MPI_enreg%comm_cell
  iomode = iomode_from_fname(wff1%fname)
@@ -1920,7 +1920,7 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
    write(msg,'(3(a,i0),3a)')&
    'For kpt number: ',ikpt,' disk file has: ',nband_disk,' bands but input file gave nband: ',nband_k,'.',ch10,&
    'This is not fatal. Bands are skipped or filled with random numbers.'
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
  if (ikpt<=nkpt_max) then
@@ -2133,7 +2133,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &   'the output variables are nsppol2=',nsppol2,', and nspinor2=',nspinor2,ch10,&
 &   'Action: use a non-spin-polarized wf to start a spinor wf,',ch10,&
 &   '        and a non-spinor wf to start a spin-polarized wf.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  my_nspinor1=max(1,nspinor1/mpi_enreg1%nproc_spinor)
@@ -2144,13 +2144,13 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
    mband_rd=min(mband1,(mband2/nspinor2)*nspinor1)
    if(mcg<mpw1*my_nspinor1*mband_rd)then
      write(message,'(2(a,i0))')' The dimension mcg= ',mcg,', should be larger than mband_rd= ',mband_rd
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if(mcg<mband2*mpw2*my_nspinor2)then
      write(message,'(a,i0,a,a,a,i0,a,i0,a,i2)' )&
 &     'The dimension mcg= ',mcg,', should be larger than',ch10,&
 &     'the product of mband2= ',mband2,', mpw2= ',mpw2,', and nspinor2= ',my_nspinor2
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -2267,7 +2267,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
          kg2_k(:,1:npw2)=kg2(:,1+ikg2:npw2+ikg2)
        else if(mkmem2==0)then
 !        Read the first line of a block and performs some checks on the unkg file.
-         MSG_ERROR("mkmem2 == 0 and rdnpw are not supported anymore.")
+         ABI_ERROR("mkmem2 == 0 and rdnpw are not supported anymore.")
          nsp=nspinor2
          !call rdnpw(ikpt2,isppol2,nbd2,npw2,nsp,0,unkg2)
 !        Read k+g data
@@ -2319,7 +2319,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !    Prepare the reading of the wavefunctions: the correct record is selected
 !    WARNING : works only for GS - for RF the number of record differs
      if(restart==2 .and. mkmem1==0)then
-       MSG_ERROR("mkmem1 == 0 has been removed.")
+       ABI_ERROR("mkmem1 == 0 has been removed.")
 
        if(debug>0)then
          write(message, '(a,a,a,a,i5,a,i5,a,a,i5,a,i5)' ) ch10,&
@@ -2364,7 +2364,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
          write(message,'(a,a,a,i6,a,i6)')&
 &         'When mkmem1/=0, one must have nbd1=nbd1_rd, while',ch10,&
 &         'nbd1 = ',nbd1,', and nbd1_rd = ',nbd1_rd
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
 !      Need to put eigenvalues in eig_k, same for occ
 !      Note use of band_index, since it is assumed that eigen and occ
@@ -2716,22 +2716,22 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
  if(nspinor1/=1 .and. nspinor1/=2)then
    write(message,'(a,i0)')'The argument nspinor1 must be 1 or 2, while it is nspinor1 = ',nspinor1
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(nspinor2/=1 .and. nspinor2/=2)then
    write(message,'(a,i0)')' The argument nspinor2 must be 1 or 2, while it is nspinor2=',nspinor2
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(nspinor1==2 .and. mod(nbd1,2)/=0)then
    write(message,'(a,i0)')' When nspinor1 is 2, nbd1 must be even, while it is nbd1 = ',nbd1
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(nspinor2==2 .and. mod(nbd2,2)/=0)then
    write(message,'(a,i0)')'  When nspinor2 is 2, nbd2 must be even, while it is nbd2=',nbd2
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(nbd1/nspinor1>nbd2/nspinor2)then
@@ -2739,7 +2739,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 &   'In wfconv, the nbd/nspinor ratio cannot decrease. However,',ch10,&
 &   'the initial quantities are nbd1,nspinor1=',nbd1,nspinor1,', and',ch10,&
 &   'the requested final quantities are nbd2,nspinor2=',nbd2,nspinor2,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ngfft_now(1:3)=ngfft1(1:3)
@@ -2806,7 +2806,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
 !This is a supplementary check
  if(restart==1 .and. convert/=0)then
-   MSG_BUG('Restart==1 and convert/=0 are exclusive')
+   ABI_BUG('Restart==1 and convert/=0 are exclusive')
  end if
 
 !Determine whether symmetries must be used

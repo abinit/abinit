@@ -144,7 +144,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
 
  if (any(sc_size <= 0).or.ncell<=0) then
    write(msg,'(a,a)')' No supercell found for setting'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !MPI variables
@@ -159,7 +159,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
 !Do some checks
  if(mod(nrpt,npcell) /= 0.or.mod(ncell,npcell) /=0)then
 !   write(msg,'(2a,2I0)')' Chose another number of CPU ',ncell,nrpt
-!   MSG_ERROR(msg)
+!   ABI_ERROR(msg)
  end if
 
  call effpot_mpi_free(effpot_mpi)

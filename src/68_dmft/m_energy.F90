@@ -351,7 +351,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 ! Only imaginary frequencies here
  if(green%w_type=="real".or.self%w_type=="real") then
    message = 'compute_energy not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
  natom=cryst_struc%natom
  nsppol=paw_dmft%nsppol
@@ -425,7 +425,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
      if((abs(energies_dmft%e_hu_tot-energies_dmft%e_hu_mig_tot).ge.0.000001).and.(occ_type/=" lda")) then
        write(message,'(2a,2e18.8,a)') ch10,'   BUG: Migdal energy and DFT+U energy do not coincide',&
 &       energies_dmft%e_hu_tot,energies_dmft%e_hu_mig_tot,occ_type
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      endif
    else if(paw_dmft%dmft_solv==2.or.paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
      energies_dmft%e_hu= energies_dmft%e_hu_mig
@@ -656,7 +656,7 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 ! Only imaginary frequencies here
  if(green%w_type=="real".or.self%w_type=="real") then
    message = 'compute_migdal_energy not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
 ! == Compute Correlation energy from Migdal formula
@@ -668,7 +668,7 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
  nwlo=green%nw
  if (green%nw/=self%nw) then
    message = 'self and green do not contains the same number of frequencies'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 ! write(std_out,*) "beta",beta
 

@@ -196,7 +196,7 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
  if ((present(gsqcutc_eff).or.present(gsqcutf_eff)).and.&
 &    ((.not.present(gmet)).or.(.not.present(k0)))) then
    msg='To compute gsqcut[c,f]_eff, both k0 and gmet must be present as argument !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ngfftc(:)=Dtset%ngfft(:)
@@ -239,7 +239,7 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
 
  CASE DEFAULT
   write(msg,'(a,i4)')' Wrong value of usepaw: ',Dtset%usepaw
-  MSG_BUG(msg)
+  ABI_BUG(msg)
  END SELECT
 
 ! == Store useful dimensions in Pawfgr ===
@@ -272,7 +272,7 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
 &   ' boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
 &   ' Need larger ngfft to use intxc=1.',ch10,&
 &   ' Action : you could increase ngfft, or decrease ecut, or put intxc=0.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  DBG_EXIT("COLL")
@@ -483,7 +483,7 @@ subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
  do ii=1,ubound(coatofin,1)
    if (coatofin(ii)==0) then
      msg = 'A zero was found in coatofin. Check that the fine FFT mesh is finer in each dimension than the coarse FFT mesh.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 

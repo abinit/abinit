@@ -573,7 +573,7 @@ subroutine ptabs_fourdp(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
  end if
 
  if (.not.grid_found) then
-   MSG_BUG(sjoin("Unable to find an allocated distrib for this fft grid with n2, n3 = ", ltoa([n2, n3])))
+   ABI_BUG(sjoin("Unable to find an allocated distrib for this fft grid with n2, n3 = ", ltoa([n2, n3])))
  end if
 
 end subroutine ptabs_fourdp
@@ -651,7 +651,7 @@ subroutine ptabs_fourwf(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
  end if
 
  if(.not. grid_found) then
-   MSG_BUG(sjoin("Unable to find an allocated distrib for this fft grid", ltoa([n2, n3])))
+   ABI_BUG(sjoin("Unable to find an allocated distrib for this fft grid", ltoa([n2, n3])))
  end if
 
 end subroutine ptabs_fourwf
@@ -987,7 +987,7 @@ subroutine initmpi_atom(dtset,mpi_enreg)
 &   msg=' Parallelisation over atoms only compatible with GS or RF !'
    if (dtset%macro_uj/=0)msg=' Parallelisation over atoms not compatible with macro_uj!=0 !'
    if (msg/='') then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -1165,7 +1165,7 @@ subroutine initmpi_grid(mpi_enreg)
       '           npkpt    =',mpi_enreg%nproc_kpt,&
       '           npspinor =',mpi_enreg%nproc_spinor,&
       '       and nproc    =',nproc
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    !Nothing to do if only 1 proc
@@ -1516,7 +1516,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
         ' over images (npimage=',dtset%npimage,&
         ') is greater than the number of dynamic (or static) images (',nimage_eff,') !',ch10,&
         ' This is inefficient.',ch10
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
      if (dtset%npimage>mpi_enreg%nproc) then
        write(unit=msg,fmt='(3a,i6,a,i4,4a)') &
@@ -1524,7 +1524,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
         ' over images (nproc=',mpi_enreg%nproc,&
         ') is smaller than npimage in input file (',dtset%npimage,&
         ')!',ch10,' This is unconsistent.',ch10
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if (mod(nimage_eff,dtset%npimage)/=0) then
        write(unit=msg,fmt='(3a,i4,a,i4,4a)') &
@@ -1532,7 +1532,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
         ' over images (npimage=',dtset%npimage,&
         ') does not divide the number of dynamic images (',nimage_eff,&
         ') !',ch10,' This is inefficient (charge unbalancing).',ch10
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    end if
 
@@ -1577,7 +1577,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
          end if
        end do
        if (nrank/=mpi_enreg%my_nimage) then
-         MSG_BUG('Error on nrank !')
+         ABI_BUG('Error on nrank !')
        end if
 !      Sort images by increasing index (this step is MANDATORY !!)
        ABI_ALLOCATE(ranks,(nrank))
@@ -1598,7 +1598,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
        mpi_enreg%me_cell=xmpi_comm_rank(mpi_enreg%comm_cell)
        mpi_enreg%nproc_cell=nproc_per_image
        if (mpi_enreg%me_cell==0.and.mod(mpi_enreg%me,nproc_per_image)/=0) then
-         MSG_BUG('Error on me_cell !')
+         ABI_BUG('Error on me_cell !')
        end if
      else
        mpi_enreg%comm_img=xmpi_comm_null
@@ -1617,7 +1617,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
        mpi_enreg%me_img=xmpi_comm_rank(mpi_enreg%comm_img)
        mpi_enreg%nproc_img=dtset%npimage
        if (iprocmin==0.and.mpi_enreg%me_img==0.and.mpi_enreg%me/=0) then
-         MSG_BUG('Error on me_img!')
+         ABI_BUG('Error on me_img!')
        end if
        ABI_ALLOCATE(mpi_enreg%distrb_img,(dtset%nimage))
 !      Dynamic images
@@ -1859,7 +1859,7 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 ! ***********************************************************************
 
  if (mpi_enreg%me_pert<0) then
-   MSG_ERROR('Error in MPI distribution! Change your proc(s) distribution or use autoparal>0.')
+   ABI_ERROR('Error in MPI distribution! Change your proc(s) distribution or use autoparal>0.')
  end if
 
  call dtset%get_npert_rbz(nband_rbz, nkpt_rbz, npert)
@@ -1884,7 +1884,7 @@ subroutine initmpi_pert(dtset,mpi_enreg)
      mpi_enreg%me_pert=xmpi_comm_rank(mpi_enreg%comm_pert)
      mpi_enreg%nproc_pert=dtset%nppert
      if (iprocmin==0.and.mpi_enreg%me_pert==0.and.mpi_enreg%me/=0) then
-       MSG_BUG('Error on me_pert!')
+       ABI_BUG('Error on me_pert!')
      end if
 !    Define mpi_enreg%distrb_pert
      ABI_ALLOCATE(mpi_enreg%distrb_pert,(npert))
@@ -2053,7 +2053,7 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
                if (nrank>0) ranks=(/((iproc_min+irank-1),irank=1,nrank)/)
              else if (nrank/=size(ranks)) then
                msg='Number of bands per proc should be the same for all k-points!'
-               MSG_BUG(msg)
+               ABI_BUG(msg)
              end if
            end if
          end if
@@ -2272,13 +2272,13 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
      write(msg,'(a,i0,a,i0,a,i0,2a)')&
       'nproc_kpt= ',nproc_kpt,' >= nkpt= ',nkpt,'* nsppol= ',nsppol,ch10,&
       'The number of processors is larger than nkpt*nsppol. This is a waste. (Ignore this warning if this is not a GS run)'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    else if (mod(nkpt*nsppol,nproc_kpt) /= 0) then
 !    nkpt not a multiple of nproc_kpt
      write(msg,'(a,i0,a,i0,3a)')&
       'nkpt*nsppol (', nkpt*nsppol, ') is not a multiple of nproc_kpt (',nproc_kpt, ')', ch10,&
       'The k-point parallelisation is inefficient. (Ignore this warning if this is not a GS run)'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end if
 
@@ -2292,7 +2292,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !Initialize the processor distribution, either from a file, or from an algorithm
  if (has_file) then
    if (open_file('kpt_distrb',msg,newunit=temp_unit,form='formatted',status='old') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    rewind(unit=temp_unit)
    if (mpi_enreg%paralbd == 1) then
@@ -2333,7 +2333,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
       'The number of processors mentioned in the kpt_distrb file',ch10,&
       'must be lower or equal to the actual number of processors =',nproc_kpt-1,ch10,&
       'Action: change the kpt_distrb file, or increase the','  number of processors.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if(proc_max/=(nproc_kpt-1)) then
@@ -2342,14 +2342,14 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
       'Only ',proc_max+1,' processors are used (from kpt_distrb file),',ch10,&
       'when',nproc_kpt,' processors are available.',ch10,&
       'Action: adjust number of processors and kpt_distrb file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if(proc_min<0) then
      write(msg, '(a,a,a)' )&
       'The number of processors must be bigger than 0 in kpt_distrb file.',ch10,&
       'Action: modify kpt_distrb file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  else
@@ -2534,14 +2534,14 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
  if (nsppol==2) then
 !* Check that the distribution over (spin,k point) allow to consider spin up and spin dn independently.
    if (mpi_enreg%nproc_kpt/=1.and.mod(mpi_enreg%nproc_kpt,2)/=0) then
-     MSG_ERROR( 'The variable nproc_kpt is not even but nssppol= 2')
+     ABI_ERROR( 'The variable nproc_kpt is not even but nssppol= 2')
 !* In this case, one processor will carry both spin. (this will create pbms for the calculation)
    end if
 !* Check that the number of band is the same for each spin, at each k-point. (It should be)
 !*   do iikpt=1,nkpthf
 !*     if (nband(iikpt)/=nband(iikpt+nkpthf)) then
 !*     msg = ' WARNING - the number of bands is different for spin up or spin down. '
-!*     MSG_ERROR(msg)
+!*     ABI_ERROR(msg)
 !*     end if
 !*    end do
 !* If one of this test is not good for one proc then other procs fall in deadlock, according to distrb2.
@@ -2555,14 +2555,14 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
    write(msg, '(a,a,i4,a,i4,a,i4,a,a)' ) ch10,&
 &   'nproc_hf=',nproc_hf,' >= nkpthf=',nkpthf,'* nbandhf=',nbandhf,ch10,&
 &   'The number of processors is larger than nkpthf*nbandhf. This is a waste.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
 
  else if(mod(nkpthf*nbandhf,nproc_hf)/=0) then
 !* nkpthf*nbandhf is not a multiple of nproc_hf
    write(msg, '(2a,i5,a,i5,3a)' ) ch10,&
 &   'nkpthf*nbandhf (', nkpthf*nbandhf, ') is not a multiple of nproc_hf (',nproc_hf, ')', ch10,&
 &   'The parallelisation may not be efficient.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 !*** End of testing section ***
@@ -2641,7 +2641,7 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 ! &     nproc_hf-1,ch10,&
 ! &     '  Action: change the kpt_distrb file, or increase the',&
 ! &     '  number of processors.'
-!      MSG_ERROR(msg)
+!      ABI_ERROR(msg)
 !    end if
 !
 !    if(proc_max/=(nproc_hf-1)) then
@@ -2650,14 +2650,14 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 ! &     '  Only ',proc_max+1,' processors are used (from kpt_distrb file),',ch10,&
 ! &     '  when',nproc_hf,' processors are available.',ch10,&
 ! &     '  Action: adjust number of processors and kpt_distrb file.'
-!      MSG_ERROR(msg)
+!      ABI_ERROR(msg)
 !    end if
 !
 !    if(proc_min<0) then
 !      write(msg, '(a,a,a)' )&
 ! &     '  The number of processors must be bigger than 0 in kpt_distrb file.',ch10,&
 ! &     ' Action: modify kpt_distrb file.'
-!      MSG_ERROR(msg)
+!      ABI_ERROR(msg)
 !    end if
 !  else
 ! !* The file does not exist...

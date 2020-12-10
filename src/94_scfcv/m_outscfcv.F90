@@ -327,7 +327,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &   'cprj datastructure must be allocated',ch10,&
 &   'with options prtwant=2,3, prtnabla>0, prtdos>3, kssform==3, pawfatbnd>0, pawprtwf>0',ch10,&
 &   'Action: change pawusecp input keyword.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Parameters for MPI-FFT
@@ -629,7 +629,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    vpaw(:,:)=zero
    if (me == master .and. my_natom > 0) then
      if (paw_an(1)%cplex > 1) then
-       MSG_WARNING('cplex = 2 : complex hartree potential in PAW spheres. This is not coded yet. Imag part ignored')
+       ABI_WARNING('cplex = 2 : complex hartree potential in PAW spheres. This is not coded yet. Imag part ignored')
      end if
    end if
 
@@ -1069,7 +1069,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    if (dtset%pawprt_b==0) then
      fname = strcat(dtfil%filnam_ds(4), '_PAWSTAT')
      if (open_file(fname, msg,newunit=tmp_unt,status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      write(tmp_unt,'(5a)') '# This file contains the statistics on the cancellation of',ch10,&
 &     '# the onsite pseudo component of the all-electron wavefunction',ch10,&
@@ -1213,7 +1213,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &   prtvol,psps,rprimd,vtrial,xred,cg,usecprj,cprj,eigen,ierr)
    call timab(964,2,tsec) ! outscfcv(outkss)
    if (ierr/=0) then
-     MSG_WARNING("outkss returned a non zero status error, check log")
+     ABI_WARNING("outkss returned a non zero status error, check log")
    end if
  end if
 
@@ -1275,7 +1275,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (me == master .and. dtset%prtfsurf == 1) then
    if (ebands_write_bxsf(ebands,crystal,dtfil%fnameabo_app_bxsf) /= 0) then
      msg = "Cannot produce BXSF file with Fermi surface, see log file for more info"
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      call wrtout(ab_out, msg)
    end if
  end if ! prtfsurf==1
@@ -1286,7 +1286,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    ierr = ebands_write_nesting(ebands,crystal,dtfil%fnameabo_app_nesting,dtset%prtnest,&
      dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg)
    if (ierr /= 0) then
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      call wrtout(ab_out, msg)
    end if
    call timab(968,2,tsec)

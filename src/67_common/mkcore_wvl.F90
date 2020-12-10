@@ -161,11 +161,11 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 !Make sure option is acceptable
  if (option<0.or.option>3) then
    write(msg,'(a,i2,a)') 'Option= ',option,' is not allowed!'
-   MSG_BUG(MSG)
+   ABI_BUG(MSG)
  end if
  if(nfft/=n3xccc)then
    write(msg,'(a)') 'nfft and n3xccc should be equal!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !MPI
@@ -330,7 +330,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
        if (npts==0) cycle
        if (npts>npts12) then
          msg='npts>npts12!'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
 
 !      Evaluate core density (and derivatives) on the set of selected points
@@ -608,21 +608,21 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 
  if(nspden >1) then
    write(message, '(a)')'mkcore_wvl_old: this is not yet generalized to npsden>1'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(option>4 .or. option<1 )then
    write(message,'(a,a,a,a,a,a,i6)') ch10,&
 &   ' mkcore_wvl_old: BUG -',ch10,&
 &   '  The argument option should be between 1 and 4,',ch10,&
 &   '  however, option=',option
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if(nfft .ne. n3xccc)then
    write(message,'(a,a,a,a,a,a,2i6)') ch10,&
 &   ' mkcore_wvl_old: BUG -',ch10,&
 &   '  nfft and n3xccc should be equal,',ch10,&
 &   '  however, nfft and n3xccc=',nfft,n3xccc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !MPI
@@ -647,7 +647,7 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
    write(message, '(a,a,a,a)' ) ch10,&
 &   ' mkcore_wvl_old: BUG -',ch10,&
 &   '  Can''t be here ! (bad option).'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  write(message,'(a,a)') ch10,&
@@ -949,16 +949,16 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
 !Checks
  if(nspden >1) then
    write(message, '(a)')'mkcore_inner: this is not yet generalized to npsden>1'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (present(rred)) then
    if (option>1.and.size(rred)/=3*ncmax) then
      write(message, '(a)')'mkcore_inner: incorrect size for rred'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  else if (option>1) then
    write(message, '(a)')'mkcore_inner: rred is not present and option >1'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Retrieve values of pseudo core density (and derivative)
@@ -1151,7 +1151,7 @@ end module m_mkcore_wvl
 !%%
 !%%  if(nspden >1) then
 !%%    write(message, '(a)')'mkcore_paw: this is not yet generalized to npsden>1'
-!%%    MSG_ERROR(message)
+!%%    ABI_ERROR(message)
 !%%  end if
 !%%
 !%%  geocode='P'
@@ -1169,7 +1169,7 @@ end module m_mkcore_wvl
 !%%  me    =xmpi_comm_rank(mpi_enreg%comm_fft);    me_fft= ngfft(11)
 !%%
 !%%  if(me /= me_fft .or. nproc /= nproc_fft) then
-!%%    MSG_BUG("mkcore_paw: comm_size or comm_rank not equal to the corresponding values in ngfft")
+!%%    ABI_BUG("mkcore_paw: comm_size or comm_rank not equal to the corresponding values in ngfft")
 !%%  end if
 !%%
 !%%  n1 = ngfft(1)
@@ -1198,7 +1198,7 @@ end module m_mkcore_wvl
 !%% &   ' mkcore_paw: BUG -',ch10,&
 !%% &   '  nfft and n3xccc should be equal,',ch10,&
 !%% &   '  however, nfft and n3xccc=',nfft,n3xccc
-!%%    MSG_BUG(message)
+!%%    ABI_BUG(message)
 !%%  end if
 !%%
 !%%  if (option==1) then
@@ -1218,7 +1218,7 @@ end module m_mkcore_wvl
 !%%    write(message, '(a,a,a,a)' ) ch10,&
 !%% &   ' mkcore_paw: BUG -',ch10,&
 !%% &   '  Can''t be here ! (bad option).'
-!%%    MSG_BUG(message)
+!%%    ABI_BUG(message)
 !%%  end if
 !%%
 !%%  write(message,'(a,a)') ch10,&

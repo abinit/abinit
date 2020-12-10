@@ -248,7 +248,7 @@ contains
                   &         'ncoeff is specified in the input but,',ch10,&
                   &         'there is no file for the coefficients ',ch10,&
                   &         'Action: add coefficients.xml file'
-             MSG_ERROR(message)
+             ABI_ERROR(message)
 
           else
              write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
@@ -340,29 +340,29 @@ elec_eval = .FALSE.
                 write(message, '(5a)' )&
 &           'The trainig-set ',trim(filnam(5)),' file is not correct ',ch10,&
 &           'Action: add training-set file'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
        else
          if (inp%fit_coeff/=0) then
            write(message, '(3a)' )&
 &           'There is no training-set file to fit the lattice model ',ch10,&
 &           'Action: add trainings-set-file'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          else if (inp%bound_model/=0) then
              write(message, '(3a)' )&
 &             'There is no  training-set file to bound the model ',ch10,&
 &             'Action: add training-set file '
-             MSG_ERROR(message)
+             ABI_ERROR(message)
          else if(inp%confinement==2) then
              write(message, '(3a)' )&
 &             'There is no training-set file to compute the confinement',ch10,&
 &             'Action: add training-set file '
-             MSG_ERROR(message) 
+             ABI_ERROR(message) 
          else if(inp%opt_effpot==2) then
              write(message, '(3a)' )&
 &             'There is no training-set file to optimize the latice model',ch10,&
 &             'Action: add training-set file '
-             MSG_ERROR(message)
+             ABI_ERROR(message)
          end if
        end if
      end if
@@ -456,7 +456,7 @@ elec_eval = .FALSE.
           write(message, '(3a)' )&
                &       'There is no step in the MD file ',ch10,&
                &       'Action: add correct MD file'
-          MSG_ERROR(message)
+          ABI_ERROR(message)
        end if
     end if
 
@@ -516,13 +516,13 @@ elec_eval = .FALSE.
            write(message, '(5a)' )&
 &           'The test-set ',trim(filnam(6)),' file is empty ',ch10,&
 &           'Action: add non-empty test-set'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
        else
            write(message, '(3a)' )&
 &           'There is no test-set file ',ch10,&
 &           'Action: add test-set file'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
        end if
      end if
 !  MPI BROADCAST the history of the MD

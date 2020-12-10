@@ -201,7 +201,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  end if
 
  if(ioption/=0.and.paw_dmft%use_sc_dmft==1) then
-   MSG_ERROR('option argument value of this routines should be 0 if usedmft=1.')
+   ABI_ERROR('option argument value of this routines should be 0 if usedmft=1.')
  end if
  if(paw_dmft%use_sc_dmft/=0) then
    nbandc1=(paw_dmft%mbandc-1)*paw_dmft%use_sc_dmft+1
@@ -246,7 +246,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    nbeta = 3
    ABI_ALLOCATE(taur_alphabeta,(dtset%nfft,dtset%nspden,3,3))
  case default
-   MSG_BUG('ioption argument value should be 0,1 or 2.')
+   ABI_BUG('ioption argument value should be 0,1 or 2.')
  end select
 
 !Init me
@@ -267,10 +267,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      return
    case (1)
      !call wvl_mkrho(dtset, mpi_enreg, occ, rhor, wvl_wfs, wvl_den)
-     MSG_ERROR("kinetic energy density (taur) is not yet implemented in wavelet formalism.")
+     ABI_ERROR("kinetic energy density (taur) is not yet implemented in wavelet formalism.")
    case (2)
      !call wvl_mkrho(dtset, mpi_enreg, occ, rhor, wvl_wfs, wvl_den)
-     MSG_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented in wavelet formalism.')
+     ABI_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented in wavelet formalism.')
    end select
  end if
 !WVL - Following is done in plane waves.
@@ -377,7 +377,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      end do
                    end do
                  else if(ioption==2)then
-                   MSG_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
+                   ABI_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
                  end if
 
 !                Non diag occupation in DMFT.
@@ -542,7 +542,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  end do
                end do
              else if(ioption==2)then
-               MSG_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
+               ABI_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
              end if
 
 ! ---------- DMFT
@@ -739,7 +739,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      end do
    end if
  case(2)
-   MSG_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
+   ABI_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
    !call symtaug(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
    !dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
  end select
@@ -1014,7 +1014,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                      rhoat=(aa*psps%nctab(itypat)%tvalespl(jj,1)+bb*psps%nctab(itypat)%tvalespl(jj+1,1)+&
                      cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
                    else
-                     MSG_BUG('Initialization of density is non consistent.')
+                     ABI_BUG('Initialization of density is non consistent.')
                    end if
 !                  Multiply structure factor times rhoat (atomic density in reciprocal space)
                    rhog(re,ii)=rhog(re,ii)+sfr*rhoat
@@ -1120,7 +1120,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                      rhoat=(aa*psps%nctab(itypat)%tvalespl(jj,1)+bb*psps%nctab(itypat)%tvalespl(jj+1,1)+&
                      cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
                    else
-                     MSG_BUG('Initialization of density is non consistent.')
+                     ABI_BUG('Initialization of density is non consistent.')
                    end if
                  end if
 
@@ -1297,7 +1297,7 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 
  if(option/=1 .and. option/=2)then
    write(message, '(a,i0)' )' Option must be 1 or 2, while it is ',option
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (mpi_enreg%nproc_wvl>1) then
@@ -1937,7 +1937,7 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
  c(:) = rprimd(:,3)
  ABI_ALLOCATE(rho,(ngrid))
  if (nspden/=1) then
-   MSG_ERROR('read_atomden: Only nspden=1 allowed.')
+   ABI_ERROR('read_atomden: Only nspden=1 allowed.')
  end if
  rho = rhor_atm(:,1)
  gmet=zero;gprimd=zero;rmet=zero;ucvol=zero
@@ -1963,7 +1963,7 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
    end do
  end do
  if (igrid/=ngrid) then
-   MSG_ERROR('read_atomden: igrid not equal to ngrid')
+   ABI_ERROR('read_atomden: igrid not equal to ngrid')
  end if
 
 !Read in atomic density data for each atom type
@@ -1979,7 +1979,7 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
      write(std_out,*) ' Current implementation requires this file to be present'
      write(std_out,*) ' for each type of atom.'
      write(std_out,*)trim(message)
-     MSG_ERROR("Cannot continue")
+     ABI_ERROR("Cannot continue")
    end if
 !  Check number of lines in file
    nlines = 1;io_err=0;
@@ -2003,7 +2003,7 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
    if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), &
 &   '_density_atom_type',itypat,'.dat'
    if (open_file(filename,message,newunit=unt,status='old',action='read') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    read(unt,*) ! Skip comment line
    do i=1,natomgr(itypat)
@@ -2013,7 +2013,7 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
    if (atomrgrid(1,itypat)/=zero) then
      write(std_out,*) 'ERROR in read_atomden, in file: ',filename
      write(std_out,*) ' First gridpoint has to be the origin.'
-     MSG_ERROR("Cannot continue")
+     ABI_ERROR("Cannot continue")
    end if
  end do ! Atom type
 
@@ -2257,7 +2257,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
          do iatom=1,natom
            if (typat(iatom)==itypat) then
              if (i>n_equiv_atoms(itypat)) then
-               MSG_ERROR('atomden: i>n_equiv_atoms')
+               ABI_ERROR('atomden: i>n_equiv_atoms')
              end if
              equiv_atom_pos(:,i,itypat) = (atom_pos(1,iatom)+dble(l))*a &
 &             + (atom_pos(2,iatom)+dble(m))*b &

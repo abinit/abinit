@@ -377,7 +377,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  !@atomorb_type
  ierr=0
  if (open_file(filename,msg,newunit=unt,form="formatted",status="old",action="read") /=0) then
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=1; RETURN
  end if
 
@@ -419,7 +419,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
    write(msg,'(a,i2,3a)')&
 &   'This version of core psp file (',version,') is not compatible with',ch10,&
 &   'the current version of Abinit.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(unit=line(6:80),fmt=*,ERR=10) creatorid
@@ -439,7 +439,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  lmax = MAXVAL(orbitals)
  if (lmax+1/=Atm%l_max) then
    write(msg,'(a)')" lmax read from file does not agree with orbitals. "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! 7)
@@ -464,7 +464,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
 &    " Truncating radial mesh for core orbitals using new rcore = ",Atm%rcore," (",my_rcore,")"
    call wrtout(std_out,msg,'COLL')
    if (rcut > my_rcore) then
-     MSG_ERROR("rcut should not exceed my_rcore")
+     ABI_ERROR("rcut should not exceed my_rcore")
    end if
  end if
 
@@ -506,7 +506,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
        write(msg,'(3a)')&
 &       ' All Phi core must be given on the same radial mesh !',ch10,&
 &       ' Action: check your pseudopotential file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      read(unt,*,ERR=10)nn,ll,ii
      ABI_CHECK(ii==isppol,"Wrong spin index")
@@ -632,7 +632,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  ! === Propagate the error ===
 10 continue
  ierr=2
- MSG_WARNING("Wrong file format")
+ ABI_WARNING("Wrong file format")
  return
 
 end subroutine init_atomorb
@@ -685,7 +685,7 @@ subroutine get_atomorb_charge(Atm,Radmesh,nele,radens)
 !************************************************************************
 
  if (Atm%nsppol==2) then
-   MSG_ERROR("nsppol==2 is Working in progress")
+   ABI_ERROR("nsppol==2 is Working in progress")
  end if
 
  ABI_MALLOC(phi2nl,(Atm%mesh_size))
@@ -780,7 +780,7 @@ subroutine get_overlap(Atm,Atmesh,Radmesh2,isppol,nphi,phi,phi_indln,overlap)
 
  ! === Spline valence onto Atom mesh (natural spline) ===
  if (do_spline==1) then
-   MSG_COMMENT("Splining in overlap")
+   ABI_COMMENT("Splining in overlap")
 
    my_mesh_size  =  Atmesh%mesh_size
    my_pts        => Atmesh%rad(1:my_mesh_size)
@@ -883,7 +883,7 @@ subroutine print_atomorb(Atm,header,unit,prtvol,mode_paral)
    msg = "  Spin unrestricted"
  case default
    write(msg,'(a,i3)')" Wrong method= ",Atm%method
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
  call wrtout(my_unt,msg,my_mode)
 
@@ -960,7 +960,7 @@ function my_mode2str(mode) result(str)
    str="Valence Orbital"
  case default
    write(msg,'(a,i3)')" Wrong mode= ",mode
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 end function my_mode2str

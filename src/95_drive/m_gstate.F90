@@ -588,9 +588,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      "The number of eigenvectors cannot be greater that the size of the Hamiltonian!",ch10,&
      "Action: decrease nband or, alternatively, increase ecut"
      if (dtset%ionmov/=23) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      else
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
 
    else if (dtset%mband >= 0.9 * npwmin) then
@@ -599,7 +599,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     "Number of bands nband= ",dtset%mband," >= 0.9 * maximum number of planewaves= ",0.9*npwmin,ch10,&
 &     "The problem is ill-defined and the GS algorithm will show numerical instabilities!",ch10,&
 &     "Assume experienced user. Execution will continue."
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end if
 
@@ -665,7 +665,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (cnt == 0) then
    mcg = 0
    write(msg,"(2(a,i0))")"rank: ",mpi_enreg%me, "does not have wavefunctions to treat. Setting mcg to: ",mcg
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  if (dtset%usewvl == 0 .and. dtset%mpw > 0 .and. cnt /= 0)then
@@ -676,12 +676,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
 &     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
 &     "to decrease the memory requirements. Consider also OpenMP threads."
-     MSG_ERROR_NOSTOP(msg,ii)
+     ABI_ERROR_NOSTOP(msg,ii)
      write (msg,'(5(a,i0), 2a)')&
 &     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
 &     ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
 &     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -777,7 +777,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      write(msg, '(a,a,a)' )&
 &     'It is not yet possible to use non-zero restartxf,',ch10,&
 &     'in parallel, when localrdwf=0. Sorry for this ...'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,0))
@@ -788,7 +788,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      write(msg,'(a,a,a)')&
 &     'An error occurred reading the input wavefunction file,',ch10,&
 &     'with restartxf=1.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else if(ios==0)then
      write(msg, '(a,a,i4,a)' )ch10,&
 &     ' gstate : reading',ab_xfh%nxfh,' (x,f) history pairs from input wf file.'
@@ -1311,7 +1311,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      write(msg, '(a,i0,2a)' )&
      'Disallowed value for ionmov=',dtset%ionmov,ch10,&
      'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24,28 and 30'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    call scfcv_destroy(scfcv_args)
@@ -1379,7 +1379,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    write_wfk = .False.
    msg = "GS calculation converged with prtwf=-1 --> Skipping WFK file output"
    call wrtout(ab_out, msg)
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
 !To print out the WFs, need the rprimd that was used to generate the G vectors
@@ -1994,7 +1994,7 @@ subroutine clnup1(acell,dtset,eigen,fermie, fnameabo_dos,fnameabo_eig,fred,&
 !If needed, print DOS (unitdos is closed in getnel, occ is not changed if option == 2
  if (dtset%prtdos==1 .and. me == master) then
    if (open_file(fnameabo_dos,msg, newunit=unitdos, status='unknown', action="write", form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    rewind(unitdos)
    maxocc=two/(dtset%nspinor*dtset%nsppol)  ! Will not work in the fixed moment case
@@ -2479,7 +2479,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  DBG_ENTER("COLL")
 
  if (dtset%macro_uj==0) then
-   MSG_BUG('Macro_uj must be set !')
+   ABI_BUG('Macro_uj must be set !')
  end if
 
  ABI_DATATYPE_ALLOCATE(dtpawuj,(0:ndtpawuj))
@@ -2638,7 +2638,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 !    if node is master
      write(msg, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
 &     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
 
      write(unit=wff2%unwff)ab_xfh%nxfh
      do ixfh=1,ab_xfh%nxfh
@@ -2719,7 +2719,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 
        if (mxfh_tmp /= ab_xfh%mxfh .or. dim2inout_tmp /= 2 .or. xfdim2_tmp /= xfdim2) then
          write (msg,"(A)") 'outxfhist : ERROR xfhist has bad dimensions in NetCDF file. Can not re-write it.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
      end if
@@ -2744,7 +2744,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 !    if node is master
      write(msg, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
 &     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
 
      read(unit=wff2%unwff,iostat=ios)ab_xfh%nxfh
 
@@ -2775,7 +2775,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 !    if node is master
      write(msg, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
 &     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
 
      do ixfh=1,ab_xfh%nxfhr
        read(unit=wff2%unwff,iostat=ios)ab_xfh%xfhist(:,:,:,ixfh)
@@ -2815,7 +2815,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 !  write(std_out,*)' outxfhist : option ', option , ' not available '
    write(msg, "(A,A,A,A,I3,A)") ch10, "outxfhist: ERROR -", ch10, &
 &   "option ", option, " not available."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine outxfhist

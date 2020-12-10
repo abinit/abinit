@@ -191,7 +191,7 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
      write(message, '(a,es12.4,a,a,a,i2,a)' )&
 &     'With non-zero h1p (=',h1p,'), mpsang should be at least 2,',ch10,&
 &     'while mpsang=',psps%mpsang,'.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    nproj(2)=1
    if (lmax<1) then
@@ -199,7 +199,7 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
 &     'Input lmax=',lmax,' disagree with input h1p=',h1p,'.',&
 &     'Your pseudopotential is incoherent.',ch10,&
 &     'Action: correct your pseudopotential file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -258,7 +258,7 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp2in
 !!***
@@ -989,7 +989,7 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp3in
 !!***
@@ -1255,7 +1255,7 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
    write(message, '(a,a,a)' )&
 &   '  only two d-projectors are allowed ',ch10,&
 &   '  Action: check your pseudopotential file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
 !  nproj=3 ; ldz=3 ; ap(1,6)=h33d
 !  ap(1,4)= 0.5d0*sqrt(63.d0/143.d0)*h33d
 !  ap(1,5)= -0.5d0*(18.d0/sqrt(143.d0))*h33d
@@ -1612,7 +1612,7 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp10in
 !!***
@@ -1689,7 +1689,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
      priloop: do iproj=1,jproj
        ipack=iproj+(jproj-1)*jproj/2
        if(mod((jproj-1)*jproj,2)/=0) then
-         MSG_ERROR("odd")
+         ABI_ERROR("odd")
        end if
        ap(1,ipack)=hij(ll,iproj,jproj)
      end do priloop
@@ -1790,7 +1790,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
          write(message, '(3a)' )&
 &         ' only two d-projectors are allowed ',ch10,&
 &         ' Action: check your pseudopotential file.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
 
        rrl=rr(2)
@@ -1825,7 +1825,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
          write(message, '(a,a,a)' )&
 &         'only one f-projector is allowed ',ch10,&
 &         'Action: check your pseudopotential file.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
 
        rrl=rr(3)
@@ -1843,7 +1843,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
 &       yp1j(1),ypnj(1),ppspl(:,2,4,1))
 
      else
-       MSG_ERROR("lmax>3?")
+       ABI_ERROR("lmax>3?")
      end if
 
 !    Linear combination using the eigenvectors

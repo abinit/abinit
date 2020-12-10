@@ -160,7 +160,7 @@ subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, &
      write(msg,'(a,I4,a,I7,2a,3E20.10)')' No supercell found with less than ', &
 &           maxsc,' unit cells in direction ', &
 &           ii, ch10, ' qphon = ', qphon
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -522,7 +522,7 @@ subroutine prt_supercell (filename, scell, title1, title2)
 ! *************************************************************************
 
   if (open_file(filename, msg, newunit=scunit) /= 0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
 ! print header

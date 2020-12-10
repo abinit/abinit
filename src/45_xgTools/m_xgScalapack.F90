@@ -157,7 +157,7 @@ module m_xgScalapack
     else if ( nthread > 1 ) then ! disable scalapack with threads since it is not threadsafe
       ! This should be check with new elpa version en MPI+OpenMP
       if ( M__CONFIG > 0 ) then
-        MSG_WARNING("xgScalapack turned off because you have threads")
+        ABI_WARNING("xgScalapack turned off because you have threads")
       end if
       usable = .false.
       return
@@ -185,7 +185,7 @@ module m_xgScalapack
       end if
        call MPI_Comm_split(comm, subgroup, xgScalapack%rank(M__WORLD), xgScalapack%comms(mycomm(1)),ierr)
        if ( ierr /= 0 ) then
-         MSG_ERROR("Error splitting communicator")
+         ABI_ERROR("Error splitting communicator")
        end if
        xgScalapack%comms(mycomm(2)) = xmpi_comm_null
        xgScalapack%rank(mycomm(1)) = xmpi_comm_rank(xgScalapack%comms(mycomm(1)))
@@ -195,7 +195,7 @@ module m_xgScalapack
     else
        call MPI_Comm_dup(comm,xgScalapack%comms(M__SLK),ierr)
        if ( ierr /= 0 ) then
-         MSG_ERROR("Error duplicating communicator")
+         ABI_ERROR("Error duplicating communicator")
        end if
        xgScalapack%rank(M__SLK) = xmpi_comm_rank(xgScalapack%comms(M__SLK))
        xgScalapack%size(M__SLK) = nproc
@@ -212,10 +212,10 @@ module m_xgScalapack
       test_row = INT((xgScalapack%rank(M__SLK)) / xgScalapack%grid%dims(2))
       test_col = MOD((xgScalapack%rank(M__SLK)), xgScalapack%grid%dims(2))
       if ( test_row /= xgScalapack%coords(M__ROW) ) then
-        MSG_WARNING("Row id mismatch")
+        ABI_WARNING("Row id mismatch")
       end if
       if ( test_col /= xgScalapack%coords(M__COL) ) then
-        MSG_WARNING("Col id mismatch")
+        ABI_WARNING("Col id mismatch")
       end if
     end if
 
@@ -233,15 +233,15 @@ module m_xgScalapack
     integer, intent(in) :: maxDim
     if ( myconfig == SLK_AUTO) then
       M__CONFIG = myconfig
-      MSG_COMMENT("xgScalapack in auto mode")
+      ABI_COMMENT("xgScalapack in auto mode")
     else if ( myconfig == SLK_DISABLED) then
       M__CONFIG = myconfig
-      MSG_COMMENT("xgScalapack disabled")
+      ABI_COMMENT("xgScalapack disabled")
     else if ( myconfig > 0) then
       M__CONFIG = myconfig
-      MSG_COMMENT("xgScalapack enabled")
+      ABI_COMMENT("xgScalapack enabled")
     else
-      MSG_WARNING("Bad value for xgScalapack config -> autodetection")
+      ABI_WARNING("Bad value for xgScalapack config -> autodetection")
       M__CONFIG = SLK_AUTO
     end if
     if ( maxDim > 0 ) then
@@ -288,7 +288,7 @@ module m_xgScalapack
 
       call xgBlock_getSize(eigenvalues,nbli_global,nbco_global)
       if ( cols(matrixA) /= nbli_global ) then
-        MSG_ERROR("Number of eigen values differ from number of vectors")
+        ABI_ERROR("Number of eigen values differ from number of vectors")
       end if
 
       if ( space(matrixA) == SPACE_C ) then
@@ -321,12 +321,12 @@ module m_xgScalapack
     if ( any(req/=-1)  ) then
       call MPI_WaitAll(2,req,status,ierr)
       if ( ierr /= 0 ) then
-          MSG_ERROR("Error waiting data")
+          ABI_ERROR("Error waiting data")
       endif
     end if
 #endif
 #else
-   MSG_ERROR("ScaLAPACK support not available")
+   ABI_ERROR("ScaLAPACK support not available")
    ABI_UNUSED(xgScalapack%verbosity)
    ABI_UNUSED(matrixA%normal)
    ABI_UNUSED(eigenvalues%normal)
@@ -363,11 +363,11 @@ module m_xgScalapack
 
       call xgBlock_getSize(eigenvalues,nbli_global,nbco_global)
       if ( cols(matrixA) /= cols(matrixB) ) then
-        MSG_ERROR("Matrix A and B don't have the same number of vectors")
+        ABI_ERROR("Matrix A and B don't have the same number of vectors")
       end if
 
       if ( cols(matrixA) /= nbli_global ) then
-        MSG_ERROR("Number of eigen values differ from number of vectors")
+        ABI_ERROR("Number of eigen values differ from number of vectors")
       end if
 
       if ( space(matrixA) == SPACE_C ) then
@@ -400,12 +400,12 @@ module m_xgScalapack
     if ( any(req/=-1)   ) then
       call MPI_WaitAll(2,req,status,ierr)
       if ( ierr /= 0 ) then
-          MSG_ERROR("Error waiting data")
+          ABI_ERROR("Error waiting data")
       endif
     end if
 #endif
 #else
-   MSG_ERROR("ScaLAPACK support not available")
+   ABI_ERROR("ScaLAPACK support not available")
    ABI_UNUSED(xgScalapack%verbosity)
    ABI_UNUSED(matrixA%normal)
    ABI_UNUSED(matrixB%normal)
@@ -442,7 +442,7 @@ module m_xgScalapack
         call xmpi_isend(tab,sendto,sendto,xgScalapack%comms(M__WORLD),req,ierr)
         !write(*,*) xgScalapack%rank(M__WORLD), "sends to", sendto
         if ( ierr /= 0 ) then
-          MSG_ERROR("Error sending data")
+          ABI_ERROR("Error sending data")
         end if
         !lap = lap+1
         !sendto = xgScalapack%rank(M__WORLD) + lap*xgScalapack%size(M__SLK)
@@ -455,11 +455,11 @@ module m_xgScalapack
         call xmpi_irecv(tab,receivefrom,xgScalapack%rank(M__WORLD),xgScalapack%comms(M__WORLD),req,ierr)
         !write(*,*) xgScalapack%rank(M__WORLD), "receive from", receivefrom
         if ( ierr /= 0 ) then
-          MSG_ERROR("Error receiving data")
+          ABI_ERROR("Error receiving data")
         end if
       end if
     !else
-      !MSG_BUG("Error scattering data")
+      !ABI_BUG("Error scattering data")
     end if
 
     call timab(M__tim_scatter,2,tsec)

@@ -140,12 +140,12 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
    write(std_out,'(a)' )' Please, give the filename of the all-electron density file'
    write(std_out,'(a,es16.6)' )' for the first type of atom, with atomic number=',znucl(itypat)
    if (read_string(file_allelectron, unit=std_in) /= 0) then
-     MSG_ERROR("Fatal error!")
+     ABI_ERROR("Fatal error!")
    end if
    write(std_out,*)' The name you entered is : ',trim(file_allelectron),ch10
    ierr = open_file(file_allelectron,msg,newunit=temp_unit,form='formatted',status='old')
    if (ierr/=0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      read(temp_unit, *) param1, param2
      do ipoint=1,mpoint
@@ -333,12 +333,12 @@ end subroutine cut3d_hirsh
 
  write(std_out,*) ch10,'  Enter the name of an output file:'
  if (read_string(filnam, unit=std_in) /= 0) then
-   MSG_ERROR("Fatal error!")
+   ABI_ERROR("Fatal error!")
  end if
  write(std_out,*) '  The name of your file is : ',trim(filnam),ch10
 
  if (open_file(filnam,msg,newunit=unt,status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  dx=(r2(1)-r1(1))/nresol
@@ -759,7 +759,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    read(std_in,*) nresoll
    write(std_out,*) ch10,'  Enter the name of an output file:'
    if (read_string(filnam, unit=std_in) /= 0) then
-     MSG_ERROR("Fatal error!")
+     ABI_ERROR("Fatal error!")
    end if
    write(std_out,*) '  The name of your file is : ',trim(filnam)
    write(std_out,*)
@@ -773,7 +773,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
  end do
 
  if (open_file(filnam,msg,newunit=unt,status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  do k2=-nresoll/2,nresoll/2
@@ -1031,7 +1031,7 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
  case (IO_MODE_FORTRAN)
    !Unformatted, on one record
    if (open_file(path, msg, newunit=unt, form='unformatted', status='old', action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    call hdr_fort_read(hdr, unt, fform)
    ABI_CHECK(fform /= 0, sjoin("Error while reading:", path))
@@ -1053,11 +1053,11 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
    NCF_CHECK(nf90_get_var(unt, varid, grid_full, start=[1,1,1,1,1], count=[1, nr1,nr2,nr3,nspden]))
    NCF_CHECK(nf90_close(unt))
 #else
-   MSG_ERROR('netcdf support is not compiled. Reconfigure with --enable-netcdf.')
+   ABI_ERROR('netcdf support is not compiled. Reconfigure with --enable-netcdf.')
 #endif
 
  case default
-   MSG_BUG(sjoin("invalid iomode:", itoa(iomode)))
+   ABI_BUG(sjoin("invalid iomode:", itoa(iomode)))
  end select
 
 end subroutine cut3d_rrho
@@ -1501,7 +1501,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    write(std_out,*)
    write(std_out,*) ch10,'  Enter the name of an output file:'
    if (read_string(filnam, unit=std_in) /= 0) then
-     MSG_ERROR("Fatal error!")
+     ABI_ERROR("Fatal error!")
    end if
    write(std_out,*) '  The name of your file is : ',trim(filnam)
 
@@ -1544,11 +1544,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
 
  if (fileformattype==1 .or. fileformattype==2) then
    if (open_file(filnam,msg,newunit=unt,status='unknown') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  else if (fileformattype==3) then
    if (open_file(filnam,msg,newunit=unt,form='unformatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    xm=0
@@ -1827,7 +1827,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !    Check if kpt exist
      if(ckpt<1 .or. ckpt>nkpt) then
        write(msg,'(a,i0)') 'Invalid k-point ',ckpt
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      ckpt=nkpt
@@ -1843,7 +1843,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
      if(cband<1 .or. cband>nband(ckpt)) then
        write(msg,'(a,i0)')'Invalid band number',cband
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      cband=nband(ckpt)
@@ -1858,7 +1858,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !    Check if spin polarisation exist
      if(csppol<1 .or. csppol>nsppol) then
        write(msg,'(a,i0)')'Invalid spin polarisation ',csppol
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      csppol=1
@@ -1875,7 +1875,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !    Check if spin polarisation exist
      if(cspinor<1 .or. cspinor>nspinor) then
        write(msg,'(a,i0)')'Invalid spinor index ',cspinor
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      write(std_out,*) ' => Your spinor component is : ',(cspinor)
      write(std_out,*)
@@ -1993,15 +1993,15 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      if(ii1==1) then
        write(std_out,*) 'What is the name of the QPS file?'
        if (read_string(fileqps, unit=std_in) /= 0) then
-         MSG_ERROR("Fatal error!")
+         ABI_ERROR("Fatal error!")
        end if
 !      Checking the existence of data file
        if (.not. file_exists(fileqps)) then
-         MSG_ERROR(sjoin('Missing data file:', fileqps))
+         ABI_ERROR(sjoin('Missing data file:', fileqps))
        end if
 
        if (open_file(fileqps, msg, newunit=iunt, status='old',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        read(iunt,*) iscf_qps
@@ -2223,7 +2223,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      if (ichoice>0 .and. ichoice<15)then
        write(std_out,*) ch10,'  Enter the root of an output file:'
        if (read_string(output1, unit=std_in) /= 0) then
-         MSG_ERROR("Fatal error!")
+         ABI_ERROR("Fatal error!")
        end if
        write(std_out,*) '  The root of your file is : ',trim(output1)
        output=trim(output1)
@@ -2252,7 +2252,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The second column is the imaginary data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_ri("RI",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
@@ -2264,7 +2264,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The only column is the real data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_ri("R",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
@@ -2276,7 +2276,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The only column is the imaginary data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_ri("I",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
@@ -2290,7 +2290,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The fifth column is the imaginary data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_xyzri("RI",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
@@ -2303,7 +2303,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The fourth column is the real data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_xyzri("R",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
@@ -2316,7 +2316,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The fourth column is the imaginary data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_xyzri("I",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
@@ -2338,7 +2338,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        do ifile=1,2
          if (open_file(filename(ifile), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          rewind(unout)
          write(unout,*)'# band,  eig_kvalues   and   occupations'
@@ -2390,7 +2390,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        rewind(unout)
        write(unout,*)'# band,  eig_kvalues   and   occupations'
@@ -2441,7 +2441,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        rewind(unout)
        write(unout,*)'# band,  eig_kvalues   and   occupations'
@@ -2496,7 +2496,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        do ifile=1,2
          if (open_file(filename(ifile), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          rewind(unout)
          do iband=1,nband(ckpt)
@@ -2542,7 +2542,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        write(std_out,*)'Give the lattice file, ', trim(filename(1))
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        write(unout,'("#",/,"#",/,"#    LATTICE VECTOR INFO:",/,"#",/,"#")')
@@ -2564,7 +2564,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)'Give the atoms positions file, ', trim(filename(2))
 
        if (open_file(filename(2), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        write(unout,'("#",/,"#",/,"#    BALL AND STICK INFO:",/,"#",/,"#")')
@@ -2587,7 +2587,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !
        write(std_out,*)'Give the enveloppe of the cell file, ',trim(filename(3))
        if (open_file(filename(3), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        write(unout,'("#",/,"#",/,"#    UNIT CELL FRAME INFO:",/,"#",/,"#")')
@@ -2631,10 +2631,10 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        shift_tau(:) = 0.0
        if (read_string(outputchar, unit=std_in) /= 0) then
-         MSG_ERROR("Fatal error!")
+         ABI_ERROR("Fatal error!")
        end if
        if (outputchar == 'y' .or. outputchar == 'Y') then
-         MSG_ERROR("Shift is buggy, don't use it")
+         ABI_ERROR("Shift is buggy, don't use it")
          write(std_out,*) 'Give the three shifts (x,y,z < ',nr1,nr2,nr3,') :'
          write(std_out,*)
          read (std_in,*) gridshift1, gridshift2, gridshift3
@@ -2648,7 +2648,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        rewind(unout)
        do iband=1,nband(ckpt)
@@ -2797,10 +2797,10 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        shift_tau(:) = 0.0
        if (read_string(outputchar, unit=std_in) /= 0) then
-         MSG_ERROR("Fatal error!")
+         ABI_ERROR("Fatal error!")
        end if
        if (outputchar == 'y' .or. outputchar == 'Y') then
-         MSG_ERROR("Shift is buggy, don't use it")
+         ABI_ERROR("Shift is buggy, don't use it")
          write(std_out,*) 'Give the three shifts (x,y,z < ',nr1,nr2,nr3,') :'
          write(std_out,*)
          read (std_in,*) gridshift1, gridshift2, gridshift3
@@ -2814,7 +2814,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
 
        if (open_file(filename(1), msg, newunit=unout, status='unknown',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        rewind(unout)
 
@@ -2892,7 +2892,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
 
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_cube(nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,natom,znucl_atom_int,xcart,unit=unout)
        close(unout)

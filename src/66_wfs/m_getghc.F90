@@ -220,22 +220,22 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !Check sizes
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwavef)<2*npw_k1*my_nspinor*ndat) then
-   MSG_BUG('wrong size for cwavef!')
+   ABI_BUG('wrong size for cwavef!')
  end if
  if (size(ghc)<2*npw_k2*my_nspinor*ndat) then
-   MSG_BUG('wrong size for ghc!')
+   ABI_BUG('wrong size for ghc!')
  end if
  if (size(gvnlxc)<2*npw_k2*my_nspinor*ndat) then
-   MSG_BUG('wrong size for gvnlxc!')
+   ABI_BUG('wrong size for gvnlxc!')
  end if
  if (sij_opt==1) then
    if (size(gsc)<2*npw_k2*my_nspinor*ndat) then
-     MSG_BUG('wrong size for gsc!')
+     ABI_BUG('wrong size for gsc!')
    end if
  end if
  if (gs_ham%usepaw==1.and.cpopt>=0) then
    if (size(cwaveprj)<gs_ham%natom*my_nspinor*ndat) then
-     MSG_BUG('wrong size for cwaveprj!')
+     ABI_BUG('wrong size for cwaveprj!')
    end if
  end if
 
@@ -250,7 +250,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 !paral_kgb constraint
  if (mpi_enreg%paral_kgb==1.and.(.not.k1_eq_k2)) then
-   MSG_BUG('paral_kgb=1 not allowed for k/=k_^prime!')
+   ABI_BUG('paral_kgb=1 not allowed for k/=k_^prime!')
  end if
 
 !Do we add Fock exchange term ?
@@ -277,12 +277,12 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 !  Need a Vlocal
    if (.not.associated(gs_ham%vlocal)) then
-     MSG_BUG("We need vlocal in gs_ham!")
+     ABI_BUG("We need vlocal in gs_ham!")
    end if
 
 !  fourwf can only process with one value of istwf_k
    if (.not.k1_eq_k2) then
-     MSG_BUG('vlocal (fourwf) cannot be computed with k/=k^prime!')
+     ABI_BUG('vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
 
 !  Eventually adjust load balancing for FFT (by changing FFT distrib)
@@ -518,10 +518,10 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !  Add metaGGA contribution
    if (associated(gs_ham%vxctaulocal)) then
      if (.not.k1_eq_k2) then
-       MSG_BUG('metaGGA not allowed for k/=k_^prime!')
+       ABI_BUG('metaGGA not allowed for k/=k_^prime!')
      end if
      if (size(gs_ham%vxctaulocal)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*4) then
-       MSG_BUG('wrong sizes for vxctaulocal!')
+       ABI_BUG('wrong sizes for vxctaulocal!')
      end if
      ABI_ALLOCATE(ghc_mGGA,(2,npw_k2*my_nspinor*ndat))
      call getghc_mGGA(cwavef,ghc_mGGA,gbound_k1,gs_ham%gprimd,gs_ham%istwf_k,kg_k1,kpt_k1,&
@@ -534,10 +534,10 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    !  Add nuclear dipole moment contribution
    if (associated(gs_ham%vectornd)) then
      if (.not.k1_eq_k2) then
-       MSG_BUG('nuclear dipole vector potential not allowed for k/=k_^prime!')
+       ABI_BUG('nuclear dipole vector potential not allowed for k/=k_^prime!')
      end if
      if (size(gs_ham%vectornd)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*3) then
-       MSG_BUG('wrong sizes for vectornd in getghc!')
+       ABI_BUG('wrong sizes for vectornd in getghc!')
      end if
      ABI_ALLOCATE(ghc_vectornd,(2,npw_k2*my_nspinor*ndat))
      call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,gs_ham%istwf_k,kg_k1,kpt_k1,&
@@ -722,7 +722,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !  Structured debugging : if prtvol=-level, stop here.
    if(prtvol==-level)then
      write(msg,'(a,i0,a)')' getghc : exit prtvol=-',level,', debugging mode => stop '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (type_calc==0.or.type_calc==2) then
@@ -1369,10 +1369,10 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !Compatibility tests
  my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
  if(gs_ham%usepaw==0) then
-   MSG_BUG('Only compatible with PAW (usepaw=1) !')
+   ABI_BUG('Only compatible with PAW (usepaw=1) !')
  end if
  if(nband<0.and.(mcg<npw_k*my_nspinor.or.mgsc<npw_k*my_nspinor.or.mcprj<my_nspinor)) then
-   MSG_BUG('Invalid value for mcg, mgsc or mcprj !')
+   ABI_BUG('Invalid value for mcg, mgsc or mcprj !')
  end if
 
 !Keep track of total time spent in getgsc:
@@ -1681,19 +1681,19 @@ end subroutine multithreaded_getghc
 
 !  if (gs_ham%matblk /= gs_ham%natom) then
 !    write(message,'(a,i4,a,i4)')' gs_ham%matblk = ',gs_ham%matblk,' but natom = ',gs_ham%natom
-!    MSG_ERROR(message)
+!    ABI_ERROR(message)
 !  end if
 !  if (ndat /= 1) then
 !    write(message,'(a,i4,a)')' ndat = ',ndat,' but getghcnd requires ndat = 1'
-!    MSG_ERROR(message)
+!    ABI_ERROR(message)
 !  end if
 !  if (my_nspinor /= 1) then
 !    write(message,'(a,i4,a)')' nspinor = ',my_nspinor,' but getghcnd requires nspinor = 1'
-!    MSG_ERROR(message)
+!    ABI_ERROR(message)
 !  end if
 !  if (any(abs(gs_ham%kpt_k(:)-gs_ham%kpt_kp(:))>tol8)) then
 !    message=' not allowed for kpt(left)/=kpt(right)!'
-!    MSG_BUG(message)
+!    ABI_BUG(message)
 !  end if
 
 !  if (any(abs(gs_ham%nucdipmom_k)>tol8)) then

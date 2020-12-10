@@ -159,20 +159,20 @@ CONTAINS  !=====================================================================
  my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
  if (mcprj/=my_nspinor*mband_cprj*mkmem*nsppol) then
    msg=' wrong size for cprj !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Check if cprj is distributed over bands
  nprocband=(mband/mband_cprj)
  if (paral_kgb==1.and.nprocband/=mpi_enreg%nproc_band) then
    msg='mband/mband_cprj must be equal to nproc_band!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if( usewvl==1 .and. (nprocband/=1)) then
    write(msg,'(2a)') ch10,&
 &   'Parallelization over bands is not compatible with WAVELETS!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Initialise and check dmft variables
@@ -189,7 +189,7 @@ CONTAINS  !=====================================================================
  paral_atom=(nrhoij/=natom.and.mpi_enreg%nproc_atom>1)
  if (paral_atom.and.nrhoij/=mpi_enreg%my_natom) then
    msg='Size of pawrhoij should be natom or my_natom!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Allocate temporary cwaveprj storage
@@ -600,19 +600,19 @@ end subroutine pawmkrhoij
 !Tests
  if(option==2.and.(ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11)) then
    message = 'Not relevant for ipert=natom+1 or ipert=natom+10 or ipert=natom+11!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if(option==2.and.cwaveprj(1,1)%ncpgr<ncpgr) then
    message = 'Error on cwaveprj1 factors derivatives!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if(option==3.and.cwaveprj(1,1)%ncpgr/=ncpgr) then
    message = 'Error on cwaveprj factors derivatives!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if (pawrhoij(1)%qphase==2.and.option/=2) then
    message = 'pawaccrhoij: qphase=2 only allowed with option=2 (1st-order rhoij)!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Set up parallelism over atoms
@@ -628,7 +628,7 @@ end subroutine pawmkrhoij
    if (cplex==1) then
      !DMFT need complex cprj
      message='DMFT computation must be done with complex cprj. Check that istwfk = 1!'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    weight_2=wtk_k*occ_k_2
  end if
@@ -1192,7 +1192,7 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
  do itypat=1,ntypat
    if (lpawu(itypat)/=lexexch(itypat).and. lpawu(itypat)/=-1.and.lexexch(itypat)/=-1) then
      message = ' lpawu must be equal to lexexch !'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 

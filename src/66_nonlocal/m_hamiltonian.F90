@@ -1056,7 +1056,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
      ham%gbound_k(:,:)=gbound_k(:,:)
    else
      if (.not.associated(ham%kg_k)) then
-       MSG_BUG('Something is missing for gbound_k computation!')
+       ABI_BUG('Something is missing for gbound_k computation!')
      end if
      !write(std_out,*)"About to call sphereboundary"
      !write(std_out,*)"size(kg_k), npw_k, mgfft",size(ham%kg_k, dim=2), ham%npw_k, ham%mgfft
@@ -1070,7 +1070,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    if (compute_ph3d.and.ham%nloalg(2)>0) then
      if ((.not.allocated(ham%phkxred)).or.(.not.associated(ham%kg_k)).or.&
          (.not.associated(ham%ph3d_k))) then
-       MSG_BUG('Something is missing for ph3d_k computation!')
+       ABI_BUG('Something is missing for ph3d_k computation!')
      end if
      call ph1d3d(1,ham%natom,ham%kg_k,ham%matblk,ham%natom,ham%npw_k,ham%ngfft(1),&
                  ham%ngfft(2),ham%ngfft(3),ham%phkxred,ham%ph1d,ham%ph3d_k)
@@ -1193,7 +1193,7 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
      ham%gbound_kp(:,:)=gbound_kp(:,:)
    else
      if (.not.associated(ham%kg_kp)) then
-       MSG_BUG('Something is missing for gbound_kp computation!')
+       ABI_BUG('Something is missing for gbound_kp computation!')
      end if
      ABI_ALLOCATE(ham%gbound_kp,(2*ham%mgfft+8,2))
      call sphereboundary(ham%gbound_kp,ham%istwf_kp,ham%kg_kp,ham%mgfft,ham%npw_kp)
@@ -1205,7 +1205,7 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
    if (compute_ph3d.and.ham%nloalg(2)>0) then
      if ((.not.associated(ham%phkpxred)).or.(.not.associated(ham%kg_kp)).or.&
 &        (.not.associated(ham%ph3d_kp))) then
-       MSG_BUG('Something is missing for ph3d_kp computation!')
+       ABI_BUG('Something is missing for ph3d_kp computation!')
      end if
      call ph1d3d(1,ham%natom,ham%kg_kp,ham%matblk,ham%natom,ham%npw_kp,ham%ngfft(1),&
 &                ham%ngfft(2),ham%ngfft(3),ham%phkpxred,ham%ph1d,ham%ph3d_kp)

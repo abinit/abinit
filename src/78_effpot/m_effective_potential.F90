@@ -247,14 +247,14 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one atom.',ch10,&
 &   'The number of atom is  ',crystal%natom,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (crystal%ntypat < 1) then
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one type of atom.',ch10,&
 &   'The number of type of atom is  ',crystal%ntypat,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !3-Fill energy of the crystal (hartree)
@@ -333,7 +333,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 !Allocation of the coefficients
  if(present(coeffs))then
    if(ncoeff /= size(coeffs))then
-     MSG_BUG('ncoeff has not the same size than coeffs array')
+     ABI_BUG('ncoeff has not the same size than coeffs array')
    end if
    call effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
  end if
@@ -412,7 +412,7 @@ subroutine effective_potential_initmpi(eff_pot,comm)
 
 !Do some checks
  if (any(cell_number <= 0).or.ncell<=0) then
-   MSG_ERROR('No supercell found for setting')
+   ABI_ERROR('No supercell found for setting')
  end if
 
 !First mpi_ifc
@@ -643,7 +643,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
      write(msg, '(a,i0,a,i0,a,a,a,i0,a)' )&
 &     'ncell(',ia,') is ',ncell(ia),', which is lower than 0 of superior than 50.',&
 &     ch10,'Action: correct ncell(',ia,').'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -1081,7 +1081,7 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 ! *************************************************************************
 
  if(ncoeff /= size(coeffs))then
-   MSG_BUG('ncoeff has not the same size than coeffs array')
+   ABI_BUG('ncoeff has not the same size than coeffs array')
  end if
 
 ! Check if the strain coupling is present
@@ -1340,7 +1340,7 @@ subroutine effective_potential_setConfinement(cutoff_disp,cutoff_strain,eff_pot,
 
 !Checks
  if (ndisp <= 0) then
-   MSG_ERROR('ndisp can not be inferior or equal to zero')
+   ABI_ERROR('ndisp can not be inferior or equal to zero')
  end if
 
 !First free the type
@@ -1399,7 +1399,7 @@ subroutine effective_potential_setSupercell(eff_pot,comm,ncell,supercell)
 
 !Checks
  if (.not.present(supercell).and..not.present(ncell)) then
-   MSG_ERROR(' You should at least set ncell of supercell type')
+   ABI_ERROR(' You should at least set ncell of supercell type')
  end if
 
  call destroy_supercell(eff_pot%supercell)
@@ -1588,7 +1588,7 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
    write(msg, '(3a)' )&
 &  ' There is not the same numbers of atoms in the two supercell',ch10,&
 &   'Action: modify the code'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ABI_ALLOCATE(xred,(3,supercell_tmp%natom))
@@ -1771,7 +1771,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
 
    if (open_file(namefile,msg,unit=unit_xml,form="formatted",&
 &      status="new",action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write(msg,'(a,a,a)')ch10,&
@@ -1860,7 +1860,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
            write(msg, '(a,a,a,a)' )&
 &         ' There is no total range but short range in your effective potential',ch10,&
 &         'Action: contact abinit group'
-           MSG_BUG(msg)
+           ABI_BUG(msg)
          end if
        else
          WRITE(unit_xml,'("  <total_force_constant units=""hartree/bohrradius**2"">")')
@@ -2082,7 +2082,7 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
  call isfile(namefile,'new')
 
  if (open_file(namefile,msg,unit=unit,form="formatted",status="new",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
   write(msg,'(a,a,a,a)')ch10,&
@@ -2291,21 +2291,21 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   if (natom /= eff_pot%supercell%natom) then
     write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',natom,&
 &   ' in argument istead of ',eff_pot%supercell%natom, ' in supercell'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   if (present(displacement))then
     if(size(displacement(1,:)) /= eff_pot%supercell%natom) then
       write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(displacement(1,:)),&
 &      ' in displacement array instead of ',eff_pot%supercell%natom, ' in supercell'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
   end if
   if (present(du_delta))then
     if(size(du_delta,3) /= eff_pot%supercell%natom) then
       write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(du_delta,3),&
 &      ' in du_delta array instead of ',eff_pot%supercell%natom, ' in supercell'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
   end if
   do ii=1,3
@@ -2313,7 +2313,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       write(msg, '(a,i0,a,i2,a,a,a,i0,a)' )&
 &     'eff_pot%supercell%rlatt(',ii,') is ',int(eff_pot%supercell%rlatt(ii,ii)),&
 &     ', which is lower than 0 of superior than 10.',ch10,'Action: correct ncell(',ii,').'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
   end do
 
@@ -2782,13 +2782,13 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   if (.not.(present(xred_ref).or.present(xcart_ref))) then
      write(msg, '(3a)' )&
 &         'You need at least give xcart_ref or xred_ref '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
   end if
 
   if (.not.(present(xred_hist).or.present(xcart_hist))) then
      write(msg, '(3a)' )&
 &         'You need at least give xcart_hist or xred_hist '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
   end if
 
   need_duDelta = .TRUE.
@@ -3488,12 +3488,12 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  !Do some checks
  if(ntime /= hist%mxhist)then
    write(msg,'(a)')'ntime is not correct'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(natom /= size(hist%xred,2)) then
    write(msg,'(a)')'natom is not correct'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 
@@ -3723,7 +3723,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
 
    npsp = size(eff_pot%crystal%znucl)
    if (npsp /= eff_pot%crystal%ntypat) then
-     MSG_WARNING("HIST file does not support alchemical mixing!")
+     ABI_WARNING("HIST file does not support alchemical mixing!")
    end if
    ncerr = nf90_def_dim(ncid,"npsp",npsp,npsp_id)
    NCF_CHECK_MSG(ncerr," define dimension npsp")

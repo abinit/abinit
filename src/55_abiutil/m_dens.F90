@@ -1597,7 +1597,7 @@ subroutine calcdenmagsph(gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,rat
  end if
 
  if(.not.(grid_found)) then
-   MSG_BUG("Unable to find an allocated distrib for this fft grid")
+   ABI_BUG("Unable to find an allocated distrib for this fft grid")
  end if
 
 !Loop over atoms
@@ -2232,14 +2232,14 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 !   write(msg,'(3a,i0)')&
 !&   'The argument option should be 1 or 2,',ch10,&
 !&   'however, option=',option
-!   MSG_BUG(msg)
+!   ABI_BUG(msg)
 ! end if
 !
 ! if (sizein<1) then
 !   write(msg,'(3a,i0)')&
 !&   'The argument sizein should be a positive number,',ch10,&
 !&   'however, sizein=',sizein
-!   MSG_ERROR(msg)
+!   ABI_ERROR(msg)
 ! end if
 
  DBG_EXIT("COLL")
@@ -2292,22 +2292,22 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
 
     ! Open the output vtk file
    if (open_file(fname_vtk,msg,newunit=denvtk,status='replace',form='formatted') /=0) then
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      RETURN
    end if
 
    if(cplex==1) then
      if (open_file(fname_xyz,msg,newunit=denxyz,status='replace',form='formatted') /=0) then
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        RETURN
      end if
    else if (cplex==2) then
      if (open_file(fname_xyz_re,msg,newunit=denxyz,status='replace',form='formatted') /=0) then
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        RETURN
      end if
      if (open_file(fname_xyz_im,msg,newunit=denxyz_im,status='replace',form='formatted') /=0) then
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        RETURN
      end if
    end if

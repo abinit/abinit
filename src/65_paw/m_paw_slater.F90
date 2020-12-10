@@ -548,7 +548,7 @@ subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_m
 
  ABI_CHECK(ln2_size==Pawtab%ij_size,"Wrong ln2_size")
  if (PRESENT(kln_mask)) then
-   MSG_ERROR("kln_mask is present")
+   ABI_ERROR("kln_mask is present")
  end if
 
  !@slatrad_cshell_t
@@ -565,7 +565,7 @@ subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_m
  if (.not.hasameq) then
    do_spline=1
    if (whichdenser/=1) &
-&    MSG_COMMENT("Pawrad is denser than Atmrad!")
+&    ABI_COMMENT("Pawrad is denser than Atmrad!")
  else
    ABI_CHECK(whichdenser==1,"Pawrad is denser than Atmrad!")
  end if
@@ -578,7 +578,7 @@ subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_m
 
  ! === Spline valence basis set onto core mesh (natural spline) ===
  if (do_spline==1) then
-   MSG_COMMENT("Splining in init_slatrad3l")
+   ABI_COMMENT("Splining in init_slatrad3l")
    ABI_MALLOC(phi_spl,(dmesh_size,ln_size))
    ABI_MALLOC(der,(cmesh_size))
    ABI_MALLOC(ypp,(cmesh_size))
@@ -634,7 +634,7 @@ subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_m
      !end if
 
      if (do_spline==1) then
-       MSG_COMMENT("Performing spline of valence phi")
+       ABI_COMMENT("Performing spline of valence phi")
        phi_i => phi_spl(:,iln)
        phi_j => phi_spl(:,jln)
      else
@@ -916,7 +916,7 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
 
    if (ierr/=0) then
      msg = " Error reading core orbitals from file: "//TRIM(fcore)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(header,'(a,i4,a)')" === Atom type = ",itypat," === "
    call print_atomorb(Atm(itypat),header,unit=std_out,prtvol=pawprtvol)
@@ -1110,7 +1110,7 @@ subroutine slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad,Pawtab)
 
  if ( ALL(which_intg /= (/1,2,3/)) ) then
    write(msg,'(a,i0)')"Wrong value for which_intg: ",which_intg
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !@slatrad_t
@@ -1191,7 +1191,7 @@ subroutine slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad,Pawtab)
        ! e.g. (1 2) (1 1). Due to angular selection rules, this integral do not contribue
        !write(std_out,*)"lslat_min, lslat_max",lslat_min,lslat_max
        !write(std_out,*)"il,jl,kl,ll",il,jl,kl,ll
-       !MSG_ERROR("")
+       !ABI_ERROR("")
        ABI_MALLOC(Slatrad4(slt_idx)%intgl,(0))
        CYCLE
      end if
@@ -1216,7 +1216,7 @@ subroutine slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad,Pawtab)
        call calc_slatradl(l_slat,mesh_size,ukul,uiuj,Pawrad,intg1)
        if (ABS(intg1-ae_intg)>tol12) then
          write(msg,'(a,es16.8)')"s_ij and s_ij differ by ",intg1-ae_intg
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
 #endif
        if (which_intg == 2) then ! Subtract the pseudo part.
@@ -1370,7 +1370,7 @@ subroutine paw_dijhf(ndij,cplex_dij,qphase,lmn2_size_max,my_natom,ntypat,Pawtab,
 
  if (my_natom>0) then
    if (pawrhoij(1)%qphase<cplex) then
-     MSG_BUG('Must have pawrhoij()%qphase >= cplex !')
+     ABI_BUG('Must have pawrhoij()%qphase >= cplex !')
    end if
  end if
 
@@ -1422,7 +1422,7 @@ subroutine paw_dijhf(ndij,cplex_dij,qphase,lmn2_size_max,my_natom,ntypat,Pawtab,
          if (nspden/=2) then
            ro=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
          else
-           MSG_ERROR("Recheck this part")
+           ABI_ERROR("Recheck this part")
            if (ispden==1) then
              ro=pawrhoij(iatom)%rhoijp(jrhoij,1) + pawrhoij(iatom)%rhoijp(jrhoij,2)
            else if (ispden==2) then
@@ -1520,7 +1520,7 @@ function summ_2gaunt(Pawang,ij_lm,kl_lm,ll_idx)
  if (ij_lm>max_klm.or.kl_lm>max_klm.or.ij_lm<1.or.kl_lm<1.or.&
 &    ll_idx>pawang%l_size_max.or.ll_idx<1) then
    write(msg,'(a,3i0)')"Wrong indeces, check pawxcdev ",ij_lm,kl_lm,ll_idx
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ll = ll_idx-1
@@ -1533,7 +1533,7 @@ function summ_2gaunt(Pawang,ij_lm,kl_lm,ll_idx)
      summ_2gaunt = summ_2gaunt + Pawang%realgnt(ignt1)*Pawang%realgnt(ignt2)
      ii=ii+1
      write(std_out,'(a,4(i2,1x),f8.5,i2)')"ll, mm, ij_lm, kl_lm: ",ll,mm,ij_lm,kl_lm,summ_2gaunt,ii
-     if (ii/=1) MSG_WARNING("ii>1")
+     if (ii/=1) ABI_WARNING("ii>1")
    end if
  end do
 
@@ -1617,7 +1617,7 @@ function slat_intg(Slatrad4,Pawtab,Pawang,i_lmn,j_lmn,k_lmn,l_lmn)
  ii = kln + lln*(lln-1)/2
  if (slt_idx /=  (iln + jln*(jln-1)/2 + ii*(ii-1)/2 )) then
    write(std_out,*)"slt_idx, iln, jln, kln, lln",slt_idx, iln, jln, kln, lln
-   MSG_BUG("Check indeces")
+   ABI_BUG("Check indeces")
  end if
 !END DEBUG
  !

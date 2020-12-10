@@ -514,7 +514,7 @@ subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
  call get_topo(rset%mpi%nproc,rset%ngpu,rset%tp)
  if(rset%tp>4)then
    msg = 'm_rec: number of gpu>number of cpu is not implemented'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  endif
 !  rset%tp = 0;if(rset%mpi%nproc>1)rset%tp = 1
 !  rset%ngpu = 0; rset%GPU%map=-1
@@ -693,7 +693,7 @@ subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
  !!--Routine for the calcul of the non-local pseudo
  if(any(psps%pspcod/=3) .and. nlrec%nlpsp ) then
    msg = "The non-local part of psp is used in Recursion only for hgh-psp"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    nlrec%nlpsp = .False.
    if (allocated(metrec%gcart))  then
      ABI_DEALLOCATE(metrec%gcart)

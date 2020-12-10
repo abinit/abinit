@@ -222,9 +222,9 @@ SUBROUTINE libtetrabz_dbldelta2(nb,ej,w)
      !IF(maxval(ABS(ej(1:3,ib))) < 1d-22) then
       !write(std_out, ej(1:3,ib))
       write(msg, *)"Nesting for band index:", ib, "ej:", ej(1:3,ib)
-      !MSG_WARNING(msg)
-      MSG_ERROR(msg)
-      !MSG_ERROR("STOP Nesting !!")
+      !ABI_WARNING(msg)
+      ABI_ERROR(msg)
+      !ABI_ERROR("STOP Nesting !!")
      end if
      !
      w(ib,1:3) = 0d0

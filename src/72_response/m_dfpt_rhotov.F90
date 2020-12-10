@@ -163,7 +163,7 @@ contains
  !FR EB SPr
  if (nspden==4) then
    if(usepaw==1) then
-     MSG_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
+     ABI_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
    end if
  end if
 
@@ -435,14 +435,14 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
 !   write(msg,'(3a,i0)')&
 !&   'The argument option should be 1 or 2,',ch10,&
 !&   'however, option=',option
-!   MSG_BUG(msg)
+!   ABI_BUG(msg)
 ! end if
 !
 ! if (sizein<1) then
 !   write(msg,'(3a,i0)')&
 !&   'The argument sizein should be a positive number,',ch10,&
 !&   'however, sizein=',sizein
-!   MSG_ERROR(msg)
+!   ABI_ERROR(msg)
 ! end if
 
  DBG_EXIT("COLL")

@@ -317,7 +317,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    write(msg,'(5a)')ch10,&
 &   ' ERROR: Efmas calculation is incompatible with phonons, elastic tensor, Born effective charges,',ch10,&
 &   ' and piezoelectric tensor calculations. Please revise your input.',ch10
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Common initialization
@@ -505,7 +505,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
              'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',ii,ch10,&
              'the number of plane waves in the ddk file is equal to', npw_,ch10,&
              'while it should be ',npw_k
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
            end if
 
          end if

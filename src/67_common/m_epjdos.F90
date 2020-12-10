@@ -208,7 +208,7 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
  if (dtset%pawfatbnd>0 .and. new%prtdosm==0) new%fatbands_flag=1
  if (new%prtdosm==1.and.dtset%pawfatbnd>0)then
 !  because they compute quantities in real and complex harmonics respectively
-   MSG_ERROR('pawfatbnd>0  and prtdosm=1 are not compatible')
+   ABI_ERROR('pawfatbnd>0  and prtdosm=1 are not compatible')
  end if
 
  ! mjv : initialization is needed as mbesslang is used for allocation below
@@ -393,7 +393,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 !m-decomposed DOS not compatible with PAW-decomposed DOS
  if (prtdosm>=1.and.paw_dos_flag==1) then
    msg = 'm-decomposed DOS (prtdosm>=1) not compatible with PAW-decomposed DOS (pawprtdos=1) !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Refuse nband different for different kpoints
@@ -404,7 +404,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        write(std_out,*) 'tetrahedron: skip subroutine.'
        write(std_out,*) 'nband must be the same for all kpoints'
        write(std_out,*) 'nband=', dtset%nband
-       MSG_WARNING('tetrahedron: skip subroutine. See message above')
+       ABI_WARNING('tetrahedron: skip subroutine. See message above')
        return
      end if
    end do
@@ -416,7 +416,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
    dtset%shiftk, dtset%nkpt, dtset%kpt, comm, msg, ierr)
  if (ierr /= 0) then
    call tetra%free()
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
@@ -426,7 +426,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  if (iam_master) then
    if (any(dtset%prtdos == [2, 5])) then
      if (open_file(fildata, msg, newunit=unitdos, status='unknown', form='formatted', action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
    else if (dtset%prtdos == 3) then
@@ -436,7 +436,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
      ! Open file for total DOS as well.
      if (open_file(strcat(fildata, '_TOTAL'), msg, newunit=unt_atsph(0), &
                    status='unknown', form='formatted', action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      do iat=1,natsph
@@ -444,7 +444,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
        if (open_file(strcat(fildata, '_AT', tag), msg, newunit=unt_atsph(iat), &
                      status='unknown', form='formatted', action="write") /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
      ! do extra spheres in vacuum too. Use _ATEXTRA[NUM] suffix
@@ -453,7 +453,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
        if (open_file(strcat(fildata, '_ATEXTRA', tag), msg, newunit=unt_atsph(natsph+iat), &
                      status='unknown', form='formatted', action="write") /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -1076,7 +1076,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
        end if
 
      case default
-       MSG_ERROR("Wrong value for rc_ylm")
+       ABI_ERROR("Wrong value for rc_ylm")
      end select
 
      ! Compute integral $ \int_0^{rc} dr r**2 ||\sum_G u(G) Y_LM^*(k+G) e^{i(k+G).Ra} j_L(|k+G| r)||**2 $
@@ -1562,11 +1562,11 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
    write(msg,'(3a)')&
     'm decomposed dos is activated',ch10, &
     'Action: deactivate it with prtdosm=0 !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if(dtset%nspinor==2) then
-   MSG_WARNING("Fatbands are not yet available in the case nspinor==2!")
+   ABI_WARNING("Fatbands are not yet available in the case nspinor==2!")
  end if
 
  ABI_CHECK(allocated(dos%fractions_m), "dos%fractions_m is not allocated!")
@@ -1579,7 +1579,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
    write(msg,'(3a)')&
     'Too big number of fat bands!',ch10, &
     'Action: decrease natsph in input file !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !--------------  PRINTING IN LOG
@@ -1637,7 +1637,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
          !unitfatbands_arr(iall,isppol)=tmp_unit+100+iall-1+(natsph*inbfatbands)*(isppol-1)
          !open (unit=unitfatbands_arr(iall,isppol),file=trim(tmpfil),status='unknown',form='formatted')
          if (open_file(tmpfil, msg, newunit=unitfatbands_arr(iall,isppol), status='unknown',form='formatted') /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
 
          write(msg,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', unitfatbands_arr(iall,isppol)
@@ -1662,7 +1662,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  end do  ! iat
 
  if(iall.ne.(natsph*inbfatbands)) then
-   MSG_ERROR("error1 ")
+   ABI_ERROR("error1 ")
  end if
 
 
@@ -2043,7 +2043,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    call int2char4(me_kpt, ikproc_str)
    filename = 'PROCAR_'//ikproc_str
    if (open_file(filename, msg, newunit=unit_procar, form="formatted", action="write") /= 0) then
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
    end if
    if(mpi_enreg%me==0) then
      write (unit_procar,'(a)') 'PROCAR lm decomposed - need to merge files yourself in parallel case!!! Or use pyprocar package'
@@ -2342,11 +2342,11 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  else if (dos%partial_dos_flag == 2) then
 
    if (dtset%nsppol /= 1 .or. dtset%nspinor /= 2) then
-     MSG_WARNING("spinor projection is meaningless if nsppol==2 or nspinor/=2. Not calculating projections.")
+     ABI_WARNING("spinor projection is meaningless if nsppol==2 or nspinor/=2. Not calculating projections.")
      return
    end if
    if (my_nspinor /= 2) then
-     MSG_WARNING("spinor projection with spinor parallelization is not coded. Not calculating projections.")
+     ABI_WARNING("spinor projection with spinor parallelization is not coded. Not calculating projections.")
      return
    end if
    ABI_CHECK(mpi_enreg%paral_spinor == 0, "prtdos 5 does not support spinor parallelism")
@@ -2405,7 +2405,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    end if
 
  else
-   MSG_WARNING('only partial_dos==1 or 2 is coded')
+   ABI_WARNING('only partial_dos==1 or 2 is coded')
  end if
 
 !DEBUG
@@ -2518,7 +2518,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
 !m-decomposed DOS not compatible with PAW-decomposed DOS
  if(prtdosm>=1.and.paw_dos_flag==1) then
-   MSG_ERROR('m-decomposed DOS not compatible with PAW-decomposed DOS!')
+   ABI_ERROR('m-decomposed DOS not compatible with PAW-decomposed DOS!')
  end if
 
 !Prepare some useful integrals
@@ -2567,7 +2567,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 !Check if cprj is distributed over bands
  nprocband=my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol/mcprj
  if (nprocband/=mpi_enreg%nproc_band) then
-   MSG_BUG('wrong mcprj/nproc_band!')
+   ABI_BUG('wrong mcprj/nproc_band!')
  end if
 
 !Quick hack: in case of parallelism, dos_fractions have already

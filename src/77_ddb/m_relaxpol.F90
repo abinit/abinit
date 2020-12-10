@@ -157,7 +157,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 &       'The value of iatfix(',ii,') is ',iatom,', which is not allowed.',ch10,&
 &       'iatfix must be larger than 0 and smaller than natom.',ch10,&
 &       'Action: correct iatfix in your input file.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      irelaxat(iatom) = 0
    end do
@@ -171,7 +171,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 &       'istrfix(',ii,') is',istrain,', which is not allowed.',ch10,&
 &       'istrfix must be larger than 0 and smaller than 6.',ch10,&
 &       'Action : correct istrfix in your input file.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      irelaxstrain(istrain) = 0
    end do
@@ -397,7 +397,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 &   'relaxat = ',relaxat,', relaxstr = ', relaxstr, ch10,&
 &   'are missing in the DDB.',ch10,&
 &   'Action: correct your DDB or change your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 

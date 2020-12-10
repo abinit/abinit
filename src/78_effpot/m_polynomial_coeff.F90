@@ -510,7 +510,7 @@ subroutine polynomial_coeff_getName(name,polynomial_coeff,symbols,recompute,iter
 &      ' The number of the requested term for the generation of',ch10,&
 &      'the name of the coefficient is not possible.',ch10,&
 &      'Action: Contact Abinit group.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(polynomial_coeff%name /= "".and..not.need_recompute)then
@@ -885,7 +885,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace
    else
      if(.not.present(unit))then
        write(message,'(a,a)')' You  need to specified the unit'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      else
        need_header = .FALSE.
        unit_xml = unit
@@ -894,7 +894,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace
  end if
  if (size(coeffs) /= ncoeff) then
    write(message,'(a,a)')' The number of coeffs does not correspond to ncoeff'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Print the coefficients into XML file
@@ -903,7 +903,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace
 !    open new file
      if (open_file(namefile,message,unit=unit_xml,form="formatted",&
 &         status="new",action="write") /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    else
 !     just open the file to append the coefficient
@@ -1045,7 +1045,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
 ! Check
   if (any(sc_size <= 0)) then
     write(msg,'(a,a)')' No supercell found for getEnergy'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   if(present(filename)) name_file = filename
@@ -1390,7 +1390,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
       write(message, '(3a)' )&
 &       'fit_iatom cannot be greater than the number of atoms on the reference unit cell',ch10,&
 &       'Action: Change input'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Obtain a list of rotated atom labels:
@@ -1600,7 +1600,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 &                'with the symmetry ',isym,' is ',dist_sym,ch10,'but the original distance is',&
 &                   dist_orig,ch10,&
 &                'Action: Contact abinit group'
-               MSG_BUG(message)
+               ABI_BUG(message)
              end if
 !            Now that a symmetric perturbation has been obtained,
 !            including the expression of the symmetry matrix, see
@@ -1630,7 +1630,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 &                        'The sign of coefficient number ',icoeff,' with the symmetry ',isym,ch10,&
 &                        'can not be found... Something is going wrong',ch10,&
 &                        'Action: Contact abinit group'
-                         MSG_BUG(message)
+                         ABI_BUG(message)
                        end if
                        list_symcoeff_tmp(5,icoeff,isym)= isym_rel(nu,idisy2)
                      end if
@@ -1712,7 +1712,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 &           'The coefficient number ',icoeff,' with the symetrie ',isym,ch10,&
 &           'has no equivalent',ch10,&
 &           'Action: Contact abinit group'
-       MSG_BUG(message)
+       ABI_BUG(message)
      else
        if(icoeff /= list_symcoeff_tmp2(6,icoeff,isym))then
          if(list_symcoeff_tmp2(1,icoeff,isym)/=&
@@ -1722,7 +1722,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 &          'does not refer to the same coefficient ',list_symcoeff_tmp2(6,icoeff,1),ch10,&
 &          'because the direction is different:',ch10,&
 &          'Action: Contact abinit group'
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
          if(list_symcoeff_tmp2(4,icoeff,isym)/=&
 &           list_symcoeff_tmp2(4,list_symcoeff_tmp2(6,icoeff,isym),1))then
@@ -1731,7 +1731,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 &          'does not refer to the same coefficient ',list_symcoeff_tmp2(6,icoeff,1),ch10,&
 &          'because the cell is different',ch10,&
 &          'Action: Contact abinit group'
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
          if((list_symcoeff_tmp2(2,icoeff,isym)/=&
 &            list_symcoeff_tmp2(2,list_symcoeff_tmp2(6,icoeff,isym),1).and.&
@@ -1746,7 +1746,7 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 &          'does not refer to the same coefficient ',list_symcoeff_tmp2(6,icoeff,1),ch10,&
 &          'because the atoms different',ch10,&
 &          'Action: Contact abinit group'
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
        end if
      end if
@@ -2041,7 +2041,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    write(message, '(3a)' )&
 &       'Option can not be superior to the maximum order ',ch10,&
 &       'Action: contact abinit group'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Initialisation of variables
@@ -2065,7 +2065,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
       write(message, '(3a)' )&
 &       'need_only_odd_power and need_only_even_power are both true',ch10,&
 &       'Action: contact abinit group'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  !Check which atom to fit, if not present do all atoms
@@ -4043,7 +4043,7 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
  if(ncoeff_in > ncoeff_out)then
    write(message,'(a,a,a)')'The input list of polynomial_coefficients is larger',ch10,&
 &                          'than the output list you want it assign to. Check size of lists.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
 
  !Copy input list into output lists

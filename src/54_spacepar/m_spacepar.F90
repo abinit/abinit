@@ -375,7 +375,7 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
    write(message, '(a,i0,a,a)' )&
    'From the calling routine, cplex=',cplex,ch10,&
    'but the only value allowed are 1 and 2.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -405,7 +405,7 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
    write(message,'(a,3e12.4,a,a)')&
    'cplex=1 but qpt=',qpt_,ch10,&
    'qpt should be 0 0 0.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ! If FFT parallelism then qpt should not be 1/2
@@ -413,7 +413,7 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
    write(message, '(a,3e12.4,a,a)' )&
    'FFT parallelism selected but qpt',qpt_,ch10,&
    'qpt(i) should not be 1/2...'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  !Initialize Gcut-off array from m_gtermcutoff
@@ -591,11 +591,11 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
    write(message,'(a,a,a,i6,a,i6)')&
 &   'When istwf_k/=1, nspinor must be 1,',ch10,&
 &   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(use_ndo==1 .and. (istwf_k==2 .and.me_g0==1)) then
-   MSG_BUG('use_ndo==1, not tested, use istwfk=1')
+   ABI_BUG('use_ndo==1, not tested, use istwfk=1')
  end if
 
  ar=zero
@@ -662,7 +662,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
      end if
      if(use_ndo==1)then
        if(.not.present(ar_im)) then
-         MSG_BUG("use_ndo true and ar_im not present")
+         ABI_BUG("use_ndo true and ar_im not present")
        end if
 !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
@@ -1142,7 +1142,7 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vh
    write(message, '(a,i0,a,a)' )&
 &   'From the calling routine, ipert=',ipert,ch10,&
 &   'so this routine for the strain perturbation should not be called.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -1161,7 +1161,7 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vh
    write(message, '(a,i10,a,a,a)' )&
 &   'Input dir gives istr=',istr,' not allowed.',ch10,&
 &   'Possible values are 1,2,3,4,5,6 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ka=idx(2*istr-1);kb=idx(2*istr)
@@ -1381,7 +1381,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  if(nsym==1)then
 
    if(nspden==2 .and. nsppol==1) then ! There must be at least one anti-ferromagnetic operation
-     MSG_BUG('In the antiferromagnetic case, nsym cannot be 1')
+     ABI_BUG('In the antiferromagnetic case, nsym cannot be 1')
    end if
 
 !  If not using symmetry, still want total density in G space rho(G).
@@ -1590,7 +1590,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              iup=iup+1;ind2=irrzon(iup,1,1)
            end do
            if (ind2/=indsy) then
-             MSG_ERROR("ind2/=indsy in symrhg !")
+             ABI_ERROR("ind2/=indsy in symrhg !")
            end if
            if (isymg(iup)==0) isymg(iup)=jsym
            if(fftn2_distrib(modulo((indsy-1)/n1,n2) + 1) == me_fft ) then  ! this is indsy is to be treated by me_fft
@@ -1673,7 +1673,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              ind=n1*(nd2*j3+r2)+j1+1  ! this is ind in the current proc
              jsym=isymg(iup+numpt)
              if (jsym==0) then
-               MSG_ERROR("jsym=0 in symrhg !")
+               ABI_ERROR("jsym=0 in symrhg !")
              end if
              magxsu1=rhosu1_arr(3*izone-2);magxsu2=rhosu2_arr(3*izone-2)
              magysu1=rhosu1_arr(3*izone-1);magysu2=rhosu2_arr(3*izone-1)
@@ -1880,7 +1880,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
 &     '  The number of ferromagnetic symmetry operations must be',ch10,&
 &     '  half the total number of operations, while it is observed that',ch10,&
 &     '  nsym=',nsym,' and nsym_magn=',nsym_used
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    ABI_ALLOCATE(symafm_used,(nsym_used))
@@ -1994,7 +1994,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
 &             ' the input symmetries do not form a group.',ch10,&
 &             ' Action : check the input symmetries carefully do they',&
 &             ' form a group ? If they do, there is a code bug.'
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
 
 !          Compute phases for any nonsymmorphic symmetries
@@ -2136,7 +2136,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
    write(message,'(3a)') &
 &   ' This may mean that the input symmetries do not form a group',ch10,&
 &   ' Action : check input symmetries carefully for errors.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Perform some checks
@@ -2147,7 +2147,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
        write(message,'(a,4i0,a,a)')&
 &       '  ifft,irrzon(ifft,1,imagn),nfftot,imagn=',ifft,irrzon(ifft,1,imagn),nfftot,imagn,ch10,&
 &       '  =>irrzon goes outside acceptable bounds.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end do
 
@@ -2158,7 +2158,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
        write(message, '(a,5i7,a,a)' )&
 &       ' izone,nzone,irrzon(izone,2,imagn),nsym,imagn =',izone,nzone,irrzon(izone,2,imagn),nsym,imagn,ch10,&
 &       '  =>irrzon goes outside acceptable bounds.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 !    Second index only goes up to nzone
      if(izonemax==0)then
@@ -2167,7 +2167,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
      if(izonemax/=0)then
        if (irrzon(izone,2,imagn)/=0) then
          message = ' beyond izonemax, irrzon(izone,2,imagn) should be zero'
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
      end if
    end do

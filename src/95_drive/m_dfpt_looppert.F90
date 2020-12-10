@@ -771,7 +771,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (maxocc>1.0d-6.and.abs(maxocc-occ(1))>1.0d-6) then ! True if non-zero occupation numbers are not equal
        write(msg, '(3a)' ) ' ipert=natom+10 or 11 does not work for a metallic system.',ch10,&
        ' This perturbation will not be computed.'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        ABI_DEALLOCATE(occ_pert)
        cycle
      end if
@@ -780,7 +780,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      write(msg, '(a,i0,3a)' ) &
       'ipert= ',ipert,' is outside the [1,dtset%natom+11] interval.',ch10,&
       'This perturbation is not (yet) allowed.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 !  Initialize the diverse parts of energy :
    eew=zero ; evdw=zero ; efrloc=zero ; efrnl=zero ; efrx1=zero ; efrx2=zero
@@ -1063,7 +1063,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
       "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband: ",dtset%mband, "mkmem_rbz: ",&
       mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
       'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
@@ -1212,7 +1212,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mkqmem_rbz: ",&
      mkqmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
      'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ABI_MALLOC_OR_DIE(cgq,(2,mcgq), ierr)
@@ -1404,7 +1404,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mk1mem_rbz: ",&
      mk1mem_rbz, "nsppol: ",dtset%nsppol,ch10,&
      'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    if (.not.kramers_deg) then
@@ -1525,7 +1525,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
            fiwfddk = nctk_ncify(fiwfddk)
          end if
          if (.not. file_exists(fiwfddk)) then
-           MSG_ERROR('Missing file: '//TRIM(fiwfddk))
+           ABI_ERROR('Missing file: '//TRIM(fiwfddk))
          end if
        end if
        write(msg,'(2a)')'- dfpt_looppert: read the DDK wavefunctions from file: ',trim(fiwfddk)
@@ -2240,7 +2240,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if(dtset%kptopt==3 .or. dtset%kptopt==0 .or. dtset%kptopt < -4 .or. dtset%nsym==1) then
 !END
      if (dtset%nsym > 1) then ! .and. dtset%efmas==0) then
-       MSG_ERROR("Symmetries are not implemented for temperature dependence calculations")
+       ABI_ERROR("Symmetries are not implemented for temperature dependence calculations")
      end if
      write(std_out,*) 'Entering: eig2stern'
      if(smdelta>0)then
@@ -2335,7 +2335,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      write(msg,'(3a)')&
      'K point grids must be the same for every perturbation: eig2stern not called',ch10,&
      'Action: Put kptopt=3 '
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if !kptopt
    ABI_DEALLOCATE(gh1c_pert)
    ABI_DEALLOCATE(gh0c1_pert)
@@ -3023,7 +3023,7 @@ subroutine eigen_meandege(eigen0,eigenresp,eigenresp_mean,mband,nband,nkpt,nsppo
 
  if(option/=1 .and. option/=2)then
    write(msg, '(a,i0)' )' The argument option should be 1 or 2, while it is found that option=',option
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  bdtot_index=0 ; bd2tot_index=0

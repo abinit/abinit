@@ -88,23 +88,23 @@
 #define ABI_CHECK(expr, msg) if (.not.(expr)) call assert(.FALSE., msg _FILE_LINE_ARGS_)
 
 /* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
-#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
-#define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; MSG_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
+#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; ABI_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
 
 /* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
-#define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+#define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
 
 /* Stop execution with message `msg` if int1 > int2 */
-#define ABI_CHECK_ILEQ(int1, int2, msg) if (int1 > int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_ILEQ(int1, int2, msg) if (int1 > int2) ABI_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
 
 /* Stop execution with message `msg` if int1 < int2 */
-#define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) ABI_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
 
 /* Stop execution with message `msg` if double1 < double2 */
-#define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+#define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
 
 /* Stop execution with message `msg` if int not in [start, stop] */
-#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) MSG_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
+#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) ABI_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
 
 #define ABI_CHECK_NOSTOP(expr, msg, ierr) \
    if (.not. (expr)) then NEWLINE ierr=ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
@@ -268,7 +268,7 @@
 #  define DBG_ENTER(mode) call sentinel(1,mode _FILE_ABIFUNC_LINE_ARGS_)
 #  define DBG_EXIT(mode)  call sentinel(2,mode _FILE_ABIFUNC_LINE_ARGS_)
 /* Stop if two arrays have different shape */
-#  define DBG_EQSHAPE(arr1, arr2) if (any(shape(arr1)/=shape(arr2))) MSG_ERROR("Different shape")
+#  define DBG_EQSHAPE(arr1, arr2) if (any(shape(arr1)/=shape(arr2))) ABI_ERROR("Different shape")
 
 #else
 /* nops */
@@ -282,28 +282,28 @@
 #endif
 
 /* Macro for basic messages */
-#define MSG_COMMENT(msg) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_)
-#define MSG_WARNING(msg) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_)
-#define MSG_COMMENT_UNIT(msg, unt) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
-#define MSG_WARNING_UNIT(msg, unt) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
-#define MSG_ERROR(msg) call msg_hndl(msg, "ERROR", "PERS" _FILE_LINE_ARGS_)
-#define MSG_ERROR_CLASS(msg, cls) call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
-#define MSG_BUG(msg) call msg_hndl(msg, "BUG", "PERS" _FILE_LINE_ARGS_)
-#define MSG_STOP(msg) call msg_hndl(msg, "STOP", "PERS")
+#define ABI_COMMENT(msg) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_)
+#define ABI_WARNING(msg) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_)
+#define ABI_COMMENT_UNIT(msg, unt) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define ABI_WARNING_UNIT(msg, unt) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define ABI_ERROR(msg) call msg_hndl(msg, "ERROR", "PERS" _FILE_LINE_ARGS_)
+#define ABI_ERROR_CLASS(msg, cls) call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
+#define ABI_BUG(msg) call msg_hndl(msg, "BUG", "PERS" _FILE_LINE_ARGS_)
+#define ABI_STOP(msg) call msg_hndl(msg, "STOP", "PERS")
 
-#define MSG_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
-#define MSG_ERROR_NOSTOP(msg, ierr) \
+#define ABI_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
+#define ABI_ERROR_NOSTOP(msg, ierr) \
    ierr=ierr+1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_)
 #define MSG_ERROR_NOSTOP_IF(condition, msg, ierr) \
-   if (condition)  then NEWLINE MSG_ERROR_NOSTOP(msg, ierr) NEWLINE endif
+   if (condition)  then NEWLINE ABI_ERROR_NOSTOP(msg, ierr) NEWLINE endif
 
 #define NCF_CHECK(ncerr) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,"No msg from caller" _FILE_LINE_ARGS_)
 #define NCF_CHECK_MSG(ncerr,msg) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,msg _FILE_LINE_ARGS_)
 
-#define NOT_IMPLEMENTED_ERROR() MSG_ERROR("Not Implemented Error")
+#define NOT_IMPLEMENTED_ERROR() ABI_ERROR("Not Implemented Error")
 
 /* Macros used for stopping the code if external libraries have not been enabled */
-#define NETCDF_NOTENABLED_ERROR() MSG_ERROR("netcdf is not activated. Use configure --enable-netcdf")
+#define NETCDF_NOTENABLED_ERROR() ABI_ERROR("netcdf is not activated. Use configure --enable-netcdf")
 
 #ifdef HAVE_FC_LONG_LINES
 #define BIGDFT_NOTENABLED_ERROR() call bigdft_lib_error(__FILE__, __LINE__)
@@ -312,7 +312,7 @@
 #endif
 
 /* Write a warning if condition  */
-#define MSG_WARNING_IF(expr, msg) if ((expr)) MSG_WARNING(msg)
+#define ABI_WARNING_IF(expr, msg) if ((expr)) ABI_WARNING(msg)
 
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
@@ -345,7 +345,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 
 
 /* F2003 support  */
-#define ABI_CHECK_CNULL(cptr,msg) if (.not.C_ASSOCIATED(cptr)) MSG_ERROR(msg)
+#define ABI_CHECK_CNULL(cptr,msg) if (.not.C_ASSOCIATED(cptr)) ABI_ERROR(msg)
 
 #ifdef HAVE_FC_ASYNC
 #define ABI_ASYNC ,asynchronous

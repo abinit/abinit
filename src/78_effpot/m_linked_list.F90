@@ -213,7 +213,7 @@ module m_linked_list
           call llist_append(self,i,val)
           return
        else
-          MSG_BUG("m_linked_list cannot find proper place to insert")
+          ABI_BUG("m_linked_list cannot find proper place to insert")
        endif
     endif
 

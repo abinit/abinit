@@ -96,7 +96,7 @@ program ioprof
  ount = dev_null; if (verbose) ount = std_out
 
  if (nprocs>1) then
-   MSG_ERROR("not programmed for parallel execution, Run it in sequential")
+   ABI_ERROR("not programmed for parallel execution, Run it in sequential")
  end if
 
  nargs = command_argument_count()
@@ -139,7 +139,7 @@ program ioprof
    call get_command_argument(3, wfk_dest)
 
    if (file_exists(wfk_dest)) then
-     MSG_ERROR(sjoin("Cannot overwrite:", wfk_dest, ". Remove file and rerun"))
+     ABI_ERROR(sjoin("Cannot overwrite:", wfk_dest, ". Remove file and rerun"))
    end if
 
    if (my_rank == master) call wfk_nc2fort(wfk_source, wfk_dest)
@@ -181,7 +181,7 @@ program ioprof
 
          ! TODO
          if (formeig==1 .and. iomode==IO_MODE_ETSF) then
-           MSG_WARNING("iomode==1 with ETSF_IO not coded yet")
+           ABI_WARNING("iomode==1 with ETSF_IO not coded yet")
            CYCLE
          end if
 
@@ -195,7 +195,7 @@ program ioprof
          end if
 
          if (nprocs > 1) then
-           MSG_ERROR("Not coded")
+           ABI_ERROR("Not coded")
            !call kvars_mpicast(Kvars,master,comm)
          end if
 
@@ -209,7 +209,7 @@ program ioprof
          call wrtout(ount,msg,"COLL")
 
          if (ierr/=0) then
-           MSG_ERROR(sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
+           ABI_ERROR(sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
          end if
 
          ! If not netcdf file, try to read the file with the other mode that is compatible with it.
@@ -227,7 +227,7 @@ program ioprof
            call wrtout(ount,msg,"COLL")
 
            if (ierr/=0) then
-             MSG_ERROR(sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
+             ABI_ERROR(sjoin("wfk_check_wfkfile returned ierr ",itoa(ierr)))
            end if
          end if
 
@@ -239,7 +239,7 @@ program ioprof
    end do
 
  case default
-   MSG_ERROR(sjoin("Unknown command:", command))
+   ABI_ERROR(sjoin("Unknown command:", command))
  end select
 
  !call wrtout(std_out,ch10//" Analysis completed.","COLL")

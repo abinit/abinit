@@ -144,16 +144,16 @@ program band2eps
 !Open the '.eps' file for write
  write(std_out,'(a,a)') 'Creation of file ', filnam(2)
  if (open_file(filnam(2),message,newunit=unt1,form="formatted",status="unknown",action="write") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 !Open the phonon energies file
  if (open_file(filnam(3),message,newunit=unt2,form="formatted") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(filnam(4)/='no') then
 !  Open the displacements file
    if (open_file(filnam(4),message,newunit=unt3,form="formatted",status="old",action='read') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 

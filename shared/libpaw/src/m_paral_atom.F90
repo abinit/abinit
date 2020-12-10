@@ -186,7 +186,7 @@ subroutine get_my_atmtab(comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,nato
      if (present(my_natom_ref).and.(my_natom>0)) then
        if (my_natom_ref/=size(my_atmtab)) then
          msg='my_atmtab should have a size equal to my_natom !'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
      end if
    end if

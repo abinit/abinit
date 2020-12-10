@@ -554,7 +554,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
  if(option<0 .or. option>2)then
    write(msg,'(A,I0,A)')'option=',option,' while the only allowed values are 0, 1, or 2.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !firstchar=' ';if (use_gpu_cuda==1) firstchar='_'
@@ -1687,9 +1687,9 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 &     'increase limit on maximal array size or set mem_test to 0 to disable this test.'
      call wrtout(std_out,msg,'PERS')
      if(option==1)then
-       MSG_ERROR_CLASS(msg, "MemanaError")
+       ABI_ERROR_CLASS(msg, "MemanaError")
      else
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        quit=1
      end if
    end if
@@ -1721,9 +1721,9 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 &     'Action: modify input variables or submission parameters to fit the available memory,',ch10,&
 &     'increase limit on available memory or set mem_test to 0 to disable this test.'
      if(option==1)then
-       MSG_ERROR_CLASS(msg, "MemanaError")
+       ABI_ERROR_CLASS(msg, "MemanaError")
      else
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        quit=1
      end if
    end if
@@ -1805,7 +1805,7 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
      ABI_DEALLOCATE(bigarray)
    end if
 
-   MSG_ERROR_CLASS("in memana with option==2 .and. quit==1", "MemanaError")
+   ABI_ERROR_CLASS("in memana with option==2 .and. quit==1", "MemanaError")
  end if !  End the test of the available memory
 
 !--------------------------------------------------------------------
@@ -1982,7 +1982,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 
  if(option<0 .or. option>2)then
    write(msg, '(a,i0,a)')'option= ',option,' while the only allowed values are 0, 1, or 2.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  firstchar=' ';if (use_gpu_cuda==1) firstchar='_'
@@ -2394,7 +2394,7 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
    write(msg, '(3a)' )&
     'Despite there is only a local part to pseudopotential(s),',ch10,&
     'lmnmax and lnmax are set to 1.'
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
 !XG040806 : These lines make modifications of lnmax and lmnmax
@@ -2478,7 +2478,7 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 &   'The number of points "mqgrid" in reciprocal space used for the',ch10,&
 &   'description of the pseudopotentials has been set automatically',ch10,&
 &   'by abinit to: ',mqgrid,'.'
-   !MSG_COMMENT(msg)
+   !ABI_COMMENT(msg)
  else
    mqgrid2=ceiling(gmax/gvecnorm*nptsgvec)
    if (mqgrid2>mqgrid) then
@@ -2487,14 +2487,14 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 &     'description of the pseudopotentials is : ',mqgrid,'.',ch10,&
 &     'It would be better to increase it to at least ',mqgrid2,', or',ch10,&
 &     'let abinit choose it automatically by setting mqgrid = 0.'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end if
 
  if (usepaw==1) then
    if(ecutdg<tol6)then
      write(msg,'(a)')'The value of (paw)ecutdg is zero or negative, which is forbidden.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    gmaxdg=one/(sqrt2*pi)*sqrt(ecutdg)
    if (mqgriddg == 0) then
@@ -2504,7 +2504,7 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 &     'The number of points "mqgriddg" in reciprocal space used for the',ch10,&
 &     'description of the pseudopotentials has been set automatically',ch10,&
 &     'by abinit to: ',mqgriddg,'.'
-     !MSG_COMMENT(msg)
+     !ABI_COMMENT(msg)
    else
      mqgriddg2=ceiling(gmax/gvecnorm*nptsgvec)
      if (mqgriddg2>mqgriddg) then
@@ -2513,7 +2513,7 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 &       'description of the pseudopotentials (fine grid) is :',mqgriddg,'.',ch10,&
 &       'It would be better to increase it to at least ',mqgriddg2,', or',ch10,&
 &       'let abinit choose it automatically by setting mqgrid = 0.'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    end if
  end if

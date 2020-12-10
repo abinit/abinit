@@ -154,32 +154,32 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
 !Do some checks
  if (size(atindx,2) /= ndisp) then
    write(msg,'(a)')' atindx and ndisp have not the same size'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (size(cell,3) /= ndisp) then
    write(msg,'(a)')' cell and ndisp have not the same size'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (size(direction) /= ndisp) then
    write(msg,'(a)')' direction and ndisp have not the same size'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (size(power_disp) /= ndisp) then
    write(msg,'(a)')' power_disp and ndisp have not the same size'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (size(power_strain) /= nstrain) then
    write(msg,'(a)')' power_strain and nstrain have not the same size'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  
  if (size(strain) /= nstrain) then
    write(msg,'(a)')' strain and nstrain have not the same size'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !First free datatype before init

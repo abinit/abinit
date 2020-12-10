@@ -297,7 +297,7 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
    write(msg,'(a)')' MODEL GW without PLASMON POLE MODEL'
  CASE DEFAULT
    write(msg,'(a,i3)')' Wrong value for Sigp%gwcalctyp = ',Sigp%gwcalctyp
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  END SELECT
  call wrtout([std_out, ab_out], msg)
 
@@ -871,7 +871,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,yd
 
  else
    ! PAW+U+GW calculation.
-   MSG_ERROR("PAW+U+GW not yet implemented")
+   ABI_ERROR("PAW+U+GW not yet implemented")
  end if
 
 end subroutine print_Sigma_QPSC
@@ -1500,7 +1500,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
  ABI_FREE(rdata5)
 
 #else
-  MSG_ERROR('netcdf support is not activated.')
+  ABI_ERROR('netcdf support is not activated.')
 #endif
 
 contains
@@ -1635,7 +1635,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
      !end where
      !if (.not.ltest) then
      !  write(std_out,*)proc_distrb
-     !  MSG_BUG("Bug in the generation of proc_distrb table")
+     !  ABI_BUG("Bug in the generation of proc_distrb table")
      !end if
    end if
  end if

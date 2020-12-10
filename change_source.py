@@ -56,13 +56,13 @@ def replace_string(s):
     """
     old2new = {
          # Malloc/free macros
-         "ABI_ALLOCATE(": "ABI_MALLOC(",
-         "ABI_DEALLOCATE(": "ABI_FREE(",
-         "ABI_DATATYPE_ALLOCATE(": "ABI_MALLOC(",
-         "ABI_DATATYPE_DEALLOCATE(": "ABI_FREE(",
-         "ABI_STAT_ALLOCATE(": "ABI_STAT_MALLOC(",
-         "ABI_DATATYPE_ALLOCATE_SCALAR(": "ABI_MALLOC_TYPE_SCALAR(",
-         "ABI_DATATYPE_DEALLOCATE_SCALAR(": "ABI_FREE(",
+         #"ABI_ALLOCATE(": "ABI_MALLOC(",
+         #"ABI_DEALLOCATE(": "ABI_FREE(",
+         #"ABI_DATATYPE_ALLOCATE(": "ABI_MALLOC(",
+         #"ABI_DATATYPE_DEALLOCATE(": "ABI_FREE(",
+         #"ABI_STAT_ALLOCATE(": "ABI_STAT_MALLOC(",
+         #"ABI_DATATYPE_ALLOCATE_SCALAR(": "ABI_MALLOC_TYPE_SCALAR(",
+         #"ABI_DATATYPE_DEALLOCATE_SCALAR(": "ABI_FREE(",
          #"ABI_STAT_MALLOC(": "ABI_STAT_MALLOC_STAT(",
          # Logging macros
          "MSG_COMMENT(": "ABI_COMMENT(",
@@ -96,7 +96,7 @@ def main():
     #for path in all_files():
     #for path in source_paths_from_abinit_src():
     #for path in all_source_files(types=("fortran", "c", "h")):
-    for path in all_source_files(types=("fortran", "h")):
+    for path in all_source_files(types=("fortran", "h", "c")):
         print("Replacing strings in:", path)
         with open(path, "rt") as fh:
             s = replace_string(fh.read())

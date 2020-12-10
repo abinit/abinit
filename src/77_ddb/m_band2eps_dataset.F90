@@ -193,7 +193,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
    write(message,'(a,I5,3a)' )&
 &   'natom ',band2eps_dtset%natom,', is not allowed ',ch10,&
 &   'Action: correct natom in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 ! Need to get the number of lines
@@ -204,7 +204,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
    write(message,'(a,I5,3a)' )&
 &   'nlines ',band2eps_dtset%nlines,', is not allowed ',ch10,&
 &   'Action: correct nlines in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 ! Need to get the number of lines
@@ -215,7 +215,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
    write(message,'(a,I5,3a)' )&
 &   'cunit ',band2eps_dtset%cunit,', is not allowed ',ch10,&
 &   'Action: correct cunit in your input file (1 or 2).'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 ! Need to get the number of lines
@@ -226,7 +226,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
    write(message,'(a,I5,3a)' )&
 &   'ngrad ',band2eps_dtset%ngrad,', is not allowed ',ch10,&
 &   'Action: correct ngrad in your input file (positive value).'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 ! Need to get the number of lines
@@ -254,7 +254,7 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
    write(message,'(a,I5,3a)' )&
 &   'prtout ',band2eps_dtset%prtout,', is not allowed ',ch10,&
 &   'Action: correct prtout in your input file (0 or 1).'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !natom dimension

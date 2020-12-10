@@ -556,7 +556,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
    if (mix%mffmem == 0 .and. istep_ > 1 .and. mix%n_fftgr>0) then
      call timab(83,1,tsec)
      if (open_file(mix%diskCache,msg,newunit=temp_unit,form='unformatted',status='old') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      rewind(temp_unit)
      read(temp_unit) mix%f_fftgr
@@ -630,7 +630,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
  if (mix%mffmem == 0) then
     call timab(83,1,tsec)
     if (open_file(mix%diskCache,msg,newunit=temp_unit,form='unformatted',status='unknown') /= 0) then
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
     rewind(temp_unit)
     ! VALGRIND complains not all of f_fftgr_disk is initialized
@@ -1224,14 +1224,14 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
 &       'Potential-based CG line minimization not',' converged after ',number_of_restart,' restarts. ',ch10,&
 &       'Action : read the eventual warnings about lack of convergence.',ch10,&
 &       'Some might be relevant. Otherwise, raise nband. Returning'
-       MSG_WARNING(errmess)
+       ABI_WARNING(errmess)
        return
      end if
 !    Make reduction in lambda_adapt (kind of steepest descent...)
      write(message,'(a,a,a)')&
 &     'Potential-based CG line minimization has trouble to converge.',ch10,&
 &     'The algorithm is restarted with more secure parameters.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      number_of_restart=number_of_restart+1
 !    At the second restart, double the number of non-self consistent loops.
      if(number_of_restart>=2)dbl_nnsclo=1
@@ -2390,7 +2390,7 @@ subroutine findminscf(choice,dedv_1,dedv_2,dedv_predict,&
    if(d2edv2_mid<0.0_dp)then
      errid = AB7_ERROR_MIXING_INTERNAL
      write(errmess,'(a,es18.10,a)')'The second derivative is negative, equal to ',d2edv2_mid,'.'
-     MSG_WARNING(errmess)
+     ABI_WARNING(errmess)
    end if
 
  else if(choice==2) then
@@ -2408,7 +2408,7 @@ subroutine findminscf(choice,dedv_1,dedv_2,dedv_predict,&
      write(errmess, '(a,es18.10,a,a,a)' )&
 &     'The second derivative is negative, equal to',d2edv2_predict,'.',ch10,&
 &     '=> Pivoting                     '
-     MSG_WARNING(errmess)
+     ABI_WARNING(errmess)
      if(etotal_2 < etotal_1)then
        lambda_predict=lambda_2-0.5_dp*(lambda_1-lambda_2)
      else

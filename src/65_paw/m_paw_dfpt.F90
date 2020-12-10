@@ -187,46 +187,46 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 & .or.ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11)) then
    if((abs(nzlmopt_a)/=1.and.nzlmopt_a/=0).or.(abs(nzlmopt_b)/=1.and.nzlmopt_b/=0)) then
      msg='invalid value for nzlmopt!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (my_natom>0) then
      if(paw_ij1(1)%has_dijhartree==0) then
        msg='dijhartree must be allocated!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      if (any(pawtab(1:ntypat)%usepawu/=0)) then
        if(paw_ij1(1)%has_dijU==0) then
          msg='dijU must be allocated!'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
      end if
      if(paw_an1(1)%has_vxc==0) then
        msg='vxc1 and vxct1 must be allocated!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      if(paw_an0(1)%has_kxc==0) then
        msg='kxc1 must be allocated!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      if ((ipert1<=natom.or.ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11).and.paw_an0(1)%has_kxc/=2) then
        msg='XC kernels for ground state must be in memory!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      if (paw_ij1(1)%qphase/=paw_an1(1)%cplex) then
        msg='paw_ij1()%qphase and paw_an1()%cplex must be equal!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      if (pawrhoij_a(1)%qphase<paw_an1(1)%cplex.or.pawrhoij_b(1)%qphase<paw_an1(1)%cplex) then
        msg='pawrhoij()%qphase must be >=paw_an1()%cplex!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      if (paw_ij1(1)%nspden/=paw_an1(1)%nspden) then
        msg='paw_ij1()%nspden and paw_an1()%nspden must be equal!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      if (pawrhoij_a(1)%nspden/=pawrhoij_b(1)%nspden) then
        msg='pawrhoij_a()%nspden must =pawrhoij_b()%nspden !'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
  end if
@@ -568,17 +568,17 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  if (my_natom>0) then
    if ((optgr2==1.or.optstr2==1).and.pawrhoij(1)%ngrhoij==0) then
      msg='pawgrnl: inconsistency between variables optgr2/optstr2 and ngrhoij!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (pawfgrtab(1)%rfgd_allocated==0) then
      if ((optgr2==1.and.qne0==1).or.optstr2==1) then
        msg='pawgrnl: pawfgrtab()%rfgd array must be allocated!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
    if (pawrhoij(1)%qphase/=1) then
      msg='pawgrnl: not supposed to be called with pawrhoij(:)%qphase=2!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -615,7 +615,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  if (optgr2==1.or.optstr2==1) then
    if (present(comm_fft)) then
      if ((.not.present(paral_kgb)).or.(.not.present(me_g0)).or.(.not.present(distribfft))) then
-       MSG_BUG(' Need paral_kgb, me_g0 and distribfft with comm_fft !')
+       ABI_BUG(' Need paral_kgb, me_g0 and distribfft with comm_fft !')
      end if
      my_me_g0=me_g0;my_paral_kgb=paral_kgb
      my_distribfft => distribfft
@@ -2073,7 +2073,7 @@ end subroutine pawgrnl
 ! and the first six are due to strain, last three due to displacements
  if (ncpgr /= 3 .and. ncpgr /= 6 .and. ncpgr /= 9) then
    message = ' dsdr_k_paw called with ncpgr /= 3, 6, or 9 (no gradients) '
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  nspinor = dtefield%nspinor

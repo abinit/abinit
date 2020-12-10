@@ -970,7 +970,7 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
    write (msg,'(3a)')&
      " For the moment gams_ee matrix elements are not FT interpolated wrt q,",ch10,&
      " only evaluated on the electron k grid. The resulting a2feew will be 0"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    icall = 1
  end if
 
@@ -1617,7 +1617,7 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
 
  if (xmpi_comm_rank(comm) == master) then
    if (open_file(strcat(basename, '_PHGAMMA'), msg, newunit=unt, action="write", form="formatted", status="unknown") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write(unt,'(a)')     '#'
@@ -1888,7 +1888,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
    ! Prepare tetrahedron integration.
    qptrlatt = 0; qptrlatt(1, 1) = a2f%ngqpt(1); qptrlatt(2, 2) = a2f%ngqpt(2); qptrlatt(3, 3) = a2f%ngqpt(3)
    qtetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f%nqshift, a2f%qshift, nqibz, qibz, comm, msg, ierr)
-   if (ierr /= 0) MSG_ERROR(msg)
+   if (ierr /= 0) ABI_ERROR(msg)
 
    ABI_CALLOC(lambda_tetra, (nqibz, natom3, nsppol))
    ABI_CALLOC(phfreq_tetra, (nqibz, natom3))
@@ -1986,11 +1986,11 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
        end do
 
        if (gams%prteliash == 3) then
-         MSG_ERROR("Eliashberg function with tetra not coded")
+         ABI_ERROR("Eliashberg function with tetra not coded")
        end if
 
      case default
-       MSG_ERROR(sjoin("Wrong intmeth:", itoa(intmeth)))
+       ABI_ERROR(sjoin("Wrong intmeth:", itoa(intmeth)))
      end select
 
    end do ! iq_ibz
@@ -2127,7 +2127,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
    ABI_MALLOC(a2feew_w_int, (nomega))
 
    if (open_file("EPC_strength_aafo_T.dat", msg, newunit=ount, form="formatted", action="write", status="unknown") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write(ount, "(a)")"# temp_el, G_0(T_e) in W/m^3/K, spin"
@@ -2486,7 +2486,7 @@ subroutine a2fw_write(a2f, basename, post, ncid)
  ! Write spin-resolved a2F(w)
  path = strcat(basename, "_A2FW")
  if (open_file(path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call write_a2fw_header()
@@ -2512,7 +2512,7 @@ subroutine a2fw_write(a2f, basename, post, ncid)
  ! Write phonon contributions to a2F(w)
  path = strcat(basename, "_PH_A2FW")
  if (open_file(path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  call write_a2fw_header()
 
@@ -2632,7 +2632,7 @@ subroutine a2fw_ee_write(a2f, basename)
  ! Write spin-resolved a2F(e,e',w)
  path = strcat(basename, "_A2FEEW")
  if (open_file(path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call write_a2fw_header()
@@ -2653,7 +2653,7 @@ subroutine a2fw_ee_write(a2f, basename)
  ! Write spin-resolved a2F(ef, ef, w)
  path = strcat(basename, "_A2FW_reference")
  if (open_file(path, msg, newunit=unt, form="formatted", status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call write_a2fw_header()
@@ -3110,7 +3110,7 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
    ! Prepare tetrahedron integration.
    qptrlatt = 0; qptrlatt(1, 1) = a2f_tr%ngqpt(1); qptrlatt(2, 2) = a2f_tr%ngqpt(2); qptrlatt(3, 3) = a2f_tr%ngqpt(3)
    qtetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f_tr%nqshift, a2f_tr%qshift, nqibz, qibz, comm, msg, ierr)
-   if (ierr/=0) MSG_ERROR(msg)
+   if (ierr/=0) ABI_ERROR(msg)
 
    ABI_MALLOC_OR_DIE(lambda_in_tetra, (nqibz, 3, 3, natom3, nsppol), ierr)
    ABI_MALLOC_OR_DIE(lambda_out_tetra, (nqibz, 3, 3, natom3, nsppol), ierr)
@@ -3366,7 +3366,7 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
  ! Write spin-resolved a2F_tr(w)
  path = strcat(basename, "_A2FW_tr")
  if (open_file(path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call write_a2fw_tr_header()
@@ -3403,7 +3403,7 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
  ! Write phonon mode contributions to a2F_tr(w,i,j)
  path = strcat(basename, "_PH_A2FW_tr")
  if (open_file(path, msg, newunit=unt, form="formatted", action="write", status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  call write_a2fw_tr_header()
 
@@ -3623,7 +3623,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 !************************************************************************
 
  if (psps%usepaw == 1) then
-   MSG_ERROR("PAW not implemented")
+   ABI_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
@@ -3709,7 +3709,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      "pert_nproc (", pert_comm%nproc, ") x qpt_nproc (", qpt_comm%nproc, ") x bsum_nproc (", bsum_comm%nproc, &
      ") x kcalc_nproc (", kpt_comm%nproc, ") x spin_nproc (", spin_comm%nproc, ") != ", &
      pert_comm%nproc * qpt_comm%nproc * bsum_comm%nproc * kpt_comm%nproc * spin_comm%nproc
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_CHECK(bsum_comm%nproc == 1, "Band parallelism not implemented in m_phgamma")
@@ -4065,7 +4065,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        end if
 
      else
-       MSG_ERROR(sjoin("Cannot find q-point:", ktoa(qpt), "in the DVDB file."))
+       ABI_ERROR(sjoin("Cannot find q-point:", ktoa(qpt), "in the DVDB file."))
      end if
 
    else
@@ -4166,7 +4166,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
           "At least one of the k-points on the FS could not be generated from a symmetrical one. dksqmax: ", dksqmax,ch10, &
           "Q-mesh: ", ltoa(gamma_ngqpt), ", K-mesh (from kptrlatt) ", ltoa(get_diag(dtset%kptrlatt)), &
           'Action: check your WFK file and the (k, q) point input variables.'
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
        end if
 
        ikq_ibz = indkk_kq(1, 1); isym_kq = indkk_kq(2, 1)
@@ -4533,7 +4533,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    write(msg, '(7a,es16.6,4a)' ) &
     'You have not specified a path for the linewidth calculation - no interpolation or output will be done ',ch10,&
     'Action: check your input variables ph_nqpath and ph_qpath'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  else
    call gams%linwid(cryst, ifc, dtset%ph_ndivsm, dtset%ph_nqpath, dtset%ph_qpath, dtfil%filnam_ds(4), ncid, wminmax, comm)
  end if
@@ -4660,7 +4660,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  ! The double delta is ill-defined for q == 0. Set nesting to 1 and return
  nesting = 0
  if (fs%eph_intmeth == 2 .and. all(abs(qpt) < tol12)) then
-   MSG_COMMENT("Tetrahedron for double grid with q = 0 is ill-defined. Returning nesting 1 to activate adaptive gaussian.")
+   ABI_COMMENT("Tetrahedron for double grid with q = 0 is ill-defined. Returning nesting 1 to activate adaptive gaussian.")
    nesting = 1
  end if
 
@@ -4724,7 +4724,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
        ik_ibz = ibz_krank%get_index(kk)
        if (ik_ibz < 1) then
          if (ierr <= enough) then
-           MSG_WARNING(sjoin('kpt:', trim(ktoa(kk)), 'has no symmetric among the k-points!'))
+           ABI_WARNING(sjoin('kpt:', trim(ktoa(kk)), 'has no symmetric among the k-points!'))
          end if
          ierr = ierr + 1; cycle
        end if
@@ -4737,7 +4737,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
        if (ikq_ibz < 1) then
          if (ierr <= enough) then
-           MSG_WARNING(sjoin('kpt + qpt:', trim(ktoa(kq)), 'has no symmetric among the k-points!'))
+           ABI_WARNING(sjoin('kpt + qpt:', trim(ktoa(kq)), 'has no symmetric among the k-points!'))
          end if
          ierr = ierr + 1; cycle
        end if
@@ -4813,7 +4813,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    ABI_FREE(dtweightde)
    ABI_FREE(tweight)
  else
-   MSG_ERROR(sjoin("Invalid value of ltetra:", itoa(ltetra)))
+   ABI_ERROR(sjoin("Invalid value of ltetra:", itoa(ltetra)))
  end if
 
  ! Now we can filter the k-points according to the tetra weights and distribute inside comm.
@@ -5047,7 +5047,7 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
            ik_ibz = ibz_krank%get_index(kk)
            if (ik_ibz < 1) then
              if (ierr <= enough) then
-               MSG_WARNING(sjoin('kpt:', trim(ktoa(kk)), 'has no symmetric among the k-points!'))
+               ABI_WARNING(sjoin('kpt:', trim(ktoa(kk)), 'has no symmetric among the k-points!'))
              end if
              ierr = ierr + 1; cycle
            end if
@@ -5060,7 +5060,7 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
 
            if (ikq_ibz < 1) then
              if (ierr <= enough) then
-               MSG_WARNING(sjoin('kpt + qpt:', trim(ktoa(kq)), 'has no symmetric among the k-points!'))
+               ABI_WARNING(sjoin('kpt + qpt:', trim(ktoa(kq)), 'has no symmetric among the k-points!'))
              end if
              ierr = ierr + 1; cycle
            end if
@@ -5097,7 +5097,7 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
        ABI_MALLOC(work_kq, (nkbz))
 
        ! TODO
-       MSG_ERROR("Not Implemented")
+       ABI_ERROR("Not Implemented")
        !call init_tetra(indkpt, cryst%gprimd, fs%klatt, kbz, nkbz, tetra, ierr, errorstring, comm)
        ABI_CHECK(ierr == 0, "init_tetra returned ierr /= 0")
 
@@ -5121,7 +5121,7 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
        ABI_FREE(dtweightde)
        ABI_FREE(tweight)
      else
-       MSG_ERROR(sjoin("Invalid value of ltetra:", itoa(ltetra)))
+       ABI_ERROR(sjoin("Invalid value of ltetra:", itoa(ltetra)))
      end if
    end do ! iq_ibz
  end do ! spin

@@ -573,7 +573,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 ! *************************************************************************
 
  if (pimd_param%use_qtb==1.and.pimd_param%qtb_file_unit<=0) then
-   MSG_BUG('piqtb_force not open!')
+   ABI_BUG('piqtb_force not open!')
  end if
 
 !############# Initializations ###########################

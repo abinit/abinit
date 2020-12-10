@@ -771,7 +771,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
  call energies_ncwrite(res%energies, ncid)
 
 #else
- MSG_ERROR("netcdf support is not activated.")
+ ABI_ERROR("netcdf support is not activated.")
 #endif
 
 contains

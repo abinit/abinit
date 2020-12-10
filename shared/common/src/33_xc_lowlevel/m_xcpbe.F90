@@ -252,13 +252,13 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
    write(message, '(a,a,a,a,i12,a)' ) ch10,&
 &   ' xcpbe : BUG -',ch10,&
 &   '  Option must be 1, 2, 3, 5, 6, 7, 8, -1 or -2 ; argument was ',option,'.'
-!  MSG_BUG(message)
+!  ABI_BUG(message)
  end if
 
 !Checks the compatibility between the presence of dvxci and ndvxci
  if(ndvxci /=0 .neqv. present(dvxci))then
    message = ' If ndvxci/=0 there must the optional argument dvxci'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Checks the compatibility between the inputs and the presence of the optional arguments
@@ -266,7 +266,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
    write(message, '(3a,i8,a)' )&
 &   'The order does not require the presence of dvxci',ch10,&
 &   'that is allowed when |order|>1, while we have',order,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(ndvxci /= 0 .and. (&
@@ -282,21 +282,21 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
 &   '    8          -2',ch10,&
 &   '    15       2, 5,6,7',ch10,&
 &   '  While we have: ndvxc=',ndvxci,', option=',option,', nspden=',nspden,', order=',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if ((option == 1 .or. option == -1 .or. option ==3) .and.  (present(grho2_updn) .or. present(dvxcdgr))) then
    write(message, '(a,a,a,i6,a)' )&
 &   'The option chosen does not need the presence',ch10,&
 &   'of the gradient, or of the array dvxcdgr in the input, needed if option/=1,-1,3 , while we have',option,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (order /= 3 .and. present(d2vxci)) then
    write(message, '(a,a,a,i6,a)' )&
 &   'The order chosen does not need the presence',ch10,&
 &   'of the array d2vxci, needed if order=3 , while we have',order,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(initialized==0)then
@@ -5021,7 +5021,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
    write(message, '(a,a,a,i12,a)' )&
 &   '  Argument nspden must be 1 or 2; ',ch10,&
 &   '  Value provided as argument was ',nspden,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !DEBUG

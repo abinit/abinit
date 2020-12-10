@@ -155,7 +155,7 @@ if(icutcoul.eq.1) then
 !   if (ng > 20 .and. mod(ng,10)==0) then
 !      write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
 !&       " If you have a metal consider setting dipdip 0.  ng = ", ng
-!      MSG_WARNING(message)
+!      ABI_WARNING(message)
 !   end if
    ii=1
    do ig3=-ng,ng
@@ -272,7 +272,7 @@ if(icutcoul.eq.1) then
 !   if (nr > 20 .and. mod(nr,10)==0) then
 !      write (message,'(3a,I10)') "Very large box of R neighbors in ewald: you probably do not want to do this.", ch10,&
 !&       " If you have a metal consider setting dipdip 0.  nr = ", nr
-!      MSG_WARNING(message)
+!      ABI_WARNING(message)
 !   end if
 !
    do ir3=-nr,nr
@@ -876,7 +876,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 &               'The phonon wavelength should not be zero :',ch10,&
 &               'there are non-analytical terms that cannot be treated.',ch10,&
 &               'Action: subtract this wavelength from the input file.'
-               MSG_ERROR(message)
+               ABI_ERROR(message)
              end if
 
            else
@@ -1013,7 +1013,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 &   'because you not are dealing with an insulator, so that',ch10,&
 &   'your dielectric matrix was simply set to zero in the Derivative DataBase.',ch10,&
 &   'Action: set the input variable dipdip to 0 .'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  inv_detdlt = one / sqrt(detdlt)
@@ -1125,7 +1125,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                        'The distance between two atoms seem to vanish.',ch10,&
                        'This is not allowed.',ch10,&
                        'Action: check the input for the atoms number',ia,' and',ib,'.'
-                     MSG_ERROR(message)
+                     ABI_ERROR(message)
                    else
                      ! This is the correction when the atoms are identical
                      do nu=1,3
@@ -1146,7 +1146,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
    ! Check if new shell must be calculated
    if(newr==0)exit
-   if(newr==1 .and. nr==mr) MSG_BUG('mr is too small')
+   if(newr==1 .and. nr==mr) ABI_BUG('mr is too small')
  end do
  end if ! check if should compute real part
 

@@ -28,7 +28,7 @@
  end if
 
 #else 
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
  ABI_UNUSED(ff)
  if (PRESENT(fftw_flags)) then

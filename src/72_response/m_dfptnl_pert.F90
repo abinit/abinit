@@ -302,7 +302,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  if(i2pert<=natom) npert_phon = npert_phon + 1
  if(i3pert<=natom) npert_phon = npert_phon + 1
  if (npert_phon>1) then
-   MSG_ERROR("dfptnl_pert is available with at most one phonon perturbation. Change your input!")
+   ABI_ERROR("dfptnl_pert is available with at most one phonon perturbation. Change your input!")
  end if
 
  usepaw = psps%usepaw
@@ -978,7 +978,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
    if (pawfgr%nfft/=nfftf) then
      write(msg,'(2(a,i10))') 'pawfgr%nfft/=nfftf : pawfgr%nfft=',pawfgr%nfft,' nfftf = ',nfftf
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call pawnhatfr(0,idir_phon,ipert_phon,natom,dtset%natom,nspden,psps%ntypat,&
@@ -1307,7 +1307,7 @@ subroutine dfptnl_exc3(cplex,exc3,k3xc,mpi_enreg,nk3xc,nfftf,nfftotf,nspden,rho1
    end if
 
  else
-   MSG_BUG('DFPTNL_PERT is implemented only for nspden=1 or 2')
+   ABI_BUG('DFPTNL_PERT is implemented only for nspden=1 or 2')
  end if
 
  call dotprod_vn(cplex,rho1r1_tot,exc3(1),exc3(2),nfftf,nfftotf,nspden,2,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)

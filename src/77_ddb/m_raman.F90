@@ -139,7 +139,7 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm,rs
 !  Check if epsq > 0
    if (epsq < tol8) then
      write(message,'(a,es14.6)')'  The value of epsq must be > 0 while it is found to be',epsq
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  Get the effective charges for the limiting direction
@@ -353,7 +353,7 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 &   'The lowest mode appears to be a "true" negative mode,',ch10,&
 &   'and not an acoustic mode. This precludes the computation',ch10,&
 &   'of the EO tensor.',ch10
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  dtm = epsinf(1,1)*epsinf(2,2)*epsinf(3,3) + &
@@ -370,7 +370,7 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 &   'This preludes the computation fo the EO tensor since',ch10,&
 &   'this quantity requires the inverse of epsilon.',ch10,&
 &   'Action : check you database and the value of dieflag in the input file.',ch10
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !dieflag is required to be one since the EO tensor

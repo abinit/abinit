@@ -157,7 +157,7 @@ contains
      call abi_io_redirect(new_ab_out=get_unit())
      if (me==0) then 
        if (open_file(NULL_FILE,msg,unit=ab_out,status='unknown') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
    else
@@ -167,14 +167,14 @@ contains
    call abi_io_redirect(new_ab_out=get_unit())
    if (me==0) then 
      if (open_file(filout(ii),msg,unit=ab_out,status='unknown') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
  end if
  if (paral==1.and.me==0.and.do_write_log) then
    call abi_io_redirect(new_std_out=get_unit())
    if (open_file(fillog(ii),msg,unit=std_out,status='unknown') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 

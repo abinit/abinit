@@ -681,7 +681,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      if (iline/=1) then
        if (d2te>d2teold+tol6) then
          write(msg,'(a,i0,a,e14.6,a,e14.6)')'New trial energy at line ',iline,'=',d2te,'is higher than former:',d2teold
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
      end if
      d2teold=d2te

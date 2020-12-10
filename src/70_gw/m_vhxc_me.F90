@@ -212,7 +212,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
  nspinor=Wfd%nspinor; nsppol =Wfd%nsppol; nspden =Wfd%nspden
- if (nspinor == 2) MSG_WARNING("Remember to ADD SO")
+ if (nspinor == 2) ABI_WARNING("Remember to ADD SO")
 
  ! TODO not used for the time being but it should be a standard input of the routine.
  !  bbks_mask(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)=Logical mask used to select
@@ -232,7 +232,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  call melements_init(Mels,Mflags,nsppol,nspden,Wfd%nspinor,Wfd%nkibz,Wfd%kibz,kstab)
 
  if (Mflags%has_lexexch==1) then
-   MSG_ERROR("Local EXX not coded!")
+   ABI_ERROR("Local EXX not coded!")
  end if
 
  ! Evaluate $v_\xc$ using only the valence charge.
@@ -572,7 +572,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      if (     SIZE(dijexc_core,DIM=1) /= lmn2_size_max  &
 &        .or. SIZE(dijexc_core,DIM=2) /= 1              &
 &        .or. SIZE(dijexc_core,DIM=3) /= Cryst%ntypat ) then
-       MSG_BUG("Wrong sizes in dijexc_core")
+       ABI_BUG("Wrong sizes in dijexc_core")
      end if
    end if
 
@@ -700,7 +700,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
                      ! FIXME H0 + spinor not implemented
                      if (Mflags%has_hbare==1.or.Mflags%has_sxcore==1) then
-                       MSG_ERROR("not implemented")
+                       ABI_ERROR("not implemented")
                      end if
 
                      if (Mflags%has_vxc==1) then ! * Accumulate vxc[n1+nc] + vxc[n1+tn+nc].

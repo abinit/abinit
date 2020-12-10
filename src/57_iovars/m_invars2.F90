@@ -372,7 +372,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
          write(msg, '(3a)' )&
          'All values for Genetic rules must be greater than 0.',ch10,&
          'Action: check the values of ga_rules.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -468,7 +468,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    write(msg, '(3a)' )&
    'cd_customnimfrqs not equal to zero and not equal to nfreqim',ch10,&
    'setting nfreqim = cd_customnimfrqs'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    dtset%nfreqim = dtset%cd_customnimfrqs
  end if
 
@@ -526,7 +526,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
          write(msg, '(3a)' )&
          'The frequencies specified in cd_imfrqs must be strictly increasing',ch10,&
          'Action: Correct this in your input file'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -541,7 +541,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
          write(msg, '(3a)' )&
          'The frequencies specified in gw_freqsp must be strictly increasing',ch10,&
          'Action: Correct this in your input file'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -708,7 +708,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      msg='The following input keywords are obsolete:'//ch10//&
      '  rfxatpol, rfxdir, rfxrlfd, rfxphon (with x=1,2,3)'//ch10//&
      'Action: change to the d3e_pertx_*** input parameters!'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepead',tread,'INT')
@@ -760,7 +760,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      write(msg, '(3a)' )&
        'The input keyword "ecut" is compulsory !',ch10,&
        'Action: add a value for "ecut" in the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -1005,7 +1005,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'inclvkb',tread,'INT')
  if(tread==1) dtset%inclvkb=intarr(1)
  if (dtset%inclvkb == 1) then
-   MSG_ERROR("inclvkb == 1 is not allowed anymore. Choose between 0 and 1.")
+   ABI_ERROR("inclvkb == 1 is not allowed anymore. Choose between 0 and 1.")
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nomegasf',tread,'INT')
@@ -1225,7 +1225,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  else
    write(msg, '(a,i0,3a)' )'occopt=',occopt,' not allowed.',ch10,'Action: correct your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !----------------------------------------------------------------------------
@@ -1479,7 +1479,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ABI_CHECK(3 * dtset%ph_nqpath <= marr, "3 * dtset%ph_nqpath > marr!")
    call intagm(dprarr,intarr,jdtset,marr,3*dtset%ph_nqpath,string(1:lenstr),'ph_qpath',tread,'DPR')
    if (tread == 0) then
-     MSG_ERROR("When ph_nqpath > 0, ph_qpath should be specified")
+     ABI_ERROR("When ph_nqpath > 0, ph_qpath should be specified")
    end if
    dtset%ph_qpath = reshape(dprarr(1:3*dtset%ph_nqpath), [3, dtset%ph_nqpath])
  end if
@@ -1494,7 +1494,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      ABI_CHECK(3 * dtset%ph_nqshift <= marr, "3 * dtset%ph_nqshift > marr!")
      call intagm(dprarr,intarr,jdtset,marr,3*dtset%ph_nqshift,string(1:lenstr),'ph_qshift',tread,'DPR')
      if (tread == 0) then
-       MSG_ERROR("When ph_nqshift > 0, ph_qshift should be specified")
+       ABI_ERROR("When ph_nqshift > 0, ph_qshift should be specified")
      end if
      dtset%ph_qshift = reshape(dprarr(1:3*dtset%ph_nqshift), [3, dtset%ph_nqshift])
    end if
@@ -1598,14 +1598,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      write(msg, '(4a)' )&
        'When ionmov==23, densfor_pred must be 2.',ch10,&
        'Set densfor_pred to 2.',ch10
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
 #else
    dtset%ionmov=12
    write(msg, '(4a)' )&
      'LOTF is disabled, ionmov can not be 23.',ch10,&
     'Set ionmov to 12.',ch10
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
 #endif
  end if
 
@@ -1670,13 +1670,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      write(msg, '(5a)' )&
       'ixc and xcname cannot be specified simultaneously',ch10,&
       'for the same dataset.',ch10,'Action: check the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      !Note that xcname is a 'key' variable : its value is stored in keyw at output of intagm
      if(trim(key_value) == 'PW92') then
         dtset%ixc=7
      else
-       MSG_ERROR(sjoin("Don't know how to convert xcname", key_value, "to ixc"))
+       ABI_ERROR(sjoin("Don't know how to convert xcname", key_value, "to ixc"))
      end if
      tread=1
    end if
@@ -1735,7 +1735,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        write(msg, '(a,es16.8,2a)' )&
        'A negative value for hyb_mixing is not allowed, while at input hyb_mixing=',dprarr(1),ch10,&
        'Action: modify hyb_mixing in the input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      dtset%hyb_mixing=-dprarr(1) ! Note the minus sign
    end if
@@ -1746,7 +1746,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        write(msg, '(a,es16.8,2a)' )&
        'A negative value for hyb_mixing_sr is not allowed, while at input hyb_mixing_sr=',dprarr(1),ch10,&
        'Action: modify hyb_mixing_sr in the input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      dtset%hyb_mixing_sr=-dprarr(1) ! Note the minus sign
    end if
@@ -1757,7 +1757,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        write(msg, '(a,es16.8,2a)' )&
        'A negative value for hyb_range_dft is not allowed, while at input hyb_range_dft=',dprarr(1),ch10,&
        'Action: modify hyb_range_dft in the input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      dtset%hyb_range_dft=-dprarr(1) ! Note the minus sign
    end if
@@ -1768,7 +1768,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        write(msg, '(a,es16.8,2a)' )&
        'A negative value for hyb_range_fock is not allowed, while at input hyb_range_fock=',dprarr(1),ch10,&
        'Action: modify hyb_range_fock in the input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      dtset%hyb_range_fock=-dprarr(1) ! Note the minus sign
    end if
@@ -1891,7 +1891,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'restartxf',tread,'INT')
  if(tread==1) dtset%restartxf=intarr(1)
  if (dtset%restartxf == 1) then
-   MSG_ERROR("restartxf == 1 has been removed in Abinit8. Use 0,-1,-2-3")
+   ABI_ERROR("restartxf == 1 has been removed in Abinit8. Use 0,-1,-2-3")
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
@@ -1949,7 +1949,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    write(msg, '(3a,i0)' )&
     'When DFT+DMFT is activated ', ch10, &
     'optforces must be equal to 0 instead of ',dtset%optforces
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optstress',tread,'INT')
@@ -2140,7 +2140,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      write(msg, '(a,a,a)' )&
       'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 ',ch10,&
       'imposing dmft_dc = 5'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      dtset%dmft_dc=5
    end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
@@ -2183,7 +2183,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      '   Number of bands to construct Wannier functions is not', &
      ' sufficient to build Wannier functions for l=',maxval(dtset%lpawu(:)),ch10, &
      '   Action: select a correct number of KS bands with dmftbandi and dmftbandf.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftcheck',tread,'INT')
@@ -2202,7 +2202,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
         'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
         'dmftqmc_n MUST be defined.',ch10,&
         'Action: add dmftqmc_n keyword in input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_l',tread,'INT')
      if(tread==1) then
@@ -2212,7 +2212,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
         'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
         'dmftqmc_l MUST be defined.',ch10,&
         'Action: add dmftqmc_l keyword in input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_seed',tread,'INT')
      if(tread==1) dtset%dmftqmc_seed=intarr(1)
@@ -2224,7 +2224,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
         'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
         'dmftqmc_therm MUST be defined.',ch10,&
         'Action: add dmftqmc_therm keyword in input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if(dtset%dmft_solv==5.or.dtset%dmft_solv==8.or.dtset%dmft_solv==9) then
     ! if(dtset%dmft_solv==5) then
@@ -2304,35 +2304,35 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       'Pseudopotential file is PAW format (pspcod=7 or 17) while',ch10,&
       'input variable "useylm" has the incompatible value 0 !',ch10,&
       'Action: change psp format or "useylm" value in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (dtset%tfkinfunc==2.and.dtset%useylm==0) then
      write(msg, '(a,a,a,a,a)' )&
       'You are using recursion method (tfkinfunc=2)  while',ch10,&
       'input variable "useylm" has the incompatible value 0 !',ch10,&
       'Action: change  "useylm" value in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (dtset%efmas==1.and.dtset%useylm==0) then
      write(msg, '(a,a,a,a,a)' )&
       'The calculation of effective masses requires the input variable, ',ch10,&
       '"useylm" to be 1, while in your input file, useylm=0',ch10,&
       'Action: change "useylm" value in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (dtset%rf2_dkdk/=0.and.dtset%useylm==0) then
      write(msg, '(a,a,a,a,a)' )&
       'The calculation of 2nd order k perturbation requires the input variable, ',ch10,&
       '"useylm" to be 1, while in your input file, useylm=0',ch10,&
       'Action: change "useylm" value in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (dtset%rf2_dkde/=0.and.dtset%useylm==0) then
      write(msg, '(a,a,a,a,a)' )&
       'The calculation of the 2nd order k/Efield perturbation requires the input variable, ',ch10,&
       '"useylm" to be 1, while in your input file, useylm=0',ch10,&
       'Action: change "useylm" value in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -2396,7 +2396,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    write(msg, '(3a)' )&
    'When ionmov is [4, 5, 6], densfor_pred must be 3.',ch10,&
    'Set densfor_pred to 3.'
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mffmem',tread,'INT')
@@ -2444,7 +2444,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ionmov',tread,'INT')
    if (tread == 1 .and. intarr(1) /= 0 .and. dtset%imgmov == 0) then
      dtset%ntime = 1000
-     MSG_COMMENT("Found ionmov /= 0 without ntime in the input. ntime has been set automatically to 1000")
+     ABI_COMMENT("Found ionmov /= 0 without ntime in the input. ntime has been set automatically to 1000")
    end if
  end if
 
@@ -2628,7 +2628,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       'You are using recursion method (tfkinfunc=2)  while',ch10,&
       'input variable "prtwf" has the incompatible value 1 !',ch10,&
       'Action: change  "prtwf=0" value in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
  if (dtset%tfkinfunc==2) dtset%prtwf=0
@@ -2640,7 +2640,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    write(msg, '(3a)' )&
    'You are using prtwf_full=1 while prtwf=0',ch10,&
    'Action: set "prtwf=0" in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtxml',tread,'INT')
@@ -2700,14 +2700,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      write(msg, '(a,i0,2a)' )&
       'w90iniprj should be set to 0, 1 or 2, however, it was ',dtset%w90iniprj,ch10,&
       'Action: check the values of w90iniprj.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if ( usepaw == 1 .and. ( dtset%w90iniprj < 2 .or. dtset%w90iniprj>6 ) &
       .and. ( dtset%w90iniprj /= 1 .and. dtset%w90iniprj/=0 )) then
      write(msg, '(a,i0,2a)' )&
       'In the PAW case, the only valid values for w90iniprj are 0, 1, 2, 5 and 6 however, it was ',dtset%w90iniprj,ch10,&
       'Action: check the values of w90iniprj.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -2719,7 +2719,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      write(msg, '(4a)' )&
       'w90prtunk should be greater or equal to zero, however, it was ',dtset%w90prtunk,ch10,&
       'Action: check the values of w90prtunk.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -2755,7 +2755,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
           'All the components of vdw_typfrag must be greater than 0.',ch10,&
           'The component',ii,' is equal to ',dtset%vdw_typfrag(ii),ch10,&
           'Action: check the values of vdw_typfrag.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -2769,21 +2769,21 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
         ' only one component of vdw_supercell could be < 0, however, it was ',ch10,&
         dtset%vdw_supercell(1),dtset%vdw_supercell(2),dtset%vdw_supercell(3),ch10,&
         'Action: check the components of vdw_supercell.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if (dtset%vdw_supercell(2)<zero.and.dtset%vdw_supercell(3)<zero) then
        write(msg, '(7a)' )&
         'only one component of vdw_supercell could be < 0, however, it was ',ch10,&
         dtset%vdw_supercell(1),dtset%vdw_supercell(2),dtset%vdw_supercell(3),ch10,&
         'Action: check the components of vdw_supercell.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if (dtset%vdw_supercell(1)<zero.and.dtset%vdw_supercell(3)<zero) then
        write(msg, '(7a)' )&
         'only one component of vdw_supercell could be < 0, however, it was ',ch10,&
         dtset%vdw_supercell(1),dtset%vdw_supercell(2),dtset%vdw_supercell(3),ch10,&
         'Action: check the components of vdw_supercell.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 
@@ -2799,7 +2799,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       'Value of nsym different from 1 when ucrpa_bands is used is under test ',dtset%nsym,&
       ' (because symmetry is not yet used)',ch10,&
       'Action: check your calculation  with nsym=1'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
    dtset%ucrpa_bands(1:2)=intarr(1:2)
  end if
@@ -2811,7 +2811,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       'Value of nsym different from 1 when ucrpa_windows is used is under test ',dtset%nsym,&
       ' (because symmetry is not yet used)',ch10,&
       'Action: check your calculation  with nsym=1'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
    dtset%ucrpa_window(1:2)=dprarr(1:2)
  end if
@@ -2821,7 +2821,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
     'ucrpa_bands and ucrpa_window cannot be specified simultaneously',ch10,&
     'for the same dataset.',ch10,&
     'Action: check the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Tolerance variables
@@ -2864,7 +2864,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
     'Only one of the tolmxf/tolmxde variables may be defined at once.',ch10,&
     'Action: check values of tolmxf, tolmxde. If you want to use ',ch10,&
     'tolmxde, you should explicitly put tolmxf to 0.0.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! if no value is given for jdtset, use defaults
@@ -2951,7 +2951,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    write(msg, '(3a)' )&
    'Only one of the tolXXX variables may be defined at once.',ch10,&
    'Action: check values of tolvrs, toldfe, tolrff, tolwfr, and toldff.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! if no value is given for jdtset, use defaults
@@ -3000,7 +3000,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    write(msg, '(3a)' )&
    'Only one of the postolXXX variables may be defined at once.',ch10,&
    'Action: check values of postoldfe and postoldff.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (itol==0.and.itol_gen==1) then
    dtset%postoldfe=toldfe_
@@ -3042,7 +3042,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      write(msg, '(3a)' )&
       'When nconeq is positive, natcon MUST be defined.',ch10,&
       'Action: check the values of nconeq and natcon.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    do ii=1,dtset%nconeq
      if(natcon(ii)<0)then
@@ -3050,7 +3050,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
         'All the components of natcon must be greater than 0.',ch10,&
         'The component',ii,' is equal to ',natcon(ii),ch10,&
         'Action: check the values of natcon.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
    niatcon=sum(natcon(:))
@@ -3064,7 +3064,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      write(msg, '(3a)' )&
      'When nconeq is positive, natcon MUST be defined.',ch10,&
      'Action: check the values of nconeq and natcon.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    do ii=1,niatcon
      if(iatcon(ii)<0)then
@@ -3072,7 +3072,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
         'All the components of iatcon must be greater than 0.',ch10,&
         'The component',ii,' is equal to ',iatcon(ii),ch10,&
         'Action: check the values of iatcon.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
 
@@ -3082,7 +3082,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      write(msg, '(3a)' )&
      'When nconeq is positive, wtatcon MUST be defined.',ch10,&
      'Action: check the values of nconeq and wtatcon.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    iat=0
    do ii=1,dtset%nconeq
@@ -3173,7 +3173,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      ABI_MALLOC(dtset%kptbounds, (3, dtset%nkpath))
      dtset%kptbounds = reshape(dprarr(1:3*dtset%nkpath), [3, dtset%nkpath])
    else
-     MSG_ERROR("When nkpath /= 0 or kptopt < 0, kptbounds must be defined in the input file.")
+     ABI_ERROR("When nkpath /= 0 or kptopt < 0, kptbounds must be defined in the input file.")
    end if
  else
    ABI_MALLOC(dtset%kptbounds, (0,0))
@@ -3186,7 +3186,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ncerr= nctk_write_ibz("kpts.nc", dtset%kptns(:,1:nkpt), dtset%wtk(1:nkpt))
    NCF_CHECK(ncerr)
 #endif
-   MSG_ERROR_NODUMP("kpts.nc file written. Aborting now")
+   ABI_ERROR_NODUMP("kpts.nc file written. Aborting now")
  end if
 
  if (dtset%nkptgw>0) then
@@ -3200,10 +3200,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ! Test bdgw values.
    if (dtset%optdriver == RUNL_SIGMA) then
      if (any(dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) <= 0)) then
-       MSG_ERROR("bdgw entries cannot be <= 0. Check input file")
+       ABI_ERROR("bdgw entries cannot be <= 0. Check input file")
      end if
      if (any(dtset%bdgw(1,1:dtset%nkptgw,1:dtset%nsppol) > dtset%bdgw(2,1:dtset%nkptgw,1:dtset%nsppol))) then
-       MSG_ERROR("First band index in bdgw cannot be greater than the second index")
+       ABI_ERROR("First band index in bdgw cannot be greater than the second index")
      end if
    end if
 
@@ -3325,7 +3325,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
          write(msg, '(3a)' )&
          'When LDA/GGA+U is activated and usedmatpu/=0, dmatpawu MUST be defined.',ch10,&
          'Action: add dmatpawu keyword in input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
 
@@ -3377,7 +3377,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%nbandhf=nband1
    else
      write(msg, '(a,i0,3a)' )'occopt=',occopt,' not allowed.',ch10,'Action: correct your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -3503,7 +3503,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
      'while it is found to be ',dtset%sigma_nshiftk,'.',ch10,&
      'Action: change the value of sigma_nshiftk in your input file, or change kptopt.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call intagm(dprarr, intarr, jdtset, marr, 3*dtset%sigma_nshiftk, string(1:lenstr), 'sigma_shiftk', tread, 'DPR')
@@ -3517,7 +3517,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"wfk_task",tread,'KEY',key_value=key_value)
  if (tread==1) dtset%wfk_task = str2wfktask(tolower(key_value))
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
-   MSG_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
+   ABI_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
  end if
 
  ABI_DEALLOCATE(intarr)

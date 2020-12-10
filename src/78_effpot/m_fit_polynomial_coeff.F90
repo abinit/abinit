@@ -212,7 +212,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
       write(message, '(3a)' )&
 &       'need_only_odd_power and need_only_even_power are both true',ch10,&
 &       'Action: contact abinit group'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  max_power_strain_in = 1
  if(present(max_power_strain))then
@@ -222,7 +222,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
       write(message, '(3a)' )&
 &       'max_power_strain can not be inferior or equal to zero',ch10,&
 &       'Action: contact abinit group'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  !Check which atom to fit, if not present do all atoms 
  if(present(fit_iatom))then 
@@ -1451,7 +1451,7 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
 !Do check
  if(ncoeff_model == 0)then
    write(msg,'(a)')'ncoeff_model must be different to 0'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Map the hist in order to be consistent with the supercell into reference_effective_potential
@@ -2337,12 +2337,12 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
  !Do some checks
  if(ntime /= hist%mxhist)then
    write(msg,'(a)')'ntime is not correct'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(natom /= size(hist%xred,2)) then
    write(msg,'(a)')'natom is not correct'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(present(compute_anharmonic))then
@@ -2369,18 +2369,18 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
    unit_energy = get_unit()
    if (open_file(file_energy,msg,unit=unit_energy,form="formatted",&
 &     status="unknown",action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    unit_stress = get_unit()
    file_stress=trim(name_file)//'_stress.dat'
    if (open_file(file_stress,msg,unit=unit_stress,form="formatted",&
 &     status="unknown",action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  else if(need_print .and. .not. present(filename))then 
    write(msg,'(3a)')' You asked for printing of the MSD-values',ch10,& 
 &        ' without specifying a filename'
-   MSG_ERROR(msg) 
+   ABI_ERROR(msg) 
  end if
  
  file_anh=trim(name_file)//'_anharmonic_terms_energy.dat'
@@ -2686,7 +2686,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 ! BORN CHARGES FILE
  if (open_file('system/Born_Charges',msg,unit=unit_born,form="formatted",&
 &    status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  do ii=1,eff_pot%crystal%ntypat
    jj = A(ii)
@@ -2703,7 +2703,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !DIELECTRIC TENSOR FILE
  if (open_file('system/Dielectric_Tensor',msg,unit=unit_epsiloninf,form="formatted",&
 &    status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  do mu=1,3
    WRITE(unit_epsiloninf,'(3(F23.14))') eff_pot%harmonics_terms%epsilon_inf(:,mu)
@@ -2713,7 +2713,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !REFERENCE STRUCTURE FILE
  if (open_file('system/Reference_structure',msg,unit=unit_ref,form="formatted",&
 &    status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(unit_ref,'("Energy (Hartree)")')
@@ -2737,7 +2737,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !Harmonic XML file
  if (open_file('system/harmonic.xml',msg,unit=unit_harmonic,form="formatted",&
 &     status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Write header
@@ -2772,14 +2772,14 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !STRAIN FILE
  if (open_file('system/Strain_Tensor',msg,unit=unit_strain,form="formatted",&
 &     status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(unit_strain,'(6(F23.14))') (eff_pot%harmonics_terms%elastic_constants)
 
 ! SYM FILE
  if (open_file('system/symmetry_operations',msg,unit=unit_sym,form="formatted",&
 &     status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(unit_sym,'("(x,y,z)  (y,-x,z) (z,x,y) (y,z,x) (x,z,y) (y,x,z) (z,y,x) (x,-y,-z) (z,-x,-y)",&
 &                " (y,-z,-x) (x,-z,-y) (y,-x,-z) (z,-y,-x) (-x,y,-z) (-z,x,-y) (-y,z,-x) (-x,z,-y)",&
@@ -2793,7 +2793,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  nstep = hist%mxhist
  if (open_file('system/Molecular_dynamic',msg,unit=unit_md,form="formatted",&
 &     status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  do ii=1,nstep
    write(unit_md,'(I5)') ii-1

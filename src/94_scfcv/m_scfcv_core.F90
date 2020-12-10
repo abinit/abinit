@@ -663,7 +663,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
    compch_fft=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)
    if (usexcnhat==0.and.dtset%ionmov==4.and.dtset%iscf<10) then
-     MSG_ERROR('You cannot simultaneously use ionmov=4 and such a PAW psp file !')
+     ABI_ERROR('You cannot simultaneously use ionmov=4 and such a PAW psp file !')
    end if
 
 !  Variables/arrays related to the PAW spheres
@@ -699,7 +699,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
    end do
    if (dtset%usedmatpu/=0.and.lpawumax>0) then
      if (2*lpawumax+1/=size(dmatpawu,1).or.2*lpawumax+1/=size(dmatpawu,2)) then
-       MSG_BUG('Incorrect size for dmatpawu!')
+       ABI_BUG('Incorrect size for dmatpawu!')
      end if
    end if
 
@@ -787,7 +787,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
      nfftmix_per_nfft=0;if(nfftf>0) nfftmix_per_nfft=(1-nfftmix/nfftf)
      call ab7_mixing_new(mix, iscf10, denpot, ispmix, nfftmix, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
      if (errid /= AB7_NO_ERROR) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if (dtset%usekden/=0) then
        if (dtset%useria==12345) then  ! This is temporary
@@ -796,7 +796,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
          call ab7_mixing_new(mix_mgga, 0, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, dtset%npulayit)
        end if
        if (errid /= AB7_NO_ERROR) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
      if (dtset%mffmem == 0) then
@@ -1024,7 +1024,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
            write(msg,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in scfcv_core."
-           MSG_COMMENT(msg)
+           ABI_COMMENT(msg)
            call wrtout(ab_out, msg, "COLL")
            timelimit_exit = 1
            exit
@@ -1511,14 +1511,14 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 &       'Although the computation of forces during electronic iterations',ch10,&
 &       'was not required by user, it is done (required by the',ch10,&
 &       'choice of ionmov input parameter).'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
      if (abs(tollist(3))+abs(tollist(7))>tiny(0._dp)) then
        write(msg,'(5a)')&
 &       'Although the computation of forces during electronic iterations',ch10,&
 &       'was not required by user, it is done (required by the',ch10,&
 &       '"toldff" or "tolrff" tolerance criteria).'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    end if
    if ((istep==1).and.(dtset%optforces==1).and. dtset%usewvl == 1) then
@@ -1526,7 +1526,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 &     'Although the computation of forces during electronic iterations',ch10,&
 &     'was required by user, it has been disable since the tolerence',ch10,&
 &     'is not on forces (force computation is expensive in wavelets).'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    call timab(56,2,tsec)
@@ -1553,7 +1553,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 &     vectornd,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
 
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
-     MSG_WARNING('THOMAS FERMI')
+     ABI_WARNING('THOMAS FERMI')
      call vtorhotf(dtset,energies%e_kinetic,energies%e_nlpsp_vfock,&
 &     energies%entropy,energies%e_fermie,gprimd,grnl,irrzon,mpi_enreg,&
 &     dtset%natom,nfftf,dtset%nspden,dtset%nsppol,dtset%nsym,phnons,&
@@ -2958,7 +2958,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        ABI_DEALLOCATE(ipiv)
 !DEBUG
        if(ierr/=0)then
-         MSG_ERROR(' The call to cgesv general inversion routine failed')
+         ABI_ERROR(' The call to cgesv general inversion routine failed')
        end if
 !ENDDEBUG
 

@@ -88,12 +88,12 @@
 
 /* Messages, errors */
 #  define USE_MSG_HANDLING use m_libpaw_tools, only : wrtout => libpaw_wrtout, libpaw_msg_hndl
-#  define MSG_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
-#  define MSG_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
-#  define MSG_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
-#  define MSG_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
+#  define ABI_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
+#  define ABI_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
+#  define ABI_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
+#  define ABI_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
 /*BigDFT should accept long lines...*/
-/*#define MSG_ERROR(msg) call libpaw_msg_hndl(msg,"ERROR","PERS",__FILE__,__LINE__)*/
+/*#define ABI_ERROR(msg) call libpaw_msg_hndl(msg,"ERROR","PERS",__FILE__,__LINE__)*/
 #  define HAVE_YAML
 
 /* Allocation/deallocation with memory profiling */
@@ -142,10 +142,10 @@
 
 /* Messages, errors */
 #  define USE_MSG_HANDLING use m_libpaw_tools, only : wrtout => libpaw_wrtout, libpaw_msg_hndl
-#  define MSG_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
-#  define MSG_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
-#  define MSG_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
-#  define MSG_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
+#  define ABI_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
+#  define ABI_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
+#  define ABI_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
+#  define ABI_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
 #  undef  HAVE_YAML
 
 /* Allocation/deallocation */

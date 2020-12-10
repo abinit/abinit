@@ -90,7 +90,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
 #endif
 
  if (xmpi_comm_size(comm) /= 1) then
-   MSG_ERROR("fold2bloch not programmed for parallel execution.")
+   ABI_ERROR("fold2bloch not programmed for parallel execution.")
  end if
 
  nargs = command_argument_count()
@@ -111,7 +111,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  !call nctk_test_mpiio()
 
  if (nctk_try_fort_or_ncfile(fname, msg) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  pos=INDEX(fname, "_")
@@ -187,14 +187,14 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
    if (nspinor==2) then
      !open output file
      if (open_file(trim(seedname)//"_SPOR_1.f2b", msg, newunit=outfile1, form="formatted", status="unknown") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if (open_file(trim(seedname)//"_SPOR_2.f2b", msg, newunit=outfile2, form="formatted", status="unknown") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      if (open_file(outname, msg, newunit=outfile1,form="formatted", status="unknown") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 

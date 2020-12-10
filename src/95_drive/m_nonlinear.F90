@@ -260,7 +260,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 &   '2 or more atomic displacements.',ch10,&
 &   'This is not allowed yet.',ch10,&
 &   'Action : change d3e_pert1_phon, d3e_pert2_phon or d3e_pert3_phon in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Computation of third order derivatives from PEAD (pead=1) or full DPFT formalism (pead=0):
@@ -276,7 +276,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  my_natom=mpi_enreg%my_natom
  paral_atom=(my_natom/=dtset%natom)
  if (paral_atom) then
-   MSG_BUG(" Nonlinear routine is not available yet with parallelization over atoms...")
+   ABI_BUG(" Nonlinear routine is not available yet with parallelization over atoms...")
  end if
 
 !Init spaceworld
@@ -485,7 +485,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
      end do
    end do
    write(std_out,'(a)')"..."
-   MSG_ERROR_NODUMP("aborting now")
+   ABI_ERROR_NODUMP("aborting now")
  end if
 
 !Set up for iterations
@@ -649,7 +649,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 
 qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 if (.not.qeq0) then
-  MSG_BUG('NONLINEAR with dtset%qptn!=0 is not implemented yet')
+  ABI_BUG('NONLINEAR with dtset%qptn!=0 is not implemented yet')
 end if
 
 !PAW: 1- Initialize values for several arrays depending only on atomic data
@@ -1580,14 +1580,14 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
        write(message,'(a,a,a)')&
 &       '  In a non-linear response calculation, nband must be equal ',ch10,&
 &       '  to the number of valence bands.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 
 !    Note that the number of bands can be different for spin up and spin down
      if (ikpt > 1) then
        if (mband_occ /= mband_occ_k) then
          message = 'The number of valence bands is not the same for every k-point'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
      else
        mband_occ = mband_occ_k
@@ -1638,7 +1638,7 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
    if(dtset%nsppol/=1)then
      if(mpi_enreg%nproc/=1)then
        message = ' At present, non-linear response calculations for spin-polarized system cannot be done in parallel.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      else
        isppol=1
      end if

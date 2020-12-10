@@ -126,7 +126,7 @@ subroutine sigtk_kcalc_from_nkptgw(dtset, mband, nkcalc, kcalc, bstart_ks, nbcal
        ierr = ierr + 1
        write(msg,'(a,2(i0,1x),2(a,i0))')&
         "For (k, s) ",ikcalc,spin," bdgw= ",dtset%bdgw(2,ikcalc,spin), " > mband = ",mband
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    end do
  end do
@@ -439,7 +439,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
       write(msg, '(a,es16.6,2a)' )&
         "At least one of the k-points could not be generated from a symmetrical one in the WFK. dksqmax: ",dksqmax, ch10,&
         'Action: check your WFK file and the value of sigma_nkpt, sigma_shiftk in the input file.'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
 
     ABI_MALLOC(sigmak2ebands, (tmp_nkpt))
@@ -530,7 +530,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
        nbcalc_ks(ic, spin) = ib_work(2, ii, spin) - ib_work(1, ii, spin) + 1
      end if
      if (nbcalc_ks(ic, spin) == 0) then
-       MSG_WARNING("Spin-polarized case with nbcalc_ks == 0, don't know if code can handle it!")
+       ABI_WARNING("Spin-polarized case with nbcalc_ks == 0, don't know if code can handle it!")
      end if
    end do
  end do
@@ -645,10 +645,10 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
    ! Consistency check.
    if (all(dtset%sigma_erange == zero)) then
-     MSG_ERROR("sigma_erange must be specified in input when calling sigtk_kpts_in_erange.")
+     ABI_ERROR("sigma_erange must be specified in input when calling sigtk_kpts_in_erange.")
    end if
    if (all(dtset%sigma_ngkpt == 0)) then
-     MSG_ERROR("sigma_ngkpt must be specified in input when calling sigtk_kpts_in_erange.")
+     ABI_ERROR("sigma_ngkpt must be specified in input when calling sigtk_kpts_in_erange.")
    end if
  end if
 
@@ -656,7 +656,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    ! Compute gaps using input ebands.
    gaps = ebands_get_gaps(ebands, gap_err)
    if (gap_err /= 0) then
-     MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
+     ABI_ERROR("Cannot compute fundamental and direct gap (likely metal).")
    end if
 
    if (my_rank == master) then
@@ -688,7 +688,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    ! Compute gaps using fine_ebands.
    fine_gaps = ebands_get_gaps(fine_ebands, gap_err)
    if (gap_err /= 0) then
-     MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
+     ABI_ERROR("Cannot compute fundamental and direct gap (likely metal).")
    end if
 
    if (my_rank == master) then
@@ -766,7 +766,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    ! Write text file with Abinit input variables (mainly for testing purposes).
    path = strcat(prefix, "_KERANGE")
    if (open_file(path, msg, newunit=unt, form="formatted") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(unt, "(a)")"kptopt 0"
    write(unt, "(a, i0)")"nkpt ", nkpt_inerange

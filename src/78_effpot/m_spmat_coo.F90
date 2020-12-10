@@ -60,7 +60,7 @@ contains
     class(coo_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
     if (size(mshape)/=2) then
-       MSG_BUG(" COO matrix should be 2D (mshape should be of length 2).")
+       ABI_BUG(" COO matrix should be 2D (mshape should be of length 2).")
     end if
     call self%ndcoo_mat_t%initialize(mshape)
   end subroutine initialize
@@ -101,7 +101,7 @@ contains
     ABI_UNUSED_A(self)
 
     ! TODO implement.
-    MSG_ERROR("mpi COO mv Not implemented yet")
+    ABI_ERROR("mpi COO mv Not implemented yet")
     ! TODO : use gather instead of reduce.
     !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
     call xmpi_sum_master(b, 0, xmpi_world, ierr )

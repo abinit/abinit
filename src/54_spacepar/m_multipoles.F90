@@ -140,7 +140,7 @@ subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
  end if
  if (.not.(fftgrid_found)) then
    msg='Unable to find an allocated distrib for the FFT grid!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Loop over FFT grid points
@@ -397,7 +397,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 
  if (me_fft == 0) then
    if (open_file(fnameabo_app_1dm,message,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind(temp_unit)
  end if
@@ -431,7 +431,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
      close(temp_unit)
      write(message, '(a,i0)' )&
 &     ' out1dm : cannot handle more than 9999 atoms, while natom=',natom
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 

@@ -198,7 +198,7 @@ subroutine echo_xc_name (ixc)
      citation = 'Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) ' ! [[cite:Ichimaru1987]]
    case default
      write(message,'(a,i0)')" echo_xc_name does not know how to handle ixc = ",ixc
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end select
 
    message = " Exchange-correlation functional for the present dataset will be:" // ch10 &
@@ -293,7 +293,7 @@ subroutine check_kxc(ixc,optdriver)
 &     '>Possible action (3):',ch10,&
 &     'Switch to another value of densfor_pred (=5, for instance).'
    end if
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine check_kxc
@@ -695,7 +695,7 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
    end if  ! option
 
  else
-   MSG_BUG('nspden>2 not allowed !')
+   ABI_BUG('nspden>2 not allowed !')
  end if ! End choice between non-spin polarized and spin-polarized.
 
  if (numneg>0) then
@@ -708,7 +708,7 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 &     ' Possible workarounds : increase ecut, or define the input variable densty,',ch10,&
 &     ' with a value larger than the guess for the decay length, or initialize your,',ch10,&
 &     ' density with a preliminary LDA or GGA-PBE if you are using a more exotic xc functional.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
    iwarn=iwarn+1
  end if
@@ -898,7 +898,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      write(message, '(a,i0,2a,i0)')&
 &     'The value of ixc specified in input, ixc = ',ixc,ch10,&
 &     'differs from the one used to initialize the functional ',ixc_from_lib
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -906,66 +906,66 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
  if( (order<1.and.order/=-2).or.order>4)then
    write(message, '(a,i0)' )&
 &   'The only allowed values for order are 1, 2, -2 or 3, while it is found to be ',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Determine quantities available in input arguments
  has_gradient=.false.;has_laplacian=.false.;has_kden=.false.
  if (usegradient==1) then
    if (.not.present(grho2_updn)) then
-     MSG_BUG('missing grho2_updn argument!')
+     ABI_BUG('missing grho2_updn argument!')
    end if
    if (nvxcgrho>0) then
      if (.not.present(vxcgrho)) then
-       MSG_BUG('missing vxcgrho argument!')
+       ABI_BUG('missing vxcgrho argument!')
      end if
      has_gradient=.true.
    end if
  else if (nvxcgrho>0) then
-   MSG_BUG('nvxcgrho>0 and usegradient=0!')
+   ABI_BUG('nvxcgrho>0 and usegradient=0!')
  end if
  if (uselaplacian==1) then
    if (.not.present(lrho_updn)) then
-     MSG_BUG('missing lrho_updn argument!')
+     ABI_BUG('missing lrho_updn argument!')
    end if
    if (nvxclrho>0) then
      if (.not.present(vxclrho)) then
-       MSG_BUG('missing vxclrho argument!')
+       ABI_BUG('missing vxclrho argument!')
      end if
      has_laplacian=.true.
    end if
  else if (nvxclrho>0) then
-   MSG_BUG('nvxclrho>0 and uselaplacian=0!')
+   ABI_BUG('nvxclrho>0 and uselaplacian=0!')
  end if
  if (usekden==1) then
    if (.not.present(tau_updn)) then
-     MSG_BUG('missing tau_updn argument!')
+     ABI_BUG('missing tau_updn argument!')
    end if
    if (nvxctau>0) then
      if (.not.present(vxctau)) then
-       MSG_BUG('missing vxctau argument!')
+       ABI_BUG('missing vxctau argument!')
      end if
      has_kden=.true.
    end if
  else if (nvxctau>0) then
-   MSG_BUG('nvxctau>0 and usekden=0!')
+   ABI_BUG('nvxctau>0 and usekden=0!')
  end if
  if (abs(order)>=2) then
    if (.not.present(dvxc)) then
      message='order>=2 needs argument dvxc!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    else if (ndvxc==0) then
      message='order>=2 needs ndvxc>0!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
  if (abs(order)>=3) then
    if (.not.present(d2vxc)) then
      message='order>=3 needs argument d2vxc!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    else if (nd2vxc==0) then
      message='order>=3 needs nd2vxc>0!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -988,7 +988,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    write(message, '(3a)' )&
 &    'one of the arguments usegradient/uselaplacian/usesekden',ch10,&
 &    'doesnt match the requirements of the XC functional!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if ((has_gradient.and.need_nvxcgrho>nvxcgrho).or.&
 &    (has_laplacian.and.need_nvxclrho>nvxclrho).or.&
@@ -997,25 +997,25 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    write(message, '(3a)' )&
 &    'one of the arguments nvxcgrho/nvxclrho/nvxctau/ndvxc/nd2vxc',ch10,&
 &    'doesnt match the requirements of the XC functional!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if (abs(order)>1.and.ixc<0.and.(need_laplacian==1.or.need_kden==1)) then
    message='Derivatives of XC potential are not available in mGGA!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Check other optional arguments
  if (my_exexch/=0.and.usegradient==0) then
    message='exexch argument only valid for GGA!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if(ixc==50) then
    if(.not.(present(el_temp)).or.(.not.present(fxcT)))then
      message = 'el_temp or fxcT is not present but are needed for IIT XC functional.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if (size(fxcT)/=npts) then
-     MSG_BUG('fxcT size must be npts!')
+     ABI_BUG('fxcT size must be npts!')
    end if
  end if
 

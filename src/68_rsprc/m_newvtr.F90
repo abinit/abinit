@@ -292,39 +292,39 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 
 !Compatibility tests
  if(nfftmix>nfft) then
-   MSG_BUG('  nfftmix>nfft not allowed !')
+   ABI_BUG('  nfftmix>nfft not allowed !')
  end if
 
  if(ispmix/=2.and.nfftmix/=nfft) then
    message = '  nfftmix/=nfft allowed only when ispmix=2 !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (dtset%usekden==1) then
    if ((.not.present(vtauresid)).or.(.not.present(vtau)).or.(.not.present(mix_mgga))) then
       message='Several arrays are mising!'
-      MSG_BUG(message)
+      ABI_BUG(message)
    end if
    if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
 &      mix_mgga%iscf==AB7_MIXING_EIG) then
      message='kinetic energy potential cannot be mixed with the selected mixing algorithm!'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
  if(dtset%usewvl==1) then
    if(dtset%wvl_bigdft_comp==1) then
      message = 'newvtr: usewvl == 1 and wvl_bigdft_comp==1 not allowed (use wvl_newtr() instead)!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if(ispmix/=1 .or. nfftmix/=nfft) then
-     MSG_BUG('newvtr: nfftmix/=nfft, ispmix/=1 not allowed for wavelets')
+     ABI_BUG('newvtr: nfftmix/=nfft, ispmix/=1 not allowed for wavelets')
    end if
  end if
 
  if(usepaw==1.and.dtset%nspden==4.and.dtset%pawoptmix==1) then
    message = ' pawoptmix=1 is not compatible with nspden=4 !'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  dielng=dielar(2)
@@ -509,14 +509,14 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 &   arr_respc = vrespc)
  end if
  if (errid /= AB7_NO_ERROR) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (dtset%usekden==1) then
    call ab7_mixing_eval_allocate(mix_mgga, istep)
    call ab7_mixing_copy_current_step(mix_mgga, vtauresid0, errid, message, &
 &        arr_respc = vtaurespc)
    if (errid /= AB7_NO_ERROR) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
  ABI_DEALLOCATE(vresid0)
@@ -571,13 +571,13 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  if (errid == AB7_ERROR_MIXING_INC_NNSLOOP) then
    dbl_nnsclo = 1
  else if (errid /= AB7_NO_ERROR) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (dtset%usekden==1) then
    call ab7_mixing_eval(mix_mgga, vtau0, istep, nfftot, ucvol_local, &
 &   mpicomm, mpi_summarize, errid, message, reset = reset)
    if (errid /= AB7_NO_ERROR) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 

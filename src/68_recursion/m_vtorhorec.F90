@@ -913,7 +913,7 @@ subroutine vtorhorec(dtset,&
    write(msg,'(a,2d10.3)')'  temps recursion    ',tsec
    call wrtout(std_out,msg,'COLL')
    write(msg,'(a,l1,a)') ' vtorhorec : rset%debug=-',rset%debug,', debugging mode => stop '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call timab(600,2,tsec2)
@@ -1417,7 +1417,7 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
    if (res_nelecth*res_nelectl>0) then
      write (msg,'(4a)')' fermisolverec : ERROR- ',ch10,&
 &     ' initial guess for fermi energy doesnt permit to  find solutions in solver',ch10
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  MAIN LOOP   ------------------------------------------------------
@@ -2219,7 +2219,7 @@ subroutine first_rec(dtset,psps,rset)
 
  call timab(601,1,tsec)  !!--Start time-counter: initialisation
 
- MSG_WARNING("RECURSION")
+ ABI_WARNING("RECURSION")
  if(dtset%recgratio>1) then
    write(msg,'(a)')'COARSE GRID IS USED'
    call wrtout(std_out,msg,'COLL')

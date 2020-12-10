@@ -227,7 +227,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
  vxctau_ => vxctau_dum ; if (with_vxctau) vxctau_ => vxctau
  if (with_vxctau.and.optres==0.and.(.not.present(vtauresid))) then
-   MSG_BUG('need vtauresid!')
+   ABI_BUG('need vtauresid!')
  end if
 
 !Check if we're in hybrid norm conserving pseudopotential with a core correction

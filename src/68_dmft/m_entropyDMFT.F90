@@ -184,7 +184,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       if ( pawtab(dt%typat(iatom))%lpawu /= -1 ) icatom = icatom + 1
     end do
 
-    if ( icatom /= ncatom ) MSG_ERROR("Inconsistent number of correlated atoms")
+    if ( icatom /= ncatom ) ABI_ERROR("Inconsistent number of correlated atoms")
 
     nctypat = 0
     do itypat=1,dt%ntypat
@@ -200,14 +200,14 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       write(message,'(2a,i4,2a)') "DMFT must have dmft_nlamda >= 3 to compute entropy", &
         "whereas its value is dmft_nlambda = ",dt%dmft_nlambda,ch10,&
         "Action : check you input variable dmft_nlambda"
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
 
     e_t%nlambda = dt%dmft_nlambda
 
     doRestart = .false.
     if ( e_t%nlambda < (e_t%mylambda+1) ) then
-      MSG_ERROR("Restart calculation of DMFT entropy with a value of dmft_entropy greater than dmft_nlambda")
+      ABI_ERROR("Restart calculation of DMFT entropy with a value of dmft_entropy greater than dmft_nlambda")
     else if ( e_t%mylambda > 0 ) then
       doRestart = .true.
     end if
@@ -422,7 +422,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       if ( iostate /= 0 ) then
         write(msg,'(5a)') "File ", trim(e_t%filedata), " does not exist or is not accessible", ch10, &
         "-> No restart performed but full calculation."
-        MSG_WARNING(msg)
+        ABI_WARNING(msg)
         e_t%mylambda = 0
       end if
 
@@ -432,7 +432,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       if ( hdr /= HDR_NAME .or. iostate /= 1 ) then
         write(msg,'(5a)') "File ", trim(e_t%filedata), " does not contain the proper header", ch10, &
         "-> No restart performed but full calculation."
-        MSG_WARNING(msg)
+        ABI_WARNING(msg)
         e_t%mylambda = 0
       end if
 
@@ -442,7 +442,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
         if ( ABS(lambda - e_t%lambda(ilambda)) >= tol9 ) then
           write(msg,'(5a,f6.4,a,f6.4)') "File ", trim(e_t%filedata), " is wrong:", ch10, &
           "Lambda values are differente: in file ", lambda, " instead of ", e_t%lambda(ilambda)
-          MSG_WARNING(msg)
+          ABI_WARNING(msg)
           goto 42
         end if
 
@@ -452,7 +452,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
             write(msg,'(7a,f6.4)') "File ", trim(e_t%filedata), " is wrong:", ch10, &
             "Temperature is different than the value of tsmear", ch10, &
             "-> No restart performed but full calculation."
-            MSG_WARNING(msg)
+            ABI_WARNING(msg)
             goto 42
           end if
           read(e_t%ofile,end=42) e_t%entropy0
@@ -488,7 +488,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       goto 43
 42    write(msg,'(5a,f6.4)') "File ", trim(e_t%filedata), " is wrong or incomplete", ch10, &
           "-> Restart calculation will restart at lambda = ",e_t%lambda(tlambda)
-      MSG_WARNING(msg)
+      ABI_WARNING(msg)
       close(e_t%ofile)
       e_t%mylambda = tlambda-1 ! -1 to go to previous lambda
     end if
@@ -673,7 +673,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     character(len=100) :: message
 
     if ( e_t%isset .eqv. .FALSE. ) &
-      MSG_ERROR("entropyDMFT is not initialized")
+      ABI_ERROR("entropyDMFT is not initialized")
 
     ! go to next lambda
     mylambda = e_t%mylambda + 1
@@ -1016,13 +1016,13 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     if ( entropy < zero ) then
       write(string,'(3a)') "Entropy is negative !!!!",ch10,&
       "It does not make any sense"
-      MSG_WARNING(string)
+      ABI_WARNING(string)
     end if
 
     if ( abs(entropy-entropyDirect) >= tol3 ) then
       write(string,'(1x,a,1x,f8.3,1x,a,1x,f8.3,2a)') "Difference between Direct and DC entropies is", abs(entropy-entropyDirect), &
         "which is greater than", tol3,ch10,"Action : converge better the DMFT and/or DFT loops"
-      MSG_WARNING(string)
+      ABI_WARNING(string)
     end if
 
 
@@ -1112,7 +1112,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       !if ( abs(integral2-integral1) >= tol6 ) then
       !  write(msg,'(1x,a,1x,f8.6,1x,a,1x,f8.6,1x,a,i4)') "Difference between two different ways of integration is", abs(integral2-integral1), &
       !    "which is greater than", tol6, "for correlated atom",e_t%index_atom(icatom)
-      !  MSG_WARNING(msg)
+      !  ABI_WARNING(msg)
       !end if
 
       integral = integral+integral1

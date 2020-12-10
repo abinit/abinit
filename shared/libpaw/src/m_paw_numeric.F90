@@ -158,7 +158,7 @@ subroutine paw_spline(t,y,n,ybcbeg,ybcend,ypp)
 &   'SPLINE_CUBIC_SET - Fatal error!',ch10, &
 &   '  The number of knots must be at least 2.',ch10, &
 &   '  The input value of N = ', n
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  LIBPAW_ALLOCATE(tmp,(n))
@@ -170,7 +170,7 @@ subroutine paw_spline(t,y,n,ybcbeg,ybcend,ypp)
 &   '  The knots must be strictly increasing, but',ch10, &
 &   '  T(',  i,') = ', t(i), ch10, &
 &   '  T(',i+1,') = ', t(i+1)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
    end if
  end do
 
@@ -281,7 +281,7 @@ subroutine paw_splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
          else
            msg='xfit not properly ordered'
          end if
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        delarg= xspline(right) - xspline(left)
        invdelarg= 1.0_dp/delarg
@@ -366,7 +366,7 @@ subroutine paw_splint_der(nspline,xspline,yspline,ysplin2,nfit,xfit,dydxfit,ierr
          else
            msg='xfit not properly ordered'
          end if
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        delarg= xspline(right) - xspline(left)
        invdelarg= 1.0_dp/delarg
@@ -452,7 +452,7 @@ subroutine paw_uniform_splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
 
  if(delarg<tol12)then
    write(msg,'(a,es16.8)') 'delarg should be strictly positive, while delarg= ',delarg
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  endif
 
  jspl=-1
@@ -654,7 +654,7 @@ subroutine paw_sort_dp(n,list,iperm,tol)
    write(msg,'(a,i12,2a)') &
 &   'paw_sort_dp has been called with array length n=',n, ch10, &
 &   ' having a value less than 1.  This is not allowed.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Conduct the usual sort
@@ -747,7 +747,7 @@ subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
 
  if (order>2) then
    msg='Wrong order in paw_jbessel!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (abs(xx)<prec) then
@@ -785,7 +785,7 @@ subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
    bes=jn*fact
    if (abs(jr)>prec) then
      msg='Bessel function did not converge!'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (order>=1) then
      factp=fact*xx/dble(2*ll+3)
@@ -797,7 +797,7 @@ subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
      besp=-jnp*factp+jn*fact*xxinv*dble(ll)
      if (abs(jr)>prec) then
        msg='1st der. of Bessel function did not converge!'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
    if (order==2) then
@@ -810,7 +810,7 @@ subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
      besp1=-jnpp*factpp+jnp*factp*xxinv*dble(ll+1)
      if (abs(jr)>prec) then
        msg='2nd der. of Bessel function did not converge !'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
  else
@@ -982,7 +982,7 @@ subroutine paw_jbessel_4spline(bes,besp,ll,order,xx,tol)
 
  if (order>2) then
    msg='Wrong order in paw_jbessel_4spline'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  select case (ll)
@@ -1027,7 +1027,7 @@ subroutine paw_jbessel_4spline(bes,besp,ll,order,xx,tol)
 
  case default
    write(msg,'(a,i4)')' wrong value for ll = ',ll
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 end subroutine paw_jbessel_4spline

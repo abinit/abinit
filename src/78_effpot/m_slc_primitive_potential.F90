@@ -185,7 +185,7 @@ contains
       write(std_out,'(A25)') 'Could not close netcdf file'
     endif
 #else
-    MSG_ERROR("Multibint should be installed with netcdf enabled to run this.")
+    ABI_ERROR("Multibint should be installed with netcdf enabled to run this.")
 
 #endif
 
@@ -239,7 +239,7 @@ contains
 
     write(std_out,'(A8,I10,A11)') 'L_iu:  ', ndata, 'terms read'  
 #else
-    MSG_ERROR("Multibinit should be installed with netcdf.")
+    ABI_ERROR("Multibinit should be installed with netcdf.")
 #endif
 
   end subroutine read_liu
@@ -297,7 +297,7 @@ contains
 
     write(std_out,'(A8,I10,A11)') 'N_iuv: ', ndata, 'terms read'  
 #else
-    MSG_ERROR("Multibinit should be installed with netcdf") 
+    ABI_ERROR("Multibinit should be installed with netcdf") 
 #endif
 
   end subroutine read_niuv
@@ -355,7 +355,7 @@ contains
       ABI_SFREE(vallist)
     endif
 #else
-    MSG_ERROR('Multibinit should be install with netcdf to run this.')
+    ABI_ERROR('Multibinit should be install with netcdf to run this.')
 #endif
 
   end subroutine read_oiju
@@ -420,7 +420,7 @@ contains
     endif
 
 #else
-    MSG_ERROR('Multibinit should be install with netcdf to run this.')
+    ABI_ERROR('Multibinit should be install with netcdf to run this.')
 #endif
 
 
@@ -676,7 +676,7 @@ contains
         call self%liu%sum_duplicates()
         call self%set_liu_sc(scpot, scmaker)
       else
-        MSG_ERROR("No parameters for bilinear coupling available. Check your input and parameter files.")
+        ABI_ERROR("No parameters for bilinear coupling available. Check your input and parameter files.")
         scpot%has_bilin = .False.
       endif
     endif
@@ -692,7 +692,7 @@ contains
         call self%niuv%sum_duplicates()
         call self%set_niuv_sc(scpot, scmaker)
       else
-        MSG_ERROR("No parameters for linear-quadratic coupling available. Check your input and parameter files.")
+        ABI_ERROR("No parameters for linear-quadratic coupling available. Check your input and parameter files.")
         scpot%has_linquad = .False.
       endif
     endif
@@ -708,7 +708,7 @@ contains
         call self%oiju%sum_duplicates()
         call self%set_oiju_sc(scpot, scmaker)
        else
-         MSG_ERROR("No parameters for quadratic-linear coupling available. Check your input and parameter files.")
+         ABI_ERROR("No parameters for quadratic-linear coupling available. Check your input and parameter files.")
          scpot%has_quadlin = .False.
        endif
      endif
@@ -724,7 +724,7 @@ contains
         call self%tijuv%sum_duplicates()
         call self%set_tijuv_sc(scpot, scmaker)
       else
-        MSG_ERROR("No parameters for biquadratic coupling available. Check your input and parameter files.")
+        ABI_ERROR("No parameters for biquadratic coupling available. Check your input and parameter files.")
         scpot%has_biquad = .False.
       endif
     endif

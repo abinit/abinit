@@ -595,7 +595,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then
    write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  call timab(130,2,tsec)

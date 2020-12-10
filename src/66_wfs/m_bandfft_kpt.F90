@@ -278,7 +278,7 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
      ikpt_this_proc=mpi_enreg%my_kpttab(ikpt)
      if ((ikpt_this_proc > mkmem).or.(ikpt_this_proc==0)) then
        message = ' this bandfft tab is not allocated !'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      if (bandfft_kpt_in(ikpt_this_proc)%flag1_is_allocated==0) then
        ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%gbound    ,(2*mgfft+8,2))
@@ -505,7 +505,7 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !      Only calculations with istwfk=1 or 2
      else
        write(message, '(a,i0,a)' )' the value istwfk=',istwf_k,' is not allowed in case of bandfft parallelization!'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
      ABI_DEALLOCATE(kg_k_gather_all)
      ABI_DEALLOCATE(npw_per_proc)
@@ -527,7 +527,7 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
        write(message, '(a,i4,3a)' ) &
 &        'There is a load unbalancing for the FFT parallelization (kpt',ikpt,').',ch10,&
 &        'Plane-wave components will be redistributed before each FFT!'
-       MSG_COMMENT(message)
+       ABI_COMMENT(message)
      end if
      bandfft_kpt_in(ikpt_this_proc)%have_to_reequilibrate=(itest>0)
 
@@ -910,12 +910,12 @@ subroutine bandfft_kpt_destroy_array(bandfft_kpt_in,mpi_enreg)
    nsppol=size(mpi_enreg%proc_distrb,3)
    if (nsppol==0.or.nkpt==0) then
      msg=' mpi_enreg%proc_distrb should be allocated !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    nkpt=size(mpi_enreg%my_kpttab)
    if (nkpt==0) then
      msg=' mpi_enreg%my_kpttab should be allocated !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    do isppol=1,nsppol
      do ikpt=1,nkpt
@@ -923,7 +923,7 @@ subroutine bandfft_kpt_destroy_array(bandfft_kpt_in,mpi_enreg)
        ikpt_this_proc=mpi_enreg%my_kpttab(ikpt)
        if ((ikpt_this_proc>mkmem) .or.(ikpt_this_proc<=0)) then
          msg=' The bandfft tab cannot be deallocated !'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
        call bandfft_kpt_destroy(bandfft_kpt_in(ikpt_this_proc))
      end do
@@ -2100,7 +2100,7 @@ subroutine prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
 
  if (.not.tabs_allocated) then
    message = ' the bandfft tabs are not allocated !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ntypat=gs_hamk%ntypat

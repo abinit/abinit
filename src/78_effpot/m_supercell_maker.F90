@@ -177,7 +177,7 @@ contains
        end do
     end do
     if (counter /= self%ncells ) then
-       MSG_ERROR("Bug found. supercell_maker: Wrong number of supercell found in build_rvec. ")
+       ABI_ERROR("Bug found. supercell_maker: Wrong number of supercell found in build_rvec. ")
     end if
   end subroutine build_rvec
 
@@ -262,7 +262,7 @@ contains
     rprim(:)= R-matmul(R_sc, self%scmat)
     ind_sc=binsearch_left_integerlist(self%rvecs, rprim)
     if (ind_sc==0) then
-            MSG_ERROR("Bug found. supercell_maker%R_to_sc: Cannot find rprim")
+            ABI_ERROR("Bug found. supercell_maker%R_to_sc: Cannot find rprim")
     end if
   end subroutine R_to_sc
 
@@ -645,7 +645,7 @@ contains
     R=[0,0,0]
     call maker%R_to_sc(R, R_sc, ind_sc2)
     if (.not.( (all(R_sc==[0,0,0])) .and. (ind_sc2==1 )))  then
-       MSG_ERROR("R_to_sc is wrong")
+       ABI_ERROR("R_to_sc is wrong")
     end if
 
     R=[0,0,3]
@@ -653,7 +653,7 @@ contains
     if (.not. (  all(j_sc(1:3)==[4,1,10]) &
          .and. all(R_sc3(:,1)==[0,0,1]) &
          .and. all(R_sc3(:,3)==[0,0,1]) ) ) then
-       MSG_ERROR("Wrong trans_j_and_Rj")
+       ABI_ERROR("Wrong trans_j_and_Rj")
        err=1
     end if
     ABI_DEALLOCATE(ind_sc)
@@ -679,14 +679,14 @@ contains
     if (.not. all(maker%rvecs==reshape([0,  0,  0,  2,  3,  4,  3,  4,  4, &
          3,  4,  5,  4,  5,  5,  5,  6, 5, &
          5,  6,  6,  6,  7, 6,  8, 10, 10], [3, 8]))) then
-       MSG_ERROR("Wrong Rvecs found !")
+       ABI_ERROR("Wrong Rvecs found !")
        err=1
     end if
 
     ! test sc_cell
     sccell(:,:)=maker%sc_cell(transpose(reshape([1.d0,2.d0,3.d0,4.d0,5.d0,6.d0,3.d0,2.d0,3.d0], [3,3])))
     if (.not. all(abs(sccell-transpose(reshape([18,18, 24, 42, 45, 60, 57, 66, 87], [3,3])))<1e-4)) then
-       MSG_ERROR("Wrong cell paramter found !")
+       ABI_ERROR("Wrong cell paramter found !")
        err=1
     end if
 
@@ -694,7 +694,7 @@ contains
     ! test trans_xred
     call maker%trans_xred(reshape([0.1d0, 0.2d0, 0.3d0, 0.1d0, 0.4d0, 0.6d0], [3, 2]), scxred)
     if (.not. all(abs(scxred(:,18)-[1.0666666666666684,0.53333333333333277,0.70000000000000040])<1e-4)) then
-       MSG_ERROR("Wrong sc_xred !")
+       ABI_ERROR("Wrong sc_xred !")
        err=1
     end if
 
@@ -706,8 +706,8 @@ contains
   end function test2
 
   subroutine scmaker_unittest()
-    if (test1()/=0) MSG_ERROR("Supercell maker: Test1 Failed")
-    if (test2()/=0) MSG_ERROR("Supercell maker: Test2 Failed")
+    if (test1()/=0) ABI_ERROR("Supercell maker: Test1 Failed")
+    if (test2()/=0) ABI_ERROR("Supercell maker: Test2 Failed")
   end subroutine scmaker_unittest
 
 
@@ -728,7 +728,7 @@ contains
 !     R_sc_d(:)=R(:)
 !     call dgesv(3, 1, sc_mat, 3, ipriv, R_sc_d, 3, info)
 !     if ( info/=0 ) then
-!        MSG_ERROR("Failed to find R_sc")
+!        ABI_ERROR("Failed to find R_sc")
 !     end if
 
 !     ! if only diagonal of rlatt works.
@@ -760,7 +760,7 @@ contains
 !           return
 !        end if
 !     end do
-!     MSG_ERROR("BUG found. supercell_maker%find_supercell_index cannot find iatom_prim, rvec pair in supercell")
+!     ABI_ERROR("BUG found. supercell_maker%find_supercell_index cannot find iatom_prim, rvec pair in supercell")
 !   end function find_supercell_index
 
 !   !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic

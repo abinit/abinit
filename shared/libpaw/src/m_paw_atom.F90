@@ -103,7 +103,7 @@ subroutine atompaw_shpfun(ll,mesh,norm,pawtab,shapefunc)
 
  mesh_size=size(shapefunc)
  if (mesh_size>mesh%mesh_size) then
-   MSG_BUG('wrong size!')
+   ABI_BUG('wrong size!')
  end if
 
 !Index for shape function cut-off radius
@@ -280,7 +280,7 @@ end subroutine atompaw_shapebes
 
  mesh_size=size(ncore)
  if (mesh_size/=size(vhnzc).or.mesh_size>radmesh_core%mesh_size) then
-   MSG_BUG('wrong sizes!')
+   ABI_BUG('wrong sizes!')
  end if
 
  LIBPAW_ALLOCATE(nwk,(mesh_size))

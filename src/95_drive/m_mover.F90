@@ -430,7 +430,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
     end if
     INQUIRE(FILE=filename, EXIST=file_exists)
 
-    MSG_ERROR("This section has been disabled, ph_freez_disp is not defined in main ABINIT")
+    ABI_ERROR("This section has been disabled, ph_freez_disp is not defined in main ABINIT")
 
 ! XG 20200322 : The input variables ph_freez_disp are not documented neither tested, so they
 ! have been removed from the allowed list in the parser. Also, you should not be here !
@@ -491,7 +491,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
            write(msg,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())), ". Will exit itime loop in mover."
-           if(need_verbose) MSG_COMMENT(msg)
+           if(need_verbose) ABI_COMMENT(msg)
            if(need_verbose) call wrtout(ab_out, msg)
            timelimit_exit = 1
            exit
@@ -611,7 +611,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
            call scfcv_run(scfcv_args, itime, electronpositron, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
            if (conv_retcode == -1) then
                msg = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
-               MSG_WARNING(msg)
+               ABI_WARNING(msg)
            end if
 
          else
@@ -647,7 +647,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !            We set to false the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
-               MSG_WARNING("The simulation is diverging, please check your effective potential")
+               ABI_WARNING("The simulation is diverging, please check your effective potential")
              end if
 !            Set the flag to finish the simulation
              iexit=1
@@ -1933,7 +1933,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
 !    Open file for writing
      if (open_file('POSABIN',msg,unit=unpos,status='replace',form='formatted') /= 0 ) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
 !    Write Positions

@@ -58,7 +58,7 @@ contains
   subroutine dense_mat_t_initialize(self,  mshape)
     class(dense_mat_t), intent(inout) :: self
     integer, intent(in)::mshape(:)
-    if(size(mshape)/=2) MSG_ERROR("mshape should be size 2 for dense_mat_t")
+    if(size(mshape)/=2) ABI_ERROR("mshape should be size 2 for dense_mat_t")
     self%nrow=mshape(1)
     self%ncol=mshape(2)
     ABI_ALLOCATE(self%mshape, (2))

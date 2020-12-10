@@ -1834,7 +1834,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  if (.not.allocated(tetra%ibz)) call htetra_init_mapping_ibz(tetra)
 
  if (all(opt /= [1, 2])) then
-   MSG_ERROR(sjoin("Invalid opt:", itoa(opt)))
+   ABI_ERROR(sjoin("Invalid opt:", itoa(opt)))
  end if
 
  my_erange = [-huge(one), huge(one)]; if (present(erange)) my_erange = erange

@@ -651,7 +651,7 @@ contains
     write(message,'(a,i8,2a)')&
       & 'ERROR IN UPD_LIS0: ICELL_TOT = ',icell_tot,ch10,&
       & 'ERROR IN UPD_LIS0: RAISE ICELLX_A'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   endif
 
   !-- clears head vector & constructs head & list      
@@ -720,7 +720,7 @@ contains
     do while(iat > 0)
       i = list(iat) 
       do while(i  > 0) 
-        if(i==iat) MSG_ERROR("i==iat")
+        if(i==iat) ABI_ERROR("i==iat")
         call dist_pbc(tau0(:,i),tau0(:,iat))
         if(r2 < rcut2) then 
           nneig(iat) = nneig(iat) + 1
@@ -734,7 +734,7 @@ contains
       if(ANY(nneig(:) > lotfvar%nneigx))  then 
         write(message,'(a,i8,a)')&
           'UPD_LIS CLASSIC: max no. of neighbours: ',lotfvar%nneigx,' is too small'
-        MSG_ERROR(message)
+        ABI_ERROR(message)
       endif
 
 
@@ -746,7 +746,7 @@ contains
         i = head(icn) 
 
         do while(i>0)
-          if(i==iat) MSG_ERROR("i==iat")
+          if(i==iat) ABI_ERROR("i==iat")
           call dist_pbc(tau0(:,i),tau0(:,iat))
           if(r2 < rcut2) then 
             nneig(iat) = nneig(iat) + 1
@@ -759,7 +759,7 @@ contains
         if(ANY(nneig(:) > lotfvar%nneigx))  then 
           write(message,'(a,i8,a)')&
             'UPD_LIS CLASSIC: max no. of neighbours: ',lotfvar%nneigx,' is too small'
-          MSG_ERROR(message)
+          ABI_ERROR(message)
         endif
       enddo
 
@@ -845,7 +845,7 @@ contains
     iat = ibnd_mat(1,ibn)
     i   = ibnd_mat(2,ibn)
     if( (npract(iat) > 50).and.(npract(i) > 50) )then  
-      MSG_ERROR('LOTF: NPRACT 50 (A) ') 
+      ABI_ERROR('LOTF: NPRACT 50 (A) ') 
     endif
   enddo
 

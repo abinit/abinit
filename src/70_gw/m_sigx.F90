@@ -279,12 +279,12 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 &          "Symmetrization cannot be performed for spin: ",spin,ch10,&
 &          "band classification encountered the following problem: ",ch10,&
 &          TRIM(QP_sym(spin)%err_msg)
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
      end do
    end if
    if (nspinor == 2) then
-     MSG_WARNING('Symmetrization with nspinor=2 not implemented')
+     ABI_WARNING('Symmetrization with nspinor=2 not implemented')
    end if
  end if
 
@@ -305,7 +305,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  CASE (2)
    fact_sp=one; tol_empty=0.005 ! to be consistent and obtain similar results if a metallic
  CASE DEFAULT                    ! spin unpolarized system is treated using nsppol==2
-   MSG_BUG('Wrong nsppol')
+   ABI_BUG('Wrong nsppol')
  END SELECT
 
  ! Table for \Sigmax_ij matrix elements.
@@ -342,7 +342,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ABI_MALLOC(irottb,(gwx_nfftot,Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,gwx_ngfft,irottb,iscompatibleFFT)
  if (.not. iscompatibleFFT) then
-   MSG_WARNING("FFT mesh is not compatible with symmetries. Results might be affected by large errors!")
+   ABI_WARNING("FFT mesh is not compatible with symmetries. Results might be affected by large errors!")
  end if
 
  ABI_MALLOC(ktabr,(gwx_nfftot,Kmesh%nbz))
@@ -556,7 +556,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        do jb=ib1,ib2
 
          if (Psps%usepaw==1 .and. use_pawnhat==1) then
-           MSG_ERROR("use_pawnhat is disabled")
+           ABI_ERROR("use_pawnhat is disabled")
            i2=jb; if (nspinor==2) i2=(2*jb-1)
            spad=(nspinor-1)
 
@@ -757,7 +757,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        call hermitianize(sigxme_tmp(:,:,spin), "Upper")
      end do
    else
-     MSG_WARNING("Should hermitianize non-collinear sigma!")
+     ABI_WARNING("Should hermitianize non-collinear sigma!")
    end if
  end if
 

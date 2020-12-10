@@ -95,7 +95,7 @@ contains
 
     iproc=xmpi_comm_rank(xmpi_world)
     if (iproc/=0) then
-       MSG_ERROR("This function (CSR_MAT%set) should be only used on root node")
+       ABI_ERROR("This function (CSR_MAT%set) should be only used on root node")
     end if
 
     self%nnz=nnz

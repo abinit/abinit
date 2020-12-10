@@ -825,7 +825,7 @@ subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
 
  if (iiter == niter+1) then
    write (message,'(a,i6,a,E20.10)') 'deloc2xcart : Error, xcart not converged in ', niter, 'iterations ', tot_diff
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(DEBUG)then
@@ -1612,13 +1612,13 @@ end subroutine xcart2deloc
    write(std_out,*) 'Error: 3 lowest eigenvalues are not zero'
    write(std_out,*) '  internal coordinates do NOT span the full degrees of freedom !'
    write(std_out,'(6E16.6)') f_eigs
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
  if ( abs(f_eigs(4)) < tol10 ) then
    write(std_out,*) 'Error: fourth eigenvalue is zero'
    write(std_out,*) '  internal coordinates do NOT span the full degrees of freedom !'
    write(std_out,'(6E16.6)') f_eigs
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
 !calculate U matrix from U = B * S_red * lambda^{-1/2}

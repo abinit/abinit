@@ -153,7 +153,7 @@ CONTAINS
  n1dim=size(cprj,dim=1);n2dim=size(cprj,dim=2);nn=size(nlmn,dim=1)
  if (nn/=n1dim) then
    write(msg,*) 'wrong sizes (pawcprj_alloc)! :',nn,n1dim
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  do jj=1,n2dim
@@ -339,15 +339,15 @@ end subroutine pawcprj_set_zero
 
  if (n1dim_in/=n1dim_out) then
    write(msg,'(a,2(1x,i0))')" Error in pawcprj_copy: n1 wrong sizes ",n1dim_in,n1dim_out
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (n2dim_in/=n2dim_out) then
    write(msg,'(a,2(1x,i0))')" Error in pawcprj_copy: n2 wrong sizes ",n2dim_in,n2dim_out
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (ncpgr_in<ncpgr_out)  then
    write(msg,'(a,2(1x,i0))')" Error in pawcprj_copy: ncpgr wrong sizes ",ncpgr_in,ncpgr_out
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Check if icgr is present and if dcp have to be copy
@@ -446,7 +446,7 @@ end subroutine pawcprj_copy
    if (n2dimx/=n2dimy) msg = TRIM(msg)//"Error in pawcprj_axpby: n2 wrong sizes !"//ch10
    if (ncpgrx/=ncpgry) msg = TRIM(msg)//"Error in pawcprj_axpby: ncpgr wrong sizes !"//ch10
    if (LEN_TRIM(msg) > 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  else
    n1dimx=0;n2dimx=0;ncpgrx=0
@@ -570,7 +570,7 @@ end subroutine pawcprj_axpby
    if (n2dimx/=n2dimy) msg = TRIM(msg)//"Error in pawcprj_zaxpby: n2 wrong sizes !"//ch10
    if (ncpgrx/=ncpgry) msg = TRIM(msg)//"Error in pawcprj_zaxpby: ncpgr wrong sizes !"//ch10
    if (LEN_TRIM(msg) > 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -935,7 +935,7 @@ end subroutine pawcprj_conjg
  if (n2in/=n2out*nn) msg = TRIM(msg)//"Bug in pawcprj_lincom: n2 wrong sizes!"//ch10
  if (ncpgrin/=ncpgrout) msg = TRIM(msg)//"Bug in pawcprj_lincom: ncpgr wrong sizes!"//ch10
  if (LEN_TRIM(msg) > 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  do jj=1,n2out
@@ -1122,11 +1122,11 @@ end subroutine pawcprj_output
  has_icpgr=(icpgr_>0.and.icpgr_<=ncpgr_)
  if (present(icpgr).and.(.not.present(ncpgr))) then
    msg='ncpgr must be present when icpgr is present (pawcprj_get)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (has_icpgr.and.cprj_k(1,1)%ncpgr<1) then
    msg='cprj_k%ncpgr not consistent with icpgr (pawcprj_get)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !MPI data
@@ -1134,7 +1134,7 @@ end subroutine pawcprj_output
  if (has_distrb) then
    if (.not.present(mpicomm)) then
      msg='mpicomm must be present when proc_distrb is present (pawcprj_get)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    me=xmpi_comm_rank(mpicomm)
  end if
@@ -1145,7 +1145,7 @@ end subroutine pawcprj_output
      read(uncp) nband0
      if (nband_k/=nband0) then
        msg='_PAW file was not created with the right options (pawcprj_get)!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
 
@@ -1352,7 +1352,7 @@ end subroutine pawcprj_get
  if (has_distrb) then
    if (.not.present(mpicomm)) then
      msg='mpicomm must be present when proc_distrb is present (pawcprj_put)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    me=xmpi_comm_rank(mpicomm)
  end if
@@ -1542,7 +1542,7 @@ end subroutine pawcprj_put
 
  if (n1cprj/=n1atindx) then
    msg='wrong sizes (pawcprj_reorder)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Nothing to do when the atoms are already sorted
@@ -1664,7 +1664,7 @@ subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,re
  if (rank/=sender.and.rank/=receiver) then
    write(msg,'(a,3i0)') &
 &   'rank is not equal to sender or receiver (pawcprj_mpi_exch): ',rank, sender, receiver
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ntotcp=n2dim*SUM(nlmn(:))
@@ -1779,15 +1779,15 @@ subroutine pawcprj_mpi_send(natom,n2dim,nlmn,ncpgr,cprj_out,receiver,spaceComm,i
 
  if (nn/=n1dim) then
    msg='size mismatch in natom (pawcprj_mpi_send)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (t2dim/=n2dim) then
    msg='size mismatch in dim=2 (pawcprj_mpi_send)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (tcpgr/=ncpgr) then
    msg='size mismatch in ncpgr (pawcprj_mpi_send)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ntotcp=n2dim*SUM(nlmn(:))
@@ -1890,15 +1890,15 @@ subroutine pawcprj_mpi_recv(natom,n2dim,nlmn,ncpgr,cprj_in,sender,spaceComm,ierr
 
  if (nn/=n1dim) then
    msg='size mismatch in natom (pawcprj_mpi_recv)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (t2dim/=n2dim) then
    msg='size mismatch in dim=2 (pawcprj_mpi_recv)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (tcpgr/=ncpgr) then
    msg='size mismatch in ncpgr (pawcprj_mpi_recv)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ntotcp=n2dim*SUM(nlmn(:))
@@ -2099,23 +2099,23 @@ subroutine pawcprj_mpi_allgather(cprj_loc,cprj_gat,natom,n2dim,n2std,nlmn,ncpgr,
 
  if (nn/=n1dim) then
    msg='size mismatch in natom (pawcprj_mpi_allgather)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (t2dim/=n2dim) then
    msg='size mismatch in dim=2 (pawcprj_mpi_allgather)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (tg2dim/=n2dim*nproc) then
    msg='size mismatch in dim=2 (pawcprj_mpi_allgather)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (tcpgr/=ncpgr) then
    msg='size mismatch in ncpgr (pawcprj_mpi_allgather)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (mod(n2dim,n2std)/=0) then
    msg='n2std should divide n2dim (pawcprj_mpi_allgather)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  rank_ordered_=.false.;if(present(rank_ordered)) rank_ordered_=rank_ordered
@@ -2226,7 +2226,7 @@ subroutine pawcprj_bcast(Cprj,natom,n2dim,nlmn,ncpgr,master,spaceComm,ierr)
  n1dim=size(Cprj,dim=1)
  if (nn/=n1dim) then
    msg='size mismatch in natom (pawcprj_bcast)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ntotcp=n2dim*SUM(nlmn(:))
@@ -2365,7 +2365,7 @@ end subroutine pawcprj_bcast
 &   size21==natom.and.size22==nbb*bpp*nspinor) then
  else
    msg='wrong cprjin/cprjout sizes (pawcprj_transpose)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Compute size of atom bloc (wr to cprj)
@@ -2476,7 +2476,7 @@ end subroutine pawcprj_bcast
      end if
      if (buf_indx/=sbufsize) then
        msg='wrong buffer size for sending (pawcprj_transpose)!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
 
 !    Main call to MPI_ALLTOALL
@@ -2508,7 +2508,7 @@ end subroutine pawcprj_bcast
      end if
      if (buf_indx/=rbufsize) then
        msg='wrong buffer size for receiving (pawcprj_transpose)!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
 
 !    Deallocation of buffers
@@ -2587,7 +2587,7 @@ end subroutine pawcprj_bcast
  n2dim_gat=size(cprj_gat,dim=2)
  if (n2dim_gat/=(nspinortot/nspinor)*n2dim) then
    msg='wrong dims (pawcprj_gather_spin)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  do iatom=1,natom
@@ -2716,7 +2716,7 @@ subroutine pawcprj_getdim(dimcprj,natom,nattyp,ntypat,typat,Pawtab,sort_mode)
 
  CASE DEFAULT
   msg='Wrong value for sort_mode: '//TRIM(sort_mode)
-  MSG_ERROR(msg)
+  ABI_ERROR(msg)
  END SELECT
 
 end subroutine pawcprj_getdim
@@ -2771,7 +2771,7 @@ function paw_overlap(cprj1,cprj2,typat,pawtab,spinor_comm) result(onsite)
 
  if (SIZE(cprj1,DIM=1)/=SIZE(cprj2,DIM=1) .or. SIZE(cprj1,DIM=1)/=natom) then
    write(msg,'(a,3i4)')' Wrong size in typat, cprj1, cprj2 : ',natom,SIZE(cprj1),SIZE(cprj2)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  nspinor = SIZE(cprj1,DIM=2)
@@ -2865,11 +2865,11 @@ subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
 
  if (natom/=n1dim) then
    msg='size mismatch in natom (pawcprj_pack)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (n2dim*SUM(nlmn)/=n2buffer) then
    msg='size mismatch in dim=2 (pawcprj_pack)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  ncpgr=0
  if (present(buffer_gr)) then
@@ -2944,11 +2944,11 @@ subroutine pawcprj_unpack(nlmn,cprj,buffer,buffer_gr)
 
  if (natom/=n1dim) then
    msg='size mismatch in natom (pawcprj_unpack)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (n2dim*SUM(nlmn)/=n2buffer) then
    msg='size mismatch in dim=2 (pawcprj_unpack)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  ncpgr=0
  if (present(buffer_gr)) then

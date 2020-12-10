@@ -372,7 +372,7 @@ subroutine em1results_print(Er,unit,prtvol,mode_paral)
  CASE (4)
    rfname='Symmetrical Inverse Dielectric Matrix'
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong Er%ID:',itoa(Er%ID)))
+   ABI_BUG(sjoin('Wrong Er%ID:',itoa(Er%ID)))
  END SELECT
 
  ! For chi, \espilon or \epsilon^{-1}, define the approximation.
@@ -398,7 +398,7 @@ subroutine em1results_print(Er,unit,prtvol,mode_paral)
 !   write(msg,'(4a,i3)')ch10,&
 !&   ' em1results_print : BUG - ',ch10,&
 !&   ' Wrong value of Er%test_type = ',Er%test_type
-!   MSG_ERROR(msg)
+!   ABI_ERROR(msg)
 !  end if
 ! end if
 
@@ -411,13 +411,13 @@ subroutine em1results_print(Er,unit,prtvol,mode_paral)
  else if (Er%Tordering==3) then
    rforder='Retarded'
  else
-   MSG_BUG(sjoin('Wrong er%tordering= ',itoa(Er%Tordering)))
+   ABI_BUG(sjoin('Wrong er%tordering= ',itoa(Er%Tordering)))
  end if
 
  kxcname='None'
  if (Er%ikxc/=0) then
    !TODO Add function to retrieve kxc name
-   MSG_ERROR('Add function to retrieve kxc name')
+   ABI_ERROR('Add function to retrieve kxc name')
    kxcname='XXXXX'
  end if
 
@@ -824,7 +824,7 @@ subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
      write(msg,'(3a,i6)')&
 &      'Some complex frequencies are too small to qualify as real or imaginary.',ch10,&
 &      'Number of unidentified frequencies = ', unclassified
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end if
 
@@ -835,7 +835,7 @@ subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
      write(msg,'(a,i8,2a,i8)')&
 &     'Number of G-vectors saved on file is less than the value required = ',npwe_asked,ch10,&
 &     'Calculation will proceed with Max available npwe = ',Er%Hscr%npwe
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    else  ! Redefine the no. of G"s for W.
      Er%npwe=npwe_asked
    end if
@@ -941,14 +941,14 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
      if (iomode == IO_MODE_MPI) then
        !call wrtout(std_out, "read_screening with MPI_IO")
-       MSG_WARNING("SUSC files is buggy. Using Fortran IO")
+       ABI_WARNING("SUSC files is buggy. Using Fortran IO")
        call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
      else
        call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm)
      end if
    else
      ! Out-of-core solution ===
-     MSG_COMMENT("mqmem==0 => allocating a single q-slice of (W|chi0) (slower but less memory).")
+     ABI_COMMENT("mqmem==0 => allocating a single q-slice of (W|chi0) (slower but less memory).")
      continue
    end if
 
@@ -972,7 +972,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 #endif
        else
          if (open_file(ofname,msg,newunit=unt_dump,form="unformatted",status="unknown",action="write") /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
        end if
        call wrtout(std_out,sjoin('mkdump_Er: calculating and writing epsilon^-1 matrix on file: ',ofname),'COLL')
@@ -999,7 +999,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          if (normv(Er%qibz(:,iqibz),gmet,'G')<GW_TOLQ0) is_qeq0=1
          ! FIXME there's a problem with SUSC files and MPI-IO
          !if (iomode == IO_MODE_MPI) then
-         !  MSG_WARNING("SUSC files is buggy. Using Fortran IO")
+         !  ABI_WARNING("SUSC files is buggy. Using Fortran IO")
          !  call read_screening(in_varname,Er%fname,npwe,1,Er%nomega,epsm1,IO_MODE_FORTRAN,comm_self,iqiA=iqibz)
          !else
          call read_screening(in_varname,Er%fname,npwe,1,Er%nomega,epsm1,iomode,comm_self,iqiA=iqibz)
@@ -1011,12 +1011,12 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          ABI_MALLOC(dummy_head,(dim_wing,dim_wing,Er%nomega))
 
          if (approx_type<2 .or. approx_type>3) then ! bootstrap
-           MSG_WARNING('Entering out-of core RPA or Kxc branch')
+           ABI_WARNING('Entering out-of core RPA or Kxc branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                    approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
 &                    dummy_lwing,dummy_uwing,epsm1,spectra,comm_self)
          else
-           MSG_WARNING('Entering out-of core fxc_ADA branch')
+           ABI_WARNING('Entering out-of core fxc_ADA branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                    approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
 &                    dummy_lwing,dummy_uwing,epsm1,spectra,comm_self,fxc_ADA(:,:,iqibz))
@@ -1071,7 +1071,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ! FIXME there's a problem with SUSC files and MPI-IO
      !if (iomode == IO_MODE_MPI) then
      !  !call wrtout(std_out, "read_screening with MPI_IO")
-     !  MSG_WARNING("SUSC files is buggy. Using Fortran IO")
+     !  ABI_WARNING("SUSC files is buggy. Using Fortran IO")
      !  call read_screening(in_varname,Er%fname,npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
      !else
      call read_screening(in_varname,Er%fname,npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm)
@@ -1086,12 +1086,12 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        ABI_MALLOC(dummy_head,(dim_wing,dim_wing,Er%nomega))
 
        if (approx_type<2 .or. approx_type>3) then
-         MSG_WARNING('Entering in-core RPA and Kxc branch')
+         ABI_WARNING('Entering in-core RPA and Kxc branch')
          call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
 &                  dummy_lwing,dummy_uwing,Er%epsm1(:,:,:,iqibz),spectra,comm)
        else
-         MSG_WARNING('Entering in-core fxc_ADA branch')
+         ABI_WARNING('Entering in-core fxc_ADA branch')
          call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
 &                  dummy_lwing,dummy_uwing,Er%epsm1(:,:,:,iqibz),spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
@@ -1189,7 +1189,7 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
    ! FIXME there's a problem with SUSC files and MPI-IO
    !if (iomode == IO_MODE_MPI) then
    !  !write(std_out,*)"read_screening with iomode",iomode,"file: ",trim(er%fname)
-   !  MSG_WARNING("SUSC files is buggy. Using Fortran IO")
+   !  ABI_WARNING("SUSC files is buggy. Using Fortran IO")
    !  call read_screening(em1_ncname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm,iqiA=iqibzA)
    !else
    call read_screening(em1_ncname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm,iqiA=iqibzA)
@@ -1200,12 +1200,12 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
      !call em1results_print(Er)
      return
    else
-     MSG_ERROR(sjoin('Wrong Er%ID', itoa(er%id)))
+     ABI_ERROR(sjoin('Wrong Er%ID', itoa(er%id)))
    end if
 
  case default
    ! In-core solution.
-   MSG_ERROR("you should not be here")
+   ABI_ERROR("you should not be here")
  end select
 
  DBG_EXIT("COLL")
@@ -1275,7 +1275,7 @@ subroutine decompose_epsm1(Er,iqibz,eigs)
      !for the moment no sort, maybe here I should sort using the real part?
      call ZGEES('V','N',sortcplx,npwe,Afull,npwe,sdim,wwc,vs,npwe,work,lwork,rwork,bwork,info)
      if (info/=0) then
-       MSG_ERROR(sjoin("ZGEES returned info:",itoa(info)))
+       ABI_ERROR(sjoin("ZGEES returned info:",itoa(info)))
      end if
 
      eigs(:,iw)=wwc(:)
@@ -1307,14 +1307,14 @@ subroutine decompose_epsm1(Er,iqibz,eigs)
      ! For the moment we require also the eigenvectors.
      call ZHPEV('V','U',npwe,Adpp,ww,eigvec,npwe,work,rwork,info)
      if (info/=0) then
-       MSG_ERROR(sjoin('ZHPEV returned info=', itoa(info)))
+       ABI_ERROR(sjoin('ZHPEV returned info=', itoa(info)))
      end if
 
      negw=(COUNT((REAL(ww)<tol6)))
      if (negw/=0) then
        write(msg,'(a,i5,a,i3,a,f8.4)')&
         'Found negative eigenvalues. No. ',negw,' at iqibz= ',iqibz,' minval= ',MINVAL(REAL(ww))
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
 
      eigs(:,iw)=ww(:)
@@ -1448,7 +1448,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  DBG_ENTER("COLL")
 
  if (nI/=1.or.nJ/=1) then
-   MSG_ERROR("nI or nJ=/1 not yet implemented")
+   ABI_ERROR("nI or nJ=/1 not yet implemented")
  end if
 
  nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1554,7 +1554,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      write(msg,'(a,i4,3a)')&
 &     'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &     'Enlarge the FFT mesh to get rid of this problem. '
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    !FIXME "recheck TDDFT code and parallel"
@@ -1580,10 +1580,10 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
  CASE (2)
    ! ADA nonlocal vertex correction contained in fxc_ADA
-   MSG_WARNING('Entered fxc_ADA branch: EXPERIMENTAL!')
+   ABI_WARNING('Entered fxc_ADA branch: EXPERIMENTAL!')
    ! Test that argument was passed
    if (.not.present(fxc_ADA)) then
-     MSG_ERROR('make_epsm1_driver was not called with optional argument fxc_ADA')
+     ABI_ERROR('make_epsm1_driver was not called with optional argument fxc_ADA')
    end if
    ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
 
@@ -1678,7 +1678,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
        end do
      else
        write(msg,'(a,i4,a)') ' -> bootstrap fxc not converged after ', nstep, ' iterations'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        ! proceed to calculate the dielectric function even if fxc is not converged
        chi0 = chi0_save
        do io=1,nomega
@@ -1830,7 +1830,7 @@ CASE(6)
    end do
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong approx_type:',itoa(approx_type)))
+   ABI_BUG(sjoin('Wrong approx_type:',itoa(approx_type)))
  END SELECT
 
  if (use_MPI) then
@@ -1961,7 +1961,7 @@ subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,ch
  ABI_UNUSED(chi0_head(1,1))
 
  if (nI/=1.or.nJ/=1) then
-   MSG_ERROR("nI or nJ=/1 not yet implemented")
+   ABI_ERROR("nI or nJ=/1 not yet implemented")
  end if
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -2121,7 +2121,7 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
  ABI_UNUSED(chi0_uwing(1,1))
 
  if (nI/=1.or.nJ/=1) then
-   MSG_ERROR("nI or nJ=/1 not yet implemented")
+   ABI_ERROR("nI or nJ=/1 not yet implemented")
  end if
 
  ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
@@ -2201,7 +2201,7 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
    end do
 
  case default
-   MSG_BUG(sjoin('Wrong option_test:',itoa(option_test)))
+   ABI_BUG(sjoin('Wrong option_test:',itoa(option_test)))
  end select
 
  ABI_FREE(chitmp)
@@ -2440,7 +2440,7 @@ subroutine lebedev_laikov_int()
 
 ! *************************************************************************
 
- MSG_ERROR("lebedev_laikov_int is still under development")
+ ABI_ERROR("lebedev_laikov_int is still under development")
 
  !tensor=RESHAPE((/4.0,2.0,4.0,0.5,2.1,0.0,5.4,2.1,5.0/),(/3,3/))
  tensor=RESHAPE((/4.0,0.0,0.0,0.0,4.0,0.0,0.0,0.0,5.0/),(/3,3/))
@@ -2511,7 +2511,7 @@ subroutine lebedev_laikov_int()
  ABI_FREE(expd_func)
  ABI_FREE(ref_func)
 
- MSG_ERROR("Exiting from lebedev_laikov_int")
+ ABI_ERROR("Exiting from lebedev_laikov_int")
 
 end subroutine lebedev_laikov_int
 !!***
@@ -2621,7 +2621,7 @@ function ylmstar_wtq_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
 
 ! *************************************************************************
 
- MSG_ERROR("Work in progress")
+ ABI_ERROR("Work in progress")
  ! box_len has to be tested
 
  gprimd = RESHAPE(real_pars(1:9),(/3,3/))
@@ -2762,7 +2762,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  call get_bz_item(Qmesh,iq_bz,qpt_bz,iq_ibz,isym_q,itim_q,ph_mqbzt,umklp,isirred)
 
  !if (itim_q/=1.or.isym_q/=1.or.ANY(umklp/=0) ) then
- !  MSG_ERROR("Bug in mdielf_bechstedt")
+ !  ABI_ERROR("Bug in mdielf_bechstedt")
  !end if
  !
  ! Symmetrize Vc in the full BZ.
@@ -2809,7 +2809,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
          em1_qpg2r(ifft) = one / mdielf_bechstedt(eps_inf,qpg2_nrm,rhor(ifft,1))
        end do
      case default
-       MSG_ERROR(sjoin("Unknown model_type:",itoa(model_type)))
+       ABI_ERROR(sjoin("Unknown model_type:",itoa(model_type)))
      end select
 
      call fourdp(cplex1,fofg,em1_qpg2r,-1,MPI_enreg_seq,nfft,1,ngfft,tim_fourdp0)
@@ -3030,7 +3030,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
  if (my_rank == master) then
    if (iomode == IO_MODE_FORTRAN) then
      if (open_file(path,msg,newunit=unt,form="unformatted", action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      !call hscr_io(er%hscr,fform,rdwr,unt,comm,master,iomode)
      do iw=1,nomega
@@ -3044,7 +3044,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
      !end do
 
    else
-     MSG_ERROR(sjoin("iomode", itoa(iomode), "is not supported"))
+     ABI_ERROR(sjoin("iomode", itoa(iomode), "is not supported"))
    end if
  end if
 
@@ -3063,7 +3063,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
      !  write(unt)chi0_uwing(:,iw,:)
      !end do
    else
-     MSG_ERROR(sjoin("iomode:", itoa(iomode), "is not supported"))
+     ABI_ERROR(sjoin("iomode:", itoa(iomode), "is not supported"))
    end if
  end if
 
@@ -3167,13 +3167,13 @@ subroutine lwl_init(lwl, path, method, cryst, vcp, npwe, gvec, comm)
    select case (iomode)
    case (IO_MODE_FORTRAN)
      if (open_file(path, msg, newunit=unt, action="read", form="unformatted", status="old") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      close(unt)
 
    case default
-     MSG_ERROR(sjoin("iomode:", itoa(iomode), "is not coded"))
+     ABI_ERROR(sjoin("iomode:", itoa(iomode), "is not coded"))
    end select
  end if
 

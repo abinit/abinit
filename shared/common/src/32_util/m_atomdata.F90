@@ -591,7 +591,7 @@ subroutine atomdata_from_symbol(atom,symbol)
  case('Xx')
    amu=     260.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=104
  case default
-   MSG_ERROR(sjoin("Unknown element symbol: `",trim(symbol), "`"))
+   ABI_ERROR(sjoin("Unknown element symbol: `",trim(symbol), "`"))
  end select
 
  atom%znucl = znucl

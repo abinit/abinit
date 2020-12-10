@@ -134,14 +134,14 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !   write(msg,'(3a,i0)')&
 !&   'The argument option should be 1 or 2,',ch10,&
 !&   'however, option=',option
-!   MSG_BUG(msg)
+!   ABI_BUG(msg)
 ! end if
 !
 ! if (sizein<1) then
 !   write(msg,'(3a,i0)')&
 !&   'The argument sizein should be a positive number,',ch10,&
 !&   'however, sizein=',sizein
-!   MSG_ERROR(msg)
+!   ABI_ERROR(msg)
 ! end if
 
  DBG_EXIT("COLL")
@@ -293,7 +293,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
 !     case default
 !     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
-!     !  MSG_ERROR(message)
+!     !  ABI_ERROR(message)
 !     end select
 !
 !     !update the new suggested rprimd and or acell in the history record
@@ -363,7 +363,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
 !     case default
 !     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
-!     !  MSG_ERROR(message)
+!     !  ABI_ERROR(message)
 !     end select
 !
 !     !update the new suggested rprimd/acell in the history record

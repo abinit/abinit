@@ -495,7 +495,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      write(msg,'(2(a,i10))') &
      'Wrong cprj size! actual size = ',size(cprj_jband),&
      ' good size = ',nband_k*gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
  if (size(cwaveprj)/=0) then
@@ -503,7 +503,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      write(msg,'(2(a,i10))') &
      'Wrong cwaveprj size! actual size = ',size(cwaveprj),&
      ' good size = ',gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -768,7 +768,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  else
 
    h_cwave = zero
-   MSG_ERROR(" rf2_apply_hamiltonian can be used only for: 0<=ipert<=natom+2 and natom+10<=ipert<=2*natom+11.")
+   ABI_ERROR(" rf2_apply_hamiltonian can be used only for: 0<=ipert<=natom+2 and natom+10<=ipert<=2*natom+11.")
    return
 
  end if

@@ -196,7 +196,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  mtypalch=psps%mtypalch
  npsp=psps%npsp
  if (npsp>npspmax) then
-   MSG_BUG("npsp>npspmax in pspini !")
+   ABI_BUG("npsp>npspmax in pspini !")
  end if
 
 !Size of grids for atomic data represented in reciprocal space
@@ -362,7 +362,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
          call pspatm(dq,dtset,dtfil,ekb,epsatm(ipsp),ffspl,indlmn,ipsp,&
            pawrad(ipsp),pawtab(ipsp),psps,vlspl,dvlspl,xcccrc,xccc1d,nctab_dum,comm_mpi=comm_mpi_)
          if (dtset%usefock==1.and.pawtab(ipsp)%has_fock==0) then
-           MSG_BUG('The PAW data file does not contain Fock information. Change the PAW data file!')
+           ABI_BUG('The PAW data file does not contain Fock information. Change the PAW data file!')
          end if
        end if
 
@@ -494,7 +494,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
        if (abs(xcccrc) > tol6) then
          write(std_out, *)"xcccrc", xcccrc
-         MSG_WARNING("Alchemical pseudopotential with nlcc!")
+         ABI_WARNING("Alchemical pseudopotential with nlcc!")
        end if
 
 !      Combine the different non-local projectors : for the scalar part then
@@ -515,7 +515,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
                        ilmn=ilmn+1         ! increment the counter
                        iproj=iproj+1       ! increment the counter, this does not work for PAW
                        if(ilmn>psps%lmnmax)then
-                         MSG_BUG('Problem with the alchemical pseudopotentials : ilmn>lmnmax.')
+                         ABI_BUG('Problem with the alchemical pseudopotentials : ilmn>lmnmax.')
                        end if
                        psps%indlmn(1,ilmn,itypat)=ilang
                        psps%indlmn(2,ilmn,itypat)=indlmn_alch(2,ilmn0,ipspalch)
@@ -629,7 +629,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  if (abs(dtset%prtpsps) == 1) then
    if (xmpi_comm_rank(xmpi_world) == 0) call psps_ncwrite(psps, trim(dtfil%filnam_ds(4))//"_PSPS.nc")
    if (dtset%prtpsps == -1) then
-     MSG_ERROR_NODUMP("prtpsps == -1 ==> aborting now")
+     ABI_ERROR_NODUMP("prtpsps == -1 ==> aborting now")
    end if
  end if
 
@@ -868,7 +868,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
        'Dimension of q-grid for nl form factors (mqgrid_ff)',ch10,&
        'is different from dimension of q-grid for Vloc (mqgrid_vl) !',ch10,&
        'This is not allowed for norm-conserving psp.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write(msg, '(a,t38,a)' )'- pspatm: opening atomic psp file',trim(psps%filpsp(ipsp))
@@ -888,7 +888,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      !    These three first lines have a similar format in all allowed psp files
      !    Open atomic data file (note: formatted input file)
      if (open_file(psps%filpsp(ipsp), msg, unit=tmp_unit, form='formatted', status='old') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      rewind (unit=tmp_unit,err=10,iomsg=errmsg)
 
@@ -943,7 +943,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 #else
      write(msg,'(a,a)')  &
        'ABINIT is not compiled with XML support for reading this type of pseudopotential ', trim(psps%filpsp(ipsp))
-     MSG_BUG(msg)
+     ABI_BUG(msg)
 #endif
 ! END useless
    else if (usexml == 1 .and. xmlpaw == 1) then
@@ -968,7 +968,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
    else if (useupf == 1) then
      if (psps%usepaw /= 0) then
-       MSG_ERROR("UPF format not allowed with PAW (USPP part not read yet)")
+       ABI_ERROR("UPF format not allowed with PAW (USPP part not read yet)")
      end if
 
      pspcod = 11
@@ -979,7 +979,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
        psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
 
    else
-     MSG_ERROR("You should not be here! erroneous type or pseudopotential input")
+     ABI_ERROR("You should not be here! erroneous type or pseudopotential input")
    end if
 
 !  ------------------------------------------------------------------------------
@@ -999,7 +999,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
         'Pseudopotential file cannot give spin-orbit characteristics,',ch10,&
         'while pspso(itypat)= ',psps%pspso(ipsp),'.',ch10,&
         'Action: check your pseudopotential and input files for consistency.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 
@@ -1010,7 +1010,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
       'does not equal input znuclpsp: ',psps%znuclpsp(ipsp),' better than 1e-08 .',ch10,&
       'znucl is read from the psp file in pspatm, while',ch10,&
       'znuclpsp is read in iofn2.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  Is the highest angular momentum within limits?
@@ -1020,20 +1020,20 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      write(msg, '(a,i0,a,i0,a,a)' )&
      'input lmax+1: ',lmax+1,' exceeds mpsang: ',psps%mpsang,ch10,&
      'indicates input lmax too large for dimensions.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  Check several choices for ixc against pspxc
 !  ixc is from ABINIT code; pspxc is from atomic psp file
    if (dtset%ixc==0) then
-     MSG_WARNING('Note that input ixc=0 => no xc is being used.')
+     ABI_WARNING('Note that input ixc=0 => no xc is being used.')
    else if(dtset%ixc/=pspxc) then
      write(msg, '(a,i0,a,i0,8a)' )&
       'Pseudopotential file pspxc: ',pspxc,', not equal to input ixc: ',dtset%ixc,'.',ch10,&
       'These parameters must agree to get the same xc in ABINIT code as in psp construction.',ch10,&
       'Action: check psp design or input file.',ch10,&
       'Assume experienced user. Execution will continue.'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    if (lloc>lmax .and. pspcod/=4 .and. pspcod/=8 .and. pspcod/=10) then
@@ -1041,7 +1041,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
       'lloc,lmax=',lloc,lmax,ch10,&
       'chosen l of local psp exceeds range from input data.',ch10,&
       'Action: check pseudopotential input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  Does the pspcod agree with type of calculation (paw or not)?
@@ -1049,7 +1049,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      write(msg, '(a,i0,a,a,i0,a)' )&
       'In reading atomic psp file, finds pspcod= ',pspcod,ch10,&
       'This is not an allowed value with usepaw= ',psps%usepaw,'.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    if (.not.psps%vlspl_recipSpace .and. (pspcod /= 2 .and. pspcod /= 3 .and. pspcod /= 10 .and. pspcod /= 7)) then
@@ -1059,7 +1059,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      write(msg, '(a,i0,2a)' )&
       'In reading atomic psp file, finds pspcod=',pspcod,ch10,&
       'This is not an allowed value with real space computation.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  MJV 16/6/2009 added pspcod 11 for upf format
@@ -1068,7 +1068,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
       'In reading atomic psp file, finds pspcod= ',pspcod,ch10,&
       'This is not an allowed value. Allowed values are 1 to 11 .',ch10,&
       'Action: check pseudopotential input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  -----------------------------------------------------------------------
@@ -1158,7 +1158,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 #else
      write(msg,'(2a)')  &
        'ABINIT is not compiled with XML support for reading this type of pseudopotential ', trim(psps%filpsp(ipsp))
-     MSG_BUG(msg)
+     ABI_BUG(msg)
 #endif
 
    else if (pspcod==10)then
@@ -1253,7 +1253,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
      write (filnam, '(a,i0,a)') trim(dtfil%fnameabo_pspdata), ipsp, ".dat"
      if (open_file(filnam, msg, newunit=unt) /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      write (unt,*) '# Pseudopotential data in reciprocal space as used by ABINIT'
      write (unt,'(a)', ADVANCE='NO') '# index       vlocal   '
@@ -1273,7 +1273,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
      write (filnam, '(a,i0,a)') trim(dtfil%fnameabo_nlcc_derivs), ipsp, ".dat"
      if (open_file(filnam, msg, newunit=unt) /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      write (unt,*) '# Non-linear core corrections'
      write (unt,*) '#  r, pseudocharge, 1st, 2nd, 3rd, 4th, 5th derivatives'
@@ -1340,7 +1340,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine pspatm
 !!***
@@ -1518,7 +1518,7 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
 
  if ( ierr /= 0 ) then
    write(msg,'(a,a,a,i8)') "Error writing pseudopotential information", ch10, "IOSTAT=", ierr
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine psp_dump_outputs

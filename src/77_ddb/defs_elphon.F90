@@ -1322,7 +1322,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 
      FSfullpqtofull(ikpt_phon,iqpt) = krank%invrank(symrankkpt_phon)
      if (FSfullpqtofull(ikpt_phon, iqpt) == -1) then
-       MSG_ERROR("looks like no kpoint equiv to k+q !!!")
+       ABI_ERROR("looks like no kpoint equiv to k+q !!!")
      end if
 
    end do
@@ -1337,7 +1337,7 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 
      mqtofull(iqpt) = krank%invrank(symrankkpt_phon)
      if (mqtofull(iqpt) == -1) then
-       MSG_ERROR("looks like no kpoint equiv to -q !!!")
+       ABI_ERROR("looks like no kpoint equiv to -q !!!")
      end if
    end do
  end if
@@ -1358,14 +1358,14 @@ subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_
 
      symrankkpt_phon = krank%get_rank(tmpkpt)
      if (krank%invrank(symrankkpt_phon) == -1) then
-       MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!!!")
+       ABI_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!!!")
      end if
      qpttoqpt(1,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
 
      tmpkpt = -tmpkpt
      symrankkpt_phon = krank%get_rank(tmpkpt)
      if (krank%invrank(symrankkpt_phon) == -1) then
-       MSG_ERROR('looks like no kpoint equiv to q by symmetry with time reversal!!!')
+       ABI_ERROR('looks like no kpoint equiv to q by symmetry with time reversal!!!')
      end if
      qpttoqpt(2,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
    end do

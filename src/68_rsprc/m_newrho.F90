@@ -253,35 +253,35 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 !Compatibility tests
  if(nfftmix>nfft) then
    message='nfftmix>nfft not allowed!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(dtset%usewvl==1) then
    if( (ispmix/=1 .or. nfftmix/=nfft)) then
      message='nfftmix/=nfft, ispmix/=1 not allowed for wavelets!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if(dtset%wvl_bigdft_comp==1) then
      message='usewvl == 1 and wvl_bigdft_comp==1 not allowed!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
  if(ispmix/=2.and.nfftmix/=nfft) then
    message='nfftmix/=nfft allowed only when ispmix=2!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (dtset%usekden==1) then
    if ((.not.present(tauresid)).or.(.not.present(taug)).or. &
 &      (.not.present(taur)).or.(.not.present(mix_mgga))) then
      message='Several arrays are missing!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
 &      mix_mgga%iscf==AB7_MIXING_EIG) then
      message='kinetic energy density cannot be mixed with the selected mixing algorithm!'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -493,7 +493,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    call ab7_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc)
  end if
  if (errid /= AB7_NO_ERROR) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Same treatment for the kinetic energy density
@@ -501,7 +501,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    call ab7_mixing_eval_allocate(mix_mgga, istep)
    call ab7_mixing_copy_current_step(mix_mgga, tauresid0, errid, message, arr_respc = taurespc)
    if (errid /= AB7_NO_ERROR) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -564,14 +564,14 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (errid == AB7_ERROR_MIXING_INC_NNSLOOP) then
    dbl_nnsclo = 1
  else if (errid /= AB7_NO_ERROR) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 !Kinetic energy density mixing (if any)
  if (dtset%usekden==1) then
    call ab7_mixing_eval(mix_mgga, taumag, istep, nfftot, ucvol_local, &
 &   mpicomm, mpi_summarize, errid, message, reset = reset)
    if (errid /= AB7_NO_ERROR) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 

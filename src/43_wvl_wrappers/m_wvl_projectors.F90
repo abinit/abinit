@@ -117,14 +117,14 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
 &     ' wvl_projectors_set :  consistency checks failed,', ch10, &
 &     '  no GTH parameters found for type number ', idata, '.', ch10, &
 &     '  Check your input pseudo files.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if (.not. psps%gth_params%hasGeometry(idata)) then
      write(message, '(a,a,a,a,a,a)' ) ch10,&
 &     ' wvl_projectors_set :  consistency checks failed,', ch10, &
 &     '  the given GTH parameters has no geometry information.', ch10, &
 &     '  Upgrade your input pseudo files to GTH with geometric informatoins.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 

@@ -168,12 +168,12 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
  call timab(181,1,tsec)
 
  if(nspden/=1 .and. nspden/=2) then
-   MSG_BUG('For nspden==4 please use dfpt_mkvxc_noncoll!')
+   ABI_BUG('For nspden==4 please use dfpt_mkvxc_noncoll!')
  end if
 
 !Special case: no XC applied
  if (ixc==0.or.nkxc==0) then
-   MSG_WARNING('Note that no xc is applied (ixc=0)')
+   ABI_WARNING('Note that no xc is applied (ixc=0)')
    vxc1=zero
    return
  end if
@@ -423,7 +423,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    end if
 
  else
-   MSG_BUG('Invalid nkxc!')
+   ABI_BUG('Invalid nkxc!')
 
  end if ! LDA or GGA
 
@@ -547,7 +547,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
  if (nkxc/=12*min(nspden,2)-5) then
    msg='Wrong nkxc value for GGA!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !metaGGA contributions are not taken into account here
@@ -824,16 +824,16 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  call timab(181,1,tsec)
 
  if(nspden/=4) then
-   MSG_BUG('only for nspden=4!')
+   ABI_BUG('only for nspden=4!')
  end if
 
  if(nkxc/=2*min(nspden,2)-1) then
-   MSG_BUG('nspden=4 works only with LSDA.')
+   ABI_BUG('nspden=4 works only with LSDA.')
  end if
 
 !Special case: no XC applied
  if (ixc==0.or.nkxc==0) then
-   MSG_WARNING('Note that no xc is applied (ixc=0)')
+   ABI_WARNING('Note that no xc is applied (ixc=0)')
    vxc1(:,:)=zero
    return
  end if

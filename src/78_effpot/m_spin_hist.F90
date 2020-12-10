@@ -505,7 +505,7 @@ contains
          &    (mxhist /=1.and.abs(step) >=mxhist)) then
        write(msg,'(a,I0,2a)')' The requested step must be less than ',mxhist,ch10,&
             &                     'Action: increase the number of history store in the hist'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
     end if
     index= mod(self%ihist+step, self%mxhist)+1
   end function findIndex

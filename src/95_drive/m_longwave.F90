@@ -184,31 +184,31 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Not valid for PAW
  if (psps%usepaw==1) then
    msg='This routine cannot be used for PAW (use pawnst3 instead) !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Not valid for finite wave-vector perturbations
  if (sqrt(sum(dtset%qptn**2))/=0_dp) then
    msg='This routine cannot be used for q=/0.d0'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Only usable with spherical harmonics
  if (dtset%useylm/=1) then
    msg='This routine cannot be used for uselim/=1'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Not valid for spin-dependent calculations
  if (dtset%nspinor/=1.or.dtset%nsppol/=1.or.dtset%nspden/=1) then
    msg='This routine cannot be used for spin-dependent calculations'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Not usable with core electron density corrections
  if (psps%n1xccc/=0) then
    msg='This routine cannot be used for n1xccc/=0'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Define some data

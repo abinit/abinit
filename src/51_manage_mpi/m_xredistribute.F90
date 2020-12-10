@@ -110,7 +110,7 @@ subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
  size = sum(send_counts)
  if(size /=sum(rec_counts))then
    msg = 'the total sizes of sent and receved msg are not equal'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  endif
 
  ABI_ALLOCATE(totbuff,(size))
@@ -183,7 +183,7 @@ subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
  size = sum(send_counts)
  if(size /=sum(rec_counts))then
    msg = 'the total sizes of sent and receved msg are not equal'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  endif
 
  ABI_ALLOCATE(totbuff,(size))

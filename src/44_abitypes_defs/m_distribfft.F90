@@ -162,10 +162,10 @@ subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
     ! Updating information about coarse fft grid
     if(distribfft_arg%n2_coarse > 0) then
       if(n2 == distribfft_arg%n2_coarse) then
-        MSG_WARNING("The distribfft passed was already allocated for coarse grid on the same size")
+        ABI_WARNING("The distribfft passed was already allocated for coarse grid on the same size")
         return
       else
-        MSG_ERROR("The distribfft passed was already allocated for coarse grid")
+        ABI_ERROR("The distribfft passed was already allocated for coarse grid")
       endif
     end if
     distribfft_arg%n2_coarse = n2
@@ -193,10 +193,10 @@ subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
  case ('f')
     if(distribfft_arg%n2_fine > 0) then
       if(n2 == distribfft_arg%n2_fine) then
-        MSG_WARNING("The distribfft passed was already allocated for fine grid on the same size")
+        ABI_WARNING("The distribfft passed was already allocated for fine grid on the same size")
         return
       else
-        MSG_ERROR("The distribfft passed was already allocated for fine grid")
+        ABI_ERROR("The distribfft passed was already allocated for fine grid")
       end if
     endif
     distribfft_arg%n2_fine = n2
@@ -222,7 +222,7 @@ subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
     end do
 
  case default
-    MSG_ERROR("Unknown kind of fft grid! Only 'c' for coarse grid and 'f' for fine grid are allowed")
+    ABI_ERROR("Unknown kind of fft grid! Only 'c' for coarse grid and 'f' for fine grid are allowed")
  end select
 
  ! One needs to know if this node has G=0 when we do the FFTs of the wavefunctions
@@ -357,7 +357,7 @@ subroutine init_distribfft_seq(distribfft_arg,grid_type,n2,n3,type_four)
    end if
 
  case default
-    MSG_ERROR("Unknown kind of fft grid! Only 'c' for coarse grid and 'f' for fine grid are allowed")
+    ABI_ERROR("Unknown kind of fft grid! Only 'c' for coarse grid and 'f' for fine grid are allowed")
  end select
 
  DBG_EXIT("COLL")

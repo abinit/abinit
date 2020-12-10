@@ -134,7 +134,7 @@ subroutine polynomial_conf_init(cutoff_disp,cutoff_strain,factor_disp,factor_str
 !Checks
  if (ndisp <= 0) then
    write(msg,'(a,a)')' ndisp can not be inferior or equal to zero'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !First free the type

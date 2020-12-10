@@ -166,11 +166,11 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
      write(message,'(a,a,a,2(i0,1x))')&
 &     'nfft and n3xccc should be equal,',ch10,&
 &     'however, nfft and n3xccc=',nfft,n3xccc
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
  if(nspden==4) then
-   MSG_ERROR('nspden==4 not coded yet')
+   ABI_ERROR('nspden==4 not coded yet')
  end if
 
  if (ixc==0) then
@@ -178,7 +178,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
    test_nhat=.false.
 
 !  No xc at all is applied (usually for testing)
-   MSG_WARNING('Note that no xc is applied (ixc=0).')
+   ABI_WARNING('Note that no xc is applied (ixc=0).')
 
  else if (ixc/=20) then
 
@@ -214,7 +214,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
    write(message, '(a,a,a,i0)' )&
 &   'Only non-spin-polarised or collinear spin is allowed,',ch10,&
 &   'while the argument nspden = ', nspden
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !We do the computation.
@@ -240,7 +240,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  if(usewvl==1) then
    if(wvl_den%denspot%rhov_is .ne. ELECTRONIC_DENSITY) then
      message= "psolver_rhohxc: rhov should contain the electronic density"
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -598,7 +598,7 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
    write(message, '(a,a,a,i0)' )&
 &   'Only non-spin-polarised or collinear spin is allowed for wavelets,',ch10,&
 &   'while the argument nspden = ', nspden
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !We do the computation.

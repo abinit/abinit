@@ -153,7 +153,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      write(msg, '(3a)' )&
      'jdtset and udtset cannot be defined both in the input file.',ch10,&
      'Action: remove one of them from your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Check values of udtset
@@ -162,13 +162,13 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
        write(msg, '(a,i0,3a)' )&
        'udtset(1) must be between 1 and 999, but it is ',intarr(1),'.',ch10,&
        'Action: change the value of udtset(1) in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if(intarr(2)<1 .or. intarr(2)>9)then
        write(msg, '(a,i0,3a)' )&
        'udtset(2) must be between 1 and 9, but it is ',intarr(2),'.',ch10,&
        'Action: change the value of udtset(2) in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if(intarr(1)*intarr(2) /= ndtset)then
        write(msg, '(3a,i0,3a,i0,a,i0,3a,i0,3a)' )&
@@ -177,7 +177,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
        'and udtset(2) = ',intarr(2),' so that their product is ',intarr(1)*intarr(2),',',ch10,&
        'while ndtset is ',ndtset,'.',ch10,&
        'Action: change udtset or ndtset in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      idtset=0
      do i1=1,intarr(1)
@@ -195,7 +195,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
        'The components of jdtset must be between 1 and 9999.',ch10,&
        'However, the input value of the component ',idtset,' of jdtset is ',dtsets(idtset)%jdtset,ch10,&
        'Action: correct jdtset in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
 
@@ -236,7 +236,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    'More than one input variable is used to defined the CPU time limit.',ch10,&
    'This is not allowed.',ch10,&
    'Action: in the input file, suppress either cpus, cpum or cpuh.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  dtsets(:)%cpus=cpus
 
@@ -287,7 +287,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'supercell_latt must have positive parameters and diagonal part',ch10,&
       'This is not allowed.  ',ch10,&
       'Action: modify supercell_latt in the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! Compute the multiplicity of the supercell
    multiplicity=dtsets(idtset)%supercell_latt(1)  &
@@ -320,7 +320,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      write(msg, '(a,i0,2a)' )&
       'Input natom must be defined, but was absent for dataset ',jdtset,ch10,&
       'Action: check the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Check that natom is greater than 0
@@ -329,7 +329,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Input natom must be > 0, but was ',dtsets(idtset)%natom,ch10,&
       'for dataset ',jdtset,'. This is not allowed.',ch10,&
       'Action: check the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if(multiplicity > 1)then
@@ -345,7 +345,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'nimage must be > 0, but was ',dtsets(idtset)%nimage,ch10,&
       'This is not allowed.',ch10,&
       'Action: check the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntypat',tread,'INT')
@@ -364,7 +364,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Input ntypat must be > 0, but was ',dtsets(idtset)%ntypat,ch10,&
       'for dataset ',jdtset,'. This is not allowed.',ch10,&
       'Action: check the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Read msym from string
@@ -376,7 +376,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Input maxnsym must be > 1, but was ',dtsets(idtset)%maxnsym,ch10,&
       'for dataset ',jdtset,'. This is not allowed.',ch10,&
       'Action: check the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Read plowan_compute
@@ -438,7 +438,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
        'natom= ',dtsets(idtset)%natom,' differs from the maximum number',ch10,&
        'of atoms, mxnatom= ',mxnatom,&
        'Action: check the input variables natom for different datasets.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
  end if
@@ -459,7 +459,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
           ' jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
           ' differs from the maximum value of ntypat= ',mxntypat,ch10,&
           ' Action: check the input variables npsp and ntypat.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        if(dtsets(idtset)%ntypat>npsp)then
          write(msg, '(5a,i0,a,i0,a,i0,2a)' )&
@@ -467,7 +467,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
           ' However, it has been found that for',ch10,&
           ' jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,' and npsp=',npsp,ch10,&
           ' Action: check the input variables npsp and ntypat.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        endif
      end do
    end if
@@ -484,9 +484,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !  if (pp_dirpath(1:1) == "$") then
 !    shell_var = pp_dirpath(2:)
 !    call get_environment_variable(shell_var, pp_dirpath, status=ierr)
-!    if (ierr == -1) MSG_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
-!    if (ierr == +1) MSG_ERROR(sjoin(shell_var, "variable is not defined!"))
-!    if (ierr == +2) MSG_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
+!    if (ierr == -1) ABI_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
+!    if (ierr == +1) ABI_ERROR(sjoin(shell_var, "variable is not defined!"))
+!    if (ierr == +2) ABI_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
 !    call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
 !  end if
    if (.not. endswith(pp_dirpath, "/")) pp_dirpath = strcat(pp_dirpath, "/")
@@ -519,7 +519,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      write(msg,'(4a)')&
 &      "Not enough pseudopotentials in input `pseudos` string, expecting npsp: ",itoa(npsp),ch10,&
 &      "Perhaps the separator (=a comma) is missing between pseudopotentials in input `pseudos` string."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    do ii=1,npsp
@@ -530,7 +530,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      pseudo_paths(ii) = adjustl(trim(pseudos_string(i1:i2)))
      if (len_trim(pp_dirpath) > 0) then
        if (len_trim(pp_dirpath) + len_trim(pseudo_paths(ii)) > fnlen) then
-         MSG_ERROR(sjoin("String of len fnlen:", itoa(fnlen), " too small to contain full pseudo path"))
+         ABI_ERROR(sjoin("String of len fnlen:", itoa(fnlen), " too small to contain full pseudo path"))
        end if
        pseudo_paths(ii) = strcat(pp_dirpath, pseudo_paths(ii))
      end if
@@ -551,7 +551,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Input paral_kgb must be 0 or 1, but was ',dtsets(idtset)%paral_kgb,ch10,&
       'for dataset ',jdtset,'. This is not allowed.',ch10,&
       'Action: check the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 
@@ -581,7 +581,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 &     'Input variables use_gpu_cuda is on',ch10,&
 &     'but no available GPU device has been detected !',ch10,&
 &     'Action: change the input variable use_gpu_cuda.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 #else
    write(msg,'(7a)')&
@@ -589,7 +589,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 &   'with (double precision) gpu mode enabled !',ch10,&
 &   'Action: change the input variable use_gpu_cuda',ch10,&
 &   '        or re-compile ABINIT with double-precision Cuda enabled.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
 #endif
  end if
 
@@ -1227,7 +1227,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      write(msg, '(3a)' )&
      'The array znucl MUST be initialized in the input file while this is not done.',ch10,&
      'Action: initialize znucl in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  else
@@ -1282,7 +1282,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
          index_upper=index_blank+1
          ! Cannot deal properly with more that 9 psps
          if(ipsp>=10)then
-           MSG_ERROR('Need to use a pseudopotential with number larger than 9. Not allowed yet.')
+           ABI_ERROR('Need to use a pseudopotential with number larger than 9. Not allowed yet.')
          end if
 
          ! write(std_out,*)' invars1 : found ipsp=',ipsp
@@ -1297,7 +1297,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &       'Did not find matching pseudopotential for XYZ atomic symbol,',ch10,&
 &       'with value ',string2,ch10,&
 &       'Action: check that the atoms required by the XYZ file correspond to one psp file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do ! Loop on atoms
 !  One should find blanks after the last significant type value
@@ -1351,7 +1351,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread_alt==1)then
    if(tread==1)then
      msg = 'nsppol and SpinPolarized cannot be specified simultaneously for the same dataset.'
-     MSG_ERROR_NOSTOP(msg, leave)
+     ABI_ERROR_NOSTOP(msg, leave)
    else
 !    Note that SpinPolarized is a logical input variable
      nsppol=1
@@ -1403,7 +1403,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
     'The input variable ntypalch must be smaller than ntypat, while it is',ch10,&
     'ntypalch=',dtset%ntypalch,', and ntypat=',ntypat,ch10,&
     'Action: check ntypalch vs ntypat in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ntyppure=ntypat-ntypalch
@@ -1415,14 +1415,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
     'The number of available pseudopotentials, npsp=',npsp,ch10,&
     'is smaller than the requested number of types of pure atoms, ntyppure=',ntyppure,ch10,&
     'Action: check ntypalch versus ntypat and npsp in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if(ntypalch>0)then
    call intagm(dprarr,intarr,jdtset,marr,ntypalch,string(1:lenstr),'algalch',tread,'INT')
    if(tread==1) dtset%algalch(1:ntypalch)=intarr(1:ntypalch)
    if (tread_geo /= 0) then
-     MSG_ERROR("Alchemical mixing cannot be used with geo variable, use typat, znucl etc.")
+     ABI_ERROR("Alchemical mixing cannot be used with geo variable, use typat, znucl etc.")
    end if
  end if
 
@@ -1433,12 +1433,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      write(msg,'(7a)')&
       'A Zeeman field has been specified without noncollinear spins.',ch10,&
       'Only the z-component of the magnetic field will be used.'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    else if (dtset%nspden == 1)then
      write(msg, '(a,a,a)' )&
       'A Zeeman field has been specified for a non-spin-polarized calculation.',ch10,&
       'Action: check the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    dtset%zeemanfield(1:3) = dprarr(1:3)
@@ -1561,7 +1561,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(msg, '(a,i0,4a)' )&
    'Input nkptgw must be >= 0, but was ',dtset%nkptgw,ch10,&
    'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Number of points for long wavelength limit. Default is dtset%gw_nqlwl=0
@@ -1571,7 +1571,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(msg, '(a,i0,4a)' )&
    'Input gw_nqlwl must be > 0, but was ',dtset%gw_nqlwl,ch10,&
    'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Read number of k-points from input file (if specified)
@@ -1672,7 +1672,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(msg, '(a,i0,4a)' )&
     'Input nqptdm must be >= 0, but was ',dtset%nqptdm,ch10,&
     'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nzchempot',tread,'INT')
@@ -1685,7 +1685,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(msg, '(a,i0,4a)' )&
     'Input cd_customnimfrqs must be >= 0, but was ',dtset%cd_customnimfrqs,ch10,&
     'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_customnfreqsp',tread,'INT')
@@ -1695,7 +1695,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(msg, '(a,i0,4a)' )&
     'Input gw_customnfreqsp must be >= 0, but was ',dtset%gw_customnfreqsp,ch10,&
     'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_n_proj_freq',tread,'INT')
@@ -1705,7 +1705,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(msg, '(a,i0,4a)' )&
    'Input gwls_n_proj_freq must be >= 0, but was ',dtset%gwls_n_proj_freq,ch10,&
    'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'efmas_calc_dirs',tread,'INT')
@@ -1715,7 +1715,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(msg, '(a,i0,4a)' )&
    'Input efmas_calc_dirs must be between -3 and 3, but was ',dtset%efmas_calc_dirs,ch10,&
    'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'efmas_n_dirs',tread,'INT')
@@ -1725,7 +1725,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(msg, '(a,i0,4a)' )&
    'Input efmas_n_dirs must be >= 0, but was ',dtset%efmas_n_dirs,ch10,&
    'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !---------------------------------------------------------------------------
@@ -1740,29 +1740,29 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! Check that nkpt is greater than 0
  if (nkpt<=0) then
    write(msg, '(a,i0)' )'After inkpts, nkpt must be > 0, but was ',nkpt
-   MSG_ERROR_NOSTOP(msg, leave)
+   ABI_ERROR_NOSTOP(msg, leave)
  end if
 
  ! Check that nsppol is 1 or 2
  if (nsppol/=1 .and. nsppol/=2) then
    write(msg, '(a,i0)' )'Input nsppol must be 1 or 2, but was ',nsppol
-   MSG_ERROR_NOSTOP(msg, leave)
+   ABI_ERROR_NOSTOP(msg, leave)
  end if
 
  ! Check that nspinor is 1 or 2
  if (nspinor/=1 .and. nspinor/=2) then
    write(msg, '(a,i0)' )'Input nspinor must be 1 or 2, but was ',nspinor
-   MSG_ERROR_NOSTOP(msg, leave)
+   ABI_ERROR_NOSTOP(msg, leave)
  end if
 
  ! Check that nspinor and nsppol are not 2 together
  if (nsppol==2 .and. nspinor==2) then
-   MSG_ERROR_NOSTOP('nspinor and nsppol cannot be 2 together!', leave)
+   ABI_ERROR_NOSTOP('nspinor and nsppol cannot be 2 together!', leave)
  end if
 
  ! Here, leave if an error has been detected earlier
  if (leave /= 0) then
-   MSG_ERROR('Errors are present in the input file. See ABOVE messages')
+   ABI_ERROR('Errors are present in the input file. See ABOVE messages')
  end if
 
  ! Now, take care of mband_upper
@@ -1784,7 +1784,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(msg, '(3a)' )&
    'fband cannot be used if occopt==0 or occopt==2 ',ch10,&
    'Action: correct your input file, suppress fband, or change occopt.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_ALLOCATE(nband,(nkpt*nsppol))
@@ -1818,7 +1818,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      write(msg, '(3a)' )&
      'fband and nband cannot be used together. ',ch10,&
      'Action: correct your input file, suppress either fband or nband.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! In case nband was not read, use fband, either read, or the default,
@@ -1862,7 +1862,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_DEALLOCATE(reaalloc)
  else
    write(msg, '(a,i0,3a)' )'occopt=',occopt,' is not an allowed value.',ch10,'Action: correct your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Check that mband_upper is greater than 0
@@ -1870,7 +1870,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    write(msg, '(a,i0,4a)' )&
    'Maximal nband must be > 0, but was ',mband_upper,ch10,&
    'This is not allowed.',ch10,'Action: check the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! The following 3 values are needed to dimension the parallelism over images
@@ -1915,7 +1915,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    'you define Wannier functions as in DFT+DMFT calculation',ch10,&
    'If instead, you want to do a full dft+dmft calculation and not only the Wannier construction, use ucrpa=0',ch10,&
    'This keywords are depreciated, please use the new keywords to perform cRPA calculation'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 !Some PAW+U keywords

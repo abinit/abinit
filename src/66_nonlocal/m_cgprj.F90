@@ -160,17 +160,17 @@ contains
 
 !Not available for useylm=0
  if (useylm==0) then
-   MSG_ERROR('Not available for useylm=0 !')
+   ABI_ERROR('Not available for useylm=0 !')
  end if
 
 !Error on bad choice
  if ((choice<1.or.choice>6).and.choice/=23.and.choice/=24) then
-   MSG_BUG('Does not presently support this choice !')
+   ABI_BUG('Does not presently support this choice !')
  end if
 
 !Error on bad idir
  if (idir>0.and.choice/=2.and.choice/=3.and.choice/=5) then
-   MSG_BUG('Does not support idir>0 for this choice')
+   ABI_BUG('Does not support idir>0 for this choice')
  end if
 
 !Error on sizes
@@ -179,15 +179,15 @@ contains
    if( (choice==2.and.nkpg<3) .or. &
 &   ((choice==4.or.choice==24).and.nkpg<9) .or. &
 &   ((choice==6.or.choice==3.or.choice==23).and.nkpg<3) ) then
-     MSG_BUG('Incorrect size for kpg array !')
+     ABI_BUG('Incorrect size for kpg array !')
    end if
  end if
  if (size(ffnl,1)/=npw_k.or.size(ffnl,3)/=lmnmax) then
-   MSG_BUG('Incorrect size for ffnl!')
+   ABI_BUG('Incorrect size for ffnl!')
  end if
  if (size(ph3d)>0) then
    if (size(ph3d,2)/=npw_k) then
-     MSG_BUG('Incorrect size for ph3d!')
+     ABI_BUG('Incorrect size for ph3d!')
    end if
  end if
 
@@ -210,7 +210,7 @@ contains
    ndgxdt=1
  end if
  if(cwaveprj(1,1)%ncpgr<ndgxdt+nd2gxdt) then
-   MSG_BUG('Incorrect size for ncpgr')
+   ABI_BUG('Incorrect size for ncpgr')
  end if
 !Eventually re-compute (k+G) vectors (and related data)
  if (nkpg==0) then
@@ -499,24 +499,24 @@ contains
 !Preliminary tests
  if (psps%useylm==0) then
    msg='Not available for useylm=0!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if ((choice<1.or.choice>6).and.choice/=23.and.choice/=24) then
    msg='Bad choice!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (idir>0.and.choice/=2.and.choice/=3.and.choice/=5) then
    msg='Does not support idir>0 for that choice!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(ylm)/=mpw*mkmem*mpsang*mpsang) then
    msg='Wrong size for Ylm!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  useylmgr=merge(0,1,(size(ylmgr)==0))
  if (useylmgr==0.and.(choice==3.or.choice==5.or.choice==23)) then
    msg=' Ylm gradients have to be in memory for choice=3, 5, or 23!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Init parallelism
@@ -545,7 +545,7 @@ contains
    end if
  end if
  if (cg_bandpp/=cprj_bandpp) then
-   MSG_BUG('cg_bandpp must be equal to cprj_bandpp !')
+   ABI_BUG('cg_bandpp must be equal to cprj_bandpp !')
  end if
 
 !Manage parallelization over spinors
@@ -553,10 +553,10 @@ contains
 !Check sizes for cprj (distribution is tricky)
  one_atom=(iatom>0)
  if (one_atom.and.ncprj/=1) then
-   MSG_BUG('Bad value for ncprj dimension (should be 1) !')
+   ABI_BUG('Bad value for ncprj dimension (should be 1) !')
  end if
  if (.not.one_atom.and.ncprj/=natom) then
-   MSG_BUG('Bad value for ncprj dimension (should be natom) !')
+   ABI_BUG('Bad value for ncprj dimension (should be natom) !')
  end if
 
 !Initialize some variables
@@ -603,7 +603,7 @@ contains
  end if
 !Test cprj gradients dimension (just to be sure)
  if (cprj(1,1)%ncpgr/=ncpgr) then
-   MSG_BUG('cprj are badly allocated !')
+   ABI_BUG('cprj are badly allocated !')
  end if
 
 
@@ -756,7 +756,7 @@ contains
          call ph1d3d(1,ncprj,kg_k,matblk,ncprj,npw_k,n1,n2,n3,phkxred,ph1d_atm,ph3d)
        end if
      else if (npband_bandfft>1) then
-       MSG_ERROR('Band-fft parallelism +nloag(1)<0 forbidden !')
+       ABI_ERROR('Band-fft parallelism +nloag(1)<0 forbidden !')
      end if
 
 !    Compute nonlocal form factors ffnl at all (k+G)

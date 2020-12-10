@@ -283,7 +283,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  call cwtime(cpu, wall, gflops, "start")
 
  if (any(cryst%symrel(:,:,1) /= identity_3d) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
-  MSG_ERROR('The first symmetry is not the identity operator!')
+  ABI_ERROR('The first symmetry is not the identity operator!')
  end if
 
  nkibz = ebands%nkpt
@@ -324,7 +324,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    'dksqmax= ',dksqmax,ch10, &
    'Action: check your WFK file and k-point input variables',ch10, &
    '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call cwtime_report(" fstab_init%listkk", cpu, wall, gflops)
@@ -648,7 +648,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
    end do
 
  else
-   MSG_ERROR(sjoin("Wrong integration method:", itoa(fs%eph_intmeth)))
+   ABI_ERROR(sjoin("Wrong integration method:", itoa(fs%eph_intmeth)))
  end if
 
 end subroutine fstab_get_dbldelta_weights
@@ -713,7 +713,7 @@ subroutine fstab_print(fstab, header, unit, prtvol)
  else if (fstab(1)%eph_intmeth == 2) then
    write(my_unt,"(a)")" FS integration done with tetrahedron method"
  else
-   MSG_ERROR(sjoin("Invalid value for eph_intmeth:", itoa(fstab(1)%eph_intmeth)))
+   ABI_ERROR(sjoin("Invalid value for eph_intmeth:", itoa(fstab(1)%eph_intmeth)))
  end if
 
  write(my_unt,"(a,i0)")" Total number of k-points in the full mesh: ",fstab(1)%nktot

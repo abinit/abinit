@@ -417,7 +417,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 !output the elph_tr_ds%a2f_1d_tr
  fname = trim(elph_ds%elph_base_name) // '_A2F_TR'
  if (open_file(fname,message,newunit=unit_a2f_tr,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write (unit_a2f_tr,'(a)')       '#'
@@ -459,7 +459,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
  fname = trim(elph_ds%elph_base_name) // '_RHO'
  if (open_file(fname,message,newunit=unit_rho,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 !print header to resistivity file
  write (unit_rho,*) '# Resistivity as a function of temperature.'
@@ -471,7 +471,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
  fname = trim(elph_ds%elph_base_name) // '_TAU'
  if (open_file(fname,message,newunit=unit_tau,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 !print header to relaxation time file
  write (unit_tau,*) '# Relaxation time as a function of temperature.'
@@ -483,7 +483,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
  fname = trim(elph_ds%elph_base_name) // '_SBK'
  if (open_file(fname,message,newunit=unit_sbk,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 !print header to relaxation time file
  write (unit_sbk,*) '# Seebeck Coefficint as a function of temperature.'
@@ -495,7 +495,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
  fname = trim(elph_ds%elph_base_name) // '_WTH'
  if (open_file(fname,message,newunit=unit_therm,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to thermal conductivity file
@@ -508,7 +508,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 
  fname = trim(elph_ds%elph_base_name) // '_LOR'
  if (open_file(fname,message,newunit=unit_lor,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to lorentz file
@@ -659,7 +659,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
              ie_1 = pair2red(ie1,ie2)
              ie_2 = pair2red(ie2,ie1)
              if (ie_1 .eq. 0 .or. ie_2 .eq. 0) then
-               MSG_BUG('CHECK pair2red!')
+               ABI_BUG('CHECK pair2red!')
              end if
 
              do ssp=1,4  ! (s,s'=+/-1, condense the indices)
@@ -1327,17 +1327,17 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 !output the elph_tr_ds%a2f_1d_tr
  fname = trim(elph_ds%elph_base_name) // '_A2F_TR'
  if (open_file (fname,message,newunit=unit_a2f_tr,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  fname = trim(elph_ds%elph_base_name) // '_A2F_TRIN'
  if (open_file(fname,message,newunit=unit_a2f_trin,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  fname = trim(elph_ds%elph_base_name) // '_A2F_TROUT'
  if (open_file (fname,message,newunit=unit_a2f_trout,status='unknown') /=0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write (unit_a2f_tr,'(a)')       '#'
@@ -1401,7 +1401,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 
  fname = trim(elph_ds%elph_base_name) // '_RHO'
  if (open_file(fname,message,newunit=unit_rho,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to resistivity file
@@ -1414,7 +1414,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 
  fname = trim(elph_ds%elph_base_name) // '_TAU'
  if (open_file(fname,message,newunit=unit_tau,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to relaxation time file
@@ -1427,7 +1427,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 
  fname = trim(elph_ds%elph_base_name) // '_WTH'
  if (open_file(fname,message,newunit=unit_therm,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to thermal conductivity file
@@ -1440,7 +1440,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 
  fname = trim(elph_ds%elph_base_name) // '_LOR'
  if (open_file(fname,message,newunit=unit_lor,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to lorentz file
@@ -1537,7 +1537,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
          tau=1.0d99
          if(dabs(integtau(elph_ds%na2f)) < tol7) then
            write(message,'(a)') ' Cannot get a physical relaxation time '
-           MSG_WARNING(message)
+           ABI_WARNING(message)
          else
            tau=1.0d0/integtau(elph_ds%na2f)
          end if
@@ -1783,7 +1783,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
    call wrtout(std_out,message,'COLL')
  else
    write (message,'(a,i0)')' Wrong value for gkqwrite = ',elph_ds%gkqwrite
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !=========================================================
@@ -1975,9 +1975,9 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
                if (abs(imeigval(jbranch)) > tol10) then
                  write (message,'(a,i0,a,es16.8)')" real values  branch = ",jbranch,' eigval = ',eigval(jbranch)
-                 MSG_WARNING(message)
+                 ABI_WARNING(message)
                  write (message,'(a,i0,a,es16.8)')" imaginary values  branch = ",jbranch,' imeigval = ',imeigval(jbranch)
-                 MSG_WARNING(message)
+                 ABI_WARNING(message)
                end if
 
              end do
@@ -2005,12 +2005,12 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
              if (diagerr > tol12) then
                write(message,'(a,es15.8)') 'get_tau_k: residual in diagonalization of gamma with phon eigenvectors: ', diagerr
-               MSG_WARNING(message)
+               ABI_WARNING(message)
              end if
 
            else
              write (message,'(a,i0)')' Wrong value for ep_scalprod = ',elph_ds%ep_scalprod
-             MSG_BUG(message)
+             ABI_BUG(message)
            end if ! end ep_scalprod if
 
 !For k'=k-q
@@ -2032,9 +2032,9 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
                if (abs(imeigval(jbranch)) > tol10) then
                  write (message,'(a,i0,a,es16.8)')" real values  branch = ",jbranch,' eigval = ',eigval2(jbranch)
-                 MSG_WARNING(message)
+                 ABI_WARNING(message)
                  write (message,'(a,i0,a,es16.8)')" imaginary values  branch = ",jbranch,' imeigval = ',imeigval(jbranch)
-                 MSG_WARNING(message)
+                 ABI_WARNING(message)
                end if
 
              end do
@@ -2062,12 +2062,12 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
              if (diagerr > tol12) then
                write(message,'(a,es15.8)') 'get_tau_k: residual in diagonalization of gamma with phon eigenvectors: ', diagerr
-               MSG_WARNING(message)
+               ABI_WARNING(message)
              end if
 
            else
              write (message,'(a,i0)')' Wrong value for ep_scalprod = ',elph_ds%ep_scalprod
-             MSG_BUG(message)
+             ABI_BUG(message)
            end if ! end ep_scalprod if
 
            tmp2_wtk(:) = tmp_wtk(jpband,ikpt_kpq,isppol,:)
@@ -2197,7 +2197,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 !output inv_tau_k and tau_k
  fname = trim(elph_ds%elph_base_name) // '_INVTAUK'
  if (open_file(fname,message,newunit=unit_invtau,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to relaxation time file
@@ -2209,7 +2209,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_TAUK'
  if (open_file(fname,message,newunit=unit_tau,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to relaxation time file
@@ -2278,7 +2278,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_TAUE'
  if (open_file(fname,message,newunit=unit_taue,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to relaxation time file
@@ -2289,7 +2289,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_MFP'
  if (open_file(fname,message,newunit=unit_mfp,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write (unit_mfp,*) '# Energy-dep mean free path as a function of temperature.'
@@ -2389,7 +2389,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_COND'
  if (open_file(fname,message,newunit=unit_cond,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to conductivity file
@@ -2402,7 +2402,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_CTH'
  if (open_file(fname,message,newunit=unit_therm,status='unknown') /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to thermal conductivity file
@@ -2415,7 +2415,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  fname = trim(elph_ds%elph_base_name) // '_SBK'
  if (open_file(fname,message,newunit=unit_sbk,status='unknown') /=0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !print header to relaxation time file

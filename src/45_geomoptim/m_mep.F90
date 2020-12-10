@@ -1143,7 +1143,7 @@ function mep_img_dotp(vect1,vect2)
 
  size1=size(vect1,1);size2=size(vect1,2)
  if (size1/=size(vect2,1).or.size2/=size(vect2,2)) then
-   MSG_BUG("Error on dimensions !")
+   ABI_BUG("Error on dimensions !")
  end if
 
  mep_img_dotp=sum(vect1*vect2)
@@ -1230,7 +1230,7 @@ function mep_img_dotp_red(rmet,vect1,vect2)
 
  size1=size(vect1,1);size2=size(vect1,2)
  if (size1/=size(vect2,1).or.size2/=size(vect2,2).or.size1/=3) then
-   MSG_BUG("Error on dimensions !")
+   ABI_BUG("Error on dimensions !")
  end if
 
  mep_img_dotp_red=zero

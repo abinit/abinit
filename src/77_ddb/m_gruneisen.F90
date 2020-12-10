@@ -207,7 +207,7 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
  end do
  if (ierr /= 0) then
    msg = ltoa([(new%cryst_vol(ivol)%ucvol, ivol=1,new%nvols)])
-   MSG_ERROR(sjoin("Gruneisen calculations requires linear mesh of volumes but received:", msg))
+   ABI_ERROR(sjoin("Gruneisen calculations requires linear mesh of volumes but received:", msg))
  end if
 
 end function gruns_new
@@ -391,7 +391,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
  ! Write text files with phonon frequencies and gruneisen on the path.
  if (my_rank == master) then
    if (open_file(strcat(prefix, "_GRUNS_QPATH"), msg, newunit=unt, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(unt,'(a)')'# Phonon band structure, Gruneisen parameters and group velocity'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
@@ -523,7 +523,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
  ! Build tetrahedra
  tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nshiftq, shiftq, nqibz, qibz, comm, msg, ierr)
- if (ierr /= 0) MSG_ERROR(msg)
+ if (ierr /= 0) ABI_ERROR(msg)
 
  ABI_CALLOC(wvols_qibz, (gruns%natom3, gruns%nvols, nqibz))
  ABI_CALLOC(gvals_qibz, (gruns%natom3, nqibz))
@@ -590,7 +590,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
    ! Write text files with Gruneisen and DOSes.
    if (open_file(strcat(prefix, "_GRUNS_DOS"), msg, newunit=unt, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(unt,'(a)')'# Phonon density of states, Gruneisen DOS and phonon group velocity DOS'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
@@ -829,7 +829,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
  if (all(inp%ng2qpt /= 0)) then
    call gruns_qmesh(gruns, prefix, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
-   MSG_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
+   ABI_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
  end if
 
  ! Compute gruneisen on the q-path.
@@ -838,7 +838,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
    call gruns_qpath(gruns, prefix, qpath, ncid, comm)
    call qpath%free()
  else
-   MSG_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
+   ABI_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
  end if
 
  ! Compute speed of sound for V0.

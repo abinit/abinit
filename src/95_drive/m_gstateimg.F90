@@ -290,7 +290,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      write(msg,'(3a)') &
 &     'When nimage>1, all the following argument should be present:',ch10,&
 &     'filnam, filstat, idtset, ndtset, jdtset  !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -327,7 +327,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      if (nimage>0) then
        if (any(hist_prev(:)%mxhist/=hist_prev(1)%mxhist)) then
          msg='History problem: all images should have the same number of time steps!'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        use_hist_prev=(hist_prev(1)%mxhist>0)
        if (use_hist_prev) ntimimage=ntimimage+hist_prev(1)%mxhist
@@ -397,7 +397,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    ABI_ALLOCATE(amass,(dtset%natom,nimage))
    do iimage=1,nimage
      if (any(amu_img(:,iimage)/=amu_img(:,1))) then
-       MSG_ERROR('HIST file is not compatible with variable masses!')
+       ABI_ERROR('HIST file is not compatible with variable masses!')
      end if
      amass(:,iimage)=amu_emass*amu_img(dtset%typat(:),iimage)
    end do
@@ -1346,7 +1346,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 !Store acell, rprim, xred and vel for the new iteration
  next_itimimage=itimimage_eff+1
  if (next_itimimage>ntimimage_stored)then
-   MSG_ERROR('next_itimimage>ntimimage_stored')
+   ABI_ERROR('next_itimimage>ntimimage_stored')
  endif
 
  do iimage=1,nimage

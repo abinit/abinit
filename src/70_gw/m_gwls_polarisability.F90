@@ -227,7 +227,7 @@ else
   write(message,"(a,es16.8,3a)")&
     "omega=",omega,",",ch10,&
     "but either it's real or imaginary part need to be 0 for the polarisability routine to work."
-  MSG_ERROR(message)
+  ABI_ERROR(message)
 end if
 
 

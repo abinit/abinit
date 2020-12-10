@@ -673,7 +673,7 @@ end subroutine gaussfit_main
  if(jproc==-1) then
 !  One should not get here!
    msg = 'error in accomodate_mpi'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !assign this term for jproc
@@ -2279,7 +2279,7 @@ subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbita
 
  if(size(tproj,2)<basis_size) then
    msg = 'wrong size for tproj in gaussfit_projector!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  option=4  !see gaussfit_main
@@ -2347,7 +2347,7 @@ subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbita
      write(msg,'(a,a,a,a)')ch10,&
 &     "ib (basis index) is too big!",ch10,&
 &     "Action: check your pseudopotentials"
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    if(present(comm_mpi)) then

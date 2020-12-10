@@ -599,7 +599,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
     'Otherwise, you might increase "buffer" in m_dynmat.F90 see bigbx9 subroutine and recompile.',ch10,&
     'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
     'if abs(brav) /= 1, in this case you should change brav to 1. If brav is already set to 1 (default) try -1.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Fourier transform of the dynamical matrices (q-->R)
@@ -786,7 +786,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    call ddb_from_file(ddb,filename,1,natom,natom,atifc, ddb_hdr, ucell_ddb,comm)
 
  else
-   MSG_ERROR(sjoin("File:", filename, "is not present in the directory"))
+   ABI_ERROR(sjoin("File:", filename, "is not present in the directory"))
  end if
 
  ! Get Dielectric Tensor and Effective Charges
@@ -992,7 +992,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
    case ("cart")
      continue
    case default
-     MSG_ERROR(sjoin("Wrong value for nanaqdir:", nanaqdir))
+     ABI_ERROR(sjoin("Wrong value for nanaqdir:", nanaqdir))
    end select
  end if
 
@@ -1108,7 +1108,7 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
    ! For the time being, the gradient is computed with finite difference and step hh.
    ! TODO: should generalize ewald9 to compute dq.
    !enough = enough + 1
-   !if (enough <= 5)  MSG_WARNING("phonon velocities with dipdip==1 not yet tested.")
+   !if (enough <= 5)  ABI_WARNING("phonon velocities with dipdip==1 not yet tested.")
    hh = 0.01_dp
    do ii=1,3
      do jj=-1,1,2
@@ -1208,7 +1208,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
- if (ifc%asr == 0) MSG_WARNING("Computing speed of sound with asr == 0! Use asr > 0")
+ if (ifc%asr == 0) ABI_WARNING("Computing speed of sound with asr == 0! Use asr > 0")
  qrad = qrad_tolkms(1); tolkms = qrad_tolkms(2)
  ABI_CHECK(qrad > zero, "vs_qrad <= 0")
  ABI_CHECK(tolkms > zero, "vs_tolkms <= 0")
@@ -1334,7 +1334,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
      vs_ierr = 1
      write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",tolkms, " [km/s]"
      call wrtout(ab_out, msg)
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
    if (num_negw > 0) then
      vs_ierr = -num_negw
@@ -1342,7 +1342,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
        " WARNING: Detected ",num_negw, " negative frequencies. Minimum was: ",min_negw * Ha_meV, "[meV]",ch10,&
        " Speed of sound could be wrong"
      call wrtout(ab_out, msg)
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    ! Dump results to netcdf file.
@@ -1772,7 +1772,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
    write(message, '(3a,i0,a)' )&
 &   'The value of ifcout exceeds the number of atoms in the big box.', ch10, &
 &   'Output limited to ',Ifc%natom*Ifc%nrpt,' atoms.'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  else
    ifcout1=ifcout
  end if
@@ -1780,13 +1780,13 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
  ! set up file for real space ifc output, if required
  if (prt_ifc == 1) then
    if (open_file('ifcinfo.out', message, newunit=unit_ifc, status="replace") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    write(iout, '(a,a)' )ch10,&
 &   '  NOTE: Open file ifcinfo.out, for the output of interatomic force constants. This is because prt_ifc==1. '
 
    if (open_file('outfile.forceconstants_ABINIT', message, newunit=unit_tdep, status="replace") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    write(iout, '(a,a,a)' )ch10,&
 &   '  NOTE: Open file outfile.forceconstants_ABINIT, for the output of interatomic force',&
@@ -1963,7 +1963,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
    close(unit_tdep)
 
    if (open_file('infile.lotosplitting_ABINIT', message, newunit=unit_tdep, status="replace") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    write(unit_tdep,'(3es28.16)') dielt(:,1)
    write(unit_tdep,'(3es28.16)') dielt(:,2)
@@ -2113,7 +2113,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
      write(message, '(3a)' )&
 &     'Unable to find a third atom not aligned with the two selected ones.',ch10,&
 &     'The local analysis (longitudinal/transverse) will not be done. The two transverse vectors are set to zero.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      vect2(:)=zero ; vect3(:)=zero
    else
      vect2(1)=work(1)/scprod**0.5
@@ -2231,7 +2231,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
 &         'The distance between two atoms vanishes.',ch10,&
 &         'This is not allowed.',ch10,&
 &         'Action: check the input for the atoms number',ia,' and',ib,'.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
      end if
 
@@ -2593,7 +2593,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
  call wrtout([std_out, ab_out], msg)
 
  if (open_file(outfile,msg,newunit=unit_btrap,status="replace") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (unit_btrap,'(a)') '#'
@@ -2714,7 +2714,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
      nqibz, qibz, cryst%nsym, .False., cryst%symrec, dummy_symafm, .True., nsppol1, qshft, nqshft, path, ierr)
    if (ierr /=0) then
      msg = "Cannot produce BXSF file with phonon isosurface, see log file for more info"
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      call wrtout(ab_out, msg, 'COLL')
    end if
  end if

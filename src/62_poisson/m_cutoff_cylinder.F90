@@ -169,7 +169,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
 &      ' found q-points with non zero components in the X-Y plane. ',ch10,&
 &      ' This is not allowed, see Notes in cutoff_cylinder.F90. ',ch10,&
 &      ' ACTION: Modify the q-point sampling. '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! * Check if Bravais lattice is orthorombic and parallel to the Cartesian versors.
    !   In this case the intersection of the W-S cell with the x-y plane is a rectangle with -ha_<=x<=ha_ and -hb_<=y<=hb_
@@ -178,7 +178,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
 &       (ANY(ABS(rprimd(1:2,  3))>tol6))    &
 &     ) then
      msg = ' Bravais lattice should be orthorombic and parallel to the cartesian versors '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ha_=half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
@@ -217,24 +217,24 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
        tmp=zero
        ! Difficult part, integrate on a small cirle of radius r0 using spherical coordinates
        !call quadrature(K0cos_dth_r0,zero,r0_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-       !if (ierr/=0) MSG_ERROR("Accuracy not reached")
+       !if (ierr/=0) ABI_ERROR("Accuracy not reached")
        !write(std_out,'(i8,a,es14.6)')ig,' 1 ',quad
        !tmp=tmp+quad
        ! Add region with 0<=x<=r0 and y>=+-(SQRT(r0^2-x^2))since WS is rectangular
        !call quadrature(K0cos_dy_r0,zero,r0_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-       !if (ierr/=0) MSG_ERROR("Accuracy not reached")
+       !if (ierr/=0) ABI_ERROR("Accuracy not reached")
        !write(std_out,'(i8,a,es14.6)')ig,' 2 ',quad
        !tmp=tmp+quad
        ! Get the in integral in the rectangle with x>=r0, should be the easiest but sometimes has problems to converge
        !call quadrature(K0cos_dy,r0_,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-       !if (ierr/=0) MSG_ERROR("Accuracy not reached")
+       !if (ierr/=0) ABI_ERROR("Accuracy not reached")
        !write(std_out,'(i8,a,es14.6)')ig,' 3 ',quad
        !
        ! === More stable method: midpoint integration with Romberg extrapolation ===
        call quadrature(K0cos_dy,zero,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
        !write(std_out,'(i8,a,es14.6)')ig,' 3 ',quad
        if (ierr/=0) then
-         MSG_ERROR("Accuracy not reached")
+         ABI_ERROR("Accuracy not reached")
        end if
        ! === Store final result ===
        ! * Factor two comes from the replacement WS -> (1,4) quadrant thanks to symmetries of the integrad.
@@ -248,7 +248,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
    ! TODO add check on hcyl value that should be smaller that 1/deltaq
    if (hcyl_<zero) then
      write(msg,'(a,f8.4)')' Negative value for cylinder length hcyl_=',hcyl_
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    if (ABS(hcyl_)>tol12) then
@@ -272,7 +272,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
            ! $ 4\pi\int_0^{R_c} d\rho\rho j_o(qpg_perp_.\rho)\int_0^hcyl dz\cos(qpg_para_*z)/sqrt(\rho^2+z^2) $
            call quadrature(F2,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
            if (ierr/=0) then
-             MSG_ERROR("Accuracy not reached")
+             ABI_ERROR("Accuracy not reached")
            end if
 
            vccut(ig,iq)=four_pi*quad
@@ -281,7 +281,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
            ! $ \int_0^h sin(qpg_para_.z)/\sqrt(rcut^2+z^2)dz $
            call quadrature(F3,zero,hcyl_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
            if (ierr/=0) then
-             MSG_ERROR("Accuracy not reached")
+             ABI_ERROR("Accuracy not reached")
            end if
 
            c1=one/qpg_para_**2-COS(qpg_para_*hcyl_)/qpg_para_**2-hcyl_*SIN(qpg_para_*hcyl_)/qpg_para_
@@ -292,7 +292,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
            ! $ 4pi\int_0^rcut d\rho \rho J_o(qpg_perp_.\rho) ln((h+\sqrt(h^2+\rho^2))/\rho) $
            call quadrature(F4,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
            if (ierr/=0) then
-             MSG_ERROR("Accuracy not reached")
+             ABI_ERROR("Accuracy not reached")
            end if
 
            vccut(ig,iq)=four_pi*quad
@@ -302,7 +302,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
            vccut(ig,iq)=two_pi*(-hcyl2+hcyl_*SQRT(hcyl2+rcut2)+rcut2*LOG((hcyl_+SQRT(hcyl_+SQRT(hcyl2+rcut2)))/rcut_))
 
          else
-           MSG_BUG('You should not be here!')
+           ABI_BUG('You should not be here!')
          end if
 
        end do !ig
@@ -333,7 +333,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
              ! === Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_  ===
              call quadrature(F5,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
              if (ierr/=0) then
-               MSG_ERROR("Accuracy not reached")
+               ABI_ERROR("Accuracy not reached")
              end if
              vccut(ig,iq)=-four_pi*quad
            else
@@ -346,7 +346,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
    end if !finite/infinite
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong value for method:',itoa(method)))
+   ABI_BUG(sjoin('Wrong value for method:',itoa(method)))
  END SELECT
  !
  ! === Collect vccut on each node ===
@@ -399,7 +399,7 @@ function F2(xx)
  zz_=xx
  call quadrature(F1,zero,rcut_,qopt_,intr,ierr,ntrial_,accuracy_,npts_)
  if (ierr/=0) then
-   MSG_ERROR("Accuracy not reached")
+   ABI_ERROR("Accuracy not reached")
  end if
 
  F2=intr*COS(qpg_para_*xx)
@@ -508,7 +508,7 @@ function K0cos_dy(xx)
  xx_=xx
  call quadrature(K0cos,-hb_,+hb_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
  if (ierr/=0) then
-   MSG_ERROR("Accuracy not reached")
+   ABI_ERROR("Accuracy not reached")
  end if
 
  K0cos_dy=quad

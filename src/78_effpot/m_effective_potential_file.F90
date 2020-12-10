@@ -272,7 +272,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       write(message, '(4a)' )&
 &        ' effective_potential_file_read: you need to give input file to compute ',&
 &        'the response fonction from DDB file ',ch10
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
 
     if(filetype ==1) then
@@ -300,7 +300,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
         write(message, '(3a)' )&
 &        ' effective_potential_file_read: problem with atifc input variables ',&
 &        'in ddb_from_file',ch10
-        MSG_BUG(message)
+        ABI_BUG(message)
       end if
 
       ABI_DEALLOCATE(atifc)
@@ -390,7 +390,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &            ' The number of coefficients in the XML file is superior to the ',ch10,&
 &            'number of coefficients in the input ',ch10,&
 &            'Action: correct your input file or change the file'
-          MSG_ERROR(message)
+          ABI_ERROR(message)
         end if
         do ii = 1,eff_pot%anharmonics_terms%ncoeff
           call polynomial_coeff_setCoefficient(inp%coefficients(ii),&
@@ -410,14 +410,14 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
        write(message, '(3a)' )&
 &         'There is no hist argument ',ch10,&
 &         'Action: add hist argument'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end if
  else
    write(message, '(5a)' )&
 &      ' The file ',trim(filename),' is not readable with Multibinit',ch10,&
 &      ' Action: Change the file.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 ! Deallocation of array
@@ -479,7 +479,7 @@ subroutine effective_potential_file_getType(filename,filetype)
  filetype = 0
 
  if (open_file(filename,message,unit=ddbun,form="formatted",status="old",action="read") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Check if the file is a XML file or a DDB and in this case, store the DDB code.
@@ -633,7 +633,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
  else
    write(message, '(a,a,a,a)' )&
 &   ' The file ',trim(filename),' is not compatible with multibinit',ch10
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 ! TODO hexu: temporarily disabled. Discuss with alex how to do this properly.
@@ -642,7 +642,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 !   write(message, '(a,a,a,a,a)' )&
 !&   ' Unable to read the number of atom from ',trim(filename),ch10,&
 !&   'This file  is not compatible with multibinit',ch10
-!   MSG_ERROR(message)
+!   ABI_ERROR(message)
 ! end if
 !
 ! if (filetype==2 .or. filetype==23) then
@@ -650,19 +650,19 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 !   if (natom < 1) then
 !     write(message, '(a,a,a)' )&
 !&     ' Unable to read the number of atom from ',trim(filename),ch10
-!     MSG_ERROR(message)
+!     ABI_ERROR(message)
 !   end if
 !
 !   if (nrpt < 1) then
 !     write(message, '(a,a,a)' )&
 !&     ' Unable to read the number of rpt points ',trim(filename),ch10
-!     MSG_ERROR(message)
+!     ABI_ERROR(message)
 !   end if
 !
 !   if (ntypat < 1) then
 !     write(message, '(a,a,a)' )&
 !&     ' Unable to read the number of type of atoms ',trim(filename),ch10
-!     MSG_ERROR(message)
+!     ABI_ERROR(message)
 !   end if
 !
 ! end if
@@ -738,7 +738,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 
    if (open_file(filename,message,unit=funit,form="formatted",status="old",&
 &                action="read") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  First parse to know the number of coefficients
@@ -796,7 +796,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 !  Maybe one day add an other type of file...
    write(message, '(a,a,a,a)' )&
 &   ' The file ',trim(filename),' is not compatible with multibinit',ch10
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 ! Do some checks
@@ -804,7 +804,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
    write(message, '(5a)' )&
 &   ' Unable to read the number of coeff from ',trim(filename),ch10,&
 &   ' This file is not compatible with multibinit',ch10
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 end subroutine effective_potential_file_getDimCoeff
@@ -867,7 +867,7 @@ subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
 
    if (open_file(filename,message,unit=funit,form="formatted",status="old",&
 &                action="read") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  First parse to know the number of atoms
@@ -987,7 +987,7 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
 !  try to read ASCII file...
    if (open_file(filename,msg,unit=unit_md,form="formatted",&
 &       status="old",action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  Start a reading loop in fortran to get the dimension of the file
@@ -1143,7 +1143,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
  if (open_file(filename,message,unit=funit,form="formatted",status="old",&
 &              action="read") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !First parse to know the number of atoms
@@ -1235,7 +1235,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 &   ' The number of total IFC  (',nrpt2,') is inferior to  ',ch10,&
 &   ' the number of short range IFC (',nrpt1,') in ',filename,ch10,&
 &   ' This is not possible',ch10
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -1453,7 +1453,7 @@ end subroutine system_getDimFromXML
 
    if (open_file(filename,message,unit=funit,form="formatted",&
 &               status="old",action="read") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !Start a reading loop in fortran
@@ -2023,14 +2023,14 @@ end subroutine system_getDimFromXML
        if(irpt3 /= irpt1)then
          write(message, '(4a)' )ch10,&
 &         ' There is several similar short IFC in ',filename,ch10
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
      else
        write(message, '(2a,I5,3a,I5,5a)' )ch10,&
 &     ' The number of total IFC  (',irpt2,') is inferior to  ',ch10,&
 &     ' the number of short range IFC (',irpt1,') in ',filename,ch10,&
 &     ' This is not possible',ch10
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end if
 
@@ -2038,19 +2038,19 @@ end subroutine system_getDimFromXML
    if (any(typat==0)) then
      write(message, '(a,a,a)' )&
 &      ' Unable to read the type of atoms ',trim(filename),ch10
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    if (any(abs(znucl)<tol16)) then
      write(message, '(a,a,a)' )&
 &      ' Unable to read the atomic number ',trim(filename),ch10
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    if (any(abs(all_amu)<tol16)) then
      write(message, '(a,a,a)' )&
 &     ' Unable to read the atomic mass ',trim(filename),ch10
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    close(unit=funit)
@@ -2805,7 +2805,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   if (abs(wcount1-wcount2)/(wcount1+wcount2)>tol8) then
     write(message,'(2a,es15.4,a,es15.4,a,es15.4)')'The total wghatm has changed',ch10,&
 &    wcount1,' before and ', wcount2, ' now, difference being ',wcount1-wcount2
-    MSG_BUG(message)
+    ABI_BUG(message)
   end if
 
 
@@ -2958,13 +2958,13 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  if (nterm_max<=0) then
    write(message, '(a,a,a)' )&
 &     ' Unable to read the number of terms in ',trim(filename),ch10
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
   if (ndisp_max<=0) then
     write(message, '(a,a,a)' )&
 &    ' Unable to read the number of displacement in ',trim(filename),ch10
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 
 !Allocation ov the polynomial coeff type
@@ -3051,7 +3051,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !  Read the values of all the terms with fortran
    if (open_file(filename,message,unit=funit,form="formatted",&
 &              status="old",action="read") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !    Start a reading loop in fortran
@@ -3494,7 +3494,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
      write(msg, '(3a)' )&
 &         'unable to map the hist file ',ch10,&
 &         'Action: check/change your MD file'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      ncell(ia) = int(factor)
    end if
@@ -3620,7 +3620,7 @@ end do  ! ia
 &         'Unable to map the molecular dynamic file  ',ch10,&
 &         'on the reference supercell structure',ch10,&
 &         'Action: change the MD file'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
    end if
 
  need_map = .FALSE.
@@ -3733,7 +3733,7 @@ subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
 
  if (open_file(filename,message,unit=funit,form="formatted",&
    status="old",action="read") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write(message, '(2a)' ) " Read displacements from ", trim(filename)

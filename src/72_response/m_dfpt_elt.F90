@@ -842,7 +842,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !    allowed one
      if(2*irange(mu)+1 > mshift)then
        write(message, '(a,i0,a)' )' The range around atom',iatom,' is too large.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
 
 !    Set up a counter that explore the relevant range
@@ -2455,7 +2455,7 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
 &           'The phonon wavelength should not be zero : ',ch10,&
 &           'there are non-analytical terms that the code cannot handle.',ch10,&
 &           'Action : subtract this wavelength from the input.'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
        else
          arg=fac*gsq
@@ -2558,7 +2558,7 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
 &               'The distance between two atoms vanishes.',ch10,&
 &               'This is not allowed.',ch10,&
 &               'Action: check the input for the atoms number',ia,' and',ib,'.'
-               MSG_ERROR(message)
+               ABI_ERROR(message)
              else
                do mu=1,3
                  do nu=1,mu
@@ -2758,7 +2758,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                write(message,'(3a)')&
   &             'The G=0 term has no contributions at first order in q: ',ch10,&
   &             'Action : sumg0=0 '
-               MSG_ERROR(message)
+               ABI_ERROR(message)
              end if
            else
              arg=fac*gsq
@@ -2892,7 +2892,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
 &                   'The distance between two atoms vanishes.',ch10,&
 &                   'This is not allowed.',ch10,&
 &                   'Action: check the input for the atoms number',ia,' and',ib,'.'
-                   MSG_ERROR(message)
+                   ABI_ERROR(message)
                  end if
                end if
 
@@ -3267,7 +3267,7 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
 &                   'The distance between two atoms vanishes.',ch10,&
 &                   'This is not allowed.',ch10,&
 &                   'Action: check the input for the atoms number',ia,' and',ib,'.'
-                   MSG_ERROR(message)
+                   ABI_ERROR(message)
                  end if
                end if
 

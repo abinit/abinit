@@ -721,7 +721,7 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
 #if defined __INTEL_COMPILER && defined HAVE_OPENMP
        if (ifft==0) then
-         MSG_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
+         ABI_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
        end if
 #endif
        oarrbox(ifft+pad_box) = iarrsph(ipw+pad_sph)
@@ -755,7 +755,7 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
        ifft_inv = ixinv + (iyinv-1)*ldx + (izinv-1)*ldx*ldy
 #if defined __INTEL_COMPILER && defined HAVE_OPENMP
        if (ifft==0 .or. ifft_inv==0) then
-         MSG_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
+         ABI_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
        end if
 #endif
        oarrbox(ifft    +pad_box) =       iarrsph(ipw+pad_sph)
@@ -764,7 +764,7 @@ subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
    end do
    !
  else
-   MSG_ERROR("Wrong istwfk")
+   ABI_ERROR("Wrong istwfk")
  end if
 
  if (istwf_k>=2) then
@@ -889,7 +889,7 @@ subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
 #if defined __INTEL_COMPILER && defined HAVE_OPENMP
        if (ifft==0) then
-         MSG_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
+         ABI_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
        end if
 #endif
        oarrbox(ifft+pad_box) = iarrsph(ipw+pad_sph)
@@ -923,7 +923,7 @@ subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
        ifft_inv = ixinv + (iyinv-1)*ldx + (izinv-1)*ldx*ldy
 #if defined __INTEL_COMPILER && defined HAVE_OPENMP
        if (ifft==0 .or. ifft_inv==0) then
-         MSG_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
+         ABI_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
        end if
 #endif
        oarrbox(ifft    +pad_box) =        iarrsph(ipw+pad_sph)
@@ -932,7 +932,7 @@ subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,
    end do
    !
  else
-   MSG_ERROR("Wrong istwfk")
+   ABI_ERROR("Wrong istwfk")
  end if
 
  if (istwf_k>=2) then

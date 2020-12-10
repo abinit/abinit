@@ -182,7 +182,7 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
 &           present(nelect).and.present(nspden).and.&
 &           present(tphysel).and.present(xc_denpos)))then
      msg='If dtset is not provided, all the other optional arguments must be provided, which is not the case!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    endif
  endif
 
@@ -276,7 +276,7 @@ subroutine get_xclevel(ixc,xclevel,usefock)
 &           'ixc=',ixc,' (libXC hybrid functional) is presently not allowed.',ch10,&
 &           'ii,jj=',ii,jj,ch10,&
 &           'Action: try another hybrid functional.'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
        end if
      end if 

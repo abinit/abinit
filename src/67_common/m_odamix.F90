@@ -255,27 +255,27 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !faire un test sur optres=1, usewvl=0, nspden=1,nhatgrdim
  if(optres/=1)then
    write(message,'(a,i0,a)')' optres=',optres,', not allowed in oda => stop '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(dtset%usewvl/=0)then
    write(message,'(a,i0,a)')' usewvl=',dtset%usewvl,', not allowed in oda => stop '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(dtset%nspden/=1)then
    write(message,'(a,i0,a)')'  nspden=',dtset%nspden,', not allowed in oda => stop '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (my_natom>0) then
    if(paw_ij(1)%has_dijhat==0)then
      message = ' dijhat variable must be allocated in odamix ! '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%qphase==2)then
      message = ' complex dij not allowed in odamix! '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 

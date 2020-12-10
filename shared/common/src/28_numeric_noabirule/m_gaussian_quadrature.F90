@@ -880,7 +880,7 @@ subroutine class_matrix ( gaussian_kind, m, alpha, beta, aj, bj, zemu )
   temp2 = 0.5D+00
 
   if ( 500.0D+00 * temp < abs ( ( r8_gamma_gq ( temp2 ) )**2 - pi ) ) then
-    MSG_ERROR('Gamma function does not match machine parameters.')
+    ABI_ERROR('Gamma function does not match machine parameters.')
   end if
 
   if ( gaussian_kind == 1 ) then
@@ -1148,7 +1148,7 @@ subroutine imtqlx ( n, d, e, z )
         write ( std_out, '(a,i8)' ) '  L = ', l
         write ( std_out, '(a,i8)' ) '  M = ', m
         write ( std_out, '(a,i8)' ) '  N = ', n
-        MSG_ERROR("Aborting now")
+        ABI_ERROR("Aborting now")
       end if
 
       j = j + 1
@@ -1301,19 +1301,19 @@ subroutine parchk ( gaussian_kind, m, alpha, beta )
 ! *************************************************************************
 
   if ( gaussian_kind <= 0 ) then
-    MSG_ERROR('PARCHK - Fatal error: KIND <= 0.')
+    ABI_ERROR('PARCHK - Fatal error: KIND <= 0.')
   end if
 !
 !  Check ALPHA for Gegenbauer, Jacobi, Laguerre, Hermite, Exponential.
 !
   if ( 3 <= gaussian_kind .and. alpha <= -1.0D+00 ) then
-    MSG_ERROR('PARCHK - Fatal error! 3 <= KIND and ALPHA <= -1.')
+    ABI_ERROR('PARCHK - Fatal error! 3 <= KIND and ALPHA <= -1.')
   end if
 !
 !  Check BETA for Jacobi.
 !
   if ( gaussian_kind == 4 .and. beta <= -1.0D+00 ) then
-    MSG_ERROR('PARCHK - Fatal error: KIND == 4 and BETA <= -1.0.')
+    ABI_ERROR('PARCHK - Fatal error: KIND == 4 and BETA <= -1.0.')
   end if
 !
 !  Check ALPHA and BETA for rational.
@@ -1321,7 +1321,7 @@ subroutine parchk ( gaussian_kind, m, alpha, beta )
   if ( gaussian_kind == 8 ) then
     tmp = alpha + beta + m + 1.0D+00
     if ( 0.0D+00 <= tmp .or. tmp <= beta ) then
-      MSG_ERROR('PARCHK - Fatal error!  KIND == 8 but condition on ALPHA and BETA fails.')
+      ABI_ERROR('PARCHK - Fatal error!  KIND == 8 but condition on ALPHA and BETA fails.')
     end if
   end if
 
@@ -1649,7 +1649,7 @@ subroutine r8mat_write ( output_filename, m, n, table )
 !  Open the file.
 !
   if (open_file(output_filename, msg, newunit=output_unit, status='replace') /= 0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
 !
@@ -2318,7 +2318,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
     be = 0.0D+00
 
     if ( abs ( b - a ) <= temp ) then
-      MSG_ERROR('SCQF - Fatal error! |B - A| too small.')
+      ABI_ERROR('SCQF - Fatal error! |B - A| too small.')
     end if
 
     shft = ( a + b ) / 2.0D+00
@@ -2330,7 +2330,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
     be = -0.5D+00
 
     if ( abs ( b - a ) <= temp ) then
-      MSG_ERROR('SCQF - Fatal error! |B - A| too small.')
+      ABI_ERROR('SCQF - Fatal error! |B - A| too small.')
     end if
 
     shft = ( a + b ) / 2.0D+00
@@ -2342,7 +2342,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
     be = alpha
 
     if ( abs ( b - a ) <= temp ) then
-      MSG_ERROR('SCQF - Fatal error!  |B - A| too small.')
+      ABI_ERROR('SCQF - Fatal error!  |B - A| too small.')
     end if
 
     shft = ( a + b ) / 2.0D+00
@@ -2354,7 +2354,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
     be = beta
 
     if ( abs ( b - a ) <= temp ) then
-      MSG_ERROR("SCQF - Fatal error! |B - A| too small.")
+      ABI_ERROR("SCQF - Fatal error! |B - A| too small.")
     end if
 
     shft = ( a + b ) / 2.0D+00
@@ -2363,7 +2363,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
   else if ( gaussian_kind == 5 ) then
 
     if ( b <= 0.0D+00 ) then
-      MSG_ERROR('SCQF - Fatal error!  B <= 0')
+      ABI_ERROR('SCQF - Fatal error!  B <= 0')
     end if
 
     shft = a
@@ -2374,7 +2374,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
   else if ( gaussian_kind == 6 ) then
 
     if ( b <= 0.0D+00 ) then
-      MSG_ERROR('SCQF - Fatal error! B <= 0.')
+      ABI_ERROR('SCQF - Fatal error! B <= 0.')
     end if
 
     shft = a
@@ -2388,7 +2388,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
     be = 0.0D+00
 
     if ( abs ( b - a ) <= temp ) then
-      MSG_ERROR('|B - A| too small.')
+      ABI_ERROR('|B - A| too small.')
     end if
 
     shft = ( a + b ) / 2.0D+00
@@ -2397,7 +2397,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
   else if ( gaussian_kind == 8 ) then
 
     if ( a + b <= 0.0D+00 ) then
-      MSG_ERROR('  A + B <= 0.')
+      ABI_ERROR('  A + B <= 0.')
     end if
 
     shft = a
@@ -2411,7 +2411,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
     be = 0.5D+00
 
     if ( abs ( b - a ) <= temp ) then
-      MSG_ERROR('|B - A| too small.')
+      ABI_ERROR('|B - A| too small.')
     end if
 
     shft = ( a + b ) / 2.0D+00
@@ -2522,7 +2522,7 @@ subroutine sgqf ( nt, aj, bj, zemu, t, wts )
 !  Exit if the zero-th moment is not positive.
 !
   if ( zemu <= 0.0D+00 ) then
-    MSG_ERROR('SGQF - Fatal error! ZEMU <= 0.')
+    ABI_ERROR('SGQF - Fatal error! ZEMU <= 0.')
   end if
 !
 !  Set up vectors for IMTQLX.

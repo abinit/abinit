@@ -208,7 +208,7 @@ subroutine assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,r
          CASE (2)
            rhotwg_sym(1:Ep%npwe,isymop) = GWPC_CONJG(rhotwg(Sm1_gmG0))*Gsph_epsG0%phmGt(1:Ep%npwe,isym)
          CASE DEFAULT
-           MSG_BUG(sjoin('Wrong itim:', itoa(itim)))
+           ABI_BUG(sjoin('Wrong itim:', itoa(itim)))
          END SELECT
        end if
      end do
@@ -233,7 +233,7 @@ subroutine assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,r
    ABI_FREE(rhotwg_sym)
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong symchi:', itoa(Ep%symchi)))
+   ABI_BUG(sjoin('Wrong symchi:', itoa(Ep%symchi)))
  END SELECT
 
 end subroutine assemblychi0_sym
@@ -291,7 +291,7 @@ subroutine mkrhotwg_sigma(ii,nspinor,npw,rhotwg,rhotwg_I)
    ! $ M_y = i * (M_{\up,\down} -M_{\down,\up}) $
    rhotwg_I(:) = (rhotwg(2*npw+1:3*npw) - rhotwg(3*npw+1:4*npw) )*j_gw
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong ii value:', itoa(ii)))
+   ABI_BUG(sjoin('Wrong ii value:', itoa(ii)))
  END SELECT
 
 end subroutine mkrhotwg_sigma
@@ -514,7 +514,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
 
  case (3)
    call wrtout(std_out,' Found Magnetic group Shubnikov type III',"COLL")
-   MSG_ERROR('Shubnikov type III not implemented')
+   ABI_ERROR('Shubnikov type III not implemented')
 
    ntest=0
    do itim=1,ltg_q%timrev
@@ -525,7 +525,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
    end do
 
    if (ntest==0) then
-       MSG_WARNING("no symmetry can be used!")
+       ABI_WARNING("no symmetry can be used!")
    end if
    !RETURN
    ABI_MALLOC(chi0_afm,(npwe,npwe))
@@ -560,7 +560,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
    ABI_FREE(chi0_afm)
 
  case default
-   MSG_BUG(sjoin('Wrong value for shubnikov= ', itoa(shubnikov)))
+   ABI_BUG(sjoin('Wrong value for shubnikov= ', itoa(shubnikov)))
  end select
 
 end subroutine symmetrize_afm_chi0
@@ -769,7 +769,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
          CASE (2)
            rhotwg_sym(1:Ep%npwe,isymop)=CONJG(rhotwg(Sm1G(1:Ep%npwe)))*phmGt(1:Ep%npwe)
          CASE DEFAULT
-           MSG_BUG(sjoin('Wrong value of itim:', itoa(itim)))
+           ABI_BUG(sjoin('Wrong value of itim:', itoa(itim)))
          END SELECT
 
 
@@ -836,7 +836,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
    ABI_FREE(rhotwg_sym)
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong value of symchi ',itoa(Ep%symchi)))
+   ABI_BUG(sjoin('Wrong value of symchi ',itoa(Ep%symchi)))
  END SELECT
 
 end subroutine accumulate_chi0_q0
@@ -939,7 +939,7 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
 &    'Indices out of boundary ',ch10,&
 &    '  my_wl = ',my_wl,' iomegal = ',iomegal,ch10,&
 &    '  my_wr = ',my_wr,' iomegar = ',iomegar,ch10
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  SELECT CASE (symchi)
@@ -1024,7 +1024,7 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
          CASE (2)
            rhotwg_sym(1:npwe)=CONJG(rhotwg(Sm1G(1:npwe)))*phmGt(1:npwe)
          CASE DEFAULT
-           MSG_BUG(sjoin('Wrong value of itim:', itoa(itim)))
+           ABI_BUG(sjoin('Wrong value of itim:', itoa(itim)))
          END SELECT
 
          ! Multiply elements G,Gp of rhotwg_sym*num and accumulate in sf_chi0(G,Gp,io)
@@ -1077,7 +1077,7 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
    ABI_FREE(rhotwg_sym)
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong value of symchi:', itoa(symchi)))
+   ABI_BUG(sjoin('Wrong value of symchi:', itoa(symchi)))
  END SELECT
 
 end subroutine accumulate_sfchi0_q0
@@ -1171,7 +1171,7 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
 &    ' Indices out of boundary ',ch10,&
 &    '  my_wl = ',my_wl,' iomegal = ',iomegal,ch10,&
 &    '  my_wr = ',my_wr,' iomegar = ',iomegar,ch10
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  SELECT CASE (symchi)
@@ -1233,7 +1233,7 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
          CASE (2)
            rhotwg_sym(1:npwe)=CONJG(rhotwg(Sm1_gmG0(1:npwe))) * Gsph_epsG0%phmGt(1:npwe,isym)
          CASE DEFAULT
-           MSG_BUG(sjoin('Wrong value for itim:', itoa(itim)))
+           ABI_BUG(sjoin('Wrong value for itim:', itoa(itim)))
          END SELECT
 
 #if 0
@@ -1288,7 +1288,7 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
    !ABI_FREE(rhotwg_sym)
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong value for symchi:', itoa(symchi)))
+   ABI_BUG(sjoin('Wrong value for symchi:', itoa(symchi)))
  END SELECT
 
 end subroutine assemblychi0sf
@@ -1380,7 +1380,7 @@ subroutine approxdelta(nomegasf,omegasf,egwdiff_re,smear,iomegal,iomegar,wl,wr,s
    end if
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong value for spmeth:', itoa(spmeth)))
+   ABI_BUG(sjoin('Wrong value for spmeth:', itoa(spmeth)))
  END SELECT
 
 end subroutine approxdelta
@@ -1553,7 +1553,7 @@ subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max
  call wrtout(std_out,msg,'COLL')
 
  if (min_rest<tol6) then
-   MSG_WARNING("System seems to be metallic")
+   ABI_WARNING("System seems to be metallic")
  end if
 
  ! ======================================================
@@ -1604,7 +1604,7 @@ subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max
    ABI_FREE(insort)
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong value for method:', itoa(method)))
+   ABI_BUG(sjoin('Wrong value for method:', itoa(method)))
  END SELECT
  !write(std_out,*)omegasf(1)*Ha_eV,omegasf(nomegasf)*Ha_eV
 
@@ -1628,7 +1628,7 @@ subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max
 
  if (my_wl==-999 .or. my_wr==-999) then
    write(msg,'(a,2i6)')' wrong value in my_wl and/or my_wr ',my_wl,my_wr
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Calculate weights for Hilbert transform.
@@ -1915,13 +1915,13 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
    end do !ig
 
  CASE DEFAULT
-   MSG_BUG("Wrong value of symchi")
+   ABI_BUG("Wrong value of symchi")
  END SELECT
 
  if (outofbox_wfn/=0) then
    enough=enough+1
    if (enough<=50) then
-     MSG_WARNING(sjoin(' Number of G1-G2 pairs outside the G-sphere for Wfns: ', itoa(outofbox_wfn)))
+     ABI_WARNING(sjoin(' Number of G1-G2 pairs outside the G-sphere for Wfns: ', itoa(outofbox_wfn)))
      if (enough==50) then
        call wrtout(std_out,' ========== Stop writing Warnings ==========','COLL')
      end if
@@ -2093,7 +2093,7 @@ subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
    ABI_DEALLOCATE(Sm1_gmG0)
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong value for symchi:', itoa(symchi)))
+   ABI_BUG(sjoin('Wrong value for symchi:', itoa(symchi)))
  END SELECT
 
 end subroutine accumulate_chi0sumrule
@@ -2164,10 +2164,10 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
  DBG_ENTER("COLL")
 
  if (chi0alg<0 .or. chi0alg>=2) then
-   MSG_BUG(sjoin('chi0alg:', itoa(chi0alg),' not allowed'))
+   ABI_BUG(sjoin('chi0alg:', itoa(chi0alg),' not allowed'))
  end if
  if (timrev/=1 .and. timrev/=2) then
-   MSG_BUG(sjoin('timrev:', itoa(timrev),' not allowed'))
+   ABI_BUG(sjoin('timrev:', itoa(timrev),' not allowed'))
  end if
 
  ABI_UNUSED(nbvw)
@@ -2198,7 +2198,7 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
 &        ' k   = ',(Kmesh%bz(ii,ik_bz),ii=1,3),ch10,&
 &        ' k-q = ',(kmq(ii),ii=1,3),ch10,&
 &        ' weight in cchi0/cchi0q is wrong '
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      ikmq_ibz=Kmesh%tab(ikmq_bz)
@@ -2335,7 +2335,7 @@ subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,b
          end if
 
        CASE DEFAULT
-         MSG_ERROR(sjoin(" Wrong value for spmeth:", itoa(Ep%spmeth)))
+         ABI_ERROR(sjoin(" Wrong value for spmeth:", itoa(Ep%spmeth)))
        END SELECT
        !write(std_out,*) "bbp_mask(ib1,ib2)",bbp_mask(ib1,ib2)
      end do !ib2
@@ -2368,7 +2368,7 @@ subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,b
    end do
 
   CASE DEFAULT
-    MSG_ERROR(sjoin("Wrong value of gwcomp:", itoa(Ep%gwcomp)))
+    ABI_ERROR(sjoin("Wrong value of gwcomp:", itoa(Ep%gwcomp)))
   END SELECT
 
 end subroutine chi0_bbp_mask

@@ -313,7 +313,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
  nfftotf=PRODUCT(ngfftf(1:3))
  if ((psps%usepaw==1.and.pawfgr%nfft/=nfftf).or.(psps%usepaw==0.and.dtset%nfft/=nfftf)) then
-   MSG_BUG('wrong values for nfft, nfftf!')
+   ABI_BUG('wrong values for nfft, nfftf!')
  end if
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
@@ -881,7 +881,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    ABI_DEALLOCATE(rhowfg)
  end if
 
- MSG_COMMENT('New density rho(r) made from input wfs')
+ ABI_COMMENT('New density rho(r) made from input wfs')
 
  call timab(59,2,tsec)
 

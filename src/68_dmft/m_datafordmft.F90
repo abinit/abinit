@@ -179,13 +179,13 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 
  if(usecprj==0) then
    write(message,*) "  usecprj=0 : BUG in datafordmft",usecprj
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(my_nspinor/=dtset%nspinor) then
    write(message,*) "  my_nspinor=/dtset%nspinor, datafordmft not working in this case",&
 &   my_nspinor,dtset%nspinor
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -242,7 +242,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  end if
  if(dtset%nstep==0.and.dtset%nbandkss==0) then
    message = 'nstep should be greater than 1'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !********************* Max Values for U terms.
@@ -255,7 +255,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !*****************   in forlb.eig
  if(me.eq.0.and.abs(dtset%pawprtvol)>=3) then
    if (open_file('forlb.eig',message,newunit=unt,form='formatted',status='unknown') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind(unt)
    write(unt,*) "Number of bands,   spins, and  k-point; and spin-orbit flag"
@@ -366,7 +366,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
                  write(message,'(a,a,i4,i4,2a)')  ch10,&
 &                 '  Wrong use of dmftqmc_t2g',paw_dmft%dmftqmc_t2g,lpawu,ch10,&
 &                 ' Action: desactivate qmftqmc_t2g or use lpawu=2'
-                 MSG_ERROR(message)
+                 ABI_ERROR(message)
                end if
              end if
 !            ----------   t2g case
@@ -381,7 +381,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
                  write(message,'(a,a,i4,i4,2a)')  ch10,&
 &                 '  Wrong use of dmftqmc_x2my2d',paw_dmft%dmftqmc_x2my2d,lpawu,ch10,&
 &                 ' Action: desactivate dmftqmc_x2my2d or use lpawu=2'
-                 MSG_ERROR(message)
+                 ABI_ERROR(message)
                end if
              end if
 !            ----------   x2my2d case
@@ -418,7 +418,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
                        write(message,'(a,a,a,a)')  ch10,&
 &                       ' jj1 is not correct in datafordmft',ch10,&
 &                       ' Action: CONTACT Abinit group'
-                       MSG_BUG(message)
+                       ABI_BUG(message)
                      end if ! jj1
                      icount_proj_ilmn=psps%indlmn(3,ilmn,itypat)  ! n: nb of projector
 !                    write(std_out,*) "icount_proj_ilmn",icount_proj_ilmn
@@ -796,7 +796,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
    ll=1
 
    if (open_file('forlb.ovlp',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    rewind(unt)
 
@@ -856,7 +856,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
                        if(jj1>(2*pawtab(itypat)%lpawu+1)) then
                          write(message,'(a,a,i4,i5,i4)') ch10," Error 2 in datafordmft",jj1,pawtab(itypat)%lpawu
                          call wrtout(std_out,  message,'COLL')
-                         MSG_ERROR("Aborting now")
+                         ABI_ERROR("Aborting now")
                        end if ! jj1
 !                      if(jj1>pawtab(dtset%typat(iatom))%nproju*(2*lpawu+1)) then
 !                      write(message,'(a,a,a,a)')  ch10,&
@@ -1390,7 +1390,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 
    if(nkpt/=1.and.present(jkpt)) then
      message = 'BUG in psichi_normalization'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    iortho=1
@@ -1567,7 +1567,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 
      call destroy_oper(norm1)
 !    call flush(std_out)           ! debug debug  debug   debug
-!    MSG_ERROR("Stop for debugging")
+!    ABI_ERROR("Stop for debugging")
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  New implementation, several atoms, general case.

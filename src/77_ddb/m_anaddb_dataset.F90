@@ -324,7 +324,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(a,f10.3,a,a,a,a,a)' )&
    'a2fsmear is ',anaddb_dtset%a2fsmear,', but only values > 1.e-6 ',ch10,&
    'are allowed',ch10,'Action: correct a2fsmear in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%alphon=0
@@ -343,7 +343,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !  is to be applied after the analysis of IFCs
 !  3,4 are for rotational invariance (under development)
 !  5 is for hermitian imposition of the ASR
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !B
@@ -361,7 +361,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,a5)' )&
    'brav is ',anaddb_dtset%brav,', but the only allowed values',ch10,&
    'are -1, 1,2,3 or 4 .',ch10,'Action: correct brav in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !C
@@ -373,7 +373,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'chneut is ',anaddb_dtset%chneut,', but the only allowed values',ch10,&
    'are 0, 1 or 2.',ch10,'Action: correct chneut in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !D
@@ -385,7 +385,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'dieflag is ',anaddb_dtset%dieflag,', but the only allowed values',ch10,&
    'are 0, 1, 2, 3 or 4.',ch10,'Action: correct dieflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%dipdip=1
@@ -395,7 +395,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'dipdip is ',anaddb_dtset%dipdip,', but the only allowed values',ch10,&
    'are -1, 0 or 1 .',ch10,'Action: correct dipdip in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%dipquad=0
@@ -405,7 +405,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'dipquad is ',anaddb_dtset%dipquad,', but the only allowed values',ch10,&
    'are 0 or 1 .',ch10,'Action: correct dipquad in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%ep_scalprod = 0
@@ -415,7 +415,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'ep_scalprod is ',anaddb_dtset%ep_scalprod,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct ep_scalprod in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%dosdeltae=one/Ha_cmm1
@@ -430,7 +430,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,es14.4,3a)' )&
    'dossmear is ',anaddb_dtset%dossmear,', which is lower than 0 .',ch10,&
    'Action: correct dossmear in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%dostol=0.25_dp
@@ -440,7 +440,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,es14.4,3a)' )&
    'dostol is ',anaddb_dtset%dostol,', which is lower than 0 .',ch10,&
    'Action: correct dostol in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%dossum=0
@@ -450,7 +450,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'dossum is ',anaddb_dtset%dossum,', but the only allowed values',ch10,&
    'are 0, 1',ch10,'Action: correct dossum in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !E
@@ -462,7 +462,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'eivec is ',anaddb_dtset%eivec,', but the only allowed values',ch10,&
    'are 0, 1, 2, 3 or 4.',ch10,'Action: correct eivec in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%elaflag=0
@@ -472,7 +472,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(a,i0,5a)' )&
    'elaflag is ',anaddb_dtset%elaflag,', but the only allowed values',ch10,&
    'are 0,1,2,3,4 or 5 .',ch10,'Action: correct elaflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !By default use the real fermie (tests for abs(elph_fermie) < tol10 in the code)
@@ -494,7 +494,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'ep_nspline is ',anaddb_dtset%ep_nspline,', but this should not be ',ch10,&
    'negative or too large .',ch10,'Action: correct ep_nspline in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !interpolate gkk or gamma. It should be better to interpolate gkk onto the
@@ -506,7 +506,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'ep_int_gkk is ',anaddb_dtset%ep_int_gkk,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct ep_int_gkk in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%elphflag=0
@@ -516,7 +516,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(a,i0,5a)' )&
    'elphflag = ',anaddb_dtset%elphflag,', but the allowed values',ch10,&
    'are 0, or 1.',ch10,'Action: correct elphflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !typical value for gaussian smearing, but can vary sensibly with the metal
@@ -527,7 +527,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(a,f10.3,5a)' )&
    'elphsmear is ',anaddb_dtset%elphsmear,'. Only values > 1.e-6 ',ch10,&
    'are allowed',ch10,'Action: correct elphsmear in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%enunit=0
@@ -537,7 +537,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'enunit is ',anaddb_dtset%enunit,', but the only allowed values',ch10,&
    'are 0, 1 or 2.',ch10,'Action: correct enunit in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Default is 0 - not used unless telphint==2
@@ -549,7 +549,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      write(message, '(a,i0,5a)' )&
      'ep_b_max is ',anaddb_dtset%ep_b_max,', but the only allowed values',ch10,&
      'are between 1 and nband.',ch10,'Action: correct ep_b_max in your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -562,7 +562,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      write(message, '(a,i0,5a)' )&
      'ep_b_min is ',anaddb_dtset%ep_b_min,', but the only allowed values',ch10,&
      'are between 1 and nband.',ch10,'Action: correct ep_b_min in your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -573,7 +573,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'ep_keepbands is ',anaddb_dtset%ep_keepbands,', but the only allowed values',ch10,&
    'are 0 or 1 .',ch10,'Action: correct ep_keepbands in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%ep_nqpt=0
@@ -583,7 +583,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'ep_nqpt is ',anaddb_dtset%ep_nqpt,', but the only allowed values',ch10,&
    'are > 0.',ch10,'Action: correct ep_nqpt in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (anaddb_dtset%ep_nqpt > 0) then
@@ -604,7 +604,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      write(message,'(3a)')&
      'ep_nqpt is non zero but ep_qptlist is absent ',ch10,&
      'Action: specify ep_qptlist in your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -618,7 +618,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(3a,i0,5a)' )&
    ' flexoflag is ',anaddb_dtset%flexoflag,', but the only allowed values',ch10,&
    'are 0, 1,2,3,4  .',ch10,'Action: correct flexoflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%freeze_displ = zero
@@ -633,7 +633,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(a,f10.3,5a)' )&
    'frmax is ',anaddb_dtset%frmax,'. Only values > 0 ',ch10,&
    'are allowed',ch10,'Action: correct frmax in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%frmin=zero
@@ -643,7 +643,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(a,f10.3,5a)' )&
    'frmin is ',anaddb_dtset%frmin,'. Only values > 0 ',ch10,&
    'are allowed',ch10,'Action: correct frmin in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !G
@@ -659,7 +659,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !&  ', but the only allowed values',ch10,&
 !&  '  are 0 or 1 .',ch10,&
 !&  '  Action: correct gkk2write in your input file.'
-!MSG_ERROR(message)
+!ABI_ERROR(message)
 !end if
 
  anaddb_dtset%gkk_rptwrite = 0
@@ -673,7 +673,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !&  ', but the only allowed values',ch10,&
 !&  '  are 0 or 1 .',ch10,&
 !&  '  Action: correct gkk_rptwrite in your input file.'
-!MSG_ERROR(message)
+!ABI_ERROR(message)
 !end if
 
  anaddb_dtset%gkqwrite = 0
@@ -683,7 +683,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'gkqwrite is ',anaddb_dtset%gkqwrite,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct gkqwrite in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%gruns_nddbs = 0
@@ -696,7 +696,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    start = index(string, "GRUNS_DDBS") + len("GRUNS_DDBS") + 1
    do ii=1,anaddb_dtset%gruns_nddbs
      if (next_token(string, start, path) /= 0) then
-       MSG_ERROR(sjoin("Cannot find DDB path in input string:", ch10, string(start:)))
+       ABI_ERROR(sjoin("Cannot find DDB path in input string:", ch10, string(start:)))
      end if
      anaddb_dtset%gruns_ddbs(ii) = rmquotes(path)
    end do
@@ -713,7 +713,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'ifcana is ',anaddb_dtset%ifcana,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct ifcana in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%ifcflag=0
@@ -723,7 +723,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'ifcflag is ',anaddb_dtset%ifcflag,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct ifcflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%ifcout=0
@@ -733,7 +733,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'ifcout is ',anaddb_dtset%ifcout,', which is lower than -1.',ch10,&
    'Action: correct ifcout in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%ifltransport = 0
@@ -743,7 +743,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'ifltransport is ',anaddb_dtset%ifltransport,', but the only allowed values',ch10,&
    'are 0 or 1 or 2 or 3.',ch10,'Action: correct ifltransport in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%instrflag=0
@@ -753,7 +753,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(a,i0,5a)' )&
    'instrflag is ',anaddb_dtset%instrflag,', but the only allowed values',ch10,&
    'are 0, 1.',ch10,'Action: correct instrflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !J
@@ -793,7 +793,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(a,f10.3,5a)' )&
    'mustar is ',anaddb_dtset%mustar,', but only positive values',ch10,&
    'are allowed',ch10,'Action: correct mustar in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !N
@@ -805,14 +805,14 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,2a,i0,3a)' )&
    'natfix is ',anaddb_dtset%natfix,', which is larger than natom',' (=',natom,')',ch10,&
    'Action: correct natfix in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(anaddb_dtset%natfix < 0)then
    write(message, '(a,i0,3a)' )&
    'natfix is ',anaddb_dtset%natfix,', which is < 0',ch10,&
    'Action: correct natfix in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%natifc=0
@@ -822,7 +822,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'natifc is ',anaddb_dtset%natifc,', which is lower than 0 .',ch10,&
    'Action: correct natifc in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%natprj_bs=0
@@ -832,7 +832,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,a,i0,2a)' )&
    'natprj_bs is ',anaddb_dtset%natprj_bs,', but must be between 0 and natom = ',natom,ch10,&
    'Action: correct natprj_bs in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%nchan=800
@@ -843,7 +843,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'nchan is ',anaddb_dtset%nchan,', which is lower than 0 .',ch10,&
    'Action: correct nchan in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ndivsm',tread,'INT')
@@ -852,7 +852,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'ndivsm is ',anaddb_dtset%ndivsm,', which is <= 0 .',ch10,&
    'Action: correct ndivsm in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%nfreq=1
@@ -862,7 +862,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'nfreq is ',anaddb_dtset%nfreq,', which is lower than 0 .',ch10,&
    'Action: correct nfreq in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%ng2qpt(:)=0
@@ -873,7 +873,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      write(message, '(a,i0,a,i0,3a,i0,a)' )&
      'ng2qpt(',ii,') is ',anaddb_dtset%ng2qpt(ii),', which is lower than 0 .',ch10,&
      'Action: correct ng2qpt(',ii,') in your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 
@@ -885,7 +885,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      write(message, '(a,i0,a,i0,3a,i0,a)' )&
      'ngqpt(',ii,') is ',anaddb_dtset%ngqpt(ii),', which is lower than 0 .',ch10,&
      'Action: correct ngqpt(',ii,') in your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 
@@ -896,7 +896,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'ngrids is ',anaddb_dtset%ngrids,', which is lower than 0 .',ch10,&
    'Action: correct ngrids in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%nlflag=0
@@ -906,7 +906,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'nlflag is ',anaddb_dtset%nlflag,', but the only allowed values',ch10,&
    'are 0, 1, 2 or 3.',ch10,'Action: correct nlflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%nph1l=0
@@ -916,7 +916,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'nph1l is ',anaddb_dtset%nph1l,', which is lower than 0 .',ch10,&
    'Action: correct nph1l in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%nph2l=0
@@ -926,7 +926,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'nph2l is ',anaddb_dtset%nph2l,', which is lower than 0 .',ch10,&
    'Action: correct nph2l in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%nqpath=0
@@ -936,7 +936,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(a,i0,3a)' )&
    'nqpath is ',anaddb_dtset%nqpath,', but must be positive',ch10,&
    'Action: correct elphflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%nqshft=1
@@ -946,7 +946,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'nqshft is ',anaddb_dtset%nqshft,', but the only allowed values',ch10,&
    'are 1, 2 or 4 .',ch10,'Action: correct nqshft in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%nsphere=0
@@ -956,7 +956,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'nsphere is ',anaddb_dtset%nsphere,', while it must be >= 0 or equal to -1',ch10,&
    'Action: correct nsphere in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%nstrfix=0
@@ -966,14 +966,14 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'nstrfix is ',anaddb_dtset%nstrfix,', which is larger than 6',ch10,&
    'Action: correct nstrfix in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(anaddb_dtset%nstrfix < 0)then
    write(message, '(a,i0,3a)' )&
    'nstrfix is ',anaddb_dtset%nstrfix,', which is < 0',ch10,&
    'Action: correct nstrfix in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%ntemper=10
@@ -983,7 +983,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'ntemper is ',anaddb_dtset%ntemper,', which is lower than 0',ch10,&
    'Action: correct ntemper in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%nwchan=10
@@ -994,7 +994,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,3a)' )&
    'nwchan is ',anaddb_dtset%nwchan,', which is lower than 0 .',ch10,&
    'Action: correct nwchan in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !O
@@ -1005,7 +1005,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(a,i0,5a)' )&
    'outboltztrap is ',anaddb_dtset%outboltztrap,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct outboltztrap in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -1017,7 +1017,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(3a,i0,5a)' )&
    ' piezoflag is ',anaddb_dtset%piezoflag,', but the only allowed values',ch10,&
    'are 0, 1,2,3,4,5,6,7  .',ch10,'Action: correct piezoflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%polflag=0
@@ -1027,7 +1027,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'polflag is ',anaddb_dtset%polflag,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct polflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%prtbltztrp=0
@@ -1037,7 +1037,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'prtbltztrp is ',anaddb_dtset%prtbltztrp,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct prtbltztrp in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  ! Default is no output for PHDOS
@@ -1049,7 +1049,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    'prtdos is ',anaddb_dtset%prtdos,', but the only allowed values',ch10,&
    'are 0 (no output) or 1 (gaussians) or 2 (tetrahedra) ',ch10,&
    'Action: correct prtdos in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Default is no output for the Fermi Surface
@@ -1061,7 +1061,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    'prtfsurf is ',anaddb_dtset%prtfsurf,'. The only allowed values',ch10,&
    'are 0 (no output) or 1 (Xcrysden bxsf format)',ch10,  &
    'Action: correct prtfsurf in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Default is no output of the real space IFC to file
@@ -1073,7 +1073,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    'prtf_ifc is ',anaddb_dtset%prt_ifc,'. The only allowed values',ch10,&
    'are 0 (no output) or 1 (AI2PS format)',ch10,  &
    'Action: correct prt_ifc in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 ! check that ifcout is set
  if (anaddb_dtset%prt_ifc /= 0 .and. anaddb_dtset%ifcout == 0) then
@@ -1089,7 +1089,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    'prtf_ddb is ',anaddb_dtset%prtddb,'. The only allowed values',ch10,&
    'are 0 (no output) or 1 (print DDB and DDB.nc files)',ch10,  &
    'Action: correct prtddb in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 ! check that ifcflag is set
  if (anaddb_dtset%prtddb /= 0 .and. anaddb_dtset%ifcflag == 0) then
@@ -1110,7 +1110,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    'prtnest is ',anaddb_dtset%prtnest,' The only allowed values',ch10,&
    'are 0 (no nesting), 1 (XY format) or 2 (XY + Xcrysden format)',ch10,&
    'Action: correct prtnest in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%prtphbands=1
@@ -1119,7 +1119,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  if (all(anaddb_dtset%prtphbands /= [0,1,2])) then
    write(message, '(a,i0,a)' )&
     'prtphbands is ',anaddb_dtset%prtphbands,', but the only allowed values are [0, 1, 2].'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%prtsrlr=0
@@ -1129,7 +1129,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'prtsrlr is ',anaddb_dtset%prtsrlr,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct prtsrlr in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%prtvol = 0
@@ -1151,7 +1151,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    'qgrid_type is ',anaddb_dtset%qgrid_type,' The only allowed values',ch10,&
    'are 1 (uniform grid from nqpt) or 2 (listed in ep_nqpt, ep_qptlist)',ch10,&
    'Action: correct qgrid_type in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%qrefine=1 ! default is no refinement
@@ -1163,7 +1163,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      'qrefine is',anaddb_dtset%qrefine,' The only allowed values',ch10,&
      'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
      'Action: correct qrefine in your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 
@@ -1174,7 +1174,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'quadquad is ',anaddb_dtset%quadquad,', but the only allowed values',ch10,&
    'are 0 or 1 .',ch10,'Action: correct quadquad in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !R
@@ -1186,7 +1186,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'ramansr is ',anaddb_dtset%ramansr,', but the only allowed values',ch10,&
    'are 0, 1 or 2.',ch10,'Action: correct ramansr in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%relaxat=0
@@ -1196,7 +1196,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'relaxat is ',anaddb_dtset%relaxat,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct relaxat in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%relaxstr=0
@@ -1206,7 +1206,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'relaxstr is ',anaddb_dtset%relaxstr,'but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct relaxstr in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%rfmeth=1
@@ -1216,7 +1216,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'rfmeth is ',anaddb_dtset%rfmeth,', but the only allowed values',ch10,&
    'are 1 or 2.',ch10,'Action: correct rfmeth in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%rifcsph=zero
@@ -1226,7 +1226,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !   write(message, '(a,f10.3,3a)' )&
 !&   'rifcsph is ',anaddb_dtset%rifcsph,', which is lower than zero.',ch10,&
 !&   'Action: correct rifcsph in your input file.'
-!   MSG_ERROR(message)
+!   ABI_ERROR(message)
 ! end if
 
 !S
@@ -1238,7 +1238,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'selectz is ',anaddb_dtset%selectz,', but the only allowed values',ch10,&
    'are 0, 1 or 2 .',ch10,'Action: correct selectz in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%symdynmat=1
@@ -1248,7 +1248,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'symdynmat is ',anaddb_dtset%symdynmat,'. The only allowed values',ch10,&
    'are 0, or 1.',ch10,'Action: correct symdynmat in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !T
@@ -1266,7 +1266,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    'telphint is ',anaddb_dtset%telphint,'. The only allowed values',ch10,&
    'are 0 (tetrahedron) or 1 (gaussian) or ','2 (set of bands occupied ep_b_min,ep_b_max) or 3 (Fermi Dirac).',ch10,&
    'Action: correct telphint in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%temperinc=100.0_dp
@@ -1276,7 +1276,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,f10.3,3a)' )&
    'temperinc is ',anaddb_dtset%temperinc,', which is lower than 0 .',ch10,&
    'Action: correct temperinc in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%tempermin=100.0_dp
@@ -1286,7 +1286,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,f10.3,3a)' )&
    'tempermin is ',anaddb_dtset%tempermin,', which is lower than 0 .',ch10,&
    'Action: correct tempermin in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%thermal_supercell(:,:)=0
@@ -1302,7 +1302,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,9I6,5a)' )&
    'thermal_supercell is ',anaddb_dtset%thermal_supercell,', but the matrix must be non singular',ch10,&
    'with a non zero determinant.',ch10,'Action: correct thermal_supercell in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%thmflag=0
@@ -1312,7 +1312,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'thmflag is ',anaddb_dtset%thmflag,', but the only allowed values',ch10,&
    'are between 0 to 8 (included).',ch10,'Action: correct thmflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%thmtol=0.25_dp
@@ -1322,7 +1322,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,es14.4,3a)' )&
    'thmtol is ',anaddb_dtset%thmtol,', which is lower than 0 .',ch10,&
    'Action: correct thmtol in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  anaddb_dtset%ep_prt_yambo = 0
@@ -1332,7 +1332,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'ep_prt_yambo is ',anaddb_dtset%ep_prt_yambo,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct ep_prt_yambo in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !default means _do_ symmetrize the ep coupling matrices over qpoints
@@ -1343,9 +1343,9 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'symgkq is ',anaddb_dtset%symgkq,', but the only allowed values',ch10,&
    'are 0 or 1.',ch10,'Action: correct symgkq in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  else if (anaddb_dtset%symgkq == 0) then
-   MSG_WARNING('You have turned off el-ph matrix symmetrization over q. Use at own risk')
+   ABI_WARNING('You have turned off el-ph matrix symmetrization over q. Use at own risk')
  end if
 
 !U
@@ -1357,12 +1357,12 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'use_k_fine is ',anaddb_dtset%use_k_fine,', but the only allowed values',ch10,&
    'are 1 or 0.',ch10,'Action: correct use_k_fine in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(anaddb_dtset%use_k_fine == 1) then
    if (sum(anaddb_dtset%kptrlatt) == 0 .or. sum(anaddb_dtset%kptrlatt_fine) == 0 ) then
-     MSG_ERROR('If a finer k-grid is used, you must specify both kptrlatt and kptrlatt_fine')
+     ABI_ERROR('If a finer k-grid is used, you must specify both kptrlatt and kptrlatt_fine')
    end if
  end if
 
@@ -1466,7 +1466,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      write(message,'(3a)')&
      'natprj_bs is non zero but iatprj_bs is absent ',ch10,&
      'Action: specify iatprj_bs in your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -1523,7 +1523,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
          write(message, '(5a)' )&
          'The first list of wavevectors ','should not have non-analytical data.',ch10,&
          'Action: correct the first list',' of wavevectors in the input file.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
      end do
    end if
@@ -1552,7 +1552,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
          write(message, '(5a)' )&
          'The second list of wavevectors',' should have only non-analytical data.',ch10,&
          'Action: correct the second list','of wavevectors in the input file.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
      end do
    end if
@@ -1575,7 +1575,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      write(message,'(3a)')&
      'nqpath is non zero but qpath is absent ',ch10,&
      'Action: specify qpath in your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -1612,14 +1612,14 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message,'(3a)' )&
    'frmax should be higher than frmin',ch10,&
    'Action: change frmax and/or frmin  in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (anaddb_dtset%nqpath==0 .and. anaddb_dtset%elphflag==1) then
    write(message,'(4a)' )&
    'elphflag is 1 but no nqpath has been specified','for phonon linewidths',ch10,&
    'Action: specify nqpath and qpath(3,nqpath) in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(anaddb_dtset%telphint /= 2 .and. (anaddb_dtset%ep_b_min /= 0 .or. anaddb_dtset%ep_b_max /= 0)) then
@@ -1627,14 +1627,14 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    'telphint is ',anaddb_dtset%telphint,', but ep_b_min or ep_b_max',ch10,&
    'are set /= 1. They will not be used'
    call wrtout(std_out,message,'COLL')
-   MSG_WARNING(message)
+   ABI_WARNING(message)
 
  else if(anaddb_dtset%telphint == 2 .and. (anaddb_dtset%ep_b_min == 0 .or. anaddb_dtset%ep_b_max == 0)) then
    write(message, '(a,i0,4a)' )&
    'telphint is ',anaddb_dtset%telphint,', but ep_b_min or ep_b_max',ch10,&
    'are not both set. ',ch10,&
    'Action: set ep_b_min and ep_b_max in your input file.',ch10
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(anaddb_dtset%thmflag < 3) then
@@ -1644,7 +1644,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      'if tetrahedron integration is used, ',&
      'or the output of the nesting function/Fermi surface is required, ',&
      'you must specify the kptrlatt'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -1652,43 +1652,43 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(3a)' )&
    'ifcflag must be 1 when the calculation of the phonon DOS is required ',ch10,&
    'Action: correct ifcflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(anaddb_dtset%prtsrlr/=0 .and. anaddb_dtset%ifcflag/=1) then
    write(message, '(3a)' )&
    'ifcflag must be 1 for the SR/LR decomposition of the phonon frequencies',ch10,&
    'Action: correct ifcflag in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (anaddb_dtset%gruns_nddbs /=0 .and. anaddb_dtset%ifcflag /=1) then
-   MSG_ERROR("ifcflag must be 1 for Grunesein calculation")
+   ABI_ERROR("ifcflag must be 1 for Grunesein calculation")
  end if
 
  if (anaddb_dtset%vs_qrad_tolkms(1) /= zero .and. anaddb_dtset%ifcflag /=1) then
-   MSG_ERROR("ifcflag must be 1 to calculate speed of sound")
+   ABI_ERROR("ifcflag must be 1 to calculate speed of sound")
  end if
 
  if(anaddb_dtset%prtdos/=0 .and. sum(abs(anaddb_dtset%ng2qpt(:))) < 3 ) then
    write(message, '(3a)' )&
    'ng2qpt must be specified when the calculation of the phonon DOS is required ',ch10,&
    'Action: correct ng2qpt in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (anaddb_dtset%ifltransport /= 0 .and. anaddb_dtset%ep_keepbands /= 1) then
    write(message, '(3a)' )&
    'Band dependency of electron phonon matrix elements must be kept for transport ',ch10,&
    'Action: set ep_keepbands to 1 in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (anaddb_dtset%ifltransport > 1 .and. sum(abs(anaddb_dtset%kptrlatt)) == 0) then
    write(message, '(3a)' )&
    'For inelastic transport or electron lifetime calculations you must specify kprtlatt ',ch10,&
    'Action: copy kptrlatt from your abinit GS file to your anaddb input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !FIXME: add check that if freeze_displ /= 0 then you need to be doing ifc and phonon interpolation
@@ -1697,7 +1697,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(3a)' )&
    'if you want interatomic force constant output, anaddb needs ngqpt input variable ',ch10,&
    'Action: set ngqpt in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !check that q-grid refinement is a divisor of ngqpt in each direction
@@ -1707,7 +1707,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    'qrefine is',anaddb_dtset%qrefine(1:3),' The only allowed values',ch10,&
    'are integers which are divisors of the ngqpt grid', anaddb_dtset%ngqpt(1:3),ch10,&
    'Action: correct qrefine in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !check that fermie and nelect are not both specified
@@ -1715,7 +1715,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,E10.2,a,E10.2,a,a,a)' )&
     'elph_fermie (',anaddb_dtset%elph_fermie,') and ep_extrael (',anaddb_dtset%ep_extrael, '), may not both be non 0',ch10,&
     'Action: remove one of the two in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  ! Check for possible typos.

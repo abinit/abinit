@@ -157,21 +157,21 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one atom.',ch10,&
 &   'The number of atom is  ',natom,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (nrpt < 1) then
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one rpt point.',ch10,&
 &   'The number of rpt points is  ',nrpt,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (nrpt /= ifcs%nrpt) then
    write(msg, '(3a,i5,a,i5,a)' )&
 &   'nrpt must have the same dimension as ifcs.',ch10,&
 &   'The number of cell is  ',nrpt,' instead of ',ifcs%nrpt,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(present(nqpt).and.(.not.present(dynmat).or.&
@@ -179,7 +179,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
 &                      .not.present(phfrq)))then
    write(msg, '(a)' )&
 &   'nqpt is specified but dynamt,qpoints or phfrq are not.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(.not.present(nqpt).and.(present(dynmat).or.&
@@ -187,7 +187,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
 &                      present(phfrq)))then
    write(msg, '(a)' )&
 &   ' dynamt,qpoints or phfrq are specified but nqpt is not.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Set number of cell
@@ -361,7 +361,7 @@ subroutine harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupli
   if(natom /= size(strain_coupling,3)) then
     write(msg, '(a)' )&
 &        ' natom has not the same size strain_coupling array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
 ! 1-deallocate old array
@@ -420,7 +420,7 @@ subroutine harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
     if(natom /= size(zeff,3)) then
     write(msg, '(a)' )&
 &        ' natom has not the same size zeff array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
 ! 1-deallocate old array
@@ -484,25 +484,25 @@ subroutine harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,phfrq,qpo
     if((natom /= size(dynmat,3)).or.(natom /= size(dynmat,5))) then
     write(msg, '(a)' )&
 &        ' natom has not the same size dynmat array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
   if (nqpt /= size(dynmat,6))then
     write(msg, '(a)' )&
 &        ' nqpt has not the same size dynmat array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
   if (nqpt /= size(qpoints,2))then
     write(msg, '(a)' )&
 &        ' nqpt has not the same size qpoints array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
   if (nqpt /= size(phfrq,2))then
     write(msg, '(a)' )&
 &        ' nqpt has not the same size phfrq array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
 ! 1-deallocate old array
@@ -601,7 +601,7 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
 
   if (any(sc_size <= 0)) then
     write(msg,'(a,a)')' sc_size can not be inferior or equal to zero'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
 ! Initialisation of variables
@@ -794,7 +794,7 @@ subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
 
  if (irpt_ref<=0) then
    write(msg,'(a,a)')' Unable to find the cell of reference in IFC'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  atmfrc => ifc%atmfrc

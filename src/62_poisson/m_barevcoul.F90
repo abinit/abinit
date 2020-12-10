@@ -322,7 +322,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    test=COUNT(vcut%pdir==1)
    ABI_CHECK((test==1),'Wrong pdir for cylinder')
    if (vcut%pdir(3)/=1) then
-     MSG_ERROR("The cylinder must be along the z-axis")
+     ABI_ERROR("The cylinder must be along the z-axis")
    end if
 
    call cutoff_cylinder(nfft,gq,ng,Gsph%gvec,vcut%rcut,vcut%hcyl,vcut%pdir,&
@@ -334,7 +334,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      ABI_MALLOC(qfit,(3,npt))
      ABI_MALLOC(vcfit,(1,npt))
      if (nfft==1) then
-       MSG_ERROR("nfft == 1 not supported when Beigi's method is used")
+       ABI_ERROR("nfft == 1 not supported when Beigi's method is used")
      endif
      qfit(:,:)=zero
      step=half/(npt*(nfft-1))              ; qfit(3,:)=arth(tol6,step,npt)
@@ -421,7 +421,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      ABI_MALLOC(qcart,(3,npt))
      ABI_MALLOC(vcfit,(1,npt))
      if (nfft==1) then
-       MSG_ERROR("nfft == 1 not supported when Beigi's method is used")
+       ABI_ERROR("nfft == 1 not supported when Beigi's method is used")
      endif
      qfit(:,:)=zero
      qcart(:,:)=zero
@@ -504,7 +504,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  CASE DEFAULT
    write(msg,'(a,i3)')'No cut-off applied to the Coulomb Potential.' //&
 &                     'Either icutcoul value not allowed or not defined.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  END SELECT
 
  ABI_DEALLOCATE(gq)

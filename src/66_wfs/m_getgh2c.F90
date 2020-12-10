@@ -160,22 +160,22 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !Compatibility tests
  if(ipert/=natom+10.and.ipert/=natom+11.and.ipert>2*natom+11)then
    msg='only ipert==natom+10/+11 and natom+11<=ipert<=2*natom+11 implemented!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  pert_phon_elfd = .false.
  if (ipert>natom+11.and.ipert<=2*natom+11) pert_phon_elfd = .true.
  if (mpi_enreg%paral_spinor==1) then
    msg='Not compatible with parallelization over spinorial components!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (gs_hamkq%nvloc>1) then
    msg='Not compatible with nvloc=4 (non-coll. magnetism)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if((ipert==natom+11.or.pert_phon_elfd).and.gs_hamkq%usepaw==1.and.optnl>=1) then
    if (gs_hamkq%nvloc>1) then
      msg='Not compatible with nvloc=4 (non-coll. magnetism)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (present(enl)) then
      enl_ptr => enl
@@ -190,15 +190,15 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      enl_ptr => rf_hamkq%e1kbfr
    else
      msg='For ipert=natom+11/pert_phon_elfd : e1kbfr and/or e1kbsc must be associated or enl optional input must be present.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (usevnl==0) then
      msg='gvnl2 must be allocated for ipert=natom+11/pert_phon_elfd !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if(opt_gvnl2==0) then
      msg='opt_gvnl2=0 not compatible with ipert=natom+11/pert_phon_elfd !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -206,22 +206,22 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwavef)<2*npw*my_nspinor) then
    msg='wrong size for cwavef!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(gh2c)<2*npw1*my_nspinor) then
    msg='wrong size for gh2c!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (usevnl/=0) then
    if (size(gvnl2)<2*npw1*my_nspinor) then
      msg='wrong size for gvnl2!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
  if (sij_opt==1) then
    if (size(gs2c)<2*npw1*my_nspinor) then
      msg='wrong size for gs2c!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -234,13 +234,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      ncpgr=cwaveprj(1,1)%ncpgr
      if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
        msg='wrong size for cwaveprj!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
  else
    if(usecprj==1)then
      msg='usecprj==1 not allowed for NC psps !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -262,7 +262,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
  if (ipert/=natom+10.and.ipert/=natom+11.and.optlocal>0) then
    msg='local part not implemented'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  else
 !  In the case of ddk operator, no local contribution (also because no self-consistency)
 !$OMP PARALLEL DO
@@ -396,7 +396,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
      iatm = ipert-(natom+11)
      if (iatm<1.or.iatm>natom) then
-       MSG_BUG(" iatm must be between 1 and natom")
+       ABI_BUG(" iatm must be between 1 and natom")
      end if
 
      ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
@@ -514,13 +514,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    kinpw1 => gs_hamkq%kinpw_kp
  else if (optnl>=1.or.has_kin) then
    msg='need kinpw1 allocated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (associated(rf_hamkq%ddkinpw_k)) then
    ddkinpw => rf_hamkq%ddkinpw_k
  else if (has_kin) then
    msg='need ddkinpw allocated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (has_kin) then

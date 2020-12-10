@@ -165,26 +165,26 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !check if nspinor is 2
  if (dtset%nspinor /= 2) then
    write(message, '(a,i0)' )' nspinor must be 2, but it is ',dtset%nspinor
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (dtset%nsppol /= 1) then
    write(message, '(a,i0)' )' spin_current:  nsppol must be 1 but it is ',dtset%nsppol
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (dtset%mkmem /= dtset%nkpt) then
    write(message, '(a,i6,a,i6,a,a)' )&
 &   ' mkmem =  ',dtset%mkmem,' must be equal to nkpt ',dtset%nkpt,ch10,&
 &   ' keep all kpt in memory'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (dtset%usepaw /= 0) then
    write(message, '(a,i0,a,a,a)' )&
 &   'usepaw =  ',dtset%usepaw,' must be equal to 0 ',ch10,&
 &   'Not functional for PAW case yet.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  cplex=2
@@ -484,7 +484,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 
    filnam=trim(dtfil%fnameabo_spcur)//spin_symbol(ispindir)//".xsf"
    if (open_file(filnam,message,newunit=spcur_unit,status='unknown') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  print header
@@ -530,7 +530,7 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 &         spinor_sym(ispinor)//spinor_sym(ispinorp)//"_"//realimag(icplex)//".xsf"
 
          if (open_file(filnam,message,newunit=spcur_unit,status='unknown') /= 0) then
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
 
          ! print header

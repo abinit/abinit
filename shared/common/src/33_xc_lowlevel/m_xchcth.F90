@@ -147,7 +147,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
 
  if (order/=1) then
    write(message, '(a,i0)' )' Order must be 1 ; argument was ',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(initialized==0)then
@@ -200,7 +200,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
    ccab0=0.589076_dp ; ccab1=4.42374_dp  ; ccab2=-19.2218_dp; ccab3=42.5721_dp  ; ccab4=-42.0052_dp
  else
    write(message, '(a,i0)' )' xchcth : ixc must be 16, 17, 26, or 27 ; argument was ',ixc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Parameters for the Perdew-Wang 92 LSD as well as LSD-RPA,
@@ -1146,7 +1146,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
    write(message, '(3a,i0)' )&
 &   '  Argument nspden must be 1 or 2; ',ch10,&
 &   '  Value provided as argument was ',nspden
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !DEBUG

@@ -477,7 +477,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      write(message,'(3a)')&
 &     'The computation of forces due to jellium background',ch10,&
 &     'has to be verified in the PAW formalism.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
 
      ABI_ALLOCATE(grtn,(3,dtset%natom))
      optatm=0;optdyfr=0;opteltfr=0;optgr=1;optstr=0;optv=1;optn=0;optn2=1

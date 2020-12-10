@@ -182,46 +182,46 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))) .or. &
        (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc)))) then
-     MSG_BUG('ekb derivatives must be allocated for ipert<=natom or natom+3/4 !')
+     ABI_BUG('ekb derivatives must be allocated for ipert<=natom or natom+3/4 !')
    end if
  end if
  if(gs_hamkq%usepaw==1.and.(ipert==natom+2)) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))) .or. &
        (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc)))) then
-     MSG_BUG('ekb derivatives must be allocated for ipert=natom+2 !')
+     ABI_BUG('ekb derivatives must be allocated for ipert=natom+2 !')
    end if
    if (usevnl==0) then
-     MSG_BUG('gvnlx1 must be allocated for ipert=natom+2 !')
+     ABI_BUG('gvnlx1 must be allocated for ipert=natom+2 !')
    end if
  end if
  if(ipert==natom+2.and.opt_gvnlx1==0) then
-   MSG_BUG('opt_gvnlx1=0 not compatible with ipert=natom+2 !')
+   ABI_BUG('opt_gvnlx1=0 not compatible with ipert=natom+2 !')
  end if
  if (mpi_enreg%paral_spinor==1) then
-   MSG_BUG('Not compatible with parallelization over spinorial components !')
+   ABI_BUG('Not compatible with parallelization over spinorial components !')
  end if
 
  ! Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwave)<2*npw*my_nspinor) then
-   MSG_BUG('wrong size for cwave!')
+   ABI_BUG('wrong size for cwave!')
  end if
  if (size(gh1c)<2*npw1*my_nspinor) then
-   MSG_BUG('wrong size for gh1c!')
+   ABI_BUG('wrong size for gh1c!')
  end if
  if (usevnl/=0) then
    if (size(gvnlx1)<2*npw1*my_nspinor) then
-     MSG_BUG('wrong size for gvnlx1!')
+     ABI_BUG('wrong size for gvnlx1!')
    end if
  end if
  if (sij_opt==1) then
    if (size(gs1c)<2*npw1*my_nspinor) then
-     MSG_BUG('wrong size for gs1c!')
+     ABI_BUG('wrong size for gs1c!')
    end if
  end if
  if (berryopt>=4) then
    if (size(grad_berry)<2*npw1*my_nspinor) then
-     MSG_BUG('wrong size for grad_berry!')
+     ABI_BUG('wrong size for grad_berry!')
    end if
  end if
 
@@ -233,17 +233,17 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    if (usecprj/=0) then
      ncpgr=cwaveprj(1,1)%ncpgr
      if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
-       MSG_BUG('wrong size for cwaveprj!')
+       ABI_BUG('wrong size for cwaveprj!')
      end if
      if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
        if (ncpgr/=1)then
-         MSG_BUG('Projected WFs (cprj) derivatives are not correctly stored !')
+         ABI_BUG('Projected WFs (cprj) derivatives are not correctly stored !')
        end if
      end if
    end if
  else
    if(usecprj==1)then
-     MSG_BUG('usecprj==1 not allowed for NC psps !')
+     ABI_BUG('usecprj==1 not allowed for NC psps !')
    end if
  end if
 
@@ -391,7 +391,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_FREE(cwavef1)
        ABI_FREE(cwavef2)
      else
-       MSG_BUG('nspinor/=1 for Non-collinear calculations!')
+       ABI_BUG('nspinor/=1 for Non-collinear calculations!')
      end if
    end if ! nvloc
 
@@ -717,12 +717,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if (associated(gs_hamkq%kinpw_kp)) then
    kinpw1 => gs_hamkq%kinpw_kp
  else if (optnl>=1.or.usevnl2.or.has_kin) then
-   MSG_BUG('need kinpw1 allocated!')
+   ABI_BUG('need kinpw1 allocated!')
  end if
  if (associated(rf_hamkq%dkinpw_k)) then
    dkinpw => rf_hamkq%dkinpw_k
  else if (has_kin) then
-   MSG_BUG('need dkinpw allocated!')
+   ABI_BUG('need dkinpw allocated!')
  end if
 
  if (has_kin) then
@@ -984,13 +984,13 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
  reuse_kpg1_k_ = 0; if (present(reuse_kpg1_k)) reuse_kpg1_k_ = reuse_kpg1_k
 
  if(.not.present(ddkinpw) .and. ipert==natom+10) then
-   MSG_BUG("ddkinpw is not optional for ipert=natom+10.")
+   ABI_BUG("ddkinpw is not optional for ipert=natom+10.")
  end if
  if(.not.present(dkinpw2) .and. ipert==natom+10 .and. idir>3) then
-   MSG_BUG("dkinpw2 is not optional for ipert=natom+10 and idir>3.")
+   ABI_BUG("dkinpw2 is not optional for ipert=natom+10 and idir>3.")
  end if
  if(.not.present(rf_hamk_dir2) .and. ((ipert==natom+10 .and. idir>3) .or. ipert==natom+11)) then
-   MSG_BUG("rf_hamk_dir2 is not optional for ipert=natom+10 (with idir>3) or ipert=natom+11.")
+   ABI_BUG("rf_hamk_dir2 is not optional for ipert=natom+10 (with idir>3) or ipert=natom+11.")
  end if
 
  ntypat = psps%ntypat
@@ -1420,18 +1420,18 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 !Compatibility tests
  if (mpi_enreg%paral_spinor==1) then
    msg='Not compatible with parallelization over spinorial components !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwave)<2*npw*my_nspinor) then
    msg='wrong size for cwave!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(gh1dqc)<2*npw1*my_nspinor) then
    msg='wrong size for gh1dqc!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !=============================================================================
@@ -1533,13 +1533,13 @@ ABI_MALLOC(gvnl1dqc_,(2,npw1*my_nspinor))
    kinpw1 => gs_hamkq%kinpw_kp
  else if (has_kin) then
    msg='need kinpw1 allocated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (associated(rf_hamkq%dkinpw_k)) then
    dqdqkinpw => rf_hamkq%dkinpw_k
  else if (has_kin) then
    msg='need dqdqkinpw allocated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (has_kin) then

@@ -191,7 +191,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
    write(message,'(a,i3,a,a)')&
 &   ' job is equal to ',job,ch10,&
 &   ' while only the values job = 0, 1, 10, 11, 20, or 21 are allowed.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (ddkflag == 1) then
@@ -199,7 +199,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
      write(message,'(a,i0,a,a)')&
 &     ' job is equal to ',job,ch10,&
 &     ' while ddkflag = 1. This is not allowed.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -209,7 +209,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
      write(message,'(3a,i4,a,i4)')&
 &     '  The content of sflag_k must be 0 or 1.',ch10,&
 &     '  However, for iband=',iband,', sflag_k(iband)=',sflag_k(iband)
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 
@@ -221,7 +221,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
    end do
    if (count > 1) then
      message = 'in case shiftbd = 0, only 1 element of sflag can be 0'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 

@@ -233,7 +233,7 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
      else if (isign == -1) then
        work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
      else
-       MSG_BUG("Wrong isign")
+       ABI_BUG("Wrong isign")
      end if
 
      call dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,work_sp)
@@ -263,7 +263,7 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
      case (-1) ! -1
        call dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofr,fofg)
      case default
-       MSG_BUG("Wrong isign")
+       ABI_BUG("Wrong isign")
      end select
    end if
 
@@ -275,11 +275,11 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
    case (-1) ! R --> G
      call dfti_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofr,fofg)
    case default
-     MSG_BUG("Wrong isign")
+     ABI_BUG("Wrong isign")
    end select
 
  case default
-   MSG_BUG("Wrong value for cplex")
+   ABI_BUG("Wrong value for cplex")
  end select
 
 end subroutine dfti_seqfourdp
@@ -381,12 +381,12 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
 
  if (option==1 .and. cplex/=1) then
    write(msg,'(a,i0)')' With the option number 1, cplex must be 1 but it is cplex=',cplex
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (option==2 .and. (cplex/=1 .and. cplex/=2)) then
    write(msg,'(a,i0)')' With the option number 2, cplex must be 1 or 2, but it is cplex=',cplex
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
@@ -490,7 +490,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
 
      CASE DEFAULT
        write(msg,'(a,i0,a)')'Option',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      END SELECT
 
    end if
@@ -563,7 +563,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
 
    CASE DEFAULT
      write(msg,'(a,i0,a)')'Option',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    END SELECT
  end if
 
@@ -623,7 +623,7 @@ subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 #include "dfti_fftrisc.finc"
 
 #else
- MSG_ERROR("DFTI support not activated")
+ ABI_ERROR("DFTI support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),weight_r,weight_i/))
@@ -745,7 +745,7 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 #include "dfti_fftrisc.finc"
 
 #else
- MSG_ERROR("DFTI support not activated")
+ ABI_ERROR("DFTI support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
@@ -813,7 +813,7 @@ subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gbound
 #undef HAVE_DFTI_MIXED_PRECISION
 
 #else
- MSG_ERROR("DFTI support not activated")
+ ABI_ERROR("DFTI support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
@@ -884,7 +884,7 @@ subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
@@ -953,7 +953,7 @@ subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
@@ -1023,7 +1023,7 @@ subroutine dfti_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
@@ -1095,7 +1095,7 @@ subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
  ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
@@ -1169,7 +1169,7 @@ subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
  ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
@@ -1242,7 +1242,7 @@ subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
  ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
@@ -1496,7 +1496,7 @@ subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
  call dfti_c2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin_fptr,fout_fptr)
 
 #else
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  ABI_UNUSED(fin(1))
  ABI_UNUSED(fout(1))
@@ -1559,7 +1559,7 @@ subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
  call dfti_c2c_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout_fptr)
 
 #else
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  ABI_UNUSED(finout(1))
 #endif
@@ -1626,7 +1626,7 @@ subroutine dfti_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  call dfti_fftpad_dpc(fptr,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
 #else
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
@@ -1690,7 +1690,7 @@ subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 #include "dfti_fftpad.finc"
 
 #else
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
@@ -1750,7 +1750,7 @@ subroutine dfti_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 #include "dfti_fftpad.finc"
 
 #else
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
@@ -1879,7 +1879,7 @@ subroutine dfti_r2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  call dfti_free(cptr)
 
 #else
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz/))
  ABI_UNUSED(ff)
  ABI_UNUSED(gg(1))
@@ -1937,7 +1937,7 @@ subroutine dfti_r2c_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  call dfti_r2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg_fptr)
 
 #else
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz/))
  ABI_UNUSED(ff)
  ABI_UNUSED(gg(1))
@@ -2040,7 +2040,7 @@ subroutine dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  call dfti_free(cptr)
 
 #else
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz/))
  ABI_UNUSED(ff(1))
  ABI_UNUSED(gg(1))
@@ -2098,7 +2098,7 @@ subroutine dfti_c2r_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  call dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff_fptr,gg)
 
 #else
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz/))
  ABI_UNUSED((/ff(1),gg(1)/))
 #endif
@@ -2164,7 +2164,7 @@ subroutine dfti_check_status(status,file,line)
  if (status /= 0) then
    if (.not. DftiErrorClass(status, DFTI_NO_ERROR)) then
      err_msg = strcat(my_msg," Error: ",DftiErrorMessage(status))
-     MSG_ERROR(err_msg)
+     ABI_ERROR(err_msg)
    end if
  end if
 
@@ -2276,7 +2276,7 @@ subroutine dfti_alloc_real_dp(size,cptr,fptr)
 
  cptr = mkl_malloc( INT(size*C_DOUBLE, KIND=C_SIZE_T), DFTI_DEFAULT_ALIGNMENT_DP)
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("mkl_malloc returned NULL!")
+   ABI_ERROR("mkl_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, [size])
@@ -2320,7 +2320,7 @@ subroutine dfti_alloc_complex_spc(size,cptr,fptr)
 
  cptr = mkl_malloc( INT(2*size*C_FLOAT, KIND=C_SIZE_T), DFTI_DEFAULT_ALIGNMENT_SP)
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("mkl_malloc returned NULL!")
+   ABI_ERROR("mkl_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, [size])
@@ -2364,7 +2364,7 @@ subroutine dfti_alloc_complex_dpc(size,cptr,fptr)
 
  cptr = mkl_malloc( INT(2*size*C_DOUBLE, KIND=C_SIZE_T), DFTI_DEFAULT_ALIGNMENT_DP)
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("mkl_malloc returned NULL!")
+   ABI_ERROR("mkl_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, [size])

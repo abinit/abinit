@@ -168,7 +168,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtv
 
  if(istep==0) then
    message = ' istep should not be equal to zero'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  spaceComm=paw_dmft%spacecomm
  !if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_kpt
@@ -695,7 +695,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
    call copy_green(weiss,green,opt_tw=1)
 !  call qmc_prep
    message = '  ===  QMC not yet distributed '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
 !   call qmc_prep(cryst_struc,green,hu,mpi_enreg,paw_dmft,pawang&
 !&   ,pawprtvol,self_old%qmc_xmu,weiss)
 
@@ -929,7 +929,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
    ! write(66,*) paw_dmft%omega_lo(ifreq), real(self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)),aimag(self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1))
    else
      message = " BUG in dyson.F90"
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end do
 
@@ -1026,14 +1026,14 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 !  == Nothing
 !  -------------------
    message = "spectral_function: This section of code is disabled!"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
    call copy_green(weissr,greenr,opt_tw=1)
 
  else if(abs(paw_dmft%dmft_solv)>=5) then
 
 !  == Nothing
 !  -------------------
-   MSG_ERROR("Stopping before copy_green")
+   ABI_ERROR("Stopping before copy_green")
    call copy_green(weissr,greenr,opt_tw=1)
 
  else if(abs(paw_dmft%dmft_solv)==0) then

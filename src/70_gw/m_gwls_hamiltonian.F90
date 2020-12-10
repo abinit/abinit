@@ -1738,7 +1738,7 @@ real(dp), allocatable :: wfk_tmp1(:,:) ,wfk_tmp2(:,:)
 
 ! Hartree-Fock cannot be used with GWLS.
 if(dtset2%usefock==1 .and. associated(gs_hamk2%fockcommon)) then
-  MSG_ERROR(' build_H : Hartree-Fock option can not be used with optdriver==66 (GWLS calculations).')
+  ABI_ERROR(' build_H : Hartree-Fock option can not be used with optdriver==66 (GWLS calculations).')
 end if
 
 !First we copy the data structure types

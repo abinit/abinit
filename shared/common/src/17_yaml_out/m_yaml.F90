@@ -227,7 +227,7 @@ subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
  case ("icycle")
    ICYCLE_IDX = val
  case default
-   MSG_ERROR(sjoin("Invalid value for label:", label))
+   ABI_ERROR(sjoin("Invalid value for label:", label))
  end select
 
  if (use_yaml == 1) then
@@ -1747,7 +1747,7 @@ subroutine forbid_reserved_label(label)
 
  do i=1,size(reserved_keywords)
    if (reserved_keywords(i) == label) then
-     MSG_ERROR(trim(label)//' is a reserved keyword and cannot be used as a YAML label.')
+     ABI_ERROR(trim(label)//' is a reserved keyword and cannot be used as a YAML label.')
    end if
  end do
 end subroutine forbid_reserved_label
@@ -1947,7 +1947,7 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
      write(tmp_s, sfmt) vs
      call yaml_print_string(stream, trim(tmp_s))
    case default
-     MSG_ERROR(sjoin("Invalid type_code:", itoa(type_code)))
+     ABI_ERROR(sjoin("Invalid type_code:", itoa(type_code)))
    end select
 
    if (i > 0 .and. mod(i, vmax) == 0 .and. i /= pl%length()) then

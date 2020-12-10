@@ -100,7 +100,7 @@ CONTAINS  !===========================================================
     vl,1,uu, mat_a_size, work, lwork, rwork, info)
   if (info/=0) then
    write(msg,'(a,i4)')'Wrong value for rwork ',info
-   MSG_BUG(msg)
+   ABI_BUG(msg)
   end if
 
   !!debbug
@@ -141,13 +141,13 @@ CONTAINS  !===========================================================
   call ZGETRF( mat_a_size, mat_a_size, uu,mat_a_size, ipvt, info )
   if (info/=0) then
    write(msg,'(a,i4)')'Wrong value for rwork ',info
-   MSG_BUG(msg)
+   ABI_BUG(msg)
   end if
 
   call ZGETRI( mat_a_size, uu, mat_a_size, ipvt, work, lwork, info )
   if (info/=0) then
    write(msg,'(a,i4)')'Wrong value for rwork ',info
-   MSG_BUG(msg)
+   ABI_BUG(msg)
   end if
 
   !(uu.exp(ww*factor)).uu-1

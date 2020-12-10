@@ -384,12 +384,12 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    new%gaps = ebands_get_gaps(ebands, ierr)
    if (ierr /= 0) then
      do spin=1, nsppol
-       MSG_WARNING(trim(new%gaps%errmsg_spin(spin)))
+       ABI_WARNING(trim(new%gaps%errmsg_spin(spin)))
        new%gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
        new%gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
      end do
-     !MSG_ERROR("ebands_get_gaps returned non-zero exit status. See above warning messages...")
-     MSG_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
+     !ABI_ERROR("ebands_get_gaps returned non-zero exit status. See above warning messages...")
+     ABI_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
    end if
 
    if (my_rank == master) then
@@ -522,7 +522,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
    if (ierr /= 0) then
      ! This should never happen for linear interpolation.
-     MSG_WARNING(sjoin("Linear interpolation produced:", itoa(ierr), " k-points with negative linewidths"))
+     ABI_WARNING(sjoin("Linear interpolation produced:", itoa(ierr), " k-points with negative linewidths"))
    end if
 
    ABI_FREE(vals_bsd)
@@ -555,7 +555,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
       write(msg, '(3a,es16.6,a)' ) &
        "Error while downsampling ebands in the transport driver",ch10, &
        "The k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
    end if
 
    ! Downsampling linewidths and velocities.
@@ -873,7 +873,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ! Compute the index of the Fermi level and handle possible out of range condition.
  ifermi = bisect(self%edos%mesh, self%ebands%fermie)
  if (ifermi == 0 .or. ifermi == self%nw) then
-   MSG_ERROR("Bisection could not find the index of the Fermi level in edos%mesh!")
+   ABI_ERROR("Bisection could not find the index of the Fermi level in edos%mesh!")
  end if
 
  ! Mobility
@@ -1365,7 +1365,7 @@ subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
    case (2)
      pre = "_MRTA"
    case default
-     MSG_ERROR(sjoin("Don't know how to handle irta:", itoa(irta)))
+     ABI_ERROR(sjoin("Don't know how to handle irta:", itoa(irta)))
    end select
    call self%write_tensor(dtset, irta, "sigma", self%sigma(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_SIGMA"))
    call self%write_tensor(dtset, irta, "seebeck", self%seebeck(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_SBK"))
@@ -1406,7 +1406,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
 !************************************************************************
 
  if (open_file(trim(path), msg, newunit=ount, form="formatted", action="write", status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (irta == 1) rta_type = "RTA type: Self-energy relaxation time approximation (SERTA)"
@@ -1565,7 +1565,7 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
  ! It's funny that we need dtset%sigma_erange to estimate sigma_erange!
  if (all(dtset%sigma_erange == 0)) then
    msg = "We need `sigma_erange` to understand if we are dealing with e/h in semiconductors or metals."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
 

@@ -394,7 +394,7 @@ CONTAINS  !===========================================================
    rank=xmpi_comm_rank(xmpi_world)
    if (num_cores_node == 0) then ! This means that OMP is not enabled.
      num_cores_node = 1
-     MSG_WARNING("You are using PLASMA but OpenMP is not enabled in Abinit!")
+     ABI_WARNING("You are using PLASMA but OpenMP is not enabled in Abinit!")
    end if
    ABI_ALLOCATE(affinity,(num_cores))
    do core_id =1,num_cores
@@ -740,13 +740,13 @@ subroutine linalg_allow_gemm3m(bool, write_msg)
  if (write_msg) then
 #ifdef HAVE_LINALG_GEMM3M
    if (bool) then
-     MSG_COMMENT("Activating ZGEMM3M version instead of ZGEMM")
+     ABI_COMMENT("Activating ZGEMM3M version instead of ZGEMM")
    else
-     MSG_COMMENT("Using ZGEMM instead of ZGEMM3M")
+     ABI_COMMENT("Using ZGEMM instead of ZGEMM3M")
    end if
 #else
    if (bool) then
-     MSG_WARNING("Cannot activate ZGEMM3M as HAVE_LINALG_GEMM3M is not defined!")
+     ABI_WARNING("Cannot activate ZGEMM3M as HAVE_LINALG_GEMM3M is not defined!")
    end if
 #endif
  endif

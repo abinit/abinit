@@ -172,7 +172,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &   'Problem reading the fourth line of pseudopotential file.',ch10,&
 &   'The parameter pspso should be 1 or 2, but it is pspso= ',pspso0,ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write(message, '(2es16.6,t47,a)' ) r1,al,'r1 and al (Hamman grid)'
@@ -190,7 +190,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &   'The treatment of spin-orbit interaction is required (pspso/=0)',ch10,&
 &   'but pseudopotential file format cannot contain spin-orbit information !',ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  nso=1;if (pspso0/=1) nso=2
@@ -222,7 +222,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &     'and number of projector for l/=0 is not 2 !',ch10,&
 &     'It has been forced to 2.'
      call wrtout(std_out,message,'COLL')
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
  end if
 
@@ -387,7 +387,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &           'angular momenta in order expected for first projection',&
 &           'operator.',ch10,' Values are ',ipsang-1,ll,ch10,&
 &           'Action: check your pseudopotential input file.'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          read (tmp_unit,*, err=10, iomsg=errmsg) wfll(:,ipsang)
        else
@@ -439,7 +439,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
      ekb_tmp(mpsang+1:mpssoang,1)=ekb_so(2:mpsang)
      do ipsang=2,lmax+1
        if((ekb_sr(ipsang)*ekb_so(ipsang))<0.0) then
-         MSG_ERROR('BIG PROBLEM WITH THE SPIN ORBIT IN PSP5NL')
+         ABI_ERROR('BIG PROBLEM WITH THE SPIN ORBIT IN PSP5NL')
        end if
      end do
 
@@ -541,7 +541,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &           'angular momenta in order expected for second projection',&
 &           'operator.',ch10,' Values are ',ipsang-1,ll,ch10,&
 &           'Action: check your pseudopotential input file.'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          read (tmp_unit,*, err=10, iomsg=errmsg) wfll(:,ipsang)
 !        DEBUG
@@ -593,7 +593,7 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp5in
 !!***

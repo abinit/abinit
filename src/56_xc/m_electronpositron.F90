@@ -847,12 +847,12 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
 
  if (electronpositron_calctype(electronpositron)/=1) then
    message = 'Only electronpositron%calctype=1 allowed !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (nkxc>3) then
    message = 'nkxc>3 (Kxc for GGA) not yet implemented !'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Hartree potential of the positron is zero

@@ -273,7 +273,7 @@ contains
     msg="The number of spins in histfile is not equal & & to the present calculation." // &
          & " Please check if the file is consistent."
     if (nspin /= self%nspin) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
     end if
 
 
@@ -295,7 +295,7 @@ contains
     ierr=nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
 #else
-    MSG_ERROR("spin_init_state set to 4 but abinit is not compiled with netcdf.")
+    ABI_ERROR("spin_init_state set to 4 but abinit is not compiled with netcdf.")
 #endif 
 
   end subroutine read_hist_spin_state
@@ -378,7 +378,7 @@ contains
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
           if (.not. present(restart_hist_fname)) then
-             MSG_ERROR("Spin initialize mode set to 4, but restart_hist_fname is not used.")
+             ABI_ERROR("Spin initialize mode set to 4, but restart_hist_fname is not used.")
            end if
            call self%read_hist_spin_state(fname=restart_hist_fname)
 
@@ -673,7 +673,7 @@ contains
     real(dp), intent(out) ::  etot
     type(hash_table_t),optional, intent(inout) :: energy_table
     if(present(displacement) .or. present(lwf) .or. present(strain)) then
-       MSG_BUG("Monte Carlo only implemented for spin.")
+       ABI_BUG("Monte Carlo only implemented for spin.")
        call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
     end if
     call energy_table%put(self%label, etot)
@@ -686,7 +686,7 @@ contains
     real(dp) ::  etot
     type(hash_table_t),optional, intent(inout) :: energy_table
 
-    if(present(spin)) MSG_ERROR("spin should not be input for spin mover.")
+    if(present(spin)) ABI_ERROR("spin should not be input for spin mover.")
     if(self%method==1) then
        call self%run_one_step_HeunP(effpot=effpot, S_in=self%Stmp, etot=etot, &
             displacement=displacement, strain=strain, lwf=lwf, energy_table=energy_table)
@@ -695,7 +695,7 @@ contains
             displacement=displacement, strain=strain, lwf=lwf, energy_table=energy_table)
     else if (self%method==3) then
        if(present(displacement) .or. present(strain) .or. present(lwf)) then
-          MSG_ERROR("Monte carlo not implemented for lattice and lwf yet.")
+          ABI_ERROR("Monte carlo not implemented for lattice and lwf yet.")
        endif
        call self%run_one_step_MC(effpot, self%Stmp, etot, energy_table=energy_table)
     else if (self%method==20) then

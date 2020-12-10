@@ -126,7 +126,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !Tests
  if(pawfgr%nfft<pawfgr%nfftc) then
    write(msg,'(a,2(i0,1x))')' nfft (fine grid) must be >= nfft (coarse grid) while: ',pawfgr%nfft, pawfgr%nfftc
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Store FFT dimensions

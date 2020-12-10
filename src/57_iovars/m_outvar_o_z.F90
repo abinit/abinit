@@ -1609,12 +1609,12 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 
  if(ndtset_alloc<1)then
    write(message, '(a,i0,a)' )' ndtset_alloc=',ndtset_alloc,', while it should be >= 1.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(ndtset_alloc>9999)then
    write(message, '(a,i0,a)' )' ndtset_alloc=',ndtset_alloc,', while it must be lower than 100.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !It is important to take iscf into account, since when it is -2, occupation numbers must be ignored

@@ -283,7 +283,7 @@ subroutine getargs(folds, fname)
  if (num_args>2) then
    write(std_out,*) "     Too many arguments."
    write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  elseif (num_args<2) then
    if (num_args==1) then
      call get_command_argument(1,args(1))
@@ -292,18 +292,18 @@ subroutine getargs(folds, fname)
        write(std_out,*) "     file_WFK is the WFK file name (ex. Ex_WFK)"
        write(std_out,*) "     x:y:z integers, greater than 0 that represent a multiplicity"
        write(std_out,*) "     in the corresponding directions used when constructing the supercell."
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      else
        write(std_out,*) "     Not all arguments are present."
        write(std_out,*) "     Make sure that file name and number of folds are indicated."
        write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
    else
      write(std_out,*) "     Not all arguments are present."
      write(std_out,*) "     Make sure that file name and number of folds are indicated."
      write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
  else
    do argcount=1, num_args
@@ -321,7 +321,7 @@ subroutine getargs(folds, fname)
  if (.not.(dir)) then
    write(std_out,*) "     Case file not found: ", trim(fname)
    write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
  !Was the number of folds entered in correct format?
@@ -331,11 +331,11 @@ subroutine getargs(folds, fname)
    write(std_out,*) "     Unknown number of folds. See below or type:"
    write(std_out,*) "     fold2Bloch <-h> or fold2Bloch <--help> for more information."
    write(std_out,*) '     Usage: $fold2Bloch file_WFK x:y:z (folds)'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
  read (argfolds(1:ii-1), *, iostat=ios) folds(1) !read X folds
  if ((ios/=0).or.(folds(1)<=0)) then
-   MSG_ERROR('Number of folds has to be a positive integer greater than 0')
+   ABI_ERROR('Number of folds has to be a positive integer greater than 0')
  end if
  argfolds=argfolds(ii+1:) !Start argfolds from the first ":"
  ii=0
@@ -344,15 +344,15 @@ subroutine getargs(folds, fname)
    write(std_out,*) '     Unknown number of folds. See below or type:'
    write(std_out,*) "     fold2Bloch <-h> or fold2Bloch <--help> for more information."
    write(std_out,*) '     Usage: $fold2Bloch file_WFK x:y:z (folds)'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
  read (argfolds(1:ii-1),*, iostat=ios) folds(2) !read Y folds
  if ((ios/=0).or.(folds(2)<=0)) then
-   MSG_ERROR('Number of folds has to be a positive integer greater than 0')
+   ABI_ERROR('Number of folds has to be a positive integer greater than 0')
  end if
  read(argfolds(ii+1:),*, iostat=ios) Folds(3) !read Z folds
  if ((ios/=0).or.(folds(3)<=0)) then
-   MSG_ERROR('Number of folds has to be a positive integer greater than 0')
+   ABI_ERROR('Number of folds has to be a positive integer greater than 0')
  end if
 
  ABI_DEALLOCATE(args)

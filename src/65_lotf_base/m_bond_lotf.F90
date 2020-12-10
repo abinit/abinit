@@ -159,7 +159,7 @@ contains
 &     'ERROR: BOND_ATOM_INIT',ch10,&
 &     'IBN_TOT2 =  ',ibn_tot2,ch10,&
 &     ' ibnd_dum out of bounds, ibn_tot2 too large '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
 
    end if
 
@@ -311,7 +311,7 @@ contains
 
    if(nfit <= 0) then
      write(msg,'(a,i8)')' UPDLIS WARNING : nfit <= 0 = ', nfit
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    do ii = 1,nfit
@@ -335,7 +335,7 @@ contains
 &     'ERROR: BOND_ATOM_INIT',ch10,&
 &     'IBN_TOT2 =  ',ibn_tot2,ch10,&
 &     ' ibnd_dum out of bounds, ibn_tot2 too large '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
   !--reorder to keep 'variational' bonds first :
@@ -381,7 +381,7 @@ contains
      ABI_ALLOCATE(ifit,(nfitmax))
    elseif(nfitdum > nfitmax) then
      write(msg,'(a)')' BOND_FIT_SET : PROBLEM OF dimensionS !! '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ifit = 0

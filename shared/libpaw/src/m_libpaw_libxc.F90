@@ -467,7 +467,7 @@ contains
 
  if (present(stop_if_error)) then
    if (stop_if_error.and.trim(msg)/="") then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -577,7 +577,7 @@ contains
 &      'is currently unsupported by LibPAW',ch10,&
 &      '(-1 means the family is unknown to the LibXC itself)',ch10,&
 &      'Please consult the LibXC documentation',ch10
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
@@ -592,7 +592,7 @@ contains
    success_c=xc_func_init(xc_func%conf,func_id_c,nspin_c)
    if (success_c/=0) then
      msg='Error in libXC functional initialization!'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  Special treatment for LDA_C_XALPHA functional
@@ -605,7 +605,7 @@ contains
    if (xc_func%id==libpaw_libxc_getid('XC_MGGA_X_TB09')) then
      if (.not.present(xc_tb09_c)) then
        msg='xc_tb09_c argument is mandatory for TB09 functional!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      xc_func%xc_tb09_c=xc_tb09_c
    end if
@@ -1369,17 +1369,17 @@ end function libpaw_libxc_nspin
 
  if (is_gga.and.(.not.present(grho2))) then
    msg='GGA needs gradient of density!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (is_mgga) then
    if (present(vxctau).and.(.not.present(tau))) then
      msg='meta-GGA needs tau!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (needs_laplacian) then
      if (present(vxclrho).and.(.not.present(lrho))) then
        msg='meta-GGA needs lrho!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
  endif
@@ -1670,7 +1670,7 @@ subroutine libpaw_libxc_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
          hyb_mixing=xc_func%hyb_mixing
        else
          msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
    end if
@@ -1682,7 +1682,7 @@ subroutine libpaw_libxc_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
          hyb_mixing_sr=xc_func%hyb_mixing_sr
        else
          msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
    end if
@@ -1694,7 +1694,7 @@ subroutine libpaw_libxc_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
          hyb_range=xc_func%hyb_range
        else
          msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
    end if
@@ -1763,7 +1763,7 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
 !  Doesnt work with all hybrid functionals
    if (is_pbe0.or.is_hse) then
      msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    is_pbe0=(xc_func%id==id_pbe0)
    is_hse=((xc_func%id==id_hse03).or.(xc_func%id==id_hse06))
@@ -1802,7 +1802,7 @@ subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_f
 
  if ((.not.is_pbe0).and.(.not.is_hse)) then
    msg='Invalid XC functional: not able to change parameters for this functional!'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine libpaw_libxc_set_hybridparams
@@ -1882,7 +1882,7 @@ function libpaw_libxc_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 
    if (libpaw_libxc_gga_from_hybrid) then
      msg='Invalid XC functional: contains 2 hybrid functionals!'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
@@ -1922,7 +1922,7 @@ function libpaw_libxc_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 
  if (.not.libpaw_libxc_gga_from_hybrid) then
    msg='Unable to find a GGA functional for this hybrid!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end function libpaw_libxc_gga_from_hybrid

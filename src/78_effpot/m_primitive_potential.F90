@@ -121,7 +121,7 @@ subroutine fill_supercell(self, scmaker, params, scpot)
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(params)
     ABI_UNUSED_A(fnames)
-    MSG_ERROR("load_from_files for abstract primitive potential is not implemented.")
+    ABI_ERROR("load_from_files for abstract primitive potential is not implemented.")
   end subroutine load_from_files
 
 

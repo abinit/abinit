@@ -247,7 +247,7 @@ ABI_DEALLOCATE(G_array)
 
 if (dielectric_model_type == 2) then
 
-  MSG_BUG('dielectric_model_type == 2 not properly implemented. Review code or input!')
+  ABI_BUG('dielectric_model_type == 2 not properly implemented. Review code or input!')
 
   !ABI_ALLOCATE(sqrt_density,(2,n4,n5,n6))
   !sqrt_density(:,:,:,:) = zero

@@ -227,7 +227,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
  if(ndtset>mdtset)then
    write(msg,'(a,i0,a,i0,a)')'  The maximal allowed ndtset is ',mdtset,' while the input value is ',ndtset,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  mtypalch=dtsets(1)%ntypalch
@@ -365,7 +365,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          dict_key="meta")
 
      case default
-       MSG_ERROR(sjoin('Add a meta section for optdriver: ', itoa(dtset%optdriver)))
+       ABI_ERROR(sjoin('Add a meta section for optdriver: ', itoa(dtset%optdriver)))
      end select
 
      !if (dtset%use_yaml == 1) then
@@ -501,7 +501,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
                rprim_img(:,1,iimage) = rprimd(:,1) / acell_img(1,iimage)
                rprim_img(:,2,iimage) = rprimd(:,2) / acell_img(1,iimage)
                rprim_img(:,3,iimage) = rprimd(:,3) / acell_img(1,iimage)
-               MSG_WARNING(dilatmx_errmsg)
+               ABI_WARNING(dilatmx_errmsg)
              end if
            end do
          end do
@@ -746,7 +746,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        write(msg,'(3a)')&
 &       'vdW-DF functionals are not fully operational yet.',ch10,&
 &       'Action: modify vdw_xc'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 #endif
    end if
@@ -837,7 +837,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      write(msg,'(a,i0,4a)')&
       'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
       'This is not allowed.',ch10, 'Action: modify optdriver in the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end select
 
    call timab(643,1,tsec)

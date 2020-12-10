@@ -111,7 +111,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 
 !Enforce that nspden<=2
  if(nspden>2) then
-   MSG_ERROR('Jellium possible only with nspden <= 2.')
+   ABI_ERROR('Jellium possible only with nspden <= 2.')
  end if
 
 !Make sure option is acceptable
@@ -119,7 +119,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
    write(message, '(a,i0,3a)' )&
 &   'option=',option,' is not allowed.',ch10,&
 &   'Must be 1 or 2.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  zcellength=rprimd(3,3)

@@ -162,19 +162,19 @@ subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enr
 !Check that nband is smaller than mband, if one will not skip the records.
  if (nband>mband .and. option/=-1)then
    write(msg,'(a,i0,a,i0,a)')' One should have nband<=mband. However, nband=',nband,', and mband=',mband,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Check that formeig is 0 or 1.
  if ( ALL(formeig/=(/0,1/)) ) then
    write(msg,'(a,i0,a)')' The argument formeig should be 0 or 1. However, formeig=',formeig,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Check the value of option
  if ( ALL( option /= (/1,2,3,4,5,-1,-2,-4/) )) then
    write(msg,'(a,i0,a)')' The argument option should be between 1 and 5, or -1, -2, -4. However, option=',option,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (option/=2.and.option/=4 .and. option/=5 ) then ! read
@@ -347,7 +347,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 !Check the options
  if ( ALL(option /= [1,3,-1,-2,-4])) then
    write(msg,'(a,i0,a)')'The argument option should be -4, -2, -1, 1 or 3.  However, option=',option,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  npwtot=npw; npwso=npw*nspinor
@@ -370,7 +370,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
      if (allocated(mpi_enreg%my_kgtab)) then
        ikpt_this_proc=mpi_enreg%my_kpttab(ikpt)
        if ( ikpt_this_proc <= 0  ) then
-         MSG_BUG("rwwf: ikpt_this_proc <= 0")
+         ABI_BUG("rwwf: ikpt_this_proc <= 0")
        end if
        do ispinor=1,nspinor
          ispinor_index=ispinor
@@ -398,7 +398,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &     'the (npw,nspinor,nband) record of a wf file, unit=',unitwf,ch10,&
 &     'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &     'Action: check your input wf file:',trim(fname)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  else
@@ -418,7 +418,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &     'the (npw,nband) record of a wf file with headform <40 , unit=',unitwf,ch10,&
 &     'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &     'Action: check your input wf file:',trim(fname)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if ! headform
 
@@ -429,20 +429,20 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
        write(msg,'(3a,i0,a,i0,a)') &
 &       'Reading option of rwwf. One should have npwtot=npw1',ch10,&
 &       'However, npwtot= ',npwtot,', and npw1= ',npw1,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      if(nspinortot/=nspinor1)then
        write(msg,'(3a,i0,a,i0,a)') &
 &       'Reading option of rwwf. One should have nspinor=nspinor1',ch10,&
 &       'However, nspinortot= ',nspinortot,', and nspinor1= ',nspinor1,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    else ! Treat the Old format.
      if(npwsotot/=npwso1)then
        write(msg,'(3a,i0,a,i0,a)') &
 &       'Reading option of rwwf. One should have npwso=npwso1',ch10,&
 &       'However, npwsotot= ',npwsotot,', and npwso1= ',npwso1,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if ! headform
 !
@@ -504,7 +504,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &     'the k+g record of a wf file, unit=',unitwf,ch10,&
 &     'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &     'Action: check your input wf file:',trim(fname)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if ! headform
 
@@ -538,7 +538,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &     'an eigenvalue record of a wf file, unit=',unitwf,ch10,&
 &     'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &     'Action: check your input wf file.',trim(fname)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 #ifdef HAVE_NETCDF
@@ -595,7 +595,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &       'a RF wf record of a wf file, unit=',unitwf,ch10,&
 &       'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &       'Action: check your input wf file.',trim(fname)
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
 #ifdef HAVE_NETCDF
@@ -654,7 +654,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &           'a RF eigenvalue record of a wf file, unit=',unitwf,ch10,&
 &           'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &           'Action: check your input wf file.',trim(fname)
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
 
          if(option==1.or.option==-2)then
@@ -679,7 +679,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 &           'a RF wf record of a wf file, unit=',unitwf,ch10,&
 &           'gave iostat=',ios,'. Your file is likely not correct.',ch10,&
 &           'Action: check your input wf file.',trim(fname)
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
        end do ! iband
 
@@ -823,19 +823,19 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 !Check the options
  if ( ALL(option /= (/2,4,5/)) ) then
    write(msg,'(a,i0)')' The argument option should be 2, 4 or 5. However, option=',option
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(wff%iomode==IO_MODE_MPI)then
    if(option==5)then
      write(msg,'(a,i0)')' With MPI-IO activated, the argument option should be 2 or 4. However, option=',option
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
  if (wff%iomode==IO_MODE_ETSF) then
    ! outkss still calls this routine!
-   MSG_WARNING("You should use outwff or ncwrite_cg to write data in netcdf format!")
+   ABI_WARNING("You should use outwff or ncwrite_cg to write data in netcdf format!")
  end if
 
 !Check that nband_disk is not larger than nband (only for writing)
@@ -843,7 +843,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
    write(msg,'(3a,i5,a,i5,a)') &
 &   'Writing option of rwwf. One should have nband<=nband_disk',ch10,&
 &   'However, nband= ',nband,', and nband_disk= ',nband_disk,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  npwtot=npw; npwso=npw*nspinor

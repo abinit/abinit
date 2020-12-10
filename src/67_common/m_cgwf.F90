@@ -220,11 +220,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
 !Touching chkexit, cpus,filnam_ds to avoid warning for abirules. This is dirty...
  if(chkexit<0)then
-   MSG_BUG('chkexit should be positive!')
+   ABI_BUG('chkexit should be positive!')
  end if
 
  if(cpus<0 .and. filnam_ds1=='a')then
-   MSG_BUG('cpus should be positive!')
+   ABI_BUG('cpus should be positive!')
  end if
 
 !======================================================================
@@ -303,7 +303,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &   'Conjugate gradient algorithm not tested with',ch10,&
 &   'wfoptalg=2 or 3 and usepaw==1 !',ch10,&
 &   'Program will continue at your own risk...'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !Electric field: definition of local variables:
@@ -554,7 +554,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
                write(message, '(a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
 &               'New trial energy at line ',iline,' = ',lam0,ch10,&
 &               'is higher than former =',lamold,ch10
-               MSG_WARNING(message)
+               ABI_WARNING(message)
              end if
              lamold=lam0
            end if
@@ -1131,7 +1131,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &             '  (electric field)',ch10,&
 &             '  New trial energy at line',iline,' = ',e0,ch10,&
 &             '  is higher than former:',e0_old,ch10
-             MSG_WARNING(message)
+             ABI_WARNING(message)
            end if
          end if         ! finite_field
 
@@ -1579,7 +1579,7 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 &   '  Cannot find theta_min. No minimum exists: the field is too strong ! ',ch10,&
 &   '  Try decreasing difference between D and 4 Pi P by changing structure or D (only for fixed D calculation)'
    call wrtout(std_out,message,'COLL')
-   MSG_ERROR('linemin cannot find theta_min')
+   ABI_ERROR('linemin cannot find theta_min')
  end if
 
 !Compute the mimum of E(theta)
@@ -2217,7 +2217,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
            if(abs(dtm_k(1))<=1d-12)dtm_k(1)=1d-12
            if(abs(dtm_k(2))<=1d-12)dtm_k(2)=1d-12
            write(std_out,*)' Changing to:',dtm_k(1:2)
-           !      REC       MSG_BUG(message)
+           !      REC       ABI_BUG(message)
         end if
 
         if (gs_hamk%usepaw == 1) then

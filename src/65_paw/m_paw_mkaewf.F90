@@ -273,7 +273,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
      call wrap2_zero_one(rsph_red(3,ifgd),red(3),shift(3))
      r0shift(:,ifgd,iatom) = shift
      !if (ANY( ABS(shift) > tol12)) then
-     !  MSG_WARNING("rmR_red is outside the first unit cell.")
+     !  ABI_WARNING("rmR_red is outside the first unit cell.")
      !  write(std_out,*)rsph_red(:,ifgd),shift
      !end if
    end do
@@ -292,7 +292,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  write(msg,'(3a)')&
 & "netcdf support must be enabled in order to output AE PAW wavefunction. ",ch10,&
 & "No output will be produced, use --enable-netcdf at configure-time. "
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
  return
 !These statements are necessary to avoid the compiler complain about unused variables:
  ii=Dtset%usepaw;ii=Dtfil%unpaw;ii=Hdr%usepaw
@@ -398,7 +398,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
      if (set_k/=0) then
        start_kpt = set_k
        stop_kpt = set_k
-       !MSG_ERROR("set_k")
+       !ABI_ERROR("set_k")
      end if
    end if
 
@@ -411,7 +411,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
      if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) then
        bdtot_index=bdtot_index+nband_k
-       !MSG_ERROR("cycle in seq!")
+       !ABI_ERROR("cycle in seq!")
        cycle
      end if
 
@@ -465,7 +465,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
        if (set_band/=0) then
          start_band = set_band
          stop_band = set_band
-         !MSG_ERROR("set_band")
+         !ABI_ERROR("set_band")
        end if
      end if
 
@@ -650,7 +650,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
           "The option to print PAW all-electron wavefunctions is on, but execution ",ch10,&
           "is in parallel on two or more processors. XcrysDen files with individual con-",ch10,&
           "tributions will not be written. In order to enable this you must run in serial."
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if ! Check if serial run
 
 #ifdef HAVE_NETCDF
@@ -714,7 +714,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
     "Likely due to the use of a too coarse FFT mesh or unconverged wavefunctions. ",ch10,&
     "Numerical values inside the augmentation regions might be inaccurate. ",ch10,&
     "Action: increase pawecutdg in your input file. "
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
  ABI_FREE(r0shift)

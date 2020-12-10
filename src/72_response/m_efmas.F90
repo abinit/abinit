@@ -402,12 +402,12 @@ integer, allocatable :: ndegs_arr(:)
  nkptval=size(efmasval,2)
  if(nkptdeg/=nkptval) then
    write(msg,'(a,i8,a,i8,a)') ' nkptdeg and nkptval =',nkptdeg,' and ',nkptval,' differ, which is inconsistent.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  nkpt=nkptdeg
  if(nkpt/=size(kpt,2)) then
    write(msg,'(a,i8,a,i8,a)') ' nkptdeg and nkpt =',nkptdeg,' and ',nkpt,' differ, which is inconsistent.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  mband=size(efmasval,1)
@@ -681,19 +681,19 @@ end subroutine print_efmas
      if(mdim==3 .and. .not. extras) then
        write(msg,'(a,l1,a,i1,a)') 'Subroutine print_tr_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if(mdim==2 .and. .not. (extras .or. present(transport_tensor_scale))) then
        write(msg,'(a,l1,a,i1,a)') 'Subroutine print_tr_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      extras = present(efmas_eigval) .and. present(efmas_eigvec)
      if(mdim>1 .and. .not. extras) then
        write(msg,'(a,l1,a,i1,a)') 'Subroutine print_tr_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 
@@ -729,7 +729,7 @@ end subroutine print_efmas
      write(tmpstr,'(6a)') ch10,'are not band extrema, but saddle points;',ch10, &
 &                       'the transport equivalent formalism breaks down in these conditions.',ch10, &
 &                       'The associated tensor(s) will therefore not be printed.'
-     MSG_WARNING_UNIT(TRIM(msg)//TRIM(tmpstr), io_unit)
+     ABI_WARNING_UNIT(TRIM(msg)//TRIM(tmpstr), io_unit)
    end if
 
    if(deg_dim>1 .and. mdim>1) then
@@ -932,16 +932,16 @@ end subroutine print_efmas
 
   if(dtset%nsppol/=1)then
     write(msg,'(a,i3,a)') 'nsppol=',dtset%nsppol,' is not yet treated in m_efmas.'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
   if(dtset%nspden/=1)then
     write(msg,'(a,i3,a)') 'nspden=',dtset%nspden,' is not yet treated in m_efmas.'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
   if(dtset%efmas_deg==0) then
     write(msg,'(a)') 'efmas_deg==0 is for debugging; the results for degenerate bands will be garbage.'
-    MSG_WARNING(msg)
-    MSG_WARNING_UNIT(msg, ab_out)
+    ABI_WARNING(msg)
+    ABI_WARNING_UNIT(msg, ab_out)
   end if
 
   ipert = dtset%natom+1
@@ -983,7 +983,7 @@ end subroutine print_efmas
           if (.not.(ALL(ABS(eigen1_deg)<tol5))) then
             write(msg,'(a,a)') ' Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
 &            'but gradient of band(s) was found to be nonzero.'
-            MSG_ERROR(msg)
+            ABI_ERROR(msg)
           end if
         end do !adir=1,3
       end if !degenerate(1)
@@ -2057,22 +2057,22 @@ function MATMUL_DP(aa,bb,mm,nn,transa,transb)
  if (transa_=='n') then
    kk=size(aa,2)
    if (size(aa,1)/=mm) then
-     MSG_BUG('Error in sizes!')
+     ABI_BUG('Error in sizes!')
    end if
  else
    kk=size(aa,1)
    if (size(aa,2)/=mm) then
-     MSG_BUG('Error in sizes!')
+     ABI_BUG('Error in sizes!')
    end if
  end if
 
  if (transb_=='n') then
    if (size(bb,1)/=kk.or.size(bb,2)/=nn) then
-     MSG_BUG('Error in sizes!')
+     ABI_BUG('Error in sizes!')
    end if
  else
    if (size(bb,1)/=nn.or.size(bb,2)/=kk) then
-     MSG_BUG('Error in sizes!')
+     ABI_BUG('Error in sizes!')
    end if
  end if
 
@@ -2127,22 +2127,22 @@ function MATMUL_DPC(aa,bb,mm,nn,transa,transb)
  if (transa_=='n') then
    kk=size(aa,2)
    if (size(aa,1)/=mm) then
-     MSG_BUG('Error in sizes!')
+     ABI_BUG('Error in sizes!')
    end if
  else
    kk=size(aa,1)
    if (size(aa,2)/=mm) then
-     MSG_BUG('Error in sizes!')
+     ABI_BUG('Error in sizes!')
    end if
  end if
 
  if (transb_=='n') then
    if (size(bb,1)/=kk.or.size(bb,2)/=nn) then
-     MSG_BUG('Error in sizes!')
+     ABI_BUG('Error in sizes!')
    end if
  else
    if (size(bb,1)/=nn.or.size(bb,2)/=kk) then
-     MSG_BUG('Error in sizes!')
+     ABI_BUG('Error in sizes!')
    end if
  end if
 

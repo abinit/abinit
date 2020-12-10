@@ -378,7 +378,7 @@ subroutine tdep_build_psij333(isym,InVar,Psij_ref,Psij_333,Sym,trans)
 ! Take into account the 6 allowed permutations
   Psij_tmp(:,:,:)=Psij_333(:,:,:)
   if ((trans.lt.1).or.(trans.gt.6)) then
-    MSG_BUG('This value of the symmetry index is not permitted')
+    ABI_BUG('This value of the symmetry index is not permitted')
   end if
   do ii=1,3
     do jj=1,3
@@ -619,7 +619,7 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rla
 !   Write the Gruneisen
     if (sum(abs(dimag(Gruneisen(:)))).gt.tol8) then
       write(53,'(i5,1x,100(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),(dimag(Gruneisen(ii)),ii=1,nmode)
-      MSG_BUG('The imaginary part of the Gruneisen is not equal to zero')
+      ABI_BUG('The imaginary part of the Gruneisen is not equal to zero')
     else
 !FB      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)
       write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode)

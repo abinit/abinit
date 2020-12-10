@@ -299,12 +299,12 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
    write(message, '(a,a,a)' )&
 &   'This routine does not work yet with istwfk /= 1.',ch10,&
 &   'This should have been tested previously ...'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (usepaw == 1 .and. usecprj /= 1) then
    message = ' PAW calculation but cprj datastructure has not been allocated !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 ! useful flags for various efield possibilities
@@ -1005,7 +1005,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
                 if(abs(dtm_k(1))<=1d-12)dtm_k(1)=1d-12
                 if(abs(dtm_k(2))<=1d-12)dtm_k(2)=1d-12
                 write(std_out,*)' Changing to:',dtm_k(1:2)
-!               MSG_BUG(message)
+!               ABI_BUG(message)
              end if
 
              dtm_mult(1,ikpt1+(isppol-1)*dtefield%fnkpt,istep) = dtm_k(1)
@@ -1163,7 +1163,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &           '  For istep = ', istep,&
 &           '  The string length = ',nkstr,&
 &           ', is not a divisor of fnkpt =',dtefield%fnkpt
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
          nstr = dtefield%fnkpt/nkstr
 
@@ -1548,7 +1548,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
            if(idir==1)then
              if(mpi_enreg%me==0)then
                if (open_file('POLSAVE',message,newunit=unt,status='OLD') /= 0) then
-                 MSG_ERROR(message)
+                 ABI_ERROR(message)
                end if
                read(unt,*)pol0
                write(message,'(a,3f20.12)')'Reading old polarization:',pol0
@@ -1615,7 +1615,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  if (dtset%berrysav == 1) then
    if(mpi_enreg%me==0)then
      if (open_file('POLSAVE',message,newunit=unt,status='UNKNOWN') /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      write(unt,'(3F20.12)') pol0
      close(unt)
@@ -2992,7 +2992,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      end if
   end do
   if (idum/=nkpt)then
-     MSG_ERROR('Found wrong number of k-points in IBZ')
+     ABI_ERROR('Found wrong number of k-points in IBZ')
   end if
 
   !set flags for fields, forces, stresses
@@ -3182,14 +3182,14 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
               write(message,'(a,a,a)')&
                    &         '  In a finite electric field, nband must be equal ',ch10,&
                    &         '  to the number of valence bands.'
-              MSG_ERROR(message)
+              ABI_ERROR(message)
            end if
         end if
 
         if (ikpt > 1) then
            if (dtefield%nband_occ(isppol) /= mband_occ_k) then
               message = "The number of valence bands is not the same for every k-point of present spin channel"
-              MSG_ERROR(message)
+              ABI_ERROR(message)
            end if
         else
            dtefield%mband_occ         = max(dtefield%mband_occ, mband_occ_k)
@@ -3472,7 +3472,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
            write(message,'(a,i5,a,i7)')&
                 &       ' The string length = ',nkstr,&
                 &       ', is not a divisor of fnkpt =',dtefield%fnkpt
-           MSG_BUG(message)
+           ABI_BUG(message)
         end if
 
         dtefield%nkstr(idir) = nkstr

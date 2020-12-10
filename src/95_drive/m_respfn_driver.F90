@@ -1027,7 +1027,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  Verify that k-point set has full space-group symmetry; otherwise exit
    timrev=1
    if (symkchk(dtset%kptns,dtset%nkpt,dtset%nsym,symrec,timrev,message) /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Calculate the kinetic part of the elastic tensor
@@ -1120,10 +1120,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &     'while rfelfd=',rfelfd,', rfddk=',rfddk,', rf2_dkdk=',rf2_dkdk,', rf2_dkde=',rf2_dkde,&
 &     ' and rfstrs=',rfstrs,'.',ch10,&
 &     'Action: change qpt, or rfelfd, or rfstrs in the input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    else if(rfasr.eq.2)then
      write(message,'(2a)')ch10,' rfasr=2 not allowed with q/=0 => rfasr was reset to 0.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      rfasr=0
    end if
  end if
@@ -1167,7 +1167,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   ' WARNING: no perturbations to be done at this q-point.',ch10,&
 &   ' You may have forgotten to set the rfdir or rfatpol variables. Continuing normally.',ch10
    call wrtout(ab_out,message,'COLL')
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
@@ -1665,7 +1665,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &               'results_respfn%gam_jdtset=',results_respfn%gam_jdtset,ch10,&
 &               'dtset%getgam_eig2nkq=',dtset%getgam_eig2nkq,ch10,&
 &               'So, it seems eig2nkq at gamma has not yet been computed, while it is needed now.'
-               MSG_BUG(message)
+               ABI_BUG(message)
              end if
            end if
            call eigen_meandege(eigen0,eigen_ddw,eigen_ddw_mean,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,2)
@@ -3659,7 +3659,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 &       '  In case of finite electric field, and electric field perturbation,',ch10,&
 &       '  the three directions for the perturbations must be treated.',ch10,&
 &       '  Action : set idir to 1 1 1, or forget about finite electric field.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      do ipert=1,mpert
        do idir=1,3
@@ -3979,7 +3979,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 ! *************************************************************************
 
  if(nspden==4)then
-   MSG_WARNING('dfpt_dyfro : DFPT with nspden=4 works at the moment just for insulators and norm-conserving psp!')
+   ABI_WARNING('dfpt_dyfro : DFPT with nspden=4 works at the moment just for insulators and norm-conserving psp!')
  end if
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)

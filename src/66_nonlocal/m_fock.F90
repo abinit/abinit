@@ -514,7 +514,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  call timab(1501,1,tsec)
 
  if (dtset%nspinor/=1) then
-   MSG_ERROR('Hartree-Fock option can be used only with option nspinor=1.')
+   ABI_ERROR('Hartree-Fock option can be used only with option nspinor=1.')
  end if
 
 
@@ -725,7 +725,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 !* Number of iterations with fixed occupied states when calculating the exact exchange contribution.
    if (dtset%nnsclohf<0) then
-     MSG_ERROR('The parameter nnsclohf must be a non-negative integer.')
+     ABI_ERROR('The parameter nnsclohf must be a non-negative integer.')
    end if
    if (dtset%nnsclohf==0) then
      fockcommon%nnsclo_hf=1
@@ -822,11 +822,11 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      if (dtset%kptopt==0) then
 !* kptopt =0 : read directly nkpt, kpt, kptnrm and wtk in the input file
 !*              => this case is not allowed for the moment
-       MSG_ERROR('Hartree-Fock option can not be used with option kptopt=0.')
+       ABI_ERROR('Hartree-Fock option can not be used with option kptopt=0.')
      else
 !* kptopt <0 : rely on kptbounds, and ndivk to set up a band structure calculation
 !*              => a band structure calculation is not yet allowed.
-       MSG_ERROR('Hartree-Fock option can not be used with option kptopt<0.')
+       ABI_ERROR('Hartree-Fock option can not be used with option kptopt<0.')
      end if
    end if
 
@@ -938,7 +938,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
        end do
      end if
      if(invsym(isym)==0) then
-       MSG_ERROR('No inverse has been found for isym')
+       ABI_ERROR('No inverse has been found for isym')
      end if
    end do
 
@@ -1739,7 +1739,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
              if ((my_jband+1)>mband) then
                write(message,*) 'The number of occupied band',my_jband+1,' at k-point',&
 &                 ikpt,' is greater than the value of nbandhf ', mband
-               MSG_ERROR(message)
+               ABI_ERROR(message)
              end if
 
 !* If the processor does not calculate the exchange with the occupied state (jkpt,my_jband), cycle
@@ -2109,7 +2109,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
  if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
    msg='SR mixing<>0 while range separation=0!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Treatment of the divergence at q+g=zero
@@ -2320,7 +2320,7 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 
  if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
    msg='strfock: SR mixing<>0 while range separation=0!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  fockstr(:)=zero

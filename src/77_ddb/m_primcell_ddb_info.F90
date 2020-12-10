@@ -234,7 +234,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
 ! *************************************************************************
 
   if (open_file(filename,msg,newunit=unit) /= 0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
 ! read in dimensions
@@ -363,7 +363,7 @@ subroutine write_primcell_ddb_info (filename,pcell)
 ! *************************************************************************
 
   if (open_file(filename,msg,newunit=unit, form="formatted",status="unknown") /= 0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
 ! read out dimensions

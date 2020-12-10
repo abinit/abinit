@@ -256,14 +256,14 @@ subroutine wrap_CHEEV(jobz, uplo, n, a, w)
 
  if (info < 0) then
    write(msg,'(a,i0,a)')"The ",-info,"-th argument of CHEEV had an illegal value."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (info > 0) then
    write(msg,'(2a,i0,a)')&
     "CHEEV: the algorithm failed to converge; ",ch10,&
     info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_FREE(rwork)
@@ -370,14 +370,14 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
 
    if (info < 0) then
     write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEV had an illegal value."
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
    end if
 
    if (info > 0) then
     write(msg,'(2a,i0,a)')&
      "ZHEEV: the algorithm failed to converge; ",ch10,&
      info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
    end if
 
    ABI_FREE(rwork)
@@ -419,7 +419,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
    RETURN
 #endif
 
-  MSG_BUG("You should not be here!")
+  ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine wrap_ZHEEV
@@ -571,7 +571,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   MSG_ERROR("Not coded yet")
+   ABI_ERROR("Not coded yet")
 
    !call init_scalapack(Slk_processor,comm)
    !istwf_k=1
@@ -607,7 +607,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
    RETURN
 #endif
 
-   MSG_BUG("You should not be here!")
+   ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine xheev_cplex
@@ -701,14 +701,14 @@ subroutine wrap_CHPEV(jobz, uplo, n, ap, w, z, ldz)
 
  if (info < 0) then
    write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEV had an illegal value."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (info > 0) then
    write(msg,'(2a,i0,a)')&
     "ZHPEV: the algorithm failed to converge; ",ch10,&
     info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_FREE(rwork)
@@ -829,14 +829,14 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
 
    if (info < 0) then
      write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHPEV had an illegal value."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (info > 0) then
      write(msg,'(2a,i0,a)')&
       "ZHPEV: the algorithm failed to converge; ",ch10,&
       info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ABI_FREE(rwork)
@@ -880,7 +880,7 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
    RETURN
 #endif
 
-   MSG_BUG("You should not be here!")
+   ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine wrap_ZHPEV
@@ -1000,7 +1000,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
 
    if (info < 0) then
      write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEGV had an illegal value."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (info > 0) then
@@ -1015,7 +1015,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
         "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
         "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
      end if
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ABI_FREE(rwork)
@@ -1041,7 +1041,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
    call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
    ! Solve the problem with scaLAPACK.
-   MSG_ERROR("slk_pZHEGV not yet coded")
+   ABI_ERROR("slk_pZHEGV not yet coded")
    ! TODO
    !% call slk_pzhegv(itype,jobz,uplo,Slk_matA,Slk_matB,w)
 
@@ -1058,7 +1058,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
    RETURN
 #endif
 
-   MSG_BUG("You should not be here!")
+   ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine wrap_ZHEGV
@@ -1253,7 +1253,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
 
 #ifdef HAVE_LINALG_SCALAPACK
 
-  MSG_ERROR("Not coded yet")
+  ABI_ERROR("Not coded yet")
   ! call init_scalapack(Slk_processor,comm)
   ! istwf_k=1
 
@@ -1270,7 +1270,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
   ! call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
   ! ! Solve the problem with scaLAPACK.
-  ! MSG_ERROR("slk_pZHEGV not yet coded")
+  ! ABI_ERROR("slk_pZHEGV not yet coded")
   ! ! TODO
   ! call slk_pzhegv(itype,jobz,uplo,Slk_matA,Slk_matB,w)
 
@@ -1289,7 +1289,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
   RETURN
 #endif
 
-  MSG_BUG("You should not be here!")
+  ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine xhegv_cplex
@@ -1466,13 +1466,13 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
 
   if (info < 0) then
     write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEVX had an illegal value."
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   if (info > 0) then
     write(msg,'(2a,i0,a)')"ZHEEVX: the algorithm failed to converge; ",ch10,&
      info,"eigenvectors failed to converge. "
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   ABI_FREE(iwork)
@@ -1517,7 +1517,7 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
    RETURN
 #endif
 
-   MSG_BUG("You should not be here!")
+   ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine wrap_ZHEEVX
@@ -1750,7 +1750,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-  MSG_ERROR("Not coded yet")
+  ABI_ERROR("Not coded yet")
   ! call init_scalapack(Slk_processor,comm)
   ! istwf_k=1
 
@@ -1785,7 +1785,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
   RETURN
 #endif
 
-  MSG_BUG("You should not be here!")
+  ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine xheevx_cplex
@@ -1975,7 +1975,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
 
    if (info < 0) then
      write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEGVX had an illegal value."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (info > 0) then
@@ -1988,7 +1988,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
         "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
         "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
      end if
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ABI_FREE(iwork)
@@ -2021,7 +2021,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
    end if
 
    ! Solve the problem.
-   MSG_ERROR("slk_pZHEGVX not coded yet")
+   ABI_ERROR("slk_pZHEGVX not coded yet")
    ! TODO write the scaLAPACK wrapper.
    !call slk_pZHEGVX(itype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abstol,Slk_vec,m,w)
 
@@ -2040,7 +2040,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
    RETURN
 #endif
 
-  MSG_BUG("You should not be here!")
+  ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine wrap_ZHEGVX
@@ -2306,7 +2306,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-  MSG_ERROR("not coded yet")
+  ABI_ERROR("not coded yet")
   ! call init_scalapack(Slk_processor,comm)
   ! istwf_k=1
 
@@ -2328,7 +2328,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
   ! end if
 
   ! ! Solve the problem.
-  ! MSG_ERROR("slk_pZHEGVX not coded yet")
+  ! ABI_ERROR("slk_pZHEGVX not coded yet")
   ! ! TODO write the scaLAPACK wrapper.
   ! call slk_pZHEGVX(itype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abstol,Slk_vec,m,w)
 
@@ -2347,7 +2347,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
   ! RETURN
 #endif
 
-  MSG_BUG("You should not be here!")
+  ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine xhegvx_cplex
@@ -2454,14 +2454,14 @@ subroutine wrap_CGEEV(jobvl, jobvr, n, a, lda, w, vl, ldvl, vr, ldvr)
 
  if (info < 0) then
    write(msg,'(a,i0,a)')" The ",-info,"-th argument of CGEEV had an illegal value."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (info > 0) then
    write(msg,'(3a,i0,a,i0,a)')&
      "CGEEV: The QR algorithm failed to compute all the eigenvalues, and no eigenvectors have been computed;",ch10,&
      "Elements ",info+1,":",n," of W contain eigenvalues which have converged. "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_FREE(work)
@@ -2577,14 +2577,14 @@ subroutine wrap_ZGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
 
    if (info < 0) then
     write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZGEEV had an illegal value."
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
    end if
 
    if (info > 0) then
     write(msg,'(3a,i0,a,i0,a)')&
      "ZGEEV: The QR algorithm failed to compute all the eigenvalues, and no eigenvectors have been computed;",ch10,&
      "Elements ",info+1,":",n," of W contain eigenvalues which have converged. "
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
    end if
 
    ABI_FREE(work)
@@ -2592,7 +2592,7 @@ subroutine wrap_ZGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
    RETURN
 
  CASE (.TRUE.)
-   MSG_BUG("You should not be here!")
+   ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine wrap_ZGEEV
@@ -2672,7 +2672,7 @@ subroutine cginv(a, n, comm)
 
    if (info < 0) then
      write(msg,'(a,i0,a)')" The ",-info,"-th argument of CGETRF had an illegal value."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (info > 0) then
@@ -2681,7 +2681,7 @@ subroutine cginv(a, n, comm)
       "U(i,i) in the P*L*U factorization is exactly zero for i = ",info,ch10,&
       "The factorization has been completed but the factor U is exactly singular.",ch10,&
       "Division by zero will occur if it is used to solve a system of equations."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    lwork=MAX(1,n)
@@ -2691,14 +2691,14 @@ subroutine cginv(a, n, comm)
 
    if (info < 0) then
      write(msg,'(a,i0,a)')" The ",-info,"-th argument of CGETRI had an illegal value."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (info > 0) then
      write(msg,'(3a,i0,a)')&
       "The matrix that has been passed to this subroutine is probably either singular or nearly singular.",ch10,&
       "U(i,i) for i= ",info," is exactly zero; the matrix is singular and its inverse could not be computed."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ABI_FREE(ipiv)
@@ -2724,7 +2724,7 @@ subroutine cginv(a, n, comm)
   ! IMPORTANT NOTE: PZGETRF requires square block decomposition i.e.,  MB_A = NB_A.
   if ( Slk_mat%descript%tab(MB_)/=Slk_mat%descript%tab(NB_) ) then
    msg ="PZGETRF requires square block decomposition i.e.,  MB_A = NB_A."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
   end if
 
   !!call slk_matrix_from_global_dpc_2D(Slk_mat,"All",a)
@@ -2737,7 +2737,7 @@ subroutine cginv(a, n, comm)
 
   if (info/=0) then
    write(msg,'(a,i0)')"PCGETRF returned info= ",info
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
   end if
 
   ! Get optimal size of workspace for PCGETRI.
@@ -2763,7 +2763,7 @@ subroutine cginv(a, n, comm)
 
   if (info/=0) then
    write(msg,'(a,i0)')"PZGETRI returned info= ",info
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
   end if
 
   ABI_FREE(work)
@@ -2783,7 +2783,7 @@ subroutine cginv(a, n, comm)
 
 #endif
 
-  MSG_BUG("You should not be here!")
+  ABI_BUG("You should not be here!")
 
  END SELECT
 
@@ -2857,7 +2857,7 @@ subroutine zginv(a, n, comm)
 
    if (info < 0) then
      write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZGETRF had an illegal value."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (info > 0) then
@@ -2866,7 +2866,7 @@ subroutine zginv(a, n, comm)
       "U(i,i) in the P*L*U factorization is exactly zero for i = ",info,ch10,&
       "The factorization has been completed but the factor U is exactly singular.",ch10,&
       "Division by zero will occur if it is used to solve a system of equations."
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
    end if
 
    lwork=MAX(1,n)
@@ -2876,14 +2876,14 @@ subroutine zginv(a, n, comm)
 
    if (info < 0) then
      write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZGETRI had an illegal value."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (info > 0) then
     write(msg,'(3a,i0,a)')&
       "The matrix that has been passed to this subroutine is probably either singular or nearly singular.",ch10,&
       "U(i,i) for i= ",info," is exactly zero; the matrix is singular and its inverse could not be computed."
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
    end if
 
    ABI_FREE(ipiv)
@@ -2919,7 +2919,7 @@ subroutine zginv(a, n, comm)
    return
 #endif
 
-  MSG_BUG("You should not be here!")
+  ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine zginv
@@ -3001,14 +3001,14 @@ subroutine zhpd_invert(uplo, a, n, comm)
 
    if (info < 0) then
      write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZPOTRF had an illegal value."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (info > 0) then
     write(msg,'(a,i0,3a)')&
       "The leading minor of order ",info," is not positive definite, ",ch10,&
       "and the factorization could not be completed."
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
    end if
    !
    ! *  ZPOTRI computes the inverse of a complex Hermitian positive definite
@@ -3020,13 +3020,13 @@ subroutine zhpd_invert(uplo, a, n, comm)
 
    if (info < 0) then
      write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZPOTRI had an illegal value."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (info > 0) then
      write(msg,'(a,2(1x,i0),a)')&
        "The ( ",info,info,")element of the factor U or L is zero, and the inverse could not be computed."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    RETURN
@@ -3060,7 +3060,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
    RETURN
 #endif
 
-   MSG_BUG("You should not be here!")
+   ABI_BUG("You should not be here!")
  END SELECT
 
 end subroutine zhpd_invert
@@ -3137,7 +3137,7 @@ subroutine matrginv(a,lda,n)
    '  is probably either singular or nearly singular.',ch10,&
    '  The ESSL routine dgeicd failed.',ch10,&
    '  Action: Contact ABINIT group '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 #elif defined HAVE_LINALG_ASL
@@ -3149,7 +3149,7 @@ subroutine matrginv(a,lda,n)
    '  is probably either singular or nearly singular.',ch10,&
    '  The ASL routine dbgmlu failed.',ch10,&
    '  Action: Contact ABINIT group '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call dbgmdi(a,lda,n,ipvt,det,-1,work,ierr)
@@ -3160,7 +3160,7 @@ subroutine matrginv(a,lda,n)
    '  is probably either singular or nearly singular.',ch10,&
    '  The ASL routine dbgmdi failed.',ch10,&
    '  Action: Contact ABINIT group '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 #else
@@ -3172,7 +3172,7 @@ subroutine matrginv(a,lda,n)
    '  is probably either singular or nearly singular.',ch10,&
    '  The LAPACK routine dgetrf failed.',ch10,&
    '  Action: Contact ABINIT group '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call dgetri(n,a,lda,ipvt,work,n,ierr)
@@ -3183,7 +3183,7 @@ subroutine matrginv(a,lda,n)
    '  is probably either singular or nearly singular.',ch10,&
    '  The LAPACK routine dgetri failed.',ch10,&
    '  Action: Contact ABINIT group '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 #endif

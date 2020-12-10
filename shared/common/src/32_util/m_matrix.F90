@@ -124,7 +124,7 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
  ABI_DEALLOCATE(rwork)
  if(info/=0) then
   message = 'Error in diagonalization of zmat (zheev) ! - '
-  MSG_ERROR(message)
+  ABI_ERROR(message)
  end if
 
 !  == Secondly Compute sqrt(diagonalized matrix)
@@ -141,7 +141,7 @@ subroutine invsqrt_matrix(matrix,tndim,force_diag)
      do im1=1,tndim
        write(std_out,'(100f7.3)') (initialmatrix(im1,im2),im2=1,tndim)
      enddo
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    else if(abs(eig(im))<tol8) then
      nb_of_zero=nb_of_zero+1
    else
@@ -411,7 +411,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  call dsyev('v','u',tndim,matrix_save,tndim,eig,work,lwork,info)
  if(info/=0) then
   message = 'Error in diagonalization of matrix (dsyev) ! - '
-  MSG_ERROR(message)
+  ABI_ERROR(message)
  end if
  if(prtopt==1) then
    write(std_out,*) 'output',INFO
@@ -431,7 +431,7 @@ subroutine blockdiago_fordsyev(matrix,tndim,eig)
  call dsyev('v','u',tndim,matrix,tndim,eig,work,lwork,info)
  if(info/=0) then
   message = 'Error in diagonalization of matrix (dsyev) ! - '
-  MSG_ERROR(message)
+  ABI_ERROR(message)
  end if
  if(prtopt==1) then
   write(std_out,*) 'output',INFO
@@ -759,7 +759,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  call zheev('v','u',tndim,matrix_save,tndim,eig,work,lwork,rwork,info)
  if(info/=0) then
   message = 'Error in diagonalization of matrix (zheev) ! - '
-  MSG_ERROR(message)
+  ABI_ERROR(message)
  end if
  write(std_out,*) 'output',INFO
  write(std_out,*) "Eigenvalues"
@@ -777,7 +777,7 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
  call zheev('v','u',tndim,matrix,tndim,eig,work,lwork,rwork,info)
  if(info/=0) then
   message = 'Error in diagonalization of matrix (zheev) ! - '
-  MSG_ERROR(message)
+  ABI_ERROR(message)
  end if
  write(std_out,*) 'output',INFO
  write(std_out,*) "Eigenvalues"

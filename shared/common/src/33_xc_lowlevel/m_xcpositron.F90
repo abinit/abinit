@@ -144,15 +144,15 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
 
  if (gga.and.ixcpositron==2) then
    msg = 'xcpositron: GGA not yet implemented for ixcpositron=2 !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (posdensity0_limit.and.ixcpositron==2) then
    msg = 'xcpositron: ixcpositron=2 cannot be treated in the zero positron density limit !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (abs(ixcpositron)/=1.and.ixcpositron/=11.and.ixcpositron/=2.and.ixcpositron/=3.and.ixcpositron/=31) then
    msg = 'xcpositron: unknown electron-positron correlation !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Compute density radii for rhor_el, rhor_pos
@@ -254,7 +254,7 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
      nqtf2=(rhoe*sqrt(four*kf/pi))**2
      eps=grhoe2(ipt)/nqtf2
      if (eps<zero) then
-       MSG_ERROR('xcpositron: problem, negative GGA espilon !')
+       ABI_ERROR('xcpositron: problem, negative GGA espilon !')
      end if
      expgga=exp(-alpha_gga*eps*third)
 

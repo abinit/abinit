@@ -442,7 +442,7 @@ contains
        if (present(Sref)) then
           self%Sref(:,:) = Sref
        else
-          MSG_WARNING("No reference spin structure specified, using ferromagnetic along z-axis")
+          ABI_WARNING("No reference spin structure specified, using ferromagnetic along z-axis")
 
           self%Sref(1,:) = 0.0_dp
           self%Sref(2,:) = 0.0_dp

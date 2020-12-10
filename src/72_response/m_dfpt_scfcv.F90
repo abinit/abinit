@@ -636,7 +636,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nfftmix, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
    end if
    if (errid /= AB7_NO_ERROR) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (dtset%mffmem == 0) then
      call ab7_mixing_use_disk_cache(mix, dtfil%fnametmp_fft)
@@ -705,7 +705,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
            write(msg,"(3a)")" Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in dfpt_scfcv."
-           MSG_COMMENT(msg)
+           ABI_COMMENT(msg)
            call wrtout(ab_out, msg, "COLL")
            timelimit_exit = 1
            exit
@@ -1022,7 +1022,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      if (quit_sum>0) exit
 !    INSERT HERE CALL TO NEWRHO3 : to be implemented
      if (psps%usepaw==1) then
-       MSG_BUG("newrho3 not implemented: use potential mixing!")
+       ABI_BUG("newrho3 not implemented: use potential mixing!")
      end if
      initialized=1
    end if
@@ -1191,7 +1191,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if (renorm > 0.01 ) then
      write(msg,'(a,a)')'   WARNING: The renormalisation seems large (> 0.01).'//char(10)//&
 '     You might consider increasing the k-point grid.'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      call wrtout(ab_out,msg,'COLL')
    end if
    write(msg,'(a)') ' '
@@ -1474,9 +1474,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      else
        ! Handle Fortran files.
        if (open_file(fi1o, msg, newunit=ncid, form='unformatted', status='old', action="readwrite") /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
-       if (fort_denpot_skip(ncid, msg) /= 0) MSG_ERROR(msg)
+       if (fort_denpot_skip(ncid, msg) /= 0) ABI_ERROR(msg)
        write(ncid) rhog1(:,1)
        close(ncid)
      end if
@@ -1606,7 +1606,7 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 ! *********************************************************************
 
  if (optene==1) then
-   MSG_BUG('Double-counting scheme not yet allowed!')
+   ABI_BUG('Double-counting scheme not yet allowed!')
  end if
 
  if (optene>-1) then
@@ -1770,11 +1770,11 @@ subroutine newfermie1(cplex,fermie1,fe1fixed,ipert,istep,ixc,my_natom,natom,nfft
 !Tests
  if (cplex==2) then
    msg='Not compatible with cplex=2!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (usepaw==1.and.usexcnhat==0.and.(size(nhatfermi)<=0.or.size(vxc1)<=0)) then
    msg='Should have nhatfermi and vxc1 allocated with usexcnhat=0!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Set up parallelism over atoms
@@ -1975,11 +1975,11 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 !Compatibility tests
  if(usepaw==1) then
    if(dtset%nspden==4.and.dtset%pawoptmix==1) then
-     MSG_ERROR('pawoptmix=1 is not compatible with nspden=4 !')
+     ABI_ERROR('pawoptmix=1 is not compatible with nspden=4 !')
    end if
    if (my_natom>0) then
      if (pawrhoij(1)%qphase<cplex) then
-       MSG_ERROR('pawrhoij()%qphase must be >=cplex !')
+       ABI_ERROR('pawrhoij()%qphase must be >=cplex !')
      end if
    end if
  end if
@@ -2081,7 +2081,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  call ab7_mixing_copy_current_step(mix, vresid0, errid, msg, arr_respc = vrespc)
 
  if (errid /= AB7_NO_ERROR) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_DEALLOCATE(vrespc)
@@ -2130,7 +2130,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
    ! MG FIXME, Why this?
    ! One should propagate the error so that we can handle it
    ! in the caller!
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Do here the mixing of the potential
@@ -2169,7 +2169,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 
  else if(iscf==5 .or. iscf==6)then
    if(ispmix/=1) then
-     MSG_ERROR('Mixing on reciprocal space not allowed with iscf=5 or 6.')
+     ABI_ERROR('Mixing on reciprocal space not allowed with iscf=5 or 6.')
    end if
 !  PAW: apply a simple mixing to rhoij (this is temporary)
    if (usepaw==1.and.my_natom>0) then
@@ -3062,7 +3062,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !Not valid for PAW
  if (psps%usepaw==1) then
    msg='This routine cannot be used for PAW (use dfpt_nstpaw instead) !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 
@@ -3656,10 +3656,10 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 !Check arguments validity
  if (ipert>natom.and.ipert/=natom+3.and.ipert/=natom+4.and.ipert/=natom+5) then
-   MSG_BUG('wrong ipert argument!')
+   ABI_BUG('wrong ipert argument!')
  end if
  if (cplex/=1) then
-   MSG_BUG('wrong cplex/=1 argument !')
+   ABI_BUG('wrong cplex/=1 argument !')
  end if
 
 !Keep track of total time spent in this routine
@@ -4285,10 +4285,10 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !Check arguments validity
  if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4.and.ipert/=gs_hamkq%natom+5) then !SPr rfmagn deb
-   MSG_BUG('wrong ipert argument !')
+   ABI_BUG('wrong ipert argument !')
  end if
  if (cplex/=1) then
-   MSG_BUG('wrong cplex/=1 argument !')
+   ABI_BUG('wrong cplex/=1 argument !')
  end if
 
 !Debugging statements
@@ -4409,7 +4409,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !Structured debugging : if prtvol=-level, stop here.
  if(prtvol==-level)then
    write(msg,'(a,a1,a,i2,a)')' fermie3 : exit prtvol=-',level,', debugging mode => stop '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call timab(130,2,tsec)

@@ -609,7 +609,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  if (my_rank == master) then
 
    if (open_file(path, msg, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    read(unt, err=10, iomsg=msg) new%version
    read(unt, err=10, iomsg=msg) new%numv1
@@ -617,7 +617,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
    ! Get important dimensions from the first header and rewind the file.
    call hdr_fort_read(new%hdr_ref, unt, fform)
    if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
-     MSG_ERROR(sjoin("While reading:", path, ch10, msg))
+     ABI_ERROR(sjoin("While reading:", path, ch10, msg))
    end if
    if (new%debug) call new%hdr_ref%echo(fform, 4, unit=std_out)
 
@@ -650,7 +650,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
    do iv1=1,new%numv1
      call hdr_fort_read(hdr1, unt, fform)
      if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
-       MSG_ERROR(sjoin("While reading hdr of v1 potential of index:", itoa(iv1), ch10, msg))
+       ABI_ERROR(sjoin("While reading hdr of v1 potential of index:", itoa(iv1), ch10, msg))
      end if
 
      ! Save cplex and FFT mesh associated to this perturbation.
@@ -776,7 +776,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(sjoin("Error while reading:", path, ch10, msg))
+ ABI_ERROR(sjoin("Error while reading:", path, ch10, msg))
 
 end function dvdb_new
 !!***
@@ -822,7 +822,7 @@ subroutine dvdb_open_read(db, ngfft, comm)
 !************************************************************************
 
  if (db%rw_mode /= DVDB_NOMODE) then
-   MSG_ERROR("DVDB should be in DVDB_NOMODE when open_read is called.")
+   ABI_ERROR("DVDB should be in DVDB_NOMODE when open_read is called.")
  end if
  db%rw_mode = DVDB_READMODE
 
@@ -837,17 +837,17 @@ subroutine dvdb_open_read(db, ngfft, comm)
  select case (db%iomode)
  case (IO_MODE_FORTRAN)
    if (open_file(db%path, msg, newunit=db%fh, form="unformatted", status="old", action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    read(db%fh, err=10, iomsg=msg)
    read(db%fh, err=10, iomsg=msg)
    db%current_fpos = 1
 
  case (IO_MODE_MPI)
-   MSG_ERROR("MPI not coded")
+   ABI_ERROR("MPI not coded")
 
  case default
-   MSG_ERROR(sjoin("Unsupported iomode:", itoa(db%iomode)))
+   ABI_ERROR(sjoin("Unsupported iomode:", itoa(db%iomode)))
  end select
 
  ! Read potentials induced by electric fields
@@ -856,7 +856,7 @@ subroutine dvdb_open_read(db, ngfft, comm)
  if (file_exists("__EFIELD_POTS__")) then
    call wrtout(std_out, " Reading Efield potentials from EFIELD_POTS")
    if (open_file("__EFIELD_POTS__", msg, newunit=unt, form="formatted") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    do ii=1,3
     read(unt, "(a)") pot_paths(ii)
@@ -869,7 +869,7 @@ subroutine dvdb_open_read(db, ngfft, comm)
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(sjoin("Error while reading", db%path, ch10, msg))
+ ABI_ERROR(sjoin("Error while reading", db%path, ch10, msg))
 
 end subroutine dvdb_open_read
 !!***
@@ -902,7 +902,7 @@ subroutine dvdb_close(db)
  case (IO_MODE_FORTRAN)
    close(db%fh)
  case default
-   MSG_ERROR(sjoin("Unsupported iomode:", itoa(db%iomode)))
+   ABI_ERROR(sjoin("Unsupported iomode:", itoa(db%iomode)))
  end select
 
  db%rw_mode = DVDB_NOMODE
@@ -1263,7 +1263,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
  else
    ! The FFT mesh used in the caller differ from the one found in the DVDB --> Fourier interpolation
    ! TODO: Add linear interpolation as well.
-   if (enough == 0) MSG_COMMENT("Performing FFT interpolation of DFPT potentials as input ngfft differs from ngfft_file.")
+   if (enough == 0) ABI_COMMENT("Performing FFT interpolation of DFPT potentials as input ngfft differs from ngfft_file.")
    enough = enough + 1
    ABI_MALLOC(v1r_file, (cplex*nfftot_file, db%nspden))
    do ispden=1,db%nspden
@@ -1391,7 +1391,7 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
    idir = pinfo(1,ipc); ipert = pinfo(2,ipc); pcase = pinfo(3, ipc)
    if (my_rank == master) then
      if (db%read_onev1(idir, ipert, iqpt, cplex, nfft, ngfft, v1scf(:,:,:,pcase), msg) /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
    if (nproc > 1) call xmpi_ibcast(v1scf(:,:,:,pcase), master, comm, requests(ipc), ierr)
@@ -1538,7 +1538,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
         db%qcache%stats(3) = db%qcache%stats(3) + 1
       else
         ! This to handle the unlikely event in which the caller changes ngfft!
-        MSG_WARNING("different cplex or nfft!")
+        ABI_WARNING("different cplex or nfft!")
       end if
    else
       !call wrtout(std_out, sjoin("Cache miss for db_iqpt. Will read it from file...", itoa(db_iqpt)))
@@ -1884,7 +1884,7 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  if (db%qcache%make_room(ineed_qpt, msg) /= 0) then
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  do db_iqpt=1,db%nqpt
@@ -2232,7 +2232,7 @@ pcase_loop: &
    !ABI_CHECK(.not. has_phase, "has phase must be tested")
    !if (has_phase) then
    !  enough = enough + 1
-   !  if (enough == 1) MSG_WARNING("has phase must be tested")
+   !  if (enough == 1) ABI_WARNING("has phase must be tested")
    !end if
 
    workg = zero
@@ -2248,12 +2248,12 @@ pcase_loop: &
 
      if (pflag(idir_eq, ipert_eq) == 0) then
        write(msg, *)"pflag for idir_eq, ipert_eq", idir_eq, ipert_eq, "cannot be zero"
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      !if (pflag(idir_eq, ipert_eq) == 0) then
      !  write(msg, *)"pflag for idir_eq, ipert_eq", idir_eq, ipert_eq, "cannot be zero"
-     !  MSG_ERROR(msg)
+     !  ABI_ERROR(msg)
      !end if
 
      do ispden=1,nspden
@@ -2364,7 +2364,7 @@ pcase_loop: &
      "Cannot recostruct all 3*natom atomic perturbations from file",ch10,&
      "This usually happens when the DVDB does not contain all the independent perturbations for this q-point",ch10,&
      "See above message for further information."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine v1phq_complete
@@ -2562,7 +2562,7 @@ subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, 
      ! FIXME
      if (.not. all(abs(tnon) < tol12)) then
        enough = enough + 1
-       if (enough == 1) MSG_WARNING("tnon must be tested!")
+       if (enough == 1) ABI_WARNING("tnon must be tested!")
      end if
 
      ipert_eq = cryst%indsym(4, isym, ipert)
@@ -2706,7 +2706,7 @@ subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex
    ! FIXME
    if (.not. all(abs(tnon) < tol12)) then
      enough = enough + 1
-     if (enough == 1) MSG_WARNING("tnon must be tested!")
+     if (enough == 1) ABI_WARNING("tnon must be tested!")
    end if
 
    ipert_eq = cryst%indsym(4, isym, ipert)
@@ -3425,7 +3425,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    ABI_FREE(all_rcart)
 
  case default
-   MSG_ERROR(sjoin("Wrong rspace_cell:", itoa(db%rspace_cell)))
+   ABI_ERROR(sjoin("Wrong rspace_cell:", itoa(db%rspace_cell)))
  end select
 
  ! Find correspondence BZ --> IBZ. Note:
@@ -3439,7 +3439,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  call qrank%free()
 
  if (dksqmax > tol12) then
-   MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
  end if
 
  ! Construct sorted mapping BZ --> IBZ to speedup qbz search below.
@@ -3477,12 +3477,12 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst+1) == iq_ibz, "Wrong iqst")
    if (abs(nqst - wtq(iq_ibz) * nqbz) > tol12) then
      write(msg, "(a,i0,a,f5.2)")"Error in q-point star or q-weights. nqst:", nqst, "wtq * nqbz = ", wtq(iq_ibz) * nqbz
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Check that the q-point has been found in DVDB.
    if (.not. found) then
-     MSG_ERROR(sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
+     ABI_ERROR(sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
    end if
 
    iqst = iqst + nqst
@@ -3499,7 +3499,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  call qrank%free()
 
  if (dksqmax > tol12) then
-   MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
  end if
 
 end subroutine prepare_ftinterp
@@ -3815,7 +3815,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
         incache = .True.
         db%ft_qcache%stats(3) = db%ft_qcache%stats(3) + 1
       else
-        MSG_ERROR("Found different cplex/nfft in cache.")
+        ABI_ERROR("Found different cplex/nfft in cache.")
       end if
    else
       !call wrtout(std_out, sjoin("Cache miss for iq_ibz. Will try to interpolate it...", itoa(iq_ibz)))
@@ -4074,7 +4074,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
    !call timab(1807, 1, tsec)
    call wrtout(std_out, sjoin(" Need to update Vscf(q) cache with: ", itoa(qcnt), "q-points from FT..."), do_flush=.True.)
    if (db%ft_qcache%make_room(ineed_qpt, msg) /= 0) then
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    cplex = 2
@@ -4240,7 +4240,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  !call qrank%free()
 
  if (dksqmax > tol12) then
-   MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
  end if
 
  ! Construct sorted mapping BZ --> IBZ to speedup qbz search below.
@@ -4279,12 +4279,12 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
    ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst+1) == iq_ibz, "Wrong iqst")
    if (abs(nqst - wtq(iq_ibz) * nqbz) > tol12) then
      write(std_out,*)nqst, wtq(iq_ibz) * nqbz
-     MSG_ERROR("Error in counting q-point star or in the weights.")
+     ABI_ERROR("Error in counting q-point star or in the weights.")
    end if
 
    ! Check that the q-point has been found in DVDB.
    if (.not. found) then
-     MSG_ERROR(sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
+     ABI_ERROR(sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
    end if
    !write(std_out,*)sjoin("qpt irred:",ktoa(qibz(:,iq_ibz)))
 
@@ -4302,7 +4302,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  !call qrank%free()
 
  if (dksqmax > tol12) then
-   MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
  end if
 
  ABI_MALLOC(emiqr, (2, db%my_nrpt))
@@ -4873,7 +4873,7 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
      else
        ! rewind the file and read it from the beginning
        if (dvdb_rewind(db, msg) /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        nn = pos_wanted
      end if
@@ -4885,7 +4885,7 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
    do ii=1,nn-1
      !write(std_out,*)"in seek with ii: ",ii,"pos_wanted: ",pos_wanted
      if (my_hdr_skip(db%fh, -1, -1, fake_qpt, msg) /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      ! Skip the records with v1.
      do ispden=1,db%nspden
@@ -4898,7 +4898,7 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
    db%current_fpos = pos_wanted
 
  else
-   MSG_ERROR("Should not be called when iomode /= IO_MODE_FORTRAN")
+   ABI_ERROR("Should not be called when iomode /= IO_MODE_FORTRAN")
  end if
 
  return
@@ -5238,13 +5238,13 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
 !************************************************************************
 
  if (file_exists(dvdb_filepath)) then
-   MSG_ERROR(sjoin("Cannot overwrite existing file:", dvdb_filepath))
+   ABI_ERROR(sjoin("Cannot overwrite existing file:", dvdb_filepath))
  end if
 
  ! If a file is not found, try the netcdf version and change v1files accordingly.
  do ii=1,nfiles
    if (nctk_try_fort_or_ncfile(v1files(ii), msg) /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -5254,7 +5254,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
 
  ! Write dvdb file (we only support fortran binary format)
  if (open_file(dvdb_filepath, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(ount, err=10, iomsg=msg) dvdb_last_version
  write(ount, err=10, iomsg=msg) nperts
@@ -5275,17 +5275,17 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
 #endif
    else
      if (open_file(v1files(ii), msg, newunit=units(ii), form="unformatted", action="read", status="old") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call hdr_fort_read(hdr1_list(ii), units(ii), fform)
    end if
 
    if (dvdb_check_fform(fform, "merge_dvdb", msg) /= 0) then
-     MSG_ERROR(sjoin("While reading:", v1files(ii), msg))
+     ABI_ERROR(sjoin("While reading:", v1files(ii), msg))
    end if
    if (prtvol > 0) call hdr1_list(ii)%echo(fform, 3, unit=std_out)
    if (hdr1_list(ii)%pertcase == 0) then
-     MSG_ERROR(sjoin("Found GS potential:", v1files(ii)))
+     ABI_ERROR(sjoin("Found GS potential:", v1files(ii)))
    end if
    !write(std_out,*)"done", trim(v1files(ii))
 
@@ -5366,7 +5366,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(sjoin("Error while merging files", ch10, msg))
+ ABI_ERROR(sjoin("Error while merging files", ch10, msg))
 
 end subroutine dvdb_merge_files
 !!***
@@ -5561,13 +5561,13 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
        ABI_MALLOC(v1scf, (cplex*nfft, db%nspden))
 
        if (db%read_onev1(idir, ipert, iqpt, cplex, nfft, ngfft, v1scf, msg) /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        ABI_MALLOC(irottb, (nfft,nsym1))
        call rotate_fft_mesh(nsym1,symrel1,tnons1,ngfft,irottb,isok)
        if (.not. isok) then
-         MSG_WARNING("Real space FFT mesh is not compatible with symmetries!")
+         ABI_WARNING("Real space FFT mesh is not compatible with symmetries!")
        end if
 
        max_err = zero
@@ -5725,7 +5725,7 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
 #endif
    else
      if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
  end if
@@ -5961,7 +5961,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  !dump_path = "V1QAVG.dat"
  if (len_trim(dump_path) /= 0 .and. my_rank == master) then
    if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(std_out,"(a)")sjoin(" Will write potentials in text format to:", dump_path)
  end if
@@ -5985,7 +5985,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    interpolated = 1
    write_v1r = dtset%prtpot > 0
  else
-   MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
+   ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
 
  call wrtout([std_out, ab_out], sjoin(ch10, "- Results stored in: ", out_ncpath))
@@ -6314,7 +6314,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
    call dvdb%load_ddb(prtvol, chneut2, comm, ddb_filepath=ddb_filepath)
  else
    dvdb%add_lr = 0
-   MSG_WARNING("ddb_filepath was not provided --> Setting dvdb_add_lr to zero")
+   ABI_WARNING("ddb_filepath was not provided --> Setting dvdb_add_lr to zero")
  end if
 
  call dvdb%print()
@@ -6939,7 +6939,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    qbz = qibz
 
  else
-   MSG_ERROR(sjoin("Invalid eph_task", itoa(dtset%eph_task)))
+   ABI_ERROR(sjoin("Invalid eph_task", itoa(dtset%eph_task)))
  end if
 
  if (present(custom_qpt)) then
@@ -6967,14 +6967,14 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  ! Read the first header
  if (my_rank == master) then
    if (open_file(dvdb%path, msg, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    read(unt, err=10, iomsg=msg) dvdb%version
    read(unt, err=10, iomsg=msg) dvdb%numv1
 
    call hdr_fort_read(hdr_ref, unt, fform)
    if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
-     MSG_ERROR(sjoin("While reading:", dvdb%path, ch10, msg))
+     ABI_ERROR(sjoin("While reading:", dvdb%path, ch10, msg))
    end if
    close(unt)
  end if
@@ -7085,7 +7085,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
 
  if (my_rank == master) then
    if (open_file(new_dvdb_fname, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(ount, err=10, iomsg=msg) dvdb_last_version
    write(ount, err=10, iomsg=msg) nperts
@@ -7113,7 +7113,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
      do ipc=1,npc
        idir = pinfo(1,ipc); iat = pinfo(2,ipc); ipert = pinfo(3, ipc)
        if (dvdb%read_onev1(idir, iat, db_iqpt, cplex, nfftf, ngfftf, v1scf, msg) /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        ! Write header
@@ -7280,7 +7280,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(msg)
+ ABI_ERROR(msg)
 
 end subroutine dvdb_interpolate_and_write
 !!***
@@ -7374,7 +7374,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
  ! =================================================
  !nperts = nperts_read + nperts_interpolate
  if (open_file(new_dvdb_fname, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(ount, err=10, iomsg=msg) dvdb_last_version
  write(ount, err=10, iomsg=msg) nperts_read
@@ -7395,7 +7395,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
    do ipc=1,npc
      idir = pinfo(1,ipc); iat = pinfo(2,ipc); ipert = pinfo(3, ipc)
      if (dvdb%read_onev1(idir, iat, db_iqpt, cplex, nfft, dvdb%ngfft, v1scf, msg) /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      ! Change the header.
@@ -7436,7 +7436,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(msg)
+ ABI_ERROR(msg)
 
 end subroutine dvdb_qdownsample
 !!***

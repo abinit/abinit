@@ -224,7 +224,7 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
 &   (present(rprim).and..not.present(rprim_def))) then
     write(message, '(a)' )&
 &     ' strain_get: should give rprim_def and rprim as input of the routines'
-    MSG_BUG(message)
+    ABI_BUG(message)
   end if
 
  if(present(rprim_def).and.present(rprim))then
@@ -252,7 +252,7 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
  else
    write(message, '(a)' )&
 &     ' strain_get: should give rprim_def or mat_delta as input of the routines'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(symmetrized_in)then

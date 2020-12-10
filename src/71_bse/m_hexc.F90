@@ -313,7 +313,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
 
  !BEGIN DEBUG
  if (use_mpio) then
-   MSG_WARNING("Testing MPI-IO routines")
+   ABI_WARNING("Testing MPI-IO routines")
    ABI_MALLOC_OR_DIE(test,(hsize,hexc%my_t1:hexc%my_t2), ierr)
    diago_is_real=(.not.BSp%have_complex_ene)
    call exc_read_rcblock(hreso_fname,Bsp,is_resonant,diago_is_real,Bsp%nsppol,Bsp%nreh,hsize,&
@@ -352,7 +352,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
    !call symmetrize(hcoup,"ALL")
 
    if (use_mpio) then
-     MSG_WARNING("Testing MPI-IO routines")
+     ABI_WARNING("Testing MPI-IO routines")
      ABI_MALLOC_OR_DIE(test,(hsize,hexc%my_t1:hexc%my_t2), ierr)
      diago_is_real=.FALSE.
      call exc_read_rcblock(hcoup_fname,Bsp,is_resonant,diago_is_real,BSp%nsppol,Bsp%nreh,hsize,&
@@ -625,7 +625,7 @@ subroutine hexc_build_hinterp(hexc,hexc_i)
 
  if (hexc%BSp%prt_ncham) then
 #ifdef HAVE_NETCDF
-   MSG_COMMENT("Printing HEXC_I.nc file")
+   ABI_COMMENT("Printing HEXC_I.nc file")
    ncerr = nctk_open_create(ncid, trim(hexc%BS_files%out_basename)//"_HEXC_I.nc", xmpi_comm_self)
    NCF_CHECK_MSG(ncerr, "Creating HEXC_I file")
    call exc_ham_ncwrite(ncid, hexc_i%Kmesh_dense, hexc%BSp, hexc_i%hsize_dense, hexc%BSp%nreh_interp, &
@@ -846,12 +846,12 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
 
  if (any(BSp%interp_mode == [2,3])) then
    if(Vcp_dense%mode /= 'CRYSTAL' .and. Vcp_dense%mode /= 'AUXILIARY_FUNCTION') then
-     MSG_BUG('Vcp_dense%mode not implemented yet !')
+     ABI_BUG('Vcp_dense%mode not implemented yet !')
    end if
  end if
 
  if(BSp%nsppol > 1) then
-   MSG_BUG("nsppol > 1 not yet implemented")
+   ABI_BUG("nsppol > 1 not yet implemented")
  end if
 
  factor = one/grid%ndiv
@@ -922,11 +922,11 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
        !if(iq_ibz > 1 .and. ABS(vc_sqrt_qbz - Vcp_dense%vc_sqrt(1,iq_ibz)) > 1.e-3) then
        !   write(*,*) "vc_sqrt_qbz = ",vc_sqrt_qbz
        !   write(*,*) "Vcp_dense%vc_sqrt(1,iq_ibz) = ",Vcp_dense%vc_sqrt(1,iq_ibz)
-       !   MSG_ERROR("vcp are not the same !")
+       !   ABI_ERROR("vcp are not the same !")
        !else if(iq_ibz == 1 .and. ABS(vc_sqrt_qbz - SQRT(Vcp_dense%i_sz)) > 1.e-3) then
        !   write(*,*) "vc_sqrt_qbz = ",vc_sqrt_qbz
        !   write(*,*) "SQRT(Vcp_dense%i_sz) = ",SQRT(Vcp_dense%i_sz)
-       !   MSG_ERROR("vcp are not the same !")
+       !   ABI_ERROR("vcp are not the same !")
        !end if
        !!END DEBUG CHK !
      end if
@@ -1068,7 +1068,7 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
 &                                         + ccoeffs(itc,corresp_ind) &
 &                                         - hmat(itc,corresp_ind)
                        case default
-                         MSG_ERROR("Wrong Bsp%interp_mode")
+                         ABI_ERROR("Wrong Bsp%interp_mode")
                        end select
 
                        ctemp(indwithnb) = &
@@ -1722,7 +1722,7 @@ subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
  call timab(697,1,tsec)
 
  if(hexc%BSp%use_interp) then
-   MSG_ERROR('Not yet implemented with interpolation !')
+   ABI_ERROR('Not yet implemented with interpolation !')
  else ! No interpolation
    ! As our matrix is hermitian (hreso), we should always use 'N' here (it is stored column-wise !)
    call xgemv('N',hexc%hsize,hexc%my_nt,cone,hexc%hreso,hexc%hsize,phi,1,czero,hphi,1)
@@ -1786,7 +1786,7 @@ subroutine hexc_matmul_full(hexc, hexc_i, phi, hphi, parity)
  ABI_UNUSED(hexc_i%hsize_dense)
 
  if(hexc%BSp%use_interp) then
-   MSG_ERROR("Coupling is not yet implemented with interpolation")
+   ABI_ERROR("Coupling is not yet implemented with interpolation")
  else ! No interpolation
    hphi = MATMUL(hexc%hreso,phi) + parity * MATMUL(hexc%hcoup,CONJG(phi))
  end if

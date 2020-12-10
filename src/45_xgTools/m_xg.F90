@@ -301,10 +301,10 @@ module m_xg
     integer   , optional, intent(in) :: comm
 
     if ( rows < 1 ) then
-      MSG_ERROR("rows < 1 ")
+      ABI_ERROR("rows < 1 ")
     endif
     if ( cols < 1 ) then
-      MSG_ERROR("cols < 1 ")
+      ABI_ERROR("cols < 1 ")
     end if
 
     ! MG: Initialize arrays with zero to avoid SIGFPE in xmpi_sum
@@ -324,7 +324,7 @@ module m_xg
       xg%vecC(:,:) = zero
       xg%trans = 'c'
     case default
-      MSG_ERROR("Invalid space")
+      ABI_ERROR("Invalid space")
     end select
 
     xg%space = space
@@ -357,12 +357,12 @@ module m_xg
     call timab(tim_set,1,tsec)
 
     if ( size(array,dim=1) /= 2 ) then
-      MSG_ERROR("First dim must be 2")
+      ABI_ERROR("First dim must be 2")
     end if
 
     cols = size(array,dim=2)/rows
     if ( shift_col+cols > xg%cols ) then
-      MSG_WARNING("Ignore some columns, input array to large")
+      ABI_WARNING("Ignore some columns, input array to large")
     endif
 
     select case (xg%space)
@@ -372,7 +372,7 @@ module m_xg
       end do
     case (SPACE_CR)
       if ( xg%rows /= 2*rows ) then
-        MSG_ERROR("Bad number of rows")
+        ABI_ERROR("Bad number of rows")
       end if
 
       do col = 1, min(cols,xg%cols-shift_col)
@@ -409,12 +409,12 @@ module m_xg
     call timab(tim_set,1,tsec)
 
     if ( size(array,dim=1) /= 2 ) then
-      MSG_ERROR("First dim must be 2")
+      ABI_ERROR("First dim must be 2")
     end if
 
     cols = size(array,dim=2)/rows
     if ( shift_col+cols > xgBlock%cols ) then
-      MSG_WARNING("Block Ignore some columns, input array to large")
+      ABI_WARNING("Block Ignore some columns, input array to large")
     endif
 
     select case (xgBlock%space)
@@ -424,7 +424,7 @@ module m_xg
       end do
     case (SPACE_CR)
       if ( xgBlock%rows /= 2*rows ) then
-        MSG_ERROR("Bad number of rows")
+        ABI_ERROR("Bad number of rows")
       end if
 
       do col = 1, min(cols,xgBlock%cols-shift_col)
@@ -463,14 +463,14 @@ module m_xg
     select case (space)
     case ( SPACE_R,SPACE_CR )
       if ( fullsize < cols*rows .or. mod(fullsize,rows) /= 0) then
-        MSG_ERROR("Bad size for real array")
+        ABI_ERROR("Bad size for real array")
       end if
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
       call c_f_pointer(cptr,xgBlock%vecR,(/ rows, cols /))
     xgBlock%trans = 't'
     case ( SPACE_C )
       if ( fullsize/2 < cols*rows .or. mod(fullsize/2,rows) /= 0) then
-        MSG_ERROR("Bad size for complex array")
+        ABI_ERROR("Bad size for complex array")
       end if
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
       call c_f_pointer(cptr,xgBlock%vecC,(/ rows, cols /))
@@ -505,13 +505,13 @@ module m_xg
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
           write(std_out,*) xgBlock%cols,xgBlock%Ldim,cols,rows
           write(std_out,*) xgBlock%cols*xgBlock%Ldim,cols*rows
-          MSG_ERROR("Bad reverseMapping")
+          ABI_ERROR("Bad reverseMapping")
       end if
       cptr = getClocR(xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
       call c_f_pointer(cptr,array,(/ rows, cols /))
     case ( SPACE_C )
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
-          MSG_ERROR("Bad complex reverseMapping")
+          ABI_ERROR("Bad complex reverseMapping")
       end if
       cptr = getClocC(xgBlock%Ldim,xgBlock%cols,xgBlock%vecC(:,:))
       call c_f_pointer(cptr,array,(/ 2*rows, cols /))
@@ -538,12 +538,12 @@ module m_xg
     call timab(tim_get,1,tsec)
 
     if ( size(array,dim=1) /= 2 ) then
-      MSG_ERROR("First dim must be 2")
+      ABI_ERROR("First dim must be 2")
     end if
 
     cols = size(array,dim=2)/rows
     if ( shift_col+cols > xg%cols ) then
-      MSG_WARNING("Ignore some columns, input array to large")
+      ABI_WARNING("Ignore some columns, input array to large")
     endif
 
     select case (xg%space)
@@ -553,7 +553,7 @@ module m_xg
       end do
     case (SPACE_CR)
       if ( xg%rows /= 2*rows ) then
-        MSG_ERROR("Bad number of rows")
+        ABI_ERROR("Bad number of rows")
       end if
 
       do col = 1, min(cols,xg%cols-shift_col)
@@ -590,12 +590,12 @@ module m_xg
     call timab(tim_get,1,tsec)
 
     if ( size(array,dim=1) /= 2 ) then
-      MSG_ERROR("First dim must be 2")
+      ABI_ERROR("First dim must be 2")
     end if
 
     cols = size(array,dim=2)/rows
     if ( shift_col+cols > xgBlock%cols ) then
-      MSG_ERROR("Ignore some columns, input array to large")
+      ABI_ERROR("Ignore some columns, input array to large")
     endif
 
     select case (xgBlock%space)
@@ -605,7 +605,7 @@ module m_xg
       end do
     case (SPACE_CR)
       if ( xgBlock%rows /= 2*rows ) then
-        MSG_ERROR("Bad number of rows")
+        ABI_ERROR("Bad number of rows")
       end if
 
       do col = 1, min(cols,xgBlock%cols-shift_col)
@@ -639,10 +639,10 @@ module m_xg
     type(c_ptr) :: cptr
 
     if ( (fcol+cols-1 ) > xg%cols ) then
-      MSG_ERROR("Too many columns")
+      ABI_ERROR("Too many columns")
     endif
     if ( rows > xg%rows ) then
-      MSG_ERROR("Too many rows")
+      ABI_ERROR("Too many rows")
     end if
 
     xgBlock%space = xg%space
@@ -680,10 +680,10 @@ module m_xg
     type(c_ptr) :: cptr
 
     if ( (fcol+cols-1 ) > xgblockA%cols ) then
-      MSG_ERROR("Too many columns")
+      ABI_ERROR("Too many columns")
     endif
     if ( rows > xgblockA%rows ) then
-      MSG_ERROR("Too many rows")
+      ABI_ERROR("Too many rows")
     end if
 
     xgBlockB%space = xgBlockA%space
@@ -785,7 +785,7 @@ module m_xg
     integer :: rows
     rows = xgBlock%rows
     if ( rows /= xgBlock%ldim ) then
-      MSG_WARNING("rows/ldim ! Be very careful at what you are doing")
+      ABI_WARNING("rows/ldim ! Be very careful at what you are doing")
     end if
   end function rows
 !!***
@@ -812,10 +812,10 @@ module m_xg
     incx = 1; if ( present(inc1) ) incx = inc1
     incy = 1; if ( present(inc2) ) incy = inc2
     if ( xgBlockA%space /= xgBlockB%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
     !if ( xgBlockA%LDim*xgBlockA%cols/incx /= xgBlockB%LDim*xgBlockB%cols/incy ) then
-    !  MSG_ERROR("Number of element different")
+    !  ABI_ERROR("Number of element different")
     !end if
 
     size1 = xgBlockA%LDim*xgBlockA%cols/incx ; if ( size1 * incx < xgBlockA%LDim*xgBlockA%cols ) size1 = size1+1
@@ -853,19 +853,19 @@ module m_xg
 
     call timab(tim_pack,1,tsec)
     if ( xgBlockA%space /= xgBlockB%space ) then
-      MSG_ERROR("Both blocks must be the same space")
+      ABI_ERROR("Both blocks must be the same space")
     end if
 
     if ( xgBlockA%Ldim /= xgBlockA%rows ) then
-      MSG_ERROR("Cannot pack when ldim /= rows")
+      ABI_ERROR("Cannot pack when ldim /= rows")
     end if
 
     if ( xgBlockA%Ldim /= xgBlockA%cols ) then
-      MSG_ERROR("Cannot pack when cols /= rows")
+      ABI_ERROR("Cannot pack when cols /= rows")
     end if
 
     if ( xgBlockA%rows*(xgBlockA%rows+1)/2 > xgBlockB%Ldim*xgBlockB%cols ) then
-      MSG_ERROR("Not enought memory in destination")
+      ABI_ERROR("Not enought memory in destination")
     end if
 
     ! make a fake pointer to pack in a 1-D array instead of 2
@@ -916,7 +916,7 @@ module m_xg
         end do
       end select
     case default
-      MSG_ERROR("Error for packing matrix")
+      ABI_ERROR("Error for packing matrix")
     end select
     call timab(tim_pack,2,tsec)
 
@@ -944,7 +944,7 @@ module m_xg
 
     call timab(tim_gemm,1,tsec)
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
 
     if ( transa == 'n' ) then
@@ -997,10 +997,10 @@ module m_xg
     call timab(tim_gemm,1,tsec)
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
     if ( xgBlockA%space /= SPACE_C ) then
-      MSG_ERROR("Not correct space")
+      ABI_ERROR("Not correct space")
     end if
 
     if ( transa == 'n' ) then
@@ -1036,7 +1036,7 @@ module m_xg
     call timab(tim_potrf,1,tsec)
 
     if ( xgBlock%rows /= xgBlock%cols ) then
-      MSG_ERROR("Matrix should be a square matrixx")
+      ABI_ERROR("Matrix should be a square matrixx")
     endif
 
     select case(xgBlock%space)
@@ -1072,7 +1072,7 @@ module m_xg
     call timab(tim_heev,1,tsec)
 
     if ( xgBlockW%space /= SPACE_R ) then
-      MSG_ERROR("Block3 must be real")
+      ABI_ERROR("Block3 must be real")
     end if
 
     select case(xgBlockA%space)
@@ -1124,7 +1124,7 @@ module m_xg
     call timab(tim_heevd,1,tsec)
 
     if ( xgBlockW%space /= SPACE_R ) then
-      MSG_ERROR("Block3 must be real")
+      ABI_ERROR("Block3 must be real")
     end if
 
     call checkResize(iwork,liwork,5*xgBlockA%rows+3)
@@ -1191,11 +1191,11 @@ module m_xg
     call timab(tim_hpev,1,tsec)
 
     if ( xgBlockAP%space /= xgBlockZ%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
 
     if ( xgBlockW%space /= SPACE_R ) then
-      MSG_ERROR("Block3 must be real")
+      ABI_ERROR("Block3 must be real")
     end if
 
     select case(xgBlockAP%space)
@@ -1251,11 +1251,11 @@ module m_xg
     call timab(tim_hpevd,1,tsec)
 
     if ( xgBlockW%space /= SPACE_R ) then
-      MSG_ERROR("Block3 must be real")
+      ABI_ERROR("Block3 must be real")
     end if
 
     if ( xgBlockAP%space /= xgBlockZ%space ) then
-      MSG_ERROR("Block 1 and 3 must have the same space")
+      ABI_ERROR("Block 1 and 3 must have the same space")
     end if
 
     call checkResize(iwork,liwork,5*xgBlockZ%rows+3)
@@ -1322,10 +1322,10 @@ module m_xg
     call timab(tim_hegv,1,tsec)
 
     if ( xgBlockA%space /= xgBlockB%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
     if ( xgBlockW%space /= SPACE_R ) then
-      MSG_ERROR("Block3 must be real")
+      ABI_ERROR("Block3 must be real")
     end if
 
     select case(xgBlockA%space)
@@ -1390,10 +1390,10 @@ module m_xg
     call timab(tim_hegvx,1,tsec)
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= xgBlockZ%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
     if ( xgBlockW%space /= SPACE_R ) then
-      MSG_ERROR("Block3 must be real")
+      ABI_ERROR("Block3 must be real")
     end if
 
     call checkResize(iwork,liwork,5*xgBlockA%rows)
@@ -1455,10 +1455,10 @@ module m_xg
     call timab(tim_hegvd,1,tsec)
 
     if ( xgBlockA%space /= xgBlockB%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
     if ( xgBlockW%space /= SPACE_R ) then
-      MSG_ERROR("Block3 must be real")
+      ABI_ERROR("Block3 must be real")
     end if
 
     call checkResize(iwork,liwork,5*xgBlockA%rows+3)
@@ -1528,11 +1528,11 @@ module m_xg
     call timab(tim_hpgv,1,tsec)
 
     if ( xgBlockAP%space /= xgBlockBP%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
 
     if ( xgBlockW%space /= SPACE_R ) then
-      MSG_ERROR("Block3 must be real")
+      ABI_ERROR("Block3 must be real")
     end if
 
     select case(xgBlockAP%space)
@@ -1596,10 +1596,10 @@ module m_xg
     call timab(tim_hpgvx,1,tsec)
 
     if ( xgBlockAP%space /= xgBlockBP%space .or. xgBlockAP%space /= xgBlockZ%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
     if ( xgBlockW%space /= SPACE_R ) then
-      MSG_ERROR("Block3 must be real")
+      ABI_ERROR("Block3 must be real")
     end if
 
     call checkResize(iwork,liwork,5*xgBlockZ%rows)
@@ -1662,10 +1662,10 @@ module m_xg
     call timab(tim_hpgvd,1,tsec)
 
     if ( xgBlockAP%space /= xgBlockBP%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
     if ( xgBlockW%space /= SPACE_R ) then
-      MSG_ERROR("Block3 must be real")
+      ABI_ERROR("Block3 must be real")
     end if
 
     call checkResize(iwork,liwork,5*xgBlockZ%rows+3)
@@ -1729,7 +1729,7 @@ module m_xg
 
     call timab(tim_trsm,1,tsec)
     if ( xgBlockA%space /= xgBlockB%space ) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
 
     select case(xgBlockA%space)
@@ -1766,7 +1766,7 @@ module m_xg
     call timab(tim_trsm,1,tsec)
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= SPACE_C) then
-      MSG_ERROR("Not same space")
+      ABI_ERROR("Not same space")
     end if
 
     call ztrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
@@ -1791,16 +1791,16 @@ module m_xg
     integer :: iblock
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= xgBlockW%space ) then
-      MSG_ERROR("Must be same space for caxmy")
+      ABI_ERROR("Must be same space for caxmy")
     end if
     if ( xgBlockA%LDim /= xgBlockB%LDim .or. xgBlockA%LDim /= xgBlockW%LDim) then
-      MSG_ERROR("Must have same LDim for caxmy")
+      ABI_ERROR("Must have same LDim for caxmy")
     end if
     if ( xgBlockA%cols /= xgBlockB%cols .or. xgBlockA%cols /= xgBlockW%cols ) then
-      MSG_ERROR("Must have same cols for caxmy")
+      ABI_ERROR("Must have same cols for caxmy")
     end if
     if ( da%rows /= xgBlockA%cols ) then
-      MSG_ERROR("Must have same cols for caxmy")
+      ABI_ERROR("Must have same cols for caxmy")
     end if
 
     select case(xgBlockA%space)
@@ -1875,7 +1875,7 @@ module m_xg
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
-      MSG_ERROR("Error colwiseMulC")
+      ABI_ERROR("Error colwiseMulC")
     case (SPACE_C)
       !$omp parallel do shared(xgBlock,vec), &
       !$omp& schedule(static)
@@ -1901,13 +1901,13 @@ module m_xg
     integer :: row
 
     if ( xgBlockA%space /= xgBlockB%space ) then
-      MSG_ERROR("Must be same space for add")
+      ABI_ERROR("Must be same space for add")
     end if
     if ( xgBlockA%rows /= xgBlockB%rows ) then
-      MSG_ERROR("Must have same LDim for add")
+      ABI_ERROR("Must have same LDim for add")
     end if
     if ( xgBlockA%cols /= xgBlockB%cols ) then
-      MSG_ERROR("Must have same cols for add")
+      ABI_ERROR("Must have same cols for add")
     end if
 
     select case(xgBlockA%space)
@@ -1974,7 +1974,7 @@ module m_xg
 
 
     if ( dot%space /= SPACE_R ) then
-      MSG_ERROR("error space")
+      ABI_ERROR("error space")
     end if
 
     select case(xgBlock%space)
@@ -2066,14 +2066,14 @@ module m_xg
     if ( xgBlock%ldim .eq. xgBlock%rows ) then
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
-        MSG_ERROR("Scaling real vector with a complex not possible")
+        ABI_ERROR("Scaling real vector with a complex not possible")
       case (SPACE_C)
         call zscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecC,inc)
       end select
     else
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
-        MSG_ERROR("Scaling real vector with a complex not possible")
+        ABI_ERROR("Scaling real vector with a complex not possible")
       case (SPACE_C)
         !$omp parallel do
         do i=1,xgBlock%cols
@@ -2113,7 +2113,7 @@ module m_xg
     type(c_ptr) :: cptr
 
     if ( xgBLock%rows*xgBlock%cols /= newShape(1)*newShape(2) ) then
-      MSG_ERROR("Bad shape")
+      ABI_ERROR("Bad shape")
     end if
 
     xgBlock%LDim = newShape(1)+( (xgBlock%LDim-xgBLock%rows)* xgBlock%cols)/newShape(2)
@@ -2194,7 +2194,7 @@ module m_xg
     integer :: i
 
     if ( diag%cols /= 1 .or. diag%rows/= min(xgBlock%rows,xgBlock%cols) ) then
-      MSG_ERROR("Bad diagonal")
+      ABI_ERROR("Bad diagonal")
     end if
 
     select case(xgBlock%space)
@@ -2241,7 +2241,7 @@ module m_xg
     integer :: i
 
     if ( xgBlock%rows /= xgBlock%cols) then
-      MSG_ERROR("Bad xgBlock shape")
+      ABI_ERROR("Bad xgBlock shape")
     end if
 
     call xg_init(diag,space(xgBlock),xgBlock%rows,1,xgBlock%spacedim_comm)

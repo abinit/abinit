@@ -237,7 +237,7 @@ contains
      if (ikmq_bz_t(ik_bz,iq_ibz)>nkbz.and.nsym==1) then
        BUG=.TRUE.
        write(message,*) "No K-Q for K/Q =",ik_bz,iq_ibz
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      bijection(ikmq_bz_t(ik_bz,iq_ibz))=.TRUE.
    end do
@@ -245,7 +245,7 @@ contains
    if (count(bijection).NE.nqibz.and.nsym==1) then
    BUG=.TRUE.
    write(message,*) 'No bijection ',ik_bz
-   MSG_ERROR(message)
+   ABI_ERROR(message)
    end if
 
    bijection(:)=.FALSE.
@@ -268,7 +268,7 @@ endif
    write(message,*) 'Read the potential and G norm'
    call wrtout(std_out,message,'COLL')
    if (open_file('normeG',message,newunit=unt,form='formatted',status='unknown') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    read(unt,*) (iiG,x,normG(iiG),iG=1,npw)
    close(unt)
@@ -353,7 +353,7 @@ endif
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
    if (open_file('forlb.ovlp',message,newunit=unt,form='formatted',status='unknown') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind(unt)
  read(unt,*) message
@@ -371,7 +371,7 @@ endif
  endif
  if(ib1/=bandinf.and.ib2/=bandsup) then
    write(message,*) "Error with bands",ib1,bandinf,ib2,bandsup
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
 !!Read the bandinf, bandinf redondance information
 
@@ -437,7 +437,7 @@ endif
 !   if (count(bijection).NE.nkbz) then
 !    BUG=.TRUE.
 !    write(message,*) 'Miss somme K point for the Wannier',count(bijection),"/",nkbz
-!    MSG_ERROR(message)
+!    ABI_ERROR(message)
 !   end if
 !
 !   if (.NOT.BUG) then
@@ -479,7 +479,7 @@ endif
 !       ((m1.NE.m2).and.(abs(ncT)>tol2)) ) then
 !         BUG=.TRUE.
 !         write(message,*)  "No orthogonality for m1,m2",m1,m2,"kpt",ik_bz,abs(nCt)
-!         MSG_ERROR(message)
+!         ABI_ERROR(message)
 !       end if
 !       nC=nC+wk*nCt
 !     end do
@@ -488,7 +488,7 @@ endif
 !     ((m1.NE.m2).and.(abs(nC)>tol)) ) then
 !       bug=.TRUE.
 !       write(message,*) "No orthogonality for",m1,m2,abs(nC)
-!       MSG_ERROR(message)
+!       ABI_ERROR(message)
 !     end if
 !     write(message,*)  m1,m2,abs(nC)
 !     nC=cmplx(0,0)
@@ -788,7 +788,7 @@ endif
             do iG2=iG1,npwe
               if (ANY(abs(scr(iG1,iG2,:,:)-scr(iG2,iG1,:,:))>tol)) then
                 write(message,*) iG1,iG2,"False"
-                MSG_ERROR(message)
+                ABI_ERROR(message)
                 do iomega1=1,nomega
                   if(abs(scr(iG1,iG2,iomega1,1)-scr(iG2,iG1,iomega1,1))>tol) then
                     write(message,*) iG1,iG2,"False",scr(iG1,iG2,iomega1,1),scr(iG2,iG1,iomega1,1)
@@ -910,7 +910,7 @@ endif
                         endif
                       enddo
                       write(message,*) "CHECK THE HERMITICITY"
-                      MSG_WARNING(message)
+                      ABI_WARNING(message)
                     end if
                     if(iG1==iG2) then
                       scr(iG1,iG1,:,:)=scr(iG1,iG1,:,:)-one ! unscreened part of
@@ -1383,7 +1383,7 @@ endif
 
 !==Ecriture de M_(G=0)^(mm')(q) ==!
  if (open_file('M_mimj(n=1_2_3)(q,G=0)',msg,newunit=unt,form='formatted',status='unknown') /=0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  do iq_ibz=1,nqibz
     write(unt,*) iq_ibz,((abs(M_q_m(i,j,1,iq_ibz)),i=1,mbband),j=1,mbband)
@@ -1392,7 +1392,7 @@ endif
 
 !==Ecriture de M_G^(mm')(q=0) ==!
  if (open_file('M_mm(m=1..mbband)(q=0)',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  do iG=1,npw
     write(unt,*) normG(iG),(abs(M_q_m(i,i,iG,1)),i=1,mbband)

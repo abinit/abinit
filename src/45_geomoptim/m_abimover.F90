@@ -795,7 +795,7 @@ case (15)
  case default
    ! MG TODO: Why is this check deactivated. We should have an empty case for all the ionmov that can use the default values
    write(msg,"(a,i0)")"Wrong value for ionmov: ",ab_mover%ionmov
-   !MSG_ERROR(msg)
+   !ABI_ERROR(msg)
  end select
 
 end subroutine abimover_ini
@@ -1349,7 +1349,7 @@ subroutine make_angles(deloc,natom)
 
        end if
        if (deloc%nang > 72*natom) then
-         MSG_ERROR('too many angles found > 72*natom')
+         ABI_ERROR('too many angles found > 72*natom')
        end if
      end do
    end do ! jbond do
@@ -1463,7 +1463,7 @@ subroutine make_dihedrals(badangles,deloc)
          end if
        end if
        if (deloc%ndihed > 6*deloc%nang) then
-         MSG_ERROR('make_dihedrals : too many dihedrals found > 6*nang')
+         ABI_ERROR('make_dihedrals : too many dihedrals found > 6*nang')
        end if
        if (chkdihed == 1) then
          if (   diheds_tmp(1,4,deloc%ndihed) == diheds_tmp(1,1,deloc%ndihed) .and.&
@@ -1497,7 +1497,7 @@ subroutine make_dihedrals(badangles,deloc)
    minshift = minval(diheds_tmp(2,:,idihed))
    maxshift = maxval(diheds_tmp(2,:,idihed))
    if (minshift <= 0 .or. maxshift > deloc%nrshift) then
-     MSG_ERROR("dihedral extends beyond first neighboring unit cells!")
+     ABI_ERROR("dihedral extends beyond first neighboring unit cells!")
    end if
  end do
  ABI_DEALLOCATE(diheds_tmp)
@@ -1581,7 +1581,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
        if (bondfudge*(rcov1+rcov2) - bl > tol6) then
          deloc%nbond = deloc%nbond+1
          if (deloc%nbond > 12*natom) then
-           MSG_ERROR('make_bonds: error too many bonds !')
+           ABI_ERROR('make_bonds: error too many bonds !')
          end if
          bonds_tmp(1,1,deloc%nbond) = iatom
          bonds_tmp(2,1,deloc%nbond) = deloc%icenter
@@ -2468,7 +2468,7 @@ real(dp) :: rpt(3)
 !***************************************************************************
 !Beginning of executable session
 !***************************************************************************
- MSG_ERROR("This routine is not tested")
+ ABI_ERROR("This routine is not tested")
 
 !write(std_out,*) 'make_bonds 01'
 !##########################################################

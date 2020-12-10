@@ -149,7 +149,7 @@ subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
    write(message, '(a,i0,a,a,a)' )&
 &   'Input iterm=',iterm,' not allowed.',ch10,&
 &   'Possible values are 1,2,3 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(istr/=old_istr) then
@@ -165,7 +165,7 @@ subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
      write(message,'(a,i0,a,a,a)')&
 &     'Input istr=',istr,' not allowed.',ch10,&
 &     'Possible values are 1,2,3,4,5,6 only.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    ka=idx(2*istr-1);kb=idx(2*istr)

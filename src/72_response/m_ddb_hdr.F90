@@ -752,7 +752,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
    write(message, '(a,i10,a,a,i10,a)' )&
     'the psddb8 DDB version number=',vrsio8,ch10,&
     'is not equal to the calling code DDB version number=',vrsddb,'.'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !Check the value of choice
@@ -760,7 +760,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
    write(message, '(a,a,a,i10,a)' )&
     'The permitted values for choice are 1 or 2.',ch10,&
     'The calling routine asks ',choice,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !==================================================================================
@@ -792,7 +792,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
        read(nunit, '(10x,i3)') usepaw0
        if (usepaw/=usepaw0) then
          write(message, '(a,i1,a,i1,a)' )'usepaw is announced to be ',usepaw,' but read usepaw is ',usepaw0,' !'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        if (usepaw==0) then
          read (nunit, '(10x,i3,14x,i3)' )dimekb0,lmnmax0
@@ -811,7 +811,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
          if(nekb>dimekb)then
            write(message, '(a,i8,a,a,a,i3,a)' )&
             '  ',nekb,' components of ekb are announced',ch10,'but dimekb=',dimekb,'.'
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
          read(nunit,*)
          ilmn=0;iproj0=0
@@ -875,13 +875,13 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
          if (lmn_size0>lmnmax) then
            write(message, '(a,i5,3a,i5,a)' )&
              'max. value of ',lmnmax,' for lmn_size is announced',ch10,'but ',lmn_size0,' is read.'
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
          if (allocated(pawtab(itypat)%dij0)) then
            if (lmn_size0>pawtab(itypat)%lmn_size) then
              write(message, '(a,i5,3a,i5,a)' )&
               'lmn_size=,',pawtab(itypat)%lmn_size,' is announced',ch10,'but ',lmn_size0,' is read.'
-             MSG_BUG(message)
+             ABI_BUG(message)
            end if
          end if
          ABI_MALLOC(nprj,(0:maxval(orbitals)))
@@ -927,7 +927,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 !    --------------------------------------------
    else if (string==' Description')then
      if (usepaw==1) then
-       MSG_BUG("old DDB pspformat not compatible with PAW")
+       ABI_BUG("old DDB pspformat not compatible with PAW")
      end if
 
      read (nunit, '(10x,i3,10x,i3)' )nproj,npsang
@@ -936,10 +936,10 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
      if(nekb>dimekb)then
        write(message, '(a,i8,a,a,a,i3,a)' )&
         '  ',nekb,' components of ekb are announced',ch10,'but the maximum is dimekb=',dimekb,'.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
      if(useylm/=0)then
-       MSG_BUG('useylm must be 0 !')
+       ABI_BUG('useylm must be 0 !')
      end if
 !    Read the data
      ABI_MALLOC(ekb0,(dimekb,dimekb))
@@ -970,7 +970,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
    else if(string==' No informat')then
      fullinit=0
    else
-     MSG_BUG('Error when reading the psp information')
+     ABI_BUG('Error when reading the psp information')
    end if
 
 !  Now, the number of blocks
@@ -1202,14 +1202,14 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
    write(message, '(a,i10,a,a,i10,a)' )&
     'The input/output DDB version number=',vrsio8,ch10,&
     'is not equal to the DDB version number=',vrsddb,'.'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !Open the input derivative database.
  write(message,'(a,a)')' About to open file ',TRIM(filnam)
  call wrtout(std_out,message,'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Check the compatibility of the input DDB with the DDB code
@@ -1222,7 +1222,7 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
    write(message, '(a,i10,2a,3(a,i10),a)' )&
     'The input DDB version number=',ddbvrs,' does not agree',ch10,&
     'with the allowed code DDB version numbers,',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Read the 4 n-integers, also testing the names of data, and checking that their value is acceptable.
@@ -1322,7 +1322,7 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
     '    occopt,  between 0 and 7        ',trim(name(7)),' =',occopt
    call wrtout(std_out,message,'COLL')
 
-   MSG_ERROR('See the error message above.')
+   ABI_ERROR('See the error message above.')
  end if
 
 !One more set of parameters define the dimensions of the
@@ -1367,13 +1367,13 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
      write(message, '(a,i4,a,i4,3a)' )&
 &     'For ikpt = ',ikpt,'  nband = ',nband(ikpt),' is negative.',ch10,&
 &     'Action: correct your DDB.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    else if(nband(ikpt)>mband)then
      write(message, '(a,i4,a,i4,a,a,i4,3a)' )&
 &     'For ikpt = ',ikpt,', nband = ',nband(ikpt),ch10,&
 &     'is larger than mband = ',mband,'.',ch10,&
 &     'Action: recompile the calling code with a larger mband.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    bantot=bantot+nband(ikpt)
  end do
@@ -1871,13 +1871,13 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    write(message, '(a,i0,2a,i0)' )&
 &   'The input/output DDB version number= ',vrsio8,ch10,&
 &   'is not equal to the DDB version number= ',vrsddb
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Open the input derivative database.
  call wrtout(std_out, sjoin(" Opening DDB file:", filnam), 'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Check the compatibility of the input DDB with the DDB code
@@ -1889,7 +1889,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    write(message, '(a,i10,2a,3(a,i10))' )&
 &   'The input DDB version number=',ddbvrs,' does not agree',ch10,&
 &   'with the allowed code DDB version numbers,',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Read the 4 n-integers, also testing the names of data,
@@ -1983,7 +1983,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    write(message, '(a,a,a,i10)' )'    occopt,     equal to 0,1 or 2   ',trim(name(7)),' =',occopt
    call wrtout(std_out,message,'COLL')
 
-   MSG_ERROR('See the error message above.')
+   ABI_ERROR('See the error message above.')
  end if
 
 !One more set of parameters define the dimensions of the
@@ -2029,7 +2029,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
      write(message, '(a,i0,a,i0,3a)' )&
 &     'For ikpt = ',ikpt,'  nband = ',nband(ikpt),' is negative.',ch10,&
 &     'Action: correct your DDB.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    bantot=bantot+nband(ikpt)
  end do
@@ -2197,7 +2197,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 
  else if(string==' Description')then
    if (usepaw==1) then
-     MSG_BUG('old DDB pspformat not compatible with PAW 1')
+     ABI_BUG('old DDB pspformat not compatible with PAW 1')
    end if
 
    read (unddb, '(10x,i3,10x,i3)' )mproj,mpsang
@@ -2224,7 +2224,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    write(message, '(a,a,a,a)' )&
 &   'Error when reading the psp information',ch10,&
 &   'String=',trim(string)
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Now, the number of blocks
@@ -2259,7 +2259,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 &       'Action: check your DDB.',ch10,&
 &       'Note: If you did use an abinit version prior to 6.12 to generate your DDB',&
 &       'pay attention to the change:: 2rd derivatives ==> 2nd derivatives'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 
      if(blktyp==1.or.blktyp==2)then
@@ -2364,7 +2364,7 @@ subroutine ddb_chkname(nmfond,nmxpct,nmxpct2)
 &   '             and name found is "',trim(nmfond_),'"',ch10,&
 &   'Likely your DDB is incorrect.',ch10,&
 &   'Action: correct your DDB, or contact the ABINIT group.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 end subroutine ddb_chkname
@@ -2604,7 +2604,7 @@ subroutine compare_ddb_variables(&
     'Comparing integers for variable ngfft.',ch10,&
     'Value from input DDB is',ngfft(ii),' and',ch10,&
     'from transfer DDB is',ngfft8(ii),'.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end do
 !17. occ
 !Compares the input and transfer values only if the input has not
@@ -2802,7 +2802,7 @@ subroutine chkr8(reali,realt,name,tol)
    'Value from input DDB is',reali,' and',ch10,&
    'from transfer DDB is',realt,'.',ch10,&
    'Action: check your DDBs.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  end subroutine chkr8
@@ -2856,7 +2856,7 @@ subroutine chki8(inti,intt,name)
    'Value from input DDB is',inti,' and',ch10,&
    'from transfer DDB is',intt,'.',ch10,&
    'Action: check your DDBs.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  end subroutine chki8
@@ -2988,7 +2988,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 !like for the output file)
  ierr = open_file(filnam,message,unit=unddb,status='unknown',form='formatted')
  if (ierr /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Write the heading

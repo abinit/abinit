@@ -403,7 +403,7 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
  if(asr/=3 .and. asr/=4)then
    write(msg,'(3a,i0)')&
    'The argument asr should be 3 or 4,',ch10, 'however, asr = ',asr
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (asr==3.or.asr==4)then
@@ -2034,7 +2034,7 @@ subroutine q0dy3_calc(natom,dyewq0,dyew,option)
    write (msg, '(3a)')&
 &   'option should be 1 or 2.',ch10,&
 &   'action: correct calling routine'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(option==2)then
@@ -2679,7 +2679,7 @@ subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
    end do
 
    if(found==0)then
-     MSG_BUG('Not able to find the vector R=(0,0,0).')
+     ABI_BUG('Not able to find the vector R=(0,0,0).')
    end if
 
    do mu=1,3
@@ -2816,7 +2816,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
     'Otherwise, you might increase "buffer" in m_dynmat.F90 see bigbx9 subroutine and recompile.',ch10,&
     'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
     'if abs(brav) /= 1, in this case you should change brav to 1. If brav is already set to 1 (default) try -1.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Only conserve the necessary points in rpt.
@@ -3015,7 +3015,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
    if(choice/=0)then
      if (nrpt/=mrpt) then
        write(msg,'(2(a,i0))')' nrpt=',nrpt,' is not equal to mrpt= ',mrpt
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      irpt=0
      do r1=-lim1,lim1
@@ -3040,7 +3040,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
    if(choice/=0)then
      if (nrpt/=mrpt) then
        write(msg,'(2(a,i0))')' nrpt=',nrpt,' is not equal to mrpt= ',mrpt
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      irpt=0
      do r1=-lim1,lim1
@@ -3076,7 +3076,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
    if(choice/=0)then
      if(nrpt/=mrpt) then
        write(msg,'(2(a,i0))')' nrpt= ',nrpt,' is not equal to mrpt= ',mrpt
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      irpt=0
      do r1=-lim1,lim1
@@ -3106,7 +3106,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
    if(choice/=0)then
      if(nrpt/=mrpt)then
        write(msg,'(2(a,i0))')' nrpt=',nrpt,' is not equal to mrpt=',mrpt
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      irpt=0
      do r1=-lim1,lim1
@@ -3124,7 +3124,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
  else
    write(msg,'(a,i0,a)')' The value of brav= ',brav,' is not allowed (should be -1, 1, 2 or 4).'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 end subroutine bigbx9
@@ -3318,7 +3318,7 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
    write(msg, '(a,i0,a,a,a)' )&
    'The required value of brav=',brav,' is not available.',ch10,&
    'It should be -1, 1,2 or 4 .'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  call wrtout(std_out,' Canonical Atomic Coordinates ')
@@ -3459,7 +3459,7 @@ subroutine chkrp9(brav,rprim)
          '  1/2  0   1/2',ch10,&
          '  1/2 1/2   0 ',ch10,&
          'Action: rebuild your DDB by using the latter rprim.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end do
@@ -3476,7 +3476,7 @@ subroutine chkrp9(brav,rprim)
          '   1/2 -1/2  1/2',ch10,&
          '   1/2  1/2 -1/2',ch10,&
          'Action: rebuild your DDB by using the latter rprim.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end do
@@ -3499,7 +3499,7 @@ subroutine chkrp9(brav,rprim)
       '  -1/2 sqrt[3]/2 0',ch10,&
       '   0      0      1',ch10,&
       'Action: rebuild your DDB by using the latter rprim.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  else
@@ -3507,7 +3507,7 @@ subroutine chkrp9(brav,rprim)
    'The value of brav=',brav,' is not allowed.',ch10,&
    'Only  -1, 1,2,3 or 4 are allowed.',ch10,&
    'Action: change the value of brav in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine chkrp9
@@ -4047,7 +4047,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
      'For the time being, only nqshft=1',ch10,&
      'is allowed with brav=4, while it is nqshft=',nqshft,'.',ch10,&
      'Action: in the input file, correct either brav or nqshft.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (nqshft == 2) then
@@ -4059,7 +4059,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          'do not generate a body-centered lattice, which',ch10,&
          'is mandatory for nqshft=2.',ch10,&
          'Action: change the q1shft vectors in your input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    else if (nqshft == 4) then
@@ -4081,7 +4081,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
            'do not generate a face-centered lattice, which',ch10,&
            'is mandatory for nqshft=4.',ch10,&
            'Action: change the q1shft vectors in your input file.'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
        end do
      end do
@@ -4089,7 +4089,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
      write(msg, '(a,i4,3a)' )&
      'nqshft must be 1, 2 or 4. It is nqshft=',nqshft,'.',ch10,&
      'Action: change nqshft in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -4100,7 +4100,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
  if (brav==1) then
    ! Does not support multiple shifts
    if (nqshft/=1) then
-     MSG_ERROR('This version of the weights does not support nqshft/=1.')
+     ABI_ERROR('This version of the weights does not support nqshft/=1.')
    end if
 
    ! Find the points of the lattice given by ngqpt*acell. These are used to define
@@ -4251,7 +4251,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          else if (nbordh==2) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/3
          else if (nbordh/=0) then
-           MSG_BUG('There is a problem of borders and weights (hex).')
+           ABI_BUG('There is a problem of borders and weights (hex).')
          end if
          if (nbord(3)==1)then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
@@ -4273,7 +4273,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
            '    ',ngqpt(1),ngqpt(2),ngqpt(3),ch10,&
            'should be equal.',ch10,&
            'Action: use identical ngqpt(1:3) in your input file.'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          do ii=4,9
            ngqpt(ii)=ngqpt(1)
@@ -4301,7 +4301,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          else if (nbord(1)==4) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/6
          else if (nbord(1)/=0) then
-           MSG_ERROR(' There is a problem of borders and weights (BCC).')
+           ABI_ERROR(' There is a problem of borders and weights (BCC).')
          end if
 
        else if(nqshft==4 .and. brav/=4)then
@@ -4318,7 +4318,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
            '    ',ngqpt(1),ngqpt(2),ngqpt(3),ch10,&
            'should be equal.',ch10,&
            'Action: use identical ngqpt(1:3) in your input file.'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          do ii=4,7
            ngqpt(ii)=ngqpt(1)
@@ -4345,14 +4345,14 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/4
          else if (nbord(1)/=0 .and. wghatm(ia,ib,irpt)>1.d-10) then
            ! Interestingly nbord(1)==4 happens for some points outside of the volume
-           MSG_BUG(' There is a problem of borders and weights (FCC).')
+           ABI_BUG(' There is a problem of borders and weights (FCC).')
          end if
 
        else
          write(msg, '(3a,i0,a)' )&
          'One should not arrive here ... ',ch10,&
          'The value nqshft ',nqshft,' is not available'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
      end do ! Assignement of weights is done
    end do ! End of the double loop on ia and ib
@@ -5061,7 +5061,7 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
    write(msg,'(3a,i0,a)' )&
     'The argument "plus" must be equal to 0 or 1.',ch10,&
     'The value ',plus,' is not available.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 end subroutine nanal9
@@ -5664,7 +5664,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
    write(msg, '(a,i0,a,a)' )&
    'In the calling subroutine, eivec is',eivec,ch10,&
    'but allowed values are between 0 and 4.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !write the phonon frequencies on unit std_out
@@ -6018,7 +6018,7 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
 
  case default
    write(msg,'(a,i0,a)' )'The only allowed values for qtor are 0 or 1, while qtor= ',qtor,' has been required.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 end subroutine ftgam

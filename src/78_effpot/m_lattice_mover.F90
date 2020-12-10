@@ -178,7 +178,7 @@ contains
        if (.not.( &
           self%latt_dynamics==101 .or.  &  ! TODO remove
           self%latt_dynamics==102 .or. self%latt_dynamics==103 ) ) then
-          MSG_ERROR("Only set lattice initial state with a Boltzmann distribution in a constant T mover.")
+          ABI_ERROR("Only set lattice initial state with a Boltzmann distribution in a constant T mover.")
        end if
        call self%rng%rand_normal_array(xi, 3*self%natom)
        do i=1, self%natom
@@ -190,7 +190,7 @@ contains
     else if(mode==2) then ! Use reference structure and 0 velocity.
        ! other modes.
        if(self%latt_dynamics==102 .or. self%latt_dynamics==103 ) then
-           MSG_ERROR("Displacement and velocity set to zero in a NVT mover.")
+           ABI_ERROR("Displacement and velocity set to zero in a NVT mover.")
        end if
        do i=1, self%natom
           self%current_vcart(:,i) = 0.0
@@ -253,10 +253,10 @@ contains
     character(len=40) :: key
 
     if(present(displacement) .or. present(strain)) then
-       MSG_ERROR("displacement and strain should not be input for lattice mover")
+       ABI_ERROR("displacement and strain should not be input for lattice mover")
     end if
 
-    MSG_BUG("The abstract lattice mover is used, which should be a bug.")
+    ABI_BUG("The abstract lattice mover is used, which should be a bug.")
 
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(effpot)
@@ -305,7 +305,7 @@ contains
     integer :: i, nstep
     character(len=90) :: msg
     if(present(displacement) .or. present(strain)) then
-       MSG_ERROR("displacement and strain should not be input for lattice mover")
+       ABI_ERROR("displacement and strain should not be input for lattice mover")
     end if
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(effpot)

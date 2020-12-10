@@ -61,7 +61,7 @@ contains
   subroutine initialize(self, mshape)
     class(lco_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
-    if (size(mshape)/=2) MSG_ERROR("LCO_mat should be of dimension 2.")
+    if (size(mshape)/=2) ABI_ERROR("LCO_mat should be of dimension 2.")
     call self%base_mat2d_t%initialize(mshape)
     ABI_MALLOC(self%icol, (self%nrow))
     ABI_MALLOC(self%val, (self%nrow))

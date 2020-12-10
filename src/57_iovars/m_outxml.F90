@@ -78,7 +78,7 @@ subroutine outxml_open(filename)
 !ABINIT has been compiled with XML output support, then we open the
 !channel of the XML output file.
  if (open_file(trim(filename)//"_LOG.xml", msg, unit=ab_xml_out, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(ab_xml_out, "(A)") '<?xml version="1.0" encoding="utf-8"?>'

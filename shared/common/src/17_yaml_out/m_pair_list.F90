@@ -551,7 +551,7 @@ subroutine pair_list_increment(pl, key, cnt)
  case (TC_INT)
    call pair_list_set(pl, key, i=cnt + i)
  case default
-   MSG_ERROR(sjoin("Expecting value in dict of integer type. got:", itoa(type_code)))
+   ABI_ERROR(sjoin("Expecting value in dict of integer type. got:", itoa(type_code)))
  end select
 
 end subroutine pair_list_increment

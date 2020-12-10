@@ -188,12 +188,12 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  if (size(pawrhoij_unsym)>0) then
    if (pawrhoij_unsym(1)%use_rhoij_==0) then
      msg='  rhoij_ field must be allocated in pawrhoij_unsym !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
  if (ipert>0.and.(.not.present(pawrhoij0))) then
    msg='  pawrhoij0 must be present when ipert>0 !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Symetrize PAW occupation matrix and store it in packed storage
@@ -714,10 +714,10 @@ end subroutine pawmkrho
  case (2)
 !    * if nspden==4, rhor contains (n^11, n^22, Re[n^12], Im[n^12].
 !    Storage mode for rhoij is different, See pawaccrhoij.
-   MSG_ERROR("nspinor 2 not coded")
+   ABI_ERROR("nspinor 2 not coded")
  case default
    write(message,'(a,i0)')" Wrong value for nspinor=",nspinor
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end select
 
 !if (prtvol>9) then ! Check normalisation
@@ -747,7 +747,7 @@ end subroutine pawmkrho
        call xred2xcart(natom,rprimd,xcart,xred)
        write(xsf_fname,'(a,I0,a)') 'N_tilde_onsite_diff_sp',ispden,'.xsf'
        if (open_file(xsf_fname,message, unit=tmp_unt,status='unknown',form='formatted') /= 0) then
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        call printxsf(ngfft(1),ngfft(2),ngfft(3),rhor_tmp(:,ispden),rprimd,&
 &       (/zero,zero,zero/),natom,ntypat,typat,xcart,znucl,tmp_unt,0)
@@ -765,7 +765,7 @@ end subroutine pawmkrho
 &   .OR.(.NOT.present(abs_n_tilde_nt_diff).AND.(present(znucl)))) then
    write(message,'(a)') ' Both abs_n_tilde_nt_diff *and* znucl must be passed',ch10,&
 &   'to denfgr for |\tilde{n}-\tilde{n}^1| norm evaluation.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call pawfgrtab_free(local_pawfgrtab)

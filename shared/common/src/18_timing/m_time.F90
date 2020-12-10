@@ -430,7 +430,7 @@ function abi_wtime() result(wall)
    end if
    if(month_now<=month_init)then
      msg = 'Problem with month and year numbers.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    do months=month_init,month_now-1
      wall=wall+86400.0d0*nday(months)
@@ -542,7 +542,7 @@ subroutine cwtime(cpu, wall, gflops, start_or_stop, msg, comm)
  end if
 
  CASE DEFAULT
-   MSG_ERROR("Wrong option for start_or_stop: "//TRIM(start_or_stop))
+   ABI_ERROR("Wrong option for start_or_stop: "//TRIM(start_or_stop))
  END SELECT
 
 end subroutine cwtime
@@ -702,7 +702,7 @@ subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
 !Check that nn lies in sensible bounds
  if (nn<0.or.nn>TIMER_SIZE) then
    write(msg,'(a,i6,a,i8,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !return accumulated time for nn
@@ -872,7 +872,7 @@ subroutine timab(nn, option, tottim)
    ! Check that nn lies in sensible bounds
    if (nn<1.or.nn>TIMER_SIZE) then
      write(msg,'(2(a,i0))')'  TIMER_SIZE = ',TIMER_SIZE,' but input nn = ',nn
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 #ifdef HAVE_PAPI
@@ -885,7 +885,7 @@ subroutine timab(nn, option, tottim)
        write(std_out,*) 'Error code', papi_errstr
      end if
      if (flops1 < 0) then
-       MSG_WARNING("Number of floating point instruction Overflow")
+       ABI_WARNING("Number of floating point instruction Overflow")
        papi_flops(:)=-1
      end if
    end if
@@ -950,7 +950,7 @@ subroutine timab(nn, option, tottim)
 
    case default
      write(msg,'(a,i10,a)')'  Input option not valid, =',option,'.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end select
  end if
 

@@ -196,7 +196,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  ! Check validity of arguments--only rho(r) (51,52) and V(r) (101,102) are presently supported
  if ( (fform-1)/2 /=25 .and. (fform-1)/2 /=50 ) then
    write(message,'(a,i0,a)')' Input fform= ',fform,' not allowed.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ! Print input fform
@@ -280,7 +280,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
        if (icheck_fft) then
          if (open_file(fildata,message,newunit=in_unt,form='unformatted',status='old') /= 0) then
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
 
          call hdr_io(fform_dum,hdr0,rdwr,in_unt)
@@ -294,7 +294,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
            write(message, "(2a,2(a,3(i0,1x)))")&
             "Will perform Fourier interpolation since in and out ngfft differ",ch10,&
             "ngfft in file: ",hdr0%ngfft,", expected ngfft: ",hdr%ngfft
-           MSG_WARNING(message)
+           ABI_WARNING(message)
 
            ! Read rho(r) from file, interpolate it, write data and change fildata
            ABI_MALLOC(rhor_file, (cplex*nfftot_in, hdr0%nspden))
@@ -332,7 +332,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
            my_fildata = trim(fildata)//"__fftinterp_rhor__"
            if (my_fildata == fildata) my_fildata = "__fftinterp_rhor__"
            if (open_file(my_fildata,message,newunit=out_unt,form='unformatted',status='unknown') /= 0) then
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
            call hdr_io(fform_dum,hdr,2,out_unt)
            do ispden=1,hdr0%nspden
@@ -361,7 +361,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
      else
        if (open_file(my_fildata, message, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        ! Initialize hdr0, thanks to reading of unwff1
        call hdr_io(fform_dum,hdr0,rdwr,unt)
@@ -459,7 +459,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
    else
      write(message,'(a,i0,a)')'Bad value for accessfil', accessfil, ' on read '
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    call wrtout(std_out,sjoin("data read from disk file: ", fildata))
@@ -504,7 +504,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 &       max(zindex + wvl_den%denspot%dpbox%nscatterarr(me, 2) &
 &       - 2 * n3 - 15, 0)
      else
-       MSG_ERROR('ioarr: WVL not implemented yet.')
+       ABI_ERROR('ioarr: WVL not implemented yet.')
      end if
      if (zstop - zstart + 1 > 0) then
 !      Our slab contains (zstop - zstart + 1) elements
@@ -538,7 +538,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
    if (usewvl == 0) then
      if (any(ngfft(:3) /= hdr%ngfft(:3))) then
        write(message,"(2(a,3(1x,i0)))")"input ngfft: ",ngfft(:3),"differs from  hdr%ngfft: ",hdr%ngfft(:3)
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end if
 
@@ -549,7 +549,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        call hdr_io(fform,hdr,rdwr,wff)
      else
        if (open_file(fildata, message, newunit=unt, form='unformatted', status='unknown', action="write") /= 0) then
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
 
        ! Write header
@@ -615,7 +615,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
    else
      write(message,'(a,i0,a)')'Bad value for accessfil', accessfil, ' on write '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    if (usewvl == 1 .and. associated(my_density)) then
@@ -626,7 +626,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
  else
    write(message,'(a,i0,a)')'Called with rdwr = ',rdwr,' not allowed.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  call cwtime_report(" IO operation", cputime, walltime, gflops)
@@ -637,7 +637,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine ioarr
 !!***
@@ -727,7 +727,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
 
  abifile = abifile_from_varname(varname)
  if (abifile%fform == 0) then
-    MSG_ERROR(sjoin("Cannot find any abifile object associated to varname:", varname))
+    ABI_ERROR(sjoin("Cannot find any abifile object associated to varname:", varname))
  end if
  ! Get fform from abifile. TODO: check file extension
  fform = abifile%fform
@@ -753,7 +753,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  case (IO_MODE_FORTRAN)
    ABI_CHECK(nproc_fft == 1, "MPI-IO must be enabled when FFT parallelism is used")
    if (open_file(path, msg, newunit=unt, form='unformatted', status='unknown', action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    call hdr%fort_write(unt, fform, ierr)
    ABI_CHECK(ierr==0,"ierr !=0")
@@ -819,7 +819,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    ! Add full pawrhoij datastructure at the end of the file.
    !if (present(pawrhoij_all) .and. me_fft == master .and. hdr%usepaw == 1) then
    !  if (open_file(path, msg, newunit=unt, form='unformatted', status='old', action="write", access="append") /= 0) then
-   !    MSG_ERROR(msg)
+   !    ABI_ERROR(msg)
    !  end if
    !  call pawrhoij_io(pawrhoij_all,un,hdr%nsppol,hdr%nspinor,hdr%nspden,hdr%lmn_size,hdr%typat,hdr%headform,"Write")
    !  close(unt)
@@ -856,7 +856,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
 #endif
 
  case default
-   MSG_ERROR(sjoin("Wrong iomode:",itoa(my_iomode)))
+   ABI_ERROR(sjoin("Wrong iomode:",itoa(my_iomode)))
  end select
 
  call cwtime_report(" IO operation", cputime, walltime, gflops)
@@ -865,7 +865,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine fftdatar_write
 !!***
@@ -1054,7 +1054,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  if (my_rank == master) then
    my_fname = fname
    if (nctk_try_fort_or_ncfile(my_fname, msg) /= 0 ) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    iomode = iomode_from_fname(my_fname)
@@ -1062,7 +1062,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
    case (IO_MODE_FORTRAN, IO_MODE_MPI)
      if (open_file(my_fname, msg, newunit=unt, form='unformatted', status='old', action="read") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      call hdr_fort_read(ohdr, unt, fform)
@@ -1071,7 +1071,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      !if (fform /= fform_den) then
      !  write(msg, "(3a, 2(a, i0))")' File: ',trim(my_fname),ch10,' is not a density file. fform: ',fform,", expecting: ", fform_den
-     !  MSG_WARNING(msg)
+     !  ABI_WARNING(msg)
      !end if
      cplex_file = 1
      if (ohdr%pertcase /= 0) then
@@ -1096,7 +1096,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      !if (fform /= fform_den) then
      !  write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file: fform= ',fform,", expecting:", fform_den
-     !  MSG_WARNING(msg)
+     !  ABI_WARNING(msg)
      !end if
 
      cplex_file = 1
@@ -1116,14 +1116,14 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      NCF_CHECK(nf90_close(unt))
 #endif
    case default
-     MSG_ERROR(sjoin("Wrong iomode:", itoa(iomode)))
+     ABI_ERROR(sjoin("Wrong iomode:", itoa(iomode)))
    end select
 
    need_interp = any(ohdr%ngfft(1:3) /= ngfft(1:3))
    if (need_interp .and. allow_interp__) then
      msg = sjoin("Different FFT meshes. Caller:", ltoa(ngfft(1:3)), &
                  ". File: ", ltoa(ohdr%ngfft(1:3)), ". Will interpolate rhor(r).")
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
 
      ABI_MALLOC(rhor_tmp, (cplex*product(ngfft(1:3)), ohdr%nspden))
      call interpolate_denpot(cplex, ohdr%ngfft(1:3), ohdr%nspden, rhor_file, ngfft(1:3), rhor_tmp)
@@ -1262,7 +1262,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine read_rhor
 !!***
@@ -1379,19 +1379,19 @@ subroutine denpot_spin_convert(denpot_in,nspden_in,denpot_out,nspden_out,fform,&
 !Checks
  if (size(denpot_in,2)/=nspden_in) then
    msg='size(denpot_in,2)/=nspden_in!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(denpot_out,2)/=nspden_out) then
    msg='size(denpot_out,2)/=nspden_out!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (my_istart_in+my_nelem-1>size(denpot_in,1)) then
    msg='istart_in+nelem>size(denpot_in,1)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (my_istart_out+my_nelem-1>size(denpot_out,1)) then
    msg='istart_out+nelem>size(denpot_out,1)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Simple copy if the number of spin-components is unchanged...

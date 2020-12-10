@@ -168,7 +168,7 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, maxocc, mband, nban
  !call cwtime(cpu, wall, gflops, "start")
 
  if (option/=1 .and. option/=2)then
-   MSG_BUG(sjoin('Option must be either 1 or 2. It is:', itoa(option)))
+   ABI_BUG(sjoin('Option must be either 1 or 2. It is:', itoa(option)))
  end if
 
  ! Initialize the occupation function and generalized entropy function,
@@ -447,7 +447,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, spinmagntarget, mband, nband, 
 
  ! Here treat the case where occopt does not correspond to a metallic occupation scheme
  if (occopt < 3 .or. occopt > 8) then
-   MSG_BUG(sjoin(' occopt= ',itoa(occopt),', a value not allowed in newocc.'))
+   ABI_BUG(sjoin(' occopt= ',itoa(occopt),', a value not allowed in newocc.'))
  end if
 
  ! Check whether nband is a constant for all k point and spin-pol
@@ -457,7 +457,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, spinmagntarget, mband, nband, 
        write(msg,'(3a,i0,a,i0,a,i0,a)')&
         'The number of bands must be the same for all k-points ',ch10,&
         'but nband(1)= ',nband(1),' is different of nband(',ikpt+(isppol-1)*nkpt,') = ',nband(ikpt+(isppol-1)*nkpt),'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end do
  end do
@@ -466,7 +466,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, spinmagntarget, mband, nband, 
  if (nelect <= zero) then
    write(msg,'(3a,es16.8,a)')&
    'nelect must be a positive number, while ',ch10, 'the calling routine asks nelect= ',nelect,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  maxocc = two / (nsppol * nspinor)
@@ -477,7 +477,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, spinmagntarget, mband, nband, 
    write(msg,'(3a,es16.8,a,i0,a,es16.8,a)' )&
    'nelect must be smaller than nband*maxocc, while ',ch10,&
    'the calling routine gives nelect= ',nelect,', nband= ',nband(1),' and maxocc= ',maxocc,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ! Use bisection algorithm to find fermi energy
@@ -539,7 +539,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, spinmagntarget, mband, nband, 
     'It might be that your number of bands (nband) corresponds to the strictly',ch10,&
     'minimum number of bands to accomodate your electrons (so, OK for an insulator),',ch10,&
     'while you are trying to describe a metal. In this case, increase nband, otherwise ...'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 
@@ -576,7 +576,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, spinmagntarget, mband, nband, 
        write(msg,'(a,i0,3a,es22.14,a,es22.14,a)')&
         'It was not possible to find Fermi energy in ',niter_max,' max bisections.',ch10,&
         'nelecthi: ',nelecthi,', and nelectlo: ',nelectlo,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end do ! End of bisection loop
 
@@ -671,7 +671,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, spinmagntarget, mband, nband, 
          write(msg,'(a,i3,3a,es22.14,a,es22.14,a)')&
           'It was not possible to find Fermi energy in ',niter_max,' bisections.',ch10,&
           'nelecthi: ',nelecthi,', and nelectlo: ',nelectlo,'.'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
      end do ! End of bisection loop
 
@@ -838,7 +838,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        ! Use FD occupations (one smearing) only with "physical" temperature tphysel
      else if (occopt /= 3) then
        write(msg, '(a,i6,a)' )' tphysel /= 0, tsmear == 0, but occopt is not = 3, but ',occopt,'.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 
@@ -939,7 +939,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        end do
 
      else
-       MSG_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
+       ABI_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
      end if
 
    else if (dblsmr /= 0) then
@@ -973,7 +973,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        write(msg, '(a,a)' )&
         'Occopt=3 is not allowed as a re-smearing.', &
         'Use a single FD, or re-smear with a different delta type (faster cutoff). '
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      else if(occopt==4 .or. occopt==5)then
        ! Cold smearing of Marzari, two values of the "a" parameter being possible
        ! first value gives minimization of the bump
@@ -1015,7 +1015,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
          smd2(-ii)=smd2(ii)
        end do
      else
-       MSG_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
+       ABI_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
      end if
 
      ! Use O(1/N4) algorithm from Num Rec (see below)
@@ -1365,7 +1365,7 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
            'k -state, band number',ibandk,', occ=',occ_k(ibandk),'eigenvalue=',eig0_k(ibandk),',',ch10,&
            ' kq-state, band number',ibandkq,', occ=',occ_kq(ibandkq),', eigenvalue=',eig0_kq(ibandkq),'.',ch10,&
            'Action: change occopt, consistently, in GS and RF calculations.'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          ratio=0.0_dp
        else

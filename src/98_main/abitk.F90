@@ -106,7 +106,7 @@ program abitk
  else
    close(std_out)
    if (open_file(NULL_FILE, msg, unit=std_out, action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -241,13 +241,13 @@ program abitk
  case ("ebands_bxsf")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
    if (ebands_write_bxsf(ebands, cryst, strcat(basename(path), "_BXSF")) /= 0)  then
-     MSG_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
+     ABI_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
    end if
 
  !case ("ebands_nesting")
    !call get_path_ebands_cryst(path, ebands, cryst, comm)
    !if (ebands_write_nesting(ebands, cryst, filepath, prtnest, tsmear, fermie_nest, qpath_vertices, errmsg) /= 0) then
-   !  MSG_ERROR("Cannot produce file for nesting factor. Check log file for info.")
+   !  ABI_ERROR("Cannot produce file for nesting factor. Check log file for info.")
    !end if
 
  case ("skw_kpath")
@@ -256,7 +256,7 @@ program abitk
 
    ! Generate k-path
    ABI_CHECK(get_arg("ndivsm", ndivsm, msg, default=20) == 0, msg)
-   !MSG_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
+   !ABI_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
    !nbounds = 5
    ABI_MALLOC(bounds, (3, 5))
    bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
@@ -391,7 +391,7 @@ program abitk
    ! Get important dimensions from the first header and rewind the file.
    !call hdr_fort_read(new%hdr_ref, unt, fform)
    !if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
-   !  MSG_ERROR(sjoin("While reading:", path, ch10, msg))
+   !  ABI_ERROR(sjoin("While reading:", path, ch10, msg))
    !end if
    !! Fortran IO
    !do ispden=1,hdr1%nspden
@@ -433,7 +433,7 @@ program abitk
 
  case default
    call abitk_show_help()
-   MSG_ERROR(sjoin("Invalid command:", command))
+   ABI_ERROR(sjoin("Invalid command:", command))
  end select
 
  ! Deallocate memory to make memcheck happy.

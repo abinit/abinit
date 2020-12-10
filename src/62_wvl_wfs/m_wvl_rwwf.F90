@@ -119,7 +119,7 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
    write(message,'(a,a,a,i0,a)')&
 &   '  Option argument is wrong,', ch10, &
 &   '  awaited values are -1 or  1 but option = ', option, '.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  comm=mpi_enreg%comm_wvl
@@ -152,7 +152,7 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
      write(message,'(4a,i0,a)') ch10,&
 &     '  wff%iomode argument is wrong,', ch10, &
 &     '  awaited values are -1, 0 (or 3 if netcdf/etsf_io is available) but value = ', wff%iomode, '.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  else
    call readmywaves(me, "wavefunctions", WF_FORMAT_NONE, wfs%ks%orbs, &
@@ -241,7 +241,7 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
    write(message,'(a,a,a,i0,a)')&
 &   '  Option argument is wrong,', ch10, &
 &   '  awaited values are -2 or  2 but option = ', option, '.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  comm=mpi_enreg%comm_wvl
@@ -279,7 +279,7 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
      write(message,'(3a,i0,a)')&
 &     '  wff%iomode argument is wrong,', ch10, &
 &     '  awaited values are -1, 0 (or 3 if netcdf/etsf_io is available) but value = ', wff%iomode, '.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  else
 !  Write in the BigDFT way.

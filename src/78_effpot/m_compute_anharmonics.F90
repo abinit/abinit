@@ -208,7 +208,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &      'the number of cell in reference  (',ref_eff_pot%harmonics_terms%ifcs%nrpt,&
 &       ') is not equal to the  ',ch10,'the number of cell  in ',trim(filenames(ii+5)),&
 &      ' (',eff_pots(ii)%harmonics_terms%ifcs%nrpt,')',ch10,'this files cannot be used',ch10
-        MSG_WARNING(message)
+        ABI_WARNING(message)
         file_usable(ii) = .False.
       end if
       if (eff_pots(ii)%crystal%natom/=ref_eff_pot%crystal%natom) then
@@ -216,7 +216,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &      'the number of atoms in reference  (',ref_eff_pot%crystal%natom,') is not equal to the  ',ch10,&
 &      'the number of atoms  in ',trim(filenames(ii+5)),' (',eff_pots(ii)%crystal%natom,')',ch10,&
 &      'this files cannot be used',ch10
-        MSG_WARNING(message)
+        ABI_WARNING(message)
         file_usable(ii) = .False.
       end if
       if (eff_pots(ii)%crystal%ntypat/=ref_eff_pot%crystal%ntypat) then
@@ -226,7 +226,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &       ch10,'the number of type of atoms  in ',trim(filenames(ii+5)),&
 &       ' (',eff_pots(ii)%crystal%ntypat,')',&
 &       ch10,'this files can not be used',ch10
-        MSG_WARNING(message)
+        ABI_WARNING(message)
         file_usable(ii) = .False.
       end if
     end do
@@ -240,7 +240,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   if (count((effpot_strain%name=="reference"))>1) then
     write(message, '(2a)' )&
 &    ' There is several file corresponding to the reference ',ch10
-    MSG_BUG(message)
+    ABI_BUG(message)
   end if
 
   have_strain = 0
@@ -280,7 +280,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     if(jj>2) then
       write(message, '(a,I1,a)' )&
  &    ' There is several file corresponding to strain uniaxial in direction ',ii,ch10
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     else
       name = 'uniaxial'
       if(ii>=4) name = 'shear'
@@ -364,7 +364,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           write(message, '(a,I1,a,a)' )&
 &             ' The deformations for strain ',ii,&
 &             ' are not the opposite',ch10
-          MSG_ERROR(message)
+          ABI_ERROR(message)
         end if
       end if
     end if

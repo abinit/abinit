@@ -121,7 +121,7 @@ subroutine exc_write_bshdr(funt,Bsp,Hdr)
 
 ! Handle IO Error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine exc_write_bshdr
 !!***
@@ -188,7 +188,7 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
  return
 
 10 ierr = 1
- MSG_WARNING(errmsg)
+ ABI_WARNING(errmsg)
 
 end subroutine exc_read_bshdr
 !!***
@@ -238,7 +238,7 @@ subroutine exc_skip_bshdr(funt,ierr)
 ! Handle IO Error
 10 continue
  ierr = 0
- MSG_WARNING(errmsg)
+ ABI_WARNING(errmsg)
 
 end subroutine exc_skip_bshdr
 !!***
@@ -288,7 +288,7 @@ subroutine exc_skip_bshdr_mpio(mpifh,at_option,ehdr_offset)
  call xmpio_read_frm(mpifh,ehdr_offset,at_option,fmarker,ierr)
  !write(std_out,*)"fmarker last record ",fmarker
 #else
- MSG_ERROR("You should not be here")
+ ABI_ERROR("You should not be here")
 #endif
 
 end subroutine exc_skip_bshdr_mpio
@@ -349,7 +349,7 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
  ABI_UNUSED(BSp%nline)
 
  if (open_file(eig_fname,msg,newunit=eig_unt,form="unformatted",status="old",action="read") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(eig_unt, err=10, iomsg=errmsg)hsize_read,neig_read
@@ -357,7 +357,7 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
 
  if (hsize_read/=hsize) then
    write(msg,'(a,2(1x,i0))')" hsize_read/=hsize: ",hsize_read,hsize
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Read eigenvalues, ignore possibly small imaginary part.
@@ -387,14 +387,14 @@ subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
 
  if (vec/=nvec) then
    write(msg,'(a,2(1x,i0))')" vec_idx is wrong, vec/=nvec ",vec,nvec+1
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  return
 
  ! Handle IO-error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine exc_read_eigen
 !!***
@@ -480,7 +480,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
  ABI_CHECK(hsize==size_exp,"Wrong hsize")
  if (neh1/=neh2) then
    msg = "BSE code does not support different number of transitions for the two spin channels"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  my_nt = my_t2-my_t1+1
@@ -498,7 +498,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
    end if
 
    if (open_file(fname,msg,newunit=funit,form="unformatted",status="old",action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    !
    ! Read the header and perform consistency checks.
@@ -550,7 +550,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      ! A) Construct resonant blocks from the upper triangles stored on file.
      ! FIXME this part wont work if we have a different number of e-h pairs
      if (.not.is_resonant) then
-       MSG_ERROR("exc_read_rcblock does not support coupling.")
+       ABI_ERROR("exc_read_rcblock does not support coupling.")
      end if
      ! It should be checked.
      spin_dim=neh1
@@ -644,7 +644,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
    if (nsppol==1) then
      call xmpio_create_coldistr_from_fpacked(glob_sizes,my_cols,old_type,ham_type,my_offpad,offset_err)
    else
-     MSG_WARNING("nsppol==2 => calling fp3blocks")
+     ABI_WARNING("nsppol==2 => calling fp3blocks")
      write(std_out,*)"neh, hsize",neh1,neh2,hsize
 
 #if 1
@@ -656,14 +656,14 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      call xmpio_check_frmarkers(mpifh,ehdr_offset,xmpio_collective,nrec,bsize_frecord,ierr)
      ABI_CHECK(ierr==0,"Error in Fortran markers")
      ABI_FREE(bsize_frecord)
-     MSG_COMMENT("Marker check ok")
+     ABI_COMMENT("Marker check ok")
      call xmpi_barrier(comm)
 #endif
 
      block_sizes(:,1) = (/neh1,neh1/)
      block_sizes(:,2) = (/neh2,neh2/)
      block_sizes(:,3) = (/neh1,neh2/)
-     MSG_ERROR("fp3blocks is buggy")
+     ABI_ERROR("fp3blocks is buggy")
      call xmpio_create_coldistr_from_fp3blocks(glob_sizes,block_sizes,my_cols,old_type,ham_type,my_offpad,offset_err)
    end if
 
@@ -671,7 +671,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
      write(msg,"(3a)")&
 &      "Global position index cannot be stored in a standard Fortran integer ",ch10,&
 &      "Excitonic matrix cannot be read with a single MPI-IO call."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    !
    ! The offset used for reading.
@@ -709,14 +709,14 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
 
    call xmpi_barrier(comm)
 #else
-   MSG_ERROR("MPI-IO support not enabled")
+   ABI_ERROR("MPI-IO support not enabled")
 #endif
  end if
 
 !BEGINDEBUG
 !  if ( ANY(hmat==HUGE(zero)) ) then
 !    write(std_out,*)"COUNT",COUNT(hmat==HUGE(zero))," hsize= ",hsize
-!    MSG_ERROR("Something wrong in the reading")
+!    ABI_ERROR("Something wrong in the reading")
 !  end if
 !ENDDEBUG
 
@@ -726,7 +726,7 @@ subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsiz
 
 ! Handle IO Error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine exc_read_rcblock
 !!***
@@ -796,10 +796,10 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
  neh = nreh(1)
 
  if (nsppol==2) then
-   MSG_WARNING("nsppol==2 is very experimental")
+   ABI_WARNING("nsppol==2 is very experimental")
  end if
  if (ANY(nreh(1)/=nreh)) then
-   MSG_ERROR(" different nreh are not supported")
+   ABI_ERROR(" different nreh are not supported")
  end if
 
  ABI_MALLOC_OR_DIE(cbuff_dpc,(exc_size), ierr)
@@ -989,7 +989,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
    end if
 
  CASE DEFAULT
-   MSG_ERROR("Unknown block_type: "//TRIM(block_type))
+   ABI_ERROR("Unknown block_type: "//TRIM(block_type))
  END SELECT
 
  ABI_FREE(cbuff_dpc)
@@ -998,7 +998,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
 
 ! Handle IO Error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine exc_fullh_from_blocks
 !!***
@@ -1139,7 +1139,7 @@ function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm
    my_offset = (ijp_glob-1)*bsize_elm + (jj-1)*2*bsize_frm
  else
    ABI_UNUSED(sub_block(1,1,1))
-   MSG_ERROR("nsppol==2 not coded")
+   ABI_ERROR("nsppol==2 not coded")
  end if
 
  offset_in_file = my_offset
@@ -1263,7 +1263,7 @@ subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,i
  ! Raise the error.
 10 continue
  ierr = 1
- MSG_WARNING(errmsg)
+ ABI_WARNING(errmsg)
 
 end subroutine exc_read_rblock_fio
 !!***
@@ -1354,7 +1354,7 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
  ABI_FREE(ene_list)
 
  if (open_file(out_fname,msg,newunit=out_unt,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(out_unt,*)"# Amplitude functions F(w) = \sum_t |<t|exc_vec>|^2 \delta(ww- ene_t), w is given in eV. "
@@ -1611,7 +1611,7 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  NCF_CHECK(ncerr)
 
 #else
- MSG_ERROR("netcdf support is not activated. ")
+ ABI_ERROR("netcdf support is not activated. ")
 #endif
 
 contains

@@ -325,7 +325,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
      else if (isign == ABI_FFTW_FORWARD) then ! -1
        work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
      else
-       MSG_BUG("Wrong isign")
+       ABI_BUG("Wrong isign")
      end if
 
      call fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,work_sp,fftw_flags=my_flags)
@@ -355,7 +355,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
      case (ABI_FFTW_FORWARD)  ! -1
        call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofr,fofg,fftw_flags=my_flags)
      case default
-       MSG_BUG("Wrong isign")
+       ABI_BUG("Wrong isign")
      end select
    end if
 
@@ -367,11 +367,11 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
    case (ABI_FFTW_BACKWARD) ! +1; G --> R
      call fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofg,fofr,fftw_flags=my_flags)
    case default
-     MSG_BUG("Wrong isign")
+     ABI_BUG("Wrong isign")
    end select
 
  case default
-   MSG_BUG(" Wrong value for cplex")
+   ABI_BUG(" Wrong value for cplex")
  end select
 
 end subroutine fftw3_seqfourdp
@@ -484,17 +484,17 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
  if (ALL(option /= (/0,1,2,3/))) then
    write(msg,'(a,i0,a)')' The option number',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (option==1 .and. cplex/=1) then
    write(msg,'(a,i0)')' With the option number 1, cplex must be 1 but it is cplex=',cplex
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (option==2 .and. (cplex/=1 .and. cplex/=2)) then
    write(msg,'(a,i0)')' With the option number 2, cplex must be 1 or 2, but it is cplex=',cplex
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  use_fftrisc = (fftalgc==2)
@@ -616,7 +616,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
      CASE DEFAULT
        write(msg,'(a,i0,a)')'Option',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      END SELECT
 
    end if
@@ -691,7 +691,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
    CASE DEFAULT
      write(msg,'(a,i0,a)')'Option',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    END SELECT
 
 
@@ -757,7 +757,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
    CASE DEFAULT
      write(msg,'(a,i0,a)')'Option',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    END SELECT
 #endif
 
@@ -819,7 +819,7 @@ subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #include "fftw3_fftrisc.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),weight_r,weight_i/))
@@ -940,7 +940,7 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #include "fftw3_fftrisc.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
@@ -1000,7 +1000,7 @@ subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboun
 #include "fftw3_fftrisc.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
@@ -1071,7 +1071,7 @@ subroutine fftw3_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFT_FFTW3 support not activated")
+ ABI_ERROR("FFT_FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
@@ -1141,7 +1141,7 @@ subroutine fftw3_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
@@ -1211,7 +1211,7 @@ subroutine fftw3_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
@@ -1283,7 +1283,7 @@ subroutine fftw3_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
  ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
@@ -1356,7 +1356,7 @@ subroutine fftw3_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
  ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
@@ -1429,7 +1429,7 @@ subroutine fftw3_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
 
 #else
  ! Silence compiler warning
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
  ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
  ABI_UNUSED((/ug(1),ur(1)/))
@@ -1508,7 +1508,7 @@ subroutine fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
  ABI_UNUSED(ff)
  if (PRESENT(fftw_flags)) then
@@ -1571,7 +1571,7 @@ subroutine fftw3_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 #include "fftw3_fftpad.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
@@ -1648,7 +1648,7 @@ subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
  ABI_UNUSED(ff)
  if (PRESENT(fftw_flags)) then
@@ -1728,7 +1728,7 @@ subroutine fftw3_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
  ABI_UNUSED(ff)
  ABI_UNUSED(gg)
@@ -1809,7 +1809,7 @@ subroutine fftw3_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
  ABI_UNUSED(ff)
  ABI_UNUSED(gg)
@@ -1891,15 +1891,15 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  ABI_MALLOC(gg_hp,(2,nhp*ndat))
 
 #ifdef DEV_RC_BUG
- if (ndat/=1) MSG_ERROR("ndat/=1 + MKL not coded")
+ if (ndat/=1) ABI_ERROR("ndat/=1 + MKL not coded")
 
  if (ANY( n /= inembed )) then
-   MSG_ERROR("Augmentation not supported")
+   ABI_ERROR("Augmentation not supported")
  end if
 
  call dfftw_plan_dft_r2c_3d(my_plan, nx, ny, nz, ff, gg_hp, my_flags)
  if (my_plan==NULL_PLAN) then
-   MSG_ERROR("dfftw_plan_dft_r2c_3d returned NULL_PLAN")
+   ABI_ERROR("dfftw_plan_dft_r2c_3d returned NULL_PLAN")
  end if
 
  !fftw_plan fftw_plan_many_dft_r2c(int rank3, const int *n, int howmany,
@@ -1966,7 +1966,7 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  ABI_FREE(gg_hp)
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz/))
  ABI_UNUSED(ff)
  ABI_UNUSED(gg(1,1))
@@ -2034,7 +2034,7 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
 
 #ifdef DEV_RC_BUG
  if (ANY( (/nx,ny,nz/) /= (/ldx,ldy,ldz/) )) then
-   MSG_ERROR("Augmentation not supported")
+   ABI_ERROR("Augmentation not supported")
  end if
 #endif
 
@@ -2067,10 +2067,10 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
 
  ! NOTE: The c2r transform destroys its input array even for out-of-place transforms.
 #ifdef DEV_RC_BUG
- if (ndat/=1) MSG_ERROR("ndat/=1 + MKL not coded")
+ if (ndat/=1) ABI_ERROR("ndat/=1 + MKL not coded")
  call dfftw_plan_dft_c2r_3d(my_plan, nx, ny, nz, ff_hp, gg, my_flags)
  if (my_plan==NULL_PLAN) then
-   MSG_ERROR("dfftw_plan_dft_c2r_3d returned NULL_PLAN")
+   ABI_ERROR("dfftw_plan_dft_c2r_3d returned NULL_PLAN")
  end if
 #else
  my_plan = dplan_many_dft_c2r(rank3, n, ndat, ff_hp, inembed, stride, idist, gg, onembed, stride, odist, my_flags, nt_all)
@@ -2084,7 +2084,7 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  ABI_FREE(ff_hp)
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz/))
  ABI_UNUSED(ff(1,1))
  ABI_UNUSED(gg(1))
@@ -2168,7 +2168,7 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  if (PRESENT(fftw_flags)) then
    ABI_UNUSED(fftw_flags)
@@ -2252,7 +2252,7 @@ subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  if (PRESENT(fftw_flags)) then
    ABI_UNUSED(fftw_flags)
@@ -2306,7 +2306,7 @@ subroutine fftw3_cleanup()
 #elif defined HAVE_FFTW3
  call dfftw_cleanup()
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
 #endif
 
 end subroutine fftw3_cleanup
@@ -2391,7 +2391,7 @@ subroutine fftw3_init_threads()
    call dfftw_init_threads(iret)
 
    if (iret==0) then
-     MSG_WARNING(" dfftw_init_threads returned 0; threaded FFTW3 is not being used!")
+     ABI_WARNING(" dfftw_init_threads returned 0; threaded FFTW3 is not being used!")
    else
      THREADS_INITED=1
    end if
@@ -2399,7 +2399,7 @@ subroutine fftw3_init_threads()
  end if
 
 #ifndef HAVE_OPENMP
-  MSG_WARNING("Using FFTW3 with threads but HAVE_OPENMP is not defined!")
+  ABI_WARNING("Using FFTW3 with threads but HAVE_OPENMP is not defined!")
 #endif
 #endif
 
@@ -2453,7 +2453,7 @@ subroutine fftw3_set_nthreads(nthreads)
 
 #ifdef HAVE_FFTW3_THREADS
  if (THREADS_INITED==0) then
-   MSG_WARNING("Threads are not initialized")
+   ABI_WARNING("Threads are not initialized")
  end if
 
  if (PRESENT(nthreads)) then
@@ -2471,7 +2471,7 @@ subroutine fftw3_set_nthreads(nthreads)
 #ifndef HAVE_OPENMP
   if (nwarns <= enough) then
     nwarns = nwarns + 1
-    MSG_WARNING("Using FFTW3 with threads but HAVE_OPENMP is not defined!")
+    ABI_WARNING("Using FFTW3 with threads but HAVE_OPENMP is not defined!")
   end if
 #endif
 
@@ -2538,7 +2538,7 @@ subroutine fftw3_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 #include "fftw3_fftpad.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,mgfft,isign/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
@@ -2600,7 +2600,7 @@ subroutine fftw3_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 #include "fftw3_fftpad.finc"
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
@@ -2656,7 +2656,7 @@ function dplan_many_dft_1D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 &    " inembed= ",inembed," istride= ",istride," idist=",idist,ch10,    &
 &    " onembed= ",onembed," ostride= ",ostride," odist=",idist,ch10
    call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function dplan_many_dft_1D
@@ -2707,7 +2707,7 @@ function dplan_many_dft_2D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 &    " inembed= ",inembed," istride= ",istride," idist=",idist,ch10,    &
 &    " onembed= ",onembed," ostride= ",ostride," odist=",idist,ch10
    call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function dplan_many_dft_2D
@@ -2759,7 +2759,7 @@ function cplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
 &    " inembed = ",inembed," istride = ",istride," idist =",idist,ch10,     &
 &    " onembed = ",onembed," ostride = ",ostride," odist =",idist,ch10
    call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function cplan_many_dft
@@ -2811,7 +2811,7 @@ function zplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
 &    " inembed = ",inembed," istride = ",istride," idist =",idist,ch10,     &
 &    " onembed = ",onembed," ostride = ",ostride," odist =",idist,ch10
    call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function zplan_many_dft
@@ -2864,7 +2864,7 @@ function dplan_many_dft_r2c(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 &    " inembed = ",inembed," istride = ",istride," idist = ",idist,ch10,&
 &    " onembed = ",onembed," ostride = ",ostride," odist = ",idist,ch10
    call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function dplan_many_dft_r2c
@@ -2915,7 +2915,7 @@ function dplan_many_dft_c2r(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 &    " inembed = ",inembed," istride = ",istride," idist = ",idist,ch10,&
 &    " onembed = ",onembed," ostride = ",ostride," odist = ",idist,ch10
    call wrtout(std_out,msg,"COLL")
-   MSG_ERROR("Check FFTW library and/or abinit code")
+   ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
 end function dplan_many_dft_c2r
@@ -3059,7 +3059,7 @@ subroutine fftw3_alloc_real1d_dp(size,cptr,fptr)
 
  cptr = fftw_malloc( INT(size*C_DOUBLE, KIND=C_SIZE_T))
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("fftw_malloc returned NULL!")
+   ABI_ERROR("fftw_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, [size])
@@ -3096,7 +3096,7 @@ subroutine fftw3_alloc_real2d_dp(shape,cptr,fptr)
 
  cptr = fftw_malloc( INT(product(shape)*C_DOUBLE, KIND=C_SIZE_T))
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("fftw_malloc returned NULL!")
+   ABI_ERROR("fftw_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, shape)
@@ -3133,7 +3133,7 @@ subroutine fftw3_alloc_complex1d_spc(size,cptr,fptr)
 
  cptr = fftw_malloc( INT(2*size*C_FLOAT, KIND=C_SIZE_T))
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("fftw_malloc returned NULL!")
+   ABI_ERROR("fftw_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, [size])
@@ -3170,7 +3170,7 @@ subroutine fftw3_alloc_complex1d_dpc(size,cptr,fptr)
 
  cptr = fftw_malloc( INT(2*size*C_DOUBLE, KIND=C_SIZE_T))
  if (.not. C_ASSOCIATED(cptr)) then
-   MSG_ERROR("fftw_malloc returned NULL!")
+   ABI_ERROR("fftw_malloc returned NULL!")
  end if
 
  call c_f_pointer(cptr, fptr, [size])
@@ -3306,7 +3306,7 @@ subroutine fftwmpi_get_work_array(cdata_f,cdata_r,rank,nx,ny,nz,ndat,comm_fft,n0
  cdata_r = fftw_alloc_complex(alloc_local)
 
 #else
-  MSG_ERROR("FFTW3_MPI support not activated")
+  ABI_ERROR("FFTW3_MPI support not activated")
   ABI_UNUSED((/nx,ny,nz,ndat,rank,comm_fft/))
   cdata_f = C_NULL_PTR; cdata_r = C_NULL_PTR
   n0 = 0; offset = 0; n0_tr = 0; offset_tr = 0
@@ -3348,7 +3348,7 @@ subroutine fftwmpi_free_work_array(cdata_f,cdata_r)
  call fftw_free(cdata_r)
  call fftw_free(cdata_f)
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  if(.false.) then
    cdata_r = C_NULL_PTR; cdata_f = C_NULL_PTR
  end if
@@ -3460,7 +3460,7 @@ subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_ff
  call fftw_free(cdata)
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  ABI_UNUSED(comm_fft)
  if (PRESENT(fftw_flags)) then
@@ -3544,7 +3544,7 @@ subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags
  call fftw_destroy_plan(plan)
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/nx,ny,nz,ndat,isign,comm_fft/))
  if (PRESENT(fftw_flags)) then
     ABI_UNUSED(fftw_flags)
@@ -3688,7 +3688,7 @@ subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
  call fftw_free(cdata_real)
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/nfft,ngfft(1),ndat,comm_fft/))
  ABI_UNUSED((/fftn2_distrib(1),ffti2_local(1)/))
  ABI_UNUSED((/fftn3_distrib(1),ffti3_local(1)/))
@@ -3840,7 +3840,7 @@ subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
  call fftw_free(cdata_real)
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/nfft,ngfft(1),ndat,comm_fft/))
  ABI_UNUSED((/fftn2_distrib(1),ffti2_local(1)/))
  ABI_UNUSED((/fftn3_distrib(1),ffti3_local(1)/))
@@ -3936,7 +3936,7 @@ subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &     fofg,fofr,comm_fft,fftw_flags=my_flags)
 
    case default
-     MSG_BUG("Wrong isign")
+     ABI_BUG("Wrong isign")
    end select
 
  case (2)
@@ -3945,11 +3945,11 @@ subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &    fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags=my_flags)
 
  case default
-   MSG_BUG(" Wrong value for cplex")
+   ABI_BUG(" Wrong value for cplex")
  end select
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/cplex,nfft,ngfft(1),ndat,isign,comm_fft/))
  ABI_UNUSED((/fftn2_distrib(1),ffti2_local(1)/))
  ABI_UNUSED((/fftn3_distrib(1),ffti3_local(1)/))
@@ -4097,14 +4097,14 @@ subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
      call mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,f03_cdata,nfft,fofg)
 
  case default
-   MSG_ERROR("Wrong sign")
+   ABI_ERROR("Wrong sign")
  end select
 
  call fftw_destroy_plan(plan)
  call fftw_free(cptr_cdata)
 
 #else
- MSG_ERROR("FFTW3_MPI support not activated")
+ ABI_ERROR("FFTW3_MPI support not activated")
  ABI_UNUSED((/cplex,nfft,ngfft(1),ndat,isign,comm_fft/))
  ABI_UNUSED((/fftn2_distrib(1),ffti2_local(1)/))
  ABI_UNUSED((/fftn3_distrib(1),ffti3_local(1)/))
@@ -4230,7 +4230,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -4463,7 +4463,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc/))
  ABI_UNUSED((/ max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
@@ -4584,7 +4584,7 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -4820,7 +4820,7 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc/))
  ABI_UNUSED((/max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
@@ -4923,12 +4923,12 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 ! check input
  if (nd1<n1 .or. nd2<n2 .or. nd3<n3) then
-   MSG_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
+   ABI_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
  end if
 
  ! Effective n1 and n2 (complex-to-complex or real-to-complex)
@@ -5123,7 +5123,7 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplex,ndat,n1,n2,n3,nd1,nd2,nd1eff,nd2proc,nd3proc,option,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
 #endif
@@ -5223,12 +5223,12 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 &     'ncache has to be enlarged to be able to hold at',ch10, &
 &     'least one 1-d FFT of each size even though this will',ch10,&
 &     'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! check input
  if (nd1<n1 .or. nd2<n2 .or. nd3<n3) then
-   MSG_ERROR("forw: assertion error nd1<n1 .or. nd2<n2 .or. nd3<n3")
+   ABI_ERROR("forw: assertion error nd1<n1 .or. nd2<n2 .or. nd3<n3")
  end if
 
 !Effective n1 and n2 (complex-to-complex or real-to-complex)
@@ -5407,7 +5407,7 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplex,ndat,n1,n2,n3,nd1,nd2,nd1eff,nd2proc,nd3proc,option,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
 #endif
@@ -5505,7 +5505,7 @@ subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
    call mpifft_dbox2fg(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
 
  case default
-   MSG_BUG("Wrong isign")
+   ABI_BUG("Wrong isign")
  end select
 
  ABI_DEALLOCATE(workr)
@@ -5615,7 +5615,7 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10,&
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !call wrtout(std_out,"applypot standard ALLTOALL + FFTW3","COLL")
@@ -5973,7 +5973,7 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc/))
  ABI_UNUSED((/max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3/))
  ABI_UNUSED((/max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft/))
@@ -6083,7 +6083,7 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &     'ncache has to be enlarged to be able to hold at',ch10,&
 &     'least one 1-d FFT of each size even though this will',ch10,&
 &     'reduce the performance for shorter transform lengths'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
 !Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -6297,7 +6297,7 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc/))
  ABI_UNUSED((/ max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft,nproc_fft,me_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),rho(1,1,1),weight_r(1),weight_i(1)/))
@@ -6420,7 +6420,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -6648,7 +6648,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc/))
  ABI_UNUSED((/ max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
@@ -6770,7 +6770,7 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -6999,7 +6999,7 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc/))
  ABI_UNUSED((/max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft/))
  ABI_UNUSED((/zf(1,1,1,1,1),zr(1,1,1,1,1)/))
@@ -7110,7 +7110,7 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10,&
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !call wrtout(std_out,"applypot with non-blocking IALLTOALL + FFTW3","COLL")
@@ -7480,7 +7480,7 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  end if
 
 #else
- MSG_ERROR("FFTW3 support not activated")
+ ABI_ERROR("FFTW3 support not activated")
  ABI_UNUSED((/cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc/))
  ABI_UNUSED((/max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3/))
  ABI_UNUSED((/max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft/))

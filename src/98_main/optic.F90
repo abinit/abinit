@@ -204,12 +204,12 @@ program optic
 
    ! Read data file
    if (open_file(filnam,msg,newunit=finunt,form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !   write(msg,'(3a)') "From version 7.11.4, optic uses namelists as input.",ch10,&
 !     "See e.g. ~/tests/tutorespfn/Input/toptic_2.in"
-!   MSG_COMMENT(msg)
+!   ABI_COMMENT(msg)
 
    ! Setup some default values:
    broadening = 1e-3_dp ! Ha
@@ -231,13 +231,13 @@ program optic
 
    ! Validate input
    if (num_nonlin_comp > 0 .and. all(nonlin_comp(1:num_nonlin_comp) == 0)) then
-     MSG_ERROR("nonlin_comp must be specified when num_nonlin_comp > 0")
+     ABI_ERROR("nonlin_comp must be specified when num_nonlin_comp > 0")
    end if
    if (num_linel_comp > 0 .and. all(linel_comp(1:num_linel_comp) == 0)) then
-     MSG_ERROR("linel_comp must be specified when num_linel_comp > 0")
+     ABI_ERROR("linel_comp must be specified when num_linel_comp > 0")
    end if
    if (num_nonlin2_comp > 0 .and. all(nonlin2_comp(1:num_nonlin2_comp) == 0)) then
-     MSG_ERROR("nonlin2_comp must be specified when num_nonlin2_comp > 0")
+     ABI_ERROR("nonlin2_comp must be specified when num_nonlin2_comp > 0")
    end if
 
    ! Open GS wavefunction file
@@ -246,7 +246,7 @@ program optic
    ! this info is not reported in the header and the offsets in wfk_compute_offsets
    ! are always computed assuming the presence of the cg
    call nctk_fort_or_ncfile(wfkfile, iomode0, msg)
-   if (len_trim(msg) /= 0) MSG_ERROR(msg)
+   if (len_trim(msg) /= 0) ABI_ERROR(msg)
    if (iomode0 == IO_MODE_MPI) iomode0 = IO_MODE_FORTRAN
    call wfk_open_read(wfk0,wfkfile,formeig0,iomode0,get_unit(),xmpi_comm_self)
    ! Get header from the gs file
@@ -262,7 +262,7 @@ program optic
    do ii=1,3
 
      call nctk_fort_or_ncfile(infiles(ii), iomode_ddk(ii), msg)
-     if (len_trim(msg) /= 0) MSG_ERROR(msg)
+     if (len_trim(msg) /= 0) ABI_ERROR(msg)
      if (iomode_ddk(ii) == IO_MODE_MPI) iomode_ddk(ii) = IO_MODE_FORTRAN
 
      if (.not. use_ncevk(ii)) then
@@ -277,7 +277,7 @@ program optic
 
        NCF_CHECK(nf90_close(ncid))
 #else
-       MSG_ERROR("Netcdf not available!")
+       ABI_ERROR("Netcdf not available!")
 #endif
 
      end if
@@ -288,7 +288,7 @@ program optic
 !&      ' The ground-state and ddk files should have the same format,',ch10,&
 !&      ' either FORTRAN binary or NetCDF, which is not the case.',ch10,&
 !&      ' Action : see input variable iomode.'
-!     MSG_ERROR(msg)
+!     ABI_ERROR(msg)
 !   endif
 
    ! Perform basic consistency tests for the GS WFK and the DDK files, e.g.
@@ -313,12 +313,12 @@ program optic
 
      if (hdr%compare(hdr_ddk(1)) /= 0) then
        write(msg, "(3a)")" Ground-state wavefunction file and ddkfile ",trim(infiles(1))," are not consistent. See above messages."
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      do ii=1,2
        if (wfks(ii)%compare(wfks(ii+1)) /= 0) then
          write(msg, "(2(a,i0,a))")" ddkfile", ii," and ddkfile ",ii+1, ", are not consistent. See above messages"
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      enddo
    endif
@@ -341,7 +341,7 @@ program optic
      call eprenorms_from_epnc(Epren,ep_nc_fname)
      ep_ntemp = Epren%ntemp
    else if (do_temperature) then
-     MSG_ERROR("You have asked for temperature but the epfile is not present !")
+     ABI_ERROR("You have asked for temperature but the epfile is not present !")
    end if
 
    ! autoparal section
@@ -373,7 +373,7 @@ program optic
      end do
 
      write(std_out,'(a)')"..."
-     MSG_ERROR_NODUMP("aborting now")
+     ABI_ERROR_NODUMP("aborting now")
    end if
 
  end if
@@ -431,7 +431,7 @@ program optic
  mband=maxval(nband(:))
  do ii=1,nkpt
    if (nband(ii) /= mband) then
-     MSG_ERROR("nband must be constant across kpts")
+     ABI_ERROR("nband must be constant across kpts")
    end if
  end do
 
@@ -473,7 +473,7 @@ program optic
      NCF_CHECK(nf90_get_var(ncid, varid, outeig, count=[2, mband, mband, nkpt, nsppol]))
      NCF_CHECK(nf90_close(ncid))
 #else
-     MSG_ERROR("Netcdf not available!")
+     ABI_ERROR("Netcdf not available!")
 #endif
    end do
 

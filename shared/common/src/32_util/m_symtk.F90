@@ -127,13 +127,13 @@ subroutine mati3inv(mm, mit)
    mit(:,:)=tt(:,:)/dd
  else
    write(msg, '(2a,2x,9i5,a)' )'Attempting to invert integer array',ch10,mm(:,:),'   ==> determinant is zero.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !If matrix is orthogonal, determinant must be 1 or -1
  if (abs(dd)/=1) then
    write(msg, '(2a,2x,9i5,a)' )'Absolute value of determinant should be one',ch10,'but determinant= ',dd
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 end subroutine mati3inv
@@ -231,7 +231,7 @@ subroutine matr3inv(aa, ait)
  else
    write(msg, '(2a,2x,9es16.8,a,a,es16.8,a)' )&
      'Attempting to invert real(8) 3x3 array',ch10,aa(:,:),ch10,'   ==> determinant=',det,' is zero.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ait(1,1) = t1 * dd
@@ -294,7 +294,7 @@ subroutine symdet(determinant, nsym, sym)
       'Abs(determinant) for symmetry number ',isym,' is ',det,' .',ch10,&
       'For a legitimate symmetry, abs(determinant) must be 1.',ch10,&
       'Action: check your symmetry operations (symrel) in input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -358,7 +358,7 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
 
 !1) Identity must be the first symmetry.
  if (ANY(symrel(:,:,1) /= identity_3d .or. symafm(1)/=1 )) then
-   MSG_WARNING("First operation must be the identity operator")
+   ABI_WARNING("First operation must be the identity operator")
    ierr = ierr+1
  end if
  !
@@ -377,7 +377,7 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
      write(msg,'(a,i0,2a)')&
       "Cannot find the inverse of symmetry operation ",isym,ch10,&
       "Input symmetries do not form a group "
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      ierr = ierr+1
    end if
 
@@ -411,7 +411,7 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
         'do not possess closure under group composition.',ch10,&
         'ABINIT might stop with an ERROR after trying to correct and making a few more checks.',ch10,&
         'Action: check symrel, symafm and possibly atomic positions, and fix them.'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        ierr = ierr+1
        print_warning=0
      end if
@@ -485,7 +485,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
 
  ! 1) Identity must be the first symmetry. Do not check if tnon == 0 as cell might not be primitive.
  if (any(symrel(:,:,1) /= identity_3d .or. symafm(1) /= 1)) then
-   MSG_WARNING("First operation must be the identity operator")
+   ABI_WARNING("First operation must be the identity operator")
    ierr = ierr + 1
  end if
 
@@ -512,7 +512,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
        write(msg,'(a,i0,2a)')&
         "Cannot find the inverse of symmetry operation ",sym1,ch10,&
         "Input symmetries do not form a group "
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        echo=0
      endif
      ierr = ierr + 1
@@ -556,7 +556,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
            'This indicates that the input symmetry elements',ch10,&
            'do not possess closure under group composition.',ch10,&
            'Action: check symrel, symafm and fix them.'
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
          echo=0
        endif
        ierr = ierr + 1
@@ -706,7 +706,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
         'Action: modify rprim, acell and/or symrel so that',ch10,&
         'vector lengths and angles are preserved.',ch10,&
         'Beware, the tolerance on symmetry operations is very small.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      else
        iexit=-1
      end if
@@ -730,7 +730,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
             'The value of the residual is: ',residual, 'that is greater than the threshold:', two*tolsym, ch10,&
             'Action: modify rprim, acell and/or symrel so that',ch10,&
             'the lattice is preserved.'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          else
            iexit=-1
          end if
@@ -818,13 +818,13 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
      'only when the input variable chkprim is 0.',ch10,&
      'Action: either change your unit cell (rprim or angdeg),',ch10,&
      'or set chkprim to 0.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      write(msg,'(3a,i0,a,a,a)')&
       'According to the symmetry finder, the unit cell is',ch10,&
       'not primitive, with multiplicity= ',multi,'.',ch10,&
       'This is allowed, as the input variable chkprim is 0.'
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
  end if
 
@@ -914,7 +914,7 @@ subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
          '  symrel=',matr2(:,1),ch10,&
          '         ',matr2(:,2),ch10,&
          '         ',matr2(:,3)
-         MSG_ERROR_CLASS(msg, "TolSymError")
+         ABI_ERROR_CLASS(msg, "TolSymError")
        end if
        symrel(ii,jj,isym)=nint(val)
      end do
@@ -1255,7 +1255,7 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
  if(abs(iholohedry)<1 .or. abs(iholohedry)>7)then
    write(msg, '(a,i0)' )&
 &    'Abs(iholohedry) should be between 1 and 7, while iholohedry=',iholohedry 
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  do ii=1,3
@@ -1590,7 +1590,7 @@ subroutine symmetrize_tnons(nsym,symrel,tnons,tolsym)
    enddo ! iorder
 
    if(order==0)then
-     MSG_BUG("Was unable to find order of operation")
+     ABI_BUG("Was unable to find order of operation")
    endif
  enddo
 
@@ -2130,7 +2130,7 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
      if(errout==3)then
        write(msg, '(a)' )&
        ' Suppress warning about finding symmetrically equivalent atoms, as mentioned already three times.'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        errout=errout+1
      endif
 
@@ -2140,7 +2140,7 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
        ' Applying inv of symm number',isym,' to atom number',iatom,'  of typat',typat(iatom),ch10,&
        ' gives tratom=',tratom(1:3),'.',ch10,&
        ' This is further away from every atom in crystal than the allowed tolerance, tolsym=',tolsym
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
 
        write(msg, '(a,3i3,a,a,3i3,a,a,3i3)' ) &
        '  The inverse symmetry matrix is',symrec(1,1:3,isym),ch10,&
@@ -2191,7 +2191,7 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
 
  if (err>tolsym) then
    write(msg, '(1x,a,1p,e14.5,a,e12.4)' )'symatm: maximum (delta t)=',err,' is larger than tol=',tolsym
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 !Stop execution if error is really big
@@ -2200,7 +2200,7 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
     'Largest error (above) is so large (0.01) that either input atomic coordinates (xred)',ch10,&
     'are wrong or space group symmetry data is wrong.',ch10,&
     'Action: correct your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine symatm
@@ -3150,7 +3150,7 @@ subroutine smallprim(metmin,minim,rprimd)
 
  if (iiter >= maxiter) then
    write(msg,'(a,i0,a)') 'the loop has failed to find a set of minimal vectors in ',maxiter,' iterations.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !At this stage, the three vectors have angles between each other that are
@@ -3181,7 +3181,7 @@ subroutine smallprim(metmin,minim,rprimd)
 
  if (iiter >= maxiter) then
    write(msg, '(a,i0,a)') 'the second loop has failed to find a set of minimal vectors in ',maxiter, 'iterations.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !DEBUG
@@ -3248,7 +3248,7 @@ subroutine smallprim(metmin,minim,rprimd)
 & minim(3,1)*(minim(1,2)*minim(2,3)-minim(2,2)*minim(1,3))
  if(determinant<-tol8)minim(:,3)=-minim(:,3)
  if(abs(determinant)<tol8)then
-   MSG_BUG('minim gives vanishing unit cell volume.')
+   ABI_BUG('minim gives vanishing unit cell volume.')
  end if
 
 !Final computation of metmin

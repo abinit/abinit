@@ -117,7 +117,7 @@ contains
        write(std_out,*) "subroutine dbsnak: error"
        write(std_out,*) "0 <= kxord <= nx is required."
        write(std_out,*) "kxord = ", kxord, " and nx = ", nx,  " is given."
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     endif
 
     do ix = 1, kxord
@@ -207,7 +207,7 @@ contains
     if (iflag .ne. 1) then
        write(std_out,*) "subroutine dbsint: error"
        write(std_out,*) "no solution of linear equation system !!!"
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     end if
 
     do ix = 1, nx
@@ -222,7 +222,7 @@ contains
     write(std_out,*) "xknot(ix) <= xknot(ix+1) required."
     write(std_out,*) ix,xknot(ix),xknot(ix+1)
 
-    MSG_ERROR("Aborting now")
+    ABI_ERROR("Aborting now")
 
   end subroutine dbsint
 
@@ -267,7 +267,7 @@ contains
           write(std_out,*) "subroutine dbsval:"
           write(std_out,*) "xknot(ix) <= xknot(ix+1) required."
           write(std_out,*) ix,xknot(ix),xknot(ix+1)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
        if((xknot(ix) .le. x) .and. (x .lt. xknot(ix+1))) leftx = ix
     end do
@@ -276,7 +276,7 @@ contains
        write(std_out,*) "subroutine dbsval:"
        write(std_out,*) "ix with xknot(ix) <= x < xknot(ix+1) required."
        write(std_out,*) "x = ", x
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     endif
 
     do ik = 1, kx-1
@@ -346,7 +346,7 @@ contains
        if (xknot(ix) .gt. xknot(ix+1)) then
           write(std_out,*) "subroutine dbsder:"
           write(std_out,*) "xknot(ix) <= xknot(ix+1) required."
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
        if ((xknot(ix) .le. x) .and. (x .lt. xknot(ix+1))) leftx = ix
     end do
@@ -357,7 +357,7 @@ contains
        write(std_out,*) "xknot(1)     = ", xknot(1)
        write(std_out,*) "xknot(nx+kx) = ", xknot(nx+kx)
        write(std_out,*) "         x   = ", x
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     endif
 
     if (iderx .eq. 0) then
@@ -497,7 +497,7 @@ contains
           write(std_out,*) ix, xknot(ix), xknot(ix+1)
           write(std_out,*)
           write(std_out,*) xknot
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -506,7 +506,7 @@ contains
           write(std_out,*) "subroutine dbs1gd:"
           write(std_out,*) "ix with xknot(ix) <= x < xknot(ix+1) required."
           write(std_out,*) "x = ", xvec(ix)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -821,7 +821,7 @@ contains
     if (iflag .ne. 1) then
        write(std_out,*) "subroutine dbs2in: error"
        write(std_out,*) "no solution of linear equation system !!!"
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     end if
 
     do j = 1, m
@@ -844,7 +844,7 @@ contains
     write(std_out,*) "knot(n+k) = ", xyknot(n+k)
     write(std_out,*) "      x/y = ", xyveci
 
-    MSG_ERROR("Aborting now")
+    ABI_ERROR("Aborting now")
 
   end subroutine spli2d
 
@@ -904,7 +904,7 @@ contains
           write(std_out,*) ix, xknot(ix), xknot(ix+1)
           write(std_out,*)
           write(std_out,*) xknot
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
        if((xknot(ix) .le. x) .and. (x .lt. xknot(ix+1))) leftx = ix
     end do
@@ -915,7 +915,7 @@ contains
        write(std_out,*) "x = ", x
        write(std_out,*)
        write(std_out,*) xknot
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     endif
 
     lefty = 0
@@ -925,7 +925,7 @@ contains
           write(std_out,*) "subroutine dbs2vl:"
           write(std_out,*) "yknot(iy) <= yknot(iy+1) required."
           write(std_out,*) iy, yknot(iy), yknot(iy+1)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
        if((yknot(iy) .le. y) .and. (y .lt. yknot(iy+1))) lefty = iy
     end do
@@ -936,7 +936,7 @@ contains
        write(std_out,*) "yknot(iy)   = ", yknot(iy)
        write(std_out,*) "  y         = ", y
        write(std_out,*) "yknot(iy+1) = ", yknot(iy+1)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     endif
 
     do iky = 1, ky
@@ -1005,7 +1005,7 @@ contains
           write(std_out,*) "subroutine dbs2dr:"
           write(std_out,*) "xknot(ix) <= xknot(ix+1) required."
           write(std_out,*) ix, xknot(ix), xknot(ix+1)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
        if((xknot(ix) .le. x) .and. (x .lt. xknot(ix+1))) nintx = ix
     end do
@@ -1014,7 +1014,7 @@ contains
        write(std_out,*) "subroutine dbs2dr:"
        write(std_out,*) "ix with xknot(ix) <= x < xknot(ix+1) required."
        write(std_out,*) "x = ", x
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     endif
 
     ninty = 0
@@ -1024,7 +1024,7 @@ contains
           write(std_out,*) "subroutine dbs2dr:"
           write(std_out,*) "yknot(iy) <= yknot(iy+1) required."
           write(std_out,*) iy, yknot(iy), yknot(iy+1)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
        if ((yknot(iy) .le. y) .and. (y .lt. yknot(iy+1))) ninty = iy
     end do
@@ -1033,7 +1033,7 @@ contains
        write(std_out,*) "subroutine dbs2dr:"
        write(std_out,*) "iy with yknot(iy) <= y < yknot(iy+1) required."
        write(std_out,*) "y = ", y
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     endif
 
     do iky = 1, ky
@@ -1138,7 +1138,7 @@ contains
           write(std_out,*) i, xknot(i), xknot(i+1)
           write(std_out,*)
           write(std_out,*) xknot
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -1147,7 +1147,7 @@ contains
           write(std_out,*) "subroutine dbs2gd:"
           write(std_out,*) "ix with xknot(ix) <= x < xknot(ix+1) required."
           write(std_out,*) "x = ", xvec(i)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -1176,7 +1176,7 @@ contains
           write(std_out,*) i, yknot(i), yknot(i+1)
           write(std_out,*)
           write(std_out,*) yknot
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -1185,7 +1185,7 @@ contains
           write(std_out,*) "subroutine dbs2gd:"
           write(std_out,*) "iy with yknot(iy) <= y < yknot(iy+1) required."
           write(std_out,*) "y = ", yvec(i)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -1417,7 +1417,7 @@ contains
     if (iflag .ne. 1) then
        write(std_out,*) "subroutine dbs3in: error"
        write(std_out,*) "no solution of linear equation system !!!"
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     end if
 
     do j = 1, l
@@ -1443,7 +1443,7 @@ contains
     write(std_out,*) "knot(n+k) = ", xyzknot(n+k)
     write(std_out,*) "    x/y/z = ", xyzveci
 
-    MSG_ERROR("Aborting now")
+    ABI_ERROR("Aborting now")
 
   end subroutine spli3d
 
@@ -1510,7 +1510,7 @@ contains
           write(std_out,*) "subroutine dbs3vl:"
           write(std_out,*) "zknot(iz) <= zknot(iz+1) required."
           write(std_out,*) iz, zknot(iz), zknot(iz+1)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
        if((zknot(iz) .le. z) .and. (z .lt. zknot(iz + 1))) nintz = iz
     end do
@@ -1521,7 +1521,7 @@ contains
        write(std_out,*) "zknot(iz)   = ", zknot(iz)
        write(std_out,*) "  z         = ", z
        write(std_out,*) "zknot(iz+1) = ", zknot(iz+1)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     endif
 
     do iz = 1, kz
@@ -1601,7 +1601,7 @@ contains
           write(std_out,*) "subroutine dbs3vl:"
           write(std_out,*) "zknot(iz) <= zknot(iz+1) required."
           write(std_out,*) iz, zknot(iz), zknot(iz+1)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
        if((zknot(iz) .le. z) .and. (z .lt. zknot(iz + 1))) nintz = iz
     end do
@@ -1612,7 +1612,7 @@ contains
        write(std_out,*) "zknot(iz)   = ", zknot(iz)
        write(std_out,*) "  z         = ", z
        write(std_out,*) "zknot(iz+1) = ", zknot(iz+1)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
     endif
 
     do iz = 1, kz
@@ -1718,7 +1718,7 @@ contains
           write(std_out,*) i, xknot(i), xknot(i+1)
           write(std_out,*)
           write(std_out,*) xknot
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -1727,7 +1727,7 @@ contains
           write(std_out,*) "subroutine dbs3gd:"
           write(std_out,*) "ix with xknot(ix) <= x < xknot(ix+1) required."
           write(std_out,*) "x = ", xvec(i)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -1756,7 +1756,7 @@ contains
           write(std_out,*) i, yknot(i), yknot(i+1)
           write(std_out,*)
           write(std_out,*) yknot
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -1765,7 +1765,7 @@ contains
           write(std_out,*) "subroutine dbs3gd:"
           write(std_out,*) "iy with yknot(iy) <= y < yknot(iy+1) required."
           write(std_out,*) "y = ", yvec(i)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -1794,7 +1794,7 @@ contains
           write(std_out,*) i, zknot(i), zknot(i+1)
           write(std_out,*)
           write(std_out,*) zknot
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 
@@ -1803,7 +1803,7 @@ contains
           write(std_out,*) "subroutine dbs3gd:"
           write(std_out,*) "iz with zknot(iz) <= z < zknot(iz+1) required."
           write(std_out,*) "z = ", zvec(i)
-          MSG_ERROR("Aborting now")
+          ABI_ERROR("Aborting now")
        endif
     end do
 

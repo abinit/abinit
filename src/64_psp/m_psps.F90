@@ -113,7 +113,7 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
  usexml = 0; xmlpaw = 0; useupf = 0
 
  if (open_file(path,msg,newunit=temp_unit,form='formatted',status='old') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  rewind (unit=temp_unit,err=10,iomsg=errmsg)
 
@@ -130,10 +130,10 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
      ii = index(testxml, '"')
      if (ii /= 0) then
        if (atoi(testxml(ii+1:ii+1)) >= 2) then
-         MSG_ERROR(sjoin("UPF version >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Pseudo:", path))
+         ABI_ERROR(sjoin("UPF version >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Pseudo:", path))
        end if
      else
-       MSG_ERROR(sjoin("Cannot find version attributed in UPF file:", path))
+       ABI_ERROR(sjoin("Cannot find version attributed in UPF file:", path))
      end if
 
    end if
@@ -154,7 +154,7 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
 
  ! Handle IO error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine test_xml_xmlpaw_upf
 !!***
@@ -356,7 +356,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
      psps%pspso(ipsp)=0
      ! This is needed to treate SOC perturbatively in sigma.
      !if (dtset%optdriver == RUNL_SIGMA .and. dtset%so_psp(ipsp) /= 0) then
-     !  MSG_WARNING("Setting pspso to 2 although nspinor == 1")
+     !  ABI_WARNING("Setting pspso to 2 although nspinor == 1")
      !  psps%pspso(ipsp) = 2
      !end if
 !    Ideally the following line should not exist,
@@ -1071,7 +1071,7 @@ subroutine psps_ncwrite(psps, path)
  NCF_CHECK(nf90_close(ncid))
 
 #else
- MSG_WARNING("netcdf support not activated. psps file cannot be created!")
+ ABI_WARNING("netcdf support not activated. psps file cannot be created!")
 #endif
 
 contains

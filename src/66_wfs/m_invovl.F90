@@ -673,7 +673,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
 
  if(maxerr >= precision .and. maxerr >= 1e-10) then
    write(message, *) 'In invovl, max error was', maxerr, ' after 30 iterations'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  else
    ! write(message,'(a,i2,a,es13.5)') 'Iterative solver in invovl finished in ', i, ' iterations, error', maxerr
    ! call wrtout(std_out,message,'COLL')

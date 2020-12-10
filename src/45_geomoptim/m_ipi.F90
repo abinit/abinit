@@ -191,12 +191,12 @@ subroutine ipi_check_initial_consistency(in_natom, in_rprimd, in_xred, ierr)
 
  ierr = 0
  if (in_natom /= origin_natom) then
-   MSG_WARNING(sjoin("in_natom:", sjoin(itoa(in_natom), " != origin_natom", itoa(origin_natom))))
+   ABI_WARNING(sjoin("in_natom:", sjoin(itoa(in_natom), " != origin_natom", itoa(origin_natom))))
    ierr = ierr + 1
  end if
 
  if (any(abs(in_rprimd - origin_rprimd) > tol6)) then
-   MSG_WARNING("Mismatch between input file and data from socket: in_rprimd and origin_rprimd do not agree within 1e-6")
+   ABI_WARNING("Mismatch between input file and data from socket: in_rprimd and origin_rprimd do not agree within 1e-6")
    write(std_out, "(a)")" in_rprind(:,ii), origin_rprimd(:,ii)"
    do ii=1,3
      write(std_out, *)in_rprimd(:,ii), origin_rprimd(:,ii)
@@ -206,12 +206,12 @@ subroutine ipi_check_initial_consistency(in_natom, in_rprimd, in_xred, ierr)
 
  if (.not. allocated(origin_xred)) then
    ierr = ierr + 1
-   MSG_WARNING("origin_xred is not allocated!")
+   ABI_WARNING("origin_xred is not allocated!")
  end if
 
  if (in_natom == origin_natom .and. allocated(origin_xred)) then
    if (any(abs(in_xred - origin_xred) > tol6)) then
-     MSG_WARNING("Mismatch between input file and data from socket: in_xred and origin_xred do not agree withing 1e-6")
+     ABI_WARNING("Mismatch between input file and data from socket: in_xred and origin_xred do not agree withing 1e-6")
      ierr = ierr + 1
      write(std_out, "(a)")" in_xred(:,ii), origin_xred(:,ii)"
      do ii=1,3
@@ -388,7 +388,7 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
    ! the logic implemented by the server.
    ABI_CHECK(new_natom == ab_mover%natom, "ipi server shall not change the number of atoms!")
    if (ab_mover%optcell == 0 .and. any(abs(new_rprimd - origin_rprimd) > tol6)) then
-     MSG_ERROR("Mismatch between origin_rprimd and data from socket: origin_rprimd and new_rprimd do not agree within 1e-6")
+     ABI_ERROR("Mismatch between origin_rprimd and data from socket: origin_rprimd and new_rprimd do not agree within 1e-6")
    end if
  end if
 

@@ -130,7 +130,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 
  if(nspden/=1 .and. nspden/=2) then
    message = ' dfpt_mkvxc, Only for nspden==1 and 2.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (usepaw==1.and.usexcnhat==0) then
@@ -219,7 +219,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
      write(message, '(a,i10,a,a,a)' )&
 &     'Input dir gives istr=',istr,' not allowed.',ch10,&
 &     'Possible values are 1,2,3,4,5,6 only.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  Rescalling needed for use in dfpt_eltfrxc for elastic tensor (not internal strain tensor).
@@ -252,7 +252,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
    ABI_DEALLOCATE(rhor1tmp)
 
  else
-   MSG_BUG('Invalid nkxc!')
+   ABI_BUG('Invalid nkxc!')
 
  end if ! LDA or GGA
 
@@ -369,11 +369,11 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 
  if (nkxc/=12*min(nspden,2)-5) then
    msg='Wrong nkxc value for GGA!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (nspden>2) then
    msg='Not compatible with non-collinear magnetism!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !metaGGA contributions are not taken into account here

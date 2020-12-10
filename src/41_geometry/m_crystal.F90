@@ -412,7 +412,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
      Cryst%symrel=symrel_noI
      Cryst%tnons=tnons_noI
      if (ANY(symafm==-1)) then
-       MSG_BUG('Solve the problem with inversion before adding ferromagnetic symmetries')
+       ABI_BUG('Solve the problem with inversion before adding ferromagnetic symmetries')
      end if
      Cryst%symafm=1
      Cryst%use_antiferro=use_antiferro
@@ -427,7 +427,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  else
    ! Find symmetries symrec,symrel,tnons,symafm
    ! TODO This should be a wrapper around the abinit library whose usage is not so straightforward
-   MSG_BUG('NotImplememented: symrel, symrec and tnons should be specied')
+   ABI_BUG('NotImplememented: symrel, symrec and tnons should be specied')
  end if
 
  ! Get symmetries in cartesian coordinates
@@ -589,43 +589,43 @@ integer function crystal_compare(self, other, header) result(ierr)
 
  ! Check direct lattice
  if (any(abs(self%rprimd - other%rprimd) > tol6)) then
-   MSG_WARNING("Found critical diffs in rprimd lattice vectors.")
+   ABI_WARNING("Found critical diffs in rprimd lattice vectors.")
    ierr = ierr + 1
  end if
 
  ! Check Symmetries
  if (any(self%symrel /= other%symrel)) then
-   MSG_WARNING("Found critical diffs in symrel symmetries.")
+   ABI_WARNING("Found critical diffs in symrel symmetries.")
    ierr = ierr + 1
  end if
  if (any(abs(self%tnons - other%tnons) > tol3)) then
-   MSG_WARNING("Found critical diffs in fractional translations tnons.")
+   ABI_WARNING("Found critical diffs in fractional translations tnons.")
    ierr = ierr + 1
  end if
  if (self%use_antiferro .neqv. other%use_antiferro) then
-   MSG_WARNING("Different values of use_antiferro")
+   ABI_WARNING("Different values of use_antiferro")
    ierr = ierr + 1
  end if
 
  ! Atoms
  if (any(self%typat /= other%typat)) then
-   MSG_WARNING("Found critical diffs in typat.")
+   ABI_WARNING("Found critical diffs in typat.")
    ierr = ierr + 1
  end if
  if (any(abs(self%zion - other%zion) > tol3)) then
-   MSG_WARNING("Found critical diffs in zion.")
+   ABI_WARNING("Found critical diffs in zion.")
    ierr = ierr + 1
  end if
  if (any(abs(self%znucl - other%znucl) > tol3)) then
-   MSG_WARNING("Found critical diffs in znucl.")
+   ABI_WARNING("Found critical diffs in znucl.")
    ierr = ierr + 1
  end if
  if (any(abs(self%amu - other%amu) > tol3)) then
-   MSG_WARNING("Found critical diffs in amu.")
+   ABI_WARNING("Found critical diffs in amu.")
    ierr = ierr + 1
  end if
  if (any(abs(self%xred - other%xred) > tol6)) then
-   MSG_WARNING("Found critical diffs in xred.")
+   ABI_WARNING("Found critical diffs in xred.")
    ierr = ierr + 1
  end if
 
@@ -711,7 +711,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  else if (Cryst%timrev==2) then
    msg = ' Time-reversal symmetry is present '
  else
-   MSG_BUG('Wrong value for timrev')
+   ABI_BUG('Wrong value for timrev')
  end if
  call wrtout(my_unt,msg,my_mode)
  if (my_prtvol == -1) return
@@ -1220,7 +1220,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
    write(msg,"(3a)")&
     "Alchemical crystals are not fully supported by the netcdf format",ch10,&
     "Important parameters (e.g. znucl, symbols) are not written with the correct value"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  symmorphic = yesno(cryst%isymmorphic())
@@ -1300,7 +1300,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("indsym"), cryst%indsym))
 
 #else
- MSG_ERROR("netcdf library not available")
+ ABI_ERROR("netcdf library not available")
 #endif
 
 contains
@@ -1419,7 +1419,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
 
  ! open file in append mode xlf and other compilers refuse append mode
  if (open_file(ciffname,msg,newunit=unitcif) /=0) then
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
@@ -1631,7 +1631,7 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
 
  ! Output POSCAR file for positions, atom types etc
  if (open_file(trim(fnameradix)//"_POSCAR", msg, newunit=iout) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  natoms_this_type = 0
@@ -1681,7 +1681,7 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
 
  ! output FORCES file for forces in same order as positions above
  if (open_file(trim(fnameradix)//"_FORCES", msg, newunit=iout) /= 0 ) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !ndisplacements

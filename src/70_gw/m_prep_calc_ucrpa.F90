@@ -289,7 +289,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      & nspinor,nsppol,pawang,prtvol,dumint)
    if(lcor/=lpawu) then
      msg = "lcor and lpawu differ in prep_calc_ucrpa"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    endif
  endif
 
@@ -336,7 +336,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
         write(msg,'(a,i0,4a)')&
 &         " Symmetrization cannot be performed for spin: ",spin,ch10,&
 &         " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
-        MSG_WARNING(msg)
+        ABI_WARNING(msg)
       end if
     end do
    end if
@@ -358,7 +358,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  CASE (2)
    fact_sp=one; tol_empty=0.005 ! to be consistent and obtain similar results if a metallic
  CASE DEFAULT                    ! spin unpolarized system is treated using nsppol==2
-   MSG_BUG('Wrong nsppol')
+   ABI_BUG('Wrong nsppol')
  END SELECT
 
  ! Remove empty states from the list of states that will be distributed.
@@ -401,7 +401,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,gwx_ngfft,irottb,iscompatibleFFT)
  if (.not.iscompatibleFFT) then
    msg = "FFT mesh is not compatible with symmetries. Results might be affected by large errors!"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  ABI_ALLOCATE(ktabr,(gwx_nfftot,Kmesh%nbz))
@@ -463,7 +463,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !&                ' In this case, using symsigma=1 might lead to spurious results as the algorithm ',ch10,&
 !&                ' will treat these states as degenerate, and it won''t be able to remove the degeneracy. ',ch10,&
 !&                ' In order to avoid this deficiency, run the calculation using symsigma=0'
-!               MSG_WARNING(msg)
+!               ABI_WARNING(msg)
 !             end if
 !           end if
 !         end do
@@ -496,7 +496,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !   if (prtvol>10.and.jk_bz==1) then ! probably just to print one time.
 !         !!q=0 Forcement donc divergence pour G=0
 !         if (open_file("normeG", msg, unit=2022, form="formatted", status="unknown") /= 0) then
-!           MSG_ERROR(msg)
+!           ABI_ERROR(msg)
 !         end if
 !         write(2022,*) 1,real(CMPLX(SQRT(Vcp%i_sz),0.0_gwp)),real((4*3.14159265)**(0.5)/CMPLX(SQRT(Vcp%i_sz),0.0_gwp))
 !            write G=0 term for the potential computed elsewhere.
@@ -726,7 +726,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
 #if 1
            msg = "reinstate optional Argument in rho_tw_g but mind inca slave!"
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
 #else
            call rho_tw_g(nspinor,Sigp%npwx,gwx_nfftot,ndat1,gwx_ngfft,1,use_padfft,igfftxg0,gwx_gbound,&
 &            wfr_sum       ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz,&

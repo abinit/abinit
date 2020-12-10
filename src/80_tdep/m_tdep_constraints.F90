@@ -821,14 +821,14 @@ end subroutine tdep_calc_constraints
             do jatom=1,InVar%natom
               if (abs(asr3(1,jatom,ii,jj,kk)).gt.tol8) then
                 write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') ' BUG --->',ii,jj,kk,iatom,jatom,asr3(1,jatom,ii,jj,kk)
-                MSG_ERROR('The acoustic sum rule is not fulfilled at the 3rd order (3rd dim)')
+                ABI_ERROR('The acoustic sum rule is not fulfilled at the 3rd order (3rd dim)')
               end if
             end do !jatom  
 !           Check the second acoustic sum rule
             do katom=1,InVar%natom
               if (abs(asr3(2,katom,ii,jj,kk)).gt.tol8) then
                 write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') ' BUG --->',ii,jj,kk,iatom,katom,asr3(2,katom,ii,jj,kk)
-                MSG_ERROR('The acoustic sum rule is not fulfilled at the 3rd order (2nd dim)')
+                ABI_ERROR('The acoustic sum rule is not fulfilled at the 3rd order (2nd dim)')
               end if
             end do !jatom  
           end do !kk
@@ -843,7 +843,7 @@ end subroutine tdep_calc_constraints
                 if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol8) then
                   write(std_out,'(a,6(i3,1x),1(e17.10,1x))') ' BUG ---> iatom,jatom,alpha,beta,gama,lambda,norm =',&
 &                                iatom,jatom,alpha,beta,gama,lambda,rot3(jatom,alpha,beta,gama,lambda)
-                  MSG_ERROR('The invariance under arbitrary rotation is not fulfilled (order 3)')
+                  ABI_ERROR('The invariance under arbitrary rotation is not fulfilled (order 3)')
                 end if  
               end do !lambda 
             end do !gama 

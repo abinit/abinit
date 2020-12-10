@@ -502,7 +502,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                    if(i2pert<=dtset%natom) npert_phon = npert_phon + 1
                    if(i3pert<=dtset%natom) npert_phon = npert_phon + 1
                    if (npert_phon>1) then
-                     MSG_ERROR("dfptnl_loop is available with at most one phonon perturbation. Change your input!")
+                     ABI_ERROR("dfptnl_loop is available with at most one phonon perturbation. Change your input!")
                    end if
 
                    pert2case = i2dir + (i2pert-1)*3
@@ -692,7 +692,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      else if (i1pert==natom+2) then
                        second_idir = i1dir
                      else
-                       MSG_BUG(" i1pert or i3pert is supposed to be equal to natom+2, which is not the case here.")
+                       ABI_BUG(" i1pert or i3pert is supposed to be equal to natom+2, which is not the case here.")
                      end if
                      call rf2_getidir(i2dir,second_idir,idir_dkde)
                      file_index(3) = idir_dkde+9+(dtset%natom+6)*3
@@ -721,7 +721,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                          fiwfddk = nctk_ncify(fiwfddk)
                        end if
                        if (.not. file_exists(fiwfddk)) then
-                         MSG_ERROR('Missing file: '//TRIM(fiwfddk))
+                         ABI_ERROR('Missing file: '//TRIM(fiwfddk))
                        end if
                      end if
                      write(message,'(2a)')'-dfptnl_loop : read the wavefunctions from file: ',trim(fiwfddk)

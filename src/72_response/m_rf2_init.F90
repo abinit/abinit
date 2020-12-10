@@ -181,7 +181,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
  if(ipert<natom+10.or.ipert>natom+11) then
    write(msg,'(a)') 'ipert must be equal to natom+10 or natom+11 for rf2 calculations.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Define perturbations and idirs

@@ -699,7 +699,7 @@ function abihist_findIndex(hist,step) result(index)
  if ((mxhist ==1.and.step/=+1) .or. (mxhist /=1.and.abs(step) >=mxhist)) then
    write(msg,'(a,I0,2a)')' The requested step must be less than ',mxhist,ch10,&
                          'Action: increase the number of history stored in the history'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ii = hist%ihist + step
@@ -898,7 +898,7 @@ type(abihist),intent(inout) :: hist_out
 
 !Check
  if (size(hist_in%xred,2)/=size(hist_out%xred,2)) then
-   MSG_BUG('Incompatible sizes for hist_in and hist_out!')
+   ABI_BUG('Incompatible sizes for hist_in and hist_out!')
  end if
 
 !Copy scalars (except ihist and mxhist)
@@ -1263,7 +1263,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
  ABI_ALLOCATE(my_imgtab,(my_nimage))
  if (present(imgtab)) then
   if (size(my_imgtab)/=my_nimage) then
-    MSG_BUG('Inconsistency between hist and imgtab!')
+    ABI_BUG('Inconsistency between hist and imgtab!')
   end if
   my_imgtab(:)=imgtab(:)
  else
@@ -1494,7 +1494,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
  ABI_ALLOCATE(my_imgtab,(my_nimage))
  if (present(imgtab)) then
   if (size(my_imgtab)/=my_nimage) then
-    MSG_BUG('Inconsistency between hist and imgtab!')
+    ABI_BUG('Inconsistency between hist and imgtab!')
   end if
   my_imgtab(:)=imgtab(:)
  else
@@ -1506,7 +1506,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
 &     natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
  if (nimage<maxval(my_imgtab)) then
-   MSG_ERROR('Not enough images in the HIST file!')
+   ABI_ERROR('Not enough images in the HIST file!')
  end if
 
 !Loop over images
@@ -1588,7 +1588,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 !1.Define the dimensions
 
  if (npsp/=ntypat) then
-   MSG_WARNING('HIST file does not support alchemical mixing!')
+   ABI_WARNING('HIST file does not support alchemical mixing!')
  end if
 
  ncerr = nf90_def_dim(ncid,"natom",natom,natom_id)

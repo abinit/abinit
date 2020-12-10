@@ -178,7 +178,7 @@ program mrgscr
    call wrtout(std_out,msg,'COLL')
 
    if (nctk_try_fort_or_ncfile(filenames(1), msg) /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  else if (nfiles > 1) then
@@ -190,7 +190,7 @@ program mrgscr
      call prompt(msg,filenames(ifile))
 
      if (nctk_try_fort_or_ncfile(filenames(ifile), msg) /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
    end do
@@ -205,10 +205,10 @@ program mrgscr
 
    abifile = abifile_from_fform(fform1)
    if (abifile%fform == 0) then
-     MSG_ERROR(sjoin("Cannot find any abifile object associated to fform1:", itoa(fform1)))
+     ABI_ERROR(sjoin("Cannot find any abifile object associated to fform1:", itoa(fform1)))
    end if
    if (abifile%class /= "polariz" .and. abifile%class /= "epsm1") then
-     MSG_ERROR(sjoin('Error while reading header, fform= ',itoa(fform1)))
+     ABI_ERROR(sjoin('Error while reading header, fform= ',itoa(fform1)))
    end if
    is_scr = abifile%class == "epsm1"
    is_sus = abifile%class == "polariz"
@@ -245,7 +245,7 @@ program mrgscr
    case (2)
      ! Merge frequencies
      write(std_out,'(3a)') ch10,' 2 => merging frequency grids',ch10
-     !MSG_WARNING("Advanced user option, consistency in fform etc. will not be checked.")
+     !ABI_WARNING("Advanced user option, consistency in fform etc. will not be checked.")
 
      write(std_out,'(2a)') ch10,' Enter freqremax [eV] for the merged file (Enter 0 to use all freq. found):'
      read(std_in,*)freqremax
@@ -254,7 +254,7 @@ program mrgscr
      call ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, hscr_merge)
 
    case default
-     MSG_ERROR("Invalid choice!")
+     ABI_ERROR("Invalid choice!")
    end select
 
  end if ! nfiles>1
@@ -415,22 +415,22 @@ program mrgscr
      write(std_out,'(2(a),I0,a)',advance='NO') ch10,' Enter the starting index for G (1 - ',Hscr0%npwe,' ): '
      read(std_in,*)ig1_start
      if (ig1_start<1.OR.ig1_start>Hscr0%npwe) then
-       MSG_ERROR(' Starting index out of bounds')
+       ABI_ERROR(' Starting index out of bounds')
      end if
      write(std_out,'(a,I0,a,I0,a)',advance='NO')    ' Enter the ending index for G ( ',ig1_start,' - ',Hscr0%npwe,' ): '
      read(std_in,*)ig1_end
      if (ig1_end<ig1_start.OR.ig1_end>Hscr0%npwe) then
-       MSG_ERROR(' Ending index out of bounds')
+       ABI_ERROR(' Ending index out of bounds')
      end if
      write(std_out,'(a,I0,a)',advance='NO')         ' Enter the starting index for G'' (1 - ',Hscr0%npwe,' ): '
      read(std_in,*)ig2_start
      if (ig2_start<1.OR.ig2_start>Hscr0%npwe) then
-       MSG_ERROR(' Starting index out of bounds')
+       ABI_ERROR(' Starting index out of bounds')
      end if
      write(std_out,'(a,I0,a,I0,a)',advance='NO')    ' Enter the ending index for G'' ( ',ig2_start,' - ',Hscr0%npwe,' ): '
      read(std_in,*)ig2_end
      if (ig2_end<ig2_start.OR.ig2_end>Hscr0%npwe) then
-       MSG_ERROR(' Ending index out of bounds')
+       ABI_ERROR(' Ending index out of bounds')
      end if
 
      only_diag = .FALSE.
@@ -450,7 +450,7 @@ program mrgscr
          do iomega=1,Hscr0%nomega
            if (iqibz==1) then
              if (nqlwl>1) then
-               MSG_ERROR('nqlwl>1 not coded yet!')
+               ABI_ERROR('nqlwl>1 not coded yet!')
              end if
              vc_sqrt => Vcp%vcqlwl_sqrt(:,iqibz)  ! Use Coulomb term for q-->0
            else
@@ -498,7 +498,7 @@ program mrgscr
          end if
 
          if (open_file(fname_dump, msg, newunit=unt_dump, status='replace', form='formatted') /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
 
          do ig1=ig1_start,ig1_end
@@ -527,7 +527,7 @@ program mrgscr
            fname_dump=TRIM(fname)//'_Imfrq_Q'//TRIM(tagq)
          end if
          if (open_file(fname_dump,msg,newunit=unt_dump,status='replace',form='formatted') /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          do ig1=ig1_start,ig1_end
            do ig2=ig2_start,ig2_end
@@ -556,7 +556,7 @@ program mrgscr
          end if
 
          if (open_file(fname_dump,msg,newunit=unt_dump,status='replace',form='formatted') /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
 
          do ig1=ig1_start,ig1_end
@@ -679,7 +679,7 @@ program mrgscr
        read(std_in,*) ii
        if (ii>0.or.ii<=Er%npwe) Er%npwe = ii
        if (ii<0.or.ii>Er%npwe) then
-         MSG_ERROR(' Wrong value for no. of plane waves!')
+         ABI_ERROR(' Wrong value for no. of plane waves!')
        end if
      end if
 
@@ -704,7 +704,7 @@ program mrgscr
          ABI_CHECK((tagq(1:1)/='#'),'Bug: string length too short!')
          fname_eigen=TRIM(prefix)//'_EM1_EIG_Q'//TRIM(tagq)
          if (open_file(fname_eigen,msg,newunit=unt_dump,status='replace',form='formatted') /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          call decompose_epsm1(Er,iqibz,epsm1_eigen)
          write(unt_dump,'(a)')       '# First (max 10) eigenvalues of eps^{-1}(omega)'
@@ -752,7 +752,7 @@ program mrgscr
              if (ppmodel==4) fname_dump=TRIM(prefix)//'_PPM_EF_EM1_EIG_Q'//TRIM(tagq)
 
              if (open_file(fname_eigen,msg,newunit=unt_dump,status='new',form='formatted') /= 0) then
-               MSG_ERROR(msg)
+               ABI_ERROR(msg)
              end if
 
              call ppm_free(PPm)
@@ -844,7 +844,7 @@ program mrgscr
              if (ppmodel==4) fname_dump=TRIM(prefix)//'_PPM_w_EF_Q'//TRIM(tagq)
 
              if (open_file(fname_dump,msg,newunit=unt_dump,status='replace',form='formatted') /= 0) then
-               MSG_ERROR(msg)
+               ABI_ERROR(msg)
              end if
 
              ! Prepare file for data on imaginary omega axis
@@ -854,7 +854,7 @@ program mrgscr
              if (ppmodel==4) fname_dump2=TRIM(prefix)//'_PPM_iw_EF_Q'//TRIM(tagq)
 
              if (open_file(fname_dump2,msg,newunit=unt_dump2,status='replace',form='formatted') /= 0) then
-               MSG_ERROR(msg)
+               ABI_ERROR(msg)
              end if
 
              ABI_MALLOC(em1_ppm,(nfreq_tot))
@@ -867,11 +867,11 @@ program mrgscr
                write(std_out,'(2(a),I0,a)',advance='NO') ch10,' Enter index for G (1 - ',Er%npwe,' ): '
                read(std_in,*)ig1
                if (ig1==0) EXIT
-               if (ig1<0.OR.ig1>Er%npwe) MSG_ERROR(' index out of bounds')
+               if (ig1<0.OR.ig1>Er%npwe) ABI_ERROR(' index out of bounds')
                write(std_out,'(2(a),I0,a)',advance='NO') ch10,' Enter index for G'' (1 - ',Er%npwe,' ): '
                read(std_in,*)ig2
                if (ig2==0) EXIT
-               if (ig2<0.OR.ig2>Er%npwe) MSG_ERROR(' index out of bounds')
+               if (ig2<0.OR.ig2>Er%npwe) ABI_ERROR(' index out of bounds')
 
                ! Generate the PPM representation of epsilon^-1
                call getem1_from_PPm_one_ggp(PPm,iqibz,Er%Hscr%zcut,nfreq_tot,omega,Vcp,em1_ppm,ig1,ig2)
@@ -981,7 +981,7 @@ program mrgscr
              if (ppmodel==1) fname_dump=TRIM(prefix)//'_norms_GN_Q'//TRIM(tagq)
              if (ppmodel==2) fname_dump=TRIM(prefix)//'_norms_HL_Q'//TRIM(tagq)
              if (open_file(fname_dump,msg, newunit=unt_dump, status='replace',form='formatted') /= 0) then
-               MSG_ERROR(msg)
+               ABI_ERROR(msg)
              end if
              write(unt_dump,'(a)') '# Various norms integrated through spline interpolation'
              write(unt_dump,'(a)') '# over all frequencies in the input file,'
@@ -996,7 +996,7 @@ program mrgscr
              if (ppmodel==2) fname_dump2=TRIM(prefix)//'_f_sumrule_HL_Q'//TRIM(tagq)
 
              if (open_file(fname_dump2,msg,newunit=unt_dump2,status='replace',form='formatted') /= 0) then
-               MSG_ERROR(msg)
+               ABI_ERROR(msg)
              end if
 
              write(unt_dump2,'(a)') '# The fulfillment of the f-sum rule: I(epsilon) ='
@@ -1165,7 +1165,7 @@ program mrgscr
        nfreqre = 0
 
      case default
-       MSG_ERROR("Invalid choice!")
+       ABI_ERROR("Invalid choice!")
      end select
 
      ! Add imaginary frequencies if any
@@ -1204,7 +1204,7 @@ program mrgscr
 
      ! Test for no real frequencies
      if (nfreqim == 0) then
-       MSG_ERROR("No imaginary frequencies in file!")
+       ABI_ERROR("No imaginary frequencies in file!")
      end if
 
      nfreq_tot = nfreqre + nfreqim ! Here nfreq_tot becomes the *true* number of freq
@@ -1253,7 +1253,7 @@ program mrgscr
 
    case(6)
      ! Model screening -------------------------------------------------------------
-     MSG_ERROR("Model screening has been removed")
+     ABI_ERROR("Model screening has been removed")
 
    !case(9)
    !  TODO

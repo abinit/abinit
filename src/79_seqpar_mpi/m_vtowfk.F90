@@ -386,7 +386,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          write(msg,'(3a)')&
           'Only istwfk=1 or 2 are allowed with wfoptalg=4/14 !',ch10,&
           'Action: put istwfk to 1 or remove k points with half integer coordinates.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
 !    =========================================================================
@@ -880,7 +880,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  if (iscf<=0 .and. residk > dtset%tolwfr) then
    write(msg,'(a,2(i0,1x),a,es13.5)')&
     'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid= ',residk
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 !Print out eigenvalues (hartree)
@@ -944,7 +944,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  if (prtvol==-level) then
    ! Structured debugging: if prtvol=-level, stop here.
    write(msg,'(a,a,a,i0,a)')' vtowfk : exit ',ch10,'  prtvol=-',level,', debugging mode => stop '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call timab(30,2,tsec)

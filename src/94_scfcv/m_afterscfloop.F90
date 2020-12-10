@@ -716,7 +716,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &       ' afterscfloop: ERROR -', ch10, &
 &       '   The density is complex, ELF analysis cannot be performed.'
        call wrtout(std_out,message,'COLL')
-!      MSG_ERROR(message)
+!      ABI_ERROR(message)
      end if
 
      if((dtset%prtgden==0) .and. (dtset%prtlden==0)) then
@@ -863,7 +863,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
    else
      message ='ELF is not yet implemented for non collinear spin cases.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
 
      ABI_ALLOCATE(elfr,(nfftf,dtset%nspden))
      do ispden=1,dtset%nspden

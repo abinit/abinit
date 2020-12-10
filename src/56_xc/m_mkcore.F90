@@ -149,7 +149,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
    write(message, '(a,i12,a,a,a)' )&
     'option=',option,' is not allowed.',ch10,&
     'Must be 1, 2, 3 or 4.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Zero out only the appropriate array according to option:
@@ -169,7 +169,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !  Zero out fr-wf part of the dynamical matrix
    dyfrx2(:,:,:)=zero
  else
-   MSG_BUG(" Can't be here! (bad option)")
+   ABI_BUG(" Can't be here! (bad option)")
  end if
 
 !Compute lengths of cross products for pairs of primitive
@@ -438,7 +438,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 
 !            If option is not 1, 2, 3, or 4.
            else
-             MSG_BUG("Can't be here in mkcore")
+             ABI_BUG("Can't be here in mkcore")
 !            End of choice of option
            end if
 
@@ -676,11 +676,11 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
    write(message, '(a,i12,a,a,a)' )&
     'option=',option,' is not allowed.',ch10,&
     'Must be 1, 2, 3 or 4.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if (usekden_) then
    message='usekden=1 not yet allowed!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 
@@ -868,7 +868,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
        if (npts==0) cycle
        if (npts>npts12) then
          message='npts>npts12!'
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
 
 !      Evaluate core density (and derivatives) on the set of selected points
@@ -1208,14 +1208,14 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 !   write(message,'(a,i0,a,a,a,i0,a)')&
 !&   ' The argument ipert must be between 1 and natom+7=',natom+7,',',ch10,&
 !&   ' while it is ipert=',ipert,'.'
-!   MSG_BUG(message)
+!   ABI_BUG(message)
 ! end if
 
  if( (ipert==natom+3 .or. ipert==natom+4) .and. cplex/=1) then
    write(message,'(3a,i4,a)')&
 &   'The argument cplex must be 1 for strain perturbationh',ch10,&
 &   'while it is cplex=',cplex,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Zero out array
@@ -1228,7 +1228,7 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
      write(message,'(a,a,a,i4,a)')&
 &     'The argument idir must be between 1 and 3,',ch10,&
 &     'while it is idir=',idir,'.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  Compute lengths of cross products for pairs of primitive
@@ -1331,7 +1331,7 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 !      write(message, '(a,a,a,a,i6,a)' ) ch10,&
 !      &    ' dfpt_mkcore : BUG -',ch10,&
 !      &    '  The range around atom',iatom,' is too large.'
-!      MSG_BUG(message)
+!      ABI_BUG(message)
 !      end if
 
 !      Set up a counter that explore the relevant range

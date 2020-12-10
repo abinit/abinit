@@ -144,7 +144,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Not applicable for electron-positron
  if (dtset%positron>0) then
    msg='NCPP+Hybrid functionals not applicable for electron-positron calculations!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Select the GGA on which the hybrid functional is based on
@@ -364,7 +364,7 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
 
  if (nspden > 2) then
    message = ' kxc_alda does not work yet for nspden > 2.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Copy the input variables from the current dataset to a temporary one

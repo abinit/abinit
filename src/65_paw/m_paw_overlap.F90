@@ -341,7 +341,7 @@ CONTAINS  !=====================================================================
      open (unit=iunit, file=cprj_file,form='unformatted',status='old',iostat=ios)
      if(ios /= 0) then
        write(message,*) " smatrix_pawinit: file",trim(cprj_file), "not found"
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 !
 !    start reading
@@ -360,7 +360,7 @@ CONTAINS  !=====================================================================
      close (unit=iunit,iostat=ios)
      if(ios /= 0) then
        write(message,*) " smatrix_pawinit: error closing file ",trim(cprj_file)
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 !
    end if

@@ -221,7 +221,7 @@ contains
            tmp_shape = shape(mpi_enreg%proc_distrb)
            if (ikpt > tmp_shape(1)) then
              msg='  ikpt out of bounds '
-             MSG_BUG(msg)
+             ABI_BUG(msg)
            end if
            if (abs(mpi_enreg%proc_distrb(ikpt,jb,isppol)-me_kpt)/=0) cycle
          end if

@@ -586,7 +586,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
   & nsym1,symrc1,0,dtset%wtk,wtk_folded,bz2ibz_smap,xmpi_comm_self)
  else
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  ABI_DEALLOCATE(bz2ibz_smap)
 
@@ -700,7 +700,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 &   "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband: ",dtset%mband, "mkmem_rbz: ",&
 &   mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
 &   'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
  ABI_CHECK(ierr==0, "out-of-memory in cg")
@@ -751,7 +751,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        fiwfatdis = nctk_ncify(fiwfatdis)
      end if
      if (.not. file_exists(fiwfatdis)) then
-       MSG_ERROR('Missing file: '//TRIM(fiwfatdis))
+       ABI_ERROR('Missing file: '//TRIM(fiwfatdis))
      end if
    end if
    write(msg,'(a,a)')'-open atomic displacement wf1 file :',trim(fiwfatdis)
@@ -779,7 +779,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        fiwfddk = nctk_ncify(fiwfddk)
      end if
      if (.not. file_exists(fiwfddk)) then
-       MSG_ERROR('Missing file: '//TRIM(fiwfddk))
+       ABI_ERROR('Missing file: '//TRIM(fiwfddk))
      end if
    end if
    write(msg, '(a,a)') '-open ddk wf1 file :',trim(fiwfddk)
@@ -809,7 +809,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        fiwfefield = nctk_ncify(fiwfefield)
      end if
      if (.not. file_exists(fiwfefield)) then
-       MSG_ERROR('Missing file: '//TRIM(fiwfefield))
+       ABI_ERROR('Missing file: '//TRIM(fiwfefield))
      end if
    end if
    write(msg, '(a,a)') '-open electric field wf1 file :',trim(fiwfefield)
@@ -839,7 +839,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        fiwfdkdk = nctk_ncify(fiwfdkdk)
      end if
      if (.not. file_exists(fiwfdkdk)) then
-       MSG_ERROR('Missing file: '//TRIM(fiwfdkdk))
+       ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
      end if
    end if
    if (iq1q2grad <= 6) then
@@ -1336,7 +1336,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
 
  else
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (prtvol>=10) then
@@ -2268,7 +2268,7 @@ end if
   & nsym1,symrc1,0,dtset%wtk,wtk_folded,bz2ibz_smap,xmpi_comm_self)
  else
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  ABI_DEALLOCATE(bz2ibz_smap)
 
@@ -2381,7 +2381,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 &   "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband: ",dtset%mband, "mkmem_rbz: ",&
 &   mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
 &   'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
  ABI_CHECK(ierr==0, "out-of-memory in cg")
@@ -2430,7 +2430,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
          fiwfatdis = nctk_ncify(fiwfatdis)
        end if
        if (.not. file_exists(fiwfatdis)) then
-         MSG_ERROR('Missing file: '//TRIM(fiwfatdis))
+         ABI_ERROR('Missing file: '//TRIM(fiwfatdis))
        end if
      end if
      write(msg,'(a,a)')'-open atomic displacement wf1 file :',trim(fiwfatdis)
@@ -2459,7 +2459,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        fiwfddk = nctk_ncify(fiwfddk)
      end if
      if (.not. file_exists(fiwfddk)) then
-       MSG_ERROR('Missing file: '//TRIM(fiwfddk))
+       ABI_ERROR('Missing file: '//TRIM(fiwfddk))
      end if
    end if
    write(msg, '(a,a)') '-open ddk wf1 file :',trim(fiwfddk)
@@ -2488,7 +2488,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
          fiwfefield = nctk_ncify(fiwfefield)
        end if
        if (.not. file_exists(fiwfefield)) then
-         MSG_ERROR('Missing file: '//TRIM(fiwfefield))
+         ABI_ERROR('Missing file: '//TRIM(fiwfefield))
        end if
      end if
      write(msg, '(a,a)') '-open electric field wf1 file :',trim(fiwfefield)
@@ -2520,7 +2520,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
          fiwfstrain = nctk_ncify(fiwfstrain)
        end if
        if (.not. file_exists(fiwfstrain)) then
-         MSG_ERROR('Missing file: '//TRIM(fiwfstrain))
+         ABI_ERROR('Missing file: '//TRIM(fiwfstrain))
        end if
      end if
      if (ka>=kb) then
@@ -2556,7 +2556,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
          fiwfdkdk = nctk_ncify(fiwfdkdk)
        end if
        if (.not. file_exists(fiwfdkdk)) then
-         MSG_ERROR('Missing file: '//TRIM(fiwfdkdk))
+         ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
        end if
      end if
      if (iq1q2grad <= 6) then
@@ -3240,7 +3240,7 @@ end subroutine dfpt_flexo
 
  else
    write(msg,"(1a)") 'kptopt must be 2 or 3 for long-wave DFPT calculations'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Transormation to complete cartesian coordinates the flexoelectric tensor
@@ -3749,7 +3749,7 @@ end subroutine dfpt_ciflexoout
  else
 
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the ddmdq calculation'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
 
  end if
 
@@ -4193,7 +4193,7 @@ end subroutine dfpt_ciflexoout
 
  else
    write(msg,"(1a)") 'kptopt must be 2 or 3 for long-wave DFPT calculations'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Transform to complete cartesian coordinates all the contributions

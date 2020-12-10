@@ -329,7 +329,7 @@ subroutine hscr_from_file(hscr,path,fform,comm)
    if (.not. endswith(path, ".nc")) then
      ! Fortran-IO
      if (open_file(path,msg,newunit=unt,form="unformatted", status="old",action="read") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call hscr_io(hscr,fform,rdwr5,unt,xmpi_comm_self,master,IO_MODE_FORTRAN)
      close(unt)
@@ -476,7 +476,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
          end if
 
        case default
-         MSG_BUG(sjoin('Wrong fform read:', itoa(fform)))
+         ABI_BUG(sjoin('Wrong fform read:', itoa(fform)))
        end select
 
      else if (iomode==IO_MODE_ETSF) then
@@ -536,11 +536,11 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
          end if
 
        case default
-         MSG_BUG(sjoin('Unsupported fform read:',itoa(fform)))
+         ABI_BUG(sjoin('Unsupported fform read:',itoa(fform)))
        end select
 #endif
      else
-       MSG_ERROR(sjoin("Unsupported value of iomode:", iomode2str(iomode)))
+       ABI_ERROR(sjoin("Unsupported value of iomode:", iomode2str(iomode)))
      end if
 
    end if ! master
@@ -678,11 +678,11 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
      end if
 #endif
    else
-     MSG_ERROR(sjoin('Unsupported iomode:',iomode2str(iomode)))
+     ABI_ERROR(sjoin('Unsupported iomode:',iomode2str(iomode)))
    end if
 
  else
-   MSG_BUG(sjoin("Wrong value for rdwr:", itoa(rdwr)))
+   ABI_BUG(sjoin("Wrong value for rdwr:", itoa(rdwr)))
  end if ! read/write/echo
 
  DBG_EXIT("COLL")
@@ -691,7 +691,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 
  ! Handle Fortran IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 contains
  integer function vid(vname)
@@ -878,7 +878,7 @@ type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,torder
  ! Get fform from abifile.
  abifile = abifile_from_varname(varname)
  if (abifile%fform == 0) then
-    MSG_ERROR(sjoin("Cannot find any abifile object associated to varname:", varname))
+    ABI_ERROR(sjoin("Cannot find any abifile object associated to varname:", varname))
  end if
 
  ! Copy the abinit header.
@@ -1249,11 +1249,11 @@ subroutine hscr_merge(Hscr_in,Hscr_out)
    if (restart==0) then
      isok=.FALSE.
      write(msg,'(a,i0,a)')' Abinit header no.',ihd,' is not consistent with the first header '
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end do
  if (.not.isok) then
-   MSG_ERROR('Cannot continue, Check headers')
+   ABI_ERROR('Cannot continue, Check headers')
  end if
 
  ! Now check variables related to polarizability|epsilon^{-1}.
@@ -1275,37 +1275,37 @@ subroutine hscr_merge(Hscr_in,Hscr_out)
  do ihd=2,nhds
    if (ANY(ABS(Hscr_in(ihd)%omega-Hscr_in(1)%omega)>tol6)) then
      write(msg,'(a,i0,a)')' Frequencies in the first and the ',ihd,'-th header differ'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (ANY(Hscr_in(ihd)%gvec(:,:)-Hscr_in(1)%gvec(:,:)/=0)) then
      write(msg,'(a,i0,a)')' Incompatible G-vector list found in the ',ihd,'-th header'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (hscr_in(ihd)%kind_cdata /= hscr_in(1)%kind_cdata) then
      write(msg,'(3a,i0,2a)')' Files contain data with different precisions.',ch10,&
      "In particular the ",ihd,'-th header has precision:',trim(hscr_in(ihd)%kind_cdata)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do !ihd
 
  ! If error is not fatal, just warn ===
  if (ANY(Hscr_in(:)%npwwfn_used/=Hscr_in(1)%npwwfn_used)) then
-   MSG_COMMENT('Files have been produced with a different number of planewaves for the wavefunctions.')
+   ABI_COMMENT('Files have been produced with a different number of planewaves for the wavefunctions.')
  end if
  if (ANY(Hscr_in(:)%nbnds_used/=Hscr_in(1)%nbnds_used)) then
-   MSG_COMMENT('Files have been produced with a different number of bands.')
+   ABI_COMMENT('Files have been produced with a different number of bands.')
  end if
  if (ANY(Hscr_in(:)%spmeth/=Hscr_in(1)%spmeth)) then
-   MSG_COMMENT('Files have been produced with different algorithms.')
+   ABI_COMMENT('Files have been produced with different algorithms.')
  end if
  if (ANY(ABS(Hscr_in(:)%mbpt_sciss-Hscr_in(1)%mbpt_sciss)>tol6)) then
-   MSG_COMMENT('Files have benn produced with different values of mbpt_sciss.')
+   ABI_COMMENT('Files have benn produced with different values of mbpt_sciss.')
  end if
  if (ANY(ABS(Hscr_in(:)%spsmear-Hscr_in(1)%spsmear)>tol6)) then
-   MSG_COMMENT('Files have been produced with different values of spsmear.')
+   ABI_COMMENT('Files have been produced with different values of spsmear.')
  end if
  if (ANY(ABS(Hscr_in(:)%zcut-Hscr_in(1)%zcut)>tol6)) then
-   MSG_COMMENT('Files have been produced with different values of zcut.')
+   ABI_COMMENT('Files have been produced with different values of zcut.')
  end if
 
  ! Now merge the list of q-points.
@@ -1428,7 +1428,7 @@ subroutine write_screening(varname,unt,iomode,npwe,nomega,iqibz,epsm1)
 #endif
 
  case default
-   MSG_ERROR(sjoin("Wrong iomode:", iomode2str(iomode)))
+   ABI_ERROR(sjoin("Wrong iomode:", iomode2str(iomode)))
  end select
 
  DBG_EXIT("COLL")
@@ -1437,7 +1437,7 @@ subroutine write_screening(varname,unt,iomode,npwe,nomega,iqibz,epsm1)
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine write_screening
 !!***
@@ -1563,13 +1563,13 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
      end do
    end do
 #else
-   MSG_ERROR("MPI-IO support not enabled at configure-time")
+   ABI_ERROR("MPI-IO support not enabled at configure-time")
 #endif
 
  case (IO_MODE_FORTRAN)
    ! Plain Fortran IO, all nodes read.
    if (open_file(fname,msg,newunit=unt,form="unformatted",status="old",action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    call hscr_io(hscr,fform,rdwr,unt,comm,master,my_iomode)
 
@@ -1580,7 +1580,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 #endif
 
  case default
-   MSG_ERROR(sjoin("Wrong iomode:", iomode2str(my_iomode)))
+   ABI_ERROR(sjoin("Wrong iomode:", iomode2str(my_iomode)))
  end select
 
  ! Slice or full array?
@@ -1589,7 +1589,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
    read_qslice = .True.
    !call wrtout(std_out, sjoin('. Reading q-slice for iq = ',itoa(iqiA),' from: ', fname))
    if (iqiA <= 0 .or. iqiA > Hscr%nqibz) then
-     MSG_BUG('iqiA out of range')
+     ABI_BUG('iqiA out of range')
    end if
  end if
 
@@ -1598,12 +1598,12 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
    write(msg,'(a,i0,2a,i0)')&
 &    'Total number of G-vectors reported on file = ',Hscr%npwe,ch10,&
 &    'Reading a smaller matrix of dimension      = ',npweA
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
  if (npweA>Hscr%npwe) then
    write(msg,'(2(a,i0))')' Dimension of matrix = ',Hscr%npwe," requiring a too big matrix = ",npweA
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_CHECK(nqibzA  <= Hscr%nqibz, 'Requiring too many q-points')
@@ -1756,7 +1756,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 #endif
 
  case default
-   MSG_ERROR(sjoin("Wrong iomode:", iomode2str(my_iomode)))
+   ABI_ERROR(sjoin("Wrong iomode:", iomode2str(my_iomode)))
  end select
 
  ! Free memory
@@ -1775,7 +1775,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 
  ! Handle Fortran IO error.
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine read_screening
 !!***
@@ -1856,11 +1856,11 @@ subroutine hscr_mpio_skip(mpio_fh,fform,offset)
    end if
 
  case default
-   MSG_BUG(sjoin('Wrong fform read:', itoa(fform)))
+   ABI_BUG(sjoin('Wrong fform read:', itoa(fform)))
  end select
 
 #else
- MSG_ERROR("hscr_mpio_skip cannot be used when MPI-IO is not enabled")
+ ABI_ERROR("hscr_mpio_skip cannot be used when MPI-IO is not enabled")
 #endif
 
 end subroutine hscr_mpio_skip
@@ -1921,7 +1921,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
  comm = xmpi_comm_self
 
  if (file_exists(fname_out)) then
-   MSG_ERROR(sjoin("Cannot overwrite existing file:", fname_out))
+   ABI_ERROR(sjoin("Cannot overwrite existing file:", fname_out))
  end if
 
  ! Merge the headers creating the full list of q-points.
@@ -1953,7 +1953,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
  iomode = IO_MODE_FORTRAN; if (endswith(fname_out, ".nc")) iomode = IO_MODE_ETSF
  if (iomode == IO_MODE_FORTRAN) then
    if (open_file(fname_out,msg,newunit=ount,status='new',form='unformatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  else
 #ifdef HAVE_NETCDF
@@ -1965,13 +1965,13 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
  fform_merge = hscr_files(1)%fform
  abifile = abifile_from_fform(fform_merge)
  if (abifile%fform == 0) then
-   MSG_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform_merge)))
+   ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform_merge)))
  end if
  varname = abifile%varname
 
  if (any(hscr_files(:)%fform /= hscr_files(1)%fform)) then
    write(std_out,*)"fforms: ",hscr_files(:)%fform
-   MSG_ERROR("Files to be merged have different fform. Cannot merge data")
+   ABI_ERROR("Files to be merged have different fform. Cannot merge data")
  end if
 
  call hscr_io(ohscr,fform_merge,rdwr2,ount,comm,master,iomode)
@@ -2057,7 +2057,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  call wrtout(std_out, sjoin(". Data written to file:", fname_out))
 
  if (file_exists(fname_out)) then
-   MSG_ERROR(sjoin("Cannot overwrite existing file:", fname_out))
+   ABI_ERROR(sjoin("Cannot overwrite existing file:", fname_out))
  end if
 
  ! Find iomode from file extension and open output file.
@@ -2066,12 +2066,12 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(unt, fname_out, comm))
 #else
-   MSG_ERROR("Netcdf support is not available")
+   ABI_ERROR("Netcdf support is not available")
 #endif
  else
    iomode = IO_MODE_FORTRAN
    if (open_file(fname_out, msg, newunit=unt, status='new', form='unformatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -2080,7 +2080,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  ABI_CHECK(ifform /= 0, sjoin("fform = 0 while reading:", ipath))
 
  if (nqrec < 1 .or. nqrec > hscr%nqibz) then
-   MSG_ERROR(sjoin("Wrong input. nqibz on file:", itoa(hscr%nqibz)))
+   ABI_ERROR(sjoin("Wrong input. nqibz on file:", itoa(hscr%nqibz)))
  end if
 
  ! Copy header
@@ -2099,7 +2099,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
 
  abifile = abifile_from_fform(fform1)
  if (abifile%fform == 0) then
-    MSG_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform1)))
+    ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform1)))
  end if
  varname = abifile%varname
 
@@ -2193,11 +2193,11 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
    do ii=1,nfiles
      if (ii == ifile) CYCLE
      if (Hscr_file(ifile)%nqibz /= Hscr_file(ii)%nqibz) then
-       MSG_ERROR(' One or more files do not have the same number of q-points!')
+       ABI_ERROR(' One or more files do not have the same number of q-points!')
      end if
      do iqibz=1,Hscr_file(1)%nqibz
        if (ABS(SUM(Hscr_file(ifile)%qibz(:,iqibz)-Hscr_file(ii)%qibz(:,iqibz))) > tol6) then
-         MSG_ERROR('Q-point set differs between one or more files!')
+         ABI_ERROR('Q-point set differs between one or more files!')
        end if
      end do
    end do
@@ -2335,7 +2335,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  call hscr_print(ohscr,header='Header of the final file',unit=std_out,prtvol=1)
 
  if (file_exists(fname_out)) then
-   MSG_ERROR(sjoin("Cannot overwrite existing file:", fname_out))
+   ABI_ERROR(sjoin("Cannot overwrite existing file:", fname_out))
  end if
 
  if (endswith(fname_out, ".nc")) then
@@ -2343,12 +2343,12 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ount, fname_out, comm))
 #else
-   MSG_ERROR("netcdf support is not activated")
+   ABI_ERROR("netcdf support is not activated")
 #endif
  else
    iomode = IO_MODE_FORTRAN
    if (open_file(fname_out, msg, newunit=ount, status='new',form='unformatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -2357,7 +2357,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
 
  abifile = abifile_from_fform(fform_merge)
  if (abifile%fform == 0) then
-    MSG_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform_merge)))
+    ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform_merge)))
  end if
  varname = abifile%varname
 
@@ -2478,7 +2478,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
 
  ! check ifreq_idx
  ABI_CHECK(nfreq_tot > 0, "nfreq_tot <= 0!")
- if (all(freq_indx == 0)) MSG_ERROR("all(freq_indx == 0)")
+ if (all(freq_indx == 0)) ABI_ERROR("all(freq_indx == 0)")
 
  ! Copy the old header
  call hscr_copy(ihscr, ohscr)
@@ -2503,12 +2503,12 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ount, fname_out, comm))
 #else
-   MSG_ERROR("Netcdf support is not available")
+   ABI_ERROR("Netcdf support is not available")
 #endif
  else
    iomode = IO_MODE_FORTRAN
    if (open_file(fname_out, msg, newunit=ount, status='new', form='unformatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -2516,7 +2516,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  fform_merge = ohscr%fform
  abifile = abifile_from_fform(fform_merge)
  if (abifile%fform == 0) then
-    MSG_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform_merge)))
+    ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform_merge)))
  end if
  varname = abifile%varname
 

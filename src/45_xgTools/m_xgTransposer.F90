@@ -131,26 +131,26 @@ module m_xgTransposer
     xgTransposer%mpiData(MPI_LINALG)%size = xmpi_comm_size(commLinalg)
 
 !    if ( space(xgBlock_linalg) /= space(xgBlock_colsrows) ) then
-!      MSG_ERROR("Linalg xgBlock and ColsRows xgBlocks are not in the same space")
+!      ABI_ERROR("Linalg xgBlock and ColsRows xgBlocks are not in the same space")
 !    end if
 
     if ( xgTransposer%mpiData(MPI_LINALG)%size < ncpuCols*ncpuRows ) then
       write(message,'(a,i6,a,i6,a)') "There is not enough MPI processes in the communcation (", &
         xgTransposer%mpiData(MPI_LINALG)%size, "). Need at least ", ncpuCols*ncpuRows, " processes"
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
 
     if ( ( algo == TRANS_ALL2ALL .or. algo == TRANS_GATHER ) ) then
       xgTransposer%mpiAlgo = algo
     else
       xgTransposer%mpiAlgo = TRANS_ALL2ALL
-      MSG_COMMENT("Bad value for transposition MPI_algo. Will use ALLTOALL")
+      ABI_COMMENT("Bad value for transposition MPI_algo. Will use ALLTOALL")
     end if
 
     !if ( xgTransposer%mpiAlgo == TRANS_ALL2ALL ) then
-    !  MSG_COMMENT("Using mpi_alltoall for transposition")
+    !  ABI_COMMENT("Using mpi_alltoall for transposition")
     !else
-    !  MSG_COMMENT("Using mpi_gatherv for transposition")
+    !  ABI_COMMENT("Using mpi_gatherv for transposition")
     !end if
 
     select case (state)
@@ -163,10 +163,10 @@ module m_xgTransposer
       if ( MOD(ncols,ncpuCols) /=0 ) then
         if ( ncols > ncpuCols ) then
           write(message,'(a,i6,a,i6,a)') "Unbalanced parallelization : ", ncols, " columns for ", ncpuCols, " MPI"
-          MSG_ERROR(message)
+          ABI_ERROR(message)
         else
           write(message,'(i6,a)') (ncpuCols-ncols)*ncpuRows, " MPI will not be used  because of the number of columns!!"
-          MSG_ERROR(message)
+          ABI_ERROR(message)
           !ncpuCols = ncols
         end if
       end if
@@ -177,7 +177,7 @@ module m_xgTransposer
         case (SPACE_C)
           xgTransposer%perPair = 1
         case default
-          MSG_ERROR("Space value unknown !")
+          ABI_ERROR("Space value unknown !")
       end select
 
       !write(*,*) "There is a total of ", nrows/xgTransposer%perPair, "rows of real pairs for ", ncpuRows, "fft cpu"
@@ -193,9 +193,9 @@ module m_xgTransposer
       call xgTransposer_makeXgBlock(xgTransposer)
 
     case (STATE_COLSROWS)
-      MSG_BUG("Not yet implemented")
+      ABI_BUG("Not yet implemented")
     case default
-      MSG_ERROR("State is undefined")
+      ABI_ERROR("State is undefined")
     end select
 
     call timab(tim_init,2,tsec)
@@ -225,18 +225,18 @@ module m_xgTransposer
     reorder  = .false.
     call mpi_cart_create(xgTransposer%mpiData(MPI_LINALG)%comm,2,sizeGrid,periodic,reorder,commColsRows,ierr)
     if ( ierr /= xmpi_success ) then
-      MSG_ERROR("xgTransposer failed to creat cartesian grid")
+      ABI_ERROR("xgTransposer failed to creat cartesian grid")
     end if
 
     selectDim = (/ .true., .false. /)
     call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_ROWS)%comm,ierr)
     if ( ierr /= xmpi_success ) then
-      MSG_ERROR("xgTransposer failed to creat rows communicator")
+      ABI_ERROR("xgTransposer failed to creat rows communicator")
     end if
     selectDim = (/ .false., .true. /)
     call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_COLS)%comm,ierr)
     if ( ierr /= xmpi_success ) then
-      MSG_ERROR("xgTransposer failed to creat columns communicator")
+      ABI_ERROR("xgTransposer failed to creat columns communicator")
     end if
 #else
     commColsRows = xmpi_comm_null
@@ -270,7 +270,7 @@ module m_xgTransposer
 
     call xmpi_allgather(nRealPairs,xgTransposer%nrowsLinalg,xgTransposer%mpiData(MPI_LINALG)%comm,ierr)
     if ( ierr /= xmpi_success ) then
-      MSG_ERROR("Error while gathering number of rows in linalg")
+      ABI_ERROR("Error while gathering number of rows in linalg")
     end if
 
     ncpuCols = xgTransposer%mpiData(MPI_COLS)%size
@@ -305,9 +305,9 @@ module m_xgTransposer
           xgTransposer%ncolsColsRows,xgTransposer%mpiData(MPI_ROWS)%comm)
       end if
     case (STATE_COLSROWS)
-      MSG_ERROR("Not yet implemented")
+      ABI_ERROR("Not yet implemented")
     case default
-      MSG_ERROR("State unknown")
+      ABI_ERROR("State unknown")
     end select
   end subroutine xgTransposer_makeXgBlock
 
@@ -325,7 +325,7 @@ module m_xgTransposer
     call timab(tim_transpose,1,tsec)
 
     if ( toState /= STATE_LINALG .and. toState /= STATE_COLSROWS ) then
-      MSG_ERROR("Bad value for toState")
+      ABI_ERROR("Bad value for toState")
     end if
 
     !write(std_out,*) "linalg", rows(xgTransposer%xgBlock_linalg)*cols(xgTransposer%xgBlock_linalg)
@@ -333,7 +333,7 @@ module m_xgTransposer
     select case (toState)
     case (STATE_LINALG)
       if ( xgTransposer%state == STATE_LINALG ) then
-        MSG_WARNING("Array linalg has already been transposed")
+        ABI_WARNING("Array linalg has already been transposed")
       end if
       if ( xgTransposer%mpiData(MPI_COLS)%size > 1 ) then
         call xgTransposer_toLinalg(xgTransposer)
@@ -342,7 +342,7 @@ module m_xgTransposer
       end if
     case (STATE_COLSROWS)
       if ( xgTransposer%state == STATE_COLSROWS ) then
-        MSG_WARNING("Array colsrows has already been transposed")
+        ABI_WARNING("Array colsrows has already been transposed")
       end if
       if ( xgTransposer%mpiData(MPI_COLS)%size > 1 ) then
         call xgTransposer_toColsRows(xgTransposer)
@@ -442,7 +442,7 @@ module m_xgTransposer
      end do
 
    case default
-     MSG_BUG("This algo does not exist")
+     ABI_BUG("This algo does not exist")
    end select
 
    xgTransposer%state = STATE_LINALG
@@ -451,7 +451,7 @@ module m_xgTransposer
    !ABI_MALLOC(status,(MPI_STATUS_SIZE))
    !call mpi_wait(request(myrequest),status,ierr)
    if ( ierr /= xmpi_success ) then
-     MSG_ERROR("Error while waiting for mpi")
+     ABI_ERROR("Error while waiting for mpi")
    end if
 
    if ( allocated(sendcounts) ) then
@@ -473,7 +473,7 @@ module m_xgTransposer
    !  if ( icpu /= myrequest ) then
    !    call mpi_wait(request(icpu),status,ierr)
    !    if ( ierr /= MPI_SUCCESS ) then
-   !      MSG_ERROR("Error while waiting for other mpi")
+   !      ABI_ERROR("Error while waiting for other mpi")
    !    end if
    !  end if
    !end do
@@ -585,14 +585,14 @@ module m_xgTransposer
      !write(*,*) me, request
 
    case default
-     MSG_BUG("This algo does not exist")
+     ABI_BUG("This algo does not exist")
    end select
 
    !ABI_MALLOC(status,(MPI_STATUS_SIZE))
    !call mpi_wait(request(myrequest),status,ierr)
    !write(*,*) "Request ended"
    if ( ierr /= xmpi_success ) then
-     MSG_ERROR("Error while waiting for mpi")
+     ABI_ERROR("Error while waiting for mpi")
    end if
    !write(*,*) "with success"
 
@@ -620,7 +620,7 @@ module m_xgTransposer
    !  if ( icpu /= myrequest ) then
    !    call mpi_wait(request(icpu),status,ierr)
    !    if ( ierr /= MPI_SUCCESS ) then
-   !      MSG_ERROR("Error while waiting for other mpi")
+   !      ABI_ERROR("Error while waiting for other mpi")
    !    end if
    !  end if
    !end do

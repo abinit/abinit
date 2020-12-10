@@ -394,29 +394,29 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !Error(s) on incorrect input
  if (hamk%useylm==0) then
    if (paw_opt>0) then
-     MSG_BUG('When paw_opt>0 you must use ylm version of nonlop! Set useylm 1.')
+     ABI_BUG('When paw_opt>0 you must use ylm version of nonlop! Set useylm 1.')
    end if
    if (cpopt/=-1) then
-     MSG_BUG('If useylm=0, ie no PAW, then cpopt/=-1 is not allowed !')
+     ABI_BUG('If useylm=0, ie no PAW, then cpopt/=-1 is not allowed !')
    end if
    if (hamk%dimekbq/=1) then
-     MSG_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
+     ABI_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
    end if
    if (hamk%use_gpu_cuda/=0) then
-     MSG_BUG('When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.')
+     ABI_BUG('When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.')
    end if
  end if
  if (hamk%use_gpu_cuda/=0.and.hamk%dimekbq/=1) then
-   MSG_BUG('GPU version of nonlop not compatible with a exp(-iqR) phase!')
+   ABI_BUG('GPU version of nonlop not compatible with a exp(-iqR) phase!')
  end if
  if ((.not.associated(hamk%kg_k)).or.(.not.associated(hamk%kg_kp))) then
-   MSG_BUG('kg_k/kg_kp should be associated!')
+   ABI_BUG('kg_k/kg_kp should be associated!')
  end if
  if ((.not.associated(hamk%ffnl_k)).or.(.not.associated(hamk%ffnl_kp))) then
-   MSG_BUG('ffnl_k/ffnl_kp should be associated!')
+   ABI_BUG('ffnl_k/ffnl_kp should be associated!')
  end if
 !if (hamk%istwf_k/=hamk%istwf_kp) then
-!  MSG_BUG('istwf has to be the same for both k-points.')
+!  ABI_BUG('istwf has to be the same for both k-points.')
 !end if
 
 !Select k-dependent objects according to select_k input parameter
@@ -508,33 +508,33 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !if (paw_opt==0.or.cpopt<2.or.((cpopt==2.or.cpopt==3).and.choice>1)) then
  if (size(ffnlin,1)/=npwin.or.size(ffnlin,3)/=hamk%lmnmax) then
    msg = 'Incorrect size for ffnlin!'
-!   MSG_BUG(msg)
+!   ABI_BUG(msg)
  end if
  if(signs==2) then
    if (size(ffnlout,1)/=npwout.or.size(ffnlout,3)/=hamk%lmnmax) then
-     MSG_BUG('Incorrect size for ffnlout!')
+     ABI_BUG('Incorrect size for ffnlout!')
    end if
  end if
 !This test is OK only because explicit sizes are passed to nonlop_* routines
  if (size(vectin)<2*npwin*my_nspinor*ndat) then
-   MSG_BUG('Incorrect size for vectin!')
+   ABI_BUG('Incorrect size for vectin!')
  end if
  if(choice/=0.and.signs==2) then
    if(paw_opt/=3) then
 !    This test is OK only because explicit sizes are passed to nonlop_* routines
      if (size(vectout)<2*npwout*my_nspinor*ndat) then
-       MSG_BUG('Incorrect size for vectout!')
+       ABI_BUG('Incorrect size for vectout!')
      end if
    end if
    if(paw_opt>=3) then
      if (size(svectout)<2*npwout*my_nspinor*ndat) then
-       MSG_BUG('Incorrect size for svectout!')
+       ABI_BUG('Incorrect size for svectout!')
      end if
    end if
  end if
  if(cpopt>=0) then
    if (size(cprjin)/=hamk%natom*my_nspinor*ndat) then
-     MSG_BUG('Incorrect size for cprjin!')
+     ABI_BUG('Incorrect size for cprjin!')
    end if
  end if
 
@@ -989,15 +989,15 @@ end subroutine nonlop
 !Error on bad choice
  if ((choice<0 .or. choice>3).and. choice/=23 .and. choice/=24) then
    write(msg,'(a,i0,a)')'Does not presently support this choice=',choice,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (cpopt<-1.or.cpopt>1) then
    msg='  Bad value for cpopt !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (nspinor==2) then
    msg='  nspinor=2 (spinorial WF) not yet allowed !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if ((cpopt==0).or.(cpopt==1))  then

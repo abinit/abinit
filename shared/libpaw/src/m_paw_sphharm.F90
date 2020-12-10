@@ -113,7 +113,7 @@ function ylmc(il,im,kcart)
 
  if (ABS(im)>ABS(il)) then
    write(msg,'(3(a,i0))') 'm is,',im,' however it should be between ',-il,' and ',il
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ylmc = czero
@@ -160,7 +160,7 @@ function ylmc(il,im,kcart)
    ylmc = -SQRT(three/(8._dp*pi))*sinth*CMPLX(cosphi,sinphi)
   else
    msg='wrong im'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
   end if
 
  case (2)
@@ -172,7 +172,7 @@ function ylmc(il,im,kcart)
    ylmc = SQRT(15.d0/(32.d0*pi))*(sinth)**2*CMPLX(costwophi,sintwophi)
   else
    msg='wrong im'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
   end if
 
  case (3)
@@ -186,12 +186,12 @@ function ylmc(il,im,kcart)
    ylmc=-SQRT(35.d0/(64.d0*pi))*sinth**3*CMPLX(costhreephi,sinthreephi)
   else
    msg='wrong im'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
   end if
 
  case default
   !write(msg,'(a,i6,a,i6)')' The maximum allowed value for l is,',LMAX,' however l=',il
-  !MSG_ERROR(msg)
+  !ABI_ERROR(msg)
  end select
 !
 !=== Treat the case im < 0 ===
@@ -208,7 +208,7 @@ function ylmc(il,im,kcart)
   if (im<0) new_ylmc=(-one)**(im)*CONJG(new_ylmc)
 
   if (ABS(new_ylmc-ylmc)>tol6) then
-    !MSG_WARNING("Check new_ylmc")
+    !ABI_WARNING("Check new_ylmc")
     !write(std_out,*)"il,im,new_ylmc, ylmc",il,im,new_ylmc,ylmc
     !write(std_out,*)"fact",SQRT((2*il+1)*dble_factorial(il-ABS(im))/(dble_factorial(il+ABS(im))*four_pi))
     !write(std_out,*)"costh,sinth,ass_leg_pol",costh,sinth,ass_leg_pol(il,ABS(im),costh)
@@ -271,7 +271,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
 
  if (ABS(im)>ABS(il))then
    write(msg,'(3(a,i0))')' m is,',im,' however it should be between ',-il,' and ',il
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  dphi=czero; dth=czero
@@ -351,7 +351,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
 
  case default
    write(msg,'(2(a,i0))')' The maximum allowed value for l is,',LMAX,' however, l=',il
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end select
 !
 !=== Treat the case im < 0 ===
@@ -962,7 +962,7 @@ subroutine plm_coeff(blm,mpsang,xx)
 
  if (abs(xx).gt.1.d0) then
    msg = ' plm_coeff :  xx > 1 !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  blm=zero
@@ -1065,7 +1065,7 @@ function ass_leg_pol(l,m,xarg)
  if (m.lt.0.or.m.gt.l.or.abs(x).gt.1.d0) then
    if (m.lt.0.or.m.gt.l.or.abs(x).gt.1.d0+1.d-10) then
     msg='Bad choice of l, m or x !'
-    MSG_BUG(msg)
+    ABI_BUG(msg)
    endif
    x=1.d0
  endif
@@ -1138,7 +1138,7 @@ subroutine plm_d2theta(mpsang,plm_d2t,xx)
 !************************************************************************
  if (abs(xx).gt.1.d0) then
    msg = 'plm_d2theta : xx > 1 !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  plm_d2t=zero
@@ -1221,7 +1221,7 @@ function plm_dphi(ll,mm,xx)
 
  if (mm.lt.0.or.mm.gt.ll.or.abs(xx).gt.1.d0) then
    msg = 'plm_dphi : mm < 0 or mm > ll or xx > 1 !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  plm_dphi=zero
@@ -1307,7 +1307,7 @@ function plm_dtheta(ll,mm,xx)
 
  if (mm.lt.0.or.mm.gt.ll.or.abs(xx).gt.1.d0) then
    msg = 'plm_dtheta : mm < 0 or mm > ll or xx > 1 !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  plm_dtheta=zero
@@ -1398,7 +1398,7 @@ subroutine pl_deriv(mpsang,pl_d2,xx)
 
  if (abs(xx).gt.1.d0) then
    msg = 'pl_deriv : xx > 1 !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  pl_d2=zero; pl_d1=zero; pl=zero
@@ -1537,7 +1537,7 @@ subroutine mkeuler(rot,cosbeta,sinbeta,cosalp,sinalp,cosgam,singam,isn)
 & 'Action: check your input file:',ch10,&
 & 'unit cell vectors and/or atoms positions',ch10,&
 & 'have to be given with a better precision.'
- MSG_ERROR(msg)
+ ABI_ERROR(msg)
 
 end subroutine mkeuler
 !!***
@@ -1808,15 +1808,15 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
 
  if(ndij/=4) then
    msg=" ndij/=4 !"
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (option/=1.and.option/=2) then
    msg=' option=/1 and =/2 !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (optspin/=1.and.optspin/=2) then
    msg=' optspin=/1 and =/2 !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (unitfi/=-1) then
@@ -1917,7 +1917,7 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
 !xj(jj)=jj-0.5
  if(ll==0)then
    msg=' ll should not be equal to zero !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  jc1=0
  invsqrt2lp1=one/sqrt(float(2*lcor+1))
@@ -2072,11 +2072,11 @@ subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitf
 
  if(ndij/=4) then
    msg=' ndij:=4 !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (option/=1.and.option/=2.and.option/=3.and.option/=4) then
    msg=' option=/1 or 2 or 3 or 4 !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(abs(prtvol)>2.and.unitfi/=-1) then
@@ -2167,7 +2167,7 @@ subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitf
 &     (abs(real(mat_out_c(ii,jj,3))-real(mat_out_c(jj,ii,4))).ge.0.0001)) then
        write(msg,'(a,4f10.4)') &
 &       ' prb with mat_out_c ',mat_out_c(ii,jj,3),mat_out_c(ii,jj,4)
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end do
  end do
@@ -2298,7 +2298,7 @@ subroutine create_mlms2jmj(lcor,mlmstwojmj)
 !xj(jj)=jj-0.5
  if(ll==0)then
    msg=' ll should not be equal to zero !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  jc1=0
  invsqrt2lp1=one/sqrt(float(2*lcor+1))
@@ -2548,7 +2548,7 @@ end subroutine setsym_ylm
 
  if (mpsang>4) then
    msg='  Not designed for angular momentum greater than 3 !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !8 angular integrals for l=0..3, m=-l..+l

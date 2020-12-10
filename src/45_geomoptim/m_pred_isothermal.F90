@@ -544,7 +544,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
    write(message, '(a,i12,a,a)' )&
 &   '  Disallowed value for optcell=',ab_mover%optcell,ch10,&
 &   '  Allowed values with ionmov==13 : 0 to 2.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !write(std_out,*) 'OLD PARAMETERS'

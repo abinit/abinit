@@ -180,7 +180,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 
 !Compatibility tests
  if (ind1==0.and.ind2>0)then
-   MSG_BUG(' Incompatible history indexes !')
+   ABI_BUG(' Incompatible history indexes !')
  end if
 
 !Rotated values of history indexes
@@ -251,7 +251,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
      write(message,'(3a,f4.1,a,f4.1)')&
 &     'Ionic positions lead to a collinear system !',ch10,&
 &     'Mixing coeffs have been set to: alpha=',alpha,' beta=',beta
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    else if (abs(a11)>=tol10.and.abs(a22)>=tol10) then
      alpha=(b1*a22-b2*a12)/detA
      beta =(b2*a11-b1*a12)/detA
@@ -1322,7 +1322,7 @@ end subroutine extrapwf
        ABI_DEALLOCATE(ipiv)
 !DEBUG
        if(ierr/=0)then
-         MSG_ERROR(' The call to cgesv general inversion routine failed')
+         ABI_ERROR(' The call to cgesv general inversion routine failed')
        end if
 !ENDDEBUG
 

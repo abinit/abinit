@@ -446,7 +446,7 @@ contains
        write(message,'(3a,3i5)')&
 &       'Problem with matching the nuclear dipole moment within a class.',ch10,&
 &       'isym,iatom0,iatom1=',isym,iatom0,iatom1
-       MSG_ERROR_CLASS(message, "TolSymError")
+       ABI_ERROR_CLASS(message, "TolSymError")
      end if
 !    jellium slab case: check whether symmetry operation has no translational
 !    component along z
@@ -541,7 +541,7 @@ contains
          'is larger than maxnsym: ',msym,ch10,&
          'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
          'or at least smaller than the present one.'
-        MSG_ERROR(message)
+        ABI_ERROR(message)
        end if
        ntrial=ntrial+1
        symrel(:,:,nsym)=ptsymrel(:,:,isym)
@@ -977,7 +977,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &       'account the symmetry operations. This might be due to an insufficient',ch10,&
 &       'number of digits in the specification of rprim (at least 10),',ch10,&
 &       'or to an erroneous rprim or angdeg. If this is not the case, then ...'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
      if(iaxis==1)then
        write(message, '(3a,3i3,2a,i3,2a,i3)' )&
@@ -985,7 +985,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &       'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
 &       'bravais(1)=',bravais(1),ch10,&
 &       'iholohedry=',iholohedry
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end if
 
@@ -996,7 +996,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &       'vectors, bravais(1)=',bravais(1),', is more symmetric',ch10,&
 &       'than the real one, iholohedry=',iholohedry,', obtained by taking into',ch10,&
 &       'account the atomic positions. Start deforming the primitive vector set.'
-       MSG_COMMENT(message)
+       ABI_COMMENT(message)
        next_stage=1
      else if(iaxis/=0)then
        if(bravais(1)<bravais1now)then
@@ -1005,7 +1005,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &         'vectors, bravais(1)=',bravais(1),', has a lower symmetry than before,',ch10,&
 &         'but is still more symmetric than the real one, iholohedry=',iholohedry,ch10,&
 &         'obtained by taking into account the atomic positions.'
-         MSG_COMMENT(message)
+         ABI_COMMENT(message)
          next_stage=1
        else if(iaxis==1)then
          write(message, '(3a,3i3,2a,i3,2a,i3)' )&
@@ -1013,7 +1013,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &         'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
 &         'bravais(1)=',bravais(1),ch10,&
 &         'iholohedry=',iholohedry
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
      end if
    end if ! problem==1
@@ -1070,7 +1070,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &     'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
 &     'bravais(1)=',bravais(1),ch10,&
 &     'iholohedry=',iholohedry
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    call matr3inv(rprimdconv,rprimdconv_invt)
@@ -1100,7 +1100,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &   'Despite efforts, Could not succeed to determine the bravais lattice :',ch10,&
 &   'bravais(1)=',bravais(1),ch10,&
 &   'iholohedry=',iholohedry
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ABI_DEALLOCATE(symrelconv)
@@ -1312,10 +1312,10 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
      call wrtout(std_out,message,'COLL')
      write(message, '(a,i4,2a)' )&
 &     'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'
-     MSG_BUG(message)
+     ABI_BUG(message)
    else if (t_axes(isym) == -2) then
      write(message, '(a,i0,a)' )'The symmetry operation number ',isym,' is not a root of unity'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    n_axes(t_axes(isym))=n_axes(t_axes(isym))+1
@@ -1328,7 +1328,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 &   'This might be due either to an error in the input file',ch10,&
 &   'or to a BUG in ABINIT',ch10,&
 &   'Please contact the ABINIT group.'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !DEBUG
@@ -1447,7 +1447,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 &       'For space groups 23, 24, 197 or 197, the three binary axes',ch10,&
 &       'are not equally partitioned along the x, y and z directions',ch10,&
 &       'test_direction(1:3)=',test_direction(:)
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
      additional_info=1
      if(abs(vect(1,2)-vect(1,3))>tol8 .or. &
@@ -1471,7 +1471,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 &   'Could not find the space group.',ch10,&
 &   'This often happens when the user selects a restricted set of symmetries ',ch10,&
 &   'in the input file, instead of letting the code automatically find symmetries.'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  spgorig=1 ; spgaxor=1
@@ -2507,7 +2507,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 &       '      ',coord(:,2),ch10,&
 &       '      ',coord(:,3),ch10,&
 &       'fact=',fact
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
      icoord(ii,jj)=nint(val)
    end do

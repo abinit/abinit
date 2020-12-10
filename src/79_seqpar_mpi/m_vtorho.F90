@@ -439,12 +439,12 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
  if ((psps%usepaw==1.and.pawfgr%nfft/=nfftf).or.(psps%usepaw==0.and.dtset%nfft/=nfftf)) then
-   MSG_BUG('wrong values for nfft, nfftf!')
+   ABI_BUG('wrong values for nfft, nfftf!')
  end if
 
 !Test optforces (to prevent memory overflow)
  if (optforces/=0.and.optforces/=1) then
-   MSG_BUG(sjoin('wrong value for optforces: ',itoa(optforces)))
+   ABI_BUG(sjoin('wrong value for optforces: ',itoa(optforces)))
  end if
 
  iscf=dtset%iscf
@@ -1120,7 +1120,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
          end do
          if(nnn.ne.mb2dkpsp)  then
            write(msg,*)' BUG in vtorho2, buffer2',nnn,mb2dkpsp
-           MSG_BUG(msg)
+           ABI_BUG(msg)
          end if
        end if
 !      Build sum of everything
@@ -1204,7 +1204,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 
        if(dmft_dftocc==0) then
          if(dtset%occopt/=3) then
-           MSG_ERROR('occopt should be equal to 3 in dmft')
+           ABI_ERROR('occopt should be equal to 3 in dmft')
          end if
 !        ==  initialise edmft
          if(paw_dmft%use_dmft>=1) edmft = zero
@@ -1232,13 +1232,13 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
               ' ERROR: Wavefunctions not converged: DFT+DMFT calculation cannot be carried out safely ',residm
              call wrtout(std_out,msg)
              write(msg,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
            end if
 
          else if (paw_dmft%use_dmft>0 .and. residm>tol10.and. dtset%dmftcheck>=0) then
            write(msg,'(3a)')ch10,&
             '  Wavefunctions not converged: DFT+DMFT calculation might not be carried out safely ',ch10
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
          end if
 
 !        ==  allocate paw_dmft%psichi and paw_dmft%eigen_dft
@@ -1287,10 +1287,10 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 !&           ' Calculation of density does not taken into account non diagonal occupations',ch10
 !           call wrtout(std_out,msg)
 !           call wrtout(ab_out,msg)
-!!          MSG_ERROR(msg)
+!!          ABI_ERROR(msg)
 !           if(dtset%nstep>1) then
 !             write(msg,'(a,i0)')'  Action: use nstep=1 instead of nstep=',dtset%nstep
-!             MSG_ERROR(msg)
+!             ABI_ERROR(msg)
 !           end if
 !           residm=zero
 !         end if
@@ -1299,10 +1299,10 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 !          write(msg,'(3a)')&
 !          &         ' Self consistent DFT+DMFT with nspinor==2 is not possible yet ',ch10,&
 !          &         ' Calculation are restricted to nstep =1'
-!          !         MSG_ERROR(msg)
+!          !         ABI_ERROR(msg)
 !          if(dtset%nstep>1) then
 !          write(msg,'(a,i0)')' Action: use nstep=1 instead of nstep=',dtset%nstep
-!          !           MSG_ERROR(msg)
+!          !           ABI_ERROR(msg)
 !          endif
 !        end if
 
@@ -1648,7 +1648,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
              'An adequate monitoring of convergence requires it to be at most 0.01_dp.',ch10,&
              'Action: increase slightly the number of bands.'
          end if
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
          exit ! It is enough if one lack of adequate occupation is identified, so exit.
        end if
      end do

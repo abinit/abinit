@@ -474,7 +474,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '    the polarisation directions incorrect    '
      write(std_out,*) '    1=x and 2=y and 3=z                      '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !number of energy mesh points
    if (nmesh.le.0) then
@@ -484,7 +484,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '    number has to integer greater than 0     '
      write(std_out,*) '    nmesh*de = max energy for calculation    '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !step in energy
    if (de.le.0._dp) then
@@ -494,7 +494,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '    number has to real greater than 0.0      '
      write(std_out,*) '    nmesh*de = max energy for calculation    '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !broadening
    if (brod.gt.0.009) then
@@ -522,7 +522,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '    scissors shift is incorrect              '
      write(std_out,*) '    number has to be greater than 0.0      '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
 !fool proof end
  end if
@@ -640,7 +640,7 @@ complex(dpc), allocatable :: eps(:)
  if (my_rank == master) then
    !  open the output files
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! write the output
    write(fout1, '(a,2i3,a)' )' #calculated the component:',v1,v2,'  of dielectric function'
@@ -903,7 +903,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
          write(std_out,*) '    The SHG susceptibility is zero         '
          write(std_out,*) '    Action : set num_nonlin_comp to zero   '
          write(std_out,*) '-------------------------------------------'
-         MSG_ERROR("Aborting now")
+         ABI_ERROR("Aborting now")
        end if
      end if
    end do
@@ -916,7 +916,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '    Action : check your input file,          ' 
      write(std_out,*) '    use only 1, 2 or 3 to define directions  '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !number of energy mesh points
    if (nmesh.le.0) then
@@ -926,7 +926,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '    number has to be integer greater than 0  '
      write(std_out,*) '    nmesh*de = max energy for calculation    '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !step in energy
    if (de.le.0._dp) then
@@ -936,7 +936,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '    number has to real greater than 0.0      '
      write(std_out,*) '    nmesh*de = max energy for calculation    '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !broadening
    if (brod.gt.0.009) then
@@ -1355,25 +1355,25 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
    end if
 
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam2,msg,newunit=fout2,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam3,msg,newunit=fout3,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam4,msg,newunit=fout4,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam5,msg,newunit=fout5,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam6,msg,newunit=fout6,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam7,msg,newunit=fout7,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 !  write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
@@ -1692,7 +1692,7 @@ integer :: start4(4),count4(4)
        write(std_out,*) '    the crystal has inversion symmetry   '
        write(std_out,*) '    the LEO susceptibility is zero       '
        write(std_out,*) '-----------------------------------------'
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
    end if
  end do
@@ -1703,7 +1703,7 @@ integer :: start4(4),count4(4)
    write(std_out,*) '    the polarisation directions incorrect    '
    write(std_out,*) '    1=x,  2=y  and 3=z                       '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 !number of energy mesh points
  if (nmesh.le.0) then
@@ -1713,7 +1713,7 @@ integer :: start4(4),count4(4)
    write(std_out,*) '    number has to be integer greater than 0  '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 !step in energy
  if (de.le.0._dp) then
@@ -1723,7 +1723,7 @@ integer :: start4(4),count4(4)
    write(std_out,*) '    number has to real greater than 0.0      '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 !broadening
  if (brod.gt.0.009) then
@@ -1961,19 +1961,19 @@ integer :: start4(4),count4(4)
 
   ! write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam2,msg,newunit=fout2,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam3,msg,newunit=fout3,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam4,msg,newunit=fout4,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam5,msg,newunit=fout5,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
@@ -2265,7 +2265,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
        write(std_out,*) '    the nl electro-optical susceptibility'
        write(std_out,*) '    is zero                              '
        write(std_out,*) '-----------------------------------------'
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
    end if
  end do
@@ -2277,7 +2277,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '    the polarisation directions incorrect    '
    write(std_out,*) '    1=x,  2=y  and 3=z                       '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
 !number of energy mesh points
@@ -2288,7 +2288,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '    number has to be integer greater than 0  '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
 !step in energy
@@ -2299,7 +2299,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '    number has to real greater than 0.0      '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
 !broadening
@@ -2564,25 +2564,25 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
    ! write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam2,msg,newunit=fout2,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam3,msg,newunit=fout3,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam4,msg,newunit=fout4,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam5,msg,newunit=fout5,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam6,msg,newunit=fout6,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam7,msg,newunit=fout7,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
   !!write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3

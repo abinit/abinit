@@ -228,7 +228,7 @@ subroutine vtorhotf(dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
        lnewtonraphson=.true.
      end if
      if (jdicho > jdichomax) then
-       MSG_ERROR('NEWTON RAPHSON NOT CONVERGED')
+       ABI_ERROR('NEWTON RAPHSON NOT CONVERGED')
      end if
    end do
    fermie=rtnewt

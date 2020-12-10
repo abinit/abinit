@@ -174,20 +174,20 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    write(message,'(a,i0,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'The only allowed values are between 1 and 4.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (option > 2 .and. .not.psps%vlspl_recipSpace) then
    write(message,'(a,i0,a,a,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'but the local part of the pseudo-potential is in real space.',ch10,&
 &   'Action: set icoulomb = 0 to turn-off real space computations.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (option > 2 .and. dtset%usewvl == 1) then
    write(message,'(a,i0,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'but this is not implemented yet from wavelets.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (dtset%usewvl == 0) then
@@ -525,7 +525,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
              else
                write(message, '(a,i0,a)' )' mklocl: Option=',option,' not allowed.'
-               MSG_BUG(message)
+               ABI_BUG(message)
              end if ! End option choice
 
 !            End skip G**2 outside cutoff:
@@ -1080,7 +1080,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
    write(message, '(a,i10,a,a,a)' )&
 &   ' Input istr=',istr,' not allowed.',ch10,&
 &   ' Possible values are 1,2,3,4,5,6 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ka=idx(2*istr-1);kb=idx(2*istr)
@@ -1428,7 +1428,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  Determination of the atom type
@@ -1706,7 +1706,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  Determination of the atom type
@@ -2005,7 +2005,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    ia1=1

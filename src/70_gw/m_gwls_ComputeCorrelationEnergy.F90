@@ -279,7 +279,7 @@ if(dtset%gwls_recycle == 2) then
 
   if (open_file(file=recy_name,iomsg=msg,newunit=recy_unit,access='direct',form='unformatted',&
 &               status='replace',recl=recy_line_size)/=0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   write_solution = .true.
@@ -1086,7 +1086,7 @@ if(dtset%gwls_recycle == 2) then
 
   if (open_file(file=recy_name,iomsg=msg,newunit=recy_unit,access='direct',form='unformatted',&
 &               status='replace',recl=recy_line_size)/=0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   write_solution = .true.

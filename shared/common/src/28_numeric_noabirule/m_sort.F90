@@ -99,7 +99,7 @@ subroutine sort_dp(n, list, iperm, tol)
   write(msg, "(a,i0,2a)")&
     "sort_dp has been called with array length n= ",n, ch10, &
     "having a value less than 1. This is not allowed."
-  MSG_ERROR(msg)
+  ABI_ERROR(msg)
 
  else ! n>1
 
@@ -211,7 +211,7 @@ subroutine sort_int(n,list,iperm)
   write(msg, "(a,i0,2a)")&
     "sort_int has been called with array length n= ",n, ch10, &
     "having a value less than 1. This is not allowed."
-  MSG_ERROR(msg)
+  ABI_ERROR(msg)
 
  else ! n>1
 

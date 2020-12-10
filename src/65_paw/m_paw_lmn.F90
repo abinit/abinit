@@ -80,7 +80,7 @@ subroutine ilm2lm(ilm,ll,mm)
 ! *********************************************************************
 
  if (ilm<1) then 
-   MSG_ERROR("Wrong ilm")
+   ABI_ERROR("Wrong ilm")
  end if
 
  ll = -1
@@ -94,7 +94,7 @@ subroutine ilm2lm(ilm,ll,mm)
  mm = ilm - ll**2 -ll-1
 
  if (ll==-1) then
-   MSG_ERROR("l>100 not programmed!")
+   ABI_ERROR("l>100 not programmed!")
  end if
 
 end subroutine ilm2lm
@@ -413,7 +413,7 @@ subroutine make_klm2lm(lmn_size,lmn2_size,lm2_size,indlmn,indklmn,klm2lm)
  end do !klmn
 
  if (ANY(klm2lm==0)) then
-   MSG_BUG("check klm2lm")
+   ABI_BUG("check klm2lm")
  end if
 
 !DEBUG
@@ -482,7 +482,7 @@ subroutine klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)
    end do
  end do
 
- MSG_BUG("Not able to found ilmn and jlmn")
+ ABI_BUG("Not able to found ilmn and jlmn")
 
 end subroutine klmn2ijlmn
 !!***

@@ -207,7 +207,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 
  ntypat=size(pawtab)
  if (size(pawrad)/=ntypat) then
-   MSG_BUG('pawrad and pawtab should have the same size!')
+   ABI_BUG('pawrad and pawtab should have the same size!')
  end if
 
 !Immediately set the value of usepotzero
@@ -259,7 +259,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 &     'formulation of XC [using compensation charge in XC or not] !',ch10,&
 &     'Action: change at least one of your atomic data (psp) file',ch10,&
 &     '        or use usexcnhat keyword in input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  ==================================================
@@ -273,7 +273,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
      ABI_ALLOCATE(pawtab(itypat)%shapefunc,(mesh_size,l_size))
    else if (.not.allocated(pawtab(itypat)%shapefunc))  then
      message='shapefunc should be allocated with shape_type=-1'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if (allocated(pawtab(itypat)%gnorm))  then
      ABI_DEALLOCATE(pawtab(itypat)%gnorm)
@@ -319,7 +319,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
    if (pawtab(itypat)%has_shapefncg>0) then
      if (gsqcut_eff<tol8) then
        message='Computation of shapefncg only possible when gsqcut>0!'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
      pawtab(itypat)%mqgrid_shp=mqgrid_shp_default
      if (allocated(pawtab(itypat)%shapefncg))  then
@@ -671,7 +671,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
    if (abs(effmass_free-one)>tol8) then
      if (pawtab(itypat)%has_kij/=2) then
        message='we need kij and has_kij/=2!'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
      if (allocated(pawtab(itypat)%dij0)) then
        pawtab(itypat)%dij0(1:lmn2_size)=pawtab(itypat)%dij0(1:lmn2_size)-pawtab(itypat)%kij(1:lmn2_size)
@@ -781,7 +781,7 @@ subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
    gencond = -1
 
  case default
-   MSG_BUG("Wrong value for mode: "//trim(mode))
+   ABI_BUG("Wrong value for mode: "//trim(mode))
  end select
 
 end subroutine paw_gencond

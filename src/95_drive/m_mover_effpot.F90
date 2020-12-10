@@ -298,7 +298,7 @@ ABI_DEALLOCATE(xcart)
 ! &         ' You need to provide DDB file in the input to compute ahnarmonic',ch10,&
 ! &         ' part of effective Hamiltionian',ch10,&
 ! &         'Action: add DDB file in the inputs'
-!        MSG_BUG(message)
+!        ABI_BUG(message)
 !      end if
 !      call ddb_to_dtset(comm, dtset,filnam(3),psps)
 !      ABI_ALLOCATE(dtset%kptns,(3,dtset%nkpt))
@@ -480,7 +480,7 @@ ABI_DEALLOCATE(xcart)
        write(message, '(5a)' )&
 &       ' The file ',trim(filnam(3)),' is not a DDB',ch10,&
 &       ' It is not compatible with ionmov 27'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 
    end if
@@ -559,7 +559,7 @@ ABI_DEALLOCATE(xcart)
      write(message, '(3a)' )&
 &     ' This dynamics can not be used with effective potential',ch10,&
 &     'Action: correct dynamics input'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
   !Get SCALE-UP INPUT

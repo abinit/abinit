@@ -211,7 +211,7 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 &     "wvl_descr_psp_fill : bug, chemical element not found in BigDFT table",ch10,&
 &     "Action: upgrade BigDFT table"
      call wrtout(ab_out,message,'COLL')
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    gth_params%set(ipsp) = .true.
  end if

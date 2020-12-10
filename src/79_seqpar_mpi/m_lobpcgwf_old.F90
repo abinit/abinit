@@ -863,7 +863,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
              ABI_DEALLOCATE(coordx3)
            end if
            if (nrestart.gt.1) then
-             MSG_WARNING('the minimization is stopped for this block')
+             ABI_WARNING('the minimization is stopped for this block')
              exit iter
            else
              restart=1
@@ -871,7 +871,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
              call wrtout(std_out,'Lobpcgwf: restart performed',"PERS")
            end if
          else
-           MSG_WARNING('Gramm matrix ill-conditionned: results may be unpredictable')
+           ABI_WARNING('Gramm matrix ill-conditionned: results may be unpredictable')
          end if
        else
          exit cond

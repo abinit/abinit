@@ -209,7 +209,7 @@ subroutine pawfgrtab_init(Pawfgrtab,cplex,l_size_atm,nspden,typat,&
  natom=SIZE(typat)
  if (my_natom/=SIZE(l_size_atm)) then
   msg='Sizes of assumed shape arrays do not match'
-  MSG_BUG(msg)
+  ABI_BUG(msg)
  end if
 
 !Set up parallelism over atoms
@@ -453,7 +453,7 @@ integer,optional,intent(in) :: comm_atom
        pawfgrtab_out => pawfgrtab_cp
      else
        msg=' siz_out should be equal to my_natom !'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    else                            ! Parallelism: the copy operation is a gather
      call get_my_natom(my_comm_atom,my_natom,siz_out)
@@ -461,7 +461,7 @@ integer,optional,intent(in) :: comm_atom
        paral_case=2;siz_max=siz_in
      else
        msg=' siz_in should be equal to my_natom !'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
  end if
@@ -820,11 +820,11 @@ subroutine pawfgrtab_gather(pawfgrtab,pawfgrtab_gathered,comm_atom,istat, &
  end do
  if (indx_int/=1+buf_int_size) then
    msg='Error (1) in pawfgrtab_gather: wrong buffer sizes !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (indx_dp/=1+buf_dp_size) then
    msg='Error (2) in pawfgrtab_gather: wrong buffer sizes !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Communicate (1 gather for integers, 1 gather for reals)
@@ -1441,7 +1441,7 @@ subroutine pawfgrtab_isendreceive_getbuffer(pawfgrtab,npawfgrtab_send,atm_indx_r
  end do
  if ((indx_int/=1+buf_int_size).or.(indx_dp/=1+buf_dp_size)) then
    write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 end subroutine pawfgrtab_isendreceive_getbuffer
@@ -1609,7 +1609,7 @@ subroutine pawfgrtab_isendreceive_fillbuffer(pawfgrtab, atmtab_send,atm_indx_sen
  end do
  if ((indx_int-1/=buf_int_size).or.(indx_dp-1/=buf_dp_size)) then
    write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 end subroutine pawfgrtab_isendreceive_fillbuffer

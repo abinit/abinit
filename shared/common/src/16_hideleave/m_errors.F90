@@ -1419,7 +1419,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
  if (ii > 0) then
    path = strcat(prefix, "_lunits_rank", itoa(my_rank), ".flun")
    if (open_file(path, msg, newunit=unt) /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    call show_units(unt)
    close(unt)
@@ -1432,7 +1432,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
 
  call xmpi_barrier(xmpi_world)
  if (ierr /= 0) then
-   MSG_ERROR(errmsg)
+   ABI_ERROR(errmsg)
  end if
 
 #else
@@ -1442,9 +1442,9 @@ subroutine abinit_doctor(prefix, print_mem_report)
  ! Check for pending requests.
  if (xmpi_count_requests /= 0) then
    write(msg, "(a,i0,a)")"Leaking ", xmpi_count_requests, " MPI requests at the end of the run"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
 #ifdef HAVE_MEM_PROFILING
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
 #endif
  end if
 

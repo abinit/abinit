@@ -461,7 +461,7 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
  if (info /= 0 ) then
    write(message,'(a,i3)') '  xpotrf, info=',info
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  call gpu_xtrsm(x_cplx,'r','u','n','n',vectsize,blocksize,cone,sqgram_gpu,blocksize,&
@@ -481,7 +481,7 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
 #else
  message='  This routine is not allowed when Cuda is disabled !'
- MSG_BUG(message)
+ ABI_BUG(message)
  if (.false.) then
    write(std_out,*) blocksize,vectsize,spaceComm,x_cplx
    if (present(timopt))  write(std_out,*) timopt

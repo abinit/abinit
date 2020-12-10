@@ -310,7 +310,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
 
  if (ANY(mg0<0)) then
    write(msg,'(a,3(i0,1x))')' called with wrong value of mG0 = ',mG0
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  tnons_warn = "Check your fractional translations tnons. "//ch10//&
@@ -364,7 +364,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    n2=ngfft(2)
    n3=ngfft(3)
    write(msg,'(3(a,i3))')' Mesh size enforced by user = ',n1,'x',n2,'x',n3
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
 
    ngfft(1)=n1
    ngfft(2)=n2
@@ -444,7 +444,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
      ig2max=MAX(2*m2+1,2*mm2+1,mm2+m2+1)
      ig3max=MAX(2*m3+1,2*mm3+1,mm3+m3+1)
    else
-     MSG_BUG(sjoin("Wrong method:", itoa(method)))
+     ABI_BUG(sjoin("Wrong method:", itoa(method)))
    end if
 
    m1=-1; m2=-1; m3=-1
@@ -465,7 +465,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    end do
 
  case default
-   MSG_BUG(sjoin('Method > 3 or < 0 not allowed in setmesh while method:', itoa(method)))
+   ABI_BUG(sjoin('Method > 3 or < 0 not allowed in setmesh while method:', itoa(method)))
  end select
  !
  ! * Warning if low npwwfn.
@@ -474,7 +474,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
     'Note that npwwfn is small with respect to npweps or with respect to npwsigx. ',ch10,&
     'Such a small npwwfn is a waste: ',ch10,&
     'You could raise npwwfn without loss in cpu time. '
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
  !
  ! Keep the largest of the m/mm and and find the FFT grid which is compatible
@@ -508,10 +508,10 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    !
    ! * Warn if not compatibile with tnons or rotational part.
    if (.not.fft_ok) then
-    MSG_WARNING('FFT mesh is not compatible with non-symmorphic translations')
+    ABI_WARNING('FFT mesh is not compatible with non-symmorphic translations')
    end if
    if (.not.(check_rot_fft(nsym,symrel,n1,n2,n3))) then
-     MSG_WARNING('FFT mesh is not compatible with rotations')
+     ABI_WARNING('FFT mesh is not compatible with rotations')
    end if
 
  else
@@ -565,7 +565,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
            ( MOD(fftsym(2),fftnons(2))/=0) .and.  &
            ( MOD(fftsym(3),fftnons(3))/=0)        &
      ) then
-     MSG_BUG('Not able to generate a symmetric FFT')
+     ABI_BUG('Not able to generate a symmetric FFT')
    end if
  end if ! enforce_sym
 
@@ -592,7 +592,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
     "Only Goedecker's routines with fftalg=1xx or FFTW3/DFTI routines are allowed in GW calculations. ",ch10,&
     "Action : check the value of fftalg in your input file, ",ch10,&
     "or modify setmesh.F90 to make sure the FFT mesh is compatible with the FFT library. "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 ! TODO Had to change setmesh to avoid bad values for FFTW3
@@ -605,7 +605,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
 !     if (powers(6)/=1 .or. powers(4)/=0 .or. powers(5)/=0) then
 !       write(msg,'(a,i0,a)')&
 !&        "ngfft(ii) ",ngfft(ii)," contains powers of 7-11 or greater; FFTW3 is not optimal "
-!       MSG_WARNING(msg)
+!       ABI_WARNING(msg)
 !     end if
 !   end do
 !   ABI_FREE(pfactors)
@@ -753,7 +753,7 @@ function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
    if (ANY(err(:,isym)>tol6)) then
      isok=.FALSE.
      !write(msg,'(a,i3,a,3es14.6)')' symmetry ',isym,') not compatible with FFT grid, error ',err(:,isym)
-     !MSG_WARNING(msg)
+     !ABI_WARNING(msg)
    end if
  end do
 
@@ -866,7 +866,7 @@ subroutine rotate_fft_mesh(nsym,symrel,tnons,ngfft,irottb,preserve)
    if (ANY(err(:,isym)>tol6)) then
      preserve=.FALSE.
      !write(msg,'(a,i3,a,3es14.6)')' symmetry ',isym,') not compatible with FFT grid, error ',err(:,isym)
-     !MSG_WARNING(msg)
+     !ABI_WARNING(msg)
    end if
  end do
 
@@ -991,7 +991,7 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
 
  if (ANY(mg0<0)) then
    write(msg,'(a,3i4)')' Found negative value of mg0= ',mg0
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  n1=ngfft(1)
@@ -1025,7 +1025,7 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
    write(msg,'(a,i0,3a)')&
     'Found ',ierr,' G-G0 vectors falling outside the FFT box. ',ch10,&
     'igfft will be set to zero for these particular G-G0 '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  DBG_EXIT("COLL")

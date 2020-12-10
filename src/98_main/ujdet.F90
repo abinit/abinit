@@ -96,7 +96,7 @@ program ujdet
    write(message,'(3a)')&
 &   'In order to use MPI_IO, you must compile with the MPI flag ',ch10,&
 &   'Action : recompile your code with different CPP flags.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 #endif
 
@@ -113,7 +113,7 @@ program ujdet
  if (iam_master) then
    call isfile(filnam(2),'new')
    if (open_file(filnam(2),message,unit=ab_out,form="formatted",status="new") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind(unit=ab_out)
 !  Print header

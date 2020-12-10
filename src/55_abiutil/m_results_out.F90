@@ -219,7 +219,7 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
  results_out_size=size(results_out)
  mpi_enregs_size=size(mpi_enregs)
  if (dtsets_size/=mpi_enregs_size .or. dtsets_size/=results_out_size) then
-   MSG_ERROR("init_results_out: wrong sizes (2)!")
+   ABI_ERROR("init_results_out: wrong sizes (2)!")
  endif
 
  if (results_out_size>0) then
@@ -660,18 +660,18 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
  mpi_enregs_size=size(mpi_enregs)
  if (dtsets_size/=results_out_size) then
    msg='  Wrong sizes for dtsets and results_out datastructures !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (mpi_enregs_size/=results_out_size) then
    msg='  Wrong sizes for dtsets and results_out datastructures !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (use_results_all) then
    results_out_all_size=size(results_out_all)
    if (results_out_size/=results_out_all_size) then
      msg='  Wrong size for results_out_all datastructure !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -788,7 +788,7 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
          end do
          if (ibufi/=isize_img.or.ibufr/=rsize_img) then
            msg='  wrong buffer sizes !'
-           MSG_BUG(msg)
+           ABI_BUG(msg)
          end if
 
 !        Gather all data

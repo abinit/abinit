@@ -265,7 +265,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (prev_accuracy_level == 2 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 3
  if (prev_accuracy_level == 3 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 4
  if (raise_acc > 0) then
-   MSG_COMMENT("Accuracy_level is automatically increased as we reached the max number of NSCF iterations.")
+   ABI_COMMENT("Accuracy_level is automatically increased as we reached the max number of NSCF iterations.")
  end if
  raise_acc = max(raise_acc, prev_accuracy_level)
 
@@ -645,7 +645,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
                             normalize=usepaw == 1)
      case default
-       MSG_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
+       ABI_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
      end select
    end do ! iblock
 
@@ -1379,7 +1379,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
    ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
    ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
  else
-   MSG_ERROR(sjoin("Invalid savemem:", itoa(savemem)))
+   ABI_ERROR(sjoin("Invalid savemem:", itoa(savemem)))
  end if
 
  do iblock=1,nblocks

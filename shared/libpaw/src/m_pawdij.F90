@@ -244,7 +244,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  if (natvshift_>0) then
    if ((.not.present(atvshift)).or.(.not.present(fatvshift))) then
      msg='when natvshift>0, atvshift and fatvshift arguments must be present!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -253,7 +253,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    if ((.not.present(electronpositron_pawrhoij)).or.&
 &      (.not.present(electronpositron_lmselect))) then
      msg='ep_pawrhoij and ep_lmselect must be present for electron-positron calculations!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -263,28 +263,28 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
  if (nspden==4.and.cplex==2) then
    msg='nspden=4 probably not compatible with cplex=2!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (my_natom>0) then
    if (paw_ij(1)%ndij==4.and.paw_ij(1)%cplex_dij/=2) then
      msg='invalid cplex size for Dij (4 Dij components)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (paw_ij(1)%qphase/=paw_an(1)%cplex) then
      msg='paw_ij()%qphase and paw_an()%cplex must be equal!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (ipert<=0.and.paw_ij(1)%qphase/=1) then
      msg='qphase must be 1 for GS calculations!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (ipert>0.and.paw_ij(1)%qphase/=cplex) then
      msg='paw_ij()%qphase must be equal to cplex!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (paw_an(1)%has_vxcval>0.and.paw_an(1)%has_vxctau==2) then
      msg='kinetic energy density not available for vxc_val!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -333,7 +333,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
      if (usexcnhat==0) then
        if (size(vxc,1)/=cplex*nfft.or.size(vxc,2)/=nspden) then
          msg='invalid size for vxc!'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
        LIBPAW_POINTER_ALLOCATE(v_dijhat,(cplex*nfft,nspden))
        v_dijhat_allocated=.true.
@@ -567,56 +567,56 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
    if (dij_need.and.(.not.dij_prereq)) then
      msg='Dij prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dij0_need.and.(.not.dij0_prereq)) then
      msg='Dij0 prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dijfock_need.and.(.not.dijfock_prereq)) then
      msg='DijFock prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    if (dijhartree_need.and.(.not.dijhartree_prereq)) then
      msg='DijHartree prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dijxc_need.and.(.not.dijxc_prereq)) then
      msg='Dij^XC prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dijhat_need.and.(.not.dijhat_prereq)) then
      msg='Dij^hat prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dijhatfr_need.and.(.not.dijhatfr_prereq)) then
      msg='DijFR^hat prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dijnd_need.and.(.not.dijnd_prereq)) then
      msg='DijND prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dijso_need.and.(.not.dijso_prereq)) then
      msg='DijSO prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dijU_need.and.(.not.dijU_prereq)) then
      msg='DijU prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dijexxc_need.and.(.not.dijexxc_prereq)) then
      msg='DijExcc prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dijxchat_need.and.(.not.dijxchat_prereq)) then
      msg='DijXC^hat prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (dijxcval_need.and.(.not.dijxcval_prereq)) then
      msg='DijXC_val prerequisites missing!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  ------------------------------------------------------------------------
@@ -1120,11 +1120,11 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
 !Check data consistency
  if (size(dijhartree,1)/=qphase*pawtab%lmn2_size) then
    msg='invalid size for DijHartree!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (pawrhoij%qphase<qphase) then
    msg='pawrhoij%qphase must be >=qphase!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Initialization
@@ -1241,24 +1241,24 @@ subroutine pawdijfock(dijfock_vv,dijfock_cv,cplex_dij,qphase,hyb_mixing,hyb_mixi
 !Check data consistency
  if (size(dijfock_vv,1)/=qphase*cplex_dij*lmn2_size.or.size(dijfock_vv,2)/=ndij) then
    msg='invalid sizes for Dijfock_vv!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(dijfock_cv,1)/=qphase*cplex_dij*lmn2_size.or.size(dijfock_cv,2)/=ndij) then
    msg='invalid sizes for Dijfock_cv!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (pawrhoij%qphase<qphase) then
    msg='pawrhoij%qphase must be >=qphase!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (ndij==4.and.cplex_dij==1) then
    msg='When ndij=4, cplex_dij must be =2!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (abs(hyb_mixing)>tol8 .and. abs(hyb_mixing_sr)>tol8) then
    msg='invalid hybrid functional'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  else
    if (abs(hyb_mixing)>tol8) then
      eijkl => pawtab%eijkl
@@ -1501,30 +1501,30 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
 !Check data consistency
  if (size(dijxc,1)/=cplex_dij*qphase*lmn2_size.or.size(dijxc,2)/=ndij) then
    msg='invalid sizes for Dijxc !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(vxc1,1)/=qphase*mesh_size.or.size(vxct1,1)/=qphase*mesh_size.or.&
 &    size(vxc1,2)/=angl_size.or.size(vxct1,2)/=angl_size.or.&
 &    size(vxc1,3)/=nspden.or.size(vxct1,3)/=nspden) then
    msg='invalid sizes for vxc1 or vxct1 !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Check if MetaGGA is activated
  if (usekden==1) then
    if (.not.present(vxctau1)) then
      msg="vxctau1 needs to be present!"
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    else if (size(vxctau1)==0) then
      msg="vxctau1 needs to be allocated!"
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (.not.present(vxcttau1)) then
      msg="vxcttau1 needs to be present!"
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    else if (size(vxcttau1)==0) then
      msg="vxcttau1 needs to be allocated!"
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -1903,17 +1903,17 @@ subroutine pawdijxcm(dijxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
 !Check data consistency
  if (size(dijxc,1)/=cplex_dij*qphase*lmn2_size.or.size(dijxc,2)/=ndij) then
    msg='invalid sizes for Dijxc !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(lmselect)/=lm_size) then
    msg='invalid size for lmselect !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(vxc1,1)/=qphase*mesh_size.or.size(vxct1,1)/=qphase*mesh_size.or.&
 &    size(vxc1,2)/=lm_size.or.size(vxct1,2)/=lm_size.or.&
 &    size(vxc1,3)/=nspden.or.size(vxct1,3)/=nspden) then
    msg='invalid sizes for vxc1 or vxct1 !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Init memory
@@ -2173,7 +2173,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 !Check data consistency
  if (size(dijhat,1)/=cplex_dij*qphase*lmn2_size.or.size(dijhat,2)/=ndij) then
    msg='invalid sizes for Dijhat !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Eventually compute g_l(r).Y_lm(r) factors for the current atom (if not already done)
@@ -2190,7 +2190,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
  if (has_qphase.and.pawfgrtab%expiqr_allocated==0) then
    if (pawfgrtab%rfgd_allocated==0) then
      msg='pawfgrtab()%rfgd array must be allocated  !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (allocated(pawfgrtab%expiqr))  then
      LIBPAW_DEALLOCATE(pawfgrtab%expiqr)
@@ -2458,11 +2458,11 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 !Check data consistency
  if (cplex_dij/=2) then
    msg='cplex_dij must be 2 for nuclear dipole moments !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(dijnd,1)/=cplex_dij*pawtab%lmn2_size.or.size(dijnd,2)/=ndij) then
    msg='invalid sizes for Dijnd !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  dijnd = zero
@@ -2607,33 +2607,33 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 !Check data consistency
  if (qphase/=1) then
    msg='qphase=2 not yet available in pawdijso!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (cplex_dij/=2) then
    msg='cplex_dij must be 2 for spin-orbit coupling!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (ndij/=4) then
    msg='ndij must be 4 for spin-orbit coupling!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (pawang%use_ls_ylm==0) then
    msg='pawang%use_ls_ylm should be /=0!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(dijso,1)/=cplex_dij*qphase*lmn2_size.or.size(dijso,2)/=ndij) then
    msg='invalid sizes for DijSO!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
    msg='invalid sizes for vh1!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(vxc1,1)/=qphase*mesh_size.or.size(vxc1,3)/=nspden.or.&
 &   (size(vxc1,2)/=angl_size.and.pawxcdev==0).or.&
 &   (size(vxc1,2)/=lm_size.and.pawxcdev/=0)) then
    msg='invalid sizes for vxc1!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !------------------------------------------------------------------------
@@ -2802,25 +2802,25 @@ subroutine pawdiju(dijpawu,cplex_dij,qphase,ndij,nsppol,pawtab,vpawu,&
 !Check data consistency
  if (qphase/=1) then
    msg='qphase=2 not available in pawdiju!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(dijpawu,1)/=cplex_dij*qphase*lmn2_size.or.size(dijpawu,2)/=ndij) then
    msg='invalid sizes for dijpawu !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(vpawu,1)/=cplex_dij.or.size(vpawu,2)/=2*lpawu+1.or.&
 &    size(vpawu,3)/=2*lpawu+1.or.size(vpawu,4)/=ndij) then
    msg='invalid sizes for vpawu !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (natvshift_>0) then
    if ((.not.present(atvshift)).or.(.not.present(fatvshift))) then
      msg='when natvshift>0, atvshift and fatvshift arguments must be present !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (size(atvshift,1)/=natvshift.or.size(atvshift,2)/=nsppol) then
      msg='invalid sizes for atvshift !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -2861,7 +2861,7 @@ subroutine pawdiju(dijpawu,cplex_dij,qphase,ndij,nsppol,pawtab,vpawu,&
            icount=in1+(in2*(in2-1))/2
            if (pawtab%ij_proj<icount)  then
              msg='DFT+U: Problem while computing dijexxc !'
-             MSG_BUG(msg)
+             ABI_BUG(msg)
            end if
 
 !          coeffpawu(:)=vpawu(:,im1,im2,idijeff) ! use real and imaginary part
@@ -3019,15 +3019,15 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
  lmn2_size=pawrhoij%lmn2_size
  if (size(diju,1)/=qphase*cplex_dij*lmn2_size.or.size(diju,2)/=ndij) then
    msg='invalid sizes for diju!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (pawrhoij%qphase<qphase) then
    msg='pawrhoij%qphase must be >=qphase!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (ndij==4) then
    msg='pawdiju_euijkl not yet available for ndij=4!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Initialization
@@ -3088,12 +3088,12 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 !  if (compute_diju_im) then
 !    if (size(diju_im,1)/=lmn2_size.or.size(diju_im,2)/=ndij) then
 !      msg='invalid sizes for diju_im !'
-!      MSG_BUG(msg)
+!      ABI_BUG(msg)
 !    end if
 !  end if
 !  if (cplex_dij/=1) then
 !    msg='pawdiju_euijkl not yet available for cplex_dij=2!'
-!    MSG_ERROR(msg)
+!    ABI_ERROR(msg)
 !  end if
 !
 !  lmn2_size=pawtab%lmn2_size
@@ -3254,25 +3254,25 @@ subroutine pawdijexxc(dijexxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
 !Check data consistency
  if (qphase==2) then
    msg='pawdijexx not available for qphase=2!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(dijexxc,1)/=cplex_dij*qphase*lmn2_size.or.size(dijexxc,2)/=ndij) then
    msg='invalid sizes for dijexxc!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(lmselect)/=lm_size) then
    msg='invalid size for lmselect!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(vxc_ex,1)/=qphase*mesh_size.or.size(vxc_ex,2)/=lm_size.or.&
 &    size(vxc_ex,3)/=nspden) then
    msg='invalid sizes for vxc_ex!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(vpawx,1)/=1.or.size(vpawx,2)/=lmn2_size.or.&
 &    size(vpawx,3)/=ndij) then
    msg='invalid sizes for vpawx!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Init memory
@@ -3383,7 +3383,7 @@ subroutine pawdijexxc(dijexxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
              icount=in1+(in2*(in2-1))/2
              if(pawtab%ij_proj<icount)  then
                msg='PAW local exact-exchange: Problem while computing dijexxc !'
-               MSG_BUG(msg)
+               ABI_BUG(msg)
              end if
              dijexxc_idij(klmn)=pawtab%exchmix &
 &                              *(vpawx(1,klmn,idij)-dijexxc_idij(klmn))
@@ -3400,7 +3400,7 @@ subroutine pawdijexxc(dijexxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
              icount=in1+(in2*(in2-1))/2
              if(pawtab%ij_proj<icount)  then
                msg='PAW local exact-exchange: Problem while computing dijexxc !'
-               MSG_BUG(msg)
+               ABI_BUG(msg)
              end if
              dijexxc_idij(klmn1)  =pawtab%exchmix &
 &                                 *(vpawx(1,klmn,idij)-dijexxc_idij(klmn1))
@@ -3588,22 +3588,22 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
  if (my_natom>0) then
    if (qne0.and.qphase==1) then
      msg='qphase must be 2 when q<>0!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (paw_ij1(1)%qphase/=qphase) then
      msg='paw_ij1()%qphase and qphase must be equal !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (paw_ij1(1)%has_dijfr==0) then
      msg='pawdij1()%dijfr must be allocated !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    testdij1=(ipert<=natom.and.option==0.and.pawfgrtab(1)%gylm_allocated==0)
    testdij2=(ipert<=natom.and.pawfgrtab(1)%gylmgr_allocated==0)
    testdij3=(testdij2.and.qne0.and.pawfgrtab(1)%expiqr_allocated==0)
    if ((testdij1.or.testdij2.or.testdij3).and.pawfgrtab(1)%rfgd_allocated==0) then
      msg='pawfgrtab()%rfgd array must be allocated  !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -4204,27 +4204,27 @@ end subroutine pawdijfr
 !Check data consistency
  if(pawtab%usepawu<0) then
    msg = "usepawu<0 not allowed!"
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if(option_interaction==3.and.pawtab%usepawu>=10) then
    msg = "Option_interaction==3 is not compatible with usepawu>=10 in pawpupot"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (size(vpawu,1)/=cplex_dij.or.size(vpawu,2)/=2*lpawu+1.or.&
 &    size(vpawu,3)/=2*lpawu+1.or.size(vpawu,4)/=ndij) then
    write (msg,'(a,4I5, a,4I5)') ' invalid sizes for vpawu !',cplex_dij,2*lpawu+1,2*lpawu+1,ndij, &
 &    ' /= ', size(vpawu,1), size(vpawu,2), size(vpawu,3), size(vpawu,4)
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(noccmmp,1)/=cplex_dij.or.size(noccmmp,2)/=2*lpawu+1.or.&
 &    size(noccmmp,3)/=2*lpawu+1.or.size(noccmmp,4)/=ndij) then
    write (msg,'(a,4I5, a,4I5)') ' invalid sizes for noccmmp !',cplex_dij,2*lpawu+1,2*lpawu+1,ndij, &
 &    ' /= ', size(noccmmp,1), size(noccmmp,2), size(noccmmp,3), size(noccmmp,4)
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(nocctot,1)/=ndij) then
    msg='invalid size for nocctot !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !=====================================================
@@ -4495,11 +4495,11 @@ end subroutine pawdijfr
  if (size(vpawx,1)/=1.or.size(vpawx,2)/=lmn2_size.or.&
 &    size(vpawx,3)/=ndij) then
    msg='invalid sizes for vpawx !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (pawrhoij%qphase==2) then
    msg='pawxpot not compatible with qphase=2 (DFPT)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !=====================================================
@@ -4683,7 +4683,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 &   (option_dij==10.and.paw_ij(1)%has_dijhartree==0).or.&
 &   (option_dij==11.and.paw_ij(1)%has_dijfock==0)) then
      msg='Incompatibilty between option_dij and allocation of Dij!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -4711,7 +4711,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  if (my_natom>0) then
    if (noncoll.and.paw_ij(1)%cplex_dij/=2) then
      msg='cplex_dij must be 2 with ndij=4!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 !Do we use antiferro symmetries ?
@@ -4724,13 +4724,13 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
    if (present(qphon)) then
      if (any(abs(qphon(1:3))>tol8).and.(.not.has_qphase)) then
        msg='Should have qphase=2 for a non-zero q!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
 !DEBUG_ALTERNATE_ALGO
 !  if(lsymnew.and.has_qphase) then
 !    msg='symdij: alternate algo not available for phonons at q<>0!'
-!    MSG_BUG(msg)
+!    ABI_BUG(msg)
 !  end if
 !DEBUG_ALTERNATE_ALGO
  end if
@@ -4756,7 +4756,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 
    if (pawang%nsym==0) then
      msg='pawang%zarot must be allocated!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  Have to make a temporary copy of dij
@@ -5202,7 +5202,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 
    if (antiferro) then
      msg='In the antiferromagnetic case, nsym cannot be 1'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    do iatom=1,my_natom
@@ -5454,7 +5454,7 @@ subroutine symdij_all(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,&
    nopt = nopt + 1
    options(nopt) = 10
    msg='symetrization of dij_exexch not coded!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Set up parallelism over atoms

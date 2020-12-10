@@ -278,12 +278,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
       'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
       'positive, while it is ',tolwfr,ch10,&
       'Action: change tolwfr in your input file and resubmit the job.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    ! toldff only allowed when prtfor==1
    ! FIXME: this test should be done on input, not during calculation
    if((ttoldff == 1 .or. ttolrff == 1) .and. prtfor==0 )then
-     MSG_ERROR('toldff only allowed when prtfor=1!')
+     ABI_ERROR('toldff only allowed when prtfor=1!')
    end if
    ! If SCF calculations, one and only one of these can differ from zero
    if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
@@ -293,7 +293,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &     'tolwfr=',tolwfr,', toldff=',toldff,', tolrff=',tolrff,', toldfe=',toldfe,ch10,&
 &     'and tolvrs=',tolvrs,' .',ch10,&
 &     'Action: change your input file and resubmit the job.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    if (dtset%usewvl == 1) then
@@ -592,7 +592,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          if (diffor < tol12) then
            write (message,'(3a)') ' toldff criterion is satisfied, but your forces are suspiciously low.', ch10,&
 &           ' Check if the forces are 0 by symmetry: in that case you can not use the toldff convergence criterion!'
-           MSG_WARNING(message)
+           ABI_WARNING(message)
            if (maxfor < tol16 .and. res2 > tol9) tolrff_ok=0
          end if
        else
@@ -838,7 +838,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
  case default
    write(message, '(a,i0,a)' )' choice = ',choice,' is not an allowed value.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end select
 
  ! Additional stuff for the Fock+SCF cycle
@@ -863,7 +863,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if(abs(dtset%postoldff)>tiny(0.0_dp))ttoldff=1
        if(abs(dtset%postoldfe)>tiny(0.0_dp))ttoldfe=1
        if (dtset%positron<0.and.ttoldff+ttoldfe/=1.and.iscf>0) then
-         MSG_ERROR('one and only one of toldff or toldfe must differ from zero !')
+         ABI_ERROR('one and only one of toldff or toldfe must differ from zero !')
        end if
      end if
      if (choice==2) then
@@ -1037,7 +1037,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
    'nqpt =',dtset%nqpt,' is not allowed',ch10,&
    '(only 0 or 1 are allowed).',ch10,&
    'Action: correct your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  ! Compute dimensional primitive translations rprimd
@@ -1075,7 +1075,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
    'boxcut= ',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
    'Need larger ngfft to use intxc=1.',ch10,&
    'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 end subroutine setup1
@@ -1171,13 +1171,13 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 ! *************************************************************************
 
  if (enunit<0.or.enunit>2) then
-   MSG_BUG(sjoin('enunit must be 0, 1 or 2. Argument was:', itoa(enunit)))
+   ABI_BUG(sjoin('enunit must be 0, 1 or 2. Argument was:', itoa(enunit)))
  end if
 
  if (prteig > 0) then
    call wrtout(iout, sjoin(' prteigrs : about to open file ', fname_eig))
    if (open_file(fname_eig, msg, newunit=temp_unit, status='unknown', form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    rewind(temp_unit) ! always rewind disk file and print latest eigenvalues
  end if
@@ -1395,7 +1395,7 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
    call wrtout(iout," ")
 
  else
-   MSG_BUG(sjoin('option:', itoa(option),', is not allowed.'))
+   ABI_BUG(sjoin('option:', itoa(option),', is not allowed.'))
  end if
 
  if (prteig > 0) close (temp_unit)
@@ -1790,7 +1790,7 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
  usepaw = 0
  ABI_MALLOC(pspheads, (npsp))
  if (npsp > 10) then
-   MSG_BUG('ecut_tmp is not well defined.')
+   ABI_BUG('ecut_tmp is not well defined.')
  end if
  ecut_tmp = -one
 
@@ -1805,7 +1805,7 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
       ! Catch possible mistake done by user (input without pseudos and `abinit t01.in` syntax)
       ! else the code starts to prompt for pseudos and execution gets stuck
       if (len_trim(input_path) /= 0) then
-        MSG_ERROR("`pseudos` variable must be specified in input when the code is invoked with the `abinit t01.in` syntax")
+        ABI_ERROR("`pseudos` variable must be specified in input when the code is invoked with the `abinit t01.in` syntax")
       end if
 
       ! Finish to read the "file" file completely, as npsp is known,
@@ -1818,7 +1818,7 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
           'There are not enough names of pseudopotentials provided in the files file.',ch10,&
           'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
           'if they are correct, complete your files file.'
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
         end if
         pspfilnam_(ipsp) = trim(filpsp)
         write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
@@ -1957,7 +1957,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
    NCF_CHECK(nf90_close(ncid))
 #endif
  else
-   MSG_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))
+   ABI_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))
  end if
 
  ABI_FREE(gs_eigen)

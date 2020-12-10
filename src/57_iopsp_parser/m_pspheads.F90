@@ -136,7 +136,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
    ! Check if the file is written in XML
    usexml = 0
    if (open_file(filnam(ipsp), msg, newunit=unt, form="formatted", status="old") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    rewind(unit=unt, err=10, iomsg=errmsg)
@@ -160,10 +160,10 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      ii = index(testxml, '"')
      if (ii /= 0) then
        if (atoi(testxml(ii+1:ii+1)) >= 2) then
-         MSG_ERROR(sjoin("UPF >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Path:", filnam(ipsp)))
+         ABI_ERROR(sjoin("UPF >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Path:", filnam(ipsp)))
        end if
      else
-       MSG_ERROR(sjoin("Cannot find version attributed in UPF file:", filnam(ipsp)))
+       ABI_ERROR(sjoin("Cannot find version attributed in UPF file:", filnam(ipsp)))
      end if
    end if
 
@@ -172,7 +172,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
    ! Check if pseudopotential file is a Q-espresso UPF1 file
    useupf = 0
    if (open_file(filnam(ipsp), msg, newunit=unt, form="formatted", status="old") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    rewind(unit=unt, err=10, iomsg=errmsg)
@@ -188,7 +188,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
    if (usexml /= 1 .and. useupf /= 1) then
      ! Open the psp file and read a normal abinit style header
      if (open_file(filnam(ipsp), msg, newunit=unt, form='formatted', status='old') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      rewind (unit=unt, err=10, iomsg=errmsg)
@@ -227,7 +227,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 #else
      write(msg, '(2a)') "XML norm-conserving pseudopotential has been input,", &
        " but abinit is not compiled with libPSML support. Reconfigure and recompile."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
 #endif
 
    else if(usexml==1.and.test_paw==1)then
@@ -415,7 +415,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
          write(msg,'(4a)')ch10,&
           "Chemical element not found in BigDFT table",ch10,&
           "Action: upgrade BigDFT table"
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
 !
 !      pspheads(ipsp)%pawheader%rpaw/4.0d0
@@ -451,7 +451,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      read (unt,*,err=10,iomsg=errmsg) pspheads(ipsp)%GTHradii(0) !rloc
      read (unt,*,err=10,iomsg=errmsg) idum
      if(idum-1/=lmax) then
-       MSG_ERROR("in inpspheads: nnonloc-1 /= lmax")
+       ABI_ERROR("in inpspheads: nnonloc-1 /= lmax")
      end if
      do ilmax=0,lmax
        read (unt,*,err=10,iomsg=errmsg) &
@@ -477,7 +477,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        'The pseudopotential code (pspcod) read from file is ',pspcod,ch10,&
        'This value is not allowed (should be between 1 and 10). ',ch10,&
        'Action: use a correct pseudopotential file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if ! pspcod
 
    ! Store in pspheads
@@ -517,7 +517,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
         'One pseudopotential is PAW (pspcod=7 or 17) !',ch10,&
         'All pseudopotentials must be PAW (this is not the case here) !',ch10,&
         'Action: use only PAW pseudopotential files.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
  end if
@@ -526,7 +526,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine inpspheads
 !!***
@@ -833,7 +833,7 @@ subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, np
 
 !call pwscf routine for reading in UPF
  if (open_file(filpsp, msg, newunit=iunit, status='old',form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !read in psp data to static data in pseudo module, for ipsx == 1
@@ -959,7 +959,7 @@ subroutine upfxc2abi(dft, pspxc)
 !    make general approach: check gradient parts first, then lda.
 !    event. check if they are consistent.
  case default
-   MSG_ERROR('upf2abinit: XC functional not recognized')
+   ABI_ERROR('upf2abinit: XC functional not recognized')
  end select
 
 end subroutine upfxc2abi

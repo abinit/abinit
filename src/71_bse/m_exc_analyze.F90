@@ -142,7 +142,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
 
 !************************************************************************
 
- MSG_WARNING("Exc plot is still under development")
+ ABI_WARNING("Exc plot is still under development")
 
  call wrtout(std_out," Calculating excitonic wavefunctions in real space","COLL")
  ABI_CHECK(Wfd%nspinor==1,"nspinor==2 not coded")
@@ -165,7 +165,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  ! TODO recheck this part.
  ! Prepare tables needed for splining the onsite term on the FFT box.
  if (Wfd%usepaw==1.and.paw_add_onsite) then
-   MSG_WARNING("Testing the calculation of AE PAW wavefunctions.")
+   ABI_WARNING("Testing the calculation of AE PAW wavefunctions.")
    ! Use a local pawfgrtab to make sure we use the correction in the paw spheres
    ! the usual pawfgrtab uses r_shape which may not be the same as r_paw.
    call pawtab_get_lsize(Pawtab,l_size_atm,Cryst%natom,Cryst%typat)
@@ -197,7 +197,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
    if (iseven(nrcell(ii))) then
      nrcl(ii) = nrcell(ii)+1
      write(msg,'(2(a,i0))')" Enforcing odd number of cell replicas ",nrcell(ii)," --> ",nrcl(ii)
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end do
 
@@ -329,7 +329,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
          exc_phi(rr) = exc_phi(rr) + eikr12 * ur_v(wp_idx) * CONJG(ur_c(wp_idx))
        end do
      else ! hole
-       MSG_ERROR("Not coded")
+       ABI_ERROR("Not coded")
      end if
      !
   end do
@@ -397,7 +397,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  if (my_rank==master) then
    out_fname = TRIM(BS_files%out_basename)//"_EXC_WF"
    if (open_file(out_fname,msg,newunit=xsf_unt,form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call printxsf(bbox(1),bbox(2),bbox(3),exc_phi2,sc_rprimd,origin0,sc_natom,Cryst%ntypat,sc_typat,&
@@ -475,7 +475,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
 
  call wrtout(std_out,' Calculating electron-hole, excited state density',"COLL")
  call wrtout(std_out," Reading eigenstates from: "//TRIM(filbseig),"COLL")
- MSG_ERROR("Not tested")
+ ABI_ERROR("Not tested")
 
  ! Prepare FFT tables to have u(r) on the ngfft_osc mesh.
  !if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) then
@@ -499,7 +499,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
  end do
 
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted", status="old", action="read") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(eig_unt) hsize,nstates
@@ -615,7 +615,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
  nexc(:) = n0(:) + rho_eh(:)
 
  if (open_file('out.den',msg,newunit=den_unt) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! here conversion to cartesian through a1, a2, a3
@@ -634,7 +634,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
  close(den_unt)
 
  if (open_file('out.sden',msg,newunit=sden_unt) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! we are looking for the plane between (100) (111)

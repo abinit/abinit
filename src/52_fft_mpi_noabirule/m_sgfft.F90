@@ -196,7 +196,7 @@ subroutine fft_cc_one_nothreadsafe(fftcache,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris)
    write(message, '(a,3i10,a,i10,a)' )&
 &   'one of the dimensions n1,n2,n3=',n1,n2,n3,&
 &   'exceeds allowed dimension mg=',mg,ch10
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !transform along x direction
@@ -318,7 +318,7 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 &   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
 &   'The second digit (fftalg(B)) must be 0 or 1.',ch10,&
 &   'Action: change fftalg in your input file.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (fftalgb==1 .and. ALL(fftalga/=(/1,3,4/)) )then
@@ -326,12 +326,12 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 &   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
 &   'When fftalg(B) is 1, the allowed values for fftalg(A) are 1 and 4.',ch10,&
 &   'Action: change fftalg in your input file.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (n4<n1.or.n5<n2.or.n6<n3) then
    write(msg,'(a,3i8,a,3i8)')'  Each of n4,n5,n6=',n4,n5,n6,'must be >= n1, n2, n3 =',n1,n2,n3
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !---------------------------------------------------------
@@ -343,7 +343,7 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
    write(msg, '(a,3i10,a,a,a,i10,a)' )&
 &   'One of the dimensions n1,n2,n3=',n1,n2,n3,',',ch10,&
 &   'exceeds allowed dimension mg=',mg,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 #endif
 
@@ -710,7 +710,7 @@ subroutine fftpad_one_nothreadsafe(fftcache,mgfft,nd1,nd2,nd3,n1,n2,n3,arr,ftarr
  if (n1>mg.or.n2>mg.or.n3>mg) then
    write(message, '(a,3i10,a,i10)')&
 &   'one of the dimensions n1,n2,n3=',n1,n2,n3,' exceeds the allowed dimension mg=',mg
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 #endif
 
@@ -1279,7 +1279,7 @@ subroutine sg_fftpx(fftcache,mfac,mg,mgfft,nd1,nd2,nd3,n2,n3,&
 
          else
 !          All radices treated
-           MSG_BUG('called with factors other than 2, 3, and 5')
+           ABI_BUG('called with factors other than 2, 3, and 5')
          end if
 
        end do  ! End of direct transformation (loop over ic)
@@ -1556,7 +1556,7 @@ subroutine sg_fftpx(fftcache,mfac,mg,mgfft,nd1,nd2,nd3,n2,n3,&
 
        else
 !        All radices are treated
-         MSG_BUG('called with factors other than 2, 3, and 5')
+         ABI_BUG('called with factors other than 2, 3, and 5')
        end if
 
 !      End of bit reversal
@@ -1998,7 +1998,7 @@ subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
 
        else
 !        All factors have been treated
-         MSG_BUG('called with factors other than 2, 3, and 5')
+         ABI_BUG('called with factors other than 2, 3, and 5')
        end if
 
      end do
@@ -2278,7 +2278,7 @@ subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
 
      else
 !      All factors treated
-       MSG_BUG('called with factors other than 2, 3, and 5')
+       ABI_BUG('called with factors other than 2, 3, and 5')
      end if
 
 !    ---------------------------------------------------------------
@@ -2366,7 +2366,7 @@ subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
 ! *************************************************************************
 
  if (fftcache<0) then
-   MSG_ERROR('fftcache must be positive')
+   ABI_ERROR('fftcache must be positive')
  end if
 
 !Outer loop over z planes (j2)--note range from n3i to n3
@@ -2688,7 +2688,7 @@ subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
 
      else
 !      All radices treated
-       MSG_BUG('called with factors other than 2, 3, and 5')
+       ABI_BUG('called with factors other than 2, 3, and 5')
      end if
 
    end do
@@ -2962,7 +2962,7 @@ subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
 
    else
 !    All radices done
-     MSG_BUG('Called with factors other than 2, 3, and 5')
+     ABI_BUG('Called with factors other than 2, 3, and 5')
    end if
  end do
 !$OMP END PARALLEL DO
@@ -3399,7 +3399,7 @@ subroutine sg_fftz(mfac,mg,nd1,nd2,nd3,n1,n2i,n2,z,zbr,trig,aft,now,bef,ris,ind,
 
 !    All radices treated
    else
-     MSG_BUG('called with factors other than 2, 3, and 5')
+     ABI_BUG('called with factors other than 2, 3, and 5')
    end if
 
 !  End of direct transformation
@@ -3713,7 +3713,7 @@ subroutine sg_fftz(mfac,mg,nd1,nd2,nd3,n1,n2i,n2,z,zbr,trig,aft,now,bef,ris,ind,
    end do ! ia
 
  else !  All radices treated
-   MSG_BUG('called with factors other than 2, 3, and 5')
+   ABI_BUG('called with factors other than 2, 3, and 5')
  end if
 
 end subroutine sg_fftz
@@ -3850,7 +3850,7 @@ subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
      write(message, '(a,i0,2a,i0)' )&
 &     'number of factors ic=',ic,ch10,&
 &     'exceeds dimensioned mfac=',mfac
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if (bef(ic)/=1) then
      aft(ic)=aft(ic)*now(ic)
@@ -3890,12 +3890,12 @@ subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
 
  if (irep/=n) then
    write(message,'(a,i0,a,i0)')'  irep should equal n ; irep=',irep,' n=',n
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (inc/=1) then
    write(message, '(a,i0)' )' inc should equal 1 in sg_ctrig; inc=',inc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 end subroutine sg_ctrig
@@ -3977,7 +3977,7 @@ subroutine sg_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_
 &      kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
 
    case default
-      MSG_ERROR("Wrong option")
+      ABI_ERROR("Wrong option")
    end select
  end do
 
@@ -4112,12 +4112,12 @@ subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gb
 
  if(istwf_k>2 .and. option==0)then
    write(message,'(a,i0)')' option=0 is not allowed with istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(istwf_k>=2 .and. option==3)then
    write(message,'(a,i0)')' option=3 is not allowed with istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !For all other tests of validity of inputs, assume that they
@@ -5059,17 +5059,17 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
  lluse_ndo=.true.
  if(istwf_k/=1)then
    write(message,'(a,i0)' )' It is not yet allowed to use dmft with istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(istwf_k>2 .and. option==0)then
    write(message, '(a,i0)' )' It is not allowed to use option=0 with istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(istwf_k>=2 .and. option==3)then
    write(message, '(a,i0)' )'  It is not allowed to use option=3 with istwf_k=',istwf_k
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  lluse_ndo=.false.
@@ -5081,7 +5081,7 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
      write(message, '(a,a,a,i4,i5)' )&
 &     'fofgin_p has a dimension equal to zero and luse_ndo true',ch10,&
 &     'Action: check dimension of fofgin_p',size(fofgin_p,2),luse_ndo
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 

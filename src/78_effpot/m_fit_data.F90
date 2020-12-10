@@ -180,13 +180,13 @@ subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff
  if(natom /= ts%natom)then
    write(message, '(a)')&
 &      ' The number of atoms does not correspond to the training set'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(ntime /= ts%ntime)then
    write(message, '(a)')&
 &      ' The number of time does not correspond to the training set'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  
 !Free the output 
@@ -336,7 +336,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 &      'The number of atoms in the hist file does not correspond to the supercell.',ch10,&
 &      'You should call the routine fit_polynomial_coeff_mapHistToRef before',ch10,&
 &      'Action: Contact abinit group'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Allocation of temporary arrays

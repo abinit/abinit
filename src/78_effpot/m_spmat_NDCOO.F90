@@ -395,7 +395,7 @@ contains
     real(dp) :: val
 
     if(self%ndim .ne. res%ndim+1) then
-      MSG_ERROR('Dimension of resulting matrix is not equal to (dimension of initial matrix -1)')
+      ABI_ERROR('Dimension of resulting matrix is not equal to (dimension of initial matrix -1)')
     endif
 
     do iind =1 , self%nnz
@@ -427,7 +427,7 @@ contains
     real(dp) :: val
 
     if(self%ndim .ne. res%ndim+2) then
-      MSG_ERROR('Dimension of resulting matrix is not equal to (dimension of initial matrix -2)')
+      ABI_ERROR('Dimension of resulting matrix is not equal to (dimension of initial matrix -2)')
     endif
     do iind =1 , self%nnz
       iiv=self%ind%data(iv, iind)

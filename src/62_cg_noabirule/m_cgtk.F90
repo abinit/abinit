@@ -434,7 +434,7 @@ subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband
 &         'The eigenvector with band ',iband,' has zero norm.',ch10,&
 &         'This usually happens when the number of bands (nband) is comparable to the number of planewaves (mpw)',ch10,&
 &         'Action: Check the parameters of the calculation. If nband ~ mpw, then decrease nband or, alternatively, increase ecut'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        xx=cos(theta)

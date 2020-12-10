@@ -1449,7 +1449,7 @@ subroutine get_eneocc_vect(ebands,arr_name,vect)
  case ('doccde')
    call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%doccde,vect)
  case default
-   MSG_BUG(sjoin('Wrong arr_name:', arr_name))
+   ABI_BUG(sjoin('Wrong arr_name:', arr_name))
  end select
 
 end subroutine get_eneocc_vect
@@ -1514,7 +1514,7 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
  case ('doccde')
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%doccde, val=zero)
  case default
-   MSG_BUG(sjoin('Wrong arr_name= ', arr_name))
+   ABI_BUG(sjoin('Wrong arr_name= ', arr_name))
  end select
 
 end subroutine put_eneocc_vect
@@ -1820,7 +1820,7 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
      write(msg,'(a,i0,a)')&
       'Trying to apply a scissor operator on a metallic band structure for spin: ',spin,&
       'Assuming you know what you are doing, continuing anyway! '
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
      !Likely newocc will stop, unless the system is semimetallic ?
    end if
  end do
@@ -1837,7 +1837,7 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
        write(msg,'(2a,4(a,i0))')&
         'Not enough bands to apply the scissor operator. ',ch10,&
         'spin: ',spin,' ikpt: ',ikpt,' nband_k: ',nband_k,' but valence index: ',ival
-       MSG_COMMENT(msg)
+       ABI_COMMENT(msg)
      end if
 
    end do
@@ -2067,7 +2067,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
    do ik=1,nkpts
      ikpt = krank%get_index(kpoints(:,ik))
      if (ikpt == -1) then
-       MSG_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
+       ABI_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
        cycle
      end if
      if (.not. (band_block(1,ik) >= 1 .and. band_block(2,ik) <= ebands%mband)) cycle
@@ -2081,7 +2081,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
  ! This can happen if wrong input.
  if (cnt == 0) then
-    MSG_WARNING("None of the k-points/bands provided was found in ebands%")
+    ABI_WARNING("None of the k-points/bands provided was found in ebands%")
     emin = minval(ebands%eig); emax = maxval(ebands%eig)
  end if
 
@@ -2188,7 +2188,7 @@ function ebands_get_minmax(ebands, arr_name) result(minmax)
  case ('doccde')
    rdata => ebands%doccde
  case default
-   MSG_BUG(sjoin('Wrong arr_name:', arr_name))
+   ABI_BUG(sjoin('Wrong arr_name:', arr_name))
  end select
 
  minmax(1,:)=greatest_real
@@ -2393,7 +2393,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
      mband = nint((ebands%nelect * ebands%nspinor) / 2)
      ebands%occ = zero
      ebands%occ(1:mband,:,:) = maxocc
-     !MSG_ERROR("Occupation factors are not initialized, likely due to scf = -2")
+     !ABI_ERROR("Occupation factors are not initialized, likely due to scf = -2")
    end if
 
    ! Calculate the valence index for each spin channel.
@@ -2458,7 +2458,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    write(msg,'(2a,2(a,es12.4))')&
     'Too large difference in number of electrons:,',ch10,&
     'Expected = ',ebands%nelect,' Calculated = ',sum(nelect_spin)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine ebands_update_occ
@@ -2576,7 +2576,7 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 ! *************************************************************************
 
  if (.not. ebands_has_metal_scheme(ebands)) then
-   MSG_ERROR("set_fermie assumes a metallic occupation scheme. Use ebands_set_scheme before calling ebands_set_fermie!")
+   ABI_ERROR("set_fermie assumes a metallic occupation scheme. Use ebands_set_scheme before calling ebands_set_fermie!")
  end if
 
  prev_fermie = ebands%fermie; prev_nelect = ebands%nelect
@@ -2664,7 +2664,7 @@ subroutine ebands_set_extrael(ebands, extrael, spinmagntarget, msg, prtvol)
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  if (.not. ebands_has_metal_scheme(ebands)) then
-   MSG_ERROR("set_extrael assumes a metallic occupation scheme. Use ebands_set_scheme!")
+   ABI_ERROR("set_extrael assumes a metallic occupation scheme. Use ebands_set_scheme!")
  end if
 
  prev_fermie = ebands%fermie; prev_nelect = ebands%nelect
@@ -2751,9 +2751,9 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
        ' does not correspond with ebands%nelect: ',tmp_ebands%nelect,' for kT: ', kTmesh(it)
 
      if (kTmesh(it) == zero) then
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      else
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
  end do ! it
@@ -3106,7 +3106,7 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  end if
 
 #else
- MSG_ERROR("netcdf support is not activated. ")
+ ABI_ERROR("netcdf support is not activated. ")
 #endif
 
 contains
@@ -3229,7 +3229,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
  edos%intmeth = intmeth
 
  if (ebands%nkpt == 1) then
-   MSG_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
+   ABI_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
    edos%intmeth = 1
  end if
 
@@ -3273,7 +3273,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
  case (2, -2)
    !call wrtout(std_out, " Computing electron-DOS with tetrahedron method")
    ! Consistency test
-   if (any(ebands%nband /= ebands%nband(1)) ) MSG_ERROR('for tetrahedra, nband(:) must be constant')
+   if (any(ebands%nband /= ebands%nband(1)) ) ABI_ERROR('for tetrahedra, nband(:) must be constant')
 
    ! Build tetra object.
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
@@ -3317,7 +3317,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    end where
 
  case default
-   MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
+   ABI_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
  ! Compute total DOS and IDOS
@@ -3341,7 +3341,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    write(msg,"(3a)")&
     "Bisection could not find an initial guess for the Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of electrons"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
@@ -3433,7 +3433,7 @@ subroutine edos_write(edos, path)
  cfact = Ha_eV
 
  if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Write header.
@@ -3447,7 +3447,7 @@ subroutine edos_write(edos, path)
  case (2)
    write(unt,'(a,i0)')'# Tetrahedron method, nkibz= ',edos%nkibz
  case default
-   MSG_ERROR(sjoin("Wrong method:", itoa(edos%intmeth)))
+   ABI_ERROR(sjoin("Wrong method:", itoa(edos%intmeth)))
  end select
 
  if (edos%ief == 0) then
@@ -3542,7 +3542,7 @@ integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_gef")), edos%gef))
 
 #else
- MSG_ERROR("netcdf library not available")
+ ABI_ERROR("netcdf library not available")
 #endif
 
 contains
@@ -3605,7 +3605,7 @@ subroutine edos_print(edos, unit, header)
  case (-2)
    write(unt, "(a)")" Linear tetrahedron method with Blochl corrections."
  case default
-   MSG_ERROR(sjoin("Wrong intmeth:", itoa(edos%intmeth)))
+   ABI_ERROR(sjoin("Wrong intmeth:", itoa(edos%intmeth)))
  end select
 
  write(unt, "(a,f5.1,a, i0)")" Mesh step: ", edos%step * Ha_meV, " (meV) with npts: ", edos%nw
@@ -3900,7 +3900,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  ABI_MALLOC(npwarr, (nkfull))
 
  if (any(cryst%symrel(:,:,1) /= identity_3d) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
-   MSG_ERROR('The first symmetry is not the identity operator!')
+   ABI_ERROR('The first symmetry is not the identity operator!')
  end if
 
  do ikf=1,nkfull
@@ -4044,7 +4044,7 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
     "At least one of the k-points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
     "kptrlatt of input ebands: ",trim(ltoa(pack(self%kptrlatt, mask=.True.))),ch10, &
     "downsampled K-mesh: ",trim(ltoa(pack(in_kptrlatt, mask=.True.)))
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_MALLOC(istwfk, (new_nkibz))
@@ -4347,7 +4347,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    !  ABI_CALLOC(new%velocity,(3,new%mband,new%nkpt,new%nsppol))
    !end if
  else
-   MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
+   ABI_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
  end if
 
  ! Interpolate eigenvalues and velocities.
@@ -4364,7 +4364,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
        !case (2)
        !  call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin), new%velocity(:,ib,ik_ibz,spin))
        case default
-         MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
+         ABI_ERROR(sjoin("Wrong params(1):", itoa(itype)))
        end select
      end do
    end do
@@ -4467,7 +4467,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  nb = my_bblock(2) - my_bblock(1) + 1
 
  if (ebands%nkpt == 1) then
-   MSG_WARNING("Cannot interpolate band energies when nkpt = 1. Returning")
+   ABI_WARNING("Cannot interpolate band energies when nkpt = 1. Returning")
    return
  end if
 
@@ -4511,7 +4511,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
                  my_bblock, comm)
 
  case default
-   MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
+   ABI_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
  end select
 
  ! Interpolate eigenvalues.
@@ -4526,7 +4526,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
        case (1)
          call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
        case default
-         MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
+         ABI_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
        end select
      end do
    end do
@@ -4633,7 +4633,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
  edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol; edos%nspinor = ebands%nspinor
  edos%intmeth = intmeth
  if (ebands%nkpt == 1) then
-   MSG_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
+   ABI_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
    edos%intmeth = 1
  end if
 
@@ -4827,7 +4827,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
    if (ntens > 0) call xmpi_sum(out_tensdos, comm, ierr)
 
  case default
-   MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
+   ABI_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
  ! Compute total DOS and IDOS
@@ -4852,7 +4852,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
     "Bisection could not find an initial guess for the Fermi level with nelect:",ebands%nelect, ch10, &
     "Possible reasons: not enough bands in DOS or wrong number of electrons.", ch10, &
     "Returning from ebands_get_edos_matrix_elements without setting edos%ief !"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
@@ -4932,7 +4932,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
      write(msg,'(a,i0,a)')&
      'Trying to compute JDOS with a metallic band structure for spin: ',spin,&
      'Assuming you know what you are doing, continuing anyway! '
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
  end do
 
@@ -4949,7 +4949,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  jdos%broad = broad
 
  !if (ebands%nkpt == 1) then
- !  MSG_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
+ !  ABI_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
  !  jdos%intmeth = 1
  !end if
 
@@ -4984,7 +4984,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  case (2, -2)
    ! Tetrahedron method
    if (any(ebands%nband /= ebands%nband(1)) ) then
-     MSG_WARNING('For tetrahedra, nband(:) must be constant')
+     ABI_WARNING('For tetrahedra, nband(:) must be constant')
      ierr = ierr + 1
    end if
    if (ierr/=0) return
@@ -5027,7 +5027,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    call tetra%free()
 
  case default
-   MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
+   ABI_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
  if (ebands%nsppol == 1) then
@@ -5040,7 +5040,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  !if (my_rank == 0) then
  !  path = "jdos_gauss.data"; if (intmeth == 2) path = "jdos_tetra.data"
  !  if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
- !    MSG_ERROR(msg)
+ !    ABI_ERROR(msg)
  !  end if
  !  do iw=1,nw
  !    write(unt,*)jdos%mesh(iw),(jdos(iw,spin), spin=1,ebands%nsppol)
@@ -5111,7 +5111,7 @@ integer function jdos_ncwrite(jdos, ncid, prefix) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_values")), jdos%values))
 
 #else
- MSG_ERROR("netcdf library not available")
+ ABI_ERROR("netcdf library not available")
 #endif
 
 contains
@@ -5227,7 +5227,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
    !input file for boltztrap: general info, Ef, Nelec, etc...
    filename= trim(fname_radix)//"_"//trim(spinsuffix(isppol))//"BLZTRP.intrans"
    if (open_file(filename, msg, newunit=iout, form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ewindow = 1.1_dp * (ebands%fermie-minval(ebands%eig(1, :, isppol)))
@@ -5251,7 +5251,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 !files file, with association of all units for Boltztrap
    filename= trim(fname_radix)//"_"//trim(spinsuffix(isppol))//"BLZTRP.def"
    if (open_file(filename, msg, newunit=iout, form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write (iout, '(3a)') "5, '", trim(fname_radix)//"_"//trim(spinsuffix(isppol))//"BLZTRP.intrans',      'old',    'formatted',0"
@@ -5288,7 +5288,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 !file is for geometry symmetries etc
  filename= trim(fname_radix)//"_BLZTRP.struct"
  if (open_file(filename, msg, newunit=iout, form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (iout, '(a)') "BoltzTraP geometry file generated by ABINIT."
@@ -5315,7 +5315,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
    filename=trim(fname_radix)//"_BLZTRP."//spinsuffix(isppol)//"energy"//trim(so_suffix)
 
    if (open_file (filename, msg, newunit=iout, form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write (iout, '(a,I5)') "BoltzTraP eigen-energies file generated by ABINIT. ispin = ", isppol
@@ -5340,7 +5340,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
    do isppol = 1, nsppol
      filename= trim(fname_radix)//"_"//spinsuffix(isppol)//"BLZTRP.tau_k"
      if (open_file(filename, msg, newunit=iout, form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      write (iout, '(a)') "BoltzTraP tau_k file generated by ANADDB."
@@ -5431,7 +5431,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
    write(appendix,"(i0)") itemp
    filename= trim(fname_radix)//"_BLZTRP.intrans_"//trim(appendix)
    if (open_file(filename, msg, newunit=iout, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write (iout, '(a)') "GENE                      # Format of input: generic format, with Symmetries"
@@ -5456,7 +5456,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
 !files file, with association of all units for Boltztrap
  filename= trim(fname_radix)//"_BLZTRP.def"
  if (open_file(filename, msg, newunit=iout, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write (iout, '(3a)') "5, '", trim(fname_radix)//"_BLZTRP", ".intrans',      'old',    'formatted',0"
  write (iout, '(3a)') "6, '", trim(fname_radix)//"_BLZTRP", ".outputtrans',      'unknown',    'formatted',0"
@@ -5492,7 +5492,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
 !file is for geometry symmetries etc
  filename= trim(fname_radix)//"_BLZTRP.struct"
  if (open_file(filename, msg, newunit=iout, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write (iout, '(a)') "BoltzTraP geometry file generated by ABINIT."
 
@@ -5516,7 +5516,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
  end if
 
  if (open_file(filename, msg, newunit=iout, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write (iout, '(a)') "BoltzTraP eigen-energies file generated by ABINIT."
  write (iout, '(I7, I7, E20.10, a)') nkpt, nsppol, ha2ryd*fermie(1), '     ! nk, nspin, Fermi level(Ry) : energies below in Ry'
@@ -5539,7 +5539,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
    write(appendix,"(i0)") itemp
    filename= trim(fname_radix)//"_BLZTRP.tau_k_"//trim(appendix)
    if (open_file(filename, msg, newunit=iout, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write (iout, '(a,f12.6)') "BoltzTraP tau_k file generated by ANADDB for T= ", Temp
    write (iout, '(I7, I7, E20.10, a)') nkpt, nsppol, ha2ryd*fermie(itemp), &
@@ -5619,7 +5619,7 @@ subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
      call ebands_write_gnuplot(ebands, prefix)
    end if
  case default
-   MSG_WARNING(sjoin("Unsupported value for prtebands:", itoa(prtebands)))
+   ABI_WARNING(sjoin("Unsupported value for prtebands:", itoa(prtebands)))
  end select
 
 end subroutine ebands_write
@@ -5686,7 +5686,7 @@ subroutine ebands_write_xmgrace(ebands, filename, kptbounds)
  end if
 
  if (open_file(filename, msg, newunit=unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(unt,'(a)') "# Grace project file"
@@ -5819,10 +5819,10 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
 
  datafile = strcat(prefix, "_EBANDS.data")
  if (open_file(datafile, msg, newunit=unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (open_file(strcat(prefix, "_EBANDS.gnuplot"), msg, newunit=gpl_unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  basefile = basename(datafile)
 
@@ -5948,12 +5948,12 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  ! Generate k-path
  ndivsm = dtset%ndivsm
  if (ndivsm <= 0) then
-   MSG_COMMENT("Setting ndivsm to 20 because variable is not given in input file")
+   ABI_COMMENT("Setting ndivsm to 20 because variable is not given in input file")
    ndivsm = 20
  end if
  nbounds = dtset%nkpath
  if (nbounds <= 0) then
-   MSG_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
+   ABI_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
    nbounds = 5
    ABI_MALLOC(bounds, (3, 5))
    bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
@@ -6024,20 +6024,20 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
  ! Check input parameters
  ierr = 0
  if (nkibz == 1) then
-   MSG_ERROR_NOSTOP("Cannot interpolate with a single k-point", ierr)
+   ABI_ERROR_NOSTOP("Cannot interpolate with a single k-point", ierr)
  end if
  if (.not. isdiagmat(kptrlatt)) then
-   MSG_ERROR_NOSTOP('kptrlatt is not diagonal. Multiple shifts are not allowed', ierr)
+   ABI_ERROR_NOSTOP('kptrlatt is not diagonal. Multiple shifts are not allowed', ierr)
  end if
  if (nshiftk /= 1) then
-   MSG_ERROR_NOSTOP('Multiple shifts not allowed', ierr)
+   ABI_ERROR_NOSTOP('Multiple shifts not allowed', ierr)
  end if
  if (any(abs(shiftk(:, 1)) > tol8)) then
-   MSG_ERROR_NOSTOP("shifted k-mesh not implented", ierr)
+   ABI_ERROR_NOSTOP("shifted k-mesh not implented", ierr)
  end if
 
  if (ierr /= 0) then
-   MSG_ERROR("Linear interpolation cannot be performed. See messages above.")
+   ABI_ERROR("Linear interpolation cannot be performed. See messages above.")
  end if
 
  nkx = kptrlatt(1, 1)
@@ -6079,7 +6079,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    'dksqmax: ',dksqmax,ch10,&
    'Action: check k-point input variables',ch10,&
    '        e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_CALLOC(new%data_uk_bsd, (nkx, nky, nkz, bsize, nsppol, ndat))

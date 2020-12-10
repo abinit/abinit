@@ -484,7 +484,7 @@ contains
    write(message, '(a,a,a,i4,a,i4,a)' ) &
 &   'With nloc_mem<=0, mincat must be less than matblk.',ch10,&
 &   'Their value is ',mincat,' and ',matblk,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Define dimensions of projected scalars
@@ -604,13 +604,13 @@ contains
  if (cpopt==4) then
    if (ndgxdt>0.and.cprjin(1,1)%ncpgr<=0) then
      message='cprjin%ncpgr=0 not allowed with cpopt=4 and these (choice,signs) !'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
  if (cpopt==1.or.cpopt==3) then
    if (cprjin(1,1)%ncpgr<ndgxdt) then
      message='should have cprjin%ncpgr>=ndgxdt with cpopt=1 or 3 !'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 

@@ -330,10 +330,10 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
  if (dtset%usewvl==0) then
    if ((psps%usepaw==1.and.pawfgr%nfft/=nfftf).or.(psps%usepaw==0.and.dtset%nfft/=nfftf)) then
-     MSG_BUG(' wrong values for nfft, nfftf !')
+     ABI_BUG(' wrong values for nfft, nfftf !')
    end if
    if ((psps%usepaw==1.and.pawfgr%mgfft/=mgfftf).or.(psps%usepaw==0.and.dtset%mgfft/=mgfftf)) then
-     MSG_BUG('wrong values for mgfft, mgfftf!')
+     ABI_BUG('wrong values for mgfft, mgfftf!')
    end if
  end if
 
@@ -1051,7 +1051,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            if(fockcommon%optstr.or.fockcommon%optfor) then
              if (mpi_enreg%paral_kgb==1) then
                msg='forsrtnps: Paral_kgb is not yet implemented for fock stresses'
-               MSG_BUG(msg)
+               ABI_BUG(msg)
              end if
              ndat=mpi_enreg%bandpp
              if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
@@ -1291,21 +1291,21 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
  if(optxc<-1.or.optxc>1)then
    write(message,'(a,i0)')' Wrong value for optxc ',optxc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if((optnc/=1.and.optnc/=2).or.(dtset%nspden/=4.and.optnc/=1))then
    write(message,'(a,i0)')' Wrong value for optnc ',optnc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(dtset%icoulomb==1.and.optxc/=-1)then
    write(message,'(a)')' This routine is not compatible with icoulomb==1 and optxc/=-1 !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(dtset%nspden==4.and.dtset%xclevel==2.and.optxc==1.and.(.not.has_nkxc_gga))then
-   MSG_ERROR(' Wrong values for optxc and nkxc !')
+   ABI_ERROR(' Wrong values for optxc and nkxc !')
  end if
 
  qq=zero

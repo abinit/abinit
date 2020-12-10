@@ -153,7 +153,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 &   'Using Teter grid (pspcod=1 and 4) but mmax=',mmax,ch10,&
 &   'mmax must be 2001 for Teter grid.',ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !File format of formatted Teter psp input (the 3 first lines
@@ -324,7 +324,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 &         'angular momenta in order expected for first projection',&
 &         'operator.',ch10,' Values are ',ipsang-1,ll,ch10,&
 &         'Action: check your pseudopotential input file.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        read (tmp_unit,*,err=10,iomsg=errmsg) wfll(:,ipsang)
 
@@ -359,7 +359,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 &         'angular momenta in order expected for second projection',&
 &         'operator.',ch10,' Values are ',ipsang-1,ll,ch10,&
 &         'Action: check your pseudopotential input file.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        read (tmp_unit,*,err=10,iomsg=errmsg) wfll(:,ipsang)
 
@@ -403,7 +403,7 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine psp1in
 !!***
@@ -651,7 +651,7 @@ subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
 &     'Allowed values are -1 for no nonlocal correction or else',ch10,&
 &     '0, 1, 2, or 3 for maximum l nonlocal correction.',ch10,&
 &     'Action: check the input atomic psp data file for lmax.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Compute normalizing integrals eta=<dV> and mean square
@@ -904,7 +904,7 @@ subroutine der_int(ff,df,rr,dr,nlast,smf)
  if (nlast<0.or.nlast>nmax) then
    write(message, '(a,i12,a,i12)' )&
 &   ' nlast=',nlast,' lies outside range [0,nmax] with dimension nmax=',nmax
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Compute derivatives at lower end, near r=0
@@ -921,7 +921,7 @@ subroutine der_int(ff,df,rr,dr,nlast,smf)
 !Compute derivative at upper end of range
  if (nlast < 4) then
    message = ' der_int: ff does not have enough elements. nlast is too low'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  df(nlast-1)=-1.d0/12.d0*ff(nlast-4)&
@@ -1122,7 +1122,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
    end do
  else
    write(message, '(a,i0)' )'  n1xccc should larger than 1, while it is n1xccc=',n1xccc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Initialization, to avoid some problem with some compilers

@@ -195,7 +195,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      write(message,'(a,a,a,a,i4,a,a,i4)')&
 &     ' The number of k-points in the whole BZ, nkpt_computed= ',nkpt_computed,ch10,&
 &     ' is not twice the number of k-points in half the BZ, nkpt3=',nkpt3
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    kptindex(:,:) = 0
@@ -267,13 +267,13 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
      if (flag == 1) then
        write(message,'(a,i0)')' Could not find a symmetric k-point for ikpt3=  ',ikpt3
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end do    ! ikpt3
 
  else
    message = ' the only values for kptopt that are allowed are 2 and 3 '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if   ! condition on kptopt
 
 
@@ -413,7 +413,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
    if (max_dist-dist(ishell)<tol8) then
      write(message,'(a,i0)')' Cannot find shell number',ishell
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    last_dist = dist(ishell)
@@ -516,7 +516,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      write(message,'(a,i0,a,a)')&
 &     ' The number of points in shell number',ishell,' is not the same',&
 &     ' for each k-point.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    if (nneigh == 0) then
@@ -582,7 +582,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      write(message,'(3a,i0,a)')&
 &     ' Singular-value decomposition of the linear system determining the',ch10,&
 &     ' weights failed (info).',info,ch10
-     MSG_COMMENT(message)
+     ABI_COMMENT(message)
      wtkflg = 1
    end if
 
@@ -599,7 +599,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
        write(message,'(4a)')&
 &       ' Linear system determining the weights could not be solved',ch10,&
 &       ' This should not happen.',ch10
-       MSG_COMMENT(message)
+       ABI_COMMENT(message)
        wtkflg = 1
      end if
    else
@@ -666,7 +666,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
    message = ' There is a problem with the finite difference expression of the ddk '//ch10&
 &        //' If you are very close to a symmetric structure, you might be confusing the algorithm with'//ch10&
 &        //' sets of k-points which are not quite part of the same shell. Try rectifying angles and acell.'
-   MSG_BUG(message)
+   ABI_BUG(message)
 
  else
 

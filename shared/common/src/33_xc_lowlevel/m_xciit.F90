@@ -93,7 +93,7 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
    write(msg, '(4a,i3,a)' ) ch10,&
 &   'With Ishimaru-Iyetomi-Tanka xc functional, the only',ch10,&
 &   'allowed values for order are 0, 1 or 2, while it is found to be ',order,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Loop over grid points

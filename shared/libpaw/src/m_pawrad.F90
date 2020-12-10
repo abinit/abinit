@@ -273,7 +273,7 @@ subroutine pawrad_init(mesh,mesh_size,mesh_type,rstep,lstep,r_for_intg)
 
  else !  Other values of mesh_type are not allowed (see psp7in.F90)
   write(msg,'(a,i0)')" Unknown value of mesh_type: ",mesh%mesh_type
-  MSG_ERROR(msg)
+  ABI_ERROR(msg)
  end if
 
  mesh%int_meshsz=mesh%mesh_size
@@ -464,7 +464,7 @@ subroutine pawrad_print(Rmesh,header,unit,prtvol,mode_paral)
 
  CASE DEFAULT
    msg = ' Unknown mesh type! Action : check your pseudopotential or input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  END SELECT
 
  call wrtout(my_unt,msg,my_mode)
@@ -546,7 +546,7 @@ subroutine pawrad_isame(Rmesh1,Rmesh2,hasameq,whichdenser)
 
  CASE DEFAULT
    msg='Unknown mesh type'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
 
  END SELECT
 
@@ -725,7 +725,7 @@ subroutine pawrad_bcast(pawrad,comm_mpi)
      isz1=size(pawrad%rad)
      if(isz1/=pawrad%mesh_size) then
        msg='rad: sz1 /= pawrad%mesh_size (1)'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
    if (allocated(pawrad%radfact)) then
@@ -733,7 +733,7 @@ subroutine pawrad_bcast(pawrad,comm_mpi)
      isz1=size(pawrad%radfact)
      if(isz1/=pawrad%mesh_size) then
        msg='radfact: sz1 /= pawrad%mesh_size (2)'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
    if (allocated(pawrad%simfact)) then
@@ -741,7 +741,7 @@ subroutine pawrad_bcast(pawrad,comm_mpi)
      isz1=size(pawrad%simfact)
      if(isz1/=pawrad%mesh_size) then
        msg='simfact: sz1 /= pawrad%mesh_size (3)'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
  end if
@@ -910,7 +910,7 @@ subroutine simp_gen(intg,func,radmesh,r_for_intg)
    if (int_meshsz>radmesh%mesh_size.or.int_meshsz>size(func)) then
      write(msg,'(3(a,i4))')"int_meshsz= ",int_meshsz," > mesh_size=",radmesh%mesh_size,&
 &                          ", size(func)=",size(func)
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    isim=3; if (radmesh%mesh_type==3)isim=4
    LIBPAW_ALLOCATE(simfact,(radmesh%mesh_size))
@@ -936,7 +936,7 @@ subroutine simp_gen(intg,func,radmesh,r_for_intg)
  else
    if (radmesh%int_meshsz>size(func)) then
      write(msg,'(2(a,i4))')"int_meshsz= ",int_meshsz," > size(func)=",size(func)
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    nn=radmesh%int_meshsz
    simp=zero
@@ -1015,7 +1015,7 @@ subroutine nderiv_gen(der,func,radmesh,der2)
  msz=size(func)
  if (size(der)/=msz.or.msz>radmesh%mesh_size) then
    msg='wrong sizes for in/out arrays!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  compute_2der=(present(der2))
@@ -1270,7 +1270,7 @@ subroutine poisson(den,ll,radmesh,rv,screened_sr_separation,qq)
 
  mesh_size=size(den)
  if (size(rv)/=mesh_size.or.mesh_size>radmesh%mesh_size) then
-   MSG_BUG('wrong sizes!')
+   ABI_BUG('wrong sizes!')
  end if
 
  use_numerov=(radmesh%mesh_type==1)
@@ -1521,7 +1521,7 @@ function pawrad_ifromr(radmesh,rr)
  else
 !  Other values of mesh_type are not allowed (see psp7in.F90)
    write(msg,'(a,i0)')" Unknown value of %mesh_type ",radmesh%mesh_type
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end function pawrad_ifromr
@@ -1569,7 +1569,7 @@ function screened_coul_kernel(order,r1,r2,formula)
 
  if (order>6) then
    msg='PAW screened exchange not coded for l>2!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Use max and min of arguments
@@ -1817,7 +1817,7 @@ subroutine calc_slatradl(ll,mesh_size,ff1,ff2,Pawrad,integral)
 
  if (mesh_size > Pawrad%mesh_size) then
    msg='mesh_size > pawrad%mesh_size!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  LIBPAW_ALLOCATE(hh,(mesh_size))

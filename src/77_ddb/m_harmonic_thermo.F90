@@ -157,7 +157,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
  thermal_filename=trim(outfilename_radix)//"_THERMO"
  if (open_file(thermal_filename, msg, newunit=thermal_unit) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(thermal_unit,*) '#'
@@ -166,12 +166,12 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 
  bij_filename=trim(outfilename_radix)//"_DEBYE_WALLER"
  if (open_file(bij_filename, msg, newunit=bij_unit) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  vij_filename=trim(outfilename_radix)//"_VELOC_SQUARED"
  if (open_file(vij_filename, msg, newunit=vij_unit) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  thmtol = anaddb_dtset%thmtol
@@ -326,7 +326,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 &             'There is a phonon frequency,',phfrq(iii),' larger than the maximum one,',ch10,&
 &             'as defined by the number of channels of width 1 cm-1, nchan=',nchan,'.',ch10,&
 &             'Action: increase nchan (suggestion : double it).'
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
            end if
 
            gg(ichan,iwchan)=gg(ichan,iwchan)+wtq2(iqpt2)
@@ -358,7 +358,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 &             'Phonon frequencies larger than the maximum one,',ch10,&
 &             'as defined by the number of channels of width 1 cm-1.',ch10,&
 &             'Action: increase nchan (suggestion : double it).'
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
            end if
 
            do iatom=1,natom
@@ -464,7 +464,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
          write(msg, '(a,es14.6,i6,a,a,es14.6,a)' )&
 &         'Frequencies are missing in g(w) : ggsum,iwchan=',ggsum,iwchan,ch10,&
 &         'gnorm=',gnorm,'.'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
 
 !      Check if the density of states changed by more than dostol
@@ -990,7 +990,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 &   'has not been match with the grids specified.',ch10,&
 &   'Action: in the input file, increase the resolution',ch10,&
 &   'of grids ng2qpt, or decrease the accuracy requirement thmtol.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if(.not.part2)then
@@ -1000,7 +1000,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 &   'has not been match with the grids specified.',ch10,&
 &   'Action: in the input file, increase the resolution',ch10,&
 &   'of grids ng2qpt, or decrease the accuracy requirement thmtol.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  close (thermal_unit)

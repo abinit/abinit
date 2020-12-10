@@ -333,7 +333,7 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if ((inxh /= 2).and.(inpstr(ipos:ipos)/='-')) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%isurf=outi
@@ -345,7 +345,7 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if ((inxh /= 2).and.(inpstr(ipos:ipos)/='-')) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%crit=outi
@@ -357,7 +357,7 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if (inxh /= 2) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%irsur=outi
@@ -369,7 +369,7 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if (inxh /= 2) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%foll=outi
@@ -381,7 +381,7 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if (inxh /= 2) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%irho=outi
@@ -393,7 +393,7 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if (inxh /= 2) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%plden=outi
@@ -406,7 +406,7 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if (inxh /= 2) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%ivol=outi
@@ -418,13 +418,13 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if (inxh /= 2) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%denout=outi
      if ((aim_dtset%denout < -1).or.(aim_dtset%denout>3)) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      write(std_out,*) cmot(1:lenc),'    ', aim_dtset%denout
      write(untout,*) cmot(1:lenc),'    ', aim_dtset%denout
@@ -434,13 +434,13 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if (inxh /= 2) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%lapout=outi
      if ((aim_dtset%lapout < -1).or.(aim_dtset%lapout>3)) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      write(std_out,*) cmot(1:lenc),'    ', aim_dtset%lapout
      write(untout,*) cmot(1:lenc),'    ', aim_dtset%lapout
@@ -450,7 +450,7 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if (inxh /= 2) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%dltyp=outi
@@ -462,7 +462,7 @@ subroutine adini(aim_dtset,inpstr,lenstr)
      inxh=index(inpstr(ipos:lenstr),' ')
      if (inxh /= 2) then
        write(std_out,*) 'ERROR in specif. of ', cmot(1:lenc)
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
      call inread(inpstr(ipos:ipos+inxh-2),inxh-1,"INT",outi,outr,errcod)
      aim_dtset%gpsurf=outi
@@ -1000,7 +1000,7 @@ subroutine aim_follow(aim_dtset,vv,npmax,srch,iatinit,iposinit,iat,ipos,nstep)
      fin=.true.
      write(std_out,*) 'CHARGE LT rhomin ',rho,' < ',aim_rhomin
      if (rho<zero) then
-       MSG_ERROR('RHO < 0 !!!')
+       ABI_ERROR('RHO < 0 !!!')
      end if
    end if
  end if
@@ -1029,7 +1029,7 @@ subroutine aim_follow(aim_dtset,vv,npmax,srch,iatinit,iposinit,iat,ipos,nstep)
      write(std_out,*) 'h0 =',h0,'  h =',hh,'  h0old =',h0old,'  dg =',dg
      write(std_out,*) 'facf =',facf
      msg =  'TIME EXCEEDED 5 min IN FOLLOW'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (dg<aim_dgmin) then
@@ -1148,7 +1148,7 @@ subroutine aim_follow(aim_dtset,vv,npmax,srch,iatinit,iposinit,iat,ipos,nstep)
      fin=.true.
      write(std_out,*) 'charge < rhomin ',rho,' < ',aim_rhomin
      if (rho<zero) then
-       MSG_ERROR('RHO < 0 !!!')
+       ABI_ERROR('RHO < 0 !!!')
      end if
      iat=0
      ipos=0
@@ -1305,37 +1305,37 @@ subroutine consist(aim_dtset,tstngr,tstvpt)
 !write(std_out,*) tstngr, tstvpt
 
  if (((aim_dtset%denout/=0).or.(aim_dtset%lapout/=0)).and.((tstngr < 1).or.(tstvpt < 2))) then
-   MSG_ERROR('in input1 - I cannot do the output !')
+   ABI_ERROR('in input1 - I cannot do the output !')
  end if
  if ((aim_dtset%denout > 0).and.(aim_dtset%lapout>0)) then
    if (aim_dtset%denout/=aim_dtset%lapout) then
      write(std_out,*) 'ERROR in input - when both denout and lapout are positive non-zero,'
      write(std_out,*) 'they must be equal.'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
    if ((tstvpt < aim_dtset%denout+1).or.(tstngr < aim_dtset%denout)) then
      write(std_out,*) 'ERROR in input2 - I cannot do the output !'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
  elseif (aim_dtset%denout > 0) then
    if ((tstvpt < aim_dtset%denout+1).or.(tstngr < aim_dtset%denout)) then
      write(std_out,*) 'ERROR in input - I cannot do the output !'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
  elseif (aim_dtset%lapout > 0) then
    if ((tstvpt < aim_dtset%lapout+1).or.(tstngr < aim_dtset%lapout)) then
      write(std_out,*) 'ERROR in input - I cannot do the output !'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
  end if
 
  if ((aim_dtset%isurf==1).and.(aim_dtset%crit==0)) then
    write(std_out,*) 'ERROR in input - must have crit/=0 for isurf==1'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
  if (((aim_dtset%ivol/=0).or.(aim_dtset%irho/=0)).and.(aim_dtset%isurf==0)) then
-   MSG_ERROR('in input - I cannot integrate without surface !')
+   ABI_ERROR('in input - I cannot integrate without surface !')
  end if
 
 end subroutine consist
@@ -1680,7 +1680,7 @@ subroutine cpdrv(aim_dtset)
    write(untout,'(" Number of BCP found: ",I4)') nbcp
    nn=nbcp*(nbcp-1)*(nbcp-2)/6
    if (bit_size(ii) <= nbcp+1) then
-     MSG_ERROR("b-test!")
+     ABI_ERROR("b-test!")
    end if
 
 !  SEARCHING RCP
@@ -2329,7 +2329,7 @@ subroutine critic(aim_dtset,vv,ev,zz,dmax,ires,sort)
        elseif (abs(ev(jj))>1.0d-24) then
          dc(ii)=dc(ii)+ff(jj)*yy(ii,jj)/ev(jj)
        else
-         MSG_ERROR("zero eigval of Hessian")
+         ABI_ERROR("zero eigval of Hessian")
        end if
      end do
    end do
@@ -3613,7 +3613,7 @@ subroutine initaim(aim_dtset,znucl_batom)
    do jj=2,ngfft(ii)-1
      ptd(jj)=aa(ii)-ptc(jj-1)**2
      if(ptd(jj)<zero) then
-       MSG_ERROR('Matrix is not positive definite !')
+       ABI_ERROR('Matrix is not positive definite !')
      end if
      ptd(jj)=sqrt(ptd(jj))
      if (jj==ngfft(ii)-1) then
@@ -3630,7 +3630,7 @@ subroutine initaim(aim_dtset,znucl_batom)
    end do
    ss=aa(ii)-ss
    if(ss<zero) then
-     MSG_ERROR('Matrix is not positive definite !')
+     ABI_ERROR('Matrix is not positive definite !')
    end if
    ptd(ngfft(ii))=sqrt(ss)
    ptp(ngfft(ii))=ptd(ngfft(ii))
@@ -3712,7 +3712,7 @@ subroutine inpar(instr,lenstr)
    inxh=index(lolett,uplett(ii:ii))
    if (inxh > 0) then
      write(std_out,*) 'ERROR The ', uplett(ii:ii) ,' is considered come lowcase !'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
  end do
  rewind(unt0)
@@ -3737,7 +3737,7 @@ subroutine inpar(instr,lenstr)
    inxh=index(line(1:inxl),'- ')
    if (inxh/=0) then
      write(std_out,*) 'ERROR sign minus with white space in input file'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
    line(1:inxl)=adjustl(line(1:inxl))
    inxl=len_trim(line(1:inxl))+1
@@ -3761,7 +3761,7 @@ subroutine inpar(instr,lenstr)
    end do
    if ((lenstr+inxl) > strlen ) then
      write(std_out,*) 'ERROR Too large input !'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    else
      instr(lenstr+1:lenstr+inxl)=line(1:inxl)
      lenstr=lenstr+inxl
@@ -4003,7 +4003,7 @@ subroutine integrho(aim_dtset,znucl_batom)
  if (rsmin < rrad(ndat(nn),nn)) then        ! search index
    inx=0
    if (rsmin < rrad(1,nn)) then
-     MSG_ERROR('absurd')
+     ABI_ERROR('absurd')
    elseif (rsmin > rrad(ndat(nn),nn)) then
      inx=ndat(nn)
    else
@@ -4046,7 +4046,7 @@ subroutine integrho(aim_dtset,znucl_batom)
      inxf=inx
      if (rs(ii,jj) < rsmin) then
        write(std_out,*) rs(ii,jj),rsmin
-       MSG_ERROR('in surface')
+       ABI_ERROR('in surface')
      elseif (rs(ii,jj) > rrad(ndat(nn),nn)) then
        inxf=ndat(nn)
      else
@@ -4833,7 +4833,7 @@ subroutine surf(aim_dtset)
                  rthe=rs_computed(ijj_exist,jj_exist)
                  if(rthe<1.0d-12)then
                    write(std_out,*)' surf : there is a bug ! rthe=',rthe
-                   MSG_ERROR("Aborting now")
+                   ABI_ERROR("Aborting now")
                  end if
                end if
                call timein(t1,wall) ; t2=zero
@@ -5864,7 +5864,7 @@ function vnorm(vv,dir)
      vnorm=vnorm+vv(ii)*vv(ii)
    end do
  else
-   MSG_ERROR('vnorm calcul')
+   ABI_ERROR('vnorm calcul')
  end if
  vnorm=sqrt(vnorm)
 end function vnorm
@@ -5987,7 +5987,7 @@ subroutine bschg1(vv,dir)
      vt(ii)=trivrp(ii,1)*vv(1)+trivrp(ii,2)*vv(2)+trivrp(ii,3)*vv(3)
    end do
  else
-   MSG_ERROR('Transformation of coordinates')
+   ABI_ERROR('Transformation of coordinates')
  end if
  vv(:)=vt(:)
 
@@ -6033,7 +6033,7 @@ subroutine bschg2(aa,dir)
    call mprod(aa,rprimd,bb)
    call mprod(ivrprim,bb,aa)
  else
-   MSG_ERROR("transformation of coordinates")
+   ABI_ERROR("transformation of coordinates")
  end if
 end subroutine bschg2
 !!***

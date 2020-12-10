@@ -224,7 +224,7 @@ subroutine spectra_write(Spectra,write_bits,fname)
  maxo = MAXVAL(Spectra%omega)
 
  if (open_file(fname,msg,newunit=unt) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !write(unt,'(a,i5,2(a,f9.1),a)')'# nomega : ',Spectra%nomega,' from ',mino*Ha_eV,' up to ',maxo*Ha_eV,' [eV] '

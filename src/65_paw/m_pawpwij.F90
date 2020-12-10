@@ -214,7 +214,7 @@ subroutine pawpwff_init(Paw_pwff,method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
      dim1 = Pawtab(itypat)%l_size**2
      dim2 = Pawtab(itypat)%lmn2_size
    case default
-     MSG_BUG("Wrong method")
+     ABI_BUG("Wrong method")
    end select
 
    Paw_pwff(itypat)%dim1 = dim1
@@ -613,7 +613,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
 
    ! Is mesh beginning with r=0 ?
    if (ABS(Pawrad(itypat)%rad(1))>tol10) then
-     MSG_ERROR("Radial mesh starts with r/=0")
+     ABI_ERROR("Radial mesh starts with r/=0")
    end if
    !
    ! === Initialize temporary arrays and variables ===
@@ -736,7 +736,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
 
    ! Is mesh beginning with r=0 ?
    if (ABS(Pawrad(itypat)%rad(1))>tol10) then
-     MSG_ERROR("Radial mesh starts with r/=0")
+     ABI_ERROR("Radial mesh starts with r/=0")
    end if
    !
    ! === Initialize temporary arrays and variables ===
@@ -830,7 +830,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
 
  CASE DEFAULT
    write(msg,'(a,i3)')' Called with wrong value for method ',method
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  END SELECT
 
  DBG_EXIT("COLL")
@@ -932,7 +932,7 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
 &    ' Function values are being requested outside range of data. ',ch10,&
 &    ' Max qpg_norm = ',MAXVAL(qpg_norm),' Max qgrid_spl = ',MAXVAL(qgrid_spl),ch10,&
 &    ' Increase ecut(wfn), check qrid_ff and gsqcut '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_MALLOC(wk_ffnl,(nq_spl,2))
@@ -1072,7 +1072,7 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
 
  CASE DEFAULT
    write(msg,'(a,i3)')' Wrong value for method= ',method
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  END SELECT
 
  ABI_FREE(wk_ffnl)
@@ -1301,7 +1301,7 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
      end do
 
    CASE DEFAULT
-     MSG_BUG("Wrong map2sphere")
+     ABI_BUG("Wrong map2sphere")
    END SELECT
 
    RETURN
@@ -1309,20 +1309,20 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
  CASE (2) ! Spinorial case.
 
    isprot1=spinrot1(1); isprot2=spinrot2(1) ! This is to bypass abirule
-   MSG_ERROR("Spinorial case not implemented yet")
+   ABI_ERROR("Spinorial case not implemented yet")
 
    SELECT CASE (map2sphere)
 
    CASE (0) ! Need results on the full FFT box thus cannot use zero-padded FFT.
    CASE (1) ! Need results on the G-sphere. Call zero-padded FFT routines if required.
    CASE DEFAULT
-     MSG_BUG("Wrong map2sphere")
+     ABI_BUG("Wrong map2sphere")
    END SELECT
 
    RETURN
 
  CASE DEFAULT
-   MSG_BUG('Wrong nspinor')
+   ABI_BUG('Wrong nspinor')
  END SELECT
 
 end subroutine paw_cross_rho_tw_g

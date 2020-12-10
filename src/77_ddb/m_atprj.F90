@@ -117,7 +117,7 @@ subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
      ABI_CHECK((iatomstring(1:1)/='#'),'Bug: string length too short!')
      t_atprj%filename(imode,iatom) = trim(outfile_radix)//"_mod"//trim(imodestring)//"_iat"//trim(iatomstring)
      if (open_file(t_atprj%filename(imode,iatom), msg, newunit=iunit, form="formatted", action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      ! print header
      write (unit=iunit, fmt='(a)') '##'

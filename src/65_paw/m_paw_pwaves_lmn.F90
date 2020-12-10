@@ -239,7 +239,7 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
      call wrap2_zero_one(rsph_red(3,ifgd),red(3),shift(3))
      Paw_onsite(iatom1)%r0shift(:,ifgd) = NINT(shift)
      !if (ANY( ABS(shift) > tol12)) then
-       !MSG_WARNING("rmR_red is outside the first unit cell.")
+       !ABI_WARNING("rmR_red is outside the first unit cell.")
        !write(ab_out,*)rsph_red(:,ifgd),shift
      !end if
    end do

@@ -115,7 +115,7 @@ subroutine bfactor(nkptfull,kptfull,nqpt,qpt,krank,nkpt,weight,nband,nestfactor)
 
      ikplusq_irr = krank%invrank(symrank_kpt)
      if (ikplusq_irr == -1) then
-       MSG_ERROR('It looks like no kpoint equiv to k+q!')
+       ABI_ERROR('It looks like no kpoint equiv to k+q!')
      end if
 
      do ib1=1,nband
@@ -210,12 +210,12 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
    write (message,'(4a)')&
     'kptrlatt should be diagonal in order to calculate the nesting factor,',ch10,&
     'skipping the nesting factor calculation ',ch10
-   MSG_WARNING(message)
+   ABI_WARNING(message)
    return
  end if
 
  if (prtnest /= 1 .and. prtnest /= 2) then
-   MSG_BUG('prtnest should be 1 or 2')
+   ABI_BUG('prtnest should be 1 or 2')
  end if
 
  !write(message,'(a,9(i0,1x))')' mknesting : kptrlatt = ',kptrlatt
@@ -374,12 +374,12 @@ subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prt
 
  if (nkpt /= nkx*nky*nkz) then
    write(message,'(a,9(i0,1x),2x,i0)')' Wrong input value for kptrlatt  ',kptrlatt, nkpt
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ! open output file and write header
  if (open_file(base_name,message,newunit=unit_nest,status="unknown",form="formatted",action="write") /= 0) then
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
  write (unit_nest,'(a)')'#'
@@ -418,7 +418,7 @@ subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prt
    fname=trim(base_name) // '_NEST_XSF'
 
    if (open_file(fname,message,newunit=unit_nest,status="unknown",form="formatted",action="write") /= 0) then
-      MSG_ERROR(message)
+      ABI_ERROR(message)
    end if
 
    origin(:)=zero

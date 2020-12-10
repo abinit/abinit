@@ -234,7 +234,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 !Not valid for PAW
  if (psps%usepaw==1) then
    msg='  This routine cannot be used for PAW (use pawnst3 instead) !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(dtset%prtvol>2)then
@@ -473,7 +473,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 &    'For ikpt = ',ikpt,', and pertcase= ',pert_atdis(3,iatpert),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -489,7 +489,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 &    'For ikpt = ',ikpt,', and pertcase= ',q2grad(3,iq2grad),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -505,7 +505,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 &    'For ikpt = ',ikpt,', and pertcase= ',q1grad(3,iq1grad),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -521,7 +521,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 &    'For ikpt = ',ikpt,', and pertcase= ',q1q2grad(4,iq1q2grad),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -1122,7 +1122,7 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
 !Not valid for PAW
  if (psps%usepaw==1) then
    msg='  This routine cannot be used for PAW (use pawnst3 instead) !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(dtset%prtvol>2)then
@@ -1361,7 +1361,7 @@ c0_VefielddQ_c1strain_bks=zero
 &    'For ikpt = ',ikpt,', and pertcase= ',pert_efield(3,iefipert),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -1377,7 +1377,7 @@ c0_VefielddQ_c1strain_bks=zero
 &    'For ikpt = ',ikpt,', and pertcase= ',q1grad(3,iq1grad),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -1395,7 +1395,7 @@ c0_VefielddQ_c1strain_bks=zero
 &    'For ikpt = ',ikpt,', and pertcase= ',pert_strain(5,istrpert),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -1411,7 +1411,7 @@ c0_VefielddQ_c1strain_bks=zero
 &    'For ikpt = ',ikpt,', and pertcase= ',q1q2grad(4,iq1q2grad),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -2142,7 +2142,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 &    'For ikpt = ',ikpt,', and pertcase= ',pert_atdis(3,iatpert),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -2158,7 +2158,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 &    'For ikpt = ',ikpt,', and pertcase= ',q1grad(3,iq1grad),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -2904,7 +2904,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
 &    'For ikpt = ',ikpt,', and pertcase= ',pert_atdis(3,iatpert),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -2920,7 +2920,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
 &    'For ikpt = ',ikpt,', and pertcase= ',q1grad(3,iq1grad),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 
@@ -2938,7 +2938,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
 &    'For ikpt = ',ikpt,', and pertcase= ',pert_strain(5,istrpert),ch10,&
 &    'the number of plane waves in the wf1 file is equal to', npw_disk,ch10,&
 &     'while it should be ',npw_k
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do
 

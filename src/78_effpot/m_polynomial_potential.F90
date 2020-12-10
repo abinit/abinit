@@ -108,7 +108,7 @@ contains
     ABI_UNUSED_A(lwf_force)
     ABI_UNUSED_A(energy)
     ABI_UNUSED_A(energy_table)
-    MSG_ERROR("calculate not implemented for this effpot.")
+    ABI_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 
 

@@ -276,7 +276,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 &         (ANY(ABS(rprimd(1:2,  3))>tol6))    &
 &       ) then
        msg = ' Bravais lattice should be orthorombic and parallel to the cartesian versors '
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      ! === Beigi method is the default one, i.e infinite cylinder of radius rcut ===
@@ -341,7 +341,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 &         (ANY(ABS(rprimd(1:2,  3))>tol6))    &
 &       ) then
        msg = ' Bravais lattice should be orthorombic and parallel to the cartesian versors '
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      ha_=half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
@@ -371,7 +371,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        call quadrature(K0cos_dy,zero,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
        !write(std_out,'(i8,a,es14.6)')ii,' 3 ',quad
        if (ierr/=0) then
-         MSG_ERROR("Accuracy not reached")
+         ABI_ERROR("Accuracy not reached")
        end if
        ! === Store final result ===
        ! * Factor two comes from the replacement WS -> (1,4) quadrant thanks to symmetries of the integrad.
@@ -388,7 +388,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      ! TODO add check on hcyl value that should be smaller that 1/deltaq
      if (hcyl_<zero) then
        write(msg,'(a,f8.4)')' Negative value for cylinder length hcyl=',hcyl_
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
 
      if (ABS(hcyl_)>tol12) then
@@ -412,7 +412,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
            if (gcart_perp_/=zero.and.gcart_para_/=zero) then
              call quadrature(F2,zero,rcut_loc,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
              if (ierr/=0) then
-               MSG_ERROR("Accuracy not reached")
+               ABI_ERROR("Accuracy not reached")
              end if
 
              gcutoff(ii)=quad*gpq(ii)
@@ -422,7 +422,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
              ! $ \int_0^h sin(qpg_para_.z)/\sqrt(rcut^2+z^2)dz $
              call quadrature(F3,zero,hcyl,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
              if (ierr/=0) then
-               MSG_ERROR("Accuracy not reached")
+               ABI_ERROR("Accuracy not reached")
              end if
 
              c1=one/gcart_para_**2-COS(gcart_para_*hcyl_)/gcart_para_**2-hcyl_*SIN(gcart_para_*hcyl_)/gcart_para_
@@ -433,7 +433,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
              ! $ 4pi\int_0^rcut d\rho \rho J_o(qpg_perp_.\rho) ln((h+\sqrt(h^2+\rho^2))/\rho) $
              call quadrature(F4,zero,rcut_loc,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
              if (ierr/=0) then
-               MSG_ERROR("Accuracy not reached")
+               ABI_ERROR("Accuracy not reached")
              end if
 
              gcutoff(ii)=quad*gpq(ii)
@@ -442,7 +442,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
              ! Use lim q+G --> 0
              gcutoff(ii)=zero
            else
-             MSG_BUG('You should not be here!')
+             ABI_BUG('You should not be here!')
            end if
 
          end do !i1
@@ -475,7 +475,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
                ! === Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_  ===
                call quadrature(F5,zero,rcut_loc,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
                if (ierr/=0) then
-                 MSG_ERROR("Accuracy not reached")
+                 ABI_ERROR("Accuracy not reached")
                end if
                  gcutoff(ii)= -quad*gpq(ii)
              else
@@ -489,7 +489,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      end if ! case 2 - selecting Rozzi
 
      CASE DEFAULT
-      MSG_BUG(sjoin('Wrong value for cylinder method:',itoa(opt_cylinder)))
+      ABI_BUG(sjoin('Wrong value for cylinder method:',itoa(opt_cylinder)))
      END SELECT
 
    CASE('SURFACE')
@@ -584,7 +584,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
        CASE DEFAULT
          write(msg,'(a,i3)')' Wrong value of surface method: ',opt_surface
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        END SELECT
 
    CASE('ERF')
@@ -624,11 +624,11 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
    CASE('CRYSTAL')
      gcutoff(:)=one ! Neutral cut-off
      !write(msg,'(a)')'CRYSTAL method: no cut-off applied to G**2 while CRYSTAL method is implied!'
-     !MSG_WARNING(msg)
+     !ABI_WARNING(msg)
    CASE DEFAULT
      gcutoff=one ! Neutral cut-off
      !write(msg,'(a)')'No cut-off applied to G**2!'
-     !MSG_WARNING(msg)
+     !ABI_WARNING(msg)
  END SELECT
 
  ABI_DEALLOCATE(gvec)
@@ -675,7 +675,7 @@ function K0cos_dy(xx)
  xx_=xx
  call quadrature(K0cos,-hb_,+hb_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
  if (ierr/=0) then
-   MSG_ERROR("Accuracy not reached")
+   ABI_ERROR("Accuracy not reached")
  end if
 
  K0cos_dy=quad
@@ -725,7 +725,7 @@ function F2(xx)
  zz_=xx
  call quadrature(F1,zero,rcut_,qopt_,intr,ierr,ntrial_,accuracy_,npts_)
  if (ierr/=0) then
-   MSG_ERROR("Accuracy not reached")
+   ABI_ERROR("Accuracy not reached")
  end if
 
  F2=intr*COS(gcart_para_*xx)

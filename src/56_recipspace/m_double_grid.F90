@@ -339,7 +339,7 @@ subroutine create_indices_coarse(bz, nbz, klatt, nshiftk, shiftk, maxcomp, nbz_c
        if (.not. found) then
          write(std_out,*) "curk1 = ",curk1
          write(std_out,*) bz
-         MSG_ERROR("A k-point generated from kptrlatt cannot be found in the BZ")
+         ABI_ERROR("A k-point generated from kptrlatt cannot be found in the BZ")
        end if
      end do
    end do
@@ -492,7 +492,7 @@ subroutine create_indices_dense(klatt_coarse, maxcomp, &
              if(.not. found) then
                write(std_out,*) "curk1 = ",curk1
                write(std_out,*) bz_dense
-               MSG_ERROR("Problem when creating indices")
+               ABI_ERROR("Problem when creating indices")
              end if
            end do
          end do

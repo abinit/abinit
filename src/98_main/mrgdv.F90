@@ -143,7 +143,7 @@ program mrgdv
      ABI_CHECK(nargs > 1, "Additional arguments are missing")
      call get_command_argument(2, dvdb_filepath)
      if (file_exists(dvdb_filepath)) then
-       MSG_ERROR(sjoin("Cannot overwrite existing file:", dvdb_filepath))
+       ABI_ERROR(sjoin("Cannot overwrite existing file:", dvdb_filepath))
      end if
 
      nfiles = nargs - 2
@@ -212,7 +212,7 @@ program mrgdv
    !  call dvdb_convert_fort2nc(dvdb_filepath, dump_file, comm)
 
    case default
-     MSG_ERROR(sjoin("Unknown command:", command))
+     ABI_ERROR(sjoin("Unknown command:", command))
    end select
 
  end if

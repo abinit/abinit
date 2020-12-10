@@ -115,10 +115,10 @@ subroutine gammapositron(gamma,grhocore2,grhoe2,igamma,ngr,npt,rhocore,rhoer,rho
  gga=(ngr==npt.and.igamma/=0)
 
  if (usecore/=0.and.usecore/=1) then
-   MSG_ERROR('Wrong value for usecore !')
+   ABI_ERROR('Wrong value for usecore !')
  end if
  if (igamma/=0.and.igamma/=1.and.igamma/=2.and.igamma/=3.and.igamma/=4) then
-   MSG_ERROR('Unknown electron-positron correlation !')
+   ABI_ERROR('Unknown electron-positron correlation !')
  end if
 
  ABI_ALLOCATE(rhor,(npt))
@@ -238,7 +238,7 @@ subroutine gammapositron(gamma,grhocore2,grhoe2,igamma,ngr,npt,rhocore,rhoer,rho
        nqtf2=(rhoe*sqrt(four*kf/pi))**2
        eps=grho2(ipt)/nqtf2
        if (eps<zero) then
-         MSG_ERROR('  problem, negative GGA espilon !')
+         ABI_ERROR('  problem, negative GGA espilon !')
        end if
        expgga=exp(-alpha_gga*eps*third)
        gg=one+(gg-one)*expgga

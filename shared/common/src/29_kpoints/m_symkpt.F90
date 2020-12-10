@@ -139,7 +139,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 !ENDDEBUG
 
  if (timrev/=1 .and. timrev/=0) then
-   MSG_BUG(sjoin(' timrev should be 0 or 1, while it is equal to:', itoa(timrev)))
+   ABI_BUG(sjoin(' timrev should be 0 or 1, while it is equal to:', itoa(timrev)))
  end if
 
  ! Find the identity symmetry operation
@@ -265,7 +265,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
                'does not belong to the k point grid.',ch10,&
                'Read the description of the input variable chksymbreak,',ch10,&
                'You might switch it to zero, or change your k point grid to one that is symmetric.'
-               MSG_ERROR(msg)
+               ABI_ERROR(msg)
              end if
 
            end if ! End condition of non-identity symmetry
@@ -466,7 +466,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 
  if (timrev/=1 .and. timrev/=0) then
    write(msg,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ! Find the identity symmetry operation
@@ -529,7 +529,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
            !find this point
            ikpt_found = krank%get_index(ksym)
            !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
-           !  MSG_ERROR('Wrong k-point mapping found by krank')
+           !  ABI_ERROR('Wrong k-point mapping found by krank')
            !end if
            !if k-point not found
            if (ikpt_found < 0) then
@@ -541,7 +541,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
              'does not belong to the k point grid.',ch10,&
              'Read the description of the input variable chksymbreak,',ch10,&
              'You might switch it to zero, or change your k point grid to one that is symmetric.'
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
            end if
          end do ! itim
        end do ! isym
@@ -574,7 +574,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
          !if k-point not found just cycle
          if (ikpt_found < 0) cycle
          !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
-         !  MSG_ERROR('Wrong k-point mapping found by krank')
+         !  ABI_ERROR('Wrong k-point mapping found by krank')
          !end if
          if (ikpt_found >= ikpt) cycle
          bz2ibz_smap(:3, ikpt)  = [ikpt_found, isym, itim]
@@ -637,7 +637,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 
  ! Check whether the mapping was sucessfull
  if (any(bz2ibz_smap(1, :) == 0)) then
-   MSG_ERROR('Could not initial mapping BZ to IBZ. Perhaps your grid breaks the symmetry of the lattice!')
+   ABI_ERROR('Could not initial mapping BZ to IBZ. Perhaps your grid breaks the symmetry of the lattice!')
  end if
 
  !do ikpt=1,nkbz

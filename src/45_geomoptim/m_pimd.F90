@@ -198,7 +198,7 @@ subroutine pimd_init(dtset,pimd_param,is_master)
    if(dtset%useria==37)then
      ierr=open_file('pimd_traj.dat',msg,newunit=pimd_param%traj_unit,form='unformatted')
      if (ierr/=0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
  end if
@@ -379,23 +379,23 @@ subroutine pimd_init_qtb(dtset,qtb_file_unit)
 !Check consistency of the read parameters with ABINIT input file
  if (abs(dtion_qtb-dtset%dtion)>tol6) then
    msg='dtion read from piqtb_force file different from dtion in input file!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (abs(mdtemp_qtb-dtset%mdtemp(2))>tol6) then
    msg='mdtemp read from piqtb_force file different from mdtemp(2) in input file!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (ntimimage_qtb<dtset%ntimimage) then
    msg='ntimimage read from piqtb_force file smaller than ntimimage in input file!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (nimage_qtb/=dtset%nimage) then
    msg='nimage read from piqtb_force file different from nimage in input file!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (ndof_qtb/=3*dtset%natom*dtset%nimage) then
    msg='Nb of degrees of freedom read from piqtb_force not consistent with input file!'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine pimd_init_qtb
@@ -441,7 +441,7 @@ subroutine pimd_skip_qtb(pimd_param)
 
  if (pimd_param%qtb_file_unit<0) then
    msg='QTB forces file unit should be positive!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Skip one line QTB random forces file
@@ -543,11 +543,11 @@ function pimd_temperature(mass,vel)
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (ndir/=3.or.natom<=0.or.nimage<=0) then
    msg='Wrong sizes for vel array !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=nimage)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  v2=zero
@@ -900,7 +900,7 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtat
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Compute total mass (of non-constrained atoms)
@@ -1022,7 +1022,7 @@ subroutine pimd_langevin_random(alea,irandom,iseed,langev,mass,natom,trotter,zer
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  mtot=sum(mass(1:natom,1:nmass))
@@ -1129,12 +1129,12 @@ subroutine pimd_langevin_random_qtb(alea,langev,mass,natom,qtb_file_unit,trotter
 
  if (qtb_file_unit<0) then
    msg='QTB forces file unit should be positive!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Read QTB random forces
@@ -1438,7 +1438,7 @@ subroutine pimd_forces(forces,natom,spring,transform,trotter,xcart)
  natom_spring=size(spring,1);nspring=size(spring,2)
  if (natom/=natom_spring.or.(nspring/=1.and.nspring/=trotter)) then
    msg='Wrong dimensions for array spring !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (transform==0) then
@@ -1527,7 +1527,7 @@ subroutine pimd_langevin_forces(alea,forces,forces_langevin,friction,&
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  do iimage=1,trotter
@@ -1598,7 +1598,7 @@ subroutine pimd_nosehoover_forces(dzeta,forces,forces_nosehoover,mass,natom,&
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
   do iimage=1,trotter
@@ -1671,7 +1671,7 @@ subroutine pimd_stresses(mass,natom,quantummass,stress_pimd,stressin,&
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  kt=temperature*kb_HaK
@@ -1871,7 +1871,7 @@ subroutine pimd_predict_taylor(dtion,forces,mass,natom,trotter,vel,xcart,xcart_n
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  do iimage=1,trotter
@@ -1940,7 +1940,7 @@ subroutine pimd_predict_verlet(dtion,forces,mass,natom,trotter,xcart,xcart_next,
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  do iimage=1,trotter
@@ -2025,11 +2025,11 @@ subroutine pimd_nosehoover_propagate(dtion,dzeta,mass,natom,nnos,qmass,temperatu
  natom_mass=size(mass,1);nmass=size(mass,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (nnos<3) then
    msg='Not available for nnos<3 !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  kt=temperature*kb_HaK
@@ -2378,7 +2378,7 @@ subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
 
  if (ioption==-1) then
    msg='Back transformation not implemented !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !=== No transformation ===================================================
@@ -2639,11 +2639,11 @@ subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform
  natom_spring=size(spring,1);nspring=size(spring,2)
  if (natom/=natom_mass.or.(nmass/=1.and.nmass/=trotter)) then
    msg='Wrong dimensions for array mass !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (natom/=natom_spring.or.(nspring/=1.and.nspring/=trotter)) then
    msg='Wrong dimensions for array spring !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !=== No transformation ===================================================

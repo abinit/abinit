@@ -1048,7 +1048,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
        if (mpi_enreg%paral_kgb==1) then
          msg='fock2ACE: Paral_kgb is not yet implemented for fock calculations'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
        ndat=mpi_enreg%bandpp
        if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj

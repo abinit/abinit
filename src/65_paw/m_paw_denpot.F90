@@ -228,46 +228,46 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !Various checks
  if(nzlmopt/=0.and.nzlmopt/=1.and.nzlmopt/=-1) then
    msg='invalid value for variable "nzlmopt"!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (my_natom>0) then
    if(paw_ij(1)%has_dijhartree==0.and.ipert/=natom+1.and.ipert/=natom+10) then
      msg='dijhartree must be allocated!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if(paw_ij(1)%has_dijU==0.and.pawtab(1)%usepawu/=0.and. &
 &    ((ipert>0.and.ipert/=natom+1.and.ipert/=natom+10).or.pawtab(1)%usepawu<0)) then
      msg='dijU must be allocated!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (pawrhoij(1)%qphase<paw_an(1)%cplex) then
      msg='pawrhoij()%qphase must be >=paw_an()%cplex!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (ipert>0.and.(ipert<=natom.or.ipert==natom+2).and.paw_an0(1)%has_kxc/=2) then
      msg='XC kernels for ground state must be in memory!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if(paw_an(1)%has_vxc==0.and.(option==0.or.option==1).and. &
 &   .not.(ipert==natom+1.or.ipert==natom+10)) then
      msg='vxc1 and vxct1 must be allocated!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if(paw_an(1)%has_vxctau==0.and.(option==0.or.option==1).and.usekden==1) then
      msg='vxctau1 and vxcttau1 must be allocated!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (ipert>0.and.paw_an(1)%has_vxctau==1.and.usekden==1) then
      msg='computation of vxctau not compatible with RF (ipert>0)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (ipert>0.and.paw_an(1)%has_vhartree==1) then
      msg='computation of vhartree not compatible with RF (ipert>0)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (ipert>0.and.paw_an(1)%has_vxcval==1.and.(option==0.or.option==1)) then
      msg='computation of vxc_val not compatible with RF (ipert>0)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -276,11 +276,11 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    ipositron=electronpositron_calctype(electronpositron)
    if (ipositron==1.and.pawtab(1)%has_kij/=2) then
      msg='kij must be in memory for electronpositron%calctype=1!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (ipert>0) then
      msg='electron-positron calculation not available for ipert>0!'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -465,7 +465,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      end if
      if (need_k3xc) then
        msg = 'Computation of k3xc with pawxcdev/=0 is not implemented yet!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
    if (pawxcdev==0) then
@@ -636,7 +636,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    if (ipert==0.and.paw_an(iatom)%has_vxcval==1.and.(option==0.or.option==1)) then
      if (.not.allocated(paw_an(iatom)%vxc1_val).or..not.allocated(paw_an(iatom)%vxct1_val)) then
        msg=' vxc1_val and vxct1_val must be associated'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
 !    ===== Vxc1_val term, vxc[n1] =====
      if (pawxcdev/=0) then
@@ -1173,29 +1173,29 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
 !Compatibility tests
  if (opt_dens/=2.and.opt_l>=0) then
    msg='opt_dens/=2 incompatible with opt_l>=0!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if(nzlmopt/=0.and.nzlmopt/=1.and.nzlmopt/=-1) then
    msg='invalid value for variable "nzlmopt"!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if(nspden>pawrhoij%nspden) then
    msg='nspden must be <= pawrhoij%nspden!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (cplex>pawrhoij%qphase) then
    msg='cplex must be <= pawrhoij%qphase!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (nzlmopt/=1) then
    if (any(.not.lmselectin(1:lm_size))) then
      msg='With nzlmopt/=1, lmselectin must be true!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
  if (pawang%gnt_option==0) then
    msg='pawang%gnt_option=0!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Various inits
@@ -1563,37 +1563,37 @@ subroutine pawkindensities(cplex,lmselectin,lm_size,nspden,nzlmopt,&
 !Compatibility tests
  if (nzlmopt/=-1) then
    msg='nzlmopt/=-1 has not not been tested (might be wrong)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (opt_dens/=2.and.opt_l>=0) then
    msg='opt_dens/=2 incompatible with opt_l>=0!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if(nzlmopt/=0.and.nzlmopt/=1.and.nzlmopt/=-1) then
    msg='invalid value for variable "nzlmopt"!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if(nspden>pawrhoij%nspden) then
    msg='nspden must be <= pawrhoij%nspden!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (cplex>pawrhoij%qphase) then
    msg='cplex must be <= pawrhoij%qphase!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (nzlmopt/=1) then
    if (any(.not.lmselectin(1:lm_size))) then
      msg='With nzlmopt/=1, lmselectin must be true!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
  if (pawang%gnt_option==0) then
    msg='pawang%gnt_option=0!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (pawang%nabgnt_option==0) then
    msg='pawang%nabgnt_option=0!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Various inits
@@ -1877,11 +1877,11 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
 !Compatibility tests
  if (pawrhoij%qphase/=qphase_dij) then
    msg='pawaccenergy: pawrhoij%qphase/=qphase_dij!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (pawrhoij%nspden>nspden_dij.and.nspden_dij/=1) then
    msg='pawaccenergy: pawrhoij%nspden>nspden_dij!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Useful data

@@ -553,7 +553,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
    nimagetot=sum(nimage_all)
    if (use_results_all) then
      if (size(results_img_all,1)/=nimagetot) then
-       MSG_BUG('Wrong results_img_all size !')
+       ABI_BUG('Wrong results_img_all size !')
      end if
    end if
 
@@ -651,7 +651,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
      end if
    end do
    if (ibufr/=rsize_img) then
-     MSG_BUG('wrong buffer size !')
+     ABI_BUG('wrong buffer size !')
    end if
 
 !  Gather all data
@@ -832,7 +832,7 @@ subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
  size1=size(array_img,1)
  if (use_array_all) then
    if (size(array_img_all,1)/=size1) then
-     MSG_BUG('Wrong array_img_all size (1)')
+     ABI_BUG('Wrong array_img_all size (1)')
    end if
  end if
 
@@ -853,7 +853,7 @@ subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
    nimagetot=sum(nimage_all)
    if (use_array_all) then
      if (size(array_img_all,2)/=nimagetot) then
-       MSG_BUG('Wrong array_img_all size (2)!')
+       ABI_BUG('Wrong array_img_all size (2)!')
      endif
    end if
 
@@ -989,7 +989,7 @@ subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
  size1=size(array_img,1);size2=size(array_img,2)
  if (use_array_all) then
    if (size(array_img_all,1)/=size1.or.size(array_img_all,2)/=size2) then
-     MSG_BUG('Wrong array_img_all size (1)!')
+     ABI_BUG('Wrong array_img_all size (1)!')
    end if
  end if
 
@@ -1010,7 +1010,7 @@ subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
    nimagetot=sum(nimage_all)
    if (use_array_all) then
      if (size(array_img_all,3)/=nimagetot) then
-       MSG_BUG('Wrong array_img_all size (2)!')
+       ABI_BUG('Wrong array_img_all size (2)!')
      endif
    end if
 
@@ -1142,7 +1142,7 @@ subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
  size1=size(array_img,1);size2=size(array_img,2)
  if (use_array_all) then
    if (size(array_img_all,1)/=size1.or.size(array_img_all,2)/=size2) then
-     MSG_BUG('Wrong array_img_all size (1)!')
+     ABI_BUG('Wrong array_img_all size (1)!')
    end if
  end if
 
@@ -1155,7 +1155,7 @@ subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
    nimagetot=sum(nimage_all)
    if (use_array_all) then
      if (size(array_img_all,3)/=nimagetot) then
-       MSG_BUG('Wrong array_img_all size (2)!')
+       ABI_BUG('Wrong array_img_all size (2)!')
      endif
    end if
 

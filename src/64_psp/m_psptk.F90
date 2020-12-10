@@ -126,7 +126,7 @@ subroutine psp1cc(fchrg,n1xccc,xccc1d)
    end do
  else
    write(message, '(a,i0)' )' n1xccc should larger than 1, while it is n1xccc=',n1xccc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Initialization, to avoid some problem with some compilers
@@ -744,7 +744,7 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 &     'Allowed values are -1 for no nonlocal correction or else',ch10,&
 &     '0, 1,2 or 3 for maximum l nonlocal correction.',ch10,&
 &     'Action: check the input atomic psp data file for lmax.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Compute normalizing integrals eta=<dV> and mean square

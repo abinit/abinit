@@ -398,7 +398,7 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
    ! Each node opens the file, skip the header and set f90_fptr.
    Wfk%fh = funt
    if (open_file(Wfk%fname,msg,unit=Wfk%fh,form="unformatted", status="old", action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Precompute number of records for Fortran IO.
@@ -420,7 +420,7 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
    if (Wfk%hdr_offset > 0) then
      call wfk_compute_offsets(Wfk)
    else
-     MSG_ERROR("hdr_offset <=0")
+     ABI_ERROR("hdr_offset <=0")
    end if
 #endif
 
@@ -430,7 +430,7 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
 #endif
 
  case default
-   MSG_ERROR(sjoin('Wrong or unsupported iomode:', itoa(wfk%iomode)))
+   ABI_ERROR(sjoin('Wrong or unsupported iomode:', itoa(wfk%iomode)))
  end select
 
  DBG_EXIT("COLL")
@@ -545,7 +545,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
    ABI_CHECK(wfk%nproc == 1, "Cannot use Fortran-IO to write WFK file with nprocs > 1")
    Wfk%fh = funt
    if (open_file(Wfk%fname,msg,unit=Wfk%fh,form="unformatted", status="unknown", action="readwrite") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Precompute number of records for Fortran IO.
@@ -579,7 +579,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
    if (Wfk%hdr_offset > 0) then
      call wfk_compute_offsets(Wfk)
    else
-     MSG_ERROR("hdr_offset <=0")
+     ABI_ERROR("hdr_offset <=0")
    end if
    call cwtime_report(" FILE_OPEN", cpu, wall, gflops)
 
@@ -625,11 +625,11 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
 
      NCF_CHECK_MSG(ncerr, sjoin("nf90_create: ", wfk%fname))
 #else
-     MSG_ERROR("You should not be here")
+     ABI_ERROR("You should not be here")
 #endif
    else
      if (wfk%nproc > 1) then
-       MSG_ERROR("Your netcdf library does not support MPI-IO. Cannot write WFK file with nprocs > 1")
+       ABI_ERROR("Your netcdf library does not support MPI-IO. Cannot write WFK file with nprocs > 1")
      end if
 
      ncerr = nf90_create(wfk%fname, nf90_write, wfk%fh)
@@ -644,7 +644,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
 #endif
 
  case default
-   MSG_ERROR(sjoin('Wrong/unsupported iomode: ', itoa(wfk%iomode)))
+   ABI_ERROR(sjoin('Wrong/unsupported iomode: ', itoa(wfk%iomode)))
  end select
 
  DBG_EXIT("COLL")
@@ -727,7 +727,7 @@ subroutine wfk_close(Wfk, delete)
 #endif
 
    case default
-     MSG_ERROR(sjoin('Wrong/unsupported value of iomode: ', itoa(Wfk%iomode)))
+     ABI_ERROR(sjoin('Wrong/unsupported value of iomode: ', itoa(Wfk%iomode)))
    end select
  end if
 
@@ -840,19 +840,19 @@ integer function wfk_validate_ks(wfk, ik_ibz, spin, band) result(ierr)
  if (ik_ibz <= 0 .or. ik_ibz > wfk%nkpt) then
    ierr = ierr + 1
    write(msg, '(2(a,i0))')'ik_ibz = ',ik_ibz,' whereas it should be between 1 and ',wfk%nkpt
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  if (spin <= 0 .or. spin > wfk%nsppol) then
    ierr = ierr + 1
    write(msg, '(2(a,i0))')'spin = ',spin,' whereas it should be between 1 and ',wfk%nsppol
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  if (present(band)) then
    if (band <=0) then
      ierr = ierr + 1
-     MSG_WARNING(sjoin('Negative band index: band = ',itoa(band)))
+     ABI_WARNING(sjoin('Negative band index: band = ',itoa(band)))
    end if
 
    ! Don't touch nband array if wrong indices.
@@ -860,13 +860,13 @@ integer function wfk_validate_ks(wfk, ik_ibz, spin, band) result(ierr)
       if (band > wfk%nband(ik_ibz, spin)) then
         ierr = ierr + 1
         write(msg, '(2(a,i0))')'band = ',band,' whereas it should be between 1 and ',wfk%nband(ik_ibz,spin)
-        MSG_WARNING(msg)
+        ABI_WARNING(msg)
       end if
    end if
  end if
 
  !if (ierr /= 0) then
- !  MSG_ERROR("Wrong (ik_ibz, spin) args, Aborting now")
+ !  ABI_ERROR("Wrong (ik_ibz, spin) args, Aborting now")
  !end if
 
 end function wfk_validate_ks
@@ -1013,7 +1013,7 @@ subroutine wfk_ncdef_dims_vars(ncid, hdr, fform, write_hdr, iskss)
  !NCF_CHECK(nf90_def_var_fill(ncid, ivar, 0, -one))
 
 #else
- MSG_ERROR("netcdf not available")
+ ABI_ERROR("netcdf not available")
 #endif
 
 end subroutine wfk_ncdef_dims_vars
@@ -1059,31 +1059,31 @@ integer function wfk_compare(wfk1, wfk2) result(ierr)
 
  ! Test basic dimensions
 !if (wfk1%hdr%nsppol /= wfk2%hdr%nsppol) then
-!  ierr = ierr + 1; MSG_WARNING("Different nsppol")
+!  ierr = ierr + 1; ABI_WARNING("Different nsppol")
 !end if
 !if (wfk1%hdr%nspinor /= wfk2%hdr%nspinor) then
-!  ierr = ierr + 1; MSG_WARNING("Different nspinor")
+!  ierr = ierr + 1; ABI_WARNING("Different nspinor")
 !end if
 !if (wfk1%hdr%nspden /= wfk2%hdr%nspden) then
-!  ierr = ierr + 1; MSG_WARNING("Different nspden")
+!  ierr = ierr + 1; ABI_WARNING("Different nspden")
 !end if
 !if (wfk1%hdr%nkpt /= wfk2%hdr%nkpt) then
-!  ierr = ierr + 1; MSG_WARNING("Different nkpt")
+!  ierr = ierr + 1; ABI_WARNING("Different nkpt")
 !end if
  if (wfk1%formeig /= wfk2%formeig) then
-   ierr = ierr + 1; MSG_WARNING("Different formeig")
+   ierr = ierr + 1; ABI_WARNING("Different formeig")
  end if
 !if (wfk1%hdr%usepaw /= wfk2%hdr%usepaw) then
-!  ierr = ierr + 1; MSG_WARNING("Different usepaw")
+!  ierr = ierr + 1; ABI_WARNING("Different usepaw")
 !end if
 !if (wfk1%hdr%ntypat /= wfk2%hdr%ntypat) then
-!  ierr = ierr + 1; MSG_WARNING("Different ntypat")
+!  ierr = ierr + 1; ABI_WARNING("Different ntypat")
 !end if
 !if (wfk1%hdr%natom /= wfk2%hdr%natom) then
-!  ierr = ierr + 1; MSG_WARNING("Different natom")
+!  ierr = ierr + 1; ABI_WARNING("Different natom")
 !end if
  !if (wfk1%hdr%fform /= wfk2%hdr%fform) then
- !  ierr = ierr + 1; MSG_WARNING("Different fform")
+ !  ierr = ierr + 1; ABI_WARNING("Different fform")
  !end if
 
  ! Return immediately if important dimensions are not equal.
@@ -1091,16 +1091,16 @@ integer function wfk_compare(wfk1, wfk2) result(ierr)
 
  ! Test important arrays (rprimd is not tested)
 !if (any(wfk1%hdr%typat /= wfk2%hdr%typat)) then
-!  ierr = ierr + 1; MSG_WARNING("Different typat")
+!  ierr = ierr + 1; ABI_WARNING("Different typat")
 !end if
 !if (any(wfk1%hdr%npwarr /= wfk2%hdr%npwarr)) then
-!  ierr = ierr + 1; MSG_WARNING("Different npwarr array")
+!  ierr = ierr + 1; ABI_WARNING("Different npwarr array")
 !end if
  if (any(wfk1%nband /= wfk2%nband)) then
-   ierr = ierr + 1; MSG_WARNING("Different nband array")
+   ierr = ierr + 1; ABI_WARNING("Different nband array")
  end if
 !if (any(abs(wfk1%hdr%kptns - wfk2%hdr%kptns) > tol6)) then
-!  ierr = ierr + 1; MSG_WARNING("Different kptns array")
+!  ierr = ierr + 1; ABI_WARNING("Different kptns array")
 !end if
 
  ! Call hdr_check to get a nice diff of the header but don't check restart and restartpaw.
@@ -1184,7 +1184,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
  ABI_CHECK(Wfk%rw_mode==WFK_READMODE, "Wfk must be in READMODE")
 
  if (wfk_validate_ks(wfk, ik_ibz, spin) /= 0) then
-   MSG_ERROR("Wrong (ik_ibz, spin) args, Aborting now")
+   ABI_ERROR("Wrong (ik_ibz, spin) args, Aborting now")
  end if
 
  ! Look before you leap.
@@ -1209,14 +1209,14 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
    else if (Wfk%formeig==1) then
       ABI_CHECK(SIZE(eig_k) >= 2*nband_disk**2, "DFPT eig_k too small")
    else
-     MSG_ERROR("formeig != [0,1]")
+     ABI_ERROR("formeig != [0,1]")
    end if
  end if
 
  if (present(occ_k)) then
    ABI_CHECK(SIZE(occ_k) >= nband_disk, "GS eig_k too small")
    if (Wfk%formeig==1) then
-     MSG_ERROR("occ_k cannot be used when formeig ==1")
+     ABI_ERROR("occ_k cannot be used when formeig ==1")
    end if
  end if
 
@@ -1232,7 +1232,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
    if (any( [npw_read, nspinor_read, nband_read] /= [npw_disk, nspinor_disk, nband_disk])) then
      write(msg,"(a,6(i0,2x))")"Mismatch between (npw, nspinor, nband) read from WFK and those found in HDR ",&
 &      npw_read, nspinor_read, nband_read, npw_disk, nspinor_disk, nband_disk
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! The second record: (k+G) vectors
@@ -1306,7 +1306,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
      end do
 
    case default
-     MSG_ERROR("formeig != [0,1]")
+     ABI_ERROR("formeig != [0,1]")
    end select
 
    ! Reached the end of the (k,s) block. Update f90_fptr
@@ -1380,7 +1380,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        else if (sc_mode==xmpio_single) then
          call MPI_FILE_READ(Wfk%fh,eig_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
        else
-         MSG_ERROR("Wrong sc_mode")
+         ABI_ERROR("Wrong sc_mode")
        end if
        ABI_CHECK_MPI(mpierr,"FILE_READ")
      end if
@@ -1411,13 +1411,13 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        else if (sc_mode==xmpio_single) then
          call MPI_FILE_READ(Wfk%fh,cg_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
        else
-         MSG_ERROR("Wrong sc_mode")
+         ABI_ERROR("Wrong sc_mode")
        end if
        ABI_CHECK_MPI(mpierr,"FILE_READ")
      end if
 
    case default
-     MSG_ERROR("formeig != [0,1]")
+     ABI_ERROR("formeig != [0,1]")
    end select
 #endif
 
@@ -1495,7 +1495,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
 #endif
 
  case default
-   MSG_ERROR(sjoin('Wrong/unsupported iomode: ', itoa(Wfk%iomode)))
+   ABI_ERROR(sjoin('Wrong/unsupported iomode: ', itoa(Wfk%iomode)))
  end select
 
  DBG_EXIT("COLL")
@@ -1504,7 +1504,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine wfk_read_band_block
 !!***
@@ -1570,7 +1570,7 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
 !************************************************************************
 
  if (wfk_validate_ks(wfk, ik_ibz, spin, band=band) /= 0) then
-   MSG_ERROR("Wrong (ik_ibz, spin, band) args, Aborting now")
+   ABI_ERROR("Wrong (ik_ibz, spin, band) args, Aborting now")
  end if
  npw_disk = wfk%Hdr%npwarr(ik_ibz)
  nband_disk = wfk%nband(ik_ibz, spin)
@@ -1690,7 +1690,7 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
      else if (sc_mode==xmpio_single) then
        call MPI_FILE_READ(wfk%fh,eig1_bks,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
      else
-       MSG_ERROR("Wrong sc_mode")
+       ABI_ERROR("Wrong sc_mode")
      end if
      ABI_CHECK_MPI(mpierr,"FILE_READ")
 
@@ -1717,7 +1717,7 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
      else if (sc_mode==xmpio_single) then
        call MPI_FILE_READ(wfk%fh,cg_bks,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
      else
-       MSG_ERROR("Wrong sc_mode")
+       ABI_ERROR("Wrong sc_mode")
      end if
      ABI_CHECK_MPI(mpierr,"FILE_READ")
 #endif
@@ -1747,7 +1747,7 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
 #endif
 
   case default
-    MSG_ERROR(sjoin('Wrong value for iomode:', itoa(Wfk%iomode)))
+    ABI_ERROR(sjoin('Wrong value for iomode:', itoa(Wfk%iomode)))
   end select
  end if
 
@@ -1757,7 +1757,7 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine wfk_read_bks
 !!***
@@ -1853,7 +1853,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
    else if (Wfk%formeig==1) then
       ABI_CHECK(SIZE(eig_k) >= 2*nband_disk**2, "DFPT eig_k too small")
    else
-     MSG_ERROR("formeig != [0,1]")
+     ABI_ERROR("formeig != [0,1]")
    end if
  end if
 
@@ -1887,7 +1887,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
      if (present(eig_k) .and. present(occ_k)) then
        write(Wfk%fh, err=10, iomsg=errmsg) eig_k, occ_k
      else
-       MSG_ERROR("Not coded")
+       ABI_ERROR("Not coded")
        write(Wfk%fh, err=10, iomsg=errmsg) ! eig_k(1:nband_disk), occ_k(1:nband_k)
      end if
 
@@ -1901,13 +1901,13 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
            my_bcount = my_bcount + 1
            write(Wfk%fh, err=10, iomsg=errmsg) cg_k(1:2,ipw+1:ipw+npwso)
          else
-           MSG_ERROR("Not coded")
+           ABI_ERROR("Not coded")
            write(Wfk%fh, err=10, iomsg=errmsg) ! cg_k(1:2,ipw+1:ipw+npwso)
          end if
        end do
 
      else
-       MSG_ERROR("Not coded")
+       ABI_ERROR("Not coded")
        do band=1,nband_disk
          write(Wfk%fh, err=10, iomsg=errmsg) ! cg_k(1:2,ipw+1:ipw+npwso)
        end do
@@ -1927,13 +1927,13 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
          my_bcount = my_bcount + 1
          write(Wfk%fh, err=10, iomsg=errmsg) cg_k(1:2,ipw+1:ipw+npwso)
        else
-         MSG_ERROR("Not coded")
+         ABI_ERROR("Not coded")
          write(Wfk%fh, err=10, iomsg=errmsg) ! cg_k(1:2,ipw+1:ipw+npwso)
        end if
      end do
 
    case default
-     MSG_ERROR("formeig != [0,1]")
+     ABI_ERROR("formeig != [0,1]")
    end select
 
    ! Reached the end of the (k,s) block. Update f90_fptr
@@ -1968,7 +1968,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
    else if (sc_mode==xmpio_single) then
      call MPI_FILE_WRITE(Wfk%fh,dims,SIZE(dims),MPI_INTEGER,MPI_STATUS_IGNORE,mpierr)
    else
-     MSG_ERROR("Wrong sc_mode")
+     ABI_ERROR("Wrong sc_mode")
    end if
    ABI_CHECK_MPI(mpierr,"writing REC_NPW")
 
@@ -2050,7 +2050,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
        else if (sc_mode==xmpio_single) then
          call MPI_FILE_WRITE(Wfk%fh,eig_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
        else
-         MSG_ERROR("Wrong sc_mode")
+         ABI_ERROR("Wrong sc_mode")
        end if
 
        ABI_CHECK_MPI(mpierr,"FILE_WRITE")
@@ -2079,13 +2079,13 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
        else if (sc_mode==xmpio_single) then
          call MPI_FILE_WRITE(Wfk%fh,cg_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
        else
-         MSG_ERROR("Wrong sc_mode")
+         ABI_ERROR("Wrong sc_mode")
        end if
        ABI_CHECK_MPI(mpierr,"FILE_WRITE")
      end if
 
    else
-     MSG_ERROR("formeig not in [0,1]")
+     ABI_ERROR("formeig not in [0,1]")
    end if
 #endif
 
@@ -2124,11 +2124,11 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
 
    else if (Wfk%formeig==1) then
      if (present(eig_k) .or. present(occ_k)) then
-       MSG_ERROR("Don't pass eig_k or occ_k when formeig==1 and ETSF-IO")
+       ABI_ERROR("Don't pass eig_k or occ_k when formeig==1 and ETSF-IO")
      end if
 
    else
-     MSG_ERROR("formeig != [0,1]")
+     ABI_ERROR("formeig != [0,1]")
    end if
 
    if (present(cg_k)) then
@@ -2146,7 +2146,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
 #endif
 
  case default
-   MSG_ERROR(sjoin('Wrong value of iomode:', itoa(Wfk%iomode)))
+   ABI_ERROR(sjoin('Wrong value of iomode:', itoa(Wfk%iomode)))
  end select
 
  DBG_EXIT("COLL")
@@ -2155,7 +2155,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine wfk_write_band_block
 !!***
@@ -2239,7 +2239,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
  !do band=1,wfk%mband
  !  if (.not. bmask(band)) continue
  !  if (wfk_validate_ks(wfk, ik_ibz, spin, band=band) /= 0) then
- !    MSG_ERROR("Wrong (ik_ibz, spin, band) args, Aborting now")
+ !    ABI_ERROR("Wrong (ik_ibz, spin, band) args, Aborting now")
  !  end if
  !end if
 
@@ -2264,7 +2264,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
    else if (Wfk%formeig==1) then
       ABI_CHECK(SIZE(eig_k) >= 2*nband_disk**2, "DFPT eig_k too small")
    else
-     MSG_ERROR("formeig != [0,1]")
+     ABI_ERROR("formeig != [0,1]")
    end if
  end if
 
@@ -2285,7 +2285,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
    if (any([npw_read, nspinor_read, nband_read] /= [npw_disk, nspinor_disk, nband_disk])) then
      write(msg,"(a,6(i0,2x))")"Mismatch between (npw, nspinor, nband) read from WFK and those found in HDR ",&
 &      npw_read, nspinor_read, nband_read, npw_disk, nspinor_disk, nband_disk
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! The second record: (k+G) vectors
@@ -2356,7 +2356,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
      end do
 
    else
-     MSG_ERROR("formeig != [0,1]")
+     ABI_ERROR("formeig != [0,1]")
    end if
 
    ! Reached the end of the (k,s) block. Update f90_fptr
@@ -2387,7 +2387,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
      else if (Wfk%formeig==1) then
        if (present(eig_k)) eig_k(1:2*nband_disk**2) = tmp_eigk(1:2*nband_disk**2)
      else
-       MSG_ERROR("formeig not in [0,1]")
+       ABI_ERROR("formeig not in [0,1]")
      end if
 
      ABI_FREE(tmp_eigk)
@@ -2475,7 +2475,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
            else if (sc_mode==xmpio_single) then
              call MPI_FILE_READ(wfk%fh,buffer,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
            else
-             MSG_ERROR("Wrong sc_mode")
+             ABI_ERROR("Wrong sc_mode")
            end if
            ABI_CHECK_MPI(mpierr,"FILE_READ")
          end if
@@ -2578,7 +2578,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
        ABI_CHECK_MPI(mpierr,"FILE_READ_ALL")
 
      case default
-       MSG_ERROR("Wrong method")
+       ABI_ERROR("Wrong method")
      end select
    end if
 #endif
@@ -2622,7 +2622,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
        NCF_CHECK_MSG(ncerr, "getting occ_k")
      end if
    else
-     MSG_ERROR("formeig !=0 not compatible with ETSF-IO")
+     ABI_ERROR("formeig !=0 not compatible with ETSF-IO")
    end if
 
    if (present(cg_k)) then
@@ -2685,7 +2685,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
 #endif
 
  case default
-   MSG_ERROR(sjoin('Wrong/unsupported value of iomode: ', itoa(wfk%iomode)))
+   ABI_ERROR(sjoin('Wrong/unsupported value of iomode: ', itoa(wfk%iomode)))
  end select
 
  DBG_EXIT("COLL")
@@ -2694,7 +2694,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
 
  ! Handle Fortran IO error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine wfk_read_bmask
 !!***
@@ -3089,7 +3089,7 @@ subroutine wfk_rewind(wfk)
    wfk%f90_fptr = [1,1,REC_NPW]
 
  case default
-   MSG_ERROR("should not be called when wfk%iomode /= IO_MODE_FORTRAN")
+   ABI_ERROR("should not be called when wfk%iomode /= IO_MODE_FORTRAN")
  end select
 
 end subroutine wfk_rewind
@@ -3161,7 +3161,7 @@ subroutine wfk_seek(Wfk,ik_ibz,spin)
    Wfk%f90_fptr = [ik_ibz, spin, REC_NPW]
 
  case default
-   MSG_ERROR("should not be called when Wfk%iomode /= IO_MODE_FORTRAN")
+   ABI_ERROR("should not be called when Wfk%iomode /= IO_MODE_FORTRAN")
  end select
 
 end subroutine wfk_seek
@@ -3268,7 +3268,7 @@ subroutine wfk_compute_offsets(Wfk)
        else if (Wfk%formeig==1) then
          base = base + 2*(nband_k-1)
        else
-         MSG_ERROR("formeig != [0,1]")
+         ABI_ERROR("formeig != [0,1]")
        end if
      end do
    end do
@@ -3302,7 +3302,7 @@ subroutine wfk_compute_offsets(Wfk)
          ! npw, nspinor, nband_disk
          offset = offset +  3*xmpi_bsize_int + 2*bsize_frm
        else
-         MSG_ERROR("Old headforms < 40 are not supported")
+         ABI_ERROR("Old headforms < 40 are not supported")
        end if
        Wfk%offset_ks(ik_ibz,spin,REC_KG) = offset
        !
@@ -3334,7 +3334,7 @@ subroutine wfk_compute_offsets(Wfk)
 &          nband_k * (2*nband_k*xmpi_bsize_dp + 2*bsize_frm)
 
        else
-         MSG_ERROR("Wrong formeig")
+         ABI_ERROR("Wrong formeig")
        end if
 
      end do ! ik_ibz
@@ -3345,7 +3345,7 @@ subroutine wfk_compute_offsets(Wfk)
 
    ! Check for possible wraparound errors.
    if (ANY(Wfk%offset_ks <= 0) .or. Wfk%offset_eof < 0) then
-     MSG_ERROR("Found negative offset. File too large for MPI-IO!!!")
+     ABI_ERROR("Found negative offset. File too large for MPI-IO!!!")
    end if
  end select
 
@@ -3491,7 +3491,7 @@ subroutine mpio_read_kg_k(fh,offset,npw_disk,sc_mode,kg_k,mpierr)
    !call MPI_File_seek(myfh, 0, MPI_SEEK_SET,mpierr)
    call MPI_FILE_READ(myfh,kg_k,ncount,MPI_INTEGER, MPI_STATUS_IGNORE,mpierr)
  else
-   MSG_ERROR("Wrong sc_mode")
+   ABI_ERROR("Wrong sc_mode")
  end if
 
  ABI_HANDLE_MPIERR(mpierr)
@@ -3575,7 +3575,7 @@ subroutine mpio_write_kg_k(fh,offset,npw_disk,sc_mode,kg_k,mpierr)
  else if (sc_mode==xmpio_single) then
    call MPI_FILE_WRITE(myfh,kg_k,ncount,MPI_INTEGER,MPI_STATUS_IGNORE,mpierr)
  else
-   MSG_ERROR("Wrong sc_mode")
+   ABI_ERROR("Wrong sc_mode")
  end if
 
  ABI_HANDLE_MPIERR(mpierr)
@@ -3668,7 +3668,7 @@ subroutine mpio_read_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpierr
    else if (sc_mode==xmpio_single) then
      call MPI_FILE_READ(myfh,buffer,bufsz,MPI_DOUBLE_PRECISION,MPI_STATUS_IGNORE,mpierr)
    else
-     MSG_ERROR("Wrong sc_mode")
+     ABI_ERROR("Wrong sc_mode")
    end if
    ABI_HANDLE_MPIERR(mpierr)
 
@@ -3684,7 +3684,7 @@ subroutine mpio_read_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpierr
    !my_offset = offset - xmpio_bsize_frm
    !call xmpio_read_dp(myfh,my_offset,sc_mode,2*nband_disk,buffer,fmarker,mpierr)
    !write(std_out,*)buffer(1:2*nband_disk)
-   !MSG_ERROR("Done")
+   !ABI_ERROR("Done")
 
    call xmpio_create_fsubarray_2D(sizes,subsizes,starts,MPI_DOUBLE_COMPLEX,gkk_type,my_offpad,mpierr)
    ABI_HANDLE_MPIERR(mpierr)
@@ -3703,12 +3703,12 @@ subroutine mpio_read_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpierr
    else if (sc_mode==xmpio_single) then
      call MPI_FILE_READ(myfh,buffer,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
    else
-     MSG_ERROR("Wrong sc_mode")
+     ABI_ERROR("Wrong sc_mode")
    end if
    ABI_HANDLE_MPIERR(mpierr)
 
  CASE DEFAULT
-   MSG_ERROR("formeig not in [0,1]")
+   ABI_ERROR("formeig not in [0,1]")
  END SELECT
 
 end subroutine mpio_read_eigocc_k
@@ -3798,12 +3798,12 @@ subroutine mpio_write_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpier
    else if (sc_mode==xmpio_single) then
      call MPI_FILE_WRITE(myfh,buffer,bufsz,MPI_DOUBLE_PRECISION,MPI_STATUS_IGNORE,mpierr)
    else
-     MSG_ERROR("Wrong sc_mode")
+     ABI_ERROR("Wrong sc_mode")
    end if
    ABI_HANDLE_MPIERR(mpierr)
 
  CASE (1)
-   !MSG_ERROR("formeig ==1 with MPI-IO not tested")
+   !ABI_ERROR("formeig ==1 with MPI-IO not tested")
    ! write the (nband_k,nband_k) matrix with the (complex) GKK matrix elements.
    bufsz    = (nband_disk**2)
    sizes    = [nband_disk, nband_disk]
@@ -3829,12 +3829,12 @@ subroutine mpio_write_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpier
    else if (sc_mode==xmpio_single) then
      call MPI_FILE_WRITE(myfh,buffer,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
    else
-     MSG_ERROR("Wrong sc_mode")
+     ABI_ERROR("Wrong sc_mode")
    end if
    ABI_HANDLE_MPIERR(mpierr)
 
  CASE DEFAULT
-   MSG_ERROR("formeig not in [0,1]")
+   ABI_ERROR("formeig not in [0,1]")
  END SELECT
 
 end subroutine mpio_write_eigocc_k
@@ -3919,7 +3919,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
      "Cannot produce full WFK file because kptrlatt == 0",ch10,&
      "Please use nkgpt and shiftk to define a homogeneous k-mesh.",ch10,&
      "Returning to caller"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
@@ -3927,7 +3927,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  my_inpath = in_path
 
  if (nctk_try_fort_or_ncfile(my_inpath, msg) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  call wrtout(std_out, sjoin("Converting:", my_inpath, "to", out_path))
 
@@ -3960,7 +3960,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
    'dksqmax=',dksqmax,ch10,&
    'Action: check your WFK file and k-point input variables',ch10,&
    '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  nkfull = ebands_full%nkpt
@@ -4416,7 +4416,7 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
        call destroy_mpi_enreg(MPI_enreg_seq)
 
      case default
-       MSG_ERROR("Wrong method")
+       ABI_ERROR("Wrong method")
      end select
 
      call cwtime(cpu,wall,gflops,"stop")
@@ -4651,7 +4651,7 @@ subroutine wfk_check_wfkfile(wfk_fname,Hdr,iomode,method,formeig,Kvars,cwtimes,c
        else if (method==1) then
          call wfk%read_bmask(bmask,ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k,occ_k=occ_k)
        else
-         MSG_ERROR("Wrong method")
+         ABI_ERROR("Wrong method")
        end if
 
        !call wfk%read_eigk(ik_ibz,spin,sc_mode,eig_k)
@@ -4666,7 +4666,7 @@ subroutine wfk_check_wfkfile(wfk_fname,Hdr,iomode,method,formeig,Kvars,cwtimes,c
        if (my_ierr/=0) then
          write(msg,"(a,i0)")"fill_or_check returned my_ierr: ",my_ierr
          ierr = my_ierr
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
 
        ABI_FREE(kg_k)
@@ -4786,19 +4786,19 @@ subroutine fill_or_check(task,Hdr,Kvars,ik_ibz,spin,formeig,kg_k,cg_k,eig_k,occ_
 
    if (ANY( ABS(cg_k(:,1:mpw) - ref_cg_k) > zero)) then
      ierr = ierr + 1
-     MSG_WARNING("Difference in cg_k")
+     ABI_WARNING("Difference in cg_k")
    end if
 
    if (ANY( ABS(kg_k - ref_kg_k) > zero)) then
      ierr = ierr + 2
-     MSG_WARNING("Difference in kg_k")
+     ABI_WARNING("Difference in kg_k")
      !write(std_out,*)"ref_kg_k",ref_kg_k
      !write(std_out,*)"kg_k",kg_k
    end if
 
    if (ANY( ABS(eig_k(1:eigsz) - ref_eig_k) > zero)) then
      ierr = ierr + 4
-     MSG_WARNING("Difference in eig_k")
+     ABI_WARNING("Difference in eig_k")
      !write(std_out,*)"ref_eig_k",ref_eig_k
      !write(std_out,*)"eig_k",eig_k
    end if
@@ -4806,7 +4806,7 @@ subroutine fill_or_check(task,Hdr,Kvars,ik_ibz,spin,formeig,kg_k,cg_k,eig_k,occ_
    if (formeig==0) then
      if (ANY( ABS(occ_k(1:nband_k) - ref_occ_k) > zero)) then
        ierr = ierr + 8
-       MSG_WARNING("occ_k")
+       ABI_WARNING("occ_k")
        !write(std_out,*)"ref_occ_k",ref_occ_k
        !write(std_out,*)"occ_k",occ_k
      end if
@@ -4814,13 +4814,13 @@ subroutine fill_or_check(task,Hdr,Kvars,ik_ibz,spin,formeig,kg_k,cg_k,eig_k,occ_
 
    write(msg,"(a,3(i0,2x))")" (ik_ibz, spin, ierr) ",ik_ibz,spin,ierr
    if (ierr/=0) then
-     MSG_WARNING(TRIM(msg)//": FAILED")
+     ABI_WARNING(TRIM(msg)//": FAILED")
    else
      call wrtout(std_out,TRIM(msg)//": OK","COLL")
    end if
 
  CASE DEFAULT
-   MSG_ERROR("Wrong task")
+   ABI_ERROR("Wrong task")
  END SELECT
 
  ABI_FREE(ref_kg_k)
@@ -4898,7 +4898,7 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
  call wfk_open_read(Wfk2,fname2,formeig,iomode2,get_unit(),comm)
 
  if (wfk1%compare(wfk2) /= 0) then
-   MSG_ERROR("WFK files are not consistent. See above messages")
+   ABI_ERROR("WFK files are not consistent. See above messages")
  end if
 
  mband = Wfk1%mband
@@ -4932,14 +4932,14 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
 
      if (ANY( ABS(kg1_k - kg2_k) > zero)) then
        ierr = ierr + 2
-       MSG_WARNING("Difference in kg_k")
+       ABI_WARNING("Difference in kg_k")
        !write(std_out,*)"kg1_k",kg1_k
        !write(std_out,*)"kg2_k",kg2_k
      end if
 
      if (ANY( ABS(eig1_k - eig2_k) > zero)) then
        ierr = ierr + 4
-       MSG_WARNING("Difference in eig_k")
+       ABI_WARNING("Difference in eig_k")
        !write(std_out,*)"eig1_k",eig1_k
        !write(std_out,*)"eig2_k",eig2_k
      end if
@@ -4947,7 +4947,7 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
      if (formeig==0) then
        if (ANY( ABS(occ1_k - occ2_k) > zero)) then
          ierr = ierr + 8
-         MSG_WARNING("occ_k")
+         ABI_WARNING("occ_k")
          write(std_out,*)"occ1_k",occ1_k
          write(std_out,*)"occ2_k",occ2_k
        end if
@@ -4955,12 +4955,12 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
 
      if (ANY( ABS(cg1_k - cg2_k) > zero)) then
        ierr = ierr + 1
-       MSG_WARNING("Difference in cg_k")
+       ABI_WARNING("Difference in cg_k")
      end if
 
      write(msg,"(a,3(i0,2x))")" (ik_ibz, spin, ierr) ",ik_ibz,spin,ierr
      if (ierr/=0) then
-       MSG_WARNING(TRIM(msg)//": FAILED")
+       ABI_WARNING(TRIM(msg)//": FAILED")
      else
        call wrtout(std_out,TRIM(msg)//": OK","COLL")
      end if
@@ -5088,7 +5088,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  !call ebands_print(fine_ebands, header="SKW interpolated energies", prtvol=dtset%prtvol)
  ABI_FREE(fine_eigen)
 #else
- MSG_ERROR("wfk_klist2mesh requires NETCDF support.")
+ ABI_ERROR("wfk_klist2mesh requires NETCDF support.")
 #endif
 
  if (my_rank == master) then
@@ -5108,7 +5108,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  ! Open WFK file with k-point list, extract dimensions and allocate workspace arrays.
  my_inpath = in_wfkpath
  if (nctk_try_fort_or_ncfile(my_inpath, msg) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  iwfk_ebands = wfk_read_ebands(my_inpath, xmpi_comm_self)
  !call ebands_print(iwfk_ebands, header="iwfk_ebands", unit=std_out, prtvol=dtset%prtvol)
@@ -5143,7 +5143,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  if (count(kf2kin /= -1) /= iwfk_ebands%nkpt) then
    write(msg, "(2a, 2(a,i0))")"Something wrong in the computation of fine_mesh --> input_mesh table.",ch10, &
     "Expecting: ", iwfk_ebands%nkpt, " matches, found: ", count(kf2kin /= -1)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Check weights (the list of k-points should be a subset of the kmesh specified by sigma_ngkpt).
@@ -5160,7 +5160,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
    write(msg, "(3a)") &
      "Mismatch between input k-weights and weigths associated to the fine mesh. ", ch10, &
      "Possible inconsistency between k-mesh defined by sigma_nshiftk and the list of k-points found in file."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! TODO
@@ -5206,7 +5206,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  !  write(msg,"(2a,2(a,es12.4),a)") &
  !    "Large error in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, " (meV)"
  !  call wrtout(ab_out, msg)
- !  MSG_WARNING(msg)
+ !  ABI_WARNING(msg)
  !end if
 
  call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
@@ -5246,13 +5246,13 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 
        ! Consistency check
        if (nband_k /= iwfk%nband(ikin, spin)) then
-         MSG_ERROR(sjoin("Mismatch in nband_k", itoa(nband_k), "/=", itoa(iwfk%nband(ikin, spin))))
+         ABI_ERROR(sjoin("Mismatch in nband_k", itoa(nband_k), "/=", itoa(iwfk%nband(ikin, spin))))
        end if
        if (npw_k /= iwfk%hdr%npwarr(ikin)) then
-         MSG_ERROR(sjoin("Mismatch in npw_k", itoa(npw_k), "/=", itoa(iwfk%hdr%npwarr(ikin))))
+         ABI_ERROR(sjoin("Mismatch in npw_k", itoa(npw_k), "/=", itoa(iwfk%hdr%npwarr(ikin))))
        end if
        if (owfk%hdr%istwfk(ikf) /= iwfk%hdr%istwfk(ikin)) then
-         MSG_ERROR(sjoin("Mismatch in istwfk_k", itoa(owfk%hdr%istwfk(ikf)), "/=", itoa(iwfk%hdr%istwfk(ikin))))
+         ABI_ERROR(sjoin("Mismatch in istwfk_k", itoa(owfk%hdr%istwfk(ikf)), "/=", itoa(iwfk%hdr%istwfk(ikin))))
        end if
 
        ! Read wavefunctions from input WFK file.

@@ -323,11 +323,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
         write(msg,'(a,i0,4a)')&
 &         " Symmetrization cannot be performed for spin: ",spin,ch10,&
 &         " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
-        MSG_WARNING(msg)
+        ABI_WARNING(msg)
       end if
     end do
    end if
-   if (Wfd%nspinor == 2) MSG_WARNING("Symmetrization with nspinor=2 not implemented")
+   if (Wfd%nspinor == 2) ABI_WARNING("Symmetrization with nspinor=2 not implemented")
  end if
 
  ABI_UNUSED(Pawang%l_max)
@@ -338,11 +338,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Set up logical flags for Sigma calculation
  if (mod10==SIG_GW_AC.and.Sigp%gwcalctyp/=1) then
-   MSG_ERROR("not implemented")
+   ABI_ERROR("not implemented")
  end if
 
  if (mod10==SIG_GW_AC.and.Sigp%gwcomp==1) then
-   MSG_ERROR("not implemented")
+   ABI_ERROR("not implemented")
  end if
 
  if (mod10==SIG_GW_AC) then
@@ -370,7 +370,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  CASE (2)
    fact_sp=one; tol_empty=0.005   ! to be consistent and obtain similar results if a metallic
  CASE DEFAULT                     ! spin unpolarized system is treated using nsppol==2
-   MSG_BUG('Wrong nsppol')
+   ABI_BUG('Wrong nsppol')
  END SELECT
 
  ! Allocate arrays used to accumulate the matrix elements of \Sigma_c over
@@ -390,7 +390,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,gwc_ngfft,irottb,iscompatibleFFT)
  if (.not.iscompatibleFFT) then
    msg = "FFT mesh is not compatible with symmetries. Results might be affected by large errors!"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  ABI_MALLOC(ktabr,(gwc_nfftot,Kmesh%nbz))
@@ -473,7 +473,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_MALLOC(vc_sqrt_qbz, (npwc))
 
  if (Er%mqmem==0) then ! Use out-of-core solution for epsilon.
-   MSG_COMMENT('Reading q-slices from file. Slower but less memory.')
+   ABI_COMMENT('Reading q-slices from file. Slower but less memory.')
  end if                                                                                !
 
  ! Additional allocations for PAW.
@@ -503,9 +503,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
       write(msg,'(3a)')&
 &       ' Frequencies in the SCR file are not compatible with the analytic continuation. ',ch10,&
 &       ' Verify the frequencies in the SCR file. '
-      MSG_WARNING(msg)
+      ABI_WARNING(msg)
       if (Wfd%my_rank==Wfd%master) write(std_out,*)AIMAG(Er%omega(Er%nomega_r+io)),(one/gl_knots(io)-one)
-      MSG_ERROR("Cannot continue!")
+      ABI_ERROR("Cannot continue!")
      end if
    end do
 
@@ -1013,7 +1013,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                write(msg,'(3a)')&
 &                'For the time being, gwcalctyp=28 cannot be used with ppmodel=3,4.',ch10,&
 &                'Use another Plasmon Pole Model when gwcalctyp=28.'
-               MSG_ERROR(msg)
+               ABI_ERROR(msg)
              end if
              ABI_MALLOC(botsq_conjg_transp,(PPm%dm2_botsq,npwc))
              botsq_conjg_transp=TRANSPOSE(botsq) ! Keep these two lines separated, otherwise gfortran messes up
@@ -1068,7 +1068,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            end if
 
          CASE DEFAULT
-           MSG_ERROR(sjoin("Unsupported value for mod10:", itoa(mod10)))
+           ABI_ERROR(sjoin("Unsupported value for mod10:", itoa(mod10)))
          END SELECT
 
          if (Sigp%gwcomp==1) then
@@ -1300,7 +1300,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    call xmpi_sum(npoles_missing, Wfd%comm, ierr)
    npls = SUM(npoles_missing)
    if (npls>0) then
-     MSG_WARNING(sjoin("Total number of missing poles for contour deformation method:", itoa(npls)))
+     ABI_WARNING(sjoin("Total number of missing poles for contour deformation method:", itoa(npls)))
      do band=minbnd,maxbnd
        npls = npoles_missing(band)
        if (npls>0) then
@@ -1516,7 +1516,7 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
  if (outofbox/=0) then
    enough=enough+1
    if (enough<=50) then
-     MSG_WARNING(sjoin('Number of G1-G2 pairs outside the G-sphere for Wfns: ',itoa(outofbox)))
+     ABI_WARNING(sjoin('Number of G1-G2 pairs outside the G-sphere for Wfns: ',itoa(outofbox)))
      if (enough==50) then
        call wrtout(std_out,' ========== Stop writing Warnings ==========')
      end if
@@ -2009,7 +2009,7 @@ subroutine calc_sig_ppm_comp(npwc,nomega,rhotwgp,botsq,otq,omegame0i_io,zcut,the
 
  if (ppmodel/=1.and.ppmodel/=2) then
    write(msg,'(a,i0,a)')' The completeness trick cannot be used when ppmodel is ',ppmodel,' It should be set to 1 or 2. '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_ALLOCATE(ket_comp,(npwc))

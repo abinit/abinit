@@ -181,7 +181,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
            'could try to raise your convergence parameters (ecut and k-points).',ch10,&
            'For your information, here are the four lowest frequencies :',ch10,&
            (phfrq(ii),ii=1,4)
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
 
 !      Compute the relaxed ion dielectric tensor

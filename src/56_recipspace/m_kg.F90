@@ -179,7 +179,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
        'Your starting geometry might be crazy.',ch10,&
        'See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
        if(iout/=std_out) call wrtout(iout,msg)
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      if (boxcut>2.2_dp) then
@@ -585,7 +585,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !  &   '  npw=',npw1,' < nband=',nband(ikpt),ch10,&
 !  &   '  Indicates not enough planewaves for desired number of bands.',ch10,&
 !  &   '  Action: change either ecut or nband in input file.'
-!  MSG_ERROR(msg)
+!  ABI_ERROR(msg)
 !  end if
 
 !  Find boundary of G sphere for efficient zero padding,
@@ -677,7 +677,7 @@ subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d
    'while their value is : ',ch10,&
    'natom-1 = ',natom-1,ch10,&
    'jatom=',jatom,', iatom=',iatom,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ABI_ALLOCATE(ph1kxred,(2,-n1:n1))
@@ -775,7 +775,7 @@ subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
  ph1d_size1=size(ph1d,1);ph1d_size2=size(ph1d,2)
  ph1d_sizemin=(2*n1+1+2*n2+1+2*n3+1)*natom
  if (ph1d_size1/=2.or.ph1d_size2<ph1d_sizemin) then
-   MSG_BUG('Wrong ph1d sizes!')
+   ABI_BUG('Wrong ph1d sizes!')
  end if
 
  do ia=1,natom
@@ -880,7 +880,7 @@ subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
    write(msg, '(a,i10,a,a,a)' )&
    'Input istr=',istr,' not allowed.',ch10,&
    'Possible values are 1,2,3,4,5,6 only.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ka=idx(2*istr-1);kb=idx(2*istr)
@@ -982,7 +982,7 @@ subroutine mkkpg(kg, kpg, kpt, nkpg, npw)
  !-- Test nkpg --
  if (nkpg/=3.and.nkpg/=9) then
    write(msg, '(a,i0)' )' Bad value for nkpg !',nkpg
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  !-- Compute (k+G) --
@@ -1221,7 +1221,7 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
 !-- Test nkpg --
  if (nkpg/=3) then
    write(msg, '(a,i0)' )' Bad value for nkpg !',nkpg
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !-- Compute (k+G) --

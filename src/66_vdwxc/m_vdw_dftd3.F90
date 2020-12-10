@@ -309,7 +309,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  if (need_dynmat) then
    if (.not.present(qphon)) then
      msg='Dynamical matrix required without a q-vector'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    dyn_vdw_dftd3=zero
  end if
@@ -325,7 +325,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    if (znucl(itypat).gt.94.0_dp) then
      write(msg,'(3a,es14.2)') &
 &     'Van der Waals DFT-D3 correction not available for atom type: ',znucl(itypat),' !'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      ivdw(itypat) = znucl(itypat)
    end if
@@ -354,7 +354,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      vdw_sr6=vdw_sr6*vdw_sr6_pbe0 ; vdw_s8=vdw_s8*vdw_s8_pbe0
    case default
      write(msg,'(a,i8,a)')'  Van der Waals DFT-D3 correction not compatible with ixc=',ixc,' !'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end select
 ! Case DFT-D3(BJ)
  elseif (vdw_xc == 7) then

@@ -169,14 +169,14 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 &     'When ABINIT is compiled without MPI flag,',ch10,&
 &     'setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.',ch10,&
 &     'Action: modify compilation option or paral_kgb in the input file.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
 
    if ( ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS]) .and. dtsets(idtset)%paral_kgb/=0) then
      dtsets(idtset)%paral_kgb=0
      write(message, '(a,i0,a)') &
 &     "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
-     MSG_COMMENT(message)
+     ABI_COMMENT(message)
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'max_ncpus',tread0,'INT')
@@ -270,7 +270,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%npkpt=1 ; dtsets(idtset)%npspinor=1 ; dtsets(idtset)%npfft=1
      dtsets(idtset)%npband=1; dtsets(idtset)%bandpp=1  ; dtsets(idtset)%nphf=1
      dtsets(idtset)%paral_kgb=0
-     MSG_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1')
+     ABI_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1')
    end if
 
 !  Take into account a possible change of paral_kgb (change of the default algorithm)
@@ -298,7 +298,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      write(message, '(a,a,a)' )&
 &     'When ionmov==4 and iscf==5 or 6, densfor_pred must be 3.',ch10,&
 &     'Set densfor_pred to 3.'
-     MSG_COMMENT(message)
+     ABI_COMMENT(message)
    end if
 
 #ifdef HAVE_LOTF
@@ -369,7 +369,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 &     'If HAVE_GPU_CUDA and recursion are used ',ch10,&
 &     'only the band parallelisation is active, we set:',ch10,&
 &     'npfft= 1, npkpt= 1, npband=',dtsets(idtset)%npband,' .'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
 
    if (dtsets(idtset)%npspinor>=2.and.dtsets(idtset)%nspinor==1) then
@@ -378,7 +378,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      write(message,'(3a)')&
 &     'npspinor is bigger than nspinor !',ch10,&
 &     'We set npspinor to 1 ; we set npfft to 2*npfft'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
 
 !  Some checks on parallelization data
@@ -392,32 +392,32 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 &       'The user-defined values of npkpt, npfft, npband or npspinor will be modified,',ch10,&
 &       'in order to bring this product below nproc .',ch10,&
 &       'At present, only a very simple algorithm is used ...'
-       MSG_WARNING(message)
+       ABI_WARNING(message)
 
        if(dtsets(idtset)%npkpt*dtsets(idtset)%npband*dtsets(idtset)%npspinor <= nproc) then
          dtsets(idtset)%npfft=1
-         MSG_WARNING('Set npfft to 1')
+         ABI_WARNING('Set npfft to 1')
        else if(dtsets(idtset)%npkpt*dtsets(idtset)%npspinor <= nproc)then
          dtsets(idtset)%npfft=1
          dtsets(idtset)%npband=1
-         MSG_WARNING('Set npfft and npband to 1')
+         ABI_WARNING('Set npfft and npband to 1')
        else if(dtsets(idtset)%npkpt <= nproc)then
          dtsets(idtset)%npfft=1
          dtsets(idtset)%npband=1
          dtsets(idtset)%npspinor=1
-         MSG_WARNING('Set npfft ,npband and npspinor to 1')
+         ABI_WARNING('Set npfft ,npband and npspinor to 1')
        else
          dtsets(idtset)%npfft=1
          dtsets(idtset)%npband=1
          dtsets(idtset)%npkpt=1
          dtsets(idtset)%npspinor=1
-         MSG_WARNING('Set npfft, npband, nspinor and npkpt to 1')
+         ABI_WARNING('Set npfft, npband, nspinor and npkpt to 1')
        end if
      else if(dtsets(idtset)%npkpt*dtsets(idtset)%npfft*dtsets(idtset)%npband*dtsets(idtset)%npspinor < nproc)then
        write(message,'(2a)')&
 &       'The number of processor must not be greater than npfft*npband*npkpt*npspinor ',&
 &       'when npfft or npkpt or npband or npspinor are chosen manually in the input file.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end if
 
@@ -448,7 +448,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 &       'The number of band*fft*spinor processors was not consistent with',ch10,&
 &       'the size of communicator used for ELPA library (np_slk).',ch10,&
 &       'np_slk value has been adjusted to ',dtsets(idtset)%np_slk,'.'
-       MSG_COMMENT(message)
+       ABI_COMMENT(message)
      end if
    end if
 #endif
@@ -459,25 +459,25 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if ((dtsets(idtset)%usefock==1).and.(dtsets(idtset)%nphf/=1)) then
 
      if ((dtsets(idtset)%nphf<0).or.(dtsets(idtset)%nphf==0)) then
-       MSG_ERROR('The value of variable nphf should be a non negative integer.')
+       ABI_ERROR('The value of variable nphf should be a non negative integer.')
      end if
      if (dtsets(idtset)%paral_kgb/=0) then
        message = 'Option paral_kgb should be turned off (value 0) for a parallelized Hartree-Fock calculation.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      if (response/=0) then
        message = 'A response function calculation is not yet possible with a parallelized Hartree-Fock calculation.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      if (dtsets(idtset)%npspinor>1) then
        message = 'The parallelism on spinors is not supported by a parallelized Hartree-Fock calculation.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      if (dtsets(idtset)%npkpt*dtsets(idtset)%nphf > nproc )then
        write(message,'(a,3(a,i0))') ch10,&
 &       'The product of variables npkpt and nphf is bigger than the number of processors: nkpt= ',&
 &       dtsets(idtset)%npkpt,' nphf= ',dtsets(idtset)%nphf  ,' and nproc= ', nproc
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end if ! Fock
 
@@ -526,7 +526,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        dtsets(idtset)%nppert=max(1,dtsets(idtset)%nppert)
        if(dtsets(idtset)%nppert>mpi_enregs(idtset)%nproc) then
          message=' The number of processors must not be smaller than nppert !'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        call initmpi_pert(dtsets(idtset),mpi_enregs(idtset))
        mpi_enregs(idtset)%nproc_kpt = mpi_enregs(idtset)%nproc_cell
@@ -640,7 +640,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
          write(message, '(4a,i0,4a)')&
 &         nm_mkmem(ii),' must be positive or null but ',nm_mkmem(ii),' =',mkmem,ch10,&
 &         'Use default ',nm_mkmem(ii),' = nkpt .'
-         MSG_WARNING(message)
+         ABI_WARNING(message)
          mkmem=nkpt
        end if
 
@@ -682,7 +682,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
      if(dtsets(idtset)%usewvl == 1 .and. dtsets(idtset)%usepaw==1 )then
        if(dtsets(idtset)%mkmem .ne. dtsets(idtset)%nkpt) then
-         MSG_ERROR("mkmem is not allowed for WVL+PAW")
+         ABI_ERROR("mkmem is not allowed for WVL+PAW")
        end if
      end if
 
@@ -698,7 +698,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        write(message,'(5a)') trim(message),ch10,&
 &       'YOU ARE STRONGLY ADVICED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
 &       'PUT "AUTOPARAL=1" IN THE INPUT FILE.'
-       MSG_WARNING(message)
+       ABI_WARNING(message)
      end if
    end if
 
@@ -722,14 +722,14 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
              write(message,'(3a,i0)') &
 &             'When use_gpu_cuda is on, the number of FFT processors, npfft, must be 1',ch10,&
 &             'However, npfft=',mpi_enregs(idtset)%nproc_fft
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
 
            if(modulo(dtsets(idtset)%ngfft(2),mpi_enregs(idtset)%nproc_fft)/=0)then
              write(message,'(3a,i0,a,i0)') &
 &             'The number of FFT processors, npfft, should be a multiple of ngfft(2).',ch10,&
 &             'However, npfft=',mpi_enregs(idtset)%nproc_fft,' and ngfft(2)=',dtsets(idtset)%ngfft(2)
-             MSG_BUG(message)
+             ABI_BUG(message)
            end if
 
            do iikpt=1,nkpt*nsppol
@@ -740,31 +740,31 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
                  write(message,'(3a,i0)') &
 &                 'The number bandpp should be 1 or a multiple of 2',ch10,&
 &                 'However, bandpp=',mpi_enregs(idtset)%bandpp
-                 MSG_BUG(message)
+                 ABI_BUG(message)
                end if
                if(modulo(dtsets(idtset)%nband(iikpt),mpi_enregs(idtset)%nproc_band*mpi_enregs(idtset)%bandpp)/=0)then
                  write(message,'(3a,i0,a,i0)') &
 &                 'The number of bands for the k-point, nband_k, should be a multiple of nproc_band*bandpp.',ch10,&
 &                 'However, nband_k=',dtsets(idtset)%nband(iikpt),' and nproc_band*bandpp=', &
 &                 mpi_enregs(idtset)%nproc_band* mpi_enregs(idtset)%bandpp
-                 MSG_BUG(message)
+                 ABI_BUG(message)
                end if
              else if ((dtsets(idtset)%istwfk(iikpt_modulo)==2) .and. (dtsets(idtset)%ngfft(7)==400)) then
-               MSG_BUG('The fftalg=400 with istwfk=2 is not valid')
+               ABI_BUG('The fftalg=400 with istwfk=2 is not valid')
              else
                if(modulo(dtsets(idtset)%nband(iikpt),mpi_enregs(idtset)%nproc_band*mpi_enregs(idtset)%bandpp)/=0)then
                  write(message,'(3a,i0,a,i0)') &
 &                 'The number of band for the k-point, nband_k, should be a multiple of nproc_band*bandpp.',ch10,&
 &                 'However, nband_k=',dtsets(idtset)%nband(iikpt),' and nproc_band*bandpp=', &
 &                 mpi_enregs(idtset)%nproc_band* mpi_enregs(idtset)%bandpp
-                 MSG_BUG(message)
+                 ABI_BUG(message)
                end if
                if ((mpi_enregs(idtset)%bandpp==0)) then
                  write(message,'(a,i0,2a,i0,2a,i0)')&
 &                 'The number bandpp should not be 0 with fftalg=',dtsets(idtset)%ngfft(7),ch10,&
 &                 'and istwfk=',dtsets(idtset)%istwfk(iikpt_modulo),ch10,&
 &                 'However, bandpp=',mpi_enregs(idtset)%bandpp
-                 MSG_BUG(message)
+                 ABI_BUG(message)
                end if
              end if
            end do
@@ -774,7 +774,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
                write(message,'(3a,i0,a,i0)') &
 &               'The number of KPT processors, npkpt, should be a multiple of nkpt*nsppol.',ch10,&
 &               'However, npkpt=',mpi_enregs(idtset)%nproc_kpt,' and nkpt*nsppol=',nkpt*nsppol
-               MSG_WARNING(message)
+               ABI_WARNING(message)
              end if
            end if
          else
@@ -785,7 +785,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 &               'The number of band for the k-point, nband_k, should be a multiple of npband*bandpp.',ch10,&
 &               'However, nband_k=',dtsets(idtset)%nband(iikpt),' and npband*bandpp=', &
 &               mpi_enregs(idtset)%nproc_band* mpi_enregs(idtset)%bandpp
-               MSG_BUG(message)
+               ABI_BUG(message)
              end if
            end do
          end if
@@ -947,7 +947,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !This is not a very clean exit in case of paral_kgb<0
  if (iexit/=0)then
    message="Stopping now!"
-   MSG_STOP(message)
+   ABI_STOP(message)
  end if
 
  DBG_EXIT("COLL")
@@ -1067,10 +1067,10 @@ end subroutine mpi_setup
 
 !Is it available
  if ((dtset%usefock==1).AND.(dtset%nphf/=1)) then
-   MSG_ERROR("autoparal>0 not available for Hartree-Fock or hybrid XC calculations!")
+   ABI_ERROR("autoparal>0 not available for Hartree-Fock or hybrid XC calculations!")
  end if
  if ((autoparal>1).and.dtset%wfoptalg/=4.and.dtset%wfoptalg/=14) then
-   MSG_ERROR("autoparal>1 only available for the old LOBPCG algorithm (wfoptalg=4/14)!")
+   ABI_ERROR("autoparal>1 only available for the old LOBPCG algorithm (wfoptalg=4/14)!")
  end if
 
  ! Unit number used for outputting the autoparal sections
@@ -1176,7 +1176,7 @@ end subroutine mpi_setup
        if (npp_max>npert_eff) then
          npp_min=npert_eff;npp_max=npert_eff
          msg='nppert is bigger than npert; we set nppert=npert'
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
      end if
      npk_min=1
@@ -1216,7 +1216,7 @@ end subroutine mpi_setup
        write(msg,'(3a)') &
         "Value of npfft given in input file is too high for the FFT grid!",ch10,&
         "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
    npf_max=min(npf_max,ngmin(2))
@@ -1265,7 +1265,7 @@ end subroutine mpi_setup
            call hdr_read_from_fname(hdr0,filden,ii,xmpi_comm_self)
            idum3(1:2)=hdr0%ngfft(2:3);if (file_found) idum3(3)=1
            call hdr0%free()
-           MSG_WARNING("Cannot find filden"//filden)
+           ABI_WARNING("Cannot find filden"//filden)
          end if
        end if
        call xmpi_bcast(idum3,0,mpi_enreg%comm_world,ii)
@@ -1510,7 +1510,7 @@ end subroutine mpi_setup
    write(msg,'(a,i0,2a,i0,a)')  &
 &  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
 &  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advices on process distribution.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    if (max_ncpus>0) then
      call wrtout(ab_out,msg)
      call flush_unit(ab_out)
@@ -1542,7 +1542,7 @@ end subroutine mpi_setup
    else if (optdriver==RUNL_RESPFN) then
      write(ount,'(a)')'#Autoparal section for DFPT calculations'
    else
-     MSG_ERROR(sjoin('Unsupported optdriver:', itoa(optdriver)))
+     ABI_ERROR(sjoin('Unsupported optdriver:', itoa(optdriver)))
    end if
    write(ount,"(a)")   "info:"
    write(ount,"(a,i0)")"    autoparal: ",autoparal

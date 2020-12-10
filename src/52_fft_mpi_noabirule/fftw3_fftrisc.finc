@@ -28,12 +28,12 @@
  ! General k-point code
  if (istwf_k>2 .and. option==0) then
    write(msg,'(a,i0)')' option=0 is not allowed with istwf_k=',istwf_k
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (istwf_k>=2 .and. option==3) then
    write(msg,'(a,i0)')' option=3 is not allowed with istwf_k=',istwf_k
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !For all other tests of validity of inputs, assume that they

@@ -561,7 +561,7 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
 
  if (sppoldbl<1 .or. sppoldbl>2) then
    write(msg, '(a,i0,a)' )'The value of sppoldbl is: ',sppoldbl,', but it should be either 1 or 2.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ! When usesym=0, the old way of converting the wavefunctions (without using the symmetries), is recovered.
@@ -822,7 +822,7 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
 
      if (dksqmn < -tol12) then
        write(msg, '(a,es16.6)' )'The minimum square of dk has negative norm: dksqmn= ',dksqmn
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
 
      !write(std_out,'(a,i6,i2,2x,i6,5i3,es24.14)' )' listkk: ikpt2,isppol,indkk(isk,:)=',ikpt2,isppol,indkk(isk,:),dksqmn
@@ -1230,7 +1230,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
          nshiftk2=nshiftk2/prime_factor(iprime)
          shiftk2(:,1:nshiftk2)=shiftk3(:,1:nshiftk2)-floor(shiftk3(:,1:nshiftk2)+tol8)
          if(kshiftk/=nshiftk2)then
-           MSG_BUG('The search for a primitive k point lattice contains a bug.')
+           ABI_BUG('The search for a primitive k point lattice contains a bug.')
          end if
 
 !        If this trial shift was successful, must exit the loop on trial ishiftk,
@@ -1415,7 +1415,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 &   'However, note that it might be due to the user,',ch10,&
 &   'if nkpt is explicitely defined in the input file.',ch10,&
 &   'In this case, please check your input file.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ABI_MALLOC(kpt,(3,nkpt_use))
@@ -1551,7 +1551,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshift
 
    if (indkpt(ikpt) == 0) then
      write(msg,'(a,i0)')' indkpt(ikpt) is still 0: no irred kpoint is equiv to ikpt ',ikpt
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end do !  loop full kpts
 
@@ -1675,7 +1675,7 @@ subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
          call wrap2_pmhalf(k2(3),k1(3),shift(3))
          if(nn > nkpt_fullbz) then
            write (msg,'(a,i0)')' nkpt_fullbz mis-estimated, exceed nn=',nn
-           MSG_BUG(msg)
+           ABI_BUG(msg)
          end if
          kpt_fullbz(:,nn)=k1(:)
          nn=nn+1
@@ -1688,7 +1688,7 @@ subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
  if (nn /= nkpt_fullbz) then
    write (msg,'(2(a,i0),a,a)')' nkpt_fullbz= ',nkpt_fullbz,' underestimated  nn=',nn,&
 &   ch10, "Perhaps your k grid or shifts do not correspond to the symmetry?"
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 end subroutine get_kpt_fullbz
@@ -1800,7 +1800,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &     'kptrlatt(:,1)= ',kptrlatt(:,1),ch10,&
 &     'kptrlatt(:,2)= ',kptrlatt(:,2),ch10,&
 &     'kptrlatt(:,3)= ',kptrlatt(:,3)
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    ngkpt(1)=kptrlatt(1,1)
@@ -1815,7 +1815,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &     'ngk(q)pt(2) = ',ngkpt(2),ch10,&
 &     'ngk(q)pt(3) = ',ngkpt(3),ch10,&
 &     'Action: correct ngkpt or ngqpt in the input file.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -1852,7 +1852,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &         'However, nshiftk must be 1 in this case, while the input nshiftk=',nshiftk,ch10,&
 &         'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
 &         'or set nshiftk=1.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        proddown=downsampling(1)*downsampling(2)*downsampling(3)
        if(proddown/=0)then
@@ -1872,7 +1872,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &         'that gives nkptlatt=',nkptlatt,ch10,&
 &         'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
 &         'or modify your k-point grid and/or your downsampling in order for them to be compatible.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
    end if
@@ -1885,7 +1885,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &     'at least',nkptlatt*nshiftk,',',ch10,&
 &     'Action: set mkpt to that value in the main routine,',ch10,&
 &     'and recompile the code.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  Build primitive vectors of the k lattice
@@ -2025,7 +2025,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      write(msg, '(a,i0,3a,i0,a)' )&
      'The number of k points ',nkpt,' is not equal to',ch10,&
      'nkptlatt*nshiftk which is ',nkptlatt*nshiftk,'.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
  else if(brav==2)then
@@ -2038,7 +2038,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &     'at least',(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2,',',ch10,&
 &     'Action: set mkpt to that value in the main routine,',ch10,&
 &     'and recompile the code.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    nn=1
    if (ngkpt(1)/=ngkpt(2).or.ngkpt(1)/=ngkpt(3)) then
@@ -2049,7 +2049,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &     'ngqpt(2) = ',ngkpt(2),ch10,&
 &     'ngqpt(3) = ',ngkpt(3),ch10,&
 &     'Action: modify ngqpt(1:3) in the input file.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if ((ngkpt(1)*nshiftk)/=(((ngkpt(1)*nshiftk)/2)*2)) then
      write(msg, '(4a,3(a,i0,a),a)' )&
@@ -2059,7 +2059,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &     'ngqpt(2)*nshiftk = ',ngkpt(2)*nshiftk,ch10,&
 &     'ngqpt(3)*nshiftk = ',ngkpt(3)*nshiftk,ch10,&
 &     'Action: modify ngqpt(1:3)*nshiftk in the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (ngkpt(1)==0.or.ngkpt(2)==0.or.ngkpt(3)==0) then
      spkpt(1,1)=0.0_dp
@@ -2101,7 +2101,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &       'The number of k points ',nkpt,'  is not equal to',ch10,&
 &       '(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2 which is',&
 &       (ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
 
@@ -2115,7 +2115,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &     'at least',(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4,',',ch10,&
 &     'Action: set mkpt to that value in the main routine,',ch10,&
 &     'and recompile the code.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    nn=1
    if ((ngkpt(1)*nshiftk)/=(((ngkpt(1)*nshiftk)/2)*2) .or.&
@@ -2128,7 +2128,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &     'ngqpt(2)*nshiftk = ',ngkpt(2)*nshiftk,ch10,&
 &     'ngqpt(3)*nshiftk = ',ngkpt(3)*nshiftk,ch10,&
 &     'Action: modify ngqpt(1:3) in the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (ngkpt(1)==0.or.ngkpt(2)==0.or.ngkpt(3)==0) then
      spkpt(1,1)=0.0_dp
@@ -2173,13 +2173,13 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
        write(msg, '(3a)' )&
 &       'BCC lattice, input ngqpt=0, so no kpt is generated.',ch10,&
 &       'Action: modify ngqpt(1:3) in the input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if(nkpt/=(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4)then
        write(msg, '(a,i0,3a,i0,a)' )&
 &       'The number of k points ',nkpt,' is not equal to',ch10,&
 &       '(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4 which is',(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
 
@@ -2193,7 +2193,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &     'at least',ngkpt(1)*ngkpt(2)*ngkpt(3),',',ch10,&
 &     'Action: set mkpt to that value in the main routine,',ch10,&
 &     'and recompile the code.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    nn=1
    if (ngkpt(1)/=ngkpt(2)) then
@@ -2203,13 +2203,13 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 &     'ngqpt(1) = ',ngkpt(1),ch10,&
 &     'ngqpt(2) = ',ngkpt(2),ch10,&
 &     'Action: modify ngqpt(1:3) in the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (ngkpt(1)==0.or.ngkpt(2)==0.or.ngkpt(3)==0) then
      write(msg, '(3a)' )&
 &     'For hexagonal lattices, ngqpt(1:3)=0 is not permitted',ch10,&
 &     'Action: modify ngqpt(1:3) in the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      do kk=1,ngkpt(3)
        do jj=1,ngkpt(2)
@@ -2233,7 +2233,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
        write(msg, '(a,i0,3a,i0,a)' )&
 &       'The number of k points ',nkpt,'  is not equal to',ch10,&
 &       'ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk which is',ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
 
@@ -2242,7 +2242,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    write(msg, '(a,i0,a,a,a)' )&
 &   'The calling routine asks brav= ',brav,'.',ch10,&
 &   'but only brav=1 or -1,2,3 or 4 are allowed.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (option/=0) then
@@ -2359,7 +2359,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 &     'The values of vacuum must be 0 or 1.',ch10,&
 &     'However, the input vacuum(',ii,') is',vacuum(ii),ch10,&
 &     'Action: correct vacuum in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -3021,7 +3021,7 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
    write(msg,'(3a,i0)')&
 &   'The argument ndiv_small should be a positive number,',ch10,&
 &   'however, ndiv_small=',ndiv_small
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  do ii=1,nbounds-1
@@ -3042,7 +3042,7 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
    write(msg,'(3a)')&
 &   'found two consecutive points in the path which are equal',ch10,&
 &   'This is not allowed, please modify the path in your input file'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  fct=fct/ndiv_small

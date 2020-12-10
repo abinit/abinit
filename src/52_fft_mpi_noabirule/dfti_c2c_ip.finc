@@ -24,7 +24,7 @@
  else if (isign==+1) then
    status = DftiComputeBackward(Desc1, ff)
  else 
-   MSG_ERROR("Wrong isign")
+   ABI_ERROR("Wrong isign")
  end if
  DFTI_CHECK(status)
 
@@ -32,7 +32,7 @@
  DFTI_CHECK(status)
 
 #else 
- MSG_ERROR("FFT_DFTI support not activated")
+ ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
  ABI_UNUSED(ff)
 #endif

@@ -130,7 +130,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
  call wrtout(std_out,message,'COLL')
 
  if (open_file('forlb.ovlp',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  rewind(unt)
  read(unt,*) message
@@ -146,7 +146,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
 & 'It might be physically correct and it is possible with the current implementation'
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-!   MSG_ERROR(msg)
+!   ABI_ERROR(msg)
  end if
 
 !Do not dead the bandinf, bandinf redondance information

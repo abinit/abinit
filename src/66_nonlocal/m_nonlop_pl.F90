@@ -268,18 +268,18 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 
 !Test: spin orbit not allowed for choice=5,6
  if (nspinortot==2 .and. choice==6 ) then
-   MSG_BUG('For nspinortot=2, choice=6 is not yet allowed.')
+   ABI_BUG('For nspinortot=2, choice=6 is not yet allowed.')
  end if
 
  if ((choice<1 .or. choice>6) .and. choice/=23 ) then
    write(msg,'(a,i0)')'Does not presently support this choice=',choice
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Test: choice 51 and 52 only allowed with nonlop_ylm
 !JWZ, 01-Sep-08
  if (choice==51 .or. choice==52) then
-   MSG_BUG('choice 51 or 52 is not yet allowed.')
+   ABI_BUG('choice 51 or 52 is not yet allowed.')
  end if
 
 !Define dimension of work arrays.
@@ -440,7 +440,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
          write(msg,'(a,a,a,i4,a,i4,a)')&
           'With nloc_mem<=0, mincat must be less than matblk.',ch10,&
           'Their value is ',mincat,' and ',matblk,'.'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
        call ph1d3d(ia3,ia4,kgin,matblk,natom,npwin,n1,n2,n3,phkxredin,ph1d,ph3din)
      end if
@@ -599,7 +599,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
                    jjs=1+((ilang-1)*ilang*(ilang+1))/6
                    if (ilang>4) then
                      write(msg,'(a,i0)')' ilang must fall in range [1..4] but value is ',ilang
-                     MSG_BUG(msg)
+                     ABI_BUG(msg)
                    end if
 
 !                  Metric & spinorial contraction from gxa to gxafac. The treatment
@@ -1484,7 +1484,7 @@ subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
      write(msg,'(a,a,a,i0)')&
      'The argument option should be 1 or 2,',ch10,&
      'however, option=',option
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    scale=two
@@ -1587,7 +1587,7 @@ subroutine ddkten(compact,idir,rank,temp,tmpfac)
    write(msg, '(a,i10,a,a,a)' )&
    'Input rank=',rank,' not allowed.',ch10,&
    'Possible values are 1,2,3 only.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Take care of p angular momentum

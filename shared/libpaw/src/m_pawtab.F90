@@ -1387,7 +1387,7 @@ subroutine pawtab_get_lsize(Pawtab,l_size_atm,natom,typat, &
  natom_typat=count(typat>0)
  if (size(pawtab)<maxval(typat)) then
    msg='error on pawtab size!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (.not.allocated(l_size_atm)) then
@@ -1412,7 +1412,7 @@ subroutine pawtab_get_lsize(Pawtab,l_size_atm,natom,typat, &
 !2nd case: parallel mode
    if (.not.present(mpi_atmtab)) then
      msg='optional args error!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    do ia=1,natom
      ityp=typat(mpi_atmtab(ia))
@@ -1853,7 +1853,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    if (trim(msg)/='') then
      write(msg0,'(3a)') &
 &     'There is a problem with the size of the following array(s):',ch10,trim(msg)
-     MSG_BUG(msg0)
+     ABI_BUG(msg0)
    end if
 
  end if ! me=0
@@ -2029,7 +2029,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
    if (ii/=nn_int+nn_int_arr) then
      msg='the number of loaded integers is not correct!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
  end if ! me=0
@@ -2221,7 +2221,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
    if (ii/=nn_int+nn_int_arr) then
      msg='the number of broadcasted integers is not correct!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
  end if ! me/=0
@@ -2466,7 +2466,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    ii=ii-1
    if (ii/=nn_dpr+nn_dpr_arr) then
      msg='the number of loaded reals is not correct!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
  end if ! me=0
@@ -2912,7 +2912,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
    if (ii/=nn_dpr+nn_dpr_arr) then
      msg='the number of broadcasted reals is not correct!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
  end if ! me/=0

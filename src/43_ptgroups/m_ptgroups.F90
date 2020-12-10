@@ -203,7 +203,7 @@ subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps
  CASE ('m-3m')
    call ptg_Oh  (nsym,nclass,sym,class_ids,class_names,Irreps)
  CASE DEFAULT
-   MSG_BUG(sjoin("Unknown value for ptg_name:", ptg_name))
+   ABI_BUG(sjoin("Unknown value for ptg_name:", ptg_name))
  END SELECT
 
  ! Calculate the trace of each irreducible representation in order to have the character at hand.
@@ -289,7 +289,7 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
   write(msg,'(3a)')&
 &  'Either identity is not present or it is not the first operation ',ch10,&
 &  'check set of symmetry operations '
-  MSG_ERROR(msg)
+  ABI_ERROR(msg)
  end if
  !
  ! Is it a group? Note that I assume that AFM sym.op (if any) have been pruned in the caller.
@@ -618,9 +618,9 @@ subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
 &    " sym_idx= ",sym_idx, " and cls_idx= ",cls_idx
    if (PRESENT(ierr)) then
      ierr=1
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    else
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -686,7 +686,7 @@ subroutine mult_table(nsym,sym,mtab)
 
    if ( ANY(found /= 1)) then
      write(std_out,*)"found = ",found
-     MSG_ERROR("Input elements do not form a group")
+     ABI_ERROR("Input elements do not form a group")
    end if
  end do ! isym
 
@@ -752,14 +752,14 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
 
  ierr=0
  if (open_file(fname,msg,newunit=unt,form="formatted") /=0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(unt,*,ERR=10)          ! Skip the header.
  read(unt,*,ERR=10) fvers    ! File version.
  if (fvers > last_file_version) then
    write(msg,"(2(a,i0))")" Found file format= ",fvers," but the latest supported version is: ",last_file_version
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  read(unt,*,ERR=10) ita_spgroup
  read(unt,*,ERR=10) basis
@@ -767,12 +767,12 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
  if (spgroup/=ita_spgroup) then
    write(msg,'(a,2i0)')&
 &   " Input space group does not match with the value reported on file: ",spgroup,ita_spgroup
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (basis /= "b") then
    msg=" Wrong value for basis: "//TRIM(basis)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! * Read the list of the k-points.
@@ -818,7 +818,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
        if ( (now-prev) /= 1 ) then
          write(msg,"(2(a,i0))")&
 &          " Symmetries on file are not ordered in classes. icls= ",icls,", isym= ",isym
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        else
          prev = now
        end if
@@ -979,7 +979,7 @@ subroutine copy_irrep(In_irreps,Out_irreps,phase_fact)
  dim2 = SIZE(Out_irreps)
  if (dim1/=dim2) then
    msg = " irreps to be copied have different dimension"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  my_phase_fact=cone
@@ -987,7 +987,7 @@ subroutine copy_irrep(In_irreps,Out_irreps,phase_fact)
    my_phase_fact=phase_fact
    if (SIZE(phase_fact) /= In_irreps(1)%nsym) then
      msg = " irreps to be copied have different dimension"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -1097,19 +1097,19 @@ function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
 
  nsym = Irrep1%nsym
  if (nsym /= Irrep2%nsym) then
-   MSG_WARNING("Irreps have different nsym")
+   ABI_WARNING("Irreps have different nsym")
    ierr=ierr+1
  end if
 
  if (Irrep1%dim /= Irrep2%dim) then
-   MSG_WARNING("Irreps have different dimensions")
+   ABI_WARNING("Irreps have different dimensions")
    write(std_out,*)Irrep1%dim,Irrep2%dim
    ierr=ierr+1
  end if
 
  if (ii>Irrep2%dim .or. jj>Irrep2%dim .or. &
 &    kk>Irrep1%dim .or. ll>Irrep1%dim) then
-   MSG_WARNING("Wrong indeces")
+   ABI_WARNING("Wrong indeces")
    write(std_out,*)ii,Irrep2%dim,jj,Irrep2%dim,kk>Irrep1%dim,ll,Irrep1%dim
    ierr=ierr+1
  end if

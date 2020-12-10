@@ -189,7 +189,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  nprocs=MPI_enreg%nproc_cell
 
  if (nprocs/=1) then
-   MSG_ERROR("mlwfovlp_qp not programmed for parallel execution")
+   ABI_ERROR("mlwfovlp_qp not programmed for parallel execution")
  end if
 
  ! Compute reciprocal space metric gmet for unit cell of disk wf
@@ -205,7 +205,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 &    'Set of GW irreducible-zone kptgw in input file is inconsistent',ch10,&
 &    'with full-zone set being used for wannier90 setup.',ch10,&
 &    'Action: correct input data'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  !
  ! === Initialize object defining the Band strucuture ===
@@ -239,7 +239,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
      'Set of GW irreducible-zone kptgw in input file is inconsistent',ch10,&
      'with full-zone set being used for wannier90 setup.',ch10,&
      'Action: correct input data'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  ABI_MALLOC(npwarr_ibz,(nkibz))
@@ -309,7 +309,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  g0w0_exists = .FALSE.
  inquire(file=gw_fname,iostat=ios,exist=g0w0_exists)
  if (ios/=0) then
-   MSG_ERROR('File g0w0 exists but iostat returns nonzero value!')
+   ABI_ERROR('File g0w0 exists but iostat returns nonzero value!')
  end if
 
  if (.not.g0w0_exists) then ! read QPS file (default behavior).
@@ -325,7 +325,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
  else
    ! Read GW file (m_ks_to_qp has been already set to 1, no extrapolation is performed)
-   MSG_WARNING(' READING GW CORRECTIONS FROM FILE g0w0 !')
+   ABI_WARNING(' READING GW CORRECTIONS FROM FILE g0w0 !')
    input = from_GW_FILE
    ABI_MALLOC(igwene,(QP_bst%mband,QP_bst%nkpt,QP_bst%nsppol))
    call rdgw(QP_bst,gw_fname,igwene,extrapolate=.FALSE.)
@@ -353,7 +353,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
        'specified for wannier90 calculation',ch10,&
        'Action: correct input so all band numbers are equal for GW',ch10,&
        'and wannier90 datasets.'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
 
     ! Load KS states for this kbz and spin
@@ -372,7 +372,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
       m_tmp(:,:)=conjg(m_ks_to_qp(:,:,irzkpt,isppol))
     else
       write(msg,'(2(a,i0))')'Invalid indkk(ikpt,6) ',itimrev,'from routine listkk for k-point ',ikpt
-      MSG_BUG(msg)
+      ABI_BUG(msg)
     end if
 
     call ZGEMM('N','N',npw_k,mband,mband,cone,cg_k,mpw,m_tmp,mband,czero,cg_qpk,mpw)
@@ -405,7 +405,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
     !&    '  orthonormality error for quasiparticle wave functions.',ch10,&
     !&    '  spin=',isppol,'  k point=',ikpt,'  ortho_err=',ortho_err,' >1E-6',ch10,&
     !&    '  Action: Be sure input nband>=maxval(bndgw)'
-    !  MSG_ERROR(msg)
+    !  ABI_ERROR(msg)
     !end if
     !deallocate(ortho)
 
@@ -416,7 +416,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
       write(msg,'(3a)')&
       " QP energies read from QPS file are not ordered, likely nband_k>nbdgw. ",ch10,&
       " Change nband in the input file so that it equals the number of GW states calculated"
-      MSG_WARNING(msg)
+      ABI_WARNING(msg)
     end if
 
     if ( .TRUE. ) then
@@ -434,7 +434,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
       write(msg,'(2a,3f8.4,3a)')ch10,&
         "QP energies at k-point ",QP_bst%kptns(:,irzkpt)," are not sorted in ascending numerical order!",ch10,&
         "Performing reordering of energies and wavefunctions to be written on the final WKF file."
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
       !write(std_out,*)"eig",(QP_bst%eig(ii,irzkpt,isppol),ii=1,nband_k)
       ABI_MALLOC(sorted_qpene,(nband_k))
       ABI_MALLOC(iord,(nband_k))
@@ -494,7 +494,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
          m_ks_to_qp_BZ(:,:,ikbz,isppol)=CONJG(m_ks_to_qp(:,:,ikibz,isppol))
        case default
          write(msg,'(a,i3)')"Wrong itimrev= ",itimrev
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end select
      end do
    end do

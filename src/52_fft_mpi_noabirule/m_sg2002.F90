@@ -158,12 +158,12 @@ subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 ! check input
  if (nd1<n1 .or. nd2<n2 .or. nd3<n3) then
-   MSG_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
+   ABI_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
  end if
 
  ! Effective n1 and n2 (complex-to-complex or real-to-complex)
@@ -443,12 +443,12 @@ subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
 &     'ncache has to be enlarged to be able to hold at',ch10, &
 &     'least one 1-d FFT of each size even though this will',ch10,&
 &     'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! check input
  if (nd1<n1 .or. nd2<n2 .or. nd3<n3) then
-   MSG_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
+   ABI_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
  end if
 
 !Effective n1 and n2 (complex-to-complex or real-to-complex)
@@ -724,7 +724,7 @@ subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -1066,7 +1066,7 @@ subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -1384,7 +1384,7 @@ subroutine sg2002_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
    call mpifft_dbox2fg(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
 
  case default
-   MSG_BUG("Wrong isign")
+   ABI_BUG("Wrong isign")
  end select
 
  ABI_DEALLOCATE(workr)
@@ -1491,7 +1491,7 @@ subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at', &
 &    'least one 1-d FFT of each size even though this will', &
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -1912,7 +1912,7 @@ subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
 &    'ncache has to be enlarged to be able to hold at', &
 &    'least one 1-d FFT of each size even though this will', &
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -2346,7 +2346,7 @@ subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &     'ncache has to be enlarged to be able to hold at', &
 &     'least one 1-d FFT of each size even though this will', &
 &     'reduce the performance for shorter transform lengths'
-    MSG_ERROR("Aborting now")
+    ABI_ERROR("Aborting now")
  end if
 
 !Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -2595,7 +2595,7 @@ subroutine ctrig(n,trig,after,before,now,isign,ic)
  write(std_out,*) 'VALUE OF',n,'NOT ALLOWED FOR FFT, ALLOWED VALUES ARE:'
 37 format(15(i5))
  write(std_out,37) (ifftdata(1,i),i=1,ndata)
- MSG_ERROR("Aborting now")
+ ABI_ERROR("Aborting now")
 
 1000 continue
  after(1)=1
@@ -4141,7 +4141,7 @@ subroutine fftstp(mm,n1dfft,m,nn,n,zin,zout,trig,after,now,before,isign)
         enddo
 
         else
-          MSG_ERROR('error fftstp')
+          ABI_ERROR('error fftstp')
         end if
 
 end subroutine fftstp

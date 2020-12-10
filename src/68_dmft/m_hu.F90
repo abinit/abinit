@@ -831,7 +831,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        ABI_DEALLOCATE(fk)
      endif
    enddo
-   !MSG_ERROR("Aborting now!")
+   !ABI_ERROR("Aborting now!")
 
 !================================================
 !  NSPINOR = 1
@@ -847,7 +847,7 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
        if(nat_correl>1.and.(hu(itypat)%jpawu>tol4)) then
           write(message,'(3a)')  ch10,'  -------> Warning: several atoms: '&
 &         ,' not extensively tested '
-          MSG_WARNING(message)
+          ABI_WARNING(message)
        endif
 
 !  ! ================================================================
@@ -1560,7 +1560,7 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
 
  if (option/=1.and.option/=2) then
    message=' option=/1 or 2 !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(abs(prtvol)>2) then
@@ -1876,7 +1876,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 
  if (option/=1.and.option/=2) then
    message=' option=/1 and =/2 !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(option==1) then
@@ -1908,7 +1908,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !xj(jj)=jj-0.5
  if(ll==0)then
    message=' ll should not be equal to zero !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  jc1=0
  invsqrt2lp1=one/sqrt(float(2*lcor+1))

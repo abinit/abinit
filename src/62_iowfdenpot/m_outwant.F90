@@ -142,7 +142,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 
 !Open the file
  if (open_file(filewnt,message,newunit=unitwnt,form='unformatted', status='unknown') /=0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Comments
@@ -196,7 +196,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
    do ii=1,nkpt
      write(std_out,*) (dtset%kptns(j,ii),j=1,3)
    end do
-   MSG_ERROR("fatal error")
+   ABI_ERROR("fatal error")
  end if
 
  call matr3inv(drprim,gmat)
@@ -268,7 +268,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 
  if(index.ne.nkpt) then
    write(message,'(a,2i0)')' OutwanT: Wrong assignemt of kpts', index,nkpt
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !End counting/assigning no of kpts/direction
@@ -388,7 +388,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
 !from WanT distribution
 
  if (open_file('band.gpl',message,newunit=iunit,status='unknown') /=0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  index=1
@@ -441,7 +441,7 @@ subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwan
        iwf=iwf+npwarr(nkp)
      else
        message = 'Wrong mkmem in outwant'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      write(unitwnt) (wfc(ig), ig=1,imax)
 !    End loop over bands

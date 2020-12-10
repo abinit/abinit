@@ -131,7 +131,7 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
 &     'The magnetic translation generator,',ch10,&
 &     'genafmconv(:)=',genafmconv(:),&
 &     'could not be identified.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -2501,7 +2501,7 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
    end do
    if(order(isym)==0)then
      write(message, '(a,i0,a)' )' The symmetry operation number',isym,' is not a root of unity'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  determinant, order and root_invers are enough to determine the
@@ -2542,7 +2542,7 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
 &     'order(isym)      =',order(isym),ch10,&
 &     'determinant(isym)=',determinant(isym),ch10,&
 &     'root_invers(isym)=',root_invers(isym)
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
  end do
@@ -2622,7 +2622,7 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
  end if
 
  if(iholohedry==0)then
-   MSG_ERROR_CLASS('Could not find the point group', "TolSymError")
+   ABI_ERROR_CLASS('Could not find the point group', "TolSymError")
  end if
 
 !DEBUG

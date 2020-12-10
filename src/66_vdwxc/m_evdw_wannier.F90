@@ -940,7 +940,7 @@ contains
      end do
 !ENDDEBUG
      if(ier/=0) then !vz_d
-       MSG_ERROR('zhpev fails!') !vz_d
+       ABI_ERROR('zhpev fails!') !vz_d
      end if !vz_d
 
      ABI_DEALLOCATE(matrx)

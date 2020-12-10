@@ -149,14 +149,14 @@ subroutine wvl_vtrial_abi2big(opt,vtrial,wvl_den)
 
    if(wvl_den%denspot%rhov_is .ne. KS_POTENTIAL) then
      message='wvl_vtrial_abi2big: rhov should contain the KS_POTENTIAL'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    call wvl_rhov_abi2big(opt,vtrial,wvl_den%denspot%rhov,shift=shiftV)
 
  else
    message='wvl_vtrial_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -234,13 +234,13 @@ subroutine wvl_rho_abi2big(opt,rhor,wvl_den)
 
    if(wvl_den%denspot%rhov_is .ne. ELECTRONIC_DENSITY) then
      message='wvl_rho_abi2big: rhov should contain the ELECTRONIC_DENSITY'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    call wvl_rhov_abi2big(opt,rhor,wvl_den%denspot%rhov)
 
  else
    message='wvl_rho_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -321,13 +321,13 @@ subroutine wvl_vhartr_abi2big(opt,vhartr,wvl_den)
 
    if(wvl_den%denspot%rhov_is .ne. HARTREE_POTENTIAL) then
      message='wvl_vhartr_abi2big: rhov should contain the HARTREE_POTENTIAL'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    call wvl_rhov_abi2big(opt,vhartr,wvl_den%denspot%rhov,shift=shiftV)
 
  else
    message='wvl_vhartr_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -481,7 +481,7 @@ subroutine wvl_occ_abi2big(mband,nkpt,nsppol,occ,opt,wvl_wfs)
    end if
  else
    message='wvl_occ_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -566,7 +566,7 @@ subroutine wvl_eigen_abi2big(mband,nkpt,nsppol,eigen,opt,wvl_wfs)
    end if
  else
    message='wvl_eigen_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -644,7 +644,7 @@ subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
      write(message,'(4a)') ch10,&
 &     ' wvl_occopt_abi2big: occopt does not have a corresponding option in BigDFT.',ch10,&
 &     ' Action: change the value of occopt to a number between 3 and 6'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  elseif(opt==2) then !BigDFT -> ABINIT
    if(occopt_big==SMEARING_DIST_FERMI) then
@@ -660,11 +660,11 @@ subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
      write(message,'(4a)') ch10,&
 &     ' wvl_occopt_abi2big: occopt in BigDFT does not have a corresponding option in ABINIT.',ch10,&
 &     ' Action: contact the ABINIT group'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  else
    message='wvl_occopt_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -725,7 +725,7 @@ subroutine wvl_rhov_abi2big_2D_4D(opt,rhov_abi,rhov_big,shift)
  nspden=size(rhov_abi,2)
  if (size(rhov_big,4)/=nspden) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  nfft_abi=size(rhov_abi)/nspden ; nfft_big=size(rhov_big)/nspden
  shift_=0;if (present(shift)) shift_=shift
@@ -785,7 +785,7 @@ subroutine wvl_rhov_abi2big_1D_4D(opt,rhov_abi,rhov_big,shift)
 #if defined HAVE_BIGDFT
  if (size(rhov_big,4)/=1) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  nfft_abi=size(rhov_abi) ; nfft_big=size(rhov_big)
  shift_=0;if (present(shift)) shift_=shift
@@ -846,7 +846,7 @@ subroutine wvl_rhov_abi2big_2D_2D(opt,rhov_abi,rhov_big,shift)
  nspden=size(rhov_abi,2)
  if (size(rhov_big,2)/=nspden) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  nfft_abi=size(rhov_abi)/nspden ; nfft_big=size(rhov_big)/nspden
  shift_=0;if (present(shift)) shift_=shift
@@ -906,7 +906,7 @@ subroutine wvl_rhov_abi2big_1D_2D(opt,rhov_abi,rhov_big,shift)
 #if defined HAVE_BIGDFT
  if (size(rhov_big,2)/=1) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  nfft_abi=size(rhov_abi) ; nfft_big=size(rhov_big)
  shift_=0;if (present(shift)) shift_=shift
@@ -1098,11 +1098,11 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
 
  if (nfft_abi<nfft+shift) then
    message='wvl_rhov_abi2big: cannot handle nfft(abi)<nfft(big)+shift case'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if(nspden==4) then
    message='wvl_rhov_abi2big: nspden=4 not yet supported'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (hmem.and.nspden==2) then
@@ -1168,7 +1168,7 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
 
  else
    message='wvl_rhov_abi2big_gen: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (hmem.and.nspden==2) then

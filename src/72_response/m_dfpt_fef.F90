@@ -170,7 +170,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
      if (ikpt > 1) then
        if (dtefield%nband_occ(isppol) /= mband_occ_k) then
          message = ' The number of valence bands is not the same for every k-point for present spin'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
      else
        dtefield%mband_occ = max(dtefield%mband_occ,mband_occ_k)
@@ -364,7 +364,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 !    Check that the string length is a divisor of nkpt
      if(mod(nkpt,nkstr) /= 0) then
        write(message,'(a,i0,a,i0)')' The string length = ',nkstr,', is not a divisor of nkpt =',nkpt
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
      dtefield%nkstr(idir) = nkstr
      dtefield%nstr(idir)  = nkpt/nkstr

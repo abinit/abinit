@@ -181,7 +181,7 @@ SUBROUTINE libtetrabz_initialize(ltetra,nge,ngw,bvec,linterpol,wlsm,nk_local,nt_
      !
   ELSE
      !
-     MSG_ERROR("[libtetrabz] STOP! ltetrta is invalid.")
+     ABI_ERROR("[libtetrabz] STOP! ltetrta is invalid.")
      !
   END IF
   !

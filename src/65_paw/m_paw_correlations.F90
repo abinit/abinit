@@ -171,7 +171,7 @@ CONTAINS  !=====================================================================
 &       '  are selected together, they must apply on the same',ch10,&
 &       '  angular momentum (lpawu/=lexexch forbidden, here for typat=',itypat,') !',ch10,&
 &       '  Action: correct your input file.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end do
  end if
@@ -251,11 +251,11 @@ CONTAINS  !=====================================================================
        write(message, '(a,a,a)' )&
 &       '  Error on the number of projectors ',ch10,&
 &       '  more than 2 projectors is not allowed for local exact-exchange'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      if(pawtab(itypat)%nproju*(2*lcur+1)/=icount)  then
        message = 'pawpuxinit: Error on the number of projectors '
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
      write(message, '(a,a,i4,a,a,i4)' ) ch10,&
 &     ' pawpuxinit : for species ',itypat,ch10,&
@@ -404,13 +404,13 @@ CONTAINS  !=====================================================================
            write(message, '(3a)' )&
 &           '  PAW+U: dmatpuopt has a wrong value !',ch10,&
 &           '  Action : change value in input file'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
        end do
      end do
      if(pawtab(itypat)%ij_proj/=icount)  then
        message = ' Error in the loop for calculating phiphjint '
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      ABI_DEALLOCATE(ff)
      if(abs(pawprtvol)>=2) then
@@ -478,7 +478,7 @@ CONTAINS  !=====================================================================
          write(message, '(a,i0,2a)' )&
 &         ' lpawu=',lpawu,ch10,&
 &         ' lpawu not equal to 0 ,1 ,2 or 3 is not allowed'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
 
 !      b. Compute ak and vee.
@@ -918,17 +918,17 @@ CONTAINS  !=====================================================================
 
  if (size(noccmmp,4)/=nspden) then
    message='size of nocctot and noccmmp are inconsistent!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if (pawtab%usepawu<0) then
    message='not allowed for usepawu<0!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if(present(dmft_dc))  then
    dmftdc=dmft_dc
    if(pawtab%usepawu<10) then
      write(message,'(a,i5)') "usepawu should be =10 if dmft_dc is present ",pawtab%usepawu
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  else
    dmftdc=0
@@ -1257,7 +1257,7 @@ CONTAINS  !=====================================================================
 
  if (pawrhoij%qphase==2) then
    message='pawxenergy: local exact-exchange not compatible with qphase=2!'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  lexexch=pawtab%lexexch
@@ -1444,31 +1444,31 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  if (my_natom>0) then
    if (nsppol/=paw_ij(1)%nsppol) then
      message='inconsistent values for nsppol!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if (compute_dmat>0) then
      if (pawrhoij(1)%nspden/=paw_ij(1)%nspden.and.&
 &        pawrhoij(1)%nspden/=4.and.paw_ij(1)%nspden/=1) then
        message=' inconsistent values for nspden!'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end if
    if (pawrhoij(1)%qphase==2) then
      message='setnoccmmp not compatible with qphase=2!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
  if (usepawu/=0.and.useexexch/=0) then
    message='usepawu/=0 and useexexch>0 not allowed!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if (impose_dmat/=0.and.dimdmat==0) then
    message='dmatpawu must be allocated when impose_dmat/=0!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if (usepawu>0.and.compute_dmat/=0.and.impose_dmat/=0.and.pawang%nsym==0) then
    message='pawang%zarot must be allocated!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Some inits
@@ -1661,7 +1661,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
              icount=in1+(in2*(in2-1))/2
              if(pawtab(itypat)%ij_proj<icount)  then
                message='PAW+U: Problem in the loop calculating noccmmp!'
-               MSG_BUG(message)
+               ABI_BUG(message)
              end if
              if(in1/=in2) then
                if(im2<=im1) then
@@ -1904,7 +1904,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            call dsyev('v','u',ldim,noccmmp_tmp(1,:,:,ispden),ldim,eig,rwork,lwork,info)
            if(info/=0) then
              message=' Error in diagonalization of noccmmp (DSYEV)!'
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
            do ilm=1,ldim
              hdp(ilm,ilm,ispden)=eig(ilm)
@@ -1922,7 +1922,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          call zheev('v','u',2*ldim,znoccmmp_tmp,2*ldim,eig,zwork,lwork,rwork,info)
          if(info/=0) then
            message=' Error in diagonalization of znoccmmp_tmp (zheev) !'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          do ilm=1,2*ldim
            hdp(ilm,ilm,1)=eig(ilm)
@@ -2135,7 +2135,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 &         '   is different from dmatpawu value set in input file !',ch10,&
 &         '   It is likely that dmatpawu does not match the symmetry operations of the system.',ch10,&
 &         '   Action: change dmatpawu in input file or increase precision until 0.00001'
-         MSG_WARNING(message)
+         ABI_WARNING(message)
        end if
 
      end if ! impose_dmat/=0
@@ -2311,7 +2311,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
  if (my_natom>0) then
    if (pawrhoij(1)%qphase==2) then
      message='setrhoijpbe0 not compatible with qphase=2!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -2330,7 +2330,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
  if (test0) then
    write(message, '(3a,i1,a)' ) &
 &   ' Local exact exchange: occ. matrix can only be imposed for l=',ll,' !'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !============================================================
@@ -2341,7 +2341,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 
 !  Open file
    if (open_file(filnam,message,unit=77,form='formatted') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Read step number and eventually exit
@@ -2450,7 +2450,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
    iread=0
    if (my_rank==0) then
      if (open_file(filnam,message,unit=77,form='formatted') /=0 ) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      nstep1=0;test0=.false.
      do while (.not.test0)
@@ -2663,7 +2663,7 @@ end subroutine setrhoijpbe0
  if(present(rmax)) then
    if(rmax>pawrad%rmax)  then
      write(message, '(a)' ) 'calc_ubare: the radius cannot be larger than the maximum radius of the mesh'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    meshsz=pawrad_ifromr(pawrad,rmax)+5
    r_for_intg=rmax

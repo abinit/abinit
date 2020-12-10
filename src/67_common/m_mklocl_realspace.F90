@@ -172,7 +172,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
  if (nproc_fft==1) n3d=n3  !for serial runs
  comm_fft=mpi_enreg%comm_fft
  if(me_fft /= mpi_enreg%me_fft .or. nproc_fft /= mpi_enreg%nproc_fft) then
-   MSG_BUG("mpi_enreg%x_fft not equal to the corresponding values in ngfft")
+   ABI_BUG("mpi_enreg%x_fft not equal to the corresponding values in ngfft")
  end if
 
 !Conditions for periodicity in the three directions
@@ -417,7 +417,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 &             '  pseudo-potential local part sampling is not wide enough', ch10, &
 &             '  want to access position ', jj, ' whereas mqgrid_vl = ', psps%mqgrid_vl, ch10, &
 &             '  Action : no idea, contact developpers...'
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
            delta = r - psps%qgrid_vl(jj)
            bb = delta * invdr
@@ -581,7 +581,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
        call system_clock(tpsStop, count_rate = countParSeconde)
        write(std_out,*) "Tps : ", real(tpsStop - tpsStart) / real(countParSeconde)
        write(std_out,*) grtn_cart_interpol
-       MSG_ERROR("Testing section!")
+       ABI_ERROR("Testing section!")
      end if
 
    end if
@@ -661,7 +661,7 @@ subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
 #if defined HAVE_BIGDFT
 
  if(nproc<0)then
-   MSG_ERROR('nproc should not be negative')
+   ABI_ERROR('nproc should not be negative')
  end if
 
 !Ionic charge (must be calculated for the PS active processes)
@@ -1491,7 +1491,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 
    if (wvl_den%denspot%rhov_is/=ELECTRONIC_DENSITY) then
      message='denspot bigdft datstructure should contain rhor!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  Extract density rhor from bigDFT datastructure
@@ -1561,7 +1561,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 
  else ! option switch
    message = 'Internal error, option should be 1 or 2!'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 #else

@@ -382,7 +382,7 @@ contains
     call ZHEEV('V', 'U', ndim, evecs, ndim, evals, work, lwork, rwork, info)
     ABI_SFREE(work)
     IF( INFO.gt.0 ) THEN
-       MSG_ERROR('The zheev algorithm failed to compute eigenvalues.')
+       ABI_ERROR('The zheev algorithm failed to compute eigenvalues.')
        STOP
     END IF
   end subroutine eigensh

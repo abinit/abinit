@@ -203,7 +203,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 
 !DDK not compatible with istwkf > 1
  if(cplex==1.and.(any(cplex_dgxdt(:)==2).or.any(cplex_d2gxdt(:)==2)))then
-   MSG_BUG("opernlb_ylm+ddk not compatible with istwfk>1")
+   ABI_BUG("opernlb_ylm+ddk not compatible with istwfk>1")
  end if
 
 !Inits

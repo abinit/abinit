@@ -162,7 +162,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 
 !call pwscf routine for reading in UPF
  if (open_file (filpsp,msg,newunit=iunit,status='old',form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !read in psp data to static data in pseudo module, for ipsx == 1
@@ -176,7 +176,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 
 !if upf file is a USPP one, stop
  if (pseudotype == 'US') then
-   MSG_ERROR('upf2abinit: USPP UPF files not supported')
+   ABI_ERROR('upf2abinit: USPP UPF files not supported')
  end if
 
 !copy over to abinit internal arrays and vars
@@ -363,7 +363,7 @@ subroutine psp11nl(ffspl,indlmn,mmax,lnmax,lmnmax,mqgrid,n_proj,&
 
    if (iproj > lmnmax) then
      write(message,'(a,2i0)') ' Too many projectors found. n_proj, lmnmax =  ',n_proj, lmnmax
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    np = proj_np(iproj)
@@ -371,7 +371,7 @@ subroutine psp11nl(ffspl,indlmn,mmax,lnmax,lmnmax,mqgrid,n_proj,&
    ll = proj_l(iproj)
    if (ll < llold) then
      message = 'psp11nl : Error: UPF projectors are not in order of increasing ll'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    else if (ll == llold) then
      iproj_1l = iproj_1l + 1
    else

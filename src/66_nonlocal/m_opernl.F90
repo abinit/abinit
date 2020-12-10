@@ -605,7 +605,7 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
      write(message,'(a,2i10,a,a)')&
 &     ' Input sign, choice=',sign,choice,ch10,&
 &     ' Are not compatible or allowed. '
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  End loop on blocks of planewaves
@@ -1216,7 +1216,7 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
      write(message, '(a,2i10,a,a)' )&
 &     '  Input sign, choice=',sign,choice,ch10,&
 &     '  Are not compatible or allowed. '
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  End loop on blocks of planewaves
@@ -3000,7 +3000,7 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
    else
 !    Problem: choice does not make sense
      write(message,'(a,i0,a)' )' Input choice=',choice,' not allowed. '
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  End loop on blocks of planewaves

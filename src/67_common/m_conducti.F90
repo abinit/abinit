@@ -163,7 +163,7 @@ contains
 !write(std_out,'(a)')' The name of the output file is :',trim(filnam_out)
 !Read data file
  if (open_file(filnam, msg, newunit=iunt, form='formatted', action="read", status="old") /=0 ) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  rewind(iunt)
  read(iunt,*)
@@ -181,7 +181,7 @@ contains
  call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
  call hdr%free()
  if (fform1 /= 610) then
-   MSG_ERROR("Abinit8 requires an OPT file with fform = 610")
+   ABI_ERROR("Abinit8 requires an OPT file with fform = 610")
  end if
 
 !Open the conducti and/or optic files
@@ -402,12 +402,12 @@ contains
 & ' Emax-Efermi       =',deltae/dble(nkpt*nsppol),' Ha',deltae/dble(nkpt*nsppol)*Ha_eV,' eV'
 
  if (open_file(trim(filnam_out)//'_Lij',msg, newunit=lij_unt, form='formatted', action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(lij_unt,'(a)')' # omega(ua) L12 L21 L22 L22'
 
  if (open_file(trim(filnam_out)//'_sig', msg, newunit=sig_unt, form='formatted', action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (nsppol==1) then
    write(sig_unt,'(a)')' # omega(ua) hbar*omega(eV)    cond(ua)             cond(ohm.cm)-1'
@@ -417,13 +417,13 @@ contains
  end if
 
  if (open_file(trim(filnam_out)//'_Kth', msg, newunit=kth_unt, form='formatted', action="write") /=0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(kth_unt,'(a)')&
 & ' #omega(ua) hbar*omega(eV)  thermal cond(ua)   Kth(W/m/K)   thermopower(ua)   Stp(microohm/K)'
 
  if (open_file(trim(filnam_out)//'.out', msg, newunit=ocond_unt, form='formatted', action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(ocond_unt,'(a)' )' #Conducti output file:'
  write(ocond_unt,'(a)' )' #Contains all results produced by conducti utility'
@@ -600,7 +600,7 @@ end subroutine conducti_paw
 !write(std_out,'(a)')' The name of the output file is :',trim(filnam_out)
 !Read data file
  if (open_file(filnam,msg, newunit=iunt, form='formatted', action="read", status="old") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  rewind(iunt)
  read(iunt,*)
@@ -623,7 +623,7 @@ end subroutine conducti_paw
  call hdr%free()
 
  if (fform2 /= 611) then
-   MSG_ERROR("Abinit8 requires an OPT2 file with fform = 611")
+   ABI_ERROR("Abinit8 requires an OPT2 file with fform = 611")
  end if
 
 !Open the optic files
@@ -782,7 +782,7 @@ end subroutine conducti_paw
  end do
 
  if (open_file(trim(filnam_out)//'_sigX', msg, newunit=sigx_unt, form='formatted', action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(sigx_unt,*) '# conducti: Xray core level conductivity, all in atomic units by default '
  write(sigx_unt,*) '# One block of 3 columns per core wavefunction'
@@ -924,7 +924,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
 !Read data file
  if (open_file(filnam,msg,newunit=iunt,form='formatted', status="old") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  rewind(iunt)
@@ -941,26 +941,26 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 ! Note indeed that we are assuming the same numer of bands in all the files.
  comm = xmpi_comm_self
  call nctk_fort_or_ncfile(filnam0, iomode, msg)
- if (len_trim(msg) /= 0) MSG_ERROR(msg)
+ if (len_trim(msg) /= 0) ABI_ERROR(msg)
  call wfk_open_read(gswfk,filnam0, formeig0, iomode, get_unit(), comm)
 
  call nctk_fort_or_ncfile(filnam1, iomode, msg)
- if (len_trim(msg) /= 0) MSG_ERROR(msg)
+ if (len_trim(msg) /= 0) ABI_ERROR(msg)
  call wfk_open_read(ddk1,filnam1, formeig1, iomode, get_unit(), comm, hdr_out=hdr)
 
  call nctk_fort_or_ncfile(filnam2, iomode, msg)
- if (len_trim(msg) /= 0) MSG_ERROR(msg)
+ if (len_trim(msg) /= 0) ABI_ERROR(msg)
  call wfk_open_read(ddk2,filnam2, formeig1, iomode, get_unit(), comm)
 
  call nctk_fort_or_ncfile(filnam3, iomode, msg)
- if (len_trim(msg) /= 0) MSG_ERROR(msg)
+ if (len_trim(msg) /= 0) ABI_ERROR(msg)
  call wfk_open_read(ddk3,filnam3, formeig1, iomode, get_unit(), comm)
 
  if (ddk1%compare(ddk2) /= 0) then
-   MSG_ERROR("ddk1 and ddk2 are not consistent. see above messages")
+   ABI_ERROR("ddk1 and ddk2 are not consistent. see above messages")
  end if
  if (ddk1%compare(ddk3) /= 0) then
-   MSG_ERROR("ddk1 and ddk3 are not consistent. see above messages")
+   ABI_ERROR("ddk1 and ddk3 are not consistent. see above messages")
  end if
 
 !Extract params from the header of the first ddk file (might have been the GS file ?)
@@ -1288,26 +1288,26 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  write(std_out,*)' conducti : call isfile '
 !
  if (open_file(trim(filnam_out)//'_tens',msg,newunit=tens_unt,form='formatted',action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (open_file(trim(filnam_out)//'_Lij',msg,newunit=lij_unt,form='formatted',action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(lij_unt,'(a)')' # omega(ua) L12 L21 L22 L22'
 
  if (open_file(trim(filnam_out)//'_sig',msg,newunit=sig_unt,form='formatted',action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(sig_unt,'(a)')' # omega(ua) hbar*omega(eV)    cond(ua)             cond(ohm.cm)-1'
 
  if (open_file(trim(filnam_out)//'_Kth',msg,newunit=kth_unt,form='formatted',action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(kth_unt,'(a)')&
 & ' #omega(ua) hbar*omega(eV)  thermal cond(ua)   Kth(W/m/K)   thermopower(ua)   Stp(microohm/K)'
 
  if (open_file(trim(filnam_out)//'.out',msg,newunit=ocond_unt,form='formatted',action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(ocond_unt,'(a)' )' Conducti output file:'
  write(ocond_unt,'(a)' )' Contains all results produced by conducti utility'
@@ -1534,7 +1534,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
  if (npti > 12000) then
    msg = "Sorry - the interpolator INTRPL is hard coded for maximum 12000 points." // &
 &        ch10 // " Reduce the conducti input npti, or implement a better interpolator!"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(std_out,'(2a)')ch10,'Calculate the principal value and related optical properties'
@@ -1545,12 +1545,12 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
  write(std_out,'(a)')'Use default value for delta interval: del=1e-3'
 
  if (open_file(trim(filnam_out_sig)//'_eps',msg, newunit=eps_unt,status='replace',action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(eps_unt,'(a)')'#energy (eV),sigma_1(Ohm-1cm-1),sigma_2(Ohm-1cm-1),epsilon_1,epsilon_2'
 
  if (open_file(trim(filnam_out_sig)//'_abs', msg, newunit=abs_unt, status='replace',action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(abs_unt,'(a)')'#energy(eV),nomega,komega,refl.,abso.(cm-1)'
 
@@ -1779,7 +1779,7 @@ end subroutine msig
 !write(std_out,'(a)')' The name of the output file is :',trim(filnam_out)
 !Read data file
  if (open_file(filnam,msg,newunit=iunt,form='formatted',action="read") /=0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  rewind(iunt)
  read(iunt,*)
@@ -1803,7 +1803,7 @@ end subroutine msig
  call hdr%free()
 
  if (fform2 /= 611) then
-   MSG_ERROR("Abinit8 requires an OPT2 file with fform = 611")
+   ABI_ERROR("Abinit8 requires an OPT2 file with fform = 611")
  end if
 
 !Open the optic files
@@ -1972,7 +1972,7 @@ end subroutine msig
  end do
 
  if (open_file(trim(filnam_out)//'_emisX',msg,newunit=ems_unt,form='formatted', action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(ems_unt,*) '# conducti: Xray emission spectrum, all in atomic units by default '
  write(ems_unt,*) '# One block of 3 columns per core wavefunction'

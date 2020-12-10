@@ -362,7 +362,7 @@ tmp_int=0
 &   'scup_elec_model is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_elec_model in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_elec_model = .TRUE.
  tmp_int = 0 
@@ -375,7 +375,7 @@ tmp_int=0
 &   'scup_freezden is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_freezden in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_freezden = .TRUE.
  tmp_int = 0 
@@ -390,7 +390,7 @@ tmp_int=0
 &   'scup_initorbocc is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_initorbocc in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_initorbocc = .TRUE.
  tmp_int = 0 
@@ -402,7 +402,7 @@ tmp_int=0
 &   'scup_ismagnetic is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_ismagnetic in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_ismagnetic = .TRUE.
  tmp_int = 0 
@@ -414,7 +414,7 @@ tmp_int=0
 &   'scup_istddft is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_istddft in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_istddft = .TRUE.
  tmp_int = 0 
@@ -429,7 +429,7 @@ tmp_int=0
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
 &     'scup_ksamp(',ii,') is',scup_dtset%scup_ksamp(ii),', which is lower than 1 .',ch10,&
 &     'Action: correct scup_ksamp(',ii,') in your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 
@@ -442,7 +442,7 @@ tmp_int=0
 &   'scup_maxscfstep is',scup_dtset%scup_maxscfstep,', but the only allowed values',ch10,&
 &   'greater than 0',ch10,&
 &   'Action: correct scup_maxscfstep in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !N
@@ -454,7 +454,7 @@ tmp_int=0
 &   'scup_ndivsm is',scup_dtset%scup_ndivsm,', but the only allowed values',ch10,&
 &   'are positiv.',ch10,&
 &   'Action: correct scup_ndivsm in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -465,7 +465,7 @@ tmp_int=0
 &   'scup_nspeck is',scup_dtset%scup_nspeck,', but the only allowed values',ch10,&
 &   'are positiv.',ch10,&
 &   'Action: correct scup_nspeck in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !O
@@ -477,7 +477,7 @@ tmp_int=0
 &   'scup_printbands is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printbands in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printbands = .TRUE.
  tmp_int = 0 
@@ -489,7 +489,7 @@ tmp_int=0
 &   'scup_printeigv is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printeigv in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printeigv = .TRUE.
  tmp_int = 0 
@@ -501,7 +501,7 @@ tmp_int=0
 &   'scup_printeltic is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printeltic in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printeltic = .TRUE.
  tmp_int = 0 
@@ -513,7 +513,7 @@ tmp_int=0
 &   'scup_printgeom is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printgeom in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printgeom = .TRUE.
  tmp_int = 0 
@@ -525,7 +525,7 @@ tmp_int=0
 &   'scup_printniter is',scup_dtset%scup_printniter,', but the only allowed values',ch10,&
 &   'are positiv',ch10,&
 &   'Action: correct scup_printniter in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printorbocc',tread,'INT')
@@ -535,7 +535,7 @@ tmp_int=0
 &   'scup_printorbocc is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printorbocc in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printorbocc = .TRUE.
  tmp_int = 0 
@@ -551,7 +551,7 @@ tmp_int=0
 &   'scup_startpulay is',scup_dtset%scup_startpulay,', but the only allowed values',ch10,&
 &   'are greater than 3',ch10,&
 &   'Action: correct scup_startpulay in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_scfmixing',tread,'DPR')
@@ -561,7 +561,7 @@ tmp_int=0
 &   'scup_scfmixing is',scup_dtset%scup_scfmixing,', but the only allowed value',ch10,&
 &   'is superior to 0.',ch10,&
 &   'Action: correct scup_scfmixing in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_scfthresh',tread,'DPR')
@@ -571,7 +571,7 @@ tmp_int=0
 &   'scup_scfthresh is',scup_dtset%scup_scfthresh,', but the only allowed value',ch10,&
 &   'is superior to 0.',ch10,&
 &   'Action: correct scup_scfthresh in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_smearing',tread,'DPR')
@@ -581,7 +581,7 @@ tmp_int=0
 &   'scup_smearing is',scup_dtset%scup_smearing,', but the only allowed value',ch10,&
 &   'is superior to or equal to 0.',ch10,&
 &   'Action: correct scup_smearing in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !T
@@ -592,7 +592,7 @@ tmp_int=0
 &   'scup_tcharge is',scup_dtset%scup_tcharge,', but the only allowed value',ch10,&
 &   'is superior to 0.',ch10,&
 &   'Action: correct scup_tcharge in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -639,7 +639,7 @@ tmp_int=0
 &       'When scup_printbands is asked, scup_speck must be initialized ',ch10,&
 &       'in the input file, which is not the case.',ch10,&
 &       'Action: initialize scup_speck in your input file, or change printbands.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end if
 

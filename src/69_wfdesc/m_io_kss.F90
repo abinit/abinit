@@ -221,7 +221,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
  CASE (IO_MODE_FORTRAN)
 
    if (open_file(filekss, msg, newunit=kss_unt, form="unformatted") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call my_hdr%fort_write(kss_unt, fform, ierr)
@@ -321,7 +321,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
 #endif
 
  CASE DEFAULT
-   MSG_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
+   ABI_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
  END SELECT
 
  call Dtset_cpy%free()
@@ -443,7 +443,7 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 #endif
 
  CASE DEFAULT
-   MSG_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
+   ABI_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
  END SELECT
 
  ABI_FREE(vkb)
@@ -546,7 +546,7 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 #ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
    if (Psps%usepaw==1) then
-     MSG_WARNING("PAW output with ETSF-IO netcdf: cprj won't be written")
+     ABI_WARNING("PAW output with ETSF-IO netcdf: cprj won't be written")
    end if
 
    ! Write G-vectors (gbig because it's not k-dependent)
@@ -572,7 +572,7 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 #endif
 
  CASE DEFAULT
-   MSG_ERROR(sjoin("Unsupported iomode:", itoa(iomode)))
+   ABI_ERROR(sjoin("Unsupported iomode:", itoa(iomode)))
  END SELECT
 
 end subroutine write_kss_wfgk
@@ -654,7 +654,7 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
 ! *********************************************************************
 
  if (PRESENT(cg).and.PRESENT(eig_vec)) then
-   MSG_ERROR("Both cg and eig_vec are present!")
+   ABI_ERROR("Both cg and eig_vec are present!")
  end if
 
 ! Mapping between the gamma-centered basis set and the k-centered one.
@@ -667,7 +667,7 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
  if (istwf_k==1) then ! Full k-centered G-sphere.
    call table_gbig2kg(npw_k,kg_k,kss_npw,gbig,trsl,ierr)
    if (ierr/=0.and.(kss_npw>=npw_k)) then
-     MSG_ERROR(' The set of G vectors is inconsistent')
+     ABI_ERROR(' The set of G vectors is inconsistent')
    end if
 
  else  ! Calculate full kg with istwf_k=1 then do the mapping.
@@ -675,7 +675,7 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
 
    call table_gbig2kg(full_npw_k,full_kg_k,kss_npw,gbig,trsl,ierr)
    if (ierr/=0.and.(kss_npw>=npw_k)) then
-     MSG_ERROR(' The set of G vectors is inconsistent')
+     ABI_ERROR(' The set of G vectors is inconsistent')
    end if
  end if
  !
@@ -736,7 +736,7 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
      ABI_FREE(full_cg)
 
    CASE DEFAULT
-     MSG_BUG("Wrong istwf_k")
+     ABI_BUG("Wrong istwf_k")
    END SELECT
 
  else if (PRESENT(eig_vec)) then
@@ -760,11 +760,11 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
 
    CASE DEFAULT
      write(msg,'(a,i0)')" Unsupported value for istwf_k: ",istwf_k
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    END SELECT
 
  else
-   MSG_ERROR("neither cg not eig_vec are in input")
+   ABI_ERROR("neither cg not eig_vec are in input")
  end if
 
  ABI_FREE(trsl)
@@ -854,7 +854,7 @@ subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,
      write(msg,'(3a)')&
 &     ' Non-symmorphic operations still remain in the symmetries list ',ch10,&
 &     ' Program does not stop but _KSS file will not be created...'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      ierr=ierr+1 ; RETURN
    end if
  else if (symmorphi==1) then
@@ -869,7 +869,7 @@ subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,
    write(msg,'(a,i4,3a)')&
 &   ' symmorphi = ',symmorphi,' while it must be 0 or 1',ch10,&
 &   ' Program does not stop but KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1 ; RETURN
  end if
  !
@@ -1330,7 +1330,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &   'when iomode==3 in outkss, support for netcdf ',ch10,&
 &   'must be compiled. Use --enable-netcdf when configuring '
 #ifndef HAVE_NETCDF
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr = ierr + 1
 #endif
  end if
@@ -1359,7 +1359,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &   ' but nband(1)=',Dtset%nband(1),' is different of nband(',&
 &   ikpt+(isppol-1)*nkpt,')=',Dtset%nband(ikpt+(isppol-1)*nkpt),'.',ch10,&
 &   '  Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 !* istwfk must be 1 for each k-point
@@ -1369,7 +1369,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &   ' States output not programmed for time-reversal symmetry.',ch10,&
 &   ' Action : change istwfk in input file (put it to 1 for all kpt).',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 !* Check spin-orbit
@@ -1377,7 +1377,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(3a)')&
 &   ' Variable mpspso should be 1 !',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 !* Check mproj
@@ -1396,7 +1396,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(3a)')&
 &   ' Pseudopotentials with f-projectors not implemented',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 !* Check useylm
@@ -1404,7 +1404,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(3a)')&
 &   ' The present version of outkss does not work with useylm/=0 !',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 !* Check PAW and kssform value
@@ -1413,14 +1413,14 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      write(msg,'(3a)')&
 &     ' Parallel PAW with kssform=1, not yet allowed',ch10,&
 &     ' Program does not stop but _KSS file will not be created...'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      ierr=ierr+1
    end if
    if (kssform==3.and.usecprj/=1) then
      write(msg,'(3a)')&
 &     ' If PAW and kssform=3, usecprj must be 1',ch10,&
 &     ' Program does not stop but _KSS file will not be created...'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      ierr=ierr+1
    end if
  end if
@@ -1429,14 +1429,14 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(3a)')&
 &   ' outkss cannot be used with parallelization on bands (paralbd/=0) !',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
  if (MPI_enreg%paral_spinor/=0) then
    write(msg,'(3a)')&
 &   ' outkss cannot be used yet with parallelization on nspinors !',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
 
  endif
@@ -1483,7 +1483,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      write(msg,'(3a)')&
 &     ' Non-symmorphic operations still remain in the symmetries list ',ch10,&
 &     ' Program does not stop but _KSS file will not be created...'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      ierr=ierr+1 ; RETURN
    end if
  else if (Dtset%symmorphi==1) then
@@ -1498,7 +1498,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(a,i4,3a)')&
 &   ' symmorphi = ',Dtset%symmorphi,' while it must be 0 or 1',ch10,&
 &   ' Program does not stop but KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1 ; RETURN
  end if
 !
@@ -1572,7 +1572,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &       ' The value choosen for the number of bands in file',ch10,&
 &       ' (nbandkss) was greater than at least one number of plane waves ',ch10,&
 &       ' for a given k-point (npw_k).',ch10,' It has been modified consequently.'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    end if
    found=.FALSE.
@@ -1587,7 +1587,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &     ' The number of bands to be computed (for one k) was',ch10,&
 &     ' greater than the number of g-vectors to be written.',ch10,&
 &     ' It has been modified consequently.'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
    nbandksseff=MINVAL(nbandkssk)
 
@@ -1602,7 +1602,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      write(msg,'(a,i5,a,i5,2a)')&
 &     ' Number of bands calculated=',nbandksseff,', greater than nbandkss=',Dtset%nbandkss,ch10,&
 &     ' will write nbandkss bands on the KSS file'
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
      nbandksseff=Dtset%nbandkss
    end if
  end if
@@ -1725,7 +1725,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
          if (kssform==3) then
            call pawcprj_copy(Cprj(:,ibg+1:ibg+dtset%nspinor*nband_k),Cprjnk_k)
          else
-           !MSG_WARNING("Here I have to use onband_diago") !FIXME
+           !ABI_WARNING("Here I have to use onband_diago") !FIXME
            call pawcprj_copy(Cprj_diago_k(:,1:n2dim),Cprjnk_k)
          end if
        end if
@@ -1768,7 +1768,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
                if (kssform==3) then
                  call pawcprj_copy(Cprj(:,ibg+1:ibg+dtset%nspinor*nband_k),Cprjnk_k)
                else
-                !MSG_WARNING("Here I have to use onband_diago") !FIXME
+                !ABI_WARNING("Here I have to use onband_diago") !FIXME
                  call pawcprj_copy(Cprj_diago_k(:,1:n2dim),Cprjnk_k)
                end if
              end if
@@ -1828,7 +1828,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
            write(msg,'(3a)')&
 &           ' The diagonalized eigenvalues differ by more than 10^-3 Hartree',ch10,&
 &           ' with respect to the conjugated gradient values.'
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
          end if
        end if
 !

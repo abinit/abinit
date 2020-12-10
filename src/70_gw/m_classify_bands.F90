@@ -224,7 +224,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
    write(msg,'(3a)')&
 &    ' For symmetry analysis, the real space FFT mesh must be compatible with the symmetries of the space group',ch10,&
 &    ' classify_bands will return. Action: change the input variable ngfftf '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    Bsym%err_status=1
    Bsym%err_msg= msg
    RETURN
@@ -252,7 +252,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  if (Bsym%err_status/=0) then
    write(msg,'(a,i0,a)')" esymm_init returned err_status= ",Bsym%err_status,&
 &    " Band classifications cannot be performed."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    RETURN
  end if
 
@@ -268,7 +268,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
      end if
    end do
    if (.not.found) then
-     MSG_ERROR("inverse not found! ")
+     ABI_ERROR("inverse not found! ")
    end if
  end do
 
@@ -319,7 +319,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
    ABI_MALLOC(Paw_onsite,(Cryst%natom))
 
    if (use_paw_aeur) then
-     MSG_WARNING("Using AE wavefunction for rotation in real space!")
+     ABI_WARNING("Using AE wavefunction for rotation in real space!")
      call paw_pwaves_lmn_init(Paw_onsite,Cryst%natom,Cryst%natom,Cryst%ntypat,&
 &                             Cryst%rprimd,Cryst%xcart,Pawtab,Pawrad,Pawfgrtab)
    end if
@@ -487,7 +487,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
    !
    ! === Calculate the trace for each class ===
    if (Bsym%only_trace) then ! TODO this is valid if only trace.
-     MSG_ERROR("Have to reconstruct missing traces")
+     ABI_ERROR("Have to reconstruct missing traces")
    else
      do isym=1,Bsym%nsym_gk
        Bsym%Calc_irreps(idg)%trace(isym) = get_trace( Bsym%Calc_irreps(idg)%mat(:,:,isym) )
@@ -680,7 +680,7 @@ function paw_phirotphj(nspinor,natom,typat,zarot_isym,Pawtab,Psps,Cprj_b1,Cprj_b
  do_conjg_left = .FALSE.; if (PRESENT(conjg_left)) do_conjg_left = conjg_left
 
  if (nspinor/=1) then
-   MSG_ERROR("nspinor/=1 not yet coded")
+   ABI_ERROR("nspinor/=1 not yet coded")
  end if
 
  ! === Rotate PAW projections ===

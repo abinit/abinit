@@ -200,7 +200,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
              'root mean square= ',smrt,ch10,&
              'estimated slope = ',alpha,ch10,&
              'Omega [eV] SigC [eV]'
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
            do io=1,Sr%nomega4sd
              write(msg,'(2f8.4)')e0pde(io)*Ha_eV,scme(io)*Ha_eV
              call wrtout(std_out,msg,"COLL")
@@ -359,7 +359,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
         write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
           'Newton-Raphson method not converged after ',NR_MAX_NITER,' iterations. ',ch10,&
           'Absolute Error = ',ABS(ctdpc),' > ',NR_ABS_ROOT_ERR
-        MSG_WARNING(msg)
+        ABI_WARNING(msg)
       end if
       !
       ! Store the final result TODO re-shift everything according to efermi
@@ -538,7 +538,7 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
 ! *************************************************************************
 
  if (nsp==3.or.nsp>4) then
-   MSG_ERROR('nsp has wrong value in print_sigma_melems')
+   ABI_ERROR('nsp has wrong value in print_sigma_melems')
  end if
 
  ount = std_out
@@ -629,7 +629,7 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  filename = TRIM(prefil)//'_HTOTAL'//TRIM(kpt_index)
 
  if (open_file(filename,msg,newunit=temp_unit,form="formatted",status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  msg = '#   row    col.      Re(htotal(r,c)) Im(htotal(r,c))  for spin11   ... spin22 ... spin12 ... spin13'
@@ -645,7 +645,7 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
 
  filename = TRIM(prefil)//'_HHARTREE'//TRIM(kpt_index)
  if (open_file(filename,msg,newunit=temp_unit,form="formatted",status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  msg = '#   row    col.      Re(hhartree(r,c))  Im(hhartree(r,c)  for spin11   ... spin22 ... spin12 ... spin13'
@@ -661,7 +661,7 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
 
  filename = TRIM(prefil)//'_SIGX'//TRIM(kpt_index)
  if (open_file(filename,msg,newunit=temp_unit,form="formatted",status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(msg,'(a)')'#   row    col.      Re(Sigx(r,c)) Im(Sigx(r,c) for spin11   ... spin22 ... spin12 ... spin13'
@@ -677,7 +677,7 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
 
  filename = TRIM(prefil)//'_SIGC'//TRIM(kpt_index)
  if (open_file(filename,msg,newunit=temp_unit,form="formatted",status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(msg,'(a)')'#   row    col.      Re(Sigc(r,c)) Im(Sigc(r,c) for spin11   ... spin22 ... spin12 ... spin21'

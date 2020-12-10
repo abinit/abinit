@@ -129,14 +129,14 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 &     ' wvl_wfs_set:  consistency checks failed,', ch10, &
 &     '  no GTH parameters found for type number ', idata, '.', ch10, &
 &     '  Check your input pseudo files.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if (.not. psps%gth_params%hasGeometry(idata)) then
      write(message, '(a,a,a,a,a,a)' ) ch10,&
 &     ' wvl_wfs_set:  consistency checks failed,', ch10, &
 &     '  the given GTH parameters has no geometry information.', ch10, &
 &     '  Upgrade your input pseudo files to GTH with geometric information.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 

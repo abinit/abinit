@@ -135,7 +135,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
 
  if(mpi_enreg%paral_spinor==1)then
    message = ' Parallelization over spinors is not currently supported'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !write(std_out,*)ch10,'outqmc: DEBUG: dtset%ndtset = ',dtset%ndtset,ch10
@@ -151,7 +151,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
  open(io,file=pwfnfilename,form='formatted',recl=300,status='unknown',iostat=ierr)
 
  if(ierr/=0)then
-   MSG_ERROR("Unable to open file: "//trim(pwfnfilename))
+   ABI_ERROR("Unable to open file: "//trim(pwfnfilename))
  end if
 
 !Check if the full set of k vectors has been used in this calculation
@@ -160,7 +160,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
    write(message,'(3a)')' outqmc: ERROR - kptopt=1 so k-points have been ',&
 &   'generated in the irreducible Brillouin Zone only. ',&
 &   'Set kptopt=2 to obtain full set of k-points.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Check if the full set of G vectors has been used in this calculation
@@ -171,7 +171,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
 &     '  istwfk(',ikpt,')=',dtset%istwfk(ikpt),' (ie /= 1) so some ',&
 &     'G-vectors may not be present.',ch10,'  Set istwfk=1 for each ',&
 &     'k-point to obtain full set.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do !ikpt
 
@@ -278,10 +278,10 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
  case(4)
    close(io,status='delete')
    write(message,'(a)')' outqmc: ERROR - nspden=4 but CASINO cannot yet deal with non-collinear spins.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  case default
    close(io,status='delete')
-   MSG_ERROR('Unrecognized value of nspden.')
+   ABI_ERROR('Unrecognized value of nspden.')
  end select
 
  write(io,"('Total energy (au per primitive cell)')")
@@ -437,7 +437,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
        if(occ(iocc)/=int(occ(iocc)))then
          write(message,'(a,i5,a,i1,a,i5,a,f11.8,a)')&
 &         'Non-integer occupation number for kpt ',ikpt,', sppol ',isppol,', band ',iband,': occ=',occ(iocc),'.'
-         MSG_WARNING(message)
+         ABI_WARNING(message)
        end if
        iocc=iocc+1
        norm=0
@@ -448,7 +448,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
        if((norm<0.999).or.(norm>1.001))then
          write(message,'(a,i5,a,i1,a,i5,a,f11.8,a)')&
 &         'Incorrectly normalised orbital for kpt ',ikpt,', sppol ',isppol,', band ',iband,': norm=',norm,'.'
-         MSG_WARNING(message)
+         ABI_WARNING(message)
        end if
      end do !iband
    end do !isppol

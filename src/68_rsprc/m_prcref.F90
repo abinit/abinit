@@ -456,7 +456,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 &     'From the calling routine, iprcel=',dtset%iprcel,ch10,&
 &     'The only allowed values are 0 or larger than 20.',ch10,&
 &     'Action: correct your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 !#######################################################################
@@ -516,11 +516,11 @@ subroutine prcref(atindx,dielar,dielinv,&
 &     'From the calling routine, densfor_pred=3',ch10,&
 &     'You cannot use residuals in reciprocal space.',ch10,&
 &     'Action: correct your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 !  Not compatible with non-collinear magnetism
    if(dtset%nspden==4)then
-     MSG_ERROR('densfor_pred=3 does not work for nspden=4 !')
+     ABI_ERROR('densfor_pred=3 does not work for nspden=4 !')
    end if
 
    n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
@@ -893,7 +893,7 @@ end subroutine prcref
 ! *************************************************************************
 
  if(optres==1)then
-   MSG_ERROR('density mixing (optres=1) not admitted!')
+   ABI_ERROR('density mixing (optres=1) not admitted!')
  end if
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -1091,7 +1091,7 @@ end subroutine prcref
 &     'From the calling routine, iprcel= ',dtset%iprcel,ch10,&
 &     'The only allowed values are 0 or larger than 20.',ch10,&
 &     'Action: correct your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 !#######################################################################
@@ -1144,12 +1144,12 @@ end subroutine prcref
 &     'From the calling routine, densfor_pred=3',ch10,&
 &     'You cannot use residuals in reciprocal space.',ch10,&
 &     'Action: correct your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  Not compatible with non-collinear magnetism
    if(dtset%nspden==4)then
-     MSG_ERROR('densfor_pred=3 does not work for nspden=4!')
+     ABI_ERROR('densfor_pred=3 does not work for nspden=4!')
    end if
 
    n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
@@ -1384,11 +1384,11 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
    write(message,'(a,i0,a,a)')&
 &   '  From the calling routine, cplex=',cplex,ch10,&
 &   '  but the only value allowed are 1 and 2.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(cplex==1.and.optreal==2)then
-   MSG_BUG('When optreal=2, cplex must be 2.')
+   ABI_BUG('When optreal=2, cplex must be 2.')
  end if
 
 !This is to allow q=0
@@ -1398,7 +1398,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
 !If cplex=1 then qphon should be 0 0 0
  if (cplex==1.and. qeq0/=1) then
    write(message,'(a,3e12.4,a)' )' cplex=1 but qphon=',qphon,' qphon should be 0 0 0.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
@@ -1994,14 +1994,14 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
    write(message, '(a,a,a)' )&
 &   'In the present version of the code, one cannot produce',ch10,&
 &   'the dielectric matrix in the metallic, spin-polarized case.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(nspden==4)then
    write(message,'(a,a,a)')&
 &   'In the present version of the code, one cannot produce',ch10,&
 &   'the dielectric matrix in the non-collinear spin-polarized case.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -2023,7 +2023,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
  do ispden=1,nspden
 
    if(nspden/=1)then
-     MSG_ERROR('dieltcel : stop, nspden/=1')
+     ABI_ERROR('dieltcel : stop, nspden/=1')
    end if
 
 !  Store the susceptibility matrix in proper mode before calling zhpev
@@ -2052,7 +2052,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
        eig_msusinvsqr(ii)=1._dp/eig_msussqr(ii)
      else if(-eig_sus(ii)< -1.d-12)then
        message = "Found positive eigenvalue of susceptibility matrix."
-       MSG_BUG(message)
+       ABI_BUG(message)
      else
 !      Set the eigenvalue corresponding to a constant potential change to 1,
 !      while it will be set to zero in Khx.

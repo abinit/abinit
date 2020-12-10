@@ -523,7 +523,7 @@ integer function fform_from_ext(abiext) result(fform)
    end if
  end if
 
- MSG_ERROR(sjoin("Cannot find fform associated to extension:", abiext))
+ ABI_ERROR(sjoin("Cannot find fform associated to extension:", abiext))
 
 end function fform_from_ext
 !!***
@@ -562,7 +562,7 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
  if (endswith(filename, ".nc")) then
    ind = index(filename, ".nc", back=.True.)
  else
-   !MSG_ERROR(sjoin("Don't know how to handle: ", filename))
+   !ABI_ERROR(sjoin("Don't know how to handle: ", filename))
    ind = len_trim(filename) + 1
  end if
 
@@ -659,7 +659,7 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
    end if
  end if
 
- MSG_ERROR(sjoin("Unknown abinit extension:", ext))
+ ABI_ERROR(sjoin("Unknown abinit extension:", ext))
 
 end function varname_from_fname
 !!***
@@ -765,13 +765,13 @@ subroutine check_fform(fform)
  abifile = abifile_from_fform(fform)
 
  if (abifile%fform == 0) then
-    MSG_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform)))
+    ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform)))
  end if
  if (abifile%fform /= fform) then
     write(msg,"(2a,2(a,i0))") &
       "Input fform does not agree with the one registered in abifile.",ch10,&
       "hdr%fform= ",fform,", abifile%fform= ",abifile%fform
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
 #else
@@ -819,13 +819,13 @@ subroutine test_abifiles()
  ierr = 0
  do ii=1,nn-1
    if (all_fforms(ii) == all_fforms(ii+1)) then
-     MSG_WARNING(sjoin("fform: ", itoa(all_fforms(ii+1)), "is already in the abifiles list"))
+     ABI_WARNING(sjoin("fform: ", itoa(all_fforms(ii+1)), "is already in the abifiles list"))
      ierr = ierr + 1
    end if
  end do
 
  if (ierr /= 0) then
-   MSG_ERROR("test_abifiles gave ierr != 0. Aborting now")
+   ABI_ERROR("test_abifiles gave ierr != 0. Aborting now")
  end if
 
 end subroutine test_abifiles
@@ -956,12 +956,12 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
 ! More checking would be needed ...
  if (dtset%ntypat/=psps%ntypat) then
    write(msg,'(a,2(i0,2x))')' dtset%ntypat and psps%ntypat differs. They are: ',dtset%ntypat,psps%ntypat
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (dtset%npsp/=psps%npsp) then
    write(msg,'(a,2(i0,2x))')' dtset%npsp and psps%npsp differs. They are: ',dtset%npsp,psps%npsp
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Note: The structure parameters are taken from the first image!
@@ -1529,14 +1529,14 @@ subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
  my_fname = fname
 
  if (nctk_try_fort_or_ncfile(my_fname, msg) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (my_rank == master) then
    if (.not.isncfile(my_fname)) then
      ! Use Fortran IO to open the file and read the header.
      if (open_file(my_fname,msg,newunit=fh,form="unformatted", status="old") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      call hdr_fort_read(Hdr,fh,fform,rewind=(rdwr1==1))
@@ -1551,7 +1551,7 @@ subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
      ABI_CHECK(fform /= 0, sjoin("Error while reading:", my_fname))
      NCF_CHECK(nf90_close(fh))
 #else
-     MSG_ERROR("netcdf support not enabled")
+     ABI_ERROR("netcdf support not enabled")
 #endif
    end if
  end if
@@ -1606,7 +1606,7 @@ subroutine hdr_write_to_fname(Hdr,fname,fform)
  if (.not.isncfile(fname)) then
    ! Use Fortran IO to write the header.
    if (open_file(fname,msg,newunit=fh,form="unformatted", status="unknown") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    call hdr%fort_write(fh, fform, ierr)
    ABI_CHECK(ierr==0, sjoin("Error while writing Abinit header to file:", fname))
@@ -1624,7 +1624,7 @@ subroutine hdr_write_to_fname(Hdr,fname,fform)
    NCF_CHECK(hdr%ncwrite(fh, fform, nc_define=.True.))
    NCF_CHECK(nf90_close(fh))
 #else
-   MSG_ERROR("netcdf support not enabled")
+   ABI_ERROR("netcdf support not enabled")
 #endif
  end if
 
@@ -1698,7 +1698,7 @@ subroutine hdr_mpio_skip(mpio_fh, fform, offset)
      "ABINIT version: ",trim(abinit_version)," cannot read old files with headform: ",headform,ch10,&
      "produced by previous versions. Use an old ABINIT version to read this file or ",ch10,&
      "regenerate your files with version >= 8.0."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
 
  else
    !read (unitfi)codvsn,headform,fform
@@ -1712,7 +1712,7 @@ subroutine hdr_mpio_skip(mpio_fh, fform, offset)
      "ABINIT version: ",trim(abinit_version)," cannot read old files with headform: ",headform,ch10,&
      "produced by previous versions. Use an old ABINIT version to read this file or ",ch10,&
      "regenerate your files with version >= 8.0."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Skip first record.
@@ -1736,7 +1736,7 @@ subroutine hdr_mpio_skip(mpio_fh, fform, offset)
  end if
 
 #else
- MSG_ERROR("hdr_mpio_skip cannot be used when MPI-IO is not enabled")
+ ABI_ERROR("hdr_mpio_skip cannot be used when MPI-IO is not enabled")
  ABI_UNUSED(mpio_fh)
 #endif
 
@@ -1830,7 +1830,7 @@ subroutine hdr_bsize_frecords(Hdr,formeig,nfrec,bsize_frecords)
          bsz_frec(nfrec) = 2*npw_k*Hdr%nspinor*xmpi_bsize_dp
        end do
      else
-       MSG_ERROR("Wrong formeig")
+       ABI_ERROR("Wrong formeig")
      end if
 
    end do
@@ -2034,7 +2034,7 @@ subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
    !  Writing the header of a formatted file
    call hdr_echo(Hdr,fform,rdwr,unit=unitfi)
  case default
-   MSG_ERROR(sjoin("Wrong value for rdwr: ",itoa(rdwr)))
+   ABI_ERROR(sjoin("Wrong value for rdwr: ",itoa(rdwr)))
  end select
 
  DBG_EXIT("COLL")
@@ -2330,7 +2330,7 @@ subroutine hdr_skip_wfftype(wff,ierr)
        "ABINIT version: ",trim(abinit_version)," cannot read old files with headform: ",headform,ch10,&
        "produced by previous versions. Use an old ABINIT version to read this file or ",ch10,&
        "regenerate your files with version >= 8.0."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    read (unit, err=10, iomsg=errmsg) integers(1:13),npsp,integers(15:17),usepaw
@@ -2358,7 +2358,7 @@ subroutine hdr_skip_wfftype(wff,ierr)
        "ABINIT version: ",trim(abinit_version)," cannot read old files with headform: ",headform,ch10,&
        "produced by previous versions. Use an old ABINIT version to read this file or ",ch10,&
        "regenerate your files with version >= 8.0."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  Causes all previous writes to be transferred to the storage device
@@ -2410,7 +2410,7 @@ subroutine hdr_skip_wfftype(wff,ierr)
  ! Handle IO-error: write warning and let the caller handle the exception.
  return
 10 ierr=1
- MSG_WARNING(errmsg)
+ ABI_WARNING(errmsg)
 
 end subroutine hdr_skip_wfftype
 !!***
@@ -2950,7 +2950,7 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
      "ABINIT version: ",trim(abinit_version)," cannot read old files with headform: ",hdr%headform,ch10,&
      "produced by previous versions. Use an old ABINIT version to read this file or ",ch10,&
      "regenerate your files with version >= 8.0."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call check_fform(fform)
@@ -3009,7 +3009,7 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 
  ! Handle IO-error: write warning and let the caller handle the exception.
 10 fform=0
- MSG_WARNING(errmsg)
+ ABI_WARNING(errmsg)
 
 end subroutine hdr_fort_read
 !!***
@@ -3072,7 +3072,7 @@ subroutine hdr_ncread(Hdr, ncid, fform)
      "ABINIT version: ",trim(abinit_version)," cannot read old files with headform: ",hdr%headform,ch10,&
      "produced by previous versions. Use an old ABINIT version to read this file or ",ch10,&
      "regenerate your files with version >= 8.0."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call check_fform(fform)
@@ -3205,7 +3205,7 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  end if
 
 #else
- MSG_ERROR("netcdf support not activated")
+ ABI_ERROR("netcdf support not activated")
 #endif
 
 contains
@@ -3309,7 +3309,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
 
  ! Handle IO-error: write warning and let the caller handle the exception.
 10 ierr=1
- MSG_WARNING(errmsg)
+ ABI_WARNING(errmsg)
 
 end subroutine hdr_fort_write
 !!***
@@ -3553,7 +3553,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
        nctkdim_t("number_of_grid_points_vector3", hdr%ngfft(3))], defmode=.True.)
      NCF_CHECK(ncerr)
    else
-     MSG_WARNING("Don't know how to define grid_points for wavelets!")
+     ABI_WARNING("Don't know how to define grid_points for wavelets!")
    end if
 
    !write(std_out,*)"hdr%nshiftk_orig,hdr%nshiftk",hdr%nshiftk_orig,hdr%nshiftk
@@ -3691,7 +3691,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("amu"), hdr%amu))
 
 #else
- MSG_ERROR("netcdf support not activated")
+ ABI_ERROR("netcdf support not activated")
 #endif
 
 contains
@@ -3914,13 +3914,13 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
  ! Check validity of fform, and find filetype
  abifile = abifile_from_fform(fform)
  if (abifile%fform == 0) then
-    MSG_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform)))
+    ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform)))
  end if
 
  ! Check validity of fform0, and find filetype
  abifile0 = abifile_from_fform(fform0)
  if (abifile0%fform == 0) then
-    MSG_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform0)))
+    ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform0)))
  end if
 
  write(msg,'(a,a17,3x,2a,a17)') &
@@ -3934,7 +3934,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
  ! Check fform from input, not from header file
  if ( fform /= fform0) then
    write(msg,'(a,i0,a,i0,a)')'input fform=',fform,' differs from disk file fform=',fform0,'.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(msg, '(a,i8,a,i8,a,i4,2x,a,a,i8,a,i8,a,i4)' ) &
@@ -3962,13 +3962,13 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    if (hdr0%rprimd(1,2) /= zero .or. hdr0%rprimd(1,3) /= zero .or. &
     hdr0%rprimd(2,1) /= zero .or. hdr0%rprimd(2,3) /= zero .or. &
     hdr0%rprimd(3,1) /= zero .or. hdr0%rprimd(3,2) /= zero) then
-     MSG_ERROR('disk file rprimd is not parallelepipedic.')
+     ABI_ERROR('disk file rprimd is not parallelepipedic.')
    end if
    if (abs(hdr0%rprimd(1,1) / hdr0%ngfft(1) - hdr %rprimd(1,1) / hdr %ngfft(1)) > tol8) then
      write(msg,'(a,F7.4,a,F7.4)')&
       'input wvl_hgrid=', 2. * hdr%rprimd(1,1) / hdr%ngfft(1), &
       'not equal disk file wvl_hgrid=', 2. * hdr0%rprimd(1,1) / hdr0%ngfft(1)
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
      tgrid = 1
    end if
  end if
@@ -3990,17 +3990,17 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
 
  if (hdr%intxc/=hdr0%intxc) then
    write(msg,'(a,i0,a,i0)')'input intxc=',hdr%intxc,' not equal disk file intxc=',hdr0%intxc
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  if (hdr%ixc/=hdr0%ixc) then
    write(msg,'(a,i0,a,i0)')'input ixc=',hdr%ixc,' not equal disk file ixc=',hdr0%ixc
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  if (hdr%natom/=hdr0%natom) then
    write(msg,'(a,i0,a,i0)')'input natom=',hdr%natom,' not equal disk file natom=',hdr0%natom
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    tatty=1
  end if
 
@@ -4013,7 +4013,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
        'FFT grids must be the same to restart from a ',trim(abifile%class),' file.',ch10,&
        "ngfft from file: ", trim(ltoa(hdr0%ngfft(1:3))), ", from input: ", trim(ltoa(hdr%ngfft(1:3))), ch10, &
        'Action: change the FFT grid in the input via ngfft or change the restart file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    tng=1
  end if
@@ -4021,7 +4021,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
  if (hdr%nkpt/=hdr0%nkpt) then
    if (abifile%class == "wf_planewave") then
      write(msg,'(a,i0,a,i0)' )'input nkpt=',hdr%nkpt,' not equal disk file nkpt=',hdr0%nkpt
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
    tkpt=1; twfk=1
  end if
@@ -4029,7 +4029,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
  if (hdr%nspinor/=hdr0%nspinor) then
    if (abifile%class == "wf_planewave") then
      write(msg,'(a,i0,a,i0)')'input nspinor=',hdr%nspinor,' not equal disk file nspinor=',hdr0%nspinor
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
    tspinor=1
  end if
@@ -4037,25 +4037,25 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
  ! No check is present for nspden
  if (hdr%nsppol/=hdr0%nsppol) then
    write(msg,'(a,i0,a,i0)')'input nsppol=',hdr%nsppol,' not equal disk file nsppol=',hdr0%nsppol
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  if (hdr%nsym/=hdr0%nsym) then
    write(msg, '(a,i0,a,i0)' )'input nsym=',hdr%nsym,' not equal disk file nsym=',hdr0%nsym
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    tsym=1
  end if
 
  if (hdr%ntypat/=hdr0%ntypat) then
    write(msg,'(a,i0,a,i0)')'input ntypat=',hdr%ntypat,' not equal disk file ntypat=',hdr0%ntypat
    call wrtout(std_out,msg,mode_paral)
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    tatty=1
  end if
 
  if (hdr%usepaw/=hdr0%usepaw) then
    write(msg,'(a,i0,a,i0)')'input usepaw=',hdr%usepaw,' not equal disk file usepaw=',hdr0%usepaw
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    tpaw=1
  end if
 
@@ -4063,13 +4063,13 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    write(msg, '(a,i6,a,i6,a,a)' )&
      'input usewvl=',hdr%usewvl,' not equal disk file usewvl=',hdr0%usewvl, ch10, &
      'Action: change usewvl input variable or your restart file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Also examine agreement of floating point data
  if (hdr%usewvl == 0 .and. abs(hdr%ecut_eff-hdr0%ecut_eff)>tol8) then
    write(msg,'(a,f12.6,a,f12.6,a)')'input ecut_eff=',hdr%ecut_eff,' /= disk file ecut_eff=',hdr0%ecut_eff,'.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    tecut=1
  end if
 
@@ -4078,7 +4078,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
      if (abs(hdr%rprimd(ii,jj)-hdr0%rprimd(ii,jj))>tol6) then
        write(msg, '(a,i1,a,i1,a,1p,e17.9,a,i1,a,i1,a,e17.9)' )&
          'input rprimd(',ii,',',jj,')=',hdr%rprimd(ii,jj),' /= disk file rprimd(',ii,',',jj,')=',hdr0%rprimd(ii,jj)
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        tprim=1
      end if
    end do
@@ -4095,7 +4095,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    call wrtout(std_out,msg,mode_paral)
    if (hdr%ecutdg/=hdr0%ecutdg) then
      write(msg, '(a,f12.6,a,f12.6)' )'input ecutdg=',hdr%ecutdg,'not equal disk file ecutdg=',hdr0%ecutdg
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      tdg=1
    end if
  end if
@@ -4130,7 +4130,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
            else
              write(msg,'(a,i0,a,i0,a,i0)' )&
               'kpt num ',ii,' input nband= ',hdr%nband(ii),' not equal disk file nband=',hdr0%nband(ii)
-             MSG_WARNING(msg)
+             ABI_WARNING(msg)
            end if
          end if
        end if
@@ -4144,7 +4144,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
      write(msg, '(a,i0,a,i0,a,a)' )&
       'input nwvlres= ',size(hdr%nwvlarr),' not equal disk file nwvlres= ',size(hdr0%nwvlarr),' or 2',&
       ' ABINIT is not implemented for wavelet resolutions different from 2.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -4166,7 +4166,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
 
  if (itest/=0) then
    write(msg,'(a,i0,a)' )'For symmetry number',itest,' input symafm not equal disk file symafm'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    tsym=1
  end if
 
@@ -4189,7 +4189,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
 
  if (itest/=0) then
    write(msg,'(a,i0,a)')'For symmetry number',itest,' input symrel not equal disk file symrel'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    tsym=1
  end if
 
@@ -4209,7 +4209,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
      if (hdr%typat(ii)/=hdr0%typat(ii)) then
        write(msg, '(a,i0,a,i0,a,i0)' )&
         'For atom number ',ii,' input typat=',hdr%typat(ii),' not equal disk file typat=',hdr0%typat(ii)
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        tatty=1
      end if
    end do
@@ -4231,7 +4231,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
      if (hdr%so_psp  (ii)/=hdr0%so_psp  (ii)) then
        write(msg,'(a,i0,a,i0,a,i0)')&
          'For pseudopotential number ',ii,' input so_psp =',hdr%so_psp(ii),' not equal disk file so_psp=',hdr0%so_psp(ii)
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    end do
  end if
@@ -4257,7 +4257,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
      if (hdr%istwfk(ii)/=hdr0%istwfk(ii)) then
        write(msg, '(a,i0,a,i0,a,i0)' )&
          'For k point number ',ii,' input istwfk=',hdr%istwfk(ii),' not equal disk file istwfk=',hdr0%istwfk(ii)
-       MSG_COMMENT(msg)
+       ABI_COMMENT(msg)
        twfk=1
      end if
    end do
@@ -4266,28 +4266,28 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
 !NEW_HDR
  if (any(hdr%kptrlatt /= hdr0%kptrlatt)) then
     write(msg,"(2(a,9(i0,1x)))")"input kptrlatt = ",hdr%kptrlatt," /= disk file kptrlatt = ",hdr0%kptrlatt
-    MSG_COMMENT(msg)
+    ABI_COMMENT(msg)
  end if
  if (hdr%kptopt /= hdr0%kptopt) then
-    MSG_COMMENT(sjoin("input kptopt = ", itoa(hdr%kptopt)," /= disk file kptopt = ", itoa(hdr0%kptopt)))
+    ABI_COMMENT(sjoin("input kptopt = ", itoa(hdr%kptopt)," /= disk file kptopt = ", itoa(hdr0%kptopt)))
  end if
  if (hdr%pawcpxocc /= hdr0%pawcpxocc) then
-    MSG_WARNING(sjoin("input pawcpxocc = ", itoa(hdr%pawcpxocc)," /= disk file pawcpxocc = ", itoa(hdr0%pawcpxocc)))
+    ABI_WARNING(sjoin("input pawcpxocc = ", itoa(hdr%pawcpxocc)," /= disk file pawcpxocc = ", itoa(hdr0%pawcpxocc)))
  end if
  if (hdr%icoulomb /= hdr0%icoulomb) then
-    MSG_WARNING(sjoin("input icoulomb = ", itoa(hdr%icoulomb)," /= disk file icoulomb = ", itoa(hdr0%icoulomb)))
+    ABI_WARNING(sjoin("input icoulomb = ", itoa(hdr%icoulomb)," /= disk file icoulomb = ", itoa(hdr0%icoulomb)))
  end if
 
  if (abs(hdr%nelect - hdr0%nelect) > tol6) then
-    MSG_WARNING(sjoin("input nelect = ", ftoa(hdr%nelect)," /= disk file nelect = ",ftoa(hdr0%nelect)))
+    ABI_WARNING(sjoin("input nelect = ", ftoa(hdr%nelect)," /= disk file nelect = ",ftoa(hdr0%nelect)))
  end if
  if (abs(hdr%charge - hdr0%charge) > tol6) then
-    MSG_WARNING(sjoin("input charge = ", ftoa(hdr%charge)," /= disk file charge = ", ftoa(hdr0%charge)))
+    ABI_WARNING(sjoin("input charge = ", ftoa(hdr%charge)," /= disk file charge = ", ftoa(hdr0%charge)))
  end if
 
  if (hdr%ntypat==hdr0%ntypat) then
    if (any(abs(hdr%amu - hdr0%amu) > tol6)) then
-      MSG_WARNING(sjoin("input amu = ",ltoa(hdr%amu)," /= disk file amu = ",ltoa(hdr0%amu)))
+      ABI_WARNING(sjoin("input amu = ",ltoa(hdr%amu)," /= disk file amu = ",ltoa(hdr0%amu)))
    end if
  end if
 !end NEW_HDR
@@ -4315,7 +4315,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
        write(msg, '(a,i5,a,3es17.7,a,a,3es17.7)' )&
         'kpt num',ii,', input kpt=',hdr%kptns(:,ii),ch10,&
         'not equal  disk file kpt=',hdr0%kptns(:,ii)
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        tkpt=1 ; iwarning=iwarning+1
        if(iwarning>=mwarning)then
          call wrtout(std_out,'The number of warning messages is sufficient ... stop writing them.',mode_paral)
@@ -4345,7 +4345,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
        write(msg,'(a,i5,a,es17.7,a,a,es17.7)')&
         'kpt num',ii,', input weight=',hdr%wtk(ii),ch10,&
         'not equal to disk file weight=',hdr0%wtk(ii)
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
 
        tkpt=1 ; iwarning=iwarning+1
        if(iwarning>=mwarning)then
@@ -4379,7 +4379,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    do ii=1,bantot
      if (abs( hdr%occ(ii)-hdr0%occ(ii) )>tol6) then
        write(msg,'(a,i0,a,1p,e15.7,a,e15.7)')'band,k: ',ii,', input occ=',hdr%occ(ii),' disk occ=',hdr0%occ(ii)
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        tband=1 ; iwarning=iwarning+1
        if(iwarning>=mwarning)then
          call wrtout(std_out,'The number of warning msgs is sufficient ... stop writing them.',mode_paral)
@@ -4408,7 +4408,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    end do
    if (itest/=0) then
      write(msg, '(a,i0,a)' )'For symmetry number ',itest,' input tnons not equal disk file tnons'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end if
 
@@ -4430,7 +4430,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
      if (abs(hdr%znucltypat(ii)-hdr0%znucltypat(ii))>tol6) then
        write(msg, '(a,i5,a,f12.6,a,f12.6)' )&
         ' For atom number ',ii,' input znucl=',hdr%znucltypat(ii),' not equal disk file znucl=',hdr0%znucltypat(ii)
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    end do
  end if
@@ -4461,7 +4461,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
          write(msg, '(a,i3,a,i3,a,i3)' )&
           'For atom type ',ipsp,' input lmn_size=',hdr%lmn_size(ipsp),&
           'not equal disk file lmn_size=',hdr0%lmn_size(ipsp)
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
          tlmn=1
        end if
      else
@@ -4483,7 +4483,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
        ' Different md5 checksum for pseudo ',ipsp,ch10,&
        ' input md5= ',hdr%md5_pseudos(ipsp),ch10,&
        ' disk  md5= ',hdr0%md5_pseudos(ipsp)
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        itest=1; tpsch=1
      end if
 
@@ -4500,7 +4500,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    end do
 
    if (itest==1) then
-     MSG_WARNING('input psp header does not agree perfectly with disk file psp header.')
+     ABI_WARNING('input psp header does not agree perfectly with disk file psp header.')
      tpseu=1
    end if
  end if
@@ -4552,10 +4552,10 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
 
    if (abifile%class == "wf_planewave") then
      restart=2
-     MSG_COMMENT('Restart of self-consistent calculation need translated wavefunctions.')
+     ABI_COMMENT('Restart of self-consistent calculation need translated wavefunctions.')
    else if (abifile%class == "density") then
      restart=0
-     MSG_WARNING('Illegal restart of non-self-consistent calculation')
+     ABI_WARNING('Illegal restart of non-self-consistent calculation')
    end if
 
    write(msg,'(a,a1,a)') &
@@ -4687,31 +4687,31 @@ integer function hdr_compare(hdr1, hdr2) result(ierr)
  ! Test basic dimensions
  if (hdr1%nsppol /= hdr2%nsppol) then
    write(msg,'(a,i0,a,i0)')'Different nsppol : ',hdr1%nsppol,' and ',hdr2%nsppol
-   ierr = ierr + 1; MSG_WARNING(msg)
+   ierr = ierr + 1; ABI_WARNING(msg)
  end if
  if (hdr1%nspinor /= hdr2%nspinor) then
    write(msg,'(a,i0,a,i0)')'Different nspinor : ',hdr1%nspinor,' and ',hdr2%nspinor
-   ierr = ierr + 1; MSG_WARNING(msg)
+   ierr = ierr + 1; ABI_WARNING(msg)
  end if
  if (hdr1%nspden /= hdr2%nspden) then
    write(msg,'(a,i0,a,i0)')'Different nspden : ',hdr1%nspden,' and ',hdr2%nspden
-   ierr = ierr + 1; MSG_WARNING(msg)
+   ierr = ierr + 1; ABI_WARNING(msg)
  end if
  if (hdr1%nkpt /= hdr2%nkpt) then
    write(msg,'(a,i0,a,i0)')'Different nkpt : ',hdr1%nkpt,' and ',hdr2%nkpt
-   ierr = ierr + 1; MSG_WARNING(msg)
+   ierr = ierr + 1; ABI_WARNING(msg)
  end if
  if (hdr1%usepaw /= hdr2%usepaw) then
    write(msg,'(a,i0,a,i0)')'Different usepaw : ',hdr1%usepaw,' and ',hdr2%usepaw
-   ierr = ierr + 1; MSG_WARNING(msg)
+   ierr = ierr + 1; ABI_WARNING(msg)
  end if
  if (hdr1%ntypat /= hdr2%ntypat) then
    write(msg,'(a,i0,a,i0)')'Different ntypat : ',hdr1%ntypat,' and ',hdr2%ntypat
-   ierr = ierr + 1; MSG_WARNING(msg)
+   ierr = ierr + 1; ABI_WARNING(msg)
  end if
  if (hdr1%natom /= hdr2%natom) then
    write(msg,'(a,i0,a,i0)')'Different natom  : ',hdr1%natom,' and ',hdr2%natom
-   ierr = ierr + 1; MSG_WARNING(msg)
+   ierr = ierr + 1; ABI_WARNING(msg)
  end if
 
  ! Return immediately if important dimensions are not equal.
@@ -4720,16 +4720,16 @@ integer function hdr_compare(hdr1, hdr2) result(ierr)
  ! Test important arrays (rprimd is not tested)
  if (any(hdr1%typat /= hdr2%typat)) then
    write(msg,'(a,i0,a,i0)')'Different ntypat array : ',hdr1%typat(1),' ... and ',hdr2%typat(1)
-   ierr = ierr + 1; MSG_WARNING(msg)
+   ierr = ierr + 1; ABI_WARNING(msg)
  end if
 !Should test npwarr, however taking into account differences due to istwfk !
 !if (any(hdr1%npwarr /= hdr2%npwarr)) then
 !  write(msg,'(a,i0,a,i0)')'Different npwarr array : ',hdr1%npwarr(1),' ... and ',hdr2%npwarr(1)
-!  ierr = ierr + 1; MSG_WARNING(msg)
+!  ierr = ierr + 1; ABI_WARNING(msg)
 !end if
  if (any(abs(hdr1%kptns - hdr2%kptns) > tol6)) then
    write(msg,'(a,i0,a,i0)')'Different kptns array '
-   ierr = ierr + 1; MSG_WARNING(msg)
+   ierr = ierr + 1; ABI_WARNING(msg)
  end if
 
 end function hdr_compare
@@ -4793,7 +4793,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    write(msg,'(3a)')&
    'Cannot continue, basic dimensions reported in the header do not agree with input file. ',ch10,&
    'Check consistency between the content of the external file and the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  test=ALL(ABS(Hdr%xred-Dtset%xred_orig(:,1:Dtset%natom,1))<tol6)
@@ -4809,7 +4809,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    ' rprimd from Hdr file   = ',ch10,(Hdr%rprimd(:,jj),jj=1,3),ch10,&
    ' rprimd from input file = ',ch10,(Dtset%rprimd_orig(:,jj,1),jj=1,3),ch10,ch10,&
    ' Modify the lattice vectors in the input file '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Check symmetry operations.
@@ -4818,7 +4818,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    write(msg,'(3a)')&
    ' real space symmetries read from Header ',ch10,&
    ' differ from the values inferred from the input file'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    tsymrel=.FALSE.
  end if
 
@@ -4827,7 +4827,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    write(msg,'(3a)')&
    ' fractional translations read from Header ',ch10,&
    ' differ from the values inferred from the input file'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ttnons=.FALSE.
  end if
 
@@ -4836,7 +4836,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    write(msg,'(3a)')&
    ' AFM symmetries read from Header ',ch10,&
    ' differ from the values inferred from the input file'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    tsymafm=.FALSE.
  end if
 
@@ -4847,44 +4847,44 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    write(msg,'(a)')' Dtset  '
    call wrtout(std_out,msg,'COLL')
    call print_symmetries(Dtset%nsym,Dtset%symrel,Dtset%tnons,Dtset%symafm)
-   MSG_ERROR('Check symmetry operations')
+   ABI_ERROR('Check symmetry operations')
  end if
 
  if (abs(Dtset%nelect-hdr%nelect)>tol6) then
    write(msg,'(2(a,f8.2))')"File contains ", hdr%nelect," electrons but nelect initialized from input is ",Dtset%nelect
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (abs(Dtset%charge-hdr%charge)>tol6) then
    write(msg,'(2(a,f8.2))')"File contains charge ", hdr%charge," but charge from input is ",Dtset%charge
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (any(hdr%kptrlatt_orig /= dtset%kptrlatt_orig)) then
    write(msg,"(5a)")&
    "hdr%kptrlatt_orig: ",trim(ltoa(reshape(hdr%kptrlatt_orig,[9]))),ch10,&
    "dtset%kptrlatt_orig: ",trim(ltoa(reshape(dtset%kptrlatt_orig, [9])))
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (any(hdr%kptrlatt /= dtset%kptrlatt)) then
    write(msg,"(5a)")&
    "hdr%kptrlatt: ",trim(ltoa(reshape(hdr%kptrlatt, [9]))),ch10,&
    "dtset%kptrlatt: ",trim(ltoa(reshape(dtset%kptrlatt, [9])))
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (any(abs(hdr%shiftk_orig - dtset%shiftk_orig(:,1:dtset%nshiftk_orig)) > tol6)) then
    write(msg,"(5a)")&
    "hdr%shiftk_orig: ",trim(ltoa(reshape(hdr%shiftk_orig, [3*hdr%nshiftk_orig]))),ch10,&
    "dtset%shiftk_orig: ",trim(ltoa(reshape(dtset%shiftk_orig, [3*dtset%nshiftk_orig])))
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (any(abs(hdr%shiftk - dtset%shiftk(:,1:dtset%nshiftk)) > tol6)) then
    write(msg,"(5a)")&
    "hdr%shiftk: ",trim(ltoa(reshape(hdr%shiftk, [3*hdr%nshiftk]))),ch10,&
    "dtset%shiftk: ",trim(ltoa(reshape(dtset%shiftk, [3*dtset%nshiftk])))
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Check if the k-points from the input file agrees with that read from the WFK file
@@ -4901,7 +4901,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
        call wrtout(std_out,msg,'COLL')
      end if
    end do
-   MSG_ERROR('Modify the k-mesh in the input file')
+   ABI_ERROR('Modify the k-mesh in the input file')
  end if
 
  if (ANY(ABS(Hdr%wtk(:) - Dtset%wtk(1:Dtset%nkpt)) > tol6)) then
@@ -4917,18 +4917,18 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
        call wrtout(std_out,msg,'COLL')
      end if
    end do
-   MSG_ERROR('Check the k-mesh and the symmetries of the system. ')
+   ABI_ERROR('Check the k-mesh and the symmetries of the system. ')
  end if
 
  ! Check istwfk storage
  if ( (ANY(Hdr%istwfk(:)/=Dtset%istwfk(1:Dtset%nkpt))) ) then
-   MSG_COMMENT('istwfk read from Header differs from the values specified in the input file (this is not critical)')
+   ABI_COMMENT('istwfk read from Header differs from the values specified in the input file (this is not critical)')
    !call wrtout(std_out, "  Hdr | input ")
    !do ik=1,Dtset%nkpt
    !  write(msg,'(i5,3x,i5)')Hdr%istwfk(ik),Dtset%istwfk(ik)
    !  call wrtout(std_out,msg,'COLL')
    !end do
-   !MSG_ERROR('Modify istwfk in the input file.')
+   !ABI_ERROR('Modify istwfk in the input file.')
  end if
 
  CONTAINS

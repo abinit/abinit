@@ -402,7 +402,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
       "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ABI_SFREE(self%lgk2ibz)
    call alloc_copy(indkk(1, :), self%lgk2ibz)
@@ -423,7 +423,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
       "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    call cwtime_report(" listkk2", cpu, wall, gflops)
 
@@ -587,7 +587,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  call htetra_init(self%tetra_k, bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, &
                   self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
  if (ierr /= 0) then
-   MSG_ERROR(errorstring)
+   ABI_ERROR(errorstring)
  end if
  ABI_FREE(bz2lgkibz)
 

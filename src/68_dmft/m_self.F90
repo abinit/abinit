@@ -424,13 +424,13 @@ subroutine dc_self(charge_loc,cryst_struc,hu,self,dmft_dc,prtopt)
            else if(dmft_dc==2) then  ! AMF
              if(nspinor==2) then
                !write(message,'(a,i4,i4,2x,e20.10)') " AMF Double counting not implemented for SO"
-               !MSG_ERROR(message)
+               !ABI_ERROR(message)
                self%hdc%matlu(iatom)%mat(m1,m1,isppol,ispinor,ispinor)= &
                hu(cryst_struc%typat(iatom))%upawu * ntot/two &
                + ( hu(cryst_struc%typat(iatom))%upawu - hu(cryst_struc%typat(iatom))%jpawu )&
                *ntot/two*(float(2*lpawu))/(float(2*lpawu+1))
                write(message,'(a,i4,i4,2x,e20.10)') " AMF Double counting is under test for SOC"
-               MSG_WARNING(message)
+               ABI_WARNING(message)
              else
                if(nsppol==2) then
                  self%hdc%matlu(iatom)%mat(m1,m1,isppol,ispinor,ispinor)=  &
@@ -450,7 +450,7 @@ subroutine dc_self(charge_loc,cryst_struc,hu,self,dmft_dc,prtopt)
 !                 write(std_out,*) "AMF", self%hdc%matlu(iatom)%mat(m1,m1,isppol,ispinor,ispinor)
              endif
            else
-             MSG_ERROR("not implemented")
+             ABI_ERROR("not implemented")
            endif
          enddo  ! m1
        enddo  ! ispinor
@@ -815,14 +815,14 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                  call wrtout(std_out,message,'COLL')
                  message = "Dimensions in self are not correct"
                  if(readimagonly==1.or.present(opt_stop)) then
-                   MSG_ERROR(message)
+                   ABI_ERROR(message)
                  else
-                   MSG_WARNING(message)
+                   ABI_WARNING(message)
                  endif
                  iexist2=2
                endif
              else
-               MSG_WARNING("Self file is empty")
+               ABI_WARNING("Self file is empty")
              endif
            endif
            !write(std_out,*) "7"
@@ -1085,9 +1085,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
       if(readimagonly==1) then
         message = "Self file does not exist or is incomplete: check the number of self data in file"
       endif
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      else
-       MSG_WARNING(message)
+       ABI_WARNING(message)
      endif
      if(iexist2==0) then
        write(message,'(4x,2a)') "File does not exist"
@@ -1107,7 +1107,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        write(message,'(4x,a,a,5i5,2x,e14.7)') "-> Put Self-Energy Equal to dc term - shift"
        call wrtout(std_out,message,'COLL')
        write(message,'(4x,a,a,5i5,2x,e14.7)') " No self energy is given, change dmft_rslf"
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      endif
      call wrtout(std_out,message,'COLL')
      do ifreq=1,self%nw
@@ -1161,7 +1161,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                        if(icount.gt.ncount) then
                          write(message,'(2a,2i5)') ch10,"Error buffer",icount,ncount
                          iexit=1
-                         MSG_ERROR(message)
+                         ABI_ERROR(message)
                        endif
                        buffer(icount)=self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
                      enddo
@@ -1174,7 +1174,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                  if(icount.gt.ncount) then
                    write(message,'(2a,2i5)') ch10,"Error buffer",icount,ncount
                    iexit=1
-                   MSG_ERROR(message)
+                   ABI_ERROR(message)
                  endif
                  buffer(icount)=self%hdc%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)
                enddo
@@ -1194,7 +1194,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
      if(ier/=0) then
        message =  "error in xmpi_sum in rw_self"
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      endif
      paw_dmft%fermie=fermie_read2(1)
 !     write(std_out,*) "Fermi level",paw_dmft%fermie
@@ -1230,7 +1230,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    endif  ! test read successful
  endif  ! optrw==1
 !   call flush_unit(std_out)
-!   MSG_ERROR("Aboring now")
+!   ABI_ERROR("Aboring now")
  if(optrw==0) then
    if(paw_dmft%dmft_rslf==0) then
      if(paw_dmft%dmft_solv/=4) then
@@ -1290,7 +1290,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                  self%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)= paw_dmft%fixed_self(im,im,ispinor,iatu)
 !                 write(message,'(a,i4,i4,2x,e20.10)') " Fixed self not implemented for nspinor==2"
 !                 call wrtout(std_out,  message,'COLL')
-!                 MSG_ERROR("Aboring now")
+!                 ABI_ERROR("Aboring now")
                endif
              enddo
            enddo
@@ -1469,7 +1469,7 @@ subroutine make_qmcshift_self(cryst_struc,hu,self,apply)
      if(abs(self%qmc_shift(iatom)-hu_shift2)>tol6) then
        write(message,'(2a,2f16.7)')  "  Shift for QMC is not correctly"&
 &      ," computed",self%qmc_shift(iatom),hu_shift2
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      endif ! shifts not equals
 
      write(message,'(4x,a,f16.7)')  &
@@ -1481,7 +1481,7 @@ subroutine make_qmcshift_self(cryst_struc,hu,self,apply)
      self%qmc_xmu(iatom)=zero
      write(message,'(4x,a,f16.7)')  &
 &     "Artificial Shift used in QMC AND to compute G is (in Ha) :",self%qmc_xmu(iatom)
-     MSG_WARNING(message)
+     ABI_WARNING(message)
 
    endif ! lpawu/=1
  enddo ! natom

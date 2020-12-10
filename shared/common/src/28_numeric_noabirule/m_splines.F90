@@ -114,7 +114,7 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
  de_dby_six = de / six
 
  if (de < tol12) then
-   MSG_ERROR(sjoin('spacing should be strictly positive, while de is: ', ftoa(de)))
+   ABI_ERROR(sjoin('spacing should be strictly positive, while de is: ', ftoa(de)))
  endif
 
  jspl = -1
@@ -198,7 +198,7 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
    enddo
 
  case default
-   MSG_ERROR(sjoin("Invalid ider:", itoa(ider)))
+   ABI_ERROR(sjoin("Invalid ider:", itoa(ider)))
  end select
 
  !call timab(1905, 2, tsec)
@@ -381,7 +381,7 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
     write(std_out,* ) 'SPLINE_CUBIC_SET - Fatal error!'
     write(std_out,* ) '  The number of knots must be at least 2.'
     write(std_out,* ) '  The input value of N = ', n
-    MSG_ERROR("Fatal error")
+    ABI_ERROR("Fatal error")
   end if
 
   ABI_ALLOCATE(tmp,(n))
@@ -393,7 +393,7 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
       write(std_out,* ) '  The knots must be strictly increasing, but'
       write(std_out,* ) '  T(',  i,') = ', t(i)
       write(std_out,* ) '  T(',i+1,') = ', t(i+1)
-      MSG_ERROR("Fatal error")
+      ABI_ERROR("Fatal error")
     end if
   end do
 !
@@ -712,11 +712,11 @@ subroutine splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
          left = k-1
        else
          if (k-1.eq.1 .and. i.eq.1) then
-           MSG_ERROR('xfit(1) < xspline(1)')
+           ABI_ERROR('xfit(1) < xspline(1)')
            !my_err=my_err+1
            !exit
          else
-           MSG_ERROR('xfit not properly ordered')
+           ABI_ERROR('xfit not properly ordered')
          end if
        end if
        delarg= xspline(right) - xspline(left)

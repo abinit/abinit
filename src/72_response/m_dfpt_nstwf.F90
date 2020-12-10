@@ -344,18 +344,18 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !Not valid for PrintBandByBand
  if (dtset%prtbbb/=0) then
-   MSG_BUG('not yet valid for prtbbb/=0!')
+   ABI_BUG('not yet valid for prtbbb/=0!')
  end if
 
 !NCPP restrictions
  if (usepaw==0) then
 !  cprj cannot be used
    if (usecprj/=0) then
-     MSG_BUG('NCPP: usecprj should be 0!')
+     ABI_BUG('NCPP: usecprj should be 0!')
    end if
 !  d2ovl cannot be used
    if (size(d2ovl)/=0) then
-     MSG_BUG('NCPP: d2ovl should not be allocated!')
+     ABI_BUG('NCPP: d2ovl should not be allocated!')
    end if
  end if
 
@@ -363,20 +363,20 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  if (usepaw==1) then
 !  Test on FFT grid sizes
    if (pawfgr%nfft/=nfftf) then
-     MSG_BUG('PAW: wrong values for nfft, nfftf!')
+     ABI_BUG('PAW: wrong values for nfft, nfftf!')
    end if
 !  Test gradients of cprj
    if (ipert<=dtset%natom.and.ncpgr/=3) then
-     MSG_BUG('PAW: wrong value of ncpgr for ipert<=natom!')
+     ABI_BUG('PAW: wrong value of ncpgr for ipert<=natom!')
    end if
    if (ipert==dtset%natom+1.and.ncpgr/=1) then
-     MSG_BUG('PAW: wrong value of ncpgr for ipert=natom+1!')
+     ABI_BUG('PAW: wrong value of ncpgr for ipert=natom+1!')
    end if
    if (ipert==dtset%natom+2.and.ncpgr/=3) then
-     MSG_BUG('PAW: wrong value of ncpgr for ipert=natom+2!')
+     ABI_BUG('PAW: wrong value of ncpgr for ipert=natom+2!')
    end if
    if ((ipert==dtset%natom+3.or.ipert==dtset%natom+4).and.ncpgr/=1) then
-     MSG_BUG('PAW: wrong value of ncpgr for ipert=natom+3 or 4!')
+     ABI_BUG('PAW: wrong value of ncpgr for ipert=natom+3 or 4!')
    end if
 !  Test on availability of DijHartree and XC on-site potentials
    if (mpi_enreg%my_natom>0.and.ipert/=dtset%natom+1)  then
@@ -869,7 +869,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',idir,ch10,&
                'the number of plane waves in the ddk file is equal to', npw_,ch10,&
                'while it should be ',npw_k
-               MSG_ERROR(msg)
+               ABI_ERROR(msg)
              end if
 
            end if
@@ -1836,7 +1836,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !Not valid for PAW
  if (psps%usepaw==1) then
    msg='  This routine cannot be used for PAW (use pawnst3 instead) !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Keep track of total time spent in dfpt_nstwf
@@ -1928,7 +1928,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 &       'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',idir,ch10,&
 &       'the number of plane waves in the ddk file is equal to', npw_disk,ch10,&
 &       'while it should be ',npw_k
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
  end do

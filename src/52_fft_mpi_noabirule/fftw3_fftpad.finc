@@ -152,7 +152,7 @@
    call xscal(dst*ldx*ldy*ldz*ndat, fact, ff, 1)
  
  CASE DEFAULT 
-   MSG_BUG("Wrong isign")
+   ABI_BUG("Wrong isign")
  END SELECT
 
  call zpad_free(zpad)

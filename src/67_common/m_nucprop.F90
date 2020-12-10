@@ -147,7 +147,7 @@ contains
     !Compatibility tests
     if (usepaw /= 1) then
        message = ' usepaw /= 1 but EFG calculation requires PAW '
-       MSG_ERROR(message)
+       ABI_ERROR(message)
     end if
 
     !Set up parallelism over atoms
@@ -393,7 +393,7 @@ contains
     !Compatibility tests
     if (usepaw /= 1) then
        message = ' usepaw /= 1 but Fermi-contact calculation requires PAW '
-       MSG_ERROR(message)
+       ABI_ERROR(message)
     end if
 
     !Set up parallelism over atoms

@@ -292,7 +292,7 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_eigenenergies'), eigr2d%eigr2d))
 
 #else
- MSG_ERROR("ETSF-IO support is not activated. ")
+ ABI_ERROR("ETSF-IO support is not activated. ")
 #endif
 
 
@@ -524,7 +524,7 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_eigenenergies_actif'), fan2d%fan2d))
 
 #else
- MSG_ERROR("netcdf support is not activated. ")
+ ABI_ERROR("netcdf support is not activated. ")
 #endif
 
 contains
@@ -611,7 +611,7 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid_, gkk2d%gkk2d))
 
 #else
- MSG_ERROR("netcdf support is not activated. ")
+ ABI_ERROR("netcdf support is not activated. ")
 #endif
 
 contains
@@ -875,7 +875,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 
  if(nsppol==2)then
    message = 'nsppol=2 is still under development. Be careful when using it ...'
-   MSG_COMMENT(message)
+   ABI_COMMENT(message)
  end if
 
  band2tot_index =0
@@ -1362,7 +1362,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  call timab(148,1,tsec)
 
  if(nsppol==2)then
-   MSG_COMMENT('nsppol=2 is still under development. Be careful when using it ...')
+   ABI_COMMENT('nsppol=2 is still under development. Be careful when using it ...')
  end if
 
  band2tot_index =0
@@ -1737,7 +1737,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      call fan_ncwrite(fan2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
 #else
-     MSG_ERROR("Dynamical calculation with ieig2rf 4 only work with NETCDF support.")
+     ABI_ERROR("Dynamical calculation with ieig2rf 4 only work with NETCDF support.")
      ABI_UNUSED(ncid)
 #endif
      ABI_DEALLOCATE(fan)
@@ -1756,7 +1756,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
 #else
-     MSG_ERROR("Dynamical calculation with ieig2rf 5 only work with NETCDF support.")
+     ABI_ERROR("Dynamical calculation with ieig2rf 5 only work with NETCDF support.")
      ABI_UNUSED(ncid)
 #endif
      ABI_DEALLOCATE(gkk)
@@ -1998,7 +1998,7 @@ subroutine smeared_delta(eigen0,eigenq,esmear,mband,smdelta,smdfunc)
 
  else
    write(message, '(a,i0,a)' )'  Smdelta= ',smdelta,' is not allowed in smdfunc'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 end subroutine smeared_delta
@@ -2073,7 +2073,7 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
 
  if(option/=1 .and. option/=2)then
    write(message,'(a,i0)')' The argument option should be 1 or 2, while it is found that option=',option
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  !printing options

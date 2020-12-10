@@ -105,7 +105,7 @@ subroutine hessinit(ab_mover, hessin, init_matrix, ndim, ucvol)
    write(message, '(a,a,a)' )&
 &   'the size of the given hessian matrix is too small.', ch10, &
 &   'This is an internal error, contact ABINIT developers.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Special arrangement: if input hessian file exists, read data from there
@@ -115,7 +115,7 @@ subroutine hessinit(ab_mover, hessin, init_matrix, ndim, ucvol)
  if (ex) then
    ! Read inverse hessian data from file; format is
    if (open_file(ab_mover%fnameabi_hes,message,newunit=temp_unit,form='formatted',status='old') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    read (temp_unit,*)
    read (temp_unit,*) ndim0
@@ -125,7 +125,7 @@ subroutine hessinit(ab_mover, hessin, init_matrix, ndim, ucvol)
 &     'Tried to read inverse hessian from file',trim(ab_mover%fnameabi_hes),' but',ch10,&
 &     'ndim of that file =',ndim0,' , is not equal to input ndim =',ndim,ch10,&
 &     ' => initialize inverse hessian with identity matrix.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      close(unit=temp_unit)
    else
      ! Read inverse hessian
@@ -263,7 +263,7 @@ subroutine hessupdt(hessin,iatfix,natom,ndim,vin,vin_prev,vout,vout_prev, &
 !end do
 
  if (mod(ndim,nimage_)/=0) then
-   MSG_BUG('nimage must be a dividor of ndim !')
+   ABI_BUG('nimage must be a dividor of ndim !')
  end if
 
 !Difference between new and previous vectors

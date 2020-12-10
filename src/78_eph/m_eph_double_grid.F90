@@ -440,7 +440,7 @@ integer function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
              mod(nint((wrap_kpt(2)+2)*self%nkpt_dense(2)),self%nkpt_dense(2))+1,&
              mod(nint((wrap_kpt(3)+2)*self%nkpt_dense(3)),self%nkpt_dense(3))+1)
  else
-   MSG_ERROR(sjoin("Error in eph_double_grid_get_index opt. Possible values are 1 or 2. Got", itoa(opt)))
+   ABI_ERROR(sjoin("Error in eph_double_grid_get_index opt. Possible values are 1 or 2. Got", itoa(opt)))
  endif
 
 end function eph_double_grid_get_index
