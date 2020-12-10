@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  9 Dec 2020.
-- ( at 13h06 )
+.Starting date : Thu 10 Dec 2020.
+- ( at 09h48 )
   
-- input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33-t34-t35/t35.in
-- output file    -> t35.out
+- input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33-t34-t35/t35.abi
+- output file    -> t35.abo
 - root for input  files -> t35i
 - root for output files -> t35o
 
@@ -586,10 +586,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.8  wall=          0.8
++Overall time at end (sec) : cpu=          0.8  wall=          0.9
