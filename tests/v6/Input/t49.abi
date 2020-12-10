@@ -1,0 +1,66 @@
+# ICl molecule in a big box
+# compute electric field gradient (1) without and (2) with spin orbit coupling
+
+ndtset 2
+
+pawspnorb1 0
+pawspnorb2 1
+
+prtefg 2
+quadmom -0.696 -0.08165
+
+# these ecuts are far too small to give converged results
+ecut 5
+pawecutdg 6
+
+# very tight tolerance coupled with small nstep to ensure portability
+toldfe 1.0D-16
+nstep 10
+
+kptopt 0
+nkpt 1
+kpt 3*0.0
+
+
+
+
+#Definition of the elementary cell
+#*********************************
+   natom 2
+   ntypat 2
+   znucl 53 17
+   typat 1 2
+
+   acell 3*20.0
+
+   xcart 0.0000 0.0000 0.0000
+         0.0 0.0 4.38605
+        
+
+
+
+
+prtwf 0
+prteig 0
+prtden 0
+
+diemac 2.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "I.GGA-PBE-paw.abinit, Cl.GGA-PBE-paw.abinit"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t49.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = 
+#%%   Electric field gradients in ICl molecule, with and without spin orbit coupling.
+#%% topics = EFG
+#%%<END TEST_INFO>

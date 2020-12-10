@@ -1,0 +1,81 @@
+# Si in diamond structure
+ acell 3*10.25
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ natom  2
+ ntypat  1
+ typat  2*1
+ xred   0.000  0.000  0.000
+        0.250  0.250  0.250
+ znucl 14.0
+
+ enunit 2
+ intxc  1
+
+ ndtset 4
+ ecut 6
+ ecutwfn 6
+ ecuteps 1.50304505E+00 Hartree
+
+# wavefunction calculation
+ occopt1       1
+ prtvol1       0
+ nline1        3
+ nstep1       10
+ tolwfr1      1.0d-16
+ getwfk1       0    # Just to avoid problem with reference out file.
+
+# chi0 calculation
+ awtr       0       # Note : the default awtr 1 is better
+ optdriver2 3
+ optdriver3 3
+ optdriver4 3
+ getwfk   1
+ ppmfrq  16.5 eV
+ prtsuscep 1
+ nqptdm2 1
+ nqptdm3 2
+ nqptdm4 3
+ qptdm2
+   0.000010    0.000020    0.000030
+ qptdm3
+  -0.250000    0.000000    0.250000
+   0.000000    0.500000    0.500000
+ qptdm4
+   0.500000    0.000000    0.000000
+  -0.250000    0.000000   -0.250000
+  -0.250000    0.500000    0.250000
+
+# valid for all datasets
+ nband     10
+ kptopt     1
+ ngkpt      2 2 2
+ nshiftk    4
+ shiftk     0.5 0.5 0.5
+            0.5 0.0 0.0
+            0.0 0.5 0.0
+            0.0 0.0 0.5
+ istwfk   2*1
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t87.abi, t88.abi, t89.abi, t90.abi, t91.abi
+#%% [files]
+#%% files_to_test = t87.abo, tolnlines=  3, tolabs=  1.100e-03, tolrel=  1.000e-02
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = GW
+#%% authors = R. Shaltaf
+#%% description =
+#%%   Test on splitting screening calculation using nqptdm and qptdm
+#%%   Si in 2-atom diamond unit cell (nkpt 2; ecut 6)
+#%%   In dataset 1, ABINIT finds the ground state (tolwfr 1.0d-16)
+#%%   the eigenvectors necessary for the GW calculation being stored in _WFK.
+#%%   In datasets 2-4, ABINIT computes the eps^-1 matrix for 1 qpt , 2 qpts, 3qpts respectively
+#%%<END TEST_INFO>
+

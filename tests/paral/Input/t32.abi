@@ -1,0 +1,55 @@
+# GaAs with NC and spin-orbit coupling.
+# Test RMM-DIIS eigensolver with paral_kgb == 1 and band-spinor MPI parallelization.
+
+paral_kgb 1
+rmm_diis -1  # 2 LOBPCG iterations then activate RMM-DIIS
+
+nspinor 2 nspden 1 # spin-orbit, non-magnetic.
+nband 16
+
+npkpt 1 npfft 1 npspinor 2 npband 2 bandpp 4
+iomode 1  # enforce MPI-IO for the time being because netcdf with MPI-IO
+          # does not support npspinor = 2.
+
+# SCF cycle options
+nstep 20
+tolvrs 1.d-8
+ecut 25
+diemac 8.0
+
+# K-points and syms
+ngkpt 2 2 2
+nshiftk 1
+shiftk 0 0 0
+
+# Structure and cell
+acell 3*5.6533 angstrom # expt value
+rprim 0   1/2 1/2
+      1/2 0   1/2
+      1/2 1/2 0
+natom 2
+ntypat 2
+typat 1 2
+znucl  31 33
+xred 3*0 3*1/4
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Ga-low_r.psp8, As_r.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test =
+#%%   t32_MPI4.abo, tolnlines=30, tolabs=7.5e-4, tolrel=0.34;
+#%% [extra_info]
+#%% keywords = NC, RMM-DIIS, SOC
+#%% authors = M. Giantomassi
+#%% description =
+#%%  GaAs with NC and spin-orbit coupling.
+#%%  Test RMM-DIIS eigensolver with paral_kgb == 1 and band-spinor MPI parallelization.
+#%%<END TEST_INFO>

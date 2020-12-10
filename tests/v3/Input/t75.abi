@@ -1,0 +1,107 @@
+# Oxygen molecule, treated with varying occupation numbers,
+# with LDA.
+#    This is to demonstrate a subtlety of the analysis of
+#    finite differences : for metallic occupation numbers,
+#    RF computation of 2DTE at Gamma, when taking
+#    Fermi energy changes (frzfermi=0), will give the same
+#    answer than finite-difference of GS computations.
+#    However, in order to find a coherent phonon
+#    band structure, and perform the Fourier interpolation,
+#    it is likely that the Fermi energy must be frozen
+#    (debate was running between Dhamann and XG as of 20040821)
+
+ ndtset 5
+
+#GS
+ xred1  0.0 0.0  0.11545    0.0 0.0 -0.1155
+
+ xred2  0.0 0.0  0.1155     0.0 0.0 -0.1155
+
+ xred3  0.0 0.0  0.11555    0.0 0.0 -0.1155
+
+#RF
+ xred4  0.0 0.0  0.1155     0.0 0.0 -0.1155
+  rfphon4  1
+ rfatpol4  1 1
+   rfdir4  0 0 1
+    nqpt4  1
+     qpt4  0.0 0.0 0.0
+  getwfk4  2
+  tolvrs4  5.0d-3
+
+#RF
+ xred5  0.0 0.0  0.1155     0.0 0.0 -0.1155
+  rfphon5  1
+ rfatpol5  1 1
+   rfdir5  0 0 1
+    nqpt5  1
+     qpt5  0.0 0.0 0.0
+  getwfk5  2
+  tolvrs5  5.0d-3
+frzfermi5  1
+
+
+#Common data
+
+ diemac 1.0d0
+ diemix 0.33333d0
+ ecut 13.00
+ getwfk -1
+ ixc 1
+  kptopt 0
+ kpt   3*0.0
+ natom  2
+ nband 12
+ nkpt 1
+ nstep 30
+ nsym 1
+ ntypat  1
+ occopt 7
+ acell  6.500  6.500  9.000
+ rprim 1 0 0  0 1 0  0 0 1
+ tolvrs 1.d-16
+ tsmear 0.02
+ typat  1 1
+ wtk  1
+ znucl  8.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/8o.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t75.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   O2 (non-spin-polarized, non-linear XC core correction, LDA)
+#%%   Metallic occupation numbers.
+#%%   For metallic occupation numbers,
+#%%   RF computation of 2DTE at Gamma, when taking
+#%%   Fermi energy changes (frzfermi=0), will give the same
+#%%   answer than finite-difference of GS computations.
+#%%   However, prior to v4.4, the change of Fermi energy
+#%%   due to the perturbation was not computed.
+#%%   This corresponds to calculations performed with frzfermi=1
+#%%   (should be used only for testing purposes).
+#%%   In dataset 1-3, one computes the total energy and forces,
+#%%   without symmetries, as it should be
+#%%   for accurate finite-difference tests.
+#%%   The reduced gradients with respect to displacements
+#%%   of the first atom along z in datasets 1 and 3 are
+#%%   -5.705344113253 Ha and -5.692553418498 Ha, giving
+#%%   the 2DTE of 127.90 Ha.
+#%%   In dataset 4, RF is computed with the Fermi energy correction, 
+#%%   and the agreement with finite-differences of datasets 1 and 3 
+#%%   is good : one gets 127.9068 Ha .
+#%%   In dataset 5, RF is computed with frozen Fermi energy
+#%%   and the disagreement with
+#%%   finite-differences of datasets 1 and 3 is large:
+#%%   one gets 100.9991668 Ha .
+#%%<END TEST_INFO>

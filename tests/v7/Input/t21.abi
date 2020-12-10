@@ -1,0 +1,106 @@
+# ---------------------------------------------------------------------------------------------------------
+# fcc Gd 
+# DFT+DMFT with Hubbard I solver with Self-consistency over Green function and density
+# and Spin Orbit Coupling.
+# ---------------------------------------------------------------------------------------------------------
+# -- DATASETS AND OPTIONS
+ndtset 2
+jdtset 1 2 # DFT+U and DFT+DMFT
+prtvol 4
+pawprtvol 3
+getwfk -1  # RESTART DFT+DMFT from DFT+U
+fftalg 112 # Needed to preserve the old behaviour
+
+
+#CONVERGENCE PARAMETERS.
+nstep1 30
+nstep   1
+tolvrs 1.0d-8
+ecut   12   # Low cutoff: test
+pawecutdg  40
+#occopt  3 tsmear 0.003675  # occopt=3 : fermi dirac
+occopt  3 tsmear 0.007000  # occopt=3 : fermi dirac
+nband  42 # number of bands nband/= dmftbandf for testing purpose.
+
+#MAGNETISM
+nsppol 1  
+nspden 4   # Non Colinear Magnetism
+nspinor 2  # Non Colinear Magnetism
+pawspnorb 1
+spinat 0 0 0  # Impose magnetism
+
+#ATOMS and CELL
+natom 1 ntypat  1 typat  1
+znucl  64.0
+xred  0   0   0
+acell 3*7.4
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1/2 1/2 0.0
+
+## K-POINTS
+kptopt 4    # do not use time reversal symetry.
+nshiftk 4
+kptrlatt 2 0 0 0 2 0 0 0 2  # At least 2 k points
+shiftk 1/2 1/2 1/2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
+istwfk *1 
+
+## == DFT+DMFT
+usedmft1 0
+usedmft2 1
+dmftbandi 9
+dmftbandf 40
+dmft_solv2 2   # Hubbard I
+dmft_iter 2    # 2 DMFT iterations
+dmft_nwli 200000   # low: test
+dmft_nwlo 100      # low: test
+dmftcheck 0
+dmft_rslf 1       # do not read self
+dmft_mxsf 0.7
+
+# Hubbard Correction
+usepawu    1
+lpawu   3    # HUbbard correction ON f-ORBITALS
+upawu1  0.00
+upawu2  0.22
+jpawu  0.0000
+f4of2_sla  0.0
+f6of2_sla  0.0
+dmatpuopt 1  # CHOOSE EXPRESSION OF THE DENSITY MATRIX.
+usedmatpu1 0 # IMPOSE DENSITY MATRIX IN THE FIRST STEP
+dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 1.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 1.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 1.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 1.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 1.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 1.0
+
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "64gd.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t21.abo, tolnlines = 50, tolabs = 2.0e-5, tolrel = 2.0e-3, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors =  B. Amadon
+#%% keywords =  DMFT, PAW
+#%% description = (Apparently the documentation section of this test has been lost)
+#%% topics = DFT+U, DMFT
+#%%<END TEST_INFO>

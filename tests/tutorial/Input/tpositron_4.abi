@@ -1,0 +1,85 @@
+#################################################################
+# Input file for the positron tutorial                          #
+#    Positron lifetime calculation within PAW                   #
+#                                                               #
+#              Si monovacancy, relaxation effect                #
+#################################################################
+
+# Self-consistent positron lifetime calculation
+
+  positron  -10     ! We perform automatic calculation of electrons and positron densities in the two-component DFT context
+  postoldfe  1.0d-5 ! We will repeat the electron and positron steps until the energy difference is lower than 1.0d-5
+  posnstep   20     ! Maximum number of electon and positron steps
+
+  ixcpositron  1  ! We are using the Boronski and Nieminen parametrization
+  optforces 1 optstress 0    ! We need to calculate forces to perform relaxation
+
+# We now include the effect of the atomic relaxation
+  ionmov 2
+  ntime 4 ! We will perform only 4 steps of relaxation, in reality more steps are required
+
+# Common input parameters
+  ! Unit cell
+    acell   3*5.43 angstrom
+    rprim   0.0 1.0 1.0
+            1.0 0.0 1.0
+            1.0 1.0 0.0
+    chkprim 0
+    natom  15
+    ntypat  1
+    typat 15*1
+    znucl 14
+    xred  
+          0.0   0.0   0.0
+          0.0   0.0   0.5
+          0.0   0.5   0.0
+          0.5   0.0   0.0
+          0.0   0.5   0.5
+          0.5   0.0   0.5
+          0.5   0.5   0.0
+          0.5   0.5   0.5
+
+          0.125 0.125 0.125
+          0.125 0.125 0.625
+          0.125 0.625 0.125
+          0.625 0.125 0.125
+          0.125 0.625 0.625
+          0.625 0.125 0.625
+          0.625 0.625 0.125
+!         0.625 0.625 0.625 ! We remove one Si atom
+
+  ! K-points and occupations
+    kptopt 1
+    ngkpt 2 2 2 
+    nshiftk 1
+    shiftk 0.0 0.0 0.0
+    occopt 1
+    nband 36
+
+    posocc 1.0  ! Occupation number for the positron (we have one positron in the cell).
+
+  ! Convergence parameters
+    ecut 8. pawecutdg 15.
+    iscf 17
+    nstep 500  ! We increase nstep
+    toldfe 1.d-8
+
+!   Miscelaneous
+    prtwf 0 prteig 0           ! To save disk space
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si.LDA-PW-paw.abinit"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   tpositron_4.abo, tolnlines= 40, tolabs= 3.0e-3, tolrel= 4.1e-1, fld_options= -easy
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = J. Wiktor
+#%% keywords = POSITRON,PAW
+#%% description = Fourth step of the tutorial on electron-positron annihilation
+#%%<END TEST_INFO>

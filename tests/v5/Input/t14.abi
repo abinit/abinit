@@ -1,0 +1,63 @@
+# Single Ni atom
+
+ndtset 4
+
+# First dataset : no atomic potential shifts
+natvshift1  0
+
+# Other datasets : turn on the atomic potential shifts for d levels
+natvshift   5
+
+# Second dataset : shifts of d levels
+atvshift2   10*0.05             # global shift of all d levels
+atvshift3   5*0.05 5*0          # shift of spin-up d levels
+atvshift4   0 0 0.05 0 0  5*0   # shift of spin-up m=0 d level
+
+# Common data
+acell 10 10.001 10.002  # This is to break the cubic symmetry, otherwise the shifts are symmetrized
+diemac 1.0d0
+diemix 1.0d0
+ecut 12
+getwfk -1
+  kptopt 0
+occopt 0
+occ 4*1 6*5/6    # Avoid SCF problems by equal occupancies of relevant orbitals
+    4*1 6*5/6
+pawecutdg 24
+natom 1
+nline 6
+nsppol 2
+nspden 2
+nstep 40
+ntypat 1
+rprim  1 0 0
+       0 1 0
+       0 0 1
+tolwfr 1.0d-14
+typat 1
+usepawu 1
+dmatpuopt  1   # choose expression of the density matrix
+lpawu 2
+xred 3*0
+znucl 28
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t14.abo, tolnlines = 9, tolabs = 1.010e-05, tolrel = 1.100e-03
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = PAW, DFTU 
+#%% description = 
+#%%   Ni atom in a big box.
+#%%   Test the use of the atvshift variable :
+#%%   change the potential of the d orbitals.
+#%% topics = DFT+U, crystal
+#%%<END TEST_INFO>

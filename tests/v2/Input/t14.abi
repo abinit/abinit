@@ -1,0 +1,25 @@
+t14.ddb.out
+DDB for Quartz, 30.0Ha, 1SP in the IBZ, 022092. Gamma, 0 0 1/4, 1/2 0 1/4.
+3
+t14.ddb.gamma.in
+t14.ddb.0.0.25.in
+t14.ddb.5.0.25.in
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t14.abi, t15.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t14.ddb.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% extra_inputs = t14.ddb.gamma.in.gz, t14.ddb.0.0.25.in.gz, t14.ddb.5.0.25.in.gz
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Generates a DDB for quartz containing the 2DTEs at three 
+#%%   q-points : (0 0 0), (0 0 1/4) and (1/2 0 1/4).
+#%%   This is a standalone test of MRGDDB.
+#%%<END TEST_INFO>

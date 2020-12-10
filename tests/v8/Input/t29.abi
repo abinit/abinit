@@ -1,0 +1,62 @@
+# Hydrogen diatomic molecule for tests--constrained DFT
+
+ ndtset 5
+
+#Constrained DFT 
+ constraint_kind1  11  0
+ constraint_kind2  11  1
+ constraint_kind3  11  2 
+ constraint_kind4  11  3  
+ constraint_kind5  11  12  
+
+#Constrained DFT data
+ magcon_lambda      2   
+ spinat        0.0 0.0   0.6     sqrt(0.18)   0.0  -sqrt(0.18)
+ chrgat        0.0               0.0
+
+#Definition of the atomic spheres
+ ratsph    2.0  2.0
+ ratsm     0.05
+
+#System description
+ acell 15 10 10
+ ntypat  2 
+ znucl  1.0  1.0
+ so_psp 0 0
+ natom 2
+ typat  1 2
+
+ nspden 4  nspinor 2   # Non-collinear case
+ nband 2
+
+ xcart    -1.1  0.0 0.0
+           1.1  0.0 0.0
+
+#Computational parameters
+ tolvrs 1.0d-10
+ nstep  35
+ ecut 5
+
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
+ pseudos "1h.pspnc, 1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t29.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% references = 
+#%% keywords = 
+#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation in case nspden=4
+#%%   with mixed constraints (different for different atomic types), and also fixing the amplitude or the direction.
+#%%   Case where the spheres overlap 
+#%%   Interestingly, in the case where only the magnitude of the magnetization on the second atom is fixed,
+#%%   without fixing its charge, the optimal configuration gives a 90 degree difference of magnetization direction for both atoms.
+#%%   It would be interesting to understand the meaning of such results, and see whether one is not in a local minimum.
+#%%   A full mapping of the energy as a function of both magnitude and direction of the magnetization of the second atom would be interesting ...
+#%%<END TEST_INFO>

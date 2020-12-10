@@ -1,0 +1,46 @@
+#  Single Ta atom in a big box (BCC), treated with spin-orbit coupling.
+ ndtset 2
+
+# First dataset : scalar wavefunctions
+# Second dataset : spinor wavefunctions
+ nspinor2 2
+
+# Common data
+ acell 3*15.00
+ ecut 10
+ enunit 2 
+ nkpt  1
+ intxc 1
+ istwfk 1  
+ kptopt 0          # Enter the k points manually 
+ kpt  0.0 0.0 0.0
+ ixc 2
+ natom  1 nband 26
+ nline 5  nstep 10
+ ntypat  1
+ occopt  7  
+ rprim   0.5 .5 -.5 -.5 0.5 .5 .5 -.5 0.5
+ toldfe 1.0d-7
+ tsmear 0.01
+ typat  1 
+ xred  0.0 0.0 0.0
+ znucl 73.0
+    
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/73ta.13.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tspin_5.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC
+#%% description = Single Ta atom in a big box (BCC), treated with spin-orbit coupling.
+#%%<END TEST_INFO>

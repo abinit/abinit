@@ -1,0 +1,87 @@
+#Crystalline ZrO2 - fluorite : computation of the response to atomic displacements, at q=X
+
+  ndtset    2
+
+#Ground state calculation
+  kptopt1   1             # Automatic generation of k points, taking
+                          # into account the symmetry
+  tolvrs1   1.0d-15       # SCF stopping criterion
+
+#Response Function calculation : electric field perturbation and phonons
+  rfphon2   1             # Activate the calculation of the atomic dispacement perturbations
+ rfatpol2   1 3           # All the atoms will be displaced
+   rfdir2   1 1 1         # All directions are selected. However, symmetries will be used to decrease
+                          # the number of perturbations
+
+    nqpt2   1
+     qpt2   0.5 0.0 0.5   # This is a calculation at X point
+
+  getwfk2   1             # Uses as input wfs the output wfs of the dataset 1
+
+  kptopt2   3             # Automatic generation of k points,
+                          # no use of symmetries to decrease
+                          # the size of the k point set.
+  tolvrs2   1.0d-10
+
+#######################################################################
+#Common input variables
+
+#Definition of the unit cell
+acell   3*9.47118842767
+rprim   0.0  0.5  0.5
+        0.5  0.0  0.5
+        0.5  0.5  0.0
+
+#Definition of the atom types
+ntypat  2
+znucl   40 8 8
+
+#Definition of the atoms
+natom   3
+typat   1 2 2
+xred    0.00  0.00  0.00
+        0.25  0.25  0.25
+        0.75  0.75  0.75
+
+#Gives the number of band, explicitly (do not take the default)
+nband   12
+
+#Exchange-correlation functional
+ixc     3
+
+#Definition of the planewave basis set
+ecut   8  # Use 30 to recover the results from Detraux et al 1997.
+
+#Definition of the k-point grid
+         kptrlatt    2 -2  2  -2  2  2  -2 -2  2
+#        kptrlatt    4 -4  4  -4  4  4  -4 -4  4   # Use this line to recover the results from Detraux
+         nshiftk   1
+         shiftk 1/2 1/2 1/2
+
+#Definition of the SCF procedure
+nstep  16 # Use a bigger value of nstep to be converged
+diemac  4.0
+
+timopt  2
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "40zr.971106_mod, 8o.phoney_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t36.abo, tolnlines = 6, tolabs = 2.0e-2, tolrel = 4.0e-4, fld_options =  -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = I. Lukacevic
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   ZrO2 FCC (fluorite structure).
+#%%   Compute the phonon frequencies at the X point.
+#%%   This worked correctly before 5.2.4, but then, an erroneous bug fix (correcting v5#21) was introduced.
+#%%   Final (correct) fixing in v6.0.4.
+#%%   (Contributed by I. Lukacevic, trying to reproduce results by Detraux et al 1997)
+#%%<END TEST_INFO>

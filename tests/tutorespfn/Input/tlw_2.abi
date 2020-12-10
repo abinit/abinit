@@ -1,0 +1,23 @@
+tlw_2.ddb.out
+Total DDB for complete Silicon FxE tensor 
+3
+tlw_1o_DS1_DDB
+tlw_1o_DS4_DDB
+tlw_1o_DS5_DDB
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain =  tlw_1.abi, tlw_2.abi, tlw_3.abi
+#%% [files]
+#%% files_to_test =
+#%%   tlw_2.ddb.out, tolnlines=  0, tolabs=  1.143e-09, tolrel=  3.000e-09, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = DFPT, LONGWAVE
+#%% description =  Input file for mrgddb
+#%% topics = longwave
+#%%<END TEST_INFO>
+

@@ -1,0 +1,47 @@
+#MgO in NaCl structure : prepare the density
+#for Bader analysis
+
+  prtden  1
+  kptopt  1
+    nkpt  2
+  tolwfr  1.0d-12
+ ngkpt  2 2 2
+ nshiftk 4
+ shiftk  0.5 0.5 0.5
+         0.5 0.0 0.0
+         0.0 0.5 0.0
+         0.0 0.0 0.5
+ acell   3*7.4
+ ecut 70
+ natom  2
+ nband 4
+ nstep 40
+ ntypat  2
+ occopt 1
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ xred 3*0.00d0 3*0.5d0
+ typat  1 2
+ znucl  8 12
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/8o.pspnc, PseudosTM_pwteter/12mg.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t56.abi, t57.abi
+#%% [files]
+#%% files_to_test = t56.abo, tolnlines=  1, tolabs=  1.010e-09, tolrel=  2.000e-09
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [shell]
+#%% post_commands = ww_mv t56o_DEN t57i_DEN
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description =
+#%%   MgO FCC crystal, with low cut-off, and 32 k points.
+#%%   Pseudopotentials WITHOUT a non-linear core correction.
+#%%   Prepare the Bader density analysis
+#%% topics = Bader
+#%%<END TEST_INFO>

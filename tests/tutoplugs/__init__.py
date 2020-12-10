@@ -15,8 +15,8 @@ subsuites = [
 
 #: List of input files
 inp_files = [
-"tw90_1.in",
-"tw90_2.in",
-"tw90_3.in",
-"tw90_4.in",
+"tw90_1.abi",
+"tw90_2.abi",
+"tw90_3.abi",
+"tw90_4.abi",
 ]
