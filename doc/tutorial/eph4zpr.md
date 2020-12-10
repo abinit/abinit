@@ -253,7 +253,7 @@ A typical workflow for ZPR calculations involves the following steps (see the [i
 
 ## Getting started
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 In this tutorial, we prefer to focus on the use of the EPH code hence
 we will be using **pre-computed** DDB and DFPT POT files to bypass the DFPT part.

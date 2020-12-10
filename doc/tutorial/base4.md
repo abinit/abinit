@@ -17,7 +17,7 @@ You will learn about the smearing of the Brillouin zone integration, and also a 
 
 This tutorial should take about 1 hour and 30 minutes.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## Total energy and lattice parameters at fixed smearing and k-point grid
 

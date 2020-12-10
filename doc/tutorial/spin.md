@@ -20,7 +20,7 @@ You will learn to use features of ABINIT which deal with spin.
 
 This tutorial should take about 1.5 hour.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 A ferromagnetic material: *bcc* Fe
 

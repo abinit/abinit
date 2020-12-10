@@ -19,7 +19,7 @@ You are supposed to know already some basics of parallelism in ABINIT, explained
 This tutorial should take about 1.5 hour and requires to have at least a 200 CPU
 cores parallel computer.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 Summary of the String Method
 

@@ -20,7 +20,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about one hour to be completed.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## Preparatory steps (WFK and the SCR file)
 

@@ -19,7 +19,7 @@ You will also finish to read the [[help:abinit]].
 
 This tutorial should take about 1 hour.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## Summary of the previous tutorial
 

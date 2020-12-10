@@ -18,7 +18,7 @@ cores (up to 64).
 You are supposed to know already some basics of parallelism in ABINIT,
 explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 Wavelets variables and parallelism
 

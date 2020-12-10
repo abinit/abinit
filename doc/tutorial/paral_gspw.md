@@ -21,7 +21,7 @@ CPU core parallel computer.
 You are supposed to know already some basics of ABINIT.
 Some useful references: [[cite:Levitt2015]], [[cite:Bottin2008]], [[cite:Knyazev2001]]
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 Introduction
 

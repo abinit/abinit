@@ -40,7 +40,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 This tutorial should take about one hour to be completed (also including the
 reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## The preliminary Kohn-Sham band structure calculation
 
