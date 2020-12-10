@@ -5,7 +5,6 @@ ndtset      3
 ############
 # SCF-GS run 
 nband1    8
-iscf1    15
 ############
 # Dataset 2
 ############
@@ -13,25 +12,22 @@ iscf1    15
 optdriver2     3       # Screening calculation
 getwfk2       -1       # Obtain WFK file from previous dataset
 nband2         8       # Bands to be used in the screening calculation
-ecuteps2       5       # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
-nfreqim2     120       # Number of freqs (w') in Imag axis used in Gauss-Legendre quadrature integration of Sigma_c(iw) = G(iw,iw') W(iw') dw'
+ecuteps2       3       # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
 inclvkb2       0       # For some reason we need this to ensure INTEL and GNU compilers give the same result! WARNING!
-gwrpacorr2     1       # Compute RPA correlation energy 
-gwgmcorr2      1       # Compute Galitskii-Migdal correlation energy
+nfreqim2      40       # Number of freqs (w') in Imag axis used in Gauss-Legendre quadrature integration of Sigma_c(iw) = G(iw,iw') W(iw') dw'
 ############
 # Dataset 3
 ############
 # Calculation of the Self-Energy matrix elements (GW corrections)
 optdriver3     4       # Self-Energy calculation
 gw1rdm         2       # Update 1-RDM with GW and use it to print DEN and WFK files, and for new FOCK matrix elements
-x1rdm          0       # Use only exchange correction x1rdm=1 OR use also Sigma_c x1rdm=0
 symsigma       0       # Sym. switched off for sigma
 gwcalctyp     21       # Compute the linearized density as when doing self-consistent AC_GW
 getwfk3       -2       # Obtain WFK file from dataset 1
 getscr3       -1       # Obtain SCR file from previous dataset
 nband3         8       # Bands to be used in the Self-Energy calculation
 ecutsigx3    8.0
-nomegasi3     40       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
+nomegasi3     20       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
 
 nkptgw3        6       # number of k-point where to calculate the GW correction
 kptgw3                 # k-points in reduced coordinates, read from output
@@ -52,23 +48,24 @@ bdgw3
 # Data common to the three different datasets
 
 # Definition of the unit cell: fcc
-acell  3*5.00          # This is equivalent to    5.000  5.000  5.000
+acell  3*10.260        # This is equivalent to   10.260 10.260 10.260
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5   
        0.5  0.5  0.0
 
 # Definition of the atom types
 ntypat  1         # There is only one type of atom
-znucl   2         # The keyword "znucl" refers to the atomic number of the 
+znucl   14        # The keyword "znucl" refers to the atomic number of the 
                   # possible type(s) of atom. The pseudopotential(s) 
                   # mentioned in the "files" file must correspond
-                  # to the type(s) of atom. Here, the only type is Helium.
+                  # to the type(s) of atom. Here, the only type Silicon.
                          
 # Definition of the atoms
-natom  1          # There is one atom
-typat  1          # of type 1, that is, Helium.
+natom  2          # There is one atom
+typat  1 1        # of type 1, that is, Silicon.
 xred              # Reduced coordinate of atoms
-      0.5  0.5  0.5
+      0.00  0.00  0.00
+      0.25  0.25  0.25
 
 # Definition of the k-point grid
 ngkpt   2 2 2  
@@ -93,29 +90,19 @@ diemac  12.0      # Although this is not mandatory, it is worth to
                   # Here, we follow the prescription for bulk silicon.
                   #
  pp_dirpath "$ABI_PSPDIR"
- pseudos "He-GGA.psp8"
+ pseudos "Si-GGA.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t33.in, t34.in, t35.in
 #%% [files]
 #%% files_to_test =
-#%%  t33.out, tolnlines = 15, tolabs = 1.100e-03, tolrel = 3.000e-01
+#%%  t36.abo, tolnlines = 15, tolabs = 1.100e-03, tolrel = 3.000e-01
 #%% [paral_info]
 #%% max_nprocs = 8
-#%% [shell]
-#%% post_commands =
-#%%  ww_cp t33o_DS1_WFK t34i_DS1_WFK;
-#%%  ww_cp t33o_DS2_SCR t34i_DS1_SCR;
-#%%  ww_cp t33o_DS3_CHKP_RDM_1 t34i_DS1_CHKP_RDM_1;
-#%%  ww_cp t33o_DS3_CHKP_RDM_2 t34i_DS1_CHKP_RDM_2;
-#%%  ww_cp t33o_DS3_CHKP_RDM_5 t34i_DS1_CHKP_RDM_5;
-#%%  ww_cp t33o_DS1_WFK t35i_DS1_WFK;
-#%%  ww_cp t33o_DS2_SCR t35i_DS1_SCR;
 #%% [extra_info]
 #%% authors = M. Rodriguez-Mayorga
 #%% keywords = NC, GW
 #%% description = 
-#%%  GW.at.KS density matrix test (Print new WFK and DEN files and compute energies)
+#%%  GW.at.KS density matrix test for Silicon
 #%%<END TEST_INFO>
