@@ -1,0 +1,24 @@
+t27.ddb.out
+Si EIGR2D file for elphon calculation
+2
+t26o_DS2_EIGR2D
+t26o_DS3_EIGR2D
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t26.abi, t27.abi, t28.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t27.ddb.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = P. Boulanger
+#%% keywords = 
+#%% description = 
+#%%   Crystalline Silicon
+#%%   Test the merging, with mrgddb, of the two second order eigenvalues files,
+#%%   _EIGR2D files, produced in test 26.
+#%%<END TEST_INFO>

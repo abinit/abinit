@@ -1,0 +1,135 @@
+
+nsym 1
+
+ixc 0
+
+nsppol 1
+
+ndtset 15    udtset 3 5
+
+#Definition of lattice parameters
+#********************************
+   acell       8 5 5
+   xcart1?    -1 0 0   1 0 0
+   xcart2?    -0.99 0 0   1 0 0
+   xcart3?    -1.01 0 0   1 0 0
+
+   ntime 100
+   nshiftk 1
+   shiftk 0.5 0.5 0.5
+   ngkpt 10 1 1
+   kptopt 2
+
+
+#Definition of atomic positions and types
+#*************************************
+   natom       2
+   ntypat      1
+   typat 2*1
+   znucl       2.0
+
+
+   occopt 1
+#  occ 32*1   #not needed when occopt 1
+   nband 2 #in case occopt 1 nband is simple scalar; if I put nband 8 the DS5 crashes
+
+#Parameters of the SCF cycles
+#****************************
+   nstep       100
+
+
+#Plane wave basis
+#*********************************
+   ecut       17.0
+
+   diemac 1.0d0
+   diemix 1/3
+
+   ecutsm      0.5
+   dilatmx     1.05
+
+#DATASET1 : scf calculation: GS WF in the BZ
+#********************************************
+   prtden?1    1
+   kptopt?1    1
+   tolwfr?1    1.0d-20
+
+#DATASET2 : non scf calculation: GS WF in the whole BZ
+#*****************************************************
+   getden?2    -1
+   kptopt?2    2
+     iscf?2   -2
+   getwfk?2    -1
+   tolwfr?2    1.0d-20
+
+#DATASET3 : ddk on the MP grid of k-points
+#*****************************************
+   getwfk?3    -1
+    rfdir?3    1 1 1
+   rfelfd?3    2
+   tolwfr?3    1.0d-20
+   kptopt?3    2
+
+#DATASET4 : ddE on the MP grid of k-points
+#*****************************************
+   prtden?4    1
+   getwfk?4    -2
+   getddk?4    -1
+    rfdir?4    1 1 1
+   rfphon?4    1
+  rfatpol?4    1 2
+   tolvrs?4    1.0d-14
+   rfelfd?4    3
+   kptopt?4    2
+  prepanl?4    1
+
+#DATASET5 : 3DTE calculation
+#***************************
+
+   getden?5    -4
+  get1den?5    -1
+   getwfk?5    -3
+   get1wf?5    -1
+   kptopt?5    2
+optdriver?5    5
+  d3e_pert1_elfd?5    1
+  d3e_pert1_phon?5    1
+ d3e_pert1_atpol?5    1 1
+   d3e_pert1_dir?5    1 0 0
+  d3e_pert2_elfd?5    1
+   d3e_pert2_dir?5    1 0 0
+  d3e_pert3_elfd?5    1
+   d3e_pert3_dir?5    1 0 0
+
+nbdbuf 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "02he.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
+#%% [files]
+#%% files_to_test = 
+#%%   t66.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 5
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   He dimer, with bare pseudopotential ixc=0
+#%%   Compute Raman intensity, showing essentially perfect agreement
+#%%   between DFPT and finite-differences, when the number of k points
+#%%   is extended to infinity.
+#%%   The present test use ngkpt 10 1 1, giving DFPT: 0.039868
+#%%   Finite-differences: 1.6318415296 - 1.6216781815 = 0.0101633077
+#%%   to be divided by 0.02 (the difference in xcart) and 4pi => 0.040439
+#%%   Going to ngkpt 80 1 1, gives:
+#%%   DFPT: 0.040052
+#%%   Finite-differences: 0.040054
+#%%   The DFPT with ngkpt 320 1 1 gives 0.040055.
+#%% topics = nonlinear
+#%%<END TEST_INFO>

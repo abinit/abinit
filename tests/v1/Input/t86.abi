@@ -1,0 +1,63 @@
+#   SiH4 molecule, geometry optimisation with partially fixed atoms.
+
+ acell 3*8
+ ecut 8
+
+ iatfix 1 4 5    # The Si atom is fixed at the origin, as well as H atoms, number 4 and 5
+ iatfixy 2 3  # The y coordinate of H atoms number 2 and 3 is fixed
+ iatfixz 2 3  # The z coordinate of H atoms number 2 and 3 is fixed
+              # So, there are only two degrees of freedom :
+              #   H atoms number 2 and 3 can move along x .
+
+ intxc 1
+ ionmov 1
+ amu 2*1.0d0
+ isecur -2
+ kptopt 0
+
+ kpt  0 0 0
+
+ natfix 3
+ natfixy 2
+ natfixz 2
+
+ natom  5 nband 4
+ nkpt  1
+ nline 5  nstep 25
+ nsym  2 ntime 5  ntypat  2
+ rprim   1.0 0.0 0.0  0.0 1.0 0.0  0.0 0.0 1.0
+ symrel
+       1  0  0    0  1  0    0  0  1
+       1  0  0    0 -1  0    0  0  1
+ tnons   6*0.0d0
+ toldff 5.0d-6
+ tolmxf 1.0d-4
+ typat  1 2 2 2 2
+ wtk   1
+ xcart  0.0   0.0   0.0
+        2.7   0.0   0.0
+       -1.71  0.0   2.5
+       -1.5   2.0   1.3
+       -1.5  -2.0   1.3
+ znucl 14.0  1.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc, PseudosTM_pwteter/1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t86.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   SiH4 : molecular dynamics with partially constrained atomic positions.
+#%%   1 special k-point, in a box 8x8x8 (too small), and 8Ha cut-off.
+#%%   Test ionmov=1
+#%%<END TEST_INFO>

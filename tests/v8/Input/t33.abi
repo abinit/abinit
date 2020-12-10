@@ -1,0 +1,82 @@
+# compute Chern number for 3 values of nuclear dipole: 0, +1, -1
+# see test v7[32] for discussion of nuclear dipole 
+
+ndtset 3
+
+kptopt 3
+nsym 1
+symrel 1 0 0 0 1 0 0 0 1
+
+orbmag 1 # activates Chern number
+
+nucdipmom1
+0.0 0.0 0.0
+0.0 0.0 0.0
+
+pawcpxocc1 1
+
+nucdipmom2
+0.0 0.0 0.0
+0.0 0.0 1.0
+
+nucdipmom3
+0.0 0.0 0.0
+0.0 0.0 -1.0
+
+optforces 0
+optstress 0
+pawcpxocc 2
+
+usexcnhat 0
+
+kptrlatt
+ 4 4 -4
+-4 4 -4
+-4 4  4
+
+
+ecut 5
+pawecutdg 6
+
+toldfe 1.0D-8
+
+nband 4
+
+symmorphi 0
+
+prtwf 0
+prtden 0
+prteig 0
+
+paral_atom 0
+
+acell    3*10.620260682  
+
+rprim    0.000000000000000   0.500000000000000   0.500000000000000 
+         0.500000000000000   0.000000000000000   0.500000000000000 
+         0.500000000000000   0.500000000000000   0.000000000000000 
+       
+natom    2  
+ntypat   2  
+typat    1 2  
+znucl    33 13  
+xred     0.250000000000000   0.250000000000000   0.250000000000000 
+         0.000000000000000   0.000000000000000   0.000000000000000 
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "As.GGA-PBE-rpaw-2.10.abinit, Al.GGA-PBE-rpaw-2.00.abinit"
+      
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t33.abo, tolnlines = 18, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = Test Chern number calculation
+#%% topics = MagField
+#%%<END TEST_INFO>

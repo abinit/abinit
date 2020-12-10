@@ -1,0 +1,65 @@
+# H2 molecule in a big box
+#
+# In this input file, the location of the information on this or that line
+# is not important : a keyword is located by the parser, and the related
+# information should follow. Still, this file is strongly structured, for pedagogical purpose.
+# The "#" symbol indicates the beginning of a comment : the remaining
+# of the line will be skipped.
+
+#Definition of the unit cell
+acell 10 10 10    # The keyword "acell" refers to the
+                  # lengths of the primitive vectors (in Bohr)
+#rprim 1 0 0  0 1 0  0 0 1 # This line, defining orthogonal primitive vectors,
+                           # is commented, because it is precisely the default value of rprim
+
+#Definition of the atom types and pseudopotentials
+ntypat 1          # There is only one type of atom
+znucl 1           # The keyword "znucl" refers to the atomic number of the possible type(s) of atom. 
+                  # Here, the only type is Hydrogen. The pseudopotential(s) 
+                  # mentioned after the keyword "pseudos" should correspond to this type of atom.
+pp_dirpath "$ABI_PSPDIR"                 # This is the path to the directory were pseudopotentials for tests are stored
+pseudos "PseudosGTH_pwteter/01h.pspgth"  # Name and location of the pseudopotential
+                         
+
+#Definition of the atoms
+natom 2           # There are two atoms
+typat 1 1         # They both are of type 1, that is, Hydrogen
+xcart             # This keyword indicates that the location of the atoms
+                  # will follow, one triplet of number for each atom
+  -0.7 0.0 0.0    # Triplet giving the cartesian coordinates of atom 1, in Bohr
+   0.7 0.0 0.0    # Triplet giving the cartesian coordinates of atom 2, in Bohr
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 10.0         # Maximal plane-wave kinetic energy cut-off, in Hartree
+kptopt 0          # Enter the k points manually 
+nkpt 1            # Only one k point is needed for isolated system,
+                  # taken by default to be 0.0 0.0 0.0
+
+#Parameters for the SCF procedure
+nstep 10          # Maximal number of SCF cycles
+toldfe 1.0d-6     # Will stop when, twice in a row, the difference 
+                  # between two consecutive evaluations of total energy 
+                  # differ by less than toldfe (in Hartree) 
+                  # This value is way too large for most realistic studies of materials
+diemac 2.0        # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescriptions for molecules in a big box
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tbase1_1.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = H2 molecule in a big box
+#%%<END TEST_INFO>

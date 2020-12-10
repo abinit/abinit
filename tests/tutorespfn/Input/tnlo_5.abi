@@ -1,0 +1,49 @@
+# General information
+#**********************
+   rfmeth  1
+   enunit  0
+   eivec   1
+   chneut  2
+   selectz 0
+
+# Flags
+#*******
+   dieflag  1
+   ifcflag  0 ! This is the default value
+   thmflag  0 ! This is the default value
+    nlflag  1
+   elaflag  3
+ piezoflag  3
+ instrflag  1
+
+# Nonlinear response calculation
+#*******************************
+   ramansr  1
+    alphon  1
+    prtmbm  1
+
+# Wavevector list number 1
+**************************                                                      
+     nph1l  1
+     qph1l  0.0 0.0 0.0 1.0 
+                                                                                
+# Wave vector list no. 2
+#***********************
+     nph2l  1
+     qph2l  1.0 0.0 0.0 0.0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% input_ddb = tnlo_4.ddb.out
+#%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi, tnlo_5.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tnlo_5.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Veithen, P. Ghosez
+#%% keywords = 
+#%% description = anaddb input file.
+#%%<END TEST_INFO>

@@ -1,0 +1,49 @@
+teph4zpr_1_DDB
+MgO phonons on 4x4x4 q-mesh
+28
+MgO_eph_zpr/flow_zpr_mgo/w1/t3/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t4/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t5/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t6/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t7/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t8/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t9/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t10/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t11/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t12/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t13/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t14/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t15/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t16/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t17/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t18/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t19/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t20/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t21/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t22/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t23/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t24/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t25/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t26/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t27/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t28/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t29/outdata/out_DDB
+MgO_eph_zpr/flow_zpr_mgo/w1/t30/outdata/out_DDB
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain =  teph4zpr_1.abi, teph4zpr_2.abi, teph4zpr_3.abi, teph4zpr_4.abi,
+#%%               teph4zpr_5.abi, teph4zpr_6.abi, teph4zpr_7.abi, teph4zpr_8.abi
+#%% [files]
+#%% use_git_submodule = MgO_eph_zpr
+#%% files_to_test =
+#%%   teph4zpr_1.stdout, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = Merge precomputed DDB files stored in the MgO_eph_zpr git submodule
+#%%<END TEST_INFO>

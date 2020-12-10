@@ -1,0 +1,59 @@
+#Print the density and the wf in parallel in the first dataset
+#then read it. Run in parallel using accesswf=1
+ndtset 2
+prtden1 1
+getden2 -1
+getwfk2 -1
+#------------------------------------------------------
+# A simple calculation on silicon
+occopt 7 tsmear 0.001
+kptopt 1
+nkpt 1 ngkpt 1 1 1  shiftk 0 0 0   istwfk 1 
+toldfe 1.0d-10
+
+nstep 4
+ecut 5.0 diemac 12.0 enunit 2
+ngfft 8 8 8   
+ ixc 3
+ acell 3*10.366
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ chksymtnons 0
+ znucl 14
+ nband 8
+ ntypat 1 typat 1 1  natom 2
+ timopt -1
+ npkpt 1
+ npband 2
+ npfft 2
+ paral_kgb 1
+
+#Obsolete entries (now set by default)
+#fftalg 401 wfoptalg 4
+#densfor_pred 6 intxc 0
+#iomode 1
+#nsym 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.phoney_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test =  4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t49_MPI4.abo, tolnlines=   26,   tolabs=  2.0e-8,      tolrel= 4.0e-7
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Si, Bulk, 2 atoms , parallel IO. Test of ground state
+#%%   Only with 4 procs, no sequential version (tests accesswf 1)
+#%%<END TEST_INFO>

@@ -1,0 +1,137 @@
+#   C in diamond structure; Very rough  2x2x2  special point grid; low ecut.
+#   Only 1 random q-points
+ ndtset 6
+ elph2_imagden 0.1 eV
+
+ ngkpt 3*2
+
+#This should not change with convergence studies
+ nshiftk 1
+ shiftk 0.0 0.0 0.0
+
+# Ground state density
+ prtden1  1
+ iscf1    7
+ tolwfr1  1.0e-16
+ kptopt1  1
+
+# Response function calculation of d/dk wave function
+ getwfk2   1
+ iscf2    -3        # Need this non-self-consistent option for d/dk
+ tolwfr2   1.0e-16
+ kptopt2   2          # Use time-reversal symmetry
+ rfelfd2   2          # Calculate d/dk wave function only
+ nqpt2     1
+ qpt2      0.0 0.0 0.0
+
+# Response function calculation of Q=0 phonons and electric field pert.
+ getwfk3  1
+ getddk3  2
+ rfphon3  1
+ rfatpol3 1 2
+ rfdir3   1 1 1 
+ rfelfd3  3   # Electric-field perturbation response only 
+ tolwfr3  1.0e-16
+ kptopt3  2 
+ nqpt3    1
+ qpt3     0.0 0.0 0.0
+
+# Non self-consistent calculation with an abritrary q point 
+ getden4   1
+ getwfk4   1
+ iscf4    -2
+ nqpt4     1
+ qpt4      1/150 0.0 0.0
+ tolwfr4   1.0d-16
+ kptopt4   1 
+
+# Computation at q without getddb to cancel the divergence (el-ph)
+ getwfk5   1
+ getwfq5   4
+ nqpt5     1
+  qpt5     1/150 0.0 0.0
+ ieig2rf5  4            # Static eigenvalues corrections using DFPT (Sternheimer)
+ smdelta5  1            # Flag required to produce the _EIGI2D used to 
+                        # compute the lifetime of electronic levels.
+                        # smdelta = 1 ==> Fermi-Dirac smearing.
+ rfphon5   1            # Do phonon response
+ rfatpol5  1 2          # Treat displacements of all atoms
+ rfdir5    1 1 1        # Do all directions 
+ tolwfr5   1.0d-16
+ kptopt5   3            # this was previously not needed because nsym is set to 1
+                        # if symmetries are later checked and used kptopt can not be 1
+
+# Computation at q with getddb to cancel the divergence (el-ph)
+ getddb6   3
+ getwfk6   1
+ getwfq6   4
+ nqpt6     1
+  qpt6     1/150 0.0 0.0
+ ieig2rf6  4            # Static eigenvalues corrections using DFPT (Sternheimer)
+ smdelta6  1            # Flag required to produce the _EIGI2D used to 
+                        # compute the lifetime of electronic levels.
+                        # smdelta = 1 ==> Fermi-Dirac smearing.
+ rfphon6   1            # Do phonon response
+ rfatpol6  1 2          # Treat displacements of all atoms
+ rfdir6    1 1 1        # Do all directions 
+ tolwfr6   1.0d-16
+ kptopt6   3 
+
+# Computation at q with irdddb to cancel the divergence (el-ph)
+# irdddb7    3
+# getwfk7   1
+# getwfq7   4
+# nqpt7     1
+#  qpt7     1/150 0.0 0.0
+# ieig2rf7  4            # Static eigenvalues corrections using DFPT (Sternheimer)
+# smdelta7  1            # Flag required to produce the _EIGI2D used to 
+#                        # compute the lifetime of electronic levels.
+#                        # smdelta = 1 ==> Fermi-Dirac smearing.
+# rfphon7   1            # Do phonon response
+# rfatpol7  1 2          # Treat displacements of all atoms
+# rfdir7    1 1 1        # Do all directions 
+# tolwfr7   1.0d-16
+
+# Cell dependant parameters
+ acell  3*6.6709983131
+ rprim  0 .5 .5 .5 0 .5 .5 .5 0
+ nsym   1     # To be on the safe side. The implementation of symmetry should be perform.
+ natom  2
+ typat  1 1
+ xred   3*0.0 3*0.25
+ nband  12
+ nbdbuf 2
+ ntypat 1
+ znucl  6
+ diemac 6
+ ecut   10
+ enunit 2
+ nstep  50
+ istwfk *1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t58.abi, t59.abi
+#%% [shell] 
+#%% post_commands = 
+#%%   ww_mv t58o_DS3_DDB t59i_DS7_DDB;
+#%%   ww_mv t58o_DS1_WFK t59o_DS1_WFK;
+#%%   ww_mv t58o_DS4_WFQ t59o_DS4_WFQ;
+#%% [files]
+#%% files_to_test = 
+#%%   t58.abo, tolnlines = 40, tolabs = 1.1e-3, tolrel = 8.0e-4, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = S. Ponc\'e
+#%% keywords = NC, DFPT, EPH_OLD
+#%% description = 
+#%%  Diamond. Test the getddb variable that cancels the divergence in el-ph for small q-points
+#%%  Such divergence is induced by a residual electric field.
+#%%  Note: The Fan terms in DATASET 6 should be different (renormalized) from the one of DATASET 5. 
+#%% topics = TDepES
+#%%<END TEST_INFO>

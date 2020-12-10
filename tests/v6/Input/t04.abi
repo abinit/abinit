@@ -1,0 +1,65 @@
+#  H2
+
+getwfk    -1          # Use GS wave functions from dataset1
+
+
+#Size-dependent parameters
+ acell 15 2*10
+
+ natom  2
+ typat  1 1
+
+ xcart   -7.3817368392E-01  0.0 0.0    # Equilibrium position
+          7.3817368392E-01  0.0 0.0
+
+ nband 2
+
+# Miscellaneous
+ nkpt 1
+ ngkpt 1 1 1
+ shiftk 0.0 0.0 0.0
+ ntypat  1
+ znucl 1
+ diemac 2.0d0
+ ecut 20.00
+ enunit 2
+ nstep 30
+ nsym 1
+ tolwfr 1.0d-18
+ prtvha 1
+ prtvhxc 1
+ prtpot 1
+ prtden 1
+ prtvpsp 1
+ prtvclmb 1
+
+#occopt 2
+#occ  2.00  0.00
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/1h.1.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t04.abi, t05.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t04.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Hydrogen dimer in a big cell.
+#%%   Produce different files (_DEN, _POT, _VHXC, _VHA), for subsequent analysis by CUT3D (see next run).
+#%%   Note the following values, that will allow to check the correctness of the subsequent analysis :
+#%%   Kinetic energy  =  1.02998395409183E+00
+#%%   Hartree energy  =  8.05073794254872E-01
+#%%   Loc. psp. energy= -2.53949740885919E+00
+#%%   Band energy (Ha)=  -7.2732761066E-01
+#%%   Also, the mean of the Vxc potential is announced to be
+#%%   Average Vxc (hartree)=  -0.05293
+#%%<END TEST_INFO>

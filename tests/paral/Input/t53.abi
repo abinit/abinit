@@ -1,0 +1,70 @@
+#   FCC Al; phonon at 1/4 1/8 1/8
+
+ istatr 1000
+ irdwfk 1
+ irdwfq 1
+
+ nbdbuf 3
+ rfphon 1
+ rfatpol 1 1
+ rfdir  1 1 1
+ nqpt   1
+ qpt    0.25 -0.125 0.125
+
+ acell 3*7.56
+ densty 1.2
+
+ ecut 10
+
+ enunit 2  
+
+ kptopt 3
+ localrdwf 1
+ nkpt 256
+ ngkpt 4 4 4  
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5 
+
+ natom  1 nband 5
+
+ nstep 20
+
+ ntypat  1
+ amu    26.96
+ occopt  4 
+ paral_kgb 0
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ timopt 2
+ tolvrs 1.0d-10
+ typat  1  
+ xred  0.0 0.0 0.0
+ znucl 13.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/13al.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t51.abi, t52.abi, t53.abi
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 10
+#%% [NCPU_1]
+#%% files_to_test = t53_MPI1.abo, tolnlines=   6,   tolabs=  2.0e-6,      tolrel= 3.0e-7, fld_options = -medium
+#%% [NCPU_2]
+#%% files_to_test = t53_MPI2.abo, tolnlines=   6,   tolabs=  2.0e-6,      tolrel= 3.0e-7, fld_options = -medium
+#%% [NCPU_4]
+#%% files_to_test = t53_MPI4.abo, tolnlines=   6,   tolabs=  2.0e-6,      tolrel= 3.0e-7, fld_options = -medium
+#%% [NCPU_10]
+#%% files_to_test = t53_MPI10.abo, tolnlines=  6,   tolabs=  2.0e-6,      tolrel= 3.0e-7, fld_options = -medium
+#%% [extra_info]
+#%% keywords = NC, DFPT
+#%% authors = Unknown
+#%% description = FCC Al metallic; 10 phonon at 1/4 1/8 1/8
+#%%<END TEST_INFO>

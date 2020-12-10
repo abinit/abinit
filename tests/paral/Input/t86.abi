@@ -1,0 +1,106 @@
+# _== Convergency and starting
+# DATASET 1: LDA 
+# DATASET 2: LDA+DMFT
+ndtset 2
+jdtset 1 2
+
+use_yaml 1
+getwfk -1
+# nline1 7
+# nnsclo1 7
+# nline2 10
+# nnsclo2 10
+
+prtvol    4
+pawprtvol 3
+
+##### CONVERGENCE PARAMETERS
+nstep1   30
+nstep2   10
+ecut      12 # low cutoff !
+ngfft 32 32 32
+ngfftdg 32 32 32
+pawecutdg 20
+tolvrs1 1.0d-7
+toldfe2 1.0d-8
+nband     32
+nbdbuf    2
+occopt 3 tsmear 1200 K
+
+##### PHYSICAL PARAMETERS
+natom 5 ntypat 3 typat 1 2 3 3 3
+znucl  23.0 38.0 8.0
+# V Sr O*3
+xred 0.00 0.00 0.00
+     0.50 0.50 0.50 
+     0.50 0.00 0.00 
+     0.00 0.50 0.00 
+     0.00 0.00 0.50 
+acell   3*7.2605
+rprim 1.0 0.0 0.0    #Real space PRIMitive translations
+      0.0 1.0 0.0
+      0.0 0.0 1.0 
+
+# == Points k and symetries
+ngkpt   2 2 2    #K - PoinTs grid : Real space LATTice
+nshiftk 2
+shiftk 1/2 1/2 1/2
+       0.0 0.0 0.0
+istwfk *1
+
+# == LDA+DMFT
+usedmft1 0
+usedmft2 1
+dmftbandi 12 # t2g bands only
+dmftbandf 23 # t2g bands only
+dmft_nwlo 100
+dmft_nwli 100000
+dmft_iter 1
+dmftcheck 0  
+dmft_rslf 1
+dmft_mxsf 0.7
+dmft_dc 1
+dmft_t2g 1   # special value for t2g only calculation.
+dmftctqmc_gmove 0
+dmftctqmc_order 50
+
+dmft_solv 2 # H1
+dmft_charge_prec 1e-10
+
+# == DFT+U
+usepawu     1  #  For density matrix printout.
+dmatpuopt  1   # The density matrix: the simplest expression.
+lpawu  2 -1 -1
+upawu1  0.00  0.0  0.0  eV
+f4of2_sla3  0.0  0.0  0.0 
+upawu2  3.1333333333333333  0.0  0.0  eV
+jpawu2  0.7583333333333333  0.0  0.0  eV
+
+paral_kgb1 0
+paral_kgb2 1
+npkpt2 1
+npband2 4
+npfft2 1
+bandpp2 8
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test =
+#%%   t86_MPI4.abo, use_yaml = yes, tolnlines = 4, tolabs = 2.0e-2, tolrel = 1.0, fld_options = -easy;
+#%% [extra_info]
+#%% authors = B. Amadon, T. Cavignac
+#%% keywords = DMFT, FAILS_IFMPI
+#%% description = DFT+DMFT for SrVO3 using Hubard I code with KGB parallelism
+#%% topics = DMFT, parallelism
+#%% [yaml_test]
+#%% file = ./t86.yaml
+#%%<END TEST_INFO>

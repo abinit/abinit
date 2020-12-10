@@ -1,0 +1,78 @@
+ acell 3*7.128759292410183  #compression 4
+ ngfft 3*12                 #need to be defined for recursion
+ tsmear   3.1668297
+ mdtemp  1000000 1000000
+ recptrott 10   #trotter parameter
+ occopt 3
+ enunit 2      #All units on output
+ nline  5      #defaut +1
+ nstep  20
+
+ timopt -1  #time analysis (debugging option)
+
+#recursion variables
+
+ ecut   5          #no ecut needed
+ nsym   1          #no symetries for recursion method
+ chkprim 0         #need a cubic cell (not primitive)
+ boxcutmin 1.0d0   #link between ecut <> ngfft
+ nkpt 1            #recursion doesn't work with more
+ toldfe    1.e-20  #not the exit criteria for recursion
+
+ tfkinfunc 2       #recursion method
+ recnrec 50        #maximum recursion order
+ recnpath 100      #discretisation path integral
+ rectolden 1.0d-2  #convergence criterium for the density
+
+ rectesteg 1       #electron gas test
+# recgratio 4
+# recrcut 1.d0      #truncation radius (net used in the test)
+# recefermi -14.d0  #initial guess for fermi energy
+
+#ions
+ znucl  2
+ natom  1         #cubic cell for recursion method
+ typat  1
+
+ rprim      #cubic cell for recursion method for 4 ions
+ 1 0 0
+ 0 1 0
+ 0 0 1
+
+ xred   #CFC for 4 ions
+ 3*0.0d0
+# 0.5 0.5 0.0
+# 0.5 0.0 0.5
+# 0.0 0.5 0.5
+
+ kptopt 0
+ istwfk 1
+
+#Parallelization variables
+ paral_kgb 0
+
+#molecular dynamic
+ nband  20
+ densfor_pred 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/2he.2.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t76.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -ridiculous
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors =  M. Mancini
+#%% keywords = 
+#%% description = 
+#%%   Test for an electron gas by recursion method (Vtrial is set to zero)
+#%%   Corresponding variable: rectesteg 
+#%%   Corresponding code: 68_recursion
+#%%   Other test: paral/tT,v5/t76
+#%% topics = Recursion
+#%%<END TEST_INFO>

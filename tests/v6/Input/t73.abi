@@ -1,0 +1,22 @@
+t73.ddb.out
+TiNb DDB file for elphon calculation
+4
+t72o_DS2_DDB
+t72o_DS3_DDB
+t72o_DS4_DDB
+t72o_DS5_DDB
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t72.abi, t73.abi, t74.abi, t75.abi, t76.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t73.ddb.out, tolnlines=   100,   tolabs=  1.0e-4,      tolrel= 1.1, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Verstraete
+#%% keywords = 
+#%% description = mrgddb of test 72
+#%%<END TEST_INFO>

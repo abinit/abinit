@@ -1,0 +1,23 @@
+2
+t89o
+t88o_SCR
+t87o_DS4_SCR
+1
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgscr
+#%% test_chain = t87.abi, t88.abi, t89.abi, t90.abi, t91.abi
+#%% [files]
+#%% files_to_test = t89.stdout, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = GW
+#%% authors = R. Shaltaf
+#%% description =
+#%%   Test of mrgscr utility
+#%%   mrgscr is used here to check the status of screening file (from test 88), 
+#%%   what is there and what is needed. 
+#%%<END TEST_INFO>
+

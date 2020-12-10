@@ -1470,7 +1470,7 @@ By F. Jollet (MR 423)
 
 By F. Jollet (MR 412)
 
-**D.26** Added a preview for the toptic_4.in file in the optic tutorial.
+**D.26** Added a preview for the toptic_4.abi file in the optic tutorial.
 
 By F. Goudreault (MR 408)
 
@@ -2204,7 +2204,7 @@ By F. Jollet (MR 423)
 
 By F. Jollet (MR 412)
 
-**D.26** Added a preview for the toptic_4.in file in the optic tutorial.
+**D.26** Added a preview for the toptic_4.abi file in the optic tutorial.
 
 By F. Goudreault (MR 408)
 
@@ -2944,7 +2944,7 @@ B.1 Implementation of algorithms to interpolate the electronic band structure,
     based either on "star functions" of on "B-splines" (as alternatives to Wannier function interpolation).
     See the input variables [[einterp]], [[nkpath]], and [[prtebands]], and tests
     old syntax: `Tlibxc#42, Tv8#04` replaced by
-    [[tests/libxc/Input/t41.in]], [[test:v8_04]].
+    [[tests/libxc/Input/t41.abi]], [[test:v8_04]].
     Work by M. Giantomassi
 
 B.2 The Fock mixing factor for the HSE hybrid functional can be tuned thanks to the input variable gwfockmix  .

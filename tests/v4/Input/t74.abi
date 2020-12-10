@@ -1,0 +1,25 @@
+# Alas, zinc-blende, analysis of the polarization
+
+polflag 1
+relaxat 0
+relaxstr 0
+chneut 0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% input_ddb = t73.ddb.out 
+#%% test_chain = t72.abi, t73.abi, t74.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t74.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Veithen
+#%% keywords = 
+#%% description = 
+#%%   AlAs, zinc-blende structure.
+#%%   Use ANADDB to compute the polarization of the previous two tests in cartesian coordinates.
+#%% topics = ConstrainedPol
+#%%<END TEST_INFO>

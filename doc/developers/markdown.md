@@ -102,12 +102,12 @@ Fenced code has three back-ticks around it.
 while indenting the code with four space, such as in
 
 ```md
-    abinit < tbase1_x.files 2> log &
+    abinit run.abi 2> log &
 ```
 
 produces
 
-    abinit < tbase1_x.files 2> log &
+    abinit run.abi 2> log &
 
 Fenced blocks is an alternative form that allows the specification of the language 
 used for syntax highlighting.
@@ -330,11 +330,11 @@ Examples:
 | `[[anaddb:dipdip]]` | [[anaddb:dipdip]]
 | `[[dipdip@anaddb]]` | [[dipdip@anaddb]]
 | `[[cite:Amadon2008]]` | [[cite:Amadon2008]]
-| `[[~abinit/tests/tutorial/Input/tbase1_1.in]]` | [[~abinit/tests/tutorial/Input/tbase1_1.in]]
-| `[[tests/tutorial/Input/tbase1_1.in]]` | [[tests/tutorial/Input/tbase1_1.in]]
+| `[[~abinit/tests/tutorial/Input/tbase1_1.abi]]` | [[~abinit/tests/tutorial/Input/tbase1_1.abi]]
+| `[[tests/tutorial/Input/tbase1_1.abi]]` | [[tests/tutorial/Input/tbase1_1.abi]]
 | `[[test:libxc_41]]` | [[test:libxc_41]]
-| `[[tests/tutorial/Refs/tbase1_1.out]]` |  [[tests/tutorial/Refs/tbase1_1.out]]
-| `[[~abinit/tests/tutorial/Refs/tbase1_1.out]]` |  [[~abinit/tests/tutorial/Refs/tbase1_1.out]]
+| `[[tests/tutorial/Refs/tbase1_1.abo]]` |  [[tests/tutorial/Refs/tbase1_1.abo]]
+| `[[~abinit/tests/tutorial/Refs/tbase1_1.abo]]` |  [[~abinit/tests/tutorial/Refs/tbase1_1.abo]]
 | `[[~abinit/tests/Psps_for_tests/6c_lda.paw]]` | [[~abinit/tests/Psps_for_tests/6c_lda.paw]]
 | `[[tests/Psps_for_tests/6c_lda.paw]]` | [[tests/Psps_for_tests/6c_lda.paw]]
 
@@ -675,42 +675,42 @@ creates a *closed* element:
 To create a button that opens a ==dialog== containing an **input file**, use:
 
 ```
-    {% dialog tests/v1/Input/t01.in %}
+    {% dialog tests/v1/Input/t01.abi %}
 ```
 
 that produces:
 
-{% dialog tests/v1/Input/t01.in %}
+{% dialog tests/v1/Input/t01.abi %}
 
 If multiple files are used such as in:
 
-    {% dialog tests/v1/Input/t01.in tests/v1/Input/t02.in tests/v1/Input/t03.in %}
+    {% dialog tests/v1/Input/t01.abi tests/v1/Input/t02.abi tests/v1/Input/t03.abi %}
 
 a modal window with tabs is produced:
 
-{% dialog tests/v1/Input/t01.in tests/v1/Input/t02.in tests/v1/Input/t03.in %}
+{% dialog tests/v1/Input/t01.abi tests/v1/Input/t02.abi tests/v1/Input/t03.abi %}
 
 
 To create a ==button== that opens a modal window containing an **input file**, use:
 
 ```
-    {% modal tests/v1/Input/t01.in %}
+    {% modal tests/v1/Input/t01.abi %}
 ```
 
 that produces:
 
-{% modal tests/v1/Input/t01.in %}
+{% modal tests/v1/Input/t01.abi %}
 
 This is useful for tutorials to give direct access to the input files.
 If multiple files are used such as in:
 
 ```
-    {% modal tests/v1/Input/t01.in tests/v1/Input/t02.in %}
+    {% modal tests/v1/Input/t01.abi tests/v1/Input/t02.abi %}
 ```
 
 a modal window with tabs is produced
 
-{% modal tests/v1/Input/t01.in tests/v1/Input/t02.in %}
+{% modal tests/v1/Input/t01.abi tests/v1/Input/t02.abi %}
 
 ## MathJax
 

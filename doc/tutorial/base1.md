@@ -156,7 +156,7 @@ later, what is in the *tbase1_1.abo* and *log* output files.
 
 It is now time to edit the *tbase1_1.abi* input file.
 
-{% dialog tests/tutorial/Input/tbase1_1.in %}
+{% dialog tests/tutorial/Input/tbase1_1.abi %}
 
 You can have a first glance at it. It is not very long: about 50 lines, mostly comments.
 Do not try to understand everything immediately.
@@ -265,7 +265,7 @@ You can find more information about messages in the log file in
 
 Now open the *tbase1_1.abo* file. Alternatively, you might have a look at the reference file we provide below.
 
-{% dialog tests/tutorial/Refs/tbase1_1.out %}
+{% dialog tests/tutorial/Refs/tbase1_1.abo %}
 
 You find some general information about the output file [[help:abinit#outputfile|here]] .
 You should also:
@@ -457,11 +457,11 @@ Also, define explicitly the number of states (or supercell "bands") to be one, u
 
 The input file *\$ABI_TESTS/tutorial/Input/tbase1_2.abi* is an example of file that will do the job,
 
-{% dialog tests/tutorial/Input/tbase1_2.in %}
+{% dialog tests/tutorial/Input/tbase1_2.abi %}
 
 while *\$ABI_TESTS/tutorial/Refs/tbase1_2.abo* is the reference output file.
 
-{% dialog tests/tutorial/Refs/tbase1_2.out %}
+{% dialog tests/tutorial/Refs/tbase1_2.abo %}
 
 Run the code with *tbase1_2.abi* (this might take fifteen seconds or so on a PC at 3 GHz),
 
@@ -538,11 +538,11 @@ accurate computation of other properties. So, change [[toldfe]] in [[tolrff]],
 and set the latter input variable to 0.02.
 The input file *tbase1_3.abi* is an example of file that will do the job
 
-{% dialog tests/tutorial/Input/tbase1_3.in %}
+{% dialog tests/tutorial/Input/tbase1_3.abi %}
 
 while *tbase1_3.abo* is an example of output file:
 
-{% dialog tests/tutorial/Refs/tbase1_3.out %}
+{% dialog tests/tutorial/Refs/tbase1_3.abo %}
 
 So, you run the code with your input file (a few seconds), examine quietly this file (which is much smaller
 than the *tbase1_2.abo* file), and get some significant output data gathered in the final echo of variables:
@@ -587,7 +587,7 @@ more detailed description of the file names in ABINIT, in [[help:abinit#32_file_
 
 The input file *tbase1_4.abi* is an example of input file for a run that will print a density.
 
-{% dialog tests/tutorial/Input/tbase1_4.in %}
+{% dialog tests/tutorial/Input/tbase1_4.abi %}
 
 The run will take a few seconds.
 
@@ -653,11 +653,11 @@ latter might not be so important).
 
 The input file *tbase1_5.abi* is an example of file that will do the job,
 
-{% dialog tests/tutorial/Input/tbase1_5.in %}
+{% dialog tests/tutorial/Input/tbase1_5.abi %}
 
 while *tbase1_5.abo* is an example of output file.
 
-{% dialog tests/tutorial/Refs/tbase1_5.out %}
+{% dialog tests/tutorial/Refs/tbase1_5.abo %}
 
 The run lasts a few seconds.
 

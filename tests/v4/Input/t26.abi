@@ -1,0 +1,101 @@
+# Fake H crystal.
+# Test tetragonal spacegroups
+
+ndtset 56
+
+spgroup1   123   spgroupma1   341
+spgroup2   123   spgroupma2   342
+spgroup3   123   spgroupma3   343
+spgroup4   123   spgroupma4   344
+spgroup5   123   spgroupma5   345
+spgroup6   123   spgroupma6   346
+spgroup7   123   spgroupma7   347
+spgroup8   124   spgroupma8   353
+spgroup9   124   spgroupma9   354
+spgroup10   124   spgroupma10   355
+spgroup11   124   spgroupma11   356
+spgroup12   124   spgroupma12   357
+spgroup13   124   spgroupma13   358
+spgroup14   124   spgroupma14   359
+spgroup15   125   spgroupma15   365
+spgroup16   125   spgroupma16   366
+spgroup17   125   spgroupma17   367
+spgroup18   125   spgroupma18   368
+spgroup19   125   spgroupma19   369
+spgroup20   125   spgroupma20   370
+spgroup21   125   spgroupma21   371
+spgroup22   126   spgroupma22   377
+spgroup23   126   spgroupma23   378
+spgroup24   126   spgroupma24   379
+spgroup25   126   spgroupma25   380
+spgroup26   126   spgroupma26   381
+spgroup27   126   spgroupma27   382
+spgroup28   126   spgroupma28   383
+spgroup29   127   spgroupma29   389
+spgroup30   127   spgroupma30   390
+spgroup31   127   spgroupma31   391
+spgroup32   127   spgroupma32   392
+spgroup33   127   spgroupma33   393
+spgroup34   127   spgroupma34   394
+spgroup35   127   spgroupma35   395
+spgroup36   128   spgroupma36   401
+spgroup37   128   spgroupma37   402
+spgroup38   128   spgroupma38   403
+spgroup39   128   spgroupma39   404
+spgroup40   128   spgroupma40   405
+spgroup41   128   spgroupma41   406
+spgroup42   128   spgroupma42   407
+spgroup43   129   spgroupma43   413
+spgroup44   129   spgroupma44   414
+spgroup45   129   spgroupma45   415
+spgroup46   129   spgroupma46   416
+spgroup47   129   spgroupma47   417
+spgroup48   129   spgroupma48   418
+spgroup49   129   spgroupma49   419
+spgroup50   130   spgroupma50   425
+spgroup51   130   spgroupma51   426
+spgroup52   130   spgroupma52   427
+spgroup53   130   spgroupma53   428
+spgroup54   130   spgroupma54   429
+spgroup55   130   spgroupma55   430
+spgroup56   130   spgroupma56   431
+
+# Common data
+prtvol -1          # stop in abinit (main program), before call driver.
+brvltt -1          # important to reduce the conventional cell to primitive,
+                   # and allow the recognition of space group
+acell 7 7 9
+angdeg  90 90 90
+ntypat 1
+znucl 1
+natrd 1
+natom 16
+xred 0.17 0.15 0.11
+spinat 0.0 0.0 1.0
+typat 1
+ecut 1
+  kptopt 0
+nkpt 1
+nline 1
+nstep 1
+toldfe 1.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t26.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H based fake crystals : magnetic groups, Shubnikov type III
+#%%   Test the generation and recognition of the
+#%%   tetragonal space groups (part III : spgroup 123 to 130)
+#%%<END TEST_INFO>

@@ -1,0 +1,168 @@
+# ----------------------------------------------------------------------------------
+#   Automatic test: computation of U in CRPA for SrVO3 for t2g and eg orbitals
+#    (symmetry is used)
+#   Parameters are not converged
+#   B. Amadon
+#
+# ----------------------------------------------------------------------------------
+ndtset 5
+jdtset 1 2 3 4 5
+paral_kgb 0
+prtvol 1
+pawprtvol 3
+#==================================================================================
+############ Parameters common to all DATASETS
+#==================================================================================
+##### CONVERGENCE PARAMETERS
+nstep    15 
+nline     5          #Number of LINE minimisations
+nnsclo    2          #Number of Non-Self Consistent LOops
+tolvrs   1.0d-15
+
+occopt    3          #OCCupation OPTion
+tsmear    0.1 eV     #Temperature of SMEARing
+#
+##### PHYSICAL PARAMETERS
+
+acell   3*6.7605
+rprim 1.0 0.0 0.0    #Real space PRIMitive translations
+      0.0 1.0 0.0
+      0.0 0.0 1.0
+natom 5 ntypat 3 typat 1 2 3 3 3
+# V Sr O*3
+xred 0.00 0.00 0.00  #vectors (X) of atom positions in REDuced coordinates
+     0.50 0.50 0.50
+     0.50 0.00 0.00
+     0.00 0.50 0.00
+     0.00 0.00 0.50
+znucl  23.0 38.0 8.0
+
+ngkpt  3 3 3           #K - PoinTs grid : Real space LATTice
+nshiftk 1            #No shift
+shiftk
+      0.5 0.5 0.5
+istwfk *1
+
+#For all the dataset
+nsym 0
+gw_icutcoul 6
+symsigma 0
+
+#----------------------------------------------------------------------------
+#-- Parameters for screening for different datasets
+#-- Except for the structure , only the parameters below should be changed
+#----------------------------------------------------------------------------
+nband 25
+ecut       4.0    # Maximal kinetic energy cut-off, in Hartree
+pawecutdg  4.1    # PAW - Energy CUToff for the Double Grid ( need only when usepaw=1=)
+ecuteps     3.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
+ecutsigx5   3.0   # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
+pawoptosc 2       # Choose the Shishkin Kresse way to compute oscillator matrix. In general Arnaud Alouani is much better, but too time consuming for this simple test.
+#gwcomp4 1
+#gwencomp4 5.0
+
+# -- Frequencies for dielectric matrix
+nfreqre4 4
+freqremax4 6 eV
+freqremin4 0 eV
+nfreqsp5 4
+freqspmax5 6 eV
+freqspmin5 0 eV
+
+# -- Parallelism
+gwpara4 1
+gwpara5 2        # necessary for dataset 5 DO NOT CHANGE IT if nsppol=2
+
+
+# -- Ucrpa: screening
+ucrpa 1              # The screening will use the Wannier weights to suppress transitions.
+ucrpa_window  -5.0 5.0 eV  # Exclude a large window of energy 
+                           #  (just because it is more stable as the convergence parameters chosen for this automatic test are low)
+
+# -- Ucrpa: Wannier functions
+dmftbandi3 12       # Precise the definition of Wannier functions (also used for DMFT calculations)
+dmftbandf3 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
+
+# -- DFTU: 1st dataset and definition of correlated angular momentum
+usepawu    1        # DFT+U is used just for printing usefull quantities.
+dmatpuopt  1        # choose expression of the density matrix
+lpawu      2 -1 -1
+jpawu      0.0 0.0 0.0 eV
+upawu      0.0 0.0 0.0  eV
+
+##----------------------------------------------------------------------------#
+# DO not change parameters below this line unless you know what you do.
+#----------------------------------------------------------------------------
+#
+#==================================================================================
+############ FIRST DATASET: First dataset with all the symetries to compute DEnsity
+#==================================================================================
+ nsym1 0
+ prtdos2 3
+ pawprtdos2 2
+
+#==================================================================================
+############ SECOND DATASET: Read density and produce wavefunctions with nsym=1
+# (useless if symetry is used)
+#==================================================================================
+#Bug with the convergence of the DEN file
+getden2 -1
+nnsclo2 5
+nline2 5
+tolwfr2   1.0d-12
+#==================================================================================
+############ THIRD DATASET: Read Wfc, produce KSS file and Wannier file
+#==================================================================================
+#  Definitions of parameters for the calculation of the KSS file
+getwfk3 -1
+nbandkss3 -1         # Number of bands in KSS file (-1 means the maximum possible)
+tolvrs3   1.0d-13
+kssform 3
+# == LDA+DMFT
+usedmft3 1           # usefull to compute Wannier functions.
+dmft_nwlo3 10
+dmft_nwli3 20000
+dmft_iter3 0
+dmft_solv3 2         # usefull to avoid supplementary variables in the input file.
+
+#==================================================================================
+############ FOURTH DATASET:  Calculation of the screening (epsilon^-1 matrix)
+#==================================================================================
+ optdriver4     3     # Screening calculation
+ getwfk4       -1     # Obtain KSS file from previous dataset
+ nfreqim4       0
+ gwcalctyp4 2
+ upawu4 0 0 0         # necessary if upawu/=0 in the first three datasets as usepawu=1 everywhere
+ symchi 0
+#  pawoptosc 1 (should be used here, but not used because it is time consuming)
+
+#==================================================================================
+############ FIFTH DATASET: Calculation of the Self-Energy matrix elements (GW corrections)
+#==================================================================================
+ upawu5 0 0 0       # necessary if upawu/=0 in the first three datasets
+ optdriver5  4      # Self-Energy calculation
+ getwfk5     3      # Obtain KSS file from dataset 1
+ getscr5     4      # Obtain SCR file from previous dataset
+ ppmodel  2         # in order to use only one frequency
+ nkptgw5      0     # number of k-point where to calculate the GW correction: all BZ
+ gwcalctyp5 2       # activate HF or ucrpa
+ mqgrid5 300        # Reduced but fine at least for SrVO3
+ mqgriddg5 300
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
+#%% [files]
+#%% files_to_test = t79.abo, tolnlines=17, tolabs=1.5e-3, tolrel= 8.0e-3, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% keywords = GW, cRPA, DMFT
+#%% authors =  B. Amadon
+#%% description = For SrVO3, compute cRPA screened interaction U by excluding an energy window to compute epsilon
+#%% topics = CRPA
+#%%<END TEST_INFO>

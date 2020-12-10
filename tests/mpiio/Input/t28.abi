@@ -1,0 +1,72 @@
+ndtset 2
+nspden 4  nspinor 2  pawspnorb 1 # spin-orbit, non-collinear magnetism
+paral_kgb 1 
+iomode 1  # enforce MPI-IO for the time being because netcdf with MPI-IO
+          # does not support npspinor = 2.
+
+prtdos   3  # Compute PJDOS
+prtpot   1
+prtvha   1
+prtvpsp  1
+prtvclmb 1
+prtvhxc  1
+prtvxc   1
+
+nband 50
+
+# === Dataset 1
+npkpt1 2 npfft1 2 npspinor1 1 # npband 2
+
+# === Dataset 2
+npkpt2 1 npfft2 2 npspinor2 2 # npband 2
+getwfk2 -1
+
+# === Structure and cell
+acell 3*5.6533 angstrom # expt value
+rprim 0   1/2 1/2
+      1/2 0   1/2
+      1/2 1/2 0
+natom 2 
+ntypat 2 
+typat 1 2
+znucl  31 33
+xred 3*0 3*1/4
+
+# === SCF cycle options
+nstep 20  tolvrs 1.d-7
+ecut 5. pawecutdg 10.
+diemac 8.0
+
+# === K-points and syms
+kptopt 4
+kptrlatt 2 2 -2
+        -2 2 -2
+        -2 2  2
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31Ga_LDA_abinit, 33As_LDA_abinit"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = .*_nag_7.0_.*
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = 
+#%%   t28_MPI4.abo, tolnlines=100, tolabs=7.5e-4, tolrel=0.3;
+#%%   t28_MPI4o_DS1_DOS_TOTAL, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
+#%%   t28_MPI4o_DS1_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
+#%%   t28_MPI4o_DS2_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
+#%% [extra_info]
+#%% keywords = PAW 
+#%% authors = M. Giantomassi
+#%% description = 
+#%%  GaAs with PAW and spin-orbit coupling. 2x2x2 K grid; low cut-off for test
+#%%  Test paral_kgb==1 with MPI-FFT/spinor parallelization, the IO of the WFK file,
+#%%  the output of potential files and the calculation of PJDOS in parallel 
+#%%  (PW term + on-site contributions)
+#%%<END TEST_INFO>
