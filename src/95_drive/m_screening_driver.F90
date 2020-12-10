@@ -197,7 +197,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat
  real(dp) :: compch_fft,compch_sph,domegareal,e0,ecore,ecut_eff,ecutdg_eff
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
- real(dp) :: alpha,rhoav,factor
+ real(dp) :: alpha,rhoav,factor,ec_gm
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  logical :: found,iscompatibleFFT,is_dfpt=.false.,use_tr,is_first_qcalc
  logical :: add_chi0_intraband,update_energies,call_pawinit
@@ -225,7 +225,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer,allocatable :: ks_vbik(:,:),ks_occ_idx(:,:),qp_vbik(:,:),nband(:,:)
  integer,allocatable :: nq_spl(:),nlmn_atm(:),gw_gfft(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),k0(3),qtmp(3),rmet(3,3),rprimd(3,3),tsec(2),strsxc(6)
- real(dp),allocatable :: igwene(:,:,:),chi0_sumrule(:),ec_rpa(:),ec_gm(:),rspower(:)
+ real(dp),allocatable :: igwene(:,:,:),chi0_sumrule(:),ec_rpa(:),rspower(:)
  real(dp),allocatable :: nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:)
  real(dp),allocatable :: rhog(:,:),rhor(:,:),rhor_p(:,:),rhor_kernel(:,:),taur(:,:)
  real(dp),allocatable :: z(:),zw(:),grchempottn(:,:),grewtn(:,:),grvdw(:,:),kxc(:,:),qmax(:)
@@ -1228,14 +1228,12 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    if (Ep%analytic_continuation .and. Dtset%gwrpacorr>0 ) then
      if (is_first_qcalc) then
        ABI_MALLOC(ec_rpa,(Dtset%gwrpacorr))
-       ABI_MALLOC(ec_gm,(Dtset%gwrpacorr))
        ec_rpa(:)=zero
-       ec_gm(:)=zero
+       ec_gm=zero
      end if
      call calc_rpa_functional(Dtset%gwrpacorr,Dtset%gwgmcorr,label,iqibz,Ep,Vcp,Qmesh,Dtfil,gmet,chi0,comm,ec_rpa,ec_gm)
      if (label==Ep%nqcalc) then
        ABI_FREE(ec_rpa)
-       ABI_FREE(ec_gm)
      end if
    end if
 
@@ -2570,13 +2568,14 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqcalc,iq,gwrpacorr,gwgmcorr,spaceComm
+ real(dp),intent(inout) :: ec_gm 
  type(kmesh_t),intent(in) :: Qmesh
  type(vcoul_t),intent(in) :: Pvc
  type(Datafiles_type),intent(in) :: Dtfil
  type(em1params_t),intent(in) :: Ep
 !arrays
  real(dp),intent(in) :: gmet(3,3)
- real(dp),intent(inout) :: ec_rpa(gwrpacorr),ec_gm(gwrpacorr)
+ real(dp),intent(inout) :: ec_rpa(gwrpacorr)
  complex(gwpc),intent(inout) :: chi0(Ep%npwe,Ep%npwe,Ep%nomega)
 
 !Local variables-------------------------------
@@ -2588,7 +2587,7 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: z(:),zl(:),zlw(:),zw(:)
- complex(gwpc),allocatable :: chi0_diag(:),chitmp(:,:)
+ complex(gwpc),allocatable :: chi0_diag(:),chitmp(:,:),chi0_diag_gm(:),chitmp_gm(:,:)
  real(gwpc),allocatable :: eig(:)
 
 ! *************************************************************************
@@ -2618,6 +2617,10 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
 
  ABI_ALLOCATE(chi0_diag,(Ep%npwe))
  ABI_MALLOC_OR_DIE(chitmp,(Ep%npwe,Ep%npwe), ierr)
+ if(gwgmcorr==1) then
+   ABI_ALLOCATE(chi0_diag_gm,(Ep%npwe))
+   ABI_MALLOC_OR_DIE(chitmp_gm,(Ep%npwe,Ep%npwe), ierr)
+ end if
 
  do io=2,Ep%nomega
 
@@ -2637,7 +2640,7 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
        ec_rpa(:) = ec_rpa(:) &
 &         - zw(io-1) / ( z(io-1) * z(io-1) ) &
 &              * Qmesh%wt(iq) * (-log( 1.0_dp-eig(ig1) )  - eig(ig1) ) / (2.0_dp * pi )
-       ec_gm(:) = ec_gm(:) &
+       ec_gm = ec_gm &
 &         - zw(io-1) / ( z(io-1) * z(io-1) ) &
 &              * Qmesh%wt(iq) * ( eig(ig1) / ( 1.0_dp-eig(ig1) ) - eig(ig1) ) / (2.0_dp * pi )
      end do
@@ -2653,27 +2656,55 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
          chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq)**2 * chi0(ig1,ig1,io)
        end do
 
+       if(ilambda==1 .and. gwgmcorr==1) then     ! Copy v^1/2*Chi0*v^1/2 for Galitskii-Migdal
+         chi0_diag_gm(:) = chi0_diag(:)
+       end if
+
        do ig2=1,Ep%npwe
          do ig1=1,Ep%npwe
            chitmp(ig1,ig2) = - lambda * Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chi0(ig1,ig2,io)
+
+           if(ilambda==1 .and. gwgmcorr==1) then ! Use lambda=1 for Galitskii-Migdal 
+             chitmp_gm(ig1,ig2) = - Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chi0(ig1,ig2,io)
+           end if
+
          end do !ig1
          chitmp(ig2,ig2) = chitmp(ig2,ig2) + 1.0_dp
+
+         if(ilambda==1 .and. gwgmcorr==1) then   ! Prepare (1-v^1/2*Chi0*v^1/2) for Galitskii-Migdal
+           chitmp_gm(ig2,ig2) = chitmp_gm(ig2,ig2) + 1.0_dp
+         end if
+
        end do !ig2
        call xginv(chitmp(:,:),Ep%npwe)
        chitmp(:,:) = matmul( chi0(:,:,io) , chitmp(:,:) )
 
+       if(ilambda==1 .and. gwgmcorr==1) then   ! Prepare Chi = [(1-v^1/2*Chi0*v^1/2)]^-1 * Chi0 for Galitskii-Migdal
+         call xginv(chitmp_gm(:,:),Ep%npwe)
+         chitmp_gm(:,:) = matmul( chi0(:,:,io) , chitmp_gm(:,:) )
+       end if
+
        do ig1=1,Ep%npwe
          chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chitmp(ig1,ig1) - chi0_diag(ig1)
+
+         if(ilambda==1 .and. gwgmcorr==1) then   ! Prepare v^1/2*Chi*v^1/2 - v^1/2*Chi0*v^1/2 for Galitskii-Migdal
+           chi0_diag_gm(ig1) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chitmp_gm(ig1,ig1) - chi0_diag_gm(ig1)
+         end if
+
        end do
 
        do ig1=1,Ep%npwe
          ec_rpa(ilambda) = ec_rpa(ilambda) &
 &           - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * real(  chi0_diag(ig1) ) / (2.0_dp * pi )
-       end do
 
-     end do ! ilambda
+         if(ilambda==1 .and. gwgmcorr==1) then   ! Integrate [v*Chi-v*Chi0](iw) dw for Galitskii-Migdal
+           ec_gm = ec_gm &
+&           - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * real(  chi0_diag_gm(ig1) ) / (2.0_dp * pi )
+         end if
+
+       end do
      
-     ! Galitskii-Migdal energy in the lambda numerical case TODO
+     end do ! ilambda
 
    end if ! exact or numerical integration over the coupling constant
 
@@ -2689,7 +2720,7 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
 
    if(rank==master) then
      ecorr = sum( zlw(:)*ec_rpa(:) )
-     ecorr_gm = sum( zlw(:)*ec_gm(:) )
+     ecorr_gm = ec_gm
      if (open_file(dtfil%fnameabo_rpa, msg, newunit=unt) /=0) then
        MSG_ERROR(msg)
      end if
@@ -2705,7 +2736,7 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
          call wrtout(ab_out,msg,'COLL')
        end do
      end if
-     if(gwrpacorr==1 .and. gwgmcorr==1) then ! Only exact integration over the coupling constant
+     if(gwgmcorr==1) then ! Only exact integration over the coupling constant
        write(unt,'(a,(2x,f14.8))') '#GM',ecorr_gm
        write(msg,'(2a,(2x,f14.8))') ch10,' Galitskii-Migdal energy [Ha] :',ecorr_gm
        call wrtout(std_out,msg,'COLL')
@@ -2720,6 +2751,10 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
 
  end if
 
+ if(gwgmcorr==1) then
+   ABI_DEALLOCATE(chitmp_gm)
+   ABI_DEALLOCATE(chi0_diag_gm)
+ end if
  ABI_DEALLOCATE(chi0_diag)
  ABI_DEALLOCATE(chitmp)
  ABI_DEALLOCATE(zl)

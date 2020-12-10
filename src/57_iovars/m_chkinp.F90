@@ -1111,11 +1111,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
    ! gwgmcorr
-   if(dt%gwgmcorr==1 .and. dt%gwrpacorr/=1) then
+   if(dt%gwgmcorr==1 .and. dt%gwrpacorr==0) then
      write(msg,'(3a)' )&
-     'gwgmcorr>0 can only be used with gwrpacorr=1',ch10,&
-     'Action: set gwgmcorr to 0 or gwrpacorr to 1'
-     MSG_ERROR_NOSTOP(msg, ierr)
+     'gwgmcorr=1 can only be used with gwrpacorr/=0',ch10,&
+     'Action: set gwgmcorr to 0 or gwrpacorr > 0'
+      MSG_ERROR_NOSTOP(msg, ierr)
    end if
 
    ! gwls_stern_kmax
