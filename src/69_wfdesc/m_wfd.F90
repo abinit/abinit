@@ -99,6 +99,9 @@ module m_wfd
 
  type,public :: kdata_t
 
+   logical :: gw1rdm 
+   ! Decide if this is a GW density matrix update calculation.
+
    integer :: istwfk
    ! Storage mode for this k point.
 
@@ -127,6 +130,7 @@ module m_wfd
    real(dp),allocatable :: ph3d(:,:,:)
    ! ph3d(2, npw, natom)
    ! 3-dim structure factors, for each atom and each plane wave.
+   ! Available only for PAW or GW density matrix update gw1rdm==2.
 
    real(dp),allocatable :: phkxred(:,:)
    ! phkxred(2,natom))
@@ -134,6 +138,7 @@ module m_wfd
 
    real(dp),allocatable :: fnl_dir0der0(:,:,:,:)
    ! fnl_dir0der0(npw,1,lmnmax,ntypat)
+   ! nonlocal form factors. Computed only if usepaw == 1 or GW density matrix update gw1rdm==2.
    ! fnl(k+G).ylm(k+G) if PAW
    ! f_ln(k+G)/|k+G|^l if NC
 
@@ -292,6 +297,8 @@ module m_wfd
 
   logical :: rfft_is_symok      ! .TRUE. if the real space FFT mesh is compatible with the rotational
                                 ! part of the space group.
+
+  logical :: gw1rdm             ! .TRUE. if the the Wfd is used for a GW density matrix update.
 
   real(dp) :: dilatmx
 
@@ -603,9 +610,15 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
  call getph(Cryst%atindx,Cryst%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,Cryst%xred)
 
  ! Calculate 3-dim structure factor phase information.
- matblk=Cryst%natom
+ matblk = 0
+ if(psps%usepaw == 1 .or. Kdata%gw1rdm) then
+   matblk=Cryst%natom
+ end if
  ABI_MALLOC(Kdata%ph3d,(2, npw_k, matblk))
- call ph1d3d(1,Cryst%natom,Kdata%kg_k,matblk,Cryst%natom,npw_k,ngfft(1),ngfft(2),ngfft(3),Kdata%phkxred,ph1d,Kdata%ph3d)
+ if(psps%usepaw == 1 .or. Kdata%gw1rdm) then
+   call ph1d3d(1,Cryst%natom,Kdata%kg_k,matblk,Cryst%natom,npw_k,ngfft(1),ngfft(2),&
+   &ngfft(3),Kdata%phkxred,ph1d,Kdata%ph3d)
+ end if
  ABI_FREE(ph1d)
 
  ! Compute spherical harmonics.
@@ -615,13 +628,13 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
  ABI_MALLOC(ylmgr_k,(npw_k, 3, Psps%mpsang**2*useylmgr))
 
  if (Kdata%useylm == 1) then
-  mkmem_=1; mpw_=npw_k; nband_=0; nkpt_=1; npwarr_(1)=npw_k
-  optder=0 ! only Ylm(K) are computed.
+   mkmem_=1; mpw_=npw_k; nband_=0; nkpt_=1; npwarr_(1)=npw_k
+   optder=0 ! only Ylm(K) are computed.
 
-  call initylmg(Cryst%gprimd, Kdata%kg_k, kpoint, mkmem_, MPI_enreg, Psps%mpsang, mpw_, nband_, nkpt_,&
+   call initylmg(Cryst%gprimd, Kdata%kg_k, kpoint, mkmem_, MPI_enreg, Psps%mpsang, mpw_, nband_, nkpt_,&
    npwarr_, 1, optder, Cryst%rprimd, Kdata%ylm, ylmgr_k)
 
-  Kdata%has_ylm = 2
+   Kdata%has_ylm = 2
  end if
 
  ! Compute (k+G) vectors.
@@ -630,13 +643,18 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
  if (nkpg>0) call mkkpg(Kdata%kg_k, kpg_k, kpoint, nkpg, npw_k)
 
  ! Compute nonlocal form factors fnl_dir0der0 for all (k+G).
- dimffnl = 1+3*ider0
+ dimffnl = 0
+ if(psps%usepaw == 1 .or. Kdata%gw1rdm) then
+   dimffnl = 1+3*ider0
+ end if
  ABI_MALLOC(Kdata%fnl_dir0der0,(npw_k, dimffnl, Psps%lmnmax, Cryst%ntypat))
 
- call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,Kdata%fnl_dir0der0,Psps%ffspl,&
-   Cryst%gmet,Cryst%gprimd,ider0,idir0,Psps%indlmn,Kdata%kg_k,kpg_k,kpoint,Psps%lmnmax,&
-   Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,Cryst%ntypat,&
-   Psps%pspso,Psps%qgrid_ff,Cryst%rmet,Psps%usepaw,Psps%useylm,Kdata%ylm,ylmgr_k)
+ if (dimffnl /=0 ) then
+   call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,Kdata%fnl_dir0der0,Psps%ffspl,&
+     Cryst%gmet,Cryst%gprimd,ider0,idir0,Psps%indlmn,Kdata%kg_k,kpg_k,kpoint,Psps%lmnmax,&
+     Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,Cryst%ntypat,&
+     Psps%pspso,Psps%qgrid_ff,Cryst%rmet,Psps%usepaw,Psps%useylm,Kdata%ylm,ylmgr_k)
+ end if
 
  ABI_FREE(kpg_k)
  ABI_FREE(ylmgr_k)
@@ -849,7 +867,8 @@ end subroutine copy_kdata_1D
 !! SOURCE
 
 subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_mask,&
-&  nspden,nspinor,ecut,ecutsm,dilatmx,istwfk,kibz,ngfft,nloalg,prtvol,pawprtvol,comm)
+&  nspden,nspinor,ecut,ecutsm,dilatmx,istwfk,kibz,ngfft,nloalg,prtvol,pawprtvol,comm,&
+&  gw1rdm)
 
 !Arguments ------------------------------------
 !scalars
@@ -865,6 +884,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  real(dp),intent(in) :: kibz(3,nkibz)
  logical,intent(in) :: bks_mask(mband,nkibz,nsppol)
  logical,intent(in) :: keep_ur(mband,nkibz,nsppol)
+ integer,intent(in),optional :: gw1rdm
  type(Pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Psps%usepaw)
 
 !Local variables ------------------------------
@@ -915,6 +935,10 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  Wfd%usepaw = Psps%usepaw
  Wfd%usewvl = 0 ! wavelets are not supported.
+ Wfd%gw1rdm = .false.
+ if(present(gw1rdm)) then
+   Wfd%gw1rdm = (gw1rdm==2)
+ end if
  Wfd%natom  = Cryst%natom
  Wfd%ntypat = Cryst%ntypat
  Wfd%lmnmax = Psps%lmnmax
@@ -1087,6 +1111,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ! TODO: This one will require some memory if nkibz is large.
  ABI_MALLOC(Wfd%Kdata, (Wfd%nkibz))
+ Wfd%Kdata%gw1rdm=Wfd%gw1rdm
 
  do ik_ibz=1,Wfd%nkibz
    kpoint  = Wfd%kibz(:,ik_ibz)
