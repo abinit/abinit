@@ -328,7 +328,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.3.2
+    version: 9.3.3
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt
