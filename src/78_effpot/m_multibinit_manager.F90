@@ -104,7 +104,7 @@ module m_multibinit_manager
      ! a polymorphic lattice mover so multiple mover could be used.
      class(lattice_mover_t), pointer :: lattice_mover => null()
      ! as for the spin, there is only one mover which has several methods
-     type(spin_mover_t) :: spin_mover  
+     type(spin_mover_t), pointer :: spin_mover => null() 
      ! type(lwf_mover_t) :: lwf_mover
 
      type(slc_mover_t) :: slc_mover
@@ -142,10 +142,12 @@ module m_multibinit_manager
      procedure :: read_potentials ! read primitve cell and potential
      procedure :: fill_supercell
      procedure :: set_movers
+     procedure :: set_spin_mover
      procedure :: set_lattice_mover
      procedure :: run_spin_dynamics
-     procedure :: run_MvT
+     procedure :: run_spin_varT
      procedure :: run_lattice_dynamics
+     procedure :: run_lattice_varT
      procedure :: run_coupled_spin_latt_dynamics
      procedure :: run
      procedure :: run_all
@@ -207,6 +209,7 @@ contains
 
   !-------------------------------------------------------------------!
   ! Finalize
+  ! NOTE: add a entry here if new type of mover
   !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(mb_manager_t), intent(inout) :: self
@@ -215,7 +218,11 @@ contains
     call self%supercell%finalize()
     call self%prim_pots%finalize()
     call self%pots%finalize()
-    call self%spin_mover%finalize()
+    if (associated(self%spin_mover)) then
+       call self%spin_mover%finalize()
+       ABI_FREE_SCALAR(self%spin_mover)
+       nullify(self%spin_mover)
+    end if
     ! Note that lattice mover is a pointer.
     ! It might be null if there is no lattice part.
     if (associated(self%lattice_mover)) then
@@ -317,6 +324,8 @@ contains
   !-------------------------------------------------------------------!
   ! prepare_params: after read, something has to be done:
   ! e.g. unit conversion
+  ! NOTE: add an entry here if there is a new dynamics with
+  !        temperature parameter
   !-------------------------------------------------------------------!
   subroutine prepare_params(self)
     class(mb_manager_t), intent(inout) :: self
@@ -329,13 +338,17 @@ contains
     end if
     if(self%has_displacement) then
        self%params%temperature = self%params%temperature/Ha_K
+       self%params%latt_temperature_start =self%params%latt_temperature_start/Ha_K
+       self%params%latt_temperature_end=self%params%latt_temperature_end/Ha_K
     end if
+
 
   end subroutine prepare_params
 
 
   !-------------------------------------------------------------------!
   ! Read potentials from file, if needed by dynamics
+  ! NOTE: add an entry here if there is a new type of potential
   !-------------------------------------------------------------------!
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
@@ -395,6 +408,7 @@ contains
 
   !-------------------------------------------------------------------!
   ! fill supercell. Both primitive cell and potential
+  ! NOTE: No need to do anything if there is new potential
   !-------------------------------------------------------------------!
   subroutine fill_supercell(self)
     class(mb_manager_t), target, intent(inout) :: self
@@ -407,8 +421,7 @@ contains
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
     call self%prim_pots%fill_supercell_list(self%sc_maker, self%params, self%pots)
-
-    ! why do this twice.
+    ! why do this twice, because each pot in the supercell is not yet linked to the supercell.
     call self%pots%set_supercell(self%supercell)
     call self%pots%set_params(self%params)
   end subroutine fill_supercell
@@ -425,15 +438,13 @@ contains
 
   !-------------------------------------------------------------------!
   ! initialize movers which are needed.
+  ! NOTE: add a entry here if new type of potential is added
   !-------------------------------------------------------------------!
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
     character(len=fnlen) :: fname
     if (self%params%spin_dynamics>0) then
-       fname=trim(self%filenames(2))//"_spinhist_input.nc"
-       call self%spin_mover%initialize(params=self%params,&
-            & supercell=self%supercell, rng=self%rng, &
-            & restart_hist_fname=fname)
+        call self%set_spin_mover()
     end if
 
     if (self%params%dynamics>0) then
@@ -442,6 +453,22 @@ contains
 
     ! TODO: LWF MOVER
   end subroutine set_movers
+
+  !-------------------------------------------------------------------!
+  !Set_spin_mover
+  !-------------------------------------------------------------------!
+  subroutine set_spin_mover(self)
+    class(mb_manager_t), intent(inout) :: self
+    select case(self%params%spin_dynamics)
+        case (1)
+          ABI_DATATYPE_ALLOCATE_SCALAR(spin_mover_t, self%spin_mover)
+    end select
+    !fname=trim(self%filenames(2))//"_spinhist_input.nc"
+        call self%spin_mover%initialize(params=self%params,&
+            & supercell=self%supercell, rng=self%rng, &
+            & restart_hist_fname=trim(self%params%spin_init_hist_fname))
+   end subroutine set_spin_mover
+
 
 
   !-------------------------------------------------------------------!
@@ -485,7 +512,7 @@ contains
   end subroutine run_spin_dynamics
 
 
-  subroutine run_MvT(self)
+  subroutine run_spin_varT(self)
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%sc_maker%initialize(diag(self%params%ncell))
@@ -493,7 +520,7 @@ contains
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%run_MvT(self%pots, self%filenames(2), energy_table=self%energy_table)
-  end subroutine run_MvT
+  end subroutine run_spin_varT
 
 
   !-------------------------------------------------------------------!
@@ -506,8 +533,30 @@ contains
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
     call self%set_movers()
+    call self%lattice_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%lattice_mover%run_time(self%pots, energy_table=self%energy_table)
+    call self%lattice_mover%ncfile%finalize()
   end subroutine run_lattice_dynamics
+
+  
+  !-------------------------------------------------------------------!
+  ! Run lattice only dynamics at various T
+  !-------------------------------------------------------------------!
+  subroutine run_lattice_varT(self)
+    class(mb_manager_t), intent(inout) :: self
+    call self%prim_pots%initialize()
+    call self%read_potentials()
+    call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%fill_supercell()
+    call self%set_movers()
+    call self%lattice_mover%run_varT(self%pots, self%filenames(2), energy_table=self%energy_table)
+  end subroutine run_lattice_varT
+
+
+
+
+
+
 
   !-------------------------------------------------------------------!
   ! Run coupled lattice spin dynamics
@@ -526,7 +575,7 @@ contains
 
     call self%prim_pots%initialize()
     call self%read_potentials()
-    
+
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
 
@@ -584,6 +633,7 @@ contains
 
   !-------------------------------------------------------------------!
   ! Run all jobs
+  ! NOTE: add a entry here if new type of dynamics
   !-------------------------------------------------------------------!
   subroutine run(self)
     class(mb_manager_t), intent(inout) :: self
@@ -594,10 +644,14 @@ contains
        if (self%params%spin_var_temperature==0) then
           call self%run_spin_dynamics()
        elseif (self%params%spin_var_temperature==1) then
-          call self%run_MvT()
+          call self%run_spin_varT()
        end if
     else if (self%params%dynamics>0 .and. self%params%spin_dynamics<=0) then
-       call self%run_lattice_dynamics()
+       if(self%params%latt_var_temperature==0) then
+          call self%run_lattice_dynamics()
+       else
+          call self%run_lattice_varT()
+       end if
 
     else if (self%params%dynamics>0 .and. self%params%spin_dynamics>0) then
        !call self%run_spin_latt_dynamics()

@@ -12,9 +12,9 @@
 #
 
 # Source file attributes
-ABI_SRC_NIL = 0     # No attribute
-ABI_SRC_BLT = 1     # The file is built by a script
-ABI_SRC_DEP = 2     # The file depends on other files
+ABI_SRC_NIL = 0  # No attribute
+ABI_SRC_BLT = 1  # The file is built by a script
+ABI_SRC_DEP = 2  # The file depends on other files
 
 # Source files
 sources = [
@@ -41,6 +41,7 @@ sources = [
     "m_lattice_io_netcdf.F90",
     "m_lattice_langevin_mover.F90",
     "m_lattice_mover.F90",
+    "m_lattice_ncfile.F90",
     "m_lattice_verlet_mover.F90",
     "m_linked_list.F90",
     "m_lwf_mover.F90",

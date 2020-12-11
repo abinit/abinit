@@ -49,6 +49,8 @@ module m_multibinit_cell
      integer:: natom = 0
      integer, allocatable  :: zion(:)
      real(dp), allocatable :: masses(:), xcart(:,:)
+     integer, allocatable :: ilatt_prim(:)
+     integer, allocatable :: rvec(:,:)
      real(dp) :: cell(3,3)
    contains
      procedure :: initialize => latt_initialize
