@@ -24,7 +24,7 @@ the computer you are using. This can be for instance:
 or the use of a specific submission file.
 
 This tutorial should take about 1.5 hour and requires a modern 
-computer cluster of 50 CPU cores or more.
+computer cluster of 20 CPU cores or more.
 
 [TUTORIAL_READMEV9]
 
@@ -50,15 +50,15 @@ generate the WFK file with the sequential version of the code.
 Now we will perform a similar calculation taking advantage of the k-point parallelism
 implemented in the ground-state part.
 
-First of all, copy the file tmbt_1.abi in the working directory Work_mbt:
+First of all, copy all input files tmbt_*.abi in the working directory Work_mbt:
 
     cd Work_mbt
-    cp ../tmbt_1.abi .
+    cp ../tmbt_*.abi .
 
 Now open the input file *\$ABI_TESTS/tutoparal/Input/tmbt_1.abi* in your
 preferred editor, and look at its structure.
 
-{% tests/tutoparal/Input/tmbt_1.abi %}
+{% dialog tests/tutoparal/Input/tmbt_1.abi %}
 
 The first dataset performs a rather standard SCF calculation to obtain the
 ground-state density. The second dataset reads the density file and calculates

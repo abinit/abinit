@@ -1,4 +1,6 @@
 # Crystalline alpha-quartz
+# Generate the WFK with a sufficient number of empty bands for G0W0 calculations
+
 ndtset 2
 timopt -1
 
