@@ -99,8 +99,8 @@ module m_wfd
 
  type,public :: kdata_t
 
-   logical :: gw1rdm 
-   ! Decide if this is a GW density matrix update calculation.
+   logical :: use_fnl_dir0der0 
+   ! Decide if we need to use fnl_dir0der0.
 
    integer :: istwfk
    ! Storage mode for this k point.
@@ -130,7 +130,7 @@ module m_wfd
    real(dp),allocatable :: ph3d(:,:,:)
    ! ph3d(2, npw, natom)
    ! 3-dim structure factors, for each atom and each plane wave.
-   ! Available only for PAW or GW density matrix update gw1rdm==2.
+   ! Available only for PAW or use_fnl_dir0der0 == true.
 
    real(dp),allocatable :: phkxred(:,:)
    ! phkxred(2,natom))
@@ -138,7 +138,7 @@ module m_wfd
 
    real(dp),allocatable :: fnl_dir0der0(:,:,:,:)
    ! fnl_dir0der0(npw,1,lmnmax,ntypat)
-   ! nonlocal form factors. Computed only if usepaw == 1 or GW density matrix update gw1rdm==2.
+   ! nonlocal form factors. Computed only if usepaw == 1 or use_fnl_dir0der0 == true.
    ! fnl(k+G).ylm(k+G) if PAW
    ! f_ln(k+G)/|k+G|^l if NC
 
@@ -298,7 +298,7 @@ module m_wfd
   logical :: rfft_is_symok      ! .TRUE. if the real space FFT mesh is compatible with the rotational
                                 ! part of the space group.
 
-  logical :: gw1rdm             ! .TRUE. if the the Wfd is used for a GW density matrix update.
+  logical :: use_fnl_dir0der0   ! .TRUE. if the the Wfd must store fnl dir0der0.
 
   real(dp) :: dilatmx
 
@@ -611,11 +611,11 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
 
  ! Calculate 3-dim structure factor phase information.
  matblk = 0
- if(psps%usepaw == 1 .or. Kdata%gw1rdm) then
+ if(psps%usepaw == 1 .or. Kdata%use_fnl_dir0der0) then
    matblk=Cryst%natom
  end if
  ABI_MALLOC(Kdata%ph3d,(2, npw_k, matblk))
- if(psps%usepaw == 1 .or. Kdata%gw1rdm) then
+ if(psps%usepaw == 1 .or. Kdata%use_fnl_dir0der0) then
    call ph1d3d(1,Cryst%natom,Kdata%kg_k,matblk,Cryst%natom,npw_k,ngfft(1),ngfft(2),&
    &ngfft(3),Kdata%phkxred,ph1d,Kdata%ph3d)
  end if
@@ -644,7 +644,7 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
 
  ! Compute nonlocal form factors fnl_dir0der0 for all (k+G).
  dimffnl = 0
- if(psps%usepaw == 1 .or. Kdata%gw1rdm) then
+ if(psps%usepaw == 1 .or. Kdata%use_fnl_dir0der0) then
    dimffnl = 1+3*ider0
  end if
  ABI_MALLOC(Kdata%fnl_dir0der0,(npw_k, dimffnl, Psps%lmnmax, Cryst%ntypat))
@@ -868,7 +868,7 @@ end subroutine copy_kdata_1D
 
 subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_mask,&
 &  nspden,nspinor,ecut,ecutsm,dilatmx,istwfk,kibz,ngfft,nloalg,prtvol,pawprtvol,comm,&
-&  gw1rdm)
+&  use_fnl_dir0der0) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -884,7 +884,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  real(dp),intent(in) :: kibz(3,nkibz)
  logical,intent(in) :: bks_mask(mband,nkibz,nsppol)
  logical,intent(in) :: keep_ur(mband,nkibz,nsppol)
- integer,intent(in),optional :: gw1rdm
+ logical,intent(in),optional :: use_fnl_dir0der0
  type(Pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Psps%usepaw)
 
 !Local variables ------------------------------
@@ -935,9 +935,9 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  Wfd%usepaw = Psps%usepaw
  Wfd%usewvl = 0 ! wavelets are not supported.
- Wfd%gw1rdm = .false.
- if(present(gw1rdm)) then
-   Wfd%gw1rdm = (gw1rdm==2)
+ Wfd%use_fnl_dir0der0 = .false.
+ if(present(use_fnl_dir0der0)) then
+   Wfd%use_fnl_dir0der0 = use_fnl_dir0der0
  end if
  Wfd%natom  = Cryst%natom
  Wfd%ntypat = Cryst%ntypat
@@ -1111,7 +1111,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ! TODO: This one will require some memory if nkibz is large.
  ABI_MALLOC(Wfd%Kdata, (Wfd%nkibz))
- Wfd%Kdata%gw1rdm=Wfd%gw1rdm
+ Wfd%Kdata%use_fnl_dir0der0=Wfd%use_fnl_dir0der0
 
  do ik_ibz=1,Wfd%nkibz
    kpoint  = Wfd%kibz(:,ik_ibz)

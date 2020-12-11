@@ -735,7 +735,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
    Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
-   Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,Dtset%gw1rdm)
+   Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,use_fnl_dir0der0=(Dtset%gw1rdm==2))
 
  ! MRM: also initialize the Wfd_nato_master for GW 1-RDM if required.
  ! Warning, this should be replaced by copy but copy fails due to bands being allocated in different manners. Do it in the future! FIXME 
