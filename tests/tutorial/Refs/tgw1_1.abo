@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.3.2 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h22 )
+.Starting date : Thu 10 Dec 2020.
+- ( at 18h12 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tgw1_1/tgw1_1.in
-- output file    -> tgw1_1.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/TestBot_MPI1/tutorial_tgw1_1/tgw1_1.abi
+- output file    -> tgw1_1.abo
 - root for input  files -> tgw1_1i
 - root for output files -> tgw1_1o
 
@@ -304,8 +304,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -645,7 +645,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000 -16.032  -0.000  -0.025   0.000  -0.020   0.000  -0.025  -0.000
        -0.000   0.000  -5.107   0.000  -0.281   0.000  -0.252  -0.000  -0.256
@@ -659,8 +659,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
        -0.000   0.000  -1.067   0.000  -0.119   0.000  -0.099  -0.000  -0.102
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  24.4707
-  dielectric constant without local fields =  27.1044
+  dielectric constant =  24.4474
+  dielectric constant without local fields =  27.0795
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     37.14  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -668,19 +668,19 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.041   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.041   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.484   0.007  -0.007  -0.022   0.022   0.022  -0.022  -0.008   0.008
-      0.000   0.007   0.007  -0.022  -0.022   0.022   0.022  -0.008  -0.008
+      0.484   0.007  -0.007  -0.022   0.022   0.022  -0.022  -0.007   0.007
+      0.000   0.007   0.007  -0.022  -0.022   0.022   0.022  -0.007  -0.007
        1       2       3       4       5       6       7       8       9
-      0.484   0.007  -0.007  -0.022   0.022   0.022  -0.022  -0.008   0.008
-      0.000  -0.007  -0.007   0.022   0.022  -0.022  -0.022   0.008   0.008
+      0.484   0.007  -0.007  -0.022   0.022   0.022  -0.022  -0.007   0.007
+      0.000  -0.007  -0.007   0.022   0.022  -0.022  -0.022   0.007   0.007
 
 
 
@@ -1110,10 +1110,55 @@ P           mkmem           6
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          4.9        0.08      0.001
+- Total wall clock time (s,m,h):          4.9        0.08      0.001
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            4.9, wall_time =            4.9
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- fourwf%(pot)                   1.130  23.0      1.151  23.4           9038      -1.00        0.98       0.98
+- sigma/=fourdp                  1.025  20.9      1.030  20.9              1      -1.00        1.00       1.00
+- projbd                         0.380   7.8      0.380   7.7          12860      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.242   4.9      0.242   4.9             -1      -1.00        1.00       1.00
+- pspini                         0.171   3.5      0.171   3.5              4      -1.00        1.00       1.00
+- nonlop(apply)                  0.157   3.2      0.139   2.8           9038      -1.00        1.13       1.13
+- invars2                        0.150   3.1      0.151   3.1              4      -1.00        1.00       1.00
+- timing timab                   0.102   2.1      0.102   2.1             10      -1.00        1.00       1.00
+- getghc-other                   0.087   1.8      0.095   1.9             -1      -1.00        0.92       0.92
+- abinit(2)                      0.051   1.0      0.052   1.1              1      -1.00        0.98       0.98
+- ewald                          0.047   1.0      0.047   1.0              4      -1.00        1.00       1.00
+- others (118)                   0.076   1.6      0.077   1.6             -1      -1.00        0.99       0.99
+-<END_TIMER>
+-
+- subtotal                       3.618  73.8      3.637  73.8                                  0.99       0.99
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           4.9, wall_time =           4.9
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- fourwf%(pot)                   1.130  23.0      1.151  23.4           9038      -1.00        0.98       0.98
+- sigma/=fourdp                  1.025  20.9      1.030  20.9              1      -1.00        1.00       1.00
+- projbd                         0.380   7.8      0.380   7.7          12860      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.242   4.9      0.242   4.9             -1      -1.00        1.00       1.00
+- pspini                         0.171   3.5      0.171   3.5              4      -1.00        1.00       1.00
+- nonlop(apply)                  0.157   3.2      0.139   2.8           9038      -1.00        1.13       1.13
+- invars2                        0.150   3.1      0.151   3.1              4      -1.00        1.00       1.00
+- timing timab                   0.102   2.1      0.102   2.1             10      -1.00        1.00       1.00
+- getghc-other                   0.087   1.8      0.095   1.9             -1      -1.00        0.92       0.92
+- abinit(2)                      0.051   1.0      0.052   1.1              1      -1.00        0.98       0.98
+- ewald                          0.047   1.0      0.047   1.0              4      -1.00        1.00       1.00
+- others (118)                   0.076   1.6      0.077   1.6             -1      -1.00        0.99       0.99
+-<END_TIMER>
 
+- subtotal                       3.618  73.8      3.637  73.8                                  0.99       0.99
 
 ================================================================================
 
@@ -1197,10 +1242,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.6
+- Proc.   0 individual time (sec): cpu=          4.9  wall=          4.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.6  wall=          4.6
++Overall time at end (sec) : cpu=          4.9  wall=          4.9

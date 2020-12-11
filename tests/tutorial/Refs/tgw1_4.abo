@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.3.2 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h22 )
+.Starting date : Thu 10 Dec 2020.
+- ( at 18h13 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_4.in
-- output file    -> tgw1_4.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/TestBot_MPI1/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_4.abi
+- output file    -> tgw1_4.abo
 - root for input  files -> tgw1_4i
 - root for output files -> tgw1_4o
 
@@ -568,8 +568,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -649,8 +649,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
        -0.000   0.000  -1.949   0.000  -0.065  -0.000  -0.149  -0.000  -0.173
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  96.4489
-  dielectric constant without local fields = 140.4403
+  dielectric constant =  96.4484
+  dielectric constant without local fields = 140.4395
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     43.67  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -795,7 +795,7 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.515966E-01 Ha ,    6.846292E+00 eV
+ New Fermi energy :        2.515966E-01 Ha ,    6.846293E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -897,8 +897,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
        -0.000   0.000  -2.165   0.000   0.111  -0.000   0.101   0.000   0.108
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  97.6146
-  dielectric constant without local fields = 140.4449
+  dielectric constant =  97.6141
+  dielectric constant without local fields = 140.4441
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     70.16  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -906,19 +906,19 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1043,12 +1043,12 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.464113E-01 Ha ,    6.705191E+00 eV
+ New Fermi energy :        2.464113E-01 Ha ,    6.705192E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.1173 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1173 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1174 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1174 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
@@ -1145,8 +1145,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
        -0.000   0.000  -2.135   0.000   0.098  -0.000   0.098   0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.3057
-  dielectric constant without local fields = 140.4463
+  dielectric constant =  98.3052
+  dielectric constant without local fields = 140.4456
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.46  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -1393,8 +1393,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
        -0.000   0.000  -2.133   0.000   0.098  -0.000   0.098  -0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.4643
-  dielectric constant without local fields = 140.4466
+  dielectric constant =  98.4638
+  dielectric constant without local fields = 140.4458
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     90.54  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -1402,19 +1402,19 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1539,7 +1539,7 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.432734E-01 Ha ,    6.619805E+00 eV
+ New Fermi energy :        2.432734E-01 Ha ,    6.619806E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -1641,8 +1641,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
        -0.000   0.000  -2.133  -0.000   0.098  -0.000   0.098   0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.4797
-  dielectric constant without local fields = 140.4466
+  dielectric constant =  98.4792
+  dielectric constant without local fields = 140.4458
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     92.44  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -1659,10 +1659,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1787,7 +1787,7 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.430340E-01 Ha ,    6.613293E+00 eV
+ New Fermi energy :        2.430339E-01 Ha ,    6.613288E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -2160,10 +2160,45 @@ P           mkmem           1
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          9.8        0.16      0.003
+- Total wall clock time (s,m,h):          9.9        0.16      0.003
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            9.8, wall_time =            9.9
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  6.716  68.3      6.745  68.3              5      -1.00        1.00       1.00
+- invars2                        0.391   4.0      0.393   4.0             10      -1.00        1.00       1.00
+- pspini                         0.180   1.8      0.182   1.8             10      -1.00        0.99       0.99
+- abinit(2)                      0.138   1.4      0.139   1.4              1      -1.00        1.00       1.00
+- ewald                          0.132   1.3      0.134   1.4             10      -1.00        0.99       0.99
+- timing timab                   0.108   1.1      0.109   1.1             10      -1.00        0.99       0.99
+- others (123)                   0.036   0.4      0.035   0.4             -1      -1.00        1.03       1.03
+-<END_TIMER>
+-
+- subtotal                       7.702  78.3      7.737  78.3                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           9.8, wall_time =           9.9
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  6.716  68.3      6.745  68.3              5      -1.00        1.00       1.00
+- invars2                        0.391   4.0      0.393   4.0             10      -1.00        1.00       1.00
+- pspini                         0.180   1.8      0.182   1.8             10      -1.00        0.99       0.99
+- abinit(2)                      0.138   1.4      0.139   1.4              1      -1.00        1.00       1.00
+- ewald                          0.132   1.3      0.134   1.4             10      -1.00        0.99       0.99
+- timing timab                   0.108   1.1      0.109   1.1             10      -1.00        0.99       0.99
+- others (123)                   0.036   0.4      0.035   0.4             -1      -1.00        1.03       1.03
+-<END_TIMER>
 
+- subtotal                       7.702  78.3      7.737  78.3                                  1.00       1.00
 
 ================================================================================
 
@@ -2247,10 +2282,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.9  wall=          9.0
+- Proc.   0 individual time (sec): cpu=          9.8  wall=          9.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.9  wall=          9.0
++Overall time at end (sec) : cpu=          9.8  wall=          9.9
