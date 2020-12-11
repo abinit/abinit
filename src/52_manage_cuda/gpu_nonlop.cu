@@ -85,7 +85,7 @@
 //  lmnmax=max. number of (l,m,n) components over all types of atoms
 //  matblk=dimension of the arrays ph3din and ph3dout
 //  mgfft=maximum size of 1D FFTs
-//  mpi_enreg=informations about MPI parallelization
+//  mpi_enreg=information about MPI parallelization
 //  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 //  mpssoang= 1+max(spin*angular momentum) for nonlocal pseudopotentials
 //  natom=number of atoms in cell

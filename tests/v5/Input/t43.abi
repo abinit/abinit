@@ -1,0 +1,39 @@
+ #test hydrogen in a BIG box.
+ #Checks FFT routines for large grid in x direction that doesn't fit cpu cache
+ acell 300 2*4.00
+ ecut  30
+  kptopt 0
+ kpt     0.5   0.5   0.5
+ nkpt    1
+ natom   1
+ nband   1
+ nstep   1
+ ntypat  1
+ occopt  1
+ rprim   1.0  0.0  0.0
+         0.0  1.0  0.0
+         0.0  0.0  1.0
+ xred    0.0  0.0  0.0
+ typat   1
+ tolwfr  1.e-22
+ znucl   1
+ nline   2
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t43.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H atom, non-spin-polarized.
+#%%   Test a very large grid in x direction.
+#%%<END TEST_INFO>

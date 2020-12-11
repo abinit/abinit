@@ -1436,7 +1436,7 @@ end subroutine strsocv
 !!
 !! INPUTS
 !!  istwf_k=storage mode of the vector
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  npw=number of planewaves
 !!  option=1 multiply by 2
 !!        =2 multiply by 1/2

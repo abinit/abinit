@@ -146,7 +146,7 @@ contains
 !!  mkqmem=Number of k+q points treated by this node (GS data)
 !!  mk1mem=Number of k points treated by this node (RF data)
 !!  mpert=maximum number of ipert
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nfftf=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)

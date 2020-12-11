@@ -1,0 +1,84 @@
+#GaAs in hypothetical wurzite (hexagonal) structure
+
+ndtset 3
+
+# Set 1 : initial self-consistency
+
+kptopt1   1
+tolvrs1 1.0d-18
+
+
+#set 2 the ddk
+rfelfd2 2  # only derivative of the gs wf
+rfdir2 1 1 1
+nqpt2 1
+qpt2 0.0 0.0 0.0 #only the gamma point
+getwfk2 -1
+kptopt2 2
+iscf2 -3
+tolwfr2 1.0d-20
+
+
+# Set 3 : response-function strain calculation
+
+rfphon3 1
+rfatpol3 1 4
+rfelfd3 3
+rfdir3 1 1 1
+nqpt3 1
+qpt3 0 0 0
+rfstrs3  3
+getwfk3 -2
+getddk3 -1
+kptopt3 2
+tolvrs3 1.0d-10
+
+
+
+#comon input data
+
+ acell    7.5526  7.5526  12.3333
+ diemac   10.0
+   ecut   5.0
+  natom   4
+  nband   8
+  ngkpt   2  2  2
+nshiftk   1
+  nstep   24
+ ntypat   2
+ prtvol   10
+  rprim   0.866025403784439  0.5  0.0
+         -0.866025403784439  0.5  0.0
+          0.0                0.0  1.0
+ shiftk   0.0 0.0 0.5
+# tolvrs   1.0d-16
+  typat   1 1 2 2
+#coordinates were optimized
+   xred   0.3333333333333333  0.6666666666666667  0.000878861213
+          0.6666666666666667  0.3333333333333333  0.500878861213
+          0.3333333333333333  0.6666666666666667  0.374132194455
+          0.6666666666666667  0.3333333333333333  0.874132194455
+   znucl  31 33
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/31ga.3.hgh, PseudosHGH_pwteter/33as.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t67.abi, t68.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t67.abo, tolnlines = 17, tolabs = 21.0, tolrel = 3.000e-03, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = X. Wu
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   This is a DDB file generating run which prepares for the calculation #68.
+#%%   The material is GaAs in hypothetical wurzite (hexagonal) structure, with
+#%%   ecut=5 Hartree, kpoint sampling=2,2,2. The response function calculations
+#%%   are with respect to electric field, strain, and displacement. Notice that
+#%%   the result has not converged yet, due to the low cutoff and k point grid.
+#%%<END TEST_INFO>

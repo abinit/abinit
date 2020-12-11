@@ -1,0 +1,94 @@
+# Nitrogen molecule, determination of an optimal densty parameter
+# Try to use defaults valid for other systems as well.
+
+#the adequate ecut and acell will depend on the system, and pseudopotential
+ acell  7 7 9
+ ecut 20
+#znucl also depends on the system
+ znucl  7.0
+
+
+#Here, the different trial densty
+ ndtset 8
+
+ densty1 0.40
+ densty2 0.55
+ densty3 0.60
+ densty4 0.61
+ densty5 0.65
+ densty6 0.80
+ densty7 1.00
+ densty8 1.20
+
+#densty1 0.5
+#densty2 0.55
+#densty3 0.6
+#densty4 0.65
+#densty5 0.7
+#densty6 0.75
+#densty7 0.8
+
+ densty9 1.2
+ densty10 1.3
+ densty11 1.4
+ densty12 1.5
+ densty13 1.7
+ densty14 2.0
+
+
+#The values here are standard ones
+ diemac 1.0d0
+ diemix 0.5d0
+ enunit 2
+ intxc 1
+ kptopt 0
+
+ kpt   3*0.25d0
+ natom  2
+ nkpt 1
+#Only one step is needed : one should get the lowest energy
+#in the fixed input potential
+ nstep 1
+#nstep 20
+#
+
+ nsym 8
+ symrel
+       1  0  0    0  1  0    0  0  1
+      -1  0  0    0  1  0    0  0  1
+       1  0  0    0 -1  0    0  0  1
+       1  0  0    0  1  0    0  0 -1
+      -1  0  0    0 -1  0    0  0  1
+      -1  0  0    0  1  0    0  0 -1
+       1  0  0    0 -1  0    0  0 -1
+      -1  0  0    0 -1  0    0  0 -1
+
+ ntypat  1
+#Use metallic occupations, and takes the default nband
+ occopt 7
+ rprim 1 0 0  0 1 0  0 0 1
+ toldfe 1.d-6
+ typat  1 1
+ wtk  1
+ xcart    0.0 0.0  0.55
+          0.0 0.0 -0.55
+          Angstrom
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/7n.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t68.abo, tolnlines = 0, tolabs = 1.451e-08, tolrel = 2.000e-10, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Compute an optimal densty parameter for N2. Molecular computation,
+#%%   using multi-dataset mode.
+#%%<END TEST_INFO>

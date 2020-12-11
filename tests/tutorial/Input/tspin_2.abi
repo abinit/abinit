@@ -1,0 +1,53 @@
+# Fe fcc structure with two atoms per unit cell for test of antiferromagnetic
+# This is the simplest fcc structure compatible with a X point spiral
+
+#data for each data set: how to get densities of state
+ ngkpt   6 6 4
+ prtdos 1  
+#Common data
+ prtden   1
+ tolwfr   1.0d-7
+  acell   3*6.60
+   ecut   18.0
+  natom   2
+  nband   16
+nshiftk   1
+#Antiferromagnet order
+ spinat 0.0 0.0   4.0
+        0.0 0.0  -4.0
+  nsppol   1
+  nspden   2
+#Antiferromagnet
+  nstep   70
+ ntypat   1
+ occopt   3
+ rprim    0.5  -0.5  0.0
+          0.5   0.5  0.0
+          0.0   0.0  1.0
+ shiftk   0.5 0.5 0.5
+ tsmear   0.01
+  typat   1 1
+   xred   0.0  0.0  0.0
+          0.5  0.0  0.5
+ znucl    26
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tspin_2.abo, tolnlines = 60, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options=-medium
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC
+#%% description = 
+#%%   Fe fcc structure with two atoms per unit cell for test of antiferromagnetic
+#%%   This is the simplest fcc structure compatible with a X point spiral
+#%%<END TEST_INFO>

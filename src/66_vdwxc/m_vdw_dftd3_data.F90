@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! Retrieve data (tabulated coefficients) for DFT-D3 corrections (see
-!! vdw_dftd3 routine for more informations). It retrieves the tabulated
+!! vdw_dftd3 routine for more information). It retrieves the tabulated
 !! dispersion coefficients C6, the supporting points of the interpolation
 !! and the cut-off radii (R0) for the dispersion correction
 !! COPYRIGHT

@@ -1,0 +1,97 @@
+# Hydrogen diatomic molecule
+# in the antiferromagnetic case
+# Test response functions in the antiferromagnetic case
+
+ ndtset 6
+
+#Dataset 1 : GS in the spin-polarized case, without using the
+#anti-ferromagnetic symmetry (spinat breaks it)
+
+ nsppol1   2        spinmagntarget1 0.0d0
+ xcart1    -2 0 0   2 0 0
+ spinat1   0 0 0.99   0 0 -1
+
+#Dataset 2 : RF in the spin-polarized case, without using the
+#anti-ferromagnetic symmetry (spinat breaks it)
+ nsppol2   2        spinmagntarget2 0.0d0
+ rfphon2   1
+ spinat2   0 0 0.99   0 0 -1
+ xcart2    -2 0 0   2 0 0
+ getwfk2   1
+   nqpt2   1
+ tolvrs2   1.0d-8
+
+#Dataset 3 : GS with automatic determination of Shubnikov symmetry
+ nsppol3   1
+ xcart3    -2 0 0   2 0 0
+ getwfk3   1
+
+#Dataset 4 : GS with automatic determination of Shubnikov symmetry
+ nsppol4   1
+ xcart4    -2.001 0 0   2 0 0
+ getwfk4   1
+
+#Dataset 5 : GS with automatic determination of Shubnikov symmetry
+ nsppol5   1
+ xcart5    -1.999 0 0   2 0 0
+ getwfk5   1
+
+#Dataset 6 : RF partially using anti-ferromagnetic symmetries
+ nsppol6   2          spinmagntarget6 0.0d0
+ xcart6    -2 0 0   2 0 0
+ getwfk6   3
+ rfphon6   1
+   nqpt6   1
+ tolvrs6   1.0d-8
+
+
+#For response function calculations
+ rfdir     1 0 0
+ rfatpol   1 2
+ qpt       3*0.0d0
+
+#Common data
+ acell 12 10 10
+ diemac 1.0d0   diemix 0.5d0
+ ecut 4.5
+ kptopt 0
+ kpt   3*0.0
+ natom  2
+ nband 1
+ nkpt 1
+ nspden 2
+ nstep 40
+ ntypat  1
+ spinat 0 0 1   0 0 -1
+ tolvrs 1.0d-14
+ typat  2*1
+ wtk  1
+ znucl  1.0
+ chksymtnons 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t12.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%     H2 diatomic molecule. Spin-polarized (anti-ferromagnetic).
+#%%     Test phonon RF for spin-polarized case.
+#%%     ixc=1 (Teter LSDA)
+#%%     From datasets 3 and 4, one gets the derivatives
+#%%     with respect to the atomic displacement along x.
+#%%     The simple finite-difference formula gives the
+#%%     2DTE 6.283100652 Ha, while the direct computation,
+#%%     without using Shubnikov symmetries, gives
+#%%     6.282967527 Ha.
+#%%<END TEST_INFO>

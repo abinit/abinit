@@ -1,0 +1,165 @@
+#
+#  the sequence of datasets makes the ground states and
+#   all of the explicit perturbations of the single
+#   Al atom in all directions, for the irreducible
+#   qpoints in a 2x2x2 grid.
+#
+ndtset 12
+
+#
+# DATASET 1 : make ground state wavefunctions and density
+#
+tolwfr1  1.0d-14
+nqpt1    0         # remove default
+getwfk1  0         # remove default
+rfphon1  0         # remove default
+prtwf1   1
+kptopt1  1
+
+#
+#defaults for all phonon runs
+#
+prepgkk 1        # flag to calculate all perturbations for el-phon calculations
+use_nonscf_gkk 0 # enforce old default and scf-calculate all perturbations
+nqpt 1           # 1 qpoint at a time
+tolvrs 1.e-8     # tolerance on 2DTE convergence: potential^(1) is what we need
+getwfk 1         # all other DS get wf from DS1
+prtwf 0
+rfatpol 1 2      # all atoms are perturbed
+rfdir 1 1 1      # all directions of perturbation
+rfphon 1
+
+qpt2   0.0 0.0 0.0
+qpt3   1/2 0.0 0.0
+qpt4   0.0 0.0 1/2
+#qpt4   1/2 1/2 0.0
+qpt5   1/2 0.0 1/2
+
+# DS6 get ddk
+rfphon6   0             # no phonons here
+rfelfd6   2             # Activate the calculation of the d/dk perturbation
+qpt6      0.0 0.0 0.0   # This is a calculation at the Gamma point
+iscf6    -3             # The d/dk perturbation must be treated non SC-ly
+tolwfr6   1.0d-14       # Must use tolwfr for non-self-consistent calculations
+
+# WF on full BZ
+tolwfr7      1.0d-14
+prtwf7       1
+prtden7      1
+getwfk7      1
+nstep7       1
+nline7       1
+nqpt7        0
+rfphon7      0
+
+# Compute the GKK correctly (no jauge problem)
+# This step is very quick as NSCF+nstep 1
+qpt8         0.0 0.0 0.0
+prtgkk8      1
+iscf8       -2
+tolwfr8      1.0d-14
+nstep8       1
+nline8       1
+getwfk8      7
+get1den8     2
+qpt9         1/2 0.0 0.0
+prtgkk9      1
+iscf9       -2
+tolwfr9      1.0d-14
+nstep9       1
+nline9       1
+getwfk9      7
+get1den9     3
+#qpt10        1/2 1/2 0.  
+qpt10        0.0 0.0 1/2
+prtgkk10     1
+iscf10      -2
+tolwfr10     1.0d-14
+nstep10      1
+nline10      1
+getwfk10     7
+get1den10    4
+qpt11        1/2 0.0 1/2
+prtgkk11     1
+iscf11      -2
+tolwfr11     1.0d-14
+nstep11      1
+nline11      1
+getwfk11     7
+get1den11    5
+
+# DS12 get the correct ddk
+prtgkk12     1
+rfphon12     0             # no phonons here
+rfelfd12     2             # Activate the calculation of the d/dk perturbation
+qpt12        0.0 0.0 0.0   # This is a calculation at the Gamma point
+iscf12      -3             # The d/dk perturbation must be treated non SC-ly
+tolwfr12     1.0d-14       # Must use tolwfr for non-self-consistent calculations
+nstep12      1
+nline12      1
+getwfk12     7
+get1den12    6
+
+
+#  the kpoint grid is minimalistic to keep the calculation
+#   manageable.
+ngkpt 4 4 4
+nshiftk 1
+shiftk
+0. 0. 0.
+#1/3 1/3 1/2
+#2/3 2/3 1/2
+
+
+kptopt 3
+
+#  as is the kinetic energy cutoff
+ecut 4.0
+
+#
+#  Common data
+#
+
+acell 2*2.9508 4.6855  Angstr
+angdeg 90 90 120
+nband 10
+nbdbuf 2
+nline 8
+
+#  include metallic occupation function with a small smearing
+occopt 7
+tsmear 0.001
+natom 2
+typat 1 1
+xred
+0.00 0.00 0.00
+1/3 2/3 1/2
+nstep 100
+ntypat 1
+znucl 22
+
+#prtnest 1
+#fermie_nest 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/22ti.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
+#%% no_check = yes
+#%% [files]
+#%% files_to_test = 
+####  The comparison of the output file has been disabled: this test
+####  fails on several slaves due to a different number of SCF cycles
+####  Finding the magic numbers that make the test pass everywhere is a tricky business.
+####%% t90.out, tolnlines = 11, tolabs = 4.0e-3, tolrel = 1.1, fld_options =  -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Verstraete
+#%% keywords = NC, DFPT 
+#%% description = 
+#%%   Ground state and phonons of hcp Ti (similar to test 72, but grid 2 2 4)
+#%%<END TEST_INFO>

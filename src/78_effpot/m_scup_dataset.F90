@@ -679,7 +679,7 @@ end subroutine invars10scup
 !!
 !!
 !! OUTPUT
-!! scup_kpath <type(kpath_t)> = kpath_t with all informations about kpath
+!! scup_kpath <type(kpath_t)> = kpath_t with all information about kpath
 !!
 !! NOTES
 !! Should be executed by one processor only.
@@ -752,7 +752,7 @@ end subroutine scup_kpath_new
 !!
 !! INPUTS
 !!
-!! scup_kpath<tpye(kpath_t) = kpath_t with all informations about kpath  
+!! scup_kpath<tpye(kpath_t) = kpath_t with all information about kpath  
 !!
 !! OUTPUT
 !! Only Printing

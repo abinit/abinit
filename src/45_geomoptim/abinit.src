@@ -25,6 +25,7 @@ sources = [
  "m_bfgs.F90",
  "m_ga.F90",
  "m_hmc.F90",
+ "m_ipi.F90",
  "m_lbfgs.F90",
  "m_mep.F90",
  "m_m1geo.F90",

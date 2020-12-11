@@ -96,7 +96,7 @@
 
 #include "abi_common.h"
 
-MODULE m_hide_blas
+module m_hide_blas
 
  use defs_basis
  use m_abicore
@@ -1311,5 +1311,5 @@ end subroutine sqmat_oconjgtrans_dpc
 
 !----------------------------------------------------------------------
 
-END MODULE m_hide_blas
+end module m_hide_blas
 !!***

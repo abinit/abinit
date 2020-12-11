@@ -1,0 +1,82 @@
+# Finite difference calculation of the clamped-ion
+# piezoelectric constants of AlAs
+# (M. Veithen, 3.5.2005)
+
+ndtset 3
+
+# strain: eta_4 = 0.00
+acell1     3*7.44856
+rprim1        0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
+              7.0710678119E-01  0.0000000000E+00  7.0710678119E-01
+              7.0710678119E-01  7.0710678119E-01  0.0000000000E+00 
+
+# strain: eta_4 = 0.01
+acell2  7.4858028  2*7.44856
+rprim2     0.                     0.70710678118654746    0.70710678118654746 
+           0.70710236181059671    0.00353551180905298    0.70710236181059671 
+           0.70710236181059671    0.70710236181059671    0.00353551180905298
+
+# strain: eta_4 = -0.01     2*7.44856
+acell3  7.4113172  2*7.44856
+rprim3     0.                     0.70710678118654757    0.70710678118654757
+           0.70710236181059671   -0.00353551180905298    0.70710236181059671 
+           0.70710236181059671    0.70710236181059671   -0.00353551180905298
+
+tolsym 1.0e-8 # Since we make rather small lattice vector changes, with the default value of tolsym
+              # ABINIT will recognize that we are close to a more symmetric
+              # configuration, and will resymmetrize the primitive vectors, something we want to avoid ...
+
+
+#Definition of the atoms
+#***********************
+   natom 2
+   ntypat 2
+   znucl 13 33
+   typat 1 2
+   ixc 3
+   xred   0.00  0.00  0.00
+          0.25  0.25  0.25
+
+#Definition of the SCF procedure
+#*******************************
+   nstep 100
+
+
+#Definition of the plane wave basis set
+#**************************************
+   ecut  2.8
+   ecutsm 0.5
+   dilatmx 1.05
+   ngkpt 6 6 6
+   nshiftk 4
+   shiftk 0.5 0.5 0.5
+          0.5 0.0 0.0
+          0.0 0.5 0.0
+          0.0 0.0 0.5
+   toldfe 1.0d-12
+
+# Berry phase calculation of the polarization
+#********************************************
+   berryopt -1
+   rfdir 1 1 1
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tffield_4.abo, tolnlines=  3, tolabs= 9.999e-9, tolrel= 1.224e-04
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Veithen
+#%% keywords = NC, DFPT
+#%% description = 
+#%%  Finite difference calculation of the clamped-ion
+#%%  piezoelectric constants of AlAs
+#%%<END TEST_INFO>

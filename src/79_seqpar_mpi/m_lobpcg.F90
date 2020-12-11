@@ -73,7 +73,7 @@ CONTAINS
 !!  $ghc(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  iterationnumber=number of iterative minimizations in LOBPCG
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (Hartree)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  $vect(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  npw=number of planewaves at this k point.

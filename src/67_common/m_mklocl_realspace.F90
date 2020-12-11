@@ -1359,7 +1359,7 @@ subroutine ind_positions_mklocl(periodic,i,n,j,go)
 !!
 !! INPUTS
 !!  efield (3)=external electric field
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms
 !!  nfft=size of vpsp (local potential)
 !!  nspden=number of spin-density components

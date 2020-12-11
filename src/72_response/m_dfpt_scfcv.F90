@@ -169,7 +169,7 @@ contains
 !!  nkpt=number of k points in the full BZ
 !!  nkpt_rbz=number of k points in the reduced BZ for this perturbation
 !!  nkxc=second dimension of the kxc array.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  npwarr(nkpt_rbz)=number of planewaves in basis at this GS k point
 !!  npwar1(nkpt_rbz)=number of planewaves in basis at this RF k+q point
@@ -259,7 +259,7 @@ contains
 !! SIDE EFFECTS
 !!  cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)=updated wavefunctions (ortho. to occ. states);
 !!  initialized= if 0 the initialization of the RF run is not yet finished
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  rhog1(2,nfftf)=array for Fourier transform of RF electron density
 !!  rhor1(cplex*nfftf,nspden)=array for RF electron density in electrons/bohr**3.
 !!  === if psps%usepaw==1

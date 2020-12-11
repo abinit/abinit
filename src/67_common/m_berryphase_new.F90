@@ -2833,7 +2833,7 @@ end subroutine init_e_field_vars
 !!   pwnsfac(2,pwind_alloc) = phase factors for non-symmorphic translations
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg = informations about MPI parallelization
+!!  mpi_enreg = information about MPI parallelization
 !!    kptdstrb(nproc,nneighbour,fmkmem_max*nsppol) : Array required
 !!      by berryphase_new.f for MPI // over k-points. Defined
 !!      for k-points in the fBZ

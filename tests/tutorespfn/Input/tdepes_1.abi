@@ -1,0 +1,69 @@
+# C in diamond structure. 
+ ndtset 3
+ elph2_imagden 0.1 eV   # Imaginary shift of the denominator of the sum-over-states 
+                        # in the perturbation denominator. Usual value is 0.1 eV to reproduce
+                        # experimental broadening at 300K. Increasing the value help the 
+                        # convergence with respect to the number of q-points. 
+ ngkpt 2 2 2            # Underconverged : k-grid should be at least 4x4x4 for diamond to be converged.
+ nshiftk 1
+ shiftk 0.0 0.0 0.0
+
+# Ground state density
+ tolvrs1  1.0d-8      # Underconverged : tolvrs 1.0d-18 should be used for converged results
+
+# Non self-consistent calculation with an arbitrary q point (here Gamma)
+ getden2  1
+ iscf2   -2
+ nqpt2    1
+ qpt2     0.0 0.0 0.0
+ nbdbuf2  2
+ tolwfr2  1.0d-8       # Underconverged : tolwfr 1.0d-22 should be used for converged results
+ 
+# Computation at Gamma
+ getwfk3  1
+ getwfq3  2
+ nqpt3    1
+ qpt3     0.0 0.0 0.0  # Calculation at Gamma
+ ieig2rf3 5            # Static eigenvalues corrections using DFPT (Sternheimer)
+ smdelta3 1            # Flag required to produce the _EIGI2D used to 
+                       # compute the lifetime of electronic levels.
+                       # smdelta = 1 ==> Fermi-Dirac smearing.
+ nbdbuf3  2            # 2 buffer bands. RF converges much faster.
+ rfphon3  1            # Do phonon response
+ rfatpol3 1 2          # Treat displacements of all atoms
+ rfdir3   1 1 1        # Do all directions 
+ tolwfr3  1.0d-8       # Underconverged : tolwfr 1.0d-22 should be used for converged results
+ kptopt3  3
+
+# Cell dependent parameters
+ acell 3*6.675
+ rprim 0 .5 .5 .5 0 .5 .5 .5 0
+ nsym 1                # Disable symmetries. Symmetries are not yet in production.
+ natom 2
+ typat 1 1
+ xred 3*0.0 3*0.25
+ nband 12
+ ntypat 1
+ znucl 6
+ diemac 6
+ ecut 10              # Underconverged ecut. 
+ enunit 2
+ nstep 50
+ istwfk *1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tdepes_1.abo,  tolnlines= 20, tolabs=  5.000e-05, tolrel=  5.000e-04, fld_options=-medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = S. Ponc\'e
+#%% keywords = NC, DFPT, EPH_OLD
+#%% description = Temperature dependence calculation of diamond.
+#%%<END TEST_INFO>

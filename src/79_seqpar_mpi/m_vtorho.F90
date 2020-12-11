@@ -53,7 +53,7 @@ module m_vtorho
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
  use m_energies,           only : energies_type
- use m_hamiltonian,        only : init_hamiltonian, gs_hamiltonian_type
+ use m_hamiltonian,        only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_bandfft_kpt,        only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
                                   bandfft_kpt_savetabs, bandfft_kpt_restoretabs, prep_bandfft_tabs
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
@@ -380,7 +380,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:)
  real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:)
- real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vlocal_tmp(:,:,:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
  complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
@@ -390,7 +390,6 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
-!Variables for BigDFT
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
 #endif
@@ -694,51 +693,18 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
      ikpt_loc = 0
      ikg=0
 
-!    Set up local potential vlocal with proper dimensioning, from vtrial
-!    Also take into account the spin.
-     if(dtset%nspden/=4)then
-       if (psps%usepaw==0.or.pawfgr%usefinegrid==0) then
-         call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal,2)
-         if(with_vxctau) then
-           do ii=1,4
-             call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-                         vxctau(:,:,ii),vxctaulocal(:,:,:,:,ii),2)
-           end do
-         end if
-       else
-         ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-         call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-                        rhodum,rhodum,cgrvtrial,vtrial)
-         call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-                     cgrvtrial,vlocal,2)
-         if(with_vxctau) then
-           do ii=1,4
-             call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-                           rhodum,rhodum,cgrvtrial,vxctau(:,:,ii))
-             call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-                         cgrvtrial,vxctaulocal(:,:,:,:,ii),2)
-           end do
-         end if
-         ABI_DEALLOCATE(cgrvtrial)
-       end if
-     else
-       ABI_ALLOCATE(vlocal_tmp,(n4,n5,n6))
-       if (psps%usepaw==0.or.pawfgr%usefinegrid==0) then
-         do ispden=1,dtset%nspden
-           call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal_tmp,2)
-           vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-         end do
-       else
-         ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-         call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-         do ispden=1,dtset%nspden
-           call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vlocal_tmp,2)
-           vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-         end do
-         ABI_DEALLOCATE(cgrvtrial)
-       end if
-       ABI_DEALLOCATE(vlocal_tmp)
-     end if ! nspden
+     ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
+     ! Also, continue to initialize the Hamiltonian.
+
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                   dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, vtrial, vlocal)
+     call gs_hamk%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
+
+     if (with_vxctau) then
+       call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                     dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+       call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
+     end if
 
      rhoaug(:,:,:,:)=zero
 
@@ -747,17 +713,13 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
      if(has_vectornd) then
         do idir = 1, 3
-           ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-           call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
-           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
-           ABI_DEALLOCATE(cgrvtrial)
+          ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
+          call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
+          ABI_DEALLOCATE(cgrvtrial)
         end do
+        call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
      end if
-
-!    Continue to initialize the Hamiltonian
-     call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
-     if (with_vxctau) call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
-     if (has_vectornd) call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
 
      call timab(982,2,tsec)
 

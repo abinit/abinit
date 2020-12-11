@@ -2444,7 +2444,7 @@ end subroutine partial_dos_fractions
 !!   nsppol       =1 or 2 spin polarization channels
 !!  fatbands_flag =1 if pawfatbnd=1 or 2
 !!  mbesslang=maximum angular momentum for Bessel function expansion
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  prtdosm=option for the m-contributions to the partial DOS
 !!  ndosfraction=natsph*mbesslang
 !!  paw_dos_flag=option for the PAW contributions to the partial DOS

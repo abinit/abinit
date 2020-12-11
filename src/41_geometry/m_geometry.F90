@@ -67,6 +67,7 @@ MODULE m_geometry
  public :: symredcart         ! Convert a symmetry operation from reduced coordinates (integers) to cart coords (reals)
  public :: strainsym          ! Symmetrize the strain tensor.
  public :: stresssym          ! Symmetrize the stress tensor.
+ public :: stress_voigt_to_mat! Build 3x3 symmetric stress tensor from stress vector in Voigt notation.
  public :: strconv            ! Convert from symmetric storage mode in reduced coords to cart coords.
  public :: littlegroup_pert   ! Determines the set of symmetries that leaves a perturbation invariant.
  public :: irreducible_set_pert  ! Determines a set of perturbations that form a basis
@@ -835,7 +836,7 @@ subroutine getspinrot(rprimd, spinrot, symrel_conv)
 !scalars
  integer :: det,ii
  real(dp) :: cos_phi,norminv,phi,scprod,sin_phi
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  integer :: identity(3,3),symrel1(3,3)
  real(dp) :: axis(3),coord(3,3),coordinvt(3,3),matr1(3,3),matr2(3,3)
@@ -1066,7 +1067,7 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
 !Local variables-------------------------------
 !scalars
  real(dp) :: cosine,xmod,zmod
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: yaxis(3)
 
@@ -1076,17 +1077,17 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
  zmod = sqrt(zaxis(1)**2 + zaxis(2)**2 + zaxis(3)**2)
 
  if(xmod < 1.d-8)then
-   write(message,'(a,a,a,i6)')&
+   write(msg,'(a,a,a,i6)')&
 &   'The module of the xaxis should be greater than 1.d-8,',ch10,&
 &   'however, |xaxis|=',xmod
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
  if(zmod < 1.d-8)then
-   write(message,'(a,a,a,i6)')&
+   write(msg,'(a,a,a,i6)')&
 &   'The module of the zaxis should be greater than 1.d-8,',ch10,&
 &   'however, |zaxis|=',zmod
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
 !verify that both axis are perpendicular
@@ -1094,10 +1095,10 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
 & + xaxis(3)*zaxis(3))/(xmod*zmod)
 
  if(abs(cosine) > 1.d-8)then
-   write(message,'(a,a,a,i6)')&
+   write(msg,'(a,a,a,i6)')&
 &   'xaxis and zaxis should be perpendicular,',ch10,&
 &   'however, cosine=',cosine
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
 !new y axis as cross product
@@ -1111,10 +1112,10 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
  inversion_flag=0
  if(xmod>10._dp .or. zmod>10._dp) then
    inversion_flag=1
-   write(message, '(4a)' )&
+   write(msg, '(4a)' )&
 &   'inversion operation will be appended to axis transformation',ch10,&
 &   'Action: If you did not intend this, make |z|<10 and |x|<10 ',ch10
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,msg)
  end if
 
  umat(1,:) = xaxis(:)/xmod
@@ -1167,7 +1168,7 @@ subroutine fixsym(iatfix,indsym,natom,nsym)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,isym,jatom
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1180,12 +1181,12 @@ subroutine fixsym(iatfix,indsym,natom,nsym)
        if (iatfix(1,jatom) /=  iatfix(1,iatom) .or. &
            iatfix(2,jatom) /=  iatfix(2,iatom) .or. &
            iatfix(3,jatom) /=  iatfix(3,iatom)) then
-         write(message, '(a,i0,a,i0,7a)' )&
+         write(msg, '(a,i0,a,i0,7a)' )&
            'Atom number: ',jatom,' is symmetrically  equivalent to atom number: ',iatom,',',ch10,&
            'but according to iatfix, iatfixx, iatfixy and iatfixz, they',ch10,&
            'are not fixed along the same directions, which is forbidden.',ch10,&
            'Action: modify either the symmetry or iatfix(x,y,z) and resubmit.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
    end do
@@ -1276,7 +1277,7 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 !Local variables-------------------------------
 !scalars
  integer :: nu
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: angle(3)
 
@@ -1292,14 +1293,14 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
  ! Also ask that the mixed product is positive.
  if (abs(ucvol)<tol12) then
    !write(std_out,*)"rprimd",rprimd,"ucvol",ucvol
-   write(message,'(5a)')&
+   write(msg,'(5a)')&
      'Input rprim and acell gives vanishing unit cell volume.',ch10,&
      'This indicates linear dependency between primitive lattice vectors',ch10,&
      'Action: correct either rprim or acell in input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
  if (ucvol<zero)then
-   write(message,'(2a,3(a,3es16.6,a),7a)')&
+   write(msg,'(2a,3(a,3es16.6,a),7a)')&
      'Current rprimd gives negative (R1 x R2) . R3 . ',ch10,&
      'Rprimd =',rprimd(:,1),ch10,&
      '        ',rprimd(:,2),ch10,&
@@ -1308,7 +1309,7 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
      '        exchange two of the input rprim vectors;',ch10,&
      '        if you are optimizing the cell size and shape (optcell/=0),',ch10,&
      '        maybe the move was too large, and you might try to decrease strprecon.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  ! Generate gprimd
@@ -1316,17 +1317,17 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 
  ! Write out rprimd, gprimd and ucvol
  if (iout>=0) then
-   write(message,'(2a)')' Real(R)+Recip(G) ','space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):'
-   call wrtout(iout,message,'COLL')
+   write(msg,'(2a)')' Real(R)+Recip(G) ','space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):'
+   call wrtout(iout,msg)
    do nu=1,3
-     write(message, '(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)' ) &
+     write(msg, '(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)' ) &
       'R(',nu,')=',rprimd(:,nu)+tol10,&
       'G(',nu,')=',gprimd(:,nu)+tol10
-     call wrtout(iout,message,'COLL')
+     call wrtout(iout,msg)
    end do
-   write(message,'(a,1p,e15.7,a)') ' Unit cell volume ucvol=',ucvol+tol10,' bohr^3'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,1p,e15.7,a)') ' Unit cell volume ucvol=',ucvol+tol10,' bohr^3'
+   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
  ! Compute real space metric.
@@ -1340,9 +1341,9 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
    angle(1)=acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))/two_pi*360.0d0
    angle(2)=acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))/two_pi*360.0d0
    angle(3)=acos(rmet(1,2)/sqrt(rmet(1,1)*rmet(2,2)))/two_pi*360.0d0
-   write(message, '(a,3es16.8,a)' )' Angles (23,13,12)=',angle(1:3),' degrees'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,3es16.8,a)' )' Angles (23,13,12)=',angle(1:3),' degrees'
+   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
 end subroutine metric
@@ -1528,7 +1529,7 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
  real(dp) :: alpha,dilatmx_new
 !arrays
  real(dp) :: eigval(3),gprimd_orig(3,3),met(3,3),old_to_new(3,3)
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1577,12 +1578,12 @@ subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
        'An adequate value would have been dilatmx_new= ',dilatmx_new,ch10,&
        'Calculation continues with limited jump, by rescaling the projected move by the factor: ',alpha,'.'
    else
-     write(message, '(3a,es16.6,2a,es16.6,2a)' )&
+     write(msg, '(3a,es16.6,2a,es16.6,2a)' )&
       'The new primitive vectors rprimd (an evolving quantity)',ch10,&
       'are too large, given the initial rprimd and the accompanying dilatmx: ',dilatmx,ch10,&
       'An adequate value would have been dilatmx_new= ',dilatmx_new,ch10,&
       'As chkdilatmx=0, assume experienced user. Execution will continue.'
-     MSG_WARNING(message)
+     MSG_WARNING(msg)
    end if
 
  end if
@@ -1949,7 +1950,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
  integer :: done,ia,ib,ic,ii,ineighb,jneighb,mneighb,mu,ndig,nu,t1,t2,t3,tmax,temp_unit
  real(dp) :: adotb,asq,bsq,co,length,sq,thdeg
 !real(dp)u1,u2,u3,v1,v2,v3
- character(len=500) :: message
+ character(len=500) :: msg
  type(atomdata_t) :: atom
 !arrays
  integer,allocatable :: list_neighb(:,:,:)
@@ -1960,29 +1961,29 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 ! *************************************************************************
 
 !Initialize the file
- write(message, '(a,a,a)' )' bonds_lgth_angles : about to open file ',trim(fnameabo_app_geo),ch10
- call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+ write(msg, '(a,a,a)' )' bonds_lgth_angles : about to open file ',trim(fnameabo_app_geo),ch10
+ call wrtout(std_out,msg,'COLL'); call wrtout(ab_out,msg,'COLL')
 
- if (open_file(fnameabo_app_geo,message,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
-   MSG_ERROR(message)
+ if (open_file(fnameabo_app_geo,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
+   MSG_ERROR(msg)
  end if
  rewind(temp_unit)
 
- write(message, '(a,a)' ) ch10,' ABINIT package : GEO file '
- call wrtout(temp_unit,message,'COLL')
+ write(msg, '(a,a)' ) ch10,' ABINIT package : GEO file '
+ call wrtout(temp_unit,msg,'COLL')
 
 !Compute maximum number of neighbors is the neighbor list,
 !from the indicative coordination number
 !Note : the following formula includes next nearest neighbors, but not others
  mneighb=1+coordn+coordn*(coordn-1)
 
- write(message, '(a,a,i2,a,a,i4,a,a,a,i4,a)' ) ch10,&
+ write(msg, '(a,a,i2,a,a,i4,a,a,a,i4,a)' ) ch10,&
 & ' Maximal coordination number, as estimated by the user : ',coordn,ch10,&
 & '  giving a maximum of ',coordn*coordn,&
 & ' nearest neighbors and next nearest neighbors, ',ch10,&
 & '                  and ',(coordn*(coordn-1))/2,&
 & ' distinct angles between nearest neighbors'
- call wrtout(temp_unit,message,'COLL')
+ call wrtout(temp_unit,msg,'COLL')
 
 !Compute metric tensor in real space rmet
  do nu=1,3
@@ -1993,16 +1994,16 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
    end do
  end do
 
- write(message, '(a,a)' )ch10,' Primitive vectors of the periodic cell (bohr)'
- call wrtout(temp_unit,message,'COLL')
+ write(msg, '(a,a)' )ch10,' Primitive vectors of the periodic cell (bohr)'
+ call wrtout(temp_unit,msg,'COLL')
  do nu=1,3
-   write(message, '(1x,a,i1,a,3f10.5)' ) '  R(',nu,')=',rprimd(:,nu)
-   call wrtout(temp_unit,message,'COLL')
+   write(msg, '(1x,a,i1,a,3f10.5)' ) '  R(',nu,')=',rprimd(:,nu)
+   call wrtout(temp_unit,msg,'COLL')
  end do
 
- write(message, '(a,a)' ) ch10,&
+ write(msg, '(a,a)' ) ch10,&
 & ' Atom list        Reduced coordinates          Cartesian coordinates (bohr)'
- call wrtout(temp_unit,message,'COLL')
+ call wrtout(temp_unit,msg,'COLL')
 
 !Set up a list of character identifiers for all atoms : iden(ia)
  ABI_ALLOCATE(iden,(natom))
@@ -2016,10 +2017,10 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
    if(ndig==4) write(iden(ia), '(a,a,i4,a)' )  atom%symbol,'(',ia,')'
    if(ndig>4)then
      close(temp_unit)
-     write(message, '(a,i8,a,a)' )&
+     write(msg, '(a,i8,a,a)' )&
 &     'bonds_lgth_angles cannot handle more than 9999 atoms, while natom=',natom,ch10,&
 &     'Action: decrease natom, or contact ABINIT group.'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
  end do
 
@@ -2029,21 +2030,21 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
  call xred2xcart(natom,rprimd,xcart,xred)
 
  do ia=1,natom
-   write(message, '(a,a,3f10.5,a,3f10.5)' ) &
+   write(msg, '(a,a,3f10.5,a,3f10.5)' ) &
 &   '   ',iden(ia),(xred(ii,ia)+tol10,ii=1,3),&
 &   '    ',(xcart(ii,ia)+tol10,ii=1,3)
-   call wrtout(temp_unit,message,'COLL')
+   call wrtout(temp_unit,msg,'COLL')
  end do
 
- write(message, '(a,a,a,a,i4,a)' )ch10,&
+ write(msg, '(a,a,a,a,i4,a)' )ch10,&
 & ' XMOL data : natom, followed by cartesian coordinates in Angstrom',&
 & ch10,ch10,natom,ch10
- call wrtout(temp_unit,message,'COLL')
+ call wrtout(temp_unit,msg,'COLL')
 
  do ia=1,natom
    call atomdata_from_znucl(atom,znucl(typat(ia)))
-   write(message, '(a,a,3f10.5)' )'   ',atom%symbol,xcart(1:3,ia)*Bohr_Ang
-   call wrtout(temp_unit,message,'COLL')
+   write(msg, '(a,a,3f10.5)' )'   ',atom%symbol,xcart(1:3,ia)*Bohr_Ang
+   call wrtout(temp_unit,msg,'COLL')
  end do
 
  ABI_DEALLOCATE(xcart)
@@ -2054,10 +2055,10 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 !Compute list of neighbors
  do ia=1,natom
 
-   write(message, '(a,a,a,a,a,a,a,a,a)' ) ch10,'===========',&
+   write(msg, '(a,a,a,a,a,a,a,a,a)' ) ch10,'===========',&
 &   '=====================================================================',&
 &   ch10,' ',iden(ia),ch10,ch10,' Bond lengths '
-   call wrtout(temp_unit,message,'COLL')
+   call wrtout(temp_unit,msg,'COLL')
 
 !  Search other atoms for bonds, but must proceed
 !  in such a way to consider a search box sufficiently large,
@@ -2143,10 +2144,10 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 !    If the work is not done, while tmax==5, then there is a problem .
      if(tmax==5)then
        close(temp_unit)
-       write(message, '(2a)' )&
+       write(msg, '(2a)' )&
 &       'Did not succeed to generate a reliable list of bonds ',&
 &       'since tmax is exceeded.'
-       MSG_BUG(message)
+       MSG_BUG(msg)
      end if
 
 !    Copy the new list into the old list.
@@ -2161,18 +2162,18 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
    do ineighb=2,mneighb
      ib=list_neighb(ineighb,1,1)
      length=sqrt(sqrlength(ineighb))
-     write(message, '(a,a,a,a,3i2,t27,a,f10.5,a,f9.5,a)' )&
+     write(msg, '(a,a,a,a,3i2,t27,a,f10.5,a,f9.5,a)' )&
 &     '  ',trim(iden(ia)),' - ',trim(iden(ib)),&
 &     list_neighb(ineighb,2:4,1),'bond length is ',&
 &     length,' bohr  ( or ',Bohr_Ang*length,' Angst.)'
-     call wrtout(temp_unit,message,'COLL')
+     call wrtout(temp_unit,msg,'COLL')
    end do
 
 !  Output the angle list
    if(coordn>1)then
 
-     write(message, '(a,a)' ) ch10,' Bond angles '
-     call wrtout(temp_unit,message,'COLL')
+     write(msg, '(a,a)' ) ch10,' Bond angles '
+     call wrtout(temp_unit,msg,'COLL')
 
      do ineighb=2,coordn
        do jneighb=ineighb+1,coordn+1
@@ -2199,11 +2200,11 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
            thdeg=acos(co)*180.d0*piinv
          end if
 
-         write(message, '(a,a,3i2,a,a,a,a,3i2,t44,a,f13.5,a)' )&
+         write(msg, '(a,a,3i2,a,a,a,a,3i2,t44,a,f13.5,a)' )&
 &         '  ',trim(iden(ib)),list_neighb(ineighb,2:4,1),' - ',&
 &         trim(iden(ia)),' - ',trim(iden(ic)),&
 &         list_neighb(jneighb,2:4,1),'bond angle is ',thdeg,' degrees '
-         call wrtout(temp_unit,message,'COLL')
+         call wrtout(temp_unit,msg,'COLL')
        end do
      end do
 
@@ -2288,7 +2289,7 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
  integer ::   iatom=0,ii,idum=-20
  real(dp) ::  rij(3), rijd(3), radiuscovi, radiuscovj, dist, rati, ratj, angdeg(3)
  real(dp) ::  cosang,aa,cc,a2
- character(len=500) :: message
+ character(len=500) :: msg
  type(atomdata_t) :: atom
 
 ! *************************************************************************
@@ -2303,12 +2304,12 @@ subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typa
 !ENDDEBUG
 
  if(random_atpos==2 .and. npsp/=ntypat)then
-   write(message, '(a,i5,2a,i5,a,i5,4a)' )&
+   write(msg, '(a,i5,2a,i5,a,i5,4a)' )&
 &   'Input variable random_atpos= ',random_atpos,ch10,&
 &   'However, the number of pseudopotentials ',npsp,', is not equal to the number of type of atoms ',ntypat,ch10,&
 &   'The use of alchemical mixing cannot be combined with the constraint based on the mixing of covalent radii.',ch10,&
 &   'Action: switch to another value of random_atpos.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
 !random_atpos = 0   Default value, no random initialisation
@@ -2506,7 +2507,7 @@ subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
 !Local variables-------------------------------
 !scalars
  integer                      :: iatom,atpp,ish,prtvoll
- character(len=500)           :: message
+ character(len=500)           :: msg
  real(dp),parameter           :: rndfact=10000_dp
 !arrays
  integer                      :: iperm(natom),jperm(natom)
@@ -2581,11 +2582,11 @@ subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
  distv=(/ ( distv(jperm(iatom)),iatom=1,natom ) /)
 
  if (prtvoll>2) then
-   write(message,'(a,i4,a)')' shellstruct found ',nsh,' shells at distances (sdisv) '
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,i4,a)')' shellstruct found ',nsh,' shells at distances (sdisv) '
+   call wrtout(std_out,msg,'COLL')
    call prmat(sdisv(1:nsh),1,nsh,1,std_out)
-   write(message,fmt='(a,150i4)')' and multiplicities (smult) ', smult(1:nsh)
-   call wrtout(std_out,message,'COLL')
+   write(msg,fmt='(a,150i4)')' and multiplicities (smult) ', smult(1:nsh)
+   call wrtout(std_out,msg,'COLL')
  end if
 
 !DEBUB
@@ -2642,7 +2643,7 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
 !Local variables-------------------------------
 !scalars
  integer                      :: iatom,jatom,katom,kdum,atpp,prtvoll
- !character(len=500)           :: message
+ !character(len=500)           :: msg
 !arrays
  integer                      :: interq(natom)
  real(dp)                     :: hxcart(3,natom),distm(natom,natom)
@@ -2677,11 +2678,7 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
    return
  end if
 
-
-!DEBUG
-!write(message, '(a,a)' ) ch10,' ioniondist start '
-!call wrtout(std_out,message,'COLL')
-!END DEBUG
+!call wrtout(std_out,' ioniondist start ','COLL')
 
  distm=0
  katom=atpp-1
@@ -3133,13 +3130,10 @@ end subroutine strainsym
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space (bohr**-1)
 !! nsym=order of group.
 !! sym(3,3,nsym)=symmetry operators (usually symrec=expressed in terms
-!!               of action on reciprocal lattice primitive translations);
-!!               integers.
-!!
-!! OUTPUT
-!! stress(6)=stress tensor, in cartesian coordinates, in symmetric storage mode
+!!               of action on reciprocal lattice primitive translations); integers.
 !!
 !! SIDE EFFECTS
+!! stress(6)=stress tensor, in cartesian coordinates, in symmetric storage mode
 !!
 !! PARENTS
 !!      m_dfpt_nstwf,m_dfpt_scfcv,m_forstr,m_geometry,m_paw_dfpt,m_stress
@@ -3229,6 +3223,41 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  call strconv(strfrac,gprimd,stress)
 
 end subroutine stresssym
+!!***
+
+!!****f* m_geometry/stress_voigt_to_mat
+!! NAME
+!!  stress_voigt_to_mat
+!!
+!! FUNCTION
+!!  Build 3x3 symmetric stress tensor from stress vector in Voigt notation.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine stress_voigt_to_mat(stress6, stress_mat)
+
+ real(dp),intent(in) :: stress6(6)
+ real(dp),intent(out) :: stress_mat(3,3)
+
+ stress_mat(1,1) = stress6(1)
+ stress_mat(2,2) = stress6(2)
+ stress_mat(3,3) = stress6(3)
+ stress_mat(2,3) = stress6(4)
+ stress_mat(3,2) = stress6(4)
+ stress_mat(1,3) = stress6(5)
+ stress_mat(3,1) = stress6(5)
+ stress_mat(1,2) = stress6(6)
+ stress_mat(2,1) = stress6(6)
+
+end subroutine stress_voigt_to_mat
 !!***
 
 !!****f* m_geometry/strconv

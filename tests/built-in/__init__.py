@@ -10,11 +10,11 @@ keywords = [
 
 #: List of input files
 inp_files = [
-"testin_fast.in",
-"testin_v1.in",
-"testin_v5.in",
-"testin_bigdft.in",
-"testin_etsf_io.in",
-"testin_libxc.in",
-"testin_wannier90.in",
+"testin_fast.abi",
+"testin_v1.abi",
+"testin_v5.abi",
+"testin_bigdft.abi",
+"testin_etsf_io.abi",
+"testin_libxc.abi",
+"testin_wannier90.abi",
 ]

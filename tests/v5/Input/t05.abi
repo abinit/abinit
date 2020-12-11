@@ -1,0 +1,79 @@
+ndtset 3
+
+kptopt1 1
+tolvrs1 1.0D-20
+prtwf1 1
+prtden1 1
+prteig1 1
+
+kptopt2 3
+nqpt2 1
+qpt2 3*0
+iscf2 -3
+tolwfr2 1.0D-20
+getwfk2 1
+prtwf2 0
+prtden2 0
+prteig2 1
+rfelfd2 2
+rfdir2 1 0 0
+
+kptopt3 0
+iscf3 -2
+getden3 1
+nkpt3 2
+kpt3 -0.260 1/2 0
+     -0.240 1/2 0
+tolwfr3 1.0D-20
+prteig3 1
+prtwf3 0
+prtden3 0
+
+ecut 5
+pawecutdg 20
+nband 4
+
+nstep 5
+
+ngkpt 2 2 2
+nshiftk 4
+shiftk 3*1/2
+       1/2 0 0
+       0  1/2 0
+       0 0 1/2
+
+acell 3*5.43 angstrom
+rprim 0.0 0.5 0.5
+      0.5 0.0 0.5
+      0.5 0.5 0.0
+
+znucl 14
+ntypat 1
+typat 1 1
+occopt 1
+natom 2
+xred 3*0 3*1/4
+
+diemac 12.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.lda"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t05.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW, DFPT, DDK
+#%% description = 
+#%%   PAW response function calculation of derivative of wavefunction (DDK)
+#%%   Si with PAW dataset generated from uspp code. Computes derivative with
+#%%   DFPT formalism, and also computes energies with displaced k+q so that
+#%%   energies can be checked by finite differences.
+#%% topics = DFPT
+#%%<END TEST_INFO>

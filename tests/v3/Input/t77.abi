@@ -1,0 +1,104 @@
+#BaO localisation tensor
+#-----------------------------------------
+
+prtbbb 1
+
+#Cell definition
+#***********************
+   acell  1.0334455587E+01  1.0334455587E+01  1.0334455587E+01
+   rprim 0.0  0.5  0.5
+         0.5  0.0  0.5
+         0.5  0.5  0.0
+
+#Atom definition
+#*********************
+   ntypat 2
+   znucl 56 8
+   ixc 3
+   natom 2
+   typat 1 2
+
+      xred    0.0       0.0        0.0
+              0.5       0.5        0.5
+
+
+#Plane waves, and k-point grid
+#******************************************************************
+   ecut 5
+   ngkpt 2 2 2
+   nshiftk 4
+   shiftk 0.5 0.5 0.5
+          0.5 0.0 0.0
+          0.0 0.5 0.0
+          0.0 0.0 0.5
+
+#SCF procedure
+#*******************************
+   nstep 100
+   diemac 12.0
+
+
+
+ ndtset 4
+
+#DATASET 1 : SC run
+#******************
+  prtden1  1
+  kptopt1  1
+  toldfe1 1.0d-10
+
+#DATASET 2 : NSC run
+#*******************
+   iscf2  -2
+ getwfk2   -1
+ getden2   -1
+ tolwfr2   1.0d-20
+ kptopt2 2
+ nband2 8
+
+#DATASET 3 : ddk + localization
+#******************************
+  getwfk3   2
+  getddk3   3
+#  ird1wf3 1
+   rfdir3   1 1 1
+  rfelfd3   2
+  tolwfr3   1.0d-20
+  nband3    8
+  kptopt3 2
+
+#DATASET 4 : phonon + electric field
+#***********************************
+  getwfk4  2
+  getddk4  3
+  rfatpol4 1 2
+  rfdir4   1 1 1
+  rfelfd4 3
+  rfphon4  1
+  toldfe4  1.0d-10
+  nband4   8
+  kptopt4 2
+
+ nbdbuf 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "56ba.psp_mod, 8o.psp_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t77.abo, tolnlines = 45, tolabs = 4.0e-03, tolrel = 1.001e+00, fld_options =  -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Veithen
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   BaO crystal.
+#%%   Computation of band-by-band decomposition of Born effective charges.
+#%%   Also, computation of the electronic localization tensor,
+#%%   and its band-by-band decomposition.
+#%%<END TEST_INFO>

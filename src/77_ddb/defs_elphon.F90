@@ -665,7 +665,7 @@ end subroutine gam_mult_displ
 !!
 !! FUNCTION
 !! Use the set of special q points calculated by the Monkhorst & Pack Technique.
-!! Check if all the informations for the q points are present in the input gamma matrices.
+!! Check if all the information for the q points are present in the input gamma matrices.
 !! Generate the gamma matrices (already summed over the FS) of the set of q points which
 !! samples homogeneously the entire Brillouin zone.
 !!
@@ -904,7 +904,7 @@ end subroutine complete_gamma
 !!
 !! FUNCTION
 !! Use the set of special q points calculated by the Monkhorst & Pack Technique.
-!! Check if all the informations for the q points are present in
+!! Check if all the information for the q points are present in
 !! the input gamma transport matrices.
 !! Generate the gamma transport matrices (already summed over the FS) of the set of q points which
 !! samples homogeneously the entire Brillouin zone.

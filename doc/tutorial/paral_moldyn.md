@@ -19,7 +19,7 @@ explained in the tutorial
 This tutorial should take about 1.5 hour to be done and requires to have at
 least a 200 CPU core parallel computer.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 Summary of the molecular dynamics method
 
