@@ -220,16 +220,13 @@
 #  define ABI_FREE_SCALAR(scalar) deallocate(scalar)
 #  define ABI_MOVE_ALLOC(from, to) call move_alloc(from, to)
 
-
 #  define ABI_DATATYPE_ALLOCATE_SCALAR(type,scalar)  allocate(type::scalar)
 #  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)   deallocate(scalar)
-
 
 #endif
 
 
-/* Macros to allocate zero-initialized arrays.
- * defined in terms of previous macros */
+/* Macros to allocate zero-initialized arrays. */
 #define ABI_CALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
 #define ABI_ICALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = 0
 #define ABI_CALLOC_OR_DIE(ARR,SIZE,ierr) ABI_MALLOC_OR_DIE(ARR, SIZE, ierr) NEWLINE ARR = zero
@@ -258,7 +255,7 @@
 #define ABI_REMALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_MALLOC(ARR, SIZE)
 #define ABI_RECALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_CALLOC(ARR, SIZE)
 
-/* Allocate and file fill with random numbers */
+/* Allocate and fill with random numbers */
 #define ABI_MALLOC_RAND(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE call random_number(ARR)
 
 /* Macros used in debug mode */
@@ -300,24 +297,10 @@
 #define MSG_ERROR_NOSTOP_IF(condition, msg, ierr) \
    if (condition)  then NEWLINE MSG_ERROR_NOSTOP(msg, ierr) NEWLINE endif
 
-#define ETSF_WARN(lstat,Error_data) call abietsf_warn(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
-
-#define ETSF_CHECK_ERROR(lstat,Error_data) if (.not. lstat) call abietsf_msg_hndl(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
 #define NCF_CHECK(ncerr) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,"No msg from caller" _FILE_LINE_ARGS_)
 #define NCF_CHECK_MSG(ncerr,msg) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,msg _FILE_LINE_ARGS_)
 
 #define NOT_IMPLEMENTED_ERROR() MSG_ERROR("Not Implemented Error")
-
-/* Macro to deprecate particular features. */
-#define MSG_DEPRECATE(msg) call wrtout(ab_out, msg, "COLL")
-/*
-#define MSG_DEPRECATE(msg) MSG_ERROR(msg)
-*/
-
-/* Macro for clean exit */
-/*
-#define ABI_EXIT(exit_status) call abi_abort("COLL",exit_status=exit_status,print_config=.False.)
-*/
 
 /* Macros used for stopping the code if external libraries have not been enabled */
 #define NETCDF_NOTENABLED_ERROR() MSG_ERROR("netcdf is not activated. Use configure --enable-netcdf")

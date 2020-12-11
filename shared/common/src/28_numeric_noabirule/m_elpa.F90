@@ -79,7 +79,7 @@ module m_elpa
    module procedure elpa_func_hermitian_multiply_complex
  end interface elpa_func_hermitian_multiply
 
-!ELPA gneralized handle
+!ELPA generalized handle
  type,public :: elpa_hdl_t
    logical :: is_allocated=.false.
    logical :: matrix_is_set=.false.
@@ -125,8 +125,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine elpa_func_init()
-
-!Arguments ------------------------------------
 
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
@@ -186,9 +184,6 @@ end subroutine elpa_func_init
 !! SOURCE
 
 subroutine elpa_func_uninit()
-
-!Arguments ------------------------------------
-!Local variables-------------------------------
 
 ! *********************************************************************
 

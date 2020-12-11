@@ -1887,7 +1887,7 @@ end subroutine mlwfovlp_setup
 !!  mband=maximum number of bands
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem =number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw.
 !!  nfft=(effective) number of FFT grid points (for this processor) (see NOTES at beginning of scfcv)
 !!  ngfft(18)=contain all needed information about 3D FFT (see NOTES at beginning of scfcv)

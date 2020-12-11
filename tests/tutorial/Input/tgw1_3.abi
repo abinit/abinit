@@ -1,0 +1,70 @@
+# Crystalline silicon
+# Calculation of the GW corrections
+
+
+# Convergence with respect to the number of bands
+ndtset  5
+nband:  50
+nband+  50
+
+# Calculation of the Self-Energy matrix elements (GW corrections)
+optdriver  4
+getwfk     2
+getscr     3
+ecutsigx    8.0
+ppmfrq    16.7 eV
+nkptgw      1
+kptgw      0.000    0.000    0.000
+bdgw       4  5 
+
+
+# Definition of the unit cell: fcc
+acell  3*10.217        # This is equivalent to   10.217 10.217 10.217
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1         # There is only one type of atom
+znucl 14          # The keyword "znucl" refers to the atomic number of the
+                  # possible type(s) of atom. The pseudopotential(s)
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Silicon.
+
+# Definition of the atoms
+natom 2           # There are two atoms
+typat  1 1        # They both are of type 1, that is, Silicon.
+xred              # Reduced coordinate of atoms
+      0.0  0.0  0.0
+      0.25 0.25 0.25
+
+# Definition of the planewave basis set (at convergence 16 Rydberg 8 Hartree)
+ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
+
+
+# Sampling of the BZ
+ngkpt   1 1 1
+nshiftk 1
+shiftk  0.0 0.0 0.0
+istwfk  *1         # This is mandatory in all the GW steps.
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tgw1_2.abi, tgw1_3.abi, tgw1_4.abi, tgw1_5.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tgw1_3.abo, tolnlines= 70, tolabs=  9.000e-03, tolrel=  3.000e-02
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = GW
+#%% description = 
+#%%   Crystalline silicon
+#%%    Calculation of the GW corrections
+#%%<END TEST_INFO>

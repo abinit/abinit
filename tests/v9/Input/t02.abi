@@ -1,0 +1,96 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+#    Test of constrained DFT in the PAW case, collinear         #
+#    BCC iron, ferromagnetic, GGA, PAW                  XG 2020 #
+#################################################################
+
+! At present, does not work when the charge is imposed ?!?
+  ndtset 5
+! ndtset 3
+
+! Spin variables
+  nsppol 2
+
+! First dataset is unconstrained calculation
+  constraint_kind1  0 0
+  spinat1           0 0 2.28     0 0 2.28  ! Unconstrained calculation, so this is only for the initialisation
+  
+! Second dataset is constrained calculation for magnetic moment, symmetric
+  constraint_kind2  1 1
+  spinat2           0 0 2.28     0 0 2.28  ! By contrast, now this is for the constraint.
+
+! Third dataset is constrained calculation for magnetic moment, assymmetric
+  constraint_kind3  1 1
+  spinat3           0 0 2.25     0 0 2.30
+
+!At present, does not work when the charge is imposed ?!?
+
+! Fourth dataset is constrained calculation for charge, assymmetric
+  constraint_kind4  10 10
+  spinat4           0 0 2.28     0 0 2.28  ! No constraint on the magnetisation, so initialisation only 
+  chrgat4           1.68 1.80
+
+! Fifth dataset is constrained calculation for charge and magnetic moment, assymmetric
+  constraint_kind5  11 11
+  spinat5           0 0 2.25     0 0 2.30
+  chrgat5           1.68 1.80
+
+#########################
+# Common input parameters
+  ! Unit cell
+    acell   3*5.42
+    ntypat 1  natom 2  typat 2*1
+    znucl 26
+    xred    0   0   0
+            0.5 0.5 0.5
+    chkprim 0
+
+  ! K-points and occupations
+    kptopt 1
+    ngkpt 4 4 4   ! 6 6 6 is more realistic
+    nshiftk 1
+    shiftk 1/2 1/2 1/2
+    occopt 7
+    tsmear  0.008
+    nband 24
+
+  ! Definition of the spheres
+    ratsph 2*2.1
+    ratsm 0.05
+    magcon_lambda 0.2
+
+  ! Convergence parameters
+    iscf 7
+    ecut 10   ! 12 is more realistic
+    pawecutdg 30.
+    tolvrs 1.d-9
+    nstep 50
+    nstep3 24 # For portability reasons
+    nstep5 48 # For portability reasons
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t02.abo, tolnlines = 30, tolabs = 2.0e+03, tolrel = 1.1 , fld_options= -ridiculous;
+#%% [paral_info]
+#%% max_nprocs = 28
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = PAW, ConstrainedDFT
+#%% description = 
+#%%   BCC iron, ferromagnetic, GGA, PAW. 
+#%%   Test constrained DFT in the PAW + collinear spin case.
+#%%   In dataset 1, unconstrained calculation, the atomic spin on atom 1 and 2 is 2.291834
+#%%   In dataset 2, symmetric constrained calculation, the atomic spin on atoms 1 and 2 is 2.280003 
+#%%     with very minor deviation from the target 2.28
+#%%   In dataset 2, unsymmetric constrained calculation, the atomic spin on atoms 1 and 2 are 2.250002 and 2.299998  
+#%%     with very minor deviations from the targets 2.28 and 2.30
+#%%   At present the test does not work with the constraints on the charge.
+#%% topics = PAW, ConstrainedDFT
+#%%<END TEST_INFO>

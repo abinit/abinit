@@ -88,7 +88,6 @@ module m_scfcv_core
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
 #endif
- use m_io_kss,           only : gshgg_mkncwrite
  use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
  use m_kg,               only : getcut, getmpw, kpgio, getph
  use m_fft,              only : fourdp
@@ -1476,11 +1475,6 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
    if(dtset%iscf>=0)then
      write(msg, '(a,a,i4)' )ch10,' ITER STEP NUMBER  ',istep
      call wrtout(std_out,msg,'COLL')
-   end if
-
-   if (dtset%useria == -4242) then
-     call gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_ij, mpi_enreg, &
-     rprimd, xred, eigen, npwarr, kg, ylm, ngfft, dtset%nfft, ngfftf, nfftf, vtrial) !electronpositron) ! Optional arguments
    end if
 
 !  The next flag says whether the xred have to be changed in the current iteration

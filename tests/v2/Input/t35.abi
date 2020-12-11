@@ -1,0 +1,69 @@
+# Aluminum molecule, treated with fixed occupation numbers
+# Compare finite differences to analytical derivatives
+# Do not use a very high precision for the finite differences
+
+ ndtset 4
+
+ xred1  0.0 0.0 -0.180   0.0 0.0  0.17995
+ xred2  0.0 0.0 -0.180   0.0 0.0  0.1800
+ xred3  0.0 0.0 -0.180   0.0 0.0  0.18005
+
+ xred4  0.0 0.0 -0.180   0.0 0.0  0.180
+
+#Specific to the RF dataset
+  rfphon4  1
+ rfatpol4  2 2
+   rfdir4  0 0 1
+    nqpt4  1
+     qpt4  0.0 0.0 0.0
+  getwfk4  2
+  diemix4  0.35
+  diemac4  1.0
+
+
+ acell 11 11 16
+ amu 1.0d0
+ diemac 1.0d0
+ diemix 0.333333333333d0
+ ecut 2.5
+ getwfk -1
+ ixc 1
+ kptopt 0
+ kpt   3*0.0
+ natom  2
+ nband 8
+ nkpt 1
+ nstep 30
+ nsym 1
+ ntypat  1
+ occ 2.0 2.0 1.6 0.2 0.2 0.0 0.0 0.0
+ occopt 0
+ rprim 1 0 0  0 1 0  0 0 1
+ tolvrs 1.d-16
+ typat  1 1
+ wtk  1
+ znucl 13.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t35.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC, DFPT
+#%% authors = Unknown
+#%% description = 
+#%%   Al2 molecule in a big box. Treat 8 bands, with some of them
+#%%   partially occupied. The occupation numbers are fixed, with occopt 0 .
+#%%   Computation of the second-order derivative of the total energy.
+#%%   With delta(xred)=0.0001, one gets delta(etot)/delta(xred)=3.32914893
+#%%   The direct computation of 2DTE at the target geometry 
+#%%   gives 3.3291477145164 . The agreement is good, and can be improved
+#%%   if a higher-order finite difference estimation is used.
+#%%<END TEST_INFO>

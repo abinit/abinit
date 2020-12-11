@@ -48,6 +48,7 @@ module m_rmm_diis
  use m_getghc,        only : getghc
  use m_nonlop,        only : nonlop
  use m_cgtk,          only : cgtk_fixphase
+ use m_abi_linalg,    only : abi_zgemm_2r
  !use m_fock,         only : fock_set_ieigen, fock_set_getghc_call
 
  implicit none
@@ -1193,7 +1194,7 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
 !local variables
  integer :: ii, ierr, idat, nprocs, option
  real(dp) :: dotr, doti !, cpu, wall, gflops
- integer :: requests(ndat)
+ !integer :: requests(ndat)
 ! *************************************************************************
 
  !if (timeit) call cwtime(cpu, wall, gflops, "start")
@@ -1214,15 +1215,15 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
      end if
    end do ! ii
 
-   if (nprocs > 1) then
-     !call xmpi_sum(diis%resmat(:,0:iter,iter,idat), comm, ierr)
-     call xmpi_isum_ip(diis%resmat(:,0:iter,iter,idat), comm, requests(idat), ierr)
-   endif
+   !if (nprocs > 1) then
+   !  call xmpi_sum(diis%resmat(:,0:iter,iter,idat), comm, ierr)
+   !  !call xmpi_isum_ip(diis%resmat(:,0:iter,iter,idat), comm, requests(idat), ierr)
+   !endif
    !if (diis%prtvol == -level) write(std_out,*)"iter, idat, resmat:", iter, idat, diis%resmat(:,0:iter,iter,idat)
  end do ! idat
 
- !if (nprocs > 1) call xmpi_sum(diis%resmat(:,0:iter,iter,1:ndat), comm, ierr)
- if (nprocs > 1) call xmpi_waitall(requests, ierr)
+ if (nprocs > 1) call xmpi_sum(diis%resmat(:,0:iter,iter,1:ndat), comm, ierr)
+ !if (nprocs > 1) call xmpi_waitall(requests, ierr)
  !if (timeit) call cwtime_report(" eval_mats", cpu, wall, gflops)
 
 end subroutine rmm_diis_eval_mats
@@ -1471,7 +1472,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
    if (cplex == 1) then
      call DGEMM("N", "N", 2*npwsp, nband, nband, one, ghc, 2*npwsp, evec_re, nband, zero, gwork, 2*npwsp)
    else
-     call ZGEMM("N", "N", npwsp, nband, nband, cone, ghc, npwsp, evec, nband, czero, gwork, npwsp)
+     call abi_zgemm_2r("N", "N", npwsp, nband, nband, cone, ghc, npwsp, evec, nband, czero, gwork, npwsp)
    end if
    call cg_zcopy(npwsp * nband, gwork, ghc)
 
@@ -1480,7 +1481,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
      if (cplex == 1) then
        call DGEMM("N", "N", 2*npwsp, nband, nband, one, gvnlxc, 2*npwsp, evec_re, nband, zero, gwork, 2*npwsp)
      else
-       call ZGEMM("N", "N", npwsp, nband, nband, cone, gvnlxc, npwsp, evec, nband, czero, gwork, npwsp)
+       call abi_zgemm_2r("N", "N", npwsp, nband, nband, cone, gvnlxc, npwsp, evec, nband, czero, gwork, npwsp)
      end if
      !call abi_xgemm('N','N', vectsize, nband, nband, cone, gvnlxc, vectsize, evec, nband, czero, gwork, vectsize, x_cplx=cplx)
      call cg_zcopy(npwsp * nband, gwork, gvnlxc)

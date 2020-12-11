@@ -126,7 +126,7 @@ contains
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  n3xccc=dimension of the xccc3d array (0 or nfftf).
 !!  nattyp(ntypat)= # atoms of each type.
@@ -1803,7 +1803,7 @@ end subroutine poslifetime
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  n3xccc= dimension of the xccc3d array (0 or nfft).
 !!  nfft= number of FFT grid points

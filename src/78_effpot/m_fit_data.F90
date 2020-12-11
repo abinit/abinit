@@ -38,7 +38,7 @@ module m_fit_data
 !!
 !! FUNCTION
 !! datatype for with all the information for the fit process
-!! This structure contains all the informations of the training set:
+!! This structure contains all the information of the training set:
 !!   - ntime
 !!   - displacement
 !!   - du_delta
@@ -118,7 +118,7 @@ module m_fit_data
 !   The model constains only harmonic part
 
    type(training_set_type) :: training_set
-!    datatype with the informations of the training set
+!    datatype with the information of the training set
    
  end type fit_data_type
 

@@ -1,0 +1,117 @@
+# NaCl molecule in a big box
+# test of the 3-rd order response function with only 1 k-point
+# (line of k-point and full mesh commented for testing purpose).
+
+
+ndtset    5   #15
+udtset    1 5 #3 5
+
+#convergence parameters
+ecut      10
+nband     4
+toldff    1.0d-8
+nstep    10  
+              
+ixc       3
+diemac    2
+
+#box
+acell     20 10 10
+rprim     1 0 0  0 1 0  0 0 1
+
+#atoms
+natom     2
+ntypat    2
+znucl     11 17
+typat     1 2
+xcart    -1.25  0.0 0.0
+          1.25  0.0 0.0   Angstrom
+
+#k-point mesh
+kptopt    2
+nshiftk   1
+shiftk    0.0 0.0 0.0
+
+#first dataset : only 1 k-point
+ngkpt1?   1 1 1
+
+#second dataset : line of k-points
+#ngkpt2?   2 1 1
+
+#third dataset : full mesh k-point
+#ngkpt3?   2 2 2
+
+
+#DATASET1 : scf calculation: GS WF in the BZ
+#********************************************
+   prtden?1    1
+   toldfe?1    1.0d-12
+
+#DATASET2 : non scf calculation: GS WF in the whole BZ
+#*****************************************************
+   getden?2   -1
+     iscf?2   -2
+   getwfk?2   -1
+   tolwfr?2    1.0d-22
+    nband?2    4
+
+
+#DATASET3 : ddk on the MP grid of k-points
+#*****************************************
+   getwfk?3   -1
+    rfdir?3    1 1 1
+   rfelfd?3    2
+   tolwfr?3    1.0d-22
+    nband?3    4
+
+#DATASET4 : ddE on the MP grid of k-points
+#*****************************************
+   prtden?4    1
+   getwfk?4   -2
+   getddk?4   -1
+    rfdir?4    1 1 1
+   rfphon?4    1
+  rfatpol?4    1 2
+   tolvrs?4    1.0d-12
+   rfelfd?4    3
+    nband?4    4
+  prepanl?4    1
+
+#DATASET5 : 3DTE calculation
+#***************************
+   getden?5   -4
+  get1den?5   -1
+   getwfk?5   -3
+   get1wf?5   -1
+    nband?5    4
+optdriver?5    5
+  d3e_pert1_elfd?5    1
+  d3e_pert1_phon?5    1
+ d3e_pert1_atpol?5    1 2
+   d3e_pert1_dir?5    1 1 1
+  d3e_pert2_elfd?5    1
+   d3e_pert2_dir?5    1 1 1
+  d3e_pert3_elfd?5    1
+   d3e_pert3_dir?5    1 1 1
+
+nbdbuf 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/11na.pspnc, PseudosTM_pwteter/17cl.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t65.abo, tolnlines = 2, tolabs = 6.0e-5, tolrel = 1.0, fld_options =  -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = S. Le Roux
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   NaCl Molecule in a big box
+#%%   3DTE calculation with only one k-point
+#%% topics = nonlinear
+#%%<END TEST_INFO>

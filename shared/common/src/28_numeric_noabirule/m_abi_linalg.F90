@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !!  management of Linear Algebra wrappers routines
-!! with support of different external library (scalapack, elpa, plasma, magma, ... )
+!!  with support of different external library (scalapack, elpa, plasma, magma, ... )
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2012-2020 ABINIT group (LNguyen,FDahm,MT)
@@ -22,13 +22,13 @@
 
 module m_abi_linalg
 
-  use defs_basis
-  use m_errors
-  use m_abicore
-  use m_xmpi
-  use m_xomp
-  use m_slk
-  use iso_c_binding
+ use defs_basis
+ use m_errors
+ use m_abicore
+ use m_xmpi
+ use m_xomp
+ use m_slk
+ use iso_c_binding
 #ifdef HAVE_LINALG_ELPA
  use m_elpa
 #endif
@@ -38,6 +38,14 @@ module m_abi_linalg
 
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox
+#endif
+
+#if defined HAVE_MPI1
+ include 'mpif.h'
+#endif
+
+#if defined HAVE_MPI2
+ use mpi
 #endif
 
  use m_time,  only : timab
@@ -75,6 +83,11 @@ module m_abi_linalg
  integer,save :: eigen_z_lrwork=0
  integer,save :: eigen_liwork=0
 
+ ! MG FIXME: I really do not understand why we should use global variables to wrap Scalapack routines.
+ !
+ ! 1) The procedures are not thread-safe.
+ ! 2) The procedures cannot be reused with different dimensions without dellocating these globals
+
  integer,save,target,allocatable :: eigen_iwork(:)
  real(sp),save,target,allocatable :: eigen_c_rwork(:)
  real(dp),save,target,allocatable :: eigen_z_rwork(:)
@@ -101,7 +114,6 @@ module m_abi_linalg
 !----------------------------------------------------------------------
 !!***
 
-
  !Procedures ------------------------------------
  public :: abi_linalg_init          ! Initialization routine
  public :: abi_linalg_finalize      ! CleanuUp routine
@@ -109,11 +121,22 @@ module m_abi_linalg
  !----------------------------------------------------------------------
 
 !BLAS INTERFACE
+ !public :: abi_zgemm
  public :: abi_xgemm
+
  interface abi_xgemm
     module procedure abi_zgemm_2d
     module procedure abi_d2zgemm
- end interface
+ end interface abi_xgemm
+
+ public :: abi_zgemm
+ public :: abi_zgemm_2d
+ public :: abi_zgemm_2r
+ interface abi_zgemm  ! No x_cplx stuff here!
+    module procedure abi_zgemm_2d
+    module procedure abi_zgemm_2r
+ end interface abi_zgemm
+
  !----------------------------------------------------------------------
  public :: abi_xcopy
  interface abi_xcopy
@@ -126,7 +149,8 @@ module m_abi_linalg
     module procedure abi_dcopy_1d_0d
     module procedure abi_d2zcopy_2d  ! FIXME To be removed. One can pass the base adress of the array!
     module procedure abi_z2dcopy_2d  ! FIXME To be removed. One can pass the base adress of the array!
- end interface
+ end interface abi_xcopy
+
  !----------------------------------------------------------------------
  public :: abi_xtrsm
  interface abi_xtrsm
@@ -134,7 +158,7 @@ module m_abi_linalg
     module procedure abi_dtrsm
     module procedure abi_d2ztrsm
     !module procedure abi_d2ztrsm_3d
- end interface
+ end interface abi_xtrsm
 
  public :: abi_d2ztrsm_3d ! Used in bestwfk TODO to be Removed
  !----------------------------------------------------------------------
@@ -214,17 +238,19 @@ module m_abi_linalg
  integer,parameter,private :: TIMAB_WFCOPY=584
  integer,parameter,private :: TIMAB_XTRSM=535
 
-#define DEV_LINALG_TIMING 1
+! Define this variable to activate timing routines
+!#define DEV_LINALG_TIMING 1
 
 ! Support for [Z,C]GEMM3M routines
- logical,save,private :: XGEMM3M_ISON=.False.
+ logical,save,private :: XGEMM3M_ISON = .False.
+ !logical,save,private :: XGEMM3M_ISON = .True.
  ! True if [Z,C]GEMM3M can be used (can be set with linalg_allow_gemm3m)
 
  public :: linalg_allow_gemm3m
 
  ! Thresholds for the activation of [Z,C]GEMM3M
- integer,parameter,private :: ZGEMM3M_LIMIT=325000
- integer,parameter,private :: CGEMM3M_LIMIT=200000
+ integer,parameter,private :: ZGEMM3M_LIMIT = 325000
+ integer,parameter,private :: CGEMM3M_LIMIT = 200000
 
 ! Handy macros
 #ifdef HAVE_LINALG_GEMM3M
@@ -266,14 +292,6 @@ CONTAINS  !===========================================================
 
  subroutine abi_linalg_init(max_eigen_pb_size,optdriver,wfoptalg,paral_kgb,&
 &                           use_gpu_cuda,use_slk,np_slk,comm_scalapack)
-
-#if defined HAVE_MPI2
-  use mpi
-#endif
-
-#if defined HAVE_MPI1
- include 'mpif.h'
-#endif
 
 !Arguments ------------------------------------
  integer,intent(in) :: max_eigen_pb_size
@@ -465,9 +483,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_s_work)) then
-   ABI_DEALLOCATE(eigen_s_work)
- end if
+ ABI_SFREE(eigen_s_work)
  ABI_ALLOCATE(eigen_s_work,(eigen_s_lwork))
 
 !Double precision WORK
@@ -498,9 +514,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_d_work)) then
-   ABI_DEALLOCATE(eigen_d_work)
- end if
+ ABI_SFREE(eigen_d_work)
  ABI_ALLOCATE(eigen_d_work,(eigen_d_lwork))
 
 !Single complex WORK
@@ -531,9 +545,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_c_work)) then
-   ABI_DEALLOCATE(eigen_c_work)
- end if
+ ABI_SFREE(eigen_c_work)
  ABI_ALLOCATE(eigen_c_work,(eigen_c_lwork))
 
 !Double complex WORK
@@ -564,9 +576,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_z_work)) then
-   ABI_DEALLOCATE(eigen_z_work)
- end if
+ ABI_SFREE(eigen_z_work)
  ABI_ALLOCATE(eigen_z_work,(eigen_z_lwork))
 
 !Single precision RWORK
@@ -581,9 +591,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_c_rwork)) then
-   ABI_DEALLOCATE(eigen_c_rwork)
- end if
+ ABI_SFREE(eigen_c_rwork)
  ABI_ALLOCATE(eigen_c_rwork,(eigen_c_lrwork))
 
 !Double precision RWORK
@@ -598,9 +606,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_z_rwork)) then
-   ABI_DEALLOCATE(eigen_z_rwork)
- end if
+ ABI_SFREE(eigen_z_rwork)
  ABI_ALLOCATE(eigen_z_rwork,(eigen_z_lrwork))
 
 !Integer IWORK
@@ -615,9 +621,7 @@ CONTAINS  !===========================================================
      if (eigen_z_maxsize>0) eigen_liwork = max(eigen_liwork,3+5*eigen_z_maxsize)
    end if
  end if
- if(allocated(eigen_iwork)) then
-   ABI_DEALLOCATE(eigen_iwork)
- end if
+ ABI_SFREE(eigen_iwork)
  ABI_ALLOCATE(eigen_iwork,(eigen_liwork))
 
  end subroutine abi_linalg_work_allocate
@@ -703,27 +707,13 @@ CONTAINS  !===========================================================
 #endif
 
 !Memory freeing
- if(allocated(eigen_s_work)) then
-   ABI_DEALLOCATE(eigen_s_work)
- end if
- if(allocated(eigen_d_work)) then
-   ABI_DEALLOCATE(eigen_d_work)
- end if
- if(allocated(eigen_c_work)) then
-   ABI_DEALLOCATE(eigen_c_work)
- end if
- if(allocated(eigen_z_work)) then
-   ABI_DEALLOCATE(eigen_z_work)
- end if
-  if(allocated(eigen_c_rwork)) then
-   ABI_DEALLOCATE(eigen_c_rwork)
- end if
- if(allocated(eigen_z_rwork)) then
-   ABI_DEALLOCATE(eigen_z_rwork)
- end if
- if(allocated(eigen_iwork)) then
-   ABI_DEALLOCATE(eigen_iwork)
- end if
+ ABI_SFREE(eigen_s_work)
+ ABI_SFREE(eigen_d_work)
+ ABI_SFREE(eigen_c_work)
+ ABI_SFREE(eigen_z_work)
+ ABI_SFREE(eigen_c_rwork)
+ ABI_SFREE(eigen_z_rwork)
+ ABI_SFREE(eigen_iwork)
 
  end subroutine abi_linalg_finalize
 !!***
@@ -738,15 +728,28 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine linalg_allow_gemm3m(bool)
+subroutine linalg_allow_gemm3m(bool, write_msg)
 
 !Arguments ------------------------------------
 !scalars
- logical,intent(in) :: bool
+ logical,intent(in) :: bool, write_msg
 
 ! *************************************************************************
 
  XGEMM3M_ISON = bool
+ if (write_msg) then
+#ifdef HAVE_LINALG_GEMM3M
+   if (bool) then
+     MSG_COMMENT("Activating ZGEMM3M version instead of ZGEMM")
+   else
+     MSG_COMMENT("Using ZGEMM instead of ZGEMM3M")
+   end if
+#else
+   if (bool) then
+     MSG_WARNING("Cannot activate ZGEMM3M as HAVE_LINALG_GEMM3M is not defined!")
+   end if
+#endif
+ endif
 
 end subroutine linalg_allow_gemm3m
 !!***
@@ -779,7 +782,7 @@ end subroutine linalg_allow_gemm3m
 !!
 !! SOURCE
 
-pure logical function use_zgemm3m(m,n,k)
+pure logical function use_zgemm3m(m, n, k)
 
 !Arguments ------------------------------------
 !scalars
@@ -789,6 +792,7 @@ pure logical function use_zgemm3m(m,n,k)
 
  use_zgemm3m = .False.
  if (XGEMM3M_ISON) use_zgemm3m = ((m * n * k) > ZGEMM3M_LIMIT)
+ !if (XGEMM3M_ISON) use_zgemm3m = .True.
 
 #ifndef HAVE_LINALG_GEMM3M
  use_zgemm3m = .False.
@@ -813,7 +817,7 @@ end function use_zgemm3m
 !!
 !! SOURCE
 
-pure logical function use_cgemm3m(m,n,k)
+pure logical function use_cgemm3m(m, n, k)
 
 !Arguments ------------------------------------
 !scalars

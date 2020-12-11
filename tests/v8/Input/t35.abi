@@ -1,0 +1,83 @@
+# Fe in GGAU with usepawu=4
+# Test done in comparison to [[cite:Chen2016a]]
+
+#OPTIONS AND DATASETS
+ndtset 1
+prtvol 3
+pawprtvol -3
+iscf 3 
+nstep 10
+tolvrs 1.0d-10
+chksymbreak 0
+
+
+# CONVERGENCE PARAM
+ecut 14
+pawecutdg  30
+nband  12
+occopt 7
+tsmear 1600 K
+
+
+# PHYSICAL DATA
+natom 1 ntypat  1 typat  1  
+znucl  26.0 
+xred  0.d0   0.d0   0.d0
+rprim   1.0  0.0 0.0
+        0.5  0.5 0.5
+        0.0  0.0 1.0
+acell  3*5.41
+
+# POINTSK 
+kptopt 1  
+ngkpt 6 6 6
+nshiftk 1
+shiftk 1/2 1/2 1/2
+
+
+# SPIN 
+nsppol 2  
+nspden 2 
+spinat 0.0 0.0 4.0
+
+# DFT+U
+usepawu    4
+dmatpuopt 2
+lpawu   2
+upawu  6.0000 eV
+jpawu  0.0000 eV
+
+usedmatpu 8
+dmatpawu
+     0.74105    0.00000    0.00000    0.00000    0.00000
+     0.00000    0.74105    0.00000    0.00000    0.00000
+     0.00000    0.00000    0.85515    0.00000    0.00000
+     0.00000    0.00000    0.00000    0.74105    0.00000
+     0.00000    0.00000    0.00000    0.00000    0.85515
+
+     0.49984    0.00000    0.00000    0.00000    0.00000
+     0.00000    0.49984    0.00000    0.00000    0.00000
+     0.00000    0.00000    0.15478    0.00000    0.00000
+     0.00000    0.00000    0.00000    0.49984    0.00000
+     0.00000    0.00000    0.00000    0.00000    0.15478
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.lda2.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t35.abo, tolnlines = 22, tolabs = 1.000e-06, tolrel = 5.000e-04
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = B. Amadon
+#%% keywords = PAW, DFTU
+#%% description =
+#%%   Test to use usepawu=4
+#%%   Test done in comparison to [[cite:Chen2016a]].
+#%% topics = DFT+U
+#%%<END TEST_INFO>

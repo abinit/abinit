@@ -1,0 +1,51 @@
+# Chain of Mg2 molecules, not aligned, in slab supercell
+
+ fftalg 412
+ exchn2n3d 1
+
+ densfor_pred 0
+ prtwf  0
+
+#Common input variables
+acell  22 26  13
+
+diemac 2.0d0
+
+ecut 8
+
+  kptopt 0
+nkpt  1
+kpt 1/4 1/4 1/4
+natom 2
+nband 2
+nstep 11
+nsym 1
+ntypat 1
+occopt 1
+tolwfr 1.0d-14
+typat 1 1
+znucl 12
+xcart -0.2 -0.3 -2.8
+       0.2  0.3  2.8
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/12mg.2.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t92.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown 
+#%% keywords = 
+#%% description = 
+#%%     Test of Mg2 molecule chains, in a slab supercell geometry.
+#%%     Symmetries are broken. k point (1/4 1/4 1/4)
+#%%     Use fftalg 412 and exchn2n3 1.
+#%%     Suitable for tests of space parallelisation.
+#%%<END TEST_INFO>

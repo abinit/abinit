@@ -580,7 +580,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                                  coordinates. Note that the phase factor is different
 !                                  if (ka=ia or ka/=ia).
 !                                  This Fourier transform is summed over cell replica
-!                                  See NOTE: add reference for more informations
+!                                  See NOTE: add reference for more information
                        fdcn(1,:,ia,ia) = fdcn(1,:,ia,ia)+grad*rcart(:)
                        fdcn(1,:,ia,ja) = fdcn(1,:,ia,ja)-grad*rcart(:)*re_arg
                        fdcn(2,:,ia,ja) = fdcn(2,:,ia,ja)-grad*rcart(:)*im_arg

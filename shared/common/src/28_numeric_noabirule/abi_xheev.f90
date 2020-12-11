@@ -33,8 +33,6 @@
   subroutine abi_dheev(jobz,uplo,n,a,lda,w,&
 &            x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
 
- implicit none
-
 !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
@@ -139,8 +137,6 @@ end subroutine abi_dheev
 
 subroutine abi_cheev(jobz,uplo,n,a,lda,w)
 
- implicit none
-
 !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
@@ -219,8 +215,6 @@ end subroutine abi_cheev
 !! SOURCE
 
 subroutine abi_zheev(jobz,uplo,n,a,lda,w)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz

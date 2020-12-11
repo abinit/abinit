@@ -1,0 +1,55 @@
+# N2 system. 
+# Excited state computation, using LDA/TDLDA
+
+ ndtset    2
+
+#DATASET 1  SCF
+ tolwfr1   1.0d-15
+  nband1   5
+ prtden1   1
+ getwfk1   0
+
+#DATASET 2 TDDFT
+   iscf2  -1
+ tolwfr2   1.0d-9
+  nband2   12
+ getden2   1
+ getwfk2   1
+
+#Common
+ acell 6  2*5 Angstrom
+ boxcenter 3*0.0d0
+ diemac 1.0d0   diemix 0.5d0
+ ecut 25
+ ixc  7
+
+kptopt 0          # Enter the k points manually 
+
+ natom  2 
+ nbdbuf 0
+
+ nstep 25
+ ntypat  1
+ typat  1 1
+ xcart -0.54885  0 0  0.54885 0 0 Angstrom   ! Distance 1.0977 Angstrom
+ znucl  7
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/7n.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   ttddft_1.abo, tolnlines=  6, tolabs=  1.010e-02, tolrel=  4.000e-01
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = TDDFT
+#%% description = 
+#%%  N2 system. 
+#%%  Excited state computation, using LDA/TDLDA
+#%%<END TEST_INFO>

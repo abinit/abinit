@@ -1,0 +1,107 @@
+# Test sigma driver with nspinor == 2. Use screening computed with nspinor 1 and nspden 1
+ndtset 6
+
+nspinor 1 nspden 1 so_psp *0
+nband    14
+ecut     8 ecutsigx 8  ecuteps  2
+tolwfr   1e-16
+
+kptopt   4
+nshiftk  1
+shiftk   0 0 0
+ngkpt    2 2 2 
+
+awtr      0
+gwpara    1
+symchi    0
+inclvkb   0
+
+nkptgw     1
+kptgw      0 0 0 
+bdgw       1 14
+symsigma   0
+
+
+#################
+### DATASET 1 ###
+#################
+
+#################
+### DATASET 2 ###
+#################
+nspinor2 2 nspden2 4 nband2  28
+getwfk2 1
+
+#################
+### DATASET 3 ###
+#################
+# Screening with nsppol 1
+optdriver3 3
+getwfk3    1
+gwcalctyp3 2 # CD
+nfreqre    10
+nfreqim    5
+freqremax  20 eV
+
+#################
+### DATASET 4 ###
+#################
+# G0W0 with nspinor 2 and plasmon-pole
+optdriver4 4
+nspinor4 2 nspden4 4 nband4  28 getwfk4  2
+#nspinor4 1 nspden4 1 nband4  14 getwfk4  1   # Activate this line to test compare with collinear case
+getscr4    3
+
+#################
+### DATASET 5 ###
+#################
+# G0W0 with nspinor 2 and COHSEX
+optdriver5 4
+gwcalctyp5 7  # COH
+nspinor5 2 nspden5 4 nband5  28 getwfk5  2
+#nspinor5 1 nspden5 1 nband5  14 getwfk5  1  # Activate this line to test compare with collinear case
+getscr5    3
+
+#################
+### DATASET 6 ###
+#################
+# G0W0 with nspinor 2 and CD
+optdriver6 4
+gwcalctyp6 2  # CD
+nspinor6 2 nspden6 4 nband6  28 getwfk6  2
+#nspinor6 1 nspden6 1 nband6  14 getwfk6  1  # Activate this line to test compare with collinear case
+getscr6    3
+
+
+######################################################################################
+# Definition of the unit cell: fcc
+acell  3*10.217        
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat 1 znucl 14         
+natom 2 typat 1 1         
+xred              
+   0.0  0.0  0.0
+   0.25 0.25 0.25
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si_r.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%  t91.abo, tolnlines = 27, tolabs = 1.1e-2, tolrel = 4.0e-2;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GW, SOC
+#%% description = 
+#%%   Test sigma driver with nspinor == 2. Use screening computed with nspinor 1 and nspden 1
+#%%<END TEST_INFO>
