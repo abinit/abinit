@@ -25,7 +25,7 @@ or the use of a specific submission file.
 
 This tutorial should take about 1.5 hour and requires to have at least a 200 CPU core parallel computer.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 Generating the WFK file in parallel
 

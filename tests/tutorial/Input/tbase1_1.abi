@@ -2,7 +2,7 @@
 #
 # In this input file, the location of the information on this or that line
 # is not important : a keyword is located by the parser, and the related
-# information should follow. 
+# information should follow. Still, this file is strongly structured, for pedagogical purpose.
 # The "#" symbol indicates the beginning of a comment : the remaining
 # of the line will be skipped.
 
@@ -12,12 +12,13 @@ acell 10 10 10    # The keyword "acell" refers to the
 #rprim 1 0 0  0 1 0  0 0 1 # This line, defining orthogonal primitive vectors,
                            # is commented, because it is precisely the default value of rprim
 
-#Definition of the atom types
+#Definition of the atom types and pseudopotentials
 ntypat 1          # There is only one type of atom
-znucl 1           # The keyword "znucl" refers to the atomic number of the 
-                  # possible type(s) of atom. The pseudopotential(s) 
-                  # mentioned in the "files" file must correspond
-                  # to the type(s) of atom. Here, the only type is Hydrogen.
+znucl 1           # The keyword "znucl" refers to the atomic number of the possible type(s) of atom. 
+                  # Here, the only type is Hydrogen. The pseudopotential(s) 
+                  # mentioned after the keyword "pseudos" should correspond to this type of atom.
+pp_dirpath "$ABI_PSPDIR"                 # This is the path to the directory were pseudopotentials for tests are stored
+pseudos "PseudosGTH_pwteter/01h.pspgth"  # Name and location of the pseudopotential
                          
 
 #Definition of the atoms
@@ -28,15 +29,13 @@ xcart             # This keyword indicates that the location of the atoms
   -0.7 0.0 0.0    # Triplet giving the cartesian coordinates of atom 1, in Bohr
    0.7 0.0 0.0    # Triplet giving the cartesian coordinates of atom 2, in Bohr
 
-#Definition of the planewave basis set
+#Numerical parameters of the calculation : planewave basis set and k point grid
 ecut 10.0         # Maximal plane-wave kinetic energy cut-off, in Hartree
-
-#Definition of the k-point grid
 kptopt 0          # Enter the k points manually 
 nkpt 1            # Only one k point is needed for isolated system,
                   # taken by default to be 0.0 0.0 0.0
 
-#Definition of the SCF procedure
+#Parameters for the SCF procedure
 nstep 10          # Maximal number of SCF cycles
 toldfe 1.0d-6     # Will stop when, twice in a row, the difference 
                   # between two consecutive evaluations of total energy 
@@ -46,13 +45,11 @@ diemac 2.0        # Although this is not mandatory, it is worth to
                   # precondition the SCF cycle. The model dielectric
                   # function used as the standard preconditioner
                   # is described in the "dielng" input variable section.
-                  # Here, we follow the prescriptions for molecules 
-                  # in a big box
+                  # Here, we follow the prescriptions for molecules in a big box
 
-
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosGTH_pwteter/01h.pspgth"
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

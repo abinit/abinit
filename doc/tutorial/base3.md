@@ -21,7 +21,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about 1 hour.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## Computing the total energy of silicon at a fixed number of k-points
 
