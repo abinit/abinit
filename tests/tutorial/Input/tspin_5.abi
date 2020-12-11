@@ -29,7 +29,7 @@
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosHGH_pwteter/73ta.13.hgh"
+ pseudos "Pseudodojo_nc_fr_04_pbe_standard_psp8/Ta.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

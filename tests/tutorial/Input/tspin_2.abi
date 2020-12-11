@@ -1,16 +1,23 @@
+# Added by runtests.py
+output_file = "tspin_2.abo"
+indata_prefix = "tspin_2i"
+outdata_prefix = "tspin_2o"
+tmpdata_prefix = "tspin_2t"
+# end runtests.py section
+
 # Fe fcc structure with two atoms per unit cell for test of antiferromagnetic
 # This is the simplest fcc structure compatible with a X point spiral
 
 #data for each data set: how to get densities of state
- ngkpt   6 6 4
+ ngkpt   4 4 2
  prtdos 1  
 #Common data
  prtden   1
  tolwfr   1.0d-7
   acell   3*6.60
-   ecut   18.0
+   ecut   25.0
   natom   2
-  nband   16
+  nband   20
 nshiftk   1
 #Antiferromagnet order
  spinat 0.0 0.0   4.0
@@ -25,7 +32,7 @@ nshiftk   1
           0.5   0.5  0.0
           0.0   0.0  1.0
  shiftk   0.5 0.5 0.5
- tsmear   0.01
+ tsmear   0.001
   typat   1 1
    xred   0.0  0.0  0.0
           0.5  0.0  0.5
@@ -33,8 +40,8 @@ nshiftk   1
 
 
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/26fe.pspnc"
+ pp_dirpath "/home/ebousquet/CODES/Abinit/Git/beauty/tests/Psps_for_tests/"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
