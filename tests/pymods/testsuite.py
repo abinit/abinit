@@ -339,6 +339,7 @@ class FileToTest(object):
         # FIXME Hack due to the stdout-out ambiguity
         if not os.path.exists(ref_fname) and ref_fname.endswith(".stdout"):
             ref_fname = ref_fname[:-7] + ".out"
+            #ref_fname = ref_fname[:-7] + ".abo"
         out_fname = os.path.abspath(os.path.join(workdir, self.name))
 
         opts = {
@@ -625,7 +626,7 @@ class AbinitTestInfoParser(object):
             inp_fname: test input file
             defaults: default values passed to the INI parser.
         """
-        logger.info("Parsing TEST_INFO section from input file : " + str(inp_fname))
+        #print("Parsing TEST_INFO section from input file : " + str(inp_fname))
 
         self.inp_fname = os.path.abspath(inp_fname)
         self.inp_dir, x = os.path.split(self.inp_fname)
@@ -779,6 +780,7 @@ class AbinitTestInfoParser(object):
                 # print(self.inp_fname, d["max_nprocs"])
 
         # Add the name of the input file.
+        #print("Before AbiitTestInfo", self.inp_fname)
         d['inp_fname'] = self.inp_fname
 
         return AbinitTestInfo(d)
@@ -813,6 +815,8 @@ class AbinitTestInfoParser(object):
         parse = TESTCNF_KEYWORDS[opt][0]
 
         fnames = parse(self.parser.get(section, opt))
+        # HACK
+        fnames = [f.replace(".in", ".abi") for f in fnames]
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
 
     def yaml_test(self):
@@ -1224,6 +1228,7 @@ def make_abitest_from_input(inp_fname, abenv, keywords=None, need_cpp_vars=None,
     Factory function to generate a Test object from the input file inp_fname
     """
     inp_fname = os.path.abspath(inp_fname)
+    #print("make_abitest_from_input got inp_fname", inp_fname)
 
     parser = AbinitTestInfoParser(inp_fname)
 
@@ -1264,7 +1269,7 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
     while inp_fnames:
         inp_fname = inp_fnames.pop(0)
 
-        # print("inp_fname", inp_fname)
+        #print("inp_fname", inp_fname)
         parser = AbinitTestInfoParser(inp_fname)
         nprocs_to_test = parser.nprocs_to_test
 
@@ -1284,13 +1289,14 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
                 out_tests.append(cls(test_info, abenv))
 
         else:
-            logger.info("got chain input %s" % inp_fname)
+            #print("got chain input for inp_fname:", inp_fname)
             # print(parser.chain_inputs())
 
             # Build the test chain with np nprocessors.
             for np in nprocs_to_test:
                 tchain_list = []
                 for cht_fname in parser.chain_inputs():
+                    #print("cht_fname", cht_fname)
                     t = make_abitest_from_input(cht_fname, abenv, keywords=keywords, need_cpp_vars=need_cpp_vars, with_np=np)
                     tchain_list.append(t)
 
@@ -2272,6 +2278,7 @@ pp_dirpath $ABI_PSPDIR
 
             if not os.path.isfile(ref_fname) and ref_fname.endswith(".stdout"):
                 ref_fname = ref_fname[:-7] + ".out"  # FIXME Hack due to the stdout-out ambiguity
+                #ref_fname = ref_fname[:-7] + ".abo"  # FIXME Hack due to the stdout-out ambiguity
 
             out_fname = os.path.abspath(os.path.join(self.workdir, f.name))
 
@@ -2284,7 +2291,7 @@ pp_dirpath $ABI_PSPDIR
             f.hdiff_fname = hdiff_fname
 
             x, ext = os.path.splitext(f.name)
-            safe_hdiff = ext in {".out", ".stdout"}  # Create HTML diff file only for these files
+            safe_hdiff = ext in {".out", ".abo", ".stdout"}  # Create HTML diff file only for these files
 
             if ref_exists and out_exists and safe_hdiff:
                 out_opt = "-m"
@@ -2322,6 +2329,7 @@ pp_dirpath $ABI_PSPDIR
 
             if not os.path.isfile(ref_fname) and ref_fname.endswith(".stdout"):
                 ref_fname = ref_fname[:-7] + ".out"  # FIXME Hack due to the stdout-out ambiguity
+                #ref_fname = ref_fname[:-7] + ".abo"  # FIXME Hack due to the stdout-out ambiguity
 
             out_fname = os.path.abspath(os.path.join(self.workdir, f.name))
 
@@ -2551,7 +2559,7 @@ class AbinitTest(BaseTest):
         # and we might want to change it especially if we are debugging the code
         inp_fname = self.inp_fname
         t_stdin.write(os.path.basename(inp_fname) + "\n")
-        t_stdin.write(self.id + ".out" + "\n")
+        t_stdin.write(self.id + ".abo" + "\n")
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
@@ -2582,7 +2590,8 @@ class AbinitTest(BaseTest):
         app = extra.append
 
         if 'output_file = "' not in line:
-            app('output_file = "%s"' % (self.id + ".out"))
+            #app('output_file = "%s"' % (self.id + ".out"))
+            app('output_file = "%s"' % (self.id + ".abo"))
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
@@ -2642,7 +2651,7 @@ class AnaddbTest(BaseTest):
         t_stdin = StringIO()
 
         t_stdin.write(self.inp_fname + "\n")         # 1) formatted input file
-        t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.id + ".abo" + "\n")       # 2) formatted output file e.g. t13.abo
         t_stdin.write(self.get_ddb_path() + "\n")    # 3) input derivative database e.g. t13.ddb.in
         t_stdin.write(self.id + ".md" + "\n")        # 4) output molecular dynamics e.g. t13.md
         t_stdin.write(self.get_gkk_path() + "\n")    # 5) input elphon matrix elements  (GKK file) :
@@ -2666,7 +2675,7 @@ class AnaddbTest(BaseTest):
             app('ddb_filepath = "%s"' % (self.get_ddb_path()))
 
         if 'output_file = "' not in line:
-            app('output_file = "%s"' % (self.id + ".out"))
+            app('output_file = "%s"' % (self.id + ".abo"))
 
         # EPH stuff
         gkk_path = self.get_gkk_path()
@@ -2696,7 +2705,7 @@ class MultibinitTest(BaseTest):
         t_stdin = StringIO()
 
         t_stdin.write(self.inp_fname + "\n")         # 1) formatted input file
-        t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.id + ".abo" + "\n")       # 2) formatted output file e.g. t13.abo
 
         if self.input_ddb:
             iddb_fname = os.path.join(self.inp_dir, self.input_ddb)
@@ -2760,7 +2769,7 @@ class TdepTest(BaseTest):
             self.exceptions.append(self.Error("%s no such hist file: " % md_hist_fname))
 
         t_stdin.write(md_hist_fname + "\n")
-        t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.abo
 
         return t_stdin.getvalue()
 
@@ -2806,7 +2815,7 @@ class OpticTest(BaseTest):
         t_stdin = StringIO()
 
         t_stdin.write(self.inp_fname + "\n")  # optic input file e.g. .../Input/t57.in
-        t_stdin.write(self.id + ".out\n")     # Output. e.g t57.out
+        t_stdin.write(self.id + ".abo\n")     # Output. e.g t57.abo
         t_stdin.write(self.id + "\n")         # Used as suffix to diff and prefix to log file names,
                                                # and also for roots for temporaries
 
@@ -3196,6 +3205,91 @@ class AbinitTestSuite(object):
             assert keywords is None, ("keywords argument is not expected with test_list")
             assert need_cpp_vars is None, ("need_cpp_vars argument is not expected with test_list.")
             self.tests = tuple(test_list)
+
+    #def git_rename(self):
+
+    #    import subprocess
+    #    seen = set()
+    #    def rename(test):
+    #        #print(test, type(test))
+    #        if test.inp_fname in seen: return
+    #        seen.add(test.inp_fname)
+
+    #        root, ext = os.path.splitext(test.inp_fname)
+    #        #assert ext == ".in"
+    #        new = root + ".abi"
+    #        inbase = os.path.basename(root)
+    #        cmd = f"git mv {test.inp_fname} {new}"
+
+    #        #print("cmd", cmd)
+    #        #subprocess.run(cmd, shell=True, check=True)
+    #        #call(cmd)
+    #        #print("inp_fname", test.inp_fname)
+
+    #        # Rename ref files
+    #        old_new = []
+    #        for f in test.files_to_test:
+    #            root, ext = os.path.splitext(test.inp_fname)
+    #            if not f.name.endswith(".out"): continue
+    #            if f.name == inbase + ".out" or "MPI" in f.name:
+    #                old_ref = os.path.join(test.ref_dir, f.name)
+    #                new, ext = os.path.splitext(old_ref)
+    #                new = new + ".abo"
+    #                cmd = f"git mv {old_ref} {new}"
+    #                print(cmd)
+    #                if os.path.exists(old_ref) and not os.path.exists(new):
+    #                    subprocess.run(cmd, shell=True, check=True)
+    #                if not os.path.exists(old_ref):
+    #                    print("Warning. unexistent:", old_ref)
+    #                old_new.append((os.path.basename(old_ref), os.path.basename(new)))
+
+    #            else:
+    #                continue
+    #                #print("strange f.name", f.name)
+
+    #        # Change names in TEST_INFO section
+    #        if old_new:
+    #            with open(test.inp_fname, "rt") as fh:
+    #                s = fh.read()
+    #                for old, new in old_new:
+    #                    print("replacing`", old, "`with:`", new, "`in:", test.inp_fname)
+    #                    s = s.replace(old, new)
+    #            #print(s)
+    #            with open(test.inp_fname, "wt") as fh:
+    #                fh.write(s)
+
+    #    def rename_chain(chain):
+    #        old_new = []
+    #        for test in chain:
+    #            print(test)
+    #            root, ext = os.path.splitext(test.inp_fname)
+    #            #assert ext == ".abi"
+    #            old = os.path.basename(root + ".in")
+    #            new = os.path.basename(root + ".abi")
+    #            #inbase = os.path.basename(root)
+    #            #cmd = f"git mv {test.inp_fname} {new}"
+    #            old_new.append((old, new))
+
+    #        # Change names in TEST_INFO section
+    #        if old_new:
+    #            for test in chain:
+    #                with open(test.inp_fname, "rt") as fh:
+    #                    s = fh.read()
+    #                    for old, new in old_new:
+    #                        print("replacing test_chain`", old, "`with:`", new, "`in:", test.inp_fname)
+    #                        s = s.replace(old, new)
+    #                #print(s)
+    #                with open(test.inp_fname, "wt") as fh:
+    #                    fh.write(s)
+
+    #    for test in self:
+    #        if isinstance(test, ChainOfTests):
+    #            #print("Skipping test chain")
+    #            #rename_chain(test)
+    #            for t in test:
+    #                rename(t)
+    #        else:
+    #            rename(test)
 
     def __str__(self):
         return "\n".join(str(t) for t in self.tests)
@@ -3966,6 +4060,7 @@ class Results(object):
                 # FIXME Hack due to the ambiguity stdout, out!
                 if not os.path.exists(ref_fname) and ref_fname.endswith(".stdout"):
                     ref_fname = ref_fname[:-7] + ".out"
+                    #ref_fname = ref_fname[:-7] + ".abo"
                 ref_files.append(ref_fname)
 
         return out_files, ref_files

@@ -1,0 +1,73 @@
+#  Isolated Bi atom. Spin-polarized, collinear.
+
+  zeemanfield 0.0 0.0 1.0
+
+  ndtset   6
+  udtset   3 2
+
+   nband1? 4 4
+ nspinor1? 1
+  nsppol1? 2
+  nspden1? 2
+
+   nband2? 8
+ nspinor2? 2
+  nsppol2? 1
+  nspden2? 4
+    nsym2? 1
+
+   nband3? 8
+ nspinor3? 2
+  nsppol3? 1
+  nspden3? 4
+    nsym3? 1
+
+  occopt?1 2
+     occ?1 5*1 3*0
+
+  occopt?2 7
+  tsmear?2 0.02
+  getwfk?2 -1
+
+#Additional test for kinetic energy density
+
+ prtkden   1
+ usekden   1
+
+#Common data
+   acell   3*10   #This parameter is of course for testing purposes only
+    xred   3*0.0
+
+  kptopt 0
+  ntypat   1
+   znucl   83.d0
+   natom   1
+   typat   1
+  spinat   0 0 3
+  so_psp   0
+
+    ecut   8
+   nstep   20
+
+  toldfe   1.0d-7
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t17.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Bi atom in a big supercell.
+#%%   Test the application of a Zeeman field.
+#%% topics = MagField
+#%%<END TEST_INFO>

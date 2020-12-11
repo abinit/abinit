@@ -1,0 +1,80 @@
+# Crystalline aluminum
+# Create the WFK file for the GW calculation.
+ndtset    2
+
+nband1    6
+toldfe1   1.0d-8     
+
+iscf2        -2
+getden2      1
+nband2      35
+nbdbuf2      5
+tolwfr2     1.0d-10
+
+#Definition of occupation numbers
+occopt 3
+tsmear 0.05
+
+#Definition of the unit cell
+acell 3*7.652
+
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5 
+       0.5  0.5  0.0
+
+#Definition of the atom types
+ntypat 1       
+znucl 13      
+
+#Definition of the atoms
+natom 1  
+typat 1  
+xred  0.0  0.0  0.0  
+
+#Definition of the planewave basis set
+ecut  8.0
+
+#Definition of the k-point grid
+ngkpt       4 4 4
+
+#64 k points
+ nshiftk     1      
+ shiftk      0.  0.  0. 
+ istwfk     *1
+#256 k points
+#nshiftk 4
+#shiftk 0 0 0   1/2 1/2 0   1/2 0 1/2  0 1/2 1/2
+#istwfk     19*1
+
+#Definition of the SCF procedure
+nstep 50          
+#toldfe 1.0d-8     
+                 
+prtvol     5
+enunit     1
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tgw2_1.abi, tgw2_2.abi, tgw2_3.abi, tgw2_4.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tgw2_1.abo, tolnlines=0, tolabs=0.000e+00, tolrel=3.000e-02
+#%% [shell] 
+#%% post_commands = 
+#%%   ww_cp tgw2_1o_DS2_WFK tgw2_2i_WFK;
+#%%   ww_cp tgw2_1o_DS2_WFK tgw2_3i_WFK;
+#%%   ww_cp tgw2_1o_DS2_WFK tgw2_4i_WFK;
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = F. Bruneval
+#%% keywords = GW
+#%% description = 
+#%%   Crystalline aluminum
+#%%   Create the WFK file for the GW calculation.
+#%%<END TEST_INFO>

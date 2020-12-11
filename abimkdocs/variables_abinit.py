@@ -7245,7 +7245,7 @@ Variable(
     text=r"""
 This option selects the format used to produce "large" binary files such as the output wavefunction files,
 the files with densities and potentials (DEN, POT) as well as the SCR file produced by the GW code.
-Other "small" files such as the GSR.nc are always produced indipendently of the value of **iomode**.
+Other "small" netcdf files such as the GSR.nc are always produced independently of the value of **iomode**.
 
 Note that this variable mainly defines the format of the output files since Abinit is able to read
 data from files independently of their format (either Fortran binary files or netcdf files).
@@ -7264,7 +7264,7 @@ plain Fortran read statements.
 There are cases, however, in which you would like to change the default behaviour.
 For example, you may want to generate WFK or DEN files in netcdf
 format because you need data in this format.
-In this case, you have to use iomode == 3 in the input file to override the default behaviour.
+In this case, you have to use [[iomode]] == 3 in the input file to override the default behaviour.
 Note, however, that you still need parallel IO capabilities enabled in the netcdf library if
 you want to produce netcdf files in parallel with [[paral_kgb]] = 1
 (i.e. netcdf4 + hdf5 + MPI-IO).
@@ -21538,14 +21538,14 @@ Variable(
     mnemonics="PseudoPotential DIRectory PATH",
     added_in_version="9.0.0",
     text=r"""
-This variable specifies the directory that will prepended to the names of the pseudopotentials
+This variable specifies the directory that will be prepended to the names of the pseudopotentials
 specified in [[pseudos]].
 This option is useful when all your pseudos are gathered in a single directory in your file system
 and you don not want to type the absolute path for each pseudopotential file.
 
 This variable is used when Abinit is executed with the new syntax:
 
-    abinit run.abi > run.log 2> run.err &
+    abinit abi_in >& log &
 
 The string must be quoted in double quotation marks:
 
@@ -21585,7 +21585,7 @@ Variable(
     abivarname="pseudos",
     varset="files",
     vartype="string",
-    topics=['Control_useful'],
+    topics=['Control_basic'],
     dimensions="scalar",
     defaultval="",
     mnemonics="PSEUDOpotentialS",
@@ -21593,7 +21593,7 @@ Variable(
     text=r"""
 String defining the list of pseudopotential files when Abinit is executed with the new syntax:
 
-    abinit run.abi > run.log 2> run.err &
+    abinit abi_in >& log &
 
 The string must be quoted in double quotation marks and multiple files should be separated by a comma, e.g.
 

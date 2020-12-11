@@ -1,0 +1,83 @@
+# ----------------------------------------------------------------------------------
+ndtset 2
+jdtset 1 2
+#jdtset 1 2 3 4
+pawprtvol 3
+getden -1 
+
+#==================================================================================
+############ Parameters common to all DATASETS
+#==================================================================================
+##### CONVERGENCE PARAMETERS
+nstep     40   
+nline     3          #Number of LINE minimisations
+nnsclo    3          #Number of Non-Self Consistent LOops
+ecut      12.0        # Maximal kinetic energy cut-off, in Hartree
+pawecutdg 20.0        #(60)PAW - Energy CUToff for the Double Grid ( need only when usepaw=1=)
+tolwfr    1.0d-15
+occopt    3          #OCCupation OPTion
+tsmear    1200 K     #Temperature of SMEARing
+#
+##### PHYSICAL PARAMETERS
+natom 5 ntypat 3 typat 1 2 3 3 3
+znucl  23.0 38.0 8.0
+# V Sr O*3
+xred 0.00 0.00 0.00  #vectors (X) of atom positions in REDuced coordinates
+     0.50 0.50 0.50
+     0.50 0.00 0.00
+     0.00 0.50 0.00
+     0.00 0.00 0.50
+acell   3*7.2605
+rprim 1.0 0.0 0.0    #Real space PRIMitive translations
+      0.0 1.0 0.0
+      0.0 0.0 1.0
+
+ngkpt   4 4 4    #K - PoinTs grid : Real space LATTice
+nshiftk 1        #No shif
+shiftk  0.5 0.5 0.5
+istwfk *1
+
+#For all the dataset
+nsym 1
+nband 30
+
+#==================================================================================
+############ SECOND DATASET: Compute band structure with fatbands
+#==================================================================================
+
+getden2    1
+nbandkss2  2
+kssform2   3
+
+pawfatbnd2  1
+
+
+#Parameters (to uncomment) for bands structure 
+iscf2      -2                                    
+kptopt2     -4                           
+ndivk2      18 20 20 28
+kptbounds2  1/4 1/4 1/4 #R'
+            0.0 0.0 0.0 #Gamma
+            1/2 0.0 0.0 #X
+            1/2 1/2 0.0 #M
+            0.0 0.0 0.0 #Gamma
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tucrpa_1.abi
+#%% [files]
+#%% [shell] 
+#%% [paral_info]
+#%% max_nprocs = 24
+#%% nprocs_to_test = 24
+#%% [NCPU_24]
+#%% files_to_test = tucrpa_1_MPI24.abo, tolnlines = 3, tolabs = 4.0e-10, tolrel = 2.0e-02
+#%% [extra_info]
+#%% keywords = LDA, FATBANDS
+#%% authors = B. Amadon
+#%% description = For SrVO3, compute band structure
+#%%<END TEST_INFO>

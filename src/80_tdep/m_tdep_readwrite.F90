@@ -239,7 +239,8 @@ contains
   if ( inputfilename == "" ) inputfilename='input.in'
   if ( filename == "" ) filename='HIST.nc'
 
-  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
+  !open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
+  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.abo')
 
 
 #if defined HAVE_NETCDF

@@ -1,0 +1,187 @@
+# 'Full' DFPT calculation of third derivatives using Second Order Sternheimer equation
+# Test on AlAs, with PAW pseudopotentials
+# (L. Baguet, 05.2018)
+# nsppol = 2
+
+# Enable output for nonlinear (full DFPT only)
+#*****************************************************
+#   nonlinear_info 1  # print details of 3rd derivatives in .out file (no time consuming)
+#   nonlinear_info 2  # nonlinear_info=1 + debug_mode activated in nonlinear (time consuming)
+#   nonlinear_info 3  # nonlinear_info=1 + debug_mode activated in rf2_init  (time consuming)
+#   nonlinear_info 4  # nonlinear_info=1 + debug_mode activated in both nonlinear and rf2_init (time consuming)
+
+# Elementary cell
+#*********************************
+   acell 3*10.64
+   rprim 0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+
+# Atoms
+#***********************
+   natom 2
+   ntypat 2
+   znucl 13 33
+   typat 1 2
+
+   xred  0.00  0.00  0.00
+         0.25  0.25  0.25
+
+# Exchange correlation functional
+#********************************
+   ixc 7
+
+# Polarization
+#*******************************
+          nsppol    2
+  spinmagntarget    0
+
+# SCF procedure
+#*******************************
+   nstep    100
+
+# Bands
+#*******************************
+  occopt    1
+   nband    8
+
+# Plane wave basis set
+#**************************************
+       ecut  3.5
+     ecutsm  0
+  pawecutdg  7.0
+
+# K point grid
+#**************************************
+   ngkpt       2 2 2
+   nshiftk     4
+   shiftk      0.5 0.5 0.5
+               0.5 0.0 0.0
+               0.0 0.5 0.0
+               0.0 0.0 0.5
+
+# Number of Datasets
+#**************************************
+#    ndtset   7
+    ndtset   4
+    jdtset   1 2 3 4
+
+# PAW option
+#*******************************
+  pawxcdev   0 # non-zero pawxcdev is not allowed for dataset 7, so we use pawxcdev=0 for all
+
+# For all datasets (except 1 and 2)
+#*******************************
+    kptopt   2
+    tolwfr   1.0d-20
+    getden   2
+    getwfk   2
+
+# DATASET1 : Ground state (density)
+#*******************************
+   getden1   0
+   getwfk1   0
+   tolvrs1   1.0d-8
+   kptopt1   1
+
+# DATASET2 : Ground state (highly converged wavefunction)
+#*******************************
+   getden2   1
+   getwfk2   1
+   tolwfr2   1.0d-22
+
+# DATASET3 : ddk (SCF cycles are useless)
+#*******************************
+    rfddk3   1
+    rfdir3   1 1 1
+# For a more effective non self-consistent computation:
+    nstep3   1
+    nline3   100
+   tolrde3   1.0d-30 # tolrde is choosen to be much lower than tolwfr.
+                     # This way the conjugate gradient steps stop at tolwfr, and not tolrde (usually around 1.0d-3).
+                     # If nline is sufficiently large, the computation converges in one step only.
+
+# DATASET4 : Phonons, Electric field
+#*******************************
+   rfelfd4   3
+   rfphon4   1
+  rfatpol4   1 2
+    rfdir4   1 1 1
+   getddk4   3
+   prtden4   1
+  prepanl4   1
+
+# DATASET5 : dkdk
+#*******************************
+# rf2_dkdk5   1
+#   getddk5   3
+#  prepanl5   1
+## Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
+#    nstep5   1
+#    nline5   100
+
+# DATASET6 : dkde
+#*******************************
+# rf2_dkde6   1
+#   getddk6   3
+#  get1den6   4
+# getdelfd6   4
+#  getdkdk6   5
+#  prepanl6   1
+## Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
+#    nstep6   1
+#    nline6   100
+
+# DATASET7 : 3DTE calculation (full DFPT)
+#*****************************************
+#optdriver7    5 # for nonlinear calculation
+#  usepead7    0
+#   getddk7    3
+#  get1den7    4
+#   get1wf7    4
+#  getdkde7    6
+#  d3e_pert1_phon7   1
+# d3e_pert1_atpol7   1 2
+#  d3e_pert1_elfd7   1
+#   d3e_pert1_dir7   1 1 1
+#  d3e_pert2_elfd7   1
+#   d3e_pert2_dir7   1 1 1
+#  d3e_pert3_elfd7   1
+#   d3e_pert3_dir7   1 1 1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pw_standard/Al.xml, As.LDA_PW-JTH_sp.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t85.abi, t86.abi
+#%% [shell]
+#%% post_commands = 
+#%%   ww_mv t85o_DS2_DEN   t86o_DS2_DEN;
+#%%   ww_mv t85o_DS2_WFK   t86o_DS2_WFK;
+#%%   ww_mv t85o_DS3_1WF7  t86o_DS3_1WF7;
+#%%   ww_mv t85o_DS3_1WF8  t86o_DS3_1WF8;
+#%%   ww_mv t85o_DS3_1WF9  t86o_DS3_1WF9;
+#%%   ww_mv t85o_DS4_DEN1  t86o_DS4_DEN1;
+#%%   ww_mv t85o_DS4_DEN4  t86o_DS4_DEN4;
+#%%   ww_mv t85o_DS4_DEN10 t86o_DS4_DEN10;
+#%%   ww_mv t85o_DS4_DEN11 t86o_DS4_DEN11;
+#%%   ww_mv t85o_DS4_DEN12 t86o_DS4_DEN12;
+#%%   ww_mv t85o_DS4_1WF1  t86o_DS4_1WF1;
+#%%   ww_mv t85o_DS4_1WF4  t86o_DS4_1WF4;
+#%%   ww_mv t85o_DS4_1WF10 t86o_DS4_1WF10;
+#%%   ww_mv t85o_DS4_1WF11 t86o_DS4_1WF11;
+#%%   ww_mv t85o_DS4_1WF12 t86o_DS4_1WF12
+#%% [files]
+#%% files_to_test = 
+#%%    t85.abo, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -easy;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = L. Baguet
+#%% keywords = PAW, DFPT
+#%% description = 
+#%%   Preparation for a nonlinear calculation : GS + linear response (ddk+phonon+efield).
+#%%   Test the polarized case (with a non-polarized system). Must give same results than t83.in
+#%%<END TEST_INFO>

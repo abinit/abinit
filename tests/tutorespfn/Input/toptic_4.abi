@@ -1,0 +1,37 @@
+&FILES
+ ddkfile_1 = 'toptic_3o_DS4_1WF7',
+ ddkfile_2 = 'toptic_3o_DS5_1WF8',
+ ddkfile_3 = 'toptic_3o_DS6_1WF9',
+ wfkfile = 'toptic_3o_DS3_WFK'
+/
+&PARAMETERS
+ broadening = 0.002,
+ domega = 0.0003,
+ maxomega = 0.3,
+ scissor = 0.000,
+ tolerance = 0.002
+/
+&COMPUTATIONS
+ num_lin_comp = 1,
+ lin_comp = 11,
+ num_nonlin_comp = 0,
+ num_linel_comp = 0,
+ num_nonlin2_comp = 0,
+/
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = optic
+#%% test_chain = toptic_3.abi, toptic_4.abi, toptic_5.abi
+#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
+#%% [files]
+#%% files_to_test = 
+#%%   toptic_4_0001_0001-linopt.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = S. Sharma, X. Gonze
+#%% keywords = 
+#%% description = Input file for optic code.
+#%%<END TEST_INFO>

@@ -14,18 +14,18 @@ is_multi_parallel = True
 
 #: List of input files
 inp_files = [
-"t01.in",
-"t21.in",
-"t22.in",
-"t24.in",
-"t25.in",
-"t26.in",
-"t27.in",
-"t28.in",
-"t42.in",
-"t49.in",
-"t51.in",
-"t62.in",
-"t69.in", 
-"-t99.in", # disabled since it have no meaning with my modifications
+"t01.abi",
+"t21.abi",
+"t22.abi",
+"t24.abi",
+"t25.abi",
+"t26.abi",
+"t27.abi",
+"t28.abi",
+"t42.abi",
+"t49.abi",
+"t51.abi",
+"t62.abi",
+"t69.abi", 
+"-t99.abi", # disabled since it have no meaning with my modifications
 ]

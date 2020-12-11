@@ -1,0 +1,70 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+#    Test of constrained DFT in the PAW case, non-spin polarized#
+#    BCC iron, nonmagnetic  GGA, PAW                    XG 2020 #
+#################################################################
+
+  ndtset 3
+
+# Spin variables
+  nsppol 1
+
+# Constrained calculation for charge, assymmetric
+  constraint_kind1  0 0
+  constraint_kind2  0 10
+  constraint_kind3  10 10
+
+  magcon_lambda     0.5
+  chrgat            1.68 1.80
+
+#########################
+# Common input parameters
+# Unit cell
+    acell   3*5.42
+    ntypat 2  natom 2  typat 1 2
+    znucl 2*26
+    xred    0   0   0
+            0.5 0.5 0.5
+    chkprim 0
+
+# K-points and occupations
+    kptopt 1
+    ngkpt 4 4 4   ! 6 6 6 is more realistic
+    nshiftk 1
+    shiftk 1/2 1/2 1/2
+    occopt 7
+    tsmear  0.008
+    nband 24
+
+# Definition of the spheres
+    ratsph 2*2.1
+    ratsm 0.05
+
+# Convergence parameters
+    iscf 7
+    ecut 10   ! 12 is more realistic
+    pawecutdg 30.
+    tolvrs 1.d-9
+    nstep 50
+    nstep2 25  # For portability reasons
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.paw, 26fe.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t01.abo, tolnlines = 18, tolabs = 80.0, tolrel = 0.4, fld_options= -ridiculous;
+#%% [paral_info]
+#%% max_nprocs = 28
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = PAW, ConstrainedDFT
+#%% description =
+#%%   BCC iron, nonmagnetic, GGA, PAW.
+#%%   Test constrained DFT in non magnetic case.
+#%% topics = PAW, ConstrainedDFT
+#%%<END TEST_INFO>
