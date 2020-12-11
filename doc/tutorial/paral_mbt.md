@@ -8,8 +8,8 @@ authors: MG, MS
 
 This tutorial aims at showing how to perform parallel calculations with the GW
 part of ABINIT. We will discuss the approaches used to parallelize the
-different steps of a typical G0W0 calculation, and how to setup the parameters
-of the run in order to achieve good speedup. α-quartz SiO2 is used as test case.
+different steps of a typical G<sub>0</sub>W<sub>0</sub> calculation, and how to setup the parameters
+of the run in order to achieve good speedup. α-quartz SiO<sub>2</sub> is used as test case.
 
 It is supposed that you have some knowledge about UNIX/Linux, and you know how to submit MPI jobs.
 You are supposed to know already some basics of parallelism in ABINIT,
@@ -30,8 +30,8 @@ computer cluster of 20 CPU cores or more.
 
 ## 1 Generating the WFK file in parallel
 
-*Before beginning, you should create a working directory in *\$ABI_TESTS/tutoparal/Input*
-whose name might be Work_mbt.*
+Before beginning, you should create a working directory in *\$ABI_TESTS/tutoparal/Input*
+whose name might be *Work_mbt*.
 
 ```sh
 cd $ABI_TESTS/tutoparal/Input/
@@ -50,7 +50,7 @@ generate the WFK file with the sequential version of the code.
 Now we will perform a similar calculation taking advantage of the k-point parallelism
 implemented in the ground-state part.
 
-First of all, copy all input files tmbt_*.abi in the working directory Work_mbt:
+First of all, copy all input files *tmbt_\*.abi* in the working directory *Work_mbt*:
 
     cd Work_mbt
     cp ../tmbt_*.abi .
@@ -168,7 +168,7 @@ three different steps that can be schematically described as follows:
 
 1. Each node computes the partial contribution to the RPA polarizability:
 
-    ![](paral_mbt_assets/gwpara2_chi0.png)
+$$ \sum_{c,\nu} = \sum^\text{occ}_\nu \sum^\text{mystop}_\text{c=mystart} $$
 
 2. The partial results are collected on each node.
 
@@ -188,7 +188,7 @@ processors divides the number of conduction states.
 The main limitation of the present implementation is represented by the
 storage of the polarizability. This matrix, indeed, is not distributed hence
 each node must have enough memory to store in memory a table whose size is
-given by ( **npweps** 2 x **nomega** x 16 bytes) where **nomega** is the total
+given by ( **npweps**<sup>2</sup> x **nomega** x 16 bytes) where **nomega** is the total
 number of frequencies computed.
 
 Tests performed at the Barcelona Supercomputing Center (see figures below)
@@ -212,11 +212,11 @@ Run the input file *tmb_2.abi* using different number of processors and keep
 track of the time for each processor number so that we can test the
 scalability of the implementation. The performance analysis reported in the
 figures above was obtained with PAW using ZnO as tests case, but you should
-observe a similar behavior also in SiO2.
+observe a similar behavior also in SiO<sub>2</sub>.
 
 Now let us have a look at the output results. Since this tutorial mainly
 focuses on how to run efficient MPI computations, we will not perform any
-converge study for SiO2. Most of the parameters used in the input files are
+converge study for SiO<sub>2</sub>. Most of the parameters used in the input files are
 already close to converge, only the k-point sampling and the number of empty
 states should be increased. You might modify the input files to perform the
 standard converge tests following the procedure described in the [first GW tutorial](gw1).
@@ -293,7 +293,7 @@ and then create a symbolic link pointing to the WFK file.
 
     >>> ln -s tmbt_1o_DS2_WFK tmbt_3i_WFK
 
-The input file is *$\ABI_TESTS/tutoparal/Input/tmbt_3.abi*.
+The input file is *\$ABI_TESTS/tutoparal/Input/tmbt_3.abi*.
 Open it so that we can have a look at its structure.
 
 {% dialog tests/tutoparal/Input/tmbt_3.abi %}
@@ -341,7 +341,7 @@ The memory needed to store the spectral function is reported in the log file:
 
 Note how the size of this array decreases when more processors are used.
 
-The figure below shows the electron energy loss function (EELF) of SiO2
+The figure below shows the electron energy loss function (EELF) of SiO<sub>2</sub>
 calculated using the Adler-Wiser and the Hilbert transform method. You might
 try to reproduce these results (the EELF is reported in the file *tmbt_3o_EELF*,
 a much denser k-sampling is required to achieve convergence).
@@ -350,7 +350,7 @@ a much denser k-sampling is required to achieve convergence).
 
 ## 4 Computing the one-shot GW corrections in parallel
 
-In this last paragraph, we discuss how to calculate G0W0 corrections in
+In this last paragraph, we discuss how to calculate G<sub>0</sub>W<sub>0</sub> corrections in
 parallel with [[gwpara]] = 2. The basic equations used to compute the self-energy matrix elements are discussed in
 [[theory:mbt#evaluation_gw_sigma|this part]] of the GW notes.
 
@@ -370,7 +370,7 @@ The most important parameters of the calculation are reported below:
 optdriver   4            # Sigma run.
 irdwfk      1
 irdscr      1
-gwcalctyp   0 ppmodel 1  # G0W0 calculation with the plasmon-pole approximation.
+gwcalctyp   0 ppmodel 1  # G<sub>0</sub>W<sub>0</sub> calculation with the plasmon-pole approximation.
 #gwcalctyp  2            # Uncomment this line to use the contour-deformation technique but remember to change the SCR file!
 gwpara      2            # Parallelization over bands.
 symsigma    1            # To enable the symmetrization of the self-energy matrix elements.
@@ -455,10 +455,10 @@ extremely slowly with respect to the number of empty states. To converge the
 QP gaps within 0.1 eV accuracy, we had to include 1200 bands in the screening
 and 800 states in the calculation of the self-energy.
 
-The comparison between the LDA band structure and the G 0W0 energy bands of
-α-quartz SiO2 is reported in the figure below. The direct gap at Γ is opened
+The comparison between the LDA band structure and the G<sub>0</sub>W<sub>0</sub> energy bands of
+α-quartz SiO<sub>2</sub> is reported in the figure below. The direct gap at Γ is opened
 up significantly from the LDA value of 6.1 eV to about 9.4 eV when the one-
-shot G0W0 method is used. You are invited to reproduce this result (take into
+shot G<sub>0</sub>W<sub>0</sub> method is used. You are invited to reproduce this result (take into
 account that this calculation has been performed at the theoretical LDA
 parameters, while the experimental structure is used in all the input files of
 this tutorial).

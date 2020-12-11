@@ -24,10 +24,10 @@ This tutorial should take about one hour to be completed.
 
 ## Preparatory steps (WFK and the SCR file)
 
-*Before starting, you might consider to work in a different subdirectory as
-for the other tutorials. Why not Work_bs?*
+Before starting, you might consider to work in a different subdirectory as
+for the other tutorials. Why not Work_bs?
 
-Copy the file *\$ABI_TESTS/tutorial/Input/tbs_1.abi*
+Copy the input files *\$ABI_TESTS/tutorial/Input/tbs_\*.abi*.
 in the working directory *Work_bs*.
 
 Make sure that the Si.psp8 pseudopotential needed for running the tutorial is placed under 
@@ -182,7 +182,7 @@ Then we have a list of five variables specifying how to construct the excitonic 
     bs_calctype       1    # L0 constructed with KS orbitals and energies.
     mbpt_sciss   0.8 eV    # Scissors operator used to correct the KS band structure.
     bs_exchange_term  1    # Exchange term included.
-    bs_coulomb_term  11    # Coulomb term included using the full matrix W_GG''
+    bs_coulomb_term  11    # Coulomb term included using the full matrix W_GG'
     bs_coupling       0    # Tamm-Dancoff approximation.
 
 The value [[bs_calctype]] = 1 specifies that the independent-particle
@@ -627,7 +627,7 @@ main difference is in the first section:
 that instructs the code to execute two calculations where the direct term is
 constructed using different value of [[ecuteps]]. We also relax the diagonal-only
 approximation for the screening by setting [[bs_coulomb_term]] = 11 so that
-the non-locality of $W(\rr, \rr'')$ is correctly taken into account.
+the non-locality of $W(\rr, \rr')$ is correctly taken into account.
 
 It is important to stress that it is not necessary to recalculate the SCR file
 from scratch just to modify the value of [[ecuteps]] used in the BS run. The

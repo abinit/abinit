@@ -1,5 +1,8 @@
 # Crystalline alpha-quartz
-# Generate the WFK with a sufficient number of empty bands for G0W0 calculations
+# Preparatory run for G0W0 calculations
+#
+# DATASET 1: SCF run
+# DATASET 2: NSCF run to generate the WFK with a sufficient number of empty bands 
 
 ndtset 2
 timopt -1
