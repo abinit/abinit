@@ -571,7 +571,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
 
  !if (dtset%prtvol > 0)
- call wrtout(std_out, sjoin(" Number of Vnl|Psi> applications:", itoa(nonlop_counter)))
+ !call wrtout(std_out, sjoin(" Number of Vnl|Psi> applications:", itoa(nonlop_counter)))
 
 !###################################################################
 
