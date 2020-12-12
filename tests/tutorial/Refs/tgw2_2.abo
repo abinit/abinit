@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.3.2 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h22 )
+.Starting date : Thu 10 Dec 2020.
+- ( at 18h13 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_2.in
-- output file    -> tgw2_2.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_2.abi
+- output file    -> tgw2_2.abo
 - root for input  files -> tgw2_2i
 - root for output files -> tgw2_2o
 
@@ -197,8 +197,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -431,19 +431,19 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the    4 th omega   9.0705   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
      -1.827   0.012  -0.012  -0.035   0.035   0.035  -0.035  -0.012   0.012
-     -0.995   0.010  -0.010  -0.031   0.031   0.031  -0.031  -0.010   0.010
+     -0.996   0.010  -0.010  -0.031   0.031   0.031  -0.031  -0.010   0.010
        1       2       3       4       5       6       7       8       9
      -1.827   0.012  -0.012  -0.035   0.035   0.035  -0.035  -0.012   0.012
-     -0.995   0.010  -0.010  -0.031   0.031   0.031  -0.031  -0.010   0.010
+     -0.996   0.010  -0.010  -0.031   0.031   0.031  -0.031  -0.010   0.010
 
 
    Upper and lower wings at the    5 th omega  12.0939   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       4.077  -0.021   0.021   0.064  -0.064  -0.064   0.064   0.021  -0.021
-     -1.782  -0.096   0.096   0.289  -0.289  -0.290   0.290   0.097  -0.097
+     -1.782  -0.096   0.096   0.289  -0.289  -0.289   0.289   0.096  -0.096
        1       2       3       4       5       6       7       8       9
       4.077  -0.021   0.021   0.064  -0.064  -0.064   0.064   0.021  -0.021
-     -1.782  -0.096   0.096   0.289  -0.289  -0.290   0.290   0.097  -0.097
+     -1.782  -0.096   0.096   0.289  -0.289  -0.289   0.289   0.096  -0.096
 
 
    Upper and lower wings at the    6 th omega  15.1174   0.0000 [eV]
@@ -1475,10 +1475,41 @@ P           mkmem           8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          2.3        0.04      0.001
+- Total wall clock time (s,m,h):          2.3        0.04      0.001
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            2.3, wall_time =            2.3
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- timing timab                   0.108   4.6      0.108   4.6             10      -1.00        1.00       1.00
+- pspini                         0.077   3.3      0.077   3.3              1      -1.00        1.00       1.00
+- invars2                        0.027   1.1      0.027   1.2              1      -1.00        0.99       0.99
+- abinit(2)                      0.013   0.6      0.014   0.6              1      -1.00        0.95       0.95
+- others (125)                   0.011   0.5      0.011   0.5             -1      -1.00        0.99       0.99
+-<END_TIMER>
+-
+- subtotal                       0.236  10.1      0.237  10.1                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           2.3, wall_time =           2.3
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- timing timab                   0.108   4.6      0.108   4.6             10      -1.00        1.00       1.00
+- pspini                         0.077   3.3      0.077   3.3              1      -1.00        1.00       1.00
+- invars2                        0.027   1.1      0.027   1.2              1      -1.00        0.99       0.99
+- abinit(2)                      0.013   0.6      0.014   0.6              1      -1.00        0.95       0.95
+- others (125)                   0.011   0.5      0.011   0.5             -1      -1.00        0.99       0.99
+-<END_TIMER>
 
+- subtotal                       0.236  10.1      0.237  10.1                                  1.00       1.00
 
 ================================================================================
 
@@ -1568,10 +1599,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.1
++Overall time at end (sec) : cpu=          2.3  wall=          2.3
