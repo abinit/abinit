@@ -3,7 +3,7 @@
 !!
 !! FUNCTION
 !!  Computation of phonon linewidths, isotropic superconducting properties
-!!  and transport in metals withing the LOVA approximation to the linearized Boltzmann equation.
+!!  and transport in metals within the LOVA approximation to the linearized Boltzmann equation.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2020 ABINIT group (MG)
@@ -487,8 +487,6 @@ contains  !=====================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -543,8 +541,6 @@ end subroutine phgamma_free
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -646,8 +642,6 @@ end subroutine phgamma_init
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -742,8 +736,6 @@ end subroutine phgamma_ncwrite
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -822,8 +814,6 @@ end subroutine tgamma_symm
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -928,8 +918,6 @@ end subroutine phgamma_eval_qibz
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1039,8 +1027,6 @@ end subroutine phgamma_interp
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1168,8 +1154,6 @@ end subroutine phgamma_interp_setup
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1378,7 +1362,7 @@ end subroutine phgamma_vv_interp
 !! phgamma_vv_interp_setup
 !!
 !! FUNCTION
-!!  This routines preparse the internal tables used to interpolate the vv_linewidths in q-space
+!!  This routines prepare the internal tables used to interpolate the vv_linewidths in q-space
 !!
 !! INPUTS
 !!  action =
@@ -1392,8 +1376,6 @@ end subroutine phgamma_vv_interp
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1412,8 +1394,7 @@ subroutine phgamma_vv_interp_setup(gams, cryst)
 !arrays
  integer,allocatable :: qirredtofull(:),qpttoqpt(:,:,:)
  real(dp),allocatable :: coskr(:,:),sinkr(:,:)
- real(dp),allocatable :: vals_in_bz(:,:,:,:,:)
- real(dp),allocatable :: vals_out_bz(:,:,:,:,:)
+ real(dp),allocatable :: vals_in_bz(:,:,:,:,:), vals_out_bz(:,:,:,:,:)
 
 ! *************************************************************************
 
@@ -1520,8 +1501,6 @@ end subroutine phgamma_vv_interp_setup
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1710,8 +1689,6 @@ end subroutine phgamma_linwid
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1769,8 +1746,6 @@ end subroutine a2fw_free
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2458,8 +2433,6 @@ end function a2fw_lambda_wij
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2608,8 +2581,6 @@ end subroutine a2fw_write
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2720,8 +2691,6 @@ end subroutine a2fw_ee_write
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2935,8 +2904,6 @@ end subroutine a2fw_solve_gap
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2998,8 +2965,6 @@ end subroutine a2fw_tr_free
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3338,8 +3303,6 @@ end subroutine a2fw_tr_init
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3521,8 +3484,6 @@ end subroutine a2fw_tr_write
 !!      m_eph_driver
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3762,7 +3723,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call xmpi_comm_free(comm_cart)
 #endif
 
- ! Distribute k-points and create mapping to ikcalc index.
+ ! Distribute k-points and create mapping to iq_ibz index.
  call xmpi_split_cyclic(nsppol, spin_comm%value, gams%my_nspins, gams%my_spins)
  ABI_CHECK(gams%my_nspins > 0, sjoin("nsppol (", itoa(nsppol), ") < spin_comm_nproc (", itoa(spin_comm%nproc), ")"))
 
@@ -4497,9 +4458,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call xmpi_sum(gams%vals_in_qibz, qs_comm%value, ierr)
    call xmpi_sum(gams%vals_out_qibz, qs_comm%value, ierr)
  end if
- if (dtset%prteliash == 3) then
-   call xmpi_sum(gams%vals_ee, qs_comm%value, ierr)
- end if
+ if (dtset%prteliash == 3) call xmpi_sum(gams%vals_ee, qs_comm%value, ierr)
 
 #ifdef HAVE_NETCDF
  ! Close the netcdf file then master reopens it
@@ -4618,8 +4577,6 @@ end subroutine eph_phgamma
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4968,8 +4925,6 @@ end subroutine find_ewin
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
-!!      xmpi_sum
 !!
 !! SOURCE
 

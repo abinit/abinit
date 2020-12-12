@@ -13,7 +13,7 @@ using hexagonal $MgB_2$ as example
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and vibrational properties in metals.
-The user should have read the  [fourth lesson on Al](base4) as well
+The user should have read the [fourth lesson on Al](base4) as well
 as the [introduction page for the EPH code](eph_intro) before running these examples.
 
 This lesson should take about 1.5 hour.
@@ -90,7 +90,7 @@ an arbitrary $\qq$-mesh specified by the user.
 By default, the code uses the [[ddb_ngqpt]] $\qq$-mesh corresponding to the DDB file (assumed to be equal to the one
 used to generate the DVDB file).
 In this case, all the DFPT scattering potentials are available and no interpolation in $qq$-space in required.
-To increase the $qq$-sampling, one simply specifies [[eph_ngqpt_fine]] in the input file while
+To increase the $qq$-sampling, one simply specifies [[eph_ngqpt_fine]] in the input file.
 In this case, the code employs the Fourier interpolation to obtain the scattering potentials.
 
 Once the phonon linewidths $\gamma_{\qq\nu}$ are known in the IBZ, EPH computes the Eliashberg function defined by:
