@@ -39,6 +39,7 @@ inp_files = [
 # GW/BSE
 "t31.abi", # HF exchange checking q->0 terms
 "t32.abi", # AC GW
+"t40.abi", # chi0 with inclvkb=2
 # DFPT
 "t41.abi",
 "t42.abi",

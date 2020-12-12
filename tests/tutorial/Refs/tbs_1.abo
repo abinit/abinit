@@ -1,5 +1,5 @@
 
-.Version 9.3.2 of ABINIT 
+.Version 9.3.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel15.0 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Dec 2020.
-- ( at 17h57 )
+.Starting date : Fri 11 Dec 2020.
+- ( at 17h02 )
   
 - input  file    -> tbs_1.abi
 - output file    -> tbs_1.abo
@@ -427,7 +427,7 @@ tolerances: {tolvrs: 1.00E-08, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.5133890666774    -8.513E+00 5.679E-03 6.794E+00
  ETOT  2  -8.5177493407095    -4.360E-03 1.729E-05 1.178E-01
- ETOT  3  -8.5177859893144    -3.665E-05 1.212E-05 2.406E-03
+ ETOT  3  -8.5177859893145    -3.665E-05 1.212E-05 2.406E-03
  ETOT  4  -8.5177864516074    -4.623E-07 1.818E-07 6.874E-06
  ETOT  5  -8.5177864526158    -1.008E-09 1.045E-07 6.247E-09
  
@@ -510,16 +510,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.11706119080595E+00
-hartree             :  5.53635400198725E-01
-xc                  : -3.11126174169906E+00
+kinetic             :  3.11706119080555E+00
+hartree             :  5.53635400198875E-01
+xc                  : -3.11126174169918E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  4.00256417160528E-01
-local_psp           : -2.35468047748151E+00
-non_local_psp       :  1.31302234401857E+00
-total_energy        : -8.51778645261578E+00
+local_psp           : -2.35468047748286E+00
+non_local_psp       :  1.31302234402028E+00
+total_energy        : -8.51778645261579E+00
 total_energy_eV     : -2.31780756799636E+02
-band_energy         : -6.96254880288854E-02
+band_energy         : -6.96254880288915E-02
 ...
 
  
@@ -915,7 +915,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
  
     2   0.000 -18.959  -0.000  -0.148  -0.000  -0.148  -0.000  -0.148   0.000
        -0.000   0.000  -4.945   0.000  -0.294  -0.000  -0.294  -0.000  -0.294
@@ -1225,7 +1225,7 @@ P           mkmem4          8
            shiftk3     1.10000000E-01  2.10000000E-01  3.10000000E-01
            shiftk4     0.00000000E+00  0.00000000E+00  0.00000000E+00
           spgroup         227
-           strten1     4.1800411716E-06  4.1800411716E-06  4.1800411716E-06
+           strten1     4.1800411669E-06  4.1800411669E-06  4.1800411669E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1395,10 +1395,10 @@ P           mkmem4          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        327.1  wall=         43.6
+- Proc.   0 individual time (sec): cpu=         41.5  wall=         46.0
  
 ================================================================================
  
  Calculation completed.
 .Delivered   4 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        327.1  wall=         43.6
++Overall time at end (sec) : cpu=         41.5  wall=         46.0
