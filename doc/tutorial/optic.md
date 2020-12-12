@@ -26,7 +26,7 @@ This tutorial should take about 1 hour.
 *Before beginning, you might consider working in a different subdirectory.
 Why not create Work_optic?*
 
-We also need to copy *toptic_1.files* and *toptic_1.in* from
+We also need to copy *toptic_1.abi* from
 *$ABI_TESTS/tutorial/Input* to *Work_optic*.
 
 ```sh
@@ -70,7 +70,6 @@ Using a larger [[nstep]] would lead to a full computation of the derivative of t
 the wavevector, while in Optic, only the matrix elements between unperturbed states are needed.
 Thus a value of [[nstep]] larger than one would not only lead to erroneous matrix elements, but would be a waste of time.
 
-
 In order to have a sufficiently fast tutorial, the k point sampling was chosen to be extremely dense.
 Instead of a $4\times 4\times 4$
 FCC lattice (256 k points), it should be something like $28\times 28\times 28$ FCC (about 100000 k points).
@@ -97,10 +96,9 @@ response (up to second order in the current implementation) for the material und
 
 First, read the [[help:optic#input|section 3]] of the Optic help file.
 
-Copy the files *toptic_2.files* and *toptic_2.abi* from *$ABI_TESTS/tutorial/Input* to *Work_optic*:
+Copy the *toptic_2.abi* input file from *$ABI_TESTS/tutorial/Input* to *Work_optic*:
 
 ```sh
-cp ../toptic_2.files .
 cp ../toptic_2.abi .
 ```
 
@@ -113,7 +111,7 @@ When you have read the input file, you can run the code, as usual, using the
 following command (assuming optic is in $PATH - copy the
 executable in the current directory if needed):
 
-    optic < toptic_2.files > log 2> err &
+    optic toptic_2.abi > log 2> err &
 
 It will take a few seconds to run. You have produced numerous output files.
 Now, you can examine some of these output files.
@@ -215,7 +213,7 @@ approximate heights of 7 and 25. Some comments are in order:
   * In many early theoretical spectra (including the ones in [[cite:Cohen1988]]),
     the agreement between the theoretical and experimental band gap is artificially good.
     In straight DFT, one cannot avoid the band gap problem. However, it is possible to
-    add an artificial "[[scissor]] shift", to make the theoretical band gap match the experimental one.
+    add an artificial "[[scissor@optic|scissor shift]]", to make the theoretical band gap match the experimental one.
 
   * Our theoretical spectrum presents additional deficiencies with respect to the other ones,
     mostly due to a still too coarse sampling of the k space (there are too many wiggles in the spectrum),
@@ -266,53 +264,51 @@ Now, examine the file *toptic_3.abi*. There are two important changes with respe
 
 When the run is finished (it is only 8 secs on a 2.8 GHz PC), you can process
 the WFK files and obtain the linear optic spectra.
-Copy the files *toptic_4.files* and *toptic_4.abi* in *Work_optic*:
+Copy the *toptic_4.abi* input file in *Work_optic*:
 
-    cp ../toptic_4.files .
     cp ../toptic_4.abi .
 
-{% dialog tests/tutorespfn/Input/toptic_4.files %}
 {% dialog tests/tutorespfn/Input/toptic_4.abi %}
 
 Examine *toptic_4.abi* file: only the linear optic spectra will be built.
 
 When you have read the input file, you can run the code, as usual using the following command
 
-    optic < toptic_4.files > log 2> err &
+    optic toptic_4.abi > log 2> err &
 
 Then, you can visualize the files *toptic_2_0001_0001-linopt.out* and
 *toptic_4_0001_0001-linopt.out* using xmgrace and compare them. The spectra
 looks completely identical. However, a careful look at these files, by editing
 them, show that indeed, the imaginary part is very similar:
 
-	 #calculated the component:  1  1  of dielectric function
- 	 #broadening:    0.000000E+00    2.000000E-03
- 	 #scissors shift:    0.000000E+00
- 	 #energy window:    3.897388E+01eV    1.432264E+00Ha
+     #calculated the component:  1  1  of dielectric function
+     #broadening:    0.000000E+00    2.000000E-03
+     #scissors shift:    0.000000E+00
+     #energy window:    3.897388E+01eV    1.432264E+00Ha
 
- 	 # Energy(eV)         Im(eps(w))
- 	    8.163415E-03    1.463528E-04
- 	    1.632683E-02    2.927094E-04
- 	    2.449025E-02    4.390740E-04
- 	    3.265366E-02    5.854504E-04
+     # Energy(eV)         Im(eps(w))
+        8.163415E-03    1.463528E-04
+        1.632683E-02    2.927094E-04
+        2.449025E-02    4.390740E-04
+        3.265366E-02    5.854504E-04
 	  ...
 
 But the real parts differ slightly (this is seen at lines 1007 and beyond):
 
-	# Energy(eV)         Re(eps(w))
-	    8.163415E-03    6.623599E+00
-	    1.632683E-02    6.623632E+00
-	    2.449025E-02    6.623686E+00
-	    3.265366E-02    6.623763E+00
+     # Energy(eV)         Re(eps(w))
+        8.163415E-03    6.623599E+00
+        1.632683E-02    6.623632E+00
+        2.449025E-02    6.623686E+00
+        3.265366E-02    6.623763E+00
       ...
 
 for *toptic_2_0001_0001-linopt.out* and
 
-	 # Energy(eV)         Re(eps(w))
-	    8.163415E-03    6.518576E+00
-	    1.632683E-02    6.518608E+00
-	    2.449025E-02    6.518663E+00
-	    3.265366E-02    6.518740E+00
+     # Energy(eV)         Re(eps(w))
+        8.163415E-03    6.518576E+00
+        1.632683E-02    6.518608E+00
+        2.449025E-02    6.518663E+00
+        3.265366E-02    6.518740E+00
 
 
 for *toptic_4_0001_0001-linopt.out*.
@@ -347,20 +343,17 @@ as those described in the first two sections of this tutorial.
 To calculate the coefficients of the linear electro-optical susceptibility
 one needs to modify the optic input file with two additional keywords.
 
-Copy the files *toptic_5.files* and *toptic_5.abi* in *Work_optic*:
+Copy the *toptic_5.abi* input file in *Work_optic*:
 
-    cp ../toptic_5.files .
     cp ../toptic_5.abi .
 
-{% dialog tests/tutorespfn/Input/toptic_5.files %}
 {% dialog tests/tutorespfn/Input/toptic_5.abi %}
 
-Note that *toptic_5.files* has not changed (we want to use the previously calculated wave functions).
-However, examine *toptic_5.abi*,  only the linear electro-optic susceptibility will be calculated.
+For *toptic_5.abi*, only the linear electro-optic susceptibility will be calculated.
 
 When you have read the input file, you can run the code, as usual using the following command
 
-    optic < toptic_5.files > log 2> err &
+    optic toptic_5.abi > log 2> err &
 
 The calculation should run in a few seconds on a modern PC.
 
