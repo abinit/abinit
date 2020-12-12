@@ -61,7 +61,7 @@ If only the linear optical response is computed, then time-reversal symmetry can
 might be restricted to the half Brillouin zone ([[kptopt]]=2).
 
 The fourth, fifth, and sixth datasets correspond to the computation of the *ddk* matrix elements,
-that is, matrix elements of the $\partial H / \partial k$ operators where H is the Hamiltonian. 
+that is, matrix elements of the $\partial H / \partial k$ operators where $H$ is the Hamiltonian.
 Note that the number of bands is the same as for datasets 2 and 3.
 Note also that these are non-self-consistent calculations, moreover, restricted to [[nstep]] = 1 and [[nline]] = 0.
 Indeed, only the matrix elements between explicitly computed (unperturbed) states are required.
