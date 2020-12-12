@@ -13,27 +13,27 @@ using hexagonal $MgB_2$ as example
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and vibrational properties in metals.
-It goes without saying that one should have read the
-[fourth lesson on Al](base4) as well as the [introduction page for the EPH code](eph_intro)
-before running these examples.
+The user should have read the  [fourth lesson on Al](base4) as well
+as the [introduction page for the EPH code](eph_intro) before running these examples.
 
 This lesson should take about 1.5 hour.
 
 ## Formalism and connection with the implementation
 
-Due to the interaction with electrons, phonons acquire a finite lifetime that is given by the imaginary
-part of the phonon-electron self-energy $\Pi$.
+Due to the interaction with electrons, (harmonic) phonons acquire a finite lifetime that is
+given by the imaginary part of the phonon-electron self-energy $\Pi_\qnu$.
+<!--
 Obviously, there's also another important contribution to the phonon lifetime originating from non-harmonic
 terms in the expansion of the Born-Oppenheimer energy surface around the equilibrium point.
-In the many-body language these non-harmonic leads to phonon-phonon scattering that can give a substancial
+In the many-body language these non-harmonic leads to phonon-phonon scattering that can give a substantial
 contribution to the phonon linewidths.
 However, these non-harmonic terms will be ignored in the rest of the tutorial and we will be mainly focusing
 on the computation of the imaginary part of $\Pi$ in the harmonic approximation.
-
+-->
 In the so-called double-delta approximation, the phonon linewidth $\gamma_{\qq\nu}$ due
 to the interaction of the ${\qq\nu}$ phonon with electrons is given by
 
-$$ 
+$$
 \gamma_{\qq\nu} = 2\pi \ww_{\qq\nu} \sum_{mn\kk} |g_{mn\nu}(\kk, \qq)|^2
 \delta(\ee_{\kpq m} -\ee_F) \delta(\ee_{\kk n} -\ee_F)
 $$
@@ -43,8 +43,8 @@ the sum over the electron wavevector $\kk$ runs over the full BZ, $\ee_F$ is the
 and $g_{mn\nu}(\kk, \qq)$ are the e-ph matrix elements discussed in the [EPH introduction](eph_intro).
 For a given phonon wavevector $\qq$, the double delta restricts the BZ integration to
 transitions between $\kk$ and $\kq$ electron states on the Fermi surface (FS).
-Converging the double-delta integral therefore requires very dense $\kk$-meshes in order to
-capture enough states on the FS.
+Converging the double-delta integral therefore requires very dense $\kk$-meshes in order to have
+enough states around the FS.
 The convergence rate is indeed much slower that the one required by the electron DOS at $\ee_F$:
 
 $$
@@ -86,8 +86,8 @@ the Fermi level that can be specified via [[eph_fsewin]].
 -->
 
 The code computes $\gamma_{\qq\nu}$ for each $\qq$-point in the IBZ associated to
-a $\qq$-mesh that can be changed by the user.
-By default, the code uses the [[ddb_ngqpt]] $qq$-mesh corresponding to the DDB file (assumed to be equal to the one
+an arbitrary $\qq$-mesh specified by the user.
+By default, the code uses the [[ddb_ngqpt]] $\qq$-mesh corresponding to the DDB file (assumed to be equal to the one
 used to generate the DVDB file).
 In this case, all the DFPT scattering potentials are available and no interpolation in $qq$-space in required.
 To increase the $qq$-sampling, one simply specifies [[eph_ngqpt_fine]] in the input file while
@@ -127,7 +127,7 @@ $$
 \lambda_{\qq\nu} = \dfrac{\gamma_{\qq\nu}}{\pi N_F \ww_{\qq\nu}^2}
 $$
 
-Finally, the isotropic superconducting temperature $T_c$ can be estimated using the McMillan expression:
+Finally, the isotropic superconducting temperature $T_c$ can be estimated using the McMillan equation:
 
 $$
 T_c = \dfrac{\ww_{log}}{1.2} \exp \Biggl [ \dfrac{-1.04 (1 + \lambda)}{\lambda ( 1 - 0.62 \mu^*) - \mu^*} \Biggr ]
@@ -189,16 +189,13 @@ to avoid numerical instabilities introduce by band crossings.
 
 ## Getting started
 
-In this tutorial, we prefer to focus on e-ph calculations and the associcated convergence studies.
-For this reason, we rely on **pre-computed DEN.nc, DDB and DFPT POT1.nc files** to bypass the DFPT part.
+In this tutorial, we prefer to focus on e-ph calculations and the associated convergence studies.
+For this reason, we rely on **pre-computed** DEN.nc, DDB and DFPT POT1.nc files to bypass the DFPT part.
 The DEN.nc file will be used to perform NSCF computations on arbitrarily dense $\kk$-meshes while the
 DFPT POT.nc files will be merged with the *mrgdv* utility to produce the DVDB database of scattering potentials.
 
-Note that these files are not shipped with the official ABINIT tarball as they are relatively
-large in size.
-In order to run the examples of this tutorial, you need to download these files
-from this github repository.
-
+Note that these files **are not shipped** with the official ABINIT tarball as they are relatively large in size.
+In order to run the examples of this tutorial, you need to download these files from the github repository.
 If git is installed on your machine, one can easily fetch the entire repository with:
 
 ```sh
@@ -254,7 +251,7 @@ with the following input file that lists all the partial POT1 files already comp
 
     XXX
 
-As mentioned in the [introduction page for the EPH code](eph_intro), the DVDB file is needed to recostruct
+As mentioned in the [introduction page for the EPH code](eph_intro), the DVDB file is needed to reconstruct
 the scattering potentials in the full BZ for all the 3 x [[natom]] atomic perturbations.
 With this file, one can obtain $\Delta_\qnu V^\KS$ for all the $\qq$-points belonging to the initial 6x6x6 DFPT
 $\qq$-mesh or even a much denser $\qq$-sampling when the Fourier interpolation of the potentials is exploited.
@@ -407,7 +404,7 @@ The high-symmetry $\qq$-path for the phonon band structure is specified with:
     Note that the default value of [[dipdip]] is designed for polar semiconductors so we recommended
     to override the default behaviour when performing calculations with [[eph_task]] = 1.
 
-Since Abinit supports multidatases, unlike anaddb, it's easy to define an input file to compute
+Since Abinit supports multidatasets, unlike anaddb, it is easy to define an input file to compute
 the phonon DOS with multiple $\qq$-meshes.
 This simple test allows us to get an initial (very qualitative) estimate of the $\qq$-sampling
 required to convergence the  Eliashberg function as $\alpha^2F(\ww)$ is essentially a weighted phonon DOS.
@@ -418,7 +415,7 @@ To analyse the results one can extract the data from the ... PHDOS.nc files
 
 This is what you should get:
 
-!!! Important
+!!! important
 
     Multiple datasets may be handy when running small calculations as in this case.
     Remember, however, that the EPH code is not designed to be used with multiple datasets.
@@ -434,7 +431,7 @@ We start with a relatively simple input that allows us to introduce the most imp
 and the main output files.
 
 To compute $\gamma_{\qq\nu}$ in metals, one has to use [[optdriver]] 7 and [[eph_task]] 1.
-As usual, the location of the DDB, DVDB and WFK files is given by
+The location of the DDB, DVDB and WFK files is given by
 [[getddb_filepath]] [[getdvdb_filepath]] [[getwfk_filepath]], respectively.
 
 [[eph_intmeth]]
@@ -455,7 +452,7 @@ This variable is optional in the sense that whatever number of MPI processes you
 a reasonable distribution of the workload.
 The distribution, however, may not be optimal as EPH tries to minimize memory requirements by focusing on the
 perturbation/k-point parallelism.
-As usual, MPI algorithms are quite efficent if the distribution of the workload is done at a very high-level.
+As usual, MPI algorithms are quite efficient if the distribution of the workload is done at a very high-level.
 In the case of $T_c$ calculations, the outermost loop is over the $\qq$-points in the IBZ hence the highest speedup
 is achieved when most of the CPUs are the used for the $\qq$-point parallelism.
 Note, however, that this kind of MPI distribution does not distribute the wavefunctions and the scattering potentials.

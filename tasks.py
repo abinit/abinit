@@ -323,6 +323,14 @@ def diff3(ctx, filename="run.abo"):
     ctx.run(cmd, pty=True)
 
 
+@task
+def add_trunk(ctx):
+    """Register trunk as remote."""
+    cmd = "git add remote trunk git@gitlab.abinit.org:trunk/abinit.git"
+    print("Executing:", cmd
+    ctx.run(cmd, pty=True)
+
+
 #@task
 #def gdb(ctx, input_name, exec_name="abinit", run_make=False):
 #    """
