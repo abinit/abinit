@@ -1,40 +1,71 @@
-# computation of the electric field gradient at the atoms in stishovite
+# Computation of the electric field gradient at the atomic sites in stishovite
+# Stishovite is a polymorph of SiO2 and has the rutile structure.
 
-prtefg 2
-quadmom 0.0 -0.02558
+# Computation of EFG requires the use of PAW, Norm-conserving pseudopotentials are
+# not appropriate for this calculation.
 
+# here are the two variables needed to trigger computation of the field gradient
+prtefg 2 # PRinT the EFG, value of 2 means to also print its components
+quadmom 0.0 -0.02558 # quadrupole moments of the nuclei (Si-29, O-17 here)
+                     # so that couplings as measured in NMR or NQR are also
+                     # reported, in MHz frequency units
+                     
+                     
+#Definition of the unit cell
+
+acell    3*7.897165371900001 # each primitive vector in rprim is scaled
+                             # by its value in acell, to give internally
+                             # cell vectors dimensioned as length in atomic units
+
+# stishovite has a primitive tetragonal cell, so two sides are equal,
+# the third different, and the angles all 90 degrees
+rprim    1.000000000000000   0.000000000000000   0.000000000000000 
+         0.000000000000000   1.000000000000000   0.000000000000000 
+         0.000000000000000   0.000000000000000   0.637688442211055 
+
+#Definition of the atom types and pseudopotentials
+ntypat 2 # two types of atoms
+znucl 14 8 # atomic number of atoms, will be cross checked against pseudopotential files
+           # here Silicon (14) and Oxygen (8). Pseudopotentials must be listed in this order.
+           # this order defines type 1 as silicon, type 2 as oxygen
+pp_dirpath "$ABI_PSPDIR" # pseudopotential directory
+pseudos "Pseudodojo_paw_pbe_standard/Si.xml, Pseudodojo_paw_pbe_standard/O.xml"
+# pseudos "Si.GGA-PBE-rpaw-1.55.abinit, O.GGA-PBE-rpaw-1.45.abinit" # pseudopotential files
+#pp_dirpath "/home/jzwanzig/abinit/psps/paw/JTH-PBE-atomicdata-1.1/ATOMICDATA/"
+#pseudos "Si.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml"
+
+#Definition of the atoms
+natom 6 # 6 atoms in the unit cell 
+typat    1 1 2 2 2 2 # atoms listed as silicons, then oxygens  
+# next are the 6 atomic positions, in order of typat (silicon, then oxygen)
+# xred gives them in units of the cell translation vectors, as is commonly
+# done in crystallography
+xred     0.000000000000000   0.000000000000000   0.000000000000000 
+         0.500000000000000   0.500000000000000   0.500000000000000 
+         0.306200000000000   0.306200000000000   0.000000000000000 
+         0.806200000000000   0.193800000000000   0.500000000000000 
+         0.193800000000000   0.806200000000000   0.500000000000000 
+         0.693800000000000   0.693800000000000   0.000000000000000 
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 15 # plane wave cutoff energy, always need to check convergence of ecut in real runs
+pawecutdg 20 # cutoff energy for PAW fine grid
+ngkpt 8 8 6 # Parameters of Monkhorst-Pack kpoint grid. Convergence should be checked for
+            # this parameter as well.
+
+#Parameters for the SCF procedure
 nstep 10
+tolvrs 1.0D-18
 
-ecut 20
-pawecutdg 25
-
+# suppress printing of density, wavefunctions, etc for this tutorial
 prtden 0
 prtwf 0
 prteig 0
 
-tolvrs 1.0D-18
 
-ngkpt 8 8 6
-
-spgroup 136 # space group number
-acell 4.1790 4.1790 2.6649 angstrom # cell sides, angstrom units
-angdeg 90.0 90.0 90.0 # cell angles (this is the default by the way)
-
-znucl 14 8 # atomic number of atoms, will be cross checked against pseudopotential files
-natom 6 # 6 atoms in the unit cell (remember Z = 2 here)
-natrd 2 # only read two atoms in, this is the asymmetric unit
-
-ntypat 2 # two types of atoms
-typat 1 2 # read atom type 1 then type 2, order is set by znucl above
-
-xred # here come the fractional coordinates from the cif file
-0 0 0 # first atom type
-0.3062 0.3062 0 # second atom type
-
-
- pp_dirpath "$ABI_PSPDIR"
- pseudos "Si.GGA-PBE-rpaw-1.55.abinit, O.GGA-PBE-rpaw-1.45.abinit"
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
