@@ -54,11 +54,11 @@ module m_tdep_abitypes
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- subroutine tdep_init_crystal(Crystal,InVar,Lattice,Sym)
+ subroutine tdep_init_crystal(Crystal,Invar,Lattice,Sym)
 
   implicit none
   type(crystal_t),intent(out) :: Crystal
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Lattice_Variables_type),intent(in) :: Lattice
   type(Symetries_Variables_type),intent(in) :: Sym
 
@@ -72,12 +72,12 @@ contains
   timrev=1
   use_antiferro=.false.
   remove_inv=.false.
-  npsp=InVar%ntypat
-  ABI_MALLOC(zion,(InVar%ntypat)) ; zion(:)=zero
+  npsp=Invar%ntypat
+  ABI_MALLOC(zion,(Invar%ntypat)) ; zion(:)=zero
   ABI_MALLOC(znucl,(npsp)) ; znucl(:)=zero
-  ABI_MALLOC(title,(InVar%ntypat))
-  call crystal_init(InVar%amu,Crystal,Sym%spgroup,InVar%natom_unitcell,npsp,&
-&   InVar%ntypat,Sym%nsym,Lattice%rprimdt,InVar%typat_unitcell,Sym%xred_zero,&
+  ABI_MALLOC(title,(Invar%ntypat))
+  call crystal_init(Invar%amu,Crystal,Sym%spgroup,Invar%natom_unitcell,npsp,&
+&   Invar%ntypat,Sym%nsym,Lattice%rprimdt,Invar%typat_unitcell,Sym%xred_zero,&
 &  zion,znucl,timrev,use_antiferro,remove_inv,title,&
 &  Sym%ptsymrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
   ABI_FREE(title)
@@ -87,19 +87,19 @@ contains
  end subroutine tdep_init_crystal
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- subroutine tdep_init_ifc(Crystal,DDB,Ifc,InVar,Lattice,MPIdata,Phi2,Rlatt_cart,Shell2at,Sym)
+ subroutine tdep_init_ifc(Crystal,DDB,Ifc,Invar,Lattice,MPIdata,Phi2,Rlatt_cart,Shell2at,Sym)
 
   implicit none
   type(crystal_t),intent(in) :: Crystal
   type(ifc_type),intent(out) :: Ifc
   type(ddb_type),intent(in) :: DDB
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Lattice_Variables_type),intent(in) :: Lattice
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell2at
   type(MPI_enreg_type), intent(in) :: MPIdata
-  double precision,intent(out) :: Phi2(3*InVar%natom,3*InVar%natom)
-  double precision,intent(in) :: Rlatt_cart(3,InVar%natom_unitcell,InVar%natom)
+  double precision,intent(out) :: Phi2(3*Invar%natom,3*Invar%natom)
+  double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
 
   integer :: iatcell,dipdip,ii,asr,symdynmat,rfmeth
   integer :: iatom,nsphere,prtsrlr,enunit,nqshft
@@ -112,17 +112,17 @@ contains
 
 ! Define matrices for LO-TO
 ! =========================
-  ABI_MALLOC(zeff, (3,3,InVar%natom_unitcell)); zeff (:,:,:)=zero
+  ABI_MALLOC(zeff, (3,3,Invar%natom_unitcell)); zeff (:,:,:)=zero
   dielt(:,:)=    zero
   dielt(1,1)=    1.d0
   dielt(2,2)=    1.d0
   dielt(3,3)=    1.d0
-  if (InVar%loto) then
+  if (Invar%loto) then
     dipdip=1
-    do iatcell=1,InVar%natom_unitcell
+    do iatcell=1,Invar%natom_unitcell
       do ii=1,3
-        zeff(ii,ii,iatcell)=InVar%born_charge(InVar%typat_unitcell(iatcell))
-        dielt(ii,ii)       =InVar%dielec_constant
+        zeff(ii,ii,iatcell)=Invar%born_charge(Invar%typat_unitcell(iatcell))
+        dielt(ii,ii)       =Invar%dielec_constant
       end do
     end do
   else
@@ -137,16 +137,16 @@ contains
   rfmeth=      1
   nsphere=     0
   rifcsph=     0
-!FB  rifcsph=     InVar%Rcut
+!FB  rifcsph=     Invar%rcut
 !  prtsrlr=     1
   prtsrlr=     0
   enunit=      0
 
-  ngqpt_in(:)= InVar%ngqpt1(:)
+  ngqpt_in(:)= Invar%ngqpt1(:)
   nqshft=      1
   ABI_MALLOC(q1shft,(3,nqshft)); q1shft(:,:)=0.5d0
 !FB  ABI_MALLOC(q1shft,(3,nqshft)); q1shft(:,:)=0.0d0
-  ABI_ALLOCATE(qdrp_cart,(3,3,3,InVar%natom_unitcell))
+  ABI_ALLOCATE(qdrp_cart,(3,3,3,Invar%natom_unitcell))
 
   call ifc_init(Ifc,Crystal,DDB,Lattice%brav,asr,symdynmat,dipdip,&
 !FB  call ifc_init(Ifc,Crystal,DDB,1,asr,symdynmat,dipdip,&
@@ -160,25 +160,25 @@ contains
 
 ! Read an IFC from ifc_in.dat input file, write it in the ifc_check.dat file and copy to Phi2
 ! =================================================================================
-  if (InVar%ReadIFC.eq.1) then
-    write(InVar%stdout,*) ' '
-    write(InVar%stdout,*) '#############################################################################'
-    write(InVar%stdout,*) '################ Read IFCs from input file ##################################'
-    write(InVar%stdout,*) '#############################################################################'
-!   Read IFC from ifc_in.dat (ReadIFC=1)
-    call tdep_read_ifc(Ifc,InVar,InVar%natom_unitcell)
+  if (Invar%readifc.eq.1) then
+    write(Invar%stdout,*) ' '
+    write(Invar%stdout,*) '#############################################################################'
+    write(Invar%stdout,*) '################ Read IFCs from input file ##################################'
+    write(Invar%stdout,*) '#############################################################################'
+!   Read IFC from ifc_in.dat (readifc=1)
+    call tdep_read_ifc(Ifc,Invar,Invar%natom_unitcell)
 !   Copy Ifc%atmfrc to Phi2
-    call tdep_ifc2phi2(Ifc%dipdip,Ifc,InVar,Lattice,InVar%natom_unitcell,1,Phi2,Rlatt_cart,Shell2at,Sym)
+    call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_cart,Shell2at,Sym)
 !   Copy Phi2 to Ifc%atmfrc
-    call tdep_ifc2phi2(Ifc%dipdip,Ifc,InVar,Lattice,InVar%natom_unitcell,0,Phi2,Rlatt_cart,Shell2at,Sym)
+    call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,0,Phi2,Rlatt_cart,Shell2at,Sym)
 !   Write IFC in ifc_out.dat (for check)
-    if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,InVar,MPIdata,InVar%natom_unitcell,1)
+    if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,MPIdata,Invar%natom_unitcell,1)
 
 !   Write the Phi2.dat file
-    if (InVar%debug.and.MPIdata%iam_master) then
-      write(InVar%stdout,'(a)') ' See the Phi2.dat file corresponding to the ifc_in.dat file'
-      open(unit=55,file=trim(InVar%output_prefix)//'Phi2.dat')
-      do iatom=1,3*InVar%natom
+    if (Invar%debug.and.MPIdata%iam_master) then
+      write(Invar%stdout,'(a)') ' See the Phi2.dat file corresponding to the ifc_in.dat file'
+      open(unit=55,file=trim(Invar%output_prefix)//'Phi2.dat')
+      do iatom=1,3*Invar%natom
         write(55,'(10000(f10.6,1x))') Phi2(iatom,:)
       end do
       close(55)
@@ -188,14 +188,14 @@ contains
  end subroutine tdep_init_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- subroutine tdep_init_ddb(Crystal,DDB,InVar,Lattice,MPIdata,Qbz)
+ subroutine tdep_init_ddb(Crystal,DDB,Invar,Lattice,MPIdata,Qbz)
 
   implicit none
   type(crystal_t),intent(in) :: Crystal
   type(ddb_type),intent(out) :: DDB
   type(Qbz_type),intent(out) :: Qbz
   type(MPI_enreg_type), intent(in) :: MPIdata
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Lattice_Variables_type),intent(in) :: Lattice
 
   integer :: option,nqshft,mqpt,nqbz,iq_ibz
@@ -210,7 +210,7 @@ contains
 ! ================================================================
   option=1
   nqshft=1
-  ngqpt_in(:)=InVar%ngqpt1(:)
+  ngqpt_in(:)=Invar%ngqpt1(:)
   qptrlatt(:,:)=0
   qptrlatt(1,1)=ngqpt_in(1)
   qptrlatt(2,2)=ngqpt_in(2)
@@ -221,8 +221,8 @@ contains
   ABI_MALLOC(spqpt,(3,mqpt)); spqpt(:,:)=zero
   ABI_MALLOC(q1shft,(3,nqshft)); q1shft(:,:)=0.5d0
 !FB  ABI_MALLOC(q1shft,(3,nqshft)); q1shft(:,:)=0.0d0
-  call smpbz(Lattice%brav,InVar%stdlog,qptrlatt,mqpt,nqbz,nqshft,option,q1shft,spqpt)
-!FB  call smpbz(1,InVar%stdlog,qptrlatt,mqpt,nqbz,nqshft,option,q1shft,spqpt)
+  call smpbz(Lattice%brav,Invar%stdlog,qptrlatt,mqpt,nqbz,nqshft,option,q1shft,spqpt)
+!FB  call smpbz(1,Invar%stdlog,qptrlatt,mqpt,nqbz,nqshft,option,q1shft,spqpt)
   ABI_FREE(q1shft)
 
 ! Initialize the DDB datatype (only needed values)
@@ -238,7 +238,7 @@ contains
 !! val(2,3*mpert*3*mpert,nqbz)= all the dynamical matrices
 !!                   real(dp),intent(in) :: blkval(2,3*mpert*3*mpert,nqbz)
 !! nqbz=number of blocks in the DDB
-  mpert=InVar%natom_unitcell+6
+  mpert=Invar%natom_unitcell+6
   msize=3*mpert*3*mpert
   ABI_MALLOC(DDB%flg,(msize,nqbz))  ; DDB%flg(:,:)=1
   ABI_MALLOC(DDB%nrm,(3,nqbz))      ; DDB%nrm(:,:)  =zero
@@ -249,7 +249,7 @@ contains
   DDB%nrm(1,:)=1.d0
   DDB%qpt(1:3,:)=spqpt(:,:)
   ABI_FREE(spqpt)
-  call alloc_copy(InVar%amu,DDB%amu)
+  call alloc_copy(Invar%amu,DDB%amu)
   DDB%rprim=Lattice%rprimt
   DDB%gprim=Lattice%gprim
   DDB%acell=Lattice%acell_unitcell
@@ -271,7 +271,7 @@ contains
   ABI_ALLOCATE(bz2ibz_smap,(6,nqbz)); wtq_folded=zero
   Qbz%wtq(:)=one/nqbz         ! Weights sum up to one
 ! Set nsym=1 in order to compute this quantity in the full BZ. 
-  call symkpt(0,Crystal%gmet,Qbz%ibz2bz,InVar%stdlog,Qbz%qbz,Qbz%nqbz,Qbz%nqibz,&
+  call symkpt(0,Crystal%gmet,Qbz%ibz2bz,Invar%stdlog,Qbz%qbz,Qbz%nqbz,Qbz%nqibz,&
 &             1,Crystal%symrec,1,Qbz%wtq,wtq_folded,bz2ibz_smap,xmpi_comm_self)
   ABI_ALLOCATE(Qbz%wtqibz   ,(Qbz%nqibz))
   ABI_ALLOCATE(Qbz%qibz     ,(3,Qbz%nqibz))
@@ -282,8 +282,8 @@ contains
     Qbz%qibz_cart(:,iq_ibz)=matmul(Crystal%gprimd,Qbz%qibz(:,iq_ibz))
   end do
   if (MPIdata%iam_master) then
-    open(unit=40,file='qbz.dat')
-    open(unit=41,file='iqbz.dat')
+    open(unit=40,file=trim(Invar%output_prefix)//'qbz.dat')
+    open(unit=41,file=trim(Invar%output_prefix)//'iqbz.dat')
     do iq_ibz=1,Qbz%nqbz
       write(40,'(i4,7(1x,f10.6))') iq_ibz,Qbz%qbz(1:3,iq_ibz),Qbz%wtq(iq_ibz),Qbz%qbz_cart(1:3,iq_ibz)
     end do
@@ -299,13 +299,13 @@ contains
  end subroutine tdep_init_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- subroutine tdep_write_ddb(Crystal,DDB,Eigen2nd,InVar,Lattice,MPIdata,Qbz,Sym)
+ subroutine tdep_write_ddb(Crystal,DDB,Eigen2nd,Invar,Lattice,MPIdata,Qbz,Sym)
 
   implicit none
   type(crystal_t),intent(in) :: Crystal
   type(ddb_type),intent(inout) :: DDB
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Lattice_Variables_type),intent(in) :: Lattice
   type(Qbz_type),intent(in) :: Qbz
   type(Symetries_Variables_type),intent(in) :: Sym
@@ -333,13 +333,13 @@ contains
   nblok=Qbz%nqbz
   choice=2
   mband=1
-!FB  mpert=InVar%natom_unitcell+6
-  mpert=InVar%natom_unitcell
+!FB  mpert=Invar%natom_unitcell+6
+  mpert=Invar%natom_unitcell
   msize=3*mpert*3*mpert
 
 !FB  write(6,*) 'BEFORE INIT VAL'
-  ABI_MALLOC(d2cart,(2,3,InVar%natom_unitcell,3,InVar%natom_unitcell));d2cart=zero
-  ABI_MALLOC(d2red ,(2,3,InVar%natom_unitcell,3,InVar%natom_unitcell));d2red =zero
+  ABI_MALLOC(d2cart,(2,3,Invar%natom_unitcell,3,Invar%natom_unitcell));d2cart=zero
+  ABI_MALLOC(d2red ,(2,3,Invar%natom_unitcell,3,Invar%natom_unitcell));d2red =zero
 ! Fill the DDB%val and DDB%flg datatype
   ddb%flg(:,:)=zero
 !FB  write(6,*) ' In cartesian coordinates'
@@ -347,9 +347,9 @@ contains
 !FB  do iq_ibz=1,Qbz%nqbz
 !FB    write(6,*) 'qpt=',iq_ibz
     d2cart=zero ; d2red=zero
-    do jatom=1,InVar%natom_unitcell
+    do jatom=1,Invar%natom_unitcell
       do jj=1,3
-        do iatom=1,InVar%natom_unitcell
+        do iatom=1,Invar%natom_unitcell
           do ii=1,3
             counter=counter+1
             d2cart(1,ii,iatom,jj,iatom) =Eigen2nd%dynmat(1,ii,iatom,jj,jatom,iq_ibz)
@@ -361,11 +361,11 @@ contains
     end do
 !FB    write(6,*) ' '
     call d2cart_to_red(d2cart,d2red,Crystal%gprimd,Crystal%rprimd,mpert, &
-&                      InVar%natom_unitcell,InVar%ntypat,Crystal%typat,Crystal%ucvol,Crystal%zion)
+&                      Invar%natom_unitcell,Invar%ntypat,Crystal%typat,Crystal%ucvol,Crystal%zion)
     counter=0
-    do jatom=1,InVar%natom_unitcell
+    do jatom=1,Invar%natom_unitcell
       do jj=1,3
-        do iatom=1,InVar%natom_unitcell
+        do iatom=1,Invar%natom_unitcell
           do ii=1,3
             counter=counter+1
             DDB%val(1,counter,iq_ibz) =d2red(1,ii,iatom,jj,jatom)
@@ -383,16 +383,16 @@ contains
 !FB  write(6,*) 'BEFORE ERROR'
 ! Print the header of the DDB
   unddb=16
-  filename = trim(InVar%output_prefix)//'_DDB'
+  filename = trim(Invar%output_prefix)//'_DDB'
   filename_bis = 'input.DDB'
   ddb_hdr%dscrpt = "DDB from TDEP"
   ddb_hdr%nblok = nblok
   ddb_hdr%mblktyp = choice
 
   ddb_hdr%matom=20
-  if (InVar%natom_unitcell.gt.ddb_hdr%matom) then
+  if (Invar%natom_unitcell.gt.ddb_hdr%matom) then
     write(message, '(a,i3,a,i3,a)' )&
-&   ' natom ',InVar%natom_unitcell,' is greater than matom ',ddb_hdr%matom,' !'
+&   ' natom ',Invar%natom_unitcell,' is greater than matom ',ddb_hdr%matom,' !'
     MSG_ERROR(message)
   end if
   ddb_hdr%mband=mband
@@ -404,9 +404,9 @@ contains
     MSG_ERROR(message)
   end if
   ddb_hdr%mtypat=5
-  if (InVar%ntypat.gt.ddb_hdr%mtypat) then
+  if (Invar%ntypat.gt.ddb_hdr%mtypat) then
     write(message, '(a,i3,a,i3,a)' )&
-&   ' nsym ',InVar%ntypat,' is greater than mtypat ',ddb_hdr%mtypat,' !'
+&   ' nsym ',Invar%ntypat,' is greater than mtypat ',ddb_hdr%mtypat,' !'
     MSG_ERROR(message)
   end if
   ddb_hdr%ddb_version=100401
@@ -432,9 +432,9 @@ contains
   ddb_hdr%tsmear=0
   ddb_hdr%usepaw=0
 
-  ddb_hdr%natom=InVar%natom_unitcell
+  ddb_hdr%natom=Invar%natom_unitcell
   ddb_hdr%nsym=Sym%nsym
-  ddb_hdr%ntypat=InVar%ntypat
+  ddb_hdr%ntypat=Invar%ntypat
 
 !FB  write(6,*) 'BEFORE MALLOC'
 !FB TO REMOVE  call ddb_hdr_malloc(ddb_hdr)
@@ -443,11 +443,11 @@ contains
 !FB  write(6,*) 'BEFORE TABS'
   ddb_hdr%acell=Lattice%acell_unitcell
   ddb_hdr%rprim=Lattice%rprimt
-  ddb_hdr%amu=InVar%amu
+  ddb_hdr%amu=Invar%amu
   ddb_hdr%nband=1
   ddb_hdr%symafm=0
   ddb_hdr%symrel=Sym%ptsymrel
-  ddb_hdr%typat=InVar%typat_unitcell
+  ddb_hdr%typat=Invar%typat_unitcell
   ddb_hdr%kpt=0
   ddb_hdr%occ=0
   ddb_hdr%spinat=0
@@ -474,30 +474,30 @@ contains
 
 !!!!!!!!! Test !!!!!!!!  
   nqshft=1
-!FB  ngqpt=InVar%ngqpt1/2.d0
-  ngqpt=InVar%ngqpt1
+!FB  ngqpt=Invar%ngqpt1/2.d0
+  ngqpt=Invar%ngqpt1
   allocate(qshft(3,nqshft))
   qshft(:,:)=0.5d0
-  ABI_ALLOCATE(qdrp_cart,(3,3,3,InVar%natom_unitcell))
+  ABI_ALLOCATE(qdrp_cart,(3,3,3,Invar%natom_unitcell))
 !FB  qshft(:,:)=0.0d0
   if (MPIdata%iam_master) then
     comm=xmpi_world
 !FB  call ifc_init_fromFile(dielt,trim(filename_bis),Ifc_tmp,natom_uc,ngqpt,nqshft,qshft,Crystal_tmp,zeff,comm)
     call ifc_init_fromFile(dielt,trim(filename),Ifc_tmp,natom_uc,ngqpt,nqshft,qshft,Crystal_tmp,zeff,qdrp_cart,comm)
     unitfile=2
-    call tdep_write_ifc(Crystal_tmp,Ifc_tmp,InVar,MPIdata,InVar%natom_unitcell,unitfile)
+    call tdep_write_ifc(Crystal_tmp,Ifc_tmp,Invar,MPIdata,Invar%natom_unitcell,unitfile)
   end if  
   ABI_DEALLOCATE(qdrp_cart)
 
  end subroutine tdep_write_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
+subroutine tdep_read_ifc(Ifc,Invar,natom_unitcell)
 
   implicit none
 
   integer,intent(in) :: natom_unitcell
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(ifc_type),intent(inout) :: Ifc
 
   integer :: iatcell,ifcout,ii,irpt,jatcell,jj,mu
@@ -506,16 +506,16 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
   double precision :: atmfrcsr1,atmfrcsr2,atmfrcsr3
   character (len=25):: string,string1,string2,string3
 
-! Read IFC from ifc_in.dat or ifc_out.dat (according to ReadIFC)
+! Read IFC from ifc_in.dat or ifc_out.dat (according to readifc)
 ! =======================================================
   ifcout=          min(Ifc%nrpt,200)
   Ifc%atmfrc(:,:,:,:,:)=zero
-  if (InVar%ReadIFC==1) then
-    write(InVar%stdout,'(a)') ' Read the IFC from ifc_in.dat'
-    open(unit=40,file='ifc_in.dat')
-  else if (InVar%ReadIFC==2) then
-    write(InVar%stdout,'(a)') ' Read the IFC from ifc_out.dat'
-    open(unit=40,file=trim(InVar%output_prefix)//'ifc_out.dat')
+  if (Invar%readifc==1) then
+    write(Invar%stdout,'(a)') ' Read the IFC from ifc_in.dat'
+    open(unit=40,file=trim(Invar%input_prefix)//'ifc_in.dat')
+  else if (Invar%readifc==2) then
+    write(Invar%stdout,'(a)') ' Read the IFC from ifc_out.dat'
+    open(unit=40,file=trim(Invar%output_prefix)//'ifc_out.dat')
   end if
   read(40,*) string
   read(40,*) string
@@ -526,7 +526,7 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
   read(40,*) string
   read(40,*) string
   read(40,*) string
-  if (InVar%loto) then
+  if (Invar%loto) then
     read(40,*) string
     read(40,*) string
     read(40,*) string
@@ -541,12 +541,12 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
       read(40,*) string
       read(40,*) string1,string2,dist
       do mu=1,3
-        if (InVar%loto) then
+        if (Invar%loto) then
           read(40,*) atmfrctot1,atmfrctot2,atmfrctot3,atmfrclr1,atmfrclr2,atmfrclr3,atmfrcsr1,atmfrcsr2,atmfrcsr3
         else
           read(40,*) atmfrcsr1,atmfrcsr2,atmfrcsr3
         end if
-        if (dist.lt.InVar%Rcut*0.99) then
+        if (dist.lt.Invar%rcut*0.99) then
 !FB       See ifc_getiaf.F90 (for wghatm)
           Ifc%atmfrc(1,iatcell,mu,jatcell,irpt)=atmfrcsr1/Ifc%wghatm(iatcell,jatcell,irpt)
           Ifc%atmfrc(2,iatcell,mu,jatcell,irpt)=atmfrcsr2/Ifc%wghatm(iatcell,jatcell,irpt)
@@ -563,7 +563,7 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
       read(40,*) string
       read(40,*) string
       read(40,*) string
-      if (InVar%loto) then
+      if (Invar%loto) then
         read(40,*) string
         read(40,*) string
         read(40,*) string
@@ -574,19 +574,19 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
     end do
   end do
   close(40)
-  write(InVar%stdout,'(a)') ' ------- achieved'
-! When the IFC come from other calculations (ReadIFC=1), then impose acoustic sum rule
+  write(Invar%stdout,'(a)') ' ------- achieved'
+! When the IFC come from other calculations (readifc=1), then impose acoustic sum rule
   call asrif9(Ifc%asr,Ifc%atmfrc,natom_unitcell,Ifc%nrpt,Ifc%rpt,Ifc%wghatm)
 
 end subroutine tdep_read_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine tdep_write_ifc(Crystal,Ifc,InVar,MPIdata,natom_unitcell,unitfile)
+subroutine tdep_write_ifc(Crystal,Ifc,Invar,MPIdata,natom_unitcell,unitfile)
 
   implicit none
 
   integer,intent(in) :: natom_unitcell,unitfile
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(ifc_type),intent(inout) :: Ifc
   type(crystal_t),intent(in) :: Crystal
   type(MPI_enreg_type), intent(in) :: MPIdata
@@ -595,21 +595,21 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,MPIdata,natom_unitcell,unitfile)
   integer :: atifc(natom_unitcell)
   character(len=500) :: message
 
-! Write IFC in ifc_out.dat or ifc_check.dat (according to ReadIFC)
+! Write IFC in ifc_out.dat or ifc_check.dat (according to readifc)
 ! =======================================================
   ifcana=            1
   atifc(:)=          1
   ifcout=          min(Ifc%nrpt,200)
   prt_ifc=           1
   if (unitfile.eq.0) then
-    write(InVar%stdout,'(a)') ' Write the IFC of TDEP in ifc_out.dat (and ifc_out.nc)'
-    open(unit=77,file=trim(InVar%output_prefix)//'ifc_out.dat')
+    write(Invar%stdout,'(a)') ' Write the IFC of TDEP in ifc_out.dat (and ifc_out.nc)'
+    open(unit=77,file=trim(Invar%output_prefix)//'ifc_out.dat')
   else if (unitfile.eq.1) then
-    write(InVar%stdout,'(a)') ' Write in ifc_check.dat (and ifc_check.nc) the IFC read previously'
-    open(unit=77,file=trim(InVar%output_prefix)//'ifc_check.dat')
+    write(Invar%stdout,'(a)') ' Write in ifc_check.dat (and ifc_check.nc) the IFC read previously'
+    open(unit=77,file=trim(Invar%output_prefix)//'ifc_check.dat')
   else if (unitfile.eq.2) then
-    write(InVar%stdout,'(a)') ' Write in ifc_ddb.dat (and ifc_ddb.nc) the IFC read from DDB file'
-    open(unit=77,file=trim(InVar%output_prefix)//'ifc_ddb.dat')
+    write(Invar%stdout,'(a)') ' Write in ifc_ddb.dat (and ifc_ddb.nc) the IFC read from DDB file'
+    open(unit=77,file=trim(Invar%output_prefix)//'ifc_ddb.dat')
   else
     write(message, '(a,i3,a)' )&
 &   ' The value of unitfile ',unitfile,' is not allowed.'
@@ -617,11 +617,11 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,MPIdata,natom_unitcell,unitfile)
   end if
 #ifdef HAVE_NETCDF
   if (unitfile.eq.0) then
-    NCF_CHECK_MSG(nctk_open_create(ncid, trim(InVar%output_prefix)//"ifc_out.nc", xmpi_comm_self), "Creating ifc_out.nc")
+    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"ifc_out.nc", xmpi_comm_self), "Creating ifc_out.nc")
   else if (unitfile.eq.1) then
-    NCF_CHECK_MSG(nctk_open_create(ncid, trim(InVar%output_prefix)//"ifc_check.nc", xmpi_comm_self), "Creating ifc_check.nc")
+    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"ifc_check.nc", xmpi_comm_self), "Creating ifc_check.nc")
   else if (unitfile.eq.2) then
-    NCF_CHECK_MSG(nctk_open_create(ncid, trim(InVar%output_prefix)//"ifc_ddb.nc", xmpi_comm_self), "Creating ifc_ddb.nc")
+    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"ifc_ddb.nc", xmpi_comm_self), "Creating ifc_ddb.nc")
   end if
   NCF_CHECK(nctk_def_basedims(ncid))
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
@@ -629,23 +629,23 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,MPIdata,natom_unitcell,unitfile)
   call ifc%write(ifcana,atifc,ifcout,prt_ifc,ncid,77)
 #endif
   close(77)
-  write(InVar%stdout,'(a)') ' ------- achieved'
+  write(Invar%stdout,'(a)') ' ------- achieved'
 
 end subroutine tdep_write_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine tdep_ifc2phi2(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phi2,Rlatt4abi,Shell2at,Sym)
+subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rlatt4abi,Shell2at,Sym)
 
   implicit none
 
   integer,intent(in) :: dipdip,natom_unitcell,option
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Lattice_Variables_type),intent(in) :: Lattice
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell2at
   type(ifc_type),intent(inout) :: Ifc
-  double precision, intent(inout) :: Phi2(3*InVar%natom,3*InVar%natom)
-  double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,InVar%natom)
+  double precision, intent(inout) :: Phi2(3*Invar%natom,3*Invar%natom)
+  double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,Invar%natom)
 
   integer :: eatom,fatom,iatcell,ii,irpt,jatcell,jatom,jj,isym,kk
   integer :: ishell,iatref,jatref,iatshell,trans
@@ -656,7 +656,7 @@ subroutine tdep_ifc2phi2(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phi2,Rla
 
 ! Link the atmfrc to the Phi2
 ! ==============================
-  if (dipdip==0.or.InVar%ReadIFC.ne.0) then
+  if (dipdip==0.or.Invar%readifc.ne.0) then
     if (option==0) Ifc%atmfrc(:,:,:,:,:)=zero
     if (option==1) Phi2(:,:)=zero
   end if  
@@ -667,11 +667,11 @@ subroutine tdep_ifc2phi2(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phi2,Rla
 
   do iatcell=1,natom_unitcell
     do jatcell=1,natom_unitcell
-      do jatom=jatcell,InVar%natom,natom_unitcell
+      do jatom=jatcell,Invar%natom,natom_unitcell
         vect_tdep(:)=Rlatt4abi(:,iatcell,jatom)+xcart(:,jatcell)-xcart(:,iatcell)
         tmp(:)=(vect_tdep(:)*Lattice%acell_unitcell(:))**2
         dist=dsqrt(sum(tmp(:)))
-        if (dist.gt.(InVar%Rcut*0.99).and.option==1) then
+        if (dist.gt.(Invar%rcut*0.99).and.option==1) then
           Phi2((iatcell-1)*3+1:(iatcell-1)*3+3,(jatom-1)*3+1:(jatom-1)*3+3)=zero
           cycle
         end if
@@ -679,7 +679,7 @@ subroutine tdep_ifc2phi2(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phi2,Rla
           vect_ddb (:)=Ifc%rpt(:,irpt)+Ifc%rcan(:,jatcell)-Ifc%rcan(:,iatcell)
           tmp(:)=(vect_ddb(:)*Lattice%acell_unitcell(:))**2
           dist=dsqrt(sum(tmp(:)))
-          if (dist.gt.(InVar%Rcut*0.99).and.option==0) then
+          if (dist.gt.(Invar%rcut*0.99).and.option==0) then
             Ifc%atmfrc(:,iatcell,:,jatcell,irpt)=zero
             cycle
           end if
@@ -738,11 +738,11 @@ subroutine tdep_ifc2phi2(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phi2,Rla
       end do !eatom
     end do !ishell
 !   Acoustic sum rule
-    do eatom=1,InVar%natom
+    do eatom=1,Invar%natom
       Phi2((eatom-1)*3+1:(eatom-1)*3+3,(eatom-1)*3+1:(eatom-1)*3+3)=zero
       do jj=1,3
         do kk=1,3
-          do fatom=1,InVar%natom
+          do fatom=1,Invar%natom
             if (fatom==eatom) cycle
             Phi2((eatom-1)*3+jj,(eatom-1)*3+kk)=Phi2((eatom-1)*3+jj,3*(eatom-1)+kk)&
 &                                                 -Phi2((eatom-1)*3+jj,3*(fatom-1)+kk)

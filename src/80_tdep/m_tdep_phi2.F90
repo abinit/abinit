@@ -46,37 +46,37 @@ module m_tdep_phi2
 contains
 
 !====================================================================================================
- subroutine tdep_calc_ftot2(Forces_TDEP,InVar,Phi1,Phi1Ui,Phi2,Phi2UiUj,ucart) 
+ subroutine tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2,Phi2UiUj,ucart) 
 
   implicit none 
 
-  type(Input_Variables_type),intent(in) :: InVar
-  double precision, intent(in)  :: Phi2(3*InVar%natom,3*InVar%natom)
-  double precision, intent(in)  :: ucart(3,InVar%natom,InVar%my_nstep)
-  double precision, intent(in)  :: Phi1(3*InVar%natom)
-  double precision, intent(out) :: Phi1Ui(InVar%my_nstep)
-  double precision, intent(out) :: Phi2UiUj(InVar%my_nstep)
-  double precision, intent(inout) :: Forces_TDEP(3*InVar%natom*InVar%my_nstep)
+  type(Input_Variables_type),intent(in) :: Invar
+  double precision, intent(in)  :: Phi2(3*Invar%natom,3*Invar%natom)
+  double precision, intent(in)  :: ucart(3,Invar%natom,Invar%my_nstep)
+  double precision, intent(in)  :: Phi1(3*Invar%natom)
+  double precision, intent(out) :: Phi1Ui(Invar%my_nstep)
+  double precision, intent(out) :: Phi2UiUj(Invar%my_nstep)
+  double precision, intent(inout) :: Forces_TDEP(3*Invar%natom*Invar%my_nstep)
   
   integer :: jj,istep,jatom,katom
   double precision, allocatable :: ucart_blas(:)
   double precision, allocatable :: ftot2(:)
 
 ! Compute Forces of the model TDEP
-  ABI_MALLOC(ucart_blas,(3*InVar%natom)); ucart_blas(:)=0.d0
-  ABI_MALLOC(ftot2     ,(3*InVar%natom)); ftot2     (:)=0.d0
-  do istep=1,InVar%my_nstep
+  ABI_MALLOC(ucart_blas,(3*Invar%natom)); ucart_blas(:)=0.d0
+  ABI_MALLOC(ftot2     ,(3*Invar%natom)); ftot2     (:)=0.d0
+  do istep=1,Invar%my_nstep
     ucart_blas(:)=0.d0 
     ftot2     (:)=0.d0 
-    do jatom=1,InVar%natom
+    do jatom=1,Invar%natom
       do jj=1,3
         ucart_blas(3*(jatom-1)+jj)=ucart(jj,jatom,istep)
       end do
     end do
     Phi1Ui(istep)=sum(Phi1(:)*ucart_blas(:))
-    call DGEMM('N','N',3*InVar%natom,1,3*InVar%natom,1.d0,Phi2,3*InVar%natom,ucart_blas,3*InVar%natom,0.d0,ftot2(:),3*InVar%natom)
-    call DGEMM('T','N',1,1,3*InVar%natom,1./2.d0,ftot2,3*InVar%natom,ucart_blas,3*InVar%natom,0.d0,Phi2UiUj(istep),3*InVar%natom)
-    Forces_TDEP(3*InVar%natom*(istep-1)+1:3*InVar%natom*istep)=-Phi1(:)-ftot2(:)
+    call DGEMM('N','N',3*Invar%natom,1,3*Invar%natom,1.d0,Phi2,3*Invar%natom,ucart_blas,3*Invar%natom,0.d0,ftot2(:),3*Invar%natom)
+    call DGEMM('T','N',1,1,3*Invar%natom,1./2.d0,ftot2,3*Invar%natom,ucart_blas,3*Invar%natom,0.d0,Phi2UiUj(istep),3*Invar%natom)
+    Forces_TDEP(3*Invar%natom*(istep-1)+1:3*Invar%natom*istep)=-Phi1(:)-ftot2(:)
   end do !istep  
   ABI_FREE(ucart_blas)
   ABI_FREE(ftot2)
@@ -84,11 +84,11 @@ contains
  end subroutine tdep_calc_ftot2
 
 !====================================================================================================
-subroutine tdep_calc_phi1fcoeff(CoeffMoore,InVar,proj,Shell1at,Sym)
+subroutine tdep_calc_phi1fcoeff(CoeffMoore,Invar,proj,Shell1at,Sym)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell1at
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
@@ -98,17 +98,17 @@ subroutine tdep_calc_phi1fcoeff(CoeffMoore,InVar,proj,Shell1at,Sym)
   integer :: icoeff,isym,mu,iatref
   double precision :: terme
 
-  write(InVar%stdout,*) ' '
-  write(InVar%stdout,*) '#############################################################################'
-  write(InVar%stdout,*) '############## Fill the matrices used in the pseudo-inverse #################'
-  write(InVar%stdout,*) '#############################################################################'
+  write(Invar%stdout,*) ' '
+  write(Invar%stdout,*) '#############################################################################'
+  write(Invar%stdout,*) '############## Fill the matrices used in the pseudo-inverse #################'
+  write(Invar%stdout,*) '#############################################################################'
 
-  write(InVar%stdout,*) ' Compute the coefficients (at the 1st order) used in the Moore-Penrose...'
+  write(Invar%stdout,*) ' Compute the coefficients (at the 1st order) used in the Moore-Penrose...'
   do ishell=1,Shell1at%nshell
     if (Shell1at%neighbours(1,ishell)%n_interactions.eq.0) cycle
     do iatshell=1,Shell1at%neighbours(1,ishell)%n_interactions
       iatom=Shell1at%neighbours(1,ishell)%atomj_in_shell(iatshell) 
-      iat_mod=mod(iatom+InVar%natom_unitcell-1,InVar%natom_unitcell)+1
+      iat_mod=mod(iatom+Invar%natom_unitcell-1,Invar%natom_unitcell)+1
       if (iat_mod==1) cycle
       iatref=Shell1at%iatref(ishell)
       isym=Shell1at%neighbours(1,ishell)%sym_in_shell(iatshell)
@@ -117,31 +117,31 @@ subroutine tdep_calc_phi1fcoeff(CoeffMoore,InVar,proj,Shell1at,Sym)
       do mu=1,3
         do icoeff=1,ncoeff
           terme=sum(Sym%S_ref(mu,:,isym,1)*proj(:,icoeff,ishell))
-          do istep=1,InVar%my_nstep
-            CoeffMoore%fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)= &
-&           CoeffMoore%fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
+          do istep=1,Invar%my_nstep
+            CoeffMoore%fcoeff(mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)= &
+&           CoeffMoore%fcoeff(mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)+terme
 !           Add all the other contributions, when iat_mod==1 (due to ASR)
-            CoeffMoore%fcoeff(mu+3*(iatom-iat_mod+1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)= &
-&           CoeffMoore%fcoeff(mu+3*(iatom-iat_mod+1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)-terme
+            CoeffMoore%fcoeff(mu+3*(iatom-iat_mod+1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)= &
+&           CoeffMoore%fcoeff(mu+3*(iatom-iat_mod+1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)-terme
           end do !istep
         end do    
       end do  
     end do !iatshell
   end do !ishell
-  write(InVar%stdout,*) ' ------- achieved'
+  write(Invar%stdout,*) ' ------- achieved'
 
 end subroutine tdep_calc_phi1fcoeff
 
 !====================================================================================================
-subroutine tdep_calc_phi2fcoeff(CoeffMoore,InVar,proj,Shell2at,Sym,ucart)
+subroutine tdep_calc_phi2fcoeff(CoeffMoore,Invar,proj,Shell2at,Sym,ucart)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell2at
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
-  double precision, intent(in) :: ucart(3,InVar%natom,InVar%my_nstep)
+  double precision, intent(in) :: ucart(3,Invar%natom,Invar%my_nstep)
   double precision, intent(in) :: proj(9,9,Shell2at%nshell)
 
   integer :: ishell,ncoeff,ncoeff_prev,istep,iatom,jatom,iatshell
@@ -168,9 +168,9 @@ subroutine tdep_calc_phi2fcoeff(CoeffMoore,InVar,proj,Shell2at,Sym,ucart)
     end do
   end do  
         
-  write(InVar%stdout,*) ' Compute the coefficients (at the 2nd order) used in the Moore-Penrose...'
+  write(Invar%stdout,*) ' Compute the coefficients (at the 2nd order) used in the Moore-Penrose...'
   do ishell=1,Shell2at%nshell
-    do iatom=1,InVar%natom
+    do iatom=1,Invar%natom
       if (Shell2at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
       do iatshell=1,Shell2at%neighbours(iatom,ishell)%n_interactions
         jatom=Shell2at%neighbours(iatom,ishell)%atomj_in_shell(iatshell) 
@@ -180,7 +180,7 @@ subroutine tdep_calc_phi2fcoeff(CoeffMoore,InVar,proj,Shell2at,Sym,ucart)
         ncoeff     =Shell2at%ncoeff(ishell)
         ncoeff_prev=Shell2at%ncoeff_prev(ishell)+CoeffMoore%ncoeff1st
 
-        do istep=1,InVar%my_nstep
+        do istep=1,Invar%my_nstep
 !         In order to impose the acoustic sum rule we use (u(j)-u(i))==u_j^\nu
           udiff(1)=ucart(1,jatom,istep)-ucart(1,iatom,istep)
           udiff(2)=ucart(2,jatom,istep)-ucart(2,iatom,istep)
@@ -194,9 +194,9 @@ subroutine tdep_calc_phi2fcoeff(CoeffMoore,InVar,proj,Shell2at,Sym,ucart)
           do mu=1,3
             do icoeff=1,ncoeff
               terme=sum(SSu(mu,:)*proj(:,icoeff,ishell))
-!FB              write(6,*) 'indices=', mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev
-              CoeffMoore%fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)= &
-&             CoeffMoore%fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
+!FB              write(6,*) 'indices=', mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev
+              CoeffMoore%fcoeff(mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)= &
+&             CoeffMoore%fcoeff(mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)+terme
             end do    
           end do  
         
@@ -204,23 +204,23 @@ subroutine tdep_calc_phi2fcoeff(CoeffMoore,InVar,proj,Shell2at,Sym,ucart)
       end do !iatshell
     end do !iatom
   end do !ishell
-  write(InVar%stdout,*) ' ------- achieved'
+  write(Invar%stdout,*) ' ------- achieved'
   ABI_FREE(SS_ref)
 
 end subroutine tdep_calc_phi2fcoeff
 
 !=====================================================================================================
-subroutine tdep_calc_phi1(InVar,ntotcoeff,proj,Phi1_coeff,Phi1,Shell1at,Sym)
+subroutine tdep_calc_phi1(Invar,ntotcoeff,proj,Phi1_coeff,Phi1,Shell1at,Sym)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell1at
   integer,intent(in) :: ntotcoeff
   double precision,intent(in) :: proj(3,3,Shell1at%nshell)
   double precision,intent(in) :: Phi1_coeff(ntotcoeff,1)
-  double precision,intent(out) :: Phi1(3*InVar%natom)
+  double precision,intent(out) :: Phi1(3*Invar%natom)
 
   integer :: ishell,isym,iatom,ncoeff,ncoeff_prev
   integer :: nshell,ii,iatshell,iat_mod
@@ -249,8 +249,8 @@ subroutine tdep_calc_phi1(InVar,ntotcoeff,proj,Phi1_coeff,Phi1,Shell1at,Sym)
   end do !ishell
 ! Acoustic sum rule
   do ii=1,3
-    do iatom=1,InVar%natom
-      iat_mod=mod(iatom+InVar%natom_unitcell-1,InVar%natom_unitcell)+1
+    do iatom=1,Invar%natom
+      iat_mod=mod(iatom+Invar%natom_unitcell-1,Invar%natom_unitcell)+1
       if (iat_mod==1) cycle
       Phi1((iatom-iat_mod+1)*3+ii)=Phi1((iatom-iat_mod+1)*3+ii)-Phi1((iatom-1)*3+ii)
     end do
@@ -259,48 +259,48 @@ subroutine tdep_calc_phi1(InVar,ntotcoeff,proj,Phi1_coeff,Phi1,Shell1at,Sym)
   ABI_FREE(Phi1_ref)
 
 ! Remove the rounding errors before writing (for non regression testing purposes)
-  do ii=1,3*InVar%natom
+  do ii=1,3*Invar%natom
     if (abs(Phi1(ii)).lt.tol8) Phi1(ii)=zero
   end do  
 
 end subroutine tdep_calc_phi1 
 
 !=====================================================================================================
-subroutine tdep_write_phi1(InVar,Phi1)
+subroutine tdep_write_phi1(Invar,Phi1)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
-  double precision,intent(in) :: Phi1(3*InVar%natom)
+  type(Input_Variables_type),intent(in) :: Invar
+  double precision,intent(in) :: Phi1(3*Invar%natom)
 
   integer :: iatcell,ii
 
-  write(InVar%stdout,*) ' '
-  write(InVar%stdout,*) '#############################################################################'
-  write(InVar%stdout,*) '#### For each shell, list of coefficients (IFC), number of neighbours... ####'
-  write(InVar%stdout,*) '#############################################################################'
+  write(Invar%stdout,*) ' '
+  write(Invar%stdout,*) '#############################################################################'
+  write(Invar%stdout,*) '#### For each shell, list of coefficients (IFC), number of neighbours... ####'
+  write(Invar%stdout,*) '#############################################################################'
 
 ! Write the IFCs in the data.out file (with others specifications: 
 ! number of atoms in a shell, distance, Trace...)
-  do iatcell=1,InVar%natom_unitcell
-    write(InVar%stdout,'(a,i4)') ' ############# List of (first order) IFC for the reference atom=',iatcell
-    write(InVar%stdout,'(2x,3(f9.6,1x))') (Phi1((iatcell-1)*3+ii),ii=1,3)
-    write(InVar%stdout,*) ' '
+  do iatcell=1,Invar%natom_unitcell
+    write(Invar%stdout,'(a,i4)') ' ############# List of (first order) IFC for the reference atom=',iatcell
+    write(Invar%stdout,'(2x,3(f9.6,1x))') (Phi1((iatcell-1)*3+ii),ii=1,3)
+    write(Invar%stdout,*) ' '
   end do !iatcell  
 
 end subroutine tdep_write_phi1 
 
 !=====================================================================================================
-subroutine tdep_calc_phi2(InVar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
+subroutine tdep_calc_phi2(Invar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell2at
   integer,intent(in) :: ntotcoeff
   double precision,intent(in) :: Phi2_coeff(ntotcoeff,1),proj(9,9,Shell2at%nshell)
-  double precision,intent(out) :: Phi2(3*InVar%natom,3*InVar%natom)
+  double precision,intent(out) :: Phi2(3*Invar%natom,3*Invar%natom)
 
   integer :: ishell,isym,eatom,fatom,ncoeff,ncoeff_prev
   integer :: nshell,ii,jj,kk,ll,kappa,iatshell,itrans
@@ -340,10 +340,10 @@ subroutine tdep_calc_phi2(InVar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
     end do !eatom
   end do !ishell
 ! Acoustic sum rule
-  do eatom=1,InVar%natom
+  do eatom=1,Invar%natom
     do jj=1,3
       do kk=1,3
-        do fatom=1,InVar%natom
+        do fatom=1,Invar%natom
           if (fatom==eatom) cycle
           Phi2((eatom-1)*3+jj,(eatom-1)*3+kk)=Phi2((eatom-1)*3+jj,3*(eatom-1)+kk)&
 &                                               -Phi2((eatom-1)*3+jj,3*(fatom-1)+kk)
@@ -355,8 +355,8 @@ subroutine tdep_calc_phi2(InVar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
   ABI_FREE(Phi2_ref)
 
 ! Remove the rounding errors before writing (for non regression testing purposes)
-  do ii=1,3*InVar%natom
-    do jj=1,3*InVar%natom
+  do ii=1,3*Invar%natom
+    do jj=1,3*Invar%natom
       if (abs(Phi2(ii,jj)).lt.tol8) Phi2(ii,jj)=zero
     end do
   end do  
@@ -364,33 +364,33 @@ subroutine tdep_calc_phi2(InVar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
 end subroutine tdep_calc_phi2 
 
 !=====================================================================================================
-subroutine tdep_write_phi2(distance,InVar,MPIdata,Phi2,Shell2at)
+subroutine tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Shell_Variables_type),intent(in) :: Shell2at
   type(MPI_enreg_type), intent(in) :: MPIdata
-  double precision,intent(in) :: distance(InVar%natom,InVar%natom,4)
-  double precision,intent(in) :: Phi2(3*InVar%natom,3*InVar%natom)
+  double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
+  double precision,intent(in) :: Phi2(3*Invar%natom,3*Invar%natom)
 
   integer :: iatcell,ishell,jshell,jatom
   integer :: nshell,ii,this_shell,iatshell
   double precision :: max_bound,min_bound,dist_shell
   integer,allocatable :: tab_shell(:)
 
-  write(InVar%stdout,*) ' '
-  write(InVar%stdout,*) '#############################################################################'
-  write(InVar%stdout,*) '#### For each shell, list of coefficients (IFC), number of neighbours... ####'
-  write(InVar%stdout,*) '#############################################################################'
+  write(Invar%stdout,*) ' '
+  write(Invar%stdout,*) '#############################################################################'
+  write(Invar%stdout,*) '#### For each shell, list of coefficients (IFC), number of neighbours... ####'
+  write(Invar%stdout,*) '#############################################################################'
 
   nshell=Shell2at%nshell
 ! Write the IFCs in the data.out file (with others specifications: 
 ! number of atoms in a shell, distance, Trace...)
   ABI_MALLOC(tab_shell,(nshell)); tab_shell(:)=0
-  do iatcell=1,InVar%natom_unitcell
+  do iatcell=1,Invar%natom_unitcell
     tab_shell(:)=0
-    write(InVar%stdout,'(a,i4)') ' ############# List of (second order) IFC for the reference atom=',iatcell
+    write(Invar%stdout,'(a,i4)') ' ############# List of (second order) IFC for the reference atom=',iatcell
 !   Sort the IFC with distance in increasing order
     min_bound=-1.d0
     do ishell=1,nshell
@@ -415,19 +415,19 @@ subroutine tdep_write_phi2(distance,InVar,MPIdata,Phi2,Shell2at)
       
 !     Write the IFC properly  
       if (Shell2at%neighbours(iatcell,this_shell)%n_interactions.ne.0) then
-        write(InVar%stdout,'(a,i4,a,i4,a,f9.6)') ' ======== NEW SHELL (ishell=',this_shell,&
+        write(Invar%stdout,'(a,i4,a,i4,a,f9.6)') ' ======== NEW SHELL (ishell=',this_shell,&
 &            '): There are',Shell2at%neighbours(iatcell,this_shell)%n_interactions,' atoms on this shell at distance=',dist_shell
         do iatshell=1,Shell2at%neighbours(iatcell,this_shell)%n_interactions
           jatom=Shell2at%neighbours(iatcell,this_shell)%atomj_in_shell(iatshell)
-          write(InVar%stdout,'(a,i4,a,i4)') '  For jatom=',jatom,' ,with type=',mod(jatom-1,InVar%natom_unitcell)+1
+          write(Invar%stdout,'(a,i4,a,i4)') '  For jatom=',jatom,' ,with type=',mod(jatom-1,Invar%natom_unitcell)+1
           do ii=1,3
-            write(InVar%stdout,'(2x,3(f9.6,1x))') Phi2((iatcell-1)*3+ii,(jatom-1)*3+1),Phi2((iatcell-1)*3+ii,(jatom-1)*3+2),&
+            write(Invar%stdout,'(2x,3(f9.6,1x))') Phi2((iatcell-1)*3+ii,(jatom-1)*3+1),Phi2((iatcell-1)*3+ii,(jatom-1)*3+2),&
 &             Phi2((iatcell-1)*3+ii,(jatom-1)*3+3)
           end do
-          write(InVar%stdout,'(a,3(1x,f11.6))') '  The components of the vector are:', distance(iatcell,jatom,2:4)
-          write(InVar%stdout,'(a,(1x,f9.6))') '  Trace=',Phi2((iatcell-1)*3+1,(jatom-1)*3+1)+Phi2((iatcell-1)*3+2,&
+          write(Invar%stdout,'(a,3(1x,f11.6))') '  The components of the vector are:', distance(iatcell,jatom,2:4)
+          write(Invar%stdout,'(a,(1x,f9.6))') '  Trace=',Phi2((iatcell-1)*3+1,(jatom-1)*3+1)+Phi2((iatcell-1)*3+2,&
 &           (jatom-1)*3+2)+Phi2((iatcell-1)*3+3,(jatom-1)*3+3)
-          write(InVar%stdout,*) ' '
+          write(Invar%stdout,*) ' '
         end do
       end if
     end do !ishell 
@@ -435,12 +435,12 @@ subroutine tdep_write_phi2(distance,InVar,MPIdata,Phi2,Shell2at)
   ABI_FREE(tab_shell)
 
 ! Write the Phi2_unitcell.dat and Phi2.dat files
-  if (InVar%debug.and.MPIdata%iam_master) then
-    write(InVar%stdout,'(a)') ' See the Phi2*.dat file'
-    open(unit=52,file=trim(InVar%output_prefix)//'Phi2_unitcell.dat')
-    open(unit=55,file=trim(InVar%output_prefix)//'Phi2.dat')
-    do jatom=1,3*InVar%natom
-      if (jatom.le.3*InVar%natom_unitcell) then
+  if (Invar%debug.and.MPIdata%iam_master) then
+    write(Invar%stdout,'(a)') ' See the Phi2*.dat file'
+    open(unit=52,file=trim(Invar%output_prefix)//'Phi2_unitcell.dat')
+    open(unit=55,file=trim(Invar%output_prefix)//'Phi2.dat')
+    do jatom=1,3*Invar%natom
+      if (jatom.le.3*Invar%natom_unitcell) then
         write(52,'(10000(f10.6,1x))') Phi2(jatom,:)
       end if  
       write(55,'(10000(f10.6,1x))') Phi2(jatom,:)
@@ -452,19 +452,19 @@ subroutine tdep_write_phi2(distance,InVar,MPIdata,Phi2,Shell2at)
 end subroutine tdep_write_phi2 
 
 !=====================================================================================================
-subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phi2,qpt_cart,Rlatt_cart)
+subroutine tdep_calc_dij(dij,eigenV,iqpt,Invar,Lattice,omega,Phi2,qpt_cart,Rlatt_cart)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Lattice_Variables_type),intent(in) :: Lattice
   integer,intent(in) :: iqpt
-  double precision,intent(in) :: Phi2(3*InVar%natom,3*InVar%natom)
-  double precision,intent(in) :: Rlatt_cart(3,InVar%natom_unitcell,InVar%natom)
+  double precision,intent(in) :: Phi2(3*Invar%natom,3*Invar%natom)
+  double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
   double precision,intent(in) :: qpt_cart(3)
-  double precision,intent(out) :: omega (3*InVar%natom_unitcell)
-  double complex  ,intent(out) :: dij   (3*InVar%natom_unitcell,3*InVar%natom_unitcell)
-  double complex  ,intent(out) :: eigenV(3*InVar%natom_unitcell,3*InVar%natom_unitcell)
+  double precision,intent(out) :: omega (3*Invar%natom_unitcell)
+  double complex  ,intent(out) :: dij   (3*Invar%natom_unitcell,3*Invar%natom_unitcell)
+  double complex  ,intent(out) :: eigenV(3*Invar%natom_unitcell,3*Invar%natom_unitcell)
 
   integer :: LWORK,ii,jj,kk,iatom,jatom,iatcell,jatcell,itypat,jtypat,iat_mod,INFO,itemp,imode,nmode
   double precision :: phase
@@ -474,9 +474,9 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phi2,qpt_cart,Rlatt
 ! double complex, allocatable :: mass_mat(:,:)
 
 ! Calculation of the dynamical matrix (Dij)
-  do iatcell=1,InVar%natom_unitcell
-    do jatom=1,InVar%natom
-      iat_mod=mod(jatom+InVar%natom_unitcell-1,InVar%natom_unitcell)+1
+  do iatcell=1,Invar%natom_unitcell
+    do jatom=1,Invar%natom
+      iat_mod=mod(jatom+Invar%natom_unitcell-1,Invar%natom_unitcell)+1
       phase=0.d0
       do kk=1,3
         phase=phase+2*pi*Rlatt_cart(kk,iatcell,jatom)*qpt_cart(kk)
@@ -491,47 +491,47 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phi2,qpt_cart,Rlatt
 
 ! The Dij has to be an hermitian matrix
   itemp=0
-  do ii=1,3*InVar%natom_unitcell
-    do jj=ii,3*InVar%natom_unitcell
+  do ii=1,3*Invar%natom_unitcell
+    do jj=ii,3*Invar%natom_unitcell
       if ((abs(real(dij(ii,jj))-real(dij(jj,ii))).gt.tol10).or.(abs(aimag(dij(ii,jj))+aimag(dij(jj,ii))).gt.tol10)) then
-        if (InVar%debug) then
-          write (InVar%stdout,'(a,1x,2(i4,1x))') 'for ii,jj=',ii,jj
-          write (InVar%stdout,'(a,1x,1(f12.8,1x))') 'abs(realij-realji)=',abs(real(dij(ii,jj))-real(dij(jj,ii)))
-          write (InVar%stdout,'(a,1x,1(f12.8,1x))') 'abs(imagij+imagji)=',abs(aimag(dij(ii,jj))+aimag(dij(jj,ii)))
+        if (Invar%debug) then
+          write (Invar%stdout,'(a,1x,2(i4,1x))') 'for ii,jj=',ii,jj
+          write (Invar%stdout,'(a,1x,1(f12.8,1x))') 'abs(realij-realji)=',abs(real(dij(ii,jj))-real(dij(jj,ii)))
+          write (Invar%stdout,'(a,1x,1(f12.8,1x))') 'abs(imagij+imagji)=',abs(aimag(dij(ii,jj))+aimag(dij(jj,ii)))
         end if  
         itemp=itemp+1
       end if  
     end do
   end do
   if (itemp.ne.0.and.iqpt.eq.1) then
-    write(InVar%stdout,*) 'WARNING: The Dij matrix is not hermitian'
-    write(InVar%stdout,*) '  Probably: one shell may not have the whole number of atoms'
-    write(InVar%stdout,*) '  The Dij matrix is symetrized'
+    write(Invar%stdout,*) 'WARNING: The Dij matrix is not hermitian'
+    write(Invar%stdout,*) '  Probably: one shell may not have the whole number of atoms'
+    write(Invar%stdout,*) '  The Dij matrix is symetrized'
   end if  
 
 ! Diagonalization of dynamical matrix Dij/sqrt(Mi*Mj)
-  LWORK=2*3*InVar%natom_unitcell-1
+  LWORK=2*3*Invar%natom_unitcell-1
   ABI_MALLOC(WORKC,(LWORK)); WORKC(:)=czero
-  ABI_MALLOC(RWORK,(3*3*InVar%natom_unitcell-2)); RWORK(:)=zero
-  do iatcell=1,InVar%natom_unitcell
-    itypat=InVar%typat_unitcell(iatcell)
-    do jatcell=1,InVar%natom_unitcell
-      jtypat=InVar%typat_unitcell(jatcell)
+  ABI_MALLOC(RWORK,(3*3*Invar%natom_unitcell-2)); RWORK(:)=zero
+  do iatcell=1,Invar%natom_unitcell
+    itypat=Invar%typat_unitcell(iatcell)
+    do jatcell=1,Invar%natom_unitcell
+      jtypat=Invar%typat_unitcell(jatcell)
       do ii=1,3
         do jj=1,3
           eigenV(ii+(iatcell-1)*3,jj+(jatcell-1)*3)=dij(ii+(iatcell-1)*3,jj+(jatcell-1)*3)/&
-&                              dcmplx(dsqrt(InVar%amu(itypat)*InVar%amu(jtypat))*amu_emass,0.d0)          
+&                              dcmplx(dsqrt(Invar%amu(itypat)*Invar%amu(jtypat))*amu_emass,0.d0)          
         end do !jj
       end do !ii 
     end do !jatcell 
   end do !iatcell
-  call ZHEEV('V','U',3*InVar%natom_unitcell,eigenV(:,:),3*InVar%natom_unitcell,omega(:),WORKC,LWORK,RWORK,INFO)
+  call ZHEEV('V','U',3*Invar%natom_unitcell,eigenV(:,:),3*Invar%natom_unitcell,omega(:),WORKC,LWORK,RWORK,INFO)
 
 ! Normalization of the eigenvectors
-  nmode=3*InVar%natom_unitcell
+  nmode=3*Invar%natom_unitcell
   do imode=1,nmode
     norm=zero
-    do iatom=1,InVar%natom_unitcell
+    do iatom=1,Invar%natom_unitcell
       do ii=1,3
         norm=norm+eigenV(3*(iatom-1)+ii,imode)*conjg(eigenV(3*(iatom-1)+ii,imode))
       end do
@@ -540,7 +540,7 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phi2,qpt_cart,Rlatt
   end do
 
 ! Remove the squared-negative frequencies  
-  do ii=1,InVar%natom_unitcell
+  do ii=1,Invar%natom_unitcell
     do jj=1,3
       if (omega((ii-1)*3+jj).lt.0.d0) then
         omega((ii-1)*3+jj)=-dsqrt(-omega((ii-1)*3+jj))
@@ -555,12 +555,12 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phi2,qpt_cart,Rlatt
 end subroutine tdep_calc_dij
 
 !=====================================================================================================
-!FB subroutine tdep_write_dij(Eigen2nd,iqpt,InVar,Lattice,qpt_cart)
-subroutine tdep_write_dij(Eigen2nd,iqpt,InVar,Lattice,qpt)
+!FB subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,Lattice,qpt_cart)
+subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,Lattice,qpt)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Lattice_Variables_type),intent(in) :: Lattice
   integer,intent(in) :: iqpt
 !FB  double precision,intent(in) :: qpt_cart(3)
@@ -572,12 +572,12 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,InVar,Lattice,qpt)
   double complex, allocatable   :: eigenV(:,:)
   integer :: ii,jj,iatcell,jatcell
 
-  ABI_MALLOC(omega ,(3*InVar%natom_unitcell))                       ; omega(:)   = zero
-  ABI_MALLOC(dij   ,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)); dij(:,:)   =czero
-  ABI_MALLOC(eigenV,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)); eigenV(:,:)=czero
+  ABI_MALLOC(omega ,(3*Invar%natom_unitcell))                       ; omega(:)   = zero
+  ABI_MALLOC(dij   ,(3*Invar%natom_unitcell,3*Invar%natom_unitcell)); dij(:,:)   =czero
+  ABI_MALLOC(eigenV,(3*Invar%natom_unitcell,3*Invar%natom_unitcell)); eigenV(:,:)=czero
   omega(:)=Eigen2nd%eigenval(:,iqpt)
-  do iatcell=1,InVar%natom_unitcell
-    do jatcell=1,InVar%natom_unitcell
+  do iatcell=1,Invar%natom_unitcell
+    do jatcell=1,Invar%natom_unitcell
       do ii=1,3
         do jj=1,3
           dij   ((iatcell-1)*3+ii,(jatcell-1)*3+jj)=dcmplx(Eigen2nd%dynmat  (1,ii,iatcell,jj,jatcell,iqpt),&
@@ -593,13 +593,13 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,InVar,Lattice,qpt)
 !FB  write(52,'(a,1x,3(f10.6,1x))') 'For qpt=',qpt_cart(:)*Lattice%acell_unitcell(:)
   write(52,'(a,1x,3(f10.6,1x))') 'For qpt=',qpt(:)
   write(52,'(a,i4,a)') '  Dij(',iqpt,'real)='
-  do iatcell=1,InVar%natom_unitcell
+  do iatcell=1,Invar%natom_unitcell
     write(52,'(100(f10.6,1x))') real(dij(1+(iatcell-1)*3,:))
     write(52,'(100(f10.6,1x))') real(dij(2+(iatcell-1)*3,:))
     write(52,'(100(f10.6,1x))') real(dij(3+(iatcell-1)*3,:))
   end do  
   write(52,'(a,i4,a)') '  Dij(',iqpt,'imag)='
-  do iatcell=1,InVar%natom_unitcell
+  do iatcell=1,Invar%natom_unitcell
     write(52,'(100(f10.6,1x))') aimag(dij(1+(iatcell-1)*3,:))
     write(52,'(100(f10.6,1x))') aimag(dij(2+(iatcell-1)*3,:))
     write(52,'(100(f10.6,1x))') aimag(dij(3+(iatcell-1)*3,:))
@@ -607,13 +607,13 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,InVar,Lattice,qpt)
   write(52,*)' '
 
 ! Print the frequencies (omega)
-  if (InVar%Enunit.eq.0) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii)*Ha_eV*1000,ii=1,3*InVar%natom_unitcell)
-  if (InVar%Enunit.eq.1) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii)*Ha_cmm1   ,ii=1,3*InVar%natom_unitcell)
-  if (InVar%Enunit.eq.2) write(53,'(i5,1x,100(f15.6,1x))') iqpt,(omega(ii)           ,ii=1,3*InVar%natom_unitcell)
+  if (Invar%enunit.eq.0) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*Ha_eV*1000,ii=1,3*Invar%natom_unitcell)
+  if (Invar%enunit.eq.1) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*Ha_cmm1   ,ii=1,3*Invar%natom_unitcell)
+  if (Invar%enunit.eq.2) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)           ,ii=1,3*Invar%natom_unitcell)
 
 ! Print the eigenvectors (eigenV) 
   write(51,*) 'For iqpt=',iqpt
-  do ii=1,3*InVar%natom_unitcell
+  do ii=1,3*Invar%natom_unitcell
     write(51,*) 'Mode number',ii,' energy',omega(ii)
     write(51,*) '  Real:'
     write(51,*) real(eigenV(:,ii))
@@ -633,7 +633,7 @@ subroutine tdep_build_phi2_33(isym,Phi2_ref,Phi2_33,Sym,itrans)
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
-! type(Input_Variables_type),intent(in) :: InVar
+! type(Input_Variables_type),intent(in) :: Invar
   double precision, intent(in) :: Phi2_ref(3,3)
   double precision, intent(out) :: Phi2_33(3,3)
   integer,intent(in) :: isym,itrans

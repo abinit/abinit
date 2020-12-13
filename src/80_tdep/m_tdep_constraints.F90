@@ -74,11 +74,11 @@ subroutine tdep_calc_orthonorm(dim1,dim2,nindep,vect)
 end subroutine tdep_calc_orthonorm
 
 !====================================================================================================
-subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nshell2at,nshell3at,nshell4at,&
+subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nshell2at,nshell3at,nshell4at,&
 &                                proj1st,proj2nd,proj3rd,proj4th,Shell1at,Shell2at,Shell3at,Shell4at,Sym) 
 
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(Shell_Variables_type),intent(in) :: Shell1at
@@ -90,7 +90,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
   double precision, intent(in) :: proj2nd(9 ,9 ,nshell2at)
   double precision, intent(in) :: proj3rd(27,27,nshell3at)
   double precision, intent(in) :: proj4th(81,81,nshell4at)
-  double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
+  double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
 
   integer :: ishell,ncoeff,ncoeff_prev,iatom,jatom,katom,latom,iatshell,YES,ishell2at,counter
   integer :: icoeff,iconst,nconst,nconst_loc,iconst_loc,iconst_new,isym,itrans,ntotcoeff,iat_mod
@@ -108,20 +108,20 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
   type(Constraints_Variables_type) :: Const3,Const4
   logical :: order2,order3,order4
 
-  natom_unitcell=InVar%natom_unitcell
-  natom         =InVar%natom
+  natom_unitcell=Invar%natom_unitcell
+  natom         =Invar%natom
 
   order2 = .false.
   order3 = .false.
   order4 = .false.
-  if (InVar%Order.ge.2) order2=.true.
-  if (InVar%Order.ge.3) order3=.true.
-!FB4th  if (InVar%Order.ge.4) order4=.true.
-  if (InVar%Order.ge.4) order4=.false.
+  if (Invar%order.ge.2) order2=.true.
+  if (Invar%order.ge.3) order3=.true.
+!FB4th  if (Invar%order.ge.4) order4=.true.
+  if (Invar%order.ge.4) order4=.false.
 
-  write(InVar%stdout,*) ' '
-  write(InVar%stdout,*) '#############################################################################'
-  write(InVar%stdout,*) '###################### Compute the constraints ##############################'
+  write(Invar%stdout,*) ' '
+  write(Invar%stdout,*) '#############################################################################'
+  write(Invar%stdout,*) '###################### Compute the constraints ##############################'
 
 ! For each couple of atoms, transform the Phi2 (3x3) ifc matrix using the symetry operation (S)
   if (order2.or.order3) then
@@ -234,7 +234,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ntotcoeff=CoeffMoore%ntotcoeff
 ! First order only
-  write(InVar%stdout,*) '########################## At the 1st order #################################'
+  write(Invar%stdout,*) '########################## At the 1st order #################################'
   if (order2) then
     ABI_MALLOC(const_rot1st,(3,3,                              ntotcoeff)); const_rot1st(:,:,:)      =zero
     ABI_MALLOC(const_rot2nd,(3,3,3,             natom_unitcell,ntotcoeff)); const_rot2nd(:,:,:,:,:)  =zero
@@ -275,7 +275,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
     end do !ishell
 
 !   First + second order
-    write(InVar%stdout,*) '########################## At the 2nd order #################################'
+    write(Invar%stdout,*) '########################## At the 2nd order #################################'
     do ishell=1,nshell2at
       do iatom=1,natom_unitcell
         if (Shell2at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
@@ -334,11 +334,11 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
         end do !iatshell
       end do !iatom
     end do !ishell
-  end if !Order=1,2
+  end if !order=1,2
 
 ! Third order
   if (order3) then
-    write(InVar%stdout,*) '########################## At the 3rd order #################################'
+    write(Invar%stdout,*) '########################## At the 3rd order #################################'
     ABI_MALLOC(Const3%AsrRot3,(natom_unitcell,natom,ntotcoeff))
     do iatom=1,natom_unitcell
       do jatom=1,natom
@@ -360,7 +360,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
           ncoeff_prev=Shell2at%ncoeff_prev(ishell)+CoeffMoore%ncoeff1st
           iat_mod=mod(jatom+natom_unitcell-1,natom_unitcell)+1
 !         1/ Rotational invariances (coming from the 2nd order). Number of constraints = natom_unitcell*natom*3**3
-          if (InVar%Order.ge.3) then
+          if (Invar%order.ge.3) then
             do alpha=1,3
               do beta=1,3
                 do gama=1,3
@@ -371,7 +371,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
                       if (beta.eq.lambda)  terme2=sum(SS_ref(alpha ,:,gama  ,isym,itrans)*proj2nd(:,icoeff,ishell))
                       if (alpha.eq.gama)   terme3=sum(SS_ref(lambda,:,beta  ,isym,itrans)*proj2nd(:,icoeff,ishell))
                       if (beta.eq.gama)    terme4=sum(SS_ref(alpha ,:,lambda,isym,itrans)*proj2nd(:,icoeff,ishell))
-                      if (distance(iatom,jatom,1).lt.InVar%Rcut3) then
+                      if (distance(iatom,jatom,1).lt.Invar%rcut3) then
                         Const3%AsrRot3(iatom,jatom,icoeff+ncoeff_prev)%ABGD(alpha,beta,gama,lambda)=&
 &                       Const3%AsrRot3(iatom,jatom,icoeff+ncoeff_prev)%ABGD(alpha,beta,gama,lambda)+terme1+terme2-terme3-terme4
                       end if
@@ -426,11 +426,11 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
         end do !iatshell
       end do !iatom   
     end do !ishell   
-  end if !Order=3
+  end if !order=3
 
 ! Fourth order
   if (order4) then
-    write(InVar%stdout,*) '########################## At the 4th order #################################'
+    write(Invar%stdout,*) '########################## At the 4th order #################################'
     ABI_MALLOC(Const4%AsrRot4,(natom_unitcell,natom,natom,ntotcoeff))
     do iatom=1,natom_unitcell
       do jatom=1,natom
@@ -454,7 +454,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
 !FB          ncoeff_prev=Shell2at%ncoeff_prev(ishell)+CoeffMoore%ncoeff1st
 !FB          iat_mod=mod(jatom+natom_unitcell-1,natom_unitcell)+1
 !FB!         1/ Rotational invariances (coming from the 2nd order). Number of constraints = natom_unitcell*natom*3**3
-!FB          if (InVar%Order.ge.3) then
+!FB          if (Invar%order.ge.3) then
 !FB            do alpha=1,3
 !FB              do beta=1,3
 !FB                do gama=1,3
@@ -465,7 +465,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
 !FB                      if (beta.eq.lambda)  terme2=sum(SS_ref(alpha ,:,gama  ,isym,itrans)*proj2nd(:,icoeff,ishell))
 !FB                      if (alpha.eq.gama)   terme3=sum(SS_ref(lambda,:,beta  ,isym,itrans)*proj2nd(:,icoeff,ishell))
 !FB                      if (beta.eq.gama)    terme4=sum(SS_ref(alpha ,:,lambda,isym,itrans)*proj2nd(:,icoeff,ishell))
-!FB                      if (distance(iatom,jatom,1).lt.InVar%Rcut3) then
+!FB                      if (distance(iatom,jatom,1).lt.Invar%rcut3) then
 !FB                        Const4%AsrRot3(iatom,jatom,icoeff+ncoeff_prev)%ABGD(alpha,beta,gama,lambda)=&
 !FB&                       Const4%AsrRot3(iatom,jatom,icoeff+ncoeff_prev)%ABGD(alpha,beta,gama,lambda)+terme1+terme2-terme3-terme4
 !FB                      end if
@@ -523,7 +523,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
         end do !iatshell
       end do !iatom   
     end do !ishell   
-  end if !Order=4
+  end if !order=4
 
   if (order2.or.order3) ABI_FREE(SS_ref)
   if (order3.or.order4) then
@@ -545,7 +545,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
   ABI_MALLOC(CoeffMoore%const ,(CoeffMoore%ntotconst,ntotcoeff)); CoeffMoore%const (:,:)=0.d0 
 
 ! Reduce the number of constraints by selecting the non-zero equations
-  write(InVar%stdout,*) '################## Reduce the number of constraints #########################'
+  write(Invar%stdout,*) '################## Reduce the number of constraints #########################'
   iconst_new=0
   if (order2) then
 !   1/ For Rotational invariances (1st order)
@@ -801,7 +801,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
 !FB  ABI_FREE(vect)
   CoeffMoore%ntotconst=iconst_new
   if (MPIdata%iam_master) then
-    open(unit=16,file=trim(InVar%output_prefix)//'constraints.dat')
+    open(unit=16,file=trim(Invar%output_prefix)//'constraints.dat')
     write(16,*) ' ======== Constraints at the 1st order (Rotational Invariances) ========'
     write(16,*) ' Number of constraints =',CoeffMoore%nconst_1st
     write(16,*) ' ======== Constraints at the 2nd order (Rotational Invariances) ========'
@@ -810,13 +810,13 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
     write(16,*) ' Number of constraints =',CoeffMoore%nconst_dynmat
     write(16,*) ' ======== Constraints at the 2nd order (Huang) ========================='
     write(16,*) ' Number of constraints =',CoeffMoore%nconst_huang
-    if (InVar%Order.ge.3) then
+    if (Invar%order.ge.3) then
       write(16,*) ' ======== Constraints at the 3rd order (Acoustic sum rules) ============'
       write(16,*) ' Number of constraints =',CoeffMoore%nconst_asr3rd
       write(16,*) ' ======== Constraints at the 3rd order (Rotational Invariances) ========'
       write(16,*) ' Number of constraints =',CoeffMoore%nconst_rot3rd
     end if
-    if (InVar%Order.ge.4) then
+    if (Invar%order.ge.4) then
       write(16,*) ' ======== Constraints at the 4th order (Acoustic sum rules) ============'
       write(16,*) ' Number of constraints =',CoeffMoore%nconst_asr4th
       write(16,*) ' ======== Constraints at the 4th order (Rotational Invariances) ========'
@@ -830,20 +830,20 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,MPIdata,nshell1at,nsh
 end subroutine tdep_calc_constraints
 
 !====================================================================================================
- subroutine tdep_check_constraints(distance,InVar,Phi2,Phi1,nshell3at,nshell4at,&
+ subroutine tdep_check_constraints(distance,Invar,Phi2,Phi1,nshell3at,nshell4at,&
 &                 Phi3_ref,Phi4_ref,Shell3at,Shell4at,Sym,ucart)
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   integer, intent(in)  :: nshell3at,nshell4at
-  double precision, intent(in)  :: Phi2(3*InVar%natom,3*InVar%natom)
-  double precision, intent(in)  :: Phi1(3*InVar%natom)
-  double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
+  double precision, intent(in)  :: Phi2(3*Invar%natom,3*Invar%natom)
+  double precision, intent(in)  :: Phi1(3*Invar%natom)
+  double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   type(Shell_Variables_type),intent(in) :: Shell3at
   type(Shell_Variables_type),intent(in) :: Shell4at
   type(Symetries_Variables_type),intent(in) :: Sym
   double precision, intent(in) :: Phi3_ref(3,3,3,nshell3at)
   double precision, intent(in) :: Phi4_ref(3,3,3,3,nshell4at)
-  double precision, intent(in) :: ucart(3,InVar%natom,InVar%my_nstep)
+  double precision, intent(in) :: ucart(3,Invar%natom,Invar%my_nstep)
   
   integer :: ii,jj,kk,ll,iatom,jatom,katom,latom,isym,itrans
   integer :: alpha,beta,gama,lambda
@@ -866,17 +866,17 @@ end subroutine tdep_calc_constraints
   order2 = .false.
   order3 = .false.
   order4 = .false.
-  if (InVar%Order.ge.2) order2=.true.
-  if (InVar%Order.ge.3) order3=.true.
-!FB4th  if (InVar%Order.ge.4) order4=.true.
-  if (InVar%Order.ge.4) order4=.false.
+  if (Invar%order.ge.2) order2=.true.
+  if (Invar%order.ge.3) order3=.true.
+!FB4th  if (Invar%order.ge.4) order4=.true.
+  if (Invar%order.ge.4) order4=.false.
 
   if (order2) then
 !   FIRST ORDER
 !   Acoustic sum rule (first order)'
     do alpha=1,3
       norm1=zero
-      do iatom=1,InVar%natom_unitcell
+      do iatom=1,Invar%natom_unitcell
         norm1=norm1+Phi1((iatom-1)*3+alpha)
       enddo
       if (abs(norm1).gt.tol8) then
@@ -890,7 +890,7 @@ end subroutine tdep_calc_constraints
     do alpha=1,3
       do beta=1,3
         norm1=zero
-        do iatom=1,InVar%natom_unitcell
+        do iatom=1,Invar%natom_unitcell
           norm1=norm1+Phi1(3*(iatom-1)+alpha)*distance(1,iatom,beta +1)-&
 &                     Phi1(3*(iatom-1)+beta )*distance(1,iatom,alpha+1)
         end do !iatom
@@ -905,11 +905,11 @@ end subroutine tdep_calc_constraints
 
 !   SECOND ORDER
 !   Acoustic sum rule (second order)
-    do iatom=1,InVar%natom
+    do iatom=1,Invar%natom
       do alpha=1,3
         do beta=1,3
           norm1=zero
-          do jatom=1,InVar%natom
+          do jatom=1,Invar%natom
             norm1=norm1+Phi2((iatom-1)*3+alpha,3*(jatom-1)+beta)
           enddo
           if (abs(norm1).gt.tol8) then
@@ -922,12 +922,12 @@ end subroutine tdep_calc_constraints
       enddo
     enddo
 !   Invariance under an arbitrary rotation (first and second order)'
-    do iatom=1,InVar%natom
+    do iatom=1,Invar%natom
       do alpha=1,3
         do beta=1,3
           do gama=1,3
             norm1=zero
-            do jatom=1,InVar%natom
+            do jatom=1,Invar%natom
               norm1=norm1+Phi2(3*(iatom-1)+alpha,3*(jatom-1)+beta)*distance(iatom,jatom,gama+1)-&
 &                         Phi2(3*(iatom-1)+alpha,3*(jatom-1)+gama)*distance(iatom,jatom,beta+1)              
             end do !jatom
@@ -943,17 +943,17 @@ end subroutine tdep_calc_constraints
         end do !beta
       end do !alpha
     end do !iatom  
-  end if !Order=1,2  
+  end if !order=1,2  
   
   if (order3) then
 !   THIRD ORDER
     ABI_MALLOC(rot3,(Invar%natom,3,3,3,3)) ; rot3(:,:,:,:,:)=0.d0
     ABI_MALLOC(asr3,(2,Invar%natom,3,3,3)) ; asr3(:,:,:,:,:)=0.d0
-    do iatom=1,InVar%natom
+    do iatom=1,Invar%natom
       rot3(:,:,:,:,:)=0.d0
       asr3(:,:,:,:,:)=0.d0
-      do jatom=1,InVar%natom
-        if (distance(iatom,jatom,1).gt.InVar%Rcut3) cycle
+      do jatom=1,Invar%natom
+        if (distance(iatom,jatom,1).gt.Invar%rcut3) cycle
 !       Compute the rotational invariance (third order)
         do alpha=1,3
           do beta=1,3
@@ -977,7 +977,7 @@ end subroutine tdep_calc_constraints
           katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
           isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           itrans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-          call tdep_build_phi3_333(isym,InVar,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
+          call tdep_build_phi3_333(isym,Invar,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
 !         Compute the first ASR : sum_k Psi_ijk=0 
 !              --> Psi_iji+sum_{k.ne.i} Psi_ijk=0
 !              --> if i.eq.j Psi_iii+sum_{k.ne.i} Psi_iik
@@ -1003,7 +1003,7 @@ end subroutine tdep_calc_constraints
         do jj=1,3
           do kk=1,3
 !           Check the first acoustic sum rule
-            do jatom=1,InVar%natom
+            do jatom=1,Invar%natom
               if (abs(asr3(1,jatom,ii,jj,kk)).gt.tol8) then
                 write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',ii,jj,kk,iatom,jatom,asr3(1,jatom,ii,jj,kk)
                 if (abs(asr3(1,jatom,ii,jj,kk)).gt.tol6)&
@@ -1011,7 +1011,7 @@ end subroutine tdep_calc_constraints
               end if
             end do !jatom  
 !           Check the second acoustic sum rule
-            do katom=1,InVar%natom
+            do katom=1,Invar%natom
               if (abs(asr3(2,katom,ii,jj,kk)).gt.tol8) then
                 write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',ii,jj,kk,iatom,katom,asr3(2,katom,ii,jj,kk)
                 if (abs(asr3(2,katom,ii,jj,kk)).gt.tol6)&                
@@ -1022,7 +1022,7 @@ end subroutine tdep_calc_constraints
         end do !jj
       end do !ii  
 !     Check the rotational invariance (third order)
-      do jatom=1,InVar%natom
+      do jatom=1,Invar%natom
         do alpha=1,3
           do beta=1,3
             do gama=1,3
@@ -1041,17 +1041,17 @@ end subroutine tdep_calc_constraints
     end do !iatom  
     ABI_FREE(asr3)
     ABI_FREE(rot3)
-  end if !Order=3
+  end if !order=3
 
 ! FOURTH ORDER
   if (order4) then
 !FB    ABI_MALLOC(rot3,(Invar%natom,3,3,3,3)) ; rot3(:,:,:,:,:)=0.d0
-    ABI_MALLOC(asr4,(Invar%natom,InVar%natom,3,3,3,3)) ; asr4(:,:,:,:,:,:)=0.d0
-    do iatom=1,InVar%natom
+    ABI_MALLOC(asr4,(Invar%natom,Invar%natom,3,3,3,3)) ; asr4(:,:,:,:,:,:)=0.d0
+    do iatom=1,Invar%natom
       asr4(:,:,:,:,:,:)=0.d0
 !FB      rot3(:,:,:,:,:)=0.d0
-!FB      do jatom=1,InVar%natom
-!FB        if (distance(iatom,jatom,1).gt.InVar%Rcut3) cycle
+!FB      do jatom=1,Invar%natom
+!FB        if (distance(iatom,jatom,1).gt.Invar%rcut3) cycle
 !FB!       Compute the rotational invariance (third order)
 !FB        do alpha=1,3
 !FB          do beta=1,3
@@ -1076,7 +1076,7 @@ end subroutine tdep_calc_constraints
           latom=Shell4at%neighbours(iatom,ishell)%atoml_in_shell(iatshell)
           isym =Shell4at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           itrans=Shell4at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-          call tdep_build_phi4_3333(isym,InVar,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
+          call tdep_build_phi4_3333(isym,Invar,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
 !         Compute the first ASR : sum_l Psi_ijkl=0 
           asr4(jatom,katom,:,:,:,:)=asr4(jatom,katom,:,:,:,:)+Phi4_3333(:,:,:,:)
 !FB!         Compute the rotational invariance (third order)
@@ -1098,8 +1098,8 @@ end subroutine tdep_calc_constraints
         do jj=1,3
           do kk=1,3
             do ll=1,3
-              do jatom=1,InVar%natom
-                do katom=1,InVar%natom
+              do jatom=1,Invar%natom
+                do katom=1,Invar%natom
                   if (abs(asr4(jatom,katom,ii,jj,kk,ll)).gt.tol8) then
                     write(std_out,'(a,1x,7(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR4) --->',ii,jj,kk,ll,iatom,jatom,katom,asr4(jatom,katom,ii,jj,kk,ll)
                     if (abs(asr4(jatom,katom,ii,jj,kk,ll)).gt.tol6)&
@@ -1112,7 +1112,7 @@ end subroutine tdep_calc_constraints
         end do !jj
       end do !ii  
 !FB!     Check the rotational invariance (third order)
-!FB      do jatom=1,InVar%natom
+!FB      do jatom=1,Invar%natom
 !FB        do alpha=1,3
 !FB          do beta=1,3
 !FB            do gama=1,3
@@ -1131,7 +1131,7 @@ end subroutine tdep_calc_constraints
     end do !iatom  
     ABI_FREE(asr4)
 !FB    ABI_FREE(rot3)
-  end if !Order=4
+  end if !order=4
 
  end subroutine tdep_check_constraints
 !====================================================================================================

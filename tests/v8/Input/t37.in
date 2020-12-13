@@ -10,9 +10,9 @@
 # Computation details
        nstep_max       101
        nstep_min         1
-            Rcut     7.426
+            rcut     7.426
 # Optional inputs
-          Ngqpt2 2 2 2
+          ngqpt2 2 2 2
           TheEnd
 
 # XG20191126 : the comparison of the omega.dat file has been suppressed, because on the new reference machine,

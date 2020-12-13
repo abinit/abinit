@@ -31,18 +31,18 @@ module m_tdep_phi4
 contains
 
 !====================================================================================================
- subroutine tdep_calc_ftot4(Forces_TDEP,InVar,MPIdata,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
+ subroutine tdep_calc_ftot4(Forces_TDEP,Invar,MPIdata,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
 
   implicit none 
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(Shell_Variables_type),intent(in) :: Shell4at
   type(Symetries_Variables_type),intent(in) :: Sym
-  double precision, intent(in)  :: ucart(3,InVar%natom,InVar%my_nstep)
+  double precision, intent(in)  :: ucart(3,Invar%natom,Invar%my_nstep)
   double precision, intent(in)  :: Phi4_ref(3,3,3,3,Shell4at%nshell)
-  double precision, intent(out) :: Phi4UiUjUkUl(InVar%my_nstep)
-  double precision, intent(inout) :: Forces_TDEP(3*InVar%natom*InVar%my_nstep)
+  double precision, intent(out) :: Phi4UiUjUkUl(Invar%my_nstep)
+  double precision, intent(inout) :: Forces_TDEP(3*Invar%natom*Invar%my_nstep)
 
   integer :: iatom,jatom,katom,latom,isym,itrans,ishell,iatshell
   integer :: ii,jj,kk,ll,istep
@@ -51,8 +51,8 @@ contains
   double precision, allocatable :: ftot4(:,:)
 
   ABI_MALLOC(Phi4_3333,(3,3,3,3)) ; Phi4_3333(:,:,:,:)=0.d0
-  ABI_MALLOC(ftot4,(3*InVar%natom,InVar%my_nstep)); ftot4(:,:)=0.d0
-  do iatom=1,InVar%natom
+  ABI_MALLOC(ftot4,(3*Invar%natom,Invar%my_nstep)); ftot4(:,:)=0.d0
+  do iatom=1,Invar%natom
     do ishell=1,Shell4at%nshell
 !     Build the 3x3x3x3 IFC of an atom in this shell    
       if (Shell4at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
@@ -62,9 +62,9 @@ contains
         latom=Shell4at%neighbours(iatom,ishell)%atoml_in_shell(iatshell)
         isym =Shell4at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
         itrans=Shell4at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi4_3333(isym,InVar,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
+        call tdep_build_phi4_3333(isym,Invar,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
 !       Calculation of the force components (third order)
-        do istep=1,InVar%my_nstep
+        do istep=1,Invar%my_nstep
           do ii=1,3
             do jj=1,3
               do kk=1,3
@@ -82,18 +82,18 @@ contains
   ABI_FREE(Phi4_3333)
   ftot4(:,:)=ftot4(:,:)/6.d0
 
-  ABI_MALLOC(ucart_blas  ,(3*InVar%natom)) ; ucart_blas  (:)=0.d0
-  do istep=1,InVar%my_nstep
+  ABI_MALLOC(ucart_blas  ,(3*Invar%natom)) ; ucart_blas  (:)=0.d0
+  do istep=1,Invar%my_nstep
     ucart_blas(:)=0.d0 
-    do jatom=1,InVar%natom
+    do jatom=1,Invar%natom
       do jj=1,3
         ucart_blas(3*(jatom-1)+jj)=ucart(jj,jatom,istep)
       end do
     end do
-    call DGEMM('T','N',1,1,3*InVar%natom,1./4.d0,ftot4(:,istep),3*InVar%natom,ucart_blas,&
-&              3*InVar%natom,0.d0,Phi4UiUjUkUl(istep),3*InVar%natom)
-    Forces_TDEP(3*InVar%natom*(istep-1)+1:3*InVar%natom*istep)=&
-&   Forces_TDEP(3*InVar%natom*(istep-1)+1:3*InVar%natom*istep)-ftot4(:,istep)
+    call DGEMM('T','N',1,1,3*Invar%natom,1./4.d0,ftot4(:,istep),3*Invar%natom,ucart_blas,&
+&              3*Invar%natom,0.d0,Phi4UiUjUkUl(istep),3*Invar%natom)
+    Forces_TDEP(3*Invar%natom*(istep-1)+1:3*Invar%natom*istep)=&
+&   Forces_TDEP(3*Invar%natom*(istep-1)+1:3*Invar%natom*istep)-ftot4(:,istep)
   end do
   ABI_FREE(ucart_blas)
   ABI_FREE(ftot4)
@@ -101,15 +101,15 @@ contains
  end subroutine tdep_calc_ftot4
 
 !====================================================================================================
-subroutine tdep_calc_phi4fcoeff(CoeffMoore,InVar,proj,Shell4at,Sym,ucart)
+subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell4at
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
-  double precision, intent(in) :: ucart(3,InVar%natom,InVar%my_nstep)
+  double precision, intent(in) :: ucart(3,Invar%natom,Invar%my_nstep)
   double precision, intent(in) :: proj(81,81,Shell4at%nshell)
 
   integer :: ishell,ncoeff,ncoeff_prev,istep,iatom,jatom,katom,latom
@@ -179,9 +179,9 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,InVar,proj,Shell4at,Sym,ucart)
     end do
   end do  
 
-  write(InVar%stdout,*) ' Compute the coefficients (at the 4th order) used in the Moore-Penrose...'
+  write(Invar%stdout,*) ' Compute the coefficients (at the 4th order) used in the Moore-Penrose...'
   do ishell=1,Shell4at%nshell
-    do iatom=1,InVar%natom
+    do iatom=1,Invar%natom
       if (Shell4at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
       do iatshell=1,Shell4at%neighbours(iatom,ishell)%n_interactions
         jatom=Shell4at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
@@ -206,9 +206,9 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,InVar,proj,Shell4at,Sym,ucart)
             end do
           end do
         end do
-        do istep=1,InVar%my_nstep
-          iindex_l=3*(iatom-1)+3*InVar%natom*(istep-1)+1
-          iindex_h=3*(iatom-1)+3*InVar%natom*(istep-1)+3
+        do istep=1,Invar%my_nstep
+          iindex_l=3*(iatom-1)+3*Invar%natom*(istep-1)+1
+          iindex_h=3*(iatom-1)+3*Invar%natom*(istep-1)+3
 !         F_i^{\mu}(t)=\sum_{\alpha\beta\gamma\delta,jkl,\nu\xi\zeta} S^{\mu\alpha}.S^{\nu\beta}.S^{\xi\gamma}.S^{\zeta\delta}.
 !                      \Chi_{ijkl}^{\alpha\beta\gamma\delta}.u_l^\zeta(t).u_k^\xi(t).u_j^\nu(t)
           do nu=1,3
@@ -225,7 +225,7 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,InVar,proj,Shell4at,Sym,ucart)
       end do !iatshell
     end do !iatom
   end do !ishell
-  write(InVar%stdout,*) ' ------- achieved'
+  write(Invar%stdout,*) ' ------- achieved'
   do isym=1,Sym%nsym
     do itrans=1,24
       ABI_FREE(Const%Sprod(isym,itrans)%SSSS)
@@ -236,11 +236,11 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,InVar,proj,Shell4at,Sym,ucart)
 end subroutine tdep_calc_phi4fcoeff
 
 !=====================================================================================================
-subroutine tdep_calc_phi4ref(InVar,ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
+subroutine tdep_calc_phi4ref(Invar,ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Shell_Variables_type),intent(in) :: Shell4at
   integer,intent(in) :: ntotcoeff
   double precision, intent(in) :: proj(81,81,Shell4at%nshell)
@@ -280,14 +280,14 @@ subroutine tdep_calc_phi4ref(InVar,ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
 end subroutine tdep_calc_phi4ref
 
 !=====================================================================================================
-subroutine tdep_write_phi4(distance,InVar,Phi4_ref,Shell4at,Sym)
+subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell4at
-  double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
+  double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(in) :: Phi4_ref(3,3,3,3,Shell4at%nshell)
 
   integer :: ishell,jshell,isym,jatom,katom,latom
@@ -295,10 +295,10 @@ subroutine tdep_write_phi4(distance,InVar,Phi4_ref,Shell4at,Sym)
   integer :: ii,jj,kk
   double precision, allocatable :: Phi4_3333(:,:,:,:)
 
-  write(InVar%stdout,*) ' '
-  write(InVar%stdout,*) '#############################################################################'
-  write(InVar%stdout,*) '#### For each shell, list of coefficients (IFC), number of neighbours... ####'
-  write(InVar%stdout,*) '#############################################################################'
+  write(Invar%stdout,*) ' '
+  write(Invar%stdout,*) '#############################################################################'
+  write(Invar%stdout,*) '#### For each shell, list of coefficients (IFC), number of neighbours... ####'
+  write(Invar%stdout,*) '#############################################################################'
 
 ! Write the IFCs in the data.out file (with others specifications: 
 ! number of atoms in a shell, Trace...)
@@ -309,7 +309,7 @@ subroutine tdep_write_phi4(distance,InVar,Phi4_ref,Shell4at,Sym)
       jatref=Shell4at%jatref(ishell)
       katref=Shell4at%katref(ishell)
       latref=Shell4at%latref(ishell)
-      write(InVar%stdout,'(a,i4,a,i4,a)') ' ======== NEW SHELL (ishell=',ishell,&
+      write(Invar%stdout,'(a,i4,a,i4,a)') ' ======== NEW SHELL (ishell=',ishell,&
 &           '): There are',Shell4at%neighbours(iatref,ishell)%n_interactions,' atoms on this shell'
       do iatshell=1,Shell4at%neighbours(iatref,ishell)%n_interactions
         jatom =Shell4at%neighbours(iatref,ishell)%atomj_in_shell(iatshell)
@@ -317,24 +317,24 @@ subroutine tdep_write_phi4(distance,InVar,Phi4_ref,Shell4at,Sym)
         latom =Shell4at%neighbours(iatref,ishell)%atoml_in_shell(iatshell)
         isym  =Shell4at%neighbours(iatref,ishell)%sym_in_shell(iatshell)
         itrans=Shell4at%neighbours(iatref,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi4_3333(isym,InVar,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
-        write(InVar%stdout,'(a,i4,a,i4)') '  For iatcell=',iatref,' ,with type=',mod(iatref-1,InVar%natom_unitcell)+1
-        write(InVar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,InVar%natom_unitcell)+1
-        write(InVar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,InVar%natom_unitcell)+1
-        write(InVar%stdout,'(a,i4,a,i4)') '  For latom  =',latom ,' ,with type=',mod(latom -1,InVar%natom_unitcell)+1
+        call tdep_build_phi4_3333(isym,Invar,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
+        write(Invar%stdout,'(a,i4,a,i4)') '  For iatcell=',iatref,' ,with type=',mod(iatref-1,Invar%natom_unitcell)+1
+        write(Invar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,Invar%natom_unitcell)+1
+        write(Invar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,Invar%natom_unitcell)+1
+        write(Invar%stdout,'(a,i4,a,i4)') '  For latom  =',latom ,' ,with type=',mod(latom -1,Invar%natom_unitcell)+1
         do ii=1,3
           do jj=1,3
-            write(InVar%stdout,'(a,i2,i2,a)') '  \Psi^{',ii,jj,'kl}='
-            write(InVar%stdout,'(2x,3(f9.6,1x))') (Phi4_3333(ii,jj,kk,1),kk=1,3)
-            write(InVar%stdout,'(2x,3(f9.6,1x))') (Phi4_3333(ii,jj,kk,2),kk=1,3)
-            write(InVar%stdout,'(2x,3(f9.6,1x))') (Phi4_3333(ii,jj,kk,3),kk=1,3)
+            write(Invar%stdout,'(a,i2,i2,a)') '  \Psi^{',ii,jj,'kl}='
+            write(Invar%stdout,'(2x,3(f9.6,1x))') (Phi4_3333(ii,jj,kk,1),kk=1,3)
+            write(Invar%stdout,'(2x,3(f9.6,1x))') (Phi4_3333(ii,jj,kk,2),kk=1,3)
+            write(Invar%stdout,'(2x,3(f9.6,1x))') (Phi4_3333(ii,jj,kk,3),kk=1,3)
           end do
         end do
-        write(InVar%stdout,'(a,3(f9.6,1x))') '  (i,j) vector components:', (distance(iatref,jatom,jj+1),jj=1,3)
-        write(InVar%stdout,'(a,3(f9.6,1x))') '  (j,k) vector components:', (distance(jatom ,katom,jj+1),jj=1,3)
-        write(InVar%stdout,'(a,3(f9.6,1x))') '  (j,k) vector components:', (distance(katom ,latom,jj+1),jj=1,3)
-        write(InVar%stdout,'(a,3(f9.6,1x))') '  (k,i) vector components:', (distance(latom,iatref,jj+1),jj=1,3)
-        write(InVar%stdout,*) ' '
+        write(Invar%stdout,'(a,3(f9.6,1x))') '  (i,j) vector components:', (distance(iatref,jatom,jj+1),jj=1,3)
+        write(Invar%stdout,'(a,3(f9.6,1x))') '  (j,k) vector components:', (distance(jatom ,katom,jj+1),jj=1,3)
+        write(Invar%stdout,'(a,3(f9.6,1x))') '  (j,k) vector components:', (distance(katom ,latom,jj+1),jj=1,3)
+        write(Invar%stdout,'(a,3(f9.6,1x))') '  (k,i) vector components:', (distance(latom,iatref,jj+1),jj=1,3)
+        write(Invar%stdout,*) ' '
       end do !iatshell
     end if !n_interactions 
   end do !ishell 
@@ -343,12 +343,12 @@ subroutine tdep_write_phi4(distance,InVar,Phi4_ref,Shell4at,Sym)
 end subroutine tdep_write_phi4
 
 !=====================================================================================================
-subroutine tdep_build_phi4_3333(isym,InVar,Phi4_ref,Phi4_3333,Sym,itrans) 
+subroutine tdep_build_phi4_3333(isym,Invar,Phi4_ref,Phi4_3333,Sym,itrans) 
 
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
-  type(Input_Variables_type),intent(in) :: InVar
+  type(Input_Variables_type),intent(in) :: Invar
   double precision, intent(in) :: Phi4_ref(3,3,3,3)
   double precision, intent(out) :: Phi4_3333(3,3,3,3)
   integer,intent(in) :: isym,itrans

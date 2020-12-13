@@ -140,6 +140,7 @@ database_path = os.path.join(abenv.tests_dir, "test_suite.cpkl")
 _tsuite_dirs = [
     #"abirules",
     "atompaw",
+    "atdep",
     "bigdft",
     "bigdft_paral",
     #"buildsys",
