@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 11 Dec 2020.
-- ( at 18h07 )
+.Starting date : Sun 13 Dec 2020.
+- ( at 16h08 )
   
-- input  file    -> /home/ebousquet/CODES/Abinit/Git/beauty/build/tests/Test_suite/tutorial_tspin_3/tspin_3.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bousquet_beauty/tests/TestBot_MPI1/tutorial_tspin_3/tspin_3.abi
 - output file    -> tspin_3.abo
 - root for input  files -> tspin_3i
 - root for output files -> tspin_3o
@@ -246,8 +246,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.01949
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/ebousquet/CODES/Abinit/Git/beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8
-- pspatm: opening atomic psp file    /home/ebousquet/CODES/Abinit/Git/beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bousquet_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bousquet_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8
 - Fe    ONCVPSP-3.3.0  r_core=   1.26437   1.20546   1.56719
 - 26.00000  16.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -288,31 +288,31 @@ tolerances: {tolwfr: 1.00E-07, }
  ETOT 11  -249.72993183564    -2.13E-07 1.06E-05 2.16E-05 0.001
  ETOT 12  -249.72993184385    -8.21E-09 2.98E-05 3.76E-06 0.001
  ETOT 13  -249.72993184595    -2.09E-09 7.20E-06 2.11E-06 0.001
- ETOT 14  -249.72993184671    -7.66E-10 2.12E-05 2.35E-07 0.000
- ETOT 15  -249.72993184675    -3.89E-11 5.02E-06 3.40E-08 0.000
- ETOT 16  -249.72993184678    -2.67E-11 1.50E-05 3.11E-09 0.000
- ETOT 17  -249.72993184678    -1.53E-12 3.50E-06 2.35E-10 0.000
- ETOT 18  -249.72993184678    -3.10E-12 1.06E-05 5.21E-12 0.000
- ETOT 19  -249.72993184678    -5.68E-14 2.43E-06 1.09E-11 0.000
- ETOT 20  -249.72993184678     8.53E-14 7.46E-06 5.36E-12 0.000
- ETOT 21  -249.72993184679    -1.56E-12 1.69E-06 5.48E-12 0.000
- ETOT 22  -249.72993184678     1.34E-12 5.23E-06 1.18E-11 0.000
- ETOT 23  -249.72993184679    -1.39E-12 1.18E-06 2.00E-11 0.000
- ETOT 24  -249.72993184678     1.79E-12 3.66E-06 1.47E-11 0.000
- ETOT 25  -249.72993184678     5.68E-14 8.16E-07 1.63E-11 0.000
- ETOT 26  -249.72993184679    -4.32E-12 2.56E-06 5.68E-11 0.000
- ETOT 27  -249.72993184679    -6.82E-13 5.66E-07 2.39E-11 0.000
- ETOT 28  -249.72993184679     1.39E-12 1.78E-06 2.37E-11 0.000
- ETOT 29  -249.72993184679     1.11E-12 3.92E-07 2.18E-11 0.000
- ETOT 30  -249.72993184679     1.02E-12 1.24E-06 7.77E-12 0.000
- ETOT 31  -249.72993184679    -8.24E-13 2.72E-07 2.19E-12 0.000
- ETOT 32  -249.72993184679     0.00E+00 8.63E-07 1.07E-12 0.000
- ETOT 33  -249.72993184679     7.96E-13 1.92E-07 1.47E-12 0.000
- ETOT 34  -249.72993184679    -2.67E-12 6.00E-07 3.19E-13 0.000
- ETOT 35  -249.72993184679    -2.84E-13 1.39E-07 2.72E-13 0.000
- ETOT 36  -249.72993184679     2.84E-13 4.17E-07 1.62E-14 0.000
- ETOT 37  -249.72993184679     1.39E-12 1.00E-07 3.20E-14 0.000
- ETOT 38  -249.72993184679    -2.96E-12 9.88E-08 5.05E-15 0.000
+ ETOT 14  -249.72993184671    -7.65E-10 2.12E-05 2.35E-07 0.000
+ ETOT 15  -249.72993184675    -3.91E-11 5.02E-06 3.40E-08 0.000
+ ETOT 16  -249.72993184678    -2.72E-11 1.50E-05 3.11E-09 0.000
+ ETOT 17  -249.72993184678    -1.17E-12 3.50E-06 2.35E-10 0.000
+ ETOT 18  -249.72993184678    -3.04E-12 1.06E-05 5.21E-12 0.000
+ ETOT 19  -249.72993184678    -5.12E-13 2.43E-06 1.09E-11 0.000
+ ETOT 20  -249.72993184678     9.09E-13 7.46E-06 5.36E-12 0.000
+ ETOT 21  -249.72993184679    -2.02E-12 1.69E-06 5.48E-12 0.000
+ ETOT 22  -249.72993184679     8.81E-13 5.23E-06 1.18E-11 0.000
+ ETOT 23  -249.72993184679    -1.45E-12 1.18E-06 2.00E-11 0.000
+ ETOT 24  -249.72993184679    -3.98E-13 3.66E-06 1.47E-11 0.000
+ ETOT 25  -249.72993184678     2.19E-12 8.16E-07 1.63E-11 0.000
+ ETOT 26  -249.72993184679    -3.38E-12 2.56E-06 5.68E-11 0.000
+ ETOT 27  -249.72993184679    -1.85E-12 5.66E-07 2.39E-11 0.000
+ ETOT 28  -249.72993184679     6.54E-13 1.78E-06 2.37E-11 0.000
+ ETOT 29  -249.72993184679     3.78E-12 3.92E-07 2.18E-11 0.000
+ ETOT 30  -249.72993184679    -2.73E-12 1.24E-06 7.80E-12 0.000
+ ETOT 31  -249.72993184679    -5.68E-14 2.72E-07 2.19E-12 0.000
+ ETOT 32  -249.72993184678     4.92E-12 8.63E-07 1.08E-12 0.000
+ ETOT 33  -249.72993184679    -4.43E-12 1.92E-07 1.48E-12 0.000
+ ETOT 34  -249.72993184679    -8.24E-13 6.00E-07 3.27E-13 0.000
+ ETOT 35  -249.72993184679     1.34E-12 1.39E-07 2.75E-13 0.000
+ ETOT 36  -249.72993184678     2.81E-12 4.17E-07 1.56E-14 0.000
+ ETOT 37  -249.72993184679    -3.67E-12 1.00E-07 3.27E-14 0.000
+ ETOT 38  -249.72993184679     4.83E-13 9.88E-08 5.11E-15 0.000
 
  At SCF step   38   max residual=  9.88E-08 < tolwfr=  1.00E-07 =>converged.
 
@@ -332,7 +332,7 @@ lattice_vectors:
 lattice_lengths: [   4.66690,    4.66690,    6.60000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.4374800E+02
-convergence: {deltae: -2.956E-12, res2:  5.053E-15, residm:  9.879E-08, diffor: null, }
+convergence: {deltae:  4.832E-13, res2:  5.111E-15, residm:  9.879E-08, diffor: null, }
 etotal    :  -2.49729932E+02
 entropy   :   0.00000000E+00
 fermie    :   5.24721312E-01
@@ -389,7 +389,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
               =  3.492569576694  3.492569576694  3.492569576694 angstroms
  prteigrs : about to open file tspin_3o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.52472   Average Vxc (hartree)=  -0.53709
- Magnetization (Bohr magneton)=  3.78323222E-04
+ Magnetization (Bohr magneton)=  3.78323207E-04
  Total spin up =  1.60001892E+01   Total spin down =  1.59998108E+01
  Eigenvalues (hartree) for nkpt=   4  k points, SPIN UP:
  kpt#   1, nband= 20, wtk=  0.25000, kpt=  0.1250  0.1250  0.2500 (reduced coord)
@@ -417,18 +417,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.11916963260485E+02
-hartree             :  6.09790314832592E+01
+kinetic             :  1.11916963260498E+02
+hartree             :  6.09790314832766E+01
 xc                  : -3.49149036284734E+01
 Ewald energy        : -1.73814893681453E+02
 psp_core            :  6.74303287608642E+00
-local_psp           : -2.07720160551829E+02
-non_local_psp       : -1.29187364402533E+01
-internal            : -2.49729666682178E+02
-'-kT*entropy'       : -2.65164612232226E-04
-total_energy        : -2.49729931846790E+02
-total_energy_eV     : -6.79549703681464E+03
-band_energy         : -2.19951136744437E+01
+local_psp           : -2.07720160551851E+02
+non_local_psp       : -1.29187364402585E+01
+internal            : -2.49729666682175E+02
+'-kT*entropy'       : -2.65164612242410E-04
+total_energy        : -2.49729931846788E+02
+total_energy_eV     : -6.79549703681458E+03
+band_energy         : -2.19951136744701E+01
 ...
 
 
@@ -586,28 +586,28 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.11796601888871E+02
-hartree             :  6.09790314832592E+01
+kinetic             :  1.11796601888822E+02
+hartree             :  6.09790314832766E+01
 xc                  : -3.49149036284734E+01
 Ewald energy        : -1.73814893681453E+02
 psp_core            :  6.74303287608642E+00
-local_psp           : -2.07720160551829E+02
-non_local_psp       : -1.28707158401273E+01
-internal            : -2.49802007453666E+02
-'-kT*entropy'       : -1.29679381531106E-03
-total_energy        : -2.49803304247481E+02
+local_psp           : -2.07720160551851E+02
+non_local_psp       : -1.28707158401130E+01
+internal            : -2.49802007453706E+02
+'-kT*entropy'       : -1.29679381534558E-03
+total_energy        : -2.49803304247521E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -2.19939138795117E+01
+band_energy         : -2.19939138794942E+01
 Ewald energy        : -1.73814893681453E+02
 psp_core            :  6.74303287608642E+00
-xc_dc               : -6.06626921975475E+01
-internal            : -2.49728466882426E+02
-'-kT*entropy'       : -1.29679381531106E-03
+xc_dc               : -6.06626921975645E+01
+internal            : -2.49728466882425E+02
+'-kT*entropy'       : -1.29679381534558E-03
 total_energy_dc     : -2.49729763676241E+02
 ...
 
@@ -756,28 +756,28 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.11796601888871E+02
-hartree             :  6.09790314832592E+01
+kinetic             :  1.11796601888822E+02
+hartree             :  6.09790314832766E+01
 xc                  : -3.49149036284734E+01
 Ewald energy        : -1.73814893681453E+02
 psp_core            :  6.74303287608642E+00
-local_psp           : -2.07720160551829E+02
-non_local_psp       : -1.28707158401273E+01
-internal            : -2.49802007453666E+02
-'-kT*entropy'       : -1.29679381531106E-03
-total_energy        : -2.49803304247481E+02
+local_psp           : -2.07720160551851E+02
+non_local_psp       : -1.28707158401130E+01
+internal            : -2.49802007453706E+02
+'-kT*entropy'       : -1.29679381534558E-03
+total_energy        : -2.49803304247521E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 3, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -2.19939138795117E+01
+band_energy         : -2.19939138794942E+01
 Ewald energy        : -1.73814893681453E+02
 psp_core            :  6.74303287608642E+00
-xc_dc               : -6.06626921975475E+01
-internal            : -2.49728466882426E+02
-'-kT*entropy'       : -1.29679381531106E-03
+xc_dc               : -6.06626921975645E+01
+internal            : -2.49728466882425E+02
+'-kT*entropy'       : -1.29679381534558E-03
 total_energy_dc     : -2.49729763676241E+02
 ...
 
@@ -948,7 +948,7 @@ P           mkmem           4
            spinat      0.0000000000E+00  0.0000000000E+00  4.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00 -4.0000000000E+00
            strten1     2.1993507930E-02  2.1993507930E-02  1.8932342133E-02
-                       0.0000000000E+00  0.0000000000E+00  8.9858933827E-04
+                       0.0000000000E+00  0.0000000000E+00  8.9858933821E-04
            symafm        1   -1    1   -1    1   -1    1   -1    1   -1
                          1   -1    1   -1    1   -1
            symrel      1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0  1
@@ -1066,10 +1066,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         28.3  wall=         29.2
+- Proc.   0 individual time (sec): cpu=         33.2  wall=         33.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  29 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         28.3  wall=         29.2
++Overall time at end (sec) : cpu=         33.2  wall=         33.3
