@@ -22,7 +22,7 @@ to compute the screening, and how to converge the relevant parameters
 
 This tutorial should take two hours to complete (you should have access to more than 8 processors).
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 The cRPA method to compute effective interaction: summary and key parameters
 

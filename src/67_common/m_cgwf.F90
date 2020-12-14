@@ -118,7 +118,7 @@ contains
 !!  dphase_k(3) = change in Zak phase for the current k-point in case berryopt = 4/14,6/16,7/17 (electric (displacement) field)
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
 !!  subham(nband*(nband+1))=Hamiltonian expressed in the WFs subspace
-!!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
+!!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in the WFs subspace
 !!  subvnlx(nband*(nband+1)*use_subvnlx))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
 !!   expressed in the WFs subspace
 !!
@@ -135,9 +135,9 @@ contains
 !!               where S is the overlap matrix (used only for paw)
 !!
 !! NOTES
-!!  1) cg should not be filtered and normalized : it should already be OK at input !
+!!  1) cg should not be filtered and normalized: it should already be OK at input !
 !!  2) Not sure that that the generalized eigenproblem (when gs_hamk%usepaw=1)
-!!     is compatible with wfoptalg=2 or 3 (use of shifted square  Hamiltonian) - to be verified
+!!     is compatible with wfoptalg=2 or 3 (use of shifted square Hamiltonian) - to be verified
 !!
 !! PARENTS
 !!      m_vtowfk
@@ -478,7 +478,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      end if
 
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
-     ! WARNING : It might be interesting to skip the following operation.
+     ! WARNING: It might be interesting to skip the following operation.
      ! The associated routines should be reexamined to see whether cwavef is not already normalized.
      if (gen_eigenpb) then
        call dotprod_g(dotr,doti,istwf_k,npw*nspinor,2,cwavef,scwavef,me_g0,mpi_enreg%comm_spinorfft)
@@ -613,7 +613,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (resid(iband)<tolwfr) then
            if (prtvol>=10) then
              write(message, '(a,i4,a,i2,a,es12.4)' ) &
-&             ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
+              ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
              call wrtout(std_out,message,'PERS')
            end if
            nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
@@ -2007,13 +2007,6 @@ end subroutine mksubham
 !! FUNCTION
 !! compute gradient contribution from berry phase in finite
 !! electric field case
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mcg)=input wavefunctions

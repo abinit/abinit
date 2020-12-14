@@ -1,0 +1,71 @@
+#Driver
+
+atom  2  # The basin of attraction of the Magnesium atom will be examined
+crit  2  # determine the critical points
+surf  1  # build the Bader surface
+gpsurf 1  # output for GNUplot
+irho  1   # drives the integration of the Bader charge
+
+#Parameter
+
+# nsa 2  #  one might gain a bit of cpu time
+# nsb 2  #  by using these values, smaller than the default
+# nsc 2
+
+inpt 50      # This value is suitable
+ntheta 8    # This value is much too small
+nphi 4       # This value is much too small
+thetamax   3.14159265358  # These two variables define a quadrant
+phimax   1.57079632679    #
+  maxatd 10.9
+  maxcpd  8.0
+  lgrad2 1.0d-4
+  lstep2 1.0d-4
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = aim
+#%% test_chain = t32.abi, t33.abi, t34.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t34.out, tolnlines = 19, tolabs = 4.000e-03, tolrel = 4.000e-03, fld_options = -medium
+#%% psp_files = DensityCore_pw/08-O.8.fc, DensityCore_pw/12-Mg.8.fc
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   MgO molecule, Bader analysis.
+#%%   Examine the Magnesium atom only.
+#%%   This is a pathological case for the currently
+#%%   implemented algorithm : the Bader volume is not convex !
+#%%   Determine correctly 6 bonding critical points,
+#%%   but only finds 4 ring critical points, and not even
+#%%   one cage critical point !
+#%%   (Euler's relation #BCP-#RCP+#CCP=2 is fulfilled, but
+#%%   the number of RCP or CCP is not right)
+#%%   Despite that fact that the critical points are not
+#%%   all found, one can proceed with the other steps of the
+#%%   Bader approach : the CP are only used to get an estimation
+#%%   of the minimal and maximal radii of the Bader surface !
+#%%   Get 9.8533 core electrons, 1.3388 valence electrons,
+#%%   for a total of 11.1922 electrons.
+#%%   The nucleus charge is +12. The Magnesium atom-in-molecule
+#%%   has a net charge of -0.8078 .
+#%%   Comparing with case 33, one sees that the charge neutrality
+#%%   is violated at the level of 0.0035 electron charge.
+#%%   This is quite good, but a bit lucky. For a better
+#%%   charge neutrality, one has to integrate better on the
+#%%   angles phi and theta (increase nphi and ntheta), and also to
+#%%   increase the ecut of the preliminary abinit run.
+#%%   In any case, with the pathology of the Mg Bader volume (being
+#%%   not convex), one will miss some charge. It should
+#%%   be pretty small, and might even be neglected for all practical
+#%%   purposes (the Bader analysis is just a trend analysis, anyhow)
+#%%   Nevertheless, in this particular
+#%%   case of the MgO molecule, there is a fundamental limit of this
+#%%   algorithm...
+#%% topics = Bader
+#%%<END TEST_INFO>

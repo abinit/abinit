@@ -689,7 +689,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  ****************************************************************************
 !  Exchange-correlation
-
+   
    call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
@@ -792,7 +792,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case(RUNL_SIGMA)
      call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
-
+   
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 

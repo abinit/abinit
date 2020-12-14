@@ -87,12 +87,6 @@ contains
 !!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -215,12 +209,6 @@ end subroutine exc_diago_driver
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -587,7 +575,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
    exc_ene_c(:) = exc_ene(:)
 
-   call destruction_matrix_scalapack(Slk_mat)
+   call Slk_mat%free()
 
    call wrtout(std_out,' Writing eigenvalues/vectors to file: '//TRIM(bseig_fname), do_flush=.True.)
 
@@ -623,7 +611,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    call MPI_FILE_CLOSE(mpi_fh, ierr)
    ABI_CHECK_MPI(ierr,"FILE_CLOSE")
 
-   call destruction_matrix_scalapack(Slk_vec)
+   call Slk_vec%free()
    call end_scalapack(Slk_processor)
    call xmpi_barrier(comm)
 #else
@@ -691,12 +679,6 @@ end subroutine exc_diago_resonant
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -843,12 +825,6 @@ end subroutine exc_print_eig
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -1106,18 +1082,12 @@ end subroutine exc_diago_coupling
 !!  BS_files<excfiles>=Datatype storing names and files used in the Bethe-Salpeter code.
 !!
 !! OUTPUT
-!!  Excitonic eigenvectors and eigenvalues are written on file BS_files%out_eig.
+!!  Excitonic eigenvectors and eigenvalues are written to file BS_files%out_eig.
 !!
 !! PARENTS
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -1581,8 +1551,8 @@ write(668,*)ovlp
    ABI_FREE(test_ene)
 #endif
 
-   call destruction_matrix_scalapack(Slk_F)
-   call destruction_matrix_scalapack(Slk_Hbar)
+   call Slk_F%free()
+   call Slk_Hbar%free()
 
    call wrtout(std_out,ch10//" Writing eigenvalues and eigenvectors on file: "//TRIM(bseig_fname))
    !
@@ -1635,7 +1605,7 @@ write(668,*)ovlp
    !call init_matrix_scalapack(Slk_tmp,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
    !Slk_tmp%buffer_cplx = Slk_vec%buffer_cplx
    !call slk_pzgemm("C","N",Slk_tmp,cone,Slk_vec,czero,Slk_ovlp)
-   !call destruction_matrix_scalapack(Slk_tmp)
+   !call Slk_tmp%free()
 
    call slk_pzgemm("C","N",Slk_vec,cone,Slk_vec,czero,Slk_ovlp)
 
@@ -1650,7 +1620,7 @@ write(668,*)ovlp
    !max_r=20; max_c=10
    !call print_arr(Slk_ovlp%buffer_cplx,max_r=max_r,max_c=max_c,unit=std_out)
 
-   call destruction_matrix_scalapack(Slk_vec)
+   call Slk_vec%free()
 
    call wrtout(std_out," Inverting overlap matrix... ")
    uplo="Upper"
@@ -1706,8 +1676,7 @@ write(668,*)ovlp
    call MPI_FILE_CLOSE(mpi_fh, mpi_err)
    ABI_CHECK_MPI(mpi_err,"FILE_CLOSE")
 
-   call destruction_matrix_scalapack(Slk_ovlp)
-
+   call Slk_ovlp%free()
    call end_scalapack(Slk_processor)
 #else
    MSG_BUG("You should not be here!")

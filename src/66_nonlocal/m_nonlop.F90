@@ -48,6 +48,7 @@ module m_nonlop
 !!***
 
  public :: nonlop
+ integer,public,save :: nonlop_counter = 0
 !!***
 
 contains
@@ -66,7 +67,7 @@ contains
 !!   - Application of the overlap matrix in reciprocal space
 !!     (<in|S|in> or (I+S)|in>).
 !!   - Application of (Vnl-lambda.S) in reciprocal space
-!! According to user s choice, the routine calls a subroutine, computing all quantities:
+!! According to user's choice, the routine calls a subroutine, computing all quantities:
 !!   - using Legendre Polynomials Pl (Norm-conserving psps only)
 !!   - using Spherical Harmonics Ylm (N-conserving or PAW ; compulsory for PAW)
 !!   - using GPUs (N-conserving or PAW)
@@ -159,16 +160,16 @@ contains
 !!     | useylm=how the NL operator is to be applied: 1=using Ylm, 0=using Legendre polynomials
 !!  [iatom_only]=optional. If present (and >0), only projectors related to atom of index iatom_only
 !!          will be applied. (used fi to apply derivative of NL operator wrt an atomic displacement)
-!!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2) 
+!!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5,51,or 52)
 !!                          for choice 53 signs=2, cross derivatives are in idir-1 and idir+1 directions
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
 !!                        - strain component (1:9) in the case (choice=33,signs=2)
-!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient
 !!                          direction in the case (choice=25,signs=2)
 !!  lambda=factor to be used when computing (Vln-lambda.S) - only for paw_opt=2
 !!         Typically lambda is the eigenvalue (or its guess)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  ndat=number of wavefunctions on which to apply nonlop
 !!  nnlout=dimension of enlout (when signs=1 and choice>0):
 !!         ==== if paw_opt=0, 1 or 2 ====
@@ -252,7 +253,7 @@ contains
 !! ==== if (signs==2) ====
 !! --if (paw_opt=0)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
-!!                or one of its derivatives to the input vect.  
+!!                or one of its derivatives to the input vect.
 !!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
 !!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
 !!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
@@ -371,7 +372,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp), ABI_CONTIGUOUS pointer :: ph1d_(:,:),sij_(:,:)
  real(dp), pointer :: enl_(:,:,:,:)
  type(pawcprj_type),pointer :: cprjin_(:,:)
-  integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
+ integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
 
 ! **********************************************************************
 
@@ -379,6 +380,11 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !Keep track of time spent in this routine (selection of different slots for different choices)
  call timab(220+tim_nonlop,1,tsec)
+
+! Increment global counter
+!$OMP MASTER
+ nonlop_counter = nonlop_counter + ndat
+!$OMP END MASTER
 
  only_SO_=0; if (present(only_SO)) only_SO_=only_SO
  my_nspinor=max(1,hamk%nspinor/mpi_enreg%nproc_spinor)
@@ -397,13 +403,11 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      MSG_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
    end if
    if (hamk%use_gpu_cuda/=0) then
-     msg = 'When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.'
-     MSG_BUG(msg)
+     MSG_BUG('When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.')
    end if
  end if
  if (hamk%use_gpu_cuda/=0.and.hamk%dimekbq/=1) then
-   msg = 'GPU version of nonlop not compatible with a exp(-iqR) phase!'
-   MSG_BUG(msg)
+   MSG_BUG('GPU version of nonlop not compatible with a exp(-iqR) phase!')
  end if
  if ((.not.associated(hamk%kg_k)).or.(.not.associated(hamk%kg_kp))) then
    MSG_BUG('kg_k/kg_kp should be associated!')
@@ -412,8 +416,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    MSG_BUG('ffnl_k/ffnl_kp should be associated!')
  end if
 !if (hamk%istwf_k/=hamk%istwf_kp) then
-!  msg = 'istwf has to be the same for both k-points.'
-!  MSG_BUG(msg)
+!  MSG_BUG('istwf has to be the same for both k-points.')
 !end if
 
 !Select k-dependent objects according to select_k input parameter
@@ -509,34 +512,29 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  end if
  if(signs==2) then
    if (size(ffnlout,1)/=npwout.or.size(ffnlout,3)/=hamk%lmnmax) then
-     msg = 'Incorrect size for ffnlout!'
-     MSG_BUG(msg)
+     MSG_BUG('Incorrect size for ffnlout!')
    end if
  end if
 !This test is OK only because explicit sizes are passed to nonlop_* routines
  if (size(vectin)<2*npwin*my_nspinor*ndat) then
-   msg = 'Incorrect size for vectin!'
-   MSG_BUG(msg)
+   MSG_BUG('Incorrect size for vectin!')
  end if
  if(choice/=0.and.signs==2) then
    if(paw_opt/=3) then
 !    This test is OK only because explicit sizes are passed to nonlop_* routines
      if (size(vectout)<2*npwout*my_nspinor*ndat) then
-       msg = 'Incorrect size for vectout!'
-       MSG_BUG(msg)
+       MSG_BUG('Incorrect size for vectout!')
      end if
    end if
    if(paw_opt>=3) then
      if (size(svectout)<2*npwout*my_nspinor*ndat) then
-       msg = 'Incorrect size for svectout!'
-       MSG_BUG(msg)
+       MSG_BUG('Incorrect size for svectout!')
      end if
    end if
  end if
  if(cpopt>=0) then
    if (size(cprjin)/=hamk%natom*my_nspinor*ndat) then
-     msg = 'Incorrect size for cprjin!'
-     MSG_BUG(msg)
+     MSG_BUG('Incorrect size for cprjin!')
    end if
  end if
 
@@ -669,6 +667,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 & (choice < 2 .or. choice == 7) )
 
  if(use_gemm_nonlop) then
+   !call wrtout(std_out, "Calling gemm_nonlop")
    call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
 &   dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
 &   idir,indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&

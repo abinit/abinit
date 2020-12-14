@@ -664,7 +664,7 @@ end subroutine Init_MetricRec
 !! debug=debug variable
 !!
 !! SIDE EFFECTS
-!! nlrec <type(nlpsprec_type)>=pseudo-potentials informations for recursion
+!! nlrec <type(nlpsprec_type)>=pseudo-potentials information for recursion
 !!
 !! PARENTS
 !!      m_vtorhorec

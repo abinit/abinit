@@ -1,0 +1,59 @@
+#test the time integration algorithm of Blanes and Moan
+#SRKNa14
+#
+#In order to have a comparison between this algorithm and that of Verlet,
+#uncomment the commented input lines, comment jdtset and increase ndtset
+# to 2.
+ ndtset 1
+ jdtset 2
+ acell 3*9.000
+ ecut 12.0
+ ecutsm 1.
+ enunit 2
+ ionmov1 6
+ ionmov2 14
+ dtion1 50
+ dtion2 1500
+ ntime1 240
+ #ntime2  8
+ ntime2  1
+ kptopt 1
+ #ngkpt 4 4 4
+ ngkpt 1 1 1
+ natom  4  nband 13
+ nline 5  nstep 30
+ occopt 7
+ tsmear 0.06
+ rprim 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0
+ toldff 1.0d-7
+ typat  4*1
+ znucl  13.0
+xred
+0.009 0.002 0.0008
+0.51  0.507 0.00002
+0.50  0.02  0.503
+0.001 0.504 0.500004
+vel
+  3.0e-5  3.0e-5  3.0e-5
+ -1.0e-5  1.0e-5 -2.0e-5
+  2.5e-5 -6.5e-5  0.5e-5
+ -4.5e-5  2.5e-5 -1.5e-5
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t03.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   uses ionmov 14 : a 14-step time integration by Blanes and Moan.
+#%% topics = MolecularDynamics
+#%%<END TEST_INFO>

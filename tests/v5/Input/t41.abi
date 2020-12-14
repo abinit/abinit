@@ -1,0 +1,47 @@
+# Aluminum molecule, geometry optimization
+# Compare tolrff and toldff
+
+ ndtset 2
+ toldff1  5.d-6
+ tolrff2  0.02
+
+ ionmov 3
+ tolmxf 5.d-5
+
+#Common data
+ acell 11 11 16
+ diemac 1.0d0
+ diemix 0.333333333333d0
+ ecut 2.5
+ ixc   1
+  kptopt 0
+ natom  2
+ nband 5
+ nbdbuf 0
+ nstep 40
+ ntime 15
+ ntypat  1
+ occopt 4
+ tsmear 0.08
+ typat  1 1
+ xred   0.0 0.0 -0.18   0.0 0.0 0.18
+ znucl 13.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t41.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Verstraete
+#%% keywords = 
+#%% description = 
+#%%   Al2 molecule in a big box. Treat 8 bands, occupied using occopt=4.
+#%%   Compare tolrff and toldff stopping criteria
+#%%<END TEST_INFO>

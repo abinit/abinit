@@ -1,0 +1,87 @@
+#CO2 in a box.
+#Tests: 
+#PAW implementation with wvl_bigdft_comp =0
+#Test: density mixing within the DIIS.
+#
+
+#Variables for Wavelets
+usewvl 1
+
+
+#Wavelets basis set:
+wvl_ngauss 1 10
+wvl_frmult 1.0        #Use at least 8
+wvl_crmult 3.0        #Too low, only for testing purposes
+wvl_hgrid 0.4         #To low as well
+nsym  1
+nscforder 14
+wvl_nprccg 5
+
+#
+wvl_bigdft_comp 0      #Follow the ABINIT path
+
+#Gamma point
+nkpt 1
+kpt 0.0 0.0 0.0
+istwfk 1               #This is mandatory for WVLs
+
+# Self-consistent run to get the density
+
+#Variables to control convergency:
+diemix   0.7
+nstep    20
+nnsclo   3
+
+# Self-consistent run to get the density
+tolvrs     1.00d-06
+
+#semiconducting case:
+nband 8             #important give only occupied bands
+occopt 1
+
+ixc 1
+icoulomb 1 #isolated system
+
+# CO2 in a box
+acell      1.6500000000E+01  1.5500000000E+01  1.5500000000E+01 Bohr
+rprim      1.00   0.00   0.00
+           0.00   1.00   0.00
+           0.00   0.00   1.00
+natom      3
+xred 5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+     3.6714652642E-01  5.0000000000E-01  5.0000000000E-01
+     6.3285347358E-01  5.0000000000E-01  5.0000000000E-01
+ntypat      2
+typat      1 2 2 
+znucl     6.00 8.00
+
+#Minimal test: do not print WFK files etc..
+chksymbreak 0
+#optforces  0 
+optstress 0
+kptopt 0
+prtden 0
+prtwf 0
+prteig 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "C.atompaw.wvl, O.atompaw.wvl"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% nprocs_to_test = 4, 10
+#%% [NCPU_4]
+#%% files_to_test = t02_MPI4.abo,  tolnlines = 40, tolabs = 0.11, tolrel = 7.0e-2
+#%% [NCPU_10]
+#%% files_to_test = t02_MPI10.abo, tolnlines = 40, tolabs = 0.11, tolrel = 7.0e-2
+#%% [extra_info]
+#%% authors = T. Rangel, M. Torrent
+#%% keywords =  PAW, WVL
+#%% description = CO2 in a box (PAW). ABINIT routines are used (wvl_bigdft_comp=0)
+#%%   Test: DIIS, density mixing
+#%% topics = Wavelets
+#%%<END TEST_INFO>

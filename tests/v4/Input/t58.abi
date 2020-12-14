@@ -1,0 +1,86 @@
+# Zincblende AlAs - strain perturbation calculation with GGA
+# Includes core charges
+
+ndtset 2
+
+#DATASET 1 : Self-consistent GS run
+
+  kptopt1   1
+  tolvrs1   1.0d-12
+
+#DATASET 2 : RF run
+
+  getwfk2   -1
+  kptopt2   2
+    nqpt2   1
+     qpt2   0 0 0
+   rfdir2   1 0 0
+  rfstrs2   3
+  tolvrs2   1.0d-8
+
+#Common data
+
+    acell  3*10.68
+   diemac  6.0
+     ecut  8.0
+      ixc  11    #PBE GGA
+    natom  2
+    nband  4
+   nbdbuf  0
+    ngkpt  2 2 2
+  nshiftk  4
+    nstep  100
+   ntypat  2
+   occopt  1
+
+    rprim  0.0 0.5 0.5
+           0.5 0.0 0.5
+           0.5 0.5 0.0
+
+   shiftk  0.5 0.5 0.5
+           0.5 0.0 0.0
+           0.0 0.5 0.0
+           0.0 0.0 0.5
+
+    typat  1 2
+     xred  0.0  0.0  0.0
+           0.25 0.25 0.25
+    znucl  13 33
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t58.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium 
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = D. R. Hamann
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Test of the strain perturbation with the GGA
+#%%   Note that this test and the following one, 59,
+#%%   address more advanced features of strain perturbation than the ones
+#%%   going with number 60 to 79, and were developed later, but were
+#%%   placed here for convenience).
+#%%   AlAs in the zincblende structure, with a choice of
+#%%   pseudopotenials that include model core charges.  In the LDA, the
+#%%   strain perturbation simply introduces perturbing charge densities
+#%%   leading to perturbing first-order potentials in a straightforward
+#%%   manner.  (This perturbation does act differently on the valence
+#%%   and model core charges.)   The GGA is a non-trivial extension,
+#%%   since strain perturbs the gradient operator itself.  This test
+#%%   is a symmetrized and stripped-down version of a test case used in
+#%%   development which yielded agreement between such RF calculations
+#%%   and numerical derivatives of GS stresses and forces to 1.e-8 to
+#%%   1.e-9 atomic units for the elastic tensor and intenal strain
+#%%   coupling parameters.  Acheiving this agreement does require forcing
+#%%   a considerably more dense fft grid than the default which is
+#%%   accepted here. (ngfft= 50 50 50 was used.)  While only the PBE GGA
+#%%   is tested here, all forms present in Abinit should give comparably
+#%%   accurate results.
+#%%<END TEST_INFO>

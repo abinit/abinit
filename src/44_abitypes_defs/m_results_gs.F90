@@ -44,6 +44,7 @@ MODULE m_results_gs
  use m_io_tools,      only : file_exists
  use m_fstrings,      only : sjoin
  use m_numeric_tools, only : get_trace
+ use m_geometry,      only : stress_voigt_to_mat
 
  implicit none
 
@@ -247,8 +248,6 @@ CONTAINS
 !!      m_mover_effpot,m_results_img
 !!
 !! CHILDREN
-!!      ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d,ydoc%add_reals
-!!      ydoc%add_string,ydoc%set_keys_to_string,ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -345,8 +344,6 @@ end subroutine init_results_gs
 !! PARENTS
 !!
 !! CHILDREN
-!!      ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d,ydoc%add_reals
-!!      ydoc%add_string,ydoc%set_keys_to_string,ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -451,8 +448,6 @@ end subroutine init_results_gs_array
 !!      m_mover_effpot,m_results_img
 !!
 !! CHILDREN
-!!      ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d,ydoc%add_reals
-!!      ydoc%add_string,ydoc%set_keys_to_string,ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -506,8 +501,6 @@ end subroutine destroy_results_gs
 !! PARENTS
 !!
 !! CHILDREN
-!!      ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d,ydoc%add_reals
-!!      ydoc%add_string,ydoc%set_keys_to_string,ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -573,8 +566,6 @@ end subroutine destroy_results_gs_array
 !!      m_results_img
 !!
 !! CHILDREN
-!!      ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d,ydoc%add_reals
-!!      ydoc%add_string,ydoc%set_keys_to_string,ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -827,8 +818,6 @@ end function results_gs_ncwrite
 !! PARENTS
 !!
 !! CHILDREN
-!!      ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d,ydoc%add_reals
-!!      ydoc%add_string,ydoc%set_keys_to_string,ydoc%write_and_free
 !!
 !! SOURCE
 ! CP modified argument list
@@ -893,15 +882,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, occopt, with_conv, info)
  end if
  ! End CP modified
  ! Cartesian stress tensor and forces.
- strten(1,1) = results%strten(1)
- strten(2,2) = results%strten(2)
- strten(3,3) = results%strten(3)
- strten(2,3) = results%strten(4)
- strten(3,2) = results%strten(4)
- strten(1,3) = results%strten(5)
- strten(3,1) = results%strten(5)
- strten(1,2) = results%strten(6)
- strten(2,1) = results%strten(6)
+ call stress_voigt_to_mat(results%strten, strten)
 
  if (strten(1,1) /= MAGIC_UNDEF) then
    call ydoc%add_real2d('cartesian_stress_tensor', strten, comment="hartree/bohr^3")

@@ -72,6 +72,25 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_EXTS], [
     AC_DEFINE([HAVE_LINALG_GEMM3M], 1,
       [Define to 1 if you have GEMM3M BLAS3 extensions.])
   fi
+
+  # gemmt family
+  AC_MSG_CHECKING([for GEMMT in the BLAS libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call sgemmt
+      call dgemmt
+      call cgemmt
+      call zgemmt
+    ]])], [sd_linalg_has_gemmt="yes"], [sd_linalg_has_gemmt="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_has_gemmt}])
+
+  if test "${sd_linalg_has_gemmt}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_GEMMT], 1,
+      [Define to 1 if you have GEMMT BLAS3 extensions.])
+  fi
+
 ]) # _SD_LINALG_CHECK_BLAS_EXTS
 
 

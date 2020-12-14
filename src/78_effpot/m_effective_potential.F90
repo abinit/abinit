@@ -127,7 +127,7 @@ module m_effective_potential
 !     type with all information for anharmonics terms
 
    type(polynomial_conf_type) :: confinement
-!     type with all the informations for the confinement
+!     type with all the information for the confinement
 
    type(supercell_type) :: supercell
 !     super cell type
@@ -364,7 +364,7 @@ end subroutine effective_potential_init
 !!  effective_potential_initmpi
 !!
 !! FUNCTION
-!!  Initializes the mpi informations for parallelism over supercell.
+!!  Initializes the mpi information for parallelism over supercell.
 !!  Only the parallelisation over cell is done here.
 !!  The parallelisation over cell and coeff is disable for now (experimental)
 !!

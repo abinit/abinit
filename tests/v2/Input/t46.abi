@@ -1,0 +1,99 @@
+#   FCC Al
+#   At fixed tsmear (=0.04), check the convergence with respect
+#   to the number of k points, for different occopt.
+#   Do not treat occopt=6, because of the SCF problems.
+
+ ndtset 9  udtset 3 3
+
+ ngkpt1?  4 4 4      nkpt1? 10
+ ngkpt2?  6 6 6      nkpt2? 28
+ ngkpt3?  8 8 8      nkpt3? 60
+
+ occopt?1 4
+ occopt?2 5
+ occopt?3 7
+
+ acell 3*7.60
+
+ ecut 3
+
+ enunit 2
+ getwfk -1
+ intxc 1
+ ixc   1
+ kptopt 1
+ natom  1 nband 4
+
+ nsym  24
+ nstep 8
+ ntypat  1
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+ symrel
+       1  0  0    0  1  0    0  0  1
+       0  1 -1    1  0 -1    0  0 -1
+      -1  0  0   -1  0  1   -1  1  0
+       0 -1  1    0 -1  0    1 -1  0
+      -1  0  1   -1  0  0   -1  1  0
+       0 -1  0    0 -1  1    1 -1  0
+       0 -1  1    1 -1  0    0 -1  0
+       0  1 -1    0  0 -1    1  0 -1
+       0  0 -1    1  0 -1    0  1 -1
+      -1  1  0   -1  0  1   -1  0  0
+       1  0 -1    0  1 -1    0  0 -1
+       1 -1  0    0 -1  0    0 -1  1
+      -1  0  0   -1  1  0   -1  0  1
+       0  1  0    1  0  0    0  0  1
+       0  0  1    0  1  0    1  0  0
+       1  0  0    0  0  1    0  1  0
+       0  0  1    1  0  0    0  1  0
+       0  1  0    0  0  1    1  0  0
+      -1  0  1   -1  1  0   -1  0  0
+       0  0 -1    0  1 -1    1  0 -1
+       1  0 -1    0  0 -1    0  1 -1
+       1 -1  0    0 -1  1    0 -1  0
+       0 -1  0    1 -1  0    0 -1  1
+      -1  1  0   -1  0  0   -1  0  1
+ tnons   72*0.0d0
+ toldfe 1.0d-8
+ typat  1
+ xred  0.0 0.0 0.0
+ znucl 13.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t46.abo  ,tolnlines = 2, tolabs = 2.0e-10, tolrel = 9e-10
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Aluminum in FCC structure.
+#%%   At fixed tsmear (=0.04), check the convergence with respect
+#%%   to the number of k points, for different occopt.
+#%%   The grids that are tested have respectively 10, 28, and 60 k points
+#%%   in the IZB (ngkpt values are 4 4 4 4, 6 6 6 4 and 8 8 8 4
+#%%   For occopt=4, the total energy (or the enthalpy) 
+#%%   is -2.079770 Ha, -2.080534 Ha, -2.080672 Ha ;
+#%%   for occopt=5, it is -2.079787 Ha, -2.080563 Ha, -2.080693 Ha ;
+#%%   for occopt=7, it is -2.084211 Ha, -2.084861 Ha, -2.084916 Ha.
+#%%   The latter values can be corrected by computing the mean of the
+#%%   total energy and the internal energy, as described in Marzari's 
+#%%   thesis, for example. Thanks to this procedure, one gets :
+#%%   -2.079732 Ha, -2.080470 Ha, and -2.080626 Ha.
+#%%   For information, with a 12 12 12 4 grid (182 k points) 
+#%%   and occopt=4, one gets -2.080648 Ha.
+#%% topics = BandOcc
+#%%<END TEST_INFO>

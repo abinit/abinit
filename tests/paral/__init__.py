@@ -4,7 +4,7 @@
 need_cpp_vars = [
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
@@ -14,64 +14,64 @@ is_multi_parallel = True
 
 #: List of input files
 inp_files = [
-#"si_kpt_band_fft.in",
-#"t_bandfft.in",
-#"t_kpt+spin.in"
-"t01.in",
-"t02.in",
-"t03.in",
-"t05.in",
-"t06.in", 
-"t07.in", 
-"t08.in",
-"t09.in",
-"t21.in",
-"t22.in",
-"-t23.in", # disabled
-"t24.in",
-"t25.in",
-"t26.in",
-"t27.in",
-"t28.in",
-"t29.in",
-"t30.in",
-"t31.in",
-"t41.in",
-"-t48.in", # MPI-IO, not tested here!
-"-t49.in", # MPI-IO, not tested here!
-"t51.in",
-"t52.in",
-"t53.in",
-"t54.in",
-"t55.in",
-"t56.in",
-"t57.in",
-"-t58.in", # disabled
-"t59.in",
-"t60.in",
-"-t61.in", # disabled for now
-"t62.in",
-"t71.in",
-"t72.in",
-"t73.in",
-"t74.in",
-"t75.in",
-"t76.in",
-"t77.in",
-"t80.in",
-"t81.in",
-"t82.in",
-"t83.in",
-"t84.in",
-"-t85.in", # disabled for now
-"t86.in",
-"t91.in",
-"t92.in",
-"t93.in",
-"t94.in",
-"t95.in",
-"t96.in",
-"t97.in",
-"t98.in",
-"t99.in"
+"t01.abi",
+"t02.abi",
+"t03.abi",
+"t05.abi",
+"t06.abi",
+"t07.abi",
+"t08.abi",
+"t09.abi",
+"t21.abi",
+"t22.abi",
+"-t23.abi", # disabled
+"t24.abi",
+"t25.abi",
+"t26.abi",
+"t27.abi",
+"t28.abi",
+"t29.abi",
+"t30.abi",
+"t31.abi",
+"t32.abi",
+"t41.abi",
+"-t48.abi", # MPI-IO, not tested here!
+"-t49.abi", # MPI-IO, not tested here!
+"t51.abi",
+"t52.abi",
+"t53.abi",
+"t54.abi",
+"t55.abi",
+"t56.abi",
+"t57.abi",
+"-t58.abi", # disabled
+"t59.abi",
+"t60.abi",
+"-t61.abi", # disabled for now
+"t62.abi",
+"t63.abi",
+"t64.abi",
+"t71.abi",
+"t72.abi",
+"t73.abi",
+"t74.abi",
+"t75.abi",
+"t76.abi",
+"t77.abi",
+"t80.abi",
+"t81.abi",
+"t82.abi",
+"t83.abi",
+"t84.abi",
+"-t85.abi", # disabled for now
+"t86.abi",
+"t91.abi",
+"t92.abi",
+"t93.abi",
+"t94.abi",
+"t95.abi",
+"t96.abi",
+"t97.abi",
+"t98.abi",
+"t99.abi"
 ]

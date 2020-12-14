@@ -69,7 +69,7 @@ CONTAINS  !===========================================================
 !!  kdep= .true. if the data for the array sizes are dependant on k points.
 !!  lmn_size=Number of (l,m,n) elements for the PAW basis set.
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! OUTPUT
 !!  Data written in file whose name is filapp//'-etsf.nc'

@@ -467,15 +467,10 @@ end subroutine scfcv_destroy
 !!  FIXME: add description.
 !!
 !! INPUTS
+!!  itime=Relaxation iteration.
 !!  scfcv=structure of scfcv
-!!  argin(sizein)=description
 !!
 !! OUTPUT
-!!  argout(sizeout)=description
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      m_gstate,m_mover
@@ -485,10 +480,11 @@ end subroutine scfcv_destroy
 !!
 !! SOURCE
 
-subroutine scfcv_run(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+subroutine scfcv_run(this, itime, electronpositron, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
 
 !Arguments ------------------------------------
  type(scfcv_t), intent(inout) :: this
+ integer,intent(in) :: itime
  type(electronpositron_type),pointer:: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
  real(dp), intent(inout) :: xred(3,this%dtset%natom)
@@ -513,9 +509,9 @@ subroutine scfcv_run(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_r
  !debug purpose
  !this%electronpositron => electronpositron
  if ( this%dtset%dmft_entropy == 0 ) then
-   call scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   call scfcv_scfcv(this, itime, electronpositron, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
  elseif ( this%dtset%dmft_entropy >=1 ) then
-   call scfcv_runWEntropyDMFT(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   call scfcv_runWEntropyDMFT(this, itime, electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
  end if
 
  DBG_EXIT("COLL")
@@ -606,11 +602,12 @@ end subroutine scfcv_run
 !!
 !! SOURCE
 
-subroutine scfcv_runWEntropyDMFT(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+subroutine scfcv_runWEntropyDMFT(this,itime,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
 
 !Arguments ------------------------------------
  type(scfcv_t), intent(inout) :: this
+ integer,intent(in) :: itime
  type(electronpositron_type),pointer :: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
  real(dp), intent(inout) :: xred(3,this%dtset%natom)
@@ -643,7 +640,7 @@ subroutine scfcv_runWEntropyDMFT(this,electronpositron,rhog,rhor,rprimd,xred,xre
  do while (entropyDMFT_nextLambda(this%entropyDMFT,this%dtset,this%pawtab,this%pawang,this%pawrad))
 
  !-----------------------------------------------------
-   call scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   call scfcv_scfcv(this, itime, electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
  !-----------------------------------------------------
    call entropyDMFT_addIntegrand(this%entropyDMFT,this%dtset, this%results_gs%energies,this%paw_dmft%forentropyDMFT)
 
@@ -672,12 +669,9 @@ end subroutine scfcv_runWEntropyDMFT
 !!
 !! INPUTS
 !!  scfcv=structure of scfcv
-!!  argin(sizein)=description
+!!  itime: Relaxation step
 !!
 !! OUTPUT
-!!  argout(sizeout)=description
-!!
-!! SIDE EFFECTS
 !!
 !! NOTES
 !!  Wrapper to scfcv to avoid circular dependencies ...
@@ -690,9 +684,10 @@ end subroutine scfcv_runWEntropyDMFT
 !!
 !! SOURCE
 
-subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+subroutine scfcv_scfcv(this, itime, electronpositron, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
 
  type(scfcv_t), intent(inout) :: this
+ integer,intent(in) :: itime
  type(electronpositron_type),pointer :: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
  real(dp), intent(inout) :: xred(3,this%dtset%natom)
@@ -701,15 +696,15 @@ subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv
  real(dp), pointer, intent(inout) :: rhor(:,:)
  integer , intent(out)   :: conv_retcode
 
-   call scfcv_core(this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,&
-&    this%dtorbmag,this%dtpawuj,&
-&    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%indsym,&
-&    this%initialized,this%irrzon,this%kg,this%mcg,this%mcprj,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,&
-&    this%nfftf,this%npwarr,&
-&    this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&
-&    this%pwind_alloc,this%pwnsfac,this%rec_set,this%resid,this%results_gs,rhog,rhor,rprimd,&
-&    this%scf_history,this%symrec,this%taug,this%taur,this%wffnew,this%wvl,xred,xred_old,this%ylm,this%ylmgr,&
-&    conv_retcode)
+   call scfcv_core(itime, this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,&
+    this%dtorbmag,this%dtpawuj,&
+    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%indsym,&
+    this%initialized,this%irrzon,this%kg,this%mcg,this%mcprj,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,&
+    this%nfftf,this%npwarr,&
+    this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&
+    this%pwind_alloc,this%pwnsfac,this%rec_set,this%resid,this%results_gs,rhog,rhor,rprimd,&
+    this%scf_history,this%symrec,this%taug,this%taur,this%wffnew,this%wvl,xred,xred_old,this%ylm,this%ylmgr,&
+    conv_retcode)
 
 end subroutine scfcv_scfcv
 

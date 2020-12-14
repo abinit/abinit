@@ -1,0 +1,97 @@
+########################################################
+#  Crystalline EuO
+#  Test of initialisation using occopt=1 (default) and spinmagntarget
+#  Computation of dielectric tensor
+########################################################
+
+   ndtset 4
+   getwfk -1
+   getwfk1 0
+
+# For different datasets, different determinations of occupation numbers
+          occopt1 1
+  spinmagntarget1 7
+           nstep1 35  # For the other datasets, the number of steps is smaller
+           nline1 6
+
+          occopt2 7
+  spinmagntarget2 7
+
+          occopt3 7   # No spinmagntarget to initialize dataset 3
+
+          occopt4 7   # No spinat to initialize dataset 4
+  spinmagntarget4 7   # But work with spinmagntarget
+  spinat4   0 0 0
+            0 0 0
+
+ tsmear 0.001
+  kptopt    1            # Automatic generation of k points with symmetries
+
+#Magnetism
+ nsppol 2
+ spinat 0 0 7
+        0 0 0
+
+#######################################################################
+#Common input variables
+
+#Definition of the unit cell
+    acell 3*9.80
+    rprim   0.0  0.5  0.5
+            0.5  0.0  0.5
+            0.5  0.5  0.0
+#Definition of the atom types
+   ntypat   2
+    znucl   63 8
+#Definition of the atoms
+    natom   2
+    typat   1 2
+     xred   0.0  0.0  0.0
+            0.5  0.5  0.5
+#Number of band
+    nband   20
+#Definition of the planewave basis set
+     ecut   15    # Reduced cut off : should be e.g. 30
+#Definition of the k-point grid
+    ngkpt   2 2 2
+  nshiftk   4
+   shiftk   0.0 0.0 0.5
+            0.0 0.5 0.0
+            0.5 0.0 0.0
+            0.5 0.5 0.5
+#Definition of the SCF procedure
+    nstep   3 
+   diemac   4.0
+   tolvrs   1.0d-15
+#PAW parameters
+pawecutdg  30
+ pawxcdev   0  # Test this value within DFPT
+
+#DFT+U
+   ixc 7
+usepawu   1
+lpawu   3  -1
+upawu   7.5   0.0  eV
+jpawu   0.6   0.0  eV
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Eu_GGA_27e_10p.pawps, O_GGA-rc12_xc0.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t22.abo, tolnlines=   40,   tolabs=  1.1e-1,      tolrel= 2.0e-1, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = B. Amadon
+#%% keywords =  PAW
+#%% description = 
+#%%    EuO rock salt structure.
+#%%    27-electron PAW pseudo (4f and 5d are explicitly treated : 4d10 4f7 5s2 5p6 (5d0) 6s2 )
+#%%    Test of initialisation using occopt=1 (the default) with non-zero spinmagntarget,
+#%%    and also metallic occopt. Also test pawxcdev=0
+#%% topics = DFT+U
+#%%<END TEST_INFO>

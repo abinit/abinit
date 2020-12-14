@@ -234,7 +234,7 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
      gth_params%radii_cf(ipsp, 2) = UNINITIALIZED(gth_params%radii_cf(ipsp, 2))
      write(message, '(a,a,a,a,a,a,a)' ) '-', ch10,&
 &     '- wvl_descr_psp_fill : COMMENT -',ch10,&
-&     "-  the pseudo-potential does not include geometric informations,",ch10,&
+&     "-  the pseudo-potential does not include geometric information,",ch10,&
 &     '-  values have been computed.'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
