@@ -7,8 +7,8 @@
 
 ndtset      4
 
-#ngkpt    2 2 2         # Density of k points used for the automatic tests of the tutorial
-ngkpt    4 4 4        # Density of k points needed for a converged calculation
+ngkpt    2 2 2         # Density of k points used for the automatic tests of the tutorial
+#ngkpt    4 4 4        # Density of k points needed for a converged calculation
 
 nshiftk  4
 shiftk   0.0 0.0 0.0  # This grid contains the Gamma point, which is the point at which
