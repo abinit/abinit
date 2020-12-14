@@ -53,22 +53,20 @@ no outstanding problem in the computed band structure. Nevertheless, as you
 will see, the agreement of the band structure with experiment can be improved
 significantly if one relies on the GW approximation.
 
-In the directory *Work_gw2*, copy the files *tgw2_x.files* and *tgw2_1.in* located
-in *\$ABI_TESTS/tutorial/Input*, and modify the *tgw2_x.files* file as usual (see [the first tutorial](base1)).
+In the directory *Work_gw2*, copy the file *tgw2_1.abi* located in *\$ABI_TESTS/tutorial/Input*.
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work_gw2
 cd Work_gw2
-cp ../tgw2_x.files .  # modify this file as usual (see tutorial 1)
-cp ../tgw2_1.in .
+cp ../tgw2_1.abi .
 ```
 
 Then issue:
 
-    abinit < tgw2_x.files > tgw2_1.log 2> err &
+    abinit tgw2_1.abi > tgw2_1.log 2> err &
 
-{% dialog tests/tutorial/Input/tgw2_x.files tests/tutorial/Input/tgw2_1.in %}
+{% dialog tests/tutorial/Input/tgw2_1.abi %}
 
 This run generates the WFK file for the subsequent GW computation and also
 provides the band width of Aluminum. Note that the simple Fermi-Dirac smearing
@@ -96,11 +94,10 @@ This is to be compared to the experimental value of 10.6 eV (see references in [
 
 In order not to lose time, let us start the calculation of the screening file
 before the examination of the corresponding input file. So, copy the file
-*tgw2_2.in*, and modify the *tgw2_x.files* file as usual (replace occurrences of
-twg2_x by tgw2_2). Also, copy the WFK file (*tgw2_1o_WFK*) to *tgw2_2i_WFK*. Then
+*tgw2_2.abi*. Also, copy the WFK file (*tgw2_1o_WFK*) to *tgw2_2i_WFK*. Then
 run the calculation (it should take about 30 seconds).
 
-{% dialog tests/tutorial/Input/tgw2_2.in %}
+{% dialog tests/tutorial/Input/tgw2_2.abi %}
 
 We now have to consider starting a GW calculation. However, unlike in the case
 of Silicon in the previous GW tutorial, where we were focussing on quantities
@@ -120,9 +117,9 @@ integration path can be deformed: one transforms an integral along the real
 axis into an integral along the imaginary axis plus residues enclosed in the
 new contour of integration. The method is extensively described in [[cite:Lebegue2003]].
 
-Examine the input file *tgw2_2.in*.
+Examine the input file *tgw2_2.abi*.
 
-{% dialog tests/tutorial/Input/tgw2_2.in %}
+{% dialog tests/tutorial/Input/tgw2_2.abi %}
 
 The ten first lines contain the important information.
 There, you find some input variables that you are already
@@ -140,8 +137,7 @@ the real axis set with the variable [[nfreqre]] is usually larger.
 ## Finding the Fermi energy and the bottom of the valence band
 
 In order not to lose time, let us start the calculation of the band width
-before the study of the input file. So, copy the file *tgw2_3.in*, and modify
-the *tgw3_x.files* file as usual (replace occurrences of twg2_x by tgw2_3).
+before the study of the input file. So, copy the file *tgw2_3.abi*.
 Also, copy the WFK file (*tgw2_1o_WFK*) to *tgw2_3i_WFK*, and the screening file
 (*tgw2_2o_SCR*) to *tgw2_3i_SCR*.
 Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
@@ -152,9 +148,9 @@ determination of the Fermi energy raises a completely new problem: one should
 sample the Brillouin Zone, to get new energies (quasiparticle energies) and
 then determine the Fermi energy. This is actually the first step towards a self-consistency!
 
-Examine the input file *tgw2_3.in*:
+Examine the input file *tgw2_3.abi*:
 
-{% dialog tests/tutorial/Input/tgw2_3.in %}
+{% dialog tests/tutorial/Input/tgw2_3.abi %}
 
 The first thirty lines contain the important information.
 There, you find some input variables with values that you are
@@ -220,15 +216,14 @@ which corresponds to the quasiparticle excitation and some additional peaks
 which correspond to quasiparticle and plasmon excitations together.
 
 In order not to lose time, this calculation can be started before the
-examination of the input file. So, copy the file *tgw2_4.in*, and modify the
-*tgw4_x.files* file as usual (replace occurrences of twg2_x by tgw2_4). Also,
+examination of the input file. So, copy the file *tgw2_4.abi*. Also,
 copy the WFK file (*tgw2_1o_WFK*) to *tgw2_4i_WFK*, and the screening file
 (*tgw2_2o_SCR*) to *tgw2_4i_SCR*.
 Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
 
-{% dialog tests/tutorial/Input/tgw2_4.in %}
+{% dialog tests/tutorial/Input/tgw2_4.abi %}
 
-Compared to the previous file (*tgw2_3.in*), the input file contains two
+Compared to the previous file (*tgw2_3.abi*), the input file contains two
 additional keywords: [[nfreqsp]], and [[freqspmax]]. Also, the computation of
 the GW self-energy is done only at the $\Gamma$ point.
 

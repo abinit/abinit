@@ -8,8 +8,7 @@ optdriver    4
 gwcalctyp    2
 symsigma     0
 nband       30
-ecutsigx    4.0
-ecutwfn     4.0
+ecutsigx    8.0
 
 nfreqsp    200
 freqspmax    2.
@@ -56,7 +55,7 @@ enunit     1
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
