@@ -51,15 +51,16 @@ So, let us run immediately this calculation, and while it is running, we will
 explain what has been done.
 
 ```sh
-cd $ABI_TESTS/tutorial/Input
 mkdir Work_gw1
 cd Work_gw1
-cp ../tgw1_1.abi .
+cp $ABI_TESTS/tutorial/Input/tgw1_1.abi .
 ```
 
 Then, issue:
 
+```sh
     abinit tgw1_1.abi > log 2> err &
+```
 
 Please run this job in background because it takes about 1 minute.
 In the meantime, you should read the following.
@@ -491,9 +492,12 @@ data. We will focus on the GW correction for $\Gamma$ point to determine the con
 We will use a coarser **k**-point grid with one shift only.
 This is a common strategy to find the converged parameters before the final calculations.
 
-In directory *Work_gw1*, copy the file *../tgw1_2.abi*.
-Edit the *tgw1_2.abi* file, and take the time to examine it.
+In directory *Work_gw1*, copy the file *tgw1_2.abi*:
+```sh
+    cp $ABI_TESTS/tutorial/Input/tgw1_2.abi .
+```
 
+Edit the *tgw1_2.abi* file, and take the time to examine it.
 Then, issue:
 
 ```sh
@@ -534,7 +538,11 @@ done by defining five datasets, with increasing [[nband]]:
     nband+  50
 ```
 
-In directory *Work_gw1*, copy the file *../tgw1_3.abi*.
+In directory *Work_gw1*, copy the file *tgw1_3.abi*:
+```sh
+    cp $ABI_TESTS/tutorial/Input/tgw1_3.abi .
+```
+
 Edit the *tgw1_3.abi* file, and take the time to examine it.
 Then, issue:
 
@@ -666,11 +674,13 @@ the screening. This will be done by defining five datasets, with increasing [[nb
     nband51  200
 
 
-In directory *Work_gw1*, copy the file *../tgw1_4.abi*.
+In directory *Work_gw1*, copy the file *tgw1_4.abi*:
+```sh
+    cp $ABI_TESTS/tutorial/Input/tgw1_4.abi .
+```
+
 Edit the *tgw1_4.abi* file, and take the time to examine it.
-
 Then, issue:
-
 ```sh
     cp tgw1_2o_DS2_WFK tgw1_4o_DS2_WFK
     abinit tgw1_4.abi > tgw1_4.log 2> err &
@@ -726,9 +736,12 @@ increasing [[ecuteps]]:
     ecuteps:?     3.0
     ecuteps+?     1.0
 
-In directory *Work_gw1*, copy the file *../tgw1_5.abi*.
-Edit the *tgw1_5.abi* file, and take the time to examine it.
+In directory *Work_gw1*, get the file *tgw1_5.abi*:
+```sh
+    cp $ABI_TESTS/tutorial/Input/tgw1_5.abi .
+```
 
+Edit the *tgw1_5.abi* file, and take the time to examine it.
 Then, issue:
 
 ```sh
@@ -797,18 +810,28 @@ fix these values and look at the convergence with respect to the BZ mesh.
 Now we try to perform a GW calculation for a real problem: the calculation of
 the GW corrections for the direct band gap of bulk Silicon at the $\Gamma$ point.
 
-In directory *Work_gw1*, copy the file *../tgw1_6.abi*.
+In directory *Work_gw1*, get the file *tgw1_6.abi*:
+```sh
+    cp $ABI_TESTS/tutorial/Input/tgw1_6.abi .
+```
+
 Then, edit the *tgw1_6.abi* file, and, without examining it, comment the line
 
+```
      ngkpt    2 2 2    # Density of k points used for the automatic tests of the tutorial
+```
 
 and uncomment the line
 
+```
     #ngkpt    4 4 4    # Density of k points needed for a converged calculation
+```
 
 Then, issue:
 
+```sh
     abinit tgw1_6.abi > tgw1_6.log 2> err &
+```
 
 This job lasts a couple of minutes or so. It is worth to run it before the examination of the input file.
 Now, you can examine it.
