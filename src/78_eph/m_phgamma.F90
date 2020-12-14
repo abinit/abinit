@@ -3626,7 +3626,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call fstab_print(fstab, unit=ab_out)
  end if
 
- ! Define q-mesh. eph_ngqpt_fine activates interpolation of potentials.
+ ! Define q-mesh. eph_ngqpt_fine activates the Fourier interpolation of the DFPT potentials.
  gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
 
  call phgamma_init(gams, cryst, ifc, fstab(1), dtset, eph_scalprod0, gamma_ngqpt, n0, comm)
@@ -3989,7 +3989,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ABI_MALLOC(tgamvv_out, (2, 9, natom3, natom3))
  end if
 
- ! Loop over my q-point in the IBZ.
+ ! Loop over my q-points in the IBZ.
  do imyq=1,gams%my_nqibz
    iq_ibz = gams%my_iqibz(imyq)
 
@@ -4039,7 +4039,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ! Examine the symmetries of the q wavevector.
    call littlegroup_q(cryst%nsym, qpt, symq, cryst%symrec, cryst%symafm, timerev_q, prtvol=dtset%prtvol)
 
-   ! Get phonon frequencies and eigenvectors.
+   ! Get phonon frequencies and eigenvectors for this q-point.
    call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
    ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
@@ -4327,7 +4327,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        end if ! add transport things
 
        if (dtset%prteliash == 3) then
-
+         !
          ! Precompute deltas with gaussian (tetra is not supported here
          ! also because one should allocate (nene, nene, mband, mband)
          !call get_dbldelta_weights_emesh()

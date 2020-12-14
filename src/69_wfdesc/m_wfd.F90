@@ -4629,7 +4629,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
  if (iam_master) then
    do ik_ibz=1,Wfd%nkibz
      if (size(Wfd%Kdata(ik_ibz)%kg_k,dim=2)<Hdr%npwarr(ik_ibz)) then
-       MSG_ERROR("Impossible to continue when the npw in the Hdr is diff. to the npw in the Wfd")
+       ABI_ERROR("Impossible to continue when the npw in the Hdr is diff. to the npw in the Wfd")
      end if
    end do
    call wfkfile%open_write(Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.TRUE.,write_frm=.FALSE.)
@@ -4669,7 +4669,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
      ABI_MALLOC_OR_DIE(cg_k, (2,cgsize), ierr)
 
      if (size(Wfd%Kdata(ik_ibz)%kg_k,dim=2)<wfkfile%Hdr%npwarr(ik_ibz)) then
-       MSG_ERROR("Wrong number of npw before printing")
+       ABI_ERROR("Wrong number of npw before printing")
        call wrtout(std_out,msg,'COLL')
      end if
      ! Extract the set of u(g) for this (kpoint,spin)
@@ -5499,7 +5499,7 @@ implicit none
  choice = 1  ! => <G|V_nonlocal|vectin>.
  cpopt  =-1; paw_opt= 0
  if (Wfd%usepaw==1) then
-   MSG_ERROR("The construction of the non-local contribution is not tested/implemented for usepaw==1!")
+   ABI_ERROR("The construction of the non-local contribution is not tested/implemented for usepaw==1!")
  end if
  ! Initialize the Hamiltonian on the coarse FFT mesh.
  call init_hamiltonian(ham_k, psps, pawtab, nspinor1, nsppol1, nspden1, natom, cryst%typat, cryst%xred, &
@@ -5518,7 +5518,7 @@ implicit none
  call wrtout(std_out,sjoin(" Will calculate ",itoa(count(bks_mask))," <b,k,s|Vnl|b,k,s> matrix elements in wfd_get_nl_me."))
  do ispin=1,Wfd%nsppol
    if (ispin/=1) then
-     MSG_WARNING("In the construction of the non-local contribution, the case nsppol/=1 is not tested.")
+     ABI_WARNING("In the construction of the non-local contribution, the case nsppol/=1 is not tested.")
    end if
    do ik_ibz=1,Wfd%nkibz
      if (all(bks_distrb(:, ik_ibz, ispin) /= Wfd%my_rank)) cycle

@@ -319,13 +319,13 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ! has_hbare uses veffh0. Why only use it with usepaw=1? Let it be available always
  if (Mflags%has_hbare==1) then
    if (Mflags%has_kinetic/=1) then
-     MSG_ERROR("Kinetic energy mels are required for the construction of Hbare mels!")
+     ABI_ERROR("Kinetic energy mels are required for the construction of Hbare mels!")
    end if
    ! Effective potential of the bare Hamiltonian: valence term is subtracted.
    ABI_MALLOC(veffh0,(nfftf,nspden))
    veffh0=vtrial-vxc_val
    !veffh0=vtrial !this is to retrieve the KS Hamiltonian
- endif 
+ endif
  ! If PAW and qp-SCGW then update Paw_ij and calculate the matrix elements ===
  ! We cannot simply rely on gwcalctyp because I need KS vxc in sigma.
  if (Wfd%usepaw==1.and.Mflags%has_hbare==1) then
@@ -470,10 +470,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
            !if (istwf_k /= 1) then
            !  cdot = two * cdot; if (istwf_k == 2) cdot = cdot - GWPC_CONJG(cg1(1)) * kinwf2(1)
            !end if
-           Mels%kinetic(ib, jb, ik_ibz, is) = cdot 
+           Mels%kinetic(ib, jb, ik_ibz, is) = cdot
            if (wfd%nspinor == 2 .and. wfd%nspden == 1) then
              cg1 => wave_ib%ug(npw_k+1:)
-             Mels%kinetic(ib, jb, ik_ibz, 2) = DOT_PRODUCT(cg1, kinwf2(npw_k+1:)) 
+             Mels%kinetic(ib, jb, ik_ibz, 2) = DOT_PRODUCT(cg1, kinwf2(npw_k+1:))
            end if
          end if
          if (Mflags%has_hbare==1) then

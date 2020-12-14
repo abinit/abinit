@@ -1115,7 +1115,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      write(msg,'(3a)' )&
      'gwgmcorr=1 can only be used with gwrpacorr/=0',ch10,&
      'Action: set gwgmcorr to 0 or gwrpacorr > 0'
-      MSG_ERROR_NOSTOP(msg, ierr)
+      ABI_ERROR_NOSTOP(msg, ierr)
    end if
 
    ! gwls_stern_kmax
@@ -2063,7 +2063,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      else
        write(msg,'(a)')&
        'For usefock=1 and nstep=0, the Fock energy is not available and will not be computed.'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      endif
    endif
 
@@ -2233,7 +2233,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
 !  end if
 
-!  optdriver 
+!  optdriver
    call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,10,&
 &   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE,&
 &   RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE],iout)

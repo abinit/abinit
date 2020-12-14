@@ -269,7 +269,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! WFQ file
    if (use_wfq) then
      if (nctk_try_fort_or_ncfile(wfq_path, msg) /= 0) then
-       ABI_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path, , ". Error:", msg))
+       ABI_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path, ". Error:", msg))
      end if
    end if
  end if ! master

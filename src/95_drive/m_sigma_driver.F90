@@ -424,7 +424,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  if (nprocs>Sigp%nbnds) then
    msg='Impossible to continue when the number of MPI processes is higher than the number of bands [i.e. max(nprocs)=nband].'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !XG090617 Please, do not remove this write, unless you have checked
@@ -2039,7 +2039,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    ! Sigma_c(w)
    if (open_file(trim(Dtfil%fnameabo_sgr)//'_SIGC',msg,unit=unt_sigc,status='unknown',form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (mod10==SIG_GW_AC) then
@@ -2409,7 +2409,7 @@ endif
    ! ======================================================
    if (rdm_update) then
      if (Sigp%nsppol/=1) then
-       MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
+       ABI_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
        ! Note: all subroutines of 70_gw/m_gwrdm.F90 are implemented assuming Sigp%nsppol==1
      end if
      ABI_MALLOC(nateigv,(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
@@ -2574,7 +2574,7 @@ endif
      ierr=0
      call xmpi_bcast(gw_rhor(:,:),master,Wfd%comm,ierr)
      if(ierr/=0) then
-       MSG_ERROR("Error distributing the GW density")
+       ABI_ERROR("Error distributing the GW density")
      endif
      ! We no longer need Wfd_nato_master.
      Wfd_nato_master%bks_comm = xmpi_comm_null
@@ -2660,7 +2660,7 @@ endif
        !
        ! Use the Wfd with 'new name' (Wfd_nato_all) because it will contain the GW 1RDM nat. orbs. (bands)
        !
-       MSG_COMMENT("From now on, the Wfd bands will contain the nat. orbs. ones")
+       ABI_COMMENT("From now on, the Wfd bands will contain the nat. orbs. ones")
        Wfd_nato_all => Wfd
        call Wfd_nato_all%rotate(Cryst,nateigv)                               ! Let rotate build the NOs in Wfd_nato_all (KS->NO)
        call xmpi_barrier(Wfd%comm)
@@ -4578,7 +4578,7 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
  end if
  ABI_FREE(qlwl)
  ! Now compute the "residual" Coulomb interactions
- MSG_COMMENT("From now on, Vcp_ks%vc_sqrt_resid contains the amount of exact exchange present on the GS.")
+ ABI_COMMENT("From now on, Vcp_ks%vc_sqrt_resid contains the amount of exact exchange present on the GS.")
  Vcp_ks%vc_sqrt_resid=sqrt(coef_hyb*Vcp_ks%vc_sqrt**2)
  Vcp_ks%i_sz_resid=coef_hyb*Vcp_ks%i_sz
 
