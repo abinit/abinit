@@ -1,0 +1,84 @@
+#################################################################
+# Input file for the positron tutorial                          #
+#    Positron lifetime calculation within PAW                   #
+#                                                               #
+#              Si monovacancy, "conventional" scheme            #
+#################################################################
+
+# Datasets definition
+  ndtset 2
+
+  positron1  0      ! Dataset 1 is a simple electronic GS calculation
+
+  positron2  1      ! Dataset 2 is a positronic GS calculation
+  getden2    1      !   in presence of the previous electronic density
+  kptopt2    0      !   Use only k=gamma point
+
+  ixcpositron2  1   ! We are using the Boronski and Nieminen parametrization
+
+# Common input parameters
+  ! Unit cell
+    acell   3*5.43 angstrom
+    rprim   0.0 1.0 1.0
+            1.0 0.0 1.0
+            1.0 1.0 0.0
+    chkprim 0
+    natom  15
+    ntypat  1
+    typat 15*1
+    znucl 14
+    xred  
+          0.0   0.0   0.0
+          0.0   0.0   0.5
+          0.0   0.5   0.0
+          0.5   0.0   0.0
+          0.0   0.5   0.5
+          0.5   0.0   0.5
+          0.5   0.5   0.0
+          0.5   0.5   0.5
+
+          0.125 0.125 0.125
+          0.125 0.125 0.625
+          0.125 0.625 0.125
+          0.625 0.125 0.125
+          0.125 0.625 0.625
+          0.625 0.125 0.625
+          0.625 0.625 0.125
+!          0.625 0.625 0.625 ! We remove one Si atom
+
+  ! K-points and occupations
+    kptopt 1
+    ngkpt 2 2 2 
+    nshiftk 1
+    shiftk 0.0 0.0 0.0
+    occopt 1
+    nband 36
+
+    posocc2 1.0  ! Occupation number for the positron (should be set <1 for bulk calculation with a small cell).
+                 ! Here the zero positron density limit is used, so results do not depend on posocc.
+
+  ! Convergence parameters
+    ecut 8. pawecutdg 15.
+    iscf 17
+    nstep 50 tolvrs 1.d-8
+
+!   Miscelaneous
+    prtwf 0 prteig 0           ! To save disk space
+    optforces 0 optstress 0    ! Not relevant here
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si.LDA-PW-paw.abinit"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   tpositron_2.abo, tolnlines=  0, tolabs= 0.0, tolrel= 0.0, fld_options= -easy
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = J. Wiktor
+#%% keywords = POSITRON,PAW
+#%% description = Second step of the tutorial on electron-positron annihilation
+#%%<END TEST_INFO>

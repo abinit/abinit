@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gaussian_quadrature
 !! NAME
 !! m_gaussian_quadrature
@@ -263,7 +262,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray
+!!      m_gwls_DielectricArray
 !!
 !! CHILDREN
 !!      imtqlx
@@ -454,7 +453,7 @@ end subroutine cdgqf
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_efmas,m_gaussian_quadrature
+!!      m_efmas,m_frohlichmodel,m_gaussian_quadrature
 !!
 !! CHILDREN
 !!      imtqlx

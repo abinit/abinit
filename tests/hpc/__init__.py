@@ -13,9 +13,9 @@ is_multi_parallel = True
 
 #: List of input files
 inp_files = [
-"t01.in",
-"t02.in",
-"t03.in",
-"t05.in",
-"t06.in", 
+"t01.abi",
+"t02.abi",
+"t03.abi",
+"t05.abi",
+"t06.abi", 
 ]

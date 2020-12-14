@@ -41,6 +41,7 @@ MODULE m_eig2d
  use m_hdr
  use m_dtset
  use m_dtfil
+ use m_ddb_hdr
 
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
@@ -49,7 +50,6 @@ MODULE m_eig2d
  use m_crystal,    only : crystal_init,  crystal_t
  use m_pawtab,     only : pawtab_type
  use m_ddb,        only : DDB_VERSION
- use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_double_grid,only : kptfine_av
  use m_mpinfo,     only : distrb2, proc_distrb_cycle
 
@@ -190,9 +190,10 @@ CONTAINS
 !! eigr2d<eigr2d_t>=the eigr2d_t datatype
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot
+!!      m_dfpt_looppert,m_eig2d
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -234,9 +235,10 @@ end subroutine eigr2d_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot
+!!      m_dfpt_looppert,m_eig2d
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -320,9 +322,10 @@ end subroutine eigr2d_ncwrite
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot
+!!      m_dfpt_looppert,m_eig2d
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -366,9 +369,10 @@ end subroutine eigr2d_free
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      eig2tot
+!!      m_eig2d
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -414,9 +418,10 @@ end subroutine fan_init
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,m_gkk
+!!      m_dfpt_looppert,m_eig2d,m_gkk
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -458,9 +463,10 @@ end subroutine gkk_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      eig2tot
+!!      m_eig2d
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -546,9 +552,10 @@ end subroutine fan_ncwrite
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,m_gkk
+!!      m_dfpt_looppert,m_eig2d,m_gkk
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -633,9 +640,10 @@ end subroutine gkk_ncwrite
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      eig2tot
+!!      m_eig2d
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -675,9 +683,10 @@ end subroutine fan_free
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,m_gkk
+!!      m_dfpt_looppert,m_eig2d,m_gkk
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -777,10 +786,10 @@ end subroutine gkk_free
 !!            electron lifetimes.
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      distrb2,dotprod_g,kptfine_av,smeared_delta,timab,wrtout,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1262,13 +1271,10 @@ end subroutine eig2stern
 !!            electron lifetimes.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      crystal_free,crystal_init,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write
-!!      distrb2,ebands_free,ebands_init,eigr2d_free,eigr2d_init,eigr2d_ncwrite
-!!      fan_free,fan_init,fan_ncwrite,gkk_free,gkk_init,gkk_ncwrite,kptfine_av
-!!      outbsd,smeared_delta,timab,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1674,11 +1680,10 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &     1,xred=xred,occ=occ_rbz)
 
-     call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, unitout)
-
-     call ddb_hdr_free(ddb_hdr)
-
+     call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, unitout)
+     call ddb_hdr%free()
    end if
+
    if(ieig2rf == 3 ) then
      call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
    end if
@@ -1766,9 +1771,8 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &       1,xred=xred,occ=occ_rbz)
 
-       call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
-
-       call ddb_hdr_free(ddb_hdr)
+       call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, unitout)
+       call ddb_hdr%free()
 
        call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
 
@@ -1831,9 +1835,10 @@ end subroutine eig2tot
 !!  to file
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot
+!!      m_dfpt_looppert,m_eig2d
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1912,9 +1917,10 @@ end subroutine outbsd
 !! smdfunc(mband,mband) : Smeared delta function weight corresponding to \delta(\epsilon_{n,k} - \epsilon_{n',k+Q})
 !!
 !! PARENTS
-!!      eig2stern,eig2tot
+!!      m_eig2d
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2023,7 +2029,7 @@ end subroutine smeared_delta
 !!  eigen_corr(mband*nkpt*nsppol)= T=0 correction to the electronic eigenvalues, due to the Fan term.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
 !!      wrtout

@@ -119,7 +119,7 @@ contains
 !! for a subset of at most nincat atoms.
 !!
 !! PARENTS
-!!      nonlop_ylm
+!!      m_nonlop_ylm
 !!
 !! CHILDREN
 !!

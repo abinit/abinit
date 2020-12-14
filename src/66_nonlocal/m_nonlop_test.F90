@@ -58,7 +58,7 @@ contains
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw= maximum number of plane waves
 !!  my_natom=number of atoms treated by current processor
 !!  natom=number of atoms in cell.
@@ -83,11 +83,11 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      afterscfloop
+!!      m_afterscfloop
 !!
 !! CHILDREN
-!!      dotprod_g,init_hamiltonian,initylmg
-!!      load_k_hamiltonian,load_spin_hamiltonian,mkffnl,mkkpg,nonlop
+!!      dotprod_g,gs_hamk%free,gs_hamk%load_k,gs_hamk%load_spin
+!!      init_hamiltonian,initylmg,mkffnl,mkkpg,nonlop
 !!
 !! SOURCE
 

@@ -1,0 +1,136 @@
+#test silicon crystal
+ ndtset 4
+
+#First dataset : SC run with 2 kpoints
+ nkpt1 2
+ kpt1 0.25000   0.25000   0.25000
+      0.25000   0.50000   0.50000
+ wtk1 0.25 0.75
+
+#Second dataset : NSC run with the full set of kpoints
+ iscf2 -2     getden2 1     getwfk2 1
+
+#Third dataset : d/dk response calculation
+ iscf3 -3     rfelfd3 2     getwfk3 2    getden3 1
+ getddk3 3   ! Needed for localisation tensor
+ rfdir3  1 0 0
+
+#Fourth dataset : phonons and  homogeneous electric field response
+ rfelfd4 3     getwfk4 2     getddk4 3
+ rfdir4  1 1 1 rfphon4 1     rfatpol4  1 2
+ diemix4  0.85
+ diemac4  1.0
+ tolwfr4  1.0d-12
+
+#Common data
+ acell   3*10.26
+ amu 28.086
+ ecut 6.00
+ ixc 3
+ kptopt 0
+ kpt
+   0.25000   0.25000   0.25000
+   0.00000   0.00000   0.25000
+   0.00000   0.25000   0.00000
+   0.25000   0.00000   0.00000
+   0.50000   0.50000   0.25000
+   0.50000   0.25000   0.50000
+   0.25000   0.50000   0.50000
+   0.50000   0.25000   0.00000
+   0.25000   0.00000   0.50000
+   0.00000   0.50000   0.25000
+   0.00000   0.25000   0.50000
+   0.25000   0.50000   0.00000
+   0.50000   0.00000   0.25000
+   0.25000   0.25000  -0.25000
+   0.25000  -0.25000   0.25000
+  -0.25000   0.25000   0.25000
+ natom  2 nband 4
+ ngfft  3*16
+ nkpt 16
+ nstep 30
+ nsym  48 ntypat  1
+ occopt 1
+ prtden 1
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel  1  0  0   0  1  0   0  0  1
+  0  1 -1   1  0 -1   0  0 -1
+  0 -1  1   0 -1  0   1 -1  0
+ -1  0  0  -1  0  1  -1  1  0
+  0  1  0   0  0  1   1  0  0
+  1  0 -1   0  0 -1   0  1 -1
+  0 -1  0   1 -1  0   0 -1  1
+ -1  0  1  -1  1  0  -1  0  0
+  0  0  1   1  0  0   0  1  0
+  0  0 -1   0  1 -1   1  0 -1
+  1 -1  0   0 -1  1   0 -1  0
+ -1  1  0  -1  0  0  -1  0  1
+  1  0 -1   0  1 -1   0  0 -1
+  0  1  0   1  0  0   0  0  1
+ -1  0  1  -1  0  0  -1  1  0
+  0 -1  0   0 -1  1   1 -1  0
+ -1  1  0  -1  0  1  -1  0  0
+  1 -1  0   0 -1  0   0 -1  1
+  0  0 -1   1  0 -1   0  1 -1
+  0  0  1   0  1  0   1  0  0
+  0 -1  1   1 -1  0   0 -1  0
+ -1  0  0  -1  1  0  -1  0  1
+  1  0  0   0  0  1   0  1  0
+  0  1 -1   0  0 -1   1  0 -1
+
+ -1  0  0   0 -1  0   0  0 -1
+  0 -1  1  -1  0  1   0  0  1
+  0  1 -1   0  1  0  -1  1  0
+  1  0  0   1  0 -1   1 -1  0
+  0 -1  0   0  0 -1  -1  0  0
+ -1  0  1   0  0  1   0 -1  1
+  0  1  0  -1  1  0   0  1 -1
+  1  0 -1   1 -1  0   1  0  0
+  0  0 -1  -1  0  0   0 -1  0
+  0  0  1   0 -1  1  -1  0  1
+ -1  1  0   0  1 -1   0  1  0
+  1 -1  0   1  0  0   1  0 -1
+ -1  0  1   0 -1  1   0  0  1
+  0 -1  0  -1  0  0   0  0 -1
+  1  0 -1   1  0  0   1 -1  0
+  0  1  0   0  1 -1  -1  1  0
+  1 -1  0   1  0 -1   1  0  0
+ -1  1  0   0  1  0   0  1 -1
+  0  0  1  -1  0  1   0 -1  1
+  0  0 -1   0 -1  0  -1  0  0
+  0  1 -1  -1  1  0   0  1  0
+  1  0  0   1 -1  0   1  0 -1
+ -1  0  0   0  0 -1   0 -1  0
+  0 -1  1   0  0  1  -1  0  1
+
+ xred 3*0.00d0 3*0.25d0
+ tnons 72*0.0d0 72*0.25d0
+ typat  1 1  tolwfr  1.e-28
+ wtk   16*0.0625d0
+ znucl  14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.Hamann_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t06.abo, tolnlines = 2, tolabs = 1.100e-04, tolrel = 1.800e-04, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords =  NC, DFPT
+#%% authors = Unknown
+#%% description = 
+#%%   Si crystal (diamond structure), 2 atoms per unit cell. 
+#%%   Computation of responses to atomic displacements
+#%%   and homogeneous electric field at Gamma,
+#%%   giving access to the dynamical matrix at q(0 0 0), including
+#%%   its non-analytical behaviour (effective charges
+#%%   do not vanish completely due to lack of convergence), 
+#%%   the associated phonon frequencies, and the macroscopic 
+#%%   dielectric constant.
+#%%   (see test.si.gamma of RESPFN)
+#%%<END TEST_INFO>

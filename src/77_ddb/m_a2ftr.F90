@@ -92,11 +92,12 @@ contains
 !!  elph_ds
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      d2c_wtq,dgemm,ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc_fourq
-!!      matrginv,simpson_int,wrtout,xmpi_sum,zgemm
+!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
+!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc%fourq,matrginv
+!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
 !!
 !! NOTES
 !!   copied from ftiaf9.f
@@ -1046,10 +1047,12 @@ end subroutine mka2f_tr
 !!  elph_ds
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      ftgam,ftgam_init,gam_mult_displ,ifc_fourq,simpson_int,wrtout,zgemm
+!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
+!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc%fourq,matrginv
+!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
 !!
 !! NOTES
 !!   copied from ftiaf9.f
@@ -1666,11 +1669,11 @@ end subroutine mka2f_tr_lova
 !!  rate_e(nene)= scattering rate due to electron phonono coupling vs. energy
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
 !!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
-!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc_fourq,matrginv
+!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc%fourq,matrginv
 !!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
 !!
 !! SOURCE

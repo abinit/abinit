@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_levenberg_marquardt
 !! NAME
 !! m_levenberg_marquardt

@@ -1,9 +1,0 @@
-Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
-83  5   980509                     zatom,zion,pspdat
-3   1   2    0    2001    0        pspcod,pspxc,lmax,lloc,mmax,r2well
-0.605000  6.679437 0         0        0   rloc, c1, c2, c3, c4
-0.678858  1.377634 -.513697  -.471028     rs, h11s, h22s, h33s
-0.798673  0.655578 -.402932  0            rp, h11p, h22p, h33p
-          0.305314 -.023134  0                k11p, k22p, k33p
-0.934683  0.378476 0         0            rd, h11d, h23d, h33d
-          0.029217 0         0                k11d, k22d, k33d           

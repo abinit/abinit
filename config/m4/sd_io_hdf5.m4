@@ -48,6 +48,7 @@ AC_DEFUN([SD_HDF5_INIT], [
   sd_hdf5_enable_fc=""
   sd_hdf5_policy=""
   sd_hdf5_status=""
+  sd_hdf5_cascade="no"
 
   # Process options
   for kwd in ${sd_hdf5_options}; do
@@ -63,6 +64,10 @@ AC_DEFUN([SD_HDF5_INIT], [
         ;;
       no-fortran)
         sd_hdf5_enable_fc="no"
+        ;;
+      mandatory)
+        sd_hdf5_enable="yes"
+        sd_hdf5_enable_def="yes"
         ;;
       *)
         AC_MSG_ERROR([invalid Steredeg HDF5 option: '${kwd}'])
@@ -129,8 +134,7 @@ AC_DEFUN([SD_HDF5_INIT], [
           sd_hdf5_init="env"
           ;;
         exe)
-          AC_MSG_ERROR([HDF5 environment variables conflict with H5CC
-                  Please set H5CC or HDF5_*FLAGS, not both])
+          sd_hdf5_cascade="yes"
           ;;
       esac
     fi
@@ -168,21 +172,7 @@ AC_DEFUN([SD_HDF5_INIT], [
         ;;
 
       env)
-        sd_hdf5_cppflags="${sd_hdf5_cppflags_def}"
-        sd_hdf5_cflags="${sd_hdf5_cflags_def}"
-        sd_hdf5_cxxflags="${sd_hdf5_cxxflags_def}"
-        test "${sd_hdf5_enable_fc}" = "yes" && \
-          sd_hdf5_fcflags="${sd_hdf5_fcflags_def}"
-        sd_hdf5_ldflags="${sd_hdf5_ldflags_def}"
-        sd_hdf5_libs="${sd_hdf5_libs_def}"
-        test ! -z "${HDF5_CPPFLAGS}" && sd_hdf5_cppflags="${HDF5_CPPFLAGS}"
-        test ! -z "${HDF5_CFLAGS}" && sd_hdf5_cflags="${HDF5_CFLAGS}"
-        test ! -z "${HDF5_CXXFLAGS}" && sd_hdf5_cxxflags="${HDF5_CXXFLAGS}"
-        if test "${sd_hdf5_enable_fc}" = "yes"; then
-          test ! -z "${HDF5_FCFLAGS}" && sd_hdf5_fcflags="${HDF5_FCFLAGS}"
-        fi
-        test ! -z "${HDF5_LDFLAGS}" && sd_hdf5_ldflags="${HDF5_LDFLAGS}"
-        test ! -z "${HDF5_LIBS}" && sd_hdf5_libs="${HDF5_LIBS}"
+        _SD_HDF5_SET_ENV
         ;;
 
       *)
@@ -241,11 +231,15 @@ AC_DEFUN([SD_HDF5_DETECT], [
       _SD_HDF5_CHECK_COMPILERS
     fi
     if test "${sd_hdf5_h5cc}" = ""; then
-      AC_MSG_WARN([could not find the HDF5 C compiler
+      if test "${sd_hdf5_cascade}" = "yes"; then
+        _SD_HDF5_SET_ENV
+      else
+        AC_MSG_WARN([could not find the HDF5 C compiler
                     Please set the H5CC environment variable to a valid HDF5
                     C compiler (usually called 'h5cc' or 'h5pcc'), so that
                     essential information about your HDF5 installation will be
                     exposed to the build system of ABINIT.])
+      fi
     fi
 
     _SD_HDF5_DUMP_CONFIG
@@ -712,3 +706,21 @@ AC_DEFUN([_SD_HDF5_DUMP_CONFIG], [
     fi
   fi
 ]) # _SD_HDF5_DUMP_CONFIG
+
+AC_DEFUN([_SD_HDF5_SET_ENV], [
+  sd_hdf5_cppflags="${sd_hdf5_cppflags_def}"
+  sd_hdf5_cflags="${sd_hdf5_cflags_def}"
+  sd_hdf5_cxxflags="${sd_hdf5_cxxflags_def}"
+  test "${sd_hdf5_enable_fc}" = "yes" && \
+    sd_hdf5_fcflags="${sd_hdf5_fcflags_def}"
+  sd_hdf5_ldflags="${sd_hdf5_ldflags_def}"
+  sd_hdf5_libs="${sd_hdf5_libs_def}"
+  test ! -z "${HDF5_CPPFLAGS}" && sd_hdf5_cppflags="${HDF5_CPPFLAGS}"
+  test ! -z "${HDF5_CFLAGS}" && sd_hdf5_cflags="${HDF5_CFLAGS}"
+  test ! -z "${HDF5_CXXFLAGS}" && sd_hdf5_cxxflags="${HDF5_CXXFLAGS}"
+  if test "${sd_hdf5_enable_fc}" = "yes"; then
+    test ! -z "${HDF5_FCFLAGS}" && sd_hdf5_fcflags="${HDF5_FCFLAGS}"
+  fi
+  test ! -z "${HDF5_LDFLAGS}" && sd_hdf5_ldflags="${HDF5_LDFLAGS}"
+  test ! -z "${HDF5_LIBS}" && sd_hdf5_libs="${HDF5_LIBS}"
+]) # _SD_HDF5_SET_ENV

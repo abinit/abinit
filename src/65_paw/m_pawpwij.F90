@@ -170,7 +170,7 @@ CONTAINS  !=====================================================================
 !!  Paw_pwff(%ntypat) <pawpwff_t>=Object storing the form factors
 !!                                    for the spline used in pawpwij_init.
 !! PARENTS
-!!      bethe_salpeter,m_shirley,screening,sigma
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!      fftbox_execute,fftbox_plan3_many,fftpad
@@ -255,7 +255,7 @@ end subroutine pawpwff_init
 !!  Paw_pwff(:)=<pawpwff_t>=Object storing form factors for the spline of wf into PAW spheres
 !!
 !! PARENTS
-!!      bethe_salpeter,m_shirley,screening,sigma
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!      fftbox_execute,fftbox_plan3_many,fftpad
@@ -318,8 +318,7 @@ end subroutine pawpwff_free
 !!   Completely initialized in output.
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband,cohsex_me
-!!      exc_build_block,exc_build_ham,m_shirley,prep_calc_ucrpa
+!!      m_chi0,m_cohsex,m_exc_build,m_prep_calc_ucrpa,m_sigc,m_sigx
 !!
 !! CHILDREN
 !!      fftbox_execute,fftbox_plan3_many,fftpad
@@ -1219,7 +1218,7 @@ end subroutine paw_rho_tw_g
 !! OUTPUT
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,prep_calc_ucrpa
+!!      m_chi0,m_prep_calc_ucrpa,m_sigc,m_sigx
 !!
 !! CHILDREN
 !!      fftbox_execute,fftbox_plan3_many,fftpad

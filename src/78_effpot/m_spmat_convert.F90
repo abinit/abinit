@@ -233,12 +233,8 @@ contains
     do i=2, csr%nrow+1
        csr%row_shift(i)= csr%row_shift(i-1)+row_nz(i-1)
     end do
-    if(allocated(i1_list)) then
-       ABI_DEALLOCATE(i1_list)
-    endif
-    if(allocated(istartend)) then
-       ABI_DEALLOCATE(istartend)
-    endif
+    ABI_SFREE(i1_list)
+    ABI_SFREE(istartend)
   end subroutine COO_to_CSR
 
 

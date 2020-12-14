@@ -1,0 +1,56 @@
+# Thin jellium slab + adatom:
+# computation of the total energy and force
+
+#Definition of occupation numbers
+nband 3   occopt 4   tsmear 0.01
+
+# tested Wigner-Seitz radius: 2.56 (copper)
+jellslab  1
+slabwsrad 2.56
+slabzbeg  7.4
+slabzend 11.1
+
+acell 7.4 7.4 22.2   ngkpt 12 12 4
+
+#Definition of the atoms
+ntypat 1   znucl 11        # There is only one type of atom: Na
+natom 1   typat 1     xcart  0.0 0.0 3.98398
+
+#Definition of the planewave basis set
+ecut   5.0        # Maximal kinetic energy cut-off, in Hartree
+
+#Exchange-correlation functional
+ixc 1             # LDA Teter Pade parametrization
+
+#Definition of the k-point grid: automatic generation
+nshiftk 1    shiftk 0.5 0.5 0.5
+
+#Definition of the SCF procedure
+nstep 30          # Maximal number of SCF cycles
+toldff 1.0d-6     # Will stop when, twice in a row, the difference
+                  # between two consecutive evaluations of total energy
+                  # differ by less than toldfe (in Hartree)
+diemix 0.7   diemac 7.0
+ionmov 2   ntime 5
+prtwf 0   prtden 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/11na.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t58.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 42
+#%% [extra_info]
+#%% authors = S. Caravati
+#%% keywords = 
+#%% description = 
+#%%   Jellium thin slab with Wigner-Seitz radius=2.56 (~copper) + 1 Na adatom.
+#%%   Computation of the total energy and force on the Na atom. Its position
+#%%   with respect to the slab already is the equilibrium position so the
+#%%   calculation should use only one optimization step.
+#%%<END TEST_INFO>

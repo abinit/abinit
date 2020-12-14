@@ -241,6 +241,14 @@ AC_DEFUN([ABI_INIT_CPU_INFO],[
           abi_cpu_model="opteron"
         fi
       fi
+      dnl EPYC ?
+      if test "${abi_cpu_model}" = ""; then
+        abi_cpu_model=`cat cpuinfo | grep -i 'EPYC'`
+        if test "${abi_cpu_model}" != ""; then
+          abi_cpu_vendor="amd"
+          abi_cpu_model="epyc"
+        fi
+      fi
       dnl Sempron ?
       if test "${abi_cpu_model}" = ""; then
         abi_cpu_model=`cat cpuinfo | grep 'Sempron'`

@@ -1,0 +1,130 @@
+#test GaAs crystal. Reproduce the gaas.x test of RESPFN,
+#however with a smaller cut-off (3Ha) than the original one (6Ha).
+#Use estimated diemac. See test 30 for near-optimal diemac.
+
+ ndtset 4
+
+#First dataset : SC run with 2 kpoints
+ prtden1 1     getden1 0   getwfk1 0
+ nqpt1 0
+ nkpt1 2
+ kpt1
+   0.25000   0.25000   0.25000
+   0.25000   0.50000   0.50000
+ wtk1 0.25 0.75
+
+#Second and third dataset : NSC run with 32 kpoints,
+#without and with q-wavevector shift
+ iscf2 -2     nqpt2 0                             getwfk2 1   getden2 1
+ iscf3 -2     nqpt3 1    qpt3  0.0d0 0.5d0 0.5d0  getwfk3 2   getden3 1
+
+#Fourth dataset : response calculation
+  getwfk4   2
+  getwfq4   3
+    nqpt4   1
+  prtvol4   10
+     qpt4   0.0d0 0.5d0 0.5d0
+ rfatpol4   1 2
+   rfdir4   1 1 1
+  rfphon4   1
+# diemac4  10.0
+  tolwfr4   2.0d-15
+
+#Common data
+ kptopt 0
+ nkpt 32
+ kpt
+   0.25000   0.25000   0.25000
+  -0.25000  -0.25000  -0.25000
+   0.00000   0.00000   0.25000
+   0.00000   0.25000   0.00000
+   0.25000   0.00000   0.00000
+   0.00000   0.00000  -0.25000
+   0.00000  -0.25000   0.00000
+  -0.25000   0.00000   0.00000
+   0.50000   0.50000   0.25000
+   0.50000   0.25000   0.50000
+   0.25000   0.50000   0.50000
+  -0.50000  -0.50000  -0.25000
+  -0.50000  -0.25000  -0.50000
+  -0.25000  -0.50000  -0.50000
+   0.50000   0.25000   0.00000
+   0.25000   0.00000   0.50000
+   0.00000   0.50000   0.25000
+   0.00000   0.25000   0.50000
+   0.25000   0.50000   0.00000
+   0.50000   0.00000   0.25000
+  -0.50000  -0.25000   0.00000
+  -0.25000   0.00000  -0.50000
+   0.00000  -0.50000  -0.25000
+   0.00000  -0.25000  -0.50000
+  -0.25000  -0.50000   0.00000
+  -0.50000   0.00000  -0.25000
+   0.25000   0.25000  -0.25000
+   0.25000  -0.25000   0.25000
+  -0.25000   0.25000   0.25000
+  -0.25000  -0.25000   0.25000
+  -0.25000   0.25000  -0.25000
+   0.25000  -0.25000  -0.25000
+ wtk 32*0.03125d0
+ acell   3*10.60
+ amu 69.72  74.9216
+ diemac 10.0
+ ecut 3.00
+ ixc 3
+ natom  2 nband 4  nbdbuf 0
+ nstep 30
+ nsym  24 ntypat  2
+ occopt 1
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel  1  0  0   0  1  0   0  0  1
+  0  1 -1   1  0 -1   0  0 -1
+  0 -1  1   0 -1  0   1 -1  0
+ -1  0  0  -1  0  1  -1  1  0
+  0  1  0   0  0  1   1  0  0
+  1  0 -1   0  0 -1   0  1 -1
+  0 -1  0   1 -1  0   0 -1  1
+ -1  0  1  -1  1  0  -1  0  0
+  0  0  1   1  0  0   0  1  0
+  0  0 -1   0  1 -1   1  0 -1
+  1 -1  0   0 -1  1   0 -1  0
+ -1  1  0  -1  0  0  -1  0  1
+  1  0 -1   0  1 -1   0  0 -1
+  0  1  0   1  0  0   0  0  1
+ -1  0  1  -1  0  0  -1  1  0
+  0 -1  0   0 -1  1   1 -1  0
+ -1  1  0  -1  0  1  -1  0  0
+  1 -1  0   0 -1  0   0 -1  1
+  0  0 -1   1  0 -1   0  1 -1
+  0  0  1   0  1  0   1  0  0
+  0 -1  1   1 -1  0   0 -1  0
+ -1  0  0  -1  1  0  -1  0  1
+  1  0  0   0  0  1   0  1  0
+  0  1 -1   0  0 -1   1  0 -1
+ xred 3*0.00d0 3*0.25d0
+ tnons 72*0.0
+ typat  1 2  tolwfr  1.e-22
+ znucl  31 33
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31ga.SGS_mod, 33as.SGS_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t07.abo, tolnlines = 2, tolabs = 1.010e-06, tolrel = 2.000e-04, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC, DFPT
+#%% authors = Unknown
+#%% description = 
+#%%   GaAs crystal (zinc-blende structure), 2 atoms per unit cell.
+#%%   Computation of responses to atomic displacements
+#%%   with X-point wavevector, giving the dynamical matrix and
+#%%   the associated phonon frequencies.
+#%%   Can be compared to the test gaas.x of RESPFN, provided
+#%%   the cut-off energy is changed (here 3Ha, in RESPFN, 6Ha).
+#%%<END TEST_INFO>

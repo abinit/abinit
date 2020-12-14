@@ -80,7 +80,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      cpu_time,diagonalize_lanczos_banded
@@ -393,7 +393,7 @@ end subroutine GeneratePrintDielectricEigenvalues
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_sternheimer
+!!      m_gwls_sternheimer
 !!
 !! CHILDREN
 !!      cpu_time,diagonalize_lanczos_banded

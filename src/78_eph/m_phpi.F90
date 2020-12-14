@@ -94,7 +94,7 @@ contains  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph
+!!      m_eph_driver
 !!
 !! NOTES
 !!
@@ -305,7 +305,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
  ! TODO FOR PAW
  usecprj = 0
- ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
+ ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
 
  ! Prepare call to getgh1c
  usevnl = 0
@@ -595,7 +595,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  call wfd_kq%free()
 
  call pawcprj_free(cwaveprj0)
- ABI_DT_FREE(cwaveprj0)
+ ABI_FREE(cwaveprj0)
 
 end subroutine eph_phpi
 !!***

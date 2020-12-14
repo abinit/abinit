@@ -147,7 +147,7 @@ contains
 !!   for a subset of at most nincat atoms.
 !!
 !! PARENTS
-!!      getcprj,nonlop_ylm
+!!      m_cgprj,m_nonlop_ylm
 !!
 !! CHILDREN
 !!      timab,xmpi_sum

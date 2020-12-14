@@ -61,17 +61,17 @@ contains
 !!  dtset <type(dataset_type)>=internal variables used by wavelets, describing
 !!   | wvl_internal=desciption of the wavelet box.
 !!   | natom=number of atoms.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!   | keys=its access keys for compact storage.
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!
@@ -121,7 +121,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 
  parallel = (nproc > 1)
 
-!Consistency checks, are all pseudo true GTH pseudo with geometric informations?
+!Consistency checks, are all pseudo true GTH pseudo with geometric information?
 !Skip for PAW case: we do not have GTH parameters
  do idata = 1, psps%npsp, 1
    if (.not. psps%gth_params%set(idata) .and. psps%usepaw==0) then
@@ -134,8 +134,8 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
    if (.not. psps%gth_params%hasGeometry(idata)) then
      write(message, '(a,a,a,a,a,a)' ) ch10,&
 &     ' wvl_wfs_set:  consistency checks failed,', ch10, &
-&     '  the given GTH parameters has no geometry informations.', ch10, &
-&     '  Upgrade your input pseudo files to GTH with geometric informations.'
+&     '  the given GTH parameters has no geometry information.', ch10, &
+&     '  Upgrade your input pseudo files to GTH with geometric information.'
      MSG_ERROR(message)
    end if
  end do
@@ -292,7 +292,7 @@ end subroutine derfcf
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      mklocl_realspace,mklocl_wavelets
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
 !!
@@ -331,14 +331,12 @@ end subroutine derf_ab
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  wfs <type(wvl_wf_type)>=wavefunctions informations in a wavelet basis.
+!!  wfs <type(wvl_wf_type)>=wavefunctions information in a wavelet basis.
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
-!!      deallocate_comms,deallocate_lr,deallocate_lzd_except_glr
-!!      deallocate_orbs,f_free_ptr
 !!
 !! SOURCE
 
@@ -405,7 +403,7 @@ end subroutine wvl_wfs_free
 !! wfs <type(wvl_wf_type)> = output localistaion region
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!

@@ -128,11 +128,13 @@ CONTAINS  !=====================================================================
 !!  (in that case pawrhoij_unsym should not be distributed over atomic sites).
 !!
 !! PARENTS
-!!      afterscfloop,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,scfcv,vtorho
+!!      m_afterscfloop,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dfptnl_pert
+!!      m_scfcv_core,m_vtorho
 !!
 !! CHILDREN
-!!      fourdp,pawmknhat,pawrhoij_copy,pawrhoij_free,pawrhoij_free_unpacked
-!!      pawrhoij_nullify,pawrhoij_symrhoij,timab,transgrid
+!!      free_my_atmtab,get_my_atmtab,initylmr,nhatgrid,pawfgrtab_free
+!!      pawfgrtab_init,pawrad_deducer0,pawtab_get_lsize,printxsf,sort_dp,spline
+!!      splint,wrtout,xmpi_barrier,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -327,7 +329,7 @@ end subroutine pawmkrho
 !!   initylmr in order to get the angular functions on the grid points.
 !!
 !! PARENTS
-!!      bethe_salpeter,outscfcv,sigma
+!!      m_bethe_salpeter,m_outscfcv,m_sigma_driver
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,initylmr,nhatgrid,pawfgrtab_free

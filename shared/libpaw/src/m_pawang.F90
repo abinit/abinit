@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pawang
 !! NAME
 !!  m_pawang
@@ -194,7 +193,7 @@ CONTAINS
 !!  Pawang <type(pawang_type)>=ANGular mesh discretization and related data
 !!
 !! PARENTS
-!!      dfpt_looppert,pawinit
+!!      m_dfpt_looppert,m_nonlinear,m_paw_init
 !!
 !! CHILDREN
 !!
@@ -327,7 +326,7 @@ end subroutine pawang_init
 !!  Pawang <type(pawang_type)>=ANGular mesh discretization and related data
 !!
 !! PARENTS
-!!      dfpt_looppert,driver,pawinit
+!!      m_dfpt_looppert,m_driver,m_nonlinear,m_paw_init
 !!
 !! CHILDREN
 !!
@@ -691,6 +690,7 @@ end subroutine initang
 !!     For each point of the angular mesh, gives the weight of the corresponding point on an unitary sphere.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
 !!

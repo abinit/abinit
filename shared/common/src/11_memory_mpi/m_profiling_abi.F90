@@ -29,7 +29,7 @@ module m_profiling_abi
 
  use defs_basis
  use iso_c_binding
- !use m_clib
+ use m_clib
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -166,6 +166,8 @@ subroutine abimem_init(level, delta_time, filename, limit_mb)
  logical :: file_exists
  character(len=500) :: msg
 ! *************************************************************************
+
+ !write(std_out, "(a,i0)")"Initializing abimem profiling with level: ", level
 
  minfo%level = level
  !start_time = abimem_wtime()

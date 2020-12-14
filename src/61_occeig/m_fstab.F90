@@ -38,7 +38,7 @@ module m_fstab
  use m_symtk,          only : matr3inv
  use defs_datatypes,   only : ebands_t
  use m_special_funcs,  only : gaussian
- use m_kpts,           only : kpts_timrev_from_kptopt, listkk, smpbz
+ use m_kpts,           only : kpts_timrev_from_kptopt, smpbz
 
  implicit none
 
@@ -102,7 +102,7 @@ module m_fstab
 
    integer,allocatable :: indkk_fs(:,:)
    ! (6, nkfs)
-   ! Tables giving the correspondence between a point in the FS-BZ and the IBZ computed in listkk.
+   ! Tables giving the correspondence between a point in the FS-BZ and the IBZ:
    !
    !   indkk_fs(1,:)      Mapping FS-BZ --> k-points in the IBZ (taken from ebands_t)
    !   indkk_fs(2,:)      The index of the symmetry S such that kfs = tim_sign * S(k_ibz) + G0
@@ -182,10 +182,8 @@ contains  !============================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_phgamma
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -246,7 +244,6 @@ end subroutine fstab_free
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -264,7 +261,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: option0 = 0, brav1 = 1, bcorr0 = 0
- integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz,sppoldbl,timrev
+ integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz,timrev
  integer :: ik,mkpt,nkbz,ierr, nene,ifermi
  real(dp),parameter :: max_occ1 = one
  real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,dksqmax,cpu,wall,gflops
@@ -273,6 +270,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  character(len=500) :: msg
  type(fstab_t),pointer :: fs
  type(htetra_t) :: tetra
+ type(krank_t) :: krank
 !arrays
  integer :: kptrlatt(3,3)
  integer,allocatable :: full2ebands(:,:),bz2ibz(:), fs2bz(:),indkk(:,:) !,fs2ibz(:)
@@ -311,11 +309,12 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  ! Find correspondence BZ --> IBZ
  ! Note that we use symrel so these tables can be used to symmetrize wavefunctions.
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
- sppoldbl = 1; if (any(cryst%symafm == -1) .and. ebands%nsppol == 1) sppoldbl=2
- ABI_MALLOC(indkk, (nkbz*sppoldbl, 6))
+ ABI_MALLOC(indkk, (6, nkbz))
 
- call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, kbz, ebands%nkpt, nkbz, cryst%nsym,&
-    sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, exit_loop=.True., use_symrec=.False.)
+ krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, kptrlatt, compute_invrank=.False.)
+ call krank%get_mapping(nkbz, kbz, dksqmax, cryst%gmet, indkk, &
+                        cryst%nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False.)
+ call krank%free()
 
  if (dksqmax > tol12) then
    write(msg, '(7a,es16.6,4a)' ) &
@@ -334,11 +333,12 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  full2ebands = 0
 
  do ik_bz=1,nkbz
-   full2ebands(1, ik_bz) = indkk(ik_bz, 1)     ! ik_ibz
-   full2ebands(2, ik_bz) = indkk(ik_bz, 2)     ! isym
-   full2ebands(3:5, ik_bz) = indkk(ik_bz, 3:5) ! g0
-   full2ebands(6, ik_bz) = indkk(ik_bz, 6)     ! itimrev
+   full2ebands(1, ik_bz) = indkk(1, ik_bz)      ! ik_ibz
+   full2ebands(2, ik_bz) = indkk(2, ik_bz)      ! isym
+   full2ebands(3:5, ik_bz) = indkk(3:5, ik_bz) ! g0
+   full2ebands(6, ik_bz) = indkk(6, ik_bz)      ! itimrev
  end do
+ ABI_FREE(indkk)
 
  ! Select only the k-points in the BZ that are sufficiently close to the FS.
  ! FIXME: Do not know why but lambda depends on eph_fsewin if gaussian
@@ -470,8 +470,8 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    !end do
  end do
 
- ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
  if (dtset%eph_intmeth == 2) then
+   ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
    ABI_MALLOC(bz2ibz, (nkbz))
    bz2ibz = full2ebands(1, :)
 
@@ -519,7 +519,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  ABI_FREE(fs2bz)
  ABI_FREE(kbz)
  ABI_FREE(full2ebands)
- ABI_FREE(indkk)
 
  call cwtime_report(" fstab_init%fs_weights:", cpu, wall, gflops)
 
@@ -590,7 +589,6 @@ end function fstab_findkg0
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -619,7 +617,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
 
  wtk = zero
  if (fs%eph_intmeth == 1 .or. nesting /= 0) then
-   ! Gaussian method (constant or adaptive method from group velocities)
+   ! Gaussian method (constant or adaptive method from group velocities if eph_fsmear is negative)
    sigma = fs%eph_fsmear
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
@@ -676,7 +674,6 @@ end subroutine fstab_get_dbldelta_weights
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -707,10 +704,18 @@ subroutine fstab_print(fstab, header, unit, prtvol)
  write(my_unt, "(a)")trim(msg)
 
  if (fstab(1)%eph_intmeth == 1) then
-   write(my_unt,"(a)")" FS integration done with gaussian method"
+   if (fstab(1)%eph_fsmear > zero) then
+     write(my_unt,"(a,f5.1,a)")" FS integration done with gaussian method and broadening:", &
+       fstab(1)%eph_fsmear * Ha_eV, " (meV)"
+   else
+     write(my_unt,"(a)")" FS integration done with adaptive gaussian method"
+   end if
  else if (fstab(1)%eph_intmeth == 2) then
    write(my_unt,"(a)")" FS integration done with tetrahedron method"
+ else
+   MSG_ERROR(sjoin("Invalid value for eph_intmeth:", itoa(fstab(1)%eph_intmeth)))
  end if
+
  write(my_unt,"(a,i0)")" Total number of k-points in the full mesh: ",fstab(1)%nktot
  !write(my_unt,"(a,f5.1)")" Energy window: ",fstab(1)%eph_fsewin * Ha_eV, " (eV)
 

@@ -1,0 +1,97 @@
+# Aluminium structure
+     acell      7.652   7.652   7.652
+     rprim      0.00   0.50   0.50
+                0.50   0.00   0.50
+                0.50   0.50   0.00
+     natom      1
+      xred      0.00   0.00   0.00
+    ntypat      1
+     typat      1
+     znucl     13.00
+    occopt      3
+    tsmear      0.05
+
+# Parameters common to all runs
+    kptopt      1
+     ngkpt      4      4      4
+   nshiftk      1
+    shiftk      0.00   0.00   0.00
+    istwfk      8*1
+
+     nstep    100
+    enunit      2
+
+    ndtset      4
+      ecut      6.0
+      ecutwfn   6.0
+      ecutsigx  3.70827987
+      ecuteps   2.7 
+     gwpara     1  # gwpara 2 is much better
+
+# Self-consistent run to get the WFK file
+    tolwfr1     1.00d-10
+     nband1     35
+     nbdbuf1    5
+
+# Calculation of the dielectric matrix
+ optdriver2     3
+ gwcalctyp2     2
+    getwfk2     1
+
+     nband2    20
+
+   nfreqim2     4
+   nfreqre2     5
+ freqremax2     1.
+      awtr2       0     # Note : the default awtr 1 is better
+      symchi      0     # Note : the default symchi 1 is better
+      symsigma    0     # Note : the default symsigma 1 is better
+
+# Calculation of the GW corrections with PPM
+ optdriver3     4
+ gwcalctyp3     0
+    getwfk3     1
+    getscr3     2
+
+     nband3    30
+    nkptgw3     2
+     kptgw3     0.00   0.00   0.00
+                0.50   0.50   0.00
+      bdgw3     1      1
+                1      2
+ gw_icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
+
+# Calculation of the GW corrections without PPM
+ optdriver4     4
+ gwcalctyp4     2
+    getwfk4     1
+    getscr4     2
+
+     nband4    30
+    nkptgw4     2
+     kptgw4     0.00   0.00   0.00
+                0.50   0.50   0.00
+      bdgw4     1      2
+                1      2
+ gw_icutcoul4     3   # old deprecated value of icutcoul, only used for legacy
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t85.abo, tolnlines = 10, tolabs = 1.100e-03, tolrel = 2.000e-03
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = F. Bruneval.
+#%% keywords = GW
+#%% description = 
+#%%   Al FCC, in primitive cell (1 atom/cell).
+#%%   Test GW calculation with and without plasmon-pole model for a metal.
+#%% topics = GW
+#%%<END TEST_INFO>

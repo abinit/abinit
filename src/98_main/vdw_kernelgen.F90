@@ -26,9 +26,9 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,destroy_mpi_enreg,flush_unit
-!!      herald,initmpi_seq,wrtout,xc_vdw_done,xc_vdw_get_params,xc_vdw_init
-!!      xc_vdw_memcheck,xc_vdw_show,xc_vdw_write,xmpi_end,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,flush_unit,herald,wrtout
+!!      xc_vdw_done,xc_vdw_get_params,xc_vdw_init,xc_vdw_memcheck,xc_vdw_show
+!!      xc_vdw_write,xmpi_end,xmpi_init
 !!
 !! SOURCE
 

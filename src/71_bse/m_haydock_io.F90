@@ -105,7 +105,7 @@ CONTAINS  !====================================================================
 !!  haydock_file = file descriptor for the haydock file
 !!
 !! PARENTS
-!!      bsepostproc,m_haydock
+!!      m_haydock
 !!
 !! CHILDREN
 !!
@@ -150,7 +150,7 @@ end subroutine open_haydock
 !!  haydock_file = haydock file descriptor
 !!
 !! PARENTS
-!!      bsepostproc,m_haydock
+!!      m_haydock
 !!
 !! CHILDREN
 !!
@@ -300,7 +300,7 @@ end subroutine skip_dim_haydock
 !!  niter = 0 if the q-point has not been found
 !!
 !! PARENTS
-!!      bsepostproc,m_haydock
+!!      m_haydock
 !!
 !! CHILDREN
 !!
@@ -445,7 +445,7 @@ end subroutine write_haydock
 !!  haydock_file = haydock file descriptor
 !!
 !! PARENTS
-!!      bsepostproc,m_haydock
+!!      m_haydock
 !!
 !! CHILDREN
 !!

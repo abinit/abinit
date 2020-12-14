@@ -12,8 +12,10 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! PARENTS
+!!      m_gstate
 !!
 !! CHILDREN
+!!      cprj_clean,cprj_paw_alloc
 !!
 !! SOURCE
 
@@ -346,10 +348,10 @@ end subroutine paw2wvl
 !! NOTES
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      nullify_paw_ij_objects
+!!      cprj_clean,cprj_paw_alloc
 !!
 !! SOURCE
 
@@ -462,9 +464,10 @@ end subroutine paw2wvl_ij
 !! NOTES
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
+!!      cprj_clean,cprj_paw_alloc
 !!
 !! SOURCE
 
@@ -537,7 +540,7 @@ end subroutine wvl_paw_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      cprj_clean,cprj_paw_alloc

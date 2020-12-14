@@ -25,7 +25,6 @@ sources = [
  "m_invars2.F90",
  "m_memeval.F90",
  "m_mpi_setup.F90",
- "m_intagm_img.F90",
  "m_outvars.F90",
  "m_outvar_a_h.F90",
  "m_outvar_i_n.F90",

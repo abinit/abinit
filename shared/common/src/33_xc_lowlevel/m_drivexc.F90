@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_drivexc
 !! NAME
 !!  m_drivexc
@@ -65,10 +64,12 @@ contains
 !!  ixc = internal code for xc functional
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
-!!      wrtout
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -237,9 +238,12 @@ end subroutine echo_xc_name
 !! OUTPUT
 !!
 !! PARENTS
-!!      respfn,scfcv
+!!      m_longwave,m_respfn_driver,m_scfcv_core
 !!
 !! CHILDREN
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -326,9 +330,12 @@ end subroutine check_kxc
 !!  [nd2vxc]= size of the array d2vxc(npts,nd2vxc) (third derivatives of Exc wrt density)
 !!
 !! PARENTS
-!!      m_pawxc,rhotoxc
+!!      m_drivexc,m_pawxc,m_rhotoxc,m_xcdata
 !!
 !! CHILDREN
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -495,9 +502,12 @@ end subroutine size_dvxc
 !!    described above.
 !!
 !! PARENTS
-!!      m_pawxc,rhotoxc
+!!      m_pawxc,m_rhotoxc
 !!
 !! CHILDREN
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -585,10 +595,13 @@ end subroutine xcmult
 !!  charge at the new real space grid points (future work).
 !!
 !! PARENTS
-!!      bethe_salpeter,m_pawxc,mkcore_wvl,posdoppler,poslifetime,posratecore
-!!      psolver_rhohxc,rhohxcpositron,rhotoxc,wvl_initro
+!!      m_bethe_salpeter,m_electronpositron,m_pawxc,m_positron,m_psolver
+!!      m_rhotoxc,m_wvl_rho,mkcore_wvl
 !!
 !! CHILDREN
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -606,7 +619,7 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 !scalars
  integer :: ifft,ispden,numneg
  real(dp) :: rhotmp,worst
- character(len=500) :: message
+ character(len=600) :: message
 !arrays
  real(dp) :: rho(2)
 
@@ -687,10 +700,14 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 
  if (numneg>0) then
    if (iwarn==0) then
-     write(message,'(a,i0,a,a,a,es10.2,a,e10.2,a,a,a,a)')&
+     write(message,'(a,i0,a,a,a,es10.2,a,e10.2,11a)')&
 &     'Density went too small (lower than xc_denpos) at ',numneg,' points',ch10,&
 &     'and was set to xc_denpos = ',xc_denpos,'. Lowest was ',worst,'.',ch10,&
-&     'Likely due to too low boxcut or too low ecut for',' pseudopotential core charge.'
+&     'This might be due to (1) too low boxcut or (2) too low ecut for',ch10,&
+&     ' pseudopotential core charge, or (3) too low ecut for estimated initial density.',ch10,&
+&     ' Possible workarounds : increase ecut, or define the input variable densty,',ch10,&
+&     ' with a value larger than the guess for the decay length, or initialize your,',ch10,&
+&     ' density with a preliminary LDA or GGA-PBE if you are using a more exotic xc functional.'
      MSG_WARNING(message)
    end if
    iwarn=iwarn+1
@@ -804,12 +821,12 @@ end subroutine mkdenpos
 !!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
 !!
 !! PARENTS
-!!    rhotoxc,m_pawxc
+!!      m_pawxc,m_rhotoxc
 !!
 !! CHILDREN
 !!      invcb,libxc_functionals_end,libxc_functionals_getvxc
-!!      libxc_functionals_init,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca,xcspol
-!!      xctetr,xcwign,xcxalp
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 

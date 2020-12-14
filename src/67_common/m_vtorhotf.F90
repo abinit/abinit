@@ -82,7 +82,7 @@ contains
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!
@@ -184,7 +184,7 @@ subroutine vtorhotf(dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 !! OUTPUT
 !!
 !! PARENTS
-!!      vtorhotf
+!!      m_vtorhotf
 !!
 !! CHILDREN
 !!
@@ -268,7 +268,7 @@ end subroutine tf
 !! OUTPUT
 !!
 !! PARENTS
-!!      vtorhotf
+!!      m_vtorhotf
 !!
 !! CHILDREN
 !!
@@ -1389,7 +1389,7 @@ end function ifermi52
 !! OUTPUT
 !!
 !! PARENTS
-!!      vtorhotf
+!!      m_vtorhotf
 !!
 !! CHILDREN
 !!

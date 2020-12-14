@@ -23,7 +23,16 @@ to k-vector must be carried out. After generating a GKK file (see
 in anaddb, setting [[anaddb:elphflag]] variable to 1. Most of the procedure is
 automatic, but can be lengthy if a large number of k-points is being used.
 
-For the superconductivity calculations, The electron-phonon interaction is
+While the legacy implementation of the transport properties in ABINIT is quite stable,
+there is a new implementation under heavy development.
+Most of the present information relates to the legacy implementation,
+although some also relates to the
+most recent procedure that relies on [[optdriver]]=7. The documentation
+of the new procedure is given mostly by the related tutorials (introduction and mobility), see below.
+Another tutorial for the new procedure for superconductivity calculations is still under development.
+
+
+For the superconductivity calculations (legacy implementation), The electron-phonon interaction is
 interpolated in reciprocal space, then integrated over the Fermi surface to
 give the Eliashberg function. Several quadrature methods are available. The
 default ([[anaddb:telphint]]=1) is to use Gaussian weighting, with a width
@@ -63,5 +72,7 @@ ANADDB can be found [[pdf:elphon_manual|here]].
 
 ## Tutorials
 
-* [[tutorial:eph|The tutorial on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
+* (Legacy approach) [[tutorial:eph|The tutorial on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
 
+* (New procedure) Two tutorials are available at [[tutorial:eph_intro|an overview of the EPH code]], and
+at [[tutorial:eph4mob|Phonon-limited mobility]]:.

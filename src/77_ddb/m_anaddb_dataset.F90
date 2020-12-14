@@ -2062,15 +2062,17 @@ end subroutine outvars_anaddb
 
 subroutine anaddb_init(input_path, filnam)
 
+  use m_fstrings
+
 !Arguments -------------------------------
 !arrays
  character(len=*),intent(in) :: input_path
- character(len=*),intent(out) :: filnam(7)
+ character(len=*),intent(out) :: filnam(8)
 
 !Local variables -------------------------
 !scalars
- integer :: lenstr, marr, jdtset, tread
- character(len=strlen) :: string
+ integer :: lenstr, marr, jdtset, tread, i1
+ character(len=strlen) :: string, fname
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
@@ -2105,6 +2107,7 @@ subroutine anaddb_init(input_path, filnam)
    write(std_out,*)' Give name for file containing ddk filenames for elphon/transport: '
    read(std_in, '(a)' ) filnam(7)
    write(std_out,'(a,a)' )'-   ',trim(filnam(7))
+   filnam(8) = ""
 
  else
    ! Read input
@@ -2140,9 +2143,25 @@ subroutine anaddb_init(input_path, filnam)
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_filepath", tread, 'KEY', key_value=filnam(7))
    if (tread == 1) write(std_out, "(2a)")"- File containing ddk filenames for elphon/transport: ", trim(filnam(7))
 
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "outdata_prefix", tread, 'KEY', key_value=filnam(8))
+   if (tread == 1) then
+     write(std_out, "(2a)")'- Root name for output files: ', trim(filnam(8))
+   endif
+
    ABI_FREE(intarr)
    ABI_FREE(dprarr)
  end if
+
+ ! Compute OUTPUT_PREFIX as in abinit.
+ ! I do not change the "files" file to avoid abckward compatibility issue
+ if (len_trim(filnam(8)) == 0) then
+   fname = basename(trim(filnam(2)))
+   i1 = index(fname, ".",back=.true.)
+   if ( i1 > 1 ) then
+     filnam(8) = fname(:i1-1)
+   end if
+   write(std_out, "(2a)")'- Root name for output files set to: ', trim(filnam(8))
+ endif
 
 end subroutine anaddb_init
 !!***
@@ -2239,7 +2258,7 @@ subroutine anaddb_chkvars(string)
  list_logicals=' '
 
 !String input variables
- list_strings=' gruns_ddbs ddb_filepath output_file gkk_filepath eph_prefix ddk_filepath' ! md_output
+ list_strings=' gruns_ddbs ddb_filepath output_file outdata_prefix gkk_filepath eph_prefix ddk_filepath' ! md_output
 !</ANADDB_VARS>
 
 !Extra token, also admitted:

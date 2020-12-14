@@ -20,7 +20,7 @@ The TB2J python package, which can be used to generate a spin model, can be foun
 
 *Before beginning, you might consider to work in a subdirectory for this tutorial. Why not Work_spindyn?*
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 Heisenberg Model formalism
 
@@ -102,7 +102,7 @@ spin_ntime = 20000              ! time steps for measurement
 spin_nctime = 100               ! Number of time steps between two writes
                                 ! into netcdf
 spin_dt = 1e-16 s               ! Time step (seconds)
-spin_qpoint_qpoint = 0.0 0.0 0.0       ! Wave vector for summation of spin in each
+spin_projection_qpoint= 0.0 0.0 0.0       ! Wave vector for summation of spin in each
                                 ! sublattice.
 
 spin_write_traj = 0             ! do not write spin trajectory to netcdf file

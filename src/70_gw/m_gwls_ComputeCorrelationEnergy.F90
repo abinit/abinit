@@ -906,7 +906,7 @@ end subroutine compute_correlations_shift_lanczos
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_sternheimer
+!!      m_gwls_sternheimer
 !!
 !! CHILDREN
 !!
@@ -1429,7 +1429,7 @@ end subroutine compute_correlations_no_model_shift_lanczos
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!
@@ -1549,7 +1549,7 @@ end subroutine compute_integrands_shift_lanczos
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!
@@ -1679,7 +1679,7 @@ end subroutine output_results
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!
@@ -1755,7 +1755,7 @@ end subroutine output_epsilon_eigenvalues
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!

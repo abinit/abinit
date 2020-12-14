@@ -107,9 +107,10 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv,vtorho
+!!      m_outscfcv,m_vtorho
 !!
 !! CHILDREN
+!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
 !!
 !! SOURCE
 
@@ -764,9 +765,10 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !!  print psichi in forlb.ovlp
 !!
 !! PARENTS
-!!      datafordmft
+!!      m_datafordmft
 !!
 !! CHILDREN
+!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
 !!
 !! SOURCE
 
@@ -932,9 +934,10 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 !!  check psichi: compute norm and occupations
 !!
 !! PARENTS
-!!      datafordmft
+!!      m_datafordmft
 !!
 !! CHILDREN
+!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
 !!
 !! SOURCE
 
@@ -1047,10 +1050,10 @@ end subroutine datafordmft
 !! NOTES
 !!
 !! PARENTS
-!!      m_hubbard_one,qmc_prep_ctqmc
+!!      m_forctqmc,m_hubbard_one,m_self
 !!
 !! CHILDREN
-!!      checkdiag_matlu,loc_oper,print_matlu,sym_matlu,wrtout
+!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
 !!
 !! SOURCE
 
@@ -1151,8 +1154,7 @@ end subroutine datafordmft
 !!      m_datafordmft,m_dmft
 !!
 !! CHILDREN
-!!      add_matlu,destroy_oper,gather_matlu,identity_oper,init_oper
-!!      invsqrt_matrix,loc_oper,print_matlu,sym_matlu,wrtout
+!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
 !!
 !! SOURCE
 
@@ -1334,11 +1336,10 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 !!  change psichi: normalizepsichi it
 !!
 !! PARENTS
-!!      psichi_renormalization
+!!      m_datafordmft
 !!
 !! CHILDREN
-!!      add_matlu,destroy_oper,gather_matlu,identity_oper,init_oper
-!!      invsqrt_matrix,loc_oper,print_matlu,sym_matlu,wrtout
+!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
 !!
 !! SOURCE
 
@@ -1725,7 +1726,7 @@ end subroutine psichi_renormalization
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu

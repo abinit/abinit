@@ -348,7 +348,7 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!! outscfcv,screening_driver,sigma_driver,fullbz_plowannier
+!!      m_outscfcv,m_plowannier,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -714,7 +714,7 @@ end subroutine destroy_orbital
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
 !!
@@ -2330,10 +2330,10 @@ end subroutine compute_coeff_plowannier
 !! OUTPUT
 !!
 !! PARENTS
-!! outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!! open_file, wrtout
+!!
 !! SOURCE
 
 
@@ -2409,10 +2409,10 @@ end subroutine compute_coeff_plowannier
 !! wan
 !!
 !! PARENTS
-!! outscfcv,cchi0, cchi0q0, prep_calc_ucrpa
+!!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!! open_file,
+!!
 !! SOURCE
 
  subroutine get_plowannier(wan_in,wan_out,dtset)
@@ -2506,7 +2506,7 @@ end subroutine get_plowannier
 !! wanbz
 !!
 !! PARENTS
-!! screening_driver
+!!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -2618,7 +2618,7 @@ end subroutine fullbz_plowannier
 !! OUTPUT
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv,m_plowannier,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -3403,7 +3403,7 @@ end subroutine print_operwan
 !! operwan_realspace
 !!
 !! PARENTS
-!! m_plowannier
+!!      m_plowannier,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -3461,7 +3461,7 @@ end subroutine init_operwan_realspace
 !! rhot1
 !!
 !! PARENTS
-!! m_sigma_driver
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -3595,7 +3595,7 @@ end subroutine reduce_operwan_realspace
 !! operwan_realspace
 !!
 !! PARENTS
-!! m_plowannier
+!!      m_plowannier,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -3645,7 +3645,7 @@ end subroutine destroy_operwan_realspace
 !! operwan_realspace
 !!
 !! PARENTS
-!! m_plowannier
+!!      m_plowannier,m_sigma_driver
 !!
 !! CHILDREN
 !!

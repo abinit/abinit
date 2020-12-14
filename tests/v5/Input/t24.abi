@@ -1,0 +1,75 @@
+# Semiconductor rhombohedral GeTe
+# Computation of electric field response and Born effective charges
+
+#prtvol 10
+
+ ndtset 9    udtset 3  3
+
+#Datasets ?1 : GS
+
+#Dataset ?2 : ddk
+ rfelfd?2   2
+ nqpt?2     1
+ getwfk?2   -1
+ kptopt?2   2
+
+#Dataset ?3: electric field + phonon response
+ rfelfd?3  3
+ rfphon?3  1
+ nqpt?3    1
+ getwfk?3  -2
+ getddk?3  -1
+ kptopt?3   2
+
+#Datasets 1? : scalar wavefunctions
+
+#Datasets 2? : spinor wavefunctions, but no SO coupling
+ nspinor2?  2
+ nband2?   10
+ so_psp2?    0 0
+
+#Dataset 3? : spinor wavefunctions, with SO coupling
+ nspinor3?  2
+ nband3?   10
+
+
+#Common data
+ acell 3*8.0d0
+ angdeg 3*58.59
+ ecut  2.0d0
+ natom  2
+ nband  5
+ nstep 20
+ ntypat  2
+ qpt 3*0.0d0
+ rfasr 0
+ rfphon  0
+ rfatpol   1 2
+ rfdir     1 1 1
+ tolwfr  1.0d-16
+ typat  1 2
+ xred    3*0.235d0 3*-0.235d0
+ znucl 32 52
+ kptopt 1
+ ngkpt 2 2 2
+
+
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "32ge.4.hgh, 52te.6.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t24.abo, tolnlines = 15, tolabs = 5.000e-01, tolrel = 3.000e-02, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   GeTe in rhombohedral structure
+#%%   Test the computation of phonons, dielectric tensor and Born effective
+#%%   charges, with and without spin-orbit coupling.
+#%%<END TEST_INFO>

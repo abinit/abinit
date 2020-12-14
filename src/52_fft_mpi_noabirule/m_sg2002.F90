@@ -116,7 +116,7 @@ contains
 !!   can be done in the workarray zw, the program stops with an error message.
 !!
 !! PARENTS
-!!      ccfft,fourdp,m_sg2002
+!!      m_fft,m_sg2002
 !!
 !! CHILDREN
 !!
@@ -400,7 +400,7 @@ end subroutine sg2002_back
 !!  can be done in the workarray zw, the program stops with an error message.
 !!
 !! PARENTS
-!!      ccfft,fourdp,m_sg2002
+!!      m_fft,m_sg2002
 !!
 !! CHILDREN
 !!
@@ -1326,7 +1326,7 @@ end subroutine sg2002_mpiforw_wf
 !!  Write simplified API for sequential version.
 !!
 !! PARENTS
-!!      fourdp,m_fft
+!!      m_fft
 !!
 !! CHILDREN
 !!

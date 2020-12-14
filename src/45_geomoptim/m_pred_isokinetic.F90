@@ -72,7 +72,7 @@ contains
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
 !!      hist2var,var2hist,wrtout,xcart2xred,xred2xcart

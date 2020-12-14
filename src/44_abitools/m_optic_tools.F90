@@ -451,7 +451,7 @@ real(dp) :: deltav1v2
 real(dp) :: ha2ev
 real(dp) :: tmpabs
 real(dp) :: renorm_factor,emin,emax
-real(dp) :: ene
+real(dp) :: ene,abs_eps,re_eps
 complex(dpc) :: b11,b12
 complex(dpc) :: ieta,w
 character(len=fnlen) :: fnam1
@@ -459,6 +459,7 @@ character(len=500) :: msg
 ! local allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
 complex(dpc), allocatable :: chi(:,:)
+ real(dp), allocatable :: im_refract(:),re_refract(:)
 complex(dpc), allocatable :: eps(:)
 
 ! *********************************************************************
@@ -538,6 +539,8 @@ complex(dpc), allocatable :: eps(:)
 !allocate local arrays
  ABI_ALLOCATE(chi,(nmesh,nspin))
  ABI_ALLOCATE(eps,(nmesh))
+ ABI_ALLOCATE(im_refract,(nmesh))
+ ABI_ALLOCATE(re_refract,(nmesh))
  ieta=(0._dp,1._dp)*brod
  renorm_factor=1._dp/(omega*dble(nsymcrys))
  ha2ev=13.60569172*2._dp
@@ -673,7 +676,11 @@ complex(dpc), allocatable :: eps(:)
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene,abs(eps(iw))
+     abs_eps=abs(eps(iw))
+     re_eps=dble(eps(iw))
+     write(fout1, '(2es16.6)' ) ene,abs_eps
+     re_refract(iw)=sqrt(half*(abs_eps+re_eps))
+     im_refract(iw)=sqrt(half*(abs_eps-re_eps))
    end do
    write(fout1,*)
    write(fout1,*)
@@ -681,7 +688,7 @@ complex(dpc), allocatable :: eps(:)
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene,sqrt(half*(abs(eps(iw)) - dble(eps(iw)) ))
+     write(fout1, '(2es16.6)' ) ene,im_refract(iw)
    end do
    write(fout1,*)
    write(fout1,*)
@@ -689,7 +696,7 @@ complex(dpc), allocatable :: eps(:)
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene,sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
+     write(fout1, '(2es16.6)' ) ene,re_refract(iw)
    end do
    write(fout1,*)
    write(fout1,*)
@@ -697,7 +704,7 @@ complex(dpc), allocatable :: eps(:)
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene, sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
+     write(fout1, '(2es16.6)' ) ene, ((re_refract(iw)-one)**2+im_refract(iw)**2)/((re_refract(iw)+one)**2+im_refract(iw)**2)
    end do
    write(fout1,*)
    write(fout1,*)
@@ -705,8 +712,8 @@ complex(dpc), allocatable :: eps(:)
    do iw=2,nmesh
      ene=(iw-1)*de
      tmpabs=zero
-     if (abs(eps(iw)) + dble(eps(iw)) > zero) then
-       tmpabs = aimag(eps(iw))*ene / sqrt(half*( abs(eps(iw)) + dble(eps(iw)) )) / Sp_Lt / Bohr_meter * 1.0d-6
+     if ( re_refract(iw) > tol10 ) then
+       tmpabs = aimag(eps(iw))*ene / re_refract(iw) / Sp_Lt / Bohr_meter * 1.0d-6
      end if
      write(fout1, '(2es16.6)' ) ha2ev*ene, tmpabs
    end do
@@ -722,8 +729,10 @@ complex(dpc), allocatable :: eps(:)
 #endif
  end if
 
- ABI_DEALLOCATE(chi)
+ ABI_FREE(chi)
  ABI_FREE(eps)
+ ABI_FREE(im_refract)
+ ABI_FREE(re_refract)
 
 end subroutine linopt
 !!***
@@ -889,10 +898,11 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
        if (abs(symcrys(1,2,isym)).lt.tst.and.abs(symcrys(1,3,isym)).lt.tst &
        .and.abs(symcrys(2,1,isym)).lt.tst.and.abs(symcrys(2,3,isym)).lt.tst.and.  &
        abs(symcrys(3,1,isym)).lt.tst.and.abs(symcrys(3,2,isym)).lt.tst) then
-         write(std_out,*) '-----------------------------------------'
-         write(std_out,*) '    the crystal has inversion symmetry   '
-         write(std_out,*) '    the SHG susceptibility is zero       '
-         write(std_out,*) '-----------------------------------------'
+         write(std_out,*) '-------------------------------------------'
+         write(std_out,*) '    The crystal has inversion symmetry     '
+         write(std_out,*) '    The SHG susceptibility is zero         '
+         write(std_out,*) '    Action : set num_nonlin_comp to zero   '
+         write(std_out,*) '-------------------------------------------'
          MSG_ERROR("Aborting now")
        end if
      end if
@@ -901,8 +911,10 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
    if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in nlinopt:                        '
-     write(std_out,*) '    the polarisation directions incorrect    '
+     write(std_out,*) '    Incorrect polarisation directions        '
      write(std_out,*) '    1=x,  2=y  and 3=z                       '
+     write(std_out,*) '    Action : check your input file,          ' 
+     write(std_out,*) '    use only 1, 2 or 3 to define directions  '
      write(std_out,*) '---------------------------------------------'
      MSG_ERROR("Aborting now")
    end if
@@ -929,19 +941,19 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
   !broadening
    if (brod.gt.0.009) then
      write(std_out,*) '---------------------------------------------'
-     write(std_out,*) '    ATTENTION: broadening is quite high      '
+     write(std_out,*) '    WARNING : broadening is quite high       '
      write(std_out,*) '    ideally should be less than 0.005        '
      write(std_out,*) '---------------------------------------------'
    else if (brod.gt.0.015) then
      write(std_out,*) '----------------------------------------'
-     write(std_out,*) '    ATTENTION: broadening is too high   '
+     write(std_out,*) '    WARNING : broadening is too high    '
      write(std_out,*) '    ideally should be less than 0.005   '
      write(std_out,*) '----------------------------------------'
    end if
   !tolerance
    if (tol.gt.0.006) then
      write(std_out,*) '----------------------------------------'
-     write(std_out,*) '    ATTENTION: tolerance is too high    '
+     write(std_out,*) '    WARNING : tolerance is too high     '
      write(std_out,*) '    ideally should be less than 0.004   '
      write(std_out,*) '----------------------------------------'
    end if

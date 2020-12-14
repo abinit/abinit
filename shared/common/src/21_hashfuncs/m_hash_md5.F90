@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hash_md5
 !! NAME
 !!  m_hash_md5

@@ -1,0 +1,62 @@
+# Fe atom in a big box
+# Perform the computation of the Gamma dynamical matrix.
+
+ ndtset 2
+
+#Dataset 1 : SCF
+  tolvrs1  1.0d-13
+   nstep1  30
+
+#Dataset 2 : RF at q=0 0 0   (this is always needed for IFCs)
+
+  getwfk2  1
+    nqpt2  1
+     qpt2  0.0 0.0 0.0
+ rfatpol2  1 1
+   rfdir2  1 1 1
+  rfphon2  1
+  tolvrs2  1.0d-10
+   nstep2  18
+
+#Common data
+
+ ecut 22
+ acell 3*6.50
+ rprim 0 .5 .5  .5 0 .5  .5 .5 0
+
+ ixc    1
+  kptopt 0
+ natom  1
+ nband 10
+ nsppol 2
+ spinat 0.0 0.0 4.0
+ ntypat  1
+ occopt 4
+ nkpt  1
+ kpt 0.0 0.0 0.0
+ wtk 1.0
+
+ typat  1
+ xred  0.0 0.0 0.0
+ znucl 26.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t15.abo, tolnlines = 0, tolabs = 1.000e-10, tolrel = 1.000e-10, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT 
+#%% description = 
+#%%     Fe FCC, spin-polarized (ferro), with only the Gamma point.
+#%%     Test spin-polarized GS and RF calculation, at varying occupation
+#%%     number (occopt=4). Check acoustic sum rule.
+#%%<END TEST_INFO>

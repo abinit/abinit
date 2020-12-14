@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_libpaw_tools
 !! NAME
 !!  m_libpaw_tools
@@ -23,7 +22,7 @@
 #include "libpaw.h"
 
 module m_libpaw_tools
-    
+
  USE_DEFS
  USE_MPI_WRAPPERS
 
@@ -62,7 +61,7 @@ module m_libpaw_tools
  private :: libpaw_write_lines    ! OS-compatible string output
  private :: libpaw_leave          ! Clean exit of F90 routines
  private :: libpaw_die            ! Clean exit
- private :: libpaw_lock_and_write ! Write a string to a file with locking mechanism 
+ private :: libpaw_lock_and_write ! Write a string to a file with locking mechanism
 
 !PRIVATE VARIABLES
  integer,save :: LIBPAW_WRITE_COMM=xmpi_world ! Communicator used for the parallel write
@@ -230,8 +229,8 @@ end subroutine libpaw_wrtout_myproc
 !!  libpaw_write_lines
 !!
 !! FUNCTION
-!!  This routine receives a string, split the message in lines according to the 
-!!  ch10 character and output the text to the specified unit. 
+!!  This routine receives a string, split the message in lines according to the
+!!  ch10 character and output the text to the specified unit.
 !!  Allows to treat correctly the write operations for Unix (+DOS) and MacOS.
 !!
 !! INPUTS
@@ -286,26 +285,26 @@ subroutine libpaw_write_lines(unit,msg)
 #endif
 
  if (msg_size==0) then
-   write(unit,*) ; return 
+   write(unit,*) ; return
  end if
 
-!Here, split the message, according to the char(10) characters (carriage return). 
+!Here, split the message, according to the char(10) characters (carriage return).
 !This technique is portable accross different OS.
  rtnpos=index(msg,ch10)
  if (rtnpos==0) then
    write(unit,"(a)") msg(1:msg_size) ; return
- end if 
+ end if
 
  ii=1; jj=rtnpos
- do 
+ do
    if (ii==jj) then
      write(unit,*)
    else
      write(unit,'(a)') msg(ii:jj-1)
    end if
    ii=jj+1 ; if (ii>msg_size) exit
-   jj=index(msg(ii:msg_size),ch10) 
-   if (jj==0) then 
+   jj=index(msg(ii:msg_size),ch10)
+   if (jj==0) then
      jj=msg_size+1
    else
      jj=jj+ii-1
@@ -326,7 +325,7 @@ end subroutine libpaw_write_lines
 !! FUNCTION
 !!  Basic error handler.
 !!
-!! INPUTS 
+!! INPUTS
 !!  msg=string containing additional information on the nature of the problem
 !!  level=string defining the type of problem. Possible values are:
 !!   COMMENT, WARNING, ERROR,BUG
@@ -358,7 +357,7 @@ subroutine libpaw_msg_hndl(msg,level,mode_paral,file,line)
 !Local variables ------------------------------
  logical :: file_exists
  character(len=500) :: f90name='Unknown'
- character(len=LEN(msg)) :: my_msg 
+ character(len=LEN(msg)) :: my_msg
  character(len=MAX(4*LEN(msg),2000)) :: sbuf
 
 ! *********************************************************************
@@ -379,15 +378,15 @@ subroutine libpaw_msg_hndl(msg,level,mode_paral,file,line)
 
  select case (libpaw_to_upper(level))
  case ('COMMENT','WARNING')
-   call libpaw_wrtout(std_out,sbuf,mode_paral) 
+   call libpaw_wrtout(std_out,sbuf,mode_paral)
  case ('ERROR','BUG')
-   call libpaw_wrtout(std_out,sbuf,mode_paral) 
+   call libpaw_wrtout(std_out,sbuf,mode_paral)
    inquire(file=LIBPAW_MPIABORTFILE,exist=file_exists)
    if ((.not.file_exists).and.xmpi_comm_size(xmpi_world)>1) then
      call libpaw_lock_and_write(LIBPAW_MPIABORTFILE,sbuf)
    end if
    call libpaw_leave(mode_paral)
- case default 
+ case default
    write(sbuf,'(4a)') ch10,' libpaw_msg_hndl: BUG**2 - ',ch10,' Wrong value for level!'
    call libpaw_die(sbuf)
  end select
@@ -458,7 +457,7 @@ end subroutine libpaw_spmsg_getcount
 !!  This routine comes directly from the SPECIALMSG_MPISUM routine delivered with ABINIT.
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!      flush,flush_
@@ -502,7 +501,7 @@ end subroutine libpaw_spmsg_mpisum
 !! OUTPUT
 !!
 !! PARENTS
-!!      driver,initmpi_world,m_io_redirect,memory_eval,mpi_setup
+!!      m_driver,m_io_redirect,m_memeval,m_mpi_setup,m_mpinfo
 !!
 !! CHILDREN
 !!      flush,flush_
@@ -513,7 +512,7 @@ subroutine libpaw_write_comm_set(new_write_comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: new_write_comm
- 
+
 !Local variables ------------------------------
 
 ! **********************************************************************
@@ -539,7 +538,7 @@ end subroutine libpaw_write_comm_set
 !! OUTPUT
 !!
 !! PARENTS
-!!      iofn1,m_argparse
+!!      m_argparse,m_dtfil
 !!
 !! CHILDREN
 !!      flush,flush_
@@ -550,7 +549,7 @@ subroutine libpaw_log_flag_set(log_flag)
 
 !Arguments ------------------------------------
  logical,intent(in) :: log_flag
- 
+
 !Local variables ------------------------------
 
 ! **********************************************************************
@@ -569,7 +568,7 @@ end subroutine libpaw_log_flag_set
 !! FUNCTION
 !!  Error handler for Netcdf calls.
 !!
-!! INPUTS 
+!! INPUTS
 !!  ncerr=Status error returned by the Netcdf library.
 !!  msg=User-defined string with info on the action that was performed
 !!  file= name of the file.
@@ -596,7 +595,7 @@ subroutine libpaw_netcdf_check(ncerr,msg,file,line)
 !Local variables-------------------------------
  integer :: f90line
  character(len=500) :: f90name
- character(len=1024) :: nc_msg 
+ character(len=1024) :: nc_msg
  character(len=2048) :: my_msg
 
 ! *************************************************************************
@@ -605,10 +604,10 @@ subroutine libpaw_netcdf_check(ncerr,msg,file,line)
  if (ncerr /= NF90_NOERR) then
    if (PRESENT(line)) then
      f90line=line
-   else 
+   else
      f90line=0
    end if
-   if (PRESENT(file)) then 
+   if (PRESENT(file)) then
      f90name = libpaw_basename(file)
    else
      f90name='Subroutine Unknown'
@@ -692,10 +691,10 @@ end subroutine libpaw_leave
 !!
 !! FUNCTION
 !!  Stop smoothly the execution in case of unexpected events reporting the
-!!  line number and the file name where the error occurred as well as the 
+!!  line number and the file name where the error occurred as well as the
 !!  MPI rank of the processor.
 !!
-!! INPUTS 
+!! INPUTS
 !!  msg=String containing additional information on the nature of the problem
 !!  [file]=Name of the f90 file containing the caller
 !!  [line]=Line number of the file where problem occurred
@@ -719,7 +718,7 @@ subroutine libpaw_die(message,file,line)
  character(len=*),optional,intent(in) :: file
 
 !Local variables ------------------------------
- integer :: rank 
+ integer :: rank
  integer :: f90line=0
  character(len=10) :: lnum,strank
  character(len=500) :: f90name='Subroutine Unknown'
@@ -737,7 +736,7 @@ subroutine libpaw_die(message,file,line)
  msg=TRIM(f90name)//':'//TRIM(lnum)//' P'//TRIM(strank)
  write(msg,'(a,2x,2a,2x,a)') ch10,TRIM(msg),ch10,TRIM(message)
 
- call libpaw_wrtout(std_out,msg,'PERS') 
+ call libpaw_wrtout(std_out,msg,'PERS')
  call libpaw_leave('PERS')
 
 end subroutine libpaw_die
@@ -785,7 +784,7 @@ subroutine libpaw_lock_and_write(filename,string)
  call libpaw_write_lines(file_unit,string)
  close(lock_unit,status="delete")
  close(file_unit)
- return 
+ return
 
 99 continue
 
@@ -820,7 +819,7 @@ integer function libpaw_get_free_unit()
   integer,parameter :: MAX_UNIT_NUMBER=64    ! There's a serious problem in Nag6.0. In principle
                                              ! Maximum unit number: 2147483647
 #else
- integer,parameter :: MAX_UNIT_NUMBER=1024 
+ integer,parameter :: MAX_UNIT_NUMBER=1024
 #endif
  integer :: iunt
  logical :: isopen
@@ -855,6 +854,7 @@ end function libpaw_get_free_unit
 !!  This routine comes directly from the FLUSH_UNIT routine delivered with ABINIT.
 !!
 !! PARENTS
+!!      m_pawrhoij
 !!
 !! CHILDREN
 !!      flush,flush_

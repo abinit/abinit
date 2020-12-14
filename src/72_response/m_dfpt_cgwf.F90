@@ -137,7 +137,7 @@ contains
 !!         input if usedcwavef=1, output if usedcwavef=2
 !!
 !! PARENTS
-!!      dfpt_vtowfk
+!!      m_dfpt_vtowfk,m_sigmaph
 !!
 !! CHILDREN
 !!      cg_precon,cg_zaxpy,cg_zcopy,dotprod_g,getdc1,getgh1c,getghc

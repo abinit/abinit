@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # coding: utf-8
 """
 This script analyzes the Abinit source tree and generates the dependency graph
@@ -248,7 +248,7 @@ def main():
     if not options.regenerate and os.path.exists(AbinitProject.get_default_pickle_file()):
         proj = AbinitProject.pickle_load()
         needs_reload = proj.needs_reload()
-	
+
         if needs_reload:
             cprint("Source tree changed. Need to parse source files again to rebuild dependency graph...", "yellow")
 
@@ -264,7 +264,7 @@ def main():
         if retcode != 0:
             cprint("validate returned retcode: %s. Aborting now" % retcode, "red")
             return retcode
-	
+
         #all_mods = proj.find_allmods("dummy_tests.F90")
         #for mod in all_mods: print(mod.basename)
 

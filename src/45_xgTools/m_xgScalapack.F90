@@ -84,7 +84,7 @@ module m_xgScalapack
 !!
 !! FUNCTION
 !!  Init the scalapack communicator for next operations.
-!!  If the comm has to many cpus, then take only a subgroup of this comm
+!!  If the comm has too many cpus, then take only a subgroup of this comm
 !!
 !! INPUTS
 !!

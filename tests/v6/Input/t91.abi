@@ -1,0 +1,22 @@
+t91.ddb.out
+Ti DDB file for elphon calculation
+4
+t90o_DS2_DDB
+t90o_DS3_DDB
+t90o_DS4_DDB
+t90o_DS5_DDB
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t91.ddb.out, tolnlines=   80,   tolabs=  1.0e-4,      tolrel= 1.1, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Verstraete
+#%% keywords = 
+#%% description = mrgddb of test 90
+#%%<END TEST_INFO>

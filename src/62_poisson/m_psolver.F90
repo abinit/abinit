@@ -84,11 +84,10 @@ contains
 !!  In ABINIT (dtset%usewvl != 1), the same convention is used as in psolver.
 !!
 !! PARENTS
-!!      energy,rhotov,scfcv,setvtr
+!!      m_dft_energy,m_rhotov,m_scfcv_core,m_setvtr
 !!
 !! CHILDREN
-!!      h_potential,mean_fftr,metric,mkdenpos,psolver_kernel,wrtout
-!!      wvl_rhov_abi2big,xc_potential
+!!      deallocate_coulomb_operator,nullify_coulomb_operator,pkernel_set,wrtout
 !!
 !! SOURCE
 
@@ -544,10 +543,10 @@ end subroutine psolver_rhohxc
 !!  In ABINIT (dtset%usewvl != 1), the same convention is used as in PSolver.
 !!
 !! PARENTS
-!!      mklocl_realspace,nres2vres
+!!      m_forstr,m_mklocl_realspace
 !!
 !! CHILDREN
-!!      h_potential,psolver_kernel,wrtout
+!!      deallocate_coulomb_operator,nullify_coulomb_operator,pkernel_set,wrtout
 !!
 !! SOURCE
 
@@ -673,8 +672,7 @@ end subroutine psolver_hartree
 !!  kernel= associated kernel on build (iaction = 1) and get action (iaction = 2).
 !!
 !! PARENTS
-!!      gstate,mklocl_realspace,psolver_hartree,psolver_rhohxc
-!!      wvl_wfsinp_reformat
+!!      m_gstate,m_mklocl_realspace,m_psolver,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!      deallocate_coulomb_operator,nullify_coulomb_operator,pkernel_set,wrtout

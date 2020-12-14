@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_iterators
 !! NAME
 !!  m_iterators
@@ -213,9 +212,7 @@ subroutine indices_free(Ids)
 ! *************************************************************************
 
  Ids%leng=0
- if (allocated(Ids%indx))  then
-   ABI_FREE(Ids%indx)
- end if
+ ABI_SFREE(Ids%indx)
 
 end subroutine indices_free
 !!***
@@ -263,7 +260,7 @@ subroutine iter2_alloc(Iter2,sizes,starts)
  Iter2%starts=(/s1,s2/)
  Iter2%sizes =sizes
 
- ABI_DT_MALLOC( Iter2%slice,(s1:s1+sizes(1)-1, s2:s2+sizes(2)-1))
+ ABI_MALLOC( Iter2%slice,(s1:s1+sizes(1)-1, s2:s2+sizes(2)-1))
 
  do i2=LBOUND(Iter2%slice,DIM=2),UBOUND(Iter2%slice,DIM=2)
    do i1=LBOUND(Iter2%slice,DIM=1),UBOUND(Iter2%slice,DIM=1)
@@ -358,7 +355,7 @@ subroutine iter2_free(Iter2)
    end do
  end do
 
- ABI_DT_FREE(Iter2%slice)
+ ABI_SFREE(Iter2%slice)
 
 end subroutine iter2_free
 !!***

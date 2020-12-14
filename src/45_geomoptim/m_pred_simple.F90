@@ -71,15 +71,14 @@ contains
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
+!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
 !!
 !! SOURCE
 
 subroutine pred_simple(ab_mover,hist,iexit)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -148,7 +147,7 @@ end subroutine pred_simple
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_mover,m_precpred_1geo
 !!
 !! CHILDREN
 !!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
@@ -158,7 +157,6 @@ end subroutine pred_simple
 subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -393,7 +391,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    end if
 
    ABI_ALLOCATE(matrix_tmp,(3*ab_mover%natom,3*ab_mover%natom))
-   
+
    matrix_tmp(:,:)=matrix(:,:)
    !write(*,*)"matrix_tmp",matrix_tmp
 

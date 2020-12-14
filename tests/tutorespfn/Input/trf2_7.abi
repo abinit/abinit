@@ -1,0 +1,44 @@
+!Input file for the anaddb code. Analysis of the SiO2 DDB                       
+
+!Flags
+ ifcflag   1     ! Interatomic force constant flag
+ ifcout    0
+ thmflag   1     ! Thermodynamical properties flag
+
+!Wavevector grid number 1 (coarse grid, from DDB)
+  brav    2      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+  ngqpt   4  4  4   ! Monkhorst-Pack indices
+  nqshft  1         ! number of q-points in repeated basic q-cell
+  q1shft  3*0.0
+
+!Interatomic force constant info
+  dipdip  1      ! Dipole-dipole interaction treatment
+
+!Wavevector grid number 2 (series of fine grids, extrapolated from interat forces)
+  ng2qpt   20 20 20  ! sample the BZ up to ngqpt2
+  ngrids   5         ! number of grids of increasing size
+  q2shft   3*0.0
+
+!Thermal information
+  nchan   1250   ! # of channels for the DOS with channel width 1 cm-1
+  nwchan  5      ! # of different channel widths from this integer down to 1 cm-1
+  thmtol  0.120  ! Tolerance on thermodynamical function fluctuations
+  ntemper 10     ! Number of temperatures
+  temperinc 20.  ! Increment of temperature in K for temperature dependency
+  tempermin 20.  ! Minimal temperature in Kelvin
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% test_chain = trf2_1.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
+#%% input_ddb = trf2_3.ddb.out 
+#%% [files]
+#%% files_to_test = 
+#%%   trf2_7.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = 
+#%% description = Input file for the anaddb code. Analysis of the SiO2 DDB
+#%%<END TEST_INFO>

@@ -40,6 +40,7 @@ module m_mklocl
  use m_pawtab,   only : pawtab_type
  use m_mklocl_realspace, only : mklocl_realspace, mklocl_wavelets
  use m_fft,      only : fourdp
+ use m_gtermcutoff,only : termcutoff
 
  use m_splines,  only : splfit
 
@@ -128,11 +129,10 @@ contains
 !! as to make the two routine different.
 !!
 !! PARENTS
-!!      forces,prcref,prcref_PMA,respfn,setvtr
+!!      m_forces,m_nonlinear,m_prcref,m_respfn_driver,m_setvtr
 !!
 !! CHILDREN
-!!      mklocl_realspace,mklocl_recipspace,mklocl_wavelets,wvl_rho_abi2big
-!!      xred2xcart
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -193,10 +193,10 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  if (dtset%usewvl == 0) then
 !  Plane wave case
    if (psps%vlspl_recipSpace) then
-     call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
-&     mpi_enreg,psps%mqgrid_vl,natom,nattyp,nfft,ngfft, &
-&     ntypat,option,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
-&     psps%vlspl,vprtrb,vpsp)
+     call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,&
+&     dtset%icutcoul,lpsstr,mgfft,mpi_enreg,psps%mqgrid_vl,natom,nattyp, &
+&     nfft,ngfft,dtset%nkpt,ntypat,option,ph1d,psps%qgrid_vl,qprtrb,dtset%rcut,&
+&     rhog,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vprtrb,vpsp)
    else
      call mklocl_realspace(grtn,dtset%icoulomb,mpi_enreg,natom,nattyp,nfft, &
 &     ngfft,dtset%nscforder,nspden,ntypat,option,pawtab,psps,rhog,rhor, &
@@ -278,21 +278,21 @@ end subroutine mklocl
 !! as to make the two routine different.
 !!
 !! PARENTS
-!!      dfpt_dyfro,mklocl,stress
+!!      m_mklocl,m_respfn_driver,m_stress
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,timab,wrtout,xmpi_sum
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
-subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
-&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,qprtrb,&
-&  rhog,ucvol,vlspl,vprtrb,vpsp)
+subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,mgfft,&
+&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,ntypat,option,ph1d,qgrid,qprtrb,&
+&  rcut,rhog,rprimd,ucvol,vcutgeo,vlspl,vprtrb,vpsp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option
- real(dp),intent(in) :: eei,gsqcut,ucvol
+ integer,intent(in) :: mgfft,mqgrid,natom,nfft,nkpt,ntypat,option,icutcoul
+ real(dp),intent(in) :: eei,gsqcut,rcut,rprimd(3,3),ucvol,vcutgeo(3)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18),qprtrb(3)
@@ -318,6 +318,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gcart(3),tsec(2)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: work1(:,:)
 
 ! *************************************************************************
@@ -358,6 +359,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    ABI_ALLOCATE(work1,(2,nfft))
    work1(:,:)=zero
  end if
+
 !
  dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
  dqm1=1.0_dp/dq
@@ -372,6 +374,9 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  dyfrlo(:,:,:)=zero
  me_g0=0
  ia1=1
+
+ !Initialize Gcut-off array from m_gtermcutoff
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -413,7 +418,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
              dd = bb*(bb**2-1.0_dp)*dq2div6
 
              vion1 = (aa*vlspl(jj,1,itypat)+bb*vlspl(jj+1,1,itypat) +&
-&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) / gsquar
+&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) / gsquar * gcutoff(ii)
 
              if(option==1)then
 
@@ -592,6 +597,8 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 
  end if
 
+ ABI_DEALLOCATE(gcutoff) 
+
  if(option==2)then
 !  Init mpi_comm
    if(mpi_enreg%nproc_fft>1)then
@@ -733,10 +740,11 @@ end subroutine mklocl_recipspace
 !!    (including the minus sign, forgotten in the paper non-linear..
 !!
 !! PARENTS
-!!      dfpt_looppert,dfpt_nstdy,dfpt_nstpaw,dfptnl_loop
+!!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
+!!      m_pead_nl_loop
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -997,10 +1005,10 @@ end subroutine dfpt_vlocal
 !! * The routine was adapted from mklocl.F90
 !!
 !! PARENTS
-!!      dfpt_looppert,dfpt_nselt,dfpt_nstpaw
+!!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1350,7 +1358,7 @@ end subroutine vlocalstr
 !!    in the matrix element calculation.
 !!
 !! PARENTS
-!!      dfpt_qdrpwf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp,splfit
@@ -1620,7 +1628,7 @@ end subroutine dfpt_vlocaldq
 !!     
 !!
 !! PARENTS
-!!      dfpt_qdrpwf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp,splfit
@@ -1918,11 +1926,9 @@ end subroutine dfpt_vlocaldqdq
 !!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
 !!
 !! PARENTS
-!!
-!!      dfpt_flexowf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!
 !!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE

@@ -104,7 +104,7 @@ CONTAINS  !====================================================================
 !!    where ib1 and ib2 are the band indeces included in the GW calculation for this k-point.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      int2char10,wrtout

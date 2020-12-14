@@ -43,7 +43,7 @@ MODULE m_qparticles
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t
- use m_ebands,         only : get_valence_idx
+ use m_ebands,         only : ebands_get_valence_idx
  use m_sigma,          only : sigma_t
  use m_pawtab,         only : pawtab_type
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io, pawrhoij_inquire_dim
@@ -110,7 +110,7 @@ CONTAINS  !=====================================================================
 !!   | QP density in real space.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -265,7 +265,7 @@ end subroutine wrqps
 !!  The value of nspden is not reported in the QPS file thus we have a possible undetected error.
 !!
 !! PARENTS
-!!      bethe_salpeter,mlwfovlp_qp,screening,sigma
+!!      m_bethe_salpeter,m_mlwfovlp_qp,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -559,7 +559,7 @@ end subroutine rdqps
 !!  Only master node should call this routine.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -699,7 +699,7 @@ end subroutine show_QP
 !!   igwene(Bst%mband,Bst%nkpt,Bst%nsppol)= The imaginary part of the QP energies.
 !!
 !! PARENTS
-!!      mlwfovlp_qp,screening,setup_bse,sigma
+!!      m_bethe_salpeter,m_mlwfovlp_qp,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -801,7 +801,7 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
    end if
 
    ABI_MALLOC(vbik,(BSt%nkpt,BSt%nsppol))
-   vbik(:,:) = get_valence_idx(BSt)
+   vbik(:,:) = ebands_get_valence_idx(BSt)
 
    do is=1,Bst%nsppol
      do ik=1,Bst%nkpt
@@ -908,7 +908,7 @@ end subroutine rdgw
 !!  Only master node should call this routine.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!

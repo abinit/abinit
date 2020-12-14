@@ -161,7 +161,8 @@ CONTAINS  !=====================================================================
 !!     %tphitphj(:,:)=useful product tPhi(:,i)*tPhi(:,j)
 !!
 !! PARENTS
-!!      bethe_salpeter,gstate,respfn,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_gstate,m_nonlinear,m_respfn_driver
+!!      m_screening_driver,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -737,7 +738,8 @@ end subroutine pawinit
 !!        "reset" reset the internal variables to -1
 !!
 !! PARENTS
-!!      bethe_salpeter,gstate,respfn,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_gstate,m_nonlinear,m_respfn_driver
+!!      m_screening_driver,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
 !!

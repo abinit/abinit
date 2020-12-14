@@ -62,9 +62,10 @@ contains
 !! ifc<ifc_type>=contains the dynamical matrix and the IFCs.
 !!
 !! PARENTS
-!! eph
+!!      m_eph_driver
 !!
 !! CHILDREN
+!!      cgqf,ifc%calcnwrite_nana_terms,zheev
 !!
 !! SOURCE
 

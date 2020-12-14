@@ -73,7 +73,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      cleanup_lanczosresolvents,compute_resolvent_column_shift_lanczos

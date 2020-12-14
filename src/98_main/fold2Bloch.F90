@@ -24,9 +24,9 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,crystal_free,crystal_from_hdr
-!!      ebands_free,getargs,newk,progress,prompt,sortc,wfk_close,wfk_open_read
-!!      wfk_read_band_block,xmpi_end,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,cryst%free,ebands_free
+!!      getargs,newk,progress,prompt,sortc,wfk%close,wfk%read_band_block
+!!      wfk_open_read,xmpi_end,xmpi_init
 !!
 !! SOURCE
 
@@ -62,7 +62,7 @@ implicit none
 !Local variables-------------------------------
 !scalars
 integer :: ikpt, iband,nspinor,nsppol,mband,nkpt,mcg,csppol, cspinor, nfold, iss, ii
-integer :: comm, my_rank, nargs, iomode, ncid, ncerr, fform, timrev, kunf_varid, weights_varid, eigunf_varid
+integer :: comm, my_rank, nargs, iomode, ncid, ncerr, fform, kunf_varid, weights_varid, eigunf_varid
 integer :: cg_b, count, outfile, outfile1, outfile2, lwcg, hicg, pos
 character(fnlen) :: fname, outname,seedname
 character(len=500) :: msg
@@ -141,8 +141,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  nfold = product(folds)
 
 #ifdef HAVE_NETCDF
- timrev = 2; if (any(wfk%hdr%kptopt == [3, 4])) timrev = 1
- cryst = wfk%hdr%get_crystal(timrev)
+ cryst = wfk%hdr%get_crystal()
 
  NCF_CHECK(nctk_open_create(ncid, strcat(seedname, "_FOLD2BLOCH.nc"), xmpi_comm_self))
  fform = fform_from_ext("FOLD2BLOCH.nc")

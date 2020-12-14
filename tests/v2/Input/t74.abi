@@ -1,0 +1,116 @@
+#   Sn in diamond structure; 2 special points; low ecut.
+#   Test of the spin-orbit interaction
+
+ ndtset 7
+
+#First dataset, no spin-orbit, no spin-doubling of wavefunctions
+ nband1     4
+ prtden1    1
+
+
+#Second dataset, no-spin-orbit, spin-doubling of wavefunctions
+ nband2     8
+ nspinor2   2   so_psp2  0
+
+
+#Third dataset, spin-orbit, spin-doubling of wavefunctions
+ nband3     8
+ nspinor3   2
+ prtden3    1
+
+#Fourth dataset, the Gamma point without spin-orbit, in the
+# density obtained without spin-orbit
+ nband4     8
+ getden4    1
+ iscf4     -2
+ kptopt4    0
+ nkpt4      1
+ kpt4       0.0 0.0 0.0
+ tolwfr4    1.0d-12
+
+#Fifth dataset, the Gamma point without spin-orbit,
+#with spin-doubling of wavefunctions, in the
+# density obtained without spin-orbit
+ nband5    16
+ nspinor5   2
+
+ so_psp5    0
+
+ getden5    1
+ iscf5     -2
+ kptopt5    0
+ nkpt5      1
+ kpt5       0.0 0.0 0.0
+ tolwfr5    1.0d-12
+
+
+#Sixth dataset, the Gamma point with spin-orbit, in the
+# density obtained without spin-orbit
+ nband6    16
+ nspinor6   2
+
+ getden6    1
+ iscf6     -2
+ kptopt6    0
+ nkpt6      1
+ kpt6       0.0 0.0 0.0
+ tolwfr6    1.0d-12
+
+#Seventh dataset, the Gamma point with spin-orbit, in the
+# density obtained with spin-orbit
+ nband7    16
+ nspinor7   2
+ getden7    3
+ iscf7     -2
+ kptopt7    0
+ nkpt7      1
+ kpt7       0.0 0.0 0.0
+ tolwfr7    1.0d-12
+
+
+#Common data
+ acell 3*12.27
+ ecut 3
+ enunit 2
+ natom  2
+ nbdbuf 0
+ kptopt 1
+ kptrlatt -2  2  2
+           2 -2  2
+           2  2 -2
+ shiftk 3*0.5d0
+ nstep 10
+ ntypat  1
+ occopt 1
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ toldfe 1.0d-10
+ typat  1 1
+ xred 3*0.00d0 3*0.25d0
+ znucl 50
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/50sn.4.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t74.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Tin in the diamond structure, with 2 special points
+#%%   Test the effect of spin-orbit coupling, especially the
+#%%   electronic structure.
+#%%   Degeneracies at Gamma are correct ! 
+#%%   (note that ecut and nkpt are too low for quantitative accuracy)
+#%%   Without spin-orbit (in eV), dataset 4:
+#%%   -8.82682  1.26955 (x3) 1.30262 3.45296 (x3)
+#%%   With spin-orbit (in eV), dataset 6:
+#%%   -8.82682  0.75225      1.30262 1.50965 (x2) 3.07128 3.62556 (x2)
+#%% topics = spinpolarisation
+#%%<END TEST_INFO>

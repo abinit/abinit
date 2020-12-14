@@ -96,7 +96,7 @@ CONTAINS  !=====================================================================
 !!  The imaginary part of the macroscopic dielectric function is written on the external file _EXC_MDF
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!
@@ -1000,7 +1000,6 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
        ! Test on the L1 norm.
        if (check(1)) test(1) = SUM(abs_err(:,1)) < tol_iter*SUM(ABS(DBLE (newg)))
        if (check(2)) test(2) = SUM(abs_err(:,2)) < tol_iter*SUM(ABS(AIMAG(newg)))
-
      else
        ! Stringent test for each point.
        if (check(1)) test(1) = ALL( abs_err(:,1) < -tol_iter*ABS(DBLE (newg)))
@@ -1013,8 +1012,13 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
        nconv = 0
      end if
      if (nconv==2) then
-       write(msg,'(a,es10.2,a,i0,a)')&
-&        " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       if(inn<100)then
+         write(msg,'(a,es10.2,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
+       else
+         write(msg,'(a,es10.2,a,i0,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       endif
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        EXIT
@@ -1720,8 +1724,13 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
        nconv = 0
      end if
      if (nconv==2) then
-       write(msg,'(a,es10.2,a,i0,a)')&
-&        " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       if(inn<100)then
+         write(msg,'(a,es10.2,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
+       else
+         write(msg,'(a,es10.2,a,i0,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       endif
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        EXIT
@@ -2303,8 +2312,13 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
        nconv = 0
      end if
      if (nconv==2) then
-       write(msg,'(a,es10.2,a,i0,a)')&
-&        " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       if(inn<100)then
+         write(msg,'(a,es10.2,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after less than 100 iterations."
+       else
+         write(msg,'(a,es10.2,a,i0,a)')&
+&          " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations."
+       endif
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        EXIT

@@ -183,11 +183,10 @@ contains
 !!  TO DO!
 !!
 !! PARENTS
-!!      dfptnl_loop
+!!      m_dfptnl_loop
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,dotprod_g,fftpac,fourwf,init_hamiltonian
-!!      mkffnl,mkkpg,nonlop,status,xmpi_sum
+!!      dotprod_vn
 !!
 !! SOURCE
 
@@ -1184,8 +1183,10 @@ end subroutine dfptnl_pert
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      m_dfptnl_pert,m_pead_nl_loop
 !!
 !! CHILDREN
+!!      dotprod_vn
 !!
 !! SOURCE
 

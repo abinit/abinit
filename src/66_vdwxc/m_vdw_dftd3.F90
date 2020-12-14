@@ -107,7 +107,7 @@ contains
 !!  Comput. Chem. 32, 1456 (2011) [[cite:Grimme2011]]
 !!
 !! PARENTS
-!!      respfn,setvtr,stress
+!!      m_respfn_driver,m_setvtr,m_stress
 !!
 !! CHILDREN
 !!
@@ -580,7 +580,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                                  coordinates. Note that the phase factor is different
 !                                  if (ka=ia or ka/=ia).
 !                                  This Fourier transform is summed over cell replica
-!                                  See NOTE: add reference for more informations
+!                                  See NOTE: add reference for more information
                        fdcn(1,:,ia,ia) = fdcn(1,:,ia,ia)+grad*rcart(:)
                        fdcn(1,:,ia,ja) = fdcn(1,:,ia,ja)-grad*rcart(:)*re_arg
                        fdcn(2,:,ia,ja) = fdcn(2,:,ia,ja)-grad*rcart(:)*im_arg
@@ -1558,7 +1558,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !! Return the product of two complex numbers stored in rank 1 array
 !!
 !! PARENTS
-!!      vdw_dftd3
+!!      m_vdw_dftd3
 !!
 !! CHILDREN
 !!
@@ -1588,7 +1588,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !! Convert gradients from cartesian to reduced coordinates
 !!
 !! PARENTS
-!!      vdw_dftd3
+!!      m_vdw_dftd3
 !!
 !! CHILDREN
 !!

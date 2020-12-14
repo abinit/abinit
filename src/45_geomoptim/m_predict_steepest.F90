@@ -83,7 +83,7 @@ contains
 !!    at output, the predicted values of xred for all images
 !!
 !! PARENTS
-!!      predictimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!      get_geometry_img,mep_steepest

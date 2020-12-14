@@ -67,7 +67,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_hamiltonian
+!!      m_gwls_hamiltonian
 !!
 !! CHILDREN
 !!      xmpi_sum

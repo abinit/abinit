@@ -1,0 +1,101 @@
+# Test for closure trick
+# to speed up the convergence on the number of bands
+# for GW calculations in metals.
+# Au bulk
+
+ndtset 4
+
+#prtvol -1 #debugging
+
+#Dataset1 SCF
+ iprcel1    45       # to speed up SCF convergence
+  nstep1    10       # 10 steps is enough to converge
+ tolvrs1    1.0d-5   # this is too low
+ getwfk1    0
+ getden1    0
+
+#Dataset2 WFK
+    iscf2  -2        # Non self-consistent calculation
+   nstep2   10
+  tolwfr2   1.0d-5   # this is too low
+   nband2   10       # a few bands just for this test
+  getwfk2   1
+  getden2   1
+
+#Dataset3 SCR
+optdriver3  3       # screening calculation
+  inclvkb3 0        # do not include VKB
+    #fftgw3 11      #
+  ecutwfn3  5.0     # too low ecut
+  ecuteps3  1.0     # this is also too low
+   getwfk3  2       #
+    nband3  10
+     awtr3  1
+   symchi3  1       #use symmetries
+
+#Dataset4 Sigma
+optdriver4 4        # Sigma calculation
+  ecutwfn4 5.0      # this is too low
+ ecutsigx4 5.0      # this is too low
+    nband4 10
+ symsigma4 1        # use symmetries
+   getwfk4 2
+   getscr4 3
+   nkptgw4 1        # apply correction to the Gamma point
+    kptgw4 0.0000  0.0000  0.0000
+     bdgw4 1 10     # States with same character have to be included if symsigma=1
+gw_icutcoul4 3        # old deprecated value of icutcoul, only used for legacy
+
+
+# Closure-trick
+gwcomp     1                # Switching on the closure trick
+gwencomp   2
+
+#Definition of the planewave basis set
+ecut        5               #This is too low
+
+# occupation option
+occopt       7
+tsmear       0.005
+
+# k-point sampling
+kptopt    1
+istwfk   3*1
+ngkpt    2 2 2             #This is too low
+nshiftk      1
+shiftk 0.0 0.0 0.0
+
+acell 3*7.71
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+#Definition of the atom types
+ntypat  1       # There is 1 type of atom
+znucl  79       # Au
+
+#Definition of the atoms
+natom  1
+typat  1
+
+xred
+    0.00000000000    0.00000000000    0.00000000000 # Au
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/79au.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t72.abo, tolnlines = 4, tolabs = 1.001e-03, tolrel = 1.500e-01, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 3
+#%% [extra_info]
+#%% authors = T. Rangel
+#%% keywords = NC, GW 
+#%% description = 
+#%%   Extrapolar approximation for GW calculations on metals. Norm-conserving.
+#%%   PRB 78, 085125 (2008)
+#%%<END TEST_INFO>

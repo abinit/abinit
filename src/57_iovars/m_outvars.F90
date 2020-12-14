@@ -209,7 +209,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
      end if
    end if
  else
-   MSG_WARNING("output of OUT.nc has been disabled. Too many datasets")
+   MSG_COMMENT("output of OUT.nc has been disabled. Too many datasets")
  end if
 #endif
  !ncid = 0

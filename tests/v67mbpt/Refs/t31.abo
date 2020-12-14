@@ -1,0 +1,1717 @@
+
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2020 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h30 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t31.in
+- output file    -> t31.out
+- root for input  files -> t31i
+- root for output files -> t31o
+
+
+ DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           5        mffmem =           1         mkmem =           8
+       mpw =         190          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       1.857 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.118 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2.
+     intxc =       0    ionmov =       0      iscf =      -2    lmnmax =       2
+     lnmax =       2     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          35        mffmem =           1         mkmem =           8
+       mpw =         190          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       2.122 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.814 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  3.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           8
+       mpw =         190          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       1.932 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.188 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  4.
+     intxc =       0    ionmov =       0      iscf =      -2    lmnmax =       2
+     lnmax =       2     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          35        mffmem =           1         mkmem =          64
+       mpw =         193          nfft =        4096          nkpt =          64
+================================================================================
+P This job should need less than                       8.330 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      6.599 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  5.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =          64
+       mpw =         193          nfft =        4096          nkpt =          64
+================================================================================
+P This job should need less than                       3.447 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      1.510 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
+              amu      2.80855000E+01
+  bs_coulomb_term1         11
+  bs_coulomb_term2         11
+  bs_coulomb_term3         21
+  bs_coulomb_term4         11
+  bs_coulomb_term5         21
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  2.20495952E-01  3.67493254E-03 Hartree
+     bs_freq_mesh4     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh5     0.00000000E+00  2.20495952E-01  3.67493254E-03 Hartree
+ bs_haydock_niter1        100
+ bs_haydock_niter2        100
+ bs_haydock_niter3        200
+ bs_haydock_niter4        100
+ bs_haydock_niter5        200
+   bs_haydock_tol1     2.00000000E-02  0.00000000E+00
+   bs_haydock_tol2     2.00000000E-02  0.00000000E+00
+   bs_haydock_tol3    -1.00000000E-03  0.00000000E+00
+   bs_haydock_tol4     2.00000000E-02  0.00000000E+00
+   bs_haydock_tol5    -1.00000000E-03  0.00000000E+00
+     bs_hayd_term1          1
+     bs_hayd_term2          1
+     bs_hayd_term3          0
+     bs_hayd_term4          1
+     bs_hayd_term5          0
+   bs_interp_prep1          0
+   bs_interp_prep2          0
+   bs_interp_prep3          1
+   bs_interp_prep4          0
+   bs_interp_prep5          0
+        bs_loband1          0
+        bs_loband2          0
+        bs_loband3          2
+        bs_loband4          0
+        bs_loband5          2
+      chksymbreak           0
+           diemac      1.20000000E+01
+             ecut      6.00000000E+00 Hartree
+          ecuteps      2.10000000E+00 Hartree
+          ecutwfn      6.00000000E+00 Hartree
+-          fftalg         312
+           getden1          0
+           getden2         -1
+           getden3          0
+           getden4          1
+           getden5          0
+           getwfk1          0
+           getwfk2          0
+           getwfk3          2
+           getwfk4          0
+           getwfk5          4
+             iscf1          7
+             iscf2         -2
+             iscf3          7
+             iscf4         -2
+             iscf5          7
+           jdtset        1    2    3    4    5
+              kpt1     5.50000000E-02  6.00000000E-02  6.50000000E-02
+                      -4.45000000E-01  6.00000000E-02  6.50000000E-02
+                       5.50000000E-02 -4.40000000E-01  6.50000000E-02
+                      -4.45000000E-01 -4.40000000E-01  6.50000000E-02
+                       5.50000000E-02  6.00000000E-02 -4.35000000E-01
+                      -4.45000000E-01  6.00000000E-02 -4.35000000E-01
+                       5.50000000E-02 -4.40000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -4.40000000E-01 -4.35000000E-01
+              kpt2     5.50000000E-02  6.00000000E-02  6.50000000E-02
+                      -4.45000000E-01  6.00000000E-02  6.50000000E-02
+                       5.50000000E-02 -4.40000000E-01  6.50000000E-02
+                      -4.45000000E-01 -4.40000000E-01  6.50000000E-02
+                       5.50000000E-02  6.00000000E-02 -4.35000000E-01
+                      -4.45000000E-01  6.00000000E-02 -4.35000000E-01
+                       5.50000000E-02 -4.40000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -4.40000000E-01 -4.35000000E-01
+              kpt3     5.50000000E-02  6.00000000E-02  6.50000000E-02
+                      -4.45000000E-01  6.00000000E-02  6.50000000E-02
+                       5.50000000E-02 -4.40000000E-01  6.50000000E-02
+                      -4.45000000E-01 -4.40000000E-01  6.50000000E-02
+                       5.50000000E-02  6.00000000E-02 -4.35000000E-01
+                      -4.45000000E-01  6.00000000E-02 -4.35000000E-01
+                       5.50000000E-02 -4.40000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -4.40000000E-01 -4.35000000E-01
+              kpt4     5.50000000E-02  6.00000000E-02  6.50000000E-02
+                       3.05000000E-01  6.00000000E-02  6.50000000E-02
+                      -4.45000000E-01  6.00000000E-02  6.50000000E-02
+                      -1.95000000E-01  6.00000000E-02  6.50000000E-02
+                       5.50000000E-02  3.10000000E-01  6.50000000E-02
+                       3.05000000E-01  3.10000000E-01  6.50000000E-02
+                      -4.45000000E-01  3.10000000E-01  6.50000000E-02
+                      -1.95000000E-01  3.10000000E-01  6.50000000E-02
+                       5.50000000E-02 -4.40000000E-01  6.50000000E-02
+                       3.05000000E-01 -4.40000000E-01  6.50000000E-02
+                      -4.45000000E-01 -4.40000000E-01  6.50000000E-02
+                      -1.95000000E-01 -4.40000000E-01  6.50000000E-02
+                       5.50000000E-02 -1.90000000E-01  6.50000000E-02
+                       3.05000000E-01 -1.90000000E-01  6.50000000E-02
+                      -4.45000000E-01 -1.90000000E-01  6.50000000E-02
+                      -1.95000000E-01 -1.90000000E-01  6.50000000E-02
+                       5.50000000E-02  6.00000000E-02  3.15000000E-01
+                       3.05000000E-01  6.00000000E-02  3.15000000E-01
+                      -4.45000000E-01  6.00000000E-02  3.15000000E-01
+                      -1.95000000E-01  6.00000000E-02  3.15000000E-01
+                       5.50000000E-02  3.10000000E-01  3.15000000E-01
+                       3.05000000E-01  3.10000000E-01  3.15000000E-01
+                      -4.45000000E-01  3.10000000E-01  3.15000000E-01
+                      -1.95000000E-01  3.10000000E-01  3.15000000E-01
+                       5.50000000E-02 -4.40000000E-01  3.15000000E-01
+                       3.05000000E-01 -4.40000000E-01  3.15000000E-01
+                      -4.45000000E-01 -4.40000000E-01  3.15000000E-01
+                      -1.95000000E-01 -4.40000000E-01  3.15000000E-01
+                       5.50000000E-02 -1.90000000E-01  3.15000000E-01
+                       3.05000000E-01 -1.90000000E-01  3.15000000E-01
+                      -4.45000000E-01 -1.90000000E-01  3.15000000E-01
+                      -1.95000000E-01 -1.90000000E-01  3.15000000E-01
+                       5.50000000E-02  6.00000000E-02 -4.35000000E-01
+                       3.05000000E-01  6.00000000E-02 -4.35000000E-01
+                      -4.45000000E-01  6.00000000E-02 -4.35000000E-01
+                      -1.95000000E-01  6.00000000E-02 -4.35000000E-01
+                       5.50000000E-02  3.10000000E-01 -4.35000000E-01
+                       3.05000000E-01  3.10000000E-01 -4.35000000E-01
+                      -4.45000000E-01  3.10000000E-01 -4.35000000E-01
+                      -1.95000000E-01  3.10000000E-01 -4.35000000E-01
+                       5.50000000E-02 -4.40000000E-01 -4.35000000E-01
+                       3.05000000E-01 -4.40000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -4.40000000E-01 -4.35000000E-01
+                      -1.95000000E-01 -4.40000000E-01 -4.35000000E-01
+                       5.50000000E-02 -1.90000000E-01 -4.35000000E-01
+                       3.05000000E-01 -1.90000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -1.90000000E-01 -4.35000000E-01
+                      -1.95000000E-01 -1.90000000E-01 -4.35000000E-01
+                       5.50000000E-02  6.00000000E-02 -1.85000000E-01
+                       3.05000000E-01  6.00000000E-02 -1.85000000E-01
+              kpt5     5.50000000E-02  6.00000000E-02  6.50000000E-02
+                       3.05000000E-01  6.00000000E-02  6.50000000E-02
+                      -4.45000000E-01  6.00000000E-02  6.50000000E-02
+                      -1.95000000E-01  6.00000000E-02  6.50000000E-02
+                       5.50000000E-02  3.10000000E-01  6.50000000E-02
+                       3.05000000E-01  3.10000000E-01  6.50000000E-02
+                      -4.45000000E-01  3.10000000E-01  6.50000000E-02
+                      -1.95000000E-01  3.10000000E-01  6.50000000E-02
+                       5.50000000E-02 -4.40000000E-01  6.50000000E-02
+                       3.05000000E-01 -4.40000000E-01  6.50000000E-02
+                      -4.45000000E-01 -4.40000000E-01  6.50000000E-02
+                      -1.95000000E-01 -4.40000000E-01  6.50000000E-02
+                       5.50000000E-02 -1.90000000E-01  6.50000000E-02
+                       3.05000000E-01 -1.90000000E-01  6.50000000E-02
+                      -4.45000000E-01 -1.90000000E-01  6.50000000E-02
+                      -1.95000000E-01 -1.90000000E-01  6.50000000E-02
+                       5.50000000E-02  6.00000000E-02  3.15000000E-01
+                       3.05000000E-01  6.00000000E-02  3.15000000E-01
+                      -4.45000000E-01  6.00000000E-02  3.15000000E-01
+                      -1.95000000E-01  6.00000000E-02  3.15000000E-01
+                       5.50000000E-02  3.10000000E-01  3.15000000E-01
+                       3.05000000E-01  3.10000000E-01  3.15000000E-01
+                      -4.45000000E-01  3.10000000E-01  3.15000000E-01
+                      -1.95000000E-01  3.10000000E-01  3.15000000E-01
+                       5.50000000E-02 -4.40000000E-01  3.15000000E-01
+                       3.05000000E-01 -4.40000000E-01  3.15000000E-01
+                      -4.45000000E-01 -4.40000000E-01  3.15000000E-01
+                      -1.95000000E-01 -4.40000000E-01  3.15000000E-01
+                       5.50000000E-02 -1.90000000E-01  3.15000000E-01
+                       3.05000000E-01 -1.90000000E-01  3.15000000E-01
+                      -4.45000000E-01 -1.90000000E-01  3.15000000E-01
+                      -1.95000000E-01 -1.90000000E-01  3.15000000E-01
+                       5.50000000E-02  6.00000000E-02 -4.35000000E-01
+                       3.05000000E-01  6.00000000E-02 -4.35000000E-01
+                      -4.45000000E-01  6.00000000E-02 -4.35000000E-01
+                      -1.95000000E-01  6.00000000E-02 -4.35000000E-01
+                       5.50000000E-02  3.10000000E-01 -4.35000000E-01
+                       3.05000000E-01  3.10000000E-01 -4.35000000E-01
+                      -4.45000000E-01  3.10000000E-01 -4.35000000E-01
+                      -1.95000000E-01  3.10000000E-01 -4.35000000E-01
+                       5.50000000E-02 -4.40000000E-01 -4.35000000E-01
+                       3.05000000E-01 -4.40000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -4.40000000E-01 -4.35000000E-01
+                      -1.95000000E-01 -4.40000000E-01 -4.35000000E-01
+                       5.50000000E-02 -1.90000000E-01 -4.35000000E-01
+                       3.05000000E-01 -1.90000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -1.90000000E-01 -4.35000000E-01
+                      -1.95000000E-01 -1.90000000E-01 -4.35000000E-01
+                       5.50000000E-02  6.00000000E-02 -1.85000000E-01
+                       3.05000000E-01  6.00000000E-02 -1.85000000E-01
+                       outvar_i_n : Printing only first  50 k-points.
+         kptrlatt1       2    0    0      0    2    0      0    0    2
+         kptrlatt2       2    0    0      0    2    0      0    0    2
+         kptrlatt3       2    0    0      0    2    0      0    0    2
+         kptrlatt4       4    0    0      0    4    0      0    0    4
+         kptrlatt5       4    0    0      0    4    0      0    0    4
+          kptrlen1     1.44490200E+01
+          kptrlen2     1.44490200E+01
+          kptrlen3     1.44490200E+01
+          kptrlen4     2.88980399E+01
+          kptrlen5     2.88980399E+01
+       mbpt_sciss1     0.00000000E+00 Hartree
+       mbpt_sciss2     0.00000000E+00 Hartree
+       mbpt_sciss3     2.93994603E-02 Hartree
+       mbpt_sciss4     0.00000000E+00 Hartree
+       mbpt_sciss5     2.93994603E-02 Hartree
+       mdf_epsinf1     0.00000000E+00
+       mdf_epsinf2     0.00000000E+00
+       mdf_epsinf3     1.20000000E+01
+       mdf_epsinf4     0.00000000E+00
+       mdf_epsinf5     1.20000000E+01
+P           mkmem1          8
+P           mkmem2          8
+P           mkmem3          8
+P           mkmem4         64
+P           mkmem5         64
+            natom           2
+            nband1          5
+            nband2         35
+            nband3          8
+            nband4         35
+            nband5          8
+           nbdbuf1          0
+           nbdbuf2          2
+           nbdbuf3          0
+           nbdbuf4          2
+           nbdbuf5          0
+           ndtset           5
+            ngfft          16      16      16
+             nkpt1          8
+             nkpt2          8
+             nkpt3          8
+             nkpt4         64
+             nkpt5         64
+           npweps1          0
+           npweps2          0
+           npweps3         51
+           npweps4          0
+           npweps5         51
+           npwwfn1          0
+           npwwfn2          0
+           npwwfn3        169
+           npwwfn4          0
+           npwwfn5        169
+            nstep          50
+             nsym          48
+           ntypat           1
+              occ1     2.000000  2.000000  2.000000  2.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ5     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+        optdriver1          0
+        optdriver2          0
+        optdriver3         99
+        optdriver4          0
+        optdriver5         99
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk1     1.10000000E-01  1.20000000E-01  1.30000000E-01
+           shiftk2     1.10000000E-01  1.20000000E-01  1.30000000E-01
+           shiftk3     1.10000000E-01  1.20000000E-01  1.30000000E-01
+           shiftk4     2.20000000E-01  2.40000000E-01  2.60000000E-01
+           shiftk5     2.20000000E-01  2.40000000E-01  2.60000000E-01
+          spgroup         227
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+            tnons      0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+           toldfe1     1.00000000E-06 Hartree
+           toldfe2     0.00000000E+00 Hartree
+           toldfe3     0.00000000E+00 Hartree
+           toldfe4     0.00000000E+00 Hartree
+           toldfe5     0.00000000E+00 Hartree
+           tolwfr1     0.00000000E+00
+           tolwfr2     1.00000000E-08
+           tolwfr3     0.00000000E+00
+           tolwfr4     1.00000000E-08
+           tolwfr5     0.00000000E+00
+            typat      1  1
+              wtk1       0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
+                         0.12500    0.12500
+              wtk2       0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
+                         0.12500    0.12500
+              wtk3       0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
+                         0.12500    0.12500
+              wtk4       0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563
+              wtk5       0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563
+                       outvars : Printing only first  50 k-points.
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl       14.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   3.
+
+ chkinp: Checking input parameters for consistency, jdtset=   4.
+
+ chkinp: Checking input parameters for consistency, jdtset=   5.
+
+================================================================================
+== DATASET  1 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 8, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 190, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
+ R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
+ R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
+ Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+-  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
+- 14.00000   4.00000    940714                znucl, zion, pspdat
+    1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   5.907  14.692    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1   2.617   4.181    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
+  pspatm : epsatm=    1.43386982
+         --- l  ekb(1:nproj) -->
+             0    3.287949
+             1    1.849886
+ pspatm: atomic psp has been read  and splines computed
+
+   2.29419171E+01                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
+
+================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.7784860380554    -8.778E+00 4.684E-03 4.424E+00
+ ETOT  2  -8.7861512961295    -7.665E-03 1.476E-05 1.293E-01
+ ETOT  3  -8.7862679203118    -1.166E-04 2.195E-05 2.759E-03
+ ETOT  4  -8.7862694743831    -1.554E-06 2.380E-05 7.407E-06
+ ETOT  5  -8.7862694793877    -5.005E-09 4.254E-05 1.059E-08
+ ETOT  6  -8.7862694793961    -8.484E-12 3.187E-05 7.947E-11
+
+ At SCF step    6, etot is converged : 
+  for the second time, diff in etot=  8.484E-12 < toldfe=  1.000E-06
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -1.52074048E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.52074048E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.52074048E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
+lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6663072E+02
+convergence: {deltae: -8.484E-12, res2:  7.947E-11, residm:  3.187E-05, diffor: null, }
+etotal    :  -8.78626948E+00
+entropy   :   0.00000000E+00
+fermie    :   2.24517494E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.52074048E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -1.52074048E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.52074048E-04, ]
+pressure_GPa:   4.4742E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          1.87174118
+    2        2.00000          1.87174118
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   79.669E-08; max=  31.866E-06
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.35165088504101     1.35165088504101     1.35165088504101
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
+              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+ prteigrs : about to open file t31o_DS1_EIG
+ Fermi (or HOMO) energy (hartree) =   0.22452   Average Vxc (hartree)=  -0.35174
+ Eigenvalues (hartree) for nkpt=   8  k points:
+ kpt#   1, nband=  5, wtk=  0.12500, kpt=  0.0550  0.0600  0.0650 (reduced coord)
+  -0.21791    0.20784    0.22274    0.22452    0.32075
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.17419994991071E+00
+hartree             :  5.94658928795185E-01
+xc                  : -3.56344675711859E+00
+Ewald energy        : -8.43581958561899E+00
+psp_core            :  8.60437873155177E-02
+local_psp           : -2.54194380616736E+00
+non_local_psp       :  1.90003800348738E+00
+total_energy        : -8.78626947939614E+00
+total_energy_eV     : -2.39086551501251E+02
+band_energy         :  3.67853467948844E-01
+...
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -1.52074048E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.52074048E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.52074048E-04  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  4.4742E+00 GPa]
+- sigma(1 1)= -4.47417222E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -4.47417222E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -4.47417222E+00  sigma(2 1)=  0.00000000E+00
+
+================================================================================
+== DATASET  2 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 8, mband: 35, nsppol: 1, nspinor: 1, nspden: 1, mpw: 190, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
+ R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
+ R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
+ Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
+--------------------------------------------------------------------------------
+
+
+================================================================================
+ prteigrs : about to open file t31o_DS2_EIG
+ Non-SCF case, kpt    1 (  0.05500  0.06000  0.06500), residuals and eigenvalues=
+  1.19E-09  2.64E-09  1.42E-09  3.05E-09  8.23E-10  2.54E-09  2.41E-10  1.60E-10
+  4.91E-10  2.49E-10  1.90E-10  1.40E-09  5.44E-10  7.01E-10  2.18E-10  5.74E-09
+  2.37E-09  1.79E-09  3.82E-09  1.12E-09  4.35E-09  1.78E-09  3.98E-10  6.95E-09
+  3.91E-09  1.56E-09  2.30E-09  3.63E-09  9.85E-09  7.76E-09  6.62E-09  8.61E-09
+  5.77E-09  7.45E-09  2.98E-05
+ -2.1791E-01  2.0784E-01  2.2274E-01  2.2452E-01  3.1889E-01  3.2022E-01
+  3.2203E-01  3.5946E-01  5.0888E-01  5.1001E-01  5.1212E-01  6.2425E-01
+  6.4271E-01  6.4620E-01  7.8476E-01  1.0732E+00  1.0774E+00  1.0832E+00
+  1.1396E+00  1.1434E+00  1.1847E+00  1.1867E+00  1.1956E+00  1.3164E+00
+  1.3389E+00  1.3435E+00  1.5190E+00  1.5559E+00  1.5622E+00  1.5666E+00
+  1.6690E+00  1.6758E+00  1.7113E+00  1.7192E+00  1.7557E+00
+  prteigrs : nnsclo,ikpt=   50    1 max resid (incl. the buffer)=  2.97738E-05
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+  prteigrs : nnsclo,ikpt=   50    2 max resid (incl. the buffer)=  2.48543E-06
+  prteigrs : nnsclo,ikpt=   50    3 max resid (incl. the buffer)=  2.00372E-06
+  prteigrs : nnsclo,ikpt=   50    4 max resid (incl. the buffer)=  5.51191E-05
+  prteigrs : nnsclo,ikpt=   50    5 max resid (incl. the buffer)=  1.70984E-05
+  prteigrs : nnsclo,ikpt=   50    6 max resid (incl. the buffer)=  3.44515E-06
+  prteigrs : nnsclo,ikpt=   50    7 max resid (incl. the buffer)=  1.00976E-05
+  prteigrs : nnsclo,ikpt=   50    8 max resid (incl. the buffer)=  1.91676E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
+lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6663072E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.995E-09, diffor:  0.000E+00, }
+etotal    :  -8.78626948E+00
+entropy   :   0.00000000E+00
+fermie    :   2.24517494E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          1.87174118
+    2        2.00000          1.87174118
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   31.137E-10; max=  99.953E-10
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.35165088504101     1.35165088504101     1.35165088504101
+ length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
+              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+ prteigrs : about to open file t31o_DS2_EIG
+ Eigenvalues (hartree) for nkpt=   8  k points:
+ kpt#   1, nband= 35, wtk=  0.12500, kpt=  0.0550  0.0600  0.0650 (reduced coord)
+  -0.21791    0.20784    0.22274    0.22452    0.31889    0.32022    0.32203    0.35946
+   0.50888    0.51001    0.51212    0.62425    0.64271    0.64620    0.78476    1.07322
+   1.07741    1.08323    1.13957    1.14337    1.18467    1.18671    1.19561    1.31638
+   1.33890    1.34350    1.51897    1.55585    1.56223    1.56663    1.66901    1.67576
+   1.71134    1.71918    1.75569
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+================================================================================
+== DATASET  3 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 190, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
+ in frequency domain and reciprocal space on a transitions basis set. 
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
+
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
+ R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
+ R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
+ Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     5.50000000E-02  6.00000000E-02  6.50000000E-02       0.12500
+     2)    -4.45000000E-01  6.00000000E-02  6.50000000E-02       0.12500
+     3)     5.50000000E-02 -4.40000000E-01  6.50000000E-02       0.12500
+     4)    -4.45000000E-01 -4.40000000E-01  6.50000000E-02       0.12500
+     5)     5.50000000E-02  6.00000000E-02 -4.35000000E-01       0.12500
+     6)    -4.45000000E-01  6.00000000E-02 -4.35000000E-01       0.12500
+     7)     5.50000000E-02 -4.40000000E-01 -4.35000000E-01       0.12500
+     8)    -4.45000000E-01 -4.40000000E-01 -4.35000000E-01       0.12500
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields     8 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for the screening function ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields     8 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =    20x   20x   20
+          total number of points  =         8000
+
+ ==== Fundamental parameters for the solution of the Bethe-Salpeter equation: ====
+ Algorithm: Haydock technique.
+ Dimension of the v, W matrices,  npweps  = 51
+ Cutoff for the wavefunctions,    npwwfn  = 169
+ Number of k-points in the IBZ,   nkibz   = 8
+ Highest empty band included,     nband   = 8
+ === Spin UP ===
+ Number of resonant transitions          96
+ Lowest occupied state                   2
+ Highest occupied state                  4
+ Lowest unoccupied state                 5
+ Highest unoccupied state                8
+ Minimum frequency [eV]           Emin    =   0.00
+ Maximum frequency [eV]           Emax    =   6.00
+ Frequency step [eV]              dE      =   0.10
+ Lorentzian broadening [eV]       eta     =   0.10
+ RPA L0 with KS energies and KS wavefunctions
+ Scissors operator energy [eV] =          0.80
+ Local fields effects (v term) included
+ Excitonic effects (W term) included
+ Full W_GG' included
+ W is approximated with the model dielectric function
+ Resonant-only calculation (Hermitian case)
+
+
+ Calculating epsilon_Macro(q-->0,w), along the following directions:
+ q = (  0.938821  0.000000  0.000000) [r.l.u.]
+ q = (  0.000000  0.938821  0.000000) [r.l.u.]
+ q = (  0.000000  0.000000  0.938821) [r.l.u.]
+ q = (  0.000000  0.813043  0.813043) [r.l.u.]
+ q = (  0.813043  0.000000  0.813043) [r.l.u.]
+ q = (  0.813043  0.813043  0.000000) [r.l.u.]
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
+ r_s =    1.9964
+ omega_plasma =   16.7088 [eV]
+
+. Writing resonant excitonic Hamiltonian on file t31o_DS3_BSR; file size=   0.00 [Gb].
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t31o_DS3_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t31o_DS3_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ Writing EXC Macroscopic dielectric function to file: t31o_DS3_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  43.4444   0.0000  34.8583   0.0000  42.4681   0.0000
+   0.1000  43.4890   0.0897  34.8802   0.0439  42.5088   0.0820
+   0.2000  43.6233   0.1806  34.9461   0.0883  42.6317   0.1651
+   0.3000  43.8494   0.2742  35.0565   0.1333  42.8382   0.2502
+   0.4000  44.1703   0.3717  35.2123   0.1795  43.1311   0.3387
+   0.5000  44.5909   0.4748  35.4150   0.2273  43.5141   0.4317
+   0.6000  45.1174   0.5853  35.6663   0.2771  43.9924   0.5306
+   0.7000  45.7582   0.7052  35.9684   0.3294  44.5727   0.6372
+   0.8000  46.5238   0.8372  36.3241   0.3848  45.2635   0.7533
+   0.9000  47.4275   0.9845  36.7368   0.4440  46.0754   0.8814
+  
+
+================================================================================
+== DATASET  4 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 64, mband: 35, nsppol: 1, nspinor: 1, nspden: 1, mpw: 193, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
+ R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
+ R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
+ Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
+--------------------------------------------------------------------------------
+
+
+================================================================================
+ prteigrs : about to open file t31o_DS4_EIG
+ Non-SCF case, kpt    1 (  0.05500  0.06000  0.06500), residuals and eigenvalues=
+  1.19E-09  2.64E-09  1.42E-09  3.05E-09  8.23E-10  2.54E-09  2.41E-10  1.60E-10
+  4.91E-10  2.49E-10  1.90E-10  1.40E-09  5.44E-10  7.01E-10  2.18E-10  5.74E-09
+  2.37E-09  1.79E-09  3.82E-09  1.12E-09  4.35E-09  1.78E-09  3.98E-10  6.95E-09
+  3.91E-09  1.56E-09  2.30E-09  3.63E-09  9.85E-09  7.76E-09  6.62E-09  8.61E-09
+  5.77E-09  7.45E-09  2.98E-05
+ -2.1791E-01  2.0784E-01  2.2274E-01  2.2452E-01  3.1889E-01  3.2022E-01
+  3.2203E-01  3.5946E-01  5.0888E-01  5.1001E-01  5.1212E-01  6.2425E-01
+  6.4271E-01  6.4620E-01  7.8476E-01  1.0732E+00  1.0774E+00  1.0832E+00
+  1.1396E+00  1.1434E+00  1.1847E+00  1.1867E+00  1.1956E+00  1.3164E+00
+  1.3389E+00  1.3435E+00  1.5190E+00  1.5559E+00  1.5622E+00  1.5666E+00
+  1.6690E+00  1.6758E+00  1.7113E+00  1.7192E+00  1.7557E+00
+  prteigrs : nnsclo,ikpt=   50    1 max resid (incl. the buffer)=  2.97738E-05
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+  prteigrs : nnsclo,ikpt=   50    2 max resid (incl. the buffer)=  2.13415E-05
+  prteigrs : nnsclo,ikpt=   50    3 max resid (incl. the buffer)=  2.48543E-06
+  prteigrs : nnsclo,ikpt=   50    4 max resid (incl. the buffer)=  4.14379E-07
+  prteigrs : nnsclo,ikpt=   50    5 max resid (incl. the buffer)=  2.32263E-05
+  prteigrs : nnsclo,ikpt=   50    6 max resid (incl. the buffer)=  3.32584E-05
+  prteigrs : nnsclo,ikpt=   50    7 max resid (incl. the buffer)=  1.04327E-05
+  prteigrs : nnsclo,ikpt=   50    8 max resid (incl. the buffer)=  6.13660E-06
+  prteigrs : nnsclo,ikpt=   50    9 max resid (incl. the buffer)=  2.00372E-06
+  prteigrs : nnsclo,ikpt=   50   10 max resid (incl. the buffer)=  2.52274E-06
+  prteigrs : nnsclo,ikpt=   50   11 max resid (incl. the buffer)=  5.51191E-05
+  prteigrs : nnsclo,ikpt=   50   12 max resid (incl. the buffer)=  6.91464E-05
+  prteigrs : nnsclo,ikpt=   50   13 max resid (incl. the buffer)=  1.11464E-07
+  prteigrs : nnsclo,ikpt=   50   14 max resid (incl. the buffer)=  2.73399E-05
+  prteigrs : nnsclo,ikpt=   50   15 max resid (incl. the buffer)=  3.87957E-05
+  prteigrs : nnsclo,ikpt=   50   16 max resid (incl. the buffer)=  9.90364E-07
+  prteigrs : nnsclo,ikpt=   50   17 max resid (incl. the buffer)=  1.19503E-05
+  prteigrs : nnsclo,ikpt=   50   18 max resid (incl. the buffer)=  1.37093E-05
+  prteigrs : nnsclo,ikpt=   50   19 max resid (incl. the buffer)=  5.01861E-06
+  prteigrs : nnsclo,ikpt=   50   20 max resid (incl. the buffer)=  5.07637E-06
+  prteigrs : nnsclo,ikpt=   50   21 max resid (incl. the buffer)=  3.57377E-05
+  prteigrs : nnsclo,ikpt=   50   22 max resid (incl. the buffer)=  1.25373E-04
+  prteigrs : nnsclo,ikpt=   50   23 max resid (incl. the buffer)=  5.35719E-07
+  prteigrs : nnsclo,ikpt=   50   24 max resid (incl. the buffer)=  6.00913E-04
+  prteigrs : nnsclo,ikpt=   50   25 max resid (incl. the buffer)=  1.55558E-05
+  prteigrs : nnsclo,ikpt=   50   26 max resid (incl. the buffer)=  1.07992E-04
+  prteigrs : nnsclo,ikpt=   50   27 max resid (incl. the buffer)=  4.92577E-08
+  prteigrs : nnsclo,ikpt=   50   28 max resid (incl. the buffer)=  1.45956E-05
+  prteigrs : nnsclo,ikpt=   50   29 max resid (incl. the buffer)=  2.51171E-06
+  prteigrs : nnsclo,ikpt=   50   30 max resid (incl. the buffer)=  5.26247E-05
+  prteigrs : nnsclo,ikpt=   50   31 max resid (incl. the buffer)=  4.80302E-06
+  prteigrs : nnsclo,ikpt=   50   32 max resid (incl. the buffer)=  3.50450E-07
+  prteigrs : nnsclo,ikpt=   50   33 max resid (incl. the buffer)=  1.70984E-05
+  prteigrs : nnsclo,ikpt=   50   34 max resid (incl. the buffer)=  2.81221E-06
+  prteigrs : nnsclo,ikpt=   50   35 max resid (incl. the buffer)=  3.44515E-06
+  prteigrs : nnsclo,ikpt=   50   36 max resid (incl. the buffer)=  1.49151E-05
+  prteigrs : nnsclo,ikpt=   50   37 max resid (incl. the buffer)=  1.04139E-05
+  prteigrs : nnsclo,ikpt=   50   38 max resid (incl. the buffer)=  1.13331E-05
+  prteigrs : nnsclo,ikpt=   50   39 max resid (incl. the buffer)=  1.39790E-08
+  prteigrs : nnsclo,ikpt=   50   40 max resid (incl. the buffer)=  1.63631E-04
+  prteigrs : nnsclo,ikpt=   50   41 max resid (incl. the buffer)=  1.00976E-05
+  prteigrs : nnsclo,ikpt=   50   42 max resid (incl. the buffer)=  1.89568E-08
+  prteigrs : nnsclo,ikpt=   50   43 max resid (incl. the buffer)=  1.91676E-04
+  prteigrs : nnsclo,ikpt=   50   44 max resid (incl. the buffer)=  6.71650E-07
+  prteigrs : nnsclo,ikpt=   50   45 max resid (incl. the buffer)=  3.10182E-05
+  prteigrs : nnsclo,ikpt=   50   46 max resid (incl. the buffer)=  6.96223E-06
+  prteigrs : nnsclo,ikpt=   50   47 max resid (incl. the buffer)=  1.80144E-06
+  prteigrs : nnsclo,ikpt=   50   48 max resid (incl. the buffer)=  3.39116E-06
+  prteigrs : nnsclo,ikpt=   50   49 max resid (incl. the buffer)=  1.42878E-05
+  prteigrs : nnsclo,ikpt=   50   50 max resid (incl. the buffer)=  1.60121E-05
+  prteigrs : nnsclo,ikpt=   50   51 max resid (incl. the buffer)=  3.66713E-06
+  prteigrs : nnsclo,ikpt=   50   52 max resid (incl. the buffer)=  1.89302E-06
+  prteigrs : nnsclo,ikpt=   50   53 max resid (incl. the buffer)=  2.05644E-06
+  prteigrs : nnsclo,ikpt=   50   54 max resid (incl. the buffer)=  6.91483E-05
+  prteigrs : nnsclo,ikpt=   50   55 max resid (incl. the buffer)=  6.25238E-06
+  prteigrs : nnsclo,ikpt=   50   56 max resid (incl. the buffer)=  1.42018E-06
+  prteigrs : nnsclo,ikpt=   50   57 max resid (incl. the buffer)=  3.87105E-05
+  prteigrs : nnsclo,ikpt=   50   58 max resid (incl. the buffer)=  2.21840E-06
+  prteigrs : nnsclo,ikpt=   50   59 max resid (incl. the buffer)=  8.58020E-07
+  prteigrs : nnsclo,ikpt=   50   60 max resid (incl. the buffer)=  1.29611E-05
+  prteigrs : nnsclo,ikpt=   50   61 max resid (incl. the buffer)=  1.38749E-06
+  prteigrs : nnsclo,ikpt=   50   62 max resid (incl. the buffer)=  5.93478E-07
+  prteigrs : nnsclo,ikpt=   50   63 max resid (incl. the buffer)=  2.25736E-06
+  prteigrs : nnsclo,ikpt=   50   64 max resid (incl. the buffer)=  7.07562E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 4, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
+lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6663072E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.995E-09, diffor:  0.000E+00, }
+etotal    :  -8.78626948E+00
+entropy   :   0.00000000E+00
+fermie    :   2.24517494E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          1.87174118
+    2        2.00000          1.87174118
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   30.551E-10; max=  99.953E-10
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.35165088504101     1.35165088504101     1.35165088504101
+ length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
+              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+ prteigrs : about to open file t31o_DS4_EIG
+ Eigenvalues (hartree) for nkpt=  64  k points:
+ kpt#   1, nband= 35, wtk=  0.01563, kpt=  0.0550  0.0600  0.0650 (reduced coord)
+  -0.21791    0.20784    0.22274    0.22452    0.31889    0.32022    0.32203    0.35946
+   0.50888    0.51001    0.51212    0.62425    0.64271    0.64620    0.78476    1.07322
+   1.07741    1.08323    1.13957    1.14337    1.18467    1.18671    1.19561    1.31638
+   1.33890    1.34350    1.51897    1.55585    1.56223    1.56663    1.66901    1.67576
+   1.71134    1.71918    1.75569
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+================================================================================
+== DATASET  5 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 64, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 193, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   4.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
+ in frequency domain and reciprocal space on a transitions basis set. 
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
+
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
+ R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
+ R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
+ Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :    64
+ Reduced coordinates and weights : 
+
+     1)     5.50000000E-02  6.00000000E-02  6.50000000E-02       0.01563
+     2)     3.05000000E-01  6.00000000E-02  6.50000000E-02       0.01563
+     3)    -4.45000000E-01  6.00000000E-02  6.50000000E-02       0.01563
+     4)    -1.95000000E-01  6.00000000E-02  6.50000000E-02       0.01563
+     5)     5.50000000E-02  3.10000000E-01  6.50000000E-02       0.01563
+     6)     3.05000000E-01  3.10000000E-01  6.50000000E-02       0.01563
+     7)    -4.45000000E-01  3.10000000E-01  6.50000000E-02       0.01563
+     8)    -1.95000000E-01  3.10000000E-01  6.50000000E-02       0.01563
+     9)     5.50000000E-02 -4.40000000E-01  6.50000000E-02       0.01563
+    10)     3.05000000E-01 -4.40000000E-01  6.50000000E-02       0.01563
+    11)    -4.45000000E-01 -4.40000000E-01  6.50000000E-02       0.01563
+    12)    -1.95000000E-01 -4.40000000E-01  6.50000000E-02       0.01563
+    13)     5.50000000E-02 -1.90000000E-01  6.50000000E-02       0.01563
+    14)     3.05000000E-01 -1.90000000E-01  6.50000000E-02       0.01563
+    15)    -4.45000000E-01 -1.90000000E-01  6.50000000E-02       0.01563
+    16)    -1.95000000E-01 -1.90000000E-01  6.50000000E-02       0.01563
+    17)     5.50000000E-02  6.00000000E-02  3.15000000E-01       0.01563
+    18)     3.05000000E-01  6.00000000E-02  3.15000000E-01       0.01563
+    19)    -4.45000000E-01  6.00000000E-02  3.15000000E-01       0.01563
+    20)    -1.95000000E-01  6.00000000E-02  3.15000000E-01       0.01563
+    21)     5.50000000E-02  3.10000000E-01  3.15000000E-01       0.01563
+    22)     3.05000000E-01  3.10000000E-01  3.15000000E-01       0.01563
+    23)    -4.45000000E-01  3.10000000E-01  3.15000000E-01       0.01563
+    24)    -1.95000000E-01  3.10000000E-01  3.15000000E-01       0.01563
+    25)     5.50000000E-02 -4.40000000E-01  3.15000000E-01       0.01563
+    26)     3.05000000E-01 -4.40000000E-01  3.15000000E-01       0.01563
+    27)    -4.45000000E-01 -4.40000000E-01  3.15000000E-01       0.01563
+    28)    -1.95000000E-01 -4.40000000E-01  3.15000000E-01       0.01563
+    29)     5.50000000E-02 -1.90000000E-01  3.15000000E-01       0.01563
+    30)     3.05000000E-01 -1.90000000E-01  3.15000000E-01       0.01563
+    31)    -4.45000000E-01 -1.90000000E-01  3.15000000E-01       0.01563
+    32)    -1.95000000E-01 -1.90000000E-01  3.15000000E-01       0.01563
+    33)     5.50000000E-02  6.00000000E-02 -4.35000000E-01       0.01563
+    34)     3.05000000E-01  6.00000000E-02 -4.35000000E-01       0.01563
+    35)    -4.45000000E-01  6.00000000E-02 -4.35000000E-01       0.01563
+    36)    -1.95000000E-01  6.00000000E-02 -4.35000000E-01       0.01563
+    37)     5.50000000E-02  3.10000000E-01 -4.35000000E-01       0.01563
+    38)     3.05000000E-01  3.10000000E-01 -4.35000000E-01       0.01563
+    39)    -4.45000000E-01  3.10000000E-01 -4.35000000E-01       0.01563
+    40)    -1.95000000E-01  3.10000000E-01 -4.35000000E-01       0.01563
+    41)     5.50000000E-02 -4.40000000E-01 -4.35000000E-01       0.01563
+    42)     3.05000000E-01 -4.40000000E-01 -4.35000000E-01       0.01563
+    43)    -4.45000000E-01 -4.40000000E-01 -4.35000000E-01       0.01563
+    44)    -1.95000000E-01 -4.40000000E-01 -4.35000000E-01       0.01563
+    45)     5.50000000E-02 -1.90000000E-01 -4.35000000E-01       0.01563
+    46)     3.05000000E-01 -1.90000000E-01 -4.35000000E-01       0.01563
+    47)    -4.45000000E-01 -1.90000000E-01 -4.35000000E-01       0.01563
+    48)    -1.95000000E-01 -1.90000000E-01 -4.35000000E-01       0.01563
+    49)     5.50000000E-02  6.00000000E-02 -1.85000000E-01       0.01563
+    50)     3.05000000E-01  6.00000000E-02 -1.85000000E-01       0.01563
+    51)    -4.45000000E-01  6.00000000E-02 -1.85000000E-01       0.01563
+    52)    -1.95000000E-01  6.00000000E-02 -1.85000000E-01       0.01563
+    53)     5.50000000E-02  3.10000000E-01 -1.85000000E-01       0.01563
+    54)     3.05000000E-01  3.10000000E-01 -1.85000000E-01       0.01563
+    55)    -4.45000000E-01  3.10000000E-01 -1.85000000E-01       0.01563
+    56)    -1.95000000E-01  3.10000000E-01 -1.85000000E-01       0.01563
+    57)     5.50000000E-02 -4.40000000E-01 -1.85000000E-01       0.01563
+    58)     3.05000000E-01 -4.40000000E-01 -1.85000000E-01       0.01563
+    59)    -4.45000000E-01 -4.40000000E-01 -1.85000000E-01       0.01563
+    60)    -1.95000000E-01 -4.40000000E-01 -1.85000000E-01       0.01563
+    61)     5.50000000E-02 -1.90000000E-01 -1.85000000E-01       0.01563
+    62)     3.05000000E-01 -1.90000000E-01 -1.85000000E-01       0.01563
+    63)    -4.45000000E-01 -1.90000000E-01 -1.85000000E-01       0.01563
+    64)    -1.95000000E-01 -1.90000000E-01 -1.85000000E-01       0.01563
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for the screening function ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =    20x   20x   20
+          total number of points  =         8000
+
+ ==== Fundamental parameters for the solution of the Bethe-Salpeter equation: ====
+ Algorithm: Haydock technique.
+ Dimension of the v, W matrices,  npweps  = 51
+ Cutoff for the wavefunctions,    npwwfn  = 169
+ Number of k-points in the IBZ,   nkibz   = 64
+ Highest empty band included,     nband   = 8
+ === Spin UP ===
+ Number of resonant transitions          768
+ Lowest occupied state                   2
+ Highest occupied state                  4
+ Lowest unoccupied state                 5
+ Highest unoccupied state                8
+ Minimum frequency [eV]           Emin    =   0.00
+ Maximum frequency [eV]           Emax    =   6.00
+ Frequency step [eV]              dE      =   0.10
+ Lorentzian broadening [eV]       eta     =   0.10
+ RPA L0 with KS energies and KS wavefunctions
+ Scissors operator energy [eV] =          0.80
+ Local fields effects (v term) included
+ Excitonic effects (W term) included
+ Full W_GG' included
+ W is approximated with the model dielectric function
+ Resonant-only calculation (Hermitian case)
+
+
+ Calculating epsilon_Macro(q-->0,w), along the following directions:
+ q = (  0.938821  0.000000  0.000000) [r.l.u.]
+ q = (  0.000000  0.938821  0.000000) [r.l.u.]
+ q = (  0.000000  0.000000  0.938821) [r.l.u.]
+ q = (  0.000000  0.813043  0.813043) [r.l.u.]
+ q = (  0.813043  0.000000  0.813043) [r.l.u.]
+ q = (  0.813043  0.813043  0.000000) [r.l.u.]
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
+ r_s =    1.9964
+ omega_plasma =   16.7088 [eV]
+
+. Writing resonant excitonic Hamiltonian on file t31o_DS5_BSR; file size=   0.00 [Gb].
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t31o_DS5_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t31o_DS5_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 176 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 189 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 183 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 183 iterations.
+ Writing EXC Macroscopic dielectric function to file: t31o_DS5_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  20.3147   0.0000  16.6621   0.0000  18.8311   0.0000
+   0.1000  20.3320   0.0349  16.6710   0.0178  18.8444   0.0267
+   0.2000  20.3842   0.0701  16.6978   0.0358  18.8844   0.0537
+   0.3000  20.4720   0.1063  16.7426   0.0541  18.9516   0.0812
+   0.4000  20.5964   0.1438  16.8058   0.0727  19.0466   0.1096
+   0.5000  20.7590   0.1832  16.8878   0.0919  19.1703   0.1390
+   0.6000  20.9619   0.2251  16.9894   0.1119  19.3242   0.1700
+   0.7000  21.2080   0.2701  17.1113   0.1328  19.5096   0.2027
+   0.8000  21.5007   0.3191  17.2545   0.1547  19.7289   0.2378
+   0.9000  21.8445   0.3730  17.4203   0.1780  19.9843   0.2757
+  
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
+              amu      2.80855000E+01
+  bs_coulomb_term1         11
+  bs_coulomb_term2         11
+  bs_coulomb_term3         21
+  bs_coulomb_term4         11
+  bs_coulomb_term5         21
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  2.20495952E-01  3.67493254E-03 Hartree
+     bs_freq_mesh4     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh5     0.00000000E+00  2.20495952E-01  3.67493254E-03 Hartree
+ bs_haydock_niter1        100
+ bs_haydock_niter2        100
+ bs_haydock_niter3        200
+ bs_haydock_niter4        100
+ bs_haydock_niter5        200
+   bs_haydock_tol1     2.00000000E-02  0.00000000E+00
+   bs_haydock_tol2     2.00000000E-02  0.00000000E+00
+   bs_haydock_tol3    -1.00000000E-03  0.00000000E+00
+   bs_haydock_tol4     2.00000000E-02  0.00000000E+00
+   bs_haydock_tol5    -1.00000000E-03  0.00000000E+00
+     bs_hayd_term1          1
+     bs_hayd_term2          1
+     bs_hayd_term3          0
+     bs_hayd_term4          1
+     bs_hayd_term5          0
+   bs_interp_prep1          0
+   bs_interp_prep2          0
+   bs_interp_prep3          1
+   bs_interp_prep4          0
+   bs_interp_prep5          0
+        bs_loband1          0
+        bs_loband2          0
+        bs_loband3          2
+        bs_loband4          0
+        bs_loband5          2
+      chksymbreak           0
+           diemac      1.20000000E+01
+             ecut      6.00000000E+00 Hartree
+          ecuteps      2.10000000E+00 Hartree
+          ecutwfn      6.00000000E+00 Hartree
+           etotal1    -8.7862694794E+00
+           etotal3     0.0000000000E+00
+           etotal5     0.0000000000E+00
+            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         312
+           getden1          0
+           getden2         -1
+           getden3          0
+           getden4          1
+           getden5          0
+           getwfk1          0
+           getwfk2          0
+           getwfk3          2
+           getwfk4          0
+           getwfk5          4
+             iscf1          7
+             iscf2         -2
+             iscf3          7
+             iscf4         -2
+             iscf5          7
+           jdtset        1    2    3    4    5
+              kpt1     5.50000000E-02  6.00000000E-02  6.50000000E-02
+                      -4.45000000E-01  6.00000000E-02  6.50000000E-02
+                       5.50000000E-02 -4.40000000E-01  6.50000000E-02
+                      -4.45000000E-01 -4.40000000E-01  6.50000000E-02
+                       5.50000000E-02  6.00000000E-02 -4.35000000E-01
+                      -4.45000000E-01  6.00000000E-02 -4.35000000E-01
+                       5.50000000E-02 -4.40000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -4.40000000E-01 -4.35000000E-01
+              kpt2     5.50000000E-02  6.00000000E-02  6.50000000E-02
+                      -4.45000000E-01  6.00000000E-02  6.50000000E-02
+                       5.50000000E-02 -4.40000000E-01  6.50000000E-02
+                      -4.45000000E-01 -4.40000000E-01  6.50000000E-02
+                       5.50000000E-02  6.00000000E-02 -4.35000000E-01
+                      -4.45000000E-01  6.00000000E-02 -4.35000000E-01
+                       5.50000000E-02 -4.40000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -4.40000000E-01 -4.35000000E-01
+              kpt3     5.50000000E-02  6.00000000E-02  6.50000000E-02
+                      -4.45000000E-01  6.00000000E-02  6.50000000E-02
+                       5.50000000E-02 -4.40000000E-01  6.50000000E-02
+                      -4.45000000E-01 -4.40000000E-01  6.50000000E-02
+                       5.50000000E-02  6.00000000E-02 -4.35000000E-01
+                      -4.45000000E-01  6.00000000E-02 -4.35000000E-01
+                       5.50000000E-02 -4.40000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -4.40000000E-01 -4.35000000E-01
+              kpt4     5.50000000E-02  6.00000000E-02  6.50000000E-02
+                       3.05000000E-01  6.00000000E-02  6.50000000E-02
+                      -4.45000000E-01  6.00000000E-02  6.50000000E-02
+                      -1.95000000E-01  6.00000000E-02  6.50000000E-02
+                       5.50000000E-02  3.10000000E-01  6.50000000E-02
+                       3.05000000E-01  3.10000000E-01  6.50000000E-02
+                      -4.45000000E-01  3.10000000E-01  6.50000000E-02
+                      -1.95000000E-01  3.10000000E-01  6.50000000E-02
+                       5.50000000E-02 -4.40000000E-01  6.50000000E-02
+                       3.05000000E-01 -4.40000000E-01  6.50000000E-02
+                      -4.45000000E-01 -4.40000000E-01  6.50000000E-02
+                      -1.95000000E-01 -4.40000000E-01  6.50000000E-02
+                       5.50000000E-02 -1.90000000E-01  6.50000000E-02
+                       3.05000000E-01 -1.90000000E-01  6.50000000E-02
+                      -4.45000000E-01 -1.90000000E-01  6.50000000E-02
+                      -1.95000000E-01 -1.90000000E-01  6.50000000E-02
+                       5.50000000E-02  6.00000000E-02  3.15000000E-01
+                       3.05000000E-01  6.00000000E-02  3.15000000E-01
+                      -4.45000000E-01  6.00000000E-02  3.15000000E-01
+                      -1.95000000E-01  6.00000000E-02  3.15000000E-01
+                       5.50000000E-02  3.10000000E-01  3.15000000E-01
+                       3.05000000E-01  3.10000000E-01  3.15000000E-01
+                      -4.45000000E-01  3.10000000E-01  3.15000000E-01
+                      -1.95000000E-01  3.10000000E-01  3.15000000E-01
+                       5.50000000E-02 -4.40000000E-01  3.15000000E-01
+                       3.05000000E-01 -4.40000000E-01  3.15000000E-01
+                      -4.45000000E-01 -4.40000000E-01  3.15000000E-01
+                      -1.95000000E-01 -4.40000000E-01  3.15000000E-01
+                       5.50000000E-02 -1.90000000E-01  3.15000000E-01
+                       3.05000000E-01 -1.90000000E-01  3.15000000E-01
+                      -4.45000000E-01 -1.90000000E-01  3.15000000E-01
+                      -1.95000000E-01 -1.90000000E-01  3.15000000E-01
+                       5.50000000E-02  6.00000000E-02 -4.35000000E-01
+                       3.05000000E-01  6.00000000E-02 -4.35000000E-01
+                      -4.45000000E-01  6.00000000E-02 -4.35000000E-01
+                      -1.95000000E-01  6.00000000E-02 -4.35000000E-01
+                       5.50000000E-02  3.10000000E-01 -4.35000000E-01
+                       3.05000000E-01  3.10000000E-01 -4.35000000E-01
+                      -4.45000000E-01  3.10000000E-01 -4.35000000E-01
+                      -1.95000000E-01  3.10000000E-01 -4.35000000E-01
+                       5.50000000E-02 -4.40000000E-01 -4.35000000E-01
+                       3.05000000E-01 -4.40000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -4.40000000E-01 -4.35000000E-01
+                      -1.95000000E-01 -4.40000000E-01 -4.35000000E-01
+                       5.50000000E-02 -1.90000000E-01 -4.35000000E-01
+                       3.05000000E-01 -1.90000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -1.90000000E-01 -4.35000000E-01
+                      -1.95000000E-01 -1.90000000E-01 -4.35000000E-01
+                       5.50000000E-02  6.00000000E-02 -1.85000000E-01
+                       3.05000000E-01  6.00000000E-02 -1.85000000E-01
+              kpt5     5.50000000E-02  6.00000000E-02  6.50000000E-02
+                       3.05000000E-01  6.00000000E-02  6.50000000E-02
+                      -4.45000000E-01  6.00000000E-02  6.50000000E-02
+                      -1.95000000E-01  6.00000000E-02  6.50000000E-02
+                       5.50000000E-02  3.10000000E-01  6.50000000E-02
+                       3.05000000E-01  3.10000000E-01  6.50000000E-02
+                      -4.45000000E-01  3.10000000E-01  6.50000000E-02
+                      -1.95000000E-01  3.10000000E-01  6.50000000E-02
+                       5.50000000E-02 -4.40000000E-01  6.50000000E-02
+                       3.05000000E-01 -4.40000000E-01  6.50000000E-02
+                      -4.45000000E-01 -4.40000000E-01  6.50000000E-02
+                      -1.95000000E-01 -4.40000000E-01  6.50000000E-02
+                       5.50000000E-02 -1.90000000E-01  6.50000000E-02
+                       3.05000000E-01 -1.90000000E-01  6.50000000E-02
+                      -4.45000000E-01 -1.90000000E-01  6.50000000E-02
+                      -1.95000000E-01 -1.90000000E-01  6.50000000E-02
+                       5.50000000E-02  6.00000000E-02  3.15000000E-01
+                       3.05000000E-01  6.00000000E-02  3.15000000E-01
+                      -4.45000000E-01  6.00000000E-02  3.15000000E-01
+                      -1.95000000E-01  6.00000000E-02  3.15000000E-01
+                       5.50000000E-02  3.10000000E-01  3.15000000E-01
+                       3.05000000E-01  3.10000000E-01  3.15000000E-01
+                      -4.45000000E-01  3.10000000E-01  3.15000000E-01
+                      -1.95000000E-01  3.10000000E-01  3.15000000E-01
+                       5.50000000E-02 -4.40000000E-01  3.15000000E-01
+                       3.05000000E-01 -4.40000000E-01  3.15000000E-01
+                      -4.45000000E-01 -4.40000000E-01  3.15000000E-01
+                      -1.95000000E-01 -4.40000000E-01  3.15000000E-01
+                       5.50000000E-02 -1.90000000E-01  3.15000000E-01
+                       3.05000000E-01 -1.90000000E-01  3.15000000E-01
+                      -4.45000000E-01 -1.90000000E-01  3.15000000E-01
+                      -1.95000000E-01 -1.90000000E-01  3.15000000E-01
+                       5.50000000E-02  6.00000000E-02 -4.35000000E-01
+                       3.05000000E-01  6.00000000E-02 -4.35000000E-01
+                      -4.45000000E-01  6.00000000E-02 -4.35000000E-01
+                      -1.95000000E-01  6.00000000E-02 -4.35000000E-01
+                       5.50000000E-02  3.10000000E-01 -4.35000000E-01
+                       3.05000000E-01  3.10000000E-01 -4.35000000E-01
+                      -4.45000000E-01  3.10000000E-01 -4.35000000E-01
+                      -1.95000000E-01  3.10000000E-01 -4.35000000E-01
+                       5.50000000E-02 -4.40000000E-01 -4.35000000E-01
+                       3.05000000E-01 -4.40000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -4.40000000E-01 -4.35000000E-01
+                      -1.95000000E-01 -4.40000000E-01 -4.35000000E-01
+                       5.50000000E-02 -1.90000000E-01 -4.35000000E-01
+                       3.05000000E-01 -1.90000000E-01 -4.35000000E-01
+                      -4.45000000E-01 -1.90000000E-01 -4.35000000E-01
+                      -1.95000000E-01 -1.90000000E-01 -4.35000000E-01
+                       5.50000000E-02  6.00000000E-02 -1.85000000E-01
+                       3.05000000E-01  6.00000000E-02 -1.85000000E-01
+                       outvar_i_n : Printing only first  50 k-points.
+         kptrlatt1       2    0    0      0    2    0      0    0    2
+         kptrlatt2       2    0    0      0    2    0      0    0    2
+         kptrlatt3       2    0    0      0    2    0      0    0    2
+         kptrlatt4       4    0    0      0    4    0      0    0    4
+         kptrlatt5       4    0    0      0    4    0      0    0    4
+          kptrlen1     1.44490200E+01
+          kptrlen2     1.44490200E+01
+          kptrlen3     1.44490200E+01
+          kptrlen4     2.88980399E+01
+          kptrlen5     2.88980399E+01
+       mbpt_sciss1     0.00000000E+00 Hartree
+       mbpt_sciss2     0.00000000E+00 Hartree
+       mbpt_sciss3     2.93994603E-02 Hartree
+       mbpt_sciss4     0.00000000E+00 Hartree
+       mbpt_sciss5     2.93994603E-02 Hartree
+       mdf_epsinf1     0.00000000E+00
+       mdf_epsinf2     0.00000000E+00
+       mdf_epsinf3     1.20000000E+01
+       mdf_epsinf4     0.00000000E+00
+       mdf_epsinf5     1.20000000E+01
+P           mkmem1          8
+P           mkmem2          8
+P           mkmem3          8
+P           mkmem4         64
+P           mkmem5         64
+            natom           2
+            nband1          5
+            nband2         35
+            nband3          8
+            nband4         35
+            nband5          8
+           nbdbuf1          0
+           nbdbuf2          2
+           nbdbuf3          0
+           nbdbuf4          2
+           nbdbuf5          0
+           ndtset           5
+            ngfft          16      16      16
+             nkpt1          8
+             nkpt2          8
+             nkpt3          8
+             nkpt4         64
+             nkpt5         64
+           npweps1          0
+           npweps2          0
+           npweps3         51
+           npweps4          0
+           npweps5         51
+           npwwfn1          0
+           npwwfn2          0
+           npwwfn3        169
+           npwwfn4          0
+           npwwfn5        169
+            nstep          50
+             nsym          48
+           ntypat           1
+              occ1     2.000000  2.000000  2.000000  2.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ5     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+        optdriver1          0
+        optdriver2          0
+        optdriver3         99
+        optdriver4          0
+        optdriver5         99
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk1     1.10000000E-01  1.20000000E-01  1.30000000E-01
+           shiftk2     1.10000000E-01  1.20000000E-01  1.30000000E-01
+           shiftk3     1.10000000E-01  1.20000000E-01  1.30000000E-01
+           shiftk4     2.20000000E-01  2.40000000E-01  2.60000000E-01
+           shiftk5     2.20000000E-01  2.40000000E-01  2.60000000E-01
+          spgroup         227
+           strten1    -1.5207404843E-04 -1.5207404843E-04 -1.5207404843E-04
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+            tnons      0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+           toldfe1     1.00000000E-06 Hartree
+           toldfe2     0.00000000E+00 Hartree
+           toldfe3     0.00000000E+00 Hartree
+           toldfe4     0.00000000E+00 Hartree
+           toldfe5     0.00000000E+00 Hartree
+           tolwfr1     0.00000000E+00
+           tolwfr2     1.00000000E-08
+           tolwfr3     0.00000000E+00
+           tolwfr4     1.00000000E-08
+           tolwfr5     0.00000000E+00
+            typat      1  1
+              wtk1       0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
+                         0.12500    0.12500
+              wtk2       0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
+                         0.12500    0.12500
+              wtk3       0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
+                         0.12500    0.12500
+              wtk4       0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563
+              wtk5       0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563    0.01563    0.01563    0.01563    0.01563
+                         0.01563    0.01563
+                       outvars : Printing only first  50 k-points.
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl       14.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
+- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+- Comment: the third generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
+-
+- Proc.   0 individual time (sec): cpu=         43.3  wall=         43.5
+
+================================================================================
+
+ Calculation completed.
+.Delivered  17 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=         43.3  wall=         43.5

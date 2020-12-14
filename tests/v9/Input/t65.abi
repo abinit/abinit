@@ -1,0 +1,76 @@
+# Cu Very rough 2x2x2 q-point grid; low ecut.
+ndtset 2
+
+# Global parameters.
+ecut   20
+tolwfr 1e-10
+
+# K-mesh (must equal the one used to produce the WFK file)
+ngkpt    4 4 4
+nshiftk  1
+shiftk   0.0 0.0 0.0
+
+# Global variables
+nband     20
+occopt 3
+symsigma  1
+tmesh 0 300 2
+ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with DDB data)
+
+############
+# DATASET 1
+############
+optdriver1 0
+getkerange_filepath1 "t62o_DS7_KERANGE.nc"
+getden1   20    # Read DEN from DS20_DEN
+getwfk1   20    # Init GS wavefunctions from DS20_WFK
+iscf1 -2
+kptopt1 0
+
+############
+# DATASET 2
+############
+optdriver2 7
+eph_task2 -4
+getwfk2     1    # Read GS wavefunctions from o_DS1_WFK
+getddb2   20     # Read DDB files from DS20_DDB
+getdvdb2  20
+eph_ngqpt_fine2 16 16 16 
+sigma_erange2 -0.2 -0.2 eV   # Select kpts in fine mesh within this energy window.
+ngkpt2    16 16 16
+nshiftk2  1
+shiftk2   0.0 0.0 0.0
+
+##############################################
+####                  STRUCTURE                  
+##############################################
+ natom 1
+ ntypat 1
+ typat 1
+ znucl 29
+ xred    0.0000000000    0.0000000000    0.0000000000
+ acell    1.0    1.0    1.0
+ rprim
+    4.1905837556    0.0000000000    2.4194346594
+    1.3968612519    3.9509202543    2.4194346594
+    0.0000000000    0.0000000000    4.8388693187
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/29cu.1.hgh"
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t62.abi, t63.abi, t64.abi, t65.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t65.abo, tolnlines = 30, tolabs = 20.0, tolrel = 5.0e-2
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = O. Nadeau
+#%% keywords = NC, DFPT, EPH, RTA
+#%% description = 
+#%%   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+#%%<END TEST_INFO>

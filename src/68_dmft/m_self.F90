@@ -129,7 +129,6 @@ CONTAINS  !=====================================================================
 !!      m_self
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -204,10 +203,9 @@ end subroutine alloc_self
 !!
 !!
 !! PARENTS
-!!      m_dmft,spectral_function
+!!      m_dmft,m_outscfcv
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -261,10 +259,9 @@ end subroutine initialize_self
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,spectral_function
+!!      m_dmft,m_outscfcv
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -318,7 +315,6 @@ end subroutine destroy_self
 !!      m_dmft
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -375,10 +371,9 @@ end subroutine print_self
 !!  hu <type(hu_type)>= variables related to the interaction between electrons
 !!
 !! PARENTS
-!!      m_dmft,spectral_function
+!!      m_dmft
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -488,10 +483,9 @@ end subroutine dc_self
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,spectral_function
+!!      m_dmft,m_outscfcv
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -1334,7 +1328,6 @@ end subroutine rw_self
 !!      m_dmft
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -1522,9 +1515,9 @@ end subroutine make_qmcshift_self
 !!  self%qmc_shift in self <type(self_type)> = Self-energy
 !!
 !! PARENTS
+!!      m_self
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1675,9 +1668,9 @@ end subroutine kramerskronig_self
 !!  self%qmc_shift in self <type(self_type)> = Self-energy
 !!
 !! PARENTS
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

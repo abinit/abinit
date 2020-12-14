@@ -120,7 +120,7 @@ contains
 !!      conducti
 !!
 !! CHILDREN
-!!      hdr_free,hdr_io,hdr_read_from_fname,metric,msig,wffclose,wffopen
+!!      hdr%free,hdr_io,hdr_read_from_fname,metric,wffclose,wffopen
 !!
 !! SOURCE
 
@@ -555,7 +555,7 @@ end subroutine conducti_paw
 !!      conducti
 !!
 !! CHILDREN
-!!      hdr_free,hdr_io,hdr_read_from_fname,metric,wffclose,wffopen
+!!      hdr%free,hdr_io,hdr_read_from_fname,metric,wffclose,wffopen
 !!
 !! SOURCE
 
@@ -876,8 +876,7 @@ end subroutine conducti_paw_core
 !!      conducti
 !!
 !! CHILDREN
-!!      getnel,hdr_free,jacobi,matr3inv,metric,msig,nctk_fort_or_ncfile
-!!      wfk_open_read,wfk_read_eigk
+!!      hdr%free,hdr_io,hdr_read_from_fname,metric,wffclose,wffopen
 !!
 !! SOURCE
 
@@ -1501,10 +1500,10 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 !!     march 2002 s.mazevet
 !!
 !! PARENTS
-!!      conducti_nc,conducti_paw
+!!      m_conducti
 !!
 !! CHILDREN
-!!      intrpl
+!!      hdr%free,hdr_io,hdr_read_from_fname,metric,wffclose,wffopen
 !!
 !! SOURCE
 
@@ -1735,7 +1734,7 @@ end subroutine msig
 !!      conducti
 !!
 !! CHILDREN
-!!      hdr_free,hdr_io,hdr_read_from_fname,metric,wffclose,wffopen
+!!      hdr%free,hdr_io,hdr_read_from_fname,metric,wffclose,wffopen
 !!
 !! SOURCE
 

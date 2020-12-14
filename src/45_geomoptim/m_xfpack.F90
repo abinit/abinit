@@ -82,17 +82,14 @@ contains
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet
+!!      m_pred_bfgs,m_pred_delocint,m_pred_fire,m_pred_verlet
 !!
 !! CHILDREN
-!!      metric,mkradim,strainsym
 !!
 !! SOURCE
 
 subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
 & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -280,18 +277,14 @@ end subroutine xfpack_vin2x
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet,xfh_recover_deloc
-!!      xfh_recover_new
+!!      m_pred_bfgs,m_pred_delocint,m_pred_fire,m_pred_verlet,m_xfpack
 !!
 !! CHILDREN
-!!      matr3inv,metric,mkrdim,strainsym
 !!
 !! SOURCE
 
 subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
   & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -457,16 +450,13 @@ end subroutine xfpack_x2vin
 !!   strten, depending on the value of optcell, and taking care ot strtarget
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet,xfh_recover_deloc
-!!      xfh_recover_new
+!!      m_pred_bfgs,m_pred_delocint,m_pred_fire,m_pred_verlet,m_xfpack
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -579,10 +569,9 @@ end subroutine xfpack_f2vout
 !! OUTPUT
 !!
 !! PARENTS
-!!      pred_bfgs,pred_lbfgs
+!!      m_pred_bfgs
 !!
 !! CHILDREN
-!!      hessupdt,xfpack_f2vout,xfpack_x2vin
 !!
 !! SOURCE
 
@@ -590,8 +579,6 @@ end subroutine xfpack_f2vout
 subroutine xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,fred,&
 & hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,vout,&
 & vout_prev,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -733,7 +720,7 @@ end subroutine xfh_recover_new
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
 !!
@@ -741,11 +728,8 @@ end subroutine xfh_recover_new
 
 subroutine xfh_update(ab_xfh,acell,fred_corrected,natom,rprim,strten,xred)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
-
 type(ab_xfh_type),intent(inout) :: ab_xfh
 integer,intent(in) :: natom
 

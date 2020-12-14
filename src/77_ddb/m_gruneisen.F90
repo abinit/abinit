@@ -132,8 +132,7 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
 
 !Local variables-------------------------------
  integer,parameter :: natifc0=0,master=0
- integer :: ivol,iblock,natom,ddbun
- integer :: nprocs,my_rank,ierr
+ integer :: ivol,iblock,natom,ddbun, nprocs,my_rank,ierr
  character(len=500) :: msg
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
@@ -158,11 +157,13 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
    call ddb_hdr_open_read(ddb_hdr, ddb_filepaths(ivol), ddbun, DDB_VERSION, dimonly=1)
    natom = ddb_hdr%natom
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
    ABI_MALLOC(atifc0, (natom))
    atifc0 = 0
-   call ddb_from_file(new%ddb_vol(ivol), ddb_filepaths(ivol), inp%brav, natom, natifc0, atifc0, new%cryst_vol(ivol), comm)
+   call ddb_from_file(new%ddb_vol(ivol), ddb_filepaths(ivol), inp%brav, natom, natifc0, atifc0, &
+                      ddb_hdr, new%cryst_vol(ivol), comm)
+   call ddb_hdr%free()
    ABI_FREE(atifc0)
    if (my_rank == master) then
      call new%cryst_vol(ivol)%print(header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
@@ -246,6 +247,8 @@ end function gruns_new
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -337,6 +340,8 @@ end subroutine gruns_fourq
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -466,6 +471,8 @@ end subroutine gruns_qpath
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -685,6 +692,8 @@ end subroutine gruns_qmesh
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -745,6 +754,8 @@ end subroutine gruns_free
 !!      anaddb
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 

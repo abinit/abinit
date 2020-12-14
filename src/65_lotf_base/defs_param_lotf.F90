@@ -67,7 +67,7 @@ CONTAINS !===========================================================
 !!  classic=stick with the adaptable Glue model (rough version)
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!

@@ -34,7 +34,7 @@
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -44,12 +44,12 @@
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_int(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_int(xval,master,comm,ier)
 
 !Arguments-------------------------
  integer,intent(inout) :: xval
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out)   :: ier
 
 !Local variables-------------------
@@ -62,11 +62,11 @@ subroutine xmpi_sum_master_int(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in spaceComm
-     call MPI_REDUCE(xval,xsum,1,MPI_INTEGER,MPI_SUM,master,spaceComm,ier)
+!    Accumulate xval on all proc. in comm
+     call MPI_REDUCE(xval,xsum,1,MPI_INTEGER,MPI_SUM,master,comm,ier)
      xval = xsum
    end if
  end if
@@ -84,7 +84,7 @@ end subroutine xmpi_sum_master_int
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -94,12 +94,12 @@ end subroutine xmpi_sum_master_int
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_dp(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_dp(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp),intent(inout) :: xval
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out)   :: ier
 
 !Local variables-------------------
@@ -112,11 +112,11 @@ subroutine xmpi_sum_master_dp(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
-!    Accumulate xval on all proc. in spaceComm
-     call MPI_REDUCE(xval,xsum,1,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
+!    Accumulate xval on all proc. in comm
+     call MPI_REDUCE(xval,xsum,1,MPI_DOUBLE_PRECISION,MPI_SUM,master,comm,ier)
      xval = xsum
    end if
  end if
@@ -135,7 +135,7 @@ end subroutine xmpi_sum_master_dp
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -145,11 +145,11 @@ end subroutine xmpi_sum_master_dp
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_int2d(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_int2d(xval,master,comm,ier)
 
 !Arguments ------------------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:)
- integer,intent(in) :: master,spaceComm
+ integer,intent(in) :: master,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------------------
@@ -164,8 +164,8 @@ subroutine xmpi_sum_master_int2d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -179,12 +179,12 @@ subroutine xmpi_sum_master_int2d(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2,MPI_INTEGER,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2,MPI_INTEGER,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_INTEGER,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -207,7 +207,7 @@ end subroutine xmpi_sum_master_int2d
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -217,12 +217,12 @@ end subroutine xmpi_sum_master_int2d
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_dp1d(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_dp1d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:)
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -236,15 +236,15 @@ subroutine xmpi_sum_master_dp1d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      ABI_STAT_ALLOCATE(xsum,(n1), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = zero ! See notes
-     call MPI_REDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
+     call MPI_REDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,master,comm,ier)
      xval (:) = xsum(:)
      ABI_DEALLOCATE(xsum)
    end if
@@ -263,7 +263,7 @@ end subroutine xmpi_sum_master_dp1d
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -273,12 +273,12 @@ end subroutine xmpi_sum_master_dp1d
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_dp2d(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_dp2d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -293,8 +293,8 @@ subroutine xmpi_sum_master_dp2d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -308,12 +308,12 @@ subroutine xmpi_sum_master_dp2d(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -335,7 +335,7 @@ end subroutine xmpi_sum_master_dp2d
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -345,12 +345,12 @@ end subroutine xmpi_sum_master_dp2d
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_dp3d(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_dp3d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -365,8 +365,8 @@ subroutine xmpi_sum_master_dp3d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -381,12 +381,12 @@ subroutine xmpi_sum_master_dp3d(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -409,7 +409,7 @@ end subroutine xmpi_sum_master_dp3d
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -419,12 +419,12 @@ end subroutine xmpi_sum_master_dp3d
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_dp4d(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_dp4d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -439,8 +439,8 @@ subroutine xmpi_sum_master_dp4d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -455,12 +455,12 @@ subroutine xmpi_sum_master_dp4d(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -483,7 +483,7 @@ end subroutine xmpi_sum_master_dp4d
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -493,12 +493,12 @@ end subroutine xmpi_sum_master_dp4d
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_dp5d(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_dp5d(xval,master,comm,ier)
 
 !Arguments ------------------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out)   :: ier
 
 !Local variables-------------------------------
@@ -513,8 +513,8 @@ subroutine xmpi_sum_master_dp5d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -531,12 +531,12 @@ subroutine xmpi_sum_master_dp5d(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -559,7 +559,7 @@ end subroutine xmpi_sum_master_dp5d
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -569,12 +569,12 @@ end subroutine xmpi_sum_master_dp5d
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_dp6d(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_dp6d(xval,master,comm,ier)
 
 !Arguments ------------------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------------------
@@ -589,8 +589,8 @@ subroutine xmpi_sum_master_dp6d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -608,12 +608,12 @@ subroutine xmpi_sum_master_dp6d(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_PRECISION,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -636,7 +636,7 @@ end subroutine xmpi_sum_master_dp6d
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -646,12 +646,12 @@ end subroutine xmpi_sum_master_dp6d
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_dp7d(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_dp7d(xval,master,comm,ier)
 
 !Arguments ------------------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------------------
@@ -666,8 +666,8 @@ subroutine xmpi_sum_master_dp7d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -686,12 +686,12 @@ subroutine xmpi_sum_master_dp7d(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5*n6*n7,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5*n6*n7,MPI_DOUBLE_PRECISION,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -714,7 +714,7 @@ end subroutine xmpi_sum_master_dp7d
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -724,12 +724,12 @@ end subroutine xmpi_sum_master_dp7d
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_int4d(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_int4d(xval,master,comm,ier)
 
 !Arguments ------------------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
  integer,intent(in) :: master
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------------------
@@ -744,8 +744,8 @@ subroutine xmpi_sum_master_int4d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -761,12 +761,12 @@ subroutine xmpi_sum_master_int4d(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_INTEGER,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_INTEGER,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_INTEGER,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -789,7 +789,7 @@ end subroutine xmpi_sum_master_int4d
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -799,12 +799,12 @@ end subroutine xmpi_sum_master_int4d
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_c1cplx(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_c1cplx(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:)
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -817,15 +817,15 @@ subroutine xmpi_sum_master_c1cplx(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      ABI_STAT_ALLOCATE(xsum,(n1), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_sp,0_sp) ! See notes
-!    Collect xval from processors on master in spaceComm
-     call MPI_REDUCE(xval,xsum,n1,MPI_COMPLEX,MPI_SUM,master,spaceComm,ier)
+!    Collect xval from processors on master in comm
+     call MPI_REDUCE(xval,xsum,n1,MPI_COMPLEX,MPI_SUM,master,comm,ier)
      xval = xsum
      ABI_DEALLOCATE(xsum)
    end if
@@ -845,7 +845,7 @@ end subroutine xmpi_sum_master_c1cplx
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -855,12 +855,12 @@ end subroutine xmpi_sum_master_c1cplx
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_c2cplx(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_c2cplx(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:)
  integer,intent(in) :: master
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -875,8 +875,8 @@ subroutine xmpi_sum_master_c2cplx(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -890,12 +890,12 @@ subroutine xmpi_sum_master_c2cplx(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2,MPI_COMPLEX,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2,MPI_COMPLEX,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -918,7 +918,7 @@ end subroutine xmpi_sum_master_c2cplx
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -928,12 +928,12 @@ end subroutine xmpi_sum_master_c2cplx
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_c3cplx(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_c3cplx(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
  integer,intent(in) :: master
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -948,8 +948,8 @@ subroutine xmpi_sum_master_c3cplx(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -964,12 +964,12 @@ subroutine xmpi_sum_master_c3cplx(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3,MPI_COMPLEX,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3,MPI_COMPLEX,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -992,7 +992,7 @@ end subroutine xmpi_sum_master_c3cplx
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -1002,12 +1002,12 @@ end subroutine xmpi_sum_master_c3cplx
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_c4cplx(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_c4cplx(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
  integer,intent(in) :: master
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -1022,8 +1022,8 @@ subroutine xmpi_sum_master_c4cplx(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -1039,12 +1039,12 @@ subroutine xmpi_sum_master_c4cplx(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_COMPLEX,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_COMPLEX,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -1068,7 +1068,7 @@ end subroutine xmpi_sum_master_c4cplx
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -1078,12 +1078,12 @@ end subroutine xmpi_sum_master_c4cplx
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_c5cplx(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_c5cplx(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
  integer,intent(in) :: master
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -1098,8 +1098,8 @@ subroutine xmpi_sum_master_c5cplx(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -1116,12 +1116,12 @@ subroutine xmpi_sum_master_c5cplx(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5,MPI_COMPLEX,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5,MPI_COMPLEX,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -1143,7 +1143,7 @@ end subroutine xmpi_sum_master_c5cplx
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -1153,12 +1153,12 @@ end subroutine xmpi_sum_master_c5cplx
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_c1dpc(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_c1dpc(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:)
  integer,intent(in) :: master
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -1172,15 +1172,15 @@ subroutine xmpi_sum_master_c1dpc(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
-!    Collect xval from processors on master in spaceComm
+!    Collect xval from processors on master in comm
      ABI_STAT_ALLOCATE(xsum,(n1), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_dp,0_dp) ! See notes
-     call MPI_REDUCE(xval,xsum,n1,MPI_DOUBLE_COMPLEX,MPI_SUM,master,spaceComm,ier)
+     call MPI_REDUCE(xval,xsum,n1,MPI_DOUBLE_COMPLEX,MPI_SUM,master,comm,ier)
      xval (:) = xsum(:)
      ABI_DEALLOCATE(xsum)
    end if
@@ -1200,7 +1200,7 @@ end subroutine xmpi_sum_master_c1dpc
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -1210,12 +1210,12 @@ end subroutine xmpi_sum_master_c1dpc
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_c2dpc(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_c2dpc(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:)
  integer ,intent(in) :: master
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -1230,8 +1230,8 @@ subroutine xmpi_sum_master_c2dpc(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -1245,12 +1245,12 @@ subroutine xmpi_sum_master_c2dpc(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2,MPI_DOUBLE_COMPLEX,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2,MPI_DOUBLE_COMPLEX,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -1273,7 +1273,7 @@ end subroutine xmpi_sum_master_c2dpc
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -1283,12 +1283,12 @@ end subroutine xmpi_sum_master_c2dpc
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_c3dpc(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_c3dpc(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
  integer,intent(in) :: master
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -1303,8 +1303,8 @@ subroutine xmpi_sum_master_c3dpc(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -1319,12 +1319,12 @@ subroutine xmpi_sum_master_c3dpc(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3,MPI_DOUBLE_COMPLEX,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3,MPI_DOUBLE_COMPLEX,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -1346,7 +1346,7 @@ end subroutine xmpi_sum_master_c3dpc
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -1356,12 +1356,12 @@ end subroutine xmpi_sum_master_c3dpc
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_c4dpc(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_c4dpc(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
  integer,intent(in) :: master
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -1376,8 +1376,8 @@ subroutine xmpi_sum_master_c4dpc(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -1393,12 +1393,12 @@ subroutine xmpi_sum_master_c4dpc(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_DOUBLE_COMPLEX,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3*n4,MPI_DOUBLE_COMPLEX,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 
@@ -1420,7 +1420,7 @@ end subroutine xmpi_sum_master_c4dpc
 !!
 !! INPUTS
 !!  master= master MPI node
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -1430,12 +1430,12 @@ end subroutine xmpi_sum_master_c4dpc
 !!
 !! SOURCE
 
-subroutine xmpi_sum_master_c5dpc(xval,master,spaceComm,ier)
+subroutine xmpi_sum_master_c5dpc(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
  integer,intent(in) :: master
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -1450,8 +1450,8 @@ subroutine xmpi_sum_master_c5dpc(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_SIZE(spaceComm,nproc_space_comm,ier)
+ if (comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
@@ -1468,12 +1468,12 @@ subroutine xmpi_sum_master_c5dpc(xval,master,spaceComm,ier)
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
      ntot=int(n1*n2*n3*n4*n5,kind=int64)
 
-!    Accumulate xval on all proc. in spaceComm
+!    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
-       call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5,MPI_DOUBLE_COMPLEX,MPI_SUM,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,n1*n2*n3*n4*n5,MPI_DOUBLE_COMPLEX,MPI_SUM,master,comm,ier)
      else
        call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_SUM)
-       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,spaceComm,ier)
+       call MPI_reduce(xval,xsum,1,my_dt,my_op,master,comm,ier)
        call xmpi_largetype_free(my_dt,my_op)
      end if
 

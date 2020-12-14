@@ -250,10 +250,10 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -403,10 +403,10 @@ end subroutine write_sigma_header
 !!  (for writing routines, no output) otherwise, should be described
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 !!
@@ -611,7 +611,7 @@ end function gw_spectral_function
 !!      m_sigma
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -763,7 +763,7 @@ end subroutine print_Sigma_perturbative
 !!      m_sigma
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -895,10 +895,10 @@ end subroutine print_Sigma_QPSC
 !!  Write documentation.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1023,10 +1023,10 @@ end subroutine sigma_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1152,7 +1152,7 @@ end function sigma_get_exene
 !! PARENTS
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1334,7 +1334,6 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
    nctkarr_t('hhartree', "dp",'cplex, nbgw, nbgw, number_of_kpoints, ndim_sig'),&
    nctkarr_t('sigmee', "dp", 'cplex, nbgw, number_of_kpoints, ndim_sig'),&
    nctkarr_t('sigcmee0', "dp",'cplex, nbgw, number_of_kpoints, ndim_sig'),&
-   nctkarr_t('sigcmesi', "dp",'cplex, nbgw, number_of_kpoints, ndim_sig'),&
    nctkarr_t('sigcme4sd', "dp",'cplex, nbgw, number_of_kpoints, nomega4sd, ndim_sig'),&
    nctkarr_t('sigxcme4sd', "dp", 'cplex, nbgw, number_of_kpoints, nomega4sd, ndim_sig'),&
    nctkarr_t('ze0',"dp", 'cplex, nbgw, number_of_kpoints, number_of_spins'),&
@@ -1357,6 +1356,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
  if (Sr%nomega_i>0) then
    ncerr = nctk_def_arrays(ncid, [&
      nctkarr_t('sigxcmesi', "dp", 'cplex, nbgw, number_of_kpoints, nomega_i, ndim_sig'),&
+     nctkarr_t('sigcmesi', "dp",'cplex, nbgw, number_of_kpoints, nomega_i, ndim_sig'),&
      nctkarr_t('omega_i', "dp", 'cplex, nomega_i')])
    NCF_CHECK(ncerr)
  end if
@@ -1546,10 +1546,10 @@ end function sigma_ncwrite
 !!  Wfd%bks_tab
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me
+!!      m_cohsex,m_sigc,m_sigx
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 

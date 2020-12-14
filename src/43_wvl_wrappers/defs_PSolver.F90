@@ -31,7 +31,7 @@ module defs_PSolver
 !! FUNCTION
 !!
 !! PARENTS
-!!      mklocl_realspace
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
 !!

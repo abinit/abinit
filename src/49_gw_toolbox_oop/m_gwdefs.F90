@@ -349,7 +349,7 @@ MODULE m_gwdefs
   real(dp) :: omegasimax                 ! Max omega for Sigma along the imag axis in case of analytic continuation
   real(dp) :: omegasimin                 ! min omega for Sigma along the imag axis in case of analytic continuation
 
-  real(dp) :: sigma_mixing               ! Global factor that multiplies Sigma to give the final matrix element. 
+  real(dp) :: sigma_mixing               ! Global factor that multiplies Sigma to give the final matrix element.
                                          ! Usually one, except for the hybrid functionals.
 
   real(dp) :: zcut                       ! Value of $\delta$ used to avoid the divergences (see related input variable)
@@ -407,7 +407,7 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -449,7 +449,7 @@ end subroutine em1params_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_gwdefs,setup_sigma
+!!      m_gwdefs,m_sigma_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -475,7 +475,7 @@ subroutine sigijtab_free(Sigijtab)
       do kk=ilow,iup
         ABI_FREE(Sigijtab(ii,jj)%col(kk)%bidx)
       end do
-      ABI_DT_FREE(Sigijtab(ii,jj)%col)
+      ABI_FREE(Sigijtab(ii,jj)%col)
 
     end do
   end do
@@ -497,7 +497,7 @@ end subroutine sigijtab_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -728,7 +728,7 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 !************************************************************************
 
  if (delta_ene**2>tol14) then
-   sgn=delta_ene/ABS(delta_ene)
+   sgn=SIGN(1.0_dp,delta_ene)
    !
    if (opt_poles == 2) then ! Resonant and anti-resonant contributions.
      if (DABS(REAL(omega))>TOL_W0) then

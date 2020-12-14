@@ -103,7 +103,7 @@ contains
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  npwarr(nkpt)=number of planewaves and boundary planewaves at each k
 !!  occ(mband*nkpt*nsppol)=
 !!          occupation numbers for each band (usually 2.0) at each k point
@@ -117,8 +117,8 @@ contains
 !!  rprimd(3,3)=dimensional real space primitive translations
 !!  tim_mkrho=timing code of the calling routine(can be set to 0 if not attributed)
 !!  ucvol=unit cell volume (Bohr**3)
-!!  wvl_den <type(wvl_denspot_type)>=density informations for wavelets
-!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets
+!!  wvl_den <type(wvl_denspot_type)>=density information for wavelets
+!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions information for wavelets
 !!
 !! OUTPUT
 !! rhog(2,nfft)=total electron density in G space
@@ -127,11 +127,11 @@ contains
 !!   (for non-collinear magnetism, first element: total density, 3 next ones: mx,my,mz in units of hbar/2)
 !!
 !! PARENTS
-!!      afterscfloop,energy,gstate,respfn,scfcv,vtorho
+!!      m_afterscfloop,m_dft_energy,m_gstate,m_longwave,m_nonlinear
+!!      m_respfn_driver,m_scfcv_core,m_vtorho
 !!
 !! CHILDREN
-!!      bandfft_kpt_set_ikpt,fftpac,fourwf,prep_fourwf,prtrhomxmn
-!!      sphereboundary,symrhg,timab,wrtout,wvl_mkrho,xmpi_sum,diag_occ_rot_cg
+!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -785,7 +785,7 @@ end subroutine mkrho
 !! gsqcut=cutoff G**2 for included G s in fft box (larger sphere).
 !! izero=if 1, unbalanced components of rho(g) have to be set to zero
 !! mgfft=maximum size of 1D FFTs
-!! mpi_enreg=informations about mpi parallelization
+!! mpi_enreg=information about mpi parallelization
 !! mqgrid=number of grid pts in q array for n^AT(q) spline.
 !! natom=number of atoms in cell.
 !! nattyp(ntypat)=number of atoms of each type in cell.
@@ -809,10 +809,10 @@ end subroutine mkrho
 !!         as well as spin-up part if spin-polarized
 !!
 !! PARENTS
-!!      gstate,setup_positron
+!!      m_gstate,m_positron
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,wrtout,zerosym
+!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1250,10 +1250,11 @@ end subroutine initro
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
 !!
 !! PARENTS
-!!      afterscfloop,bethe_salpeter,clnup1,mkrho,screening,sigma,vtorho
+!!      m_afterscfloop,m_bethe_salpeter,m_gstate,m_mkrho,m_screening_driver
+!!      m_sigma_driver,m_vtorho
 !!
 !! CHILDREN
-!!      wrtout,xmpi_sum
+!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1892,10 +1893,10 @@ end subroutine prtrhomxmn
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      atomden
+!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2128,7 +2129,7 @@ end subroutine read_atomden
 !!
 !!
 !! PARENTS
-!!      read_atomden
+!!      m_mkrho
 !!
 !! CHILDREN
 !!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master

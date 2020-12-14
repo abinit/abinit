@@ -91,11 +91,12 @@ CONTAINS  !=====================================================================
 !!    rhorf(cplex*nfftf,nspden)=output density/potential in r space on the fine grid
 !!
 !! PARENTS
-!!      dfpt_looppert,energy,fourier_interpol,getgh1c,gstate,ks_ddiago,m_io_kss
-!!      pawmkrho,respfn,scfcv,vtorho,vtorhorec
+!!      m_afterscfloop,m_dfpt_looppert,m_dft_energy,m_fourier_interpol
+!!      m_getgh1c,m_gstate,m_io_kss,m_ksdiago,m_nonlinear,m_orbmag,m_paw_mkrho
+!!      m_respfn_driver,m_scfcv_core,m_vtorho,m_vtorhorec
 !!
 !! CHILDREN
-!!      fourdp,indirect_parallel_fourier,zerosym
+!!      indgrid,pawfgr_destroy,transgrid
 !!
 !! SOURCE
 

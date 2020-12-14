@@ -41,7 +41,7 @@ MODULE m_screen
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_BZ_item, has_bz_item
  use m_gsphere,        only : gsphere_t
- use m_vcoul,          only : vcoul_t 
+ use m_vcoul,          only : vcoul_t
  use m_io_screening,   only : hscr_free, hscr_io, read_screening, write_screening, hscr_print, &
 &                             hscr_copy, hscr_t, hscr_bcast, hscr_from_file, ncname_from_id, em1_ncname, chi0_ncname
  use m_ppmodel,        only : ppmodel_t, ppm_init, ppm_free, ppm_nullify, PPM_NONE, new_setup_ppmodel, ppm_symmetrizer
@@ -568,7 +568,7 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
    select case (W%fgg_qbz_stat)
    case (FGG_QBZ_ISALLOCATED)
      call fgg_free_0D(W%Fgg_qbz)
-     ABI_DT_FREE(W%Fgg_qbz)
+     ABI_FREE(W%Fgg_qbz)
      nullify(W%Fgg_qbz)
      W%fgg_qbz_stat = FGG_QBZ_ISPOINTER
 
@@ -587,7 +587,7 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
    case (FGG_QBZ_ISPOINTER)
      ! Allocate memory
      nullify(W%Fgg_qbz)
-     ABI_DT_MALLOC(W%Fgg_qbz,)
+     ABI_MALLOC(W%Fgg_qbz,)
 
      call fgg_init(W%Fgg_qbz,W%npw,W%nomega,nqlwl)
      W%fgg_qbz_stat = FGG_QBZ_ISALLOCATED
@@ -684,7 +684,7 @@ end function screen_ihave_fgg
 !! W<screen_t>=The data structure to be nullified.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_screen
+!!      m_bethe_salpeter,m_screen
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -724,7 +724,7 @@ end subroutine screen_nullify
 !! OUTPUT
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -776,7 +776,7 @@ subroutine screen_free(W)
  select case (W%fgg_qbz_stat)
  case (FGG_QBZ_ISALLOCATED)
    call fgg_free_0D(W%Fgg_qbz)
-   ABI_DT_FREE(W%Fgg_qbz)
+   ABI_FREE(W%Fgg_qbz)
    nullify(W%Fgg_qbz)
    W%fgg_qbz_stat=FGG_QBZ_ISPOINTER
 
@@ -791,7 +791,7 @@ subroutine screen_free(W)
  ! Free the Fgg matrices.
  if (associated(W%Fgg)) then
    call fgg_free(W%Fgg)
-   ABI_DT_FREE(W%Fgg)
+   ABI_FREE(W%Fgg)
  end if
  !
  ! Free the plasmon pole tables.
@@ -833,7 +833,7 @@ end subroutine screen_free
 !!  W<screen_t>=The structure initialized with basic dimensions and arrays.
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -1050,7 +1050,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  nomega = W%nomega
  nI     = W%ni
  nJ     = W%nj
- ABI_DT_MALLOC(W%Fgg,(nqibz))
+ ABI_MALLOC(W%Fgg,(nqibz))
 
  if (from_file) then
 
@@ -1196,7 +1196,7 @@ end subroutine screen_init
 !!  to reconstruct the BZ.
 !!
 !! PARENTS
-!!      exc_build_block
+!!      m_exc_build
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -1347,7 +1347,7 @@ end subroutine screen_symmetrizer
 !!   *  where alpha and beta are scalars, x and y are vectors and A is an m by n matrix.
 !!
 !! PARENTS
-!!      exc_build_block
+!!      m_exc_build
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose

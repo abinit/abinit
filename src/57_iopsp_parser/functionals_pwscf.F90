@@ -207,6 +207,7 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
+!!      functionals_pwscf,m_pspheads
 !!
 !! CHILDREN
 !!
@@ -404,6 +405,7 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
+!!      functionals_pwscf
 !!
 !! CHILDREN
 !!
@@ -441,6 +443,7 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
+!!      functionals_pwscf
 !!
 !! CHILDREN
 !!
@@ -820,6 +823,7 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_pspheads
 !!
 !! CHILDREN
 !!
@@ -921,6 +925,7 @@ end subroutine dft_name
 !! OUTPUT
 !!
 !! PARENTS
+!!      functionals_pwscf
 !!
 !! CHILDREN
 !!

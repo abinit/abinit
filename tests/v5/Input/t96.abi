@@ -1,0 +1,100 @@
+#
+#  the sequence of datasets makes the ground states and
+#   all of the explicit perturbations of the single
+#   Ni atom in all directions, for the irreducible
+#   qpoints in a 2x2x2 grid.
+#
+ndtset 10
+
+# DATASET 1 : make ground state wavefunctions and density
+kptopt1 3
+tolwfr1 1.0d-14
+prtden1 1
+nline1 8    ! This is to expedite the convergence of higher-lying bands
+nnsclo1 2
+spinat1 0.0 0.0 .2
+prtdos1 2
+
+nsppol 2
+
+#
+#  qpoint Gamma
+#
+rfatpol2  1 1 rfdir2  1 0 0 rfphon2  1 tolvrs2   1.0e-5 getwfk2  1  kptopt2  3 nqpt2  1 qpt2   0.0 0.0 0.0
+rfatpol3  1 1 rfdir3  0 1 0 rfphon3  1 tolvrs3   1.0e-5 getwfk3  1  kptopt3  3 nqpt3  1 qpt3   0.0 0.0 0.0
+rfatpol4  1 1 rfdir4  0 0 1 rfphon4  1 tolvrs4   1.0e-5 getwfk4  1  kptopt4  3 nqpt4  1 qpt4   0.0 0.0 0.0
+
+#
+#  qpoint 1/2 0 0
+#
+rfatpol5  1 1 rfdir5  1 0 0 rfphon5  1 tolvrs5   1.0e-5 getwfk5  1  kptopt5  3 nqpt5  1 qpt5   0.5 0.0 0.0
+rfatpol6  1 1 rfdir6  0 1 0 rfphon6  1 tolvrs6   1.0e-5 getwfk6  1  kptopt6  3 nqpt6  1 qpt6   0.5 0.0 0.0
+rfatpol7  1 1 rfdir7  0 0 1 rfphon7  1 tolvrs7   1.0e-5 getwfk7  1  kptopt7  3 nqpt7  1 qpt7   0.5 0.0 0.0
+
+#
+#  qpoint X= 1/2 1/2 0
+#
+rfatpol8  1 1 rfdir8  1 0 0 rfphon8  1 tolvrs8   1.0e-5 getwfk8  1  kptopt8  3 nqpt8  1 qpt8   0.5 0.5 0.0
+rfatpol9  1 1 rfdir9  0 1 0 rfphon9  1 tolvrs9   1.0e-5 getwfk9  1  kptopt9  3 nqpt9  1 qpt9   0.5 0.5 0.0
+rfatpol10 1 1 rfdir10 0 0 1 rfphon10 1 tolvrs10  1.0e-5 getwfk10 1  kptopt10 3 nqpt10 1 qpt10  0.5 0.5 0.0
+
+#
+#  Common data
+#
+
+#
+#  the kpoint grid is minimalistic to keep the calculation
+#   manageable.
+#
+ngkpt 2 2 2
+
+#
+#  as is the kinetic energy cutoff
+#
+ecut 10.0
+
+#
+#  use a centered grid for the kpoints
+#
+nshiftk 1
+shiftk 0.0 0.0 0.0
+acell 3*7
+rprim
+ 0.0 0.5 0.5
+ 0.5 0.0 0.5
+ 0.5 0.5 0.0
+nband 14
+nbdbuf 4
+
+#
+#  include metallic occupation function with a small smearing
+#
+occopt 7
+tsmear 0.001
+natom 1
+typat 1
+xred 0.00 0.00 0.00
+nstep 800
+ntypat 1
+znucl 28
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/28ni.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t96.abi, t97.abi, t98.abi, t99.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t96.abo, tolnlines = 3, tolabs = 2.1e-02, tolrel = 1.001e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   FCC Ni - get phonons and ddk in preparation for an electron-phonon coupling run.
+#%%   a few extra features are used compared to the tutorial.
+#%% topics = ElPhonInt
+#%%<END TEST_INFO>

@@ -75,7 +75,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputePoles,gwls_GenerateEpsilon
+!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon
 !!
 !! CHILDREN
 !!      zgemm,zhbev
@@ -177,7 +177,7 @@ end subroutine get_seeds
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputePoles,gwls_GenerateEpsilon,gwls_LanczosResolvents
+!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon,m_gwls_LanczosResolvents
 !!
 !! CHILDREN
 !!      zgemm,zhbev
@@ -480,7 +480,7 @@ end subroutine block_lanczos_algorithm
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputePoles,gwls_GenerateEpsilon,gwls_LanczosResolvents
+!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon,m_gwls_LanczosResolvents
 !!
 !! CHILDREN
 !!      zgemm,zhbev

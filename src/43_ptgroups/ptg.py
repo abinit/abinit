@@ -625,7 +625,7 @@ class PointGroup(list):
         fh.write("\n")
         fh.write("! List of irreducible representations.\n")
         #fh.write(" nirrepr = %s\n" % self.nirrepr)
-        fh.write(" ABI_DT_MALLOC(Irr, (%(nclass)s))\n" % locals())
+        fh.write(" ABI_MALLOC(Irr, (%(nclass)s))\n" % locals())
         idx = 0
         for irrepr in self.irreprs:
             idx += 1

@@ -300,7 +300,6 @@ end subroutine re_and_im_screening
 !! NOTES
 !!
 !! PARENTS
-!!      calc_sigc_pole_cd
 !!
 !! CHILDREN
 !!

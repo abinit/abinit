@@ -6,11 +6,10 @@ Overview
 
 Abinit Fallbacks is a package builder for the external dependencies of Abinit,
 in development environments lacking these components. They do not provide full
-support for the advanced features of Abinit nor production-grade calculation
+support for the advanced features of Abinit nor HPC-grade calculation
 capabilities. They are designed to let developers quickly test new versions of
 these external dependencies in various situations before proposing upgrades, as
-well as to allow end-users to run preliminary calculations before optimizing
-their production environment to their scientific projects.
+well as to allow end-users to run calculations on their favorite PCs.
 
 
 No warranty

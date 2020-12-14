@@ -205,11 +205,10 @@ CONTAINS
 !!  electronpositron=<type(electronpositron_type)>=electronpositron datastructure
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      energies_copy,fourdp,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free
+!!      mean_fftr,mkdenpos,xcden,xcpositron,xmpi_sum
 !!
 !! SOURCE
 
@@ -362,11 +361,10 @@ end subroutine init_electronpositron
 !!  electronpositron=<type(electronpositron_type)>=electronpositron datastructure
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      energies_copy,fourdp,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free
+!!      mean_fftr,mkdenpos,xcden,xcpositron,xmpi_sum
 !!
 !! SOURCE
 
@@ -484,11 +482,10 @@ end subroutine destroy_electronpositron
 !!  vhartr(nfftf)=array for holding Hartree potential
 !!
 !! PARENTS
-!!      afterscfloop
+!!      m_afterscfloop
 !!
 !! CHILDREN
-!!      energies_copy,fourdp,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free
+!!      mean_fftr,mkdenpos,xcden,xcpositron,xmpi_sum
 !!
 !! SOURCE
 
@@ -813,7 +810,7 @@ end function electronpositron_calctype
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!
 !! PARENTS
-!!      energy,rhotov,setvtr
+!!      m_dft_energy,m_rhotov,m_setvtr
 !!
 !! CHILDREN
 !!      mean_fftr,mkdenpos,xcden,xcpositron,xmpi_sum

@@ -1,0 +1,88 @@
+# Crystalline aluminum : computation of the total energy
+#
+# Determination of the surface energy of aluminum :
+# convergence with respect to the number of vacuum layers.
+
+ndtset 3
+
+#Definition of the unit cell
+acell  3*7.50559090E+00  # Lattice parameters of bulk aluminum
+rprim1 0.5 -0.5  0.0    
+       0.5  0.5  0.0   
+       0.0  0.0  2.5   
+rprim2 0.5 -0.5  0.0     
+       0.5  0.5  0.0    
+       0.0  0.0  3.0   
+rprim3 0.5 -0.5  0.0
+       0.5  0.5  0.0
+       0.0  0.0  3.5
+natom1 3           # Three atoms per cell: three aluminum layers and some vacuum
+natom2 4           # Four  atoms per cell: four aluminum layers and some vacuum
+natom3 5           # Five  atoms per cell: five aluminum layers and some vacuum
+
+#SCF preconditioner
+iprcel 45
+
+#Definition of occupation numbers
+occopt 4
+tsmear 0.04
+
+#Definition of the k-point grid 
+ngkpt  4 4 1 
+nshiftk 2
+shiftk  0.5 0.0 0.0
+        0.0 0.5 0.0
+
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 13          # The keyword "znucl" refers to the atomic number of the 
+                  # possible type(s) of atom. The pseudopotential(s) 
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Aluminum
+                         
+
+#Definition of the atoms
+typat 1 1 1 1 1    # All possible atoms are type 1.
+xcart             
+   3*0.0             # Triplet giving the CARTESIAN coordinates of atom 1.
+   0.0  2*3.75279545 # Triplet giving the CARTESIAN coordinates of atom 2.
+   2*0.0  7.5055909  # Triplet giving the CARTESIAN coordinates of atom 3.
+   0.0  3.75279545  11.25838635 # Triplet giving the CARTESIAN coordinates of atom 4.
+   2*0.0 15.0111818  # Triplet giving the CARTESIAN coordinates of atom 5.
+chksymtnons 0        # Some of the non-symmorphic vectors are unconvential, but this is harmless in a ground-state calculation.
+ 
+#The relaxation
+ionmov 2
+tolmxf 5.0d-4
+ntime 10
+
+#Exchange-correlation functional
+ixc 1             # LDA Teter Pade parametrization
+
+#Definition of the planewave basis set
+ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the SCF procedure
+nstep 10          # Maximal number of SCF cycles
+toldff 5.0d-5     
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tbase4_7.abo, tolnlines= 41, tolabs=1.001e-02, tolrel=0.03, fld_options=-easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Crystalline aluminum : computation of the total energy
+#%%   Determination of the surface energy of aluminum :
+#%%   convergence with respect to the number of vacuum layers.
+#%%<END TEST_INFO>

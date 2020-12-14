@@ -1,0 +1,88 @@
+# Crystalline NiTi : computation of the response to atomic displacements, at q=Gamma
+
+  ndtset   3
+  prtvol   10
+
+#Specific to ground state calculation
+  kptopt1   3            # Automatic generation of k points
+  tolvrs1   1.0d-18      # SCF stopping criterion
+  prtden1   1
+
+
+  nqpt2     1
+  qpt2      0.0   0.0   1.0
+  qptnrm2   24
+  getwfk2   1
+  getden2   1
+  kptopt2   3
+  tolwfr2   1.0d-18
+  iscf2     -2
+
+
+  rfphon3   1
+  rfatpol3  1  2
+  rfdir3    1  1  1
+  nqpt3     1
+  qpt3      0.0   0.0   1.0
+  qptnrm3   24
+  getwfk3   1
+  getwfq3   2
+  kptopt3   3
+  tolvrs3   1.0d-8
+  diemix    0.3
+
+#######################################################################
+#Common input variables
+
+#Definition of the unit cell
+acell 3*5.718           # This is equivalent to   5.718 5.718 5.718
+rprim  1.0  0.0  0.0    # SC primitive vectors (to be scaled by acell)
+       0.0  1.0  0.0
+       0.0  0.0  1.0
+
+occopt 4
+tsmear 0.02
+
+#Definition of the atom types
+ntypat 2
+znucl 22 28
+
+#Definition of the atoms
+natom 2
+typat 1 2
+xred     0.0  0.0  0.0       0.5  0.5  0.5
+
+#Gives the number of band, explicitely (do not take the default)
+nband  18
+
+#Definition of the planewave basis set
+ ecut    4.0          # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the k-point grid
+nshiftk 1
+shiftk  0.5 0.5 0.5
+ngkpt   2   2   2
+
+#Definition of the SCF procedure
+nstep 20               # Maximal number of SCF cycles
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/22ti.pspnc, PseudosTM_pwteter/28ni.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t85.abo, tolnlines = 35, tolabs = 2.0e+00, tolrel = 3.100e-03, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Tijssens
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   NiTi simple cubic (RockSalt) Metallic. Different mems are zero.
+#%%   The second perturbation does not converge well !
+#%%   Should be improved.
+#%%<END TEST_INFO>

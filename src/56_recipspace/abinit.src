@@ -23,12 +23,12 @@ sources = [
  "m_bz_mesh.F90",
  "m_double_grid.F90",
  "m_gsphere.F90",
+ "m_getshell.F90",
  "m_kg.F90",
  "m_kpts.F90",
  "m_lgroup.F90",
  "m_nesting.F90",
  "m_skw.F90",
- "m_getshell.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

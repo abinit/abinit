@@ -213,21 +213,9 @@ contains
 !!     see PRB 78, 035105 (2008), Eq. (42) [[cite:Audouze2008]]
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      appdig,destroy_mpi_enreg
-!!      dfpt_accrho,dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
-!!      dfpt_mkvxcstr,dfpt_sygra,dfpt_vlocal,dotprod_g,dotprod_vn,fftpac
-!!      getcprj,getdc1,getgh1c,hartrestr,init_hamiltonian,init_rf_hamiltonian
-!!      initmpi_seq,initylmg,kpgstr
-!!      mkffnl,mkkin,mkkpg,occeig
-!!      paw_an_reset_flags,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      paw_ij_reset_flags,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawdfptenergy,pawdij2e1kb,pawdijfr,pawmkrho,pawnhatfr,pawrhoij_alloc
-!!      pawrhoij_free,pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,projbd
-!!      stresssym,symrhg,timab,vlocalstr,wfk_close,wfk_open_read,wfk_read_bks
-!!      wrtout,xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
 
@@ -483,15 +471,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Index of strain perturbation, if any
  istr=idir;if (ipert==dtset%natom+4) istr=idir+3
 
-!Open ddk WF file(s)
+!Open ddk WF file(s) in sequential mode
  if (has_ddk_file) then
    do kdir1=1,mdir1
      idir1=jdir1(kdir1)
      if (ddkfil(idir1)/=0) then
        write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk(idir1))
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       call wfk_open_read(ddks(idir1),fiwfddk(idir1),formeig1,dtset%iomode,ddkfil(idir1),spaceworld)
+       call wrtout([std_out, ab_out],msg)
+       call wfk_open_read(ddks(idir1),fiwfddk(idir1),formeig1,dtset%iomode,ddkfil(idir1), xmpi_comm_self)
      end if
    end do
  end if
@@ -878,10 +865,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              ik_ddk = indkpt1(ikpt)
              npw_ = ddks(idir1)%hdr%npwarr(ik_ddk)
              if (npw_/=npw_k) then
-               write(unit=msg,fmt='(a,i3,a,i5,a,i3,a,a,i5,a,a,i5)')&
-&               'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',idir,ch10,&
-&               'the number of plane waves in the ddk file is equal to', npw_,ch10,&
-&               'while it should be ',npw_k
+               write(msg, '(a,i0,a,i0,a,i0,a,a,i0,a,a,i0)')&
+               'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',idir,ch10,&
+               'the number of plane waves in the ddk file is equal to', npw_,ch10,&
+               'while it should be ',npw_k
                MSG_ERROR(msg)
              end if
 
@@ -1612,9 +1599,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  if (has_ddk_file) then
    do kdir1=1,mdir1
      idir1=jdir1(kdir1)
-     if (ddkfil(idir1)/=0)then
-       call ddks(idir1)%close()
-     end if
+     if (ddkfil(idir1)/=0) call ddks(idir1)%close()
    end do
  end if
  ABI_DEALLOCATE(jpert1)
@@ -1793,12 +1778,9 @@ end subroutine dfpt_nstpaw
 !!  XG 20141103 The localization tensor cannot be defined in the metallic case. It should not be computed.
 !!
 !! PARENTS
-!!      dfpt_nstdy
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      dotprod_g,gaugetransfo,getgh1c
-!!      init_rf_hamiltonian
-!!      mkffnl,mkkpg,timab,wfk_read_bks
 !!
 !! SOURCE
 
@@ -2217,7 +2199,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !!                             in the diagonal gauge
 !!
 !! PARENTS
-!!      dfpt_nstwf
+!!      m_dfpt_nstwf
 !!
 !! CHILDREN
 !!

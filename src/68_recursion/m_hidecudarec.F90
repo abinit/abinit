@@ -278,7 +278,7 @@ end subroutine InitRecGPU
 !! OUTPUT
 !!
 !! PARENTS
-!!      first_rec,vtorhorec
+!!      m_vtorhorec
 !!
 !! CHILDREN
 !!      unset_dev

@@ -102,12 +102,12 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_vtowfk
+!!      m_dfpt_vtowfk
 !!
 !! CHILDREN
-!!      cg_zaxpy,dotprod_g,getcprj,pawcprj_alloc,pawcprj_free,pawcprj_get
-!!      rf2_accumulate_bands,rf2_apply_hamiltonian,rf2_getidirs,sqnorm_g
-!!      wfk_read_bks,wrtout,xmpi_allgather,xmpi_barrier
+!!      cg_zaxpy,ddk_f,dotprod_g,getcprj,pawcprj_alloc,pawcprj_free,pawcprj_get
+!!      rf2_accumulate_bands,rf2_apply_hamiltonian,rf2_getidirs,sqnorm_g,timab
+!!      wrtout,xmpi_allgather,xmpi_barrier
 !!
 !! SOURCE
 

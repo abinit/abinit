@@ -64,8 +64,8 @@
   znucl= 83.00
 
  Pseudopotential info :
- title=Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
-  znuclpsp= 83.00, zionpsp=  5.00, pspso=  0, pspdat=980509, pspcod=  3, pspxc=  1
+ title=Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
+  znuclpsp= 83.00, zionpsp=  5.00, pspso=  0, pspdat= 10605, pspcod=  3, pspxc=  1
   lmnmax  =  9
  
  Last record :

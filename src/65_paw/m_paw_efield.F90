@@ -68,7 +68,7 @@ CONTAINS  !=====================================================================
 !!  pelev(3)= electronic polarisation. expectation value term (PAW only)
 !!
 !! PARENTS
-!!      berryphase_new
+!!      m_berryphase_new
 !!
 !! CHILDREN
 !!      timab,xmpi_sum

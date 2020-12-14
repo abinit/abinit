@@ -211,6 +211,74 @@ subroutine xmpi_bcast_int3d(xval,master,spaceComm,ier)
 end subroutine xmpi_bcast_int3d
 !!***
 
+!!****f* ABINIT/xmpi_bcast_int4d
+!! NAME
+!!  xmpi_bcast_int4d
+!!
+!! FUNCTION
+!!  Broadcasts data from master to slaves.
+!!  Target: three-dimensional integer arrays.
+!!
+!! INPUTS
+!!  spaceComm= MPI communicator
+!!  master= master MPI node
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_bcast
+!!
+!! SOURCE
+subroutine xmpi_bcast_int4d(xval,master,spaceComm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
+ integer,intent(in) :: spaceComm,master
+ integer,intent(out) :: ier
+
+!Local variables-------------------------------
+#if defined HAVE_MPI
+ integer :: my_dt,my_op,n1,n2,n3,n4
+ integer(kind=int64) :: nn,ntot
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   n1=size(xval,dim=1)
+   n2=size(xval,dim=2)
+   n3=size(xval,dim=3)
+   n4=size(xval,dim=4)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2*n3*n4,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_INTEGER,master,spaceComm,ier)
+   else
+     nn=int(n1*n2*n3,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
+     if (nn>huge(0_int32)) nn=int(n1,kind=int64)
+     call xmpi_largetype_create(ntot/nn,MPI_INTEGER,my_dt,my_op,MPI_OP_NULL)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_bcast_int4d
+!!***
+
 !!****f* ABINIT/xmpi_bcast_dpv
 !! NAME
 !!  xmpi_bcast_dpv
