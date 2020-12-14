@@ -18,7 +18,6 @@ kptgw
              0.000000    0.000000    0.000000
 bdgw
              1 1
-gw_icutcoul    3          # old deprecated value of icutcoul, only used for legacy
 
 #Definition of occupation numbers
 occopt 3

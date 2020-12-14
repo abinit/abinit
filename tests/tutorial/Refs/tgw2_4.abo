@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 14 Dec 2020.
-- ( at 14h42 )
+- ( at 15h19 )
   
 - input  file    -> tgw2_4.abi
 - output file    -> tgw2_4.abo
@@ -61,7 +61,6 @@ _ WF disk file :      0.463 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
         freqspmax      2.00000000E+00 Hartree
         freqspmin     -2.00000000E+00 Hartree
         gwcalctyp           2
-      gw_icutcoul           3
            istwfk        1    0    1    0    0    0    1    0
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -301,8 +300,8 @@ QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -4.220  -9.458 -15.044   5.649   0.930  -0.075  -9.399   0.058  -4.162
-        1   0.000   0.000   0.000   1.253   0.000   0.000   1.166   1.166   1.166
+        1  -4.220  -9.458 -15.616   5.931   0.903  -0.107  -9.663  -0.206  -4.426
+        1   0.000   0.000   0.000   1.253   0.000   0.000   1.132   1.132   1.132
 ...
 
 
@@ -323,7 +322,6 @@ data: !SigmaeeData |
         freqspmax      2.00000000E+00 Hartree
         freqspmin     -2.00000000E+00 Hartree
         gwcalctyp           2
-      gw_icutcoul           3
            istwfk        1    0    1    0    0    0    1    0
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -521,10 +519,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.2
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.2  wall=          2.2
+.Delivered   2 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.3  wall=          2.3

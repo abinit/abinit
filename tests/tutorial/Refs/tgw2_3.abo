@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 14 Dec 2020.
-- ( at 14h42 )
+- ( at 15h09 )
   
 - input  file    -> tgw2_3.abi
 - output file    -> tgw2_3.abo
@@ -52,8 +52,8 @@ _ WF disk file :      0.463 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.6520000000E+00  7.6520000000E+00  7.6520000000E+00 Bohr
               amu      2.69815390E+01
-             bdgw           1       1       2       2       1       2       1       1
-                            1       3       1       3       1       5       1       4
+             bdgw           1       5       1       5       1       5       1       5
+                            1       5       1       5       1       5       1       5
              ecut      8.00000000E+00 Hartree
          ecutsigx      8.00000000E+00 Hartree
           ecutwfn      8.00000000E+00 Hartree
@@ -324,12 +324,18 @@ meta: {optdriver: 4, gwcalctyp: 12, }
 iteration_state: {dtset: 1, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
-KS_gap     :    0.000
-QP_gap     :    0.000
-Delta_QP_KS:    0.000
+KS_gap     :   23.882
+QP_gap     :   23.902
+Delta_QP_KS:    0.021
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -4.220    -9.458    -4.220     5.238   -15.616     5.931     0.903    -0.107    -9.663    -0.206    -4.426    -4.448
+        2    19.662    -9.585    19.662    29.246    -2.718    -7.097     0.802    -0.246    -9.770    -0.185    19.477    19.430
+        3    19.662    -9.585    19.662    29.246    -2.718    -7.098     0.802    -0.247    -9.770    -0.185    19.476    19.430
+        4    19.662    -9.585    19.662    29.246    -2.718    -7.098     0.802    -0.247    -9.770    -0.185    19.476    19.431
+        5    21.095    -9.387    21.095    30.482    -2.461    -7.390     0.713    -0.402    -9.718    -0.331    20.764    20.631
+        6    21.095    -9.387    21.095    30.482    -2.461    -7.390     0.713    -0.402    -9.718    -0.331    20.764    20.631
+        7    21.095    -9.387    21.095    30.482    -2.461    -7.390     0.713    -0.403    -9.718    -0.331    20.764    20.631
 ...
 
 
@@ -337,12 +343,16 @@ data: !SigmaeeData |
 iteration_state: {dtset: 1, }
 kpoint     : [   0.250,    0.000,    0.000, ]
 spin       : 1
-KS_gap     :    0.000
-QP_gap     :    0.000
-Delta_QP_KS:    0.000
+KS_gap     :   12.899
+QP_gap     :   12.953
+Delta_QP_KS:    0.054
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -2.533    -9.458    -2.533     6.925   -14.781     5.080     0.662    -0.509    -9.619    -0.161    -2.694    -2.776
         2    10.366    -9.481    10.366    19.847    -5.121    -4.516     0.688    -0.454    -9.588    -0.107    10.259    10.210
+        3    17.884    -9.492    17.884    27.376    -2.964    -6.755     0.703    -0.423    -9.651    -0.159    17.725    17.658
+        4    17.884    -9.492    17.884    27.376    -2.964    -6.755     0.703    -0.423    -9.651    -0.159    17.725    17.658
+        5    21.248    -9.403    21.248    30.651    -2.663    -7.099     0.567    -0.764    -9.607    -0.204    21.044    20.889
 ...
 
 
@@ -350,13 +360,17 @@ data: !SigmaeeData |
 iteration_state: {dtset: 1, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
-KS_gap     :    0.000
-QP_gap     :    0.000
-Delta_QP_KS:    0.000
+KS_gap     :   15.858
+QP_gap     :   15.623
+Delta_QP_KS:   -0.235
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1     2.340    -9.414     2.340    11.754   -11.930     2.296     0.693    -0.442    -9.567    -0.153     2.187     2.119
         2     2.516    -9.511     2.516    12.027   -11.743     2.110     0.688    -0.454    -9.595    -0.084     2.432     2.394
+        3    18.375    -9.496    18.375    27.870    -2.901    -7.046     0.710    -0.409    -9.815    -0.320    18.055    17.924
+        4    18.375    -9.496    18.375    27.870    -2.901    -7.046     0.709    -0.410    -9.815    -0.320    18.055    17.924
+        5    18.443    -9.462    18.443    27.905    -2.831    -6.769     0.729    -0.372    -9.563    -0.101    18.342    18.305
+        6    18.443    -9.462    18.443    27.905    -2.831    -6.769     0.729    -0.372    -9.563    -0.100    18.342    18.305
 ...
 
 
@@ -364,12 +378,16 @@ data: !SigmaeeData |
 iteration_state: {dtset: 1, }
 kpoint     : [   0.250,    0.250,    0.000, ]
 spin       : 1
-KS_gap     :    0.000
-QP_gap     :    0.000
-Delta_QP_KS:    0.000
+KS_gap     :   16.404
+QP_gap     :   16.652
+Delta_QP_KS:    0.248
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -1.974    -9.458    -1.974     7.483   -14.491     4.695     0.696    -0.436    -9.693    -0.236    -2.210    -2.313
+        2    14.430    -9.580    14.430    24.010    -3.893    -5.670     0.706    -0.417    -9.568     0.012    14.442    14.298
+        3    14.468    -9.479    14.468    23.947    -3.669    -5.980     0.684    -0.461    -9.595    -0.116    14.352    14.298
+        4    14.468    -9.479    14.468    23.947    -3.669    -5.980     0.684    -0.461    -9.595    -0.116    14.352    14.447
+        5    15.196    -9.432    15.196    24.627    -3.475    -5.998     0.687    -0.456    -9.460    -0.029    15.167    15.154
 ...
 
 
@@ -385,6 +403,8 @@ data: !SigmaeeData |
         1     1.872    -9.460     1.872    11.332   -12.222     2.604     0.676    -0.478    -9.567    -0.107     1.765     1.714
         2     6.162    -9.472     6.162    15.634    -8.713    -0.935     0.693    -0.442    -9.594    -0.122     6.040     5.986
         3    10.577    -9.439    10.577    20.016    -4.969    -4.591     0.703    -0.423    -9.524    -0.085    10.492    10.456
+        4    13.988    -9.473    13.988    23.461    -3.793    -5.912     0.684    -0.462    -9.632    -0.159    13.829    13.756
+        5    15.645    -9.445    15.645    25.090    -3.483    -6.060     0.703    -0.422    -9.514    -0.069    15.576    15.547
 ...
 
 
@@ -400,6 +420,8 @@ data: !SigmaeeData |
         1     0.239    -9.458     0.239     9.697   -13.230     3.615     0.679    -0.473    -9.565    -0.107     0.132     0.082
         2     8.174    -9.523     8.174    17.697    -6.774    -2.920     0.700    -0.429    -9.643    -0.120     8.054     8.003
         3     9.655    -9.393     9.655    19.048    -5.343    -4.166     0.702    -0.425    -9.474    -0.081     9.574     9.539
+        4    16.432    -9.474    16.432    25.906    -3.209    -6.475     0.645    -0.551    -9.609    -0.135    16.296    16.222
+        5    18.362    -9.427    18.362    27.789    -2.967    -6.822     0.652    -0.534    -9.663    -0.236    18.126    18.000
 ...
 
 
@@ -433,23 +455,26 @@ data: !SigmaeeData |
         2     6.090    -9.522     6.090    15.612    -8.997    -0.748     0.691    -0.447    -9.676    -0.154     5.936     5.867
         3     7.106    -9.299     7.106    16.405    -7.401    -2.024     0.698    -0.433    -9.387    -0.088     7.018     6.980
         4     7.961    -9.478     7.961    17.439    -6.608    -2.982     0.696    -0.438    -9.555    -0.078     7.883     7.849
+        5    22.825    -9.537    22.825    32.362    -2.413    -7.595     0.663    -0.509    -9.849    -0.312    22.513    22.353
+        6    22.825    -9.537    22.825    32.362    -2.413    -7.596     0.663    -0.509    -9.850    -0.312    22.512    22.354
 ...
 
 
- New Fermi energy :        2.425933E-01 Ha ,    6.601299E+00 eV
+ New Fermi energy :        2.425077E-01 Ha ,    6.598969E+00 eV
+ New Exchange energy :    -6.140895E-01 Ha ,   -1.671022E+01 eV
 
  writing QP data on file : tgw2_3o_QPS
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
 .  kptgw no:  1; Maximum DeltaE = (  -0.206   1.132) for band index:  1
-.  kptgw no:  2; Maximum DeltaE = (   0.000   0.000) for band index:  1
-.  kptgw no:  3; Maximum DeltaE = (  -0.153   0.084) for band index:  1
+.  kptgw no:  2; Maximum DeltaE = (  -0.161   0.487) for band index:  1
+.  kptgw no:  3; Maximum DeltaE = (  -0.320  -0.361) for band index:  4
 .  kptgw no:  4; Maximum DeltaE = (  -0.236   0.458) for band index:  1
-.  kptgw no:  5; Maximum DeltaE = (  -0.107   0.115) for band index:  1
-.  kptgw no:  6; Maximum DeltaE = (  -0.107   0.251) for band index:  1
+.  kptgw no:  5; Maximum DeltaE = (  -0.159  -0.166) for band index:  4
+.  kptgw no:  6; Maximum DeltaE = (  -0.236  -0.341) for band index:  5
 .  kptgw no:  7; Maximum DeltaE = (  -0.211   0.021) for band index:  1
-.  kptgw no:  8; Maximum DeltaE = (  -0.154   0.005) for band index:  2
+.  kptgw no:  8; Maximum DeltaE = (  -0.312  -0.670) for band index:  6
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -457,8 +482,8 @@ data: !SigmaeeData |
  -outvars: echo values of variables after computation  --------
             acell      7.6520000000E+00  7.6520000000E+00  7.6520000000E+00 Bohr
               amu      2.69815390E+01
-             bdgw           1       1       2       2       1       2       1       1
-                            1       3       1       3       1       5       1       4
+             bdgw           1       5       1       5       1       5       1       5
+                            1       5       1       5       1       5       1       5
              ecut      8.00000000E+00 Hartree
          ecutsigx      8.00000000E+00 Hartree
           ecutwfn      8.00000000E+00 Hartree
@@ -663,10 +688,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.4  wall=          4.4
+- Proc.   0 individual time (sec): cpu=          8.3  wall=          8.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.4  wall=          4.4
+.Delivered   9 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.3  wall=          8.3
