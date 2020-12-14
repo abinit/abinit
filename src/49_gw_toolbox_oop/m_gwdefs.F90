@@ -38,6 +38,7 @@ MODULE m_gwdefs
  integer,public,parameter :: unt_sig = 22  ! Self-energy as a function of frequency
  integer,public,parameter :: unt_sgr = 23  ! Derivative wrt omega of the Self-energy
  integer,public,parameter :: unt_sgm = 20  ! Sigma on the Matsubara axis
+ integer,public,parameter :: unt_sigc = 24 ! Sigma_c as a function of (epsilon_i) MRM
  integer,public,parameter :: unt_gwdiag  = 40 ! GW diagonal
 
  real(dp),public,parameter :: GW_TOLQ =0.0001_dp
