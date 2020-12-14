@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_epjdos
 !! NAME
 !!  m_epjdos
@@ -488,14 +489,24 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
  if (iam_master) then
    if (any(dtset%prtdos == [2, 5])) then
-     call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
-     dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
+     ! CP modified
+     !call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
+     !dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
+     !dtset%tphysel,dtset%tsmear,unitdos)
+     call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,ebands%fermih,&
+     dtset%mband,dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
      dtset%tphysel,dtset%tsmear,unitdos)
+     ! End CP modified
    else if (dtset%prtdos == 3) then
      do iat=0,natsph+natsph_extra
-       call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
-       dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
+       ! CP modified
+       !call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
+       !dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
+       !dtset%tphysel,dtset%tsmear,unt_atsph(iat))
+       call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,ebands%fermih,&
+       dtset%mband,dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
        dtset%tphysel,dtset%tsmear,unt_atsph(iat))
+       ! End CP modified
      end do
    end if
  end if

@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_hdr
 !! NAME
 !! m_hdr
@@ -97,6 +98,7 @@ module m_hdr
   integer :: date          ! starting date
   integer :: headform      ! format of the header
   integer :: intxc         ! input variable
+  integer :: ivalence      ! CP added variable
   integer :: ixc           ! input variable
   integer :: mband         ! maxval(hdr%nband)
   integer :: natom         ! input variable
@@ -124,11 +126,14 @@ module m_hdr
   real(dp) :: ecut_eff     ! ecut*dilatmx**2 (dilatmx is an input variable)
   real(dp) :: etot         ! EVOLVING variable
   real(dp) :: fermie       ! EVOLVING variable
+  real(dp) :: fermih       ! EVOLVING variable; CP added
   real(dp) :: residm       ! EVOLVING variable
   real(dp) :: stmbias      ! input variable
   real(dp) :: tphysel      ! input variable
   real(dp) :: tsmear       ! input variable
   real(dp) :: nelect       ! number of electrons (computed from pseudos and charge)
+  real(dp) :: ne_qFD       ! CP number of excited electrons (input variable)
+  real(dp) :: nh_qFD       ! CP number of excited holes (input variable)
   real(dp) :: charge       ! input variable
 
   ! This record is not a part of the hdr_type, although it is present in the
@@ -967,32 +972,61 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
  ! Note: The structure parameters are taken from the first image!
  if (present(comm_atom)) then
    if (present(mpi_atmtab)) then
+     ! CP modified
+     !call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
+     !  dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
+     !  dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+     !  dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
+     !  dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
+     !  dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
+     !  dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
+     !  comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
      call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
        dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
        dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
        dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
        dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
-       dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
-       dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
+       dtset%kptopt,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,dtset%charge,&
+       dtset%kptrlatt_orig,dtset%kptrlatt,dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
        comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
+     ! End CP modified
    else
+     ! CP modified
+     !call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
+     !  dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
+     !  dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+     !  dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
+     !  dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
+     !  dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
+     !  dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
+     !  comm_atom=comm_atom)
      call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
        dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
        dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
        dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
        dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
-       dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
-       dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
+       dtset%kptopt,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,dtset%charge,&
+       dtset%kptrlatt_orig,dtset%kptrlatt,dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
        comm_atom=comm_atom)
+     ! End CP modified
    end if
  else
+   ! CP modified
+   !call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
+   !  dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
+   !  dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
+   !  dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),dtset%symrel,&
+   !  dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
+   !  dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
+   !  dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
    call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
      dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
      dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
      dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),dtset%symrel,&
      dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
-     dtset%kptopt,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
-     dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
+     dtset%kptopt,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,dtset%charge,&
+     dtset%kptrlatt_orig,dtset%kptrlatt,dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
+   ! End CP modified
  end if
 
 end subroutine hdr_init
@@ -1120,6 +1154,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
  Hdr_cp%headform = Hdr_in%headform
  hdr_cp%icoulomb = hdr_in%icoulomb
  Hdr_cp%intxc    = Hdr_in%intxc
+ Hdr_cp%ivalence = Hdr_in%ivalence ! CP added for occopt 9 calls 
  Hdr_cp%ixc      = Hdr_in%ixc
  Hdr_cp%natom    = Hdr_in%natom
  Hdr_cp%nkpt     = Hdr_in%nkpt
@@ -1167,11 +1202,14 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
  Hdr_cp%ecut_eff    = Hdr_in%ecut_eff
  Hdr_cp%etot        = Hdr_in%etot
  Hdr_cp%fermie      = Hdr_in%fermie
+ Hdr_cp%fermih      = Hdr_in%fermih ! CP added
  Hdr_cp%residm      = Hdr_in%residm
  Hdr_cp%stmbias     = Hdr_in%stmbias
  Hdr_cp%tphysel     = Hdr_in%tphysel
  Hdr_cp%tsmear      = Hdr_in%tsmear
  hdr_cp%nelect      = hdr_in%nelect
+ hdr_cp%ne_qFD      = hdr_in%ne_qFD ! CP added for occopt 9 case
+ hdr_cp%nh_qFD      = hdr_in%nh_qFD ! CP added for occopt 9 case
  hdr_cp%charge      = hdr_in%charge
 
  Hdr_cp%qptn(:)     = Hdr_in%qptn(:)
@@ -1295,21 +1333,22 @@ end function hdr_get_nelect_from_occ
 !!      crystal_init,wrtout
 !!
 !! SOURCE
-
+! CP modified argument list: added ne_qFD,nh_qFD,ivalence
 subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
   codvsn,pertcase,natom,nsym,nspden,ecut,pawecutdg,ecutsm,dilatmx,&
   intxc,ixc,stmbias,usewvl,pawcpxocc,pawspnorb,ngfft,ngfftdg,so_psp,qptn,&
   rprimd,xred,symrel,tnons,symafm,typat,amu,icoulomb,&
-  kptopt,nelect,charge,kptrlatt_orig,kptrlatt,&
+  kptopt,nelect,ne_qFD,nh_qFD,ivalence,charge,kptrlatt_orig,kptrlatt,&
   nshiftk_orig,nshiftk,shiftk_orig,shiftk,&
   mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nsym,nspden,intxc,ixc,usewvl,pawcpxocc,pawspnorb,pertcase
+ integer,intent(in) :: ivalence ! CP added
  integer,intent(in) :: kptopt,nshiftk_orig,nshiftk,icoulomb
  integer, intent(in),optional :: comm_atom
- real(dp),intent(in) :: ecut,ecutsm,dilatmx,stmbias,pawecutdg,nelect,charge
+ real(dp),intent(in) :: ecut,ecutsm,dilatmx,stmbias,pawecutdg,nelect,ne_qFD,nh_qFD,charge ! CP added ne_qFD and nh_qFD
  character(len=8),intent(in) :: codvsn
  type(ebands_t),intent(in) :: ebands
  type(pseudopotential_type),intent(in) :: psps
@@ -1380,6 +1419,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 !Default for other data  (all evolving data)
  hdr%etot     =1.0d20
  hdr%fermie   =1.0d20
+ hdr%fermih   =1.0d20 ! CP added
  hdr%residm   =1.0d20
 
 ! Allocate all components of hdr
@@ -1414,16 +1454,19 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  hdr%typat(1:natom) =typat(1:natom)  ! PMA : in tests/v2/t11 size(dtset%typat) is bigger dtset%natom
  hdr%xred(:,1:natom)=xred(:,1:natom) ! Evolving data
 
- hdr%kptopt = kptopt
- hdr%pawcpxocc = pawcpxocc
- hdr%nelect = nelect
- hdr%charge = charge
+ hdr%kptopt        = kptopt
+ hdr%pawcpxocc     = pawcpxocc
+ hdr%nelect        = nelect
+ hdr%ne_qFD        = ne_qFD   ! CP added
+ hdr%nh_qFD        = nh_qFD   ! CP added
+ hdr%ivalence      = ivalence ! CP added
+ hdr%charge        = charge
  hdr%kptrlatt_orig = kptrlatt_orig
- hdr%kptrlatt = kptrlatt
- hdr%shiftk_orig = shiftk_orig(:, 1:hdr%nshiftk_orig)
- hdr%shiftk = shiftk
- hdr%icoulomb = icoulomb
- hdr%amu = amu
+ hdr%kptrlatt      = kptrlatt
+ hdr%shiftk_orig   = shiftk_orig(:, 1:hdr%nshiftk_orig)
+ hdr%shiftk        = shiftk
+ hdr%icoulomb      = icoulomb
+ hdr%amu           = amu
 
  if (psps%usepaw==1)then
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
@@ -2432,6 +2475,7 @@ end subroutine hdr_skip_wfftype
 !! bantot=total number of bands
 !! etot=total energy (Hartree)
 !! fermie=Fermi energy (Hartree)
+!! fermih=Fermi energy for holes (Hartree), useful when occopt = 9 ! CP added
 !! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !! comm_atom=--optional-- MPI communicator over atoms
 !! residm=maximal residual
@@ -2451,15 +2495,15 @@ end subroutine hdr_skip_wfftype
 !!      crystal_init,wrtout
 !!
 !! SOURCE
-
-subroutine hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,amu, &
+! CP added fermih to the list of arguments
+subroutine hdr_update(hdr,bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,xred,amu, &
                       comm_atom,mpi_atmtab) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bantot
  integer,optional,intent(in) :: comm_atom
- real(dp),intent(in) :: etot,fermie,residm
+ real(dp),intent(in) :: etot,fermie,fermih,residm ! CP added fermih
  class(hdr_type),intent(inout) :: hdr
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
@@ -2472,6 +2516,7 @@ subroutine hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,amu
 !Update of the "evolving" data
  hdr%etot     =etot
  hdr%fermie   =fermie
+ hdr%fermih   =fermih
  hdr%residm   =residm
  hdr%rprimd(:,:)=rprimd(:,:)
  hdr%occ(:)   =occ(:)
@@ -2552,7 +2597,10 @@ subroutine hdr_bcast(hdr, master, me, comm)
  DBG_ENTER("COLL")
 
 !Transmit the integer scalars
- list_size = 43
+ ! CP modified
+ !list_size = 43
+ list_size = 44
+ ! End CP modified
  ABI_MALLOC(list_int,(list_size))
  if (master==me)then
    list_int(1)=hdr%bantot
@@ -2580,6 +2628,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    list_int(25:33)=reshape(hdr%kptrlatt_orig, [3*3])
    list_int(34:42)=reshape(hdr%kptrlatt, [3*3])
    list_int(43)=hdr%icoulomb
+   list_int(44)=hdr%ivalence ! CP added
  end if
 
  call xmpi_bcast(list_int,master,comm,ierr)
@@ -2610,6 +2659,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    hdr%kptrlatt_orig = reshape(list_int(25:33), [3,3])
    hdr%kptrlatt = reshape(list_int(34:42), [3,3])
    hdr%icoulomb = list_int(43)
+   hdr%ivalence = list_int(44) ! CP added
  end if
  ABI_FREE(list_int)
 
@@ -2667,22 +2717,37 @@ subroutine hdr_bcast(hdr, master, me, comm)
  ABI_FREE(list_int)
 
 !Transmit the double precision scalars and arrays
- list_size = 21+ 3*nkpt+nkpt+bantot + 3*nsym + 3*natom + 2*npsp+ntypat + &
-             2 + 3*hdr%nshiftk_orig + 3*hdr%nshiftk + hdr%ntypat
+ ! CP modified
+ !list_size = 21+ 3*nkpt+nkpt+bantot + 3*nsym + 3*natom + 2*npsp+ntypat + &
+ !            2 + 3*hdr%nshiftk_orig + 3*hdr%nshiftk + hdr%ntypat
+ list_size = 22+ 3*nkpt+nkpt+bantot + 3*nsym + 3*natom + 2*npsp+ntypat + &
+             4 + 3*hdr%nshiftk_orig + 3*hdr%nshiftk + hdr%ntypat
+ ! End CP modified
  ABI_MALLOC(list_dpr,(list_size))
 
  if (master==me)then
    list_dpr(1)=hdr%ecut_eff
    list_dpr(2)=hdr%etot
    list_dpr(3)=hdr%fermie
-   list_dpr(4)=hdr%residm
-   list_dpr(5:13)=reshape(hdr%rprimd(1:3,1:3),(/9/))
-   list_dpr(14)=hdr%ecut
-   list_dpr(15)=hdr%ecutdg
-   list_dpr(16)=hdr%ecutsm
-   list_dpr(17)=hdr%tphysel
-   list_dpr(18)=hdr%tsmear
-   list_dpr(19:21)=hdr%qptn(1:3)                                 ; index=21
+   list_dpr(4)=hdr%fermih ! CP added
+   ! CP modified
+   !list_dpr(4)=hdr%residm
+   !list_dpr(5:13)=reshape(hdr%rprimd(1:3,1:3),(/9/))
+   !list_dpr(14)=hdr%ecut
+   !list_dpr(15)=hdr%ecutdg
+   !list_dpr(16)=hdr%ecutsm
+   !list_dpr(17)=hdr%tphysel
+   !list_dpr(18)=hdr%tsmear
+   !list_dpr(19:21)=hdr%qptn(1:3)                                 ; index=21
+   list_dpr(5)=hdr%residm
+   list_dpr(6:14)=reshape(hdr%rprimd(1:3,1:3),(/9/))
+   list_dpr(15)=hdr%ecut
+   list_dpr(16)=hdr%ecutdg
+   list_dpr(17)=hdr%ecutsm
+   list_dpr(18)=hdr%tphysel
+   list_dpr(19)=hdr%tsmear
+   list_dpr(20:22)=hdr%qptn(1:3)                                 ; index=22
+   ! End CP modified
    list_dpr(1+index:3*nkpt +index)=reshape(hdr%kptns,(/3*nkpt/)) ; index=index+3*nkpt
    list_dpr(1+index:nkpt   +index)=hdr%wtk                       ; index=index+nkpt
    list_dpr(1+index:bantot +index)=hdr%occ                       ; index=index+bantot
@@ -2692,6 +2757,8 @@ subroutine hdr_bcast(hdr, master, me, comm)
    list_dpr(1+index:npsp   +index)=hdr%znuclpsp                  ; index=index+npsp
    list_dpr(1+index:ntypat  +index)=hdr%znucltypat               ; index=index+ntypat
    list_dpr(1+index)=hdr%nelect; index=index+1
+   list_dpr(1+index)=hdr%ne_qFD; index=index+1 ! CP added line
+   list_dpr(1+index)=hdr%nh_qFD; index=index+1 ! CP added line
    list_dpr(1+index)=hdr%charge; index=index+1
    list_dpr(1+index:index+3*hdr%nshiftk_orig) = reshape(hdr%shiftk_orig, [3*hdr%nshiftk_orig])
    index=index+3*hdr%nshiftk_orig
@@ -2706,14 +2773,25 @@ subroutine hdr_bcast(hdr, master, me, comm)
    hdr%ecut_eff=list_dpr(1)
    hdr%etot    =list_dpr(2)
    hdr%fermie  =list_dpr(3)
-   hdr%residm  =list_dpr(4)
-   hdr%rprimd  =reshape(list_dpr(5:13),(/3,3/))
-   hdr%ecut    =list_dpr(14)
-   hdr%ecutdg  =list_dpr(15)
-   hdr%ecutsm  =list_dpr(16)
-   hdr%tphysel =list_dpr(17)
-   hdr%tsmear  =list_dpr(18)
-   hdr%qptn(1:3)=list_dpr(19:21)                                    ; index=21
+   hdr%fermih  =list_dpr(4)
+   ! CP modified
+   !hdr%residm  =list_dpr(4)
+   !hdr%rprimd  =reshape(list_dpr(5:13),(/3,3/))
+   !hdr%ecut    =list_dpr(14)
+   !hdr%ecutdg  =list_dpr(15)
+   !hdr%ecutsm  =list_dpr(16)
+   !hdr%tphysel =list_dpr(17)
+   !hdr%tsmear  =list_dpr(18)
+   !hdr%qptn(1:3)=list_dpr(19:21)                                    ; index=21
+   hdr%residm  =list_dpr(5)
+   hdr%rprimd  =reshape(list_dpr(6:14),(/3,3/))
+   hdr%ecut    =list_dpr(15)
+   hdr%ecutdg  =list_dpr(16)
+   hdr%ecutsm  =list_dpr(17)
+   hdr%tphysel =list_dpr(18)
+   hdr%tsmear  =list_dpr(19)
+   hdr%qptn(1:3)=list_dpr(20:22)                                    ; index=22
+   ! End CP modified
    hdr%kptns   =reshape(list_dpr(1+index:3*nkpt +index),(/3,nkpt/)) ; index=index+3*nkpt
    hdr%wtk     =list_dpr(1+index:nkpt   +index)                     ; index=index+nkpt
    hdr%occ     =list_dpr(1+index:bantot +index)                     ; index=index+bantot
@@ -2723,6 +2801,8 @@ subroutine hdr_bcast(hdr, master, me, comm)
    hdr%znuclpsp=list_dpr(1+index:npsp   +index)                     ; index=index+npsp
    hdr%znucltypat=list_dpr(1+index:ntypat  +index)                  ; index=index+ntypat
    hdr%nelect = list_dpr(1+index); index=index+1
+   hdr%ne_qFD = list_dpr(1+index); index=index+1 ! CP added line
+   hdr%nh_qFD = list_dpr(1+index); index=index+1 ! CP added line
    hdr%charge = list_dpr(1+index); index=index+1
    hdr%shiftk_orig = reshape(list_dpr(1+index:index+3*hdr%nshiftk_orig), [3, hdr%nshiftk_orig])
    index=index+3*hdr%nshiftk_orig
@@ -2957,6 +3037,8 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 
 !Reading the second record of the file ------------------------------------
  read(unit, err=10, iomsg=errmsg) &
+  !CP Commented   hdr%bantot, hdr%date, hdr%intxc, hdr%ivalence, hdr%ixc, hdr%natom, hdr%ngfft(1:3),&
+  ! But causes problems of compatibility in I/O for tests
    hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3),&
    hdr%nkpt, hdr%nspden, hdr%nspinor, hdr%nsppol, hdr%nsym, hdr%npsp, hdr%ntypat, hdr%occopt, hdr%pertcase,&
    hdr%usepaw, hdr%ecut, hdr%ecutdg, hdr%ecutsm, hdr%ecut_eff, hdr%qptn(1:3), hdr%rprimd,&
@@ -2989,6 +3071,7 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 ! Reading the final record of the header  ---------------------------------
  read(unit, err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:)
 
+ !CP commented read(unit, err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%fermih, hdr%amu(:) !CP modified, added fermih
  read(unit, err=10, iomsg=errmsg)&
     hdr%kptopt,hdr%pawcpxocc,hdr%nelect,hdr%charge,hdr%icoulomb,&
     hdr%kptrlatt,hdr%kptrlatt_orig, hdr%shiftk_orig,hdr%shiftk
@@ -3147,6 +3230,7 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  ABI_FREE(occ3d)
 
  NCF_CHECK(nf90_get_var(ncid, vid("fermi_energy"), hdr%fermie))
+ NCF_CHECK(nf90_get_var(ncid, vid("hole_fermi_energy"), hdr%fermih)) ! CP added
  NCF_CHECK(nf90_get_var(ncid, vid("primitive_vectors"), hdr%rprimd))
  NCF_CHECK(nf90_get_var(ncid, vid("reduced_symmetry_matrices"), hdr%symrel))
  NCF_CHECK(nf90_get_var(ncid, vid("atom_species"), hdr%typat))
@@ -3183,6 +3267,8 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  NCF_CHECK(nf90_get_var(ncid, vid("kptopt"), hdr%kptopt))
  NCF_CHECK(nf90_get_var(ncid, vid("pawcpxocc"), hdr%pawcpxocc))
  NCF_CHECK(nf90_get_var(ncid, vid("nelect"), hdr%nelect))
+ NCF_CHECK(nf90_get_var(ncid, vid("ne_qFD"), hdr%ne_qFD)) ! CP added
+ NCF_CHECK(nf90_get_var(ncid, vid("nh_qFD"), hdr%nh_qFD)) ! CP added
  NCF_CHECK(nf90_get_var(ncid, vid("charge"), hdr%charge))
  NCF_CHECK(nf90_get_var(ncid, vid("kptrlatt_orig"), hdr%kptrlatt_orig))
  NCF_CHECK(nf90_get_var(ncid, vid("kptrlatt"), hdr%kptrlatt))
@@ -3276,6 +3362,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
  write(unit, err=10, iomsg=errmsg) hdr%codvsn, headform, fform
 
  write(unit, err=10, iomsg=errmsg) &
+  ! CP Commented   hdr%bantot, hdr%date, hdr%intxc, hdr%ivalence, hdr%ixc, hdr%natom, hdr%ngfft(1:3), &
    hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3), &
    hdr%nkpt, hdr%nspden, hdr%nspinor, hdr%nsppol, hdr%nsym, hdr%npsp, hdr%ntypat, hdr%occopt, hdr%pertcase,&
    hdr%usepaw, hdr%ecut, hdr%ecutdg, hdr%ecutsm, hdr%ecut_eff, hdr%qptn, hdr%rprimd, &
@@ -3289,8 +3376,10 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
    hdr%tnons(:,:), hdr%znucltypat(:), hdr%wtk(:)
  ABI_FREE(occ3d)
 
+ !CP commented write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%fermih, hdr%amu(:) ! CP added
  write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:)
  write(unit,err=10, iomsg=errmsg) &
+  ! hdr%kptopt, hdr%pawcpxocc, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%charge, hdr%icoulomb,& ! CP qdded
    hdr%kptopt, hdr%pawcpxocc, hdr%nelect, hdr%charge, hdr%icoulomb,&
    hdr%kptrlatt,hdr%kptrlatt_orig, hdr%shiftk_orig(:,1:hdr%nshiftk_orig),hdr%shiftk(:,1:hdr%nshiftk)
 
@@ -3484,13 +3573,17 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "number_of_electrons"])
    NCF_CHECK(ncerr)
-   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
+   ! CP modified
+   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "hole_fermi_energy", "smearing_width"])
+   ! End CP modified
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_set_atomic_units(ncid, "smearing_width"))
 
    ! Some variables require the specifications of units.
    NCF_CHECK(nctk_set_atomic_units(ncid, "eigenvalues"))
    NCF_CHECK(nctk_set_atomic_units(ncid, "fermi_energy"))
+   NCF_CHECK(nctk_set_atomic_units(ncid, "hole_fermi_energy")) ! CP added
    NCF_CHECK(nf90_put_att(ncid, vid("number_of_states"), "k_dependent", k_dependent))
 
    ! Define dimensions.
@@ -3505,8 +3598,12 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    end if
 
    ! Define scalars.
+   ! CP modified
+   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+   !  "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "usewvl"])
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "usewvl"])
+     "date","ivalence", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "usewvl"])
+   ! End CP modified
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
@@ -3566,7 +3663,10 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "kptopt", "pawcpxocc", "icoulomb"])
    NCF_CHECK(ncerr)
+   !CP modified
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "nelect", "charge"])
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "nelect", "ne_qFD", "nh_qFD", "charge"])
+   ! End CP modified
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [&
@@ -3601,6 +3701,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
  ! Write electrons
  NCF_CHECK(nf90_put_var(ncid, vid("fermi_energy"), hdr%fermie))
+ NCF_CHECK(nf90_put_var(ncid, vid("hole_fermi_energy"), hdr%fermih)) ! CP added fermih
  NCF_CHECK(nf90_put_var(ncid, vid("smearing_width"), hdr%tsmear))
  NCF_CHECK(nf90_put_var(ncid, vid("smearing_scheme"), nctk_string_from_occopt(hdr%occopt)))
 
@@ -3638,10 +3739,15 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("codvsn"), hdr%codvsn))
  NCF_CHECK(nf90_put_var(ncid, vid("title"), hdr%title))
 
+ ! CP modified
+ !ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+!&  "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "icoulomb"],&
+!&  [hdr%date, hdr%ixc ,hdr%intxc ,hdr%occopt, hdr%pertcase, HDR_LATEST_HEADFORM, fform, hdr%usepaw, hdr%icoulomb])
  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-&  "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "icoulomb"],&
-&  [hdr%date, hdr%ixc ,hdr%intxc ,hdr%occopt, hdr%pertcase, HDR_LATEST_HEADFORM, fform, hdr%usepaw, hdr%icoulomb])
+&  "date", "ivalence", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "icoulomb"],&
+&  [hdr%date, hdr%ivalence, hdr%ixc ,hdr%intxc ,hdr%occopt, hdr%pertcase, HDR_LATEST_HEADFORM, fform, hdr%usepaw, hdr%icoulomb])
  NCF_CHECK(ncerr)
+ ! End CP modified
 
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
 &  "ecut_eff", "ecutdg", "ecutsm", "etot", "residm", "stmbias", "tphysel", "tsmear"],&
@@ -3676,8 +3782,12 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    "kptopt", "pawcpxocc"],[hdr%kptopt, hdr%pawcpxocc])
  NCF_CHECK(ncerr)
 
+ ! CP modified
+ !ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
+ !  "nelect", "charge"],[hdr%nelect, hdr%charge])
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "nelect", "charge"],[hdr%nelect, hdr%charge])
+   "nelect", "ne_qFD", "nh_qFD", "charge"],[hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%charge])
+! End CP modified
  NCF_CHECK(ncerr)
 
  ! NB: In etsf_io the number of electrons is declared as integer.
@@ -4281,6 +4391,18 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
  if (abs(hdr%nelect - hdr0%nelect) > tol6) then
     MSG_WARNING(sjoin("input nelect = ", ftoa(hdr%nelect)," /= disk file nelect = ",ftoa(hdr0%nelect)))
  end if
+! CP added for occopt 9
+ if (abs(hdr%ne_qFD - hdr0%ne_qFD) > tol6) then
+    MSG_WARNING(sjoin("input ne_qFD = ", ftoa(hdr%ne_qFD)," /= disk file nelect = ",ftoa(hdr0%ne_qFD)))
+ end if
+ if (abs(hdr%nh_qFD - hdr0%nh_qFD) > tol6) then
+    MSG_WARNING(sjoin("input nh_qFD = ", ftoa(hdr%nh_qFD)," /= disk file nelect = ",ftoa(hdr0%nh_qFD)))
+ end if
+ if (hdr%ivalence/=hdr0%ivalence) then
+   write(msg,'(a,i0,a,i0)')'input ival=',hdr%ivalence,' not equal disk file ival=',hdr0%ivalence
+   MSG_WARNING(msg)
+ end if
+ ! End CP added
  if (abs(hdr%charge - hdr0%charge) > tol6) then
     MSG_WARNING(sjoin("input charge = ", ftoa(hdr%charge)," /= disk file charge = ", ftoa(hdr0%charge)))
  end if
@@ -4854,6 +4976,16 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    write(msg,'(2(a,f8.2))')"File contains ", hdr%nelect," electrons but nelect initialized from input is ",Dtset%nelect
    MSG_ERROR(msg)
  end if
+ ! CP added
+ if (abs(Dtset%ne_qFD-hdr%ne_qFD)>tol6) then
+   write(msg,'(2(a,f8.2))')"File contains ", hdr%ne_qFD," electrons but nelect initialized from input is ",Dtset%ne_qFD
+   MSG_ERROR(msg)
+ end if
+ if (abs(Dtset%nh_qFD-hdr%nh_qFD)>tol6) then
+   write(msg,'(2(a,f8.2))')"File contains ", hdr%nh_qFD," electrons but nelect initialized from input is ",Dtset%nh_qFD
+   MSG_ERROR(msg)
+ end if
+ ! End CP added
  if (abs(Dtset%charge-hdr%charge)>tol6) then
    write(msg,'(2(a,f8.2))')"File contains charge ", hdr%charge," but charge from input is ",Dtset%charge
    MSG_ERROR(msg)

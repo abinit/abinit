@@ -1,3 +1,4 @@
+! CP modified 
 !!****m* ABINIT/m_chkinp
 !! NAME
 !!  m_chkinp
@@ -1242,7 +1243,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  iprcel
    call chkint(0,0,cond_string,cond_values,ierr,'iprcel',dt%iprcel,1,(/0/),1,21,iout)   !  0 or superior to 21
-   if(nsppol==2 .and. (dt%occopt>=3 .and. dt%occopt<=8).and.mod(dt%iprcel,10)>49 )then
+   ! CP modified
+   !if(nsppol==2 .and. (dt%occopt>=3 .and. dt%occopt<=8).and.mod(dt%iprcel,10)>49 )then
+   if(nsppol==2 .and. (dt%occopt>=3 .and. dt%occopt<=9).and.mod(dt%iprcel,10)>49 )then
+   ! End CP modified
      write(msg,'(5a)')&
      'For spin-polarized metallic systems (occopt>3),',ch10,&
      'only RPA dielectric matrix can be evaluated) !',ch10,&
@@ -2186,13 +2190,19 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  occopt
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'occopt',dt%occopt,9,(/0,1,2,3,4,5,6,7,8/),iout)
+   ! CP modified
+   !call chkint_eq(0,0,cond_string,cond_values,ierr,'occopt',dt%occopt,9,(/0,1,2,3,4,5,6,7,8/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'occopt',dt%occopt,10,(/0,1,2,3,4,5,6,7,8,9/),iout)
+   ! End CP modified
 !  When prtdos==1 or 4, occopt must be between 3 and 8
    if(dt%prtdos==1.or.dt%prtdos==4)then
      write(cond_string(1), "(A)") 'prtdos'
      cond_values(1)=dt%prtdos
 !    Make sure that occopt is 3,4,5,6,7, or 8
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,6,(/3,4,5,6,7,8/),iout)
+     ! CP modified
+     !call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,6,(/3,4,5,6,7,8/),iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,7,(/3,4,5,6,7,8,9/),iout)
+     ! End CP modified
    end if
 !  When nsppol==2 and spinmagntarget is the default value (-99.99d0), occopt cannot be 1.
    if(nsppol==2.and.dt%occopt==1.and.abs(dt%spinmagntarget+99.99d0)<tol8)then
@@ -3278,7 +3288,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  tsmear
    call chkdpr(0,0,cond_string,cond_values,ierr,'tsmear',dt%tsmear,1,zero,iout)
 !  Check that tsmear is non-zero positive for metallic occupation functions
-   if(3<=dt%occopt .and. dt%occopt<=8)then
+   ! CP modified
+   ! if(3<=dt%occopt .and. dt%occopt<=8)then
+   if(3<=dt%occopt .and. dt%occopt<=9)then
+   ! End CP modified
      cond_string(1)='occopt' ; cond_values(1)=dt%occopt
      call chkdpr(1,1,cond_string,cond_values,ierr,'tsmear',dt%tsmear,1,tol8,iout)
    end if

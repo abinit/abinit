@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_common
 !! NAME
 !!  m_common
@@ -123,7 +124,8 @@ contains
 !!  etotal=total energy (hartree)
 !!  favg(3)=average of forces (ha/bohr)
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
-!!  fermie=fermi energy (Hartree)
+!!  fermie=fermi energy (Hartree) / for electrons thermalized in the conduction bands when occopt==9 ! CP modified
+!!  fermih=fermi energy (Hartree) for holes thermalized in the VB when occopt==9 ! CP added
 !!  fname_eig=filename for printing of the eigenenergies
 !!  fock <type(fock_type)>=quantities for the fock operator (optional argument)
 !!  character(len=fnlen) :: filnam1=character strings giving input file name
@@ -178,8 +180,9 @@ contains
 !!
 !! SOURCE
 
+! CP modified: added fermih to the list of arguments
 subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
-&  eigen,etotal,favg,fcart,fermie,fname_eig,filnam1,initGS,&
+&  eigen,etotal,favg,fcart,fermie,fermih,fname_eig,filnam1,initGS,&
 &  iscf,istep,istep_fock_outer,istep_mix,kpt,maxfor,moved_atm_inside,mpi_enreg,&
 &  nband,nkpt,nstep,occ,optres,&
 &  prtfor,prtxml,quit,res2,resid,residm,response,tollist,usepaw,&
@@ -192,7 +195,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  integer,intent(in) :: moved_atm_inside,nkpt,nstep
  integer,intent(in) :: optres,prtfor,prtxml,response,usepaw
  integer,intent(out) :: quit,conv_retcode
- real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,maxfor,res2,residm
+ real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm ! CP added fermih
  real(dp),intent(in) :: vxcavg
  character(len=fnlen),intent(in) :: fname_eig,filnam1
  type(electronpositron_type),pointer,optional :: electronpositron
@@ -520,11 +523,18 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    ! Print eigenvalues every step if dtset%prtvol>=10 and GS case
    if (my_rank == master .and. (dtset%prtvol>=10 .and. response==0 .and. dtset%tfkinfunc==0 .and. dtset%usewvl==0)) then
      option=1
-     call prteigrs(eigen,dtset%enunit,fermie,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
+     ! CP modified
+!     call prteigrs(eigen,dtset%enunit,fermie,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
+!&     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
+!
+!     call prteigrs(eigen,dtset%enunit,fermie,fname_eig,std_out,iscf,kpt,dtset%kptopt,dtset%mband,&
+!&     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
+     call prteigrs(eigen,dtset%enunit,fermie,fermih,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
 &     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
 
-     call prteigrs(eigen,dtset%enunit,fermie,fname_eig,std_out,iscf,kpt,dtset%kptopt,dtset%mband,&
+     call prteigrs(eigen,dtset%enunit,fermie,fermih,fname_eig,std_out,iscf,kpt,dtset%kptopt,dtset%mband,&
 &     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
+     ! End CP modified
    end if
 
    if(response==0)then
@@ -1106,7 +1116,8 @@ end subroutine setup1
 !!   or, if option==5...7, zero-point motion correction to eigenvalues (averaged)
 !!  enunit=choice parameter: 0=>output in hartree; 1=>output in eV;
 !!   2=> output in both hartree and eV
-!!  fermie=fermi energy (Hartree)
+!!  fermie=fermi energy (Hartree)/ for electrons thermalized in the conduction bands when occopt==9 ! CP modified
+!!  fermih=fermi energy (Hartree) for holes thermalized in the VB when occopt==9 ! CP modified
 !!  fname_eig=filename for printing of the eigenenergies
 !!  iout=unit number for formatted output file
 !!  iscf=option for self-consistency
@@ -1141,7 +1152,8 @@ end subroutine setup1
 !!
 !! SOURCE
 
-subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,nband,&
+!CP added fermih to argument list
+subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,mband,nband,&
 &  nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
 
  use m_io_tools,  only : open_file
@@ -1150,7 +1162,7 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 !scalars
  integer,intent(in) :: enunit,iout,iscf,kptopt,mband,nkpt,nnsclo_now,nsppol
  integer,intent(in) :: occopt,option,prteig,prtvol
- real(dp),intent(in) :: fermie,tolwfr,vxcavg
+ real(dp),intent(in) :: fermie,fermih,tolwfr,vxcavg ! CP added fermih
  character(len=*),intent(in) :: fname_eig
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
@@ -1242,8 +1254,18 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
      end if
 
      if(iscf>=0 .and. (ienunit==0 .or. option==1))then
-       write(msg, '(3a,f10.5,3a,f10.5)' ) &
-        ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
+       ! CP modified for occopt 9 case
+       !write(msg, '(3a,f10.5,3a,f10.5)' ) &
+       ! ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
+       if (occopt == 9) then
+          write(msg, '(3a,f10.5,a,f10.5,3a,f10.5)' ) &
+          ' Fermi energy for thermalized electrons and holes (',trim(strunit2),') =',&
+          convrt*fermie,', ',convrt*fermih,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
+       else 
+          write(msg, '(3a,f10.5,3a,f10.5)' ) &
+          ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
+       end if
+       ! End CP modified
        call wrtout(iout,msg)
        if (prteig > 0) call wrtout(temp_unit,msg)
      end if

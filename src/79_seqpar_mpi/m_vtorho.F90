@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_vtorho
 !! NAME
 !!  m_vtorho
@@ -1213,9 +1214,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Compute the new occupation numbers from eigen
      call timab(990,1,tsec)
-     call newocc(doccde,eigen,energies%entropy,energies%e_fermie,dtset%spinmagntarget,&
-&     dtset%mband,dtset%nband,dtset%nelect,dtset%nkpt,dtset%nspinor,&
-&     dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
+     ! CP modified
+     !call newocc(doccde,eigen,energies%entropy,energies%e_fermie,dtset%spinmagntarget,&
+!&     dtset%mband,dtset%nband,dtset%nelect,dtset%nkpt,dtset%nspinor,&
+!&     dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
+     call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
+&     dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
+&     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,&
+&     dtset%tsmear,dtset%wtk)
+     ! End CP modified
      call timab(990,2,tsec)
 
 !    !=========  DMFT call begin ============================================
@@ -1576,19 +1583,54 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(iscf/=-1 .and. iscf/=-2)then
        call timab(993,1,tsec)
        energies%e_fermie = -huge(one)
+! CP addition for occopt 9 case
+       if (dtset%occopt==9) then
+          energies%e_fermih = -huge(one)
+       end if
+! End CP addition
        bdtot_index=1
        do isppol=1,dtset%nsppol
          do ikpt=1,dtset%nkpt
            nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-           do iband=1,nband_k
-             if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermie+tol10) then
-               energies%e_fermie=eigen(bdtot_index)
-             end if
-             bdtot_index=bdtot_index+1
-           end do
+           ! CP modified
+           !do iband=1,nband_k
+           !  if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermie+tol10) then
+           !    energies%e_fermie=eigen(bdtot_index)
+           !  end if
+           !  bdtot_index=bdtot_index+1
+           !end do
+           if (dtset%occopt/=9) then
+              do iband=1,nband_k
+                 if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermie+tol10) then
+                   energies%e_fermie=eigen(bdtot_index)
+                 end if
+                 bdtot_index=bdtot_index+1
+              end do
+           else
+              ! In case occopt 9, computing the fermi level for the electrons remaining in the VB = fermi level of holes
+              do iband=1,dtset%ivalence
+                 if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermih+tol10) then
+                   energies%e_fermih=eigen(bdtot_index)
+                 end if
+                 bdtot_index=bdtot_index+1
+              end do
+              ! In case occopt 9, computing the fermi level for the electrons thermalized in the conduction bands
+              do iband=dtset%ivalence+1,nband_k
+                 if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermie+tol10) then
+                   energies%e_fermie=eigen(bdtot_index)
+                 end if
+                 bdtot_index=bdtot_index+1
+              end do
+           end if
+           ! End CP modified
          end do
        end do
        call xmpi_max(energies%e_fermie,spaceComm_distrb,ierr)
+       ! CP added in the case occopt = 9
+       if (dtset%occopt == 9) then
+          call xmpi_max(energies%e_fermih,spaceComm_distrb,ierr)
+       end if
+       ! End CP added
        call timab(993,2,tsec)
      end if
 
@@ -1639,10 +1681,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !  In the non-self-consistent case, print eigenvalues and residuals
    if(iscf<=0 .and. me_distrb==0)then
      option=2 ; enunit=1 ; vxcavg_dum=zero
-     call prteigrs(eigen,enunit,energies%e_fermie,dtfil%fnameabo_app_eig,&
-&     ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,dtset%nband,&
-&     dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
+     ! CP modified
+     !call prteigrs(eigen,enunit,energies%e_fermie,dtfil%fnameabo_app_eig,&
+!&     ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,dtset%nband,&
+!&     dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
+!&     dtset%prteig,prtvol,resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
+     call prteigrs(eigen,enunit,energies%e_fermie,energies%e_fermih,&
+&     dtfil%fnameabo_app_eig,ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,&
+&     dtset%nband,dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
 &     dtset%prteig,prtvol,resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
+     ! End CP modified
    end if
 
 !  Find largest residual over bands, k points, and spins, except for nbdbuf highest bands
@@ -2149,8 +2197,8 @@ subroutine wvl_occ()
    DBG_ENTER("COLL")
 
 !  Compute the new occupation numbers from eigen
-   call newocc(doccde_,eigen,energies%entropy,energies%e_fermie,dtset%spinmagntarget,&
-&   dtset%mband,dtset%nband,dtset%nelect,dtset%nkpt,dtset%nspinor,&
+   call newocc(doccde_,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,&
+&   dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,&
 &   dtset%nsppol,occ,dtset%occopt,prtvol,&
 &   dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
 

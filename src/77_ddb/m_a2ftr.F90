@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_a2ftr
 !! NAME
 !! m_a2ftr
@@ -2265,6 +2266,12 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
 !BoltzTraP output files in SIESTA format
  if (elph_ds%prtbltztrp == 1) then
+   ! CP added
+   ! CP test to prevent use in case occopt = 9
+    if (Bst%occopt==9) then
+       MSG_ERROR("Boltztrap outputting not possible with occopt = 9 at the moment")
+    end if
+    ! End CP added
    call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
 &   elph_ds%tempermin,elph_ds%temperinc,ntemper,fermie, &
 &   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,nband,elph_ds%nelect,new_nkptirr, &

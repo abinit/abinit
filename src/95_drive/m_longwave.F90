@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_longwave
 !! NAME
 !!  m_longwave
@@ -147,7 +148,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,sumg0,timrev,tim_mkrho,usexcnhat
 ! integer :: idir,ipert,
- real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,gsqcut_eff,gsqcutc_eff,residm
+ real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm ! CP added fermih
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc
  character(len=fnlen) :: dscrpt
@@ -273,11 +274,16 @@ ecore=zero
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
- etot=hdr%etot ; fermie=hdr%fermie ; residm=hdr%residm
+ etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
 !If parallelism over atom, hdr is distributed
- call hdr%update(bantot,etot,fermie,&
+! CP modified
+ call hdr%update(bantot,etot,fermie,fermih,&
 & residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
 & comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
+! call hdr%update(bantot,etot,fermie,&
+!& residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
+!& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
+ ! End CP modified
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
