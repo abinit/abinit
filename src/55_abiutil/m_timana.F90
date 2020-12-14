@@ -852,7 +852,37 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1102)='nonlop_ylm%opernla_blas         '
  names(1103)='nonlop_ylm%opernlb              '
  names(1104)='nonlop_ylm%opernlb_blas         '
- names(1150)='nonlop_ylm(other)               '
+ names(1119)='nonlop_ylm(other)               '
+
+ names(1120)='opernla                         '
+ names(1121)='opernla%scal                    '
+ names(1122)='opernla%scal_lmn                '
+ names(1123)='opernla%gx                      '
+ names(1124)='opernla(other)                  '
+
+ names(1130)='opernla_blas                    '
+ names(1131)='opernla_blas%scal               '
+ names(1132)='opernla_blas%scal_lmn           '
+ names(1133)='opernla_blas%gx                 '
+ names(1134)='opernla_blas(other)             '
+
+ names(1140)='opernlb                         '
+ names(1141)='opernlb%gxfac_                  '
+ names(1142)='opernlb%gxfacs_                 '
+ names(1143)='opernlb%scal_fac                '
+ names(1144)='opernlb%scal_facs               '
+ names(1145)='opernlb%vect                    '
+ names(1146)='opernlb%vects                   '
+ names(1147)='opernlb(other)                  '
+
+ names(1150)='opernlb_blas                    '
+ names(1151)='opernlb_blas%gxfac_             '
+ names(1152)='opernlb_blas%gxfacs_            '
+ names(1153)='opernlb_blas%scal_fac           '
+ names(1154)='opernlb_blas%scal_facs          '
+ names(1155)='opernlb_blas%vect               '
+ names(1156)='opernlb_blas%vects              '
+ names(1157)='opernlb_blas(other)             '
 
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
@@ -1252,7 +1282,19 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
    case(45)
 !      Estimate the complement of nonlop_ylm
-     tslots(:6)=(/1150,1100,-1101,-1102,-1103,-1104/)
+     tslots(:6)=(/1119,1100,-1101,-1102,-1103,-1104/)
+   case(46)
+     ! opernla(other)
+     tslots(:5)=(/1124,1120,-1121,-1122,-1123/)
+   case(47)
+     ! opernla_blas(other)
+     tslots(:5)=(/1134,1130,-1131,-1132,-1133/)
+   case(48)
+     ! opernlb(other)
+     tslots(:8)=(/1147,1140,-1141,-1142,-1143,-1144,-1145,-1146/)
+   case(49)
+     ! opernlb_blas(other)
+     tslots(:8)=(/1157,1150,-1151,-1152,-1153,-1154,-1155,-1156/)
 
    case default
      cycle
@@ -1641,8 +1683,20 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
          msg='low-level xgTransposer type '
        case(79)
-         list(:6)=(/1100,1101,1102,1103,1104,1150/)
+         list(:6)=(/1100,1101,1102,1103,1104,1119/)
          msg='nonlop_ylm'
+       case(80)
+         list(:5)=(/1120,1121,1122,1123,1124/)
+         msg='opernla'
+       case(81)
+         list(:5)=(/1130,1131,1132,1133,1134/)
+         msg='opernla_blas'
+       case(82)
+         list(:8)=(/1140,1141,1142,1143,1144,1145,1146,1147/)
+         msg='opernlb'
+       case(83)
+         list(:8)=(/1150,1151,1152,1153,1154,1155,1156,1157/)
+         msg='opernlb_blas'
        case default
          cycle ! This allows to disable temporarily some partitionings
 

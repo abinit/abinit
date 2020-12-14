@@ -168,7 +168,8 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
 !arrays
  integer,intent(in) :: indlmn(6,nlmn),nloalg(3)
  integer,intent(out) :: cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
- real(dp),intent(in) :: ffnl(npw,dimffnl,nlmn),kpg(npw,nkpg),ph3d(2,npw,matblk)
+ real(dp),intent(in),target :: ffnl(npw,dimffnl,nlmn)
+ real(dp),intent(in) :: kpg(npw,nkpg),ph3d(2,npw,matblk)
  real(dp),intent(in) :: vect(:,:)
  real(dp),intent(out) :: d2gxdt(cplex,nd2gxdt,nlmn,nincat,nspinor)
  real(dp),intent(out) :: dgxdt(cplex,ndgxdt,nlmn,nincat,nspinor),gx(cplex,nlmn,nincat,nspinor)
@@ -196,11 +197,14 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
  integer :: ffnl_dir(2)
  real(dp) :: tsec(2)
 ! real(dp),allocatable :: kpg(:,:)
+ real(dp),pointer :: ffnl_loc(:,:)
  real(dp),allocatable :: scali(:),scalr(:),scalari(:,:),scalarr(:,:),scalr_lmn(:),scali_lmn(:)
  complex(dp) :: ctmp,cil(4)
 ! *************************************************************************
 
  if (choice==-1) return
+
+ call timab(1130,1,tsec)
 
  if (abs(choice)>1) then
    MSG_ERROR('Only abs(choice)<=1 is available for now.')
@@ -272,6 +276,15 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
  ABI_ALLOCATE(scalr_lmn,(nlmn))
  ABI_ALLOCATE(scali_lmn,(nlmn))
 
+ ffnl_loc => ffnl(:,1,:)
+! ABI_ALLOCATE(ffnl_loc,(nlmn,npw))
+! ffnl_loc(:,:)=ffnl(:,1,:)
+! do ipw=1,npw
+!   do ilmn=1,nlmn
+!     ffnl_loc(ilmn,ipw) = ffnl(ipw,1,ilmn)
+!   end do
+! end do
+
 ! i^l
  cil(1) = ( 1.0_DP, 0.0_DP) * wt
  cil(2) = ( 0.0_DP, 1.0_DP) * wt
@@ -286,6 +299,7 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
    do ia=1,nincat
      iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 !    Compute c(g).exp(2pi.i.g.R)
+     call timab(1131,1,tsec)
      do ipw=ipw0,npw
        jpw=ipw+ipwshft
        scalr(ipw)=(vect(1,jpw)*ph3d(1,ipw,iaph3d)-vect(2,jpw)*ph3d(2,ipw,iaph3d))
@@ -296,6 +310,7 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
        scalr(1)=half*vect(1,1+ipwshft)*ph3d(1,1,iaph3d)
        scali(1)=half*vect(1,1+ipwshft)*ph3d(2,1,iaph3d)
      end if
+     call timab(1131,2,tsec)
 
 !    --------------------------------------------------------------------
 !    ALL CHOICES:
@@ -304,22 +319,26 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
 
      if (choice>=0) then
 
-       call DGEMV('T',npw,nlmn,1.0_DP,ffnl(:,1,:),npw,scalr,1,0.0_DP,scalr_lmn,1)
-       call DGEMV('T',npw,nlmn,1.0_DP,ffnl(:,1,:),npw,scali,1,0.0_DP,scali_lmn,1)
-!       scalr_lmn(:)=0.0_DP
-!       scali_lmn(:)=0.0_DP
-!       do ilmn=1,nmln
-!         do ipw=1,npw
-!           scalr_lmn(ilmn) = scalr_lmn(ilmn) + scalr(ipw) * ffnl(ipw,1,ilmn)
-!           scali_lmn(ilmn) = scali_lmn(ilmn) + scali(ipw) * ffnl(ipw,1,ilmn)
-!         end do                  
-!       end do
+       call timab(1132,1,tsec)
+!       call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scalr,1,0.0_DP,scalr_lmn,1)
+!       call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scali,1,0.0_DP,scali_lmn,1)
+       scalr_lmn(:)=0.0_DP
+       scali_lmn(:)=0.0_DP
+       do ilmn=1,nlmn
+         do ipw=1,npw
+           scalr_lmn(ilmn) = scalr_lmn(ilmn) + scalr(ipw) * ffnl_loc(ipw,ilmn)
+           scali_lmn(ilmn) = scali_lmn(ilmn) + scali(ipw) * ffnl_loc(ipw,ilmn)
+         end do                  
+       end do
+       call timab(1132,2,tsec)
+       call timab(1133,1,tsec)
        do ilmn=1,nlmn
          il=mod(indlmn(1,ilmn),4)+1
          ctmp = cil(il) * cmplx(scalr_lmn(ilmn),scali_lmn(ilmn),kind=DP)
          gx(1,ilmn,ia,ispinor) = real(ctmp)
          gx(2,ilmn,ia,ispinor) = aimag(ctmp)
        end do
+       call timab(1133,2,tsec)
 
      end if
 
@@ -349,6 +368,8 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
    end if
    call timab(48,2,tsec)
  end if
+
+ call timab(1130,2,tsec)
 
 end subroutine opernla_ylm_blas
 !!***
