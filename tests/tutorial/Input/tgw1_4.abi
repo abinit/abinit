@@ -28,7 +28,7 @@ getwfk       2
 ppmfrq      16.7 eV
 
 # Definition of the unit cell: fcc
-acell  3*10.217        # This is equivalent to   10.217 10.217 10.217
+acell  3*10.26         # Experimental lattice constants
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5
        0.5  0.5  0.0
@@ -52,7 +52,7 @@ ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
 
 
 # Sampling of the BZ
-ngkpt   1 1 1
+ngkpt   2 2 2
 nshiftk 1
 shiftk  0.0 0.0 0.0
 istwfk  *1         # This is mandatory in all the GW steps.
