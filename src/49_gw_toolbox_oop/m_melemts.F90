@@ -74,6 +74,7 @@ MODULE m_melemts
 
  type,public :: melflags_t
 
+  integer :: has_kinetic=0
   integer :: has_hbare=0
   integer :: has_lexexch=0
   integer :: has_sxcore=0
@@ -132,6 +133,10 @@ MODULE m_melemts
   ! kibz(3,nkibz)
   ! The list of k-points in reduced coordinates.
 
+  complex(dpc), allocatable :: kinetic(:,:,:,:)
+  ! kinetic(b1:b2,b1:b2,nkibz,nsppol*nspinor**2)
+  ! Matrix elements of the kinetic energy.
+
   complex(dpc), allocatable :: hbare(:,:,:,:)
   ! hbare(b1:b2,b1:b2,nkibz,nsppol*nspinor**2)
   ! Matrix elements of the bare Hamiltonian.
@@ -177,7 +182,7 @@ MODULE m_melemts
  !public :: mels_get_exene_core
 !!***
 
- integer,parameter,private :: NNAMES=8
+ integer,parameter,private :: NNAMES=9
  integer,parameter,private :: NAMELEN=13
 
 ! List of matrix element names.
@@ -191,6 +196,7 @@ MODULE m_melemts
 &                    "vu           ",&
 &                    "vlexx        ",&
 &                    "vhartree     ",&
+&                    "kinetic      ",&
 &                    "hbare        "/)
 
 CONTAINS  !========================================================================================
@@ -220,6 +226,7 @@ subroutine melflags_reset(Mflags)
 ! *************************************************************************
 
  ! @melflags_t
+ Mflags%has_kinetic         = 0
  Mflags%has_hbare           = 0
  Mflags%has_sxcore          = 0
  Mflags%has_vhartree        = 0
@@ -267,6 +274,7 @@ subroutine melflags_copy(Mflags_in, Mflags_out)
  call melflags_reset(Mflags_out)
 
  ! @melflags_t
+ Mflags_out%has_kinetic         = Mflags_in%has_kinetic
  Mflags_out%has_hbare           = Mflags_in%has_hbare
  Mflags_out%has_sxcore          = Mflags_in%has_sxcore
  Mflags_out%has_vhartree        = Mflags_in%has_vhartree
@@ -322,6 +330,7 @@ subroutine melements_free(Mels)
  ABI_SFREE(Mels%kibz)
 
 !complex arrays
+ ABI_SFREE(Mels%kinetic)
  ABI_SFREE(Mels%hbare)
  ABI_SFREE(Mels%sxcore)
  ABI_SFREE(Mels%vhartree)
@@ -377,6 +386,9 @@ subroutine my_select_melements(Mels,aname,flag_p,arr_p)
 ! *************************************************************************
 
  SELECT CASE (tolower(aname))
+ CASE ("kinetic")
+   flag_p => Mels%flags%has_kinetic
+   arr_p  => Mels%kinetic
  CASE ("hbare")
    flag_p => Mels%flags%has_hbare
    arr_p  => Mels%hbare
@@ -457,7 +469,6 @@ subroutine melements_init(Mels,Mflags_in,nsppol,nspden,nspinor,nkibz,kibz,bands_
 
  ! * Copy flags.
  call melflags_copy(Mflags_in, Mels%flags)
-
  ! * Copy dimensions.
  Mels%nkibz   = nkibz
  Mels%nsppol  = nsppol
@@ -499,6 +510,10 @@ subroutine melements_init(Mels,Mflags_in,nsppol,nspden,nspinor,nkibz,kibz,bands_
  Mels%kibz = kibz
 
 ! complex arrays
+ if (Mels%flags%has_kinetic == 1) then
+   ABI_CALLOC(Mels%kinetic,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+ end if
+
  if (Mels%flags%has_hbare == 1) then
    ABI_CALLOC(Mels%hbare,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if

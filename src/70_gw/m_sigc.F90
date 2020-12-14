@@ -55,6 +55,7 @@ module m_sigc
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_sym,       only : paw_symcprj
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
+ use m_hide_lapack,   only : xheev
 
  implicit none
 
@@ -302,7 +303,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    neigmax = MIN(Dtset%gwaclowrank,Sigp%npwc)
  else
    neigmax = Sigp%npwc
- endif 
+ endif
 
  ABI_MALLOC(w_maxval,(minbnd:maxbnd))
  w_maxval = zero
@@ -338,7 +339,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Set up logical flags for Sigma calculation
  if (mod10==SIG_GW_AC.and.Sigp%gwcalctyp/=1) then
-   ABI_ERROR("not implemented")
+   if(Sigp%gwcalctyp/=21) then
+       ABI_ERROR("not implemented")
+   else
+     write(msg,'(a34,i9)')'Constructing Sigma_c(iw) for k = ',ikcalc
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   end if
  end if
 
  if (mod10==SIG_GW_AC.and.Sigp%gwcomp==1) then
@@ -756,14 +763,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        if (mod10==SIG_GW_AC) then
 
          call timab(444,1,tsec) ! ac_lrk_diag
-         ! Important to set to zero here for all procs since we're going to use a dirty reduction later 
+         ! Important to set to zero here for all procs since we're going to use a dirty reduction later
          ! The reduction 'xmpi_sum' does not induce a significant performance loss in the tested systems
          ac_epsm1cqwz2(:,:,:) = czero_gw
          neig(:) = 0
          do iiw=1,Er%nomega_i
            ! Use the available MPI tasks to parallelize over iw'
            if ( Dtset%gwpara == 2 .and. MODULO(iiw-1,Wfd%nproc) /= Wfd%my_rank ) CYCLE
-         
+
            ! Prepare the integration weights w_i 1/z_i^2 f(1/z_i-1)..
            ! The first frequencies are always real, skip them.
            z2=gl_knots(iiw)*gl_knots(iiw)
@@ -809,7 +816,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ! Sum over band
      call timab(445,1,tsec) ! loop
      do ib=1,Sigp%nbnds
-       call timab(436,1,tsec) ! (1)
 
        ! Parallelism over spin
        ! This processor has this k-point but what about spin?
@@ -902,7 +908,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call timab(437,2,tsec) ! rho_tw_g
 
        call timab(443,1,tsec) ! ac_lrk_appl
-      
+
        if (mod10==SIG_GW_AC) then
          rhotw_epsm1_rhotw(:,:,:) = czero_gw
          do iiw=1,Er%nomega_i
@@ -910,8 +916,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
            call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
 &                    rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
-           call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),&
-&                    zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
+           call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,&
+                     rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
 
            ! Get the upper part of rhotw_epsm1_rhotw
            ! that is hermitian by construction
@@ -952,7 +958,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
          CASE (SIG_GW_AC)
            ! GW with Analytic continuation.
-
            ! This part is so optimized for AC that there is nothing to do here !
 
          CASE (SIG_GW_CD)

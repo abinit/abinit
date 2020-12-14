@@ -753,6 +753,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
+!  ecutsigx
+
    ! Check for GW calculations that are not implemented.
    if (ANY(optdriver == [RUNL_SCREENING, RUNL_SIGMA])) then
      if (dt%nspinor == 2) then
@@ -1107,6 +1109,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        'Action: set gwrpacorr to 0 or change gwcalctyp'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
+   end if
+   ! gwgmcorr
+   if(dt%gwgmcorr==1 .and. dt%gwrpacorr==0) then
+     write(msg,'(3a)' )&
+     'gwgmcorr=1 can only be used with gwrpacorr/=0',ch10,&
+     'Action: set gwgmcorr to 0 or gwrpacorr > 0'
+      MSG_ERROR_NOSTOP(msg, ierr)
    end if
 
    ! gwls_stern_kmax
@@ -2049,7 +2058,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%nstep==0)then
 !    nstep==0 computation of energy not yet implemented with Fock term, see m_energy.F90
      cond_string(1)='usefock' ; cond_values(1)=dt%usefock
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'usefock',dt%usefock,1,(/0/),iout)
+     if(dt%usefock/=1) then
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'usefock',dt%usefock,1,(/0/),iout)
+     else
+       write(msg,'(a)')&
+       'For usefock=1 and nstep=0, the Fock energy is not available and will not be computed.'
+       MSG_WARNING(msg)
+     endif
    endif
 
 !  nsym
@@ -2218,9 +2233,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
 !  end if
 
-!  optdriver
+!  optdriver 
    call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,10,&
-&   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE, RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE],iout)
+&   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE,&
+&   RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE],iout)
    if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR,RUNL_LONGWAVE])) then
      write(msg,'(a,i3,3a,14(a,i2),4a)' )&
 &     'The input variable optdriver=',dt%optdriver,ch10,&
