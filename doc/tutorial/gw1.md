@@ -435,7 +435,7 @@ abiopen.py tgw1_1o_DS4_SIGRES.nc -p
 ================================= Structure =================================
 Full Formula (Si2)
 Reduced Formula: Si
-abc   :   3.838648   3.838648   3.838648
+abc   :   3.839136   3.839136   3.839136
 angles:  60.000000  60.000000  60.000000
 Sites (2)
   #  SP       a     b     c
@@ -446,33 +446,39 @@ Sites (2)
 Abinit Spacegroup: spgid: 0, num_spatial_symmetries: 48, has_timerev: True, symmorphic: True
 
 ============================== Kohn-Sham bands ==============================
-Number of electrons: 8.0, Fermi level: 6.246 (eV)
-nsppol: 1, nkpt: 6, mband: 30, nspinor: 1, nspden: 1
+Number of electrons: 8.0, Fermi level: 4.773 (eV)
+nsppol: 1, nkpt: 6, mband: 80, nspinor: 1, nspden: 1
 smearing scheme: none, tsmear_eV: 0.272, occopt: 1
 Direct gap:
     Energy: 2.544 (eV)
-    Initial state: spin=0, kpt=[+0.000, +0.000, +0.000], weight: 0.031, band=3, eig=5.967, occ=2.000
-    Final state:   spin=0, kpt=[+0.000, +0.000, +0.000], weight: 0.031, band=4, eig=8.472, occ=0.000
+    Initial state: spin: 0, kpt: [+0.000, +0.000, +0.000], weight: 0.031, band: 3, eig: 4.418, occ: 2.000
+    Final state:   spin: 0, kpt: [+0.000, +0.000, +0.000], weight: 0.031, band: 4, eig: 6.961, occ: 0.000
 Fundamental gap:
-    Energy: 0.558 (eV)
-    Initial state: spin=0, kpt=[+0.000, +0.000, +0.000], weight: 0.031, band=3, eig=5.967, occ=2.000
-    Final state:   spin=0, kpt=[+0.500, +0.500, +0.000], weight: 0.094, band=4, eig=6.525, occ=0.000
-Bandwidth: 12.101 (eV)
+    Energy: 0.710 (eV)
+    Initial state: spin: 0, kpt: [+0.000, +0.000, +0.000], weight: 0.031, band: 3, eig: 4.418, occ: 2.000
+    Final state:   spin: 0, kpt: [+0.500, +0.500, +0.000], weight: 0.094, band: 4, eig: 5.128, occ: 0.000
+Bandwidth: 11.985 (eV)
 Valence maximum located at:
-    spin=0, kpt=[+0.000, +0.000, +0.000], weight: 0.031, band=3, eig=5.967, occ=2.000
+    spin: 0, kpt: [+0.000, +0.000, +0.000], weight: 0.031, band: 3, eig: 4.418, occ: 2.000
 Conduction minimum located at:
-    spin=0, kpt=[+0.500, +0.500, +0.000], weight: 0.094, band=4, eig=6.525, occ=0.000
+    spin: 0, kpt: [+0.500, +0.500, +0.000], weight: 0.094, band: 4, eig: 5.128, occ: 0.000
+
+TIP: Call set_fermie_to_vbm() to set the Fermi level to the VBM if this is a non-magnetic semiconductor
 
 
 =============================== QP direct gaps ===============================
 QP_dirgap: 3.110 (eV) for K-point: [+0.000, +0.000, +0.000] $\Gamma$, spin: 0
 
 
-============== QP results for each k-point and spin (All in eV) ==============
+============== QP results for each k-point and spin (all in eV) ==============
 K-point: [+0.000, +0.000, +0.000] $\Gamma$, spin: 0
-   band     e0    qpe  qpe_diago   vxcme  sigxme  sigcmee0  vUme   ze0
-3     3  5.967  5.835      5.796 -11.268 -13.253     1.814   0.0  0.77
-4     4  8.472  8.955      9.099 -10.056  -5.573    -3.856   0.0  0.77
+   band     e0    qpe  qpe_diago   vxcme  sigxme  sigcmee0  vUme    ze0
+1     1  4.418  3.975      3.840 -11.332 -13.262     1.352   0.0  0.766
+2     2  4.418  3.975      3.840 -11.332 -13.262     1.352   0.0  0.766
+3     3  4.418  3.975      3.840 -11.332 -13.262     1.352   0.0  0.766
+4     4  6.961  7.085      7.123 -10.028  -5.550    -4.316   0.0  0.766
+5     5  6.961  7.085      7.123 -10.028  -5.550    -4.316   0.0  0.766
+6     6  6.961  7.085      7.123 -10.028  -5.550    -4.316   0.0  0.766
 ```
 
 For further details about the SIGRES.nc file and the AbiPy API see the |SigresFileNb|.
@@ -585,25 +591,25 @@ $ abicomp.py sigres tgw1_3o_*_SIGRES.nc -e -sns
 
 Output of robot.get_dataframe():
                        nsppol     qpgap  nspinor  nspden  nband  nkpt  \
-tgw1_3o_DS1_SIGRES.nc       1  3.114257        1       1     50     1
-tgw1_3o_DS2_SIGRES.nc       1  3.116411        1       1    100     1
-tgw1_3o_DS3_SIGRES.nc       1  3.116962        1       1    150     1
-tgw1_3o_DS4_SIGRES.nc       1  3.117476        1       1    200     1
-tgw1_3o_DS5_SIGRES.nc       1  3.117396        1       1    250     1
+tgw1_3o_DS1_SIGRES.nc       1  3.221130        1       1     50     3   
+tgw1_3o_DS2_SIGRES.nc       1  3.226755        1       1    100     3   
+tgw1_3o_DS3_SIGRES.nc       1  3.229167        1       1    150     3   
+tgw1_3o_DS4_SIGRES.nc       1  3.229755        1       1    200     3   
+tgw1_3o_DS5_SIGRES.nc       1  3.229636        1       1    250     3   
 
-                        ecutwfn   ecuteps  ecutsigx  scr_nband  sigma_nband  \
-tgw1_3o_DS1_SIGRES.nc  7.563851  5.105599  7.563851         25           50
-tgw1_3o_DS2_SIGRES.nc  7.563851  5.105599  7.563851         25          100
-tgw1_3o_DS3_SIGRES.nc  7.563851  5.105599  7.563851         25          150
-tgw1_3o_DS4_SIGRES.nc  7.563851  5.105599  7.563851         25          200
-tgw1_3o_DS5_SIGRES.nc  7.563851  5.105599  7.563851         25          250
+                       ecutwfn   ecuteps  ecutsigx  scr_nband  sigma_nband  \
+tgw1_3o_DS1_SIGRES.nc      8.0  5.062893       8.0         60           50   
+tgw1_3o_DS2_SIGRES.nc      8.0  5.062893       8.0         60          100   
+tgw1_3o_DS3_SIGRES.nc      8.0  5.062893       8.0         60          150   
+tgw1_3o_DS4_SIGRES.nc      8.0  5.062893       8.0         60          200   
+tgw1_3o_DS5_SIGRES.nc      8.0  5.062893       8.0         60          250   
 
-                       gwcalctyp  scissor_ene
-tgw1_3o_DS1_SIGRES.nc          0          0.0
-tgw1_3o_DS2_SIGRES.nc          0          0.0
-tgw1_3o_DS3_SIGRES.nc          0          0.0
-tgw1_3o_DS4_SIGRES.nc          0          0.0
-tgw1_3o_DS5_SIGRES.nc          0          0.0
+                       gwcalctyp  scissor_ene  
+tgw1_3o_DS1_SIGRES.nc          0          0.0  
+tgw1_3o_DS2_SIGRES.nc          0          0.0  
+tgw1_3o_DS3_SIGRES.nc          0          0.0  
+tgw1_3o_DS4_SIGRES.nc          0          0.0  
+tgw1_3o_DS5_SIGRES.nc          0          0.0  
 ```
 
 ![](gw1_assets/abicomp_sigres_tgw1_3o.png)
