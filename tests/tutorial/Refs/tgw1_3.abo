@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 14 Dec 2020.
-- ( at 11h35 )
+- ( at 14h13 )
   
 - input  file    -> tgw1_3.abi
 - output file    -> tgw1_3.abo
@@ -26,15 +26,15 @@
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =          50        mffmem =           1         mkmem =           3
        mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.609 Mbytes of memory.
+P This job should need less than                       4.004 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.693 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -43,15 +43,15 @@ _ WF disk file :      0.693 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =         100        mffmem =           1         mkmem =           3
        mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       4.502 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -60,15 +60,15 @@ _ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =         150        mffmem =           1         mkmem =           3
        mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       5.511 Mbytes of memory.
+P This job should need less than                       5.712 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.076 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -77,15 +77,15 @@ _ WF disk file :      2.076 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =         200        mffmem =           1         mkmem =           3
        mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       6.633 Mbytes of memory.
+P This job should need less than                       6.835 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.767 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -94,15 +94,15 @@ _ WF disk file :      2.767 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =         250        mffmem =           1         mkmem =           3
        mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       7.870 Mbytes of memory.
+P This job should need less than                       8.072 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.458 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -128,6 +128,7 @@ _ WF disk file :      3.458 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
            getscr           3
            getwfk           2
            istwfk        1    1    1
+              ixc          11
            jdtset        1    2    3    4    5
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -369,9 +370,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -387,25 +388,22 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/bruneval/devel/abinit//tests//Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/bruneval/devel/abinit//tests//Psps_for_tests/PseudosTM_pwteter/14si.pspnc
--  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
-- 14.00000   4.00000    940714                znucl, zion, pspdat
-    1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
-    0   5.907  14.692    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    1   2.617   4.181    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
-  pspatm : epsatm=    1.43386982
+- pspini: atom type   1  psp file is /home/bruneval/devel/abinit/tests//Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/bruneval/devel/abinit/tests//Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
+- Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
+- 14.00000   4.00000    170510                znucl, zion, pspdat
+    8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    5.99000000000000    4.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+     nproj     2     2     2
+     extension_switch     1
+  pspatm : epsatm=    9.34321699
          --- l  ekb(1:nproj) -->
-             0    3.287949
-             1    1.849886
+             0    5.168965    0.829883
+             1    2.571282    0.578307
+             2   -2.427311   -0.488097
  pspatm: atomic psp has been read  and splines computed
 
-   2.29419171E+01                                ecore*ucvol(ha*bohr**3)
+   1.49491472E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
@@ -484,16 +482,16 @@ iteration_state: {dtset: 1, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.443
-QP_gap     :    3.221
-Delta_QP_KS:    0.778
+QP_gap     :    3.143
+Delta_QP_KS:    0.700
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   4.665 -11.315 -13.527   1.904   0.785  -0.273 -11.557  -0.242   4.423
-        3   4.665 -11.315 -13.527   1.904   0.785  -0.273 -11.557  -0.242   4.423
-        4   4.665 -11.315 -13.527   1.904   0.785  -0.273 -11.557  -0.242   4.423
-        5   7.108  -9.965  -4.945  -4.344   0.793  -0.261  -9.429   0.536   7.644
-        6   7.108  -9.965  -4.945  -4.344   0.793  -0.261  -9.429   0.536   7.644
-        7   7.108  -9.965  -4.945  -4.344   0.793  -0.261  -9.429   0.536   7.644
+        2   4.665 -11.412 -13.527   1.904   0.785  -0.273 -11.578  -0.165   4.500
+        3   4.665 -11.412 -13.527   1.904   0.785  -0.273 -11.578  -0.165   4.500
+        4   4.665 -11.412 -13.527   1.904   0.785  -0.273 -11.578  -0.165   4.500
+        5   7.108  -9.962  -4.945  -4.344   0.793  -0.261  -9.428   0.534   7.643
+        6   7.108  -9.962  -4.945  -4.344   0.793  -0.261  -9.428   0.534   7.643
+        7   7.108  -9.962  -4.945  -4.344   0.793  -0.261  -9.428   0.534   7.643
 ...
 
 
@@ -515,9 +513,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -609,16 +607,16 @@ iteration_state: {dtset: 2, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.443
-QP_gap     :    3.227
-Delta_QP_KS:    0.784
+QP_gap     :    3.149
+Delta_QP_KS:    0.705
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   4.665 -11.315 -13.527   1.768   0.784  -0.275 -11.663  -0.348   4.317
-        3   4.665 -11.315 -13.527   1.768   0.784  -0.275 -11.663  -0.348   4.317
-        4   4.665 -11.315 -13.527   1.768   0.784  -0.275 -11.663  -0.348   4.317
-        5   7.108  -9.965  -4.945  -4.470   0.792  -0.263  -9.529   0.436   7.544
-        6   7.108  -9.965  -4.945  -4.470   0.792  -0.263  -9.529   0.436   7.544
-        7   7.108  -9.965  -4.945  -4.470   0.792  -0.263  -9.529   0.436   7.544
+        2   4.665 -11.412 -13.527   1.768   0.784  -0.275 -11.684  -0.271   4.394
+        3   4.665 -11.412 -13.527   1.768   0.784  -0.275 -11.684  -0.271   4.394
+        4   4.665 -11.412 -13.527   1.768   0.784  -0.275 -11.684  -0.271   4.394
+        5   7.108  -9.962  -4.945  -4.470   0.792  -0.263  -9.528   0.434   7.542
+        6   7.108  -9.962  -4.945  -4.470   0.792  -0.263  -9.528   0.434   7.542
+        7   7.108  -9.962  -4.945  -4.470   0.792  -0.263  -9.528   0.434   7.542
 ...
 
 
@@ -640,9 +638,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -734,16 +732,16 @@ iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.443
-QP_gap     :    3.229
-Delta_QP_KS:    0.786
+QP_gap     :    3.151
+Delta_QP_KS:    0.708
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   4.665 -11.315 -13.527   1.741   0.784  -0.275 -11.684  -0.369   4.296
-        3   4.665 -11.315 -13.527   1.741   0.784  -0.275 -11.684  -0.369   4.296
-        4   4.665 -11.315 -13.527   1.741   0.784  -0.275 -11.684  -0.369   4.296
-        5   7.108  -9.965  -4.945  -4.494   0.792  -0.263  -9.548   0.417   7.525
-        6   7.108  -9.965  -4.945  -4.494   0.792  -0.263  -9.548   0.417   7.525
-        7   7.108  -9.965  -4.945  -4.494   0.792  -0.263  -9.548   0.417   7.525
+        2   4.665 -11.412 -13.527   1.741   0.784  -0.275 -11.705  -0.293   4.372
+        3   4.665 -11.412 -13.527   1.741   0.784  -0.275 -11.705  -0.293   4.372
+        4   4.665 -11.412 -13.527   1.741   0.784  -0.275 -11.705  -0.293   4.372
+        5   7.108  -9.962  -4.945  -4.494   0.792  -0.263  -9.547   0.415   7.523
+        6   7.108  -9.962  -4.945  -4.494   0.792  -0.263  -9.547   0.415   7.523
+        7   7.108  -9.962  -4.945  -4.494   0.792  -0.263  -9.547   0.415   7.523
 ...
 
 
@@ -765,9 +763,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -859,16 +857,16 @@ iteration_state: {dtset: 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.443
-QP_gap     :    3.230
-Delta_QP_KS:    0.787
+QP_gap     :    3.152
+Delta_QP_KS:    0.708
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   4.665 -11.315 -13.527   1.733   0.784  -0.275 -11.690  -0.375   4.290
-        3   4.665 -11.315 -13.527   1.733   0.784  -0.275 -11.690  -0.375   4.290
-        4   4.665 -11.315 -13.527   1.733   0.784  -0.275 -11.690  -0.375   4.290
-        5   7.108  -9.965  -4.945  -4.500   0.792  -0.263  -9.553   0.412   7.520
-        6   7.108  -9.965  -4.945  -4.500   0.792  -0.263  -9.553   0.412   7.520
-        7   7.108  -9.965  -4.945  -4.500   0.792  -0.263  -9.553   0.412   7.520
+        2   4.665 -11.412 -13.527   1.733   0.784  -0.275 -11.711  -0.299   4.366
+        3   4.665 -11.412 -13.527   1.733   0.784  -0.275 -11.711  -0.299   4.366
+        4   4.665 -11.412 -13.527   1.733   0.784  -0.275 -11.711  -0.299   4.366
+        5   7.108  -9.962  -4.945  -4.500   0.792  -0.263  -9.553   0.410   7.518
+        6   7.108  -9.962  -4.945  -4.500   0.792  -0.263  -9.553   0.410   7.518
+        7   7.108  -9.962  -4.945  -4.500   0.792  -0.263  -9.553   0.410   7.518
 ...
 
 
@@ -890,9 +888,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -984,16 +982,16 @@ iteration_state: {dtset: 5, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.443
-QP_gap     :    3.230
-Delta_QP_KS:    0.786
+QP_gap     :    3.151
+Delta_QP_KS:    0.708
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   4.665 -11.315 -13.527   1.731   0.784  -0.275 -11.692  -0.376   4.289
-        3   4.665 -11.315 -13.527   1.731   0.784  -0.275 -11.692  -0.376   4.289
-        4   4.665 -11.315 -13.527   1.731   0.784  -0.275 -11.692  -0.376   4.289
-        5   7.108  -9.965  -4.945  -4.502   0.792  -0.263  -9.555   0.410   7.518
-        6   7.108  -9.965  -4.945  -4.502   0.792  -0.263  -9.555   0.410   7.518
-        7   7.108  -9.965  -4.945  -4.502   0.792  -0.263  -9.555   0.410   7.518
+        2   4.665 -11.412 -13.527   1.731   0.784  -0.275 -11.713  -0.300   4.365
+        3   4.665 -11.412 -13.527   1.731   0.784  -0.275 -11.713  -0.300   4.365
+        4   4.665 -11.412 -13.527   1.731   0.784  -0.275 -11.713  -0.300   4.365
+        5   7.108  -9.962  -4.945  -4.502   0.792  -0.263  -9.554   0.408   7.516
+        6   7.108  -9.962  -4.945  -4.502   0.792  -0.263  -9.554   0.408   7.516
+        7   7.108  -9.962  -4.945  -4.502   0.792  -0.263  -9.554   0.408   7.516
 ...
 
 
@@ -1026,6 +1024,7 @@ data: !SigmaeeData |
            getscr           3
            getwfk           2
            istwfk        1    1    1
+              ixc          11
            jdtset        1    2    3    4    5
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -1286,7 +1285,12 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] ABINIT: Overview, and focus on selected capabilities
+- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [3] ABINIT: Overview, and focus on selected capabilities
 - J. Chem. Phys. 152, 124102 (2020).
 - A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
@@ -1303,7 +1307,7 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [3] Recent developments in the ABINIT software package.
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1323,7 +1327,7 @@ P           mkmem           3
 -
 - And optionally:
 -
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1336,10 +1340,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         21.6  wall=         21.6
+- Proc.   0 individual time (sec): cpu=         21.4  wall=         21.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.6  wall=         21.6
++Overall time at end (sec) : cpu=         21.4  wall=         21.4

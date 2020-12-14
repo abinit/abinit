@@ -560,28 +560,30 @@ mentioned in the fragments of output:
 
 Gathering the GW energies for each number of bands, one gets:
 
+```
      number of bands                                   50
-        4   4.665 -11.315 -13.527   1.904   0.785  -0.273 -11.557  -0.242   4.423
-        5   7.108  -9.965  -4.945  -4.344   0.793  -0.261  -9.429   0.536   7.644
+        4   4.665 -11.412 -13.527   1.904   0.785  -0.273 -11.578  -0.165   4.500
+        5   7.108  -9.962  -4.945  -4.344   0.793  -0.261  -9.428   0.534   7.643
 
      number of bands                                  100
-        4   4.665 -11.315 -13.527   1.768   0.784  -0.275 -11.663  -0.348   4.317
-        5   7.108  -9.965  -4.945  -4.470   0.792  -0.263  -9.529   0.436   7.544
+        4   4.665 -11.412 -13.527   1.768   0.784  -0.275 -11.684  -0.271   4.394
+        5   7.108  -9.962  -4.945  -4.470   0.792  -0.263  -9.528   0.434   7.542
 
      number of bands                                  150
-        4   4.665 -11.315 -13.527   1.741   0.784  -0.275 -11.684  -0.369   4.296
-        5   7.108  -9.965  -4.945  -4.494   0.792  -0.263  -9.548   0.417   7.525
+        4   4.665 -11.412 -13.527   1.741   0.784  -0.275 -11.705  -0.293   4.372
+        5   7.108  -9.962  -4.945  -4.494   0.792  -0.263  -9.547   0.415   7.523
 
      number of bands                                  200
-        4   4.665 -11.315 -13.527   1.733   0.784  -0.275 -11.690  -0.375   4.290
-        5   7.108  -9.965  -4.945  -4.500   0.792  -0.263  -9.553   0.412   7.520
+        4   4.665 -11.412 -13.527   1.733   0.784  -0.275 -11.711  -0.299   4.366
+        5   7.108  -9.962  -4.945  -4.500   0.792  -0.263  -9.553   0.410   7.518
 
      number of bands                                  250
-        4   4.665 -11.315 -13.527   1.731   0.784  -0.275 -11.692  -0.376   4.289
-        5   7.108  -9.965  -4.945  -4.502   0.792  -0.263  -9.555   0.410   7.518
+        4   4.665 -11.412 -13.527   1.731   0.784  -0.275 -11.713  -0.300   4.365
+        5   7.108  -9.962  -4.945  -4.502   0.792  -0.263  -9.554   0.408   7.516
+```
 
 
-So that [[nband]] = 100 can be considered converged within 0.02 eV, which is fair to compared with experiment.
+So that [[nband]] = 100 can be considered converged within 30 meV, which is fair to compare with experimental accuracy.
 
 With |AbiPy|, one can use the |abicomp| script provides to compare multiple SIGRES.nc files
 Use the `--expose` option to visualize of the QP gaps extracted from the different netcdf files:
@@ -591,11 +593,11 @@ $ abicomp.py sigres tgw1_3o_*_SIGRES.nc -e -sns
 
 Output of robot.get_dataframe():
                        nsppol     qpgap  nspinor  nspden  nband  nkpt  \
-tgw1_3o_DS1_SIGRES.nc       1  3.221130        1       1     50     3   
-tgw1_3o_DS2_SIGRES.nc       1  3.226755        1       1    100     3   
-tgw1_3o_DS3_SIGRES.nc       1  3.229167        1       1    150     3   
-tgw1_3o_DS4_SIGRES.nc       1  3.229755        1       1    200     3   
-tgw1_3o_DS5_SIGRES.nc       1  3.229636        1       1    250     3   
+tgw1_3o_DS1_SIGRES.nc       1  3.142871        1       1     50     3   
+tgw1_3o_DS2_SIGRES.nc       1  3.148588        1       1    100     3   
+tgw1_3o_DS3_SIGRES.nc       1  3.151012        1       1    150     3   
+tgw1_3o_DS4_SIGRES.nc       1  3.151603        1       1    200     3   
+tgw1_3o_DS5_SIGRES.nc       1  3.151485        1       1    250     3   
 
                        ecutwfn   ecuteps  ecutsigx  scr_nband  sigma_nband  \
 tgw1_3o_DS1_SIGRES.nc      8.0  5.062893       8.0         60           50   
@@ -688,39 +690,24 @@ computation of the screening is mentioned in the fragments of output:
 ```
 
 
-Gathering the macroscopic dielectric constant and GW energies for each number
-of bands, one gets:
+Gathering the GW energies for each number of bands, one gets:
 
 ```
   number of bands                                    25
-  dielectric constant =  49.0127
-  dielectric constant without local fields =  56.7721
-        4   4.665 -11.315 -13.527   1.968   0.786  -0.273 -11.507  -0.191   4.474
-        5   7.108  -9.965  -4.945  -4.279   0.796  -0.257  -9.375   0.589   7.698
-
+        4   4.665 -11.412 -13.527   1.968   0.786  -0.273 -11.527  -0.115   4.550
+        5   7.108  -9.962  -4.945  -4.279   0.796  -0.257  -9.375   0.587   7.696
   number of bands                                    50
-  dielectric constant =  49.3138
-  dielectric constant without local fields =  56.7752
-        4   4.665 -11.315 -13.527   1.798   0.784  -0.275 -11.640  -0.325   4.341
-        5   7.108  -9.965  -4.945  -4.446   0.788  -0.268  -9.512   0.453   7.561
-
+        4   4.665 -11.412 -13.527   1.798   0.784  -0.275 -11.661  -0.248   4.417
+        5   7.108  -9.962  -4.945  -4.446   0.789  -0.268  -9.512   0.451   7.559
   number of bands                                   100
-  dielectric constant =  49.3931
-  dielectric constant without local fields =  56.7760
-        4   4.665 -11.315 -13.527   1.708   0.784  -0.276 -11.710  -0.395   4.270
-        5   7.108  -9.965  -4.945  -4.523   0.791  -0.265  -9.572   0.393   7.501
-
+        4   4.665 -11.412 -13.527   1.708   0.784  -0.276 -11.731  -0.318   4.347
+        5   7.108  -9.962  -4.945  -4.523   0.791  -0.264  -9.571   0.391   7.499
   number of bands                                   150
-  dielectric constant =  49.4047
-  dielectric constant without local fields =  56.7762
-        4   4.665 -11.315 -13.527   1.685   0.783  -0.277 -11.728  -0.413   4.253
-        5   7.108  -9.965  -4.945  -4.541   0.790  -0.265  -9.587   0.378   7.487
-
+        4   4.665 -11.412 -13.527   1.685   0.783  -0.276 -11.749  -0.336   4.329
+        5   7.108  -9.962  -4.945  -4.542   0.790  -0.265  -9.586   0.376   7.485
   number of bands                                   200
-  dielectric constant =  49.4071
-  dielectric constant without local fields =  56.7762
-        4   4.665 -11.315 -13.527   1.678   0.783  -0.277 -11.733  -0.418   4.248
-        5   7.108  -9.965  -4.945  -4.549   0.790  -0.265  -9.592   0.372   7.481
+        4   4.665 -11.412 -13.527   1.678   0.783  -0.277 -11.754  -0.341   4.324
+        5   7.108  -9.962  -4.945  -4.549   0.790  -0.265  -9.592   0.370   7.479
 
 ```
 
@@ -759,45 +746,28 @@ computation of the screening is mentioned in the fragments of output:
      dimension of the eps^-1 matrix                     59
 ```
 
-Gathering the macroscopic dielectric constant and GW energies for each number
-of bands, one gets:
+Gathering the GW energies for each number of bands, one gets:
 
 ```
      dimension of the eps^-1 matrix                     59
-  dielectric constant =  49.4882
-  dielectric constant without local fields =  56.7760
-        4   4.665 -11.315 -13.527   1.899   0.786  -0.272 -11.561  -0.246   4.419
-        5   7.108  -9.965  -4.945  -4.462   0.791  -0.264  -9.523   0.442   7.550
-
+        4   4.665 -11.412 -13.527   1.899   0.786  -0.272 -11.582  -0.169   4.496
+        5   7.108  -9.962  -4.945  -4.462   0.791  -0.264  -9.523   0.440   7.548
      dimension of the eps^-1 matrix                    113
-  dielectric constant =  49.3997
-  dielectric constant without local fields =  56.7760
-        4   4.665 -11.315 -13.527   1.755   0.784  -0.275 -11.673  -0.358   4.307
-        5   7.108  -9.965  -4.945  -4.512   0.791  -0.264  -9.563   0.401   7.510
-
+        4   4.665 -11.412 -13.527   1.755   0.784  -0.275 -11.694  -0.282   4.383
+        5   7.108  -9.962  -4.945  -4.513   0.791  -0.264  -9.563   0.400   7.508
      dimension of the eps^-1 matrix                    137
-  dielectric constant =  49.3984
-  dielectric constant without local fields =  56.7760
-        4   4.665 -11.315 -13.527   1.728   0.784  -0.276 -11.694  -0.379   4.286
-        5   7.108  -9.965  -4.945  -4.518   0.791  -0.264  -9.568   0.397   7.505
-
+        4   4.665 -11.412 -13.527   1.728   0.784  -0.276 -11.715  -0.303   4.362
+        5   7.108  -9.962  -4.945  -4.518   0.791  -0.264  -9.567   0.395   7.504
      dimension of the eps^-1 matrix                    169
-  dielectric constant =  49.3931
-  dielectric constant without local fields =  56.7760
-        4   4.665 -11.315 -13.527   1.708   0.784  -0.276 -11.710  -0.395   4.270
-        5   7.108  -9.965  -4.945  -4.523   0.791  -0.265  -9.572   0.393   7.501
-
+        4   4.665 -11.412 -13.527   1.708   0.784  -0.276 -11.731  -0.318   4.347
+        5   7.108  -9.962  -4.945  -4.523   0.791  -0.264  -9.571   0.391   7.499
      dimension of the eps^-1 matrix                    259
-  dielectric constant =  49.3897
-  dielectric constant without local fields =  56.7760
-        4   4.665 -11.315 -13.527   1.696   0.783  -0.276 -11.719  -0.404   4.261
-        5   7.108  -9.965  -4.945  -4.527   0.791  -0.265  -9.575   0.390   7.498
-
+        4   4.665 -11.412 -13.527   1.696   0.784  -0.276 -11.740  -0.328   4.338
+        5   7.108  -9.962  -4.945  -4.527   0.791  -0.264  -9.574   0.388   7.496
      dimension of the eps^-1 matrix                    283
-  dielectric constant =  49.3884
-  dielectric constant without local fields =  56.7760
-        4   4.665 -11.315 -13.527   1.695   0.783  -0.276 -11.720  -0.405   4.260
-        5   7.108  -9.965  -4.945  -4.527   0.791  -0.265  -9.575   0.390   7.498
+        4   4.665 -11.412 -13.527   1.695   0.784  -0.276 -11.741  -0.329   4.337
+        5   7.108  -9.962  -4.945  -4.527   0.791  -0.264  -9.575   0.388   7.496
+
 ```
 
 
@@ -871,23 +841,23 @@ You should obtain the following results:
 iteration_state: {dtset: 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
-KS_gap     :    2.524
-QP_gap     :    3.181
-Delta_QP_KS:    0.657
+KS_gap     :    2.564
+QP_gap     :    3.196
+Delta_QP_KS:    0.632
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.788 -11.219 -12.705   0.775   0.763  -0.310 -11.762  -0.543   5.246
-        3   5.788 -11.219 -12.705   0.775   0.763  -0.310 -11.762  -0.543   5.246
-        4   5.788 -11.219 -12.705   0.775   0.763  -0.310 -11.762  -0.543   5.246
-        5   8.312 -10.034  -5.843  -4.041   0.763  -0.310  -9.920   0.115   8.427
-        6   8.312 -10.034  -5.843  -4.041   0.763  -0.310  -9.920   0.115   8.427
-        7   8.312 -10.034  -5.843  -4.041   0.763  -0.310  -9.920   0.115   8.427
+        2   4.369 -11.316 -12.769   0.817   0.765  -0.308 -11.803  -0.487   3.882
+        3   4.369 -11.316 -12.769   0.817   0.765  -0.308 -11.803  -0.487   3.882
+        4   4.369 -11.316 -12.769   0.817   0.765  -0.308 -11.803  -0.487   3.882
+        5   6.933 -10.039  -5.840  -4.010   0.765  -0.307  -9.894   0.144   7.078
+        6   6.933 -10.039  -5.840  -4.010   0.765  -0.307  -9.894   0.144   7.078
+        7   6.933 -10.039  -5.840  -4.010   0.765  -0.307  -9.894   0.144   7.078
 ...
 ```
 
 
-So that the DFT energy gap in $\Gamma$ is about 2.52 eV, while the GW correction is
-about 0.66 eV, so that the GW band gap found is 3.18 eV.
+So that the DFT energy gap in $\Gamma$ is about 2.56 eV, while the GW correction is
+about 0.63 eV, so that the GW band gap found is 3.20 eV.
 
 One can compare now what have been obtained to what one can get from the literature.
 
@@ -905,7 +875,7 @@ One can compare now what have been obtained to what one can get from the literat
      GW          3.30 eV   R.W. Godby, M. Schlueter, L.J. Sham, PRB 37, 10159 (1988)
      GW  (FLAPW) 3.30 eV   N. Hamada, M. Hwang and A.J. Freeman, PRB 41, 3620 (1990)
      GW  (FLAPW) 3.12 eV   W. Ku and A.G. Eguiluz, PRL 89, 126401 (2002)
-     GW          3.18 eV   present work
+     GW          3.20 eV   present work
 
 The values are spread over an interval of 0.2 eV. They depend on the details
 of the calculations. In the case of pseudopotential calculations, they depend

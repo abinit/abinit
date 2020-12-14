@@ -58,7 +58,7 @@ istwfk  *1         # This is mandatory in all the GW steps.
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/14si.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
