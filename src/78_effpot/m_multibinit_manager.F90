@@ -93,7 +93,8 @@ module m_multibinit_manager
   ! Multibinit manager
   !-------------------------------------------------------------------!
   type, public :: mb_manager_t
-     character(len=fnlen) :: filenames(17)
+    
+     character(len=fnlen) :: filenames(18)
      ! pointer to parameters. it is a pointer because it is initialized outside manager
      type(multibinit_dtset_type), pointer :: params=>null() 
      type(supercell_maker_t) :: sc_maker  ! supercell maker
@@ -157,15 +158,14 @@ contains
   !-------------------------------------------------------------------!
   ! initialize
   !-------------------------------------------------------------------!
-  subroutine initialize(self, filenames,params)
+  subroutine initialize(self,  filenames,params)
     class(mb_manager_t), intent(inout) :: self
-    character(len=fnlen), intent(inout) :: filenames(17)
+    character(len=fnlen), intent(inout) :: filenames(18)
     type(multibinit_dtset_type), target, optional, intent(in) :: params
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     integer :: i
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
     self%filenames(:)=filenames(:)
     call xmpi_bcast(self%filenames, master, comm, ierr)
 
@@ -277,17 +277,17 @@ contains
     !To automate a maximum calculation, multibinit reads the number of atoms
     !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
     !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
-    if(iam_master) then
-       write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-            & '-',trim(self%filenames(3)),ch10,' to initialize the multibinit input'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-    end if
 
 
     !FIXME: This should not be here.
     ! It is only for lattice potential
     if(.False.) then
+     if(iam_master) then
+       write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
+            & '-',trim(self%filenames(3)),ch10,' to initialize the multibinit input'
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
+     end if
        call effective_potential_file_getDimSystem(self%filenames(3),natom,ntypat,nph1l,nrpt)
     else
        natom=0
@@ -466,7 +466,7 @@ contains
     !fname=trim(self%filenames(2))//"_spinhist_input.nc"
         call self%spin_mover%initialize(params=self%params,&
             & supercell=self%supercell, rng=self%rng, &
-            & restart_hist_fname=trim(self%params%spin_init_hist_fname))
+            & restart_hist_fname=self%params%spin_init_hist_fname)
    end subroutine set_spin_mover
 
 
@@ -668,7 +668,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine run_all(self, filenames, params)
     class(mb_manager_t), intent(inout) :: self
-    character(len=fnlen), intent(inout) :: filenames(17)
+    character(len=fnlen), intent(inout) :: filenames(18)
     type(multibinit_dtset_type), optional, intent(in) :: params
     call self%initialize(filenames, params=params)
     call self%run()

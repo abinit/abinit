@@ -137,6 +137,7 @@ module m_multibinit_dataset
   integer :: latt_temperature_nstep
 
 
+ ! integer :: random_seed
 
   ! parameters for spin
  ! integer :: spin_calc_traj_obs
@@ -283,6 +284,8 @@ module m_multibinit_dataset
 !  character(len=fnlen) :: lwf_pot_fname
   character(len=fnlen) :: slc_pot_fname
 
+  character(len=fnlen) :: outdata_prefix
+
 
  end type multibinit_dtset_type
 !!***
@@ -421,25 +424,24 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%latt_temperature_nstep=0
  multibinit_dtset%latt_var_temperature=0
 
- multibinit_dtset%latt_lwf_anharmonic = 0
 
 
-! multibinit_dtset%latt_init_hist_fname=""
- multibinit_dtset%spin_init_hist_fname=""
+ multibinit_dtset%latt_init_hist_fname=""
  multibinit_dtset%latt_pot_fname=""
- multibinit_dtset%spin_pot_fname=""
- multibinit_dtset%lwf_pot_fname=""
- multibinit_dtset%slc_pot_fname=""
- 
+ !multibinit_dtset%lwf_pot_fname=""
 
 
- 
+! multibinit_dtset%random_seed=-1
+
  !multibinit_dtset%spin_calc_traj_obs=0
  multibinit_dtset%spin_calc_thermo_obs=1
  !multibinit_dtset%spin_calc_correlation_obs=0
  multibinit_dtset%spin_dipdip=0
+ multibinit_dtset%spin_dt=100
  multibinit_dtset%spin_dynamics=0
+ multibinit_dtset%spin_init_hist_fname=""
  multibinit_dtset%spin_init_state=1
+
  multibinit_dtset%spin_ntime_pre=0
  multibinit_dtset%spin_ntime=10000
  multibinit_dtset%spin_nctime=100
@@ -447,7 +449,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 !multibinit_dtset%spin_n1l=1
 !multibinit_dtset%spin_n2l=0
 
- multibinit_dtset%spin_dt=100
+ multibinit_dtset%spin_pot_fname=""
 
  multibinit_dtset%spin_damping=-1.0
  multibinit_dtset%spin_sia_add=0
@@ -462,7 +464,11 @@ multibinit_dtset%spin_temperature_nstep= 0
 multibinit_dtset%spin_var_temperature=0 
 multibinit_dtset%spin_write_traj=1 
 
+multibinit_dtset%slc_pot_fname=""
 multibinit_dtset%slc_coupling=0
+
+
+multibinit_dtset%outdata_prefix=""
 
 !=======================================================================
 !Arrays
@@ -1125,9 +1131,10 @@ multibinit_dtset%latt_temperature_start=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_pot_fname',tread,'KEY',&
       & key_value=multibinit_dtset%slc_pot_fname)
 
-
- 
-
+ multibinit_dtset%outdata_prefix=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'outdata_prefix',tread,'KEY',&
+      & key_value=multibinit_dtset%outdata_prefix)
+ if(.not. tread==1) multibinit_dtset%latt_init_hist_fname="multibinit"
 
 !N
  multibinit_dtset%natifc=natom
@@ -1402,6 +1409,12 @@ multibinit_dtset%latt_temperature_start=0.0
 &   'Action: correct rifcsph in your input file.'
    MSG_ERROR(message)
  end if
+
+
+! R
+!  multibinit_dtset%random_seed=-1
+!  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_seed',tread,'INT')
+!  if(tread==1) multibinit_dtset%random_seed=intarr(1)
 
 !S
 

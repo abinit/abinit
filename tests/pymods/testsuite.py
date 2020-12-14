@@ -1968,7 +1968,7 @@ pp_dirpath $ABI_PSPDIR
             # Run the code (run_etime is the wall time spent to execute the test)
             # FIXME: Add support for more executables
             use_files_file = self.use_files_file
-            if self.executable not in ("abinit", "anaddb"):
+            if self.executable not in ("abinit", "anaddb", "multibinit"):
                 use_files_file = True
 
             if use_files_file:

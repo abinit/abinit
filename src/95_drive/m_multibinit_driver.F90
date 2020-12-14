@@ -117,7 +117,7 @@ contains
 !!
   !! SOURCE
   subroutine multibinit_main(filnam, dry_run)
-    character(len=fnlen), intent(inout) :: filnam(17)
+    character(len=fnlen), intent(inout) :: filnam(18)
     integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
     type(effective_potential_type) :: reference_effective_potential

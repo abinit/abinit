@@ -100,20 +100,6 @@ program multibinit
   ! Parse command line arguments.
   args = args_parser(); if (args%exit /= 0) goto 100
 
- ! nargs = command_argument_count()
- ! do iarg=1,nargs
- !    call get_command_argument(number=iarg, value=arg)
- !    if (arg == "-v" .or. arg == "--version") then
- !       write(std_out,"(a)") trim(abinit_version); goto 100
- !       goto 100
- !    else if (arg == "--unittest") then
- !       unittest=.True.
- !       call mb_test_main()
- !       goto 100
- !    else if(arg== "-F03") then
- !       use_f03=.True.
- !    endif
- ! end do
 
  ! Initialize memory profiling if activated at configure time.
  ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
@@ -136,7 +122,7 @@ program multibinit
   call wrtout(std_out,message,'COLL')
 
   !Initialise the code : write heading, and read names of files.
-  call init10(filnam,comm)
+  call init10(args%input_path, filnam,comm)
 
   !******************************************************************
 
@@ -169,6 +155,7 @@ program multibinit
        & ('=',ii=1,80),ch10
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
+
 
   !***************************************************************************************
   !***************************************************************************************

@@ -63,7 +63,7 @@ contains
 !!
   !! SOURCE
   subroutine multibinit_main2(filnam)
-    character(len=fnlen), intent(inout) :: filnam(17)
+    character(len=fnlen), intent(inout) :: filnam(18)
     type(mb_manager_t) :: manager
     call manager%run_all(filnam)
   end subroutine multibinit_main2
