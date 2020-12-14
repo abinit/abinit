@@ -9,7 +9,7 @@ and how to use the McMillan equation to estimate the superconducting critical te
 the isotropic Eliashberg formalism.
 We start by presenting the equations implemented in the code and their connection with the ABINIT input variables.
 Then we discuss how to run isotropic $T_c$-calculations and how to perform typical convergence studies
-using hexagonal $MgB_2$ as example
+using hexagonal $MgB_2$ as example.
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and vibrational properties in metals.
@@ -22,14 +22,6 @@ This lesson should take about 1.5 hour.
 
 Due to the interaction with electrons, (harmonic) phonons acquire a finite lifetime that is
 given by the imaginary part of the phonon-electron self-energy $\Pi_\qnu$.
-<!--
-Obviously, there's also another important contribution to the phonon lifetime originating from non-harmonic
-terms in the expansion of the Born-Oppenheimer energy surface around the equilibrium point.
-In the many-body language these non-harmonic leads to phonon-phonon scattering that can give a substantial
-contribution to the phonon linewidths.
-However, these non-harmonic terms will be ignored in the rest of the tutorial and we will be mainly focusing
-on the computation of the imaginary part of $\Pi$ in the harmonic approximation.
--->
 In the so-called double-delta approximation, the phonon linewidth $\gamma_{\qq\nu}$ due
 to the interaction of the ${\qq\nu}$ phonon with electrons is given by
 
@@ -45,7 +37,7 @@ For a given phonon wavevector $\qq$, the double delta restricts the BZ integrati
 transitions between $\kk$ and $\kq$ electron states on the Fermi surface (FS).
 Converging the double-delta integral therefore requires very dense $\kk$-meshes in order to have
 enough states around the FS.
-The convergence rate is indeed much slower that the one required by the electron DOS at $\ee_F$:
+The convergence rate is much slower that the one required by the electron DOS at $\ee_F$:
 
 $$
 g(\ee_F) = \sum_{n\kk} \delta(\ee_F - \ee_{n\kk})
@@ -53,12 +45,22 @@ $$
 
 in which a single Dirac delta is involved.
 
+!!! important
+
+  Obviously, there is also another important contribution to phonon lifetimes due to non-harmonic
+  terms in the expansion of the Born-Oppenheimer energy surface around the equilibrium point.
+  In the many-body language these non-harmonic leads to phonon-phonon scattering that can give a substantial
+  contribution to the phonon linewidths.
+  However, these non-harmonic terms will be ignored in the rest of the tutorial and we will be mainly focusing
+  on the computation of the imaginary part of $\Pi$ in the harmonic approximation.
+
+
 At the level of the implementation, the integration of the double delta can be performed either with the tetrahedron scheme
 or by replacing the Dirac delta with a Gaussian function of finite width.
 The integration algorithm is defined by the [[eph_intmeth]] input variable.
 In the case of Gaussian method, one can use a fixed broadening ([[eph_fsmear]] > 0)
 or an adaptive scheme ([[eph_fsmear]] < 0) in which the broadening is automatically computed from
-the electron group velocity [[cite:Li2015]].
+the electron group velocities [[cite:Li2015]].
 
 !!! important
 
@@ -87,8 +89,8 @@ the Fermi level that can be specified via [[eph_fsewin]].
 
 The code computes $\gamma_{\qq\nu}$ for each $\qq$-point in the IBZ associated to
 an arbitrary $\qq$-mesh specified by the user.
-By default, the code uses the [[ddb_ngqpt]] $\qq$-mesh corresponding to the DDB file (assumed to be equal to the one
-used to generate the DVDB file).
+By default, the EPH code uses the [[ddb_ngqpt]] $\qq$-mesh corresponding to the DDB file 
+(that is assumed to be equal to the one used to generate the DVDB file).
 In this case, all the DFPT scattering potentials are available and no interpolation in $qq$-space in required.
 To increase the $qq$-sampling, one simply specifies [[eph_ngqpt_fine]] in the input file.
 In this case, the code employs the Fourier interpolation to obtain the scattering potentials.
@@ -133,8 +135,8 @@ $$
 T_c = \dfrac{\ww_{log}}{1.2} \exp \Biggl [ \dfrac{-1.04 (1 + \lambda)}{\lambda ( 1 - 0.62 \mu^*) - \mu^*} \Biggr ]
 $$
 
-where $\mu^*$ is a semi-empirical variable that descrives the (screened) e-e interaction while
-$\ww_{\text{log}}$ is the *logarithmic* average of the phonon frequencies given by:
+where $\mu^*$ is a semi-empirical parameter that descrives the (screened) e-e interaction while
+$\ww_{\text{log}}$ is the *logarithmic* average of the phonon frequencies defined by:
 
 $$
 \ww_{\text{log}} = \exp \Biggl [ \dfrac{2}{\lambda} \int \dfrac{\alpha^2F(\ww)}{\ww}\log(\ww)\dd\ww \Biggr ]
@@ -142,7 +144,8 @@ $$
 
 !!! important
 
-    The code computes $\gamma_{\qq\nu}$ for all the $\qq$-points in the IBZ associated to a homogeneous mesh
+    The code computes $\gamma_{\qq\nu}$ for all the $\qq$-points in the IBZ associated 
+    to a homogeneous $\qq$-mesh
     as these quantities are then used to evalute integrals in $\qq$-space.
     [[ddb_ngqpt]] mesh that is the $\qq$-mesh used in the DFPT computations.
     In this case, the code does not performy any kind of interpolation in $\qq$-space.
@@ -190,9 +193,10 @@ to avoid numerical instabilities introduce by band crossings.
 ## Getting started
 
 In this tutorial, we prefer to focus on e-ph calculations and the associated convergence studies.
-For this reason, we rely on **pre-computed** DEN.nc, DDB and DFPT POT1.nc files to bypass the DFPT part.
+For this reason, we rely on **pre-computed** DEN.nc, DDB and DFPT potentials files 
+in order to bypass both the GS and the DFPT part.
 The DEN.nc file will be used to perform NSCF computations on arbitrarily dense $\kk$-meshes while the
-DFPT POT.nc files will be merged with the *mrgdv* utility to produce the DVDB database of scattering potentials.
+DFPT POT.nc files will be merged with the *mrgdv* utility to produce the DVDB database required by the EPH code.
 
 Note that these files **are not shipped** with the official ABINIT tarball as they are relatively large in size.
 In order to run the examples of this tutorial, you need to download these files from the github repository.
@@ -241,31 +245,31 @@ The input file of the GS run is also stored in the DEN.nc file and one can easil
     In this tutorial, we are trying to find some kind of compromise between accuracy and computational cost.
 -->
 
-To merge the POT1 files, execute the *mrgdv* tool using:
+To merge the DFPT potential files, execute the *mrgdv* tool using:
 
 ```sh
-mrgdv <
+mrgdv < teph4isotc_1.abi
 ```
 
-with the following input file that lists all the partial POT1 files already computed for you:
+with the following input file that lists all the partial DFPT POT files already computed:
 
-    XXX
+{% dialog tests/tutorespfn/Input/teph4isotc_1.abi %}
 
+<!--
 As mentioned in the [introduction page for the EPH code](eph_intro), the DVDB file is needed to reconstruct
 the scattering potentials in the full BZ for all the 3 x [[natom]] atomic perturbations.
 With this file, one can obtain $\Delta_\qnu V^\KS$ for all the $\qq$-points belonging to the initial 6x6x6 DFPT
 $\qq$-mesh or even a much denser $\qq$-sampling when the Fourier interpolation of the potentials is exploited.
 Still the computation of the e-ph matrix elements in the approach implemented in EPH requires the explicit
 knowledge of Bloch states at $\kk$ and $\kq$.
-This is the problem we will address in the next section.
+This is the problem we will try to address in the next section.
 
-<!--
 At this point, we have all the ingredients required to compute phonon linewidths and $T_c$.
-As mentioned in the introductions $\gamma_{\qq\nu}$ coverge slowly wrt to the $\kk$-sampling
+As mentioned in the introductions $\gamma_{\qq\nu}$ converge slowly wrt to the $\kk$-sampling
 so we need to monitor the convergence wrt the number of wavevectors for electrons.
 
 We will try to get an initial rough estimate by looking at the BZ sampling required to
-properly descrive quantities that are relatively easy to compute:
+properly describe quantities that are relatively easy to compute:
 
 1. The electronic DOS at the Fermi level
 2. The phonon DOS.
@@ -273,13 +277,13 @@ properly descrive quantities that are relatively easy to compute:
 The first test gives us an idea of the $\kk$-mesh whereas the second test gives us an idea
 of the $\qq$-mesh.
 
-Let's start from the electron DOS...
+Let's start from the electron DOS.
 -->
 
-### Battle plan
+### Defining the parameters for the convergence study.
 
 Our goal is to perform calculations of $\gamma_{\qq\nu}$ with different $\qq/\kk$-meshes to
-analyse the convergence behaviour of $\lambda$ and $\alpha^2F(\ww)$.
+analyze the convergence behaviour of $\lambda$ and $\alpha^2F(\ww)$.
 Remember that in the EPH code the $\qq$-mesh can be changed at will thanks to the Fourier interpolation
 of the dynamical matrix and of the DFPT potentials whereas the $\kk$-mesh must correspond
 to the one used to generate the input WKF file.
@@ -305,7 +309,6 @@ for four different Gamma-centered $\kk$-meshes: 12x12x12, 18x18x18, 24x24x24, an
 ## Electronic properties
 
 This is what is done in the XXX input file.
-
 
 Run the calculation with as it will take time using:
 

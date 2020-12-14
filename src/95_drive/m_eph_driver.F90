@@ -264,12 +264,12 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    ! Accept WFK file in Fortran or netcdf format.
    if (use_wfk .and. nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
-     ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk0_path, msg))
+     ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk0_path, ". Error:", msg))
    end if
    ! WFQ file
    if (use_wfq) then
      if (nctk_try_fort_or_ncfile(wfq_path, msg) /= 0) then
-       ABI_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path, msg))
+       ABI_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path, , ". Error:", msg))
      end if
    end if
  end if ! master

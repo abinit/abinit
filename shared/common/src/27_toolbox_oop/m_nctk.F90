@@ -507,7 +507,7 @@ integer function nctk_try_fort_or_ncfile(filename, errmsg, unit) result(ierr)
      filename = nctk_ncify(filename)
    end if
    if (.not. file_exists(filename)) then
-     ierr = 1; errmsg = 'Missing file: '//trim(filename)
+     ierr = 1; errmsg = 'Cannot find file: '//trim(filename)
    end if
  end if
 
