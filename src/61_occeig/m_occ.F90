@@ -158,7 +158,7 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
 ! smdFD (tt) = 1.0_dp / (exp(-tt/2.0_dp) + exp(tt/2.0_dp))**2
 !scalars
  integer,parameter :: prtdos1=1
- integer :: bantot,iband,iene,ikpt,index,index_tot,index_start,isppol, nene,nptsdiv2 ! CP added index_tot
+ integer :: iband,iene,ikpt,index,index_tot,index_start,isppol, nene,nptsdiv2 ! CP added index_tot, removed bantot
  real(dp) :: buffer,deltaene,dosdbletot,doshalftot,dostot, wk
  real(dp) :: enemax,enemin,enex,intdostot,limit,tsmearinv
  !real(dp) :: cpu, wall, gflops

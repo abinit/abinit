@@ -288,7 +288,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp) :: residm,tolwfr,tolwfr_save,toldfe_save,toldff_save,tolrff_save,tolvrs_save
  real(dp) :: ucvol, eig1_r, eig1_i
  real(dp) :: residm_mq !+/-q duplicates
- real(dp) :: fermih ! CP added; not very useful, but used for compatibility
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
  logical :: first_entry,found_eq_gkk,t_exist,paral_atom,write_1wfk,init_rhor1
  logical :: kramers_deg
