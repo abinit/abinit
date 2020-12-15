@@ -1,16 +1,31 @@
 #
 ndtset  1
+optdriver 7
+eph_task  1
 
-iscf -2
-getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
+getddb_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB"
+getwfk_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
+getdvdb_filepath "teph4isotc_1_DVDB"
 
-tolwfr 1e-14
+ddb_ngqpt 4 4 4
+#eph_ngqpt_fine 12 12 12
+dipdip 0         # No treatment of the dipole-dipole part. OK for metals
 
-# Dataset 1: Band structure calculation.
-kptopt1 -7
-#ndivsm1  10    
-ndivsm1  5
-kptbounds1    
+eph_intmeth 1
+eph_fsewin 0.3 eV
+eph_fsmear -1.0
+
+# Tricks to make the calculation faster.
+#mixprec 1
+#boxcutmin 1.1
+
+# K-mesh: must be consistent with the one used to generate the WFK file
+ngkpt   12 12 12
+nshiftk 1
+shiftk  0.0 0.0 0.0 
+
+ph_nqpath 8
+ph_qpath
     0.0 0.0 0.0   # Gamma
     1/3 1/3 0.0   # K
     0.5 0.0 0.0   # M
@@ -20,25 +35,9 @@ kptbounds1
     0.5 0.0 0.5   # L
     0.0 0.0 0.5   # A
 
-# Dataset 2: NSCF on a k-mesh
-ngkpt2   12 12 12
-nshiftk2 1
-shiftk2  0.0 0.0 0.0   
 
-#optdriver 8
-#wfk_task "wfk_kpts_erange"
-#getwfk_filepath "161616_WFK"
-
-# Define fine k-mesh for the interpolation
-#sigma_ngkpt   64 64 64
-#sigma_nshiftk 1
-#sigma_shiftk  0 0 0
-#
-#sigma_erange 0.0 0.2 eV   # Select kpts in fine mesh within this energy window.
-#einterp 1 5 0 0           # Parameters for star-function interpolation
-
-#COMMON INPUT DATA
-ecut 35
+#COMMON INPUT DATA###########################################################
+ecut    35.0  
 nband   8
 occopt  4              # Marzari smearing
 tsmear 0.02
@@ -46,21 +45,22 @@ tsmear 0.02
 # MgB2 structure
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
-pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8,
-         Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8"
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8/"
+pseudos "Mg-low.psp8, B.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, 
-### teph4isotc_4.abi, teph4isotc_5.abi, teph4isotc_6.abi, teph4isotc_7.abi, teph4isotc_8.abi
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
 #%% files_to_test =
 #%%   teph4isotc_2.abo, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
-#%% max_nprocs = 2
+#%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH

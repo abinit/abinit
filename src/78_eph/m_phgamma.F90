@@ -4094,6 +4094,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ! Compute integration weights and distribute k-points (my_nfsk_q)
      call phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nesting, kpt_comm%value)
 
+     !lgk = lgroup_new(cryst, kk, self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz, comm)
+
      do myik=1,gams%my_nfsk_q
        call cwtime(cpu_k, wall_k, gflops_k, "start")
 

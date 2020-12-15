@@ -1106,8 +1106,7 @@ Execute it with:
 abinit teph4zpr_8.abi > teph4zpr_8.log 2> err &
 ```
 
-To plot the spectral function $A_\nk(\ww)$ in an easy way, use AbiPy
-to extract the data from the netcdf file.
+To plot the spectral function $A_\nk(\ww)$ in an easy way, use AbiPy to extract the data from the netcdf file.
 We can do it in two different ways:
 
 - using a small python script that calls the AbiPy API

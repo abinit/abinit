@@ -1,41 +1,44 @@
 #
 ndtset  1
-optdriver 7
-eph_task  1
 
-getddb_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB"
-getdvdb_filepath "teph4isotc_1_DVDB"
-getwfk_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
+iscf -2
+tolwfr 1e-14
 
-ddb_ngqpt 4 4 4
-eph_ngqpt_fine 12 12 12
+getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
-dipdip 0         # No treatment of the dipole-dipole part. OK for metals
-mixprec 1
-boxcutmin 1.1
-eph_fsewin 0.3 eV
-eph_intmeth 1
-eph_fsmear -1.0
+# Dataset 1: Band structure calculation.
+kptopt1 -7
+#ndivsm1  10    
+ndivsm1  5
+kptbounds1    
+    0.0 0.0 0.0   # Gamma
+    1/3 1/3 0.0   # K
+    0.5 0.0 0.0   # M
+    0.0 0.0 0.0   # Gamma
+    0.0 0.0 0.5   # A
+    1/3 1/3 0.5   # H
+    0.5 0.0 0.5   # L
+    0.0 0.0 0.5   # A
 
-# Dataset 1: GS calculation
-ngkpt   12 12 12
-nshiftk 1
-shiftk  0.0 0.0 0.0 
+# Dataset 2: NSCF on a k-mesh
+ngkpt2   12 12 12
+nshiftk2 1
+shiftk2  0.0 0.0 0.0   
 
-ph_nqpath 8
-ph_qpath
-           0.0 0.0 0.0   # Gamma
-           1/3 1/3 0.0   # K
-           0.5 0.0 0.0   # M
-           0.0 0.0 0.0   # Gamma
-           0.0 0.0 0.5   # A
-           1/3 1/3 0.5   # H
-           0.5 0.0 0.5   # L
-           0.0 0.0 0.5   # A
+#optdriver 8
+#wfk_task "wfk_kpts_erange"
+#getwfk_filepath "161616_WFK"
 
+# Define fine k-mesh for the interpolation
+#sigma_ngkpt   64 64 64
+#sigma_nshiftk 1
+#sigma_shiftk  0 0 0
+#
+#sigma_erange 0.0 0.2 eV   # Select kpts in fine mesh within this energy window.
+#einterp 1 5 0 0           # Parameters for star-function interpolation
 
-#COMMON INPUT DATA###########################################################
-ecut    35.0  
+#COMMON INPUT DATA
+ecut 35
 nband   8
 occopt  4              # Marzari smearing
 tsmear 0.02
@@ -43,10 +46,12 @@ tsmear 0.02
 # MgB2 structure
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
-pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8,
-         Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8"
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8/"
+pseudos "Mg-low.psp8, B.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+###############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -56,7 +61,7 @@ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8,
 #%% files_to_test =
 #%%   teph4isotc_3.abo, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
-#%% max_nprocs = 10
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH

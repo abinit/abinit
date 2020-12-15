@@ -741,7 +741,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    end do
  end do
 
- ! Build list of k-points inside pockets. Use overdimensioned array.
+ ! Build list of k-points inside pockets. Use over dimensioned array.
  cnt = count(kshe_mask /= 0)
  ABI_MALLOC(krange2ibz, (cnt))
  cnt = 0

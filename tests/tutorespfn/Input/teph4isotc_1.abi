@@ -61,6 +61,9 @@ MgB2_eph4isotc/flow_mgb2_phonons/w1/t57/outdata/out_POT3.nc
 MgB2_eph4isotc/flow_mgb2_phonons/w1/t58/outdata/out_POT4.nc
 MgB2_eph4isotc/flow_mgb2_phonons/w1/t59/outdata/out_POT6.nc
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv

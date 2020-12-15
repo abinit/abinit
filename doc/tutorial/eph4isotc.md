@@ -20,7 +20,7 @@ This lesson should take about 1.5 hour.
 
 ## Formalism and connection with the implementation
 
-Due to the interaction with electrons, (harmonic) phonons acquire a finite lifetime that is
+Due to the interaction with electrons, phonons acquire a finite lifetime
 given by the imaginary part of the phonon-electron self-energy $\Pi_\qnu$.
 In the so-called double-delta approximation, the phonon linewidth $\gamma_{\qq\nu}$ due
 to the interaction of the ${\qq\nu}$ phonon with electrons is given by
@@ -35,9 +35,9 @@ the sum over the electron wavevector $\kk$ runs over the full BZ, $\ee_F$ is the
 and $g_{mn\nu}(\kk, \qq)$ are the e-ph matrix elements discussed in the [EPH introduction](eph_intro).
 For a given phonon wavevector $\qq$, the double delta restricts the BZ integration to
 transitions between $\kk$ and $\kq$ electronic states on the Fermi surface (FS).
-Converging the double-delta integral therefore requires very dense $\kk$-meshes to sample
-enough states around the FS.
-The convergence rate is indeed much slower that the one required by the electron DOS at $\ee_F$:
+Converging the double-delta integral therefore requires very dense $\kk$-meshes in order
+to sample enough states around the FS.
+The convergence rate is indeed much slower than the one required by the electron DOS at $\ee_F$:
 
 $$
 g(\ee_F) = \sum_{n\kk} \delta(\ee_F - \ee_{n\kk})
@@ -45,26 +45,26 @@ $$
 
 in which a single Dirac delta is involved.
 
-!!! important
+!!! note
 
-  There is also another important contribution to phonon lifetimes due to non-harmonic
+  Note that there is also another important contribution to the phonon lifetimes due to non-harmonic
   terms in the expansion of the Born-Oppenheimer energy surface around the equilibrium point.
   In the many-body language these non-harmonic leads to phonon-phonon scattering that can give a substantial
   contribution to the phonon linewidths.
-  However, these non-harmonic terms will be ignored in the rest of the tutorial as we will be mainly focusing
+  In the rest of the tutorial, however, non-harmonic terms will be ignored and we will be mainly focusing
   on the computation of the imaginary part of $\Pi$ in the harmonic approximation.
 
-At the level of the implementation, the integration of the double delta can be performed 
+At the level of the implementation, the integration of the double delta can be performed
 either with the tetrahedron scheme or by replacing the Dirac delta with a Gaussian of finite width.
 The integration algorithm is defined by the [[eph_intmeth]] input variable.
 In the case of Gaussian method, one can use a fixed broadening ([[eph_fsmear]] > 0)
-or an adaptive scheme (activated by using a negative value for [[eph_fsmear]]) in which the broadening 
+or an adaptive scheme (activated by using a negative value for [[eph_fsmear]]) in which the broadening
 is automatically computed from the electron group velocities [[cite:Li2015]].
 
 !!! important
 
     The tetrahedron method is more accurate and does not require any broadening parameter.
-    Note, however, that in the present implementation the computational cost of the double 
+    Note, however, that in the present implementation the computational cost of the double
     delta with the tetrahedron method
     quickly increases with the size of the $\kk$-mesh so the adaptive Gaussian scheme represents a valid alternative,
     especially when a dense $\kk$-sampling is used.
@@ -75,20 +75,15 @@ These parameters are usually equal to the ones used for the GS/DFPT calculation.
 However, it is possible to change the value of $\ee_F$ at the EPH level using three (mutually exclusive) input variables:
 [[eph_fermie]], [[eph_extrael]] and [[eph_doping]].
 
-The summation can be limited to states within an energy window around
-the Fermi level that can be specified via [[eph_fsewin]].
+The summation can be limited to states within an energy window around the Fermi level specified via [[eph_fsewin]].
 
-<!--
-!!! important
-
-    The $\kk$-mesh used by the EPH code is defined by the input variables [[ngkpt]], [[nshiftk]] and [[shiftk]]
-    Note, however, that the $\kk$-sampling  must correspond to the mesh used to generated the input WFK file.
-    Convergence studies are performed by generating different WFK files on $\kk$-meshes of increasing density.
--->
+The $\kk$-mesh used by the EPH code is defined by the input variables [[ngkpt]], [[nshiftk]] and [[shiftk]]
+Note, that the $\kk$-sampling  must correspond to the mesh used to generated the input WFK file.
+Convergence studies are performed by generating different WFK files on $\kk$-meshes of increasing density.
 
 The code computes $\gamma_{\qq\nu}$ for each $\qq$-point in the IBZ associated to
 an arbitrary $\qq$-mesh specified by the user.
-By default, the EPH code uses the [[ddb_ngqpt]] $\qq$-mesh corresponding to the DDB file 
+By default, the EPH code uses the [[ddb_ngqpt]] $\qq$-mesh corresponding to the DDB file
 (that is assumed to be equal to the one used to generate the DVDB file).
 In this case, all the DFPT scattering potentials are available and no interpolation in $qq$-space in required.
 To increase the $qq$-sampling, one simply specifies [[eph_ngqpt_fine]] in the input file.
@@ -143,7 +138,7 @@ $$
 
 !!! important
 
-    The code computes $\gamma_{\qq\nu}$ for all the $\qq$-points in the IBZ associated 
+    The code computes $\gamma_{\qq\nu}$ for all the $\qq$-points in the IBZ associated
     to a homogeneous $\qq$-mesh as these quantities are then used to evalute integrals in $\qq$-space.
     [[ddb_ngqpt]] mesh that is the $\qq$-mesh used in the DFPT computations.
     In this case, the code does not performy any kind of interpolation in $\qq$-space.
@@ -190,8 +185,8 @@ to avoid numerical instabilities introduce by band crossings.
 
 ## Getting started
 
-In this tutorial, we prefer to focus on e-ph calculations and the associated convergence studies.
-For this reason, we rely on **pre-computed** DEN.nc, DDB and DFPT potentials files 
+In this lesson we prefer to focus on e-ph calculations and the associated convergence studies.
+For this reason, we rely on **pre-computed** DEN.nc, DDB and DFPT potentials
 to bypass both the GS and the DFPT part.
 The DEN.nc file will be used to perform NSCF computations on arbitrarily dense $\kk$-meshes while the
 DFPT POT.nc files will be merged with the *mrgdv* utility to produce the DVDB database required by the EPH code.
@@ -201,44 +196,69 @@ In order to run the examples of this tutorial, you need to download these files 
 If git is installed on your machine, one can easily fetch the entire repository with:
 
 ```sh
-git clone ...
+git clone https://github.com/abinit/MgO_eph_zpr.git
 ```
 
 Alternatively, use *wget*:
 
 ```sh
-wget
+wget https://github.com/abinit/MgO_eph_zpr/archive/master.zip
 ```
 
 or *curl*:
 
 ```sh
-curl
+curl -L https://github.com/abinit/MgO_eph_zpr/archive/master.zip -o master.zip
 ```
 
-or simply copy the tarball by clicking the "download button" in the github interface.
-Note that the directory with the input files must be located in the same working directory as the one in which
-you will be executing the tutorial.
 
+or simply copy the tarball by clicking the "download button" in the github web page,
+unzip the file and rename the directory with:
+
+```sh
+unzip master.zip
+mv MgO_eph_zpr-master MgO_eph_zpr
+```
+
+!!! warning
+
+    The directory with the precomputed files must be located in the same working directory
+    in which you will be executing the tutorial and must be named `MgO_eph_zpr`.
+
+
+<!--
+The |AbiPy| script used to executed the DFPT part is available
+[here](https://github.com/abinit/MgO_eph_zpr/blob/master/run_zpr_mgo.py).
+Note that several parameters have been tuned to reach a reasonable **compromise between accuracy
+and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
+More specifically, we use norm-conserving pseudopotentials with a cutoff energy [[ecut]]
+of 30 Ha (too low, it should be ~50 Ha).
+The DFPT computations is done for the set of irreducible $\qq$-points corresponding
+to a $\Gamma$-centered 4x4x4 $\qq$ mesh (again, too coarse).
+$\bm{Z}^*$ and $\bm{\ee}^\infty$ are also computed with the same unconverged settings.
+
+To produce these files, we used the experimental parameters for hexagonal $MgB_2$ (a = 5.8317 and c/a= 1.1419)
+and norm-conserving pseudopotentials with an energy cutoff [[ecut]] of 60 Ry.
+All the calculations have been performed with a 40x40x40 [[ngkpt]] Gamma-centered grid for electrons,
+and the Gaussian smearing [[occopt]] with [[tsmear]].
+The DFPT computations have been done for a set of XXX irreducible $\qq$-points
+corresponding to a $\Gamma$-centered 6x6x6 mesh.
+This is the |AbiPy| script used to automate the GS + DFPT calculation:
+-->
+
+<!--
 The input file of the GS run is also stored in the DEN.nc file and one can easily access it with the
 *ncdump* utility
 
-!!! info
+The results are not fully converged ...
 
-    To produce these files, we used the experimental parameters for hexagonal $MgB_2$ (a = 5.8317 and c/a= 1.1419)
-    and norm-conserving pseudopotentials with an energy cutoff [[ecut]] of 60 Ry.
-    All the calculations have been performed with a 40x40x40 [[ngkpt]] Gamma-centered grid for electrons,
-    and the Gaussian smearing [[occopt]] with [[tsmear]].
-    The DFPT computations have been done for a set of XXX irreducible $\qq$-points
-    corresponding to a $\Gamma$-centered 6x6x6 mesh.
-    This is the |AbiPy| script used to automate the GS + DFPT calculation:
-    The results are not fully converged ...
+It is clear that, in more realistic applications, one should monitor the convergence of
+lattice parameters and vibrational properties wrt to the $\kk$-mesh and the [[tsmear]] broadening
+before embarking on EPH calculations.
+This is especially true in metals in which a correct description of the FS is crucial.
+In this tutorial, we are trying to find some kind of compromise between accuracy and computational cost.
+-->
 
-    It is clear that, in more realistic applications, one should monitor the convergence of
-    lattice parameters and vibrational properties wrt to the $\kk$-mesh and the [[tsmear]] broadening
-    before embarking on EPH calculations.
-    This is especially true in metals in which a correct description of the FS is crucial.
-    In this tutorial, we are trying to find some kind of compromise between accuracy and computational cost.
 
 ## Merging the DFPT potentials
 
@@ -251,6 +271,15 @@ mrgdv < teph4isotc_1.abi
 with the following input file that lists all the partial DFPT POT files already computed:
 
 {% dialog tests/tutorespfn/Input/teph4isotc_1.abi %}
+
+This (rather fast) step produces the `` file that will be used in the next EPH calculations.
+Executing:
+
+```sh
+mrgdv info
+```
+
+shows that all the independent phonon perturbations are available
 
 <!--
 As mentioned in the [introduction page for the EPH code](eph_intro), the DVDB file is needed to reconstruct
@@ -275,16 +304,51 @@ The first test gives us an idea of the $\kk$-mesh whereas the second test gives 
 of the $\qq$-mesh.
 
 Let's start from the electron DOS.
-This is what is done in the XXX input file.
 -->
 
-## Electronic properties
+## Analyzing electronic and vibrational properties
+
+Before proceeding with the e-ph calculation, it is worth to spend some time to analyze in more
+detail the electron and phonon band structures.
+
+```sh
+abistruct.py kpath mgb2_DEN.nc
+```
+
+To compute the electron DOS with the tetrahedron method,
+one can use the *abitk* utility located in *src/98_main* and the syntax:
+
+```sh
+abitk ebands_dos MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
+```
+
+to read the eigenvalues in the IBZ from a `GSR.n` file (`WFK.nc` files are supported as well).
+We can also produce a BXSF file with the `ebands_bxsf` command:
+
+```sh
+abitk ebands_bxsf MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
+```
+
+to produce a file `out_GSR.nc_BXSF` that can be used to visualize the Fermi surface with Xcrysden e.g.
+
+```
+xcrysden --bxsf out_GSR.nc_BXSF
+```
+
+!!! tip
+
+    The same feature is available inside Abinit if [[prtfsurf]] is set to 1.
+
+First of all, we have to select the $\kk$-path for the NSCF run by using
+the [[kptbounds]] and [[ndivsm]] input variables.
 
 Run the calculation with as it will take time using:
 
 ```
 abinit
 ```
+
+{% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
 
 All the NSCF calculations will start from the **pre-computed DEN.nc file** via the [[getden_filepath]] input variable.
 Note the usage of the new input variable [[structure]] (added in Abinit v9) to read the crystalline structure from
@@ -311,38 +375,6 @@ getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
     Obviously you are free to use the multidataset philosophy whenever it makes calculations easier to handle
     but keep in mind that the EPH code is not designed with this idea in mind and that you will start
     to experience the multidaset inefficiency when the dimension of the problem increases.
-
-
-```sh
-abistruct.py kpath mgb2_DEN.nc
-```
-
-To compute the electron DOS with the tetrahedron method, 
-one can use the *abitk* utility located in *src/98_main* and the syntax:
-
-```sh
-abitk ebands_dos MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
-```
-
-to read the eigenvalues in the IBZ from a `GSR.n` file (`WFK.nc` files are supported as well).
-We can also produce a BXSF file with the `ebands_bxsf` command:
-
-```sh
-abitk ebands_bxsf MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
-```
-
-to produce a file `out_GSR.nc_BXSF` that can be used to visualize the Fermi surface with Xcrysden e.g.
-
-```
-xcrysden --bxsf out_GSR.nc_BXSF
-```
-
-!!! tip
-
-    The same feature is available inside Abinit if [[prtfsurf]] is set to 1.
-
-First of all, we have to select the $\kk$-path for the NSCF run by using
-the [[kptbounds]] and [[ndivsm]] input variables.
 
 ## Vibrational properties
 
@@ -404,22 +436,49 @@ This is what you should get:
 
 Remember to discuss k-mesh and tsmear at the DFPT level.
 
-## Our first isotropic Tc computation
+## Our first computation of isotropic Tc
 
-Now we can finally run our first Eliashberg calculation.
-We start with a relatively simple input that allows us to introduce the most important variables
-and the main output files.
+For our first example, we use a relatively simple input file that allows us to introduce
+the most important variables and the organization of the main output files:
 
-To compute $\gamma_{\qq\nu}$ in metals, one has to use [[optdriver]] 7 and [[eph_task]] 1.
+{% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
+
+First of all, in order to compute $\gamma_{\qq\nu}$ in metals, one has to use
+[[optdriver]] = 7 and [[eph_task]] = 1.
 The location of the DDB, DVDB and WFK files is specified via
 [[getddb_filepath]] [[getdvdb_filepath]] [[getwfk_filepath]], respectively.
+In this particular case, we have:
+
+```sh
+getddb_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB"
+getwfk_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
+getdvdb_filepath "teph4isotc_1_DVDB"
+```
+
+Note how the DDB and the WFK are taken from the git repository while for the DVDB we specify 
+the file produced by *mrgdv* in the previous step:
+
+Next, we have the variables governing the EPH calculation:
 
 [[eph_intmeth]]
 
-Let's now discuss in more detail the output files produced by the code.
+``
+ddb_ngqpt 4 4 4
+dipdip 0         # No treatment of the dipole-dipole part. OK for metals
 
-{% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
-{% dialog tests/tutorespfn/Input/teph4isotc_3.abi %}
+eph_intmeth 1
+eph_fsmear -1.0
+eph_fsewin 0.3 eV
+```
+
+In this example, we are using the adaptive Gaussian smearing
+
+Tricks to make the calculation faster.
+
+```
+mixprec 1
+boxcutmin 1.1
+```
 
 [[mixprec]] 1
 [[boxcutmin]] 1.1
@@ -427,11 +486,29 @@ Let's now discuss in more detail the output files produced by the code.
 [[eph_intmeth]] 1
 [[eph_fsmear]] -1
 
+It is worth stressing that the k-mesh must be consistent with the one used to generate 
+the WFK file and indeed we use:
+
+```
 ngkpt   12 12 12
 nshiftk 1
-shiftk  0.0 0.0 0.0 
+shiftk  0.0 0.0 0.0
+```
 
-## Preparing the convergence study.
+We now discuss in more detail the output files produced by the code.
+TODO: Discuss output, netcdf files and provide AbiPy examples.
+
+
+Exercise:
+ 
+ Since our WFK is defined on a 12x12x12 $\kk$-mesh it is very easy to activate the interpolation
+ of the DFPT potentials to go from a 6x6x6 to a 12x12x12 $\qq$-mesh while keeping the same WFK file.
+ Use [[eph_ngqpt_fine]] in the previous input file to densify the $\qq$-mesh for phonons and compare the 
+ results with those obtained with 6x6x6.
+ Use also mixprec 1 and boxcutmin 1.1 to accelerate the calculation and compare the results.
+
+
+## Preparing the convergence study wrt the k-mesh
 
 Our goal is to perform calculations of $\gamma_{\qq\nu}$ with different $\qq/\kk$-meshes to
 analyze the convergence behaviour of $\lambda$ and $\alpha^2F(\ww)$.
@@ -453,25 +530,74 @@ A 12x12x12 $\qq$-mesh (with interpolation) and the following $\kk$-meshes:
 
     12x12x12, 24x24x24, (36x36x36)
 
-The pattern at this point should evident: we need to perform NSCF computations
+The pattern at this point should clear: we need to perform NSCF computations
 for four different Gamma-centered $\kk$-meshes: 12x12x12, 18x18x18, 24x24x24, and (48x48x48).
 The computational cost of the NSC run increases quickly with the size of the $\kk$-mesh but as already
 stressed we only needed electron states in a appropriate energy window around the Fermi level.
 To speed the computation of the WFK files we will be using the same trick based on the star-function interpolation
 used in the Mobility tutorial.
 
-## How to reduce the number of k-points to be computed in the NSCF run
-
 TODO
+How to reduce the number of k-points to be computed in the NSCF run
 As we have seen, Eliashberg calculations require the knowledge of Bloch states
 inside a relatively small energy window around $\ee_F$.
 The NSCF computation of the WFK files with dense $\kk$-sampling [[sigma_erange]]
 
-## Increasing the q-mesh
+
+abitk skw_compare ../../../../tests/modules_with_data/MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc teph4isotc_3o_DS1_GSR.nc --is-metal
+
+abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot
+
+The figure shows that the SKW interpolation nicely reproduces the band dispersion around the Fermi level.
+Discrepancies between the ab-initio energies and the interpolated ones are observed in correspondence of
+band-crossings.
+This is somehow expected since SKW is a Fourier-based interpolation scheme but in our fortunately the crossings
+are relatively far from the Fermi level.
+
+At this point, we are confident that the SKW interpolation works as expected and we can use it to locate
+the $\kk$-wavevectors of a much denser $\kk$-mesh that are located inside an energy window [[sigma_erange]]
+to generate the *KERANGE.nc* file
+
+```
+optdriver 8
+wfk_task "wfk_kpts_erange"
+getwfk_filepath "161616_WFK"
+
+ Define fine k-mesh for the SKW interpolation
+sigma_ngkpt   32 32 32
+sigma_nshiftk 1
+sigma_shiftk  0 0 0
+
+sigma_erange -0.2 -0.2 eV  # Select kpts in the fine mesh within this energy window.
+einterp 1 5 0 0            # Parameters for star-function interpolation
+```
+
+!!! important
+
+    When dealing with metals, sigma_erange must be negative so that the energy window is
+    refered to the Fermi level and not to the CBM/VBM.
+    Use a value for the window that is reasonably large in order to account for possible oscillations
+    and/or inaccuracies of the SKW interpolation.
+
+Once we have the KERANGE.nc file, we can use it to perform a NSCF calculation to generate a customized WFK file
+on the dense $\kk$-mesh.
+This is what is done in ...
+
+
+{% dialog tests/tutorespfn/Input/teph4isotc_3.abi %}
+
+that produces the following (customized) WFK files:
+
+- A
+- B
+
+At this point, we can run EPH calculations with denser $\kk$- and $\qq$-meshes.
+
+## Convergence study wrt to the k/q-mesh
 
 [[eph_ngqpt_fine]]
 
-## Increasing the k-mesh
+{% dialog tests/tutorespfn/Input/teph4isotc_3.abi %}
 
 ## Notes on the MPI parallelism
 
