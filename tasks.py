@@ -407,9 +407,10 @@ def pull(ctx):
 
 
 @task
-def modules(ctx):
+def submodules(ctx):
     """Update submodules."""
-    ctx.run("git submodule update --remote --init")
+    with cd(ABINIT_ROOTDIR):
+        ctx.run("git submodule update --remote --init")
 
 @task
 def branchoff(ctx, start_point):
