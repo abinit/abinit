@@ -4124,10 +4124,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        call krank%free()
 
        if (dksqmax > tol12) then
-         write(msg, '(3a,es16.6,7a)' ) &
+         write(msg, '(3a,es16.6,6a)' ) &
           "The WFK file cannot be used to compute phonon linewidths.",ch10, &
           "At least one of the k-points on the FS could not be generated from a symmetrical one. dksqmax: ", dksqmax,ch10, &
-          "Q-mesh: ", ltoa(gamma_ngqpt), ", K-mesh (from kptrlatt) ", ltoa(get_diag(dtset%kptrlatt)), &
+          "Q-mesh: ", trim(ltoa(gamma_ngqpt)), ", K-mesh (from kptrlatt) ", trim(ltoa(get_diag(dtset%kptrlatt))), &
           'Action: check your WFK file and the (k, q) point input variables.'
           ABI_ERROR(msg)
        end if

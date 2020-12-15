@@ -153,7 +153,6 @@ Nesting factor
     N(\qq) = \sum_{mn\kk} \delta(\ee_{\kpq m}) \delta(\ee_{\kk n})
 \end{equation}
 
-
 Implementation details:
 
 \begin{equation}
@@ -192,8 +191,8 @@ The DEN.nc file will be used to perform NSCF computations on arbitrarily dense $
 DFPT POT.nc files will be merged with the *mrgdv* utility to produce the DVDB database required by the EPH code.
 
 Note that these files **are not shipped** with the official ABINIT tarball as they are relatively large in size.
-In order to run the examples of this tutorial, you need to download these files from 
-this github repository](https://github.com/abinit/MgB2_eph4isotc).
+In order to run the examples of this tutorial, you need to download the files from 
+[this github repository](https://github.com/abinit/MgB2_eph4isotc).
 If git is installed on your machine, one can easily fetch the entire repository with:
 
 ```sh
@@ -223,30 +222,23 @@ mv MgB2_eph4isotc-master MgB2_eph4isotc
 !!! warning
 
     The directory with the precomputed files must be located in the same working directory
-    in which you will be executing the tutorial and must be named `MgO_eph_zpr`.
+    in which you will be executing the tutorial and must be named `MgB2_eph4isotc`.
 
 
 The |AbiPy| script used to executed the DFPT part is available
 [here](https://github.com/abinit/MgB2_eph4isotc/blob/main/run_mgb2_phonons.py).
 Note that several parameters have been tuned to reach a reasonable **compromise between accuracy
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
-More specifically, we use norm-conserving pseudopotentials with a cutoff energy [[ecut]]
-of 38 Ha
-The DFPT computations is done for the set of irreducible $\qq$-points corresponding
-to a $\Gamma$-centered 6x6x6 $\qq$ mesh (again, too coarse).
-
-To produce these files, we used the experimental parameters for hexagonal $MgB_2$ (a = 5.8317 and c/a= 1.1416)
+More specifically, we use norm-conserving pseudopotentials with a cutoff energy [[ecut]] of 38 Ha
+We use the experimental parameters for hexagonal $MgB_2$ (a = 5.8317 and c/a= 1.1416)
 All the calculations have been performed with a 12x12x12 [[ngkpt]] Gamma-centered grid for electrons,
 and the Marzari smearing [[occopt]] with [[tsmear]].
-The DFPT computations have been done for a set of XXX irreducible $\qq$-points
-corresponding to a $\Gamma$-centered 6x6x6 mesh.
-This is the |AbiPy| script used to automate the GS + DFPT calculation:
+The DFPT computations is done for XXX irreducible $\qq$-points corresponding
+to a $\Gamma$-centered 4x4x4 $\qq$-mesh (again, too coarse).
 
 <!--
 The input file of the GS run is also stored in the DEN.nc file and one can easily access it with the
 *ncdump* utility
-
-The results are not fully converged ...
 
 It is clear that, in more realistic applications, one should monitor the convergence of
 lattice parameters and vibrational properties wrt to the $\kk$-mesh and the [[tsmear]] broadening
@@ -268,11 +260,11 @@ with the following input file that lists all the partial DFPT POT files already 
 
 {% dialog tests/tutorespfn/Input/teph4isotc_1.abi %}
 
-This (rather fast) step produces the `` file that will be used in the next EPH calculations.
+This (rather fast) step produces the **teph4isotc_1_DVDB** file that will be used in the next examples.
 Executing:
 
 ```sh
-mrgdv info
+mrgdv info teph4isotc_1_DVDB
 ```
 
 shows that all the independent phonon perturbations are available
@@ -304,25 +296,52 @@ Let's start from the electron DOS.
 
 ## Analyzing electronic and vibrational properties
 
-Before proceeding with the e-ph calculation, it is worth to spend some time to analyze in more
-detail the electron and phonon band structures.
+Before proceeding with the e-ph calculation, it is worth spending some time to analyze 
+in more detail the electron and phonon band structures computed by AbiPy.
+
+
+```sh
+abiopen.py MgB2_eph4isotc/flow_mgb2_phonons/w0/t1/outdata/out_GSR.nc -e
+```
+
+![](eph4isotc_assets/MgB2_ebands.png)
+
 
 ```sh
 abistruct.py kpath mgb2_DEN.nc
+
+...
+
+# K-path in reduced coordinates:
+ ndivsm 10
+ kptopt -11
+ kptbounds
+    +0.00000  +0.00000  +0.00000  # $\Gamma$
+    +0.50000  +0.00000  +0.00000  # M
+    +0.33333  +0.33333  +0.00000  # K
+    +0.00000  +0.00000  +0.00000  # $\Gamma$
+    +0.00000  +0.00000  +0.50000  # A
+    +0.50000  +0.00000  +0.50000  # L
+    +0.33333  +0.33333  +0.50000  # H
+    +0.00000  +0.00000  +0.50000  # A
+    +0.50000  +0.00000  +0.50000  # L
+    +0.50000  +0.00000  +0.00000  # M
+    +0.33333  +0.33333  +0.00000  # K
+    +0.33333  +0.33333  +0.50000  # H
 ```
 
 To compute the electron DOS with the tetrahedron method,
 one can use the *abitk* utility located in *src/98_main* and the syntax:
 
 ```sh
-abitk ebands_dos MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
+abitk ebands_dos MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc 
 ```
 
 to read the eigenvalues in the IBZ from a `GSR.n` file (`WFK.nc` files are supported as well).
 We can also produce a BXSF file with the `ebands_bxsf` command:
 
 ```sh
-abitk ebands_bxsf MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
+abitk ebands_bxsf MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc 
 ```
 
 to produce a file `out_GSR.nc_BXSF` that can be used to visualize the Fermi surface with Xcrysden e.g.
@@ -335,11 +354,7 @@ xcrysden --bxsf out_GSR.nc_BXSF
 
     The same feature is available inside Abinit if [[prtfsurf]] is set to 1.
 
-First of all, we have to select the $\kk$-path for the NSCF run by using
-the [[kptbounds]] and [[ndivsm]] input variables.
-
-Run the calculation with as it will take time using:
-
+<!--
 ```
 abinit
 ```
@@ -347,16 +362,7 @@ abinit
 {% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
 
 All the NSCF calculations will start from the **pre-computed DEN.nc file** via the [[getden_filepath]] input variable.
-Note the usage of the new input variable [[structure]] (added in Abinit v9) to read the crystalline structure from
-an external file in order to avoid repeating the unit cell in each input file.
 
-We  Read MgB2 structure from external file
-
-```sh
-structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
-
-getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
-```
 
 !!! important
 
@@ -372,9 +378,30 @@ getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
     Obviously you are free to use the multidataset philosophy whenever it makes calculations easier to handle
     but keep in mind that the EPH code is not designed with this idea in mind and that you will start
     to experience the multidaset inefficiency when the dimension of the problem increases.
+-->
 
 ## Vibrational properties
 
+Let's call anaddb via anaddb to compute the phonon band structure using a 4x4x4
+
+```sh
+abiview.py ddb MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB
+```
+
+![](eph4isotc_assets/MgB2_phbands.png)
+
+The fact that 4x4x4 is too coarse is clearly seen if we compare
+The reason why we don't provide files obtained with a 6x6x6 is that the size of repo with the DFPT potentials 
+would be around 200 Mb
+
+```sh
+abicomp.py ddb MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB MgB2_eph4isotc/666q_DDB -e
+```
+
+![](eph4isotc_assets/abicomp_phbands.png)
+
+
+<!--
 In this section, we use the interface provided by the EPH code to
 compute vibrational properties using the pre-generated DDB file instead of the *anaddb* tool.
 To compute vibrational properties without performing a full e-ph calculation,
@@ -432,32 +459,45 @@ This is what you should get:
     with different number of CPUS and different amount of memory.
 
 Remember to discuss k-mesh and tsmear at the DFPT level.
+-->
 
-## Our first computation of isotropic Tc
+## Our first computation of the isotropic Tc
 
 For our first example, we use a relatively simple input file that allows us to introduce
 the most important variables and the organization of the main output files:
 
 {% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
 
-First of all, in order to compute $\gamma_{\qq\nu}$ in metals, one has to use
-[[optdriver]] = 7 and [[eph_task]] = 1.
+To activate the computation of $\gamma_{\qq\nu}$ in metals, we use [[optdriver]] = 7 and [[eph_task]] = 1.
 The location of the DDB, DVDB and WFK files is specified via
-[[getddb_filepath]] [[getdvdb_filepath]] [[getwfk_filepath]], respectively.
-In this particular case, we have:
+[[getddb_filepath]] [[getdvdb_filepath]] [[getwfk_filepath]], respectively:
 
 ```sh
 getddb_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB"
+
 getwfk_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
+
 getdvdb_filepath "teph4isotc_1_DVDB"
 ```
 
-Note how the DDB and the WFK are taken from the git repository while for the DVDB we specify 
+The DDB and the WFK are taken from the git repository while for the DVDB we specify 
 the file produced by *mrgdv* in the previous step:
+Note the usage of the new input variable [[structure]] (added in Abinit v9) to read the crystalline structure from
+an external file in order to avoid repeating the unit cell in each input file.
+
+```sh
+structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
+
+getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
+```
 
 Next, we have the variables governing the EPH calculation:
 
+[[ddb_ngpqt]], [[dipdip]]
 [[eph_intmeth]]
+[[eph_fsewin]] 0.3 eV
+[[eph_intmeth]] 1
+[[eph_fsmear]] -1
 
 ``
 ddb_ngqpt 4 4 4
@@ -470,21 +510,16 @@ eph_fsewin 0.3 eV
 
 In this example, we are using the adaptive Gaussian smearing
 
-Tricks to make the calculation faster.
+Tricks to make EPH calculations faster.
+[[mixprec]] 1 and [[boxcutmin]] 1.1
 
 ```
 mixprec 1
 boxcutmin 1.1
 ```
 
-[[mixprec]] 1
-[[boxcutmin]] 1.1
-[[eph_fsewin]] 0.3 eV
-[[eph_intmeth]] 1
-[[eph_fsmear]] -1
-
-It is worth stressing that the k-mesh must be consistent with the one used to generate 
-the WFK file and indeed we use:
+Finally, the k-mesh must in terms of [[ngkpt]], [[nshift]] and [[shiftk]] 
+that must be consistent with the sampling used to generate the WFK file:
 
 ```
 ngkpt   12 12 12
@@ -495,7 +530,6 @@ shiftk  0.0 0.0 0.0
 We now discuss in more detail the output files produced by the code.
 TODO: Discuss output, netcdf files and provide AbiPy examples.
 
-
 Exercise:
  
  Since our WFK is defined on a 12x12x12 $\kk$-mesh it is very easy to activate the interpolation
@@ -503,7 +537,6 @@ Exercise:
  Use [[eph_ngqpt_fine]] in the previous input file to densify the $\qq$-mesh for phonons and compare the 
  results with those obtained with 6x6x6.
  Use also mixprec 1 and boxcutmin 1.1 to accelerate the calculation and compare the results.
-
 
 ## Preparing the convergence study wrt the k-mesh
 
@@ -540,17 +573,21 @@ As we have seen, Eliashberg calculations require the knowledge of Bloch states
 inside a relatively small energy window around $\ee_F$.
 The NSCF computation of the WFK files with dense $\kk$-sampling [[sigma_erange]]
 
+```
+abitk skw_compare MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc MgB2_eph4isotc/flow_mgb2_phonons/w0/t1/outdata/out_GSR.nc  --is-metal
+```
 
-abitk skw_compare ../../../../tests/modules_with_data/MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc teph4isotc_3o_DS1_GSR.nc --is-metal
-
+```
 abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot
+```
+
+![](eph4isotc_assets/skw_vs_abinitio_ebands.png)
 
 The figure shows that the SKW interpolation nicely reproduces the band dispersion around the Fermi level.
-Discrepancies between the ab-initio energies and the interpolated ones are observed in correspondence of
-band-crossings.
+Discrepancies between the ab-initio energies and the interpolated ones are observed 
+in correspondence of band-crossings.
 This is somehow expected since SKW is a Fourier-based interpolation scheme but in our fortunately the crossings
 are relatively far from the Fermi level.
-
 At this point, we are confident that the SKW interpolation works as expected and we can use it to locate
 the $\kk$-wavevectors of a much denser $\kk$-mesh that are located inside an energy window [[sigma_erange]]
 to generate the *KERANGE.nc* file
@@ -560,7 +597,7 @@ optdriver 8
 wfk_task "wfk_kpts_erange"
 getwfk_filepath "161616_WFK"
 
- Define fine k-mesh for the SKW interpolation
+# Define fine k-mesh for the SKW interpolation
 sigma_ngkpt   32 32 32
 sigma_nshiftk 1
 sigma_shiftk  0 0 0

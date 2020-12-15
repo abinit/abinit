@@ -7,7 +7,11 @@ getddb_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB"
 getwfk_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
 getdvdb_filepath "teph4isotc_1_DVDB"
 
+structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
+
 ddb_ngqpt 4 4 4
+#eph_ngqpt_fine 6 6 6
+#eph_ngqpt_fine 8 8 8
 #eph_ngqpt_fine 12 12 12
 dipdip 0         # No treatment of the dipole-dipole part. OK for metals
 
@@ -15,15 +19,16 @@ eph_intmeth 1
 eph_fsewin 0.3 eV
 eph_fsmear -1.0
 
-# Tricks to make the calculation faster.
-#mixprec 1
-#boxcutmin 1.1
+# Tricks to make EPH calculations faster.
+mixprec 1
+boxcutmin 1.1
 
 # K-mesh: must be consistent with the one used to generate the WFK file
 ngkpt   12 12 12
 nshiftk 1
 shiftk  0.0 0.0 0.0 
 
+# Compute phonon bands along this q-path.
 ph_nqpath 8
 ph_qpath
     0.0 0.0 0.0   # Gamma
@@ -41,9 +46,6 @@ ecut    38.0
 nband   8
 occopt  4              # Marzari smearing
 tsmear 0.02
-
-# MgB2 structure
-structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
 pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8/"
 pseudos "Mg-low.psp8, B.psp8"
