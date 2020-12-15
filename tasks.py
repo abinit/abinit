@@ -405,6 +405,12 @@ def pull(ctx):
     ctx.run("git pull --recurse-submodules")
     ctx.run("git stash apply")
 
+
+@task
+def modules(ctx):
+    """Update submodules."""
+    ctx.run("git submodule update --remote --init")
+
 @task
 def branchoff(ctx, start_point):
     """"Checkout new branch from start_point e.g. `trunk/release-9.0` and set default upstream to origin."""

@@ -37,7 +37,7 @@ ph_qpath
 
 
 #COMMON INPUT DATA###########################################################
-ecut    35.0  
+ecut    38.0  
 nband   8
 occopt  4              # Marzari smearing
 tsmear 0.02

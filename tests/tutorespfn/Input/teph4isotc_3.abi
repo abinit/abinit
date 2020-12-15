@@ -38,7 +38,7 @@ shiftk2  0.0 0.0 0.0
 #einterp 1 5 0 0           # Parameters for star-function interpolation
 
 #COMMON INPUT DATA
-ecut 35
+ecut 38
 nband   8
 occopt  4              # Marzari smearing
 tsmear 0.02

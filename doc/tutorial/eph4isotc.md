@@ -192,32 +192,32 @@ The DEN.nc file will be used to perform NSCF computations on arbitrarily dense $
 DFPT POT.nc files will be merged with the *mrgdv* utility to produce the DVDB database required by the EPH code.
 
 Note that these files **are not shipped** with the official ABINIT tarball as they are relatively large in size.
-In order to run the examples of this tutorial, you need to download these files from the github repository.
+In order to run the examples of this tutorial, you need to download these files from 
+this github repository](https://github.com/abinit/MgB2_eph4isotc).
 If git is installed on your machine, one can easily fetch the entire repository with:
 
 ```sh
-git clone https://github.com/abinit/MgO_eph_zpr.git
+git clone https://github.com/abinit/MgB2_eph4isotc.git
 ```
 
 Alternatively, use *wget*:
 
 ```sh
-wget https://github.com/abinit/MgO_eph_zpr/archive/master.zip
+wget https://github.com/abinit/MgB2_eph4isotc/archive/master.zip
 ```
 
 or *curl*:
 
 ```sh
-curl -L https://github.com/abinit/MgO_eph_zpr/archive/master.zip -o master.zip
+curl -L https://github.com/abinit/MgB2_eph4isotc/archive/master.zip -o master.zip
 ```
-
 
 or simply copy the tarball by clicking the "download button" in the github web page,
 unzip the file and rename the directory with:
 
 ```sh
 unzip master.zip
-mv MgO_eph_zpr-master MgO_eph_zpr
+mv MgB2_eph4isotc-master MgB2_eph4isotc
 ```
 
 !!! warning
@@ -226,25 +226,21 @@ mv MgO_eph_zpr-master MgO_eph_zpr
     in which you will be executing the tutorial and must be named `MgO_eph_zpr`.
 
 
-<!--
 The |AbiPy| script used to executed the DFPT part is available
-[here](https://github.com/abinit/MgO_eph_zpr/blob/master/run_zpr_mgo.py).
+[here](https://github.com/abinit/MgB2_eph4isotc/blob/main/run_mgb2_phonons.py).
 Note that several parameters have been tuned to reach a reasonable **compromise between accuracy
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
 More specifically, we use norm-conserving pseudopotentials with a cutoff energy [[ecut]]
-of 30 Ha (too low, it should be ~50 Ha).
+of 38 Ha
 The DFPT computations is done for the set of irreducible $\qq$-points corresponding
-to a $\Gamma$-centered 4x4x4 $\qq$ mesh (again, too coarse).
-$\bm{Z}^*$ and $\bm{\ee}^\infty$ are also computed with the same unconverged settings.
+to a $\Gamma$-centered 6x6x6 $\qq$ mesh (again, too coarse).
 
-To produce these files, we used the experimental parameters for hexagonal $MgB_2$ (a = 5.8317 and c/a= 1.1419)
-and norm-conserving pseudopotentials with an energy cutoff [[ecut]] of 60 Ry.
-All the calculations have been performed with a 40x40x40 [[ngkpt]] Gamma-centered grid for electrons,
-and the Gaussian smearing [[occopt]] with [[tsmear]].
+To produce these files, we used the experimental parameters for hexagonal $MgB_2$ (a = 5.8317 and c/a= 1.1416)
+All the calculations have been performed with a 12x12x12 [[ngkpt]] Gamma-centered grid for electrons,
+and the Marzari smearing [[occopt]] with [[tsmear]].
 The DFPT computations have been done for a set of XXX irreducible $\qq$-points
 corresponding to a $\Gamma$-centered 6x6x6 mesh.
 This is the |AbiPy| script used to automate the GS + DFPT calculation:
--->
 
 <!--
 The input file of the GS run is also stored in the DEN.nc file and one can easily access it with the
@@ -354,8 +350,9 @@ All the NSCF calculations will start from the **pre-computed DEN.nc file** via t
 Note the usage of the new input variable [[structure]] (added in Abinit v9) to read the crystalline structure from
 an external file in order to avoid repeating the unit cell in each input file.
 
+We  Read MgB2 structure from external file
+
 ```sh
-# Read MgB2 structure from external file
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
 getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
