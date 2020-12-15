@@ -2062,7 +2062,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fre
    call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,fermih,&
 &   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
 &   dtset%nsppol,occ,dtset%occopt,option,dtset%tphysel,&
-&   dtset%tsmear,unitdos,dtset%wtk,1,dtset%nband(0))!CP: added 1, nband(0) to fit new definition of getnel; parameters only used if
+&   dtset%tsmear,unitdos,dtset%wtk,1,dtset%nband(1))!CP: added 1, nband(0) to fit new definition of getnel; parameters only used if
 ! occopt 9
    ! End CP modified
    ABI_DEALLOCATE(doccde)

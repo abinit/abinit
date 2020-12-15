@@ -3664,7 +3664,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "kptopt", "pawcpxocc", "icoulomb"])
    NCF_CHECK(ncerr)
    !CP modified
-   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "nelect", "charge"])
+   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "nelect", "charge"])
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "nelect", "ne_qFD", "nh_qFD", "charge"])
    ! End CP modified
    NCF_CHECK(ncerr)

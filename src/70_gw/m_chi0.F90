@@ -2227,8 +2227,8 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 ! write(std_out,*)"nelect1: ",o_nelect
  if (BSt%occopt < 9) then
    call getnel(o_doccde,dummy_dosdeltae,eigen_pdelta_vec,o_entropy,BSt%fermie,BSt%fermie,maxocc,BSt%mband,BSt%nband,&
-&              o_nelect,BSt%nkpt,BSt%nsppol,o_occ_pdelta,BSt%occopt,option1,BSt%tphysel,BSt%tsmear,unitdos0,BSt%wtk,1,BSt%nband(0))
-! CP: adding 1 and BSt%nband(0) as dummy arguments since here we already test for occopt==9
+&              o_nelect,BSt%nkpt,BSt%nsppol,o_occ_pdelta,BSt%occopt,option1,BSt%tphysel,BSt%tsmear,unitdos0,BSt%wtk,1,BSt%nband(1))
+! CP: adding 1 and BSt%nband(1) as dummy arguments since here we already test for occopt==9
    write(std_out,*)"nelect1: ",o_nelect
  else
    MSG_ERROR('occopt 9 not implemented for GW calculations')
@@ -2246,7 +2246,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  !write(std_out,*)"nelect2: ",o_nelect
  if (BSt%occopt < 9) then
    call getnel(o_doccde,dummy_dosdeltae,eigen_mdelta_vec,o_entropy,BSt%fermie,BSt%fermie,maxocc,BSt%mband,BSt%nband,&
-&    o_nelect,BSt%nkpt,BSt%nsppol,o_occ_mdelta,BSt%occopt,option1,BSt%tphysel,BSt%tsmear,unitdos0,BSt%wtk,1,BSt%nband(0))
+&    o_nelect,BSt%nkpt,BSt%nsppol,o_occ_mdelta,BSt%occopt,option1,BSt%tphysel,BSt%tsmear,unitdos0,BSt%wtk,1,BSt%nband(1))
    write(std_out,*)"nelect2: ",o_nelect
  else
    MSG_ERROR("occopt 9 not implemented for GW calculations")
