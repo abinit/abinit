@@ -174,7 +174,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
      nshsigx=0
      call setshells(dtsets(idtset)%ecutsigx,dtsets(idtset)%npwsigx,nshsigx,&
       dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'sigx',ucvol)
-   end if ! (SIGMA|SCREENING|SCGW|BSE)
+   end if ! (SIGMA|SCREENING|SCGW|BSE|RDFTM)
 
  end do
 
@@ -449,6 +449,18 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_band_index',tread,'INT')
  if(tread==1) dtset%gwls_band_index=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw1rdm',tread,'INT')
+ if(tread==1) dtset%gw1rdm=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'x1rdm',tread,'INT')
+ if(tread==1) dtset%x1rdm=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtchkprdm',tread,'INT')
+ if(tread==1) dtset%prtchkprdm=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdchkprdm',tread,'INT')
+ if(tread==1) dtset%irdchkprdm=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_first_seed',tread,'INT')
  if(tread==1) then
    dtset%gwls_first_seed=intarr(1)
@@ -571,6 +583,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwrpacorr',tread,'INT')
  if(tread==1) dtset%gwrpacorr=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgmcorr',tread,'INT')
+ if(tread==1) dtset%gwgmcorr=intarr(1)
 
  ! RESPFN integer input variables (needed here to get the value of response)
  ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
@@ -1005,7 +1020,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'inclvkb',tread,'INT')
  if(tread==1) dtset%inclvkb=intarr(1)
  if (dtset%inclvkb == 1) then
-   MSG_ERROR("inclvkb == 1 is not allowed anymore. Choose between 0 and 1.")
+   MSG_ERROR("inclvkb == 1 is not allowed anymore. Choose between 0 and 2.")
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nomegasf',tread,'INT')
@@ -3198,7 +3213,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
 
    ! Test bdgw values.
-   if (dtset%optdriver == RUNL_SIGMA) then
+   if (dtset%optdriver == RUNL_SIGMA) then  
      if (any(dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) <= 0)) then
        MSG_ERROR("bdgw entries cannot be <= 0. Check input file")
      end if

@@ -85,7 +85,7 @@ nband 4  # number of occupied states
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = X. Gonze
-#%% keywords = HF, PBE0, FAILS_IFMPI
+#%% keywords = HF, PBE0
 #%% description = Test of Fock in sequential case, with RMM-DIIS and NC psps
 #%%  The energy computation is not variational. While residm and vres2 converge
 #%%  quite fast, the total energy convergence is lagging behind ...
