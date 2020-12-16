@@ -162,9 +162,9 @@ program multibinit
   if(args%multibinit_F03_mode==1) then
      ! Use the F03 mode, which has only spin and a simple harmonic lattice now
      ! After everything is migrated, it will becomes default and multibinit_main will be deprecated.
-     call multibinit_main2(filnam)
+     call multibinit_main2(args%input_path,filnam, args%dry_run)
   else
-     call multibinit_main(filnam, args%dry_run)
+     call multibinit_main(args%input_path, filnam, args%dry_run)
   end if
   ! Final message
   !****************************************************************************************

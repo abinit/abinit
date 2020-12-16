@@ -102,6 +102,7 @@ contains
        NCF_CHECK_MSG(ncerr, "close netcdf lattice history file"//trim(self%filename)//".")
     end if
 #endif
+
   end subroutine finalize
 
   subroutine write_cell(self, supercell)
@@ -261,7 +262,7 @@ contains
 
   subroutine close(self)
     class(lattice_ncfile_t) :: self
-
+    self%isopen=.False.
   end subroutine close
 
 

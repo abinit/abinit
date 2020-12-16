@@ -1121,20 +1121,22 @@ multibinit_dtset%latt_temperature_start=0.0
  multibinit_dtset%spin_pot_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_pot_fname',tread,'KEY',&
       & key_value=multibinit_dtset%spin_pot_fname)
-
+ if(.not. tread==1) multibinit_dtset%spin_pot_fname=""
 
  multibinit_dtset%latt_pot_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_pot_fname',tread,'KEY',&
       & key_value=multibinit_dtset%latt_pot_fname)
+ if(.not. tread==1) multibinit_dtset%latt_pot_fname=""
 
  multibinit_dtset%slc_pot_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_pot_fname',tread,'KEY',&
       & key_value=multibinit_dtset%slc_pot_fname)
+ if(.not. tread==1) multibinit_dtset%slc_pot_fname=""
 
  multibinit_dtset%outdata_prefix=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'outdata_prefix',tread,'KEY',&
       & key_value=multibinit_dtset%outdata_prefix)
- if(.not. tread==1) multibinit_dtset%latt_init_hist_fname="multibinit"
+ if(.not. tread==1) multibinit_dtset%outdata_prefix="multibinit"
 
 !N
  multibinit_dtset%natifc=natom

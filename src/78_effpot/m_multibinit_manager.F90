@@ -37,7 +37,7 @@ module m_multibinit_manager
   use m_errors
   use m_xmpi
 
-  use m_init10, only: init10
+  use m_init10, only: init10, postfix_fnames
   use m_mathfuncs, only: diag
   use m_hashtable_strval, only: hash_table_t
   use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
@@ -93,7 +93,7 @@ module m_multibinit_manager
   ! Multibinit manager
   !-------------------------------------------------------------------!
   type, public :: mb_manager_t
-    
+     character(len=fnlen) :: input_path
      character(len=fnlen) :: filenames(18)
      ! pointer to parameters. it is a pointer because it is initialized outside manager
      type(multibinit_dtset_type), pointer :: params=>null() 
@@ -139,6 +139,7 @@ module m_multibinit_manager
      procedure :: initialize
      procedure :: finalize
      procedure :: read_params    ! parse input file
+
      procedure :: prepare_params ! process the parameters. e.g. convert unit, set some flags, etc.
      procedure :: read_potentials ! read primitve cell and potential
      procedure :: fill_supercell
@@ -158,14 +159,16 @@ contains
   !-------------------------------------------------------------------!
   ! initialize
   !-------------------------------------------------------------------!
-  subroutine initialize(self,  filenames,params)
+  subroutine initialize(self,input_path, filenames,params)
     class(mb_manager_t), intent(inout) :: self
+    character(len=fnlen), intent(inout) :: input_path
     character(len=fnlen), intent(inout) :: filenames(18)
     type(multibinit_dtset_type), target, optional, intent(in) :: params
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     integer :: i
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    self%input_path=input_path
     self%filenames(:)=filenames(:)
     call xmpi_bcast(self%filenames, master, comm, ierr)
 
@@ -230,15 +233,15 @@ contains
        ABI_FREE_SCALAR(self%lattice_mover)
        nullify(self%lattice_mover)
     end if
+    !call self%lwf_mover%finalize()
+
     if(.not. self%use_external_params) then
        call multibinit_dtset_free(self%params)
        if (associated(self%params)) then
            ABI_FREE_SCALAR(self%params)
        endif
-       !deallocate(self%params)
     endif
     nullify(self%params)
-    !call self%lwf_mover%finalize()
 
     self%has_displacement=.False.
     self%has_strain=.False.
@@ -279,23 +282,6 @@ contains
     !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
 
 
-    !FIXME: This should not be here.
-    ! It is only for lattice potential
-    if(.False.) then
-     if(iam_master) then
-       write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-            & '-',trim(self%filenames(3)),ch10,' to initialize the multibinit input'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-     end if
-       call effective_potential_file_getDimSystem(self%filenames(3),natom,ntypat,nph1l,nrpt)
-    else
-       natom=0
-       ntypat=0
-       nph1l=0
-       nrpt=0
-    endif
-
     !Read the input file, and store the information in a long string of characters
     !strlen from defs_basis module
     option=1
@@ -313,12 +299,13 @@ contains
 
     !Read the input file
     call invars10(self%params,lenstr,natom,string)
-
+    call postfix_fnames(self%input_path, self%filenames, self%params )
     if (iam_master) then
        !  Echo the inputs to console and main output file
        call outvars_multibinit(self%params,std_out)
        call outvars_multibinit(self%params,ab_out)
     end if
+
   end subroutine read_params
 
   !-------------------------------------------------------------------!
@@ -463,7 +450,6 @@ contains
         case (1)
           ABI_DATATYPE_ALLOCATE_SCALAR(spin_mover_t, self%spin_mover)
     end select
-    !fname=trim(self%filenames(2))//"_spinhist_input.nc"
         call self%spin_mover%initialize(params=self%params,&
             & supercell=self%supercell, rng=self%rng, &
             & restart_hist_fname=self%params%spin_init_hist_fname)
@@ -666,12 +652,18 @@ contains
   !run_all: THE function which does everything
   !         from the very begining to end.
   !-------------------------------------------------------------------!
-  subroutine run_all(self, filenames, params)
+  subroutine run_all(self, input_path, filenames, dry_run)
     class(mb_manager_t), intent(inout) :: self
+    character(len=fnlen), intent(inout) :: input_path
     character(len=fnlen), intent(inout) :: filenames(18)
-    type(multibinit_dtset_type), optional, intent(in) :: params
-    call self%initialize(filenames, params=params)
-    call self%run()
+    integer, intent(in) :: dry_run
+    call self%initialize(input_path, filenames)
+    if (dry_run==0) then
+      call self%run()
+    else
+      call wrtout([std_out, ab_out], "Multibinit in dry_run mode. Exiting after input parser")
+      call xmpi_end()
+    end if
     call self%finalize()
   end subroutine run_all
 

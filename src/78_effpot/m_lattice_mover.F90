@@ -503,6 +503,9 @@ contains
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+
     if (iam_master) then
        T_start=self%params%latt_temperature_start
        T_end=self%params%latt_temperature_end

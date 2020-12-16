@@ -158,15 +158,8 @@ contains
     character(len=500) :: message
     integer :: ii
     logical:: use_sia, use_exchange, use_dmi, use_bi
-
-    if (len_trim(params%spin_pot_fname)/=0) then
-        fname=params%spin_pot_fname
-    else if (len_trim(fnames(3))/=0) then
-        fname=fnames(3)
-    else
-        MSG_ERROR("The spin potential file should be given either with spin_pot_fname in input file or in files file.")
-    endif
-
+    fname=params%spin_pot_fname
+    ABI_UNUSED(fnames)
     if (xmpi_comm_rank(xmpi_world)==0) then
        write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
             &     'reading spin terms.'

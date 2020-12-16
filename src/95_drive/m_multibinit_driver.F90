@@ -116,14 +116,14 @@ contains
 !!      scup_kpath_print,wrtout,xmpi_bcast,xmpi_end
 !!
   !! SOURCE
-  subroutine multibinit_main(filnam, dry_run)
+  subroutine multibinit_main(input_path, filnam, dry_run)
+    character(len=fnlen), intent(inout) :: input_path 
     character(len=fnlen), intent(inout) :: filnam(18)
     integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
     type(effective_potential_type) :: reference_effective_potential
     type(abihist) :: hist, hist_tes
 
-    ! data for spin
     !type(spin_model_t) :: spin_model
     type(mb_manager_t) :: manager
     character(len=strlen) :: string
@@ -225,7 +225,7 @@ contains
                &     'reading spin terms.'
        end if
        !call spin_model%initialize( filnam, inp )
-       call  manager%initialize(filnam, params=inp)
+       call  manager%initialize(input_path, filnam, params=inp)
     else
        !  Read the model (from DDB or XML)
        call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)

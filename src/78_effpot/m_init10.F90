@@ -29,6 +29,7 @@ module m_init10
  use m_errors
  use m_abicore
  use m_fstrings,     only : int2char4, rmquotes, sjoin, strcat, basename
+ use m_multibinit_dataset, only: multibinit_dtset_type
 
  implicit none
 
@@ -36,6 +37,7 @@ module m_init10
 !!***
 
  public :: init10
+ public :: postfix_fnames
 !!***
 
 contains
@@ -52,9 +54,9 @@ contains
 !!
 !! INPUTS
 !!  character(len=fnlen) input_path: gives the name of the input file.
-  !! If not given, the files file are then used with a deprecation message.
+!! If not given, the files file are then used with a deprecation message.
 !! OUTPUT
-!! character(len=fnlen) filnam(6)=character strings giving file names
+!! character(len=fnlen) filnam(18)=character strings giving file names
 !!
 !! NOTES
 !! 1. Should be executed by one processor only.
@@ -109,9 +111,6 @@ subroutine init10(input_path, filnam,comm)
  filnam(:) = ""
 
  if (me==master)then
-    print *, "input_path:", input_path
-    print *, "input_path:", trim(input_path)
-    print *, "input_path:", len_trim(input_path)
     if (len_trim(input_path) == 0) then
        ! Legacy Files file mode.
        write(std_out, "(2a)")" DeprecationWarning: ",ch10
@@ -151,24 +150,14 @@ subroutine init10(input_path, filnam,comm)
     else
        filnam(1)=input_path
        filnam(2) = trim(input_path)//".abo"
-       filnam(3) = "i"
-       filnam(4) = "o"
-       filnam(5) = "t"
 
        fname = basename(input_path)
        i1 = index(fname, ".")
-       !if (i1 /= 0) then
        if (i1 > 1) then
-          ! file ext is present --> use prefix to initialize filnam
-          !TODO:  read the input file and set the filnam array
           i2 = index(input_path, ".", back=.True.)
           filnam(2) = input_path(:i2) // "abo"
-          ! file ext is present --> use prefix to initialize filnam
-          !TODO:  read the input file and set the filnam array
-       
+          ! The rest filnam(3:) are set after reading from input file.
        end if
-
-
     end if
  end if
 
@@ -177,6 +166,43 @@ subroutine init10(input_path, filnam,comm)
 
 end subroutine init10
 !!***
+
+!===============================================================
+! Change the extension of a filename. e.g. run.abo -> run_hist.nc
+!> @ fname: the old fname
+!> @ new_ext: the new extension. e.g. .nc or _hist.nc
+!===============================================================
+function change_extension(fname, new_ext) result (ret)
+    character(len=fnlen), intent(in) :: fname, new_ext
+    character(len=fnlen) :: tmp_fname
+    character(len=fnlen) :: ret
+    integer :: i1, i2
+    tmp_fname=basename(fname)
+    i1 = index(tmp_fname, ".")
+    if (i1 > 1) then
+       i2 = index(fname, ".", back=.True.)
+       ret = fname(:i2) // trim(new_ext)
+    end if
+end function change_extension
+
+!===============================================================
+! Sync the filename info from files file and from input file
+!> @ input_path: input file
+!> @ filnam : the filenames from files file
+!> @ params: data read from inputfile
+!===============================================================
+subroutine postfix_fnames(input_path, filnam, params)
+  character(len=fnlen), intent(inout) :: input_path, filnam(18)
+  type(multibinit_dtset_type), intent(inout) :: params
+  ! if using files file, set the params%*_fname according to filnam
+  if (len_trim(input_path)==0) then
+     if (len_trim(params%spin_pot_fname)==0) params%spin_pot_fname=filnam(3)
+     if (len_trim(params%latt_pot_fname)==0) params%latt_pot_fname=filnam(3)
+     if (len_trim(params%slc_pot_fname)==0) params%slc_pot_fname=filnam(3)
+     ! TODO lattice model
+  end if
+
+end subroutine postfix_fnames
 
 end module m_init10
 !!***
