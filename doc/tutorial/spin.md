@@ -35,85 +35,100 @@ You can copy these two files in the *Work_spin* directory with:
 cd $ABI_TESTS/tutorial/Input
 mkdir Work_spin
 cd Work_spin
-cp ../tspin_x.files .  # Change it, when needed, as usual.
 cp ../tspin_1.in .
 ```
 
-{% dialog tests/tutorial/Input/tspin_x.files tests/tutorial/Input/tspin_1.in %}
+{% dialog tests/tutorial/Input/tspin_1.in %}
 
 You can now run the calculation with:
 
 ```sh
-abinit < tspin_x.files > log 2> err &
+abinit tspin_1.in > log > err &
 ```
 
-then you should edit the input file, and read it carefully.
-Because we are going to perform magnetic calculations, there a two new types of variables:
+In the mean time the calculation is done, have a look at the input file, and read it carefully.
+Because we are going to perform magnetic calculations, there are two new types of variables related to magnetism:
 
 * [[nsppol]]
 * [[spinat]]
 
-You can read their description in the help file. You will work at fixed
-[[ecut]] (=18Ha) and k-point grid, defined by [[ngkpt]] (the 4x4x4
-Monkhorst-Pack grid). It is implicit that in *real life*, you should do a
-convergence test with respect to both convergence parameters (NB: one needs a
+You will work with a low [[ecut]] (=18Ha) and a small k-point grid (defined by [[ngkpt]]) of 4x4x4
+Monkhorst-Pack grid. It is implicit that in *real life*, you should do a
+convergence test with respect to both [[ecut]] and [[ngkpt]] parameters and this is even more
+important with magnetism that involves low energy differences (e.g. one needs a
 minimal cut-off to exhibit magnetic effects).
-This run takes about 12 seconds on a modern PC.
 
-We will compare the output with and without magnetization. (Hence, there are two datasets in the run)
-We now look at the output file:
-In the magnetic case, the electronic density is split into two parts,
+This basic first example will compare two cases, one that do not take into account magnetism and one that take into account it (done through two datasets in the input, the dataset 1 does not include magnetism and dataset 2 includes it).
+We now look at the output file. 
+In the magnetic case (dataset 2), the electronic density is split into two parts,
 the "Spin-up" and the "Spin-down" parts to which correspond different Kohn-Sham
 potentials and different sets of eigenvalues whose occupations are given by the
-Fermi-Dirac function (without the ubiquitous factor 2)
+Fermi-Dirac function (without the ubiquitous factor 2).
 
 For the first k-point, for instance, we get:
 
 ```
-(no magnetization)
-occ   2.00000   1.99989   1.99989   1.22915   1.22915   0.28676   0.00000   0.00000
+(no magnetism)
+   2.00000    2.00000    2.00000    2.00000    2.00000    1.99999    1.99999    1.28101   1.28101    0.35284
+
 (magnetic case)
-occ   1.00000   0.99999   0.99999   0.98396   0.98396   0.69467   0.00000   0.00000 (spin-up)
-      1.00000   0.99730   0.99730   0.00898   0.00898   0.00224   0.00000   0.00000 (spin-down)
+(SPIN UP)
+   1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.97826   0.97826    0.68642
+(SPIN DOWN)
+   1.00000    1.00000    1.00000    1.00000    1.00000    0.99995    0.99995    0.05851   0.05851    0.01699
 ```
 
-We note that the occupations are very different for up and down spins, which
-means that the eigenvalues are shifted, which is in turn due to a shift of the
-exchange-correlation potential, and therefore of the effective potential.
+We note that the occupations of the magnetic case are different for up and down spin channels, which
+means that the eigenvalues are shifted (which is in turn due to a shift of the exchange-correlation potential, 
+and therefore of the effective potential).
 You can indeed have a look at the output file to compare spin-up and down eigenvalues:
 
-    -0.48411  -0.38615  -0.38615  -0.30587  -0.30587  -0.27293   0.33747   0.33747 (up, kpt#1)
-    -0.46638  -0.32383  -0.32383  -0.21767  -0.21767  -0.20371   0.36261   0.36261 (dn, kpt#1)
+```
+(up channel:)
+  -3.09143   -1.74675   -1.74675   -1.74418    0.25777    0.36032    0.36032    0.46350   0.46350    0.49374
+(dn channel:)
+  -3.04218   -1.69171   -1.69171   -1.68906    0.27331    0.40348    0.40348    0.52935   0.52935    0.54215
+```
 
-The magnetization density (in unit of $\mu_B$ - Bohr's magneton) is the
-difference between the up and down densities. The magnetization density,
-divided by the total density, is denoted "zeta".
-This quantity "zeta" can vary between -1 and 1. It is zero everywhere in the non-magnetic case.
-In the magnetic case, we can read for instance its minimal and maximal values in the output file provided 
-that [[prtvol]] is set to 2 in the input file:
+Now you can move down in the output and look at the following section:
+````
+ Integrated electronic and magnetization densities in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1   2.00000     7.658786     6.158329     13.817115     1.500458
+ ---------------------------------------------------------------------
+  Sum:              7.658786     6.158329     13.817115     1.500458
+ Total magnetization (from the atomic spheres):             1.500458
+ Total magnetization (exact up - dn):                       1.571040
+======================================================================
+````
 
-    Min spin pol zeta= -4.8326E-02 at reduced coord.  0.7222  0.5000  0.2222
-         next min= -4.8326E-02 at reduced coord.  0.5000  0.7222  0.2222
-    Max spin pol zeta=  5.7306E-01 at reduced coord.  0.0000  0.8889  0.8889
-         next max=  5.7306E-01 at reduced coord.  0.8889  0.0000  0.8889
+In the last line, it is reported the total magnetization of the whole unit cell 
+(in unit of $\mu_B$ - Bohr's magneton), which correponds to the difference between the
+integrated up and down densities, here we have 1.571040 $\mu_B$.
+It is also reported the same difference but as integrated into spheres around each atom 
+(here we have only one atom), which gives here 1.500458 $\mu_B$ on iron atom.
+The integrated magnetization in atomic spheres is an approximation, one should always check
+that the sum of the integrated atomic magnetization from the atomic sphere is very close to the 
+exact up-dn unit cell magnetization.
+In the case of dataset 1 without magnetism, only the integrated electronic density is reported since there is
+no distinction between up and down spin channels.
 
-The total magnetization, i.e. the integrated in the unit cell, is now:
+You can look to the total energy of dataset 1 and 2:
 
-    Magnetization (Bohr magneton)=  1.96743463E+00
-    Total spin up =  4.98371731E+00   Total spin down =  3.01628269E+00
+```
+           etotal1    -1.2342819713E+02
+           etotal2    -1.2343141307E+02
+```
 
-We observe that the total density (up + down) yields 8.000 as expected.
+The energy of the magnetic calculation is lower than the non-magnetic one,
+which is expected for a magnetic crystal (the system gains energy through the extra degrees of freedom given by the magnetism).
+Finally, you can also remark that the stress tensor is affected by the presence of magnetism.
+This would also be true for the forces, but we don't remark it here because we are in high symmetry symmetry structure (all the forces are zeroed by symmetry), however this would be apparent for a less symmetric material.
 
-The magnetization density is not the only changed quantity.
-The energy is changed too, and we get:
+#### --- EB: I STOPPED HERE --- ###
 
-    etotal1  -2.4661707268E+01  (no magnetization)
-    etotal2  -2.4670792868E+01  (with magnetization)
-
-The energy of the magnetized system is the lowest and therefore energetically
-favoured, as expected since bcc iron is a ferromagnet.
-Finally, one also notes that the stress tensor is affected by the
-magnetization. This would also be true for the forces, for a less symmetric material.
 
 It is interesting to consider in more detail the distribution of eigenvalues
 for each direction of magnetization, which is best done by looking at the
