@@ -29,6 +29,7 @@ spin_write_traj = 0
 #%% need_cpp_vars = HAVE_XML
 #%% exclude_builders = .*_nag_7.0_.*
 #%% system_xml = t23.xml
+#%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
 #%%   t23.abo, tolnlines = 1, tolabs = 2e3, tolrel = 1, fld_options = -medium;

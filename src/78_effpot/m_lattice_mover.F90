@@ -387,7 +387,6 @@ contains
 
     nstep=floor(self%total_time/self%dt)
     do i =1, nstep
-       !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
        if(modulo(i, self%params%nctime)==0) then
           write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &

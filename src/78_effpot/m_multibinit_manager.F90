@@ -446,10 +446,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_spin_mover(self)
     class(mb_manager_t), intent(inout) :: self
-    select case(self%params%spin_dynamics)
-        case (1)
-          ABI_DATATYPE_ALLOCATE_SCALAR(spin_mover_t, self%spin_mover)
-    end select
+        ABI_DATATYPE_ALLOCATE_SCALAR(spin_mover_t, self%spin_mover)
         call self%spin_mover%initialize(params=self%params,&
             & supercell=self%supercell, rng=self%rng, &
             & restart_hist_fname=self%params%spin_init_hist_fname)
