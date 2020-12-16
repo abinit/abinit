@@ -10,10 +10,10 @@ keywords = [
 
 #: List of input files
 inp_files = [
-    "tatdep1_1.in",
-    "tatdep1_2.in",
-    "tatdep1_3.in",
-    "tatdep2_1.in",
-    "tatdep2_2.in",
-    "tatdep2_3.in",
+    "tatdep1_1.abi",
+    "tatdep1_2.abi",
+    "tatdep1_3.abi",
+    "tatdep2_1.abi",
+    "tatdep2_2.abi",
+    "tatdep2_3.abi",
 ]

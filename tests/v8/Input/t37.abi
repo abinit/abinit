@@ -21,7 +21,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
-#%% md_hist = t37_HIST.nc
+#%% md_hist = t37_
 #%% [files]
 #%% files_to_test = 
 #%%   t37.abo, tolnlines = 1, tolabs = 0, tolrel = 0, fld_options = -medium;
