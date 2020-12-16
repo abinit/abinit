@@ -500,7 +500,7 @@ getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
 Next, we have the variables governing the EPH calculation:
 
-[[ddb_ngpqt]], [[dipdip]]
+[[ddb_ngqpt]], [[dipdip]]
 [[eph_intmeth]]
 [[eph_fsewin]] 0.3 eV
 [[eph_intmeth]] 1
