@@ -1,0 +1,44 @@
+#  Isolated Bi atom
+
+   ndtset   2
+ pawspnorb1 0  ! Without spin-orbit
+ pawspnorb2 1  ! With spin-orbit
+
+   ntypat  1 typat  1
+    natom  1
+   znucl   83.d0
+
+   nband1  12
+   nband2  24
+    nsym   1
+
+  kptopt   4
+  occopt   7
+  tsmear   0.02
+
+#Common data
+   acell   3*10   #This parameter is of course for testing purposes only
+    xred   3*0.0
+    ecut   8
+ pawecutdg 15
+   nstep   20
+  toldfe   1.0d-7
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "83bi.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tspin_6.abo, tolnlines=  5, tolabs=  3.000e-08, tolrel=  3.000e-03
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = PAW 
+#%% description = 
+#%%   Bismuth atom, isolated, in a supercell - with and without spin-orbit coupling.
+#%%<END TEST_INFO>

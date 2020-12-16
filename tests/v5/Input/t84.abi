@@ -1,0 +1,45 @@
+# anaddb analysis of Au zigzag wire
+
+ifcflag 0
+
+brav 1
+ngqpt 1 1 11
+nqshft 1
+q1shft 3*0.0
+
+asr 4
+chneut 0
+
+eivec 4
+
+nph1l 11
+
+qph1l 0.0  0.0  0.0  1.0
+      0.0  0.0  0.05 1.0
+      0.0  0.0  0.1  1.0
+      0.0  0.0  0.15 1.0
+      0.0  0.0  0.2  1.0
+      0.0  0.0  0.25 1.0
+      0.0  0.0  0.3  1.0
+      0.0  0.0  0.35 1.0
+      0.0  0.0  0.4  1.0
+      0.0  0.0  0.45 1.0
+      0.0  0.0  0.5  1.0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% input_ddb = t83.ddb.out
+#%% test_chain = t81.abi, t82.abi, t83.abi, t84.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t84.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%## extra_inputs = t83.ddb.out.gz
+#%% psp_files = 
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords =
+#%% description = Tests asr=4, 0D - rotational invariance for anaddb. NOTE : This algorithm has never been finalized.
+#%%<END TEST_INFO>

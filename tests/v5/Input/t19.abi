@@ -1,0 +1,94 @@
+# fcc Gd.
+# This calculation is not converged with respect to k-points and plane wave cutoff.
+# In the fcc symetry, real harmonics as defined in Abinit do not diagonalise the density matrix.
+# With dmatudiag =1, the diagonalization of the density matrix is done.
+# One can thus check the degeneracy of the density matrix (cf output file).
+# Eigenvectors  corresponds to cubic harmonics which diagonalize the density matrix in the cubic symetry.
+#DATASETS AND OPTIONS
+nstep 80
+tolvrs 1.0d-10
+getwfk -1
+pawprtvol 2
+prtvol 3
+nnsclo 5
+nline 5
+
+#CONVERGENCE PARAMETERS.
+ecut 14
+pawecutdg  40
+occopt 7
+tsmear 0.015
+nband  20
+
+#PHYSICAL PARAMETERS.
+nsppol 2
+nspden 2
+spinat 0 0 8
+natom 1 ntypat  1 typat  1
+znucl  64.0
+xred  0   0   0
+acell 3*7.4
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1/2 1/2 0.0
+
+## K-POINTS
+nshiftk 4
+kptrlatt 3 0 0 0 3 0 0 0 3
+shiftk 1/2 1/2 1/2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
+
+## DOS
+prtdos 3
+dosdeltae 0.005
+natsph 1
+iatsph 1
+pawprtdos 2
+
+# DFT+U
+usepawu    1
+lpawu   3    # DFT+U CORRECTION ON f-ORBITALS
+upawu  0.22
+jpawu  0.0368
+dmatpuopt 2  # CHOOSE EXPRESSION OF THE DENSITY MATRIX.
+dmatudiag 1  # DIAGONALISE DENSITY MATRIX
+usedmatpu 5 # IMPOSE DENSITY MATRIX IN THE FIRST 10 STEPS
+dmatpawu  1.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 1.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 1.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 1.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 1.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 1.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 1.0
+
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "64gd.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t19.abo,         tolnlines = 40,  tolabs = 1.000e-01, tolrel = 7.000e-01, fld_options = -medium;
+#%%  t19o_DOS_AT0001, tolnlines = 100, tolabs = 5.100e-01, tolrel = 3.000e-03, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = B. Amadon
+#%% keywords = PAW, DFTU
+#%% description = 
+#%%   FCC Gadolinium. PAW + U calculation
+#%%   Test the imposition of the density matrix (10 first steps) and related variables.
+#%%   Test of partial DOS is also done (through the diff of DOS_AT0001)
+#%% topics = DFT+U
+#%%<END TEST_INFO>

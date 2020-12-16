@@ -243,6 +243,8 @@ type, public :: dataset_type
  integer :: gwmem = 11
  integer :: gwpara = 2
  integer :: gwrpacorr = 0
+ integer :: gwgmcorr = 0
+ integer :: gw1rdm = 0
 
  integer :: gw_customnfreqsp
  integer :: gw_frqim_inzgrid = 0
@@ -273,6 +275,7 @@ type, public :: dataset_type
  integer :: iprcel
  integer :: iprcfc
  integer :: irandom
+ integer :: irdchkprdm = 0
  integer :: irdddb = 0
  integer :: irddvdb = 0
  integer :: irdddk = 0
@@ -460,6 +463,7 @@ type, public :: dataset_type
  integer :: prepgkk = 0
  integer :: prtbbb = 0
  integer :: prtbltztrp = 0
+ integer :: prtchkprdm = 1
  integer :: prtcif = 0
  integer :: prtden
  integer :: prtdensph = 1
@@ -597,6 +601,7 @@ type, public :: dataset_type
  integer :: w90prtunk
 !X
  integer :: xclevel
+ integer :: x1rdm  = 0
 
 !Integer arrays
  integer :: bdberry(4)
@@ -1487,6 +1492,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
+ dtout%gwgmcorr           = dtin%gwgmcorr
+ dtout%gw1rdm             = dtin%gw1rdm
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
@@ -1533,6 +1540,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%iprcel             = dtin%iprcel
  dtout%iprcfc             = dtin%iprcfc
  dtout%irandom            = dtin%irandom
+ dtout%irdchkprdm         = dtin%irdchkprdm
  dtout%irdbseig           = dtin%irdbseig
  dtout%irdbsreso          = dtin%irdbsreso
  dtout%irdbscoup          = dtin%irdbscoup
@@ -1710,6 +1718,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prepgkk            = dtin%prepgkk
  dtout%prtbbb             = dtin%prtbbb
  dtout%prtbltztrp         = dtin%prtbltztrp
+ dtout%prtchkprdm         = dtin%prtchkprdm
  dtout%prtcif             = dtin%prtcif
  dtout%prtden             = dtin%prtden
  dtout%prtdensph          = dtin%prtdensph
@@ -1855,6 +1864,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%w90prtunk          = dtin%w90prtunk
  dtout%xclevel            = dtin%xclevel
  dtout%xc_denpos          = dtin%xc_denpos
+ dtout%x1rdm              = dtin%x1rdm
 
 !Copy allocated integer arrays from dtin to dtout
  dtout%bdberry(:)         = dtin%bdberry(:)
@@ -3140,7 +3150,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'
+ list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_invalid_freq'
  list_vars=trim(list_vars)//' gw_icutcoul'
@@ -3158,7 +3168,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irddvdb irdefmas'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
@@ -3215,7 +3225,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
- list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
+ list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
  list_vars=trim(list_vars)//' prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar'
@@ -3300,7 +3310,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
 !X
- list_vars=trim(list_vars)//' xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile'
+ list_vars=trim(list_vars)//' xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile x1rdm'
 !Y
 !Z
  list_vars=trim(list_vars)//' zcut zeemanfield znucl'

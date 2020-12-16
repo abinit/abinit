@@ -1,0 +1,50 @@
+!Input file for the anaddb code. Analysis of the DDB for BaSr(TiO3)2 FCC unit cell
+
+!Flags
+ dieflag   2     ! 2=> electronic dielectric tensor only
+ ifcflag   1     ! Interatomic force constant flag
+
+!Effective charges
+  chneut   2     ! Charge neutrality requirement for effective charges.
+                 !        2=> imposed with weights proportional to screening)
+
+!Interatomic force constant info
+  dipdip  1      ! Dipole-dipole interaction treatment
+  ifcana  0      ! Analysis of the IFCs
+  ifcout 20      ! Number of IFC's written in the output, per atom
+  natifc  3      ! Number of atoms in the cell for which ifc's are analysed
+   atifc  1 2 3  ! List of atoms
+
+!Wavevector grid number 1 (coarse grid, from DDB)
+  brav    2      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+  ngqpt   1  1  1   ! Monkhorst-Pack indices
+  nqshft  2         ! number of q-points in repeated basic q-cell
+  q1shft  3*0.0  3*0.5
+
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+  nph1l     5      ! number of phonons in list 1
+  qph1l   0.0  0.0  0.0  1.0
+          0.0  0.5  0.5  1.0
+          0.5  0.0  0.5  1.0
+          0.5  0.5  0.0  1.0
+          0.5  0.5  0.5  1.0
+# Not the default value, to keep temporal continuity with older versions
+  symdynmat 0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% [files]
+#%% files_to_test = 
+#%%   t39.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% extra_inputs = t39.ddb.in.gz
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   BaSr(TiO3)2 FCC unit cell. Show how to use only the q Gamma point
+#%%   to obtain symmetric IFCs using Anaddb.
+#%% topics = Phonons, PhononBands
+#%%<END TEST_INFO>

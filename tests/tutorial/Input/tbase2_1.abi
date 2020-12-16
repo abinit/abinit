@@ -1,0 +1,91 @@
+# H2 molecule in a big box
+#
+# This file to optimize the H2 bond length, compute the associated total
+# energy, then to compute the total energy of the isolated H atom.
+#
+
+ndtset 2
+
+#Definition of the unit cell and ecut, 
+#for which one will have to make a convergence study
+acell 10 10 10 
+ecut 10
+
+#First dataset : find the optimal bond length of H2, and associated total energy
+   natom1  2             # There are two atoms
+  ionmov1  2             # Use the modified Broyden algorithm
+   ntime1  10            # Maximum number of Broyden "timesteps"
+  tolmxf1  5.0d-4        # Stopping criterion for the geometry optimization : when 
+                         # the residual forces are less than tolmxf, the Broyden 
+                         # algorithm can stop
+   xcart1  -0.7  0.0 0.0 # The starting values of the
+            0.7  0.0 0.0 # atomic coordinates
+  toldff1  5.0d-5        # Will stop the SCF cycle when, twice in a row, 
+                         # the difference between two consecutive evaluations of
+                         # forces differ by less than toldff (in Hartree/Bohr)
+   nband1   1            # Just one band
+
+#Second dataset : get the total energy of the isolated atom
+   natom2  1             # There is one atom
+  nsppol2  2             # Spin-polarized calculation
+  occopt2  2             # Allow occupation numbers to be set by hand
+   nband2  1 1           # Number of bands for spin up and spin down
+     occ2  1.0  0.0      # Occupation numbers for spin up state and spin down state.
+  toldfe2  1.0d-6        # Will stop the SCF cycles when, twice in a row, 
+                         # the difference between two consecutive evaluations 
+                         # of total energy differ by less than toldfe (in Hartree)
+                         # This value is way too large for most realistic studies of materials
+   xcart2  0.0 0.0 0.0   # The atom is located at the origin
+  spinat2  0.0 0.0 1.0   # Initialisation of spin
+
+
+#rprim 1 0 0  0 1 0  0 0 1 # This line, defining orthogonal primitive vectors,
+                           # is commented, because it is precisely the default value of rprim
+
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 1           # The keyword "znucl" refers to the atomic number of the 
+                  # possible type(s) of atom. The pseudopotential(s) 
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Hydrogen.
+                         
+
+#Definition of the atoms
+typat 1 1         # For the first dataset, both numbers will be read,
+                  # while for the second dataset, only one number will be read
+
+#Definition of the k-point grid
+kptopt 0          # Enter the k points manually 
+nkpt 1            # Only one k point is needed for isolated system,
+                  # taken by default to be 0.0 0.0 0.0
+
+#Definition of the SCF procedure
+nstep 10          # Maximal number of SCF cycles
+#toldfe is no more defined, as toldff is used above... 
+diemac 2.0        # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescriptions for molecules
+                  # in a big box
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tbase2_1.abo, tolnlines=  3, tolabs=  3.000e-10, tolrel=  2.000e-08
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%    H2 molecule in a big box
+#%%    This file to optimize the H2 bond length, compute the associated total
+#%%    energy, then to compute the total energy of the isolated H atom.
+#%%<END TEST_INFO>

@@ -1,0 +1,125 @@
+# -------------------------------------------------------------------
+# Argon - Test of Van der Waals dispersion potential with Becke-
+# Jonhson damping (DFT-D3(BJ)) on dynamical matrix
+# Test on FFC Argon
+# DATASET 1: ground-state
+# DATASET 2: computation of the dynamical matrix at G by DFPT
+# DATASET 3: ground-state at k+(0,0,1/2)
+# DATASET 4: computation of the dynamical matrix at (0,0,1/2) by DFPT
+# DATASET 5: ground-state at k+(0,0,1/3)
+# DATASET 6: computation of the dynamical matrix at (0,0,1/3) by DFPT
+# --------------------------------------------------------------------
+
+
+ndtset  4
+ecut 3 # Must be increased for convergence purposes 
+nstep 10
+ecutsm 0.5
+dilatmx 1.05
+ixc 11
+kptopt 3
+# DATASET 1: ground-state computation
+kptopt1   1
+tolvrs1   1.0d-18
+
+# DATASET 2: phonon computation at G by DFPT
+rfphon2   1
+rfatpol2   1 1
+rfdir2   1 1 1
+nqpt2   1
+qpt2   0.0 0.0 0.0
+getwfk2   1
+kptopt2   2
+tolvrs2   1d-16
+
+#DATASET 3: ground-state at k+A
+getden3  1
+iscf3   -2
+nqpt3    1
+qpt3     0.0 0.0 0.5
+nbdbuf3  2
+tolwfr3  1.0d-24
+
+# DATASET 4: phonon computation at A by DFPT
+rfphon4   1
+rfatpol4   1 1
+rfdir4  1 1 1
+nqpt4   1
+qpt4   0.0 0.0 0.5
+getwfk4   1
+#getwfq4   3
+getwfq_filepath4 "t98o_DS3_WFQ"
+kptopt4   3
+tolvrs4   1d-16
+
+#DATASET 5: ground-state at k+(0,0,1/3)
+getden5  1
+iscf5   -2
+nqpt5    1
+qpt5     0.0 0.0 1/3
+nbdbuf5  2
+tolwfr5  1.0d-24
+
+
+# DATASET 6: phonon computation at (0,0,1/3) by DFPT
+rfphon6   1
+rfatpol6   1 1
+rfdir6  1 1 1
+nqpt6   1
+qpt6   0.0 0.0 1/3
+getwfk6   1
+#getwfq6   5
+getwfq_filepath6 "t98o_DS5_WFQ"
+kptopt6   3
+tolvrs6   1d-16
+
+nband 10
+nbdbuf 2
+
+acell 3*10.4388809485E+00
+rprim 0 0.5 0.5
+      0.5 0 0.5
+      0.5 0.5 0
+
+ntypat  1
+znucl 18
+natom 1
+typat  1*1
+xred
+      0.0 0.0 0.25
+
+ngkpt  3*3 # Must be much increased for convergence purposes
+nshiftk 4
+shiftk  0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+diemac 3
+
+# vdW DFT-D input variables
+vdw_xc 7  # Activate DFT-D3(BJ)
+vdw_tol 1d-10 # Tolerance on the pair-wise term
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "18ar.revpbe"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t98.abo, tolnlines = 8, tolabs = 1.0e-05, tolrel = 1.0e-06, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = B. VAN TROEYE
+#%% keywords = DFPT, VDW, DFT-D3(BJ)
+#%% description = 
+#%%   Computation of the dynamical matrix at different q-vector including
+#%%   vdW-DFT-D3 corrections with Becke-Jonhson damping (DFT-D3(BJ))
+#%%   Only the pair-wise is computed (3-body term not implemented)
+#%%   In this test the following properties are thus tested: contribution
+#%%   to the energy and to the stress of DFT-D3(BJ) as well as 
+#%%   the contribution to the dynamical matrix
+#%% topics = vdw
+#%%<END TEST_INFO>

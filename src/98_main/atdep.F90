@@ -395,12 +395,11 @@ program atdep
  ABI_MALLOC(Phi4UiUjUkUl,(Invar%my_nstep)); Phi4UiUjUkUl(:)=0.d0 
  ABI_MALLOC(Phi3_ref,(3,3,3,Shell3at%nshell))  ; Phi3_ref(:,:,:,:)=0.d0
  ABI_MALLOC(Phi4_ref,(3,3,3,3,Shell4at%nshell)); Phi4_ref(:,:,:,:,:)=0.d0
- write(6,*) 'Coeff=', CoeffMoore%ncoeff1st,CoeffMoore%ncoeff2nd,CoeffMoore%ncoeff3rd,CoeffMoore%ncoeff4th
  ntotcoeff=CoeffMoore%ncoeff1st  + CoeffMoore%ncoeff2nd  + CoeffMoore%ncoeff3rd  + CoeffMoore%ncoeff4th
  ntotconst=CoeffMoore%nconst_1st + CoeffMoore%nconst_2nd + CoeffMoore%nconst_3rd + CoeffMoore%nconst_4th
  CoeffMoore%ntotcoeff=ntotcoeff
  CoeffMoore%ntotconst=ntotconst
- write(6,*) 'bornes=',3*natom*Invar%my_nstep,ntotcoeff
+
  ABI_MALLOC(CoeffMoore%fcoeff,(3*natom*Invar%my_nstep,ntotcoeff)); CoeffMoore%fcoeff(:,:)=0.d0 
  if (Invar%readifc.ne.1) then
    call tdep_calc_phi1fcoeff(CoeffMoore,Invar,proj1st,Shell1at,Sym)
@@ -426,7 +425,7 @@ program atdep
  if (Invar%together.eq.1) then
    write(stdout,*) '############### (Solve simultaneously all the orders) #######################'  
    if (Invar%readifc.ne.1) then
-     call tdep_calc_MoorePenrose(CoeffMoore,Forces_MD,0,Invar,MP_coeff,MPIdata)
+     call tdep_calc_MoorePenrose(CoeffMoore,Fresid,0,Invar,MP_coeff,MPIdata)
    end if  
    ABI_MALLOC(Phi1_coeff,(ncoeff1st,1)); Phi1_coeff(:,:)=MP_coeff(1:ncoeff1st,:)
    ABI_MALLOC(Phi2_coeff,(ncoeff2nd,1)); Phi2_coeff(:,:)=MP_coeff(ncoeff1st+1:ncoeff1st+ncoeff2nd,:)
@@ -458,6 +457,8 @@ program atdep
 !==========================================================================================
 !=================== If all the Orders are solved successively ============================
 !==========================================================================================
+!ATTENTION : Le LR semble enleve a l'ordre 2 mais pas a l'ordre 3 et 4. On repart de 
+!            Forces_MD tout en bas et pas de Fresid (car les ordres 2 et 3 sont supprimes au
  else if (Invar%together.eq.0) then
    write(stdout,*) '################## (Solve successively each order) ##########################'  
    do ii=1,Invar%order-1

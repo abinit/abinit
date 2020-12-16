@@ -1,0 +1,131 @@
+# Crystalline silicon: BSE excitons with iterative diagonalization. 
+ndtset 4
+gwpara  2
+
+# Definition of the planewave basis set 
+ecut 6         
+ecutwfn 6
+ecuteps     2.1
+
+istwfk *1
+nstep  50      
+diemac 12.0
+
+# Definition of the k-point grid
+kptopt 1             # Automatic generation of k points,
+ngkpt  2 2 2
+nshiftk 4
+shiftk  0.5 0.5 0.5  
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+
+########################################
+# Dataset1: self-consistent calculation
+########################################
+tolvrs1 1.0d-12
+
+###########################################
+# Dataset2: non-self-consistent calculation
+###########################################
+iscf2    -2       # non self-consistency, 
+getden2  -1       # read previous density file
+tolwfr2  1.0d-18  
+nband2    12
+
+
+##############################################################
+# Dataset3: 
+# Build BSE Hamiltonian with model dielectric function 
+# and compute bs_nstates excitons with iterative diagonalization
+##############################################################
+optdriver3 99
+getwfk3  2
+inclvkb3 2
+
+# Parameters controlling the conjugate gradient method in the BSE code.
+bs_algorithm3      3       # CG algorithm
+bs_nstates3        10      # Compute first 10 eigenvectors.
+tolwfr3            1.e-18  # Tolerance on residuals.
+nstep3             20      # Max number of iterations
+nline3             4       # Number of line minimization
+nbdbuf3            4       # Exclude last 4 states from convergence test.
+
+# Parameters for the BSE Hamiltonian.
+bs_exchange_term3  1
+bs_coulomb_term3   21     # Use model W and full W_GG.
+mdf_epsinf3        12.0
+bs_calctype3       1      # Use KS energies and orbitals to construct L0
+mbpt_sciss3          0.8 eV
+bs_coupling3       0
+bs_loband3         2 
+nband3             8
+
+
+##############################################################
+# Dataset4: 
+# Read BSE Hamiltonian generated in the previous datasets 
+# and compute bs_nstates excitons with (partial) direct diagonalization.
+##############################################################
+optdriver4 99
+getwfk4  2
+getbsreso4 3              # Read resonant block produced in dataset 4
+inclvkb4  2
+
+bs_algorithm4      1      # Direct diagonalization
+bs_nstates4        10     # Compute first 10 eigenvectors --> partial diago.
+bs_exchange_term4  1      # Include local fields
+
+# Use same parameters as dataset3 for the sake of consistency although 
+# H_exc will be read from file.
+bs_coulomb_term4   21     # Use full W_GG read from the SCR file.
+mdf_epsinf4        12.0
+bs_calctype4       1      # Use KS energies and orbitals to construct L0
+mbpt_sciss4          0.8 eV
+bs_coupling4       0      # No coupling (default)
+bs_loband4         2  
+nband4             8
+
+
+########################
+# Crystalline structure
+########################
+# Definition of the unit cell: fcc
+acell 3*10.217         
+rprim  0.0  0.5  0.5   
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat 1         
+znucl 14         
+
+# Definition of the atoms
+natom 2          
+typat 1 1         
+xred              
+   0.0  0.0  0.0
+   0.25 0.25 0.25
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t16.abo,          tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t16o_DS3_EXC_MDF, tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t16o_DS4_EXC_MDF, tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GW, BSE
+#%% description = 
+#%%   Silicon: Computation of the excitonic levels with the Bethe-Salpeter equation.
+#%%   Dataset3 uses the band-by-band conjugate gradient method to compute the lowest 10 states
+#%%   Dataset4 performs the same task with partial direct diagonalization (Lapack)
+#%% topics = BSE
+#%%<END TEST_INFO>

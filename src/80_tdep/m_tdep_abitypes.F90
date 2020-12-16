@@ -171,7 +171,7 @@ contains
     call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_cart,Shell2at,Sym)
 !   Copy Phi2 to Ifc%atmfrc
     call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,0,Phi2,Rlatt_cart,Shell2at,Sym)
-!   Write IFC in ifc_out.dat (for check)
+!   Write IFC in ifc_check.dat (for check)
     if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,MPIdata,Invar%natom_unitcell,1)
 
 !   Write the Phi2.dat file
@@ -660,8 +660,6 @@ subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rla
     if (option==0) Ifc%atmfrc(:,:,:,:,:)=zero
     if (option==1) Phi2(:,:)=zero
   end if  
-!FB  if (dipdip==0.and.option==0) Ifc%atmfrc(:,:,:,:,:)=zero
-!FB  if (dipdip==0.and.option==1) Phi2(:,:)=zero
   call xred2xcart(natom_unitcell,Lattice%rprimt(:,:),xcart(:,:),Sym%xred_zero(:,:))
   tol=1.d-8
 
@@ -693,8 +691,6 @@ subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rla
 &                         Phi2(ii+(iatcell-1)*3,(jatom-1)*3+jj)/Ifc%wghatm(iatcell,jatcell,irpt)
                 else if (option==1) then
                   Phi2(ii+(iatcell-1)*3,(jatom-1)*3+jj)=Ifc%atmfrc(ii,iatcell,jj,jatcell,irpt)*Ifc%wghatm(iatcell,jatcell,irpt)
-                  if (abs(Phi2(ii+(iatcell-1)*3,(jatom-1)*3+jj)-0.000040).lt.1.d-6) then
-                  end if
                 end if
               enddo
             enddo

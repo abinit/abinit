@@ -1,0 +1,45 @@
+!Input file for the anaddb code. Analysis of the He DDB
+
+!Flags
+ ifcflag   1     ! Interatomic force constant flag
+ ifcout 0
+ thmflag 3
+ telphint 1
+!Wavevector grid number 1 (coarse grid, from DDB)
+  brav    1      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+  ngqpt   1 1 1   ! Monkhorst-Pack indices
+  nqshft  1         ! number of q-points in repeated basic q-cell
+  q1shft  3*0.0
+
+!Interatomic force constant info
+  dipdip  0      ! Dipole-dipole interaction treatment
+
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+ nph1l    1     ! number of phonons in list 1
+ qph1l   0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% test_chain = t58.abi, t59.abi
+#%% input_ddb = t58o_DS2_DDB
+#%% input_gkk = t58o_DS2_EIGR2D
+#%% [files]
+#%% files_to_test = 
+#%%   t59.abo, tolnlines = 7, tolabs = 4.0e-2, tolrel = 2.0e-4
+#%% psp_files = 
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   He BCC 8-atom supercell. Fake smooth pseudopotential.
+#%%   Follow-up of test 58. Analyse (anaddb) the DDB and EIGR2D files.
+#%%   Compute the electron-phonon modifications of the electronic structure.
+#%%   Result to be compared with test 53 and 57. Agreement at the level of the sixth digit.
+#%%   For the lowest eigenenergy, with -0.19671 Ha, ZP correction is -1.775401E-03  (bands 1 to 6)
+#%%   For the HOMO,               with  0.09747 Ha, ZP correction is  1.970636E-03  (bands 7 and 8)
+#%%   For the LUMO,               with  0.46242 Ha, ZP correction is -3.291344E-03  (bands 9 to 14)
+#%% topics = TDepES
+#%%<END TEST_INFO>

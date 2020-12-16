@@ -242,6 +242,10 @@ contains
   end if  
   write (Invar%stdlog, '(a)', err=12 ) '.'//trim(Invar%output_prefix)
 12 continue
+  if ( inputfilename == "" ) inputfilename='input.in'
+  if ( filename == "" ) filename='HIST.nc'
+
+  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.abo')
 
 #if defined HAVE_NETCDF
  !Open netCDF file

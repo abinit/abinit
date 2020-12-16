@@ -20,7 +20,7 @@ The TB2J python package, which can be used to generate a spin model, can be foun
 
 *Before beginning, you might consider to work in a subdirectory for this tutorial. Why not Work_spindyn?*
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 Heisenberg Model formalism
 
