@@ -83,7 +83,7 @@ nbandhf2 4         # number of occupied states
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = X. Gonze
-#%% keywords = HF, PBE0, FAILS_IFMPI
+#%% keywords = HF, PBE0
 #%% description = Test of Fock in sequential case, with simple mixing and PAW
 #%% topics = Hybrids
 #%%<END TEST_INFO>
