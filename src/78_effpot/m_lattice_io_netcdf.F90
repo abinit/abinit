@@ -117,6 +117,7 @@ contains
     class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
+    ABI_UNUSED(fnames)
     call self%load_from_netcdf(params%latt_pot_fname)
   end subroutine load_from_files
 

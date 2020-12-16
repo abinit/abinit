@@ -264,7 +264,6 @@ contains
     use m_effective_potential_file
     use m_effective_potential
     class(mb_manager_t), intent(inout) :: self
-    character(len=500) :: message
     integer :: lenstr
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
@@ -429,7 +428,6 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
-    character(len=fnlen) :: fname
     if (self%params%spin_dynamics>0) then
         call self%set_spin_mover()
     end if
