@@ -1,0 +1,91 @@
+# Test for the calculation of effective mass tensor in CaO. 
+  
+  ndtset 3
+  
+  # Ground state calculation
+    kptopt1   1
+    ngkpt1    4 4 4   # for testing purposes
+    nshiftk1  1
+    shiftk1   0. 0. 0.
+    tolvrs1   1.0d-22
+  
+    #Restore the default parameters for the ground state part,
+    #i.e. override the common parameters defined for the effective mass datasets.
+    tolwfr1   0.0d0
+    nkpt1     0
+  
+  # WFK calc. at requested k-point
+  
+    iscf2    -2
+    getden2   1
+  
+                                                                                                          
+  # Response Function calculation : d/dk
+    rfelfd3   2         # Activate the calculation of the d/dk perturbation (required for effective mass calc.)
+  
+    getden3   1
+    getwfk3   2
+  
+    kptopt    0        # K-points can be specified in any way one want, they just need to be present in the 
+    nkpt      2        # ground state calc. too.
+    kpt       0.00 0.00 0.00   # Gamma                                                                      
+              0.00 0.50 0.50   # X
+              
+                                                                                                          
+    tolwfr    1.0d-22  # Must use tolwfr for non-self-consistent calculations.
+  
+    efmas3       1     # Triggers the calculation of effective mass tensors for the specified k-points.
+    efmas_bands  6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
+                 7 9   
+    efmas_calc_dirs3 1
+    efmas_n_dirs3 7
+    efmas_ntheta3 100
+    efmas_dirs3 
+              1 0 0
+              0 1 0
+              0 0 1
+              1 1 1
+              0 1 1
+              1 0 1
+              1 1 0
+     prtefmas3     1
+   
+#######################################################################   
+acell 3*9.136
+xred
+   0.0000000000    0.0000000000    0.0000000000
+   0.5000000000    0.5000000000    0.5000000000
+rprim
+  0   0.5 0.5
+  0.5 0   0.5
+  0.5 0.5 0  
+typat 1 2
+natom 2
+ntypat 2
+znucl 20 8
+# Disable symmetries.        
+nband 12
+nbdbuf 2
+diemac 6
+ecut 30               # Underconverged ecut. 
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8, O.psp8"
+nstep 100
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [shell]
+#%% post_commands =
+#%% [files]
+#%% files_to_test =
+#%%   t56.abo, tolnlines = 6, tolabs = 1.1e-6, tolrel = 2.0e-4
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = DFPT
+#%% description =
+#%%  CaO effective mass tensor at \Gamma and X. Also compute the Frohlich average of the effective mass.
+#%% topics = EffectiveMass
+#%%<END TEST_INFO>

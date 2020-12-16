@@ -1,0 +1,44 @@
+# HBe molecule, spin-polarized, determination of forces
+ builtintest 3
+
+ acell 12 10 10
+ diemac 1.0d0
+ diemix 0.333333333333d0
+ ecut 4.5
+ enunit 2 
+ kptopt 0
+ kpt 3*0.0d0
+ natom  2 nband 4 2
+ ngfft 24 20 20
+ nkpt 1
+ nline 5  nsppol 2  
+ nstep 15
+ ntypat  2
+ occ 1 1 1 0  1 1 
+ occopt 2
+ prtvol 1
+ rprim 1 0 0  0 1 0  0 0 1
+ tolwfr 1.0d-16
+ typat  1 2  
+ xcart -1.50 0 0   1.50 0 0
+ wtk 1
+ znucl  1.0 4.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth, PseudosGTH_pwteter/04be.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t00.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC
+#%% description = HBe molecule, spin-polarized, determination of forces 
+#%%   Very quick built-in test, to check that ABINIT is working.
+#%%<END TEST_INFO>

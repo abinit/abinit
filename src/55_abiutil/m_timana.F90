@@ -889,6 +889,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1621) = 'mkinvovl(build_d)             '
  names(1622) = 'mkinvovl(build_ptp)           '
 
+ names(1633) = "rmm_diis:build_hij            "; basic(1633) = 1
+ names(1634) = "rmm_diis:band_opt             "; basic(1634) = 1
+
  ! lobpcg2
  names(1650) = 'lobpcgwf2                     '; basic(1650) = 1
  names(1651) = 'lobpcg_init                    '

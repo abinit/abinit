@@ -1864,10 +1864,8 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 
 ! *************************************************************************
 
-!DEBUG
 !write(std_out,*)' initwf : enter, ikptsp_old,ikpt,spin,nkpt= ',ikptsp_old,ikpt,spin,nkpt
 !stop
-!ENDDEBUG
 
 #if 0
  MSG_WARNING("Entering new IO section")
@@ -1894,13 +1892,11 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
    end do
  end if
 
-!DEBUG
 !write(std_out,*)' initwf : before rwwf'
 !write(std_out,*)' formeig,icg,ikpt,spin=',formeig,icg,ikpt,spin
 !write(std_out,*)' nband_k,nband_disk,npw,nspinor=',nband_k,nband_disk,npw,nspinor
 !write(std_out,*)' unwff1=',unwff1
 !stop
-!ENDDEBUG
 
  if(mpi_enreg%paralbd==0)tim_rwwf=2
  if(mpi_enreg%paralbd==1)tim_rwwf=20
@@ -1921,9 +1917,8 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 
  ! Check the number of bands on disk file against desired number. These are not required to agree)
  if (nband_disk /= nband_k .and. ikpt<=nkpt_max) then
-   write(msg,'(2(a,i0),3a,i0,3a)')&
-   'For kpt number ',ikpt,' disk file has ',nband_disk,' bands',ch10,&
-   'but input file gave nband= ',nband_k,'.',ch10,&
+   write(msg,'(3(a,i0),3a)')&
+   'For kpt number: ',ikpt,' disk file has: ',nband_disk,' bands but input file gave nband: ',nband_k,'.',ch10,&
    'This is not fatal. Bands are skipped or filled with random numbers.'
    MSG_COMMENT(msg)
  end if
@@ -2700,10 +2695,11 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  integer :: istwf10_k,istwf1_k,istwf2_k,isym,itimrev
  integer :: mgfft1,mgfft2,n1,n2,n3,n4,n5,n6
  integer :: nbremn,npwtot,nspinor_index,nspinor1_this_proc,nspinor2_this_proc
- integer :: order,ortalgo,seed
+ integer :: order,ortalgo 
  real(dp) :: ai,ar,arg,bi,br,eig_tmp,spinrots,spinrotx,spinroty,spinrotz
  character(len=500) :: message
  integer, parameter :: int64 = selected_int_kind(18)
+ integer(KIND=int64) :: seed
  !arrays
  integer :: atindx(1),identity(3,3),ngfft_now(18),no_shift(3),shiftg(3)
  integer :: symm(3,3),symrel_conv(3,3)
@@ -3169,8 +3165,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 !            3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
 !            fold1 is between 0 and 34, fold2 is between 0 and 114. As sums of five
 !            uniform random variables, their distribution is close to a gaussian
-             fold1=mod(seed,3)+mod(seed,5)+mod(seed,7)+mod(seed,11)+mod(seed,13)
-             fold2=mod(seed,17)+mod(seed,19)+mod(seed,23)+mod(seed,29)+mod(seed,31)
+             fold1=modulo(seed,3)+modulo(seed,5)+modulo(seed,7)+modulo(seed,11)+modulo(seed,13)
+             fold2=modulo(seed,17)+modulo(seed,19)+modulo(seed,23)+modulo(seed,29)+modulo(seed,31)
 !            The gaussian distributions are folded, in order to be back to a uniform distribution
 !            foldre is between 0 and 20, foldim is between 0 and 18
              foldre=mod(fold1+fold2,21)
@@ -3178,7 +3174,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
              cg2(1,index+icg2)=dble(foldre)
              cg2(2,index+icg2)=dble(foldim)
            else
-             ! (AL) Simple linear congruential generator from
+             ! (Antoine Levitt) Simple linear congruential generator from
              ! numerical recipes, modulo'ed and 64bit'ed to avoid
              ! overflows (NAG doesn't like overflows, even though
              ! they are perfectly legitimate here). Then, we get some
@@ -3245,6 +3241,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
 !Orthogonalize GS wfs
  if (optorth==1.and.formeig==0.and.(mpi_enreg2%paral_kgb/=1.or.mpi_enreg2%nproc_cell==1)) then
+ !if (.True.) then
    ABI_ALLOCATE(dum,(2,0))
    ortalgo=0 !;ortalgo=3
    call pw_orthon(icg2,0,istwf2_k,mcg2,0,npw2*nspinor2_this_proc,nbd2,ortalgo,dum,0,cg2,&

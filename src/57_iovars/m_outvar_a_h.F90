@@ -477,6 +477,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%chksymbreak
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chksymbreak','INT',0)
 
+ intarr(1,:)=dtsets(:)%chksymtnons
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chksymtnons','INT',0)
+
  intarr(1,:)=dtsets(:)%chneut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chneut','INT',0)
 
@@ -883,6 +886,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%extrapwf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extrapwf','INT',0)
 
+ intarr(1,:)=dtsets(:)%expert_user
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'expert_user','INT',0)
+
 !###########################################################
 !### 03. Print all the input variables (F)
 !##
@@ -1192,6 +1198,10 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gwcalctyp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcalctyp','INT',0)
 
+ intarr(1,:)=dtsets(:)%gw1rdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw1rdm','INT',0)
+
+
  intarr(1,:)=dtsets(:)%gwcomp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcomp','INT',0)
 
@@ -1209,6 +1219,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%gwrpacorr
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwrpacorr','INT',0)
+
+ intarr(1,:)=dtsets(:)%gwgmcorr
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwgmcorr','INT',0)
 
 !gw_customnfreqsp
 !It actually overrides the content of nfreqsp (which is forbidden !) in dtset.

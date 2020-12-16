@@ -1,0 +1,65 @@
+#   Si in diamond structure; 2 special points; raise ecut slightly, leave ng
+
+ acell 3*10.26311
+ diemac 12.0d0
+ ecut 7.0
+ enunit 2   irdwfk  1
+ kptopt 0
+ kpt   1 1 1     1 2 2   kptnrm 4
+ natom  2 nband 4
+ ngfft  3*16  nkpt  2
+ nstep 20
+ nsym  24  ntypat  1
+ occ 4*2.0d0 occopt  0   
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel
+  1  0  0   0  1  0   0  0  1
+  0  1 -1   1  0 -1   0  0 -1
+  0 -1  1   0 -1  0   1 -1  0
+ -1  0  0  -1  0  1  -1  1  0
+  0  1  0   0  0  1   1  0  0
+  1  0 -1   0  0 -1   0  1 -1
+  0 -1  0   1 -1  0   0 -1  1
+ -1  0  1  -1  1  0  -1  0  0
+  0  0  1   1  0  0   0  1  0
+  0  0 -1   0  1 -1   1  0 -1
+  1 -1  0   0 -1  1   0 -1  0
+ -1  1  0  -1  0  0  -1  0  1
+  1  0 -1   0  1 -1   0  0 -1
+  0  1  0   1  0  0   0  0  1
+ -1  0  1  -1  0  0  -1  1  0
+  0 -1  0   0 -1  1   1 -1  0
+ -1  1  0  -1  0  1  -1  0  0
+  1 -1  0   0 -1  0   0 -1  1
+  0  0 -1   1  0 -1   0  1 -1
+  0  0  1   0  1  0   1  0  0
+  0 -1  1   1 -1  0   0 -1  0
+ -1  0  0  -1  1  0  -1  0  1
+  1  0  0   0  0  1   0  1  0
+  0  1 -1   0  0 -1   1  0 -1
+ tnons 72*0.0
+ tolwfr 1.0d-14
+ typat  1 1 
+ wtk   1 3
+ xred 3*0.00d0 3*0.25d0
+ znucl 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% input_prefix = t05o
+#%% test_chain = t03.abi, t05.abi, t06.abi, t07.abi, t08.abi, t09.abi, t11.abi, t12.abi, t14.abi, t16.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t14.abo, tolnlines = 2, tolabs = 1.100e-06, tolrel = 4.000e-04, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Same as 05 but with ecut raised, reading wf.13 to start. Tests boxcut<2.
+#%%<END TEST_INFO>

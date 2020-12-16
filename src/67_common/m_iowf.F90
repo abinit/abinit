@@ -402,15 +402,8 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    ! Create an ETSF file for the wavefunctions
    if (iomode == IO_MODE_ETSF) then
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
-#ifdef HAVE_ETSF_IO
-     call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
-     !crystal = hdr%get_crystal()
-     !NCF_CHECK(ebands_ncwrite_path(gs_ebands, cryst, filname)
-     !call crystal%free()
-#else
      MSG_ERROR("ETSF_IO is not activated")
      ABI_UNUSED(psps%ntypat)
-#endif
    end if
 
    call WffOpen(iomode,spaceComm,filnam,ierr,wff2,master,me0,unwff2,spaceComm_io)

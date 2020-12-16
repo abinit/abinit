@@ -107,7 +107,7 @@ contains
 !!  dtfil <type(datafiles_type)> = variables related to files
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  etotal = new total energy (no meaning at output)
-!!  mpi_enreg=informations about MPI pnarallelization
+!!  mpi_enreg=information about MPI pnarallelization
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
 !!  xred(3,natom) = reduced atomic coordinates
 !!
@@ -401,7 +401,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 & phnons,dtset%symafm,symrec,dtset%symrel,dtset%tnons,dtset%typat,xred)
 
 !Symmetrize atomic coordinates over space group elements:
- call symmetrize_xred(indsym,natom,dtset%nsym,dtset%symrel,dtset%tnons,xred)
+ call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
  call sytens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
 
@@ -1463,7 +1463,7 @@ end subroutine nonlinear
 !!  kpt3(3,nkpt3) = reduced coordinates of k-points in the full BZ
 !!  mband = maximum number of bands
 !!  mkmem = number of k points which can fit in memory
-!!  mpi_enreg = informations about MPI parallelization
+!!  mpi_enreg = information about MPI parallelization
 !!  mpw = maximum number of plane waves
 !!  nband(nkpt*nsppol)=number of bands at each k point, for each polarization
 !!  nkpt2 = number of k-points in the reduced BZ

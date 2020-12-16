@@ -1719,7 +1719,7 @@ end function imax_loc_rdp
 !!
 !! SOURCE
 
-pure function imin_loc_int(arr,mask)
+pure function imin_loc_int(arr, mask)
 
 !Arguments ------------------------------------
 !scalars
@@ -3490,7 +3490,7 @@ end subroutine mkherm
 !!
 !! SOURCE
 
-subroutine hermit(chmin,chmout,ierr,ndim)
+subroutine hermit(chmin, chmout, ierr, ndim)
 
 !Arguments ------------------------------------
 !scalars
@@ -3506,7 +3506,7 @@ subroutine hermit(chmin,chmout,ierr,ndim)
  integer :: idim,merrors,nerrors
  real(dp),parameter :: eps=epsilon(0.0d0)
  real(dp) :: ch_im,ch_re,moduls,tol
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -3531,18 +3531,18 @@ subroutine hermit(chmin,chmout,ierr,ndim)
    if( abs(ch_im) > tol .or. abs(ch_im) > tol8*abs(ch_re)) nerrors=1
 
    if( (abs(ch_im) > tol .and. nmesgs<mmesgs) .or. nerrors==2)then
-     write(message, '(3a,i0,a,es20.12,a,es20.12,a)' )&
-&     'Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-&     'for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
-     call wrtout(std_out,message,'PERS')
+     write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
+     ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
+     ' for component:',idim,' Im part is: ',ch_im,', Re part is: ',ch_re,'.'
+     call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
 
    if( ( abs(ch_im) > tol8*abs(ch_re) .and. nmesgs<mmesgs) .or. nerrors==2)then
-     write(message, '(3a,i0,a,es20.12,a,es20.12,a)' )&
-&     'Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-&     'for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
-     call wrtout(std_out,message,'PERS')
+     write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
+     ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
+     ' for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
+     call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
 
@@ -3561,10 +3561,10 @@ subroutine hermit(chmin,chmout,ierr,ndim)
 
  if(merrors==2)then
    ierr=1
-   write(message, '(3a)' )&
-&   'Imaginary part(s) of diagonal Hermitian matrix element(s) is too large.',ch10,&
-&   'See previous messages.'
-   MSG_BUG(message)
+   write(msg, '(3a)' )&
+    'Imaginary part(s) of diagonal Hermitian matrix element(s) is too large.',ch10,&
+    'See previous messages.'
+   MSG_BUG(msg)
  end if
 
 end subroutine hermit
@@ -3736,11 +3736,11 @@ end subroutine symmetrize_dpc
 !!
 !! INPUTS
 !! N: size of matrix
-!! cplx: is the matrix complex
-!! mat_in(2, N*N)= matrix to be packed
+!! cplx: 2 if matrix is complex, 1 for real matrix.
+!! mat_in(cplx, N*N)= matrix to be packed
 !!
 !! OUTPUT
-!! mat_out(N*N+1)= packed matrix
+!! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
 !!
 !! PARENTS
 !!      m_rayleigh_ritz
@@ -3751,10 +3751,11 @@ end subroutine symmetrize_dpc
 
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
-
  integer, intent(in) :: N, cplx
  real(dp), intent(in) :: mat_in(cplx, N*N)
  real(dp), intent(out) :: mat_out(cplx*N*(N+1)/2)
+
+!local variables
  integer :: isubh, i, j
 
  ! *************************************************************************
@@ -4816,13 +4817,12 @@ end function isordered_rdp
 
 !----------------------------------------------------------------------
 
-
 !!****f* m_numeric_tools/stats_eval
 !! NAME
 !!  stats_eval
 !!
 !! FUNCTION
-!!  Helper function used to calculate the statistical parameters of a data set.
+!!  Helper function used to calculate the statistical parameters of a dataset.
 !!
 !! INPUT
 !!  arr(:)=Array with the values.
@@ -4852,13 +4852,11 @@ pure function stats_eval(arr) result(stats)
 
 ! *************************************************************************
 
- !@stats_t
  stats%min   = +HUGE(one)
  stats%max   = -HUGE(one)
  stats%mean  = zero
 
  nn = SIZE(arr)
-
  do ii=1,nn
    xx = arr(ii)
    stats%max  = MAX(stats%max, xx)
@@ -5786,7 +5784,7 @@ function uniformrandom(seed)
  integer :: kk
  real(dp) :: im1inv,im2inv
  real(dp), save :: table(97)
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -5819,8 +5817,8 @@ function uniformrandom(seed)
  ii3=mod(ia3*ii3+ic3,im3)
  kk=1+(97*ii3)/im3
  if (kk<1.or.kk>97) then
-   write(message,'(a,2i0,a)' ) ' trouble in uniformrandom; ii3,kk=',ii3,kk,' =>stop'
-   MSG_ERROR(message)
+   write(msg,'(a,2i0,a)' ) ' trouble in uniformrandom; ii3,kk=',ii3,kk,' =>stop'
+   MSG_ERROR(msg)
  end if
  uniformrandom=table(kk)
 
@@ -5896,7 +5894,7 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
  real(dp) :: aa,bb,bbp,cc,ccp,d_lambda,dd
  real(dp) :: discr,ee,eep,lambda_shift,sum1,sum2,sum3,uu
  real(dp) :: uu3,vv,vv3
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -5913,8 +5911,7 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 !ENDDEBUG
 
  if(abs(lambda_1-1.0_dp)>tol12 .or. abs(lambda_2)>tol12) then
-   message = '  For choice=4, lambda_1 must be 1 and lambda_2 must be 0.'
-   MSG_BUG(message)
+   MSG_BUG('For choice=4, lambda_1 must be 1 and lambda_2 must be 0.')
  end if
 
 !Evaluate quartic interpolation
@@ -5937,21 +5934,20 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
    d2edv2_predict=0.0
 
 !  Even if there is a problem, try to keep going ...
-   message = 'The 2nd degree equation has no positive root (choice=4).'
-   MSG_WARNING(message)
+   MSG_WARNING('The 2nd degree equation has no positive root (choice=4).')
    status=2
    if(etotal_1<etotal_2)then
-     write(message, '(a,a,a)' )&
-&     'Will continue, since the new total energy is lower',ch10,&
-&     'than the old. Take a larger step in the same direction.'
-     MSG_COMMENT(message)
+     write(msg, '(a,a,a)' )&
+      'Will continue, since the new total energy is lower',ch10,&
+      'than the old. Take a larger step in the same direction.'
+     MSG_COMMENT(msg)
      lambda_predict=2.5_dp
    else
-     write(message, '(a,a,a,a,a)' )&
-&     'There is a problem, since the new total energy is larger',ch10,&
-&     'than the old (choice=4).',ch10,&
-&     'I take a point between the old and new, close to the old .'
-     MSG_COMMENT(message)
+     write(msg, '(a,a,a,a,a)' )&
+     'There is a problem, since the new total energy is larger',ch10,&
+     'than the old (choice=4).',ch10,&
+     'I take a point between the old and new, close to the old .'
+     MSG_COMMENT(msg)
      lambda_predict=0.25_dp
    end if
 !  Mimick a zero-gradient lambda, in order to avoid spurious
@@ -6014,18 +6010,18 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 
  end if
 
- write(message, '(a,i3)' )'   line minimization, algorithm ',4
- call wrtout(std_out,message,'COLL')
- write(message, '(a,a)' )'                        lambda      etotal ','           dedv        d2edv2    '
- call wrtout(std_out,message,'COLL')
- write(message, '(a,es12.4,es18.10,2es12.4)' )'   old point         :',lambda_2,etotal_2,dedv_2,d2edv2_2
- call wrtout(std_out,message,'COLL')
- write(message, '(a,es12.4,es18.10,2es12.4)' )'   new point         :',lambda_1,etotal_1,dedv_1,d2edv2_1
- call wrtout(std_out,message,'COLL')
- write(message, '(a,es12.4,es18.10,2es12.4)' )'   predicted point   :',lambda_predict,etotal_predict,dedv_predict,d2edv2_predict
- call wrtout(std_out,message,'COLL')
- write(message, '(a)' ) ' '
- call wrtout(std_out,message,'COLL')
+ write(msg, '(a,i3)' )'   line minimization, algorithm ',4
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,a)' )'                        lambda      etotal ','           dedv        d2edv2    '
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,es12.4,es18.10,2es12.4)' )'   old point         :',lambda_2,etotal_2,dedv_2,d2edv2_2
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,es12.4,es18.10,2es12.4)' )'   new point         :',lambda_1,etotal_1,dedv_1,d2edv2_1
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,es12.4,es18.10,2es12.4)' )'   predicted point   :',lambda_predict,etotal_predict,dedv_predict,d2edv2_predict
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a)' ) ' '
+ call wrtout(std_out,msg,'COLL')
 
 end subroutine findmin
 !!***

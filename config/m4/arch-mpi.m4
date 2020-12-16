@@ -745,7 +745,7 @@ EOF
 #
 AC_DEFUN([ABI_MPI_INIT], [
   # Delegate most of the init stage to Steredeg
-  SD_MPI_INIT([optional fail], [-lmpi])
+  SD_MPI_INIT([auto optional fail], [-lmpi])
 
   # Allow MPI flavors
   AC_ARG_WITH([mpi-flavor],

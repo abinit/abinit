@@ -49,7 +49,7 @@ module m_scfcv_core
  use m_berryphase_new,   only : update_e_field_vars
  use m_dens,             only : constrained_dft_t, constrained_dft_ini, constrained_dft_free
  use m_time,             only : timab
- use m_fstrings,         only : int2char4, sjoin
+ use m_fstrings,         only : int2char4, sjoin, itoa
  use m_symtk,            only : symmetrize_xred
  use m_geometry,         only : metric
  use m_fftcore,          only : getng, sphereboundary
@@ -88,7 +88,6 @@ module m_scfcv_core
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
 #endif
- use m_io_kss,           only : gshgg_mkncwrite
  use m_outxml,           only : out_resultsgs_XML, out_geometry_XML
  use m_kg,               only : getcut, getmpw, kpgio, getph
  use m_fft,              only : fourdp
@@ -262,7 +261,7 @@ contains
 !!
 !! SOURCE
 
-subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
+subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
 &  dtset,ecore,eigen,electronpositron,fatvshift,hdr,indsym,&
 &  initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
@@ -271,7 +270,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mcg,my_natom,ndtpawuj,pwind_alloc
+ integer,intent(in) :: itime, mcg,my_natom,ndtpawuj,pwind_alloc
  integer,intent(inout) :: initialized,nfftf,mcprj
  integer,intent(out) :: conv_retcode
  real(dp),intent(in) :: cpus,ecore,fatvshift
@@ -346,10 +345,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp) :: ecutf,ecutsus,edum,elast,etotal,evxc,fermie,gsqcut,hyb_mixing,hyb_mixing_sr
  real(dp) :: maxfor,res2,residm,ucvol,ucvol_local,val_max
  real(dp) :: val_min,vxcavg,vxcavg_dum
- real(dp) :: zion,wtime_step,now,prev
+ real(dp) :: zion,wtime_step,now,prev,esum,enonlocalpsp !MRM
  character(len=10) :: tag
  character(len=500) :: MY_NAME = "scfcv_core"
- character(len=1500) :: message
+ character(len=1500) :: msg
  !character(len=500) :: dilatmx_errmsg
  character(len=fnlen) :: fildata
  type(MPI_type) :: mpi_enreg_diel
@@ -372,7 +371,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  integer,allocatable :: dimcprj(:),dimcprj_srt(:)
  integer,allocatable :: gbound_diel(:,:),irrzondiel(:,:,:),kg_diel(:,:)
  integer,allocatable :: l_size_atm(:)
- integer,allocatable :: indsym_dum(:,:,:),symrec_dum(:,:,:)
+ integer,allocatable :: indsym_dum(:,:,:),symrec_dum(:,:,:), rmm_diis_status(:,:,:)
  logical,pointer :: lmselect_ep(:,:)
  real(dp) :: dielar(7),dphase(3),dummy2(6),favg(3),gmet(3,3),gprimd(3,3)
  real(dp) :: kpt_diel(3),pel(3),pel_cg(3),pelev(3),pion(3),ptot(3),qpt(3),red_ptot(3) !!REC
@@ -400,7 +399,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  type(scf_history_type) :: scf_history_wf
  type(constrained_dft_t) :: constrained_dft
-
  type(paw_an_type),allocatable :: paw_an(:)
  type(paw_ij_type),allocatable :: paw_ij(:)
  type(pawfgrtab_type),allocatable,save :: pawfgrtab(:)
@@ -428,7 +426,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  lmax_diel = 0
 
 !MPI communicators
- if ((xmpi_paral==1).and.(mpi_enreg%paral_hf==1)) then
+ if (xmpi_paral==1.and.mpi_enreg%paral_hf==1) then
    spaceComm=mpi_enreg%comm_kpt
  else
    spaceComm=mpi_enreg%comm_cell
@@ -530,8 +528,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    energies%e_corepsp   = ecore / ucvol
    energies%e_corepspdc = zero
  case(2)
-     ! No need to include the PspCore energy since it is already included in the
-     ! local pseudopotential  (vpsp)
+   ! No need to include the PspCore energy since it is already included in the
+   ! local pseudopotential  (vpsp)
    energies%e_corepsp   = zero
    energies%e_corepspdc = zero
  end select
@@ -664,8 +662,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    compch_fft=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)
    if (usexcnhat==0.and.dtset%ionmov==4.and.dtset%iscf<10) then
-     message = 'You cannot simultaneously use ionmov=4 and such a PAW psp file !'
-     MSG_ERROR(message)
+     MSG_ERROR('You cannot simultaneously use ionmov=4 and such a PAW psp file !')
    end if
 
 !  Variables/arrays related to the PAW spheres
@@ -701,8 +698,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    end do
    if (dtset%usedmatpu/=0.and.lpawumax>0) then
      if (2*lpawumax+1/=size(dmatpawu,1).or.2*lpawumax+1/=size(dmatpawu,2)) then
-       message = 'Incorrect size for dmatpawu!'
-       MSG_BUG(message)
+       MSG_BUG('Incorrect size for dmatpawu!')
      end if
    end if
 
@@ -788,18 +784,18 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      end if
      !TRangel: added to avoid segfaults with Wavelets
      nfftmix_per_nfft=0;if(nfftf>0) nfftmix_per_nfft=(1-nfftmix/nfftf)
-     call ab7_mixing_new(mix, iscf10, denpot, ispmix, nfftmix, dtset%nspden, npawmix, errid, message, dtset%npulayit)
+     call ab7_mixing_new(mix, iscf10, denpot, ispmix, nfftmix, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
      if (errid /= AB7_NO_ERROR) then
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
      if (dtset%usekden/=0) then
        if (dtset%useria==12345) then  ! This is temporary
-         call ab7_mixing_new(mix_mgga, iscf10, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, message, dtset%npulayit)
+         call ab7_mixing_new(mix_mgga, iscf10, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, dtset%npulayit)
        else
-         call ab7_mixing_new(mix_mgga, 0, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, message, dtset%npulayit)
+         call ab7_mixing_new(mix_mgga, 0, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, dtset%npulayit)
        end if
        if (errid /= AB7_NO_ERROR) then
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end if
      if (dtset%mffmem == 0) then
@@ -817,7 +813,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    ABI_ALLOCATE(grhf,(0,0))
  end if ! iscf>0
 
-!Here initialize the datastructure constrained_dft, for constrained DFT calculations as well as penalty function constrained magnetization
+! Here initialize the datastructure constrained_dft, for constrained DFT calculations
+! as well as penalty function constrained magnetization
  if(any(dtset%constraint_kind(:)/=0).or.dtset%magconon/=0)then
    call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
 &    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
@@ -1006,23 +1003,26 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  quitsum_request = xmpi_request_null; timelimit_exit = 0
  istep_updatedfock=0
 
+ ABI_ICALLOC(rmm_diis_status, (2, dtset%nkpt, dtset%nsppol))
+
 ! start SCF loop
  do istep=1,max(1,nstep)
+
    ! Handle time limit condition.
    if (istep == 1) prev = abi_wtime()
    if (istep  > 1) then
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     call wrtout(std_out, sjoin(" scfcv_core: previous iteration took ",sec2str(wtime_step)))
+     call wrtout(std_out, sjoin(" scfcv_core: SCF iteration", itoa(istep-1)," took:", sec2str(wtime_step), "<<< TIME"))
 
      if (have_timelimit_in(MY_NAME)) then
        if (istep > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
-           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in scfcv_core."
-           MSG_COMMENT(message)
-           call wrtout(ab_out, message, "COLL")
+           write(msg,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in scfcv_core."
+           MSG_COMMENT(msg)
+           call wrtout(ab_out, msg, "COLL")
            timelimit_exit = 1
            exit
          end if
@@ -1041,7 +1041,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !    --------------------------------------------------------------
 
 !    Eventually symmetrize atomic coordinates over space group elements:
-     call symmetrize_xred(indsym,dtset%natom,dtset%nsym,dtset%symrel,dtset%tnons,xred)
+     call symmetrize_xred(dtset%natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
      if (dtset%usewvl == 0) then
 !      Get cut-off for g-vectors
@@ -1171,9 +1171,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
      !Fock energy
      energies%e_exactX=zero
-     if (fock%fock_common%optfor) then
-       fock%fock_common%forces=zero
-     end if
+     if (fock%fock_common%optfor) fock%fock_common%forces=zero
 
      if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf .or. &
 &        (fock%fock_common%nnsclo_hf>1 .and. fock%fock_common%scf_converged) ) then
@@ -1239,7 +1237,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        if(fock%fock_common%use_ACE/=0) then
          call fock2ACE(cg,cprj,fock,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,&
 &         dtset%mkmem,mpi_enreg,psps%mpsang,&
-&         dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
+&         dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
 &         dtset%nspinor,dtset%nsppol,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
 &         dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm)
          energies%e_fock0=fock%fock_common%e_fock0
@@ -1248,25 +1246,20 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        !Should place a test on whether there should be the final exit of the istep loop.
        !This test should use focktoldfe.
        !This should update the info in fock%fock_common%fock_converged.
-       !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always,
+       !For the time being, fock%fock_common%fock_converged=.false., so the loop end with the maximal value of nstep always,
        !except when nnsclo_hf==1 (so the Fock operator is always updated), in which case, the usual exit tests (toldfe, tolvrs, etc)
        !work fine.
        !if(fock%fock_common%nnsclo_hf==1 .and. fock%fock_common%use_ACE==0)then
-       if(fock%fock_common%nnsclo_hf==1)then
-         fock%fock_common%fock_converged=.TRUE.
-       end if
+       if(fock%fock_common%nnsclo_hf==1) fock%fock_common%fock_converged=.TRUE.
 
        !Depending on fockoptmix, possibly restart the mixing procedure for the potential
-       if(mod(dtset%fockoptmix,10)==1)then
-         istep_mix=1
-       end if
+       if(mod(dtset%fockoptmix,10)==1) istep_mix=1
      else
        istep_updatedfock=istep_updatedfock+1
      end if
 
      !Used locally
      hyb_mixing=fock%fock_common%hyb_mixing ; hyb_mixing_sr=fock%fock_common%hyb_mixing_sr
-
    end if ! usefock
 
 !  Initialize/update data in the electron-positron case
@@ -1344,13 +1337,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     taur=taur,vxc_hybcomp=vxc_hybcomp,vxctau=vxctau,add_tfw=tfw_activated,xcctau3d=xcctau3d)
 
      ! set the zero of the potentials here
-     if(dtset%usepotzero==2) then
-       vpsp(:) = vpsp(:) + ecore / ( zion * ucvol )
-     end if
+     if(dtset%usepotzero==2) vpsp(:) = vpsp(:) + ecore / ( zion * ucvol )
 
-     if(dtset%optdriver==RUNL_GWLS) then
-       call build_vxc(vxc,nfftf,dtset%nspden)
-     end if
+     if(dtset%optdriver==RUNL_GWLS) call build_vxc(vxc,nfftf,dtset%nspden)
 
      if ((nhatgrdim>0.and.nstep>0).or.dummy_nhatgr) then
        ABI_DEALLOCATE(nhatgr)
@@ -1364,9 +1353,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        call destroy_distribfft(rec_set%mpi%distribfft)
        call init_distribfft(rec_set%mpi%distribfft,'c',rec_set%mpi%nproc_fft,rec_set%ngfftrec(2),rec_set%ngfftrec(3))
        call init_distribfft(rec_set%mpi%distribfft,'f',rec_set%mpi%nproc_fft,dtset%ngfft(2),dtset%ngfft(3))
-       if(initialized==0) then
-         call first_rec(dtset,psps,rec_set)
-       end if
+       if(initialized==0) call first_rec(dtset,psps,rec_set)
      end if
 
 !    End the condition of atomic position change or istep==1
@@ -1405,9 +1392,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !    Correct the total energies accordingly
 !    vpotzero(1) = -beta/ucvol
 !    vpotzero(2) = -1/ucvol sum_ij rho_ij gamma_ij
-     write(message,'(a,f14.6,2x,f14.6)') &
+     write(msg,'(a,f14.6,2x,f14.6)') &
 &     ' average electrostatic smooth potential [Ha] , [eV]',SUM(vpotzero(:)),SUM(vpotzero(:))*Ha_eV
-     call wrtout(std_out,message,'COLL')
+     call wrtout(std_out,msg,'COLL')
      vtrial(:,:)=vtrial(:,:)+SUM(vpotzero(:))
      if(option/=1)then
 !      Fix the direct total energy (non-zero only for charged systems)
@@ -1472,12 +1459,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !  Write out occupancies to dtpawuj-dataset
    if (dtset%usepawu/=0.and.dtset%macro_uj>0.and.istep>1.and.ipositron/=1) then
      call pawuj_red(dtset,dtpawuj,fatvshift,my_natom,dtset%natom,dtset%ntypat,&
-     paw_ij,pawrad,pawtab,ndtpawuj,&
-&     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     paw_ij,pawrad,pawtab,ndtpawuj,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    end if
 
    call timab(241,2,tsec)
-
 
 !  No need to continue and call vtorho, when nstep==0
    if(nstep==0)exit
@@ -1488,13 +1473,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    call timab(56,1,tsec)
 
    if(dtset%iscf>=0)then
-     write(message, '(a,a,i4)' )ch10,' ITER STEP NUMBER  ',istep
-     call wrtout(std_out,message,'COLL')
-   end if
-
-   if (dtset%useria == -4242) then
-     call gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_ij, mpi_enreg, &
-     rprimd, xred, eigen, npwarr, kg, ylm, ngfft, dtset%nfft, ngfftf, nfftf, vtrial) !electronpositron) ! Optional arguments
+     write(msg, '(a,a,i4)' )ch10,' ITER STEP NUMBER  ',istep
+     call wrtout(std_out,msg,'COLL')
    end if
 
 !  The next flag says whether the xred have to be changed in the current iteration
@@ -1524,26 +1504,26 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    if (dtset%iscf<0) computed_forces=0
    if ((istep==1).and.(dtset%optforces/=1)) then
      if (moved_atm_inside==1) then
-       write(message,'(5a)')&
+       write(msg,'(5a)')&
 &       'Although the computation of forces during electronic iterations',ch10,&
 &       'was not required by user, it is done (required by the',ch10,&
 &       'choice of ionmov input parameter).'
-       MSG_WARNING(message)
+       MSG_WARNING(msg)
      end if
      if (abs(tollist(3))+abs(tollist(7))>tiny(0._dp)) then
-       write(message,'(5a)')&
+       write(msg,'(5a)')&
 &       'Although the computation of forces during electronic iterations',ch10,&
 &       'was not required by user, it is done (required by the',ch10,&
 &       '"toldff" or "tolrff" tolerance criteria).'
-       MSG_WARNING(message)
+       MSG_WARNING(msg)
      end if
    end if
    if ((istep==1).and.(dtset%optforces==1).and. dtset%usewvl == 1) then
-     write(message,'(5a)')&
+     write(msg,'(5a)')&
 &     'Although the computation of forces during electronic iterations',ch10,&
 &     'was required by user, it has been disable since the tolerence',ch10,&
 &     'is not on forces (force computation is expensive in wavelets).'
-     MSG_WARNING(message)
+     MSG_WARNING(msg)
    end if
 
    call timab(56,2,tsec)
@@ -1554,11 +1534,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    call timab(242,1,tsec)
 !  Compute the density from the trial potential
    if (dtset%tfkinfunc==0) then
-     if(VERBOSE)then
-       call wrtout(std_out,'*. Compute the density from the trial potential (vtorho)',"COLL")
-     end if
+     if(VERBOSE) call wrtout(std_out,'*. Compute the density from the trial potential (vtorho)',"COLL")
 
-     call vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
+     call vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &     eigen,electronpositron,energies,etotal,gbound_diel,&
 &     gmet,gprimd,grnl,gsqcut,hdr,indsym,irrzon,irrzondiel,&
@@ -1569,7 +1547,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     pawrhoij,pawtab,phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &     pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,rmet,rprimd,&
 &     susmat,symrec,taug,taur,nvtauresid,ucvol_local,usecprj,wffnew,with_vectornd,&
-&     vectornd,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
+&     vectornd,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
 
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
      MSG_WARNING('THOMAS FERMI')
@@ -1577,6 +1555,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     energies%entropy,energies%e_fermie,gprimd,grnl,irrzon,mpi_enreg,&
 &     dtset%natom,nfftf,dtset%nspden,dtset%nsppol,dtset%nsym,phnons,&
 &     rhog,rhor,rprimd,ucvol,vtrial)
+
      residm=zero
      energies%e_eigenvalues=zero
    end if
@@ -1603,11 +1582,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    end if
 
    call timab(242,2,tsec)
-
-    !if (dtset%useria == -4242) then
-    !  call gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_ij, mpi_enreg, &
-    !     rprimd, xred, eigen, npwarr, kg, ylm, ngfft, dtset%nfft, ngfftf, nfftf, vtrial) !electronpositron) ! Optional arguments
-    !end if
 
 !  ######################################################################
 !  Skip out of step loop if non-SCF (completed)
@@ -1754,9 +1728,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !  ----------------------------------------------------------------------
 
    call timab(243,1,tsec)
-   if(VERBOSE)then
-     call wrtout(std_out,'*. Compute the new potential from the trial density',"COLL")
-   end if
+   if(VERBOSE) call wrtout(std_out,'*. Compute the new potential from the trial density',"COLL")
 
 !  Set XC computation flag
    optxc=1
@@ -1823,9 +1795,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
    if (dtset%iscf<10) then
 
-     if(VERBOSE)then
-       call wrtout(std_out,'Check exit criteria in case of potential mixing',"COLL")
-     end if
+     if(VERBOSE) call wrtout(std_out,'Check exit criteria in case of potential mixing',"COLL")
 
 !    If the potential mixing is required, compute the total energy here
 !    PAW: has to compute here spherical terms
@@ -1845,9 +1815,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      end if
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
-     if (usefock==1) then
-       energies%e_fockdc=two*energies%e_fock
-     end if
+     if (usefock==1) energies%e_fockdc=two*energies%e_fock
 
      if (.not.wvlbigdft) then
 ! TODO: add nvtauresid if needed (for forces?)
@@ -1914,9 +1882,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    call timab(245,1,tsec)
    if (dtset%iscf<10 .and. dtset%iscf>0 .and. .not. wvlbigdft) then
 
-     if(VERBOSE)then
-       call wrtout(std_out,'*. Mix the potential (if required) - Check exit criteria',"COLL")
-     end if
+     if(VERBOSE) call wrtout(std_out,'*. Mix the potential (if required) - Check exit criteria',"COLL")
 
 !    Precondition the residual and forces, then determine the new vtrial
 !    (Warning: the (H)xc potential may have been subtracted from vtrial)
@@ -1939,17 +1905,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !  END MINIMIZATION ITERATIONS
 !  ######################################################################
 
-   if(VERBOSE)then
-     call wrtout(std_out,'*. END MINIMIZATION ITERATIONS',"COLL")
-   end if
+   if(VERBOSE) call wrtout(std_out,'*. END MINIMIZATION ITERATIONS',"COLL")
 
 !  The initialisation of the gstate run should be done when this point is reached
    initialized=1
-
-   !if (dtset%useria == -4242) then
-   !  call gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_ij, mpi_enreg, &
-   !     rprimd, xred, eigen, npwarr, kg, ylm, ngfft, dtset%nfft, ngfftf, nfftf, vtrial) !electronpositron) ! Optional arguments
-   !end if
 
 !  This is to save the density for restart.
    if (iwrite_fftdatar(mpi_enreg)) then
@@ -2005,12 +1964,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    if (ipositron/=0) electronpositron%istep_scf=electronpositron%istep_scf+1
 
    call timab(245,2,tsec)
-
  end do ! istep
 
- if(allocated(nhatgr))then
-   ABI_DEALLOCATE(nhatgr)
- endif
+ ABI_FREE(rmm_diis_status)
+ ABI_SFREE(nhatgr)
 
  ! Avoid pending requests if itime == ntime.
  call xmpi_wait(quitsum_request,ierr)
@@ -2024,11 +1981,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  end if
 
  if (usefock==1)then
-   if(wfmixalg/=0)then
-     call scf_history_free(scf_history_wf)
-   end if
+   if(wfmixalg/=0) call scf_history_free(scf_history_wf)
  end if
-
 
  if (quit==1.and.nstep==1) initialized=1
 
@@ -2042,7 +1996,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    if (.not.allocated(nhatgr) ) then
      ABI_ALLOCATE(nhatgr,(0,0,0))
    end if
-
+   
    call energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &   energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,&
 &   nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,&
@@ -2126,8 +2080,42 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &   ucvol,dtfil%unpaw,xred,ylm,ylmgr)
  end if
 
+! MRM print final Hartree energy components
+ write(std_out,'(a1)')' '
+ write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
+ 
+ enonlocalpsp=energies%e_nlpsp_vfock-2.0d0*energies%e_fock0
+ esum=energies%e_kinetic+energies%e_ewald+energies%e_corepsp+energies%e_hartree+energies%e_xc&
+ &+energies%e_localpsp+enonlocalpsp+energies%e_fock0& 
+ &+energies%e_hybcomp_E0+energies%e_hybcomp_v0+energies%e_hybcomp_v+energies%e_vdw_dftd&
+ &+energies%e_elecfield+energies%e_magfield   
+
+ write(std_out,'(a,2(es16.6,a))')' Ekinetic   = : ',energies%e_kinetic    ,' Ha ,',energies%e_kinetic*Ha_eV    ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Evext_l    = : ',energies%e_localpsp   ,' Ha ,',energies%e_localpsp*Ha_eV   ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Evext_nl   = : ',enonlocalpsp          ,' Ha ,',enonlocalpsp*Ha_eV          ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Epsp_core  = : ',energies%e_corepsp    ,' Ha ,',energies%e_corepsp*Ha_eV      ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Ehartree   = : ',energies%e_hartree    ,' Ha ,',energies%e_hartree*Ha_eV    ,' eV'
+ if(dtset%usefock==1) then
+   write(std_out,'(a,2(es16.6,a))')' Efock      = : ',energies%e_fock0      ,' Ha ,',energies%e_fock0*Ha_eV      ,' eV'
+ endif
+ write(std_out,'(a,2(es16.6,a))')' Exc_ks     = : ',energies%e_xc         ,' Ha ,',energies%e_xc*Ha_eV         ,' eV'
+ if(abs(energies%e_vdw_dftd)>1.0d-6) then
+   write(std_out,'(a,2(es16.6,a))')' EvdW-D     = : ',energies%e_vdw_dftd   ,' Ha ,',energies%e_vdw_dftd*Ha_eV   ,' eV'
+ endif
+ if(abs(energies%e_elecfield)>1.0d-6) then
+   write(std_out,'(a,2(es16.6,a))')' Eefield    = : ',energies%e_elecfield  ,' Ha ,',energies%e_elecfield*Ha_eV  ,' eV'
+ endif
+ if(abs(energies%e_magfield)>1.0d-6) then
+   write(std_out,'(a,2(es16.6,a))')' Emfield    = : ',energies%e_magfield   ,' Ha ,',energies%e_magfield*Ha_eV   ,' eV'
+ endif
+ write(std_out,'(a,2(es16.6,a))')' Enn        = : ',energies%e_ewald      ,' Ha ,',energies%e_ewald*Ha_eV      ,' eV'
+ write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
+ write(std_out,'(a,2(es16.6,a))')' Etot       = : ',esum                  ,' Ha ,',esum*Ha_eV                  ,' eV'
+ write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
+
  call timab(246,2,tsec)
  call timab(247,1,tsec)
+ ! end MRM printing energy components
 
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
@@ -2279,9 +2267,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 ! Deallocate exact exchange data at the end of the calculation
  if (usefock==1) then
-   if (fock%fock_common%use_ACE/=0) then
-     call fock_ACE_destroy(fock%fockACE)
-   end if
+   if (fock%fock_common%use_ACE/=0) call fock_ACE_destroy(fock%fockACE)
    call fock_common_destroy(fock%fock_common)
    call fock_BZ_destroy(fock%fock_BZ)
    call fock_destroy(fock)
@@ -3108,20 +3094,18 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        icg=icg+my_nspinor*nband_k*npw_k
        icg_hist=icg_hist+my_nspinor*nbdmix*npw_k
 
-!      End big k point loop
-     end do
-!    End loop over spins
-   end do
+     end do ! End big k point loop
+   end do ! End loop over spins
 
  end if ! istep>=2
 
  if(wfmixalg>2 .and. istep>1)then
 
 !DEBUG
-!      write(std_out,*)' '
-!      write(std_out,*)' Entering the residual minimisation part '
-!      write(std_out,*)' '
-!      call flush(std_out)
+!  write(std_out,*)' '
+!  write(std_out,*)' Entering the residual minimisation part '
+!  write(std_out,*)' '
+!  call flush(std_out)
 !ENDDEBUG
 
    call timab(48,1,tsec)

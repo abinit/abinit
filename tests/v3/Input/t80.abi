@@ -1,0 +1,112 @@
+# H2 molecule : study of translational and rotational modes
+
+ ndtset   3
+ ecut      12.0
+ ecutsm       1.0
+ ixc          1
+  ngkpt       2 2 2  !! Better to use this than the gamma point
+ diemac       2
+ nband        1
+
+### First data set : geometry optimization
+
+ kptopt1     1
+ tolmxf1     1.0d-5
+  ntime1    10
+ toldff1     1.0d-6
+ ionmov1     3
+
+### Second data set : accurate wave function calculation ###
+
+   kptopt2      1
+   tolwfr2      1.0d-22
+   getwfk2      -1
+ getxcart2     -1
+
+### Third data set : atomic displacement ###
+
+  kptopt3      2
+    nqpt3      1
+     qpt3      0.0 0.0 0.0
+  rfphon3      1
+ rfatpol3      1  2
+   rfdir3      1 1 1
+  tolvrs3      1.0d-9
+  getwfk3     -1
+getxcart3     -2
+
+### Structure parameters ###
+
+ acell 3*14.0
+ natom   2
+ nstep  40
+     xcart  7.2669124276E-01  0.0000000000E+00  0.0000000000E+00
+           -7.2669124276E-01  0.0000000000E+00  0.0000000000E+00
+ ntypat   1
+ typat    1  1
+ znucl  1.00
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t80.abo, tolnlines = 0, tolabs = 1.289e-10, tolrel = 3.000e-10, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   H2 molecule : examine the rotational freedom.
+#%%   The present test produces the following 
+#%%   vibrational frequencies (with degeneracies indicated):
+#%%   56.89 i cm-1 (2)
+#%%   0.41   cm-1 (2)
+#%%   1.05   cm-1
+#%%   3800    cm-1 
+#%%   The large frequency corresponds to the stretching
+#%%   mode, and has the right order of magnitude.
+#%%   The frequencies close to 1 cm-1 corresponds
+#%%   to translation modes, and are small enough
+#%%   for usual applications.
+#%%   The  56.89 i cm-1 mode corresponds to rotation of 
+#%%   the H2 molecule. The magnitude of this
+#%%   frequency might seem quite
+#%%   large. Here are the results of tests made to understand
+#%%   this phenomenon. First, note that  
+#%%   ecut 12  acell 3*14
+#%%   Increasing the value of ecut to 25 decreases
+#%%   the magnitude of the frequency to 36.8 cm-1 .
+#%%   However, in order to continue to make it smaller,
+#%%   the cell size must be increased , and an oscillatory
+#%%   behaviour is observed :
+#%%   3*16   45.6 i cm-1
+#%%   3*18   22.7   cm-1
+#%%   3*20   19.1 i cm-1
+#%%   3*22   15.7 i cm-1
+#%%   3*24   13.7   cm-1
+#%%   Many other tests have been set up. In particular,
+#%%   it was observed that the frequency of the oscillatory
+#%%   behaviour changes with the ecut, and also that 
+#%%   using the Gamma point, instead of the 1/4 1/4 1/4 k point
+#%%   (used in this test) degrades the convergence.
+#%%   The overall picture is as follows.
+#%%   There are different reasons for the translation
+#%%   and rotation modes to acquire a non-zero frequency
+#%%   when plane waves and supercells are used.
+#%%   Still, as concerns translations, only the
+#%%   existence of a discretization of the XC grid
+#%%   is important. For rotations, supercell effects
+#%%   are also present :
+#%%   - alignement of dipole or quadrupoles
+#%%   - interaction between tails of wavefunctions, accross cells
+#%%   Since the convergence in supercell size is oscillatory, we infer
+#%%   that the breaking of the rotational invariance is mostly 
+#%%   due to interaction between wavefunction tails.
+#%%   This will be checked by confining the system in a spherical
+#%%   well, in a forthcoming test.
+#%%<END TEST_INFO>

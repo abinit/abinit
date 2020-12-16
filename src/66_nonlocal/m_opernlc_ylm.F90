@@ -83,7 +83,7 @@ contains
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
 !!  itypat=type of atoms
 !!  lambda=factor to be used when computing (Vln-lambda.S) - only for paw_opt=2
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  ndgxdt=second dimension of dgxdt
 !!  ndgxdtfac=second dimension of dgxdtfac

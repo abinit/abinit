@@ -32,10 +32,6 @@ MODULE m_errors
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
-#ifdef HAVE_ETSF_IO
- use etsf_io_low_level
- use etsf_io
-#endif
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -76,10 +72,6 @@ include "fexcp.h"
  public :: set_backtrace_onerr ! Activate show_backtrace call in msg_hndl. 0 to disable it.
  !public :: show_backtrace   ! Shows a backtrace at an arbitrary place in user code. (Gfortran/Ifort extension)
  public :: unused_var       ! Helper function used to silence compiler warnings due to unused variables.
-#if defined HAVE_ETSF_IO
- public :: abietsf_msg_hndl ! Error handler for ETSF-IO routines.
- public :: abietsf_warn     ! Write warnings reported by ETSF-IO routines.
-#endif
  public :: bigdft_lib_error
  public :: xlf_set_sighandler
  public :: abinit_doctor         ! Perform checks on memory leaks and leaking file descriptors
@@ -1223,117 +1215,6 @@ elemental subroutine unused_ch(var)
 
 end subroutine unused_ch
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_errors/abietsf_msg_hndl
-!! NAME
-!!  abietsf_msg_hndl
-!!
-!! FUNCTION
-!!  Wrapper to interface the abinint error handlers with the error handling routines used in etsf-io.
-!!  It is usually interfaced via the macro ETSF_* defined in abi_common.h
-!!
-!! INPUTS
-!!  lstat=Logical flag returned by etsf-io routines.
-!!  Error_data<ETSF_io_low_error>=Structure storing the error returned by etsf-io calls.
-!!  [line]=line number of the file where the problem occurred
-!!  [file]=name of the f90 file containing the caller
-!!  mode_paral=Either "COLL" or "PERS".
-!!
-!! OUTPUT
-!!  Only writing, then the code is stopped.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
-!!
-!! SOURCE
-
-#if defined HAVE_ETSF_IO
-
-subroutine abietsf_msg_hndl(lstat,Error_data,mode_paral,file,line)
-
-!Arguments ------------------------------------
- integer,optional,intent(in) :: line
- character(len=*),optional,intent(in) :: file
- character(len=*),intent(in) :: mode_paral
- logical,intent(in) :: lstat
- type(ETSF_io_low_error),intent(in) :: Error_data
-
-!Local variables-------------------------------
- integer :: f90line=0
- character(len=500) :: f90name='Subroutine Unknown'
- character(len=etsf_io_low_error_len) :: errmess
-! *********************************************************************
-
- if (lstat) RETURN
-
- if (PRESENT(line)) f90line=line
- if (PRESENT(file)) f90name = file
- call etsf_io_low_error_to_str(errmess,Error_data)
-
- call msg_hndl(errmess,"ERROR",mode_paral,f90name,f90line)
-
-end subroutine abietsf_msg_hndl
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_errors/abietsf_warn
-!! NAME
-!!  abietsf_warn
-!!
-!! FUNCTION
-!!  Wrapper to write warning messages, only used for ETSF_IO routines
-!!  It is usually interfaced via the macro ETSF_WARN defined in abi_common.h
-!!
-!! INPUTS
-!!  lstat=status error.
-!!  Error_data<ETSF_io_low_error>=Structure storing the error returned by etsf-io calls.
-!!  [line]=line number of the file where the problem occurred
-!!  [file]=name of the f90 file containing the caller
-!!  mode_paral=Either "COLL" or "PERS".
-!!
-!! OUTPUT
-!!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
-!!
-!! SOURCE
-
-
-subroutine abietsf_warn(lstat,Error_data,mode_paral,file,line)
-
-!Arguments ------------------------------------
- integer,optional,intent(in) :: line
- logical,intent(in) :: lstat
- character(len=*),optional,intent(in) :: file
- character(len=*),intent(in) :: mode_paral
- type(ETSF_io_low_error),intent(in) :: Error_data
-
-!Local variables-------------------------------
- integer :: f90line=0
- character(len=500) :: f90name='Subroutine Unknown'
- character(len=etsf_io_low_error_len) :: errmess
-! *********************************************************************
-
- if (lstat) RETURN
-
- if (PRESENT(line)) f90line=line
- if (PRESENT(file)) f90name = file
- call etsf_io_low_error_to_str(errmess,Error_data)
-
- call msg_hndl(errmess,"WARNING",mode_paral,f90name,f90line)
-
-end subroutine abietsf_warn
-!!***
-
-#endif
 
 !----------------------------------------------------------------------
 

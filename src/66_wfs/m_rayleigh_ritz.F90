@@ -62,7 +62,7 @@ contains
 !! hamiltonian/overlap matrices in full and calling the subdiago method
 !!
 !! INPUTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
 !!  nspinor=number of plane waves at this k point
@@ -190,8 +190,6 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
  call fxphas_seq(evec,edummy,0,0,1,nband*nband,nband*nband,nband,nband,0)
  ABI_DEALLOCATE(edummy)
 
-
-
  ! Rotate
  call abi_xgemm('n','n',vectsize,nband, nband,cone,cg , vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
  cg = gtempc
@@ -283,7 +281,7 @@ end subroutine rayleigh_ritz_subdiago
 !! hamiltonian/overlap matrices directly, and calling the ScaLapack routines
 !!
 !! INPUTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
 !!  nspinor=number of plane waves at this k point

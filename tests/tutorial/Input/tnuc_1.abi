@@ -1,0 +1,51 @@
+# computation of the electric field gradient at the atoms in stishovite
+
+prtefg 2
+quadmom 0.0 -0.02558
+
+nstep 10
+
+ecut 20
+pawecutdg 25
+
+prtden 0
+prtwf 0
+prteig 0
+
+tolvrs 1.0D-18
+
+ngkpt 8 8 6
+
+spgroup 136 # space group number
+acell 4.1790 4.1790 2.6649 angstrom # cell sides, angstrom units
+angdeg 90.0 90.0 90.0 # cell angles (this is the default by the way)
+
+znucl 14 8 # atomic number of atoms, will be cross checked against pseudopotential files
+natom 6 # 6 atoms in the unit cell (remember Z = 2 here)
+natrd 2 # only read two atoms in, this is the asymmetric unit
+
+ntypat 2 # two types of atoms
+typat 1 2 # read atom type 1 then type 2, order is set by znucl above
+
+xred # here come the fractional coordinates from the cif file
+0 0 0 # first atom type
+0.3062 0.3062 0 # second atom type
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si.GGA-PBE-rpaw-1.55.abinit, O.GGA-PBE-rpaw-1.45.abinit"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tnuc_1.abo, tolnlines=  3, tolabs=  1.2e-8 , tolrel= 3.0e-8
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = 
+#%% topics = SmartSymm
+#%%<END TEST_INFO>

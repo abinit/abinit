@@ -1,0 +1,133 @@
+#############################################################################
+#Test strain perturbation in paw.  Al crystal, finite difference and response
+#function 2DTE wrt strain are compared.
+#############################################################################
+
+ndtset 8 jdtset 1 2 3 4 5 6 12 13
+
+#First dataset : self-consistent run with limited convergence
+ prtwf1 1 
+ nline1 20
+ tolwfr1 1.0d-18
+
+# Datasets 2-6 : finite-difference runs with strain component 1 (1def)
+# increment 0.0005
+  getwfk2 1
+  rprim2
+             0.000000    0.500000    0.500000
+             0.500000    0.000000    0.500000
+             0.500000    0.500000    0.000000
+                                     
+ #deformation delta=-0.005            
+  getwfk3 1
+  rprim3  -0.000250   0.500000   0.499750
+           0.500000  -0.000250   0.499750
+           0.499750   0.499750   0.000000
+
+
+# #deformation delta=0.005
+  getwfk4 1
+  rprim4   0.000250   0.500000   0.500250
+           0.500000   0.000250   0.500250
+           0.500250   0.500250   0.000000
+
+  #deformation delta=-0.01
+  getwfk5 1
+  rprim5    -0.000500   0.500000   0.499500
+             0.500000  -0.000500   0.499500
+             0.499500   0.499500   0.000000
+
+#deformation delta=0.01
+  getwfk6 1
+  rprim6  0.000500   0.500000   0.500500
+          0.500000   0.000500   0.500500
+          0.500500   0.500500   0.000000
+
+#Dataset 12 : response function strain perturbation calculation
+  rfstrs12  3
+  rfphon12  1
+   rfdir12  1 1 1
+    nqpt12  1
+     qpt12  0 0 0
+  kptopt12  3
+  getwfk12  1
+
+#Dataset 13 : response function strain perturbation calculation (usexcnhat==0)
+ usexcnhat13  0
+    rfstrs13  3
+    rfphon13  1
+     rfdir13  1 1 1
+      nqpt13  1
+       qpt13  0 0 0
+    kptopt13  3
+    getwfk13  1
+
+  
+#######################################################################
+#Common input variables
+
+#Definition of the unit cell
+  acell  3*5.6684462775E+00 
+  rprim
+         0.000000    0.500000    0.500000
+         0.500000    0.000000    0.500000
+         0.500000    0.500000    0.000000
+
+#Definition of the atom types
+   ntypat 1
+    znucl  13
+
+#Definition of the atoms
+   natom  1
+   typat 1 
+    xred   0.0   0.0   0.0
+#Number of band
+   nband  6
+#Definition of the planewave basis set
+    ecut  15  
+#Definition of the k-point grid
+   ngkpt 2 2 2
+ nshiftk 4
+  shiftk 0.5 0.5 0.5
+         0.5 0.0 0.0
+         0.0 0.5 0.0
+         0.0 0.0 0.5
+  kptopt 1
+#Definition of the SCF procedure
+     nstep 200
+    tolvrs 1.0d-8
+ usexcnhat 1
+    occopt 3
+    ecutsm 0.5
+ boxcutmin 2.2
+    tsmear 5d-3 
+
+#PAW parameters
+ pawecutdg 20
+
+ prtwf 0 prteig 0 prtden 0
+ prtvol 10
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "al_ps.abinit.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t95.abo, tolnlines = 9, tolabs = 3.9e-04, tolrel = 5.0e-04, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = A. MARTIN
+#%% keywords = PAW, DFPT, ELASTIC
+#%% description = 
+#%%   Computation of elastic tensor and internal strain in DFPT+PAW
+#%%   Ground state is computed.
+#%%   Finite-difference runs with strain component 1 (1def) is computed
+#%%   DFPT is computed
+#%%   Comparaison with Finite Diferrences give excellent agreement ~1e-5%
+#%%   DFPT is computed with usexcnhat==0 (Just for test)
+#%% topics = Elastic
+#%%<END TEST_INFO>

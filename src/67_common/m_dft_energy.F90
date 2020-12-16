@@ -102,6 +102,8 @@ contains
 !! of ehart, enxc, and eei.
 !! WARNING XG180913 : At present, Fock energy not computed !
 !!
+!! NOTE that this routine is callned in m_scfcv_core only when nstep == 0
+!!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=<G|Cnk>=Fourier coefficients of wavefunction
@@ -151,7 +153,7 @@ contains
 !!  symrec(3,3,nsym)=symmetry operations in reciprocal space
 !!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
 !!  vpsp(nfftf)=local pseudopotential in real space (hartree)
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!  wvl <type(wvl_internal_type)>=wavelets internal data
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!  xred(3,natom)=reduced coordinates of atoms (dimensionless)
@@ -288,12 +290,12 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1),vzeeman(4)
  real(dp) :: magvec(dtset%nspden)
  real(dp),target :: vxctau_dum(0,0,0)
- real(dp),allocatable :: buffer(:),cgrvtrial(:,:)
+ real(dp),allocatable :: buffer(:)
  real(dp),allocatable :: cwavef(:,:),eig_k(:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
  real(dp),allocatable :: kinpw(:),kinpw_sav(:),kxc(:,:),occ_k(:),occblock(:)
  real(dp),allocatable :: ph3d(:,:,:),ph3d_sav(:,:,:)
  real(dp),allocatable :: resid_k(:),rhowfg(:,:),rhowfr(:,:),vlocal(:,:,:,:)
- real(dp),allocatable :: vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),v_constr_dft_r(:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),v_constr_dft_r(:,:)
  real(dp),pointer :: vxctau_(:,:,:)
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
@@ -564,54 +566,17 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  do isppol=1,dtset%nsppol
    ikg=0
 
-!  Set up local potential vlocal with proper dimensioning, from vtrial
-!  Also take into account the spin.
-   if(dtset%nspden/=4)then
-     if (psps%usepaw==0.or.pawfgr%usefinegrid==0) then
-       call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal,2)
-       if(with_vxctau) then
-         do ispden=1,4
-           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-&           vxctau(:,:,ispden),vxctaulocal(:,:,:,:,ispden),2)
-         end do
-       end if
-     else
-       ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-       call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vlocal,2)
-       if(with_vxctau) then
-         do ispden=1,4
-           call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-&                         rhodum,rhodum,cgrvtrial,vxctau(:,:,ispden))
-           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-&                      cgrvtrial,vxctaulocal(:,:,:,:,ispden),2)
-         end do
-       end if
-       ABI_DEALLOCATE(cgrvtrial)
-     end if
-   else
-     ABI_ALLOCATE(vlocal_tmp,(n4,n5,n6))
-     if (psps%usepaw==0) then
-       do ispden=1,dtset%nspden
-         call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal_tmp,2)
-         vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-       end do
-     else
-       ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-       do ispden=1,dtset%nspden
-         call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vlocal_tmp,2)
-         vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-       end do
-       ABI_DEALLOCATE(cgrvtrial)
-     end if
-     ABI_DEALLOCATE(vlocal_tmp)
-   end if
+   ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
+   ! Also take into account the spin.
 
-!  Continue Hamiltonian initialization
+   call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                 dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, vtrial, vlocal)
    call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
+
    if (with_vxctau) then
-     call gs_hamk%load_spin(isppol,vxctaulocal=vxctaulocal)
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                   dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+     call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
    end if
 
 !  Loop over k points
@@ -1045,6 +1010,11 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 &     prtvol,gs_hamk%usepaw,cpopt,cwaveprj,&
 &     already_transposed=.false.)
    end if
+
+   !call cg_get_eigens(usepaw, istwf_k, npwsp, nband, cg, ghc, gsc, eig, me_g0, comm_bsf)
+   !call cg_get_residvecs(usepaw, npwsp, nband, eig, cg, ghc, gsc, gwork)
+   !call cg_norm2g(istwf_k, npwsp, nband, gwork, resid, me_g0, comm_bsf)
+   ! MG: Communicators are wrongi if paral_kgb. One should use mpi_enreg%comm_bandspinorfft
 
 !  Compute the residual, <Cn|(H-<Cn|H|Cn>)**2|Cn>:
    do iblocksize=1,blocksize

@@ -829,7 +829,7 @@ end subroutine impurity_solve
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  istep    =  step of iteration for DFT.
 !!  dft_occup
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  opt_weissgreen= 1: compute weiss from green and self
 !!                = 2: compute green from weiss and self

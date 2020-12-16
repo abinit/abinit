@@ -32,14 +32,6 @@
 
   subroutine abi_dhpev(jobz,uplo,n,a,w,z,ldz,istwf_k,use_slk)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpev'
-
-!End of the abilint section
-
- implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
@@ -76,20 +68,19 @@
    dim_evec1= 2*n/istwf_k_
    ABI_ALLOCATE(tmp_evec,(dim_evec1,n))
    tmp_evec = zero
-   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_,10)
-   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_,10)
+   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_, tbloc=10)
+   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_, tbloc=10)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
 #else
    call matrix_from_global(sca_a,a,istwf_k_)
 #endif
-   call compute_eigen_problem(slk_processor,sca_a,&
-&        sca_ev,w,slk_communicator,istwf_k_)
+   call compute_eigen_problem(slk_processor,sca_a,sca_ev,w,slk_communicator,istwf_k_)
    call matrix_to_global(sca_a,a,istwf_k_)
    call matrix_to_reference(sca_ev,tmp_evec,istwf_k_)
    call xmpi_sum(tmp_evec,z,dim_evec1*n,slk_communicator,ierr)
-   call destruction_matrix_scalapack(sca_a)
-   call destruction_matrix_scalapack(sca_ev)
+   call sca_a%free()
+   call sca_ev%free()
    ABI_DEALLOCATE(tmp_evec)
 #endif
 
@@ -122,14 +113,6 @@ end subroutine abi_dhpev
 !! SOURCE
 
   subroutine abi_chpev(jobz,uplo,n,a,w,z,ldz)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpev'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
@@ -187,14 +170,6 @@ end subroutine abi_chpev
 !! SOURCE
 
   subroutine abi_zhpev(jobz,uplo,n,a,w,z,ldz)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpev'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz

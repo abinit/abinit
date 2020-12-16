@@ -1,0 +1,61 @@
+# Test Al XML pseudopotential - ONCVPSP
+
+natom   1
+ntypat  1
+typat   1
+znucl   13
+ndtset   3
+ecut1   7.00
+ecut2   8.00
+ecut3   9.00
+acell   3.97    3.97    3.97 Angstrom
+rprim   0.0     0.5     0.5 
+        0.5     0.0     0.5
+        0.5     0.5     0.0
+xred  0.000  0.000 0.000
+natrd   1
+natfix  1
+iatfix  1
+optcell 0
+dilatmx 1.1
+ecutsm  0.5
+nband   10
+kptopt  1
+ngkpt  10 10 10
+nshiftk 4
+shiftk  0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+iscf    5
+nstep   30
+toldfe  1.0d-8
+occopt  3
+tsmear  0.01
+ionmov     0
+ntime      0
+prtden     0
+prtpot     0
+prtvha     0
+prtvhxc    0
+prtvxc     0
+prt1dm     0
+ixc -101130
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13_Al_oncv.psml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t07.abo, tolnlines = 0, tolabs = 1.1e-06, tolrel = 0.00e+00
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = Y. Pouillon
+#%% keywords = NC
+#%% description = 
+#%%   Partial cut-off energy convergence study of bulk FCC aluminium
+#%%<END TEST_INFO>

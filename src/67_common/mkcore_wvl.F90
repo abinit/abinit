@@ -64,7 +64,7 @@ contains
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
 !!  [mpi_comm_wvl]=MPI communicator (optional)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
 !!  nfft=dimension of vxc (XC potential)
@@ -1068,7 +1068,7 @@ end module m_mkcore_wvl
 !%% !!  or http://www.gnu.org/copyleft/gpl.txt .
 !%% !!
 !%% !! INPUTS
-!%% !!  mpi_enreg=informations about MPI parallelization
+!%% !!  mpi_enreg=information about MPI parallelization
 !%% !!
 !%% !! OUTPUT
 !%% !!  argout(sizeout)=description

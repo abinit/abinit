@@ -512,6 +512,9 @@ contains
  intarr(1,:)=dtsets(:)%prtbltztrp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtbltztrp','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtchkprdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtchkprdm','INT',0)
+
  intarr(1,:)=dtsets(:)%prtcif
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtcif','INT',0)
 
@@ -838,6 +841,11 @@ contains
 
  dprarr(1,:)=dtsets(:)%rifcsph
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rifcsph','DPR',0)
+
+ intarr(1,:)=dtsets(:)%rmm_diis
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rmm_diis','INT',0)
+ intarr(1,:)=dtsets(:)%rmm_diis_savemem
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rmm_diis_savemem','INT',0)
 
 !rprim
  prtimg(:,:)=1
@@ -1454,6 +1462,9 @@ contains
 
  dprarr(1,:)=dtsets(:)%xc_tb09_c
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_tb09_c','DPR',0)
+
+ intarr(1,:)=dtsets(:)%x1rdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'x1rdm','INT',0)
 
 !xred
  prtimg(:,:)=1

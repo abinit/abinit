@@ -1,0 +1,2770 @@
+
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2020 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h27 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v5_t21/t21.in
+- output file    -> t21.out
+- root for input  files -> t21i
+- root for output files -> t21o
+
+
+ DATASET    1 : space group P4/n m m (#129); Bravais tP (primitive tetrag.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      50  mpssoang =       3    mqgrid =    3001
+     natom =       6  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      16    n1xccc =    2501    ntypat =       3
+    occopt =       1   xclevel =       1
+-    mband =          18        mffmem =           1         mkmem =           1
+       mpw =        1239          nfft =       45000          nkpt =           1
+================================================================================
+P This job should need less than                      14.998 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.342 Mbytes ; DEN or POT disk file :      0.345 Mbytes.
+================================================================================
+
+
+ DATASET    2 : space group P4/n m m (#129); Bravais tP (primitive tetrag.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2.
+     intxc =       0    ionmov =       0      iscf =      -2    lmnmax =       6
+     lnmax =       6     mgfft =      50  mpssoang =       3    mqgrid =    3001
+     natom =       6  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      16    n1xccc =    2501    ntypat =       3
+    occopt =       1   xclevel =       1
+-    mband =          18        mffmem =           1         mkmem =           1
+       mpw =        1264          nfft =       45000          nkpt =           1
+================================================================================
+P This job should need less than                       9.523 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.349 Mbytes ; DEN or POT disk file :      0.345 Mbytes.
+================================================================================
+
+
+ DATASET    3 : space group P4/n m m (#129); Bravais tP (primitive tetrag.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  3 (RF).
+     intxc =       0      iscf =       7    lmnmax =       6     lnmax =       6
+     mgfft =      50  mpssoang =       3    mqgrid =    3001     natom =       6
+  nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
+      nsym =      16    n1xccc =    2501    ntypat =       3    occopt =       1
+   xclevel =       1
+-    mband =          18        mffmem =           1         mkmem =           1
+-   mkqmem =           1        mk1mem =           1           mpw =        2528
+      nfft =       45000          nkpt =           1
+================================================================================
+P This job should need less than                      17.182 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.696 Mbytes ; DEN or POT disk file :      0.345 Mbytes.
+================================================================================
+
+
+ DATASET    4 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  4 (RF).
+     intxc =       0      iscf =       7    lmnmax =       6     lnmax =       6
+     mgfft =      50  mpssoang =       3    mqgrid =    3001     natom =       6
+  nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
+      nsym =       1    n1xccc =    2501    ntypat =       3    occopt =       1
+   xclevel =       1
+-    mband =          18        mffmem =           1         mkmem =           1
+-   mkqmem =           1        mk1mem =           1           mpw =        2528
+      nfft =       45000          nkpt =           1
+================================================================================
+P This job should need less than                      17.180 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.696 Mbytes ; DEN or POT disk file :      0.345 Mbytes.
+================================================================================
+
+
+ DATASET   12 : space group P4/n m m (#129); Bravais tP (primitive tetrag.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 12.
+     intxc =       0    ionmov =       0      iscf =      -2    lmnmax =       6
+     lnmax =       6     mgfft =      50  mpssoang =       3    mqgrid =    3001
+     natom =       6  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      16    n1xccc =    2501    ntypat =       3
+    occopt =       1   xclevel =       1
+-    mband =          18        mffmem =           1         mkmem =           1
+       mpw =        2495          nfft =       45000          nkpt =           1
+================================================================================
+P This job should need less than                      10.406 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.687 Mbytes ; DEN or POT disk file :      0.345 Mbytes.
+================================================================================
+
+
+ DATASET   13 : space group P4/n m m (#129); Bravais tP (primitive tetrag.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 13 (RF).
+     intxc =       0      iscf =       7    lmnmax =       6     lnmax =       6
+     mgfft =      50  mpssoang =       3    mqgrid =    3001     natom =       6
+  nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
+      nsym =      16    n1xccc =    2501    ntypat =       3    occopt =       1
+   xclevel =       1
+-    mband =          18        mffmem =           1         mkmem =           1
+-   mkqmem =           1        mk1mem =           1           mpw =        2495
+      nfft =       45000          nkpt =           1
+================================================================================
+P This job should need less than                      17.126 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.687 Mbytes ; DEN or POT disk file :      0.345 Mbytes.
+================================================================================
+
+
+ DATASET   14 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 14 (RF).
+     intxc =       0      iscf =       7    lmnmax =       6     lnmax =       6
+     mgfft =      50  mpssoang =       3    mqgrid =    3001     natom =       6
+  nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
+      nsym =       1    n1xccc =    2501    ntypat =       3    occopt =       1
+   xclevel =       1
+-    mband =          18        mffmem =           1         mkmem =           1
+-   mkqmem =           1        mk1mem =           1           mpw =        2495
+      nfft =       45000          nkpt =           1
+================================================================================
+P This job should need less than                      17.124 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.687 Mbytes ; DEN or POT disk file :      0.345 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      7.0000000000E+00  7.0000000000E+00  1.2000000000E+01 Bohr
+              amu      1.89984032E+01  3.54527000E+01  2.07200000E+02
+           diemac      6.00000000E+00
+             ecut      2.00000000E+01 Hartree
+-          fftalg         312
+           getden1          0
+           getden2          1
+           getden3          0
+           getden4          0
+           getden12         1
+           getden13         0
+           getden14         0
+           getwfk1          0
+           getwfk2          1
+           getwfk3          1
+           getwfk4          1
+           getwfk12         1
+           getwfk13         1
+           getwfk14         1
+           getwfq1          0
+           getwfq2          0
+           getwfq3          2
+           getwfq4          2
+           getwfq12         0
+           getwfq13        12
+           getwfq14        12
+             iscf1          7
+             iscf2         -2
+             iscf3          7
+             iscf4          7
+             iscf12        -2
+             iscf13         7
+             iscf14         7
+           istwfk1       2
+           istwfk2       9
+           istwfk3       1
+           istwfk4       1
+           istwfk12      0
+           istwfk13      1
+           istwfk14      1
+           jdtset        1    2    3    4   12   13   14
+           kptopt           0
+P           mkmem           1
+P          mkqmem           1
+P          mk1mem           1
+            natom           6
+            nband          18
+           nbdbuf1          0
+           nbdbuf2          2
+           nbdbuf3          0
+           nbdbuf4          0
+           nbdbuf12         2
+           nbdbuf13         0
+           nbdbuf14         0
+           ndtset           7
+            ngfft          30      30      50
+             nkpt           1
+             nqpt1          0
+             nqpt2          1
+             nqpt3          1
+             nqpt4          1
+             nqpt12         1
+             nqpt13         1
+             nqpt14         1
+            nstep         100
+             nsym1         16
+             nsym2         16
+             nsym3         16
+             nsym4          1
+             nsym12        16
+             nsym13        16
+             nsym14         1
+           ntypat           3
+              occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+        optdriver1          0
+        optdriver2          0
+        optdriver3          1
+        optdriver4          1
+        optdriver12         0
+        optdriver13         1
+        optdriver14         1
+              qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+              qpt2     5.00000000E-01  5.00000000E-01  5.00000000E-01
+              qpt3     5.00000000E-01  5.00000000E-01  5.00000000E-01
+              qpt4     5.00000000E-01  5.00000000E-01  5.00000000E-01
+              qpt12    1.00000000E-01  1.00000000E-01  2.00000000E-01
+              qpt13    1.00000000E-01  1.00000000E-01  2.00000000E-01
+              qpt14    1.00000000E-01  1.00000000E-01  2.00000000E-01
+          rfatpol1          1       1
+          rfatpol2          1       1
+          rfatpol3          3       3
+          rfatpol4          3       3
+          rfatpol12         1       1
+          rfatpol13         3       3
+          rfatpol14         3       3
+            rfdir1          0       0       0
+            rfdir2          0       0       0
+            rfdir3          0       0       1
+            rfdir4          0       0       1
+            rfdir12         0       0       0
+            rfdir13         0       0       1
+            rfdir14         0       0       1
+           rfphon1          0
+           rfphon2          0
+           rfphon3          1
+           rfphon4          1
+           rfphon12         0
+           rfphon13         1
+           rfphon14         1
+          spgroup1        129
+          spgroup2        129
+          spgroup3        129
+          spgroup4          1
+          spgroup12       129
+          spgroup13       129
+          spgroup14         1
+           symafm1       1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1
+           symafm2       1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1
+           symafm3       1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1
+           symafm4       1
+           symafm12      1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1
+           symafm13      1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1
+           symafm14      1
+           symrel1     1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                       0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+           symrel2     1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                       0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+           symrel3     1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                       0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+           symrel4     1  0  0   0  1  0   0  0  1
+           symrel12    1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                       0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+           symrel13    1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                       0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+           symrel14    1  0  0   0  1  0   0  0  1
+            tnons1     0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+            tnons2     0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+            tnons3     0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+            tnons4     0.0000000  0.0000000  0.0000000
+            tnons12    0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+            tnons13    0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+            tnons14    0.0000000  0.0000000  0.0000000
+           tolvrs1     1.00000000E-12
+           tolvrs2     0.00000000E+00
+           tolvrs3     1.00000000E-08
+           tolvrs4     1.00000000E-08
+           tolvrs12    0.00000000E+00
+           tolvrs13    1.00000000E-08
+           tolvrs14    1.00000000E-08
+           tolwfr1     0.00000000E+00
+           tolwfr2     1.00000000E-17
+           tolwfr3     0.00000000E+00
+           tolwfr4     0.00000000E+00
+           tolwfr12    1.00000000E-17
+           tolwfr13    0.00000000E+00
+           tolwfr14    0.00000000E+00
+            typat      1  1  2  2  3  3
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.8521202301E+00  1.8521202301E+00  0.0000000000E+00
+                       0.0000000000E+00  1.8521202301E+00  4.1044962893E+00
+                       1.8521202301E+00  0.0000000000E+00 -4.1044962893E+00
+                       0.0000000000E+00  1.8521202301E+00  1.3254449923E+00
+                       1.8521202301E+00  0.0000000000E+00 -1.3254449923E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       3.5000000000E+00  3.5000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  3.5000000000E+00  7.7563739003E+00
+                       3.5000000000E+00  0.0000000000E+00 -7.7563739003E+00
+                       0.0000000000E+00  3.5000000000E+00  2.5047280396E+00
+                       3.5000000000E+00  0.0000000000E+00 -2.5047280396E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+                       0.0000000000E+00  5.0000000000E-01  6.4636449169E-01
+                       5.0000000000E-01  0.0000000000E+00 -6.4636449169E-01
+                       0.0000000000E+00  5.0000000000E-01  2.0872733663E-01
+                       5.0000000000E-01  0.0000000000E+00 -2.0872733663E-01
+            znucl        9.00000   17.00000   82.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   3.
+
+ chkinp: Checking input parameters for consistency, jdtset=   4.
+
+ chkinp: Checking input parameters for consistency, jdtset=  12.
+
+ chkinp: Checking input parameters for consistency, jdtset=  13.
+
+ chkinp: Checking input parameters for consistency, jdtset=  14.
+
+================================================================================
+== DATASET  1 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 6, nkpt: 1, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1239, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.0000000  0.0000000  0.0000000  G(1)=  0.1428571  0.0000000  0.0000000
+ R(2)=  0.0000000  7.0000000  0.0000000  G(2)=  0.0000000  0.1428571  0.0000000
+ R(3)=  0.0000000  0.0000000 12.0000000  G(3)=  0.0000000  0.0000000  0.0833333
+ Unit cell volume ucvol=  5.8800000E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  30  30  50
+         ecut(hartree)=     20.000   => boxcut(ratio)=   2.06971
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/9f.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/9f.pspnc
+-  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
+-  9.00000   7.00000    940714                znucl, zion, pspdat
+    1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   6.771  17.439    1   1.3876018        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1  24.372  32.350    0   1.3876018        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    0.49406148701180    6.36128955091623    0.66947621353748   rchrg,fchrg,qchrg
+  pspatm : epsatm=    1.80528525
+         --- l  ekb(1:nproj) -->
+             0    6.310228
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/17cl.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/17cl.pspnc
+-  Troullier-Martins psp for element  Cl        Thu Oct 27 17:32:09 EDT 1994
+- 17.00000   7.00000    940714                znucl, zion, pspdat
+    1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0  10.493  25.212    1   1.6350894        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1   5.554   8.510    1   1.6350894        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    2   0.000   0.000    0   1.6350894        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1.23315314129373    1.11669953786602    1.82740311420084   rchrg,fchrg,qchrg
+  pspatm : epsatm=    2.73037554
+         --- l  ekb(1:nproj) -->
+             0    6.290146
+             1    3.746067
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/82pb.4.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/82pb.4.hgh
+- Hartwigsen-Goedecker-Hutter psp for Pb,  from PRB58, 3641 (1998)
+- 82.00000   4.00000     10605                znucl, zion, pspdat
+    3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ rloc=   0.6175000
+ cc1 =   0.7531430; cc2 =   0.0000000; cc3 =   0.0000000; cc4 =   0.0000000
+ rrs =   0.7052590; h11s=   1.9799270; h22s=  -0.1649600; h33s=  -0.8060600
+ rrp =   0.8466410; h11p=   0.8644200; h22p=  -0.5409690; h33p=   0.0000000
+                    k11p=   0.2077110; k22p=   0.0129480; k33p=   0.0000000
+ rrd =   0.9719390; h11d=   0.3749670; h22d=   0.0000000; h33d=   0.0000000
+                    k11d=   0.0292560; k22d=   0.0000000; k33d=   0.0000000
+-  Local part computed in reciprocal space.
+
+ pspatm : COMMENT -
+  the projectors are not normalized,
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
+  However, this does not influence the results obtained hereafter.
+  pspatm : epsatm=   12.37618897
+         --- l  ekb(1:nproj) -->
+             0   -1.367110    0.141978    2.479722
+             1   -1.780211    2.777773
+             2    4.356433
+ pspatm: atomic psp has been read  and splines computed
+
+   1.21765318E+03                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are    2477.000    2477.000
+
+================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-12, }
+...
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -79.361584221642    -7.936E+01 4.573E-02 3.086E+04
+ ETOT  2  -75.707198693372     3.654E+00 8.562E-02 7.199E+04
+ ETOT  3  -87.265156846324    -1.156E+01 4.607E-02 3.806E+03
+ ETOT  4  -88.305206774185    -1.040E+00 3.993E-03 1.263E+03
+ ETOT  5  -88.492738733549    -1.875E-01 2.104E-03 6.110E+02
+ ETOT  6  -88.587397340026    -9.466E-02 1.612E-03 1.095E+02
+ ETOT  7  -88.599612402111    -1.222E-02 3.516E-04 3.746E+00
+ ETOT  8  -88.601189091692    -1.577E-03 4.426E-05 3.417E-01
+ ETOT  9  -88.601319131260    -1.300E-04 4.424E-06 4.153E-02
+ ETOT 10  -88.601327002710    -7.871E-06 2.110E-07 1.063E-04
+ ETOT 11  -88.601327033537    -3.083E-08 2.286E-10 1.594E-06
+ ETOT 12  -88.601327034621    -1.084E-09 2.132E-11 8.303E-08
+ ETOT 13  -88.601327034648    -2.714E-11 5.199E-13 1.595E-10
+ ETOT 14  -88.601327034645     2.501E-12 8.918E-16 1.619E-12
+ ETOT 15  -88.601327034645     4.405E-13 1.221E-17 2.421E-14
+
+ At SCF step   15       vres2   =  2.42E-14 < tolvrs=  1.00E-12 =>converged.
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  1.27401404E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.27401404E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.98197927E-03  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  12.0000000, ]
+lattice_lengths: [   7.00000,    7.00000,   12.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   5.8800000E+02
+convergence: {deltae:  4.405E-13, res2:  2.421E-14, residm:  1.221E-17, diffor: null, }
+etotal    :  -8.86013270E+01
+entropy   :   0.00000000E+00
+fermie    :   2.04383081E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.27401404E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.27401404E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.98197927E-03, ]
+pressure_GPa:  -5.4233E+01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  F]
+- [  5.0000E-01,   5.0000E-01,   0.0000E+00,  F]
+- [  0.0000E+00,   5.0000E-01,   6.4636E-01, Cl]
+- [  5.0000E-01,   0.0000E+00,  -6.4636E-01, Cl]
+- [  0.0000E+00,   5.0000E-01,   2.0873E-01, Pb]
+- [  5.0000E-01,   0.0000E+00,  -2.0873E-01, Pb]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -1.15648232E-18, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -1.15648232E-18, ]
+- [ -0.00000000E+00,  -0.00000000E+00,   6.05262811E-02, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -6.05262811E-02, ]
+- [ -0.00000000E+00,  -0.00000000E+00,   4.48354223E-02, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -4.48354223E-02, ]
+force_length_stats: {min:   1.15648232E-18, max:   6.05262811E-02, mean:   3.51205678E-02, }
+...
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          7.13879140
+    2        2.00000          7.13879140
+    3        2.00000          5.18218225
+    4        2.00000          5.18218225
+    5        2.00000          1.04985398
+    6        2.00000          1.04985398
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   37.479E-19; max=  12.213E-18
+ reduced coordinates (array xred) for    6 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.500000000000      0.500000000000      0.000000000000
+       0.000000000000      0.500000000000      0.646364491690
+       0.500000000000      0.000000000000     -0.646364491690
+       0.000000000000      0.500000000000      0.208727336630
+       0.500000000000      0.000000000000     -0.208727336630
+ rms dE/dt=  3.0129E-01; max dE/dt=  7.2632E-01; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+    3       0.000000000000      0.000000000000     -0.726315373740
+    4       0.000000000000      0.000000000000      0.726315373740
+    5       0.000000000000      0.000000000000     -0.538025067275
+    6       0.000000000000      0.000000000000      0.538025067275
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.85212023006500     1.85212023006500     0.00000000000000
+    3      0.00000000000000     1.85212023006500     4.10449628933050
+    4      1.85212023006500     0.00000000000000    -4.10449628933050
+    5      0.00000000000000     1.85212023006500     1.32544499225146
+    6      1.85212023006500     0.00000000000000    -1.32544499225146
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    3     -0.00000000000000    -0.00000000000000     0.06052628114500
+    4     -0.00000000000000    -0.00000000000000    -0.06052628114500
+    5     -0.00000000000000    -0.00000000000000     0.04483542227295
+    6     -0.00000000000000    -0.00000000000000    -0.04483542227295
+ frms,max,avg= 2.5107869E-02 6.0526281E-02   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    3     -0.00000000000000    -0.00000000000000     3.11238625382865
+    4     -0.00000000000000    -0.00000000000000    -3.11238625382865
+    5     -0.00000000000000    -0.00000000000000     2.30552991736955
+    6     -0.00000000000000    -0.00000000000000    -2.30552991736955
+ frms,max,avg= 1.2910984E+00 3.1123863E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales=  7.000000000000  7.000000000000 12.000000000000 bohr
+              =  3.704240460130  3.704240460130  6.350126503080 angstroms
+ prteigrs : about to open file t21o_DS1_EIG
+ Fermi (or HOMO) energy (hartree) =   0.20438   Average Vxc (hartree)=  -0.39010
+ Eigenvalues (hartree) for nkpt=   1  k points:
+ kpt#   1, nband= 18, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.69774   -0.65213   -0.35826   -0.31003   -0.09874   -0.00753   -0.00753    0.03605
+   0.07558    0.09031    0.10456    0.10456    0.10747    0.10747    0.11875    0.13806
+   0.13806    0.20438
+
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.55860692527114E+01
+hartree             :  2.39515239767222E+01
+xc                  : -2.18317437268484E+01
+Ewald energy        : -6.63383234942939E+01
+psp_core            :  2.07083874667438E+00
+local_psp           : -8.65185389815503E+01
+non_local_psp       :  1.44788471919399E+01
+total_energy        : -8.86013270346448E+01
+total_energy_eV     : -2.41096472044512E+03
+band_energy         : -1.81339409579511E+00
+...
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  1.27401404E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.27401404E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.98197927E-03  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -5.4233E+01 GPa]
+- sigma(1 1)=  3.74827809E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.74827809E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  8.77328442E+01  sigma(2 1)=  0.00000000E+00
+
+================================================================================
+== DATASET  2 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 6, nkpt: 1, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1264, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.0000000  0.0000000  0.0000000  G(1)=  0.1428571  0.0000000  0.0000000
+ R(2)=  0.0000000  7.0000000  0.0000000  G(2)=  0.0000000  0.1428571  0.0000000
+ R(3)=  0.0000000  0.0000000 12.0000000  G(3)=  0.0000000  0.0000000  0.0833333
+ Unit cell volume ucvol=  5.8800000E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  30  30  50
+         ecut(hartree)=     20.000   => boxcut(ratio)=   2.06971
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS1_WFK
+
+================================================================================
+ prteigrs : about to open file t21o_DS2_EIG
+ Non-SCF case, kpt    1 (  0.50000  0.50000  0.50000), residuals and eigenvalues=
+  3.44E-18  3.53E-18  3.45E-18  1.91E-18  3.46E-18  3.42E-18  2.75E-18  2.67E-18
+  2.95E-18  8.30E-18  3.11E-18  3.51E-18  6.48E-18  6.33E-18  6.29E-18  6.73E-18
+  5.54E-18  3.16E-18
+ -6.6964E-01 -6.6964E-01 -3.0445E-01 -3.0445E-01 -1.1379E-01 -1.1379E-01
+ -3.0806E-02 -3.0806E-02  8.6113E-02  8.6113E-02  8.6527E-02  8.6527E-02
+  9.0545E-02  9.0545E-02  1.1461E-01  1.1461E-01  1.5759E-01  1.5759E-01
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  12.0000000, ]
+lattice_lengths: [   7.00000,    7.00000,   12.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   5.8800000E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  8.299E-18, diffor:  0.000E+00, }
+etotal    :  -8.86013270E+01
+entropy   :   0.00000000E+00
+fermie    :   2.04383081E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  F]
+- [  5.0000E-01,   5.0000E-01,   0.0000E+00,  F]
+- [  0.0000E+00,   5.0000E-01,   6.4636E-01, Cl]
+- [  5.0000E-01,   0.0000E+00,  -6.4636E-01, Cl]
+- [  0.0000E+00,   5.0000E-01,   2.0873E-01, Pb]
+- [  5.0000E-01,   0.0000E+00,  -2.0873E-01, Pb]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          7.13879140
+    2        2.00000          7.13879140
+    3        2.00000          5.18218225
+    4        2.00000          5.18218225
+    5        2.00000          1.04985398
+    6        2.00000          1.04985398
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   42.709E-19; max=  82.987E-19
+ reduced coordinates (array xred) for    6 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.500000000000      0.500000000000      0.000000000000
+       0.000000000000      0.500000000000      0.646364491690
+       0.500000000000      0.000000000000     -0.646364491690
+       0.000000000000      0.500000000000      0.208727336630
+       0.500000000000      0.000000000000     -0.208727336630
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.85212023006500     1.85212023006500     0.00000000000000
+    3      0.00000000000000     1.85212023006500     4.10449628933050
+    4      1.85212023006500     0.00000000000000    -4.10449628933050
+    5      0.00000000000000     1.85212023006500     1.32544499225146
+    6      1.85212023006500     0.00000000000000    -1.32544499225146
+ length scales=  7.000000000000  7.000000000000 12.000000000000 bohr
+              =  3.704240460130  3.704240460130  6.350126503080 angstroms
+ prteigrs : about to open file t21o_DS2_EIG
+ Eigenvalues (hartree) for nkpt=   1  k points:
+ kpt#   1, nband= 18, wtk=  1.00000, kpt=  0.5000  0.5000  0.5000 (reduced coord)
+  -0.66964   -0.66964   -0.30445   -0.30445   -0.11379   -0.11379   -0.03081   -0.03081
+   0.08611    0.08611    0.08653    0.08653    0.09055    0.09055    0.11461    0.11461
+   0.15759    0.15759
+
+================================================================================
+== DATASET  3 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 6, nkpt: 1, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2528, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getwfq/=0, take file _WFQ from output of DATASET   2.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.0000000  0.0000000  0.0000000  G(1)=  0.1428571  0.0000000  0.0000000
+ R(2)=  0.0000000  7.0000000  0.0000000  G(2)=  0.0000000  0.1428571  0.0000000
+ R(3)=  0.0000000  0.0000000 12.0000000  G(3)=  0.0000000  0.0000000  0.0833333
+ Unit cell volume ucvol=  5.8800000E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ setup1 : take into account q-point for computing boxcut.
+
+ getcut: wavevector=  0.5000  0.5000  0.5000  ngfft=  30  30  50
+         ecut(hartree)=     20.000   => boxcut(ratio)=   2.03079
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS1_WFK
+
+ ==>  initialize data related to q vector <== 
+
+ The list of irreducible perturbations for this q vector is:
+    1)    idir= 3    ipert=   3
+
+================================================================================
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.500000  0.500000  0.500000
+ Perturbation : displacement of atom   3   along direction   3
+ Found     2 symmetries that leave the perturbation invariant.
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS1_WFK
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS2_WFQ
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   1017.5759308377     -3.052E+02 2.022E+00 1.800E+06
+ ETOT  2   173.68090203047     -8.439E+02 9.710E-01 1.694E+05
+ ETOT  3   12.457625530623     -1.612E+02 1.043E-01 4.919E+03
+ ETOT  4   9.6431109733096     -2.815E+00 2.462E-03 3.827E+02
+ ETOT  5   9.4172944835734     -2.258E-01 9.043E-05 2.134E+01
+ ETOT  6   9.4067633082466     -1.053E-02 3.702E-06 1.511E-01
+ ETOT  7   9.4067174857748     -4.582E-05 5.990E-08 3.558E-03
+ ETOT  8   9.4067159057950     -1.580E-06 8.993E-10 9.785E-05
+ ETOT  9   9.4067158396167     -6.618E-08 4.512E-11 1.406E-06
+ ETOT 10   9.4067158386085     -1.008E-09 8.678E-13 7.894E-08
+ ETOT 11   9.4067158385835     -2.501E-11 2.780E-14 1.437E-09
+
+ At SCF step   11       vres2   =  1.44E-09 < tolvrs=  1.00E-08 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   47.342E-16; max=  27.797E-15
+
+ Thirteen components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   1.67969238E+03 eigvalue=  -8.15095999E+01  local=  -1.47271690E+03
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =  -1.36693301E+03  Hartree=   5.11568367E+02     xc=  -1.18992651E+02
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   7.95314314E+02   enl1=  -1.25977882E+03
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -1.31335592E+03
+ 10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
+ fr.local=   4.11289455E+02 fr.nonlo=   6.11049749E+02  Ewald=   3.07535493E+02
+ 13,14 Frozen wf xc core corrections (1) and (2)
+ frxc 1  =  -1.26168169E+02  frxc 2 =   1.19056103E+02
+ Resulting in :
+ 2DEtotal=    0.9406715839E+01 Ha. Also 2DEtotal=    0.255969755546E+03 eV
+    (2DErelax=   -1.3133559161E+03 Ha. 2DEnonrelax=    1.3227626319E+03 Ha)
+    (  non-var. 2DEtotal :    9.4067178615E+00 Ha)
+
+================================================================================
+
+ ---- first-order wavefunction calculations are completed ----
+
+
+ ==> Compute Derivative Database <==
+  
+  2nd-order matrix (non-cartesian coordinates, masses not included,
+   asr not included )
+     j1       j2             matrix element
+  dir pert dir pert     real part     imaginary part
+  
+   1    1   2    1         0.0000000000         0.0000000000
+   1    1   3    1         0.0000000000         0.0000000000
+   1    1   1    2         0.0000000000         0.0000000000
+   1    1   3    2         0.0000000000         0.0000000000
+   1    1   1    3        -0.0000000000         0.0000000000
+   1    1   2    3         0.0000000000        -0.0000000000
+   1    1   3    3         0.0000008017         0.0000000000
+   1    1   1    4         0.0000000000        -0.0000000000
+   1    1   2    4         0.0000000000        -0.0000000000
+   1    1   3    4         3.2077905219        -0.0000000000
+   1    1   1    5        -0.0000000000         0.0000000000
+   1    1   2    5        -0.0000000000        -0.0000000000
+   1    1   3    5        -0.0000000000        -0.0000000000
+   1    1   1    6        -0.0000000000         0.0000000000
+   1    1   2    6         0.0000000000        -0.0000000000
+  
+   2    1   1    1         0.0000000000         0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
+   2    1   2    2        -0.0000000000         0.0000000000
+   2    1   3    2         0.0000000000         0.0000000000
+   2    1   1    3         0.0000000000        -0.0000000000
+   2    1   2    3         0.0000000000        -0.0000000000
+   2    1   3    3        -3.2077905219         0.0000000000
+   2    1   1    4         0.0000000000        -0.0000000000
+   2    1   2    4         0.0000000000         0.0000000000
+   2    1   3    4        -0.0000008017        -0.0000000000
+   2    1   1    5        -0.0000000000        -0.0000000000
+   2    1   2    5        -0.0000000000         0.0000000000
+   2    1   1    6         0.0000000000        -0.0000000000
+   2    1   2    6        -0.0000000000        -0.0000000000
+   2    1   3    6         0.0000000000         0.0000000000
+  
+   3    1   1    1         0.0000000000         0.0000000000
+   3    1   2    1         0.0000000000         0.0000000000
+   3    1   1    2         0.0000000000         0.0000000000
+   3    1   2    2         0.0000000000         0.0000000000
+   3    1   3    2        -0.0000000000         0.0000000000
+   3    1   1    3         0.0000000000         0.0000000000
+   3    1   3    3         0.0000000015         0.0000000000
+   3    1   2    4        -0.0000000000         0.0000000000
+   3    1   3    4        -0.0000000015        -0.0000000000
+   3    1   1    5        -0.0000000000        -0.0000000000
+   3    1   3    5        -0.0000000000         0.0000000000
+   3    1   2    6         0.0000000000         0.0000000000
+   3    1   3    6        -0.0000000000         0.0000000000
+  
+   1    2   1    1         0.0000000000         0.0000000000
+   1    2   3    1         0.0000000000         0.0000000000
+   1    2   2    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   1    3         0.0000000000         0.0000000000
+   1    2   2    3         0.0000000000         0.0000000000
+   1    2   3    3         3.2077905219        -0.0000000000
+   1    2   1    4        -0.0000000000        -0.0000000000
+   1    2   2    4         0.0000000000         0.0000000000
+   1    2   3    4         0.0000008017         0.0000000000
+   1    2   1    5         0.0000000000        -0.0000000000
+   1    2   2    5         0.0000000000         0.0000000000
+   1    2   1    6         0.0000000000         0.0000000000
+   1    2   2    6         0.0000000000         0.0000000000
+   1    2   3    6         0.0000000000         0.0000000000
+  
+   2    2   2    1        -0.0000000000         0.0000000000
+   2    2   3    1         0.0000000000         0.0000000000
+   2    2   1    2         0.0000000000         0.0000000000
+   2    2   3    2         0.0000000000         0.0000000000
+   2    2   1    3         0.0000000000         0.0000000000
+   2    2   2    3         0.0000000000        -0.0000000000
+   2    2   3    3        -0.0000008017        -0.0000000000
+   2    2   1    4         0.0000000000         0.0000000000
+   2    2   2    4         0.0000000000         0.0000000000
+   2    2   3    4        -3.2077905219         0.0000000000
+   2    2   1    5         0.0000000000         0.0000000000
+   2    2   2    5         0.0000000000         0.0000000000
+   2    2   3    5        -0.0000000000        -0.0000000000
+   2    2   1    6         0.0000000000         0.0000000000
+   2    2   2    6         0.0000000000        -0.0000000000
+  
+   3    2   1    1         0.0000000000         0.0000000000
+   3    2   2    1         0.0000000000         0.0000000000
+   3    2   3    1        -0.0000000000         0.0000000000
+   3    2   1    2        -0.0000000000         0.0000000000
+   3    2   2    2         0.0000000000         0.0000000000
+   3    2   2    3        -0.0000000000        -0.0000000000
+   3    2   3    3        -0.0000000015        -0.0000000000
+   3    2   1    4         0.0000000000        -0.0000000000
+   3    2   3    4         0.0000000015         0.0000000000
+   3    2   2    5        -0.0000000000        -0.0000000000
+   3    2   3    5         0.0000000000        -0.0000000000
+   3    2   1    6         0.0000000000         0.0000000000
+   3    2   3    6         0.0000000000        -0.0000000000
+  
+   1    3   1    1        -0.0000000000        -0.0000000000
+   1    3   2    1         0.0000000000         0.0000000000
+   1    3   3    1         0.0000000000        -0.0000000000
+   1    3   1    2         0.0000000000        -0.0000000000
+   1    3   2    2         0.0000000000        -0.0000000000
+   1    3   2    3         0.0000000000         0.0000000000
+   1    3   3    3         0.0000000130        -0.0000000000
+   1    3   1    4         0.0000000000        -0.0000000000
+   1    3   3    4         0.0000000150         0.0000000000
+   1    3   2    5        -0.0000000000        -0.0000000000
+   1    3   3    5        -0.0000000000        -0.0000000000
+   1    3   1    6         0.0000000000         0.0000000000
+   1    3   3    6         0.0000000000         0.0000000000
+  
+   2    3   1    1         0.0000000000         0.0000000000
+   2    3   2    1         0.0000000000         0.0000000000
+   2    3   1    2         0.0000000000        -0.0000000000
+   2    3   2    2         0.0000000000         0.0000000000
+   2    3   3    2        -0.0000000000         0.0000000000
+   2    3   1    3         0.0000000000         0.0000000000
+   2    3   3    3         0.0000000130        -0.0000000000
+   2    3   2    4         0.0000000000         0.0000000000
+   2    3   3    4         0.0000000150         0.0000000000
+   2    3   1    5        -0.0000000000        -0.0000000000
+   2    3   3    5         0.0000000000         0.0000000000
+   2    3   2    6        -0.0000000000        -0.0000000000
+   2    3   3    6         0.0000000000         0.0000000000
+  
+   3    3   1    1         0.0000008017        -0.0000000000
+   3    3   2    1        -3.2077905219        -0.0000000000
+   3    3   3    1         0.0000000015        -0.0000000000
+   3    3   1    2         3.2077905219         0.0000000000
+   3    3   2    2        -0.0000008017         0.0000000000
+   3    3   3    2        -0.0000000015         0.0000000000
+   3    3   1    3         0.0000000130         0.0000000000
+   3    3   2    3         0.0000000130         0.0000000000
+   3    3   3    3         9.4067178615         0.0000000000
+   3    3   1    4         0.0000000150        -0.0000000000
+   3    3   2    4         0.0000000150        -0.0000000000
+   3    3   3    4        -0.0000006999        -0.0000000000
+   3    3   1    5        -0.0000000292        -0.0000000000
+   3    3   2    5        -0.0000000292        -0.0000000000
+   3    3   3    5        -5.9752915998         0.0000000000
+   3    3   1    6        -0.0000000284        -0.0000000000
+   3    3   2    6        -0.0000000284        -0.0000000000
+   3    3   3    6         0.0000007865         0.0000000000
+  
+   1    4   1    1         0.0000000000         0.0000000000
+   1    4   2    1         0.0000000000         0.0000000000
+   1    4   1    2        -0.0000000000         0.0000000000
+   1    4   2    2         0.0000000000        -0.0000000000
+   1    4   3    2         0.0000000000         0.0000000000
+   1    4   1    3         0.0000000000         0.0000000000
+   1    4   3    3         0.0000000150         0.0000000000
+   1    4   2    4         0.0000000000         0.0000000000
+   1    4   3    4         0.0000000130        -0.0000000000
+   1    4   1    5         0.0000000000        -0.0000000000
+   1    4   3    5        -0.0000000000        -0.0000000000
+   1    4   2    6         0.0000000000         0.0000000000
+   1    4   3    6        -0.0000000000         0.0000000000
+  
+   2    4   1    1         0.0000000000         0.0000000000
+   2    4   2    1         0.0000000000        -0.0000000000
+   2    4   3    1        -0.0000000000        -0.0000000000
+   2    4   1    2         0.0000000000        -0.0000000000
+   2    4   2    2         0.0000000000        -0.0000000000
+   2    4   2    3         0.0000000000        -0.0000000000
+   2    4   3    3         0.0000000150         0.0000000000
+   2    4   1    4         0.0000000000         0.0000000000
+   2    4   3    4         0.0000000130        -0.0000000000
+   2    4   2    5        -0.0000000000        -0.0000000000
+   2    4   3    5        -0.0000000000        -0.0000000000
+   2    4   1    6         0.0000000000         0.0000000000
+   2    4   3    6        -0.0000000000        -0.0000000000
+  
+   3    4   1    1         3.2077905219         0.0000000000
+   3    4   2    1        -0.0000008017         0.0000000000
+   3    4   3    1        -0.0000000015         0.0000000000
+   3    4   1    2         0.0000008017        -0.0000000000
+   3    4   2    2        -3.2077905219        -0.0000000000
+   3    4   3    2         0.0000000015        -0.0000000000
+   3    4   1    3         0.0000000150        -0.0000000000
+   3    4   2    3         0.0000000150        -0.0000000000
+   3    4   3    3        -0.0000006999         0.0000000000
+   3    4   1    4         0.0000000130         0.0000000000
+   3    4   2    4         0.0000000130         0.0000000000
+   3    4   3    4         9.4067178615         0.0000000000
+   3    4   1    5        -0.0000000284        -0.0000000000
+   3    4   2    5        -0.0000000284        -0.0000000000
+   3    4   3    5         0.0000007865         0.0000000000
+   3    4   1    6        -0.0000000292        -0.0000000000
+   3    4   2    6        -0.0000000292        -0.0000000000
+   3    4   3    6        -5.9752915998         0.0000000000
+  
+   1    5   1    1        -0.0000000000        -0.0000000000
+   1    5   2    1        -0.0000000000         0.0000000000
+   1    5   3    1        -0.0000000000         0.0000000000
+   1    5   1    2         0.0000000000         0.0000000000
+   1    5   2    2         0.0000000000        -0.0000000000
+   1    5   2    3        -0.0000000000         0.0000000000
+   1    5   3    3        -0.0000000292         0.0000000000
+   1    5   1    4         0.0000000000         0.0000000000
+   1    5   3    4        -0.0000000284         0.0000000000
+   1    5   2    5         0.0000000000         0.0000000000
+   1    5   3    5        -0.0000000000         0.0000000000
+   1    5   1    6         0.0000000000         0.0000000000
+   1    5   3    6        -0.0000000000         0.0000000000
+  
+   2    5   1    1        -0.0000000000         0.0000000000
+   2    5   2    1        -0.0000000000        -0.0000000000
+   2    5   1    2         0.0000000000        -0.0000000000
+   2    5   2    2         0.0000000000        -0.0000000000
+   2    5   3    2        -0.0000000000         0.0000000000
+   2    5   1    3        -0.0000000000         0.0000000000
+   2    5   3    3        -0.0000000292         0.0000000000
+   2    5   2    4        -0.0000000000         0.0000000000
+   2    5   3    4        -0.0000000284         0.0000000000
+   2    5   1    5         0.0000000000         0.0000000000
+   2    5   3    5         0.0000000000         0.0000000000
+   2    5   2    6         0.0000000000         0.0000000000
+   2    5   3    6         0.0000000000         0.0000000000
+  
+   3    5   1    1        -0.0000000000         0.0000000000
+   3    5   3    1        -0.0000000000        -0.0000000000
+   3    5   2    2        -0.0000000000         0.0000000000
+   3    5   3    2         0.0000000000         0.0000000000
+   3    5   1    3        -0.0000000000         0.0000000000
+   3    5   2    3         0.0000000000        -0.0000000000
+   3    5   3    3        -5.9752915998        -0.0000000000
+   3    5   1    4        -0.0000000000         0.0000000000
+   3    5   2    4        -0.0000000000         0.0000000000
+   3    5   3    4         0.0000007865        -0.0000000000
+   3    5   1    5        -0.0000000000         0.0000000000
+   3    5   2    5         0.0000000000         0.0000000000
+   3    5   1    6        -0.0000000000         0.0000000000
+   3    5   2    6         0.0000000000         0.0000000000
+   3    5   3    6         0.0000000000        -0.0000000000
+  
+   1    6   1    1        -0.0000000000        -0.0000000000
+   1    6   2    1         0.0000000000         0.0000000000
+   1    6   1    2         0.0000000000        -0.0000000000
+   1    6   2    2         0.0000000000        -0.0000000000
+   1    6   3    2         0.0000000000        -0.0000000000
+   1    6   1    3         0.0000000000        -0.0000000000
+   1    6   3    3        -0.0000000284         0.0000000000
+   1    6   2    4         0.0000000000        -0.0000000000
+   1    6   3    4        -0.0000000292         0.0000000000
+   1    6   1    5         0.0000000000        -0.0000000000
+   1    6   3    5        -0.0000000000        -0.0000000000
+   1    6   2    6         0.0000000000         0.0000000000
+   1    6   3    6         0.0000000000         0.0000000000
+  
+   2    6   1    1         0.0000000000         0.0000000000
+   2    6   2    1        -0.0000000000         0.0000000000
+   2    6   3    1         0.0000000000        -0.0000000000
+   2    6   1    2         0.0000000000        -0.0000000000
+   2    6   2    2         0.0000000000         0.0000000000
+   2    6   2    3        -0.0000000000         0.0000000000
+   2    6   3    3        -0.0000000284         0.0000000000
+   2    6   1    4         0.0000000000        -0.0000000000
+   2    6   3    4        -0.0000000292         0.0000000000
+   2    6   2    5         0.0000000000        -0.0000000000
+   2    6   3    5         0.0000000000        -0.0000000000
+   2    6   1    6         0.0000000000         0.0000000000
+   2    6   3    6         0.0000000000         0.0000000000
+  
+   3    6   2    1         0.0000000000        -0.0000000000
+   3    6   3    1        -0.0000000000        -0.0000000000
+   3    6   1    2         0.0000000000        -0.0000000000
+   3    6   3    2         0.0000000000         0.0000000000
+   3    6   1    3         0.0000000000        -0.0000000000
+   3    6   2    3         0.0000000000        -0.0000000000
+   3    6   3    3         0.0000007865        -0.0000000000
+   3    6   1    4        -0.0000000000        -0.0000000000
+   3    6   2    4        -0.0000000000         0.0000000000
+   3    6   3    4        -5.9752915998        -0.0000000000
+   3    6   1    5        -0.0000000000        -0.0000000000
+   3    6   2    5         0.0000000000        -0.0000000000
+   3    6   3    5         0.0000000000         0.0000000000
+   3    6   1    6         0.0000000000         0.0000000000
+   3    6   2    6         0.0000000000         0.0000000000
+  
+  
+  Dynamical matrix, in cartesian coordinates,
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    1   2    1         0.0000000000         0.0000000000
+   1    1   3    1         0.0000000000         0.0000000000
+   1    1   1    2         0.0000000000         0.0000000000
+   1    1   3    2         0.0000000000         0.0000000000
+   1    1   1    3        -0.0000000000         0.0000000000
+   1    1   2    3         0.0000000000        -0.0000000000
+   1    1   3    3         0.0000000095         0.0000000000
+   1    1   1    4         0.0000000000        -0.0000000000
+   1    1   2    4         0.0000000000        -0.0000000000
+   1    1   3    4         0.0381879824        -0.0000000000
+   1    1   1    5        -0.0000000000         0.0000000000
+   1    1   2    5        -0.0000000000        -0.0000000000
+   1    1   3    5        -0.0000000000        -0.0000000000
+   1    1   1    6        -0.0000000000         0.0000000000
+   1    1   2    6         0.0000000000        -0.0000000000
+  
+   2    1   1    1         0.0000000000         0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
+   2    1   2    2        -0.0000000000         0.0000000000
+   2    1   3    2         0.0000000000         0.0000000000
+   2    1   1    3         0.0000000000        -0.0000000000
+   2    1   2    3         0.0000000000        -0.0000000000
+   2    1   3    3        -0.0381879824         0.0000000000
+   2    1   1    4         0.0000000000        -0.0000000000
+   2    1   2    4         0.0000000000         0.0000000000
+   2    1   3    4        -0.0000000095        -0.0000000000
+   2    1   1    5        -0.0000000000        -0.0000000000
+   2    1   2    5        -0.0000000000         0.0000000000
+   2    1   1    6         0.0000000000        -0.0000000000
+   2    1   2    6        -0.0000000000        -0.0000000000
+   2    1   3    6         0.0000000000         0.0000000000
+  
+   3    1   1    1         0.0000000000         0.0000000000
+   3    1   2    1         0.0000000000         0.0000000000
+   3    1   1    2         0.0000000000         0.0000000000
+   3    1   2    2         0.0000000000         0.0000000000
+   3    1   3    2        -0.0000000000         0.0000000000
+   3    1   1    3         0.0000000000         0.0000000000
+   3    1   3    3         0.0000000000         0.0000000000
+   3    1   2    4        -0.0000000000         0.0000000000
+   3    1   3    4        -0.0000000000        -0.0000000000
+   3    1   1    5        -0.0000000000        -0.0000000000
+   3    1   3    5        -0.0000000000         0.0000000000
+   3    1   2    6         0.0000000000         0.0000000000
+   3    1   3    6        -0.0000000000         0.0000000000
+  
+   1    2   1    1         0.0000000000         0.0000000000
+   1    2   3    1         0.0000000000         0.0000000000
+   1    2   2    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   1    3         0.0000000000         0.0000000000
+   1    2   2    3         0.0000000000         0.0000000000
+   1    2   3    3         0.0381879824        -0.0000000000
+   1    2   1    4        -0.0000000000        -0.0000000000
+   1    2   2    4         0.0000000000         0.0000000000
+   1    2   3    4         0.0000000095         0.0000000000
+   1    2   1    5         0.0000000000        -0.0000000000
+   1    2   2    5         0.0000000000         0.0000000000
+   1    2   1    6         0.0000000000         0.0000000000
+   1    2   2    6         0.0000000000         0.0000000000
+   1    2   3    6         0.0000000000         0.0000000000
+  
+   2    2   2    1        -0.0000000000         0.0000000000
+   2    2   3    1         0.0000000000         0.0000000000
+   2    2   1    2         0.0000000000         0.0000000000
+   2    2   3    2         0.0000000000         0.0000000000
+   2    2   1    3         0.0000000000         0.0000000000
+   2    2   2    3         0.0000000000        -0.0000000000
+   2    2   3    3        -0.0000000095        -0.0000000000
+   2    2   1    4         0.0000000000         0.0000000000
+   2    2   2    4         0.0000000000         0.0000000000
+   2    2   3    4        -0.0381879824         0.0000000000
+   2    2   1    5         0.0000000000         0.0000000000
+   2    2   2    5         0.0000000000         0.0000000000
+   2    2   3    5        -0.0000000000        -0.0000000000
+   2    2   1    6         0.0000000000         0.0000000000
+   2    2   2    6         0.0000000000        -0.0000000000
+  
+   3    2   1    1         0.0000000000         0.0000000000
+   3    2   2    1         0.0000000000         0.0000000000
+   3    2   3    1        -0.0000000000         0.0000000000
+   3    2   1    2        -0.0000000000         0.0000000000
+   3    2   2    2         0.0000000000         0.0000000000
+   3    2   2    3        -0.0000000000        -0.0000000000
+   3    2   3    3        -0.0000000000        -0.0000000000
+   3    2   1    4         0.0000000000        -0.0000000000
+   3    2   3    4         0.0000000000         0.0000000000
+   3    2   2    5        -0.0000000000        -0.0000000000
+   3    2   3    5         0.0000000000        -0.0000000000
+   3    2   1    6         0.0000000000         0.0000000000
+   3    2   3    6         0.0000000000        -0.0000000000
+  
+   1    3   1    1        -0.0000000000        -0.0000000000
+   1    3   2    1         0.0000000000         0.0000000000
+   1    3   3    1         0.0000000000        -0.0000000000
+   1    3   1    2         0.0000000000        -0.0000000000
+   1    3   2    2         0.0000000000        -0.0000000000
+   1    3   2    3         0.0000000000         0.0000000000
+   1    3   3    3         0.0000000002        -0.0000000000
+   1    3   1    4         0.0000000000        -0.0000000000
+   1    3   3    4         0.0000000002         0.0000000000
+   1    3   2    5        -0.0000000000        -0.0000000000
+   1    3   3    5        -0.0000000000        -0.0000000000
+   1    3   1    6         0.0000000000         0.0000000000
+   1    3   3    6         0.0000000000         0.0000000000
+  
+   2    3   1    1         0.0000000000         0.0000000000
+   2    3   2    1         0.0000000000         0.0000000000
+   2    3   1    2         0.0000000000        -0.0000000000
+   2    3   2    2         0.0000000000         0.0000000000
+   2    3   3    2        -0.0000000000         0.0000000000
+   2    3   1    3         0.0000000000         0.0000000000
+   2    3   3    3         0.0000000002        -0.0000000000
+   2    3   2    4         0.0000000000         0.0000000000
+   2    3   3    4         0.0000000002         0.0000000000
+   2    3   1    5        -0.0000000000        -0.0000000000
+   2    3   3    5         0.0000000000         0.0000000000
+   2    3   2    6        -0.0000000000        -0.0000000000
+   2    3   3    6         0.0000000000         0.0000000000
+  
+   3    3   1    1         0.0000000095        -0.0000000000
+   3    3   2    1        -0.0381879824        -0.0000000000
+   3    3   3    1         0.0000000000        -0.0000000000
+   3    3   1    2         0.0381879824         0.0000000000
+   3    3   2    2        -0.0000000095         0.0000000000
+   3    3   3    2        -0.0000000000         0.0000000000
+   3    3   1    3         0.0000000002         0.0000000000
+   3    3   2    3         0.0000000002         0.0000000000
+   3    3   3    3         0.0653244296         0.0000000000
+   3    3   1    4         0.0000000002        -0.0000000000
+   3    3   2    4         0.0000000002        -0.0000000000
+   3    3   3    4        -0.0000000049        -0.0000000000
+   3    3   1    5        -0.0000000003        -0.0000000000
+   3    3   2    5        -0.0000000003        -0.0000000000
+   3    3   3    5        -0.0414950806         0.0000000000
+   3    3   1    6        -0.0000000003        -0.0000000000
+   3    3   2    6        -0.0000000003        -0.0000000000
+   3    3   3    6         0.0000000055         0.0000000000
+  
+   1    4   1    1         0.0000000000         0.0000000000
+   1    4   2    1         0.0000000000         0.0000000000
+   1    4   1    2        -0.0000000000         0.0000000000
+   1    4   2    2         0.0000000000        -0.0000000000
+   1    4   3    2         0.0000000000         0.0000000000
+   1    4   1    3         0.0000000000         0.0000000000
+   1    4   3    3         0.0000000002         0.0000000000
+   1    4   2    4         0.0000000000         0.0000000000
+   1    4   3    4         0.0000000002        -0.0000000000
+   1    4   1    5         0.0000000000        -0.0000000000
+   1    4   3    5        -0.0000000000        -0.0000000000
+   1    4   2    6         0.0000000000         0.0000000000
+   1    4   3    6        -0.0000000000         0.0000000000
+  
+   2    4   1    1         0.0000000000         0.0000000000
+   2    4   2    1         0.0000000000        -0.0000000000
+   2    4   3    1        -0.0000000000        -0.0000000000
+   2    4   1    2         0.0000000000        -0.0000000000
+   2    4   2    2         0.0000000000        -0.0000000000
+   2    4   2    3         0.0000000000        -0.0000000000
+   2    4   3    3         0.0000000002         0.0000000000
+   2    4   1    4         0.0000000000         0.0000000000
+   2    4   3    4         0.0000000002        -0.0000000000
+   2    4   2    5        -0.0000000000        -0.0000000000
+   2    4   3    5        -0.0000000000        -0.0000000000
+   2    4   1    6         0.0000000000         0.0000000000
+   2    4   3    6        -0.0000000000        -0.0000000000
+  
+   3    4   1    1         0.0381879824         0.0000000000
+   3    4   2    1        -0.0000000095         0.0000000000
+   3    4   3    1        -0.0000000000         0.0000000000
+   3    4   1    2         0.0000000095        -0.0000000000
+   3    4   2    2        -0.0381879824        -0.0000000000
+   3    4   3    2         0.0000000000        -0.0000000000
+   3    4   1    3         0.0000000002        -0.0000000000
+   3    4   2    3         0.0000000002        -0.0000000000
+   3    4   3    3        -0.0000000049         0.0000000000
+   3    4   1    4         0.0000000002         0.0000000000
+   3    4   2    4         0.0000000002         0.0000000000
+   3    4   3    4         0.0653244296         0.0000000000
+   3    4   1    5        -0.0000000003        -0.0000000000
+   3    4   2    5        -0.0000000003        -0.0000000000
+   3    4   3    5         0.0000000055         0.0000000000
+   3    4   1    6        -0.0000000003        -0.0000000000
+   3    4   2    6        -0.0000000003        -0.0000000000
+   3    4   3    6        -0.0414950806         0.0000000000
+  
+   1    5   1    1        -0.0000000000        -0.0000000000
+   1    5   2    1        -0.0000000000         0.0000000000
+   1    5   3    1        -0.0000000000         0.0000000000
+   1    5   1    2         0.0000000000         0.0000000000
+   1    5   2    2         0.0000000000        -0.0000000000
+   1    5   2    3        -0.0000000000         0.0000000000
+   1    5   3    3        -0.0000000003         0.0000000000
+   1    5   1    4         0.0000000000         0.0000000000
+   1    5   3    4        -0.0000000003         0.0000000000
+   1    5   2    5         0.0000000000         0.0000000000
+   1    5   3    5        -0.0000000000         0.0000000000
+   1    5   1    6         0.0000000000         0.0000000000
+   1    5   3    6        -0.0000000000         0.0000000000
+  
+   2    5   1    1        -0.0000000000         0.0000000000
+   2    5   2    1        -0.0000000000        -0.0000000000
+   2    5   1    2         0.0000000000        -0.0000000000
+   2    5   2    2         0.0000000000        -0.0000000000
+   2    5   3    2        -0.0000000000         0.0000000000
+   2    5   1    3        -0.0000000000         0.0000000000
+   2    5   3    3        -0.0000000003         0.0000000000
+   2    5   2    4        -0.0000000000         0.0000000000
+   2    5   3    4        -0.0000000003         0.0000000000
+   2    5   1    5         0.0000000000         0.0000000000
+   2    5   3    5         0.0000000000         0.0000000000
+   2    5   2    6         0.0000000000         0.0000000000
+   2    5   3    6         0.0000000000         0.0000000000
+  
+   3    5   1    1        -0.0000000000         0.0000000000
+   3    5   3    1        -0.0000000000        -0.0000000000
+   3    5   2    2        -0.0000000000         0.0000000000
+   3    5   3    2         0.0000000000         0.0000000000
+   3    5   1    3        -0.0000000000         0.0000000000
+   3    5   2    3         0.0000000000        -0.0000000000
+   3    5   3    3        -0.0414950806        -0.0000000000
+   3    5   1    4        -0.0000000000         0.0000000000
+   3    5   2    4        -0.0000000000         0.0000000000
+   3    5   3    4         0.0000000055        -0.0000000000
+   3    5   1    5        -0.0000000000         0.0000000000
+   3    5   2    5         0.0000000000         0.0000000000
+   3    5   1    6        -0.0000000000         0.0000000000
+   3    5   2    6         0.0000000000         0.0000000000
+   3    5   3    6         0.0000000000        -0.0000000000
+  
+   1    6   1    1        -0.0000000000        -0.0000000000
+   1    6   2    1         0.0000000000         0.0000000000
+   1    6   1    2         0.0000000000        -0.0000000000
+   1    6   2    2         0.0000000000        -0.0000000000
+   1    6   3    2         0.0000000000        -0.0000000000
+   1    6   1    3         0.0000000000        -0.0000000000
+   1    6   3    3        -0.0000000003         0.0000000000
+   1    6   2    4         0.0000000000        -0.0000000000
+   1    6   3    4        -0.0000000003         0.0000000000
+   1    6   1    5         0.0000000000        -0.0000000000
+   1    6   3    5        -0.0000000000        -0.0000000000
+   1    6   2    6         0.0000000000         0.0000000000
+   1    6   3    6         0.0000000000         0.0000000000
+  
+   2    6   1    1         0.0000000000         0.0000000000
+   2    6   2    1        -0.0000000000         0.0000000000
+   2    6   3    1         0.0000000000        -0.0000000000
+   2    6   1    2         0.0000000000        -0.0000000000
+   2    6   2    2         0.0000000000         0.0000000000
+   2    6   2    3        -0.0000000000         0.0000000000
+   2    6   3    3        -0.0000000003         0.0000000000
+   2    6   1    4         0.0000000000        -0.0000000000
+   2    6   3    4        -0.0000000003         0.0000000000
+   2    6   2    5         0.0000000000        -0.0000000000
+   2    6   3    5         0.0000000000        -0.0000000000
+   2    6   1    6         0.0000000000         0.0000000000
+   2    6   3    6         0.0000000000         0.0000000000
+  
+   3    6   2    1         0.0000000000        -0.0000000000
+   3    6   3    1        -0.0000000000        -0.0000000000
+   3    6   1    2         0.0000000000        -0.0000000000
+   3    6   3    2         0.0000000000         0.0000000000
+   3    6   1    3         0.0000000000        -0.0000000000
+   3    6   2    3         0.0000000000        -0.0000000000
+   3    6   3    3         0.0000000055        -0.0000000000
+   3    6   1    4        -0.0000000000        -0.0000000000
+   3    6   2    4        -0.0000000000         0.0000000000
+   3    6   3    4        -0.0414950806        -0.0000000000
+   3    6   1    5        -0.0000000000        -0.0000000000
+   3    6   2    5         0.0000000000        -0.0000000000
+   3    6   3    5         0.0000000000         0.0000000000
+   3    6   1    6         0.0000000000         0.0000000000
+   3    6   2    6         0.0000000000         0.0000000000
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  1.005387E-03  1.005387E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  2.206569E+02  2.206569E+02
+ chkph3 : WARNING -
+  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+
+================================================================================
+== DATASET  4 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 6, nkpt: 1, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2528, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getwfq/=0, take file _WFQ from output of DATASET   2.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.0000000  0.0000000  0.0000000  G(1)=  0.1428571  0.0000000  0.0000000
+ R(2)=  0.0000000  7.0000000  0.0000000  G(2)=  0.0000000  0.1428571  0.0000000
+ R(3)=  0.0000000  0.0000000 12.0000000  G(3)=  0.0000000  0.0000000  0.0833333
+ Unit cell volume ucvol=  5.8800000E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ setup1 : take into account q-point for computing boxcut.
+
+ getcut: wavevector=  0.5000  0.5000  0.5000  ngfft=  30  30  50
+         ecut(hartree)=     20.000   => boxcut(ratio)=   2.03079
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS1_WFK
+
+ ==>  initialize data related to q vector <== 
+
+ The list of irreducible perturbations for this q vector is:
+    1)    idir= 3    ipert=   3
+
+================================================================================
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.500000  0.500000  0.500000
+ Perturbation : displacement of atom   3   along direction   3
+ The set of symmetries contains only one element for this perturbation.
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS1_WFK
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS2_WFQ
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   1017.5853338076     -3.052E+02 2.022E+00 1.800E+06
+ ETOT  2   173.69701164982     -8.439E+02 9.683E-01 1.694E+05
+ ETOT  3   12.461378084527     -1.612E+02 1.030E-01 4.922E+03
+ ETOT  4   9.6448714958571     -2.817E+00 2.362E-03 3.853E+02
+ ETOT  5   9.4172461237178     -2.276E-01 8.844E-05 2.127E+01
+ ETOT  6   9.4067638050409     -1.048E-02 3.965E-06 1.518E-01
+ ETOT  7   9.4067176099403     -4.620E-05 6.234E-08 3.806E-03
+ ETOT  8   9.4067159028706     -1.707E-06 8.953E-10 8.899E-05
+ ETOT  9   9.4067158397665     -6.310E-08 4.553E-11 1.530E-06
+ ETOT 10   9.4067158386958     -1.071E-09 8.834E-13 7.423E-08
+ ETOT 11   9.4067158386621     -3.365E-11 2.549E-14 1.441E-09
+
+ At SCF step   11       vres2   =  1.44E-09 < tolvrs=  1.00E-08 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   45.629E-16; max=  25.489E-15
+
+ Thirteen components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   1.67969238E+03 eigvalue=  -8.15095997E+01  local=  -1.47271690E+03
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =  -1.36693301E+03  Hartree=   5.11568366E+02     xc=  -1.18992651E+02
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   7.95314314E+02   enl1=  -1.25977882E+03
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -1.31335592E+03
+ 10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
+ fr.local=   4.11289455E+02 fr.nonlo=   6.11049749E+02  Ewald=   3.07535493E+02
+ 13,14 Frozen wf xc core corrections (1) and (2)
+ frxc 1  =  -1.26168169E+02  frxc 2 =   1.19056103E+02
+ Resulting in :
+ 2DEtotal=    0.9406715839E+01 Ha. Also 2DEtotal=    0.255969755548E+03 eV
+    (2DErelax=   -1.3133559161E+03 Ha. 2DEnonrelax=    1.3227626319E+03 Ha)
+    (  non-var. 2DEtotal :    9.4067184631E+00 Ha)
+
+================================================================================
+
+ ---- first-order wavefunction calculations are completed ----
+
+
+ ==> Compute Derivative Database <==
+  
+  2nd-order matrix (non-cartesian coordinates, masses not included,
+   asr not included )
+     j1       j2             matrix element
+  dir pert dir pert     real part     imaginary part
+  
+   1    1   3    3         0.0000007685         0.0000000000
+  
+   2    1   3    3        -3.2077907039         0.0000000000
+  
+   3    1   3    3         0.0000000012        -0.0000000000
+  
+   1    2   3    3         3.2077904381        -0.0000000000
+  
+   2    2   3    3        -0.0000007780         0.0000000000
+  
+   3    2   3    3        -0.0000000018        -0.0000000000
+  
+   1    3   3    3         0.0000000098        -0.0000000000
+  
+   2    3   3    3         0.0000000156         0.0000000000
+  
+   3    3   1    1         0.0000007685        -0.0000000000
+   3    3   2    1        -3.2077907039        -0.0000000000
+   3    3   3    1         0.0000000012         0.0000000000
+   3    3   1    2         3.2077904381         0.0000000000
+   3    3   2    2        -0.0000007780        -0.0000000000
+   3    3   3    2        -0.0000000018         0.0000000000
+   3    3   1    3         0.0000000098         0.0000000000
+   3    3   2    3         0.0000000156        -0.0000000000
+   3    3   3    3         9.4067184631         0.0000000000
+   3    3   1    4         0.0000000137        -0.0000000000
+   3    3   2    4         0.0000000159        -0.0000000000
+   3    3   3    4        -0.0000006794         0.0000000000
+   3    3   1    5        -0.0000000324        -0.0000000000
+   3    3   2    5        -0.0000000253         0.0000000000
+   3    3   3    5        -5.9752915969         0.0000000000
+   3    3   1    6        -0.0000000257         0.0000000000
+   3    3   2    6        -0.0000000303        -0.0000000000
+   3    3   3    6         0.0000007586         0.0000000000
+  
+   1    4   3    3         0.0000000137         0.0000000000
+  
+   2    4   3    3         0.0000000159         0.0000000000
+  
+   3    4   3    3        -0.0000006794        -0.0000000000
+  
+   1    5   3    3        -0.0000000324         0.0000000000
+  
+   2    5   3    3        -0.0000000253        -0.0000000000
+  
+   3    5   3    3        -5.9752915969        -0.0000000000
+  
+   1    6   3    3        -0.0000000257        -0.0000000000
+  
+   2    6   3    3        -0.0000000303         0.0000000000
+  
+   3    6   3    3         0.0000007586        -0.0000000000
+  
+  
+  Dynamical matrix, in cartesian coordinates,
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    1   3    3         0.0000000091         0.0000000000
+  
+   2    1   3    3        -0.0381879846         0.0000000000
+  
+   3    1   3    3         0.0000000000        -0.0000000000
+  
+   1    2   3    3         0.0381879814        -0.0000000000
+  
+   2    2   3    3        -0.0000000093         0.0000000000
+  
+   3    2   3    3        -0.0000000000        -0.0000000000
+  
+   1    3   3    3         0.0000000001        -0.0000000000
+  
+   2    3   3    3         0.0000000002         0.0000000000
+  
+   3    3   1    1         0.0000000091        -0.0000000000
+   3    3   2    1        -0.0381879846        -0.0000000000
+   3    3   3    1         0.0000000000         0.0000000000
+   3    3   1    2         0.0381879814         0.0000000000
+   3    3   2    2        -0.0000000093        -0.0000000000
+   3    3   3    2        -0.0000000000         0.0000000000
+   3    3   1    3         0.0000000001         0.0000000000
+   3    3   2    3         0.0000000002        -0.0000000000
+   3    3   3    3         0.0653244338         0.0000000000
+   3    3   1    4         0.0000000002        -0.0000000000
+   3    3   2    4         0.0000000002        -0.0000000000
+   3    3   3    4        -0.0000000047         0.0000000000
+   3    3   1    5        -0.0000000004        -0.0000000000
+   3    3   2    5        -0.0000000003         0.0000000000
+   3    3   3    5        -0.0414950805         0.0000000000
+   3    3   1    6        -0.0000000003         0.0000000000
+   3    3   2    6        -0.0000000004        -0.0000000000
+   3    3   3    6         0.0000000053         0.0000000000
+  
+   1    4   3    3         0.0000000002         0.0000000000
+  
+   2    4   3    3         0.0000000002         0.0000000000
+  
+   3    4   3    3        -0.0000000047        -0.0000000000
+  
+   1    5   3    3        -0.0000000004         0.0000000000
+  
+   2    5   3    3        -0.0000000003        -0.0000000000
+  
+   3    5   3    3        -0.0414950805        -0.0000000000
+  
+   1    6   3    3        -0.0000000003        -0.0000000000
+  
+   2    6   3    3        -0.0000000004         0.0000000000
+  
+   3    6   3    3         0.0000000053        -0.0000000000
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  0.000000E+00  1.005387E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  0.000000E+00  2.206569E+02
+ chkph3 : WARNING -
+  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+
+================================================================================
+== DATASET 12 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 12, }
+dimensions: {natom: 6, nkpt: 1, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2495, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.0000000  0.0000000  0.0000000  G(1)=  0.1428571  0.0000000  0.0000000
+ R(2)=  0.0000000  7.0000000  0.0000000  G(2)=  0.0000000  0.1428571  0.0000000
+ R(3)=  0.0000000  0.0000000 12.0000000  G(3)=  0.0000000  0.0000000  0.0833333
+ Unit cell volume ucvol=  5.8800000E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  30  30  50
+         ecut(hartree)=     20.000   => boxcut(ratio)=   2.06971
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS1_WFK
+
+================================================================================
+ prteigrs : about to open file t21o_DS12_EIG
+ Non-SCF case, kpt    1 (  0.10000  0.10000  0.20000), residuals and eigenvalues=
+  5.95E-18  7.39E-18  4.27E-18  2.05E-18  6.47E-18  6.55E-18  6.07E-18  5.33E-18
+  9.13E-18  1.49E-18  3.75E-18  6.48E-18  2.73E-18  4.96E-18  9.56E-18  3.52E-18
+  4.69E-18  4.28E-18
+ -6.9527E-01 -6.5388E-01 -3.5595E-01 -3.0644E-01 -1.0028E-01 -1.1393E-02
+ -1.2258E-03  1.2283E-03  5.7931E-02  7.0334E-02  8.8800E-02  9.8241E-02
+  1.0525E-01  1.1605E-01  1.4451E-01  1.4464E-01  1.8073E-01  2.1476E-01
+
+
+--- !ResultsGS
+iteration_state: {dtset: 12, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  12.0000000, ]
+lattice_lengths: [   7.00000,    7.00000,   12.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   5.8800000E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.557E-18, diffor:  0.000E+00, }
+etotal    :  -8.86013270E+01
+entropy   :   0.00000000E+00
+fermie    :   2.04383081E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  F]
+- [  5.0000E-01,   5.0000E-01,   0.0000E+00,  F]
+- [  0.0000E+00,   5.0000E-01,   6.4636E-01, Cl]
+- [  5.0000E-01,   0.0000E+00,  -6.4636E-01, Cl]
+- [  0.0000E+00,   5.0000E-01,   2.0873E-01, Pb]
+- [  5.0000E-01,   0.0000E+00,  -2.0873E-01, Pb]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          7.13879140
+    2        2.00000          7.13879140
+    3        2.00000          5.18218225
+    4        2.00000          5.18218225
+    5        2.00000          1.04985398
+    6        2.00000          1.04985398
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   53.553E-19; max=  95.571E-19
+ reduced coordinates (array xred) for    6 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.500000000000      0.500000000000      0.000000000000
+       0.000000000000      0.500000000000      0.646364491690
+       0.500000000000      0.000000000000     -0.646364491690
+       0.000000000000      0.500000000000      0.208727336630
+       0.500000000000      0.000000000000     -0.208727336630
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.85212023006500     1.85212023006500     0.00000000000000
+    3      0.00000000000000     1.85212023006500     4.10449628933050
+    4      1.85212023006500     0.00000000000000    -4.10449628933050
+    5      0.00000000000000     1.85212023006500     1.32544499225146
+    6      1.85212023006500     0.00000000000000    -1.32544499225146
+ length scales=  7.000000000000  7.000000000000 12.000000000000 bohr
+              =  3.704240460130  3.704240460130  6.350126503080 angstroms
+ prteigrs : about to open file t21o_DS12_EIG
+ Eigenvalues (hartree) for nkpt=   1  k points:
+ kpt#   1, nband= 18, wtk=  1.00000, kpt=  0.1000  0.1000  0.2000 (reduced coord)
+  -0.69527   -0.65388   -0.35595   -0.30644   -0.10028   -0.01139   -0.00123    0.00123
+   0.05793    0.07033    0.08880    0.09824    0.10525    0.11605    0.14451    0.14464
+   0.18073    0.21476
+
+================================================================================
+== DATASET 13 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 13, }
+dimensions: {natom: 6, nkpt: 1, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2495, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getwfq/=0, take file _WFQ from output of DATASET  12.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.0000000  0.0000000  0.0000000  G(1)=  0.1428571  0.0000000  0.0000000
+ R(2)=  0.0000000  7.0000000  0.0000000  G(2)=  0.0000000  0.1428571  0.0000000
+ R(3)=  0.0000000  0.0000000 12.0000000  G(3)=  0.0000000  0.0000000  0.0833333
+ Unit cell volume ucvol=  5.8800000E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ setup1 : take into account q-point for computing boxcut.
+
+ getcut: wavevector=  0.1000  0.1000  0.2000  ngfft=  30  30  50
+         ecut(hartree)=     20.000   => boxcut(ratio)=   2.05325
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS1_WFK
+
+ ==>  initialize data related to q vector <== 
+
+ The list of irreducible perturbations for this q vector is:
+    1)    idir= 3    ipert=   3
+
+================================================================================
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.100000  0.100000  0.200000
+ Perturbation : displacement of atom   3   along direction   3
+ Found     2 symmetries that leave the perturbation invariant.
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS1_WFK
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS12_WFQ
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 13, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   4038.9888382539      2.582E+03 2.241E+00 6.196E+07
+ ETOT  2   921.49561177732     -3.117E+03 1.084E+00 3.830E+06
+ ETOT  3   166.16596727556     -7.553E+02 1.811E-01 1.294E+06
+ ETOT  4   35.484049674292     -1.307E+02 4.656E-02 1.010E+05
+ ETOT  5   4.1138075084357     -3.137E+01 7.267E-03 1.894E+03
+ ETOT  6   3.7530332016263     -3.608E-01 1.416E-04 8.394E+01
+ ETOT  7   3.7255079696958     -2.753E-02 5.523E-06 1.414E+00
+ ETOT  8   3.7243294728232     -1.178E-03 3.707E-07 2.011E-01
+ ETOT  9   3.7242577138072     -7.176E-05 2.742E-08 7.722E-02
+ ETOT 10   3.7242469423097     -1.077E-05 3.831E-09 4.641E-03
+ ETOT 11   3.7242460837192     -8.586E-07 2.230E-10 1.324E-03
+ ETOT 12   3.7242460070524     -7.667E-08 2.180E-11 4.400E-05
+ ETOT 13   3.7242460049151     -2.137E-09 6.063E-13 7.426E-06
+ ETOT 14   3.7242460046245     -2.906E-10 8.946E-14 1.017E-06
+ ETOT 15   3.7242460044770     -1.476E-10 2.412E-14 6.644E-08
+ ETOT 16   3.7242460044508     -2.615E-11 1.224E-15 3.707E-09
+
+ At SCF step   16       vres2   =  3.71E-09 < tolvrs=  1.00E-08 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   33.718E-17; max=  12.243E-16
+
+ Thirteen components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   1.62596592E+03 eigvalue=  -8.07686417E+01  local=  -1.41064689E+03
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =  -1.67339913E+03  Hartree=   6.56339774E+02     xc=  -1.21173984E+02
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   7.83137510E+02   enl1=  -1.23230826E+03
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -1.45285371E+03
+ 10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
+ fr.local=   4.11289455E+02 fr.nonlo=   6.11049749E+02  Ewald=   4.41350814E+02
+ 13,14 Frozen wf xc core corrections (1) and (2)
+ frxc 1  =  -1.26168169E+02  frxc 2 =   1.19056103E+02
+ Resulting in :
+ 2DEtotal=    0.3724246004E+01 Ha. Also 2DEtotal=    0.101341887616E+03 eV
+    (2DErelax=   -1.4528537069E+03 Ha. 2DEnonrelax=    1.4565779529E+03 Ha)
+    (  non-var. 2DEtotal :    3.7242569067E+00 Ha)
+
+================================================================================
+
+ ---- first-order wavefunction calculations are completed ----
+
+
+ ==> Compute Derivative Database <==
+  
+  2nd-order matrix (non-cartesian coordinates, masses not included,
+   asr not included )
+     j1       j2             matrix element
+  dir pert dir pert     real part     imaginary part
+  
+   1    1   3    3         0.2665963779         0.3143840420
+   1    1   3    4         0.6766204610        -0.0375900882
+  
+   2    1   3    3         0.5694923511        -0.3672965082
+   2    1   3    4         0.0308906969        -0.4110434520
+  
+   3    1   3    3         0.1650876162         1.6430793132
+   3    1   3    4        -0.8322191015        -1.4263151536
+  
+   1    2   3    3         0.6766204610         0.0375900882
+   1    2   3    4         0.2665963779        -0.3143840420
+  
+   2    2   3    3         0.0308906969         0.4110434520
+   2    2   3    4         0.5694923511         0.3672965082
+  
+   3    2   3    3        -0.8322191015         1.4263151536
+   3    2   3    4         0.1650876162        -1.6430793132
+  
+   1    3   3    3        -0.4163985078        -1.2315675869
+   1    3   3    4         0.0411101317         0.0768199611
+  
+   2    3   3    3        -0.4163985078        -1.2315675869
+   2    3   3    4         0.0411101317         0.0768199611
+  
+   3    3   1    1         0.2665963779        -0.3143840420
+   3    3   2    1         0.5694923511         0.3672965082
+   3    3   3    1         0.1650876162        -1.6430793132
+   3    3   1    2         0.6766204610        -0.0375900882
+   3    3   2    2         0.0308906969        -0.4110434520
+   3    3   3    2        -0.8322191015        -1.4263151536
+   3    3   1    3        -0.4163985078         1.2315675869
+   3    3   2    3        -0.4163985078         1.2315675869
+   3    3   3    3         3.7242569067        -0.0000000000
+   3    3   1    4         0.0411101317         0.0768199611
+   3    3   2    4         0.0411101317         0.0768199611
+   3    3   3    4         0.1128629671        -1.6249691078
+   3    3   1    5        -0.5102318704         0.4683505273
+   3    3   2    5        -0.5102318704         0.4683505273
+   3    3   3    5        -6.7765429517         2.6302741080
+   3    3   1    6        -0.2074745738         0.4077690995
+   3    3   2    6        -0.2074745738         0.4077690995
+   3    3   3    6         1.0909210023         3.7665140459
+  
+   1    4   3    3         0.0411101317        -0.0768199611
+   1    4   3    4        -0.4163985078         1.2315675869
+  
+   2    4   3    3         0.0411101317        -0.0768199611
+   2    4   3    4        -0.4163985078         1.2315675869
+  
+   3    4   1    1         0.6766204610         0.0375900882
+   3    4   2    1         0.0308906969         0.4110434520
+   3    4   3    1        -0.8322191015         1.4263151536
+   3    4   1    2         0.2665963779         0.3143840420
+   3    4   2    2         0.5694923511        -0.3672965082
+   3    4   3    2         0.1650876162         1.6430793132
+   3    4   1    3         0.0411101317        -0.0768199611
+   3    4   2    3         0.0411101317        -0.0768199611
+   3    4   3    3         0.1128629671         1.6249691078
+   3    4   1    4        -0.4163985078        -1.2315675869
+   3    4   2    4        -0.4163985078        -1.2315675869
+   3    4   3    4         3.7242569067         0.0000000000
+   3    4   1    5        -0.2074745738        -0.4077690995
+   3    4   2    5        -0.2074745738        -0.4077690995
+   3    4   3    5         1.0909210023        -3.7665140459
+   3    4   1    6        -0.5102318704        -0.4683505273
+   3    4   2    6        -0.5102318704        -0.4683505273
+   3    4   3    6        -6.7765429517        -2.6302741080
+  
+   1    5   3    3        -0.5102318704        -0.4683505273
+   1    5   3    4        -0.2074745738         0.4077690995
+  
+   2    5   3    3        -0.5102318704        -0.4683505273
+   2    5   3    4        -0.2074745738         0.4077690995
+  
+   3    5   3    3        -6.7765429517        -2.6302741080
+   3    5   3    4         1.0909210023         3.7665140459
+  
+   1    6   3    3        -0.2074745738        -0.4077690995
+   1    6   3    4        -0.5102318704         0.4683505273
+  
+   2    6   3    3        -0.2074745738        -0.4077690995
+   2    6   3    4        -0.5102318704         0.4683505273
+  
+   3    6   3    3         1.0909210023        -3.7665140459
+   3    6   3    4        -6.7765429517         2.6302741080
+  
+  
+  Dynamical matrix, in cartesian coordinates,
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    1   3    3         0.0031737664         0.0037426672
+   1    1   3    4         0.0080550055        -0.0004475011
+  
+   2    1   3    3         0.0067796708        -0.0043725775
+   2    1   3    4         0.0003677464        -0.0048933744
+  
+   3    1   3    3         0.0011464418         0.0114102730
+   3    1   3    4        -0.0057792993        -0.0099049663
+  
+   1    2   3    3         0.0080550055         0.0004475011
+   1    2   3    4         0.0031737664        -0.0037426672
+  
+   2    2   3    3         0.0003677464         0.0048933744
+   2    2   3    4         0.0067796708         0.0043725775
+  
+   3    2   3    3        -0.0057792993         0.0099049663
+   3    2   3    4         0.0011464418        -0.0114102730
+  
+   1    3   3    3        -0.0049571251        -0.0146615189
+   1    3   3    4         0.0004894063         0.0009145233
+  
+   2    3   3    3        -0.0049571251        -0.0146615189
+   2    3   3    4         0.0004894063         0.0009145233
+  
+   3    3   1    1         0.0031737664        -0.0037426672
+   3    3   2    1         0.0067796708         0.0043725775
+   3    3   3    1         0.0011464418        -0.0114102730
+   3    3   1    2         0.0080550055        -0.0004475011
+   3    3   2    2         0.0003677464        -0.0048933744
+   3    3   3    2        -0.0057792993        -0.0099049663
+   3    3   1    3        -0.0049571251         0.0146615189
+   3    3   2    3        -0.0049571251         0.0146615189
+   3    3   3    3         0.0258628952        -0.0000000000
+   3    3   1    4         0.0004894063         0.0009145233
+   3    3   2    4         0.0004894063         0.0009145233
+   3    3   3    4         0.0007837706        -0.0112845077
+   3    3   1    5        -0.0060741889         0.0055756015
+   3    3   2    5        -0.0060741889         0.0055756015
+   3    3   3    5        -0.0470593261         0.0182657924
+   3    3   1    6        -0.0024699354         0.0048543940
+   3    3   2    6        -0.0024699354         0.0048543940
+   3    3   3    6         0.0075758403         0.0261563475
+  
+   1    4   3    3         0.0004894063        -0.0009145233
+   1    4   3    4        -0.0049571251         0.0146615189
+  
+   2    4   3    3         0.0004894063        -0.0009145233
+   2    4   3    4        -0.0049571251         0.0146615189
+  
+   3    4   1    1         0.0080550055         0.0004475011
+   3    4   2    1         0.0003677464         0.0048933744
+   3    4   3    1        -0.0057792993         0.0099049663
+   3    4   1    2         0.0031737664         0.0037426672
+   3    4   2    2         0.0067796708        -0.0043725775
+   3    4   3    2         0.0011464418         0.0114102730
+   3    4   1    3         0.0004894063        -0.0009145233
+   3    4   2    3         0.0004894063        -0.0009145233
+   3    4   3    3         0.0007837706         0.0112845077
+   3    4   1    4        -0.0049571251        -0.0146615189
+   3    4   2    4        -0.0049571251        -0.0146615189
+   3    4   3    4         0.0258628952         0.0000000000
+   3    4   1    5        -0.0024699354        -0.0048543940
+   3    4   2    5        -0.0024699354        -0.0048543940
+   3    4   3    5         0.0075758403        -0.0261563475
+   3    4   1    6        -0.0060741889        -0.0055756015
+   3    4   2    6        -0.0060741889        -0.0055756015
+   3    4   3    6        -0.0470593261        -0.0182657924
+  
+   1    5   3    3        -0.0060741889        -0.0055756015
+   1    5   3    4        -0.0024699354         0.0048543940
+  
+   2    5   3    3        -0.0060741889        -0.0055756015
+   2    5   3    4        -0.0024699354         0.0048543940
+  
+   3    5   3    3        -0.0470593261        -0.0182657924
+   3    5   3    4         0.0075758403         0.0261563475
+  
+   1    6   3    3        -0.0024699354        -0.0048543940
+   1    6   3    4        -0.0060741889         0.0055756015
+  
+   2    6   3    3        -0.0024699354        -0.0048543940
+   2    6   3    4        -0.0060741889         0.0055756015
+  
+   3    6   3    3         0.0075758403        -0.0261563475
+   3    6   3    4        -0.0470593261         0.0182657924
+
+  Phonon wavevector (reduced coordinates) :  0.10000  0.10000  0.20000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  4.745093E-04  7.584350E-04
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  1.041428E+02  1.664572E+02
+ chkph3 : WARNING -
+  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+
+================================================================================
+== DATASET 14 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 14, }
+dimensions: {natom: 6, nkpt: 1, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2495, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getwfq/=0, take file _WFQ from output of DATASET  12.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.0000000  0.0000000  0.0000000  G(1)=  0.1428571  0.0000000  0.0000000
+ R(2)=  0.0000000  7.0000000  0.0000000  G(2)=  0.0000000  0.1428571  0.0000000
+ R(3)=  0.0000000  0.0000000 12.0000000  G(3)=  0.0000000  0.0000000  0.0833333
+ Unit cell volume ucvol=  5.8800000E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ setup1 : take into account q-point for computing boxcut.
+
+ getcut: wavevector=  0.1000  0.1000  0.2000  ngfft=  30  30  50
+         ecut(hartree)=     20.000   => boxcut(ratio)=   2.05325
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS1_WFK
+
+ ==>  initialize data related to q vector <== 
+
+ The list of irreducible perturbations for this q vector is:
+    1)    idir= 3    ipert=   3
+
+================================================================================
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.100000  0.100000  0.200000
+ Perturbation : displacement of atom   3   along direction   3
+ The set of symmetries contains only one element for this perturbation.
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS1_WFK
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t21o_DS12_WFQ
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 14, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   4039.0050996045      2.582E+03 2.241E+00 6.196E+07
+ ETOT  2   921.54275508564     -3.117E+03 1.084E+00 3.830E+06
+ ETOT  3   166.19093702101     -7.554E+02 1.798E-01 1.294E+06
+ ETOT  4   35.488112265785     -1.307E+02 4.656E-02 1.009E+05
+ ETOT  5   4.1140933812697     -3.137E+01 7.263E-03 1.894E+03
+ ETOT  6   3.7534202922303     -3.607E-01 1.418E-04 8.414E+01
+ ETOT  7   3.7256675963866     -2.775E-02 5.870E-06 1.509E+00
+ ETOT  8   3.7245453535914     -1.122E-03 5.072E-07 3.647E-01
+ ETOT  9   3.7242571377254     -2.882E-04 9.893E-08 6.329E-02
+ ETOT 10   3.7242467041511     -1.043E-05 3.303E-09 2.563E-03
+ ETOT 11   3.7242462382995     -4.659E-07 2.385E-10 1.054E-03
+ ETOT 12   3.7242460317969     -2.065E-07 6.853E-11 2.277E-04
+ ETOT 13   3.7242460077007     -2.410E-08 8.462E-12 2.416E-05
+ ETOT 14   3.7242460048163     -2.884E-09 4.154E-13 2.326E-06
+ ETOT 15   3.7242460046050     -2.112E-10 6.515E-14 2.775E-07
+ ETOT 16   3.7242460045607     -4.434E-11 4.662E-15 3.699E-08
+ ETOT 17   3.7242460045705      9.777E-12 4.856E-16 2.104E-09
+
+ At SCF step   17       vres2   =  2.10E-09 < tolvrs=  1.00E-08 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   23.952E-17; max=  48.565E-17
+
+ Thirteen components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   1.62596593E+03 eigvalue=  -8.07686423E+01  local=  -1.41064690E+03
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =  -1.67339915E+03  Hartree=   6.56339781E+02     xc=  -1.21173984E+02
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   7.83137511E+02   enl1=  -1.23230826E+03
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -1.45285371E+03
+ 10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
+ fr.local=   4.11289455E+02 fr.nonlo=   6.11049749E+02  Ewald=   4.41350814E+02
+ 13,14 Frozen wf xc core corrections (1) and (2)
+ frxc 1  =  -1.26168169E+02  frxc 2 =   1.19056103E+02
+ Resulting in :
+ 2DEtotal=    0.3724246005E+01 Ha. Also 2DEtotal=    0.101341887619E+03 eV
+    (2DErelax=   -1.4528537069E+03 Ha. 2DEnonrelax=    1.4565779529E+03 Ha)
+    (  non-var. 2DEtotal :    3.7242525731E+00 Ha)
+
+================================================================================
+
+ ---- first-order wavefunction calculations are completed ----
+
+
+ ==> Compute Derivative Database <==
+  
+  2nd-order matrix (non-cartesian coordinates, masses not included,
+   asr not included )
+     j1       j2             matrix element
+  dir pert dir pert     real part     imaginary part
+  
+   1    1   3    3         0.2665954886         0.3143845142
+  
+   2    1   3    3         0.5694915344        -0.3672959411
+  
+   3    1   3    3         0.1650883781         1.6430792674
+  
+   1    2   3    3         0.6766195160         0.0375898298
+  
+   2    2   3    3         0.0308897057         0.4110431587
+  
+   3    2   3    3        -0.8322179526         1.4263156240
+  
+   1    3   3    3        -0.4163984445        -1.2315679299
+  
+   2    3   3    3        -0.4163986445        -1.2315678020
+  
+   3    3   1    1         0.2665954886        -0.3143845142
+   3    3   2    1         0.5694915344         0.3672959411
+   3    3   3    1         0.1650883781        -1.6430792674
+   3    3   1    2         0.6766195160        -0.0375898298
+   3    3   2    2         0.0308897057        -0.4110431587
+   3    3   3    2        -0.8322179526        -1.4263156240
+   3    3   1    3        -0.4163984445         1.2315679299
+   3    3   2    3        -0.4163986445         1.2315678020
+   3    3   3    3         3.7242525731        -0.0000000000
+   3    3   1    4         0.0411103202         0.0768192651
+   3    3   2    4         0.0411103026         0.0768194414
+   3    3   3    4         0.1128614828        -1.6249688798
+   3    3   1    5        -0.5102320862         0.4683505283
+   3    3   2    5        -0.5102320871         0.4683504094
+   3    3   3    5        -6.7765426740         2.6302750014
+   3    3   1    6        -0.2074747132         0.4077690094
+   3    3   2    6        -0.2074747456         0.4077691535
+   3    3   3    6         1.0909208985         3.7665129561
+  
+   1    4   3    3         0.0411103202        -0.0768192651
+  
+   2    4   3    3         0.0411103026        -0.0768194414
+  
+   3    4   3    3         0.1128614828         1.6249688798
+  
+   1    5   3    3        -0.5102320862        -0.4683505283
+  
+   2    5   3    3        -0.5102320871        -0.4683504094
+  
+   3    5   3    3        -6.7765426740        -2.6302750014
+  
+   1    6   3    3        -0.2074747132        -0.4077690094
+  
+   2    6   3    3        -0.2074747456        -0.4077691535
+  
+   3    6   3    3         1.0909208985        -3.7665129561
+  
+  
+  Dynamical matrix, in cartesian coordinates,
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    1   3    3         0.0031737558         0.0037426728
+  
+   2    1   3    3         0.0067796611        -0.0043725707
+  
+   3    1   3    3         0.0011464471         0.0114102727
+  
+   1    2   3    3         0.0080549942         0.0004474980
+  
+   2    2   3    3         0.0003677346         0.0048933709
+  
+   3    2   3    3        -0.0057792913         0.0099049696
+  
+   1    3   3    3        -0.0049571243        -0.0146615230
+  
+   2    3   3    3        -0.0049571267        -0.0146615215
+  
+   3    3   1    1         0.0031737558        -0.0037426728
+   3    3   2    1         0.0067796611         0.0043725707
+   3    3   3    1         0.0011464471        -0.0114102727
+   3    3   1    2         0.0080549942        -0.0004474980
+   3    3   2    2         0.0003677346        -0.0048933709
+   3    3   3    2        -0.0057792913        -0.0099049696
+   3    3   1    3        -0.0049571243         0.0146615230
+   3    3   2    3        -0.0049571267         0.0146615215
+   3    3   3    3         0.0258628651        -0.0000000000
+   3    3   1    4         0.0004894086         0.0009145151
+   3    3   2    4         0.0004894084         0.0009145172
+   3    3   3    4         0.0007837603        -0.0112845061
+   3    3   1    5        -0.0060741915         0.0055756015
+   3    3   2    5        -0.0060741915         0.0055756001
+   3    3   3    5        -0.0470593241         0.0182657986
+   3    3   1    6        -0.0024699371         0.0048543930
+   3    3   2    6        -0.0024699374         0.0048543947
+   3    3   3    6         0.0075758396         0.0261563400
+  
+   1    4   3    3         0.0004894086        -0.0009145151
+  
+   2    4   3    3         0.0004894084        -0.0009145172
+  
+   3    4   3    3         0.0007837603         0.0112845061
+  
+   1    5   3    3        -0.0060741915        -0.0055756015
+  
+   2    5   3    3        -0.0060741915        -0.0055756001
+  
+   3    5   3    3        -0.0470593241        -0.0182657986
+  
+   1    6   3    3        -0.0024699371        -0.0048543930
+  
+   2    6   3    3        -0.0024699374        -0.0048543947
+  
+   3    6   3    3         0.0075758396        -0.0261563400
+
+  Phonon wavevector (reduced coordinates) :  0.10000  0.10000  0.20000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+   0.000000E+00  0.000000E+00  6.326064E-04
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+-  0.000000E+00  0.000000E+00  1.388411E+02
+ chkph3 : WARNING -
+  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      7.0000000000E+00  7.0000000000E+00  1.2000000000E+01 Bohr
+              amu      1.89984032E+01  3.54527000E+01  2.07200000E+02
+           diemac      6.00000000E+00
+             ecut      2.00000000E+01 Hartree
+           etotal1    -8.8601327035E+01
+           etotal3     9.4067158386E+00
+           etotal4     9.4067158387E+00
+           etotal13    3.7242460045E+00
+           etotal14    3.7242460046E+00
+            fcart1    -0.0000000000E+00 -0.0000000000E+00 -1.1564823173E-18
+                      -0.0000000000E+00 -0.0000000000E+00 -1.1564823173E-18
+                      -0.0000000000E+00 -0.0000000000E+00  6.0526281145E-02
+                      -0.0000000000E+00 -0.0000000000E+00 -6.0526281145E-02
+                      -0.0000000000E+00 -0.0000000000E+00  4.4835422273E-02
+                      -0.0000000000E+00 -0.0000000000E+00 -4.4835422273E-02
+            fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart13    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart14    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         312
+           getden1          0
+           getden2          1
+           getden3          0
+           getden4          0
+           getden12         1
+           getden13         0
+           getden14         0
+           getwfk1          0
+           getwfk2          1
+           getwfk3          1
+           getwfk4          1
+           getwfk12         1
+           getwfk13         1
+           getwfk14         1
+           getwfq1          0
+           getwfq2          0
+           getwfq3          2
+           getwfq4          2
+           getwfq12         0
+           getwfq13        12
+           getwfq14        12
+             iscf1          7
+             iscf2         -2
+             iscf3          7
+             iscf4          7
+             iscf12        -2
+             iscf13         7
+             iscf14         7
+           istwfk1       2
+           istwfk2       9
+           istwfk3       1
+           istwfk4       1
+           istwfk12      0
+           istwfk13      1
+           istwfk14      1
+           jdtset        1    2    3    4   12   13   14
+           kptopt           0
+P           mkmem           1
+P          mkqmem           1
+P          mk1mem           1
+            natom           6
+            nband          18
+           nbdbuf1          0
+           nbdbuf2          2
+           nbdbuf3          0
+           nbdbuf4          0
+           nbdbuf12         2
+           nbdbuf13         0
+           nbdbuf14         0
+           ndtset           7
+            ngfft          30      30      50
+             nkpt           1
+             nqpt1          0
+             nqpt2          1
+             nqpt3          1
+             nqpt4          1
+             nqpt12         1
+             nqpt13         1
+             nqpt14         1
+            nstep         100
+             nsym1         16
+             nsym2         16
+             nsym3         16
+             nsym4          1
+             nsym12        16
+             nsym13        16
+             nsym14         1
+           ntypat           3
+              occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+        optdriver1          0
+        optdriver2          0
+        optdriver3          1
+        optdriver4          1
+        optdriver12         0
+        optdriver13         1
+        optdriver14         1
+              qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+              qpt2     5.00000000E-01  5.00000000E-01  5.00000000E-01
+              qpt3     5.00000000E-01  5.00000000E-01  5.00000000E-01
+              qpt4     5.00000000E-01  5.00000000E-01  5.00000000E-01
+              qpt12    1.00000000E-01  1.00000000E-01  2.00000000E-01
+              qpt13    1.00000000E-01  1.00000000E-01  2.00000000E-01
+              qpt14    1.00000000E-01  1.00000000E-01  2.00000000E-01
+          rfatpol1          1       1
+          rfatpol2          1       1
+          rfatpol3          3       3
+          rfatpol4          3       3
+          rfatpol12         1       1
+          rfatpol13         3       3
+          rfatpol14         3       3
+            rfdir1          0       0       0
+            rfdir2          0       0       0
+            rfdir3          0       0       1
+            rfdir4          0       0       1
+            rfdir12         0       0       0
+            rfdir13         0       0       1
+            rfdir14         0       0       1
+           rfphon1          0
+           rfphon2          0
+           rfphon3          1
+           rfphon4          1
+           rfphon12         0
+           rfphon13         1
+           rfphon14         1
+          spgroup1        129
+          spgroup2        129
+          spgroup3        129
+          spgroup4          1
+          spgroup12       129
+          spgroup13       129
+          spgroup14         1
+           strten1     1.2740140418E-03  1.2740140418E-03  2.9819792651E-03
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten13    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten14    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symafm1       1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1
+           symafm2       1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1
+           symafm3       1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1
+           symafm4       1
+           symafm12      1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1
+           symafm13      1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1
+           symafm14      1
+           symrel1     1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                       0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+           symrel2     1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                       0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+           symrel3     1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                       0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+           symrel4     1  0  0   0  1  0   0  0  1
+           symrel12    1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                       0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+           symrel13    1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                       0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+           symrel14    1  0  0   0  1  0   0  0  1
+            tnons1     0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+            tnons2     0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+            tnons3     0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+            tnons4     0.0000000  0.0000000  0.0000000
+            tnons12    0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+            tnons13    0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+                       0.5000000  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.0000000
+            tnons14    0.0000000  0.0000000  0.0000000
+           tolvrs1     1.00000000E-12
+           tolvrs2     0.00000000E+00
+           tolvrs3     1.00000000E-08
+           tolvrs4     1.00000000E-08
+           tolvrs12    0.00000000E+00
+           tolvrs13    1.00000000E-08
+           tolvrs14    1.00000000E-08
+           tolwfr1     0.00000000E+00
+           tolwfr2     1.00000000E-17
+           tolwfr3     0.00000000E+00
+           tolwfr4     0.00000000E+00
+           tolwfr12    1.00000000E-17
+           tolwfr13    0.00000000E+00
+           tolwfr14    0.00000000E+00
+            typat      1  1  2  2  3  3
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.8521202301E+00  1.8521202301E+00  0.0000000000E+00
+                       0.0000000000E+00  1.8521202301E+00  4.1044962893E+00
+                       1.8521202301E+00  0.0000000000E+00 -4.1044962893E+00
+                       0.0000000000E+00  1.8521202301E+00  1.3254449923E+00
+                       1.8521202301E+00  0.0000000000E+00 -1.3254449923E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       3.5000000000E+00  3.5000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  3.5000000000E+00  7.7563739003E+00
+                       3.5000000000E+00  0.0000000000E+00 -7.7563739003E+00
+                       0.0000000000E+00  3.5000000000E+00  2.5047280396E+00
+                       3.5000000000E+00  0.0000000000E+00 -2.5047280396E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+                       0.0000000000E+00  5.0000000000E-01  6.4636449169E-01
+                       5.0000000000E-01  0.0000000000E+00 -6.4636449169E-01
+                       0.0000000000E+00  5.0000000000E-01  2.0872733663E-01
+                       5.0000000000E-01  0.0000000000E+00 -2.0872733663E-01
+            znucl        9.00000   17.00000   82.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [4] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [5] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- Proc.   0 individual time (sec): cpu=         19.3  wall=         19.4
+
+================================================================================
+
+ Calculation completed.
+.Delivered  24 WARNINGs and  38 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.3  wall=         19.4

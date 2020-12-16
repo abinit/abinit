@@ -38,8 +38,6 @@
 
 subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
- implicit none
-
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side
  character(len=1), intent(in) :: uplo
@@ -92,8 +90,6 @@ end subroutine abi_ztrsm
 
   subroutine abi_dtrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,&
 &       x_cplx)
-
- implicit none
 
  !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag
@@ -159,7 +155,6 @@ end subroutine abi_dtrsm
  subroutine abi_d2ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,&
 &  x_cplx)
 
- implicit none
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag
  integer, intent(in) :: m,n,lda,ldb
@@ -223,8 +218,6 @@ end subroutine abi_d2ztrsm
 !!
 
   subroutine abi_d2ztrsm_3d(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
-
- implicit none
 
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag

@@ -1,0 +1,107 @@
+# Finite difference calculation of d chi / d tau of AlAs
+# (M. Veithen, 29.4.2005)
+
+#Definition of the unit cell
+#**********************************
+   acell 3*10.53
+   rprim 0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+
+#Definition of the atoms
+#*********************
+   natom 2
+   ntypat 2
+   znucl 13 33
+   typat 1 2
+   ixc 3
+
+#Definition of the scf procedure
+#******************************
+   nstep 100
+
+
+#Definition of the plane wave basis
+#************************************
+   ecut  2.8
+#  ecut  5
+   ecutsm 0.5
+   dilatmx 1.05
+   ngkpt 6 6 6
+   nshiftk 4
+   shiftk 0.5 0.5 0.5
+          0.5 0.0 0.0
+          0.0 0.5 0.0
+          0.0 0.0 0.5
+
+ndtset 12
+jdtset
+ 11 12 13 14
+ 21 22 23 24
+ 31 32 33 34
+
+
+xcart1?    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           2.6325000000E+00  2.6325000000E+00  2.6325000000E+00 
+
+xcart2?    0.0100000000E+00  0.0000000000E+00  0.0000000000E+00
+           2.6325000000E+00  2.6325000000E+00  2.6325000000E+00 
+
+xcart3?   -0.0100000000E+00  0.0000000000E+00  0.0000000000E+00
+           2.6325000000E+00  2.6325000000E+00  2.6325000000E+00 
+
+#DATASET1 : scf calculation: GS WF in the BZ
+#********************************************
+   prtden?1   1
+   kptopt?1   1
+   toldfe?1  1.0d-12
+
+#DATASET2 : non scf calculation: GS WF in the whole BZ
+#*****************************************************
+   getden?2  -1
+   getwfk?2  -1
+   kptopt?2   2
+     iscf?2  -2
+   tolwfr?2   1.0d-22
+    nband?2   4
+
+
+#DATASET3 : ddk on the MP grid of k-points
+#*****************************************
+   getwfk?3  -1
+    rfdir?3   1 1 1
+   rfelfd?3   2
+   tolwfr?3   1.0d-22
+    nband?3   4
+   kptopt?3   2
+
+
+#DATASET4 : dielectric tensor calculation
+#****************************************
+   getwfk?4  -2
+   getddk?4  -1
+    rfdir?4   1 1 1
+   tolvrs?4   1.0d-12
+   rfelfd?4   3
+    nband?4   4
+   kptopt?4   2
+    prtwf?4   0
+
+nbdbuf 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tnlo_6.abo, tolnlines=  1, tolabs=  1.01e-8, tolrel=  7e-5
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Veithen
+#%% keywords = NC, DFPT
+#%% description = Finite difference calculation of d chi / d tau of AlAs
+#%%<END TEST_INFO>

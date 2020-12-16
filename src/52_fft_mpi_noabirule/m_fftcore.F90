@@ -162,9 +162,9 @@ integer function fftcore_set_mixprec(wp) result(old_wp)
 
  select case (fftcore_mixprec)
  case (0)
-   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " fftcore_mixprec 0 --> Activating FFT in double-precision.")
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " fftcore_mixprec 0 --> Using double-precision FFT", newlines=1)
  case (1)
-   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " fftcore_mixprec 1 --> Activating FFT in mixed precision.")
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " fftcore_mixprec 1 --> Using mixed precision FFT", newlines=1)
  case default
    MSG_ERROR(sjoin("Wrong value for input wp:", itoa(fftcore_mixprec)))
  end select
@@ -1081,16 +1081,16 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  if (paral_fft_==1) then
    ! For the time being, one need ngfft(2) and ngfft(3) to be multiple of nproc_fft
    if(modulo(ngfft(2),nproc_fft)/=0)then
-     write(msg,'(3a,i5,a,i5)')&
-      'The second dimension of the FFT grid, ngfft(2), should be',&
-      'a multiple of the number of processors for the FFT, nproc_fft.',&
+     write(msg,'(4a,i5,a,i5)')&
+      'The second dimension of the FFT grid, ngfft(2), should be ',&
+      'a multiple of the number of processors for the FFT, nproc_fft.',ch10,&
       'However, ngfft(2)=',ngfft(2),' and nproc_fft=',nproc_fft
      MSG_BUG(msg)
    end if
    if(modulo(ngfft(3),nproc_fft)/=0)then
-     write(msg,'(3a,i5,a,i5)')&
-      'The third dimension of the FFT grid, ngfft(3), should be',&
-      'a multiple of the number of processors for the FFT, nproc_fft.',&
+     write(msg,'(4a,i5,a,i5)')&
+      'The third dimension of the FFT grid, ngfft(3), should be ',&
+      'a multiple of the number of processors for the FFT, nproc_fft.',ch10,&
       'However, ngfft(3)=',ngfft(3),' and nproc_fft=',nproc_fft
      MSG_BUG(msg)
    end if

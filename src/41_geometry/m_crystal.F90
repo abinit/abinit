@@ -221,8 +221,8 @@ MODULE m_crystal
    procedure :: adata_type
    ! Return atomic data from the itypat index.
 
-   !procedure :: compare => crystal_compare
-   ! Compare two structures, write warning messages if they differ
+   procedure :: compare => crystal_compare
+   ! Compare two crystalline structures, write warning messages if they differ, return exit status
 
    procedure :: print => crystal_print
    ! Print dimensions and basic info stored in the object
@@ -539,6 +539,107 @@ subroutine crystal_free(Cryst)
  ABI_SFREE(Cryst%title)
 
 end subroutine crystal_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_compare
+!! NAME
+!!  crystal_compare
+!!
+!! FUNCTION
+!!   Compare two crystalline structures,
+!!   write warning messages to stdout if they differ, return exit status
+!!
+!! INPUTS
+!!  [header]=Optional header message.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function crystal_compare(self, other, header) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ class(crystal_t),intent(in) :: self, other
+ character(len=*),optional,intent(in) :: header
+
+!Local variables-------------------------------
+ !integer :: isym, iat, itypat
+! *********************************************************************
+
+ if (present(header)) call wrtout(std_out, header)
+ ierr = 0
+
+ ! Test basic dimensions and metadata.
+ ABI_CHECK_IEQ_IERR(self%natom, other%natom, "Different natom" , ierr)
+ ABI_CHECK_IEQ_IERR(self%ntypat, other%ntypat, "Different ntypat" , ierr)
+ ABI_CHECK_IEQ_IERR(self%npsp, other%npsp, "Different npsp" , ierr)
+ ABI_CHECK_IEQ_IERR(self%nsym, other%nsym, "Different nsym" , ierr)
+ ABI_CHECK_IEQ_IERR(self%timrev, other%timrev, "Different timrev" , ierr)
+
+ if (ierr /= 0) goto 10
+ ! After this point, we know that basic dimensions agree with each other.
+ ! Yes, I use GOTO and I'm proud of that!
+
+ ! Check direct lattice
+ if (any(abs(self%rprimd - other%rprimd) > tol6)) then
+   MSG_WARNING("Found critical diffs in rprimd lattice vectors.")
+   ierr = ierr + 1
+ end if
+
+ ! Check Symmetries
+ if (any(self%symrel /= other%symrel)) then
+   MSG_WARNING("Found critical diffs in symrel symmetries.")
+   ierr = ierr + 1
+ end if
+ if (any(abs(self%tnons - other%tnons) > tol3)) then
+   MSG_WARNING("Found critical diffs in fractional translations tnons.")
+   ierr = ierr + 1
+ end if
+ if (self%use_antiferro .neqv. other%use_antiferro) then
+   MSG_WARNING("Different values of use_antiferro")
+   ierr = ierr + 1
+ end if
+
+ ! Atoms
+ if (any(self%typat /= other%typat)) then
+   MSG_WARNING("Found critical diffs in typat.")
+   ierr = ierr + 1
+ end if
+ if (any(abs(self%zion - other%zion) > tol3)) then
+   MSG_WARNING("Found critical diffs in zion.")
+   ierr = ierr + 1
+ end if
+ if (any(abs(self%znucl - other%znucl) > tol3)) then
+   MSG_WARNING("Found critical diffs in znucl.")
+   ierr = ierr + 1
+ end if
+ if (any(abs(self%amu - other%amu) > tol3)) then
+   MSG_WARNING("Found critical diffs in amu.")
+   ierr = ierr + 1
+ end if
+ if (any(abs(self%xred - other%xred) > tol6)) then
+   MSG_WARNING("Found critical diffs in xred.")
+   ierr = ierr + 1
+ end if
+
+ if (ierr /= 0) goto 10
+ return
+
+ ! Print structure to aid debugging. Caller will handle exit status.
+10 call wrtout(std_out, "Comparing crystal1 and crystal2 for possible differences before returning ierr /= 0!")
+   call self%print(header="crystal1")
+   call wrtout(std_out, "")
+   call other%print(header="crystal2")
+   call wrtout(std_out, "")
+
+end function crystal_compare
 !!***
 
 !----------------------------------------------------------------------

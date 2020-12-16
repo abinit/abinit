@@ -4285,7 +4285,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
  if (system == "cartesian") then
    ! Go from cartesian to reduced.
    ABI_MALLOC(xcart, (3, new%natom))
-   xcart = new%xred
+   xcart = new%xred * Ang_Bohr
    call xcart2xred(new%natom, new%rprimd, xcart, new%xred)
    ABI_FREE(xcart)
  end if

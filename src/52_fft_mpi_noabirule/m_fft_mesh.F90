@@ -528,7 +528,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
        if (((fftnons(ii)/nt)*nt)/=fftnons(ii)) fftnons(ii)=mincm(fftnons(ii),nt)
      end do
    end do
-   write(msg,'(a,3(i0,1x))')' setmesh: divisor mesh',fftnons(:)
+   write(msg,'(a,3(i0,1x))')' setmesh: divisor mesh ',fftnons(:)
    call wrtout(ount,msg,'COLL')
    !
    ! 2) Check if also rotations preserve the grid.
@@ -569,7 +569,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    end if
  end if ! enforce_sym
 
- write(msg,'(3(a,i3),2a,i8,a)')&
+ write(msg,'(3(a,i5),2a,i12,a)')&
   ' setmesh: FFT mesh size selected  = ',n1,'x',n2,'x',n3,ch10,&
   '          total number of points  = ',nfftot,ch10
  call wrtout(ount,msg,'COLL')

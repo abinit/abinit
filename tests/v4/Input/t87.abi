@@ -1,0 +1,112 @@
+# Silicon structure
+     acell     10.263  10.263  10.263
+     rprim      0.00   0.50   0.50
+                0.50   0.00   0.50
+                0.50   0.50   0.00
+     natom      2
+      xred      0.00   0.00   0.00
+                0.25   0.25   0.25
+    ntypat      1
+     typat      1      1
+     znucl     14.00
+ symmorphi      0
+
+# Parameters common to all runs
+
+     ngkpt      4      4      4
+   nshiftk      1
+    shiftk      0.00   0.00   0.00
+    istwfk      8*1
+
+     nstep    100
+    enunit      2
+
+    ndtset      5
+    ecut      6.0
+    ecutwfn   6.0
+    ecutsigx  3.56069426E+00 
+    ecuteps   5.62214883E-01
+
+# Self-consistent run to get the WFK file
+    tolwfr1     1.00d-10
+    nband1      35
+    nbdbuf      5
+
+# Calculation of the static dielectric matrix
+# Dummy calculation to cheap on abinit! HF does not need screening!
+ optdriver2     3
+ gwcalctyp2    25
+    getwfk2     1
+
+     nband2     5
+      awtr2     0       # Note : the default awtr 1 is better
+      symsigma  0
+
+# Calculation of the HF corrections - iteration 1
+ optdriver3     4
+ gwcalctyp3    25
+    getwfk3     1
+    getscr3     2
+    getqps3    -1
+     nband3    12
+ gw_icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
+
+# Calculation of the HF corrections - iteration 2
+ optdriver4     4
+ gwcalctyp4    25
+    getwfk4     1
+    getscr4     2
+    getqps4    -1
+     nband4    12
+ gw_icutcoul4     3   # old deprecated value of icutcoul, only used for legacy
+
+# Calculation of the HF corrections - iteration 3
+ optdriver5     4
+ gwcalctyp5    25
+    getwfk5     1
+    getscr5     2
+    getqps5    -1
+     nband5    12
+ gw_icutcoul5     3   # old deprecated value of icutcoul, only used for legacy
+
+#Common to all HF calculations
+     nkptgw     8
+      kptgw
+              0.00000000E+00  0.00000000E+00  0.00000000E+00
+              2.50000000E-01  0.00000000E+00  0.00000000E+00
+              5.00000000E-01  0.00000000E+00  0.00000000E+00
+              2.50000000E-01  2.50000000E-01  0.00000000E+00
+              5.00000000E-01  2.50000000E-01  0.00000000E+00
+             -2.50000000E-01  2.50000000E-01  0.00000000E+00
+              5.00000000E-01  5.00000000E-01  0.00000000E+00
+             -2.50000000E-01  5.00000000E-01  2.50000000E-01
+       bdgw
+              1 12
+              1 12
+              1 12
+              1 12
+              1 12
+              1 12
+              1 12
+              1 12
+   ixc_sigma  40
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t87.abo, tolnlines = 18, tolabs = 1.010e-03, tolrel = 1.400e-02
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = F. Bruneval
+#%% keywords = GW 
+#%% description = 
+#%%   Si FCC, in primitive cell (2 atoms/cell).
+#%%   Test self-consistent HF (3 iterations).
+#%%<END TEST_INFO>

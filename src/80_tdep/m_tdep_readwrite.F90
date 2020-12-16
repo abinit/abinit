@@ -239,7 +239,8 @@ contains
   if ( inputfilename == "" ) inputfilename='input.in'
   if ( filename == "" ) filename='HIST.nc'
 
-  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
+  !open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
+  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.abo')
 
 
 #if defined HAVE_NETCDF
@@ -480,7 +481,7 @@ contains
       MSG_ERROR('A keyword is not allowed. See the log file.')
     end if  
   end do
-! Output very important informations 
+! Output very important information 
   write(InVar%stdout,'(a)') ' '
   if (InVar%Impose_Symetry.eq.0) then
     write(InVar%stdout,'(a)') ' STOP IF THE DIJ (IFC) MATRIX IS NOT HERMITIAN (SYMETRIC)'

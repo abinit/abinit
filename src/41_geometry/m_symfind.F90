@@ -30,7 +30,8 @@ module m_symfind
  use m_abicore
  use m_symlist
 
- use m_symtk,     only : chkgrp, chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, smallprim, print_symmetries
+ use m_symtk, &
+& only : chkgrp, chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, smallprim, print_symmetries, sg_multable
  use m_geometry,  only : acrossb, xred2xcart
  use m_spgdata,   only : getptgroupma, symptgroup, spgdata
 
@@ -535,12 +536,12 @@ contains
      if(trialok==1)then
        nsym=nsym+1
        if(nsym>msym)then
-         write(message,'(3a,i0,4a)')&
-&         'The number of symmetries (including non-symmorphic translations)',ch10,&
-&         'is larger than maxnsym=',msym,ch10,&
-&         'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
-&         'or at least smaller than the present one.'
-         MSG_ERROR(message)
+         write(message,'(a,i0,2a,i0,4a)')&
+         'The number of symmetries (including non-symmorphic translations) is:', nsym, ch10,&
+         'is larger than maxnsym: ',msym,ch10,&
+         'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
+         'or at least smaller than the present one.'
+        MSG_ERROR(message)
        end if
        ntrial=ntrial+1
        symrel(:,:,nsym)=ptsymrel(:,:,isym)
@@ -564,7 +565,8 @@ contains
    ABI_DEALLOCATE(spinatred)
  end if
 
- call chkgrp(nsym,symafm,symrel,ierr_)
+! call chkgrp(nsym,symafm,symrel,ierr_)
+ call sg_multable(nsym, symafm, symrel, tnons, tolsym, ierr_)
  if (ierr_/=0) then
    call print_symmetries(nsym,symrel,tnons,symafm)
  end if
@@ -576,14 +578,14 @@ contains
  endif
 
 !DEBUG
-! write(message,'(a,I0,a)')' symfind : exit, nsym=',nsym,ch10
-! write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are :'
-! call wrtout(std_out,message,'COLL')
-! do isym=1,nsym
-!   write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
-!&   symafm(isym),tnons(:,isym)
-!   call wrtout(std_out,message,'COLL')
-! end do
+!  write(message,'(a,I0,es16.6,a)')' symfind : exit, nsym, tolsym=',nsym,tolsym,ch10
+!  write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are :'
+!  call wrtout(std_out,message,'COLL')
+!  do isym=1,nsym
+!    write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
+! &   symafm(isym),tnons(:,isym)
+!    call wrtout(std_out,message,'COLL')
+!  end do
 !stop
 !ENDDEBUG
 
@@ -1337,7 +1339,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 !ENDDEBUG
 
 !Treat cases in which the space group cannot be identified on the
-!basis of n_axes one need additional informations
+!basis of n_axes one need additional information
  if(brvltt==1)then
 !  If the bravais lattice is primitive
    if(nsymconv==4)then
@@ -1451,7 +1453,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
      if(abs(vect(1,2)-vect(1,3))>tol8 .or. &
 &     abs(vect(2,1)-vect(2,3))>tol8 .or. &
 &     abs(vect(3,1)-vect(3,2))>tol8) additional_info=2
-   end if ! additional informations are needed
+   end if ! additional information are needed
  end if ! brvltt==1
 
  if (brvltt==0 .or. brvltt==1) then ! Primitive
@@ -1692,6 +1694,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
    iholohedry=list_holo(index)
 
 !  DEBUG
+!  write(std_out,*)
 !  write(std_out,*)' symlatt : trial holohedry',iholohedry
 !  ENDDEBUG
 
@@ -1725,6 +1728,11 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
          cell_base(:,1)=minim(:,ia)
          cell_base(:,2)=minim(:,ib)
          cell_base(:,3)=minim(:,itrial)
+!DEBUG
+!      write(std_out,*)' cell_base(:,1)=',cell_base(:,1)
+!      write(std_out,*)' cell_base(:,2)=',cell_base(:,2)
+!      write(std_out,*)' cell_base(:,3)=',cell_base(:,3)
+!ENDDEBUG
 !        Checks that the basis vectors are OK for the target holohedry
          call holocell(cell_base,0,foundc,iholohedry,tolsym)
        else if(abs(reduceda-0.5d0)<tolsym)then
@@ -2581,6 +2589,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !DEBUG
 !write(std_out,'(a)') ' symlatt : exit '
+!stop
 !ENDDEBUG
 
 end subroutine symlatt

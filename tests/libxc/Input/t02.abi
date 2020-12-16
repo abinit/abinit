@@ -1,0 +1,93 @@
+# Bi atom : comparison between the native XC functionals from abinit and the LibXC
+
+ndtset 18
+jdtset 1 2  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+
+#LDA Teter 93
+ixc1 1
+ixc2 -20
+
+#LDA with PW92 C
+ixc9 7
+ixc10 -1012
+
+#GGA PBE
+ixc11 11
+ixc12 -101130
+
+#GGA RPBE
+ixc13 15
+ixc14 -117130
+
+#GGA HTCH93
+ixc15 16
+ixc16 -161
+
+#GGA HCTH120
+ixc17 17
+ixc18 -162
+
+#GGA HCTH147
+ixc19 26
+ixc20 -163
+
+#GGA HCTH407
+ixc21 27
+ixc22 -164
+
+#GGA WC
+ixc23 23
+ixc24 -118130
+
+#Common data
+acell 3*14
+diemac 2.0d0
+diemix 0.5d0
+ecut 10
+
+nband 4 4
+kptopt 0
+nkpt 1
+nstep 2
+occopt 2
+occ 1 1 1 1  1 0 0 0
+tolwfr 1.0d-14
+xred 3*0
+
+ntypat 1
+natom 1
+typat 1
+znucl 83
+
+nspinor 1
+nsppol  2
+nspden  2
+spinat  1 0 0
+
+#Avoid to print densities and wavefunctions
+prtden 0
+prtwf  0
+prteig 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t02.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%     Isolated Bismuth atom
+#%%     Compare the results using the native XC library and the
+#%%     corresponding ones of LibXC, in the spin-polarized case :
+#%%     2 LDAs (Teter93, PW92)
+#%%     7 GGAs (PBE, RPBE, HCTH93, HCTH120, HCTH147, HCTH407, WuCohen)
+#%%     Results are excellent (better than 10 microHa), except for Wu Cohen (must be a bug somewhere).
+#%%<END TEST_INFO>
