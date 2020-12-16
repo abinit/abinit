@@ -280,6 +280,14 @@ module m_multibinit_dataset
   character(len=fnlen) :: spin_init_hist_fname
   character(len=fnlen) :: latt_init_hist_fname
   character(len=fnlen) :: latt_pot_fname
+
+!  character(len=fnlen) :: latt_inp_ddb_fname
+!  character(len=fnlen) :: latt_inp_coeff_fname
+!  character(len=fnlen) :: latt_training_set_fname
+!  character(len=fnlen) :: latt_test_set_fname
+!  character(len=fnlen) :: latt_ddb_fnames(12)
+
+
   character(len=fnlen) :: spin_pot_fname
 !  character(len=fnlen) :: lwf_pot_fname
   character(len=fnlen) :: slc_pot_fname
@@ -428,6 +436,15 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 
  multibinit_dtset%latt_init_hist_fname=""
  multibinit_dtset%latt_pot_fname=""
+ !multibinit_dtset%latt_inp_ddb_fname=""
+ !multibinit_dtset%latt_inp_coeff_fname=""
+ !multibinit_dtset%latt_training_set_fname=""
+ !multibinit_dtset%latt_test_set_fname=""
+ !multibinit_dtset%latt_ddb_fnames(12)=""
+
+
+
+
  !multibinit_dtset%lwf_pot_fname=""
 
 
