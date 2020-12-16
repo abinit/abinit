@@ -63,6 +63,7 @@ istwfk  *1         # This is mandatory in all the GW steps.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_nag_7.0_.*
 #%% test_chain = tgw1_2.abi, tgw1_3.abi, tgw1_4.abi, tgw1_5.abi
 #%% [files]
 #%% files_to_test = 
