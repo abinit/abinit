@@ -2254,7 +2254,7 @@ function a2fw_tr_moment(a2f_tr, nn, spin, out_int)
  type(a2fw_tr_t),intent(in) :: a2f_tr
 !arrays
  real(dp),intent(out),optional :: out_int(a2f_tr%nomega,3,3)
- real(dp), dimension(3,3) :: a2fw_tr_moment
+ real(dp) :: a2fw_tr_moment(3,3)
 
 !Local variables -------------------------
 !scalars
@@ -4095,6 +4095,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      call phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nesting, kpt_comm%value)
 
      !lgk = lgroup_new(cryst, kk, self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz, comm)
+     !lgk%free()
 
      do myik=1,gams%my_nfsk_q
        call cwtime(cpu_k, wall_k, gflops_k, "start")
@@ -4170,10 +4171,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Compute nonlocal form factors ffnlk at (k+G)
        ABI_MALLOC(ffnlk, (npw_k, 1, psps%lmnmax, psps%ntypat))
        call mkffnl(psps%dimekb, 1, psps%ekb, ffnlk, psps%ffspl,&
-         cryst%gmet, cryst%gprimd, ider0, idir0, psps%indlmn, kg_k, kpg_k, kk, psps%lmnmax, &
-         psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat,&
-         psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum, &
-         comm=pert_comm%value)
+                   cryst%gmet, cryst%gprimd, ider0, idir0, psps%indlmn, kg_k, kpg_k, kk, psps%lmnmax, &
+                   psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat,&
+                   psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum, &
+                   comm=pert_comm%value)
 
        ! Compute k+q+G vectors
        nkpg1 = 3*dtset%nloalg(3)
@@ -4183,9 +4184,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Compute nonlocal form factors ffnl1 at (k+q+G)
        ABI_MALLOC(ffnl1, (npw_kq, 1, psps%lmnmax, psps%ntypat))
        call mkffnl(psps%dimekb, 1, psps%ekb, ffnl1, psps%ffspl, cryst%gmet, cryst%gprimd, ider0, idir0, &
-         psps%indlmn, kg_kq, kpg1_k, kq, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg1, &
-         npw_kq, psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_kq, ylmgr_kq, &
-         comm=pert_comm%value)
+                   psps%indlmn, kg_kq, kpg1_k, kq, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg1, &
+                   npw_kq, psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_kq, ylmgr_kq, &
+                   comm=pert_comm%value)
 
        ! Loop over all my perturbations.
        gkk_atm = zero
@@ -4199,10 +4200,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &  ! In
-           cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
-           npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
-           dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1,&   ! Out
-           reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
+                             cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
+                             npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
+                             dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1, &   ! Out
+                             reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -4297,10 +4298,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
                do ipc1 = 1,3
                  ! vk x vk
                  vv_kk(ipc1 + (ipc2-1)*3, ib1,ib2) = fs%vk(ipc1, ib1) * fs%vk(ipc2, ib2)
-                    !ddk%velocity(ipc1,ib1,ik_fs,spin) * ddk%velocity(ipc2,ib2,ik_fs,spin)
                  ! vk x vk+q
                  vv_kkq(ipc1 + (ipc2-1)*3, ib1,ib2) = fs%vkq(ipc1, ib1) * fs%vk(ipc2, ib2)
-                    !ddk%velocity(ipc1,ib1,ikq_bz,spin) * ddk%velocity(ipc2,ib2,ik_fs,spin)
                end do
              end do
            end do

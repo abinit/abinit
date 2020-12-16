@@ -4793,7 +4793,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  if (iomode == IO_MODE_MPI) then
    call wrtout(std_out, sjoin( &
      " If MPI-IO is too slow, use the command line option `abinit --enforce-fortran-io ...`", ch10, &
-     " to make the master prc read data with Fortran-IO and then broadcast (requires more memory)"), do_flush=.True.)
+     " to make the master proc read data with Fortran-IO and then broadcast (requires more memory)"), do_flush=.True.)
  end if
 
  if (iread) then

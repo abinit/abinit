@@ -67,7 +67,7 @@ MgB2_eph4isotc/flow_mgb2_phonons/w1/t59/outdata/out_POT6.nc
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv
-#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, 
+#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi, teph4isotc_5.abi, 
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
 #%% files_to_test =

@@ -293,6 +293,15 @@ def vimt(ctx, tagname):
 
 
 @task
+def env(ctx):
+    """Print sh code to set $PATH and $ABI_PSPDIR in order to work with build directory."""
+    print("\nExecute the following lines in the shell to set the env:\n")
+    top = find_top_build_tree(".", with_abinit=True)
+    binpath = os.path.join(top, "src", "98_main")
+    print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Psps_for_tests")
+    print(f"export PATH={binpath}:$PATH")
+
+@task
 def diff2(ctx, filename="run.abo"):
     """
     Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.

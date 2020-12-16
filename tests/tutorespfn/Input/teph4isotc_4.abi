@@ -1,24 +1,28 @@
 #
 ndtset  1
 
-optdriver 8
-wfk_task "wfk_kpts_erange"
-getwfk_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
+getkerange_filepath "teph4isotc_3o_DS1_KERANGE.nc"
 
-# Define fine k-mesh for the SKW interpolation
-sigma_ngkpt   18 18 18
-#sigma_ngkpt   24 24 24
-sigma_nshiftk 1
-sigma_shiftk  0 0 0
+# Read DEN file to initialize the NSCF run.
+getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
-sigma_erange -0.2 -0.2 eV  # Select kpts in the fine mesh within this energy window.
-einterp 1 5 0 0            # Parameters for star-function interpolation (default values)
+# Init GS wavefunctions from this file (optional).
+getwfk_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
 
-ngkpt   12 12 12
-nshiftk 1
-shiftk  0.0 0.0 0.0   
+iscf  -2
+tolwfr 1e-18
+kptopt 0                        # Important!
 
-# COMMON INPUT DATA
+# These variables must be consistent with the values of
+# sigma_ngkpt, sigma_shiftk used in the previous step
+ngkpt   18 18 18
+#ngkpt    24 24 24
+#ngkpt    32 32 32
+nshiftk  1
+shiftk   0.0 0.0 0.0
+
+
+#COMMON INPUT DATA
 ecut 38
 nband   8
 occopt  4              # Marzari smearing
@@ -40,10 +44,9 @@ pseudos "Mg-low.psp8, B.psp8"
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
 #%% files_to_test =
-#%%   teph4isotc_3.abo, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03;
-#%%   teph4isotc_3o_DS1_KERANGE, tolnlines= 10, tolabs=0.0, tolrel= 0.0;
+#%%   teph4isotc_4.abo, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
-#%% max_nprocs = 10
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH

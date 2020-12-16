@@ -3648,11 +3648,9 @@ class AbinitTestSuite(object):
                 msg = (
                     "Timeout occured while trying to acquire lock in:\n\t{}\n"
                     "Perhaps a previous run did not exit cleanly or another "
-                    "process is running in the same directory.\n If you are"
-                    "sure no other process is in execution, remove the "
-                    "directory with `rm -rf` and rerun.\n"
+                    "process is running in the same directory.\n If you are "
+                    "sure no other process is in execution, remove the directory with `rm -rf` and rerun.\n"
                 ).format(self.workdir)
-
                 cprint(msg, "red")
                 return
 
