@@ -30,7 +30,7 @@ nshiftk 1
 shiftk    0.11 0.21 0.31  # This shift breaks the symmetry of the k-mesh.
 chksymbreak 0             # Mandatory for using symmetry-breaking k-meshes in the BS code.
 
-ecutwfn 8.0               # Cutoff for the wavefunction.
+ecutwfn 12.0               # Cutoff for the wavefunction.
 ecuteps 2.0               # Cutoff for W and /bare v used to calculate the BS matrix elements.
 inclvkb 2                 # The commutator for the optical limit is correctly evaluated.
 gw_icutcoul 3               # Legacy value
@@ -58,7 +58,7 @@ xred              # Reduced coordinate of atoms
    0.25 0.25 0.25
 
 # Definition of the planewave basis set 
-ecut 8         # Maximal kinetic energy cut-off, in Hartree
+ecut 12        # Maximal kinetic energy cut-off, in Hartree
 
 istwfk *1
 nstep  50      # Maximal number of SCF cycles
@@ -66,7 +66,7 @@ diemac 12.0
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/14si.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

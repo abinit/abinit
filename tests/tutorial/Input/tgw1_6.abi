@@ -18,15 +18,10 @@ shiftk   0.0 0.0 0.0  # This grid contains the Gamma point, which is the point a
 istwfk  *1            # For the GW computations, do not take advantage of the 
                       # specificities of k points to reduce the number of components of the
                       # wavefunction.
-tolwfr  1.0d-10   
 
 # Dataset1: usual self-consistent ground-state calculation
 # Definition of the k-point grid
-shiftk1  0.5 0.5 0.5  # This grid is the most economical, but does not contain the Gamma point.
-         0.5 0.0 0.0
-         0.0 0.5 0.0
-         0.0 0.0 0.5
-istwfk1 *0            # For the ground state, let the code use the time-reversal symmetry
+nband1  6
 tolvrs1 1e-10
 
 # Dataset2: calculation of WFK file
@@ -35,11 +30,12 @@ iscf2    -2             # Non self-consistent calculation
 getden2  -1             # Read previous density file
 nband2   120
 nbdbuf2   20
+tolwfr2  1.0d-12   
 
 # Dataset3: Calculation of the screening (epsilon^-1 matrix)
 optdriver3   3       # Screening calculation
 getwfk3     -1       # Obtain WFK file from previous dataset
-nband3      25       # Bands to be used in the screening calculation
+nband3      50       # Bands to be used in the screening calculation
 ecuteps3    6.0      # Dimension of the screening matrix
 ppmfrq3    16.7 eV  # Imaginary frequency where to calculate the screening
 
@@ -57,7 +53,7 @@ kptgw4                       # k-points
 bdgw4       4  5             # calculate GW corrections for bands from 4 to 5
 
 # Definition of the unit cell: fcc
-acell  3*10.217        # This is equivalent to   10.217 10.217 10.217
+acell  3*10.26         # Experimental lattice constants
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5   
        0.5  0.5  0.0
@@ -91,7 +87,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/14si.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -102,7 +98,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = Unknown
+#%% authors = V. Olevano, F. Bruneval, M. Giantomassi
 #%% keywords = GW
 #%% description = 
 #%%   Crystalline silicon

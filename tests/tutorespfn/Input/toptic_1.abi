@@ -34,7 +34,7 @@
 
 #Fifth dataset : ddk response function along axis 2
    iscf5 -3
-  nstep5  1  nline5  0   prtwf5  3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements.
+  nstep5  1  nline5  0  prtwf5  3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements.
 
    nqpt5  1  
   rfdir5  0 1 0
@@ -42,7 +42,7 @@
 
 #Sixth dataset : ddk response function along axis 3
    iscf6 -3
-  nstep6  1  nline6  0    prtwf6  3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements.
+  nstep6  1  nline6  0  prtwf6  3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements.
 
    nqpt6  1  
   rfdir6  0 0 1
@@ -67,21 +67,18 @@
    qpt  0.0 0.0 0.0     # Not really needed, because it is the defaults, but mentioned here to keep track of its importance for datasets 4-6
 
  acell   3*10.60
- amu 69.72  74.9216
  diemac 10.0
  ecut 2.00             # This is also too low
- ixc 3
  natom  2  nbdbuf 2
  ntypat  2
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
  xred 3*0.00d0 3*0.25d0
- tnons 72*0.0
  typat  1 2  tolwfr  1.e-20
  znucl  31 33
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/31ga.pspnc, PseudosTM_pwteter/33as.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8, Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

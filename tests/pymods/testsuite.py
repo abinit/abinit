@@ -1970,9 +1970,14 @@ pp_dirpath $ABI_PSPDIR
             self.stderr_fname = os.path.join(self.workdir, self.id + ".stderr")
 
             # Run the code (run_etime is the wall time spent to execute the test)
-            # FIXME: Add support for more executables
+
+            # Here we decided whether we should invoke the executable with/without files file.
+            # Note that not all the executables have removed support for the files file, moreover we still have
+            # a couple of Abinit tests in which the files file sytenx is still used (use_files_file option in TEST_INFO)
+            # just to make sure we still support the legacy mode.
+
             use_files_file = self.use_files_file
-            if self.executable not in ("abinit", "anaddb", "multibinit"):
+            if self.executable not in ("abinit", "anaddb", "optic", "multibinit"):  # FIXME: Add support for more executables
                 use_files_file = True
 
             if use_files_file:
@@ -1984,8 +1989,9 @@ pp_dirpath $ABI_PSPDIR
                 bin_argstr = " " + self.exec_args
 
             else:
-                # New CLI mode: invoke exec with syntax `abinit run.abi`
-                # stdin_fname won't be created
+                # New CLI mode: invoke executable with syntax `abinit run.abi`. stdin_fname won't be created
+                # The subclass should implement prepare_new_cli_invokation that performs all the operations
+                # needed to prepare the input files. May be empty.
                 self.keep_files([self.stdout_fname, self.stderr_fname])
                 stdin_fname = ""
                 self.prepare_new_cli_invokation()
@@ -2954,13 +2960,14 @@ class OpticTest(BaseTest):
     """
     def make_stdin(self):
         t_stdin = StringIO()
-
         t_stdin.write(self.inp_fname + "\n")  # optic input file e.g. .../Input/t57.in
         t_stdin.write(self.id + ".abo\n")     # Output. e.g t57.abo
         t_stdin.write(self.id + "\n")         # Used as suffix to diff and prefix to log file names,
-                                               # and also for roots for temporaries
-
+                                              # and also for roots for temporaries
         return t_stdin.getvalue()
+
+    def prepare_new_cli_invokation(self):
+        """Empty implementation"""
 
 
 class Band2epsTest(BaseTest):

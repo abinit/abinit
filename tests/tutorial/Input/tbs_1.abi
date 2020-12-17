@@ -49,7 +49,7 @@ awtr4      1
 symchi4    1
 getwfk4    2
 ecuteps4   6
-ecutwfn4   8
+ecutwfn4   12
 nband4    100  # This value leads to well converged QP energies, see the first GW tutorial
 nfreqre4   1   # Only the static limit is needed for standard BSE calculations.
 nfreqim4   0
@@ -77,7 +77,7 @@ xred              # Reduced coordinate of atoms
    0.25 0.25 0.25
 
 # Definition of the planewave basis set 
-ecut 8         # Maximal kinetic energy cut-off, in Hartree
+ecut 12         # Maximal kinetic energy cut-off, in Hartree
 
 istwfk *1
 nstep  50      # Maximal number of SCF cycles
@@ -85,7 +85,7 @@ diemac 12.0
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/14si.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
