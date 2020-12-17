@@ -17,7 +17,7 @@ latt_taut = 80
 #%% [setup]
 #%% executable = multibinit
 #%% exclude_builders = .*_nag_7.0_.*
-#%% system_xml = t83.nc
+#%% latt_pot = t83.nc
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 

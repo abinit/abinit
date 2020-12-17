@@ -296,6 +296,7 @@ contains
     call xmpi_bcast(string,master, comm, ierr)
     call xmpi_bcast(lenstr,master, comm, ierr)
 
+
     !Read the input file
     call invars10(self%params,lenstr,natom,string)
     call postfix_fnames(self%input_path, self%filenames, self%params )

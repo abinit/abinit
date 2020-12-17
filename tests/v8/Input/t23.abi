@@ -1,6 +1,5 @@
 ##############################################################################
-#Test for multibinit, just read xml and generate the effective potential into XML file
-# without regeneration of dipole-dipole just reading xml
+#Test for multibinit, just read xml and run spin dynamics
 ##############################################################################
 prt_model = 0
 
@@ -28,7 +27,7 @@ spin_write_traj = 0
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
 #%% exclude_builders = .*_nag_7.0_.*
-#%% system_xml = t23.xml
+#%% spin_pot = t23.xml
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 

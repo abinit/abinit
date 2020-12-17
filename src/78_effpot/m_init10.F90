@@ -195,11 +195,28 @@ subroutine postfix_fnames(input_path, filnam, params)
   character(len=fnlen), intent(inout) :: input_path, filnam(18)
   type(multibinit_dtset_type), intent(inout) :: params
   ! if using files file, set the params%*_fname according to filnam
+  integer :: i
   if (len_trim(input_path)==0) then
      if (len_trim(params%spin_pot_fname)==0) params%spin_pot_fname=filnam(3)
      if (len_trim(params%latt_pot_fname)==0) params%latt_pot_fname=filnam(3)
      if (len_trim(params%slc_pot_fname)==0) params%slc_pot_fname=filnam(3)
      ! TODO lattice model
+     if (len_trim(params%latt_inp_ddb_fname)==0) params%latt_inp_ddb_fname=filnam(3)
+     if (len_trim(params%latt_inp_coeff_fname)==0) params%latt_inp_coeff_fname=filnam(4)
+     if (len_trim(params%latt_training_set_fname)==0) params%latt_training_set_fname=filnam(5)
+     if (len_trim(params%latt_test_set_fname)==0) params%latt_test_set_fname=filnam(6)
+     do i=1, 12
+        if (len_trim(params%latt_ddb_fnames(i))==0) params%latt_ddb_fnames(i)=filnam(6+i)
+     end do
+  else
+     filnam(2)=params%outdata_prefix
+     filnam(3)=params%latt_inp_ddb_fname
+     filnam(4)=params%latt_inp_coeff_fname
+     filnam(5)=params%latt_training_set_fname
+     filnam(6)=params%latt_test_set_fname
+     do i=1, 12
+        filnam(i+6)=params%latt_ddb_fnames(i)
+     end do
   end if
 
 end subroutine postfix_fnames
