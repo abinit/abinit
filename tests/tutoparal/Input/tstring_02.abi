@@ -1,10 +1,3 @@
-# Added by runtests.py
-output_file = "tstring_02_MPI1.abo"
-indata_prefix = "tstring_02_MPI1i"
-outdata_prefix = "tstring_02_MPI1o"
-tmpdata_prefix = "tstring_02_MPI1t"
-# end runtests.py section
-
 #######################################
 #       INPUT FILE FOR ABINIT         #
 #                                     #
@@ -78,7 +71,7 @@ bandpp        10
 #%% [files]
 #%% [NCPU_1]
 #%% files_to_test = 
-#%%   tstring_02_MPI1.abo, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%%   tstring_02_MPI1.abo, tolnlines = 100, tolabs = 1.100e-03, tolrel = 3.000e-03
 #%% [paral_info]
 #%% nprocs_to_test = 1
 #%% max_nprocs = 1
