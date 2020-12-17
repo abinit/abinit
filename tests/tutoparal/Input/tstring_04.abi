@@ -1,0 +1,100 @@
+#######################################
+#       INPUT FILE FOR ABINIT         #
+#                                     #
+#  Hydronium ion + NH3 molecule       #
+#  String method                      #
+#  Moving the proton from H2O to NH3  #
+#  keeping O and H atoms fixed        #
+#######################################
+
+# Definition of the unit cell
+# ===========================
+natom         8
+
+ntypat        3
+
+# Species     
+#             O   N   H   
+znucl         
+              8   7   1   
+
+typat         
+              1   3   3   2   3   3   3   3   
+
+acell         1.90000000000000e+01   9.45000000000000e+00   9.45000000000000e+00
+
+pp_dirpath "$ABI_PSPDIR/"
+pseudos "8o_hard.paw, 7n.paw, 1h.paw"
+
+# Electronic configuration
+# ========================
+nband         10       # Number of bands to compute
+kptopt        0        # No autogeneration of kpts so only use Gamma (0,0,0)
+charge        1.0      # Charge of the simulation cell
+
+# Convergence parameters
+# ======================
+ecut          20
+pawecutdg     40
+
+# Control of the SCF cycle
+# ========================
+toldff        5.0d-7   # Stopping criterion of SCF cycle
+nstep         50       # Maximal number of SCF steps
+
+# Parallelization
+# ===============
+paral_kgb     1
+bandpp        10
+npimage       10
+
+# Definition of the path
+# ======================
+xcart
+              9.50000000000000e+00   4.72500000000000e+00   4.72500000000000e+00
+              8.78880669651267e+00   4.18545744317269e+00   6.37110790758689e+00
+              8.77293633488673e+00   6.36455593226601e+00   4.18635811311101e+00
+              1.70589045315426e+01   4.72500000000000e+00   4.72500000000000e+00
+              1.77134747847551e+01   4.53626662932361e+00   2.92099542503427e+00
+              1.76621251249637e+01   3.23814843988977e+00   5.79610274973190e+00
+              1.77046046434544e+01   6.37635347652822e+00   5.48456565592253e+00
+              1.14429112972054e+01   4.76730392402942e+00   4.75400033398202e+00
+
+xcart_lastimg
+              9.50000000000000e+00   4.72500000000000e+00   4.72500000000000e+00
+              8.91345082448424e+00   4.35796634798935e+00   6.43664714991067e+00
+              8.87345549085054e+00   6.42372790595609e+00   4.36355858493516e+00
+              1.70589045315426e+01   4.72500000000000e+00   4.72500000000000e+00
+              1.79784868447040e+01   4.43478157641596e+00   3.02993414054722e+00
+              1.74576205909991e+01   3.23935584104076e+00   5.92127459427586e+00
+              1.77274679050992e+01   6.37060951768643e+00   5.52690694840329e+00
+              1.50878829808298e+01   4.83727156502352e+00   4.46954661345980e+00
+
+# String controls
+# ===============
+nimage        12         # Number of points along the string
+imgmov        2          # Selection of "String Method" algo
+ntimimage     50         # Max. number of relaxation steps of the string
+tolimg        0.001      # Tol. criterion (will stop when average energy of cells < tolimg)
+dynimage      0 10*1 0   # Keep first and last images fixed
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [NCPU_10]
+#%% files_to_test = 
+#%%   tstring_04_MPI10.abo, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%% [paral_info]
+#%% nprocs_to_test = 10
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = 
+#%% keywords = 
+#%% description = 
+#%%   Hydronium ion + NH3 molecule      
+#%%   String method                    
+#%%   Moving the proton from H2O to NH3
+#%%   keeping O and H atoms fixed      
+#%%<END TEST_INFO>

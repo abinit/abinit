@@ -53,9 +53,9 @@ inp_files = [
 #"tmoldyn_06.abi",
 #"tmoldyn_07.abi",
 "tstring_01.abi",   # MPI Error in MPI_ALLREDUCE
-#"tstring_02.abi",
-#"tstring_03.abi",
-#"tstring_04.abi",
+"tstring_02.abi",
+"tstring_03.abi",
+"tstring_04.abi",
 "tucrpa_1.abi",
 "tucrpa_2.abi",
 #"tucrpa_3.abi",
