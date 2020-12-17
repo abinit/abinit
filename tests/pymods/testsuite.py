@@ -2882,7 +2882,7 @@ class MultibinitTest(BaseTest):
         if test_set_fname is not None and 'latt_test_set_fname = "' not in line:
             app('latt_test_set_fname = "%s"' % (test_set_fname))
 
-        app('outdata_prefix = "%s"' % (self.id))
+        app('outdata_prefix = "%s"' % (self.id + ".abo"))
 
         if 'output_file = "' not in line:
             app('output_file = "%s"' % (self.id + ".abo"))
