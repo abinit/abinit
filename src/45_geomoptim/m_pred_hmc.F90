@@ -64,10 +64,11 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      hist2var,pred_velverlet,var2hist,xred2xcart
+!!      generate_random_velocities,hist2var,metropolis_check,pred_velverlet
+!!      var2hist,wrtout
 !!
 !! SOURCE
 

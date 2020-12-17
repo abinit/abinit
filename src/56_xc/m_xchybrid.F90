@@ -93,11 +93,11 @@ contains
 !!  but needs one less call to libxc
 !!
 !! PARENTS
-!!      forces,forstr,rhotov,setvtr
+!!      m_forces,m_forstr,m_rhotov,m_setvtr
 !!
 !! CHILDREN
-!!      libxc_functionals_end,libxc_functionals_init,metric,mkcore,rhotoxc
-!!      xcdata_init
+!!      dtset_copy,dtset_free,libxc_functionals_end,libxc_functionals_init
+!!      rhohxc
 !!
 !! SOURCE
 

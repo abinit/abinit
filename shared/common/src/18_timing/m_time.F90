@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_time
 !! NAME
 !! m_time
@@ -20,16 +19,16 @@
 
 #include "abi_common.h"
 
-MODULE m_time
+module m_time
 
  use defs_basis
  use m_abicore
  use m_errors
  use iso_c_binding
- use m_xmpi
 #if defined HAVE_MPI2
  use mpi
 #endif
+ use m_xmpi
  use m_clib
 
  use m_xpapi,    only: xpapi_flops
@@ -482,14 +481,14 @@ end function abi_wtime
 !!  call cwtime(cpu,wall,gflops,"stop")
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,eph,exc_build_block
-!!      exc_build_ham,lapackprof,m_abilasi,m_bse_io,m_dvdb,m_epjdos
-!!      m_exc_itdiago,m_fft,m_fft_prof,m_fstab,m_gkk,m_gruneisen,m_ifc,m_ioarr
-!!      m_iowf,m_phgamma,m_phonons,m_phpi,m_shirley,m_sigmaph,m_skw,m_wfd,m_wfk
-!!      partial_dos_fractions
+!!      lapackprof,m_bse_io,m_chi0,m_ddk,m_dvdb,m_ebands,m_eph_driver,m_ephwg
+!!      m_epjdos,m_exc_build,m_exc_itdiago,m_fft,m_fft_prof,m_fstab,m_gkk
+!!      m_gruneisen,m_hide_lapack,m_ifc,m_ioarr,m_iowf,m_phgamma,m_phonons
+!!      m_phpi,m_rta,m_sigc,m_sigmaph,m_sigx,m_skw,m_time,m_unittests,m_vtowfk
+!!      m_wfd,m_wfk
 !!
 !! CHILDREN
-!!      xpapi_flops
+!!      papif_flops,papif_perror,timein
 !!
 !! SOURCE
 
@@ -568,8 +567,12 @@ end subroutine cwtime
 !!  gflops = Gigaflops
 !!
 !! PARENTS
+!!      m_ddk,m_dvdb,m_ebands,m_eph_driver,m_ephwg,m_fstab,m_gruneisen,m_ifc
+!!      m_ioarr,m_iowf,m_phgamma,m_phonons,m_rta,m_sigmaph,m_skw,m_unittests
+!!      m_wfd,m_wfk
 !!
 !! CHILDREN
+!!      papif_flops,papif_perror,timein
 !!
 !! SOURCE
 
@@ -632,10 +635,11 @@ end subroutine cwtime_report
 !!  Should be replaced by cwtime
 !!
 !! PARENTS
-!!      abinit,aim,aim_follow,anaddb,bsepostproc,conducti,cpdrv,cut3d,drvaim
-!!      elphon,first_rec,m_exit,mrgddb,mrgscr,multibinit,optic,rsurf,surf,timab
+!!      abinit,aim,anaddb,conducti,cut3d,m_bader,m_elphon,m_exit,m_time
+!!      m_vtorhorec,mrgddb,mrgscr,multibinit,optic
 !!
 !! CHILDREN
+!!      papif_flops,papif_perror,timein
 !!
 !! SOURCE
 
@@ -672,9 +676,10 @@ end subroutine timein
 !!  return_ncount gives the number of times that the accumulator has been incremented
 !!
 !! PARENTS
-!!      timana
+!!      m_timana,testtransposer
 !!
 !! CHILDREN
+!!      papif_flops,papif_perror,timein
 !!
 !! SOURCE
 
@@ -690,14 +695,14 @@ subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
 
 !Local variables-------------------------------
 !scalars
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
 !Check that nn lies in sensible bounds
  if (nn<0.or.nn>TIMER_SIZE) then
-   write(message,'(a,i6,a,i8,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
-   MSG_BUG(message)
+   write(msg,'(a,i6,a,i8,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
+   MSG_BUG(msg)
  end if
 
 !return accumulated time for nn
@@ -723,9 +728,10 @@ end subroutine time_accu
 !!  Set the value of papiopt
 !!
 !! PARENTS
-!!      abinit
+!!      m_common
 !!
 !! CHILDREN
+!!      papif_flops,papif_perror,timein
 !!
 !! SOURCE
 
@@ -796,43 +802,36 @@ end function time_get_papiopt
 !!  option=see comment above
 !!
 !! OUTPUT
-!!  on option=4 :
+!!  on option=4:
 !!    tottim(2,nn)=accumulated time for accumulator nn; otherwise
 !!     tottim is a dummy variable.
 !!    option gives the number of times that the
 !!     accumulator has been incremented
 !!
 !! PARENTS
-!!      abinit,afterscfloop,atm2fft,bethe_salpeter,calc_sigc_me,calc_sigx_me
-!!      calcdenmagsph,cchi0,cgq_builder,cgwf,chebfi,cohsex_me,corrmetalwf1,d2frnl
-!!      density_rec,dfpt_cgwf,dfpt_dyfro,dfpt_dyxc1,dfpt_eltfrhar,dfpt_eltfrkin
-!!      dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_looppert,dfpt_mkrho
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_newvtr,dfpt_nstdy
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_rhotov,dfpt_scfcv,dfpt_vtorho
-!!      dfpt_vtowfk,dfpt_wfkfermi,dfptnl_loop,dielmt,dieltcel,m_dmft
-!!      dotprodm_v,dotprodm_vn,driver,dyson,eig2stern,eig2tot,elt_ewald
-!!      eltxccore,energy,entropyrec,etotfor,exc_build_block,exc_build_ham
-!!      fermisolverec,first_rec,fock2ACE,fock_getghc,forces,forstr,forstrnps
-!!      fourdp,fourwf,fxphas,getgh1c,getghc,getgsc,getngrec,gran_potrec
-!!      green_kernel,gstate,gstateimg,gwls_ComputeCorrelationEnergy
-!!      gwls_DielectricArray,gwls_QR_factorization,gwls_lineqsolver
-!!      gwls_model_polarisability,gwls_polarisability,gwls_sternheimer,hartre
-!!      impurity_solve,initberry,initorbmag,initwf,inkpts,invars2,inwffil
-!!      listkk,lobpcgwf,m_ab7_invars_f90,m_ab7_mixing,m_cgtools,m_dyson_solver
-!!      m_fftcore,m_fftw3,m_fock,m_green,m_haydock,m_hexc,m_invovl,m_iowf
-!!      m_lobpcg,m_lobpcg2,m_lobpcgwf,m_paral_pert,m_sg2002,m_wfutils,m_xg
-!!      m_xgScalapack,mag_penalty,mkcore,mkcore_paw,mkcore_wvl,mkffnl
-!!      mklocl_realspace,mklocl_recipspace,mkresi,mkrho,newkpt,newocc,newrho
-!!      newvtr,nhatgrid,nlenergyrec,nonlinear,nonlop,odamix,opernla_ylm
-!!      optics_paw,optics_paw_core,optics_vloc,outkss,outscfcv,pareigocc
-!!      partial_dos_fractions_paw,pawdenpot,pawdfptenergy,pawinit,pawmknhat
-!!      pawmknhat_psipsi,pawmkrho,pawpolev,prep_bandfft_tabs,prep_calc_ucrpa
-!!      prep_fourwf,prep_getghc,prep_nonlop,pspatm,pspheads_comm,pspini
-!!      pw_orthon,rayleigh_ritz,recursion,recursion_nl,respfn,rhotov,rhotoxc
-!!      rwwf,scfcv,screening,setsym,setvtr,sigma,sqnormm_v,status,stress,strhar
-!!      suscep_stat,susk,suskmm,symrhg,symsgcube,tddft,timana,vn_nl_rec,vtorho
-!!      vtorhorec,vtorhotf,vtowfk,wf_mixing,wfconv,wfk_analyze,wfsinp
-!!      wvl_nhatgrid,xcden,xcpot
+!!      abinit,anaddb,m_ab7_mixing,m_afterscfloop,m_atm2fft,m_bandfft_kpt
+!!      m_berryphase_new,m_bethe_salpeter,m_cgtk,m_cgtools,m_cgwf,m_chebfi
+!!      m_chi0,m_cohsex,m_common,m_d2frnl,m_dens,m_dfpt_cgwf,m_dfpt_elt
+!!      m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_dfpt_nstwf
+!!      m_dfpt_rhotov,m_dfpt_scfcv,m_dfpt_vtorho,m_dfpt_vtowfk,m_dfptnl_loop
+!!      m_dft_energy,m_dmft,m_driver,m_dvdb,m_dyson_solver,m_eig2d,m_epjdos
+!!      m_ewald,m_exc_build,m_fft,m_fftcore,m_fftw3,m_fock,m_fock_getghc
+!!      m_forces,m_forstr,m_getgh1c,m_getghc,m_green,m_gstate,m_gstateimg
+!!      m_gwls_ComputeCorrelationEnergy,m_gwls_DielectricArray
+!!      m_gwls_QR_factorization,m_gwls_lineqsolver,m_gwls_model_polarisability
+!!      m_gwls_polarisability,m_gwls_sternheimer,m_haydock,m_hexc,m_ifc
+!!      m_inkpts,m_invars2,m_invovl,m_inwffil,m_io_kss,m_iowf,m_kpts,m_lobpcg
+!!      m_lobpcg2,m_lobpcgwf,m_lobpcgwf_old,m_mkcore,m_mkffnl,m_mklocl
+!!      m_mklocl_realspace,m_mkrho,m_newrho,m_newvtr,m_nonlinear,m_nonlop,m_occ
+!!      m_odamix,m_opernla_ylm,m_optics_vloc,m_orbmag,m_outscfcv,m_paral_pert
+!!      m_paw_denpot,m_paw_dfpt,m_paw_efield,m_paw_init,m_paw_mkrho,m_paw_nhat
+!!      m_paw_optics,m_pead_nl_loop,m_prcref,m_prep_calc_ucrpa,m_prep_kgb
+!!      m_pspheads,m_pspini,m_rayleigh_ritz,m_rec,m_respfn_driver,m_rf2_init
+!!      m_rhotov,m_rhotoxc,m_rwwf,m_scfcv_core,m_screening_driver,m_setvtr
+!!      m_sg2002,m_sigc,m_sigma_driver,m_sigmaph,m_sigx,m_spacepar,m_stress
+!!      m_suscep_stat,m_symsg,m_tddft,m_timana,m_vtorho,m_vtorhorec,m_vtorhotf
+!!      m_vtowfk,m_wfk_analyze,m_wfutils,m_xctk,m_xg,m_xgScalapack
+!!      m_xgTransposer,mkcore_wvl,testtransposer
 !!
 !! CHILDREN
 !!      papif_flops,papif_perror,timein
@@ -840,7 +839,7 @@ end function time_get_papiopt
 !! SOURCE
 !!
 
-subroutine timab(nn,option,tottim)
+subroutine timab(nn, option, tottim)
 
 #ifdef HAVE_PAPI
 #include "f90papi.h"
@@ -855,7 +854,7 @@ subroutine timab(nn,option,tottim)
 !Local variables-------------------------------
 !scalars
  real(dp),save :: cpu,wall
- character(len=500) :: message
+ character(len=500) :: msg
 #ifdef HAVE_PAPI
  integer(C_INT) :: check
  integer(C_LONG_LONG),save :: flops1
@@ -867,13 +866,13 @@ subroutine timab(nn,option,tottim)
 
  if (option==5) timopt=nn
 
-!If timopt was set to zero by a call with option=5, suppress
-!all action of this routine (might as well return at this point !)
+ ! If timopt was set to zero by a call with option=5, suppress
+ ! all action of this routine (might as well return at this point !)
  if(timopt/=0 .and. option/=5)then
    ! Check that nn lies in sensible bounds
    if (nn<1.or.nn>TIMER_SIZE) then
-     write(message,'(a,i0,a,i0)')'  TIMER_SIZE = ',TIMER_SIZE,' but input nn = ',nn
-     MSG_BUG(message)
+     write(msg,'(2(a,i0))')'  TIMER_SIZE = ',TIMER_SIZE,' but input nn = ',nn
+     MSG_BUG(msg)
    end if
 
 #ifdef HAVE_PAPI
@@ -950,12 +949,12 @@ subroutine timab(nn,option,tottim)
 #endif
 
    case default
-     write(message,'(a,i10,a)')'  Input option not valid, =',option,'.'
-     MSG_BUG(message)
+     write(msg,'(a,i10,a)')'  Input option not valid, =',option,'.'
+     MSG_BUG(msg)
    end select
  end if
 
 end subroutine timab
 !!***
 
-END MODULE m_time
+end module m_time

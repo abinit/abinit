@@ -21,12 +21,12 @@
 !!
 !! SOURCE
 
-subroutine xmpi_min_intv(xval,xmin,spaceComm,ier)
+subroutine xmpi_min_intv(xval,xmin,comm,ier)
 
 !Arguments-------------------------
  integer ,intent(in) :: xval
  integer ,intent(out) :: xmin
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out)   :: ier
 
 !Local variables-------------------
@@ -36,9 +36,9 @@ subroutine xmpi_min_intv(xval,xmin,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    arr_xval(1) = xval
-   call MPI_ALLREDUCE(arr_xval,arr_xmin,1,MPI_INTEGER,MPI_MIN,spaceComm,ier)
+   call MPI_ALLREDUCE(arr_xval,arr_xmin,1,MPI_INTEGER,MPI_MIN,comm,ier)
    xmin = arr_xmin(1)
  else
 #endif
@@ -60,7 +60,7 @@ end subroutine xmpi_min_intv
 !!  Target: scalar double precisions.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -75,12 +75,12 @@ end subroutine xmpi_min_intv
 !!      mpi_allreduce
 !!
 !! SOURCE
-subroutine xmpi_min_dpv(xval,xmin,spaceComm,ier)
+subroutine xmpi_min_dpv(xval,xmin,comm,ier)
 
 !Arguments-------------------------
  real(dp),intent(in) :: xval
  real(dp),intent(out) :: xmin
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out)   :: ier
 
 !Local variables-------------------
@@ -90,9 +90,9 @@ subroutine xmpi_min_dpv(xval,xmin,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    arr_xval(1) = xval
-   call MPI_ALLREDUCE(arr_xval,arr_xmin,1,MPI_DOUBLE_PRECISION,MPI_MIN,spaceComm,ier)
+   call MPI_ALLREDUCE(arr_xval,arr_xmin,1,MPI_DOUBLE_PRECISION,MPI_MIN,comm,ier)
    xmin = arr_xmin(1)
  else
 #endif

@@ -71,7 +71,7 @@ berryopt35  4       efield35  -0.0005 -0.0005 -0.0005    getwfk35  34
 #%% [files]
 #%% files_to_test = 
 #%%   tffield_7.out, tolnlines=  0, tolabs=  0.0, tolrel=  0.0
-#%% psp_files =  13al.pspnc, 33as.pspnc
+#%% psp_files =  PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

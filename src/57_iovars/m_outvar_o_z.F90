@@ -104,10 +104,10 @@ contains
 !!  computation, so that their values if choice=1 or choice=2 will differ.
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
-!!      mkrdim,prtocc,prttagm,prttagm_images,xred2xcart
+!!      appdig
 !!
 !! SOURCE
 
@@ -410,7 +410,7 @@ contains
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_it(1:narrm(idtset))
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1) 
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1)
 
 
 !plowan_iatom
@@ -511,6 +511,9 @@ contains
 
  intarr(1,:)=dtsets(:)%prtbltztrp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtbltztrp','INT',0)
+
+ intarr(1,:)=dtsets(:)%prtchkprdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtchkprdm','INT',0)
 
  intarr(1,:)=dtsets(:)%prtcif
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtcif','INT',0)
@@ -835,6 +838,14 @@ contains
 
  dprarr(1,:)=dtsets(:)%rhoqpmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rhoqpmix','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%rifcsph
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rifcsph','DPR',0)
+
+ intarr(1,:)=dtsets(:)%rmm_diis
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rmm_diis','INT',0)
+ intarr(1,:)=dtsets(:)%rmm_diis_savemem
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rmm_diis_savemem','INT',0)
 
 !rprim
  prtimg(:,:)=1
@@ -1452,6 +1463,9 @@ contains
  dprarr(1,:)=dtsets(:)%xc_tb09_c
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_tb09_c','DPR',0)
 
+ intarr(1,:)=dtsets(:)%x1rdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'x1rdm','INT',0)
+
 !xred
  prtimg(:,:)=1
  do idtset=0,ndtset_alloc
@@ -1561,7 +1575,7 @@ contains
 !!  (only writing)
 !!
 !! PARENTS
-!!      outvar_o_z
+!!      m_outvar_o_z
 !!
 !! CHILDREN
 !!      appdig

@@ -84,7 +84,7 @@ contains
 !!        J. Comp. Chem. 27, 1787 (2006) [[cite:Grimme2006]]
 !!
 !! PARENTS
-!!      respfn,setvtr,stress
+!!      m_respfn_driver,m_setvtr,m_stress
 !!
 !! CHILDREN
 !!
@@ -499,7 +499,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !! Convert gradients from cartesian to reduced coordinates
 !!
 !! PARENTS
-!!      vdw_dftd2
+!!      m_vdw_dftd2
 !!
 !! CHILDREN
 !!

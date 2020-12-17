@@ -79,6 +79,7 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -113,9 +114,10 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
-!!      respfn
+!!      m_eph_driver,m_respfn_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -162,6 +164,7 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -194,9 +197,10 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
-!!      respfn
+!!      m_eph_driver,m_respfn_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -233,9 +237,10 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
-!!      d2frnl
+!!      m_d2frnl
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -355,8 +360,10 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -516,8 +523,10 @@ end subroutine print_efmas
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_eph_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -643,6 +652,7 @@ end subroutine print_efmas
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -830,7 +840,7 @@ end subroutine print_efmas
 !!  istwfk_pert(nkpt_rbz,3,mpert) = integer for choice of storage of wavefunction at
 !!            each k point for each perturbation.
 !!  mpert = maximum number of perturbations.
-!!  mpi_enreg = informations about MPI parallelization.
+!!  mpi_enreg = information about MPI parallelization.
 !!  nkpt_rbz = number of k-points for each perturbation.
 !!  npwarr(nkpt_rbz,mpert) = array of numbers of plane waves for each k-point
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
@@ -843,11 +853,10 @@ end subroutine print_efmas
 !!    efmasval(:,:)%eig2_diag OUTPUT : generalized 2nd order k-derivatives of eigenenergy
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_tr_efmas,zgemm,zgetrf
-!!      zgetri,zheev
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -1126,18 +1135,17 @@ end subroutine print_efmas
 !!    efmasval(:,:)%eig2_diag band curvature double tensor
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
 !!  mpert = maximum number of perturbations.
-!!  mpi_enreg = informations about MPI parallelization.
+!!  mpi_enreg = information about MPI parallelization.
 !!  nkpt_rbz = number of k-points for each perturbation.
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_tr_efmas,zgemm,zgetrf
-!!      zgetri,zheev
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 

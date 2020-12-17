@@ -77,7 +77,7 @@ CONTAINS
 !!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
 !!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
@@ -122,7 +122,7 @@ end subroutine set_pert_comm
 !!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
 !!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
@@ -192,7 +192,7 @@ end  subroutine unset_pert_comm
 !!  pawrhoij(my_natom)<type(pawrhoij_type)>=PAW rhoij occupancies
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
 !!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
@@ -441,7 +441,7 @@ end  subroutine set_pert_paw
 !!  pawrhoij(my_natom)<type(pawrhoij_type)>=PAW rhoij occupancies
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
 !!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks

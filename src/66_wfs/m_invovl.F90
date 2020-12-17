@@ -100,7 +100,7 @@ CONTAINS
 !! nkpt= number of k-points
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -134,7 +134,7 @@ CONTAINS
 !! nkpt= number of k-points
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -175,7 +175,7 @@ CONTAINS
 !! INPUTS
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -433,7 +433,7 @@ end subroutine make_invovl
 !! INPUTS
 !!
 !! PARENTS
-!!      chebfi
+!!      m_chebfi
 !!
 !! CHILDREN
 !!      dsymm,zhemm

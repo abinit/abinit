@@ -79,9 +79,11 @@ CONTAINS
 !! eff_pot<type(effective_potential)> = effective potential datatype with new fitted coefficients
 !!
 !! PARENTS
-!! multibinit
+!!      m_multibinit_driver
 !!
 !! CHILDREN
+!!      polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -356,10 +358,11 @@ end subroutine opt_effpot
 !! 
 !!
 !! PARENTS
-!! multibinit
+!!      m_multibinit_driver
 !!
 !! CHILDREN
-!! opt_effpot 
+!!      polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -885,9 +888,11 @@ end subroutine opt_getHOforterm
 !! 
 !!
 !! PARENTS
-!! opt_effpotbound
+!!      m_opt_effpot
 !!
 !! CHILDREN
+!!      polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -1303,7 +1308,7 @@ end subroutine opt_filterdisp
 !! of existing terms in effective potential
 !!
 !! INPUTS
-!! eff_pot<effective_potential_type>: datatype with all the informations 
+!! eff_pot<effective_potential_type>: datatype with all the information 
 !! 				      about the effective potential 
 !! power_strain(2): start and stop order for strain terms
 !! comm: mpi communicator (at the moment only sequential tested) 
@@ -1313,10 +1318,11 @@ end subroutine opt_filterdisp
 !!                               potential + HO even strain terms
 !!
 !! PARENTS
-!! opt_effpotbound
+!!      m_opt_effpot
 !!
 !! CHILDREN
-!! m_polynomial_coeff.F90/polynomial_coeff_init 
+!!      polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -1397,7 +1403,7 @@ end subroutine opt_getHOstrain
 !!          For range 6 to 8: x^2*y^2*z^2,x^4*y^2*z^2,x^2*y^4*z^2,x^2*y^2*z^4. 
 !!
 !! INPUTS
-!! eff_pot<effective_potential_type>: datatype with all the informations 
+!! eff_pot<effective_potential_type>: datatype with all the information 
 !! 				      about the effective potential 
 !! power_disp(2): start and stop order for disp terms
 !! comm: mpi communicator (at the moment only sequential tested) 
@@ -1407,10 +1413,11 @@ end subroutine opt_getHOstrain
 !!                               potential + HO even disp terms
 !!
 !! PARENTS
-!! opt_effpotbound
+!!      m_opt_effpot
 !!
 !! CHILDREN
-!! m_polynomial_coeff.F90/polynomial_coeff_init 
+!!      polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -1595,10 +1602,11 @@ end subroutine opt_getHOcrossdisp
 !! terms<polynomial_coeff_type>: list single displacement polynomial_coeffs
 !!
 !! PARENTS
-!! opt_effpotbound
+!!      m_opt_effpot
 !!
 !! CHILDREN
-!! m_polynomial_coeff.F90/polynomial_coeff_init 
+!!      polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -1861,10 +1869,11 @@ end subroutine opt_getSingleDispTerms
 !! ncoeff: number of coefficients
 !!
 !! PARENTS
-!! opt_effpotbound
+!!      m_opt_effpot
 !!
 !! CHILDREN
-!! m_polynomial_coeff.F90/polynomial_coeff_init 
+!!      polynomial_coeff_getname,polynomial_coeff_init
+!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 

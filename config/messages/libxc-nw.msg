@@ -1,1 +1,1 @@
-Please point the configuration to a working libXC installation
+Please specify the installation directory of libXC

@@ -37,7 +37,7 @@
 !! next contraction is then simply a dot product over the unique elements.
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!

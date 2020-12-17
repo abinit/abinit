@@ -129,9 +129,10 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
+!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -1343,6 +1344,7 @@ contains
 !! PARENTS
 !!
 !! CHILDREN
+!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -1422,10 +1424,10 @@ end subroutine mlwfovlp
 !! NOTES
 !!
 !! PARENTS
-!!      mlwfovlp
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      wrtout
+!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -1609,10 +1611,10 @@ end subroutine mlwfovlp_seedname
 !! NOTES
 !!
 !! PARENTS
-!!      mlwfovlp
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,wannier_setup,wrtout
+!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -1885,7 +1887,7 @@ end subroutine mlwfovlp_setup
 !!  mband=maximum number of bands
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem =number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw.
 !!  nfft=(effective) number of FFT grid points (for this processor) (see NOTES at beginning of scfcv)
 !!  ngfft(18)=contain all needed information about 3D FFT (see NOTES at beginning of scfcv)
@@ -1906,10 +1908,10 @@ end subroutine mlwfovlp_setup
 !! NOTES
 !!
 !! PARENTS
-!!      mlwfovlp
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      wrtout,xmpi_barrier,xmpi_sum
+!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -2263,10 +2265,10 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !! NOTES
 !!
 !! PARENTS
-!!      mlwfovlp
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      mlwfovlp_radial,mlwfovlp_ylmfac,wrtout,ylm_cmplx
+!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -2763,10 +2765,10 @@ end subroutine mlwfovlp_proj
 !! This routine is still under developement
 !!
 !! PARENTS
-!!      mlwfovlp
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      mlwfovlp_ylmfar,simp_gen,simpson_int,wrtout,xred2xcart
+!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -3132,10 +3134,10 @@ end subroutine mlwfovlp_projpaw
 !!  guess by the user to construct the MLWF.
 !!
 !! PARENTS
-!!      mlwfovlp_proj
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      besjm,simpson_int
+!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -3273,10 +3275,10 @@ end subroutine mlwfovlp_radial
 !! NOTES
 !!
 !! PARENTS
-!!      mlwfovlp_proj
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      rotmat,ylm_cmplx,zgesv
+!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -3529,7 +3531,7 @@ end subroutine mlwfovlp_ylmfac
 !! NOTES
 !!
 !! PARENTS
-!!      mlwfovlp_projpaw
+!!      m_mlwfovlp
 !!
 !! CHILDREN
 !!      initylmr,matrginv,rotmat

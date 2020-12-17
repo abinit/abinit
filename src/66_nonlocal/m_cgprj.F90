@@ -86,7 +86,7 @@ contains
 !!  kpoint(3)=k point in terms of recip. translations
 !!  lmnmax=max. number of (l,m,n) components over all types of atoms
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~ABINIT/Infos/vargs.htm#ngfft
@@ -112,11 +112,13 @@ contains
 !!  Spin-orbit
 !!
 !! PARENTS
-!!      cgwf,ctocprj,debug_tools,dfpt_accrho,dfpt_nstpaw,ks_ddiago,m_wfd
-!!      rf2_init
+!!      m_cgprj,m_cgwf,m_dfpt_mkrho,m_dfpt_nstwf,m_dfptnl_pert,m_ksdiago
+!!      m_orbmag,m_rf2_init,m_wfd
 !!
 !! CHILDREN
-!!      mkkpg,opernla_ylm,ph1d3d
+!!      getcprj,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_mpi_sum
+!!      pawcprj_put,pawcprj_set_zero,ph1d3d,strconv,xmpi_allgather
+!!      xmpi_allgatherv,xmpi_alltoallv
 !!
 !! SOURCE
 
@@ -429,7 +431,8 @@ contains
 !!                                       Usually ncprj=natom
 !!
 !! PARENTS
-!!      dfpt_looppert,extrapwf,forstr,scfcv,update_e_field_vars,vtorho
+!!      m_berryphase_new,m_dfpt_looppert,m_extraprho,m_forstr,m_scfcv_core
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      getcprj,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_mpi_sum

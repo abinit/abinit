@@ -73,11 +73,9 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      ext_buffers,ind_positions,metric,mkdenpos,pawrad_free,pawrad_init
-!!      sort_dp,splint,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -400,23 +398,22 @@ end subroutine wvl_initro
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=input variables.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  occ(dtset%mband)=occupation numbers.
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! OUTPUT
 !!  rhor(dtset%nfft)=electron density in r space
 !!
 !! SIDE EFFECTS
-!!  proj <type(wvl_projector_type)>=projectors informations for wavelets.
+!!  proj <type(wvl_projector_type)>=projectors information for wavelets.
 !!   | proj(OUT)=computed projectors.
 !!
 !! PARENTS
-!!      afterscfloop,gstate,mkrho,mover,vtorho
+!!      m_afterscfloop,m_gstate,m_mkrho,m_mover,m_vtorho
 !!
 !! CHILDREN
-!!      communicate_density,sumrho,wrtout,wvl_rho_abi2big
 !!
 !! SOURCE
 
@@ -504,7 +501,7 @@ end subroutine wvl_mkrho
 !! NOTES
 !!
 !! PARENTS
-!!      newrho,newvtr
+!!      m_newrho,m_newvtr
 !!
 !! CHILDREN
 !!

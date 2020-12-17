@@ -72,10 +72,10 @@ contains
 !!  dipole(nspden)=mean value of the dipole of input array, for each nspden component
 !!
 !! PARENTS
-!!      multipoles_out
+!!      m_multipoles
 !!
 !! CHILDREN
-!!      destroy_distribfft,init_distribfft_seq,xmpi_sum
+!!      atomdata_from_znucl,ptabs_fourdp,wrtout,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -224,10 +224,10 @@ end subroutine multipoles_fftr
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      multipoles_fftr,wrtout
+!!      atomdata_from_znucl,ptabs_fourdp,wrtout,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -351,7 +351,7 @@ end subroutine multipoles_out
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,ptabs_fourdp,wrtout,xmpi_sum,xred2xcart

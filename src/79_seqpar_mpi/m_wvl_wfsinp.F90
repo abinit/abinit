@@ -75,22 +75,23 @@ contains
 !!  dtset <type(dataset_type)>=input variables.
 !!  hdr0 <type(hdr_type)>=the header of wf, den and pot files (read from restart)
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  option=1 for reading a file following ABINIT format, -1 for a BigDFT format.
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  wff <type(wffile_type)>= structure with informations on wf file.
+!!  wff <type(wffile_type)>= structure with information on wf file.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates.
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      first_orthon,wrtout,wvl_occ_abi2big,wvl_read
+!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -234,14 +235,11 @@ end subroutine wvl_wfsinp_disk
 !! NOTES
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
-!!      copy_old_wavefunctions,deallocate_wfd,first_orthon
-!!      local_potential_dimensions,nullify_gaussian_basis,psolver_kernel
-!!      reformatmywaves,wrtout,wvl_denspot_free,wvl_denspot_set
-!!      wvl_projectors_free,wvl_projectors_set,wvl_setboxgeometry,wvl_setngfft
-!!      wvl_wfs_free,wvl_wfs_lr_copy,wvl_wfs_set,xred2xcart
+!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -433,19 +431,19 @@ end subroutine wvl_wfsinp_reformat
 !!  hdr0 <type(hdr_type)>=the header of wf, den and pot files (read from restart)
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  ireadwf=1 for reading from file, 0 otherwise.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  option=1 for reading a file following ABINIT format, -1 for a BigDFT format.
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  wff <type(wffile_type)>= structure with informations on wf file.
+!!  wff <type(wffile_type)>= structure with information on wf file.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  wvl <type(wvl_data)>=wavefunctions & projectors informations for wavelets.
+!!  wvl <type(wvl_data)>=wavefunctions & projectors information for wavelets.
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
 !!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big

@@ -100,12 +100,11 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      hdr_io,setnabla_ylm,pawcprj_alloc,pawcprj_free,pawcprj_get
-!!      pawcprj_mpi_allgather,pawrad_deducer0,simp_gen,timab,wffclose,wffopen
-!!      xmpi_exch,xmpi_sum,xmpi_sum_master
+!!      destroy_mpi_enreg,hdr%free,hdr_io,hdr_read_from_fname,initmpi_seq
+!!      kramerskronig,matrginv,metric,wffopen
 !!
 !! SOURCE
 
@@ -509,12 +508,11 @@ CONTAINS  !=====================================================================
 !!  (only writing in a file)
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      hdr_io,setnabla_ylm,pawcprj_alloc,pawcprj_free,pawcprj_get
-!!      pawcprj_mpi_allgather,pawpsp_read_corewf,pawrad_deducer0,simp_gen,timab
-!!      wffclose,wffopen,xmpi_exch,xmpi_sum_master
+!!      destroy_mpi_enreg,hdr%free,hdr_io,hdr_read_from_fname,initmpi_seq
+!!      kramerskronig,matrginv,metric,wffopen
 !!
 !! SOURCE
 
@@ -824,7 +822,7 @@ CONTAINS  !=====================================================================
 !!      conducti
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,hdr_free,hdr_io,hdr_read_from_fname,initmpi_seq
+!!      destroy_mpi_enreg,hdr%free,hdr_io,hdr_read_from_fname,initmpi_seq
 !!      kramerskronig,matrginv,metric,wffopen
 !!
 !! SOURCE

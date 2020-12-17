@@ -88,11 +88,11 @@ contains
 !!                               acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      fcart2fred,hist2var,metric,mkrdim,var2hist
-!!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
+!!      fcart2fred,hist2var,metric,mkrdim,var2hist,xfpack_f2vout,xfpack_vin2x
+!!      xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)

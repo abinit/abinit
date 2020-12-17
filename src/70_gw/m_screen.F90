@@ -684,7 +684,7 @@ end function screen_ihave_fgg
 !! W<screen_t>=The data structure to be nullified.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_screen
+!!      m_bethe_salpeter,m_screen
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -724,7 +724,7 @@ end subroutine screen_nullify
 !! OUTPUT
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -833,7 +833,7 @@ end subroutine screen_free
 !!  W<screen_t>=The structure initialized with basic dimensions and arrays.
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -1196,7 +1196,7 @@ end subroutine screen_init
 !!  to reconstruct the BZ.
 !!
 !! PARENTS
-!!      exc_build_block
+!!      m_exc_build
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -1347,7 +1347,7 @@ end subroutine screen_symmetrizer
 !!   *  where alpha and beta are scalars, x and y are vectors and A is an m by n matrix.
 !!
 !! PARENTS
-!!      exc_build_block
+!!      m_exc_build
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose

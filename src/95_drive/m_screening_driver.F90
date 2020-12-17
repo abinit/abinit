@@ -156,27 +156,10 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,calc_rpa_functional,cchi0,cchi0q0,chi0_bksmask
-!!      chi0q0_intraband,chi_free,chkpawovlp,coeffs_gausslegint
-!!      destroy_mpi_enreg,ebands_copy,ebands_free,ebands_update_occ
-!!      em1params_free,energies_init,fourdp,get_gftt,getph,gsph_free,hdr_free
-!!      hscr_free,hscr_io,init_distribfft_seq,initmpi_seq,kmesh_free,kxc_ada
-!!      kxc_driver,littlegroup_free,lwl_write,make_epsm1_driver,metric,mkrdim
-!!      nhatgrid,output_chi0sumrule,paw_an_free,paw_an_init,paw_an_nullify
-!!      paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify,paw_pwaves_lmn_free
-!!      paw_pwaves_lmn_init,pawdenpot,pawdij,pawfgr_destroy,pawfgr_init
-!!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawnabla_init,pawprt
-!!      pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc,pawrhoij_copy
-!!      pawrhoij_free,pawtab_get_lsize,pawtab_print,print_arr,print_ngfft
-!!      prtrhomxmn,pspini,random_stopping_power,rdgw,rdqps,rotate_fft_mesh
-!!      setsym_ylm,setup_screening,setvtr,spectra_free,spectra_repr
-!!      spectra_write,symdij,symdij_all,test_charge,timab,vcoul_free
-!!      wfd_change_ngfft,wfd_copy,wfd_free,wfd_init,wfd_mkrho,wfd_print
-!!      wfd_read_wfk,wfd_rotate,wfd_test_ortho,write_screening,wrtout
-!!      xmpi_bcast
+!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -214,7 +197,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat
  real(dp) :: compch_fft,compch_sph,domegareal,e0,ecore,ecut_eff,ecutdg_eff
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
- real(dp) :: alpha,rhoav,factor
+ real(dp) :: alpha,rhoav,factor,ec_gm
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  logical :: found,iscompatibleFFT,is_dfpt=.false.,use_tr,is_first_qcalc
  logical :: add_chi0_intraband,update_energies,call_pawinit
@@ -1240,14 +1223,15 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call write_screening("polarizability",unt_susc,Dtset%iomode,Ep%npwe,Ep%nomega,iqcalc,chi0)
    end if
 
-!  Calculate the RPA functional correlation energy if the polarizability on a
+!  Calculate the Galitskii-Migdal and RPA functionals for the correlation energy if the polarizability on a
 !  Gauss-Legendre mesh along imaginary axis is available
    if (Ep%analytic_continuation .and. Dtset%gwrpacorr>0 ) then
      if (is_first_qcalc) then
        ABI_MALLOC(ec_rpa,(Dtset%gwrpacorr))
        ec_rpa(:)=zero
+       ec_gm=zero
      end if
-     call calc_rpa_functional(Dtset%gwrpacorr,label,iqibz,Ep,Vcp,Qmesh,Dtfil,gmet,chi0,comm,ec_rpa)
+     call calc_rpa_functional(Dtset%gwrpacorr,Dtset%gwgmcorr,label,iqibz,Ep,Vcp,Qmesh,Dtfil,gmet,chi0,comm,ec_rpa,ec_gm)
      if (label==Ep%nqcalc) then
        ABI_FREE(ec_rpa)
      end if
@@ -1592,10 +1576,10 @@ end subroutine screening
 !!   might be redefined in setshells in order to close the shell.
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
-!!      xmpi_split_work2_i4b
+!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1908,7 +1892,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ABI_FREE(gvec_kss)
 
  ! FIXME this wont work if nqptdm/=0
- call vcoul_init(Vcp,Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
+ call vcoul_init(Vcp,Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
 &  Ep%qlwl,ngfftf,comm)
 
 #if 0
@@ -2215,10 +2199,10 @@ end subroutine setup_screening
 !! ierr=Exit status.
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
-!!      xmpi_split_work2_i4b
+!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2351,10 +2335,10 @@ end subroutine chi0_bksmask
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
-!!      get_bz_item,spline,splint,wrtout
+!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2556,7 +2540,7 @@ end subroutine random_stopping_power
 !! calc_rpa_functional
 !!
 !! FUNCTION
-!!  Routine used to calculate the RPA approximation to the correlation energy
+!!  Routine used to calculate the Galitskii-Migdal and RPA approximations to the correlation energy
 !!  from the irreducible polarizability.
 !!
 !! INPUTS
@@ -2570,20 +2554,21 @@ end subroutine random_stopping_power
 !! OUTPUT
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
-subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa)
+subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa,ec_gm)
 
  use m_hide_lapack, only : xginv, xheev
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iqcalc,iq,gwrpacorr,spaceComm
+ integer,intent(in) :: iqcalc,iq,gwrpacorr,gwgmcorr,spaceComm
+ real(dp),intent(inout) :: ec_gm 
  type(kmesh_t),intent(in) :: Qmesh
  type(vcoul_t),intent(in) :: Pvc
  type(Datafiles_type),intent(in) :: Dtfil
@@ -2596,13 +2581,13 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 !Local variables-------------------------------
 !scalars
  integer :: ig1,ig2,ilambda,io,master,rank,nprocs,unt,ierr
- real(dp) :: ecorr
+ real(dp) :: ecorr,ecorr_gm
  real(dp) :: lambda
  logical :: qeq0
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: z(:),zl(:),zlw(:),zw(:)
- complex(gwpc),allocatable :: chi0_diag(:),chitmp(:,:)
+ complex(gwpc),allocatable :: chi0_diag(:),chitmp(:,:),chi0_diag_gm(:),chitmp_gm(:,:)
  real(gwpc),allocatable :: eig(:)
 
 ! *************************************************************************
@@ -2632,6 +2617,10 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 
  ABI_ALLOCATE(chi0_diag,(Ep%npwe))
  ABI_MALLOC_OR_DIE(chitmp,(Ep%npwe,Ep%npwe), ierr)
+ if(gwgmcorr==1) then
+   ABI_ALLOCATE(chi0_diag_gm,(Ep%npwe))
+   ABI_MALLOC_OR_DIE(chitmp_gm,(Ep%npwe,Ep%npwe), ierr)
+ end if
 
  do io=2,Ep%nomega
 
@@ -2651,6 +2640,9 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
        ec_rpa(:) = ec_rpa(:) &
 &         - zw(io-1) / ( z(io-1) * z(io-1) ) &
 &              * Qmesh%wt(iq) * (-log( 1.0_dp-eig(ig1) )  - eig(ig1) ) / (2.0_dp * pi )
+       ec_gm = ec_gm &
+&         - zw(io-1) / ( z(io-1) * z(io-1) ) &
+&              * Qmesh%wt(iq) * ( eig(ig1) / ( 1.0_dp-eig(ig1) ) - eig(ig1) ) / (2.0_dp * pi )
      end do
      ABI_DEALLOCATE(eig)
 
@@ -2664,24 +2656,54 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
          chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq)**2 * chi0(ig1,ig1,io)
        end do
 
+       if(ilambda==1 .and. gwgmcorr==1) then     ! Copy v^1/2*Chi0*v^1/2 for Galitskii-Migdal
+         chi0_diag_gm(:) = chi0_diag(:)
+       end if
+
        do ig2=1,Ep%npwe
          do ig1=1,Ep%npwe
            chitmp(ig1,ig2) = - lambda * Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chi0(ig1,ig2,io)
+
+           if(ilambda==1 .and. gwgmcorr==1) then ! Use lambda=1 for Galitskii-Migdal 
+             chitmp_gm(ig1,ig2) = - Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chi0(ig1,ig2,io)
+           end if
+
          end do !ig1
          chitmp(ig2,ig2) = chitmp(ig2,ig2) + 1.0_dp
+
+         if(ilambda==1 .and. gwgmcorr==1) then   ! Prepare (1-v^1/2*Chi0*v^1/2) for Galitskii-Migdal
+           chitmp_gm(ig2,ig2) = chitmp_gm(ig2,ig2) + 1.0_dp
+         end if
+
        end do !ig2
        call xginv(chitmp(:,:),Ep%npwe)
        chitmp(:,:) = matmul( chi0(:,:,io) , chitmp(:,:) )
 
+       if(ilambda==1 .and. gwgmcorr==1) then   ! Prepare Chi = [(1-v^1/2*Chi0*v^1/2)]^-1 * Chi0 for Galitskii-Migdal
+         call xginv(chitmp_gm(:,:),Ep%npwe)
+         chitmp_gm(:,:) = matmul( chi0(:,:,io) , chitmp_gm(:,:) )
+       end if
+
        do ig1=1,Ep%npwe
          chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chitmp(ig1,ig1) - chi0_diag(ig1)
+
+         if(ilambda==1 .and. gwgmcorr==1) then   ! Prepare v^1/2*Chi*v^1/2 - v^1/2*Chi0*v^1/2 for Galitskii-Migdal
+           chi0_diag_gm(ig1) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chitmp_gm(ig1,ig1) - chi0_diag_gm(ig1)
+         end if
+
        end do
 
        do ig1=1,Ep%npwe
          ec_rpa(ilambda) = ec_rpa(ilambda) &
 &           - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * real(  chi0_diag(ig1) ) / (2.0_dp * pi )
-       end do
 
+         if(ilambda==1 .and. gwgmcorr==1) then   ! Integrate [v*Chi-v*Chi0](iw) dw for Galitskii-Migdal
+           ec_gm = ec_gm &
+&           - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * real(  chi0_diag_gm(ig1) ) / (2.0_dp * pi )
+         end if
+
+       end do
+     
      end do ! ilambda
 
    end if ! exact or numerical integration over the coupling constant
@@ -2694,9 +2716,11 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
  if(iqcalc==Ep%nqcalc) then
 
    call xmpi_sum_master(ec_rpa,master,spaceComm,ierr)
+   call xmpi_sum_master(ec_gm,master,spaceComm,ierr)
 
    if(rank==master) then
      ecorr = sum( zlw(:)*ec_rpa(:) )
+     ecorr_gm = ec_gm
      if (open_file(dtfil%fnameabo_rpa, msg, newunit=unt) /=0) then
        MSG_ERROR(msg)
      end if
@@ -2712,11 +2736,25 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
          call wrtout(ab_out,msg,'COLL')
        end do
      end if
+     if(gwgmcorr==1) then ! Only exact integration over the coupling constant
+       write(unt,'(a,(2x,f14.8))') '#GM',ecorr_gm
+       write(msg,'(2a,(2x,f14.8))') ch10,' Galitskii-Migdal energy [Ha] :',ecorr_gm
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(unt,'(a1)') ' '
+       write(msg,'(a1)') ' '
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+     end if
      close(unt)
    end if
 
  end if
 
+ if(gwgmcorr==1) then
+   ABI_DEALLOCATE(chitmp_gm)
+   ABI_DEALLOCATE(chi0_diag_gm)
+ end if
  ABI_DEALLOCATE(chi0_diag)
  ABI_DEALLOCATE(chitmp)
  ABI_DEALLOCATE(zl)

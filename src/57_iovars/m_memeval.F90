@@ -78,9 +78,9 @@ contains
 !!      abinit
 !!
 !! CHILDREN
-!!      abi_io_redirect,getdim_nloc,getmpw,getng,libpaw_write_comm_set
-!!      littlegroup_q,mati3inv,memorf,memory,metric,mkrdim,prtspgroup,setmqgrid
-!!      wvl_memory
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -479,10 +479,12 @@ end subroutine memory_eval
 !! This is because there are allocated arrays in these routines.
 !!
 !! PARENTS
-!!      memory_eval
+!!      m_memeval
 !!
 !! CHILDREN
-!!      memana,wrtout
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -1366,10 +1368,12 @@ end subroutine memory
 !!  (only writing)
 !!
 !! PARENTS
-!!      memorf,memory
+!!      m_memeval
 !!
 !! CHILDREN
-!!      wrtout
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -1923,10 +1927,12 @@ end subroutine memana
 !!  have been done : nsym=nsym1, nkpt=nkpt_rbz, mpw=mpw1 ...
 !!
 !! PARENTS
-!!      memory_eval
+!!      m_memeval
 !!
 !! CHILDREN
-!!      memana,wrtout
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -2287,10 +2293,12 @@ end subroutine memorf
 !!  lnmaxso=maximum number of l,n projectors, taking into account the spin-orbit
 !!
 !! PARENTS
-!!      m_psps,memory_eval
+!!      m_memeval,m_psps
 !!
 !! CHILDREN
-!!      wrtout
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -2434,9 +2442,12 @@ end subroutine getdim_nloc
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_psps,memory_eval
+!!      m_memeval,m_psps
 !!
 !! CHILDREN
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -2540,7 +2551,7 @@ end subroutine setmqgrid
 !! The estimator is the one provided by BigDFT.
 !!
 !! PARENTS
-!!      memory_eval
+!!      m_memeval
 !!
 !! CHILDREN
 !!      atomic_info,createwavefunctionsdescriptors,deallocate_lr

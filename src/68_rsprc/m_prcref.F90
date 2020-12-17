@@ -179,13 +179,10 @@ contains
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
 !!
 !! PARENTS
-!!      newrho
+!!      m_newrho
 !!
 !! CHILDREN
-!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,hartre
-!!      indirect_parallel_fourier,kgindex,mean_fftr,metric,mkcore,mklocl
-!!      moddiel,prcrskerker1,prcrskerker2,rhotoxc,testsusmat,xcart2xred
-!!      xcdata_init,xmpi_sum,zerosym
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -211,7 +208,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  integer,intent(in) :: atindx(dtset%natom),ffttomix(nfft*(1-nfftprc/nfft))
  integer,intent(in) :: kg_diel(3,npwdiel),nattyp(ntypat),ngfft(18),ngfftprc(18)
  real(dp),intent(in) :: dielar(7),fcart(3,dtset%natom),rhog(2,nfft)
- real(dp),intent(in) :: rhor(nfft,dtset%nspden),rprimd(3,3)
+ real(dp),intent(in) :: rhor(nfft,dtset%nspden)
  real(dp),intent(in) :: susmat(2,npwdiel,dtset%nspden,npwdiel,dtset%nspden)
  real(dp),intent(in) :: vhartr(nfft),vresid(nfftprc*optreal,dtset%nspden)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden)
@@ -219,7 +216,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  real(dp),intent(inout) :: gmet(3,3),kxc(nfft,nkxc)
  real(dp),intent(inout) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),vpsp(nfft)
  real(dp),intent(inout) :: xred(3,dtset%natom)
- real(dp),intent(out) :: dtn_pc(3,dtset%natom),rhoijrespc(npawmix)
+ real(dp),intent(out) :: dtn_pc(3,dtset%natom),rhoijrespc(npawmix),rprimd(3,3)
  real(dp),intent(out) :: vrespc(nfftprc*optreal,dtset%nspden)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*psps%usepaw)
@@ -595,7 +592,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !      Note: atindx1 should be passed to atm2fft (instead of atindx) but it is unused...
        call atm2fft(atindx,xccc3d,vpsp,dummy,dummy2,dummy9,dummy1,gmet,gprimd,dummy3,dummy4,gsqcut,&
 &       mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,&
-&       optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb,dummy5,dummy6,dummy7,&
+&       optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb,dtset%rcut,dummy5,rprimd,dummy6,dummy7,&
 &       ucvol,psps%usepaw,dummy8,dummy8,dummy8,vprtrb,psps%vlspl,&
 &       comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &       paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
@@ -631,7 +628,8 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(vhartr_wk,(nfft))
      option=1
 
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog_wk,rprimd,vhartr_wk)
+     call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
+                 &dtset%nkpt,dtset%rcut,rhog_wk,rprimd,dtset%vcutgeo,vhartr_wk)
 
 !    Prepare the call to rhotoxc
      call xcdata_init(xcdata,dtset=dtset)
@@ -821,13 +819,10 @@ end subroutine prcref
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
 !!
 !! PARENTS
-!!      newvtr
+!!      m_newvtr
 !!
 !! CHILDREN
-!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,hartre
-!!      indirect_parallel_fourier,kgindex,mean_fftr,metric,mkcore,mklocl
-!!      moddiel,prcrskerker1,prcrskerker2,rhotoxc,testsusmat,xcart2xred
-!!      xcdata_init,xmpi_sum,zerosym
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -856,14 +851,14 @@ end subroutine prcref
  integer,intent(in) :: kg_diel(3,npwdiel),nattyp(ntypat),ngfft(18),ngfftprc(18)
  real(dp),intent(in) :: dielar(7),fcart(3,dtset%natom)
  real(dp),intent(in) :: rhog(2,nfft)
- real(dp),intent(in) :: rhor(nfft,dtset%nspden),rprimd(3,3)
+ real(dp),intent(in) :: rhor(nfft,dtset%nspden)
  real(dp),intent(in) :: susmat(2,npwdiel,dtset%nspden,npwdiel,dtset%nspden)
  real(dp),intent(in) :: vhartr(nfft),vresid(nfftprc*optreal,dtset%nspden)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden)
  real(dp),intent(inout) :: dielinv(2,npwdiel,dtset%nspden,npwdiel,dtset%nspden)
  real(dp),intent(inout) :: gmet(3,3),kxc(nfft,nkxc)
  real(dp),intent(inout) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),vpsp(nfft)
- real(dp),intent(inout) :: xred(3,dtset%natom)
+ real(dp),intent(inout) :: xred(3,dtset%natom),rprimd(3,3)
  real(dp),intent(out) :: dtn_pc(3,dtset%natom),rhoijrespc(npawmix)
  real(dp),intent(out) :: vrespc(nfftprc*optreal,dtset%nspden)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*psps%usepaw)
@@ -1225,7 +1220,7 @@ end subroutine prcref
      call atm2fft(atindx,xccc3d,vpsp,dummy_out1,dummy_out2,dummy_out3,dummy_in,gmet,&
 &     gprimd,dummy_out4,dummy_out5,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,&
 &     nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&     psps,pawtab,ph1d,psps%qgrid_vl,qprtrb,dummy_in,dummy_out6,dummy_out7,ucvol,&
+&     psps,pawtab,ph1d,psps%qgrid_vl,qprtrb,dtset%rcut,dummy_in,rprimd,dummy_out6,dummy_out7,ucvol,&
 &     psps%usepaw,dummy_in,dummy_in,dummy_in,vprtrb,psps%vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
@@ -1261,7 +1256,8 @@ end subroutine prcref
    ABI_ALLOCATE(vhartr_wk,(nfft))
    option=1
 
-   call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog_wk,rprimd,vhartr_wk)
+   call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
+               &dtset%nkpt,dtset%rcut,rhog_wk,rprimd,dtset%vcutgeo,vhartr_wk)
 
 !  Prepare the call to rhotoxc
    call xcdata_init(xcdata,dtset=dtset)
@@ -1346,10 +1342,10 @@ end subroutine prcref_PMA
 !! optreal==2 is not compatible with cplex==1
 !!
 !! PARENTS
-!!      dfpt_newvtr,prcref,prcref_PMA
+!!      m_dfpt_scfcv,m_prcref
 !!
 !! CHILDREN
-!!      fourdp,metric,ptabs_fourdp
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -1582,10 +1578,10 @@ end subroutine moddiel
 !! Write equation below (hermitian matrix)
 !!
 !! PARENTS
-!!      prcref,prcref_PMA
+!!      m_prcref
 !!
 !! CHILDREN
-!!      timab,wrtout,zhpev
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -1943,11 +1939,10 @@ end subroutine dielmt
 !! Will not work in the spin-polarized, metallic case.
 !!
 !! PARENTS
-!!      prcref,prcref_PMA
+!!      m_prcref
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,fourdp,init_distribfft_seq,initmpi_seq,timab,wrtout
-!!      zhpev
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -2415,10 +2410,10 @@ end subroutine dieltcel
 !!  needs severe cleaning and this is abuse of modules as common blocks...
 !!
 !! PARENTS
-!!      prcref,prcref_PMA
+!!      m_prcref
 !!
 !! CHILDREN
-!!      cgpr,frskerker1__end,frskerker1__init,laplacian,prc_mem_init
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -2633,10 +2628,10 @@ end subroutine prcrskerker1
 !! NOTES
 !!
 !! PARENTS
-!!      prcref,prcref_PMA
+!!      m_prcref
 !!
 !! CHILDREN
-!!      cgpr,dotprod_vn,frskerker2__end,frskerker2__init,laplacian,ptabs_fourdp
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -2940,10 +2935,10 @@ end subroutine prcrskerker2
 !! and resulting min
 !!
 !! PARENTS
-!!      prcrskerker1,prcrskerker2
+!!      m_prcref
 !!
 !! CHILDREN
-!!      linmin
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -3030,10 +3025,10 @@ end subroutine cgpr
 !! v: the starting and then ending point of the minimization
 !!
 !! PARENTS
-!!      cgpr
+!!      m_prcref
 !!
 !! CHILDREN
-!!      bracketing
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -3088,9 +3083,10 @@ end subroutine linmin
 !! a,x: two members of the bracketing triplet (see b)
 !!
 !! PARENTS
-!!      linmin
+!!      m_prcref
 !!
 !! CHILDREN
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 

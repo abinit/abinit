@@ -351,7 +351,7 @@ end subroutine init_results_out
 !!  results_out(:)=<type(results_out_type)>=results_out datastructure array
 !!
 !! PARENTS
-!!      abinit,driver
+!!      abinit,m_driver
 !!
 !! CHILDREN
 !!      copy_results_out,init_results_out,xmpi_allgather,xmpi_allgatherv
@@ -598,7 +598,7 @@ end subroutine copy_results_out
 !!  results_out_all(:)=<type(results_out_type)>=global (gathered) results_out datastructure array
 !!
 !! PARENTS
-!!      abinit,driver
+!!      abinit,m_driver
 !!
 !! CHILDREN
 !!      copy_results_out,init_results_out,xmpi_allgather,xmpi_allgatherv

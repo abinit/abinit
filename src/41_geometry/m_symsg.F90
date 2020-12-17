@@ -70,10 +70,9 @@ contains
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
 !! PARENTS
-!!      gensymspgr
+!!      m_spgbuilder
 !!
 !! CHILDREN
-!!      bldgrp,spgdata,timab
 !!
 !! SOURCE
 
@@ -558,10 +557,9 @@ end subroutine symsgcube
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
 !! PARENTS
-!!      gensymspgr
+!!      m_spgbuilder
 !!
 !! CHILDREN
-!!      bldgrp,spgdata
 !!
 !! SOURCE
 
@@ -899,10 +897,9 @@ end subroutine symsghexa
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
 !! PARENTS
-!!      gensymspgr
+!!      m_spgbuilder
 !!
 !! CHILDREN
-!!      spgdata
 !!
 !! SOURCE
 
@@ -1444,10 +1441,9 @@ end subroutine symsgmono
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
 !! PARENTS
-!!      gensymspgr
+!!      m_spgbuilder
 !!
 !! CHILDREN
-!!      bldgrp,spgdata
 !!
 !! SOURCE
 
@@ -1939,10 +1935,9 @@ end subroutine symsgortho
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
 !! PARENTS
-!!      gensymspgr
+!!      m_spgbuilder
 !!
 !! CHILDREN
-!!      bldgrp,spgdata
 !!
 !! SOURCE
 
@@ -2391,7 +2386,7 @@ end subroutine symsgtetra
 !! nogen = number of generators, number of operations to be applied onto themselves
 !!
 !! PARENTS
-!!      symsgcube,symsghexa,symsgortho,symsgtetra
+!!      m_symsg
 !!
 !! CHILDREN
 !!

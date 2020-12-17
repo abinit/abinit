@@ -93,6 +93,11 @@ CONTAINS  !===========================================================
 !!      cut3d
 !!
 !! CHILDREN
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
+!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -202,6 +207,11 @@ end subroutine cut3d_hirsh
 !!      cut3d
 !!
 !! CHILDREN
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
+!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -396,6 +406,11 @@ end subroutine cut3d_lineint
 !!      m_cut3d
 !!
 !! CHILDREN
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
+!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -452,6 +467,11 @@ end subroutine normalize
 !!      cut3d
 !!
 !! CHILDREN
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
+!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -811,6 +831,11 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
 !!      cut3d
 !!
 !! CHILDREN
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
+!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -919,6 +944,11 @@ end subroutine cut3d_pointint
 !!      m_cut3d
 !!
 !! CHILDREN
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
+!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -969,6 +999,11 @@ end subroutine reduce
 !!      cut3d
 !!
 !! CHILDREN
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
+!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -1046,6 +1081,11 @@ end subroutine cut3d_rrho
 !!      m_cut3d
 !!
 !! CHILDREN
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
+!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -1094,6 +1134,11 @@ end subroutine vdot
 !!      cut3d
 !!
 !! CHILDREN
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
+!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -1673,6 +1718,11 @@ end subroutine cut3d_volumeint
 !!      cut3d
 !!
 !! CHILDREN
+!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
+!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
+!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
+!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
+!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 

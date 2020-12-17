@@ -20,9 +20,9 @@
 !!
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,delete_file
-!!      get_command_argument,hdr_echo,hdr_free,hdr_read_from_fname,herald
-!!      wfk_check_wfkfile,wfk_close,wfk_create_wfkfile,wfk_nc2fort
-!!      wfk_open_read,wfk_print,wfk_prof,wrtout,xmpi_init
+!!      get_command_argument,hdr%echo,hdr%free,hdr_read_from_fname,herald
+!!      wfk%close,wfk%print,wfk_check_wfkfile,wfk_create_wfkfile,wfk_nc2fort
+!!      wfk_open_read,wfk_prof,wrtout,xmpi_init
 !!
 !! SOURCE
 

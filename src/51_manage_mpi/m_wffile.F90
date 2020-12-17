@@ -573,7 +573,7 @@ end subroutine xnullifyOff
 !!  wff=<type(wffile_type)>=structured info for reading/writing
 !!
 !! PARENTS
-!!      posdoppler
+!!      m_positron
 !!
 !! CHILDREN
 !!
@@ -622,7 +622,7 @@ end subroutine xmoveOff
 !!  wff= structured info for reading/writing the wavefunctions
 !!
 !! PARENTS
-!!      m_ioarr,m_wffile,outxfhist,posdoppler,rwwf
+!!      m_gstate,m_ioarr,m_positron,m_rwwf,m_wffile
 !!
 !! CHILDREN
 !!
@@ -696,7 +696,7 @@ end subroutine xderiveWRecEnd
 !!  wff= structured info for reading/writing the wavefunctions
 !!
 !! PARENTS
-!!      m_ioarr,m_wffile,outxfhist,posdoppler,rwwf
+!!      m_gstate,m_ioarr,m_positron,m_rwwf,m_wffile
 !!
 !! CHILDREN
 !!
@@ -764,7 +764,7 @@ end subroutine xderiveWRecInit
 !!  wff= structured info for reading/writing the wavefunctions
 !!
 !! PARENTS
-!!      m_ioarr,m_wffile,outxfhist,rwwf
+!!      m_gstate,m_ioarr,m_rwwf,m_wffile
 !!
 !! CHILDREN
 !!
@@ -813,7 +813,7 @@ end subroutine xderiveRRecEnd
 !!  wff= structured info for reading/writing the wavefunctions
 !!
 !! PARENTS
-!!      m_ioarr,m_wffile,outxfhist,rwwf
+!!      m_gstate,m_ioarr,m_rwwf,m_wffile
 !!
 !! CHILDREN
 !!
@@ -1038,9 +1038,8 @@ end function wff_ireadf90
 !! wff= structured info about the wavefunction file
 !!
 !! PARENTS
-!!      conducti_paw,conducti_paw_core,emispec_paw,inwffil,linear_optics_paw
-!!      m_ioarr,m_iowf,m_wfk,optics_paw,optics_paw_core,optics_vloc,posdoppler
-!!      uderiv
+!!      m_conducti,m_elpolariz,m_inwffil,m_ioarr,m_iowf,m_optics_vloc
+!!      m_paw_optics,m_positron,m_wfk
 !!
 !! CHILDREN
 !!
@@ -1191,9 +1190,9 @@ end subroutine WffOpen
 !! ierr=error code
 !!
 !! PARENTS
-!!      conducti_paw,conducti_paw_core,dfpt_looppert,dfptnl_loop,emispec_paw
-!!      gstate,m_ioarr,m_iowf,m_wfk,nonlinear,optics_paw,optics_paw_core
-!!      optics_vloc,posdoppler,respfn,uderiv
+!!      m_conducti,m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_elpolariz,m_gstate
+!!      m_ioarr,m_iowf,m_longwave,m_nonlinear,m_optics_vloc,m_paw_optics
+!!      m_pead_nl_loop,m_positron,m_respfn_driver,m_wfk
 !!
 !! CHILDREN
 !!
@@ -1531,7 +1530,7 @@ end subroutine WffReadDataRec_dp2d
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      rwwf
+!!      m_rwwf
 !!
 !! CHILDREN
 !!
@@ -1616,7 +1615,7 @@ end subroutine WffReadNpwRec
 !! For the future : one should treat the possible errors of backspace
 !!
 !! PARENTS
-!!      gstate,randac,rwwf
+!!      m_gstate,m_rwwf
 !!
 !! CHILDREN
 !!
@@ -1707,7 +1706,7 @@ end subroutine WffReadSkipRec
 !!  For MPI-IO library the performance is improved by the use a "view" of the file for each proc.
 
 !! PARENTS
-!!      rwwf
+!!      m_rwwf
 !!
 !! CHILDREN
 !!
@@ -2201,7 +2200,7 @@ end subroutine WffWriteDataRec_dp2d
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      rwwf
+!!      m_rwwf
 !!
 !! CHILDREN
 !!
@@ -3064,7 +3063,7 @@ end subroutine xderiveReadVal_char
 !!  wff= structured info for reading/writing the wavefunctions
 !!
 !! PARENTS
-!!      rwwf
+!!      m_rwwf
 !!
 !! CHILDREN
 !!
@@ -3881,7 +3880,7 @@ end subroutine xderiveWrite_char
 !!  wff <type(wffile_type)> =
 !!
 !! PARENTS
-!!      uderiv
+!!      m_elpolariz
 !!
 !! CHILDREN
 !!

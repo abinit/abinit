@@ -753,7 +753,7 @@ end subroutine  harmonics_terms_evaluateElastic
 !! ifc<type(ifc_type)> = interatomic forces constants
 !!
 !! PARENTS
-!!      compute_anharmonics,m_effective_potential
+!!      m_compute_anharmonics,m_effective_potential
 !!
 !! CHILDREN
 !!      wrtout

@@ -77,7 +77,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_GWlanczos,gwls_QR_factorization
+!!      m_gwls_GWlanczos,m_gwls_QR_factorization
 !!
 !! CHILDREN
 !!      xmpi_allgather,xmpi_sum
@@ -147,7 +147,7 @@ end subroutine extract_QR
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray
+!!      m_gwls_DielectricArray
 !!
 !! CHILDREN
 !!      xmpi_allgather,xmpi_sum
@@ -244,7 +244,7 @@ end subroutine extract_SVD
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_QR_factorization
+!!      m_gwls_QR_factorization
 !!
 !! CHILDREN
 !!      xmpi_allgather,xmpi_sum
@@ -392,7 +392,7 @@ end subroutine extract_SVD_lapack
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_QR_factorization
+!!      m_gwls_QR_factorization
 !!
 !! CHILDREN
 !!      xmpi_allgather,xmpi_sum

@@ -103,7 +103,7 @@ CONTAINS  !===========================================================
 !!      m_rec
 !!
 !! CHILDREN
-!!      wrtout,xmpi_max
+!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -227,7 +227,7 @@ end subroutine H_D_distrib
 !!      m_rec
 !!
 !! CHILDREN
-!!      wrtout,xmpi_max
+!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -290,10 +290,10 @@ end subroutine find_maxmin_proc
 !! OUTPUT
 !!
 !! PARENTS
-!!      first_rec,m_rec
+!!      m_rec,m_vtorhorec
 !!
 !! CHILDREN
-!!      wrtout,xmpi_max
+!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -418,10 +418,10 @@ end subroutine cpu_distribution
 !!
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout,xmpi_max
+!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -594,10 +594,10 @@ end subroutine InitRec
 !! metrec <type(metricrec_type)>= infinitesimal metrics used in recursion
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      wrtout,xmpi_max
+!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -664,13 +664,13 @@ end subroutine Init_MetricRec
 !! debug=debug variable
 !!
 !! SIDE EFFECTS
-!! nlrec <type(nlpsprec_type)>=pseudo-potentials informations for recursion
+!! nlrec <type(nlpsprec_type)>=pseudo-potentials information for recursion
 !!
 !! PARENTS
-!!      first_rec
+!!      m_vtorhorec
 !!
 !! CHILDREN
-!!      wrtout,xmpi_max
+!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -769,10 +769,10 @@ end subroutine Init_nlpspRec
 !! All pointers are deallocated.
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout,xmpi_max
+!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -849,10 +849,10 @@ end subroutine CleanRec
 !! rset%min_nrec is changed
 !!
 !! PARENTS
-!!      vtorhorec
+!!      m_vtorhorec
 !!
 !! CHILDREN
-!!      wrtout,xmpi_max
+!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -923,7 +923,7 @@ end subroutine Calcnrec
 !!      m_rec
 !!
 !! CHILDREN
-!!      sort_int,timab
+!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -1241,7 +1241,7 @@ end subroutine getngrec
 !!      m_rec
 !!
 !! CHILDREN
-!!      gamma_function,initylmr,wrtout
+!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 

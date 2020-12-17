@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_copy
 !! NAME
 !!  m_copy
@@ -1183,6 +1182,7 @@ end subroutine alloc_copy_int3d
 !! PARENTS
 !!
 !! CHILDREN
+!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1218,6 +1218,7 @@ end subroutine alloc_copy_int4d_1b
 !! PARENTS
 !!
 !! CHILDREN
+!!      c_f_pointer
 !!
 !! SOURCE
 

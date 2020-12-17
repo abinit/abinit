@@ -63,7 +63,7 @@
  2) Traditional CPP
 **/
 
-#if defined (FC_INTEL)
+#if defined (FC_INTEL) || defined (FC_AOCC)
 #define CONCAT(x,y) x ## y
 #else
 #define CONCAT(x,y) x/**/y
@@ -71,18 +71,50 @@
 
 #define BYTE_SIZE(array)  PRODUCT(SHAPE(array)) * DBLE(KIND(array))
 
+/* var = var + increment
+ * Because Fortran does not provide inplace add.
+ * but NAG does not like this CPP macro so we cannot use it!
+ *
+#define IADD(var, increment) var = var + increment
+*/ 
+
 /*
  * ABI_  abinit macros.
  * DBG_  macros for debugging. Defined only if abinit is compiled in DEBUG_MODE.
  * MSG_  macros for logging.
 */
 
-#define ABI_CHECK(expr, str) if (.not.(expr)) call assert(.FALSE., str _FILE_LINE_ARGS_)
+/* Stop execution with message `msg` if not expr */
+#define ABI_CHECK(expr, msg) if (.not.(expr)) call assert(.FALSE., msg _FILE_LINE_ARGS_)
+
+/* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
+#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; MSG_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
+
+/* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
+#define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+
+/* Stop execution with message `msg` if int1 > int2 */
+#define ABI_CHECK_ILEQ(int1, int2, msg) if (int1 > int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+
+/* Stop execution with message `msg` if int1 < int2 */
+#define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+
+/* Stop execution with message `msg` if double1 < double2 */
+#define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+
+/* Stop execution with message `msg` if int not in [start, stop] */
+#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) MSG_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
+
+#define ABI_CHECK_NOSTOP(expr, msg, ierr) \
+   if (.not. (expr)) then NEWLINE ierr=ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
+
+/* Stop execution with message if MPI call returned error exit code */
 #define ABI_CHECK_MPI(ierr, msg) call check_mpi_ierr(ierr, msg _FILE_LINE_ARGS_)
 
 /* This macro is used in low-level MPI wrappers to return mpierr to the caller
  * so that one can locate the problematic call. Use it wisely since it may cause memory leaks.
- * #define ABI_HANDLE_MPIERR(mpierr) ABI_CHECK_MPI(mpierr,"ABI_HANDLE: Fatal error")
+ * #define ABI_HANDLE_MPIERR(mpierr) ABI_CHECK_MPI(mpierr, "ABI_HANDLE: Fatal error")
  */
 #define ABI_HANDLE_MPIERR(mpierr) if (mpierr /= MPI_SUCCESS) RETURN
 
@@ -165,8 +197,7 @@
    call abimem_record(0, QUOTE(to), _LOC(to), "A", ABI_MEM_BITS(to),  __FILE__, __LINE__)
 
 
-/* Allocate a polymophic scalar 
- * allocate(datatype:: scalar) */
+/* Allocate a polymophic scalar that is: allocate(datatype:: scalar) */
 #  define ABI_DATATYPE_ALLOCATE_SCALAR(type, scalar)                    \
   allocate(type::scalar) NEWLINE                                        \
     call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
@@ -174,8 +205,6 @@
 #  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)                        \
   call abimem_record(0, QUOTE(scalar), _LOC(scalar), "D", -storage_size(scalar, kind=8), __FILE__, __LINE__) NEWLINE \
     deallocate(scalar) 
-
-
 
 #else
 /* macros used in production */
@@ -191,25 +220,20 @@
 #  define ABI_FREE_SCALAR(scalar) deallocate(scalar)
 #  define ABI_MOVE_ALLOC(from, to) call move_alloc(from, to)
 
-
 #  define ABI_DATATYPE_ALLOCATE_SCALAR(type,scalar)  allocate(type::scalar)
 #  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)   deallocate(scalar)
-
 
 #endif
 
 
-/* Macros to allocate zero-initialized arrays.
- * defined in terms of previous macros */
+/* Macros to allocate zero-initialized arrays. */
 #define ABI_CALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
 #define ABI_ICALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = 0
 #define ABI_CALLOC_OR_DIE(ARR,SIZE,ierr) ABI_MALLOC_OR_DIE(ARR, SIZE, ierr) NEWLINE ARR = zero
 
 /* Shorthand versions */
 #define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
-
 #define ABI_FREE(ARR) ABI_DEALLOCATE(ARR)
-
 #define ABI_STAT_MALLOC(ARR,SIZE,ierr) ABI_STAT_ALLOCATE(ARR,SIZE,ierr)
 
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
@@ -230,6 +254,9 @@
 #define ABI_SFREE_PTR(PTR) if (associated(PTR)) then NEWLINE ABI_FREE(PTR) NEWLINE endif
 #define ABI_REMALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_MALLOC(ARR, SIZE)
 #define ABI_RECALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_CALLOC(ARR, SIZE)
+
+/* Allocate and fill with random numbers */
+#define ABI_MALLOC_RAND(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE call random_number(ARR)
 
 /* Macros used in debug mode */
 #ifdef DEBUG_MODE
@@ -255,14 +282,14 @@
 #endif
 
 /* Macro for basic messages */
-#define MSG_COMMENT(msg) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_)
-#define MSG_WARNING(msg) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_)
-#define MSG_COMMENT_UNIT(msg, unt) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
-#define MSG_WARNING_UNIT(msg, unt) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
-#define MSG_ERROR(msg) call msg_hndl(msg,"ERROR", "PERS" _FILE_LINE_ARGS_)
+#define MSG_COMMENT(msg) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_)
+#define MSG_WARNING(msg) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_)
+#define MSG_COMMENT_UNIT(msg, unt) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define MSG_WARNING_UNIT(msg, unt) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define MSG_ERROR(msg) call msg_hndl(msg, "ERROR", "PERS" _FILE_LINE_ARGS_)
 #define MSG_ERROR_CLASS(msg, cls) call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
-#define MSG_BUG(msg) call msg_hndl(msg,"BUG", "PERS" _FILE_LINE_ARGS_)
-#define MSG_STOP(msg) call msg_hndl(msg,"STOP", "PERS")
+#define MSG_BUG(msg) call msg_hndl(msg, "BUG", "PERS" _FILE_LINE_ARGS_)
+#define MSG_STOP(msg) call msg_hndl(msg, "STOP", "PERS")
 
 #define MSG_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
 #define MSG_ERROR_NOSTOP(msg, ierr) \
@@ -270,24 +297,10 @@
 #define MSG_ERROR_NOSTOP_IF(condition, msg, ierr) \
    if (condition)  then NEWLINE MSG_ERROR_NOSTOP(msg, ierr) NEWLINE endif
 
-#define ETSF_WARN(lstat,Error_data) call abietsf_warn(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
-
-#define ETSF_CHECK_ERROR(lstat,Error_data) if (.not. lstat) call abietsf_msg_hndl(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
 #define NCF_CHECK(ncerr) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,"No msg from caller" _FILE_LINE_ARGS_)
 #define NCF_CHECK_MSG(ncerr,msg) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,msg _FILE_LINE_ARGS_)
 
 #define NOT_IMPLEMENTED_ERROR() MSG_ERROR("Not Implemented Error")
-
-/* Macro to deprecate particular features. */
-#define MSG_DEPRECATE(msg) call wrtout(ab_out, msg, "COLL")
-/*
-#define MSG_DEPRECATE(msg) MSG_ERROR(msg)
-*/
-
-/* Macro for clean exit */
-/*
-#define ABI_EXIT(exit_status) call abi_abort("COLL",exit_status=exit_status,print_config=.False.)
-*/
 
 /* Macros used for stopping the code if external libraries have not been enabled */
 #define NETCDF_NOTENABLED_ERROR() MSG_ERROR("netcdf is not activated. Use configure --enable-netcdf")
@@ -373,7 +386,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #endif
 
 /* DFTI macros (should be declared in m_dfti but build-sys tests complain */
-#define DFTI_CHECK(status) if (status/=0) call dfti_check_status(status _FILE_LINE_ARGS_)
+#define DFTI_CHECK(status) if (status /= 0) call dfti_check_status(status _FILE_LINE_ARGS_)
 
 
 /* Macros used in the GW code */

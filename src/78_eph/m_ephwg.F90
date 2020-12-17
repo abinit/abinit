@@ -46,6 +46,7 @@ module m_ephwg
  use m_lgroup
  use m_ebands
  use m_eph_double_grid
+ use m_krank
 
  use defs_datatypes,    only : ebands_t
  use m_time,            only : cwtime, cwtime_report
@@ -103,11 +104,11 @@ type, public :: ephwg_t
   ! Number of points in IBZ(k) i.e. the irreducible wedge
   ! defined by the operations of the little group of k.
 
-  ! Integer controling whether to compute and store the electron-phonon matrix elements
-  ! computed from generalized Frohlich model
-  ! C. Verdi and F. Giustino, Phys. Rev. Lett. 115, 176401 (2015).
-  ! 1,2: Unused (for compatibility with sigma_t)
-  ! 3: Compute Frohlich electron-phonon matrix elements in the IBZ for later integration
+  !real(dp) :: max_phfrq
+  ! Max Phonon frequency, computed from phfrq_ibz
+
+  integer :: kptrlatt(3,3)
+   ! Value of kptrlatt after inkpts. So one shift
 
   integer, allocatable :: kq2ibz(:)
   ! kq2ibz(nq_k)
@@ -213,7 +214,7 @@ contains
 !! SOURCE
 
 type(ephwg_t) function ephwg_new( &
-&  cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, comm) result(new)
+   cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, comm) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -253,9 +254,10 @@ type(ephwg_t) function ephwg_new( &
 
  ! Get full BZ (new%nbz, new%bz) and new kptrlatt for tetra.
  call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, out_nkibz, out_kibz, out_wtk, new%nbz, new%bz, &
-   new_kptrlatt=out_kptrlatt)
+                             new_kptrlatt=out_kptrlatt)
  call cwtime_report(" ephwg_new: kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
+ new%kptrlatt = out_kptrlatt
  rlatt = out_kptrlatt; call matr3inv(rlatt, new%klatt)
 
  ABI_CHECK(size(out_kibz, dim=2) == new%nibz, "mismatch in nkibz!")
@@ -277,7 +279,11 @@ type(ephwg_t) function ephwg_new( &
    new%phfrq_ibz(ik, :) = phfrq
  end do
 
+ ! Collect results on each rank
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
+
+ !new%max_phfrq = maxval(phfrq_ibz)
+
  call cwtime_report(" ephwg_new: ifc_fourq", cpu, wall, gflops)
 
 end function ephwg_new
@@ -340,6 +346,7 @@ end function ephwg_from_ebands
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -355,13 +362,13 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1
  integer :: ierr,ii
  logical :: do_mapping
  real(dp) :: dksqmax, cpu, wall, gflops
  character(len=80) :: errorstring
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
+ type(krank_t) :: krank
 !arrays
  integer,allocatable :: indkk(:,:)
 
@@ -374,6 +381,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
  ! Get little group of the (external) kpoint.
  call self%lgk%free()
  self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
+
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
@@ -384,12 +392,12 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    ! to symmetrize wavefunctions and potentials that require S-1 i.e. the symrel convention.
 
    ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
-   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
-   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
+   ABI_MALLOC(indkk, (6, self%nq_k))
 
-   !call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, self%lgk%nsym_lg,&
-   !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+   krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
+   call krank%get_mapping(self%nq_k, self%lgk%ibz, dksqmax, cryst%gmet, indkk, &
+                          cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+   call krank%free()
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -397,7 +405,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
      MSG_ERROR(msg)
    end if
    ABI_SFREE(self%lgk2ibz)
-   call alloc_copy(indkk(:, 1), self%lgk2ibz)
+   call alloc_copy(indkk(1, :), self%lgk2ibz)
    ABI_FREE(indkk)
    call cwtime_report(" listkk1", cpu, wall, gflops)
 
@@ -405,10 +413,12 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    do ii=1,self%nq_k
      self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint
    end do
-   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+   ABI_MALLOC(indkk, (6, self%nq_k))
 
-   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
+   krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
+   call krank%get_mapping(self%nq_k, self%lgk%ibz, dksqmax, cryst%gmet, indkk, &
+                          cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+   call krank%free()
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -418,15 +428,17 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    call cwtime_report(" listkk2", cpu, wall, gflops)
 
    ABI_SFREE(self%kq2ibz)
-   call alloc_copy(indkk(:, 1), self%kq2ibz)
+   call alloc_copy(indkk(1, :), self%kq2ibz)
    ABI_FREE(indkk)
+
+   ! Revert changes
    do ii=1,self%nq_k
      self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) - kpoint
    end do
  end if
 
  ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
- ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
+ ABI_MALLOC(indkk, (self%nbz, 1))
  indkk(:, 1) = self%lgk%bz2ibz_smap(1, :)
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
@@ -479,7 +491,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1,timrev0=0
+ integer,parameter :: timrev0 = 0
  integer :: ierr,ii,ik_idx
  !real(dp) :: dksqmax
  character(len=80) :: errorstring
@@ -597,6 +609,7 @@ end subroutine ephwg_double_grid_setup_kpoint
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -653,6 +666,7 @@ end subroutine ephwg_report_stats
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -750,6 +764,7 @@ end subroutine ephwg_get_deltas
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -832,6 +847,7 @@ end subroutine ephwg_get_deltas_wvals
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -891,19 +907,23 @@ end subroutine ephwg_get_deltas_qibzk
 !! Compute weights for a given (kpoint, qpoint, spin) for all phonon modes.
 !!
 !! INPUTS
-!! qpt(3)
-!! iband_sum=band index in self-energy sum. (global index i.e. unshifted)
-!! spin=Spin index
-!! nu=Phonon branch.
+!! nz: Number of frequencies
 !! nbcalc=Number of bands in self-energy matrix elements.
-!! zvals
-!! opt: 1 for S. Kaprzyk routines, 2 for Lambin.
+!! zvals(nw): z-values
+!! iband_sum = band index in self-energy sum. (global index i.e. unshifted)
+!! spin=Spin index
+!! nu=Phonon branch index
+!! zinv_opt:
+!!   1 for S. Kaprzyk routines,
+!!   2 for Lambin-Vigneron.
 !! comm=MPI communicator
 !! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
 !!   Nstar(q) is the number of points in the star of the q-point (using the symmetries of the little group of k)
 !!   If use_bzsum is set to True, the Nstar(q) coefficient is removed so that the caller can
 !!   integrate over the BZ without using symmetries.
-!!
+!!  [erange(2)]: if present, weights are computed with an approximated asyntotic expression if
+!!   real(z) is outside of this interval and with tetra if inside.
+
 !! OUTPUT
 !!  cweights(nz, 2, nbcalc, %nq_k)  (plus, minus)
 !!  include weights for BZ integration.
@@ -911,27 +931,31 @@ end subroutine ephwg_get_deltas_qibzk
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
-subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, opt, cweights, comm, use_bzsum)
+subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, zinv_opt, cweights, comm, use_bzsum, erange)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, opt, comm
+ integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, zinv_opt, comm
  class(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
-!arraye
+!arrays
  complex(dpc),intent(in) :: zvals(nz, nbcalc)
  complex(dpc),intent(out) :: cweights(nz, 2, nbcalc, self%nq_k)
+ real(dp),optional,intent(in) :: erange(2)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
- integer :: iq_ibz,ikpq_ibz,ib,ii,iq,nprocs, my_rank, ierr
+ integer,parameter :: master = 0
+ integer :: iq_ibz, ikpq_ibz, ib, ii, iq, nprocs, my_rank !, ierr
  real(dp),parameter :: max_occ1 = one
+ !real(dp) :: emin, emax
  logical :: use_bzsum_
 !arrays
+ real(dp) :: my_erange(2)
  real(dp),allocatable :: pme_k(:,:)
  complex(dp),allocatable :: cweights_tmp(:,:)
 !----------------------------------------------------------------------
@@ -939,6 +963,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  use_bzsum_ = .False.; if (present(use_bzsum)) use_bzsum_ = use_bzsum
+ my_erange = [-huge(one), huge(one)]; if (present(erange)) my_erange = erange
 
  ! Allocate array for e_{k+q, b} +- w_{q,nu)
  ABI_MALLOC(pme_k, (self%nq_k, 2))
@@ -951,42 +976,36 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
    pme_k(iq, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
  end do
 
+ ! As this part is quite demanding, especially when nz is large, use input z-mesh
+ ! when we are inside the window in which the denominator can blow up (+- some tolerance)
+ ! Outside the window, downsample the mesh use to compute the weights and spline the results.
+ !if (zinv_opt == 2) then
+ !  emin = minval(self%eigkbs_ibz(:, ib, spin))
+ !  emax = maxval(self%eigkbs_ibz(:, ib, spin))
+ !  !my_erange = [emin - half * abs(emin), emax + half * abs(emax)]
+ !  my_erange = [emin - tol2 * abs(emin), emax + tol2 * abs(emax)]
+ !end if
+
  cweights = zero
  ABI_MALLOC(cweights_tmp, (nz, self%nq_k))
+
  do ib=1,nbcalc
    do ii=1,2
-     call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:,ib), &
-                                          max_occ1, self%nq_k, opt, cweights_tmp, comm)
+     call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:, ib), max_occ1, self%nq_k, zinv_opt, &
+                                          cweights_tmp, comm, erange=my_erange)
      do iq=1,self%nq_k
-       cweights(:,ii,ib,iq) = cweights_tmp(:,iq)
+       cweights(:, ii, ib, iq) = cweights_tmp(:, iq)
      end do
    end do
  end do
+
  ABI_FREE(cweights_tmp)
 
  ! Rescale weights so that the caller can sum over the full BZ.
  !if (use_bzsum_) cweights = cweights / ( self%lgk%weights(iqlk) * self%nbz )
 
- call xmpi_sum(cweights, comm, ierr)
-
- ! Compare results with naive one-point integration.
- !if (.False. .and. my_rank == master) then
- !  volconst_mult = one
- !  volconst_mult = self%lgk%weights(iqlk)
- !  do ib=1,nbcalc
- !    !do nu=1,self%natom3
- !      write(std_out,*)"# naive vs tetra integration for band, nu", ib - 1 + self%bstart, nu
- !      do iz=1,nz
- !        write(std_out,"(5es16.8)") &
- !          dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 1)) * volconst_mult, cweights(iz, 1, ib, nu)
- !        write(std_out,"(5es16.8)") &
- !          dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 2)) * volconst_mult, cweights(iz, 2, ib, nu)
- !      end do
- !    !end do
- !  end do
- !end if
-
  ABI_FREE(pme_k)
+ !call xmpi_sum(cweights, comm, ierr)
 
 end subroutine ephwg_get_zinv_weights
 !!***
@@ -1005,6 +1024,7 @@ end subroutine ephwg_get_zinv_weights
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 

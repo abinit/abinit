@@ -81,7 +81,7 @@ contains
 !! in Hybrid Monte Carlo iterations.
 !!
 !! PARENTS
-!!      mover,pred_hmc
+!!      m_precpred_1geo,m_pred_hmc
 !!
 !! CHILDREN
 !!      hist2var,var2hist,xcart2xred,xred2xcart

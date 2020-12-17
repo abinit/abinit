@@ -113,7 +113,7 @@ CONTAINS
 !!            several parameters for Minimal Energy Path (MEP) search.
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!      wrtout,xcart2xred,xred2xcart
@@ -170,7 +170,7 @@ end subroutine mep_init
 !!            several parameters for Minimal Energy Path (MEP) search.
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!      wrtout,xcart2xred,xred2xcart
@@ -230,7 +230,7 @@ end subroutine mep_destroy
 !!                       before and after time evolution
 !!
 !! PARENTS
-!!      predict_neb,predict_steepest,predict_string
+!!      m_predict_neb,m_predict_steepest,m_predict_string
 !!
 !! CHILDREN
 !!      wrtout,xcart2xred,xred2xcart
@@ -328,7 +328,7 @@ end subroutine mep_steepest
 !!                       before and after time evolution
 !!
 !! PARENTS
-!!      predict_neb
+!!      m_predict_neb
 !!
 !! CHILDREN
 !!      wrtout,xcart2xred,xred2xcart
@@ -455,7 +455,7 @@ end subroutine mep_qmin
 !!  Could see Numerical Recipes (Fortran), 1986, page 307.
 !!
 !! PARENTS
-!!      predict_neb
+!!      m_predict_neb
 !!
 !! CHILDREN
 !!      wrtout,xcart2xred,xred2xcart
@@ -639,7 +639,7 @@ end subroutine mep_lbfgs
 !!  Has to work in cartesian coordinates
 !!
 !! PARENTS
-!!      predict_neb
+!!      m_predict_neb
 !!
 !! CHILDREN
 !!      wrtout,xcart2xred,xred2xcart
@@ -962,7 +962,7 @@ end subroutine mep_gbfgs
 !!                       before and after time evolution
 !!
 !! PARENTS
-!!      predict_string
+!!      m_predict_string
 !!
 !! CHILDREN
 !!      wrtout,xcart2xred,xred2xcart

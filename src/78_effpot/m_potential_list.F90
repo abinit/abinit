@@ -79,6 +79,7 @@ module m_potential_list
      procedure :: initialize ! make an empty list
      procedure :: ipot       ! return the i'th potential
      procedure :: set_supercell ! pointer to supercell and set_supercell for all pot in list
+     procedure :: set_params
      procedure :: finalize
      procedure :: append  ! add a potential to the list
      procedure :: calculate ! each potential in list do calculate and then sum.
@@ -182,6 +183,17 @@ contains
     self%has_strain= (self%has_strain.or. effpot%has_strain)
     self%has_lwf =(self%has_lwf.or. effpot%has_lwf)
   end subroutine append
+
+  subroutine set_params(self, params)
+    class(potential_list_t), intent(inout) :: self  ! the effpot may save the states.
+    type(multibinit_dtset_type), intent(inout) :: params
+    integer :: i
+    do i=1, self%size
+       call self%list(i)%ptr%set_params(params)
+    end do
+  end subroutine set_params
+
+
 
   !----------------------------------------------------------------------
   !> @brief calculate energy and 1st derivatives

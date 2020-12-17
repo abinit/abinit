@@ -86,7 +86,7 @@ CONTAINS  !=====================================================================
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!      compute_anharmonics,m_effective_potential
+!!      m_compute_anharmonics,m_effective_potential,m_generate_training_set
 !!
 !! CHILDREN
 !!      wrtout
@@ -144,7 +144,7 @@ end subroutine strain_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      compute_anharmonics
+!!      m_compute_anharmonics
 !!
 !! CHILDREN
 !!      wrtout
@@ -189,7 +189,7 @@ end subroutine strain_free
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!      compute_anharmonics,m_effective_potential,m_fit_data
+!!      m_compute_anharmonics,m_effective_potential,m_fit_data
 !!
 !! CHILDREN
 !!      wrtout

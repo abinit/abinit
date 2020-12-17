@@ -97,7 +97,7 @@ contains
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      c_f_pointer
+!!      wrtout
 !!
 !! SOURCE
 
@@ -330,7 +330,7 @@ end subroutine build_spectra
 !!      m_exc_spectra,m_haydock
 !!
 !! CHILDREN
-!!      c_f_pointer
+!!      wrtout
 !!
 !! SOURCE
 
@@ -502,7 +502,7 @@ end subroutine exc_write_data
 !!      m_exc_spectra,m_haydock
 !!
 !! CHILDREN
-!!      c_f_pointer
+!!      wrtout
 !!
 !! SOURCE
 
@@ -631,7 +631,7 @@ end subroutine exc_eps_rpa
 !!      m_exc_spectra
 !!
 !! CHILDREN
-!!      c_f_pointer
+!!      wrtout
 !!
 !! SOURCE
 
@@ -881,7 +881,7 @@ end subroutine exc_eps_resonant
 !!      m_exc_spectra
 !!
 !! CHILDREN
-!!      c_f_pointer
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1069,7 +1069,7 @@ end subroutine exc_eps_coupling
 !!      m_haydock
 !!
 !! CHILDREN
-!!      c_f_pointer
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1215,7 +1215,7 @@ end subroutine exc_write_tensor
 !!      m_exc_spectra,m_haydock
 !!
 !! CHILDREN
-!!      c_f_pointer
+!!      wrtout
 !!
 !! SOURCE
 

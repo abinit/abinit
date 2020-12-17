@@ -129,7 +129,8 @@ CONTAINS !===========================================================
 !!  Update of "fft distrib" tabs accordingly to the fft parallelisation
 !!
 !! PARENTS
-!!      m_fft,m_fft_prof,m_qparticles,m_wfd,mpi_setup,scfcv,vtorhorec
+!!      m_fft,m_fft_prof,m_mpi_setup,m_qparticles,m_scfcv_core,m_vtorhorec
+!!      m_wfd
 !!
 !! CHILDREN
 !!
@@ -252,10 +253,10 @@ end subroutine init_distribfft
 !!  Update of "fft distrib" tabs accordingly to the fft parallelisation
 !!
 !! PARENTS
-!!      atm2fft,bethe_salpeter,calc_vhxc_me,cut3d,dfpt_atm2fft,dieltcel,eph
-!!      ks_ddiago,m_cut3d,m_dvdb,m_fft_prof,m_gsphere,m_ioarr,m_kxc,m_ppmodel
-!!      m_screening,m_wfk,multipoles_fftr,pawgrnl,pawmknhat,pawmknhat_psipsi
-!!      pawsushat,scfcv,screening,sigma,suscep_stat,susk,suskmm,wfk_analyze
+!!      cut3d,m_atm2fft,m_bethe_salpeter,m_cut3d,m_dvdb,m_eph_driver,m_fft_prof
+!!      m_gsphere,m_ioarr,m_ksdiago,m_kxc,m_multipoles,m_paw_dfpt,m_paw_nhat
+!!      m_ppmodel,m_prcref,m_scfcv_core,m_screening,m_screening_driver
+!!      m_sigma_driver,m_suscep_stat,m_vhxc_me,m_wfk,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -378,9 +379,8 @@ end subroutine init_distribfft_seq
 !!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
-!!      atm2fft,dfpt_atm2fft,m_cut3d,m_fft,m_mpinfo,m_qparticles,m_wfd
-!!      multipoles_fftr,pawgrnl,pawmknhat,pawmknhat_psipsi,pawsushat,scfcv
-!!      vtorhorec
+!!      m_atm2fft,m_cut3d,m_fft,m_mpinfo,m_multipoles,m_paw_dfpt,m_paw_nhat
+!!      m_qparticles,m_scfcv_core,m_vtorhorec,m_wfd
 !!
 !! CHILDREN
 !!

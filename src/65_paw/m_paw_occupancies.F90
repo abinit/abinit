@@ -92,12 +92,10 @@ CONTAINS  !=====================================================================
 !!          Sum_{n,k} {occ(n,k)*conjugate[cprj_nk(ii)].cprj_nk(jj)} (non symetrized)
 !!
 !! PARENTS
-!!      afterscfloop,scfcv,vtorho
+!!      m_afterscfloop,m_scfcv_core,m_vtorho
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin,pawcprj_get
-!!      pawrhoij_free,pawrhoij_init_unpacked
-!!      pawrhoij_mpisum_unpacked,wrtout
+!!      free_my_atmtab,get_my_atmtab,pawrhoij_alloc,pawrhoij_inquire_dim
 !!
 !! NOTES
 !!  The cprj are distributed over band processors.
@@ -552,10 +550,10 @@ end subroutine pawmkrhoij
 !!                                +conjugate[cprj_nk(ii)].dcprj_nk(jj)/dr_mu)}
 !!
 !! PARENTS
-!!      d2frnl,dfpt_accrho,energy,pawmkrhoij,posdoppler,wfd_pawrhoij
+!!      m_d2frnl,m_dfpt_mkrho,m_dft_energy,m_paw_occupancies,m_positron,m_wfd
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab
+!!      free_my_atmtab,get_my_atmtab,pawrhoij_alloc,pawrhoij_inquire_dim
 !!
 !! SOURCE
 
@@ -1149,10 +1147,10 @@ end subroutine pawaccrhoij
 !!                                        in packed storage
 !!
 !! PARENTS
-!!      gstate,respfn,setup_positron
+!!      m_gstate,m_nonlinear,m_positron,m_respfn_driver
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawrhoij_alloc
+!!      free_my_atmtab,get_my_atmtab,pawrhoij_alloc,pawrhoij_inquire_dim
 !!
 !! SOURCE
 

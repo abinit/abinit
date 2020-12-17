@@ -104,12 +104,10 @@ contains
 !!   checking, so the user must be very careful or the results may be invalid.
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      crystal_free,crystal_from_hdr,destroy_mpi_enreg,ebands_free,ebands_init
-!!      initmpi_seq,kmesh_free,kmesh_init,listkk,metric,pawcprj_getdim,rdgw
-!!      rdqps,sort_dp,update_cprj,wrtout,zgemm
+!!      pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 
@@ -546,7 +544,7 @@ end subroutine mlwfovlp_qp
 !! To be moved to cprj_utils, although here we use complex variables.
 !!
 !! PARENTS
-!!      mlwfovlp_qp
+!!      m_mlwfovlp_qp
 !!
 !! CHILDREN
 !!      pawcprj_alloc,pawcprj_free

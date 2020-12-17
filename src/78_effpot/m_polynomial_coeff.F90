@@ -136,11 +136,9 @@ CONTAINS  !=====================================================================
 !!
 !! PARENTS
 !!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
-!!      m_polynomial_coeff,mover_effpot
+!!      m_mover_effpot,m_opt_effpot,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -253,11 +251,9 @@ end subroutine polynomial_coeff_init
 !!
 !! PARENTS
 !!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
-!!      m_polynomial_coeff,mover_effpot
+!!      m_mover_effpot,m_opt_effpot,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -304,10 +300,9 @@ end subroutine polynomial_coeff_free
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!
+!!      m_opt_effpot,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free
 !!
 !! SOURCE
 
@@ -354,11 +349,9 @@ end subroutine polynomial_coeff_list_free
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_effective_potential_file,mover_effpot
+!!      m_effective_potential_file,m_mover_effpot
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -396,11 +389,10 @@ end subroutine polynomial_coeff_setCoefficient
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_opt_effpot
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -443,11 +435,10 @@ end subroutine polynomial_coeff_setName
 !! name = name xof the coefficients
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_opt_effpot
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -587,8 +578,6 @@ end subroutine polynomial_coeff_getName
 !!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -680,8 +669,6 @@ end subroutine polynomial_coeff_broadcast
 !!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -749,8 +736,6 @@ end subroutine polynomial_coeff_MPIsend
 !!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -846,11 +831,9 @@ end subroutine polynomial_coeff_MPIrecv
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_effective_potential,mover_effpot
+!!      m_effective_potential,m_mover_effpot,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -1024,8 +1007,6 @@ end subroutine polynomial_coeff_writeXML
 !!      m_effective_potential
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 !!
@@ -1319,11 +1300,9 @@ end subroutine polynomial_coeff_evaluate
 !!               If check_pbc is true we remove these kind of terms
 !!
 !! PARENTS
-!!      m_polynomial_coeff
+!!      m_opt_effpot,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -1984,11 +1963,9 @@ end subroutine polynomial_coeff_getList
 !! ncoeff_tot = total number of coefficient over the CPU
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff,mover_effpot
+!!      m_fit_polynomial_coeff,m_mover_effpot,m_opt_effpot,m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -3556,8 +3533,6 @@ end function getCoeffFromList
 !!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -3660,10 +3635,9 @@ end subroutine generateTermsFromList
 !! ncoeff_out = number of coefficients
 !!
 !! PARENTS
+!!      m_opt_effpot
 !!
 !! CHILDREN
-!!      polynomial_coeff_free,polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_term_free,polynomial_term_init,wrtout
 !!
 !! SOURCE
 
@@ -3847,9 +3821,9 @@ end subroutine polynomial_coeff_getOrder1
 !! ncoeff_out = number of coefficients
 !!
 !! PARENTS
+!!      m_opt_effpot
 !!
 !! CHILDREN
-!! polynomial_coeff_getNorder
 !!
 !! SOURCE
 subroutine polynomial_coeff_getEvenAnhaStrain(strain_terms,crystal,irred_ncoeff,power_strain,comm)
@@ -4093,6 +4067,11 @@ end subroutine coeffs_list_copy
 !!
 !! OUTPUT
 !!
+!! PARENTS
+!!      m_polynomial_coeff
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine sort_combination(combination,n_int)
@@ -4142,6 +4121,11 @@ end subroutine sort_combination
 !! INPUTS
 !!
 !! OUTPUT
+!!
+!! PARENTS
+!!      m_polynomial_coeff
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -4298,6 +4282,11 @@ end function check_irreducibility
 !! INPUTS
 !!
 !! OUTPUT
+!!
+!! PARENTS
+!!      m_polynomial_coeff
+!!
+!! CHILDREN
 !!
 !! SOURCE
 

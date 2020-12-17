@@ -141,7 +141,7 @@ CONTAINS  !=====================================================================
 !!  dtpawuj(0:ndtpawuj) (initialization of fields vsh, occ, iuj,nnat)
 !!
 !! PARENTS
-!!      pawuj_drive,ujdet
+!!      m_gstate,ujdet
 !!
 !! CHILDREN
 !!
@@ -211,7 +211,7 @@ end subroutine pawuj_ini
 !! OUTPUT
 !!
 !! PARENTS
-!!      pawuj_drive,ujdet
+!!      m_gstate,ujdet
 !!
 !! CHILDREN
 !!
@@ -268,10 +268,9 @@ end subroutine pawuj_free
 !!  (among other things a section in the ab.out that can be used for input in ujdet)
 !!
 !! PARENTS
-!!      pawuj_drive,ujdet
+!!      m_gstate,ujdet
 !!
 !! CHILDREN
-!!      chiscwrt,lcalcu,mksupercell,prmat,prttagm,shellstruct,wrtout
 !!
 !! SOURCE
 
@@ -801,10 +800,9 @@ end subroutine pawuj_det
 !!  dtpawuj(0:ndtpawuj) (initialization of fields vsh, occ, iuj,nnat)
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,linvmat,prmat,wrtout,xmpi_lor,xmpi_sum
 !!
 !! SOURCE
 
@@ -1043,10 +1041,9 @@ end subroutine pawuj_red
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pawuj_det
+!!      m_paw_uj
 !!
 !! CHILDREN
-!!      prmat,wrtout
 !!
 !! SOURCE
 
@@ -1145,7 +1142,7 @@ end subroutine chiscwrt
 !!  oumat(nnat,nnat)=inverse of inmat, nnat=nat+1 for option=1 or option=3; nnat=nat for option=2
 !!
 !! PARENTS
-!!      pawuj_red,pawuj_utils
+!!      m_paw_uj
 !!
 !! CHILDREN
 !!
@@ -1254,7 +1251,7 @@ end subroutine linvmat
 !!  oumat(nat+1,nat+1)=inverse of inmat
 !!
 !! PARENTS
-!!      pawuj_utils
+!!      m_paw_uj
 !!
 !! CHILDREN
 !!
@@ -1329,7 +1326,7 @@ end subroutine lprtmat
 !!  ures=resulting U (in eV) on atom pawujat
 !!
 !! PARENTS
-!!      pawuj_det
+!!      m_paw_uj
 !!
 !! CHILDREN
 !!
@@ -1423,7 +1420,7 @@ end subroutine lcalcu
 !!  matt(nj+1,nj+1) completed matrix
 !!
 !! PARENTS
-!!      pawuj_utils
+!!      m_paw_uj
 !!
 !! CHILDREN
 !!

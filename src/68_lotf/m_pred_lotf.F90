@@ -75,7 +75,7 @@ CONTAINS !===========================================================
  !! NOTES
  !!
  !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
  !! CHILDREN
 !!      extrapolation_loop,fitclus,hist2var,init_lotf,intparms

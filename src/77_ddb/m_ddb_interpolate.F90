@@ -75,8 +75,6 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
-!!      d2cart_to_red,ddb_free,ddb_hdr_open_write,ddb_malloc,ddb_write_block
-!!      gtblk9,gtdyn9,outddbnc,wrtout
 !!
 !! SOURCE
 
@@ -351,7 +349,7 @@ end subroutine ddb_interpolate
 !!  Only writing
 !!
 !! PARENTS
-!!      ddb_interpolate,respfn
+!!      m_ddb_interpolate,m_respfn_driver
 !!
 !! CHILDREN
 !!

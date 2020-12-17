@@ -84,11 +84,10 @@ contains
 !!                               acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      dsyev,hist2var,isopress,isostress,isotemp,metric,mkrdim,var2hist,wrtout
-!!      xcart2xred,xred2xcart
+!!      dsyev
 !!
 !! SOURCE
 
@@ -633,7 +632,7 @@ end subroutine pred_isothermal
 !!  vel=update the velocities
 !!
 !! PARENTS
-!!      pred_isothermal
+!!      m_pred_isothermal
 !!
 !! CHILDREN
 !!      dsyev
@@ -772,7 +771,7 @@ end subroutine isotemp
 !!  vel=update the velocities
 !!
 !! PARENTS
-!!      pred_isothermal
+!!      m_pred_isothermal
 !!
 !! CHILDREN
 !!      dsyev
@@ -946,7 +945,7 @@ end subroutine isopress
 !!  vel=update the velocities
 !!
 !! PARENTS
-!!      pred_isothermal
+!!      m_pred_isothermal
 !!
 !! CHILDREN
 !!      dsyev

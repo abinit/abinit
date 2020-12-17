@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! Retrieve data (tabulated coefficients) for DFT-D3 corrections (see
-!! vdw_dftd3 routine for more informations). It retrieves the tabulated
+!! vdw_dftd3 routine for more information). It retrieves the tabulated
 !! dispersion coefficients C6, the supporting points of the interpolation
 !! and the cut-off radii (R0) for the dispersion correction
 !! COPYRIGHT
@@ -32,7 +32,7 @@
 !!  index_cnj: table containing the index of non-zero values of CNj coefficients
 !!
 !! PARENTS
-!!      vdw_dftd3
+!!      m_vdw_dftd3
 !!
 !! CHILDREN
 !!

@@ -56,7 +56,7 @@ public :: prc_mem_free
 !! This subroutine allocates the module's main component
 !!
 !! PARENTS
-!!      prcrskerker1
+!!      m_prcref
 !!
 !! CHILDREN
 !!
@@ -91,7 +91,7 @@ integer, intent(in) :: nfft
 !! This subroutine deallocates the module's main component
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!

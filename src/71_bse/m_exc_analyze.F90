@@ -88,10 +88,7 @@ contains
 !! PARENTS
 !!
 !! CHILDREN
-!!      exc_read_eigen,nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init
-!!      pawcprj_alloc,pawcprj_free,pawfgrtab_free,pawfgrtab_init
-!!      pawfgrtab_print,pawtab_get_lsize,printxsf,wfd_change_ngfft,wfd_sym_ur
-!!      wrap2_zero_one,wrtout,xmpi_bcast,xmpi_sum_master
+!!      wfd%get_ur,wrtout
 !!
 !! SOURCE
 
@@ -431,10 +428,10 @@ end subroutine exc_plot
 !! OUTPUT
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      wfd_get_ur,wrtout
+!!      wfd%get_ur,wrtout
 !!
 !! SOURCE
 

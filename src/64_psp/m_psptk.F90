@@ -88,10 +88,10 @@ contains
 !! Warning: the fifth derivative is not yet delivered.
 !!
 !! PARENTS
-!!      psp1in,psp5in
+!!      m_psp1,m_psp5
 !!
 !! CHILDREN
-!!      gg1cc,gp1cc,gpp1cc,spline
+!!      spline,splint
 !!
 !! SOURCE
 
@@ -219,9 +219,10 @@ end subroutine psp1cc
 !!  gg1cc_xx= gg1cc_x(xx)
 !!
 !! PARENTS
-!!      psp1cc
+!!      m_psptk
 !!
 !! CHILDREN
+!!      spline,splint
 !!
 !! SOURCE
 
@@ -284,9 +285,10 @@ end subroutine gg1cc
 !! $ phi''(x)=\frac{\cos(2\pi x)-(1-15x^2+20x^4) phi(x)}{x(1-4x^2)(1-x^2)}$
 !!
 !! PARENTS
-!!      psp1cc
+!!      m_psptk
 !!
 !! CHILDREN
+!!      spline,splint
 !!
 !! SOURCE
 
@@ -355,9 +357,10 @@ end subroutine gp1cc
 !!
 !!
 !! PARENTS
-!!      psp1cc
+!!      m_psptk
 !!
 !! CHILDREN
+!!      spline,splint
 !!
 !! SOURCE
 
@@ -501,10 +504,10 @@ end subroutine gpp1cc
 !!   (needed for spline fitter).
 !!
 !! PARENTS
-!!      psp5in,psp6in
+!!      m_psp5,m_psp6
 !!
 !! CHILDREN
-!!      ctrap
+!!      spline,splint
 !!
 !! SOURCE
 
@@ -679,10 +682,10 @@ end subroutine psp5lo
 !! the energy scale of the nonlocal psp corrections.
 !!
 !! PARENTS
-!!      psp5in,psp6in
+!!      m_psp5,m_psp6
 !!
 !! CHILDREN
-!!      ctrap,spline
+!!      spline,splint
 !!
 !! SOURCE
 
@@ -1182,10 +1185,10 @@ end subroutine psp5nl
 !!   (needed for spline fitter).
 !!
 !! PARENTS
-!!      psp8in,psp9in
+!!      m_psp8,m_psp9
 !!
 !! CHILDREN
-!!      ctrap,splfit,spline
+!!      spline,splint
 !!
 !! SOURCE
 
@@ -1358,10 +1361,10 @@ end subroutine psp8lo
 !! the energy scale of the nonlocal psp corrections.
 !!
 !! PARENTS
-!!      psp8in,psp9in
+!!      m_psp8,m_psp9
 !!
 !! CHILDREN
-!!      ctrap,sbf8,spline
+!!      spline,splint
 !!
 !! SOURCE
 
@@ -1561,7 +1564,7 @@ end subroutine psp8nl
 !!  xccc1d(n1xccc,6)= 1D core charge function and its five first derivatives
 !!
 !! PARENTS
-!!      psp6cc_drh,upf2abinit
+!!      m_psp6,m_upf2abinit
 !!
 !! CHILDREN
 !!      spline,splint

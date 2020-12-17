@@ -99,11 +99,22 @@ contains
   !! OUTPUT
   !!
   !! PARENTS
-  !!
-  !!
+!!      multibinit
+!!
   !! CHILDREN
-  !!
-  !!
+!!      abihist_bcast,abihist_free,chkvars,compute_anharmonics
+!!      effective_potential_file_getdimsystem,effective_potential_file_gettype
+!!      effective_potential_file_maphisttoref,effective_potential_file_read
+!!      effective_potential_file_readmdfile,effective_potential_free
+!!      effective_potential_setconfinement,effective_potential_writenetcdf
+!!      effective_potential_writexml,fit_polynomial_coeff_fit
+!!      fit_polynomial_coeff_testeffpot,fit_polynomial_printsystemfiles
+!!      global_set_print_bands,global_set_print_parameters
+!!      global_set_scf_parameters,instrng,inupper,invars10,manager%finalize
+!!      manager%initialize,manager%run,mover_effpot,multibinit_dtset_free
+!!      opt_effpot,opt_effpotbound,outvars_multibinit,scup_kpath_new
+!!      scup_kpath_print,wrtout,xmpi_bcast,xmpi_end
+!!
   !! SOURCE
   subroutine multibinit_main(filnam, dry_run)
     character(len=fnlen), intent(inout) :: filnam(17)
@@ -544,7 +555,9 @@ elec_eval = .FALSE.
                &       ('=',ii=1,80)
           call wrtout(ab_out,message,'COLL')
           call wrtout(std_out,message,'COLL')
-          name = replace(trim(filnam(2)),".out","")
+          !name = replace(trim(filnam(2)),".out","")
+          ! Assume new .abo convention
+          name = replace(trim(filnam(2)),".abo","")
           call effective_potential_writeXML(reference_effective_potential,inp%prt_model,filename=name,&
                &       prt_dipdip=inp%dipdip_prt==1)
        else if (inp%prt_model == -2)then

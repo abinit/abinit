@@ -89,10 +89,10 @@ contains
 !!   only output to file
 !!
 !! PARENTS
-!!      afterscfloop
+!!      m_afterscfloop
 !!
 !! CHILDREN
-!!      fourwf,printxsf,sphereboundary,vso_realspace_local,xred2xcart
+!!      gamma_function,spline,splint,xred2xcart
 !!
 !! SOURCE
 
@@ -606,7 +606,7 @@ end subroutine spin_current
 !! NOTES
 !!
 !! PARENTS
-!!      spin_current
+!!      m_spin_current
 !!
 !! CHILDREN
 !!      gamma_function,spline,splint,xred2xcart

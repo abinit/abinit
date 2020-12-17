@@ -151,7 +151,7 @@ contains
 !!
 !!
 !! PARENTS
-!!      nonlop_ylm
+!!      m_nonlop_ylm
 !!
 !! CHILDREN
 !!

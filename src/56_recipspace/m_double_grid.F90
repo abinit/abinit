@@ -167,9 +167,10 @@ CONTAINS  !=====================================================================
 !!  grid = double_grid to be created
 !!
 !! PARENTS
-!!      setup_bse_interp
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -288,6 +289,7 @@ end subroutine double_grid_init
 !!      m_double_grid
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -370,6 +372,7 @@ end subroutine create_indices_coarse
 !!      m_bseinterp,m_double_grid
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -427,6 +430,7 @@ end subroutine get_kpt_from_indices_coarse
 !!      m_double_grid
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -578,6 +582,7 @@ end subroutine get_kpt_from_indices_dense
 !!      m_double_grid
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -656,6 +661,7 @@ end subroutine compute_neighbours
 !!      m_hexc
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -717,9 +723,10 @@ end subroutine compute_corresp
 !! All allocated memory is released.
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -775,9 +782,10 @@ end subroutine double_grid_free
 !!  wgt_sub(nkpt_sub) = weight of the k-points of the fine grid that are around center(3).
 !!
 !! PARENTS
-!!      eig2stern,eig2tot
+!!      m_eig2d
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -930,7 +938,7 @@ end subroutine kptfine_av
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_rank,interpol3d_indices,wrap2_zero_one
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 

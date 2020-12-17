@@ -135,7 +135,7 @@ CONTAINS !===========================================================
 !!             several parameters for Path-Integral MD.
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!
@@ -285,7 +285,7 @@ end subroutine pimd_nullify
 !!            several parameters for PIMD.
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!
@@ -418,7 +418,7 @@ end subroutine pimd_init_qtb
 !! OUTPUT
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!
@@ -605,8 +605,7 @@ end function pimd_temperature
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_npt
-!!      pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -872,8 +871,7 @@ end subroutine pimd_print
 !!  iseed=seed for random number generator
 !!
 !! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_npt
-!!      pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -996,7 +994,7 @@ end subroutine pimd_initvel
 !!  iseed=seed for random number generator (used only if irandom=1)
 !!
 !! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt
+!!      m_pimd_langevin
 !!
 !! CHILDREN
 !!
@@ -1104,7 +1102,7 @@ end subroutine pimd_langevin_random
 !!  alea(3,natom,trotter)=set of random forces
 !!
 !! PARENTS
-!!      pimd_langevin_nvt
+!!      m_pimd_langevin
 !!
 !! CHILDREN
 !!
@@ -1198,7 +1196,7 @@ end subroutine pimd_langevin_random_qtb
 !!  iseed=seed for random number generator (used only if irandom=1)
 !!
 !! PARENTS
-!!      pimd_langevin_npt
+!!      m_pimd_langevin
 !!
 !! CHILDREN
 !!
@@ -1270,7 +1268,7 @@ end subroutine pimd_langevin_random_bar
 !!  iseed=seed for random number generator (used only if irandom=1)
 !!
 !! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt
+!!      m_pimd_langevin
 !!
 !! CHILDREN
 !!
@@ -1320,8 +1318,7 @@ end subroutine pimd_langevin_random_init
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_npt
-!!      pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -1415,7 +1412,7 @@ end subroutine pimd_energies
 !!    at output: forces from electronic calculation + quantum spring contribution
 !!
 !! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -1502,7 +1499,7 @@ end subroutine pimd_forces
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt
+!!      m_pimd_langevin
 !!
 !! CHILDREN
 !!
@@ -1573,7 +1570,7 @@ end subroutine pimd_langevin_forces
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pimd_nosehoover_nvt
+!!      m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -1646,8 +1643,7 @@ end subroutine pimd_nosehoover_forces
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_npt
-!!      pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -1848,7 +1844,7 @@ end function pimd_diff_stress
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pimd_langevin_nvt,pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -1916,7 +1912,7 @@ end subroutine pimd_predict_taylor
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pimd_langevin_nvt,pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -1997,7 +1993,7 @@ end subroutine pimd_predict_verlet
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pimd_nosehoover_nvt
+!!      m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -2170,7 +2166,7 @@ end subroutine pimd_nosehoover_propagate
 !!  array(3,natom,trotter)=array to be transformed
 !!
 !! PARENTS
-!!      pimd_langevin_nvt,pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -2358,7 +2354,7 @@ end subroutine pimd_coord_transform
 !!  Back transformation (ioption=-1) not implemented !
 !!
 !! PARENTS
-!!      pimd_langevin_nvt,pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -2483,7 +2479,7 @@ end subroutine pimd_force_transform
 !!  forces(3,natom,trotter)=array containing forces
 !!
 !! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!
@@ -2614,7 +2610,7 @@ end subroutine pimd_apply_constraint
 !!  Back transformation (ioption=-1) not implemented !
 !!
 !! PARENTS
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_nvt
+!!      m_pimd_langevin,m_pimd_nosehoover
 !!
 !! CHILDREN
 !!

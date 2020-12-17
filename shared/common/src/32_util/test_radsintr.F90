@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/check/test_radsintr
 !! NAME
 !!  test_radsintr

@@ -1,0 +1,80 @@
+#BaTiO3 SLAB ending TiO2 double layer
+# N=9
+# paralelectric configuration
+#Supercell and atoms
+
+acell 4.0 4.0 28.0 Angstrom
+            xcart      0.0000000000E+00  0.0000000000E+00 -4.2633349730E+00
+                       3.7794522658E+00  3.7794522658E+00 -3.2803418097E+00
+                       0.0000000000E+00  3.7794522658E+00 -3.6627278067E+00
+                       3.7794522658E+00  0.0000000000E+00  6.5250113947E-01
+                       0.0000000000E+00  3.7794522658E+00 -1.0555036964E-01
+                       3.7794522658E+00  3.7794522658E+00  3.2682166278E-01
+                       0.0000000000E+00  0.0000000000E+00  3.9815918094E+00
+                       3.7794522658E+00  3.7794522658E+00  4.0167907030E+00
+                       3.7794522658E+00  0.0000000000E+00  7.7541444349E+00
+                       0.0000000000E+00  3.7794522658E+00  7.6664087705E+00
+                       3.7794522658E+00  3.7794522658E+00  7.7182324796E+00
+                       0.0000000000E+00  0.0000000000E+00  1.1412913350E+01
+                       3.7794522658E+00  3.7794522658E+00  1.1416615533E+01
+                       3.7794522658E+00  0.0000000000E+00  1.5117809063E+01
+                       0.0000000000E+00  3.7794522658E+00  1.5117809063E+01
+                       3.7794522658E+00  3.7794522658E+00  1.5117809063E+01
+                       0.0000000000E+00  0.0000000000E+00  1.8822704777E+01
+                       3.7794522658E+00  3.7794522658E+00  1.8819002593E+01
+                       3.7794522658E+00  0.0000000000E+00  2.2481473692E+01
+                       0.0000000000E+00  3.7794522658E+00  2.2569209355E+01
+                       3.7794522658E+00  3.7794522658E+00  2.2517385647E+01
+                       0.0000000000E+00  0.0000000000E+00  2.6254026317E+01
+                       3.7794522658E+00  3.7794522658E+00  2.6218827423E+01
+                       3.7794522658E+00  0.0000000000E+00  2.9583116986E+01
+                       0.0000000000E+00  3.7794522658E+00  3.0341168496E+01
+                       3.7794522658E+00  3.7794522658E+00  2.9908796464E+01
+                       0.0000000000E+00  0.0000000000E+00  3.4498953099E+01
+                       3.7794522658E+00  3.7794522658E+00  3.3515959935E+01
+                       0.0000000000E+00  3.7794522658E+00  3.3898345933E+01
+chksymtnons 0
+ntypat 3
+
+znucl 56 22 8
+typat 3 3 2 3 3 2 1 3 3 3 2 1 3 3 3 2 1 3 3 3 2 1 3 3 3 2 3 3 2
+natom 29
+nband 120
+
+#electronic structure
+ecut 15.0
+nstep 30
+ngkpt 4 4 1
+kptopt 3
+tolwfr 1.0d-22
+tolrde 0.0 # This is a development input variable, used in the present case to avoid load unbalance
+           # when studying the scaling with respect to the number of cores. Do not define it in
+           # your production runs
+
+prtden 0
+rfphon 1
+irdwfk 1
+rfatpol 1 1
+rfdir 0 0 1
+nqpt 1
+qpt 0.0 0.25  0.0
+
+timopt -2
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "56ba.psp_mod, 22ti.psp_mod, 8o.psp_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tdfpt_03.abi, tdfpt_04.abi
+#%% [files]
+#%% [paral_info]
+#%% max_nprocs = 24
+#%% nprocs_to_test = 24
+#%% [NCPU_24]
+#%% files_to_test = tdfpt_04_MPI24.abo, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% [extra_info]
+#%% keywords = NC
+#%% description = BaTiO3 linear response calculation
+#%%<END TEST_INFO>

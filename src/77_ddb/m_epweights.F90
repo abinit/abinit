@@ -72,9 +72,10 @@ contains
 !!  elph_ds%k_phon%vvelocwtk = velocity^2 time integration weights of the coarse FS k-grid
 !!
 !! PARENTS
-!!      elphon,get_nv_fs_en
+!!      m_elphon
 !!
 !! CHILDREN
+!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
 !!
 !! SOURCE
 
@@ -913,9 +914,10 @@ end subroutine d2c_weights
 !!  elph_ds%k_phon%wtq = integration weights of the coarse k-grid
 !!
 !! PARENTS
-!!      mka2f,mka2f_tr
+!!      m_a2ftr,m_elphon
 !!
 !! CHILDREN
+!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
 !!
 !! SOURCE
 
@@ -1363,7 +1365,7 @@ end subroutine d2c_wtq
 !!   weights should be recalculated on-the-fly! The present implementation is not flexible!
 !!
 !! PARENTS
-!!      get_nv_fs_en,get_tau_k
+!!      m_a2ftr,m_elphon
 !!
 !! CHILDREN
 !!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
@@ -1608,10 +1610,10 @@ end subroutine ep_el_weights
 !!   weights should be recalculated on-the-fly! The present implementation is not flexible!
 !!
 !! PARENTS
-!!      elphon,get_nv_fs_en,get_nv_fs_temp
+!!      m_elphon
 !!
 !! CHILDREN
-!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv,wrtout
+!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
 !!
 !! SOURCE
 
@@ -1836,7 +1838,7 @@ end subroutine ep_fs_weights
 !!   weights should be recalculated on-the-fly! The present implementation is not flexible!
 !!
 !! PARENTS
-!!      get_tau_k,mka2f,mka2f_tr
+!!      m_a2ftr,m_elphon
 !!
 !! CHILDREN
 !!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv

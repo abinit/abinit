@@ -75,7 +75,7 @@ contains
 !!   corrvdw           = van der Waals correction to the energy.
 !!
 !! PARENTS
-!!      mlwfovlp
+!!      m_mlwfovlp
 !!
 !! CHILDREN
 !!
@@ -1055,7 +1055,7 @@ end subroutine evdw_wannier
 !! OUTPUT
 !!
 !! PARENTS
-!!      evdw_wannier
+!!      m_evdw_wannier
 !!
 !! CHILDREN
 !!
@@ -1127,7 +1127,7 @@ end subroutine getFu
 !! OUTPUT
 !!
 !! PARENTS
-!!      evdw_wannier
+!!      m_evdw_wannier
 !!
 !! CHILDREN
 !!
@@ -1185,7 +1185,7 @@ end subroutine getFu
 !! OUTPUT
 !!
 !! PARENTS
-!!      evdw_wannier
+!!      m_evdw_wannier
 !!
 !! CHILDREN
 !!
@@ -1338,7 +1338,7 @@ end subroutine getFu
 !! OUTPUT
 !!
 !! PARENTS
-!!      evdw_wannier
+!!      m_evdw_wannier
 !!
 !! CHILDREN
 !!
@@ -1425,7 +1425,7 @@ end subroutine vv10limit
 !! OUTPUT
 !!
 !! PARENTS
-!!      evdw_wannier
+!!      m_evdw_wannier
 !!
 !! CHILDREN
 !!

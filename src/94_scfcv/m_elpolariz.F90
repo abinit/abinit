@@ -122,10 +122,9 @@ contains
 !! pion(3)= reduced coordinates of the ionic polarization (a. u.)
 !!
 !! PARENTS
-!!      afterscfloop
+!!      m_afterscfloop
 !!
 !! CHILDREN
-!!      berryphase,berryphase_new,metric,uderiv,wrtout
 !!
 !! SOURCE
 
@@ -474,11 +473,9 @@ end subroutine elpolariz
 !!                     $c_g$ to $c_g^*$ when time-reversal symetrie is used
 !!
 !! PARENTS
-!!      elpolariz
+!!      m_elpolariz
 !!
 !! CHILDREN
-!!      appdig,dzgedi,dzgefa,hdr_io,matr3inv,rwwf,waveformat,wffclose,wffopen
-!!      wrtout,xdefineoff
 !!
 !! SOURCE
 
@@ -965,7 +962,7 @@ end subroutine uderiv
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      uderiv
+!!      m_elpolariz
 !!
 !! CHILDREN
 !!

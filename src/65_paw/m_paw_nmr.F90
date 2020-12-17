@@ -76,6 +76,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -189,11 +190,10 @@ subroutine make_orbl_paw(idir,natom,ntypat,orbl,pawrad,pawtab,typat)
 !! replaced in the Kresse and Joubert formulation by the sum over $\rho_{ij}$ occupations for each basis element pair.
 !!
 !! PARENTS
-!!      calc_efg
+!!      m_nucprop
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,matpointsym,pawdensities,pawrad_deducer0
-!!      simp_gen,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -404,7 +404,7 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 !! See Zwanziger, J. Phys. Conden. Matt. 21, 15024-15036 (2009) [[cite:Zwanziger2009]].
 !!
 !! PARENTS
-!!      calc_fc
+!!      m_nucprop
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,xmpi_sum

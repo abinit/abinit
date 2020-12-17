@@ -1,0 +1,132 @@
+########################################################
+#  Crystalline EuO - non-spin polarized (withouth 4f)
+#  Computation of phonon at Gamma
+#  Computation of dielectric tensor
+#  Computation of effective charges
+########################################################
+
+   ndtset 4
+   ixc 7
+
+#Set 1 : ground state self-consistency
+
+  rfphon1   0            # Cancel default
+  getwfk1   0            # Cancel default
+    nqpt1   0            # Cancel default
+  kptopt1   1            # Automatic generation of k points with symmetries
+  tolvrs1   1.0d-15      # SCF stopping criterion (modify default)
+   prtwf1   1            # WF printed
+
+#Set 2 : Response function calculation of d/dk wave function
+
+  rfphon2   0          # Cancel default
+  rfelfd2   2          # Calculate d/dk wave function only
+  kptopt2   2          # Use time-reversal symmetry for k-points
+    iscf2   -3         # Need this non-self-consistent option for d/dk
+  tolwfr2   1.0d-15    # SCF stopping criterion (modify default)
+   prtwf2   1            # WF printed
+
+#Set 3: Response function calculation to electric field
+
+  rfphon3   0          # Cancel default
+  rfelfd3   3          # Response to electric field only
+  getwfk3   1          # Use GS wave functions from dataset 1
+  getddk3   2          # Use DDK wave functions from dataset 2
+  kptopt3   2          # Use time-reversal symmetry for k-points
+
+# For converged calculation, comment the following line ...
+   nstep3   6             
+
+#Set 4 : Response function calculation of Q=0 phonons
+
+  rfphon4   1          # Do phonon response
+ rfatpol4   1 2        # Treat displacements of all atoms
+  getwfk4   1          # Use GS wave functions from dataset 1
+  getddk4   2          # Use GS wave functions from dataset 1
+  kptopt4   2          # Use time-reversal symmetry for k-points
+
+# For converged calculation, comment the following line ...
+   nstep4   6             
+
+
+#Defaults for all datasets)
+
+   rfphon   1          # Do phonon response
+  rfatpol   1 2        # Treat displacements of all atoms
+    rfdir   1 1 1      # Do all directions (symmetry will be used)
+   getwfk   1          # Use GS wave functions from dataset 1
+   kptopt   3          # Need full k-point set for finite-Q response
+    prtwf   0          # No WF printed
+
+
+
+#Incomplete set of symmetry-inequivalent qpt chosen to be commensurate
+# with kpt mesh so that only one set of GS wave functions is needed.
+     nqpt   1
+     qpt2   0.00000000E+00  0.00000000E+00  0.00000000E+00
+     qpt3   0.00000000E+00  0.00000000E+00  0.00000000E+00
+     qpt4   0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+
+#######################################################################
+#Common input variables
+
+#Definition of the unit cell
+    acell 3*9.80
+    rprim   0.0  0.5  0.5
+            0.5  0.0  0.5
+            0.5  0.5  0.0
+#Definition of the atom types
+   ntypat   2
+    znucl   63 8
+#Definition of the atoms
+    natom   2
+    typat   1 2
+     xred   0.0  0.0  0.0
+            0.5  0.5  0.5
+#Number of band
+    nband   13
+#Definition of the planewave basis set
+     ecut   10
+#Definition of the k-point grid
+#   ngkpt   6 6 6
+    ngkpt   2 2 2
+  nshiftk   4
+   shiftk   0.0 0.0 0.5
+            0.0 0.5 0.0
+            0.5 0.0 0.0
+            0.5 0.5 0.5
+#Definition of the SCF procedure
+    nstep   25
+   diemac   9.0
+   tolvrs   1.0d-8
+#PAW parameters
+#pawecutdg  120   # This Value allows to recover an excellent acoustic sum rule
+ pawecutdg  40
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Eu_GGA_20e_8p_xc0.pawps, O_GGA-rc12_xc0.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t43.abo, tolnlines=   26,   tolabs=  1.1e+1,      tolrel= 0.01852, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors =  Unknown
+#%% keywords =  PAW, DFPT
+#%% description =
+#%%    EuO rock salt structure.
+#%%    20-electron PAW pseudo (4f in the core, but 4d10 as semi-core : 4d10 5s2 5p6 (5d0) 6s2 )
+#%%    Test of computation of dielectric tensor, Born effective charges, dynamical matrix.
+#%%    To keep the CPU time to a reasonable level, the responses are computed
+#%%    with minimal parameters (nstep and the kpoint grid are too small,
+#%%    ecut might be increased, and also pawecutdg).
+#%%    Note: Charge neutrality is not achieved with the present dataset for Born Effective Charges,
+#%%          but can be easily reached by increasing some parameters; for instance:
+#%%           (ngkpt 6 6 6,  ecut 40. pawecutdg 40.) gives Z(Eu)=2.5085, Z(O)=-2.4982
+#%% topics = DFPT
+#%%<END TEST_INFO>

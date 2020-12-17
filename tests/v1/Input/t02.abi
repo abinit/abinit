@@ -1,0 +1,66 @@
+#   FCC Al; 2 special points
+
+ acell 3*7.60
+ ecut 10
+ enunit 2
+ intxc 1
+ kptopt 0
+ kpt   1 1 1     1 2 2   kptnrm 4
+ natom  1 nband 4
+ nkpt  2
+ nline 3  nstep 8
+ nsym  24 ntypat  1
+ occopt  5  prtvol 10
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel
+       1  0  0    0  1  0    0  0  1
+       0  1 -1    1  0 -1    0  0 -1
+      -1  0  0   -1  0  1   -1  1  0
+       0 -1  1    0 -1  0    1 -1  0
+      -1  0  1   -1  0  0   -1  1  0
+       0 -1  0    0 -1  1    1 -1  0
+       0 -1  1    1 -1  0    0 -1  0
+       0  1 -1    0  0 -1    1  0 -1
+       0  0 -1    1  0 -1    0  1 -1
+      -1  1  0   -1  0  1   -1  0  0
+       1  0 -1    0  1 -1    0  0 -1
+       1 -1  0    0 -1  0    0 -1  1
+      -1  0  0   -1  1  0   -1  0  1
+       0  1  0    1  0  0    0  0  1
+       0  0  1    0  1  0    1  0  0
+       1  0  0    0  0  1    0  1  0
+       0  0  1    1  0  0    0  1  0
+       0  1  0    0  0  1    1  0  0
+      -1  0  1   -1  1  0   -1  0  0
+       0  0 -1    0  1 -1    1  0 -1
+       1  0 -1    0  0 -1    0  1 -1
+       1 -1  0    0 -1  1    0 -1  0
+       0 -1  0    1 -1  0    0 -1  1
+      -1  1  0   -1  0  0   -1  0  1
+ tnons   72*0.0d0
+ tolwfr 1.0d-16
+ tsmear 0.05
+ typat  1
+ wtk   1 3
+ xred  0.0 0.0 0.0
+ znucl 13.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/13al.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = t02.abo, tolnlines=  1, tolabs=  1.001e-09, tolrel=  1.100e-04
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC
+#%% description = 
+#%%   Bulk Aluminium, FCC, with 2 special points, occopt=5 and tsmear=0.05.
+#%%   Designed to test the treatment of metals, using the "cold smearing"
+#%%   of N. Marzari , with a=-.8165 (monotonic function in the tail).
+#%% topics = BandOcc
+#%%<END TEST_INFO>

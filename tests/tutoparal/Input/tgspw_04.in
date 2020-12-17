@@ -142,7 +142,7 @@
 #%% [NCPU_32]
 #%% files_to_test = 
 #%%   tgspw_04_MPI32.out, tolnlines = 750, tolabs = 1.1e-3, tolrel = 1.0e-2 
-#%% psp_files = 79au.pspnc
+#%% psp_files = PseudosTM_pwteter/79au.pspnc
 #%% [paral_info]
 #%% max_nprocs = 32
 #%% nprocs_to_test = 32

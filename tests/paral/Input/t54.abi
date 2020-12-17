@@ -1,0 +1,145 @@
+#test GaAs crystal, with small ecut.
+#note that localrdwf=1
+
+ ndtset 5
+
+#DATASET 1 : SC run with 2 kpoints
+  prtden1  1     
+    nqpt1  0
+    nkpt1  2
+  kptopt1  1
+  tolwfr1  1.0d-22
+
+#DATASET 2 : NSC run with 16 kpoints, without q-wavevector shift
+   iscf2  -2     
+   nqpt2   0    
+ getwfk2   1   
+ getden2   1
+ tolwfr2   1.0d-22
+
+#DATASET 3 : ddk perturbation (all directions are needed in order 
+#run dataset 5)
+ getwfk3   2
+   iscf3  -3     
+   nqpt3   1   
+    qpt3   0.0d0 0.0d0 0.0d0
+  rfdir3   1 1 1
+ rfelfd3   2
+ tolwfr3   1.0d-22
+
+#DATASET 4 : phonon and electric field perturbations 
+  diemix4   0.7
+  diemac4   1.0
+  getddk4   3
+  getwfk4   2
+    nqpt4   1                             
+     qpt4   0.0d0 0.0d0 0.0d0
+ rfatpol4   1 2 
+   rfdir4   1 1 1
+  rfelfd4   3
+  rfphon4   1
+  tolwfr4   1.0d-16
+ prepanl4   1
+
+#DATASET5 : 3DTE calculation
+#***************************
+   getden5    1
+  get1den5    4
+   getwfk5    2
+   get1wf5    4
+   kptopt5    2
+optdriver5    5
+ d3e_pert1_elfd5    1
+ d3e_pert1_phon5    1
+ d3e_pert1_atpol5   1 2
+ d3e_pert1_dir5     1 1 1
+ d3e_pert2_elfd5    1
+ d3e_pert2_dir5     1 1 1
+ d3e_pert3_elfd5    1
+ d3e_pert3_dir5     1 1 1
+
+
+
+#Common data
+ nkpt 16
+ ngkpt 2 2 2 
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+ kptopt 2
+ acell   3*10.60
+ amu 69.72  74.9216
+ ecut 1.00
+ getden 0
+ ixc 3
+ localrdwf 1
+ natom  2 nband 4  nbdbuf 0
+ nstep 40
+
+ nsym  24 ntypat  2
+ occopt 1
+ paral_kgb 0
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel  1  0  0   0  1  0   0  0  1
+  0  1 -1   1  0 -1   0  0 -1
+  0 -1  1   0 -1  0   1 -1  0
+ -1  0  0  -1  0  1  -1  1  0
+  0  1  0   0  0  1   1  0  0
+  1  0 -1   0  0 -1   0  1 -1
+  0 -1  0   1 -1  0   0 -1  1
+ -1  0  1  -1  1  0  -1  0  0
+  0  0  1   1  0  0   0  1  0
+  0  0 -1   0  1 -1   1  0 -1
+  1 -1  0   0 -1  1   0 -1  0
+ -1  1  0  -1  0  0  -1  0  1
+  1  0 -1   0  1 -1   0  0 -1
+  0  1  0   1  0  0   0  0  1
+ -1  0  1  -1  0  0  -1  1  0
+  0 -1  0   0 -1  1   1 -1  0
+ -1  1  0  -1  0  1  -1  0  0
+  1 -1  0   0 -1  0   0 -1  1
+  0  0 -1   1  0 -1   0  1 -1
+  0  0  1   0  1  0   1  0  0
+  0 -1  1   1 -1  0   0 -1  0
+ -1  0  0  -1  1  0  -1  0  1
+  1  0  0   0  0  1   0  1  0
+  0  1 -1   0  0 -1   1  0 -1
+ xred 3*0.00d0 3*0.25d0
+ timopt 2
+ tnons 72*0.0
+ typat  1 2  
+ znucl  31 33
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31ga.SGS_mod, 33as.SGS_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 10
+#%% [NCPU_1]
+#%% files_to_test = t54_MPI1.abo, tolnlines=    1,   tolabs=  1.1e-7,      tolrel= 1.1e-4, fld_options = -medium
+#%% [NCPU_2]
+#%% files_to_test = t54_MPI2.abo, tolnlines=    1,   tolabs=  1.1e-7,      tolrel= 1.1e-4, fld_options = -medium
+#%% [NCPU_4]
+#%% files_to_test = t54_MPI4.abo, tolnlines=    1,   tolabs=  1.1e-7,      tolrel= 1.1e-4, fld_options = -medium
+#%% [NCPU_10]
+#%% files_to_test = t54_MPI10.abo, tolnlines=    1,   tolabs=  1.1e-7,      tolrel= 1.1e-4, fld_options = -medium
+#%% [extra_info]
+#%% keywords =  NC, DFPT, NONLINEAR
+#%% authors = Unknown
+#%% description = 
+#%%    GaAs in zinc-blende structure; GS and RF calculation
+#%%    (similar to test v2 #30, except that only two q points are
+#%%    considered) the 5-th dataset compute 3DTE.
+#%%    localrdwf=1
+#%%    Also check parallelism for Raman calculations.
+#%% topics = nonlinear
+#%%<END TEST_INFO>

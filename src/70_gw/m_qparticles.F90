@@ -110,7 +110,7 @@ CONTAINS  !=====================================================================
 !!   | QP density in real space.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -265,7 +265,7 @@ end subroutine wrqps
 !!  The value of nspden is not reported in the QPS file thus we have a possible undetected error.
 !!
 !! PARENTS
-!!      bethe_salpeter,mlwfovlp_qp,screening,sigma
+!!      m_bethe_salpeter,m_mlwfovlp_qp,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -559,7 +559,7 @@ end subroutine rdqps
 !!  Only master node should call this routine.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -699,7 +699,7 @@ end subroutine show_QP
 !!   igwene(Bst%mband,Bst%nkpt,Bst%nsppol)= The imaginary part of the QP energies.
 !!
 !! PARENTS
-!!      mlwfovlp_qp,screening,setup_bse,sigma
+!!      m_bethe_salpeter,m_mlwfovlp_qp,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -908,7 +908,7 @@ end subroutine rdgw
 !!  Only master node should call this routine.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!

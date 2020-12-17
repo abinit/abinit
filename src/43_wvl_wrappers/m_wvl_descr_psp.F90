@@ -69,10 +69,10 @@ contains
 !!                 | natsc    = number of atoms with semicore
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      atomic_info,psp_from_data,wrtout
+!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
 !!
 !! SOURCE
 
@@ -167,10 +167,10 @@ end subroutine wvl_descr_psp_set
 !! OUTPUT
 !!
 !! PARENTS
-!!      psp10in,psp2in,psp3in,pspatm
+!!      m_psp_hgh,m_pspini
 !!
 !! CHILDREN
-!!      atomic_info,psp_from_data,wrtout
+!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
 !!
 !! SOURCE
 
@@ -234,7 +234,7 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
      gth_params%radii_cf(ipsp, 2) = UNINITIALIZED(gth_params%radii_cf(ipsp, 2))
      write(message, '(a,a,a,a,a,a,a)' ) '-', ch10,&
 &     '- wvl_descr_psp_fill : COMMENT -',ch10,&
-&     "-  the pseudo-potential does not include geometric informations,",ch10,&
+&     "-  the pseudo-potential does not include geometric information,",ch10,&
 &     '-  values have been computed.'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
@@ -314,10 +314,10 @@ end subroutine wvl_descr_psp_fill
 !! wvl <type(wvl_internal_type)>=internal variables for wavelets
 !!
 !! PARENTS
-!!      gstate,wvl_memory
+!!      m_gstate,m_memeval
 !!
 !! CHILDREN
-!!      deallocate_atoms_data,f_free_ptr
+!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
 !!
 !! SOURCE
 
@@ -379,11 +379,10 @@ end subroutine wvl_descr_free
 !!                 | natpol   =  integer related to polarisation at the first step
 !!
 !! PARENTS
-!!      gstate,wvl_memory
+!!      m_gstate,m_memeval
 !!
 !! CHILDREN
-!!      allocate_atoms_nat,allocate_atoms_ntypes,astruct_set_n_atoms
-!!      astruct_set_n_types,f_release_routine,f_routine
+!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
 !!
 !! SOURCE
 
@@ -480,7 +479,7 @@ end subroutine wvl_descr_atoms_set
 !!                 | natpol   =  integer related to polarisation at the first step
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      astruct_set_symmetries,symmetry_set_n_sym,wrtout

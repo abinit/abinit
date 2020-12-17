@@ -108,6 +108,7 @@ CONTAINS  !===============================================================
 !!      m_exc_diago
 !!
 !! CHILDREN
+!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
@@ -646,6 +647,7 @@ CONTAINS  !===========================================================
 !!      m_exc_itdiago
 !!
 !! CHILDREN
+!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
@@ -805,6 +807,7 @@ end subroutine exc_init_phi_block
 !!      m_exc_itdiago
 !!
 !! CHILDREN
+!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
@@ -964,6 +967,7 @@ end subroutine exc_write_phi_block
 !!      m_exc_itdiago
 !!
 !! CHILDREN
+!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
@@ -1066,6 +1070,7 @@ end subroutine exc_subspace_rotation
 !!      m_exc_itdiago
 !!
 !! CHILDREN
+!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
@@ -1202,6 +1207,7 @@ end function convergence_degree
 !!      m_exc_itdiago
 !!
 !! CHILDREN
+!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 

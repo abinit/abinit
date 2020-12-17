@@ -246,7 +246,7 @@ CONTAINS  !=====================================================================
 !!   kpt_in is non-symmorphic namely thers is at lest a symmetry operation with non-zero tnons.
 !!
 !! PARENTS
-!!      classify_bands
+!!      m_classify_bands
 !!
 !! CHILDREN
 !!      xgeev,xginv,zpotrf,ztrsm
@@ -835,7 +835,7 @@ end subroutine esymm_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      classify_bands
+!!      m_classify_bands
 !!
 !! CHILDREN
 !!      xgeev,xginv,zpotrf,ztrsm
@@ -1040,7 +1040,7 @@ end subroutine esymm_free_2D
 !! OUTPUT
 !!
 !! PARENTS
-!!      classify_bands
+!!      m_classify_bands
 !!
 !! CHILDREN
 !!      xgeev,xginv,zpotrf,ztrsm
@@ -1342,7 +1342,7 @@ end function which_irrep
 !!  esymm<esymm_t>
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me
+!!      m_cohsex,m_sigc,m_sigx
 !!
 !! CHILDREN
 !!      xgeev,xginv,zpotrf,ztrsm

@@ -107,7 +107,7 @@ CONTAINS  !=====================================================================
 !! scell = supercell structure to be initialized
 !!
 !! PARENTS
-!!      freeze_displ_allmodes
+!!      m_phonons
 !!
 !! CHILDREN
 !!
@@ -358,7 +358,7 @@ end subroutine order_supercell_typat
 !! scell = supercell structure: xcart will be updated with phonon displacement
 !!
 !! PARENTS
-!!      freeze_displ_allmodes,m_phonons
+!!      m_phonons
 !!
 !! CHILDREN
 !!
@@ -434,7 +434,7 @@ end subroutine freeze_displ_supercell
 !! printing to file
 !!
 !! PARENTS
-!!      freeze_displ_allmodes
+!!      m_phonons
 !!
 !! CHILDREN
 !!
@@ -766,8 +766,7 @@ end function distance_supercell
 !! scell = supercell structure with data to be output
 !!
 !! PARENTS
-!!      freeze_displ_allmodes,m_effective_potential,m_fit_polynomial_coeff
-!!      m_phonons,m_supercell
+!!      m_effective_potential,m_fit_polynomial_coeff,m_phonons,m_supercell
 !!
 !! CHILDREN
 !!
@@ -830,7 +829,7 @@ end subroutine destroy_supercell
 !!  rprimd_sc unit cell dimensions of supercell
 !!
 !! PARENTS
-!!      pawuj_det
+!!      m_paw_uj
 !!
 !! CHILDREN
 !!

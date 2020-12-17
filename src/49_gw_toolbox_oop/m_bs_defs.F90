@@ -286,7 +286,7 @@ CONTAINS  !=====================================================================
 !!  Bsp<excparam>=All associated pointers are deallocated.
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!      wrtout
@@ -336,7 +336,7 @@ end subroutine bs_parameters_free
 !!  Only printing.
 !!
 !! PARENTS
-!!      setup_bse
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!      wrtout
@@ -507,7 +507,7 @@ end subroutine print_bs_parameters
 !!  Returns a string with the calculation type.
 !!
 !! PARENTS
-!!      m_bs_defs,m_exc_spectra,setup_bse
+!!      m_bethe_salpeter,m_bs_defs,m_exc_spectra
 !!
 !! CHILDREN
 !!      wrtout
@@ -569,7 +569,7 @@ end subroutine bsp_calctype2str
 !!    output: Trans(max_nreh,nsppol) stores the correspondence t -> (band,kbz,spin) and the transition energy.
 !!
 !! PARENTS
-!!      setup_bse,setup_bse_interp
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!      wrtout
@@ -767,7 +767,7 @@ end function repr_2trans
 !!  Only printing.
 !!
 !! PARENTS
-!!      setup_bse
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!      wrtout

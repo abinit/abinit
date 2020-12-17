@@ -271,11 +271,9 @@ CONTAINS  !===========================================================
 !!  Clean and deallocate types for the ddb_type structure
 !!
 !! PARENTS
-!!      anaddb,ddb_interpolate,dfpt_looppert,dfptnl_doutput,eph,gstate
-!!      m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -309,9 +307,10 @@ end subroutine ddb_free
 !!  Create object and copy all types for the ddb_type structure
 !!
 !! PARENTS
+!!      m_ddb
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -362,10 +361,9 @@ end subroutine ddb_copy
 !! OUTPUT
 !!
 !! PARENTS
-!!      ddb_interpolate,dfptnl_doutput,gstate,m_ddb,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -418,10 +416,9 @@ end subroutine ddb_malloc
 !!   Ddb<type(ddb_type)>= Input if node is master, other nodes returns with a completely initialized instance.
 !!
 !! PARENTS
-!!      m_ddb
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -518,11 +515,9 @@ end subroutine ddb_bcast
 !! iblok= number of the block that corresponds to the specifications
 !!
 !! PARENTS
-!!      anaddb,ddb_interpolate,m_ddb,m_effective_potential_file,m_phonons
-!!      thmeig
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -775,7 +770,7 @@ end subroutine ddb_get_block
 !!      m_ddb
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -842,10 +837,9 @@ end subroutine gamma9
 !! only executed by one processor.
 !!
 !! PARENTS
-!!      m_ddb,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1095,7 +1089,7 @@ end subroutine ddb_read_block
 !!      m_ddb
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1352,10 +1346,10 @@ end subroutine rdddb9
 !! Only for one processor (no use of wrtout)
 !!
 !! PARENTS
-!!      m_ddb,thmeig
+!!      m_ddb,m_thmeig
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1436,10 +1430,10 @@ end subroutine chkin9
 !! d3cart(2,3,mpert,3,mpert,3,mpert)=matrix of third-order energy derivatives in cartesian coordinates
 !!
 !! PARENTS
-!!      m_ddb,nonlinear
+!!      m_ddb,m_nonlinear
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1587,10 +1581,11 @@ end subroutine nlopt
 !!   They are needed for legacy code!
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,eph,m_effective_potential_file,m_gruneisen
+!!      anaddb,m_dfpt_looppert,m_dvdb,m_effective_potential_file,m_eph_driver
+!!      m_gruneisen,m_ifc
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1803,10 +1798,10 @@ end subroutine ddb_from_file
 !! is transformed from reduced coordinates to cartesian coordinates
 !!
 !! PARENTS
-!!      thmeig
+!!      m_thmeig
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1912,7 +1907,7 @@ end subroutine carttransf
 !!      m_ddb
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2015,7 +2010,7 @@ end subroutine carteig2d
 !!      m_ddb
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2104,7 +2099,7 @@ end subroutine dtech9
 !!      m_ddb
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2836,7 +2831,7 @@ end function ddb_get_asrq0
 !! PARENTS
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2925,10 +2920,9 @@ end subroutine ddb_diagoq
 !!   Output: Changed to enforce ASR.
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_phonons
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2974,10 +2968,9 @@ end subroutine asrq0_apply
 !!   Free dynamic memory
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential_file
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3043,10 +3036,9 @@ end subroutine asrq0_free
 !! only executed by one processor.
 !!
 !! PARENTS
-!!      ddb_interpolate,dfptnl_doutput,gstate,mblktyp1,mblktyp5
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3220,10 +3212,10 @@ end subroutine ddb_write_block
 !!  the permutations of the perturbations.
 !!
 !! PARENTS
-!!      nonlinear
+!!      m_nonlinear
 !!
 !! CHILDREN
-!!      ddb_free,ddb_malloc,ddb_write_block,wrtout
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3315,7 +3307,7 @@ end subroutine dfptnl_doutput
 !! PARENTS
 !!
 !! CHILDREN
-!!      ddb_hdr_free,ddb_hdr_open_read
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3481,8 +3473,7 @@ end subroutine ddb_to_dtset
 !!      mrgddb
 !!
 !! CHILDREN
-!!      ddb_free,ddb_hdr_compare,ddb_hdr_free,ddb_hdr_open_read
-!!      ddb_hdr_open_write,ddb_malloc,ddb_write_block,read_block,wrtout
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3595,7 +3586,8 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
                           matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
                           msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
-   if (chkopt==1)then
+   ! If PAW, we need to call %compare for its side effects.
+   if (chkopt==1 .or. usepaw == 1)then
      ! Compare the current DDB and input DDB information.
      ! In case of an inconsistency, halt the execution.
      call wrtout(std_out, ' compare the current and input DDB information')
@@ -3800,8 +3792,7 @@ end subroutine mblktyp1
 !!      mrgddb
 !!
 !! CHILDREN
-!!      ddb_free,ddb_hdr_compare,ddb_hdr_free,ddb_hdr_open_read
-!!      ddb_hdr_open_write,ddb_malloc,ddb_write_block,read_block,wrtout
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3922,7 +3913,8 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
                           matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
                           msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
-   if (chkopt==1)then
+   ! If PAW, we need to call %compare for its side effects.
+   if (chkopt==1 .or. usepaw == 1)then
      ! Compare the current DDB and input DDB information.
      ! In case of an inconsistency, halt the execution.
      write(msg, '(a)' )' compare the current and input DDB information'
@@ -4101,10 +4093,10 @@ end subroutine mblktyp5
 !!   the permutations of the perturbations.
 !!
 !! PARENTS
-!!      longwave
+!!      m_longwave
 !!
 !! CHILDREN
-!!      ddb_free,ddb_malloc,ddb_write_blok,wrtout
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4215,7 +4207,7 @@ end subroutine dfpt_lw_doutput
 !!      m_ddb
 !!
 !! CHILDREN
-!!      cart39
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4318,6 +4310,7 @@ end subroutine lwcart
 !!      m_ddb
 !!
 !! CHILDREN
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4426,9 +4419,10 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 !! ddb_lw= ddb block datastructure
 !!
 !! PARENTS
-!!     anaddb
+!!      anaddb
 !!
 !! CHILDREN
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4535,6 +4529,7 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 !!      m_ifc
 !!
 !! CHILDREN
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4677,9 +4672,9 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
      write(msg, '(a,a,a,i0,a,a,a,3es16.6,a,a,a,a)' )&
       'Information is missing in the DDB.',ch10,&
       'The dynamical matrix number ',iqpt,' cannot be built,',ch10,&
-      'since no block with wavevector',spqpt(1:3,iqpt),ch10,&
+      'since no block with qpt:',spqpt(1:3,iqpt),ch10,&
       'has been found.',ch10,&
-      'Action: add the required blok in the DDB, or modify your input file.'
+      'Action: add the required block in the DDB, or modify the q-mesh your input file.'
      if (.not.allow_qmiss) then
        MSG_ERROR(msg)
      else
@@ -4740,12 +4735,12 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
            index = idir1+ 3*((ipert1-1)+ddb%mpert*((idir2-1)+3*(ipert2-1)))
            !if(ddb%flg(idir1,ipert1,idir2,ipert2,q1)/=1)then
            if(ddb%flg(index,q1)/=1)then
-             write(msg, '(a,a,a,i0,a,a,a,4i0,a,a,a,a)' )&
-             'Information are missing in the DDB.',ch10,&
-             'In block',q1,' the following element is missing :',ch10,&
-             'idir1,ipert1,idir2,ipert2=',idir1,ipert1,idir2,ipert2,ch10,&
-             'Action: add the required information in the DDB,',ch10,&
-             'or modify your input file.'
+             write(msg, '(a,a,a,i0,a,a,a,4(i0,1x),a,a,a,a)' )&
+             'Elements are missing in the DDB.',ch10,&
+             'In block iq1: ',q1,' the following element is missing: ',ch10,&
+             '(idir1, ipert1, idir2, ipert2): ',idir1,ipert1,idir2,ipert2,ch10,&
+             'Action: add the required information in the DDB with mrgddb,',ch10,&
+             'and/or check that all irreducible perturbations have been computed.'
              MSG_ERROR(msg)
            end if
          end do

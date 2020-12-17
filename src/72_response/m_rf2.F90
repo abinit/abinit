@@ -148,7 +148,7 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_looppert,dfpt_scfcv,rf2_init
+!!      m_dfptnl_loop,m_dfptnl_pert
 !!
 !! CHILDREN
 !!
@@ -188,7 +188,7 @@ end subroutine rf2_getidir
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_looppert,dfpt_scfcv,rf2_init
+!!      m_dfpt_looppert,m_dfpt_lw,m_dfpt_scfcv,m_rf2_init
 !!
 !! CHILDREN
 !!
@@ -430,7 +430,7 @@ end subroutine rf2_accumulate_bands
 !!    Note that <Proj_i^(2)|u^(0)> is always computed on the fly.
 !!
 !! PARENTS
-!!      rf2_init
+!!      m_dfptnl_pert,m_rf2_init
 !!
 !! CHILDREN
 !!

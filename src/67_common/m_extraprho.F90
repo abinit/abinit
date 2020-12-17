@@ -116,10 +116,11 @@ contains
 !!  scf_history <type(scf_history_type)>=arrays obtained from previous SCF cycles
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      atm2fft,extrapwf,jellium,pawrhoij_alloc,wrtout
+!!      cgcprj_cholesky,dotprod_set_cgcprj,lincom_cgcprj,pawcprj_alloc
+!!      pawcprj_axpby,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_put,zgesv
 !!
 !! SOURCE
 
@@ -140,11 +141,11 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
  integer,intent(in) :: nattyp(ntypat),ngfft(18),npwarr(dtset%nkpt)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*dtset%natom)
- real(dp),intent(in) :: qgrid(mqgrid),rprimd(3,3)
+ real(dp),intent(in) :: qgrid(mqgrid)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) ::  zion(ntypat),znucl(ntypat)
  real(dp), intent(inout) :: cg(2,mcg)
- real(dp),intent(inout) :: rhor(nfft,dtset%nspden),xred_new(3,dtset%natom)
+ real(dp),intent(inout) :: rhor(nfft,dtset%nspden),rprimd(3,3),xred_new(3,dtset%natom)
  real(dp),intent(in) :: xred_old(3,dtset%natom)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
@@ -339,7 +340,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
  call atm2fft(atindx1,scf_history%atmrho_last,dummy_out1,dummy_out2,dummy_out3,&
 & dummy_out4,gauss,gmet,gprimd,dummy_out5,dummy_out6,gsqcut,mgfft,mqgrid,dtset%natom,nattyp,&
 & nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,qgrid,&
-& dummy3,dummy_in,strn_dummy6,strv_dummy6,ucvol,usepaw,dummy_in,dummy_in,dummy_in,dummy2,dummy_in,&
+& dummy3,dtset%rcut,dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,usepaw,dummy_in,dummy_in,dummy_in,dummy2,dummy_in,&
 & comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 & paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
  ABI_DEALLOCATE(gauss)
@@ -526,12 +527,11 @@ end subroutine extraprho
 !!  SHOULD BE CAREFULY TESTED AND DEBUGGED (ESPECIALLY WITHIN PAW).
 !!
 !! PARENTS
-!!      extraprho
+!!      m_extraprho
 !!
 !! CHILDREN
-!!      ctocprj,dotprod_g,getph,hermit,metric,pawcprj_alloc,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_lincom,pawcprj_put
-!!      pawcprj_zaxpby,xmpi_allgather,xmpi_alltoallv,zgemm,zhpev
+!!      cgcprj_cholesky,dotprod_set_cgcprj,lincom_cgcprj,pawcprj_alloc
+!!      pawcprj_axpby,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_put,zgesv
 !!
 !! SOURCE
 
@@ -1137,12 +1137,11 @@ end subroutine extrapwf
 !!  scf_history_wf <type(scf_history_type)>=arrays obtained from previous SCF cycles
 !!
 !! PARENTS
-!!      scfcv_core
+!!      m_extraprho
 !!
 !! CHILDREN
-!!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
-!!      lincom_cgcprj,pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_get
-!!      pawcprj_getdim,pawcprj_lincom,pawcprj_put,timab,xmpi_sum,zgesv
+!!      cgcprj_cholesky,dotprod_set_cgcprj,lincom_cgcprj,pawcprj_alloc
+!!      pawcprj_axpby,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_put,zgesv
 !!
 !! SOURCE
 

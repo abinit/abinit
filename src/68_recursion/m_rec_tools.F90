@@ -68,7 +68,7 @@ CONTAINS  !===========================================================
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      first_rec,m_rec
+!!      m_rec,m_vtorhorec
 !!
 !! CHILDREN
 !!
@@ -128,7 +128,7 @@ end subroutine get_pt0_pt1
 !! potloc is a cut of pot around trasl
 !!
 !! PARENTS
-!!      first_rec,nlenergyrec,vtorhorec
+!!      m_vtorhorec
 !!
 !! CHILDREN
 !!
@@ -191,7 +191,7 @@ end subroutine reshape_pot
 !!  prod_b2=numerical factor
 !!
 !! PARENTS
-!!      density_rec,recursion,recursion_nl
+!!      m_vtorhorec
 !!
 !! CHILDREN
 !!

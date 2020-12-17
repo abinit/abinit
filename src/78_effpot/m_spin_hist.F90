@@ -275,10 +275,10 @@ contains
   !! OUTPUT
   !! hist <type(spin_hist_t)()> = spin hist type
   !! PARENTS
-  !!      m_spin_hist
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%inc1
+!!
   !! SOURCE
   subroutine set_atomic_structure(self, acell, rprimd, xred, spin_index, ntypat,  typat, znucl)
 
@@ -452,10 +452,10 @@ contains
   !! OUTPUT
   !!   hist <type(spin_hist_t)()> = spin hist type
   !! PARENTS
-  !!      m_spin_hist
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%inc1
+!!
   !! SOURCE
   subroutine inc1(self)
 

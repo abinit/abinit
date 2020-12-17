@@ -145,16 +145,16 @@ contains
 !!    (gradients of rhoij for each atom with respect to atomic positions are computed here)
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      appdig,check_degeneracies,dotprod_g
-!!      init_hamiltonian,metric,mkffnl
-!!      mkkin,mkkpg,nonlop,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      paw_ij_reset_flags,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawdij2e1kb
-!!      pawdijfr,pawfgrtab_free,pawfgrtab_init,pawgrnl,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,pawrhoij_symrhoij
-!!      timab,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
+!!      appdig,check_degeneracies,ddkfiles,dotprod_g,gs_ham%free,gs_ham%load_k
+!!      gs_ham%load_spin,init_hamiltonian,metric,mkffnl,mkkin,mkkpg,nonlop
+!!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawaccrhoij
+!!      pawcprj_alloc,pawcprj_free,pawdij2e1kb,pawdijfr,pawfgrtab_free
+!!      pawfgrtab_init,pawgrnl,pawrhoij_free,pawrhoij_gather,pawrhoij_nullify
+!!      pawrhoij_symrhoij,pawtab_get_lsize,strconv,timab,wfk_open_read,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -458,14 +458,13 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  end if !PAW
 
 !If needed, manage ddk files
-!Open ddk WF file(s)
+!Open ddk WF file(s) in sequential mode
  if (need_becfr.or.need_piezofr) then
    do ii=1,3 ! Loop over elect. field directions
      if (ddkfil(ii)/=0) then
        write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk(ii))
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       call wfk_open_read(ddkfiles(ii),fiwfddk(ii),formeig1,dtset%iomode,ddkfil(ii),spaceworld)
+       call wrtout([std_out, ab_out], msg)
+       call wfk_open_read(ddkfiles(ii),fiwfddk(ii),formeig1,dtset%iomode,ddkfil(ii), xmpi_comm_self)
      end if
    end do
  end if
@@ -502,10 +501,10 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
            ABI_CHECK(ik_ddk(ii) /= -1, "Cannot find k-point in DDK")
            npw_ = ddkfiles(ii)%hdr%npwarr(ik_ddk(ii))
            if (npw_/=npw_k) then
-             write(unit=msg,fmt='(a,i3,a,i5,a,i3,a,a,i5,a,a,i5)')&
-&             'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',ii,ch10,&
-&             'the number of plane waves in the ddk file is equal to', npw_,ch10,&
-&             'while it should be ',npw_k
+             write(msg, '(a,i0,a,i0,a,i0,a,a,i0,a,a,i0)')&
+             'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',ii,ch10,&
+             'the number of plane waves in the ddk file is equal to', npw_,ch10,&
+             'while it should be ',npw_k
              MSG_ERROR(msg)
            end if
 

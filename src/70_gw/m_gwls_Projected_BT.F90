@@ -88,7 +88,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      cleanup_lanczosresolvents
@@ -472,7 +472,7 @@ end subroutine compute_projected_BT_shift_Lanczos
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      cleanup_lanczosresolvents

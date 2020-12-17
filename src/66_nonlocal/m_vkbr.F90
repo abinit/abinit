@@ -126,7 +126,7 @@ CONTAINS  !=====================================================================
 !!    Completely initialized in output.
 !!
 !! PARENTS
-!!      calc_optical_mels,cchi0q0,cchi0q0_intraband
+!!      m_chi0,m_ddk,m_wfd_optic
 !!
 !! CHILDREN
 !!      ylmcd
@@ -408,7 +408,7 @@ end subroutine add_vnlr_commutator
 !!  SOC not implemented.
 !!
 !! PARENTS
-!!      m_vkbr
+!!      m_iowf,m_vkbr
 !!
 !! CHILDREN
 !!      ylmcd
@@ -689,7 +689,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
 !Local variables-------------------------------
 !scalars
  integer :: ii,iat,ig,il,im,ilm,itypat,nlmn,iln0,iln,ilmn,in
- real(dp),parameter :: ppad=tol8
+ real(dp),parameter :: ppad=tol6
  real(dp) :: cosphi,costh,factor,mkg,mkg2,sinphi,sinth,sq,xdotg
  complex(dpc) :: dphi,dth,sfac
  character(len=500) :: msg

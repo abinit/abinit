@@ -159,7 +159,7 @@ CONTAINS
 !!  results_img(:)=<type(results_img_type)>=results_img datastructure array
 !!
 !! PARENTS
-!!      gstateimg,m_results_img
+!!      m_gstateimg,m_results_img
 !!
 !! CHILDREN
 !!      mkrdim,xred2xcart
@@ -236,7 +236,7 @@ end subroutine init_results_img
 !!  results_img(:)=<type(results_img_type)>=results_img datastructure array
 !!
 !! PARENTS
-!!      gstateimg,prtimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!      mkrdim,xred2xcart
@@ -371,7 +371,7 @@ end subroutine nullify_results_img
 !!  results_img_out=<type(results_img_type)>=output results_img datastructure
 !!
 !! PARENTS
-!!      gstateimg,m_results_img
+!!      m_gstateimg,m_results_img
 !!
 !! CHILDREN
 !!      mkrdim,xred2xcart
@@ -483,7 +483,7 @@ end subroutine copy_results_img
 !!  results_img_all(:)=<type(results_img_type)>=global (gathered) results_img datastructure array
 !!
 !! PARENTS
-!!      prtimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!      mkrdim,xred2xcart
@@ -1098,7 +1098,7 @@ end subroutine gather_array_img_2D
 !!                    (has 3 dimensions; the 3rd one is nimage)
 !!
 !! PARENTS
-!!      predict_pimd
+!!      m_predict_pimd
 !!
 !! CHILDREN
 !!      mkrdim,xred2xcart
@@ -1250,7 +1250,7 @@ end subroutine scatter_array_img
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      predict_neb,predict_steepest,predict_string
+!!      m_predict_neb,m_predict_steepest,m_predict_string
 !!
 !! CHILDREN
 !!      mkrdim,xred2xcart

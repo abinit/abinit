@@ -38,7 +38,7 @@ module m_fit_data
 !!
 !! FUNCTION
 !! datatype for with all the information for the fit process
-!! This structure contains all the informations of the training set:
+!! This structure contains all the information of the training set:
 !!   - ntime
 !!   - displacement
 !!   - du_delta
@@ -118,7 +118,7 @@ module m_fit_data
 !   The model constains only harmonic part
 
    type(training_set_type) :: training_set
-!    datatype with the informations of the training set
+!    datatype with the information of the training set
    
  end type fit_data_type
 
@@ -225,7 +225,7 @@ end subroutine fit_data_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_fit_data,m_fit_polynomial_coeff
+!!      m_fit_data,m_fit_polynomial_coeff,m_opt_effpot
 !!
 !! CHILDREN
 !!
@@ -285,7 +285,7 @@ end subroutine fit_data_free
 !! fit_data<fit_data_type> = fit_data is now filled
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      m_fit_polynomial_coeff,m_opt_effpot
 !!
 !! CHILDREN
 !!

@@ -140,14 +140,11 @@ CONTAINS  !=====================================================================
 !!    must contain first-order quantities, namely paw_an1 (resp. paw_ij1).
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_scfcv,odamix,paw_qpscgw,respfn,scfcv,screening
-!!      sigma
+!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_odamix
+!!      m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawdensities,pawdijfock,pawdijhartree
-!!      pawdijnd,pawdijso,pawrad_deducer0,pawuenergy,pawxc,pawxc_dfpt,pawxcm
-!!      pawxcm_dfpt,pawxcmpositron,pawxcpositron,pawxenergy,pawxpot,poisson
-!!      setnoccmmp,timab,wrtout,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -1132,10 +1129,10 @@ end subroutine pawdenpot
 !!               updated with the contribution of current atom
 !!
 !! PARENTS
-!!      make_efg_onsite,pawdenpot,pawdfptenergy,poslifetime,posratecore
+!!      m_paw_denpot,m_paw_dfpt,m_paw_dfptnl,m_paw_nmr,m_positron
 !!
 !! CHILDREN
-!!      pawrad_deducer0,simp_gen,wrtout
+!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -1525,10 +1522,10 @@ end subroutine pawdensities
 !!  ttau1(cplex*mesh_size,lm_size,nspden)]= pseudo on site kinetic energy density
 !!
 !! PARENTS
-!!      pawdenpot
+!!      m_paw_denpot
 !!
 !! CHILDREN
-!!      pawrad_deducer0,simp_gen
+!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -1823,7 +1820,7 @@ end subroutine pawkindensities
 !!             expression of 2nd-order energy)
 !!
 !! PARENTS
-!!      m_paw_denpot
+!!      m_paw_denpot,m_paw_dfpt
 !!
 !! NOTES
 !! * The general form for Dij is:
@@ -1845,6 +1842,9 @@ end subroutine pawkindensities
 !!   Note the order of s1/s2 indices, especially for Rho_ij.
 !!   The present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
 !!     rho^{s1,s2}^_ij = Sum[<Psi^s2|pi><pj|Psi^s1]  (s1 and s2 exponents inverted)
+!!
+!! CHILDREN
+!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -2015,10 +2015,10 @@ end subroutine pawaccenergy
 !!             expression of 2nd-order energy)
 !!
 !! PARENTS
-!!      m_paw_denpot
+!!      m_paw_denpot,m_paw_dfpt
 !!
 !! CHILDREN
-!!      pawaccenergy
+!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -2100,7 +2100,7 @@ end subroutine pawaccenergy_nospin
 !!     At output: new value for Paw_ij()%dij
 !!
 !! PARENTS
-!!      calc_vhxc_me
+!!      m_vhxc_me
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout

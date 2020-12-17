@@ -118,7 +118,7 @@ end subroutine ilm2lm
 !!  indlmn(6,lmn_size)=array giving l,m,n,lm,ln,s for i=lmn
 !!
 !! PARENTS
-!!      m_atom
+!!      m_paw_atomorb
 !!
 !! CHILDREN
 !!
@@ -189,7 +189,7 @@ end subroutine make_indlmn
 !!  klm_diag(lmn2_size)=1 il==jl and im==jm, 0 otherwise.
 !!
 !! PARENTS
-!!      m_atom
+!!      m_paw_atomorb
 !!
 !! CHILDREN
 !!
@@ -277,7 +277,7 @@ end subroutine make_indklmn
 !!  where iln=(il,in) and iln<=jln. NB: kln2ln is an application and not a bijection
 !!
 !! PARENTS
-!!      m_atom,m_paw_slater
+!!      m_paw_atomorb,m_paw_slater
 !!
 !! CHILDREN
 !!

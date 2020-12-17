@@ -38,6 +38,7 @@ MODULE m_gwdefs
  integer,public,parameter :: unt_sig = 22  ! Self-energy as a function of frequency
  integer,public,parameter :: unt_sgr = 23  ! Derivative wrt omega of the Self-energy
  integer,public,parameter :: unt_sgm = 20  ! Sigma on the Matsubara axis
+ integer,public,parameter :: unt_sigc = 24 ! Sigma_c as a function of (epsilon_i) MRM
  integer,public,parameter :: unt_gwdiag  = 40 ! GW diagonal
 
  real(dp),public,parameter :: GW_TOLQ =0.0001_dp
@@ -407,7 +408,7 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -449,7 +450,7 @@ end subroutine em1params_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_gwdefs,setup_sigma
+!!      m_gwdefs,m_sigma_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -497,7 +498,7 @@ end subroutine sigijtab_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -728,7 +729,7 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 !************************************************************************
 
  if (delta_ene**2>tol14) then
-   sgn=delta_ene/ABS(delta_ene)
+   sgn=SIGN(1.0_dp,delta_ene)
    !
    if (opt_poles == 2) then ! Resonant and anti-resonant contributions.
      if (DABS(REAL(omega))>TOL_W0) then

@@ -69,7 +69,7 @@ contains
 !! INPUTS
 !!  cryst_struc
 !!  istep    =  step of iteration for DFT.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawtab <type(pawtab)>
@@ -79,7 +79,7 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      impurity_solve,spectral_function
+!!      m_dmft
 !!
 !! CHILDREN
 !!      pawpupot,wrtout

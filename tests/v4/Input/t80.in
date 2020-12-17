@@ -66,7 +66,7 @@ diemac 9.0
 #%% [files]
 #%% files_to_test = 
 #%%   t80.out,      tolnlines=  7, tolabs=  2.000e-05, tolrel=  3.000e-02, fld_options =-medium
-#%% psp_files= 13al.pspnc, 33as.pspnc
+#%% psp_files= PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

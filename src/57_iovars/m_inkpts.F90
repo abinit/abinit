@@ -125,10 +125,10 @@ contains
 !! to strange bugs in the debugging procedure, if one tries to print wtk or istwfk, in this case!
 !!
 !! PARENTS
-!!      invars1,invars2
+!!      m_invars1,m_invars2
 !!
 !! CHILDREN
-!!      getkgrid,intagm,metric,mknormpath,testkgrid,timab,wrtout
+!!      getkgrid,intagm,metric,symfind,symlatt
 !!
 !! SOURCE
 
@@ -403,7 +403,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
        if(ngkpt(ii)<1)then
          write(msg,'(a,i0,3a,i0,3a)') &
          'The input variable ngkpt(',ii,') must be strictly positive,',ch10,&
-         'while it is found to be',ngkpt(ii),'.',ch10,&
+         'while it is found to be ',ngkpt(ii),'.',ch10,&
          'Action: change it in your input file, or change kptopt.'
          MSG_ERROR(msg)
        end if
@@ -573,7 +573,7 @@ end subroutine inkpts
 !!  wtqc=weigth of the eventual current q point
 !!
 !! PARENTS
-!!      invars1
+!!      m_invars1
 !!
 !! CHILDREN
 !!      getkgrid,intagm,metric,symfind,symlatt

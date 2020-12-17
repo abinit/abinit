@@ -81,7 +81,7 @@ contains
 !!   produce not output at all
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
 !!      hist2var,mkradim,mkrdim,var2hist,xcart2xred,xred2xcart

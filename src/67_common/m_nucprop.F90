@@ -99,11 +99,10 @@ contains
 !!  (only writing, printing)
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      dsyev,free_my_atmtab,get_my_atmtab,make_efg_el,make_efg_ion
-!!      make_efg_onsite,wrtout
+!!      fourdp,matpointsym,matr3inv,ptabs_fourdp,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -359,10 +358,10 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,make_fc_paw,wrtout
+!!      fourdp,matpointsym,matr3inv,ptabs_fourdp,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -485,8 +484,10 @@ contains
 !! his Eq. 4.8.
 !!
 !! PARENTS
+!!      m_nucprop
 !!
 !! CHILDREN
+!!      fourdp,matpointsym,matr3inv,ptabs_fourdp,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -710,7 +711,7 @@ end subroutine make_efg_ion
 !!
 !!
 !! PARENTS
-!!      calc_efg
+!!      m_nucprop
 !!
 !! CHILDREN
 !!      fourdp,matpointsym,matr3inv,ptabs_fourdp,xmpi_sum,xred2xcart

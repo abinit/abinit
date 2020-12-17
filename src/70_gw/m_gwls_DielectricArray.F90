@@ -116,7 +116,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
@@ -186,7 +186,7 @@ end subroutine generate_frequencies_and_weights
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
@@ -299,7 +299,7 @@ end subroutine compute_eps_m1_minus_eps_model_m1
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
@@ -395,7 +395,7 @@ end subroutine compute_eps_m1_minus_one
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
@@ -995,7 +995,7 @@ end subroutine compute_eps_model_m1_minus_one
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
@@ -1055,7 +1055,7 @@ end subroutine cleanup_projected_Sternheimer_epsilon
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel

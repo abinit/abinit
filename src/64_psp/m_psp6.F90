@@ -94,10 +94,10 @@ contains
 !!  xccc1d(n1xccc,6)=1D core charge function and five derivatives, from psp file
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
-!!      psp5lo,psp5nl,psp6cc,psp6cc_drh,spline,wrtout
+!!      cc_derivatives
 !!
 !! SOURCE
 
@@ -353,10 +353,10 @@ end subroutine psp6in
 !!                    using a simple pseudization scheme
 !!
 !! PARENTS
-!!      psp6in
+!!      m_psp6
 !!
 !! CHILDREN
-!!      psden,smooth,spline,splint,vhtnzc
+!!      cc_derivatives
 !!
 !! SOURCE
 
@@ -551,10 +551,10 @@ end subroutine psp6cc
 !!    ff=exp(-(a+b.r^2+c.r^4))
 !!
 !! PARENTS
-!!      psp6cc
+!!      m_psp6
 !!
 !! CHILDREN
-!!      ctrap
+!!      cc_derivatives
 !!
 !! SOURCE
 
@@ -681,10 +681,10 @@ end subroutine psden
 !!  vhtnzc(mesh) = hartree potential induced by density tild[n_Z+n_core] (pseudo core density + nucleus)
 !!
 !! PARENTS
-!!      psp6cc
+!!      m_psp6
 !!
 !! CHILDREN
-!!      ctrap
+!!      cc_derivatives
 !!
 !! SOURCE
 
@@ -793,7 +793,7 @@ end subroutine vhtnzc
 !!  xccc1d(n1xccc,6)= 1D core charge function and its five first derivatives
 !!
 !! PARENTS
-!!      psp6in
+!!      m_psp6
 !!
 !! CHILDREN
 !!      cc_derivatives

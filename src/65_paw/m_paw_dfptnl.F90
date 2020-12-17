@@ -87,11 +87,10 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      dfptnl_pert
+!!      m_dfptnl_pert
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawdensities,pawxc_dfpt,pawxcm3
-!!      timab,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab
 !!
 !! SOURCE
 
@@ -294,9 +293,10 @@ end subroutine paw_dfptnl_energy
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      paw_dfptnl_energy
+!!      m_paw_dfptnl
 !!
 !! CHILDREN
+!!      free_my_atmtab,get_my_atmtab
 !!
 !! SOURCE
 
@@ -513,7 +513,7 @@ end subroutine paw_dfptnl_xc
 !!        pawrhoij(:)%rhoij_(lmn2_size,nspden) (non symetrized)
 !!
 !! PARENTS
-!!      paw_dfptnl_pert
+!!      m_dfptnl_pert
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab

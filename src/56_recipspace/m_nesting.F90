@@ -75,7 +75,7 @@ CONTAINS  !=====================================================================
 !! Must be called with kpt = full grid! Reduction by symmetry is not possible for q-dependent quantities (or not easy :)
 !!
 !! PARENTS
-!!      m_nesting,outelph
+!!      m_elphon,m_nesting
 !!
 !! CHILDREN
 !!      make_path,printxsf,wrap2_zero_one
@@ -164,7 +164,7 @@ end subroutine bfactor
 !!   Write data to file.
 !!
 !! PARENTS
-!!      elphon,m_ebands
+!!      m_ebands,m_elphon
 !!
 !! CHILDREN
 !!      make_path,printxsf,wrap2_zero_one

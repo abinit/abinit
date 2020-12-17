@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xcpbe
 !! NAME
 !!  m_xcpbe
@@ -131,7 +130,7 @@ contains
 !!  WARNING: option=4 not yet implemented.
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
 !!      invcb

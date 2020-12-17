@@ -96,7 +96,7 @@ CONTAINS
 !! cutoff_in = optional,cut off to apply to the range of interation if
 !!           the coefficient are genereted in this routine
 !! max_power_strain = maximum order of the strain of the strain phonon coupling
-!! fit_initializeData = optional, logical !If true, we store all the informations for the fit,
+!! fit_initializeData = optional, logical !If true, we store all the information for the fit,
 !!                      it will reduce the computation time but increase a lot the memory...
 !! fit_tolMSDF = optional, tolerance in eV^2/A^2 on the Forces for the fit process
 !! fit_tolMSDS = optional, tolerance in eV^2/A^2 on the Stresses for the fit process
@@ -114,7 +114,7 @@ CONTAINS
 !! eff_pot<type(effective_potential)> = effective potential datatype with new fitted coefficients
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff,mover_effpot,multibinit
+!!      m_fit_polynomial_coeff,m_mover_effpot,m_multibinit_driver
 !!
 !! CHILDREN
 !!      destroy_supercell,generelist,init_supercell,xred2xcart
@@ -505,7 +505,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Get the decomposition for each coefficients of the forces,stresses and energy for
 !each atoms and each step  (see equations 11 & 12 of  
 !PRB95,094115(2017)) [[cite:Escorihuela-Sayalero2017]]+ allocation
-!If the user does not turn off this initialization, we store all the informations for the fit,
+!If the user does not turn off this initialization, we store all the information for the fit,
 !it will reduce the computation time but increase a lot the memory...
  if(need_initialize_data)then
    ABI_ALLOCATE(energy_coeffs,(my_ncoeff,ntime))
@@ -1201,7 +1201,7 @@ end subroutine fit_polynomial_coeff_fit
 !! eff_pot = effective potential datatype with new fitted coefficients
 !!
 !! PARENTS
-!!      mover_effpot
+!!      m_mover_effpot
 !!
 !! CHILDREN
 !!      destroy_supercell,generelist,init_supercell,xred2xcart
@@ -1672,7 +1672,7 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 !!          information from the subroutine dsgesv in LAPACK
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      m_fit_polynomial_coeff,m_opt_effpot
 !!
 !! CHILDREN
 !!      destroy_supercell,generelist,init_supercell,xred2xcart
@@ -2002,7 +2002,7 @@ end subroutine fit_polynomial_coeff_computeGF
 !! energy_out(ncoeff,ntime)        = value of the energy for each  coefficient (Ha)
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      m_fit_polynomial_coeff,m_opt_effpot
 !!
 !! CHILDREN
 !!      destroy_supercell,generelist,init_supercell,xred2xcart
@@ -2284,7 +2284,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! mses =  Mean square error of the stresses (Hatree/Bohr)**2
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      m_fit_polynomial_coeff,m_opt_effpot
 !!
 !! CHILDREN
 !!      destroy_supercell,generelist,init_supercell,xred2xcart
@@ -2616,7 +2616,7 @@ end subroutine fit_polynomial_coeff_testEffPot
 !! OUTPUT
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver
 !!
 !! CHILDREN
 !!      destroy_supercell,generelist,init_supercell,xred2xcart

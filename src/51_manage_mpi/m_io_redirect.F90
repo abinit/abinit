@@ -60,7 +60,7 @@ contains
 !!   nfil= number of files to be named
 !!
 !! PARENTS
-!!      dfpt_looppert,gstateimg
+!!      m_dfpt_looppert,m_gstateimg
 !!
 !! CHILDREN
 !!      abi_io_redirect,libpaw_write_comm_set
@@ -127,7 +127,7 @@ contains
 !!   prtvol= flag to activate printing
 !!
 !! PARENTS
-!!      dfpt_looppert,gstateimg
+!!      m_dfpt_looppert,m_gstateimg
 !!
 !! CHILDREN
 !!      abi_io_redirect,libpaw_write_comm_set
@@ -199,7 +199,7 @@ contains
 !!   prtvol= flag to activate printing
 !!
 !! PARENTS
-!!      dfpt_looppert,gstateimg
+!!      m_dfpt_looppert,m_gstateimg
 !!
 !! CHILDREN
 !!      abi_io_redirect,libpaw_write_comm_set
@@ -303,7 +303,7 @@ contains
 !!   prtvol= flag to activate printing  
 !!
 !! PARENTS
-!!      dfpt_looppert,gstateimg
+!!      m_dfpt_looppert,m_gstateimg
 !!
 !! CHILDREN
 !!      abi_io_redirect,libpaw_write_comm_set

@@ -38,12 +38,13 @@ module m_argparse
  use m_nctk
 
  use m_build_info,      only : dump_config, abinit_version
- use m_io_tools,        only : open_file, file_exists
+ use m_io_tools,        only : open_file, file_exists, enforce_fortran_io
  use m_cppopts_dumper,  only : dump_cpp_options
  use m_optim_dumper,    only : dump_optim
  use m_fstrings,        only : atoi, atof, itoa, firstchar, startswith, sjoin
  use m_time,            only : str2sec
  use m_libpaw_tools,    only : libpaw_log_flag_set
+ use m_ipi,             only : ipi_setup
 
  implicit none
 
@@ -55,6 +56,7 @@ module m_argparse
    module procedure get_arg_int
    module procedure get_arg_dp
    module procedure get_arg_str
+   module procedure get_arg_bool
  end interface get_arg
 
  public :: get_arg_list    ! Parse array argument from command line. Return exit code.
@@ -64,7 +66,9 @@ module m_argparse
    module procedure get_arg_list_dp
  end interface get_arg_list
 
- public :: parse_kargs    !  Parse command line arguments, return options related to k-point sampling
+ public :: get_start_step_num    ! Parse string from command line in the format "start:step:num"
+                                 ! defining an arithmetic progression.
+ public :: parse_kargs           !  Parse command line arguments, return options related to k-point sampling
 !!***
 
 !!****t* m_argparse/args_t
@@ -72,7 +76,7 @@ module m_argparse
 !! args_t
 !!
 !! FUNCTION
-!! Stores the command line options
+!! Stores command line options
 !!
 !! SOURCE
 
@@ -82,6 +86,7 @@ module m_argparse
      ! /=0 to exit after having parsed the command line options.
 
    integer :: abimem_level = 0
+    ! Options for memory profiling. See m_profiling_abi
 
    integer :: dry_run = 0
      ! /= 0 to exit after the validation of the input file.
@@ -125,8 +130,8 @@ contains
 type(args_t) function args_parser() result(args)
 
 !Local variables-------------------------------
- integer :: ii,ierr
- logical :: iam_master,verbose
+ integer :: ii, ierr
+ logical :: iam_master, verbose
  real(dp) :: timelimit
  character(len=500) :: arg !,msg
 
@@ -141,7 +146,7 @@ type(args_t) function args_parser() result(args)
 
  if (command_argument_count() == 0) return
 
- iam_master = (xmpi_comm_rank(xmpi_world) == 0)
+ iam_master = xmpi_comm_rank(xmpi_world) == 0
 
  ! Store full command line for future reference.
  call get_command(args%cmdline)
@@ -208,9 +213,13 @@ type(args_t) function args_parser() result(args)
     else if (begins_with(arg, "--fft-ialltoall")) then
       call fft_allow_ialltoall(parse_yesno(arg, "--fft-ialltoall"))
 
+    else if (begins_with(arg, "--ipi")) then
+      call get_command_argument(ii + 1, arg)
+      call ipi_setup(arg, xmpi_world)
+
     ! Enable/disable [Z,C]GEMM3
     else if (begins_with(arg, "--xgemm3m")) then
-      call linalg_allow_gemm3m(parse_yesno(arg, "--xgemm3m"))
+      call linalg_allow_gemm3m(parse_yesno(arg, "--xgemm3m"), write_msg=iam_master)
 
     ! Enable/disable PLASMA
     else if (begins_with(arg, "--plasma")) then
@@ -230,6 +239,9 @@ type(args_t) function args_parser() result(args)
     else if (arg == "--netcdf-classic") then
       !  Use netcdf classic mode for new files when only sequential-IO needs to be performed
       call nctk_use_classic_for_seq()
+
+    else if (arg == "--enforce-fortran-io") then
+      call enforce_fortran_io(.True.)
 
     else if (arg == "--F03") then
        ! For multibinit only
@@ -252,6 +264,9 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"--log                      Enable log files and status files in parallel execution."
         write(std_out,*)"--netcdf-classic           Use netcdf classic mode for new files if parallel-IO is not needed."
         write(std_out,*)"                           Default is netcdf4/hdf5"
+        write(std_out,*)"--enforce-fortran-io       Use Fortran-IO instead of MPI-IO when operating on Fortran files"
+        write(std_out,*)"                           Useful to read files when the MPI-IO library is not efficient."
+        write(std_out,*)"                           DON'T USE this option when the code needs to write large files e.g. WFK"
         write(std_out,*)"-t, --timelimit            Set the timelimit for the run. Accepts time in Slurm notation:"
         write(std_out,*)"                               days-hours"
         write(std_out,*)"                               days-hours:minutes"
@@ -280,42 +295,9 @@ type(args_t) function args_parser() result(args)
     end if
   end do
 
-  if (verbose) call args_print(args)
 #endif
 
 end function args_parser
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_argparse/args_print
-!! NAME
-!!  args_print
-!!
-!! FUNCTION
-!!  Print object.
-!!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine args_print(args)
-
-!Arguments ------------------------------------
- type(args_t),intent(in) :: args
-
-! *************************************************************************
-
- call wrtout(std_out, sjoin("Command line:", args%cmdline))
- call wrtout(std_out, sjoin("exit:", itoa(args%abimem_level)))
- call wrtout(std_out, sjoin("abimem_level:", itoa(args%abimem_level)))
- call wrtout(std_out, sjoin("dry_run:", itoa(args%abimem_level)))
-
-end subroutine args_print
 !!***
 
 !!****f* m_argparse/begins_with
@@ -517,7 +499,7 @@ end function get_arg_dp
 !!  get_arg_str
 !!
 !! FUNCTION
-!!  Parse scalar argument from command line. Return exit code.
+!!  Parse scalar string argument from command line. Return exit code.
 !!
 !! INPUTS
 !!  argname= Argument name
@@ -570,6 +552,140 @@ integer function get_arg_str(argname, argval, msg, default, exclude) result(ierr
  end if
 
 end function get_arg_str
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_argparse/get_arg_bool
+!! NAME
+!!  get_arg_bool
+!!
+!! FUNCTION
+!!  Parse scalar boolean argument from command line. Return exit code.
+!!
+!! INPUTS
+!!  argname= Argument name
+!!  [default]= Default value
+!!  [exclude]= argname and exclude are mutually exclusive.
+!!
+!! OUTPUT
+!!   argval= Value of argname
+!!   msg= Error message
+!!
+!! SOURCE
+
+integer function get_arg_bool(argname, argval, msg, default, exclude) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: argname
+ logical,intent(out) :: argval
+ character(len=*),intent(out) :: msg
+ logical,optional,intent(in) :: default
+ character(len=*),optional,intent(in) :: exclude
+
+!Local variables-------------------------------
+ integer :: ii
+ logical :: found_argname, found_excl
+ character(len=500) :: arg
+
+! *************************************************************************
+
+ ierr = 0; msg = ""; if (present(default)) argval = default
+ found_argname = .False.; found_excl = .False.
+ argval = .False.
+
+ do ii=1,command_argument_count()
+   call get_command_argument(ii, arg)
+   if (present(exclude)) then
+     if (arg == "--" // trim(exclude)) found_excl = .True.
+   end if
+   if (begins_with(arg, "--" // trim(argname))) then
+     argval = parse_yesno(arg, "--" // trim(argname), default=.True.)
+     found_argname = .True.
+   end if
+ end do
+
+ if (ierr /= 0) msg = sjoin("Error while reading argument: ", argname, ch10, msg)
+ if (found_argname .and. found_excl) then
+   ierr = ierr + 1; msg = sjoin("Variables", argname, "and", exclude, "are mutually exclusive", ch10, msg)
+ end if
+
+end function get_arg_bool
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_argparse/get_start_step_num
+!! NAME
+!!  get_start_step_num
+!!
+!! FUNCTION
+!!  Parse string from command line in the format "start:step:num" defining an arithmetic progression.
+!!  Return exit code.
+!!
+!! INPUTS
+!!  argname= Argument name
+!!  [default]= Default value
+!!  [exclude]= argname and exclude are mutually exclusive.
+!!
+!! OUTPUT
+!!   ilist= [start, step, num]
+!!   msg= Error message
+!!
+!! SOURCE
+
+integer function get_start_step_num(argname, ilist, msg, default, exclude) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: argname
+ integer,intent(out) :: ilist(3)
+ character(len=*),intent(out) :: msg
+ integer,optional,intent(in) :: default(3)
+ character(len=*),optional,intent(in) :: exclude
+
+!Local variables-------------------------------
+ integer :: ii, jj
+ character(len=500) :: str
+
+! *************************************************************************
+
+ if (present(exclude)) then
+   ierr = get_arg_str(argname, str, msg, default="", exclude=exclude)
+ else
+   ierr = get_arg_str(argname, str, msg, default="")
+ end if
+ if (ierr /= 0) return
+
+ if (len_trim(str) == 0) then
+   if (present(default)) then
+     ilist = default
+   else
+     ierr = ierr + 1; msg = sjoin("Variables", argname, "is not found and default is not given")
+   end if
+   return
+ end if
+
+ ! We got a non-empty string. Let's parse it.
+ ii = index(str, ":")
+ if (ii <= 1) then
+   msg = sjoin("Cannot find first `:` in string:", str)
+   ierr = ierr + 1; return
+ end if
+ ilist(1) = atoi(str(1:ii-1))
+
+ jj = index(str(ii+1:), ":")
+ if (jj == 0) then
+   msg = sjoin("Cannot find second `:` in string:", str)
+   ierr = ierr + 1; return
+ end if
+
+ ilist(2) = atoi(str(ii+1: jj+ii-1))
+ ilist(3) = atoi(str(jj+ii+1:))
+ !print *, "ilist:", ilist
+
+end function get_start_step_num
 !!***
 
 !!****f* m_argparse/get_arg_list_int
@@ -785,6 +901,7 @@ end function get_arg_list_dp
 !! OUTPUT
 !!
 !! PARENTS
+!!      abitk
 !!
 !! CHILDREN
 !!

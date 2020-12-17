@@ -100,7 +100,7 @@ contains
 !! (see last section of the routine, but are presently disabled)
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
 !!      prttagm,prttagm_images
@@ -339,9 +339,6 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%icoulomb
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'icoulomb','INT',0)
 
- intarr(1,:)=dtsets(:)%icsing
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'icsing','INT',0)
-
  intarr(1,:)=dtsets(:)%icutcoul
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'icutcoul','INT',0)
 
@@ -380,6 +377,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%irdbsreso
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdbsreso','INT',0)
+
+ intarr(1,:)=dtsets(:)%irdchkprdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdchkprdm','INT',0)
 
  intarr(1,:)=dtsets(:)%irdddk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdddk','INT',0)

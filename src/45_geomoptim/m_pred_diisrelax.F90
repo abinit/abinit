@@ -64,8 +64,7 @@ contains
 !! for instance.
 !!
 !! INPUTS
-!! ab_mover <type(abimover)> : Datatype with all the information
-!!                                needed by the preditor
+!! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
 !! itime  : Index of the present iteration
 !! ntime  : Maximal number of iterations
 !! zDEBUG : if true print some debugging information
@@ -73,11 +72,10 @@ contains
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist <type(abihist)> : History of positions,forces
-!!                               acell, rprimd, stresses
+!! hist <type(abihist)> : History of positions,forces,acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
 !!      dcopy,dgemv,dsysv,hessinit,hessupdt,hist2var,var2hist,xcart2xred
@@ -86,8 +84,6 @@ contains
 !! SOURCE
 
 subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -1,0 +1,68 @@
+#################################################################
+# Input file for the positron tutorial                          #
+#    Positron lifetime calculation within PAW                   #
+#                                                               #
+#              Si, 2 atoms in the box                           #
+#################################################################
+
+# Datasets definition
+  ndtset 2
+
+  positron1  0      ! Dataset 1 is a simple electronic GS calculation
+
+  positron2  1      ! Dataset 2 is a positronic GS calculation
+  getden2    1      !   in presence of the previous electronic density
+  kptopt2    0      !   Use only k=gamma point
+
+  ixcpositron2  1   ! We are using the Boronski and Nieminen parametrization
+
+# Common input parameters
+  ! Unit cell
+    acell   3*5.43 angstrom
+    rprim   0.0 0.5 0.5
+            0.5 0.0 0.5
+            0.5 0.5 0.0
+
+    natom  2
+    ntypat  1
+    typat 2*1
+    znucl 14
+    xred  0.0   0.0   0.0
+          0.25 0.25 0.25
+
+  ! K-points and occupations
+    kptopt 1
+    ngkpt 4 4 4 
+    nshiftk 1
+    shiftk 0.0 0.0 0.0
+    occopt 1
+    nband 6
+
+    posocc2 1  ! Occupation number for the positron (should be set <1 for bulk calculation with a small cell).
+               ! Here the zero positron density limit is used, so results do not depend on posocc.
+
+  ! Convergence parameters
+    ecut 8. pawecutdg 15.
+    iscf 17
+    nstep 50 tolvrs 1.d-8
+
+!   Miscelaneous
+    prtwf 0 prteig 0           ! To save disk space
+    optforces 0 optstress 0    ! Not relevant here
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si.LDA-PW-paw.abinit"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   tpositron_1.abo, tolnlines=  0, tolabs= 0.0, tolrel= 0.0, fld_options= -easy
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = J. Wiktor
+#%% keywords = POSITRON,PAW
+#%% description = First step of the tutorial on electron-positron annihilation
+#%%<END TEST_INFO>

@@ -410,6 +410,7 @@ contains
 
     ! why do this twice.
     call self%pots%set_supercell(self%supercell)
+    call self%pots%set_params(self%params)
   end subroutine fill_supercell
 
   !-------------------------------------------------------------------!

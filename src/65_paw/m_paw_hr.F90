@@ -99,7 +99,7 @@ CONTAINS  !=====================================================================
 !!  Deallocate memory 
 !!
 !! PARENTS
-!!      bethe_salpeter,cchi0q0,cchi0q0_intraband
+!!      m_bethe_salpeter,m_chi0
 !!
 !! CHILDREN
 !!      simp_gen
@@ -326,7 +326,7 @@ end function paw_ihr
 !!  The cross-term contribution is added to the commutator 
 !!
 !! PARENTS
-!!      cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!      simp_gen
@@ -418,7 +418,7 @@ end subroutine paw_cross_ihr_comm
 !! OUTPUT
 !!
 !! PARENTS
-!!      bethe_salpeter,cchi0q0,cchi0q0_intraband
+!!      m_bethe_salpeter,m_chi0
 !!
 !! CHILDREN
 !!      simp_gen

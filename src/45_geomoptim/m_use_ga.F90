@@ -47,7 +47,7 @@
 !!    at output, the predicted values of xred for all images
 !!
 !! PARENTS
-!!      predictimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!      convert_coortogen,convert_gentocoor,initialize_perm,metric,mkradim

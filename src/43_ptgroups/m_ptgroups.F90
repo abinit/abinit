@@ -110,7 +110,7 @@ CONTAINS  !===========================================================
 !! Irreps(nclass)=Datatype gathering data on the different irreducible representations.
 !!
 !! PARENTS
-!!      m_ptgroups
+!!      m_ptgroups,m_unittests
 !!
 !! CHILDREN
 !!      irrep_free

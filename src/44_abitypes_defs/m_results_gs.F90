@@ -43,6 +43,7 @@ MODULE m_results_gs
  use m_io_tools,      only : file_exists
  use m_fstrings,      only : sjoin
  use m_numeric_tools, only : get_trace
+ use m_geometry,      only : stress_voigt_to_mat
 
  implicit none
 
@@ -242,10 +243,9 @@ CONTAINS
 !!  results_gs=<type(results_gs_type)>=results_gs datastructure
 !!
 !! PARENTS
-!!      m_results_img,mover_effpot
+!!      m_mover_effpot,m_results_img
 !!
 !! CHILDREN
-!!      energies_copy,energies_ncwrite
 !!
 !! SOURCE
 
@@ -341,7 +341,6 @@ end subroutine init_results_gs
 !! PARENTS
 !!
 !! CHILDREN
-!!      energies_copy,energies_ncwrite
 !!
 !! SOURCE
 
@@ -442,10 +441,9 @@ end subroutine init_results_gs_array
 !!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure
 !!
 !! PARENTS
-!!      m_results_img,mover_effpot
+!!      m_mover_effpot,m_results_img
 !!
 !! CHILDREN
-!!      energies_copy,energies_ncwrite
 !!
 !! SOURCE
 
@@ -499,7 +497,6 @@ end subroutine destroy_results_gs
 !! PARENTS
 !!
 !! CHILDREN
-!!      energies_copy,energies_ncwrite
 !!
 !! SOURCE
 
@@ -565,7 +562,6 @@ end subroutine destroy_results_gs_array
 !!      m_results_img
 !!
 !! CHILDREN
-!!      energies_copy,energies_ncwrite
 !!
 !! SOURCE
 
@@ -861,15 +857,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
  call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
 
  ! Cartesian stress tensor and forces.
- strten(1,1) = results%strten(1)
- strten(2,2) = results%strten(2)
- strten(3,3) = results%strten(3)
- strten(2,3) = results%strten(4)
- strten(3,2) = results%strten(4)
- strten(1,3) = results%strten(5)
- strten(3,1) = results%strten(5)
- strten(1,2) = results%strten(6)
- strten(2,1) = results%strten(6)
+ call stress_voigt_to_mat(results%strten, strten)
 
  if (strten(1,1) /= MAGIC_UNDEF) then
    call ydoc%add_real2d('cartesian_stress_tensor', strten, comment="hartree/bohr^3")

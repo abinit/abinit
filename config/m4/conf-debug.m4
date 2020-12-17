@@ -124,4 +124,5 @@ AC_DEFUN([ABI_DEBUG_INIT],[
       [Define to 1 to turn on verbose debug messages in the source code.])
   fi
   AC_MSG_RESULT([${abi_debug_verbose}])
+  AC_SUBST(abi_debug_flavor)
 ]) # ABI_DEBUG_INIT

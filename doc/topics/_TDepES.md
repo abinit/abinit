@@ -27,8 +27,11 @@ requires the use of norm-conserving pseudopotentials. NetCDF support is
 mandatory.
 
 The AHC implementation in ABINIT is still under heavy development.
-We do not describe in this topics the most recent procedure that relies on [[optdriver]]=7,
-neither the Frohlich model computations.
+Most of the present information relates to the legacy implementation,
+although some also relates to the 
+most recent procedure that relies on [[optdriver]]=7. The documentation
+of the new procedure is given mostly by the related tutorials.
+We do not describe the Frohlich model computations.
 
 In the oldest, well-established, AHC implementation in ABINIT, 
 the sum over highly energetic bands appearing in the AHC
@@ -80,5 +83,7 @@ For the temperature dependence of the Fermi energy, see [[topic:ElPhonTransport]
 
 ## Tutorials
 
-* A tutorial has been developed on [[tutorial:tdepes|the temperature dependence of the electronic structure]]:.
+* (Legacy procedure) A tutorial is available at [[tutorial:tdepes|the temperature dependence of the electronic structure]]:.
+* (New procedure) Two tutorials are available at [[tutorial:eph_intro|an overview of the EPH code]], and
+[[tutorial:eph4zpr|Zero-point renormalization of the band gap and temperature-dependent band gaps]]:.
 

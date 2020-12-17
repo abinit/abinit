@@ -98,7 +98,7 @@ contains
 !! itypatcor : correlated species
 !!
 !! PARENTS
-!!      cchi0,cchi0q0,prep_calc_ucrpa
+!!      m_chi0,m_prep_calc_ucrpa
 !!
 !! CHILDREN
 !!      get_bz_item,wrtout

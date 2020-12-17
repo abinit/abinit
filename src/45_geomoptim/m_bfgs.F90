@@ -68,7 +68,7 @@ CONTAINS  !===========================================================
 !!  hessin(ndim,ndim)=hessian matrix, initialised at output.
 !!
 !! PARENTS
-!!      pred_bfgs,pred_diisrelax
+!!      m_pred_bfgs,m_pred_diisrelax
 !!
 !! CHILDREN
 !!      findmin
@@ -197,8 +197,7 @@ end subroutine hessinit
 !!  hessin(ndim,ndim)=hessian matrix, updated at output.
 !!
 !! PARENTS
-!!      m_mep,pred_bfgs,pred_delocint,pred_diisrelax,xfh_recover_deloc
-!!      xfh_recover_new
+!!      m_mep,m_pred_bfgs,m_pred_delocint,m_pred_diisrelax,m_xfpack
 !!
 !! CHILDREN
 !!      findmin
@@ -221,7 +220,7 @@ subroutine hessupdt(hessin,iatfix,natom,ndim,vin,vin_prev,vout,vout_prev, &
 !scalars
  integer :: iatom,idir,ii,jj,nimage_
  real(dp) :: den1,den2,den3
- character(len=100) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: bfgs(ndim),din(ndim),dout(ndim),hdelta(ndim)
 
@@ -264,8 +263,7 @@ subroutine hessupdt(hessin,iatfix,natom,ndim,vin,vin_prev,vout,vout_prev, &
 !end do
 
  if (mod(ndim,nimage_)/=0) then
-   msg='nimage must be a dividor of ndim !'
-   MSG_BUG(msg)
+   MSG_BUG('nimage must be a dividor of ndim !')
  end if
 
 !Difference between new and previous vectors
@@ -352,7 +350,7 @@ end subroutine hessupdt
 !!  vout_prev(ndim)=previous output vector; contains input vout at output
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint
+!!      m_pred_bfgs,m_pred_delocint
 !!
 !! CHILDREN
 !!      findmin

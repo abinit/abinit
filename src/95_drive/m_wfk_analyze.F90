@@ -46,7 +46,7 @@ module m_wfk_analyze
  use m_fftcore,         only : print_ngfft
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_esymm,           only : esymm_t, esymm_free
- use m_ddk,             only : ddk_compute
+ use m_ddk,             only : ddkstore_t
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -108,7 +108,7 @@ contains
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! NOTES
 !!
@@ -128,10 +128,11 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
+!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 
-subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
+subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -168,6 +169,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !type(paw_dmft_type) :: paw_dmft
  type(mpi_type) :: mpi_enreg
  type(wfd_t) :: wfd
+ type(ddkstore_t) :: ds
 !arrays
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: l_size_atm(:)
@@ -201,58 +203,28 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    end if
  end if
  call xmpi_bcast(wfk0_path, master, comm, ierr)
- call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path) )
+ call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path))
 
  !call cwtime(cpu,wall,gflops,"start")
 
  ! Costruct crystal and ebands from the GS WFK file.
- call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
+ call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm) !,gs_occ)
  call wfk0_hdr%vs_dtset(dtset)
 
  cryst = wfk0_hdr%get_crystal()
- call cryst%print(header="crystal structure from WFK file")
+ call cryst%print(header="Crystal structure from WFK file")
 
- ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
-
- ! TODO:
- ! Make sure everything is OK if WFK comes from a NSCF run since occ are set to zero
- ! fermie is set to 0 if nscf!
-
- ! Here we change the GS bands (fermi level, scissors operator ...)
- ! All the modifications to ebands should be done here.
-
- !if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
- !  write(msg,"(2a,2(a,i0,a,f14.6,a))")&
- !    " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
- !    "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
- !    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
- !  call wrtout(ab_out,msg)
- !  call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
- !end if
-
- !if (dtset%eph_fermie /= zero) then ! default value of eph_fermie is zero hence no tolerance is used!
- !  ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
- !  call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
- !  call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
- !  call wrtout(ab_out,msg)
-
- !else if (abs(dtset%eph_extrael) > tol12) then
- !  NOT_IMPLEMENTED_ERROR()
- !  ! TODO: Be careful with the trick used in elphon for passing the concentration
- !  !call ebands_set_nelect(ebands, dtset%eph_extrael, spinmagntarget, msg)
- !  call wrtout(ab_out,msg)
- !end if
+ ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
 
  !call ebands_update_occ(ebands, spinmagntarget)
- call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
+ call ebands_print(ebands,header="Ground state energies", prtvol=dtset%prtvol)
  ABI_FREE(gs_eigen)
 
- ! TODO Recheck getng, should use same trick as that used in screening and sigma.
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
                   gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
 
- call print_ngfft(ngfftc,header='Coarse FFT mesh used for the wavefunctions')
- call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
+ call print_ngfft(ngfftc, header='Coarse FFT mesh used for the wavefunctions')
+ call print_ngfft(ngfftf, header='Dense FFT mesh used for densities and potentials')
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
@@ -368,7 +340,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  case (WFK_TASK_DDK, WFK_TASK_DDK_DIAGO)
    ! Calculate the DDK matrix elements from the WFK file
-   call ddk_compute(wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
+   ds%only_diago = .False.; if (dtset%wfk_task == WFK_TASK_DDK_DIAGO) ds%only_diago = .True.
+   call ds%compute_ddk(wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
+   call ds%free()
 
  case (WFK_TASK_EINTERP)
    ! Band structure interpolation from eigenvalues computed on the k-mesh.
@@ -459,9 +433,10 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 !!  Initialize the wavefunction descriptor
 !!
 !! PARENTS
-!!      wfk_analyze
+!!      m_wfk_analyze
 !!
 !! CHILDREN
+!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 
@@ -481,7 +456,7 @@ subroutine read_wfd()
    ABI_FREE(bks_mask)
 
    call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
-   call wfd%test_ortho(cryst,pawtab)
+   !call wfd%test_ortho(cryst, pawtab)
 
  end subroutine read_wfd
 

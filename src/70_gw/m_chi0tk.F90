@@ -34,9 +34,9 @@ MODULE m_chi0tk
  use m_wfd
 
  use defs_datatypes, only : ebands_t
- use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, em1params_t, j_gw
+ use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, one_gw, em1params_t, j_gw
  use m_fstrings, only : sjoin, itoa
- use m_hide_blas,     only : xgerc, xgemm
+ use m_hide_blas,only : xgerc, xgemm, xherk, xher
  use m_crystal,  only : crystal_t
  use m_gsphere,  only : gsphere_t, gsph_gmg_idx, gsph_gmg_fftidx
  use m_bz_mesh,  only : littlegroup_t, kmesh_t, has_BZ_item
@@ -107,19 +107,20 @@ CONTAINS  !=====================================================================
 !!  chi0(npwe,npwe,nomega)=independent-particle susceptibility matrix in reciprocal space
 !!
 !! PARENTS
-!!      cchi0,cchi0q0_intraband
+!!      m_chi0
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 
-subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_epsG0,chi0)
+subroutine assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_epsG0,chi0)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
+ logical,intent(in) :: is_metallic
  integer,intent(in) :: ik_bz,npwepG0,nspinor
  type(gsphere_t),intent(in) :: Gsph_epsG0
  type(littlegroup_t),intent(in) :: Ltg_q
@@ -131,13 +132,14 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
 
 !Local variables-------------------------------
 !scalars
- integer :: itim,io,isym,ig1,ig2,nthreads
+ integer :: itim,io,isym,nthreads
+ integer :: isymop,nsymop
+ real(gwp) :: dr
  complex(gwpc) :: dd
  !character(len=500) :: msg
 !arrays
  integer :: Sm1_gmG0(Ep%npwe)
- complex(gwpc) :: rhotwg_sym(Ep%npwe)
- !complex(gwpc),allocatable :: rhotwg_I(:),rhotwg_J(:)
+ complex(gwpc),allocatable :: rhotwg_sym(:,:)
 
 ! *************************************************************************
 
@@ -148,27 +150,22 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
  SELECT CASE (Ep%symchi)
  CASE (0)
    ! Do not use symmetries
-   if (nthreads==1 .or. Ep%nomega>=nthreads) then
-     ! MKL_10.3 xgerc is not threaded. BTW: single precision is faster (sometimes factor ~2).
-!$omp parallel do private(dd)
-     do io=1,Ep%nomega
-       dd = green_w(io)
-       call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
-     end do
-   else
-!$omp parallel private(dd)
-     do io=1,Ep%nomega
-       dd = green_w(io)
-!$omp do
-       do ig2=1,Ep%npwe
-         do ig1=1,Ep%npwe
-           chi0(ig1,ig2,io) = chi0(ig1,ig2,io) + dd * rhotwg(ig1) * GWPC_CONJG(rhotwg(ig2))
-         end do
-       end do
-!$omp end do NOWAIT
-     end do
-!$omp end parallel
-   end if
+
+   ! note that single precision is faster (sometimes factor ~2).
+   ! Rely on MKL threads for OPENMP parallelization
+
+   do io=1,Ep%nomega
+     ! Check if green_w(io) is real (=> pure imaginary omega)
+     ! and that it is not a metal
+     ! then the corresponding chi0(io) is hermitian
+     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic ) then
+       dr=green_w(io)
+       call xher('U',Ep%npwe,dr,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     else
+       dd=green_w(io)
+       call xgerc(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     endif
+   end do
 
  CASE (1)
    ! Use symmetries to reconstruct the integrand in the BZ.
@@ -189,6 +186,11 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
    ! these arrays, usually, do not conform to rho_twg_sym(npw) !
    !
    ! Loop over symmetries of the space group and time-reversal.
+   nsymop = count(Ltg_q%wtksym(:,:,ik_bz)==1)
+   ABI_MALLOC(rhotwg_sym,(Ep%npwe,nsymop))
+   isymop = 0
+
+   ! Prepare all the rhotwg at once to use BLAS level 3 routines
    do isym=1,Ltg_q%nsym_sg
      do itim=1,Ltg_q%timrev
        if (Ltg_q%wtksym(itim,isym,ik_bz)==1) then
@@ -199,43 +201,36 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
          !gmG0 => Ltg_q%igmG0(1:Ep%npwe,itim,isym)
          Sm1_gmG0(1:Ep%npwe) = Gsph_epsG0%rottbm1( Ltg_q%igmG0(1:Ep%npwe,itim,isym), itim,isym)
 
+         isymop = isymop + 1
          SELECT CASE (itim)
          CASE (1)
-           rhotwg_sym(1:Ep%npwe) = rhotwg(Sm1_gmG0) * Gsph_epsG0%phmGt(1:Ep%npwe,isym)
+           rhotwg_sym(1:Ep%npwe,isymop) = rhotwg(Sm1_gmG0) * Gsph_epsG0%phmGt(1:Ep%npwe,isym)
          CASE (2)
-           rhotwg_sym(1:Ep%npwe) = GWPC_CONJG(rhotwg(Sm1_gmG0))*Gsph_epsG0%phmGt(1:Ep%npwe,isym)
+           rhotwg_sym(1:Ep%npwe,isymop) = GWPC_CONJG(rhotwg(Sm1_gmG0))*Gsph_epsG0%phmGt(1:Ep%npwe,isym)
          CASE DEFAULT
            MSG_BUG(sjoin('Wrong itim:', itoa(itim)))
          END SELECT
-
-         ! Multiply rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
-         if (nthreads==1 .or. Ep%nomega>=nthreads) then
-           ! MKL_10.3 xgerc is not threaded. BTW: single precision is faster (sometimes factor ~2).
-!$omp parallel do private(dd)
-           do io=1,Ep%nomega
-             dd=green_w(io)
-             call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg_sym,1,rhotwg_sym,1,chi0(:,:,io),Ep%npwe)
-           end do
-
-         else
-           !write(std_out,*)"in new with nthreads = ",nthreads
-!$omp parallel private(dd)
-           do io=1,Ep%nomega
-             dd=green_w(io)
-!$omp do
-             do ig2=1,Ep%npwe
-               do ig1=1,Ep%npwe
-                 chi0(ig1,ig2,io) = chi0(ig1,ig2,io) + dd * rhotwg_sym(ig1) * GWPC_CONJG(rhotwg_sym(ig2))
-               end do
-             end do
-!$omp end do NOWAIT
-           end do
-!$omp end parallel
-         end if
        end if
-
      end do
    end do
+
+   ! Multiply rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
+   ! note that single precision is faster (sometimes factor ~2).
+   ! Rely on MKL threads for OPENMP parallelization
+   do io=1,Ep%nomega
+     ! Check if green_w(io) is real (=> pure imaginary omega)
+     ! and that it is not a metal
+     ! then the corresponding chi0(io) is hermitian
+     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic ) then
+       dr=green_w(io)
+       call xherk('U','N',Ep%npwe,nsymop,dr,rhotwg_sym,Ep%npwe,one_gw,chi0(:,:,io),Ep%npwe)
+     else
+       dd=green_w(io)
+       call xgemm('N','C',Ep%npwe,Ep%npwe,nsymop,dd,rhotwg_sym,Ep%npwe,rhotwg_sym,Ep%npwe,cone_gw,chi0(:,:,io),Ep%npwe)
+     endif
+   end do
+
+   ABI_FREE(rhotwg_sym)
 
  CASE DEFAULT
    MSG_BUG(sjoin('Wrong symchi:', itoa(Ep%symchi)))
@@ -361,7 +356,7 @@ end subroutine mkrhotwg_sigma
 !!  More CPU demanding but safer in case of a large chi0 matrix. One might loop over G1 and G2 shells ...
 !!
 !! PARENTS
-!!      cchi0,cchi0q0,cchi0q0_intraband
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -643,17 +638,18 @@ end subroutine symmetrize_afm_chi0
 !!     operation in real space. The term involving the fractional translation is zero provided that b /= b'.
 !!
 !! PARENTS
-!!      cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,Cryst,Ltg_q,Gsph_epsG0,&
+subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,Cryst,Ltg_q,Gsph_epsG0,&
 & chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
 
 !Arguments ------------------------------------
 !scalars
+ logical,intent(in) :: is_metallic
  integer,intent(in) :: ik_bz,isym_kbz,itim_kbz,npwepG0,nspinor,gwcomp
  real(dp),intent(in) :: deltaf_b1b2
  type(littlegroup_t),intent(in) :: Ltg_q
@@ -672,12 +668,14 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
 !Local variables-------------------------------
 !scalars
  integer :: itim,io,isym,idir,jdir
+ integer :: isymop,nsymop
+ real(gwp) :: dr
  complex(gwpc) :: dd
  !character(len=500) :: msg
 !arrays
  integer,ABI_CONTIGUOUS pointer :: Sm1G(:)
  complex(dpc) :: mir_kbz(3)
- complex(gwpc),allocatable :: rhotwg_sym(:)
+ complex(gwpc),allocatable :: rhotwg_sym(:,:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: phmGt(:)
 
 !************************************************************************
@@ -694,11 +692,20 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
    !    rhotwg(1)= S^-1q * rhotwx_ibz
    !    rhotwg(1)=-S^-1q * CONJG(rhotwx_ibz) if time-reversal is used.
 
-   ! Multiply elements G1,G2 of rhotwg_sym by green_w(io) and accumulate in chi0(G1,G2,io)
-!$omp parallel do private(dd)
+   ! Multiply elements G1,G2 of rhotwg by green_w(io) and accumulate in chi0(G1,G2,io)
+
+   ! Rely on MKL threads for OPENMP parallelization
    do io=1,Ep%nomega
-     dd=green_w(io)
-     call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     ! Check if green_w(io) is real (=> pure imaginary omega)
+     ! and that it is not a metal
+     ! then the corresponding chi0(io) is hermitian
+     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic ) then
+       dr=green_w(io)
+       call xher('U',Ep%npwe,dr,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     else
+       dd=green_w(io)
+       call xgerc(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     endif
    end do
 
    ! === Accumulate heads and wings for each small q ===
@@ -741,7 +748,10 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
 
  CASE (1)
    ! Use symmetries to reconstruct the integrand.
-   ABI_MALLOC(rhotwg_sym, (Ep%npwe))
+
+   nsymop = count(Ltg_q%wtksym(:,:,ik_bz)==1)
+   ABI_MALLOC(rhotwg_sym,(Ep%npwe,nsymop))
+   isymop = 0
 
    ! Loop over symmetries of the space group and time-reversal.
    do isym=1,Ltg_q%nsym_sg
@@ -752,21 +762,16 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
          phmGt => Gsph_epsG0%phmGt  (1:Ep%npwe,isym) ! In the 2 lines below note the slicing (1:npwe)
          Sm1G  => Gsph_epsG0%rottbm1(1:Ep%npwe,itim,isym)
 
+         isymop = isymop + 1
          SELECT CASE (itim)
          CASE (1)
-           rhotwg_sym(1:Ep%npwe)=rhotwg(Sm1G(1:Ep%npwe))*phmGt(1:Ep%npwe)
+           rhotwg_sym(1:Ep%npwe,isymop)=rhotwg(Sm1G(1:Ep%npwe))*phmGt(1:Ep%npwe)
          CASE (2)
-           rhotwg_sym(1:Ep%npwe)=CONJG(rhotwg(Sm1G(1:Ep%npwe)))*phmGt(1:Ep%npwe)
+           rhotwg_sym(1:Ep%npwe,isymop)=CONJG(rhotwg(Sm1G(1:Ep%npwe)))*phmGt(1:Ep%npwe)
          CASE DEFAULT
            MSG_BUG(sjoin('Wrong value of itim:', itoa(itim)))
          END SELECT
 
-         ! Multiply elements G1,G2 of rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
-!$omp parallel do private(dd)
-         do io=1,Ep%nomega
-           dd=green_w(io)
-           call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg_sym,1,rhotwg_sym,1,chi0(:,:,io),Ep%npwe)
-         end do
 
          ! === Accumulate heads and wings for each small q ===
          ! FIXME extrapolar method should be checked!!
@@ -783,13 +788,13 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
          ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
          do idir=1,3
            do io=1,Ep%nomega
-             chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym)
-             chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg_sym*CONJG(mir_kbz(idir))
+             chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym(:,isymop))
+             chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg_sym(:,isymop)*CONJG(mir_kbz(idir))
              ! Add contribution due to extrapolar technique.
              !if (gwcomp==1.and.ABS(deltaf_b1b2)>=GW_TOL_DOCC) then
              if (gwcomp==1) then
-               chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym)
-               chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg_sym*CONJG(mir_kbz(idir))
+               chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym(:,isymop))
+               chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg_sym(:,isymop)*CONJG(mir_kbz(idir))
              end if
            end do
          end do
@@ -811,6 +816,22 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
        end if !wtksym
      end do !itim
    end do !isym
+
+   ! Multiply rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
+   ! note that single precision is faster (sometimes factor ~2).
+   ! Rely on MKL threads for OPENMP parallelization
+   do io=1,Ep%nomega
+     ! Check if green_w(io) is real (=> pure imaginary omega)
+     ! and that it is not a metal
+     ! then the corresponding chi0(io) is hermitian
+     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic ) then
+       dr=green_w(io)
+       call xherk('U','N',Ep%npwe,nsymop,dr,rhotwg_sym,Ep%npwe,one_gw,chi0(:,:,io),Ep%npwe)
+     else
+       dd=green_w(io)
+       call xgemm('N','C',Ep%npwe,Ep%npwe,nsymop,dd,rhotwg_sym,Ep%npwe,rhotwg_sym,Ep%npwe,cone_gw,chi0(:,:,io),Ep%npwe)
+     endif
+   end do
 
    ABI_FREE(rhotwg_sym)
 
@@ -875,7 +896,7 @@ end subroutine accumulate_chi0_q0
 !!  sf_head(3,3,my_wl:my_wr)=Updated head of the spectral function.
 !!
 !! PARENTS
-!!      cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1113,7 +1134,7 @@ end subroutine accumulate_sfchi0_q0
 !!  Umklapp processes are not yet implemented
 !!
 !! PARENTS
-!!      cchi0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1306,7 +1327,7 @@ end subroutine assemblychi0sf
 !!  iomegar= index in the array omegasf of the first frequency > egwdiff
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1390,7 +1411,7 @@ end subroutine approxdelta
 !! kkweight(nsp,ne)=frequency dependent weights Eq A1 PRB 74, 035101 (2006) [[cite:Shishkin2006]]
 !!
 !! PARENTS
-!!      m_chi0
+!!      m_chi0tk
 !!
 !! CHILDREN
 !!
@@ -1491,7 +1512,7 @@ end subroutine calc_kkweight
 !!  omegasf(nomegasf+1)=frequencies for imaginary part.
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1634,7 +1655,7 @@ end subroutine setup_spectral
 !! OUTPUT
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1710,7 +1731,7 @@ end subroutine hilbert_transform
 !! OUTPUT
 !!
 !! PARENTS
-!!      cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1809,7 +1830,7 @@ end subroutine hilbert_transform_headwings
 !!  In output the "delta part" of the completeness correction is added.
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1927,7 +1948,7 @@ end subroutine completechi0_deltapart
 !!  otherwise, should be described
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!
@@ -2011,7 +2032,7 @@ end subroutine output_chi0sumrule
 !!  using the symmetry operations of the little group of the external q.
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -2106,7 +2127,7 @@ end subroutine accumulate_chi0sumrule
 !! max_rest,min_rest=Maximun and minimum resonant (posite) transition energy treated by this node.
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -2255,7 +2276,7 @@ end subroutine make_transitions
 !! OUTPUT
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!

@@ -106,13 +106,10 @@ contains
 !!    %tvalespl(mqgrid_vl,2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
-!!      nctab_eval_tvalespl,pawrad_free,pawrad_init,ps_corecharge_get
-!!      ps_destroy,ps_nonlocalprojectors_filter,ps_projector_get
-!!      ps_provenance_get,ps_pseudoatomspec_get,ps_valenceconfiguration_get
-!!      ps_valenceshell_get,psml_reader,psp8lo,psp8nl,psp9cc,spline,wrtout
+!!      dgesv
 !!
 !! SOURCE
 
@@ -691,7 +688,7 @@ end subroutine psp9in
 !!  This routine will be built only if PSML support is enabled.
 !!
 !! PARENTS
-!!      psp9in
+!!      m_psp9
 !!
 !! CHILDREN
 !!      dgesv

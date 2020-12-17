@@ -43,8 +43,6 @@
 
 subroutine alloc_on_gpu(gpu_ptr,size)
 
- implicit none
-
 !Arguments ------------------------------------
  integer :: size ! size in bytes to allocate
  type(c_ptr) :: gpu_ptr
@@ -85,8 +83,6 @@ end subroutine alloc_on_gpu
 !! SOURCE
 
 subroutine copy_from_gpu(dtab,gpu_ptr,size)
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: size ! taille en octet a transferer
@@ -130,8 +126,6 @@ end subroutine copy_from_gpu
 
 subroutine copy_on_gpu(dtab,gpu_ptr,size)
 
- implicit none
-
 !Arguments ------------------------------------
  integer :: size ! size in byte (to be transfered)
  real(dp), dimension(*),optional :: dtab
@@ -171,8 +165,6 @@ end subroutine copy_on_gpu
 
 subroutine dealloc_on_gpu(gpu_ptr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(c_ptr) :: gpu_ptr
 
@@ -208,7 +200,6 @@ end subroutine dealloc_on_gpu
 
 subroutine gpu_linalg_init()
 
- implicit none
 
 end subroutine gpu_linalg_init
 !!***
@@ -235,8 +226,6 @@ end subroutine gpu_linalg_init
 !!
 !! SOURCE
 subroutine gpu_linalg_shutdown()
-
- implicit none
 
 end subroutine gpu_linalg_shutdown
 !!***
@@ -281,8 +270,6 @@ end subroutine gpu_linalg_shutdown
 !! SOURCE
 
 subroutine gpu_xgemm(cplx,transa,transb,m,n,k,alpha,a_gpu,lda,b_gpu,ldb,beta,c_gpu,ldc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
@@ -361,8 +348,6 @@ end subroutine gpu_xgemm
 !! SOURCE
 subroutine gpu_xtrsm(cplx,side,uplo,transa,diag,m,n,alpha,a_gpu,lda,b_gpu,ldb)
 
- implicit none
-
 ! !Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
  complex(dpc), intent(in) :: alpha
@@ -424,8 +409,6 @@ end subroutine gpu_xtrsm
 subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spaceComm,&
 &                              sqgram_gpu,vectsize,&
 &                              x_cplx,timopt,tim_xortho) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

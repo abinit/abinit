@@ -83,7 +83,7 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
 !!      hdr_io,timab,wffclose,wffopen,xmpi_exch,xmpi_sum_master

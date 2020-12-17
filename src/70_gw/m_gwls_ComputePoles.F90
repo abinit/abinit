@@ -76,7 +76,7 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      block_lanczos_algorithm,diagonalize_lanczos_banded
@@ -263,7 +263,7 @@ end subroutine generate_degeneracy_table_for_poles
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      block_lanczos_algorithm,diagonalize_lanczos_banded

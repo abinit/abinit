@@ -60,9 +60,10 @@ module m_rot_cg
 !!   cwavef_rot(2, npw, nband) = fourier coefficient of wave functions for all bands rotated in the band space
 !!
 !! PARENTS
-!!      mkrho
+!!      m_rot_cg
 !!
 !! CHILDREN
+!!      diag_occ
 !!
 !! SOURCE
 !!
@@ -167,9 +168,10 @@ end subroutine diag_occ
 !!   cwavef is rotated with the unitary matrix obtained from the diagonalisation
 !!   of occupations (occ_nd)
 !! PARENTS
-!!      mkrho
+!!      m_mkrho
 !!
 !! CHILDREN
+!!      diag_occ
 !!
 !! SOURCE
 !!

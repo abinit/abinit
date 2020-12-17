@@ -185,6 +185,10 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
 
 ! *********************************************************************
 
+!DEBUG
+!write(std_out,*)' m_epjdos%epjdos_new, enter '
+!ENDDEBUG
+
  new%nkpt = dtset%nkpt; new%mband = dtset%mband; new%nsppol = dtset%nsppol
 
  new%prtdos = dtset%prtdos
@@ -261,6 +265,10 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
    new%fractions_paw1 = zero; new%fractions_pawt1 = zero
  end if
 
+!DEBUG
+!write(std_out,*)' m_epjdos%epjdos_new, exit '
+!ENDDEBUG
+
 end function epjdos_new
 !!***
 
@@ -272,10 +280,9 @@ end function epjdos_new
 !!  deallocate memory
 !!
 !! PARENTS
-!!      outscfcv
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -332,10 +339,10 @@ end subroutine epjdos_free
 !!  (no explicit output)
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -371,6 +378,10 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  real(dp),allocatable :: wdt(:,:)
 
 ! *********************************************************************
+
+!DEBUG
+!write(std_out,*)' m_epjdos%dos_calcncwrite, enter '
+!ENDDEBUG
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm); iam_master = (my_rank == master)
 
@@ -719,6 +730,10 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  write(msg,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
  call wrtout(std_out,msg,"PERS")
 
+!DEBUG
+!write(std_out,*)' m_epjdos%dos_calcncwrite, exit '
+!ENDDEBUG
+
 contains
 
 subroutine write_extra_headers()
@@ -882,10 +897,10 @@ end subroutine dos_calcnwrite
 !!    different contributions outside the loop thus reducing the number of MPI calls.
 !!
 !! PARENTS
-!!      m_cut3d,partial_dos_fractions
+!!      m_cut3d,m_epjdos
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1243,7 +1258,7 @@ end subroutine recip_ylm
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1437,7 +1452,7 @@ end subroutine dens_in_sph
 !!      m_epjdos
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1502,10 +1517,10 @@ end subroutine sphericaldens
 !!  This routine should be called by master only
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1735,10 +1750,10 @@ end subroutine prtfatbands
 !!  Only writing
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1926,11 +1941,10 @@ end subroutine fatbands_ncwrite
 !!  where the sum over G is done on the reduced G-sphere and w(G) = 1/2 if G=G0 else 1.
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      cg_getspin,cwtime,destroy_mpi_enreg,getkpgnorm,getph,initmpi_seq
-!!      initylmg,jlspline_free,ph1d3d,recip_ylm,sort_dp,splint,wrtout,xmpi_sum
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1981,6 +1995,17 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  complex(dpc) :: cgcmat(2,2)
 
 !*************************************************************************
+
+!DEBUG
+!write(std_out, '(a)') ' m_epjdos%partial_dos_fractions : enter '
+!ENDDEBUG
+
+ if(dtset%natsph==dtset%natom)then
+   write(msg, '(a)') ' Compute the partial DOS fractions. This can be time-consuming. Think using natsph and iatsph.'
+ else
+   write(msg, '(a)') ' Compute the partial DOS fractions.'
+ endif
+ call wrtout(std_out,msg,'COLL')
 
  ! for the moment, only support projection on angular momenta
  if (dos%partial_dos_flag /= 1 .and. dos%partial_dos_flag /= 2) then
@@ -2114,6 +2139,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    abs_shift_b =  0 ! offset to allow for automatic update with +1 below
    do isppol=1,dtset%nsppol
      ioffkg = 0
+
      do ikpt=1,dtset%nkpt
        nband_k = dtset%nband((isppol-1)*dtset%nkpt + ikpt)
        if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) then
@@ -2382,6 +2408,10 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    MSG_WARNING('only partial_dos==1 or 2 is coded')
  end if
 
+!DEBUG
+!write(std_out,*) ' m_epjdos%partial_dos_fractions : exit '
+!ENDDEBUG
+
  if (dtset%prtprocar /= 0) close(unit_procar)
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -2414,7 +2444,7 @@ end subroutine partial_dos_fractions
 !!   nsppol       =1 or 2 spin polarization channels
 !!  fatbands_flag =1 if pawfatbnd=1 or 2
 !!  mbesslang=maximum angular momentum for Bessel function expansion
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  prtdosm=option for the m-contributions to the partial DOS
 !!  ndosfraction=natsph*mbesslang
 !!  paw_dos_flag=option for the PAW contributions to the partial DOS
@@ -2438,7 +2468,7 @@ end subroutine partial_dos_fractions
 !!              m discretization of partial DOS fractions
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
 !!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum

@@ -79,7 +79,7 @@ contains
 !!   | typat(natom)=type (integer) for each atom
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
@@ -154,12 +154,12 @@ contains
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      dotprod_vn,hartre,mag_penalty,mean_fftr,psolver_rhohxc,rhohxcpositron
-!!      rhotoxc,sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init
-!!      xchybrid_ncpp_cc,xred2xcart
+!!      constrained_residual,dotprod_vn,hartre,mag_penalty,mean_fftr
+!!      psolver_rhohxc,rhohxcpositron,rhotoxc,sqnorm_v,timab,wvl_psitohpsi
+!!      wvl_vtrial_abi2big,xcdata_init,xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 
@@ -261,7 +261,8 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
    if (with_vxctau) vtauresid(:,:)=vxctau(:,:,1)
 !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
-     call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
+     call hartre(1,gsqcut,dtset%icutcoul,usepaw,mpi_enreg,nfft,ngfft,&
+                 &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
 
      !Use the proper exchange_correlation energy : either the origin one, or the auxiliary one
      ixc_current=dtset%ixc
