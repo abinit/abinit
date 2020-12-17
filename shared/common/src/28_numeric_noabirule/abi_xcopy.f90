@@ -111,7 +111,7 @@ end subroutine abi_zcopy_1d
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
  if(cplx_ == 2) then
-    call zcopy(size,dcmplx(tsrc),incsrc,tdest,incdest)
+    call zcopy(size,tsrc,incsrc,tdest,incdest)
  else
     call dcopy(size,tsrc,incsrc,tdest,incdest)
  end if
@@ -267,7 +267,7 @@ end subroutine abi_dcopy_1d_0d
 
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
  if(cplx_ == 2) then
-    call zcopy(size,dcmplx(tsrc),incsrc,tdest,incdest)
+    call zcopy(size,tsrc,incsrc,tdest,incdest)
  else
     call dcopy(size,tsrc,incsrc,tdest,incdest)
  end if
@@ -313,7 +313,7 @@ subroutine abi_z2dcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
  if(cplx_ == 2) then
     call zcopy(size,tsrc,incsrc,tdest,incdest)
  else
-    call dcopy(size,dble(tsrc),incsrc,tdest,incdest)
+    call dcopy(size,tsrc,incsrc,tdest,incdest)
  end if
 
 #ifdef DEV_LINALG_TIMING

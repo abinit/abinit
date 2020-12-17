@@ -115,7 +115,7 @@ subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx)
 #ifdef HAVE_LINALG_PLASMA
  if (ABI_LINALG_PLASMA_ISON) then
    if(cplx_ == 2) then
-      info = PLASMA_zpotrf_c(uplo_plasma(uplo),n,c_loc(dcmplx(a)),lda)
+      info = PLASMA_zpotrf_c(uplo_plasma(uplo),n,c_loc(a),lda)
    else
       info = PLASMA_dpotrf_c(uplo_plasma(uplo),n,c_loc(a),lda)
    end if
@@ -124,7 +124,7 @@ subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx)
 #endif
 
  if(cplx_ == 2) then
-    call zpotrf(uplo,n,dcmplx(a),lda,info)
+    call zpotrf(uplo,n,a,lda,info)
  else
     call dpotrf(uplo,n,a,lda,info)
  end if
