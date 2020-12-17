@@ -29,7 +29,10 @@ module m_multibinit_dataset
  use m_abicore
  use m_errors
 
- use m_parser, only : intagm
+ use m_xmpi
+ use m_parser, only : intagm, instrng
+ use m_fstrings,   only : replace, inupper
+ use m_dtset,      only : chkvars 
  use m_ddb,    only : DDB_QTOL
  use m_scup_dataset
 
@@ -41,7 +44,8 @@ module m_multibinit_dataset
  public :: multibinit_dtset_init
  public :: multibinit_dtset_free
  public :: outvars_multibinit
- public :: invars_multibinit_first_round
+ public :: invars_multibinit_filenames
+ public :: invars_multibinit_filenames_from_input_file
  public :: invars10
 !!***
 
@@ -627,15 +631,15 @@ end subroutine multibinit_dtset_free
 !----------------------------------------------------------------------
 
 !===============================================================
-! First round of parsing of input variables for Multibinit
-! read only the latt_inp_ddb_fname.
+! Parsing of input variables for Multibinit
+! read only the latt_inp_ddb_fname, and the outdata_prefix.
 ! It contains the reference structure, so that the natom can be decided
 !> @ fname: the name of the ddb file
 !> @ string: the input file in string
 !> @ lenstr: the length of string
 !===============================================================
-subroutine invars_multibinit_first_round(fname, string, lenstr)
-  character(len=fnlen), intent(inout) :: fname
+subroutine invars_multibinit_filenames( string, lenstr, outdata_prefix, sys_fname )
+  character(len=fnlen), optional, intent(inout) :: outdata_prefix, sys_fname
   character(len=*), intent(inout) :: string
   integer, intent(in) :: lenstr 
   integer :: jdtset,marr,tread
@@ -646,13 +650,51 @@ subroutine invars_multibinit_first_round(fname, string, lenstr)
   ABI_ALLOCATE(intarr,(marr))
   ABI_ALLOCATE(dprarr,(marr))
   jdtset=1
-  fname=""
-  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_ddb_fname',tread,'KEY',&
-       & key_value=fname)
-  if(.not. tread==1) fname=""
+
+  if(present(outdata_prefix)) then
+     outdata_prefix=""
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'outdata_prefix',tread,'KEY',&
+          & key_value=outdata_prefix)
+     if(.not. tread==1) outdata_prefix=""
+  end if
+
+  if(present(sys_fname)) then
+     sys_fname=""
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_ddb_fname',tread,'KEY',&
+          & key_value=sys_fname)
+     if(.not. tread==1) sys_fname=""
+  end if
   ABI_SFREE(intarr)
   ABI_SFREE(dprarr)
-end subroutine invars_multibinit_first_round
+end subroutine invars_multibinit_filenames
+
+
+subroutine invars_multibinit_filenames_from_input_file(input_path, outdata_prefix, sys_fname)
+  character(len=fnlen), optional, intent(inout) :: outdata_prefix, sys_fname, input_path
+  character(len=strlen)  :: string
+  integer :: lenstr, option
+
+  integer :: master, my_rank, comm, nproc, ierr
+  logical :: iam_master
+  master = 0
+  comm = xmpi_world
+  nproc = xmpi_comm_size(comm)
+  my_rank = xmpi_comm_rank(comm)
+  iam_master = (my_rank == master)
+
+
+  option=1
+  if (iam_master) then
+     call instrng (input_path,lenstr,option,strlen,string)
+     !To make case-insensitive, map characters to upper case:
+     call inupper(string(1:lenstr))
+     !Check whether the string only contains valid keywords
+     call chkvars(string)
+  end if
+  call xmpi_bcast(string,master, comm, ierr)
+  call xmpi_bcast(lenstr,master, comm, ierr)
+  call invars_multibinit_filenames( string=string, lenstr=lenstr, sys_fname=sys_fname, outdata_prefix=outdata_prefix)
+end subroutine invars_multibinit_filenames_from_input_file
 
 
 !!****f* m_multibinit_dataset/invars10

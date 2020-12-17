@@ -164,7 +164,6 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    character(len=fnlen) :: sys_fname
 
 
 !MPI variables
@@ -173,7 +172,6 @@ contains
     nproc = xmpi_comm_size(comm)
     my_rank = xmpi_comm_rank(comm)
     iam_master = (my_rank == master)
-
 
     !Read the input file, only to the the name of the file which contains the ddb file or xml file 
     ! for getting the number of atoms.
@@ -190,16 +188,11 @@ contains
     !To automate a maximum calculation, multibinit reads the number of atoms
     !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
     !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
-    if(len_trim(input_path)==0) then
-        sys_fname=filnam(3)
-    else
-        call invars_multibinit_first_round(sys_fname, string, strlen)
-    endif
     write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-         & '-',trim(sys_fname),ch10,' to initialize the multibinit input'
+         & '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    call effective_potential_file_getDimSystem(sys_fname,natom,ntypat,nph1l,nrpt)
+    call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
 
 
 
