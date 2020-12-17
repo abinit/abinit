@@ -140,11 +140,9 @@ contains
     character(len=fnlen) :: ncdf_fname
     character(len=500) :: message
     integer :: ii
-
-    ABI_UNUSED_A(params)
-
+    ABI_UNUSED(fnames)
     if (xmpi_comm_rank(xmpi_world)==0) then
-       ncdf_fname=fnames(3)
+       ncdf_fname=params%slc_pot_fname
        write(message,'(a,(81a, 80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
             &     '- Reading spin-lattice coupling terms from ', trim(ncdf_fname)
        call wrtout(ab_out,message,'COLL')

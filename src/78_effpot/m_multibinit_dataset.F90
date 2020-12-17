@@ -41,6 +41,7 @@ module m_multibinit_dataset
  public :: multibinit_dtset_init
  public :: multibinit_dtset_free
  public :: outvars_multibinit
+ public :: invars_multibinit_first_round
  public :: invars10
 !!***
 
@@ -281,11 +282,11 @@ module m_multibinit_dataset
   character(len=fnlen) :: latt_init_hist_fname
   character(len=fnlen) :: latt_pot_fname
 
-!  character(len=fnlen) :: latt_inp_ddb_fname
-!  character(len=fnlen) :: latt_inp_coeff_fname
-!  character(len=fnlen) :: latt_training_set_fname
-!  character(len=fnlen) :: latt_test_set_fname
-!  character(len=fnlen) :: latt_ddb_fnames(12)
+  character(len=fnlen) :: latt_inp_ddb_fname
+  character(len=fnlen) :: latt_inp_coeff_fname
+  character(len=fnlen) :: latt_training_set_fname
+  character(len=fnlen) :: latt_test_set_fname
+  character(len=fnlen) :: latt_ddb_fnames(12)
 
 
   character(len=fnlen) :: spin_pot_fname
@@ -436,11 +437,11 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 
  multibinit_dtset%latt_init_hist_fname=""
  multibinit_dtset%latt_pot_fname=""
- !multibinit_dtset%latt_inp_ddb_fname=""
- !multibinit_dtset%latt_inp_coeff_fname=""
- !multibinit_dtset%latt_training_set_fname=""
- !multibinit_dtset%latt_test_set_fname=""
- !multibinit_dtset%latt_ddb_fnames(12)=""
+ multibinit_dtset%latt_inp_ddb_fname=""
+ multibinit_dtset%latt_inp_coeff_fname=""
+ multibinit_dtset%latt_training_set_fname=""
+ multibinit_dtset%latt_test_set_fname=""
+ multibinit_dtset%latt_ddb_fnames(12)=""
 
 
 
@@ -625,6 +626,36 @@ end subroutine multibinit_dtset_free
 
 !----------------------------------------------------------------------
 
+!===============================================================
+! First round of parsing of input variables for Multibinit
+! read only the latt_inp_ddb_fname.
+! It contains the reference structure, so that the natom can be decided
+!> @ fname: the name of the ddb file
+!> @ string: the input file in string
+!> @ lenstr: the length of string
+!===============================================================
+subroutine invars_multibinit_first_round(fname, string, lenstr)
+  character(len=fnlen), intent(inout) :: fname
+  character(len=*), intent(inout) :: string
+  integer, intent(in) :: lenstr 
+  integer :: jdtset,marr,tread
+  !arrays
+  integer,allocatable :: intarr(:)
+  real(dp),allocatable :: dprarr(:)
+  marr=300
+  ABI_ALLOCATE(intarr,(marr))
+  ABI_ALLOCATE(dprarr,(marr))
+  jdtset=1
+  fname=""
+  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_ddb_fname',tread,'KEY',&
+       & key_value=fname)
+  print *, "fname", fname
+  if(.not. tread==1) fname=""
+  ABI_SFREE(intarr)
+  ABI_SFREE(dprarr)
+end subroutine invars_multibinit_first_round
+
+
 !!****f* m_multibinit_dataset/invars10
 !!
 !! NAME
@@ -670,6 +701,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:),work(:)
+
+ ! strings
+ character(len=fnlen*12) :: lattddb_string
+ integer :: sidx(13), cnt, i1, i2
 
 !*********************************************************************
  marr=30
@@ -1144,6 +1179,63 @@ multibinit_dtset%latt_temperature_start=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_pot_fname',tread,'KEY',&
       & key_value=multibinit_dtset%latt_pot_fname)
  if(.not. tread==1) multibinit_dtset%latt_pot_fname=""
+
+ multibinit_dtset%latt_inp_ddb_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_ddb_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_inp_ddb_fname)
+ if(.not. tread==1) multibinit_dtset%latt_inp_ddb_fname=""
+print *, "latt_inp_ddb_fname:", multibinit_dtset%latt_inp_ddb_fname 
+
+ multibinit_dtset%latt_inp_coeff_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_coeff_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_inp_coeff_fname)
+ if(.not. tread==1) multibinit_dtset%latt_inp_coeff_fname=""
+print *, "latt_inp_ddb_fname:", multibinit_dtset%latt_inp_coeff_fname 
+
+ multibinit_dtset%latt_training_set_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_training_set_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_training_set_fname)
+ if(.not. tread==1) multibinit_dtset%latt_training_set_fname=""
+
+ multibinit_dtset%latt_test_set_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_test_set_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_test_set_fname)
+ if(.not. tread==1) multibinit_dtset%latt_test_set_fname=""
+
+
+ multibinit_dtset%latt_ddb_fnames=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_ddb_fnames',tread,'KEY',&
+      & key_value=lattddb_string)
+ if(.not. tread==1) then
+    lattddb_string=""
+    multibinit_dtset%latt_ddb_fnames(:)=""
+ else
+    sidx(1) = 1; sidx(13) = len(lattddb_string)
+    cnt = 1
+    do ii=1,len(lattddb_string)
+       if (lattddb_string(ii:ii) == ",") then
+          lattddb_string(ii:ii) = " "
+          cnt = cnt + 1
+          sidx(cnt) = ii
+          ABI_CHECK(cnt <= 12, "Too many commas in latt_ddb_fnames!")
+       end if
+    end do
+
+    do ii=1,cnt
+       i1 = sidx(ii)
+       i2 = sidx(ii + 1)
+       cnt = len(adjustl(trim(lattddb_string(i1:i2))))
+       ABI_CHECK(cnt <= fnlen, "latt_ddb_fnames path too small, increase fnlen")
+       multibinit_dtset%latt_ddb_fnames(ii) = adjustl(trim(lattddb_string(i1:i2)))
+       ! if (len_trim(pp_dirpath) > 0) then
+       !   if (len_trim(pp_dirpath) + len_trim(pseudo_paths(ii)) > fnlen) then
+       !     MSG_ERROR(sjoin("String of len fnlen:", itoa(fnlen), " too small to contain full pseudo path"))
+       !   end if
+       !   pseudo_paths(ii) = strcat(pp_dirpath, pseudo_paths(ii))
+       !end if
+    end do
+ end if
+
 
  multibinit_dtset%slc_pot_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_pot_fname',tread,'KEY',&

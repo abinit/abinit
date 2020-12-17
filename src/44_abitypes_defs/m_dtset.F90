@@ -3181,10 +3181,15 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' kberry kpt kptbounds kptgw'
  list_vars=trim(list_vars)//' kptnrm kptopt kptrlatt kptrlen kssform'
 !L
+ list_vars=trim(list_vars)//' latt_ddb_fnames'
  list_vars=trim(list_vars)//' latt_init_hist_fname'
+ list_vars=trim(list_vars)//' latt_inp_coeff_fname'
+ list_vars=trim(list_vars)//' latt_inp_ddb_fname'
  list_vars=trim(list_vars)//' latt_friction latt_pot_fname latt_taut'
+ list_vars=trim(list_vars)//' latt_test_set_fname'
  list_vars=trim(list_vars)//' latt_temperature latt_temperature_start latt_temperature_end'
  list_vars=trim(list_vars)//' latt_temperature_nstep latt_var_temperature'
+ list_vars=trim(list_vars)//' latt_training_set_fname'
 
 ! list_vars=trim(list_vars)//' latt_taup latt_compressibility latt_mask'
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
@@ -3266,7 +3271,7 @@ subroutine chkvars(string)
 !list_vars=trim(list_vars)//' scup_smearing scup_freezden'
 !End SCALE-UP variables
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
- list_vars=trim(list_vars)//' slc_coupling'
+ list_vars=trim(list_vars)//' slc_coupling slc_pot_fname'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
  !list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'
  list_vars=trim(list_vars)//' spin_calc_thermo_obs'

@@ -78,7 +78,7 @@ module m_multibinit_driver
 #endif 
   !use m_generate_training_set, only : generate_training_set
   use m_compute_anharmonics, only : compute_anharmonics
-  use m_init10,              only : init10
+  use m_init10,              only : init10, postfix_fnames
   use m_parser,     only : instrng
   use m_fstrings,   only : replace, inupper
   use m_dtset,      only : chkvars
@@ -164,6 +164,7 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
+    character(len=fnlen) :: sys_fname
 
 
 !MPI variables
@@ -178,13 +179,35 @@ contains
     !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
     !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
 
-    !TODO: hexu comment: why no if(iam_master) ?
+    option=1
+    if (iam_master) then
+       call instrng (filnam(1),lenstr,option,strlen,string)
+       !To make case-insensitive, map characters to upper case:
+       call inupper(string(1:lenstr))
+       !Check whether the string only contains valid keywords
+       call chkvars(string)
+    end if
+    call xmpi_bcast(string,master, comm, ierr)
+    call xmpi_bcast(lenstr,master, comm, ierr)
+
+ 
+
+    if(len_trim(input_path)==0) then
+        sys_fname=filnam(3)
+    else
+        print *, "reading sys_fname from file ", input_path
+        print *, "string", string
+        print *, "strlen", strlen
+        call invars_multibinit_first_round(sys_fname, string, strlen)
+    endif
+    print *, "sys_fname", sys_fname
+
     write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-         & '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
+         & '-',trim(sys_fname),ch10,' to initialize the multibinit input'
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
 
-    call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
+    call effective_potential_file_getDimSystem(sys_fname,natom,ntypat,nph1l,nrpt)
 
     !Read the input file, and store the information in a long string of characters
     !strlen from defs_basis module
@@ -204,6 +227,8 @@ contains
 
     !Read the input file
     call invars10(inp,lenstr,natom,string)
+    call postfix_fnames(input_path, filnam, inp)
+    print *, "filnam:", filnam
 
     if (iam_master) then
        !  Echo the inputs to console and main output file

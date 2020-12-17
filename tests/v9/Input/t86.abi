@@ -34,7 +34,9 @@ slc_coupling = 0010 # activate only Oiju terms
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF
 #%% exclude_builders = .*_nag_7.0_.*
-#%% system_xml = t83.nc
+#%% spin_pot = t83.nc
+#%% latt_pot = t83.nc
+#%% slc_pot = t83.nc
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
