@@ -288,8 +288,6 @@ which also show that the magnetizations of the two atoms are opposite.
 The values of the atom magnetization is a bit different than the ones from the
 ABINIT output because it uses a slightly different integration paramters.
 
-### --- EB: I STOPPED HERE --- ###
-
 ## 3 Another look at *fcc* Fe
 
 Instead of treating fcc Fe directly as an antiferromagnetic material, we will
@@ -297,21 +295,19 @@ not make any hypotheses on its magnetic structure, and run the calculation
 like the one for bcc Fe, anticipating only that the two spin directions are going to be different.
 We will not even assume that the initial spins are of the same magnitude.
 
-You can copy the file *$ABI_TESTS/tutorial/Input/tspin_3.in* to *Work_spin*.
+You can copy the file *$ABI_TESTS/tutorial/Input/tspin_3.abi* to *Work_spin*.
 
-{% dialog tests/tutorial/Input/tspin_3.in %}
+{% dialog tests/tutorial/Input/tspin_3.abi %}
 
-This is your input file. You can modify the file *tspin_x.files* and immediately
-start running the calculation. Then, you should edit it to understand its contents.
+You can run the calculation with this is input file and look at it to understand its contents.
 
-Note the values of [[spinat]]. In this job, we wish again to characterize the magnetic structure.
-We are not going to use zeta as in the preceding calculation, but we will here
-use another feature of abinit: atom and angular momentum projected densities of state.
-These are densities of states weighted by the projection of the wave functions
-on angular momentum channels (that is spherical harmonics) centered on each atom of the system.
+Note the values of [[spinat]]. In this job, we will again to characterize the magnetic structure.
+We are going to use atom and angular momentum projected densities of state.
+These are DOS weighted by the projection of the wave functions
+on angular momentum channels (i.e. the spherical harmonics) centered on each atom of the system.
 Note that these DOS are computed with the tetrahedron method, which is rather
-time consuming and produces more accurate but less smooth DOS than the smearing method. The time
-is strongly dependent on the number of k-points, and we use here only a reduced set.
+time consuming and produces more accurate but less smooth DOS than the smearing method. 
+The CPU time is strongly dependent on the number of k-points, and we use here only a reduced set.
 (This will take about 1.5 minutes on a modern computer)
 
 To specify this calculation we need new variables, in addition to [[prtdos]] set now to 3:
@@ -323,8 +319,8 @@ To specify this calculation we need new variables, in addition to [[prtdos]] set
 This will specify the atoms around which the calculation will be performed, and the radius of the sphere.
 We specifically select a new dataset for each atom, a non self-consistent
 calculation being run to generate the projected density of states.
-First, we note that the value of the energy is: Etotal=-4.92489557316370E+01,
-which shows that we have attained essentially the same state as above.
+First, we note that the value of the total energy is -2.4972993185E+02 Ha,
+which shows that we have attained essentially the same state as in tspin2 (etotal=-2.4972993198E+02).
 
 The density of states will be in the files *tspin_3o_DS2_DOS_AT0001* for the
 first atom, and *tspin_3o_DS3_DOS_AT0002* for the second atom.
@@ -333,7 +329,7 @@ moment and whose integral up to the Fermi level will yield an estimate of the
 magnetization on each atom.
 We note the Fermi level (echoed in the file *tspin_3o_DS1_DOS*):
 
-    Fermi energy :      -0.28270392
+    Fermi energy :      0.52472131
 
 If we have a look at the integrated site-projected density of states, we can
 compute the total moment on each atom. To this end, one can open the file
@@ -344,43 +340,44 @@ file is self-documented, and describes the line content, for spin up and spin do
 # energy(Ha)  l=0   l=1   l=2   l=3   l=4    (integral=>)  l=0   l=1   l=2 l=3   l=4
 ```
 
-If we look for the lines containing  an energy of "-0.28250", we find
+If we look for the lines containing  an energy of "0.52450", we find
 
-up  -0.28250  0.8026  2.6082  23.3966  0.7727  0.1687  0.30  0.34  <font color="red">3.42</font>  0.04  0.01
-dn  -0.28250  0.3381  1.8716  24.0456  0.3104  0.1116  0.30  0.33  <font color="red">2.74</font>  0.04  0.01
+up :
+  0.52450  0.3714  1.0151  13.6555  0.1144  0.0683   1.29  3.30  <font color="red">2.49</font>  0.05  0.02
 
-There are apparently changes in the densities of states for all the channels,
-but besides the d-channels, these are indeed fluctuations. This is confirmed
-by looking at the integrated density of states which is different only for the
-d-channel. The difference between up and down is 0.68, in rough agreement
+down :
+  0.52450  0.1597  1.6758   9.8137  0.0872  0.0750   1.29  3.32  <font color="red">3.69</font>  0.04  0.01
+
+There are apparently changes in the DOS for all projected orbitals,
+but only the d orbital projection has sizeable differences. 
+This is confirmed by looking at the integrated DOS which is different only for the
+d-channel. 
+The difference between up and down is 1.20, in rough agreement
 (regarding our very crude methods of integration) with the previous
-calculation. Using a calculation with the same number of k-points for the
-projected DOS, we can plot the up-down integrated dos difference for the d-channel.
+calculation. 
+Using a calculation with the same number of k-points for the
+projected DOS, we can plot the up-down integrated dos difference for the d-channel:
 
 ![](spin_assets/energy_diff_fccfe.jpg)
 
 Note that there is some scatter in this graph, due to the finite number of digits (2 decimal
-places) of the integrated dos given in the file *tspin_3o_DS3_DOS_AT0002*.
+places) of the integrated DOS given in the file *tspin_3o_DS3_DOS_AT0002*.
 
 If we now look at the up and down DOS for each atom, we can see that the
 corner atom and the face atom possess opposite magnetizations, which roughly
-cancel each other. The density of states computed with the tetrahedron method
-is not as smooth as by the smearing method, and a running average allows for a better view.
-
-As mentioned earlier, the solution of the Kohn-Sham equation
-might benefit of using a smaller value of [[tolrde]] (e.g. 0.001 instead of the default 0.005),
-and a larger value of [[nline]] (e.g. 6 instead of the default 4).
-
+cancel each other. 
+The DOS computed with the tetrahedron method is not as smooth as by the smearing method, 
+and a running average allows for a better view.
 
 ## 4 Ferrimagnetic (not yet)
 
 Some materials can display a particular form of ferromagnetism, which also can
 be viewed as non compensated antiferromagnetism, called ferrimagnetism.
 Some atoms possess up spin and other possess down spin, but the total spin magnetization is non zero.
-This happens generally for system with different type of atoms, and sometimes
+This happens generally for system with different type of atoms with different magnetic moment, and sometimes
 in rather complicated structures such as magnetite.
 
-## 5 The spin-orbit coupling
+## 5 The spin-orbit coupling (SOC)
 
 For heavy atoms a relativistic description of the electronic structure becomes
 necessary, and this can be accomplished through the relativistic DFT approach.
@@ -392,25 +389,19 @@ degeneracy is lifted according to the eigenvalues of the $L+S$ operator
 (l+1/2 and l-1/2 of degeneracy 2l+2 and 2l).
 After pseudization, the associated wave functions can be recovered by adding to usual pseudo-potential projectors a
 spin-orbit term of the generic form $v(r).|l,s\rangle L.S \langle l,s|$.
-Not all potentials include this additional term, but the HGH type pseudopotentials do systematically.
+Not all potentials include this additional term,  if you use the pseudopotentials from pseudodojo, you have
+to choose those generated in a fully relativistic option (with "FR" in the name, "SR" means semi-relativistic).
 
 In a plane wave calculation, the wavefunctions will be two-component
 spinors, that is they will have a spin-up and a spin-down component, and these
-components will be coupled. This means the size of the Hamiltonian matrix is quadrupled.
+components will be coupled. 
+This means the size of the Hamiltonian matrix is quadrupled and the CPU time will be enlarged.
 
 We will consider here a heavier atom than Iron: *Tantalum*.
-You will have to change the "files" file accordingly, as we want to use the
-potential: *73ta.hghsc*. It is a HGH pseudopotential, with semicore states.
-Replace the last line of the tspin_x.files by
 
-    ../../../Psps_for_tests/73ta.hghsc
+You can copy the file *$ABI_TESTS/tutorial/Input/tspin_5.abi* in *Work_spin* and run the calculation.
 
-You can copy the file *$ABI_TESTS/tutorial/Input/tspin_5.in* in *Work_spin*.
-
-{% dialog tests/tutorial/Input/tspin_5.in %}
-
-Change accordingly the file names in *tspin_x.files*, then run the calculation.
-It takes about 20 secs on a recent computer.
+{% dialog tests/tutorial/Input/tspin_5.abi %}
 
 The input file contains one new variable:
 
@@ -418,37 +409,37 @@ The input file contains one new variable:
 
 Have a look at it. You should also look at [[so_psp]]; it is not set explicitly here,
 because the SO information is directly read from the pseudopotential file.
-One could force a non-SO calculation by setting [[so_psp]] to 0.
+One could force a non-SO calculation by setting [[so_psp]] to 0 even if the pseudo is "FR".
 
 In this run, we check that we recover the splitting of the atomic levels by
-performing a calculation in a big box. Two calculations are launched with and
-without spin-orbit.
+performing a calculation in a big box. 
+Two calculations are launched with and without SOC.
 
-We can easily follow the symmetry of the different levels of the non spin orbit calculation:
-
-```
-  kpt#   1, nband= 26, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
--2.44760
--1.46437  -1.46437  -1.46437
--0.17045
--0.10852  -0.10852  -0.10852  -0.10740  -0.10740
-```
-
-That is, the symmetry: s, p, s, d
-After application of the spin-orbit coupling, we now have to consider twice as many levels:
+We can easily follow the symmetry of the different levels of the non-SOC calculation:
 
 ```
  kpt#   1, nband= 26, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
--2.43258  -2.43258
--1.67294  -1.67294  -1.35468  -1.35468  -1.35468  -1.35468
--0.16788  -0.16788
--0.11629  -0.11629  -0.11629  -0.11629  -0.09221  -0.09221 -0.09120  -0.09120  -0.09120  -0.09120
+  -2.60446   -1.43298   -1.43298   -1.43298   -0.15676   -0.09981   -0.09981   -0.09981
+  -0.09925   -0.09925    0.02071    0.02071    0.02071    0.04448    0.14037    0.14037
+   0.14037    0.14239    0.14239    0.14239    0.15233    0.15233    0.27078    0.27078
+   0.27078    0.30259
+```
+
+That is, the symmetry: s, p, s, d
+After application of the SOC, we now have to consider twice as many levels:
+
+```
+ kpt#   1, nband= 26, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -2.59401   -2.59401   -1.65064   -1.65064   -1.32587   -1.32587   -1.32587   -1.32587
+  -0.15505   -0.15505   -0.10627   -0.10627   -0.10627   -0.10627   -0.08765   -0.08765
+  -0.08706   -0.08706   -0.08706   -0.08706    0.00400    0.00400    0.03011    0.03011
+   0.03011    0.03011
 ```
 
 The levels are not perfectly degenerate, due to the finite size of the simulation box,
 and in particular the cubic shape, which gives a small crystal field splitting of the d orbitals
 between $e_g$ and $t_{2g}$ states.
-We can nevetheless compute the splitting of the levels, and we obtain, for e.g. the p-channel: 1.67294-1.35468=0.31826 Ha
+We can nevetheless compute the splitting of the levels, and we obtain, for e.g. the p-channel: 1.65064-1.32587=0.32477 Ha
 
 If we now consider the
 [NIST table](https://www.nist.gov/pml/atomic-reference-data-electronic-structure-calculations-tantalum)
@@ -457,15 +448,11 @@ of atomic data, we obtain:
     5p splitting, table: 1.681344-1.359740=0.321604 Ha
     5d splitting, table:   .153395-.131684=0.021711 Ha
 
-We obtain a reasonable agreement.
-A more converged (and more expensive calculation) would yield:
-
-    5p splitting, abinit: 1.64582-1.32141=0.32441 Ha
-    5d splitting, abinit:   .09084-.11180=0.02096 Ha
+We obtain a reasonable agreement. A better agreement could be obtained by improving the convergence parameters.
 
 ### 5.2 Projector Augmented-Wave
 
-Within the Projector Augmented-Wave method, the usual (pseudo-)Hamiltonian can be expressed as:
+Within the Projector Augmented-Wave (PAW) method, the usual (pseudo-)Hamiltonian can be expressed as:
 
 $$
 H  =  K + V_{eff} + \Sigma_{ij} D_{ij}  |p_i \rangle \langle p_j|
@@ -484,9 +471,9 @@ H  \simeq  K + V_{eff} + \Sigma (D_{ij}+D^{SO}_{ij})  |p_i \rangle \langle p_j|
 $$
 
 where $D^{SO}_{ij}$ is the projection of the ($L.S$) operator into the PAW augmentation regions.
-As an immediate consequence , we thus have the possibility to use the standard $p_i$ PAW projectors;
+As an immediate consequence, we have the possibility to use the standard $p_i$ PAW projectors;
 in other words, it is possible to use the standard PAW datasets (pseudopotentials) to perform
-calculations including spin-orbit coupling.
+calculations including SOC.
 But, of course, it is still necessary to express the wave-functions as two
 components spinors (spin-up and a spin-down components).
 Let's have a look at the following keyword:
@@ -496,39 +483,43 @@ Let's have a look at the following keyword:
 This activates the spin-orbit coupling within PAW (forcing [[nspinor]]=2).
 
 Now the practice:
-We consider Bismuth.
-You will have to change the "files" file accordingly, to use the new
-potential *83bi.paw*. This is a PAW dataset with 5d, 6s and 6p electrons in the valence.
-Replace the last line of the tspin_x.files by:
+We consider Bismuth, the PAW dataset file contains the 5d, 6s and 6p electrons in the valence.
 
-    ../../../Psps_for_tests/83bi.paw
+You can copy the file *$ABI_TESTS/tutorial/Input/tspin_6.abi* in *Work_spin*
+(one Bismuth atom in a large cell) and run the calculation. 
+It takes about 10 seconds on a recent computer.
 
-You can copy the file *$ABI_TESTS/tutorial/Input/tspin_6.in* in *Work_spin*
-(one Bismuth atom in a large cell). Change the file names in
-*tspin_x.files* accordingly, then run the calculation. It takes about 10 seconds on a recent computer.
+{% dialog tests/tutorial/Input/tspin_6.abi %}
 
-{% dialog tests/tutorial/Input/tspin_6.in %}
-
-Two datasets are executed: the first without spin-orbit coupling, the second one using  [[pawspnorb]]=1.
+Two datasets are executed: the first without SOC, the second one using  [[pawspnorb]]=1.
 
 The resulting eigenvalues are:
 
+Without SOC:
 ```
  Eigenvalues (hartree) for nkpt=   1  k points:
- kpt#   1, nband= 24, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced
-coord)
- 5d   -0.93353  -0.93353  -0.93353  -0.93353  -0.82304  -0.82304  -0.82304
--0.82304 -0.82291  -0.82291
- 6s   -0.42972  -0.42972
- 6p   -0.11089  -0.11089  -0.03810  -0.03810  -0.03810  -0.03810
+ kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+5d  -0.86985   -0.86985   -0.86879   -0.86879   -0.86879   
+6s  -0.43169   
+6p  -0.05487   -0.05486   -0.05486   
+...
+```
+
+With SOC:
+```
+ kpt#   1, nband= 24, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+5d  -0.91133   -0.91133   -0.91133   -0.91133   -0.80022   -0.80022   -0.80022   -0.80022   -0.79954   -0.79954   
+6s  -0.41639   -0.41639   
+6p  -0.09817   -0.09817   -0.02546   -0.02546   -0.02546   -0.02546        
+...
 ```
 
 Again, the levels are not perfectly degenerate, due to the finite size and non spherical
 shape of the simulation box.
 We can compute the splitting of the levels, and we obtain:
 
-    5d-channel: 0.93353-0.82304=0.11048 Ha
-    6p-channel: 0.11089-0.03810=0.07289 Ha
+    5d-channel: 0.91133-0.80022=0.11111 Ha
+    6p-channel: 0.09817-0.02546=0.07271 Ha
 
 If we now consider the
 [NIST table](https://www.nist.gov/pml/atomic-reference-data-electronic-structure-calculations-bismuth)
@@ -539,18 +530,32 @@ of atomic data, we obtain:
 
 A perfect agreement even with a small simulation cell and very small values of plane-wave cut-offs.
 This comes from the generation of the PAW dataset, where the SOC is calculated very accurately
-and for an atomic reference. The exchange correlation functional has little impact on large SOC
+and for an atomic reference. 
+The exchange correlation functional has little impact on large SOC
 splittings, which are mainly a kinetic energy effect.
 
-## 6 Rotation of the magnetization and spin-orbit coupling
+## 6 Rotation of the magnetization and spin-orbit coupling (coming soon)
 
-The most spectacular manifestation of the spin-orbit coupling is the energy
-associated with a rotation of the magnetisation with respect with the crystal axis.
-It is at the origin of the magneto crystalline anisotropy of paramount technological importance.
+The most spectacular manifestation of the SOC is the energy
+associated with a rotation of the magnetisation with respect to the crystal axis.
+It is at the origin of the magneto crystalline anisotropy (MCA) of paramount technological importance.
 
-As mentioned earlier, the solution of the Kohn-Sham equation
-might benefit of using a smaller value of [[tolrde]] (e.g. 0.001 instead of the default 0.005),
-and a larger value of [[nline]] (e.g. 6 instead of the default 4).
+## 7 Summary
+
+The table below can help to know how to handle the different magnetic calculation cases in ABINIT:
+
+|  case         | msppol | nspinor | nspden |
+| ------------- | ------ | ------- | ------ |
+| non-magnetic  | 1      | 1       | 1      |
+| collinear FM  | 2      | 1       | 2      |
+| collinear AFM | 1      | 1       | 2      |
+| non-collinear | 1      | 2       | 4      |
+
+Note that non-collinear magnetism can be done with or without SOC.
+With SOC do not use time reversal symmetry ([[kptopt]] = 4), however as the symmetries
+in the presence of SOC it is not (yet fully) implemented please remove all symmetries when running
+non-collinear magnetism with SOC (i.e. [[kptopt]]=3 and [[nsym]]=1).
+
 
 * * *
 GZ would like to thank B. Siberchicot for useful comments.
