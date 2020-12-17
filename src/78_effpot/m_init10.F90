@@ -157,9 +157,11 @@ subroutine init10(input_path, filnam,comm)
           i2 = index(input_path, ".", back=.True.)
           filnam(2) = input_path(:i2) // "abo"
           ! The rest filnam(3:) are set after reading from input file.
+          ! as in postfix_filenames subroutine
        end if
     end if
  end if
+
 
 !Communicate filenames to all processors
  call xmpi_bcast (filnam, master, comm, ierr)
@@ -220,6 +222,8 @@ subroutine postfix_fnames(input_path, filnam, params)
   end if
 
 end subroutine postfix_fnames
+
+
 
 end module m_init10
 !!***
