@@ -127,19 +127,13 @@ which is expected for a magnetic crystal (the system gains energy through the ex
 Finally, you can also remark that the stress tensor is affected by the presence of magnetism.
 This would also be true for the forces, but we don't remark it here because we are in high symmetry symmetry structure (all the forces are zeroed by symmetry), however this would be apparent for a less symmetric material.
 
-#### --- EB: I STOPPED HERE --- ###
-
 
 It is interesting to consider in more detail the distribution of eigenvalues
-for each direction of magnetization, which is best done by looking at the
-respective densities of state.
-To this end we have set [[prtdos]] = 1 in the input file, in order to obtain
-the density of states corresponding to spin-up and spin-down electrons (as soon as [[nsppol]] = 2).
-The values of the DOS are in the files *tspin_1o_DS1_DOS* and *tspin_1o_DS2_DOS*
-for the magnetic and non-magnetic cases respectively. We can extract the values
-for use in a plotting software.
-Traditionally, in order to enhance visibility, one plots
-the DOS of minority spin electrons using negative values.
+for each spin channel, which is best done by looking at the respective densities of state (DOS).
+To this end we have set [[prtdos]] = 1 in the input file that will print the up and down DOS (as soon as [[nsppol]] = 2).
+The DOS data can be found in the files *tspin_1o_DS1_DOS* and *tspin_1o_DS2_DOS*
+for the non-magnetic and the magnetic cases respectively, which can be used with a plotting software.
+Traditionally, in order to enhance visibility, the DOS of minority spin electrons is done using negative values.
 If we compare the DOS of the magnetized system
 
 ![](spin_assets/bccfe_mag_dos2.jpg)
@@ -148,30 +142,36 @@ and the non-magnetized system
 
 ![](spin_assets/bccfe_nonmag_dos2.jpg)
 
-we observe that the up and down DOS have been "shifted" with respect each other.
-The integrated density of states yields the number of electrons for each spin
-direction, and we see the magnetization which arises from the fact that there
-are more up than down electrons at the Fermi level.
+we observe that the up and down DOS channels have been "shifted" with respect to each other, which is a footprint of the presence of non-zero total magnetization in the crystal (either ferro- or ferri-magnetic).
+The integrated DOS yields the number of electrons for each spin direction, 
+and we see that the magnetization arises from the fact that there are more up than down electrons at the Fermi level.
 
-That the magnetization points upwards is fortuitous, and we can get it
-pointing downwards by changing the sign of the initial [[spinat]].
-Indeed, in the absence of spin-orbit coupling, there is no relation between
-the direction of magnetization and the crystal axes.
-If we start with a [[spinat]] of 0, the magnetization remains 0. [[spinat]]
-serves two purposes: it is a way to initially break the spin symmetry (up/down), and also
-to start with a reasonable magnetic moment, close enough to the final one (in spin DFT,
-as opposed to the original flavor, there can be several local minima for the total energy).
+The magnetization is from the up channels because we initialized [[spinat]] with positive values.
+We could initialize it to negative value to have negative magnetization.
+[[spinat]] serves two purposes: it is a way to initially break the spin symmetry (up/down), 
+and also to start with an initial magnetic moment, 
+ideally close enough to the final DFT one but sometimes a final non-zero magnetic moment on the atoms is obtained by initializing [[spinat]] to larger values than the formal one 
+(in spin DFT there can be several local minima for the total energy).
+
+Note that [[spinat]] has three components (i.e. for x, y  and z directions) for each atom 
+but in the absence of spin-orbit coupling (collinear calculation) 
+there is no relation between the direction of magnetization and the crystal axes.
+In these collinear magnetism calculations, only the z component of the spins is read to define the amplitude of the atomic magnetic moment 
+(treated as a scalar value, i.e. only sign and amplitude matter).
 
 The self-consistent loop is affecting both the density (like in the non-magnetic case) as
-well as the spin-magnetization. For this reason, it might be more difficult to reach
-than in the non-magnetic case. 
-Not only starting with a reasonable magnetic moment might help in this respect, but also,
-modified (tighter) calculation parameters might be needed. For example, in the case of
-Cobalt, in order to obtain the correct (non-zero) magnetic moment, a rather
-dense sampling of wavevectors in the Brillouin zone must be used (e.g.e 16x16x16), with a 
-rather small value of [[tsmear]]. The solution of the Kohn-Sham equation
-will benefit of using a smaller value of [[tolrde]] (e.g. 0.001 instead of the default 0.005),
-and a larger value of [[nline]] (e.g. 6 instead of the default 4).
+well as the spin-magnetization. 
+For this reason, it might be more difficult to reach convergence in the magnetic cases than in 
+the non-magnetic cases.
+Not only starting with a large enough magnetic moment might help to converge toward the correct
+magnetic ground sate, 
+but also modified (tighter) convergence parameters might be needed. 
+For example, in the case of Cobalt, in order to obtain the correct (non-zero) magnetic moment, 
+a rather dense k-point sampling in the Brillouin zone must be used (e.g. 16x16x16), with a 
+rather small value of [[tsmear]]. 
+The convergence of a magnetic calculation a smaller value of [[tolrde]] (e.g. 0.001 instead of the default 0.005),
+a larger value of [[nline]] (e.g. 6 to 12 instead of the default 4) 
+or reducing the mixing parameters diemix and mostly diemixmag.
 
 
 ## 2 An antiferromagnetic example: *fcc* Fe
@@ -180,7 +180,7 @@ Well sort of....
 
 Actually, fcc Fe, displays many complicated structures, in particular spin spirals.
 A spiral is characterized by a direction along an axis, an angle of
-the magnetization with respect to this axis and a step after which the magnetization comes full circle.
+the magnetization with respect to this axis and a step after which the magnetization comes full circled.
 A very simple particular case is when the angle is 90°, the axis is <100> and
 the step is the unit cell side: spin directions alternate between
 planes perpendicular to the <100> axis yielding a "spiral stairway":
@@ -191,83 +191,79 @@ For instance, if the atom at [x,y,0] possesses an "up" magnetization, the atom
 at [x+1/2,y,1/2] would possess a down magnetization etc...
 To describe such a structure, a unit cell with two atoms is sufficient, [0,0,0] and
 [1/2,0,1/2].
-The atoms will be given opposite magnetization with the help of the variable [[spinat]].
+The two atoms will be given opposite magnetization with the help of the variable [[spinat]].
 
-Copy the file *$ABI_TESTS/tutorial/Input/tspin_2.in* in *Work_spin*.
+Copy the file *$ABI_TESTS/tutorial/Input/tspin_2.abi* in *Work_spin*.
 
-{% dialog tests/tutorial/Input/tspin_2.in %}
+{% dialog tests/tutorial/Input/tspin_2.abi %}
 
-This is your input file. Modify the *tspin_x.files* file accordingly.
+This is your input file.
 
 You can run the calculation, then you should edit the *tspin_2.in* file, and briefly
-look at the two changes with respect to the file *tspin_1.in*: the
+look at the two changes with respect to the file *tspin_1.abi*: the
 unit cell basis vectors [[rprim]], and the new [[spinat]].
 
-Note also we use now [[nsppol]] = 1 and [[nspden]] = 2: this combination of values
-is only valid when performing a strictly antiferromagnetic calculation: nspden = 2 means
-that we have 2 independent components for the charge density while nsppol = 1
-means that we have 1 independent component for the wave-functions.
+Note also that we use now [[nsppol]] = 1 and [[nspden]] = 2: this combination of values
+is only valid when performing a strictly antiferromagnetic (AFM) calculation: 
+nspden = 2 means that we have 2 independent components for the charge density 
+while nsppol = 1 means that we have 1 independent component for the wave-functions.
 In that case, ABINIT uses the so-called Shubnikov symmetries, to perform
-calculations twice faster than with [[nsppol]] = 2 and [[nspden]] = 2. The
-symmetry of the crystal is not the full fcc symmetry anymore, since the
-symmetry must now preserve the magnetization of each atom.  ABINIT is
-nevertheless able to detect such symmetry belonging to the Shubnikov groups
+calculations twice faster than with [[nsppol]] = 2 and [[nspden]] = 2 
+(spin up and down channels are equivalent by symmetry in the case of perfect AFM cases). 
+The symmetry of the crystal is not the full fcc symmetry anymore, since the
+symmetry must now preserve the magnetization of each atom.  
+ABINIT is nevertheless able to detect such symmetry belonging to the Shubnikov groups
 and correctly finds that the cell is primitive, which would not be the case
-if we had the same vector [[spinat]] on each atom.
+if we had the same vector [[spinat]] on each atom (FM case).
 
-If we now run the calculation again, this total computation time is
-approximately 30 seconds on a recent CPU.
+If we now run this AFM calculation, this total computation time is
+approximately 10-20 seconds on a recent CPU.
 If we look at the eigenvalues and occupations, they are again filled with a
-factor 2, which comes from the symmetry considerations alluded to above, and
+factor 2, which comes from the symmetry considerations aforementioned, and
 not from the "usual" spin degeneracy: the potential for spin-up is equal to
 the potential for spin-down, shifted by the antiferromagnetic translation
 vector. Eigenenergies are identical for spin-up and spin-down, but
 wavefunctions are shifted one with respect to the other.
 
 ```
-kpt#   1, nband= 16, wtk=  0.05556, kpt=  0.0833  0.0833  0.1250 (reduced coord)
--0.60539  -0.47491  -0.42613  -0.39022  -0.35974  -0.34377  -0.28895  -0.28828
--0.25314  -0.24042  -0.22943  -0.14218   0.20264   0.26203   0.26641   0.62158
-    occupation numbers for kpt#   1
- 2.00000   2.00000   2.00000   1.99997   1.99945   1.99728   1.50632 1.48106
- 0.15660   0.04652   0.01574   0.00000   0.00000   0.00000   0.00000 0.00000
+ kpt#   1, nband= 20, wtk=  0.25000, kpt=  0.1250  0.1250  0.2500 (reduced coord)
+  -2.75606   -2.71227   -1.51270   -1.50656   -1.50211   -1.46164   -1.45614   -1.45485
+   0.25613    0.34136    0.38202    0.41368    0.41915    0.46180    0.48400    0.50628
+   0.52100    0.54004    0.56337    0.64500
+      occupation numbers for kpt#   1
+   2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000
+   2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000
+   1.95186    0.00000    0.00000    0.00000
 ```
 
-How do we know we have magnetic order?
-The density of states used for bcc Fe will not be useful since the net
-magnetization is zero and we have as many up and down electrons.
-The magnetization is reflected in the existence of distinct up and down
-electronic densities, whose sum is the total density and whose difference yields
-the net magnetization density at each point in real space.
+The total magnetization being zero we can question how do we know we have magnetic order?
+Indeed, the DOS will not be useful since the net we have as many up and down electrons.
 
-In particular, the integral of the magnetization around each atom will give an
-indication of the magnetic moment carried by this particular atom. A first
-estimation is printed out by ABINIT. You can read:
+We can however look at the integrated magnetization around each atom to have an
+indication of the magnetic moment carried by each atom:
 
 ```
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     3.327892     2.990936      6.318828     0.336956
-    2   2.00000     2.986707     3.323643      6.310350    -0.336936
+    1   2.00000     7.748236     6.575029     14.323265     1.173206
+    2   2.00000     6.575029     7.748236     14.323265    -1.173206
  ---------------------------------------------------------------------
-  Sum:              6.314599     6.314579     12.629179     0.000020
- Total magnetization (from the atomic spheres):             0.000020
+  Sum:             14.323265    14.323265     28.646531    -0.000000
+ Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
 ================================================================================
 ```
 
-and obtain a rough estimation of the magnetic moment of each atom
-(strongly dependent on the radius used to project the charge density):
+which gives (dependent on the radius used to project the charge density):
 
-    magnetization of atom 1= 0.33696
-    magnetization of atom 2=-0.33693
+    magnetization of atom 1= 1.173206
+    magnetization of atom 2=-1.173206
 
-But here we want more precise results...
-To perform the integration, we will use the utility *cut3d* which yields an
-interpolation of the magnetization at any point in space. *cut3d* is one of the
-executables of the ABINIT package and is installed together with abinit.
+Another way to get integrated atom magnetization can be done by using the utility 
+*cut3d* which yields an interpolation of the magnetization at any point in space. 
+*cut3d* is one of the executables of the ABINIT package and is installed together with abinit.
 For the moment cut3d is interactive, and we will use it through a very primitive script
 (written in Python) to perform a rough estimate of the magnetization on each atom.
 You can have a look at the [magnetization.py program](spin_assets/magnetization.py), and note
@@ -283,13 +279,16 @@ python magnetization.py
 
 you will see the result:
 
-    For atom 0 magnetic moment 0.3568281445920086
-    For atom 1 magnetic moment -0.3567450343127074
+```
+For atom 0 magnetic moment 1.2336144871839712
+For atom 1 magnetic moment -1.2336216848949257
+```
 
-which shows that the magnetizations of the two atoms are really opposite.
-With the next input file *tspin_3.in*, we will consider this same problem, but
-in a different way. We note, for future reference, that the total energy is:
-Etotal=-4.92489592898935E+01
+which also show that the magnetizations of the two atoms are opposite.
+The values of the atom magnetization is a bit different than the ones from the
+ABINIT output because it uses a slightly different integration paramters.
+
+### --- EB: I STOPPED HERE --- ###
 
 ## 3 Another look at *fcc* Fe
 
