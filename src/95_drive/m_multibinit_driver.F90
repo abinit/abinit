@@ -175,10 +175,8 @@ contains
     iam_master = (my_rank == master)
 
 
-    !To automate a maximum calculation, multibinit reads the number of atoms
-    !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
-    !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
-
+    !Read the input file, only to the the name of the file which contains the ddb file or xml file 
+    ! for getting the number of atoms.
     option=1
     if (iam_master) then
        call instrng (filnam(1),lenstr,option,strlen,string)
@@ -189,46 +187,25 @@ contains
     end if
     call xmpi_bcast(string,master, comm, ierr)
     call xmpi_bcast(lenstr,master, comm, ierr)
-
- 
-
+    !To automate a maximum calculation, multibinit reads the number of atoms
+    !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
+    !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
     if(len_trim(input_path)==0) then
         sys_fname=filnam(3)
     else
-        print *, "reading sys_fname from file ", input_path
-        print *, "string", string
-        print *, "strlen", strlen
         call invars_multibinit_first_round(sys_fname, string, strlen)
     endif
-    print *, "sys_fname", sys_fname
-
     write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
          & '-',trim(sys_fname),ch10,' to initialize the multibinit input'
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-
     call effective_potential_file_getDimSystem(sys_fname,natom,ntypat,nph1l,nrpt)
 
-    !Read the input file, and store the information in a long string of characters
-    !strlen from defs_basis module
-    option=1
-    if (iam_master) then
-       call instrng (filnam(1),lenstr,option,strlen,string)
-       !To make case-insensitive, map characters to upper case:
-       call inupper(string(1:lenstr))
 
-       !Check whether the string only contains valid keywords
-       call chkvars(string)
-
-    end if
-
-    call xmpi_bcast(string,master, comm, ierr)
-    call xmpi_bcast(lenstr,master, comm, ierr)
 
     !Read the input file
     call invars10(inp,lenstr,natom,string)
     call postfix_fnames(input_path, filnam, inp)
-    print *, "filnam:", filnam
 
     if (iam_master) then
        !  Echo the inputs to console and main output file

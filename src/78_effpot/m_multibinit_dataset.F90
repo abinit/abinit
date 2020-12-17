@@ -649,7 +649,6 @@ subroutine invars_multibinit_first_round(fname, string, lenstr)
   fname=""
   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_ddb_fname',tread,'KEY',&
        & key_value=fname)
-  print *, "fname", fname
   if(.not. tread==1) fname=""
   ABI_SFREE(intarr)
   ABI_SFREE(dprarr)
@@ -1184,13 +1183,11 @@ multibinit_dtset%latt_temperature_start=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_ddb_fname',tread,'KEY',&
       & key_value=multibinit_dtset%latt_inp_ddb_fname)
  if(.not. tread==1) multibinit_dtset%latt_inp_ddb_fname=""
-print *, "latt_inp_ddb_fname:", multibinit_dtset%latt_inp_ddb_fname 
 
  multibinit_dtset%latt_inp_coeff_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_coeff_fname',tread,'KEY',&
       & key_value=multibinit_dtset%latt_inp_coeff_fname)
  if(.not. tread==1) multibinit_dtset%latt_inp_coeff_fname=""
-print *, "latt_inp_ddb_fname:", multibinit_dtset%latt_inp_coeff_fname 
 
  multibinit_dtset%latt_training_set_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_training_set_fname',tread,'KEY',&
