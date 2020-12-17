@@ -82,8 +82,8 @@ You can copy these three files into a directory (e.g. Work_spindyn).
 In tmulti5_1.files, three file names are given:
 
 ```
-tmulti5_1.in
-tmulti5_1.out
+tmulti5_1.abi
+tmulti5_1.abo
 tmulti5_1.xml
 ```
 
