@@ -50,7 +50,7 @@ w90prtunk2 1   #Prints UNK files (for plotting the Wannier functions)
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Si-LDA.paw"
+ pseudos "Pseudodojo_paw_pw_standard/Si.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
