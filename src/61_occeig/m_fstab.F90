@@ -61,7 +61,7 @@ module m_fstab
     ! Spin index
 
    integer :: nkfs
-    ! Number of k-points on the Fermi-surface (FS-BZ).
+    ! Number of k-points on the Fermi-surface in the full BZ.
 
    integer :: nktot
     ! Total number of k-points in the initial mesh.
@@ -126,12 +126,12 @@ module m_fstab
 
    real(dp),allocatable :: kpts(:,:)
    ! (3, nkfs)
-   ! Reduced coordinates of the k-points on the Fermi surface.
+   ! Reduced coordinates of the BZ k-points on the Fermi surface.
 
    real(dp),allocatable :: vk(:,:), vkq(:,:)
    ! (3, mnb)
    ! Velocities in cartesian cordinates. Used to implement the adaptive gaussian broadening
-   ! Values are filled by the called (phgamma) inside the loop over k-points.
+   ! Values are filled by call (e.g. phgamma) inside the loop over k-points.
 
    real(dp),allocatable :: tetra_wtk(:,:)
    ! (maxnb, nkibz)
@@ -335,7 +335,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  do ik_bz=1,nkbz
    full2ebands(1, ik_bz) = indkk(1, ik_bz)      ! ik_ibz
    full2ebands(2, ik_bz) = indkk(2, ik_bz)      ! isym
-   full2ebands(3:5, ik_bz) = indkk(3:5, ik_bz) ! g0
+   full2ebands(3:5, ik_bz) = indkk(3:5, ik_bz)  ! g0
    full2ebands(6, ik_bz) = indkk(6, ik_bz)      ! itimrev
  end do
  ABI_FREE(indkk)

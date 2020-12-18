@@ -54,6 +54,7 @@ module m_cgtools
  real(dp),public,parameter :: cg_cone(2)  = (/1._dp,0._dp/)
 
  ! Helper functions.
+ !public :: cg_prod
  public :: cg_tocplx
  public :: cg_fromcplx
  public :: cg_kfilter

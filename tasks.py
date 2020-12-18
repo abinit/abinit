@@ -208,8 +208,8 @@ def mksite(ctx):
     Build the Abinit documentation by running the mksite.py script and open the main page in the browser.
     """
     with cd(ABINIT_ROOTDIR):
+        webbrowser.open_new_tab("http://127.0.0.1:8000")
         ctx.run("./mksite.py serve --dirtyreload", pty=True)
-        return webbrowser.open_new_tab("http://127.0.0.1:8000")
 
 
 @task
