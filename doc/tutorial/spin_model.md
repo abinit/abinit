@@ -117,7 +117,7 @@ cd Work_spindyn
 multibinit --F03 < tmulti5_1.files > tmulti5_1.txt 
 ```
 
-Note that the .files file will be deprecated in the next version of ABINIT and MULTIBINIT. Then only two files are required, the following variables in the input file can be used to specify the spin potential file and the prefix of the output files. 
+Note that the .files file will be deprecated in the next version of ABINIT and MULTIBINIT. Then only two files are required. The following variables in the input file can be used to specify the spin potential file and the prefix of the output files. 
 
 ```
 spin_pot_fname = "tmulti5_1.xml"
