@@ -77,10 +77,10 @@ element calculation is new from version 7.6.
 
 The important variable for electron-phonon coupling calculations is [[prtgkk]]
 This prints out files suffixed GKK, which contain the electron-phonon matrix
-elements. The matrix elements only depend on the self-consistent perturbed
+elements, and are calculated by DS 7-9. The matrix elements only depend on the self-consistent perturbed
 density (files suffixed 1DENx), which we get from DS 2-4 (linked by variable
-[[get1den]]). These can therefore be calculated on arbitrarily dense k-point
-meshes. Even better, only a single step is needed, since no self-consistency
+[[get1den]]). The GKK can therefore be calculated on arbitrarily dense k-point
+meshes chosen in DS 6. Even better, only a single SCF step is needed, since no self-consistency
 is required. To enforce the calculation of all the matrix elements on all
 k-points, symmetries are disabled when [[prtgkk]] is set to 1, so be sure *not*
 to use it during the normal self-consistent phonon runs DS 2-4. Again this is
@@ -99,16 +99,22 @@ cutoff [[ecut]] is a bit low, and the number of k-points (determined by
 [[ngkpt]]) is much too low. Electron-phonon calculations require a very
 precise determination of the Fermi surface of the metal. This implies a very
 dense k-point mesh, and the convergence of the grid must be checked. In our
-case, for Al, we will use a (non-shifted) 4x4x4 k-point grid, but a converged
+case, for Al, we will use a (non-shifted) 6x6x6 k-point grid, but a converged
 calculation needs more than 16x16x16 points. This will be re-considered in
-section 5. The q-point grid will be 2x2x2. It must be a sub-grid of the full
-k-point grid, and must contain the Γ point.
+section 5. The q-point grid will be 2x2x2, and is selected by the [[ngqpt]], 
+[[qshift]], [[nqshift]], and [[qptopt]] variables. It must be a sub-grid of the full
+k-point grid, and must contain the Γ point. For the phonon and GKK datasets,
+the q-point is selected by the variable [[iqpt]]: this guarantees that there are
+no errors in transcription of q coordinates, and simplifies workflows. The only
+unknown ahead of time is the total number of q (and hence datasets) in the irreducible
+wedge. One way to check this is to set iqpt to a very large value: the error message
+gives you the size of the irreducible set.
 
 The value of [[acell]] is fixed to a rounded value from experiment.
 It, too, should be converged to get physical results (see [Tutorial 3](base3)).
 
 Note that the value of 1.0E-14 for [[tolwfr]] is tight, and should be even
-lower (down to 1.0E-20 or even 1.0E-22). This is because the wavefunctions
+lower (down to 1.0E-20 or even 1.0E-22) for accurate results. This is because the wavefunctions
 will be used later explicitly in the matrix elements for ANADDB, as opposed to
 only energy values or densities, which are averages of the wavefunctions and
 eigenenergies over k-points and bands. Electron-phonon quantities are delicate
@@ -147,7 +153,8 @@ minimal number of 2DTE for different mixed second derivatives of the total
 energy. In our case we use the first derivatives, and they must all be calculated explicitly.
 
 You are now the proud owner of 9 first-order matrix element files (suffixed
-\_GKKx), corresponding to the three directional perturbations of the atom at
+\_GKKx, and corresponding copies in netcdf format \_GKKx.nc), 
+corresponding to the three directional perturbations of the atom at
 each of the three q-points. The \_GKK files contain the matrix elements of the
 electron-phonon interaction, which we will extract and use in the following.
 Besides the \_GKK files there are the \_DDB files for each perturbation which
@@ -366,9 +373,10 @@ The abinit input file *teph_1.in* already obtained the DDK files from the
 additional dataset, DS5, with the following lines of *teph_1.in*:
 
     tolwfr5 1.0d-14
-    qpt5 0 0 0
+    iqpt5 1
     rfphon5 0
     rfelfd5 2
+    prtwf5   0
 
 You can copy the additional .ddk file from the tests/tutorespfn/Inputs directory, and
 run ANADDB. The input for *teph_6.in* has added to *teph_5.in* the following 2 lines:
