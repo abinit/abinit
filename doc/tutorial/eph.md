@@ -391,7 +391,7 @@ and has produced a number of additional files:
 The high T behavior is necessarily linear if you include only first order e-p
 coupling and neglect the variation of the GKK off of the Fermi surface. The
 inset shows the low T behavior, which is not a simple polynomial (with simple
-models it should be T^3 or T^5 - see [[cite:Ashcroft1976|Ashcroft and Mermin]]). See the [[cite:Savrasov1996|Savrasov paper]]
+models it should be T$^3$ or T$^5$ - see [[cite:Ashcroft1976|Ashcroft and Mermin]]). See the [[cite:Savrasov1996|Savrasov paper]]
 for reference values in simple metals using well converged k- and q- point grids.
 
 Finally, note that the \_RHO and \_WTH files contain a series of tensor
