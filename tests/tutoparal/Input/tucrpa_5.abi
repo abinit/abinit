@@ -5,7 +5,6 @@
 ndtset 4
 jdtset 1 2 3 4
 paral_kgb 0
-prtvol 10
 pawprtvol 3
 #==================================================================================
 ############ Parameters common to all DATASETS
@@ -41,16 +40,16 @@ shiftk
 istwfk *1
 
 #For all the dataset
-nsym     1
+nsym      0
 gw_icutcoul 6
-symchi   0
-symsigma 0             # Default in v9 is 1 but I don't think UCPRA supports it (MG)
+symchi    0
+symsigma  0
 
 #----------------------------------------------------------------------------
 #-- Parameters for screening for different datasets
 #-- Except for the structure , only the parameters below should be changed
 #----------------------------------------------------------------------------
-nband 50
+nband 100
 ecut        12.0    # Maximal kinetic energy cut-off, in Hartree
 pawecutdg   20.0    # PAW - Energy CUToff for the Double Grid ( need only when usepaw=1=)
 #ecutwfn     12.0
@@ -78,13 +77,16 @@ tolvrs1   1.0d-13
 #==================================================================================
 ############ SECOND DATASET: Read Wfc, produce KSS file and Wannier file
 #==================================================================================
-getden2        -1
-# == Compute empty bands precisely
-iscf2          -2
 nbandkss2 -1         # Number of bands in KSS file (-1 means the maximum possible)
 kssform 3
+
+# Definition of parameters for the calculation of the WFK file
 nbdbuf2         4
+iscf2          -2
+getden2        -1
 tolwfr2   1.0d-18     # Will stop when this tolerance is achieved
+
+
 
 # == Compute Projected Wannier functions (as used in DMFT)
 usedmft2    1       # useful to compute Wannier functions.
@@ -97,11 +99,11 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
 optdriver3     3     # Screening calculation
 gwcalctyp3 2         
 getwfk3       -1     # Obtain WFK file from previous dataset
-ecuteps3      5.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
+ecuteps3      3.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
 
 # -- Frequencies for dielectric matrix
-nfreqre3 1
-freqremax3 10 eV
+nfreqre3 50
+freqremax3 30 eV
 freqremin3 0 eV
 nfreqim3   0
 
@@ -118,14 +120,15 @@ optdriver4  4      # Self-Energy calculation
 gwcalctyp4  2      # activate HF or ucrpa
 getwfk4     2      # Obtain WFK file from dataset 1
 getscr4     3      # Obtain SCR file from previous dataset
-ecutsigx4   30.0   # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
+ecutsigx4   20.0   # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
 # irdscr3     1
 # irdwfk3     1
 
 # -- Frequencies for 
-nfreqsp4    1
-freqspmax4 10 eV
+nfreqsp4   50
+freqspmax4 30 eV
 freqspmin4  0 eV
+# ppmodel  2         # in order to use only one frequency
 nkptgw4      0     # number of k-point where to calculate the GW correction: all BZ
 mqgrid4 300        # Reduced but fine at least for SrVO3
 mqgriddg4 300      # Reduced but fine at least for SrVO3
@@ -136,20 +139,20 @@ gwpara4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
 pp_dirpath "$ABI_PSPDIR"
 pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
 
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tucrpa_2.abi
+#%% test_chain = tucrpa_5.abi
 #%% [files]
+#%% files_to_test = 
+#%%   tucrpa_5.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
 #%% [shell] 
 #%% [paral_info]
-#%% max_nprocs = 24
-#%% nprocs_to_test = 24
-#%% [NCPU_24]
-#%% files_to_test = tucrpa_2_MPI24.abo, tolnlines = 6, tolabs = 5.000e-01, tolrel = 1.100e-02
+#%% nprocs_to_test = 32
+#%% max_nprocs = 32
 #%% [extra_info]
 #%% keywords = LDA, CRPA
 #%% authors = B. Amadon
-#%% description = For SrVO3, compute U
-#%%   The results of this test with 24 procs are non-reproducible at present ! See the huge tolerance. There must be a bug ...
+#%% description = For SrVO3, compute U as a function of frequency.
 #%%<END TEST_INFO>

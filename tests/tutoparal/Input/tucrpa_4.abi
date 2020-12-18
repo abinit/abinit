@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------
-#   Tutorial: Computation of U in CRPA for SrVO3 for t2g and eg orbitals
+#   Tutorial: Computation of U in CRPA for SrVO3 
 #   B. Amadon
 # ----------------------------------------------------------------------------------
 ndtset 4
@@ -41,10 +41,9 @@ shiftk
 istwfk *1
 
 #For all the dataset
-nsym     1
+nsym      1
 gw_icutcoul 6
-symchi   0
-symsigma 0             # Default in v9 is 1 but I don't think UCPRA supports it (MG)
+#symchi   0
 
 #----------------------------------------------------------------------------
 #-- Parameters for screening for different datasets
@@ -62,6 +61,7 @@ dmatpuopt  1        # choose expression of the density matrix
 lpawu      2 -1 -1
 jpawu      0.0 0.0 0.0 eV
 upawu      0.0 0.0 0.0 eV
+dmft_t2g  1
 
 # -- Activate calculation of U and J
 ucrpa 1              # The screening will use the Wannier weights to suppress transitions.
@@ -89,7 +89,7 @@ tolwfr2   1.0d-18     # Will stop when this tolerance is achieved
 # == Compute Projected Wannier functions (as used in DMFT)
 usedmft2    1       # useful to compute Wannier functions.
 dmftbandi2 21       # Precise the definition of Wannier functions (also used for DMFT calculations)
-dmftbandf2 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
+dmftbandf2 23       # Precise the definition of Wannier functions (also used for DMFT calculations)
 
 #==================================================================================
 ############ THIRD DATASET:  Calculation of the screening (epsilon^-1 matrix)
@@ -104,23 +104,25 @@ nfreqre3 1
 freqremax3 10 eV
 freqremin3 0 eV
 nfreqim3   0
-
 # -- Ucrpa: screening
-ucrpa_bands3  21 25  # In principle, it is useless for ucrpa=2. It is however still necessary for technical reasons even if is redundant with dmftbandi and dmftbandf.
+ucrpa_bands3  21 23  # In principle, it is useless for ucrpa=2. It is however still necessary for technical reasons even if is redundant with dmftbandi and dmftbandf.
 
 # -- Parallelism
 gwpara3 1
+lpawu3      2 -1 -1 # Peculiar value because t2g orbitals have the same degeneracy as p orbitals.
 
 #==================================================================================
 ############ FOURTH DATASET: Calculation of the effective interaction (optdriver=4 and gwcalctyp=2 and ucrpa=1)
 #==================================================================================
+symsigma 1
+lpawu4      2 -1 -1 # Peculiar value because t2g orbitals have the same degeneracy as p orbitals.
 optdriver4  4      # Self-Energy calculation
 gwcalctyp4  2      # activate HF or ucrpa
 getwfk4     2      # Obtain WFK file from dataset 1
 getscr4     3      # Obtain SCR file from previous dataset
 ecutsigx4   30.0   # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
-# irdscr3     1
-# irdwfk3     1
+# irdscr4     1     
+# irdwfk4     1
 
 # -- Frequencies for 
 nfreqsp4    1
@@ -131,25 +133,25 @@ mqgrid4 300        # Reduced but fine at least for SrVO3
 mqgriddg4 300      # Reduced but fine at least for SrVO3
 
 # -- Parallelism
-gwpara4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
+gwpara4 1        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
 
 pp_dirpath "$ABI_PSPDIR"
 pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
 
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tucrpa_2.abi
+#%% test_chain = tucrpa_4.abi
 #%% [files]
+#%% files_to_test = 
+#%%   tucrpa_4.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
 #%% [shell] 
 #%% [paral_info]
-#%% max_nprocs = 24
-#%% nprocs_to_test = 24
-#%% [NCPU_24]
-#%% files_to_test = tucrpa_2_MPI24.abo, tolnlines = 6, tolabs = 5.000e-01, tolrel = 1.100e-02
+#%% nprocs_to_test = 32
+#%% max_nprocs = 32
 #%% [extra_info]
 #%% keywords = LDA, CRPA
 #%% authors = B. Amadon
-#%% description = For SrVO3, compute U
-#%%   The results of this test with 24 procs are non-reproducible at present ! See the huge tolerance. There must be a bug ...
+#%% description = For SrVO3, compute U, t2g t2g case
 #%%<END TEST_INFO>
