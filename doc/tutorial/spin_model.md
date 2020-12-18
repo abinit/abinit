@@ -16,7 +16,7 @@ With this lesson, you will learn to:
   * Determine the critical temperature for a magnetic phase transition
   * Calculate spin canting angles for systems with Dzyaloshinskii-Moriya interaction
 
-The TB2J python package, which can be used to generate a spin model, can be found on the website at https://github.com/mailhexu/TB2J. The online documenation can be found at https://tb2j.readthedocs.io/en/latest/ .
+The TB2J python package, which can be used to generate a spin model, can be found on the website at [https://github.com/mailhexu/TB2J](https://github.com/mailhexu/TB2J). The online documenation can be found at [https://tb2j.readthedocs.io](https://tb2j.readthedocs.io/en/latest/) .
 
 
 
