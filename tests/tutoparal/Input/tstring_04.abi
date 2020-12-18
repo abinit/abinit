@@ -80,7 +80,7 @@ xcart_lastimg
 nimage        12         # Number of points along the string
 imgmov        2          # Selection of "String Method" algo
 ntimimage     50         # Max. number of relaxation steps of the string
-tolimg        0.001      # Tol. criterion (will stop when average energy of cells < tolimg)
+tolimg        0.0001     # Tol. criterion (will stop when average energy of cells < tolimg)
 dynimage      0 10*1 0   # Keep first and last images fixed
 
 
