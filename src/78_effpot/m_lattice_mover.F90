@@ -175,17 +175,13 @@ contains
   !    if mode=1, use a Boltzman distribution to init the velocities.
   !    if mode=2, ...
   !-------------------------------------------------------------------!
-  subroutine set_initial_state(self, mode, restart_hist_fname)
+  subroutine set_initial_state(self, mode)
     ! set initial positions, spin, etc
     class(lattice_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
-    character(len=fnlen), optional, intent(in) :: restart_hist_fname
-
-
     real(dp) :: xi(3, self%natom)
     integer :: i
 
-    ABI_UNUSED(restart_hist_fname)
 
     if(mode==1) then ! using a boltzmann distribution. 
        ! Should only be used for a constant Temperature mover
@@ -216,7 +212,6 @@ contains
        call self%get_T_and_Ek()
     end if
 
-    ABI_UNUSED(restart_hist_fname)
 
   end subroutine set_initial_state
 

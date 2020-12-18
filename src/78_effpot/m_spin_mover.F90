@@ -133,12 +133,11 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine initialize(self, params, supercell, rng, restart_hist_fname)
+  subroutine initialize(self, params, supercell, rng)
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target :: params
     type(mbsupercell_t), target :: supercell
     type(rng_t), target, intent(in) :: rng
-    character(len=fnlen), optional, intent(in) :: restart_hist_fname
     integer ::  nspin
 
     integer :: master, my_rank, comm, nproc, ierr
@@ -218,11 +217,7 @@ contains
             &     spin_temperature=params%spin_temperature)
     endif
 
-    if(present(restart_hist_fname)) then 
-      call self%set_initial_state(mode=params%spin_init_state, restart_hist_fname=restart_hist_fname)
-    else
-      call self%set_initial_state(mode=params%spin_init_state)
-    endif
+    call self%set_initial_state(mode=params%spin_init_state)
 
     ! observable
     if(iam_master) then
@@ -308,10 +303,9 @@ contains
   !   3. spin configuration using qpoint and rotation axis (e.g. for FM or AFM)
   !   4. Restart from last entry of hist netcdf file
   !----------------------------------------------------------------------------!
-  subroutine set_initial_state(self, mode, restart_hist_fname)
+  subroutine set_initial_state(self, mode)
     class(spin_mover_t),            intent(inout) :: self
     integer,              optional, intent(in)    :: mode
-    character(len=fnlen), optional, intent(in)    :: restart_hist_fname
 
     integer :: i, init_mode
     character(len=500) :: msg
@@ -374,13 +368,10 @@ contains
          case (4)
           ! read from last step of hist file
           write(msg,'(a,a,a)') "Initial spins set to input spin hist file ",&
-             &  trim(restart_hist_fname), '.'  
+             &  trim(self%params%spin_init_hist_fname), '.'  
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
-          if (.not. present(restart_hist_fname)) then
-             MSG_ERROR("Spin initialize mode set to 4, but restart_hist_fname is not used.")
-           end if
-           call self%read_hist_spin_state(fname=restart_hist_fname)
+          call self%read_hist_spin_state(fname=self%params%spin_init_hist_fname)
 
        end select
 
