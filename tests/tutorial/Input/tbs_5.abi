@@ -10,7 +10,7 @@ ndtset 5
 
 # Definition of the k-point grid
 kptopt 1             # Option for the automatic generation of k points,
-ngkpt  ?? 
+ngkpt  5 5 5
 nshiftk 1
 shiftk  0.0 0.0 0.0  # Gamma-centered k-mesh is 
 
@@ -102,3 +102,7 @@ ecut 8         # Maximal kinetic energy cut-off, in Hartree
 istwfk *1
 nstep  50      # Maximal number of SCF cycles
 diemac 12.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"

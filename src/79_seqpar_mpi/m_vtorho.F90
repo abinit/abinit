@@ -1050,6 +1050,9 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 
    call timab(988,1,tsec)
    if (usefock) then
+     if (usefock_ACE==0) then
+       call xmpi_sum(energies%e_fock0,mpi_enreg%comm_kpt,ierr)
+     end if
      if(fock%fock_common%optfor) call xmpi_sum(fock%fock_common%forces,mpi_enreg%comm_kpt,ierr)
    end if
 !  Electric field: compute string-averaged change in Zak phase

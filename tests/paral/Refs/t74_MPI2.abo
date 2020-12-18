@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.3.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h45 )
+.Starting date : Fri 11 Dec 2020.
+- ( at 11h30 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI2/paral_t74_MPI2/t74.in
-- output file    -> t74_MPI2.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bruneval_bugfix_inclvkb/tests/TestBot_MPI2/paral_t74_MPI2/t74.abi
+- output file    -> t74_MPI2.abo
 - root for input  files -> t74_MPI2i
 - root for output files -> t74_MPI2o
 
@@ -270,8 +270,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15366
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -454,8 +454,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -544,7 +544,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000 -10.816  -0.000  -0.115  -0.000  -0.101  -0.002  -0.106   0.001
        -0.000   0.000  -4.811   0.000   0.041   0.000   0.047   0.000   0.044
@@ -632,14 +632,14 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the   12 th omega   0.0000  45.0108 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -0.600  -0.000   0.006  -0.000   0.009  -0.000   0.008   0.000
        -0.000   0.000  -0.207   0.000  -0.010   0.000  -0.009   0.000  -0.009
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  21.7629
-  dielectric constant without local fields =  23.4250
+  dielectric constant =  21.7630
+  dielectric constant without local fields =  23.4251
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     16.60  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -691,11 +691,11 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
    Upper and lower wings at the    6 th omega  19.4367   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      2.346  -0.276  -0.373   0.829   1.264  -0.829  -1.264   0.275   0.373
-     -9.431   0.380  -0.257  -1.261   0.815   1.261  -0.816  -0.381   0.257
+      2.345  -0.276  -0.373   0.829   1.264  -0.829  -1.264   0.275   0.373
+     -9.432   0.380  -0.257  -1.261   0.815   1.261  -0.816  -0.381   0.257
        1       2       3       4       5       6       7       8       9
-      2.346   0.384   0.270  -1.265  -0.828   1.266   0.828  -0.384  -0.270
-     -9.431   0.263  -0.370  -0.816   1.260   0.816  -1.261  -0.263   0.370
+      2.345   0.384   0.270  -1.265  -0.828   1.266   0.828  -0.384  -0.270
+     -9.432   0.263  -0.370  -0.816   1.260   0.816  -1.261  -0.263   0.370
 
 
    Upper and lower wings at the    7 th omega  23.3240   0.0000 [eV]
@@ -719,10 +719,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the    9 th omega   0.0000   4.0732 [eV]
        1       2       3       4       5       6       7       8       9
       0.102   0.006  -0.006  -0.019   0.019   0.019  -0.019  -0.006   0.006
-     -0.000   0.006   0.006  -0.019  -0.019   0.019   0.019  -0.006  -0.006
+      0.000   0.006   0.006  -0.019  -0.019   0.019   0.019  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.102   0.006  -0.006  -0.019   0.019   0.019  -0.019  -0.006   0.006
-     -0.000  -0.006  -0.006   0.019   0.019  -0.019  -0.019   0.006   0.006
+      0.000  -0.006  -0.006   0.019   0.019  -0.019  -0.019   0.006   0.006
 
 
    Upper and lower wings at the   10 th omega   0.0000  11.1650 [eV]
@@ -746,10 +746,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the   12 th omega   0.0000  45.0108 [eV]
        1       2       3       4       5       6       7       8       9
       0.867   0.003  -0.003  -0.008   0.008   0.008  -0.008  -0.003   0.003
-      0.000   0.003   0.003  -0.008  -0.008   0.008   0.008  -0.003  -0.003
+     -0.000   0.003   0.003  -0.008  -0.008   0.008   0.008  -0.003  -0.003
        1       2       3       4       5       6       7       8       9
       0.867   0.003  -0.003  -0.008   0.008   0.008  -0.008  -0.003   0.003
-      0.000  -0.003  -0.003   0.008   0.008  -0.008  -0.008   0.003   0.003
+     -0.000  -0.003  -0.003   0.008   0.008  -0.008  -0.008   0.003   0.003
 
 
 
@@ -1808,7 +1808,7 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.827126E-01 Ha ,    7.693001E+00 eV
+ New Fermi energy :        2.827126E-01 Ha ,    7.693002E+00 eV
  New Exchange energy :    -1.929567E+00 Ha ,   -5.250620E+01 eV
 
  === QP Band Gaps ===
@@ -2074,10 +2074,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.5  wall=         13.8
+- Proc.   0 individual time (sec): cpu=          5.1  wall=         12.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.2  wall=         27.4
++Overall time at end (sec) : cpu=         10.3  wall=         25.5
