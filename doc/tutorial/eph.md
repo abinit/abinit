@@ -19,6 +19,11 @@ utility. This implies a preliminary calculation of the electron-phonon matrix
 elements and phonon frequencies and eigenvectors, from a standard ABINIT
 phonon calculation, which will be reviewed succinctly.
 
+Note that this tutorial covers a legacy version of the electron-phonon calculation.
+A new, more efficient workflow is presented in Tutorials [Introduction to the new EPH workflow](eph_intro).
+The old workflow is still useful because it is compatible with spinors (spin orbit coupling), PAW, and
+therefore also DFT+U, but it will be deprecated at some time in the future.
+
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
@@ -37,14 +42,13 @@ It is presumed that the user has already followed the Tutorials [RF1](rf1) and [
 and understands the calculation of ground state and response (phonon using density-functional
 perturbation theory (DFPT)) properties with ABINIT.
 
-The file *teph_1.files* lists the file names and root names for the first run (GS+perturbations).
-You can copy it to the working directory. You can also copy the file *teph_1.in* to your working directory.
+Copy the file *teph_1.in* to your working directory. It contains in particular file names and root names 
+for the first run (GS+perturbations).
 
 ```sh
 cd $ABI_TESTS/tutorespfn/Input
 mkdir Work_eph
 cd Work_eph
-cp ../teph_1.file .
 cp ../teph_1.in .
 ```
 
@@ -52,7 +56,7 @@ cp ../teph_1.in .
 
 You can immediately start this run - the input files will be examined later...
 
-    abinit < teph_1.files > log 2> err &
+    abinit teph_1.in > log 2> err &
 
 ### Dataset Structure and Flow
 
@@ -78,7 +82,7 @@ density (files suffixed 1DENx), which we get from DS 2-4 (linked by variable
 [[get1den]]). These can therefore be calculated on arbitrarily dense k-point
 meshes. Even better, only a single step is needed, since no self-consistency
 is required. To enforce the calculation of all the matrix elements on all
-k-points, symmetries are disabled when [[prtgkk]] is set to 1, so be sure not
+k-points, symmetries are disabled when [[prtgkk]] is set to 1, so be sure *not*
 to use it during the normal self-consistent phonon runs DS 2-4. Again this is
 very different from versions before 7.6.
 
@@ -117,7 +121,7 @@ disk (you only need to keep the ground state wave functions, with prtwf1 1).
 
 Run the first input (a few seconds on a recent PC), and you should obtain a value of
 
-     etotal -2.0828579336121 Ha
+     etotal -2.3076512079E+00 Ha
 
 for the energy at the end of DATASET 1. The following datasets calculate the
 second order energy variations under atomic displacement in the three reduced
@@ -130,7 +134,7 @@ As an example, DATASET 3 calculates the perturbed
 wavefunctions at k+q, for k in the ground state k-point mesh, and q=(1/2,0,0).
 Then, DATASET 3 calculates
 
-     2DTE 0.80951882353353
+     2DTE 6.9410188336E-01 Ha
 
 for the second-order energy variation for movement of the (unique) atom along
 the first reduced direction for q=(1/2,0,0). The main differences with [Tutorial RF1](rf1)
@@ -143,10 +147,10 @@ minimal number of 2DTE for different mixed second derivatives of the total
 energy. In our case we use the first derivatives, and they must all be calculated explicitly.
 
 You are now the proud owner of 9 first-order matrix element files (suffixed
-_GKKx), corresponding to the three directional perturbations of the atom at
-each of the three q-points. The _GKK files contain the matrix elements of the
+\_GKKx), corresponding to the three directional perturbations of the atom at
+each of the three q-points. The \_GKK files contain the matrix elements of the
 electron-phonon interaction, which we will extract and use in the following.
-Besides the _GKK files there are the _DDB files for each perturbation which
+Besides the \_GKK files there are the \_DDB files for each perturbation which
 contain the 2DTE for the different phonons wavevectors q.
 
 ## 2 Merging of the 2DTE DDB files using MRGDDB
@@ -193,15 +197,15 @@ or use
 
 {% dialog tests/tutorespfn/Input/teph_3.in %}
 
-The matrix element sections of all the _GKK files will be extracted and
+The matrix element sections of all the \_GKK files will be extracted and
 concatenated into one (binary) file, here named *teph_3o_GKK.bin*. The following
 lines in *teph_3.in* give the output format (0 for binary or 1 for ascii), then
 the name of the ground state wavefunction file. The fourth line contains 3
-integers, which give the number of _1WF files (which can also be used to
-salvage the GKK), the number of _GKK files, and the number of perturbations in
-the _GKK files. Thus, MRGGKK functions very much like [help:mrgddb|MRGDDB], and can merge _GKK
+integers, which give the number of \_1WF files (which can also be used to
+salvage the GKK), the number of \_GKK files, and the number of perturbations in
+the \_GKK files. Thus, MRGGKK functions very much like [help:mrgddb|MRGDDB], and can merge \_GKK
 files which already contain several perturbations (q-points or atomic
-displacements). Finally, the names of the different _1WF and _GKK files are listed.
+displacements). Finally, the names of the different \_1WF and \_GKK files are listed.
 
 MRGGKK will run on this example in a few seconds. In more general cases, the
 runtime will depend on the size of the system, and for a large number of bands
@@ -219,10 +223,9 @@ ANADDB to carry out the calculation of the electron-phonon quantities.
 
 {% dialog tests/tutorespfn/Input/teph_4.in %}
 
-ANADDB takes a files file, just like ABINIT, which tells it where to find the input,
+ANADDB has file path variables, just like ABINIT, which tells it where to find the input,
 ddb, and gkk files, and what to name the output, thermodynamical output, and
-electron phonon output files. *\$ABI_TESTS/tutorespfn/Input/teph_4.files* is
-your files file for ANADDB. You can edit it now.
+electron phonon output files. 
 
 The new variables are at the head of the file:
 
@@ -253,7 +256,7 @@ which are usually special points of high symmetry. The number of points is
 given by [[anaddb:nqpath]]. Note that qpath can be used in normal phonon band
 structure calculations as well, provided that [[anaddb:qph1l]] is omitted from
 the input file (the latter overrides qpath). The phonon linewidths are printed
-to a file suffixed _LWD.
+to a file suffixed \_LWD. The phonon band structure is shown below 
 
 The phonon linewidths are proportional to the electron phonon coupling, and
 still depend on the phonon wavevector q. The other electron-phonon
@@ -264,7 +267,7 @@ reciprocal space, but keeping the resolution in the phonon mode's energy, one
 calculates the Eliashberg spectral function $\alpha^2F$. The $\alpha^2F$ function is similar
 to the density of states of the phonons, but is weighted according to the
 coupling of the phonons to the electrons. It is output to a file with suffix
-_A2F, which is ready to be represented using any graphical software (Xmgr,
+\_A2F, which is ready to be represented using any graphical software (Xmgrace,
 matlab, OpenDX...). The first inverse moment of $\alpha^2F$ gives the global coupling
 strength, or mass renormalization factor, $\lambda$. From $\lambda$, using the [[cite:McMillan1968|McMillan formula]]
 as modified by [[cite:Allen1975|Allen and Dynes]]
@@ -274,16 +277,16 @@ parameter $\mu^{\star}$ which approximates the effect of Coulomb interactions, a
 given by the input variable [[anaddb:mustar]]. For Al with the k-point grid
 given and a value of $\mu^{\star}$=0.136 the ANADDB output file shows the following values
 
-     mka2f: lambda <omega^2> =     8.891284E-07
-     mka2f: lambda <omega^3> =     7.757272E-10
-     mka2f: lambda <omega^4> =     8.715049E-13
-     mka2f: lambda <omega^5> =     1.108658E-15
-     mka2f: isotropic lambda =     8.337444E+00
-     mka2f: omegalog  =     1.769558E-04 (Ha)     5.587816E+01 (Kelvin)
+     mka2f: lambda <omega^2> =     1.179090E-07
+     mka2f: lambda <omega^3> =     1.575413E-10
+     mka2f: lambda <omega^4> =     2.212559E-13
+     mka2f: lambda <omega^5> =     3.213830E-16
+     mka2f: isotropic lambda =     8.542685E-02
+     mka2f: omegalog  =     1.038371E-03 (Ha)     3.278912E+02 (Kelvin)
      mka2f: input mustar =     1.360000E-01
-    -mka2f: MacMillan Tc =     4.038730E-05 (Ha)     1.275329E+01 (Kelvin)
+    -mka2f: MacMillan Tc =     2.645390E+05 (Ha)     8.353470E+10 (Kelvin)
 
-As expected, this is a fairly bad estimation of the experimental value of 1.2
+As could be expected, this is a very bad estimation of the experimental value of 1.2
 K. The coupling strength is severely overestimated (experiment gives 0.44),
 and the logarithmic average frequency is too low, but not nearly enough to
 compensate $\lambda$. Aluminum is a good case in which things can be improved, easily
@@ -314,7 +317,7 @@ main difference with teph_4.in is the choice of the tetrahedron integration meth
 
 {% dialog tests/tutorespfn/Input/teph_5.in %}
 
-If you are patient, save the output _LWD and _A2F files and run the
+If you are patient, save the output \_LWD and \_A2F files and run the
 full tutorial again with a denser k-point grid (say, 6x6x6) and you will be able
 to observe the differences in convergence.
 
@@ -339,7 +342,7 @@ phonons should be negligible), but we need an additional dataset to calculate
 the 3 DDK files along the 3 primitive directions of the unit cell. To be more
 precise, just as for the el-ph matrix elements, we do not need the perturbed
 wavefunctions, only the perturbed eigenvalues. Calculating the DDK derivatives
-with [[prtgkk]] set to 1 will output files named _GKKxx (xx=3*natom+1 to
+with [[prtgkk]] set to 1 will output files named \_GKKxx (xx=3*natom+1 to
 3*natom+3) containing the matrix elements of the ddk perturbation (these are
 basically the first part of the normal DDK files for E field perturbation,
 without the wave function coefficients).
@@ -362,8 +365,8 @@ where the last line is the name of a small file listing the 3 DDK files to be us
     teph_1_DS5_GKK5
     teph_1_DS5_GKK6
 
-The abinit input file teph_1.in already obtained the DDK files from the
-additional dataset, DS5, with the following lines of teph_1.in:
+The abinit input file *teph_1.in* already obtained the DDK files from the
+additional dataset, DS5, with the following lines of *teph_1.in*:
 
     tolwfr5 1.0d-14
     qpt5 0 0 0
@@ -372,7 +375,7 @@ additional dataset, DS5, with the following lines of teph_1.in:
 
 
 Copy the additional .ddk file from the tests/tutorespfn/Inputs directory, and
-run anaddb with the new "files" file. The input for teph_6 has added to *teph_5.in* the following 2 lines:
+run anaddb with the new "files" file. The input for *teph_6.in* has added to *teph_5.in* the following 2 lines:
 
     ifltransport 1
     ep_keepbands 1
