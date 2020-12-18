@@ -179,7 +179,7 @@ contains
     ! set initial positions, spin, etc
     class(lattice_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
-    character(len=*), optional, intent(in) :: restart_hist_fname
+    character(len=fnlen), optional, intent(in) :: restart_hist_fname
 
 
     real(dp) :: xi(3, self%natom)
