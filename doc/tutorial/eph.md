@@ -14,7 +14,7 @@ This tutorial demonstrates how to obtain the following physical properties, for 
   * the McMillan critical temperature
   * the resistivity and electronic part of the thermal conductivity
 
-Here you will learn to use the electron-phonon coupling part of the anaddb
+Here you will learn to use the electron-phonon coupling part of the ANADDB
 utility. This implies a preliminary calculation of the electron-phonon matrix
 elements and phonon frequencies and eigenvectors, from a standard ABINIT
 phonon calculation, which will be reviewed succinctly.
@@ -169,7 +169,7 @@ or use
 {% dialog tests/tutorespfn/Input/teph_2.in %}
 
 This is your input file for the [[help:mrgddb|MRGDDB]] utility, which will
-take the different _DDB files and merge them into a single one which ANADDB
+take the different \_DDB files and merge them into a single one which ANADDB
 will use to determine the phonon frequencies and eigenvectors. *teph_2.in*
 contains the name of the final file, a comment line, then the number of *_DDB*
 files to be merged and their names.
@@ -256,7 +256,10 @@ which are usually special points of high symmetry. The number of points is
 given by [[anaddb:nqpath]]. Note that qpath can be used in normal phonon band
 structure calculations as well, provided that [[anaddb:qph1l]] is omitted from
 the input file (the latter overrides qpath). The phonon linewidths are printed
-to a file suffixed \_LWD. The phonon band structure is shown below 
+to a file suffixed \_LWD. The phonon band structure is shown below, and is already
+stable with a 6x6x6 k-point grid.
+
+![Phonon band structure of Al](eph_assets/Al_phonon_BS.png)
 
 The phonon linewidths are proportional to the electron phonon coupling, and
 still depend on the phonon wavevector q. The other electron-phonon
@@ -287,10 +290,13 @@ given and a value of $\mu^{\star}$=0.136 the ANADDB output file shows the follow
     -mka2f: MacMillan Tc =     2.645390E+05 (Ha)     8.353470E+10 (Kelvin)
 
 As could be expected, this is a very bad estimation of the experimental value of 1.2
-K. The coupling strength is severely overestimated (experiment gives 0.44),
-and the logarithmic average frequency is too low, but not nearly enough to
-compensate $\lambda$. Aluminum is a good case in which things can be improved, easily
-because its Fermi surface is isotropic and the coupling is weak.
+K. The coupling strength is severely underestimated (experiment gives 0.44),
+and the logarithmic average frequency is a bit too high (converged value of 270 K in [[cite:Savrasov1996|Savrasov]]).
+The resulting critical temperature from McMillan's formula is unphysical, and you
+should always regard it critically: if $\lambda$ is close to or lower than the chosen value of
+$\mu^{\star}$, Tc will diverge. 
+Aluminum is a good case in which things can be improved easily,
+because its Fermi surface is large and isotropic and the coupling is weak.
 
 ## 5 Convergence tests of the integration techniques
 
@@ -318,8 +324,9 @@ main difference with teph_4.in is the choice of the tetrahedron integration meth
 {% dialog tests/tutorespfn/Input/teph_5.in %}
 
 If you are patient, save the output \_LWD and \_A2F files and run the
-full tutorial again with a denser k-point grid (say, 6x6x6) and you will be able
-to observe the differences in convergence.
+full tutorial again with a denser k-point grid (say, 12x12x12) and you will be able
+to observe the differences in convergence. For Al the $\alpha^2F$ function and related
+quantities converge for a minimal k-point grid of about 16x16x16.
 
 ## 6 Transport quantities within Boltzmann theory
 
@@ -334,7 +341,7 @@ resistivity, heat conductivity limited by electron-phonon coupling) is the
 Fermi velocity, i.e. the group velocity of a wavepacket of electrons placed at
 the Fermi surface. This is the "true" velocity the charge will move at, once
 you have displaced the Fermi sphere a little bit in k space (see, e.g.
-[[cite:Ashcroft1976|Ashcroft and Mermin]] as well). The velocity can be related simply to a
+[[cite:Ashcroft1976|Ashcroft and Mermin]]). The velocity can be related simply to a
 commutator of the position, which is also used for dielectric response, using
 a DDK calculation (see [the first DFPT tutorial (DFPT1)](rf1).
 The phonon calculation at Gamma need not include the electric field (this is a metal after all, so the effect on the
@@ -347,19 +354,9 @@ with [[prtgkk]] set to 1 will output files named \_GKKxx (xx=3*natom+1 to
 basically the first part of the normal DDK files for E field perturbation,
 without the wave function coefficients).
 
-The anaddb "files" file must specify where the ddk files are, so anaddb can
-calculate the Fermi velocities. It actually reads:
-
-    teph_6.in
-    teph_6.out
-    teph_2.ddb.out
-    moldyn
-    teph_3o_GKK.bin
-    teph.ep
-    teph_6.ddk
-
-
-where the last line is the name of a small file listing the 3 DDK files to be used:
+The ANADDB input must specify where the ddk files are, so ANADDB can
+calculate the Fermi velocities. The variable ddk_filepath points to a 
+small file listing the 3 DDK files to be used, whose contents in our case are:
 
     teph_1_DS5_GKK4
     teph_1_DS5_GKK5
@@ -373,9 +370,8 @@ additional dataset, DS5, with the following lines of *teph_1.in*:
     rfphon5 0
     rfelfd5 2
 
-
-Copy the additional .ddk file from the tests/tutorespfn/Inputs directory, and
-run anaddb with the new "files" file. The input for *teph_6.in* has added to *teph_5.in* the following 2 lines:
+You can copy the additional .ddk file from the tests/tutorespfn/Inputs directory, and
+run ANADDB. The input for *teph_6.in* has added to *teph_5.in* the following 2 lines:
 
     ifltransport 1
     ep_keepbands 1
@@ -396,9 +392,9 @@ The high T behavior is necessarily linear if you include only first order e-p
 coupling and neglect the variation of the GKK off of the Fermi surface. The
 inset shows the low T behavior, which is not a simple polynomial (with simple
 models it should be T^3 or T^5 - see [[cite:Ashcroft1976|Ashcroft and Mermin]]). See the [[cite:Savrasov1996|Savrasov paper]]
-above for reference values in simple metals using well converged k- and q- point grids.
+for reference values in simple metals using well converged k- and q- point grids.
 
-Finally, note that the _RHO and _WTH files contain a series of tensor
+Finally, note that the \_RHO and \_WTH files contain a series of tensor
 components, for the resistivity tensor (2 1 = y x or the current response
 along y when you apply an electric field along x). In most systems the tensor
 should be diagonal by symmetry, and the value of off-diagonal terms gives an

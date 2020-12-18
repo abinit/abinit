@@ -19,7 +19,7 @@ prtwf1   1       # need GS wavefunctions for further runs
 getwfk1  0
 kptopt1  1
 # enforce calculation of forces at each SCF step
-optforces 1 #FIXME
+#optforces 1 #FIXME
 
 #
 # DATASET 2-4 : phonons on a 2x2x2 q-point grid, saving perturbed densities
