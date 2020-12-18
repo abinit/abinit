@@ -447,8 +447,7 @@ contains
     class(mb_manager_t), intent(inout) :: self
         ABI_DATATYPE_ALLOCATE_SCALAR(spin_mover_t, self%spin_mover)
         call self%spin_mover%initialize(params=self%params,&
-            & supercell=self%supercell, rng=self%rng, &
-            & restart_hist_fname=self%params%spin_init_hist_fname)
+            & supercell=self%supercell, rng=self%rng)
    end subroutine set_spin_mover
 
 
