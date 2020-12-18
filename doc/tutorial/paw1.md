@@ -679,8 +679,7 @@ Looking at the [[varset:paw|PAW variable set]], you can find the description
 of additional input keywords related to PAW.
 They are to be used when tuning the computation, in order to gain accuracy or save CPU time.  
 
-See also descriptions of these variables and input file examples in the
-[PAW topic](../topics/PAW) page.
+See also descriptions of these variables and input file examples in the [[topic:PAW|PAW topic]] page.
 
 !!! Warning
 
