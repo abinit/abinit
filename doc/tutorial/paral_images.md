@@ -285,8 +285,8 @@ the path ([[nimage]]) and the convergence criterion ([[tolimg]]).
     Open the `tstring_04o_HIST.nc` file with `agate` or `qAgate` to produce this animation.
     
   <video id="video_string" controls autoplay>
-  <source src="paral_images_assets/stringvideo.mp4" type="video/mp4">
-  <source src="paral_images_assets/stringvideo.webm" type="video/webm">
+  <source src="../paral_images_assets/stringvideo.mp4" type="video/mp4">
+  <source src="../paral_images_assets/stringvideo.webm" type="video/webm">
   You browser does not support the video tag. Download the file [here](paral_images_assets/stringvideo.mp4).
   </video>
     
