@@ -1006,7 +1006,7 @@ Give the size of the supercell for the dynamics
 
 Variable(
     abivarname="outdata_prefix",
-    varset="files",
+    varset="multibinit",
     vartype="string",
     topics=['Control_useful'],
     dimensions="scalar",
