@@ -84,7 +84,7 @@ cp ../tpaw1_1.abi .
 
 and execute ABINIT:
 
-    abinit tpaw1_1.abi >& log &
+    abinit tpaw1_1.abi >& log
 
 The code should run very quickly.
 In the meantime, you can read the input file and see that there is no PAW input variable.
@@ -95,7 +95,7 @@ Now, open the *tpaw1_1.abi* file and change the line with pseudopotential inform
 replace the *PseudosTM_pwteter/6c.pspnc* file with *Pseudodojo_paw_pw_standard/C.xml*.
 Run the code again:
 
-    abinit tpaw1_1.abi >& log &
+    abinit tpaw1_1.abi >& log
 
 Your run should stop almost immediately!
 The input file, indeed, is missing the mandatory argument [[pawecutdg]]!!
@@ -263,7 +263,7 @@ from 8 Ha to 24 Ha.
 You might use the *tpaw1_2.abi* file (with a standard Norm-Conserving
 PseudoPotential), and run:
 
-    abinit tpaw1_1.abi >& log &
+    abinit tpaw1_1.abi >& log
 
 You should obtain the following _total energy_ values (see *tpaw1_2.abo*):
 
@@ -413,7 +413,7 @@ Also note that more k-points are used in order to increase the accuracy of the D
 
 Launch the code with these files; you should obtain the *tpaw1_4.abo* and the DOS file (*tpaw1_4o_DOS*):
 
-    abinit tpaw1_4.abi >& log &
+    abinit tpaw1_4.abi >& log
 
 You can plot the DOS file; for this purpose, use a graphical tool
 and plot column 3 with respect to column 2.  
@@ -579,7 +579,7 @@ around 3.54 angstrom, using the standard PAW dataset.
 
 {% dialog tests/tutorial/Input/tpaw1_5.abi %}
 
-    abinit tpaw1_1.abi >& log &
+    abinit tpaw1_1.abi >& log
 
 From the *tpaw1_5.abo* file, you can extract the 7 values of _acell_ and 7 values
 of _etotal_, then put them into a file and plot it with a graphical tool.

@@ -94,10 +94,12 @@ You have now to install the `ATOMPAW` code. In your internet browser, enter the 
 Then, download the last version of the `tar.gz` file, unzip and untar it.
 Enter the `atompaw-4.x.y.z` and execute:
 
+```sh
     mkdir build
     cd build
     ../configure
     make
+```
 
 if all goes well, you get the `ATOMPAW` executable at 
 <span style="color:green">atompaw-4.x.y.z/build/src/atompaw</span>.  
@@ -106,8 +108,9 @@ If not, Go into the directory <span style="color:green">doc</span>, open the fil
 !!! Note
     On MacOS, you can use [[https://brew.sh|homebrew]] package manager and install `ATOMPAW` by typing:
     
+```sh
         brew install atompaw/repo/atompaw
-
+```
 
 !!! Note
     In the following, we name *atompaw* the `ATOMPAW` executable.
