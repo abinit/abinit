@@ -2034,6 +2034,18 @@ pp_dirpath $ABI_PSPDIR
 
                 if not self.exec_error and f.has_line_count_error: f.do_html_diff = True
 
+                if f.do_html_diff:
+                    # Disable html diff if file size is >= 150 Kb or files do not exist.
+                    html_max_bites = 150 * 1000
+                    out_size_bites = ref_size_bites = html_max_bites
+                    try:
+                        out_size_bites = os.path.getsize(os.path.join(self.workdir, f.name))
+                        ref_size_bites = os.path.getsize(os.path.join(self.ref_dir, f.name))
+                    except OSError:
+                        pass
+                    if out_size_bites >= html_max_bites or ref_size_bites >= html_max_bites:
+                        f.do_html_diff = False
+
                 self.cprint(self.full_id + "[run_etime: %s s]: " % sec2str(self.run_etime) + msg,
                             status2txtcolor[status])
 

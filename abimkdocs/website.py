@@ -1408,7 +1408,7 @@ Enter any string to search in the database. Clicking without any request will gi
     def dialog_from_filename(self, path, title=None, ret_btn_dialog=False):
         """Build customized jquery dialog to show the content of filepath `path`."""
 
-        # FIXME: This to faciliate migration to new scheme for file extensions
+        # FIXME: This to facilitate migration to new scheme for file extensions
         # It will be removed when the beautification is completed.
         if path.endswith(".in") and not os.path.exists(path):
             print("Using old convention for file extension: `.in` instead of `.abi`.\n",
@@ -1424,7 +1424,7 @@ Enter any string to search in the database. Clicking without any request will gi
 
         title = path if title is None else title
         with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
-            if path.endswith(".in"):
+            if path.endswith(".abi") or path.endswith(".in"):
                 text = highlight(fh.read(), BashLexer(), HtmlFormatter(cssclass="codehilite small-text"))
             elif path.endswith(".py"):
                 text = highlight(fh.read(), PythonLexer(), HtmlFormatter(cssclass="codehilite small-text"))
@@ -1465,10 +1465,6 @@ Enter any string to search in the database. Clicking without any request will gi
                  "Please change the md tutorial to use the .abo convention for:", path)
            root, _ = os.path.splitext(path)
            path = root + ".abo"
-
-
-
-
 
         # Based on https://v4-alpha.getbootstrap.com/components/modal/#examples
         # See also https://stackoverflow.com/questions/14971766/load-content-with-ajax-in-bootstrap-modal

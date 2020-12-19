@@ -385,8 +385,8 @@ extra:
         Python: "[Python](http://www.python.org/)"
         #spglib: https://atztogo.github.io/spglib/
         #bader: http://theory.cm.utexas.edu/henkelman/code/bader/
-        #ase: https://wiki.fysik.dtu.dk/ase/
-        #COD: http://www.crystallography.net/cod/
+        ase: "[ase](https://wiki.fysik.dtu.dk/ase/)"
+        COD: "[COD](http://www.crystallography.net/cod/)"
         CIF: "[CIF](http://www.iucr.org/resources/cif)"
         vesta: "[vesta](http://jp-minerals.org/vesta/en/)"
         xcrysden: "[XCrysDen](http://www.xcrysden.org/)"
@@ -397,6 +397,8 @@ extra:
         avogadro: "[avogadro](https://avogadro.cc/)"
         phononwebsite: "[phononwebsite](http://henriquemiranda.github.io/phononwebsite/)"
         phonopy: "[phonopy](https://atztogo.github.io/phonopy/)"
+        pyprocar: "[pyprocar](https://romerogroup.github.io/pyprocar/)"
+        fermisurfer: "[fermisurfer](http://fermisurfer.osdn.jp/)"
         #netcdf: https://www.unidata.ucar.edu/software/netcdf/docs/faq.html#whatisit
         #YAML: https://en.wikipedia.org/wiki/YAML
         #JSON: https://en.wikipedia.org/wiki/JSON

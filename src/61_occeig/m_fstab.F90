@@ -1,5 +1,6 @@
 !!****m* ABINIT/m_fstab
 !! NAME
+!!  m_fstab
 !!
 !! FUNCTION
 !!  Tools for the management of a set of Fermi surface k-points
@@ -51,7 +52,8 @@ module m_fstab
 !!
 !! FUNCTION
 !!  Tables with the correspondence between points of the Fermi surface (FS) and the k-points in the
-!!  IBZ (k-points found in ebands_t). We use `nsppol` fstab_t objects to account for spin polarization.
+!!  IBZ (k-points found in ebands_t).
+!!  We use `nsppol` fstab_t objects to account for spin polarization.
 !!
 !! SOURCE
 
@@ -102,7 +104,7 @@ module m_fstab
 
    integer,allocatable :: indkk_fs(:,:)
    ! (6, nkfs)
-   ! Tables giving the correspondence between a point in the FS-BZ and the IBZ:
+   ! Table giving the correspondence between a point in the FS-BZ and the IBZ:
    !
    !   indkk_fs(1,:)      Mapping FS-BZ --> k-points in the IBZ (taken from ebands_t)
    !   indkk_fs(2,:)      The index of the symmetry S such that kfs = tim_sign * S(k_ibz) + G0
@@ -130,7 +132,7 @@ module m_fstab
 
    real(dp),allocatable :: vk(:,:), vkq(:,:)
    ! (3, mnb)
-   ! Velocities in cartesian cordinates. Used to implement the adaptive gaussian broadening
+   ! Velocities in cartesian coordinates. Used to implement the adaptive gaussian broadening
    ! Values are filled by call (e.g. phgamma) inside the loop over k-points.
 
    real(dp),allocatable :: tetra_wtk(:,:)
@@ -151,13 +153,13 @@ module m_fstab
 
  contains
 
- procedure :: free => fstab_free
-  ! Free memory.
+   procedure :: free => fstab_free
+   ! Free memory.
 
- procedure :: findkg0 => fstab_findkg0
-  ! Find the index of the k-point on the FS
+   procedure :: findkg0 => fstab_findkg0
+   ! Find the index of the k-point on the FS
 
- procedure :: get_dbldelta_weights => fstab_get_dbldelta_weights
+   procedure :: get_dbldelta_weights => fstab_get_dbldelta_weights
 
  end type fstab_t
 
@@ -283,11 +285,10 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  call cwtime(cpu, wall, gflops, "start")
 
  if (any(cryst%symrel(:,:,1) /= identity_3d) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
-  ABI_ERROR('The first symmetry is not the identity operator!')
+   ABI_ERROR('The first symmetry is not the identity operator!')
  end if
 
  nkibz = ebands%nkpt
-
  kptrlatt = dtset%kptrlatt
  !call kpts_ibz_from_kptrlatt(cryst, kptrlatt, ebands%kptopt, dtset%nshiftk, dtset%shiftk, &
  ! nkibz, kibz, wtk, nkbz, kbz, &
@@ -367,7 +368,8 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
      if (blow == 0) blow = 1
      !if (blow == nband_k .or. blow == 0) cycle ! out of range
      !write(std_out,*)"here with blow: ", blow,nband_k
-     !write(std_out,*)"eig_blow, eig_max, elow, ehigh:", ebands%eig(blow, ik_ibz, spin), ebands%eig(nband_k, ik_ibz, spin), elow,ehigh
+     !write(std_out,*)"eig_blow, eig_max, elow, ehigh:", &
+     !                ebands%eig(blow, ik_ibz, spin), ebands%eig(nband_k, ik_ibz, spin), elow,ehigh
 
      inwin = .False.; i1 = huge(1); i2 = -1
      do band=blow,nband_k
@@ -404,7 +406,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 
    ! Define band indices enclosing states on the FS.
    ! Note that we need all k-points for a given band when computing weights with tetrahedron.
-   ! This means that we have to be carefull when selecting the weight associated to a given pair
+   ! This means that we have to be careful when selecting the weight associated to a given pair
    ! (band_kq, kq), (band_k, k).
    ! Then we have to rearrange the weights
    fs%bmin = huge(1); fs%bmax = -huge(1)
@@ -584,7 +586,7 @@ end function fstab_findkg0
 !!   In this case, we fallback to adaptive gaussian.
 !!
 !! OUTPUT
-!!   wtk(fs%maxnb)=Weights for FS integration.
+!!   wtk(fs%maxnb, fs%maxnb)=Weights for FS integration.
 !!
 !! PARENTS
 !!

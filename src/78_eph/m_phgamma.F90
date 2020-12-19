@@ -926,8 +926,8 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
 !arrays
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(out) :: phfrq(gams%natom3),gamma_ph(gams%natom3),lambda_ph(gams%natom3)
- real(dp),intent(out),optional :: gamma_ph_ee(gams%nene,gams%nene,gams%natom3)
  real(dp),intent(out) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp),intent(out),optional :: gamma_ph_ee(gams%nene,gams%nene,gams%natom3)
 
 !Local variables-------------------------------
 !scalars
@@ -998,7 +998,7 @@ subroutine phgamma_interp(gams, cryst, ifc, spin, qpt, phfrq, gamma_ph, lambda_p
  ! but the Fourier interpolated gammas do not fulfill this property so we set everything
  ! to zero when we are inside a sphere or radius
  if (normv(qpt, cryst%gmet, "G") < EPH_Q0TOL) then
-   write(std_out,*)"Setting values to zero."
+   !write(std_out,*)"Setting values to zero."
    gamma_ph(1:3) = zero
    lambda_ph(1:3) = zero
  end if
@@ -1743,7 +1743,7 @@ end subroutine a2fw_free
 !! SOURCE
 
 subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqpt, nqshift, qshift, comm, &
-  qintp, qptopt) ! optional
+                     qintp, qptopt) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -2194,7 +2194,7 @@ real(dp) function a2fw_get_moment(a2f, nn, spin, out_int)
  if (nn - 1 >= 0) then
    do iw=1,a2f%nomega
      omg = a2f%omega(iw)
-     omg_nm1 = omg ** (nn-1)
+     omg_nm1 = omg ** (nn - 1)
      ff(iw) = a2f%vals(iw,0,spin) * omg_nm1
    end do
  else
@@ -2310,7 +2310,7 @@ end function a2fw_tr_moment
 !!
 !! SOURCE
 
-real(dp) function a2fw_logmoment(a2f,spin) result(res)
+real(dp) function a2fw_logmoment(a2f, spin) result(res)
 
 !Arguments ------------------------------------
 !scalars
@@ -2342,67 +2342,6 @@ real(dp) function a2fw_logmoment(a2f,spin) result(res)
  res = zero
 
 end function a2fw_logmoment
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_phgamma/a2fw_lambda_wij
-!! NAME
-!! a2fw_lambda_wij
-!!
-!! FUNCTION
-!!  Compute \int dw [w x a2F(w)] (w_i-w_j)**2 + w**2)
-!!
-!! INPUTS
-!!  a2f<a2fw_t>=Structure storing the Eliashberg function.
-!!  w1,wj=Matsubara frequencies (real) in Hartree
-!!  spin=Spin index
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-real(dp) function a2fw_lambda_wij(a2f,wi,wj,spin) result(res)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: spin
- real(dp),intent(in) :: wi,wj
- type(a2fw_t),intent(in) :: a2f
-
-!Local variables -------------------------
-!scalars
- integer :: iw
- real(dp) :: wd2,vv,omg
- logical :: iszero
-!arrays
- real(dp) :: values(a2f%nomega)
-
-! *********************************************************************
-
- wd2 = (wi - wj)** 2
- iszero = (abs(wi - wj) < EPHTK_WTOL)
-
- do iw=1,a2f%nomega
-   omg = a2f%omega(iw)
-   vv = a2f%vals(iw,0,spin)
-   if (abs(a2f%omega(iw)) > EPHTK_WTOL) then
-     values(iw) = vv * omg / (wd2 + omg**2)
-   else
-     if (iszero) then ! TODO
-       values(iw) = zero
-     else
-       values(iw) = vv * omg / (wd2 + omg**2)
-     end if
-   end if
- end do
-
- res = simpson(a2f%wstep, values)
- if (res < zero) res = zero
-
-end function a2fw_lambda_wij
 !!***
 
 !----------------------------------------------------------------------
@@ -2740,7 +2679,7 @@ end subroutine a2fw_tr_free
 !! SOURCE
 
 subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqpt, nqshift, qshift, comm,&
-  qintp, qptopt) ! optional
+                        qintp, qptopt) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -2761,8 +2700,7 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
  integer,parameter :: master = 0
  integer :: my_qptopt,iq_ibz,nqibz,ount,my_rank,nproc,cnt
  integer :: mu,iw,natom3,nsppol,spin,ierr,nomega,nqbz, idir, jdir
- real(dp) :: cpu, wall, gflops
- real(dp) :: omega,xx,omega_min,omega_max,ww
+ real(dp) :: omega,xx,omega_min,omega_max,ww, cpu, wall, gflops
  logical :: do_qintp
  character(len=500) :: msg
  type(htetra_t) :: qtetra
@@ -3617,7 +3555,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! Initialize the wave function descriptor.
  ! Only wavefunctions on the FS are stored in wfd.
  ! Need all k-points on the FS because of k+q, spin is not distributed for the time being.
- ! One could reduce the memory allocated per MPI-rank via MPI-FFT or OpenMP.
+ ! It would be possible to reduce the memory allocated per MPI-rank via MPI-FFT or OpenMP.
 
  ABI_MALLOC(nband, (nkibz, nsppol))
  ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
@@ -3888,6 +3826,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
        !
        kq = kk + qpt; ikq_bz = fs%findkg0(kq, g0bz_kq)
+
        ! Skip this point if kq does not belong to the FS window.
        if (ikq_bz == -1) cycle
 
@@ -3910,7 +3849,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        kq_ibz = ebands%kptns(:, ikq_ibz)
 
        ! If we have used the KERANGE trick, we may have k or k+q points with just one G component set to zero
-       ! so we skip this transition immediately.
+       ! so we skip this transition immediately. This should happen only if fsewin > sigma_erange.
        if (wfd%npwarr(ik_ibz) == 1 .or. wfd%npwarr(ikq_ibz) == 1) cycle
 
        ! Number of bands crossing the Fermi level at k+q
@@ -4053,7 +3992,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Multiply by the weight of the q-point if we are summing over IBZ(q).
        !dbldelta_wts = dbldelta_wts * wtk_lgq
 
-       ! Accumulate results in tgam (sum over FS and bands for this spin).
+       ! Accumulate results in tgam (summing over FS k-points and bands for this spin).
        do ipc2=1,natom3
          do ipc1=1,natom3
            do ib2=1,nband_k
@@ -4395,8 +4334,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    nesting = 1
  end if
 
- ! Compute little group of the q-point.
- !lg_q = lgroup_new(cryst, qpt, self%timrev, fs%nkfs, fs%kpts, nkibz, kibz, comm)
+ ! Compute little group of the q-point. Map fs%kpts to ebands%kptns (IBZ)
+ !lg_q = lgroup_new(cryst, qpt, self%timrev, fs%nkfs, fs%kpts, ebands%nkpt, ebands%kpnts, comm)
  !do ik_fs=1,fs%nkfs
  !  ik_lgibz = lg_q%bz2ibz_smap(1, ik_fs)
  !  lg_q%weights(iklg_ibz)
@@ -4558,6 +4497,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
  ! Now we can filter the k-points according to the tetra weights and distribute inside comm.
  ! Assuming all procs in comm have all k-points in the IBZ.
+ ! nkfs_q is the total number of BZ k-points on the FS that contribute for this q-point.
  ABI_MALLOC(select_ikfs, (fs%nkfs))
  nkfs_q = 0
  do ik_fs=1,fs%nkfs
@@ -4567,6 +4507,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    end if
  end do
 
+ ! Here we compute my_ifsk_q.
  ABI_SFREE(gams%my_ifsk_q)
  call xmpi_split_list(nkfs_q, select_ikfs, comm, gams%my_nfsk_q, gams%my_ifsk_q)
  ABI_FREE(select_ikfs)
