@@ -664,7 +664,7 @@ computed; it is indeed a very good approximation.
 
 Converging a _Self-Consistent Cycle_, or ensuring the global minimum is reached,
 with PAW+U is sometimes difficult. Using [[usedmatpu]] and [[dmatpawu]] can help.
-See [tutorial on DFT+U](Dftu).
+See [tutorial on DFT+U](dftu).
 
 ### 8.d. Printing volume for PAW###
 

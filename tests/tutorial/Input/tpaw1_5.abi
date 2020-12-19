@@ -54,7 +54,7 @@ shiftk            # with different shifts:
 nstep 10          # Maximal number of SCF cycles
 tolvrs 1.0d-10    # Will stop when, twice in a row, the difference 
                   # between two consecutive evaluations of potential residual 
-                  # differ by less than tolvrs 
+                  # differ by less than tolvrs
 
 #Miscelaneous parameters
 prtwf 1           # Print wavefunctions (re-used from one dataset to the other)
