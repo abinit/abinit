@@ -327,6 +327,8 @@ We use the `Si_paw_pw_12el.xml` PAW dataset which includes 8 additional valence 
 
 We can now rerun the lifetime calculation with the new atomic dataset:
 
+{% dialog tests/tutorial/Input/tpositron_6.abi %}
+
     abinit tpositron_6.abi >& log
 
 We now find the positron lifetime calculated in the RPA limit:
@@ -347,6 +349,8 @@ the PAW dataset completeness for positron calculations**.
 The PAW dataset completeness is even more important in the _Doppler spectra_
 calculations. We will now recalculate the momentum distribution including 12
 _valence electrons_ using `tpositron_7.abi`:
+
+{% dialog tests/tutorial/Input/tpositron_7.abi %}
 
     abinit tpositron_7.abi >& log
 

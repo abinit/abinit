@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.3.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,14 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h23 )
+.Starting date : Sat 19 Dec 2020.
+- ( at 15h44 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tpositron_7/tpositron_7.in
-- output file    -> tpositron_7.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/TestBot_MPI1/tutorial_tpositron_7/tpositron_7.abi
+- output file    -> tpositron_7.abo
 - root for input  files -> tpositron_7i
 - root for output files -> tpositron_7o
 
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/Psps_for_tests/Si_paw_pw_12el.xml
 
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -36,7 +38,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        27    nfftf =     19683
 ================================================================================
-P This job should need less than                       8.338 Mbytes of memory.
+P This job should need less than                       8.581 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.065 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
@@ -57,7 +59,7 @@ _ WF disk file :      1.065 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
              ecut      1.20000000E+01 Hartree
 -          fftalg         312
            istwfk        1    1    1    1    1    1    1    1
-              ixc           7
+              ixc       -1012
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        0.00000000E+00  0.00000000E+00  5.00000000E-01
                        0.00000000E+00  5.00000000E-01  0.00000000E+00
@@ -172,11 +174,6 @@ electrons: {nelect:   2.40000000E+01, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 ...
 
- Exchange-correlation functional for the present dataset will be:
-  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
- Citation for XC functional:
-  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1306065  5.1306065  G(1)= -0.0974544  0.0974544  0.0974544
  R(2)=  5.1306065  0.0000000  5.1306065  G(2)=  0.0974544 -0.0974544  0.0974544
@@ -195,30 +192,27 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.05836
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si.12el.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si.12el.LDA-PW-paw.abinit
-- Paw atomic data for element Si - Generated with atompaw v3.1.0.3
-- 14.00000  12.00000  20170718                znucl, zion, pspdat
-    7    7    1    0      1361   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw5
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/Psps_for_tests/Si_paw_pw_12el.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/Psps_for_tests/Si_paw_pw_12el.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/Psps_for_tests/Si_paw_pw_12el.xml
+ Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 12), orbitals=   0   0   0   1   1   1
  Spheres core radius: rc_sph= 1.60149249
- 4 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1361 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1356 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=1658 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size=1753 , AA= 0.43309E-03 BB= 0.60633E-02
+ 1 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=2001 , AA= 0.43309E-03 BB= 0.60633E-02
  Shapefunction is BESSEL type: shapef(r,l)=aa(1,l)*jl(q(1,l)*r)+aa(2,l)*jl(q(2,l)*r)
  Radius for shape functions =  1.40144648
+ mmax= 2001
  Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
+ Radial grid used for projectors is grid 1
  Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 3
- Radial grid used for pseudo valence density is grid 4
+ Radial grid used for Vloc is grid 1
+ Radial grid used for pseudo valence density is grid 1
+ Mesh size for Vloc has been set to 1772 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-   4.61048727E+02                                ecore*ucvol(ha*bohr**3)
+   4.61043961E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
 _setup2: Arith. and geom. avg. npw (full set) are     535.625     535.544
@@ -233,30 +227,30 @@ tolerances: {tolvrs: 1.00E-10, }
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
 TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
- ETOT  1  -203.13170259385    -2.031E+02 2.018E+00 4.212E-01
- ETOT  2  -204.32809669163    -1.196E+00 1.865E-05 8.810E-01
- ETOT  3  -204.33213933428    -4.043E-03 6.480E-09 1.151E+00
- ETOT  4  -204.31802317267     1.412E-02 7.931E-08 4.684E-02
- ETOT  5  -204.31744390006     5.793E-04 2.281E-09 1.463E-03
- ETOT  6  -204.31744415666    -2.566E-07 3.102E-11 8.887E-05
- ETOT  7  -204.31744338699     7.697E-07 7.001E-12 6.605E-06
- ETOT  8  -204.31744332270     6.430E-08 3.139E-13 1.210E-08
- ETOT  9  -204.31744332264     5.625E-11 8.854E-16 2.466E-10
- ETOT 10  -204.31744332265    -1.097E-11 4.918E-17 2.569E-12
+ ETOT  1  -202.98120036457    -2.030E+02 2.962E+00 3.040E-01
+ ETOT  2  -204.33078557694    -1.350E+00 2.756E-05 9.894E-01
+ ETOT  3  -204.34028198830    -9.496E-03 2.974E-08 1.619E+00
+ ETOT  4  -204.31836793562     2.191E-02 1.869E-07 5.708E-02
+ ETOT  5  -204.31759815757     7.698E-04 2.675E-09 5.680E-03
+ ETOT  6  -204.31753223693     6.592E-05 6.806E-10 5.734E-05
+ ETOT  7  -204.31753176279     4.741E-07 7.108E-12 3.906E-06
+ ETOT  8  -204.31753171917     4.362E-08 2.371E-13 3.389E-09
+ ETOT  9  -204.31753171921    -3.931E-11 8.886E-17 1.168E-09
+ ETOT 10  -204.31753171920     4.889E-12 1.971E-17 5.149E-12
 
- At SCF step   10       nres2   =  2.57E-12 < tolvrs=  1.00E-10 =>converged.
+ At SCF step   10       nres2   =  5.15E-12 < tolvrs=  1.00E-10 =>converged.
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 11  -204.66249974627    -3.451E-01 6.064E+00 8.810E-02
- ETOT 12  -204.67744410417    -1.494E-02 4.853E-02 4.664E-02
- ETOT 13  -204.67758336670    -1.393E-04 3.947E-04 1.876E-04
- ETOT 14  -204.67746529703     1.181E-04 4.904E-06 7.508E-05
- ETOT 15  -204.67745792782     7.369E-06 7.381E-08 3.345E-07
- ETOT 16  -204.67745792784    -1.924E-11 1.909E-10 1.478E-08
- ETOT 17  -204.67745792784    -2.842E-14 1.074E-13 1.651E-09
- ETOT 18  -204.67745792784     0.000E+00 1.349E-17 1.084E-12
+ ETOT 11  -204.66259200801    -3.451E-01 6.067E+00 8.805E-02
+ ETOT 12  -204.67754247534    -1.495E-02 6.568E-02 4.665E-02
+ ETOT 13  -204.67768093615    -1.385E-04 3.969E-05 1.923E-04
+ ETOT 14  -204.67756283164     1.181E-04 6.377E-06 7.602E-05
+ ETOT 15  -204.67755540856     7.423E-06 3.118E-07 3.126E-07
+ ETOT 16  -204.67755540858    -1.879E-11 5.804E-09 1.043E-08
+ ETOT 17  -204.67755540858    -5.684E-14 9.607E-13 1.359E-09
+ ETOT 18  -204.67755540858     0.000E+00 2.872E-17 4.766E-13
 
- At SCF step   18       nres2   =  1.08E-12 < tolvrs=  1.00E-10 =>converged.
+ At SCF step   18       nres2   =  4.77E-13 < tolvrs=  1.00E-10 =>converged.
 
  scprqt:  WARNING -
   posnstep=    2 was not enough SCF cycles to converge difference between
@@ -273,10 +267,10 @@ lattice_vectors:
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7010716E+02
-convergence: {deltae:  0.000E+00, res2:  1.084E-12, residm:  1.349E-17, diffor:  0.000E+00, }
-etotal    :  -2.04677458E+02
+convergence: {deltae:  0.000E+00, res2:  4.766E-13, residm:  2.872E-17, diffor:  0.000E+00, }
+etotal    :  -2.04677555E+02
 entropy   :   0.00000000E+00
-fermie    :  -3.04034952E-01
+fermie    :  -3.04042704E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
@@ -289,75 +283,75 @@ force_length_stats: {min: null, max: null, mean: null, }
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        1.60149          8.86515891
-    2        1.60149          8.86470982
+    1        1.60149          8.86511845
+    2        1.60149          8.86466971
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.000117548169386
- Compensation charge over fine fft grid    =      0.000117602923624
+ Compensation charge over spherical meshes =      0.000117699007778
+ Compensation charge over fine fft grid    =      0.000117752054655
 
  ==== Results concerning PAW augmentation regions ====
 
  Total pseudopotential strength Dij (hartree):
  -Note: these are the positronic Dij
  Atom #  1
-  27.56035  -8.15694 -24.18681   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-  -8.15694   2.31193   6.63394   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
- -24.18681   6.63394  18.38598   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000  24.80233   0.00000   0.00000  -5.33036   0.00000   0.00000 -32.81034   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000  24.80233   0.00000   0.00000  -5.33036   0.00000   0.00000 -32.81034   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000  24.80233   0.00000   0.00000  -5.33036   0.00000   0.00000 -32.81034
-   0.00000   0.00000   0.00000  -5.33036   0.00000   0.00000   1.11388   0.00000   0.00000   6.70247   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000  -5.33036   0.00000   0.00000   1.11388   0.00000   0.00000   6.70247   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000  -5.33036   0.00000   0.00000   1.11388   0.00000   0.00000   6.70247
-   0.00000   0.00000   0.00000 -32.81034   0.00000   0.00000   6.70247   0.00000   0.00000  38.84555   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000 -32.81034   0.00000   0.00000   6.70247   0.00000   0.00000  38.84555   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000 -32.81034   0.00000   0.00000   6.70247   0.00000   0.00000  38.84555
+  27.56073  -8.15729 -24.18806   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+  -8.15729   2.31195   6.63412   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+ -24.18806   6.63412  18.38612   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.00000  24.80278   0.00000   0.00000  -5.33056   0.00000   0.00000 -32.81201   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  24.80278   0.00000   0.00000  -5.33056   0.00000   0.00000 -32.81201   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  24.80278   0.00000   0.00000  -5.33056   0.00000   0.00000 -32.81201
+   0.00000   0.00000   0.00000  -5.33056   0.00000   0.00000   1.11390   0.00000   0.00000   6.70278   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -5.33056   0.00000   0.00000   1.11390   0.00000   0.00000   6.70278   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -5.33056   0.00000   0.00000   1.11390   0.00000   0.00000   6.70278
+   0.00000   0.00000   0.00000 -32.81201   0.00000   0.00000   6.70278   0.00000   0.00000  38.84607   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000 -32.81201   0.00000   0.00000   6.70278   0.00000   0.00000  38.84607   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000 -32.81201   0.00000   0.00000   6.70278   0.00000   0.00000  38.84607
  Atom #  2
-  27.56035  -8.15694 -24.18681   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-  -8.15694   2.31193   6.63394   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
- -24.18681   6.63394  18.38598   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000  24.80233   0.00000   0.00000  -5.33036   0.00000   0.00000 -32.81034   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000  24.80233   0.00000   0.00000  -5.33036   0.00000   0.00000 -32.81034   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000  24.80233   0.00000   0.00000  -5.33036   0.00000   0.00000 -32.81034
-   0.00000   0.00000   0.00000  -5.33036   0.00000   0.00000   1.11388   0.00000   0.00000   6.70247   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000  -5.33036   0.00000   0.00000   1.11388   0.00000   0.00000   6.70247   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000  -5.33036   0.00000   0.00000   1.11388   0.00000   0.00000   6.70247
-   0.00000   0.00000   0.00000 -32.81034   0.00000   0.00000   6.70247   0.00000   0.00000  38.84555   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000 -32.81034   0.00000   0.00000   6.70247   0.00000   0.00000  38.84555   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000 -32.81034   0.00000   0.00000   6.70247   0.00000   0.00000  38.84555
+  27.56073  -8.15729 -24.18806   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+  -8.15729   2.31195   6.63412   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+ -24.18806   6.63412  18.38612   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.00000  24.80278   0.00000   0.00000  -5.33056   0.00000   0.00000 -32.81201   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  24.80278   0.00000   0.00000  -5.33056   0.00000   0.00000 -32.81201   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  24.80278   0.00000   0.00000  -5.33056   0.00000   0.00000 -32.81201
+   0.00000   0.00000   0.00000  -5.33056   0.00000   0.00000   1.11390   0.00000   0.00000   6.70278   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -5.33056   0.00000   0.00000   1.11390   0.00000   0.00000   6.70278   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -5.33056   0.00000   0.00000   1.11390   0.00000   0.00000   6.70278
+   0.00000   0.00000   0.00000 -32.81201   0.00000   0.00000   6.70278   0.00000   0.00000  38.84607   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000 -32.81201   0.00000   0.00000   6.70278   0.00000   0.00000  38.84607   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000 -32.81201   0.00000   0.00000   6.70278   0.00000   0.00000  38.84607
 
 
  Augmentation waves occupancies Rhoij:
  -Note: these are the electronic Rhoij
  Atom #  1
-   2.00009   0.00130  -0.00023   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00130   1.48670  -0.03686   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-  -0.00023  -0.03686   0.00102   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186
-   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245
-   0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015
+   2.00007   0.00069   0.00014   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00069   1.48727  -0.03701   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00014  -0.03701   0.00103   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.00000   1.99921   0.00000   0.00000  -0.00770   0.00000   0.00000   0.00195   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   1.99921   0.00000   0.00000  -0.00770   0.00000   0.00000   0.00195   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   1.99921   0.00000   0.00000  -0.00770   0.00000   0.00000   0.00195
+   0.00000   0.00000   0.00000  -0.00770   0.00000   0.00000   1.32673   0.00000   0.00000  -0.01248   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00770   0.00000   0.00000   1.32673   0.00000   0.00000  -0.01248   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00770   0.00000   0.00000   1.32673   0.00000   0.00000  -0.01248
+   0.00000   0.00000   0.00000   0.00195   0.00000   0.00000  -0.01248   0.00000   0.00000   0.00015   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00195   0.00000   0.00000  -0.01248   0.00000   0.00000   0.00015   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00195   0.00000   0.00000  -0.01248   0.00000   0.00000   0.00015
  Atom #  2
-   2.00009   0.00130  -0.00023   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00130   1.48670  -0.03686   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-  -0.00023  -0.03686   0.00102   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   1.99922   0.00000   0.00000  -0.00759   0.00000   0.00000   0.00186
-   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00759   0.00000   0.00000   1.32659   0.00000   0.00000  -0.01245
-   0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00186   0.00000   0.00000  -0.01245   0.00000   0.00000   0.00015
+   2.00007   0.00069   0.00014   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00069   1.48727  -0.03701   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00014  -0.03701   0.00103   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.00000   1.99921   0.00000   0.00000  -0.00770   0.00000   0.00000   0.00195   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   1.99921   0.00000   0.00000  -0.00770   0.00000   0.00000   0.00195   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   1.99921   0.00000   0.00000  -0.00770   0.00000   0.00000   0.00195
+   0.00000   0.00000   0.00000  -0.00770   0.00000   0.00000   1.32673   0.00000   0.00000  -0.01248   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00770   0.00000   0.00000   1.32673   0.00000   0.00000  -0.01248   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00770   0.00000   0.00000   1.32673   0.00000   0.00000  -0.01248
+   0.00000   0.00000   0.00000   0.00195   0.00000   0.00000  -0.01248   0.00000   0.00000   0.00015   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00195   0.00000   0.00000  -0.01248   0.00000   0.00000   0.00015   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00195   0.00000   0.00000  -0.01248   0.00000   0.00000   0.00015
 
 
 
@@ -373,23 +367,23 @@ force_length_stats: {min: null, max: null, mean: null, }
  # Enhancement factor of Boronski & Nieminen
    Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)
 
- Positron lifetime                         (ps)   =  2.79179762E+02
- Positron lifetime with IPM for core elec. (ps)   =  2.79187080E+02
- Annihilation rate                         (ns-1) =  3.58192153E+00
- Annihilation rate with IPM for core elec. (ns-1) =  3.58182765E+00
+ Positron lifetime                         (ps)   =  2.79166638E+02
+ Positron lifetime with IPM for core elec. (ps)   =  2.79173967E+02
+ Annihilation rate                         (ns-1) =  3.58208992E+00
+ Annihilation rate with IPM for core elec. (ns-1) =  3.58199588E+00
 
  Annihilation rate core/valence decomposition:
-   Core    contribution to ann.rate          (ns-1) =  9.07191067E-04
-   Valence contribution to ann.rate          (ns-1) =  3.58101434E+00
-   Core    contribution to ann.rate with IPM (ns-1) =  7.96793447E-04
-   Valence contribution to ann.rate with IPM (ns-1) =  3.58103085E+00
+   Core    contribution to ann.rate          (ns-1) =  9.08718246E-04
+   Valence contribution to ann.rate          (ns-1) =  3.58118120E+00
+   Core    contribution to ann.rate with IPM (ns-1) =  7.98148684E-04
+   Valence contribution to ann.rate with IPM (ns-1) =  3.58119773E+00
 
  Annihilation rate PAW decomposition:
-   Plane-wave contribution to ann.rate          (ns-1) =  3.54313928E+00
-   Plane-wave valence contribution to ann.rate  (ns-1) =  3.54313928E+00
-   On-site core contribution to ann.rate        (ns-1) =  9.07191067E-04
-   On-site valence contribution to ann.rate     (ns-1) =  3.78750598E-02
-   Plane-wave contribution to ann.rate with IPM (ns-1) =  3.54313928E+00
+   Plane-wave contribution to ann.rate          (ns-1) =  3.54329717E+00
+   Plane-wave valence contribution to ann.rate  (ns-1) =  3.54329717E+00
+   On-site core contribution to ann.rate        (ns-1) =  9.08718246E-04
+   On-site valence contribution to ann.rate     (ns-1) =  3.78840286E-02
+   Plane-wave contribution to ann.rate with IPM (ns-1) =  3.54329717E+00
    Plane-wave core contrb. to ann.rate with IPM (ns-1) =  0.00000000E+00
 
 ########## Lifetime computation 2
@@ -399,23 +393,23 @@ force_length_stats: {min: null, max: null, mean: null, }
  # Enhancement factor of Boronski & Nieminen IN THE RPA LIMIT
    Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)
 
- Positron lifetime                         (ps)   =  2.29666202E+02
- Positron lifetime with IPM for core elec. (ps)   =  2.29671155E+02
- Annihilation rate                         (ns-1) =  4.35414523E+00
- Annihilation rate with IPM for core elec. (ns-1) =  4.35405135E+00
+ Positron lifetime                         (ps)   =  2.29657868E+02
+ Positron lifetime with IPM for core elec. (ps)   =  2.29662828E+02
+ Annihilation rate                         (ns-1) =  4.35430324E+00
+ Annihilation rate with IPM for core elec. (ns-1) =  4.35420921E+00
 
  Annihilation rate core/valence decomposition:
-   Core    contribution to ann.rate          (ns-1) =  9.07191086E-04
-   Valence contribution to ann.rate          (ns-1) =  4.35323804E+00
-   Core    contribution to ann.rate with IPM (ns-1) =  7.96793447E-04
-   Valence contribution to ann.rate with IPM (ns-1) =  4.35325455E+00
+   Core    contribution to ann.rate          (ns-1) =  9.08718264E-04
+   Valence contribution to ann.rate          (ns-1) =  4.35339453E+00
+   Core    contribution to ann.rate with IPM (ns-1) =  7.98148684E-04
+   Valence contribution to ann.rate with IPM (ns-1) =  4.35341106E+00
 
  Annihilation rate PAW decomposition:
-   Plane-wave contribution to ann.rate          (ns-1) =  4.31536244E+00
-   Plane-wave valence contribution to ann.rate  (ns-1) =  4.31536244E+00
-   On-site core contribution to ann.rate        (ns-1) =  9.07191086E-04
-   On-site valence contribution to ann.rate     (ns-1) =  3.78756029E-02
-   Plane-wave contribution to ann.rate with IPM (ns-1) =  4.31536244E+00
+   Plane-wave contribution to ann.rate          (ns-1) =  4.31550995E+00
+   Plane-wave valence contribution to ann.rate  (ns-1) =  4.31550995E+00
+   On-site core contribution to ann.rate        (ns-1) =  9.08718264E-04
+   On-site valence contribution to ann.rate     (ns-1) =  3.78845747E-02
+   Plane-wave contribution to ann.rate with IPM (ns-1) =  4.31550995E+00
    Plane-wave core contrb. to ann.rate with IPM (ns-1) =  0.00000000E+00
 
       (*) IPM=Independent particle Model
@@ -425,13 +419,13 @@ force_length_stats: {min: null, max: null, mean: null, }
 -Use ~abinit/scripts/post_processing/posdopspectra.F90 to process it.
 
  Annihilation rate obtained from integration of e-p pairs momentum distribution:
-   lambda=    5.082828040893E+00 ns-1
+   lambda=    5.083152817344E+00 ns-1
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   19.979E-19; max=  13.490E-18
+ Mean square residual over all n,k,spin=   43.327E-19; max=  28.717E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -444,29 +438,29 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      1.35750000000000     1.35750000000000     1.35750000000000
  length scales= 10.261212901569 10.261212901569 10.261212901569 bohr
               =  5.430000000000  5.430000000000  5.430000000000 angstroms
- Fermi (or HOMO) energy (hartree) =   0.22765   Average Vxc (hartree)=  -0.31503
+ Fermi (or HOMO) energy (hartree) =   0.22762   Average Vxc (hartree)=  -0.31503
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 16, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -4.64961   -4.64930   -3.06307   -3.06307   -3.06307   -3.06254   -3.06254   -3.06254
-  -0.21550    0.22765    0.22765    0.22765    0.31563    0.31563    0.31563    0.34384
+  -4.64999   -4.64967   -3.06349   -3.06349   -3.06349   -3.06296   -3.06296   -3.06296
+  -0.21553    0.22762    0.22762    0.22762    0.31561    0.31561    0.31561    0.34381
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.01888288261803E+00
-hartree             :  5.84387041523811E+01
-xc                  : -3.25177487448359E+00
+kinetic             :  7.02123795865024E+00
+hartree             :  5.84369300880994E+01
+xc                  : -3.25227044604594E+00
 Ewald energy        : -7.55952464681649E+01
-psp_core            :  1.70691039262478E+00
-local_psp           : -1.71894427761971E+02
-spherical_terms     : -2.07404910692367E+01
-electronic          : -2.04317442746233E+02
-positronic          : -9.45445757815586E-01
-electron_positron_interaction:  5.85431152621166E-01
-total_energy        : -2.04677457351427E+02
-total_energy_eV     : -5.56955685947847E+03
+psp_core            :  1.70689274860386E+00
+local_psp           : -1.71891659531391E+02
+spherical_terms     : -2.07434168259033E+01
+electronic          : -2.04317532476152E+02
+positronic          : -9.45390600026341E-01
+electron_positron_interaction:  5.85366910647001E-01
+total_energy        : -2.04677556165531E+02
+total_energy_eV     : -5.56955954834698E+03
 ...
 
 
@@ -477,12 +471,12 @@ total_energy_eV     : -5.56955685947847E+03
             acell      1.0261212902E+01  1.0261212902E+01  1.0261212902E+01 Bohr
               amu      2.80855000E+01
              ecut      1.20000000E+01 Hartree
-           etotal     -2.0467745793E+02
+           etotal     -2.0467755541E+02
             fcart      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
            istwfk        1    1    1    1    1    1    1    1
-              ixc           7
+              ixc       -1012
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        0.00000000E+00  0.00000000E+00  5.00000000E-01
                        0.00000000E+00  5.00000000E-01  0.00000000E+00
@@ -616,7 +610,13 @@ P           mkmem           8
 - Comment: PAW calculations. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [3] The Abinit project: Impact, environment and recent developments.
+- [3] Libxc: A library of exchange and correlation functionals for density functional theory.
+- M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
+- Comment: to be cited when LibXC is used (negative value of ixc)
+- Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
+-
+- [4] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -633,7 +633,7 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [4] ABINIT: Overview, and focus on selected capabilities
+- [5] ABINIT: Overview, and focus on selected capabilities
 - J. Chem. Phys. 152, 124102 (2020).
 - A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
@@ -650,7 +650,7 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [5] Recent developments in the ABINIT software package.
+- [6] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -668,10 +668,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        100.3  wall=        100.9
+- Proc.   0 individual time (sec): cpu=         92.7  wall=         92.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        100.3  wall=        100.9
++Overall time at end (sec) : cpu=         92.7  wall=         92.9
