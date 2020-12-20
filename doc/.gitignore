@@ -1,5 +1,8 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
+INSTALL_EasyBuild.md
+INSTALL_CentOS.md
 INSTALL_MacOS.md
+INSTALL_gpu.md
 INSTALL_Ubuntu.md
 INSTALL_gpu.md
 INSTALL_CentOS.md
@@ -8,6 +11,7 @@ INSTALL_EasyBuild.md
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
+variables/aim.md
 variables/atdep.md
 variables/aim.md
 variables/optic.md
@@ -30,6 +34,9 @@ variables/paw.md
 variables/rlx.md
 variables/vdw.md
 variables/w90.md
+variables/multibinit.md
+variables/anaddb.md
+variables/optic.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md

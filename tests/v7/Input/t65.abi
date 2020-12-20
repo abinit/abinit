@@ -76,7 +76,7 @@ nbandhf 6
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = C. Martins
-#%% keywords = HF, PBE0, FAILS_IFMPI
+#%% keywords = HF, PBE0
 #%% description = Test of PBE0 in sequential case
 #%% topics = Hybrids
 #%%<END TEST_INFO>
