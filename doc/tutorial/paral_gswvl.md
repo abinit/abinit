@@ -67,7 +67,7 @@ use the given values (0.45 Bohr and 5).
 Run ABINIT with 3 processors. The overall time is printed at the end of the
 output file (and of the log):
 
-    Proc.   0 individual time (sec): cpu=        172.6  wall=        172.6
+    Proc.   0 individual time (sec): cpu=         36.0  wall=         36.0
 
 Read the output file to find the number of orbitals in the calculation (given
 by the keyword [[nband]]). With the distribution scheme of the wavelet mode,
