@@ -1407,16 +1407,17 @@ Enter any string to search in the database. Clicking without any request will gi
 
     def dialog_from_filename(self, path, title=None, ret_btn_dialog=False):
         """Build customized jquery dialog to show the content of filepath `path`."""
+        abs_path = os.path.join(self.root, path)
 
         # FIXME: This to faciliate migration to new scheme for file extensions
         # It will be removed when the beautification is completed.
-        if path.endswith(".in") and not os.path.exists(path):
+        if path.endswith(".in") and not os.path.exists(abs_path):
             print("Using old convention for file extension: `.in` instead of `.abi`.\n",
                   "Please change the md tutorial to use the .abi convention for", path)
             root, _ = os.path.splitext(path)
             path = root + ".abi"
 
-        if path.endswith(".out") and not os.path.exists(path):
+        if path.endswith(".out") and not os.path.exists(abs_path):
            print("Using old convention for file extension: `.out` instead of `.abo`.\n",
                  "Please change the md tutorial to use the .abo convention for", path)
            root, _ = os.path.splitext(path)
@@ -1451,16 +1452,17 @@ Enter any string to search in the database. Clicking without any request will gi
 
     def modal_from_filename(self, path, title=None):
         """Return HTML string with bootstrap modal and content taken from file `path`."""
+        abs_path = os.path.join(self.root, path)
 
         # FIXME: This to faciliate migration to new scheme for file extensions
         # It will be removed when the beautification is completed.
-        if path.endswith(".in") and not os.path.exists(path):
+        if path.endswith(".in") and not os.path.exists(abs_path):
             print("Using old convention for file extension: `.in` instead of `.abi`.\n",
                   "Please change the md tutorial to use the .abi convention for:", path)
             root, _ = os.path.splitext(path)
             path = root + ".abi"
 
-        if path.endswith(".out") and not os.path.exists(path):
+        if path.endswith(".out") and not os.path.exists(abs_path):
            print("Using old convention for file extension: `.out` instead of `.abo`.\n",
                  "Please change the md tutorial to use the .abo convention for:", path)
            root, _ = os.path.splitext(path)
