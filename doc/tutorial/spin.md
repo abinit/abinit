@@ -12,7 +12,7 @@ This tutorial aims at showing how to get the following physical properties:
 * the estimation of the atom magnetic moment
 * analyse the total density of states per spin direction
 * analyse the density of states per atom and per spin direction
-* look at the effect of spin-orbit coupling for a non magnetic system
+* effect of spin-orbit coupling for a non magnetic system
 * non-collinear magnetism (not yet)
 * spin-orbit coupling and magnetocristalline anisotropy (not yet)
 
@@ -134,7 +134,7 @@ To this end we have set [[prtdos]] = 1 in the input file that will print the up 
 The DOS data can be found in the files *tspin_1o_DS1_DOS* and *tspin_1o_DS2_DOS*
 for the non-magnetic and the magnetic cases respectively, which can be used with a plotting software.
 Traditionally, in order to enhance visibility, the DOS of minority spin electrons is done using negative values.
-If we compare the DOS of the magnetized system:
+If we compare the DOS of the magnetized system (the Fermi energy is highlighted by a vertical dashed line):
 
 ![](spin_assets/bccfe_mag_dos2.jpg)
 
@@ -142,7 +142,7 @@ and the non-magnetized system:
 
 ![](spin_assets/bccfe_nonmag_dos2.jpg)
 
-we observe that the up and down DOS channels have been "shifted" with respect to each other, which is a footprint of the presence of non-zero total magnetization in the crystal (either ferro- or ferri-magnetic).
+We observe that the up and down DOS channels have been "shifted" with respect to each other, which is a footprint of the presence of non-zero total magnetization in the crystal (either ferro- or ferri-magnetic).
 The integrated DOS yields the number of electrons for each spin direction, 
 and we see that the magnetization arises from the fact that there are more up than down electrons at the Fermi level.
 
@@ -308,7 +308,7 @@ on angular momentum channels (i.e. the spherical harmonics) centered on each ato
 Note that these DOS are computed with the tetrahedron method, which is rather
 time consuming and produces more accurate but less smooth DOS than the smearing method. 
 The CPU time is strongly dependent on the number of k-points, and we use here only a reduced set.
-(This will take about 1.5 minutes on a modern computer)
+(This will take about 40 seconds on a modern computer)
 
 To specify this calculation we need new variables, in addition to [[prtdos]] set now to 3:
 
