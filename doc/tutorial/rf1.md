@@ -47,8 +47,8 @@ The first listed in *trf1_1.abi* (for Al) will define the first type of atom of 
 (see input variables [[typat]] and [[ntypat]]) and the second (for As) will define the second type of atom. 
 It might be the first time that you encounter this situation (more than one type of atoms) in the
 tutorials, at variance with the first four basic tutorials.
-
-To access the pseudopotential, the input file expect you to define the variable ABI_PSPDIR in your environment.
+!!! warning
+    To access the pseudopotential, the input file expect you to define the variable ABI_PSPDIR in your environment.
 
 You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_1.abi* in *Work_rf1*.
 This is your input file. You should read it carefully.
@@ -97,14 +97,7 @@ The output file also mentions that the forces on both atoms vanish.
 The run that you just made will be considered as defining a ground-state
 configuration, on top of which responses to perturbations will be computed.
 The main output of this ground-state run is the wavefunction file *trf1_1o_WFK*,
-that you can already rename as *trf1_1i_WFK* to use it as input wave function for the next runs.
-
-!!! warning
-
-    So, in the corresponding *files* file for all the following runs, at third line,
-    pay attention **to keep** "trf1_1i". By contrast, for the second run, you
-    should change the first line from "trf1_1" to "trf1_2", and do similarly for the second,
-    fourth and fifth lines of this file.
+that you can already rename as *trf1_2i_WFK* to use it as input wave function for the next runs.
 
 ## 2 Frozen-phonon calculation of a second derivative of the total energy
 
@@ -123,7 +116,8 @@ You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_2.abi* in *Work_rf1*.
 This is your input file. You should open it and briefly look at the two
 changes with respect to *trf1_1.abi*:
 the change of [[xred]], and the reading of the wavefunction file, using the [[irdwfk]] input variable. 
-You need to rename the file trf1_1.o_WFK to trf1_2.i_WFK so Abinit can find the WFK during the calculation.
+!!! warning
+    You need to copy trf1_1.o_WFK to trf1_2.i_WFK so Abinit can find the wavefunction during the calculation.
 
 Then, you can make the run, following the same command as before, with a different files file, referring to *trf1_2.abi*.
 The symmetry is lowered with respect to the ground-state geometry, so that the number of k-points
@@ -233,7 +227,9 @@ This is your input file. You should examine it. The changes with respect to
 Accordingly, you should get familiarized with the new input variables:
 [[rfphon]], [[rfatpol]], [[rfdir]]. Then, pay attention to the special use of
 the [[kptopt]] input variable. It will be explained in more detail later.
-You also need to rename the file trf1_2.o_WFK to trf1_3.i_WFK so Abinit can find the WFK during the calculation.
+
+!!! warning
+    You need to copy trf1_2.o_WFK to trf1_3.i_WFK so Abinit can find the wavefunction during the calculation.
 
 
 {% dialog tests/tutorespfn/Input/trf1_3.abi %}
@@ -303,8 +299,9 @@ As for test rf1_3, the changes with respect to *trf1_1.abi* are
 all gathered in the first part of this file. Moreover, the changes with
 respect to *trf1_3.abi* concern only the input variables [[rfatpol]], and [[rfdir]].
 Namely, all the atoms will be displaced, in all the directions.
-You also need to rename the file trf1_2.o_WFK to trf1_4.i_WFK so Abinit can find the WFK during the calculation.
 
+!!! warning
+    You need to copy trf1_2.o_WFK to trf1_4.i_WFK so Abinit can find the wavefunction during the calculation.
 
 {% dialog tests/tutorespfn/Input/trf1_4.abi%}
 
