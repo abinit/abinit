@@ -895,22 +895,29 @@ The bibtex file is available [here](../abiref.bib).
 
 !!! note
 
-    Supposing you made your own install of ABINIT, the input files to run the examples
+    Supposing you made your own installation of ABINIT, the input files to run the examples
     are in the *~abinit/tests/* directory where *~abinit* is the absolute path of the abinit top-level directory.
-    If you have NOT made your own install, ask your system administrator where to find the package, especially the executable and test files.
+    If you have NOT made your own install, ask your system administrator where to find the package,
+    especially the executable and test files.
 
-    In case you work on your own PC or workstation, to make things easier, we suggest you define some handy environment variables by
-    executing the following lines in the terminal:
+    In case you work on your own PC or workstation, to make things easier, we suggest you define
+    some handy environment variables by executing the following lines in the terminal:
 
     ```bash
     export ABI_HOME=Replace_with_absolute_path_to_abinit_top_level_dir # Change this line
-    export PATH=$ABI_HOME/src/98_main/:$PATH     # Do not change this line : path to executable
-    export ABI_TESTS=$ABI_HOME/tests/            # Do not change this line : path to tests dir
-    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/ # Do not change this line : path to pseudos dir
+    export PATH=$ABI_HOME/src/98_main/:$PATH      # Do not change this line: path to executable
+    export ABI_TESTS=$ABI_HOME/tests/             # Do not change this line: path to tests dir
+    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Do not change this line: path to pseudos dir
     ```
 
     Examples in this tutorial use these shell variables: copy and paste
-    the code snippets into the terminal (**remember to set ABI_HOME first!**).
+    the code snippets into the terminal (**remember to set ABI_HOME first!**) or, alternatively,
+    source the `set_abienv.sh` script located in the *~abinit* directory:
+
+    ```sh
+    source ~abinit/set_abienv.sh
+    ```
+
     The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
     so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
 
@@ -918,7 +925,7 @@ The bibtex file is available [here](../abiref.bib).
     copy there the input files of the lesson.
 
     Most of the tutorials do not rely on parallelism (except specific [[tutorial:basepar|tutorials on parallelism]]).
-    However you can run most of the tutorial examples in parallel, see the [[topic:parallelism|topic on parallelism]].
+    However you can run most of the tutorial examples in parallel with MPI, see the [[topic:parallelism|topic on parallelism]].
 """
         new_lines = []
         for line in lines:

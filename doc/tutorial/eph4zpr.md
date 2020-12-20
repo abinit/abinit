@@ -255,6 +255,15 @@ A typical workflow for ZPR calculations involves the following steps (see the [i
 
 [TUTORIAL_READMEV9]
 
+Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
+Why not create Work_eph4zpr in $ABI_TESTS/tutorespfn/Input?
+
+```sh
+cd $ABI_TESTS/tutorespfn/Input
+mkdir Work_eph4zpr
+cd Work_eph4zpr
+```
+
 In this tutorial, we prefer to focus on the use of the EPH code hence
 we will be using **pre-computed** DDB and DFPT POT files to bypass the DFPT part.
 We also provide a DEN.nc file to initialize the NSCF calculations
