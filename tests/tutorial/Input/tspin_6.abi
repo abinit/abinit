@@ -4,7 +4,8 @@
  pawspnorb1 0  ! Without spin-orbit
  pawspnorb2 1  ! With spin-orbit
 
-   ntypat  1 typat  1
+   ntypat  1 
+    typat  1
     natom  1
    znucl   83.d0
 
@@ -13,6 +14,7 @@
     nsym   1
 
   kptopt   4
+
   occopt   7
   tsmear   0.02
 
@@ -24,7 +26,7 @@
    nstep   20
   toldfe   1.0d-7
 
-
+# Pseudo:
  pp_dirpath "$ABI_PSPDIR"
  pseudos "Pseudodojo_paw_pw_standard/Bi.xml"
 

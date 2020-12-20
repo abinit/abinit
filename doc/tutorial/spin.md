@@ -8,8 +8,8 @@ authors: GZ, MT, EB, MJV
 
 This tutorial aims at showing how to get the following physical properties:
 
-* the total magnetization of a ferromagnetic material
-* the magnetization of an antiferromagnetic material
+* the total magnetization of a ferromagnetic (or ferrimagnetic) material
+* the estimation of the atom magnetic moment
 * analyse the total density of states per spin direction
 * analyse the density of states per atom and per spin direction
 * look at the effect of spin-orbit coupling for a non magnetic system
@@ -27,23 +27,22 @@ This tutorial should take about 1.5 hour.
 *Before beginning, you might consider to work in a different subdirectory, as
 for the other tutorials. Why not Work_spin?*
 
-The file *tspin_x.files* in *\$ABI_TESTS/tutorial/Input* lists the file names and root names.
-while *tspin_1.in* is our input file.
-You can copy these two files in the *Work_spin* directory with:
+The file *tspin_x.abi* in *\$ABI_TESTS/tutorial/Input* lists the input files for the spin tutorials.
+You can copy the first one in the *Work_spin* directory with:
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work_spin
 cd Work_spin
-cp ../tspin_1.in .
+cp ../tspin_1.abi .
 ```
 
-{% dialog tests/tutorial/Input/tspin_1.in %}
+{% dialog tests/tutorial/Input/tspin_1.abi %}
 
 You can now run the calculation with:
 
 ```sh
-abinit tspin_1.in > log > err &
+abinit tspin_1.abi > log > err &
 ```
 
 In the mean time the calculation is done, have a look at the input file, and read it carefully.
@@ -55,10 +54,11 @@ Because we are going to perform magnetic calculations, there are two new types o
 You will work with a low [[ecut]] (=18Ha) and a small k-point grid (defined by [[ngkpt]]) of 4x4x4
 Monkhorst-Pack grid. It is implicit that in *real life*, you should do a
 convergence test with respect to both [[ecut]] and [[ngkpt]] parameters and this is even more
-important with magnetism that involves low energy differences (e.g. one needs a
-minimal cut-off to exhibit magnetic effects).
+important with magnetism that involves low energy differences and small magnetization density values.
 
-This basic first example will compare two cases, one that do not take into account magnetism and one that take into account it (done through two datasets in the input, the dataset 1 does not include magnetism and dataset 2 includes it).
+This basic first example will compare two cases, 
+one that do not take into account magnetism and one that take into account it 
+(done through two datasets in the input, the dataset 1 does not include magnetism and dataset 2 includes it).
 We now look at the output file. 
 In the magnetic case (dataset 2), the electronic density is split into two parts,
 the "Spin-up" and the "Spin-down" parts to which correspond different Kohn-Sham
@@ -79,9 +79,9 @@ For the first k-point, for instance, we get:
 ```
 
 We note that the occupations of the magnetic case are different for up and down spin channels, which
-means that the eigenvalues are shifted (which is in turn due to a shift of the exchange-correlation potential, 
-and therefore of the effective potential).
-You can indeed have a look at the output file to compare spin-up and down eigenvalues:
+means that the eigenvalues are shifted 
+(which is in turn due to a shift of the exchange-correlation potential and therefore of the effective potential).
+You can have a look at the output file to compare spin-up and down eigenvalues:
 
 ```
 (up channel:)
@@ -90,7 +90,7 @@ You can indeed have a look at the output file to compare spin-up and down eigenv
   -3.04218   -1.69171   -1.69171   -1.68906    0.27331    0.40348    0.40348    0.52935   0.52935    0.54215
 ```
 
-Now you can move down in the output and look at the following section:
+Now you can move down in the output file and look at the following section:
 ````
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -110,12 +110,12 @@ integrated up and down densities, here we have 1.571040 $\mu_B$.
 It is also reported the same difference but as integrated into spheres around each atom 
 (here we have only one atom), which gives here 1.500458 $\mu_B$ on iron atom.
 The integrated magnetization in atomic spheres is an approximation, one should always check
-that the sum of the integrated atomic magnetization from the atomic sphere is very close to the 
+that the sum of the integrated atomic magnetization "from the atomic sphere" is very close to the 
 exact up-dn unit cell magnetization.
 In the case of dataset 1 without magnetism, only the integrated electronic density is reported since there is
 no distinction between up and down spin channels.
 
-You can look to the total energy of dataset 1 and 2:
+You can look at the total energy of dataset 1 and 2:
 
 ```
            etotal1    -1.2342819713E+02
@@ -123,7 +123,7 @@ You can look to the total energy of dataset 1 and 2:
 ```
 
 The energy of the magnetic calculation is lower than the non-magnetic one,
-which is expected for a magnetic crystal (the system gains energy through the extra degrees of freedom given by the magnetism).
+which is expected for a magnetic crystal (the system gains energy through the extra degrees of freedom given by the spins).
 Finally, you can also remark that the stress tensor is affected by the presence of magnetism.
 This would also be true for the forces, but we don't remark it here because we are in high symmetry symmetry structure (all the forces are zeroed by symmetry), however this would be apparent for a less symmetric material.
 
@@ -134,11 +134,11 @@ To this end we have set [[prtdos]] = 1 in the input file that will print the up 
 The DOS data can be found in the files *tspin_1o_DS1_DOS* and *tspin_1o_DS2_DOS*
 for the non-magnetic and the magnetic cases respectively, which can be used with a plotting software.
 Traditionally, in order to enhance visibility, the DOS of minority spin electrons is done using negative values.
-If we compare the DOS of the magnetized system
+If we compare the DOS of the magnetized system:
 
 ![](spin_assets/bccfe_mag_dos2.jpg)
 
-and the non-magnetized system
+and the non-magnetized system:
 
 ![](spin_assets/bccfe_nonmag_dos2.jpg)
 
@@ -147,11 +147,11 @@ The integrated DOS yields the number of electrons for each spin direction,
 and we see that the magnetization arises from the fact that there are more up than down electrons at the Fermi level.
 
 The magnetization is from the up channels because we initialized [[spinat]] with positive values.
-We could initialize it to negative value to have negative magnetization.
+We could initialize it to a negative value to have negative magnetization.
 [[spinat]] serves two purposes: it is a way to initially break the spin symmetry (up/down), 
 and also to start with an initial magnetic moment, 
 ideally close enough to the final DFT one but sometimes a final non-zero magnetic moment on the atoms is obtained by initializing [[spinat]] to larger values than the formal one 
-(in spin DFT there can be several local minima for the total energy).
+(in spin DFT there can be several local minima for the total energy and depending on your starting point you can end up in different local minima).
 
 Note that [[spinat]] has three components (i.e. for x, y  and z directions) for each atom 
 but in the absence of spin-orbit coupling (collinear calculation) 
@@ -171,7 +171,7 @@ a rather dense k-point sampling in the Brillouin zone must be used (e.g. 16x16x1
 rather small value of [[tsmear]]. 
 The convergence of a magnetic calculation a smaller value of [[tolrde]] (e.g. 0.001 instead of the default 0.005),
 a larger value of [[nline]] (e.g. 6 to 12 instead of the default 4) 
-or reducing the mixing parameters diemix and mostly diemixmag.
+and/or reducing the mixing parameters diemix and mostly diemixmag.
 
 
 ## 2 An antiferromagnetic example: *fcc* Fe
@@ -216,7 +216,7 @@ ABINIT is nevertheless able to detect such symmetry belonging to the Shubnikov g
 and correctly finds that the cell is primitive, which would not be the case
 if we had the same vector [[spinat]] on each atom (FM case).
 
-If we now run this AFM calculation, this total computation time is
+If we now run this AFM calculation, its computation time is
 approximately 10-20 seconds on a recent CPU.
 If we look at the eigenvalues and occupations, they are again filled with a
 factor 2, which comes from the symmetry considerations aforementioned, and
@@ -237,7 +237,7 @@ wavefunctions are shifted one with respect to the other.
 ```
 
 The total magnetization being zero we can question how do we know we have magnetic order?
-Indeed, the DOS will not be useful since the net we have as many up and down electrons.
+Indeed, the DOS will not be useful since we have as many up and down electrons.
 
 We can however look at the integrated magnetization around each atom to have an
 indication of the magnetic moment carried by each atom:
@@ -290,7 +290,7 @@ ABINIT output because it uses a slightly different integration paramters.
 
 ## 3 Another look at *fcc* Fe
 
-Instead of treating fcc Fe directly as an antiferromagnetic material, we will
+Instead of treating fcc Fe directly as an AFM material, we will
 not make any hypotheses on its magnetic structure, and run the calculation
 like the one for bcc Fe, anticipating only that the two spin directions are going to be different.
 We will not even assume that the initial spins are of the same magnitude.
@@ -301,7 +301,7 @@ You can copy the file *$ABI_TESTS/tutorial/Input/tspin_3.abi* to *Work_spin*.
 
 You can run the calculation with this is input file and look at it to understand its contents.
 
-Note the values of [[spinat]]. In this job, we will again to characterize the magnetic structure.
+Note the values of [[spinat]]. In this job, we will again characterize the magnetic structure.
 We are going to use atom and angular momentum projected densities of state.
 These are DOS weighted by the projection of the wave functions
 on angular momentum channels (i.e. the spherical harmonics) centered on each atom of the system.
@@ -445,8 +445,8 @@ If we now consider the
 [NIST table](https://www.nist.gov/pml/atomic-reference-data-electronic-structure-calculations-tantalum)
 of atomic data, we obtain:
 
-    5p splitting, table: 1.681344-1.359740=0.321604 Ha
-    5d splitting, table:   .153395-.131684=0.021711 Ha
+    5p splitting, table: 1.681344-1.359740 = 0.321604 Ha
+    5d splitting, table: 0.153395-0.131684 = 0.021711 Ha
 
 We obtain a reasonable agreement. A better agreement could be obtained by improving the convergence parameters.
 
@@ -518,15 +518,15 @@ Again, the levels are not perfectly degenerate, due to the finite size and non s
 shape of the simulation box.
 We can compute the splitting of the levels, and we obtain:
 
-    5d-channel: 0.91133-0.80022=0.11111 Ha
-    6p-channel: 0.09817-0.02546=0.07271 Ha
+    5d-channel: 0.91133-0.80022 = 0.11111 Ha
+    6p-channel: 0.09817-0.02546 = 0.07271 Ha
 
 If we now consider the
 [NIST table](https://www.nist.gov/pml/atomic-reference-data-electronic-structure-calculations-bismuth)
 of atomic data, we obtain:
 
-    5d-channel: 1.063136-0.952668=0.11047 Ha
-    6p-channel: 0.228107-0.156444=0.07166 Ha
+    5d-channel: 1.063136-0.952668 = 0.11047 Ha
+    6p-channel: 0.228107-0.156444 = 0.07166 Ha
 
 A perfect agreement even with a small simulation cell and very small values of plane-wave cut-offs.
 This comes from the generation of the PAW dataset, where the SOC is calculated very accurately
@@ -555,6 +555,9 @@ Note that non-collinear magnetism can be done with or without SOC.
 With SOC do not use time reversal symmetry ([[kptopt]] = 4), however as the symmetries
 in the presence of SOC it is not (yet fully) implemented please remove all symmetries when running
 non-collinear magnetism with SOC (i.e. [[kptopt]]=3 and [[nsym]]=1).
+The non-collinear magnetism + SOC cases can be much more difficult to converge (SCF) and might require 
+to strongly reduce the [[diemix]] and mostly the [[diemixmag]] mixing flags; you might have to increase [[nline]] and play with negative values of [[nnsclo]].
+DFT+U correction is also necessary in most of the magnetic calculations if you use regular LDA and GGA functionals (i.e. not hybrid fucntionals).
 
 
 * * *

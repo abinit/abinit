@@ -6,7 +6,6 @@
  nspinor2 2
 
 # Common data
- acell 3*15.00
  ecut 10
  enunit 2 
  nkpt  1
@@ -14,20 +13,26 @@
  istwfk 1  
  kptopt 0          # Enter the k points manually 
  kpt  0.0 0.0 0.0
- ixc 2
- natom  1 nband 26
- nline 5  nstep 10
+
  ntypat  1
- occopt  7  
- rprim   0.5 .5 -.5 -.5 0.5 .5 .5 -.5 0.5
- toldfe 1.0d-7
- tsmear 0.01
+ acell 3*15.00
+ rprim   0.5  0.5 -0.5 
+        -0.5  0.5  0.5 
+         0.5 -0.5  0.5
+ natom  1 
  typat  1 
- xred  0.0 0.0 0.0
  znucl 73.0
+ xred  0.0 0.0 0.0
+ 
+ toldfe  1.0d-7
+  nline  5  
+ nstep   10
+
+ nband   26
+ occopt  7  
+ tsmear  0.01
     
-
-
+# Pseudo:
  pp_dirpath "$ABI_PSPDIR"
  pseudos "Pseudodojo_nc_fr_04_pbe_standard_psp8/Ta.psp8"
 

@@ -5,41 +5,41 @@ outdata_prefix = "tspin_2o"
 tmpdata_prefix = "tspin_2t"
 # end runtests.py section
 
-# Fe fcc structure with two atoms per unit cell for test of antiferromagnetic
+# Fe fcc structure with two atoms per unit cell for test of antiferromagnetic order
 # This is the simplest fcc structure compatible with a X point spiral
 
 #data for each data set: how to get densities of state
  ngkpt   4 4 2
- prtdos 1  
+nshiftk  1
+ shiftk  0.5 0.5 0.5
+ prtdos  1  
 #Common data
  prtden   1
  tolwfr   1.0d-7
   acell   3*6.60
    ecut   25.0
-  natom   2
-  nband   20
-nshiftk   1
-#Antiferromagnet order
+#Antiferromagnic order
  spinat 0.0 0.0   4.0
         0.0 0.0  -4.0
   nsppol   1
   nspden   2
-#Antiferromagnet
-  nstep   70
+#crystal cell definition:
+  natom   2
  ntypat   1
- occopt   3
- rprim    0.5  -0.5  0.0
-          0.5   0.5  0.0
-          0.0   0.0  1.0
- shiftk   0.5 0.5 0.5
- tsmear   0.001
   typat   1 1
    xred   0.0  0.0  0.0
           0.5  0.0  0.5
  znucl    26
+  nstep   70
+ rprim    0.5  -0.5  0.0
+          0.5   0.5  0.0
+          0.0   0.0  1.0
+# Treating metallic occupation:
+  nband   20
+ occopt   3
+ tsmear   0.001
 
-
-
+# Pseudo:
  pp_dirpath "$ABI_PSPDIR"
  pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8"
 
