@@ -154,25 +154,7 @@ The inputs directory also contains scripts for plotting these graphs
 individually, and you are encouraged to test and modify them. We can look
 inside the `C_simple.input` file:
 
-     C 6                                         ! Atomic name and number
-     LDA-PW scalarrelativistic loggrid 801 logderivrange -10 40 1000 ! XC approx., SE type, gridtype, # pts, logderiv
-     2 2 0 0 0 0                                 ! maximum n for each l: 2s,2p,0d,0f..
-     2 1 2                                       ! Partially filled shell: 2p^2
-     0 0 0                                       ! Stop marker
-     c                                           ! 1s - core
-     v                                           ! 2s - valence
-     v                                           ! 2p - valence
-     1                                           ! l_max treated = 1
-     1.3                                         ! core radius r_c
-     n                                           ! no more unoccupied s-states
-     n                                           ! no more unoccupied p-states
-     vanderbilt                                  ! vanderbilt scheme for finding projectors
-     2 0                                         ! localisation scheme
-     1.3                                         ! Core radius for occ. 2s state
-     1.3                                         ! Core radius for occ. 2p state
-     XMLOUT                                      ! Run atompaw2XML converter
-     prtcorewf noxcnhat nospline noptim          ! XML conversion options
-     END                                         ! Exit
+{% dialog tutorial/paw3_assets/inputs/C_simple.input %}
 
 Here we see that the current dataset is very simple, it has no basis states
 beyond the $2s$ and $2p$ occupied valence states in carbon. It is thus not
@@ -474,6 +456,8 @@ If we take a look in the `elk.in` file, at the beginning we will see the lines:
       2   1   1   1  : 2p m=1
       2   1   2   1  : 2p m=2
     ...
+
+{% dialog tutorial/paw3_assets/inputs/elk_C_diamond.in %}
 
 
 Any text after an exclamation mark (or a colon on the lines defining data) is
@@ -964,6 +948,9 @@ There is an `Elk` input file prepared at: [elk_Mg_band.in](paw3_assets/inputs/el
 we suggest you copy it into a subdirectory dedicated to the Mg `Elk` calculation (why not `Mg_elk`?), rename
 it to `elk.in` and take a look inside the input file.
 
+{% dialog tutorial/paw3_assets/inputs/elk_Mg_band.in %}
+
+
 There will be sections familiar from before, defining the lattice vectors,
 structure, etc. (Mg has a 2-atom hexagonal unit cell.) Then there are a couple
 of new lines for the metallic case:
@@ -1034,6 +1021,9 @@ we compare band structures to align the band plots at the Fermi energy.
 
 Now it's time to calculate the equilibrium lattice parameters. There is a
 prepared file at: [elk_Mg_equi.in](paw3_assets/inputs/elk_Mg_equi.in).
+
+{% dialog tutorial/paw3_assets/inputs/elk_Mg_equi.in %}
+
 As before copy this to your directory rename it to `elk.in`. The layout of this file looks pretty much
 like the one before, except the band structure keywords are missing, and now
 switdth is fixed to the value we extracted before:
