@@ -9,23 +9,27 @@ authors: DC
 This tutorial explains how to run the calculation of an isolated system using a
 wavelet basis-set on a parallel computer using MPI. You will learn the
 different characteristics of a parallel run using the wavelet basis-set and
-test the speed-up on a small boron cluster of 14 atoms followed by a test on a
-bigger alkane molecule.
+test the speed-up on a small **boron cluster of 14 atoms** followed by a test on a
+bigger **alkane molecule**.
 
 This tutorial should take about 90 minutes and requires you have several CPU
-cores (up to 64).
+cores (up to 64 if possible).
 
 You are supposed to know already some basics of parallelism in ABINIT,
-explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
+explained in the tutorial [A first introduction to ABINIT in parallel](basepar).  
+
+The tutorial will be more profitable if you have already performed calculations
+using the wavelet formalism (see the [[topic:Wavelets|topic page on wavelets]]
+and the [[usewvl]] keyword).
 
 [TUTORIAL_READMEV9]
 
 ## 1 Wavelets variables and parallelism
 
 The parallelism with the wavelet formalism can be used for two purposes: to
-reduce the memory load per node, or to reduce the overall computation time.
+**reduce the memory** load per node, or to reduce the overall **computation time**.
 
-The MPI parallelization in the wavelet mode relies on the orbital distribution
+The MPI parallelization in the wavelet mode relies on the **orbital distribution**
 scheme, in which the orbitals of the system under investigation are
 distributed over the assigned MPI processes. This scheme reaches its limit
 when the number of MPI processes is equal to the number of orbitals in the
@@ -33,14 +37,14 @@ simulation. To distribute the orbitals uniformly, the number of processors
 must be a factor (divisor) of the number of orbitals. If this is not the case,
 the distribution is not optimal, but the code tries to balance the load over
 the processors. For example, if we have 5 orbitals and 4 processors, the
-orbitals will have the distribution: 2/1/1/1.
+orbitals will have the distribution: `2/1/1/1`.
 
 There are no specific input variables to use the parallelism in the wavelet
 mode as the only parallelisation level is on orbitals. So running ABINIT with
 an `mpirun` command is enough (this command differs according to the local MPI
 implementation) such as:
 
-    mpirun -np Nproc abinit < infile > logfile
+	 mpirun -n Nproc abinit < infile.abi >& logfile
 
 For further understanding of the wavelet mode, or for citation purposes, one
 may read [[cite:Genovese2008]]
@@ -48,13 +52,17 @@ may read [[cite:Genovese2008]]
 ## 2 Speed-up calculation for a boron cluster
 
 We propose here to determine the speed-up in the calculation of the total
-energy of a cluster made of 14 boron atoms. Open the file `tgswvl_01.in`. It
+energy of a cluster made of 14 boron atoms.
+
+![Boron14](paral_gswvl_assets/boron.jpg){width=30%}
+
+Open the file `tgswvl_1.abi`. It
 contains first the definition of the wavelet basis-set. One may want to test
 the precision of the calculation by varying the [[wvl_hgrid]] and
 [[wvl_crmult]] variables. This is not the purpose of this tutorial, so we will
-use the given values (0.45Bohr and 5).
+use the given values (0.45 Bohr and 5).
 
-{% dialog tests/tutoparal/Input/tgswvl_01.in  %}
+{% dialog tests/tutoparal/Input/tgswvl_1.abi  %}
 
 Run ABINIT with 3 processors. The overall time is printed at the end of the
 output file (and of the log):
@@ -183,10 +191,12 @@ same run time (since the load balancing will be better).
 ## 5 Speed-up calculation on a 65-atom alkane
 
 Let's do the same with a bigger molecule and a finer grid. Open the file
-`tgswvl_02.in`. It contains the definition of an alkane chain of 65 atoms,
+`tgswvl_2.abi`. It contains the definition of an alkane chain of 65 atoms,
 providing 64 orbitals.
 
-{% dialog tests/tutoparal/Input/tgswvl_02.in %}
+![Boron14](paral_gswvl_assets/alkane.jpg){width=60%}
+
+{% dialog tests/tutoparal/Input/tgswvl_2.abi %}
 
 Run this input file with {1, 2, 4, 8, 16, 24, 32, 48, 64} processors.
 The run with one processor should take less than one hour. If
@@ -206,4 +216,4 @@ With the wavelet mode, it is possible to efficiently decrease the run time by
 increasing the number of processors. The efficiency is limited by the increase
 of amount of time spent in the communications. The efficiency increases with
 the quality of the calculation: the more accurate the calculations are (finer
-hgrid...), the more efficient the code parallelization will be.
+_hgrid_...), the more efficient the code parallelization will be.
