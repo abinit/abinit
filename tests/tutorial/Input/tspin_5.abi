@@ -1,33 +1,37 @@
 #  Single Ta atom in a big box (BCC), treated with spin-orbit coupling.
+ enunit 2 
+
  ndtset 2
 
 # First dataset : scalar wavefunctions
 # Second dataset : spinor wavefunctions
  nspinor2 2
 
-# Common data
+# cutoff, k-points: 
  ecut 10
- enunit 2 
  nkpt  1
- intxc 1
  istwfk 1  
  kptopt 0          # Enter the k points manually 
  kpt  0.0 0.0 0.0
 
+# Crystal cell definition:
+ natom  1 
  ntypat  1
+ znucl 73.0
+ typat  1 
+ xred  0.0 0.0 0.0
+
  acell 3*15.00
  rprim   0.5  0.5 -0.5 
         -0.5  0.5  0.5 
          0.5 -0.5  0.5
- natom  1 
- typat  1 
- znucl 73.0
- xred  0.0 0.0 0.0
- 
+
+# SCF: 
  toldfe  1.0d-7
   nline  5  
  nstep   10
 
+# Electron occupation:
  nband   26
  occopt  7  
  tsmear  0.01
