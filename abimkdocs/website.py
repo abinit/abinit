@@ -896,7 +896,7 @@ The bibtex file is available [here](../abiref.bib).
 !!! note
 
     Supposing you made your own installation of ABINIT, the input files to run the examples
-    are in the *~abinit/tests/* directory where *~abinit* is the absolute path of the abinit top-level directory.
+    are in the *~abinit/tests/* directory where *~abinit* is the **absolute path** of the abinit top-level directory.
     If you have NOT made your own install, ask your system administrator where to find the package,
     especially the executable and test files.
 

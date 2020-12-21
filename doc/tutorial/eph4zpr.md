@@ -902,14 +902,6 @@ An example is given in
 
 {% dialog tests/tutorespfn/Input/teph4zpr_5.abi %}
 
-<!--
-!!! important
-
-    The multidataset syntax is quite handy when running small calculations but you can achieve a much better
-    speedup if you split the calculation using different input files as these jobs are independent
-    and can be thus executed in parallel.
--->
-
 Run the calculation, as usual, using
 
 ```sh
