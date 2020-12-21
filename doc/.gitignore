@@ -4,12 +4,19 @@ INSTALL_CentOS.md
 INSTALL_MacOS.md
 INSTALL_gpu.md
 INSTALL_Ubuntu.md
+INSTALL_gpu.md
+INSTALL_CentOS.md
+INSTALL_EasyBuild.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
 variables/aim.md
 variables/atdep.md
+variables/aim.md
+variables/optic.md
+variables/anaddb.md
+variables/multibinit.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
