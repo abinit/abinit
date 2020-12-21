@@ -90,17 +90,17 @@ optstress 0       # Stress tensor computation is not relevant here
 #%% max_nprocs = 14
 #%% nprocs_to_test = 1, 2, 4, 8, 10, 12
 #%% [NCPU_1]
-#%% files_to_test = tgswvl_1_MPI1.abo, tolnlines =   3, tolabs =  1.1e-6, tolrel= 6.5e-5
+#%% files_to_test = tgswvl_1_MPI1.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 8.1e-5
 #%% [NCPU_2]
-#%% files_to_test = tgswvl_1_MPI2.abo, tolnlines =   3, tolabs =  1.1e-6, tolrel= 6.5e-5
+#%% files_to_test = tgswvl_1_MPI2.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 8.1e-5
 #%% [NCPU_4]
-#%% files_to_test = tgswvl_1_MPI4.abo, tolnlines =   3, tolabs =  1.1e-6, tolrel= 6.5e-5
+#%% files_to_test = tgswvl_1_MPI4.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 8.1e-5
 #%% [NCPU_8]
-#%% files_to_test = tgswvl_1_MPI8.abo, tolnlines =   3, tolabs =  1.1e-6, tolrel= 6.5e-5
+#%% files_to_test = tgswvl_1_MPI8.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 8.1e-5
 #%% [NCPU_10]
-#%% files_to_test = tgswvl_1_MPI10.abo, tolnlines =   3, tolabs =  1.1e-6, tolrel= 6.5e-5
+#%% files_to_test = tgswvl_1_MPI10.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 8.1e-5
 #%% [NCPU_12]
-#%% files_to_test = tgswvl_1_MPI12.abo, tolnlines =   3, tolabs =  1.1e-6, tolrel= 6.5e-5
+#%% files_to_test = tgswvl_1_MPI12.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 8.1e-5
 #%% [extra_info]
 #%% authors = D. Caliste
 #%% keywords = NC,WVL
