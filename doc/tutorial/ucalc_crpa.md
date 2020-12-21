@@ -60,7 +60,7 @@ Several parameters (both physical and technical) are important for the cRPA calc
     the more localized is the radial part of the Wannier orbital. Finally, note that Wannier orbitals
     are used in DMFT and cRPA implementations but this is not the most usual choice of correlated orbitals
     in the DFT+_U_ implementation in particular in ABINIT (see [[cite:Amadon2008a]]).
-    The relation between the two expressions is briefly discussed in [[cite:Geneste2016]].
+    The relation between the two expressions is briefly discussed in [[cite:Geneste2017]].
 
   * **The constrained polarization calculation.** As we will discuss in section
     2, there are different ways to define the constrained polarizability, by suppressing in the polarization,
