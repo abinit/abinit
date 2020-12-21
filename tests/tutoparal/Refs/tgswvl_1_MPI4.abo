@@ -1,6 +1,6 @@
 
 .Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 20 Dec 2020.
-- ( at 15h04 )
+.Starting date : Mon 21 Dec 2020.
+- ( at 19h25 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Test_suite/tutoparal_tgswvl_1_MPI4/tgswvl_1.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/TestBot_MPI4/tutoparal_tgswvl_1_MPI4/tgswvl_1.abi
 - output file    -> tgswvl_1_MPI4.abo
 - root for input  files -> tgswvl_1_MPI4i
 - root for output files -> tgswvl_1_MPI4o
@@ -37,7 +37,7 @@
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  3 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -149,8 +149,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 0, paral_kgb: 0, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Psps_for_tests/B-q3
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/torrent_beauty/tests/Psps_for_tests/B-q3
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/Psps_for_tests/B-q3
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_beauty/tests/Psps_for_tests/B-q3
 - Goedecker pseudopotential for B
 -  5.00000   3.00000     70301                znucl, zion, pspdat
    10   11    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -195,21 +195,21 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  grdnorm    vres2
- ETOT  1  -13.589187827664    -1.359E+01 7.729E-01 2.113E+03
- ETOT  2  -19.184379630940    -5.595E+00 4.041E-01 3.070E+02
+ ETOT  1  -13.589187827663    -1.359E+01 7.729E-01 2.113E+03
+ ETOT  2  -19.184379630941    -5.595E+00 4.041E-01 3.070E+02
  ETOT  3  -21.465808396769    -2.281E+00 1.817E-01 4.713E+01
  ETOT  4  -22.110662046913    -6.449E-01 9.312E-02 4.295E+01
  ETOT  5  -22.379424105238    -2.688E-01 4.846E-02 2.949E+01
- ETOT  6  -22.454845980451    -7.542E-02 2.760E-02 3.438E+01
+ ETOT  6  -22.454845980452    -7.542E-02 2.760E-02 3.438E+01
  ETOT  7  -22.487400150507    -3.255E-02 1.552E-02 2.023E+01
- ETOT  8  -22.498299446788    -1.090E-02 9.232E-03 1.045E+01
+ ETOT  8  -22.498299446787    -1.090E-02 9.232E-03 1.045E+01
  ETOT  9  -22.502363749582    -4.064E-03 5.594E-03 4.877E+00
  ETOT 10  -22.503989924288    -1.626E-03 3.727E-03 2.423E+00
  ETOT 11  -22.504811576992    -8.217E-04 2.262E-03 8.339E-01
  ETOT 12  -22.505128110365    -3.165E-04 1.453E-03 4.832E-01
  ETOT 13  -22.505259133748    -1.310E-04 9.329E-04 2.558E-01
- ETOT 14  -22.505309794252    -5.066E-05 5.896E-04 6.908E-02
- ETOT 15  -22.505331580327    -2.179E-05 3.998E-04 6.438E-02
+ ETOT 14  -22.505309794252    -5.066E-05 5.896E-04 6.907E-02
+ ETOT 15  -22.505331580326    -2.179E-05 3.998E-04 6.438E-02
  ETOT 16  -22.505342048971    -1.047E-05 2.827E-04 4.728E-02
  ETOT 17  -22.505347754870    -5.706E-06 2.057E-04 1.365E-02
  ETOT 18  -22.505350984551    -3.230E-06 1.456E-04 7.860E-03
@@ -291,19 +291,19 @@ force_length_stats: {min:   1.11867352E+00, max:   3.50928999E+00, mean:   2.590
        0.449862611188      0.419182459713      0.480526381299
        0.555246324082      0.406770881400      0.543077027641
  rms dE/dt=  3.6026E+01; max dE/dt=  7.7290E+01; dE/dt below (all hartree)
-    1      42.879240396716    -38.959953865859    -50.722072585872
+    1      42.879240396716    -38.959953865859    -50.722072585871
     2      23.790208398740    -80.676891413955     16.284124106303
     3      46.353804938305      7.449100689775     -6.051111832760
     4     -43.591421272681    -23.103168582750      5.806329703639
-    5      34.757236187182     11.660017437361      2.101195328093
-    6       6.848421432707    -26.055071266291      4.833759470935
-    7     -20.896215710984     30.128661119269     49.749177069498
+    5      34.757236187182     11.660017437361      2.101195328092
+    6       6.848421432707    -26.055071266291      4.833759470934
+    7     -20.896215710984     30.128661119269     49.749177069497
     8     -52.758858264573    -10.518177063893    -31.786355588687
     9     -22.009504522118    -41.908712785724     62.401804565481
-   10       8.192590514999     77.289806928323      3.959158385111
+   10       8.192590514999     77.289806928322      3.959158385111
    11       9.686459139372     19.333859771128    -56.923810833207
    12     -32.659763248261    -13.212679542324     -2.311995891435
-   13      45.628491911908     36.997772685209     26.863670815720
+   13      45.628491911908     36.997772685209     26.863670815719
    14     -46.230086379128     51.663999414944    -24.215116515392
 
  cartesian coordinates (angstrom) at end:
@@ -323,37 +323,37 @@ force_length_stats: {min:   1.11867352E+00, max:   3.50928999E+00, mean:   2.590
    14      6.47881258185405     5.32753351898206     6.46613967456596
 
  cartesian forces (hartree/bohr) at end:
-    1     -1.94466719155115     1.57439514472508     2.25427864253850
-    2     -1.07895145468150     3.25992797495118    -0.72377454378036
-    3     -2.10224381475247    -0.30071817065407     0.26890260906688
-    4      1.97690476624464     0.93371695146815    -0.25809479255087
-    5     -1.57632232944075    -0.47085622106158    -0.09342215363768
-    6     -0.31061644488409     1.05298574676272    -0.21486944887511
-    7      0.94764374303842    -1.21706404659322    -2.21111023103346
-    8      2.39266154592226     0.42523244565574     1.41269122044141
+    1     -1.94466719155115     1.57439514472507     2.25427864253848
+    2     -1.07895145468151     3.25992797495118    -0.72377454378035
+    3     -2.10224381475247    -0.30071817065407     0.26890260906689
+    4      1.97690476624464     0.93371695146814    -0.25809479255087
+    5     -1.57632232944075    -0.47085622106158    -0.09342215363767
+    6     -0.31061644488409     1.05298574676273    -0.21486944887510
+    7      0.94764374303842    -1.21706404659323    -2.21111023103346
+    8      2.39266154592226     0.42523244565573     1.41269122044141
     9      0.99813303152523     1.69353691926509    -2.77344923085496
-   10     -0.37157649396760    -3.12256488736307    -0.17599828950518
-   11     -0.43932563793009    -0.78091045676934     2.52991145353118
-   12      1.48113796241605     0.53410123266305     0.10271967834133
-   13     -2.06934979994987    -1.49460390784335    -1.19397661975444
-   14      2.09657211801094    -2.08717872520637     1.07619170607275
+   10     -0.37157649396760    -3.12256488736305    -0.17599828950517
+   11     -0.43932563793010    -0.78091045676934     2.52991145353117
+   12      1.48113796241604     0.53410123266305     0.10271967834134
+   13     -2.06934979994986    -1.49460390784334    -1.19397661975444
+   14      2.09657211801094    -2.08717872520637     1.07619170607274
  frms,max,avg= 1.5525924E+00 3.2599280E+00   3.044E-05 -2.556E-04  3.569E-05 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -99.99879921178906    80.95864662158462   115.91965880949721
-    2    -55.48190988397492   167.63222233004029   -37.21798032719698
-    3   -108.10171428766499   -15.46354877442398    13.82752695599129
-    4    101.65652181484172    48.01365208204641   -13.27176673213505
-    5    -81.05774643581677   -24.21239835388090    -4.80395988791064
-    6    -15.97253845737394    54.14669961054460   -11.04903037813444
-    7     48.72979643823778   -62.58394431290134  -113.69985002517690
-    8    123.03559321202023    21.86632969189344    72.64349720863900
-    9     51.32605982133695    87.08516248081490  -142.61648160945069
-   10    -19.10722995354710  -160.56872895980527    -9.05019516465862
-   11    -22.59103071560573   -40.15602685546212   130.09326663421319
-   12     76.16316989976090    27.46458733704464     5.28205779075304
-   13   -106.41023617983963   -76.85561659646648   -61.39674119105141
-   14    107.81006393941459  -107.32703630102874    55.33999791662106
+    1    -99.99879921178909    80.95864662158397   115.91965880949613
+    2    -55.48190988397511   167.63222233004021   -37.21798032719693
+    3   -108.10171428766485   -15.46354877442372    13.82752695599173
+    4    101.65652181484180    48.01365208204594   -13.27176673213501
+    5    -81.05774643581695   -24.21239835388082    -4.80395988791017
+    6    -15.97253845737380    54.14669961054499   -11.04903037813403
+    7     48.72979643823777   -62.58394431290159  -113.69985002517681
+    8    123.03559321202007    21.86632969189327    72.64349720863896
+    9     51.32605982133715    87.08516248081489  -142.61648160945074
+   10    -19.10722995354714  -160.56872895980459    -9.05019516465820
+   11    -22.59103071560594   -40.15602685546199   130.09326663421280
+   12     76.16316989976062    27.46458733704437     5.28205779075322
+   13   -106.41023617983920   -76.85561659646632   -61.39674119105143
+   14    107.81006393941470  -107.32703630102856    55.33999791662045
  frms,max,avg= 7.9837505E+01 1.6763222E+02   1.565E-03 -1.314E-02  1.835E-03 e/A
  length scales= 22.050000000000 24.750000000000 22.500000000000 bohr
               = 11.668357449409 13.097135912602 11.906487193275 angstroms
@@ -507,19 +507,13 @@ total_energy_dc     : -2.25049445386280E+01
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Specification of an extensible and portable file format for electronic structure and crystallographic data
-- X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon, M.J. Verstraete,
-- Comput. Material Science 43, 1056 (2008).
-- Comment: to be cited in case the ETSF_IO file format is used, i.e. iomode=3.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2008
--
-- [2] Daubechies wavelets as a basis set for density functional pseudopotential calculations.
+- [1] Daubechies wavelets as a basis set for density functional pseudopotential calculations.
 - L. Genovese, A. Neelov, S. Goedecker, T. Deutsch, S.A. Ghasemi, A. Willand, D. Caliste, O. Zilberberg, M. Rayson, A. Bergman et R. Schneider,
 - J. Chem. Phys. 129, 014109 (2008).
 - Comment: to be cited in case BigDFT project is used, i.e. usewvl=1.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#genovese2008
 -
-- [3] The Abinit project: Impact, environment and recent developments.
+- [2] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -536,7 +530,7 @@ total_energy_dc     : -2.25049445386280E+01
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [4] ABINIT: Overview, and focus on selected capabilities
+- [3] ABINIT: Overview, and focus on selected capabilities
 - J. Chem. Phys. 152, 124102 (2020).
 - A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
@@ -553,7 +547,7 @@ total_energy_dc     : -2.25049445386280E+01
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [5] Recent developments in the ABINIT software package.
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -571,10 +565,25 @@ total_energy_dc     : -2.25049445386280E+01
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         30.0  wall=         30.0
+- And optionally:
+-
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
+- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+- Comment: the third generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
+-
+- Proc.   0 individual time (sec): cpu=         30.9  wall=         30.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        119.8  wall=        119.8
++Overall time at end (sec) : cpu=        123.4  wall=        123.7

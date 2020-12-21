@@ -80,19 +80,30 @@ by the keyword [[nband]]). With the distribution scheme of the wavelet mode,
 the best distribution over processors will be obtained for, 1, 3, 7 and 21
 processors. Create four different directories (with the number of processors
 for instance) and run four times ABINIT with the same input file, varying the
-number of processors in {1, 3, 7, 21}. The speed-up is the ratio between the
-time with one processor and the time of a run with N processors.
+number of processors in {1, 3, 7, 21}.
+
+    abinit tgswvl_1.abi >& log
+
+The speed-up is the ratio between the time with one processor and the
+time of a run with N processors.
 
 Assuming that the directories are called {01, 03, 07, 21}, one can grep the
-over-all time of a run and plot it in gnuplot with:
+over-all time of a run and plot it with the [gnuplot](http://www.gnuplot.info) graphical tool.  
+Just issue:
 
-    plot "< grep 'individual time' */log | tr '/' ' '" u 1:(ttt/$11) w lp t "Boron cluster", x t "Ideal speed-up"
+    gnuplot
 
-where `ttt` represents the time on one processor. The efficiency (in percent)
-of the parallelization process is the ratio between the speed-up and the
-number of processors. One can plot it with:
+and, in `gnuplot` command line, type:
 
-    plot "< grep 'individual time' */log | tr '/' ' '" u 1:(ttt/$11/$1*100) w lp t "Boron cluster"
+    plot "< grep 'individual time' */*.abo | tr '/' ' '" u 1:(ttt/$11) w lp t "Boron cluster", x t "Ideal speed-up"
+
+where `ttt` represents the time on one processor (replace `ttt` by this time in the
+command line above).  
+
+The efficiency (in percent) of the parallelization process is the ratio between the speed-up and the
+number of processors. One can plot it (using [gnuplot](http://www.gnuplot.info)) with:
+
+    plot "< grep 'individual time' */*.abo | tr '/' ' '" u 1:(ttt/$11/$1*100) w lp t "Boron cluster"
 
 The first conclusion is that the efficiency is not so good when one use one
 orbital per processor. This is a general rule with the wavelet mode: due to
@@ -175,6 +186,7 @@ bigger number of processors, like the Poisson Solver part for instance.
 Run the boron example with {2, 4, 14, 15} processors and plot the speed-up.
 One can also look at the standard output to the load balancing of the Poisson
 Solver and the load balancing of orbitals (with 15 processors):
+
 
     [...]
      Processes from 0 to 9 treat 2 orbitals
