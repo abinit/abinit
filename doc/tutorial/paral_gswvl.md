@@ -22,6 +22,12 @@ The tutorial will be more profitable if you have already performed calculations
 using the wavelet formalism (see the [[topic:Wavelets|topic page on wavelets]]
 and the [[usewvl]] keyword).
 
+!!! Important
+	 To use a wavelet basis set `ABINIT` should have been compiled with the `bigdft` library.
+	 To do this, download the [bigdft fallback](https://www.abinit.org/fallbacks) and use
+	 the `--with-bigdft`, `BIGDFT_LIBS`, `BIGDFT_FCFLAGS`, etc. flags during the
+	 `configure` step.
+ 
 [TUTORIAL_READMEV9]
 
 ## 1 Wavelets variables and parallelism
