@@ -301,7 +301,7 @@ K. The coupling strength is severely underestimated (experiment gives 0.44),
 and the logarithmic average frequency is a bit too high (converged value of 270 K in [[cite:Savrasov1996|Savrasov]]).
 The resulting critical temperature from McMillan's formula is unphysical, and you
 should always regard it critically: if $\lambda$ is close to or lower than the chosen value of
-$\mu^{\star}$, Tc will diverge. 
+$\mu^{\star}$, $T_c$ will diverge. 
 Aluminum is a good case in which things can be improved easily,
 because its Fermi surface is large and isotropic and the coupling is weak.
 
@@ -330,6 +330,9 @@ main difference with teph_4.in is the choice of the tetrahedron integration meth
 
 {% dialog tests/tutorespfn/Input/teph_5.in %}
 
+Already at this level, you can see the increased accuracy: the isotropic $\lambda$
+values (around 0.50) and the MacMillan $T_c$ (2.2 Kelvin) are much more realistic.
+
 If you are patient, save the output \_LWD and \_A2F files and run the
 full tutorial again with a denser k-point grid (say, 12x12x12) and you will be able
 to observe the differences in convergence. For Al the $\alpha^2F$ function and related
@@ -356,8 +359,8 @@ phonons should be negligible), but we need an additional dataset to calculate
 the 3 DDK files along the 3 primitive directions of the unit cell. To be more
 precise, just as for the el-ph matrix elements, we do not need the perturbed
 wavefunctions, only the perturbed eigenvalues. Calculating the DDK derivatives
-with [[prtgkk]] set to 1 will output files named \_GKKxx (xx=3*natom+1 to
-3*natom+3) containing the matrix elements of the ddk perturbation (these are
+with [[prtgkk]] set to 1 will output files named \_GKKxx (xx=3 *natom* + 1 to
+3 *natom* + 3) containing the matrix elements of the ddk perturbation (these are
 basically the first part of the normal DDK files for E field perturbation,
 without the wave function coefficients).
 
@@ -391,19 +394,22 @@ see
 and has produced a number of additional files:
 
   * *_A2F_TR* contain the equivalent Eliashberg spectral functions with Fermi speed factors (how many phonons do we have at a given energy, how much do they couple with the electrons, and how fast are these electrons going). Integrating with appropriate functions of the phonon energy, one gets:
-  * the resistivity as a function of temperature (teph_6.out_ep_RHO and figure) and
+  * the resistivity as a function of temperature (teph_6.out_ep_RHO and figure)
   * the thermal conductivity as a function of temperature (teph_6.out_ep_WTH) but ONLY the electronic contribution. You are still missing the phonon-phonon interactions, which are the limiting factor in the thermal conductivity beyond a few 100 K. For metals at even higher temperature the electrons will often dominate again as they contain more degrees of freedom.
 
 ![Resistivity of Al as a function of T](eph_assets/teph_6_RHO.png)
 
 The high T behavior is necessarily linear if you include only first order e-p
 coupling and neglect the variation of the GKK off of the Fermi surface. The
-inset shows the low T behavior, which is not a simple polynomial (with simple
+inset shows the low T behavior, which is not a simple polynomial (with textbook
 models it should be T$^3$ or T$^5$ - see [[cite:Ashcroft1976|Ashcroft and Mermin]]). See the [[cite:Savrasov1996|Savrasov paper]]
-for reference values in simple metals using well converged k- and q- point grids.
+for reference values in simple metals using well converged k- and q- point grids, here we are missing a factor of 2, which is not
+bad given how crude the grids are.
 
 Finally, note that the \_RHO and \_WTH files contain a series of tensor
 components, for the resistivity tensor (2 1 = y x or the current response
-along y when you apply an electric field along x). In most systems the tensor
+along y when you apply an electric field along x). In many systems the tensor
 should be diagonal by symmetry, and the value of off-diagonal terms gives an
-estimate of the numerical error.
+estimate of the symmetrization error (tiny). Similarly the difference in the diagonal terms
+is due to numerical convergence: here is is a few per-mil, visible in the figure 
+between green and red lines (yy and xx components).
