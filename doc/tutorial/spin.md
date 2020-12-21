@@ -356,13 +356,12 @@ The difference between up and down is 1.20, in rough agreement
 (regarding our very crude methods of integration) with the previous
 calculation. 
 Using a calculation with the same number of k-points for the
-projected DOS, we can plot the up-down integrated dos difference for the d-channel:
+projected DOS, we can plot the up-down integrated dos difference for the d-channel of each atom:
 
 ![](spin_assets/energy_diff_fccfe.jpg)
 
-Note that there is some scatter in this graph, due to the finite number of digits (2 decimal
-places) of the integrated DOS given in the file *tspin_3o_DS3_DOS_AT0002*.
-
+Note that there is some scatter in this graph, due to the finite number of digits
+of the integrated DOS given in the file *tspin_3o_DS3_DOS_AT0001* and *tspin_3o_DS3_DOS_AT0002*.
 If we now look at the up and down DOS for each atom, we can see that the
 corner atom and the face atom possess opposite magnetizations, which roughly
 cancel each other. 
