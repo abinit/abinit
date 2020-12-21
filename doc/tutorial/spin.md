@@ -418,10 +418,10 @@ We can easily follow the symmetry of the different levels of the non-SOC calcula
 
 ```
  kpt#   1, nband= 26, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -2.60446   -1.43298   -1.43298   -1.43298   -0.15676   -0.09981   -0.09981   -0.09981
-  -0.09925   -0.09925    0.02071    0.02071    0.02071    0.04448    0.14037    0.14037
-   0.14037    0.14239    0.14239    0.14239    0.15233    0.15233    0.27078    0.27078
-   0.27078    0.30259
+  -2.60792   -1.43380   -1.43380   -1.43380   -0.14851   -0.09142   -0.09142   -0.09142
+  -0.09033   -0.09033    0.02657    0.02657    0.02657    0.05604    0.14930    0.14930
+   0.14930    0.15321    0.15321    0.15321    0.16211    0.16211    0.27952    0.27952
+   0.27952    0.31238
 ```
 
 That is, the symmetry: s, p, s, d
@@ -429,16 +429,16 @@ After application of the SOC, we now have to consider twice as many levels:
 
 ```
  kpt#   1, nband= 26, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -2.59401   -2.59401   -1.65064   -1.65064   -1.32587   -1.32587   -1.32587   -1.32587
-  -0.15505   -0.15505   -0.10627   -0.10627   -0.10627   -0.10627   -0.08765   -0.08765
-  -0.08706   -0.08706   -0.08706   -0.08706    0.00400    0.00400    0.03011    0.03011
-   0.03011    0.03011
+  -2.59704   -2.59704   -1.65268   -1.65268   -1.32544   -1.32544   -1.32544   -1.32544
+  -0.14663   -0.14663   -0.09760   -0.09760   -0.09760   -0.09760   -0.07881   -0.07881
+  -0.07805   -0.07805   -0.07805   -0.07805    0.01044    0.01044    0.03597    0.03597
+   0.03597    0.03597
 ```
 
 The levels are not perfectly degenerate, due to the finite size of the simulation box,
 and in particular the cubic shape, which gives a small crystal field splitting of the d orbitals
 between $e_g$ and $t_{2g}$ states.
-We can nevetheless compute the splitting of the levels, and we obtain, for e.g. the p-channel: 1.65064-1.32587=0.32477 Ha
+We can nevetheless compute the splitting of the levels, and we obtain, for e.g. the p-channel: 1.65268-1.32544=0.32724 Ha
 
 If we now consider the
 [NIST table](https://www.nist.gov/pml/atomic-reference-data-electronic-structure-calculations-tantalum)
