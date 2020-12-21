@@ -630,7 +630,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 
 !Begin calculate U in supercell
 
-!Analize shell structure of primitive cell
+!Analyze shell structure of primitive cell
 !and atomic distances in primitive cell
  ABI_MALLOC(smult_org,(nat_org))
  ABI_MALLOC(sdistv_org,(nat_org))
