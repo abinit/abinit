@@ -2440,7 +2440,7 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
 
 !Obtain a list of rotated atom labels:
  tolsym8=tol8
- call symatm(indsym,natom,nsym,symrec,tnons,tolsym8,typat,xred)
+ call symatm(indsym,natom,nsym,symrec,tnons,tolsym8,typat,xred,print_indsym=10)
 
 !If non-SCF calculation, or nsym==1, do not need IBZ data
  if ( (iscf>0 .or. iscf==-3) .and. nsym>1 ) then
