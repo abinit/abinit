@@ -1,0 +1,49 @@
+# Bi atom : GGA PBE from LibXC
+ builtintest 6
+
+#GGA PBE
+ixc -101130
+
+#Common data
+acell 3*11
+diemac 2.0d0
+diemix 0.5d0
+ecut 10
+
+nband 4 4
+ kptopt 0
+nkpt 1
+nstep 2
+occopt 2
+occ 1 1 1 1  1 0 0 0
+tolwfr 1.0d-14
+xred 3*0
+
+ntypat 1
+natom 1
+typat 1
+znucl 83
+
+nspinor 1
+nsppol  2
+nspden  2
+spinat  1.0 0.0 0.0
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = t00.abo, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = Bi atom with PAW, GGA PBE from LibXC
+#%%   Very quick built-in test, to check that LibXC is installed.
+#%%<END TEST_INFO>

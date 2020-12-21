@@ -1,0 +1,110 @@
+# Silicon structure
+     acell     10.263  10.263  10.263
+     rprim      0.00   0.50   0.50
+                0.50   0.00   0.50
+                0.50   0.50   0.00
+     natom      2
+      xred      0.00   0.00   0.00
+                0.25   0.25   0.25
+    ntypat      1
+     typat      1      1
+     znucl     14.00
+
+# Parallelism options
+   paral_kgb  0
+#  paral_kgb  1
+#    npband   1
+#     npfft   1
+#     npkpt   2
+#     nproc   2
+
+# Parameters common to all runs
+      ecut      4.00
+  ecutsigx      1.49923969
+   ecuteps      1.49923969
+     ngkpt      4      4      4
+   nshiftk      1
+    shiftk      0.00   0.00   0.00
+    istwfk      8*1
+
+     nstep     20
+    enunit      2
+
+    ndtset      3
+# Self-consistent run to get the density
+    toldfe1     1.0d-8
+     nband1    10
+
+     gwpara     2
+     symsigma   0
+
+# Calculation of the dielectric matrix - iteration 1
+# localrdwf2     0      # testing localdrwf=0 in parallel
+ optdriver2     3
+ gwcalctyp2     2
+    getwfk2     1
+
+     nband2    10
+   ecutwfn2     1.49923969E+00 Hartree
+   nfreqim2     4
+   nfreqre2     8
+ freqremax2     1.
+
+# Calculation of the noPPM GW corrections - iteration 1
+# localrdwf3     0      # testing localdrwf=0 in parallel
+ optdriver3     4
+ gwcalctyp3     2
+    getwfk3     1
+    getscr3     2
+     nband3    10
+   ecutwfn3     1.49923969E+00 Hartree
+ gw_icutcoul3     3   #  old deprecated value of icutcoul, only used for legacy
+
+
+#Common to all model GW calculations
+   rhoqpmix     0.5
+     nkptgw     8
+      kptgw     
+              0.00000000E+00  0.00000000E+00  0.00000000E+00
+              2.50000000E-01  0.00000000E+00  0.00000000E+00
+              5.00000000E-01  0.00000000E+00  0.00000000E+00
+              2.50000000E-01  2.50000000E-01  0.00000000E+00
+              5.00000000E-01  2.50000000E-01  0.00000000E+00
+             -2.50000000E-01  2.50000000E-01  0.00000000E+00
+              5.00000000E-01  5.00000000E-01  0.00000000E+00
+             -2.50000000E-01  5.00000000E-01  2.50000000E-01
+       bdgw   
+              1 8
+              1 8
+              1 8
+              1 8
+              1 8
+              1 8
+              1 8
+              1 8
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4
+#%% max_nprocs = 4
+#%% [NCPU_1]
+#%% files_to_test = t74_MPI1.abo, tolnlines=   16,   tolabs=  1.1e-3,      tolrel= 2.0e-2
+#%% [NCPU_2]
+#%% files_to_test = t74_MPI2.abo, tolnlines=   16,   tolabs=  1.1e-3,      tolrel= 2.0e-2
+#%% [NCPU_4]
+#%% files_to_test = t74_MPI4.abo, tolnlines=   16,   tolabs=  1.1e-3,      tolrel= 2.0e-2
+#%% [extra_info]
+#%% keywords =  NC, GW
+#%% authors = F. Bruneval
+#%% description = 
+#%%   Si, Bulk, 2 atoms, parallelism over k-points for the WFK file creation
+#%%   parallelism over bands for GW without PPM 
+#%%<END TEST_INFO>

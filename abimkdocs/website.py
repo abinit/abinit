@@ -879,7 +879,7 @@ The bibtex file is available [here](../abiref.bib).
     executing the following lines in the terminal:
 
     ```bash
-    export ABI_HOME=Replace_with_the_absolute_path_to_the_abinit_top_level_dir
+    export ABI_HOME=Replace_with_absolute_path_to_abinit_top_level_dir
     export PATH=$ABI_HOME/src/98_main/:$PATH
     export ABI_TESTS=$ABI_HOME/tests/
     export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Pseudopotentials used in examples.
@@ -899,20 +899,14 @@ The bibtex file is available [here](../abiref.bib).
     are in the *~abinit/tests/* directory where *~abinit* is the absolute path of the abinit top-level directory.
     If you have NOT made your own install, ask your system administrator where to find the package, especially the executable and test files.
 
-    To execute the tutorials, create a working directory (`Work*`) and
-    copy there the input files of the lesson.
-
-    Most of the tutorials do not rely on parallelism (except specific [[tutorial:basepar|tutorials on parallelism]]).
-    However you can run most of the tutorial examples in parallel, see the [[topic:parallelism|topic on parallelism]].
-
     In case you work on your own PC or workstation, to make things easier, we suggest you define some handy environment variables by
     executing the following lines in the terminal:
 
     ```bash
-    export ABI_HOME=Replace_with_the_absolute_path_to_the_abinit_top_level_dir
-    export PATH=$ABI_HOME/src/98_main/:$PATH
-    export ABI_TESTS=$ABI_HOME/tests/
-    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Pseudopotentials used in examples.
+    export ABI_HOME=Replace_with_absolute_path_to_abinit_top_level_dir # Change this line
+    export PATH=$ABI_HOME/src/98_main/:$PATH     # Do not change this line : path to executable
+    export ABI_TESTS=$ABI_HOME/tests/            # Do not change this line : path to tests dir
+    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/ # Do not change this line : path to pseudos dir
     ```
 
     Examples in this tutorial use these shell variables: copy and paste
@@ -920,6 +914,11 @@ The bibtex file is available [here](../abiref.bib).
     The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
     so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
 
+    To execute the tutorials, create a working directory (`Work*`) and
+    copy there the input files of the lesson.
+
+    Most of the tutorials do not rely on parallelism (except specific [[tutorial:basepar|tutorials on parallelism]]).
+    However you can run most of the tutorial examples in parallel, see the [[topic:parallelism|topic on parallelism]].
 """
         new_lines = []
         for line in lines:
@@ -1238,10 +1237,10 @@ The bibtex file is available [here](../abiref.bib).
                 if prefix in self.abinit_tests.all_subsuite_names:
                     # [[test:gspw_01]]  --> Need to get the name of suite from subsuite.
                     suite_name = self.abinit_tests.suite_of_subsuite(prefix).name
-                    url = "/tests/%s/Input/t%s.in" % (suite_name, name)
+                    url = "/tests/%s/Input/t%s.abi" % (suite_name, name)
                 else:
                     # [[test:libxc_41]]
-                    url = "/tests/%s/Input/t%s.in" % (prefix, tnum)
+                    url = "/tests/%s/Input/t%s.abi" % (prefix, tnum)
 
                 if a.text is None: a.text = "%s[%s]" % (prefix, tnum)
                 test = self.rpath2test[url[1:]]
@@ -1381,7 +1380,7 @@ The bibtex file is available [here](../abiref.bib).
 
 ## All variables
 
-See aim, anaddb, atdep, multibinit or optic for the subset of input variables for the executables 
+See aim, anaddb, atdep, multibinit or optic for the subset of input variables for the executables
 AIM(Bader), ANADDB, ATDEP, MULTIBINIT and OPTIC.
 Such input variables are specifically labelled @aim, @anaddb, @atdep, @multibinit or @optic in the input variable database.
 Enter any string to search in the database. Clicking without any request will give all variables.
@@ -1408,6 +1407,21 @@ Enter any string to search in the database. Clicking without any request will gi
 
     def dialog_from_filename(self, path, title=None, ret_btn_dialog=False):
         """Build customized jquery dialog to show the content of filepath `path`."""
+
+        # FIXME: This to faciliate migration to new scheme for file extensions
+        # It will be removed when the beautification is completed.
+        if path.endswith(".in") and not os.path.exists(path):
+            print("Using old convention for file extension: `.in` instead of `.abi`.\n",
+                  "Please change the md tutorial to use the .abi convention for", path)
+            root, _ = os.path.splitext(path)
+            path = root + ".abi"
+
+        if path.endswith(".out") and not os.path.exists(path):
+           print("Using old convention for file extension: `.out` instead of `.abo`.\n",
+                 "Please change the md tutorial to use the .abo convention for", path)
+           root, _ = os.path.splitext(path)
+           path = root + ".abo"
+
         title = path if title is None else title
         with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
             if path.endswith(".in"):
@@ -1437,8 +1451,28 @@ Enter any string to search in the database. Clicking without any request will gi
 
     def modal_from_filename(self, path, title=None):
         """Return HTML string with bootstrap modal and content taken from file `path`."""
+
+        # FIXME: This to faciliate migration to new scheme for file extensions
+        # It will be removed when the beautification is completed.
+        if path.endswith(".in") and not os.path.exists(path):
+            print("Using old convention for file extension: `.in` instead of `.abi`.\n",
+                  "Please change the md tutorial to use the .abi convention for:", path)
+            root, _ = os.path.splitext(path)
+            path = root + ".abi"
+
+        if path.endswith(".out") and not os.path.exists(path):
+           print("Using old convention for file extension: `.out` instead of `.abo`.\n",
+                 "Please change the md tutorial to use the .abo convention for:", path)
+           root, _ = os.path.splitext(path)
+           path = root + ".abo"
+
+
+
+
+
         # Based on https://v4-alpha.getbootstrap.com/components/modal/#examples
         # See also https://stackoverflow.com/questions/14971766/load-content-with-ajax-in-bootstrap-modal
+
         title = path if title is None else title
         with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
             text = escape(fh.read(), tag="pre", cls="small-text")
@@ -1643,7 +1677,7 @@ class AbinitStats(object):
         from subprocess import check_output
         num_f90files = int(check_output(["ls -l %s/*/*.F90 | wc" % src_dir], shell=True))
         num_f90lines = int(check_output(["cat %s/*/*.F90 | wc" % src_dir], shell=True))
-        num_tests = int(check_output(["ls %s/tests/*/Input/t*in | wc" % src_dir], shell=True))
+        num_tests = int(check_output(["ls %s/tests/*/Input/t*abi | wc" % src_dir], shell=True))
         self.parse()
 
     def json_dump(self, path):

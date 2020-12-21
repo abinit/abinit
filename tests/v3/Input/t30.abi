@@ -1,0 +1,121 @@
+# Si in diamond structure
+ acell 3*10.25
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ natom  2
+ ntypat  1
+ typat  2*1
+ xred   0.000  0.000  0.000
+        0.250  0.250  0.250
+ znucl 14.0
+
+ enunit 2
+ intxc  1
+
+ ndtset 6
+ ecut    6
+ ecutwfn 6
+ ecutsigx 1.50304505
+ ecuteps  1.50304505
+ prtgsr  0
+ gwpara  1
+ symsigma 0
+
+# wavefunction calculation
+ nband1       15
+ nbdbuf1       5
+ occopt1       1
+
+ prtvol1       0
+ nline1        3
+ nstep1       10
+ tolwfr1       1.0d-16
+
+# screening calculation
+ optdriver2 3
+ getwfk2    1
+ nband2    10
+ ppmfrq2  16.5 eV
+ awtr2       0       # Note : the default awtr 1 is better
+ symchi      0       # Note : the default symchi 1 is better
+
+# sigma calculation
+ optdriver3  4
+ getwfk3     1
+ getscr3     2
+ ppmodel3    1
+ nkptgw3     1
+ kptgw3      0.250  0.750  0.250
+ bdgw3       4  5
+ ppmfrq3    16.5 eV
+ zcut3       0.1 eV
+ gw_icutcoul3  3          # old deprecated value of icutcoul, only used for legacy
+
+
+# sigma calculation
+ optdriver4  4
+ getwfk4     1
+ getscr4     2
+ ppmodel4    2
+ nkptgw4     1
+ kptgw4      0.250  0.750  0.250
+ bdgw4       4  5
+ zcut4       0.1 eV
+ gw_icutcoul4  3          # old deprecated value of icutcoul, only used for legacy
+
+# sigma calculation
+ optdriver5  4
+ getwfk5     1
+ getscr5     2
+ ppmodel5    3
+ nkptgw5     1
+ kptgw5      0.250  0.750  0.250
+ bdgw5       4  5
+ zcut5       0.1 eV
+ gw_icutcoul5  3          # old deprecated value of icutcoul, only used for legacy
+
+# sigma calculation
+ optdriver6  4
+ getwfk6     1
+ getscr6     2
+ ppmodel6    4
+ nkptgw6     1
+ kptgw6      0.250  0.750  0.250
+ bdgw6       4  5
+ zcut6       0.1 eV
+ gw_icutcoul6  3          # old deprecated value of icutcoul, only used for legacy
+
+# valid for all datasets
+ nband     10
+ kptopt    1
+ ngkpt     2 2 2
+ nshiftk   4
+ shiftk    0.5 0.5 0.5
+           0.5 0.0 0.0
+           0.0 0.5 0.0
+           0.0 0.0 0.5
+ istwfk    2*1
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t30.abo, tolnlines = 6, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = GW
+#%% description = 
+#%%   Si in 2-atom diamond unit cell (nkpt 2; ecut 6)
+#%%   In dataset 1, ABINIT finds the ground state KS wavefunctions (tolwfr 1.0d-16).
+#%%   the eigenvectors necessary for the GW calculation being stored in _WFK.
+#%%   In dataset 2, ABINIT computes the eps^-1 matrix (optdriver 3)
+#%%   nband 10) for the GW calculation and stores it in _SCR.
+#%%   In dataset 3-6, ABINIT computes the GW correction for bands 4 and 5 with different plasmon-pole models.
+#%% topics = GW
+#%%<END TEST_INFO>

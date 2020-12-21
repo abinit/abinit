@@ -1,0 +1,73 @@
+#Structural optimisation
+
+#ndtset 6    jdtset 1 2 3 4 5 6
+
+#  ngkpt1  6  6  6
+#  ngkpt2  8  8  8
+#  ngkpt3 10 10 10
+#  ngkpt4 12 12 12
+#  ngkpt5 14 14 14
+#  ngkpt6 16 16 16
+
+  ngkpt  6  6  6   # In the present example, only this grid of k points is considered
+                   # A full convergence study on k points should be done, see the above lines.
+
+#Definition of the unit cell
+#**********************************
+   acell 3*1.053E+01
+   rprim 0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+
+#Definition of the atoms
+#*********************
+   natom 2
+   ntypat 2
+   znucl 13 33
+   typat 1 2
+   xred  0    0    0
+         0.25 0.25 0.25
+   ixc 3
+
+#Definition of the scf procedure
+#******************************
+   nstep  100
+
+#Definition of the plane wave basis
+#************************************
+   ecut  2.8
+   ecutsm 0.5
+   dilatmx 1.05
+
+   nshiftk   4
+   shiftk   0.5 0.5 0.5
+            0.5 0.0 0.0
+            0.0 0.5 0.0
+            0.0 0.0 0.5
+
+#Structural relaxation
+#*********************
+   ionmov 2
+   optcell 2
+   tolvrs 1.0d-15
+   tolmxf 5.0d-6
+   ntime 100
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tnlo_1.abo, tolnlines=  1, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Veithen, P. Ghosez
+#%% keywords = 
+#%% description = Structural optimisation
+#%%<END TEST_INFO>

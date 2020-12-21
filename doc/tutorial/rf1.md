@@ -20,7 +20,7 @@ thermodynamical properties, please consult the [second tutorial on DFPT](rf2).
 
 This tutorial should take about 2 hours.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 The ground-state geometry of AlAs
 
@@ -31,8 +31,7 @@ Why not create Work_rf1 in \$ABI_TESTS/tutorespfn/Input?*
 cd $ABI_TESTS/tutorespfn/Input
 mkdir Work_rf1
 cd Work_rf1
-cp ../trf1_x.files .   # You will need to edit this file.
-cp ../trf1_1.in .
+cp ../trf1_1.abi .
 ```
 
 !!! important
@@ -42,24 +41,19 @@ cp ../trf1_1.in .
     specialized, non-DFPT ones), but `$ABI_TESTS/tutorespfn`.
     This will be the case for all the DFPT based part of the tutorial.
 
-The file *trf1_x.files* lists the file names and root names.
-
-{% dialog tests/tutorespfn/Input/trf1_x.files %}
-
-You can copy it in the *Work_rf1* directory and, as usual, change its name to *trf1_1.files*
-and replace the occurrences of `trf1_x` by `trf1_1`.
-
-Note that two pseudopotentials are mentioned in this *files* file: one
+Note that two pseudopotentials are mentioned in the input file: one
 for the Aluminum atom, and one for the Arsenic atom.
-The first listed in *trf1_x.files* (for Al) will define the first type of atom of the input file
-(see input variables [[typat]] and [[ntypat]]) and the second (for As) will define the second type of atom.
+The first listed in *trf1_1.abi* (for Al) will define the first type of atom of the input file
+(see input variables [[typat]] and [[ntypat]]) and the second (for As) will define the second type of atom. 
 It might be the first time that you encounter this situation (more than one type of atoms) in the
 tutorials, at variance with the first four basic tutorials.
+!!! warning
+    To access the pseudopotential, the input file expect you to define the variable ABI_PSPDIR in your environment.
 
-You can also copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_1.in* in *Work_rf1*.
+You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_1.abi* in *Work_rf1*.
 This is your input file. You should read it carefully.
 
-{% dialog tests/tutorespfn/Input/trf1_1.in %}
+{% dialog tests/tutorespfn/Input/trf1_1.abi %}
 
 It drives a single self-consistent calculation of the total energy of AlAs to generate the corresponding
 self-consistent charge density and wavefunctions, that will be used for the DFPT calculations.
@@ -67,14 +61,7 @@ self-consistent charge density and wavefunctions, that will be used for the DFPT
 Note that the value of [[tolvrs]] is rather stringent.
 This is because the wavefunctions determined by the present run will be used later as starting
 point of the DFPT calculation.
-However, the number of steps, [[nstep]], in this example file has been set to 15, and
-you will see that this is not enough to reach the target [[tolvrs]].
-In production runs, you should choose a large enough value of [[nstep]] to reach your [[tolvrs]] target.
-In the present tutorial, due to portability concerns related to automatic testing, we could
-not allow a larger [[nstep]].
-This minor problem with some tutorial examples was mentioned briefly in
-a side note to the answer to question 1 of tutorial 1 - just before
-[this section](base1#computation-of-the-interatomic-distance-method-1).
+The number of steps, [[nstep]], in this example file has been set to 25. You should always choose a large enough value of [[nstep]] to reach your [[tolvrs]] target.
 
 !!! danger
 
@@ -89,11 +76,11 @@ They give acceptable but not very accurate results such that the running time is
 
 You should make the run (a few seconds):
 
-    abinit < trf1_1.files > log 2> err
+    abinit trf1_1.abi > log 2> err
 
-The resulting main output file, *trf1_1.out*, should be similar to the one below:
+The resulting main output file, *trf1_1.abo*, should be similar to the one below:
 
-{% dialog tests/tutorespfn/Refs/trf1_1.out %}
+{% dialog tests/tutorespfn/Refs/trf1_1.abo %}
 
 This output file is not very long, so you can quickly read it entirely.
 Note that one obtains the following value for the energy, in the final echo section:
@@ -110,14 +97,7 @@ The output file also mentions that the forces on both atoms vanish.
 The run that you just made will be considered as defining a ground-state
 configuration, on top of which responses to perturbations will be computed.
 The main output of this ground-state run is the wavefunction file *trf1_1o_WFK*,
-that you can already rename as *trf1_1i_WFK* to use it as input wave function for the next runs.
-
-!!! warning
-
-    So, in the corresponding *files* file for all the following runs, at third line,
-    pay attention **to keep** "trf1_1i". By contrast, for the second run, you
-    should change the first line from "trf1_1" to "trf1_2", and do similarly for the second,
-    fourth and fifth lines of this file.
+that you can already rename as *trf1_2i_WFK* to use it as input wave function for the next runs.
 
 ## 2 Frozen-phonon calculation of a second derivative of the total energy
 
@@ -132,25 +112,27 @@ For the time being, in order to be able to perform a direct comparison with the 
 a DFPT calculation, we choose as a perturbation the displacement of the Al
 atom along the first axis of the reduced coordinates.
 
-You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_2.in* in *Work_rf1*.
+You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_2.abi* in *Work_rf1*.
 This is your input file. You should open it and briefly look at the two
-changes with respect to *trf1_1.in*:
-the change of [[xred]], and the reading of the wavefunction file, using the [[irdwfk]] input variable.
+changes with respect to *trf1_1.abi*:
+the change of [[xred]], and the reading of the wavefunction file, using the [[irdwfk]] input variable. 
+!!! warning
+    You need to copy trf1_1.o_WFK to trf1_2.i_WFK so Abinit can find the wavefunction during the calculation.
 
-Then, you can make the run, following the same command as before, with a different files file, referring to *trf1_2.in*.
+Then, you can make the run, following the same command as before, with a different files file, referring to *trf1_2.abi*.
 The symmetry is lowered with respect to the ground-state geometry, so that the number of k-points
 increases a lot, and of course, the CPU time.
 
-{% dialog tests/tutorespfn/Input/trf1_2.in tests/tutorespfn/Refs/trf1_2.out %}
+{% dialog tests/tutorespfn/Input/trf1_2.abi tests/tutorespfn/Refs/trf1_2.abo %}
 
 From this run, it is possible to get the values of the total energy, and the
 value of the gradient of the total energy (dE) with respect to change of reduced coordinate (dt):
 
-     rms dE/dt=  3.5517E-03; max dE/dt=  5.0079E-03; dE/dt below (all hartree)
-        1       0.005007937776      0.002526310510      0.002526310510
-        2      -0.005007879256     -0.002526283046     -0.002526283046
-     ...
-        >>>>>>>>> Etotal= -9.76268124105767E+00
+        rms dE/dt=  3.5517E-03; max dE/dt=  5.0079E-03; dE/dt below (all hartree)
+            1       0.005007937776      0.002526310510      0.002526310510
+            2      -0.005007879256     -0.002526283046     -0.002526283046
+            ...
+        total_energy        : -9.76268124105730E+00
 
 The change of reduced coordinate ([[xred]]) of the Al atom along the first axis was
 rather small (1/1000 = 0.001), and we can make an estimate of the second derivative of
@@ -233,9 +215,9 @@ case, taking a finer XC grid will allow one to reduce this effect.
 We now compute the second derivative of the total energy with respect to the
 same atomic displacement through the DFPT capabilities of ABINIT.
 
-You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_3.in* in *Work_rf1*.
+You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_3.abi* in *Work_rf1*.
 This is your input file. You should examine it. The changes with respect to
-*trf1_1.in* are all gathered in the first part of this file, before
+*trf1_1.abi* are all gathered in the first part of this file, before
 
 ```
 #######################################################################
@@ -246,7 +228,11 @@ Accordingly, you should get familiarized with the new input variables:
 [[rfphon]], [[rfatpol]], [[rfdir]]. Then, pay attention to the special use of
 the [[kptopt]] input variable. It will be explained in more detail later.
 
-{% dialog tests/tutorespfn/Input/trf1_3.in %}
+!!! warning
+    You need to copy trf1_2.o_WFK to trf1_3.i_WFK so Abinit can find the wavefunction during the calculation.
+
+
+{% dialog tests/tutorespfn/Input/trf1_3.abi %}
 
 When you have understood the purpose of the input variable values specified
 before the "Common input variables" section, you can make the code run, as usual.
@@ -258,7 +244,7 @@ Read it quickly, as we will come back to the most important points hereafter.
 ABINIT has created several different files:
 
   * *trf1_3.log* (the log file)
-  * *trf1_3.out* (the output file), possibly also trf1_3o_OUT.nc, an abridged netCDF version
+  * *trf1_3.abo* (the output file), possibly also trf1_3o_OUT.nc, an abridged netCDF version
   * *trf1_3o_1WF1* (the 1st-order wavefunction file)
   * *trf1_3o_DEN1* (the 1st-order density file)
   * *trf1_3o_POT1* (the 1st-order potential file)
@@ -267,7 +253,7 @@ ABINIT has created several different files:
 Let us have a look at the output file. You can follow the description provided
 in the [[help:respfn#output|section 6.2]] of the respfn help file.
 
-{% dialog tests/tutorespfn/Refs/trf1_3.out %}
+{% dialog tests/tutorespfn/Refs/trf1_3.abo %}
 
 You should be able to find the place where the iterations
 for the minimisation (with respect to the unique perturbation) take place:
@@ -299,29 +285,32 @@ DFPT approach calls for some accuracy considerations. These can be found in
     With |AbiPy|, one can easily visualize the convergence of the DFPT cycle with the |abiopen| script
     and the syntax:
 
-        abiopen.py trf1_3.out --expose -sns=talk
+        abiopen.py trf1_3.abo --expose -sns=talk
 
     ![](rf1_assets/abiopen_trf1_3.out.png)
 
 ## 4 DFPT calculation of the dynamical matrix at $\Gamma$
 
 We are now in the position to compute the full dynamical matrix at the $\Gamma$ point (q=0).
-You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_4.in* in *Work_rf1*.
+You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_4.abi* in *Work_rf1*.
 This is your input file.
 
-As for test rf1_3, the changes with respect to *trf1_1.in* are
+As for test rf1_3, the changes with respect to *trf1_1.abi* are
 all gathered in the first part of this file. Moreover, the changes with
-respect to *trf1_3.in* concern only the input variables [[rfatpol]], and [[rfdir]].
+respect to *trf1_3.abi* concern only the input variables [[rfatpol]], and [[rfdir]].
 Namely, all the atoms will be displaced, in all the directions.
 
-{% dialog tests/tutorespfn/Input/trf1_4.in%}
+!!! warning
+    You need to copy trf1_2.o_WFK to trf1_4.i_WFK so Abinit can find the wavefunction during the calculation.
+
+{% dialog tests/tutorespfn/Input/trf1_4.abi%}
 
 There are six perturbations to consider.
 So, one might think that the CPU time will raise accordingly.
 This is not true, as ABINIT is able to determine which perturbations are the symmetric of another perturbation,
 see [[help:respfn#symmetries|section 3]] of the respfn help file.
 
-Now, you can make the run. You open the file *trf1_4.out*, and notice that the
+Now, you can make the run. You open the file *trf1_4.abo*, and notice that the
 response to two perturbations were computed explicitly, while the response to
 the other four could be deduced from the two first by using the symmetries.
 
@@ -398,12 +387,12 @@ section of the present tutorial. The sections to be read are:
 
 You are now in the position to compute the full dynamical matrix at $\Gamma$ (q=0),
 including the coupling with an homogeneous electric field.
-You can copy *\$ABI_TESTS/tutorespfn/Input/trf1_5.in* in *Work_rf1*.
+You can copy *\$ABI_TESTS/tutorespfn/Input/trf1_5.abi* in *Work_rf1*.
 This is your input file.
 
-{% dialog tests/tutorespfn/Input/trf1_5.in tests/tutorespfn/Refs/trf1_5.out %}
+{% dialog tests/tutorespfn/Input/trf1_5.abi tests/tutorespfn/Refs/trf1_5.abo %}
 
-As for the other DFPT tests, the changes with respect to the *trf1_1.in* are all gathered
+As for the other DFPT tests, the changes with respect to the *trf1_1.abi* are all gathered
 in the first part of this file.
 Unlike the other tests, however, the multi-dataset mode was used, computing from scratch
 the ground-state properties, then computing the effect of the ddk perturbation, then the effect of all
@@ -550,8 +539,10 @@ Still, the agreement of our calculation with the theoretical result is not very 
 [[ecut]] = 3 Hartree, we have 9.76. Changing it to 6 Hartree gives 10.40 . A
 better k point sampling (8x8x8), with [[ecut]] = 6 Hartree, reduces the value to 9.89.
 Changing pseudopotentials finally improves the agreement: with the
-much harder *13al.pspgth* and *33as.psphgh* pseudopotentials with adequate
-[[ecut]] = 16 Hartree and 8x8x8 Monkhorst-Pack sampling, we reach a value of 9.37.
+much harder *al.psp8* and *as.psp8* pseudopotentials with adequate
+[[ecut]] = 20 Hartree and 8x8x8 Monkhorst-Pack sampling, we reach a value of 9.30. 
+Note that we need to change [[ixc]]=-1012 and consider [[nband]]=9, since there is 3 electrons for Al and 15 electrons for As moving in these pseudopotential.
+This information can be found by searching zion in the .abo of any file using the pseudopotentials. 
 This illustrates that the dielectric tensor is a much more sensitive quantity than the others.
 
 ## 6 DFPT calculation of phonon frequencies at non-zero q
@@ -563,16 +554,16 @@ In any case, the computation within the reciprocal space DFPT formalism is more
 efficient than the real space frozen-phonon technique since the use of supercells is
 completely avoided with DFPT. For an explanation of this fact, see for example section IV of [[cite:Gonze1997]].
 
-You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_6.in* in *Work_rf1*.
+You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_6.abi* in *Work_rf1*.
 This is your input file.
 
-{% dialog tests/tutorespfn/Input/trf1_6.in tests/tutorespfn/Refs/trf1_6.out %}
+{% dialog tests/tutorespfn/Input/trf1_6.abi tests/tutorespfn/Refs/trf1_6.abo %}
 
-As for the other RF tests, the changes with respect to *trf1_1.in* are
+As for the other RF tests, the changes with respect to *trf1_1.abi* are
 all gathered in the first part of this file.
 The multi-dataset mode is used, computing from scratch the ground-state wave functions, then computing different
 dynamical matrices with DFPT.
-The run is about 1...2 minutes on a 2.8 GHz machine.
+The run is about 1 minutes on a 2.8 GHz machine.
 In the mean time, you might read more of the ABINIT documentation
 (why not the [[help:mrgddb|mrgddb_help]] and the [[help:anaddb|anaddb_help]]).
 

@@ -1,0 +1,42 @@
+#Diamond Si in an orthorhombic cell.
+#Produce the wf to test  cut3d.
+
+ prtwf   1
+
+ acell 6  10  14
+ ecut 5.8
+ natom  2 nband 4
+ nsppol 2     spinmagntarget 0.0d0
+ nstep 10
+ ntypat  1
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ toldfe 1.0d-6
+ typat  1 1
+ xred 3*0.00d0 3*0.25d0
+ znucl 14
+
+ kptopt 1
+ ngkpt  2 2 2
+ istwfk   1 1 1 1
+
+ diemix 0.6
+ diemac 5
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t58.abi, t59.abi
+#%% [files]
+#%% files_to_test = t58.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = JF. Briere
+#%% description = 
+#%%  Diamond Si in an orthorhombic cell, in preparation of cut3d analysis, see test 59.
+#%%<END TEST_INFO>
+

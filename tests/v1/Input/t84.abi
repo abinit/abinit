@@ -1,0 +1,107 @@
+#   Si in diamond structure; 2 special points.   Bond centered.
+#   Test double-loop use of multi-dataset mode.
+#   Same as test 83, although use no series
+
+ ndtset 12    udtset 3 4    getwfk -1
+
+#inner loop : increase ecut
+ ecut1? 4.0
+ ecut2? 5.0
+ ecut3? 6.0
+
+#outer loop : increase acell
+ acell?1   3*10.00
+ acell?2   3*10.10
+ acell?3   3*10.20
+ acell?4   3*10.30
+
+ diemac 12.0
+ ecutsm 0.5
+ enunit 2
+ intxc 1
+ kptopt 0
+
+ kpt   1 1 1     1 2 2   kptnrm 4
+ natom  2 nband 4
+ nkpt  2
+ nline 3
+ nstep 10
+ nsym  24 ntypat  1
+ occ 4*2.0d0 occopt  0
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel
+       1  0  0    0  1  0    0  0  1
+       0  1 -1    1  0 -1    0  0 -1
+      -1  0  0   -1  0  1   -1  1  0
+       0 -1  1    0 -1  0    1 -1  0
+      -1  0  1   -1  0  0   -1  1  0
+       0 -1  0    0 -1  1    1 -1  0
+       0 -1  1    1 -1  0    0 -1  0
+       0  1 -1    0  0 -1    1  0 -1
+       0  0 -1    1  0 -1    0  1 -1
+      -1  1  0   -1  0  1   -1  0  0
+       1  0 -1    0  1 -1    0  0 -1
+       1 -1  0    0 -1  0    0 -1  1
+      -1  0  0   -1  1  0   -1  0  1
+       0  1  0    1  0  0    0  0  1
+       0  0  1    0  1  0    1  0  0
+       1  0  0    0  0  1    0  1  0
+       0  0  1    1  0  0    0  1  0
+       0  1  0    0  0  1    1  0  0
+      -1  0  1   -1  1  0   -1  0  0
+       0  0 -1    0  1 -1    1  0 -1
+       1  0 -1    0  0 -1    0  1 -1
+       1 -1  0    0 -1  1    0 -1  0
+       0 -1  0    1 -1  0    0 -1  1
+      -1  1  0   -1  0  0   -1  0  1
+ tnons
+   0.0  0.0  0.0
+   0.0  0.0 -0.5
+  -0.5  0.0  0.0
+   0.0 -0.5  0.0
+  -0.5  0.0  0.0
+   0.0 -0.5  0.0
+   0.0 -0.5  0.0
+   0.0  0.0 -0.5
+   0.0  0.0 -0.5
+  -0.5  0.0  0.0
+   0.0  0.0 -0.5
+   0.0 -0.5  0.0
+  -0.5  0.0  0.0
+   0.0  0.0  0.0
+   0.0  0.0  0.0
+   0.0  0.0  0.0
+   0.0  0.0  0.0
+   0.0  0.0  0.0
+  -0.5  0.0  0.0
+   0.0  0.0 -0.5
+   0.0  0.0 -0.5
+   0.0 -0.5  0.0
+   0.0 -0.5  0.0
+  -0.5  0.0  0.0
+ toldfe 1.0d-6
+ typat  1 1
+ wtk   1 3
+ xred   -0.125 -0.125 -0.125
+         0.125  0.125  0.125
+ znucl 14.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t84.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   2 special k point Si in 2-atom diamond unit cell.
+#%%   Double-loop over acell and ecut using metacharacters only.
+#%% topics = multidtset
+#%%<END TEST_INFO>

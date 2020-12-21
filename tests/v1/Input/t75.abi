@@ -1,0 +1,93 @@
+# Hydrogen diatomic molecule. acell much too small.
+# Multidataset testing : geometry optimisation in
+# two parts (test the output of the HIST.nc file, restartxf == -1),
+# then use getxcart and getwfk, and increase the number of bands
+# as well as ecut for a fixed geometry calculation.
+
+# DATASET configuration
+#----------------------
+ ndtset 3
+ restartxf -1
+
+# dataset 1
+ ecut1   12
+ ionmov1  2
+ nband1   1
+ ntime1   2
+
+# dataset 2
+ ecut2   12
+ ionmov2  2
+ nband2   1
+ ntime2   3
+
+# dataset 3
+ ecut3   15
+ ionmov3  0
+ nband3   3
+ ntime    5
+
+# Atomic Structure
+#-----------------
+ acell  7 5 5
+ natom  2
+ ntypat  1
+ rprim 1 0 0
+       0 1 0
+       0 0 1
+ typat  2*1
+ xcart  -0.385  0 0
+         0.385  0 0   Angstrom
+ znucl  1.0
+
+# Structure Optimization
+#-----------------------
+ tolmxf 5.0d-5
+
+# Other variables
+#----------------
+ kptopt 0
+ nkpt  1
+ kptnrm  4
+ kpt  1 1 1
+ wtk  1
+ diemac 1.0d0
+ diemix 0.5d0
+ densfor_pred 1
+ nline 3
+ nstep 7
+ nsym 8
+ occopt 1
+ symrel  1  0  0   0  1  0   0  0  1
+        -1  0  0   0  1  0   0  0  1
+         1  0  0   0 -1  0   0  0  1
+        -1  0  0   0 -1  0   0  0  1
+         1  0  0   0  1  0   0  0 -1
+        -1  0  0   0  1  0   0  0 -1
+         1  0  0   0 -1  0   0  0 -1
+        -1  0  0   0 -1  0   0  0 -1
+ tnons 24*0
+ toldff 5.0d-6
+ getxcart -1
+ getwfk -1
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t75.abo, tolnlines = 0, tolabs = 3.811e-12, tolrel = 5.000e-08
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Same as test 66, H2 molecule with 1 k points, but uses the restartxf=-1 option
+#%%   to test the output of the HIST.nc file. Note that HIST.nc is not read since 
+#%%   one should introduce a getrestartxf variable.
+#%%<END TEST_INFO>

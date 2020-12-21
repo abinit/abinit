@@ -1,0 +1,20 @@
+t86.ddb.out
+Al DDB file for elphon calculation
+3
+t85o_DS2_DDB
+t85o_DS3_DDB
+t85o_DS4_DDB
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi, t90.abi, t91.abi, t92.abi, t93.abi, t94.abi, t95.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t86.ddb.out, tolnlines = 9, tolabs = 6.000e-08, tolrel = 3.000e-02, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+%%  authors = Unknown
+#%% description = mrggkk: merge the 1WF files from t85
+#%%<END TEST_INFO>

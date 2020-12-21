@@ -1,0 +1,46 @@
+# NSCF computation of WFK files with empty states to prepare convergence studies for ZPR calculation
+ ndtset 3
+
+ nband1  70 nbdbuf1 -10 # A negative value means 10% of nband
+ nband   25 nbdbuf   5
+
+# Three Gamma-centered k-meshes:
+# 4x4x4 with 70 bands, then 8x8x8 and 12x12x12 with 25 bands.
+ ngkpt1 4 4 4
+ ngkpt2 8 8 8     getwfk2 -1  # Read previous WFK file to speedup NSCF run.
+ ngkpt3 12 12 12  getwfk3 -1
+
+ nshiftk 1
+ shiftk 0 0 0
+
+########################
+# Common to all datasets
+########################
+ ecut 35.0
+ nstep 150
+ iscf -2          # NSCF run
+ tolwfr 1e-14     # 1e-18 is the recommended value
+
+ getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+
+ structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "O.psp8, Mg-sp-gw.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  teph4zpr_1.abi, teph4zpr_2.abi, teph4zpr_3.abi, teph4zpr_4.abi,
+#%%               teph4zpr_5.abi, teph4zpr_6.abi, teph4zpr_7.abi, teph4zpr_8.abi
+#%% [files]
+#%% use_git_submodule = MgO_eph_zpr
+#%% files_to_test =
+#%%   teph4zpr_3.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = NSCF computation of WFK files with empty states to prepare convergence studies for ZPR calculation
+#%%<END TEST_INFO>

@@ -1,0 +1,77 @@
+# ================================================================
+# NiO: 2 Ni and 2 O atoms in a fcc supercell
+#
+# Test of the preliminary PAW + DMFT loop in abinit
+# (a DMFT calculation is not actually done here:
+# the check is only that LDA is recovered through the DMFT loop).
+# Low cut-off for test; too few k-points
+# ================================================================
+
+# === Datasets
+ndtset 2
+nsppol 2  nspden 2  nspinor 1  ! ferro-magnetic
+fftalg 112  # Needed to preserve old behaviour
+
+# === Structure and cell
+natom 4 ntypat 2 typat 1 1 2 2
+spinat 0 0 1   0 0 -1   0 0 0   0 0 0
+znucl  28.0 8.0
+xred 0 0 0
+    0.0 0.0 0.5
+    0.5 0.5 0.25
+    0.5 0.5 0.75
+acell   3*7.92
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1.0 1.0 0.0
+chksymbreak 0
+nband 28
+occopt 7  tsmear 0.015
+
+# === SCF cycle options
+nstep 20  tolvrs 1.d-7
+ecut 8. pawecutdg 10.
+diemix 0.5
+
+# === K-points and syms
+kptopt 1
+kptrlatt 2 0 0 0 2 0 0 0 2
+
+# === DFT+U/LDA+DMFT options
+usedmft1 0
+usedmft2 1
+dmftcheck2 -1
+dmftbandi 1
+dmftbandf 28
+dmft_solv 2 # will not be used in practice here
+# For historical purposes only, do not use outside of tests
+dmft_occnd_imag 0
+usepawu 0
+lpawu   2 -1        # Applied on d electrons of Nickel
+upawu  0.30   0.0   # Value of U parameter
+jpawu  0.0350 0.0   # Value of J parameter
+dmatpuopt 2
+dmftqmc_l 10
+dmftqmc_n 10
+
+# === Other options
+prtden 0  prteig 0  prtwf 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t07.abo, tolnlines = 3, tolabs = 3.0e-6, tolrel = 3.0e-4, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 6
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = PAW, DMFT
+#%% description = 
+#%%   NiO with 4 atoms. Check of the modified self-consistent loop over electronic density for DMFT. This
+#%%   calculation use LDA occupations for the test and is not running the DMFT part (dmftcheck2=-1).
+#%%<END TEST_INFO>

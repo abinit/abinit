@@ -1,0 +1,34 @@
+t88o_DS20_DVDB
+14
+t85o_DS2_POT1
+t85o_DS3_POT1
+t85o_DS3_POT2
+t85o_DS4_POT1
+t85o_DS4_POT2
+t85o_DS5_POT1
+t85o_DS6_POT1
+t85o_DS6_POT2
+t85o_DS6_POT3
+t85o_DS7_POT1
+t85o_DS7_POT3
+t85o_DS8_POT1
+t85o_DS9_POT1
+t85o_DS9_POT2
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgdv
+#%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t87.stdout, tolnlines=00, tolabs=6.000e-08, tolrel=4.000e-04, fld_options=-medium
+#%% [shell]
+#%% post_commands =
+#%%  ww_cp t88o_DS20_DVDB t89o_DS20_DVDB;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Giantomassi 
+#%% keywords = NC, DFPT, EPH
+#%% description = Merge the DFPT POT files for Al produced on a 4x4x4 q-mesh.
+#%%<END TEST_INFO>

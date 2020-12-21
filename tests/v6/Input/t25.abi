@@ -1,0 +1,58 @@
+# H2 molecule, in a somewhat small box.
+# Computation of transition path between two local minima of the geometry space.
+
+ntimimage 15
+nimage 6
+imgmov 2
+chksymbreak 0
+fxcartfactor 5.0
+tolimg 1.d-5
+istatimg 0
+
+dynimage  0 4*1 0   # Will do relaxation only for the four internal images
+
+natfixx 2
+iatfixx 1 2
+
+xcart         3*0d0              3*0.766911
+xcart_lastimg 3*0d0     2.233089 2*0.766911
+
+#Common data
+
+acell  3*3.0d0
+ecut 15.0d0
+ecutsm 0.5d0
+natom  2
+nband  1
+nstep 20
+ntypat  2
+toldff  2.0d-6
+typat  1 2  # Treat the two atoms as inequivalent, in order to be able to fix the position of one of them, and not the other.
+znucl 1 1
+
+kptopt 1
+ngkpt 4 4 4
+
+#This is to save memory and prevent density history storage
+ densfor_pred 1
+
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
+ pseudos "1h.pspnc, 1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t25.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 20
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = STRING
+#%% description = 
+#%%   Hydrogen diatomic molecule in a cell, close to BCC
+#%%   Test the string method : 6 images, exploring the transition
+#%%   path but keeping X coordinated fixed. Similar to test 24
+#%% topics = TransPath
+#%%<END TEST_INFO>

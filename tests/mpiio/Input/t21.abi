@@ -1,0 +1,84 @@
+ ndtset 8
+
+ occopt1 0
+ nkpt1 1 istwfk1 1 toldfe1 1.0d-10
+
+ occopt2 7 tsmear2 0.001
+ nkpt2 1 istwfk2 1 toldfe2 1.0d-10
+
+ occopt3 0
+ kptopt3 1 kptrlatt3 2 0 0 0 2 0 0 0 2 istwfk3 30*1
+ nshiftk3 4 shiftk3 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+ toldfe3 1.0d-10
+
+ occopt4 7 tsmear4 0.001
+ kptopt4 1 kptrlatt4 2 0 0 0 2 0 0 0 2 istwfk4 30*1
+ nshiftk4 4 shiftk4 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+ toldfe4 1.0d-10
+
+ occopt5 0
+ nkpt5 1 istwfk5 1
+ ionmov5 3 ntime5 5 toldff5 1.0d-6 tolmxf5 1.0d-5
+
+ occopt6 7 tsmear6 0.001
+ nkpt6 1 istwfk6 1
+ ionmov6 3 ntime6 5 toldff6 1.0d-6 tolmxf6 1.0d-5
+
+ occopt7 0
+ kptopt7 1 kptrlatt7 2 0 0 0 2 0 0 0 2 istwfk7 30*1
+ nshiftk7 4 shiftk7 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+ ionmov7 3 ntime7 5 toldff7 1.0d-7 tolmxf7 1.0d-5
+
+ occopt8 7 tsmear8 0.001
+ kptopt8 1 kptrlatt8 2 0 0 0 2 0 0 0 2 istwfk8 30*1
+ nshiftk8 4 shiftk8 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+ ionmov8 3 ntime8 5 toldff8 1.0d-7 tolmxf8 1.0d-5
+
+ nstep 20
+ ecut 10. diemac 12.0d0  enunit 2
+ ngfft 6 6 6
+ ixc 3
+ acell 3*10.366
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ chksymtnons 0
+ znucl 14
+ kptopt 0
+ nband 12 occ 4*2 8*0
+ ntypat 1 typat 1 1  natom 2
+ timopt -1
+ npkpt 1
+ npband 2
+ npfft 2
+ paral_kgb 1
+
+
+#Obsolete entries (now set by default)
+#fftalg 401 wfoptalg 4
+#densfor_pred 6 intxc 0
+#nsym 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.phoney_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t21_MPI4.abo, tolnlines=   10,   tolabs=  2.6e-2,      tolrel= 4.0e-1, fld_options = -easy
+#%% [extra_info]
+#%% keywords = NC 
+#%% authors = Unknown
+#%% description = 
+#%%   Si, Bulk, 2 atoms , paral_kgb.
+#%%   Test of ground state with different occs(7 and 0),
+#%%   and also ionmov 2. Only with 0 and 4 procs.
+#%% topics = MolecularDynamics
+#%%<END TEST_INFO>

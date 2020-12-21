@@ -2228,11 +2228,12 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives a rough description of the initial GS density, for each type of atom.
-This value is only used to create the first exchange and correlation
-potential, and is not used anymore afterwards. For the time being, it
-corresponds to an average radius (a.u.) of the density, and is used to
-generate a gaussian density. If set to 0.0, an optimized value is used.
-No meaning for RF calculations.
+This value is used to create the first exchange and correlation
+potential. Afterwards, it is not used anymore, except in cases related to [[densfor_pred]]. 
+
+[[densty]] gives an average radius (a.u.) of a Gaussian density, that will make each pseudoion neutral.
+If set to 0.0, a tabulated value is used, announced as a 'decay length' in the log file.
+No meaning for RF calculations or any calculation in which a starting density is taken as input.
 """,
 ),
 
@@ -2591,7 +2592,7 @@ columns corresponds respectively to (the normalisation factor has been dropped)
   * m=2, $x^{2}-y^{2}$
 
 [[dmatpawu]] must always be given as a "spin-up" occupation matrix (and
-eventually a "spin-down" matrix). Be aware that its physical meaning depends
+if needed a "spin-down" matrix). Be aware that its physical meaning depends
 on the magnetic properties imposed to the system (with [[nsppol]],
 [[nspinor]], [[nspden]]):
 
@@ -3829,7 +3830,7 @@ Variable(
     mnemonics="ENergy UNITs",
     added_in_version="before_v9",
     text=r"""
-Governs the units to be used for output of eigenvalues (and eventual phonon frequencies)
+Governs the units to be used for output of eigenvalues (and if any, phonon frequencies)
 
   * 0  --> print eigenvalues in hartree;
   * 1  --> print eigenvalues in eV;
@@ -4501,7 +4502,7 @@ algorithm, when the Fock operator is updated.
   (it continues to use the previous potential/density pairs without worrying).
   2. If [[fockoptmix]] == 1: the SCF algorithm is restarted (the previous potential/density pairs are discarded).
 
-The second-to-last (dozen) digit governs the possible modification of the XC
+The second-to-last (tens) digit governs the possible modification of the XC
 functional inside the SCF loop to take into account the lack of update of the
 Fock operator. Irrelevant when the unit digit is 0. If the value 1 is used
 (so, e.g. [[fockoptmix]] == 11), an auxiliary xc functional is used inside the
@@ -4922,9 +4923,9 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This variable is typically used to chain the calculations, in the multi-
-dataset mode ([[ndtset]] > 0), since it describes from which dataset [[acell]]
-and [[rprim]] are to be taken, as input of the present dataset. The cell
-parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
+dataset mode ([[ndtset]] > 0), since it describes from which dataset the output [[acell]]
+and [[rprim]] are to be taken (implicitly also [[scalecart]]), as input of the present dataset. 
+The cell parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
 If 0, no previously computed values are used.
 If >0, the value must be the index of the dataset from which the
 cell data is to be used as input data. It must be the index of a dataset already
@@ -6732,7 +6733,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Mixing coefficient for the unscreened Fock operator in case of hybrid
-functionals. Hartree-Fock corresponds to 1.0, PBE0 to 0.25.
+functionals. Hartree-Fock corresponds to 1.0, PBE0 to 0.25, and B3LYP to 0.2.
 
 ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
 """,
@@ -6751,7 +6752,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Mixing coefficient for the screened Fock operator in case of hybrid
-functionals. HSE has 0.25, B3LYP has 0.2.
+functionals. HSE has 0.25. 
 
 ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune
 this mixing coefficient.
@@ -7244,7 +7245,7 @@ Variable(
     text=r"""
 This option selects the format used to produce "large" binary files such as the output wavefunction files,
 the files with densities and potentials (DEN, POT) as well as the SCR file produced by the GW code.
-Other "small" files such as the GSR.nc are always produced indipendently of the value of **iomode**.
+Other "small" netcdf files such as the GSR.nc are always produced independently of the value of **iomode**.
 
 Note that this variable mainly defines the format of the output files since Abinit is able to read
 data from files independently of their format (either Fortran binary files or netcdf files).
@@ -7263,7 +7264,7 @@ plain Fortran read statements.
 There are cases, however, in which you would like to change the default behaviour.
 For example, you may want to generate WFK or DEN files in netcdf
 format because you need data in this format.
-In this case, you have to use iomode == 3 in the input file to override the default behaviour.
+In this case, you have to use [[iomode]] == 3 in the input file to override the default behaviour.
 Note, however, that you still need parallel IO capabilities enabled in the netcdf library if
 you want to produce netcdf files in parallel with [[paral_kgb]] = 1
 (i.e. netcdf4 + hdf5 + MPI-IO).
@@ -7291,7 +7292,7 @@ Variable(
     mnemonics="IONic MOVEs",
     added_in_version="before_v9",
     text=r"""
-Choice of algorithm to control the displacements of ions, and eventually changes of cell shape and size (see [[optcell]]).
+Choice of algorithm to control the displacements of ions, and possibly changes of cell shape and size (see [[optcell]]).
 No meaning for RF calculations.
 
   * 0 --> Do not move ions (**default behaviour**)
@@ -7649,7 +7650,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of _1WF files",
     added_in_version="before_v9",
     text=r"""
-Indicates eventual starting wavefunctions. As alternative, one can use the
+Indicates possible starting wavefunctions. As alternative, one can use the
 input variables [[getwfk]], [[getwfq]], [[get1wf]] or [[getddk]].
 
 Ground-state calculation:
@@ -7762,7 +7763,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of DDK wavefunctions, in _1WF files",
     added_in_version="before_v9",
     text=r"""
-Indicates eventual starting wavefunctions. As alternative, one can use the
+Indicates possible starting wavefunctions. As alternative, one can use the
 input variables [[getwfk]], [[getwfq]], [[get1wf]] or [[getddk]].
 
 Ground-state calculation:
@@ -7944,7 +7945,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of _WFK files",
     added_in_version="before_v9",
     text=r"""
-Indicates eventual starting wavefunctions. As alternative, one can use the
+Indicates possible starting wavefunctions. As alternative, one can use the
 input variables [[getwfk]], [[getwfq]], [[get1wf]] or [[getddk]].
 
 Ground-state calculation:
@@ -7988,7 +7989,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of the grid _WFK file on the FINE grid",
     added_in_version="before_v9",
     text=r"""
-Indicates eventual starting wavefunctions. As alternative, one can use the input variables [[getwfkfine]].
+Indicates possible starting wavefunctions. As alternative, one can use the input variables [[getwfkfine]].
 
 Ground-state calculation:
 
@@ -8027,7 +8028,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of _WFQ files",
     added_in_version="before_v9",
     text=r"""
-Indicates eventual starting wavefunctions. As alternative, one can use the
+Indicates possible starting wavefunctions. As alternative, one can use the
 input variables [[getwfk]], [[getwfq]], [[get1wf]] or [[getddk]].
 
 Ground-state calculation:
@@ -12569,7 +12570,7 @@ equal to 1 or 0 in each k-point (spin-polarized case). If [[nsppol]] = 2 and
 k points may optionally have different numbers of bands and different
 occupancies. [[nband]]([[nkpt]] * [[nsppol]]) is given explicitly as an array of
 [[nkpt]] * [[nsppol]] elements. [[occ]]() is given explicitly for all bands at
-each k point, and eventually for each spin -- the total number of elements is
+each k point, and possibly for each spin -- the total number of elements is
 the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 [[wtk]] ([[nkpt]]) are NOT automatically normalized under this option.
 
@@ -12676,8 +12677,8 @@ Variable(
     text=r"""
 Allows one to optimize the unit cell shape and dimensions, when [[ionmov]] >= 2 or
 3. The configuration for which the stress almost vanishes is iteratively
-determined, by using the same algorithms as for the nuclei positions. Will
-eventually modify [[acell]] and/or [[rprim]]. The ionic positions are ALWAYS
+determined, by using the same algorithms as for the nuclei positions.
+May modify [[acell]] and/or [[rprim]]. The ionic positions are ALWAYS
 updated, according to the forces. A target stress tensor might be defined, see [[strtarget]].
 
   * **optcell** = 0: modify nuclear positions, since [[ionmov]] = 2 or 3, but no cell shape and dimension optimisation.
@@ -12932,7 +12933,7 @@ this case, [[npkpt]], [[npspinor]], [[npfft]] and [[npband]] are ignored.
 Require compilation option --enable-mpi="yes".
 
 **If paral_kgb = 1**, the parallelization over bands, FFTs, and k-point/spin-
-components is activated (see [[npkpt]], [[npfft]] [[npband]] and eventually
+components is activated (see [[npkpt]], [[npfft]] [[npband]] and possibly
 [[npspinor]]). With this parallelization, the work load is split over four
 levels of parallelization (three level of parallelisation (kpt-band-fft )+
 spin) The different communications almost occur along one dimension only.
@@ -12966,7 +12967,7 @@ can be done as well with a sequential as with a parallel version of the code.
 The user can then choose the adequate number of processor on which he can run
 his job. He must put again paral_kgb = 1 in the input file and put the
 corresponding values for [[npkpt]], [[npfft]], [[npband]],[[bandpp]] and
-eventually [[npspinor]] in the input file.
+possibly [[npspinor]] in the input file.
 """,
 ),
 
@@ -15153,7 +15154,7 @@ real space tau(r), in units of Bohr^-5.
 The name of the kinetic energy density file will be the root output name, followed by _KDEN.
 Like a _DEN file, it can be analyzed by cut3d.
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
-Note that the computation of the kinetic energy density must be activate,
+Note that the computation of the kinetic energy density must be activated,
 thanks to the input variable [[usekden]].
 Please note that kinetic energy density is **not** yet implemented in the case
 of PAW ([[usepaw]] = 1) calculations.
@@ -16125,7 +16126,7 @@ of [[symrel]] are not used. This is to allow doing calculations with
 [[nsym]] = 1, sometimes needed for T-dependent electronic structure, still
 decreasing the number of q points in the case [[qptopt]] = 1 or [[qptopt]] = 3.
 
-  * 0 --> read directly [[qpt]], and its (eventual) renormalisation factor [[qptnrm]].
+  * 0 --> read directly [[qpt]], and its (possible) renormalisation factor [[qptnrm]].
 
   * 1 --> Take fully into account the symmetry to generate the grid of q points in the Irreducible Brillouin Zone only.
     (This is the usual mode for RF calculations)
@@ -21537,14 +21538,14 @@ Variable(
     mnemonics="PseudoPotential DIRectory PATH",
     added_in_version="9.0.0",
     text=r"""
-This variable specifies the directory that will prepended to the names of the pseudopotentials
+This variable specifies the directory that will be prepended to the names of the pseudopotentials
 specified in [[pseudos]].
 This option is useful when all your pseudos are gathered in a single directory in your file system
 and you don not want to type the absolute path for each pseudopotential file.
 
 This variable is used when Abinit is executed with the new syntax:
 
-    abinit run.abi > run.log 2> run.err &
+    abinit abi_in >& log &
 
 The string must be quoted in double quotation marks:
 
@@ -21584,7 +21585,7 @@ Variable(
     abivarname="pseudos",
     varset="files",
     vartype="string",
-    topics=['Control_useful'],
+    topics=['Control_basic'],
     dimensions="scalar",
     defaultval="",
     mnemonics="PSEUDOpotentialS",
@@ -21592,7 +21593,7 @@ Variable(
     text=r"""
 String defining the list of pseudopotential files when Abinit is executed with the new syntax:
 
-    abinit run.abi > run.log 2> run.err &
+    abinit abi_in >& log &
 
 The string must be quoted in double quotation marks and multiple files should be separated by a comma, e.g.
 

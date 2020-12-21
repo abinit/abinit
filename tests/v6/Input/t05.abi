@@ -1,0 +1,42 @@
+t04o_DEN
+0
+2
+t04o_VHA
+0
+2
+t04o_VHXC
+0
+2
+t04o_POT
+0
+0
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = cut3d
+#%% test_chain = t04.abi, t05.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t05.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Hydrogen dimer in a big cell.
+#%%   Read the previously generated files, and analyze them separately, as well as jointly.
+#%%   Remarkable values of the separate analysis :
+#%%   - the integral of the charge density over the volume of the unit cell is 2.0
+#%%   - the mean of the Hartree potential vanishes (G=0) component
+#%%   - the mean of the Kohn-Sham and XC potentials are the same (as their difference would come from non-zero G=0
+#%%   contributions from the local potential and Hartree potential), that is
+#%%   Sum of values, mean, mean times cell volume=   -6.859211E+03   -5.292601E-02   -7.938901E+01
+#%%   - the mean of the XC potential -5.292601E-02 is in perfect agreement with the one from the previous run.
+#%%   Remarkable values of the joint analysis :
+#%%   - the integral of the product of charge density and Hartree potential over the volume of the unit cell is
+#%%   1.610148E+00, correctly twice the Hartree energy.
+#%%   - the integral of the product of charge density and Kohn-Sham potential over the volume of the unit cell is
+#%%   -1.757312E+00, correctly, the difference between the band energy and kinetic energy.
+#%%<END TEST_INFO>
