@@ -111,32 +111,32 @@ Then run the calculation in sequential, first for the initial
 configuration (`tstring_01.in`), and then for the final one (`tstring_02.in`). You
 should obtain the following positions:
 
-1) for the initial configuration:
+1. for the initial configuration:
 
-```
-xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-          -7.1119330966E-01 -5.3954252784E-01  1.6461078895E+00
-          -7.2706367116E-01  1.6395559231E+00 -5.3864186404E-01
-           7.5589045315E+00  0.0000000000E+00  0.0000000000E+00
-           8.2134747935E+00 -1.8873337293E-01 -1.8040045499E+00
-           8.1621251369E+00 -1.4868515614E+00  1.0711027413E+00
-           8.2046046694E+00  1.6513534511E+00  7.5956562273E-01
-           1.9429112745E+00  4.2303909125E-02  2.9000318893E-02
-```
+    ```
+    xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+              -7.1119330966E-01 -5.3954252784E-01  1.6461078895E+00
+              -7.2706367116E-01  1.6395559231E+00 -5.3864186404E-01
+               7.5589045315E+00  0.0000000000E+00  0.0000000000E+00
+               8.2134747935E+00 -1.8873337293E-01 -1.8040045499E+00
+               8.1621251369E+00 -1.4868515614E+00  1.0711027413E+00
+               8.2046046694E+00  1.6513534511E+00  7.5956562273E-01
+               1.9429112745E+00  4.2303909125E-02  2.9000318893E-02
+    ```
 
-2) for the final configuration:
+2. for the final configuration:
 
-```
-xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-          -5.8991482730E-01 -3.6948430331E-01  1.7099330811E+00
-          -6.3146217793E-01  1.6964706443E+00 -3.6340264832E-01
-           7.5589045315E+00  0.0000000000E+00  0.0000000000E+00
-           8.4775515860E+00 -2.9286989031E-01 -1.6949564152E+00
-           7.9555913454E+00 -1.4851844626E+00  1.1974660442E+00
-           8.2294855730E+00  1.6454040992E+00  8.0048724879E-01
-           5.5879660323E+00  1.1438061815E-01 -2.5524007156E-01
-
-```
+    ```
+    xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+              -5.8991482730E-01 -3.6948430331E-01  1.7099330811E+00
+              -6.3146217793E-01  1.6964706443E+00 -3.6340264832E-01
+               7.5589045315E+00  0.0000000000E+00  0.0000000000E+00
+               8.4775515860E+00 -2.9286989031E-01 -1.6949564152E+00
+               7.9555913454E+00 -1.4851844626E+00  1.1974660442E+00
+               8.2294855730E+00  1.6454040992E+00  8.0048724879E-01
+               5.5879660323E+00  1.1438061815E-01 -2.5524007156E-01
+    
+    ```
 
 
 ## 3 Related keywords
@@ -184,7 +184,7 @@ thus only perform one step of string method.
 {% dialog tests/tutoparal/Input/tstring_03.abi %}
 
 Open the `tstring_03.abi` file and look at it. The initial and final
-configurations are specified at the end through the keywords [[xcart] and
+configurations are specified at the end through the keywords [[xcart]] and
 [[nimage|xcart_lastimg]]. By default, ABINIT generates the intermediate
 images by a linear interpolation between these two configurations. In this
 first calculation, we will sample the MEP with 12 points (2 are fixed and
@@ -247,7 +247,7 @@ Total energy as a function of OH distance for the path computed with 12 images
 and [[tolimg]]=0.0001 (which is very close to the x coordinate of the proton:
 first coordinate of xcart  for the 8th atom in the output file).
 
-The keyword [[npimage]] can be automatically set by ABINIT if [[autoparal]] is et to 1. 
+The keyword [[npimage]] can be automatically set by ABINIT if [[autoparal]] is set to 1. 
 
 Let us test this functionality. Edit again the `tstring_04.in` file and comment
 the [[npimage]] line, then add [[autoparal]]=1. Then run the calculation again over 10 CPU cores.
@@ -279,10 +279,13 @@ the path ([[nimage]]) and the convergence criterion ([[tolimg]]).
 
     !!! tip
         The image can be obtained with `agate` or `qagate` with the following commands
+            ```
             :open tstring_04_MPI10o_HIST.nc # 12 images calculation
             :plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV" hold=true
             :open tstring_04_MPI10_22o_HIST.nc # 22 images calculation
             :plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV"
+            ```
+        Replace `plot` with `print` to get the `gnuplot` script.
     
     The following animation is made by putting together the 22
     images obtained at the end of this calculation, from (_i_) to (_f_) and then from
