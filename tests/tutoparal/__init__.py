@@ -18,7 +18,7 @@ subsuites = [
 #"gswvl",
 "mbt",
 #"dmft",
-#"moldyn",
+"moldyn",
 "string",
 "ucrpa",
 ]
@@ -45,13 +45,13 @@ inp_files = [
 "tmbt_3.abi",   # OK
 "tmbt_4.abi",   # OK
 #"tmbt_5.abi",  
-#"tmoldyn_01.abi",    # This is not stable. Does it use random number generators?
-#"tmoldyn_02.abi",
-#"tmoldyn_03.abi",
-#"tmoldyn_04.abi",
-#"tmoldyn_05.abi",
-#"tmoldyn_06.abi",
-#"tmoldyn_07.abi",
+"tmoldyn_01.abi",    # This is not stable. Does it use random number generators?
+"tmoldyn_02.abi",
+"tmoldyn_03.abi",
+"tmoldyn_04.abi",
+"tmoldyn_05.abi",
+"tmoldyn_06.abi",
+"tmoldyn_07.abi",
 "tstring_01.abi",   # MPI Error in MPI_ALLREDUCE
 "tstring_02.abi",
 "tstring_03.abi",

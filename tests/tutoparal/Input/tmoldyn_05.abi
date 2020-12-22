@@ -1,9 +1,9 @@
 #parallelization
 paral_kgb 1
-npband 15
-npfft 3
-npkpt 1
-bandpp 2
+npband 8
+npfft 1
+npkpt 8
+bandpp 19
 
 prtden 0 prtwf 0 prteig 0
 ecut 3.
@@ -13,7 +13,7 @@ tolvrs 1.d-3 nstep 50
 
 #K-points and sym
 occopt 3
-kptopt 0 nkpt 1
+ngkpt 2 2 2
 nsym 1
 
 #Molecular Dynamics parameters
@@ -28,7 +28,7 @@ rprim 1 0 0
  0 1 0
 0 0 1
 natom 108 ntypat 1 typat 108*1 znucl 13.0
-nband 300
+nband 304
 xred
   0.00000000E+00  0.00000000E+00  0.00000000E+00
   0.00000000E+00  0.16666667E+00  0.16666667E+00
@@ -139,17 +139,20 @@ xred
   0.83333333E+00  0.66666667E+00  0.83333333E+00
   0.83333333E+00  0.83333333E+00  0.66666667E+00
 
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8"
+pseudos "Al.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [files]
+#%% [NCPU_64]
 #%% files_to_test = 
-#%%   tmoldyn_04.out, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
-#%% psp_files = PseudosTM_pwteter/13al.pspnc
+#%%   tmoldyn_05_MPI64.abo, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
 #%% [paral_info]
-#%% nprocs_to_test = 45
+#%% nprocs_to_test = 64
+#%% max_nprocs=64
 #%% [extra_info]
-#%% authors = 
+#%% authors = J. Bieder
 #%% keywords = 
-#%% description = 
+#%% description = Molecular dynamics for Al
 #%%<END TEST_INFO>
