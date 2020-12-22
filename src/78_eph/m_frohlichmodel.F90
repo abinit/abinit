@@ -272,7 +272,8 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
        do idir=1,3
          do iband=1,deg_dim
            do jband=1,deg_dim
-             lutt_dij(iband,jband)=DOT_PRODUCT(lutt_unit_kdir(:,idir),MATMUL(eig2_diag_cart(:,:,iband,jband),lutt_unit_kdir(:,idir)))
+             lutt_dij(iband,jband)=&
+&             DOT_PRODUCT(lutt_unit_kdir(:,idir),MATMUL(eig2_diag_cart(:,:,iband,jband),lutt_unit_kdir(:,idir)))
            enddo
          enddo
 
