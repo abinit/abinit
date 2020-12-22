@@ -32,7 +32,7 @@ iterative procedure in which each iteration consists of two steps:
 1. **Evolution step**: the images are moved following the atomic forces.
 2. **Reparametrization step**: the images are equally redistributed along the string.
 
-The algorithm presently implemented in ABINIT is the so-called "simplified string method" [[cite:Weinan2007]].
+The algorithm presently implemented in ABINIT is the so-called *simplified string method* [[cite:Weinan2007]].
 It has been designed for the sampling of smooth energy landscapes.
 
 *Before continuing you might work in a different subdirectory as for the other
@@ -41,8 +41,8 @@ tutorials. Why not work_paral_string?*
 !!! important
 
     In what follows, the names of files are mentioned as if you were in this subdirectory.
-    All the input files can be found in the *\$ABI_TESTS/tutoparal/Input* directory.
-    You can compare your results with reference output files located in *\$ABI_TESTS/tutoparal/Refs*.
+    All the input files can be found in the `\$ABI_TESTS/tutoparal/Input` directory.
+    You can compare your results with reference output files located in `\$ABI_TESTS/tutoparal/Refs`.
 
     In the following, when "run ABINIT over _nn_ CPU cores" appears, you have to use
     a specific command line according to the operating system and architecture of
@@ -73,7 +73,7 @@ NH<sub>3</sub> at a given distance from each other (4.0 Å = 7.5589 bohr). The c
 using a LDA exchange-correlation functional.
 
 You can visualize the initial and final states of the reaction below (H atoms
-are in white, the O atom is in red and the N atom in grey).
+are in white, the O atom is in red and the N atom in blue).
 
 ![initial state](paral_images_assets/Initial1.png)
 
@@ -232,18 +232,18 @@ presence of the NH<sub>3</sub> molecule.
     ```
     The total energies are printed out as: etotal_1img, etotal_2img, ...., etotal_12img.
 
-    Alternatively use the command `:data etotal` in `agate` or `qAgate` to export the total energy into a file.
-
 !!! tip
     Also, you can can have a look at the atomic positions in each image: in
     cartesian coordinates (xcart_1img, xcart_2img, ...) or in reduced coordinates
     (xred_1img, xred_2img, ...) to compute the OH distance.
 
-    Alternatively use the command `:data distance 1 8` in `agate` or `qAgate` to export the OH distance into a file.
 
+!!! tip
+    You can issue the command `:plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV"` in `agate` or `qAgate`
 ![courbe 1](paral_images_assets/curve1.png)
 
 Total energy as a function of OH distance for the path computed with 12 images
+
 and [[tolimg]]=0.0001 (which is very close to the x coordinate of the proton:
 first coordinate of xcart  for the 8th atom in the output file).
 
@@ -276,15 +276,22 @@ the path ([[nimage]]) and the convergence criterion ([[tolimg]]).
     Total energy as a function of OH distance for the path computed with 12 images
     and [[tolimg]]=0.0001 (grey curve) and the one computed with 22 images and
     [[tolimg]]=0.0001 (red curve).
+
+    !!! tip
+        The image can be obtained with `agate` or `qagate` with the following commands
+            :open tstring_04_MPI10o_HIST.nc # 12 images calculation
+            :plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV" hold=true
+            :open tstring_04_MPI10_22o_HIST.nc # 22 images calculation
+            :plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV"
     
     The following animation is made by putting together the 22
     images obtained at the end of this calculation, from (_i_) to (_f_) and then from
     (_f_) to (_i_). It allows to visualize the MEP.
 
     !!! tip
-    Open the `tstring_04o_HIST.nc` file with `agate` or `qAgate` to produce this animation.
+        Open the `tstring_04o_HIST.nc` file with `agate` or `qAgate` to produce this animation.
     
-  <video id="video_string" controls autoplay>
+  <video id="video_string" controls autoplay loop style="width: 100%;">
   <source src="../paral_images_assets/stringvideo.mp4" type="video/mp4">
   <source src="../paral_images_assets/stringvideo.webm" type="video/webm">
   You browser does not support the video tag. Download the file [here](paral_images_assets/stringvideo.mp4).
