@@ -263,10 +263,8 @@ As usual, checking whether the input parameters give converged values is of cour
 In this case, we should first use [[help:mrgddb|mrgddb]] to merge the _DDB and _EIGR2D/_EIGI2D
 but since we only have one q-point we do not have to perform this step.
 The static temperature dependence and the G2F can be computed thanks to anaddb
-with the files file [[tests/tutorespfn/Input/tdepes_2.files]] and the input
+with the files file tdepes_2.files and the input
 file [[tests/tutorespfn/Input/tdepes_2.abi]].
-
-{% dialog tests/tutorespfn/Input/tdepes_2.files %}
 
 The information contained in the files file can be understood by looking at the echo
 if its reading in the standard output:
@@ -295,7 +293,7 @@ As concern the anaddb input file, note that the electron-phonon analysis is trig
 
 Launch anaddb by the command
 
-    anaddb < tdepes_2.files > tdepes_2.stdout
+    anaddb tdepes_2.abi 
 
 (where `anaddb` might have to be replaced by the proper location of the anaddb executable).
 
@@ -539,9 +537,7 @@ with the usual syntax:
 
 <!-- THIS SECTION DOES NOT SEEM CORRECT : there is no other k point computed in section 2 ...
 Of course, the high symmetry points computed in section 2 have the same value here.
-It is a good idea to check it by running the script with the file [[tests/tutorespfn/Input/tdepes_3bis.files]].
-
-{% dialog tests/tutorespfn/Input/tdepes_3bis.files %}
+It is a good idea to check it by running the script with the file tdepes_3bis.files.
 
 -->
 
