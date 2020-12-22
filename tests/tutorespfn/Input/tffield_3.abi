@@ -1,5 +1,8 @@
-# General informations
-#**********************
+# anaddb input file to compute DFPT properties of AlP,
+# based on previous abinit computations in tffield_2.abi
+
+# General information
+#********************
    rfmeth  1
    chneut  2
 
@@ -8,8 +11,12 @@
    elaflag  3
  piezoflag  3
  instrflag  1
+   dieflag  3
+     nph2l  1
 
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
@@ -21,7 +28,7 @@
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = M. Veithen, P. Ghosez
+#%% authors = J. Zwanziger, M. Veithen, P. Ghosez
 #%% keywords = 
 #%% description = Anaddb input file.
 #%%<END TEST_INFO>

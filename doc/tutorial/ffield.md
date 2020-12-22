@@ -585,6 +585,11 @@ conditions of strain, stress, field, and so forth are discussed in depth in
 
 ![](ffield_assets/tffield_6_stress.png)
 
-Redoing the same kind of finite field calculation when allowing the ions to
-relax, one can access the relaxed ion proper piezoelectric constant.
-The result is 0.1311 C/m$^2$.
+The following input file modifies the previous run to perform a finite field 
+calculation combined with ion relaxation, giving access to the
+the relaxed ion proper piezoelectric constant.
+
+{% dialog tests/tutorespfn/Input/tffield_7.abi %}
+
+From the output of this run, analyzing the results in the same way as before,
+you should obtain 0.1311 C/m$^2$ for the relaxed ion piezoelectric constant.
