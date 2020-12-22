@@ -129,7 +129,8 @@ program abinit
 #endif
 
 #if defined HAVE_BIGDFT
- use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories
+ use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories,&
+ &                         f_timing_initialize,f_timing_reset
 #endif
 
  use m_common, only : get_dtsets_pspheads
@@ -275,6 +276,9 @@ program abinit
  call f_lib_initialize()
  call bigdft_init_errors()
  call bigdft_init_timing_categories()
+!Should be called once per dataset
+ call delete_file('wvl_time.yaml',ierr)
+ call f_timing_reset(filename='wvl_time.yaml',master=me==0,verbose_mode=.false.)
 #endif
 
  ABI_MALLOC(mpi_enregs, (0:max(1,ndtset)))

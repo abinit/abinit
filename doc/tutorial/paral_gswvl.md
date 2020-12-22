@@ -187,7 +187,6 @@ Run the boron example with {2, 4, 14, 15} processors and plot the speed-up.
 One can also look at the standard output to the load balancing of the Poisson
 Solver and the load balancing of orbitals (with 15 processors):
 
-
     [...]
      Processes from 0 to 9 treat 2 orbitals
      Processes from 10 to 10 treat 1 orbitals
