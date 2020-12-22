@@ -130,7 +130,7 @@ program abinit
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories,&
- &                         f_timing_initialize,f_timing_reset
+ &                         f_timing_initialize,f_timing_reset,wvl_timing => timing
 #endif
 
  use m_common, only : get_dtsets_pspheads
@@ -276,9 +276,10 @@ program abinit
  call f_lib_initialize()
  call bigdft_init_errors()
  call bigdft_init_timing_categories()
-!Should be called once per dataset
- call delete_file('wvl_time.yaml',ierr)
- call f_timing_reset(filename='wvl_time.yaml',master=me==0,verbose_mode=.false.)
+ if (timopt==10) then
+   call delete_file('wvl_timings.yaml',ierr)
+   call f_timing_reset(filename='wvl_time.yaml',master=me==0,verbose_mode=.false.)
+ end if
 #endif
 
  ABI_MALLOC(mpi_enregs, (0:max(1,ndtset)))
@@ -459,7 +460,7 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 17) Timing analysis
- if(timopt/=0)then
+ if(mod(timopt,10)/=0)then
    call timana (mpi_enregs(1), natom, nband, ndtset, nfft, nkpt, npwtot, nsppol, timopt)
  else
 #if defined HAVE_MPI
@@ -595,16 +596,19 @@ program abinit
    end if
  end do
 
+#if defined HAVE_BIGDFT
+ if (timopt==10) then
+   call wvl_timing(xmpi_world,'== POSTPRC','PR')
+ end if
+ call f_lib_finalize()
+#endif
+
  ! Here we deallocate dtsets. Do not access dtsets after this line!
  do ii=0,size(dtsets)-1,1
    call dtsets(ii)%free()
  end do
  ABI_FREE(dtsets)
  ABI_FREE(pspheads)
-
-#if defined HAVE_BIGDFT
- call f_lib_finalize()
-#endif
 
 #if defined HAVE_GPU_CUDA
  call unsetdevice_cuda(use_gpu_cuda)

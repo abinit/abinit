@@ -68,6 +68,7 @@
            prteig           0
             prtwf           0
           spgroup           1
+           timopt          10
            tolwfr      1.00000000E-14
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1
            usewvl           1
@@ -435,6 +436,7 @@ total_energy_dc     : -2.25049445386556E+01
           spgroup           1
            strten      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+           timopt          10
            tolwfr      1.00000000E-14
             typat      1  1  1  1  1  1  1  1  1  1  1  1  1  1
            usewvl           1

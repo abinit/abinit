@@ -21,6 +21,7 @@ iscf         0    # Activation of the Direct minimization scheme for the calcula
 nwfshist     6    # Activation of DIIS algoithm (Direct minimization scheme)
                   #   with 6 wavefunctions stored in history
 
+timopt      10    # This will create a YAML file with the timings of the WVL routines
 
 #-------------------------------------------------------------------------------
 

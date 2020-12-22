@@ -277,7 +277,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
- logical :: is_dfpt=.false.,wvlbigdft=.false.,wvl_debug=.true.
+ logical :: is_dfpt=.false.,wvlbigdft=.false.
  character(len=500) :: msg
  character(len=fnlen) :: ddbnm,dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
@@ -1247,7 +1247,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (iexit/=0) eigen(:)=zero
 
 #if defined HAVE_BIGDFT
- if (dtset%usewvl == 1 .and. wvl_debug) then
+ if (dtset%usewvl == 1 .and. dtset%timopt==10) then
    call wvl_timing(xmpi_world,'== INITS','PR')
  end if
 #endif
@@ -1694,7 +1694,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
 
 #if defined HAVE_BIGDFT
- if (dtset%usewvl == 1 .and. wvl_debug) then
+ if (dtset%usewvl == 1 .and. dtset%timopt==10) then
    call wvl_timing(xmpi_world,'== WFN OPT','PR')
  end if
 #endif

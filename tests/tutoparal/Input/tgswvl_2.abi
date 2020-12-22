@@ -20,6 +20,7 @@ nwfshist     6    # Activation of DIIS algoithm for the calculation of wavefunct
                   #   (Direct minimization scheme)
                   #   with 6 wavefunctions stored in history
 
+timopt      10    # This will create a YAML file with the timings of the WVL routines
 
 #-------------------------------------------------------------------------------
 
