@@ -23,9 +23,9 @@ The linear response method has been introduced by several authors
 [[cite:Cococcioni2002]], [[cite:Cococcioni2005]],[[cite:Dederichs1984]],[[cite:Hybertsen1989]],
 [[cite:Anisimov1991]],[[cite:Pickett1998]].
 It is based on the fact that *U* corresponds to the energy to localize an additional
-electron on the same site: *U=E[n+1]+E[n-1]-2E[n]* [[cite:Hybertsen1989]]. This can be reformulated
+electron on the same site: $U=E[n+1]+E[n-1]-2E[n]$ [[cite:Hybertsen1989]]. This can be reformulated
 as the response to an infinitesimal change of of occupation of the orbital by
-the electrons dn. Then *U* is the second derivative of the energy with respect
+the electrons $dn$. Then *U* is the second derivative of the energy with respect
 to the occupation $U=\frac{\delta^2 E}{\delta^2 n}$. The first method fixed the occupation by
 cutting the hopping terms of localized orbitals. Later propositions
 constrained the occupation through Lagrange multipliers [[cite:Dederichs1984]],[[cite:Anisimov1991]]. The Lagrange
@@ -72,27 +72,27 @@ for the other tutorials. Why not Work_udet?*
      You can compare your results with reference output files located in
      $ABI_TESTS/tutorial/Refs directory (for the present tutorial they are named tudet*.abo).
 
-The input file *tudet_1.in* is an example of a file to prepare a wave function
+The input file *tudet_1.abi* is an example of a file to prepare a wave function
 for further processing. The corresponding output file is ../Refs/tudet_1.abo).
 
-Copy the files *tudet_1.in* in your work directory, and run ABINIT:
+Copy the files *tudet_1.abi* in your work directory, and run ABINIT:
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work_udet
 cd Work_udet
-cp ../tudet_1.in .
+cp ../tudet_1.abi .
 
-abinit  tudet_1.in > log 2> err &
+abinit  tudet_1.abi > log 2> err &
 ```
 
 In the meantime, you can read the input file and see that this is a usual
 DFT+U calculation, with *U*=0.
 
-{% dialog tests/tutorial/Input/tudet_1.in %}
+{% dialog tests/tutorial/Input/tudet_1.abi %}
 
 This setting allows us to read the occupations of
-the Fe 3d orbitals ([[lpawu]] 2). The cell contains 2 atoms. This is the
+the Fe $3d$ orbitals ([[lpawu]] 2). The cell contains 2 atoms. This is the
 minimum to get reasonable response matrices. We converge the electronic
 structure to a high accuracy ([[tolvrs]] 10d-12), which usually allows one to
 determine occupations with a precision of 10d-10. The [[ecut]] is chosen very low,
@@ -101,14 +101,14 @@ We do not suppress the writing of the *WFK* file, because this is the input for
 the calculations of U.
 
 Once this calculation has finished, run the second one:
-Copy the file *tudet_2.in* in your work directory, and run ABINIT:
+Copy the file *tudet_2.abi* in your work directory, and run ABINIT:
 
-    abinit tudet_2.in > tudet_2.log
+    abinit tudet_2.abi > tudet_2.log
 
-{% dialog tests/tutorial/Input/tudet_2.in %}
+{% dialog tests/tutorial/Input/tudet_2.abi %}
 
-As you can see from the *tudet_2.in* file, this run uses the *tudet_1o_WFK* as
-an input (as indata_prefix = "tudet_1.o"). In the *tudet_2.in* all the symmetry relations are specified
+As you can see from the *tudet_2.abi* file, this run uses the *tudet_1o_WFK* as
+an input (as indata_prefix = "tudet_1.o"). In the *tudet_2.abi* all the symmetry relations are specified
 explicitly. In the *tudet_2.log* you can verify that none of the symmetries
 connects atoms 1 with atom 2:
 
@@ -131,7 +131,7 @@ You can generate these symmetries, in a separate run, where you specify the
 atom where the perturbation is done as a different species. From the output
 you read the number of symmetries ([[nsym]]), the symmetry operations
 ([[symrel]]) and the non-symmorphic vectors ([[tnons]]). This is already
-done here and inserted in the *tudet_2.in* file. Note that you can alternatively
+done here and inserted in the *tudet_2.abi* file. Note that you can alternatively
 disable all symmetries with [[nsym]] = 1, or break specific symmetries by
 displacing the impurity atom in the preliminary run. However, for the
 determination of *U*, the positions should be the ideal positions and only the
@@ -158,18 +158,24 @@ Self-consistency was reached twice: Once for a positive shift, once for the nega
 The lines starting with URES
 
      URES      ii    nat       r_max    U(J)[eV]   U_ASA[eV]   U_inf[eV]
-     URES       1      2     4.69390     3.86230     3.10778     2.71714
-     URES       2     16     9.38770     7.28001     5.85781     5.12150
-     URES       3     54    14.08160     7.60740     6.12125     5.35182
-     URES       4    128    18.77540     7.67626     6.17665     5.40026
-     URES       5    250    23.46930     7.69849     6.19454     5.41590
+     URES       1      2     4.69390     3.86321     3.10851     2.71778
+     URES       2     16     9.38770     7.28015     5.85793     5.12160
+     URES       3     54    14.08160     7.60761     6.12142     5.35197
+     URES       4    128    18.77540     7.67652     6.17686     5.40045
+     URES       5    250    23.46930     7.69879     6.19478     5.41611
 
     
-contain *U* for different supercells. The column "nat" indicates how many atoms
-were involved in the supercell, r_max indicates the maximal distance of the
+contain *U* for different supercells. These values of $U$ are computed using the extrapolation
+procedure proposed in [[cite:Cococcioni2005]]. In this work, it is shown that using a two atom supercell for the DFT calculation
+and an extrapolation procedure allows a estimation of the value of $U$. More precise values can be obtained
+using a larger supercell for the DFT calculation and an extrapolation. For simplicity, in this tutorial, we restrict to
+the two atoms supercell for the DFT calculation.
+
+ The column "nat" indicates how many atoms
+were involved in the extrapolated supercell, r_max indicates the maximal distance of the
 impurity atoms in that supercell. The column *U* indicates the actual *U* you
 calculated and should use in your further calculations. U_ASA is an estimate
-of *U* for more extended projectors and U_\inf is the estimate for a projector
+of *U* for more extended projectors and U_inf is the estimate for a projector
 extended even further.
 
 Although it is enough to set [[macro_uj]] 1, you can further tune your runs.
@@ -211,12 +217,12 @@ to specify the maximum total number of atoms in the supercell. Then, run *ujdet*
     grep URES ujdet.out
 
      URES      ii    nat       r_max    U(J)[eV]   U_ASA[eV]   U_inf[eV]
-     URES       1      2     4.69390     3.86230     3.10778     2.71714
-     URES       2     16     9.38770     7.28001     5.85781     5.12150
-     URES       3     54    14.08160     7.60740     6.12125     5.35182
-     URES       4    128    18.77540     7.67626     6.17665     5.40026
-     URES       5    250    23.46930     7.69849     6.19454     5.41590
-     URES       6    432    28.16310     7.70781     6.20204     5.42246
+     URES       1      2     4.69390     3.86321     3.10851     2.71778
+     URES       2     16     9.38770     7.28015     5.85793     5.12160
+     URES       3     54    14.08160     7.60761     6.12142     5.35197
+     URES       4    128    18.77540     7.67652     6.17686     5.40045
+     URES       5    250    23.46930     7.69879     6.19478     5.41611
+     URES       6    432    28.16310     7.70813     6.20230     5.42268
 
 
 As you can see, *U* has now been extrapolated to a supercell containing 432 atoms.
