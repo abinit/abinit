@@ -116,7 +116,7 @@ program anaddb
  real(dp),allocatable :: qdrp_cart(:,:,:,:)
  character(len=10) :: procstr
  character(len=24) :: codename, start_datetime
- character(len=strlen) :: string
+ character(len=strlen) :: string, raw_string
  character(len=fnlen) :: filnam(8),elph_base_name,tmpfilename, phibz_prefix
  character(len=500) :: msg
  type(args_t) :: args
@@ -200,16 +200,17 @@ program anaddb
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module
  if (iam_master) then
-   call instrng(filnam(1), lenstr, 1, strlen, string)
+   call instrng(filnam(1), lenstr, 1, strlen, string, raw_string)
    ! To make case-insensitive, map characters to upper case.
    call inupper(string(1:lenstr))
  end if
 
  call xmpi_bcast(string, master, comm, ierr)
+ call xmpi_bcast(raw_string, master, comm, ierr)
  call xmpi_bcast(lenstr, master, comm, ierr)
 
  ! Save input string in global variable so that we can access it in ntck_open_create
- INPUT_STRING = string
+ INPUT_STRING = raw_string
 
  ! Read the inputs
  call invars9(inp, lenstr, natom, string)
@@ -609,7 +610,7 @@ program anaddb
 !**********************************************************************
  call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(8),comm)
 
- 
+
  ! Interpolate the DDB onto the first list of vectors and write the file.
  if (inp%prtddb == 1 .and. inp%ifcflag == 1) then
    call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
@@ -635,7 +636,7 @@ program anaddb
 ! and related properties: mode effective charges, oscillator strength
 ! - Raman tensor (at q=0 with only TO modes) and EO coef. (nlflag)
 !**********************************************************************
- 
+
  ABI_MALLOC(fact_oscstr, (2,3,3*natom))
  ABI_MALLOC(lst,(inp%nph2l+1))
  lst(:)=zero
@@ -643,10 +644,10 @@ program anaddb
  ! Print the electronic contribution to the dielectric tensor
  ! It can be extracted directly from the DDB if perturbation with E-field is present
  if (inp%dieflag/=0 .or. inp%nph2l/=0 .or. inp%nlflag==1) then
- 
+
   !***************************************************************
   ! Generates the dynamical matrix at Gamma
-  ! TODO: Check if we can avoid recomputing the phonon freq and eigendispla at Gamma becasue 
+  ! TODO: Check if we can avoid recomputing the phonon freq and eigendispla at Gamma becasue
   ! it is already done before in this routine. (EB)
   ! The problem is that it is done through mkphbs, which has only printing and does not retrun anything as out... (EB)
 
@@ -678,7 +679,7 @@ program anaddb
     mpert,msym,natom,nsym,ntypat,phfrq,qphnrm(1),qphon,&
     Crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
 
-  ! calculation of the oscillator strengths, mode effective charge and 
+  ! calculation of the oscillator strengths, mode effective charge and
   ! dielectric tensor, frequency dependent dielectric tensor (dieflag)
   ! and mode by mode decomposition of epsilon if dieflag==3
   if (inp%dieflag/=0) then
@@ -695,7 +696,7 @@ program anaddb
     call wrtout([std_out, ab_out], msg)
 
     call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-      ab_out,lst,mpert,natom,0,phfrq,comm,ana_ncid) 
+      ab_out,lst,mpert,natom,0,phfrq,comm,ana_ncid)
   end if
 
 end if ! dieflag!=0 or inp%nph2l/=0
@@ -800,10 +801,10 @@ end if ! condition on nlflag
    if (inp%dieflag/=2 .and. inp%dieflag/=0) then
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
        ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
-   end if 
- end if ! nph2l/=0   
+   end if
+ end if ! nph2l/=0
  ! End of second list of wv stuff (nph2l/=0)
-   
+
 
  ABI_FREE(fact_oscstr)
  ABI_FREE(lst)

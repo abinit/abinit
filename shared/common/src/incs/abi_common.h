@@ -123,14 +123,9 @@
  * Add option to check automatically the exit status of allocate so that we can abort gracefully if oom.
  * and abipy can detect the problem.
  *
- *   ABI_ALLOCATE   --> Allocate memory for intrinsic datatypes (real, integer, complex).
- *   ABI_CALLOC     --> Clear alloc: same as ABI_ALLOCATE but initializes memory with zeros
- *   ABI_DEALLOCATE --> Free memory allocated by ABI_ALLOCATE
- *
- * To allocate/deallocate arrays of user-defined type use:
- *
- *   ABI_DT_ALLOCATE
- *   ABI_DT_DEALLOCATE
+ *   ABI_MALLOC    --> Allocate memory for intrinsic datatypes (real, integer, complex).
+ *   ABI_CALLOC     --> Clear alloc: same as ABI_MALLOC but initializes memory with zeros
+ *   ABI_FREE --> Free memory allocated by ABI_MALLOC
  *
  * To allocate scalars, use:
  *
@@ -209,6 +204,15 @@
 #  define ABI_MALLOC_TYPE_SCALAR(type,scalar)  allocate(type::scalar)
 
 #endif
+
+
+/* FIXME
+ * Alias to preserve previous behaviour. Just to facilitate the migration */
+#define ABI_ALLOCATE(arr, size) ABI_MALLOC(arr, size)
+#define ABI_DEALLOCATE(arr) ABI_FREE(arr)
+#define MSG_ERROR(msg) ABI_ERROR(msg)
+#define MSG_WARNING(msg) ABI_WARNING(msg)
+#define MSG_BUG(msg) ABI_BUG(msg)
 
 
 /* Macros to allocate zero-initialized arrays. */

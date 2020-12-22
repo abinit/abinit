@@ -73,7 +73,7 @@ program band2eps
  real(dp),allocatable :: displ(:,:)
  type(band2eps_dataset_type) :: inp
  character(len=500) :: message
- character(len=strlen) :: string
+ character(len=strlen) :: string, raw_string
   !scale : hold the scale for each line (dimension=nlines)
   !qname : hold the name (gamma,R,etc..) for each extremity of line (dimension=nlines+1)
   !nqptl : =nqpt by line (dimension=nlines)
@@ -133,7 +133,7 @@ program band2eps
 !strlen from defs_basis module
  write(std_out,'(a,a)') 'Opening and reading input file: ', filnam(1)
  option=1
- call instrng (filnam(1),lenstr,option,strlen,string)
+ call instrng (filnam(1),lenstr,option,strlen,string, raw_string)
  !To make case-insensitive, map characters to upper case:
  call inupper(string(1:lenstr))
 

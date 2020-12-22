@@ -241,7 +241,7 @@ type(args_t) function args_parser() result(args)
       call libpaw_log_flag_set(.True.)
 
     else if (arg == "--netcdf-classic") then
-      !  Use netcdf classic mode for new files when only sequential-IO needs to be performed
+      ! Use netcdf classic mode for new files when only sequential-IO needs to be performed
       call nctk_use_classic_for_seq()
 
     else if (arg == "--enforce-fortran-io") then

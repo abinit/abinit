@@ -226,7 +226,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 !scalars
  integer,parameter :: master=0, option1= 1
  integer :: marr,tread,lenstr_noxyz,ierr
- character(len=strlen) :: string_raw
+ character(len=strlen) :: string_raw, string_with_comments
  character(len=500) :: msg
 !arrays
  integer :: intarr(1)
@@ -240,7 +240,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  if (xmpi_comm_rank(comm) == master) then
 
    ! strlen from defs_basis module
-   call instrng(filnamin, lenstr, option1, strlen, string)
+   call instrng(filnamin, lenstr, option1, strlen, string, string_with_comments)
 
    ! Copy original file, without change of case
    string_raw=string
@@ -281,10 +281,10 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  end if
 
  ! Save input string in global variable so that we can access it in ntck_open_create
- ! XG20200720 : Why not saving string ? string_raw is less processed than string ...
- ! MG: Because the string will be use by python or users to recreate an input file.
- ! and input file in lower-case is nicer
- INPUT_STRING = string_raw
+ ! XG20200720: Why not saving string ? string_raw is less processed than string ...
+ ! MG: Because we don't want a processed string without comments.
+ ! Abipy may use the commented section to extract additional metadata e.g. the pseudos md5
+ INPUT_STRING = string_with_comments
 
  !write(std_out,'(a)')string(:lenstr)
 
@@ -300,8 +300,7 @@ end subroutine parsefile
 !! at first character in string, reading ndig digits (including possible
 !! sign, decimal, and exponent) by computing the appropriate format and
 !! performing a formatted read (list-directed read would be perfect for
-!! this application but is inconsistent with internal read according to
-!! Fortran90 standard).
+!! this application but is inconsistent with internal read according to Fortran90 standard).
 !! In case of a real number, this routine
 !! is also able to read SQRT(number): return the square root of the number.
 !!
@@ -496,7 +495,8 @@ end subroutine inread
 !!
 !! OUTPUT
 !!  lenstr=actual number of character in string
-!!  string*(strln)=string of character
+!!  string*(strln)=preprocessed string of character
+!!  raw_string=string without any preprocessine (comments are included.
 !!
 !! PARENTS
 !!      anaddb,importcml,localorb_S,lwf,parsefile
@@ -506,7 +506,7 @@ end subroutine inread
 !!
 !! SOURCE
 
-recursive subroutine instrng(filnam, lenstr, option, strln, string)
+recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
 
 !Arguments ------------------------------------
 !scalars
@@ -514,13 +514,14 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  integer,intent(out) :: lenstr
  character(len=*),intent(in) :: filnam
  character(len=*),intent(out) :: string
+ character(len=*),intent(out) :: raw_string
 
 !Local variables-------------------------------
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
  integer :: b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
- integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign
+ integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign,lenstr_raw
  logical :: include_found, ex
 !arrays
  integer :: bs(2)
@@ -529,7 +530,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  character(len=500) :: filnam_inc,msg
  character(len=fnlen) :: shell_var, shell_value
  character(len=fnlen+20) :: line
- character(len=strlen),pointer :: string_inc
+ character(len=strlen),pointer :: string_inc, raw_string_inc
 
 !************************************************************************
 
@@ -558,6 +559,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  ! Initialize string to blanks
  string=blank
  lenstr=1
+ lenstr_raw = 0
 
  ! Set maximum number lines to be read to some large number
  mline=500000
@@ -571,18 +573,16 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
    !  The number of lines in the commentary is also resulting from
    !  a long tuning..
 
-   !  DEBUG
-   !  write(std_out,*)' instrng, iline=',iline,' ios=',ios,' echo :',trim(line(1:fnlen+20))
-   !  ENDDEBUG
+   ! write(std_out,*)' instrng, iline=',iline,' ios=',ios,' echo :',trim(line(1:fnlen+20))
 
    ! Exit the reading loop when arrived at the end
-   if(ios/=0)then
+   if (ios/=0) then
      backspace(input_unit)
      read (unit=input_unit,fmt= '(a1)' ,iostat=ios) string1
      if(ios/=0)exit
      backspace(input_unit)
      read (unit=input_unit,fmt= '(a3)' ,iostat=ios) string3
-     if(string3=='end')exit
+     if(string3=='end') exit
      write(msg, '(3a,i0,11a)' ) &
       'It is observed in the input file: ',TRIM(filnam),', line number ',iline,',',ch10,&
       'that there is a non-zero IO signal.',ch10,&
@@ -592,6 +592,21 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
       'add the keyword ''end'' at the very beginning of the last line of your input file.'
      ABI_ERROR(msg)
    end if
+
+   ! Save raw line in raw_string including comments that may be needed by external processors
+   ! e.g. AbiPy may need the JSON section with pseudos. Also add new line.
+   ii2 = len_trim(line) + 1
+   if (lenstr_raw + ii2 > strln) then
+     write(msg, '(8a)' ) &
+      'The size of your input file: ',trim(filnam),' is such that the internal',ch10,&
+      'character string that should contain it is too small.',ch10,&
+      'Action: decrease the size of your input file,',ch10,&
+      'or contact the ABINIT group.'
+     ABI_ERROR(msg)
+   end if
+
+   raw_string(lenstr_raw+1:lenstr_raw+ii2) = trim(line) // new_line("A")
+   lenstr_raw = lenstr_raw + ii2
 
    ! TODO: Ignore sections inside TEST_INFO markers so that we don't need to prepend comment markers.
    !in_testinfo = 0
@@ -731,7 +746,8 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
      end if
      ! Read included file (warning: recursive call !)
      ABI_MALLOC(string_inc,)
-     call instrng(trim(filnam_inc),lenstr_inc,option,strln-lenstr,string_inc)
+     ABI_MALLOC(raw_string_inc,)
+     call instrng(trim(filnam_inc),lenstr_inc,option,strln-lenstr,string_inc,raw_string_inc)
      ! Check resulting total string length
      if (lenstr+lenstr_inc>strln) then
        write(msg, '(6a)' ) &
@@ -744,6 +760,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
      string(lenstr+1:lenstr+lenstr_inc)=string_inc(1:lenstr_inc)
      lenstr=lenstr+lenstr_inc
      ABI_FREE(string_inc)
+     ABI_FREE(raw_string_inc)
    end if
 
    ! If mline is reached, something is wrong
@@ -761,9 +778,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  nline1=iline-1
  close (unit=input_unit)
 
-!DEBUG
-!    write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
-!ENDDEBUG
+ !write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
 
 !Substitute environment variables, if any
  b1=0
@@ -781,9 +796,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
    if(b3/=0 .and. b3<b2)b2=b3
    if(b2/=0)then
      shell_var=string(b1+1:b1+b2-1)
-!DEBUG
-!write(std_out,'(a,a)')' shell_var=',shell_var(:b2-1)
-!ENDDEBUG
+     !write(std_out,'(a,a)')' shell_var=',shell_var(:b2-1)
      call get_environment_variable(shell_var(:b2-1),shell_value,status=ierr,length=len_val)
      if (ierr == -1) ABI_ERROR(sjoin(shell_var(:b2-1), "is present but value of environment variable is too long"))
      if (ierr == +1) ABI_ERROR(sjoin(shell_var(:b2-1), "environment variable is not defined!"))
@@ -793,12 +806,10 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
      lenstr=lenstr-(b2-b1)+len_val
    endif
  enddo
-!DEBUG
-!write(std_out,'(a)')string(:lenstr)
-!ENDDEBUG
+ !write(std_out,'(a)')string(:lenstr)
 
-!Identify concatenate string '" // "' with an arbitrary number of blanks before and after the //
-!Actually, at this stage, there is no consecutive blanks left...
+ ! Identify concatenate string '" // "' with an arbitrary number of blanks before and after the //
+ ! Actually, at this stage, there is no consecutive blanks left...
  do
    b1 = index(string(1:lenstr), '//')
    if(b1/=0)then
@@ -827,9 +838,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
    endif
  enddo
 
-!DEBUG
-!write(std_out,'(a,a)')' incomprs : 2, string=',string(:lenstr)
-!ENDDEBUG
+ !write(std_out,'(a,a)')' incomprs : 2, string=',string(:lenstr)
 
  ! Make sure we don't have unmatched quotation marks
  if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
@@ -3965,7 +3974,7 @@ type(geo_t) function geo_from_abivars_path(path, comm) result(new)
  integer :: jdtset, iimage, nimage, iatom, itypat
  integer :: my_rank, lenstr, ierr, ii, start, tread, marr
  !character(len=500) :: msg
- character(len=strlen) :: string
+ character(len=strlen) :: string, raw_string
 !arrays
  integer,allocatable :: intarr(:)
  real(dp) :: acell(3), rprim(3,3)
@@ -3979,7 +3988,7 @@ type(geo_t) function geo_from_abivars_path(path, comm) result(new)
 
  if (my_rank == master) then
    ! Below part copied from `parsefile`. strlen from defs_basis module
-   call instrng(path, lenstr, option1, strlen, string)
+   call instrng(path, lenstr, option1, strlen, string, raw_string)
    ! To make case-insensitive, map characters of string to upper case.
    call inupper(string(1:lenstr))
    !call chkvars_in_string(protocol1, list_vars, list_logicals, list_strings, string)
