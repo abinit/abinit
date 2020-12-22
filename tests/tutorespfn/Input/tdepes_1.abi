@@ -38,7 +38,7 @@
 # Cell dependent parameters
  acell 3*6.675
  rprim 0 .5 .5 .5 0 .5 .5 .5 0
- nsym 1                # Disable symmetries. Symmetries are not yet in production.
+ nsym 1              # Disable symmetries. K-point symmetries are not yet working.
  natom 2
  typat 1 1
  xred 3*0.0 3*0.25
@@ -46,14 +46,16 @@
  ntypat 1
  znucl 6
  diemac 6
- ecut 10              # Underconverged ecut. 
+ ecut 37              
  enunit 2
- nstep 50
  istwfk *1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/6c.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
