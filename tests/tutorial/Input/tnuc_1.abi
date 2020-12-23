@@ -30,9 +30,6 @@ znucl 14 8 # atomic number of atoms, will be cross checked against pseudopotenti
            # this order defines type 1 as silicon, type 2 as oxygen
 pp_dirpath "$ABI_PSPDIR" # pseudopotential directory
 pseudos "Pseudodojo_paw_pbe_standard/Si.xml, Pseudodojo_paw_pbe_standard/O.xml"
-# pseudos "Si.GGA-PBE-rpaw-1.55.abinit, O.GGA-PBE-rpaw-1.45.abinit" # pseudopotential files
-#pp_dirpath "/home/jzwanzig/abinit/psps/paw/JTH-PBE-atomicdata-1.1/ATOMICDATA/"
-#pseudos "Si.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml"
 
 #Definition of the atoms
 natom 6 # 6 atoms in the unit cell 
