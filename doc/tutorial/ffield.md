@@ -49,22 +49,22 @@ For example, create Work_ffield in \$ABI_TESTS/tutorespfn/Input*
 In this tutorial we will assume that the ground-state properties of AlP have
 been previously obtained, and that the corresponding convergence studies have been done.
 We will adopt the following set of generic parameters:
+```
+acell   3*7.2728565836E+00
+ecut    5    
+ecutsm  0.5
+dilatmx 1.05
+nband   4 (=number of occupied bands)
+ngkpt   6 6 6
+nshiftk 4
+shiftk  0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
 
-       acell               10.29
-       ecut                5    
-       ecutsm              0.5
-       dilatmx             1.05
-       nband               4 (=number of occupied bands)
-       ngkpt               6 6 6
-       nshiftk             4
-       shiftk   0.5 0.5 0.5
-                0.5 0.0 0.0
-                0.0 0.5 0.0
-                0.0 0.0 0.5
-
-       pseudopotentials    Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
-                           Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
-
+pseudopotentials  Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+                  Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+```
 
 In principle, the [[acell]] to be used should be the one corresponding to the
 optimized structure at the [[ecut]], and [[ngkpt]] combined with [[nshiftk]]
@@ -150,21 +150,22 @@ rfdir          1 1 1
 Make the run, then open the output file and look for the occurrence "Berry".
 The output reports values of the Berry phase for individual k-point strings.
 
-     Computing the polarization (Berry phase) for reciprocal vector:
-      0.16667  0.00000  0.00000 (in reduced coordinates)
-     -0.01620  0.01620  0.01620 (in cartesian coordinates - atomic units)
-     Number of strings:   144
-     Number of k points in string:    6
+```
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.16667  0.00000  0.00000 (in reduced coordinates)
+ -0.01620  0.01620  0.01620 (in cartesian coordinates - atomic units)
+ Number of strings:   144
+ Number of k points in string:    6
 
-     Summary of the results
-     Electronic Berry phase     2.206976968E-03
-                Ionic phase    -7.500000000E-01
-                Total phase    -7.477930231E-01
-        Remapping in [-1,1]    -7.477930231E-01
- 
-               Polarization    -1.632453164E-02 (a.u. of charge)/bohr^2
-               Polarization    -9.340041839E-01 C/m^2
+ Summary of the results
+ Electronic Berry phase     2.206976733E-03
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.477930233E-01
+    Remapping in [-1,1]    -7.477930233E-01
 
+           Polarization    -1.632453164E-02 (a.u. of charge)/bohr^2
+           Polarization    -9.340041842E-01 C/m^2
+```
 The "Remapping in [-1,1]" is there to avoid the quantum of polarization. As
 discussed in [[cite:Djani2012]], the indeterminacy of the quantum phase,
 directly related to the quantum of polarization, can lead to spurious effects
@@ -191,47 +192,29 @@ If you go further in the file you will find the final results in cartesian
 coordinates. You can collect them for the different values of $\tau$.
 
 $\tau = 0$
+```
+ Polarization in cartesian coordinates (a.u.):
+     Total: -0.282749182E-01  -0.282749182E-01  -0.282749182E-01
 
-     Polarization in cartesian coordinates (a.u.):
-     (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-         Electronic berry phase:        0.834483494E-04   0.834483494E-04   0.834483491E-04
-         Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01  
-         Total:                        -0.282749182E-01  -0.282749182E-01  -0.282749182E-01
-    
-     Polarization in cartesian coordinates (C/m^2):
-     (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-         Electronic berry phase:        0.477447741E-02   0.477447740E-02   0.477447739E-02
-         Ionic:                        -0.162251718E+01  -0.162251718E+01  -0.162251718E+01  
-         Total:                        -0.161774270E+01  -0.161774270E+01  -0.161774270E+01
-
+ Polarization in cartesian coordinates (C/m^2):
+     Total: -0.161774270E+01  -0.161774270E+01  -0.161774270E+01
+```
 $\tau = +0.01$
+```
+ Polarization in cartesian coordinates (a.u.):
+     Total: -0.281920467E-01  -0.282749119E-01  -0.282749119E-01
 
-     Polarization in cartesian coordinates (a.u.):
-     (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-         Electronic berry phase:        0.560333204E-04   0.834547246E-04   0.834547246E-04
-         Ionic:                        -0.282480804E-01  -0.283583666E-01  -0.283583666E-01  
-         Total:                        -0.281920470E-01  -0.282749118E-01  -0.282749118E-01
-    
-     Polarization in cartesian coordinates (C/m^2):
-     (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-         Electronic berry phase:        0.320593306E-02   0.477484216E-02   0.477484216E-02
-         Ionic:                        -0.161620718E+01  -0.162251718E+01  -0.162251718E+01  
-         Total:                        -0.161300125E+01  -0.161774234E+01  -0.161774234E+01
-
+ Polarization in cartesian coordinates (C/m^2):
+     Total: -0.161300123E+01  -0.161774234E+01  -0.161774234E+01
+```
 $\tau = -0.01$
+```
+ Polarization in cartesian coordinates (a.u.):
+     Total: -0.283577762E-01  -0.282749119E-01  -0.282749119E-01
 
-     Polarization in cartesian coordinates (a.u.):
-     (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-         Electronic berry phase:        0.110876151E-03   0.834547247E-04   0.834547247E-04
-         Ionic:                        -0.284686528E-01  -0.283583666E-01  -0.283583666E-01  
-         Total:                        -0.283577766E-01  -0.282749118E-01  -0.282749118E-01
-    
-     Polarization in cartesian coordinates (C/m^2):
-     (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-         Electronic berry phase:        0.634375253E-02   0.477484217E-02   0.477484217E-02
-         Ionic:                        -0.162882718E+01  -0.162251718E+01  -0.162251718E+01  
-         Total:                        -0.162248342E+01  -0.161774234E+01  -0.161774234E+01
-
+ Polarization in cartesian coordinates (C/m^2):
+     Total: -0.162248340E+01  -0.161774234E+01  -0.161774234E+01
+```
 From the previous data, we can extract the Born effective charge of Al. Values
 to be used are those in a.u., in order to find the charge in electron units. It
 corresponds to (the volume of the primitive unit cell must be specified in atomic units too):
@@ -287,27 +270,27 @@ anaddb for further processing, using the input file *tffield_3.abi* and the *tff
 
 The DFPT calculation yields the following
 piezoelectric constants, as found in
-*tffield_3.out*:
+*tffield_3.abo*:
+```
+ Proper piezoelectric constants (clamped ion) (unit:c/m^2)
 
-     Proper piezoelectric constants (clamped ion) (unit:c/m^2)
+      0.00000000     -0.00000000      0.00000000
+      0.00000000      0.00000000      0.00000000
+     -0.00000000     -0.00000000     -0.00000000
+     -0.64263948      0.00000000      0.00000000
+      0.00000000     -0.64263948      0.00000000
+      0.00000000      0.00000000     -0.64263948
+ ....
+ Proper piezoelectric constants (relaxed ion) (unit:c/m^2)
 
-          0.00000000      0.00000000      0.00000000
-         -0.00000000      0.00000000     -0.00000000
-          0.00000000      0.00000000      0.00000000
-         -0.64263946      0.00000000      0.00000000
-          0.00000000     -0.64263946      0.00000000
-          0.00000000      0.00000000     -0.64263946
-     ...
-     Proper piezoelectric constants (relaxed ion) (unit:c/m^2)
-
-          0.00000000      0.00000000     -0.00000000
-          0.00000000     -0.00000000     -0.00000000
-          0.00000000      0.00000000     -0.00000000
-          0.13114445      0.00000000     -0.00000000
-          0.00000000      0.13114445     -0.00000000
-         -0.00000000     -0.00000000      0.13114445
-
-{% dialog tests/tutorespfn/Refs/tffield_3.out %}
+      0.00000000      0.00000000     -0.00000000
+      0.00000000     -0.00000000     -0.00000000
+      0.00000000     -0.00000000     -0.00000000
+      0.13114427      0.00000000     -0.00000000
+      0.00000000      0.13114427     -0.00000000
+     -0.00000000     -0.00000000      0.13114427
+```
+{% dialog tests/tutorespfn/Refs/tffield_3.abo %}
 
 The piezoelectric constants here are the change in polarization as a function
 of strain [[cite:Wu2005]].  The rows are the strain directions using Voigt
@@ -355,29 +338,20 @@ should give the following final results (obtained by taking finite difference
 expressions of the strains for different electric fields): 
 $-0.6427~C/m^2$ for the clamped ion case, and $0.1310~C/m^2$ for the relaxed ion case.
 
-For example, the clamped ion piezoelectric constant was obtained from *tffield_4.out*:
-
-    == DATASET  2 ==================================================================
+For example, the clamped ion piezoelectric constant was obtained from *tffield_4.abo*:
+```
+== DATASET  2 ==========================================================
+....
+ Polarization in cartesian coordinates (C/m^2):
+     Total: -0.162420887E+01  -0.162587046E+01  -0.162587046E+01
+....    
+== DATASET  3 ==========================================================
      ...
-     Polarization in cartesian coordinates (C/m^2):
-     (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-         Electronic berry phase:       -0.165111693E-02   0.480007628E-02   0.480007628E-02
-         Ionic:                        -0.162255774E+01  -0.163067053E+01  -0.163067053E+01  
-         Total:                        -0.162420886E+01  -0.162587045E+01  -0.162587045E+01
-    
-    and
-    
-    == DATASET  3 ==================================================================
-     ...
-     Polarization in cartesian coordinates (C/m^2):
-     (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-         Electronic berry phase:        0.112035049E-01   0.475231432E-02   0.475231432E-02
-         Ionic:                        -0.162255774E+01  -0.161444495E+01  -0.161444495E+01  
-         Total:                        -0.161135424E+01  -0.160969264E+01  -0.160969264E+01
-
-
-The difference between -0.162420886E+01 (obtained at strain +0.01) and
--0.161135424E+01 (obtained at train -0.01) gives the finite difference -0.0128546,
+ Polarization in cartesian coordinates (C/m^2):
+     Total: -0.161135421E+01  -0.160969264E+01  -0.160969264E+01
+```
+The difference between -0.162420887E+01 (obtained at strain +0.01) and
+-0.161135421E+01 (obtained at train -0.01) gives the finite difference -0.0128546,
 which, divided by 0.02 (the total change in strain) gives -0.6427, as noted above.
 
 ## 3 Finite electric field calculations
@@ -451,25 +425,23 @@ evolution of the forces with the field and extract the following results from
 the output file:
 
 $E=0$
-
-    cartesian forces (hartree/bohr) at end:
-       1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-       2     -0.00000000000000    -0.00000000000000    -0.00000000000000
-
-
+```
+cartesian forces (hartree/bohr) at end:
+   1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+   2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+```
 $E = +0.0001$
-
-    cartesian forces (hartree/bohr) at end:
-       1     -0.00022532222820    -0.00022532222820    -0.00022532222820
-       2      0.00022532222820     0.00022532222820     0.00022532222820
-
-
+```
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00022532204220    -0.00022532204220    -0.00022532204220
+    2      0.00022532204220     0.00022532204220     0.00022532204220
+```
 $E = -0.0001$
-
-    cartesian forces (hartree/bohr) at end:
-       1      0.00022548272851     0.00022548272851     0.00022548272851
-       2     -0.00022548272851    -0.00022548272851    -0.00022548272851
-
+```
+ cartesian forces (hartree/bohr) at end:
+    1      0.00022548273033     0.00022548273033     0.00022548273033
+    2     -0.00022548273033    -0.00022548273033    -0.00022548273033
+```
 In a finite electric field, the force on atom $A$ in direction $i$ can be written as:
 $$
 F_{A,i} = Z^*_{A,ii}E + \Omega_0 \frac{d\chi}{d\tau} E^2
@@ -500,31 +472,20 @@ Going back to the output file, you can also look at the evolution of the
 polarization with the field.
 
 $E = 0$
-
-    Polarization in cartesian coordinates (a.u.):
-    (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-        Electronic berry phase:        0.834483487E-04   0.834483487E-04   0.834483487E-04
-        Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01  
-        Total:                        -0.282749182E-01  -0.282749182E-01  -0.282749182E-01
-
-
+```
+ Polarization in cartesian coordinates (a.u.):
+     Total: -0.282749182E-01  -0.282749182E-01  -0.282749182E-01
+```
 $E = +0.0001$
-
-    Polarization in cartesian coordinates (a.u.):
-    (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-        Electronic berry phase:        0.127353848E-03   0.127353848E-03   0.127353848E-03
-        Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01  
-        Total:                        -0.282310127E-01  -0.282310127E-01  -0.282310127E-01
-
-
+```
+ Polarization in cartesian coordinates (a.u.):
+     Total: -0.282310128E-01  -0.282310128E-01  -0.282310128E-01
+```
 $E = -0.0001$
-
-    Polarization in cartesian coordinates (a.u.):
-    (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-        Electronic berry phase:        0.395935833E-04   0.395935836E-04   0.395935838E-04
-        Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01  
-        Total:                        -0.283187730E-01  -0.283187730E-01  -0.283187730E-01
-
+```
+ Polarization in cartesian coordinates (a.u.):
+     Total: -0.283187730E-01  -0.283187730E-01  -0.283187730E-01
+```
 
 In a finite electric field, the polarization in terms of the linear and
 quadratic susceptibilities is, in SI units,
