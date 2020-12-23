@@ -46,7 +46,7 @@ tutorials. Why not work_paral_string?*
 
     In the following, when "run ABINIT over _nn_ CPU cores" appears, you have to use
     a specific command line according to the operating system and architecture of
-    the computer you are using. This can be for instance: mpirun -n _nn_ abinit input.abi
+    the computer you are using. This can be for instance: `mpirun -n nn abinit input.abi`
     or the use of a specific submission file.
 
 !!! tip
