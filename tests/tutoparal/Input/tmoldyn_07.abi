@@ -13,19 +13,19 @@ tolvrs 1.d-3 nstep 50
 
 #K-points and sym
 occopt 3
-kptopt 0 nkpt 1
+ngkpt 1 1 1
 nsym 1
 
 #Molecular Dynamics parameters
 ionmov 12 ntime 300
 dtion 100
 ndtset 3
-mdtemp1 5500 5500
-mdtemp2 6000 6000
-mdtemp3 6500 6500
-tsmear1 5500. K
-tsmear2 6000. K
-tsmear3 6500. K
+mdtemp1 4500 4500
+mdtemp2 5000 5000
+mdtemp3 5500 5500
+tsmear1 4500. K
+tsmear2 5000. K
+tsmear3 5500. K
 
 #Cell and atoms definition
 acell 3*12.81
