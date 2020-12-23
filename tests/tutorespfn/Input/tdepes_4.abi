@@ -116,7 +116,7 @@
     3/8 3/8 3/4  # K
     0.0 0.0 0.0  # Gamma
 
-# Cell dependant parameters
+# Cell dependent parameters
  acell 3*6.675
  rprim 0 .5 .5 .5 0 .5 .5 .5 0
  nsym 1                # Disable symmetries. Symmetries are not yet in production.
@@ -142,7 +142,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tdepes_4.abo,  tolnlines= 0, tolabs=  0.000e-00, tolrel=  0.000e-00, fld_options=-easy
+#%%   tdepes_4.abo,  tolnlines= 30, tolabs=  2.000e-04, tolrel=  5.000e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

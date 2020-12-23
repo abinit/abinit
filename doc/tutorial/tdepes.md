@@ -26,7 +26,7 @@ There are three ways to compute the temperature dependence with Abinit:
   * **Using post-processing python scripts**: This way provides more options and is more efficient (less disk space, less memory demanding). 
     This option **requires Netcdf** (both in Abinit and python). In this tutorial, we only focus on this approach.
 
-  * **Using an interpolation of the perturbed potential**: This new way is covered in the [[Eph4zpr]]  [Zero-point renormalization of the band gap and temperature-dependent band gaps](Eph4zpr) tutorial.  
+  * **Using an interpolation of the perturbed potential**: This new way is covered in the [ZPR and T-dependent band structures](eph4zpr) tutorial.  
 
 !!! important
 
@@ -303,9 +303,6 @@ The run will generate 3 files:
 :  This g2F spectral function represents the contribution of the phononic modes of energy E
    to the change of electronic eigenenergies according to the equation
 
-![](tdepes_assets/Eq1.png)
-
-
 **tdepes_2.out_ep_PDS**
 :  This file contains the phonon density of states
 
@@ -318,9 +315,6 @@ The run will generate 3 files:
 END OF OBSOLETE
 
 -->
-
-
-
 
 
 
@@ -624,9 +618,4 @@ accurate values of the ZPR at 0K you can look at the table above.
     It is therefore possible to extrapolate the results. Different analytical behavior extists depending
     if the material is polar and if the state we are considering is a band extrema or not.
     More information can be found in Ref. [[cite:Ponce2015]]
-
-
-
-
-
 

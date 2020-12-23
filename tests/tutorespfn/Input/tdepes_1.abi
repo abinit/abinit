@@ -33,12 +33,12 @@
  rfatpol3 1 2          # Treat displacements of all atoms
  rfdir3   1 1 1        # Do all directions 
  tolwfr3  1.0d-8       # Underconverged : tolwfr 1.0d-22 should be used for converged results
- kptopt3  3
 
 # Cell dependent parameters
  acell 3*6.675
  rprim 0 .5 .5 .5 0 .5 .5 .5 0
  nsym 1              # Disable symmetries. K-point symmetries are not yet working.
+ kptopt  3           # Disable TR symmetry
  natom 2
  typat 1 1
  xred 3*0.0 3*0.25
