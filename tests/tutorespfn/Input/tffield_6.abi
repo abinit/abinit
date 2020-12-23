@@ -81,7 +81,8 @@ shiftk 0.5 0.5 0.5
        0.0 0.0 0.5
 
 #Parameters for the SCF procedure
-toldfe 1.0d-12
+nstep 8
+toldfe 1.0d-15
 
 # suppress printing of density and eigenvalues for this tutorial, 
 # but we do need the wavefunctions

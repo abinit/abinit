@@ -12,6 +12,7 @@ ndtset 3
     prtwf1    1
    kptopt1    1
    tolvrs1    1.0D-18
+    nstep1    8
 
 #DATASET2 : non scf calculation: GS WF in the whole BZ
 #*****************************************************
@@ -38,6 +39,7 @@ ndtset 3
    getddk3    2
    tolvrs3    1.0d-12
    kptopt3    2
+    nstep3    8
 
 #Definition of the unit cell
 # these cell parameters were derived from a relaxation run done with the
