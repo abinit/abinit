@@ -28,7 +28,7 @@ least a 200 CPU core parallel computer.
     its core engine.
     Any post-process tool will work though !!
 
-## 1 Summary of the molecular dynamics method
+## Summary of the molecular dynamics method
 
 The basic idea underlying Ab Initio Molecular Dynamics (AIMD) is to compute
 the forces acting on the nuclei from electronic structure calculations that
@@ -61,7 +61,7 @@ mkdir -p $ABI_TESTS/tutoparal/Input/Work_paral_moldyn
 cd $ABI_TESTS/tutoparal/Input/Work_paral_moldyn
 ```
 
-## 2 Performing molecular dynamics with ABINIT
+## Performing molecular dynamics with ABINIT
 
 There are different algorithms to do molecular dynamics. See the input
 variable [[ionmov]], with values 1, 6, 7, 8, 9, 12, 13 and 14. [[dtion]]
@@ -172,7 +172,7 @@ allocated for this tutorial.
     You can plot the evolution of pressure with respect to the time step by issuing `:plot P`.
     Replace `:plot` by `:print` or `:data` to save the image or write an ASCII file.
 
-## 3 The convergence on **k**-points and supercell size
+## The convergence on **k**-points and supercell size
 
 In the previous section you have learned to perform molecular dynamics with
 abinit. We used a fcc supercell of 32 atoms with only 1 **k**-point. In this
@@ -280,12 +280,12 @@ one **k**-point generated with a 1x1x1 gid is *not* $\Gamma$!.
 To get the $\Gamma$ point only, and decrease the execution time by half, set
 [[shiftk]] to `0 0 0` and check the value [[kpt]] in the output file.
 
-## 4 Compute the melting temperature of Al at a given pressure
+## Compute the melting temperature of Al at a given pressure
 
 As an example of what can be done in molecular dynamics, we are going to
 calculate the melting temperature of aluminum using the so-called Heat Until
 it Melts (HUM) method. In this method the solid phase is heated gradually
-until melting occurs. Let's start with a temperature of 5500 K.
+until melting occurs. Let's start with a temperature of 4500 K.
 To work fast, we use a 32 atoms supercell and 1 **k**-point 
 (note that the output file is very big,
 and no reference has been provided for comparison).
@@ -296,19 +296,29 @@ temperature, the cell is solid.
 
 !!! tip
     Alternatively, use `agate` or `qagate` to directly produce the following pictures.
-    The positions can be obtains directly with `:plot positions xy cart` where xy can be replaced by
-    xz or yz to change the plan. `cart` means cartesian coordinates.
+    The positions can be obtains directly with `:plot positions yz` where yz can be replaced by
+    xy or xz to change the plan. Note that the atoms on the border are not displayed at contrario
+    to the animations.
 
 ![xcart](paral_moldyn_assets/xcart1.png)
 
-Increase the temperature to 6000 K (do not
+  <video id="video_md1" controls autoplay loop style="width: 100%;">
+  <source src="../paral_moldyn_assets/4500.mp4" type="video/mp4">
+  You browser does not support the video tag. Download the file [here](paral_moldyn_assets/4500.mp4).
+  </video>
+
+Increase the temperature to 5000 K (do not
 forget to also change the electronic temperature with tsmear) and run ABINIT.
 Save the pressure and again, look at the positions. The cell is still solid.
-Set the temperature to 6500 K. Look at the positions: the ions are moving
+Set the temperature to 5500 K. Look at the positions: the ions are moving
 across the cell and do not come back to their equilibrium positions. The cell
 has melted and is now liquid. Plot the pressures for the three simulations:
 
 ![xcart](paral_moldyn_assets/xcart2.png)
+ <video id="video_md2" controls autoplay loop style="width: 100%;">
+ <source src="../paral_moldyn_assets/5500.mp4" type="video/mp4">
+ You browser does not support the video tag. Download the file [here](paral_moldyn_assets/5500.mp4).
+ </video>
 
 !!! tip
     To run the three temperatures in 1 run, use [[ndtset]] 3 and specify for each `dtset` the values for [[mdtemp]]
@@ -333,8 +343,8 @@ has melted and is now liquid. Plot the pressures for the three simulations:
 
 You can clearly observe a discontinuous change in pressure due to the volume
 difference between the solid and liquid phases. This give a melting
-temperature of 6250 K at 149 GPa. With more sophisticated techniques the
-melting temperature at this pressure is around 5500 K. Indeed, in addition to
+temperature of 5250 K at 132 GPa. 
+One has to be very careful. Indeed, in addition to
 the crude parameters we used ([[ecut]], [[natom]]...), the HUM method has some
 intrinsic drawbacks. In HUM the crystal is heated homogeneously, the melting
 initiates in the bulk and this results in an overheating effect.
