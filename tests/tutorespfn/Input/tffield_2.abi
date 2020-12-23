@@ -4,13 +4,14 @@
 
 # DFPT calculations require a series of computations to 
 # to derive all necessary information
-ndtset 3    # 3 calculations will be performed
+ndtset 3
 
 #DATASET1 : scf calculation: GS WF in the BZ
 #********************************************
    prtden1    1
+    prtwf1    1
    kptopt1    1
-   toldfe1    1.0d-12
+   tolvrs1    1.0D-18
 
 #DATASET2 : non scf calculation: GS WF in the whole BZ
 #*****************************************************
@@ -24,17 +25,18 @@ ndtset 3    # 3 calculations will be performed
                 # It would also be possible to use rfddk 1 here, and compute the DDK
                 # wavefunctions from within the DFPT formalism
     rfdir2    1 1 1
+    prtwf2    1
 
-#DATASET3 : linear response to atomic displacements, electric fields, and strains
-#**************************************************************
+#DATASET3 : linear response to atomic displacements
+#**************************************************
    getwfk3    2
-   getddk3    2
     rfdir3    1 1 1
-   rfstrs3    3
    rfphon3    1
   rfatpol3    1 2
+   rfstrs3    3
    rfelfd3    3
-   tolvrs3    1.0d-10
+   getddk3    2
+   tolvrs3    1.0d-12
    kptopt3    2
 
 #Definition of the unit cell
@@ -78,6 +80,12 @@ shiftk 0.5 0.5 0.5
        0.5 0.0 0.0
        0.0 0.5 0.0
        0.0 0.0 0.5
+
+# by default, don't save files, only save files within each
+# data set as needed
+prtwf 0
+prtden 0
+prteig 0
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
