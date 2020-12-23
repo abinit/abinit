@@ -1,9 +1,4 @@
 # Crystalline alpha-quartz
-# Preparatory run for G0W0 calculations
-#
-# DATASET 1: SCF run
-# DATASET 2: NSCF run to generate the WFK with a sufficient number of empty bands 
-
 ndtset 2
 timopt -1
 
@@ -76,10 +71,10 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%% test_chain = tmbt_1.abi, tmbt_2.abi, tmbt_3.abi, tmbt_4.abi
 #%% [files]
 #%% [paral_info]
-#%% max_nprocs = 20
-#%% nprocs_to_test = 20
+#%% max_nprocs = 64
+#%% nprocs_to_test = 64
 #%% [NCPU_20]
-#%% files_to_test = tmbt_1_MPI20.abo, tolnlines = 5, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%% files_to_test = tmbt_1_MPI64.abo, tolnlines = 5, tolabs = 1.100e-03, tolrel = 3.000e-03
 #%% [shell]
 #%% post_commands = 
 #%%  ww_cp tmbt_1_MPI20o_DS2_WFK tmbt_2_MPI20i_WFK;
