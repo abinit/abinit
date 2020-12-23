@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 22 Dec 2020.
-- ( at 16h12 )
+.Starting date : Wed 23 Dec 2020.
+- ( at 13h46 )
   
 - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/sponce_beauty/tests/TestBot_MPI1/tutorespfn_tdepes_1/tdepes_1.abi
 - output file    -> tdepes_1.abo
@@ -118,9 +118,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
                        5.00000000E-01  0.00000000E+00  5.00000000E-01
                        0.00000000E+00  5.00000000E-01  5.00000000E-01
                        5.00000000E-01  5.00000000E-01  5.00000000E-01
-           kptopt1          1
-           kptopt2          1
-           kptopt3          3
+           kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      9.43987553E+00
 P           mkmem           8
@@ -1116,9 +1114,7 @@ tolerances: {tolwfr: 1.00E-08, }
                        5.00000000E-01  0.00000000E+00  5.00000000E-01
                        0.00000000E+00  5.00000000E-01  5.00000000E-01
                        5.00000000E-01  5.00000000E-01  5.00000000E-01
-           kptopt1          1
-           kptopt2          1
-           kptopt3          3
+           kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      9.43987553E+00
 P           mkmem           8
@@ -1288,10 +1284,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         19.5  wall=         19.6
+- Proc.   0 individual time (sec): cpu=         21.2  wall=         21.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and  25 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.5  wall=         19.6
+.Delivered   0 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=         21.2  wall=         21.4
