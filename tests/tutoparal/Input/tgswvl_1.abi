@@ -86,6 +86,7 @@ optstress 0       # Stress tensor computation is not relevant here
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_BIGDFT
+#%% exclude_builders = ubu_intel_16.0_mpich, ubu_intel_15.0_mpich
 #%% [files]
 #%% [paral_info]
 #%% max_nprocs = 14
