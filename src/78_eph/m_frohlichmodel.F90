@@ -35,6 +35,7 @@ module m_frohlichmodel
  use m_ifc
  use m_dtset
 
+ use m_fstrings,            only : sjoin, itoa
  use m_gaussian_quadrature, only : cgqf
 
  implicit none
@@ -90,10 +91,10 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  !character(len=500) :: msg
 !arrays
  logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
- logical, allocatable :: lutt_found(:), lutt_warn(:)
- real(dp) :: kpt(3)
+ logical :: lutt_found(3), lutt_warn(3)
+ real(dp) :: kpt(3), lutt_params(3), lutt_unit_kdir(3,3)
  real(dp), allocatable :: eigenval(:), rwork(:), unit_qdir(:,:)
- real(dp), allocatable :: lutt_dij(:,:), lutt_eigenval(:,:), lutt_params(:), lutt_unit_kdir(:,:)
+ real(dp), allocatable :: lutt_dij(:,:), lutt_eigenval(:,:)
  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:)
  real(dp), allocatable :: gq_points_th(:),gq_weights_th(:)
  real(dp), allocatable :: gq_points_cosph(:),gq_points_sinph(:)
@@ -253,12 +254,8 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
      !Compute the Luttinger parameters for the cubic case (deg_dim=3)
      if(deg_dim==3) then
 
-       ABI_ALLOCATE(lutt_unit_kdir, (3,3))
-       ABI_ALLOCATE(lutt_params, (3))
-       ABI_ALLOCATE(lutt_eigenval, (3,deg_dim))
-       ABI_ALLOCATE(lutt_dij, (deg_dim, deg_dim))
-       ABI_ALLOCATE(lutt_found, (3))
-       ABI_ALLOCATE(lutt_warn, (3))
+       ABI_MALLOC(lutt_eigenval, (3,deg_dim))
+       ABI_MALLOC(lutt_dij, (deg_dim, deg_dim))
 
        !Define unit_kdir for Luttinger parameters
        lutt_unit_kdir(:,1) = (/1,0,0/)
@@ -279,7 +276,8 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
          eigenvec=lutt_dij ; lutt_eigenval(idir,:)=zero
          work=zero     ; rwork=zero
-         call zheev('V','U',deg_dim,eigenvec,deg_dim,lutt_eigenval(idir,:),work,lwork,rwork,info) 
+         call zheev('V','U',deg_dim,eigenvec,deg_dim,lutt_eigenval(idir,:),work,lwork,rwork,info)
+         ABI_CHECK(info == 0, sjoin("zheev returned info:", itoa(info)))
        enddo
 
        !Check degereracies in (100) direction, and evaluate A and B.
@@ -316,15 +314,13 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
            lutt_found(3)=.true.
          endif
        enddo
-        
+
        if(.not. (all(lutt_found))) then
          lutt_warn(3)=.true.
        endif
 
-       ABI_DEALLOCATE(lutt_unit_kdir)
-       ABI_DEALLOCATE(lutt_eigenval)
-       ABI_DEALLOCATE(lutt_dij)
-       ABI_DEALLOCATE(lutt_found)
+       ABI_FREE(lutt_eigenval)
+       ABI_FREE(lutt_dij)
 
      endif !Luttinger parameters
 
@@ -343,6 +339,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
          eigenvec = f3d ; eigenval = zero
          work=zero      ; rwork=zero
          call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
+         ABI_CHECK(info == 0, sjoin("zheev returned info:", itoa(info)))
        endif
 
        m_avg = m_avg + weight_qdir(iqdir)*eigenval
@@ -447,13 +444,6 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
      ABI_FREE(eigenval)
      ABI_FREE(saddle_warn)
      ABI_FREE(start_eigf3d_pos)
-
-     if(allocated(lutt_params)) then
-       ABI_DEALLOCATE(lutt_params)
-     endif
-     if(allocated(lutt_warn)) then
-       ABI_DEALLOCATE(lutt_warn)
-     endif
 
    enddo ! ideg
  enddo ! ikpt

@@ -754,7 +754,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
  nspden = dtset%nspden; nkpt = ebands%nkpt
 
- ! FFT meshes from input file (not necessarly equal to the ones found in the external files.
+ ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
@@ -914,7 +914,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
 
  ! if PAW, one has to solve a generalized eigenproblem
- ! BE careful here because I will need sij_opt == -1
+ ! Be careful here because I will need sij_opt == -1
  usecprj = 0
  gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
 
@@ -945,7 +945,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (sigma%mrta == 0) then
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start", msg=" Computing v_nk matrix elements for all states in Sigma_nk...")
    ! Consider only the nk states in Sigma_nk
-   ! All sigma_nk states are available on each node so parallelization is easy.
+   ! All sigma_nk states are available on each node so MPI parallelization is easy.
    cnt = 0
    do spin=1,nsppol
      do ikcalc=1,sigma%nkcalc
@@ -971,7 +971,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start", msg=" Computing v_nk matrix elements for all states in the IBZ...")
 
    ! Imaginary part with MRTA. Here we need v_kq as well.
-   ! Usually kq is one of the kcalc points except when nk is close to edge of the sigma_erange window.
+   ! Usually kq is one of the kcalc points except when nk is close to the edge of the sigma_erange window.
    ! due to ph absorption/emission.
    ! In this case, indeed, we may need a kq state that is not in the initial kcalc set.
    !
