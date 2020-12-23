@@ -1,5 +1,6 @@
 # Input for PAW2 tutorial
-# Nickel ferromagnetic fcc structure for testing ecut convergence
+# Nickel ferromagnetic fcc structure
+# Testing ecut convergence
 
 #Define the different datasets
 #ndtset 8         # 8 datasets. Uncomment this line for the tutorial
@@ -53,7 +54,7 @@ shiftk            # with different shifts:
   0.0 0.0 0.5
 
 #Parameters for the SCF procedure
-nstep 50          # Maximal number of SCF cycles
+nstep 35          # Maximal number of SCF cycles
 tolvrs 1.0d-9     # Will stop when, twice in a row, the difference 
                   # between two consecutive evaluations of potential residual 
                   # differ by less than tolvrs
@@ -81,5 +82,6 @@ prteig 0          # Do not print eigenvalues
 #%% keywords = PAW
 #%% description = 
 #%%   Input for PAW2 tutorial
-#%%   Nickel ferromagnetic fcc structure for testing ecut convergence
+#%%   Nickel ferromagnetic fcc structure
+#%%   Testing ecut convergence
 #%%<END TEST_INFO>
