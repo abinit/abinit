@@ -8,8 +8,7 @@ optdriver    4
 gwcalctyp    2
 symsigma     0
 nband       30
-ecutsigx    4.0
-ecutwfn     4.0
+ecutsigx    8.0
 
 nfreqsp    200
 freqspmax    2.
@@ -19,7 +18,6 @@ kptgw
              0.000000    0.000000    0.000000
 bdgw
              1 1
-gw_icutcoul    3          # old deprecated value of icutcoul, only used for legacy
 
 #Definition of occupation numbers
 occopt 3
@@ -56,7 +54,7 @@ enunit     1
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -64,7 +62,7 @@ enunit     1
 #%% test_chain = tgw2_1.abi, tgw2_2.abi, tgw2_3.abi, tgw2_4.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tgw2_4.abo, tolnlines=  2, tolabs=  1.010e-06, tolrel=  3.000e-02 
+#%%   tgw2_4.abo, tolnlines=  2, tolabs=  1.1e-03, tolrel=  3.0e-02 
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
