@@ -1,10 +1,24 @@
+# Added by runtests.py
+output_file = "tspin_3.abo"
+indata_prefix = "tspin_3i"
+outdata_prefix = "tspin_3o"
+tmpdata_prefix = "tspin_3t"
+# end runtests.py section
+
 # Fe fcc structure with two atoms per unit cell for test of antiferromagnetic
 # This is the simplest fcc structure compatible with a X point spiral
 
+
+   ecut  25.0
+
+# SCF:
+  nstep   70
+ tolwfr   1.0d-7
+
+# Multidataset:
 ndtset 3
 
-#Data for each data set: how to get densities of state
- ngkpt1  6 6 4 
+ ngkpt1  4 4 2 
 prtdos1  1
 
  ngkpt2  3 3 2
@@ -23,37 +37,36 @@ natsph3  1
 iatsph3  2
 ratsph3  2.4
 
-
-#Common data
- ntypat   1
+# Crystal cell definition:
   natom   2
+ ntypat   1
+  znucl   26
   typat   1 1
+   xred   0.0  0.0  0.0
+          0.5  0.0  0.5
+
   acell   3*6.60
   rprim   0.5  -0.5  0.0
           0.5   0.5  0.0
           0.0   0.0  1.0
-   xred   0.0  0.0  0.0
-          0.5  0.0  0.5
+
+# Magnetism:
+ nsppol   2
  spinat   0.0 0.0   4.0
           0.0 0.0  -4.0
-   ecut   18.0
-  znucl   26
-  nband   16
- nsppol   2
 
-nshiftk   1
+# Electron occupation:
+  nband   20
  occopt   3
+ tsmear   0.001
 
-  nstep   70
- tolwfr   1.0d-7
- tsmear   0.01
-
+# Printing:
  prtden   1
  prtkpt   1
 
-
+# Pseudo:
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/26fe.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
