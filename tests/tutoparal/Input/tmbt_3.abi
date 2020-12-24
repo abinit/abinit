@@ -78,7 +78,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%% [paral_info]
 #%% max_nprocs = 64
 #%% nprocs_to_test = 64
-#%% [NCPU_20]
+#%% [NCPU_64]
 #%% files_to_test = tmbt_3_MPI64.abo, tolnlines = 10, tolabs = 1.100e-03, tolrel = 3.000e-03
 #%% [extra_info]
 #%% authors = M. Giantomassi
