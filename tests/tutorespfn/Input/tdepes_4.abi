@@ -140,9 +140,10 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = [^s][^c][^o].*
 #%% [files]
 #%% files_to_test = 
-#%%   tdepes_4.abo,  tolnlines= 300, tolabs=  2.000e-04, tolrel=  5.000e-04, fld_options=-medium
+#%%   tdepes_4.abo,  tolnlines= 0, tolabs=  0.0, tolrel=  0.0
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
