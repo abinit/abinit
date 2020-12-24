@@ -55,6 +55,7 @@ module m_sigc
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_sym,       only : paw_symcprj
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
+ use m_hide_lapack,   only : xheev
 
  implicit none
 
@@ -338,7 +339,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Set up logical flags for Sigma calculation
  if (mod10==SIG_GW_AC.and.Sigp%gwcalctyp/=1) then
-   MSG_ERROR("not implemented")
+         ! MRM allow gwcalctyp to compute the 1-RDM
+   if(Sigp%gwcalctyp/=21) then
+       MSG_ERROR("not implemented")
+   else
+     write(msg,'(a34,i9)')'Constructing Sigma_c(iw) for k = ',ikcalc
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   end if  
  end if
 
  if (mod10==SIG_GW_AC.and.Sigp%gwcomp==1) then
@@ -497,7 +505,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, Er%nomega_i))
 
    call coeffs_gausslegint(zero,one,gl_knots,gl_wts,Er%nomega_i)
-
+   
    do io=1,Er%nomega_i ! First frequencies are always real
      if (ABS(AIMAG(one*Er%omega(Er%nomega_r+io))-(one/gl_knots(io)-one)) > 0.0001) then
       write(msg,'(3a)')&
@@ -809,7 +817,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ! Sum over band
      call timab(445,1,tsec) ! loop
      do ib=1,Sigp%nbnds
-       call timab(436,1,tsec) ! (1)
 
        ! Parallelism over spin
        ! This processor has this k-point but what about spin?
@@ -910,8 +917,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
            call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
 &                    rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
-           call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),&
-&                    zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
+           call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,&
+                     rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
 
            ! Get the upper part of rhotw_epsm1_rhotw
            ! that is hermitian by construction
@@ -952,7 +959,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
          CASE (SIG_GW_AC)
            ! GW with Analytic continuation.
-
            ! This part is so optimized for AC that there is nothing to do here !
 
          CASE (SIG_GW_CD)

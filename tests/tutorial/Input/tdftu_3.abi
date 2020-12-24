@@ -14,10 +14,11 @@ pawecutdg 30
 tolvrs 1.0d-7
 nband  28
 occopt 7 tsmear 0.015
-#tsmear 300 K
 
 #Structural parameters
-natom 4 ntypat 2 typat 1 1 2 2
+natom 4
+ntypat 2
+typat 1 1 2 2
 znucl 28 8
 xred 0 0 0
     0.0 0.0 0.5
