@@ -65,6 +65,12 @@ prtwf 1           # Print wavefunctions (re-used from one dataset to the other)
 prtden 0          # Do not print density
 prteig 0          # Do not print eigenvalues
 
+fftalg 112        # This impose the use of ABINIT internal FFT
+                  #   This is only to numerically stabilize the results
+                  #   and make them more reproducible (in terms of the number of
+                  #   SCF iterations). But it could affect the performances.
+                  # !! !Please, do not put this keyword this in normal use.
+
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
