@@ -1,12 +1,14 @@
 # Author: S. Ponc\'e + Y. Gillet
-# Date: 30/04/2013 -- 11/09/2014 -- 07/08/2015
-# Version 1.4
+# Date: 30/04/2013 -- 11/09/2014 -- 07/08/2015 -- 21/12/2020
+# Version 1.5
 # Classes needed for the temperature_final.py script
-# Last devel info: Spin + Lifetime coding
+# 2015 : Spin + Lifetime coding
+# 2020 : Port to python3
 
-from __future__ import division, print_function
+#from __future__ import division, print_function
 import numpy as N
 from numpy import zeros
+from numpy import complex, float
 import itertools as Iter
 from functools import partial
 import multiprocessing
@@ -25,20 +27,20 @@ kb_HaK = 3.1668154267112283e-06
 ###########
 
 class system:
-  natom = None
-  ntypat = None
-  nkpt = None
-  kpt = None
-  Kptns = None
-  EIG = None
-  nband = None
-  acell = None
-  occ = None
-  amu = None
-  rprim = N.empty((3,3))
-  iqpt = None
-  IFC = None
-  filename = None
+  natom  = 0
+  ntypat = 0
+  nkpt   = 0
+  kpt    = None
+  Kptns  = None
+  EIG    = None
+  nband  = 0
+  acell  = None
+  occ    = None
+  amu    = None
+  rprim  = N.empty((3, 3))
+  iqpt   = None
+  IFC    = None
+  filename     = None
   filefullpath = None
   def __init__(self,directory=None,filename=None):
     if filename == None:return
