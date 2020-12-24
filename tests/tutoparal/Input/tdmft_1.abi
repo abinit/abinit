@@ -1,10 +1,10 @@
-# SrVO3, a simple archetypal correlated materials
+# SrVO3, a simple archetypal correlated material
 #
-# This file computes the DFT electronic structure of SrVO3 in the first 
+# In this test, we compute the DFT electronic structure of SrVO3 in the first 
 # dataset and then the orbital character of the bands for the t2g and eg
 # orbitals of the vanadium atom and the p orbitals of the oygen atoms.
 
-#Multi-dataset keywords
+#Multi-dataset parameters
 ndtset 2                # Two datasets
 jdtset 1 2
 getden -1               # Second one takes the density of the first
@@ -18,7 +18,7 @@ rprim 1.0 0.0 0.0       # real space primitive translation vectors
 #Definition of the atom types and pseudopotentials
 natom 5                 # Five atoms
 ntypat 3                # Three types
-znucl  23 38 8          # First atom type should be the correlated one (V)
+znucl  23 38 8          # First atom type should be the correlated one V
                         # then, we have Sr and O.
 typat 1 2 3 3 3         # V Sr O3
 xred                    # This keyword indicates that the location of the atoms
