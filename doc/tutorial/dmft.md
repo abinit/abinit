@@ -1,5 +1,5 @@
 ---
-authors: BAmadon
+authors: BAmadon, OGingras
 ---
 
 # Tutorial on DFT+DMFT
@@ -74,25 +74,24 @@ Several parameters (both physical and technical) needs to be discussed for a DFT
 *You might create a subdirectory of the *\$ABI_TESTS/tutoparal* directory, and use it for the tutorial.
 In what follows, the names of files will be mentioned as if you were in this subdirectory*
 
-Copy the files *tdmft_1.in* and *dmft_x.files* from *\$ABI_TESTS/tutoparal* in your Work
+Copy the file *tdmft_1.abi* from *\$ABI_TESTS/tutoparal* in your Work
 directory,
 
 ```sh
 cd $ABI_TESTS/tutoparal/Input
 mkdir Work_dmft
 cd Work_dmft
-cp ../tdmft_x.files .
-cp ../tdmft_1.in .
+cp ../tdmft_1.abi .
 ```
 
-{% dialog tests/tutoparal/Input/tdmft_x.files tests/tutoparal/Input/tdmft_1.in %}
+{% dialog tests/tutoparal/Input/tdmft_1.abi %}
 
-Then edit the *tdmft_x.files* and run ABINIT with:
+Then run ABINIT with:
 
-    mpirun -n 32 abinit < tdmft_x.files > log_1 &
+    mpirun -n 24 abinit  tdmft_1.abi > log_1 &
 
 This run should take some time. It is recommended that you use at least 10
-processors (and 32 should be fast). It calculates the LDA ground state of
+processors (and 24 should be fast). It calculates the LDA ground state of
 SrVO3 and compute the band structure in a second step.
 
 The variable [[pawfatbnd]] allows to create files with "fatbands" (see description of the
@@ -131,7 +130,7 @@ _p_. However, we clearly see an important hybridization. The Fermi level (at 0
 eV) is in the middle of bands 21-23.
 
 One can easily check that bands 21-23 are mainly _d-t 2g_ and bands 24-25 are
-mainly _e<sub>g</sub>_: just use [[pawfatbnd]] = 2 in *tdmft_1.in* and relaunch the calculations.
+mainly _e<sub>g</sub>_: just use [[pawfatbnd]] = 2 in *tdmft_1.abi* and relaunch the calculations.
 Then the file *tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m-2*,
 *tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m-1* and
 *tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m1* give you respectively the _xy_, _yz_ and
@@ -165,19 +164,19 @@ orbitals. For this, we will use Wannier functions.
 
 As we have seen in the orbitally resolved fatbands, the Kohn Sham wave
 function contains a important weight of _t<sub>2g</sub>_ atomic orbitals mainly in _t
-2g_-like bands but also in oxygen bands.
+<sub>2g</sub>_-like bands but also in oxygen bands.
 
 So, we can use only the _t<sub>2g</sub>_-like bands to define Wannier functions or also
 both the _t<sub>2g</sub>_-like and _O-p_ -like bands.
 
-The first case corresponds to the input file *tdmft_2.in*. In this case
+The first case corresponds to the input file *tdmft_2.abi*. In this case
 [[dmftbandi]] = 21 and [[dmftbandf]] = 23. As we only put the electron interaction
 on _t<sub>2g</sub>_ orbitals, we have to use first [[lpawu]] = 2, but also the keyword
 [[dmft_t2g]] = 1 in order to restrict the application of interaction on _t<sub>2g</sub>_ orbitals.
 
 Notice also that before launching a DMFT calculation, the LDA should be
 perfectly converged, including the empty states (check nline and nnsclo in the
-input file). The input file *tdmft_2.in* thus contains two datasets: the first
+input file). The input file *tdmft_2.abi* thus contains two datasets: the first
 one is a well converged LDA calculation, and the second is the DFT+DMFT calculation.
 
 Notice the other dmft variables used in the input file and check their meaning
@@ -197,7 +196,7 @@ Let's now discuss the value of the effective Coulomb interaction U ([[upawu]])
 and J ([[jpawu]]). The values of U and J used in ABINIT in DMFT use the same
 convention as in DFT+_U_ calculations in ABINIT (cf [[cite:Amadon2008a]]). However,
 calculations in Ref. [[cite:Amadon2008]] use for U and J the usual convention for
-_t 2g _ systems as found in [[cite:Lechermann2006]], Eq. 26 (see also the appendix
+_t<sub>2g</sub>_ systems as found in [[cite:Lechermann2006]], Eq. 26 (see also the appendix
 in [[cite:Fresard1997]]). It corresponds to the Slater integral F4=0 and we can
 show that U_abinit=U-4/3 J and J_abinit=7/6 J. So in order to use U = 4 eV and
 J=0.65 eV with these latter conventions (as in [[cite:Amadon2008]]), we have to use
@@ -205,12 +204,12 @@ in ABINIT: [[upawu]] = 3.13333 eV; [[jpawu]] = 0.75833 eV and [[f4of2_sla]] = 0.
 
 Now, you can launch the calculation:
 
-Copy the files *../Input/tdmft_2.in* and modify *tdmft_x.files* in your Work
+Copy the file *../Input/tdmft_2.abi* in your Work
 directory and run ABINIT:
 
-    mpirun -n 32 abinit < tdmft_x.files > log_2
+    mpirun -n 24 abinit tdmft_2.abi > log_2
 
-{% dialog tests/tutoparal/Input/tdmft_2.in %}
+{% dialog tests/tutoparal/Input/tdmft_2.abi %}
 
 
 ### 3.2. The DFT+DMFT calculation: the log file
@@ -231,18 +230,18 @@ computed (Eq.(2.1) in [[cite:Amadon2012]]) and unnormalized orbitals are built
 
       ------ Symetrised Occupation
 
-            0.11142  -0.00000  -0.00000
-           -0.00000   0.11142  -0.00000
-           -0.00000  -0.00000   0.11142
+            0.10480  -0.00000  -0.00000
+            0.00000   0.10480  -0.00000
+           -0.00000  -0.00000   0.10480
 
 
 and the Normalization of this orbital basis is
 
       ------ Symetrised Norm
 
-            0.65790   0.00000   0.00000
-            0.00000   0.65790   0.00000
-            0.00000   0.00000   0.65790
+            0.62039   0.00000   0.00000
+            0.00000   0.62039   0.00000
+            0.00000   0.00000   0.62039
 
 Now, let's compare these numbers to other quantities. If the preceding LDA
 calculation is converged, dmatpuopt=1 is used, and [[dmftbandi]]=1 and
@@ -259,23 +258,23 @@ condition is not fulfilled. Concerning the norm if these orbitals, two factors p
 
   * Secondly, the atomic orbitals used to do the projection are cut at the PAW radius.
     As a consequence, even if we would use a complete set of KS wavefunctions and thus the closure relation,
-    the norm could not be one. In our case, it could be at most 0.86852, which is the norm of the
+    the norm could not be one. In our case, it could be at most 0.84179, which is the norm of the
     truncated atomic function of _d_ orbitals of Vanadium used in this calculation.
     This number can be found in the log file by searching for ph0phiint (grep "ph0phiint(icount)= 1" log_2).
     (See also the discussion in Section B.3 of [[cite:Amadon2012]]).
 
 Next the LDA Green's function is computed.
 
-     =====  LDA Green Function Calculation
+     =====  DFT Green Function Calculation
 
 Then the Green's function is integrated to compute the occupation matrix.
 Interestingly, the density matrix here must be equal to the density matrix
 computed with the unnormalized correlated orbitals. If this is not the case,
 it means that the frequency grid is not sufficiently large. In our case, we find:
 
-            0.11143   0.00000   0.00000
-            0.00000   0.11143   0.00000
-            0.00000   0.00000   0.11143
+            0.10481  -0.00000  -0.00000
+           -0.00000   0.10481  -0.00000
+           -0.00000  -0.00000   0.10481
 
 So the error is very small (1.10E-5). As an exercise, you can decrease the
 number of frequencies and see that the error becomes larger.
@@ -283,13 +282,13 @@ number of frequencies and see that the error becomes larger.
 Then the true orthonormal Wannier functions are built and the Green's function
 is computed in this basis just after:
 
-     =====  LDA Green Function Calculation with renormalized psichi
+     =====  DFT Green Function Calculation with renormalized psichi
 
 The occupation matrix is now:
 
-            0.16937   0.00000  -0.00000
-            0.00000   0.16937   0.00000
-           -0.00000   0.00000   0.16937
+            0.16893   0.00000  -0.00000
+            0.00000   0.16893   0.00000
+           -0.00000   0.00000   0.16893
 
 We see that because of the orthonormalization of the orbitals necessary to
 built Wannier functions, the occupation matrix logically increases.
@@ -323,9 +322,9 @@ once before doing again the DFT Loop (cf Fig. 1 of [[cite:Amadon2012]]). At the 
 of the calculation, the occupation matrix is written and is:
 
               -- polarization spin component  1
-            0.16843   0.00000  -0.00000
-           -0.00000   0.16843  -0.00000
-           -0.00000   0.00000   0.16843
+            0.16812   0.00000  -0.00000
+            0.00000   0.16812  -0.00000
+           -0.00000  -0.00000   0.16812
 
 We can see that the total number of electron is very close to one and it does
 not change much as a function of iterations. As an output of the calculation,
@@ -348,8 +347,8 @@ on _Regression_ and you can do a 4th order fit as:
 
 ![self](dmft_assets/self.jpg)
 
-The slope at zero frequency obtained is 0.82. From this number, the
-quasiparticle renormalisation weight can be obtained using Z=1/(1+0.82)=0.55.
+The slope at zero frequency obtained is 0.81. From this number, the
+quasiparticle renormalisation weight can be obtained using Z=1/(1+0.81)=0.55.
 
 ### 3.4. The Green's function for correlated orbitals
 
@@ -456,16 +455,16 @@ hybridization, as a consequence, we will now built Wannier functions with a
 large window, by including oxygen _p_ -like bands in the definition of Wannier
 functions. Create a new input file:
 
-    cp tdmft_2.in tdmft_3.in
+    cp tdmft_2.abi tdmft_3.abi
 
-and use [[dmftbandi]] = 12 in *tdmft_3.in*. Now the code will built Wannier
+and use [[dmftbandi]] = 12 in *tdmft_3.abi*. Now the code will built Wannier
 functions with a larger window, including _O-p_ -like bands, and thus much
-more localized. Launch the calculation after having updated tdmft_x.files (if
+more localized. Launch the calculation (if
 the calculation is too long, you can decide to restart the second dataset
 directly from a converged LDA calculation instead of redoing the LDA
 calculation for each new DMFT calculation).
 
-    abinit < tdmft_x.files > log_3
+    abinit tdmft_3.abi > log_3
 
 In this case, both the occupation and the norm are larger because more states
 are taken into account: you have the occupation matrix which is
@@ -578,15 +577,15 @@ energy has a physical meaning in DFT+DMFT and not Etotal or ETOT.
 
 ## 6 Electronic Structure of SrVO3 in DFT+DMFT: Equilibrium volume
 
-We focus now on the total energy. Create a new input file, *tdmft_4.in*:
+We focus now on the total energy. Create a new input file, *tdmft_4.abi*:
 
-    cp tdmft_3.in tdmft_4.in
+    cp tdmft_3.abi tdmft_4.abi
 
 And use [[acell]] = 7.1605 instead of 7.2605. Relaunch the calculation and note the
-Internal energy (grep Internal tdmft_4.out).
+Internal energy (grep Internal tdmft_4.abo).
 
 Redo another calculation with [[acell]] = 7.00. Then extract the LDA Internal energy
-and the DMFT Internal energy (grep Internal tdmft_5.out).
+and the DMFT Internal energy (grep Internal tdmft_5.abo).
 
 <center>
 
@@ -606,13 +605,13 @@ that the equilibrium volume is very weakly modified by the strong correlations i
 We are going to use OmegaMaxEnt to do the direct analytical continuation of the self-energy in Matsubara frequencies to real frequencies.
 (A more precise way to do the analytical continuation uses an auxiliary Green's function as mentionned in e.g. endnote 55
 of Ref. [[cite:Sakuma2013a]]).
-First of all, we are going to relaunch a more converged calculation using tdmft_5.in
+First of all, we are going to relaunch a more converged calculation using tdmft_5.abi
 
-{% dialog tests/tutoparal/Input/tdmft_5.in%}
+{% dialog tests/tutoparal/Input/tdmft_5.abi%}
 
-Modify tdmft_x.files and launch the calculation, it might take some time. The calculation takes in few minutes with 4 processors.
+Launch the calculation, it might take some time. The calculation takes in few minutes with 4 processors.
 
-    abinit < tdmft_x.files > log_5
+    abinit tdmft_5.abi > log_5
 
 We are going to create a new directory for the analytical continuation.
 
@@ -678,19 +677,19 @@ this matrix is just useless):
     cp tdmft_5o_DS2.UnitaryMatrix_for_DiagLevel_iatom0001 tdmft_5i_DS3.UnitaryMatrix_for_DiagLevel_iatom0001 
 
 Copy the Self energy in imaginary frequency for restart also (dmft_nwlo should be the same in the input
-file  tdmft_5.in and tdmft_2.in)
+file  tdmft_5.abi and tdmft_2.abi)
 
     cp tdmft_5o_DS2Self-omega_iatom0001_isppol1 tdmft_5o_DS3Self-omega_iatom0001_isppol1
     
 
-Then modify tdmft_5.in with
+Then modify tdmft_5.abi with
 
     ndtset 1
     jdtset 3
     
 and relaunch the calculation.
 
-    abinit < tdmft_x.files > log_5_dataset3
+    abinit tdmft_5.abi > log_5_dataset3
 
 
 Then the spectral function is obtained in file tdmft_5o_DS3_DFTDMFT_SpectralFunction_kresolved_from_realaxisself. You can copy

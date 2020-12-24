@@ -67,20 +67,22 @@ kptbounds2  1/4 1/4 1/4 #R'
             1/2 1/2 0.0 #M
             0.0 0.0 0.0 #Gamma
 
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tdmft_1.in
+#%% test_chain = tdmft_1.abi
 #%% [files]
-#%% files_to_test = 
-#%%   tdmft_1.out, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
-#%% psp_files= 23v.paw, 38sr.paw, 8o.paw 
-#%% [shell] 
 #%% [paral_info]
-#%% nprocs_to_test = 32
-#%% max_nprocs = 32
+#%% max_nprocs = 24
+#%% nprocs_to_test = 24
+#%% [NCPU_24]
+#%% files_to_test = tdmft_1_MPI24.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
+#%% [shell]
 #%% [extra_info]
 #%% keywords = LDA, FATBANDS
-#%% authors = B. Amadon
+#%% authors = B. Amadon, O. Gingras
 #%% description = For SrVO3, compute band structure
 #%%<END TEST_INFO>
