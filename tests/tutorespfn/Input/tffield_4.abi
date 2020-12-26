@@ -98,7 +98,7 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tffield_4.abo, tolnlines=  3, tolabs= 9.999e-9, tolrel= 1.224e-04
+#%%   tffield_4.abo, tolnlines=  10, tolabs= 9.999e-9, tolrel= 1.224e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
