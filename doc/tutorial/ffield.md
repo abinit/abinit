@@ -336,7 +336,7 @@ Notice how in the relaxed ion case, the input file includes [[ionmov]] = 2 and [
 order to relax the ion positions at fixed cell geometry. These calculations
 should give the following final results (obtained by taking finite difference
 expressions of the strains for different electric fields): 
-$-0.6427~C/m^2$ for the clamped ion case, and $0.1310~C/m^2$ for the relaxed ion case.
+$-0.6427~C/m^2$ for the clamped ion case, and $0.1271~C/m^2$ for the relaxed ion case.
 
 For example, the clamped ion piezoelectric constant was obtained from *tffield_4.abo*:
 ```
