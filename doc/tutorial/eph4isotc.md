@@ -371,18 +371,20 @@ Fermi surface (see Fig. 3) around the Γ–A line.
 The value of the DOS at the Fermi level plays a very important role when discussing superconducting properties.
 Actually this is one of the quantities that should be subject to convergence studies with respect to the $\kk$-grid
 before embarking on DFPT calculations.
-To compute the DOS with the tetrahedron method, use the `ebands_dos` command of *abitk*
+To compute the DOS with the tetrahedron method, use the `ebands_edos` command of *abitk*
 
 ```sh
-abitk ebands_dos MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
+abitk ebands_edos MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
 ```
 
 to read the eigenvalues in the IBZ from a `GSR.n` file (`WFK.nc` files are supported as well).
-This command produces a text file named XXX that can be visualized with:
+This command produces a text file named `out_GSR.nc_EDOS` that can be visualized with:
 
 ```sh
-foobar:
+abiopen.py out_GSR.nc_EDOS -e
 ```
+
+![](eph4isotc_assets/MgB2_matplotlib_fs.png)
 
 Note that the phonon linewidths have a *geometrical contribution* due to Fermi surface since $\gamma_\qnu$
 is expected to be large in correspondence of $\qq$ wave vectors connecting two portions of the FS.
@@ -413,7 +415,7 @@ xcrysden --bxsf out_GSR.nc_BXSF
 ![](eph4isotc_assets/MgB2_matplotlib_fs.png)
 
 Other tools such as |pyprocar| or |fermisurfer| can read data in the BXSF format as well.
-For a rather minimalistic matplotlib-based approach, use can also use the |abiview| script with the *fs* command:
+For a minimalistic matplotlib-based approach, use can also use the |abiview| script with the *fs* command:
 
 ```sh
 abiview.py fs MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
@@ -586,6 +588,18 @@ ph_ngqpt
 ph_nqpath
 ph_qpath
 ph_ndivsm
+
+# Compute phonon bands along this q-path.
+ph_nqpath 8
+ph_qpath
+    0.0 0.0 0.0   # Gamma
+    1/3 1/3 0.0   # K
+    0.5 0.0 0.0   # M
+    0.0 0.0 0.0   # Gamma
+    0.0 0.0 0.5   # A
+    1/3 1/3 0.5   # H
+    0.5 0.0 0.5   # L
+    0.0 0.0 0.5   # A
 ```
 
 The phonon DOS will be computed using the (dense) [[ph_ngqpt]] $\qq$-mesh and [[ph_intmeth]].
@@ -602,6 +616,9 @@ Remember to discuss k-mesh and [[tsmear]] at the DFPT level.
 -->
 
 We now discuss in more detail the output file produced by the code.
+
+{% dialog tests/tutorespfn/Refs/teph4isotc_3.abo %}
+
 After the standard section with info on the unit cell and pseudopotentials,
 we find the output of the electronic DOS:
 
@@ -807,7 +824,7 @@ that produces:
 ![](eph4isotc_assets/skw_vs_abinitio_ebands.png)
 
 The figure shows that the SKW interpolant nicely reproduces the *ab-initio* dispersion around the Fermi level.
-Discrepancies between the *ab-initio* results and the interpolated values are visible
+**Discrepancies** between the *ab-initio* results and the interpolated values are visible
 in correspondence of **band-crossings**.
 This is expected since SKW is a Fourier-based approach and band-crossing leads to a non-analytic behaviour
 of the signal that cannot be faithfully reproduced with a finite number of Fourier components.
@@ -863,7 +880,10 @@ You may need to change [[einterp]] if you had to use different values when using
     When dealing with metals, both entries in [[sigma_erange]] must be **negative** 
     so that the energy window is refered to the Fermi level and not to the CBM/VBM.
     Use a value for the window that is reasonably large in order to account for possible oscillations
-    and/or inaccuracies of the SKW interpolation.
+    and/or inaccuracies of the SKW interpolation around $\ee_F$.
+
+{% dialog tests/tutorespfn/Refs/teph4isotc_3.abo %}
+{% dialog tests/tutorespfn/Refs/teph4isotc_4.abo %}
 
 Once we have the *KERANGE.nc* file, we can use it to perform a NSCF calculation to generate
 a customized WFK file on the dense $\kk$-mesh:
@@ -896,14 +916,14 @@ with the [[getkerange_filepath]]:
     ```
 
     to start the NSCF run from the **precomputed** GS DEN file, initialize the trial wafefunctions
-    from  [[getwfk_filepath]] to accelerate a bit the calculation 
+    from [[getwfk_filepath]] to accelerate a bit the calculation.
 
 
 ## Convergence study wrt to the k/q-mesh
 
 At this point, we can use the WFK files to perform EPH calculations with denser $\kk$-meshes.
 We will be using settings similar to the ones used in **teph4isotc_2.abi** except for
-the use of [[eph_ngqpt_fine]] and [[getwfk_filepath]] and [[ngkpt]]:
+the use of [[eph_ngqpt_fine]], [[getwfk_filepath]] and [[ngkpt]]:
 
 {% dialog tests/tutorespfn/Input/teph4isotc_5.abi %}
 
@@ -920,9 +940,9 @@ the **band parallelism is not supported**, only atomic perturbations, $\qq$-poin
 The [[eph_np_pqbks]] variable is optional in the sense that whatever number of MPI processes you use,
 the EPH code is able to parallelize the calculation by distributing over $\kk$-points and spins (if any).
 This distribution, however, may not be optimal, especially if you have lot of CPUs available
-and/or you need to decrease the memory required per CPU.
+and/or you need to decrease the memory requirements per CPU.
 
-To decrease the memory requirement, we suggest to activate the parallelism over perturbations
+To decrease memory, we suggest to activate the parallelism over perturbations
 (up to 3 x [[natom]]) to make the memory for $W(\rr,\RR, \text{3 x natom})$ scale.
 If memory is not of concern, activate the $\qq$-point parallelism to boost the calculation.
 Note that the code is not able to distribute the memory for the wavefunctions although

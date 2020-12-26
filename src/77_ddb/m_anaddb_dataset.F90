@@ -2072,7 +2072,7 @@ subroutine anaddb_init(input_path, filnam)
 !Local variables -------------------------
 !scalars
  integer :: lenstr, marr, jdtset, tread, i1
- character(len=strlen) :: string, fname
+ character(len=strlen) :: string, raw_string, fname
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
@@ -2111,7 +2111,7 @@ subroutine anaddb_init(input_path, filnam)
 
  else
    ! Read input
-   call instrng(input_path, lenstr, 1, strlen, string)
+   call instrng(input_path, lenstr, 1, strlen, string, raw_string)
    ! To make case-insensitive, map characters to upper case.
    call inupper(string(1:lenstr))
 
@@ -2153,7 +2153,7 @@ subroutine anaddb_init(input_path, filnam)
  end if
 
  ! Compute OUTPUT_PREFIX as in abinit.
- ! I do not change the "files" file to avoid abckward compatibility issue
+ ! I do not change the "files" file to avoid backward compatibility issue
  if (len_trim(filnam(8)) == 0) then
    fname = basename(trim(filnam(2)))
    i1 = index(fname, ".",back=.true.)

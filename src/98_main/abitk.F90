@@ -70,7 +70,7 @@ program abitk
  real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb !, tolsym, tsmear
  logical :: is_metal
  character(len=500) :: command, arg, msg, ptgroup
- character(len=fnlen) :: path, other_path !, prefix
+ character(len=fnlen) :: path, other_path, out_path !, prefix
  type(hdr_type) :: hdr
  type(ebands_t) :: ebands, ebands_kpath, other_ebands
  type(edos_t) :: edos
@@ -230,7 +230,9 @@ program abitk
    if (command == "ebands_edos") then
      edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
      call edos%print(std_out, header="Electron DOS")
-     call edos%write(strcat(basename(path), "_EDOS"))
+     out_path = strcat(basename(path), "_EDOS")
+     call wrtout(std_out, sjoin("Writing electron DOS to file:", out_path))
+     call edos%write(out_path)
 
    else if (command == "ebands_jdos") then
      NOT_IMPLEMENTED_ERROR()

@@ -45,6 +45,7 @@ MODULE m_ebands
  use m_kpts
  use m_sort
  use m_dtset
+ use m_yaml
 
  use defs_datatypes,   only : ebands_t
  use m_copy,           only : alloc_copy
@@ -162,6 +163,9 @@ MODULE m_ebands
 
    real(dp) :: step = -one
    ! Step of the mesh
+
+   real(dp) :: nelect = zero
+    ! Number of electrons taken from ebands.
 
    real(dp),allocatable :: mesh(:)
    ! mesh(nw)
@@ -3227,6 +3231,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 
  edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol; edos%nspinor = ebands%nspinor
  edos%intmeth = intmeth
+ edos%nelect = ebands%nelect
 
  if (ebands%nkpt == 1) then
    ABI_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
@@ -3422,49 +3427,66 @@ subroutine edos_write(edos, path)
 
 !Local variables-------------------------------
  integer :: iw,spin,unt
- real(dp) :: cfact,efermi
+ real(dp) :: efermi, gef_tot, gef_up, gef_down
  character(len=500) :: msg
+ type(yamldoc_t) :: ydoc
 
 ! *************************************************************************
-
- ! Convert everything into eV
- ! I know that Abinit should use Ha but Hartrees are not readable.
- ! Please don't change this code, in case add an optional argument to specify different units.
- cfact = Ha_eV
 
  if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
    ABI_ERROR(msg)
  end if
 
- ! Write header.
+ ! Write header (human-readable format)
  write(unt,'(a)')'# Electron density of states: Energy in eV, DOS in states/eV per unit cell.'
  write(unt,"(a)")"# The zero of energies corresponds to the Fermi level."
 
+ ! Add Yaml section with parameters.
+ ydoc = yamldoc_open("EDOS_PARAMS")
+ call ydoc%add_ints("nkibz, nsppol, nspinor, intmeth, edos_npts", &
+                    [edos%nkibz, edos%nsppol, edos%nspinor, edos%intmeth, edos%nw])
+ call ydoc%add_reals("nelect, edos_mesh_step_eV", &
+                    [edos%nelect, edos%step * Ha_eV])
+
  select case (edos%intmeth)
  case (1)
-   write(unt,'(a,es16.8,a,i0)')&
-     '# Gaussian method with smearing= ',edos%broad*cfact,' [eV], nkibz= ',edos%nkibz
+   call ydoc%add_string("method", "Gaussian")
+   call ydoc%add_real("gaussian_broadening_eV", edos%broad * Ha_eV)
  case (2)
-   write(unt,'(a,i0)')'# Tetrahedron method, nkibz= ',edos%nkibz
+   call ydoc%add_string("method", "Linear tetrahedron")
+ case (-2)
+   call ydoc%add_string("method", "Linear tetrahedron method with Blochl corrections")
  case default
    ABI_ERROR(sjoin("Wrong method:", itoa(edos%intmeth)))
  end select
 
  if (edos%ief == 0) then
-   write(unt,'(a)')'# Fermi level: None'
+   call ydoc%set_keys_to_string("Fermi_level_eV, gef, gef_up, gef_down", "null")
    efermi = zero
  else
-   write(unt,'(a,es16.8,a)')'# Fermi level: ',edos%mesh(edos%ief)*cfact," [eV]"
    efermi = edos%mesh(edos%ief)
-   !efermi = zero
+   call ydoc%add_real("Fermi_level_eV", efermi * Ha_eV)
+   gef_tot = edos%gef(0) / Ha_eV
+   gef_up = gef_tot / two; gef_down = gef_tot / two
+   if (edos%nsppol == 2) then
+     gef_up = edos%gef(1) / Ha_eV; gef_down = edos%gef(2) / Ha_eV
+   end if
+   if (edos%nspinor == 1) then
+     call ydoc%add_reals("gef, gef_up, gef_down", [gef_tot, gef_up, gef_down])
+   else
+     call ydoc%add_reals("gef", [gef_tot])
+   end if
  end if
+
+ ! Write header in Yaml format but prepend # so that one can still use tools such as gnuplot or xmgrace.
+ call ydoc%write_and_free(unt, firstchar="#")
 
  ! Write data.
  write(unt,"(a)")"# Energy           DOS_TOT          IDOS_TOT         DOS[spin=UP]     IDOS[spin=UP] ..."
  do iw=1,edos%nw
-   write(unt,'(es17.8)',advance='no')(edos%mesh(iw) - efermi) * cfact
+   write(unt,'(es17.8)',advance='no')(edos%mesh(iw) - efermi) * Ha_eV
    do spin=0,edos%nsppol
-     write(unt,'(2es17.8)',advance='no')max(edos%dos(iw,spin) / cfact, tol30), max(edos%idos(iw,spin), tol30)
+     write(unt,'(2es17.8)',advance='no')max(edos%dos(iw,spin) / Ha_eV, tol30), max(edos%idos(iw,spin), tol30)
    end do
    write(unt,*)
  end do
@@ -3487,7 +3509,7 @@ end subroutine edos_write
 !!  edos<edos_t>=DOS container
 !!  ncid=NC file handle.
 !!  [prefix]=String prepended to netcdf dimensions/variables (HDF5 poor-man groups)
-!!   Empty string if not specified.
+!!    Empty string if not specified.
 !!
 !! OUTPUT
 !!  ncerr= netcdf exit status.
@@ -3624,9 +3646,10 @@ subroutine edos_print(edos, unit, header)
    write(unt,"(a,es16.8)")"   g(eF) for spin down:", edos%gef(2) / Ha_eV
  end if
  write(unt,"(a,f6.1)")" Total number of electrons at eF: ", edos%idos(edos%ief, 0)
+ !write(unt,"(a,f6.1)")" Total number of electrons from ebands: ", edos%nelect
  if (edos%nsppol == 2) then
-   write(unt,"(a,es16.8)")"   N(eF) for spin up:  ", edos%idos(edos%ief, 1)
-   write(unt,"(a,es16.8)")"   N(eF) for spin down:", edos%idos(edos%ief, 2)
+   write(unt,"(a,es16.8)")"   IDOS(eF) for spin up:  ", edos%idos(edos%ief, 1)
+   write(unt,"(a,es16.8)")"   IDOS(eF) for spin down:", edos%idos(edos%ief, 2)
  end if
 
  write(unt, "(a)")""
@@ -4632,6 +4655,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 
  edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol; edos%nspinor = ebands%nspinor
  edos%intmeth = intmeth
+ edos%nelect = ebands%nelect
  if (ebands%nkpt == 1) then
    ABI_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
    edos%intmeth = 1
