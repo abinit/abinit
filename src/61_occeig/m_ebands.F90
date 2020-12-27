@@ -3743,6 +3743,7 @@ end subroutine edos_get_carriers
 !!  cryst<crystal_t>=Info on unit cell and symmetries.
 !!  filepath=File name for output data.
 !!  prtnest = flags governing the format of the output file. see mknesting.
+!!  1 for X-Y format, 2 for XCrysden format (XSF)
 !!  tsmear=Broadening used to approximation the delta function.
 !!  fermie_nest
 !!  qpath_vertices = vertices of the reciprocal space trajectory
@@ -3801,7 +3802,7 @@ integer function ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermi
  invgauwidth = one / (0.1_dp * eV_Ha); if (tsmear > tol10) invgauwidth = one / tsmear
  prefact = one / sqrt(pi) * invgauwidth
 
- ABI_MALLOC(fs_weights,(ebands%nband(1),ebands%nkpt,ebands%nsppol))
+ ABI_MALLOC(fs_weights, (ebands%nband(1), ebands%nkpt, ebands%nsppol))
 
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt

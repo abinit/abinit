@@ -1266,7 +1266,7 @@ end function ftoa
 !! CHILDREN
 !!
 
-pure function ktoa(kpt,fmt)
+pure function ktoa(kpt, fmt)
 
  real(dp),intent(in) :: kpt(3)
  character(len=*),optional,intent(in) :: fmt

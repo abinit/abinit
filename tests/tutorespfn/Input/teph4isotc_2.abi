@@ -1,5 +1,4 @@
-#
-ndtset  1
+# MgB2: Computation of the isotropic Migdal-Eliashberg Tc 
 optdriver 7
 eph_task  1
 
@@ -10,14 +9,15 @@ getdvdb_filepath "teph4isotc_1_DVDB"
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
 ddb_ngqpt 4 4 4
-#eph_ngqpt_fine 6 6 6
-#eph_ngqpt_fine 8 8 8
-#eph_ngqpt_fine 12 12 12
+eph_ngqpt_fine 6 6 6
 dipdip 0         # No treatment of the dipole-dipole part. OK for metals
 
-eph_intmeth 1
+#eph_intmeth 2   # Tetrahedron method
+#eph_fsewin 0.3 eV
+eph_intmeth 1   # Gaussian
 eph_fsewin 0.3 eV
-eph_fsmear -1.0
+#eph_fsmear -1.0
+eph_fsmear 0.1 eV
 
 # Tricks to make EPH calculations faster.
 mixprec 1
@@ -29,6 +29,7 @@ nshiftk 1
 shiftk  0.0 0.0 0.0 
 
 # Compute phonon bands along this q-path.
+#prtnest   1
 ph_nqpath 8
 ph_qpath
     0.0 0.0 0.0   # Gamma
@@ -41,7 +42,7 @@ ph_qpath
     0.0 0.0 0.5   # A
 
 
-#COMMON INPUT DATA###########################################################
+# COMMON INPUT DATA###########################################################
 ecut    38.0  
 nband   8
 occopt  4              # Marzari smearing
@@ -66,5 +67,5 @@ pseudos "Mg-low.psp8, B.psp8"
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = Computation of isotropic Migdal-Eliashberg Tc
+#%% description = Computation of the isotropic Migdal-Eliashberg Tc
 #%%<END TEST_INFO>

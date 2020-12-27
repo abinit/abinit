@@ -64,6 +64,20 @@ specified in Hartree via [[eph_fsmear]] or an adaptive scheme (activated when [[
 in which a state-dependent broadening $\sigma_\nk$ is automatically computed from
 the electron group velocities $v_\nk$ [[cite:Li2015]].
 
+<!--
+Nesting factor
+Note that the phonon linewidths have a *geometrical contribution* due to Fermi surface since $\gamma_\qnu$
+is expected to be large in correspondence of $\qq$ wave vectors connecting two portions of the FS.
+Strictly speaking this is true only if the e-ph matrix elements are constant.
+I real materials the amplitude of $g_{mn\nu}(\kk, \qq)$ is not constant
+and this may enhance/suppress the value $\gamma_\qnu$ for particular modes.
+Yet visualizing the FS is rather useful when discussing e-ph properties in metals.
+
+\begin{equation}
+    N(\qq) = \sum_{mn\kk} \delta(\ee_{\kpq m}) \delta(\ee_{\kk n})
+\end{equation}
+-->
+
 !!! important
 
     The tetrahedron method is more accurate and does not require any broadening parameter.
@@ -154,11 +168,11 @@ A more detailed discussion about isotropic/anisotropic formulations can be found
 
 <!--
 
-Nesting factor
 
-\begin{equation}
-    N(\qq) = \sum_{mn\kk} \delta(\ee_{\kpq m}) \delta(\ee_{\kk n})
-\end{equation}
+
+
+
+
 
 Implementation details:
 

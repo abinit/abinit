@@ -2059,7 +2059,7 @@ pp_dirpath $ABI_PSPDIR
                     if self.exclude_builders: cprint("\t\texclude_builder: %s" % str(self.exclude_builders), color="yellow")
 
                 if status == "failed" and self.use_git_submodule:
-                    cprint("\tTest %s failed. Note, however, that this requires external files in %s" % (
+                    cprint("\tTest %s failed. Note, however, that this test requires external files in %s" % (
                           self.full_id, self.use_git_submodule), color="yellow")
                     cprint("\tUse `git submodule update --recursive --remote` to fetch the last version from the remote url.",
                            color="yellow")

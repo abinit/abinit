@@ -80,7 +80,8 @@ module m_fstab
    ! Max number of bands on the FS (bmax - bmin + 1)
 
    integer :: eph_intmeth
-   ! Integration method. 1 for gaussian, 2 for tetrahedra
+   ! Integration method.
+   ! 1 for gaussian, 2 for tetrahedra, -2 for optmized tetrahedron
 
    integer :: nene
    ! Number of chemical potential values used for inelastic integration
@@ -472,7 +473,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    !end do
  end do
 
- if (dtset%eph_intmeth == 2) then
+ if (abs(dtset%eph_intmeth) == 2) then
    ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
    ABI_MALLOC(bz2ibz, (nkbz))
    bz2ibz = full2ebands(1, :)
@@ -623,14 +624,14 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
    sigma = fs%eph_fsmear
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
-     if (fs%eph_fsmear < zero .or. fs%eph_intmeth == 2) then
+     if (fs%eph_fsmear < zero .or. abs(fs%eph_intmeth) == 2) then
        sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
        !write(std_out, *)"sigma:", sigma * Ha_eV
      end if
      g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - 1
-       if (fs%eph_fsmear < zero .or. fs%eph_intmeth == 2) then
+       if (fs%eph_fsmear < zero .or. abs(fs%eph_intmeth) == 2) then
          sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
        end if
        g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
@@ -638,7 +639,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
      end do
    end do
 
- else if (fs%eph_intmeth == 2) then
+ else if (abs(fs%eph_intmeth) == 2) then
    ! Tetrahedron method. Copy weights in the correct position.
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - fs%bmin
@@ -691,9 +692,7 @@ subroutine fstab_print(fstab, header, unit, prtvol)
 !scalars
  integer :: my_unt,my_prtvol,spin
  class(fstab_t),pointer :: fs
-! changed from type() to class() based on fortran compile error message
-! by NP
-! type(fstab_t),pointer :: fs
+! type(fstab_t),pointer :: fs ! changed by NP from type() to class() based on fortran compile error message
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -714,6 +713,8 @@ subroutine fstab_print(fstab, header, unit, prtvol)
    end if
  else if (fstab(1)%eph_intmeth == 2) then
    write(my_unt,"(a)")" FS integration done with tetrahedron method"
+ else if (fstab(1)%eph_intmeth == -2) then
+   write(my_unt,"(a)")" FS integration done with optimized tetrahedron method  tetrahedron method"
  else
    ABI_ERROR(sjoin("Invalid value for eph_intmeth:", itoa(fstab(1)%eph_intmeth)))
  end if

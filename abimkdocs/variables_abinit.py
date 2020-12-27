@@ -2229,7 +2229,7 @@ Variable(
     text=r"""
 Gives a rough description of the initial GS density, for each type of atom.
 This value is used to create the first exchange and correlation
-potential. Afterwards, it is not used anymore, except in cases related to [[densfor_pred]]. 
+potential. Afterwards, it is not used anymore, except in cases related to [[densfor_pred]].
 
 [[densty]] gives an average radius (a.u.) of a Gaussian density, that will make each pseudoion neutral.
 If set to 0.0, a tabulated value is used, announced as a 'decay length' in the log file.
@@ -3907,7 +3907,7 @@ Variable(
     vartype="real",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval="0.01 Hartree",
+    defaultval="0.04 Hartree",
     mnemonics="Electron-Phonon: Fermi Surface Energy WINdow",
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
@@ -4924,7 +4924,7 @@ Variable(
     text=r"""
 This variable is typically used to chain the calculations, in the multi-
 dataset mode ([[ndtset]] > 0), since it describes from which dataset the output [[acell]]
-and [[rprim]] are to be taken (implicitly also [[scalecart]]), as input of the present dataset. 
+and [[rprim]] are to be taken (implicitly also [[scalecart]]), as input of the present dataset.
 The cell parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
 If 0, no previously computed values are used.
 If >0, the value must be the index of the dataset from which the
@@ -6752,7 +6752,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Mixing coefficient for the screened Fock operator in case of hybrid
-functionals. HSE has 0.25. 
+functionals. HSE has 0.25.
 
 ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune
 this mixing coefficient.

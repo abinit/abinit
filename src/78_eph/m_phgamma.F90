@@ -3271,7 +3271,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
- real(dp),allocatable :: gs1c(:,:), v1_work(:,:,:,:)
+ real(dp),allocatable :: gs1c(:,:), v1_work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
  real(dp), allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:)
  real(dp), allocatable :: tmp_vals_ee(:,:,:,:,:), emesh(:)
@@ -3341,7 +3341,12 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call phgamma_init(gams, cryst, ifc, fstab(1), dtset, eph_scalprod0, gamma_ngqpt, n0, comm)
  call wrtout(std_out, sjoin("Will compute", itoa(gams%nqibz), "q-points in the IBZ"))
 
+ ! 1 for the linear tetrahedron method.
+ ! 2 for the optimized tetrahedron method.
  ltetra = 2 !; ltetra = dtset%useria + 1
+ !ltetra = 1
+ !if (dtset%eph_intmeth ==  2) ltetra = 1
+ !if (dtset%eph_intmeth == -2) ltetra = 2
  ! Compute optimal energy window for tetra.
  !call find_ewin(gams%nqibz, gams%qibz, cryst, ebands, ltetra, sigma, comm)
 
@@ -3696,6 +3701,61 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Create ddkop object to compute group velocities if needed.
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+
+ ! Imaginary part with MRTA. Here we need v_kq as well.
+ ! Usually kq is one of the kcalc points except when nk is close to the edge of the sigma_erange window.
+ ! due to ph absorption/emission.
+ ! In this case, indeed, we may need a kq state that is not in the initial kcalc set.
+ !
+ ! Solution:
+ !   1) precompute group velocities in the IBZ and the ihave_ikibz_spin file (common to all procs)
+ !   2) Fill sigma%vcar_calc needed by the transport driver from the vcar_ibz array
+ !   3) Use symmetries to reconstruct v_kq from vcar_ibz
+ !
+ ! NB: All procs store in memory the same set of Bloch states.
+
+! ABI_CALLOC(vcar_ibz, (3, sigma%bsum_start:sigma%bsum_stop, nkpt, nsppol))
+!
+! cnt = 0
+! do spin=1,nsppol
+!   do ik_ibz=1,ebands%nkpt
+!     kk = ebands%kptns(:, ik_ibz)
+!     npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
+!     ikcalc = ibzspin_2ikcalc(ik_ibz, spin)
+!     if (.not. ihave_ikibz_spin(ik_ibz, spin)) cycle
+!     if (npw_k == 1) cycle
+!     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
+!
+!     call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
+!
+!     do band_ks=sigma%bsum_start,sigma%bsum_stop
+!       if (.not. wfd%ihave_ug(band_ks, ik_ibz, spin)) cycle
+!       call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
+!       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+!       vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
+!       vcar_ibz(:, band_ks, ik_ibz, spin) = vk
+!       if (ikcalc /= -1) then
+!         ! This IBZ k-point is in the kcalc set --> Store vk in vcar_calc
+!         bstart_ks = sigma%bstart_ks(ikcalc, spin)
+!         bstop = bstart_ks + sigma%nbcalc_ks(ikcalc, spin) - 1
+!         if (band_ks >= bstart_ks .and. band_ks <= bstop) then
+!           ib_k = band_ks - bstart_ks + 1
+!           sigma%vcar_calc(:, ib_k, ikcalc, spin) = vk
+!         end if
+!       end if
+!     end do
+!   end do
+! end do
+! call xmpi_sum(sigma%vcar_calc, comm, ierr)
+! call xmpi_sum(vcar_ibz, comm, ierr)
+! ABI_FREE(vcar_ibz)
+
+ ! Write v_nk to disk.
+!#ifdef HAVE_NETCDF
+! if (my_rank == master) then
+!   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_calc"), sigma%vcar_calc))
+! end if
+!#endif
 
  if (dtset%eph_transport > 0) then
    ABI_MALLOC(tgamvv_in, (2, 9, natom3, natom3))
@@ -4329,8 +4389,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
  ! The double delta is ill-defined for q == 0. Set nesting to 1 and return
  nesting = 0
- if (fs%eph_intmeth == 2 .and. all(abs(qpt) < tol12)) then
-   ABI_COMMENT("Tetrahedron for double grid with q = 0 is ill-defined. Will use adaptive gaussian.")
+ if (abs(fs%eph_intmeth) == 2 .and. all(abs(qpt) < tol12)) then
+   ABI_COMMENT("Tetrahedron for double grid with q = 0 is ill-defined. Using adaptive gaussian.")
    nesting = 1
  end if
 
@@ -4409,7 +4469,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
        eig_k(:, ik_bz) = ebands%eig(fs%bmin:fs%bmax, ik_ibz, spin)
 
-       ! Find correspondence between the BZ grid and the IBZ.
+       ! Find correspondence between the k+q in the BZ grid and the IBZ.
        kq = kk + qpt
        ikq_ibz = ibz_krank%get_index(kq)
 
@@ -4430,27 +4490,36 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
  select case (ltetra)
  case (1, 2)
+   ! Use libtetra routines.
    ! Compute weights for double delta integration. Note that libtetra assumes Ef set to zero.
    ! TODO: Average weights over degenerate states?
    write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra: ", ltetra, " for q-point:", trim(ktoa(qpt))
    eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
    ABI_MALLOC(wght_bz, (nb, nb, nkbz))
    call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
-   eig_k = eig_k + ebands%fermie; eig_kq = eig_kq + ebands%fermie
 
    ! Reindex from full BZ to fs% kpoints.
+   !enemin = huge(one); enemax = -huge(one)
    do ik_bz=1,nkbz
      ik_fs = kbz2fs(ik_bz)
      if (ik_fs /= -1) then
        fs%dbldelta_tetra_weights_kfs(:,:,ik_fs) = wght_bz(:,:,ik_bz)
+       !if any(abs(wght_bz) > zero) then
+       !  enemin = min(enemin, eig_k(1, ik_bz), eig_kq(1, ik_bz))
+       !  enemax = min(enemax, eig_k(nb, ik_bz), eig_kq(nb, ik_bz))
+       !end if
      else
        !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
      end if
    end do
    ABI_FREE(wght_bz)
 
+   ! Revert changes to eig arrays
+   eig_k = eig_k + ebands%fermie !; eig_kq = eig_kq + ebands%fermie
+
  case (3)
    ! Tetrahedron method with Allen's approach for double delta.
+   ! WARNING: wrong results maybe bug somewhere.
    write(std_out,"(2a)")" Calling Allen's version for q-point: ", trim(ktoa(qpt))
    nene = 3
    enemin = ebands%fermie - tol6
@@ -4495,9 +4564,9 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    ABI_ERROR(sjoin("Invalid value of ltetra:", itoa(ltetra)))
  end select
 
- ! Now we can filter the k-points according to the tetra weights and distribute inside comm.
+ ! Now we can filter the k-points according to the tetra weights and distribute them inside comm.
  ! Assuming all procs in comm have all k-points in the IBZ.
- ! nkfs_q is the total number of BZ k-points on the FS that contribute for this q-point.
+ ! nkfs_q is the total number of BZ k-points on the FS contributing for this q-point.
  ABI_MALLOC(select_ikfs, (fs%nkfs))
  nkfs_q = 0
  do ik_fs=1,fs%nkfs
@@ -4529,7 +4598,7 @@ end subroutine phgamma_setup_qpoint
 
 !!****f* m_phgamma/find_ewin
 !! NAME
-!! find_ewing
+!! find_ewin
 !!
 !! FUNCTION
 !!
@@ -4562,10 +4631,8 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
 
 ! *************************************************************************
 
- my_rank = xmpi_comm_rank(comm)
-
  call cwtime(cpu, wall, gflops, "start")
-
+ my_rank = xmpi_comm_rank(comm)
  ABI_MALLOC(wtqs, (nqibz, ebands%nsppol, 3))
 
  ! 1 is low, 2 is high, 3 is for the workspace
@@ -4813,7 +4880,6 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
  call ibz_krank%free()
 
  call xmpi_sum(wtqs, comm, ierr)
-
  !call cwtime_report(" calc_dbldelta", cpu, wall, gflops)
 
 end subroutine calc_dbldelta

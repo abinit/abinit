@@ -283,7 +283,7 @@ program abitk
    !call ebands_free(ebands_kmesh)
 
  case ("skw_compare")
-   ! Get energies on the IBZ from filepath
+   ! Get energies on the IBZ from path
    call get_path_ebands_cryst(path, ebands, cryst, comm)
 
    ! Get ab-initio energies for the second file (assume k-path!)
