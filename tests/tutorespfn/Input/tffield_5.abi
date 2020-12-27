@@ -88,8 +88,8 @@ shiftk 0.5 0.5 0.5
        0.0 0.0 0.5
 
 #Parameters for the SCF procedure
-toldfe 1.0d-15
-nstep 5
+tolvrs 1.0D-19
+nstep 8
 
 # suppress printing of density, wavefunctions, etc for this tutorial
 prtwf 0
@@ -104,7 +104,7 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tffield_5.abo, tolnlines=  10, tolabs=  1.100e-08, tolrel=  4.500e-04
+#%%   tffield_5.abo, tolnlines=  22, tolabs=  1.100e-08, tolrel=  4.500e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
