@@ -93,6 +93,7 @@ module m_phgamma
 !!***
 
  public :: eph_phgamma
+ public :: find_ewin
 
 !----------------------------------------------------------------------
 
@@ -4601,6 +4602,7 @@ end subroutine phgamma_setup_qpoint
 !! find_ewin
 !!
 !! FUNCTION
+!!  Use bisection to find the optimal energy window around the Fermi level
 !!
 !! PARENTS
 !!
@@ -4622,8 +4624,9 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_rank, iq_ibz, spin, ii
+ integer :: my_rank, iq_ibz, spin, ii, unt
  real(dp) :: cpu, wall, gflops
+ character(len=500) :: msg
 !arrays
  integer :: bstarts(3), bstops(3)
  real(dp) :: elows(3), ehighs(3), ewins(3), qsums(3)
@@ -4633,27 +4636,40 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
 
  call cwtime(cpu, wall, gflops, "start")
  my_rank = xmpi_comm_rank(comm)
- ABI_MALLOC(wtqs, (nqibz, ebands%nsppol, 3))
+
+ unt = -1
+ if (xmpi_comm_rank(comm) == master) then
+   if (open_file("tetra.dat", msg, newunit=unt, action="write", form="formatted", status="unknown") /= 0) then
+     ABI_ERROR(msg)
+   end if
+ end if
 
  ! 1 is low, 2 is high, 3 is for the workspace
+ ABI_MALLOC(wtqs, (nqibz, ebands%nsppol, 3))
  ewins(1) = half * eV_Ha; elows(1) = ebands%fermie - ewins(1); ehighs(1) = ebands%fermie + ewins(1)
  call ebands_get_bands_from_erange(ebands, elows(1), ehighs(1), bstarts(1), bstops(1))
  call calc_dbldelta(cryst, ebands, ltetra, bstarts(1), bstops(1), nqibz, qibz, wtqs(:,:,1), comm)
+ if (unt /= -1) write(unt, *) wtqs(:,:,1)
 
- ewins(2) = five * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
+ !ewins(2) = five * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
+ ewins(2) = two * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
+ ewins(2) = one * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
  call ebands_get_bands_from_erange(ebands, elows(2), ehighs(2), bstarts(2), bstops(2))
  call calc_dbldelta(cryst, ebands, ltetra, bstarts(2), bstops(2), nqibz, qibz, wtqs(:,:,2), comm)
+ if (unt /= -1) write(unt, *) wtqs(:,:,2)
 
  if (abs(sum(abs(wtqs(:,:,1)) - sum(abs(wtqs(:,:,2))))) / sum(abs(wtqs(:,:,2))) < tol2) then
    fs_ewin = ewins(1)
-   call print_weights(1)
+   call print_weights_index(1)
    goto 100
  end if
 
+ ! Bisection part.
  do
    ewins(3) = (ewins(1) + ewins(2)) / two; elows(3) = ebands%fermie - ewins(3); ehighs(3) = ebands%fermie + ewins(3)
    call ebands_get_bands_from_erange(ebands, elows(3), ehighs(3), bstarts(3), bstops(3))
    call calc_dbldelta(cryst, ebands, ltetra, bstarts(3), bstops(3), nqibz, qibz, wtqs(:,:,3), comm)
+   if (unt /= -1) write(unt, *) wtqs(:,:,3)
 
    do ii=1,3
      qsums(ii) = sum(abs(wtqs(:,:,ii))) / nqibz
@@ -4669,7 +4685,7 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
 
    if (abs(qsums(3) - qsums(2)) / qsums(2) < tol2) then
      fs_ewin = ewins(3)
-     call print_weights(3)
+     call print_weights_index(3)
      exit
 
    else
@@ -4680,12 +4696,13 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
 
 100 continue
  ABI_FREE(wtqs)
+ if (unt /= -1) close(unt)
 
  call cwtime_report(" find_ewin", cpu, wall, gflops)
 
 contains
 
-subroutine print_weights(ind)
+subroutine print_weights_index(ind)
 
  integer,intent(in) :: ind
 
@@ -4699,7 +4716,7 @@ subroutine print_weights(ind)
    end do
  end if
 
-end subroutine print_weights
+end subroutine print_weights_index
 
 end subroutine find_ewin
 !!***
@@ -4711,6 +4728,7 @@ end subroutine find_ewin
 !! calc_dbldelta
 !!
 !! FUNCTION
+!!  Compute Tetrahedron weights for the double delta.
 !!
 !! PARENTS
 !!      m_phgamma

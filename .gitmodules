@@ -4,5 +4,5 @@
 	branch = master
 [submodule "tests/modules_with_data/MgB2_eph4isotc"]
 	path = tests/modules_with_data/MgB2_eph4isotc
-	url = https://github.com/abinit/MgB2_eph4isotc.git
+	url = git://github.com/abinit/MgB2_eph4isotc.git
 	branch = main

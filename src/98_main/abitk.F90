@@ -57,6 +57,7 @@ program abitk
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
  use m_parser,         only : geo_t, geo_from_poscar_path
+ use m_phgamma,        only : find_ewin
 
  implicit none
 
@@ -66,8 +67,8 @@ program abitk
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, intmeth, lenr !occopt,
- integer :: ndivsm, abimem_level, ierr, ntemp, ios, itemp, use_symmetries
- real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb !, tolsym, tsmear
+ integer :: ndivsm, abimem_level, ierr, ntemp, ios, itemp, use_symmetries, ltetra
+ real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb, fs_ewin !, tolsym, tsmear
  logical :: is_metal
  character(len=500) :: command, arg, msg, ptgroup
  character(len=fnlen) :: path, other_path, out_path !, prefix
@@ -410,6 +411,13 @@ program abitk
    !! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
    !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
    !ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
+
+ case ("find_ewin")
+   ltetra = 2
+   ABI_CHECK(get_arg("ltetra", ltetra, msg, default=2) == 0, msg)
+   call get_path_ebands_cryst(path, ebands, cryst, comm)
+   ! Use Q-mesh == K-mesh for double delta.
+   call find_ewin(ebands%nkpt, ebands%kptns, cryst, ebands, ltetra, fs_ewin, comm)
 
  ! ===========
  ! Unit tests
