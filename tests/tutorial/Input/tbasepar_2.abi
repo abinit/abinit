@@ -27,13 +27,6 @@ shiftk 0.5 0.5 0.5
 occopt 7
 nband  40
 
-#Spin polarization parameters
-nsppol 2
-spinat 0.0 0.0 3.0
-       0.0 0.0 3.0
-       0.0 0.0 3.0
-       0.0 0.0 3.0
-
 #Parameters for the SCF procedure
 nstep  5
 tolvrs 1.0d-13
