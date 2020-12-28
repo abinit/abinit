@@ -1497,16 +1497,17 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 !  Extract density rhor from bigDFT datastructure
    ABI_ALLOCATE(rhov,(nfft, nspden))
    ABI_ALLOCATE(vhartr,(nfft))
+   rhov=zero ; vhartr=zero
    shift = wvl_den%denspot%dpbox%ndims(1) * wvl_den%denspot%dpbox%ndims(2) &
 &   * wvl_den%denspot%dpbox%i3xcsh
-   do i = 1, nfft
+   do i = 1, min(nfft,size(wvl_den%denspot%rhov)-shift)
      rhov(i, 1) = wvl_den%denspot%rhov(i + shift)
      vhartr(i)  = wvl_den%denspot%rhov(i + shift)
    end do
    if (nspden == 2) then
      shift = shift + wvl_den%denspot%dpbox%ndims(1) * wvl_den%denspot%dpbox%ndims(2) &
 &     * wvl_den%denspot%dpbox%n3d
-     do i = 1, nfft
+     do i = 1, min(nfft,size(wvl_den%denspot%rhov)-shift)
        rhov(i, 2) =             wvl_den%denspot%rhov(i + shift)
        vhartr(i)  = vhartr(i) + wvl_den%denspot%rhov(i + shift)
      end do
