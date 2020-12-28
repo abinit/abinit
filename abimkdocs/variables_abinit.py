@@ -3959,18 +3959,21 @@ we are computing.
 
 Phonon linewidths in metals (**eph_task** = 1):
 
-:   The default approach for the integration of the double-delta over the Fermi surface is 2 (tetrahedron).
+:   The default approach for the integration of the double-delta over the Fermi surface is 2
+    (optimized tetrahedron by [[Kawamura2014]]).
     When the gaussian method is used, the broadening is given by [[eph_fsmear]].
     A negative value activates the adaptive Gaussian broadening.
     See also [[eph_fsewin]].
 
 Electron-phonon self-energy (also spectral function) with **eph_task** = 4):
 
-:   The default is [[eph_intmeth]]==1, Lorentzian method with broadening specified by [[zcut]]. Note that [[eph_intmeth]]==2 is still in development for this case (ABINITv9.2).
+:   The default is [[eph_intmeth]]==1, Lorentzian method with broadening specified by [[zcut]].
+    Note that [[eph_intmeth]]==2 is **still in development** for this case (ABINITv9.2).
 
 Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
 
-:   The default is [[eph_intmeth]]==2, Tetrahedron method except when symsigma == 0, where it is [[eph_intmeth]]==1..
+:   The default is [[eph_intmeth]]==2, Tetrahedron method by [[Blochl1993]] except when symsigma == 0,
+    where it is [[eph_intmeth]]==1..
 """,
 ),
 

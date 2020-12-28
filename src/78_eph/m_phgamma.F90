@@ -3272,17 +3272,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
- real(dp),allocatable :: gs1c(:,:), v1_work(:,:,:,:), vcar_ibz(:,:,:,:)
+ real(dp),allocatable :: gs1c(:,:), v1_work(:,:,:,:) !, vcar_ibz(:,:,:,:)
  real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
  real(dp), allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:)
  real(dp), allocatable :: tmp_vals_ee(:,:,:,:,:), emesh(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
- ! for the Eliashberg solver
- !integer :: ntemp
- !real(dp) :: reltol,wcut
- !real(dp) :: temp_range(2)
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart
  logical :: reorder
@@ -4494,34 +4490,28 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    ! Use libtetra routines.
    ! Compute weights for double delta integration. Note that libtetra assumes Ef set to zero.
    ! TODO: Average weights over degenerate states?
-   write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra: ", ltetra, " for q-point:", trim(ktoa(qpt))
+   call wrtout(std_out, sjoin(" Calling libtetrabz_dbldelta with ltetra:", itoa(ltetra)))
    eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
    ABI_MALLOC(wght_bz, (nb, nb, nkbz))
    call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
+   ! Revert changes to eig arrays
+   eig_k = eig_k + ebands%fermie !; eig_kq = eig_kq + ebands%fermie
 
    ! Reindex from full BZ to fs% kpoints.
-   !enemin = huge(one); enemax = -huge(one)
    do ik_bz=1,nkbz
      ik_fs = kbz2fs(ik_bz)
      if (ik_fs /= -1) then
        fs%dbldelta_tetra_weights_kfs(:,:,ik_fs) = wght_bz(:,:,ik_bz)
-       !if any(abs(wght_bz) > zero) then
-       !  enemin = min(enemin, eig_k(1, ik_bz), eig_kq(1, ik_bz))
-       !  enemax = min(enemax, eig_k(nb, ik_bz), eig_kq(nb, ik_bz))
-       !end if
      else
        !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
      end if
    end do
    ABI_FREE(wght_bz)
 
-   ! Revert changes to eig arrays
-   eig_k = eig_k + ebands%fermie !; eig_kq = eig_kq + ebands%fermie
-
  case (3)
    ! Tetrahedron method with Allen's approach for double delta.
    ! WARNING: wrong results maybe bug somewhere.
-   write(std_out,"(2a)")" Calling Allen's version for q-point: ", trim(ktoa(qpt))
+   call wrtout(std_out " Calling Allen's version for q-point")
    nene = 3
    enemin = ebands%fermie - tol6
    enemax = ebands%fermie + tol6
@@ -4787,7 +4777,6 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
  ABI_MALLOC(eig_kq, (nb, nkbz))
 
  wtqs = zero
-
  cnt = 0
  do spin=1,ebands%nsppol
    do iq_ibz=1,nqibz
@@ -4843,9 +4832,9 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
        eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
        ABI_MALLOC(wght_bz, (nb, nb, nkbz))
        call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
-       eig_k = eig_k + ebands%fermie; eig_kq = eig_kq + ebands%fermie
+       eig_k = eig_k + ebands%fermie !; eig_kq = eig_kq + ebands%fermie
 
-       wtqs(iq_ibz, spin) = sum(wght_bz)
+       wtqs(iq_ibz, spin) = sum(abs(wght_bz))
        ABI_FREE(wght_bz)
 
      else if (ltetra == 3) then
@@ -4875,7 +4864,7 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
                                     max_occ1, nene, nene, nkbz, tetra, tweight, dtweightde, ierr)
           ABI_CHECK(ierr == 0, "get_dbldelta_weights returned ierr /= 0")
 
-          wtqs(iq_ibz, spin) = wtqs(iq_ibz, spin) + sum(dtweightde(:, 2, 2))
+          wtqs(iq_ibz, spin) = wtqs(iq_ibz, spin) + sum(abs(dtweightde(:, 2, 2)))
          end do
        end do
 

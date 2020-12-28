@@ -57,7 +57,9 @@ in which a single Dirac delta is involved.
     on the computation of the imaginary part of the phonon self-energy $\Pi$ in the harmonic approximation.
 
 At the level of the implementation, the integration of the double delta can be performed
-either with the **tetrahedron** scheme ([[eph_intmeth]] == 1),
+either with the **optimized tetrahedron** scheme [[cite:Kawamura2014]] as implemented 
+in the [libtetrabz library](http://libtetrabz.osdn.jp/en/_build/html/index.html)
+when [[eph_intmeth]] is set to 1,
 or by replacing the Dirac distribution with a **Gaussian** of finite width ([[eph_intmeth]] == 2).
 If the Gaussian method is selected, one can choose between a constant broadening $\sigma$
 specified in Hartree via [[eph_fsmear]] or an adaptive scheme (activated when [[eph_fsmear]] < 0)
@@ -84,7 +86,7 @@ Yet visualizing the FS is rather useful when discussing e-ph properties in metal
     Note, however, that in the present implementation the computational cost of the double
     delta with the tetrahedron method
     quickly increases with the size of the $\kk$-mesh so the adaptive Gaussian scheme
-    represents a valid alternative, especially when dense $\kk$-meshes are used.
+    may represent a valid alternative, especially when dense $\kk$-meshes are needed.
 
 The value of the Fermi level, $\ee_F$, is automatically computed from the KS eigenvalues stored
 in the input WFK file according to the two input variables [[occopt]] and [[tsmear]].
@@ -94,7 +96,7 @@ three (mutually exclusive) input variables: [[eph_fermie]], [[eph_extrael]] and 
 This may be useful if you want to study the effect of doping within the **rigid band approximation**.
 
 The sum over bands is restricted to Bloch states within an energy window of thickness [[eph_fsewin]]
-around the Fermi level.
+around the Fermi level (additional details are given in the tutorials).
 The $\kk$-mesh is defined by the input variables [[ngkpt]], [[nshiftk]] and [[shiftk]].
 Note that the $\kk$-sampling **must be equal** to the ones used to generate the input WFK file.
 
@@ -142,7 +144,7 @@ $$
 
 In principle, $T_c$ can be obtained by solving the isotropic Eliashberg equations
 but many applications prefer to bypass the explicit solution
-and **estimate** $T_c$ using the semi-empirical McMillan equation:
+and **estimate** $T_c$ using the semi-empirical McMillan equation [[cite:McMillan1968]], [[cite:Allen1975]]:
 
 $$
 T_c = \dfrac{\ww_{log}}{1.2} \exp \Biggl [ \dfrac{-1.04 (1 + \lambda)}{\lambda ( 1 - 0.62 \mu^*) - \mu^*} \Biggr ]
@@ -167,13 +169,6 @@ as impurities tend to smear out the anisotropy of the superconducting gap.
 A more detailed discussion about isotropic/anisotropic formulations can be found in [[cite:Margine2013]].
 
 <!--
-
-
-
-
-
-
-
 Implementation details:
 
 \begin{equation}
@@ -438,11 +433,11 @@ abiview.py fs MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
 to visualize the FS in the **unit cell** of the reciprocal lattice.
 
 
-![](eph4isotc_assets/MgB2_fs_matplotlib.png)
+![](eph4isotc_assets/MgB2_matplotlib_fs.png)
 
 !!! tip
 
-    The BXSF file can be produced at the end of the GS calculations
+    The BXSF file can be produced at the end of the GS calculation
     or inside the EPH code by setting [[prtfsurf]] to 1 but *abitk* is quite handy if you already
     have a file and you don't want to write a full Abinit input file and rerun the calculation
     from scratch.
@@ -551,18 +546,35 @@ so that we do can avoid repeating the unit cell in every input file.
 Next, we have the variables governing the EPH calculation:
 
 ```sh
-ddb_ngqpt 4 4 4
-dipdip 0         # No treatment of the dipole-dipole part. OK for metals
-
-eph_intmeth 1
-eph_fsmear -1.0
-eph_fsewin 0.3 eV
+ddb_ngqpt 4 4 4        # The ab-initio q-mesh (DDB, DVDB)
+eph_ngqpt_fine 6 6 6   # Activate interpolation of DFPT potentials
+                       # gamma_{q,nu} are computed of this fine grid.
+dipdip 0               # No treatment of the dipole-dipole part. OK for metals
 ```
 
 In this first example, we prefer not to interpolate the DFPT potentials so only [[ddb_ngqpt]] is specified.
+[[eph_ngqpt_fine]]
 [[dipdip]] is set to zero as we are dealing with a metal and the inter-atomic force constants are relatively short-ranged.
-The $\kk$-point integration is done with the adaptive Gaussian smearing.
-See [[eph_intmeth]], [[eph_fsewin]], [[eph_fsewin]].
+
+
+```sh
+eph_intmeth 1       # Gaussian method for double-delta integration.
+eph_fsmear 0.1 eV   # Constant broadening in Gaussian function.
+eph_fsewin 0.3 eV   # Energy window for wavefunctions.
+```
+
+The $\kk$-point integration is performed with the Gaussian smearing.
+See [[eph_intmeth]] == 1 and 0.1 eV for [[eph_fsmear]].
+Nota that, in order to accelerate the calculation, we have decreased [[eph_fsewin]] can be from its default 
+value of 1 eV to 0.3 eV.
+This is possible when the Gaussian method is used since
+states whose energy is 3-4 standard deviation from the Fermi level give negligible contribution to the double delta integral.
+In other words, for the Gaussian technique, an almost option value of [[eph_fsewin]] can be deduded from [[eph_fsmear]]
+Unfortunately, this is not possible when the tetrahedron method is used and to some extent also when the adaptive
+broadening is used.
+We will discuss
+Hopefully, the next versions of the code will provide ...
+0.04 Ha ~ 1 eV
 
 Then we activate two tricks just to make the calculation faster:
 
@@ -571,11 +583,9 @@ mixprec 1
 boxcutmin 1.1
 ```
 
-!!! tip
-
-    As explained in the documentation, using [[mixprec]] = 1 and [[boxcutmin]] = 1.1
-    should not have significant effects on the final results yet these are not the default values
-    as users are supposed to compare the results with/without this trick before running production calculations.
+As explained in the documentation, using [[mixprec]] = 1 and [[boxcutmin]] = 1.1
+should not have significant effects on the final results yet these are not the default values
+as users are supposed to compare the results with/without this trick before running production calculations.
 
 <!--
 
@@ -629,9 +639,11 @@ The high-symmetry $\qq$-path for the phonon band structure is specified with:
 Remember to discuss k-mesh and [[tsmear]] at the DFPT level.
 -->
 
-We now discuss in more detail the output file produced by the code.
+### Output files
 
-{% dialog tests/tutorespfn/Refs/teph4isotc_3.abo %}
+We now discuss in more detail the output file produced by the calculation.
+
+{% dialog tests/tutorespfn/Refs/teph4isotc_2.abo %}
 
 After the standard section with info on the unit cell and pseudopotentials,
 we find the output of the electronic DOS:
@@ -679,7 +691,7 @@ Then, for each $\qq$-point in the IBZ, the code outputs the values of $\ww_\qnu$
 ```
 
 The linewidths of the acoustic mode at $\Gamma$ are zero.
-The default value of [[asr]] is automatically set to 1
+The default value of [[asr]] is automatically set to 1.
 
 ```sh
 abiview.py ddb_asr MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB
@@ -751,6 +763,23 @@ our results are not that bad considering that the calculation took less than XXX
      Use compare the results obtained without [[mixprec]] 1 and [[boxcutmin]] 1.1.
      You may want to run the calculation in parallel with mpirun.
 
+## Using the tetrahedron method 
+
+In this section, we repeat the calculation done in **teph4isotc_2.abi** 
+but now with the **optimized tetrahedron** scheme [[cite:Kawamura2014]].
+The goal is to show that (i) phonon linewidths are very sensitive to the $\kk$-mesh and the integration scheme and 
+that (ii)
+-
+
+constructing a third-order interpolation function with 20 $\kk$-points
+
+```
+ndtset 4
+eph_intmeth 2   # Tetra
+eph_fsewin: 0.4 eV
+eph_fsewin+ 0.4 eV
+```
+
 ## Preparing the convergence study wrt the k-mesh
 
 Our goal is to perform calculations of $\gamma_\qnu$ and $\lambda_\qnu$ with different $\kk-\qq$-meshes
@@ -763,10 +792,11 @@ when such a coarse **ab-initio** sampling is used.
 In a nutshell, we have to make the best of what we have at hand while minimizing the computational cost.
 
 Since we already have a WFK file on a 12x12x12 $\kk$-mesh, it makes sense to compute electrons 
-on a 24x24x24 $\kk$-mesh
-so that we can compare the following configurations:
+on a 24x24x24 $\kk$-mesh so that we can compare the following configurations:
 
 <!--
+TODO: Discuss energy window, sigma_erange in connection with FS window and integration scheme
+
 As already mentioned in the introduction, the integration of the double delta requires very dense $\kk$-meshes
 for electrons in order to obtain accurate results for $\gamma_\qnu$.
 By the same token, converging the fine details of $\alpha^2F(\ww)$ and $\lambda$ requires

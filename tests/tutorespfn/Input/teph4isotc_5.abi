@@ -60,7 +60,7 @@ pseudos "Mg-low.psp8, B.psp8"
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
 #%% files_to_test =
-#%%   teph4isotc_5.abo, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   teph4isotc_5.abo, tolnlines= 200, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

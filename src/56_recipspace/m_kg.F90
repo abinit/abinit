@@ -126,15 +126,15 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 
 ! *************************************************************************
 
-!This is to treat the case where ecut has not been initialized,
-!for wavelet computations. The default for ecut is -1.0 , allowed only for wavelets calculations
+ ! This is to treat the case in which ecut has not been initialized e.g. for wavelet computations.
+ ! The default for ecut is -1.0 , allowed only for wavelets calculations
  ecut_pw=ecut
  if(ecut<-tol8)ecut_pw=ten
 
-!gcut(box)**2=boxsq; gcut(sphere)**2=sphsq
-!get min. d**2 to boundary of fft box:
-!(gmet sets dimensions: bohr**-2)
-!ecut(sphere)=0.5*(2 pi)**2 * sphsq:
+ !gcut(box)**2=boxsq; gcut(sphere)**2=sphsq
+ !get min. d**2 to boundary of fft box:
+ !(gmet sets dimensions: bohr**-2)
+ !ecut(sphere)=0.5*(2 pi)**2 * sphsq:
  call bound(largesq,boxsq,gbound,gmet,kpt,ngfft,plane)
  effcut=0.5_dp * (two_pi)**2 * boxsq
  sphsq=2._dp*ecut_pw/two_pi**2
@@ -148,14 +148,13 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
    '         ecut(hartree)=',ecut_pw+tol8,ch10,'=> whole FFT box selected'
    if(iout/=std_out) call wrtout(iout,msg)
    call wrtout(std_out,msg)
-
  else
 
-!  Get G^2 cutoff for sphere of double radius of basis sphere
-!  for selecting G s for rho(G), V_Hartree(G), and V_psp(G)--
-!  cut off at fft box boundary or double basis sphere radius, whichever
-!  is smaller.  If boxcut were 2, then relation would be
-!$ecut_eff = (1/2) * (2 Pi Gsmall)^2 and gsqcut=4*Gsmall^2$.
+  ! Get G^2 cutoff for sphere of double radius of basis sphere
+  ! for selecting G s for rho(G), V_Hartree(G), and V_psp(G)--
+  ! cut off at fft box boundary or double basis sphere radius, whichever
+  ! is smaller.  If boxcut were 2, then relation would be
+  ! $ecut_eff = (1/2) * (2 Pi Gsmall)^2 and gsqcut=4*Gsmall^2$.
    boxcut = sqrt(boxsq/sphsq)
    cutrad = min(2.0_dp,boxcut)
    gsqcut = (cutrad**2)*(2.0_dp*ecut_pw)/two_pi**2
@@ -184,7 +183,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 
      if (boxcut>2.2_dp) then
        write(msg, '(a,a,a,a,a,a,a,a,a,a,a,f12.6,a,a)' ) ch10,&
-       ' getcut : COMMENT -',ch10,&
+       ' getcut: COMMENT -',ch10,&
        '  Note that boxcut > 2.2 ; recall that',' boxcut=Gcut(box)/Gcut(sphere) = 2',ch10,&
        '  is sufficient for exact treatment of convolution.',ch10,&
        '  Such a large boxcut is a waste : you could raise ecut',ch10,&
@@ -195,9 +194,9 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 
      if (boxcut<1.5_dp) then
        write(msg, '(15a)' ) ch10,&
-       ' getcut : WARNING -',ch10,&
+       ' getcut: WARNING -',ch10,&
        '  Note that boxcut < 1.5; this usually means',ch10,&
-       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
+       '  that the forces are being fairly strongly affected by',' the smallness of the fft box.',ch10,&
        '  Be sure to test with larger ngfft(1:3) values.',ch10,&
        '  This situation might happen when optimizing the cell parameters.',ch10,&
        '  Your starting geometry might be crazy.',ch10,&

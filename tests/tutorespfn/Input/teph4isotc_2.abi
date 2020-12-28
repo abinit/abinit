@@ -8,16 +8,17 @@ getdvdb_filepath "teph4isotc_1_DVDB"
 
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 
-ddb_ngqpt 4 4 4
-eph_ngqpt_fine 6 6 6
-dipdip 0         # No treatment of the dipole-dipole part. OK for metals
+ddb_ngqpt 4 4 4        # The ab-initio q-mesh (DDB, DVDB)
+eph_ngqpt_fine 6 6 6   # Activate interpolation of DFPT potentials
+                       # gamma_{q,nu} are computed of this fine grid.
+dipdip 0               # No treatment of the dipole-dipole part. OK for metals
 
 #eph_intmeth 2   # Tetrahedron method
 #eph_fsewin 0.3 eV
-eph_intmeth 1   # Gaussian
-eph_fsewin 0.3 eV
 #eph_fsmear -1.0
-eph_fsmear 0.1 eV
+eph_intmeth 1       # Gaussian method for double-delta integration.
+eph_fsmear 0.1 eV   # Constant broadening in Gaussian function.
+eph_fsewin 0.3 eV   # Energy window for wavefunctions.
 
 # Tricks to make EPH calculations faster.
 mixprec 1
