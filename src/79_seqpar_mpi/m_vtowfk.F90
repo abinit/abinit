@@ -39,6 +39,7 @@ module m_vtowfk
  use m_time,        only : timab, cwtime, cwtime_report, sec2str
  use m_fstrings,    only : sjoin, itoa, ftoa
  use m_hamiltonian, only : gs_hamiltonian_type
+ use m_getghc,      only : getghc_nucdip
  use m_paw_dmft,    only : paw_dmft_type
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
  use m_paw_dmft,    only : paw_dmft_type
@@ -127,6 +128,7 @@ contains
 !!  ek_k(nband_k)=contribution from each band to kinetic energy, at this k-point
 !!  ek_k_nd(2,nband_k,nband_k*use_dmft)=contribution to kinetic energy,
 !!     including non-diagonal terms, at this k-point (usefull if use_dmft)
+!!  end_k(nband_k)=contribution from each band to nuclear dipole energy, at this k-point
 !!  resid_k(nband_k)=residuals for each band over all k points, BEFORE the band rotation.
 !!   In input: previous residuals.
 !!  ==== if optforces>0 ====
@@ -160,7 +162,7 @@ contains
 !! SOURCE
 
 subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
-& eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
+& eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 & ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj,mkgq,mpi_enreg,&
 & mpw,natom,nband_k,nkpt,istep,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
 & pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,zshift, rmm_diis_status)
@@ -184,7 +186,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),pwnsfacq(2,mkgq)
  real(dp), intent(in) :: zshift(nband_k)
  real(dp), intent(out) :: eig_k(nband_k),ek_k(nband_k),dphase_k(3),ek_k_nd(2,nband_k,nband_k*paw_dmft%use_dmft)
- real(dp), intent(out) :: enlx_k(nband_k)
+ real(dp), intent(out) :: end_k(nband_k),enlx_k(nband_k)
  real(dp), intent(out) :: grnl_k(3*natom,nband_k*optforces)
  real(dp), intent(inout) :: resid_k(nband_k)
  real(dp), intent(inout) :: cg(2,mcg),rhoaug(gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,gs_hamk%nvloc)
@@ -211,7 +213,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  character(len=500) :: msg
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
- real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),gsc(:,:)
+ real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),gsc(:,:),ghc_vectornd(:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
@@ -635,6 +637,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),0)
 
      ek_k(iband)=ar
+
+     if(ANY(ABS(dtset%nucdipmom)>tol8)) then
+       ABI_ALLOCATE(ghc_vectornd,(2,npw_k))
+       call getghc_nucdip(cwavef,ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
+&        gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
+&        gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%use_gpu_cuda)
+       end_k(iband)=DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
+         & DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k))
+       ABI_DEALLOCATE(ghc_vectornd)
+     end if
 
      if(paw_dmft%use_dmft==1) then
        do iband1=1,nband_k
