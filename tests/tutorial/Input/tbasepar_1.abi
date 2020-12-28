@@ -22,7 +22,7 @@ xred
   0.000   0.000   0.000
 
 #Numerical parameters of the calculation : planewave basis set and k point grid
-ecut  30.0
+ecut  24.0
 ngkpt 12 12 12
 nshiftk 4
 shiftk
@@ -32,7 +32,7 @@ shiftk
    0.0 0.0 0.5
 occopt 7
 tsmear 0.01
-nband  8
+nband  7
 
 #Parameters for the SCF procedure
 nstep   10
