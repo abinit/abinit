@@ -199,7 +199,7 @@ MODULE m_paw_ij
   real(dp), allocatable :: dijnd(:,:)
    ! dijnd(cplex_dij*lmn2_size,ndij)
    ! On-site matrix elements of -\frac{1}{c}\mu\cdot L/r^3
-   ! Same storage as Dij (see above); not available for RF (i.e. qphase=2)
+   ! Same storage as Dij (see above)
 
   real(dp), allocatable :: dijso(:,:)
    ! dijso(cplex_dij*qphase*lmn2_size,ndij)
@@ -1150,7 +1150,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
      end if
 
      !Dij nuclear dipole
-     if (Paw_ij(iatom)%has_dijnd/=0.and.my_ipert<=0) then
+     if (Paw_ij(iatom)%has_dijnd/=0) then
        write(msg,'(a)') '   *********** Dij Nuclear Dipole **********'
        call wrtout(my_unt,msg,my_mode)
        call get_dij_parts(cplex_dij,1,Paw_ij(iatom)%dijnd,always_img=.true.)

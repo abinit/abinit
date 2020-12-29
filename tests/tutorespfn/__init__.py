@@ -73,7 +73,6 @@ inp_files = [
 "tffield_4.abi",
 "tffield_5.abi",
 "tffield_6.abi",
-#"-tffield_7.abi",  # Disabled
 #
 "tlw_1.abi",
 "tlw_2.abi",

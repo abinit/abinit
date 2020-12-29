@@ -48,6 +48,7 @@ module m_getghc
  public :: getghc     ! Compute <G|H|C> for input vector |C> expressed in reciprocal space
  public :: getgsc     ! Compute <G|S|C> for all input vectors |Cnk> at a given k-point
  public :: multithreaded_getghc
+ public :: getghc_nucdip ! compute <G|H_nucdip|C> for input vector |C> expressed in recip space
 !!***
 
 contains
@@ -1625,103 +1626,6 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
 end subroutine multithreaded_getghc
 !!***
-
-! !!****f* ABINIT/getghcnd
-! !!
-! !! NAME
-! !! getghcnd
-! !!
-! !! FUNCTION
-! !! Compute <G|H_ND|C> for input vector |C> expressed in reciprocal space
-! !! Result is put in array ghcnc. H_ND is the Hamiltonian due to magnetic dipoles
-! !! on the nuclear sites.
-! !!
-! !! INPUTS
-! !! cwavef(2,npw*nspinor*ndat)=planewave coefficients of wavefunction.
-! !! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
-! !! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
-! !! ndat=number of FFT to do in //
-! !!
-! !! OUTPUT
-! !! ghcnd(2,npw*my_nspinor*ndat)=matrix elements <G|H_ND|C>
-! !!
-! !! NOTES
-! !!  This routine applies the Hamiltonian due to an array of magnetic dipoles located
-! !!  at the atomic nuclei to the input wavefunction. Strategy below is to take advantage of
-! !!  Hermiticity to store H_ND in triangular form and then use a BLAS call to zhpmv to apply to
-! !!  input vector in one shot.
-! !! Application of <k^prime|H|k> or <k|H|k^prime> not implemented!
-! !!
-! !! PARENTS
-! !!      getghc
-! !!
-! !! CHILDREN
-! !!      zhpmv
-! !!
-! !! SOURCE
-
-! subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
-
-! !Arguments ------------------------------------
-! !scalars
-!  integer,intent(in) :: my_nspinor,ndat
-!  type(gs_hamiltonian_type),intent(in) :: gs_ham
-! !arrays
-!  real(dp),intent(in) :: cwavef(2,gs_ham%npw_k*my_nspinor*ndat)
-!  real(dp),intent(out) :: ghcnd(2,gs_ham%npw_k*my_nspinor*ndat)
-
-! !Local variables-------------------------------
-! !scalars
-!  integer :: cwavedim
-!  character(len=500) :: message
-!  !arrays
-!  complex(dpc),allocatable :: inwave(:),hggc(:)
-
-! ! *********************************************************************
-
-!  if (gs_ham%matblk /= gs_ham%natom) then
-!    write(message,'(a,i4,a,i4)')' gs_ham%matblk = ',gs_ham%matblk,' but natom = ',gs_ham%natom
-!    ABI_ERROR(message)
-!  end if
-!  if (ndat /= 1) then
-!    write(message,'(a,i4,a)')' ndat = ',ndat,' but getghcnd requires ndat = 1'
-!    ABI_ERROR(message)
-!  end if
-!  if (my_nspinor /= 1) then
-!    write(message,'(a,i4,a)')' nspinor = ',my_nspinor,' but getghcnd requires nspinor = 1'
-!    ABI_ERROR(message)
-!  end if
-!  if (any(abs(gs_ham%kpt_k(:)-gs_ham%kpt_kp(:))>tol8)) then
-!    message=' not allowed for kpt(left)/=kpt(right)!'
-!    ABI_BUG(message)
-!  end if
-
-!  if (any(abs(gs_ham%nucdipmom_k)>tol8)) then
-!    cwavedim = gs_ham%npw_k*my_nspinor*ndat
-!    ABI_MALLOC(hggc,(cwavedim))
-!    ABI_MALLOC(inwave,(cwavedim))
-
-!    inwave(1:gs_ham%npw_k) = cmplx(cwavef(1,1:gs_ham%npw_k),cwavef(2,1:gs_ham%npw_k),kind=dpc)
-
-!     ! apply hamiltonian hgg to input wavefunction inwave, result in hggc
-!     ! ZHPMV is a level-2 BLAS routine, does Matrix x Vector multiplication for double complex
-!     ! objects, with the matrix as Hermitian in packed storage
-!    call ZHPMV('L',cwavedim,cone,gs_ham%nucdipmom_k,inwave,1,czero,hggc,1)
-
-!    ghcnd(1,1:gs_ham%npw_k) = real(hggc)
-!    ghcnd(2,1:gs_ham%npw_k) = aimag(hggc)
-
-!    ABI_FREE(hggc)
-!    ABI_FREE(inwave)
-
-!  else
-
-!    ghcnd(:,:) = zero
-
-!  end if
-
-! end subroutine getghcnd
-! !!***
 
 end module m_getghc
 !!***

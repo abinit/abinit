@@ -375,14 +375,13 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
- real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:)
+ real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:)
  real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:)
  real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
- complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
  type(oper_type) :: dft_occup
@@ -452,6 +451,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  if(.not. wvlbigdft) then
    energies%e_eigenvalues = zero
    energies%e_kinetic     = zero
+   energies%e_nucdip      = zero
    energies%e_nlpsp_vfock = zero
    if (usefock) then
      energies%e_fock=zero
@@ -804,6 +804,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 
        ABI_MALLOC(eig_k,(nband_k))
        ABI_MALLOC(ek_k,(nband_k))
+       ABI_MALLOC(end_k,(nband_k))
        ABI_MALLOC(enlx_k,(nband_k))
        ABI_MALLOC(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
        ABI_MALLOC(occ_k,(nband_k))
@@ -813,6 +814,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 
        eig_k(:)=zero
        ek_k(:)=zero
+       end_k(:)=zero
        enlx_k(:)=zero
        if(paw_dmft%use_dmft==1) ek_k_nd(:,:,:)=zero
        if (optforces>0) grnl_k(:,:)=zero
@@ -915,10 +917,11 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        end if
 
 !      Compute the eigenvalues, wavefunction, residuals,
-!      contributions to kinetic energy, nonlocal energy, forces,
+!      contributions to kinetic energy, nuclear dipole energy,
+!      nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
-&       dtset,eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
+&       dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
@@ -933,9 +936,6 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        ABI_FREE(kinpw)
        ABI_FREE(kg_k)
        ABI_FREE(kpg_k)
-       if(allocated(nucdipmom_k)) then
-         ABI_FREE(nucdipmom_k)
-       end if
        ABI_FREE(ylm_k)
        ABI_FREE(ph3d)
        ABI_FREE(cgq)
@@ -974,6 +974,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
          do iband=1,nband_k
            if (abs(occ_k(iband))>tol8) then
              energies%e_kinetic     = energies%e_kinetic     + dtset%wtk(ikpt)*occ_k(iband)*ek_k(iband)
+             energies%e_nucdip     = energies%e_nucdip     + dtset%wtk(ikpt)*occ_k(iband)*end_k(iband)
              energies%e_eigenvalues = energies%e_eigenvalues + dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
              energies%e_nlpsp_vfock = energies%e_nlpsp_vfock + dtset%wtk(ikpt)*occ_k(iband)*enlx_k(iband)
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ_k(iband)*grnl_k(:,iband)
@@ -998,6 +999,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        ABI_FREE(eig_k)
        ABI_FREE(ek_k)
        ABI_FREE(ek_k_nd)
+       ABI_FREE(end_k)
        ABI_FREE(grnl_k)
        ABI_FREE(occ_k)
        ABI_FREE(resid_k)
@@ -1449,7 +1451,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 
        call timab(989,1,tsec)
 
-       nbuf=2*mbdkpsp+dtset%nfft*dtset%nspden+3+3*natom*optforces
+       nbuf=2*mbdkpsp+dtset%nfft*dtset%nspden+4+3*natom*optforces
        ! If Hartree-Fock calculation, the exact exchange energy is k-dependent.
        if(dtset%usefock==1) then
          nbuf=nbuf+1
@@ -1471,7 +1473,8 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
          buffer1(index1+1) = energies%e_kinetic
          buffer1(index1+2) = energies%e_eigenvalues
          buffer1(index1+3) = energies%e_nlpsp_vfock
-         index1=index1+3
+         buffer1(index1+4) = energies%e_nucdip
+         index1=index1+4
          ! If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            buffer1(index1+1) = energies%e_fock
@@ -1515,7 +1518,8 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
          energies%e_kinetic = buffer1(index1+1)
          energies%e_eigenvalues = buffer1(index1+2)
          energies%e_nlpsp_vfock = buffer1(index1+3)
-         index1=index1+3
+         energies%e_nucdip = buffer1(index1+4)
+         index1=index1+4
          ! If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            energies%e_fock = buffer1(index1+1)

@@ -2107,11 +2107,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        if (.not.ex) then
          write(unit=filename,fmt='(a,i1)') 'corewf.abinit',itypat
          inquire(file=filename,exist=ex)
-         if (.not.ex) then
-           write(msg,'(4a)') 'Core wave-functions file is missing!',ch10,&
-&                            'Looking for: ',trim(filename)
-           ABI_ERROR(msg)
-         end if
+       end if
+       if (.not.ex) then
+         write(msg,'(3a)') 'Core wave-functions file is missing!',ch10,&
+&                          'Looking for: psp-name.corewf[.xml][.abinit] or corewf.dat'
+         ABI_ERROR(msg)
        end if
        call pawpsp_read_corewf(energycor,indlmncor(itypat)%value,lcor,lmncmax(itypat),&
 &       ncor,nphicor(itypat),pawrad(itypat),phicor(itypat)%value,&

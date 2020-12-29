@@ -1535,6 +1535,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
        !!!  call wrtout(iout,msg,'COLL')
        !!!endif
      end if
+     if (ANY(ABS(dtset%nucdipmom)>tol8)) then
+       call edoc%add_real('nucl. magn. dipoles',energies%e_nucdip)
+     end if
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
        call edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
      end if

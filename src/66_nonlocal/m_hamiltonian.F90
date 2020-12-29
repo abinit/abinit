@@ -307,13 +307,6 @@ module m_hamiltonian
    ! phkxred(2,natom)
    ! phase factors exp(2 pi k.xred) at k
 
-! ===== Complex arrays
-
-  complex(dpc), allocatable :: nucdipmom_k(:)
-   ! nucdipmom_k(npw_k*(npw_k+1)/2)
-   ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
-   ! lower triangular part of Hermitian matrix
-
 ! ===== Real pointers
 
   real(dp), ABI_CONTIGUOUS pointer :: ekb(:,:,:,:) => null()
@@ -607,9 +600,6 @@ subroutine destroy_hamiltonian(Ham)
  ABI_SFREE(Ham%sij)
  ABI_SFREE(Ham%nucdipmom)
  ABI_SFREE(Ham%ph1d)
-
-! Complex arrays
- ABI_SFREE(Ham%nucdipmom_k)
 
 ! Structured datatype pointers
  if (associated(Ham%fockcommon)) nullify(Ham%fockcommon)
@@ -941,7 +931,7 @@ end subroutine init_hamiltonian
 !! SOURCE
 
 subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
-                              kg_k,kpg_k,kpt_k,nucdipmom_k,npw_k,npw_fft_k,ph3d_k,&
+                              kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
                               compute_gbound,compute_ph3d)
 
 !Arguments ------------------------------------
@@ -953,7 +943,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
  real(dp),intent(in),optional,target :: ffnl_k(:,:,:,:),kinpw_k(:),kpg_k(:,:),ph3d_k(:,:,:)
- complex(dpc),intent(in),optional :: nucdipmom_k(:)
  type(fock_ACE_type),intent(in),optional,target :: fockACE_k
 
 !Local variables-------------------------------
@@ -989,11 +978,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    ham%npw_fft_k  = npw_k
    ham%npw_fft_kp = npw_k
  end if
-
- ! k-dependend complex quantities
-  if (present(nucdipmom_k)) then
-   ham%nucdipmom_k(:) = nucdipmom_k(:)
-  end if
 
 !Pointers to k-dependent quantitites
  if (present(kinpw_k)) then

@@ -504,6 +504,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      if(gs_hamkq%nspinor==2) cpopt=-1
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnlx1_)
+!     write(std_out,'(a,4es16.8)')'JWZ debug nonlop cwave gvnlx1_ ',cwave(1,1),cwave(2,1),gvnlx1_(1,1),gvnlx1_(2,1)
+!     write(std_out,'(a,4es16.8)')'JWZ debug nonlop cwave gs1c ',cwave(1,1),cwave(2,1),gs1c(1,1),gs1c(2,1)
      if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
        ABI_FREE(cwaveprj_tmp)
