@@ -3072,15 +3072,30 @@ end subroutine paw_setup_copy
    end do
  end if
 
- LIBPAW_DATATYPE_DEALLOCATE(radmesh)
- LIBPAW_DATATYPE_DEALLOCATE(mesh_shift)
+ if (allocated(radmesh)) then
+   call pawrad_free(radmesh)
+   LIBPAW_DATATYPE_DEALLOCATE(radmesh)
+ end if
+ if (allocated(mesh_shift)) then
+   LIBPAW_DATATYPE_DEALLOCATE(mesh_shift)
+ end if
 
- LIBPAW_DATATYPE_DEALLOCATE(grids)
- LIBPAW_DATATYPE_DEALLOCATE(corestate)
+ if (allocated(grids)) then
+   LIBPAW_DATATYPE_DEALLOCATE(grids)
+ end if
+ if (allocated(corestate)) then
+   LIBPAW_DATATYPE_DEALLOCATE(corestate)
+ end if
 
- LIBPAW_DATATYPE_DEALLOCATE(gridwf)
- LIBPAW_DATATYPE_DEALLOCATE(statewf)
- LIBPAW_DEALLOCATE(phitmp)
+ if (allocated(gridwf)) then
+   LIBPAW_DATATYPE_DEALLOCATE(gridwf)
+ end if
+ if (allocated(statewf)) then
+   LIBPAW_DATATYPE_DEALLOCATE(statewf)
+ end if
+ if (allocated(phitmp)) then
+   LIBPAW_DEALLOCATE(phitmp)
+ end if
 
 !Close the XML atomicdata file
  close(funit)

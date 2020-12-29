@@ -864,7 +864,7 @@ subroutine timab(nn, option, tottim)
 #endif
 ! *************************************************************************
 
- if (option==5) timopt=nn
+ if (option==5) timopt=mod(nn,10)
 
  ! If timopt was set to zero by a call with option=5, suppress
  ! all action of this routine (might as well return at this point !)

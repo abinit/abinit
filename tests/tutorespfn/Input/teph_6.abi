@@ -11,7 +11,7 @@ tempermin 1.0
 temperinc 2.0
 
 # Minimalistic kpoint grid - needed for tetrahedron method
-kptrlatt 4 0 0  0 4 0  0 0 4
+kptrlatt 6 0 0  0 6 0  0 0 6
 elphsmear 0.01   # This input variable is not relevant in the tetrahedron method case
 
 mustar 0.136

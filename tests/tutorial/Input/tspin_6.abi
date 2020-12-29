@@ -1,32 +1,40 @@
 #  Isolated Bi atom
 
    ndtset   2
+
  pawspnorb1 0  ! Without spin-orbit
  pawspnorb2 1  ! With spin-orbit
 
-   ntypat  1 typat  1
-    natom  1
-   znucl   83.d0
-
-   nband1  12
-   nband2  24
     nsym   1
 
+# cutoff, k-points: 
   kptopt   4
-  occopt   7
-  tsmear   0.02
-
-#Common data
-   acell   3*10   #This parameter is of course for testing purposes only
-    xred   3*0.0
     ecut   8
  pawecutdg 15
+
+# Crystal cell definition:
+    natom  1
+   ntypat  1 
+    typat  1
+   znucl   83.d0
+    xred   3*0.0
+
+   acell   3*10   #This parameter is of course for testing purposes only
+
+
+# electron occupation:
+  occopt   7
+  tsmear   0.02
+   nband1  12
+   nband2  24 # 2 times more band with SOC
+
+# SCF: 
    nstep   20
   toldfe   1.0d-7
 
-
+# Pseudo:
  pp_dirpath "$ABI_PSPDIR"
- pseudos "83bi.paw"
+ pseudos "Pseudodojo_paw_pw_standard/Bi.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
