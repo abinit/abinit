@@ -1377,9 +1377,9 @@ subroutine covar_gamma(atindx1,cg,cgg1,cprj,cprjg1,dtorbmag,dtset,gmet,gprimd,mc
   ncpgr = 1
   ABI_ALLOCATE(dimlmn,(dtset%natom))
   call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
-  ABI_DATATYPE_ALLOCATE(cprjg,(dtset%natom,mcprj))
+  ABI_MALLOC(cprjg,(dtset%natom,mcprj))
   call pawcprj_alloc(cprjg,ncpgr,dimlmn)
-  ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
+  ABI_MALLOC(cwaveprj,(dtset%natom,1))
   call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
 
   ! smatrix related variables
@@ -1581,9 +1581,9 @@ subroutine covar_gamma(atindx1,cg,cgg1,cprj,cprjg1,dtorbmag,dtset,gmet,gprimd,mc
   ABI_DEALLOCATE(kpg_k)
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprjg)
-  ABI_DATATYPE_DEALLOCATE(cprjg)
+  ABI_FREE(cprjg)
   call pawcprj_free(cwaveprj)
-  ABI_DATATYPE_DEALLOCATE(cwaveprj)
+  ABI_FREE(cwaveprj)
   ABI_DEALLOCATE(pwind_k)
   ABI_DEALLOCATE(pwnsfac_k)
 
@@ -1664,9 +1664,9 @@ subroutine duqdu_gamma(atindx1,cgg1,cprjg1,dtorbmag,dtset,duqduchern,duqdumag,&
   ncpgr = cprjg1(1,1,1)%ncpgr
   ABI_ALLOCATE(dimlmn,(dtset%natom))
   call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
-  ABI_DATATYPE_ALLOCATE(cprj1_kb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+  ABI_MALLOC(cprj1_kb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
   call pawcprj_alloc(cprj1_kb,ncpgr,dimlmn)
-  ABI_DATATYPE_ALLOCATE(cprj1_kg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+  ABI_MALLOC(cprj1_kg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
   call pawcprj_alloc(cprj1_kg,ncpgr,dimlmn)
 
   ABI_ALLOCATE(kk_paw,(2,nband_k,nband_k))
@@ -1734,9 +1734,9 @@ subroutine duqdu_gamma(atindx1,cgg1,cprjg1,dtorbmag,dtset,duqduchern,duqdumag,&
 
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj1_kb)
-  ABI_DATATYPE_DEALLOCATE(cprj1_kb)
+  ABI_FREE(cprj1_kb)
   call pawcprj_free(cprj1_kg)
-  ABI_DATATYPE_DEALLOCATE(cprj1_kg)
+  ABI_FREE(cprj1_kg)
   ABI_DEALLOCATE(kk_paw)
 
 end subroutine duqdu_gamma
@@ -3208,7 +3208,7 @@ subroutine udsqdu_gamma(atindx1,cg,cgg1,cprj,eeig,dtset,gmet,gprimd,mcg,mcprj,mp
   ncpgr = cprj(1,1)%ncpgr
   ABI_ALLOCATE(dimlmn,(dtset%natom))
   call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
-  ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
+  ABI_MALLOC(cwaveprj,(dtset%natom,1))
   call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
 
   ! nonlop parameters
@@ -3343,7 +3343,7 @@ subroutine udsqdu_gamma(atindx1,cg,cgg1,cprj,eeig,dtset,gmet,gprimd,mcg,mcprj,mp
 
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cwaveprj)
-  ABI_DATATYPE_DEALLOCATE(cwaveprj)
+  ABI_FREE(cwaveprj)
   ABI_DEALLOCATE(phkxred)
   ABI_DEALLOCATE(ph1d)
   ABI_DEALLOCATE(ph3d)
@@ -3846,7 +3846,7 @@ subroutine make_onsite_l(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,nband_o
 
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
-  ABI_DATATYPE_DEALLOCATE(cprj_k)
+  ABI_FREE(cprj_k)
 
 end subroutine make_onsite_l
 !!***
@@ -3936,7 +3936,7 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,nband_
   ncpgr = cprj(1,1)%ncpgr
   ABI_ALLOCATE(dimlmn,(dtset%natom))
   call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
-  ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,nband_k))
+  ABI_MALLOC(cprj_k,(dtset%natom,nband_k))
   call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
 
   ! loop over kpts on each processor
@@ -4049,7 +4049,7 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,nband_
 
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
-  ABI_DATATYPE_DEALLOCATE(cprj_k)
+  ABI_FREE(cprj_k)
 
 end subroutine make_onsite_bm
 !!***
@@ -4129,7 +4129,7 @@ subroutine ndpaw_energy(atindx1,cenergy,cprj,dtset,mcprj,mpi_enreg,nattyp,&
  ABI_ALLOCATE(dimlmn,(dtset%natom))
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'R')
 
- ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,nband_occ))
+ ABI_MALLOC(cprj_k,(dtset%natom,nband_occ))
  call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
 
  cbra_cdij_cket = czero
@@ -4192,7 +4192,7 @@ subroutine ndpaw_energy(atindx1,cenergy,cprj,dtset,mcprj,mpi_enreg,nattyp,&
 
  ABI_DEALLOCATE(dimlmn)
  call pawcprj_free(cprj_k)
- ABI_DATATYPE_DEALLOCATE(cprj_k)
+ ABI_FREE(cprj_k)
 
 end subroutine ndpaw_energy
 !!***
@@ -5388,7 +5388,7 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
  if(dtorbmag%fnkpt .EQ. 1) then
     ABI_ALLOCATE(dimlmn,(dtset%natom))
     call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
-    ABI_DATATYPE_ALLOCATE(cprjg1,(3,dtset%natom,mcprj))
+    ABI_MALLOC(cprjg1,(3,dtset%natom,mcprj))
     do adir = 1, 3
        call pawcprj_alloc(cprjg1(adir,:,:),0,dimlmn)
     end do
@@ -5566,7 +5566,7 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
     do adir = 1, 3
        call pawcprj_free(cprjg1(adir,:,:))
     end do
-    ABI_DATATYPE_DEALLOCATE(cprjg1)
+    ABI_FREE(cprjg1)
  end if
 
 end subroutine orbmag_wf

@@ -4511,7 +4511,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  case (3)
    ! Tetrahedron method with Allen's approach for double delta.
    ! WARNING: wrong results maybe bug somewhere.
-   call wrtout(std_out " Calling Allen's version for q-point")
+   call wrtout(std_out, " Calling Allen's version for q-point")
    nene = 3
    enemin = ebands%fermie - tol6
    enemax = ebands%fermie + tol6
