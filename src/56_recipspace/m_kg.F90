@@ -183,7 +183,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 
      if (boxcut>2.2_dp) then
        write(msg, '(a,a,a,a,a,a,a,a,a,a,a,f12.6,a,a)' ) ch10,&
-       ' getcut: COMMENT -',ch10,&
+       ' getcut : COMMENT -',ch10,&
        '  Note that boxcut > 2.2 ; recall that',' boxcut=Gcut(box)/Gcut(sphere) = 2',ch10,&
        '  is sufficient for exact treatment of convolution.',ch10,&
        '  Such a large boxcut is a waste : you could raise ecut',ch10,&

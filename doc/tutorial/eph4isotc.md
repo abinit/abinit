@@ -496,30 +496,33 @@ In real life one should perform an accurate convergence study...
 
 ## Our first computation of the isotropic Tc
 
-For our first example, we use a relatively simple input file that allows us to introduce
+For our first example, we use a relatively simple input file that allows to introduce
 the most important variables and the organization of the main output file.
-Copy the input file in the working directory and execute it using:
+Copy *teph4isotc_2.abi* in the working directory and execute it using:
 
 ```sh
 abinit teph4isotc_2.abi > log 2> err
 ```
 
-If you prefer, you can run it in parallel with e.g two MPI processes using:
+!!! tip
 
-```sh
-mpirun -n 2 abinit teph4isotc_2.abi > log 2> err
-```
+    If you prefer, you can run it in parallel with e.g two MPI processes using:
 
-without having to introduce any input variable for the MPI parallelization
-as the EPH code can automatically distribute the workload.
-Further information concerning the MPI version are given in the
-[last section of the tutorial](#notes-on-the-mpi-parallelism)
+    ```sh
+    mpirun -n 2 abinit teph4isotc_2.abi > log 2> err
+    ```
+
+    without having to introduce any input variable for the MPI parallelization
+    as the EPH code can automatically distribute the workload.
+    Further information concerning the MPI version are given in the
+    [last section of the tutorial](#notes-on-the-mpi-parallelism)
 
 We now discuss the meaning of the different variables in more detail.
 
 {% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
 
-To activate the computation of $\gamma_{\qq\nu}$ in metals, we use [[optdriver]] = 7 and [[eph_task]] = 1.
+To activate the computation of $\gamma_{\qq\nu}$ in metals, 
+we use [[optdriver]] = 7 and [[eph_task]] = 1.
 The location of the DDB, DVDB and WFK files is specified via
 [[getddb_filepath]] [[getdvdb_filepath]] [[getwfk_filepath]], respectively.
 
@@ -556,6 +559,8 @@ In this first example, we prefer not to interpolate the DFPT potentials so only 
 [[eph_ngqpt_fine]]
 [[dipdip]] is set to zero as we are dealing with a metal and the inter-atomic force constants are relatively short-ranged.
 
+The $\kk$-point integration is performed with the Gaussian smearing ([[eph_intmeth]] == 1 and 0.1 eV for [[eph_fsmear]]).
+
 
 ```sh
 eph_intmeth 1       # Gaussian method for double-delta integration.
@@ -563,10 +568,8 @@ eph_fsmear 0.1 eV   # Constant broadening in Gaussian function.
 eph_fsewin 0.3 eV   # Energy window for wavefunctions.
 ```
 
-The $\kk$-point integration is performed with the Gaussian smearing.
-See [[eph_intmeth]] == 1 and 0.1 eV for [[eph_fsmear]].
-Nota that, in order to accelerate the calculation, we have decreased [[eph_fsewin]] can be from its default 
-value of 1 eV to 0.3 eV.
+Note that, in order to accelerate the calculation, we have decreased [[eph_fsewin]] can be 
+from its default value of 1 eV to 0.3 eV.
 This is possible when the Gaussian method is used since
 states whose energy is 3-4 standard deviation from the Fermi level give negligible contribution to the double delta integral.
 In other words, for the Gaussian technique, an almost option value of [[eph_fsewin]] can be deduded from [[eph_fsmear]]
@@ -674,7 +677,8 @@ and the integration method used for the double delta:
     Max band: 5
 ```
 
-Then, for each $\qq$-point in the IBZ, the code outputs the values of $\ww_\qnu$, $\gamma_\qnu$ and $\lambda_\qnu$:
+Then, for each $\qq$-point in the IBZ, the code outputs 
+the values of $\ww_\qnu$, $\gamma_\qnu$ and $\lambda_\qnu$:
 
 ```md
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
@@ -754,6 +758,8 @@ use at least a 6x6x6 $\qq$-mesh for phonons.
 It is clear that we need to densify the BZ sampling to get more reliable results yet
 our results are not that bad considering that the calculation took less than XXX minutes in sequential.
 
+<!--
+
 ??? note "Exercise"
 
      Since our WFK is defined on a 12x12x12 $\kk$-mesh it is very easy to activate the interpolation
@@ -763,13 +769,14 @@ our results are not that bad considering that the calculation took less than XXX
      Use compare the results obtained without [[mixprec]] 1 and [[boxcutmin]] 1.1.
      You may want to run the calculation in parallel with mpirun.
 
+-->
+
 ## Using the tetrahedron method 
 
 In this section, we repeat the calculation done in **teph4isotc_2.abi** 
 but now with the **optimized tetrahedron** scheme [[cite:Kawamura2014]].
-The goal is to show that (i) phonon linewidths are very sensitive to the $\kk$-mesh and the integration scheme and 
-that (ii)
--
+This test will show that (i) phonon linewidths are very sensitive to the $\kk$-mesh 
+and the integration scheme and that (ii)
 
 constructing a third-order interpolation function with 20 $\kk$-points
 

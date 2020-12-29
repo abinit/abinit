@@ -3388,6 +3388,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_CHECK(bsum_comm%nproc == 1, "Band parallelism not implemented in m_phgamma")
 
 #ifdef HAVE_MPI
+ !call ephtk_build_grid(pert_comm%nproc, qpt_comm%nproc, bsum_comm%nproc, kpt_comm%nproc, spin_comm%nproc)
  ! Create 5d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in FS, kpoints in FS, spins
  ndims = 5
  ABI_MALLOC(dims, (ndims))

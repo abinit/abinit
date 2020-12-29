@@ -171,7 +171,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  integer :: comm_cell,usewvl,unt
  integer :: restart,restartpaw,spaceComm,spaceComm_io
  real(dp) :: cputime,walltime,gflops
- character(len=500) :: message,errmsg
+ character(len=500) :: msg,errmsg
  character(len=fnlen) :: my_fildata
  character(len=nctk_slen) :: varname
  type(hdr_type) :: hdr0
@@ -195,21 +195,21 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
  ! Check validity of arguments--only rho(r) (51,52) and V(r) (101,102) are presently supported
  if ( (fform-1)/2 /=25 .and. (fform-1)/2 /=50 ) then
-   write(message,'(a,i0,a)')' Input fform= ',fform,' not allowed.'
-   ABI_BUG(message)
+   write(msg,'(a,i0,a)')' Input fform= ',fform,' not allowed.'
+   ABI_BUG(msg)
  end if
 
  ! Print input fform
  if ( (fform-1)/2==25 .and. rdwr==1) then
-   message = ' ioarr: reading density data '
+   msg = ' ioarr: reading density data '
  else if ( (fform-1)/2==25 .and. rdwr==2) then
-   message = ' ioarr: writing density data'
+   msg = ' ioarr: writing density data'
  else if ( (fform-1)/2==50 .and. rdwr==1) then
-   message = ' ioarr: reading potential data'
+   msg = ' ioarr: reading potential data'
  else if ( (fform-1)/2==50 .and. rdwr==2) then
-   message = ' ioarr: writing potential data'
+   msg = ' ioarr: writing potential data'
  end if
- call wrtout(std_out,message)
+ call wrtout(std_out,msg)
 
  call wrtout(std_out, 'ioarr: file name is: '//TRIM(fildata))
 
@@ -279,8 +279,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        if (accessfil == 4) icheck_fft = (xmpi_comm_rank(spaceComm)==master)
 
        if (icheck_fft) then
-         if (open_file(fildata,message,newunit=in_unt,form='unformatted',status='old') /= 0) then
-           ABI_ERROR(message)
+         if (open_file(fildata,msg,newunit=in_unt,form='unformatted',status='old') /= 0) then
+           ABI_ERROR(msg)
          end if
 
          call hdr_io(fform_dum,hdr0,rdwr,in_unt)
@@ -291,10 +291,10 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
          nfftot_out = product(hdr%ngfft(1:3))
 
          if (need_fftinterp) then
-           write(message, "(2a,2(a,3(i0,1x)))")&
+           write(msg, "(2a,2(a,3(i0,1x)))")&
             "Will perform Fourier interpolation since in and out ngfft differ",ch10,&
             "ngfft in file: ",hdr0%ngfft,", expected ngfft: ",hdr%ngfft
-           ABI_WARNING(message)
+           ABI_WARNING(msg)
 
            ! Read rho(r) from file, interpolate it, write data and change fildata
            ABI_MALLOC(rhor_file, (cplex*nfftot_in, hdr0%nspden))
@@ -331,8 +331,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
            ! FIXME: This should be done in a cleaner way!
            my_fildata = trim(fildata)//"__fftinterp_rhor__"
            if (my_fildata == fildata) my_fildata = "__fftinterp_rhor__"
-           if (open_file(my_fildata,message,newunit=out_unt,form='unformatted',status='unknown') /= 0) then
-             ABI_ERROR(message)
+           if (open_file(my_fildata,msg,newunit=out_unt,form='unformatted',status='unknown') /= 0) then
+             ABI_ERROR(msg)
            end if
            call hdr_io(fform_dum,hdr,2,out_unt)
            do ispden=1,hdr0%nspden
@@ -360,8 +360,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        call hdr_check(fform,fform_dum,hdr,hdr0,'COLL',restart,restartpaw)
 
      else
-       if (open_file(my_fildata, message, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
-         ABI_ERROR(message)
+       if (open_file(my_fildata, msg, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
+         ABI_ERROR(msg)
        end if
        ! Initialize hdr0, thanks to reading of unwff1
        call hdr_io(fform_dum,hdr0,rdwr,unt)
@@ -458,8 +458,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 #endif
 
    else
-     write(message,'(a,i0,a)')'Bad value for accessfil', accessfil, ' on read '
-     ABI_BUG(message)
+     write(msg,'(a,i0,a)')'Bad value for accessfil', accessfil, ' on read '
+     ABI_BUG(msg)
    end if
 
    call wrtout(std_out,sjoin("data read from disk file: ", fildata))
@@ -537,8 +537,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
    ! Make sure ngfft agrees with hdr%ngfft.
    if (usewvl == 0) then
      if (any(ngfft(:3) /= hdr%ngfft(:3))) then
-       write(message,"(2(a,3(1x,i0)))")"input ngfft: ",ngfft(:3),"differs from  hdr%ngfft: ",hdr%ngfft(:3)
-       ABI_ERROR(message)
+       write(msg,"(2(a,3(1x,i0)))")"input ngfft: ",ngfft(:3),"differs from  hdr%ngfft: ",hdr%ngfft(:3)
+       ABI_ERROR(msg)
      end if
    end if
 
@@ -548,8 +548,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        call WffOpen(iomode,spaceComm,fildata,ierr,wff,0,me,unt)
        call hdr_io(fform,hdr,rdwr,wff)
      else
-       if (open_file(fildata, message, newunit=unt, form='unformatted', status='unknown', action="write") /= 0) then
-         ABI_ERROR(message)
+       if (open_file(fildata, msg, newunit=unt, form='unformatted', status='unknown', action="write") /= 0) then
+         ABI_ERROR(msg)
        end if
 
        ! Write header
@@ -614,8 +614,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 #endif
 
    else
-     write(message,'(a,i0,a)')'Bad value for accessfil', accessfil, ' on write '
-     ABI_ERROR(message)
+     write(msg,'(a,i0,a)')'Bad value for accessfil', accessfil, ' on write '
+     ABI_ERROR(msg)
    end if
 
    if (usewvl == 1 .and. associated(my_density)) then
@@ -625,8 +625,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
    call wrtout(std_out,sjoin(' Data written to disk file:', fildata))
 
  else
-   write(message,'(a,i0,a)')'Called with rdwr = ',rdwr,' not allowed.'
-   ABI_BUG(message)
+   write(msg,'(a,i0,a)')'Called with rdwr = ',rdwr,' not allowed.'
+   ABI_BUG(msg)
  end if
 
  call cwtime_report(" IO operation", cputime, walltime, gflops)
