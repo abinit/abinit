@@ -93,7 +93,7 @@ help_dev dev_help dev:
 # robodoc-html-x.x.x.tar contains all html files produced by ROBODOC
 robodoc:
 	rm -rf tmp-robodoc robodoc-html && mkdir tmp-robodoc
-	cp -rf $(top_srcdir)/shared/common/src/[0-3]* tmp-robodoc
+	cp -rfL $(top_srcdir)/shared/common/src/[0-3]* tmp-robodoc
 	cp -rf $(top_srcdir)/src/[4-9]* tmp-robodoc
 	cp $(top_srcdir)/config/robodoc/robodoc-html.rc tmp-robodoc/robodoc.rc
 	cd tmp-robodoc && rm -f */*.in && rm -f */interfaces* && robodoc > ../robodoc.log 2> ../robodoc.err
