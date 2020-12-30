@@ -25,20 +25,20 @@ This tutorial should take about 1 hour.
 
 We studied the H$_2$ molecule in a big box.
 We used 10 Ha as cut-off energy, a 10x10x10 Bohr$^3$ supercell, the local-density approximation
-(as well as the local-spin-density approximation) in the Teter parametrization ([[ixc]] = 1, the
-default), and a pseudopotential from the Goedecker-Hutter-Teter table.
+(as well as the local-spin-density approximation) in the Perdew-Wang parametrization ([[ixc]] = -1012)
+and a pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>.
 
 At this stage, we compared our results:
 
-* bond length: 1.522 Bohr
-* atomisation energy at that bond length: 0.1656 Ha = 4.506 eV
+* bond length: 1.486 Bohr
+* atomisation energy at that bond length: 0.1704 Ha = 4.635 eV
 
 with the experimental data (as well as theoretical data using a much more accurate technique than DFT)
 
   * bond length: 1.401 Bohr
   * atomisation energy: 4.747 eV
 
-The bond length is awful (nearly 10% off), and the atomisation energy is a bit too low, 5% off.
+The bond length is rather bad (about 6% off), and the atomisation energy is a bit too low, 2.5% off.
 
 ## 2 The convergence in ecut (I)
 
@@ -49,34 +49,27 @@ Why not Work2?*
 
 Because we will compute many times the bond length and atomisation energy, it
 is worth to make a single input file that will do all the associated operations.
-You should try to use 2 datasets (try to combine *\$ABI_TESTS/tutorial/Input/tbase1_3.in* with *tbase1_5.in*).
+You should try to use 2 datasets (try to combine *\$ABI_TESTS/tutorial/Input/tbase1_3.abi* with *tbase1_5.abi*).
 Do not try to have the same position of the H atom as one of the H$_2$ atoms in the optimized geometry.
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work2
 cd Work2
-cp ../tbase2_x.files .   # You will need to edit this file.
-cp ../tbase2_1.in .
+cp ../tbase2_1.abi .
 ```
 
-The input file *tbase2_1.in* is an example of file that will do the job,
+The input file *tbase2_1.abi* is an example of file that will do the job,
 
-{% dialog tests/tutorial/Input/tbase2_1.in %}
+{% dialog tests/tutorial/Input/tbase2_1.abi %}
 
-while *tbase2_1.out* is an example of output file:
+while *tbase2_1.abo* is an example of output file:
 
-{% dialog tests/tutorial/Refs/tbase2_1.out %}
-
-You might use *$ABI_TESTS/tutorial/Input/tbase2_x.files* as *files* file
-(do not forget to modify it, like in [[lesson:base1|tutorial 1]],
-although it does not differ from *tbase1_x.files*.
-
-{% dialog tests/tutorial/Input/tbase2_x.files %}
+{% dialog tests/tutorial/Refs/tbase2_1.abo %}
 
 Execute the code with:
 
-    abinit < tbase2_x.files > log 2> err &
+    abinit tbase2_1.abi > log 2> err &
 
 The run should take less than one minute.
 
