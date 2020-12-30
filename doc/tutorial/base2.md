@@ -89,7 +89,7 @@ You can also check that the residual forces are lower than `5.0d-4`.
 Convergence issues are discussed in [[help:abinit#numerical-quality|section 6]] of the abinit help file, on numerical quality.
 You should read it.
 By the way, you have read many parts of the abinit help file!
-You are missing the sections [[help:abinit#2|2]], [[help:abinit#pseudopotential-files|5]],  [[help:abinit#numerical-quality|6]].
+You are missing the sections (or part of) [[help:abinit#2|2]], [[help:abinit#pseudopotential-files|5]],  [[help:abinit#numerical-quality|6]].
 
 You are also missing the description of many input variables.
 We suggest that you finish reading entirely the abinit help file now, while
@@ -105,7 +105,7 @@ focus only on [[ecut]] and [[acell]]. This is because
 * there is no k point convergence study to be done for an isolated system in a big box:
   no additional information is gained by adding a k-point beyond one
 
-* the boxcut value is automatically chosen larger than 2 by ABINIT, see the determination of the
+* the boxcut value (see [[boxcutmin]]) is automatically chosen larger than 2 by ABINIT, see the determination of the
   input variable [[ngfft]] by preprocessing
 
 * we are using [[ionmov]] = 2 for the determination of the geometry.
@@ -113,8 +113,8 @@ focus only on [[ecut]] and [[acell]]. This is because
 ## 3 The convergence in ecut (II)
 
 For the check of convergence with respect to [[ecut]], you have the choice
-between doing different runs of the *tbase2_1.in* file with different values of
-[[ecut]], or doing a double loop of datasets, as proposed in *$ABI_TESTS/tutorial/Input/tbase2_2.in*.
+between doing different runs of the *tbase2_1.abi* file with different values of
+[[ecut]], or doing a double loop of datasets, as proposed in *$ABI_TESTS/tutorial/Input/tbase2_2.abi*.
 The values of [[ecut]] have been chosen between 10 Ha and 35 Ha, by step of 5 Ha.
 If you want to make a double loop, you might benefit of reading again the
 [[help:abinit#loop|double-loop section]] of the abinit_help file.
@@ -178,11 +178,11 @@ We will explore [[acell]] starting from `8 8 8` to `18 18 18`, by step of `2 2 2
 We keep [[ecut]] 10 for this study. Indeed, it is a rather general rule that there is
 little cross-influence between the convergence of [[ecut]] and the convergence of [[acell]].
 
-The file *$ABI_TESTS/tutorial/Input/tbase2_3.in* can be used as an example.
+The file *$ABI_TESTS/tutorial/Input/tbase2_3.abi* can be used as an example.
 
-{% dialog tests/tutorial/Input/tbase2_3.in %}
+{% dialog tests/tutorial/Input/tbase2_3.abi %}
 
-The output results in *$ABI_TESTS/tutorial/Refs/tbase2_3.out* are as follows:
+The output results in *$ABI_TESTS/tutorial/Refs/tbase2_3.abo* are as follows:
 
         etotal11   -1.1188124709E+00
         etotal12   -4.8074164402E-01
@@ -241,15 +241,15 @@ This allows to have reasonable CPU time still.
 ## 5 The final calculation in Local (Spin) Density Approximation
 
 We now use the correct values of both [[ecut]] and [[acell]].
-Well, you should modify the *tbase2_3.in* file to make a calculation with `acell 12 12 12` and `ecut 30`.
+Well, you should modify the *tbase2_3.abi* file to make a calculation with `acell 12 12 12` and `ecut 30`.
 You can still use the double loop feature with `udtset 1 2`
 (which reduces to a single loop), to minimize the modifications to the file.
 
-The file *$ABI_TESTS/tutorial/Input/tbase2_4.in* can be taken as an example of input file:
+The file *$ABI_TESTS/tutorial/Input/tbase2_4.abi* can be taken as an example of input file:
 
-{% dialog tests/tutorial/Input/tbase2_4.in %}
+{% dialog tests/tutorial/Input/tbase2_4.abi %}
 
-while *$ABI_TESTS/tutorial/Refs/tbase2_4.out* is as an example of output file:
+while *$ABI_TESTS/tutorial/Refs/tbase2_4.abo* is as an example of output file:
 
 {% dialog tests/tutorial/Refs/tbase2_4.out %}
 
@@ -271,22 +271,25 @@ The output data are:
 * The interatomic distance is 1.452 Bohr.
 * These are our final data for the local (spin) density approximation.
 
-We have used [[ixc]] = 1.
-Other expressions for the local (spin) density approximation [2, 3 ... 7] are possible.
+Witou our choice of pseudopotential, the value of [[ixc]] was -1012, corresponding
+to the Perdew-Wang [[cite:Perdew1992a]] parameterization of the LDA XC functional.
+It is in principle the same as using [[ixc]] = 1.
+Other expressions for the local (spin) density approximation [[ixc]]=[2, 3 ... 7] are possible.
 The values 1, 2, 3 and 7 should give about the same results, since they all start
 from the XC energy of the homogeneous electron gas, as determined by Quantum Monte Carlo calculations.
-Other possibilities (*ixc* = 4, 5, 6) are older local density functionals, that could not rely on these data.
+Other possibilities ([[ixc]] = 4, 5, 6) are older local density functionals, that could not rely on these data.
 
 ## 6 The use of the Generalized Gradient Approximation
 
 We will use the Perdew-Burke-Ernzerhof functional proposed in [[cite:Perdew1996]]
 
-In principle, for GGA, one should use another pseudopotential than for LDA.
+For GGA, we use another pseudopotential than for LDA.
+In principle we should redo the [[ecut]] convergence test, possibly coming to the conclusion
+that another value of [[ecut]] should be use.
 However, for the special case of Hydrogen, and in general pseudopotentials
 with a very small core (including only the 1s orbital), pseudopotentials
 issued from the LDA and from the GGA are very similar.
-So, we will not change our pseudopotential.
-This will save us lot of time, as we should not redo an [[ecut]] convergence test
+So, we will not redo an [[ecut]] convergence test.
 
 !!! important
 
@@ -295,9 +298,9 @@ This will save us lot of time, as we should not redo an [[ecut]] convergence tes
 Independently of the pseudopotential, an [[acell]] convergence test should not
 be done again, since the vacuum is treated similarly in LDA or GGA.
 
-So, our final values within GGA will be easily obtained by setting [[ixc]] to 11 in *tbase2_4.in*.
+So, our final values within GGA will be easily obtained by changing the pseudopotential with respect to the one used in *tbase2_4.abi*.
 
-{% dialog tests/tutorial/Input/tbase2_5.in %}
+{% dialog tests/tutorial/Input/tbase2_5.abi %}
 
         etotal11 -1.1621428376E+00
         etotal12 -4.9869631917E-01
