@@ -749,13 +749,15 @@ These are:
 
 * [[ecut]] (the plane-wave kinetic energy cut-off)
 * [[acell]] (the supercell size)
-* [[ixc]] (not even mentioned until now, this input variable specifies what kind of
-  exchange-correlation functional is to be used)
 * the pseudopotential
+* [[ixc]] (not even mentioned until now, this input variable specifies what kind of
+  exchange-correlation functional is to be used, and is by default deduced from the pseudopotential - a choice
+  of exchange-correlation functional is mandatory to produce a pseudopotential, and mixing different exchange-correlation
+  functionals for pseudopotentials generation and ABINIT calculations is bad practice)
 
-We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density approximation
-(as well as the local-spin-density approximation) in the
-Teter parametrization, and a LDA pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>,
+We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, 
+the LDA (=local-density approximation, as well as the local-spin-density approximation in the spin-polarized case) in the
+Perdew-Wang parametrization ([[ixc]]=-1012), and a LDA pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>,
 copied in the ABINIT directory $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8 . You might have a look at
 the file $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8/README.md to learn more about pseudopotentials.
 
