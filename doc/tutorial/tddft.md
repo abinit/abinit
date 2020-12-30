@@ -99,7 +99,7 @@ to see if it suits your needs, and read the recent literature ...
 ## A first computation of electronic excitation energies and oscillator strengths, for N$_2$
 
 We will now compute and analyse the excitation energies of the diatomic molecule N$_2$.
-This is a rather simple s.ystem, with cylindrical symmetry,
+This is a rather simple system, with cylindrical symmetry,
 allowing interesting understanding. Although we will suppose that you are
 familiarized with quantum numbers for diatomic molecules, this should not play
 an important role in the understanding of the way to use Abinit
@@ -107,24 +107,23 @@ implementation of Casida's formalism.
 
 *Before beginning, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_tddft?*
-Copy the files *ttddft_x.files* and *ttddft_1.in* in *Work_tddft*:
+Copy the file *ttddft_1.abi* in *Work_tddft*:
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work_tddft
 cd Work_tddft
-cp ../ttddft_x.files .
-cp ../ttddft_1.in .
+cp ../ttddft_1.abi .
 ```
 
 So, issue now:
 
-    abinit < ttddft_x.files > log 2> err &
+    abinit ttddft_1.abi > log &
 
-The computation is quite fast: about 15 secs on a 2.8 GHz PC.
-Let's examine the input file *ttddft_1.in*.
+The computation is quite fast: about 3 secs on a 2.8 GHz PC.
+Let's examine the input file *ttddft_1.abi*.
 
-{% dialog tests/tutorial/Input/ttddft_1.in %}
+{% dialog tests/tutorial/Input/ttddft_1.abi %}
 
 There are two datasets: the first one corresponds to a typical ground-state
 calculation, with only occupied bands. The density and wavefunctions are
@@ -142,12 +141,13 @@ You will note that we have 5 occupied bands (defined for dataset 1), and that
 we add 7 unoccupied bands in the dataset 2, to obtain a total of 12 bands. The
 box is not very large (6x5x5 Angstrom), the cutoff is quite reasonable, 25
 Hartree), and as requested for the Casida's formalism, only one k point is
-used. We have chosen the Perdew-Wang 92 LDA functional for both the self-
-consistent and non-self-consistent calculations ([[ixc]] = 7).
+used. We are using the Perdew-Wang 92 LDA functional for both the self-
+consistent and non-self-consistent calculations ([[ixc]] = -1012), as deduced
+by abinit by looking at the pseudopotential file..
 
-We can now examine the output file *ttddft_1.out.*
+We can now examine the output file *ttddft_1.abo.*
 
-{% dialog tests/tutorial/Refs/ttddft_1.out %}
+{% dialog tests/tutorial/Refs/ttddft_1.abo %}
 
 One can jump to the second dataset section, and skip a few non-interesting
 information, in order to reach the following information:
