@@ -3388,7 +3388,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_CHECK(bsum_comm%nproc == 1, "Band parallelism not implemented in m_phgamma")
 
 #ifdef HAVE_MPI
- !call ephtk_build_grid(pert_comm%nproc, qpt_comm%nproc, bsum_comm%nproc, kpt_comm%nproc, spin_comm%nproc)
  ! Create 5d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in FS, kpoints in FS, spins
  ndims = 5
  ABI_MALLOC(dims, (ndims))
@@ -4494,7 +4493,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    call wrtout(std_out, sjoin(" Calling libtetrabz_dbldelta with ltetra:", itoa(ltetra)))
    eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
    ABI_MALLOC(wght_bz, (nb, nb, nkbz))
-   call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
+   call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz, comm=comm)
    ! Revert changes to eig arrays
    eig_k = eig_k + ebands%fermie !; eig_kq = eig_kq + ebands%fermie
 
@@ -4574,6 +4573,12 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  ABI_FREE(select_ikfs)
 
  write(std_out,"(2(a,i0),/)")" Treating ", gams%my_nfsk_q, " k-points in the FS window over total nkfs: ", fs%nkfs
+
+ !write(msg, "(2(a,i0,a),a,2(f7.3,1x),a)") &
+ ! " Number of k-points in the FS window treated by this MPI proc: ", gams%my_nfsk_q, ch10, &
+ ! " Number of MPI procs in kpt_comm: ", gams%kpt_comm%nproc, ch10, &
+ ! " Load balance inside qpt_comm ranges between: [",  efact_min, efact_max, "] (should be ~1)"
+ !call wrtout(std_out, msg)
 
  ABI_FREE(kbz2fs)
  ABI_FREE(indkpt)
@@ -4832,7 +4837,7 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
        !write(std_out,"(a,i0,2a)")" Calling libtetrabz_dbldelta with ltetra: ", ltetra, " for q-point:", trim(ktoa(qpt))
        eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
        ABI_MALLOC(wght_bz, (nb, nb, nkbz))
-       call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
+       call libtetrabz_dbldelta(ltetra, cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz, comm=comm)
        eig_k = eig_k + ebands%fermie !; eig_kq = eig_kq + ebands%fermie
 
        wtqs(iq_ibz, spin) = sum(abs(wght_bz))

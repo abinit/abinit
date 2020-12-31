@@ -890,8 +890,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !###################################################################
 
  if (iscf<=0 .and. residk > dtset%tolwfr) then
-   write(msg,'(a,2(i0,1x),a,es13.5)')&
-    'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid= ',residk
+   write(msg,'(2(a,i0),a,es13.5)')&
+    "Wavefunctions not converged for ikpt: ", ikpt ", nnsclo: ",nnsclo_now,', max resid: ',residk
    ABI_WARNING(msg)
  end if
 

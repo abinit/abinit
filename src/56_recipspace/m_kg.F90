@@ -194,7 +194,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 
      if (boxcut<1.5_dp) then
        write(msg, '(15a)' ) ch10,&
-       ' getcut: WARNING -',ch10,&
+       ' getcut : WARNING -',ch10,&
        '  Note that boxcut < 1.5; this usually means',ch10,&
        '  that the forces are being fairly strongly affected by',' the smallness of the fft box.',ch10,&
        '  Be sure to test with larger ngfft(1:3) values.',ch10,&
