@@ -246,15 +246,15 @@ Next, one finds the excitation energies for the spin-triplet states:
       TDDFT triplet excitation energies (at most 20 of them are printed),
       and corresponding total energies.
       Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
-       1    3.06494E-01   8.34013E+00   -2.036839E+01    1.00(  5->  6)  0.00(  0->  6)
-       2    3.06494E-01   8.34013E+00   -2.036839E+01    1.00(  5->  7)  0.00(  0->  6)
-       3    3.50400E-01   9.53488E+00   -2.032448E+01    1.00(  5->  8)  0.00(  0->  6)
-       4    3.60026E-01   9.79682E+00   -2.031486E+01    1.00(  4->  6)  0.00(  0->  6)
-       5    3.60026E-01   9.79682E+00   -2.031486E+01    1.00(  3->  6)  0.00(  0->  6)
-       6    3.60026E-01   9.79682E+00   -2.031486E+01    1.00(  4->  7)  0.00(  0->  6)
-       7    3.60026E-01   9.79682E+00   -2.031486E+01    1.00(  3->  7)  0.00(  0->  6)
-       8    4.03933E-01   1.09916E+01   -2.027095E+01    1.00(  4->  8)  0.00(  0->  6)
-       9    4.03933E-01   1.09916E+01   -2.027095E+01    1.00(  3->  8)  0.00(  0->  6)
+       1    2.84779E-01   7.74923E+00   -2.039010E+01    1.00(  5->  7)  0.00(  5->  6)
+       2    2.84781E-01   7.74928E+00   -2.039010E+01    1.00(  5->  6)  0.00(  5->  7)
+       3    2.97188E-01   8.08689E+00   -2.037770E+01    0.50(  3->  7)  0.50(  4->  6)
+       4    3.30296E-01   8.98780E+00   -2.034459E+01    0.50(  4->  7)  0.50(  3->  6)
+       5    3.30344E-01   8.98913E+00   -2.034454E+01    0.50(  4->  6)  0.50(  3->  7)
+       6    3.43692E-01   9.35234E+00   -2.033119E+01    1.00(  5->  8)  0.00(  2-> 10)
+       7    3.60026E-01   9.79681E+00   -2.031486E+01    0.50(  3->  6)  0.50(  4->  7)
+       8    3.85278E-01   1.04839E+01   -2.028961E+01    0.91(  2->  7)  0.09(  3->  8)
+       9    3.85310E-01   1.04848E+01   -2.028957E+01    0.91(  2->  6)  0.08(  4->  8)
        ...
 
 Spin-triplet energies are markedly lower than the corresponding spin-singlet
@@ -267,20 +267,20 @@ To summarize our results, we obtain the following five lowest-lying spin-
 singlet excitation energies, with corresponding quantum numbers (that we
 derive from the knowledge of the Kohn-Sham states quantum numbers):
 
-    9.47 eV   m=+1,-1  even parity (Pi_g state)
-    9.86 eV   m=0      even parity (Sigma_g state)
-    9.91 eV   m=0      odd parity  (Sigma_u state)
-    10.46 eV  m=+2,-2  odd parity  (Delta_u state)
-    10.79 eV  m=+1,-1  odd parity  (Pi_u state)
+    9.40 eV   m=+1,-1  even parity (Pi_g state)
+    9.80 eV   m=0      even parity (Sigma_g state)
+    10.03 eV   m=0      odd parity  (Sigma_u state)
+    10.44 eV  m=+2,-2  odd parity  (Delta_u state)
+    10.97 eV  m=+1,-1  odd parity  (Pi_u state)
 
 and the following five lowest-lying spin-triplet excitations energies, with
 corresponding quantum numbers:
 
-    7.85 eV   m=+1,-1  even parity (Pi_g state)
-    8.16 eV   m=0      odd parity  (Sigma_u state)
-    9.08 eV   m=+2,-2  odd parity  (Delta_u state)
-    9.16 eV   m=0      even parity (Sigma_g state)
-    9.91 eV   m=0      odd parity  (Sigma_u state)
+    7.75 eV   m=+1,-1  even parity (Pi_g state)
+    8.09 eV   m=0      odd parity  (Sigma_u state)
+    8.99 eV   m=+2,-2  odd parity  (Delta_u state)
+    9.35 eV   m=0      even parity (Sigma_g state)
+    9.80 eV   m=0      odd parity  (Sigma_u state)
 
 The quantum number related to the effect of a mirror plane, needed for $\Sigma$
 states, could not be attributed on the sole basis of the knowledge of Kohn-
@@ -303,18 +303,18 @@ and the lowest-lying experimental spin-triplet excitations energies are:
 In several cases, the agreement is quite satisfactory, on the order of 0.1-0.2
 eV. However, there are also noticeable discrepancies. Indeed, we have to understand, in our simulation:
 
-  * The appearance of the spin-singlet $^1\Sigma_g$ state at 9.86 eV (Spin-singlet state 2)
+  * The appearance of the spin-singlet $^1\Sigma_g$ state at 9.80 eV (Spin-singlet state 2)
   * The inversion between the spin-triplet $^3\Pi_g$ and $^3\Sigma_u$ states (Spin-triplet states 1 and 2)
-  * The appearance of the spin-triplet $^3\Sigma_g$ state at 9.16 eV (Spin-triplet state 4)
+  * The appearance of the spin-triplet $^3\Sigma_g$ state at 9.35 eV (Spin-triplet state 4)
 
 Still, the agreement between these TDDFT values and the experimental values is
 much better than anything that can be done on the sole basis of Kohn-Sham
 energy differences, that are (for spin-singlet and -triplet):
 
-    8.46 eV   m=+1,-1   even parity (Pi_g state)
-    9.36 eV   m=0       odd parity  (Sigma_u state)
-    9.91 eV   m=0(twice),+2,-2 odd parity  (Sigma_u and Delta_u states)
-    10.81 eV  m=+1,-1   odd parity  (Pi_u state)
+    8.34 eV   m=+1,-1   even parity (Pi_g state)
+    9.53 eV   m=0       odd parity  (Sigma_u state)
+    9.80 eV   m=0(twice),+2,-2 odd parity  (Sigma_u and Delta_u states)
+    10.99 eV  m=+1,-1   odd parity  (Pi_u state)
 
 ## Convergence studies
 
@@ -403,7 +403,7 @@ results of an ABINIT calculation using ecut 45 Hartree, acell 12 11 11, and 30
 bands (not fully converged, though!), then compare the results with other
 LDA/TDLDA results (from [[cite:Casida1998]]) and experimental results:
 
-                          present Casida experimental
+                       present  Casida experimental
     Singlet Pi_g      :  9.25    9.05     9.31
     Singlet Sigma_u-  :  9.72    9.63     9.92
     Singlet Delta_u   : 10.22   10.22    10.27
@@ -421,7 +421,7 @@ of the $^3\Pi_g$ state (0.4 eV). In particular, we note that LDA/TDLDA is
 not able to get the correct ordering of the lower two triplet states ... One
 of our problems was intrinsic to the LDA/TDLDA approximation ...
 
-## The choice of the exchange-correlation potential
+## The choice of the exchange-correlation potential and kernel
 
 As emphasized in [[cite:Casida1998]], choosing a different functional for the self-consistent part
 (XC potential) and the generation of the coupling matrix (XC
@@ -432,4 +432,6 @@ better description of the Rydberg states. Still, the LDA kernel works pretty wel
 
 In order to activate this procedure, set the value of [[ixc]] in dataset 1 to the
 SCF functional, and the value of ixc in dataset 2 to the XC functional to be
-used for the kernel. Use pseudopotentials that agree with the SCF functional.
+used for the kernel. Use pseudopotentials that agree with the SCF functional in dataset 1.
+As of writing (end of 2020), the ABINIT implementation has a strong restriction on the XC kernels that can be used. They
+must be of LDA-type. See the list of allowed [[ixc]] values in the description of [[iscf]]=-1.
