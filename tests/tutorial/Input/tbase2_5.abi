@@ -16,8 +16,8 @@ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/H.psp8"  # Name and location of t
 
 #Definition of the unit cell and ecut, 
 #for which one will have to make a convergence study
- acell:? 12 12 12  acell+? 2 2 2 
- ecut 30
+ acell:? 16 16 16  acell+? 2 2 2 
+ ecut 25
 
 #First dataset : find the optimal bond length of H2, and associated total energy
    natom?1 2             # There are two atoms

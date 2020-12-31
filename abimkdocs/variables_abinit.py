@@ -8141,8 +8141,8 @@ Other (**negative**) options:
     rho(r) and then run **iscf** = -2 for the intended set of k-points and bands.
     To prepare a run with **iscf** = -2, a density file can be produced using the
     parameter [[prtden]] (see its description). When a self-consistent set of
-    wavefunctions is already available, abinit can be used with [[nstep]] = 0 (see
-    Test_v2/t47.in), and the adequate value of [[prtden]].
+    wavefunctions is already available, abinit can be used with [[nstep]] = 0 
+    and the adequate value of [[prtden]], see tests/v2/Input/t47.abi .
 
   * -3 --> like -2, but initialize [[occ]] and [[wtk]], directly or indirectly
     (using [[ngkpt]] or [[kptrlatt]]) depending on the value of [[occopt]].
