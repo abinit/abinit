@@ -104,7 +104,7 @@ nstep 8  # limit number of steps for the tutorial, in general this should be set
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tnlo_5.abo, tolnlines=  5, tolabs=  5.0e-8, tolrel= 1e-4 
+#%%   tnlo_5.abo, tolnlines= 180, tolabs=  2.0e-6, tolrel= 5e-4 
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

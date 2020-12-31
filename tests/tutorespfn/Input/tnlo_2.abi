@@ -125,7 +125,7 @@ prteig 0
 #%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tnlo_2.abo, tolnlines=  65, tolabs=  9.000e-07, tolrel=  9.000e-02
+#%%   tnlo_2.abo, tolnlines= 330, tolabs=  2.000e-04, tolrel=  9.000e-02
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
