@@ -3604,27 +3604,31 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
  ! that will be used to symmetrize the wavefunctions in G-space.
  call cwtime(cpu, wall, gflops, "start")
+ call wrtout(std_out, "Computing mpw. This may take some time for dense k/q meshes.")
+ !call fstab_get_mpw_gmax(nsppol, fstab, mpw, gmax, comm)
  mpw = 0; gmax = 0; cnt = 0
- do iq_ibz=1,gams%nqibz
-   qpt = gams%qibz(:,iq_ibz)
-   do spin=1,nsppol
-     fs => fstab(spin)
-     do ik_bz=1,fs%nkfs
-       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm
-       kk = fs%kpts(:, ik_bz); kq = kk + qpt
-       ! Compute G sphere, returning npw. Note istwfk == 1.
-       call get_kg(kk, 1, ecut, cryst%gmet, onpw, gtmp)
-       mpw = max(mpw, onpw)
-       do ipw=1,onpw
-         do ii=1,3
-          gmax(ii) = max(gmax(ii), abs(gtmp(ii,ipw)))
-         end do
-       end do
-       ABI_FREE(gtmp)
 
+ do spin=1,nsppol
+   fs => fstab(spin)
+   do ik_bz=1,fs%nkfs
+     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm
+     kk = fs%kpts(:, ik_bz)
+     ! Compute G sphere, returning npw. Note istwfk == 1.
+     call get_kg(kk, 1, ecut, cryst%gmet, onpw, gtmp)
+     mpw = max(mpw, onpw)
+     do ipw=1,onpw
+       do ii=1,3
+        gmax(ii) = max(gmax(ii), abs(gtmp(ii,ipw)))
+       end do
+     end do
+     ABI_FREE(gtmp)
+
+     do iq_ibz=1,gams%nqibz
+       qpt = gams%qibz(:,iq_ibz)
        ! TODO: g0 umklapp here can enter into play!
        ! fstab should contains the max of the umlapp G-vectors.
        ! gmax could not be large enough!
+       kq = kk + qpt
        call get_kg(kq, 1, ecut, cryst%gmet, onpw, gtmp)
        mpw = max(mpw, onpw)
        do ipw=1,onpw
@@ -3634,13 +3638,16 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        end do
        ABI_FREE(gtmp)
      end do
-   end do
- end do
- call cwtime_report(" gmax and mpw", cpu, wall, gflops)
+
+   end do ! ik_bz
+ end do ! spin
 
  my_mpw = mpw; call xmpi_max(my_mpw, mpw, comm, ierr)
  my_gmax = gmax; call xmpi_max(my_gmax, gmax, comm, ierr)
  call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw)))
+
+ ! FIXME: This is an hotspot
+ call cwtime_report(" gmax and mpw", cpu, wall, gflops)
 
  ! Init work_ngfft
  gmax = gmax + 4 ! FIXME: this is to account for umklapp
