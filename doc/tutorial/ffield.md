@@ -240,8 +240,15 @@ You can review how to use DFPT in the
     triggered by [[rfddk]]. Although not strictly required in the present DFPT calculation,
     the finite difference approach is necessary in the various
     Berry's phase computations of polarization, in order to maintain phase coherency
-    between wavefunctions at neighboring k points. It generally converges more slowly
-    with k point density than do DFPT methods.
+    between wavefunctions at neighboring k points. Therefore in the present tutorial we use
+    the finite difference approach, in order to compare the results of the Berry's phase
+    computation to those of DFPT more accurately.
+
+!!! warning
+    The use of kpoint overlaps in Berry's phase calculations is necessary, but causes the
+    results to converge *much* more slowly with kpoint mesh density than other types of
+    calculations. It is critical in production work using Berry's phase methods to check
+    carefully the convergence with respect to kpoint mesh density.
 
 Go ahead and run the input file,
 and have a look at the output file, to identify the
