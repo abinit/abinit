@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 30 Dec 2020.
-- ( at 22h35 )
+- ( at 19h55 )
   
 - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_beauty/Test_suite/tutorespfn_tnlo_2-tnlo_3-tnlo_4/tnlo_2.abi
 - output file    -> tnlo_2.abo
@@ -3377,10 +3377,10 @@ P          mk1mem5        432
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        100.4  wall=        100.8
+- Proc.   0 individual time (sec): cpu=        126.3  wall=        126.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  24 WARNINGs and  32 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        100.4  wall=        100.8
++Overall time at end (sec) : cpu=        126.3  wall=        126.7

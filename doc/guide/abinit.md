@@ -1257,12 +1257,15 @@ basis for a given set of atoms. Some atoms (notably those in the first row or
 first transition series row) have relatively deep pseudopotentials which
 require many planewaves for convergence. In contrast are atoms like Si for
 which fewer planewaves are needed. A typical value of [[ecut]] for silicon
-might be 5-10 Hartree for quite good convergence, while the value for oxygen
-might be 25-35 Hartree or more depending on the convergence desired and the
-design of the pseudo- potential.
+with a norm-conserving pseudopotential
+might be 10...15 Hartree for quite good convergence, while the value for oxygen
+might be 35...40 Hartree or more depending on the convergence desired and the
+design of the pseudo-potential. With PAW, the [[ecut]] to be used is usually 
+smaller, e.g. 17 Hartree for oxygen. The pseudo-dojo <http://www.pseudo-dojo.org/>
+provides hints with the available pseudopotentials.
 
-NOTE: It is necessary in every new problem to **TEST** the convergence by
-**RAISING** [[ecut]] for a given calculation until the results being computed
+NOTE: It is necessary in every new problem to **TEST** the convergence, by
+**RAISING** [[ecut]] for a given calculation, until the results being computed
 are constant to within some tolerance. This is up to the user and is very
 important. For a given [[acell]] and [[rprim]], [[ecut]] is the parameter
 which controls the number of planewaves. Of course if [[rprim]] or [[acell]]
@@ -1273,14 +1276,12 @@ the convergence of _e.g._ the total energy within some range of planewave
 number or [[ecut]]. It is appropriate to attempt to optimize this convergence,
 especially for difficult atoms like oxygen or copper, as long as one does not
 significantly compromise the quality or transferability of the
-pseudopotential. There are many people working on new techniques for
-optimizing convergence.
+pseudopotential. 
 
-For information on extended norm conservation, see E. L. Shirley, D. C. Allan,
-R. M. Martin, and J. D. Joannopoulos, Phys. Rev. B 40, 3652 (1989).
-
-For information on optimizing the convergence of pseudopotentials, see A. M.
-Rappe, K. M. Rabe, E. Kaxiras, and J. D. Joannopoulos, Phys. Rev. B 41, 1227 (1990).
+For information on optimizing the convergence of pseudopotentials, see 
+[[cite:Rappe1990]]. For the generation of ONCVPSP pseudopotentials, see 
+[[cite:Hamann2013]]. For the pseudodojo, see [[cite:Vansetten2018]].
+For the JTH table of PAW atomic data, see [[cite:Jollet2014]].
 
 (2) In addition to achieving convergence in the number of planewaves in the
 basis, one must ensure that the SCF iterations which solve the electronic
