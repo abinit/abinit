@@ -4,12 +4,12 @@ authors: MG
 
 # Superconducting properties within the isotropic Eliashberg formalism
 
-This tutorial explains how to compute phonon linewidths in metals due to the electron-phonon (e-ph) interaction 
+This tutorial explains how to compute phonon linewidths in metals induced by the electron-phonon (e-ph) interaction 
 and how to use the McMillan equation to estimate the superconducting critical temperature $T_c$
 within the **isotropic Eliashberg formalism**.
 We start by presenting the basic equations implemented in the code and their connection with the ABINIT variables.
 Then we discuss how to run isotropic $T_c$-calculations and how to perform typical convergence studies
-using MgB$_2$ as example, a well-known phonon-mediated superconductor with a $T_c$ = 39 K.
+using MgB$_2$ as example, a well-known phonon-mediated superconductor with $T_c$ = 39 K.
 For a more complete theoretical introduction see [[cite:Giustino2017]] and references therein.
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
@@ -39,7 +39,7 @@ For a given phonon wavevector $\qq$, the double Dirac delta restricts the BZ int
 transitions between $\kk$ and $\kq$ electronic states on the Fermi surface (FS).
 As a consequence, converging $\gamma_{\qq\nu}$ requires very dense $\kk$-meshes in order
 to sample enough states around the FS.
-The convergence rate, indeed, is expected to be much slower than the one required by the electron DOS at $\ee_F$:
+The convergence rate, indeed, is expected to be much slower than that required by the electron DOS at $\ee_F$:
 
 $$
 g(\ee_F) = \sum_{n\kk} \delta(\ee_F - \ee_{n\kk})
@@ -57,12 +57,12 @@ in which a single Dirac delta is involved.
     on the computation of the imaginary part of the phonon self-energy $\Pi$ in the harmonic approximation.
 
 At the level of the implementation, the technique for integrating the double delta over the FS
-is specified by the [[eph_intmeth]] input variable.
+is selected via the [[eph_intmeth]] input variable.
 One can use the **optimized tetrahedron** scheme [[cite:Kawamura2014]] as implemented 
 in the [libtetrabz library](http://libtetrabz.osdn.jp/en/_build/html/index.html) ([[eph_intmeth]] == 2).
 or, alternatively, replace the Dirac distribution with a **Gaussian** of finite width ([[eph_intmeth]] == 1).
 If the Gaussian method is selected, one can choose between a constant broadening $\sigma$
-specified in Hartree via [[eph_fsmear]] or an adaptive scheme (activated when [[eph_fsmear]] < 0)
+specified in Hartree by [[eph_fsmear]] or an adaptive scheme (activated when [[eph_fsmear]] < 0)
 in which a state-dependent broadening $\sigma_\nk$ is automatically computed from
 the electron group velocities $v_\nk$ [[cite:Li2015]].
 Note that the adaptive scheme is also used for the optimized tetrahedron scheme at the $\Gamma$ point 
@@ -130,8 +130,7 @@ except for the weighting factor $\frac{\gamma_{\qq\nu}}{\ww_{\qq\nu}}$.
 
 The technique used to compute $\alpha^2F(\ww)$ is defined by [[ph_intmeth]] (note the `ph_` prefix instead of `eph_`).
 Both the Gaussian ([[ph_intmeth]] = 1 with [[ph_smear]] smearing) and
-the linear tetrahedron method by ([[ph_intmeth]] = 2, default) are implemented 
-for the $\qq$-space integration [[cite:Blochl1994]].
+the linear tetrahedron method by [[cite:Blochl1994]] ([[ph_intmeth]] = 2, default) are available.
 The total e-ph coupling strength $\lambda$ is defined as the first inverse moment of $\alpha^2F(\ww)$:
 
 $$
@@ -145,11 +144,13 @@ $$
 \lambda_{\qq\nu} = \dfrac{\gamma_{\qq\nu}}{\pi N_F \ww_{\qq\nu}^2}
 $$
 
+<!--
 The frequency integration is performed by computing $\alpha^2F(\ww)$ on a linear mesh 
 of step [[ph_wstep]] covering the entire range of phonon frequencies.
+-->
 
-In principle, $T_c$ can be obtained by solving the isotropic Eliashberg equations for the gap
-but many applications prefer to bypass the explicit solution
+In principle, $T_c$ can be obtained by solving the isotropic Eliashberg equations for the superconducting 
+gap [[cite:Margine2013]] but many applications prefer to bypass the explicit solution
 and **estimate** $T_c$ using the semi-empirical McMillan equation [[cite:McMillan1968]]
 in the improved version proposed by [[cite:Allen1975]]:
 
@@ -174,36 +175,6 @@ with a **weak dependence** on $\kk$ so that it is possible to average the equati
 This approximation becomes valid in the case of metals with impurities - the so-called dirty-limit - 
 as impurities tend to smear out the anisotropy of the superconducting gap.
 A more detailed discussion about isotropic/anisotropic formulations can be found in [[cite:Margine2013]].
-
-<!--
-Implementation details:
-
-\begin{equation}
-    \gamma_{\qq\nu} = 2\pi \ww_{\qq\nu} \sum_{pp'} d_{\qq p}^* \tilde\gamma_{p p'}(\qq) d_{\qq p'}^*
-\end{equation}
-
-where
-
-\begin{equation}
-    \tilde\gamma_{p p'}(\qq) =
-    \sum_{mn\kk} g_{mn,p}(\kk, \qq)^*  g_{mn,p'}(\kk, \qq)  \delta(\ee_{\kpq m}) \delta(\ee_{\kk n})
-\end{equation}
-
-$\tilde\gamma_{p p'}(\qq)$ has the same symmetries as the dynamical matrix.
-The code computes $\tilde\gamma$ for all q-points in the IBZ, each matrix is re-symmetrized
-if symdynmat == 1 so that degeneracies at high-symmetry q-points are correctly reproduced.
-The matrix elements for q-points in the full BZ are then obtained by rotating the initial set of q-points in the BZ.
-and Fourier transformed to real space with:
-
-\begin{equation}
-    \tilde\gamma_{p p'}(\RR) = \sum_\qq e^{i\qq\cdot\RR} \tilde\gamma_{p p'}(\qq)
-\end{equation}
-
-At this point, it is possible to interpolate the matrices via Fourier interpolation.
-A similar approach is used for the dynamical matrix.
-Note that we interpolate the matrices in this representation instead of the phonon mode representation
-to avoid numerical instabilities introduce by band crossings.
--->
 
 ## Getting started
 
@@ -549,7 +520,7 @@ In real life one should perform an accurate convergence study...
 
 For our first example, we use a relatively simple input file that allows us to introduce
 the most important variables and the organization of the main output file.
-Copy *teph4isotc_2.abi* in the working directory and execute it using:
+Copy *teph4isotc_2.abi* in the working directory and run the code using:
 
 ```sh
 abinit teph4isotc_2.abi > log 2> err
@@ -564,7 +535,7 @@ abinit teph4isotc_2.abi > log 2> err
     ```
 
     without having to introduce any input variable for the MPI parallelization
-    as the EPH code can automatically distribute the workload.
+    as the EPH code can automatically distribute the workload over k-points and spins.
     Further details concerning the MPI version are given in the
     [last section of the tutorial](#notes-on-the-mpi-parallelism)
 
@@ -573,7 +544,7 @@ We now discuss the meaning of the different variables in more detail.
 {% dialog tests/tutorespfn/Input/teph4isotc_2.abi %}
 
 To activate the computation of $\gamma_{\qq\nu}$ in metals,  we use [[optdriver]] = 7 and [[eph_task]] = 1.
-The location of the DDB, DVDB and WFK files is specified via
+The location of the external DDB, DVDB and WFK files is specified via
 [[getddb_filepath]] [[getdvdb_filepath]] [[getwfk_filepath]], respectively.
 
 ```sh
@@ -594,8 +565,8 @@ with the **abifile** prefix
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
 ```
 
-to read the crystalline structure from an external file.
-so that we do can avoid repeating the unit cell in every input file.
+to read the crystalline structure from an external file
+so that we do avoid repeating the unit cell in every input file.
 
 Next, we have the variables defining the coarse and fine $\qq$-mesh ([[ddb_ngqpt]] and [[eph_ngqpt_fine]]):
 
@@ -612,21 +583,19 @@ constants are relatively short-ranged.
 The $\kk$-point integration is performed with the Gaussian smearing 
 ([[eph_intmeth]] == 1 and 0.1 eV for [[eph_fsmear]]).
 
-
 ```sh
 eph_intmeth 1       # Gaussian method for double-delta integration.
 eph_fsmear 0.1 eV   # Constant broadening in Gaussian function.
 eph_fsewin 0.3 eV   # Energy window for wavefunctions.
 ```
 
-Note that, in order to accelerate the calculation, we have decreased [[eph_fsewin]] can be 
+Note that, in order to accelerate the calculation, we have decreased [[eph_fsewin]]
 from its default value of 1 eV to 0.3 eV.
 This is possible when the Gaussian method is used since
 states whose energy is 3-4 standard deviation from the Fermi level give negligible contribution to the double delta integral.
-In other words, for the Gaussian technique, an almost option value of [[eph_fsewin]] can be deduded from [[eph_fsmear]]
-Unfortunately, this is not possible when the tetrahedron method is used and to some extent also when the adaptive
+In other words, for the Gaussian technique, an optimal value of [[eph_fsewin]] can be deduced from [[eph_fsmear]]
+Unfortunately, this is not possible when the tetrahedron method is used and, to some extent, also when the adaptive
 broadening is used.
-We will discuss
 Hopefully, the next versions of the code will provide ...
 0.04 Ha ~ 1 eV
 
@@ -637,7 +606,7 @@ mixprec 1
 boxcutmin 1.1
 ```
 
-As explained in the documentation, using [[mixprec]] = 1 and [[boxcutmin]] = 1.1
+As explained in the documentation, using [[mixprec]] = 1 and 2 > [[boxcutmin]] >= 1.1
 should not have significant effects on the final results yet these are not the default values
 as users are supposed to compare the results with/without this trick before running production calculations.
 
@@ -715,7 +684,7 @@ we find the output of the electronic DOS:
 ```
 
 Then the code outputs some basic info concerning the Fermi surface
-and the integration method used for the double delta:
+and method for the integration of the double delta:
 
 ```md
  ==== Fermi surface info ====
@@ -745,7 +714,7 @@ the values of $\ww_\qnu$, $\gamma_\qnu$ and $\lambda_\qnu$:
     9        3.127043E-03    3.508418E-08    5.701304E-05
 ```
 
-The frequencies of the acoustic modes at $\Gamma$ aare zero (as they should be) 
+The frequencies of the acoustic modes at $\Gamma$ are zero (as they should be) 
 since [[asr]] is automatically set to 1 so the acoustic rule is **automatically enforced**.
 Also, the linewidths of the acoustic modes are zero.
 In this case, however, the code uses a rather simple heuristic rule:
@@ -827,11 +796,15 @@ our results are not that bad considering that the calculation took less than XXX
 ## Using the tetrahedron method 
 
 In this section, we repeat the calculation done in **teph4isotc_2.abi** 
-but now with the **optimized tetrahedron** scheme [[cite:Kawamura2014]].
+but now with the **optimized tetrahedron** scheme by [[cite:Kawamura2014]].
 This test will show that (i) phonon linewidths are very sensitive to the $\kk$-mesh 
-and the integration scheme and that (ii)
+and the integration scheme and that (ii) one has to test different values of [[eph_fsewin]] 
+to find the optimizal one.
 
-constructing a third-order interpolation function with 20 $\kk$-points
+The reason is that the optimized tetrahedron scheme constructs a third-order interpolation function 
+with 20 $\kk$-points so states that are relatively far from the Fermi level contributes to the integrand.
+If [[eph_fsewin]] is too small, part of the weigt is lost.
+To find an optimal value, we can use:
 
 ```md
 ndtset 4
@@ -839,6 +812,17 @@ eph_intmeth 2   # Tetra
 eph_fsewin: 0.4 eV
 eph_fsewin+ 0.4 eV
 ```
+
+We don't provide an input file to perform such test as one can easily change **teph4isotc_2.abi**.
+and the run the calculation in parallel.
+To compare the results, we use the `a2f` command of the |abicomp| script and we pass the list of `A2F.c` files:
+
+```sh
+abicomp.py a2f teph4isotc_2o_DS*_A2F.nc -e
+```
+
+![](eph4isotc_assets/abicomp_phbands.png)
+
 
 ## Preparing the convergence study wrt the k-mesh
 
@@ -855,7 +839,7 @@ Since we already have a WFK file on a 12x12x12 $\kk$-mesh, it makes sense to com
 on a 24x24x24 $\kk$-mesh so that we can compare the following configurations:
 
 <!--
-TODO: Discuss energy window, sigma_erange in connection with FS window and integration scheme
+TODO: Discuss energy window, sigma_erange in connection with the FS window and the integration scheme
 
 As already mentioned in the introduction, the integration of the double delta requires very dense $\kk$-meshes
 for electrons in order to obtain accurate results for $\gamma_\qnu$.
@@ -1044,7 +1028,6 @@ and compute the WFK file with a NSCF run from the DEN.nc file.
 You should get:
 
 The EPH calculation on 48 CPUs takes ~ minutes and less than XXX Gb of memory.
-
 
 ## Notes on the MPI parallelism
 

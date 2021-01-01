@@ -3341,6 +3341,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! 1 for the linear tetrahedron method.
  ! 2 for the optimized tetrahedron method.
  ltetra = 2 !; ltetra = dtset%useria + 1
+ if (dtset%useria /= 0) ltetra = dtset%useria
  !ltetra = 1
  !if (dtset%eph_intmeth ==  2) ltetra = 1
  !if (dtset%eph_intmeth == -2) ltetra = 2
