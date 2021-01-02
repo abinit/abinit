@@ -8,6 +8,7 @@ paral_kgb 1
 npkpt 4
 npband 6
 npfft  1
+nbdbuf 2
 
 #Definition of the unit cell
 acell 4.0 4.0 28.0 Angstrom
@@ -15,7 +16,7 @@ acell 4.0 4.0 28.0 Angstrom
 #Definition of the atom types and pseudopotentials
 ntypat 3
 znucl 56 22 8
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard"
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8"
 pseudos "Ba.psp8, Ti.psp8, O.psp8"
 
 #Definition of the atoms
@@ -59,8 +60,8 @@ kptopt 1
 
 #Parameters for the SCF procedure
 nstep 50
-tolwfr 1.0d-22
-#iprcel 45
+tolwfr 1.0d-18
+iprcel 45   # This is to help the SCF procedure, work quite well in this case of a slab.
 
 #Electronic structure
 nband 120
