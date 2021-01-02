@@ -195,15 +195,15 @@ while *$ABI_TESTS/tutorial/Refs/tbase3_4.abo* is a reference output file.
 
 You should obtain the following evolution of the lattice parameters:
 
-    acell1   1.0233363682E+01  1.0233363682E+01  1.0233363682E+01 Bohr
-    acell2   1.0216447241E+01  1.0216447241E+01  1.0216447241E+01 Bohr
+    acell1     1.0208746777E+01  1.0208746777E+01  1.0208746777E+01 Bohr
+    acell2     1.0195482058E+01  1.0195482058E+01  1.0195482058E+01 Bohr
 
 with the following very small residual stresses:
 
-    strten1   1.8591719160E-07  1.8591719160E-07  1.8591719160E-07
-              0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-    strten2  -2.8279720007E-08 -2.8279720007E-08 -2.8279720007E-08
-              0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+    strten1    -2.0279878345E-08 -2.0279878345E-08 -2.0279878345E-08
+                0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+    strten2    -9.2829783285E-08 -9.2829783286E-08 -9.2829783286E-08
+                0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 
 The stress tensor is given in Hartree/Bohr<sup>3</sup>, and the order of the components is:
 
@@ -212,14 +212,14 @@ The stress tensor is given in Hartree/Bohr<sup>3</sup>, and the order of the com
 
 There is only a 0.13% relative difference between *acell1* and *acell2*.
 So, our converged LDA value for Silicon, with the *Si.psp8* pseudopotential of the [PseudoDojo website](http://www.pseudo-dojo.org/)
-is 10.216 Bohr (actually 10.21644), that is 5.406 Angstrom.
+is 10.195 Bohr, that is 5.395 Angstrom.
 The experimental value is *5.431* Angstrom at 25 degree Celsius,
 see R.W.G. Wyckoff, Crystal structures Ed. Wiley and sons, New-York (1963)
 or the [NIST database](https://physics.nist.gov/cgi-bin/cuu/Value?asil|search_for=silicon).
 
 ## Computing the band structure
 
-We fix the parameters [[acell]] to the theoretical value of 3 * 10.216,
+We fix the parameters [[acell]] to the theoretical value of 3 * 10.195,
 and we fix also the grid of k-points (the 4x4x4 FCC grid, equivalent to a 8x8x8 Monkhorst-pack grid).
 We will ask for 8 bands (4 valence and 4 conduction).
 
@@ -268,13 +268,13 @@ in which you output the density ([[prtden]] 1), and, for the second dataset:
 * the only tolerance criterion admitted for non-self-consistent calculations is [[tolwfr]].
   You should set it to 1.0d-10 (or so), and suppress [[toldfe]].
 
-The input file *$ABI_TESTS/tutorial/Input/tbase3_5.in* is an example,
+The input file *$ABI_TESTS/tutorial/Input/tbase3_5.abi* is an example,
 
-{% dialog tests/tutorial/Input/tbase3_5.in %}
+{% dialog tests/tutorial/Input/tbase3_5.abi %}
 
-while *$ABI_TESTS/tutorial/Refs/tbase3_5.out* is a reference output file.
+while *$ABI_TESTS/tutorial/Refs/tbase3_5.abo* is a reference output file.
 
-{% dialog tests/tutorial/Refs/tbase3_5.out %}
+{% dialog tests/tutorial/Refs/tbase3_5.abo %}
 
 You should find the band structure starting at (second dataset):
 
@@ -348,7 +348,7 @@ The high-symmetry k-path follows the conventions described in [[cite:Setyawan201
 Let's try with:
 
 ```sh
-abistruct.py kpath tbase3_5.in
+abistruct.py kpath tbase3_5.abi
 
 # Abinit Structure
  natom 2
