@@ -315,8 +315,8 @@ reference output files are present in *\$ABI_TESTS/tutoparal/Refs*:
 *tdfpt_03_MPI24.abo* and *tdfpt_04_MPI24.abo*. The naming convention is such that the
 number of cores used to run them is added after the name of the test: the
 *tdfpt_03.abi* files were run with 24 cores.
-The preparatory step took about 5 minutes, and the DFPT step took about
-5 minutes as well.
+The preparatory step took about 1.5 minutes, and the DFPT step took about
+3 minutes.
 
 {% dialog tests/tutoparal/Input/tdfpt_03.abi tests/tutoparal/Input/tdfpt_04.abi %}
 
