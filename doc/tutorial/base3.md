@@ -162,14 +162,14 @@ You should read the information about [[kpt]] and [[wtk]].
 
 From the output file, here is the evolution of total energy for the different k-point grids:
 
-    etotal1  -8.8662238960E+00
-    etotal2  -8.8724909739E+00
-    etotal3  -8.8726017432E+00
-    etotal4  -8.8726056405E+00
+    etotal1    -8.5187390642E+00
+    etotal2    -8.5250179735E+00
+    etotal3    -8.5251232908E+00
+    etotal4    -8.5251270559E+00
 
 The difference between dataset 3 and dataset 4 is rather small.
 Even the dataset 2 gives an accuracy of about 0.0001 Ha. So, our converged value for the total energy,
-at fixed [[acell]], fixed [[ecut]], is -8.8726 Ha.
+at fixed [[acell]], fixed [[ecut]], is -8.8251 Ha.
 
 ## Determination of the lattice parameters
 
@@ -185,13 +185,13 @@ For the automatic optimisation of cell volume, use:
 You should read the indications about [[dilatmx]] and [[ecutsm]].
 Do not test all the k-point grids, only those with **nkpt** 2 and 10.
 
-The input file *$ABI_TESTS/tutorial/Input/tbase3_4.in* is an example,
+The input file *$ABI_TESTS/tutorial/Input/tbase3_4.abi* is an example,
 
-{% dialog tests/tutorial/Input/tbase3_4.in %}
+{% dialog tests/tutorial/Input/tbase3_4.abi %}
 
-while *$ABI_TESTS/tutorial/Refs/tbase3_4.out* is a reference output file.
+while *$ABI_TESTS/tutorial/Refs/tbase3_4.abo* is a reference output file.
 
-{% dialog tests/tutorial/Refs/tbase3_4.out %}
+{% dialog tests/tutorial/Refs/tbase3_4.abo %}
 
 You should obtain the following evolution of the lattice parameters:
 
@@ -211,7 +211,7 @@ The stress tensor is given in Hartree/Bohr<sup>3</sup>, and the order of the com
                             23  13  12
 
 There is only a 0.13% relative difference between *acell1* and *acell2*.
-So, our converged LDA value for Silicon, with the *14si.pspnc* pseudopotential (see the *tbase3_x.files* file)
+So, our converged LDA value for Silicon, with the *Si.psp8* pseudopotential of the [PseudoDojo website](http://www.pseudo-dojo.org/)
 is 10.216 Bohr (actually 10.21644), that is 5.406 Angstrom.
 The experimental value is *5.431* Angstrom at 25 degree Celsius,
 see R.W.G. Wyckoff, Crystal structures Ed. Wiley and sons, New-York (1963)

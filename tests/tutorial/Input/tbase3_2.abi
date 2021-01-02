@@ -30,7 +30,7 @@ xred              # This keyword indicate that the location of the atoms
    1/4  1/4  1/4  # Triplet giving the REDUCED coordinate of atom 2.
 
 #Definition of the planewave basis set
-ecut  8.0         # Maximal kinetic energy cut-off, in Hartree
+ecut  12.0         # Maximal kinetic energy cut-off, in Hartree
 
 #Definition of the k-point grid
 nkpt 2            # Number of k points (It does not agree with ngkpt and shiftk)
@@ -56,7 +56,7 @@ diemac 12.0       # Although this is not mandatory, it is worth to
                   # function used as the standard preconditioner
                   # is described in the "dielng" input variable section.
                   # Here, we follow the prescription for bulk silicon.
-                  
+
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
