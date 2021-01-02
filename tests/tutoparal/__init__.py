@@ -27,8 +27,8 @@ subsuites = [
 inp_files = [
 "tgswvl_1.abi",
 "tgswvl_2.abi",
-#"tdfpt_01.abi",
-#"tdfpt_02.abi",
+"tdfpt_01.abi",
+"tdfpt_02.abi",
 "tdfpt_03.abi",
 "tdfpt_04.abi",
 #"tdfpt_03PAW.abi,"

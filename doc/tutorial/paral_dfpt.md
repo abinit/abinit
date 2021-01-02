@@ -116,27 +116,32 @@ We start by treating the case of a small systems, namely FCC aluminum, for
 which there is only one atom per unit cell. Of course, many k points are needed.
 
 **2.1.** The first step is the pre-computation of the ground state
-wavefunctions. This is driven by the files *tdfpt_01.files* (and *tdfpt_01.in*).
-You should edit them and examine them.
+wavefunctions. This is driven by the files *tdfpt_01.abi*.
+You should edit it and examine it.
 
-{% dialog tests/tutoparal/Input/tdfpt_01.files tests/tutoparal/Input/tdfpt_01.in %}
+{% dialog tests/tutoparal/Input/tdfpt_01.abi %}
 
 One relies on a k-point grid of 8x8x8 x 4 shifts (=2048 k points), and 5 bands.
 For this ground-state calculation, symmetries can be used to reduce
 drastically the number of k points: there are 60 k points in the irreducible
 Brillouin zone (this cannot be deduced from the examination of the input file, though).
+In order to treat properly the phonon calculation, the number of bands is larger than the
+default value, that would have given [[nband]]=3. Indeed, several of the unoccupied bands 
+plays a role in the response calculations in the case of etallic occupations.
+For example, the acoustic sum rule might be largely violated when too few unoccopied 
+bands are treated. 
+
 This calculation is very fast, actually.
 You can launch it:
 
-    mpirun -n 4  abinit < tdfpt_01.files > tdfpt_01.log &
+    mpirun -n 4  abinit tdfpt_01.abi > log &
 
 A reference output file is available in *\$ABI_TESTS/tutoparal/Refs*, under
-the name *tdfpt_01.out*. It was obtained using 4 computing cores, and took a few seconds.
+the name *tdfpt_01.abo*. It was obtained using 4 computing cores, and took a few seconds.
 
-**2.2.** The second step is the DFPT calculation, for which the files are
-*tdfpt_02.files* (and *tdfpt_02.in*).
+**2.2.** The second step is the DFPT calculation, see the file *tdfpt_02.abi*
 
-{% dialog tests/tutoparal/Input/tdfpt_02.files tests/tutoparal/Input/tdfpt_02.in %}
+{% dialog tests/tutoparal/Input/tdfpt_02.abi %}
 
 There are three perturbations (three atomic displacements). For the two first
 perturbations, no symmetry can be used, while for the third, two symmetries
@@ -152,46 +157,40 @@ First copy the output of the ground-state calculation so that it can be used
 as the input of the DFPT calculation:
 
     cp tdfpt_01.o_WFK tdfpt_02.i_WFK
-    cp tdfpt_01.o_WFK tdfpt_02.i_WFQ
 
+(A _WFQ file is not needed, as all GS wavefunctions at k+q are present in the GW wavefuction at k).
 Then, you can launch the calculation:
 
-    mpirun -n 4 abinit < tdfpt_02.files > tdfpt_02.log &
+    mpirun -n 4 abinit tdfpt_02.abi > tdfpt_02.log &
 
 A reference output file is given in *\$ABI_TESTS/tutoparal/Refs*, under the name
-*tdfpt_02.out*. Edit it, and examine some information.
+*tdfpt_02.abo*. Edit it, and examine some information.
 The calculation has been made with four computing cores:
 
 ```
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 ```
 
 The wall clock time is less than 50 seconds :
 
 ```
 -
-- Proc.   0 individual time (sec): cpu=         48.5  wall=         48.5
+- Proc.   0 individual time (sec): cpu=         46.5  wall=         58.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered    0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        194.1  wall=        194.1
++Overall time at end (sec) : cpu=        189.3  wall=        233.4
 ```
 
 The major result is the phonon frequencies:
 
       Phonon wavevector (reduced coordinates) :  0.25000 -0.12500  0.12500
      Phonon energies in Hartree :
-       6.944980E-04  7.756637E-04  1.145943E-03
-     Phonon energies in meV     :
-    -  1.889825E+01  2.110688E+01  3.118270E+01
+       6.521506E-04  7.483301E-04  1.099648E-03
      Phonon frequencies in cm-1    :
-    -  1.524247E+02  1.702385E+02  2.515054E+02
-     Phonon frequencies in Thz     :
-    -  4.569578E+00  5.103622E+00  7.539943E+00
-     Phonon energies in Kelvin  :
-    -  2.193049E+02  2.449349E+02  3.618597E+02
+    -  1.431305E+02  1.642395E+02  2.413447E+02
 
 **2.3.** Because this test case is quite fast, you should play a bit with it.
 In particular, run it several times, with an increasing number of computing
@@ -248,7 +247,7 @@ the timing for the computing core (node) number 0. The second one is the sum
 over all computing cores of the data of the first group. Note that there is a
 factor of four between these two groups, reflecting that the load balance is good.
 
-Let's examine the second group of data in more detail. It corresponds to a
+Let us examine the second group of data in more detail. It corresponds to a
 decomposition of the most time-consuming parts of the code. Note that the
 subtotal is 98.9 percent, thus the statistics is quite good. Without going
 into the detail of each routine, for the present purpose, the most significant
@@ -271,11 +270,11 @@ seconds in any case. You should observe a similar behaviour with your own tests.
 **3.1.** This test, with 29 atoms, is slower, but scales better than the Al
 FCC case. It consists in the computation of one perturbation at qpt 0.0 0.25
 0.0 for a 29 atom slab of barium titanate, artificially terminated by a double
-TiO2 layer on each face, with a reasonable k-point sampling of the Brillouin zone.
+TiO$_2$ layer on each face, with a reasonable k-point sampling of the Brillouin zone.
 
 The symmetry of the system and perturbation will allow to decrease this
 sampling to one quarter of the Brillouin zone. E.g. with the k-point sampling
-ngkpt 4 4 1, there will be actually 4 k-points in the irreducible Brillouin
+[[ngkpt]] 4 4 1, there will be actually 4 k-points in the irreducible Brillouin
 zone for the Ground state calculations. For the DFPT case, only one symmetry
 will survive, so that, after the calculation of the frozen-wavefunction part
 (for which no symmetry is used), the self-consistent part will be done with 8
@@ -287,16 +286,16 @@ present tutorial is too low to obtain physical results (it should be around 40 H
 As in the previous case, a preparatory ground-state calculation is needed.
 
 The input files are provided, in the directory *\$ABI_TESTS/tutoparal/Input*.
-The preparatory step is governed by *tdfpt_03.files* (and *tdfpt_03.in*). The real
-(=DFPT) test case is governed by *tdfpt_04.files* (and *tdfpt_04.in*). The
+The preparatory step is driven by *tdfpt_03.in*. The real
+(=DFPT) test case is driven by *tdfpt_04.in*. The
 reference output files are present in *\$ABI_TESTS/tutoparal/Refs*:
-*tdfpt_0324.out* and *tdfpt_0432.out*. The naming convention is such that the
+*tdfpt_03_MPI24.abo* and *tdfpt_04_MPI24.abo*. The naming convention is such that the
 number of cores used to run them is added after the name of the test: the
-*tdfpt_03.in* file was run with 24 cores, while the *tdfpt_04.in* was run with 32
-cores. The preparatory step took about 5 minutes, and the DFPT step took about
+*tdfpt_03.abi* files were run with 24 cores.
+The preparatory step took about 5 minutes, and the DFPT step took about
 5 minutes as well.
 
-{% dialog tests/tutoparal/Input/tdfpt_03.in tests/tutoparal/Input/tdfpt_04.in %}
+{% dialog tests/tutoparal/Input/tdfpt_03.abi tests/tutoparal/Input/tdfpt_04.abi %}
 
 You can run now these test cases. For tdfpt_03, you might
 need to change the [[npband]] value (presently 6), if you are not using 24
@@ -304,7 +303,7 @@ processors. At variance, for tdfpt_04, no adaptation of the input file is
 needed to be able to run on an arbitrary number of processors.
 To launch the ground-state computation, type:
 
-    mpirun -n 24 abinit < tdfpt_03.files > tdfpt_03.log &
+    mpirun -n 24 abinit tdfpt_03.abi > log &
 
 then copy the output of the ground-state calculation so that it can be used as
 the input of the DFPT calculation:
@@ -314,12 +313,12 @@ the input of the DFPT calculation:
 
 and launch the calculation:
 
-    mpirun -n 24 abinit < tdfpt_04.files > tdfpt_04.log &
+    mpirun -n 24 abinit tdfpt_04.abi > log &
 
 Now, examine the obtained output file for test 04, especially the timing.
 
-In the reference file *\$ABI_TESTS/tutoparal/Refs/tdfpt_0432.out*,
-with 32 computing cores, the timing section delivers:
+In the reference file *\$ABI_TESTS/tutoparal/Refs/tdfpt_04_MPI24.abo*,
+with 24 computing cores, the timing section delivers:
 
     - For major independent code sections, cpu and wall times (sec),
     - as well as % of the total time and number of calls
@@ -344,7 +343,7 @@ with 32 computing cores, the timing section delivers:
 
 You will notice that the sum of the major independent code sections is again
 very close to 100%. You might now explore the behaviour of the CPU time for
-different numbers of compute cores (consider values below and above 32
+different numbers of compute cores (consider values below and above 24
 processors). Some time-consuming routines will benefit from the parallelism, some other will not.
 
 The kpoint + band parallelism will efficiently work for many important sections
@@ -355,7 +354,7 @@ saturate well below this value, as there are some non-parallelized sections of t
 
 In the above-mentioned list, the kpoint+band parallelism cannot be exploited
 (or is badly exploited) in several sections of the code : "vtorho3:synchro",
-about 5 percents of the total time of the run on 32 processors, "newkpt(excl.rwwf)",
+about 5 percents of the total time of the run on 24 processors, "newkpt(excl.rwwf)",
 about 2 percents, vtowfk3(contrib), about 1.5 percent, "pspini", about
 1 percent. This amounts to about 10% of the total, and, according to Amdahl's
 law, the saturation will happen soon, with less than 100 processors.
@@ -364,12 +363,12 @@ law, the saturation will happen soon, with less than 100 processors.
 back to a converged value (8x8x1).
 Try this if you have more than 100 processors at hand.
 
-Set in your input file *tdfpt_03.in*:
+Set in your input file *tdfpt_03.abi*:
 
        ngkpt 8 8 1    ! This should replace ngkpt 4 4 1
        npkpt 16       ! This should replace npkpt 4
 
-Also, set in *tdfpt_04.in*:
+Also, set in *tdfpt_04.abi*:
 
        ngkpt 8 8 1    ! This should replace ngkpt 4 4 1
 
@@ -377,7 +376,7 @@ and launch again the preliminary step, then the DFPT step. Then, you can
 practice the DFPT calculation by varying the number of computing cores. For
 the latter, you could even consider varying the number of self-consistent
 iterations to see the initialisation effects (small value of nstep), or target
-a value giving converged results (nstep 50 instead of nstep 18). The energy
+a value giving converged results ([[nstep]] 50 instead of [[nstep]] 18). The energy
 cut-off might also be increased (e.g. ecut 40 Hartree gives a much better
 value). Indeed, with a large value of k points, and large value of nstep, you
 should be able to obtain a speed-up of more than one hundred for the DFPT
@@ -400,7 +399,7 @@ number of computing cores (also, the efficiency of the calculation).
 ![Schema 1](paral_dfpt_assets/Speedup.jpeg)
 
 Beyond 300 computing cores, the sequential parts of the code start to dominate.
-With more realistic computing parameters (ecut 40), they dominate only beyond 600 processors.
+With more realistic computing parameters ([[ecut]] 40), they dominate only beyond 600 processors.
 
 This last example is the end of the present tutorial. You have been explained
 the basics of the current implementation of the parallelism for the DFPT part
