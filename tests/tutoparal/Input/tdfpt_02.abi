@@ -56,7 +56,7 @@
 #%% max_nprocs = 4
 #%% nprocs_to_test = 4
 #%% [NCPU_4]
-#%% files_to_test = tdfpt_02_MPI4.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%% files_to_test = tdfpt_02_MPI4.abo, tolnlines= 10, tolabs=  1.1e-05, tolrel=  2.0e-03
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords =
