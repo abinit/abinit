@@ -15,7 +15,7 @@ is_multi_parallel = True
 subsuites = [
 "dfpt",
 "gspw",
-#"gswvl",
+"gswvl",
 "mbt",
 "dmft",
 #"moldyn",
@@ -25,8 +25,8 @@ subsuites = [
 
 #: List of input files
 inp_files = [
-#"gswvl_01.abi",
-#"gswvl_02.abi",
+"tgswvl_1.abi",
+"tgswvl_2.abi",
 #"tdfpt_01.abi",
 #"tdfpt_02.abi",
 "tdfpt_03.abi",
