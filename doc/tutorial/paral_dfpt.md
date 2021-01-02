@@ -291,7 +291,7 @@ for a speed-up of 19.7 ..
 **3.1.** This test, with 29 atoms, is slower, but scales better than the Al
 FCC case. It consists in the computation of one perturbation at qpt 0.0 0.25
 0.0 for a 29 atom slab of barium titanate, artificially terminated by a double
-TiO$_2$ layer on each face, with a reasonable k-point sampling of the Brillouin zone.
+$TiO_2$ layer on each face, with a reasonable k-point sampling of the Brillouin zone.
 
 The symmetry of the system and perturbation will allow to decrease this
 sampling to one quarter of the Brillouin zone. E.g. with the k-point sampling
