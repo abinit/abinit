@@ -215,11 +215,11 @@ of these excitations are mentioned (size of the contribution then identification
 It is seen that the first and second excitations are degenerate (numerical
 inaccuracies accounts for the meV difference), and mainly comes from the first
 and second Kohn-Sham energy differences (between occupied state 5 and
-unoccupied states 6 and 7). This is also true for the third excitation, that
+unoccupied states 6 and 7). This is also true for the fourth excitation, that
 comes from the third Kohn-Sham energy difference (between occupied state 5 and
 unoccupied state 8). The quadruplet of Kohn-Sham energy differences, that was
 observed at 3.60026E-01 Ha, has been split into one doublet and two singlets,
-with numbers 4 (the lowest singlet), 5-6 (the doublet) while the last singlet
+with numbers 3 (the lowest singlet), 5-6 (the doublet) while the last singlet
 is not present in the 20 lowest excitations.
 
 The list of oscillator strength is then provided.
@@ -268,8 +268,8 @@ singlet excitation energies, with corresponding quantum numbers (that we
 derive from the knowledge of the Kohn-Sham states quantum numbers):
 
     9.40 eV   m=+1,-1  even parity (Pi_g state)
-    9.80 eV   m=0      even parity (Sigma_g state)
-    10.03 eV   m=0      odd parity  (Sigma_u state)
+    9.80 eV   m=0      odd parity  (Sigma_u state)
+    10.03 eV  m=0      even parity (Sigma_g state)
     10.44 eV  m=+2,-2  odd parity  (Delta_u state)
     10.97 eV  m=+1,-1  odd parity  (Pi_u state)
 
@@ -303,7 +303,7 @@ and the lowest-lying experimental spin-triplet excitations energies are:
 In several cases, the agreement is quite satisfactory, on the order of 0.1-0.2
 eV. However, there are also noticeable discrepancies. Indeed, we have to understand, in our simulation:
 
-  * The appearance of the spin-singlet $^1\Sigma_g$ state at 9.80 eV (Spin-singlet state 2)
+  * The appearance of the spin-singlet $^1\Sigma_g$ state at 10.03 eV (Spin-singlet state 3)
   * The inversion between the spin-triplet $^3\Pi_g$ and $^3\Sigma_u$ states (Spin-triplet states 1 and 2)
   * The appearance of the spin-triplet $^3\Sigma_g$ state at 9.35 eV (Spin-triplet state 4)
 
@@ -325,22 +325,22 @@ We will start with the number of unoccupied states. The only input parameter
 to be changed in the input file is the value of nband2. The following results
 are obtained, for nband2 = 12, 30, 60, 100 and 150 (Energies given in eV):
 
-    Singlet 1 :  9.47   9.44   9.39   9.36   9.35
-    Singlet 2 :  9.86   9.74   9.68   9.66   9.66
-    Singlet 3 :  9.91   9.91   9.91   9.91   9.91
-    Singlet 4 : 10.46  10.45  10.44  10.44  10.43
-    Singlet 5 : 10.79  10.79  10.79  10.79  10.79
-    Triplet 1 :  7.85   7.84   7.83   7.82   7.82
-    Triplet 2 :  8.16   8.08   8.03   8.00   8.00
-    Triplet 3 :  9.08   9.07   9.05   9.05   9.04
-    Triplet 4 :  9.16   9.16   9.15   9.15   9.15
-    Triplet 5 :  9.91   9.91   9.91   9.91   9.91
+    Singlet 1 :  9.40   9.37   9.33   9.30   9.28
+    Singlet 2 :  9.80   9.80   9.80   9.79   9.80
+    Singlet 3 : 10.03   9.91   9.85   9.83   9.83
+    Singlet 4 : 10.44  10.43  10.43  10.42  10.42
+    Singlet 5 : 10.97  10.97  10.97  10.97  10.97
+    Triplet 1 :  7.75   7.75   7.73   7.73   7.72
+    Triplet 2 :  8.06   8.02   7.98   7.96   7.95
+    Triplet 3 :  8.99   8.97   8.96   8.96   8.95
+    Triplet 4 :  9.35   9.34   9.34   9.34   9.34
+    Triplet 5 :  9.80   9.80   9.80   9.80   9.80
 
 You might try to obtain one of these...
 
-The computation with nband2 = 100 takes
-about 7 minutes on a 2.8 GHz PC, and gives a result likely converged within
-0.01 eV. Let's have a look at these data. Unfortunately, none of the above-
+The computation with nband2 = 100 takes a bit more than 1 minute,
+and gives a result likely converged within 0.01 eV.
+Let us have a look at these data. Unfortunately, none of the above-
 mentioned discrepancies with experimental data is resolved, although the
 difference between the first and second spin-triplet states decreases
 significantly. Although we see that at least 60 bands are needed to obtain
@@ -349,49 +349,49 @@ to understand the most important discrepancies, while keeping the CPU time to a 
 
 We next try to increase the cut-off energy. Again, this is fairly easy. One
 can e.g. set up a double dataset loop. The following results are obtained, for
-ecut = 25, 35, 45, 55, 65, and 75 Ha:
+ecut = 25, 30, 35 and 45 Ha:
 
-    Singlet 1 :  9.47   9.41   9.39   9.36   9.36
-    Singlet 2 :  9.86   9.83   9.78   9.76   9.76
-    Singlet 3 :  9.91   9.97  10.01  10.02  10.03
-    Singlet 4 : 10.46  10.37  10.32  10.30  10.29
-    Singlet 5 : 10.79  10.87  10.90  10.91  10.92
-    Triplet 1 :  7.85   7.79   7.76   7.74   7.73
-    Triplet 2 :  8.16   8.02   7.94   7.92   7.91
-    Triplet 3 :  9.08   8.98   8.92   8.90   8.89
-    Triplet 4 :  9.16   9.28   9.33   9.34   9.34
-    Triplet 5 :  9.91   9.83   9.78   9.77   9.76
+    Singlet 1 :  9.40   9.37   9.36   9.36 
+    Singlet 2 :  9.80   9.78   9.77   9.77 
+    Singlet 3 : 10.03  10.03  10.04  10.04 
+    Singlet 4 : 10.46  10.37  10.32  10.30
+    Singlet 5 : 10.97  10.98  10.98  10.98
+    Triplet 1 :  7.75   7.72   7.72   7.72 
+    Triplet 2 :  8.09   8.06   8.06   8.06
+    Triplet 3 :  8.99   8.97   8.96   8.96
+    Triplet 4 :  9.35   9.35   9.35   9.35
+    Triplet 5 :  9.80   9.78   9.77   9.77  
 
 You might try to obtain one of these...
 
-The computation with ecut=75 takes
-about 90 secs on a 2.8 GHz PC, and gives a result likely converged within 0.01
-eV. Let us have a look at these data. Concerning the discrepancies with the
-experimental results, we see that the position of the second spin-singlet
-state has even worsened, the difference between the first and second spin-
-triplet states decreases, so that, together with an increase of nband, their
-order might become the correct one, and the fourth spin-triplet state energy
-has increased, but not enough.
+The computation with ecut=30 takes a couple of seconds
+and gives a result likely converged within 0.01 eV. 
+The modifications with respect to the results with ecut=25 Ha are quite small.
 
 We finally examine the effect of the cell size. Again, this is fairly easy.
+e keep 12 bands, but stick to ecut=30 Ha.
 One can e.g. set up a double dataset loop. The following results are obtained,
-for acell = (6 5 5), (7 6 6), (8 7 7), (9 8 8), (10 9 9) and (12 11 11):
+for acell = (6 5 5), (8 7 7), (10 9 9), (12 11 11), (14 13 13), (16 15 15) and (20 19 19):
 
-    Singlet 1 :  9.47   9.37   9.33   9.33   9.33   9.33
-    Singlet 2 :  9.86   9.78   9.84   9.91   9.96  10.03
-    Singlet 3 :  9.91   9.88   9.85   9.85   9.85   9.85
-    Singlet 4 : 10.46  10.41  10.38  10.37  10.37  10.37
-    Singlet 5 : 10.79  10.98  11.14  11.27  11.19  11.04
-    Triplet 1 :  7.85   7.75   7.72   7.71   7.72   7.72
-    Triplet 2 :  8.16   8.18   8.18   8.18   8.19   8.20
-    Triplet 3 :  9.08   9.07   9.06   9.06   9.06   9.06
-    Triplet 4 :  9.16   9.36   9.55   9.68   9.78   9.90
-    Triplet 5 :  9.91   9.88   9.85   9.85   9.85   9.85
+    Singlet 1 :  9.37   9.25   9.24   9.24   9.25   9.25   9.25
+    Singlet 2 :  9.78   9.73   9.72   9.72   9.72   9.72   9.72
+    Singlet 3 : 10.03  10.04  10.18  10.26  10.29  10.32  10.34
+    Singlet 4 : 10.42  10.35  10.34  10.34  10.34  10.34  10.35
+    Singlet 5 : 10.98  11.34  11.40  11.12  10.95  10.84  10.70
+    Triplet 1 :  7.72   7.60   7.60   7.60   7.60   7.60   7.60
+    Triplet 2 :  8.06   8.07   8.07   8.08   8.08   8.08   8.08
+    Triplet 3 :  8.97   8.94   8.94   8.94   8.94   8.94   8.94
+    Triplet 4 :  9.35   9.73   9.72   9.72   9.72   9.72   9.72
+    Triplet 5 :  9.78   9.75  10.00  10.12  10.18  10.22  10.27
 
 Obviously, the cell size plays an important role in the spurious appearance of
 the states, that was remarked when comparing against experimental data.
-Indeed, the singlet 2 and triplet 4 states energy increases strongly with the
+Indeed, the singlet 3 and triplet 4 states energy increases strongly with the
 cell size, while all other states quickly stabilize (except the still higher singlet 5 state).
+Actually, the singlet 3 and 4 switch between (16 15 15) and (20 19 19),
+and the triplet 4 and 5 switch between (6 5 5) and (8 7 7)  ...
+The presence of the singlet 3 state (Sigma_g) in the three lowest ones,
+an the triplet 4 state (Sigma_g) were two of our discrepancies.
 
 There is one lesson to be learned from that convergence study: the
 convergence of different states can be quite different. Usually, converging
@@ -399,34 +399,34 @@ the lower excited states do not require too much effort, while it is quite
 difficult, especially concerning the supercell size, to converge higher states.
 
 At this stage, we will simply stop this convergence study, and give the
-results of an ABINIT calculation using ecut 45 Hartree, acell 12 11 11, and 30
-bands (not fully converged, though!), then compare the results with other
+results of an ABINIT calculation using ecut 30 Hartree, acell 10 9 9, and 100
+bands, focusing only on those states already converged, then compare the results with other
 LDA/TDLDA results (from [[cite:Casida1998]]) and experimental results:
 
                        present  Casida experimental
-    Singlet Pi_g      :  9.25    9.05     9.31
+    Singlet Pi_g      :  9.20    9.05     9.31
     Singlet Sigma_u-  :  9.72    9.63     9.92
-    Singlet Delta_u   : 10.22   10.22    10.27
-    Triplet Sigma_u+  :  7.95    7.85     7.75
-    Triplet Pi_g      :  7.64    7.54     8.04
-    Triplet Delta_u   :  8.89    8.82     8.88
+    Singlet Delta_u   : 10.33   10.22    10.27
+    Triplet Sigma_u+  :  7.99    7.85     7.75
+    Triplet Pi_g      :  7.59    7.54     8.04
+    Triplet Delta_u   :  8.92    8.82     8.88
     Triplet Sigma_u-  :  9.72    9.63     9.67
 
 Our calculation is based on pseudopotentials, while Casida's calculation is an
-all-electron one. This fact might account for the 0.1-0.2 eV discrepancy
-between both calculations (it is of course the user's responsibility to test
+all-electron one. This fact might account for the discrepancy
+between both calculations (maximal 0.15 eV - it is of course the user's responsibility to test
 the influence of different pseudopotentials on his/her calculations). The
 agreement with experimental data is on the order of 0.2 eV, with the exception
-of the $^3\Pi_g$ state (0.4 eV). In particular, we note that LDA/TDLDA is
-not able to get the correct ordering of the lower two triplet states ... One
+of the $^3\Pi_g$ state (0.45 eV). In particular, we note that LDA/TDLDA is
+not able to get the correct ordering of the lowest two triplet states ... One
 of our problems was intrinsic to the LDA/TDLDA approximation ...
 
 ## The choice of the exchange-correlation potential and kernel
 
 As emphasized in [[cite:Casida1998]], choosing a different functional for the self-consistent part
-(XC potential) and the generation of the coupling matrix (XC
-kernel) can give a better description of the higher-lying states. Indeed, a
-potential with a -1/r tail (unlike the LDA or GGA) like the van Leeuwen-Baerends one [[cite:VanLeeuwen1994]],
+(XC potential) and the generation of the coupling matrix (XC kernel) 
+can give a better description of the higher-lying states. 
+Indeed, a potential with a -1/r tail (unlike the LDA or GGA) like the van Leeuwen-Baerends one [[cite:VanLeeuwen1994]],
 can reproduce fairly well the ionisation energy, giving a much
 better description of the Rydberg states. Still, the LDA kernel works pretty well.
 
