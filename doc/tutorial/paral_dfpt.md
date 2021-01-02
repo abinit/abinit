@@ -303,12 +303,14 @@ k points in the corresponding irreducible Brillouin zone. With the sampling 8
 8 1, there will be 32 k points in the irreducible Brillouin zone for the DFPT
 case. There are 120 bands. Note that the value of [[ecut]] that is used in the
 present tutorial is too low to obtain physical results (it should be around 40 Hartree).
+Also, only one atomic displacement is considered, so that the phonon frequencies
+delivered at the end of the run are meaningless.
 
 As in the previous case, a preparatory ground-state calculation is needed.
 
 The input files are provided, in the directory *\$ABI_TESTS/tutoparal/Input*.
-The preparatory step is driven by *tdfpt_03.in*. The real
-(=DFPT) test case is driven by *tdfpt_04.in*. The
+The preparatory step is driven by *tdfpt_03.abi*. The real
+(=DFPT) test case is driven by *tdfpt_04.abi*. The
 reference output files are present in *\$ABI_TESTS/tutoparal/Refs*:
 *tdfpt_03_MPI24.abo* and *tdfpt_04_MPI24.abo*. The naming convention is such that the
 number of cores used to run them is added after the name of the test: the
@@ -330,7 +332,6 @@ then copy the output of the ground-state calculation so that it can be used as
 the input of the DFPT calculation:
 
     cp tdfpt_03.o_WFK tdfpt_04.i_WFK
-    cp tdfpt_03.o_WFK tdfpt_04.i_WFQ
 
 and launch the calculation:
 
