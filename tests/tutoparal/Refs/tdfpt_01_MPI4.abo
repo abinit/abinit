@@ -1,6 +1,6 @@
 
 .Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin18.7.0_gnu9.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat  2 Jan 2021.
-- ( at 13h11 )
+- ( at 14h42 )
   
-- input  file    -> /Users/gonze/_Research/ABINIT_git/beauty/tests/Test_suite/tutoparal_tdfpt_01_MPI4-tdfpt_02_MPI4/tdfpt_01.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Test_suite/tutoparal_tdfpt_01_MPI4-tdfpt_02_MPI4/tdfpt_01.abi
 - output file    -> tdfpt_01_MPI4.abo
 - root for input  files -> tdfpt_01_MPI4i
 - root for output files -> tdfpt_01_MPI4o
@@ -239,8 +239,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10256
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -273,10 +273,10 @@ tolerances: {tolvrs: 1.00E-18, }
  ETOT  3  -2.3617437502414    -4.690E-06 8.338E-04 5.086E-05
  ETOT  4  -2.3617437778410    -2.760E-08 2.087E-04 1.868E-07
  ETOT  5  -2.3617437779023    -6.130E-11 1.992E-04 2.040E-09
- ETOT  6  -2.3617437779033    -9.668E-13 5.929E-05 3.595E-12
- ETOT  7  -2.3617437779033    -7.994E-15 5.211E-05 1.651E-14
- ETOT  8  -2.3617437779033    -4.441E-15 1.414E-05 3.672E-18
- ETOT  9  -2.3617437779033     6.217E-15 1.220E-05 1.067E-20
+ ETOT  6  -2.3617437779033    -9.628E-13 5.929E-05 3.595E-12
+ ETOT  7  -2.3617437779033    -1.021E-14 5.211E-05 1.651E-14
+ ETOT  8  -2.3617437779033    -2.665E-15 1.414E-05 3.672E-18
+ ETOT  9  -2.3617437779033     5.329E-15 1.220E-05 1.067E-20
 
  At SCF step    9       vres2   =  1.07E-20 < tolvrs=  1.00E-18 =>converged.
 
@@ -296,7 +296,7 @@ lattice_vectors:
 lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0802030E+02
-convergence: {deltae:  6.217E-15, res2:  1.067E-20, residm:  1.220E-05, diffor: null, }
+convergence: {deltae:  5.329E-15, res2:  1.067E-20, residm:  1.220E-05, diffor: null, }
 etotal    :  -2.36174378E+00
 entropy   :   0.00000000E+00
 fermie    :   2.89607287E-01
@@ -351,15 +351,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.71684995935622E-01
-hartree             :  3.67933265906829E-03
+kinetic             :  8.71684995935623E-01
+hartree             :  3.67933265906833E-03
 xc                  : -1.11967000370575E+00
 Ewald energy        : -2.72908456792489E+00
 psp_core            :  1.59523320803172E-02
 local_psp           :  1.71592256657905E-01
 non_local_psp       :  4.24099570999390E-01
 internal            : -2.36174608329833E+00
-'-kT*entropy'       :  2.30539501769843E-06
+'-kT*entropy'       :  2.30539501769411E-06
 total_energy        : -2.36174377790331E+00
 total_energy_eV     : -6.42663165194937E+01
 band_energy         :  3.74786472124707E-01
@@ -630,10 +630,10 @@ P           mkmem          15
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.1  wall=          8.2
++Overall time at end (sec) : cpu=          4.3  wall=          4.3
