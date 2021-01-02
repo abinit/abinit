@@ -88,12 +88,6 @@ inp_files = [
 "tnlo_3.abi",
 "tnlo_4.abi",
 "tnlo_5.abi",
-"tnlo_6.abi",
-"tnlo_7.abi",
-"tnlo_8.abi",
-"tnlo_9.abi",
-"tnlo_10.abi",
-"tnlo_11.abi",
 #
 "toptic_1.abi",
 "toptic_2.abi",
