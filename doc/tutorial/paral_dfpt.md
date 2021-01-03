@@ -291,7 +291,7 @@ for a speed-up of 19.7 ..
 **3.1.** This test, with 29 atoms, is slower, but scales better than the Al
 FCC case. It consists in the computation of one perturbation at qpt 0.0 0.25
 0.0 for a 29 atom slab of barium titanate, artificially terminated by a double
-$TiO_2$ layer on each face, with a reasonable k-point sampling of the Brillouin zone.
+TiO<sub>2</sub> layer on each face, with a reasonable k-point sampling of the Brillouin zone.
 
 The symmetry of the system and perturbation will allow to decrease this
 sampling to one quarter of the Brillouin zone. E.g. with the k-point sampling
@@ -345,26 +345,28 @@ with 24 computing cores, the timing section delivers:
     - For major independent code sections, cpu and wall times (sec),
     - as well as % of the total time and number of calls
 
-    - routine                         cpu     %       wall     %      number of calls
+    -<BEGIN_TIMER mpi_nprocs = 24, omp_nthreads = 1, mpi_rank = world>
+    - cpu_time =        3826.4, wall_time =        3828.0
+    -
+    - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
     -                                                                  (-1=no count)
-    - projbd                      3046.599  34.0   3065.259  34.0         171639
-    - fourwf%(pot)                2545.342  28.4   2561.313  28.4         103098
-    - nonlop(apply)               1059.279  11.8   1066.034  11.8          85818
-    - fourwf%(G->r)                531.322   5.9    534.929   5.9          50112
-    - vtorho3:synchro              444.450   5.0    448.598   5.0            576
-    - nonlop(forces)               195.017   2.2    195.487   2.2         100800
-    - newkpt(excl. rwwf   )        179.142   2.0    179.185   2.0            -32
-    - vtowfk3(contrib)             137.486   1.5    137.878   1.5            -32
-    - pspini                        97.276   1.1     99.901   1.1             32
+    - projbd                      1238.539  32.4   1239.573  32.4         278400      -1.00        1.00       1.00
+    - nonlop(apply)               1012.783  26.5   1012.982  26.5         139200      -1.00        1.00       1.00
+    - fourwf%(pot)                 544.047  14.2    544.201  14.2         167040      -1.00        1.00       1.00
+    - dfpt_vtorho:MPI              450.196  11.8    450.170  11.8            720      -1.00        1.00       1.00
+    - nonlop(forces)               131.081   3.4    131.129   3.4         108576      -1.00        1.00       1.00
+    - fourwf%(G->r)                107.885   2.8    107.930   2.8          55680      -1.00        1.00       1.00
+    - pspini                        54.945   1.4     54.943   1.4             24      -1.00        1.00       1.00
 
     <...>
 
-    - 45   others                    0.000   0.0      0.000   0.0
+    - others (99)                  -98.669  -2.6    -99.848  -2.6             -1      -1.00        0.99       0.99
+    -<END_TIMER>
 
-    - subtotal                    8760.405  97.8   8811.874  97.8
+    - subtotal                    3569.873  93.3   3570.325  93.3                                  1.00       1.00
 
-You will notice that the sum of the major independent code sections is again
-very close to 100%. You might now explore the behaviour of the CPU time for
+You will notice that the sum of the major independent code sections is reasonably
+close to 100%. You might now explore the behaviour of the CPU time for
 different numbers of compute cores (consider values below and above 24
 processors). Some time-consuming routines will benefit from the parallelism, some other will not.
 
@@ -375,10 +377,9 @@ perturbation) times nband is 8*120=960. Of course, the total speed-up will
 saturate well below this value, as there are some non-parallelized sections of the code.
 
 In the above-mentioned list, the kpoint+band parallelism cannot be exploited
-(or is badly exploited) in several sections of the code : "vtorho3:synchro",
-about 5 percents of the total time of the run on 24 processors, "newkpt(excl.rwwf)",
-about 2 percents, vtowfk3(contrib), about 1.5 percent, "pspini", about
-1 percent. This amounts to about 10% of the total, and, according to Amdahl's
+(or is badly exploited) in several sections of the code : "dfpt_vtorho:MPI",
+about 12 percents of the total time of the run on 24 processors, "pspini", about 1.4 percent. 
+This amounts to about 1/8 of the total, and, according to Amdahl's
 law, the saturation will happen soon, with less than 100 processors.
 
 **3.2.** A better parallelism can be seen if the number of k-points is brought
@@ -399,7 +400,7 @@ practice the DFPT calculation by varying the number of computing cores. For
 the latter, you could even consider varying the number of self-consistent
 iterations to see the initialisation effects (small value of nstep), or target
 a value giving converged results ([[nstep]] 50 instead of [[nstep]] 18). The energy
-cut-off might also be increased (e.g. ecut 40 Hartree gives a much better
+cut-off might also be increased (e.g. [[ecut]] 40 Hartree gives a much better
 value). Indeed, with a large value of k points, and large value of nstep, you
 should be able to obtain a speed-up of more than one hundred for the DFPT
 calculation, when compared to a sequential run (see below). Keep track of the
