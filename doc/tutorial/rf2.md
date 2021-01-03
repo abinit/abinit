@@ -435,7 +435,7 @@ You can copy the files *trf2_7.abi* from *\$ABI_TESTS/tutorespfn/Input* to *Work
 and have a look at them.
 The same DDB as for trf2_4 and trf2_5 is used, namely *trf2_3.ddb.out*.
 
-{% dialog tests/tutorespfn/Input/trf2_7.files tests/tutorespfn/Input/trf2_7.in %}
+{% dialog tests/tutorespfn/Input/trf2_7.files tests/tutorespfn/Input/trf2_7.abi %}
 
 The following additional input variables are present:
 
