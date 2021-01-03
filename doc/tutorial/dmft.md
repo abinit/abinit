@@ -48,8 +48,6 @@ Several parameters (both physical and technical) needs to be discussed for a DFT
   * The definition of the Coulomb and exchange interaction U and J are done as in DFT+_U_ through the variables [[upawu]] and [[jpawu]].     They could be computed with the cRPA method, also available in ABINIT. The value of U and J should in principle depend
     on the definition of correlated orbitals. In this tutorial, U and J will be seen as parameters, as in the DFT+_U_ approach.
     As in DFT+_U_, two double counting methods are available (see the [[dmft_dc]] input variable).
-    Note that in version 7.10.5 (but not in later versions) [[jpawu]] = 0 is required if the density matrix
-    in the correlated subspace is not diagonal.
 
   * The choice of the double counting correction. The current default choice in ABINIT is ([[dmft_dc]] = 1)
     which corresponds to the full localized limit.
@@ -322,9 +320,9 @@ once before doing again the DFT Loop (cf Fig. 1 of [[cite:Amadon2012]]). At the 
 of the calculation, the occupation matrix is written and is:
 
               -- polarization spin component  1
-            0.16812   0.00000  -0.00000
-            0.00000   0.16812  -0.00000
-           -0.00000  -0.00000   0.16812
+            0.16811   0.00000  -0.00000
+            0.00000   0.16811  -0.00000
+           -0.00000  -0.00000   0.16811
 
 We can see that the total number of electron is very close to one and it does
 not change much as a function of iterations. As an output of the calculation,
@@ -347,8 +345,8 @@ on _Regression_ and you can do a 4th order fit as:
 
 ![self](dmft_assets/self.jpg)
 
-The slope at zero frequency obtained is 0.81. From this number, the
-quasiparticle renormalisation weight can be obtained using Z=1/(1+0.81)=0.55.
+The slope at zero frequency obtained is 0.82. From this number, the
+quasiparticle renormalisation weight can be obtained using Z=1/(1+0.82)=0.55.
 
 ### 3.4. The Green's function for correlated orbitals
 
@@ -471,18 +469,18 @@ are taken into account: you have the occupation matrix which is
 
       ------ Symetrised Occupation
 
-            0.23573  -0.00000  -0.00000
-           -0.00000   0.23573  -0.00000
-           -0.00000  -0.00000   0.23573
+            0.22504  -0.00000  -0.00000
+           -0.00000   0.22504  -0.00000
+           -0.00000  -0.00000   0.22504
 
 
 and the norm is:
 
       ------ Symetrised Norm
 
-            0.78223   0.00000  -0.00000
-            0.00000   0.78223  -0.00000
-           -0.00000  -0.00000   0.78223
+            0.73746   0.00000  -0.00000
+            0.00000   0.73746  -0.00000
+           -0.00000  -0.00000   0.73746
 
 Let us now compare the total number of electron and the norm with the two energy window:
 
@@ -491,9 +489,9 @@ Let us now compare the total number of electron and the norm with the two energy
 Energy window:                           |   _t<sub>2g</sub>_-like bands |        _t<sub>2g</sub>_-like+ _O-p_ -like bands
 -----------------------------------------|-------------------------------|---------------------------------------------------
 [[dmftbandi]]/[[dmftbandf]]:                     |    21/23                      | 12/23
-Norm:                                    |  0.66                         |   0.78
-LDA Number of electrons (before ⊥):   |  0.66(=0.11*6)                |  1.42(=0.235*6)
-LDA Number of electrons (after  ⊥):   |    1.02                       |  1.81
+Norm:                                    |  0.63                         |   0.78
+LDA Number of electrons (before ⊥):   |  0.63(=0.105*6)                |  1.35(=0.235*6)
+LDA Number of electrons (after  ⊥):   |    1.00                       |  1.77
 
 </center>
 
@@ -506,16 +504,13 @@ means that by selecting bands 12-23 in the calculation, we took into account
 Sham bands. Moreover, after orthonormalization, you can check that the
 difference between LDA numbers of electrons is still large (1.02 versus 1.81),
 even if the orthonormalization effect is larger on the small windows case.
-Note that in this particular case, with diagonal matrix, the number of
-electrons before and after orthonormalization are simply linked by
-n_before/Norm=n_after, i.e. 1.81 ≈1.42/0.78 and 1.02≈0.66/0.66
 
 At the end of the DFT+DMFT calculation, the occupation matrix is written and is
 
               -- polarization spin component  1
-            0.29450   0.00000   0.00000
-            0.00000   0.29450   0.00000
-            0.00000   0.00000   0.29450
+            0.29313   0.00000   0.00000
+            0.00000   0.29313   0.00000
+            0.00000   0.00000   0.29313
 
 Similarly to the previous calculation, the spectral function can be plotted
 using the Maximum Entropy code: we find a spectral function with an
@@ -545,16 +540,16 @@ expressions are equals also in DFT+DMFT). So after gathering the data:
 
  Iteration |     Internal Energy (Ha)
 -----------|--------------------------
-      1    |  -1.51483736718814E+02
-      2    |  -1.51480860837124E+02
-      3    |  -1.51479980721122E+02
-      4    |  -1.51479456233951E+02
-      5    |  -1.51479511038784E+02
-      6    |  -1.51479570943715E+02
-      7    |  -1.51479487485907E+02
-      8    |  -1.51479539558451E+02
-      9    |  -1.51479457525225E+02
-     10    |  -1.51479582334490E+02
+      1    |  -1.51857850339126E+02
+      2    |  -1.51986727402835E+02
+      3    |  -1.51895311846530E+02
+      4    |  -1.51906820876597E+02
+      5    |  -1.51891956860157E+02
+      6    |  -1.51891135879190E+02
+      7    |  -1.51892587329592E+02
+      8    |  -1.51891607809905E+02
+      9    |  -1.51891447186423E+02
+     10    |  -1.51892343918492E+02
 
 </center>
 
@@ -572,8 +567,7 @@ than the tolerance, the calculation will never converge. So if a given
 precision on the total energy is expected, a practical solution is to increase
 the number of Quantum Monte Carlo steps ([[dmftqmc_n]]) in order to lower the
 statistical noise. Also another solution is to do an average over the last
-values of the internal energy. Note that in version 7.10.5, only the Internal
-energy has a physical meaning in DFT+DMFT and not Etotal or ETOT.
+values of the internal energy. 
 
 ## 6 Electronic Structure of SrVO3 in DFT+DMFT: Equilibrium volume
 
@@ -582,22 +576,21 @@ We focus now on the total energy. Create a new input file, *tdmft_4.abi*:
     cp tdmft_3.abi tdmft_4.abi
 
 And use [[acell]] = 7.1605 instead of 7.2605. Relaunch the calculation and note the
-Internal energy (grep Internal tdmft_4.abo).
+internal energy (grep internal tdmft_4.abo).
 
-Redo another calculation with [[acell]] = 7.00. Then extract the LDA Internal energy
-and the DMFT Internal energy (grep Internal tdmft_5.abo).
+Redo another calculation with [[acell]] = 7.00. Plot DMFT energies as a function of acell.
 
 <center>
 
-acell  | Internal energy LDA  |  Internal energy DMFT
--------|----------------------|-------------------------
-7.0000 |  -151.51517          |     -151.4797
-7.1605 |  -151.52399          |     -151.4877
-7.2605 |  -151.51515          |     -151.4795
+acell  |  Internal energy DMFT
+-------|-------------------------
+7.0000 |     -151.8908
+7.1605 |     -151.8978
+7.2605 |     -151.8920
 
 </center>
 
-and then plot DMFT and LDA energies as a function of acell. You will notice
+You will notice
 that the equilibrium volume is very weakly modified by the strong correlations is this case.
 
 ## 7 Electronic Structure of SrVO3: k-resolved Spectral function
