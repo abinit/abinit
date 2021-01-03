@@ -252,21 +252,22 @@ Note:
 So, you should set up in your input file, for the first dataset, a usual SCF calculation
 in which you output the density ([[prtden]] 1), and, for the second dataset:
 
-* fix [[iscf]] to -2, to make a non-self-consistent calculation;
-* define [[getden]] -1, to take the output density of dataset 1;
-* set [[nband]] to 8;
+* fix [[iscf]] to -2, to make a non-self-consistent calculation,
+* define [[getden]] -1, to take the output density of dataset 1,
+* set [[nband]] to 8,
 * set [[kptopt]] to -3, to define three segments in the brillouin Zone;
-* set [[ndivsm]] to 10
+* set [[ndivsm]] to 10,
 * set [[kptbounds]] to
 
         0.5  0.0  0.0 # L point
         0.0  0.0  0.0 # Gamma point
         0.0  0.5  0.5 # X point
-        1.0  1.0  1.0 # Gamma point in another cell.
+        1.0  1.0  1.0 # Gamma point in another cell
 
-* set [[enunit]] to 1, in order to have eigenenergies in eV
+* set [[enunit]] to 1, in order to have eigenenergies in eV,
 * the only tolerance criterion admitted for non-self-consistent calculations is [[tolwfr]].
   You should set it to 1.0d-10 (or so), and suppress [[toldfe]].
+* The [[nstep]] parameter was set to 20 to make sure convergence can be reached.  
 
 The input file *$ABI_TESTS/tutorial/Input/tbase3_5.abi* is an example,
 
@@ -278,15 +279,15 @@ while *$ABI_TESTS/tutorial/Refs/tbase3_5.abo* is a reference output file.
 
 You should find the band structure starting at (second dataset):
 
-     Eigenvalues (   eV  ) for nkpt=  40  k points:
-     kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
-      -3.78815  -1.15872   4.69668   4.69668   7.38795   9.23867   9.23867  13.45707
-     kpt#   2, nband=  8, wtk=  1.00000, kpt=  0.4500  0.0000  0.0000 (reduced coord)
-      -3.92759  -0.95774   4.71292   4.71292   7.40692   9.25561   9.25561  13.48927
-     kpt#   3, nband=  8, wtk=  1.00000, kpt=  0.4000  0.0000  0.0000 (reduced coord)
-      -4.25432  -0.44393   4.76726   4.76726   7.46846   9.31193   9.31193  13.57737
-     kpt#   4, nband=  8, wtk=  1.00000, kpt=  0.3500  0.0000  0.0000 (reduced coord)
-      -4.64019   0.24941   4.85732   4.85732   7.56855   9.38323   9.38323  13.64601
+    Eigenvalues (   eV  ) for nkpt=  39  k points:
+    kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
+    -4.83930   -2.21100    3.66138    3.66138    6.36920    8.18203    8.18203   12.44046
+    kpt#   2, nband=  8, wtk=  1.00000, kpt=  0.4500  0.0000  0.0000 (reduced coord)
+    -4.97880   -2.00874    3.67946    3.67946    6.39165    8.20580    8.20580   12.47444
+    kpt#   3, nband=  8, wtk=  1.00000, kpt=  0.4000  0.0000  0.0000 (reduced coord)
+    -5.30638   -1.49394    3.73328    3.73328    6.45364    8.26444    8.26444   12.56455
+    kpt#   4, nband=  8, wtk=  1.00000, kpt=  0.3500  0.0000  0.0000 (reduced coord)
+    -5.69306   -0.79729    3.82286    3.82286    6.55602    8.33970    8.33970   12.65080
      ....
 
 One needs a graphical tool to represent all these data.
@@ -295,25 +296,25 @@ In a separate file (*_EIG*), you will find the list of k-points and the eigenene
 
 Even without a graphical tool we will have a quick look at the values at L, $\Gamma$, X and $\Gamma$ again:
 
-     kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
-      -3.78815  -1.15872   4.69668   4.69668   7.38795   9.23867   9.23867  13.45707
+    kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
+    -4.83930   -2.21100    3.66138    3.66138    6.36920    8.18203    8.18203   12.44046
 
-     kpt#  11, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-      -6.17005   5.91814   5.91814   5.91814   8.44836   8.44836   8.44836   9.17755
+    kpt#  11, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+    -7.22396    4.87519    4.87519    4.87519    7.42159    7.42159    7.42159    8.26902
 
-     kpt#  23, nband=  8, wtk=  1.00000, kpt=  0.0000  0.5000  0.5000 (reduced coord)
-      -1.96393  -1.96393   3.00569   3.00569   6.51173   6.51173  15.95524  15.95524
+    kpt#  23, nband=  8, wtk=  1.00000, kpt=  0.0000  0.5000  0.5000 (reduced coord)
+    -3.01262   -3.01262    1.97054    1.97054    5.46033    5.46033   15.02324   15.02382
 
-     kpt#  39, nband=  8, wtk=  1.00000, kpt=  1.0000  1.0000  1.0000 (reduced coord)
-      -6.17005   5.91814   5.91814   5.91814   8.44836   8.44836   8.44836   9.17755
+    kpt#  39, nband=  8, wtk=  1.00000, kpt=  1.0000  1.0000  1.0000 (reduced coord)
+    -7.22396    4.87519    4.87519    4.87519    7.42159    7.42159    7.42159    8.26902
 
 The last $\Gamma$ is exactly equivalent to the first $\Gamma$.
 It can be checked that the top of the valence band
-is obtained at $\Gamma$ (=5.91814 eV). The width of the valence band is 12.09 eV, the lowest unoccupied state at X
-is 0.594 eV higher than the top of the valence band, at $\Gamma$.
+is obtained at $\Gamma$ (=4.87519 eV). The width of the valence band is 12.1 eV, the lowest unoccupied state at X
+is 0.585 eV higher than the top of the valence band, at $\Gamma$.
 
 The Si is described as an indirect band gap material (this is correct),
-with a band-gap of about 0.594 eV (this is quantitatively quite wrong: the experimental value 1.17 eV is at 25 degree Celsius).
+with a band-gap of about 0.585 eV (this is quantitatively quite wrong: the experimental value 1.17 eV is at 25 degree Celsius).
 The minimum of the conduction band is even slightly displaced with respect to X, see kpt # 21.
 This underestimation of the band gap is well-known (the famous DFT band-gap problem).
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
