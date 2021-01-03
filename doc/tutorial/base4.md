@@ -24,21 +24,20 @@ This tutorial should take about 1 hour and 30 minutes.
 *Before beginning, you might consider to work in a different subdirectory, as for tutorials 1, 2 or 3.
 Why not Work4?*
 
-The file *tbase4_x.files* lists the file names and root names.
-You can copy it in the *Work4* directory (and change it, as usual).
-You can also copy the file *tbase4_1.in* in *Work4*.
+
+The following commands will move you to your working directory, create the *Work4* directory, and move you into that directory as you did in the previous tutorials.
+Then, we copy the file *tbase4_1.abi* inside the *Work4* directory. The commands are:
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work4
 cd Work4
-cp ../tbase4_x.files .  # You will need to edit this file.
-cp ../tbase4_1.in .
+cp ../tbase4_1.abi .
 ```
 
-*tbase4_1.in* is our input file. You should edit it and read it carefully,
+*tbase4_1.abi* is our input file. You should edit it and read it carefully,
 
-{% dialog tests/tutorial/Input/tbase4_x.files tests/tutorial/Input/tbase4_1.in %}
+{% dialog tests/tutorial/Input/tbase4_1.abi %}
 
 and then a look at the following new input variables:
 
@@ -51,17 +50,17 @@ Note also the following:
    you should do a convergence test with respect to *ecut*.
    Here, a suitable *ecut* is given to you in order to save time.
    It will give a lattice parameter that is 0.2% off of the experimental value.
-   Note that this is the *softer* pseudopotential of those that we have used until now: the *01h.pspgth* for H needed 30 Ha
-   (it was rather hard), the *14si.pspnc* for Si needed 8 Ha. Se the end of this page for a
+   Note that this is the *softest* pseudopotential of those that we have used until now: the *01h.pspgth* for H needed 30 Ha
+   (it was rather hard), the *Si.psp8* for Si needed 12 Ha. See the end of this page for a
    discussion of *soft* and *hard* pseudopotentials.
 
 2. The input variable [[diemac]] has been suppressed.
-   Aluminum is a metal, and the default is tailored for that case.
+   Aluminum is a metal, and the default value for this input variable is tailored for that case.
 
 When you have read the input file, you can run the code, as usual (it will take a few seconds).
 
 ```sh
-abinit < tbase4_x.files > log 2> err &
+abinit tbase4_1.abi > log 2> err &
 ```
 
 Then, read the output file quietly.
@@ -112,13 +111,13 @@ with the associated [[nkpt]]:
     nkpt3 28
     nkpt4 60
 
-The input file *tbase4_2.in* is an example:
+The input file *tbase4_2.abi* is an example:
 
-{% dialog tests/tutorial/Input/tbase4_2.in %}
+{% dialog tests/tutorial/Input/tbase4_2.abi %}
 
-while *tbase4_2.out* is a reference output file:
+while *tbase4_2.abo* is a reference output file:
 
-{% dialog tests/tutorial/Refs/tbase4_2.out %}
+{% dialog tests/tutorial/Refs/tbase4_2.abo %}
 
 The run might take about thirty seconds on a PC 3 GHz.
 
@@ -149,13 +148,13 @@ Use the double-loop capability of the multi-dataset mode,
 with the *tsmear* changes in the **inner** loop. This will saves CPU time, as the wavefunctions
 of the previous dataset will be excellent (no transfer to different k-points).
 
-The input file *tbase4_3.in* is an example:
+The input file *tbase4_3.abi* is an example:
 
-{% dialog tests/tutorial/Input/tbase4_3.in %}
+{% dialog tests/tutorial/Input/tbase4_3.abi %}
 
-while *tbase4_3.out* is thre reference output file.
+while *tbase4_3.abo* is the reference output file.
 
-{% dialog tests/tutorial/Refs/tbase4_3.out %}
+{% dialog tests/tutorial/Refs/tbase4_3.abo %}
 
 From the output file, here is the evolution of [[acell]]:
 
@@ -190,7 +189,7 @@ For that particular value of *tsmear*, one can use the second k-point grid, givi
 
 In what follows, we will stick to these values of [[ecut]] and [[tsmear]] and try to use k-point grids with a similar resolution.
 
-Our final value for the aluminum lattice parameter, in the LDA, using the *13al.981214.fhi* pseudopotential,
+Our final value for the aluminum lattice parameter, in the LDA, using the *Al.psp8* pseudopotential,
 is thus 7.5041 Bohr.
 
 !!! note
@@ -245,16 +244,16 @@ There is no primitive cell of bulk aluminum based on these vectors, but a double
 We will first compute the total energy associated with this doubled cell.
 This is not strictly needed, but it is a valuable intermediate step towards the study of the surface.
 
-You might start from *tbase4_3.in*. You have to change [[rprim]]. Still, try to keep [[acell]]
+You might start from *tbase4_3.abi*. You have to change [[rprim]]. Still, try to keep [[acell]]
 at the values of bulk aluminum that were determined previously.
 But it is not all: the most difficult part in the passage to this doubled cell is the definition of the k-point grid.
 Of course, one could just take a homogeneous simple cubic grid of k-points, but this will not
-correspond exactly to the k-point grid used in the primitive cell in *tbase4_3.in*.
+correspond exactly to the k-point grid used in the primitive cell in *tbase4_3.abi*.
 This would not be a big problem, but you would miss some error cancellation.
 
-The answer to this problem is given in the input file *$ABI_TESTS/tutorial/Input/tbase4_4.in*.
+The answer to this problem is given in the input file *$ABI_TESTS/tutorial/Input/tbase4_4.abi*.
 
-{% dialog tests/tutorial/Input/tbase4_4.in %}
+{% dialog tests/tutorial/Input/tbase4_4.abi %}
 
 The procedure to do the exact translation of the k-point grid will not be explained here (sorry for this).
 If you do not see how to do it, just use homogeneous simple cubic grids, with about the same resolution
@@ -267,7 +266,7 @@ The grids of k-points should not be too anisotropic for this rough estimation to
 
 Note also the input variables [[rprim]] and [[chkprim]] in this input file.
 
-Now run *tbase4_4.in* (the reference file is *$ABI_TESTS/tutorial/Refs/tbase4_4.out*).
+Now run *tbase4_4.abi* (the reference file is *$ABI_TESTS/tutorial/Refs/tbase4_4.abo*).
 You should find the following total energy:
 
     etotal     -4.1962972610E+00
@@ -293,7 +292,7 @@ It is convenient to take the vacuum region as having a multiple of the width of 
 The supercell to use is the double of the previous cell (that had two layers of Aluminum atoms along the `[0 0 1]` direction).
 Of course, the relaxation of the surface might give an important contribution to the total energy.
 
-You should start from *tbase4_4.in*.
+You should start from *tbase4_4.abi*.
 You have to modify [[rprim]] (double the cell along `[0 0 1]`), the atomic positions, as well as the k-point mesh.
 For the latter, it is supposed that the electrons cannot propagate from one slab to its image in the `[0 0 1]` direction,
 so that the $k_z$ component of the special k-points can be taken 0: only one layer of k-points is needed along the z-direction.
@@ -301,13 +300,13 @@ You should also allow the relaxation of atomic positions, but not the relaxation
 (the lattice parameters along x or y must be considered fixed to the bulk value, while, for the z direction,
 there is no interest to allow the vacuum region to collapse!
 
-The input file *tbase4_5.in* is an example,
+The input file *tbase4_5.abi* is an example,
 
-{% dialog tests/tutorial/Input/tbase4_5.in %}
+{% dialog tests/tutorial/Input/tbase4_5.abi %}
 
-while *tbase4_5.out* is the reference output file.
+while *tbase4_5.abo* is the reference output file.
 
-{% dialog tests/tutorial/Refs/tbase4_5.out %}
+{% dialog tests/tutorial/Refs/tbase4_5.abo %}
 
 The run might last one minute.
 
@@ -325,7 +324,7 @@ The total energy after the Broyden relaxation is:
 
     etotal     -6.2622251508E+00
 
-The relaxed surface energy, per surface unit cell, is obtained by comparing the bulk energy and the 
+The relaxed surface energy, per surface unit cell, is obtained by comparing the bulk energy and the
 relaxed slab energy, and gives 0.015885 Ha = 0.432eV.
 It seems that the relaxation energy is very small, compared to the surface energy, but we need to do the convergence studies.
 
@@ -336,13 +335,13 @@ It is preferable to define atomic positions in Cartesian coordinates.
 The same coordinates will work for both 2 and 3 vacuum layers, while this is not the case for reduced coordinates,
 as the cell size increases.
 
-The input file *tbase4_6.in* is an example input file,
+The input file *tbase4_6.abi* is an example input file,
 
-{% dialog tests/tutorial/Input/tbase4_6.in %}
+{% dialog tests/tutorial/Input/tbase4_6.abi %}
 
-while *tbase4_6.out* is the reference output file.
+while *tbase4_6.abo* is the reference output file.
 
-{% dialog tests/tutorial/Refs/tbase4_6.out %}
+{% dialog tests/tutorial/Refs/tbase4_6.abo %}
 
 The run is on the order of thirty seconds on a PC 3 GHz.
 
@@ -398,13 +397,13 @@ One could use an effective dielectric constant of about 3 or 5, with a rather sm
 However, there is also another possibility, using an estimation of the dielectric matrix governed by [[iprcel]]=45.
 For comparison with the previous treatment of SCF, one can recompute the result with 3 aluminum layers.
 
-The input file *tbase4_7.in* is an example, while
+The input file *tbase4_7.abi* is an example, while
 
-{% dialog tests/tutorial/Input/tbase4_7.in %}
+{% dialog tests/tutorial/Input/tbase4_7.abi %}
 
-*tbase4_7.out* is a reference output file.
+*tbase4_7.abo* is a reference output file.
 
-{% dialog tests/tutorial/Refs/tbase4_7.out %}
+{% dialog tests/tutorial/Refs/tbase4_7.abo %}
 
 This run might take about one minute, and is the longest of the four basic tutorials. You should start it now.
 
@@ -449,7 +448,7 @@ of the concepts already explored.
 
 Just for your information, and as an additional warning, when the work accomplished
 until now is completed with 6 and 7 layers without relaxation
-(see *\$ABI_TESTS/tutorial/Input/tbase4_8.in* and *\$ABI_TESTS/tutorial/Refs/tbase4_8.out* where 5, 6 and 7 layers are treated),
+(see *\$ABI_TESTS/tutorial/Input/tbase4_8.abi* and *\$ABI_TESTS/tutorial/Refs/tbase4_8.abo* where 5, 6 and 7 layers are treated),
 this non-relaxed energy surface energy behaves as follows:
 
 number of aluminum layers | surface energy
@@ -461,7 +460,7 @@ number of aluminum layers | surface energy
 7   | 0.463 eV
 
 So, the surface energy convergence is rather difficult to reach. Our values, with a `4x4x1` grid,
-a smearing of 0.04 Ha, a kinetic energy cut-off of 6 Ha, the *13al.981214.fhi* pseudopotential,
+a smearing of 0.04 Ha, a kinetic energy cut-off of 6 Ha, the *Al.psp8* pseudopotential,
 still oscillate between 0.45 eV and 0.51 eV.
 Increasing the k-point sampling might decrease slightly the oscillations, but note that this effect
 is intrinsic to the computation of properties of a metallic surface: the electrons are confined inside the slab potential,
