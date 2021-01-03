@@ -17,3 +17,5 @@ NC SR (ONCVPSP v0.4), PBE, standard, psp8
 Se-d.psp8 and Zn-sp.psp8 have been downloaded on November 1, 2020 from 
 https://github.com/abinit/pseudo_dojo/tree/master/pseudo_dojo/pseudos/ONCVPSP-PBE-PDv0.4
 
+H.psp8 has been downloaded on December 30, 2020 from the page http://www.pseudo-dojo.org/, with the settings
+NC SR (ONCVPSP v0.4), PBE, standard, psp8

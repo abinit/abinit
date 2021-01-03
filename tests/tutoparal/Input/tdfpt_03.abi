@@ -1,9 +1,27 @@
 #SLAB ending TiO2 double layer
 # N=9
 # paralelectric configuration
-#Supercell and atoms
 
+#Parameters that govern parallelism
+paral_kgb 1
+#fftalg 401  # Needed to preserve old behaviour
+npkpt 4
+npband 6
+npfft  1
+nbdbuf 2
+
+#Definition of the unit cell
 acell 4.0 4.0 28.0 Angstrom
+
+#Definition of the atom types and pseudopotentials
+ntypat 3
+znucl 56 22 8
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8"
+pseudos "Ba.psp8, Ti.psp8, O.psp8"
+
+#Definition of the atoms
+natom 29
+typat 3 3 2 3 3 2 1 3 3 3 2 1 3 3 3 2 1 3 3 3 2 1 3 3 3 2 3 3 2
             xcart      0.0000000000E+00  0.0000000000E+00 -4.2633349730E+00
                        3.7794522658E+00  3.7794522658E+00 -3.2803418097E+00
                        0.0000000000E+00  3.7794522658E+00 -3.6627278067E+00
@@ -34,31 +52,20 @@ acell 4.0 4.0 28.0 Angstrom
                        3.7794522658E+00  3.7794522658E+00  3.3515959935E+01
                        0.0000000000E+00  3.7794522658E+00  3.3898345933E+01
 chksymtnons 0
-ntypat 3
 
-znucl 56 22 8
-typat 3 3 2 3 3 2 1 3 3 3 2 1 3 3 3 2 1 3 3 3 2 1 3 3 3 2 3 3 2
-natom 29
-nband 120
-
-#electronic structure
+#Numerical parameters of the calculation : planewave basis set and k point grid
 ecut 15.0
-nstep 50
 ngkpt 4 4 1
 kptopt 1
-tolwfr 1.0d-22
-iprcel 45
 
-prtden 0
+#Parameters for the SCF procedure
+nstep 50
+tolwfr 1.0d-18
+iprcel 45   # This is to help the SCF procedure, work quite well in this case of a slab.
 
-paral_kgb 1
-fftalg 401  # Needed to preserve old behaviour
-npkpt 4
-npband 6
-npfft  1
-
- pp_dirpath "$ABI_PSPDIR"
- pseudos "56ba.psp_mod, 22ti.psp_mod, 8o.psp_mod"
+#Electronic structure
+nband 120
+#prtden 0
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -72,7 +79,7 @@ npfft  1
 #%% files_to_test = tdfpt_03_MPI24.abo, tolnlines = 0, tolabs = 0.0, tolrel= 0.0
 #%% post_commands = 
 #%%   ww_cp tdfpt_03_MPI24o_WFK tdfpt_04_MPI24i_WFK;
-#%%   ww_mv tdfpt_03_MPI24o_WFK tdfpt_04_MPI24i_WFQ'
+#%%   ww_mv tdfpt_03_MPI24o_WFK tdfpt_04_MPI24i_WFQ
 #%% [extra_info]
 #%% keywords = NC
 #%% description = BaTiO3 linear response calculation
