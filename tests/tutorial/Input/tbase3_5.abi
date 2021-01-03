@@ -33,7 +33,7 @@ xred              # This keyword indicate that the location of the atoms
 ecut 12.0         # Maximal kinetic energy cut-off, in Hartree
 
 #Definition of the SCF procedure
-nstep 10          # Maximal number of SCF cycles
+nstep 20          # Maximal number of SCF cycles
 diemac 12.0       # Although this is not mandatory, it is worth to
                   # precondition the SCF cycle. The model dielectric
                   # function used as the standard preconditioner
@@ -64,7 +64,7 @@ kptbounds2  0.5  0.0  0.0 # L point
             0.0  0.5  0.5 # X point
             1.0  1.0  1.0 # Gamma point in another cell.
 tolwfr2  1.0d-12
-enunit2  1             # Will output the eigenenergies in eV 
+enunit2  1             # Will output the eigenenergies in eV
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
