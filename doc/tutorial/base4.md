@@ -305,8 +305,6 @@ The total energy after the first SCF cycle, when the atomic positions are equal 
 
     ETOT  5  -7.0427135007667
 
-    ETOT  6  -6.2619738807344
-
 The total energy of three aluminum atoms in the bulk,
 (from section 4.3, etotal24 multiplied by three) is -7.0735754304 Ha.
 Comparing the non-relaxed slab energy and the bulk energy, one obtains
@@ -316,8 +314,6 @@ namely 0.01543 Ha = 0.420 eV.
 The total energy after the Broyden relaxation is:
 
     etotal     -7.0429806856E+00
-
-    etotal     -6.2622251508E+00
 
 The relaxed surface energy, per surface unit cell, is obtained by comparing the bulk energy and the
 relaxed slab energy, and gives 0.015297 Ha = 0.416 eV.
@@ -342,9 +338,9 @@ The run is on the order of of few seconds on a modern PC.
 
 In the Broyden step 0 of the first dataset, you will notice the WARNING:
 
-     scprqt:  WARNING -
-      nstep=    6 was not enough SCF cycles to converge;
-      maximum force difference=  5.493E-05 exceeds toldff=  5.000E-05
+    scprqt:  WARNING -
+     nstep=    6 was not enough SCF cycles to converge;
+     maximum force difference=  6.859E-05 exceeds toldff=  5.000E-05
 
 The input variable [[nstep]] was intentionally set to the rather low value of 6, to warn you about
 possible convergence difficulties.
@@ -356,14 +352,14 @@ was close of being fulfilled, but one should keep this in mind, as you will see.
 
 For the 2 vacuum layer case, one has the non-relaxed total energy:
 
-    ETOT  6  -6.2539524271719
+    ETOT  6  -7.0350152828531
 
-giving the unrelaxed surface energy 0.0200 Ha = 0.544 eV;
+giving the unrelaxed surface energy 0.0193 Ha = 0.525 eV;
 and for the relaxed case:
 
-    etotal1    -6.2547006435E+00
+    etotal1    -7.0358659542E+00
 
-(this one is converged to the required level) giving the relaxed surface energy 0.0196 Ha = 0.533 eV
+(this one is converged to the required level) giving the relaxed surface energy 0.0189 Ha = 0.514 eV
 
 Note that the difference between unrelaxed and relaxed case is a bit larger than in the case of one vacuum layer.
 This is because there was some interaction between slabs of different supercells.
@@ -375,13 +371,13 @@ However, for the Broyden steps number 2 and beyond, because one takes advantage 
 a sufficient convergence is reached.
 The total energy, in the relaxed case, is:
 
-    etotal2    -6.2559103620E+00
+    etotal2    -7.0371360761E+00
 
-giving the relaxed surface energy `0.0190 Ha = 0.515 eV`.
-There is a rather small 0.018 eV difference with the 2 vacuum layer case.
+giving the relaxed surface energy `0.0182 Ha = 0.495 eV`.
+There is a rather small 0.019 eV difference with the 2 vacuum layer case.
 
 For the next run, we will keep the 2 vacuum layer case, and we know that the accuracy
-of the coming calculation cannot be better than 0.016 eV. One might investigate the 4 vacuum layer case,
+of the coming calculation cannot be better than 0.019 eV. One might investigate the 4 vacuum layer case,
 but this is not worth, in the present tutorial.
 
 ## Surface energy: increasing the number of aluminum layers
@@ -406,37 +402,37 @@ You will notice that the SCF convergence is rather satisfactory, for all the cas
 
 For the 3 aluminum layer case, one has the non-relaxed total energy:
 
-    ETOT  6  -6.2539524363433
+    ETOT  6  -7.0350153035193
 
-(this quantity is converged, unlike in test 4.6) giving the unrelaxed surface energy 0.0200 Ha = 0.544 eV;
+(this quantity is converged, unlike in test 4.6) giving the unrelaxed surface energy 0.0193 Ha = 0.525 eV;
 and for the relaxed case:
 
-etotal1    -6.2547008127E+00
+    etotal1    -7.0358683757E+00
 
 (by contrast the difference with test 4.6 is less than 1 microHa) giving
-the relaxed surface energy 0.0196 Ha = 0.533 eV.
+the relaxed surface energy 0.0189 Ha = 0.514 eV.
 
 For the 4 aluminum layer case, one has the non-relaxed total energy:
 
-    ETOT  6  -8.3546873357119
+    ETOT  6  -9.3958299123967
 
-giving the unrelaxed surface energy 0.0186Ha = 0.506 eV; and for the relaxed case:
+giving the unrelaxed surface energy 0.0178 Ha = 0.484 eV; and for the relaxed case:
 
-    etotal2    -8.3565593186E+00
+    etotal2    -9.3978596458E+00
 
-giving the relaxed surface energy 0.0183 Ha = 0.498 eV.
+giving the relaxed surface energy 0.0168 Ha = 0.457 eV.
 
 For the 5 aluminum layer case, one has the non-relaxed total energy:
 
-    ETOT  6  -10.453642176439
+    ETOT  6  -11.754755842794
 
-giving the unrelaxed surface energy 0.0183Ha = 0.498 eV; and for the relaxed case:
+giving the unrelaxed surface energy 0.0173 Ha = 0.471 eV; and for the relaxed case:
 
-    etotal3    -1.0454163186E+01
+    etotal3    -1.1755343136E+01
 
-giving the relaxed surface energy 0.0180 Ha = 0.490 eV.
+giving the relaxed surface energy 0.0170 Ha = 0.463 eV.
 
-The relative difference in the surface energy of the 4 and 5 layer cases is on the order of 1.5%.
+The relative difference in the surface energy of the 4 and 5 layer cases is on the order of 1.2%.
 
 In the framework of this tutorial, we will not pursue this investigation, which is a simple application
 of the concepts already explored.
