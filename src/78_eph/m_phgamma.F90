@@ -1798,7 +1798,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
  end if
 
  if (do_qintp) then
-   ! Generate fine q-mesh, findthe IBZ and the corresponding weights.
+   ! Generate fine q-mesh, find the IBZ and the corresponding weights.
    qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
 
    call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_qptopt, nqshift, qshift, nqibz, qibz, wtq, nqbz, qbz, &
@@ -2907,7 +2907,7 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
 
  !call a2fw_tr_print_info()
 
- ! Compute lambda(w) (resolved in spin mode and directions)
+ ! Compute lambda_tr(w) (resolved in spin mode and directions)
  do spin=1,nsppol
    do mu=0,natom3
      do idir=1,3
@@ -3229,7 +3229,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
  integer :: ik_fs, myik, mys !, myiq
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
- integer :: ii,ipw,mpw,my_mpw,mnb,ierr,cnt,ncid
+ integer :: ii,jj,ipw,mpw,my_mpw,mnb,ierr,cnt,ncid
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q, ltetra
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
@@ -3240,7 +3240,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 #endif
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk, dksqmax
- logical :: gen_eigenpb, need_velocities
+ logical :: gen_eigenpb, need_velocities, isirr_k, isirr_kq
  type(wfd_t) :: wfd
  type(fstab_t),pointer :: fs
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -3260,19 +3260,19 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: indkk_kq(6,1)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:)
  integer,allocatable :: my_pinfo(:,:), pert_table(:,:) !, qibz_done(:)
- real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2)
+ real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2), vk(3), vkq(3)
  real(dp) :: wminmax(2), n0(ebands%nsppol)
  real(dp) :: resvv_in(2,9), resvv_out(2,9), phfrq(3*cryst%natom)
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: displ_cart(:,:,:,:), displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kinpw1(:), kpg1_k(:,:), kpg_k(:,:), dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:), ffnl1(:,:,:,:), ph3d(:,:,:), ph3d1(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkk_atm(:,:,:,:)
- real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkk_atm(:,:,:,:) !,gkq_nu(:,:,:,:)
+ real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
- real(dp),allocatable :: gs1c(:,:), v1_work(:,:,:,:) !, vcar_ibz(:,:,:,:)
+ real(dp),allocatable :: gs1c(:,:), v1_work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
  real(dp), allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:)
  real(dp), allocatable :: tmp_vals_ee(:,:,:,:,:), emesh(:)
@@ -3589,7 +3589,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call wfd%print(header="Wavefunctions on the Fermi surface")
 
  ABI_FREE(nband)
- ABI_FREE(bks_mask)
  ABI_FREE(keep_ur)
  ABI_FREE(wfd_istwfk)
 
@@ -3705,60 +3704,54 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! As a side effect, one can also implement restart over q-points
 
  ! Create ddkop object to compute group velocities if needed.
- ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
-
- ! Imaginary part with MRTA. Here we need v_kq as well.
- ! Usually kq is one of the kcalc points except when nk is close to the edge of the sigma_erange window.
- ! due to ph absorption/emission.
- ! In this case, indeed, we may need a kq state that is not in the initial kcalc set.
- !
- ! Solution:
  !   1) precompute group velocities in the IBZ and the ihave_ikibz_spin file (common to all procs)
- !   2) Fill sigma%vcar_calc needed by the transport driver from the vcar_ibz array
  !   3) Use symmetries to reconstruct v_kq from vcar_ibz
  !
  ! NB: All procs store in memory the same set of Bloch states.
 
-! ABI_CALLOC(vcar_ibz, (3, sigma%bsum_start:sigma%bsum_stop, nkpt, nsppol))
-!
-! cnt = 0
-! do spin=1,nsppol
-!   do ik_ibz=1,ebands%nkpt
-!     kk = ebands%kptns(:, ik_ibz)
-!     npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
-!     ikcalc = ibzspin_2ikcalc(ik_ibz, spin)
-!     if (.not. ihave_ikibz_spin(ik_ibz, spin)) cycle
-!     if (npw_k == 1) cycle
-!     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
-!
-!     call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
-!
-!     do band_ks=sigma%bsum_start,sigma%bsum_stop
-!       if (.not. wfd%ihave_ug(band_ks, ik_ibz, spin)) cycle
-!       call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
-!       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-!       vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
-!       vcar_ibz(:, band_ks, ik_ibz, spin) = vk
-!       if (ikcalc /= -1) then
-!         ! This IBZ k-point is in the kcalc set --> Store vk in vcar_calc
-!         bstart_ks = sigma%bstart_ks(ikcalc, spin)
-!         bstop = bstart_ks + sigma%nbcalc_ks(ikcalc, spin) - 1
-!         if (band_ks >= bstart_ks .and. band_ks <= bstop) then
-!           ib_k = band_ks - bstart_ks + 1
-!           sigma%vcar_calc(:, ib_k, ikcalc, spin) = vk
-!         end if
-!       end if
-!     end do
-!   end do
-! end do
-! call xmpi_sum(sigma%vcar_calc, comm, ierr)
-! call xmpi_sum(vcar_ibz, comm, ierr)
-! ABI_FREE(vcar_ibz)
+ ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+
+ call cwtime(cpu, wall, gflops, "start", msg=" Computing v_nk matrix elements for all states in Sigma_nk...")
+ ii = huge(1); jj = -1
+ do spin=1,nsppol
+   ii = min(ii, fstab(spin)%bmin)
+   jj = max(jj, fstab(spin)%bmax)
+ end do
+ ABI_CALLOC(vcar_ibz, (3, ii:jj, nkibz, nsppol))
+ ABI_MALLOC(cgwork, (2, mpw*wfd%nspinor))
+
+ cnt = 0
+ do spin=1,nsppol
+   fs => fstab(spin)
+   do ik_ibz=1,ebands%nkpt
+     kk = ebands%kptns(:, ik_ibz)
+     npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
+     if (all(bks_mask(:, ik_ibz, spin) .eqv. .False.)) cycle
+     if (npw_k == 1) cycle
+     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
+
+     call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
+
+     do band_k=fs%bmin,fs%bmax
+       if (.not. bks_mask(band_k, ik_ibz, spin)) cycle
+       !if (.not. wfd%ihave_ug(band_k, ik_ibz, spin)) cycle
+       call wfd%copy_cg(band_k, ik_ibz, spin, cgwork)
+       eig0nk = ebands%eig(band_k, ik_ibz, spin)
+       vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
+       vcar_ibz(:, band_k, ik_ibz, spin) = vk
+     end do
+   end do
+ end do
+ call xmpi_sum(vcar_ibz, comm, ierr)
+ ABI_FREE(cgwork)
+ call cwtime_report(" Velocities", cpu, wall, gflops)
+
+ ABI_FREE(bks_mask)
 
  ! Write v_nk to disk.
 !#ifdef HAVE_NETCDF
 ! if (my_rank == master) then
-!   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_calc"), sigma%vcar_calc))
+!   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_ibz"), vcar_ibz))
 ! end if
 !#endif
 
@@ -3786,7 +3779,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    end if
 
    if (do_ftv1q == 0) then
-     ! No interpolation --> Find the index of the q-point in the DVDB.
+     ! No interpolation --> find the index of the q-point in the DVDB.
      db_iqpt = dvdb%findq(qpt)
 
      if (db_iqpt /= -1) then
@@ -3852,8 +3845,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ABI_MALLOC(kets_k, (2, mpw*nspinor, mnb))
      ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, mnb))
      ABI_MALLOC(gkk_atm, (2, mnb, mnb, natom3))
+     !ABI_MALLOC(gkq_nu, (2, mnb, natom3))
 
-     ! The weights for FS integration.
+     ! The weights for the integration of the double-delta.
      ABI_MALLOC(dbldelta_wts, (mnb, mnb))
 
      if (dtset%eph_transport > 0) then
@@ -3880,6 +3874,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        kk = fs%kpts(:, ik_fs)
        ik_ibz = fs%indkk_fs(1, ik_fs); isym_k = fs%indkk_fs(2, ik_fs)
        trev_k = fs%indkk_fs(6, ik_fs); g0_k = fs%indkk_fs(3:5,ik_fs)
+       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
        kk_ibz = ebands%kptns(:,ik_ibz)
 
        ! Number of bands crossing the Fermi level at k
@@ -3911,6 +3906,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
        ikq_ibz = indkk_kq(1, 1); isym_kq = indkk_kq(2, 1)
        trev_kq = indkk_kq(6, 1); g0_kq = indkk_kq(3:5, 1)
+       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
        kq_ibz = ebands%kptns(:, ikq_ibz)
 
        ! If we have used the KERANGE trick, we may have k or k+q points with just one G component set to zero
@@ -4025,10 +4021,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ABI_FREE(kpg1_k)
        ABI_FREE(kpg_k)
 
-       ! Collect gkk_atm inside pert_comm so that all procs can operate on data.
+       ! Collect gkk_atm inside pert_comm so that all procs can operate on the data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
 
-       !call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
+       ! Get gkq in the phonon representation.
+       !call ephtk_gkknu_from_atm(mnb, mnb, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
        ! Compute group velocities if we are in transport mode or adaptive gaussian or
        ! tetrahedron with libtetrabz returning nesting condition.
@@ -4037,18 +4034,36 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        if (need_velocities) then
          ! Compute diagonal matrix elements of velocity operator with DFPT routines
          ! Velocities are in Cartesian coordinates.
-         call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
+         !
+         ! If k+q is not in the IBZ, we need to recostruct the value by symmetry using v(Sq) = S v(q).
+         ! Use transpose(R) because we are using the tables for the wavefunctions
+         ! In this case listkk has been called with symrec and use_symrec=False
+         ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
+
+         !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
          do ib2=1,nband_k
            band_k = ib2 + bstart_k - 1
-           fs%vk(:,ib2) = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), &
-                                          istwf_k, npw_k, wfd%nspinor, kets_k(:,:,ib2), cwaveprj0)
+           vk = vcar_ibz(:, band_k, ik_ibz, spin)
+           if (.not. isirr_k) then
+             vk = matmul(transpose(cryst%symrel_cart(:,:,isym_k)), vk)
+             if (trev_k /= 0) vk = -vk
+           end if
+           !vk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), &
+           !                     istwf_k, npw_k, wfd%nspinor, kets_k(:,:,ib2), cwaveprj0)
+           fs%vk(:,ib2) = vk
          end do
 
-         call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
+         !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
          do ib1=1,nband_kq
            band_kq = ib1 + bstart_kq - 1
-           fs%vkq(:,ib1) = ddkop%get_vdiag(ebands%eig(band_kq, ikq_ibz, spin), &
-                                           istwf_kq, npw_kq, wfd%nspinor, bras_kq(:,:,ib1), cwaveprj0)
+           vkq = vcar_ibz(:, band_kq, ikq_ibz, spin)
+           if (.not. isirr_kq) then
+             vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
+             if (trev_kq /= 0) vkq = -vkq
+           end if
+           !vkq = ddkop%get_vdiag(ebands%eig(band_kq, ikq_ibz, spin), &
+           !                                 istwf_kq, npw_kq, wfd%nspinor, bras_kq(:,:,ib1), cwaveprj0)
+           fs%vkq(:,ib1) = vkq
          end do
        end if
 
@@ -4166,6 +4181,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ABI_FREE(kets_k)
      ABI_FREE(h1kets_kq)
      ABI_FREE(gkk_atm)
+     !ABI_FREE(gkq_nu)
      ABI_SFREE(wt_ek)
      ABI_SFREE(wt_ekq)
 
@@ -4198,7 +4214,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ABI_FREE(vlocal1)
 
    write(msg,'(2(a,i0),a)')" Computation of q-point [", iq_ibz, "/", gams%nqibz, "]"
-   call cwtime_report(msg, cpu_q, wall_q, gflops_q, pre_str=ch10, end_str=ch10)
+   call cwtime_report(msg, cpu_q, wall_q, gflops_q, end_str=ch10)
  end do ! iq_ibz
 
  call cwtime_report(" Full computation of phonon linewidths", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
@@ -4219,6 +4235,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
  !ABI_FREE(qibz_done)
+ ABI_SFREE(vcar_ibz)
 
  if (dtset%eph_transport > 0) then
    ABI_FREE(tgamvv_in)
@@ -4443,6 +4460,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
                        time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
 
+ ! Compute eig_k and eig_kq in full BZ for the relevant bands around Ef.
  nb = fs%maxnb
  ABI_MALLOC(kbz, (3, nkbz))
  ABI_MALLOC(indkpt, (nkbz))
@@ -4462,7 +4480,11 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
        kbz(:, ik_bz) = kk
 
        ik_fs = fs%krank%get_index(kk)
-       if (ik_fs /= -1) kbz2fs(ik_bz) = ik_fs
+       if (ik_fs /= -1) then
+         kbz2fs(ik_bz) = ik_fs
+       else
+         !ABI_ERROR(sjoin('kpt:', trim(ktoa(kk)), 'is not in FS!!'))
+       end if
 
        ik_ibz = ibz_krank%get_index(kk)
        if (ik_ibz < 1) then

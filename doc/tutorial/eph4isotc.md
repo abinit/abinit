@@ -364,9 +364,8 @@ Contrarily to intercalated graphites, two of the $\sigma$ bands are filled incom
 Together with weak kz dispersion this results in the appearance of two nearly cylindrical sheets of the
 Fermi surface (see Fig. 3) around the Γ–A line. 
 In MgB2, the σ-band crosses the Fermi level and hybridization with other conduction electrons is
-weak. The high Tc-state of this material develops from the strong
-attractive interaction between the electrons of the σ-band and
-the E2g mode of vibrations. 
+weak. The high Tc-state of this material develops from the strong attractive interaction 
+between the electrons of the σ-band and the E2g mode of vibrations. 
 
 -->
 
@@ -519,7 +518,7 @@ In real life one should perform an accurate convergence study...
 ## Our first computation of the isotropic Tc
 
 For our first example, we use a relatively simple input file that allows us to introduce
-the most important variables and the organization of the main output file.
+the most important variables and the organization of the results.
 Copy *teph4isotc_2.abi* in the working directory and run the code using:
 
 ```sh
@@ -578,7 +577,7 @@ dipdip 0               # No treatment of the dipole-dipole part. OK for metals
 ```
 
 [[dipdip]] is set to zero as we are dealing with a metal and the inter-atomic force 
-constants are relatively short-ranged.
+constants are usually short-ranged if we ignore Kohn-anomalies [[cite:Kohn1959]]
 
 The $\kk$-point integration is performed with the Gaussian smearing 
 ([[eph_intmeth]] == 1 and 0.1 eV for [[eph_fsmear]]).
@@ -599,7 +598,7 @@ broadening is used.
 Hopefully, the next versions of the code will provide ...
 0.04 Ha ~ 1 eV
 
-Then we activate two tricks just to make the calculation faster:
+Then we activate two tricks to make the calculation faster:
 
 ```sh
 mixprec 1
@@ -664,7 +663,7 @@ Remember to discuss k-mesh and [[tsmear]] at the DFPT level.
 
 ### Output files
 
-We now discuss in more detail the output file produced by the calculation.
+We now discuss in more detail the main output file produced by the calculation.
 
 {% dialog tests/tutorespfn/Refs/teph4isotc_2.abo %}
 
@@ -684,7 +683,7 @@ we find the output of the electronic DOS:
 ```
 
 Then the code outputs some basic info concerning the Fermi surface
-and method for the integration of the double delta:
+and the method for the BZ integration of the double delta:
 
 ```md
  ==== Fermi surface info ====
@@ -881,7 +880,7 @@ The choice of an optimal window is discussed afterwards.
 
 First of all, we **strongly recommend** to test whether the SKW interpolation can reproduce
 the *ab-initio* results with reasonable accuracy.
-A possible approach consists in comparing the *ab-initio* band structure with the interpolated one
+by comparing the *ab-initio* band structure with the interpolated one
 using the `skw_compare` command of *abitk*:
 
 ```sh
@@ -892,7 +891,7 @@ abitk skw_compare \
 
 The fist argument is a *GSR.nc* (*WFK.nc*) file with the energies in the IBZ
 that will be used to build the star-function interpolant.
-The quality of the interpolant will obviously depend on the density of this $\kk$-mesh.
+The quality of the interpolant obviously depends on the density of this $\kk$-mesh.
 The second file contains the *ab-initio* eigenvalues along a $\kk$-path computed with a standard NSCF run.
 In this example, we are using precomputed GSR.nc files with a 12x12x12 $\kk$-mesh for the SKW interpolation.
 
@@ -1012,15 +1011,16 @@ TODO: Discussion about energy range and integration scheme.
 
 ## Convergence study wrt to the k/q-mesh
 
-At this point, we can use the WFK files to perform EPH calculations with denser $\kk$-meshes.
+At this point, we can use the WFK file to perform EPH calculations with denser $\kk$-meshes.
 We will be using settings similar to the ones used in **teph4isotc_2.abi** except for
 the use of [[eph_ngqpt_fine]], [[getwfk_filepath]] and [[ngkpt]]:
 
 {% dialog tests/tutorespfn/Input/teph4isotc_5.abi %}
 
+<!--
 ## A more accurate calculation
 
-If you want to reproduce the results, you can find another githug repository here
+If you want to reproduce the results, you can find another github repository here
 with the DFPT computation performed with a 24x24x24 $\kk$-mesh and a 6x6x6 $\qq$-mesh for phonons.
 Download the repository as explained at the beginning of the lesson, merge the partial POT files 
 and compute the WFK file with a NSCF run from the DEN.nc file.
@@ -1028,6 +1028,7 @@ and compute the WFK file with a NSCF run from the DEN.nc file.
 You should get:
 
 The EPH calculation on 48 CPUs takes ~ minutes and less than XXX Gb of memory.
+-->
 
 ## Notes on the MPI parallelism
 

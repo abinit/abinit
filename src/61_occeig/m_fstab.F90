@@ -714,7 +714,7 @@ subroutine fstab_print(fstab, header, unit, prtvol)
  else if (fstab(1)%eph_intmeth == 2) then
    write(my_unt,"(a)")" FS integration done with tetrahedron method"
  else if (fstab(1)%eph_intmeth == -2) then
-   write(my_unt,"(a)")" FS integration done with optimized tetrahedron method  tetrahedron method"
+   write(my_unt,"(a)")" FS integration done with optimized tetrahedron method"
  else
    ABI_ERROR(sjoin("Invalid value for eph_intmeth:", itoa(fstab(1)%eph_intmeth)))
  end if

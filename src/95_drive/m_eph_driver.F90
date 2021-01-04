@@ -399,7 +399,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! DDB cryst comes from DPPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
    cryst_ddb%timrev = cryst%timrev
-   if (cryst%compare(cryst_ddb, header="Comparing WFK crystal with DDB crystal") /= 0) then
+   if (cryst%compare(cryst_ddb, header=" Comparing WFK crystal with DDB crystal") /= 0) then
      ABI_ERROR("Crystal structure from WFK and DDB do not agree! Check messages above!")
    end if
    call cryst_ddb%free()
@@ -512,7 +512,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
    dvdb%cryst%timrev = cryst%timrev
-   if (cryst%compare(dvdb%cryst, header="Comparing WFK crystal with DVDB crystal") /= 0) then
+   if (cryst%compare(dvdb%cryst, header=" Comparing WFK crystal with DVDB crystal") /= 0) then
      ABI_ERROR("Crystal structure from WFK and DVDB do not agree! Check messages above!")
    end if
    if (dtset%prtvol > 10) dvdb%debug = .True.
