@@ -59,9 +59,7 @@ Note also the following:
 
 When you have read the input file, you can run the code, as usual (it will take a few seconds).
 
-```sh
-abinit tbase4_1.abi > log 2> err &
-```
+  abinit tbase4_1.abi > log 2> err &
 
 Then, read the output file quietly.
 You should note that the Fermi energy and occupation numbers have been computed automatically:
