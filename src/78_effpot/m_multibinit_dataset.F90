@@ -1219,10 +1219,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%optcell=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
  if(tread==1) multibinit_dtset%optcell=intarr(1)
- if(multibinit_dtset%optcell<0.or.multibinit_dtset%optcell>2)then
+ if(multibinit_dtset%optcell<0.or.multibinit_dtset%optcell>10)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'optcell is',multibinit_dtset%optcell,', but the only allowed values',ch10,&
-&   'are 0, 1 or 2.',ch10,&
+&   'are 0, 1, 2, 3, 4, 5, 6 ,7, 8 and 9.',ch10,&
 &   'Action: correct optcell in your input file.'
    MSG_ERROR(message)
  end if
