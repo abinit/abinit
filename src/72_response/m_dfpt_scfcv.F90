@@ -89,7 +89,7 @@ module m_dfpt_scfcv
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_dfpt_nstwf,   only : dfpt_nstpaw, dfpt_nstwf
  use m_mkcore,         only : dfpt_mkcore
- use m_spacepar,   only : hartrestr, symrhg
+ use m_spacepar,   only : hartrestr, make_vectornd, symrhg
 
  implicit none
 
@@ -397,7 +397,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: optene,optfr,option,optres,prtfor,qphase_rhoij,quit,quit_sum,qzero
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
- integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,Z_kappa
+ integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,with_vectornd,Z_kappa
  integer :: dbl_nnsclo_mq,ifft !-q duplicate for dbl_nnsclo
 !integer :: pqmq ! pqmq = indicator for potential mixing
  logical :: need_fermie1,nmxc,paral_atom,use_nhat_gga
@@ -428,7 +428,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),allocatable :: dielinv(:,:,:,:,:),gr_dum(:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
- real(dp),allocatable :: susmat(:,:,:,:,:),vhartr1(:),vxc1(:,:)
+ real(dp),allocatable :: susmat(:,:,:,:,:),vectornd(:,:),vhartr1(:),vxc1(:,:)
  real(dp),allocatable :: vhartr1_tmp(:,:)
  real(dp),allocatable,target :: vtrial1(:,:),vtrial2(:,:)
  real(dp),allocatable :: vtrial1_pq(:,:),vtrial1_mq(:,:),rhorfermi_mq(:,:)
@@ -673,6 +673,19 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_ALLOCATE(pwindall,(0,0,0))
    ABI_ALLOCATE(qmat,(0,0,0,0,0,0))
  end if
+
+! if any nuclear dipoles are nonzero, compute the vector potential in real space 
+ with_vectornd = 0
+ ! nuclear dipoles only work with the DDK response function
+ if ( (ANY(ABS(dtset%nucdipmom(:,:))>tol8)) .AND. (ipert.EQ.dtset%natom+1) )  with_vectornd = 1
+ if(allocated(vectornd)) then
+   ABI_DEALLOCATE(vectornd)
+ end if
+ ABI_ALLOCATE(vectornd,(with_vectornd*nfftf,3))
+ if(with_vectornd .EQ. 1) then
+   call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,&
+   & ngfftf,dtset%nucdipmom,rprimd,vectornd,xred)
+ endif
 
  call timab(154,2,tsec)
 
@@ -925,7 +938,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid,residm,rhog1,&
 &   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
-&   vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1)
+&   vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1)
    if (.not.kramers_deg) then
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
      rhog1_pq=rhog1 !same for rhog1_pq
@@ -939,7 +952,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     occk_mq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
 &     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
-&     vtrial,vtrial1_mq,wtk_rbz,xred,ylm,ylm1,ylmgr1)
+&     vectornd,vtrial,vtrial1_mq,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1)
      !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
      do ifft=1,nfftf
        rhor1_pq(2*ifft-1,:) = half*(rhor1(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
@@ -1174,7 +1187,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid2,residm2,rhog2,&
 &   rhor2,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
-&   vtrial,vtrial2,wtk_rbz,xred,ylm,ylm1,ylmgr1,1)
+&   vectornd,vtrial,vtrial2,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,1)
 
    write(msg,'(a)') ' '//char(10)//&
 '   ---------------------------------'
@@ -1510,6 +1523,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if(allocated(mpi_enreg%kpt_loc2ibz_sp))  then
      ABI_DEALLOCATE(mpi_enreg%kpt_loc2ibz_sp)
    end if
+ end if
+
+ if(ALLOCATED(vectornd)) then
+   ABI_DEALLOCATE(vectornd)
  end if
 
  if(psps%usepaw==1) then

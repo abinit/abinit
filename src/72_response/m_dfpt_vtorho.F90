@@ -160,8 +160,10 @@ contains
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
 !!  ddk<wfk_t)=struct info DDK file
+!!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=GS Vtrial(r).
 !!  vtrial1(cplex*nfftf,nspden)=INPUT RF Vtrial(r).
+!!  with_vectornd = 1 if vectornd allocated
 !!  wtk_rbz(nkpt_rbz)=weight assigned to each k point.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
@@ -226,13 +228,13 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,&
-& usecprj,useylmgr1,ddk_f,vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
+& usecprj,useylmgr1,ddk_f,vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,dbl_nnsclo,dim_eig2rf,idir,ipert,mband,mk1mem,mkmem
  integer,intent(in) :: mkqmem,mpw,mpw1,my_natom,natom,ncpgr,nfftf,nkpt_rbz,nspden
- integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1
+ integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1,with_vectornd
  integer,optional,intent(in) :: cg1_out
  real(dp),intent(in) :: fermie1,ucvol
  real(dp),intent(out) :: edocc,eeig0,ek0,ek1,eloc0,enl0,enl1,nres2,residm
@@ -270,6 +272,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp), intent(out) :: nhat1(cplex*nfftf,dtset%nspden*psps%usepaw)
  real(dp),intent(out) :: resid(mband*nkpt_rbz*nsppol),rhog1(2,nfftf)
  real(dp),intent(inout) :: nvresid1(cplex*nfftf,nspden),rhor1(cplex*nfftf,nspden)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
@@ -297,19 +300,19 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: iband,nlines_done,ibdkpt,ibg,ibg1,ibgq,icg,icg1,icgq,ierr
  integer :: ii,ikg,ikg1,ikpt,ilm,index1,ispden,iscf_mod,isppol,istwf_k
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
- integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
+ integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nddir,nkpg,nkpg1
  integer :: nband_eff
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
- logical :: paral_atom,qne0
+ logical :: has_vectornd,paral_atom,qne0
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq,rf_hamk_dir2
 !arrays
  integer,allocatable :: kg1_k(:,:),kg_k(:,:)
  integer, pointer :: my_atmtab(:)
- real(dp) :: kpoint(3),kpq(3)
+ real(dp) :: kpoint(3),kpq(3),rhodum(1)
  real(dp) :: tsec(2)
- real(dp),allocatable :: buffer1(:)
+ real(dp),allocatable :: buffer1(:),cgrvtrial(:,:)
  real(dp),allocatable :: ddkinpw(:),dkinpw(:),dkinpw2(:)
  real(dp),allocatable :: doccde_k(:),doccde_kq(:)
  real(dp),allocatable :: edocc_k(:),eeig0_k(:),eig0_k(:),eig0_kq(:),eig1_k(:)
@@ -319,7 +322,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),allocatable :: kpg_k(:,:),occ_k(:),occ_kq(:)
  real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:),resid_k(:)
  real(dp),allocatable :: rho1wfg(:,:),rho1wfr(:,:),rhoaug1(:,:,:,:),rocceig(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:),vlocal1(:,:,:,:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vectornd_pac_idir(:,:,:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:)
  real(dp),allocatable :: ylm1_k(:,:),ylm_k(:,:),ylmgr1_k(:,:,:)
  type(pawrhoij_type),pointer :: pawrhoij1_unsym(:)
 
@@ -448,6 +451,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  ABI_ALLOCATE(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ABI_ALLOCATE(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc))
 
+ has_vectornd = (with_vectornd .EQ. 1)
+ if(has_vectornd) then
+    ABI_ALLOCATE(vectornd_pac,(n4,n5,n6,gs_hamkq%nvloc,3))
+    ABI_ALLOCATE(vectornd_pac_idir,(n4,n5,n6,gs_hamkq%nvloc))
+ end if
+
  nlines_done = 0
 
 !LOOP OVER SPINS
@@ -478,6 +487,23 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !  Nullify contribution to 1st-order density from this k-point
    rhoaug1(:,:,:,:)=zero
+
+! if vectornd is present, set it up for addition to gs_hamkq and rf_hamkq.
+! Note that it must be done for the three Cartesian directions. Also, the following
+! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
+   if(has_vectornd) then
+     do nddir = 1, 3
+       ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
+         & rhodum,rhodum,cgrvtrial,vectornd(:,nddir))
+       call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
+         & cgrvtrial,vectornd_pac(:,:,:,1,nddir),2)
+       ABI_DEALLOCATE(cgrvtrial)
+     end do
+     call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
+     vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
+     call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
+   end if
 
    call timab(125,1,tsec)
 
@@ -725,6 +751,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  ABI_DEALLOCATE(rhoaug1)
  ABI_DEALLOCATE(vlocal)
  ABI_DEALLOCATE(vlocal1)
+ if(has_vectornd) then
+   ABI_DEALLOCATE(vectornd_pac)
+   ABI_DEALLOCATE(vectornd_pac_idir)
+ end if
 
  call timab(124,2,tsec)
 
