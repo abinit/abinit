@@ -444,20 +444,20 @@ this non-relaxed energy surface energy behaves as follows:
 
 number of aluminum layers | surface energy
 --- | ---
-3   | 0.544 eV
-4   | 0.506 eV
-5   | 0.498 eV
-6   | 0.449 eV
-7   | 0.463 eV
+3   | 0.525 eV
+4   | 0.484 eV
+5   | 0.471 eV
+6   | 0.419 eV
+7   | 0.426 eV
 
 So, the surface energy convergence is rather difficult to reach. Our values, with a `4x4x1` grid,
 a smearing of 0.04 Ha, a kinetic energy cut-off of 6 Ha, the *Al.psp8* pseudopotential,
-still oscillate between 0.45 eV and 0.51 eV.
+still oscillate between 0.42 eV and 0.53 eV.
 Increasing the k-point sampling might decrease slightly the oscillations, but note that this effect
 is intrinsic to the computation of properties of a metallic surface: the electrons are confined inside the slab potential,
 with sub-bands in the direction normal to the surface, and the Fermi energy oscillates with the width of the slab.
 This effect might be understood based on a comparison with the behaviour of a jellium slab.
-An error on the order of 0.016 eV is due to the thin vacuum layer.
+An error on the order of 0.019 eV is due to the thin vacuum layer.
 Other sources of errors might have to be rechecked, seeing the kind of accuracy that is needed.
 
 Experimental data give a surface energy around 0.55 eV (sorry, the reference is to be provided).
