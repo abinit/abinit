@@ -43,7 +43,7 @@ shiftk  0.5 0.0 0.0
         0.0 0.5 0.0
 
 #Definition of the SCF procedure
-nstep 10          # Maximal number of SCF cycles
+nstep 6          # Maximal number of SCF cycles
 toldff 5.0d-5
 
 #Definition of occupation numbers

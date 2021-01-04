@@ -61,35 +61,35 @@ When you have read the input file, you can run the code, as usual (it will take 
 
   abinit tbase4_1.abi > log 2> err &
 
-Then, read the output file quietly.
+Then, give a quick look at the output file.
 You should note that the Fermi energy and occupation numbers have been computed automatically:
 
-     Fermi (or HOMO) energy (hartree) =   0.26847   Average Vxc (hartree)=  -0.34746
-     Eigenvalues (hartree) for nkpt=   2  k points:
-     kpt#   1, nband=  3, wtk=  0.75000, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-       0.09425   0.25438   0.41909
-          occupation numbers for kpt#   1
-       2.00003   1.33307   0.00014
-     prteigrs : prtvol=0 or 1, do not print more k-points.
+    Fermi (or HOMO) energy (hartree) =   0.27151   Average Vxc (hartree)=  -0.36713
+    Eigenvalues (hartree) for nkpt=   2  k points:
+    kpt#   1, nband=  3, wtk=  0.75000, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+      0.09836    0.25743    0.42131
+        occupation numbers for kpt#   1
+      2.00003    1.33305    0.00015
+    prteigrs : prtvol=0 or 1, do not print more k-points.
 
 You should also note that the components of the total energy include an entropy term:
 
-     Components of total free energy (in Hartree):
-
-        Kinetic energy  =  8.70954971782498E-01
-        Hartree energy  =  3.84986358590396E-03
-        XC energy       = -8.08434339502224E-01
-        Ewald energy    = -2.72948286712169E+00
-        PspCore energy  =  3.78721653637092E-02
-        Loc. psp. energy=  8.26684645838168E-02
-        NL   psp  energy=  4.52588269933839E-01
-        >>>>> Internal E= -2.08998347137414E+00
-
-        -kT*entropy     = -7.99729047978171E-03
-        >>>>>>>>> Etotal= -2.09798076185393E+00
-
-     Other information on the energy :
-        Total energy(eV)= -5.70889598417024E+01 ; Band energy (Ha)=   3.6059822203E-01
+    --- !EnergyTerms
+    iteration_state     : {dtset: 1, itime: 3, icycle: 1, }
+    comment             : Components of total free energy in Hartree
+    kinetic             :  8.68009594268178E-01
+    hartree             :  3.75144741427686E-03
+    xc                  : -1.11506134985146E+00
+    Ewald energy        : -2.71387012800927E+00
+    psp_core            :  1.56870175692757E-02
+    local_psp           :  1.66222476058238E-01
+    non_local_psp       :  4.25215770913582E-01
+    internal            : -2.35004517163717E+00
+    '-kT*entropy'       : -7.99850001032776E-03
+    total_energy        : -2.35804367164750E+00
+    total_energy_eV     : -6.41656315078440E+01
+    band_energy         :  3.72511439902163E-01
+    ...
 
 ## The convergence study with respect to k-points
 
@@ -117,15 +117,15 @@ while *tbase4_2.abo* is a reference output file:
 
 {% dialog tests/tutorial/Refs/tbase4_2.abo %}
 
-The run might take about thirty seconds on a PC 3 GHz.
+The run might take a few seconds on a modern PC.
 
 You will see that, **for the particular value** [[tsmear]] = 0.05 Ha, the lattice parameter
 is already converged with [[nkpt]] = 10:
 
-    acell1     7.5588968086E+00  7.5588968086E+00  7.5588968086E+00 Bohr
-    acell2     7.5070431499E+00  7.5070431499E+00  7.5070431499E+00 Bohr
-    acell3     7.5016877756E+00  7.5016877756E+00  7.5016877756E+00 Bohr
-    acell4     7.4992662653E+00  7.4992662653E+00  7.4992662653E+00 Bohr
+  acell1     7.6023827082E+00  7.6023827082E+00  7.6023827082E+00 Bohr
+  acell2     7.5627822506E+00  7.5627822506E+00  7.5627822506E+00 Bohr
+  acell3     7.5543007304E+00  7.5543007304E+00  7.5543007304E+00 Bohr
+  acell4     7.5529744581E+00  7.5529744581E+00  7.5529744581E+00 Bohr
 
 Note that there is usually a **strong** cross-convergence effect between the number of
 k-points and the value of the broadening, [[tsmear]].
@@ -156,18 +156,18 @@ while *tbase4_3.abo* is the reference output file.
 
 From the output file, here is the evolution of [[acell]]:
 
-    acell11    7.5587661702E+00  7.5587661702E+00  7.5587661702E+00 Bohr
-    acell12    7.5587696944E+00  7.5587696944E+00  7.5587696944E+00 Bohr
-    acell13    7.5587696871E+00  7.5587696871E+00  7.5587696871E+00 Bohr
-    acell14    7.5587710578E+00  7.5587710578E+00  7.5587710578E+00 Bohr
-    acell21    7.5055168997E+00  7.5055168997E+00  7.5055168997E+00 Bohr
-    acell22    7.5056781966E+00  7.5056781966E+00  7.5056781966E+00 Bohr
-    acell23    7.5018335937E+00  7.5018335937E+00  7.5018335937E+00 Bohr
-    acell24    7.5041510220E+00  7.5041510220E+00  7.5041510220E+00 Bohr
-    acell31    7.4963466654E+00  7.4963466654E+00  7.4963466654E+00 Bohr
-    acell32    7.4957099831E+00  7.4957099831E+00  7.4957099831E+00 Bohr
-    acell33    7.4969520318E+00  7.4969520318E+00  7.4969520318E+00 Bohr
-    acell34    7.4993529673E+00  7.4993529673E+00  7.4993529673E+00 Bohr
+    acell11    7.6022357792E+00  7.6022357792E+00  7.6022357792E+00 Bohr
+    acell12    7.6022341271E+00  7.6022341271E+00  7.6022341271E+00 Bohr
+    acell13    7.6022341214E+00  7.6022341214E+00  7.6022341214E+00 Bohr
+    acell14    7.6022357148E+00  7.6022357148E+00  7.6022357148E+00 Bohr
+    acell21    7.5604102145E+00  7.5604102145E+00  7.5604102145E+00 Bohr
+    acell22    7.5605496029E+00  7.5605496029E+00  7.5605496029E+00 Bohr
+    acell23    7.5565044147E+00  7.5565044147E+00  7.5565044147E+00 Bohr
+    acell24    7.5593333886E+00  7.5593333886E+00  7.5593333886E+00 Bohr
+    acell31    7.5483073963E+00  7.5483073963E+00  7.5483073963E+00 Bohr
+    acell32    7.5482393302E+00  7.5482393302E+00  7.5482393302E+00 Bohr
+    acell33    7.5497784006E+00  7.5497784006E+00  7.5497784006E+00 Bohr
+    acell34    7.5521340033E+00  7.5521340033E+00  7.5521340033E+00 Bohr
 
 These data should be analyzed properly. For [[tsmear]] = 0.01, the converged value,
 contained in *acell31*, must be compared to *acell11* and *acell21*:
@@ -188,31 +188,24 @@ For that particular value of *tsmear*, one can use the second k-point grid, givi
 In what follows, we will stick to these values of [[ecut]] and [[tsmear]] and try to use k-point grids with a similar resolution.
 
 Our final value for the aluminum lattice parameter, in the LDA, using the *Al.psp8* pseudopotential,
-is thus 7.5041 Bohr.
-
-!!! note
-
-    For historical reasons (consistency with older versions of the tutorial), we will work on the following,
-    with a slightly different value, of 7.5056 Bohr, that is 3.9718 Angstrom.
-    The experimental value at 25 degree Celsius is 4.04958 Angstrom.
+is thus 7.5593 Bohr, which corresponds to 4.0002 Angstrom. The experimental value at 25 Celsius is 4.04958 Angstrom, hence our theoretical value has an error of 1.2%. We caution that converged parameters should be used to properly assess the accuracy of a pseudopotential and functional.
 
 The associated total energy and accuracy can be deduced from:
 
-    etotal11   -2.0916027819E+00
-    etotal12   -2.0931968906E+00
-    etotal13   -2.0947909992E+00
-    etotal14   -2.0963851177E+00
-    etotal21   -2.0969713557E+00
-    etotal22   -2.0975525285E+00
-    etotal23   -2.0978233733E+00
-    etotal24   -2.0979980153E+00
-    etotal31   -2.0983520905E+00
-    etotal32   -2.0983215368E+00
-    etotal33   -2.0983305960E+00
-    etotal34   -2.0984218116E+00
+    etotal11   -2.3516656074E+00
+    etotal12   -2.3532597160E+00
+    etotal13   -2.3548538247E+00
+    etotal14   -2.3564479440E+00
+    etotal21   -2.3568282638E+00
+    etotal22   -2.3574128355E+00
+    etotal23   -2.3576771874E+00
+    etotal24   -2.3578584768E+00
+    etotal31   -2.3582092001E+00
+    etotal32   -2.3581800122E+00
+    etotal33   -2.3581917663E+00
+    etotal34   -2.3582884106E+00
 
-**etotal** 24 is -2.0979980153E+00 Ha, with an accuracy of 0.0005 Ha.
-
+**etotal** 24 is -2.3578584768E+00 Ha, with an accuracy of 0.0005 Ha.
 
 !!! tip
 
@@ -267,9 +260,9 @@ Note also the input variables [[rprim]] and [[chkprim]] in this input file.
 Now run *tbase4_4.abi* (the reference file is *$ABI_TESTS/tutorial/Refs/tbase4_4.abo*).
 You should find the following total energy:
 
-    etotal     -4.1962972610E+00
+    etotal     -4.7164794308E+00
 
-It is not exactly twice the total energy for the primitive cell, mentioned above, but the difference is less than 0.0005 Ha.
+It is not exactly twice the total energy for the primitive cell, mentioned above, but the difference is less than 0.001 Ha.
 It is due to the different FFT grids used in the two runs, and affect the exchange-correlation energy.
 These grids are always homogeneous primitive 3D grids, so that changing the orientation of the lattice
 will give mutually incompatible lattices. Increasing the size of the FFT grid would improve the agreement.
@@ -306,24 +299,28 @@ while *tbase4_5.abo* is the reference output file.
 
 {% dialog tests/tutorial/Refs/tbase4_5.abo %}
 
-The run might last one minute.
+The run will take a few second on a modern PC.
 
 The total energy after the first SCF cycle, when the atomic positions are equal to their starting values, is:
+
+    ETOT  5  -7.0427135007667
 
     ETOT  6  -6.2619738807344
 
 The total energy of three aluminum atoms in the bulk,
-(from section 4.3, etotal24 multiplied by three) is -6.293994 Ha.
+(from section 4.3, etotal24 multiplied by three) is -7.0735754304 Ha.
 Comparing the non-relaxed slab energy and the bulk energy, one obtains
 the non-relaxed surface energy, per surface unit cell (there are two surfaces in our simulation cell!),
-namely 0.016010 Ha = 0.436 eV.
+namely 0.01543 Ha = 0.420 eV.
 
 The total energy after the Broyden relaxation is:
+
+    etotal     -7.0429806856E+00
 
     etotal     -6.2622251508E+00
 
 The relaxed surface energy, per surface unit cell, is obtained by comparing the bulk energy and the
-relaxed slab energy, and gives 0.015885 Ha = 0.432eV.
+relaxed slab energy, and gives 0.015297 Ha = 0.416 eV.
 It seems that the relaxation energy is very small, compared to the surface energy, but we need to do the convergence studies.
 
 ## Surface energy: increasing the number of vacuum layers
@@ -341,7 +338,7 @@ while *tbase4_6.abo* is the reference output file.
 
 {% dialog tests/tutorial/Refs/tbase4_6.abo %}
 
-The run is on the order of thirty seconds on a PC 3 GHz.
+The run is on the order of of few seconds on a modern PC.
 
 In the Broyden step 0 of the first dataset, you will notice the WARNING:
 
