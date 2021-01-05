@@ -399,10 +399,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    end if
  end if ! finite_field
 
-  !LTEST
-!  write(999,'(a,es17.8e3)') 'vloc',sum(abs(gs_hamk%vlocal))
-!  write(999,'(a,es17.8e3)') 'kin',sum(abs(gs_hamk%kinpw_k))
-  !LTEST
 
  ! ======================================================================
  ! If generalized eigenproblem: has to know <g|S|c> for all
@@ -431,11 +427,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &         1,isppol,mband,1,natom,1,mband,dimlmn,nspinor,nsppol,0,&
 &         mpicomm=spaceComm_distrb,proc_distrb=mpi_enreg%proc_distrb)
        else
-         !LTEST
-!         call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,&
-!           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
-!         ghc=zero
-         !LTEST
          call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,&
            &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
        end if
@@ -490,10 +481,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        call cg_zcopy(npw*nspinor,gsc(1,1+igsc_shift),scwavef)
      end if
 
-     !LTEST
-!     write(999,'(a,i5)') 'iband',iband
-!     write(999,'(a,es17.8e3)') 'cwave 1',sum(abs(cwavef))
-     !LTEST
 
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
      ! WARNING : It might be interesting to skip the following operation.
@@ -508,9 +495,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        xnorm=one/sqrt(abs(dotr))
        call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
      end if
-     !LTEST
-!     write(999,'(a,es17.8e3)') 'cwavef 2',sum(abs(cwavef))
-     !LTEST
 
      if (prtvol==-level) then
        write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
@@ -624,11 +608,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (prtvol==-level) then
            write(message,'(a,i0,2es21.10e3)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
            call wrtout(std_out,message,'PERS')
-           !LTEST
-!           write(999,'(a,es17.8e3)') 'eval',eval
-!           flush(999)
-!           MSG_ERROR('stop here')
-           !LTEST
          end if
 
          ! ======================================================================
@@ -766,9 +745,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! Projecting again out all bands (not normalized).
          call projbd(cg,direc,-1,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
 &         gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
-         !LTEST
-         !write(std_out,'(a,es21.10e3)') 'direc',sum(abs(direc))
-         !LTEST
 
          ! ======================================================================
          ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
@@ -838,10 +814,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          else
            call dotprod_g(dotr,doti,istwf_k,npw*nspinor,3,cwavef,conjgr,me_g0,mpi_enreg%comm_spinorfft)
          end if
-         !LTEST
-         !write(std_out,'(a,es21.10e3)') 'dotr',dotr
-         !write(std_out,'(a,es21.10e3)') 'doti',doti
-         !LTEST
 
          ! Project the conjugated gradient onto the current band
          ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
@@ -860,11 +832,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
            end do
          end if
-         !LTEST
-         !write(std_out,'(a,es21.10e3)') 'cwavef',sum(abs(cwavef))
-         !write(std_out,'(a,es21.10e3)') 'conjgr',sum(abs(conjgr))
-         !write(std_out,'(a,es21.10e3)') 'direc ',sum(abs(direc))
-         !LTEST
          ! In case of generalized eigenproblem, normalization of direction vector
          ! cannot be done here (because S|D> is not known here).
          if (.not.gen_eigenpb) then
@@ -910,9 +877,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            call dotprod_g(dotr,doti,istwf_k,npw*nspinor,1,direc,gs_direc,me_g0,mpi_enreg%comm_spinorfft)
            xnorm=one/sqrt(abs(dotr))
          end if
-         !LTEST
-         !write(std_out,'(a,es21.10e3)') 'xnorm (D)',xnorm
-         !LTEST
 
          ! Compute dhc = Re{<D|H|C>}
          call dotprod_g(dhc,doti,istwf_k,npw*nspinor,1,direc,ghc,me_g0,mpi_enreg%comm_spinorfft)
