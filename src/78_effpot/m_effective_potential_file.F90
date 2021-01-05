@@ -3434,7 +3434,7 @@ end subroutine effective_potential_file_readMDfile
 !!
 !! SOURCE
 
-subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose)
+subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose,sc_size)
 
 !Arguments ------------------------------------
 !scalars
@@ -3444,6 +3444,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
  integer,optional,allocatable,intent(inout) :: iatfix(:,:)
+ integer,optional,intent(in) :: sc_size(3)
 !Local variables-------------------------------
 !scalar
  integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncells,nstep_hist
@@ -3473,33 +3474,37 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
 
- do ia=1,3
-   scale_cell(:) = 0
-   do ii=1,3
-     if(abs(rprimd_ref(ii,ia)) > tol10)then
-       scale_cell(ii) = nint(rprimd_hist(ii,ia) / rprimd_ref(ii,ia))
-     end if
-   end do
-!  Check if the factor for the supercell is revelant
-   revelant_factor = .TRUE.
-   do ii=1,3
-     if(abs(scale_cell(ii)) < tol10) cycle
-     factor = abs(scale_cell(ii))
-     do jj=ii,3
-       if(abs(scale_cell(jj)) < tol10) cycle
-       if(abs(abs(scale_cell(ii))-abs(scale_cell(jj))) > tol10) revelant_factor = .FALSE.
-     end do
-   end do
-   if(.not.revelant_factor)then
-     write(msg, '(3a)' )&
-&         'unable to map the hist file ',ch10,&
-&         'Action: check/change your MD file'
-     MSG_ERROR(msg)
-   else
-     ncell(ia) = int(factor)
-   end if
- end do
-
+ if(present(sc_size))then 
+    ncell(:) = sc_size 
+ else 
+    do ia=1,3
+      scale_cell(:) = 0
+      do ii=1,3
+        if(abs(rprimd_ref(ii,ia)) > tol10)then
+          scale_cell(ii) = nint(rprimd_hist(ii,ia) / rprimd_ref(ii,ia))
+        end if
+      end do
+!     Check if the factor for the supercell is revelant
+      revelant_factor = .TRUE.
+      do ii=1,3
+        if(abs(scale_cell(ii)) < tol10) cycle
+        factor = abs(scale_cell(ii))
+        do jj=ii,3
+          if(abs(scale_cell(jj)) < tol10) cycle
+          if(abs(abs(scale_cell(ii))-abs(scale_cell(jj))) > tol10) revelant_factor = .FALSE.
+        end do
+      end do
+      if(.not.revelant_factor)then
+        write(msg, '(3a)' )&
+&            'unable to map the hist file ',ch10,&
+&            'Action: check/change your MD file'
+        MSG_ERROR(msg)
+      else
+        ncell(ia) = int(factor)
+      end if
+    end do
+ end if 
+ 
  ncells = product(ncell)
 
 !Check if the energy stored in the hist is revelant, sometimes some MD files gives

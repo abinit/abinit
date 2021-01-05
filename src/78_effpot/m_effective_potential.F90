@@ -2309,10 +2309,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     end if
   end if
   do ii=1,3
-    if(eff_pot%supercell%rlatt(ii,ii)<0.or.eff_pot%supercell%rlatt(ii,ii)>50)then
+    if(eff_pot%supercell%rlatt(ii,ii)<0.or.eff_pot%supercell%rlatt(ii,ii)>100)then
       write(msg, '(a,i0,a,i2,a,a,a,i0,a)' )&
 &     'eff_pot%supercell%rlatt(',ii,') is ',int(eff_pot%supercell%rlatt(ii,ii)),&
-&     ', which is lower than 0 of superior than 10.',ch10,'Action: correct ncell(',ii,').'
+&     ', which is lower than 0 or superior than 100.',ch10,'Action: correct ncell(',ii,').'
       MSG_ERROR(msg)
     end if
   end do

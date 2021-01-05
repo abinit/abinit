@@ -277,7 +277,7 @@ ABI_DEALLOCATE(xcart)
    dtset%ph_nqshift = inp%nqshft
    dtset%prtxml = 0     ! print the xml
    dtset%signperm = 1   ! SIGN of PERMutation potential
-   dtset%strprecon = 1  ! STRess PRECONditioner
+   dtset%strprecon = inp%strprecon  ! STRess PRECONditioner
    dtset%supercell_latt(:) = 0
    do ii=1,3
      dtset%supercell_latt(ii) = sc_size(ii)
@@ -619,7 +619,7 @@ ABI_DEALLOCATE(xcart)
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp)     
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:))     
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then

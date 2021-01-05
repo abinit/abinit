@@ -194,7 +194,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,verbose,writeHIST,scup_dtset)
+& effective_potential,filename_ddb,verbose,writeHIST,scup_dtset,sc_size)
 
 !Arguments ------------------------------------
 !scalars
@@ -213,6 +213,7 @@ real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
 type(scup_dtset_type),optional, intent(inout) :: scup_dtset
+integer,optional,intent(in) :: sc_size(3)
 
 !Local variables-------------------------------
 !scalars
@@ -351,7 +352,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !  If restarxf specifies to start to the last iteration
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then 
      if(present(effective_potential))then
-       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose,sc_size) ! Map Hist to Ref to order atoms
        xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
        hist%ihist = 1 
      end if
@@ -615,7 +616,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !          (done in pred_montecarlo)
            name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
-               if(icycle==1)call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+               if(icycle==1)call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,need_verbose,sc_size=sc_size) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
                hist%ihist = 1
              end if

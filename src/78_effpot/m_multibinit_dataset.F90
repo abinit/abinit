@@ -173,6 +173,7 @@ module m_multibinit_dataset
   real(dp) :: fit_tolMSDE
   real(dp) :: fit_tolMSDFS
   real(dp) :: fit_tolGF
+  real(dp) :: strprecon
   real(dp) :: strfact
   real(dp) :: temperature
   real(dp) :: rifcsph
@@ -408,6 +409,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%rfmeth=1
  multibinit_dtset%rifcsph=zero
  multibinit_dtset%strfact=100.0d0
+ multibinit_dtset%strprecon=1.0d0
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
  multibinit_dtset%test_effpot=0 
@@ -940,7 +942,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(multibinit_dtset%ts_option<0.or.multibinit_dtset%ts_option>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'ts_option is',multibinit_dtset%ts_option,', but the only allowed values',ch10,&
-&   'are positives for multibinit.',ch10,&
+&   'are zero and one for multibinit.',ch10,&
 &   'Action: correct ts_option in your input file.'
    MSG_ERROR(message)
  end if
@@ -1219,10 +1221,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%optcell=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
  if(tread==1) multibinit_dtset%optcell=intarr(1)
- if(multibinit_dtset%optcell<0.or.multibinit_dtset%optcell>2)then
+ if(multibinit_dtset%optcell<0.or.multibinit_dtset%optcell>9)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'optcell is',multibinit_dtset%optcell,', but the only allowed values',ch10,&
-&   'are 0, 1 or 2.',ch10,&
+&   'are 0, 1, 2, 3, 4, 5, 6 , 7, 8, 9.',ch10,&
 &   'Action: correct optcell in your input file.'
    MSG_ERROR(message)
  end if
@@ -1764,6 +1766,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'strfact is ',multibinit_dtset%strfact,'. The only allowed values',ch10,&
 &   'are positives values.',ch10,&
 &   'Action: correct strfact in your input file.'
+   MSG_ERROR(message)
+ end if
+ 
+ multibinit_dtset%strprecon=1.0d0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strprecon',tread,'DPR')
+ if(tread==1) multibinit_dtset%strprecon=dprarr(1)
+ if(multibinit_dtset%strprecon<tol8 .or. multibinit_dtset%strprecon >1.0d0)then
+   write(message, '(a,f10.1,a,a,a,a,a)' )&
+&   'strprecon is ',multibinit_dtset%strprecon,'. The only allowed values',ch10,&
+&   'are positives values smaller or equal than 1.',ch10,&
+&   'Action: correct strprecon in your input file.'
    MSG_ERROR(message)
  end if
 
