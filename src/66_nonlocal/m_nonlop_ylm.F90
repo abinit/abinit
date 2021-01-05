@@ -483,10 +483,6 @@ contains
  check=(maxval(indlmn(6,:,:))<=1)
  ABI_CHECK(check,'BUG: spin-orbit not yet allowed')
 
-!new algo not allowed for choice>3
- check=nloalg(1)==2.or.choice<=3
- ABI_CHECK(check,'BUG: blas implementation allowed for choice<=3 only (for the moment)')
-
 !Test: size of blocks of atoms
  mincat=min(NLO_MINCAT,maxval(nattyp))
  if (nloalg(2)<=0.and.mincat>matblk) then
@@ -744,17 +740,10 @@ contains
 !      Allocate memory for projected scalars
        ABI_ALLOCATE(gx,(cplex,nlmn,nincat,nspinor))
        ABI_ALLOCATE(gxfac,(cplex_fac,nlmn,nincat,nspinor))
-       if (nloalg(1)==2) then
-         ABI_ALLOCATE(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor))
-         ABI_ALLOCATE(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor))
-         ABI_ALLOCATE(d2gxdtfac,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor))
-         ABI_ALLOCATE(dgxdtfac,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor))
-       else
-         ABI_ALLOCATE(dgxdt,(cplex,nlmn,ndgxdt,nincat,nspinor))
-         ABI_ALLOCATE(d2gxdt,(cplex,nlmn,nd2gxdt,nincat,nspinor))
-         ABI_ALLOCATE(d2gxdtfac,(cplex_fac,nlmn,nd2gxdtfac,nincat,nspinor))
-         ABI_ALLOCATE(dgxdtfac,(cplex_fac,nlmn,ndgxdtfac,nincat,nspinor))
-       end if
+       ABI_ALLOCATE(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor))
+       ABI_ALLOCATE(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor))
+       ABI_ALLOCATE(d2gxdtfac,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor))
+       ABI_ALLOCATE(dgxdtfac,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor))
        gx(:,:,:,:)=zero;gxfac(:,:,:,:)=zero
        if (ndgxdt>0) dgxdt(:,:,:,:,:)=zero
        if (ndgxdtfac>0) dgxdtfac(:,:,:,:,:)=zero
@@ -762,13 +751,8 @@ contains
        if (nd2gxdtfac>0) d2gxdtfac(:,:,:,:,:)=zero
        if (paw_opt>=3) then
          ABI_ALLOCATE(gxfac_sij,(cplex,nlmn,nincat,nspinor))
-         if (nloalg(1)==2) then
-           ABI_ALLOCATE(dgxdtfac_sij,(cplex,ndgxdtfac,nlmn,nincat,nspinor))
-           ABI_ALLOCATE(d2gxdtfac_sij,(cplex,nd2gxdtfac,nlmn,nincat,nspinor))
-         else
-           ABI_ALLOCATE(dgxdtfac_sij,(cplex,nlmn,ndgxdtfac,nincat,nspinor))
-           ABI_ALLOCATE(d2gxdtfac_sij,(cplex,nlmn,nd2gxdtfac,nincat,nspinor))
-         end if
+         ABI_ALLOCATE(dgxdtfac_sij,(cplex,ndgxdtfac,nlmn,nincat,nspinor))
+         ABI_ALLOCATE(d2gxdtfac_sij,(cplex,nd2gxdtfac,nlmn,nincat,nspinor))
          gxfac_sij(:,:,:,:)=zero
          if (ndgxdtfac>0) dgxdtfac_sij(:,:,:,:,:)=zero
          if (nd2gxdtfac>0) d2gxdtfac_sij(:,:,:,:,:) = zero
