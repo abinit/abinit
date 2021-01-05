@@ -88,8 +88,8 @@ contains
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5,signs=2)
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
-!!                        - strain component (1:9) in the case (choice=33,signs=2) 
-!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                        - strain component (1:9) in the case (choice=33,signs=2)
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient
 !!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
 !!  istwf_k=option parameter that describes the storage of wfs
@@ -107,7 +107,7 @@ contains
 !!  npw=number of plane waves in reciprocal space
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  ph3d(2,npw,matblk)=three-dimensional phase factors
-!!  [qdir]= optional, direction of the q-gradient (only for choice=22 choice=25 and choice=33) 
+!!  [qdir]= optional, direction of the q-gradient (only for choice=22 choice=25 and choice=33)
 !!  signs=chooses possible output:
 !!   signs=1: compute derivatives in all directions
 !!   signs=2: compute derivative in direction IDIR only
@@ -168,7 +168,8 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
 !arrays
  integer,intent(in) :: indlmn(6,nlmn),nloalg(3)
  integer,intent(out) :: cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
- real(dp),intent(in) :: ffnl(npw,dimffnl,nlmn),kpg(npw,nkpg),ph3d(2,npw,matblk)
+ real(dp),intent(in),target :: ffnl(npw,dimffnl,nlmn)
+ real(dp),intent(in) :: kpg(npw,nkpg),ph3d(2,npw,matblk)
  real(dp),intent(in) :: vect(:,:)
  real(dp),intent(out) :: d2gxdt(cplex,nd2gxdt,nlmn,nincat,nspinor)
  real(dp),intent(out) :: dgxdt(cplex,ndgxdt,nlmn,nincat,nspinor),gx(cplex,nlmn,nincat,nspinor)
@@ -179,6 +180,7 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
  integer :: ierr,igamma,il,ilmn,ipw,ipw0,ipwshft,ispinor,jpw,mu,mu0
  integer :: mua,mub,ndir,nthreads,nua1,nua2,nub1,nub2
  real(dp), parameter :: two_pi2=two_pi*two_pi
+ real(dp) :: buffer,fact
  real(dp) :: aux_i,aux_i2,aux_i3,aux_i4
  real(dp) :: aux_r,aux_r2,aux_r3,aux_r4
  real(dp) :: buffer_i1,buffer_i2,buffer_i3,buffer_i4,buffer_i5,buffer_i6
@@ -196,21 +198,26 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
  integer :: ffnl_dir(2)
  real(dp) :: tsec(2)
 ! real(dp),allocatable :: kpg(:,:)
- real(dp),allocatable :: scali(:),scalr(:),scalari(:,:),scalarr(:,:),scalr_lmn(:),scali_lmn(:)
+ real(dp),pointer :: ffnl_loc(:,:)
+ real(dp),allocatable,target :: scali(:),scalr(:)
+ real(dp),pointer :: scal_pointer(:)
+ real(dp),allocatable :: scalari(:,:),scalarr(:,:),scalr_lmn(:),scali_lmn(:)
  complex(dp) :: ctmp,cil(4)
 ! *************************************************************************
 
  if (choice==-1) return
 
+ call timab(1130,1,tsec)
+
  if (abs(choice)>1) then
    MSG_ERROR('Only abs(choice)<=1 is available for now.')
  end if
- if (cplex/=2) then
-   MSG_ERROR('Only cplex=2 is available for now.')
- end if
- if (istwf_k/=1) then
-   MSG_ERROR('Only istwf_k=1 is available for now.')
- end if
+! if (cplex/=2) then
+!   MSG_ERROR('Only cplex=2 is available for now.')
+! end if
+! if (istwf_k/=1) then
+!   MSG_ERROR('Only istwf_k=1 is available for now.')
+! end if
 
 !Useful variables
  choice_=abs(choice)
@@ -272,6 +279,15 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
  ABI_ALLOCATE(scalr_lmn,(nlmn))
  ABI_ALLOCATE(scali_lmn,(nlmn))
 
+ ffnl_loc => ffnl(:,1,:)
+! ABI_ALLOCATE(ffnl_loc,(nlmn,npw))
+! ffnl_loc(:,:)=ffnl(:,1,:)
+! do ipw=1,npw
+!   do ilmn=1,nlmn
+!     ffnl_loc(ilmn,ipw) = ffnl(ipw,1,ilmn)
+!   end do
+! end do
+
 ! i^l
  cil(1) = ( 1.0_DP, 0.0_DP) * wt
  cil(2) = ( 0.0_DP, 1.0_DP) * wt
@@ -286,6 +302,7 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
    do ia=1,nincat
      iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 !    Compute c(g).exp(2pi.i.g.R)
+     call timab(1131,1,tsec)
      do ipw=ipw0,npw
        jpw=ipw+ipwshft
        scalr(ipw)=(vect(1,jpw)*ph3d(1,ipw,iaph3d)-vect(2,jpw)*ph3d(2,ipw,iaph3d))
@@ -296,6 +313,7 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
        scalr(1)=half*vect(1,1+ipwshft)*ph3d(1,1,iaph3d)
        scali(1)=half*vect(1,1+ipwshft)*ph3d(2,1,iaph3d)
      end if
+     call timab(1131,2,tsec)
 
 !    --------------------------------------------------------------------
 !    ALL CHOICES:
@@ -304,23 +322,73 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
 
      if (choice>=0) then
 
-       call DGEMV('T',npw,nlmn,1.0_DP,ffnl(:,1,:),npw,scalr,1,0.0_DP,scalr_lmn,1)
-       call DGEMV('T',npw,nlmn,1.0_DP,ffnl(:,1,:),npw,scali,1,0.0_DP,scali_lmn,1)
-!       scalr_lmn(:)=0.0_DP
-!       scali_lmn(:)=0.0_DP
-!       do ilmn=1,nmln
-!         do ipw=1,npw
-!           scalr_lmn(ilmn) = scalr_lmn(ilmn) + scalr(ipw) * ffnl(ipw,1,ilmn)
-!           scali_lmn(ilmn) = scali_lmn(ilmn) + scali(ipw) * ffnl(ipw,1,ilmn)
-!         end do                  
-!       end do
-       do ilmn=1,nlmn
-         il=mod(indlmn(1,ilmn),4)+1
-         ctmp = cil(il) * cmplx(scalr_lmn(ilmn),scali_lmn(ilmn),kind=DP)
-         gx(1,ilmn,ia,ispinor) = real(ctmp)
-         gx(2,ilmn,ia,ispinor) = aimag(ctmp)
-       end do
+       if (cplex==2) then
+         call timab(1132,1,tsec)
+         if (nloalg(1)==3) then
+           scalr_lmn(:)=0.0_DP
+           scali_lmn(:)=0.0_DP
+           do ilmn=1,nlmn
+             do ipw=1,npw
+               scalr_lmn(ilmn) = scalr_lmn(ilmn) + scalr(ipw) * ffnl_loc(ipw,ilmn)
+               scali_lmn(ilmn) = scali_lmn(ilmn) + scali(ipw) * ffnl_loc(ipw,ilmn)
+             end do
+           end do
+         else if (nloalg(1)==4) then
+           call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scalr,1,0.0_DP,scalr_lmn,1)
+           call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scali,1,0.0_DP,scali_lmn,1)
+         end if
+         call timab(1132,2,tsec)
+         call timab(1133,1,tsec)
+         do ilmn=1,nlmn
+           il=mod(indlmn(1,ilmn),4)+1
+           ctmp = cil(il) * cmplx(scalr_lmn(ilmn),scali_lmn(ilmn),kind=DP)
+           gx(1,ilmn,ia,ispinor) = real(ctmp)
+           gx(2,ilmn,ia,ispinor) = aimag(ctmp)
+         end do
+         call timab(1133,2,tsec)
+       else ! cplex==1
+         do ilmn=1,nlmn
+           il=mod(indlmn(1,ilmn),4)+1
+           ctmp = cil(il)
+           buffer = zero
+           if (real(ctmp)>tol14) then
+             scal_pointer => scalr
+             fact = real(ctmp)
+           end if
+           if (aimag(ctmp)>tol14) then
+             scal_pointer => scali
+             fact = aimag(ctmp)
+           end if
+           do ipw=1,npw
+             buffer = buffer + scal_pointer(ipw) * ffnl_loc(ipw,ilmn)
+           end do
+           gx(1,ilmn,ia,ispinor) = fact * buffer
+         end do
+       end if
 
+     end if
+
+!    --------------------------------------------------------------------
+!    CHOICE= 2, 4, 6, 23, 24, 54  --  SIGNS= 1
+!    Accumulate dGxdt --- derivative wrt atm pos. --- for all directions
+!    --------------------------------------------------------------------
+     if (signs==1) then
+       call timab(1132,1,tsec)
+       if (nloalg(1)==3) then
+         scalr_lmn(:)=0.0_DP
+         scali_lmn(:)=0.0_DP
+         do ilmn=1,nlmn
+           do ipw=1,npw
+             scalr_lmn(ilmn) = scalr_lmn(ilmn) + scalr(ipw) * ffnl_loc(ipw,ilmn)
+             scali_lmn(ilmn) = scali_lmn(ilmn) + scali(ipw) * ffnl_loc(ipw,ilmn)
+           end do
+         end do
+       else if (nloalg(1)==4) then
+         call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scalr,1,0.0_DP,scalr_lmn,1)
+         call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scali,1,0.0_DP,scali_lmn,1)
+       end if
+       call timab(1132,2,tsec)
+       
      end if
 
    end do ! End loop on atoms
@@ -349,6 +417,8 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
    end if
    call timab(48,2,tsec)
  end if
+
+ call timab(1130,2,tsec)
 
 end subroutine opernla_ylm_blas
 !!***

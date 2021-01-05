@@ -853,15 +853,45 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1021)='listkk                          '; basic(1021) = 1
 
  names(1100)='nonlop_ylm                      '
- names(1101)='nlylm%opernla                   '
- names(1102)='nlylm%opernla_blas              '
- names(1103)='nlylm%opernlb                   '
- names(1104)='nlylm%opernlb_blas              '
- names(1105)='nlylm%opernlc                   '
- names(1106)='nlylm%opernld                   '
- names(1107)='nlylm%opernld(left)             '
- names(1108)='nlylm%opernld(left+im)          '
- names(1150)='nlylm(other)                    '
+ names(1101)='nonlop_ylm%opernla              '
+ names(1102)='nonlop_ylm%opernla_blas         '
+ names(1103)='nonlop_ylm%opernlb              '
+ names(1104)='nonlop_ylm%opernlb_blas         '
+ names(1105)='nonlop_ylm%opernlc              '
+ names(1106)='nonlop_ylm%opernld              '
+ names(1107)='nonlop_ylm%opernld(l)           '
+ names(1108)='nonlop_ylm%opernld(l+im)        '
+ names(1119)='nonlop_ylm(other)               '
+
+ names(1120)='opernla                         '
+ names(1121)='opernla%scal                    '
+ names(1122)='opernla%scal_lmn                '
+ names(1123)='opernla%gx                      '
+ names(1124)='opernla(other)                  '
+
+ names(1130)='opernla_blas                    '
+ names(1131)='opernla_blas%scal               '
+ names(1132)='opernla_blas%scal_lmn           '
+ names(1133)='opernla_blas%gx                 '
+ names(1134)='opernla_blas(other)             '
+
+ names(1140)='opernlb                         '
+ names(1141)='opernlb%gxfac_                  '
+ names(1142)='opernlb%gxfacs_                 '
+ names(1143)='opernlb%scal_fac                '
+ names(1144)='opernlb%scal_facs               '
+ names(1145)='opernlb%vect                    '
+ names(1146)='opernlb%vects                   '
+ names(1147)='opernlb(other)                  '
+
+ names(1150)='opernlb_blas                    '
+ names(1151)='opernlb_blas%gxfac_             '
+ names(1152)='opernlb_blas%gxfacs_            '
+ names(1153)='opernlb_blas%scal_fac           '
+ names(1154)='opernlb_blas%scal_facs          '
+ names(1155)='opernlb_blas%vect               '
+ names(1156)='opernlb_blas%vects              '
+ names(1157)='opernlb_blas(other)             '
 
  names(1200)='getcprj                         '; basic(1200) = 1
  names(1201)='getcprj%opernla                 '
@@ -1281,20 +1311,32 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
    case(45)
 !      Estimate the complement of nonlop_ylm
-     tslots(:10)=(/1150,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
+     tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
    case(46)
+    ! opernla(other)
+     tslots(:5)=(/1124,1120,-1121,-1122,-1123/)
+   case(47)
+     ! opernla_blas(other)
+     tslots(:5)=(/1134,1130,-1131,-1132,-1133/)
+   case(48)
+     ! opernlb(other)
+     tslots(:8)=(/1147,1140,-1141,-1142,-1143,-1144,-1145,-1146/)
+   case(49)
+     ! opernlb_blas(other)
+     tslots(:8)=(/1157,1150,-1151,-1152,-1153,-1154,-1155,-1156/)
+   case(50)
 !      Estimate the complement of getcprj
      tslots(:4)=(/1210,1200,-1201,-1202/)
-   case(47)
+   case(51)
 !      Estimate the complement of cgwf_paw
      tslots(:10)=(/1301,1300,-1200,-1211,-1363,-1364,-1370,-201,-211,-880/)
-   case(48)
+   case(52)
 !      Sum calls of getcsc
      tslots(:3)=(/1360,1363,1364/)
-   case(49)
+   case(53)
 !      Estimate the complement of getcsc
      tslots(:4)=(/1362,1360,-1361,-236/)
-   case(50)
+   case(54)
 !      Estimate the complement of getchc
      tslots(:5)=(/1375,1370,-235,-1371,-1372/)
 
@@ -1688,15 +1730,27 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:10)=(/1300,1200,1211,1363,1364,1370,201,211,880,1301/)
          msg='cgwf_paw'
        case(80)
-         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1150/)
+         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)
          msg='nonlop_ylm'
        case(81)
+         list(:5)=(/1120,1121,1122,1123,1124/)
+         msg='opernla'
+       case(82)
+         list(:5)=(/1130,1131,1132,1133,1134/)
+         msg='opernla_blas'
+       case(83)
+         list(:8)=(/1140,1141,1142,1143,1144,1145,1146,1147/)
+         msg='opernlb'
+       case(84)
+         list(:8)=(/1150,1151,1152,1153,1154,1155,1156,1157/)
+         msg='opernlb_blas'
+       case(85)
          list(:4)=(/1200,1201,1202,1210/)
          msg='getcprj'
-       case(82)
+       case(86)
          list(:4)=(/1360,1361,236,1362/)
          msg='getcsc'
-       case(83)
+       case(87)
          list(:5)=(/1370,235,1371,1372,1375/)
          msg='getchc'
        case default

@@ -396,7 +396,7 @@ contains
  integer :: iatm,ic,idir1,idir2,ii,ierr,ilmn,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
  integer :: n1,n2,n3,nd2gxdt,ndat_left_,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
- real(dp) :: enlk
+ real(dp) :: enlk, tsec(2)
  logical :: check,testnl
  character(len=500) :: message
 !arrays
@@ -411,7 +411,6 @@ contains
  real(dp),allocatable :: sij_typ(:),strnlk(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: ffnlin_typ(:,:,:),ffnlout_typ(:,:,:),kpgin_(:,:),kpgout_(:,:)
- real(dp) :: tsec(2)
 
 ! **********************************************************************
 
@@ -749,11 +748,11 @@ contains
 
 !      Allocate memory for projected scalars
        ABI_ALLOCATE(gx,(cplex,nlmn,nincat,nspinor))
+       ABI_ALLOCATE(gxfac,(cplex_fac,nlmn,nincat,nspinor))
        ABI_ALLOCATE(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor))
        ABI_ALLOCATE(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor))
        ABI_ALLOCATE(d2gxdtfac,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor))
        ABI_ALLOCATE(dgxdtfac,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor))
-       ABI_ALLOCATE(gxfac,(cplex_fac,nlmn,nincat,nspinor))
        gx(:,:,:,:)=zero;gxfac(:,:,:,:)=zero
        if (ndgxdt>0) dgxdt(:,:,:,:,:)=zero
        if (ndgxdtfac>0) dgxdtfac(:,:,:,:,:)=zero
@@ -856,7 +855,7 @@ contains
 
 !      Computation or <p_lmn|c> (and derivatives) for this block of atoms
        if ((cpopt<4.and.choice_a/=-1.and.choice_a/=0).or.choice==8.or.choice==81) then
-         if (abs(choice_a)>1) then
+         if (abs(choice_a)>1.or.nloalg(1)==2) then
            call timab(1101,1,tsec)
            call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &           ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
@@ -978,7 +977,7 @@ contains
            if(nloalg(2)<=0) then
              call ph1d3d(ia3,ia4,kgout,matblk,natom,npwout,n1,n2,n3,phkxredout,ph1d,ph3dout)
            end if
-           if (abs(choice_b)>1) then
+           if (abs(choice_b)>1.or.nloalg(1)==2) then
              call timab(1103,1,tsec)
              call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &             d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&

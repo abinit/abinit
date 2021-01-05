@@ -30,6 +30,7 @@ module m_opernlb_ylm_blas
 #if defined HAVE_OPENMP
  use OMP_LIB
 #endif
+ use m_time,only : timab
 
  implicit none
 
@@ -69,8 +70,8 @@ contains
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5, 51, 52 and signs=2)
 !!                        - strain component (1:6) in the case (choice=2,signs=2) or (choice=6,signs=1)
-!!                        - strain component (1:9) in the case (choice=33,signs=2) 
-!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                        - strain component (1:9) in the case (choice=33,signs=2)
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient
 !!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
 !!  kpg(npw,nkpg)=(k+G) components (if nkpg=3).
@@ -99,7 +100,7 @@ contains
 !! SIDE EFFECTS
 !! --if (paw_opt=0)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
-!!                or one of its derivatives to the input vect.  
+!!                or one of its derivatives to the input vect.
 !!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
 !!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
 !!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
@@ -174,7 +175,8 @@ subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  real(dp),intent(in) :: dgxdtfac(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: dgxdtfac_sij(cplex,ndgxdtfac,nlmn,nincat*(paw_opt/3),nspinor)
  real(dp),intent(in) :: d2gxdtfac_sij(cplex,nd2gxdtfac,nlmn,nincat*(paw_opt/3),nspinor)
- real(dp),intent(in) :: ffnl(npw,dimffnl,nlmn),gxfac(cplex_fac,nlmn,nincat,nspinor)
+ real(dp),intent(in),target :: ffnl(npw,dimffnl,nlmn)
+ real(dp),intent(in) :: gxfac(cplex_fac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: gxfac_sij(cplex,nlmn,nincat,nspinor*(paw_opt/3))
  real(dp),intent(in) :: kpg(npw,nkpg),ph3d(2,npw,matblk)
  real(dp),intent(inout) :: svect(:,:),vect(:,:)
@@ -190,14 +192,18 @@ subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  integer,parameter :: idir1(9)=(/1,1,1,2,2,2,3,3,3/),idir2(9)=(/1,2,3,1,2,3,1,2,3/)
  integer,parameter :: nalpha(9)=(/1,2,3,3,3,2,2,1,1/),nbeta(9)=(/1,2,3,2,1,1,3,3,2/)
+ real(dp) :: tsec(2)
  real(dp),allocatable :: d2gxdtfac_(:,:,:),d2gxdtfacs_(:,:,:),dgxdtfac_(:,:,:),dgxdtfacs_(:,:,:),gxfac_(:,:),gxfacs_(:,:)
  real(dp),allocatable :: scalr(:),scali(:)
+ real(dp),pointer :: ffnl_loc(:,:)
 ! complex(dpc),allocatable :: ztab(:)
  complex(dp) :: ctmp, cil(4)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+ call timab(1150,1,tsec)
 
 !Nothing to do when choice=4, 6 or 23
  if (choice==4.or.choice==6.or.choice==23) return
@@ -232,6 +238,15 @@ subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  if (nthreads>1) then
    MSG_ERROR('Only nthreads=1 is available for now.')
  end if
+
+! ABI_ALLOCATE(ffnl_loc,(npw,nlmn))
+! ffnl_loc(:,:) = ffnl(:,1,:)
+ ffnl_loc => ffnl(:,1,:)
+! do ilmn=1,nlmn
+!   do ipw=1,npw
+!     ffnl_loc(ipw,ilmn) = ffnl(ipw,1,ilmn)
+!   end do
+! end do
 
  if (paw_opt/=3) then
    ABI_ALLOCATE(gxfac_,(nlmn,2))
@@ -282,6 +297,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
    do ia=1,nincat
      iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 !    Scale gxfac with 4pi/sqr(omega).(-i)^l
+     call timab(1151,1,tsec)
      if (paw_opt/=3) then
        do ilmn=1,nlmn
          il=mod(indlmn(1,ilmn),4)+1
@@ -290,8 +306,10 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          gxfac_(ilmn,2) = aimag(ctmp)
        end do
      end if
+     call timab(1151,2,tsec)
 
 !    Scale gxfac_sij with 4pi/sqr(omega).(-i)^l
+     call timab(1152,1,tsec)
      if (paw_opt>=3) then
        do ilmn=1,nlmn
          il=mod(indlmn(1,ilmn),4)+1
@@ -300,19 +318,35 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          gxfacs_(ilmn,2) = aimag(ctmp)
        end do
      end if
+     call timab(1152,2,tsec)
 
 !    Compute <g|Vnl|c> (or derivatives) for each plane wave:
 
      if (paw_opt/=3) then
 
-       call DGEMV('N',npw,nlmn,1.0_DP,ffnl(:,1,:),npw,gxfac_(:,1),1,0.0_DP,scalr,1)
-       call DGEMV('N',npw,nlmn,1.0_DP,ffnl(:,1,:),npw,gxfac_(:,2),1,0.0_DP,scali,1)
+       call timab(1153,1,tsec)
+       if (nloalg(1)==3) then
+         scalr(:) = zero
+         scali(:) = zero
+         do ilmn=1,nlmn
+           do ipw=1,npw
+             scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,1)
+             scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,2)
+           end do
+         end do
+       else if (nloalg(1)==4) then
+         call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,1),1,0.0_DP,scalr,1)
+         call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,2),1,0.0_DP,scali,1)
+       end if
+       call timab(1153,2,tsec)
 
+       call timab(1155,1,tsec)
        do ipw=1,npw
          jpw=ipw+ipwshft
          vect(1,jpw)=vect(1,jpw)+scalr(ipw)*ph3d(1,ipw,iaph3d)+scali(ipw)*ph3d(2,ipw,iaph3d)
          vect(2,jpw)=vect(2,jpw)-scalr(ipw)*ph3d(2,ipw,iaph3d)+scali(ipw)*ph3d(1,ipw,iaph3d)
        end do
+       call timab(1155,2,tsec)
 
      end if
 
@@ -320,14 +354,26 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
      if (paw_opt>=3) then
 
-       call DGEMV('N',npw,nlmn,1.0_DP,ffnl(:,1,:),npw,gxfacs_(:,1),1,0.0_DP,scalr,1)
-       call DGEMV('N',npw,nlmn,1.0_DP,ffnl(:,1,:),npw,gxfacs_(:,2),1,0.0_DP,scali,1)
+       call timab(1154,1,tsec)
+       !call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,1),1,0.0_DP,scalr,1)
+       !call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,2),1,0.0_DP,scali,1)
+       scalr(:) = zero
+       scali(:) = zero
+       do ilmn=1,nlmn
+         do ipw=1,npw
+           scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,1)
+           scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,2)
+         end do
+       end do
+       call timab(1154,2,tsec)
 
+       call timab(1156,1,tsec)
        do ipw=1,npw
          jpw=ipw+ipwshft
          svect(1,jpw)=svect(1,jpw)+scalr(ipw)*ph3d(1,ipw,iaph3d)+scali(ipw)*ph3d(2,ipw,iaph3d)
          svect(2,jpw)=svect(2,jpw)-scalr(ipw)*ph3d(2,ipw,iaph3d)+scali(ipw)*ph3d(1,ipw,iaph3d)
        end do
+       call timab(1156,2,tsec)
 
      end if
 
@@ -335,6 +381,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
    end do
  end do !  End loop on spinors
 
+! ABI_DEALLOCATE(ffnl_loc)
 ! ABI_DEALLOCATE(ztab)
  ABI_DEALLOCATE(scalr)
  ABI_DEALLOCATE(scali)
@@ -357,6 +404,8 @@ if (choice==33) two_piinv=1.0_dp/two_pi
      ABI_DEALLOCATE(d2gxdtfacs_)
    end if
  end if
+
+ call timab(1150,2,tsec)
 
  DBG_EXIT("COLL")
 
