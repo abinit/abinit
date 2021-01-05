@@ -45,7 +45,8 @@ module m_dfpt_vtowfk
  use m_spacepar,     only : meanvalue_g
  use m_dfpt_mkrho,   only : dfpt_accrho
  use m_dfpt_cgwf,    only : dfpt_cgwf
- use m_getghc,       only : getgsc
+ use m_getghc,       only : getgsc, getghc_nucdip
+ use m_getgh1c,      only : getgh1ndc
 
  implicit none
 
@@ -139,6 +140,10 @@ contains
 !!      energy from all bands at this k point.
 !!  eloc0_k(nband_k)=zero-order local contribution to 2nd-order total energy
 !!      from all bands at this k point.
+!!  end0_k(nband_k)=0-order nuclear dipole energy contribution to 2nd-order total
+!!      energy from all bands at this k point.
+!!  end1_k(nband_k)=1st-order nuclear dipole energy contribution to 2nd-order total
+!!      energy from all bands at this k point.
 !!  enl0_k(nband_k)=zero-order non-local contribution to 2nd-order total energy
 !!      from all bands at this k point.
 !!  enl1_k(nband_k)=first-order non-local contribution to 2nd-order total energy
@@ -167,7 +172,7 @@ contains
 subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & dim_eig2rf,dtfil,dtset,&
 & edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,&
-& ek0_k,ek1_k,eloc0_k,enl0_k,enl1_k,&
+& ek0_k,ek1_k,eloc0_k,end0_k,end1_k,enl0_k,enl1_k,&
 & fermie1,ffnl1,ffnl1_test,gh0c1_set,gh1c_set,grad_berry,gs_hamkq,&
 & ibg,ibgq,ibg1,icg,icgq,icg1,idir,ikpt,ipert,&
 & isppol,mband,mcgq,mcprjq,mkmem,mk1mem,&
@@ -207,7 +212,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  real(dp),intent(inout) :: edocc_k(nband_k),eeig0_k(nband_k),eig1_k(2*nband_k**2)
  real(dp),intent(out) :: ek0_k(nband_k),eloc0_k(nband_k)
  real(dp),intent(inout) :: ek1_k(nband_k)
- real(dp),intent(out) :: enl0_k(nband_k),enl1_k(nband_k)
+ real(dp),intent(out) :: end0_k(nband_k),end1_k(nband_k),enl0_k(nband_k),enl1_k(nband_k)
  real(dp),intent(out) :: resid_k(nband_k)
  type(pawcprj_type),intent(in) :: cprj(natom,nspinor*mband*mkmem*nsppol*gs_hamkq%usecprj)
  type(pawcprj_type),intent(in) :: cprjq(natom,mcprjq)
@@ -229,7 +234,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
- real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:)
+ real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:),ghc_vectornd(:,:)
  real(dp),allocatable :: gsc(:,:),gscq(:,:),gvnlx1(:,:),gvnlxc(:,:)
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj0(:,:),cwaveprj1(:,:)
@@ -447,6 +452,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        ek0_k(iband)=zero
        ek1_k(iband)=zero
        eeig0_k(iband)=zero
+       end0_k(iband)=zero
+       end1_k(iband)=zero
        enl0_k(iband)=zero
        enl1_k(iband)=zero
        eloc0_k(iband)=zero
@@ -465,6 +472,34 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          ek1_k(iband)=two*energy_factor*ar
        end if
 
+!      Compute the 0-order nuclear dipole contribution (with cwavef)
+!      only relevant for DDK
+       if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(gs_hamkq%vectornd)) ) then
+         ABI_ALLOCATE(ghc_vectornd,(2,npw_k))
+         ! ndat hard-coded as 1; my_nspinor hard-coded as 1
+         call getghc_nucdip(cwavef,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpt_k,&
+&          gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
+&          gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,1,gs_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
+!        There is an additional factor of 2 with respect to the bare matrix element
+         end0_k(iband)=energy_factor*(DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
+           & DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k)))
+         ABI_DEALLOCATE(ghc_vectornd)
+       end if
+ 
+!      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.
+!      only relevant for DDK
+       if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(rf_hamkq%vectornd)) ) then
+         ABI_ALLOCATE(ghc_vectornd,(2,npw_k))
+         ! ndat hard-coded as 1; my_nspinor hard-coded as 1
+         call getgh1ndc(cwave1,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
+           & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
+           & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,1,rf_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
+!        There is an additional factor of 4 with respect to the bare matrix element
+         end1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
+           & DOT_PRODUCT(cwave0(2,1:npw_k),ghc_vectornd(2,1:npw_k)))
+         ABI_DEALLOCATE(ghc_vectornd)
+       end if
+! 
 !      Compute eigenvalue part of total energy (with cwavef)
        if (gs_hamkq%usepaw==1) then
          call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwavef,gsc,mpi_enreg%me_g0,&
