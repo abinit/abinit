@@ -17,7 +17,7 @@ subsuites = [
 "gspw",
 "gswvl",
 "mbt",
-#"dmft",
+"dmft",
 #"moldyn",
 "string",
 "ucrpa",
@@ -33,8 +33,8 @@ inp_files = [
 "tdfpt_04.abi",
 #"tdfpt_03PAW.abi,"
 #"tdfpt_04PAW.abi",
-#"tdmft_1.abi",
-#"tdmft_2.abi",
+"tdmft_1.abi",
+"tdmft_2.abi",
 "tgspw_01.abi",
 "tgspw_02.abi",    # OK
 "tgspw_03.abi",    # OK

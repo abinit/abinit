@@ -114,7 +114,7 @@ the computer you are using. This can be for instance: mpirun -np 16 abinit
 ## 2 Computation of one dynamical matrix (q =0.25 -0.125 0.125) for FCC aluminum
 
 We start by treating the case of a small systems, namely FCC aluminum, for
-which there is only one atom per unit cell. Of course, many k points are needed.
+which there is only one atom per unit cell. Of course, many k points are needed, since this is a metal.
 
 **2.1.** The first step is the pre-computation of the ground state
 wavefunctions. This is driven by the files *tdfpt_01.abi*.
@@ -123,6 +123,7 @@ You should edit it and examine it.
 {% dialog tests/tutoparal/Input/tdfpt_01.abi %}
 
 One relies on a k-point grid of 8x8x8 x 4 shifts (=2048 k points), and 5 bands.
+The k-point grid sampling is well converged, actually.
 For this ground-state calculation, symmetries can be used to reduce
 drastically the number of k points: there are 60 k points in the irreducible
 Brillouin zone (this cannot be deduced from the examination of the input file, though).
@@ -269,15 +270,17 @@ namely, fourwf%(pot) (application of the local potential, which implies two Four
 interatomic forces), fourwf%(G->r) (fourier transform needed to build the first-order density). Also, quite noticeable
 is dfpt_vtorho:MPI , synchronisation of the MPI parallelism. 
 
-A study of the speed-up brought by the k-point parallelism gives the following behaviour, between 1 and 40 cores:
+A study of the speed-up brought by the k-point parallelism for this simple test case
+gives the following behaviour, between 1 and 40 cores:
 
-<div id="plotly_plot" style="width:90%;height:250px;"></div>
+<div id="plotly_plot" style="width:90%;height:450px;"></div>
 <script>
 $(function() {
-    Plotly.plot(document.getElementById('plotly_plot'), [{
-        x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40],
-        y: [1, 1.92, 3.75, 5.50, 7.17, 9.34, 11.1, 14.4, 17.8, 19.7] }],
-        {margin: {t: 0}}
+    Plotly.newPlot(document.getElementById('plotly_plot'), 
+        [{ x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], name: 'Ideal'},
+         { x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 1.92, 3.75, 5.50, 7.17, 9.34, 11.1, 14.4, 17.8, 19.7], name: 'Observed' }], 
+        { title: "Parallel speed-up", 
+          xaxis: {title:'Number of cores'} }
     );
 });
 </script>
@@ -288,25 +291,39 @@ for a speed-up of 19.7 ..
 
 ## 3 Computation of one perturbation for a slab of 29 atoms of barium titanate
 
-**3.1.** This test, with 29 atoms, is slower, but scales better than the Al
-FCC case. It consists in the computation of one perturbation at qpt 0.0 0.25
+**3.1.** This test, with 29 atoms, is slower, but highlights other aspects 
+of the DFPT parallelism than the Al FCC case. 
+It consists in the computation of one perturbation at [[qpt]] 0.0 0.25
 0.0 for a 29 atom slab of barium titanate, artificially terminated by a double
 TiO<sub>2</sub> layer on each face, with a reasonable k-point sampling of the Brillouin zone.
 
 The symmetry of the system and perturbation will allow to decrease this
 sampling to one quarter of the Brillouin zone. E.g. with the k-point sampling
 [[ngkpt]] 4 4 1, there will be actually 4 k-points in the irreducible Brillouin
-zone for the Ground state calculations. For the DFPT case, only one symmetry
+zone for the Ground state calculations. For the DFPT case, only one (binary) symmetry
 will survive, so that, after the calculation of the frozen-wavefunction part
 (for which no symmetry is used), the self-consistent part will be done with 8
-k points in the corresponding irreducible Brillouin zone. With the sampling 8
-8 1, there will be 32 k points in the irreducible Brillouin zone for the DFPT
-case. There are 120 bands. Note that the value of [[ecut]] that is used in the
+k points in the corresponding irreducible Brillouin zone. Beyond 8 cores, the parallelisation
+will be done also on the bands. This will prove to be much more dependent
+on the computer architecture than the (low-communication) parallelism over k-points.
+
+With the sampling 8 8 1, there will be 32 k points in the irreducible Brillouin zone for the DFPT
+case. This will allow potentially to use efficiently a larger number of processors, provided the
+computer architecture and network is good enough.
+
+There are 116 occupied bands. For the ground state calculation, 4 additional conduction
+bands will be explicitly treated, which will allow better SCF stability thanks to [[iprcel]] 45.
+Note that the value of [[ecut]] that is used in the
 present tutorial is too low to obtain physical results (it should be around 40 Hartree).
 Also, only one atomic displacement is considered, so that the phonon frequencies
 delivered at the end of the run are meaningless.
 
 As in the previous case, a preparatory ground-state calculation is needed.
+We use the input variable [[autoparal]]=1 . It does not delivers the best repartition of
+processors among [[npkpt]], [[npband]] and [[npfft]], but achieves a decent repartition, usually within a factor of two.
+With 24 processors, it selects [[npkpt]]=4 (optimal), [[npband]]=3 and [[npfft]]=2, while [[npband]]=6 and [[npband]]=1 would do better.
+For information, the speeup going from 24 cores to 64 cores is 1.76, not quite the increase of number of processor (2.76).
+Anyhow, the topics of the tutorial is not the GS calculation.
 
 The input files are provided, in the directory *\$ABI_TESTS/tutoparal/Input*.
 The preparatory step is driven by *tdfpt_03.abi*. The real
@@ -314,15 +331,17 @@ The preparatory step is driven by *tdfpt_03.abi*. The real
 reference output files are present in *\$ABI_TESTS/tutoparal/Refs*:
 *tdfpt_03_MPI24.abo* and *tdfpt_04_MPI24.abo*. The naming convention is such that the
 number of cores used to run them is added after the name of the test: the
-*tdfpt_03.abi* files were run with 24 cores.
-The preparatory step took about 1.5 minutes, and the DFPT step took about
-3 minutes.
+*tdfpt_03.abi* files are run with 24 cores.
+The preparatory step takes about 3 minutes, and the DFPT step takes about
+3 minutes as well.
 
 {% dialog tests/tutoparal/Input/tdfpt_03.abi tests/tutoparal/Input/tdfpt_04.abi %}
 
-You can run now these test cases. For tdfpt_03, you might
-need to change the [[npband]] value (presently 6), if you are not using 24
-processors. At variance, for tdfpt_04, no adaptation of the input file is
+You can run now these test cases. For tdfpt_03, with [[autoparal]]=1, 
+you will be able to run on different numbers of processors compatible with [[nkpt]]=4,
+[[nband]]=120 and [[ngfft]]=[30 30 192], detected by ABINIT. Alternatively, you might decide to explicitly 
+define [[npkpt]], [[npband]] and [[npfft]].
+At variance, for tdfpt_04, no adaptation of the input file is
 needed to be able to run on an arbitrary number of processors.
 To launch the ground-state computation, type:
 
@@ -331,7 +350,7 @@ To launch the ground-state computation, type:
 then copy the output of the ground-state calculation so that it can be used as
 the input of the DFPT calculation:
 
-    cp tdfpt_03.o_WFK tdfpt_04.i_WFK
+    mv tdfpt_03o_WFK.nc tdfpt_04i_WFK.nc
 
 and launch the calculation:
 
@@ -341,6 +360,23 @@ Now, examine the obtained output file for test 04, especially the timing.
 
 In the reference file *\$ABI_TESTS/tutoparal/Refs/tdfpt_04_MPI24.abo*,
 with 24 computing cores, the timing section delivers:
+
+    - For major independent code sections, cpu and wall times (sec),
+    -  as well as % of the time and number of calls for node 0-
+    -<BEGIN_TIMER mpi_nprocs = 24, omp_nthreads = 1, mpi_rank = 0>
+    - cpu_time =          159.9, wall_time =          160.0
+    -
+    - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+    -                                                                  (-1=no count)
+    - projbd                        46.305   1.2     46.345   1.2          11520      -1.00        1.00       1.00
+    - nonlop(apply)                 42.180   1.1     42.183   1.1           5760      -1.00        1.00       1.00
+    - dfpt_vtorho:MPI               25.087   0.7     25.085   0.7             30      -1.00        1.00       1.00
+    - fourwf%(pot)                  22.435   0.6     22.436   0.6           6930      -1.00        1.00       1.00
+    - nonlop(forces)                 5.485   0.1      5.486   0.1           4563      -1.00        1.00       1.00
+    - fourwf%(G->r)                  4.445   0.1      4.446   0.1           2340      -1.00        1.00       1.00
+    - pspini                         2.311   0.1      2.311   0.1              1      -1.00        1.00       1.00
+
+    <...>
 
     - For major independent code sections, cpu and wall times (sec),
     - as well as % of the total time and number of calls
@@ -365,7 +401,8 @@ with 24 computing cores, the timing section delivers:
 
     - subtotal                    3569.873  93.3   3570.325  93.3                                  1.00       1.00
 
-You will notice that the sum of the major independent code sections is reasonably
+You will notice that the run took about 160 seconds (wall clock time)..
+The sum of the major independent code sections is reasonably
 close to 100%. You might now explore the behaviour of the CPU time for
 different numbers of compute cores (consider values below and above 24
 processors). Some time-consuming routines will benefit from the parallelism, some other will not.
@@ -379,19 +416,37 @@ saturate well below this value, as there are some non-parallelized sections of t
 In the above-mentioned list, the kpoint+band parallelism cannot be exploited
 (or is badly exploited) in several sections of the code : "dfpt_vtorho:MPI",
 about 12 percents of the total time of the run on 24 processors, "pspini", about 1.4 percent. 
-This amounts to about 1/8 of the total, and, according to Amdahl's
-law, the saturation will happen soon, with less than 100 processors.
+This amounts to about 1/8 of the total.
+However, the scalability of the band parallelisation is rather poor, and effective saturation
+in this case already happens at 16 processor.
+
+A study of the speed-up brought by the combined k-point and band parallelism for this test case
+on a 2 AMD EPYC 7502 machine (2 CPUS, each with 32 cores)
+gives the following behaviour, between 1 and 40 cores:
+
+<div id="plotly_plot2" style="width:90%;height:450px;"></div>
+<script>
+$(function() {
+    Plotly.newPlot(document.getElementById('plotly_plot2'), 
+        [{ x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], name: 'Ideal'},
+         { x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 1.97, 3.93, 3.86, 7.67, 7.53, 14.77, 16.44, 15.47, 14.37], name: 'Observed' }],
+        { title: "Parallel speed-up", 
+          xaxis: {title:'Number of cores'} }
+    );
+}); 
+</script>
+
+The additional band parallelism is very efficient when running with 16 cores, bringing 14.77 speed-up,
+while using only the k point parallelism, with 6 cores, gives 7.67 speed-up. However, the behaviour
+is disappointing beyond 16 cores, or even for a number of processors which is not a multiple of 8.
+
+Such a behaviour might be different on your machine.
 
 **3.2.** A better parallelism can be seen if the number of k-points is brought
-back to a converged value (8x8x1).
+back to a converged value (8x8x1). Again, 
 Try this if you have more than 100 processors at hand.
 
-Set in your input file *tdfpt_03.abi*:
-
-       ngkpt 8 8 1    ! This should replace ngkpt 4 4 1
-       npkpt 16       ! This should replace npkpt 4
-
-Also, set in *tdfpt_04.abi*:
+Set in your input files *tdfpt_03.abi* and *tdfpt_04.abo* :
 
        ngkpt 8 8 1    ! This should replace ngkpt 4 4 1
 
@@ -402,11 +457,12 @@ iterations to see the initialisation effects (small value of nstep), or target
 a value giving converged results ([[nstep]] 50 instead of [[nstep]] 18). The energy
 cut-off might also be increased (e.g. [[ecut]] 40 Hartree gives a much better
 value). Indeed, with a large value of k points, and large value of nstep, you
-should be able to obtain a speed-up of more than one hundred for the DFPT
+might be able to obtain a speed-up of more than one hundred for the DFPT
 calculation, when compared to a sequential run (see below). Keep track of the
 time for each computing core number, to observe the scaling.
 
-As a typical observation, the Wall clock timing decreases from
+On a machine with a good communication network, the following results were observed in 2011.
+The Wall clock timing decreases from
 
     - Proc.   0 individual time (sec): cpu=       2977.3  wall=       2977.3
 
@@ -424,8 +480,30 @@ number of computing cores (also, the efficiency of the calculation).
 Beyond 300 computing cores, the sequential parts of the code start to dominate.
 With more realistic computing parameters ([[ecut]] 40), they dominate only beyond 600 processors.
 
-This last example is the end of the present tutorial. You have been explained
-the basics of the current implementation of the parallelism for the DFPT part
-of ABINIT, then you have explored two test cases: one for a small cell
+However, on the same (recent, but with slow connection beyond 32 cores) computer than for the [[ngkpt]] 4 4 1 case,
+the saturation sets in already beyond 16 cores, with the following behaviour (the reference is taken with respect to the timing at 4 processors):
+
+<div id="plotly_plot3" style="width:90%;height:450px;"></div>
+<script>
+$(function() {
+    Plotly.newPlot(document.getElementById('plotly_plot3'),
+        [{ x: [1,4, 8, 12, 16, 24, 32, 40], y: [1, 4, 8, 12, 16, 24, 32, 40], name: 'Ideal'},
+         { x: [4, 8, 12, 16, 24, 32, 40], y: [4, 7.86, 10.46, 14.92, 13.82, 16.15, 15.27], name: 'Observed' }],
+        { title: "Parallel speed-up",
+          xaxis: {title:'Number of cores'} }
+    );
+});
+</script>
+
+Thus, it is very important that you gain some understanding of the scaling of your typical runs
+for your particular computer, and that you know the parameters (especially [[nkpt]]) of your calculations. 
+Up to 4 or 8 cores, the ABINIT scaling will usually be very good, if
+k-point parallelism is possible. In the range between 10 and 100 cores, the speed-up might still be good,
+but this will depend on details.
+
+This last example is the end of the present tutorial. 
+The basics of the current implementation of the parallelism for the DFPT part of ABINIT have been explained,
+then you have explored two test cases: one for a small cell
 materials, with lots of k points, and another one, medium-size, in which the k
-point and band parallelism can be used efficiently even for more than one hundred computing cores.
+point and band parallelism must be used. It might reveal efficient, but this will depend on the detail of your calculation
+and your computer architecture.
