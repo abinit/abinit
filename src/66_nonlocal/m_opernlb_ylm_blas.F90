@@ -70,8 +70,8 @@ contains
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5, 51, 52 and signs=2)
 !!                        - strain component (1:6) in the case (choice=2,signs=2) or (choice=6,signs=1)
-!!                        - strain component (1:9) in the case (choice=33,signs=2) 
-!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                        - strain component (1:9) in the case (choice=33,signs=2)
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient
 !!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
 !!  kpg(npw,nkpg)=(k+G) components (if nkpg=3).
@@ -100,7 +100,7 @@ contains
 !! SIDE EFFECTS
 !! --if (paw_opt=0)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
-!!                or one of its derivatives to the input vect.  
+!!                or one of its derivatives to the input vect.
 !!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
 !!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
 !!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
@@ -325,16 +325,19 @@ if (choice==33) two_piinv=1.0_dp/two_pi
      if (paw_opt/=3) then
 
        call timab(1153,1,tsec)
-!       call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,1),1,0.0_DP,scalr,1)
-!       call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,2),1,0.0_DP,scali,1)
-       scalr(:) = zero
-       scali(:) = zero
-       do ilmn=1,nlmn
-         do ipw=1,npw
-           scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,1)
-           scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,2)
+       if (nloalg(1)==3) then
+         scalr(:) = zero
+         scali(:) = zero
+         do ilmn=1,nlmn
+           do ipw=1,npw
+             scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,1)
+             scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,2)
+           end do
          end do
-       end do
+       else if (nloalg(1)==4) then
+         call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,1),1,0.0_DP,scalr,1)
+         call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,2),1,0.0_DP,scali,1)
+       end if
        call timab(1153,2,tsec)
 
        call timab(1155,1,tsec)

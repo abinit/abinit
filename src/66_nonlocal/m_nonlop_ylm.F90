@@ -483,6 +483,10 @@ contains
  check=(maxval(indlmn(6,:,:))<=1)
  ABI_CHECK(check,'BUG: spin-orbit not yet allowed')
 
+!new algo not allowed for choice>3
+ check=nloalg(1)==2.or.choice<=3
+ ABI_CHECK(check,'BUG: blas implementation allowed for choice<=3 only (for the moment)')
+
 !Test: size of blocks of atoms
  mincat=min(NLO_MINCAT,maxval(nattyp))
  if (nloalg(2)<=0.and.mincat>matblk) then
@@ -739,11 +743,18 @@ contains
 
 !      Allocate memory for projected scalars
        ABI_ALLOCATE(gx,(cplex,nlmn,nincat,nspinor))
-       ABI_ALLOCATE(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor))
-       ABI_ALLOCATE(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor))
-       ABI_ALLOCATE(d2gxdtfac,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor))
-       ABI_ALLOCATE(dgxdtfac,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor))
        ABI_ALLOCATE(gxfac,(cplex_fac,nlmn,nincat,nspinor))
+       if (nloalg(1)==2) then
+         ABI_ALLOCATE(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor))
+         ABI_ALLOCATE(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor))
+         ABI_ALLOCATE(d2gxdtfac,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor))
+         ABI_ALLOCATE(dgxdtfac,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor))
+       else
+         ABI_ALLOCATE(dgxdt,(cplex,nlmn,ndgxdt,nincat,nspinor))
+         ABI_ALLOCATE(d2gxdt,(cplex,nlmn,nd2gxdt,nincat,nspinor))
+         ABI_ALLOCATE(d2gxdtfac,(cplex_fac,nlmn,nd2gxdtfac,nincat,nspinor))
+         ABI_ALLOCATE(dgxdtfac,(cplex_fac,nlmn,ndgxdtfac,nincat,nspinor))
+       end if
        gx(:,:,:,:)=zero;gxfac(:,:,:,:)=zero
        if (ndgxdt>0) dgxdt(:,:,:,:,:)=zero
        if (ndgxdtfac>0) dgxdtfac(:,:,:,:,:)=zero
@@ -751,8 +762,13 @@ contains
        if (nd2gxdtfac>0) d2gxdtfac(:,:,:,:,:)=zero
        if (paw_opt>=3) then
          ABI_ALLOCATE(gxfac_sij,(cplex,nlmn,nincat,nspinor))
-         ABI_ALLOCATE(dgxdtfac_sij,(cplex,ndgxdtfac,nlmn,nincat,nspinor))
-         ABI_ALLOCATE(d2gxdtfac_sij,(cplex,nd2gxdtfac,nlmn,nincat,nspinor))
+         if (nloalg(1)==2) then
+           ABI_ALLOCATE(dgxdtfac_sij,(cplex,ndgxdtfac,nlmn,nincat,nspinor))
+           ABI_ALLOCATE(d2gxdtfac_sij,(cplex,nd2gxdtfac,nlmn,nincat,nspinor))
+         else
+           ABI_ALLOCATE(dgxdtfac_sij,(cplex,nlmn,ndgxdtfac,nincat,nspinor))
+           ABI_ALLOCATE(d2gxdtfac_sij,(cplex,nlmn,nd2gxdtfac,nincat,nspinor))
+         end if
          gxfac_sij(:,:,:,:)=zero
          if (ndgxdtfac>0) dgxdtfac_sij(:,:,:,:,:)=zero
          if (nd2gxdtfac>0) d2gxdtfac_sij(:,:,:,:,:) = zero
@@ -846,10 +862,7 @@ contains
 
 !      Computation or <p_lmn|c> (and derivatives) for this block of atoms
        if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
-!LTEST
-         if (abs(choice_a)>1) then
-!         if (abs(choice_a)>-1) then
-!LTEST
+         if (abs(choice_a)>1.or.nloalg(1)==2) then
            call timab(1101,1,tsec)
            call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &           ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
@@ -957,10 +970,7 @@ contains
            if(nloalg(2)<=0) then
              call ph1d3d(ia3,ia4,kgout,matblk,natom,npwout,n1,n2,n3,phkxredout,ph1d,ph3dout)
            end if
-!LTEST
-          if (abs(choice_b)>1) then
-!        if (abs(choice_b)>-1) then
-!LTEST
+          if (abs(choice_b)>1.or.nloalg(1)==2) then
              call timab(1103,1,tsec)
              call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &             d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
