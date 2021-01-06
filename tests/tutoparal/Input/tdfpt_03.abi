@@ -4,11 +4,7 @@
 
 #Parameters that govern parallelism
 paral_kgb 1
-#fftalg 401  # Needed to preserve old behaviour
-npkpt 4
-npband 6
-npfft  1
-nbdbuf 2
+autoparal 1  # This attempts to find a good distribution of processors. Actually, it is not optimal, but decent.
 
 #Definition of the unit cell
 acell 4.0 4.0 28.0 Angstrom
@@ -51,7 +47,8 @@ typat 3 3 2 3 3 2 1 3 3 3 2 1 3 3 3 2 1 3 3 3 2 1 3 3 3 2 3 3 2
                        0.0000000000E+00  0.0000000000E+00  3.4498953099E+01
                        3.7794522658E+00  3.7794522658E+00  3.3515959935E+01
                        0.0000000000E+00  3.7794522658E+00  3.3898345933E+01
-chksymtnons 0
+chksymtnons 0  # The position of the system is such that some symmetry operations have a non-symmorphic shift which 
+               # is not a simple fraction. This is not a problem for ABINIT, but this input variable must be activated.
 
 #Numerical parameters of the calculation : planewave basis set and k point grid
 ecut 15.0
@@ -59,13 +56,12 @@ ngkpt 4 4 1
 kptopt 1
 
 #Parameters for the SCF procedure
-nstep 50
-tolwfr 1.0d-18
+nstep 30
+tolvrs 1.0d-18
 iprcel 45   # This is to help the SCF procedure, work quite well in this case of a slab.
 
 #Electronic structure
 nband 120
-#prtden 0
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -78,8 +74,7 @@ nband 120
 #%% [NCPU_24]
 #%% files_to_test = tdfpt_03_MPI24.abo, tolnlines = 0, tolabs = 0.0, tolrel= 0.0
 #%% post_commands = 
-#%%   ww_cp tdfpt_03_MPI24o_WFK tdfpt_04_MPI24i_WFK;
-#%%   ww_mv tdfpt_03_MPI24o_WFK tdfpt_04_MPI24i_WFQ
+#%%   ww_mv tdfpt_03_MPI24o_WFK tdfpt_04_MPI24i_WFK 
 #%% [extra_info]
 #%% keywords = NC
 #%% description = BaTiO3 linear response calculation
