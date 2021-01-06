@@ -324,8 +324,8 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
      if (paw_opt/=3) then
 
-       call timab(1153,1,tsec)
        if (nloalg(1)==3) then
+         call timab(1153,1,tsec)
          scalr(:) = zero
          scali(:) = zero
          do ilmn=1,nlmn
@@ -334,11 +334,13 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,2)
            end do
          end do
+         call timab(1153,2,tsec)
        else if (nloalg(1)==4) then
+         call timab(1157,1,tsec)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,1),1,0.0_DP,scalr,1)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,2),1,0.0_DP,scali,1)
+         call timab(1157,2,tsec)
        end if
-       call timab(1153,2,tsec)
 
        call timab(1155,1,tsec)
        do ipw=1,npw
@@ -354,18 +356,23 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
      if (paw_opt>=3) then
 
-       call timab(1154,1,tsec)
-       !call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,1),1,0.0_DP,scalr,1)
-       !call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,2),1,0.0_DP,scali,1)
-       scalr(:) = zero
-       scali(:) = zero
-       do ilmn=1,nlmn
-         do ipw=1,npw
-           scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,1)
-           scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,2)
+       if (nloalg(1)==3) then
+         call timab(1154,1,tsec)
+         scalr(:) = zero
+         scali(:) = zero
+         do ilmn=1,nlmn
+           do ipw=1,npw
+             scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,1)
+             scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,2)
+           end do
          end do
-       end do
-       call timab(1154,2,tsec)
+         call timab(1154,2,tsec)
+       else if (nloalg(1)==4) then
+         call timab(1158,1,tsec)
+         call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,1),1,0.0_DP,scalr,1)
+         call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,2),1,0.0_DP,scali,1)
+         call timab(1158,2,tsec)
+       end if
 
        call timab(1156,1,tsec)
        do ipw=1,npw
