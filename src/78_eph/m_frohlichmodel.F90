@@ -83,15 +83,17 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 !Local variables ------------------------------
 !scalars
  logical :: sign_warn
- integer :: deg_dim,iband,ideg,ikpt,imode,info,iphi,iqdir,itheta
+ integer :: deg_dim,iband,ideg,idir,ikpt,imode,info,ipar,iphi,iqdir,itheta
  integer :: jband,lwork,nphi,nqdir,ntheta
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
  real(dp) :: zpr_frohlich,zpr_q0_avg,zpr_q0_fact
  !character(len=500) :: msg
 !arrays
  logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
+ logical, allocatable :: lutt_found(:), lutt_warn(:)
  real(dp) :: kpt(3)
  real(dp), allocatable :: eigenval(:), rwork(:), unit_qdir(:,:)
+ real(dp), allocatable :: lutt_dij(:,:), lutt_eigenval(:,:), lutt_params(:), lutt_unit_kdir(:,:)
  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:)
  real(dp), allocatable :: gq_points_th(:),gq_weights_th(:)
  real(dp), allocatable :: gq_points_cosph(:),gq_points_sinph(:)
@@ -248,6 +250,84 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
      endif
 
+     !Compute the Luttinger parameters for the cubic case (deg_dim=3)
+     if(deg_dim==3) then
+
+       ABI_ALLOCATE(lutt_unit_kdir, (3,3))
+       ABI_ALLOCATE(lutt_params, (3))
+       ABI_ALLOCATE(lutt_eigenval, (3,deg_dim))
+       ABI_ALLOCATE(lutt_dij, (deg_dim, deg_dim))
+       ABI_ALLOCATE(lutt_found, (3))
+       ABI_ALLOCATE(lutt_warn, (3))
+
+       !Define unit_kdir for Luttinger parameters
+       lutt_unit_kdir(:,1) = (/1,0,0/)
+       lutt_unit_kdir(:,2) = 1/sqrt(2.0)*(/1,1,0/)
+       lutt_unit_kdir(:,3) = 1/sqrt(3.0)*(/1,1,1/)
+
+       !Degeneracy problems warning
+       lutt_warn=(/.false.,.false.,.false./)
+
+       !Inverse effective mass tensor eigenvalues in lutt_unit_kdir directions
+       do idir=1,3
+         do iband=1,deg_dim
+           do jband=1,deg_dim
+             lutt_dij(iband,jband)=&
+&             DOT_PRODUCT(lutt_unit_kdir(:,idir),MATMUL(eig2_diag_cart(:,:,iband,jband),lutt_unit_kdir(:,idir)))
+           enddo
+         enddo
+
+         eigenvec=lutt_dij ; lutt_eigenval(idir,:)=zero
+         work=zero     ; rwork=zero
+         call zheev('V','U',deg_dim,eigenvec,deg_dim,lutt_eigenval(idir,:),work,lwork,rwork,info) 
+       enddo
+
+       !Check degereracies in (100) direction, and evaluate A and B.
+       !Eigenvalues are 2*A (d=1), 2*B (d=2)
+       if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,3))<tol5) then
+         lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,3))/2)
+         lutt_params(1)=0.5*lutt_eigenval(1,1)
+       else if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,1))<tol5) then
+         lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,1))/2)
+         lutt_params(1)=0.5*lutt_eigenval(1,3)
+       else
+         lutt_warn(1)=.true.
+       endif
+
+       !Check degeneracies in (111) direction and evaluate C
+       !Eigenvalues are 2/3*(A+2B-C) (d=2), 2/3*(A+2B+2C) (d=1)
+       if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,3))<tol5) then
+         lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,3)))
+       else if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,1))<tol5) then
+         lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,1)))
+       else
+         lutt_warn(2)=.true.
+       endif
+
+       !Verify that the (110) direction eigenvalues are coherent with Luttinger parameters
+       !Eigenvalues are 2B, A+B-C, A+B+C
+       lutt_found=(/.false.,.false.,.false./)
+       do ipar=1,deg_dim
+         if(abs(lutt_eigenval(2,ipar)-2*lutt_params(2))<tol4) then
+           lutt_found(1)=.true.
+         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)-lutt_params(3)))<tol4) then
+           lutt_found(2)=.true.
+         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)+lutt_params(3)))<tol4) then
+           lutt_found(3)=.true.
+         endif
+       enddo
+        
+       if(.not. (all(lutt_found))) then
+         lutt_warn(3)=.true.
+       endif
+
+       ABI_DEALLOCATE(lutt_unit_kdir)
+       ABI_DEALLOCATE(lutt_eigenval)
+       ABI_DEALLOCATE(lutt_dij)
+       ABI_DEALLOCATE(lutt_found)
+
+     endif !Luttinger parameters
+
      !Perform the integral over the sphere
      zpr_frohlich_avg=zero
      do iqdir=1,nqdir
@@ -304,6 +384,28 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 &        efmasdeg(ikpt)%degs_bounds(1,ideg),' through ',efmasdeg(ikpt)%degs_bounds(2,ideg)
      endif
 
+     !Print the Luttinger for the cubic case (deg_dim=3)
+     if(deg_dim==3) then
+       if (.not. (any(saddle_warn))) then
+         if(any(lutt_warn)) then
+           ! Warn for degeneracy breaking in inverse effective mass tensor eigenvalues
+           write(ab_out, '(2a)') ch10, ' Luttinger parameters could not be determined:'
+           if (lutt_warn(1)) then
+             write(ab_out, '(a)') '     Predicted degeneracies for deg_dim = 3 are not met for (100) direction.'
+           endif
+           if (lutt_warn(2)) then
+             write(ab_out, '(a)') '     Predicted degeneracies for deg_dim = 3 are not met for (111) direction.'
+           endif
+           if (lutt_warn(3)) then
+             write(ab_out, '(a)') '     Predicted inverse effective mass tensor eigenvalues for direction (110) are not met.'
+           endif
+           write(ab_out, '(a)') ch10
+         else
+           write(ab_out, '(a,3f14.6)') ' Luttinger parameters (A, B, C) [at. units]: ',lutt_params(:)
+         endif
+       endif
+     endif
+
      sign_warn=.false.
      do iband=1,deg_dim
        if(saddle_warn(iband)) then
@@ -345,6 +447,13 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
      ABI_DEALLOCATE(eigenval)
      ABI_DEALLOCATE(saddle_warn)
      ABI_DEALLOCATE(start_eigf3d_pos)
+
+     if(allocated(lutt_params)) then
+       ABI_DEALLOCATE(lutt_params)
+     endif
+     if(allocated(lutt_warn)) then
+       ABI_DEALLOCATE(lutt_warn)
+     endif
 
    enddo ! ideg
  enddo ! ikpt

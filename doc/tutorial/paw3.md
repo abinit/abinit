@@ -11,9 +11,9 @@ all-electron code. We will be comparing results with the open `Elk` FP-LAPW code
 (a branch of the `EXCITING` code) available under GPLv3.
 
 You will learn how to compare calculations of the _equilibrium lattice_
-parameter, the _Bulk modulus_ and the _band structure_ between ABINIT PAW results
+parameter, the _Bulk modulus_ and the _band structure_ between `ABINIT` PAW results
 and those from the `Elk` code.
-It is assumed you already know how to use ABINIT in the PAW case. The tutorial
+It is assumed you already know how to use `ABINIT` in the PAW case. The tutorial
 assumes no previous experience with the `Elk` code, but it is strongly advised
 that the users familiarise themselves a bit with this code before attempting
 to do similar comparisons with their own datasets.
@@ -49,7 +49,7 @@ orbital energies, i.e. the band structure for a simple bulk system.
     * Match the `Elk` muffin-tin radii and the PAW cutoff radii.
     * Use a k-point grid of similar quality.
     * Use a similar cutoff for the plane wave expansion.
-    * Freeze the core in the `Elk` code (whenever possible), to match the frozen PAW core in ABINIT.
+    * Freeze the core in the `Elk` code (whenever possible), to match the frozen PAW core in `ABINIT`.
     * Use a similar atomic on-site radial grid.
 
 We will use **Carbon**, in the **diamond structure**, as an example of a simple solid
@@ -65,7 +65,7 @@ that one has already satisfied oneself that the datasets for Zn, Mg, and Mn in
 their pure forms are good.
 
 One could also compare results for molecules, and we encourage you to do this
-if you have the time. However, doing this consistently in ABINIT requires a
+if you have the time. However, doing this consistently in `ABINIT` requires a
 supercell approach and would make this tutorial very long, so we shall not do
 it here. We will now discuss the prerequisites for this tutorial.
 
@@ -73,18 +73,20 @@ it here. We will now discuss the prerequisites for this tutorial.
 
 It is assumed that you are already familiar with the contents and procedures
 in tutorials [PAW1](paw1) and [PAW2](paw2), and so
-have some familiarity with input files for atompaw, and the issues in creating
+have some familiarity with input files for  `ATOMPAW` , and the issues in creating
 PAW datasets. To exactly reproduce the results in this tutorial, you will
 need:
 
-  * The `ATOMPAW` code for generating PAW datasets.
-You have now to install the `ATOMPAW` code. Try to type in your browser:
-
-	https://users.wfu.edu/natalie/papers/pwpaw/atompaw-4.1.0.6.tar.gz
-
-
-Then, download the file, unzip and untar it.Go into the directory "doc", open the file "atompaw-usersguide.pdf". Go p.3 and follow the instructions to compile atompaw.
-
+  * The `ATOMPAW` code for generating PAW datasets (see tutorial [PAW2](paw2), section **2.**).
+  
+```sh
+	   cd atompaw-4.x.y.z
+	   mkdir build
+	   cd build
+	   ../configure
+	   make
+```
+  
   * the `Elk` code (this tutorial was designed with v1.2.15),
     available [here](https://sourceforge.net/projects/elk/files/).
     We will use the `Elk` code itself, as well as its `eos` (equation-of-state) utility,
@@ -94,7 +96,7 @@ Then, download the file, unzip and untar it.Go into the directory "doc", open th
     *\$ABI_HOME/doc/tutorial/paw3_assets/scripts/*. For the `python` scripts, `python3` is required.
     There are also various *gnuplot* scripts there.
 
-You will of course also need a working copy of ABINIT. Please make sure that
+You will of course also need a working copy of `ABINIT`. Please make sure that
 the above components are downloaded and working on your system before
 continuing this tutorial. The tutorial also makes extensive use of |gnuplot|, so
 please also ensure that a recent and working version is installed on your system.
@@ -111,8 +113,11 @@ please also ensure that a recent and working version is installed on your system
 
 Make a _working directory_ for the `ATOMPAW` generation (you could call it
 `C_atompaw`) and copy the file: [C_simple.input](paw3_assets/inputs/C_simple.input) to it.
+
+{% dialog tutorial/paw3_assets/inputs/C_simple.input %}
+
 Then go there and run `ATOMPAW` by typing (assuming that you have set things up so that you
-can run atompaw by just typing atompaw):
+can run atompaw by just typing `atompaw`):
 
     atompaw < C_simple.input
 
@@ -149,25 +154,7 @@ The inputs directory also contains scripts for plotting these graphs
 individually, and you are encouraged to test and modify them. We can look
 inside the `C_simple.input` file:
 
-     C 6                                         ! Atomic name and number
-     LDA-PW scalarrelativistic loggrid 801 logderivrange -10 40 1000 ! XC approx., SE type, gridtype, # pts, logderiv
-     2 2 0 0 0 0                                 ! maximum n for each l: 2s,2p,0d,0f..
-     2 1 2                                       ! Partially filled shell: 2p^2
-     0 0 0                                       ! Stop marker
-     c                                           ! 1s - core
-     v                                           ! 2s - valence
-     v                                           ! 2p - valence
-     1                                           ! l_max treated = 1
-     1.3                                         ! core radius r_c
-     n                                           ! no more unoccupied s-states
-     n                                           ! no more unoccupied p-states
-     vanderbilt                                  ! vanderbilt scheme for finding projectors
-     2 0                                         ! localisation scheme
-     1.3                                         ! Core radius for occ. 2s state
-     1.3                                         ! Core radius for occ. 2p state
-     XMLOUT                                      ! Run atompaw2abinit converter
-     prtcorewf noxcnhat nospline noptim          ! Abinit conversion options
-     0                                           ! Exit
+{% dialog tutorial/paw3_assets/inputs/C_simple.input %}
 
 Here we see that the current dataset is very simple, it has no basis states
 beyond the $2s$ and $2p$ occupied valence states in carbon. It is thus not
@@ -176,35 +163,40 @@ the PAW dataset. Note that the `scalarrelativistic` option is turned on. While
 this is not strictly necessary for such a light atom, we must always ensure to
 have this turned on if we intend to compare with results from the `Elk` code.
 
-We will now run basic convergence tests in abinit for this dataset. The
-dataset file for abinit has already been generated (it is the `C.LDA-PW-
-paw.xml` file in the current directory). Make a new subdirectory for the
+We will now run basic convergence tests in `ABINIT` for this dataset. The
+dataset file for `ABINIT` has already been generated (it is the `C.LDA-PW-paw.xml`
+file in the current directory). Make a new subdirectory for the
 test in the current directory (you could call it `abinit_test` for instance), go
-there and copy the file: [ab_C_test.in](paw3_assets/inputs/ab_C_test.in) into
-it. This ABINIT input file contains several datasets which increment the `ecut`
+there and copy the file: [ab_C_test.abi](paw3_assets/inputs/ab_C_test.abi) into
+it. This `ABINIT` input file contains several datasets which increment the `ecut`
 input variable, and perform ground state and band structure calculations for
-each value of `ecut`. This is thus the internal abinit convergence study. Any
+each value of `ecut`. This is thus the internal `ABINIT` convergence study. Any
 dataset is expected to converge to a result sooner or later, but that does not
 mean that the final result is accurate, unless the dataset is good. The goal
-is of course to generate a dataset which both converges quickly and is very accurate.
-The `ab_C_test.in` file contains:
+is of course to generate a dataset which both converges quickly and is very accurate.  
 
+{% dialog tutorial/paw3_assets/inputs/ab_C_test.abi %}
+
+The `ab_C_test.abi` file contains:
+
+    pseudos="C.LDA-PW-paw.xml"
+
+    pp_dirpath="../"
     outdata_prefix="outputs/ab_C_test_o"
     tmpdata_prefix="outputs/ab_C_test"
 
 So it expects the newly generated dataset to be in the directory above.
 Also, to keep things tidy, it assumes the outputs will be put in a subdirectory
-called `outputs/`. Make sure to create it before you start the abinit run by writing:
+called `outputs/`. Make sure to create it before you start the `ABINIT` run by writing:
 
     mkdir outputs
 
 !!! important
-
     You may have to change the path to reach the Psps_for_tests repository. For this, modify the varaible `pp_dirpath` in the input file. 
 
-You can now run the abinit tests (maybe even in a separate new `xterm` window), by executing:
+You can now run the `ABINIT` tests (maybe even in a separate new `xterm` window), by executing:
 
-    abinit ab_C_test.in >& log_C_test &
+    abinit ab_C_test.abi >& log_C_test
 
 There are 18 double-index datasets in total, with the first index running from
 1 to 9 and the second from 1 to 2. You can check on the progress of the
@@ -214,7 +206,7 @@ might want to take a look in the input file. Note the lines pertaining to the
 increment in `ecut` (around line 29):
 
      ...
-     # Cutoff variables
+     #Cutoff variables
      ecut:? 5.0
      ecut+?  5.0
      `pawecutdg` 110.0
@@ -243,7 +235,6 @@ This should give you an output similar to this (though not the text to the left)
      etotal71 -1.1518427967E+01      -   0.23 mHa (35 Ha)
      etotal81 -1.1518542165E+01      -   0.11 mHa (40 Ha)
      etotal91 -1.1518570692E+01      -   0.03 mHa (45 Ha)
-     
 
 Your values might differ slightly in the last decimals. The calculation of
 diamond with the current PAW Carbon dataset converged to a precision of the
@@ -253,10 +244,10 @@ about 25 Ha, which is an indication of a) that the number of projectors per
 angular momentum channel is low, and  b) that other parameters apart from ecut
 dominate convergence beyond this point.
 
-If we turn to the ~band structure~, we can use the script
+If we turn to the _band structure_, we can use the script
 [comp_bands_abinit2abinit.py](paw3_assets/scripts/comp_bands_abinit2abinit.py)
 to check the convergence of the band structure. Copy the script to the
-directory where the ABINIT input file is and issue:
+directory where the `ABINIT` input file is and issue:
 
      python comp_bands_abinit2abinit.py outputs/ab_C_test_o_DS12_EIG outputs/ab_C_test_o_DS92_EIG eV
 
@@ -268,7 +259,7 @@ This will print a long series of columns and at the end you will see:
      # minimum diff:    -4.437905  eV
      # maximum diff:     1.089000  eV
      #
-     # NOTE: Abinit values are read in fixed format with five decimal
+     # NOTE: `ABINIT` values are read in fixed format with five decimal
      #       places. For low values, four or three decimal figures
      #       may be the highest precision you can get.
 
@@ -281,7 +272,7 @@ on average, because the band-structure of the first dataset is far from
 converged. The columns output before the statistics are arranged so that if
 you pipe the output to a data file:
 
-    python comp_bands_abinit2abinit.py outputs/ab_C_test_o_DS12_EIG outputs/ab_C_test_o_DS92_EIG eV > bands_5Ha_vs_45Ha.dat
+     python comp_bands_abinit2abinit.py outputs/ab_C_test_o_DS12_EIG outputs/ab_C_test_o_DS92_EIG eV > bands_5Ha_vs_45Ha.dat
 
 you can plot the two band structures in `gnuplot` directly, by entering:
 
@@ -326,15 +317,17 @@ calculation. To independently verify that the dataset is good, we need to
 calculate the equilibrium lattice parameter (and the _Bulk modulus_) and compare
 this and the band structure with an `Elk` calculation.
 
-First, we will need to calculate the total energy of diamond in ABINIT for a
+First, we will need to calculate the total energy of diamond in `ABINIT` for a
 number of lattice parameters around the minimum of the total energy. There is
 example input file for doing this at:
-[ab_C_equi.in](paw3_assets/inputs/ab_C_equi.in).
+[ab_C_equi.abi](paw3_assets/inputs/ab_C_equi.abi).
 The new input file has ten datasets which increment the lattice parameter, alatt,
 from 6.1 to 7.0 Bohr in steps of 0.1 Bohr. A look in the input file will tell
 you that `ecut` is set to 25 Hartrees. Copy these to your abinit_test directory and run:
 
-    abinit  ab_C_equi.in >& log_C_equi &
+{% dialog tutorial/paw3_assets/inputs/ab_C_equi.abi %}
+
+    abinit ab_C_equi.abi >& log_C_equi
 
 The run should be done fairly quickly, and when it's done we can check on the
 volume and the total energy by using "grep"
@@ -376,7 +369,7 @@ If we examine the `etotal` values, the total energy does indeed go to a
 minimum, and we also see that given the magnitude of the variations of the
 total energy, an `ecut` of 25 Ha should be more than sufficient. We will now
 extract the equilibrium volume and bulk modulus by using the eos bundled with
-elk. This requires us to put the above data in an  eos.in file. Create such a
+elk. This requires us to put the above data in an `eos.in` file. Create such a
 file with your favorite editor and enter the following five lines and then the
 data you just extracted:
 
@@ -428,7 +421,7 @@ at equilibrium for this dataset.
 
 In order to estimate whether these values are good or not, we need independent
 verification, and this will be provided by the all-electron `Elk` code. There is
-an `Elk` input file matching our abinit diamond calculation at
+an `Elk` input file matching our `ABINIT` diamond calculation at
 [elk_C_diamond.in](paw3_assets/inputs/elk_C_diamond.in). You need
 to copy this file to a directory set up for the `Elk` run (why not call it
 `C_elk`), and it needs to be renamed to `elk.in`, which is the required input
@@ -463,6 +456,8 @@ If we take a look in the `elk.in` file, at the beginning we will see the lines:
       2   1   1   1  : 2p m=1
       2   1   2   1  : 2p m=2
     ...
+
+{% dialog tutorial/paw3_assets/inputs/elk_C_diamond.in %}
 
 
 Any text after an exclamation mark (or a colon on the lines defining data) is
@@ -544,41 +539,41 @@ valence for another atomic species, this value needs to be adjusted downwards or
 The second thing we need to check is whether the number of grid points and the
 _muffin-tin_ radius that we use in the `Elk` calculation is roughly equivalent to
 the PAW one. If you have a look in the PAW dataset we generated before, i.e.
-in the `C_LDA.pawps` file, there is the line:
+in the `C.LDA-PW-paw.xml` file, there is the line:
 
-     ...
-     <radial_grid eq="r=a*(exp(d*i)-1)" a=" 2.1888410558886799E-03" d=" 1.3133046335332079E-02" istart="0" iend="  800" id="log1">
-  <values>
-     ...
+	   ...
+	   <radial_grid eq="r=a*(exp(d*i)-1)" a=" 2.1888410558886799E-03" d=" 1.3133046335332079E-02" istart="0" iend="  800" id="log1">
+	<values>
+	   ...
 
 These define the PAW grids used for wavefunctions, densities and potentials.
 To approximately match the intensity of the grids, we should modify the fifth
 line in the `C.in` file:
 
-     ...
-       0.816497E-06    1.3000   38.0877   300    : sprmin, rmt, sprmax, nrmt
-     ...
-     to:
-     ...
-       0.816497E-06    1.3000   38.0877   500    : sprmin, rmt, sprmax, nrmt
-     ...
+	   ...
+		 0.816497E-06    1.3000   38.0877   300    : sprmin, rmt, sprmax, nrmt
+	   ...
+	   to:
+	   ...
+		 0.816497E-06    1.3000   38.0877   500    : sprmin, rmt, sprmax, nrmt
+	   ...
 
 You now need to comment out the species generation input block in the `elk.in` file:
 
-     ...
-     ! Construct atomic species file 'C.in'
-     !species
-     ! 6  : atomic number
-     ! 'C'
-     ! 'carbon'
-     ! 21894.16673    : atomic mass
-     ! 1.300000000    : muffin-tin radius
-     ! 4              : number of occ. states
-     ! 1   0   1   2  : 1s
-     ! 2   0   1   2  : 2s
-     ! 2   1   1   1  : 2p m=1
-     ! 2   1   2   1  : 2p m=2
-     ...
+	   ...
+	   ! Construct atomic species file 'C.in'
+	   !species
+	   ! 6  : atomic number
+	   ! 'C'
+	   ! 'carbon'
+	   ! 21894.16673    : atomic mass
+	   ! 1.300000000    : muffin-tin radius
+	   ! 4              : number of occ. states
+	   ! 1   0   1   2  : 1s
+	   ! 2   0   1   2  : 2s
+	   ! 2   1   1   1  : 2p m=1
+	   ! 2   1   2   1  : 2p m=2
+	   ...
 
 !!! Note
     This is very important! If you do not comment these lines the species
@@ -620,7 +615,7 @@ and plot it in `gnuplot` with:
 
 You should get a graph like this:
 
-![Comparison of abinit and elk bands without shift](paw3_assets/images/band_abinit_elk_I.png)
+![Comparison of `ABINIT` and elk bands without shift](paw3_assets/images/band_abinit_elk_I.png)
 
 As you can see, the band structures look alike but differ by an absolute
 shift, which is normal, because in a periodic system there is no unique vacuum
@@ -661,14 +656,14 @@ the end of the output:
 we can tell that this is not true for the rest of the points. Since the script
 assumes alignment at the VBM, it now separates its statistics for occupied and
 unoccupied bands. The uppermost unoccupied bands can fit badly, depending on
-what precision was asked of abinit (especially, if `nbdbuf` is used).
+what precision was asked of `ABINIT` (especially, if `nbdbuf` is used).
 
 The fit is quite bad in general, an average of about 0.025 eV difference for
 occupied states, and about 0.05 eV difference for unoccupied states. If you
 plot the ouput as before, by piping the above to a `bands.dat` file and
 executing the same `gnuplot` command, you should get the plot below.
 
-![Comparison of abinit and elk bands with shift](paw3_assets/images/band_abinit_elk_II.png)
+![Comparison of `ABINIT` and elk bands with shift](paw3_assets/images/band_abinit_elk_II.png)
 
 On the scale of the band plot there is a small - but visible - difference
 between the two. Note that the deviations are usually larger away from the
@@ -681,9 +676,9 @@ precision can be expected.
 As we are now creating our "gold standard" with an `Elk` calculation, we also
 need to calculate the equilibrium lattice parameter and Bulk modulus of
 diamond with the `Elk` code. Unfortunately, `Elk` does not use datasets, so the
-various lattice parameters we used in our abinit structural search will have
+various lattice parameters we used in our `ABINIT` structural search will have
 to be put in one by one by hand and the code run for each. The lattice
-parameters in the abinit run were from 6.1 to 7.0 in increments of 0.1, so
+parameters in the `ABINIT` run were from 6.1 to 7.0 in increments of 0.1, so
 that makes ten runs in total. To perform the first, simply edit the `elk.in`
 file and change the keyword (at line 57):
 
@@ -761,7 +756,7 @@ your system.) By running the `eos` utility as before we get:
 
      alatt = (4*74.47144624)^(1/3) = 6.6785 Bohr (3.5341 Å)
 
-So we see that the initial, primitive, abinit dataset is about 9 GPa off for
+So we see that the initial, primitive, `ABINIT` dataset is about 9 GPa off for
 the _Bulk modulus_ and about 0.035 Bohr away from the correct value for the
 lattice parameter. In principle, these should be about an order of magnitude
 better, so let us see if we can make it so.
@@ -808,7 +803,7 @@ and bands for the input file below:
      1.3                                     ! Core radius for occ. 2p state
      1.3                                     ! Core radius for unocc. 2p state
      XMLOUT                                       ! Run atompaw2abinit converter
-     prtcorewf noxcnhat nospline noptim      ! Abinit conversion options
+     prtcorewf noxcnhat nospline noptim      ! `ABINIT` conversion options
      0                                       ! Stop marker
 
 Generate an atomic data file from this (you can replace the items in the old
@@ -826,8 +821,8 @@ Note the much better fit of the logarithmic derivatives, and the change in the
 shape of the projector functions (in blue in the `wfn` plots), due to the more
 complicated scheme used to optimise them.
 
-Generate the dataset like before and run the abinit `ecut` testing datasets in
-the `ab_C_test.in` abinit input file again. You should get an `etotal`
+Generate the dataset like before and run the `ABINIT` `ecut` testing datasets in
+the `ab_C_test.abi` `ABINIT` input file again. You should get an `etotal`
 convergence like this (again, the values to the left are just there to help):
 
                                        etotal   (ecut)
@@ -854,8 +849,8 @@ datasets 32 and 92 gives:
      ...
 
 Which also shows a much faster convergence than before. Is the dataset
-accurate enough? Well, if you run the abinit equilibrium parameter input file
-in `ab_C_equi.in`, you should get data for an `eos.in` file:
+accurate enough? Well, if you run the `ABINIT` equilibrium parameter input file
+in `ab_C_equi.abi`, you should get data for an `eos.in` file:
 
      "C - Diamond (second PAW dataset)" : cname - name of material
      2                                  : natoms - number of atoms
@@ -885,8 +880,8 @@ For comparison, we list all previous values again:
 
      Equilibrium        Bulk modulus       lattice
      volume, V0         B0                parameter
-     75.5073            460.37            3.5505 Å   (first primitive PAW dataset)
-     74.7110	        465.79            3.5379 Å   (second better PAW dataset)
+     75.5073            460.37            3.5505 Å   (1st primitive PAW dataset)
+     74.7110	        465.79            3.5379 Å   (2nd better PAW dataset)
      74.4714            469.70            3.5341 Å   (Elk all-electron)
 
 It is obvious that the second dataset is much better than the first one.
@@ -938,20 +933,23 @@ this parameter depends on the k-point grid used. As the k-point grid becomes
 denser, the optimum spread becomes smaller, and all values converge toward
 their ideal counterparts in the limit of no smearing and an infinitely dense grid.
 
-The problem is that, in ABINIT, finding the optimum smearing parameter takes a
+The problem is that, in `ABINIT`, finding the optimum smearing parameter takes a
 (potentially time consuming) convergence study. However, we are in luck. The
-elk code has an option for automatically determining the smearing parameter.
+`Elk` code has an option for automatically determining the smearing parameter.
 Thus we should use the `Elk` code first, set a relatively dense k-mesh, and
 calculate the equilibrium bulk modulus, lattice parameter and band structure.
 Then we make sure to match the automatically determined smearing width, and
 most importantly, make sure that we match the smearing function used between
-the `Elk` and the abinit calculation.
+the `Elk` and the `ABINIT` calculation.
 
 ### 4.1. Magnesium - The all-electron calculation
 
 There is an `Elk` input file prepared at: [elk_Mg_band.in](paw3_assets/inputs/elk_Mg_band.in),
 we suggest you copy it into a subdirectory dedicated to the Mg `Elk` calculation (why not `Mg_elk`?), rename
 it to `elk.in` and take a look inside the input file.
+
+{% dialog tutorial/paw3_assets/inputs/elk_Mg_band.in %}
+
 
 There will be sections familiar from before, defining the lattice vectors,
 structure, etc. (Mg has a 2-atom hexagonal unit cell.) Then there are a couple
@@ -995,7 +993,7 @@ this should furnish you with a list:
 
 where the last value is the one we seek, i.e. the smearing at convergence.
 Since this `Elk` file will also calculate the band structure, you will have a
-`BAND.OUT` file at the end of this calculation to compare your ABINIT band
+`BAND.OUT` file at the end of this calculation to compare your `ABINIT` band
 structure to. There is one more thing we need to check, and that is the Fermi energy:
 
      grep 'Fermi  ' INFO.OUT
@@ -1023,6 +1021,9 @@ we compare band structures to align the band plots at the Fermi energy.
 
 Now it's time to calculate the equilibrium lattice parameters. There is a
 prepared file at: [elk_Mg_equi.in](paw3_assets/inputs/elk_Mg_equi.in).
+
+{% dialog tutorial/paw3_assets/inputs/elk_Mg_equi.in %}
+
 As before copy this to your directory rename it to `elk.in`. The layout of this file looks pretty much
 like the one before, except the band structure keywords are missing, and now
 switdth is fixed to the value we extracted before:
@@ -1109,44 +1110,21 @@ with this scale factor, we have that:
      volume, V0         B0                parameters
      291.6029           40.1437            a = b = 3.1323 Å  c = 5.0854 Å
 
-Now we have all the information needed to proceed with the abinit calculation.
+Now we have all the information needed to proceed with the `ABINIT` calculation.
 
-### 4.2. Magnesium - The abinit calculation
+### 4.2. Magnesium - The `ABINIT` calculation
 
 As usual, it's best to prepare a separate subdirectory for the atomic data and
-the ABINIT test. We will assume that the subdirectories have been created as:
+the `ABINIT` test. We will assume that the subdirectories have been created as:
 
      mkdir Mg_atompaw
      mkdir Mg_atompaw/abinit_test
      mkdir Mg_atompaw/abinit_test/outputs
 
 and that your current directory is `./Mg_atompaw`. For the Mg `ATOMPAW` input,
-create a file `Mg.input` with the following content:
+use the file  [Mg.input](paw3_assets/inputs/Mg.input).
 
-     Mg 12
-     LDA-PW scalarrelativistic loggrid 801 40. logderivrange -10 40 1000
-     3 3 0 0 0 0
-     3 1 0
-     0 0 0
-     c
-     v
-     v
-     v
-     v
-     1
-     1.9
-     n
-     n
-     custom polynom2 7 11 vanderbiltortho sincshape
-     2 0 ultrasoft
-     1.9
-     1.9
-     1.9
-     1.9
-     XMLOUT
-     prtcorewf noxcnhat nospline noptim
-     0
-
+{% dialog tutorial/paw3_assets/inputs/Mg.input %}
 
 Note that there are not really many projectors in this dataset, only two
 per angular momentum channel. It should be possible to make this much better
@@ -1154,12 +1132,15 @@ adding extra projectors, and maybe even unoccupied $d$-states. If you run
 atompaw with this, you can have a look with the bundled `plot_MG_all.p` file
 and others like it to get a feel for the quality of this dataset.
 
-Generate the abinit dataset file, and make sure it's given as:
-`./Mg_atompaw/Mg_LDA-PW-paw.xml`, then go to the subdirectory for the ABINIT test,
-and copy these files to it: [ab_Mg_test.in](paw3_assets/inputs/ab_Mg_test.in),
-and [ab_Mg_equi.in](paw3_assets/inputs/ab_Mg_equi.in). 
+Generate the `ABINIT` dataset file, and make sure it's given as:
+`./Mg_atompaw/Mg_LDA-PW-paw.xml`, then go to the subdirectory for the `ABINIT` test,
+and copy these files to it: [ab_Mg_test.abi](paw3_assets/inputs/ab_Mg_test.abi),
+and [ab_Mg_equi.abi](paw3_assets/inputs/ab_Mg_equi.abi). 
 The file for testing the convergence has already been set up so that the smearing
 strategy is equivalent to the `Elk` one, as evidenced by the lines:
+
+{% dialog tutorial/paw3_assets/inputs/ab_Mg_test.abi %}
+{% dialog tutorial/paw3_assets/inputs/ab_Mg_equi.abi %}
 
      ...
      # Parameters for metals
@@ -1174,14 +1155,14 @@ possibilities compare the entries for the keyword `stype` in the `Elk` manual
 and the entries for `occopt` in ABINIT).
 
 Now run the test input file (if your computer has several cores, you might
-want to take advantage of that and run abinit in parallel). The test suite can
+want to take advantage of that and run `ABINIT` in parallel). The test suite can
 take some time to complete, because of the dense _k-point mesh sampling_. Make
 sure you pipe the screen to a log file: `log_Mg_test`
 
 When the run is finished, we can check the convergence properties as before,
 and we that an `ecut` of 15 Ha is definitely enough. The interesting thing will
 now be to compare the band structures. First we need to check the Fermi energy
-of the abinit calculation, if you do a `grep`:
+of the `ABINIT` calculation, if you do a `grep`:
 
      grep ' Fermi' log_Mg_test
 
@@ -1194,14 +1175,14 @@ converging towards one number:
      newocc : new Fermi energy is       0.137605 , with nelect=     20.000000
 
 
-The last one of these is the final _Fermi energy_ of the ABINIT calculation. The
+The last one of these is the final _Fermi energy_ of the `ABINIT` calculation. The
 `abinit2elk` band comparison _script_ can now be given the _Fermi energies_ of the
 two different calculations and align band structures there. Copy the
 `BAND.OUT` file from the `Elk` calculation to the current directory, as well as
 the band comparison script `comp_bands_abinit2elk.py`. This script can also be
 used to align the bands at different Fermi energies. However, in the
 `BAND.OUT` file from `Elk`, the bands are already shifted so that the Fermi
-energy is at zero, so it is only the alignment of the abinit file that is required:
+energy is at zero, so it is only the alignment of the `ABINIT` file that is required:
 
      python comp_bands_abinit2elk.py ./outputs/ab_Mg_test_o_DS32_EIG BAND.OUT Fermi 0.137605 0.0 eV
 
@@ -1221,10 +1202,10 @@ output to a file `bands_abinit_elk.dat`, and go into gnuplot and use the script 
      
 You should get a plot that looks something like this:
 
-![Comparison of Mg abinit and Elk bands alignet at Fermi level](paw3_assets/images/band_abinit_elk_III.png)
+![Comparison of Mg `ABINIT` and Elk bands alignet at Fermi level](paw3_assets/images/band_abinit_elk_III.png)
 
 As we can see, the bands should fit quite well. Finally, for the structural, a
-run of the `ab_Mg_equi.in` file gives us all the information we need for the
+run of the `ab_Mg_equi.abi` file gives us all the information we need for the
 creation of an `eos.in` file:
 
      "Mg - bulk metallic (ABINIT)"

@@ -20,8 +20,7 @@
  nstep     14
  ixc       1
 
-# It's an isolated system so nkpt=1, other thinghs I took from
-# the tutorial
+# It is an isolated system so nkpt=1, other things I took from the tutorial
   kptopt 0
  nkpt      1
  diemac    1.5

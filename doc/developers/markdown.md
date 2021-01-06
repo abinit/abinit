@@ -712,6 +712,8 @@ a modal window with tabs is produced
 
 {% modal tests/v1/Input/t01.abi tests/v1/Input/t02.abi %}
 
+Note however, that these extensions do not work when called within the input variable database files (abimkdocs/variables*.py files).
+
 ## MathJax
 
 Formulas written in LaTeX are interpreted automatically (at visualization time) thanks to the

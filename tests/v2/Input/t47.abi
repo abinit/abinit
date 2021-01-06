@@ -5,10 +5,7 @@
 
 # most or all datasets will need these values
  nstep 0  iscf -3  prtden 1  tolwfr 1.0d-14
- getden 1   # getden should not be needed when nstep is 0, but
-            # ABINIT requires it for the time being. This should
-            # be changed later ... (this is for version 2.2)
-
+ getden 1   
 
 #DATASET 1  Compute the SCF density
  getden1 0

@@ -82,12 +82,7 @@
 #Gives the number of band, explicitely (do not take the default)
     nband   4         
 
-#Exchange-correlation functional
-
-      ixc   1             # LDA Teter Pade parametrization
-
 #Definition of the planewave basis set
-
      ecut   3.0           # Maximal kinetic energy cut-off, in Hartree
 
 #Definition of the k-point grid
