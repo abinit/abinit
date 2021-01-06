@@ -1852,7 +1852,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourwf=1
- integer :: idat,idir,ipw,nspinortot,shift
+ integer :: idat,ipw,nspinortot,shift
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: weight=one
  !arrays
