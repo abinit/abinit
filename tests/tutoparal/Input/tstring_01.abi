@@ -63,7 +63,7 @@ tolmxf        5.0d-5   # Stopping criterion of relaxation cycle
 
 # Parallelization
 # ===============
-paral_kgb     1
+paral_kgb     1        # Force use of lobpcg WITH parallelism on 1 CPU
 bandpp        10
 
 
