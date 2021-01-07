@@ -54,6 +54,7 @@ module m_getgh1c
  public :: getdc1
  public :: getgh1dqc
  public :: getgh1dqc_setup
+ public :: getgh1ndc
 !!***
 
 contains
@@ -150,13 +151,14 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  integer :: choice,cplex1,cpopt,ipw,ipws,ispinor,istr,i1,i2,i3
  integer :: my_nspinor,natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs
  integer :: tim_fourwf,tim_nonlop,usecprj
- logical :: compute_conjugate,has_kin,usevnl2
+ logical :: compute_conjugate,has_kin,has_nd1,usevnl2
  real(dp) :: weight !, cpu, wall, gflops
  !character(len=500) :: msg
 !arrays
  real(dp) :: enlout(1),tsec(2),svectout_dum(1,1),vectout_dum(1,1)
  real(dp),allocatable :: cwave_sp(:,:),cwavef1(:,:),cwavef2(:,:)
- real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:),gvnl2(:,:)
+ real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:)
+ real(dp),allocatable :: gh1ndc(:,:),gvnl2(:,:)
  real(dp),allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:),work(:,:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: gvnlx1_(:,:)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
@@ -502,6 +504,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    JLJ: BUG (wrong result) of H^(1) if stored cprj are used in PAW DDKs with nspinor==2 (==1 works fine).
 !    To be debugged, if someone has time...
      if(gs_hamkq%nspinor==2) cpopt=-1
+     if(associated(gs_hamkq%vectornd)) cpopt=-1
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnlx1_)
 !     write(std_out,'(a,4es16.8)')'JWZ debug nonlop cwave gvnlx1_ ',cwave(1,1),cwave(2,1),gvnlx1_(1,1),gvnlx1_(2,1)
@@ -742,6 +745,30 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end if
      end do
    end do
+ end if
+
+!======================================================================
+!== Apply the 1st-order nuclear dipole operator to the wavefunction
+!== Only coded for DDK
+!== (add it to nl contribution)
+!======================================================================
+
+ has_nd1=( (ipert .EQ. natom+1) .AND. ASSOCIATED(rf_hamkq%vectornd) )
+
+ if (has_nd1) then
+   ABI_ALLOCATE(gh1ndc,(2,npw))
+   call getgh1ndc(cwave,gh1ndc,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
+     & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,&
+     & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,my_nspinor,rf_hamkq%vectornd,&
+     & gs_hamkq%use_gpu_cuda)
+   do ispinor=1,my_nspinor
+     do ipw=1,npw
+       ipws=ipw+npw*(ispinor-1)
+       gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+gh1ndc(1,ipw)
+       gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+gh1ndc(2,ipw)
+     end do
+   end do
+   ABI_DEALLOCATE(gh1ndc)
  end if
 
 !======================================================================
@@ -1776,6 +1803,155 @@ end if
 
 end subroutine getgh1dqc_setup
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/getgh1ndc
+!!
+!! NAME
+!! getgh1ndc
+!!
+!! FUNCTION
+!! Compute 1st order magnetic nuclear dipole moment contribution to <G|H|C>
+!! for input vector |C> expressed in reciprocal space.
+!! Only for DDK perturbation
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  gh1ndc(2,npw_k*my_nspinor*ndat)=1st order A.p contribution to <G|H|C> for array of nuclear dipoles
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!! This codes only the DDK response for A.p, so effectively A_ipert|C>. The nuclear dipole Hamiltonian
+!! (to first order in the nuclear dipole strength) is A.p where in atomic units
+!! A.p=\alpha^2 m x (r-R)/(r-R)^3 . p. Here the components of A have been precomputed in real space 
+!! by make_vectornd. The first-order DDK contribution is d A.p/dk = A_idir where idir is the 
+!! direction of the DDK perturbation, or 2\pi A_idir when k is given in reduced coords as is usual
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
+&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,use_gpu_cuda)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,use_gpu_cuda
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
+ real(dp),intent(inout) :: cwavein(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(inout) :: gh1ndc(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: tim_fourwf=1
+ integer :: idat,ipw,nspinortot,shift
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ real(dp) :: weight=one
+ !arrays
+ real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:)
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:)
+ real(dp),allocatable :: work(:,:,:,:)
+
+! *********************************************************************
+
+ gh1ndc(:,:)=zero
+ if (nvloc/=1) return
+
+ nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
+ if (mpi_enreg%paral_spinor==0) then
+   shift=npw_k
+   nspinor1TreatedByThisProc=.true.
+   nspinor2TreatedByThisProc=(nspinortot==2)
+ else
+   shift=0
+   nspinor1TreatedByThisProc=(mpi_enreg%me_spinor==0)
+   nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
+ end if
+
+ ABI_ALLOCATE(work,(2,n4,n5,n6*ndat))
+
+ if (nspinortot==1) then
+
+    ABI_ALLOCATE(ghc1,(2,npw_k*ndat))
+
+    ! apply vector potential in direction ipert to input wavefunction
+    call fourwf(1,vectornd,cwavein,ghc1,work,gbound_k,gbound_k,&
+      & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+      & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+
+    ! scale by 2\pi\alpha^2
+    gh1ndc=two_pi*FineStructureConstant2*ghc1
+
+    ABI_DEALLOCATE(ghc1)
+
+    ! JWZ debug blank this term for now
+    ! gh1ndc = zero
+
+ else ! nspinortot==2
+
+    ABI_ALLOCATE(cwavein1,(2,npw_k*ndat))
+    ABI_ALLOCATE(cwavein2,(2,npw_k*ndat))
+    do idat=1,ndat
+       do ipw=1,npw_k
+          cwavein1(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+          cwavein2(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
+       end do
+    end do
+
+    if (nspinor1TreatedByThisProc) then
+
+       ABI_ALLOCATE(ghc1,(2,npw_k*ndat))
+
+       call fourwf(1,vectornd,cwavein1,ghc1,work,gbound_k,gbound_k,&
+         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+         & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+       
+       do idat=1,ndat
+         do ipw=1,npw_k
+           gh1ndc(1:2,ipw+(idat-1)*npw_k)=two_pi*FineStructureConstant2*ghc1(1:2,ipw+(idat-1)*npw_k)
+         end do
+       end do
+
+       ABI_DEALLOCATE(ghc1)
+
+    end if ! end spinor 1
+
+    if (nspinor2TreatedByThisProc) then
+
+       ABI_ALLOCATE(ghc2,(2,npw_k*ndat))
+
+       call fourwf(1,vectornd,cwavein2,ghc2,work,gbound_k,gbound_k,&
+         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+         & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+
+       do idat=1,ndat
+         do ipw=1,npw_k
+           gh1ndc(1:2,ipw+(idat-1)*npw_k+shift)=two_pi*FineStructureConstant2*ghc2(1:2,ipw+(idat-1)*npw_k)
+         end do
+       end do
+
+       ABI_DEALLOCATE(ghc2)
+
+    end if ! end spinor 2
+
+    ABI_DEALLOCATE(cwavein1)
+    ABI_DEALLOCATE(cwavein2)
+
+ end if ! nspinortot
+
+ ABI_DEALLOCATE(work)
+
+end subroutine getgh1ndc
+!!***
+
 
 end module m_getgh1c
 !!***
