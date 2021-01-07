@@ -228,21 +228,6 @@ contains
 
     ! *********************************************************************
 
-    ! U_{K_0}
-    ! this%e_shiftfactor=zero
-    ! band_index=0
-    ! do isppol=1,nsppol
-    !   do ikpt=1,nkpt
-    !     nband_k=nband(ikpt+(isppol-1)*nkpt)
-    !     do ii=nband_k-this%nbcut+1,nband_k
-    !       this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
-    !     end do
-    !     band_index=band_index+nband_k
-    !   end do
-    ! end do
-    ! this%e_shiftfactor=this%e_shiftfactor/this%nbcut
-    ! write(0,*) 'eknk_new', this%e_shiftfactor
-
     ! U_{HEG_0}
     if(this%version==1) then
       this%e_shiftfactor=zero
@@ -260,28 +245,44 @@ contains
       this%ebcut=hightemp_e_heg(dble(this%bcut),this%ucvol)+this%e_shiftfactor
     end if
 
-    ! U_{LEGACY_0}
+    ! U_{K_0}
     if(this%version==2) then
-      eigentemp(:)=zero
-      eknktemp(:)=zero
-      mk(:)=.true.
-      ! Sorting eigen and eknk in ascending energy order.
-      do ii=1,this%bcut*nkpt*nsppol
-        krow=minloc(eigen,dim=1,mask=mk)
-        mk(minloc(eigen,dim=1,mask=mk))=.false.
-        eigentemp(ii)=eigen(krow)
-        eknktemp(ii)=eknk(krow)
-      end do
-      ! Doing the average over the this%nbcut lasts states...
-      niter=0
       this%e_shiftfactor=zero
-      do ii=this%bcut*nkpt*nsppol-this%nbcut+1,this%bcut*nkpt*nsppol
-        this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
-        niter=niter+1
+      band_index=0
+      do isppol=1,nsppol
+        do ikpt=1,nkpt
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          do ii=nband_k-this%nbcut+1,nband_k
+            this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
+          end do
+          band_index=band_index+nband_k
+        end do
       end do
-      this%e_shiftfactor=this%e_shiftfactor/niter
-      this%ebcut=eigentemp(this%bcut*nkpt*nsppol)
+      this%e_shiftfactor=this%e_shiftfactor/this%nbcut
     end if
+
+    ! U_{LEGACY_0}
+    ! if(this%version==3) then
+    !   eigentemp(:)=zero
+    !   eknktemp(:)=zero
+    !   mk(:)=.true.
+    !   ! Sorting eigen and eknk in ascending energy order.
+    !   do ii=1,this%bcut*nkpt*nsppol
+    !     krow=minloc(eigen,dim=1,mask=mk)
+    !     mk(minloc(eigen,dim=1,mask=mk))=.false.
+    !     eigentemp(ii)=eigen(krow)
+    !     eknktemp(ii)=eknk(krow)
+    !   end do
+    !   ! Doing the average over the this%nbcut lasts states...
+    !   niter=0
+    !   this%e_shiftfactor=zero
+    !   do ii=this%bcut*nkpt*nsppol-this%nbcut+1,this%bcut*nkpt*nsppol
+    !     this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
+    !     niter=niter+1
+    !   end do
+    !   this%e_shiftfactor=this%e_shiftfactor/niter
+    !   this%ebcut=eigentemp(this%bcut*nkpt*nsppol)
+    ! end if
   end subroutine compute_e_shiftfactor
   !!***
 
