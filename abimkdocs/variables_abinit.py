@@ -8141,8 +8141,8 @@ Other (**negative**) options:
     rho(r) and then run **iscf** = -2 for the intended set of k-points and bands.
     To prepare a run with **iscf** = -2, a density file can be produced using the
     parameter [[prtden]] (see its description). When a self-consistent set of
-    wavefunctions is already available, abinit can be used with [[nstep]] = 0 (see
-    Test_v2/t47.in), and the adequate value of [[prtden]].
+    wavefunctions is already available, abinit can be used with [[nstep]] = 0 
+    and the adequate value of [[prtden]], see tests/v2/Input/t47.abi .
 
   * -3 --> like -2, but initialize [[occ]] and [[wtk]], directly or indirectly
     (using [[ngkpt]] or [[kptrlatt]]) depending on the value of [[occopt]].
@@ -8155,7 +8155,12 @@ Other (**negative**) options:
     Note that the oscillator strength needs to be defined with respect to an origin of coordinate,
     thanks to the input variable [[boxcenter]]. The maximal number of Kohn-Sham excitations to be used
     to build the excited state TDDFT matrix can be defined by [[td_mexcit]], or indirectly
-    by the maximum Kohn-Sham excitation energy [[td_maxene]].
+    by the maximum Kohn-Sham excitation energy [[td_maxene]]. Only "LDA-like" XC kernels are implemented,
+    from native ABINIT XC functionals with specific values of [[ixc]]=[0,1,7,8,20,21,22]. In case you use a XC functional from the libxc,
+    corresponding to these values, there is no automatic translation, so that you have to specify explicitly
+    the [[ixc]] value among the above ones. As an example, if the [[ixc]] from your pseudopotentiel is -1012,
+    this corresponds to the same functional (LDA - Perdew Wang 1992) as [[ixc]]=7, and you should specify [[ixc]]=7.
+    
 """,
 ),
 
@@ -8305,8 +8310,8 @@ used for debugging). A warning is issued if this is not the case.
 Unfortunately, pseudopotential (or PAW) generators for hybrid functionals and
 mGGA are currently under development, so that one usually uses GGA or LDA
 pseudopotentials instead. The error should be limited when GGA or LDA
-pseudopotentials with semi-core states are used. Still this is a non-
-controlled error. Moreover, the choices [[ixc]] = 1, 2, 3 and 7 are fits to the
+pseudopotentials with semi-core states are used. 
+Still this is a non-controlled error. Moreover, the choices [[ixc]] = 1, 2, 3 and 7 are fits to the
 same data, from Ceperley-Alder, and are rather similar, at least for spin-unpolarized systems.
 The choice between the non-spin-polarized and spin-polarized case is governed
 by the value of [[nsppol]] (see below).
@@ -8372,11 +8377,10 @@ that it comes from the LibXC). In the case of separate exchange functional
 (let us represent its identifier by XXX) and correlation functional (let us
 represent its identified by CCC), a six-digit number will have to be specified
 for [[ixc]], by concatenation, be it XXXCCC or CCCXXX. As an example,
-[[ixc]] = -020 gives access to the Teter93 LDA, while [[ixc]] = -101130 gives
-access to the PBE GGA. In version 0.9 of LibXC (December 2008), there are 16
-three-dimensional (S)LDA functionals (1 for X, 14 for C, 1 for combined XC),
-and there are 41 three-dimensional GGA (23 for X, 8 for C, 10 for combined
-XC). Note that for a meta-GGA, the kinetic energy density is needed.
+[[ixc]] = -1012 gives the Perdew-Wang 1992 LDA ([[ixc]]=7 as well), 
+[[ixc]] = -020 gives the Teter93 LDA ([[ixc]]=1 as well), 
+while [[ixc]] = -101130 gives the PBE GGA ([[ixc]]=11 as well). 
+Note that for a meta-GGA, the kinetic energy density is needed.
 This means having [[usekden]] = 1.
 
 ==(S)LDA functionals== (do not forget to add a minus sign, as discussed above)
@@ -18178,6 +18182,11 @@ routine are timed in detail.
   * If 4  -->  close to [[timopt]] = 1, except that the different parts of the lobpcg
 routine are timed in detail. A different splitting of lobpcg than for
 [[timopt]] = -3 is provided.
+  * If 10  -->  relevant only when the wavelet basis set is used (i.e. [[usewvl]] = 1).
+    When activated, a file named `wvl_timings.yaml`,
+    in [YAML format](https://en.wikipedia.org/wiki/YAML), is created.
+    It contains a time analysis of the _BigDFT_ wavelet routines.
+    See the [[tutorial:paral_gswvl|tutorial on parallelism using wavelets]]
   * If -1  -->  a full analysis of timings is delivered
   * If -2  -->  a full analysis of timings is delivered, except timing the timer
   * If -3  -->  a full analysis of timings is delivered, including the detailed

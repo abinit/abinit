@@ -86,26 +86,26 @@ files, slightly different numerical results, or timing differences, e.g.:
 
 ```diff
 2,3c2,3
-< .Version 9.3.2 of ABINIT 
+< .Version 9.4.1 of ABINIT 
 < .(MPI version, prepared for a x86_64_darwin18.7.0_gnu9.3 computer) 
 ---
-> .Version 9.3.1 of ABINIT 
+> .Version 9.3.3 of ABINIT 
 > .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 17,18c17,18
-< .Starting date : Mon  7 Dec 2020.
+< .Starting date : Mon 25 Jan 2021.
 < - ( at 21h07 )
 ---
-> .Starting date : Tue 10 Nov 2020.
-> - ( at 22h21 )
+> .Starting date : Wed 30 Dec 2020.
+> - ( at 19h15 )
 20,21c20,21
 < - input  file    -> tbase1_1.abi
 < - output file    -> tbase1_1.abo
 ---
-> - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Test_suite/tutorial_tbase1_1/tbase1_1.abi
+> - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_beauty/tests/TestBot_MPI1/tutorial_tbase1_1/tbase1_1.abi
 > - output file    -> tbase1_1.abo
 117,118c117,118
-< - pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/beauty/tests//Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
-< - pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/beauty/tests//Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+< - pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+< - pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
 ---
 > - pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
 > - pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
@@ -749,13 +749,15 @@ These are:
 
 * [[ecut]] (the plane-wave kinetic energy cut-off)
 * [[acell]] (the supercell size)
-* [[ixc]] (not even mentioned until now, this input variable specifies what kind of
-  exchange-correlation functional is to be used)
 * the pseudopotential
+* [[ixc]] (not even mentioned until now, this input variable specifies what kind of
+  exchange-correlation functional is to be used, and is by default deduced from the pseudopotential - a choice
+  of exchange-correlation functional is mandatory to produce a pseudopotential, and mixing different exchange-correlation
+  functionals for pseudopotentials generation and ABINIT calculations is bad practice)
 
-We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density approximation
-(as well as the local-spin-density approximation) in the
-Teter parametrization, and a LDA pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>,
+We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, 
+the LDA (=local-density approximation, as well as the local-spin-density approximation in the spin-polarized case) in the
+Perdew-Wang parametrization ([[ixc]]=-1012), and a LDA pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>,
 copied in the ABINIT directory $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8 . You might have a look at
 the file $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8/README.md to learn more about pseudopotentials.
 

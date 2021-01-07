@@ -4,40 +4,52 @@
  ndtset    2
 
 #DATASET 1  SCF
- tolwfr1   1.0d-15
+ tolwfr1   1.0d-15  # Well converged, giving accurate density
   nband1   5
  prtden1   1
- getwfk1   0
 
 #DATASET 2 TDDFT
    iscf2  -1
- tolwfr2   1.0d-9
-  nband2   12
+ tolwfr2   1.0d-9   # The additional bands do no need to be so well converged.
+  nband2   12  # We will change this value to 30, 60, 100 and 150 for the convergence study
  getden2   1
  getwfk2   1
 
-#Common
- acell 6  2*5 Angstrom
- boxcenter 3*0.0d0
- diemac 1.0d0   diemix 0.5d0
- ecut 25
- ixc  7
-
-kptopt 0          # Enter the k points manually 
-
- natom  2 
+#In this specific example, the number of bands is determined manually above, and there is no "buffer" band to be taken into account. 
  nbdbuf 0
 
- nstep 25
+#Definition of the unit cell, also boxcenter for the specificity of TDDFT
+ acell 6 2*5 Angstrom  # We will change these values ifor the convergence study, to : 8 2*7  ; 10 2*9 ; 12 2*11 ; 14 2*13 ; 16 2*15 ; 20 2*19
+ boxcenter 3*0.0d0
+
+#Definition of the atom types and pseudopotentials
  ntypat  1
- typat  1 1
- xcart -0.54885  0 0  0.54885 0 0 Angstrom   ! Distance 1.0977 Angstrom
  znucl  7
+ pp_dirpath "$ABI_PSPDIR"                 # This is the path to the directory were pseudopotentials for tests are stored
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/N.psp8"  # Name and location of the pseudopotential
+                  # This pseudopotential comes from the pseudodojo site http://www.pseudo-dojo.org/  (NC SR LDA standard),
+                  # and was generated using the LDA exchange-correlation functional (PW=Perdew-Wang, ixc=-1012).
+                  # By default, abinit uses the same exchange-correlation functional than the one of the input pseudopotential(s)
+ ixc 7   # In the TDDFT implementation of ABINIT, only selected native XC functionals can be used. 
+         # The ixc=7 is equivalent to ixc=-1012, but is allowed for TDDFT, while ixc=-1012 is not allowed.
 
+#Definition of the atoms
+ natom  2 
+ typat  1 1
+ xcart -0.54875  0 0  0.54875 0 0 Angstrom   # Distance 1.0975 Angstrom, fixed at experimental value according to 
+    # Tables of Interatomic Distances and Configuration in Molecules and Ions, L.E. Sutton, ed., London: The Chemical Society, 1958.
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosHGH_pwteter/7n.5.hgh"
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ ecut 25 # We will change this value to 30, 35 and 45 for the convergence study
+ kptopt 0          # Enter the k points manually, and by default, only one k point, at Gamma 
 
+#Parameters for the SCF procedure
+ diemac 1.0d0   diemix 0.5d0
+ nstep 25
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
