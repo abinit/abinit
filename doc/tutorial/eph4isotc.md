@@ -4,13 +4,14 @@ authors: MG
 
 # Superconducting properties within the isotropic Eliashberg formalism
 
-This tutorial explains how to compute phonon linewidths in metals induced by the electron-phonon (e-ph) interaction
-and how to use the McMillan equation to estimate the superconducting critical temperature $T_c$
-within the **isotropic Eliashberg formalism**.
+This tutorial explains how to compute phonon linewidths induced by the electron-phonon (e-ph) interaction
+in metallic systems and how to use the Eliashberg spectral function and the McMillan equation 
+to estimate the superconducting critical temperature $T_c$ within the **isotropic Eliashberg formalism**.
+
 We start by presenting the basic equations implemented in the code and their connection with the ABINIT variables.
 Then we discuss how to run isotropic $T_c$-calculations and how to perform typical convergence studies
-using MgB$_2$ as example, a well-known phonon-mediated superconductor with $T_c$ = 39 K.
-For a more complete theoretical introduction see [[cite:Giustino2017]] and references therein.
+using MgB$_2$, a well-known phonon-mediated superconductor with $T_c$ = 39 K.
+For a more complete theoretical introduction, see [[cite:Giustino2017]] and references therein.
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and vibrational properties **in metals**.
@@ -21,8 +22,8 @@ This lesson should take about 1.5 hour.
 
 ## Formalism and connection with the implementation
 
-Due to the interaction with electrons, phonons become quasi-particle excitations
-with a **renormalized energy** and a **finite lifetime**.
+Due to the interaction with electrons, vibrational energies get renormalized and phonon excitations 
+acquire a **finite lifetime**.
 These many-body effects are described by the phonon-electron self-energy:
 
 $$
@@ -31,12 +32,11 @@ $$
 $$
 
 where only contributions up to the second order in the e-ph vertex $g$ have been included.
-The sum over $\kk$ is performed over the first BZ, 
-$\eta$ is a positive real infinitesimal
+The sum over $\kk$ is performed over the first BZ, $\eta$ is a positive real infinitesimal
 and $\gkkp$ are the e-ph matrix element discussed in the [EPH introduction](eph_intro).
 This expression contains the T-dependence via the Fermi-Dirac distribution function $f$
 and the factor two accounts for spin degeneracy (we are assuming a non-magnetic system 
-in which electron energies $\ee$ and e-ph matrix elements $g$ do not depend on the spin).
+so electron energies $\ee$ and e-ph matrix elements do not depend on the spin).
 
 <!--
 where $\ww_{\qq\nu}$ is the phonon frequency,
@@ -47,9 +47,9 @@ $n_\qnu(T)$ is the Bose-Einstein occupation number, $f_{m\kk+\qq}(T, \ef)$ is th
 $\enk$ is the energy of the electron state, and $\wqnu$ is the phonon frequency for the phonon wavevector $\qq$.
 -->
 
-The real part of $\Pi_\qnu$ defines the shift of the vibrational energies due to e-ph interaction
+The real part of $\Pi_\qnu$ gives the correction to the vibrational energies due to e-ph interaction
 while the phonon **linewidth** $\gamma_{\qq\nu}$ (full width at half maximum) is twice
-the imaginary part $\Pi^{''}_\qnu$ evaluated at $\ww = \ww_\qnu$:
+the imaginary part $\Pi^{''}_\qnu$ evaluated at "bare" frequency $\ww_\qnu$:
 
 $$
 \gamma_{\qq\nu}(T) = 2\, \Pi^{''}_\qnu(\ww=\ww_\qnu, T).
@@ -64,39 +64,35 @@ $$
 the imaginary part of $\Pi$ can we rewritten as:
 
 $$
-\Pi^{''}_{\qq\nu}(\ww_\qnu, T) = \dfrac{2}{N_\kk} \sum_{mn\kk} |g_{mn\nu}(\kk, \qq)|^2
+\Pi^{''}_{\qq\nu}(\ww_\qnu, T) = \dfrac{2\pi}{N_\kk} \sum_{mn\kk} |g_{mn\nu}(\kk, \qq)|^2
 (f_\nk - f_{m\kq})\,\delta(\ee_{\kk n} - \ee_{m\kpq} -\ww_\qnu)
 $$
 
+where the delta function enforces energy conservation in the scattering process.
 Because phonon energies are typically small compared to electronic energies,
-the energy difference $\ee_{\kk n} - \ee_{m\kpq}$ is also small, and one can approximate the
-difference in the electronic occupation factors with:
+the energy difference $\ee_{\kk n} - \ee_{m\kpq}$ is also small, hence it is possible to 
+approximate the difference in the occupation factors with:
 
 $$
 f_\nk - f_{m\kq} \approx f'(\ee_\nk) (\ee_{\kk n} - \ee_{m\kpq}) = -f'(\ee_\nk) \ww_\qnu
 $$
 
-At low T, the derivative of the Fermi-Dirac occupation function is strongly peaked at the Fermi level:
+At low T, the derivative of the Fermi-Dirac occupation function is strongly peaked around the Fermi level and 
+we can approximate it with:
 
 $$ f'(\ee_\nk) \approx -\delta(\ee_\nk - \ee_F) $$
 
-By neglecting $\ww_\qnu$ in the argument of the
-delta, we obtain the so-called **double-delta approximation** (DDA) for the phonon linewidth [[cite:Allen1972]]:
+By neglecting $\ww_\qnu$ in the argument of the delta, we obtain the 
+so-called **double-delta approximation** (DDA) for the phonon linewidth [[cite:Allen1972]]:
 
 $$
-\gamma_{\qq\nu} = 2\pi \ww_{\qq\nu} \sum_{mn\kk} |g_{mn\nu}(\kk, \qq)|^2
-\delta(\ee_{\kpq m} -\ee_F) \delta(\ee_{\kk n} -\ee_F)
+\gamma_{\qq\nu} = \dfrac{4\pi \ww_{\qq\nu}}{N_\kk} \sum_{mn\kk} 
+|g_{mn\nu}(\kk, \qq)|^2 \delta(\ee_{\kpq m} -\ee_F) \delta(\ee_{\kk n} -\ee_F)
 $$
-
-<!--
-Note that in the DDA the linewidths do not depends on T, moreover the approximation breaks
-down at small $\qq$ where the phonon frequency cannot be neglected.
--->
 
 For a given phonon wavevector $\qq$, the DDA restricts the BZ integration to
 electronic transitions between $\kk$ and $\kq$ states on the Fermi surface (FS).
-As a consequence, converging $\gamma_{\qq\nu}$ requires very dense $\kk$-meshes 
-to sample enough states around the FS.
+As a consequence, very dense $\kk$-meshes are needed to converge $\gamma_{\qq\nu}$.
 The convergence rate, indeed, is expected to be much slower than that required by the electron DOS at $\ee_F$:
 
 $$
@@ -107,7 +103,10 @@ in which a single Dirac delta is involved.
 
 !!! note
 
-    It is worth stressing that there is another important contribution to the phonon lifetimes induced by
+    The DDA breaks down at small $\qq$ where the phonon frequency cannot be neglected.
+    Note also that the DDA linewidths do not depend on the temperature.
+
+    It is also worth stressing that there is another important contribution to the phonon lifetimes induced by
     **non-harmonic** terms in the Taylor expansion of the Born-Oppenheimer energy surface around the equilibrium point.
     Within the framework of many-body perturbation theory, these non-harmonic terms lead
     to **phonon-phonon scattering processes** that can give a substantial contribution to the lifetimes
@@ -120,12 +119,12 @@ is selected via the [[eph_intmeth]] input variable.
 One can use the **optimized tetrahedron** scheme [[cite:Kawamura2014]] as implemented
 in the [libtetrabz library](http://libtetrabz.osdn.jp/en/_build/html/index.html) ([[eph_intmeth]] == 2)
 or replace the Dirac distribution with a **Gaussian** of finite width ([[eph_intmeth]] == 1).
-If the Gaussian method is selected, one can choose between a constant broadening $\sigma$
+When the Gaussian method is selected, one can choose between a constant broadening $\sigma$
 specified in Hartree by [[eph_fsmear]] or an adaptive scheme (activated when [[eph_fsmear]] < 0)
 in which a state-dependent broadening $\sigma_\nk$ is automatically computed from
 the electron group velocities $v_\nk$ [[cite:Li2015]].
-Note that the adaptive scheme is also used for the optimized tetrahedron scheme at the $\Gamma$ point
-since the double-delta is ill-defined for $\qq = \Gamma$.
+Note that the adaptive scheme is also used internally by the code when the optimized tetrahedron scheme 
+is used since the double-delta expression is ill-defined for $\qq = \Gamma$.
 
 <!--
 Nesting factor
@@ -158,39 +157,58 @@ although it is possible to change the value of $\ee_F$ during an EPH calculation
 three (mutually exclusive) input variables: [[eph_fermie]], [[eph_extrael]] and [[eph_doping]].
 This may be useful if you want to study the effect of doping within the **rigid band approximation**.
 
-The sum over bands is restricted to Bloch states within an energy window of thickness [[eph_fsewin]]
+<!--
+As concerns the computation of the electron DOS, 
+[[prtdos]] [[dosdeltae]] [[tsmear]]
+-->
+
+The sum over bands in $\gamma_{\qq\nu}$ is restricted to Bloch states within an energy window of thickness [[eph_fsewin]]
 around the Fermi level (additional details are given in the tutorials).
 The $\kk$-mesh is defined by the input variables [[ngkpt]], [[nshiftk]] and [[shiftk]].
-These values **must correspond** to the ones used to generate the input WFK file.
+that **must be equal** to the ones used to generate the input WFK file.
 
 The code computes $\gamma_{\qq\nu}$ for all the $\qq$-point in the IBZ associated to the [[eph_ngqpt_fine]] $\qq$-mesh.
-The DFPT potentials and phonon frequencies are interpolated starting
+The DFPT potentials are interpolated starting
 from the [[ddb_ngqpt]] *ab-initio* $\qq$-mesh associated to the input DVDB/DDB files.
 If [[eph_ngqpt_fine]] is not specified in the input, [[eph_ngqpt_fine]] == [[ddb_ngqpt]] is assumed
 and no interpolation of the potentials in $\qq$-space is required.
 
-Once the phonon linewidths $\gamma_{\qq\nu}$ are known in the IBZ, ABINIT computes the Eliashberg function:
+Once the phonon linewidths $\gamma_{\qq\nu}$ are known in the IBZ, ABINIT computes 
+the isotropic Eliashberg function:
 
 $$
-\alpha^2F(\ww) = \dfrac{1}{N_F} \sum_{\qq\nu} \dfrac{\gamma_{\qq\nu}}{\ww_{\qq\nu}} \delta(\ww - \ww_{\qq \nu})
+\alpha^2F(\ww) = 
+\dfrac{1}{N_\qq\, N_F} \sum_{\qq\nu} \dfrac{\gamma_{\qq\nu}}{\ww_{\qq\nu}} \delta(\ww - \ww_{\qq \nu})
 $$
 
 where $N_F$ is the density of states (DOS) per spin at the Fermi level.
+The Eliashberg function can be equivalently expressed as:
+
+$$
+\alpha^2F(\ww) = 
+\dfrac{1}{N_\qq N_\kk\, N_F} \sum_{\kk\qq mn \nu}
+|g_{mn\nu}(\kk, \qq)|^2 \delta(\ee_{\kpq m} -\ee_F) \delta(\ee_{\kk n} -\ee_F) \delta(\ww - \ww_{\qq \nu})
+$$
+
 From a physical perspective, $\alpha^2F(\ww)$ gives the strength by which a phonon
-of energy $\ww$ scatters electronic states on the FS (remember that ABINIT uses atomic units hence $\hbar = 1$).
+of energy $\hbar\ww$ scatters electronic states on the FS 
+(remember that ABINIT uses atomic units hence $\hbar = 1$).
 This quantity is accessible in experiments and experience has shown that
 $\alpha^2F(\ww)$ is qualitatively similar to the phonon DOS $F(\ww)$:
 
 $$
-F(\ww) = \sum_{\qq\nu} \delta(\ww - \ww_{\qq \nu})
+F(\ww) = \dfrac{1}{N_\qq} \sum_{\qq\nu} \delta(\ww - \ww_{\qq \nu})
 $$
 
 This is not surprising as the equation for $\alpha^2F(\ww)$ resembles the one for $F(\ww)$,
 except for the weighting factor $\frac{\gamma_{\qq\nu}}{\ww_{\qq\nu}}$.
+This is also the rationale behind the $\alpha^2F$ notation: the Eliashberg function can be seen 
+as the phonon DOS times a smooth positive prefactor $\alpha^2(\ww)$.
 
 The technique used to compute $\alpha^2F(\ww)$ is defined by [[ph_intmeth]] (note the `ph_` prefix instead of `eph_`).
 Both the Gaussian ([[ph_intmeth]] = 1 with [[ph_smear]] smearing) and
 the linear tetrahedron method by [[cite:Blochl1994]] ([[ph_intmeth]] = 2, default) are available.
+$\alpha^2F(\ww)$ is evaluated on a linear mesh of step [[ph_wstep]] covering the entire range of phonon frequencies.
 The total e-ph coupling strength $\lambda$ is defined as the first inverse moment of $\alpha^2F(\ww)$:
 
 $$
@@ -198,16 +216,10 @@ $$
 $$
 
 where we have introduced the mode-dependent coupling strength:
-<!-- For spin unpolarized systems: -->
 
 $$
 \lambda_{\qq\nu} = \dfrac{\gamma_{\qq\nu}}{\pi N_F \ww_{\qq\nu}^2}
 $$
-
-<!--
-The frequency integration is performed by computing $\alpha^2F(\ww)$ on a linear mesh
-of step [[ph_wstep]] covering the entire range of phonon frequencies.
--->
 
 In principle, $T_c$ can be obtained by solving the isotropic Eliashberg equations for the superconducting
 gap [[cite:Margine2013]] but many applications prefer to bypass the explicit solution
@@ -225,12 +237,12 @@ $$
 \ww_{\text{log}} = \exp \Biggl [ \dfrac{2}{\lambda} \int \dfrac{\alpha^2F(\ww)}{\ww}\log(\ww)\dd\ww \Biggr ]
 $$
 
-In pratical applications, $\mu^*$ is usually treated as an **external parameter**,
+In pratical applications, $\mu^*$ is treated as an **external parameter**,
 typically between 0.1 and 0.2, that is adjusted to reproduce experimental results.
-The default value of [[eph_mustar]] used in the code is 0.1.
+The default value of [[eph_mustar]] used by ABINIT is 0.1.
 
 Before concluding this brief theoretical introduction, we would like to
-stress that the present formalism assumes a single superconducting gap
+stress that the present formalism assumes a **single superconducting gap**
 with a **weak dependence** on $\kk$ so that it is possible to average the equations over the FS.
 This approximation becomes valid in the case of metals with impurities - the so-called dirty-limit -
 as impurities tend to smear out the anisotropy of the superconducting gap.
@@ -250,17 +262,19 @@ approach for calculating the intrinsic resistivity of realistic
 metallic materials on the level of first-principles calculations.
 According to Allen’s original work [21], the Ziman formula
 In comparison with the
-expression of the spectral function given by Eq. (3), the spectral function in the DDFA 
+expression of the spectral function given by Eq. (3), the spectral function in the DDA 
 is used more extensively in studying the intrinsic resistivity of metallic materials on the level of
 first-principles calculations in recent relevant works [3–5].
 
-Allen [9] obtained an approximation relating the conductivity of metals to the transport spectral function α2Ftr, which is a
+Allen [9] obtained an approximation relating the conductivity of metals 
+to the transport spectral function α2Ftr, which is a
 variant of the Eliashberg spectral function α2F. 
-
 lowest-order variational approximation (LOVA)
 -->
 
 [[cite:Allen1976b]], [[cite:Allen1978]]
+
+[[eph_transport]]
 
 
 ## Getting started

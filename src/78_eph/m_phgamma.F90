@@ -3,7 +3,7 @@
 !!
 !! FUNCTION
 !!  Computation of phonon linewidths, isotropic superconducting properties
-!!  and transport in metals within the LOVA approximation to the linearized Boltzmann equation.
+!!  and transport properties in metals within the LOVA approximation to the linearized Boltzmann equation.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2020 ABINIT group (MG)
@@ -20,6 +20,7 @@
 !!  6) More examples and tutorials (using precomputed Netcd files)
 !!  7) SKW interpolation for ph linewidths and/or linear interpolation (I don't trust plain Fourier interpolation).
 !!  8) Perform more benchmarks with dense meshes to detect hotspots and memory bottlenecks
+!!  9) Test SOC
 !!
 !! PARENTS
 !!
@@ -85,7 +86,6 @@ module m_phgamma
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
- use m_io_tools,       only : get_unit
 
  implicit none
 

@@ -213,7 +213,7 @@ SUBROUTINE libtetrabz_dbldelta2(nb,ej,w)
   INTEGER :: ib, ii, indx(3)
   REAL(8) :: a(3,3), e(3), V
   REAL(8) :: ediff(3)
-  character(len=500) :: msg
+  !character(len=500) :: msg
   !
   DO ib = 1, nb
      !
