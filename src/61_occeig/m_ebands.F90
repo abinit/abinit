@@ -3325,7 +3325,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    ABI_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
- ! Compute total DOS and IDOS
+ ! Compute total DOS and IDOS by summing the two spin channels.
  max_occ = two / (ebands%nspinor * ebands%nsppol)
  edos%dos(:, 0) = max_occ * sum(edos%dos(:,1:), dim=2)
 

@@ -3993,7 +3993,7 @@ Electron-phonon self-energy (also spectral function) with **eph_task** = 4):
 
 Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
 
-:   The default is [[eph_intmeth]] == 2, Tetrahedron method by [[cite:Blochl1993]] except when symsigma == 0,
+:   The default is [[eph_intmeth]] == 2, Tetrahedron method by [[cite:Blochl1994]] except when [[symsigma]] == 0,
     where it is [[eph_intmeth]] == 1.
 """,
 ),
@@ -8165,7 +8165,7 @@ Other (**negative**) options:
     rho(r) and then run **iscf** = -2 for the intended set of k-points and bands.
     To prepare a run with **iscf** = -2, a density file can be produced using the
     parameter [[prtden]] (see its description). When a self-consistent set of
-    wavefunctions is already available, abinit can be used with [[nstep]] = 0 
+    wavefunctions is already available, abinit can be used with [[nstep]] = 0
     and the adequate value of [[prtden]], see tests/v2/Input/t47.abi .
 
   * -3 --> like -2, but initialize [[occ]] and [[wtk]], directly or indirectly
@@ -8184,7 +8184,7 @@ Other (**negative**) options:
     corresponding to these values, there is no automatic translation, so that you have to specify explicitly
     the [[ixc]] value among the above ones. As an example, if the [[ixc]] from your pseudopotentiel is -1012,
     this corresponds to the same functional (LDA - Perdew Wang 1992) as [[ixc]]=7, and you should specify [[ixc]]=7.
-    
+
 """,
 ),
 
@@ -8334,7 +8334,7 @@ used for debugging). A warning is issued if this is not the case.
 Unfortunately, pseudopotential (or PAW) generators for hybrid functionals and
 mGGA are currently under development, so that one usually uses GGA or LDA
 pseudopotentials instead. The error should be limited when GGA or LDA
-pseudopotentials with semi-core states are used. 
+pseudopotentials with semi-core states are used.
 Still this is a non-controlled error. Moreover, the choices [[ixc]] = 1, 2, 3 and 7 are fits to the
 same data, from Ceperley-Alder, and are rather similar, at least for spin-unpolarized systems.
 The choice between the non-spin-polarized and spin-polarized case is governed
@@ -8401,9 +8401,9 @@ that it comes from the LibXC). In the case of separate exchange functional
 (let us represent its identifier by XXX) and correlation functional (let us
 represent its identified by CCC), a six-digit number will have to be specified
 for [[ixc]], by concatenation, be it XXXCCC or CCCXXX. As an example,
-[[ixc]] = -1012 gives the Perdew-Wang 1992 LDA ([[ixc]]=7 as well), 
-[[ixc]] = -020 gives the Teter93 LDA ([[ixc]]=1 as well), 
-while [[ixc]] = -101130 gives the PBE GGA ([[ixc]]=11 as well). 
+[[ixc]] = -1012 gives the Perdew-Wang 1992 LDA ([[ixc]]=7 as well),
+[[ixc]] = -020 gives the Teter93 LDA ([[ixc]]=1 as well),
+while [[ixc]] = -101130 gives the PBE GGA ([[ixc]]=11 as well).
 Note that for a meta-GGA, the kinetic energy density is needed.
 This means having [[usekden]] = 1.
 

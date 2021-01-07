@@ -4,7 +4,7 @@ authors: MG
 
 # Superconducting properties within the isotropic Eliashberg formalism
 
-This tutorial explains how to compute phonon linewidths in metals induced by the electron-phonon (e-ph) interaction 
+This tutorial explains how to compute phonon linewidths in metals induced by the electron-phonon (e-ph) interaction
 and how to use the McMillan equation to estimate the superconducting critical temperature $T_c$
 within the **isotropic Eliashberg formalism**.
 We start by presenting the basic equations implemented in the code and their connection with the ABINIT variables.
@@ -21,28 +21,86 @@ This lesson should take about 1.5 hour.
 
 ## Formalism and connection with the implementation
 
-Due to the interaction with electrons, phonons acquire a **finite lifetime**
-that is related to the imaginary part of the phonon-electron self-energy $\Pi_\qnu$.
-In the so-called double-delta approximation, the linewidth $\gamma_{\qq\nu}$
-of the ${\qq\nu}$ phonon is given by:
+Due to the interaction with electrons, phonons become quasi-particle excitations
+with a **renormalized energy** and a **finite lifetime**.
+These many-body effects are described by the phonon-electron self-energy:
+
+$$
+\Pi_{\qq\nu}(\ww, T) = \dfrac{2}{N_\kk} \sum_{mn\kk} |g_{mn\nu}(\kk, \qq)|^2
+\dfrac{f_\nk - f_{m\kq}}{\ee_{\nk} - \ee_{m\kq} -\ww - i\eta^+}
+$$
+
+where only contributions up to the second order in the e-ph vertex $g$ have been included.
+The sum over $\kk$ is performed over the first BZ, 
+$\eta$ is a positive real infinitesimal
+and $\gkkp$ are the e-ph matrix element discussed in the [EPH introduction](eph_intro).
+This expression contains the T-dependence via the Fermi-Dirac distribution function $f$
+and the factor two accounts for spin degeneracy (we are assuming a non-magnetic system 
+in which electron energies $\ee$ and e-ph matrix elements $g$ do not depend on the spin).
+
+<!--
+where $\ww_{\qq\nu}$ is the phonon frequency,
+the sum over the electron wavevector $\kk$ runs over the full BZ, $\ee_F$ is the Fermi level
+and $g_{mn\nu}(\kk, \qq)$ are the e-ph matrix elements discussed in the [EPH introduction](eph_intro).
+where $\nu$ is the phonon mode, $m$ the final electron state (after the scattering),
+$n_\qnu(T)$ is the Bose-Einstein occupation number, $f_{m\kk+\qq}(T, \ef)$ is the Fermi-Dirac occupation function,
+$\enk$ is the energy of the electron state, and $\wqnu$ is the phonon frequency for the phonon wavevector $\qq$.
+-->
+
+The real part of $\Pi_\qnu$ defines the shift of the vibrational energies due to e-ph interaction
+while the phonon **linewidth** $\gamma_{\qq\nu}$ (full width at half maximum) is twice
+the imaginary part $\Pi^{''}_\qnu$ evaluated at $\ww = \ww_\qnu$:
+
+$$
+\gamma_{\qq\nu}(T) = 2\, \Pi^{''}_\qnu(\ww=\ww_\qnu, T).
+$$
+
+Using the [Sokhotski–Plemelj theorem](https://en.wikipedia.org/wiki/Sokhotski%E2%80%93Plemelj_theorem):
+
+$$
+\lim_{\eta \rightarrow 0^+} \dfrac{1}{x \pm i\eta} = \mp i\pi\delta(x) + \mathcal{P}(\dfrac{1}{x})
+$$
+
+the imaginary part of $\Pi$ can we rewritten as:
+
+$$
+\Pi^{''}_{\qq\nu}(\ww_\qnu, T) = \dfrac{2}{N_\kk} \sum_{mn\kk} |g_{mn\nu}(\kk, \qq)|^2
+(f_\nk - f_{m\kq})\,\delta(\ee_{\kk n} - \ee_{m\kpq} -\ww_\qnu)
+$$
+
+Because phonon energies are typically small compared to electronic energies,
+the energy difference $\ee_{\kk n} - \ee_{m\kpq}$ is also small, and one can approximate the
+difference in the electronic occupation factors with:
+
+$$
+f_\nk - f_{m\kq} \approx f'(\ee_\nk) (\ee_{\kk n} - \ee_{m\kpq}) = -f'(\ee_\nk) \ww_\qnu
+$$
+
+At low T, the derivative of the Fermi-Dirac occupation function is strongly peaked at the Fermi level:
+
+$$ f'(\ee_\nk) \approx -\delta(\ee_\nk - \ee_F) $$
+
+By neglecting $\ww_\qnu$ in the argument of the
+delta, we obtain the so-called **double-delta approximation** (DDA) for the phonon linewidth [[cite:Allen1972]]:
 
 $$
 \gamma_{\qq\nu} = 2\pi \ww_{\qq\nu} \sum_{mn\kk} |g_{mn\nu}(\kk, \qq)|^2
 \delta(\ee_{\kpq m} -\ee_F) \delta(\ee_{\kk n} -\ee_F)
 $$
 
-where $\ww_{\qq\nu}$ is the phonon frequency,
-the sum over the electron wavevector $\kk$ runs over the full BZ, $\ee_F$ is the Fermi level
-and $g_{mn\nu}(\kk, \qq)$ are the e-ph matrix elements discussed in the [EPH introduction](eph_intro).
+<!--
+Note that in the DDA the linewidths do not depends on T, moreover the approximation breaks
+down at small $\qq$ where the phonon frequency cannot be neglected.
+-->
 
-For a given phonon wavevector $\qq$, the double Dirac delta restricts the BZ integration to
-transitions between $\kk$ and $\kq$ electronic states on the Fermi surface (FS).
-As a consequence, converging $\gamma_{\qq\nu}$ requires very dense $\kk$-meshes in order
+For a given phonon wavevector $\qq$, the DDA restricts the BZ integration to
+electronic transitions between $\kk$ and $\kq$ states on the Fermi surface (FS).
+As a consequence, converging $\gamma_{\qq\nu}$ requires very dense $\kk$-meshes 
 to sample enough states around the FS.
 The convergence rate, indeed, is expected to be much slower than that required by the electron DOS at $\ee_F$:
 
 $$
-g(\ee_F) = \sum_{n\kk} \delta(\ee_F - \ee_{n\kk})
+g(\ee_F) = \dfrac{1}{N_\kk} \sum_{n\kk} \delta(\ee_{n\kk} - \ee_F)
 $$
 
 in which a single Dirac delta is involved.
@@ -52,20 +110,21 @@ in which a single Dirac delta is involved.
     It is worth stressing that there is another important contribution to the phonon lifetimes induced by
     **non-harmonic** terms in the Taylor expansion of the Born-Oppenheimer energy surface around the equilibrium point.
     Within the framework of many-body perturbation theory, these non-harmonic terms lead
-    to **phonon-phonon scattering processes** that can give a substantial contribution to the lifetimes.
+    to **phonon-phonon scattering processes** that can give a substantial contribution to the lifetimes
+    at "high" T.
     In the rest of the tutorial, however, non-harmonic terms will be ignored and we will be mainly focusing
     on the computation of the imaginary part of the phonon self-energy $\Pi$ in the harmonic approximation.
 
 At the level of the implementation, the technique for integrating the double delta over the FS
 is selected via the [[eph_intmeth]] input variable.
-One can use the **optimized tetrahedron** scheme [[cite:Kawamura2014]] as implemented 
-in the [libtetrabz library](http://libtetrabz.osdn.jp/en/_build/html/index.html) ([[eph_intmeth]] == 2).
-or, alternatively, replace the Dirac distribution with a **Gaussian** of finite width ([[eph_intmeth]] == 1).
+One can use the **optimized tetrahedron** scheme [[cite:Kawamura2014]] as implemented
+in the [libtetrabz library](http://libtetrabz.osdn.jp/en/_build/html/index.html) ([[eph_intmeth]] == 2)
+or replace the Dirac distribution with a **Gaussian** of finite width ([[eph_intmeth]] == 1).
 If the Gaussian method is selected, one can choose between a constant broadening $\sigma$
 specified in Hartree by [[eph_fsmear]] or an adaptive scheme (activated when [[eph_fsmear]] < 0)
 in which a state-dependent broadening $\sigma_\nk$ is automatically computed from
 the electron group velocities $v_\nk$ [[cite:Li2015]].
-Note that the adaptive scheme is also used for the optimized tetrahedron scheme at the $\Gamma$ point 
+Note that the adaptive scheme is also used for the optimized tetrahedron scheme at the $\Gamma$ point
 since the double-delta is ill-defined for $\qq = \Gamma$.
 
 <!--
@@ -86,8 +145,8 @@ Yet visualizing the FS is rather useful when discussing e-ph properties in metal
 
     The tetrahedron method is more accurate and does not require any broadening parameter.
     Note, however, that in the present implementation the computational cost of the double
-    delta with the tetrahedron method quickly increases with the size of the $\kk$-mesh 
-    so the adaptive Gaussian scheme may represent a valid alternative, especially 
+    delta with the tetrahedron method quickly increases with the size of the $\kk$-mesh
+    so the adaptive Gaussian scheme may represent a valid alternative, especially
     when dense $\kk$-meshes are needed.
 
 -->
@@ -105,10 +164,11 @@ The $\kk$-mesh is defined by the input variables [[ngkpt]], [[nshiftk]] and [[sh
 These values **must correspond** to the ones used to generate the input WFK file.
 
 The code computes $\gamma_{\qq\nu}$ for all the $\qq$-point in the IBZ associated to the [[eph_ngqpt_fine]] $\qq$-mesh.
-The DFPT potentials and phonon frequencies are interpolated starting 
+The DFPT potentials and phonon frequencies are interpolated starting
 from the [[ddb_ngqpt]] *ab-initio* $\qq$-mesh associated to the input DVDB/DDB files.
-If [[eph_ngqpt_fine]] is not specified in the input, [[eph_ngqpt_fine]] == [[ddb_ngqpt]] is assumed 
+If [[eph_ngqpt_fine]] is not specified in the input, [[eph_ngqpt_fine]] == [[ddb_ngqpt]] is assumed
 and no interpolation of the potentials in $\qq$-space is required.
+
 Once the phonon linewidths $\gamma_{\qq\nu}$ are known in the IBZ, ABINIT computes the Eliashberg function:
 
 $$
@@ -116,7 +176,7 @@ $$
 $$
 
 where $N_F$ is the density of states (DOS) per spin at the Fermi level.
-From a physical perspective, $\alpha^2F(\ww)$ gives the strength by which a phonon 
+From a physical perspective, $\alpha^2F(\ww)$ gives the strength by which a phonon
 of energy $\ww$ scatters electronic states on the FS (remember that ABINIT uses atomic units hence $\hbar = 1$).
 This quantity is accessible in experiments and experience has shown that
 $\alpha^2F(\ww)$ is qualitatively similar to the phonon DOS $F(\ww)$:
@@ -145,11 +205,11 @@ $$
 $$
 
 <!--
-The frequency integration is performed by computing $\alpha^2F(\ww)$ on a linear mesh 
+The frequency integration is performed by computing $\alpha^2F(\ww)$ on a linear mesh
 of step [[ph_wstep]] covering the entire range of phonon frequencies.
 -->
 
-In principle, $T_c$ can be obtained by solving the isotropic Eliashberg equations for the superconducting 
+In principle, $T_c$ can be obtained by solving the isotropic Eliashberg equations for the superconducting
 gap [[cite:Margine2013]] but many applications prefer to bypass the explicit solution
 and **estimate** $T_c$ using the semi-empirical McMillan equation [[cite:McMillan1968]]
 in the improved version proposed by [[cite:Allen1975]]:
@@ -165,16 +225,43 @@ $$
 \ww_{\text{log}} = \exp \Biggl [ \dfrac{2}{\lambda} \int \dfrac{\alpha^2F(\ww)}{\ww}\log(\ww)\dd\ww \Biggr ]
 $$
 
-In pratical applications, $\mu^*$ is usually treated as an **external parameter**, 
+In pratical applications, $\mu^*$ is usually treated as an **external parameter**,
 typically between 0.1 and 0.2, that is adjusted to reproduce experimental results.
 The default value of [[eph_mustar]] used in the code is 0.1.
 
-Before concluding this brief theoretical introduction, we would like to 
-stress that the present formalism assumes a single superconducting gap 
+Before concluding this brief theoretical introduction, we would like to
+stress that the present formalism assumes a single superconducting gap
 with a **weak dependence** on $\kk$ so that it is possible to average the equations over the FS.
-This approximation becomes valid in the case of metals with impurities - the so-called dirty-limit - 
+This approximation becomes valid in the case of metals with impurities - the so-called dirty-limit -
 as impurities tend to smear out the anisotropy of the superconducting gap.
 A more detailed discussion about isotropic/anisotropic formulations can be found in [[cite:Margine2013]].
+
+## Transport properties in the normal metallic state
+
+<!--
+In this work, we employ the Ziman formula [2] to calculate
+the intrinsic resistivity of Ti2N monolayer. It was first derived
+by Ziman from the variational solution of the Boltzmann
+transport equation in the presence of e-ph scattering. Then,
+it was generalized by Allen to more realistic cases such as
+the complicated Fermi surface formed by multiple bands [20].
+Thus, the Ziman resistivity formula becomes an appropriate
+approach for calculating the intrinsic resistivity of realistic
+metallic materials on the level of first-principles calculations.
+According to Allen’s original work [21], the Ziman formula
+In comparison with the
+expression of the spectral function given by Eq. (3), the spectral function in the DDFA 
+is used more extensively in studying the intrinsic resistivity of metallic materials on the level of
+first-principles calculations in recent relevant works [3–5].
+
+Allen [9] obtained an approximation relating the conductivity of metals to the transport spectral function α2Ftr, which is a
+variant of the Eliashberg spectral function α2F. 
+
+lowest-order variational approximation (LOVA)
+-->
+
+[[cite:Allen1976b]], [[cite:Allen1978]]
+
 
 ## Getting started
 
@@ -243,7 +330,7 @@ to a $\Gamma$-centered 4x4x4 $\qq$-mesh (again, **too coarse** as we will see in
 
 Please keep in mind that several parameters have been tuned in order to reach a reasonable **compromise between accuracy
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
-It is clear that, in real life, one should start from convergence studies for 
+It is clear that, in real life, one should start from convergence studies for
 lattice parameters and vibrational properties as a function of the $\kk$-mesh and the [[tsmear]] broadening
 before embarking on EPH calculations.
 This is especially true in metals in which a correct description of the FS is crucial.
@@ -299,7 +386,7 @@ Before proceeding with e-ph calculations, it is worth spending some time to anal
 the structural, electronic and vibrational properties of MgB$_2$ in more detail.
 We will be using the |AbiPy| scripts to post-process the data stored in the precomputed netcdf files.
 
-To visualize the crystalline structure with e.g. |vesta|, 
+To visualize the crystalline structure with e.g. |vesta|,
 use the |abiview| script with the `structure` command.
 
 ```md
@@ -330,11 +417,11 @@ that produces:
     Other visualizers are supported see `abiview.py structure --help`
     The same command supports also output files in netcdf format e.g. GSR.nc.
 
-MgB$_2$ crystallizes in the so-called AlB$_2$ [prototype structure](http://aflow.org/prototype-encyclopedia/AB2_hP3_191_a_d) 
-with Boron atoms forming graphite-like (honeycomb) layers separated by layers of Mg atoms 
+MgB$_2$ crystallizes in the so-called AlB$_2$ [prototype structure](http://aflow.org/prototype-encyclopedia/AB2_hP3_191_a_d)
+with Boron atoms forming graphite-like (honeycomb) layers separated by layers of Mg atoms
 This structure may be regarded as that of completely intercalated graphite with C replaced by B.
 Note also that MgB$_2$ is formally isoelectronic to graphite hence
-electronic properties of MgB$_2$ are expected to have some similarity to those 
+electronic properties of MgB$_2$ are expected to have some similarity to those
 of graphite and graphite intercalation compounds.
 
 Now we use the |abiopen| script to plot the electronic bands stored in the GSR file produced
@@ -352,20 +439,20 @@ TODO: Discussion about sigma, pi bands and fatbands. Add link to AbiPy fatbands 
 
 The electronic properties of MgB$_2$ have been intensively discussed in literature, see e.g. [[cite:Mazin2003]].
 The dispersion is quite similar to that of graphite with three bonding $\sigma$
-bands corresponding to in-plane $sp^2$ hybridization in the boron layer and two $\pi$ bands 
-(bonding and antibonding) formed by B $p_z$ orbitals. 
+bands corresponding to in-plane $sp^2$ hybridization in the boron layer and two $\pi$ bands
+(bonding and antibonding) formed by B $p_z$ orbitals.
 
 <!--
 Both σ and π bands have strong in-plane dispersion due to the large overlap between all p orbitals
-(both in-plane and out-of-plane) for neighboring boron atoms. 
+(both in-plane and out-of-plane) for neighboring boron atoms.
 The interlayer overlaps are much smaller, especially for pxy orbitals, so that the kz dispersion of σ bands
-does not exceed 1 eV. 
-Contrarily to intercalated graphites, two of the $\sigma$ bands are filled incompletely. 
+does not exceed 1 eV.
+Contrarily to intercalated graphites, two of the $\sigma$ bands are filled incompletely.
 Together with weak kz dispersion this results in the appearance of two nearly cylindrical sheets of the
-Fermi surface (see Fig. 3) around the Γ–A line. 
+Fermi surface (see Fig. 3) around the Γ–A line.
 In MgB2, the σ-band crosses the Fermi level and hybridization with other conduction electrons is
-weak. The high Tc-state of this material develops from the strong attractive interaction 
-between the electrons of the σ-band and the E2g mode of vibrations. 
+weak. The high Tc-state of this material develops from the strong attractive interaction
+between the electrons of the σ-band and the E2g mode of vibrations.
 
 -->
 
@@ -435,7 +522,7 @@ and provide a *GSR.nc* (*WFK.nc*) file with energies computed on a $\kk$-mesh in
 abitk ebands_bxsf MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_GSR.nc
 ```
 
-This command reconstructs the KS energy in the full BZ by symmetry and produces 
+This command reconstructs the KS energy in the full BZ by symmetry and produces
 the `out_GSR.nc_BXSF` file that can be open with |xcrysden| using:
 
 ```sh
@@ -500,7 +587,7 @@ abicomp.py ddb \
 
 ![](eph4isotc_assets/abicomp_phbands.png)
 
-The figure reveals that the vibrational spectrum interpolated from the 4x4x4 $\qq$-mesh 
+The figure reveals that the vibrational spectrum interpolated from the 4x4x4 $\qq$-mesh
 underestimates the maximum phonon frequency.
 Other differences are visible around XXX~.
 Note also that phonon frequencies in metals are also quite sensitive to the $\kk$-mesh and the smearing [[tsmear]].
@@ -508,7 +595,7 @@ In real life one should perform an accurate convergence study...
 
 !!! note
 
-    The *666q_DDB* file was produced with the same AbiPy script by just changing the value 
+    The *666q_DDB* file was produced with the same AbiPy script by just changing the value
     of the *ngqpt* variable.
     The reason why we do not provide files obtained with a 6x6x6 $\qq$-sampling is that the size of the
     git repository including all the DFPT potentials is around 200 Mb.
@@ -555,10 +642,10 @@ getdvdb_filepath "teph4isotc_1_DVDB"
 ```
 
 The DDB and the WFK files are read from the git repository while for the DVDB we use
-the one produced by *mrgdv* in the previous section (remember what we said about 
+the one produced by *mrgdv* in the previous section (remember what we said about
 the use of **relative paths** in the input files).
 Note also the use of the new input variable [[structure]] (added in Abinit v9)
-with the **abifile** prefix 
+with the **abifile** prefix
 
 ```sh
 structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
@@ -576,10 +663,10 @@ eph_ngqpt_fine 6 6 6   # Activate interpolation of DFPT potentials
 dipdip 0               # No treatment of the dipole-dipole part. OK for metals
 ```
 
-[[dipdip]] is set to zero as we are dealing with a metal and the inter-atomic force 
+[[dipdip]] is set to zero as we are dealing with a metal and the inter-atomic force
 constants are usually short-ranged if we ignore Kohn-anomalies [[cite:Kohn1959]]
 
-The $\kk$-point integration is performed with the Gaussian smearing 
+The $\kk$-point integration is performed with the Gaussian smearing
 ([[eph_intmeth]] == 1 and 0.1 eV for [[eph_fsmear]]).
 
 ```sh
@@ -696,7 +783,7 @@ and the method for the BZ integration of the double delta:
     Max band: 5
 ```
 
-Then, for each $\qq$-point in the IBZ, the code outputs 
+Then, for each $\qq$-point in the IBZ, the code outputs
 the values of $\ww_\qnu$, $\gamma_\qnu$ and $\lambda_\qnu$:
 
 ```md
@@ -713,7 +800,7 @@ the values of $\ww_\qnu$, $\gamma_\qnu$ and $\lambda_\qnu$:
     9        3.127043E-03    3.508418E-08    5.701304E-05
 ```
 
-The frequencies of the acoustic modes at $\Gamma$ are zero (as they should be) 
+The frequencies of the acoustic modes at $\Gamma$ are zero (as they should be)
 since [[asr]] is automatically set to 1 so the acoustic rule is **automatically enforced**.
 Also, the linewidths of the acoustic modes are zero.
 In this case, however, the code uses a rather simple heuristic rule:
@@ -740,7 +827,7 @@ teph4isotc_2o_DS1_EDOS         teph4isotc_2o_DS1_PHBST.nc
 ```
 
 The files without the `.nc` extension are text files that can be plotted with e.g. |gnuplot| or |xmgrace|.
-More specifically, 
+More specifically,
 
 Apple
 :   Pomaceous fruit of plants of the genus Malus in the family Rosaceae.
@@ -757,10 +844,10 @@ that produces the following plot:
 ![](eph4isotc_assets/abiopen_teph4isotc_2o_DS1_A2F.png)
 
 Our first results should be interpreted with a critical eye due to coarse sampling used,
-yet our $\alpha^2F(\ww)$ already shows features that are observed in other (more accurate) calculations 
-reported in the literature: a broad peak at ~70 meV that gives the most important contribution to the total $\lambda$ 
-and a second smaller peak at ~70 meV. 
-The sharp delta-like peaks are an artifact of the linear interpolation and will hopefully disappear 
+yet our $\alpha^2F(\ww)$ already shows features that are observed in other (more accurate) calculations
+reported in the literature: a broad peak at ~70 meV that gives the most important contribution to the total $\lambda$
+and a second smaller peak at ~70 meV.
+The sharp delta-like peaks are an artifact of the linear interpolation and will hopefully disappear
 if denser $\qq$-meshes are used.
 Our initial values for $\lambda$ and $\ww_{log}$ are:
 
@@ -774,7 +861,7 @@ If we compare our results for $\lambda$ with those reported in [[cite:Margine201
 ![](eph4isotc_assets/MgB2_Margine_table.png)
 
 we see that our first calculation underestimates $\lambda$ by almost a factor two.
-Note, however, that all the previous studies used much denser samplings and all of them 
+Note, however, that all the previous studies used much denser samplings and all of them
 use at least a 6x6x6 $\qq$-mesh for phonons.
 It is clear that we need to densify the BZ sampling to get more reliable results yet
 our results are not that bad considering that the calculation took less than XXX minutes in sequential.
@@ -792,15 +879,15 @@ our results are not that bad considering that the calculation took less than XXX
 
 -->
 
-## Using the tetrahedron method 
+## Using the tetrahedron method
 
-In this section, we repeat the calculation done in **teph4isotc_2.abi** 
+In this section, we repeat the calculation done in **teph4isotc_2.abi**
 but now with the **optimized tetrahedron** scheme by [[cite:Kawamura2014]].
-This test will show that (i) phonon linewidths are very sensitive to the $\kk$-mesh 
-and the integration scheme and that (ii) one has to test different values of [[eph_fsewin]] 
+This test will show that (i) phonon linewidths are very sensitive to the $\kk$-mesh
+and the integration scheme and that (ii) one has to test different values of [[eph_fsewin]]
 to find the optimizal one.
 
-The reason is that the optimized tetrahedron scheme constructs a third-order interpolation function 
+The reason is that the optimized tetrahedron scheme constructs a third-order interpolation function
 with 20 $\kk$-points so states that are relatively far from the Fermi level contributes to the integrand.
 If [[eph_fsewin]] is too small, part of the weigt is lost.
 To find an optimal value, we can use:
@@ -827,14 +914,14 @@ abicomp.py a2f teph4isotc_2o_DS*_A2F.nc -e
 
 Our goal is to perform calculations of $\gamma_\qnu$ and $\lambda_\qnu$ with different $\kk-\qq$-meshes
 in order to analyze the convergence behaviour of $\alpha^2F(\ww)$ and $\lambda$.
-Due to the limited amount of time available for a tutorial, we won't be able to fully reproduce published results 
-also because we are still using a 4x4x4 **ab-initio** $\qq$-mesh that, as already discussed, is not enough 
+Due to the limited amount of time available for a tutorial, we won't be able to fully reproduce published results
+also because we are still using a 4x4x4 **ab-initio** $\qq$-mesh that, as already discussed, is not enough
 to describe vibrational properties.
-By the same token, we should not expect the Fourier interpolation of the scattering potentials to work perfectly 
-when such a coarse **ab-initio** sampling is used. 
+By the same token, we should not expect the Fourier interpolation of the scattering potentials to work perfectly
+when such a coarse **ab-initio** sampling is used.
 In a nutshell, we have to make the best of what we have at hand while minimizing the computational cost.
 
-Since we already have a WFK file on a 12x12x12 $\kk$-mesh, it makes sense to compute electrons 
+Since we already have a WFK file on a 12x12x12 $\kk$-mesh, it makes sense to compute electrons
 on a 24x24x24 $\kk$-mesh so that we can compare the following configurations:
 
 <!--
@@ -873,8 +960,8 @@ to prepare our convergence studies.
 The NSCF computation of the WFK becomes quite CPU-consuming and memory-demanding if dense $\kk$-meshes are needed.
 Fortunately, we can optimize this part since the computation of $\gamma_\qnu$
 requires the knowledge of Bloch states inside a relatively small energy window around $\ee_F$.
-Similarly to what is done in the [eph4mob tutorial](eph4mob), we can therefore take advantage of 
-the star-function SKW interpolation to find the $\kk$ wavevectors whose energy is inside 
+Similarly to what is done in the [eph4mob tutorial](eph4mob), we can therefore take advantage of
+the star-function SKW interpolation to find the $\kk$ wavevectors whose energy is inside
 the [[sigma_erange]] energy window **around the Fermi level**.
 The choice of an optimal window is discussed afterwards.
 
@@ -965,7 +1052,7 @@ You may need to change [[einterp]] if you had to use different values when using
 
 !!! important
 
-    When dealing with metals, both entries in [[sigma_erange]] must be **negative** 
+    When dealing with metals, both entries in [[sigma_erange]] must be **negative**
     so that the energy window is refered to the Fermi level and not to the CBM/VBM.
     Use a value for the window that is reasonably large in order to account for possible oscillations
     and/or inaccuracies of the SKW interpolation around $\ee_F$.
@@ -1022,7 +1109,7 @@ the use of [[eph_ngqpt_fine]], [[getwfk_filepath]] and [[ngkpt]]:
 
 If you want to reproduce the results, you can find another github repository here
 with the DFPT computation performed with a 24x24x24 $\kk$-mesh and a 6x6x6 $\qq$-mesh for phonons.
-Download the repository as explained at the beginning of the lesson, merge the partial POT files 
+Download the repository as explained at the beginning of the lesson, merge the partial POT files
 and compute the WFK file with a NSCF run from the DEN.nc file.
 
 You should get:
