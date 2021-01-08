@@ -378,8 +378,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  integer :: spaceComm_fft,tim_mkrho
  logical :: test_gylmgr,test_nfgd,test_rfgd
  logical :: wvlbigdft=.false.
- real(dp) :: c_fermi,dtaur,dtaurzero
- real(dp) :: ucvol
+ real(dp) :: c_fermi,dtaur,dtaurzero,ucvol
  character(len=500) :: message
  type(paw_dmft_type) :: paw_dmft
 #if defined HAVE_BIGDFT
@@ -549,6 +548,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !----------------------------------------------------------------------
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
+
  if(dtset%orbmag.NE.0) then
     call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,&
          & paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,rprimd,symrec,usecprj,&

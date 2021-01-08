@@ -805,7 +805,7 @@ contains
 !Compute the xc kernel, in the form needed for the singlet or triplet
 !excitation energy.
 !In the case ixc=20, kxc vanishes, but no change is made here, for simplicity.
-!(ixc=20 implemented only in the not spin polyrized case)
+!(ixc=20 implemented only in the not spin polarized case)
 
 !DEBUG
 !write(std_out,*)' tddft : xc kernel '

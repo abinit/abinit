@@ -93,6 +93,7 @@ program optic
  use m_ebands
  use m_eprenorms
  use m_crystal
+ use m_argparse
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -104,7 +105,7 @@ program optic
  use m_geometry,       only : metric
  use m_io_tools,       only : flush_unit, open_file, file_exists, get_unit
  use m_numeric_tools,  only : c2r
- use m_fstrings,       only : int2char4, itoa, sjoin, strcat, endswith
+ use m_fstrings,       only : int2char4, itoa, sjoin, strcat, endswith, basename
 
  implicit none
 
@@ -112,7 +113,7 @@ program optic
 
 !Local variables-------------------------------
  integer,parameter :: formeig0=0,formeig1=1,tim_rwwf=0,master=0
- integer :: fform,finunt,ep_ntemp,itemp
+ integer :: fform,finunt,ep_ntemp,itemp,i1,i2
  integer :: bantot,bdtot0_index,bdtot_index
  integer :: headform,ierr,ii,jj,ikpt,isym
  integer :: isppol,mband,nomega,natom,nband1,nsym
@@ -138,6 +139,7 @@ program optic
  type(crystal_t) :: cryst
  type(eprenorms_t) :: Epren
  type(wfk_t) :: wfk0
+ type(args_t) :: args
 !arrays
  integer :: iomode_ddk(3)
  integer,allocatable :: istwfk(:), npwarr(:), nband(:), symrel(:,:,:), symrec(:,:,:)
@@ -149,7 +151,7 @@ program optic
  real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
  logical :: use_ncevk(0:3)
- character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile
+ character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile,fname
  character(len=fnlen) :: infiles(0:3)
 ! for the moment this is imposed by the format in linopt.f and nlinopt.f
  character(len=256) :: prefix,tmp_radix
@@ -178,11 +180,14 @@ program optic
  comm = xmpi_world
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
-!Initialize memory profiling if it is activated
-!if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
-!note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Parse command line arguments.
+ args = args_parser(); if (args%exit /= 0) goto 100
+
+ !Initialize memory profiling if it is activated
+ !if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
+ !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
  call timein(tcpui,twall)
@@ -193,25 +198,44 @@ program optic
    codename='OPTIC '//repeat(' ',18)
    call herald(codename,abinit_version,std_out)
 
-   !Read data file name
-   write(std_out,'(a)')' Please, give the name of the data file ...'
-   read(5, '(a)')filnam
-   write(std_out,'(a,a,1x,a,a)')' The name of the data file is :',ch10,trim(filnam),ch10
-   write(std_out,'(a)')' Please, give the name of the output file ...'
-   read(5, '(a)')filnam_out
-   write(std_out,'(a,a,1x,a,a)')' The name of the output file is :',ch10,trim(filnam_out),ch10
-   write(std_out,'(a)')' Please, give the root name for the (non)linear optical data output file ...'
-   read(5, '(a)')prefix
-   write(std_out,'(a,a,1x,a)')' The root name of the output files is :',ch10,trim(prefix)
+   if (len_trim(args%input_path) == 0) then
+     ! Legacy Files file mode.
+     write(std_out, "(2a)")" DeprecationWarning: ",ch10
+     write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
+     write(std_out, "(a)")"     Use the syntax `optic t01.abi` to run optic"
+
+     !Read data file name
+     write(std_out,'(a)')' Please, give the name of the data file ...'
+     read(5, '(a)')filnam
+     write(std_out,'(a,a,1x,a,a)')' The name of the data file is :',ch10,trim(filnam),ch10
+     write(std_out,'(a)')' Please, give the name of the output file ...'
+     read(5, '(a)')filnam_out
+     write(std_out,'(a,a,1x,a,a)')' The name of the output file is :',ch10,trim(filnam_out),ch10
+     write(std_out,'(a)')' Please, give the root name for the (non)linear optical data output file ...'
+     read(5, '(a)')prefix
+     write(std_out,'(a,a,1x,a)')' The root name of the output files is :',ch10,trim(prefix)
+
+  else
+    filnam = args%input_path
+    ! Get prefix from input file. Default values are provided
+    filnam_out = trim(filnam)//".abo"
+    prefix = trim(filnam)
+
+    ! If the basename has file extension e.g. run.abi, use what comes before the dot to build
+    ! filnam_out (e.g. run.abo) and the prefix for output files.
+    fname = basename(args%input_path)
+    i1 = index(fname, ".")
+    if (i1 > 1) then
+      i2 = index(args%input_path, ".", back=.True.)
+      filnam_out = args%input_path(:i2) // "abo"
+      prefix =  args%input_path(:i2-1)
+    end if
+  end if
 
    ! Read data file
    if (open_file(filnam,msg,newunit=finunt,form='formatted') /= 0) then
      MSG_ERROR(msg)
    end if
-
-!   write(msg,'(3a)') "From version 7.11.4, optic uses namelists as input.",ch10,&
-!     "See e.g. ~/tests/tutorespfn/Input/toptic_2.in"
-!   MSG_COMMENT(msg)
 
    ! Setup some default values:
    broadening = 1e-3_dp ! Ha
@@ -309,9 +333,6 @@ program optic
        write(msg, "(12a)")trim(infiles(ii))
        call wrtout(std_out,msg,'COLL')
      enddo
-!DEBUG
-!  stop
-!ENDDEBUG
 
      if (hdr%compare(hdr_ddk(1)) /= 0) then
        write(msg, "(3a)")" Ground-state wavefunction file and ddkfile ",trim(infiles(1))," are not consistent. See above messages."
@@ -324,11 +345,6 @@ program optic
        end if
      enddo
    endif
-
-!DEBUG
-!  stop
-!ENDDEBUG
-
 
    ! TODO: one should perform basic consistency tests for the EVK files, e.g.
    ! k-points and their order, spins, number of bands could differ in the four files.
@@ -398,6 +414,8 @@ program optic
  call xmpi_bcast(do_antiresonant,master,comm,ierr)
  call xmpi_bcast(do_ep_renorm,master,comm,ierr)
  call xmpi_bcast(ep_ntemp,master,comm,ierr)
+ call xmpi_bcast(filnam_out, master, comm, ierr)
+ call xmpi_bcast(prefix, master, comm, ierr)
  if (do_ep_renorm) call eprenorms_bcast(Epren, master, comm)
 
 !Extract info from the header
@@ -875,7 +893,7 @@ program optic
 !Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam)
 
- call xmpi_end()
+100 call xmpi_end()
 
  end program optic
 !!***

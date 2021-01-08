@@ -278,7 +278,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih ! CP added fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
- logical :: is_dfpt=.false.,wvlbigdft=.false.,wvl_debug=.false.
+ logical :: is_dfpt=.false.,wvlbigdft=.false.
  character(len=500) :: msg
  character(len=fnlen) :: ddbnm,dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
@@ -1256,12 +1256,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  fatvshift=one
 
- if (dtset%usewvl == 1 .and. wvl_debug) then
-#if defined HAVE_BIGDFT
-   call wvl_timing(me,'INIT','PR')
-#endif
- end if
-
 !Check whether exiting was required by the user. If found then do not start minimization steps
 !At this first call to chkexi, initialize cpus, if it
 !is non-zero (which would mean that no action has to be taken)
@@ -1273,6 +1267,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !If immediate exit, and wavefunctions were not read, must zero eigenvalues
  if (iexit/=0) eigen(:)=zero
+
+#if defined HAVE_BIGDFT
+ if (dtset%usewvl == 1 .and. dtset%timopt==10) then
+   call wvl_timing(xmpi_world,'== INITS','PR')
+ end if
+#endif
 
  call timab(34,2,tsec)
 
@@ -1353,11 +1353,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Mark this GS computation as done
  initialized=1
- if (dtset%usewvl == 1 .and. wvl_debug) then
-#if defined HAVE_BIGDFT
-   call wvl_timing(me,'WFN_OPT','PR')
-#endif
- end if
 
 !Will be put here later.
 !! ! WVL - maybe compute the tail corrections to energy
@@ -1736,6 +1731,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #if defined HAVE_GPU_CUDA
  if (dtset%use_gpu_cuda==1) then
    call dealloc_hamilt_gpu(2,dtset%use_gpu_cuda)
+ end if
+#endif
+
+#if defined HAVE_BIGDFT
+ if (dtset%usewvl == 1 .and. dtset%timopt==10) then
+   call wvl_timing(xmpi_world,'== WFN OPT','PR')
  end if
 #endif
 

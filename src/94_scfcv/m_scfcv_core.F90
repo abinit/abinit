@@ -2091,6 +2091,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 & dtset%pawprtwf > 0  )
 
  if(dtset%orbmag .NE. 0) recompute_cprj=.TRUE.
+ if(ANY(ABS(dtset%nucdipmom)>tol8)) recompute_cprj=.TRUE.
  if (recompute_cprj) then
    usecprj=1
    mband_cprj=dtset%mband/mpi_enreg%nproc_band
@@ -2443,6 +2444,7 @@ end subroutine scfcv_core
 !!   | e_hybcomp_v (IN)=potential compensation energy for the hybrid functionals at self-consistent density
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
 !!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
+!!   | e_nucdip(IN)=energy due to array of nuclear magnetic dipoles
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
 !!   | e_paw(IN)=PAW spherical part energy
@@ -2637,7 +2639,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
       energies%e_localpsp + energies%e_corepsp +&
 !&    two*energies%e_fock - energies%e_fock0 +&   ! The Fock energy is already included in the non-local one
 !&     energies%e_nlpsp_vfock - energies%e_fock0 +&
-&     energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
+&     energies%e_entropy + energies%e_elecfield + energies%e_magfield + energies%e_nucdip +&
 &     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v + energies%e_constrained_dft
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
 

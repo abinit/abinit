@@ -1,0 +1,65 @@
+#   FCC Al; ; phonon at 1/4 1/8 1/8
+
+#Definition of DFPT calculation
+ rfphon 1
+ rfatpol 1 1
+ rfdir  1 1 1
+ nqpt   1
+ qpt    0.25 -0.125 0.125
+ irdwfk 1
+
+#Timing parameters
+ prtvol 10
+ timopt 1
+
+
+#Definition of the unit cell
+ acell 3*7.56
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+
+#Definition of the atom types and pseudopotentials
+ ntypat  1
+ znucl 13.0
+ pp_dirpath "$ABI_PSPDIR"                 # This is the path to the directory were pseudopotentials for tests are stored
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"  # Name and location of the pseudopotential
+
+#Definition of the atoms
+ natom  1
+ typat  1  
+ xred  0.0 0.0 0.0
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ ecut 10
+ kptopt 3
+ ngkpt 8 8 8 
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+
+#Parameters for the SCF procedure
+ nstep 20
+ occopt 4
+ tolvrs 1.0d-10
+ nband 5
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tdfpt_01.abi, tdfpt_02.abi
+#%% [files]
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% nprocs_to_test = 4
+#%% [NCPU_4]
+#%% files_to_test = tdfpt_02_MPI4.abo, tolnlines= 12, tolabs=  1.1e-05, tolrel=  6.0e-03
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords =
+#%% description = FCC Al linear response with k point parallelism
+#%%<END TEST_INFO>
+

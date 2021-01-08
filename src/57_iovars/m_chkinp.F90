@@ -1387,8 +1387,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &   'ixc',dt%ixc,34,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,24,26,27,31,32,33,34,35,40,41,42,50/),-1,0,iout) ! One of the values, or negative
    if(dt%iscf==-1)then
      cond_string(1)='iscf' ; cond_values(1)=-1
-!    Make sure that ixc is 1, 7, 8, 20, 21 or 22 or negative
-     call chkint(1,1,cond_string,cond_values,ierr,'ixc',dt%ixc,6,(/1,7,8,20,21,22/),-1,0,iout)
+!    Make sure that ixc is 1, 7, 8, 20, 21 or 22  (native functionals only for TDDFT - LibXC functionals have not been tested !)
+     call chkint(1,1,cond_string,cond_values,ierr,'ixc',dt%ixc,6,(/1,7,8,20,21,22/),0,0,iout)
    end if
    if(response==1)then
      cond_string(1)='response' ; cond_values(1)=1
@@ -2123,7 +2123,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
 
 !    nucdipmom requires kptopt 3 or zero
-     if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
+     ! if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
+     if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) ) then
        write(msg, '(a,i4,a,a,a)' )&
        ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
        ' => stop ',ch10,&
@@ -2456,10 +2457,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
   end if
-  ! only kptopt 3 is allowed
+  ! only kptopt 3 or 0 are allowed
   if(dt%orbmag.NE.0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,1,(/3/),iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/0,3/),iout)
   end if
   ! only kpt parallelism is allowed at present
   if(dt%orbmag .GT. 0) then
