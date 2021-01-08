@@ -55,7 +55,7 @@ inp_files = [
 "tstring_01.abi",  
 "tstring_02.abi",
 "tstring_03.abi",
-"tstring_04.abi",
+#"tstring_04.abi", # Desactivate because fldiff timeout on max2
 "tucrpa_1.abi",
 "tucrpa_2.abi",
 #"tucrpa_3.abi",
