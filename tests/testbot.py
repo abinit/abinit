@@ -323,12 +323,12 @@ class TestBot(object):
         if self.runmode == "static":
             # Old mode: run all available tests with 1 MPI node here,
             # then use MPI mode in mp_suites (paral/mpiio)
-            np_list = [2, 4, 10, 24]
+            np_list = [2, 4, 10, 24, 64]
             nfailed, npassed, nexecuted = self.run_tests_with_np(1, suite_args=suite_args, runmode=self.runmode)
         else:
             # New mode: run all available tests with 2 MPI procs here,
             # then enter the mp_suites with [4, 10, 24] CPUs
-            np_list = [4, 10, 24]
+            np_list = [4, 10, 24, 64]
             nfailed, npassed, nexecuted = self.run_tests_with_np(2, suite_args=suite_args, runmode=self.runmode)
 
         if self.has_mpi:
