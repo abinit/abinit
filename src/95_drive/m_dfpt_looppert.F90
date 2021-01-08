@@ -64,6 +64,7 @@ module m_dfpt_loopert
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_iowf,       only : outwf
  use m_ioarr,      only : read_rhor
+ use m_orbmag,     only : orbmag_ddk
  use m_pawang,     only : pawang_type, pawang_init, pawang_free
  use m_pawrad,     only : pawrad_type
  use m_pawtab,     only : pawtab_type
@@ -315,12 +316,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer,allocatable :: symaf1(:),symaf1_tmp(:),symrc1(:,:,:),symrl1(:,:,:),symrl1_tmp(:,:,:)
  integer, pointer :: old_atmtab(:)
  real(dp) :: dielt(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),tsec(2)
- real(dp),allocatable :: buffer1(:,:,:,:,:),cg(:,:),cg1(:,:),cg1_active(:,:),cg0_pert(:,:)
+ real(dp),allocatable :: buffer1(:,:,:,:,:),cg(:,:),cg1(:,:),cg1_active(:,:),cg1_orbmag(:,:,:),cg0_pert(:,:)
  real(dp),allocatable :: cg1_pert(:,:,:,:),cgq(:,:),gh0c1_pert(:,:,:,:)
  real(dp),allocatable :: doccde_rbz(:),docckqde(:)
  real(dp),allocatable :: gh1c_pert(:,:,:,:),eigen0(:),eigen0_copy(:),eigen1(:),eigen1_mean(:)
  real(dp),allocatable :: eigenq(:),gh1c_set(:,:),gh0c1_set(:,:),kpq(:,:)
  real(dp),allocatable :: kpq_rbz(:,:),kpt_rbz(:,:),occ_pert(:),occ_rbz(:),occkq(:),kpt_rbz_pert(:,:)
+ real(dp),allocatable :: vtrial_local(:,:)
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons1(:,:,:),resid(:),rhog1(:,:)
  real(dp),allocatable :: rhor1_save(:,:,:)
  real(dp),allocatable :: rhor1(:,:),rho1wfg(:,:),rho1wfr(:,:),tnons1(:,:),tnons1_tmp(:,:)
@@ -333,6 +335,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:),zeff(:,:,:)
  real(dp),allocatable :: phasecg(:,:),gauss(:,:)
  real(dp),allocatable :: gkk(:,:,:,:,:)
+ logical :: has_cg1_orbmag(3)
  type(pawcprj_type),allocatable :: cprj(:,:),cprjq(:,:)
  type(paw_ij_type),pointer :: paw_ij_pert(:)
  type(paw_an_type),pointer :: paw_an_pert(:)
@@ -1407,6 +1410,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      MSG_ERROR(msg)
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
+   ! space for all 3 ddk wavefunctions if call to orbmag will be needed
+   if ( (dtset%orbmag .GE. 11) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_orbmag)) ) then
+     ABI_ALLOCATE(cg1_orbmag,(2,mcg1,3))
+     has_cg1_orbmag(:) = .FALSE.
+   end if
    if (.not.kramers_deg) then
      mcg1mq=mpw1_mq*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
      ABI_MALLOC_OR_DIE(cg1_mq,(2,mcg1mq), ierr)
@@ -2012,6 +2020,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call wrtout(ab_out," dfpt_looppert: DFPT cycle converged with prtwf=-1. Will skip output of the 1st-order WFK file.")
    end if
 
+   ! store DDK wavefunctions in memory for later call to orbmag-ddk
+   ! only relevant for DDK pert with orbmag calculation
+   if( (dtset%orbmag .GE. 11) .AND. (ipert .EQ. dtset%natom+1) ) then
+     cg1_orbmag(:,:,idir) = cg1(:,:)
+     has_cg1_orbmag(idir) = .TRUE.
+   end if
+
    if (write_1wfk) then
      ! Output 1st-order wavefunctions in file
      call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&
@@ -2084,6 +2099,28 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call dfpt_prtene(dtset%berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
 &     ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1,eovl1,epaw1,evdw,exc1,ab_out,&
 &     ipert,dtset%natom,psps%usepaw,usevdw)
+   end if
+
+   ! call orbmag if needed
+   if ( (dtset%orbmag .GE. 11) .AND. (dtset%rfddk .EQ. 1) .AND. &
+     & (COUNT(has_cg1_orbmag) .EQ. 3) ) then
+
+     if ( .NOT. ALLOCATED(vtrial_local)) then
+       ABI_ALLOCATE(vtrial_local,(nfftf,dtset%nspden))
+     end if
+     vtrial_local = vtrial
+     call orbmag_ddk(atindx,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,&
+    & nattyp,nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawtab,psps,rprimd,usecprj,&
+    & vtrial_local,xred,ylm,ylmgr)
+
+     if( ALLOCATED(vtrial_local) ) then
+       ABI_DEALLOCATE(vtrial_local)
+     end if
+     if( ALLOCATED(cg1_orbmag) ) then
+       ABI_DEALLOCATE(cg1_orbmag)
+       has_cg1_orbmag(:) = .FALSE.
+     end if
+
    end if
 
    if(mpi_enreg%paral_pert==1) then
