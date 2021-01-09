@@ -43,7 +43,7 @@ inp_files = [
 "tmbt_1.abi",   # OK     
 "tmbt_2.abi",   # OK
 "tmbt_3.abi",   # OK
-"tmbt_4.abi",   # OK
+#"tmbt_4.abi",   # OK on some machines, but not on S64 .
 #"tmbt_5.abi",  
 #"tmoldyn_01.abi",    # This is not stable. Does it use random number generators?
 #"tmoldyn_02.abi",

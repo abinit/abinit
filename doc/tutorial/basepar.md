@@ -195,8 +195,7 @@ You can start immediately a sequential run with
 to have a reference CPU time.
 On a Intel Xeon 20C 2.1 GHz, it runs in about 40 seconds.
 
-Contrary to the sequential case, it is worth to have a look at the input
-file (*.abi). It might possibly be modified for parallel execution, as one should avoid
+The input file (*.abi) might possibly be modified for parallel execution, as one should avoid
 unnecessary network communications. Indeed, if every node has its own temporary or
 scratch directory (so not in the multicore case), you can achieve this by providing a path to a local disk
 for the temporary files in the input file by using the [[tmpdata_prefix]] variable. Supposing each processor has access
