@@ -764,8 +764,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
  call getph(cryst%atindx, natom, n1, n2, n3, ph1d, cryst%xred)
 
- ! Construct object to store final results.
  ecut = dtset%ecut ! dtset%dilatmx
+
  ! Check if a previous netcdf file is present and restart the calculation
  ! Here we try to read an existing SIGEPH file if eph_restart
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
@@ -774,6 +774,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    sigma_restart = sigmaph_read(sigeph_filepath, dtset, xmpi_comm_self, msg, ierr)
  end if
 
+ ! Construct object to store final results.
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfil, comm)
 
  if (my_rank == master .and. dtset%eph_restart == 1) then
@@ -869,18 +870,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end do
    end do
    ! Uncomment these lines to disable energy window trick and allocate all bands.
-   if (dtset%userie == 123) then
-     call wrtout(std_out, " Storing all bands between my_bsum_start and my_bsum_stop.")
-     bks_mask(sigma%my_bsum_start:sigma%my_bsum_stop, : ,:) = .True.
-   end if
+   !if (dtset%userie == 123) then
+   !  call wrtout(std_out, " Storing all bands between my_bsum_start and my_bsum_stop.")
+   !  bks_mask(sigma%my_bsum_start:sigma%my_bsum_stop, : ,:) = .True.
+   !end if
  else
    bks_mask(sigma%my_bsum_start:sigma%my_bsum_stop, : ,:) = .True.
  endif
 
- if (dtset%userie == 124) then
-   ! Uncomment this line to have all states on each MPI rank.
-   bks_mask = .True.; call wrtout(std_out, " Storing all bands for debugging purposes.")
- end if
+ !if (dtset%userie == 124) then
+ !  ! Uncomment this line to have all states on each MPI rank.
+ !  bks_mask = .True.; call wrtout(std_out, " Storing all bands for debugging purposes.")
+ !end if
 
  ! This table is needed when computing the imaginary part:
  ! k+q states outside the energy window are not read hence their contribution won't be included.
@@ -1031,10 +1032,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Precompute phonon frequencies and eigenvectors in the IBZ.
  ! These quantities are then used to symmetrize quantities for q in the IBZ(k) in order
- ! to reduce the number of calls to ifc%fourq
- !use_ifc_fourq = .True.
- use_ifc_fourq = .False.
- use_ifc_fourq = dtset%userib == 123
+ ! to reduce the number of calls to ifc%fourq (expensive if dipdip == 1)
+
+ use_ifc_fourq = .False. !use_ifc_fourq = .True. !use_ifc_fourq = dtset%userib == 123
  phstore = phstore_new(cryst, ifc, sigma%nqibz, sigma%qibz, use_ifc_fourq, sigma%pert_comm%value)
  call cwtime_report(" phonons in the IBZ", cpu_ks, wall_ks, gflops_ks)
 
@@ -1159,7 +1159,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
 
  if (sigma%use_ftinterp) then
-   ! Use ddb_ngqpt q-mesh to compute real-space represention of DFPT v1scf potentials to prepare Fourier interpolation.
+   ! Use ddb_ngqpt q-mesh to compute the real-space represention of DFPT v1scf potentials to prepare Fourier interpolation.
    ! R-points are distributed inside comm_rpt
    ! Note that when R-points are distributed inside qpt_comm we cannot interpolate potentials on-the-fly
    ! inside the loop over q-points.
@@ -1316,7 +1316,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
      ! and save KS energies in sigma%e0vals
-     ! Note: One should rotate the wavefunctions if kk is not irred (not implemented)
+     ! Note: One should rotate the wavefunctions if kk is not in the IBZ (not implemented)
      ABI_MALLOC(kets_k, (2, npw_k*nspinor, nbcalc_ks))
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
      if (osc_ecut /= zero) then
@@ -1741,7 +1741,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                             npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
          end if
 
-         ! Get gkk(kcalc, q, idir_ipert) (atom representation)
+         ! Get gkk(kcalc, q, idir_ipert) (atomic representation)
          ! No need to handle istwf_kq because it's always 1.
          gkq_atm = zero; cnt = 0
          do imyp=1,my_npert
@@ -1769,7 +1769,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            do cnt=1,nbcalc_ks*natom3
              ipc = 1 + (cnt - 1) / nbcalc_ks
              ib_k = 1 + mod(cnt - 1, nbcalc_ks)
-             gkq_atm(:, ib_k, ipc)= gkq_allgather(:, cnt, 2)
+             gkq_atm(:, ib_k, ipc) = gkq_allgather(:, cnt, 2)
            end  do
          end if
 
@@ -2804,12 +2804,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
      new%my_bsum_start = new%bsum_start; new%my_bsum_stop = new%bsum_stop
    end if
 
-   if (dtset%useria == 567) then
-     ! Uncomment this part to use all states to debug.
-     call wrtout(unts, "- Setting bstart to 1 and bstop to nband for debugging purposes")
-     new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
-     new%my_bsum_start = new%bsum_start; new%my_bsum_stop = new%bsum_stop
-   end if
+   !if (dtset%useria == 567) then
+   !  ! Uncomment this part to use all states to debug.
+   !  call wrtout(unts, "- Setting bstart to 1 and bstop to nband for debugging purposes")
+   !  new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
+   !  new%my_bsum_start = new%bsum_start; new%my_bsum_stop = new%bsum_stop
+   !end if
 
  else
    ! Re + Im
@@ -3214,9 +3214,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  ! Prepare computation of Frohlich self-energy
  ! TODO: Reintegrate at least frohl_model 1 for the full self-energy
  new%frohl_model = 0 ! nint(dtset%frohl_params(1))
- if (.not. new%imag_only .and. dtset%useria == 1) then
-   if (dvdb%has_zeff) new%frohl_model = 1
- end if
+ !if (.not. new%imag_only .and. dtset%useria == 1) then
+ !  if (dvdb%has_zeff) new%frohl_model = 1
+ !end if
 
  if (new%frohl_model /= 0) then
    ! Init parameters for numerical integration inside sphere.
