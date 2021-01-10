@@ -129,7 +129,7 @@ contains
 !!  dyvdw(2,3,natom,3,natom*usevdw)=vdw DFT-D part of the dynamical matrix
 !!  dyfr_cplex=1 if dyfrnl is real, 2 if it is complex
 !!  dyfr_nondiag=1 if dyfrnl is non diagonal with respect to atoms; 0 otherwise
-!!  eigbrd(2,mband*nsppol,nkpt,3,natom,3,natom*dim_eigbrd)=boradening factors for the electronic eigenvalues
+!!  eigbrd(2,mband*nsppol,nkpt,3,natom,3,natom*dim_eigbrd)=broadening factors for the electronic eigenvalues
 !!  eig2nkq(2,mband*nsppol,nkpt,3,natom,3,natom*dim_eig2nkq)=second derivatives of the electronic eigenvalues
 !!  eltcore(6,6)=core contribution to the elastic tensor
 !!  elteew(6+3*natom,6)=Ewald contribution to the elastic tensor
@@ -1093,7 +1093,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (psps%usepaw==1) then
      ncpgr=3 ! Valid for ipert<=natom (phonons), ipert=natom+2 (elec. field)
              ! or for ipert==natom+10,11
-     if (ipert==dtset%natom+1) ncpgr=1
+     if (ipert==dtset%natom+1) then
+       if (dtset%orbmag.GT.10) then
+         ncpgr=3
+       else
+         ncpgr=1
+       end if
+     end if
      if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) ncpgr=1
      if (usecprj==1) then
        mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
@@ -1103,7 +1109,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (ipert<=dtset%natom) then
          choice=2; iorder_cprj=0; idir0=0
        else if (ipert==dtset%natom+1) then
-         choice=5; iorder_cprj=0; idir0=idir
+         if (dtset%orbmag.GT.10) then
+           choice=5; iorder_cprj=0; idir0=0
+         else
+           choice=5; iorder_cprj=0; idir0=idir
+         end if
        else if (ipert==dtset%natom+2) then
          choice=5; iorder_cprj=0; idir0=0
        else if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) then
