@@ -143,14 +143,15 @@ pawecutdg     5  # Minimal value not converge to run with ecut
 
 # Control of the SCF cycle
 # ========================
-nstep         5
+nstep         10
 toldfe        1.e-7
 
 # Parallelization
 # ===============
 paral_kgb     1
-npband        16  # Change this line according to the tutorial  
-npfft         4   # Change this line according to the tutorial
+npband        32  # Change this line according to the tutorial  
+bandpp        2   # Change this line according to the tutorial
+npfft         2   # Change this line according to the tutorial
 timopt        -3  # Get timing information of the run in the *.abo (output) file
 
 #%%<BEGIN TEST_INFO>
@@ -159,7 +160,7 @@ timopt        -3  # Get timing information of the run in the *.abo (output) file
 #%% [files]
 #%% [NCPU_64]
 #%% files_to_test = 
-#%%   tgspw_02_MPI64.abo, tolnlines = 170, tolabs = 1.1e-3, tolrel = 1.0e-2 
+#%%   tgspw_04_MPI64.abo, tolnlines = 170, tolabs = 1.1e-3, tolrel = 1.0e-2 
 #%% [paral_info]
 #%% max_nprocs = 64
 #%% nprocs_to_test = 64
@@ -168,3 +169,4 @@ timopt        -3  # Get timing information of the run in the *.abo (output) file
 #%% keywords = 
 #%% description = 
 #%%<END TEST_INFO>
+

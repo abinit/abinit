@@ -131,27 +131,27 @@ pseudos      "Pseudodojo_paw_pw_standard/Au.xml"
 
 # Electronic configuration
 # ========================
-nband         648
+nband         640
 occopt        3 
 tsmear        0.002
 nkpt          1
 
 # Convergence parameters
 # ======================
- ecut          5  # Irrealist. Just to reduce the computation time in order to perform some benchmark
- pawecutdg     5  # Minimal value not converge to run with ecut
+ecut          5  # Irrealist. Just to reduce the computation time in order to perform some benchmark
+pawecutdg     5  # Minimal value not converge to run with ecut
 
 # Control of the SCF cycle
 # ========================
-nstep          10
-toldfe         1.e-7
+nstep         5
+toldfe        1.e-7
 
 # Parallelization
 # ===============
-paral_kgb      1
-autoparal      1
-max_ncpus      108
-timopt         -3 # Get timing information of the run in the *.abo (output) file
+paral_kgb     1
+autoparal     1
+max_ncpus     64
+timopt        -3 # Get timing information of the run in the *.abo (output) file
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

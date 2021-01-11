@@ -38,7 +38,7 @@ inp_files = [
 "tgspw_01.abi",
 "tgspw_02.abi",    # OK
 "tgspw_03.abi",    # OK
-#"tgspw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
+"tgspw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
 #"tgspw_05.abi",
 "tmbt_1.abi",   # OK     
 "tmbt_2.abi",   # OK
