@@ -2485,10 +2485,11 @@ pp_dirpath $ABI_PSPDIR
                 </tr>
                 <py-open>for idx, f in enumerate(self.files_to_test):</py-open>
                  <tr valign="top" align="left">
+                  <py-line code = "out_link = html_link(basename(f.name))"/>
                   <py-line code = "fld_link = html_link(basename(f.fldiff_fname))"/>
                   <py-line code = "txt_diff_link = html_link(basename(f.diff_fname))"/>
                   <py-line code = "html_diff_link = html_link(basename(f.hdiff_fname))"/>
-                  <py-line code = "tab_row = args2htmltr(f.name, status2html(f.fld_status), fld_link, f.fld_options, txt_diff_link, html_diff_link)"/>
+                  <py-line code = "tab_row = args2htmltr(out_link, status2html(f.fld_status), fld_link, f.fld_options, txt_diff_link, html_diff_link)"/>
                   ${tab_row}
                  </tr>
                 <py-close/>
