@@ -98,7 +98,7 @@ module m_hdr
   integer :: date          ! starting date
   integer :: headform      ! format of the header
   integer :: intxc         ! input variable
-  integer :: ivalence      ! CP added variable
+  integer :: ivalence=1    ! CP added variable
   integer :: ixc           ! input variable
   integer :: mband         ! maxval(hdr%nband)
   integer :: natom         ! input variable
@@ -126,14 +126,14 @@ module m_hdr
   real(dp) :: ecut_eff     ! ecut*dilatmx**2 (dilatmx is an input variable)
   real(dp) :: etot         ! EVOLVING variable
   real(dp) :: fermie       ! EVOLVING variable
-  real(dp) :: fermih       ! EVOLVING variable; CP added
+  real(dp) :: fermih=zero  ! EVOLVING variable; CP added
   real(dp) :: residm       ! EVOLVING variable
   real(dp) :: stmbias      ! input variable
   real(dp) :: tphysel      ! input variable
   real(dp) :: tsmear       ! input variable
   real(dp) :: nelect       ! number of electrons (computed from pseudos and charge)
-  real(dp) :: ne_qFD       ! CP number of excited electrons (input variable)
-  real(dp) :: nh_qFD       ! CP number of excited holes (input variable)
+  real(dp) :: ne_qFD=zero  ! CP number of excited electrons (input variable)
+  real(dp) :: nh_qFD=zero  ! CP number of excited holes (input variable)
   real(dp) :: charge       ! input variable
 
   ! This record is not a part of the hdr_type, although it is present in the
@@ -315,10 +315,7 @@ module m_hdr
    module procedure hdr_io_wfftype
  end interface hdr_io
 
- ! CP modified
- ! integer,private,parameter :: HDR_KNOWN_HEADFORMS(1) = [80]
- integer,private,parameter :: HDR_KNOWN_HEADFORMS(2) = (/80,93/)
- ! End CP modified
+ integer,private,parameter :: HDR_KNOWN_HEADFORMS(1) = [80]
  ! The list of headforms used so far.
 
  integer,private,parameter :: size_hdr_known_headforms = size(HDR_KNOWN_HEADFORMS) ! Need this for Flang
@@ -3083,6 +3080,10 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 
  ! CP added
  ! Read in case occopt = 9
+ hdr%ivalence = hdr%nelect / 2
+ hdr%ne_qFD   = zero
+ hdr%nh_qFD   = zero
+ hdr%fermih   = zero
  if (hdr%occopt == 9) then
     write(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
  end if
