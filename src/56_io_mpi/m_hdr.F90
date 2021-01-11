@@ -3830,7 +3830,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
   NCF_CHECK(nf90_put_var(ncid, vid("hole_fermi_energy"), hdr%fermih)) ! CP added fermih
   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "ivalence"])
   NCF_CHECK(ncerr)
-  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "ivalence"])
+  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "ivalence"], [hdr%ivalence])
   NCF_CHECK(ncerr)
   ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "ne_qFD", "nh_qFD"],[hdr%ne_qFD, hdr%nh_qFD])
  end if
