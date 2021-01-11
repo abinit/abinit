@@ -3180,17 +3180,6 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  ! === Write abinit-related stuff (not covered by ETSF-IO) ===
  ! ===========================================================
  ! Define variables.
- ! CP added for occopt 9 variables
- ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-         "number_of_conduction_electrons", "number_of_valence_holes"])
- NCF_CHECK(ncerr)
- ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "holes_fermi_energy"])
- NCF_CHECK(ncerr)
- NCF_CHECK(nctk_set_atomic_units(ncid, "holes_fermi_energy")) ! CP modified for occopt == 9
- NCF_CHECK(nf90_put_var(ncid, vid("holes_fermi_energy"), ebands%fermih))
- NCF_CHECK(nf90_put_var(ncid, vid("number_of_conduction_electrons"), ebands%ne_qFD))
- NCF_CHECK(nf90_put_var(ncid, vid("number_of_valence_holes"), ebands%nh_qFD))
- ! End CP added
  NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "occopt", "kptopt"], defmode=.True.))
  NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "tphysel", "charge", "nelect", "extrael"]))
 
@@ -3228,6 +3217,20 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  if (write_ngkpt) then
    NCF_CHECK(nf90_put_var(ncid, vid('ngkpt_shiftk'), ebands%shiftk_orig))
  end if
+
+ ! CP added for case occopt 9
+ if (ebands%occopt == 9) then
+    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+         "number_of_conduction_electrons", "number_of_valence_holes"])
+    NCF_CHECK(ncerr)
+    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "holes_fermi_energy"])
+    NCF_CHECK(ncerr)
+    NCF_CHECK(nctk_set_atomic_units(ncid, "holes_fermi_energy")) ! CP modified for occopt == 9
+    NCF_CHECK(nf90_put_var(ncid, vid("holes_fermi_energy"), ebands%fermih))
+    NCF_CHECK(nf90_put_var(ncid, vid("number_of_conduction_electrons"), ebands%ne_qFD))
+    NCF_CHECK(nf90_put_var(ncid, vid("number_of_valence_holes"), ebands%nh_qFD))
+ endif
+ ! End CP added
 
 #else
  MSG_ERROR("netcdf support is not activated. ")
