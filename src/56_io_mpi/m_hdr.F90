@@ -315,7 +315,10 @@ module m_hdr
    module procedure hdr_io_wfftype
  end interface hdr_io
 
- integer,private,parameter :: HDR_KNOWN_HEADFORMS(1) = [80]
+ ! CP modified
+ ! integer,private,parameter :: HDR_KNOWN_HEADFORMS(1) = [80]
+ integer,private,parameter :: HDR_KNOWN_HEADFORMS(2) = (/80,93/)
+ ! End CP modified
  ! The list of headforms used so far.
 
  integer,private,parameter :: size_hdr_known_headforms = size(HDR_KNOWN_HEADFORMS) ! Need this for Flang
@@ -3025,6 +3028,11 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  ! fform is not a record of hdr_type
  ABI_CHECK(read_first_record(unit, hdr%codvsn, hdr%headform, fform, errmsg) == 0, errmsg)
 
+ ! CP debug
+ !write(std_out,*) 'In hdr_fort_read, l. 3032, headform, fform = ', hdr%headform, ', ', fform
+ ! End CP debug
+
+
  if (hdr%headform < 80) then
    write(msg,'(3a,i0,4a)') &
      "ABINIT version: ",trim(abinit_version)," cannot read old files with headform: ",hdr%headform,ch10,&
@@ -3037,8 +3045,6 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 
 !Reading the second record of the file ------------------------------------
  read(unit, err=10, iomsg=errmsg) &
-  !CP Commented   hdr%bantot, hdr%date, hdr%intxc, hdr%ivalence, hdr%ixc, hdr%natom, hdr%ngfft(1:3),&
-  ! But causes problems of compatibility in I/O for tests
    hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3),&
    hdr%nkpt, hdr%nspden, hdr%nspinor, hdr%nsppol, hdr%nsym, hdr%npsp, hdr%ntypat, hdr%occopt, hdr%pertcase,&
    hdr%usepaw, hdr%ecut, hdr%ecutdg, hdr%ecutsm, hdr%ecut_eff, hdr%qptn(1:3), hdr%rprimd,&
@@ -3071,10 +3077,16 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 ! Reading the final record of the header  ---------------------------------
  read(unit, err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:)
 
- !CP commented read(unit, err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%fermih, hdr%amu(:) !CP modified, added fermih
  read(unit, err=10, iomsg=errmsg)&
     hdr%kptopt,hdr%pawcpxocc,hdr%nelect,hdr%charge,hdr%icoulomb,&
     hdr%kptrlatt,hdr%kptrlatt_orig, hdr%shiftk_orig,hdr%shiftk
+
+ ! CP added
+ ! Read in case occopt = 9
+ if (hdr%occopt == 9) then
+    write(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+ end if
+ ! End CP added
 
 ! Reading the records with psp information ---------------------------------
  do ipsp=1,hdr%npsp
@@ -3137,7 +3149,7 @@ subroutine hdr_ncread(Hdr, ncid, fform)
 #ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
- integer :: nresolution, itypat, ii
+ integer :: nresolution, itypat, ii, varid, ncerr ! CP added varid, ncerr
  character(len=500) :: msg
 !arrays
  integer,allocatable :: nband2d(:,:)
@@ -3230,7 +3242,6 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  ABI_FREE(occ3d)
 
  NCF_CHECK(nf90_get_var(ncid, vid("fermi_energy"), hdr%fermie))
- NCF_CHECK(nf90_get_var(ncid, vid("hole_fermi_energy"), hdr%fermih)) ! CP added
  NCF_CHECK(nf90_get_var(ncid, vid("primitive_vectors"), hdr%rprimd))
  NCF_CHECK(nf90_get_var(ncid, vid("reduced_symmetry_matrices"), hdr%symrel))
  NCF_CHECK(nf90_get_var(ncid, vid("atom_species"), hdr%typat))
@@ -3267,8 +3278,6 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  NCF_CHECK(nf90_get_var(ncid, vid("kptopt"), hdr%kptopt))
  NCF_CHECK(nf90_get_var(ncid, vid("pawcpxocc"), hdr%pawcpxocc))
  NCF_CHECK(nf90_get_var(ncid, vid("nelect"), hdr%nelect))
- NCF_CHECK(nf90_get_var(ncid, vid("ne_qFD"), hdr%ne_qFD)) ! CP added
- NCF_CHECK(nf90_get_var(ncid, vid("nh_qFD"), hdr%nh_qFD)) ! CP added
  NCF_CHECK(nf90_get_var(ncid, vid("charge"), hdr%charge))
  NCF_CHECK(nf90_get_var(ncid, vid("kptrlatt_orig"), hdr%kptrlatt_orig))
  NCF_CHECK(nf90_get_var(ncid, vid("kptrlatt"), hdr%kptrlatt))
@@ -3289,6 +3298,34 @@ subroutine hdr_ncread(Hdr, ncid, fform)
    call pawrhoij_io(hdr%pawrhoij,ncid,hdr%nsppol,hdr%nspinor,hdr%nspden,hdr%lmn_size,hdr%typat,&
       hdr%headform,"Read",form="netcdf")
  end if
+
+ ! CP added: reading the values of fermih, ne_qFD, nh_qFD and ivalence if occopt = 9
+ hdr%fermih   = zero
+ hdr%ne_qFD   = zero
+ hdr%nh_qFD   = zero
+ hdr%ivalence = hdr%nelect / 2
+
+ if (hdr%occopt == 9) then
+
+   ncerr = nf90_inq_varid(ncid, "hole_fermi_energy", varid)
+   if (ncerr /= nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, vid("hole_fermi_energy"), hdr%fermih))
+   end if
+   ncerr = nf90_inq_varid(ncid, "ne_qFD", varid)
+   if (ncerr /= nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, vid("ne_qFD"), hdr%ne_qFD))
+   end if
+   ncerr = nf90_inq_varid(ncid, "nh_qFD", varid)
+   if (ncerr /= nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, vid("nh_qFD"), hdr%nh_qFD))
+   end if
+   ncerr = nf90_inq_varid(ncid, "ivalence", varid)
+   if (ncerr /= nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, vid("ivalence"), hdr%ivalence))
+   end if
+
+ endif
+ ! End CP added
 
 #else
  MSG_ERROR("netcdf support not activated")
@@ -3359,11 +3396,13 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
 
 !Writing always use last format version
  headform = HDR_LATEST_HEADFORM
+ ! CP debug
+ !write(std_out,*) 'CP debug = ', headform
+ ! End CP debug
  write(unit, err=10, iomsg=errmsg) hdr%codvsn, headform, fform
 
  write(unit, err=10, iomsg=errmsg) &
-  ! CP Commented   hdr%bantot, hdr%date, hdr%intxc, hdr%ivalence, hdr%ixc, hdr%natom, hdr%ngfft(1:3), &
-   hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3), &
+    hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3), &
    hdr%nkpt, hdr%nspden, hdr%nspinor, hdr%nsppol, hdr%nsym, hdr%npsp, hdr%ntypat, hdr%occopt, hdr%pertcase,&
    hdr%usepaw, hdr%ecut, hdr%ecutdg, hdr%ecutsm, hdr%ecut_eff, hdr%qptn, hdr%rprimd, &
    hdr%stmbias, hdr%tphysel, hdr%tsmear, hdr%usewvl, hdr%nshiftk_orig, hdr%nshiftk, hdr%mband
@@ -3376,13 +3415,17 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
    hdr%tnons(:,:), hdr%znucltypat(:), hdr%wtk(:)
  ABI_FREE(occ3d)
 
- !CP commented write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%fermih, hdr%amu(:) ! CP added
- write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:)
+  write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:) 
  write(unit,err=10, iomsg=errmsg) &
-  ! hdr%kptopt, hdr%pawcpxocc, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%charge, hdr%icoulomb,& ! CP qdded
-   hdr%kptopt, hdr%pawcpxocc, hdr%nelect, hdr%charge, hdr%icoulomb,&
+    hdr%kptopt, hdr%pawcpxocc, hdr%nelect, hdr%charge, hdr%icoulomb,&
    hdr%kptrlatt,hdr%kptrlatt_orig, hdr%shiftk_orig(:,1:hdr%nshiftk_orig),hdr%shiftk(:,1:hdr%nshiftk)
 
+ ! CP added
+ ! Write record for occopt 9 option if needed
+ if (hdr%occopt == 9) then
+    write(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+ end if
+ ! End CP added
  ! Write the records with psp information ---------------------------------
  do ipsp=1,hdr%npsp
    write(unit, err=10, iomsg=errmsg) &
@@ -3573,17 +3616,13 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "number_of_electrons"])
    NCF_CHECK(ncerr)
-   ! CP modified
-   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
-   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "hole_fermi_energy", "smearing_width"])
-   ! End CP modified
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_set_atomic_units(ncid, "smearing_width"))
 
    ! Some variables require the specifications of units.
    NCF_CHECK(nctk_set_atomic_units(ncid, "eigenvalues"))
    NCF_CHECK(nctk_set_atomic_units(ncid, "fermi_energy"))
-   NCF_CHECK(nctk_set_atomic_units(ncid, "hole_fermi_energy")) ! CP added
    NCF_CHECK(nf90_put_att(ncid, vid("number_of_states"), "k_dependent", k_dependent))
 
    ! Define dimensions.
@@ -3598,12 +3637,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    end if
 
    ! Define scalars.
-   ! CP modified
-   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-   !  "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "usewvl"])
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "date","ivalence", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "usewvl"])
-   ! End CP modified
+     "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "usewvl"])
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
@@ -3663,10 +3698,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "kptopt", "pawcpxocc", "icoulomb"])
    NCF_CHECK(ncerr)
-   !CP modified
-   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "nelect", "charge"])
-   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "nelect", "ne_qFD", "nh_qFD", "charge"])
-   ! End CP modified
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "nelect", "charge"])
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [&
@@ -3701,7 +3733,6 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
  ! Write electrons
  NCF_CHECK(nf90_put_var(ncid, vid("fermi_energy"), hdr%fermie))
- NCF_CHECK(nf90_put_var(ncid, vid("hole_fermi_energy"), hdr%fermih)) ! CP added fermih
  NCF_CHECK(nf90_put_var(ncid, vid("smearing_width"), hdr%tsmear))
  NCF_CHECK(nf90_put_var(ncid, vid("smearing_scheme"), nctk_string_from_occopt(hdr%occopt)))
 
@@ -3739,15 +3770,10 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("codvsn"), hdr%codvsn))
  NCF_CHECK(nf90_put_var(ncid, vid("title"), hdr%title))
 
- ! CP modified
- !ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-!&  "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "icoulomb"],&
-!&  [hdr%date, hdr%ixc ,hdr%intxc ,hdr%occopt, hdr%pertcase, HDR_LATEST_HEADFORM, fform, hdr%usepaw, hdr%icoulomb])
  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-&  "date", "ivalence", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "icoulomb"],&
-&  [hdr%date, hdr%ivalence, hdr%ixc ,hdr%intxc ,hdr%occopt, hdr%pertcase, HDR_LATEST_HEADFORM, fform, hdr%usepaw, hdr%icoulomb])
+&  "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "icoulomb"],&
+&  [hdr%date, hdr%ixc ,hdr%intxc ,hdr%occopt, hdr%pertcase, HDR_LATEST_HEADFORM, fform, hdr%usepaw, hdr%icoulomb])
  NCF_CHECK(ncerr)
- ! End CP modified
 
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
 &  "ecut_eff", "ecutdg", "ecutsm", "etot", "residm", "stmbias", "tphysel", "tsmear"],&
@@ -3782,12 +3808,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    "kptopt", "pawcpxocc"],[hdr%kptopt, hdr%pawcpxocc])
  NCF_CHECK(ncerr)
 
- ! CP modified
- !ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
- !  "nelect", "charge"],[hdr%nelect, hdr%charge])
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "nelect", "ne_qFD", "nh_qFD", "charge"],[hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%charge])
-! End CP modified
+   "nelect", "charge"],[hdr%nelect, hdr%charge])
  NCF_CHECK(ncerr)
 
  ! NB: In etsf_io the number of electrons is declared as integer.
@@ -3799,6 +3821,21 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("shiftk"), hdr%shiftk))
  NCF_CHECK(nf90_put_var(ncid, vid("md5_pseudos"), hdr%md5_pseudos))
  NCF_CHECK(nf90_put_var(ncid, vid("amu"), hdr%amu))
+
+ ! CP added
+ if (hdr%occopt == 9) then
+  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "hole_fermi_energy"])
+  NCF_CHECK(ncerr)
+  NCF_CHECK(nctk_set_atomic_units(ncid, "hole_fermi_energy")) ! CP added
+  NCF_CHECK(nf90_put_var(ncid, vid("hole_fermi_energy"), hdr%fermih)) ! CP added fermih
+  ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "ivalence"])
+  NCF_CHECK(ncerr)
+  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "ivalence"])
+  NCF_CHECK(ncerr)
+  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "ne_qFD", "nh_qFD"],[hdr%ne_qFD, hdr%nh_qFD])
+ end if
+ ! End CP added
+
 
 #else
  MSG_ERROR("netcdf support not activated")
@@ -4978,11 +5015,11 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  end if
  ! CP added
  if (abs(Dtset%ne_qFD-hdr%ne_qFD)>tol6) then
-   write(msg,'(2(a,f8.2))')"File contains ", hdr%ne_qFD," electrons but nelect initialized from input is ",Dtset%ne_qFD
+   write(msg,'(2(a,f8.2))')"File contains ", hdr%ne_qFD," electrons in the conduction bands but nelect initialized from input is ",Dtset%ne_qFD
    MSG_ERROR(msg)
  end if
  if (abs(Dtset%nh_qFD-hdr%nh_qFD)>tol6) then
-   write(msg,'(2(a,f8.2))')"File contains ", hdr%nh_qFD," electrons but nelect initialized from input is ",Dtset%nh_qFD
+   write(msg,'(2(a,f8.2))')"File contains ", hdr%nh_qFD," electrons in the valence bands but nelect initialized from input is ",Dtset%nh_qFD
    MSG_ERROR(msg)
  end if
  ! End CP added
