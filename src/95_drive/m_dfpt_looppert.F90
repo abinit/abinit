@@ -2119,7 +2119,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_ALLOCATE(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
-     call orbmag_ddk(atindx,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,&
+     call orbmag_ddk(atindx,cg,cg1_orbmag,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,&
     & nattyp,nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawtab,psps,rprimd,usecprj,&
     & vtrial_local,xred,ylm,ylmgr)
 

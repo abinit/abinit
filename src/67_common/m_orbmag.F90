@@ -900,7 +900,7 @@ end subroutine initorbmag
 !! make_pcg1
 !!
 !! FUNCTION
-!! Routine to compute Pcg1 from cg1
+!! Routine to compute Pcg1 from cg1 via |u_i> = |u_i> + 1/2\sum_j |u_j><u_j|S^1|u_i>
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2020 ABINIT  group (JWZ)
@@ -912,13 +912,13 @@ end subroutine initorbmag
 !! INPUTS
 !!
 !! OUTPUT
-!! only printing
 !!
 !! SIDE EFFECTS
 !!
 !! TODO
 !!
 !! NOTES
+!! See Audouze et al PRB 78, 035105 (2008) Eq. 40
 !!
 !! PARENTS
 !!
@@ -939,34 +939,44 @@ subroutine make_pcg1(cg1,icg,mcg1,nband_k,npw_k,pcg1,us1u)
  !Local variables -------------------------
  !scalars
  integer :: iband,idir,ipw,jband
- real(dp) :: ius1u,rus1u
+ real(dp) :: us1ur, us1ui
  !arrays
- real(dp),allocatable :: cwavei(:,:),cwavej(:,:)
+ real(dp),allocatable :: cwaveir(:),cwaveii(:),cwavejr(:),cwaveji(:)
 
  !----------------------------------------------------
 
- ABI_ALLOCATE(cwavei,(2,npw_k))
- ABI_ALLOCATE(cwavej,(2,npw_k))
+ ABI_ALLOCATE(cwaveir,(npw_k))
+ ABI_ALLOCATE(cwaveii,(npw_k))
+ ABI_ALLOCATE(cwavejr,(npw_k))
+ ABI_ALLOCATE(cwaveji,(npw_k))
 
  pcg1 = zero
  do idir = 1, 3
    do iband = 1, nband_k
-     cwavei(1:2,1:npw_k) = cg1(1:2,icg+(iband-1)*npw_k+1:icg+iband*npw_k,idir)
+     cwaveir(1:npw_k) = cg1(1,icg+(iband-1)*npw_k+1:icg+iband*npw_k,idir)
+     cwaveii(1:npw_k) = cg1(2,icg+(iband-1)*npw_k+1:icg+iband*npw_k,idir)
      do jband = 1, nband_k
-       rus1u = real(us1u(jband,iband,idir))
-       ius1u = aimag(us1u(jband,iband,idir))
-       cwavej(1:2,1:npw_k) = cg1(1:2,icg+(jband-1)*npw_k+1:icg+jband*npw_k,idir)
-       do ipw=1, npw_k
-         cwavei(1,ipw)=cwavei(1,ipw)+half*(rus1u*cwavej(1,ipw)-ius1u*cwavej(2,ipw))
-         cwavei(2,ipw)=cwavei(2,ipw)+half*(rus1u*cwavej(2,ipw)+ius1u*cwavej(1,ipw))
-       end do ! end loop over ipw
+
+       us1ur = real(us1u(jband,iband,idir))
+       us1ui = aimag(us1u(jband,iband,idir))
+       cwavejr(1:npw_k) = cg1(1,icg+(jband-1)*npw_k+1:icg+jband*npw_k,idir)
+       cwaveji(1:npw_k) = cg1(2,icg+(jband-1)*npw_k+1:icg+jband*npw_k,idir)
+
+       cwaveir = cwaveir + half*(us1ur*cwavejr - us1ui*cwaveji)
+       cwaveii = cwaveii + half*(us1ur*cwaveji + us1ui*cwavejr)
+
      end do ! end loop over jband
-     pcg1(1:2,(iband-1)*npw_k+1:iband*npw_k,idir) = cwavei(1:2,1:npw_k)
+
+     pcg1(1,(iband-1)*npw_k+1:iband*npw_k,idir) = cwaveir
+     pcg1(2,(iband-1)*npw_k+1:iband*npw_k,idir) = cwaveii
+
    end do ! end loop over iband
  end do ! end loop over idir
 
- ABI_DEALLOCATE(cwavei)
- ABI_DEALLOCATE(cwavej)
+ ABI_DEALLOCATE(cwaveir)
+ ABI_DEALLOCATE(cwaveii)
+ ABI_DEALLOCATE(cwavejr)
+ ABI_DEALLOCATE(cwaveji)
 
 end subroutine make_pcg1
 !!***
@@ -1043,10 +1053,10 @@ subroutine make_us1u(atindx1,cprj,dtset,icprj,ikpt,isppol,mcprj,my_nspinor,nband
          ilmn=pawtab(itypat)%indklmn(7,klmn)
          jlmn=pawtab(itypat)%indklmn(8,klmn)
          cpb=cmplx(cprj_k(iatom,iband)%cp(1,ilmn),cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc)
-         cpk=cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn),KIND=dpc)
+         cpk=cmplx(cprj_k(iatom,jband)%cp(1,jlmn),cprj_k(iatom,jband)%cp(2,jlmn),KIND=dpc)
          do idir = 1, 3
            dcpb=cmplx(cprj_k(iatom,iband)%dcp(1,ilmn,idir),cprj_k(iatom,iband)%dcp(2,ilmn,idir),KIND=dpc)
-           dcpk=cmplx(cprj_k(iatom,iband)%dcp(1,jlmn,idir),cprj_k(iatom,iband)%dcp(2,jlmn,idir),KIND=dpc)
+           dcpk=cmplx(cprj_k(iatom,jband)%dcp(1,jlmn,idir),cprj_k(iatom,jband)%dcp(2,jlmn,idir),KIND=dpc)
            consite=(conjg(cpb)*dcpk+conjg(dcpb)*cpk)*pawtab(itypat)%sij(klmn)*pawtab(itypat)%dltij(klmn)
            us1u(iband,jband,idir)=us1u(iband,jband,idir)+consite
          end do ! end loop over idir
@@ -5026,7 +5036,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
  type(pseudopotential_type), intent(inout) :: psps
 
  !arrays
- integer :: atindx1(dtset%natom),nattyp(dtset%ntypat),ngfftf(18),npwarr(dtset%nkpt)
+ integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat),ngfftf(18),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3),rprimd(3,3),xred(3,dtset%natom)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -5037,9 +5047,10 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
 
  !Local
  !scalars
- integer :: dimffnl,exchn2n3d
+ integer :: adir,bdir,dimffnl,exchn2n3d
+ integer :: getcprj_choice,getcprj_cpopt,getcprj_idir,getcprj_useylm
  integer :: getghc_cpopt,getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc
- integer :: iatom,icg,icprj,ider,idir,ikg,ikg1,ikpt,ilm,isppol,istwf_k
+ integer :: gdir,iatom,icg,icprj,ider,idir,ikg,ikg1,ikpt,ilm,isppol,istwf_k
  integer :: me,my_nspinor
  integer :: nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn
  integer :: nkpg,npw_k,npw_k_
@@ -5051,13 +5062,14 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),rhodum(1),rmet(3,3)
- real(dp),allocatable :: cgrvtrial(:,:),cwavef(:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable :: cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwaveg1(:,:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:)
- real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
+ real(dp),allocatable :: pcg1(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  complex(dpc),allocatable :: us1u(:,:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
+ type(pawcprj_type),allocatable :: cwaveprj(:,:),cprj_k1(:,:,:)
 
  !----------------------------------------------
 
@@ -5074,6 +5086,12 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
  ngfft4=dtset%ngfft(4) ; ngfft5=dtset%ngfft(5) ; ngfft6=dtset%ngfft(6)
  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
  exchn2n3d = 0; ikg1 = 0
+
+ ! input parameters for getcprj call for pcg1 wavefunctions
+ getcprj_choice = 5 ! compute cprj and k derivs
+ getcprj_idir = 0 ! compute derivs in all 3 directions
+ getcprj_cpopt = 0 ! no cprj in memory at input
+ getcprj_useylm = 1 ! use Ylm's
 
  ! input parameters for calls to getghc at ikpt
  getghc_cpopt = 4 ! cprj and derivatives already in memory
@@ -5137,6 +5155,11 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
 
  ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
  call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
+
+ ABI_DATATYPE_ALLOCATE(cprj_k1,(dtset%natom,nband_k,3))
+ do adir = 1, 3
+   call pawcprj_alloc(cprj_k1(:,:,adir),ncpgr,dimlmn)
+ end do
 
  ABI_ALLOCATE(kg_k,(3,dtset%mpw))
  ABI_ALLOCATE(kinpw,(dtset%mpw))
@@ -5210,7 +5233,29 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
    ABI_ALLOCATE(us1u,(nband_k,nband_k,3))
    call make_us1u(atindx1,cprj,dtset,icprj,ikpt,isppol,mcprj,my_nspinor,nband_k,pawtab,us1u)
 
+   ! Compute Pcg1, the 1st order wavefunctions projected to conduction space
+   ABI_ALLOCATE(pcg1,(2,nband_k*npw_k,3))
+   call make_pcg1(cg1,icg,mcg1,nband_k,npw_k,pcg1,us1u)
+
+   ! compute cprj and derivs for pcg1 wavefunctions
    ABI_ALLOCATE(cwavef,(2,npw_k))
+   do adir = 1, 3
+     do nn = 1, nband_k
+       cwavef = pcg1(:,(nn-1)*npw_k+1:nn*npw_k,adir)
+       call getcprj(getcprj_choice,getcprj_cpopt,cwavef,cwaveprj,ffnl_k,&
+         & getcprj_idir,psps%indlmn,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
+         & dtset%mgfft,mpi_enreg,&
+         & dtset%natom,nattyp,ngfftf,dtset%nloalg,npw_k,my_nspinor,dtset%ntypat,&
+         & phkxred,ph1d,ph3d,ucvol,getcprj_useylm)
+       call pawcprj_put(atindx1,cwaveprj,cprj_k1(:,:,adir),dtset%natom,&
+         & nn,0,ikpt,0,isppol,nband_k,dtset%mkmem,&
+         & dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0,&
+         & mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+     end do
+   end do
+
+   ABI_ALLOCATE(cwaveb1,(2,npw_k))
+   ABI_ALLOCATE(cwaveg1,(2,npw_k))
    ABI_ALLOCATE(ghc,(2,npw_k))
    ABI_ALLOCATE(gsc,(2,npw_k))
    ABI_ALLOCATE(gvnlc,(2,npw_k))
@@ -5222,7 +5267,22 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
        & getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc)
      Enk = DOT_PRODUCT(cwavef(1,1:npw_k),ghc(1,1:npw_k)) &
        & + DOT_PRODUCT(cwavef(2,1:npw_k),ghc(2,1:npw_k))
+
+     do adir = 1, 3
+       bdir = modulo(adir,3)+1
+       gdir = modulo(adir+1,3)+1
+       
+       cwaveb1=pcg1(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+       cwaveg1=pcg1(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+     end do ! end loop over adir
+
    end do
+   ABI_DEALLOCATE(cwavef)
+   ABI_DEALLOCATE(cwaveb1)
+   ABI_DEALLOCATE(cwaveg1)
+   ABI_DEALLOCATE(ghc)
+   ABI_DEALLOCATE(gsc)
+   ABI_DEALLOCATE(gvnlc)
 
    icg = icg + npw_k*nband_k
    ikg = ikg + npw_k
@@ -5235,10 +5295,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
    ABI_DEALLOCATE(ph3d)
    ABI_DEALLOCATE(phkxred)
    ABI_DEALLOCATE(us1u)
-   ABI_DEALLOCATE(cwavef)
-   ABI_DEALLOCATE(ghc)
-   ABI_DEALLOCATE(gsc)
-   ABI_DEALLOCATE(gvnlc)
+   ABI_DEALLOCATE(pcg1)
 
  end do ! end loop over kpts
 
@@ -5259,6 +5316,10 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
  ABI_DEALLOCATE(dimlmn)
  call pawcprj_free(cwaveprj)
  ABI_DATATYPE_DEALLOCATE(cwaveprj)
+ do adir = 1, 3
+   call pawcprj_free(cprj_k1(:,:,adir))
+ end do
+ ABI_DATATYPE_DEALLOCATE(cprj_k1)
 
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' JWZ debug orbmag_ddk progress: time ',finish_time-start_time
