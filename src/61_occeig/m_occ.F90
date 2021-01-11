@@ -711,11 +711,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  end if
 
  ! If the target nelect is not between nelectlo and nelecthi, exit
- ! CP modified
- !if (nelect < nelectlo .or. nelect > nelecthi) then
- if( occopt==9 .and. ( (nelect-nh_qFD)<nholeslo .or. (nelect-nh_qFD)>nholeshi  &
-&    .or. (ne_qFD < nelectlo) .or. (ne_qFD > nelecthi) ) )then
- ! End CP modified
+ if (nelect < nelectlo .or. nelect > nelecthi) then
    write(msg, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
     ' newocc: ',ch10,&
     '  The calling routine gives nelect= ',nelect,ch10,&
