@@ -730,14 +730,19 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  end if
 
   ! CP added special test for occopt == 9
- if( occopt==9 .and. ( (nelect-nh_qFD)<nholeslo .or. (nelect-nh_qFD)>nholeshi  &
-&    .or. (ne_qFD < nelectlo) .or. (ne_qFD > nelecthi) ) )then
-   write(msg,'(a,a,a,d16.8,a,a,d16.8,a,a,d16.8,a,d16.8,a,d16.8,a,d16.8,a)') 'newocc : ',ch10, &
-&   'The calling routine gives nelect-nh_qFD = ', nelect-nh_qFD, ch10, &
-&  ', ne_qFD = ', ne_qFD, ch10, '. The lowest (highest resp.) bound for nelect-nh_qFD is ', &
-&   nholeslo, ' ( ', nholeshi, ' ); for ne_qFD, the bounds are ',&
+ if( occopt==9 ) then
+    if ((nelect-nh_qFD)<nholeslo .or. (nelect-nh_qFD)>nholeshi) then
+       write(msg,'(a,a,a,d16.8,a,a,d16.8,a,d16.8,a)') 'newocc : ',ch10, &
+&      'The calling routine gives nelect-nh_qFD = ', nelect-nh_qFD, ch10, &
+&       'The lowest (highest resp.) bound for nelect-nh_qFD is ', &
+&   nholeslo, ' ( ', nholeshi, ' ).'
+    endif
+    if ((ne_qFD < nelectlo) .or. (ne_qFD > nelecthi) ) then
+       write(msg,'(a,a,a,d16.8,a,a,d16.8,a,d16.8,a)') 'newocc : ',ch10, &
+&   'The calling routine gives ne_qFD = ', ne_qFD, ch10, 'The lowest (highest resp.) bound for ne_qFD are ',&
 &   nelectlo, ' ( ', nelecthi, ' ) .'
-
+    endif
+         
    write(msg, '(11a)' )&
 &   'In order to get the right number of carriers,',ch10,&
 &   'it seems that the Fermi energies must be outside the range',ch10,&
