@@ -143,7 +143,7 @@ pawecutdg     5  # Minimal value not converge to run with ecut
 
 # Control of the SCF cycle
 # ========================
-nstep         10
+nstep         5
 toldfe        1.e-7
 
 # Parallelization
