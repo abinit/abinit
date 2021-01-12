@@ -45,7 +45,7 @@ This is because the basis sets used to solve the problem (plane waves, bands, ..
 &mdash; linearly, as the square, or even exponentially &mdash;.
 The computational resources are limited by two factors:
 
-* The memory, i.e. the amount of data stored in RAM,
+* The memory, *i.e*. the amount of data stored in RAM,
 * The computing efficiency, with specific bottlenecks.
 
 Therefore, it is mandatory to adopt a parallelization strategy:
@@ -61,7 +61,7 @@ In this tutorial, we will discuss:
     1. Reducing the time needed to perform one electronic iteration (improve efficiency)
     2. Reducing the number of electronic iterations (improve convergence)
 
-The tests are performed on a 108 gold atom system.
+The tests are performed on a 107 gold atom system.
 In this tutorial the plane-wave
 cutoff energy is strongly reduced, for practical reasons.
 
@@ -87,9 +87,9 @@ OK, let's start!
 
 Copy the `tgspw_01.abi` file the tutorial directory into your working directory.
 
-{% tests/tutoparal/Input/tgspw_01.abi %}
+{% dialog tests/tutoparal/Input/tgspw_01.abi %}
 
-Then run ABINIT on 1 CPU core (using 1 MPI process and 1 *openMP* thread).
+Then run ABINIT on 1 CPU core (using 1 MPI process and 1 *OpenMP* thread).
 
 ABINIT should stop without starting a calculation (don't pay attention to the error message).
 At the end of the output file `tgspw_01.abo`, you will see:
@@ -265,7 +265,7 @@ In the following we use the same settings as previously, just performing more el
 + bandpp        1 # This is the default value
 ```
 
-{% tests/tutoparal/Input/tgspw_03.abi %}
+{% dialog tests/tutoparal/Input/tgspw_03.abi %}
 
 Copy the input file `tgspw_03.abi` then run ABINIT over 64 CPUs,
 setting [[bandpp]]**=1** and then [[bandpp]]**=2**. The output files will be
@@ -276,8 +276,7 @@ Conclusion: for a given number of processors, it is possible to improve
 the convergence by increasing bandpp.
 
 However, as you can see, the CPU time per iteration
-increases when [[bandpp]] increases (note that the 2<sup>nd</sup> run performed less iterations
-than the first one):
+increases when [[bandpp]] increases: 
 
 ```bash
 grep Proc tgspw_03.bandpp1.abo tgspw_03.bandpp2.abo
@@ -343,7 +342,7 @@ We will see in the next section how the use of *hybrid parallelism* can again im
     when [[bandpp]] increases but the convergence rate is better.
 
 
-## Hybrid parallelism: MPI+*openMP*
+## Hybrid parallelism: MPI+*OpenMP*
 
 In modern supercomputers, the computing units (CPU cores) are no more equally distributed.
 They are grouped by **nodes** in which they share the same memory access.
@@ -351,7 +350,7 @@ In so-called *many-core* architecture CPU cores can be numerous on the same node
 You could continue to use them as if they were not sharing the memory (using MPI only)
 but this is not the most efficient way to take benefit from the computer.
 The best practice is to use *hybrid* parallelism, mixing distributed memory parallelism
-(MPI, between nodes) and shared memory parallelism ( *openMP*, inside a node). As you will
+(MPI, between nodes) and shared memory parallelism ( *OpenMP*, inside a node). As you will
 see, this will also have consequences on the performance of the iterative diagonalization
 algorithm (LOBPCG).
 Let's try!
@@ -359,8 +358,8 @@ Let's try!
 !!! important
     
     To use ABINIT with both MPI and OpenMP, make sure to compile abinit with
-    1. `--enable-openmp` to activate OpenMP support
-    2. to link against a linear algebra library that support multithreading like (mkl)[https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl/link-line-advisor.html]
+    `--enable-openmp` to activate OpenMP support
+    **and** to link against a linear algebra library that support multithreading like [mkl](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl/link-line-advisor.html)
 
 !!! note
 
@@ -374,15 +373,15 @@ Let's try!
 The `tgspw_04.abi` input file has the parallelization set to [[npband]]=32 and [[npfft]]=2.
 Thus it uses 32 MPI processes. We have set [[bandpp]]=2.
 
-1. Run ABINIT using 64 MPI processes and 1 *openMP* threads (set `OMP_NUM_THREADS=1`). Copy the output file to `tgspw_04.bandpp2.1thread.abo`
-2. Set [[npfft]]=1 and run ABINIT using 32 MPI processes and 2 *openMP* threads (set `OMP_NUM_THREADS=2`). Copy the output file to `tgspw_04.bandpp2.2thread.abo`
+1. Run ABINIT using 64 MPI processes and 1 *OpenMP* threads (set `OMP_NUM_THREADS=1`). Copy the output file to `tgspw_04.bandpp2.1thread.abo`
+2. Set [[npfft]]=1 and run ABINIT using 32 MPI processes and 2 *OpenMP* threads (set `OMP_NUM_THREADS=2`). Copy the output file to `tgspw_04.bandpp2.2thread.abo`
 
 !!! note
 
     32 MPI x 2 threads = 64 cores.
 
 
-{% tests/tutoparal/Input/tgspw_04.abi %}
+{% dialog tests/tutoparal/Input/tgspw_04.abi %}
 
 Let's have a look at the timings and compare them :
 
@@ -424,16 +423,16 @@ Doing so, the communications between MPI processes are also reduced !
 
     When using threads, [[bandpp]] needs not to be a multiple of threads but it is **highly recommanded**!
 
-    *How do we choose the number of threads?*
-    
-    Well, it strongly depends on the computer architecture and the case!
+* *How do we choose the number of threads?*
 
-    A computer is made of *nodes*. On each node, there are *sockets* containing a given number
-    of CPU cores. All the cores of one *node* can access the RAM of all the *sockets* but this access
-    is faster on their own *socket*. This is the origin of the famous *Non Uniform Memory
-    Access* effect (NUMA). The number of *threads* has thus to be a divisor of the total
-    number of cores in the node, but it is better to choose a divisor of the number of
-    cores in a *socket*. Indeed ABINIT performance is very sensitive to NUMA effect.
+  Well, it strongly depends on the computer architecture and the case!
+  
+  A computer is made of *nodes*. On each node, there are *sockets* containing a given number
+  of CPU cores. All the cores of one *node* can access the RAM of all the *sockets* but this access
+  is faster on their own *socket*. This is the origin of the famous *Non Uniform Memory
+  Access* effect (NUMA). The number of *threads* has thus to be a divisor of the total
+  number of cores in the node, but it is better to choose a divisor of the number of
+  cores in a *socket*. Indeed ABINIT performance is very sensitive to NUMA effect.
 
 In the following, let's learn how to use ABINIT on 4 *OpenMP* threads...
 First we change the input file as follows:
@@ -456,11 +455,12 @@ tgspw_04.bandpp4.4thread.abo:+Overall time at end (sec) : cpu=       4423.2  wal
 
 We again have improved ABINIT performances!
 
-*Can we do better?*
+* *Can we do better?*
 
-In principle, yes. As previously explained, we have to increase the block size for
-the LOBPCG diagonalization algorithm. Let's try it, just changing the [[bandpp]]
-value in input file:
+  In principle, yes. As previously explained, we have to increase the block size for
+  the LOBPCG diagonalization algorithm. 
+
+Let's try it, just changing the [[bandpp]] value in input file:
 
 ```diff
 - bandpp        4
@@ -496,7 +496,7 @@ You can try this with `max_ncpus=64` and `OMP_NUM_THREADS=4`...
 
     * `npband x bandpp` (size of a block) should be maximized.
        It has to divide the number of bands (`nband`)
-    * `bandpp` should be a multiple of the number of *openMP* tasks
+    * `bandpp` should be a multiple of the number of *OpenMP* tasks
     * `nband` has to be a multiple of `npband x bandpp`.
     * In any case, the ideal distribution is system dependent!
 
@@ -538,7 +538,7 @@ This means that the scalability of ABINIT is quasi-linear on the *k-point* level
 !!!important
 
     When you want to parallelize a calculation, begin by the k-point level, then
-    follow with the band level; then activate the FFT level or openMP threads.
+    follow with the band level; then activate the FFT level or OpenMP threads.
 
 Here, the timing obtained for the output `tgspw_05.abo` leads to a hypothetical
 speedup of $45.5/50.4 \times 256\approx 231$, which is good, but not 256 as expected if the scaling was
@@ -554,7 +554,7 @@ This sequential part is mainly (99%) done outside the "vtowfk level".
 Let's have a look at the time spend in the well parallelized subroutine `vtowfk`:
 
 ```bash
-grep -e '- vtowfk *[[:digit:]]' tgspw_03.abo tgspw_05.abo
+grep -e '- vtowfk *[-[:digit:]]' tgspw_03.abo tgspw_05.abo
 tgspw_03.abo:- vtowfk                      2574.132  89.4   2589.639  89.3            640                   0.99       0.99
 tgspw_03.abo:- vtowfk                      2574.132  89.4   2589.639  89.3            640                   0.99       0.99
 tgspw_05.abo:- vtowfk                     10521.057  82.3  10595.093  82.3           2560                   0.99       0.99
@@ -572,8 +572,8 @@ and only 82.3% when you parallelize.
 
 This behaviour is related to the [Amdhal's law](https://en.wikipedia.org/wiki/Amdahl%27s_law):
 
-    > The speedup of a program using multiple processes in parallel computing is
-    > limited by the time needed for the sequential fraction of the program.
+> The speedup of a program using multiple processes in parallel computing is
+> limited by the time needed for the sequential fraction of the program.
 
 For example, if a program needs 20 hours using a single processor core,
 and a particular portion of 1 hour cannot be parallelized, while the remaining
