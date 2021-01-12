@@ -159,7 +159,7 @@ timopt        -3 # Get timing information of the run in the *.abo (output) file
 #%% expected_failure = yes
 #%% [NCPU_1]
 #%% files_to_test = 
-#%%   tgspw_01.abo, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%%   tgspw_01_MPI1.abo, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% nprocs_to_test = 1
