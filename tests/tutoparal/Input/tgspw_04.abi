@@ -157,7 +157,6 @@ timopt        -3  # Get timing information of the run in the *.abo (output) file
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [files]
 #%% [NCPU_64]
 #%% files_to_test = 
 #%%   tgspw_04_MPI64.abo, tolnlines = 170, tolabs = 1.1e-3, tolrel = 1.0e-2 
