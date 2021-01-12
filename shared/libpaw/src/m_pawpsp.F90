@@ -1442,14 +1442,13 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
          MSG_ERROR(msg)
        end if
        oldformat=ex
-       if (.not.ex) then
-!        No core WF file found
-         write(msg, '(3a)' )&
-&         'Checks for existence of files corewf.abinit[.xml] or corewf.dat',ch10,&
-&         'but INQUIRE finds file does not exist!'
-         MSG_ERROR(msg)
-       end if
      end if
+   end if
+   if (.not.ex) then
+     write(msg, '(3a)' )&
+&      'Checks for existence of file psp-name.corewf[.xml][.abinit] or corewf.dat',ch10,&
+&       'but INQUIRE finds file does not exist!'
+     MSG_ERROR(msg)
    end if
  end if
 

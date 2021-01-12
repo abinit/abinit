@@ -307,13 +307,6 @@ module m_hamiltonian
    ! phkxred(2,natom)
    ! phase factors exp(2 pi k.xred) at k
 
-! ===== Complex arrays
-
-  complex(dpc), allocatable :: nucdipmom_k(:)
-   ! nucdipmom_k(npw_k*(npw_k+1)/2)
-   ! nuclear dipole moment Hamiltonian in reciprocal space, stored as
-   ! lower triangular part of Hermitian matrix
-
 ! ===== Real pointers
 
   real(dp), ABI_CONTIGUOUS pointer :: ekb(:,:,:,:) => null()
@@ -510,6 +503,12 @@ module m_hamiltonian
    ! e1kbsc(dime1kb1,dime1kb2,nspinor**2,cplex)
    ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,:,my_isppol)
 
+  real(dp), pointer :: vectornd(:,:,:,:) => null()
+   ! vectornd(n4,n5,n6,nvloc)
+   ! vector potential of nuclear magnetic dipoles
+   ! in real space, on the augmented fft grid, in direction idir 
+   ! (the ddk pert direction)
+
   real(dp), pointer :: vlocal1(:,:,:,:) => null()
    ! vlocal1(cplex*n4,n5,n6,nvloc)
    ! 1st-order local potential in real space, on the augmented fft grid
@@ -607,9 +606,6 @@ subroutine destroy_hamiltonian(Ham)
  ABI_SFREE(Ham%sij)
  ABI_SFREE(Ham%nucdipmom)
  ABI_SFREE(Ham%ph1d)
-
-! Complex arrays
- ABI_SFREE(Ham%nucdipmom_k)
 
 ! Structured datatype pointers
  if (associated(Ham%fockcommon)) nullify(Ham%fockcommon)
@@ -941,7 +937,7 @@ end subroutine init_hamiltonian
 !! SOURCE
 
 subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
-                              kg_k,kpg_k,kpt_k,nucdipmom_k,npw_k,npw_fft_k,ph3d_k,&
+                              kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
                               compute_gbound,compute_ph3d)
 
 !Arguments ------------------------------------
@@ -953,7 +949,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
  real(dp),intent(in),optional,target :: ffnl_k(:,:,:,:),kinpw_k(:),kpg_k(:,:),ph3d_k(:,:,:)
- complex(dpc),intent(in),optional :: nucdipmom_k(:)
  type(fock_ACE_type),intent(in),optional,target :: fockACE_k
 
 !Local variables-------------------------------
@@ -989,11 +984,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    ham%npw_fft_k  = npw_k
    ham%npw_fft_kp = npw_k
  end if
-
- ! k-dependend complex quantities
-  if (present(nucdipmom_k)) then
-   ham%nucdipmom_k(:) = nucdipmom_k(:)
-  end if
 
 !Pointers to k-dependent quantitites
  if (present(kinpw_k)) then
@@ -1521,6 +1511,7 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
  if (associated(rf_Ham%dkinpw_kp)) nullify(rf_Ham%dkinpw_kp)
  if (associated(rf_Ham%ddkinpw_k)) nullify(rf_Ham%ddkinpw_k)
  if (associated(rf_Ham%ddkinpw_kp)) nullify(rf_Ham%ddkinpw_kp)
+ if (associated(rf_Ham%vectornd)) nullify(rf_Ham%vectornd)
  if (associated(rf_Ham%vlocal1)) nullify(rf_Ham%vlocal1)
  if (associated(rf_Ham%e1kbfr)) nullify(rf_Ham%e1kbfr)
  if (associated(rf_Ham%e1kbsc)) nullify(rf_Ham%e1kbsc)
@@ -1703,6 +1694,8 @@ end subroutine init_rf_hamiltonian
 !!
 !! INPUTS
 !!  isppol=index of current spin
+!!  [vectornd(n4,n5,n6,nvloc)]=optional, vector potential of nuclear magnetic dipoles in real space in 
+!!   ddk direction idir
 !!  [vlocal1(cplex*n4,n5,n6,nvloc)]=optional, 1st-order local potential in real space
 !!  [with_nonlocal]=optional, true if non-local factors have to be loaded
 !!
@@ -1717,7 +1710,7 @@ end subroutine init_rf_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
+subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vectornd,vlocal1,with_nonlocal)
 
 !Arguments ------------------------------------
 !scalars
@@ -1726,6 +1719,7 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
  class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),optional,target,intent(in) :: vlocal1(:,:,:,:)
+ real(dp),optional,target,intent(in) :: vectornd(:,:,:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -1740,6 +1734,11 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
  if (present(vlocal1)) then
    ABI_CHECK(size(vlocal1)==rf_Ham%cplex*rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc,"Wrong vlocal1")
    rf_Ham%vlocal1 => vlocal1
+ end if
+
+ if (present(vectornd)) then
+   ABI_CHECK(size(vectornd)==rf_Ham%cplex*rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc,"Wrong vectornd")
+   rf_Ham%vectornd => vectornd
  end if
 
  ! Retrieve non-local factors for this spin component

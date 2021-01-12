@@ -94,47 +94,47 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
 #==================================================================================
 ############ THIRD DATASET:  Calculation of the screening (epsilon^-1 matrix)
 #==================================================================================
- optdriver3     3     # Screening calculation
- gwcalctyp3 2         
- getwfk3       -1     # Obtain WFK file from previous dataset
- ecuteps3      5.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
+optdriver3     3     # Screening calculation
+gwcalctyp3 2         
+getwfk3       -1     # Obtain WFK file from previous dataset
+ecuteps3      5.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
 
 # -- Frequencies for dielectric matrix
- nfreqre3 1
- freqremax3 10 eV
- freqremin3 0 eV
- nfreqim3   0
+nfreqre3 1
+freqremax3 10 eV
+freqremin3 0 eV
+nfreqim3   0
 
 # -- Ucrpa: screening
- ucrpa_bands3  21 25  # In principle, it is useless for ucrpa=2. It is however still necessary for technical reasons even if is redundant with dmftbandi and dmftbandf.
+ucrpa_bands3  21 25  # In principle, it is useless for ucrpa=2. It is however still necessary for technical reasons even if is redundant with dmftbandi and dmftbandf.
 
 # -- Parallelism
- gwpara3 1
+gwpara3 1
 
 #==================================================================================
 ############ FOURTH DATASET: Calculation of the effective interaction (optdriver=4 and gwcalctyp=2 and ucrpa=1)
 #==================================================================================
- optdriver4  4      # Self-Energy calculation
- gwcalctyp4  2      # activate HF or ucrpa
- getwfk4     2      # Obtain WFK file from dataset 1
- getscr4     3      # Obtain SCR file from previous dataset
- ecutsigx4   30.0   # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
+optdriver4  4      # Self-Energy calculation
+gwcalctyp4  2      # activate HF or ucrpa
+getwfk4     2      # Obtain WFK file from dataset 1
+getscr4     3      # Obtain SCR file from previous dataset
+ecutsigx4   30.0   # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
 # irdscr3     1
 # irdwfk3     1
 
 # -- Frequencies for 
- nfreqsp4    1
- freqspmax4 10 eV
- freqspmin4  0 eV
- nkptgw4      0     # number of k-point where to calculate the GW correction: all BZ
- mqgrid4 300        # Reduced but fine at least for SrVO3
- mqgriddg4 300      # Reduced but fine at least for SrVO3
+nfreqsp4    1
+freqspmax4 10 eV
+freqspmin4  0 eV
+nkptgw4      0     # number of k-point where to calculate the GW correction: all BZ
+mqgrid4 300        # Reduced but fine at least for SrVO3
+mqgriddg4 300      # Reduced but fine at least for SrVO3
 
 # -- Parallelism
- gwpara4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
+gwpara4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -146,7 +146,7 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%% files_to_test = tucrpa_2_MPI24.abo, tolnlines = 6, tolabs = 5.000e-01, tolrel = 1.100e-02
+#%% files_to_test = tucrpa_2_MPI24.abo, tolnlines = 10, tolabs = 5.000e-01, tolrel = 1.100e-02
 #%% [extra_info]
 #%% keywords = LDA, CRPA
 #%% authors = B. Amadon

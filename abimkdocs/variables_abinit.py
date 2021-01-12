@@ -2592,7 +2592,7 @@ columns corresponds respectively to (the normalisation factor has been dropped)
   * m=2, $x^{2}-y^{2}$
 
 [[dmatpawu]] must always be given as a "spin-up" occupation matrix (and
-eventually a "spin-down" matrix). Be aware that its physical meaning depends
+if needed a "spin-down" matrix). Be aware that its physical meaning depends
 on the magnetic properties imposed to the system (with [[nsppol]],
 [[nspinor]], [[nspden]]):
 
@@ -3830,7 +3830,7 @@ Variable(
     mnemonics="ENergy UNITs",
     added_in_version="before_v9",
     text=r"""
-Governs the units to be used for output of eigenvalues (and eventual phonon frequencies)
+Governs the units to be used for output of eigenvalues (and if any, phonon frequencies)
 
   * 0  --> print eigenvalues in hartree;
   * 1  --> print eigenvalues in eV;
@@ -4502,7 +4502,7 @@ algorithm, when the Fock operator is updated.
   (it continues to use the previous potential/density pairs without worrying).
   2. If [[fockoptmix]] == 1: the SCF algorithm is restarted (the previous potential/density pairs are discarded).
 
-The second-to-last (dozen) digit governs the possible modification of the XC
+The second-to-last (tens) digit governs the possible modification of the XC
 functional inside the SCF loop to take into account the lack of update of the
 Fock operator. Irrelevant when the unit digit is 0. If the value 1 is used
 (so, e.g. [[fockoptmix]] == 11), an auxiliary xc functional is used inside the
@@ -6733,7 +6733,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Mixing coefficient for the unscreened Fock operator in case of hybrid
-functionals. Hartree-Fock corresponds to 1.0, PBE0 to 0.25.
+functionals. Hartree-Fock corresponds to 1.0, PBE0 to 0.25, and B3LYP to 0.2.
 
 ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune this mixing coefficient.
 """,
@@ -6752,7 +6752,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Mixing coefficient for the screened Fock operator in case of hybrid
-functionals. HSE has 0.25, B3LYP has 0.2.
+functionals. HSE has 0.25. 
 
 ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune
 this mixing coefficient.
@@ -7292,7 +7292,7 @@ Variable(
     mnemonics="IONic MOVEs",
     added_in_version="before_v9",
     text=r"""
-Choice of algorithm to control the displacements of ions, and eventually changes of cell shape and size (see [[optcell]]).
+Choice of algorithm to control the displacements of ions, and possibly changes of cell shape and size (see [[optcell]]).
 No meaning for RF calculations.
 
   * 0 --> Do not move ions (**default behaviour**)
@@ -7650,7 +7650,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of _1WF files",
     added_in_version="before_v9",
     text=r"""
-Indicates eventual starting wavefunctions. As alternative, one can use the
+Indicates possible starting wavefunctions. As alternative, one can use the
 input variables [[getwfk]], [[getwfq]], [[get1wf]] or [[getddk]].
 
 Ground-state calculation:
@@ -7763,7 +7763,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of DDK wavefunctions, in _1WF files",
     added_in_version="before_v9",
     text=r"""
-Indicates eventual starting wavefunctions. As alternative, one can use the
+Indicates possible starting wavefunctions. As alternative, one can use the
 input variables [[getwfk]], [[getwfq]], [[get1wf]] or [[getddk]].
 
 Ground-state calculation:
@@ -7945,7 +7945,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of _WFK files",
     added_in_version="before_v9",
     text=r"""
-Indicates eventual starting wavefunctions. As alternative, one can use the
+Indicates possible starting wavefunctions. As alternative, one can use the
 input variables [[getwfk]], [[getwfq]], [[get1wf]] or [[getddk]].
 
 Ground-state calculation:
@@ -7989,7 +7989,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of the grid _WFK file on the FINE grid",
     added_in_version="before_v9",
     text=r"""
-Indicates eventual starting wavefunctions. As alternative, one can use the input variables [[getwfkfine]].
+Indicates possible starting wavefunctions. As alternative, one can use the input variables [[getwfkfine]].
 
 Ground-state calculation:
 
@@ -8028,7 +8028,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of _WFQ files",
     added_in_version="before_v9",
     text=r"""
-Indicates eventual starting wavefunctions. As alternative, one can use the
+Indicates possible starting wavefunctions. As alternative, one can use the
 input variables [[getwfk]], [[getwfq]], [[get1wf]] or [[getddk]].
 
 Ground-state calculation:
@@ -8141,8 +8141,8 @@ Other (**negative**) options:
     rho(r) and then run **iscf** = -2 for the intended set of k-points and bands.
     To prepare a run with **iscf** = -2, a density file can be produced using the
     parameter [[prtden]] (see its description). When a self-consistent set of
-    wavefunctions is already available, abinit can be used with [[nstep]] = 0 (see
-    Test_v2/t47.in), and the adequate value of [[prtden]].
+    wavefunctions is already available, abinit can be used with [[nstep]] = 0 
+    and the adequate value of [[prtden]], see tests/v2/Input/t47.abi .
 
   * -3 --> like -2, but initialize [[occ]] and [[wtk]], directly or indirectly
     (using [[ngkpt]] or [[kptrlatt]]) depending on the value of [[occopt]].
@@ -8155,7 +8155,12 @@ Other (**negative**) options:
     Note that the oscillator strength needs to be defined with respect to an origin of coordinate,
     thanks to the input variable [[boxcenter]]. The maximal number of Kohn-Sham excitations to be used
     to build the excited state TDDFT matrix can be defined by [[td_mexcit]], or indirectly
-    by the maximum Kohn-Sham excitation energy [[td_maxene]].
+    by the maximum Kohn-Sham excitation energy [[td_maxene]]. Only "LDA-like" XC kernels are implemented,
+    from native ABINIT XC functionals with specific values of [[ixc]]=[0,1,7,8,20,21,22]. In case you use a XC functional from the libxc,
+    corresponding to these values, there is no automatic translation, so that you have to specify explicitly
+    the [[ixc]] value among the above ones. As an example, if the [[ixc]] from your pseudopotentiel is -1012,
+    this corresponds to the same functional (LDA - Perdew Wang 1992) as [[ixc]]=7, and you should specify [[ixc]]=7.
+    
 """,
 ),
 
@@ -8305,8 +8310,8 @@ used for debugging). A warning is issued if this is not the case.
 Unfortunately, pseudopotential (or PAW) generators for hybrid functionals and
 mGGA are currently under development, so that one usually uses GGA or LDA
 pseudopotentials instead. The error should be limited when GGA or LDA
-pseudopotentials with semi-core states are used. Still this is a non-
-controlled error. Moreover, the choices [[ixc]] = 1, 2, 3 and 7 are fits to the
+pseudopotentials with semi-core states are used. 
+Still this is a non-controlled error. Moreover, the choices [[ixc]] = 1, 2, 3 and 7 are fits to the
 same data, from Ceperley-Alder, and are rather similar, at least for spin-unpolarized systems.
 The choice between the non-spin-polarized and spin-polarized case is governed
 by the value of [[nsppol]] (see below).
@@ -8372,11 +8377,10 @@ that it comes from the LibXC). In the case of separate exchange functional
 (let us represent its identifier by XXX) and correlation functional (let us
 represent its identified by CCC), a six-digit number will have to be specified
 for [[ixc]], by concatenation, be it XXXCCC or CCCXXX. As an example,
-[[ixc]] = -020 gives access to the Teter93 LDA, while [[ixc]] = -101130 gives
-access to the PBE GGA. In version 0.9 of LibXC (December 2008), there are 16
-three-dimensional (S)LDA functionals (1 for X, 14 for C, 1 for combined XC),
-and there are 41 three-dimensional GGA (23 for X, 8 for C, 10 for combined
-XC). Note that for a meta-GGA, the kinetic energy density is needed.
+[[ixc]] = -1012 gives the Perdew-Wang 1992 LDA ([[ixc]]=7 as well), 
+[[ixc]] = -020 gives the Teter93 LDA ([[ixc]]=1 as well), 
+while [[ixc]] = -101130 gives the PBE GGA ([[ixc]]=11 as well). 
+Note that for a meta-GGA, the kinetic energy density is needed.
 This means having [[usekden]] = 1.
 
 ==(S)LDA functionals== (do not forget to add a minus sign, as discussed above)
@@ -12570,7 +12574,7 @@ equal to 1 or 0 in each k-point (spin-polarized case). If [[nsppol]] = 2 and
 k points may optionally have different numbers of bands and different
 occupancies. [[nband]]([[nkpt]] * [[nsppol]]) is given explicitly as an array of
 [[nkpt]] * [[nsppol]] elements. [[occ]]() is given explicitly for all bands at
-each k point, and eventually for each spin -- the total number of elements is
+each k point, and possibly for each spin -- the total number of elements is
 the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 [[wtk]] ([[nkpt]]) are NOT automatically normalized under this option.
 
@@ -12677,8 +12681,8 @@ Variable(
     text=r"""
 Allows one to optimize the unit cell shape and dimensions, when [[ionmov]] >= 2 or
 3. The configuration for which the stress almost vanishes is iteratively
-determined, by using the same algorithms as for the nuclei positions. Will
-eventually modify [[acell]] and/or [[rprim]]. The ionic positions are ALWAYS
+determined, by using the same algorithms as for the nuclei positions.
+May modify [[acell]] and/or [[rprim]]. The ionic positions are ALWAYS
 updated, according to the forces. A target stress tensor might be defined, see [[strtarget]].
 
   * **optcell** = 0: modify nuclear positions, since [[ionmov]] = 2 or 3, but no cell shape and dimension optimisation.
@@ -12933,7 +12937,7 @@ this case, [[npkpt]], [[npspinor]], [[npfft]] and [[npband]] are ignored.
 Require compilation option --enable-mpi="yes".
 
 **If paral_kgb = 1**, the parallelization over bands, FFTs, and k-point/spin-
-components is activated (see [[npkpt]], [[npfft]] [[npband]] and eventually
+components is activated (see [[npkpt]], [[npfft]] [[npband]] and possibly
 [[npspinor]]). With this parallelization, the work load is split over four
 levels of parallelization (three level of parallelisation (kpt-band-fft )+
 spin) The different communications almost occur along one dimension only.
@@ -12967,7 +12971,7 @@ can be done as well with a sequential as with a parallel version of the code.
 The user can then choose the adequate number of processor on which he can run
 his job. He must put again paral_kgb = 1 in the input file and put the
 corresponding values for [[npkpt]], [[npfft]], [[npband]],[[bandpp]] and
-eventually [[npspinor]] in the input file.
+possibly [[npspinor]] in the input file.
 """,
 ),
 
@@ -16126,7 +16130,7 @@ of [[symrel]] are not used. This is to allow doing calculations with
 [[nsym]] = 1, sometimes needed for T-dependent electronic structure, still
 decreasing the number of q points in the case [[qptopt]] = 1 or [[qptopt]] = 3.
 
-  * 0 --> read directly [[qpt]], and its (eventual) renormalisation factor [[qptnrm]].
+  * 0 --> read directly [[qpt]], and its (possible) renormalisation factor [[qptnrm]].
 
   * 1 --> Take fully into account the symmetry to generate the grid of q points in the Irreducible Brillouin Zone only.
     (This is the usual mode for RF calculations)
@@ -18178,6 +18182,11 @@ routine are timed in detail.
   * If 4  -->  close to [[timopt]] = 1, except that the different parts of the lobpcg
 routine are timed in detail. A different splitting of lobpcg than for
 [[timopt]] = -3 is provided.
+  * If 10  -->  relevant only when the wavelet basis set is used (i.e. [[usewvl]] = 1).
+    When activated, a file named `wvl_timings.yaml`,
+    in [YAML format](https://en.wikipedia.org/wiki/YAML), is created.
+    It contains a time analysis of the _BigDFT_ wavelet routines.
+    See the [[tutorial:paral_gswvl|tutorial on parallelism using wavelets]]
   * If -1  -->  a full analysis of timings is delivered
   * If -2  -->  a full analysis of timings is delivered, except timing the timer
   * If -3  -->  a full analysis of timings is delivered, including the detailed

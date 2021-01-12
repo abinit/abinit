@@ -390,9 +390,9 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    dijhat_available=.true.;dijhat_prereq=.true.
 !  Dij^hat_FR: only for RF and when it was previously computed
    dijhatfr_available=(ipert>0.and.paw_ij(iatom)%has_dijfr==2) ; dijhatfr_prereq=.true.
-!  DijND: not available for RF, requires non-zero nucdipmom
+!  DijND: requires non-zero nucdipmom
    dijnd_available=.false. ; dijnd_prereq=(cplex_dij==2)
-   if (has_nucdipmom) dijnd_available=(ipert<=0.and.any(abs(nucdipmom(:,iatom))>tol8))
+   if (has_nucdipmom) dijnd_available=(any(abs(nucdipmom(:,iatom))>tol8))
 !  DijSO: not available for RF, positron; only for spin-orbit ; VHartree and Vxc needed
    dijso_available=(pawspnorb>0.and.ipert<=0.and.ipositron/=1)
    dijso_prereq=(paw_ij(iatom)%has_dijso==2.or.&
@@ -2439,21 +2439,21 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: idir,ilmn,il,im,iln,ilm,jlmn,jl,jm,jlm,jln,klmn,kln,mesh_size
- real(dp) :: intgr3
+ integer :: idir,ij_size,il,ilm,im,jl,jlm,jm,klmn,kln,lmn2_size,mesh_size
  complex(dpc) :: lms
- logical :: ndmom
 !arrays
- integer, LIBPAW_CONTIGUOUS pointer :: indlmn(:,:)
- real(dp),allocatable :: ff(:)
+ integer,pointer :: indlmn(:,:),indklmn(:,:)
+ real(dp),allocatable :: ff(:),intgr3(:)
  character(len=500) :: msg
 
 ! *************************************************************************
 
 !Useful data
+ indklmn => pawtab%indklmn
  indlmn => pawtab%indlmn
  mesh_size=pawtab%mesh_size
- LIBPAW_ALLOCATE(ff,(mesh_size))
+ ij_size=pawtab%ij_size
+ lmn2_size=pawtab%lmn2_size
 
 !Check data consistency
  if (cplex_dij/=2) then
@@ -2466,53 +2466,62 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
  end if
 
  dijnd = zero
- ndmom=(any(abs(nucdipmom)>tol8))
 
- if (ndmom) then ! only do the computation if at least one component of nuclear dipole is nonzero
+ ! only calculate if some nucdipmom component nonzero
 
-!  loop over basis state pairs for this type
-   do jlmn=1,pawtab%lmn_size
-     jl=indlmn(1,jlmn)
-     jm=indlmn(2,jlmn)
-     jlm=indlmn(4,jlmn)
-     jln=indlmn(5,jlmn)
-     do ilmn=1,pawtab%lmn_size
-       il=indlmn(1,ilmn)
-       im=indlmn(2,ilmn)
-       iln=indlmn(5,ilmn)
-       ilm=indlmn(4,ilmn)
-       klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
-       kln = pawtab%indklmn(2,klmn)
+ if ( ANY(ABS(nucdipmom) .GT. tol12 )) then
+   
+   !-------------------------------------------------------------------
+   ! Computation of (<phi_i|phi_j>-<tphi_i|tphi_j>)/r^3 radial integral
+   !-------------------------------------------------------------------
 
-  !    Computation of (<phi_i|phi_j>-<tphi_i|tphi_j>)/r^3 radial integral
+   LIBPAW_ALLOCATE(intgr3,(ij_size))
 
-       ff(2:mesh_size)=(pawtab%phiphj(2:mesh_size,kln)-&
-  &     pawtab%tphitphj(2:mesh_size,kln))/pawrad%rad(2:mesh_size)**3
-       call pawrad_deducer0(ff,mesh_size,pawrad)
-       call simp_gen(intgr3,ff,pawrad)
+   LIBPAW_ALLOCATE(ff,(mesh_size))
+   do kln=1,ij_size
+     ff(2:mesh_size)=(pawtab%phiphj(2:mesh_size,kln) - &
+&      pawtab%tphitphj(2:mesh_size,kln))/pawrad%rad(2:mesh_size)**3
+     call pawrad_deducer0(ff,mesh_size,pawrad)
+     call simp_gen(intgr3(kln),ff,pawrad)
+   end do
+   LIBPAW_DEALLOCATE(ff)
 
-       do idir = 1, 3
+   !---------------------------
+   ! accumulate matrix elements
+   !---------------------------
+   do klmn=1,lmn2_size
 
-! matrix element <S il im|L_idir|S jl jm>
-         call slxyzs(il,im,idir,jl,jm,lms)
+     ilm=indklmn(5,klmn)
+     jlm=indklmn(6,klmn)
 
-         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
-              & intgr3*dreal(lms)*nucdipmom(idir)*FineStructureConstant2
-         dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
-              & intgr3*dimag(lms)*nucdipmom(idir)*FineStructureConstant2
+     il=indlmn(1,ilm)
+     jl=indlmn(1,jlm)
+     if ( il .NE. jl ) cycle
 
-       end do
+     im=indlmn(2,ilm)
+     jm=indlmn(2,jlm)
+     kln=indklmn(2,klmn)
 
-     end do ! end loop over ilmn
-   end do ! end loop over jlmn
+     do idir = 1, 3
+       if ( ABS(nucdipmom(idir)) .LT. tol12 ) cycle
+       call slxyzs(il,im,idir,jl,jm,lms)
 
-! in case of ndij > 1, note that there is no spin-flip in this term
-! so therefore down-down = up-up, and up-down and down-up terms are still zero
-   if(ndij > 1) dijnd(:,2)=dijnd(:,1)
+       dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
+         & intgr3(kln)*dreal(lms)*nucdipmom(idir)*FineStructureConstant2
+       dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
+         & intgr3(kln)*dimag(lms)*nucdipmom(idir)*FineStructureConstant2
 
- end if ! end check for a nonzero nuclear dipole moment
+     end do ! end loop over idir
 
- LIBPAW_DEALLOCATE(ff)
+   end do ! end loop over basis states
+
+   LIBPAW_DEALLOCATE(intgr3)
+
+ end if ! end check on nonzero dipole component
+
+ ! in case of ndij > 1, note that there is no spin-flip in this term
+ ! so therefore down-down = up-up, and up-down and down-up terms are still zero
+ if(ndij > 1) dijnd(:,2)=dijnd(:,1)
 
 end subroutine pawdijnd
 !!***
