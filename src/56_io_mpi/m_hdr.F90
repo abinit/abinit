@@ -5016,11 +5016,13 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  end if
  ! CP added
  if (abs(Dtset%ne_qFD-hdr%ne_qFD)>tol6) then
-   write(msg,'(2(a,f8.2))')"File contains ", hdr%ne_qFD," electrons in the conduction bands but nelect initialized from input is ",Dtset%ne_qFD
+   write(msg,'(2(a,f8.2))')"File contains ", hdr%ne_qFD,&
+&  " electrons in the conduction bands but nelect initialized from input is ",Dtset%ne_qFD
    MSG_ERROR(msg)
  end if
  if (abs(Dtset%nh_qFD-hdr%nh_qFD)>tol6) then
-   write(msg,'(2(a,f8.2))')"File contains ", hdr%nh_qFD," electrons in the valence bands but nelect initialized from input is ",Dtset%nh_qFD
+   write(msg,'(2(a,f8.2))')"File contains ", hdr%nh_qFD,&
+&  " electrons in the valence bands but nelect initialized from input is ",Dtset%nh_qFD
    MSG_ERROR(msg)
  end if
  ! End CP added
