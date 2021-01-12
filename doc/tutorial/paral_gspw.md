@@ -15,8 +15,7 @@ You will learn how to use some keywords related to the **KGB** parallelization s
 It is possible to use ABINIT with other levels of parallelism but this is not the focus of this tutorial.
 You will learn how to speedup your calculations and how to improve their convergence rate.
 
-This tutorial should take about 1.5 hour and requires access to at most a 256
-CPU core parallel computer.
+This tutorial should take about 1.5 hour and requires access to 64 CPU core parallel computer except for the last section which requires 256 CPU cores.
 
 You are supposed to know already some basics of ABINIT.
 Some useful references: [[cite:Levitt2015]], [[cite:Bottin2008]], [[cite:Knyazev2001]]
@@ -503,6 +502,10 @@ You can try this with `max_ncpus=64` and `OMP_NUM_THREADS=4`...
 
 ## 6 The KGB parallelization
 
+!!! note
+    For this part, a cluster was used and therefore the timing for `tgspw_03.abi` is different than the previous run in the previous section.
+    **Use the same cluster to run `tgspw_03.abi` and the following run.**
+
 Up to now, we only performed a "GB" parallelization, using 2 levels (bands and/or FFT).
 If the system has more than 1 *k-point*, one can add a third level of parallelization
 and perform a full "KBG" parallelization. There is no difficulty in
@@ -522,17 +525,14 @@ MPI processes. This is done using the [[npkpt]] input variable:
 
 We need 4 times more processes than before, so run ABINIT over
 256 CPU cores (only MPI) with the `tgspw_05.abi` file.
-The timing obtained in the output file `tgspw_05.abo` is:
+The timing obtained in the output file `tgspw_05.abo` and `tgspw_03.abo` are:
 
 ```bash
-grep Proc tgspw_05.abo
-- Proc.   0 individual time (sec): cpu=        180.8  wall=        184.9
+grep Proc tgspw_03.abo tgspw_05.abo 
+tgspw_03.abo:- Proc.   0 individual time (sec): cpu=         44.2  wall=         45.5
+tgspw_05.abo:- Proc.   0 individual time (sec): cpu=         49.3  wall=         50.4
 ```
-The reference time for `tgspw_03.bandpp2.abo` was 96.4s !
-Don't be surprise ... Indeed there is a trick.
-The *k-point* in `tgspw_03.abi` is $\Gamma$ for which the wave function is real.
-Here, with 4 *k-points*  
-is quasi-identical to the one obtained for 1 *k-point* (see `tgspw_03.bandpp2.abo`).
+They are quasi-identical !
 This means that the scalability of ABINIT is quasi-linear on the *k-point* level.
 
 !!!important
@@ -540,35 +540,40 @@ This means that the scalability of ABINIT is quasi-linear on the *k-point* level
     When you want to parallelize a calculation, begin by the k-point level, then
     follow with the band level; then activate the FFT level or openMP threads.
 
-Here, the timing obtained for the output `tgspw_05.out` leads to a hypothetical
-speedup of 346, which is good, but not 432 as expected if the scaling was
-linear. Indeed, the time needed here is slightly longer (10 sec. more) than
-the one obtained in `tgspw_02.027-04.out`.
+Here, the timing obtained for the output `tgspw_05.abo` leads to a hypothetical
+speedup of $45.5/50.4 \times 256\approx 231$, which is good, but not 256 as expected if the scaling was
+linear. Indeed, the time needed here is slightly longer (5 sec. more) than
+the one obtained in `tgspw_03.abo`.
 To go further, let's compare the time spent in all the routines.
-A first clue comes from the timing done outside the "vtowfk level",
-which contains 99% of sequential processor time:
+All the input files you have used contain the input variable [[timopt]]=-3 which activates the timing of different subparts of the run. 
+You can find the results a the end of the output files before the references.
+
+A first clue to undestand this not perfect speedup comes from the sequential code which is not parallelized. 
+This sequential part is mainly (99%) done outside the "vtowfk level".
+
+Let's have a look at the time spend in the well parallelized subroutine `vtowfk`:
 
 ```bash
-grep "vtowfk   " tgspw_05.out tgspw_02.027-04.out
-tgspw_05.out:       - vtowfk   21028.382  68.3  21042.797  67.9  4320
-tgspw_05.out:       - vtowfk   21028.382  68.3  21042.797  67.9  4320
-tgspw_02.027-04.out:- vtowfk    5154.681  80.8   5155.008  78.6  1080
-tgspw_02.027-04.out:- vtowfk    5154.681  80.8   5155.008  78.6  1080
+grep -e '- vtowfk *[[:digit:]]' tgspw_03.abo tgspw_05.abo
+tgspw_03.abo:- vtowfk                      2574.132  89.4   2589.639  89.3            640                   0.99       0.99
+tgspw_03.abo:- vtowfk                      2574.132  89.4   2589.639  89.3            640                   0.99       0.99
+tgspw_05.abo:- vtowfk                     10521.057  82.3  10595.093  82.3           2560                   0.99       0.99
+tgspw_05.abo:- vtowfk                     10521.057  82.3  10595.093  82.3           2560                   0.99       0.99
 ```
 
 We see that the KGB parallelization performs really well, since the wall time
-spent within `vtowfk` is approximatively equal: $21028/432\approx 5154/108$.
+spent within `vtowfk` is approximatively equal: $10521.057/256\approx 2574.132/64\approx 40$.
 So, the speedup is quasi-linear in `vtowfk`. The problem comes from parts outside
 `vtowfk` which are not parallelized and are responsible for the negligible
-(1-99.xyz)% of time spent in sequential. These parts are no longer negligible
+(100-82.3)% of time spent in sequential. These parts are no longer negligible
 when you parallelize over hundreds of processors. The time spent in `vtowfk`
-corresponds to 84.8% of the overall time when you don't parallelize over k-points,
-and only 70.7% when you parallelize.
+corresponds to 89.4% of the overall time when you don't parallelize over k-points,
+and only 82.3% when you parallelize.
 
 This behaviour is related to the [Amdhal's law](https://en.wikipedia.org/wiki/Amdahl%27s_law):
 
-> The speedup of a program using multiple processes in parallel computing is
-  limited by the time needed for the sequential fraction of the program.
+    > The speedup of a program using multiple processes in parallel computing is
+    > limited by the time needed for the sequential fraction of the program.
 
 For example, if a program needs 20 hours using a single processor core,
 and a particular portion of 1 hour cannot be parallelized, while the remaining
