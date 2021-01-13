@@ -926,57 +926,65 @@ end subroutine initorbmag
 !!
 !! SOURCE
 
-subroutine make_pcg1(cg1,icg,mcg1,nband_k,npw_k,pcg1,us1u)
+subroutine make_pcg1(cg,cg1,cprj,cprj_k1,dtset,icg,icprj,&
+    & mcg,mcg1,mcprj,nband_k,npw_k,pawtab,pcg1)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: icg,mcg1,nband_k,npw_k
+ integer,intent(in) :: icg,icprj,mcg,mcg1,mcprj,nband_k,npw_k
+ type(dataset_type),intent(in) :: dtset
  !arrays
- real(dp),intent(in) :: cg1(2,mcg1,3)
+ real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3)
  real(dp),intent(out) :: pcg1(2,npw_k*nband_k,3)
- complex(dpc),intent(in) :: us1u(nband_k,nband_k,3)
+ type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
+ type(pawcprj_type),intent(in) :: cprj_k1(dtset%natom,nband_k,3)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
  !Local variables -------------------------
  !scalars
- integer :: iband,idir,ipw,jband
- real(dp) :: us1ur, us1ui
+ integer :: iatom,idir,ii,ilmn,jj,ipw,itypat,jlmn,klmn
+ real(dp) :: doti,dotr
+ complex(dpc) :: cpb,cpk,consite
  !arrays
- real(dp),allocatable :: cwaveir(:),cwaveii(:),cwavejr(:),cwaveji(:)
+ real(dp),allocatable :: cg1i(:,:),cgj(:,:)
 
  !----------------------------------------------------
 
- ABI_ALLOCATE(cwaveir,(npw_k))
- ABI_ALLOCATE(cwaveii,(npw_k))
- ABI_ALLOCATE(cwavejr,(npw_k))
- ABI_ALLOCATE(cwaveji,(npw_k))
+ ABI_ALLOCATE(cg1i,(2,npw_k))
+ ABI_ALLOCATE(cgj,(2,npw_k))
 
  pcg1 = zero
+
  do idir = 1, 3
-   do iband = 1, nband_k
-     cwaveir(1:npw_k) = cg1(1,icg+(iband-1)*npw_k+1:icg+iband*npw_k,idir)
-     cwaveii(1:npw_k) = cg1(2,icg+(iband-1)*npw_k+1:icg+iband*npw_k,idir)
-     do jband = 1, nband_k
-
-       us1ur = real(us1u(jband,iband,idir))
-       us1ui = aimag(us1u(jband,iband,idir))
-       cwavejr(1:npw_k) = cg1(1,icg+(jband-1)*npw_k+1:icg+jband*npw_k,idir)
-       cwaveji(1:npw_k) = cg1(2,icg+(jband-1)*npw_k+1:icg+jband*npw_k,idir)
-
-       cwaveir = cwaveir + half*(us1ur*cwavejr - us1ui*cwaveji)
-       cwaveii = cwaveii + half*(us1ur*cwaveji + us1ui*cwavejr)
-
-     end do ! end loop over jband
-
-     pcg1(1,(iband-1)*npw_k+1:iband*npw_k,idir) = cwaveir
-     pcg1(2,(iband-1)*npw_k+1:iband*npw_k,idir) = cwaveii
-
-   end do ! end loop over iband
+   do ii = 1, nband_k
+     cg1i = cg1(:,icg+(ii-1)*npw_k+1:icg+ii*npw_k,idir)
+     do jj = 1, nband_k
+       cgj = cg(:,icg+(jj-1)*npw_k+1:icg+jj*npw_k)
+       dotr=  DOT_PRODUCT(cgj(1,:),cg1i(1,:))+DOT_PRODUCT(cgj(2,:),cg1i(2,:))
+       doti= -DOT_PRODUCT(cgj(2,:),cg1i(1,:))+DOT_PRODUCT(cgj(1,:),cg1i(2,:))
+       do iatom=1,dtset%natom
+         itypat=dtset%typat(iatom)
+         do klmn=1,pawtab(itypat)%lmn2_size
+           ilmn=pawtab(itypat)%indklmn(7,klmn)
+           jlmn=pawtab(itypat)%indklmn(8,klmn)
+           cpb=cmplx(cprj(iatom,icprj+jj)%cp(1,ilmn),cprj(iatom,icprj+jj)%cp(2,ilmn),KIND=dpc)
+           cpk=cmplx(cprj_k1(iatom,ii,idir)%cp(1,jlmn),cprj_k1(iatom,ii,idir)%cp(2,jlmn),KIND=dpc)
+           consite=conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk*pawtab(itypat)%dltij(klmn)
+           dotr=dotr+real(consite)
+           doti=doti+aimag(consite)
+         end do ! end loop over klmn
+       end do ! end loop over iatom
+       do ipw = 1, npw_k
+         cg1i(1,ipw) = cg1i(1,ipw) - (cgj(1,ipw)*dotr - cgj(2,ipw)*doti)
+         cg1i(2,ipw) = cg1i(2,ipw) - (cgj(1,ipw)*doti + cgj(2,ipw)*dotr)
+       end do ! end loop over ipw
+     end do ! end loop over jj
+     pcg1(:,(ii-1)*npw_k+1:ii*npw_k,idir) = cg1i
+   end do ! end loop over ii
  end do ! end loop over idir
 
- ABI_DEALLOCATE(cwaveir)
- ABI_DEALLOCATE(cwaveii)
- ABI_DEALLOCATE(cwavejr)
- ABI_DEALLOCATE(cwaveji)
+ ABI_DEALLOCATE(cg1i)
+ ABI_DEALLOCATE(cgj)
 
 end subroutine make_pcg1
 !!***
@@ -1013,36 +1021,25 @@ end subroutine make_pcg1
 !!
 !! SOURCE
 
-subroutine make_us1u(atindx1,cprj,dtset,icprj,ikpt,isppol,mcprj,my_nspinor,nband_k,pawtab,us1u)
+subroutine make_us1u(cprj,dtset,icprj,mcprj,nband_k,pawtab,us1u)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: icprj,ikpt,isppol,mcprj,my_nspinor,nband_k
+ integer,intent(in) :: icprj,mcprj,nband_k
  type(dataset_type),intent(in) :: dtset
 
  !arrays
- integer,intent(in) :: atindx1(dtset%natom)
- complex(dpc),intent(out) :: us1u(nband_k,nband_k,3)
+ real(dp),intent(out) :: us1u(2,nband_k,nband_k,3)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
  !Local variables -------------------------
  !scalars
- integer :: iatom,iband,idir,ilmn,itypat,jband,jlmn,klmn,ncpgr
+ integer :: iatom,iband,idir,ilmn,itypat,jband,jlmn,klmn
  complex(dpc) :: consite,cpb,cpk,dcpb,dcpk
  !arrays
- integer,allocatable :: dimlmn(:),nattyp_dum(:)
- type(pawcprj_type),allocatable :: cprj_k(:,:)
 
  !----------------------------------------------------
-
- ncpgr = cprj(1,1)%ncpgr
- ABI_ALLOCATE(dimlmn,(dtset%natom))
- call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
- ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,my_nspinor*dtset%mband))
- call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
- call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
-   & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
 
  us1u=czero
  do iband = 1, nband_k
@@ -1052,22 +1049,19 @@ subroutine make_us1u(atindx1,cprj,dtset,icprj,ikpt,isppol,mcprj,my_nspinor,nband
        do klmn=1,pawtab(itypat)%lmn2_size
          ilmn=pawtab(itypat)%indklmn(7,klmn)
          jlmn=pawtab(itypat)%indklmn(8,klmn)
-         cpb=cmplx(cprj_k(iatom,iband)%cp(1,ilmn),cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc)
-         cpk=cmplx(cprj_k(iatom,jband)%cp(1,jlmn),cprj_k(iatom,jband)%cp(2,jlmn),KIND=dpc)
+         cpb=cmplx(cprj(iatom,icprj+iband)%cp(1,ilmn),cprj(iatom,icprj+iband)%cp(2,ilmn),KIND=dpc)
+         cpk=cmplx(cprj(iatom,icprj+jband)%cp(1,jlmn),cprj(iatom,icprj+jband)%cp(2,jlmn),KIND=dpc)
          do idir = 1, 3
-           dcpb=cmplx(cprj_k(iatom,iband)%dcp(1,ilmn,idir),cprj_k(iatom,iband)%dcp(2,ilmn,idir),KIND=dpc)
-           dcpk=cmplx(cprj_k(iatom,jband)%dcp(1,jlmn,idir),cprj_k(iatom,jband)%dcp(2,jlmn,idir),KIND=dpc)
+           dcpb=cmplx(cprj(iatom,icprj+iband)%dcp(1,idir,ilmn),cprj(iatom,icprj+iband)%dcp(2,idir,ilmn),KIND=dpc)
+           dcpk=cmplx(cprj(iatom,icprj+jband)%dcp(1,idir,jlmn),cprj(iatom,icprj+jband)%dcp(2,idir,jlmn),KIND=dpc)
            consite=(conjg(cpb)*dcpk+conjg(dcpb)*cpk)*pawtab(itypat)%sij(klmn)*pawtab(itypat)%dltij(klmn)
-           us1u(iband,jband,idir)=us1u(iband,jband,idir)+consite
+           us1u(1,iband,jband,idir)=us1u(1,iband,jband,idir)+real(consite)
+           us1u(2,iband,jband,idir)=us1u(2,iband,jband,idir)+aimag(consite)
          end do ! end loop over idir
        end do ! end loop over klmn
      end do ! end loop over iatom
    end do ! end loop over jband
  end do ! end loop over iband
-
- ABI_DEALLOCATE(dimlmn)
- call pawcprj_free(cprj_k)
- ABI_DATATYPE_DEALLOCATE(cprj_k)
 
 end subroutine make_us1u
 !!***
@@ -5059,6 +5053,10 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
 
+ integer :: ilmn,jlmn,klmn,itypat
+ real(dp) :: doti,dotr
+ complex(dpc) :: cpb,cpk,consite
+
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),rhodum(1),rmet(3,3)
@@ -5066,10 +5064,10 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
  real(dp),allocatable :: ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: pcg1(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
- real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
+ real(dp),allocatable :: us1u(:,:,:,:),vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
- complex(dpc),allocatable :: us1u(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cprj_k1(:,:,:)
+ type(pawcprj_type),allocatable :: cwaveprj1(:,:)
 
  !----------------------------------------------
 
@@ -5155,6 +5153,8 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
 
  ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
  call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
+ ABI_DATATYPE_ALLOCATE(cwaveprj1,(dtset%natom,1))
+ call pawcprj_alloc(cwaveprj1,ncpgr,dimlmn)
 
  ABI_DATATYPE_ALLOCATE(cprj_k1,(dtset%natom,nband_k,3))
  do adir = 1, 3
@@ -5230,15 +5230,34 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
      & compute_gbound=.TRUE.)
 
    ! Compute <u_mk|S^1|u_nk>.
-   ABI_ALLOCATE(us1u,(nband_k,nband_k,3))
-   call make_us1u(atindx1,cprj,dtset,icprj,ikpt,isppol,mcprj,my_nspinor,nband_k,pawtab,us1u)
+   ABI_ALLOCATE(us1u,(2,nband_k,nband_k,3))
+!   call make_us1u(cprj,dtset,icprj,mcprj,nband_k,pawtab,us1u)
 
    ! Compute Pcg1, the 1st order wavefunctions projected to conduction space
    ABI_ALLOCATE(pcg1,(2,nband_k*npw_k,3))
-   call make_pcg1(cg1,icg,mcg1,nband_k,npw_k,pcg1,us1u)
+!   call make_pcg1(cg1,icg,mcg1,nband_k,npw_k,pcg1,us1u)
 
-   ! compute cprj and derivs for pcg1 wavefunctions
+!   pcg1 = cg1(:,icg+1:icg+nband_k*npw_k,:)
+
+   ! compute cprj and derivs for cg1 wavefunctions
    ABI_ALLOCATE(cwavef,(2,npw_k))
+   do adir = 1, 3
+     do nn = 1, nband_k
+       cwavef = cg1(:,icg+(nn-1)*npw_k+1:icg+nn*npw_k,adir)
+       call getcprj(getcprj_choice,getcprj_cpopt,cwavef,cwaveprj,ffnl_k,&
+         & getcprj_idir,psps%indlmn,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
+         & dtset%mgfft,mpi_enreg,&
+         & dtset%natom,nattyp,ngfftf,dtset%nloalg,npw_k,my_nspinor,dtset%ntypat,&
+         & phkxred,ph1d,ph3d,ucvol,getcprj_useylm)
+       call pawcprj_put(atindx1,cwaveprj,cprj_k1(:,:,adir),dtset%natom,&
+         & nn,0,ikpt,0,isppol,nband_k,dtset%mkmem,&
+         & dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0,&
+         & mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+     end do
+   end do
+   call make_pcg1(cg,cg1,cprj,cprj_k1,dtset,icg,icprj,&
+     & mcg,mcg1,mcprj,nband_k,npw_k,pawtab,pcg1)
+   ! compute cprj and derivs for pcg1 wavefunctions
    do adir = 1, 3
      do nn = 1, nband_k
        cwavef = pcg1(:,(nn-1)*npw_k+1:nn*npw_k,adir)
@@ -5252,7 +5271,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
          & dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0,&
          & mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
      end do
-   end do
+   end do 
 
    ABI_ALLOCATE(cwaveb1,(2,npw_k))
    ABI_ALLOCATE(cwaveg1,(2,npw_k))
@@ -5273,7 +5292,28 @@ subroutine orbmag_ddk(atindx1,cg,cg1,cprj,dtset,gsqcut,mcg,mcg1,mcprj,mpi_enreg,
        gdir = modulo(adir+1,3)+1
        
        cwaveb1=pcg1(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+       call pawcprj_get(atindx1,cwaveprj1,cprj_k1(:,:,bdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+         & dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
+ 
        cwaveg1=pcg1(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+
+       dotr=DOT_PRODUCT(cwavef(1,:),cwaveb1(1,:))+&
+         & DOT_PRODUCT(cwavef(2,:),cwaveb1(2,:))
+       doti=DOT_PRODUCT(cwavef(1,:),cwaveb1(2,:))-&
+         & DOT_PRODUCT(cwavef(2,:),cwaveb1(1,:))        
+       do iatom=1,dtset%natom
+           itypat=dtset%typat(iatom)
+           do klmn=1,pawtab(itypat)%lmn2_size
+              ilmn=pawtab(itypat)%indklmn(7,klmn)
+              jlmn=pawtab(itypat)%indklmn(8,klmn)
+              cpb=cmplx(cwaveprj(iatom,1)%cp(1,ilmn),cwaveprj(iatom,1)%cp(2,ilmn),KIND=dpc)
+              cpk=cmplx(cwaveprj1(iatom,1)%cp(1,jlmn),cwaveprj1(iatom,1)%cp(2,jlmn),KIND=dpc)
+              consite=conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk*pawtab(itypat)%dltij(klmn)
+              dotr=dotr+real(consite)
+              doti=doti+aimag(consite)
+           end do
+        end do
+       write(std_out,'(a,3i4,2es16.8)')'JWZ debug ikpt nn adir <du_nkb|unk> ',ikpt,nn,adir,dotr,doti
      end do ! end loop over adir
 
    end do
