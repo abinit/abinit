@@ -554,7 +554,7 @@ This sequential part is mainly (99%) done outside the "vtowfk level".
 Let's have a look at the time spend in the well parallelized subroutine `vtowfk`:
 
 ```bash
-grep -e '- vtowfk *[-[:digit:]]' tgspw_03.abo tgspw_05.abo
+grep -e '- vtowfk *[[:digit:]]' tgspw_03.abo tgspw_05.abo
 tgspw_03.abo:- vtowfk                      2574.132  89.4   2589.639  89.3            640                   0.99       0.99
 tgspw_03.abo:- vtowfk                      2574.132  89.4   2589.639  89.3            640                   0.99       0.99
 tgspw_05.abo:- vtowfk                     10521.057  82.3  10595.093  82.3           2560                   0.99       0.99
