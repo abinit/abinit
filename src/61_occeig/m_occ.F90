@@ -389,7 +389,10 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
      do iene=1,nene
 
        ! Compute the arguments of the dos and occupation function
-       arg(:)=(enex-eigen(1:bantot))*tsmearinv
+       ! CP modified
+       ! arg(:)=(enex-eigen(1:bantot))*tsmearinv
+       arg(:)=(enex-eigen(1:number_of_bands))*tsmearinv
+       ! End CP modified
 
        !call splfit(xgrid,derfun,smdfun,0,arg,dos,(2*nptsdiv2+1),bantot)
        !call splfit(xgrid,derfun,occfun,0,arg,intdos,(2*nptsdiv2+1),bantot)
