@@ -14874,7 +14874,7 @@ step, with the name being made of
 
 If [[prtdos]] = 3, the same tetrahedron method as for [[prtdos]] = 2 is used, but
 the angular-momentum projected (l=0,1,2,3,4) DOS in sphere centered on the atoms
-is computed (not directly the total atom-cenetered DOS). The
+is computed (not directly the total atom-centered DOS). The
 preparation of this case, the parameters under which the computation is to be
 done, and the file denomination is similar to the [[prtdos]] = 2 case. However,
 three additional input variables might be provided, describing the atoms that
