@@ -18,7 +18,7 @@ subsuites = [
 "gswvl",
 "mbt",
 "dmft",
-#"moldyn",
+"moldyn",
 "string",
 "ucrpa",
 ]
@@ -38,24 +38,24 @@ inp_files = [
 "tgspw_01.abi",
 "tgspw_02.abi",    # OK
 "tgspw_03.abi",    # OK
-#"tgspw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
+"tgspw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
 #"tgspw_05.abi",
 "tmbt_1.abi",   # OK     
 "tmbt_2.abi",   # OK
 "tmbt_3.abi",   # OK
 #"tmbt_4.abi",   # OK on some machines, but not on S64 .
 #"tmbt_5.abi",  
-#"tmoldyn_01.abi",    # This is not stable. Does it use random number generators?
+#"tmoldyn_01.abi",    # Not really tested on all slaves, runs are a bit long
 #"tmoldyn_02.abi",
 #"tmoldyn_03.abi",
 #"tmoldyn_04.abi",
 #"tmoldyn_05.abi",
 #"tmoldyn_06.abi",
 #"tmoldyn_07.abi",
-"tstring_01.abi",   # MPI Error in MPI_ALLREDUCE
-#"tstring_02.abi",
-#"tstring_03.abi",
-#"tstring_04.abi",
+"tstring_01.abi",  
+"tstring_02.abi",
+"tstring_03.abi",
+#"tstring_04.abi", # Desactivate because fldiff timeout on max2
 "tucrpa_1.abi",
 "tucrpa_2.abi",
 #"tucrpa_3.abi",
