@@ -388,19 +388,8 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
      enex=enemin
      do iene=1,nene
 
-     ! CP modified
        ! Compute the arguments of the dos and occupation function
-       !arg(:)=(enex-eigen(1:bantot))*tsmearinv
-       index = 0
-       index_tot = 0
-       do ikpt=1,nkpt
-          if (occopt == 2) high_band_index=nband(ikpt+nkpt*(isppol-1))
-          do iband=low_band_index,high_band_index
-             index = index + 1
-             arg(index) = enex-eigen(iband + index_tot)
-          end do
-          index_tot = index_tot + nband(ikpt+nkpt*(isppol-1))
-       end do
+       arg(:)=(enex-eigen(1:bantot))*tsmearinv
 
        !call splfit(xgrid,derfun,smdfun,0,arg,dos,(2*nptsdiv2+1),bantot)
        !call splfit(xgrid,derfun,occfun,0,arg,intdos,(2*nptsdiv2+1),bantot)
@@ -424,6 +413,7 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
        dosdbletot=zero
        index=index_start
 
+     ! CP modified
        ! write(std_out,*)' eigen, arg, dos, intdos, doshalf, dosdble'
        !do ikpt=1,nkpt
        !  do iband=1,nband(ikpt+nkpt*(isppol-1))
@@ -445,7 +435,6 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
              dosdbletot=dosdbletot+wtk(ikpt)*maxocc*dosdble(index)*tsmearinv*0.5_dp
           end do
        end do
-
    ! End CP modified
 
        ! Print the data for this energy
