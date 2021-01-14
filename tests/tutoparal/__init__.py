@@ -45,7 +45,7 @@ inp_files = [
 "tmbt_3.abi",   # OK
 #"tmbt_4.abi",   # OK on some machines, but not on S64 .
 #"tmbt_5.abi",  
-#"tmoldyn_01.abi",    # Not really tested on all slaves, runs are a bit long
+ "tmoldyn_01.abi",    # Not really tested on all slaves, runs are a bit long. XG210114:Try again ...
 #"tmoldyn_02.abi",
 #"tmoldyn_03.abi",
 #"tmoldyn_04.abi",
@@ -55,7 +55,7 @@ inp_files = [
 "tstring_01.abi",  
 "tstring_02.abi",
 "tstring_03.abi",
-#"tstring_04.abi", # Desactivate because fldiff timeout on max2
+"tstring_04.abi", # Desactivate because fldiff timeout on max2. XG210114:Try again. Might exclude max2 ...
 "tucrpa_1.abi",
 "tucrpa_2.abi",
 #"tucrpa_3.abi",
