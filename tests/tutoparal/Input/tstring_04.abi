@@ -87,6 +87,7 @@ dynimage      0 10*1 0   # Keep first and last images fixed
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = max2_gnu_6.5_mpich
 #%% [files]
 #%% [NCPU_10]
 #%% files_to_test = 
