@@ -19,7 +19,7 @@ subsuites = [
 "mbt",
 "dmft",
 "moldyn",
-"string",
+"images",
 "ucrpa",
 ]
 
@@ -52,10 +52,10 @@ inp_files = [
 #"tmoldyn_05.abi",    # Run is too long : more than 20 minutes on 64 procs
 #"tmoldyn_06.abi",
 #"tmoldyn_07.abi",    # Run is too long : more than 20 minutes on 2 procs.
-"tstring_01.abi",  
-"tstring_02.abi",
-"tstring_03.abi",
-"tstring_04.abi", # Desactivate because fldiff timeout on max2. XG210114:Try again. Might exclude max2 ...
+"timages_01.abi",  
+"timages_02.abi",
+"timages_03.abi",
+"timages_04.abi", 
 "tucrpa_1.abi",
 "tucrpa_2.abi",
 #"tucrpa_3.abi",
