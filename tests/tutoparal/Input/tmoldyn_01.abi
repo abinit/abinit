@@ -71,7 +71,7 @@ pseudos "Al.psp8"
 #%% executable = abinit
 #%% [NCPU_2]
 #%% files_to_test = 
-#%%   tmoldyn_01_MPI2.abo, tolnlines = 0, tolabs = 0.0e-00, tolrel = 0.0e-00, fld_options= -medium;
+#%%   tmoldyn_01_MPI2.abo, tolnlines = 18, tolabs = 1.1e-7, tolrel = 3.0e-6, fld_options= -medium;
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% nprocs_to_test = 2
