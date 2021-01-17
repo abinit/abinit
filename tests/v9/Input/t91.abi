@@ -64,5 +64,5 @@ tsmear 0.003
 #%% description = 
 #%%   2 Silicon atoms, in a diamond structure.
 #%%   Test the computation of occopt 9.
-#%% topics = constrained DFT
+#%% topics = PAW 
 #%%<END TEST_INFO>
