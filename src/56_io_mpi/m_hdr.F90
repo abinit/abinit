@@ -3825,7 +3825,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
  ! CP added
  if (hdr%occopt == 9) then
-  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "hole_fermi_energy"])
+  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "hole_fermi_energy", "ne_qFD", "nh_qFD"])
   NCF_CHECK(ncerr)
   NCF_CHECK(nctk_set_atomic_units(ncid, "hole_fermi_energy")) ! CP added
   NCF_CHECK(nf90_put_var(ncid, vid("hole_fermi_energy"), hdr%fermih)) ! CP added fermih

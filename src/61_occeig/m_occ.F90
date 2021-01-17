@@ -559,6 +559,9 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  real(dp) :: entropye, entropyh ! CP added
  real(dp),allocatable :: doccdet(:),eigent(:),occt(:)
  character(len=500) :: msg
+ ! CP added
+ logical::not_enough_bands=.false.
+ ! End CP added
 
 ! *************************************************************************
 
@@ -675,6 +678,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  else if (occopt == 9) then
     call getnel(doccde,dosdeltae,eigen,entropye,fermie_hi,fermie_hi,maxocc,mband,nband,&
 & nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, ivalence+1, nband(1)) ! Excited electrons
+    fermih_hi=fermie_hi
     call getnel(doccde,dosdeltae,eigen,entropyh,fermih_hi,fermih_hi,maxocc,mband,nband,&
 & nholeshi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk,1, ivalence)
  end if
@@ -704,45 +708,44 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
  ! If the target nelect is not between nelectlo and nelecthi, exit
  if (nelect < nelectlo .or. nelect > nelecthi) then
+   not_enough_bands = .true.
    write(msg, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
     ' newocc: ',ch10,&
     '  The calling routine gives nelect= ',nelect,ch10,&
     '  The lowest bound is ',fermie_lo,', with nelect=',nelectlo,ch10,&
     '  The highest bound is ',fermie_hi,', with nelect=',nelecthi
    call wrtout(std_out, msg)
-
-   write(msg, '(11a)' )&
-    'In order to get the right number of electrons,',ch10,&
-    'it seems that the Fermi energy must be outside the range',ch10,&
-    'of eigenenergies, plus 6 or 30 times the smearing, which is strange.',ch10,&
-    'It might be that your number of bands (nband) corresponds to the strictly',ch10,&
-    'minimum number of bands to accomodate your electrons (so, OK for an insulator),',ch10,&
-    'while you are trying to describe a metal. In this case, increase nband, otherwise ...'
    MSG_BUG(msg)
  end if
 
   ! CP added special test for occopt == 9
  if( occopt==9 ) then
     if ((nelect-nh_qFD)<nholeslo .or. (nelect-nh_qFD)>nholeshi) then
+       not_enough_bands = .true.
        write(msg,'(a,a,a,d16.8,a,a,d16.8,a,d16.8,a)') 'newocc : ',ch10, &
 &      'The calling routine gives nelect-nh_qFD = ', nelect-nh_qFD, ch10, &
 &       'The lowest (highest resp.) bound for nelect-nh_qFD is ', &
 &   nholeslo, ' ( ', nholeshi, ' ).'
+       MSG_BUG(msg)
     endif
     if ((ne_qFD < nelectlo) .or. (ne_qFD > nelecthi) ) then
+       not_enough_bands = .true.
        write(msg,'(a,a,a,d16.8,a,a,d16.8,a,d16.8,a)') 'newocc : ',ch10, &
 &   'The calling routine gives ne_qFD = ', ne_qFD, ch10, 'The lowest (highest resp.) bound for ne_qFD are ',&
 &   nelectlo, ' ( ', nelecthi, ' ) .'
+       MSG_BUG(msg)
     endif
-         
-   write(msg, '(11a)' )&
-&   'In order to get the right number of carriers,',ch10,&
-&   'it seems that the Fermi energies must be outside the range',ch10,&
-&   'of eigenenergies, plus 6 or 30 times the smearing, which is strange.',ch10,&
-&   'It might be that your number of bands (nband) corresponds to the strictly',ch10,&
-&   'minimum number of bands to accomodate your electrons (so, OK for an insulator),',ch10,&
-&   'while you are trying to describe a metal. In this case, increase nband, otherwise ...'
-   MSG_BUG(msg)
+   
+   if (not_enough_bands) then    
+      write(msg, '(11a)' )&
+&      'In order to get the right number of carriers,',ch10,&
+&      'it seems that the Fermi energies must be outside the range',ch10,&
+&      'of eigenenergies, plus 6 or 30 times the smearing, which is strange.',ch10,&
+&      'It might be that your number of bands (nband) corresponds to the strictly',ch10,&
+&      'minimum number of bands to accomodate your electrons (so, OK for an insulator),',ch10,&
+&      'while you are trying to describe a metal. In this case, increase nband, otherwise ...'
+      MSG_BUG(msg)
+   end if
  end if
  ! End CP added
 
