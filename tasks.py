@@ -420,7 +420,7 @@ def submodules(ctx):
     """Update submodules."""
     with cd(ABINIT_ROOTDIR):
         # https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules
-        #ctx.run("git submodule update --remote --init")
+        ctx.run("git submodule update --remote --init")
         #ctx.run("git submodule update --remote")
         ctx.run("git submodule update --recursive --remote")
 
