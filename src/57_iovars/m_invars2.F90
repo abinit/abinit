@@ -1276,34 +1276,29 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'builtintest',tread,'INT')
  if(tread==1) dtset%builtintest=intarr(1)
 
+ ! Here we set the values of the different chk* flags depending on the value of expert_user.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'expert_user',tread,'INT')
  if(tread==1) dtset%expert_user=intarr(1)
 
- if(dtset%expert_user==0)then
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkdilatmx',tread,'INT')
-   if(tread==1) dtset%chkdilatmx=intarr(1)
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
-   if(tread==1) dtset%chkprim=intarr(1)
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
-   if(tread==1) dtset%chksymbreak=intarr(1)
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymtnons',tread,'INT')
-   if(tread==1) dtset%chksymtnons=intarr(1)
-
- else
-
+ if (dtset%expert_user > 0) then
+   ! Set all flags to zero although we still allow users to activate particular tests via explicit values.
    dtset%chkdilatmx=0
    dtset%chkprim=0
    dtset%chksymbreak=0
    dtset%chksymtnons=0
+ end if
 
- endif
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkdilatmx',tread,'INT')
+ if(tread==1) dtset%chkdilatmx=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'expert_user',tread,'INT')
- if(tread==1) dtset%expert_user=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
+ if(tread==1) dtset%chkprim=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
+ if(tread==1) dtset%chksymbreak=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymtnons',tread,'INT')
+ if(tread==1) dtset%chksymtnons=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fockoptmix',tread,'INT')
  if(tread==1) dtset%fockoptmix=intarr(1)
@@ -3236,7 +3231,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
 
    ! Test bdgw values.
-   if (dtset%optdriver == RUNL_SIGMA) then  
+   if (dtset%optdriver == RUNL_SIGMA) then
      if (any(dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) <= 0)) then
        MSG_ERROR("bdgw entries cannot be <= 0. Check input file")
      end if

@@ -1630,14 +1630,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
    expert_user=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'expert_user',tread,'INT')
-   if(tread==1) expert_user=intarr(1)
-   if(expert_user==0)then
-     chksymbreak=1
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
-     if(tread==1) chksymbreak=intarr(1)
-   else
-     chksymbreak=0
-   endif
+   if (tread==1) expert_user=intarr(1)
+
+   ! The default value of chksymbreak depends on expert_user but we still allow user to specify it.
+   chksymbreak=1; if (expert_user > 0) chksymbreak = 0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
+   if(tread==1) chksymbreak=intarr(1)
 
    ! Use the first image to predict k and/or q points, except if an intermediate image is available
    intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
