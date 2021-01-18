@@ -4186,8 +4186,8 @@ Variable(
     text=r"""
 If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]]).
 If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero).
-(In the future, the level three will always be the maximum allowed value, with all checks set to zero, while a more refined behaviour
-might be implemented for [[expert_user]]==1 or 2).
+In the future, the level three will always be the maximum allowed value, with all checks set to zero,
+while a more refined behaviour might be implemented for [[expert_user]] == 1 or 2).
 """,
 ),
 

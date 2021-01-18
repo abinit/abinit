@@ -27,9 +27,8 @@ module m_cutoff_cylinder
 
  use m_fstrings,        only : sjoin, itoa
  use m_geometry,        only : normv, metric
- use m_numeric_tools,   only : quadrature
  use m_bessel,          only : CALJY0, CALJY1, CALCK0, CALCK1
- use m_numeric_tools,   only : arth, geop, imin_loc, llsfit_svd, l2norm, OPERATOR(.x.), quadrature, isdiagmat
+ use m_numeric_tools,   only : OPERATOR(.x.), quadrature
  use m_paw_numeric,     only : paw_jbessel
 
  implicit none
@@ -47,7 +46,7 @@ module m_cutoff_cylinder
  real(dp),save :: zz_,xx_
  real(dp),save :: hcyl_,rcut_,accuracy_
 
-CONTAINS  
+CONTAINS
 !!***
 
 !----------------------------------------------------------------------

@@ -3213,7 +3213,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
 
    ! Test bdgw values.
-   if (dtset%optdriver == RUNL_SIGMA) then  
+   if (dtset%optdriver == RUNL_SIGMA) then
      if (any(dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) <= 0)) then
        ABI_ERROR("bdgw entries cannot be <= 0. Check input file")
      end if
