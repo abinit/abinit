@@ -108,6 +108,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp) :: ciflexo(3,3,3,3)
  real(dp) :: intstrn(3,3,3,ddb%natom)
+ real(dp) :: piezofr(3,ddb%natom,3,3)
  real(dp) :: lattflexo(3,3,3,3)
  real(dp) :: mixflexo(3,3,3,3)
  real(dp) :: pol1(3,3,3,ddb%natom)
@@ -224,7 +225,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
 
    if (iblok/=0.and.jblok/=0) then
      call dtmixflexo(asr,d2asr,ddb%val(:,:,kblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),crystal%gprimd,&
-   & intstrn,intstrn_only,mixflexo,ddb%mpert,ddb%natom,pol1,psinvdm,crystal%rprimd,crystal%ucvol)
+   & intstrn,intstrn_only,mixflexo,ddb%mpert,ddb%natom,piezofr,pol1,psinvdm,crystal%rprimd,crystal%ucvol)
    end if
 
  end if
@@ -297,7 +298,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
 
    if (iblok/=0.and.jblok/=0) then
      call dtlattflexo(ddb%amu,ddb%val(:,:,lblok),ddb_lw%val(:,:,jblok),ddb_lw%val(:,:,iblok),&
-   & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,prtvol,psinvdm,crystal%typat,crystal%ucvol,zeff)
+   & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,piezofr,prtvol,psinvdm,crystal%typat,crystal%ucvol,zeff)
    end if
  end if
 
@@ -452,6 +453,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !! intstrn_only= activates only the calculation of the internal strain tensor
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
+!! piezofr(3,natom,3,3)= piezoelectric force response tensor 
 !! pol1(3,3,3,natom)= tensor with the polarization induced by an atomic displacement (P^(1))
 !! rprimd(3,3)= basis vectors in the real space
 !! ucvol= unit cell volume
@@ -469,7 +471,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !!
 !! SOURCE
 
-subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_only,mixflexo,mpert,natom,pol1,psinvdm,rprimd,ucvol)
+subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_only,mixflexo,mpert,natom,piezofr,pol1,psinvdm,rprimd,ucvol)
 
 !Arguments -------------------------------
 !scalars
@@ -483,6 +485,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(out) :: intstrn(3,3,3,natom)
+ real(dp),intent(out) :: piezofr(3,natom,3,3)
  real(dp),intent(inout) :: pol1(3,3,3,natom)
  real(dp),intent(out) :: psinvdm(3*natom,3*natom)
  real(dp),intent(in) :: rprimd(3,3)
@@ -499,7 +502,6 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
  real(dp) :: redforces(3,natom),forces(3,natom)
  real(dp) :: phi1(3,natom,3,natom,3)
- real(dp) :: piezofr(3,natom,3,3)
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
  character(len=2) :: voigt(9)=(/'xx','yy','zz','yz','xz','xy','zy','zx','yx'/)
@@ -685,6 +687,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! intstrn(3,3,3,natom)= relaxed-ion internal strain tensor
 !! mpert= maximum number of ipert
 !! natom= number of atoms in unit cell
+!! piezofr(3,natom,3,3)= piezoelectric force response tensor (required to compute the Lagrange elastic tensor)
 !! prtvol= if >1 print all tensors entering the structure of lattflexo
 !! psinvdm(3*natom,3*natom) = pseudo inverse of dynamical matrix 
 !! typat(natom)= Type of each atom in the unit cell
@@ -702,7 +705,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! SOURCE
 
 subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,&
-                     & ntypat,prtvol,psinvdm,typat,ucvol,zeff)
+                     & ntypat,piezofr,prtvol,psinvdm,typat,ucvol,zeff)
 
 !Arguments -------------------------------
 !scalars
@@ -716,6 +719,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  real(dp),intent(in) :: blkvalA(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(in) :: blkvalB(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(in) :: intstrn(3,3,3,natom)
+ real(dp),intent(in) :: piezofr(3,natom,3,3)
  real(dp),intent(in) :: psinvdm(3*natom,3*natom)
  real(dp),intent(in) :: zeff(3,3,natom)
  real(dp),intent(out) :: lattflexo(3,3,3,3)
@@ -736,9 +740,10 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  real(dp) :: flexois(3,natom,3,3,3)
  real(dp) :: flexofr(3,natom,3,3,3)
  real(dp) :: hatCsupkap(3,natom,3,3,3)
+ real(dp) :: lmcelast(3,3,3,3)
  real(dp) :: phi1(3,natom,3,natom,3)
  real(dp) :: ricelast_t2(3,3,3,3)
- real(dp) :: roundbkt(3,3,3,3),roundbkt_k(3,3,3,3,natom)
+ real(dp) :: roundbkt_k(3,3,3,3,natom)
  real(dp) :: sqrbkt_t1(3,3,3,3)
  real(dp) :: stress(3,3)
  character(len=2) :: voigt(9)=(/'xx','yy','zz','yz','xz','xy','zy','zx','yx'/)
@@ -891,19 +896,21 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 !   end do
 ! end do
 
-!Now compute the rount bracketed tensor of Born and Huang 
+!Now compute the contribution to the elastic tensor due to ion relaxations  
 !and sum with the clamped ion elastic tensor to obtain the relaxed ion one
- roundbkt(:,:,:,:)=zero
+ lmcelast(:,:,:,:)=zero
  do strsd2=1,3
    do strsd1=1,3
      do qvecd=1,3
-       do iatd=1,3
-         do iat=1,natom
-           roundbkt(iatd,qvecd,strsd1,strsd2)=roundbkt(iatd,qvecd,strsd1,strsd2) + &
-         & roundbkt_k(iatd,qvecd,strsd1,strsd2,iat)*fac
+       do jatd=1,3
+         do iatd=1,3
+           do iat=1,natom
+             lmcelast(jatd,qvecd,strsd1,strsd2)=lmcelast(jatd,qvecd,strsd1,strsd2) + &
+             piezofr(iatd,iat,jatd,qvecd)*intstrn(qvecd,jatd,iatd,iat)*fac
+           end do
          end do
-         ricelast_t2(iatd,qvecd,strsd1,strsd2)=frcelast_t2(iatd,qvecd,strsd1,strsd2) + &
-       & roundbkt(iatd,qvecd,strsd1,strsd2)
+         ricelast_t2(jatd,qvecd,strsd1,strsd2)=frcelast_t2(jatd,qvecd,strsd1,strsd2) + &
+       & lmcelast(jatd,qvecd,strsd1,strsd2)
        end do
      end do
    end do
