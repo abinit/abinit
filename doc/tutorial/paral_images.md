@@ -6,18 +6,20 @@ authors: MT, GG, JB
 
 ## String method for the computation of minimum energy paths, in parallel.
 
-This tutorial aims at showing how to perform a calculation of a minimum energy
-path (MEP) using the string method.
+This tutorial aims at showing how to use the parallelism on images, by performing a calculation of a minimum energy
+path (MEP) using the string method. 
 
 You will learn how to run the string method on a parallel architecture and
 what are the main input variables that govern convergence and numerical
-efficiency of the parallelism on *images*.
+efficiency of the parallelism on *images*. Other algorithms use images, 
+e.g. path-integral molecular dynamics, hyperdynamics, linear combination of images, ... with different values of [[ionmov]].
+The parallelism on images can be used for all these algorithms.
 
 You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
 [A first introduction to ABINIT in parallel](basepar), and  [ground state with plane waves](paral_gspw).
 
 This tutorial should take about 1.5 hour and requires to have at least a 10 CPU
-cores parallel computer.
+core parallel computer.
 
 [TUTORIAL_READMEV9]
 
@@ -36,7 +38,7 @@ The algorithm presently implemented in ABINIT is the so-called *simplified strin
 It has been designed for the sampling of smooth energy landscapes.
 
 *Before continuing you might work in a different subdirectory as for the other
-tutorials. Why not work_paral_string?*
+tutorials. Why not work_paral_images?*
 
 !!! important
 
@@ -80,18 +82,18 @@ are in white, the O atom is in red and the N atom in blue).
 ![final state](paral_images_assets/Initial2.png)
 
 !!! tip
-    To obtain these images, open the `tstring_01.abi` and `tstring_02.abi` files with `agate` 
+    To obtain these images, open the `timages_01.abi` and `timages_02.abi` files with `agate` 
     or `qAgate`
 
 Before using the string method, it is necessary to optimize the initial and
-final points. The input files `tstring_01.abi` and `tstring_02.abi` contain
+final points. The input files `timages_01.abi` and `timages_02.abi` contain
 respectively two geometries close to the initial and final states of the
 system. You have first to optimize properly these initial and final
 configurations, using for instance the Broyden algorithm implemented in ABINIT.
 
-{% dialog tests/tutoparal/Input/tstring_01.in tests/tutoparal/Input/tstring_02.in %}
+{% dialog tests/tutoparal/Input/timages_01.abi tests/tutoparal/Input/timages_02.abi %}
 
-Open the `tstring_01.abi` file and look at it carefully. The unit cell is defined
+Open the `timages_01.abi` file and look at it carefully. The unit cell is defined
 at the begining. Note that the keywords [[natfix]] and [[iatfix]] are used to keep
 fixed the positions of the O and N atoms. The cell is tetragonal and its size
 is larger along x so that the periodic images of the system are separated by
@@ -108,7 +110,7 @@ Note the use of [[bandpp]] 10 to accelerate the convergence.
     [[npkpt]], [[npband]], [[npfft]], [[npspinor]] could be used wisely.
 
 Then run the calculation in sequential, first for the initial
-configuration (`tstring_01.in`), and then for the final one (`tstring_02.in`). You
+configuration (`timages_01.abi`), and then for the final one (`timages_02.abi`). You
 should obtain the following positions:
 
 1. for the initial configuration:
@@ -181,9 +183,9 @@ You can now start with the string method.
 First, for test purpose, we will not use the parallelism over images and will
 thus only perform one step of string method.
 
-{% dialog tests/tutoparal/Input/tstring_03.abi %}
+{% dialog tests/tutoparal/Input/timages_03.abi %}
 
-Open the `tstring_03.abi` file and look at it. The initial and final
+Open the `timages_03.abi` file and look at it. The initial and final
 configurations are specified at the end through the keywords [[xcart]] and
 [[nimage|xcart_lastimg]]. By default, ABINIT generates the intermediate
 images by a linear interpolation between these two configurations. In this
@@ -199,9 +201,9 @@ runs over 1 CPU core.
 
 Now you can perform the complete computation of the MEP using the parallelism over the images.
 
-{% dialog tests/tutoparal/Input/tstring_04.abi %}
+{% dialog tests/tutoparal/Input/timages_04.abi %}
 
-Open the `tstring_04.in` file. The keyword [[npimage]] has been added and set to 10, and
+Open the `timages_04.abi` file. The keyword [[npimage]] has been added and set to 10, and
 [[ntimimage]] has been increased to 50.
 This calculation has thus to be run over 10 CPU cores.
 
@@ -249,7 +251,7 @@ first coordinate of xcart  for the 8th atom in the output file).
 
 The keyword [[npimage]] can be automatically set by ABINIT if [[autoparal]] is set to 1. 
 
-Let us test this functionality. Edit again the `tstring_04.in` file and comment
+Let us test this functionality. Edit again the `timages_04.abi` file and comment
 the [[npimage]] line, then add [[autoparal]]=1. Then run the calculation again over 10 CPU cores.
 
 Open the output file and look at the [[npimage]] value ...
@@ -280,9 +282,9 @@ the path ([[nimage]]) and the convergence criterion ([[tolimg]]).
     !!! tip
         The image can be obtained with `agate` or `qagate` with the following commands
             ```
-            :open tstring_04_MPI10o_HIST.nc # 12 images calculation
+            :open timages_04_MPI10o_HIST.nc # 12 images calculation
             :plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV" hold=true
-            :open tstring_04_MPI10_22o_HIST.nc # 22 images calculation
+            :open timages_04_MPI10_22o_HIST.nc # 22 images calculation
             :plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV"
             ```
         Replace `plot` with `print` to get the `gnuplot` script.
@@ -292,7 +294,7 @@ the path ([[nimage]]) and the convergence criterion ([[tolimg]]).
     (_f_) to (_i_). It allows to visualize the MEP.
 
     !!! tip
-        Open the `tstring_04o_HIST.nc` file with `agate` or `qAgate` to produce this animation.
+        Open the `timages_04o_HIST.nc` file with `agate` or `qAgate` to produce this animation.
     
   <video id="video_string" controls autoplay loop style="width: 100%;">
   <source src="../paral_images_assets/stringvideo.mp4" type="video/mp4">
