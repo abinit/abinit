@@ -290,8 +290,11 @@ module m_dtfil
   character(len=fnlen) :: fnameabi_qps
   character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
   character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
+  character(len=fnlen) :: fnameabi_chkp_rdm       ! Checkpoint for GW@DFA to read     
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
+  character(len=fnlen) :: fnameabo_ks_den         ! KS DEN file at Sigma level
+  character(len=fnlen) :: fnameabo_chkp_rdm       ! Checkpoint for GW@DFA to write
   character(len=fnlen) :: fnameabo_dos
   character(len=fnlen) :: fnameabo_dvdb
   character(len=fnlen) :: fnameabo_eelf
@@ -764,6 +767,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabi_hes=trim(dtfil%filnam_ds(3))//'_HES'
  dtfil%fnameabi_phfrq=trim(dtfil%filnam_ds(3))//'_PHFRQ'
  dtfil%fnameabi_phvec=trim(dtfil%filnam_ds(3))//'_PHVEC'
+ dtfil%fnameabi_chkp_rdm =trim(dtfil%filnam_ds(3))//'_CHKP_RDM_'
 
 !-------------------------------------------------------------------------------------------
  ! Build name of files from dtfil%filnam_ds(4)
@@ -793,6 +797,8 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_qp_eig=trim(dtfil%filnam_ds(4))//'_QP_DB.nc' ! TODO change name
  dtfil%fnameabo_rpa=trim(dtfil%filnam_ds(4))//'_RPA'
  dtfil%fnameabo_scr=trim(dtfil%filnam_ds(4))//'_SCR'
+ dtfil%fnameabo_ks_den=trim(dtfil%filnam_ds(4))//'_KS_DEN'
+ dtfil%fnameabo_chkp_rdm=trim(dtfil%filnam_ds(4))//'_CHKP_RDM_'
  dtfil%fnameabo_sgm=trim(dtfil%filnam_ds(4))//'_SGM'
  dtfil%fnameabo_sgr=trim(dtfil%filnam_ds(4))//'_SGR'
  dtfil%fnameabo_sig=trim(dtfil%filnam_ds(4))//'_SIG'
@@ -1664,7 +1670,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      ! Legacy Files file mode.
      write(std_out, "(2a)")" DeprecationWarning: ",ch10
      write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
-     write(std_out, "(2a)")"     Use the syntax `abinit t01.abi` where t01.abi is an input with pseudopotenials.",ch10
+     write(std_out, "(2a)")"     Use the syntax `abinit t01.abi` where t01.abi is an input with pseudopotentials e.g.",ch10
      write(std_out, "(3a)")'            pseudos = "al.psp8, as.psp8"',ch10,ch10
 
      write(std_out,*,err=10,iomsg=errmsg)' Give name for formatted input file: '

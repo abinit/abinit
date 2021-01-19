@@ -74,4 +74,5 @@ AC_DEFUN([ABI_OPTIM_INIT],[
       AC_MSG_NOTICE([optimization profile overriden by user-defined FCFLAGS])
     fi
   fi
+  AC_SUBST(abi_optim_flavor)
 ]) # ABI_OPTIM_INIT

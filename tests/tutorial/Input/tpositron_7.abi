@@ -1,0 +1,126 @@
+# Input for Positron tutorial
+# Sixth step (part 2) of the tutorial on electron-positron annihilation
+# Doppler spectrum calculation within PAW - 12 valence electrons
+# Si, 2 atoms in the box
+
+# This input file is similar to tpositron_5.abi, except:
+#   - the number of bands, because of the additional 8 electrons states
+#   - the plane wave cut-off energy because additional PAW basis functions are localized
+
+#-------------------------------------------------------------------------------
+#Definition of variables specific to electron-positron calculation
+
+#TC-DFT Self-consistent cycle
+positron   -10    # We perform automatic calculation of electrons and positron densities
+                  #   in the two-component DFT context (storing wavefunctions in memory)
+                  # Automatic electron-positron loop has to be switched on in Doppler calculations
+                  #   to have both electron and positron wavefunctions in memory
+
+posnstep     2    # Maximum number of electon and positron steps = 2
+                  # We simulate a delocalized positron, so we only perform two steps
+                  #   of electon-positron calculations. It means that the electronic
+                  #   wavefunction is not affected by the positron.
+                  
+posdoppler   1    # Activation of Doppler broadening calculation
+
+ixcpositron  1    # We are using the Boronski and Nieminen parametrization
+
+posocc     1.0    # Occupation number for the positron
+                  #   (should be set <1 for bulk calculation with a small cell).
+                  # Here the zero positron density limit is used,
+                  #   so results do not depend on posocc.
+
+                  # Note about Brillouin zone sampling:
+                  # In Doppler calculation we need to have a uniform k-point grid
+                  #   in the momentum space. Symmetries are not used,
+                  #   so the full grid needs to be specified.
+                  #   so results do not depend on posocc.
+
+
+#-------------------------------------------------------------------------------
+#Definition of data common to all datasets
+
+#Definition of the unit cell
+acell 3*5.43 angstrom  # Lengths of the primitive vectors (exp. param. in angstrom)
+rprim             # 3 orthogonal primitive vectors (FCC lattice)
+  0.0 1/2 1/2 
+  1/2 0.0 1/2
+  1/2 1/2 0.0
+
+#Definition of the atom types and pseudopotentials
+ntypat 1          # There is only one type of atom
+znucl 14          # Atomic number of the possible type(s) of atom. Here silicon.
+pp_dirpath "$ABI_PSPDIR"        # Path to the directory were
+                                #   pseudopotentials for tests are stored
+pseudos "Si_paw_pw_12el.xml"    # Name and location of the pseudopotential
+                         
+#Definition of the atoms
+natom 2           # There are two atoms
+typat 1 1         # They both are of type 1, that is, Silicon
+xred              # Location of the atoms:
+  0.0 0.0 0.0     #  Triplet giving the reduced coordinates of atom 1
+  1/4 1/4 1/4     #  Triplet giving the reduced coordinates of atom 2
+
+#Definition of bands and occupation numbers
+nband 16          # Compute 16 bands (we have semicore states)
+occopt 1          # Automatic generation of occupation numbers, as a semiconductor
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 12.           # Maximal plane-wave kinetic energy cut-off, in Hartree
+pawecutdg 15.     # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
+
+                  # In Doppler broadening calculation we need to have a uniform
+                  #   k-point grid in the momentum space. Symmetries are not used,
+                  #   so the full grid needs to be specified.
+kptopt 0          # - Option for manual setting of k-points
+istwfk *1         # - No time-reversal symmetry optimization
+nkpt 8            # - Corresponds to a 2x2x2 grid, denser grids may be needed to get converged spectra
+kpt               # - K-point coordinates in reciprocal space:
+  0   0   0
+  0   0   0.5
+  0   0.5 0
+  0.5 0   0
+  0   0.5 0.5
+  0.5 0   0.5
+  0.5 0.5 0
+  0.5 0.5 0.5 
+
+#Parameters for the SCF procedure
+nstep 100         # Maximal number of SCF cycles
+tolvrs 1.0d-10    # Will stop when, twice in a row, the difference 
+                  # between two consecutive evaluations of potential residual 
+                  # differ by less than tolvrs 
+
+                  # We need additional parameters to imporve the convergency:
+nline   8         #  - increase the number of iterations of the minimization algorithm
+nnsclo  2         #  - perform 2 non-self-consistent loop per SCF cycle
+nbdbuf 16         # This is to make the test portable (don't use this usually)
+
+#Miscelaneous parameters
+prtwf 0           # Do not print wavefunctions
+prtden 1          # Print density (electronic and/or positronic)
+prteig 0          # Do not print eigenvalues
+optforces 0       # Forces computation is not relevant here
+optstress 0       # Stress tensor computation is not relevant here
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   tpositron_7.abo, tolnlines= 7, tolabs=9., tolrel= 1.0, fld_options= -easy
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = J. Wiktor
+#%% keywords = POSITRON,PAW
+#%% description =
+#%%   Input for Positron tutorial
+#%%   Sixth step (part 2) of the tutorial on electron-positron annihilation
+#%%   Doppler spectrum calculation within PAW - 12 valence electrons
+#%%   Si, 2 atoms in the box
+#%%<END TEST_INFO>

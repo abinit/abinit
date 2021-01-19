@@ -403,7 +403,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
        if(ngkpt(ii)<1)then
          write(msg,'(a,i0,3a,i0,3a)') &
          'The input variable ngkpt(',ii,') must be strictly positive,',ch10,&
-         'while it is found to be',ngkpt(ii),'.',ch10,&
+         'while it is found to be ',ngkpt(ii),'.',ch10,&
          'Action: change it in your input file, or change kptopt.'
          MSG_ERROR(msg)
        end if

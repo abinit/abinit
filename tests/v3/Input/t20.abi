@@ -1,0 +1,132 @@
+# Hydrogen diatomic molecule
+# in the antiferromagnetic case
+# Distances are 4 bohr for dataset 1-3, and 6 bohr for dataset 4-6
+# In the latter case, there is a magnetic translation.
+
+ ndtset 6
+
+#Dataset 1 : no Shubnikov symmetry
+ nsppol1   2          spinmagntarget1 0.0d0
+ xcart1    -2 0 0   2 0 0
+ nsym1     8
+ symrel1   1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+           1  0  0   0 -1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+           1  0  0   0  0  1   0  1  0       1  0  0   0  0  1   0 -1  0
+           1  0  0   0  0 -1   0 -1  0       1  0  0   0  0 -1   0  1  0
+
+#Dataset 2 : explicit Shubnikov symmetry
+ nsppol2   1
+ xcart2    -2 0 0   2 0 0
+ nsym2     16
+ symrel2   1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+           1  0  0   0 -1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+           1  0  0   0  0  1   0  1  0       1  0  0   0  0  1   0 -1  0
+           1  0  0   0  0 -1   0 -1  0       1  0  0   0  0 -1   0  1  0
+          -1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
+          -1  0  0   0 -1  0   0  0 -1      -1  0  0   0 -1  0   0  0  1
+          -1  0  0   0  0  1   0  1  0      -1  0  0   0  0  1   0 -1  0
+          -1  0  0   0  0 -1   0 -1  0      -1  0  0   0  0 -1   0  1  0
+ symafm2   8*1  8*-1
+
+#Dataset 3 : automatic determination of Shubnikov symmetry
+ nsppol3   1
+ xcart3    -2 0 0   2 0 0
+
+#Dataset 4 : no Shubnikov symmetry
+ nsppol4   2          spinmagntarget4 0.0d0
+ xcart4    -3 0 0   3 0 0
+ chkprim4  0
+ nsym4     16
+ symrel4   1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+           1  0  0   0 -1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+           1  0  0   0  0  1   0  1  0       1  0  0   0  0  1   0 -1  0
+           1  0  0   0  0 -1   0 -1  0       1  0  0   0  0 -1   0  1  0
+          -1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
+          -1  0  0   0 -1  0   0  0 -1      -1  0  0   0 -1  0   0  0  1
+          -1  0  0   0  0  1   0  1  0      -1  0  0   0  0  1   0 -1  0
+          -1  0  0   0  0 -1   0 -1  0      -1  0  0   0  0 -1   0  1  0
+ tnons4    24*0.0d0
+           0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0
+
+#Dataset 5 : explicit Shubnikov symmetry
+ nsppol5   1
+ xcart5    -3 0 0   3 0 0
+ chkprim5  0
+ nsym5     32
+ symrel5   1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+           1  0  0   0 -1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+           1  0  0   0  0  1   0  1  0       1  0  0   0  0  1   0 -1  0
+           1  0  0   0  0 -1   0 -1  0       1  0  0   0  0 -1   0  1  0
+          -1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
+          -1  0  0   0 -1  0   0  0 -1      -1  0  0   0 -1  0   0  0  1
+          -1  0  0   0  0  1   0  1  0      -1  0  0   0  0  1   0 -1  0
+          -1  0  0   0  0 -1   0 -1  0      -1  0  0   0  0 -1   0  1  0
+           1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+           1  0  0   0 -1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+           1  0  0   0  0  1   0  1  0       1  0  0   0  0  1   0 -1  0
+           1  0  0   0  0 -1   0 -1  0       1  0  0   0  0 -1   0  1  0
+          -1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
+          -1  0  0   0 -1  0   0  0 -1      -1  0  0   0 -1  0   0  0  1
+          -1  0  0   0  0  1   0  1  0      -1  0  0   0  0  1   0 -1  0
+          -1  0  0   0  0 -1   0 -1  0      -1  0  0   0  0 -1   0  1  0
+ tnons5    48*0.0d0
+           0.5d0 0.0d0 0.0d0     0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0     0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0     0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0     0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0     0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0     0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0     0.5d0 0.0d0 0.0d0
+           0.5d0 0.0d0 0.0d0     0.5d0 0.0d0 0.0d0
+ symafm5   8*1  16*-1  8*1
+
+#Dataset 6 : automatic determination of Shubnikov symmetry
+ nsppol6   1
+ xcart6    -3 0 0   3 0 0
+ chkprim6  0
+
+
+#Common data
+ acell 12 10 10
+ diemac 1.0d0   diemix 0.5d0
+ ecut 4.5
+  kptopt 0
+ kpt   3*0.0
+ natom  2
+ nband 1
+ nkpt 1
+ nspden 2
+ nstep 30
+ ntypat  1
+ spinat 0 0 1   0 0 -1
+ tolvrs 1.0d-8
+ typat  2*1
+ wtk  1
+ znucl  1.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t20.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%     H diatomic molecule in the antiferromagnetic regime. 
+#%%     Different data sets.
+#%%     Test Shubnikov symmetries.
+#%%<END TEST_INFO>

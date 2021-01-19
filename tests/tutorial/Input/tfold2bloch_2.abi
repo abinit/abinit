@@ -1,0 +1,22 @@
+tfold2bloch_1o_DS2_WFK # WFK file
+1 2 3                  # x y z integers giving the multiplicity 
+                       # in the corresponding directions used when constructing the supercell
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = fold2Bloch
+#%% test_chain = tfold2bloch_1.abi, tfold2bloch_2.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tfold2bloch.f2b, tolnlines=100, tolabs=0.1, tolrel=0.2;
+######%%   tfold2bloch_2.out, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = O. Rubel
+#%% keywords = FOLD2BLOCH
+#%% description = 
+#%%   H6 Supercell
+#%%   Generates a 6 atom Hydrogen supercell with the multiplicity of 1:2:3 (x:y:z)
+#%%   Produce WFK file to be analyzed with fold2bloch
+#%%<END TEST_INFO>

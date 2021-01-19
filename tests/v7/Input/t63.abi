@@ -1,0 +1,66 @@
+# ================================================================
+# Fe bcc structure (ferromagnetic metal)
+#
+# Test for Abinit: PAW spin-polarized + GGA
+#                  Shape function for compensation charge Bessel
+#                                 analytical and numerical
+# Low cut-off for test
+# ================================================================
+
+# Datasets
+   ndtset 2
+   typat1 1  ! PAW dataset with numerical shape function
+   typat2 2  ! PAW dataset with numerical shape function XML PAW data
+  ntypat  2
+
+# Unit cell
+  acell   3*5.42
+  rprim   -0.5  0.5  0.5
+           0.5 -0.5  0.5
+           0.5  0.5 -0.5
+  natom   1
+   xred   0.0  0.0  0.0
+  znucl   2*26
+  nband   14
+  nsppol  2
+  spinat  0. 0. 4.
+
+# K-points and symmmetries
+ kptopt   1
+  ngkpt   6 6 6
+nshiftk   1
+ shiftk   0.5 0.5 0.5
+ occopt   7
+ tsmear   0.008
+
+# Self-consistent cycle
+ toldfe   1.0d-10
+  nstep   30
+
+# Basis sets
+   ecut   8.
+pawecutdg 10.
+
+# Miscelaneous
+   prtwf1 1 getwfk2 1
+   prtwf2 0
+   prtden 0
+   prteig 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.num.paw, Fe-paw-abinit.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t63.abo, tolnlines =11, tolabs = 2.50e-07, tolrel = 4.0e-02
+#%% [paral_info]
+#%% max_nprocs = 28
+#%% [extra_info]
+#%% authors = F. Jollet
+#%% keywords = PAW
+#%% description = Fe bcc structure (ferromagnetic metal), with numerical shape function with and without PAW XML data.
+#%%<END TEST_INFO>

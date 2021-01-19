@@ -19,13 +19,14 @@ It should take about 1 hour.
 For the theory related to the temperature-dependent calculations, please read
 the following papers: [[cite:Ponce2015]], [[cite:Ponce2014]] and [[cite:Ponce2014a]].
 
-There are two ways to compute the temperature dependence with Abinit:
+There are three ways to compute the temperature dependence with Abinit:
 
-  * **Using Anaddb**: historically the first implementation. This option does not require Netcdf.
+  * **Using Anaddb**: historically the first implementation.
 
-  * **Using post-processing python scripts**: this is the recommended approach as it provides more options
-    and is more efficient (less disk space, less memory demanding). This option
-    **requires Netcdf** (both in Abinit and python). In this tutorial, we only focus on the netCDF-based approach.
+  * **Using post-processing python scripts**: This way provides more options and is more efficient (less disk space, less memory demanding). 
+    This option **requires Netcdf** (both in Abinit and python). In this tutorial, we only focus on this approach.
+
+  * **Using an interpolation of the perturbed potential**: This new way is covered in the [ZPR and T-dependent band structures](eph4zpr) tutorial.  
 
 !!! important
 
@@ -44,31 +45,6 @@ There are two ways to compute the temperature dependence with Abinit:
         pip install scipy
         pip install netcdf4
 
-
-    Abinit must be configured with: `configure --with-config-file=myconf.ac`
-    where the configuration file must contain at least:
-
-        with_trio_flavor="netcdf+other-options"
-
-        # To link against an external libs, use
-        #with_netcdf_incs="-I${HOME}/local/include"
-
-        # if (netcdf4 + hdf5):
-        #with_netcdf_libs="-L/usr/local/lib -lnetcdff -lnetcdf -L${HOME}/local/lib -lhdf5_hl -lhdf5"
-        # else if netcdf3:
-        #with_netcdf_libs="-L${HOME}/local/lib/ -lnetcdff -lnetcdf"
-
-    For example, with MPI you might use the following basic myconf.ac file
-
-        with_trio_flavor="netcdf"
-
-        with_mpi_prefix='/home/XXXXX/local/openmpi1.10/'
-        enable_mpi="yes"
-        enable_mpi_io="yes"
-        enable_openmp="no"
-
-        prefix='/home/XXXX/abinit/build/'
-
     A list of configuration files for clusters is available in the
     [abiconfig repository](https://github.com/abinit/abiconfig)
 
@@ -79,15 +55,16 @@ There are two ways to compute the temperature dependence with Abinit:
     to get the list of libraries/options activated in the build.
     You should see netcdf in the `TRIO flavor` section:
 
-         === Connectors / Fallbacks ===
-          Connectors on : yes
-          Fallbacks on  : yes
-          DFT flavor    : libxc-fallback
-          FFT flavor    : none
-          LINALG flavor : netlib-fallback
-          MATH flavor   : none
-          TIMER flavor  : abinit
-          TRIO flavor   : netcdf
+         === Connectors / Fallbacks === 
+          LINALG flavor  : netlib
+          FFT flavor     : goedecker
+          HDF5           : yes
+          NetCDF         : yes
+          NetCDF Fortran : yes
+          LibXC          : yes
+          Wannier90      : no
+
+[TUTORIAL_READMEV9]
 
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
@@ -103,8 +80,8 @@ The prefix for files is **tdepes**. As usual, we use the shorthand `~abinit` to 
 the root directory where the abinit package has been deployed, but most often
 consider the paths relative to this directory.
 
-First, examine the [[tests/tutorespfn/Input/tdepes_1.in]] input file.
-{% dialog tests/tutorespfn/Input/tdepes_1.in %}
+First, examine the [[tests/tutorespfn/Input/tdepes_1.abi]] input file.
+{% dialog tests/tutorespfn/Input/tdepes_1.abi %}
 
 Note that there are three datasets ([[ndtset]]=3). The first dataset corresponds to a standard
 self-consistent calculation, with an unshifted eight k-point grid,
@@ -122,10 +99,6 @@ This induces the creation of the Derivative DataBase file tdepes_1o_DS3_DDB.
 The electron-phonon matrix elements are produced because of [[ieig2rf]]3=5 ,
 this option generating the needed netCDF files tdepes_1o_DS3_EIGR2D.nc and tdepes_1o_DS3_GKK.nc .
 
-We will use [[tests/tutorespfn/Input/tdepes_1.files]], with minor modifications -see below-, to execute abinit.
-
-{% dialog tests/tutorespfn/Input/tdepes_1.files %}
-
 In order to run abinit, we suggest that you create a working directory, why not call it `Work`,
 as subdirectory of ~abinit/tests/tutorespfn/Input, then
 copy/modify the relevant files. Explicitly:
@@ -133,26 +106,15 @@ copy/modify the relevant files. Explicitly:
     cd ~abinit/tests/tutorespfn/Input
     mkdir Work
     cd Work
-    cp ../tdepes*in ../tdepes*files .
+    cp ../tdepes*in .
 
-Then, edit the [[tests/tutorespfn/Input/tdepes_1.files]] to modify location of the pseudopotential file
-(from the Work subdirectory, the location is ../../../Psps_for_tests/PseudosTM_pwteter/6c.pspnc, although you might as well copy the
-file 6c.pspnc in the Work directory, in which case the location is simply 6c.pspnc).
 Finally, issue
 
-    abinit < tdepes_1.files > tdepes_1.stdout
+    abinit tdepes_1.abi 
 
-(where `abinit` might have to be replaced by the proper location of the abinit executable, or by ./abinit if you have
-copied abinit in the Work directory).
-
-<!--
-### If Abinit is compiled with Netcdf...
--->
-
-If you have compiled the code with Netcdf, the calculation will produce
-several _EIG.nc,
-_DDB, EIGR2D.nc and EIGI2D.nc files, that contain respectively the eigenvalues (GS or
-perturbed), the second-order derivative of the total energy with respect to
+The calculation will produce several _EIG.nc, _DDB, EIGR2D.nc and EIGI2D.nc files, 
+that contain respectively the eigenvalues (GS or perturbed), 
+the second-order derivative of the total energy with respect to
 two atomic displacements, the electron-phonon matrix elements used to compute
 the renormalization of the eigenenergies and the electron-phonon matrix
 elements used to compute the lifetime of the electronic states.
@@ -176,7 +138,7 @@ into the directory where you did the calculations.
 
 You can then simply run the python script with the following command:
 
-    ./temperature_final.py
+    python temperature_final.py
 
 and enter the information asked by the script, typically the following
 (data contained in ~abinit/tests/tutorespfn/Input/tdepes_1_temperature.in):
@@ -199,13 +161,13 @@ tdepes_1o_DS1_EIG.nc       # Name of the unperturbed EIG.nc file with Eigenvalue
 
 Alternatively, copy this example file in the Work directory if not yet done, and then run
 
-    ./temperature_final.py < tdepes_1_temperature.in
+    python temperature_final.py < tdepes_1_temperature.in
 
 {% dialog tests/tutorespfn/Input/tdepes_1_temperature.in %}
 
 !!! warning
 
-    Remember to use py2.7 and install the libraries required by the script before running.
+    Remember to install the libraries required by the script before running.
 
     For pip, use:
 
@@ -221,18 +183,18 @@ Alternatively, copy this example file in the Work directory if not yet done, and
 You should see on the screen an output similar to:
 
 ```shell
-Start on 15/3/2018 at 13h29
+Start on 21/12/2020 at 15h21 
 
-    ____  ____       _                                      _
-   |  _ \|  _ \     | |_ ___ _ __ ___  _ __   ___ _ __ __ _| |_ _   _ _ __ ___
-   | |_) | |_) |____| __/ _ \ '_ ` _ \| '_ \ / _ \ '__/ _` | __| | | | '__/ _ \
-   |  __/|  __/_____| ||  __/ | | | | | |_) |  __/ | | (_| | |_| |_| | | |  __/
-   |_|   |_|         \__\___|_| |_| |_| .__/ \___|_|  \__,_|\__|\__,_|_|  \___|
-                                      |_|                              Version 1.3
-
-This script compute the static/dynamic zero-point motion
+    ____  ____       _                                      _                   
+   |  _ \|  _ \     | |_ ___ _ __ ___  _ __   ___ _ __ __ _| |_ _   _ _ __ ___  
+   | |_) | |_) |____| __/ _ \ '_ ` _ \| '_ \ / _ \ '__/ _` | __| | | | '__/ _ \ 
+   |  __/|  __/_____| ||  __/ | | | | | |_) |  __/ | | (_| | |_| |_| | | |  __/ 
+   |_|   |_|         \__\___|_| |_| |_| .__/ \___|_|  \__,_|\__|\__,_|_|  \___| 
+                                      |_|                              Version 1.5         
+  
+This script compute the static/dynamic zero-point motion 
   and the temperature dependence of eigenenergies due to electron-phonon interaction.
-  The electronic lifetime can also be computed.
+  The electronic lifetime can also be computed. 
 
   WARNING: The first Q-point MUST be the Gamma point.
 
@@ -245,7 +207,7 @@ Define the type of calculation you want to perform. Type:
 Enter name of the output file
 Enter value of the smearing parameter for AHC (in eV)
 Enter value of the Gaussian broadening for the Eliashberg function and PDOS (in eV)
-Enter the energy range for the PDOS and Eliashberg calculations (in eV): [e.g. 0 0.5]
+Enter the energy range for the PDOS and Eliashberg calculations (in eV): [e.g. 0 0.5] 
 Introduce the min temperature, the max temperature and the temperature steps. e.g. 0 200 50 for (0,50,100,150)
 Enter the number of Q-points you have
 Enter the name of the 0 DDB file
@@ -253,10 +215,12 @@ Enter the name of the 0 eigq file
 Enter the name of the 0 EIGR2D file
 Enter the name of the 0 GKK file
 Enter the name of the unperturbed EIG.nc file at Gamma
-Q-point:  0  with wtq = 1.0  and reduced coord. [ 0.  0.  0.]
+Inside the dynamic_zpm_temp def
+Q-point:  0  with wtq = 1.0  and reduced coord. [0. 0. 0.]
+WARNING: An eigenvalue is negative with value:  -2.8630004909173537e-10  ... but proceed with value 0.0
 Now compute active space ...
 Now compute generalized g2F Eliashberg electron-phonon spectral function ...
-End on 15/3/2018 at 13 h 29
+End on 21/12/2020 at 15 h 21 
 Runtime: 0 seconds (or 0.0 minutes)
 ```
 
@@ -278,30 +242,18 @@ The python code has generated the following files:
   at each k-point for each band. It also contains the evolution of each band with temperature at k=$\Gamma$.
 -->
 
-We can for example visualize the temperature dependence at k=$\Gamma$  of the HOMO bands
-(`Band: 3` section in the **temperature_1.txt** file, that you can examine)
+We can for example visualize the temperature dependence at k=$\Gamma$  of the LUMO bands
+(`Band: 4` section in the **temperature_1.txt** file, that you can examine)
 with the contribution of only q=$\Gamma$.
 
-<!--
 ![](tdepes_assets/plot1.png)
 
-Here you can see that the HOMO correction goes down with temperature. This is
-due to the use of underconvergence parameters. If you increase [[ecut]] from
-5 to 10, you get the following plot.
--->
-
-![](tdepes_assets/plot2.png)
-
-The HOMO eigenenergies correction goes up with temperature... You can
-also plot the LUMO corrections and see that they go down. The
-ZPR correction as well as their temperature dependence usually closes the gap
+As you can see, the LUMO correction goes down with temperature. 
+If the calculations were converged, the HOMO eigenenergies correction should go up with temperature. 
+In general, the ZPR correction as well as their temperature dependence usually closes the gap
 of semiconductors.
 
 As usual, checking whether the input parameters give converged values is of course important.
-The run used [[ecut]]=10. With the severely underestimated [[ecut]]=5, the HOMO correction goes down with temperature.
-
-
-
 
 
 <!--   OBSOLETE
@@ -311,17 +263,15 @@ The run used [[ecut]]=10. With the severely underestimated [[ecut]]=5, the HOMO 
 In this case, we should first use [[help:mrgddb|mrgddb]] to merge the _DDB and _EIGR2D/_EIGI2D
 but since we only have one q-point we do not have to perform this step.
 The static temperature dependence and the G2F can be computed thanks to anaddb
-with the files file [[tests/tutorespfn/Input/tdepes_2.files]] and the input
-file [[tests/tutorespfn/Input/tdepes_2.in]].
-
-{% dialog tests/tutorespfn/Input/tdepes_2.files %}
+with the files file tdepes_2.files and the input
+file [[tests/tutorespfn/Input/tdepes_2.abi]].
 
 The information contained in the files file can be understood by looking at the echo
 if its reading in the standard output:
 
 ```
   Give name for formatted input file:
--   tdepes_2.in
+-   tdepes_2.abi
   Give name for formatted output file:
 -   tdepes_2.out
   Give name for input derivative database:
@@ -336,14 +286,14 @@ if its reading in the standard output:
 -   dummy.ddk
 ```
 
-{% dialog tests/tutorespfn/Input/tdepes_2.in %}
+{% dialog tests/tutorespfn/Input/tdepes_2.abi %}
 
 As concern the anaddb input file, note that the electron-phonon analysis is triggered by
 [[anaddb:thmflag]] 3, as well as [[anaddb:telphint]] 1 .
 
 Launch anaddb by the command
 
-    anaddb < tdepes_2.files > tdepes_2.stdout
+    anaddb tdepes_2.abi 
 
 (where `anaddb` might have to be replaced by the proper location of the anaddb executable).
 
@@ -352,9 +302,6 @@ The run will generate 3 files:
 **tdepes_2.out_ep_G2F**
 :  This g2F spectral function represents the contribution of the phononic modes of energy E
    to the change of electronic eigenenergies according to the equation
-
-![](tdepes_assets/Eq1.png)
-
 
 **tdepes_2.out_ep_PDS**
 :  This file contains the phonon density of states
@@ -371,9 +318,6 @@ END OF OBSOLETE
 
 
 
-
-
-
 ## 2 Converging the calculation with respect to the grid of phonon wavevectors
 
 Convergence studies with respect to most of the parameters will rely on obvious modifications
@@ -386,7 +330,7 @@ From now on we will only describe the approach with Abinit **compiled with Netcd
 The approach with Anaddb is similar to what we described in the previous sections.
 Note, however, that Anaddb only supports integration with homogenous q-point grids.
 -->
-The netCDF version can perform the q-wavevector integration either with random q-points or
+The code can perform the q-wavevector integration either with random q-points or
 homogenous Monkhorst-Pack meshes.
 Both grids have been used in the Ref. [[cite:Ponce2014]], see e.g. Fig. 3 of this paper.
 
@@ -396,10 +340,10 @@ calculations at these points, gather the results and analyze them.
 The temperature_final.py script will detect that you used random
 integration thanks to the weight of the q-point stored in the _EIGR2D.nc file
 and perform the integration accordingly.
-The random integration converges slowly but in a consistent manner.
+The random integration converges slowly but in a smooth manner.
 
 However, since this method is a little bit less user-friendly than the one based on homogeneous grids,
-we will focus on this homogenous integration. Even simpler, it is not trivial.
+we will focus on this homogenous integration. 
 In this case, the user must specify in the ABINIT input file the homogeneous q-point grid,
 using input variables like
 [[ngqpt]], [[qptopt]], [[shiftq]], [[nshiftq]], ..., i.e. variables whose names
@@ -432,8 +376,8 @@ Suppose that one is looking for the number of q-points corresponding to
     nshiftq 1
     shiftq 0.0 0.0 0.0
 
-One make a quick ABINIT run with [[tests/tutorespfn/Input/tdepes_2.in]].
-Note that several input variables have been changed with respect to [[tests/tutorespfn/Input/tdepes_1.in]]:
+One make a quick ABINIT run with [[tests/tutorespfn/Input/tdepes_2.abi]].
+Note that several input variables have been changed with respect to [[tests/tutorespfn/Input/tdepes_1.abi]]:
 
     ndtset 1
     nstep 0
@@ -450,9 +394,9 @@ Then, the k-point grid is
 specified thanks to [[ngkpt]], [[nshiftk]], [[shiftk]], replacing the corresponding input variables for the q-point
 grid. The use of symmetries has been reenabled thanks to [[nsym]]=0.
 
-After possibly modifying [[tests/tutorespfn/Input/tdepes_2.files]] to account for the location of the pseudopotential file, as above, issue:
+To run it, issue:
 
-    abinit < tdepes_2.files > tdepes_2.stdout
+    abinit  tdepes_2.abi  
 
 Now, the number of points can be seen in the output file :
 
@@ -486,9 +430,9 @@ So, compared to the first run in this tutorial, we have to replace
 
     ndtset 3     by      ndtset 24 udtset 8 3
 
-in the input file [[tests/tutorespfn/Input/tdepes_3.in]], and adjusted accordingly all input variables that were dataset-dependent.
+in the input file [[tests/tutorespfn/Input/tdepes_3.abi]], and adjusted accordingly all input variables that were dataset-dependent.
 
-{% dialog tests/tutorespfn/Input/tdepes_3.in %}
+{% dialog tests/tutorespfn/Input/tdepes_3.abi %}
 
 Please, refer to the
 [[help:abinit#35-defining-a-double-loop-dataset|explanation of the usage of a double-loop of datasets]]
@@ -511,36 +455,31 @@ that translates into
 
 allowing to perform calculations for three datasets at each q-point.
 
-After possibly modifying [[tests/tutorespfn/Input/tdepes_3.files]] to account for the location of the pseudopotential file, as above, issue:
+Then issue:
 
-    abinit < tdepes_3.files > tdepes_3.stdout
+    abinit tdepes_3.abi
 
-This is a significantly longer ABINIT run (still less than one minute), also producing many files.
+This is a significantly longer ABINIT run (still less than two minutes), also producing many files.
 
 When the run is finished, copy the file [[tests/tutorespfn/Input/tdepes_3_temperature.in]] in the
 working directory (if not yet done) and launch the python script with:
 
     ./temperature_final.py < tdepes_3_temperature.in
 
-{% dialog tests/tutorespfn/Input/tdepes_3.files %}
+{% dialog tests/tutorespfn/Input/tdepes_3_temperature.in %}
 
-Examination of the same HOMO band at k=$\Gamma$ for a 4x4x4 q-point grid gives a very different result
-than previously. Indeed, for the ZPR, one finds (in eV)
+Examination of the same HOMO and LUMO bands at k=$\Gamma$ for a 4x4x4 q-point grid gives a very different result
+than previously. 
+The zero-point renormalization (ZPR) is the change of the bandgap at 0 K and was (band 4 - band 3):
+   
+    -0.012507 - 0.017727 = -0.030234 eV
 
-    Band: 3
-    0.0 0.154686616316
+and is now:
 
-instead of
+    -0.351528 - 0.095900 = -0.447428 eV
 
-    Band: 3
-    0.0 0.0464876236664
-
-that, is, the ZPR is now about three times larger, and similary for the temperature dependence.
-
-
-<!--
-![](tdepes_assets/plot3.png)
--->
+This means that the bandgap was closing by 30 meV at 0 K and is now closing by 447 meV at 0 K. 
+For comparison, the converged direct bandgap ZPR of diamond is 438.6 meV from Ref. [[cite:Ponce2015]].
 
 As a matter of fact, diamond requires an extremely dense q-point grid (40x40x40) to be converged.
 On the bright side, each q-point calculation is independent and thus the parallel scaling is ideal.
@@ -553,38 +492,33 @@ coupling along high-symmetry lines requires the use of 6 datasets per q-point.
 Moreover, the choice of an arbitrary k-wavevector breaks all symmetries of the crystal.
 Different datasets are required to compute the following quantites:
 
-$\Psi^{(0)}_{kHom}$
-:       The ground-state wavefunctions on the Homogeneous k-point sampling.
+$\Psi^{(0)}_{kHom}$ : The ground-state wavefunctions on the Homogeneous k-point sampling.
 
-$\Psi^{(0)}_{kBS}$
-:       The ground-state wavefunctions computed along the bandstructure k-point sampling.
+$\Psi^{(0)}_{kBS}$ : The ground-state wavefunctions computed along the bandstructure k-point sampling.
 
-$\Psi^{(0)}_{kHom+q}$
-:       The ground-state wavefunctions on the shifted Homogeneous k+q-point sampling.
+$\Psi^{(0)}_{kHom+q}$ : The ground-state wavefunctions on the shifted Homogeneous k+q-point sampling.
 
-$n^{(1)}$
-:       The perturbed density integrated over the homogeneous k+q grid.
+$n^{(1)}$ : The perturbed density integrated over the homogeneous k+q grid.
 
-$\Psi^{(0)}_{kBS+q}$
-:       The ground-state wavefunctions obtained from reading the perturbed density of the previous dataset.
+$\Psi^{(0)}_{kBS+q}$ : The ground-state wavefunctions obtained from reading the perturbed density of the previous dataset.
 
-Reading the previous quantity we obtain the el-ph matrix elements along the BS with all physical
+Reading the previous quantity we obtain the el-ph matrix elements along the bandstructure with all physical
 quantities integrated over a homogeneous grid.
 
-We will use the [[tests/tutorespfn/Input/tdepes_4.in]] input file
+We will use the [[tests/tutorespfn/Input/tdepes_4.abi]] input file
 
-{% dialog tests/tutorespfn/Input/tdepes_4.in %}
+{% dialog tests/tutorespfn/Input/tdepes_4.abi %}
 
 Note the use of the usual input variables to define a path in the Brillouin Zone to build an electronic band structure:
 [[kptbounds]], [[kptopt]], and [[ndivsm]]. Note also that we have defined [[qptopt]]=3. The number of q-points
 is thus very easy to determine, as being the product of [[ngqpt]] values times [[nshiftq]]. Here a very rough 2*2*2 grid has been chosen,
 even less dense than the one for section 2.
 
-After possibly modifying [[tests/tutorespfn/Input/tdepes_4.files]] to account for the location of the pseudopotential file, as above, issue:
+Then issue:
 
-    abinit < tdepes_4.files > tdepes_4.stdout
+    abinit tdepes_4.abi
 
-This is a significantly longer ABINIT run (2-3 minutes), also producing many files.
+This is a significantly longer ABINIT run (5-10 minutes), also producing many files.
 
 
 then use [[tests/tutorespfn/Input/tdepes_4_temperature.in]] for the python script.
@@ -597,9 +531,7 @@ with the usual syntax:
 
 <!-- THIS SECTION DOES NOT SEEM CORRECT : there is no other k point computed in section 2 ...
 Of course, the high symmetry points computed in section 2 have the same value here.
-It is a good idea to check it by running the script with the file [[tests/tutorespfn/Input/tdepes_3bis.files]].
-
-{% dialog tests/tutorespfn/Input/tdepes_3bis.files %}
+It is a good idea to check it by running the script with the file tdepes_3bis.files.
 
 -->
 
@@ -620,7 +552,7 @@ L \Gamma X W K L W X K \Gamma
 
 or more directly
 
-    ./plot_bs.py < tdepes_4_plot_bs.in
+    ./plot_bs.py < tdepes_4_plot_bs.abi
 
 This should give the following bandstructure
 
@@ -686,9 +618,4 @@ accurate values of the ZPR at 0K you can look at the table above.
     It is therefore possible to extrapolate the results. Different analytical behavior extists depending
     if the material is polar and if the state we are considering is a band extrema or not.
     More information can be found in Ref. [[cite:Ponce2015]]
-
-
-
-
-
 

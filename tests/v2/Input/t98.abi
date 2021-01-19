@@ -1,0 +1,114 @@
+#test GaAs crystal, with small ecut.
+#Use ecutsm as well as dilatmx
+
+ ndtset 5
+
+#DATASET 1 : SC run with 2 kpoints
+    nqpt1  0
+    nkpt1  2
+  kptopt1  1
+  tolwfr1  1.0d-22
+
+#DATASET 2 : ddk perturbation (only the x direction is needed,
+#thanks to the use of symmetries)
+#No dilatmx
+ getwfk2   1
+ getddk2   2    ! This is needed for the localisation tensor only
+   iscf2  -3
+   nqpt2   1
+    qpt2   0.0d0 0.0d0 0.0d0
+  rfdir2   1 0 0
+ rfelfd2   2
+ tolwfr2   1.0d-22
+dilatmx2   1.0d0
+
+#DATASET 3 : phonon and electric field perturbations
+#No dilatmx
+  getddk3   2
+  getwfk3   1
+    nqpt3   1
+     qpt3   0.0d0 0.0d0 0.0d0
+ rfatpol3   1 2
+   rfdir3   1 1 1
+  rfelfd3   3
+  rfphon3   1
+  tolwfr3   1.0d-16
+ dilatmx3   1.0d0
+
+#DATASET 4 : ddk perturbation (only the x direction is needed,
+#thanks to the use of symmetries)
+#Use the same dilatmx than for GS
+ getwfk4   1
+ getddk4   4    ! This is needed for the localisation tensor only
+   iscf4  -3
+   nqpt4   1
+    qpt4   0.0d0 0.0d0 0.0d0
+  rfdir4   1 0 0
+ rfelfd4   2
+ tolwfr4   1.0d-22
+
+#DATASET 5 : phonon and electric field perturbations
+#Use the same dilatmx than for GS
+  getddk5   4   # Warning    getddk6 2    will not work !
+  getwfk5   1
+    nqpt5   1
+     qpt5   0.0d0 0.0d0 0.0d0
+ rfatpol5   1 2
+   rfdir5   1 1 1
+  rfelfd5   3
+  rfphon5   1
+  tolwfr5   1.0d-16
+
+
+#Common data
+
+ ngkpt 2 2 2
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+ kptopt 3
+
+ acell   3*10.60
+ amu 69.72  74.9216
+ diemac 6.0
+ ecut 1.40
+ ecutsm 0.40
+ dilatmx 1.20
+ chkdilatmx 0
+ ixc 3
+ natom  2 nband 4  nbdbuf 0
+ nstep 12
+
+ ntypat  2
+ occopt 1
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ xred 3*0.00d0 3*0.25d0
+ typat  1 2
+ znucl  31 33
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31ga.SGS_mod, 33as.SGS_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t98.abo, tolnlines = 38, tolabs = 1.1e-03, tolrel = 6.0e-02
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC, DFPT
+#%% authors = Unknown
+#%% description = 
+#%%   Generate first-order responses for GaAs (zinc-blende).
+#%%   Compute responses at Gamma, in the presence of a non-zero ecutsm and dilatmx.
+#%%   1) ground state calculation, with a k-point sampling in the irreducible
+#%%   Brillouin zone only;
+#%%   2) computation of the ddk response, in preparation to the electric field
+#%%   response ;
+#%%   3) computation of the dynamical matrix at Gamma, as well as the
+#%%   Born effective charges, and the dielectric tensor ;
+#%%<END TEST_INFO>

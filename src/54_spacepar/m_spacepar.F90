@@ -2191,7 +2191,7 @@ end subroutine irrzg
 !!
 !! INPUTS
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
 !!  ngfft=array of dimensions for different FFT grids
 !!  nspden=number of spin-density components
@@ -2440,7 +2440,7 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
 
 !Obtain a list of rotated atom labels:
  tolsym8=tol8
- call symatm(indsym,natom,nsym,symrec,tnons,tolsym8,typat,xred)
+ call symatm(indsym,natom,nsym,symrec,tnons,tolsym8,typat,xred,print_indsym=10)
 
 !If non-SCF calculation, or nsym==1, do not need IBZ data
  if ( (iscf>0 .or. iscf==-3) .and. nsym>1 ) then

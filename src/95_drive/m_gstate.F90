@@ -262,7 +262,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !52  for density rho(r)       (fformr)
 !102 for potential V(r) file. (fformv)  NOT USED
 !scalars
- integer,parameter :: formeig=0,level=101,response=0 ,cplex1=1, master=0
+ integer,parameter :: formeig=0, level=101, response=0 ,cplex1=1, master=0, itime0=0
  integer :: ndtpawuj=0  ! Cannot use parameter because scfargs points to this! Have to get rid of pointers to scalars!
 #if defined HAVE_BIGDFT
  integer :: icoulomb
@@ -277,7 +277,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
- logical :: is_dfpt=.false.,wvlbigdft=.false.,wvl_debug=.false.
+ logical :: is_dfpt=.false.,wvlbigdft=.false.
  character(len=500) :: msg
  character(len=fnlen) :: ddbnm,dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
@@ -1234,12 +1234,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  fatvshift=one
 
- if (dtset%usewvl == 1 .and. wvl_debug) then
-#if defined HAVE_BIGDFT
-   call wvl_timing(me,'INIT','PR')
-#endif
- end if
-
 !Check whether exiting was required by the user. If found then do not start minimization steps
 !At this first call to chkexi, initialize cpus, if it
 !is non-zero (which would mean that no action has to be taken)
@@ -1252,6 +1246,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !If immediate exit, and wavefunctions were not read, must zero eigenvalues
  if (iexit/=0) eigen(:)=zero
 
+#if defined HAVE_BIGDFT
+ if (dtset%usewvl == 1 .and. dtset%timopt==10) then
+   call wvl_timing(xmpi_world,'== INITS','PR')
+ end if
+#endif
+
  call timab(34,2,tsec)
 
  conv_retcode = 0
@@ -1260,14 +1260,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !  ###########################################################
 !  ### 14. Move atoms and acell according to ionmov value
-
-
-!  Eventually symmetrize atomic coordinates over space group elements:
-!  call symmetrize_xred(indsym,dtset%natom,dtset%nsym,dtset%symrel,dtset%tnons,xred)
-
-!  If atoms are not being moved and U should not be determined,
-!  use scfcv directly; else
-!  call move, pawuj_drive or brdmin which in turn calls scfcv.
 
    call timab(35,3,tsec)
 
@@ -1289,7 +1281,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Should merge this call with the call for dtset%ionmov==4 and 5
 
      if (dtset%macro_uj==0) then
-       call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+       call scfcv_run(scfcv_args,itime0,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
      else
 !      Conduct determination of U
        call pawuj_drive(scfcv_args,dtset,electronpositron,rhog,rhor,rprimd,xred,xred_old)
@@ -1298,7 +1290,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    ========================================
 !    New structure for geometry optimization
 !    ========================================
-   else if (dtset%ionmov>50.or.dtset%ionmov<=27) then
+   else if (dtset%ionmov>50.or.dtset%ionmov<=28) then
 
      ! TODO: return conv_retcode
      call mover(scfcv_args,ab_xfh,acell,args_gs%amu,dtfil,&
@@ -1317,8 +1309,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    else ! Not an allowed option
      write(msg, '(a,i0,2a)' )&
-&     'Disallowed value for ionmov=',dtset%ionmov,ch10,&
-&     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24 and 30'
+     'Disallowed value for ionmov=',dtset%ionmov,ch10,&
+     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24,28 and 30'
      MSG_BUG(msg)
    end if
 
@@ -1339,11 +1331,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Mark this GS computation as done
  initialized=1
- if (dtset%usewvl == 1 .and. wvl_debug) then
-#if defined HAVE_BIGDFT
-   call wvl_timing(me,'WFN_OPT','PR')
-#endif
- end if
 
 !Will be put here later.
 !! ! WVL - maybe compute the tail corrections to energy
@@ -1437,7 +1424,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !write final electric field components HONG
 
  if (dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt ==7 .or.  &
-& dtset%berryopt == 14 .or. dtset%berryopt == 16 .or. dtset%berryopt ==17 ) then ! output final elctric field data    !!HONG
+& dtset%berryopt == 14 .or. dtset%berryopt == 16 .or. dtset%berryopt ==17 ) then ! output final electric field data    !!HONG
    if (dtset%berryopt == 4) then
      write(msg,'(a,a)')   ch10, 'Constant unreduced E calculation  - final values:'
    else if (dtset%berryopt == 6 ) then
@@ -1707,6 +1694,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #if defined HAVE_GPU_CUDA
  if (dtset%use_gpu_cuda==1) then
    call dealloc_hamilt_gpu(2,dtset%use_gpu_cuda)
+ end if
+#endif
+
+#if defined HAVE_BIGDFT
+ if (dtset%usewvl == 1 .and. dtset%timopt==10) then
+   call wvl_timing(xmpi_world,'== WFN OPT','PR')
  end if
 #endif
 
@@ -2408,7 +2401,7 @@ end subroutine clnup2
 !!   | nsym=number of symmetry elements in space group
 !!  ecore=core psp energy (part of total energy) (hartree)
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)= # atoms of each type.
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  nspinor=number of spinorial components of the wavefunctions
@@ -2478,6 +2471,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: itime0 = 0
  integer,target :: ndtpawuj=4
  integer :: iuj,conv_retcode
  real(dp) :: ures
@@ -2528,7 +2522,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 
    !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
 !&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
-   call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   call scfcv_run(scfcv_args,itime0,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
    scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
  end do

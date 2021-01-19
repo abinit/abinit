@@ -398,16 +398,16 @@ end subroutine wvl_initro
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=input variables.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  occ(dtset%mband)=occupation numbers.
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! OUTPUT
 !!  rhor(dtset%nfft)=electron density in r space
 !!
 !! SIDE EFFECTS
-!!  proj <type(wvl_projector_type)>=projectors informations for wavelets.
+!!  proj <type(wvl_projector_type)>=projectors information for wavelets.
 !!   | proj(OUT)=computed projectors.
 !!
 !! PARENTS

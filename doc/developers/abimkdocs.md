@@ -63,7 +63,7 @@ pip install -r requirements.txt --user
     The entire documentation supports Unicode so feel free to use unicode symbols in the docs.
 
 MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. 
-Then start *our customized* server 
+First issue */*/makemake (actually config/scripts/makemake). Then start *our customized* server 
 by running the `./mksite.py serve` command:
 
 ```sh

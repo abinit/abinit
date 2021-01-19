@@ -1,0 +1,70 @@
+# Computation of the Fermi contact term at the atomic sites in SnO2
+# SnO2 has the rutile structure
+
+prtfc 1 # requests Fermi contact at each nuclear site
+
+#Definition of the unit cell
+
+acell    3*8.9535222618      # each primitive vector in rprim is scaled
+                             # by its value in acell, to give internally
+                             # cell vectors dimensioned as length in atomic units
+
+# SnO2 has a primitive tetragonal cell, so two sides are equal,
+# the third different, and the angles all 90 degrees
+rprim    1.000000000000000   0.000000000000000   0.000000000000000 
+         0.000000000000000   1.000000000000000   0.000000000000000 
+         0.000000000000000   0.000000000000000   0.672541156606163
+       
+#Definition of the atom types and pseudopotentials
+ntypat 2 # two types of atoms
+znucl 50 8 # atomic number of atoms, will be cross checked against pseudopotential files
+           # here Tin (50) and Oxygen (8). Pseudopotentials must be listed in this order.
+           # this order defines type 1 as tin, type 2 as oxygen
+pp_dirpath "$ABI_PSPDIR" # pseudopotential directory
+pseudos "Pseudodojo_paw_pbe_standard/Sn-sp.xml, Pseudodojo_paw_pbe_standard/O.xml"
+
+#Definition of the atoms
+natom 6 # 6 atoms in the unit cell 
+typat    1 1 2 2 2 2 # atoms listed as silicons, then oxygens  
+# next are the 6 atomic positions, in order of typat (silicon, then oxygen)
+# xred gives them in units of the cell translation vectors, as is commonly
+# done in crystallography
+xred     0.000000000000000   0.000000000000000   0.000000000000000 
+         0.500000000000000   0.500000000000000   0.500000000000000 
+         0.307100000000000   0.307100000000000   0.000000000000000 
+         0.807100000000000   0.192900000000000   0.500000000000000 
+         0.192900000000000   0.807100000000000   0.500000000000000 
+         0.692900000000000   0.692900000000000   0.000000000000000 
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 15 # plane wave cutoff energy, always need to check convergence of ecut in real runs
+pawecutdg 20 # cutoff energy for PAW fine grid
+ngkpt 8 8 6 # Parameters of Monkhorst-Pack kpoint grid. Convergence should be checked for
+            # this parameter as well.
+
+#Parameters for the SCF procedure
+nstep 10
+tolvrs 1.0D-18
+
+# suppress printing of density, wavefunctions, etc for this tutorial
+prtden 0
+prtwf 0
+prteig 0
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tnuc_2.abo, tolnlines=  12, tolabs=  4.1e-09, tolrel=  3.000e-03
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = 
+#%% topics = SmartSymm
+#%%<END TEST_INFO>

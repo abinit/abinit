@@ -91,7 +91,7 @@ contains
 !!  ixc = choice of exchange-correlation functional
 !!  kinstr(6)=kinetic energy part of stress tensor
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimensioned number of q grid points for local psp spline
 !!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
@@ -719,7 +719,7 @@ end subroutine stress
 !!  ehart=Hartree energy (hartree)
 !!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
 !!  $gsqcut=(boxcut^2)*ecut/(2._dp*(\pi^2))$
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  rhog(2,nfft)=Fourier transform of charge density (bohr^-3)

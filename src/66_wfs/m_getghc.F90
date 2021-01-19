@@ -6,7 +6,7 @@
 !! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT, JB, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,13 +48,13 @@ module m_getghc
  public :: getghc     ! Compute <G|H|C> for input vector |C> expressed in reciprocal space
  public :: getgsc     ! Compute <G|S|C> for all input vectors |Cnk> at a given k-point
  public :: multithreaded_getghc
+ public :: getghc_nucdip ! compute <G|H_nucdip|C> for input vector |C> expressed in recip space
 !!***
 
 contains
 !!***
 
 !!****f* ABINIT/getghc
-!!
 !! NAME
 !! getghc
 !!
@@ -62,7 +62,7 @@ contains
 !! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
 !! Result is put in array ghc.
 !! <G|Vnonlocal + VfockACE|C> is also returned in gvnlxc if either NLoc NCPP or FockACE.
-!! if required, <G|S|C> is returned in gsc (S=overlap - PAW only)
+!! If required, <G|S|C> is returned in gsc (S=overlap - PAW only)
 !! Note that left and right k points can be different, i.e. ghc=<k^prime+G|H|C_k>.
 !!
 !! INPUTS
@@ -125,8 +125,8 @@ contains
 !! SOURCE
 
 subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
-&                 prtvol,sij_opt,tim_getghc,type_calc,&
-&                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
+                  prtvol,sij_opt,tim_getghc,type_calc,&
+                  kg_fft_k,kg_fft_kp,select_k) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -142,6 +142,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp),intent(inout) :: cwavef(:,:)
  real(dp),intent(out) :: ghc(:,:),gvnlxc(:,:)
  type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
+ !MG: Passing these arrays assumed-shape has the drawback that client code is
+ !forced to use vec(2, npw*ndat) instead of the more user-friendly vec(2,npw,ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -219,27 +221,22 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !Check sizes
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwavef)<2*npw_k1*my_nspinor*ndat) then
-   msg='wrong size for cwavef!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for cwavef!')
  end if
  if (size(ghc)<2*npw_k2*my_nspinor*ndat) then
-   msg='wrong size for ghc!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for ghc!')
  end if
  if (size(gvnlxc)<2*npw_k2*my_nspinor*ndat) then
-   msg='wrong size for gvnlxc!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for gvnlxc!')
  end if
  if (sij_opt==1) then
    if (size(gsc)<2*npw_k2*my_nspinor*ndat) then
-     msg='wrong size for gsc!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for gsc!')
    end if
  end if
  if (gs_ham%usepaw==1.and.cpopt>=0) then
    if (size(cwaveprj)<gs_ham%natom*my_nspinor*ndat) then
-     msg='wrong size for cwaveprj!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for cwaveprj!')
    end if
  end if
 
@@ -254,12 +251,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 !paral_kgb constraint
  if (mpi_enreg%paral_kgb==1.and.(.not.k1_eq_k2)) then
-   msg='paral_kgb=1 not allowed for k/=k_^prime!'
-   MSG_BUG(msg)
+   MSG_BUG('paral_kgb=1 not allowed for k/=k_^prime!')
  end if
 
 !Do we add Fock exchange term ?
- has_fock=(associated(gs_ham%fockcommon))
+ has_fock = associated(gs_ham%fockcommon)
  if (has_fock) fock => gs_ham%fockcommon
 
 !Parallelization over spinors management
@@ -278,7 +274,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 ! Application of the local potential
 !============================================================
 
- if ((type_calc==0).or.(type_calc==1).or.(type_calc==3)) then
+ if (any(type_calc == [0, 1, 3])) then
 
 !  Need a Vlocal
    if (.not.associated(gs_ham%vlocal)) then
@@ -348,8 +344,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !    call cg_zcopy(npw_k1*ndat,cwavef(1,1+shift1),cwavef2)
    end if
 
-!  Treat scalar local potentials
    if (gs_ham%nvloc==1) then
+!  Treat scalar local potentials
 
      if (nspinortot==1) then
 
@@ -365,7 +361,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 &         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
        end if
 
-     else ! nspinortot==2
+     else
+       ! nspinortot==2
 
        if (nspinor1TreatedByThisProc) then
          ABI_ALLOCATE(ghc1,(2,npw_k2*ndat))
@@ -397,8 +394,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
      end if ! nspinortot
 
-!    Treat non-collinear local potentials
    else if (gs_ham%nvloc==4) then
+!    Treat non-collinear local potentials
 
      ABI_ALLOCATE(ghc1,(2,npw_k2*ndat))
      ABI_ALLOCATE(ghc2,(2,npw_k2*ndat))
@@ -554,13 +551,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  end if ! type_calc
 
 
- if ((type_calc==0).or.(type_calc==2).or.(type_calc==3)) then
+ if (any(type_calc == [0, 2, 3])) then
 
 !============================================================
 ! Application of the non-local potential and the Fock potential
 !============================================================
 
-   if ((type_calc==0).or.(type_calc==2)) then
+   if (type_calc==0 .or. type_calc==2) then
      signs=2 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
      if (has_fock) then
@@ -616,10 +613,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        end if
      end if
 
-   else if (type_calc == 3) then ! for kinetic and local only, nonlocal and vfock should be zero
-
+   else if (type_calc == 3) then
+     ! for kinetic and local only, nonlocal and vfock should be zero
      gvnlxc(:,:) = zero
-
    end if ! if(type_calc...
 
 !============================================================
@@ -730,7 +726,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      MSG_ERROR(msg)
    end if
 
-   if ((type_calc==0).or.(type_calc==2)) then
+   if (type_calc==0.or.type_calc==2) then
      if (has_fock.and.gs_ham%usepaw==1.and.cpopt<2) then
        call pawcprj_free(cwaveprj_fock)
        ABI_DATATYPE_DEALLOCATE(cwaveprj_fock)
@@ -757,13 +753,6 @@ end subroutine getghc
 !! Compute magnetic nuclear dipole moment contribution to <G|H|C>
 !! for input vector |C> expressed in reciprocal space.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT, JWZ)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! cwavef(2,npw_k*my_nspinor*ndat)=planewave coefficients of wavefunction.
 !! gbound_k(2*mgfft+4)=sphere boundary info
@@ -772,7 +761,7 @@ end subroutine getghc
 !! kg_k(3,npw_k)=G vec coordinates wrt recip lattice transl.
 !! kpt(3)=current k point
 !! mgfft=maximum single fft dimension
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
 !! ndat=number of FFTs to perform in parall
 !! ngfft(18)=contain all needed information about 3D FFT
@@ -1015,13 +1004,6 @@ end subroutine getghc_nucdip
 !! FUNCTION
 !! Compute metaGGA contribution to <G|H|C> for input vector |C> expressed in reciprocal space.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! cwavef(2,npw_k*my_nspinor*ndat)=planewave coefficients of wavefunction.
 !! gbound_k(2*mgfft+4)=sphere boundary info
@@ -1029,7 +1011,7 @@ end subroutine getghc_nucdip
 !! kg_k(3,npw_k)=G vec coordinates wrt recip lattice transl.
 !! kpt(3)=current k point
 !! mgfft=maximum single fft dimension
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
 !! ndat=number of FFTs to perform in parall
 !! ngfft(18)=contain all needed information about 3D FFT
@@ -1490,13 +1472,6 @@ end subroutine getgsc
 !!
 !! FUNCTION
 !!
-!! COPYRIGHT
-!! Copyright (C) 2016-2020 ABINIT group (JB)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !! cpopt=flag defining the status of cwaveprj%cp(:)=<Proj_i|Cnk> scalars (PAW only)
 !!       (same meaning as in nonlop.F90 routine)
@@ -1510,7 +1485,7 @@ end subroutine getgsc
 !! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
 !! lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
 !!        Typically lambda is the eigenvalue (or its guess)
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! ndat=number of FFT to do in parallel
 !! prtvol=control print volume and debugging output
 !! sij_opt= -PAW ONLY-  if  0, only matrix elements <G|H|C> have to be computed
@@ -1518,9 +1493,9 @@ end subroutine getgsc
 !!                      if -1, matrix elements <G|H-lambda.S|C> have to be computed in ghc (gsc not used)
 !! tim_getghc=timing code of the calling subroutine(can be set to 0 if not attributed)
 !! type_calc= option governing which part of Hamitonian is to be applied:
-!             0: whole Hamiltonian
+!!            0: whole Hamiltonian
 !!            1: local part only
-!!            2: non-local+kinetic only (added to the exixting Hamiltonian)
+!!            2: non-local+kinetic only (added to the existing Hamiltonian)
 !!            3: local + kinetic only (added to the existing Hamiltonian)
 !! ===== Optional inputs =====
 !!   [kg_fft_k(3,:)]=optional, (k+G) vector coordinates to be used for the FFT tranformation
@@ -1660,103 +1635,6 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
 end subroutine multithreaded_getghc
 !!***
-
-! !!****f* ABINIT/getghcnd
-! !!
-! !! NAME
-! !! getghcnd
-! !!
-! !! FUNCTION
-! !! Compute <G|H_ND|C> for input vector |C> expressed in reciprocal space
-! !! Result is put in array ghcnc. H_ND is the Hamiltonian due to magnetic dipoles
-! !! on the nuclear sites.
-! !!
-! !! INPUTS
-! !! cwavef(2,npw*nspinor*ndat)=planewave coefficients of wavefunction.
-! !! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
-! !! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
-! !! ndat=number of FFT to do in //
-! !!
-! !! OUTPUT
-! !! ghcnd(2,npw*my_nspinor*ndat)=matrix elements <G|H_ND|C>
-! !!
-! !! NOTES
-! !!  This routine applies the Hamiltonian due to an array of magnetic dipoles located
-! !!  at the atomic nuclei to the input wavefunction. Strategy below is to take advantage of
-! !!  Hermiticity to store H_ND in triangular form and then use a BLAS call to zhpmv to apply to
-! !!  input vector in one shot.
-! !! Application of <k^prime|H|k> or <k|H|k^prime> not implemented!
-! !!
-! !! PARENTS
-! !!      getghc
-! !!
-! !! CHILDREN
-! !!      zhpmv
-! !!
-! !! SOURCE
-
-! subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
-
-! !Arguments ------------------------------------
-! !scalars
-!  integer,intent(in) :: my_nspinor,ndat
-!  type(gs_hamiltonian_type),intent(in) :: gs_ham
-! !arrays
-!  real(dp),intent(in) :: cwavef(2,gs_ham%npw_k*my_nspinor*ndat)
-!  real(dp),intent(out) :: ghcnd(2,gs_ham%npw_k*my_nspinor*ndat)
-
-! !Local variables-------------------------------
-! !scalars
-!  integer :: cwavedim
-!  character(len=500) :: message
-!  !arrays
-!  complex(dpc),allocatable :: inwave(:),hggc(:)
-
-! ! *********************************************************************
-
-!  if (gs_ham%matblk /= gs_ham%natom) then
-!    write(message,'(a,i4,a,i4)')' gs_ham%matblk = ',gs_ham%matblk,' but natom = ',gs_ham%natom
-!    MSG_ERROR(message)
-!  end if
-!  if (ndat /= 1) then
-!    write(message,'(a,i4,a)')' ndat = ',ndat,' but getghcnd requires ndat = 1'
-!    MSG_ERROR(message)
-!  end if
-!  if (my_nspinor /= 1) then
-!    write(message,'(a,i4,a)')' nspinor = ',my_nspinor,' but getghcnd requires nspinor = 1'
-!    MSG_ERROR(message)
-!  end if
-!  if (any(abs(gs_ham%kpt_k(:)-gs_ham%kpt_kp(:))>tol8)) then
-!    message=' not allowed for kpt(left)/=kpt(right)!'
-!    MSG_BUG(message)
-!  end if
-
-!  if (any(abs(gs_ham%nucdipmom_k)>tol8)) then
-!    cwavedim = gs_ham%npw_k*my_nspinor*ndat
-!    ABI_ALLOCATE(hggc,(cwavedim))
-!    ABI_ALLOCATE(inwave,(cwavedim))
-
-!    inwave(1:gs_ham%npw_k) = cmplx(cwavef(1,1:gs_ham%npw_k),cwavef(2,1:gs_ham%npw_k),kind=dpc)
-
-!     ! apply hamiltonian hgg to input wavefunction inwave, result in hggc
-!     ! ZHPMV is a level-2 BLAS routine, does Matrix x Vector multiplication for double complex
-!     ! objects, with the matrix as Hermitian in packed storage
-!    call ZHPMV('L',cwavedim,cone,gs_ham%nucdipmom_k,inwave,1,czero,hggc,1)
-
-!    ghcnd(1,1:gs_ham%npw_k) = real(hggc)
-!    ghcnd(2,1:gs_ham%npw_k) = aimag(hggc)
-
-!    ABI_DEALLOCATE(hggc)
-!    ABI_DEALLOCATE(inwave)
-
-!  else
-
-!    ghcnd(:,:) = zero
-
-!  end if
-
-! end subroutine getghcnd
-! !!***
 
 end module m_getghc
 !!***

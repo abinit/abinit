@@ -162,8 +162,10 @@ contains
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
 !!  ddk<wfk_t)=struct info DDK file
+!!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=GS Vtrial(r).
 !!  vtrial1(cplex*nfftf,nspden)=INPUT RF Vtrial(r).
+!!  with_vectornd = 1 if vectornd allocated
 !!  wtk_rbz(nkpt_rbz)=weight assigned to each k point.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
@@ -183,6 +185,8 @@ contains
 !!  ek1=1st-order kinetic energy part of 2nd-order total energy
 !!    (not for phonons)
 !!  eloc0=0th-order local (psp+vxc+Hart) part of 2nd-order total energy
+!!  end0=0th-order nuclear dipole energy part of 2nd-order total energy.
+!!  end1=1st-order nuclear dipole energy part of 2nd-order total energy
 !!  enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
 !!  enl1=1st-order nonlocal pseudopot. part of 2nd-order total energy.
 !!  gh1c_set(2,mpw1*nspinor*mband_mem*mk1mem*nsppol*dim_eig2rf)= set of <G|H^{(1)}|nK>
@@ -220,7 +224,7 @@ contains
 
 subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,qphon,&
-& edocc,eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,enl0,enl1,&
+& edocc,eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,end0,end1,enl0,enl1,&
 & fermie1,gh0c1_set,gh1c_set,gmet,gprimd,idir,indsy1,&
 & ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,mband_mem,&
 & mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1,my_natom,&
@@ -228,17 +232,17 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,&
-& usecprj,useylmgr1,ddk_f,vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
+& usecprj,useylmgr1,ddk_f,vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,dbl_nnsclo,dim_eig2rf,idir,ipert,mband,mk1mem,mkmem
  integer,intent(in) :: mband_mem
  integer,intent(in) :: mkqmem,mpw,mpw1,my_natom,natom,ncpgr,nfftf,nkpt_rbz,nspden
- integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1
+ integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1,with_vectornd
  integer,optional,intent(in) :: cg1_out
  real(dp),intent(in) :: fermie1,ucvol
- real(dp),intent(out) :: edocc,eeig0,ek0,ek1,eloc0,enl0,enl1,nres2,residm
+ real(dp),intent(out) :: edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,nres2,residm
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -273,6 +277,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp), intent(out) :: nhat1(cplex*nfftf,dtset%nspden*psps%usepaw)
  real(dp),intent(out) :: resid(mband*nkpt_rbz*nsppol),rhog1(2,nfftf)
  real(dp),intent(inout) :: nvresid1(cplex*nfftf,nspden),rhor1(cplex*nfftf,nspden)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
@@ -300,30 +305,30 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: iband,nlines_done,ibdkpt,ibg,ibg1,ibgq,icg,icg1,icgq,ierr
  integer :: ii,ikg,ikg1,ikpt,ilm,index1,ispden,iscf_mod,isppol,istwf_k
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
- integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
+ integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nddir,nkpg,nkpg1
  integer :: nband_eff
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  integer :: nband_me
- logical :: paral_atom,qne0
+ logical :: has_vectornd,paral_atom,qne0
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq,rf_hamk_dir2
 !arrays
  integer,allocatable :: kg1_k(:,:),kg_k(:,:)
  integer, pointer :: my_atmtab(:)
- real(dp) :: kpoint(3),kpq(3)
+ real(dp) :: kpoint(3),kpq(3),rhodum(1)
  real(dp) :: tsec(2)
- real(dp),allocatable :: buffer1(:)
+ real(dp),allocatable :: buffer1(:),cgrvtrial(:,:)
  real(dp),allocatable :: ddkinpw(:),dkinpw(:),dkinpw2(:)
  real(dp),allocatable :: doccde_k(:),doccde_kq(:)
  real(dp),allocatable :: edocc_k(:),eeig0_k(:),eig0_k(:),eig0_kq(:),eig1_k(:)
- real(dp),allocatable :: ek0_k(:),ek1_k(:),eloc0_k(:),enl0_k(:),enl1_k(:)
+ real(dp),allocatable :: ek0_k(:),ek1_k(:),eloc0_k(:),end0_k(:),end1_k(:),enl0_k(:),enl1_k(:)
  real(dp),allocatable :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:),ffnlk(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:,:),kinpw1(:),kpg1_k(:,:)
  real(dp),allocatable :: kpg_k(:,:),occ_k(:),occ_kq(:)
  real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:),resid_k(:)
  real(dp),allocatable :: rho1wfg(:,:),rho1wfr(:,:),rhoaug1(:,:,:,:),rocceig(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:),vlocal1(:,:,:,:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vectornd_pac_idir(:,:,:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:)
  real(dp),allocatable :: ylm1_k(:,:),ylm_k(:,:),ylmgr1_k(:,:,:)
  type(pawrhoij_type),pointer :: pawrhoij1_unsym(:)
 
@@ -357,7 +362,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  iscf_mod=dtset%iscf;if(ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11) iscf_mod=-3
 
  edocc=zero ; eeig0=zero ; ek0=zero  ; ek1=zero
- eloc0=zero ; enl0=zero ; enl1=zero
+ eloc0=zero ; end0=zero  ; end1=zero ; enl0=zero ; enl1=zero
  bdtot_index=0
  bd2tot_index=0
  ibg=0;icg=0
@@ -452,6 +457,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  ABI_ALLOCATE(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ABI_ALLOCATE(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc))
 
+ has_vectornd = (with_vectornd .EQ. 1)
+ if(has_vectornd) then
+    ABI_ALLOCATE(vectornd_pac,(n4,n5,n6,gs_hamkq%nvloc,3))
+    ABI_ALLOCATE(vectornd_pac_idir,(n4,n5,n6,gs_hamkq%nvloc))
+ end if
+
  nlines_done = 0
 
 !LOOP OVER SPINS
@@ -482,6 +493,23 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !  Nullify contribution to 1st-order density from this k-point
    rhoaug1(:,:,:,:)=zero
+
+! if vectornd is present, set it up for addition to gs_hamkq and rf_hamkq.
+! Note that it must be done for the three Cartesian directions. Also, the following
+! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
+   if(has_vectornd) then
+     do nddir = 1, 3
+       ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
+         & rhodum,rhodum,cgrvtrial,vectornd(:,nddir))
+       call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
+         & cgrvtrial,vectornd_pac(:,:,:,1,nddir),2)
+       ABI_DEALLOCATE(cgrvtrial)
+     end do
+     call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
+     vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
+     call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
+   end if
 
    call timab(125,1,tsec)
 
@@ -529,19 +557,22 @@ print *, ' vtorho nband_me ', nband_me
      ABI_ALLOCATE(ek0_k,(nband_k))
      ABI_ALLOCATE(ek1_k,(nband_k))
      ABI_ALLOCATE(eloc0_k,(nband_k))
+     ABI_ALLOCATE(end0_k,(nband_k))
+     ABI_ALLOCATE(end1_k,(nband_k))
+     ABI_ALLOCATE(enl0_k,(nband_k))
+     ABI_ALLOCATE(enl1_k,(nband_k))
      ABI_ALLOCATE(occ_k,(nband_k))
      ABI_ALLOCATE(occ_kq,(nband_k))
      ABI_ALLOCATE(resid_k,(nband_k))
      ABI_ALLOCATE(rocceig,(nband_k,nband_k))
-     ABI_ALLOCATE(enl0_k,(nband_k))
-     ABI_ALLOCATE(enl1_k,(nband_k))
 
      eig1_k(:)=zero
      eig0_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
      eig0_kq(:)=eigenq(1+bdtot_index:nband_k+bdtot_index)
      edocc_k(:)=zero
      eeig0_k(:)=zero ; ek0_k(:)=zero  ; ek1_k(:)=zero
-     eloc0_k(:)=zero ; enl0_k(:)=zero ; enl1_k(:)=zero
+     eloc0_k(:)=zero ; end0_k(:)=zero ; end1_k(:)=zero
+     enl0_k(:)=zero ; enl1_k(:)=zero
      occ_k(:)=occ_rbz(1+bdtot_index:nband_k+bdtot_index)
      occ_kq(:)=occkq(1+bdtot_index:nband_k+bdtot_index)
      doccde_k(:)=doccde_rbz(1+bdtot_index:nband_k+bdtot_index)
@@ -624,7 +655,7 @@ print *, 'eig0_kq  ',   eig0_kq
      nband_kq = nband_k  !Note that the calculation only works for same number of bands on all K points.
 !    Note that dfpt_vtowfk is called with kpoint, while kpt is used inside vtowfk3
      call dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dim_eig2rf,dtfil,&
-&     dtset,edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,ek0_k,ek1_k,eloc0_k,enl0_k,enl1_k,fermie1,&
+&     dtset,edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,ek0_k,ek1_k,eloc0_k,end0_k,end1_k,enl0_k,enl1_k,fermie1,&
 &     ffnl1,ffnl1_test,gh0c1_set,gh1c_set,grad_berry,gs_hamkq,ibg,ibgq,ibg1,icg,icgq,icg1,idir,ikpt,ipert,isppol,&
 &     mband,mband_mem,mcgq,mcprjq,mkmem,mk1mem,mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,nnsclo_now,&
 &     npw_k,npw1_k,dtset%nspinor,nsppol,n4,n5,n6,occ_k,pawrhoij1_unsym,prtvol,psps,resid_k,&
@@ -669,6 +700,8 @@ print *, 'eig0_kq  ',   eig0_kq
          ek0=ek0+wtk_k*occ_k(iband)*ek0_k(iband)
          ek1=ek1+wtk_k*occ_k(iband)*ek1_k(iband)
          eloc0=eloc0+wtk_k*occ_k(iband)*eloc0_k(iband)
+         end0=end0+wtk_k*occ_k(iband)*end0_k(iband)
+         end1=end1+wtk_k*occ_k(iband)*end1_k(iband)
          enl0=enl0+wtk_k*occ_k(iband)*enl0_k(iband)
          enl1=enl1+wtk_k*occ_k(iband)*enl1_k(iband)
 #ifdef DEV_MJV
@@ -687,6 +720,8 @@ print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
      ABI_DEALLOCATE(ek0_k)
      ABI_DEALLOCATE(ek1_k)
      ABI_DEALLOCATE(eloc0_k)
+     ABI_DEALLOCATE(end0_k)
+     ABI_DEALLOCATE(end1_k)
      ABI_DEALLOCATE(enl0_k)
      ABI_DEALLOCATE(enl1_k)
 
@@ -757,6 +792,10 @@ print *, ' rhoaug1 my bands and k 737 ', rhoaug1(:,1:10,1,1)
  ABI_DEALLOCATE(rhoaug1)
  ABI_DEALLOCATE(vlocal)
  ABI_DEALLOCATE(vlocal1)
+ if(has_vectornd) then
+   ABI_DEALLOCATE(vectornd_pac)
+   ABI_DEALLOCATE(vectornd_pac_idir)
+ end if
 
  call timab(124,2,tsec)
 
@@ -765,13 +804,13 @@ print *, ' rhoaug1 my bands and k 737 ', rhoaug1(:,1:10,1,1)
    call timab(129,1,tsec)
 
 !  Compute buffer size
-   buffer_size=7+mbd2kpsp+mbdkpsp
+   buffer_size=9+mbd2kpsp+mbdkpsp
    if (iscf_mod>0) then
      buffer_size=buffer_size+cplex*dtset%nfft*nspden
    end if
    ABI_ALLOCATE(buffer1,(buffer_size))
 
-!  Pack rhor1,edocc,eeig0,ek0,ek1,eloc0,enl0,enl1,eigen1,resid
+!  Pack rhor1,edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,eigen1,resid
    if (iscf_mod>0) then
      index1=cplex*dtset%nfft*nspden
      if (psps%usepaw==0) then
@@ -786,7 +825,8 @@ print *, ' rhoaug1 my bands and k 737 ', rhoaug1(:,1:10,1,1)
    buffer1(index1+3)=ek0  ;buffer1(index1+4)=ek1
    buffer1(index1+5)=eloc0;buffer1(index1+6)=enl0
    buffer1(index1+7)=enl1
-   index1=index1+7
+   buffer1(index1+8)=end0;buffer1(index1+9)=end1
+   index1=index1+9
    bdtot_index=0;bd2tot_index=0
    do isppol=1,nsppol
      do ikpt=1,nkpt_rbz
@@ -827,7 +867,8 @@ print *, 'vtorho rho1wfr 814 ', rho1wfr(1:5,:)
    ek0=buffer1(index1+3)  ;ek1=buffer1(index1+4)
    eloc0=buffer1(index1+5);enl0=buffer1(index1+6)
    enl1=buffer1(index1+7)
-   index1=index1+7
+   end0=buffer1(index1+8);end1=buffer1(index1+9)
+   index1=index1+9
    bdtot_index=0;bd2tot_index=0
    do isppol=1,nsppol
      do ikpt=1,nkpt_rbz

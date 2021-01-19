@@ -126,7 +126,7 @@ contains
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  n3xccc=dimension of the xccc3d array (0 or nfftf).
 !!  nattyp(ntypat)= # atoms of each type.
@@ -1803,7 +1803,7 @@ end subroutine poslifetime
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  n3xccc= dimension of the xccc3d array (0 or nfft).
 !!  nfft= number of FFT grid points
@@ -2107,11 +2107,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        if (.not.ex) then
          write(unit=filename,fmt='(a,i1)') 'corewf.abinit',itypat
          inquire(file=filename,exist=ex)
-         if (.not.ex) then
-           write(msg,'(4a)') 'Core wave-functions file is missing!',ch10,&
-&                            'Looking for: ',trim(filename)
-           MSG_ERROR(msg)
-         end if
+       end if
+       if (.not.ex) then
+         write(msg,'(3a)') 'Core wave-functions file is missing!',ch10,&
+&                          'Looking for: psp-name.corewf[.xml][.abinit] or corewf.dat'
+         MSG_ERROR(msg)
        end if
        call pawpsp_read_corewf(energycor,indlmncor(itypat)%value,lcor,lmncmax(itypat),&
 &       ncor,nphicor(itypat),pawrad(itypat),phicor(itypat)%value,&

@@ -690,7 +690,7 @@ print *, 'driver dtset%mkmem ', dtset%mkmem
 
 !  ****************************************************************************
 !  Exchange-correlation
-
+   
    call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
@@ -793,7 +793,7 @@ print *, 'driver dtset%mkmem ', dtset%mkmem
 
    case(RUNL_SIGMA)
      call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
-
+   
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 
@@ -969,20 +969,6 @@ print *, 'driver 823 '
 
 !Results_respfn deallocation
  call destroy_results_respfn(results_respfn)
-
-#if defined HAVE_BIGDFT
-!XG 121126 : NOTE that the next debugging section was quite problematic : indeed we are
-!outside the loop over datasets, so the value of dtset%usewvl, that is referring to the last
-!dtset, might not be initialized, if the dataset is NOT treated by the processor.
-!See line 253 for the initialisation of dtset, while this might not happen if
-!if(mpi_enregs(idtset)%me<0) cycle  , as defined by line 216
-!if (dtset%usewvl == 1) then
-!!  WVL - debugging
-!call memocc_abi(0,mpi_enregs(1)%me_wvl,'count','stop')
-!call wvl_timing(mpi_enregs(1)%me_wvl,'WFN_OPT','PR')
-!call wvl_timing(mpi_enregs(1)%me_wvl,'              ','RE')
-!end if
-#endif
 
  call timab(644,2,tsec)
  call timab(640,2,tsec)

@@ -1,0 +1,143 @@
+########################################################
+# Crystalline AlAs :
+#  Computation of (part of) the phonon spectrum
+#  Computation of dielectric tensor and effective charges
+########################################################
+
+   ndtset 6
+   fftalg  112  # This test is not very stable ecut=3!
+   fftalg1 401  # This is to enforce the old behaviour
+
+#Set 1 : ground state self-consistency
+
+  rfphon1   0            # Cancel default
+  getwfk1   0            # Cancel default
+    nqpt1   0            # Cancel default
+  kptopt1   1            # Automatic generation of k points with symmetries
+  tolwfr1   1.0d-20      # SCF stopping criterion (modify default)
+   prtwf1   1            # Printing of WF
+
+#Set 2 : Response function calculation of d/dk wave function
+
+  rfphon2   0            # Cancel default
+  rfelfd2   2            # Calculate d/dk wave function only
+  kptopt2   2            # Use time-reversal symmetry for k-points
+    iscf2   -3           # Need this non-self-consistent option for d/dk
+   prtwf2   1            # Printing of WF
+
+#Set 3: Response function calculation to electric field
+
+  rfphon3   0          # Cancel default
+  rfelfd3   3          # Response to electric field only
+   rfdir3   1 1 1      # Do all directions (symmetry will be used)
+  getwfk3   1          # Use GS wave functions from dataset 1
+  getddk3   2          # Use DDK wave functions from dataset 2
+  kptopt3   2          # Use time-reversal symmetry for k-points
+
+#Set 4 : Response function calculation of Q=0 phonons
+
+  rfphon4   1          # Do phonon response
+ rfatpol4   1 2        # Treat displacements of all atoms
+   rfdir4   1 1 1      # Do all directions (symmetry will be used)
+  getwfk4   1          # Use GS wave functions from dataset 1
+  getddk4   2          # Use DDK wave functions from dataset 2
+  kptopt4   2          # Use time-reversal symmetry for k-points
+
+#Sets 5-6 : Finite-wave-vector phonon calculations (defaults for all datasets)
+
+   rfphon   1          # Do phonon response
+  rfatpol   1 2        # Treat displacements of all atoms
+    rfdir   1 1 1      # Do all directions (symmetry will be used)
+   getwfk   1          # Use GS wave functions from dataset 1
+   kptopt   3          # Need full k-point set for finite-Q response
+   prtwf    1          # No printing of WF
+
+#Incomplete set of symmetry-inequivalent qpt chosen to be commensurate
+# with kpt mesh so that only one set of GS wave functions is needed.
+     nqpt   1
+     qpt2   0.00000000E+00  0.00000000E+00  0.00000000E+00
+     qpt3   0.00000000E+00  0.00000000E+00  0.00000000E+00
+     qpt4   0.00000000E+00  0.00000000E+00  0.00000000E+00
+     qpt5   2.50000000E-01  0.00000000E+00  0.00000000E+00
+     qpt6  -2.50000000E-01  5.00000000E-01  2.50000000E-01
+#    Following q-points complete the q-point set (not used here)
+#    qpt7   2.50000000E-01  2.50000000E-01  0.00000000E+00
+#    qpt8   5.00000000E-01  2.50000000E-01  0.00000000E+00
+#    qpt9  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+#    qpt10  5.00000000E-01  5.00000000E-01  0.00000000E+00
+#    qpt11  5.00000000E-01  0.00000000E+00  0.00000000E+00
+
+
+#######################################################################
+#Common input variables
+      paral_atom 1 
+
+#Definition of the unit cell
+    acell   3*10.61
+    rprim   0.0  0.5  0.5
+            0.5  0.0  0.5
+            0.5  0.5  0.0
+#Definition of the atom types
+   ntypat   2
+    znucl   13 33
+paral_rf1 0 
+paral_rf2 0 
+paral_rf3 0 
+paral_rf 1
+paral_kgb1 1 
+autoparal 1  paral_kgb 0
+nppert 2 
+#Definition of the atoms
+    natom   2
+    typat   1 2
+     xred   0.0  0.0  0.0
+            0.25 0.25 0.25
+#Number of band
+    nband  4 
+#Definition of the planewave basis set
+     ecut   3.0
+#Definition of the k-point grid
+    ngkpt   4  4  4
+  nshiftk   4
+   shiftk   0.0 0.0 0.5
+            0.0 0.5 0.0
+            0.5 0.0 0.0
+            0.5 0.5 0.5
+#Definition of the SCF procedure
+    nstep   25
+   diemac   9.0
+   tolvrs   1.0d-8
+#PAW parameters
+pawecutdg   9.
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "al_ps.abinit.paw, as_ps.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = .*_intel_1[89].0_.*
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4, 10
+#%% max_nprocs = 10
+#%% [NCPU_4]
+#%% files_to_test = t62_MPI4.abo, tolnlines = 50, tolabs= 3.0e-2, tolrel= 2.0e-1, fld_options = -easy
+#%% [NCPU_10]
+#%% files_to_test = t62_MPI10.abo, tolnlines = 65, tolabs= 3.0e-2, tolrel= 2.0e-1, fld_options = -easy
+#%% [extra_info]
+#%% authors = M. Torrent, M. Delaveau
+#%% keywords = PAW, DFPT, DDK
+#%% description = 
+#%%   This test check the parallelization over atomic sites both for the ground state
+#%%   and response function features (within PAW formalism), together with
+#%%   parallelization over perturbations.
+#%%   Computation of phonons and response to electric field within PAW (both q=0 and q/=0) 
+#%%   Test on AlAs structure inspired by v6/t62.
+#%%   Ground state, DDK, effective charges and dielectric tensor are computed.
+#%%   Phonon modes at q=0 are computed.
+#%%   Phonon modes at q=(1/4,0,0) and q=(-1/4,1/2/1/4) are computed.
+#%%   Note: Charge neutrality is not achieved with the present dataset,
+#%%   but can be easily reached by increasing some parameters; for instance:
+#%%     (ngkpt 8 8 8, ecut 15., pawecutdg 30.) gives Z(Al)=2.1184310, Z(As)=-2.1184804
+#%%<END TEST_INFO>

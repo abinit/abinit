@@ -1,0 +1,46 @@
+# Carbon atom
+ acell 9 9 9
+ diemac 1.0d0
+ ecut 19
+ isecur 1
+ kptopt 0
+ kpt   3*0.0
+ natom  1 nband 4 1
+ nkpt 1
+ nline 5  nnsclo 2
+ nsppol 2   nstep 20
+ nsym 2 ntypat  1
+ occ 1.0 1.0 1.0 0.0
+     1.0
+ occopt 2
+ rprim 1 0 0  0 1 0  0 0 1
+ symrel  1  0  0   0  1  0   0  0  1
+         1  0  0   0 -1  0   0  0  1
+ tnons 3*0 3*0
+ tolwfr 1.d-16
+ typat  1
+ wtk  1
+ xcart   0.0 0.0 0.0
+ znucl  6.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = t33.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Isolated carbon atom, with PseudosTM_pwteter/6c.pspnc pseudopotential
+#%%   Test a non-spherical, spin-polarized atom, with nsym=2.
+#%%   In order to have a fast computation, the cut-off, 19Ha, 
+#%%   is not large enough for good convergence, as well as the box size 9x9x9.
+#%%   With better convergence parameters, it can be used to find 
+#%%   the atomization energy of carbon-containing molecules.
+#%%<END TEST_INFO>

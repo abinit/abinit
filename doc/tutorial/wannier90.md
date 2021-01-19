@@ -15,7 +15,7 @@ basic variables to govern the numerical efficiency.
 This tutorial should take about 1 hour and it is important to note that the examples in this tutorial
 are not converged, they are just examples to show how to use the code.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## Summary of Wannier90 in ABINIT
 
@@ -52,23 +52,16 @@ Before starting make sure that you compiled abinit enabling Wannier90.
 You may have to recompile the code with
 
 ```
-configure --with-config-file=myconf.ac
+configure --with-config-file=myconf.ac9
 ```
 
-where *myconf.ac* defines:
+where *myconf.ac9* defines:
 
 ```sh
-# Flavor of the DFT library to use (default is atompaw+bigdft+libxc+wannier90)
+#Install prefix of the PSML I/O library (e.g.
+#                          /usr/local).
+with_wannier90="/usr/local"
 
-with_dft_flavor="wannier90"
-
-# Include flags for the Wannier90 library (default is unset)
-#
-#with_wannier90_incs="-I/usr/local/include/wannier90"
-
-# Link flags for the Wannier90 library (default is unset)
-#
-#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
 ```
 
 Now we will compute a set of MLWFs for silicon.
@@ -76,14 +69,13 @@ We are going to extract the Wannier functions corresponding to the four valence 
 
 *Before beginning, you might consider to work in a different sub-directory as
 for the other tutorials. Why not Work_w90?*
-Then copy the files file *tw90_1.files*, *tw90_1.in* and *wannier90.win* from
+Then copy the files *tw90_1.abi* and *wannier90.win* from
 the *$ABI_TESTS/tutoplugs/Input* directory to *Work_w90*:
 
     cd $ABI_TESTS/tutoplugs/Input
     mkdir Work_w90
     cd Work_w90
-    cp ../tw90_1.files .
-    cp ../tw90_1.in .
+    cp ../tw90_1.abi .
 
 Wannier90 also uses a secondary input file called *wannier90.win*.
 Therefore, you must include this file in the folder:
@@ -92,11 +84,11 @@ Therefore, you must include this file in the folder:
 
 Now you are ready to run abinit. Please type in:
 
-    abinit < tw90_1.files > log 2> err &
+    abinit  tw90_1.abi > log 2> err &
 
-Let's examine the input file *tw90_1.in*, while the calculation is running.
+Let's examine the input file *tw90_1.abi*, while the calculation is running.
 
-{% dialog tests/tutoplugs/Input/tw90_1.in %}
+{% dialog tests/tutoplugs/Input/tw90_1.abi %}
 
 The input file should look familiar to you. It is indeed the primitive cell of silicon.
 It has two data sets: first a SCF calculation and then a NSCF calculation which
@@ -166,8 +158,9 @@ You will obtain a table of the following form:
      +--------------------------------------------------------------------+<-- CONV
      | Iter  Delta Spread     RMS Gradient      Spread (Ang^2)      Time  |<-- CONV
      +--------------------------------------------------------------------+<-- CONV
-          0     0.492E+02     0.0000000000       49.1838608828       0.09  <-- CONV
-          1    -0.947E+01    22.7791321117       39.7138163954       0.09  <-- CONV
+          0     0.438E+02     0.0000000000       43.7939618280       0.08  <-- CONV
+          1    -0.946E+01    10.5484513508       34.3387915333       0.09  <-- CONV
+
 
 You can verify that the final spread you get is around 4.0 Å$^2$.
 
@@ -234,15 +227,14 @@ Before starting it is assumed that you have already completed the tutorials [PAW
 For silicon, we just have to add the variable [[pawecutdg]] and the PAW Atomic Data is included in the pseudopotential file.
 An example has already been prepared.
 
-Just copy the files *tw90_2.files* and *tw90_2.in* into *Work_w90*:
+Just copy the file  *tw90_2.abi* into *Work_w90*:
 
-    cp ../tw90_2.files .
-    cp ../tw90_2.in .
+    cp ../tw90_2.abi .
 
 We are going to reuse the wannier90.win of the previous example.
 Now, just run abinit again
 
-    abinit < tw90_2.files > log 2> err &
+    abinit tw90_2.abi > log 2> err &
 
 As it is expected, the results should be similar than those of the PW case.
 
@@ -262,18 +254,17 @@ a very accurate starting guess to get the MLWF.
 We are going to extract the $sp^3$ hybrid orbitals of Silane SiH$_4$. You can start
 by copying from the tests/tutoplugs directory the following files:
 
-    cp ../tw90_3.files .
-    cp ../tw90_3.in .
+    cp ../tw90_3.abi .
     cp ../tw90_3o_DS2_w90.win .
 
 Now run abinit
 
-    abinit < tw90_3.files > log 2> err &
+    abinit  tw90_3.abi > log 2> err &
 
 While it is running, we can start to examine the input files.
-Open the main input file *tw90_3.in*. The file is divided into three datasets.
+Open the main input file *tw90_3.abi*. The file is divided into three datasets.
 
-{% dialog tests/tutoplugs/Input/tw90_3.in %}
+{% dialog tests/tutoplugs/Input/tw90_3.abi %}
 
 First a SCF calculation is done. What follows is a NSCF calculation including
 more bands. Finally, in the third dataset we just read the wavefunction from
@@ -307,9 +298,9 @@ Now we will redo the silicon case but defining different initial projections.
 This calculation will be more time consuming, so you can start by running the
 calculation while reading:
 
-    cp ../tw90_4.in .
-    cp ../tw90_4.files .
+    cp ../tw90_4.abi .
     cp ../tw90_4o_DS3_w90.win .
+    abinit  tw90_4.abi > log 2> err &
 
 **Initial projections:**
 
@@ -325,13 +316,11 @@ the .amn file will be reduced.
 
 **Interpolated band structure**
 
-We are going to run Wannier90 in standalone mode. Just comment out the first
-two lines of the **.win** file:
+We are going to run Wannier90 in standalone mode. Just comment out the following
+lines of the **.win** file:
 
     postproc_setup = .true.   !used to write .nnkp file at first run
     num_iter = 100
-    wannier_plot = .true.
-    wannier_plot_supercell = 3
 
 And uncomment the following two lines:
 

@@ -30,6 +30,7 @@ MODULE m_xmpi
 
  use defs_basis
  use m_profiling_abi
+! use m_errors
  use iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
  use ISO_FORTRAN_ENV, only : int16,int32,int64
@@ -642,6 +643,7 @@ end interface xmpi_isum
 
 ! Non-blocking in-place version
 interface xmpi_isum_ip
+  module procedure xmpi_isum_ip_dp2d
   module procedure xmpi_isum_ip_dp4d
 end interface xmpi_isum_ip
 !!***
@@ -2816,7 +2818,9 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ABI_UNUSED(datatype)
+  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! ABI_UNUSED(datatype)
+  if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_int
 !!***
 !--------------------------------------
@@ -2837,7 +2841,9 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ABI_UNUSED(datatype)
+  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! ABI_UNUSED(datatype)
+  if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_real
 !!***
 !--------------------------------------
@@ -2858,7 +2864,9 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ABI_UNUSED(datatype)
+  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! ABI_UNUSED(datatype)
+  if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dble
 !!***
 !--------------------------------------
@@ -2879,7 +2887,9 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ABI_UNUSED(datatype)
+  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! ABI_UNUSED(datatype)
+  if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_cplx
 !!***
 !--------------------------------------
@@ -2900,7 +2910,9 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ABI_UNUSED(datatype)
+  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! ABI_UNUSED(datatype)
+  if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dcplx
 !!***
 !--------------------------------------
@@ -2921,7 +2933,9 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk).or.invec(kk)
     end do
   end do
-  ABI_UNUSED(datatype)
+  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! ABI_UNUSED(datatype)
+  if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_lor_log
 !!***
 !--------------------------------------
@@ -2942,7 +2956,9 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk).and.invec(kk)
     end do
   end do
-  ABI_UNUSED(datatype)
+  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! ABI_UNUSED(datatype)
+  if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_land_log
 !!***
 

@@ -86,7 +86,7 @@ contains
 !!  kpoint(3)=k point in terms of recip. translations
 !!  lmnmax=max. number of (l,m,n) components over all types of atoms
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~ABINIT/Infos/vargs.htm#ngfft

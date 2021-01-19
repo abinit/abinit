@@ -87,8 +87,6 @@ module m_yaml
  contains
 
    procedure :: write_and_free => yamldoc_write_unit_and_free
-    !, yamldoc_write_units_and_free ! ifort13-16 does not generic interfaces
-    !
     ! Write Yaml document to unit and free memory.
 
    procedure :: write_units_and_free => yamldoc_write_units_and_free
@@ -153,6 +151,9 @@ module m_yaml
 
  public :: yaml_single_dict
   ! Create a full document from a single dictionary
+
+ public :: yaml_write_dict
+  ! Write a dictionary in a Yaml document.
 
  public :: yaml_iterstart
   ! Set the value of the iteration indices used to build the iteration_state dict in the Yaml documents
@@ -255,6 +256,7 @@ end subroutine yaml_iterstart
 !!  [width]: optional, impose a minimum width of the field name side of the column (padding with spaces)
 !!  [int_fmt]: Default format for integers.
 !!  [real_fmt]: Default format for real.
+!!  [with_iter_state]: True if dict with iteration state should be added. Default: True
 !!
 !! PARENTS
 !!
@@ -262,7 +264,7 @@ end subroutine yaml_iterstart
 !!
 !! SOURCE
 
-type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_fmt) result(new)
+type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_fmt, with_iter_state) result(new)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: tag
@@ -270,9 +272,10 @@ type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_f
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
  character(len=*),optional,intent(in) :: int_fmt, real_fmt
+ logical,optional,intent(in) :: with_iter_state
 
 !Local variables-------------------------------
- logical :: nl
+ logical :: nl, with_iter_state_
  type(pair_list) :: dict
 ! *************************************************************************
 
@@ -284,7 +287,8 @@ type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_f
 
  call new%stream%push(ch10//'---'//' !'//trim(tag)//ch10)
 
- if (DTSET_IDX /= -1) then
+ with_iter_state_ = .True.; if (present(with_iter_state)) with_iter_state_ = with_iter_state
+ if (with_iter_state_ .and. DTSET_IDX /= -1) then
    ! Write dictionary with iteration state.
    call dict%set('dtset', i=DTSET_IDX)
    if (TIMIMAGE_IDX /= -1) call dict%set("timimage", i=TIMIMAGE_IDX)
@@ -535,12 +539,12 @@ end subroutine yamldoc_add_int
 !!  Add a list of integer numbers to the document
 !!
 !! INPUTS
-!!  keylist = List of comma-separated keywords
-!!  values = List of values
+!!  keylist = List of comma-separated keywords e.g. "foo, bar"
+!!  values = List of integer values
 !!  [int_fmt] = override the default formatting
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [dict_key]=If present, a dictionary with key `dict_key` is created instead of a list.
-!!  [multiline_trig] = optional minimum number of elements before switching to multiline representation
+!!  [multiline_trig] = minimum number of elements before switching to multiline representation
 !!  [ignore]= If present, ignore entrie if values is equal to ignore.
 !!
 !! PARENTS
@@ -1472,6 +1476,48 @@ subroutine yaml_single_dict(unit, tag, comment, pl, key_size, string_size, &
  call doc%write_and_free(unit, newline=nl)
 
 end subroutine yaml_single_dict
+!!***
+
+!!****f* m_yaml/yaml_write_dict
+!! NAME
+!! yaml_write_dict
+!!
+!! FUNCTION
+!!  Write a dictionary in a Yaml document.
+!!
+!! INPUTS
+!!  tag: Yaml tag
+!!  dict_name: Dictionary name
+!!  dict: Dictionary
+!!  unit: Unit numver
+!!  [with_iter_state]: True if dict with iteration state should be added. Default: False
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine yaml_write_dict(tag, dict_name, dict, unit, with_iter_state)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: tag, dict_name
+ type(pair_list),intent(inout) :: dict
+ integer,intent(in) :: unit
+ logical,optional,intent(in) :: with_iter_state
+
+!Local variables-------------------------------
+ type(yamldoc_t) :: ydoc
+ logical :: with_iter_state_
+! *************************************************************************
+
+ with_iter_state_ = .False.; if (present(with_iter_state)) with_iter_state_ = with_iter_state
+
+ ydoc = yamldoc_open(tag, with_iter_state=with_iter_state_)
+ call ydoc%add_dict(dict_name, dict)
+ call ydoc%write_and_free(unit)
+
+end subroutine yaml_write_dict
 !!***
 
 !!****f* m_yaml/yamldoc_write_unit_and_free
