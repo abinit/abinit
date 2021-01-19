@@ -5908,6 +5908,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 !arrays
  integer :: ngfft(18)
  integer, allocatable :: gfft(:,:),ig2ifft(:), gsmall(:,:)
+ real(dp) :: dvdb_qdamp(1)
  real(dp) :: vals2(2)
  real(dp),pointer :: this_qpts(:,:)
  real(dp),allocatable :: file_v1r(:,:,:,:),long_v1r(:,:,:,:),tmp_v1r(:,:,:,:)
@@ -6050,7 +6051,8 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      "has_dielt", "has_zeff", "has_quadrupoles", "has_efield"], &
      l2int([dvdb%has_dielt, dvdb%has_zeff, dvdb%has_quadrupoles, dvdb%has_efield]))
    NCF_CHECK(ncerr)
-   NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [dvdb%qdamp]))
+   dvdb_qdamp = dvdb%qdamp
+   NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], dvdb_qdamp))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gsmall"), gsmall))
  end if
 #endif
