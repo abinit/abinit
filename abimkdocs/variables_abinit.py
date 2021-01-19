@@ -2229,7 +2229,7 @@ Variable(
     text=r"""
 Gives a rough description of the initial GS density, for each type of atom.
 This value is used to create the first exchange and correlation
-potential. Afterwards, it is not used anymore, except in cases related to [[densfor_pred]]. 
+potential. Afterwards, it is not used anymore, except in cases related to [[densfor_pred]].
 
 [[densty]] gives an average radius (a.u.) of a Gaussian density, that will make each pseudoion neutral.
 If set to 0.0, a tabulated value is used, announced as a 'decay length' in the log file.
@@ -4161,7 +4161,7 @@ Variable(
     added_in_version="9.2.2",
     text=r"""
 If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]]).
-If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero).
+If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero) although it is still possible to activate particular tests by specifying input variables directly in the input file.
 (In the future, the level three will always be the maximum allowed value, with all checks set to zero, while a more refined behaviour
 might be implemented for [[expert_user]]==1 or 2).
 """,
@@ -4924,7 +4924,7 @@ Variable(
     text=r"""
 This variable is typically used to chain the calculations, in the multi-
 dataset mode ([[ndtset]] > 0), since it describes from which dataset the output [[acell]]
-and [[rprim]] are to be taken (implicitly also [[scalecart]]), as input of the present dataset. 
+and [[rprim]] are to be taken (implicitly also [[scalecart]]), as input of the present dataset.
 The cell parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
 If 0, no previously computed values are used.
 If >0, the value must be the index of the dataset from which the
@@ -6752,7 +6752,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Mixing coefficient for the screened Fock operator in case of hybrid
-functionals. HSE has 0.25. 
+functionals. HSE has 0.25.
 
 ABINIT knows the correct value from [[ixc]]. Experts might nevertheless tune
 this mixing coefficient.
@@ -8141,7 +8141,7 @@ Other (**negative**) options:
     rho(r) and then run **iscf** = -2 for the intended set of k-points and bands.
     To prepare a run with **iscf** = -2, a density file can be produced using the
     parameter [[prtden]] (see its description). When a self-consistent set of
-    wavefunctions is already available, abinit can be used with [[nstep]] = 0 
+    wavefunctions is already available, abinit can be used with [[nstep]] = 0
     and the adequate value of [[prtden]], see tests/v2/Input/t47.abi .
 
   * -3 --> like -2, but initialize [[occ]] and [[wtk]], directly or indirectly
@@ -8160,7 +8160,7 @@ Other (**negative**) options:
     corresponding to these values, there is no automatic translation, so that you have to specify explicitly
     the [[ixc]] value among the above ones. As an example, if the [[ixc]] from your pseudopotentiel is -1012,
     this corresponds to the same functional (LDA - Perdew Wang 1992) as [[ixc]]=7, and you should specify [[ixc]]=7.
-    
+
 """,
 ),
 
@@ -8310,7 +8310,7 @@ used for debugging). A warning is issued if this is not the case.
 Unfortunately, pseudopotential (or PAW) generators for hybrid functionals and
 mGGA are currently under development, so that one usually uses GGA or LDA
 pseudopotentials instead. The error should be limited when GGA or LDA
-pseudopotentials with semi-core states are used. 
+pseudopotentials with semi-core states are used.
 Still this is a non-controlled error. Moreover, the choices [[ixc]] = 1, 2, 3 and 7 are fits to the
 same data, from Ceperley-Alder, and are rather similar, at least for spin-unpolarized systems.
 The choice between the non-spin-polarized and spin-polarized case is governed
@@ -8377,9 +8377,9 @@ that it comes from the LibXC). In the case of separate exchange functional
 (let us represent its identifier by XXX) and correlation functional (let us
 represent its identified by CCC), a six-digit number will have to be specified
 for [[ixc]], by concatenation, be it XXXCCC or CCCXXX. As an example,
-[[ixc]] = -1012 gives the Perdew-Wang 1992 LDA ([[ixc]]=7 as well), 
-[[ixc]] = -020 gives the Teter93 LDA ([[ixc]]=1 as well), 
-while [[ixc]] = -101130 gives the PBE GGA ([[ixc]]=11 as well). 
+[[ixc]] = -1012 gives the Perdew-Wang 1992 LDA ([[ixc]]=7 as well),
+[[ixc]] = -020 gives the Teter93 LDA ([[ixc]]=1 as well),
+while [[ixc]] = -101130 gives the PBE GGA ([[ixc]]=11 as well).
 Note that for a meta-GGA, the kinetic energy density is needed.
 This means having [[usekden]] = 1.
 
