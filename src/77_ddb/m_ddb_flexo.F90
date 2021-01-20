@@ -878,6 +878,11 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  end do
 
 !MR: kept for testing only. If uncommented the resulting elastic tensors must agree with HWRV's ones
+! write(ab_out,*)
+! write(ab_out,*) "Stress tensor"
+! do i=1,3
+!   write(ab_out,*) stress(i,:)
+! end do
 ! do i=1,3
 !   do j=1,3
 !     do k=1,3
