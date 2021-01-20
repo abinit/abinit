@@ -905,8 +905,8 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
        do jatd=1,3
          do iatd=1,3
            do iat=1,natom
-             lmcelast(jatd,qvecd,strsd1,strsd2)=lmcelast(jatd,qvecd,strsd1,strsd2) + &
-             intstrn(qvecd,jatd,iatd,iat)*piezofr(iatd,iat,strsd1,strsd2)*fac
+             lmcelast(jatd,qvecd,strsd1,strsd2)=lmcelast(jatd,qvecd,strsd1,strsd2) - &
+             intstrn(jatd,qvecd,iatd,iat)*piezofr(iatd,iat,strsd1,strsd2)*fac
            end do
          end do
          ricelast_t2(jatd,qvecd,strsd1,strsd2)=frcelast_t2(jatd,qvecd,strsd1,strsd2) + &
