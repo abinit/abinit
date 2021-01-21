@@ -1378,11 +1378,11 @@ subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
      end do ! ii
 
    else !Metals
-     call wrtout(unts, sjoin(" Conductivity[1/(Vscm)] using ", rta_type, "approximation"))
+     call wrtout(unts, sjoin(" Conductivity(V^-1 s^-1 cm^-1) using ", rta_type, "approximation"))
 
      do spin=1, self%nsppol
        if (self%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
-       write(msg, "(4a16)") 'Temperature [K]', 'xx', 'yy', 'zz'
+       write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
        call wrtout(unts, msg)
        do itemp=1,self%ntemp
          write(msg,"(f16.2,3e16.2)") &
