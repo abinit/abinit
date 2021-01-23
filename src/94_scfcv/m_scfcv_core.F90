@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_scfcv_core
 !! NAME
 !!  m_scfcv_core
@@ -343,7 +344,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
  integer :: my_quit,quitsum_request,timelimit_exit,usecg,wfmixalg,with_vectornd
  integer ABI_ASYNC :: quitsum_async
  real(dp) :: boxcut,compch_fft,compch_sph,deltae,diecut,diffor,ecut
- real(dp) :: ecutf,ecutsus,edum,elast,etotal,evxc,fermie,gsqcut,hyb_mixing,hyb_mixing_sr
+ real(dp) :: ecutf,ecutsus,edum,elast,etotal,evxc,fermie,fermih,gsqcut,hyb_mixing,hyb_mixing_sr ! CP added fermih
  real(dp) :: maxfor,res2,residm,ucvol,ucvol_local,val_max
  real(dp) :: val_min,vxcavg,vxcavg_dum
  real(dp) :: zion,wtime_step,now,prev,esum,enonlocalpsp !MRM
@@ -522,6 +523,10 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
    energies%e_fermie = results_gs%energies%e_fermie
    results_gs%fermie = results_gs%energies%e_fermie
    !write(std_out,*)"in scfcv_core: results_gs%fermie: ",results_gs%fermie
+! CP added for occopt 9
+   energies%e_fermih = results_gs%energies%e_fermih
+   results_gs%fermih = results_gs%energies%e_fermih
+! End CP addition
  end if
 
  select case(dtset%usepotzero)
@@ -537,6 +542,9 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
  if(wvlbigdft) energies%e_corepsp = zero
 
  fermie=energies%e_fermie
+ ! CP added
+ fermih=energies%e_fermih
+ ! End CP added
  isave_den=0; isave_kden=0 !initial index of density protection file
  optres=merge(0,1,dtset%iscf<10)
  usexcnhat=0!;mcprj=0
@@ -598,12 +606,20 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 !results_gs should not be used as input of scfcv_core
 !HERE IS PRINTED THE FIRST LINE OF SCFCV
 
+ ! CP modified
+! call scprqt(choice,cpus,deltae,diffor,dtset,&
+!& eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
+!& dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
+!& maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
+!& occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
+!& psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode)
  call scprqt(choice,cpus,deltae,diffor,dtset,&
-& eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
+& eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
 & dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 & maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 & occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
 & psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode)
+ ! End CP modified
 
 !Various allocations (potentials, gradients, ...)
  ABI_MALLOC(forold,(3,dtset%natom))
@@ -1553,7 +1569,8 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 &     vectornd,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
 
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
-     ABI_WARNING('THOMAS FERMI')
+     ! CP: occopt 9 not available with Thomas Fermi functionals
+     MSG_WARNING('THOMAS FERMI')
      call vtorhotf(dtset,energies%e_kinetic,energies%e_nlpsp_vfock,&
 &     energies%entropy,energies%e_fermie,gprimd,grnl,irrzon,mpi_enreg,&
 &     dtset%natom,nfftf,dtset%nspden,dtset%nsppol,dtset%nsym,phnons,&
@@ -1641,13 +1658,22 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
      if(paw_dmft%use_dmft==1) then
        call prtene(dtset,energies,std_out,psps%usepaw)
      end if
+     ! CP modified
+     ! call scprqt(choice,cpus,deltae,diffor,dtset,&
+!&     eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
+!&     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
+!&     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
+!&     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
+!&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
+!&     electronpositron=electronpositron,fock=fock)
      call scprqt(choice,cpus,deltae,diffor,dtset,&
-&     eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
+&     eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
 &     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
 &     electronpositron=electronpositron,fock=fock)
+     ! End CP modified
      call timab(52,2,tsec)
 
 !    Check if we need to exit the loop
@@ -1842,13 +1868,22 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 !    Check exit criteria
      call timab(52,1,tsec)
      choice=2
+     ! CP modified
+     !call scprqt(choice,cpus,deltae,diffor,dtset,&
+!&     eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
+!&     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
+!&     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
+!&     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
+!&     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
+!&     electronpositron=electronpositron,fock=fock)
      call scprqt(choice,cpus,deltae,diffor,dtset,&
-&     eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
+&     eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
 &     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
 &     electronpositron=electronpositron,fock=fock)
+     ! End CP modified
      call timab(52,2,tsec)
 
 !    Check if we need to exit the loop
@@ -1921,11 +1956,17 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 !      Don't use parallelism over atoms because only me=0 accesses here
        bantot=hdr%bantot
        if (dtset%positron==0) then
-         call hdr%update(bantot,etotal,energies%e_fermie,residm,&
+         ! CP modified
+         !call hdr%update(bantot,etotal,energies%e_fermie,residm,&
+!&         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
+         call hdr%update(bantot,etotal,energies%e_fermie,energies%e_fermih,residm,&
 &         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
+         ! End CP modified
        else
-         call hdr%update(bantot,electronpositron%e0,energies%e_fermie,residm,&
+         ! CP modified
+         call hdr%update(bantot,electronpositron%e0,energies%e_fermie,energies%e_fermih,residm,&
 &         rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
+         ! End CP modified
        end if
      end if
 
@@ -1999,7 +2040,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
    if (.not.allocated(nhatgr) ) then
      ABI_MALLOC(nhatgr,(0,0,0))
    end if
-   
+
    call energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &   energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,&
 &   nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,&
@@ -2087,12 +2128,12 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 ! MRM print final Hartree energy components
  write(std_out,'(a1)')' '
  write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
- 
+
  enonlocalpsp=energies%e_nlpsp_vfock-2.0d0*energies%e_fock0
  esum=energies%e_kinetic+energies%e_ewald+energies%e_corepsp+energies%e_hartree+energies%e_xc&
- &+energies%e_localpsp+enonlocalpsp+energies%e_fock0& 
+ &+energies%e_localpsp+enonlocalpsp+energies%e_fock0&
  &+energies%e_hybcomp_E0+energies%e_hybcomp_v0+energies%e_hybcomp_v+energies%e_vdw_dftd&
- &+energies%e_elecfield+energies%e_magfield   
+ &+energies%e_elecfield+energies%e_magfield
 
  write(std_out,'(a,2(es16.6,a))')' Ekinetic   = : ',energies%e_kinetic    ,' Ha ,',energies%e_kinetic*Ha_eV    ,' eV'
  write(std_out,'(a,2(es16.6,a))')' Evext_l    = : ',energies%e_localpsp   ,' Ha ,',energies%e_localpsp*Ha_eV   ,' eV'

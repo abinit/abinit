@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_dfpt_loopert
 !! NAME
 !!  m_dfpt_loopert
@@ -1036,20 +1037,32 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
    ABI_MALLOC(eigen0,(bantot_rbz))
    eigen0(:)=zero
-   call ebands_init(bantot_rbz,ebands_k,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
+   ! CP modified
+   !call ebands_init(bantot_rbz,ebands_k,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
+   !  nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
+   !  dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+   !  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+   call ebands_init(bantot_rbz,ebands_k,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+     doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
      nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
      dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
      dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
-   ABI_FREE(eigen0)
+   ! End CP modified
+   ABI_DEALLOCATE(eigen0)
 
 !  Initialize header, update it with evolving variables
    gscase=0 ! A GS WF file is read
    call hdr_init(ebands_k,codvsn,dtset,hdr0,pawtab,gscase,psps,wvl%descr,&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
-   call hdr0%update(bantot_rbz,etotal,fermie,&
+   ! CP modified
+   !call hdr0%update(bantot_rbz,etotal,fermie,&
+   !  residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
+   !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call hdr0%update(bantot_rbz,etotal,fermie,fermie,& ! CP: duplicated fermie to fit new def of hdr_update
      residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   ! End CP modified
 
    _IBM6("before inwffil")
 
@@ -1179,16 +1192,30 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Initialize band structure datatype at k+q
    ABI_MALLOC(eigenq,(bantot_rbz))
    eigenq(:)=zero
-   call ebands_init(bantot_rbz,ebands_kq,dtset%nelect,doccde_rbz,eigenq,istwfk_rbz,kpq_rbz,&
+   ! CP modified
+   !call ebands_init(bantot_rbz,ebands_kq,dtset%nelect,doccde_rbz,eigenq,istwfk_rbz,kpq_rbz,&
+!&   nband_rbz,nkpt_rbz,npwar1,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
+!&   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!&   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+   call ebands_init(bantot_rbz,ebands_kq,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+&   doccde_rbz,eigenq,istwfk_rbz,kpq_rbz,&
 &   nband_rbz,nkpt_rbz,npwar1,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 &   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+   ! End CP modified
    if (.not.kramers_deg) then
      eigenq(:)=zero
-     call ebands_init(bantot_rbz,ebands_kmq,dtset%nelect,doccde_rbz,eigenq,istwfk_rbz,kmq_rbz,&
+     ! CP modified
+     ! call ebands_init(bantot_rbz,ebands_kmq,dtset%nelect,doccde_rbz,eigenq,istwfk_rbz,kmq_rbz,&
+!&     nband_rbz,nkpt_rbz,npwar1_mq,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
+!&     dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!&     dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+     call ebands_init(bantot_rbz,ebands_kmq,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+&     doccde_rbz,eigenq,istwfk_rbz,kmq_rbz,&
 &     nband_rbz,nkpt_rbz,npwar1_mq,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 &     dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &     dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+      ! End CP modified
    end if
    ABI_FREE(eigenq)
 
@@ -1340,18 +1367,28 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      option=1
      dosdeltae=zero ! the DOS is not computed with option=1
      maxocc=two/(dtset%nspinor*dtset%nsppol)
-     call getnel(docckqde,dosdeltae,eigenq,entropy,fermie,maxocc,dtset%mband,&
+     ! CP modified
+     !call getnel(docckqde,dosdeltae,eigenq,entropy,fermie,maxocc,dtset%mband,&
+     !  nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occkq,dtset%occopt,option,&
+     !  dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
+     call getnel(docckqde,dosdeltae,eigenq,entropy,fermie,fermie,maxocc,dtset%mband,&
        nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occkq,dtset%occopt,option,&
-       dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
+       dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz,1,dtset%nband(1)) ! CP: added 1, nband(0) to fit new def of getnel
+     ! End CP modified
 !    Compare nelect at k and nelelect at k+q
      write(msg, '(a,a,a,es16.6,a,es16.6,a)')&
        ' dfpt_looppert : total number of electrons, from k and k+q',ch10,&
        '  fully or partially occupied states are',dtset%nelect,' and',nelectkq,'.'
      call wrtout([std_out, ab_out], msg)
      if (.not.kramers_deg) then
-       call getnel(docckde_mq,dosdeltae,eigen_mq,entropy,fermie,maxocc,dtset%mband,&
+       ! CP modified
+       !call getnel(docckde_mq,dosdeltae,eigen_mq,entropy,fermie,maxocc,dtset%mband,&
+       !  nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occk_mq,dtset%occopt,option,&
+       !  dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
+       call getnel(docckde_mq,dosdeltae,eigen_mq,entropy,fermie,fermie,maxocc,dtset%mband,&
          nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occk_mq,dtset%occopt,option,&
-         dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
+         dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz,1,dtset%nband(1))
+       ! End CP modified
 !      Compare nelect at k and nelelect at k-q
        write(msg, '(a,a,a,es16.6,a,es16.6,a)')&
          ' dfpt_looppert : total number of electrons, from k and k-q',ch10,&
@@ -1957,11 +1994,19 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! MG FIXME: Here there's a bug because eigen0 is dimensioned with nkpt_rbz i.e. IBZ(q)
      ! but the ebands_t object is constructed with dimensions taken from hdr0 i.e. the IBZ(q=0).
      bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-     call ebands_init(bantot,gkk_ebands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
+     ! CP modified
+     !call ebands_init(bantot,gkk_ebands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
+!&     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
+!&     hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
+!&     hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
+!&     hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
+     call ebands_init(bantot,gkk_ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+&     doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &     hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
 &     hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 &     hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
+      ! End CP modified
 
      ! Init a gkk_t object
      call gkk_init(gkk,gkk2d,dtset%mband,dtset%nsppol,nkpt_rbz,1,1)
@@ -2072,9 +2117,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call eigen_meandege(eigen0,eigen1,eigen1_mean,dtset%mband,nband_rbz,nkpt_rbz,dtset%nsppol,1)
      option=4
      if (me == master) then
-       call prteigrs(eigen1_mean,dtset%enunit,fermie,dtfil%fnametmp_1wf1_eig,ab_out,iscf_mod,kpt_rbz,dtset%kptopt,&
+       ! CP modified
+       !call prteigrs(eigen1_mean,dtset%enunit,fermie,dtfil%fnametmp_1wf1_eig,ab_out,iscf_mod,kpt_rbz,dtset%kptopt,&
+!&       dtset%mband,nband_rbz,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
+!&       option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk_rbz)
+       call prteigrs(eigen1_mean,dtset%enunit,fermie,fermie,dtfil%fnametmp_1wf1_eig,ab_out,iscf_mod,kpt_rbz,dtset%kptopt,&
 &       dtset%mband,nband_rbz,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
 &       option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk_rbz)
+       ! End CP modified
      end if
      ABI_FREE(eigen1_mean)
    end if
@@ -2301,11 +2351,19 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !        Electronic band energies.
          bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-         call ebands_init(bantot,gkk_ebands,dtset%nelect,doccde,eigen0_pert,hdr0%istwfk,hdr0%kptns,&
+         ! CP modified
+         !call ebands_init(bantot,gkk_ebands,dtset%nelect,doccde,eigen0_pert,hdr0%istwfk,hdr0%kptns,&
+!&         hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
+!&         hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
+!&         hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
+!&         hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
+         call ebands_init(bantot,gkk_ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+&         doccde,eigen0_pert,hdr0%istwfk,hdr0%kptns,&
 &         hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &         hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
 &         hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 &         hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
+          ! End CP modified
 
 !        Second order derivative EIGR2D (real and Im)
          call eigr2d_init(eig2nkq,eigr2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)

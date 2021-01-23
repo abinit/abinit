@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_outscfcv
 !! NAME
 !!  m_outscfcv
@@ -304,7 +305,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  logical :: remove_inv
  logical :: paral_atom, paral_fft, my_atmtab_allocated
  real(dp) :: e_zeeman
- real(dp) :: e_fermie
+ real(dp) :: e_fermie, e_fermih ! CP added e_fermih
  type(oper_type) :: dft_occup
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands
@@ -368,15 +369,26 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  bantot= dtset%mband*dtset%nkpt*dtset%nsppol
  ABI_CALLOC(doccde, (bantot))
 
- call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+ ! CP modified
+ !call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+ !  hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+ !  hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+ !  hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+ call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+   doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
    hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
    hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
    hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+ ! End CP modified
 
  ABI_FREE(doccde)
 
  ebands%fermie  = results_gs%energies%e_fermie
  e_fermie = results_gs%energies%e_fermie
+ ! CP added
+ ebands%fermih  = results_gs%energies%e_fermih
+ e_fermih = results_gs%energies%e_fermih
+ ! End CP added
  ebands%entropy = results_gs%energies%entropy
  !write(std_out,*)"ebands%efermi in outscfcv",ebands%fermie
  !write(std_out,*)"results_gs%energies%e_fermie in outscfcv",e_fermie
@@ -390,7 +402,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! YAML output
  if (me == master) then
-   call results_gs%yaml_write(ab_out, crystal, dtset%nstep > 0, info="Summary of ground state results")
+   call results_gs%yaml_write(ab_out, crystal, dtset%occopt, dtset%nstep > 0, info="Summary of ground state results")
  end if
 
 !wannier interface

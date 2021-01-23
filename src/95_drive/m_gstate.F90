@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_gstate
 !! NAME
 !!  m_gstate
@@ -274,7 +275,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
- real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
+ real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih ! CP added fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: is_dfpt=.false.,wvlbigdft=.false.
@@ -573,10 +574,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
- etot=hdr%etot ; fermie=hdr%fermie ; residm=hdr%residm
- call hdr%update(bantot,etot,fermie,&
+ etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
+ ! CP modified
+ !call hdr%update(bantot,etot,fermie,&
+ !  residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
+ !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%update(bantot,etot,fermie,fermih,&
    residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ ! End CP modified
 
  ! PW basis set: test if the problem is ill-defined.
  if (dtset%usewvl == 0 .and. dtset%tfkinfunc /= 2) then
@@ -852,17 +858,27 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !were read from disk, occupation scheme is metallic (this excludes iscf=-1),
 !and occupation numbers are required by iscf
  if( dtfil%ireadwf==1 .and. &
-& (dtset%occopt>=3.and.dtset%occopt<=8) .and. &
+! CP modified
+!& (dtset%occopt>=3.and.dtset%occopt<=8) .and. &
+& (dtset%occopt>=3.and.dtset%occopt<=9) .and. & ! allowing for occopt 9
+! End CP modified
 & (dtset%iscf>0 .or. dtset%iscf==-3) .and. dtset%positron/=1 ) then
 
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
 !  Do not take into account the possible STM bias
+! CP modified
+!   call newocc(doccde,eigen,results_gs%energies%entropy,&
+!&   results_gs%energies%e_fermie,&
+!&   dtset%spinmagntarget,dtset%mband,dtset%nband,&
+!&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
+!&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk)
    call newocc(doccde,eigen,results_gs%energies%entropy,&
-&   results_gs%energies%e_fermie,&
+&   results_gs%energies%e_fermie,results_gs%energies%e_fermih,dtset%ivalence,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
-&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
+&   dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk)
+! End CP modified
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
    ABI_FREE(doccde)
@@ -1064,9 +1080,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        end if
 
        if (rdwrpaw/=0) then
-         call hdr%update(bantot,etot,fermie,residm,&
+         ! CP modified
+         !call hdr%update(bantot,etot,fermie,residm,&
+         !  rprimd,occ,pawrhoij,xred,args_gs%amu,&
+         !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+         call hdr%update(bantot,etot,fermie,fermih,residm,&
            rprimd,occ,pawrhoij,xred,args_gs%amu,&
            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+         ! End CP modified
        end if
 
        ! Read kinetic energy density
@@ -1170,7 +1191,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
     ! Read density and get Fermi level from hdr_den
      call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
      mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
-     results_gs%etotal = hdr_den%etot; results_gs%energies%e_fermie = hdr_den%fermie
+     results_gs%etotal = hdr_den%etot;
+     results_gs%energies%e_fermie = hdr_den%fermie; results_gs%energies%e_fermih = hdr_den%fermih ! CP modified, added fermih
      call hdr_den%free()
 
      if(dtfil%ireadkden/=0 .and. dtset%usekden==1)then
@@ -1345,20 +1367,33 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !! end if
 
 !Update the header, before using it
- call hdr%update(bantot,results_gs%etotal,results_gs%energies%e_fermie,&
+ ! CP modified
+ !call hdr%update(bantot,results_gs%etotal,results_gs%energies%e_fermie,&
+ !  results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
+ !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%update(bantot,results_gs%etotal,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
    results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ ! End CP modified
 
  ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde=zero
 
- call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+ ! CP modified
+! call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+!& hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+!& hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+!& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+ call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+& doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
 & hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
 & hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
 & hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+ ! End CP modified
 
  ebands%fermie = results_gs%energies%e_fermie
- ABI_FREE(doccde)
+ ebands%fermih = results_gs%energies%e_fermih ! CP modified
+ ABI_DEALLOCATE(doccde)
  !write(std_out,*)"efermi after ebands_init",ebands%fermie
 
  ! Compute and print the gaps.
@@ -1408,10 +1443,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call cryst%free()
  end if
 
- call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,&
+ ! CP modified
+! call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,&
+!& dtfil%fnameabo_dos,dtfil%fnameabo_eig,results_gs%fred,&
+!& mpi_enreg,nfftf,ngfftf,occ,dtset%optforces,&
+!& resid,rhor,rprimd,results_gs%vxcavg,xred)
+ call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
 & dtfil%fnameabo_dos,dtfil%fnameabo_eig,results_gs%fred,&
 & mpi_enreg,nfftf,ngfftf,occ,dtset%optforces,&
 & resid,rhor,rprimd,results_gs%vxcavg,xred)
+ ! End CP modified
 
  if ( (dtset%iscf>=0 .or. dtset%iscf==-3) .and. dtset%prtstm==0) then
    call prtene(dtset,results_gs%energies,ab_out,psps%usepaw)
@@ -1819,6 +1860,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!  enunit=choice for units of output eigenvalues: 0=>hartree,
 !!   1=> eV, 2=> hartree and eV
 !!  fermie=fermi energy (Hartree)
+!!  fermih=fermi energy for holes (Hartree) ! CP added for occopt 9
 !!  fnameabo_dos=filename of output DOS file
 !!  fnameabo_eig=filename of output EIG file
 !!  fred(3,natom)=d(E)/d(xred) (hartree)
@@ -1864,14 +1906,14 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
-
-subroutine clnup1(acell,dtset,eigen,fermie, fnameabo_dos,fnameabo_eig,fred,&
+! CP added fermih to the list of arguments
+subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fred,&
                   mpi_enreg,nfft,ngfft,occ,prtfor, resid,rhor,rprimd,vxcavg,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft, prtfor
- real(dp),intent(in) :: fermie, vxcavg
+ real(dp),intent(in) :: fermie, fermih, vxcavg !CP added fermih
  character(len=*),intent(in) :: fnameabo_dos,fnameabo_eig
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
@@ -1965,16 +2007,28 @@ subroutine clnup1(acell,dtset,eigen,fermie, fnameabo_dos,fnameabo_eig,fred,&
 
  if(dtset%tfkinfunc==0)then
    if (me == master) then
-     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
+     ! CP modified
+     !call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
+!&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
+!&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+!&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
+!&     vxcavg,dtset%wtk)
+!     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
+!&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
+!&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+!&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
+!&     vxcavg,dtset%wtk)
+     call prteigrs(eigen,dtset%enunit,fermie,fermih,fnameabo_eig,ab_out,&
 &     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
 &     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
-     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
+     call prteigrs(eigen,dtset%enunit,fermie,fermih,fnameabo_eig,std_out,&
 &     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
 &     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
+      ! End CP modified
    end if
 
 #if defined HAVE_NETCDF
@@ -2000,12 +2054,19 @@ subroutine clnup1(acell,dtset,eigen,fermie, fnameabo_dos,fnameabo_eig,fred,&
    rewind(unitdos)
    maxocc=two/(dtset%nspinor*dtset%nsppol)  ! Will not work in the fixed moment case
    option=2
-   ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
-   call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,&
+   ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   ! CP modified
+   !call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,&
+!&   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
+!&   dtset%nsppol,occ,dtset%occopt,option,dtset%tphysel,&
+!&   dtset%tsmear,unitdos,dtset%wtk)
+   call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,fermih,&
 &   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
 &   dtset%nsppol,occ,dtset%occopt,option,dtset%tphysel,&
-&   dtset%tsmear,unitdos,dtset%wtk)
-   ABI_FREE(doccde)
+&   dtset%tsmear,unitdos,dtset%wtk,1,dtset%nband(1))!CP: added 1, nband(1) to fit new definition of getnel; parameters only used if
+! occopt 9
+   ! End CP modified
+   ABI_DEALLOCATE(doccde)
  end if
 
 end subroutine clnup1

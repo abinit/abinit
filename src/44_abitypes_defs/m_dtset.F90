@@ -1,3 +1,5 @@
+! CP modified
+
 !!****m* ABINIT/m_dtset
 !! NAME
 !!  m_dtset
@@ -300,6 +302,7 @@ type, public :: dataset_type
  integer :: istatimg
  integer :: istatr
  integer :: istatshft
+ integer :: ivalence ! CP added for occopt==9 purposes
  integer :: ixc
  integer :: ixc_sigma
  integer :: ixcpositron
@@ -745,6 +748,8 @@ type, public :: dataset_type
  real(dp) :: mdwall
  real(dp) :: mep_mxstep
  real(dp) :: nelect
+ real(dp) :: ne_qFD = zero ! CP added
+ real(dp) :: nh_qFD = zero  ! CP added
  real(dp) :: noseinert
  real(dp) :: omegasimax = 50/Ha_eV
  real(dp) :: omegasrdmax = 1.0_dp/Ha_eV  ! = 1eV
@@ -1039,15 +1044,24 @@ subroutine dtset_chkneu(dtset, charge, occopt)
 !(2) Optionally initialize occ with semiconductor occupancies
 !(even for a metal : at this stage, the eigenenergies are unknown)
 !Note that nband(1)=nband(2) in this section, as occopt=2 is avoided.
- if(occopt==1 .or. (occopt>=3 .and. occopt<=8) )then
+ ! CP modified
+ !if(occopt==1 .or. (occopt>=3 .and. occopt<=8) )then
+ if(occopt==1 .or. (occopt>=3 .and. occopt<=9) )then
+ ! End CP modified
 !  Here, initialize a real(dp) variable giving the
 !  maximum occupation number per band
    maxocc=2.0_dp/real(dtset%nsppol*dtset%nspinor,dp)
 
 !  Determine the number of bands fully or partially occupied
-   nocc=int((dtset%nelect-1.0d-8)/maxocc) + 1
+   ! CP modified
+   !nocc=int((dtset%nelect-1.0d-8)/maxocc) + 1
+   nocc=int((dtset%nelect-dtset%nh_qFD-1.0d-8)/maxocc) + 1
+   !End CP modified
 !  Occupation number of the highest level
-   occlast=dtset%nelect-maxocc*(nocc-1)
+   ! CP modified
+   !occlast=dtset%nelect-maxocc*(nocc-1)
+   occlast=dtset%nelect-dtset%nh_qFD-maxocc*(nocc-1)
+   ! End CP modified
    !write(std_out,*)' maxocc,nocc,occlast=',maxocc,nocc,occlast
 
 !  The number of allowed bands must be sufficiently large
@@ -1066,9 +1080,33 @@ subroutine dtset_chkneu(dtset, charge, occopt)
        if (1<nocc) tmpocc(1:nocc-1)=maxocc
 !      Then, do it for highest occupied band
        if (1<=nocc) tmpocc(nocc)=occlast
-!      Finally do it for eventual unoccupied bands
-       if ( nocc<dtset%nband(1)*dtset%nsppol ) tmpocc(nocc+1:dtset%nband(1)*dtset%nsppol)=0.0_dp
+       ! CP added to treat the case occopt = 9
+       if (occopt==9) then
+          if (nocc > dtset%ivalence*dtset%nsppol) then
+             write(msg,'(a,i5,a,f17.8,a)') 'In occopt = 9 case, ivalence = ', dtset%ivalence, &
+&           ' is too small compared to the number of electrons in the valence bands, nelect-nh_qFD = ', &
+&           dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
+            MSG_ERROR(msg)
+          end if
+       
+       if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=0.0_dp
+       ! now do it for excited electrons in the conduction bands > ivalence
+       nocc   = (dtset%ne_qFD-1.0d-8)/maxocc + 1
+       occlast= dtset%ne_qFD-maxocc*(nocc-1)
+       if ( (nocc+dtset%ivalence*dtset%nsppol) > dtset%nband(1)*dtset%nsppol) then
+          write(msg,'(a)') 'Occopt = 9: Not enough band above ivalence. Increase nband or reduce ivalence'
+          MSG_ERROR(msg)
+       end if
 
+       if(nocc > 1)  tmpocc(dtset%ivalence*dtset%nsppol+1:dtset%ivalence*dtset%nsppol+nocc-1)=maxocc
+       if(nocc >= 1) tmpocc(dtset%ivalence*dtset%nsppol+nocc)=occlast
+       if ((dtset%ivalence*dtset%nsppol + nocc) < dtset%nband(1)*dtset%nsppol) &
+&             tmpocc(dtset%ivalence*dtset%nsppol+nocc+1:dtset%nband(1)*dtset%nsppol)=0.0_dp
+       else
+!      Finally do it for eventual unoccupied bands
+         if ( nocc<dtset%nband(1)*dtset%nsppol ) tmpocc(nocc+1:dtset%nband(1)*dtset%nsppol)=0.0_dp
+       end if
+       ! End CP added
 !      Now copy the tmpocc array in the occ array, taking into account the spin
        if(dtset%nsppol==1)then
          do ikpt=1,dtset%nkpt
@@ -1565,6 +1603,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%istatimg           = dtin%istatimg
  dtout%istatr             = dtin%istatr
  dtout%istatshft          = dtin%istatshft
+ dtout%ivalence           = dtin%ivalence ! CP added for occopt == 9 purposes
  dtout%ixc                = dtin%ixc
  dtout%ixc_sigma          = dtin%ixc_sigma
  dtout%ixcpositron        = dtin%ixcpositron
@@ -1940,6 +1979,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mdwall             = dtin%mdwall
  dtout%mep_mxstep         = dtin%mep_mxstep
  dtout%nelect             = dtin%nelect
+ dtout%ne_qFD             = dtin%ne_qFD ! CP added for occopt == 9 purposes
+ dtout%nh_qFD             = dtin%nh_qFD ! CP added for occopt == 9 purposes
  dtout%nnos               = dtin%nnos
  dtout%noseinert          = dtin%noseinert
  dtout%omegasimax         = dtin%omegasimax
@@ -3174,7 +3215,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
  list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot'
- list_vars=trim(list_vars)//' irdvdw'
+ list_vars=trim(list_vars)//' irdvdw ival' ! CP added ival for occopt 9 case
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'
 !K
@@ -3202,7 +3243,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
- list_vars=trim(list_vars)//' np_slk nqpt nqptdm nscforder nshiftk nshiftq nqshft'
+ list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqFD nscforder nshiftk nshiftq nqshft' ! CP added nqFD for occopt 9
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nwfshist nzchempot'
 !O

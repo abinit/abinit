@@ -1,3 +1,5 @@
+! CP modified
+
 !!****p* ABINIT/optic
 !! NAME
 !! optic
@@ -555,10 +557,17 @@ program optic
  istwfk = hdr%istwfk
  npwarr = hdr%npwarr
 
- call ebands_init(bantot, ks_ebands, nelect, doccde, eigen0, istwfk, kpt, &
+! CP modified
+! call ebands_init(bantot, ks_ebands, nelect, doccde, eigen0, istwfk, kpt, &
+!& nband, nkpt, npwarr, nsppol, nspinor, tphysel, broadening, occopt, occ, wtk, &
+!& hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+!& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+ call ebands_init(bantot, ks_ebands, nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
+& doccde, eigen0, istwfk, kpt, &
 & nband, nkpt, npwarr, nsppol, nspinor, tphysel, broadening, occopt, occ, wtk, &
 & hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
 & hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+! End CP modified
 
  !YG : should we use broadening for ebands_init
  call ebands_update_occ(ks_ebands, -99.99d0)

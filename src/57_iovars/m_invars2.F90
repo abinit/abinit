@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_invars2
 !! NAME
 !!  m_invars2
@@ -1192,8 +1193,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  end if
 
  charge=dtset%charge
+ ! CP added
+ dtset%nh_qFD=zero
+ dtset%ne_qFD=zero
+ dtset%ivalence=0
+ ! CP Ended
 
- if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
+ ! CP modified
+ !if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
+ if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=9) ) then
+ ! End CP modified
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nband',tnband,'INT')
    if(tnband==1) then
      nband1=intarr(1)
@@ -1232,6 +1241,20 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    do ikpt=1,nkpt*nsppol
      dtset%nband(ikpt)=nband1
    end do
+
+   ! CP added 
+   if (occopt==9)then
+! Read the valence band index
+      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ival',tread,'INT')
+      if (tread==1) dtset%ivalence=intarr(1)
+      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqFD',tread,'DPR')
+      if (tread==1)then
+        dtset%ne_qFD=dprarr(1)
+        dtset%nh_qFD=dprarr(1) ! CP: here we assume that number of excited electrons  = number of excited holes. Potentially can be
+! relaxed in the future if consistent changes with the charge tag are made .
+      end if
+   end if
+   ! End CP added
 
  else if (occopt==2) then
    ! Give nband explicitly for each k point and spin
@@ -3369,7 +3392,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%nbandhf=intarr(1)
  else
    ! If the occupation numbers might change, must keep the maximum number of bands
-   if(occopt>=3 .and. occopt<=8)then
+   ! CP modified
+   !if(occopt>=3 .and. occopt<=8)then
+   if(occopt>=3 .and. occopt<=9)then
+   ! End CP modified
      dtset%nbandhf=maxval(dtset%nband(1:nkpt*nsppol))
    else if(occopt==0 .or. occopt==1 .or. occopt==2) then
      ! Eliminate all the bands that are never occupied
