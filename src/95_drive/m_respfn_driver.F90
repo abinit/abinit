@@ -1,3 +1,5 @@
+! CP modified
+
 !!****m* ABINIT/m_respfn_driver
 !! NAME
 !!  m_respfn_driver
@@ -238,7 +240,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
- real(dp) :: epaw,epawdc,etot,evdw,fermie,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
+ real(dp) :: epaw,epawdc,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm ! CP added fermih
  real(dp) :: ucvol,vxcavg
  character(len=fnlen) :: dscrpt
  character(len=fnlen) :: filename
@@ -438,11 +440,16 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
- etot=hdr%etot ; fermie=hdr%fermie ; residm=hdr%residm
+ etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
 !If parallelism over atom, hdr is distributed
- call hdr%update(bantot,etot,fermie,&
+ ! CP modified
+ !call hdr%update(bantot,etot,fermie,&
+ !  residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
+ !  comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%update(bantot,etot,fermie,fermih,&
    residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
+ ! End CP modified
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
@@ -573,15 +580,27 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Compute occupation numbers and fermi energy, in case occupation scheme is metallic.
  ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
- if( dtset%occopt>=3.and.dtset%occopt<=8 ) then
+ ! CP modified
+ ! if( dtset%occopt>=3.and.dtset%occopt<=8 ) then
+ if( dtset%occopt>=3.and.dtset%occopt<=9 ) then
+ ! End CP modified
 
-   call newocc(doccde,eigen0,entropy,fermie,dtset%spinmagntarget,dtset%mband,dtset%nband,&
-&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,dtset%prtvol,dtset%stmbias,&
+   ! CP modified (list of arguments of newocc changes)
+   !call newocc(doccde,eigen0,entropy,fermie,dtset%spinmagntarget,dtset%mband,dtset%nband,&
+!&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,dtset%prtvol,dtset%stmbias,&
+!&   dtset%tphysel,dtset%tsmear,dtset%wtk)
+   call newocc(doccde,eigen0,entropy,fermie,fermih,dtset%ivalence,&
+&   dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
+&   dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,dtset%prtvol,dtset%stmbias,&
 &   dtset%tphysel,dtset%tsmear,dtset%wtk)
+   ! End CP modified
 
 !  Update fermie and occ
    etot=hdr%etot ; residm=hdr%residm
-   call hdr%update(bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
+   !CP modified
+   !call hdr%update(bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
+   call hdr%update(bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
+   ! End CP modified
 
  else
 !  doccde is irrelevant in this case
@@ -1619,9 +1638,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
          call wrtout(ab_out,message,'COLL')
          call wrtout(std_out,message,'COLL')
 
-         call prteigrs(eigen0,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
+         ! CP modified
+         !call prteigrs(eigen0,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
+!&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,3,0,dtset%prtvol,&
+!&         eigen0,zero,zero,dtset%wtk)
+         call prteigrs(eigen0,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
 &         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,3,0,dtset%prtvol,&
 &         eigen0,zero,zero,dtset%wtk)
+         ! Emd CP modified
 
          write(message, '(a)' ) ch10
          call wrtout(ab_out,message,'COLL')
@@ -1633,9 +1657,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
          call elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_fan,gprimd,&
 &         dtset%mband,natom,dtset%nkpt,dtset%nsppol,1,phfrq,dtset%prtvol)
          call eigen_meandege(eigen0,eigen_fan,eigen_fan_mean,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,2)
-         call prteigrs(eigen_fan_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
+         ! CP modified
+         !call prteigrs(eigen_fan_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
+!&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
+!&         eigen0,zero,zero,dtset%wtk)
+         call prteigrs(eigen_fan_mean,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
 &         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
 &         eigen0,zero,zero,dtset%wtk)
+         ! End CP modified
+         !call prteigrs(eigen_fan_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
+!&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
+!&         eigen0,zero,zero,dtset%wtk)
+          ! End CP modified
 
          if(qeq0 .or. dtset%getgam_eig2nkq>0)then
 
@@ -1669,10 +1702,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
              end if
            end if
            call eigen_meandege(eigen0,eigen_ddw,eigen_ddw_mean,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,2)
-           call prteigrs(eigen_ddw_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
+           ! CP modified
+           !call prteigrs(eigen_ddw_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
+!&           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,6,0,dtset%prtvol,&
+!&           eigen0,zero,zero,dtset%wtk)
+           call prteigrs(eigen_ddw_mean,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
 &           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,6,0,dtset%prtvol,&
 &           eigen0,zero,zero,dtset%wtk)
-
+           ! End CP modified
            write(message, '(a)' ) ch10
            call wrtout(ab_out,message,'COLL')
            call wrtout(std_out,message,'COLL')
@@ -1680,9 +1717,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !          Print sum of mean Fan and DDW
            ABI_ALLOCATE(eigen_fanddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
            eigen_fanddw=eigen_fan_mean+eigen_ddw_mean
-           call prteigrs(eigen_fanddw,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
+           ! CP modified
+           !call prteigrs(eigen_fanddw,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
+!&           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,7,0,dtset%prtvol,&
+!&           eigen0,zero,zero,dtset%wtk)
+           call prteigrs(eigen_fanddw,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
 &           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,7,0,dtset%prtvol,&
 &           eigen0,zero,zero,dtset%wtk)
+           ! End CP modified
 
            ABI_DEALLOCATE(eigen_ddw)
            ABI_DEALLOCATE(eigen_ddw_mean)
