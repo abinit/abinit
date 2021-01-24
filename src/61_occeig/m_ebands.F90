@@ -2651,7 +2651,7 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 
  ! CP added
  if (ebands%occopt==9) then
-   MSG_ERROR("set_fermie unavailable when occopt 9")
+   ABI_ERROR("set_fermie unavailable when occopt 9")
  end if
  ! End CP added
  if (.not. ebands_has_metal_scheme(ebands)) then
@@ -3490,7 +3490,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    write(msg,"(3a)")&
     "Bisection could not find an initial guess for the holes Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of holes"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  ! End CP added
  end if
@@ -5091,7 +5091,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
    write(msg,"(3a)")&
     "Bisection could not find an initial guess for the holes Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of holes"
-   !MSG_WARNING(msg)
+   !ABI_WARNING(msg)
    return
  end if
  ! End CP added
@@ -5454,7 +5454,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 ! CP test to prevent use in case occopt = 9
  if (ebands%occopt==9) then
     write(msg,'(a)') "Boltztrap outputting not possible with occopt = 9 at the moment"
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  nelec = ebands_nelect_per_spin(ebands)

@@ -639,13 +639,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      ek_k(iband)=ar
 
      if(ANY(ABS(dtset%nucdipmom)>tol8)) then
-       ABI_ALLOCATE(ghc_vectornd,(2,npw_k))
+       ABI_MALLOC(ghc_vectornd,(2,npw_k))
        call getghc_nucdip(cwavef,ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
 &        gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
 &        gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%use_gpu_cuda)
        end_k(iband)=DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
          & DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k))
-       ABI_DEALLOCATE(ghc_vectornd)
+       ABI_FREE(ghc_vectornd)
      end if
 
      if(paw_dmft%use_dmft==1) then

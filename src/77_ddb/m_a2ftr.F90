@@ -2269,7 +2269,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
    ! CP added
    ! CP test to prevent use in case occopt = 9
     if (Bst%occopt==9) then
-       MSG_ERROR("Boltztrap outputting not possible with occopt = 9 at the moment")
+       ABI_ERROR("Boltztrap outputting not possible with occopt = 9 at the moment")
     end if
     ! End CP added
    call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&

@@ -1086,7 +1086,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
              write(msg,'(a,i5,a,f17.8,a)') 'In occopt = 9 case, ivalence = ', dtset%ivalence, &
 &           ' is too small compared to the number of electrons in the valence bands, nelect-nh_qFD = ', &
 &           dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
-            MSG_ERROR(msg)
+            ABI_ERROR(msg)
           end if
        
        if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=0.0_dp
@@ -1095,7 +1095,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
        occlast= dtset%ne_qFD-maxocc*(nocc-1)
        if ( (nocc+dtset%ivalence*dtset%nsppol) > dtset%nband(1)*dtset%nsppol) then
           write(msg,'(a)') 'Occopt = 9: Not enough band above ivalence. Increase nband or reduce ivalence'
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
        end if
 
        if(nocc > 1)  tmpocc(dtset%ivalence*dtset%nsppol+1:dtset%ivalence*dtset%nsppol+nocc-1)=maxocc

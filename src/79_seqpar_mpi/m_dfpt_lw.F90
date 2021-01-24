@@ -682,7 +682,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 & dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 & dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  ! End CP modified
- ABI_DEALLOCATE(eigen0)
+ ABI_FREE(eigen0)
 
  ABI_FREE(doccde_rbz)
 
@@ -2375,8 +2375,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 & dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz, dtset%charge, dtset%kptopt, &
 & dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  ! End CP modified
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(doccde_rbz)
+ ABI_FREE(eigen0)
+ ABI_FREE(doccde_rbz)
 
 !Initialize header, update it with evolving variables
  gscase=0 ! A GS WF file is read

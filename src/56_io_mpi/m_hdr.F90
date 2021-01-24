@@ -4431,14 +4431,14 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
  end if
 ! CP added for occopt 9
  if (abs(hdr%ne_qFD - hdr0%ne_qFD) > tol6) then
-    MSG_WARNING(sjoin("input ne_qFD = ", ftoa(hdr%ne_qFD)," /= disk file nelect = ",ftoa(hdr0%ne_qFD)))
+    ABI_WARNING(sjoin("input ne_qFD = ", ftoa(hdr%ne_qFD)," /= disk file nelect = ",ftoa(hdr0%ne_qFD)))
  end if
  if (abs(hdr%nh_qFD - hdr0%nh_qFD) > tol6) then
-    MSG_WARNING(sjoin("input nh_qFD = ", ftoa(hdr%nh_qFD)," /= disk file nelect = ",ftoa(hdr0%nh_qFD)))
+    ABI_WARNING(sjoin("input nh_qFD = ", ftoa(hdr%nh_qFD)," /= disk file nelect = ",ftoa(hdr0%nh_qFD)))
  end if
  if (hdr%ivalence/=hdr0%ivalence) then
    write(msg,'(a,i0,a,i0)')'input ival=',hdr%ivalence,' not equal disk file ival=',hdr0%ivalence
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
  ! End CP added
  if (abs(hdr%charge - hdr0%charge) > tol6) then
@@ -5018,12 +5018,12 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  if (abs(Dtset%ne_qFD-hdr%ne_qFD)>tol6) then
    write(msg,'(2(a,f8.2))')"File contains ", hdr%ne_qFD,&
 &  " electrons in the conduction bands but nelect initialized from input is ",Dtset%ne_qFD
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (abs(Dtset%nh_qFD-hdr%nh_qFD)>tol6) then
    write(msg,'(2(a,f8.2))')"File contains ", hdr%nh_qFD,&
 &  " electrons in the valence bands but nelect initialized from input is ",Dtset%nh_qFD
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  ! End CP added
  if (abs(Dtset%charge-hdr%charge)>tol6) then

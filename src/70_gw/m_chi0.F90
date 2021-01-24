@@ -2231,7 +2231,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 ! CP: adding 1 and BSt%nband(1) as dummy arguments since here we already test for occopt==9
    write(std_out,*)"nelect1: ",o_nelect
  else
-   MSG_ERROR('occopt 9 not implemented for GW calculations')
+   ABI_ERROR('occopt 9 not implemented for GW calculations')
  end if
  ! End CP modified
  !
@@ -2249,7 +2249,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 &    o_nelect,BSt%nkpt,BSt%nsppol,o_occ_mdelta,BSt%occopt,option1,BSt%tphysel,BSt%tsmear,unitdos0,BSt%wtk,1,BSt%nband(1))
    write(std_out,*)"nelect2: ",o_nelect
  else
-   MSG_ERROR("occopt 9 not implemented for GW calculations")
+   ABI_ERROR("occopt 9 not implemented for GW calculations")
  end if
  ! End CP modified
 

@@ -455,8 +455,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
  has_vectornd = (with_vectornd .EQ. 1)
  if(has_vectornd) then
-    ABI_ALLOCATE(vectornd_pac,(n4,n5,n6,gs_hamkq%nvloc,3))
-    ABI_ALLOCATE(vectornd_pac_idir,(n4,n5,n6,gs_hamkq%nvloc))
+    ABI_MALLOC(vectornd_pac,(n4,n5,n6,gs_hamkq%nvloc,3))
+    ABI_MALLOC(vectornd_pac_idir,(n4,n5,n6,gs_hamkq%nvloc))
  end if
 
  nlines_done = 0
@@ -495,12 +495,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
    if(has_vectornd) then
      do nddir = 1, 3
-       ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+       ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
        call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
          & rhodum,rhodum,cgrvtrial,vectornd(:,nddir))
        call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
          & cgrvtrial,vectornd_pac(:,:,:,1,nddir),2)
-       ABI_DEALLOCATE(cgrvtrial)
+       ABI_FREE(cgrvtrial)
      end do
      call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
      vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
@@ -533,29 +533,29 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
      kpoint(:)=kpt_rbz(:,ikpt)
      kpq(:)=kpoint(:);if (ipert<natom+3.or.ipert==natom+5) kpq(:)=kpq(:)+qphon(1:3)
-     ABI_ALLOCATE(kg_k,(3,npw_k))
-     ABI_ALLOCATE(kg1_k,(3,npw1_k))
-     ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
-     ABI_ALLOCATE(ylm1_k,(npw1_k,psps%mpsang*psps%mpsang*psps%useylm))
-     ABI_ALLOCATE(ylmgr1_k,(npw1_k,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
-     ABI_ALLOCATE(doccde_k,(nband_k))
-     ABI_ALLOCATE(doccde_kq,(nband_k))
-     ABI_ALLOCATE(eig0_k,(nband_k))
-     ABI_ALLOCATE(eig0_kq,(nband_k))
-     ABI_ALLOCATE(eig1_k,(2*nband_k**2))
-     ABI_ALLOCATE(edocc_k,(nband_k))
-     ABI_ALLOCATE(eeig0_k,(nband_k))
-     ABI_ALLOCATE(ek0_k,(nband_k))
-     ABI_ALLOCATE(ek1_k,(nband_k))
-     ABI_ALLOCATE(eloc0_k,(nband_k))
-     ABI_ALLOCATE(end0_k,(nband_k))
-     ABI_ALLOCATE(end1_k,(nband_k))
-     ABI_ALLOCATE(enl0_k,(nband_k))
-     ABI_ALLOCATE(enl1_k,(nband_k))
-     ABI_ALLOCATE(occ_k,(nband_k))
-     ABI_ALLOCATE(occ_kq,(nband_k))
-     ABI_ALLOCATE(resid_k,(nband_k))
-     ABI_ALLOCATE(rocceig,(nband_k,nband_k))
+     ABI_MALLOC(kg_k,(3,npw_k))
+     ABI_MALLOC(kg1_k,(3,npw1_k))
+     ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+     ABI_MALLOC(ylm1_k,(npw1_k,psps%mpsang*psps%mpsang*psps%useylm))
+     ABI_MALLOC(ylmgr1_k,(npw1_k,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+     ABI_MALLOC(doccde_k,(nband_k))
+     ABI_MALLOC(doccde_kq,(nband_k))
+     ABI_MALLOC(eig0_k,(nband_k))
+     ABI_MALLOC(eig0_kq,(nband_k))
+     ABI_MALLOC(eig1_k,(2*nband_k**2))
+     ABI_MALLOC(edocc_k,(nband_k))
+     ABI_MALLOC(eeig0_k,(nband_k))
+     ABI_MALLOC(ek0_k,(nband_k))
+     ABI_MALLOC(ek1_k,(nband_k))
+     ABI_MALLOC(eloc0_k,(nband_k))
+     ABI_MALLOC(end0_k,(nband_k))
+     ABI_MALLOC(end1_k,(nband_k))
+     ABI_MALLOC(enl0_k,(nband_k))
+     ABI_MALLOC(enl1_k,(nband_k))
+     ABI_MALLOC(occ_k,(nband_k))
+     ABI_MALLOC(occ_kq,(nband_k))
+     ABI_MALLOC(resid_k,(nband_k))
+     ABI_MALLOC(rocceig,(nband_k,nband_k))
 
      eig1_k(:)=zero
      eig0_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
@@ -688,18 +688,18 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
        end do
      end if
 
-     ABI_DEALLOCATE(eig1_k)
-     ABI_DEALLOCATE(occ_k)
-     ABI_DEALLOCATE(resid_k)
-     ABI_DEALLOCATE(edocc_k)
-     ABI_DEALLOCATE(eeig0_k)
-     ABI_DEALLOCATE(ek0_k)
-     ABI_DEALLOCATE(ek1_k)
-     ABI_DEALLOCATE(eloc0_k)
-     ABI_DEALLOCATE(end0_k)
-     ABI_DEALLOCATE(end1_k)
-     ABI_DEALLOCATE(enl0_k)
-     ABI_DEALLOCATE(enl1_k)
+     ABI_FREE(eig1_k)
+     ABI_FREE(occ_k)
+     ABI_FREE(resid_k)
+     ABI_FREE(edocc_k)
+     ABI_FREE(eeig0_k)
+     ABI_FREE(ek0_k)
+     ABI_FREE(ek1_k)
+     ABI_FREE(eloc0_k)
+     ABI_FREE(end0_k)
+     ABI_FREE(end1_k)
+     ABI_FREE(enl0_k)
+     ABI_FREE(enl1_k)
 
 !    Keep track of total number of bands (all k points so far, even for k points not treated by me)
      bdtot_index=bdtot_index+nband_k
@@ -757,12 +757,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
    call rf_hamk_dir2%free()
  end if
- ABI_DEALLOCATE(rhoaug1)
- ABI_DEALLOCATE(vlocal)
- ABI_DEALLOCATE(vlocal1)
+ ABI_FREE(rhoaug1)
+ ABI_FREE(vlocal)
+ ABI_FREE(vlocal1)
  if(has_vectornd) then
-   ABI_DEALLOCATE(vectornd_pac)
-   ABI_DEALLOCATE(vectornd_pac_idir)
+   ABI_FREE(vectornd_pac)
+   ABI_FREE(vectornd_pac_idir)
  end if
 
  call timab(124,2,tsec)

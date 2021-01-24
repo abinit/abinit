@@ -449,19 +449,6 @@ This is left as optional exercise.
 Fatbands plots produced with AbiPy starting from the *FATBANDS.nc* file are available
 [here](https://abinit.github.io/abipy/gallery/plot_efatbands.html).
 
-<!--
-Both σ and π bands have strong in-plane dispersion due to the large overlap between all p orbitals
-(both in-plane and out-of-plane) for neighboring boron atoms.
-The interlayer overlaps are much smaller, especially for pxy orbitals, so that the kz dispersion of σ bands
-does not exceed 1 eV.
-Contrarily to intercalated graphites, two of the $\sigma$ bands are filled incompletely.
-Together with weak kz dispersion this results in the appearance of two nearly cylindrical sheets of the
-Fermi surface (see Fig. 3) around the Γ–A line.
-In MgB2, the σ-band crosses the Fermi level and hybridization with other conduction electrons is weak.
-The high Tc-state of this material develops from the strong attractive interaction
-between the electrons of the σ-band and the E_{2g} mode of vibrations.
--->
-
 !!! tip
 
     The high-symmetry $\kk$-path has been automatically computed by AbiPy when generating the Flow.

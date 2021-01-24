@@ -756,7 +756,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  has_nd1=( (ipert .EQ. natom+1) .AND. ASSOCIATED(rf_hamkq%vectornd) )
 
  if (has_nd1) then
-   ABI_ALLOCATE(gh1ndc,(2,npw))
+   ABI_MALLOC(gh1ndc,(2,npw))
    call getgh1ndc(cwave,gh1ndc,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
      & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,&
      & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,my_nspinor,rf_hamkq%vectornd,&
@@ -768,7 +768,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+gh1ndc(2,ipw)
      end do
    end do
-   ABI_DEALLOCATE(gh1ndc)
+   ABI_FREE(gh1ndc)
  end if
 
 !======================================================================
@@ -1876,11 +1876,11 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
    nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
  end if
 
- ABI_ALLOCATE(work,(2,n4,n5,n6*ndat))
+ ABI_MALLOC(work,(2,n4,n5,n6*ndat))
 
  if (nspinortot==1) then
 
-    ABI_ALLOCATE(ghc1,(2,npw_k*ndat))
+    ABI_MALLOC(ghc1,(2,npw_k*ndat))
 
     ! apply vector potential in direction ipert to input wavefunction
     call fourwf(1,vectornd,cwavein,ghc1,work,gbound_k,gbound_k,&
@@ -1890,15 +1890,15 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
     ! scale by 2\pi\alpha^2
     gh1ndc=two_pi*FineStructureConstant2*ghc1
 
-    ABI_DEALLOCATE(ghc1)
+    ABI_FREE(ghc1)
 
     ! JWZ debug blank this term for now
     ! gh1ndc = zero
 
  else ! nspinortot==2
 
-    ABI_ALLOCATE(cwavein1,(2,npw_k*ndat))
-    ABI_ALLOCATE(cwavein2,(2,npw_k*ndat))
+    ABI_MALLOC(cwavein1,(2,npw_k*ndat))
+    ABI_MALLOC(cwavein2,(2,npw_k*ndat))
     do idat=1,ndat
        do ipw=1,npw_k
           cwavein1(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k)
@@ -1908,7 +1908,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 
     if (nspinor1TreatedByThisProc) then
 
-       ABI_ALLOCATE(ghc1,(2,npw_k*ndat))
+       ABI_MALLOC(ghc1,(2,npw_k*ndat))
 
        call fourwf(1,vectornd,cwavein1,ghc1,work,gbound_k,gbound_k,&
          & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1920,13 +1920,13 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
          end do
        end do
 
-       ABI_DEALLOCATE(ghc1)
+       ABI_FREE(ghc1)
 
     end if ! end spinor 1
 
     if (nspinor2TreatedByThisProc) then
 
-       ABI_ALLOCATE(ghc2,(2,npw_k*ndat))
+       ABI_MALLOC(ghc2,(2,npw_k*ndat))
 
        call fourwf(1,vectornd,cwavein2,ghc2,work,gbound_k,gbound_k,&
          & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1938,16 +1938,16 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
          end do
        end do
 
-       ABI_DEALLOCATE(ghc2)
+       ABI_FREE(ghc2)
 
     end if ! end spinor 2
 
-    ABI_DEALLOCATE(cwavein1)
-    ABI_DEALLOCATE(cwavein2)
+    ABI_FREE(cwavein1)
+    ABI_FREE(cwavein2)
 
  end if ! nspinortot
 
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
 end subroutine getgh1ndc
 !!***

@@ -452,7 +452,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ! CP added:
  if (dtset%occopt == 9) then
     write(msg,'(a)') "Cannot perform dfpt with occopt = 9: not yet implemented"
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
  ! End CP added
 
@@ -700,9 +700,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ! nuclear dipoles only work with the DDK response function
  if ( (ANY(ABS(dtset%nucdipmom(:,:))>tol8)) .AND. (ipert.EQ.dtset%natom+1) )  with_vectornd = 1
  if(allocated(vectornd)) then
-   ABI_DEALLOCATE(vectornd)
+   ABI_FREE(vectornd)
  end if
- ABI_ALLOCATE(vectornd,(with_vectornd*nfftf,3))
+ ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
  if(with_vectornd .EQ. 1) then
    call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,&
    & ngfftf,dtset%nucdipmom,rprimd,vectornd,xred)
@@ -1580,7 +1580,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  end if
 
  if(ALLOCATED(vectornd)) then
-   ABI_DEALLOCATE(vectornd)
+   ABI_FREE(vectornd)
  end if
 
  if(psps%usepaw==1) then

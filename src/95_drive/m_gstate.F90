@@ -1393,7 +1393,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  ebands%fermie = results_gs%energies%e_fermie
  ebands%fermih = results_gs%energies%e_fermih ! CP modified
- ABI_DEALLOCATE(doccde)
+ ABI_FREE(doccde)
  !write(std_out,*)"efermi after ebands_init",ebands%fermie
 
  ! Compute and print the gaps.
@@ -2054,7 +2054,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fre
    rewind(unitdos)
    maxocc=two/(dtset%nspinor*dtset%nsppol)  ! Will not work in the fixed moment case
    option=2
-   ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
    ! CP modified
    !call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,&
 !&   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
@@ -2066,7 +2066,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fre
 &   dtset%tsmear,unitdos,dtset%wtk,1,dtset%nband(1))!CP: added 1, nband(1) to fit new definition of getnel; parameters only used if
 ! occopt 9
    ! End CP modified
-   ABI_DEALLOCATE(doccde)
+   ABI_FREE(doccde)
  end if
 
 end subroutine clnup1

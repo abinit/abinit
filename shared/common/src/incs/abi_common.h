@@ -207,12 +207,12 @@
 
 
 /* FIXME
+#define _ABI_ALLOCATE(arr, size) ABI_MALLOC(arr, size)
+#define _ABI_DEALLOCATE(arr) ABI_FREE(arr)
+#define _MSG_ERROR(msg) ABI_ERROR(msg)
+#define _MSG_WARNING(msg) ABI_WARNING(msg)
+#define _MSG_BUG(msg) ABI_BUG(msg)
  * Alias to preserve previous behaviour. Just to facilitate the migration */
-#define ABI_ALLOCATE(arr, size) ABI_MALLOC(arr, size)
-#define ABI_DEALLOCATE(arr) ABI_FREE(arr)
-#define MSG_ERROR(msg) ABI_ERROR(msg)
-#define MSG_WARNING(msg) ABI_WARNING(msg)
-#define MSG_BUG(msg) ABI_BUG(msg)
 
 
 /* Macros to allocate zero-initialized arrays. */

@@ -579,7 +579,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
 !Compute occupation numbers and fermi energy, in case occupation scheme is metallic.
- ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  ! CP modified
  ! if( dtset%occopt>=3.and.dtset%occopt<=8 ) then
  if( dtset%occopt>=3.and.dtset%occopt<=9 ) then

@@ -1048,7 +1048,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
      dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    ! End CP modified
-   ABI_DEALLOCATE(eigen0)
+   ABI_FREE(eigen0)
 
 !  Initialize header, update it with evolving variables
    gscase=0 ! A GS WF file is read
