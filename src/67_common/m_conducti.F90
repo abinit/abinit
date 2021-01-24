@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_conducti
 !! NAME
 !!  m_conducti
@@ -1066,8 +1067,13 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
    tphysel=zero
    maxocc=two/(nsppol*nspinor)
    dosdeltae=zero
-   call getnel(doccde,dosdeltae,eigen0,entropy,fermie,maxocc,mband,nband,&
-&   nelect,nkpt,nsppol,occ,occopt,1,tphysel,tsmear,11,wtk)
+   ! CP modified
+!   call getnel(doccde,dosdeltae,eigen0,entropy,fermie,maxocc,mband,nband,&
+!&   nelect,nkpt,nsppol,occ,occopt,1,tphysel,tsmear,11,wtk)
+   call getnel(doccde,dosdeltae,eigen0,entropy,fermie,fermie,maxocc,mband,nband,&
+&   nelect,nkpt,nsppol,occ,occopt,1,tphysel,tsmear,11,wtk,1,nband(1))  ! CP: using 1 and nband(0) as dummy value, because function
+! not implemented for occopt==9; adding fermih=fermie in the list of arguments as well
+   ! End CP modified
 !  DEBUG
 !  write(std_out,'(a,f10.5)')' getnel : nelect   =',nelect
 !  ENDDEBUG

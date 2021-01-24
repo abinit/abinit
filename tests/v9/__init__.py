@@ -77,4 +77,5 @@ inp_files = [
 "t87.abi", # Spin lattice coupling, Oiju and Tijuv.
 # GS Coulomb cut-off
 "t90.abi", # checkG Coulomb cut-off, large tolerance a.t.m.
+"t91.abi", # occopt 9 tests on Si
 ]
