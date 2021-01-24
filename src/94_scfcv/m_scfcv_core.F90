@@ -96,7 +96,7 @@ module m_scfcv_core
  use m_outscfcv,         only : outscfcv
  use m_afterscfloop,     only : afterscfloop
  use m_extraprho,        only : extraprho
- use m_spacepar,         only : make_vectornd,setsym
+ use m_spacepar,         only : make_vectornd,make_vectornd2,setsym
  use m_newrho,           only : newrho
  use m_newvtr,           only : newvtr
  use m_vtorho,           only : vtorho
@@ -1128,6 +1128,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
         ABI_DEALLOCATE(vectornd)
      end if
      ABI_ALLOCATE(vectornd,(with_vectornd*nfftf,3))
+     vectornd=zero
      if(with_vectornd .EQ. 1) then
         call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
              & rprimd,vectornd,xred)

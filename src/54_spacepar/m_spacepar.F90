@@ -47,6 +47,7 @@ module m_spacepar
 
 public :: hartre            ! Given rho(G), compute Hartree potential (=FFT of rho(G)/pi/(G+q)**2)
 public :: make_vectornd     ! compute vector potential due to nuclear magnetic dipoles, in real space 
+public :: make_vectornd2     ! compute vector potential due to nuclear magnetic dipoles, in real space 
 public :: meanvalue_g       ! Compute <wf|op|wf> where op is real and diagonal in G-space.
 public :: laplacian         ! Compute the laplacian of a function defined in real space
 public :: redgr             ! Compute reduced gradients of a real function on the usual unshifted FFT grid.
@@ -63,7 +64,189 @@ public :: rotate_rho
 contains
 !!***
 
-  !!****f* m_spacepar/make_vectornd
+!!****f* m_spacepar/make_vectornd2
+!! NAME
+!! make_vectornd2
+!!
+!! FUNCTION
+!! For nuclear dipole moments m, compute vector potential A(r) = (m x (r-R))/|r-R|^3
+!! in r space. This is done by computing A(G) followed by FFT.
+!!
+!! NOTES
+!! This code is copied and modified from m_spacepar/hartre where a very similar loop
+!! over G is done followed by FFT to real space
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
+!!
+!! PARENTS
+!!      m_scfcv_core
+!!
+!! CHILDREN
+!!      fourdp,ptabs_fourdp
+!!
+!! SOURCE
+
+subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom,&
+     & rprimd,vectornd,xred)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,izero,natom,nfft
+ real(dp),intent(in) :: gsqcut
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
+ real(dp),intent(out) :: vectornd(nfft,3)
+
+!Local variables-------------------------------
+ !scalars
+ integer,parameter :: im=2,re=1
+ integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig1,ig2,ig3,ig1max,ig2max,ig3max
+ integer :: ig1min,ig2min,ig3min
+ integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
+ real(dp),parameter :: tolfix=1.000000001e0_dp
+ real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol
+ complex(dpc) :: prefac,cgr
+ !arrays
+ integer :: id(3)
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gmet(3,3),gcart(3),gprimd(3,3),gred(3),mcgc(3),rmet(3,3)
+ real(dp) :: rgbasis(3,3,3)
+ real(dp),allocatable :: gq(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
+
+
+! *************************************************************************
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
+
+ prefac = -four_pi*j_dpc/(ucvol*two_pi)
+
+ ! Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ ! Initialize a few quantities
+ cutoff=gsqcut*tolfix
+
+ ! In order to speed the routine, precompute the components of g+q
+ ! Also check if the booked space was large enough...
+ ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+ do ii=1,3
+   id(ii)=ngfft(ii)/2+2
+   do ing=1,ngfft(ii)
+     ig=ing-(ing/id(ii))*ngfft(ii)-1
+     gq(ii,ing)=ig
+   end do
+ end do
+ ig1max=-1;ig2max=-1;ig3max=-1
+ ig1min=n1;ig2min=n2;ig3min=n3
+
+ ABI_ALLOCATE(work1,(2,nfft))
+ ABI_ALLOCATE(work2,(2,nfft))
+ ABI_ALLOCATE(work3,(2,nfft))
+ work1=zero; work2=zero; work3=zero
+ id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+ ! Triple loop on each dimension
+ do i3=1,n3
+   do i2=1,n2
+     if (fftn2_distrib(i2) == me_fft) then
+       i2_local = ffti2_local(i2)
+       i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
+       ! Do the test that eliminates the Gamma point outside of the inner loop
+       ii1=1
+       !if(i23==0 .and. ig2==0 .and. ig3==0)then
+       !  ii1=2
+       !  work1(re,1+i23)=zero
+       !  work1(im,1+i23)=zero
+       !end if
+
+       ! Final inner loop on the first dimension (note the lower limit)
+       do i1=ii1,n1
+         ii=i1+i23
+
+         gred(1) = gq(1,i1); gred(2) = gq(2,i2); gred(3) = gq(3,i3)
+         gcart(1:3) = MATMUL(gprimd,gred)
+         gs = DOT_PRODUCT(gcart,gcart)
+         
+         if( (gs .LE. cutoff) .AND. (gs .gt. tol8) )then
+
+            do iatom = 1, natom
+              if (.NOT. ANY(ABS(nucdipmom(:,iatom)) .GT. tol8 )) cycle
+              phase = -two_pi*DOT_PRODUCT(xred(:,iatom),gred(:))
+              cgr = cmplx(cos(phase),sin(phase))
+
+              mcgc(1) = nucdipmom(2,iatom)*gcart(3) - nucdipmom(3,iatom)*gcart(2)
+              mcgc(2) = nucdipmom(3,iatom)*gcart(1) - nucdipmom(1,iatom)*gcart(3)
+              mcgc(3) = nucdipmom(1,iatom)*gcart(2) - nucdipmom(2,iatom)*gcart(1)
+
+              mcgc = MATMUL(TRANSPOSE(gprimd),mcgc)
+
+              work1(re,ii) = work1(re,ii) + real(prefac*cgr*mcgc(1)/gs)
+              work2(re,ii) = work2(re,ii) + real(prefac*cgr*mcgc(2)/gs)
+              work3(re,ii) = work3(re,ii) + real(prefac*cgr*mcgc(3)/gs)
+
+              work1(im,ii) = work1(im,ii) + aimag(prefac*cgr*mcgc(1)/gs)
+              work2(im,ii) = work2(im,ii) + aimag(prefac*cgr*mcgc(2)/gs)
+              work3(im,ii) = work3(im,ii) + aimag(prefac*cgr*mcgc(3)/gs)
+
+            end do
+          else
+             ! gs>cutoff
+             work1(re,ii)=zero
+             work1(im,ii)=zero
+             work2(re,ii)=zero
+             work2(im,ii)=zero
+             work3(re,ii)=zero
+             work3(im,ii)=zero
+          end if
+
+       end do ! End loop on i1
+     end if
+   end do ! End loop on i2
+ end do ! End loop on i3
+
+ ABI_DEALLOCATE(gq)
+
+ if ( izero .EQ. 1 ) then
+   ! Set contribution of unbalanced components to zero
+
+    call zerosym(work1,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+    call zerosym(work2,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+    call zerosym(work3,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+
+ end if
+
+ ! Fourier Transform
+ ABI_ALLOCATE(ndvecr,(cplex*nfft))
+ ndvecr=zero
+ call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,1)=ndvecr(:)
+ ABI_DEALLOCATE(work1)
+ 
+ ndvecr=zero
+ call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,2) = ndvecr(:)
+ ABI_DEALLOCATE(work2)
+ 
+ ndvecr=zero
+ call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,3) = ndvecr(:)
+ ABI_DEALLOCATE(work3)
+ ABI_DEALLOCATE(ndvecr)
+
+end subroutine make_vectornd2
+!!***
+
+
+!!****f* m_spacepar/make_vectornd
 !! NAME
 !! make_vectornd
 !!
@@ -203,11 +386,11 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
        i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
        ! Do the test that eliminates the Gamma point outside of the inner loop
        ii1=1
-       if(i23==0 .and. ig2==0 .and. ig3==0)then
-         ii1=2
-         work1(re,1+i23)=zero
-         work1(im,1+i23)=zero
-       end if
+       !if(i23==0 .and. ig2==0 .and. ig3==0)then
+       !  ii1=2
+       !  work1(re,1+i23)=zero
+       !  work1(im,1+i23)=zero
+       !end if
 
        ! Final inner loop on the first dimension (note the lower limit)
        do i1=ii1,n1
@@ -217,7 +400,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
 
           gred(1) = gq(1,i1); gred(2) = gq(2,i2); gred(3) = gq(3,i3)
          
-          if(gs .LE. cutoff)then
+          if( (gs .LE. cutoff) .AND. (gs .gt. tol8) )then
 
              do iatom = 1, nd_atom_tot
                 nd_atom = nd_list(iatom)

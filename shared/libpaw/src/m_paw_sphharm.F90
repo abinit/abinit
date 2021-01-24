@@ -729,17 +729,17 @@ end subroutine initylmr
 !! ys
 !!
 !! FUNCTION
-!!  Computes the matrix element <Yl'm'|Slm>
+!!  Computes the matrix element <Y_(l2,m2)|S_(l1,m1)>
 !!
 !! INPUTS
-!!  integer :: l',m',l,m
+!!  integer :: l2,m2,l1,m1
 !!
 !! OUTPUT
 !!  complex(dpc) :: ys_val
 !!
 !! NOTES
 !! Ylm is the standard complex-valued spherical harmonic, Slm is the real spherical harmonic
-!! used througout abinit. <Yl'm'|Slm> is their overlap.
+!! used througout abinit. 
 !!
 !! PARENTS
 !!      m_epjdos,m_paw_sphharm
@@ -748,51 +748,38 @@ end subroutine initylmr
 !!
 !! SOURCE
 
-subroutine ys(lp,mp,ll,mm,ys_val)
+subroutine ys(l2,m2,l1,m1,ys_val)
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: ll,lp,mm,mp
+ integer,intent(in) :: l1,l2,m1,m2
  complex(dpc),intent(out) :: ys_val
 
 !Local variables ---------------------------------------
  !scalars
- real(dp) :: d_lp_ll,d_mp_mm,d_mp_mbar,d_mp_am,d_mp_ambar,powm,powam
+ integer :: am1
+ real(dp) :: pam1,pm1
 
 ! *********************************************************************
 
 
  ys_val = czero
 
- d_lp_ll = zero
- if (lp .EQ. ll) d_lp_ll = one
+ if ( l2 /= l1 ) return
 
- d_mp_mm = zero
- if (mp .EQ. mm) d_mp_mm = one
+ pm1=(-one)**m1
+ am1=abs(m1)
+ pam1=(-one)**am1
 
- d_mp_mbar = zero
- if (mp .EQ. -mm) d_mp_mbar = one
-
- d_mp_am = zero
- if (mp .EQ. abs(mm)) d_mp_am = one
-
- d_mp_ambar = zero
- if (mp .EQ. -abs(mm)) d_mp_ambar = one
-
- powm=-one
- if (mod(mm,2) .EQ. 0) powm = one
-
- powam=-one
- if (mod(abs(mm),2) .EQ. 0) powam = one
-
- select case (mm)
- case (0) ! case for S_l0
-    ys_val = cone*d_lp_ll*d_mp_mm
- case (:-1) ! case for S_lm with m < 0
-    ys_val = (zero,one)*sqrthalf*powm*d_lp_ll*(-d_mp_am+powam*d_mp_ambar)
- case (1:) ! case for S_lm with m > 0
-    ys_val = cone*sqrthalf*d_lp_ll*(powm*d_mp_mm+d_mp_mbar)
- end select
+ if (m1 > 0) then
+   if (m2 ==  m1) ys_val=pm1*sqrthalf
+   if (m2 == -m1) ys_val=sqrthalf
+ else if (m1 == 0) then
+   if (m2 == m1) ys_val = cone
+ else
+   if (m2 ==  am1) ys_val=-j_dpc*pm1*sqrthalf
+   if (m2 == -am1) ys_val = j_dpc*pm1*sqrthalf*pam1
+ end if
 
 end subroutine ys
 !!***
@@ -832,27 +819,26 @@ subroutine lxyz(lp,mp,idir,ll,mm,lidir)
 
 !Local variables ---------------------------------------
 !scalars
- complex(dpc) :: jmme, jpme
+ complex(dpc) :: jme, jmme, jpme
 
 ! *********************************************************************
 
- jpme=czero; jmme=czero
- if (lp==ll) then
-   if (mp==mm+1) jpme=cone*sqrt((ll-mm)*(ll+mm+one))
-   if (mp==mm-1) jmme=cone*sqrt((ll-mm+one)*(ll+mm))
- end if
-
  lidir = czero
- if (lp == ll) then
-   select case (idir)
-     case (1) ! Lx
-       lidir = cone*half*(jpme+jmme)
-     case (2) ! Ly
-       lidir = -(zero,one)*half*(jpme-jmme)
-     case (3) ! Lz
-       if (mp == mm) lidir = mm*cone
-   end select
- end if
+ if ( lp /= ll ) return
+
+ jpme=czero; jmme=czero; jme=czero
+ if (mp==mm+1) jpme=-cone*sqrt(half*((ll*(ll+1))-mm*(mm+1)))
+ if (mp==mm-1) jmme= cone*sqrt(half*((ll*(ll+1))-mm*(mm-1)))
+ if (mp==mm) jme=cone*mm
+
+ select case (idir)
+   case (1) ! Lx
+     lidir = -sqrthalf*(jpme - jmme)
+   case (2) ! Ly
+     lidir = j_dpc*sqrthalf*(jpme + jmme)
+   case (3) ! Lz
+     lidir = jme
+ end select
 
 end subroutine lxyz
 !!***
@@ -893,25 +879,23 @@ subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: lpp,lppp,mpp,mppp
+ integer :: mpp,mppp
  complex(dpc) :: lidir,sy_val,ys_val
 
 ! *********************************************************************
 
  sls_val = czero
 
- if (lp == ll) then
-   lpp  = ll
-   lppp = ll
-   do mpp = -lpp, lpp
-     call ys(lpp,mpp,lp,mp,sy_val)
-     do mppp = -lppp, lppp
-       call lxyz(lpp,mpp,idir,lppp,mppp,lidir)
-       call ys(lppp,mppp,ll,mm,ys_val)
-       sls_val = sls_val + conjg(sy_val)*lidir*ys_val
-     end do
+ if ( lp /= ll ) return
+
+ do mpp = -ll, ll
+   call ys(ll,mpp,ll,mp,sy_val)
+   do mppp = -ll, ll
+     call lxyz(ll,mpp,idir,ll,mppp,lidir)
+     call ys(ll,mppp,ll,mm,ys_val)
+     sls_val = sls_val + conjg(sy_val)*lidir*ys_val
    end do
- end if
+ end do
 
 end subroutine slxyzs
 !!***

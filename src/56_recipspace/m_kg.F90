@@ -1156,7 +1156,6 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
              &     (iadum(2) == iadum1(2)).and. &
              &     (iadum(3) == iadum1(3)) ) then
            pwind_k1(ipw) = jpw
-           ! write(std_out,'(a,2i4)')'JWZ debug : bg ipw == jpw ',ipw,jpw
            exit
         end if
      end do

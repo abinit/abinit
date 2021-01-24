@@ -684,6 +684,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
    has_vectornd = (with_vectornd .EQ. 1)
    if(has_vectornd) then
       ABI_ALLOCATE(vectornd_pac,(n4,n5,n6,gs_hamk%nvloc,3))
+      vectornd_pac=zero
    end if
 
 !  LOOP OVER SPINS
