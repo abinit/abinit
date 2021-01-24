@@ -186,6 +186,10 @@ type,public :: rta_t
    ! (3, 3, nw, %ntemp, 2, %nsppol, nrta)
    ! 5-th index is for e-h
 
+   real(dp),allocatable :: conductivity(:,:,:,:,:)
+   ! Conductivity at the Fermi level
+   ! (3, 3, %ntemp, %nsppol, nrta)
+
    real(dp),allocatable :: n(:,:,:)
    ! (nw, ntemp, 2) carrier density for e/h (n/cm^3)
 
@@ -656,7 +660,6 @@ subroutine rta_compute(self, cryst, dtset, comm)
  real(dp) :: vr(3), dummy_vecs(1,1,1,1,1), work_33(3,3), S_33(3,3)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:,:), out_valsdos(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
  real(dp),allocatable :: out_tensdos(:,:,:,:,:,:), tau_vals(:,:,:,:,:), l0inv_33nw(:,:,:)
- !character(len=500) :: msg
 
 !************************************************************************
 
@@ -875,9 +878,24 @@ subroutine rta_compute(self, cryst, dtset, comm)
  if (ifermi == 0 .or. ifermi == self%nw) then
    ABI_ERROR("Bisection could not find the index of the Fermi level in edos%mesh!")
  end if
+ 
+ max_occ = two / (self%nspinor * self%nsppol)
+ 
+ ! Conductivity
+ ABI_MALLOC(self%conductivity, (3, 3, self%ntemp, self%nsppol, self%nrta))
+ do spin=1,self%nsppol
+   do itemp=1,self%ntemp
+     do irta=1,self%nrta
+       do jj=1,3
+         do ii=1,3
+           self%conductivity(ii,jj,itemp,spin,irta) = self%sigma(ii, jj, ifermi, itemp, spin, irta) * 0.01 !m^-1 to cm^-1
+         end do
+       end do
+     end do
+   end do ! itemp
+ end do ! spin
 
  ! Mobility
- max_occ = two / (self%nspinor * self%nsppol)
  ABI_MALLOC(self%n, (self%nw, self%ntemp, 2))
  ABI_MALLOC(self%mobility, (3, 3, self%nw, self%ntemp, 2, self%nsppol, self%nrta))
 
@@ -1221,6 +1239,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
     nctkarr_t('seebeck', "dp", "three, three, edos_nw, ntemp, nsppol, nrta"), &
     nctkarr_t('pi',      "dp", "three, three, edos_nw, ntemp, nsppol, nrta"), &
     nctkarr_t('mobility',"dp", "three, three, edos_nw, ntemp, two, nsppol, nrta"), &
+    nctkarr_t('conductivity',"dp", "three, three, ntemp, nsppol, nrta"), &
     nctkarr_t('N',  "dp", "edos_nw, ntemp, two"), &
     nctkarr_t('mobility_mu',"dp", "three, three, two, ntemp, nsppol, nrta")], &
  defmode=.True.)
@@ -1263,6 +1282,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "pi"),      self%pi))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "N"), self%n))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility"), self%mobility))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "conductivity"), self%conductivity))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu))
 #endif
 
@@ -1315,27 +1335,46 @@ subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
    if (irta == 1) rta_type = "SERTA"
    if (irta == 2) rta_type = "MRTA"
 
-   do ii=1,3
-     call wrtout(unts, sjoin(" Cartesian component of", rta_type, "mobility tensor:", components(ii)))
-     write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
-     call wrtout(unts, msg)
+   if(self%assume_gap) then !SemiConductor
+     do ii=1,3
+       call wrtout(unts, sjoin(" Cartesian component of", rta_type, "mobility tensor:", components(ii)))
+       write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
+       call wrtout(unts, msg)
 
-     do spin=1,self%nsppol
-       if (self%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
-       do itemp=1,self%ntemp
-         write(msg,"(f16.2,2e16.2,2f16.2)") &
+       do spin=1,self%nsppol
+         if (self%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+
+         do itemp=1,self%ntemp
+           write(msg,"(f16.2,2e16.2,2f16.2)") &
            self%kTmesh(itemp) / kb_HaK, &
            self%ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
            self%nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
            self%mobility_mu(ii, ii, 1, itemp, spin, irta), self%mobility_mu(ii, ii, 2, itemp, spin, irta)
            !self%transport_mu_e(itemp) * Ha_eV
-         call wrtout(unts, msg)
-       end do ! itemp
-     end do ! spin
-     call wrtout(unts, ch10)
-   end do
+           call wrtout(unts, msg)
+         end do ! itemp
+       end do ! spin
+       call wrtout(unts, ch10)
+     end do ! ii
 
-   call wrtout(unts, ch10)
+   else !Metals
+     call wrtout(unts, sjoin(" Conductivity(V^-1 s^-1 cm^-1) using ", rta_type, "approximation"))
+
+     do spin=1, self%nsppol
+       if (self%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+       write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+       call wrtout(unts, msg)
+       do itemp=1,self%ntemp
+         write(msg,"(f16.2,3e16.2)") &
+         self%kTmesh(itemp) / kb_HaK, &
+         self%conductivity(1,1, itemp, spin, irta), &
+         self%conductivity(2,2, itemp, spin, irta), &
+         self%conductivity(3,3, itemp, spin, irta)
+         call wrtout(unts, msg)
+       end do !itemp
+     end do !spin
+     call wrtout(unts, ch10)
+   end if 
  end do ! irta
 
  do irta=1,self%nrta
@@ -1353,7 +1392,7 @@ subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
    call self%write_tensor(dtset, irta, "zte", self%zte(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_ZTE"))
    call self%write_tensor(dtset, irta, "pi", self%pi(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_PI"))
  end do
-
+ 
 end subroutine rta_print_txt_files
 !!***
 
@@ -1473,6 +1512,7 @@ subroutine rta_free(self)
  ABI_SFREE(self%l2)
  ABI_SFREE(self%sigma)
  ABI_SFREE(self%mobility)
+ ABI_SFREE(self%conductivity)
  ABI_SFREE(self%seebeck)
  ABI_SFREE(self%kappa)
  ABI_SFREE(self%zte)
