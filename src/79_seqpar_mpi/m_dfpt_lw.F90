@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_dfpt_lw
 !! NAME
 !!  m_dfpt_lw
@@ -670,10 +671,17 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
  ABI_ALLOCATE(eigen0,(bantot_rbz))
  eigen0(:)=zero
- call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
+ ! CP modified
+! call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
+!& nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
+!& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+& doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 & nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 & dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 & dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ ! End CP modified
  ABI_DEALLOCATE(eigen0)
 
  ABI_DEALLOCATE(doccde_rbz)
@@ -683,9 +691,14 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  call hdr_init(bs_rbz,codvsn,dtset,hdr0,pawtab,gscase,psps,wvl%descr,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
- call hdr0%update(bantot_rbz,etotal,fermie,&
+ ! CP modified
+! call hdr0%update(bantot_rbz,etotal,fermie,&
+!& residm,rprimd,occ_rbz,pawrhoij,xred,dtset%amu_orig(:,1),&
+!& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr0%update(bantot_rbz,etotal,fermie,fermie,&
 & residm,rprimd,occ_rbz,pawrhoij,xred,dtset%amu_orig(:,1),&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ ! End CP modified
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bs_rbz)
@@ -2352,10 +2365,16 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
  ABI_ALLOCATE(eigen0,(bantot_rbz))
  eigen0(:)=zero
- call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
-& nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ ! CP modified
+! call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
+!& nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
+!& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+& doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,&
+& dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz, dtset%charge, dtset%kptopt, &
+& dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ ! End CP modified
  ABI_DEALLOCATE(eigen0)
  ABI_DEALLOCATE(doccde_rbz)
 
@@ -2364,9 +2383,14 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  call hdr_init(bs_rbz,codvsn,dtset,hdr0,pawtab,gscase,psps,wvl%descr,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
- call hdr0%update(bantot_rbz,etotal,fermie,&
+ ! CP modified
+! call hdr0%update(bantot_rbz,etotal,fermie,&
+!& residm,rprimd,occ_rbz,pawrhoij,xred,dtset%amu_orig(:,1),&
+!& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr0%update(bantot_rbz,etotal,fermie,fermie,& ! CP modified call to function; we assume occopt 9 does not work with DFPT
 & residm,rprimd,occ_rbz,pawrhoij,xred,dtset%amu_orig(:,1),&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ ! End CP modified
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bs_rbz)

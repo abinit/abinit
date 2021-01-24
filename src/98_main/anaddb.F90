@@ -330,7 +330,7 @@ program anaddb
  iblok = ddb%get_dielt_zeff(crystal,inp%rfmeth,inp%chneut,inp%selectz,epsinf,zeff)
 
  ! Try to get epsinf, in case just the DDE are present
- if (iblok_epsinf == 0) then
+ if (iblok == 0) then
    iblok_epsinf = ddb%get_dielt(inp%rfmeth,epsinf)
  end if
 
@@ -642,7 +642,7 @@ program anaddb
 
  ! Print the electronic contribution to the dielectric tensor
  ! It can be extracted directly from the DDB if perturbation with E-field is present
- if (inp%dieflag/=0 .or. inp%nph2l/=0 .or. inp%nlflag==1) then
+ if ((inp%dieflag/=0 .and. inp%dieflag/=2) .or. inp%nph2l/=0 .or. inp%nlflag==1) then
  
   !***************************************************************
   ! Generates the dynamical matrix at Gamma

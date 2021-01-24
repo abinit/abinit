@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_dfpt_scfcv
 !! NAME
 !!  m_dfpt_scfcv
@@ -448,6 +449,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  call timab(120,1,tsec)
  call timab(154,1,tsec)
 
+ ! CP added:
+ if (dtset%occopt == 9) then
+    write(msg,'(a)') "Cannot perform dfpt with occopt = 9: not yet implemented"
+    MSG_ERROR(msg)
+ end if
+ ! End CP added
+
  ! intel 18 really needs this to be initialized
  maxfor = zero
 
@@ -520,13 +528,22 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !At present, no double loop
  istep_mix=1 ; istep_fock_outer=1
 
+ ! CP modified
+ !call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
+!& etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
+!& 1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
+!& mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
+!& nstep,occ_rbz,0,prtfor,0,&
+!& quit,res2,resid,residm,response,&
+!& tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
  call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
-& etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
+& etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 & 1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 & mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 & nstep,occ_rbz,0,prtfor,0,&
 & quit,res2,resid,residm,response,&
 & tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
+ ! End CP modified
 
 !Allocations/initializations for PAW only
  if(psps%usepaw==1) then
@@ -1023,13 +1040,22 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
      choice=2
+     ! CP modified
+!     call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
+!&     etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
+!&     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
+!&     mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
+!&     nstep,occ_rbz,0,prtfor,0,&
+!&     quit,res2,resid,residm,response,&
+!&     tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
      call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
-&     etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
+&     etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 &     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 &     mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 &     nstep,occ_rbz,0,prtfor,0,&
 &     quit,res2,resid,residm,response,&
 &     tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
+     ! End CP modified
      call timab(152,2,tsec)
 
      if (istep==nstep) quit=1
@@ -1091,13 +1117,23 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      call timab(152,1,tsec)
      choice=2
+     ! CP modified to take into account new definition of hdr_update; test to avoid dfpt and occopt 9 was already done
+     ! so we can just set fermih = fermie
+!     call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
+!&     etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
+!&     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
+!&     mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
+!&     nstep,occ_rbz,0,prtfor,0,&
+!&     quit,res2,resid,residm,response,&
+!&     tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
      call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
-&     etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
+&     etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 &     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 &     mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 &     nstep,occ_rbz,0,prtfor,0,&
 &     quit,res2,resid,residm,response,&
 &     tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
+     ! End CP modified
 !     !debug: print the information about residuals at "-q"
 !     if(.not.kramers_deg) then
 !       call scprqt(choice,cpus,deltae_mq,diffor,dtset,eigen0,&
@@ -1390,20 +1426,33 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !residm, diffor - infos from tollist have been saved inside )
 !Set also the value of conv_retcode
  choice=3
+ ! CP modified
+! call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
+!& etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
+!& 1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
+!& mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
+!& nstep,occ_rbz,0,prtfor,0,&
+!& quit,res2,resid,residm,response,&
+!& tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
  call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
-& etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
+& etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 & 1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 & mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 & nstep,occ_rbz,0,prtfor,0,&
 & quit,res2,resid,residm,response,&
 & tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
+! End CP modified
 
 !Update the content of the header (evolving variables)
  bantot_rbz = sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
- call hdr%update(bantot_rbz,etotal,fermie,&
+ ! CP modified
+! call hdr%update(bantot_rbz,etotal,fermie,&
+!& residm,rprimd,occ_rbz,pawrhoij1,xred,dtset%amu_orig(:,1),&
+!& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
+ call hdr%update(bantot_rbz,etotal,fermie,fermie,&
 & residm,rprimd,occ_rbz,pawrhoij1,xred,dtset%amu_orig(:,1),&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
-
+ ! End CP modified
 !Optionally provide output of charge density and/or potential in real space,
 !as well as analysis of geometrical factors (bond lengths and bond angles).
 !Warnings :
