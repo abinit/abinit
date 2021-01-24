@@ -3967,12 +3967,21 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  kfull => ebands_full%kptns
 
  ! Build new header and update pawrhoij.
+ ! CP modified
+ !call hdr_init_lowlvl(hdr_kfull,ebands_full,psps,pawtab,dummy_wvl,abinit_version,&
+ !  ihdr%pertcase,ihdr%natom,ihdr%nsym,ihdr%nspden,ihdr%ecut,dtset%pawecutdg,ihdr%ecutsm,dtset%dilatmx,&
+ !  ihdr%intxc,ihdr%ixc,ihdr%stmbias,ihdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,ihdr%so_psp,&
+ !  ihdr%qptn,cryst%rprimd,cryst%xred,ihdr%symrel,ihdr%tnons,ihdr%symafm,ihdr%typat,ihdr%amu,ihdr%icoulomb,&
+ !  kptopt3,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
+ !  dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
  call hdr_init_lowlvl(hdr_kfull,ebands_full,psps,pawtab,dummy_wvl,abinit_version,&
    ihdr%pertcase,ihdr%natom,ihdr%nsym,ihdr%nspden,ihdr%ecut,dtset%pawecutdg,ihdr%ecutsm,dtset%dilatmx,&
    ihdr%intxc,ihdr%ixc,ihdr%stmbias,ihdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,ihdr%so_psp,&
    ihdr%qptn,cryst%rprimd,cryst%xred,ihdr%symrel,ihdr%tnons,ihdr%symafm,ihdr%typat,ihdr%amu,ihdr%icoulomb,&
-   kptopt3,dtset%nelect,dtset%charge,dtset%kptrlatt_orig,dtset%kptrlatt,&
+   kptopt3,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,dtset%charge,&
+   dtset%kptrlatt_orig,dtset%kptrlatt,&
    dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
+ ! End CP modified
 
  if (psps%usepaw == 1) call pawrhoij_copy(iwfk%hdr%pawrhoij, hdr_kfull%pawrhoij)
 

@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_bethe_salpeter
 !! NAME
 !!  m_bethe_salpeter
@@ -1561,10 +1562,17 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  ABI_MALLOC(npwarr,(Dtset%nkpt))
  npwarr=BSP%npwwfn
 
- call ebands_init(bantot,KS_BSt,Dtset%nelect,doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
+ ! CP modified
+ !call ebands_init(bantot,KS_BSt,Dtset%nelect,doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
+!&  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
+!&  dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!&  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ call ebands_init(bantot,KS_BSt,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+&  doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
 &  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
 &  dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ ! End CP modified
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)
@@ -1602,7 +1610,10 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
 
- call hdr_bse%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
+ ! CP modified
+ !call hdr_bse%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
+ call hdr_bse%update(bantot,1.0d20,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
+ ! End CP modified
 
  ABI_FREE(occfact)
 
@@ -2183,11 +2194,19 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  ABI_MALLOC(npwarr,(kmesh_dense%nibz))
  npwarr=BSP%npwwfn
 
- call ebands_init(bantot_dense,KS_BSt_dense,Dtset%nelect,doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
+ ! CP modified
+ !call ebands_init(bantot_dense,KS_BSt_dense,Dtset%nelect,doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
+!&  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
+!&  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
+!&  hdr_wfk_dense%charge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
+!&  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
+ call ebands_init(bantot_dense,KS_BSt_dense,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,& ! CP added
+&  doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
 &  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
 &  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
 &  hdr_wfk_dense%charge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
 &  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
+ ! End CP modified
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)

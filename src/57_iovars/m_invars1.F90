@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_invars1
 !! NAME
 !!  m_invars1
@@ -1807,7 +1808,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end do
  end if
 
- if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
+ ! CP modified
+ !if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
+ if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=9) ) then
+ ! End CP modified
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nband',tnband,'INT')
    ! Note: mband_upper is initialized, not nband
    if(tnband==1) mband_upper=intarr(1)

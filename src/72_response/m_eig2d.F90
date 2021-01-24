@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_eig2d
 !! NAME
 !!  m_eig2d
@@ -1701,11 +1702,19 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 &   dtset%symrel,dtset%tnons,dtset%symafm)
 !  Electronic band energies.
    bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-   call ebands_init(bantot,Bands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
+   ! CP modified
+!   call ebands_init(bantot,Bands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
+!&   hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
+!&   hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
+!&   hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
+!&   hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
+   call ebands_init(bantot,Bands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+&   doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &   hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &   hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
 &   hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 &   hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
+   ! End CP modified
 
 !  Second order derivative EIGR2D (real and Im)
    if(ieig2rf == 3 ) then
