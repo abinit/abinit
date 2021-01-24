@@ -196,11 +196,11 @@ type,public :: rta_t
 
  contains
 
-    procedure :: compute => rta_compute
-    procedure :: compute_mobility => rta_compute_mobility
-    procedure :: print_txt_files => rta_print_txt_files
-    procedure :: write_tensor => rta_write_tensor
-    procedure :: free => rta_free
+   procedure :: compute => rta_compute
+   procedure :: compute_mobility => rta_compute_mobility
+   procedure :: print_txt_files => rta_print_txt_files
+   procedure :: write_tensor => rta_write_tensor
+   procedure :: free => rta_free
 
  end type rta_t
 !!***
@@ -1076,31 +1076,11 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  max_occ = two / (self%nspinor * self%nsppol)
 
  ABI_MALLOC(self%mobility_mu, (3, 3, 2, self%ntemp, self%nsppol, self%nrta))
+
+ ! Compute carriers per unit cell.
  ABI_CALLOC(self%ne, (self%ntemp))
  ABI_CALLOC(self%nh, (self%ntemp))
-
- !call ebands_get_carriers(self%ebands, self%ntemp, kTmesh, mu_e, self%nh, self%ne)
-
- ! Compute carrier concentration
- do spin=1,nsppol
-   do ik_ibz=1,nkpt
-     wtk = self%ebands%wtk(ik_ibz)
-     do ib=1, self%ebands%nband(ik_ibz + (spin-1)* self%ebands%nkpt)
-       eig_nk = self%ebands%eig(ib, ik_ibz, spin)
-
-       do itemp=1,self%ntemp
-         kT = self%kTmesh(itemp)
-         mu_e = self%transport_mu_e(itemp)
-         if (eig_nk >= mu_e) then
-           self%ne(itemp) = self%ne(itemp) + wtk * occ_fd(eig_nk, kT, mu_e) * max_occ
-         else
-           self%nh(itemp) = self%nh(itemp) + wtk * (one - occ_fd(eig_nk, kT, mu_e)) * max_occ
-         end if
-       end do
-
-     end do
-   end do
- end do
+ call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%nh, self%ne)
 
  ! Get units conversion factor and spin degeneracy
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)

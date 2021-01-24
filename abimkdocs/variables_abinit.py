@@ -22024,7 +22024,7 @@ but this option should be used with extreme care and it is not recommended in ge
 RMM-DIIS usually requires less wall-time per iteration when compared to other approaches since
 there is no explicit orthogonalization while optimizing the trial states.
 Only a single full-band Cholesky orthogonalization is performed per SCF iteration before recomputing the new density.
-As a consequence, one RMM-DIIS iteration is usually faster (sometimes even by a factor > two) than one CG/LOBPCG iteration,
+As a consequence, one RMM-DIIS iteration is usually faster (sometimes even by a factor two) than one CG/LOBPCG iteration,
 especially in systems with relatively large [[mpw]].
 However, the additional steps of the algorithm (subspace rotation and Cholesky orthogonalization)
 present poor MPI-scalability hence this part will start to dominate the wall-time in systems with large [[nband]].
@@ -22061,22 +22061,6 @@ available for NSCF calculations).
 
 Last but not least, note that the default implementation is quite aggressive at the level of memory allocations.
 A less memory-intensive version of the algorithm can be activated via [[rmm_diis_savemem]] = 1.
-
-TIPS:
-
-Mention [[bandpp]] and band locking.
-Use more permissive tolerances and then restart with tighter settings.
-
-On the other hand, please keep in mind that **RMM-DIIS is not guaranteed to find the correct ground-state**.
-Moreover the algorithm may have problems to converge and more iterations may be needed to reach a given precision.
-Also, the present implementation is optimized for converging occupied states so we do not recommend
-RMM-DIIS for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
-
-Obviously the time-to-solution depends on the overall number of SCF iterations required to reach convergence.
-This is the reason why providing RMM-DIIS with reasonable initial trial wavefunctions and potential
-is crucial both for performance and the reliability of the results.
-Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
-then restart from the WFK file using e.g. the LOBPCG solver to reconverge the results with stricter tolerance.
 """,
 ),
 

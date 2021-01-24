@@ -689,7 +689,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
- real(dp) :: vkk_norm, osc_ecut
+ real(dp) :: vkk_norm, vkq_norm, osc_ecut
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx
  logical :: isirr_k, isirr_kq, gen_eigenpb, is_qzero, isirr_q, use_ifc_fourq
  type(wfd_t) :: wfd
@@ -775,7 +775,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
 
  ! Construct object to store final results.
- sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfil, comm)
+ sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
 
  if (my_rank == master .and. dtset%eph_restart == 1) then
    if (ierr == 0) then
@@ -1826,6 +1826,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            if (.not. isirr_kq) then
              vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
              if (trev_kq /= 0) vkq = -vkq
+             vkq_norm = sqrt(dot_product(vk, vk))
            end if
 
            ! Precompute alpha MRTA coefficients for all nk states.
@@ -1834,6 +1835,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              vkk_norm = sqrt(dot_product(vk, vk))
              alpha_mrta(ib_k) = one ! zero
              if (vkk_norm > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vkk_norm ** 2
+             !if (vkk_norm > tol6 .and. vkq_norm > tol6) then
+             !  alpha_mrta(ib_k) = one - dot_product(vkq, vk) / (vkk_norm * vk_norm)
+             !end if
            end do
          end if
          call timab(1906, 2, tsec)
@@ -2423,7 +2427,7 @@ end subroutine sigmaph
 !!
 !! SOURCE
 
-type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfil, comm) result(new)
+type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -2432,7 +2436,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands
  type(ifc_type),intent(in) :: ifc
- type(dvdb_t),intent(in) :: dvdb
+ !type(dvdb_t),intent(in) :: dvdb
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables ------------------------------
@@ -2480,7 +2484,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  if (dtset%eph_task == -4) then
    new%imag_only = .True.
    new%mrta = 1 ! Compute lifetimes in the MRTA approximation? Default is yes
-   if (dtset%userie == 1) new%mrta = 0
+   !if (dtset%userie == 1) new%mrta = 0
  end if
 
  ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method

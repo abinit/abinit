@@ -1732,7 +1732,7 @@ function crystal_symmetrize_cart_vec3(cryst, v) result(vsum)
  !symmetrize
  vsum = zero
  do isym=1, cryst%nsym
-   vsym = matmul( (cryst%symrel_cart(:,:,isym)), v)
+   vsym = matmul(cryst%symrel_cart(:,:,isym), v)
    vsum = vsum + vsym
  end do
  vsum = vsum / cryst%nsym

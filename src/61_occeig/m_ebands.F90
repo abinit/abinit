@@ -1,4 +1,4 @@
-! CP modified for occopt 9 
+! CP modified for occopt 9
 !!****m* ABINIT/m_ebands
 !! NAME
 !!  m_ebands
@@ -3832,8 +3832,8 @@ end subroutine edos_print
 !! edos_get_carriers
 !!
 !! FUNCTION
-!!  Compute carrier concentration for holes (nh) and electrons (ne) for a given list of `ntemp`
-!!  temperatures `kTmesh` and chemical potentials `mu_e`.
+!!  Compute number of holes (nh) and electrons (ne) per unit cell from a given
+!!  list of `ntemp` temperatures `kTmesh` and chemical potentials `mu_e`.
 !!
 !! INPUTS
 !!
@@ -6454,7 +6454,7 @@ end subroutine klinterp_eval_bsd
 !! ebands_get_carriers
 !!
 !! FUNCTION
-!!  Compute carrier concentration for holes (nh) and electrons (ne) for a given list of `ntemp`
+!!  Compute number of holes (nh) and electrons (ne) per unit cell from a given list of `ntemp`
 !!  temperatures `kTmesh` and chemical potentials `mu_e`.
 !!
 !! SOURCE
@@ -6475,7 +6475,6 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
 
 ! *********************************************************************
 
- ! Copy important dimensions
  max_occ = two / (self%nspinor * self%nsppol)
  ne = zero; nh = zero
 
