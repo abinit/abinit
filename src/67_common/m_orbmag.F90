@@ -5098,7 +5098,8 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1)
- real(dp) :: chern(3),orbmag_cc(3),orbmag_vv(3),rhodum(1),rmet(3,3)
+ real(dp) :: chern(3),chern_total(2,3),orbmag_cc(3),orbmag_total(2,3),orbmag_vv(3)
+ real(dp) :: rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwaveg1(:,:)
  real(dp),allocatable :: dcwavef(:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
@@ -5427,6 +5428,13 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  write(std_out,'(a,3es16.8)')'JWZ debug orbmag_cc ',orbmag_cc(1),orbmag_cc(2),orbmag_cc(3)
  write(std_out,'(a,3es16.8)')'JWZ debug orbmag_vv ',orbmag_vv(1),orbmag_vv(2),orbmag_vv(3)
  write(std_out,'(a,3es16.8)')'JWZ debug chern ',chern(1),chern(2),chern(3)
+
+ orbmag_total=zero;chern_total=zero
+ orbmag_total(1,:)=orbmag_cc(:) + orbmag_vv
+ chern_total(1,:)=chern(:)
+
+ call output_orbmag(1,orbmag_total)
+ call output_orbmag(2,chern_total)
 
 !---------------------------------------------------
 ! deallocate memory
