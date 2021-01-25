@@ -5078,7 +5078,6 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  !Local
  !scalars
  integer :: adir,bdir,buff_size,dimffnl,exchn2n3d
- integer :: getcprj_choice,getcprj_cpopt,getcprj_idir,getcprj_useylm,getdc1_optcprj
  integer :: getghc_cpopt,getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc
  integer :: gdir,iatom,icg,icprj,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k,jj
  integer :: me,mcgk,my_nspinor
@@ -5093,7 +5092,6 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
  integer :: ilmn,jlmn,klmn,itypat
  real(dp) :: doti,dotr
- complex(dpc) :: cpb,cpk,consite
 
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:)
@@ -5102,13 +5100,12 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  real(dp) :: rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwaveg1(:,:)
- real(dp),allocatable :: dcwavef(:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable :: dcwavef(:,:),dscg_k(:,:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),scg_k(:,:),scprod(:,:)
  real(dp),allocatable :: us1u(:,:,:,:),vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj1(:,:),dcwaveprj(:,:)
- type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_k1(:,:,:),cprj_pk1(:,:,:)
+ type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
  !----------------------------------------------
 
@@ -5128,36 +5125,28 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
  exchn2n3d = 0; ikg1 = 0
 
- ! input parameters for getcprj call for pcg1 wavefunctions
- getcprj_choice =  5 ! compute cprj and k derivs
- getcprj_idir = 0 ! compute derivs in all 3 directions
- getcprj_cpopt = 0 ! no cprj in memory at input
- getcprj_useylm = 1 ! use Ylm's
-
- ! input parameters for calls to getghc at ikpt
- getghc_cpopt = 4   ! cprj and derivatives already in memory
- ndat = 1           ! number of fft's in parallel
- getghc_prtvol = 0
- getghc_sij_opt = 1 ! compute both H|C> and S|C>
- getghc_tim = 0
- ! getghc: type_calc 0 means kinetic, local, nonlocal
- getghc_type_calc = 0
- lambda = zero 
- lambda_ndat = zero 
-
  ! input parameters for calls to nonlop
- nonlop_choice =  1! 
- nonlop_cpopt = 4  ! cprj and derivs in memory already
- nonlop_nnlout = 1
+ ! nonlop_choice will be changed from call to call
+ nonlop_cpopt = -1  ! cprj computed and not saved
  nonlop_pawopt = 3 ! apply only S
  nonlop_signs = 2  ! get <G|Op|C> vector
+ nonlop_nnlout = 1
  nonlop_tim = 0
 
- getdc1_optcprj = 1
-
+ ! input parameters to projbd
  projbd_scprod_io = 0
- projbd_tim = 0 
  projbd_useoverlap = 1
+ projbd_tim = 0 
+
+ ! input parameters for calls to getghc at ikpt
+ getghc_cpopt = -1 ! cprj computed and not saved
+ getghc_sij_opt = 1 ! compute both H|C> and S|C>
+ ndat = 1           ! number of fft's in parallel
+ getghc_prtvol = 0
+ getghc_type_calc = 0 ! type_calc 0 means kinetic, local, nonlocal
+ getghc_tim = 0
+ lambda = zero 
+ lambda_ndat = zero 
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -5176,6 +5165,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  call fftpac(isppol,mpi_enreg,dtset%nspden,&
       & ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vlocal,2)
  ABI_DEALLOCATE(cgrvtrial)
+ call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
  
  !========  compute nuclear dipole vector potential (may be zero) ==========
  with_vectornd=0
@@ -5194,40 +5184,8 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        & ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
    end do
    ABI_DEALLOCATE(cgrvtrial)
+   call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
  end if
-
- !======= add vlocal ====================
- call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
-
- !====== add vectornd if available ==============
- if(has_nucdip) then
-    call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
- end if
-
- ncpgr = 0
- if (getcprj_choice .EQ. 5) ncpgr=3
- ABI_ALLOCATE(dimlmn,(dtset%natom))
- call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'R')
-
- ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
- call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
- ABI_DATATYPE_ALLOCATE(dcwaveprj,(dtset%natom,1))
- call pawcprj_alloc(dcwaveprj,ncpgr,dimlmn)
- ABI_DATATYPE_ALLOCATE(cwaveprj1,(dtset%natom,1))
- call pawcprj_alloc(cwaveprj1,ncpgr,dimlmn)
-
- ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,nband_k))
- call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
-
- ABI_DATATYPE_ALLOCATE(cprj_k1,(dtset%natom,nband_k,3))
- do adir = 1, 3
-   call pawcprj_alloc(cprj_k1(:,:,adir),ncpgr,dimlmn)
- end do
-
- ABI_DATATYPE_ALLOCATE(cprj_pk1,(dtset%natom,nband_k,3))
- do adir = 1, 3
-   call pawcprj_alloc(cprj_pk1(:,:,adir),ncpgr,dimlmn)
- end do
 
  ABI_ALLOCATE(kg_k,(3,dtset%mpw))
  ABI_ALLOCATE(kinpw,(dtset%mpw))
@@ -5311,9 +5269,6 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_ALLOCATE(gvnlc,(2,npw_k))
    ! input parameters for calls to nonlop
    nonlop_choice =  1! apply (I+S)
-   nonlop_cpopt = -1  ! cprj computed and not saved
-   nonlop_pawopt = 3 ! apply only S
-   nonlop_signs = 2  ! get <G|Op|C> vector
    do nn = 1, nband_k
      cwavef = cg_k(:,(nn-1)*npw_k+1:nn*npw_k)
      call nonlop(nonlop_choice,nonlop_cpopt,cwaveprj,nonlop_enlout,gs_hamk,0,&
@@ -5322,11 +5277,23 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
      scg_k(1:2,(nn-1)*npw_k+1:nn*npw_k) = gsc(1:2,1:npw_k)
    end do ! end loop over nn
 
+   ! compute \partial S/\partial k |u_nk>
+   ABI_ALLOCATE(dscg_k,(2,mcgk,3))
+   ! input parameters for calls to nonlop
+   nonlop_choice =  5! apply dS/dk
+   do adir = 1, 3
+     do nn = 1, nband_k
+       cwavef = cg_k(:,(nn-1)*npw_k+1:nn*npw_k)
+       call nonlop(nonlop_choice,nonlop_cpopt,cwaveprj,nonlop_enlout,gs_hamk,adir,&
+         & lambda_ndat,mpi_enreg,ndat,nonlop_nnlout,nonlop_pawopt,nonlop_signs,gsc,&
+         & nonlop_tim,cwavef,gvnlc)
+       dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir) = gsc(1:2,1:npw_k)
+     end do ! end loop over nn
+   end do
+
    ! compute projection of cg1_k on conduction space
    ABI_ALLOCATE(pcg1_k,(2,nband_k*npw_k,3))
    ABI_ALLOCATE(scprod,(2,nband_k))
-   projbd_scprod_io = 0
-   projbd_useoverlap = 1
    do adir = 1, 3
      do nn = 1, nband_k
 
@@ -5342,8 +5309,6 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_ALLOCATE(ghc,(2,npw_k))
    ABI_ALLOCATE(cwaveb1,(2,npw_k))
    ABI_ALLOCATE(cwaveg1,(2,npw_k))
-   getghc_cpopt = -1   ! cprj computed and not saved
-   getghc_sij_opt = 1 ! compute both H|C> and S|C>
    do nn = 1, nband_k
 
      ! compute H^0|u_nk> and <u_nk|H^0|u_nk>
@@ -5387,6 +5352,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_DEALLOCATE(gvnlc)
    ABI_DEALLOCATE(cg_k)
    ABI_DEALLOCATE(scg_k)
+   ABI_DEALLOCATE(dscg_k)
    ABI_DEALLOCATE(cg1_k)
    ABI_DEALLOCATE(pcg1_k)
    ABI_DEALLOCATE(scprod)
@@ -5430,7 +5396,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  write(std_out,'(a,3es16.8)')'JWZ debug chern ',chern(1),chern(2),chern(3)
 
  orbmag_total=zero;chern_total=zero
- orbmag_total(1,:)=orbmag_cc(:) + orbmag_vv
+ orbmag_total(1,:)=orbmag_cc(:) + orbmag_vv(:)
  chern_total(1,:)=chern(:)
 
  call output_orbmag(1,orbmag_total)
@@ -5449,24 +5415,6 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  ABI_DEALLOCATE(kg_k)
  ABI_DEALLOCATE(kinpw)
  ABI_DEALLOCATE(ph1d)
-
- ABI_DEALLOCATE(dimlmn)
- call pawcprj_free(cwaveprj)
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
- call pawcprj_free(dcwaveprj)
- ABI_DATATYPE_DEALLOCATE(dcwaveprj)
- call pawcprj_free(cwaveprj1)
- ABI_DATATYPE_DEALLOCATE(cwaveprj1)
-
- do adir = 1, 3
-   call pawcprj_free(cprj_k1(:,:,adir))
-   call pawcprj_free(cprj_pk1(:,:,adir))
- end do
- ABI_DATATYPE_DEALLOCATE(cprj_k1)
- ABI_DATATYPE_DEALLOCATE(cprj_pk1)
-
- call pawcprj_free(cprj_k)
- ABI_DATATYPE_DEALLOCATE(cprj_k)
 
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' JWZ debug orbmag_ddk progress: time ',finish_time-start_time
