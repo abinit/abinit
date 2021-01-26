@@ -1,7 +1,9 @@
 # Linear and nonlinear response calculation for AlP
 # Perturbations: electric fields & atomic displacements
+# Use of 'full DFPT' method for third derivatives,
+# so we need to solve Second Order Sternheimer equation
 
-ndtset 5
+ndtset 7
 
 #DATASET1 : scf calculation: GS WF in the BZ
 #********************************************
@@ -44,22 +46,43 @@ ndtset 5
    kptopt4    2
   prepanl4    1
 
-#DATASET5 : 3DTE calculation
+# DATASET5 : dkdk
+#*******************************
+ rf2_dkdk5   1
+   getddk5   3
+  prepanl5   1
+# Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
+    nstep5   1
+    nline5   100
+
+# DATASET6 : dkde
+#*******************************
+ rf2_dkde6   1
+   getddk6   3
+  get1den6   4
+ getdelfd6   4
+  getdkdk6   5
+  prepanl6   1
+# Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
+    nstep6   1
+    nline6   100
+
+#DATASET7 : 3DTE calculation
 #***************************
-   getden5    1
-  get1den5    4
-   getwfk5    2
-   get1wf5    4
-   kptopt5    2
-optdriver5    5
-  d3e_pert1_elfd5    1
-  d3e_pert1_phon5    1
- d3e_pert1_atpol5    1 2
-   d3e_pert1_dir5    1 1 1
-  d3e_pert2_elfd5    1
-   d3e_pert2_dir5    1 1 1
-  d3e_pert3_elfd5    1
-   d3e_pert3_dir5    1 1 1
+   getden7    1
+  get1den7    4
+   getwfk7    2
+   get1wf7    4
+   kptopt7    2
+optdriver7    5
+  d3e_pert1_elfd7    1
+  d3e_pert1_phon7    1
+ d3e_pert1_atpol7    1 2
+   d3e_pert1_dir7    1 1 1
+  d3e_pert2_elfd7    1
+   d3e_pert2_dir7    1 1 1
+  d3e_pert3_elfd7    1
+   d3e_pert3_dir7    1 1 1
 
 #Definition of the unit cell
 # these cell parameters were derived from a relaxation run done with the
@@ -121,16 +144,17 @@ prteig 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tnlo_2.abo, tolnlines= 330, tolabs=  2.000e-04, tolrel=  9.000e-02
+#%%   tnlo_2_fDFPT.abo, tolnlines =1 , tolabs =1.0E-8, tolrel = 1.0E-8
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors =  J. Zwanziger, M. Veithen
+#%% authors = L. Baguet, J. Zwanziger
 #%% keywords = NC, DFPT, NONLINEAR
 #%% description = 
 #%%   Linear and nonlinear response calculation for AlP
-#%%   Perturbations: electric fields & atomic displacements
+#%%   Perturbations: electric fields & atomic displacements.
+#%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7). 
+#%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
 #%%<END TEST_INFO>

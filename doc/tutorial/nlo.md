@@ -102,8 +102,8 @@ computation of energy derivatives up to third order only requires the
 knowledge of the ground-state and first-order wavefunctions, see
 [[cite:Gonze1989]] and [[cite:Gonze1995]].
 Our study will therefore include the following steps : (i) computation of the
-ground-state wavefunctions and density; (ii) determination of the first-order
-wavefunctions and construction of the related databases for second and third-
+ground-state wavefunctions and density; (ii) determination of
+wavefunctions derivatives and construction of the related databases for second and third-
 order energy derivatives, (iii) combination of the different databases and
 analysis to get the physical properties of interest.
 
@@ -126,7 +126,10 @@ field and atomic displacements:
 
 The various steps are combined into a single input file.
 
-**Responses to electric fields, atomic displacements, and strains.**
+There are two implementations for the computation of third-order derivatives.
+First we will present the *PEAD* method, as described in [[cite:Veithen2005]], then we will present the *full DFPT* method, as described in [[cite:Gonze2020]] and [[cite:Romero2020]]. In the latter case, the input file is slightly modified so the reader interested in *full DFPT* should read the *PEAD* part first. In ABINIT, only the *full DFPT* implementation is available for PAW pseudopotentials.
+
+**Responses to electric fields, atomic displacements, and strains (with PEAD)**
 
 Let us examine the file *tnlo_2.abi*. Its purpose is to build databases for
 second and third energy derivatives with respect to electric fields, atomic
@@ -169,7 +172,6 @@ computed. This section includes the following:
   get1den5    4
    getwfk5    2
    get1wf5    4
-    nband5    4
    kptopt5    2
 optdriver5    5
   d3e_pert1_elfd5    1
@@ -201,9 +203,15 @@ database files (DDB) generated independently for second and third energy
 derivatives at the end of run steps 4 and 5. Keep these databases, as they will be
 used later for a global and convenient analysis of the results using ANADDB.
 
+**Responses to electric fields, atomic displacements, and strains (with full DFPT)**
+
+If not already done, the reader should read the part on the *PEAD* method.
+
+Now you can compare the files *tnlo_2.abi* and *tnlo_2_fDFPT.abi*.
+
 **Merge of the DDB.**
 
-At this stage, all the relevant energy derivatives have been obtained and are
+At this stage, using either the PEAD or full DFPT method, all the relevant energy derivatives have been obtained and are
 stored in individual databases. These must be combined with the 
 [[help:mrgddb|MRGDDB]] merge
 utility in order to get a complete database *tnlo_3.ddb.out*. Explicitly, you
@@ -262,12 +270,12 @@ frequencies of longitudinal mode frequencies at Gamma):
 ```
 You can now run the code `anaddb` as
 *\$ABI_HOME/src/98_main/anaddb < tnlo_4.files*.
-The results are in the file tnlo_4.out.
+The results are in the file tnlo_4.abo.
 Various interesting physical properties are now directly accessible in this
 output in meaningful units. You can go through the file and
 identify the results mentioned below. Note that the order in which they are
 given below is not the same than the order in which they appear in the
-tnlo_4.out. You will have to jump between different sections of tnlo_4.out to find them.
+tnlo_4.abo. You will have to jump between different sections of tnlo_4.abo to find them.
 
 For comparison, we report in parenthesis (...) the values obtained with ecut =
 5, and for nonlinear responses in brackets [...] the results from [[cite:Veithen2005]].
