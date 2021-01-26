@@ -5096,10 +5096,11 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1)
- real(dp) :: chern(3),chern_total(2,3),orbmag_cc(3),orbmag_total(2,3),orbmag_vv(3)
+ real(dp) :: chern(3),chernb(2,3),chern_total(2,3),orbmag_cc(3),orbmag_total(2,3),orbmag_vv(3)
  real(dp) :: rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwaveg1(:,:)
+ real(dp),allocatable :: cwavedsdb(:,:),cwavedsdg(:,:)
  real(dp),allocatable :: dcwavef(:,:),dscg_k(:,:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),scg_k(:,:),scprod(:,:)
@@ -5198,6 +5199,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  orbmag_cc = zero
  orbmag_vv = zero
  chern = zero
+ chernb = zero
  !============= BIG FAT KPT LOOP :) ===========================
  do ikpt = 1, dtset%nkpt
 
@@ -5309,6 +5311,8 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_ALLOCATE(ghc,(2,npw_k))
    ABI_ALLOCATE(cwaveb1,(2,npw_k))
    ABI_ALLOCATE(cwaveg1,(2,npw_k))
+   ABI_ALLOCATE(cwavedsdb,(2,npw_k))
+   ABI_ALLOCATE(cwavedsdg,(2,npw_k))
    do nn = 1, nband_k
 
      ! compute H^0|u_nk> and <u_nk|H^0|u_nk>
@@ -5336,9 +5340,30 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        orbmag_cc(adir) = orbmag_cc(adir) + doti
        
        ! <du/db|S|du/dg> contributes to orbmag_vv and chern number
+       ! vv needs (i/2)*eps_abg*<du/db|S|du/dg>Enk = -Im<du/db|S|du/dg>Enk =
+       ! +Im<du/dg|S|du/db>Enk
        doti=-DOT_PRODUCT(cwaveg1(2,:),gsc(1,:))+DOT_PRODUCT(cwaveg1(1,:),gsc(2,:))
        orbmag_vv(adir) = orbmag_vv(adir) + doti*Enk
+
+       ! chern needs i*eps_abg*<du/db|S|du/dg> so contract with eps_abg
+       ! -2*Im<du/db|S|du/dg> = 2*Im<du/dg|S|du/db>
        chern(adir) = chern(adir) + two*doti
+
+       cwavedsdb(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+       cwavedsdg(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+
+       ! also need <u|dS/db|du/dg> - <u|dS/dg|du/db>
+       doti=-DOT_PRODUCT(cwavedsdb(2,:),cwaveg1(1,:))+&
+         &   DOT_PRODUCT(cwavedsdb(1,:),cwaveg1(2,:)) - &
+         & (-DOT_PRODUCT(cwavedsdg(2,:),cwaveb1(1,:))+&
+         &   DOT_PRODUCT(cwavedsdg(1,:),cwaveb1(2,:)))
+       dotr= DOT_PRODUCT(cwavedsdb(1,:),cwaveg1(1,:))+&
+         &   DOT_PRODUCT(cwavedsdb(2,:),cwaveg1(2,:)) - &
+         & ( DOT_PRODUCT(cwavedsdg(1,:),cwaveb1(1,:))+&
+         &   DOT_PRODUCT(cwavedsdg(2,:),cwaveb1(2,:)))
+
+       chernb(1,adir) = chernb(1,adir) + dotr
+       chernb(2,adir) = chernb(2,adir) + doti
 
      end do
 
@@ -5347,6 +5372,8 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_DEALLOCATE(cwavef)
    ABI_DEALLOCATE(cwaveb1)
    ABI_DEALLOCATE(cwaveg1)
+   ABI_DEALLOCATE(cwavedsdb)
+   ABI_DEALLOCATE(cwavedsdg)
    ABI_DEALLOCATE(ghc)
    ABI_DEALLOCATE(gsc)
    ABI_DEALLOCATE(gvnlc)
@@ -5391,9 +5418,14 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  chern(1:3) = ucvol*MATMUL(gprimd,chern(1:3))
  chern(1:3) = chern(1:3) * two/(ucvol*dtset%nkpt*two_pi)
 
+ chernb(1,:)=ucvol*MATMUL(gprimd,chernb(1,:))
+ chernb(2,:)=ucvol*MATMUL(gprimd,chernb(2,:))
+ chernb = chernb * two/(ucvol*dtset%nkpt*two_pi)
+
  write(std_out,'(a,3es16.8)')'JWZ debug orbmag_cc ',orbmag_cc(1),orbmag_cc(2),orbmag_cc(3)
  write(std_out,'(a,3es16.8)')'JWZ debug orbmag_vv ',orbmag_vv(1),orbmag_vv(2),orbmag_vv(3)
  write(std_out,'(a,3es16.8)')'JWZ debug chern ',chern(1),chern(2),chern(3)
+ write(std_out,'(a,6es16.8)')'JWZ debug chernb ',chernb(1,1),chernb(2,1),chernb(1,2),chernb(2,2),chernb(1,3),chernb(2,3)
 
  orbmag_total=zero;chern_total=zero
  orbmag_total(1,:)=orbmag_cc(:) + orbmag_vv(:)
