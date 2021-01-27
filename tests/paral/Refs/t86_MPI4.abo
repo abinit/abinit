@@ -97,6 +97,28 @@ _ WF disk file :      0.471 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
         dmft_rslf2          1
         dmft_solv1          5
         dmft_solv2          2
+ dmft_wanorthnorm1          2
+ dmft_wanorthnorm2          3
+             ecut      8.00000000E+00 Hartree
+-          fftalg         112
+              ixc           7
+           jdtset        1    2
+            jpawu1     0.00000000E+00  0.00000000E+00 Hartree
+            jpawu2     3.50000000E-02  0.00000000E+00 Hartree
+              kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+         kptrlatt        2    0    0      0    2    0      0    0    2
+          kptrlen      1.12005714E+01
+            lpawu1         -1      -1
+            lpawu2          2      -1
+P           mkmem           3
+            natom           4
+            nband          28
+           ndtset           2
+            ngfft          16      16      32
+          ngfftdg          16      16      32
+             nkpt           3
  dmft_charge_prec1     1.0000000000E-06
  dmft_charge_prec2     1.0000000000E-10
              ecut      1.20000000E+01 Hartree
@@ -1230,6 +1252,28 @@ total_energy_dc_eV  : -4.12184545739891E+03
         dmft_rslf2          1
         dmft_solv1          5
         dmft_solv2          2
+ dmft_wanorthnorm1          2
+ dmft_wanorthnorm2          3
+             ecut      8.00000000E+00 Hartree
+-          fftalg         112
+              ixc           7
+           jdtset        1    2
+            jpawu1     0.00000000E+00  0.00000000E+00 Hartree
+            jpawu2     3.50000000E-02  0.00000000E+00 Hartree
+              kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+         kptrlatt        2    0    0      0    2    0      0    0    2
+          kptrlen      1.12005714E+01
+            lpawu1         -1      -1
+            lpawu2          2      -1
+P           mkmem           3
+            natom           4
+            nband          28
+           ndtset           2
+            ngfft          16      16      32
+          ngfftdg          16      16      32
+             nkpt           3
  dmft_charge_prec1     1.0000000000E-06
  dmft_charge_prec2     1.0000000000E-10
              ecut      1.20000000E+01 Hartree

@@ -51,6 +51,7 @@ dmft_iter 1
 dmftcheck 0
 # For historical purposes only, do not use outside of tests
 dmft_occnd_imag 0
+dmft_wanorthnorm 3
 
 # == CTQMC
 dmft_solv 5 # CTQMC

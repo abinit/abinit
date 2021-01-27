@@ -66,6 +66,7 @@ dmftctqmc_order 50
 
 dmft_solv 2 # H1
 dmft_charge_prec 1e-10
+dmft_wanorthnorm 3
 
 # == DFT+U
 usepawu     1  #  For density matrix printout.

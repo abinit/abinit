@@ -64,6 +64,7 @@ dmftqmc_n 1.d6
 dmftqmc_therm 10000
 #dmftctqmc_gmove 0
 dmft_charge_prec 1e-10
+dmft_wanorthnorm 3
 
 
 # == DFT+U

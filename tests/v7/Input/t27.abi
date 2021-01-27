@@ -59,6 +59,7 @@ dmft_dc 1
 dmft_t2g 1   # special value for t2g only calculation.
 # For historical purposes only, do not use outside of tests
 dmft_occnd_imag 0
+dmft_wanorthnorm 3
 
 # == CTQMC
 dmft_solv 5 # CTQMC
