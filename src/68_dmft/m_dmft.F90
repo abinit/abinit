@@ -213,7 +213,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtv
  end do
  opt_renorm=3
 ! write(6,*) "natomcor",natomcor
-! if(natomcor>1) opt_renorm=2
+ if(natomcor>1) opt_renorm=2 ! if number of atoms is larger than one, one must use a new orthogonalization scheme.
  if(paw_dmft%nspinor==2.and.(paw_dmft%dmft_solv==8.or.paw_dmft%dmft_solv==9)) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
                                                                 ! ought to be  generalized  in the  future
  if(paw_dmft%dmft_solv/=-1) then
