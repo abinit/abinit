@@ -5,67 +5,72 @@
 
 ndtset 7
 
-#DATASET1 : scf calculation: GS WF in the BZ
+#DATASET1 : scf calculation: GS WF in the IBZ
 #********************************************
-   prtden1    1
-    prtwf1    1
-   kptopt1    1
-   toldfe1    1.0d-12
+   prtden1    1        # save density on disk, will be used in other datasets
+    prtwf1    1        # save WF on disk, will be used in other datasets
+   kptopt1    1        # use Irreducible Brillouin Zone (all symmetry taken into account)
+   toldfe1    1.0d-12  # SCF convergence criteria (could be tolwfr or tolvrs)
 
-#DATASET2 : non scf calculation: GS WF in the whole BZ
+#DATASET2 : non scf calculation: GS WF in half BZ
 #*****************************************************
-   getden2    1
-   kptopt2    2
-     iscf2   -2
-   getwfk2    1
-   tolwfr2    1.0d-22
-    prtwf2    1
+   getden2    1        # use density from dataset 1
+   kptopt2    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+   getwfk2    1        # use GS WF from dataset 1 (as input)
+     iscf2   -2        # non-self-consistent calculation
+   tolwfr2    1.0d-22  # convergence criteria on WF, need high precision for response
+    prtwf2    1        # save WF on disk, will be used in other datasets
 
-#DATASET3 : ddk on the MP grid of k-points
-#*****************************************
-   getwfk3    2
-    rfdir3    1 1 1
-   rfelfd3    2
-   tolwfr3    1.0d-22
-    prtwf3    1
-   kptopt3    2
+#DATASET3 : derivative of WF with respect to k points
+#****************************************************
+   getwfk3    2        # use GS WF from dataset 2
+   kptopt3    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+   rfelfd3    2        # compute 1st-order WF derivatives with respect to k-points
+    rfdir3    1 1 1    # compute all directions
+   tolwfr3    1.0d-22  # convergence criteria on 1st-order  WF 
+    prtwf3    1        # save 1st-order WF on disk, will be used in other datasets
 
-#DATASET4 : ddE on the MP grid of k-points
+#DATASET4 : response functions and corresponding 1st order WF derivatives
 # phonons, electric fields, and strains are all done
-#*****************************************
-   prtden4    1
-   getwfk4    2
-   getddk4    3
-    rfdir4    1 1 1
-   rfphon4    1
-  rfatpol4    1 2
-   tolvrs4    1.0d-12
-    prtwf4    1
-   rfelfd4    3
-   rfstrs4    3
-   kptopt4    2
-  prepanl4    1
+#**************************************************************
+   getwfk4    2        # use GS WF from dataset 2
+   kptopt4    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+   getddk4    3        # use ddk WF from dataset 3 (needed for electric field)
+   rfphon4    1        # compute 1st-order WF derivatives with respect to atomic displacements...
+  rfatpol4    1 2      # ...for all atoms (so here only 1 and 2)
+    rfdir4    1 1 1    # compute all directions
+   rfelfd4    3        # compute 1st-order WF derivatives with respect to electric field
+   rfstrs4    3        # compute 1st-order WF derivatives with respect to strains
+   tolvrs4    1.0d-12  # SCF convergence criteria (could be tolwfr)
+  prepanl4    1        # make sure that response functions are correctly prepared for a non-linear computation
+    prtwf4    1        # save 1st-order WF on disk, will be used in other datasets
+   prtden4    1        # save 1st-order density on disk, will be used in other datasets
 
-# DATASET5 : dkdk
+# DATASET5 : 2nd order WF derivatives (dkdk)
 #*******************************
- rf2_dkdk5   1
-   getddk5   3
-  prepanl5   1
-# Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
-    nstep5   1
-    nline5   100
+ rf2_dkdk5   1        # compute 2nd-order WF derivatives with respect to k-points
+   getwfk5   2        # use GS WF from dataset 2
+   kptopt5   2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+   getddk5   3        # use 1st-order WF from dataset 3
+  prepanl5   1        # compute only needed directions for the non-linear computation
+   tolwfr5   1.0d-22  # convergence criteria on 2nd-order  WF
+    prtwf5   1        # save 2nd-order WF on disk, will be used in other datasets
 
-# DATASET6 : dkde
+# DATASET6 : 2nd order WF derivatives (dkde)
 #*******************************
- rf2_dkde6   1
+ rf2_dkde6   1        # compute 2nd-order WF derivatives with respect to electric field and k-points
+   getwfk6   2        # use GS WF from dataset 2
    getddk6   3
   get1den6   4
  getdelfd6   4
   getdkdk6   5
   prepanl6   1
+   tolwfr6   1.0d-22
 # Non self-consistent computation : can converge in one step. If not, increase nline instead of nstep. tolrde is not used.
     nstep6   1
     nline6   100
+   kptopt6   2
+    prtwf6   1
 
 #DATASET7 : 3DTE calculation
 #***************************
@@ -73,8 +78,11 @@ ndtset 7
   get1den7    4
    getwfk7    2
    get1wf7    4
+   getddk7    3
+  getdkde7    6
    kptopt7    2
 optdriver7    5
+  usepead7    0 
   d3e_pert1_elfd7    1
   d3e_pert1_phon7    1
  d3e_pert1_atpol7    1 2

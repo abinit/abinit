@@ -2797,9 +2797,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  prepanl
 !  Must have prtden=1 to prepare a nonlinear calculation
-   if (dt%prtden /= 1) then
-     cond_string(1)='prtden' ; cond_values(1)=dt%prtden
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'prepanl',dt%prepanl,1,(/1/),iout)
+   if (dt%prepanl==1.and.(dt%rfelfd/=0.or.dt%rfphon/=0)) then
+     cond_string(1)='rfelfd'  ; cond_values(1)=dt%rfelfd
+     cond_string(2)='rfphon'  ; cond_values(2)=dt%rfphon
+     cond_string(3)='prepanl' ; cond_values(3)=dt%prepanl
+     call chkint_eq(1,3,cond_string,cond_values,ierr,'prtden',dt%prtden,1,(/1/),iout)
    end if
 
 !  prtbbb
