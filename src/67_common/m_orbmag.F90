@@ -5362,14 +5362,10 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        cwavedsdb(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
        cwavedsdg(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
 
-       dub_dsg_r = DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(1,:))+&
-                   DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(2,:))
-       dug_dsb_r = DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(1,:))+&
-                   DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(2,:))
-       dub_dsg_i = DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(2,:))-&
-                   DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(1,:))
-       dug_dsb_i = DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(2,:))-&
-                   DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(1,:))
+       dug_dsb_r = DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(1,:)) + DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(2,:))
+       dug_dsb_i = -DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(1,:)) + DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(2,:))
+       dub_dsg_r = DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(2,:))
+       dub_dsg_i = -DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(2,:))
 
        !VV I term gives (i/2)eps_abg <du/db|dS/dg|u>Enk
        !VV III term gives (i/2)eps_abg <du|dS/db|du/dg>Enk
