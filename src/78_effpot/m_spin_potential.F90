@@ -110,13 +110,13 @@ contains
     self%is_null=.False.
     self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
-    ABI_ALLOCATE( self%ms, (self%nspin))
+    ABI_MALLOC( self%ms, (self%nspin))
     if(iam_master) then
        call self%coeff_coo%initialize([self%nspin*3, self%nspin*3])
     endif
-    ABI_ALLOCATE(self%external_hfield, (3,self%nspin))
+    ABI_MALLOC(self%external_hfield, (3,self%nspin))
     self%external_hfield=0.0_dp
-    ABI_ALLOCATE( self%Htmp, (3, self%nspin))
+    ABI_MALLOC( self%Htmp, (3, self%nspin))
     self%Htmp(:,:)=0.0_dp
 
     self%has_external_hfield=.False.
@@ -443,15 +443,15 @@ contains
   subroutine finalize(self)
     class(spin_potential_t), intent(inout):: self
     if (allocated(self%ms)) then
-       ABI_DEALLOCATE(self%ms)
+       ABI_FREE(self%ms)
     end if
 
     if (allocated(self%Htmp)) then
-       ABI_DEALLOCATE(self%Htmp)
+       ABI_FREE(self%Htmp)
     endif
 
     if (allocated(self%external_hfield)) then
-       ABI_DEALLOCATE(self%external_hfield)
+       ABI_FREE(self%external_hfield)
     endif
 
     call self%bilinear_csr_mat%finalize()

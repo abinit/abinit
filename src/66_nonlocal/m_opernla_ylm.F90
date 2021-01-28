@@ -262,8 +262,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
      ipwshft=(ispinor-1)*npw
 
 !    Allocate work space
-     ABI_ALLOCATE(scali,(npw))
-     ABI_ALLOCATE(scalr,(npw))
+     ABI_MALLOC(scali,(npw))
+     ABI_MALLOC(scalr,(npw))
 
 !    Loop on atoms (blocking)
      do ia=1,nincat
@@ -1161,8 +1161,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !        --------------------------------------------------------------------
        if ((signs==1).and.(choice_==6)) then
          mu0=1;if (choice_==6) mu0=37
-         ABI_ALLOCATE(scalarr,(npw,4))
-         ABI_ALLOCATE(scalari,(npw,4))
+         ABI_MALLOC(scalarr,(npw,4))
+         ABI_MALLOC(scalari,(npw,4))
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -1224,8 +1224,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              end if
            end if
          end do
-         ABI_DEALLOCATE(scalarr)
-         ABI_DEALLOCATE(scalari)
+         ABI_FREE(scalarr)
+         ABI_FREE(scalari)
        end if
 
 !      --------------------------------------------------------------------
@@ -1234,8 +1234,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !        --------------------------------------------------------------------
        if ((signs==1).and.(choice_==6)) then
          mu0=1
-         ABI_ALLOCATE(scalarr,(npw,10))
-         ABI_ALLOCATE(scalari,(npw,10))
+         ABI_MALLOC(scalarr,(npw,10))
+         ABI_MALLOC(scalari,(npw,10))
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -1324,8 +1324,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              end if
            end if
          end do
-         ABI_DEALLOCATE(scalarr)
-         ABI_DEALLOCATE(scalari)
+         ABI_FREE(scalarr)
+         ABI_FREE(scalari)
        end if
 
 !      --------------------------------------------------------------------
@@ -1478,8 +1478,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
      end do ! End loop on atoms
 
 !    Deallocate temporary space
-     ABI_DEALLOCATE(scali)
-     ABI_DEALLOCATE(scalr)
+     ABI_FREE(scali)
+     ABI_FREE(scalr)
 
    end do !  End loop on spinorial components
 
@@ -1503,9 +1503,9 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !    Allocate work space
 !$OMP SECTIONS
 !$OMP SECTION
-     ABI_ALLOCATE(scali,(npw))
+     ABI_MALLOC(scali,(npw))
 !$OMP SECTION
-     ABI_ALLOCATE(scalr,(npw))
+     ABI_MALLOC(scalr,(npw))
 !$OMP END SECTIONS
 
 !    Loop on atoms (blocking)
@@ -2698,8 +2698,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !        --------------------------------------------------------------------
        if ((signs==1).and.(choice_==6)) then
          mu0=1;if (choice_==6) mu0=37
-         ABI_ALLOCATE(scalarr,(npw,4))
-         ABI_ALLOCATE(scalari,(npw,4))
+         ABI_MALLOC(scalarr,(npw,4))
+         ABI_MALLOC(scalari,(npw,4))
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -2780,8 +2780,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              end if
            end if
          end do
-         ABI_DEALLOCATE(scalarr)
-         ABI_DEALLOCATE(scalari)
+         ABI_FREE(scalarr)
+         ABI_FREE(scalari)
        end if
 
 !      --------------------------------------------------------------------
@@ -2790,8 +2790,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !        --------------------------------------------------------------------
        if ((signs==1).and.(choice_==6)) then
          mu0=1
-         ABI_ALLOCATE(scalarr,(npw,10))
-         ABI_ALLOCATE(scalari,(npw,10))
+         ABI_MALLOC(scalarr,(npw,10))
+         ABI_MALLOC(scalari,(npw,10))
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -2901,8 +2901,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              end if
            end if
          end do
-         ABI_DEALLOCATE(scalarr)
-         ABI_DEALLOCATE(scalari)
+         ABI_FREE(scalarr)
+         ABI_FREE(scalari)
        end if
 
 !      --------------------------------------------------------------------
@@ -3103,9 +3103,9 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !    Deallocate temporary space
 !$OMP SECTIONS
 !$OMP SECTION
-     ABI_DEALLOCATE(scali)
+     ABI_FREE(scali)
 !$OMP SECTION
-     ABI_DEALLOCATE(scalr)
+     ABI_FREE(scalr)
 !$OMP END SECTIONS
 
    end do !  End loop on spinorial components

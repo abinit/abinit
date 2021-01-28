@@ -371,11 +371,11 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
 
 !Check Kxc
  if (size(kxc)>3*vectsize) then
-     MSG_ERROR('Cannot use Kxc from GGA!')
+     ABI_ERROR('Cannot use Kxc from GGA!')
  end if
 
  if((rotation_method==1.or.rotation_method==2).and.cplex==2) then
-     MSG_ERROR('rotation_method=1 and 2 are not available for cplex=2 case! use ixcrot=3')
+     ABI_ERROR('rotation_method=1 and 2 are not available for cplex=2 case! use ixcrot=3')
  endif
 
 
@@ -897,14 +897,14 @@ subroutine test_rotations(option,cplex)
 !  write(msg,'(3a,i0)')&
 !&  'The argument option should be 1 or 2,',ch10,&
 !&  'however, option=',option
-!  MSG_BUG(msg)
+!  ABI_BUG(msg)
 ! end if
 !
 ! if (sizein<1) then
 !  write(msg,'(3a,i0)')&
 !&  '  The argument sizein should be a positive number,',ch10,&
 !&  '  however, sizein=',sizein
-!  MSG_ERROR(msg)
+!  ABI_ERROR(msg)
 ! end if
 
  DBG_EXIT("COLL")

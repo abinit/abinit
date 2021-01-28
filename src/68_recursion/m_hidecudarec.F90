@@ -153,7 +153,7 @@ subroutine InitRecGPU_0(recgpu,mpi_ab)
 ! *************************************************************************
  recgpu%nptrec = 0
  nullify(recgpu%map)
- ABI_ALLOCATE(recgpu%map,(0:mpi_ab%nproc-1))
+ ABI_MALLOC(recgpu%map,(0:mpi_ab%nproc-1))
  recgpu%map = -1       !--Initial guess no gpu
 
 end subroutine InitRecGPU_0
@@ -396,14 +396,14 @@ subroutine CleanRecGPU(recgpu,load)
  recgpu%nptrec = 0
 
  if(associated(recgpu%map))  then
-   ABI_DEALLOCATE(recgpu%map)
+   ABI_FREE(recgpu%map)
  end if
  if(load==1)then
    if(allocated(recgpu%par%displs)) then
-     ABI_DEALLOCATE(recgpu%par%displs)
+     ABI_FREE(recgpu%par%displs)
    end if
    if(allocated(recgpu%par%vcount)) then
-     ABI_DEALLOCATE(recgpu%par%vcount)
+     ABI_FREE(recgpu%par%vcount)
    end if
  endif
  call unset_dev()

@@ -524,7 +524,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 
  if (info /= 0) then
    write(msg,'(2(a,i0))')" proc: ",processor%myproc,' error in the initialisation of the scalapack matrix: ',info
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Allocate local buffer.
@@ -931,7 +931,7 @@ subroutine matrix_from_global(matrix, reference, istwf_k)
 ! &         '  For istwf_k=2, observed the following element of matrix :',ch10,&
 ! &         iglob,jglob,reference(ind+1),ch10,&
 ! &         '  with a non-negligible imaginary part.'
-!          MSG_BUG(msg)
+!          ABI_BUG(msg)
 !        end if
 
      end if
@@ -1011,7 +1011,7 @@ subroutine matrix_from_global_sym(matrix, reference, istwf_k)
         !         &         '  For istwf_k=2, observed the following element of matrix :',ch10,&
         !         &         iglob,jglob,reference(ind+1),ch10,&
         !         &         '  with a non-negligible imaginary part.'
-        !    MSG_BUG(msg)
+        !    ABI_BUG(msg)
         ! end if
      end if
 
@@ -1429,7 +1429,7 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat, uplo, glob_mat)
    end do
 
  case default
-   MSG_BUG(" Wrong uplo: "//TRIM(uplo))
+   ABI_BUG(" Wrong uplo: "//TRIM(uplo))
  end select
 
 end subroutine slk_matrix_from_global_dpc_2D
@@ -1486,7 +1486,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
  szm = SIZE(glob_pmat)
  n = NINT( (-1 + SQRT(one+8*szm) )*half )
  if (n*(n+1)/2 /= SIZE(glob_pmat)) then
-   MSG_ERROR("Buggy compiler")
+   ABI_ERROR("Buggy compiler")
  end if
 
  select case (uplo(1:1))
@@ -1526,7 +1526,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
    end do
 
  case default
-   MSG_BUG(" Wrong uplo: "//TRIM(uplo))
+   ABI_BUG(" Wrong uplo: "//TRIM(uplo))
  end select
 
 end subroutine slk_matrix_from_global_dpc_1Dp
@@ -1604,7 +1604,7 @@ subroutine slk_matrix_to_global_dpc_2D(Slk_mat, uplo, glob_mat)
    end do
 
  case default
-   MSG_BUG(" Wrong uplo: "//TRIM(uplo))
+   ABI_BUG(" Wrong uplo: "//TRIM(uplo))
  end select
 
 end subroutine slk_matrix_to_global_dpc_2D
@@ -1898,7 +1898,7 @@ subroutine compute_eigen_problem(processor,matrix,results,eigen,comm,istwf_k)
 
   if (INFO/=0) then
      write(msg,'(A,I6)') "Problem to compute workspace to use ScaLAPACK, INFO=",INFO
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
   endif
 
   TWORK_tmp(1) = IWORK_tmp(1)
@@ -1957,7 +1957,7 @@ subroutine compute_eigen_problem(processor,matrix,results,eigen,comm,istwf_k)
 
   if (INFO/=0) then
      write(msg,'(A,I6)') "Problem to compute eigenvalues and eigenvectors with ScaLAPACK, INFO=",INFO
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
   endif
 
   ABI_FREE(IFAIl)
@@ -2243,7 +2243,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 
   if (INFO/=0) then
      write(msg,'(A,I6)') "Problem to compute workspace to use ScaLAPACK, INFO=",INFO
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
   endif
 
   TWORK_tmp(1) = IWORK_tmp(1)
@@ -2304,7 +2304,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 
   if (INFO/=0) then
      write(msg,'(A,I6)') "Problem to compute eigen problem with ScaLAPACK, INFO=",INFO
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
   endif
 
   ABI_FREE(IFAIl)
@@ -2847,7 +2847,7 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
  if (info < 0) then
    write(msg,'(a,i7,a)')" The ",-info,"-th argument of PZHEEVX had an illegal value."
    if (info==-25) msg = " LRWORK is too small to compute all the eigenvectors requested, no computation is performed"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (info > 0) then
@@ -2875,7 +2875,7 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
      msg = " PZSTEBZ  failed to compute eigenvalues. Ensure ABSTOL=2.0*PDLAMCH('U')"
      call wrtout(std_out, msg)
    end if
-   MSG_ERROR("Cannot continue")
+   ABI_ERROR("Cannot continue")
  end if
 
  ! Check the number of eigenvalues found wrt to the number of vectors calculated.
@@ -2884,7 +2884,7 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
    " The user supplied insufficient space and PZHEEVX is not able to detect this before beginning computation. ",ch10,&
    " To get all the  eigenvectors requested, the user must supply both sufficient space to hold the ",ch10,&
    " eigenvectors in Z (M .LE. DESCZ(N_)) and sufficient workspace to compute them. "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_FREE(work)
@@ -3088,7 +3088,7 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
  !MOD( JB-1, DESCB( NB_ ) ) = 0
 
  if (.not.ltest) then
-   MSG_ERROR("Alignment requirements not satisfied, check the caller")
+   ABI_ERROR("Alignment requirements not satisfied, check the caller")
  end if
 
  !Allocate the arrays for the results of the calculation
@@ -3163,7 +3163,7 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
  if (info < 0) then
    write(msg,'(a,i7,a)')" The ",-info,"-th argument of PZHEGVX had an illegal value."
    if (info==-25) msg = " LRWORK is too small to compute all the eigenvectors requested, no computation is performed"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (info > 0) then
@@ -3198,7 +3198,7 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
      " IFAIL(1) indicates the order of the smallest minor which is not positive definite."
      call wrtout(std_out, msg)
    end if
-   MSG_ERROR("Cannot continue")
+   ABI_ERROR("Cannot continue")
  end if
 
  ! Check the number of eigenvalues found wrt to the number of vectors calculated.
@@ -3207,7 +3207,7 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
    " The user supplied insufficient space and PZHEGVX is not able to detect this before beginning computation. ",ch10,&
    " To get all the  eigenvectors requested, the user must supply both sufficient space to hold the ",ch10,&
    " eigenvectors in Z (M .LE. DESCZ(N_)) and sufficient workspace to compute them. "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_FREE(work)
@@ -3262,7 +3262,7 @@ subroutine slk_zinvert(Slk_mat)
 
  ! IMPORTANT NOTE: PZGETRF requires square block decomposition i.e., MB_A = NB_A.
  if (Slk_mat%descript%tab(MB_) /= Slk_mat%descript%tab(NB_)) then
-   MSG_ERROR(" PZGETRF requires square block decomposition i.e MB_A = NB_A.")
+   ABI_ERROR(" PZGETRF requires square block decomposition i.e MB_A = NB_A.")
  end if
 
  ipiv_size = my_locr(Slk_mat) + Slk_mat%descript%tab(MB_)
@@ -3446,11 +3446,11 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
  ABI_CHECK(allocated(Slk_mat%buffer_cplx),"%buffer_cplx not allocated")
 
  if (firstchar(uplo, ["U","L"]) .and. Slk_mat%sizeb_global(1) /= Slk_mat%sizeb_global(2) ) then
-   MSG_ERROR("rectangular matrices are not compatible with the specified uplo")
+   ABI_ERROR("rectangular matrices are not compatible with the specified uplo")
  end if
 
  if (PRESENT(glob_subarray).and. .not. firstchar(uplo, ["A"])) then
-   MSG_ERROR("glob_subarray should not be used when uplo/=All")
+   ABI_ERROR("glob_subarray should not be used when uplo/=All")
  end if
 
  do_open = PRESENT(fname)
@@ -3493,7 +3493,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
    write(msg,"(3a)")&
     " Global position index cannot be stored in standard Fortran integer ",ch10,&
     " scaLAPACK matrix cannot be read with a single MPI-IO call."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call MPI_FILE_SET_VIEW(my_fh, my_offset, etype, slk_type, 'native', MPI_INFO_NULL, ierr)
@@ -3527,7 +3527,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
    nrows_w = glob_subarray(1,2) - glob_subarray(1,1) + 1
    ncols_w = glob_subarray(2,2) - glob_subarray(2,1) + 1
    if (.not.firstchar(uplo, ["A"])) then
-     MSG_ERROR("glob_subarray should not be used when uplo/=All")
+     ABI_ERROR("glob_subarray should not be used when uplo/=All")
    end if
  end if
 
@@ -3542,7 +3542,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
    else if (firstchar(uplo, ["L"])) then
      bsize_frecord = (/(col_glob * bsize_elm, col_glob=nfrec,1,-1)/)
    else
-     MSG_ERROR("Wrong uplo")
+     ABI_ERROR("Wrong uplo")
    end if
    call xmpio_write_frmarkers(mpi_fh,my_offset,xmpio_collective,nfrec,bsize_frecord,ierr)
    ABI_CHECK(ierr==0,"Error while writing Fortran markers")
@@ -3564,7 +3564,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
      offset = offset + ( (Slk_mat%sizeb_global(2) * (Slk_mat%sizeb_global(2))+1)/2 ) * bsize_elm
      if (is_fortran_file) offset = offset + Slk_mat%sizeb_global(2)*2*xmpio_bsize_frm
    else
-     MSG_ERROR("Wrong uplo")
+     ABI_ERROR("Wrong uplo")
    end if
  end if
 
@@ -3572,7 +3572,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
  RETURN
 
 #else
-  MSG_ERROR("MPI-IO support not activated")
+  ABI_ERROR("MPI-IO support not activated")
 #endif
 
 end subroutine slk_write
@@ -3680,7 +3680,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
 
  ABI_CHECK(allocated(Slk_mat%buffer_cplx),"%buffer_cplx not allocated")
  if (firstchar(uplo, ["U","L"]) .and. Slk_mat%sizeb_global(1) /= Slk_mat%sizeb_global(2) ) then
-   MSG_ERROR("rectangular matrices are not compatible with the specified uplo")
+   ABI_ERROR("rectangular matrices are not compatible with the specified uplo")
  end if
 
  nrows_glob = Slk_mat%sizeb_global(1)
@@ -3705,7 +3705,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
    write(msg,"(3a)")&
     "Global position index cannot be stored in standard Fortran integer ",ch10,&
     "scaLAPACK matrix cannot be read with a single MPI-IO call."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  call MPI_FILE_SET_VIEW(my_fh, my_offset, etype, slk_type, 'native', MPI_INFO_NULL, ierr)
@@ -3745,7 +3745,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
    else if (firstchar(uplo, ["L"])) then
      bsize_frecord = (/(col_glob * bsize_elm, col_glob=nfrec,1,-1)/)
    else
-     MSG_ERROR("Wrong uplo")
+     ABI_ERROR("Wrong uplo")
    end if
    call xmpio_check_frmarkers(my_fh,my_offset,xmpio_collective,nfrec,bsize_frecord,ierr)
    ABI_CHECK(ierr==0,"Wrong Fortran record markers")
@@ -3766,7 +3766,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
      offset = offset + ( (Slk_mat%sizeb_global(2) * (Slk_mat%sizeb_global(2))+1)/2 ) * bsize_elm
      if (is_fortran_file) offset = offset + Slk_mat%sizeb_global(2)*2*xmpio_bsize_frm
    else
-     MSG_ERROR("Wrong uplo")
+     ABI_ERROR("Wrong uplo")
    end if
  end if
 
@@ -3774,7 +3774,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  RETURN
 
 #else
- MSG_ERROR("MPI-IO support not enabled")
+ ABI_ERROR("MPI-IO support not enabled")
 #endif
 
 end subroutine slk_read
@@ -3927,7 +3927,7 @@ subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsbloc
    write(msg,"(3a)")&
     " Global position index cannot be stored in standard Fortran integer ",ch10,&
     " scaLAPACK matrix cannot be read with a single MPI-IO call ."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  block_length(my_nel+2) = 1
@@ -3945,7 +3945,7 @@ subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsbloc
  ABI_CHECK_MPI(mpi_err,"MPI_type_COMMIT")
 
 #else
- MSG_ERROR("MPI-IO is mandatatory in slk_single_fview_read_mask")
+ ABI_ERROR("MPI-IO is mandatatory in slk_single_fview_read_mask")
 #endif
 
 end subroutine slk_single_fview_read_mask
@@ -4005,7 +4005,7 @@ subroutine slk_symmetrize(Slk_mat, uplo, symtype)
  ! One and only one buffer should be allocated.
  if (is_real .and. is_cplx) then
    write(msg,'(a,2l1)')" ScaLAPACK buffers are not allocated correctly, is_real=, is_cplx ",is_real,is_cplx
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (is_real) RETURN
@@ -4019,11 +4019,11 @@ subroutine slk_symmetrize(Slk_mat, uplo, symtype)
  case("N","n")
    if (ALL(uplo(1:1) /= ["A","a"])) then
      msg = " Found symtype= "//TRIM(symtype)//", but uplo= "//TRIM(uplo)
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    RETURN  ! Nothing to do.
  case default
-   MSG_ERROR("Wrong symtype "//TRIM(symtype))
+   ABI_ERROR("Wrong symtype "//TRIM(symtype))
  end select
 
  !write(std_out,*)"is_cplx",is_cplx
@@ -4068,7 +4068,7 @@ subroutine slk_symmetrize(Slk_mat, uplo, symtype)
    end if
 
  case default
-   MSG_BUG(" Wrong uplo: "//TRIM(uplo))
+   ABI_BUG(" Wrong uplo: "//TRIM(uplo))
  end select
 
 end subroutine slk_symmetrize
@@ -4157,7 +4157,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
 
  !Cannot use MPI_type_CREATE_INDEXED_BLOCK since it is not correctly implemented in several MPI libraries.
  !etype has to be set to MPI_BYTE, since the displacement in MPI structures is always in byte.
- ! MSG_WARNING("Using MPI_type_STRUCT for the MPI-IO file view")
+ ! ABI_WARNING("Using MPI_type_STRUCT for the MPI-IO file view")
 
  etype = MPI_BYTE
  call MPI_type_SIZE(etype,bsize_etype,mpi_err)
@@ -4236,11 +4236,11 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
      write(msg,"(3a)")&
       " Global position index cannot be stored in standard Fortran integer ",ch10,&
       " scaLAPACK matrix cannot be read with a single MPI-IO call ."
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
  case default
-   MSG_BUG(" Wrong uplo: "//TRIM(uplo))
+   ABI_BUG(" Wrong uplo: "//TRIM(uplo))
  end select
 
  block_length(nel+2)= 1
@@ -4258,7 +4258,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
  ABI_CHECK_MPI(mpi_err,"MPI_type_COMMIT")
 
 #else
- MSG_ERROR("MPI-IO is mandatatory in slk_single_fview_read")
+ ABI_ERROR("MPI-IO is mandatatory in slk_single_fview_read")
 #endif
 
 end subroutine slk_single_fview_read
@@ -4353,7 +4353,7 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
  end if
 
  if (PRESENT(glob_subarray).and..not.firstchar(uplo, ["A"])) then
-   MSG_ERROR("glob_subarray should not be used when uplo/=All")
+   ABI_ERROR("glob_subarray should not be used when uplo/=All")
  end if
 
  call slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
@@ -4453,14 +4453,14 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
    end do
 
  case default
-   MSG_BUG(" Wrong uplo: "//TRIM(uplo))
+   ABI_BUG(" Wrong uplo: "//TRIM(uplo))
  end select
 
  if (offset_err/=0) then  ! just warn, let the caller handle the exception.
    write(msg,"(3a)")&
     "Global position index cannot be stored in standard Fortran integer ",ch10,&
     "scaLAPACK matrix cannot be read with a single MPI-IO call ."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  ! Final number of matrix elements that will be written by this node.
@@ -4481,7 +4481,7 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
  ABI_CHECK_MPI(mpi_err,"MPI_type_COMMIT")
 
 #else
- MSG_ERROR("MPI-IO is mandatatory in slk_single_fview_read")
+ ABI_ERROR("MPI-IO is mandatatory in slk_single_fview_read")
 #endif
 
 end subroutine slk_single_fview_write
@@ -4542,7 +4542,7 @@ subroutine slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
  ! One and only one buffer should be allocated.
  if (ierr/=1) then
    write(msg,'(a,i0)')" ScaLAPACK buffers are not allocated correctly, ierr= ",ierr
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine slk_bsize_and_type
@@ -4656,7 +4656,7 @@ subroutine slk_my_rclist(Slk_mat,rc_str,how_many,rc_list)
    ABI_FREE(seen)
 
  case default
-   MSG_ERROR(" Wrong rc_str: "//TRIM(rc_str))
+   ABI_ERROR(" Wrong rc_str: "//TRIM(rc_str))
  end select
 
 end subroutine slk_my_rclist

@@ -359,7 +359,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    write(msg,'(4a)')ch10,&
 &    "Band classification in terms of magnetic space groups not coded! ",ch10,&
 &    "Only the ferromagnetic subgroup will be used "
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
  ABI_MALLOC(symrec_fm,(3,3,nsym_fm))
@@ -484,7 +484,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    lgroup_fname = "lgroup_"//TRIM(spgroup_str)
 
    if (file_exists(lgroup_fname)) then
-     MSG_ERROR("Not coded")
+     ABI_ERROR("Not coded")
 
      ! Read little groups from the external database.
      !% call init_groupk_from_file(Lgrp,spgroup,lgroup_fname,ierr)
@@ -499,7 +499,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 &      "Non-symmorphic small group and zone border. ",ch10,&
 &      "External file: ",TRIM(lgroup_fname)," containing Bilbao tables not found ",ch10,&
 &      "Character analysis cannot be performed. Accidental degeneracies cannot be detected. "
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
 
      esymm%has_chtabs = .FALSE.
 
@@ -635,7 +635,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
        write(std_out,'(a,i2,a,9i2,4x,a,9i2)')" found ",found(isym)," Ptg ",Ptg%sym(:,:,isym),"conv_symrec ",conv_symrec(:,:,isym)
      end do
      msg = " sgk and esymm%Ptg are inconsistent. Check tables or source"
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      esymm%err_msg = msg(1:500)
      esymm%err_status = ESYM_PTG_WRONG_MAPPING
      esymm%has_chtabs = .FALSE.
@@ -725,7 +725,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
          write(msg,'(a,i2,2a,i0,a,i2)')&
 &          "Herring test for the irreducible representation number ",irp,ch10,&
 &          "gave ",esymm%herring_test(irp),", while it should be 0 or +- ",Ptg%nsym
-          MSG_WARNING(msg)
+          ABI_WARNING(msg)
           esymm%err_msg   =msg
           esymm%err_status=esymm_HERRING_WRONG_TEST
        end if
@@ -810,7 +810,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    ABI_FREE(dim_irreps)
    if (nacc_deg/=0) then
      write(msg,'(a,i0,a)')" Detected ",nacc_deg," accidental degeneracies."
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      esymm%err_status=ESYM_ACCDEG_ERROR
      ! TODO this should signal to the caller that we have to decompose the calculated representation.
      esymm%err_msg =msg(1:500)
@@ -1088,7 +1088,7 @@ subroutine esymm_finalize(esymm,prtvol)
 &    "Reference character table not available. ",ch10,&
 &    "Symmetry analysis not available. Using heuristic method to classify the states.",ch10,&
 &    "It might not work, especially if accidental degeneracies are present."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    !
    ! The simplest thing we can do here is using the calculated matrices to get the
    ! character and comparing the results hoping everything is OK.
@@ -1120,7 +1120,7 @@ subroutine esymm_finalize(esymm,prtvol)
      write(msg,'(3a)')&
 &      "The number of different calculated traces is found to be greater than nclasses!",ch10,&
 &      "Heuristic method clearly failed. Symmetry analysis cannot be performed."
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      esymm%err_status = ESYM_HEUR_WRONG_NCLASSES
      esymm%err_msg    = msg
 
@@ -1142,7 +1142,7 @@ subroutine esymm_finalize(esymm,prtvol)
              write(msg,'(3a)')&
 &              "Found two set of degenerate states with same character but different dimension!",ch10,&
 &              "heuristic method clearly failed. Symmetry analysis cannot be performed."
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
              esymm%err_status = ESYM_HEUR_WRONG_DIMS
              esymm%err_msg    = msg
            end if
@@ -1195,7 +1195,7 @@ subroutine esymm_finalize(esymm,prtvol)
 
  if (size(esymm%irrep2b(0)%value) /= 0) then
    write(msg,'(a,i0,a)')" Band classification algorithm was not able to classify ",size(esymm%irrep2b(0)%value)," states."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    esymm%err_status = ESYM_CLASSIFICATION_ERROR
    esymm%err_msg    = msg
  end if
@@ -1234,7 +1234,7 @@ subroutine esymm_finalize(esymm,prtvol)
 
    if (max_err>TOL_ORTHO) then
      write(msg,'(a,es10.2)')" Too large maximum error on \sum_R \chi^*_a(R)\chi_b(R) = N_R \delta_{ab}: ",max_err
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      esymm%err_status =  ESYM_ORTHO_ERROR
      esymm%err_msg    =  msg
    else
@@ -1268,7 +1268,7 @@ subroutine esymm_finalize(esymm,prtvol)
 
      if (max_err>TOL_UNITARY) then
        write(msg,'(a,es10.2)')" Too large maximum error on the unitary of representions matrices: ",max_err
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        esymm%err_msg    = msg
        esymm%err_status = ESYM_UNITARY_ERROR
      else
@@ -1371,7 +1371,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
 ! *********************************************************************
 
  if (esymm_failed(esymm)) then
-   MSG_ERROR("Symmetrization cannot be performed. You should not be here!")
+   ABI_ERROR("Symmetrization cannot be performed. You should not be here!")
  end if
 
  do idg1=1,esymm%ndegs  ! First loop over set of degenerate states.
@@ -1379,7 +1379,7 @@ subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
    b1_stop  = esymm%degs_bounds(2,idg1)
 
    !if (b1_stop<lbnd .or. b2_start >ubnd) then
-   !  MSG_ERROR("Wrong band indeces, check esymm initialization")
+   !  ABI_ERROR("Wrong band indeces, check esymm initialization")
    !end if
 
    Irrep1 => esymm%Calc_irreps(idg1)

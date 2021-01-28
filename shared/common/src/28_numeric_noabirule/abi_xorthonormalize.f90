@@ -94,7 +94,7 @@ subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
 
  if (info /= 0 )  then
    write(message,'(a,i0)')'abi_xpotrf, info=',info
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  !Find X  X*sqgram=blockvectorx
@@ -177,7 +177,7 @@ subroutine ortho_reim(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vect
 
  if (info /= 0 )  then
    write(message,'(a,i0)')'dpotrf, info=',info
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Find X  X*sqgram=blockvectorx
@@ -251,7 +251,7 @@ subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
 
  if (info /= 0 )  then
    write(message,'(a,i0)')'zpotrf, info=',info
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call abi_xtrsm('r','u','n','n',vectsize,blocksize,cone,sqgram,blocksize,blockvectorx,vectsize)

@@ -598,7 +598,7 @@ subroutine blas_cholesky_ortho_spc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
  call CPOTRF('U',nvec,cf_ovlp,nvec,ierr)
  if (ierr/=0)  then
    write(msg,'(a,i0)')' ZPOTRF returned info= ',ierr
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  !
  ! 3) Solve X U = io_mat. On exit iomat is orthonormalized.
@@ -664,7 +664,7 @@ subroutine blas_cholesky_ortho_dpc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
  call ZPOTRF('U',nvec,cf_ovlp,nvec,ierr)
  if (ierr/=0)  then
    write(msg,'(a,i0)')' ZPOTRF returned info= ',ierr
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  !
  ! 3) Solve X U = io_mat. On exit io_mat is orthonormalized.

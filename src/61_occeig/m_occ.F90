@@ -130,7 +130,7 @@ contains
 !! SOURCE
 
 subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mband, nband, &
-                  nelect, nkpt, nsppol, occ, occopt, option, tphysel, tsmear, unitdos, wtk, iB1, iB2) 
+                  nelect, nkpt, nsppol, occ, occopt, option, tphysel, tsmear, unitdos, wtk, iB1, iB2)
           ! CP added fermih, iB1 and iB2 in the list of arguments
 
 !Arguments ------------------------------------
@@ -178,7 +178,7 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
  !call cwtime(cpu, wall, gflops, "start")
 
  if (option/=1 .and. option/=2)then
-   MSG_BUG(sjoin('Option must be either 1 or 2. It is:', itoa(option)))
+   ABI_BUG(sjoin('Option must be either 1 or 2. It is:', itoa(option)))
  end if
 
  ! Initialize the occupation function and generalized entropy function,
@@ -194,9 +194,9 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
     high_band_index = nband(1)
     number_of_bands = sum(nband(:))
  end if
- ABI_ALLOCATE(occ_tmp,(number_of_bands))
- ABI_ALLOCATE(ent_tmp,(number_of_bands))
- ABI_ALLOCATE(doccde_tmp,(number_of_bands))
+ ABI_MALLOC(occ_tmp,(number_of_bands))
+ ABI_MALLOC(ent_tmp,(number_of_bands))
+ ABI_MALLOC(doccde_tmp,(number_of_bands))
  ! End CP addition
 
  ! Just get the number nptsdiv2 and allocate entfun, occfun, smdfun and xgrid accordingly
@@ -511,7 +511,7 @@ end subroutine getnel
 !!  doccde(maxval(nband(:))*nkpt*nsppol)=derivative of occupancies wrt
 !!           the energy for each band and k point
 !!  entropy= entropy associated with the smearing (adimensional)
-!!  fermie= fermi energy (Hartree)/fermi level for thermalized excited electrons in bands > ivalence when occopt=9 
+!!  fermie= fermi energy (Hartree)/fermi level for thermalized excited electrons in bands > ivalence when occopt=9
 !!  fermih= fermi level for thermalized excited holes in bands <= ivalence ! CP added for occopt 9 case
 !!  occ(maxval(nband(:))*nkpt*nsppol)=occupancies for each band and k point
 !!
@@ -524,7 +524,7 @@ end subroutine getnel
 !! SOURCE
 
 subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarget, mband, nband, &
-  nelect, ne_qFD, nh_qFD, nkpt, nspinor, nsppol, occ, occopt, prtvol, stmbias, tphysel, tsmear, wtk) ! CP modified: 
+  nelect, ne_qFD, nh_qFD, nkpt, nspinor, nsppol, occ, occopt, prtvol, stmbias, tphysel, tsmear, wtk) ! CP modified:
 !  added fermih, ivalence, ne_qFD, nh_qFD for occopt 9 case
 
 !Arguments ------------------------------------
@@ -553,7 +553,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  real(dp) :: fermih_lo,fermih_mid,fermih_hi ! CP added
  real(dp) :: fermie_biased,maxocc
  real(dp) :: nelect_tmp,nelecthi,nelectlo,nelectmid,nelect_biased
- real(dp) :: nholeshi,nholeslo,nholesmid ! CP added  
+ real(dp) :: nholeshi,nholeslo,nholesmid ! CP added
  real(dp) :: entropyet(2),fermie_hit(2),fermie_lot(2),fermie_midt(2),nelecthit(2) ! CP modified
  real(dp) :: nelectlot(2),nelectt(2),tsec(2)
  real(dp) :: entropye, entropyh ! CP added
@@ -571,7 +571,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
  ! Here treat the case where occopt does not correspond to a metallic occupation scheme
  if (occopt < 3 .or. occopt > 9) then ! CP modified
-   MSG_BUG(sjoin(' occopt= ',itoa(occopt),', a value not allowed in newocc.'))
+   ABI_BUG(sjoin(' occopt= ',itoa(occopt),', a value not allowed in newocc.'))
  end if
 
  ! Check whether nband is a constant for all k point and spin-pol
@@ -581,7 +581,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        write(msg,'(3a,i0,a,i0,a,i0,a)')&
         'The number of bands must be the same for all k-points ',ch10,&
         'but nband(1)= ',nband(1),' is different of nband(',ikpt+(isppol-1)*nkpt,') = ',nband(ikpt+(isppol-1)*nkpt),'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end do
  end do
@@ -590,7 +590,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  if (nelect <= zero) then
    write(msg,'(3a,es16.8,a)')&
    'nelect must be a positive number, while ',ch10, 'the calling routine asks nelect= ',nelect,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ! CP added: Check whether the number of holes and electrons if positive
@@ -599,7 +599,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        write(msg,'(3a,es16.8,a,es16.8,a)')&
 &   'ne_qFD or nh_qFD must be positive numbers, while ',ch10,&
 &   'the calling routine asks ne_qFD= ',ne_qFD,' and nh_qFD= ',nh_qFD, '.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
     end if
  end if
  ! End CP added
@@ -612,7 +612,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
    write(msg,'(3a,es16.8,a,i0,a,es16.8,a)' )&
    'nelect must be smaller than nband*maxocc, while ',ch10,&
    'the calling routine gives nelect= ',nelect,', nband= ',nband(1),' and maxocc= ',maxocc,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 ! CP added: Providing additional checks to ensure that there are enough valence and conduction bands to accomodate ne_qFD and nh_qFD
@@ -620,13 +620,13 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
    write(msg,'(a,es16.8,2a,es16.8,a)') 'ne_qFD = ', ne_qFD ,ch10, &
 &   'must be smaller than (nband-ivalence)*maxocc*nsppol = ', &
 &   (nband(1)-ivalence)*nsppol*maxocc,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  else if( occopt==9 .and. (nh_qFD > ivalence*nsppol*maxocc .or. &
 &                          nelect - nh_qFD > ivalence*nsppol*maxocc ) )then
    write(msg,'(a,es16.8,2a,es16.8,2a,es16.8,a)') 'nh_qFD = ', nh_qFD ,ch10, &
 &   'and nelect-nh_qFD = ', nelect - nh_qFD,ch10, ' must be smaller than ivalence*maxocc*nsppol = ', &
 &   ivalence*nsppol*maxocc,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
   end if
 ! End CP added
 
@@ -646,7 +646,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  if (occopt == 3) fermie_lo = fermie_lo - 24.0_dp * tsmear ! CP modified
  if(occopt==9)fermih_lo = fermie_lo ! CP added to take into account holes
  !if (present(ef_range) fermilo = ef_range(1)
- 
+
  ! CP modified
  !call getnel(doccde,dosdeltae,eigen,entropy,fermilo,maxocc,mband,nband,&
  ! nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
@@ -692,7 +692,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  ! CP added
    if (occopt==9)then
       write(msg,'(a)') 'occopt=9 and spinmagntarget not implemented.'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
    end if
  ! End CP added
    sign = 1
@@ -715,7 +715,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
     '  The lowest bound is ',fermie_lo,', with nelect=',nelectlo,ch10,&
     '  The highest bound is ',fermie_hi,', with nelect=',nelecthi
    call wrtout(std_out, msg)
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
   ! CP added special test for occopt == 9
@@ -726,17 +726,17 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 &      'The calling routine gives nelect-nh_qFD = ', nelect-nh_qFD, ch10, &
 &       'The lowest (highest resp.) bound for nelect-nh_qFD is ', &
 &   nholeslo, ' ( ', nholeshi, ' ).'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
     endif
     if ((ne_qFD < nelectlo) .or. (ne_qFD > nelecthi) ) then
        not_enough_bands = .true.
        write(msg,'(a,a,a,d16.8,a,a,d16.8,a,d16.8,a)') 'newocc : ',ch10, &
 &   'The calling routine gives ne_qFD = ', ne_qFD, ch10, 'The lowest (highest resp.) bound for ne_qFD are ',&
 &   nelectlo, ' ( ', nelecthi, ' ) .'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
     endif
-   
-   if (not_enough_bands) then    
+
+   if (not_enough_bands) then
       write(msg, '(11a)' )&
 &      'In order to get the right number of carriers,',ch10,&
 &      'it seems that the Fermi energies must be outside the range',ch10,&
@@ -744,7 +744,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 &      'It might be that your number of bands (nband) corresponds to the strictly',ch10,&
 &      'minimum number of bands to accomodate your electrons (so, OK for an insulator),',ch10,&
 &      'while you are trying to describe a metal. In this case, increase nband, otherwise ...'
-      MSG_BUG(msg)
+      ABI_BUG(msg)
    end if
  end if
  ! End CP added
@@ -759,7 +759,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
      ! Produce nelectmid from fermimid
      !call getnel(doccde,dosdeltae,eigen,entropy,fermimid,maxocc,mband,nband,&
      !  nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
-     if (occopt /= 9) then 
+     if (occopt /= 9) then
 
        call getnel(doccde,dosdeltae,eigen,entropye,fermie_mid,fermie_mid,maxocc,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, 1, nband(1))
@@ -825,7 +825,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        write(msg,'(a,i0,3a,es22.14,a,es22.14,a)')&
         'It was not possible to find Fermi energy in ',niter_max,' max bisections.',ch10,&
         'nelecthi: ',nelecthi,', and nelectlo: ',nelectlo,'.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
        if (occopt == 9) then
           write(msg,'(a,es22.14,a,es22.14,a)')&
           'nholesi = ',nholeshi,', and holeslo = ',nholeslo,'.'
@@ -860,9 +860,9 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
    !  Compute occupation numbers for prtstm/=0, close to the Fermi energy
    if (abs(stmbias) > tol10) then
       ! CP added to prevent use with occopt = 9 so far
-      if (occopt == 9) then 
+      if (occopt == 9) then
          write(msg,'(a)') 'Occopt 9 and prtstm /=0 not implemented together. Change occopt or prtstm.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
       end if
       ! End CP added
      fermie_biased = fermie - stmbias ! CP modify name
@@ -883,7 +883,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
      write(msg,'(a,f14.6)')' newocc: the number of electrons in the STM range is nelect_biased=',nelect_biased
      call wrtout(std_out,msg)
    end if
-   
+
 
  else
    ! Calculations with a specified moment
@@ -959,7 +959,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
          write(msg,'(a,i3,3a,es22.14,a,es22.14,a)')&
           'It was not possible to find Fermi energy in ',niter_max,' bisections.',ch10,&
           'nelecthi: ',nelecthi,', and nelectlo: ',nelectlo,'.'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
      end do ! End of bisection loop
 
@@ -1130,7 +1130,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
      else if (occopt /= 3 .and. occopt/=9) then
        write(msg, '(a,i6,a)' )' tphysel /= 0, tsmear == 0, but occopt is not = 3 or 9, but ',occopt,'.'
      ! End CP modify
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 
@@ -1237,7 +1237,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        end do
 
      else
-       MSG_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
+       ABI_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
      end if
 
    else if (dblsmr /= 0) then
@@ -1274,7 +1274,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        write(msg, '(a,a)' )&
         'Occopt=3 is not allowed as a re-smearing.', &
         'Use a single FD, or re-smear with a different delta type (faster cutoff). '
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      else if(occopt==4 .or. occopt==5)then
        ! Cold smearing of Marzari, two values of the "a" parameter being possible
        ! first value gives minimization of the bump
@@ -1316,7 +1316,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
          smd2(-ii)=smd2(ii)
        end do
      else
-       MSG_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
+       ABI_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
      end if
 
      ! Use O(1/N4) algorithm from Num Rec (see below)
@@ -1666,7 +1666,7 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
            'k -state, band number',ibandk,', occ=',occ_k(ibandk),'eigenvalue=',eig0_k(ibandk),',',ch10,&
            ' kq-state, band number',ibandkq,', occ=',occ_kq(ibandkq),', eigenvalue=',eig0_kq(ibandkq),'.',ch10,&
            'Action: change occopt, consistently, in GS and RF calculations.'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          ratio=0.0_dp
        else

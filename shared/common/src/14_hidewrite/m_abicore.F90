@@ -86,7 +86,7 @@ subroutine appdig(integ,string,strinn)
  !if (integ<0) then
  !  write(msg,'(a,i0,a)') &
  !  'Input integer =',integ,' must not be <0. Argument integ was input as negative.'
- !  MSG_BUG(msg)
+ !  ABI_BUG(msg)
  !end if
 
  ! Fill output string initially with blanks to end of dimensioned length

@@ -195,7 +195,7 @@ if ( .false. ) then
 
 else
 
-  ABI_ALLOCATE(Rmatrix,(lsolutions_max,lsolutions_max))
+  ABI_MALLOC(Rmatrix,(lsolutions_max,lsolutions_max))
 
   ! perform QR first
   call extract_QR(mpi_communicator, Hsize,lsolutions_max,svd_matrix,Rmatrix)
@@ -203,7 +203,7 @@ else
   ! perform SVD on the much smaller Rmatrix!
   call extract_SVD_lapack(lsolutions_max,lsolutions_max,Rmatrix,svd_values)
 
-  ABI_ALLOCATE(svd_tmp,(Hsize,lsolutions_max))
+  ABI_MALLOC(svd_tmp,(Hsize,lsolutions_max))
 
   ! Rmatrix is overwritten with U matrix from SVD. Update the svd_matrix
   call ZGEMM(            'N',   & ! Leave first array as is
@@ -222,8 +222,8 @@ else
 
   svd_matrix(:,:) = svd_tmp(:,:)
 
-  ABI_DEALLOCATE(svd_tmp)
-  ABI_DEALLOCATE(Rmatrix)
+  ABI_FREE(svd_tmp)
+  ABI_FREE(Rmatrix)
 end if
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
@@ -282,14 +282,14 @@ character(50)  :: debug_filename
 
 
 ! allocate arrays for the svd
-ABI_ALLOCATE(svd_U                  ,(1,1))
-ABI_ALLOCATE(svd_V                  ,(1,1))
+ABI_MALLOC(svd_U                  ,(1,1))
+ABI_MALLOC(svd_V                  ,(1,1))
 
 
 ! DIMENSION QUERRY for singluar decomposition problem
 
-ABI_ALLOCATE(rwork_svd    ,(5*min(Hsize,lsolutions_max)))
-ABI_ALLOCATE(work_svd,(1))
+ABI_MALLOC(rwork_svd    ,(5*min(Hsize,lsolutions_max)))
+ABI_MALLOC(work_svd,(1))
 lwork_svd = -1
 
 call zgesvd('O',            & ! The first min(m,n) columns of U (the left singular vectors) are overwritten on the array A;
@@ -329,9 +329,9 @@ end if
 
 lwork_svd = nint(dble(work_svd(1)))
 
-ABI_DEALLOCATE(work_svd)
+ABI_FREE(work_svd)
 
-ABI_ALLOCATE(work_svd,(lwork_svd))
+ABI_MALLOC(work_svd,(lwork_svd))
 
 ! computation run
 
@@ -368,10 +368,10 @@ end if
 
 
 
-ABI_DEALLOCATE(work_svd)
-ABI_DEALLOCATE(rwork_svd)
-ABI_DEALLOCATE(svd_U)
-ABI_DEALLOCATE(svd_V)
+ABI_FREE(work_svd)
+ABI_FREE(rwork_svd)
+ABI_FREE(svd_U)
+ABI_FREE(svd_V)
 
 end subroutine extract_SVD_lapack
 !!***
@@ -511,7 +511,7 @@ end if
 !--------------------------------------------------------------------------------
 ! Get the number of plane waves on every processor
 !--------------------------------------------------------------------------------
-ABI_ALLOCATE(nproc_array,(mpi_nproc))
+ABI_MALLOC(nproc_array,(mpi_nproc))
 
 nproc_array = 0
 
@@ -543,17 +543,17 @@ end do
 !
 !--------------------------------------------------------------------------------
 
-ABI_ALLOCATE(A_matrix, (Hsize,Xsize))
-ABI_ALLOCATE(V_matrix, (Hsize,Xsize))
-ABI_ALLOCATE(list_beta, (Xsize))
-ABI_ALLOCATE(coeff   , (Xsize))
+ABI_MALLOC(A_matrix, (Hsize,Xsize))
+ABI_MALLOC(V_matrix, (Hsize,Xsize))
+ABI_MALLOC(list_beta, (Xsize))
+ABI_MALLOC(coeff   , (Xsize))
 
 A_matrix(:,:) = Xmatrix(:,:)
 V_matrix(:,:) = cmplx_0
 list_beta(:)  = cmplx_0
 
 
-ABI_ALLOCATE(vj, (Hsize))
+ABI_MALLOC(vj, (Hsize))
 
 do j = 1, Xsize
 
@@ -648,7 +648,7 @@ end do
 !
 !--------------------------------------------------------------------------------
 
-ABI_ALLOCATE(Rinternal,(Xsize,Xsize))
+ABI_MALLOC(Rinternal,(Xsize,Xsize))
 
 Rinternal = cmplx_0
 
@@ -673,7 +673,7 @@ call xmpi_sum(Rinternal,mpi_communicator,ierr) ! sum on all processors
 !
 !--------------------------------------------------------------------------------
 
-ABI_ALLOCATE( Qinternal, (Hsize,Xsize))
+ABI_MALLOC( Qinternal, (Hsize,Xsize))
 
 ! initialize Q to the identity in the top corner
 Qinternal = cmplx_0
@@ -727,9 +727,9 @@ end do ! j
 
 
 ! clean up
-ABI_DEALLOCATE(V_matrix)
-ABI_DEALLOCATE(coeff)
-ABI_DEALLOCATE(vj)
+ABI_FREE(V_matrix)
+ABI_FREE(coeff)
+ABI_FREE(vj)
 
 !--------------------------------------------------------------------------------
 ! Do some debug, if requested
@@ -748,7 +748,7 @@ if (debug ) then
   end if
 
 
-  ABI_ALLOCATE(error,(Xsize,Xsize))
+  ABI_MALLOC(error,(Xsize,Xsize))
 
   error = cmplx_0
 
@@ -770,9 +770,9 @@ if (debug ) then
   end if
 
 
-  ABI_DEALLOCATE(error)
+  ABI_FREE(error)
 
-  ABI_ALLOCATE(error,(Hsize,Xsize))
+  ABI_MALLOC(error,(Hsize,Xsize))
 
   error = Xmatrix
 
@@ -824,7 +824,7 @@ if (debug ) then
 
   end if
 
-  ABI_DEALLOCATE(error)
+  ABI_FREE(error)
 
 end if
 
@@ -839,11 +839,11 @@ if (present(Rmatrix)) then
   Rmatrix = Rinternal
 end if
 
-ABI_DEALLOCATE(Qinternal)
-ABI_DEALLOCATE(Rinternal)
-ABI_DEALLOCATE(nproc_array)
-ABI_DEALLOCATE(A_matrix)
-ABI_DEALLOCATE(list_beta)
+ABI_FREE(Qinternal)
+ABI_FREE(Rinternal)
+ABI_FREE(nproc_array)
+ABI_FREE(A_matrix)
+ABI_FREE(list_beta)
 
 
 10 format(A)

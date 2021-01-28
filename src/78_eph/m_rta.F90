@@ -200,11 +200,11 @@ type,public :: rta_t
 
  contains
 
-    procedure :: compute => rta_compute
-    procedure :: compute_mobility => rta_compute_mobility
-    procedure :: print_txt_files => rta_print_txt_files
-    procedure :: write_tensor => rta_write_tensor
-    procedure :: free => rta_free
+   procedure :: compute => rta_compute
+   procedure :: compute_mobility => rta_compute_mobility
+   procedure :: print_txt_files => rta_print_txt_files
+   procedure :: write_tensor => rta_write_tensor
+   procedure :: free => rta_free
 
  end type rta_t
 !!***
@@ -388,12 +388,12 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    new%gaps = ebands_get_gaps(ebands, ierr)
    if (ierr /= 0) then
      do spin=1, nsppol
-       MSG_WARNING(trim(new%gaps%errmsg_spin(spin)))
+       ABI_WARNING(trim(new%gaps%errmsg_spin(spin)))
        new%gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
        new%gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
      end do
-     !MSG_ERROR("ebands_get_gaps returned non-zero exit status. See above warning messages...")
-     MSG_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
+     !ABI_ERROR("ebands_get_gaps returned non-zero exit status. See above warning messages...")
+     ABI_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
    end if
 
    if (my_rank == master) then
@@ -526,7 +526,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
    if (ierr /= 0) then
      ! This should never happen for linear interpolation.
-     MSG_WARNING(sjoin("Linear interpolation produced:", itoa(ierr), " k-points with negative linewidths"))
+     ABI_WARNING(sjoin("Linear interpolation produced:", itoa(ierr), " k-points with negative linewidths"))
    end if
 
    ABI_FREE(vals_bsd)
@@ -559,7 +559,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
       write(msg, '(3a,es16.6,a)' ) &
        "Error while downsampling ebands in the transport driver",ch10, &
        "The k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
    end if
 
    ! Downsampling linewidths and velocities.
@@ -876,7 +876,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ! Compute the index of the Fermi level and handle possible out of range condition.
  ifermi = bisect(self%edos%mesh, self%ebands%fermie)
  if (ifermi == 0 .or. ifermi == self%nw) then
-   MSG_ERROR("Bisection could not find the index of the Fermi level in edos%mesh!")
+   ABI_ERROR("Bisection could not find the index of the Fermi level in edos%mesh!")
  end if
  
  max_occ = two / (self%nspinor * self%nsppol)
@@ -1094,31 +1094,11 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  max_occ = two / (self%nspinor * self%nsppol)
 
  ABI_MALLOC(self%mobility_mu, (3, 3, 2, self%ntemp, self%nsppol, self%nrta))
+
+ ! Compute carriers per unit cell.
  ABI_CALLOC(self%ne, (self%ntemp))
  ABI_CALLOC(self%nh, (self%ntemp))
-
- !call ebands_get_carriers(self%ebands, self%ntemp, kTmesh, mu_e, self%nh, self%ne)
-
- ! Compute carrier concentration
- do spin=1,nsppol
-   do ik_ibz=1,nkpt
-     wtk = self%ebands%wtk(ik_ibz)
-     do ib=1, self%ebands%nband(ik_ibz + (spin-1)* self%ebands%nkpt)
-       eig_nk = self%ebands%eig(ib, ik_ibz, spin)
-
-       do itemp=1,self%ntemp
-         kT = self%kTmesh(itemp)
-         mu_e = self%transport_mu_e(itemp)
-         if (eig_nk >= mu_e) then
-           self%ne(itemp) = self%ne(itemp) + wtk * occ_fd(eig_nk, kT, mu_e) * max_occ
-         else
-           self%nh(itemp) = self%nh(itemp) + wtk * (one - occ_fd(eig_nk, kT, mu_e)) * max_occ
-         end if
-       end do
-
-     end do
-   end do
- end do
+ call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%nh, self%ne)
 
  ! Get units conversion factor and spin degeneracy
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
@@ -1404,7 +1384,7 @@ subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
    case (2)
      pre = "_MRTA"
    case default
-     MSG_ERROR(sjoin("Don't know how to handle irta:", itoa(irta)))
+     ABI_ERROR(sjoin("Don't know how to handle irta:", itoa(irta)))
    end select
    call self%write_tensor(dtset, irta, "sigma", self%sigma(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_SIGMA"))
    call self%write_tensor(dtset, irta, "seebeck", self%seebeck(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_SBK"))
@@ -1445,7 +1425,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
 !************************************************************************
 
  if (open_file(trim(path), msg, newunit=ount, form="formatted", action="write", status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (irta == 1) rta_type = "RTA type: Self-energy relaxation time approximation (SERTA)"
@@ -1605,7 +1585,7 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
  ! It's funny that we need dtset%sigma_erange to estimate sigma_erange!
  if (all(dtset%sigma_erange == 0)) then
    msg = "We need `sigma_erange` to understand if we are dealing with e/h in semiconductors or metals."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
 

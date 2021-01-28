@@ -50,8 +50,8 @@ contains
 
     self%nrpt=nrpt
 
-    ABI_ALLOCATE(self%xred,(3, nbasis))
-    ABI_ALLOCATE(self%rpts, (3, nrpt))
+    ABI_MALLOC(self%xred,(3, nbasis))
+    ABI_MALLOC(self%rpts, (3, nrpt))
 
     self%cell(:,:)=cell(:,:)
     self%xred(:,:)=xred(:,:)
@@ -61,11 +61,11 @@ contains
   subroutine finalize(self)
     class(tight_binding_t), intent(inout) :: self
     if(allocated(self%xred)) then
-       ABI_DEALLOCATE(self%xred)
+       ABI_FREE(self%xred)
     end if
 
     if(allocated(self%rpts)) then
-       ABI_DEALLOCATE(self%rpts)
+       ABI_FREE(self%rpts)
     end if
   end subroutine finalize
 

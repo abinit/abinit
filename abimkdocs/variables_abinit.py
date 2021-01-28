@@ -292,10 +292,17 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-This input variable is used only when running ABINIT in parallel and for Ground-State calculations.
-It controls the automatic determination of parameters related to parallel work
-distribution (if not imposed in input file). Given a total number of
-processors, ABINIT can find a suitable distribution that fill (when possible)
+This input variable controls the automatic determination of input parameters related to parallel work
+distribution if not specified in input file.
+
+!!! note
+
+    Note that this variable is only used when running **ground-state calculations** in parallel with MPI.
+    Other [[optdriver]] runlevels implement different MPI algorithms that rely on other input variables that are
+    not automatically set by [[autoparal]]. Please consult the tutorials to learn how
+    to run beyond-GS calculations with MPI.
+
+Given a total number of processors, ABINIT can find a suitable distribution that fill (when possible)
 all the different levels of parallelization. ABINIT can also determine optimal
 parameters for the use of parallel Linear Algebra routines (using Scalapack or Cuda, at present).
 The different values are:
@@ -325,11 +332,11 @@ The different values are:
 
 Note that *autoparal* = 1 can be used on every set of processors;
 *autoparal* > 1 should be used on a sufficiently large number of MPI process.
-Also note that *autoparal* can be used simultaneously with [[max_ncpus]]; in
-this case, ABINIT performs an optimization of process distribution for each
+Also note that *autoparal* can be used simultaneously with [[max_ncpus]].
+In this case, ABINIT performs an optimization of process distribution for each
 total number of processors from 2 to [[max_ncpus]]. A weight is associated to
-each distribution and the higher this weight is the better the distribution
-is. After having printed out the weights, the code stops.
+each distribution and the higher this weight is the better the distribution is.
+After having printed out the weights, the code stops.
 """,
 ),
 
@@ -713,18 +720,32 @@ Variable(
     mnemonics="BOX CUT-off MINimum",
     added_in_version="before_v9",
     text=r"""
-The box cutoff ratio is the ratio between the wavefunction plane wave sphere
-radius, and the radius of the sphere that can be inserted in the FFT box, in reciprocal space.
-
+The box cutoff ratio is the ratio between the radius of the G-sphere that can be inserted in the FFT box (see [[ngfft]])
+and the G-sphere used to represent the wavefunctions as computed from the input [[ecut]].
 In order for the density to be exact (in the case of the plane wave part, not the PAW on-site terms),
-this ratio should be at least two. If one uses a smaller ratio (e.g 1.5), one will gain speed, at the expense of accuracy.
-In the case of pure ground state calculation (e.g. for the determination of geometries), this is sensible.
-It should also be noticed that using a value of [[boxcutmin]] too close to one can lead to runtime errors in the FFT routines.
-A value larger than to 1.1 is therefore recommended.
+this ratio should be **at least two**.
 
-Prior to v8.9, the use of boxcutmin for DFPT calculations was forbidden. However, after testing, it was seen that
-the deterioration in phonon band structures could be alleviated to a large extent by the imposition
-of the Acoustic Sum Rule [[asr]].
+!!! warning
+
+    If one uses a smaller ratio (e.g. 1.5), one will gain speed at the price of accuracy.
+    Keep in mind that using a value of [[boxcutmin]] too close to 1 may lead to runtime errors in the FFT routines
+    so a value larger than 1.1 is strongly recommended.
+
+It should also be stressed that the quality of the forces is affected by the value of [[boxcutmin]].
+The default value (2.0) is OK for ground state calculations and structural relaxations.
+On the contrary, the computations of vibrational frequencies based on finite-difference methods such as those
+implemented by |phonopy| turn out to be rather sensitive to the quality of the forces.
+Tests have shown that, for particular systems, |phonopy| calculations require a larger [[boxcutmin]] (e.g. 3.0)
+to reproduce the DFPT results.
+The optimal value of [[boxcutmin]] likely depends on the pseudopotentials and the system under investigation, yet
+this is something worth keeping in mind.
+
+!!! note
+
+    Prior to v8.9, the use of boxcutmin for DFPT calculations was forbidden.
+    However, after testing, it was seen that
+    the deterioration in phonon band structures could be alleviated to a large extent by the imposition
+    of the Acoustic Sum Rule [[asr]].
 """,
 ),
 
@@ -841,7 +862,7 @@ Variable(
     requires="[[optdriver]] == 99",
     added_in_version="before_v9",
     text=r"""
-This variable governs the choice among the different options that are
+This variable governs the choice among the different options
 available for the treatment of Coulomb term of the Bethe-Salpeter Hamiltonian.
 **bs_coulomb_term** is the concatenation of two digits, labelled (A) and (B).
 
@@ -3907,7 +3928,7 @@ Variable(
     vartype="real",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval="0.01 Hartree",
+    defaultval="0.04 Hartree",
     mnemonics="Electron-Phonon: Fermi Surface Energy WINdow",
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
@@ -3959,18 +3980,21 @@ we are computing.
 
 Phonon linewidths in metals (**eph_task** = 1):
 
-:   The default approach for the integration of the double-delta over the Fermi surface is 2 (tetrahedron).
+:   The default approach for the integration of the double-delta over the Fermi surface is 2
+    (optimized tetrahedron by [[cite:Kawamura2014]]).
     When the gaussian method is used, the broadening is given by [[eph_fsmear]].
     A negative value activates the adaptive Gaussian broadening.
     See also [[eph_fsewin]].
 
 Electron-phonon self-energy (also spectral function) with **eph_task** = 4):
 
-:   The default is [[eph_intmeth]]==1, Lorentzian method with broadening specified by [[zcut]]. Note that [[eph_intmeth]]==2 is still in development for this case (ABINITv9.2).
+:   The default is [[eph_intmeth]] == 1, Lorentzian method with broadening specified by [[zcut]].
+    Note that [[eph_intmeth]] == 2 is **still in development** for this case (ABINITv9.2).
 
 Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
 
-:   The default is [[eph_intmeth]]==2, Tetrahedron method except when symsigma == 0, where it is [[eph_intmeth]]==1..
+:   The default is [[eph_intmeth]] == 2, Tetrahedron method by [[cite:Blochl1994]] except when [[symsigma]] == 0,
+    where it is [[eph_intmeth]] == 1.
 """,
 ),
 
@@ -4161,9 +4185,10 @@ Variable(
     added_in_version="9.2.2",
     text=r"""
 If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]]).
-If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero) although it is still possible to activate particular tests by specifying input variables directly in the input file.
-(In the future, the level three will always be the maximum allowed value, with all checks set to zero, while a more refined behaviour
-might be implemented for [[expert_user]]==1 or 2).
+If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero)
+although it is still possible to activate particular tests by specifying input variables directly in the input file.
+In the future, the level three will always be the maximum allowed value, with all checks set to zero,
+while a more refined behaviour might be implemented for [[expert_user]]==1 or 2).
 """,
 ),
 
@@ -14850,7 +14875,7 @@ step, with the name being made of
 
 If [[prtdos]] = 3, the same tetrahedron method as for [[prtdos]] = 2 is used, but
 the angular-momentum projected (l=0,1,2,3,4) DOS in sphere centered on the atoms
-is computed (not directly the total atom-cenetered DOS). The
+is computed (not directly the total atom-centered DOS). The
 preparation of this case, the parameters under which the computation is to be
 done, and the file denomination is similar to the [[prtdos]] = 2 case. However,
 three additional input variables might be provided, describing the atoms that
@@ -21999,7 +22024,7 @@ but this option should be used with extreme care and it is not recommended in ge
 RMM-DIIS usually requires less wall-time per iteration when compared to other approaches since
 there is no explicit orthogonalization while optimizing the trial states.
 Only a single full-band Cholesky orthogonalization is performed per SCF iteration before recomputing the new density.
-As a consequence, one RMM-DIIS iteration is usually faster (sometimes even by a factor > two) than one CG/LOBPCG iteration,
+As a consequence, one RMM-DIIS iteration is usually faster (sometimes even by a factor two) than one CG/LOBPCG iteration,
 especially in systems with relatively large [[mpw]].
 However, the additional steps of the algorithm (subspace rotation and Cholesky orthogonalization)
 present poor MPI-scalability hence this part will start to dominate the wall-time in systems with large [[nband]].
@@ -22036,22 +22061,6 @@ available for NSCF calculations).
 
 Last but not least, note that the default implementation is quite aggressive at the level of memory allocations.
 A less memory-intensive version of the algorithm can be activated via [[rmm_diis_savemem]] = 1.
-
-TIPS:
-
-Mention [[bandpp]] and band locking.
-Use more permissive tolerances and then restart with tighter settings.
-
-On the other hand, please keep in mind that **RMM-DIIS is not guaranteed to find the correct ground-state**.
-Moreover the algorithm may have problems to converge and more iterations may be needed to reach a given precision.
-Also, the present implementation is optimized for converging occupied states so we do not recommend
-RMM-DIIS for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
-
-Obviously the time-to-solution depends on the overall number of SCF iterations required to reach convergence.
-This is the reason why providing RMM-DIIS with reasonable initial trial wavefunctions and potential
-is crucial both for performance and the reliability of the results.
-Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
-then restart from the WFK file using e.g. the LOBPCG solver to reconverge the results with stricter tolerance.
 """,
 ),
 

@@ -1734,7 +1734,7 @@ subroutine metcon(rank,gmet,aa,bb)
    write(message, '(a,i0,a,a,a)' )&
 &   'Input rank=',rank,' not allowed.',ch10,&
 &   'Possible values are 0,1,2,3 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  contains
@@ -2015,7 +2015,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
    write(message, '(a,i0,a,a,a)' )&
 &   'Input rank=',rank,' not allowed.',ch10,&
 &   'Possible values are 0,1,2,3 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  contains

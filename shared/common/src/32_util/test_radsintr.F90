@@ -65,8 +65,8 @@ program test_radsintr
  qstep = 0.04
 
 !Initialization of meshes
- ABI_ALLOCATE(rmesh,(rmesh_size))
- ABI_ALLOCATE(qmesh,(qmesh_size))
+ ABI_MALLOC(rmesh,(rmesh_size))
+ ABI_MALLOC(qmesh,(qmesh_size))
  do ii=1,rmesh_size
    rmesh(ii) =rstep*dble(ii-1)
  end do
@@ -74,9 +74,9 @@ program test_radsintr
    qmesh(ii) =qstep*dble(ii-1)
  end do
 
- ABI_ALLOCATE(funr,(rmesh_size))
- ABI_ALLOCATE(funq,(qmesh_size))
- ABI_ALLOCATE(funr2,(rmesh_size))
+ ABI_MALLOC(funr,(rmesh_size))
+ ABI_MALLOC(funq,(qmesh_size))
+ ABI_MALLOC(funr2,(rmesh_size))
 
  do ii=1,rmesh_size
    funr(ii)=exp(-((rmesh(ii)-one)**two)/0.1d0)
@@ -101,11 +101,11 @@ program test_radsintr
    write(std_out,*) rmesh(ii), funr2(ii)
  end do
 
- ABI_DEALLOCATE(funq)
- ABI_DEALLOCATE(funr)
- ABI_DEALLOCATE(funr2)
- ABI_DEALLOCATE(rmesh)
- ABI_DEALLOCATE(qmesh)
+ ABI_FREE(funq)
+ ABI_FREE(funr)
+ ABI_FREE(funr2)
+ ABI_FREE(rmesh)
+ ABI_FREE(qmesh)
 
  end program test_radsintr
 !!***

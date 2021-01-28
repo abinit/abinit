@@ -29,7 +29,7 @@ module m_out_acknowl
  use m_abicore
  use m_dtset
 
- use m_fstrings,     only : prep_dash
+ use m_fstrings,     only : prep_char
  use defs_datatypes, only : pspheader_type
 
  implicit none
@@ -91,11 +91,11 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
  nrefs=40
- ABI_ALLOCATE(cite,(nrefs))
- ABI_ALLOCATE(ref,(nrefs))
- ABI_ALLOCATE(comment,(nrefs))
+ ABI_MALLOC(cite,(nrefs))
+ ABI_MALLOC(ref,(nrefs))
+ ABI_MALLOC(comment,(nrefs))
 
- ABI_ALLOCATE(priority,(nrefs))
+ ABI_MALLOC(priority,(nrefs))
 !The highest, the best, except that one from -1 and -2 should be cited.
 !0 means, cite if there are less than five papers total, otherwise forget, and any case, mention that it is optional.
 !1-19 means specific papers, that must be cited. However, they might not appear in the top list of papers.
@@ -109,8 +109,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  ref(1)=' The Abinit project: Impact, environment and recent developments.'//ch10//&
    ' Computer Phys. Comm. 248, 107042 (2020).'//ch10//&
    ' X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,'//ch10//&
-   ' J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,'//ch10//& 
-   ' G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,'//ch10//& 
+   ' J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,'//ch10//&
+   ' G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,'//ch10//&
    ' J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,'//ch10
  ref(1)=trim(ref(1))//&
    ' D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,'//ch10//&
@@ -610,10 +610,10 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
            end if
            if(len_trim(comment(iref))/=0)then
              write(string, '(2a,i0,4a)')ch10,' [',ncited,']',trim(ref(iref)),ch10,trim(comment(iref))
-             call wrtout(iout,trim(prep_dash(string)))
+             call wrtout(iout,trim(prep_char(string, "-")))
            else
              write(string, '(2a,i0,4a)')ch10,' [',ncited,']',trim(ref(iref))
-             call wrtout(iout,trim(prep_dash(string)))
+             call wrtout(iout,trim(prep_char(string, "-")))
            end if
          end if
        end if
@@ -623,10 +623,10 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  end do
 
 !Cleaning
- ABI_DEALLOCATE(cite)
- ABI_DEALLOCATE(ref)
- ABI_DEALLOCATE(comment)
- ABI_DEALLOCATE(priority)
+ ABI_FREE(cite)
+ ABI_FREE(ref)
+ ABI_FREE(comment)
+ ABI_FREE(priority)
 
 end subroutine out_acknowl
 !!***

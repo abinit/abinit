@@ -166,7 +166,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  call timab(691,1,tsec) ! exc_haydock_driver(read)
 
  if (BSp%have_complex_ene) then
-   MSG_ERROR("Complex energies are not supported yet")
+   ABI_ERROR("Complex energies are not supported yet")
  end if
 
  my_rank = Wfd%my_rank
@@ -210,7 +210,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  if (prtdos) then
    nkets=nkets+1
    if (Bsp%use_coupling>0) then
-     MSG_ERROR("DOS with coupling not coded")
+     ABI_ERROR("DOS with coupling not coded")
      nkets=nkets+1
    end if
  end if
@@ -289,7 +289,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
  if(BSp%do_ep_renorm) then
    if (BSp%nsppol == 2) then
-     MSG_ERROR('Elphon renorm with nsppol == 2 not yet coded !')
+     ABI_ERROR('Elphon renorm with nsppol == 2 not yet coded !')
    end if
    do_ep_renorm = .TRUE.
    ntemp = Epren%ntemp
@@ -344,7 +344,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
          !TODO support multiple spins !
          if(ABS(en - (Epren%eigens(ic,ep_ik,isppol)-Epren%eigens(iv,ep_ik,isppol)+BSp%mbpt_sciss)) > tol3) then
-           MSG_ERROR("Eigen from the transition does not correspond to the EP file !")
+           ABI_ERROR("Eigen from the transition does not correspond to the EP file !")
          end if
          ep_renorms(ireh) = (Epren%renorms(1,ic,ik,isppol,itemp) - Epren%renorms(1,iv,ik,isppol,itemp))
 
@@ -399,7 +399,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
         write(msg,'(3a)')&
 &         'The RPA_NLF dielectric complex tensor cannot be computed',ch10,&
 &         'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
-        MSG_COMMENT(msg)
+        ABI_COMMENT(msg)
      end if
 
      ABI_FREE(tensor_cart_rpanlf)
@@ -421,7 +421,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
         write(msg,'(3a)')&
 &         'The GW_NLF dielectric complex tensor cannot be computed',ch10,&
 &         'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
-        MSG_COMMENT(msg)
+        ABI_COMMENT(msg)
      end if
 
      ABI_FREE(tensor_cart_gwnlf)
@@ -439,7 +439,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      !call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
 
      !if (BSp%exchange_term>0) then
-     !  MSG_COMMENT(' f-sum rule should be checked without LF')
+     !  ABI_COMMENT(' f-sum rule should be checked without LF')
      !end if
      !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
 
@@ -454,7 +454,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
    !
    ! The ket for the approximated DOS.
    if (prtdos) then
-     MSG_WARNING("Calculating DOS with Haydock method")
+     ABI_WARNING("Calculating DOS with Haydock method")
      ABI_CHECK(BSp%use_coupling==0,"DOS with coupling not coded")
      iq = BSp%nq + 1
      if (my_rank==master) then
@@ -483,7 +483,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      end if
    else
      if (BSp%use_interp) then
-       MSG_ERROR("BSE Interpolation with coupling is not supported")
+       ABI_ERROR("BSE Interpolation with coupling is not supported")
      else
        call haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,green,comm)
      end if
@@ -522,7 +522,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
          write(msg,'(3a)')&
 &          'The EXC dielectric complex tensor cannot be computed',ch10,&
 &          'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
-         MSG_COMMENT(msg)
+         ABI_COMMENT(msg)
      end if
 
      ABI_FREE(tensor_cart)
@@ -664,7 +664,7 @@ subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
  nsppol = Hdr_bse%nsppol
 
  if (BSp%use_interp) then
-   MSG_COMMENT("No parallelization in Interpolation")
+   ABI_COMMENT("No parallelization in Interpolation")
    my_nt = SUM(Bsp%nreh_interp)
  else
    my_nt = my_t2-my_t1+1
@@ -1111,19 +1111,19 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
 
    if (haydock_file%op/=ftype) then
      write(msg,"(2(a,i0))")" Expecting restart file with filetype: ",ftype," but found ",op_file
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (haydock_file%hsize/=hsize) then
      write(msg,"(2(a,i0))")&
 &      " Rank of H_exc read from file: ",hsize_file," differs from the one used in this run: ",hsize
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (haydock_file%use_coupling /= BSp%use_coupling) then
      write(msg,'(2(a,i0))')&
 &      " use_coupling_file: ",use_coupling_file," differs from input file value: ",BSp%use_coupling
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call read_haydock(haydock_file, Bsp%q(:,iq_search), aa_file, bb_file, &
@@ -1133,7 +1133,7 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
      write(msg,"(a,3f8.4,3a)")&
 &      " Could not find q-point: ",BSp%q(:,iq_search)," in file ",TRIM(restart_file),&
 &      " Cannot restart Haydock iterations for this q-point"
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    else
      write(msg,'(a,i0)')" Number of iterations already performed: ",niter_file
      call wrtout(std_out,msg,"COLL")
@@ -1143,7 +1143,7 @@ subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_
        write(msg,'(2a,2(a,f8.4),a)')&
 &        " Restart file has been produced with a different Lorentzian broadening: ",ch10,&
 &        " broad_file: ",haydock_file%broad," input broadening: ",BSp%broad," Continuing anyway. "
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
 
      call close_haydock(haydock_file)
@@ -1357,10 +1357,10 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
 
 !************************************************************************
 
- MSG_WARNING("Haydock + coupling is still under development")
+ ABI_WARNING("Haydock + coupling is still under development")
 
  if(BSp%use_interp) then
-   MSG_ERROR("Coupling is not yet implemented with interpolation")
+   ABI_ERROR("Coupling is not yet implemented with interpolation")
  end if
 
  nproc  = xmpi_comm_size(comm)
@@ -1390,10 +1390,10 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
      msg = strcat(" Restarting Haydock calculation from file: ",restart_file)
      call wrtout(std_out,msg,"COLL")
      call wrtout(ab_out,msg,"COLL")
-     MSG_ERROR("Restart is not tested")
+     ABI_ERROR("Restart is not tested")
    else
      can_restart=.FALSE.
-     MSG_WARNING(strcat("Cannot find restart file: ",restart_file))
+     ABI_WARNING(strcat("Cannot find restart file: ",restart_file))
    end if
  end if
  !
@@ -1401,7 +1401,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
  if (my_rank==master) then
    out_file = TRIM(BS_files%out_basename)//TRIM(tag_file)
    if (open_file(out_file,msg,newunit=out_unt,form="unformatted") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! write header TODO: standardize this part.
    write(out_unt)hsize,Bsp%use_coupling,BSE_HAYD_IMEPS,nkets,Bsp%broad
@@ -1453,7 +1453,7 @@ subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_
 
    else ! Use the previously calculates a and b.
      niter_done=niter_file
-     MSG_ERROR("Restart not coded")
+     ABI_ERROR("Restart not coded")
      !aa(1:niter_done) = aa_file
      !bb(1:niter_done) = bb_file
      !phi_np1=phi_np1_file(my_t1:my_t2)   ! Select the slice treated by this node.
@@ -1914,10 +1914,10 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 
 !************************************************************************
 
- MSG_WARNING("Haydock with Bilanczos is still under development")
+ ABI_WARNING("Haydock with Bilanczos is still under development")
 
  if(BSp%use_interp) then
-   MSG_ERROR("Bilanczos is not yet implemented with interpolation")
+   ABI_ERROR("Bilanczos is not yet implemented with interpolation")
  end if
 
  nproc  = xmpi_comm_size(comm)
@@ -1947,10 +1947,10 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
      msg = strcat(" Restarting Haydock calculation from file: ",restart_file)
      call wrtout(std_out,msg,"COLL")
      call wrtout(ab_out,msg,"COLL")
-     MSG_ERROR("Restart is not implemented")
+     ABI_ERROR("Restart is not implemented")
    else
      can_restart=.FALSE.
-     MSG_WARNING(strcat("Cannot find restart file: ",restart_file))
+     ABI_WARNING(strcat("Cannot find restart file: ",restart_file))
    end if
  end if
  !
@@ -1958,7 +1958,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  if (my_rank==master) then
    out_file = TRIM(BS_files%out_basename)//TRIM(tag_file)
    if (open_file(out_file,msg,newunit=out_unt,form="unformatted") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! write header TODO: standardize this part.
    write(out_unt)hsize,Bsp%use_coupling,BSE_HAYD_IMEPS,nkets,Bsp%broad
@@ -2028,7 +2028,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 
    else ! Use the previously calculates a and b.
      niter_done=niter_file
-     MSG_ERROR("Restart not coded")
+     ABI_ERROR("Restart not coded")
      !aa(1:niter_done) = aa_file
      !bb(1:niter_done) = bb_file
      !phi_np1=phi_np1_file(my_t1:my_t2)   ! Select the slice treated by this node.
@@ -2506,7 +2506,7 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
  case (0) ! No terminator.
    div=czero
  case (-1,1)
-   MSG_ERROR("Not yet implemented")
+   ABI_ERROR("Not yet implemented")
    if (term_type==-1) then
      bb_inf=bb(nlev)
      aa_inf=aa(nlev)
@@ -2517,7 +2517,7 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
    ! Be careful with the sign of the SQRT.
    div(:) = half*(bb(nlev)/(bb_inf))**2 * ( zpts-aa_inf - SQRT((zpts-aa_inf)**2 - four*bb_inf**2) )
  case (2)
-   MSG_ERROR("Not yet implemented")
+   ABI_ERROR("Not yet implemented")
    div = zero
    if (nlev>4) then
      bg=zero; bu=zero
@@ -2543,7 +2543,7 @@ subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
 
  case default
    write(msg,'(a,i0)')" Wrong value for term_type : ",term_type
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end select
 
  do it=nlev,2,-1
