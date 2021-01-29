@@ -1126,7 +1126,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer,parameter :: master = 0
  integer :: chksymbreak,expert_user,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower, tread_geo
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
- integer :: natomcor,natom,nkpt,nkpthf,npsp,npspalch, ncid
+ integer :: natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs

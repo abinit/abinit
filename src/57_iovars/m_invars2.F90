@@ -2201,9 +2201,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    do iatom=1,dtset%natom
      if(dtset%lpawu(dtset%typat(iatom))>0) natomcor=natomcor+1
    enddo
-   write(6,*) "WAN 1",dtset%dmft_wanorthnorm
    if(natomcor>1) dtset%dmft_wanorthnorm=2
-   write(6,*) "WAN 2",dtset%dmft_wanorthnorm
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_wanorthnorm',tread,'INT')
    if(tread==1) dtset%dmft_wanorthnorm=intarr(1)
 
