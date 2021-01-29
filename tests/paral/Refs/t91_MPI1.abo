@@ -1802,8 +1802,6 @@ total_energy_dc_eV  : -1.00858681770609E+04
   dmft_occnd_imag2          0
         dmft_solv1          5
         dmft_solv2          2
- dmft_wanorthnorm1          2
- dmft_wanorthnorm2          3
              ecut      8.00000000E+00 Hartree
            etotal1    -3.7079492844E+02
            etotal2    -3.7064885156E+02
