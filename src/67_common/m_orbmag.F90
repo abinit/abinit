@@ -5102,8 +5102,8 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwaveg1(:,:)
  real(dp),allocatable :: cwavedsdb(:,:),cwavedsdg(:,:)
  real(dp),allocatable :: dcwavef(:,:),dscg_k(:,:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
- real(dp),allocatable :: kinpw(:),kpg_k(:,:),orbmag_terms(:,:)
- real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),scg_k(:,:),scprod(:,:)
+ real(dp),allocatable :: kinpw(:),kpg_k(:,:),orbmag_terms(:)
+ real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),scg_k(:,:),scg1_k(:,:,:),scprod(:,:)
  real(dp),allocatable :: us1u(:,:,:,:),vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -5196,14 +5196,15 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
  icg = 0
  ikg = 0
- nterms = 5 ! various contributing terms in orbmag and chern
+ nterms = 6 ! various contributing terms in orbmag and chern
  nterms3 = nterms*3
  ! 1:3 orbmag CC
  ! 4:6 orbmag VV II
  ! 7:9 orbmag VV I+III
- ! 10:12 chern I
- ! 13:15 chern II
- ABI_ALLOCATE(orbmag_terms,(2,nterms3))
+ ! 10:12 chern
+ ! 13:15 alternate orbmag H
+ ! 16:18 alternate orbmag E
+ ABI_ALLOCATE(orbmag_terms,(nterms3))
  orbmag_terms = zero
  
  !============= BIG FAT KPT LOOP :) ===========================
@@ -5266,12 +5267,13 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_ALLOCATE(cg_k,(2,mcgk))
    cg_k = cg(1:2,icg+1:icg+mcgk)
    ABI_ALLOCATE(scg_k,(2,mcgk))
+   ABI_ALLOCATE(scg1_k,(2,mcgk,3))
 
    ! retrieve first order wavefunctions at this k point
    ABI_ALLOCATE(cg1_k,(2,mcgk,3))
    cg1_k = cg1(1:2,icg+1:icg+mcgk,1:3)
 
-   ! compute S|u_nk>
+   ! compute S|u_nk> and S|du/dk>
    ABI_ALLOCATE(cwavef,(2,npw_k))
    ABI_ALLOCATE(gsc,(2,npw_k))
    ABI_ALLOCATE(gvnlc,(2,npw_k))
@@ -5283,6 +5285,13 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        & lambda_ndat,mpi_enreg,ndat,nonlop_nnlout,nonlop_pawopt,nonlop_signs,gsc,&
        & nonlop_tim,cwavef,gvnlc)
      scg_k(1:2,(nn-1)*npw_k+1:nn*npw_k) = gsc(1:2,1:npw_k)
+     do adir = 1, 3
+       cwavef = cg1_k(:,(nn-1)*npw_k+1:nn*npw_k,adir)
+       call nonlop(nonlop_choice,nonlop_cpopt,cwaveprj,nonlop_enlout,gs_hamk,0,&
+         & lambda_ndat,mpi_enreg,ndat,nonlop_nnlout,nonlop_pawopt,nonlop_signs,gsc,&
+         & nonlop_tim,cwavef,gvnlc)
+       scg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir) = gsc(1:2,1:npw_k)
+     end do
    end do ! end loop over nn
 
    ! compute \partial S/\partial k |u_nk>
@@ -5345,19 +5354,23 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        doti=-DOT_PRODUCT(cwaveg1(2,:),ghc(1,:))+DOT_PRODUCT(cwaveg1(1,:),ghc(2,:))
  
        ! 1:3 orbmag CC
-       orbmag_terms(1,adir) = orbmag_terms(1,adir) + doti
+       orbmag_terms(adir) = orbmag_terms(adir) + doti
        
-       ! <du/db|S|du/dg> contributes to orbmag_vv and chern number
+       ! <du/db|S|du/dg> contributes to orbmag_vv
        ! vv needs (i/2)*eps_abg*<du/db|S|du/dg>Enk = -Im<du/db|S|du/dg>Enk =
        ! +Im<du/dg|S|du/db>Enk
        ! 4:6 orbmag VV II
        doti=-DOT_PRODUCT(cwaveg1(2,:),gsc(1,:))+DOT_PRODUCT(cwaveg1(1,:),gsc(2,:))
-       orbmag_terms(1,3+adir) = orbmag_terms(1,3+adir) + doti*Enk
+       orbmag_terms(3+adir) = orbmag_terms(3+adir) + doti*Enk
 
        ! chern needs i*eps_abg*<du/db|S|du/dg> so contract with eps_abg
        ! -2*Im<du/db|S|du/dg> = 2*Im<du/dg|S|du/db>
-       ! 10:12 chern I
-       orbmag_terms(1,9+adir) = orbmag_terms(1,9+adir) + two*doti
+       ! 10:12 chern 
+       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
+             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir))
+       orbmag_terms(9+adir) = orbmag_terms(9+adir) - two*doti
+       ! 16:18 alternate orbmag E term 
+       orbmag_terms(15+adir) = orbmag_terms(15+adir) - doti*Enk
 
        cwavedsdb(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
        cwavedsdg(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
@@ -5372,12 +5385,17 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        ! combined with eps_abg contraction they contribute
        ! -Im(VVI)*Enk
        ! 7:9 orbmag VV I+III
-       orbmag_terms(1,6+adir)=orbmag_terms(1,6+adir)-(dub_dsg_i-dug_dsb_i)*Enk
+       orbmag_terms(6+adir)=orbmag_terms(6+adir)-(dub_dsg_i-dug_dsb_i)*Enk
 
-       ! chern gets i eps_abg <u|dS/db|du/dg>
-       ! 13:15 chern II
-       orbmag_terms(1,12+adir)=orbmag_terms(1,12+adir)-(-dug_dsb_i+dub_dsg_i)
-       orbmag_terms(2,12+adir)=orbmag_terms(2,12+adir)+(dug_dsb_r-dub_dsg_r)
+
+       ! alternate orbmag <du/dk|H|du/dk> directly
+       cwaveg1(1:2,1:npw_k) = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+       call getghc(getghc_cpopt,cwaveg1,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
+         & getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc)
+       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),ghc(1,1:npw_k)) + &
+             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),ghc(2,1:npw_k))
+       ! 13:15 alternate orbmag H term 
+       orbmag_terms(12+adir) = orbmag_terms(12+adir) - doti
 
      end do
 
@@ -5393,6 +5411,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_DEALLOCATE(gvnlc)
    ABI_DEALLOCATE(cg_k)
    ABI_DEALLOCATE(scg_k)
+   ABI_DEALLOCATE(scg1_k)
    ABI_DEALLOCATE(dscg_k)
    ABI_DEALLOCATE(cg1_k)
    ABI_DEALLOCATE(pcg1_k)
@@ -5416,48 +5435,33 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_ALLOCATE(buffer2,(buff_size))
    buffer1(1:buff_size) = reshape(orbmag_terms,(/buff_size/))
    call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-   orbmag_terms(1:2,1:nterms3)=reshape(buffer2,(/2,nterms3/))
+   orbmag_terms(1:nterms3)=reshape(buffer2,(/nterms3/))
    ABI_DEALLOCATE(buffer1)
    ABI_DEALLOCATE(buffer2)
  end if
 
  do iterms = 1, nterms
-   orbmag_terms(1,(iterms-1)*3+1:iterms*3) = &
-     & ucvol*MATMUL(gprimd,orbmag_terms(1,(iterms-1)*3+1:iterms*3))
-   orbmag_terms(2,(iterms-1)*3+1:iterms*3) = &
-     & ucvol*MATMUL(gprimd,orbmag_terms(2,(iterms-1)*3+1:iterms*3))
+   orbmag_terms((iterms-1)*3+1:iterms*3) = &
+     & ucvol*MATMUL(gprimd,orbmag_terms((iterms-1)*3+1:iterms*3))*two/(ucvol*dtset%nkpt)
  end do
 
- do iterms = 1, 3
-   orbmag_terms(1,(iterms-1)*3+1:iterms*3) = &
-     & orbmag_terms(1,(iterms-1)*3+1:iterms*3)*two/(ucvol*dtset%nkpt)
-   orbmag_terms(2,(iterms-1)*3+1:iterms*3) = &
-     & orbmag_terms(2,(iterms-1)*3+1:iterms*3)*two/(ucvol*dtset%nkpt)
- end do
+ orbmag_terms(10:12) = orbmag_terms(10:12)/two_pi
  
- do iterms = 4,5
-   orbmag_terms(1,(iterms-1)*3+1:iterms*3) = &
-     & orbmag_terms(1,(iterms-1)*3+1:iterms*3)*two/(ucvol*dtset%nkpt*two_pi)
-   orbmag_terms(2,(iterms-1)*3+1:iterms*3) = &
-     & orbmag_terms(2,(iterms-1)*3+1:iterms*3)*two/(ucvol*dtset%nkpt*two_pi)
- end do
-
- do iterms = 1, 5
-   write(std_out,'(a,i4,6es16.8)')'JWZ debug orbmag_terms term ',iterms,&
-     & orbmag_terms(1,(iterms-1)*3+1),&
-     & orbmag_terms(2,(iterms-1)*3+1),&
-     & orbmag_terms(1,(iterms-1)*3+2),&
-     & orbmag_terms(2,(iterms-1)*3+2),&
-     & orbmag_terms(1,(iterms-1)*3+3),&
-     & orbmag_terms(2,(iterms-1)*3+3)
+ do iterms = 1, nterms
+   write(std_out,'(a,i4,3es16.8)')'JWZ debug orbmag_terms term ',iterms,&
+     & orbmag_terms((iterms-1)*3+1),&
+     & orbmag_terms((iterms-1)*3+2),&
+     & orbmag_terms((iterms-1)*3+3)
  end do
 
  orbmag_total=zero;chern_total=zero
- orbmag_total(1,:)=orbmag_terms(1,1:3)+orbmag_terms(1,4:6)+orbmag_terms(1,7:9)
- chern_total(1,:)=orbmag_terms(1,10:12)+orbmag_terms(1,13:15)
- chern_total(2,:)=orbmag_terms(2,10:12)+orbmag_terms(2,13:15)
-
+ orbmag_total(1,1:3)=orbmag_terms(1:3)+orbmag_terms(4:6)+orbmag_terms(7:9)
  call output_orbmag(1,orbmag_total)
+ orbmag_total(1,1:3)=orbmag_terms(13:15)+orbmag_terms(16:18)
+ call output_orbmag(1,orbmag_total)
+
+
+ chern_total(1,1:3)=orbmag_terms(10:12)
  call output_orbmag(2,chern_total)
 
 !---------------------------------------------------
