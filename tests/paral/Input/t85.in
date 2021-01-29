@@ -62,7 +62,6 @@ dmftcheck 0
 dmft_rslf 1       # do not read self
 dmft_mxsf 0.7
 dmft_charge_prec 1e-10
-dmft_wanorthnorm 3
 
 # Hubbard Correction
 usepawu    1

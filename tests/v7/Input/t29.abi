@@ -46,7 +46,6 @@ dmft_nwli 10000
 dmft_iter 1
 dmftcheck 0
 # For historical purposes only, do not use outside of tests
-dmft_wanorthnorm 3
 dmft_occnd_imag 0
 
 dmft_entropy 1

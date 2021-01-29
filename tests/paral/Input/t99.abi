@@ -61,7 +61,6 @@ dmft_tolfreq 0.01
 dmftctqmc_triqs_nleg 30
 # For historical purposes only, do not use outside of tests
 dmft_occnd_imag 0
-dmft_wanorthnorm 3
 
 # == CTQMC
 dmft_solv 7 # Rotationally invariant interaction with TRIQS/CTHYB Monte Carlo code.

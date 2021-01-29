@@ -88,8 +88,6 @@ _ WF disk file :      8.291 Mbytes ; DEN or POT disk file :      2.405 Mbytes.
   dmft_occnd_imag2          0
         dmft_solv1          5
         dmft_solv2          7
- dmft_wanorthnorm1          2
- dmft_wanorthnorm2          3
      dmft_tolfreq1     1.0000000000E-04
      dmft_tolfreq2     1.0000000000E-02
              ecut      1.60000000E+01 Hartree
@@ -1733,8 +1731,6 @@ total_energy_dc_eV  : -4.14068733647439E+03
   dmft_occnd_imag2          0
         dmft_solv1          5
         dmft_solv2          7
- dmft_wanorthnorm1          2
- dmft_wanorthnorm2          3
      dmft_tolfreq1     1.0000000000E-04
      dmft_tolfreq2     1.0000000000E-02
              ecut      1.60000000E+01 Hartree

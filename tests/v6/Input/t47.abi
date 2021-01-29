@@ -53,7 +53,6 @@ dmft_rslf 1
 dmft_mxsf 0.3
 # For historical purposes only, do not use outside of tests
 dmft_occnd_imag 0
-dmft_wanorthnorm 3
 
 # DFT+U
 usepawu    1
