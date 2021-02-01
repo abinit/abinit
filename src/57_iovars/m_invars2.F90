@@ -1242,7 +1242,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%nband(ikpt)=nband1
    end do
 
-   ! CP added 
+   ! CP added
    if (occopt==9)then
 ! Read the valence band index
       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ival',tread,'INT')
@@ -1402,6 +1402,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symv1scf',tread,'INT')
  if(tread==1) dtset%symv1scf = intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_prtsrate',tread,'INT')
+ if(tread==1) dtset%eph_prtsrate=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_restart',tread,'INT')
  if(tread==1) dtset%eph_restart=intarr(1)

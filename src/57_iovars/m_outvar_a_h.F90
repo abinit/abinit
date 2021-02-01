@@ -823,6 +823,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(2,:)=dtsets(:)%eph_phrange(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_phrange','INT',0)
 
+ intarr(1,:)=dtsets(:)%eph_prtsrate
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_prtsrate','INT',0)
+
  intarr(1,:)=dtsets(:)%eph_restart
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_restart','INT',0)
 

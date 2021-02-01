@@ -55,7 +55,7 @@ module m_eph_driver
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
- use m_rta,             only : rta_driver, rta_estimate_sigma_erange
+ use m_rta,             only : rta_driver, rta_estimate_sigma_erange, ibte_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -621,9 +621,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   ! Compute transport properties only if sigma_erange has been used
+   ! Compute transport properties in the RTA only if sigma_erange has been used
    if (dtset%eph_task == -4 .and. any(abs(dtset%sigma_erange) > zero)) then
      call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+   end if
+
+   ! Solve IBTE only if sigma_erange and eph_prtsrate.
+   if (dtset%eph_task == -4 .and. any(abs(dtset%sigma_erange) > zero) .and. dtset%eph_prtsrate > 0) then
+     call ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    end if
 
  case (5, -5)
@@ -637,6 +642,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (7)
    ! Compute phonon-limited RTA from SIGEPH file.
    call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+
+ case (8)
+   ! Solve IBTE from SIGEPH file.
+   call ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  case (-7)
    ! Estimate sigma_erange

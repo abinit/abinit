@@ -21080,6 +21080,20 @@ obtained with a 50x50x50 without having to perform a full lifetime calculation o
 ),
 
 Variable(
+    abivarname="eph_prtsrate",
+    varset="eph",
+    topics=['ElPhonInt_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    mnemonics="EPH PRinT Scattering RATE to netcdf file",
+    added_in_version="9.3.0",
+    text=r"""
+This variable is still under development.
+""",
+),
+
+Variable(
     abivarname="eph_restart",
     varset="eph",
     topics=['ElPhonInt_basic'],

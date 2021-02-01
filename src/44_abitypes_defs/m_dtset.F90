@@ -172,6 +172,7 @@ type, public :: dataset_type
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
  integer :: eph_phrange(2) = 0
+ integer :: eph_prtsrate = 0
  integer :: eph_restart = 0
  integer :: eph_stern = 0
  integer :: eph_task = 1
@@ -1088,7 +1089,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
 &           dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
             ABI_ERROR(msg)
           end if
-       
+
        if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=0.0_dp
        ! now do it for excited electrons in the conduction bands > ivalence
        nocc   = (dtset%ne_qFD-1.0d-8)/maxocc + 1
@@ -1432,6 +1433,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_phwinfact      = dtin%eph_phwinfact
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
+ dtout%eph_prtsrate       = dtin%eph_prtsrate
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
@@ -3165,7 +3167,7 @@ subroutine chkvars(string)
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
  list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
- list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
+ list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta eph_prtsrate'
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extrapwf'
 !F
