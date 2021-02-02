@@ -660,7 +660,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmft_charge_prec = dtset%dmft_charge_prec
 
 ! for entropy (alternate external calculation)
- paw_dmft%ientropy  =  1
+ paw_dmft%ientropy  =  0
  paw_dmft%u_for_s   =  4.1_dp
  paw_dmft%j_for_s   =  0.5_dp
 

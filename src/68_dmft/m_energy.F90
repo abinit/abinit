@@ -820,6 +820,7 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  nocc=nsploop
  e_ee=zero
  e_dc=zero
+ e_dc_for_s=zero
  e_dcdc=zero
  edftumdc=zero
  edftumdcdc=zero
