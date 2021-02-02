@@ -114,6 +114,7 @@ PUBLIC  :: ImpurityOperator_doCheck
 PRIVATE :: ImpurityOperator_checkOverlap
 PUBLIC  :: ImpurityOperator_getError
 PUBLIC  :: ImpurityOperator_printLatex
+PUBLIC  :: ImpurityOperator_occup_histo_time
 
 CONTAINS
 !!***
@@ -2278,6 +2279,110 @@ SUBROUTINE ImpurityOperator_printLatex(this, ostream, isweep)
   WRITE(ostream,'(2x,A17)') "\transduration{0}"
   WRITE(ostream,'(A11)')    "\end{frame}"
 END SUBROUTINE ImpurityOperator_printLatex
+!!***
+
+!!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_occup_histo_time
+!! NAME
+!!  ImpurityOperator_occup_histo_time
+!!
+!! SUBROUTINE
+!!  Compute histogrammes of occupations.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2020 ABINIT group (B. Amadon)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  this=ImpurityOperator
+!!  histo=histogramme of occupations
+!!
+!! OUTPUT
+!!  ImpurityOperator_occup_histo_time=number of electrons
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!  Will be filled automatically by the parent script
+!!
+!! CHILDREN
+!!  Will be filled automatically by the parent script
+!!
+!! SOURCE
+
+SUBROUTINE ImpurityOperator_occup_histo_time(this,histo)
+
+!Arguments ------------------------------------
+  TYPE(ImpurityOperator), INTENT(IN)          :: this
+  DOUBLE PRECISION, DIMENSION(:), INTENT(OUT) :: histo
+
+!Local variables ------------------------------
+  DOUBLE PRECISION                   :: tau
+  INTEGER                            :: scanning
+  INTEGER                            :: iflavor, itau, noccup,ntau
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)        :: occup
+  INTEGER, ALLOCATABLE, DIMENSION(:)          :: occuptot
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)          :: histo_loc
+
+
+  ntau=100
+  MALLOC(occuptot,(1:ntau))
+  MALLOC(occup,(1:this%flavors,1:ntau))
+  MALLOC(histo_loc,(1:this%flavors+1))
+  do itau=1,ntau
+    tau=float(itau-1)/float(ntau)*this%beta
+    occuptot(itau)=0
+!    write(6,*) "tau",tau
+    do iflavor = 1, this%flavors
+      occup(iflavor,itau)=0
+      do scanning = 1, this%particles(iflavor)%tail
+  !      write(6,*) itau,iflavor,scanning
+!        write(6,*) "tau",tau,this%particles(iflavor)%list(scanning,Cdag_),this%particles(iflavor)%list(scanning,C_)
+
+        if(this%particles(iflavor)%list(scanning,C_)>this%beta.and.tau<this%particles(iflavor)%list(scanning,Cdag_)) then
+
+          if(tau<(this%particles(iflavor)%list(scanning,C_)-this%beta).and.tau>(this%particles(iflavor)%list(scanning,Cdag_)-this%beta)) then 
+            occup(iflavor,itau)=occup(iflavor,itau)+1
+          endif 
+
+        else
+
+          if(tau<this%particles(iflavor)%list(scanning,C_).and.tau>this%particles(iflavor)%list(scanning,Cdag_)) then 
+            occup(iflavor,itau)=occup(iflavor,itau)+1
+          endif 
+
+        endif
+
+      enddo
+      occuptot(itau)= occuptot(itau) + occup(iflavor,itau)
+!      write(6,*) "A",itau,iflavor,occup(iflavor,itau),this%particles(iflavor)%tail
+    enddo
+!      write(6,*) "B",itau,occuptot(itau)
+  enddo
+
+  histo_loc=0
+  do itau=1,ntau
+    histo_loc(occuptot(itau)+1)=histo_loc(occuptot(itau)+1)+1
+  enddo
+
+!  write(6,*)
+!  write(6,*) "=== Histogram of occupations ===="
+  do noccup=1,this%flavors+1
+     histo_loc(noccup)=histo_loc(noccup)/float(ntau)*100.0
+!     write(6,*)  noccup-1, histo_loc(noccup)
+     histo(noccup)= histo(noccup) + histo_loc(noccup)
+  enddo
+!  write(6,*) "================================="
+!  write(6,*)
+  FREE(occup)
+  FREE(occuptot)
+  FREE(histo_loc)
+
+
+END SUBROUTINE ImpurityOperator_occup_histo_time
 !!***
 
 END MODULE m_ImpurityOperator

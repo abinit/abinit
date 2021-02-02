@@ -39,6 +39,7 @@ MODULE m_hu
  private
 
  public :: init_hu
+ public :: copy_hu
  public :: destroy_hu
 ! public :: qmc_hu
  public :: print_hu
@@ -301,6 +302,62 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2my2d)
  enddo ! itypat
 
 end subroutine init_hu
+!!***
+
+!!****f* m_hu/copy_hu
+!! NAME
+!! copy_hu
+!!
+!! FUNCTION
+!!  Allocate variables used in type hu_type.
+!!
+!! INPUTS
+!!  hu <type(hu_type)>= U interaction
+!!
+!! OUTPUTS
+!!  hu_new <type(hu_type)>= U interaction
+!!
+!! PARENTS
+!!      m_dmft
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine copy_hu(ntypat,hu,hu_new)
+
+ use defs_basis
+ implicit none
+
+!Arguments ------------------------------------
+!type
+ integer, intent(in) :: ntypat
+ type(hu_type), intent(in) :: hu(ntypat)
+ type(hu_type), intent(out) :: hu_new(ntypat)
+!Local variables ------------------------------------
+ integer :: itypat,ndim
+!************************************************************************
+
+ do itypat=1,ntypat
+   hu_new(itypat)%lpawu      = hu(itypat)%lpawu
+   hu_new(itypat)%jmjbasis   = hu(itypat)%jmjbasis
+   hu_new(itypat)%upawu      = hu(itypat)%upawu
+   hu_new(itypat)%jpawu      = hu(itypat)%jpawu
+   hu_new(itypat)%f2_sla     = hu(itypat)%f2_sla
+   hu_new(itypat)%f4of2_sla  = hu(itypat)%f4of2_sla
+   hu_new(itypat)%f6of2_sla  = hu(itypat)%f6of2_sla
+   hu_new(itypat)%jpawu_zero = hu(itypat)%jpawu_zero
+   ndim=2*hu_new(itypat)%lpawu+1
+   ABI_ALLOCATE(hu_new(itypat)%uqmc,(ndim*(2*ndim-1)))
+   ABI_ALLOCATE(hu_new(itypat)%udens,(2*ndim,2*ndim))
+   ABI_ALLOCATE(hu_new(itypat)%vee,(ndim,ndim,ndim,ndim))
+   hu_new(itypat)%vee        = hu(itypat)%vee
+   hu_new(itypat)%udens      = hu(itypat)%udens
+   hu_new(itypat)%uqmc       = hu(itypat)%uqmc
+ enddo ! itypat
+
+end subroutine copy_hu
 !!***
 
 !!****f* m_hu/destroy_hu

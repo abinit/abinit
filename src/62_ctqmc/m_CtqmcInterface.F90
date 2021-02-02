@@ -55,6 +55,7 @@ TYPE, PUBLIC :: CtqmcInterface
   TYPE(Ctqmc)         :: Hybrid
   INTEGER _PRIVATE :: opt_fk       = 0
   INTEGER _PRIVATE :: opt_order    = 0
+  INTEGER _PRIVATE :: opt_histo    = 0
   INTEGER _PRIVATE :: opt_movie    = 0
   INTEGER _PRIVATE :: opt_analysis = 0
   INTEGER _PRIVATE :: opt_check    = 0
@@ -156,6 +157,7 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
   END IF
   this%opt_fk       = 0
   this%opt_order    = 0
+  this%opt_histo    = 0
   this%opt_movie    = 0
   this%opt_analysis = 0
   this%opt_check    = 0
@@ -206,12 +208,13 @@ END SUBROUTINE CtqmcInterface_init
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_movie,opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_histo,opt_movie,opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_Fk
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_order
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_histo
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_movie
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_analysis
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_check
@@ -223,6 +226,8 @@ SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_movie,opt_analysis,o
     this%opt_Fk = opt_fk
   IF ( PRESENT(opt_order) ) &
     this%opt_order = opt_order
+  IF ( PRESENT(opt_histo) ) &
+    this%opt_histo = opt_histo
   IF ( PRESENT(opt_analysis) ) &
     this%opt_analysis = opt_analysis
   IF ( PRESENT(opt_check) ) &
@@ -310,6 +315,7 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
     CALL Ctqmc_setU(this%Hybrid, matU)
 
   CALL Ctqmc_run(this%Hybrid,opt_order=this%opt_order, &
+                           opt_histo=this%opt_histo, &
                            opt_movie=this%opt_movie, &
                            opt_analysis=this%opt_analysis, &
                            opt_check=this%opt_check, &
