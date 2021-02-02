@@ -63,7 +63,7 @@ module m_hightemp
   !!
   !! SOURCE
   type,public :: hightemp_type
-    integer :: bcut,nbcut,version
+    integer :: bcut,iopt_pot,nbcut,version
     real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,ent_freeel
     real(dp) :: gcut,std_init,nfreeel,e_shiftfactor,ucvol
     logical :: prt_cg
@@ -122,6 +122,12 @@ contains
 
     this%bcut=mband
     this%nbcut=nbcut
+    if(version==3) then
+      this%iopt_pot=2
+      this%version=1
+    else
+      this%iopt_pot=1
+    end if
     this%version=version
     this%ebcut=zero
     this%edc_kin_freeel=zero
@@ -317,7 +323,7 @@ contains
     this%nfreeel=zero
 
     call hightemp_get_nfreeel(this%bcut,this%ebcut,this%e_shiftfactor,&
-    & fermie,this%gcut,this%nfreeel,tsmear,this%ucvol,this%version)
+    & fermie,this%gcut,this%iopt_pot,this%nfreeel,tsmear,this%ucvol,this%version)
   end subroutine compute_nfreeel
   !!***
 
@@ -370,119 +376,122 @@ contains
     ! *********************************************************************
     step=1e-1
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-    gamma=(fermie-this%e_shiftfactor)/tsmear
     this%e_kin_freeel=zero
+    if(this%iopt_pot==1) then
+      gamma=(fermie-this%e_shiftfactor)/tsmear
+      if(this%version==1) then
+        if(this%gcut>dble(this%bcut)) then
 
-    if(this%version==1) then
-      if(this%gcut>dble(this%bcut)) then
+          ! Dynamic array find size
+          ix=dble(this%bcut)
+          ii=0
+          do while(ix<=this%gcut)
+            ii=ii+1
+            ix=ix+step
+          end do
 
-        ! Dynamic array find size
-        ix=dble(this%bcut)
-        ii=0
-        do while(ix<=this%gcut)
-          ii=ii+1
-          ix=ix+step
-        end do
+          ABI_ALLOCATE(valueseel,(ii))
+          ix=dble(this%bcut)
+          ii=0
+          sigma=this%std_init
+          ! open(file='Gauss',unit=23,status='OLD')
+          ! close(23,status="DELETE")
+          ! open(file='Gauss',unit=23,status='NEW')
+          do while(ix<=this%gcut)
+            ii=ii+1
+            sigma=sigma-0.0002*sigma
+            valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
+            & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
+            & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
+            ! write(23,*) ix,0.5*hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
+            ! & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
+            ix=ix+step
+          end do
+          ! close(23)
+          if (ii>1) then
+            this%e_kin_freeel=this%e_kin_freeel+simpson(step,valueseel)
+          end if
+          ABI_DEALLOCATE(valueseel)
 
-        ABI_ALLOCATE(valueseel,(ii))
-        ix=dble(this%bcut)
-        ii=0
-        sigma=this%std_init
-        ! open(file='Gauss',unit=23,status='OLD')
-        ! close(23,status="DELETE")
-        ! open(file='Gauss',unit=23,status='NEW')
-        do while(ix<=this%gcut)
-          ii=ii+1
-          sigma=sigma-0.0002*sigma
-          valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
-          & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
-          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
-          ! write(23,*) ix,0.5*hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
-          ! & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
-          ix=ix+step
-        end do
-        ! close(23)
-        if (ii>1) then
-          this%e_kin_freeel=this%e_kin_freeel+simpson(step,valueseel)
+          ! Change Fermi-Dirac integral lower bound.
+          xcut=hightemp_e_heg(ix-step,this%ucvol)/tsmear
+
+          ! Check if 6-sigma uncertainty is respected.
+          zero_gaussian=exp(-(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))**2/(2*sigma**2))/&
+          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
+          if(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)) < 3*sigma) then
+            write(msg,'(5a,f6.4,3a,f10.6,a,f10.6,3a)') &
+            & "WARNING: The planewaves module standard deviation is too high.",ch10,&
+            & "The gaussian distribution of planewaves is not null at gamma point.",ch10,&
+            & "(= ",zero_gaussian,") Planewaves module meanvalue should be ideally > 3*sigma.",ch10,&
+            & "Mean value = ",sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol))," < ",&
+            & 3*sigma," = 3*sigma",ch10,&
+            & "Action: Increase nband. Assuming experienced user. Execution will continue."
+            MSG_WARNING(msg)
+          end if
+        else
+          xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
         end if
-        ABI_DEALLOCATE(valueseel)
 
-        ! Change Fermi-Dirac integral lower bound.
-        xcut=hightemp_e_heg(ix-step,this%ucvol)/tsmear
+        !TEMPORARY
+        ! ix=dble(this%bcut)
+        ! ii=0
+        ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        ! minocc=tol16
+        ! do while(fn>minocc)
+        !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        !   ii=ii+1
+        !   ix=ix+step
+        ! end do
+        ! ABI_ALLOCATE(valuese,(ii))
+        ! ix=dble(this%bcut)
+        ! ii=0
+        ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        ! do while(fn>minocc)
+        !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        !   ii=ii+1
+        !   valuese(ii)=2*fn*hightemp_e_heg(ix,this%ucvol)
+        !   ix=ix+step
+        ! end do
+        ! if (ii>1) then
+        !   this%e_kin_freeel=this%e_kin_freeel+simpson(step,valuese)
+        ! end if
+        ! ABI_DEALLOCATE(valuese)
+        !END TEMPORARY
+      else if(this%version==2) then
+        xcut=(this%ebcut-this%e_shiftfactor)/tsmear
 
-        ! Check if 6-sigma uncertainty is respected.
-        zero_gaussian=exp(-(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))**2/(2*sigma**2))/&
-        & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
-        if(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)) < 3*sigma) then
-          write(msg,'(5a,f6.4,3a,f10.6,a,f10.6,3a)') &
-          & "WARNING: The planewaves module standard deviation is too high.",ch10,&
-          & "The gaussian distribution of planewaves is not null at gamma point.",ch10,&
-          & "(= ",zero_gaussian,") Planewaves module meanvalue should be ideally > 3*sigma.",ch10,&
-          & "Mean value = ",sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol))," < ",&
-          & 3*sigma," = 3*sigma",ch10,&
-          & "Action: Increase nband. Assuming experienced user. Execution will continue."
-          MSG_WARNING(msg)
-        end if
-      else
-        xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
+        !TEMPORARY
+        ! ix=this%ebcut
+        ! ii=0
+        ! fn=fermi_dirac(ix,fermie,tsmear)
+        ! minocc=tol16
+        ! do while(fn>minocc)
+        !   fn=fermi_dirac(ix,fermie,tsmear)
+        !   ii=ii+1
+        !   ix=ix+step
+        ! end do
+        ! ABI_ALLOCATE(valuese,(ii))
+        ! ix=this%ebcut
+        ! ii=0
+        ! fn=fermi_dirac(ix,fermie,tsmear)
+        ! do while(fn>minocc)
+        !   fn=fermi_dirac(ix,fermie,tsmear)
+        !   ii=ii+1
+        !   valuese(ii)=fn*hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)*&
+        !   & (ix-this%e_shiftfactor)
+        !   ix=ix+step
+        ! end do
+        ! if (ii>1) then
+        !   this%e_kin_freeel=this%e_kin_freeel+simpson(step,valuese)
+        ! end if
+        ! ABI_DEALLOCATE(valuese)
+        !END TEMPORARY
       end if
-
-      !TEMPORARY
-      ! ix=dble(this%bcut)
-      ! ii=0
-      ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      ! minocc=tol16
-      ! do while(fn>minocc)
-      !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      !   ii=ii+1
-      !   ix=ix+step
-      ! end do
-      ! ABI_ALLOCATE(valuese,(ii))
-      ! ix=dble(this%bcut)
-      ! ii=0
-      ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      ! do while(fn>minocc)
-      !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      !   ii=ii+1
-      !   valuese(ii)=2*fn*hightemp_e_heg(ix,this%ucvol)
-      !   ix=ix+step
-      ! end do
-      ! if (ii>1) then
-      !   this%e_kin_freeel=this%e_kin_freeel+simpson(step,valuese)
-      ! end if
-      ! ABI_DEALLOCATE(valuese)
-      !END TEMPORARY
-    else if(this%version==2) then
-      xcut=(this%ebcut-this%e_shiftfactor)/tsmear
-
-      !TEMPORARY
-      ! ix=this%ebcut
-      ! ii=0
-      ! fn=fermi_dirac(ix,fermie,tsmear)
-      ! minocc=tol16
-      ! do while(fn>minocc)
-      !   fn=fermi_dirac(ix,fermie,tsmear)
-      !   ii=ii+1
-      !   ix=ix+step
-      ! end do
-      ! ABI_ALLOCATE(valuese,(ii))
-      ! ix=this%ebcut
-      ! ii=0
-      ! fn=fermi_dirac(ix,fermie,tsmear)
-      ! do while(fn>minocc)
-      !   fn=fermi_dirac(ix,fermie,tsmear)
-      !   ii=ii+1
-      !   valuese(ii)=fn*hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)*&
-      !   & (ix-this%e_shiftfactor)
-      !   ix=ix+step
-      ! end do
-      ! if (ii>1) then
-      !   this%e_kin_freeel=this%e_kin_freeel+simpson(step,valuese)
-      ! end if
-      ! ABI_DEALLOCATE(valuese)
-      !END TEMPORARY
+    else
+      gamma=(fermie)/tsmear
+      xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
     end if
-
     this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
 
     ! Computation of edc_kin_freeel
@@ -535,32 +544,58 @@ contains
 
     step=1e-1
     this%ent_freeel=zero
-
     if(this%version==1) then
-      ! Dynamic array find size
-      ix=dble(this%bcut)
-      ii=0
-      fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      minocc=tol16
-      do while(fn>minocc)
+      if(this%iopt_pot==1) then
+        ! Dynamic array find size
+        ix=dble(this%bcut)
+        ii=0
         fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        ii=ii+1
-        ix=ix+step
-      end do
-      ABI_ALLOCATE(valuesent,(ii))
-      ix=dble(this%bcut)
-      ii=0
-      fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      do while(fn>minocc)
+        minocc=tol16
+        do while(fn>minocc)
+          fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+          ii=ii+1
+          ix=ix+step
+        end do
+        ABI_ALLOCATE(valuesent,(ii))
+        ix=dble(this%bcut)
+        ii=0
         fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        ii=ii+1
-        valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
-        ix=ix+step
-      end do
-      if (ii>1) then
-        this%ent_freeel=simpson(step,valuesent)
+        do while(fn>minocc)
+          fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+          ii=ii+1
+          valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
+          ix=ix+step
+        end do
+        if (ii>1) then
+          this%ent_freeel=simpson(step,valuesent)
+        end if
+        ABI_DEALLOCATE(valuesent)
+      else
+        ! Dynamic array find size
+        ix=dble(this%bcut)
+        ii=0
+        fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol),fermie,tsmear)
+        minocc=tol16
+        do while(fn>minocc)
+          fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol),fermie,tsmear)
+          ii=ii+1
+          ix=ix+step
+        end do
+        ABI_ALLOCATE(valuesent,(ii))
+        ix=dble(this%bcut)
+        ii=0
+        fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol),fermie,tsmear)
+        do while(fn>minocc)
+          fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol),fermie,tsmear)
+          ii=ii+1
+          valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
+          ix=ix+step
+        end do
+        if (ii>1) then
+          this%ent_freeel=simpson(step,valuesent)
+        end if
+        ABI_DEALLOCATE(valuesent)
       end if
-      ABI_DEALLOCATE(valuesent)
     else if(this%version == 2) then
       ! Dynamic array find size
       ix=this%ebcut
@@ -1406,6 +1441,7 @@ contains
   !! e_shiftfactor=energy shift factor
   !! fermie=chemical potential (Hartree)
   !! gcut=high energy orbital number separating gaussian and dirac regimen
+  !! iopt_pot=option to treat the potential
   !! nelect=number of electrons per unit cell
   !! tsmear=temperature (Hartree)
   !! ucvol=unit cell volume (bohr^3)
@@ -1419,11 +1455,11 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_get_nfreeel(bcut,ebcut,e_shiftfactor,fermie,gcut,nelect,tsmear,ucvol,version)
+  subroutine hightemp_get_nfreeel(bcut,ebcut,e_shiftfactor,fermie,gcut,iopt_pot,nelect,tsmear,ucvol,version)
 
     ! Arguments -------------------------------
     ! Scalars
-    integer :: bcut,version
+    integer :: bcut,iopt_pot,version
     real(dp),intent(in) :: ebcut,fermie,gcut,tsmear,e_shiftfactor,ucvol
     real(dp),intent(inout) :: nelect
 
@@ -1442,8 +1478,9 @@ contains
 
     step=1e-1
     factor=sqrt(2.)/(PI*PI)*ucvol*tsmear**(1.5)
-    gamma=(fermie-e_shiftfactor)/tsmear
-    if(version==1) then
+    if(iopt_pot==1) then
+      gamma=(fermie-e_shiftfactor)/tsmear
+      if(version==1) then
       if(gcut>dble(bcut)) then
 
         ! Dynamic array find size
@@ -1498,7 +1535,7 @@ contains
       ! end if
       ! ABI_DEALLOCATE(valuesn)
       !END TEMPORARY
-    else if(version==2) then
+      else if(version==2) then
       xcut=(ebcut-e_shiftfactor)/tsmear
 
       !TEMPORARY
@@ -1526,6 +1563,10 @@ contains
       ! end if
       ! ABI_DEALLOCATE(valuesn)
       !END TEMPORARY
+      end if
+    else
+      gamma=(fermie)/tsmear
+      xcut=hightemp_e_heg(dble(bcut),ucvol)/tsmear
     end if
     nelect=nelect+factor*djp12(xcut,gamma)
   end subroutine hightemp_get_nfreeel

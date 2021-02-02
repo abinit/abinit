@@ -1121,6 +1121,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ABI_DEALLOCATE(dphasek)
    end if ! berryflag
    ABI_DEALLOCATE(rhoaug)
+   !temp-------
+   write(0,*) size(vlocal(:,:,:,1)),sum(vlocal(:,:,:,1))
+   !temp-------
    ABI_DEALLOCATE(vlocal)
    if(with_vxctau) then
      ABI_DEALLOCATE(vxctaulocal)
