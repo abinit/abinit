@@ -60,7 +60,6 @@ dmft_nwlo 100      # low: test
 dmftcheck 0
 dmft_rslf 1       # do not read self
 dmft_mxsf 0.7
-# For historical purposes only, do not use outside of tests
 
 # Hubbard Correction
 usepawu    1
