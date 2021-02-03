@@ -1926,7 +1926,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%usepawu=intarr(1)
  if(dtset%usedmft>0.and.(dtset%usepawu==14.or.dtset%usepawu==4)) then
     dtset%usepawu=14
- else if(dtset%usedmft>0.and.dtset%usepawu>0) then
+ else if(dtset%usedmft>0.and.dtset%usepawu>=0) then
     dtset%usepawu=1
  endif
 

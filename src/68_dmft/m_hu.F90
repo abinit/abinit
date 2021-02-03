@@ -349,9 +349,9 @@ subroutine copy_hu(ntypat,hu,hu_new)
    hu_new(itypat)%f6of2_sla  = hu(itypat)%f6of2_sla
    hu_new(itypat)%jpawu_zero = hu(itypat)%jpawu_zero
    ndim=2*hu_new(itypat)%lpawu+1
-   ABI_ALLOCATE(hu_new(itypat)%uqmc,(ndim*(2*ndim-1)))
-   ABI_ALLOCATE(hu_new(itypat)%udens,(2*ndim,2*ndim))
-   ABI_ALLOCATE(hu_new(itypat)%vee,(ndim,ndim,ndim,ndim))
+   ABI_MALLOC(hu_new(itypat)%uqmc,(ndim*(2*ndim-1)))
+   ABI_MALLOC(hu_new(itypat)%udens,(2*ndim,2*ndim))
+   ABI_MALLOC(hu_new(itypat)%vee,(ndim,ndim,ndim,ndim))
    hu_new(itypat)%vee        = hu(itypat)%vee
    hu_new(itypat)%udens      = hu(itypat)%udens
    hu_new(itypat)%uqmc       = hu(itypat)%uqmc

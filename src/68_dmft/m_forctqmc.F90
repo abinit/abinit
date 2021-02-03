@@ -456,7 +456,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! END Of diagonalization
 ! ===========================================================================================
      if(paw_dmft%ientropy==1) then
-       ABI_DATATYPE_ALLOCATE(hu_for_s,(cryst_struc%ntypat))
+       ABI_MALLOC(hu_for_s,(cryst_struc%ntypat))
        ! Usefull to compute interaction energy for U=1 J=J/U when U=0.
        call copy_hu(cryst_struc%ntypat,hu,hu_for_s)
        f4of2_sla=-1_dp
@@ -467,7 +467,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call rotatevee_hu(cryst_struc,hu_for_s,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms_for_s,rot_type_vee)
        call destroy_hu(hu_for_s,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
 !      udens_atoms_for_s will be used later.
-       ABI_DATATYPE_DEALLOCATE(hu_for_s)
+       ABI_FREE(hu_for_s)
      endif
 
 

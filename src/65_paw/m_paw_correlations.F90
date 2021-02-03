@@ -434,7 +434,7 @@ CONTAINS  !=====================================================================
          ABI_FREE(pawtab(itypat)%vee)
        end if
        sz1=2*lpawu+1
-       ABI_FREE(pawtab(itypat)%vee,(sz1,sz1,sz1,sz1))
+       ABI_MALLOC(pawtab(itypat)%vee,(sz1,sz1,sz1,sz1))
        call calc_vee(pawtab(itypat)%f4of2_sla,pawtab(itypat)%f6of2_sla,pawtab(itypat)%jpawu,&
 &       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee)
 
@@ -871,7 +871,7 @@ CONTAINS  !=====================================================================
          write(message, '(a,i0,2a)' )&
 &         ' lpawu=',lpawu,ch10,&
 &         ' lpawu not equal to 0 ,1 ,2 or 3 is not allowed'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
 
 !      b. Compute ak and vee.
