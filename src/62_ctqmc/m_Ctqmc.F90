@@ -2647,15 +2647,15 @@ include 'mpif.h'
   FREE(beta)
 
   IF ( this%opt_histo .GT. 0 ) THEN
-    write(op%ostream,*) "=== Histogram of occupations for complete simulation  ===="
+    write(this%ostream,*) "=== Histogram of occupations for complete simulation  ===="
    ! write(6,*) "sumh over procs", sumh
     sumh=0
     do n1=1,this%flavors+1
-       write(op%ostream,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)/float(this%size)
+       write(this%ostream,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)/float(this%size)
        sumh=sumh+this%occup_histo_time(n1)/float(this%size)
     enddo
-       write(op%ostream,'(a,f10.4)') " all" , sumh
-    write(op%ostream,*) "================================="
+       write(this%ostream,'(a,f10.4)') " all" , sumh
+    write(this%ostream,*) "================================="
   ENDIF
 
 END SUBROUTINE Ctqmc_getResult
