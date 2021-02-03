@@ -194,7 +194,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! ======================================
  ABI_MALLOC(udens_atoms,(natom))
  ABI_MALLOC(eigvectmatlu,(natom,nsppol))
- if(paw_dmft%ientropy==1) ABI_MALLOC(udens_atoms_for_s,(natom))
+ if(paw_dmft%ientropy==1) then
+   ABI_MALLOC(udens_atoms_for_s,(natom))
+ endif
  ABI_MALLOC(dmat_diag,(natom))
  ABI_MALLOC(identity,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,dmat_diag)
@@ -208,7 +210,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
      end do
      ABI_MALLOC(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
-     if(paw_dmft%ientropy==1) ABI_MALLOC(udens_atoms_for_s(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     if(paw_dmft%ientropy==1) then
+       ABI_MALLOC(udens_atoms_for_s(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     endif
      dmat_diag(iatom)%mat=czero
    end if
  end do
@@ -1358,7 +1362,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
              enddo
            enddo
            ! Here in udens U=1, J=J/U, so we need to multiply bu U/Ha_eV
-           write(message,'(a,3(f14.10,3x))') "For entropy calculation E_corr_qmc, u_for_s, j_for,s", paw_dmft%u_for_s*EE/Ha_eV,paw_dmft%u_for_s,paw_dmft%j_for_s
+           write(message,'(a,3(f14.10,3x))') "For entropy calculation E_corr_qmc, u_for_s, j_for,s", &
+&          paw_dmft%u_for_s*EE/Ha_eV,paw_dmft%u_for_s,paw_dmft%j_for_s
            call wrtout(std_out,message,'COLL')
            EE=zero
            do if1=1,nflavor
@@ -1368,7 +1373,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
              enddo
            enddo
            ! Here in udens U=U, J=J, so we obtain directly the results
-           write(message,'(a,3(f14.10,3x))') "Reference   calculation E_corr_qmc, upawu  , jpawu  ", EE,hu(itypat)%upawu*Ha_eV,hu(itypat)%jpawu*Ha_eV
+           write(message,'(a,3(f14.10,3x))') "Reference   calculation E_corr_qmc, upawu  , jpawu  ", &
+&             EE,hu(itypat)%upawu*Ha_eV,hu(itypat)%jpawu*Ha_eV
            call wrtout(std_out,message,'COLL')
          endif
          ABI_FREE(docc)

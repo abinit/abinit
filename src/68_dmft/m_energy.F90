@@ -924,9 +924,11 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  energies_dmft%e_dc_tot=e_dc ! this is the onlu quantity used after.
  energies_dmft%e_hu_dftu_tot=e_ee
  if(paw_dmft%ientropy==1) then
-   write(message,'(a,3(f14.10,3x))') "For entropy calculation E_dc_tot, u_for_s, j_for,s", e_dc_for_s,paw_dmft%u_for_s,paw_dmft%j_for_s
+   write(message,'(a,3(f14.10,3x))') "For entropy calculation E_dc_tot, u_for_s, j_for,s", &
+  & e_dc_for_s,paw_dmft%u_for_s,paw_dmft%j_for_s
    call wrtout(std_out,message,'COLL')
-   write(message,'(a,3(f14.10,3x))') "Reference   calculation E_dc_tot, upawu  , jpawu  ", e_dc,upawu*Ha_eV,jpawu*Ha_eV
+   write(message,'(a,3(f14.10,3x))') "Reference   calculation E_dc_tot, upawu  , jpawu  ", &
+  & e_dc,upawu*Ha_eV,jpawu*Ha_eV
    call wrtout(std_out,message,'COLL')
  endif
 

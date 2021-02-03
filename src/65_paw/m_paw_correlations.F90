@@ -139,8 +139,8 @@ CONTAINS  !=====================================================================
 !Local variables ---------------------------------------
 !scalars
  integer :: icount,il,ilmn,ilmnp,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
- integer :: klm0u,klm0x,klma,klmb,klmn,klmna,klmnb,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
- integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lmpawu,lpawu
+ integer :: klm0x,klma,klmb,klmn,klmna,klmnb,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
+ integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
  integer :: mesh_size,int_meshsz,mkyc,sig,sigp,sz1
  logical :: compute_euijkl,compute_euij_fll
@@ -149,7 +149,7 @@ CONTAINS  !=====================================================================
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: euijkl_temp(2,2),euijkl_temp2(2,2),euijkl_dc(2,2)
- real(dp),allocatable :: ff(:),fk(:),gg(:)
+ real(dp),allocatable :: ff(:),gg(:)
 
 ! *************************************************************************
 
@@ -800,7 +800,7 @@ CONTAINS  !=====================================================================
 
 !Local variables ---------------------------------------
 !scalars
- integer :: il,isela,iselb
+ integer :: isela,iselb
  integer :: klm0u,klma,klmb,kyc,lkyc
  integer :: lmkyc,lmpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41

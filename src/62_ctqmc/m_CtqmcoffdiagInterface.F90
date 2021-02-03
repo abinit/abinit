@@ -201,7 +201,8 @@ END SUBROUTINE CtqmcoffdiagInterface_init
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_histo,opt_movie,opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_histo,opt_movie,&
+& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op

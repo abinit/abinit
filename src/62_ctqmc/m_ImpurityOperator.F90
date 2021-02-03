@@ -2344,7 +2344,8 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo)
 
         if(this%particles(iflavor)%list(scanning,C_)>this%beta.and.tau<this%particles(iflavor)%list(scanning,Cdag_)) then
 
-          if(tau<(this%particles(iflavor)%list(scanning,C_)-this%beta).and.tau>(this%particles(iflavor)%list(scanning,Cdag_)-this%beta)) then 
+          if(tau<(this%particles(iflavor)%list(scanning,C_)-this%beta).and.&
+&            tau>(this%particles(iflavor)%list(scanning,Cdag_)-this%beta)) then 
             occup(iflavor,itau)=occup(iflavor,itau)+1
           endif 
 
