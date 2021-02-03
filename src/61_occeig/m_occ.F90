@@ -506,8 +506,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !potential and add to nelect bounds.
  if(present(hightemp)) then
    if(associated(hightemp)) then
-     call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
-&     fermilo,hightemp%gcut,hightemp%iopt_pot,nelectlo,tsmear,hightemp%ucvol,hightemp%version)
+     call hightemp%compute_nfreeel(fermilo,nelectlo,tsmear)
    end if
  end if
 
@@ -524,8 +523,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !potential and add to nelect bounds.
  if(present(hightemp)) then
    if(associated(hightemp)) then
-     call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
-&     fermihi,hightemp%gcut,hightemp%iopt_pot,nelecthi,tsmear,hightemp%ucvol,hightemp%version)
+     call hightemp%compute_nfreeel(fermihi,nelecthi,tsmear)
    end if
  end if
 
@@ -577,8 +575,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      !potential and add to nelect bounds.
      if(present(hightemp)) then
        if (associated(hightemp)) then
-         call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
-&         fermimid,hightemp%gcut,hightemp%iopt_pot,nelectmid,tsmear,hightemp%ucvol,hightemp%version)
+         call hightemp%compute_nfreeel(fermimid,nelectmid,tsmear)
        end if
      end if
 

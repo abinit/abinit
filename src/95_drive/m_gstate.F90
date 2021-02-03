@@ -898,8 +898,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
      ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
      vtrial(:,:)=zero
-
-     call hightemp%compute_nfreeel(results_gs%energies%e_fermie,dtset%tsmear)
+     hightemp%nfreeel=zero
+     call hightemp%compute_nfreeel(results_gs%energies%e_fermie,hightemp%nfreeel,&
+&     dtset%tsmear)
      call hightemp%compute_efreeel(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
 &     dtset%tsmear,vtrial)
 

@@ -1251,7 +1251,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Blanchet Once we have occupation, compute number of free electrons
      if(associated(hightemp)) then
-       call hightemp%compute_nfreeel(energies%e_fermie,dtset%tsmear)
+       hightemp%nfreeel=zero
+       call hightemp%compute_nfreeel(energies%e_fermie,hightemp%nfreeel,dtset%tsmear)
        call hightemp%compute_efreeel(energies%e_fermie,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
        call hightemp%compute_ent_freeel(energies%e_fermie,dtset%tsmear)
