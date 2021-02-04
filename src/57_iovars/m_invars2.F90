@@ -250,7 +250,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !scalars
  integer :: bantot,berryopt,dmatsize,ndim,getocc,narr,nprocs
  integer :: iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol,ixc_current
- integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry
+ integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,natomcor,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key, tread_extrael
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image
@@ -2196,6 +2196,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_solv=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
    if(tread==1) dtset%dmft_t2g=intarr(1)
+
+   natomcor=0
+   do iatom=1,dtset%natom
+     if(dtset%lpawu(dtset%typat(iatom))>0) natomcor=natomcor+1
+   enddo
+   if(natomcor>1) dtset%dmft_wanorthnorm=2
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_wanorthnorm',tread,'INT')
+   if(tread==1) dtset%dmft_wanorthnorm=intarr(1)
+
 !  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_x2my2d',tread,'INT')
 !  if(tread==1) dtset%dmft_x2my2d=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tolfreq',tread,'DPR')

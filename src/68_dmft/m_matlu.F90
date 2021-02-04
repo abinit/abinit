@@ -1580,6 +1580,7 @@ end subroutine add_matlu
    else if((nsppol==2.or.nsppol==1).and.nspinor==1) then
      do iatom=1,natom
        if(matlu(iatom)%lpawu.ne.-1) then
+         tndim=nspinor*(2*matlu(iatom)%lpawu+1)
          do im1=1,tndim
            do im2=1,tndim
              gathermatlu(iatom)%value(im1,im2)=matlu(iatom)%mat(im1,im2,isppol,1,1)
@@ -1993,6 +1994,7 @@ end subroutine add_matlu
    else if((nsppol==2.or.nsppol==1).and.nspinor==1) then
      do iatom=1,natom
        if(matlu(iatom)%lpawu.ne.-1) then
+         tndim=nspinor*(2*matlu(iatom)%lpawu+1)
          do im1=1,tndim
            do im2=1,tndim
              gathermatlu(iatom)%value(im1,im2)=matlu(iatom)%mat(im1,im2,isppol,1,1)
@@ -2104,6 +2106,7 @@ end subroutine add_matlu
    else if((nsppol==2.or.nsppol==1).and.nspinor==1) then
      do iatom=1,natom
        if(matlu(iatom)%lpawu.ne.-1) then
+         tndim=nspinor*(2*matlu(iatom)%lpawu+1)
          do im1=1,tndim
            do im2=1,tndim
              matlu(iatom)%mat(im1,im2,isppol,1,1)= gathermatlu(iatom)%value(im1,im2)

@@ -2181,6 +2181,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_charge_prec=tol6
+   dtsets(idtset)%dmft_wanorthnorm=3
    dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0
    dtsets(idtset)%dmftcheck=0
