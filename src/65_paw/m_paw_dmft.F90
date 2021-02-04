@@ -192,6 +192,10 @@ MODULE m_paw_dmft
   !  =1   print green
   !  =2   print self
 
+  integer :: dmft_wanorthnorm
+  !  1 orthonormalisation of Wannier functions k-point after k-point
+  !  2 orthonormalisation over the sum over k-points.
+
   integer :: idmftloop
   ! current iteration in the dmft loop
 
@@ -632,6 +636,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmft_iter=dtset%dmft_iter
  paw_dmft%dmft_kspectralfunc=dtset%dmft_kspectralfunc
  paw_dmft%dmft_dc=dtset%dmft_dc
+ paw_dmft%dmft_wanorthnorm=dtset%dmft_wanorthnorm
  !paw_dmft%idmftloop=0
  paw_dmft%prtvol = dtset%prtvol
  paw_dmft%prtdos = dtset%prtdos

@@ -46,6 +46,7 @@ dmftbandf 28
 dmft_solv 2 # will not be used in practice here
 # For historical purposes only, do not use outside of tests
 dmft_occnd_imag 0
+dmft_wanorthnorm2 3
 usepawu 0
 lpawu   2 -1        # Applied on d electrons of Nickel
 upawu  0.30   0.0   # Value of U parameter
