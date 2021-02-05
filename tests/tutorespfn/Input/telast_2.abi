@@ -1,4 +1,4 @@
-#AlAs in hypothetical wurzite (hexagonal) structure
+#AlP in hypothetical wurzite (hexagonal) structure
 #Response function calculation for:
 #    * rigid-atom elastic tensor
 #    * rigid-atom piezoelectric tensor
@@ -55,7 +55,7 @@
 
 #Definition of the atom types and atoms
  ntypat   2 
-  znucl   13 33
+  znucl   13 15
   natom   4
   typat   1 1 2 2
 
@@ -97,7 +97,7 @@ nshiftk   1              # Use one copy of grid only (default)
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -112,7 +112,7 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% authors = D. Hamann
 #%% keywords = NC, DFPT 
 #%% description = 
-#%%   AlAs in hypothetical wurzite (hexagonal) structure
+#%%   AlP in hypothetical wurzite (hexagonal) structure
 #%%   Response function calculation for:
 #%%       * rigid-atom elastic tensor
 #%%       * rigid-atom piezoelectric tensor
