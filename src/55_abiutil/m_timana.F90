@@ -162,8 +162,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  character(len=32) :: names(-1:TIMER_SIZE),entry_name
  character(len=*),parameter :: format01040 ="('- ',a24,f15.3,f6.1,f14.3,f6.1,i15,16x,f7.2,1x,f10.2)"
  character(len=*),parameter :: format01041 ="('- ',a24,f15.3,f6.1,f14.3,f6.1,i15,3x,g12.3,1x,f7.2,1x,f10.2)"
- character(len=*),parameter :: format_head1="(a,t35,a,t46,a,t54,a,t66,a,t72,a,t88,a,3x,a7,1x,a10)"
- character(len=*),parameter :: format_head2="(a,t35,a,t46,a,t54,a,t66,a,t72,a,t84,a)"
+ character(len=*),parameter :: format_head1="(a,t38,a,t46,a,t57,a,t66,a,t72,a,t88,a,3x,a7,1x,a10)"
+ character(len=*),parameter :: format_head2="(a,t38,a,t46,a,t57,a,t66,a,t72,a,t84,a)"
 
 ! *************************************************************************
 

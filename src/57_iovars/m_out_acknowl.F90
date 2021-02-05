@@ -458,21 +458,21 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#royo2019'
  priority(40)=20
 
- ref(41)='Phonon-limited electron mobility in Si, GaAs, and GaP with exact treatment of dynamical quadrupoles, '//ch10//&
+ ref(41)=' Phonon-limited electron mobility in Si, GaAs, and GaP with exact treatment of dynamical quadrupoles, '//ch10//&
   ' G. Brunin, H. P. C. Miranda, M. Giantomassi, M. Royo, M. Stengel, M. J. Verstraete,'//ch10//&
   ' X. Gonze, G.-M. Rignanese and G. Hautier, Phys. Rev. B 102, 094308 (2020).'
  comment(41)=' Comment : Phonon-limited electron mobility has been computed using eph_task=7.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#brunin2020b'
  priority(41)=20
 
- ref(42)='Predominance of non-adiabatic effects in zero-point renormalization of the electronic band gap,  '//ch10//&
+ ref(42)=' Predominance of non-adiabatic effects in zero-point renormalization of the electronic band gap,  '//ch10//&
   ' A. Miglio, V. Brousseau-Couture, E. Godbout, G. Antonius, Y.-H. Chan, S.G. Louie,  M. Cote, M. Giantomassi'//ch10//&
   ' and X. Gonze, npj Computational Materials 6, 167 (2020).'
  comment(42)=' Comment : Generalized Frohlich model calculations using eph_task=6.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#miglio2020'
  priority(42)=20
 
- ref(43)='Photoinduced Phase Transitions in Ferroelectrics, '//ch10//&
+ ref(43)=' Photoinduced Phase Transitions in Ferroelectrics, '//ch10//&
   ' C. Paillard, E. Torun, L. Wirtz, J. Iniguez and L. Bellaiche, Phys. Rev. Lett. 123, 087601 (2019).'
  comment(43)=' Comment : Thermalized carriers eph_task=6.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#paillard2019'

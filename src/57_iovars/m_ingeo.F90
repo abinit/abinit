@@ -879,7 +879,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          ABI_FREE(symrec)
 
          if(print_comment_tolsym==1)then
-           write(msg,'(a,es12.3,11a)')&
+           write(msg,'(a,es12.3,13a)')&
             'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
             'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
             'symmetrized before storing them in the dataset internal variable.',ch10,&
