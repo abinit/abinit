@@ -880,13 +880,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
          if(print_comment_tolsym==1)then
            write(msg,'(a,es12.3,13a)')&
-            'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
-            'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
-            'symmetrized before storing them in the dataset internal variable.',ch10,&
-            'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
-            'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-            'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.',ch10,&
-            'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
+&           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
+&           'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
+&           'symmetrized before storing them in the dataset internal variable.',ch10,&
+&           'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
+&           'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+&           'In order to avoid this symmetrization (e.g. for specific debugging/development),',&
+&           ' decrease tolsym to 1.0e-8 or lower.',ch10,&
+&           'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
            ABI_COMMENT(msg)
            print_comment_tolsym=0
          endif
