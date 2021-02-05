@@ -174,6 +174,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
+ integer, save :: print_comment_tolsym=1
  integer :: bckbrvltt,brvltt,chkprim,expert_user,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
  integer :: ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
@@ -877,14 +878,18 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          ABI_FREE(indsym)
          ABI_FREE(symrec)
 
-         write(msg,'(a,es12.3,11a)')&
-          'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
-          'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
-          'symmetrized before storing them in the dataset internal variable.',ch10,&
-          'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
-          'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-          'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
-         ABI_WARNING(msg)
+         if(print_comment_tolsym==1)then
+           write(msg,'(a,es12.3,11a)')&
+            'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
+            'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
+            'symmetrized before storing them in the dataset internal variable.',ch10,&
+            'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
+            'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+            'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.',ch10,&
+            'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
+           ABI_COMMENT(msg)
+           print_comment_tolsym=0
+         endif
 
          call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
            nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
