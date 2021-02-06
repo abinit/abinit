@@ -105,7 +105,8 @@ module m_lgroup
    ! Anti-ferromagnetic character associated to symrec_lg
 
    integer,allocatable :: bz2ibz_smap(:,:)
-   ! bz2ibz_smap(6, nbz) Mapping BZ --> IBZ(q)
+   ! bz2ibz_smap(6, nbz)
+   ! Mapping BZ --> IBZ(q)
    ! Note that here we used the symmetries of the little group.
 
    integer, allocatable :: lgsym2glob(:, :)

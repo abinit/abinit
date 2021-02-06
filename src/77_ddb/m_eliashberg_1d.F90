@@ -111,10 +111,10 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
  nmatsu = 50
 !write(std_out,*) ' eliashberg_1d : nmatsu = ', nmatsu
 
- ABI_ALLOCATE(lambda_1d,(-nmatsu:nmatsu))
- ABI_ALLOCATE(z_1d,(-nmatsu:nmatsu))
- ABI_ALLOCATE(delta_1d,(-nmatsu:nmatsu))
- ABI_ALLOCATE(mm_1d,(-nmatsu:nmatsu,-nmatsu:nmatsu))
+ ABI_MALLOC(lambda_1d,(-nmatsu:nmatsu))
+ ABI_MALLOC(z_1d,(-nmatsu:nmatsu))
+ ABI_MALLOC(delta_1d,(-nmatsu:nmatsu))
+ ABI_MALLOC(mm_1d,(-nmatsu:nmatsu,-nmatsu:nmatsu))
 
  unit_lam=get_unit()
  fname=trim(elph_ds%elph_base_name) // "_LAM"
@@ -220,10 +220,10 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
    write(std_out,*) 'Eliashberg Tc nonetheless = ', tc, ' (Ha) = ', tc/kb_HaK, ' (K)'
  end if
 
- ABI_DEALLOCATE(lambda_1d)
- ABI_DEALLOCATE(z_1d)
- ABI_DEALLOCATE(delta_1d)
- ABI_DEALLOCATE(mm_1d)
+ ABI_FREE(lambda_1d)
+ ABI_FREE(z_1d)
+ ABI_FREE(delta_1d)
+ ABI_FREE(mm_1d)
 
  close (UNIT=unit_z)
  close (UNIT=unit_lam)

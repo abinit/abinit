@@ -1,0 +1,73 @@
+# Computation of the Fermi contact term at the atomic sites in \alpha-Sn
+# Nonmetallic form of tin
+
+prtfc 1 # requests Fermi contact at each nuclear site
+
+#Definition of the unit cell
+
+acell    3*12.262810608      # each primitive vector in rprim is scaled
+                             # by its value in acell, to give internally
+                             # cell vectors dimensioned as length in atomic units
+
+# a-Sn has a cubic conventional cell, so the primitive cell 
+# has 60 deg angles
+rprim    0.000000000000000   0.500000000000000   0.500000000000000 
+         0.500000000000000   0.000000000000000   0.500000000000000 
+         0.500000000000000   0.500000000000000   0.000000000000000 
+
+#Definition of the atom types and pseudopotentials
+ntypat 1 # one types of atom
+znucl 50 # atomic number of atoms, will be cross checked against pseudopotential files
+           # here Tin (50) is the atom type
+pp_dirpath "$ABI_PSPDIR" # pseudopotential directory
+pseudos "Pseudodojo_paw_pbe_standard/Sn-sp.xml"
+
+#Definition of the atoms
+natom 2 # 2 atoms in the primitive unit cell
+typat    1 1  # atoms listed as Sn Sn
+# next are the atomic positions
+# xred gives them in units of the cell translation vectors, as is commonly
+# done in crystallography
+xred     0.000000000000000   0.000000000000000   0.000000000000000 
+         0.250000000000000   0.250000000000000   0.250000000000000 
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 15 # plane wave cutoff energy, always need to check convergence of ecut in real runs
+pawecutdg 20 # cutoff energy for PAW fine grid
+ngkpt 4 4 4  # Parameters of Monkhorst-Pack kpoint grid. Convergence should be checked for
+             # this parameter as well.
+nshiftk 4 # the default M-P shift of 1/2, 1/2, 1/2 breaks the symmetry of the
+          # reciprocal lattice but these shifts preserve it. See the abinit
+          # documentation for the shiftk input variable
+shiftk
+0.5 0.5 0.5
+0.5 0.0 0.0
+0.0 0.5 0.0
+0.0 0.0 0.5
+
+#Parameters for the SCF procedure
+nstep 10
+tolvrs 1.0D-18
+
+# suppress printing of density, wavefunctions, etc for this tutorial
+prtden 0
+prtwf 0
+prteig 0
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tnuc_3.abo, tolnlines=  3, tolabs=  6.000e-10, tolrel=  3.000e-10
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = 
+#%% topics = SmartSymm
+#%%<END TEST_INFO>

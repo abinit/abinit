@@ -267,7 +267,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ABI_CHECK(nfftot_osc==PRODUCT(ngfft_osc(1:3)),"mismatch in FFT size")
 
  if (Wfd%nsppol==2) then
-   MSG_WARNING("nsppol==2 is still under testing")
+   ABI_WARNING("nsppol==2 is still under testing")
  end if
  !
  ! MPI variables.
@@ -400,7 +400,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  if (my_rank==master) then
 
    if (open_file(fname,msg,newunit=bsh_unt,form="unformatted",action="write") /= 0) then
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
    end if
    call exc_write_bshdr(bsh_unt,Bsp,Hdr_bse)
    ! To force the writing (needed for MPI-IO).
@@ -408,7 +408,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
    if (.not.use_mpiio) then ! Reopen the file and skip the header.
      if (open_file(fname,msg,newunit=bsh_unt,form="unformatted",action="readwrite") /= 0) then
-        MSG_ERROR(msg)
+        ABI_ERROR(msg)
      end if
      call exc_skip_bshdr(bsh_unt,ierr)
    end if
@@ -418,15 +418,15 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ii = LEN_TRIM(fname)
      tmpfname(ii-2:ii+1) = 'ABSR'
      if (open_file(tmpfname,msg,newunit=a_unt,form='unformatted',action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      tmpfname(ii-2:ii+1) = 'BBSR'
      if (open_file(tmpfname,msg,newunit=b_unt,form='unformatted',action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      tmpfname(ii-2:ii+1) = 'CBSR'
      if (open_file(tmpfname,msg,newunit=c_unt,form='unformatted',action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call exc_write_bshdr(a_unt,Bsp,Hdr_bse)
      call exc_write_bshdr(b_unt,Bsp,Hdr_bse)
@@ -437,17 +437,17 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      if (.not.use_mpiio) then ! Reopen the file and skip the header.
        tmpfname(ii-2:ii+1) = 'ABSR'
        if (open_file(tmpfname,msg,newunit=a_unt,form='unformatted',action="readwrite") /= 0) then
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
        end if
        call exc_skip_bshdr(a_unt,ierr)
        tmpfname(ii-2:ii+1) = 'BBSR'
        if (open_file(tmpfname,msg,newunit=b_unt,form='unformatted',action="readwrite") /= 0) then
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
        end if
        call exc_skip_bshdr(b_unt,ierr)
        tmpfname(ii-2:ii+1) = 'CBSR'
        if (open_file(tmpfname,msg,newunit=c_unt,form='unformatted',action="readwrite") /= 0) then
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
        end if
        call exc_skip_bshdr(c_unt,ierr)
      end if
@@ -536,11 +536,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    my_hsize = hsize_of(my_rank)
    if (my_hsize<=0) then
      write(msg,'(a,i0)')"Wrong number of transitions: my_hsize= ",my_hsize
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (my_hsize /= INT(my_hsize,KIND=i4b)) then
      write(msg,'(a,i0)')"Size of local block too large for a default integer, Increase the number of CPUs: my_hsize= ",my_hsize
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    my_cols=0
@@ -888,7 +888,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
                  if (ir<t_start(my_rank).or.ir>t_stop(my_rank)) then
                    write(msg,'(a,3(1x,i0))')" Gonna SIGFAULT, ir, t_start, t_stop ",ir,t_start(my_rank),t_stop(my_rank)
-                   MSG_ERROR(msg)
+                   ABI_ERROR(msg)
                  end if
                  !ABI_CHECK(itp >= it,"itp < it")
 
@@ -971,7 +971,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ierr = SUM(SUM(ttp_check,DIM=2),DIM=1)
      if (ierr/=my_hsize) then
        write(msg,'(a,2i0)')"ierr/=my_hsize",ierr,my_hsize
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      ABI_FREE(ttp_check)
 #endif
@@ -1022,7 +1022,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
        end do
      else
-        MSG_ERROR("iq_ibz should be 1")
+        ABI_ERROR("iq_ibz should be 1")
      end if
 
      do itp=1,BSp%nreh(block) ! Loop over transition tp = (kp,vp,cp,spin2)
@@ -1186,7 +1186,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 #ifdef HAVE_MPI_IO
      ! Write the Hamiltonian with collective MPI-IO.
      if (BSp%prep_interp) then
-       MSG_ERROR("Preparation of interpolation technique not yet coded with MPI-IO")
+       ABI_ERROR("Preparation of interpolation technique not yet coded with MPI-IO")
      end if
      ABI_CHECK(nsppol==1,"nsppol==2 not coded, offset is wrong")
      !
@@ -1197,7 +1197,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        write(msg,"(3a)")&
 &        "Global position index cannot be stored in a standard Fortran integer. ",ch10,&
 &        "BSE matrix cannot be written with a single MPI-IO call. "
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      !
      ! Each node uses a different offset to skip the header and the blocks written by the other CPUs.
@@ -1210,7 +1210,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ABI_CHECK_MPI(mpi_err,"MPI_TYPE_FREE")
 
      if (hsize_of(my_rank) /= INT(hsize_of(my_rank),kind=i4b) ) then
-       MSG_ERROR("Wraparound error")
+       ABI_ERROR("Wraparound error")
      end if
 
      tmp_size = INT(hsize_of(my_rank))
@@ -1230,7 +1230,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ABI_CHECK(ierr==0,"Error while writing Fortran markers")
      ABI_FREE(bsize_frecord)
 #else
-     MSG_BUG("You should not be here!")
+     ABI_BUG("You should not be here!")
 #endif
    else
      ! Use FORTRAN IO with sequential access mode.
@@ -1365,7 +1365,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          end if
          if (iend/=hsize_of(sender)) then
            write(msg,'(2(a,i0))')" Wraparound error: iend=",iend," my_hsize=",hsize_of(sender)
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          ABI_SFREE(prev_col)
          if (BSp%prep_interp) then
@@ -1420,7 +1420,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    my_cols(1) = col_start(my_rank)
    my_cols(2) = col_stop (my_rank)
    if (my_cols(2)-my_cols(1)<=0) then
-     MSG_ERROR("One of the processors has zero columns!")
+     ABI_ERROR("One of the processors has zero columns!")
    end if
 
    ABI_MALLOC(ncols_of,(0:nproc-1))
@@ -1461,7 +1461,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
        end do
      else
-        MSG_ERROR("iq_ibz should be 1")
+        ABI_ERROR("iq_ibz should be 1")
      end if
 
      do itp=1,neh2 ! Loop over transition tp = (kp,vp,cp,spin2)
@@ -1558,7 +1558,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ABI_CHECK(ierr==0,"Error while writing Fortran markers")
      ABI_FREE(bsize_frecord)
 #else
-     MSG_BUG("You should not be here")
+     ABI_BUG("You should not be here")
 #endif
    else
      ! Use FORTRAN IO with sequential access mode.
@@ -1901,7 +1901,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
        vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
      end do
    else
-      MSG_ERROR("iq_ibz should be 1")
+      ABI_ERROR("iq_ibz should be 1")
    end if
 
    do itp=1,BSp%nreh(block) ! Loop over transition tp = (kp,vp,cp,spin2)
@@ -1982,7 +1982,7 @@ if (nsppol==2) then
  my_cols(1) = col_start(my_rank)
  my_cols(2) = col_stop (my_rank)
  if (my_cols(2)-my_cols(1)<=0) then
-   MSG_ERROR("One of the processors has zero columns!")
+   ABI_ERROR("One of the processors has zero columns!")
  end if
 
  ABI_MALLOC(ncols_of,(0:nproc-1))
@@ -2020,7 +2020,7 @@ if (nsppol==2) then
        vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
      end do
    else
-      MSG_ERROR("iq_ibz should be 1")
+      ABI_ERROR("iq_ibz should be 1")
    end if
 
    do itp=1,neh2 ! Loop over transition tp = (kp,vp,cp,spin2)
@@ -2160,7 +2160,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  ABI_CHECK(nfftot_osc==PRODUCT(ngfft_osc(1:3)),"mismatch in FFT size")
 
  if (BSp%have_complex_ene) then
-   MSG_ERROR("Complex energies are not supported yet")
+   ABI_ERROR("Complex energies are not supported yet")
  end if
 
  ! Do we have to compute some block?

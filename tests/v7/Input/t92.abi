@@ -1,0 +1,29 @@
+t92o            # Name of output file
+0               # binary (0) or ascii (1) output
+t90o_DS6_WFK   # GS wavefunction file
+0  9  9       # number of 1WF files, of GKK files, and of perturbations in the GKK files
+t90o_DS7_GKK1  # names of the 1WF then the (eventual) GKK files
+t90o_DS7_GKK2
+t90o_DS7_GKK3
+t90o_DS8_GKK1
+t90o_DS8_GKK2
+t90o_DS8_GKK3
+t90o_DS9_GKK1
+t90o_DS9_GKK2
+t90o_DS9_GKK3
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrggkk
+#%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
+#%% [files]
+#%% files_to_test = 
+#%%  t92.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors =  B. Xu
+#%% keywords = 
+#%% description = mrggkk of test 90
+#%% topics = ElPhonInt
+#%%<END TEST_INFO>

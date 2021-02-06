@@ -583,7 +583,7 @@ contains !===========================================================
       &    'ERROR: negative coordination!!! ',ch10,&
       &    'coord = ', coordatom_i,ch10,&
       &    'The coordination cannot be negative!'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
 
   elseif (coordatom_i < nsU) then
 
@@ -656,7 +656,7 @@ contains !===========================================================
       &    'ERROR: negative coordination!!! ',ch10,&
       &    'coord = ', coordatom_i,ch10,&
       &    'The coordination cannot be negative!'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
 
   elseif (coordatom_i < nsU) then
 

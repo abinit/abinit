@@ -1,0 +1,56 @@
+# Hydrogen diatomic molecule for tests--constrained DFT
+
+ ndtset 4
+
+#Constrained DFT data
+ constraint_kind2   10    0  # Dataset 2 is constrained DFT for the charge on atom 1
+ chrgat2           0.5  0.0
+ ratsph2           1.0  1.0  # Non-overlapping spheres
+
+ constraint_kind3   10   10  # Dataset 3 is constrained DFT for the charge on both atoms
+ chrgat3           0.0  0.0  # Impose neutrality of atoms 
+ ratsph3           2.0  2.0  # Overlapping spheres are treated correctly
+
+ constraint_kind4   10   10  # Dataset 4 is constrained DFT for the charge on both atoms
+ chrgat4          -0.1  0.1  # Create charge imbalance
+ ratsph4           2.0  2.0  # Overlapping spheres are treated correctly
+
+
+ magcon_lambda      2
+
+#System description
+ acell 15 10 10
+ ntypat  2     # IMPORTANT : one needs to define two kinds of atoms, despite that both are hydrogen,
+               # in order to constrain the charge for atom 1, and not to impose a constraint for atom 2 !
+ znucl  1.0 1.0
+ natom 2
+ typat  1 2
+
+ nband 1
+
+ xcart    -1.1  0.0 0.0
+           1.1  0.0 0.0
+
+#Computational parameters
+ tolwfr 1.0d-14
+ nstep  20
+ ecut 5
+
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
+ pseudos "1h.pspnc, 1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t24.abo, tolnlines = 2, tolabs = 2.2e-9, tolrel = 1.0e-9
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% references = 
+#%% keywords = 
+#%% description = H2 diatomic molecule, static, to check the constrained DFT implementation with constrained charges 
+#%%  Constrain the charge around atom 1 to the value 0.5, then work with both atoms and larger spheres
+#%%<END TEST_INFO>

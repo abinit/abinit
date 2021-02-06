@@ -394,29 +394,29 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !Error(s) on incorrect input
  if (hamk%useylm==0) then
    if (paw_opt>0) then
-     MSG_BUG('When paw_opt>0 you must use ylm version of nonlop! Set useylm 1.')
+     ABI_BUG('When paw_opt>0 you must use ylm version of nonlop! Set useylm 1.')
    end if
    if (cpopt/=-1) then
-     MSG_BUG('If useylm=0, ie no PAW, then cpopt/=-1 is not allowed !')
+     ABI_BUG('If useylm=0, ie no PAW, then cpopt/=-1 is not allowed !')
    end if
    if (hamk%dimekbq/=1) then
-     MSG_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
+     ABI_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
    end if
    if (hamk%use_gpu_cuda/=0) then
-     MSG_BUG('When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.')
+     ABI_BUG('When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.')
    end if
  end if
  if (hamk%use_gpu_cuda/=0.and.hamk%dimekbq/=1) then
-   MSG_BUG('GPU version of nonlop not compatible with a exp(-iqR) phase!')
+   ABI_BUG('GPU version of nonlop not compatible with a exp(-iqR) phase!')
  end if
  if ((.not.associated(hamk%kg_k)).or.(.not.associated(hamk%kg_kp))) then
-   MSG_BUG('kg_k/kg_kp should be associated!')
+   ABI_BUG('kg_k/kg_kp should be associated!')
  end if
  if ((.not.associated(hamk%ffnl_k)).or.(.not.associated(hamk%ffnl_kp))) then
-   MSG_BUG('ffnl_k/ffnl_kp should be associated!')
+   ABI_BUG('ffnl_k/ffnl_kp should be associated!')
  end if
 !if (hamk%istwf_k/=hamk%istwf_kp) then
-!  MSG_BUG('istwf has to be the same for both k-points.')
+!  ABI_BUG('istwf has to be the same for both k-points.')
 !end if
 
 !Select k-dependent objects according to select_k input parameter
@@ -497,44 +497,44 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  dimffnlin=size(ffnlin,2);dimffnlout=size(ffnlout,2)
  kpgin_allocated=(.not.associated(kpgin))
  if (kpgin_allocated) then
-   ABI_ALLOCATE(kpgin,(npwin,0))
+   ABI_MALLOC(kpgin,(npwin,0))
  end if
  kpgout_allocated=(.not.associated(kpgout))
  if (kpgout_allocated) then
-   ABI_ALLOCATE(kpgout,(npwout,0))
+   ABI_MALLOC(kpgout,(npwout,0))
  end if
 
 !Check some sizes for safety
 !if (paw_opt==0.or.cpopt<2.or.((cpopt==2.or.cpopt==3).and.choice>1)) then
  if (size(ffnlin,1)/=npwin.or.size(ffnlin,3)/=hamk%lmnmax) then
    msg = 'Incorrect size for ffnlin!'
-!   MSG_BUG(msg)
+!   ABI_BUG(msg)
  end if
  if(signs==2) then
    if (size(ffnlout,1)/=npwout.or.size(ffnlout,3)/=hamk%lmnmax) then
-     MSG_BUG('Incorrect size for ffnlout!')
+     ABI_BUG('Incorrect size for ffnlout!')
    end if
  end if
 !This test is OK only because explicit sizes are passed to nonlop_* routines
  if (size(vectin)<2*npwin*my_nspinor*ndat) then
-   MSG_BUG('Incorrect size for vectin!')
+   ABI_BUG('Incorrect size for vectin!')
  end if
  if(choice/=0.and.signs==2) then
    if(paw_opt/=3) then
 !    This test is OK only because explicit sizes are passed to nonlop_* routines
      if (size(vectout)<2*npwout*my_nspinor*ndat) then
-       MSG_BUG('Incorrect size for vectout!')
+       ABI_BUG('Incorrect size for vectout!')
      end if
    end if
    if(paw_opt>=3) then
      if (size(svectout)<2*npwout*my_nspinor*ndat) then
-       MSG_BUG('Incorrect size for svectout!')
+       ABI_BUG('Incorrect size for svectout!')
      end if
    end if
  end if
  if(cpopt>=0) then
    if (size(cprjin)/=hamk%natom*my_nspinor*ndat) then
-     MSG_BUG('Incorrect size for cprjin!')
+     ABI_BUG('Incorrect size for cprjin!')
    end if
  end if
 
@@ -559,35 +559,35 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    iatm=hamk%atindx(iatom_only_);itypat=hamk%typat(iatom_only_)
    natom_=1 ; ntypat_=1 ; dimenl2_=1 ; matblk_=1
    nloalg_(:)=hamk%nloalg(:)
-   ABI_ALLOCATE(atindx1_,(1))
-   ABI_ALLOCATE(nattyp_,(1))
+   ABI_MALLOC(atindx1_,(1))
+   ABI_MALLOC(nattyp_,(1))
    atindx1_(1)=1 ; nattyp_(1)=1
 !  Store at the right place the 1d phases
    n1=hamk%ngfft(1);n2=hamk%ngfft(2);n3=hamk%ngfft(3)
-   ABI_ALLOCATE(ph1d_,(2,(2*n1+1)+(2*n2+1)+(2*n3+1)))
+   ABI_MALLOC(ph1d_,(2,(2*n1+1)+(2*n2+1)+(2*n3+1)))
    shift1=(iatm-1)*(2*n1+1)
    ph1d_(:,1:2*n1+1)=hamk%ph1d(:,1+shift1:2*n1+1+shift1)
    shift2=(iatm-1)*(2*n2+1)+hamk%natom*(2*n1+1)
    ph1d_(:,1+2*n1+1:2*n2+1+2*n1+1)=hamk%ph1d(:,1+shift2:2*n2+1+shift2)
    shift3=(iatm-1)*(2*n3+1)+hamk%natom*(2*n1+1+2*n2+1)
    ph1d_(:,1+2*n1+1+2*n2+1:2*n3+1+2*n2+1+2*n1+1)=hamk%ph1d(:,1+shift3:2*n3+1+shift3)
-   ABI_ALLOCATE(phkxredin_,(2,1))
-   ABI_ALLOCATE(phkxredout_,(2,1))
+   ABI_MALLOC(phkxredin_,(2,1))
+   ABI_MALLOC(phkxredout_,(2,1))
    phkxredin_(:,1)=phkxredin(:,iatm)
    phkxredout_(:,1)=phkxredout(:,iatm)
-   ABI_ALLOCATE(ph3din_,(2,npwin,1))
-   ABI_ALLOCATE(ph3dout_,(2,npwout,1))
+   ABI_MALLOC(ph3din_,(2,npwin,1))
+   ABI_MALLOC(ph3dout_,(2,npwout,1))
    if (force_recompute_ph3d.or.hamk%matblk<hamk%natom) then
      nloalg_(2)=-abs(nloalg_(2)) !Will compute the 3D phase factors inside nonlop
    else
      ph3din_(:,1:npwin,1)=ph3din(:,1:npwin,iatm)
      ph3dout_(:,1:npwout,1)=ph3dout(:,1:npwout,iatm)
    end if
-   ABI_ALLOCATE(ffnlin_,(npwin,dimffnlin,hamk%lmnmax,1))
-   ABI_ALLOCATE(ffnlout_,(npwout,dimffnlout,hamk%lmnmax,1))
+   ABI_MALLOC(ffnlin_,(npwin,dimffnlin,hamk%lmnmax,1))
+   ABI_MALLOC(ffnlout_,(npwout,dimffnlout,hamk%lmnmax,1))
    ffnlin_(:,:,:,1)=ffnlin(:,:,:,itypat)
    ffnlout_(:,:,:,1)=ffnlout(:,:,:,itypat)
-   ABI_DATATYPE_ALLOCATE(cprjin_,(1,my_nspinor*((cpopt+5)/5)))
+   ABI_MALLOC(cprjin_,(1,my_nspinor*((cpopt+5)/5)))
    if (cpopt>=0) then
      nlmn_atm(1)=cprjin(iatm,1)%nlmn
      ncpgr_atm=cprjin(iatm,1)%ncpgr
@@ -600,7 +600,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      end do
    end if
    if (size(enl_ptr)>0) then
-     ABI_ALLOCATE(enl_,(size(enl_ptr,1),1,hamk%nspinor**2,size(enl_ptr,4)))
+     ABI_MALLOC(enl_,(size(enl_ptr,1),1,hamk%nspinor**2,size(enl_ptr,4)))
      do ii=1,size(enl_ptr,4)
        do ispden=1,hamk%nspinor**2
          if (dimenl2==hamk%natom .and. hamk%usepaw==1) then
@@ -613,18 +613,18 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
        end do
      end do
    else
-     ABI_ALLOCATE(enl_,(0,0,0,0))
+     ABI_MALLOC(enl_,(0,0,0,0))
    end if
    if (allocated(hamk%sij)) then
      dimsij=size(hamk%sij,1)
-     ABI_ALLOCATE(sij_,(dimsij,1))
+     ABI_MALLOC(sij_,(dimsij,1))
      if (size(hamk%sij,2)==hamk%ntypat) then
        sij_(:,1)=hamk%sij(:,itypat)
      else if (size(hamk%sij)>0) then
        sij_(:,1)=hamk%sij(:,1)
      end if
    end if
-   ABI_ALLOCATE(indlmn_,(6,hamk%lmnmax,1))
+   ABI_MALLOC(indlmn_,(6,hamk%lmnmax,1))
    indlmn_(:,:,1)=hamk%indlmn(:,:,itypat)
 
  else
@@ -645,8 +645,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    indlmn_     => hamk%indlmn
    if (force_recompute_ph3d) then
      nloalg_(2)=-abs(nloalg_(2)) !Will compute the 3D phase factors inside nonlop
-     ABI_ALLOCATE(ph3din_,(2,npwin,hamk%matblk))
-     ABI_ALLOCATE(ph3dout_,(2,npwout,hamk%matblk))
+     ABI_MALLOC(ph3din_,(2,npwin,hamk%matblk))
+     ABI_MALLOC(ph3dout_,(2,npwout,hamk%matblk))
    else
      ph3din_     => ph3din
      ph3dout_    => ph3dout
@@ -761,30 +761,30 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if (cpopt>=0) then
      call pawcprj_free(cprjin_)
    end if
-   ABI_DEALLOCATE(atindx1_)
-   ABI_DEALLOCATE(nattyp_)
-   ABI_DEALLOCATE(ph1d_)
-   ABI_DEALLOCATE(ph3din_)
-   ABI_DEALLOCATE(ph3dout_)
-   ABI_DEALLOCATE(phkxredin_)
-   ABI_DEALLOCATE(phkxredout_)
-   ABI_DEALLOCATE(ffnlin_)
-   ABI_DEALLOCATE(ffnlout_)
-   ABI_DEALLOCATE(enl_)
-   ABI_DEALLOCATE(indlmn_)
-   ABI_DATATYPE_DEALLOCATE(cprjin_)
+   ABI_FREE(atindx1_)
+   ABI_FREE(nattyp_)
+   ABI_FREE(ph1d_)
+   ABI_FREE(ph3din_)
+   ABI_FREE(ph3dout_)
+   ABI_FREE(phkxredin_)
+   ABI_FREE(phkxredout_)
+   ABI_FREE(ffnlin_)
+   ABI_FREE(ffnlout_)
+   ABI_FREE(enl_)
+   ABI_FREE(indlmn_)
+   ABI_FREE(cprjin_)
    if (allocated(hamk%sij)) then
-     ABI_DEALLOCATE(sij_)
+     ABI_FREE(sij_)
    end if
  else if (force_recompute_ph3d) then
-   ABI_DEALLOCATE(ph3din_)
-   ABI_DEALLOCATE(ph3dout_)
+   ABI_FREE(ph3din_)
+   ABI_FREE(ph3dout_)
  end if
  if (kpgin_allocated) then
-   ABI_DEALLOCATE(kpgin)
+   ABI_FREE(kpgin)
  end if
  if (kpgout_allocated) then
-   ABI_DEALLOCATE(kpgout)
+   ABI_FREE(kpgout)
  end if
 
  call timab(220+tim_nonlop,2,tsec)
@@ -989,27 +989,27 @@ end subroutine nonlop
 !Error on bad choice
  if ((choice<0 .or. choice>3).and. choice/=23 .and. choice/=24) then
    write(msg,'(a,i0,a)')'Does not presently support this choice=',choice,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (cpopt<-1.or.cpopt>1) then
    msg='  Bad value for cpopt !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (nspinor==2) then
    msg='  nspinor=2 (spinorial WF) not yet allowed !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if ((cpopt==0).or.(cpopt==1))  then
-   ABI_ALLOCATE(proj,(2,lmnmax*natom))
+   ABI_MALLOC(proj,(2,lmnmax*natom))
    proj=zero;
  end if
 
 !Workaround to get choice=1/signs=1 working
  if (choice==1.and.signs==1) then
    signs_=2
-   ABI_ALLOCATE(vectout_,(2,npwin*nspinor))
-   ABI_ALLOCATE(svectout_,(2,npwin*nspinor*(paw_opt/3)))
+   ABI_MALLOC(vectout_,(2,npwin*nspinor))
+   ABI_MALLOC(svectout_,(2,npwin*nspinor*(paw_opt/3)))
  else
    signs_=signs;vectout_=>vectout;svectout_=>svectout
  end if
@@ -1031,8 +1031,8 @@ end subroutine nonlop
    else
      call dotprod_g(enlout(1),doti,istwf_k,npwin*nspinor,1,vectin,svectout_,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
    end if
-   ABI_DEALLOCATE(vectout_)
-   ABI_DEALLOCATE(svectout_)
+   ABI_FREE(vectout_)
+   ABI_FREE(svectout_)
  else
    nullify(vectout_,svectout_)
  end if
@@ -1050,7 +1050,7 @@ end subroutine nonlop
        end do
      end do
    end do
-   ABI_DEALLOCATE(proj)
+   ABI_FREE(proj)
  end if
 
  DBG_EXIT("COLL")

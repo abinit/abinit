@@ -1,5 +1,5 @@
 ---
-authors: BAmadon
+authors: BAmadon, OGingras
 ---
 
 # Tutorial on DFT+DMFT
@@ -21,7 +21,7 @@ variables common to DFT+_U_ and DFT+DMFT.
 This tutorial should take about one hour to complete
 (less if you have access to several processors).
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 The DFT+DMFT method: summary and key parameters
 
@@ -48,8 +48,6 @@ Several parameters (both physical and technical) needs to be discussed for a DFT
   * The definition of the Coulomb and exchange interaction U and J are done as in DFT+_U_ through the variables [[upawu]] and [[jpawu]].     They could be computed with the cRPA method, also available in ABINIT. The value of U and J should in principle depend
     on the definition of correlated orbitals. In this tutorial, U and J will be seen as parameters, as in the DFT+_U_ approach.
     As in DFT+_U_, two double counting methods are available (see the [[dmft_dc]] input variable).
-    Note that in version 7.10.5 (but not in later versions) [[jpawu]] = 0 is required if the density matrix
-    in the correlated subspace is not diagonal.
 
   * The choice of the double counting correction. The current default choice in ABINIT is ([[dmft_dc]] = 1)
     which corresponds to the full localized limit.
@@ -74,25 +72,24 @@ Several parameters (both physical and technical) needs to be discussed for a DFT
 *You might create a subdirectory of the *\$ABI_TESTS/tutoparal* directory, and use it for the tutorial.
 In what follows, the names of files will be mentioned as if you were in this subdirectory*
 
-Copy the files *tdmft_1.in* and *dmft_x.files* from *\$ABI_TESTS/tutoparal* in your Work
+Copy the file *tdmft_1.abi* from *\$ABI_TESTS/tutoparal* in your Work
 directory,
 
 ```sh
 cd $ABI_TESTS/tutoparal/Input
 mkdir Work_dmft
 cd Work_dmft
-cp ../tdmft_x.files .
-cp ../tdmft_1.in .
+cp ../tdmft_1.abi .
 ```
 
-{% dialog tests/tutoparal/Input/tdmft_x.files tests/tutoparal/Input/tdmft_1.in %}
+{% dialog tests/tutoparal/Input/tdmft_1.abi %}
 
-Then edit the *tdmft_x.files* and run ABINIT with:
+Then run ABINIT with:
 
-    mpirun -n 32 abinit < tdmft_x.files > log_1 &
+    mpirun -n 24 abinit  tdmft_1.abi > log_1 &
 
 This run should take some time. It is recommended that you use at least 10
-processors (and 32 should be fast). It calculates the LDA ground state of
+processors (and 24 should be fast). It calculates the LDA ground state of
 SrVO3 and compute the band structure in a second step.
 
 The variable [[pawfatbnd]] allows to create files with "fatbands" (see description of the
@@ -131,7 +128,7 @@ _p_. However, we clearly see an important hybridization. The Fermi level (at 0
 eV) is in the middle of bands 21-23.
 
 One can easily check that bands 21-23 are mainly _d-t 2g_ and bands 24-25 are
-mainly _e<sub>g</sub>_: just use [[pawfatbnd]] = 2 in *tdmft_1.in* and relaunch the calculations.
+mainly _e<sub>g</sub>_: just use [[pawfatbnd]] = 2 in *tdmft_1.abi* and relaunch the calculations.
 Then the file *tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m-2*,
 *tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m-1* and
 *tdmft_1o_DS2_FATBANDS_at0001_V_is1_l2_m1* give you respectively the _xy_, _yz_ and
@@ -165,19 +162,19 @@ orbitals. For this, we will use Wannier functions.
 
 As we have seen in the orbitally resolved fatbands, the Kohn Sham wave
 function contains a important weight of _t<sub>2g</sub>_ atomic orbitals mainly in _t
-2g_-like bands but also in oxygen bands.
+<sub>2g</sub>_-like bands but also in oxygen bands.
 
 So, we can use only the _t<sub>2g</sub>_-like bands to define Wannier functions or also
 both the _t<sub>2g</sub>_-like and _O-p_ -like bands.
 
-The first case corresponds to the input file *tdmft_2.in*. In this case
+The first case corresponds to the input file *tdmft_2.abi*. In this case
 [[dmftbandi]] = 21 and [[dmftbandf]] = 23. As we only put the electron interaction
 on _t<sub>2g</sub>_ orbitals, we have to use first [[lpawu]] = 2, but also the keyword
 [[dmft_t2g]] = 1 in order to restrict the application of interaction on _t<sub>2g</sub>_ orbitals.
 
 Notice also that before launching a DMFT calculation, the LDA should be
 perfectly converged, including the empty states (check nline and nnsclo in the
-input file). The input file *tdmft_2.in* thus contains two datasets: the first
+input file). The input file *tdmft_2.abi* thus contains two datasets: the first
 one is a well converged LDA calculation, and the second is the DFT+DMFT calculation.
 
 Notice the other dmft variables used in the input file and check their meaning
@@ -197,7 +194,7 @@ Let's now discuss the value of the effective Coulomb interaction U ([[upawu]])
 and J ([[jpawu]]). The values of U and J used in ABINIT in DMFT use the same
 convention as in DFT+_U_ calculations in ABINIT (cf [[cite:Amadon2008a]]). However,
 calculations in Ref. [[cite:Amadon2008]] use for U and J the usual convention for
-_t 2g _ systems as found in [[cite:Lechermann2006]], Eq. 26 (see also the appendix
+_t<sub>2g</sub>_ systems as found in [[cite:Lechermann2006]], Eq. 26 (see also the appendix
 in [[cite:Fresard1997]]). It corresponds to the Slater integral F4=0 and we can
 show that U_abinit=U-4/3 J and J_abinit=7/6 J. So in order to use U = 4 eV and
 J=0.65 eV with these latter conventions (as in [[cite:Amadon2008]]), we have to use
@@ -205,12 +202,12 @@ in ABINIT: [[upawu]] = 3.13333 eV; [[jpawu]] = 0.75833 eV and [[f4of2_sla]] = 0.
 
 Now, you can launch the calculation:
 
-Copy the files *../Input/tdmft_2.in* and modify *tdmft_x.files* in your Work
+Copy the file *../Input/tdmft_2.abi* in your Work
 directory and run ABINIT:
 
-    mpirun -n 32 abinit < tdmft_x.files > log_2
+    mpirun -n 24 abinit tdmft_2.abi > log_2
 
-{% dialog tests/tutoparal/Input/tdmft_2.in %}
+{% dialog tests/tutoparal/Input/tdmft_2.abi %}
 
 
 ### 3.2. The DFT+DMFT calculation: the log file
@@ -231,18 +228,18 @@ computed (Eq.(2.1) in [[cite:Amadon2012]]) and unnormalized orbitals are built
 
       ------ Symetrised Occupation
 
-            0.11142  -0.00000  -0.00000
-           -0.00000   0.11142  -0.00000
-           -0.00000  -0.00000   0.11142
+            0.10480  -0.00000  -0.00000
+            0.00000   0.10480  -0.00000
+           -0.00000  -0.00000   0.10480
 
 
 and the Normalization of this orbital basis is
 
       ------ Symetrised Norm
 
-            0.65790   0.00000   0.00000
-            0.00000   0.65790   0.00000
-            0.00000   0.00000   0.65790
+            0.62039   0.00000   0.00000
+            0.00000   0.62039   0.00000
+            0.00000   0.00000   0.62039
 
 Now, let's compare these numbers to other quantities. If the preceding LDA
 calculation is converged, dmatpuopt=1 is used, and [[dmftbandi]]=1 and
@@ -259,23 +256,23 @@ condition is not fulfilled. Concerning the norm if these orbitals, two factors p
 
   * Secondly, the atomic orbitals used to do the projection are cut at the PAW radius.
     As a consequence, even if we would use a complete set of KS wavefunctions and thus the closure relation,
-    the norm could not be one. In our case, it could be at most 0.86852, which is the norm of the
+    the norm could not be one. In our case, it could be at most 0.84179, which is the norm of the
     truncated atomic function of _d_ orbitals of Vanadium used in this calculation.
     This number can be found in the log file by searching for ph0phiint (grep "ph0phiint(icount)= 1" log_2).
     (See also the discussion in Section B.3 of [[cite:Amadon2012]]).
 
 Next the LDA Green's function is computed.
 
-     =====  LDA Green Function Calculation
+     =====  DFT Green Function Calculation
 
 Then the Green's function is integrated to compute the occupation matrix.
 Interestingly, the density matrix here must be equal to the density matrix
 computed with the unnormalized correlated orbitals. If this is not the case,
 it means that the frequency grid is not sufficiently large. In our case, we find:
 
-            0.11143   0.00000   0.00000
-            0.00000   0.11143   0.00000
-            0.00000   0.00000   0.11143
+            0.10481  -0.00000  -0.00000
+           -0.00000   0.10481  -0.00000
+           -0.00000  -0.00000   0.10481
 
 So the error is very small (1.10E-5). As an exercise, you can decrease the
 number of frequencies and see that the error becomes larger.
@@ -283,13 +280,13 @@ number of frequencies and see that the error becomes larger.
 Then the true orthonormal Wannier functions are built and the Green's function
 is computed in this basis just after:
 
-     =====  LDA Green Function Calculation with renormalized psichi
+     =====  DFT Green Function Calculation with renormalized psichi
 
 The occupation matrix is now:
 
-            0.16937   0.00000  -0.00000
-            0.00000   0.16937   0.00000
-           -0.00000   0.00000   0.16937
+            0.16893   0.00000  -0.00000
+            0.00000   0.16893   0.00000
+           -0.00000   0.00000   0.16893
 
 We see that because of the orthonormalization of the orbitals necessary to
 built Wannier functions, the occupation matrix logically increases.
@@ -323,9 +320,9 @@ once before doing again the DFT Loop (cf Fig. 1 of [[cite:Amadon2012]]). At the 
 of the calculation, the occupation matrix is written and is:
 
               -- polarization spin component  1
-            0.16843   0.00000  -0.00000
-           -0.00000   0.16843  -0.00000
-           -0.00000   0.00000   0.16843
+            0.16811   0.00000  -0.00000
+            0.00000   0.16811  -0.00000
+           -0.00000  -0.00000   0.16811
 
 We can see that the total number of electron is very close to one and it does
 not change much as a function of iterations. As an output of the calculation,
@@ -456,34 +453,34 @@ hybridization, as a consequence, we will now built Wannier functions with a
 large window, by including oxygen _p_ -like bands in the definition of Wannier
 functions. Create a new input file:
 
-    cp tdmft_2.in tdmft_3.in
+    cp tdmft_2.abi tdmft_3.abi
 
-and use [[dmftbandi]] = 12 in *tdmft_3.in*. Now the code will built Wannier
+and use [[dmftbandi]] = 12 in *tdmft_3.abi*. Now the code will built Wannier
 functions with a larger window, including _O-p_ -like bands, and thus much
-more localized. Launch the calculation after having updated tdmft_x.files (if
+more localized. Launch the calculation (if
 the calculation is too long, you can decide to restart the second dataset
 directly from a converged LDA calculation instead of redoing the LDA
 calculation for each new DMFT calculation).
 
-    abinit < tdmft_x.files > log_3
+    abinit tdmft_3.abi > log_3
 
 In this case, both the occupation and the norm are larger because more states
 are taken into account: you have the occupation matrix which is
 
       ------ Symetrised Occupation
 
-            0.23573  -0.00000  -0.00000
-           -0.00000   0.23573  -0.00000
-           -0.00000  -0.00000   0.23573
+            0.22504  -0.00000  -0.00000
+           -0.00000   0.22504  -0.00000
+           -0.00000  -0.00000   0.22504
 
 
 and the norm is:
 
       ------ Symetrised Norm
 
-            0.78223   0.00000  -0.00000
-            0.00000   0.78223  -0.00000
-           -0.00000  -0.00000   0.78223
+            0.73746   0.00000  -0.00000
+            0.00000   0.73746  -0.00000
+           -0.00000  -0.00000   0.73746
 
 Let us now compare the total number of electron and the norm with the two energy window:
 
@@ -492,9 +489,9 @@ Let us now compare the total number of electron and the norm with the two energy
 Energy window:                           |   _t<sub>2g</sub>_-like bands |        _t<sub>2g</sub>_-like+ _O-p_ -like bands
 -----------------------------------------|-------------------------------|---------------------------------------------------
 [[dmftbandi]]/[[dmftbandf]]:                     |    21/23                      | 12/23
-Norm:                                    |  0.66                         |   0.78
-LDA Number of electrons (before ⊥):   |  0.66(=0.11*6)                |  1.42(=0.235*6)
-LDA Number of electrons (after  ⊥):   |    1.02                       |  1.81
+Norm:                                    |  0.63                         |   0.78
+LDA Number of electrons (before ⊥):   |  0.63(=0.105*6)                |  1.35(=0.235*6)
+LDA Number of electrons (after  ⊥):   |    1.00                       |  1.77
 
 </center>
 
@@ -507,16 +504,13 @@ means that by selecting bands 12-23 in the calculation, we took into account
 Sham bands. Moreover, after orthonormalization, you can check that the
 difference between LDA numbers of electrons is still large (1.02 versus 1.81),
 even if the orthonormalization effect is larger on the small windows case.
-Note that in this particular case, with diagonal matrix, the number of
-electrons before and after orthonormalization are simply linked by
-n_before/Norm=n_after, i.e. 1.81 ≈1.42/0.78 and 1.02≈0.66/0.66
 
 At the end of the DFT+DMFT calculation, the occupation matrix is written and is
 
               -- polarization spin component  1
-            0.29450   0.00000   0.00000
-            0.00000   0.29450   0.00000
-            0.00000   0.00000   0.29450
+            0.29313   0.00000   0.00000
+            0.00000   0.29313   0.00000
+            0.00000   0.00000   0.29313
 
 Similarly to the previous calculation, the spectral function can be plotted
 using the Maximum Entropy code: we find a spectral function with an
@@ -546,16 +540,16 @@ expressions are equals also in DFT+DMFT). So after gathering the data:
 
  Iteration |     Internal Energy (Ha)
 -----------|--------------------------
-      1    |  -1.51483736718814E+02
-      2    |  -1.51480860837124E+02
-      3    |  -1.51479980721122E+02
-      4    |  -1.51479456233951E+02
-      5    |  -1.51479511038784E+02
-      6    |  -1.51479570943715E+02
-      7    |  -1.51479487485907E+02
-      8    |  -1.51479539558451E+02
-      9    |  -1.51479457525225E+02
-     10    |  -1.51479582334490E+02
+      1    |  -1.51857850339126E+02
+      2    |  -1.51986727402835E+02
+      3    |  -1.51895311846530E+02
+      4    |  -1.51906820876597E+02
+      5    |  -1.51891956860157E+02
+      6    |  -1.51891135879190E+02
+      7    |  -1.51892587329592E+02
+      8    |  -1.51891607809905E+02
+      9    |  -1.51891447186423E+02
+     10    |  -1.51892343918492E+02
 
 </center>
 
@@ -573,32 +567,30 @@ than the tolerance, the calculation will never converge. So if a given
 precision on the total energy is expected, a practical solution is to increase
 the number of Quantum Monte Carlo steps ([[dmftqmc_n]]) in order to lower the
 statistical noise. Also another solution is to do an average over the last
-values of the internal energy. Note that in version 7.10.5, only the Internal
-energy has a physical meaning in DFT+DMFT and not Etotal or ETOT.
+values of the internal energy. 
 
 ## 6 Electronic Structure of SrVO3 in DFT+DMFT: Equilibrium volume
 
-We focus now on the total energy. Create a new input file, *tdmft_4.in*:
+We focus now on the total energy. Create a new input file, *tdmft_4.abi*:
 
-    cp tdmft_3.in tdmft_4.in
+    cp tdmft_3.abi tdmft_4.abi
 
 And use [[acell]] = 7.1605 instead of 7.2605. Relaunch the calculation and note the
-Internal energy (grep Internal tdmft_4.out).
+internal energy (grep internal tdmft_4.abo).
 
-Redo another calculation with [[acell]] = 7.00. Then extract the LDA Internal energy
-and the DMFT Internal energy (grep Internal tdmft_5.out).
+Redo another calculation with [[acell]] = 7.00. Plot DMFT energies as a function of acell.
 
 <center>
 
-acell  | Internal energy LDA  |  Internal energy DMFT
--------|----------------------|-------------------------
-7.0000 |  -151.51517          |     -151.4797
-7.1605 |  -151.52399          |     -151.4877
-7.2605 |  -151.51515          |     -151.4795
+acell  |  Internal energy DMFT
+-------|-------------------------
+7.0000 |     -151.8908
+7.1605 |     -151.8978
+7.2605 |     -151.8920
 
 </center>
 
-and then plot DMFT and LDA energies as a function of acell. You will notice
+You will notice
 that the equilibrium volume is very weakly modified by the strong correlations is this case.
 
 ## 7 Electronic Structure of SrVO3: k-resolved Spectral function
@@ -606,13 +598,13 @@ that the equilibrium volume is very weakly modified by the strong correlations i
 We are going to use OmegaMaxEnt to do the direct analytical continuation of the self-energy in Matsubara frequencies to real frequencies.
 (A more precise way to do the analytical continuation uses an auxiliary Green's function as mentionned in e.g. endnote 55
 of Ref. [[cite:Sakuma2013a]]).
-First of all, we are going to relaunch a more converged calculation using tdmft_5.in
+First of all, we are going to relaunch a more converged calculation using tdmft_5.abi
 
-{% dialog tests/tutoparal/Input/tdmft_5.in%}
+{% dialog tests/tutoparal/Input/tdmft_5.abi%}
 
-Modify tdmft_x.files and launch the calculation, it might take some time. The calculation takes in few minutes with 4 processors.
+Launch the calculation, it might take some time. The calculation takes in few minutes with 4 processors.
 
-    abinit < tdmft_x.files > log_5
+    abinit tdmft_5.abi > log_5
 
 We are going to create a new directory for the analytical continuation.
 
@@ -678,19 +670,19 @@ this matrix is just useless):
     cp tdmft_5o_DS2.UnitaryMatrix_for_DiagLevel_iatom0001 tdmft_5i_DS3.UnitaryMatrix_for_DiagLevel_iatom0001 
 
 Copy the Self energy in imaginary frequency for restart also (dmft_nwlo should be the same in the input
-file  tdmft_5.in and tdmft_2.in)
+file  tdmft_5.abi and tdmft_2.abi)
 
     cp tdmft_5o_DS2Self-omega_iatom0001_isppol1 tdmft_5o_DS3Self-omega_iatom0001_isppol1
     
 
-Then modify tdmft_5.in with
+Then modify tdmft_5.abi with
 
     ndtset 1
     jdtset 3
     
 and relaunch the calculation.
 
-    abinit < tdmft_x.files > log_5_dataset3
+    abinit tdmft_5.abi > log_5_dataset3
 
 
 Then the spectral function is obtained in file tdmft_5o_DS3_DFTDMFT_SpectralFunction_kresolved_from_realaxisself. You can copy

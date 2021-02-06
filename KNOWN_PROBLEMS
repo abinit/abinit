@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv9.3.2 is for development
+The present release ABINITv9.3.3 is for development
 
 0. List of platforms
 1. Batteries of tests
@@ -14,7 +14,7 @@ The present release ABINITv9.3.2 is for development
 ================================================================
 0. Platforms
 
-For ABINITv9.3.2, list closed on 2020 12 06
+For ABINITv9.3.3, list closed on 2021 01 05
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status

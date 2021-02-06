@@ -142,7 +142,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  end if
 
  if (inclvkb==1.and.usepaw==0) then
-   MSG_ERROR("inclvkb==1 not coded,using inclvkb==2")
+   ABI_ERROR("inclvkb==1 not coded,using inclvkb==2")
  end if
  !
  ! Calculate the matrix elements of ir in the IBZ.

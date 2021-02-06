@@ -92,15 +92,15 @@ CONTAINS  !===========================================================
   ! *********************************************************************
 
   mat_a_size = max(1,size(mat_a,dim=1))
-  ABI_ALLOCATE(ww,(mat_a_size))
-  ABI_ALLOCATE(uu,(mat_a_size,mat_a_size))
+  ABI_MALLOC(ww,(mat_a_size))
+  ABI_MALLOC(uu,(mat_a_size,mat_a_size))
 
   !Now it calculates the eigenvalues and eigenvectors of the matrix
   call ZGEEV('No left vectors','Vectors (right)',mat_a_size, mat_a, mat_a_size,ww,&
     vl,1,uu, mat_a_size, work, lwork, rwork, info)
   if (info/=0) then
    write(msg,'(a,i4)')'Wrong value for rwork ',info
-   MSG_BUG(msg)
+   ABI_BUG(msg)
   end if
 
   !!debbug
@@ -141,20 +141,20 @@ CONTAINS  !===========================================================
   call ZGETRF( mat_a_size, mat_a_size, uu,mat_a_size, ipvt, info )
   if (info/=0) then
    write(msg,'(a,i4)')'Wrong value for rwork ',info
-   MSG_BUG(msg)
+   ABI_BUG(msg)
   end if
 
   call ZGETRI( mat_a_size, uu, mat_a_size, ipvt, work, lwork, info )
   if (info/=0) then
    write(msg,'(a,i4)')'Wrong value for rwork ',info
-   MSG_BUG(msg)
+   ABI_BUG(msg)
   end if
 
   !(uu.exp(ww*factor)).uu-1
   mat_a = matmul(mat_a,uu)
 
-  ABI_DEALLOCATE(ww)
-  ABI_DEALLOCATE(uu)
+  ABI_FREE(ww)
+  ABI_FREE(uu)
 
  end subroutine exp_mat_cx
  !!***

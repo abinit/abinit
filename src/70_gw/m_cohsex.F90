@@ -267,11 +267,11 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
       if (.not.can_symmetrize(spin)) then
         write(msg,'(a,i0,4a)')" Symmetrization cannot be performed for spin: ",spin,ch10,&
 &         " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
-        MSG_WARNING(msg)
+        ABI_WARNING(msg)
       end if
     end do
    end if
-   if (nspinor == 2) MSG_WARNING('Symmetrization with nspinor=2 not implemented')
+   if (nspinor == 2) ABI_WARNING('Symmetrization with nspinor=2 not implemented')
  end if
 
  mod10=MOD(Sigp%gwcalctyp, 10)
@@ -290,7 +290,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  CASE (2)
    fact_sp=one; tol_empty=0.005   ! to be consistent and obtain similar results if a metallic
  CASE DEFAULT                     ! spin unpolarized system is treated using nsppol==2
-   MSG_BUG('Wrong nsppol')
+   ABI_BUG('Wrong nsppol')
  END SELECT
 
  call timab(442,1,tsec) ! csigme(init0)
@@ -302,7 +302,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ABI_MALLOC(irottb,(gwc_nfftot,Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,gwc_ngfft,irottb,iscompatibleFFT)
  if (.not.iscompatibleFFT) then
-   MSG_WARNING("FFT mesh is not compatible with symmetries. Results might be affected by large errors!")
+   ABI_WARNING("FFT mesh is not compatible with symmetries. Results might be affected by large errors!")
  end if
 
  ABI_MALLOC(ktabr,(gwc_nfftot, Kmesh%nbz))
@@ -450,7 +450,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 
  ! Out-of-core solution for epsilon.
  if (Er%mqmem==0) then
-   MSG_COMMENT('Reading q-slices from file. Slower but less memory.')
+   ABI_COMMENT('Reading q-slices from file. Slower but less memory.')
  end if
 
  call timab(442,2,tsec)
@@ -953,7 +953,7 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
  if (outofbox/=0) then
    enough=enough+1
    if (enough<=50) then
-     MSG_WARNING(sjoin(' Number of G1-G2 pairs outside the G-sphere for Wfns:', itoa(outofbox)))
+     ABI_WARNING(sjoin(' Number of G1-G2 pairs outside the G-sphere for Wfns:', itoa(outofbox)))
      if (enough==50) then
        call wrtout(std_out,' ========== Stop writing Warnings ==========')
      end if

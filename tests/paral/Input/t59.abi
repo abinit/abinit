@@ -1,0 +1,89 @@
+#   C in diamond structure; 2x2x2 FCC special point grid; low ecut.
+
+ndtset 2
+
+
+#Dataset 1 : ground state density
+nqpt1       0
+ieig2rf1    0
+smdelta1    0
+rfphon1     0
+getwfk1     0          # Use GS wave functions from dataset1
+
+nqpt        1
+ieig2rf     1
+elph2_imagden      0.1 eV
+#elph2_imagden 0.0  # This is to reproduce results that established the correctness of the Fan+DDW
+#                     by comparision with finite-differences
+bdeigrf     8
+smdelta     1
+getwfk      1          # Use GS wave functions from dataset1
+kptopt      3          # Need full k-point set for finite-Q response
+rfphon      1          # Do phonon response
+rfatpol     1 2        # Treat displacements of all atoms
+rfdir       1 1 1      # Do all directions (symmetry will be used)
+
+#Dataset 2-5 : phonon frequencies and band corrections 
+qpt2   0.0 0.0 0.0
+
+#Size-dependent parameters
+ acell 3*6.65
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+
+ natom  2 
+ typat  1 1  
+ xred 3*0.00d0 3*0.25d0
+
+ nband 8
+
+ ngkpt 2 2 2
+ nshiftk 4
+ shiftk 0.0 0.0 0.0
+        0.0 0.5 0.5
+        0.5 0.0 0.5
+        0.5 0.5 0.0
+
+# Miscellaneous
+ ntypat  1
+ znucl 6
+ diemac 6.0d0
+ ecut 15
+#ecut 20 # This is to reproduce results that established the correctness of the Fan+DDW
+#                     by comparison with finite-differences
+ enunit 2
+ nstep 30
+ nsym 1
+ tolwfr 1.0d-16
+ paral_kgb 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 10
+#%% [NCPU_1]
+#%% files_to_test  = t59_MPI1.abo,          tolnlines=    3,   tolabs=  1.1e-6,      tolrel= 3.0e-4
+#%% [NCPU_2]
+#%% files_to_test  = t59_MPI2.abo,          tolnlines=    3,   tolabs=  1.1e-6,      tolrel= 3.0e-4
+#%% [NCPU_4]
+#%% files_to_test  = t59_MPI4.abo,          tolnlines=    3,   tolabs=  2.0e-6,      tolrel= 3.0e-4
+#%% [NCPU_10]
+#%% files_to_test  = t59_MPI10.abo,          tolnlines=    9,   tolabs=  2.0e-6,      tolrel= 3.0e-4
+#%% [extra_info]
+#%% keywords = NC, DFPT, EPH_OLD
+#%% authors = Unknown
+#%% description = 
+#%%   Calculation of the electron-phonon band structure renormalisation for Diamond,
+#%%   due to the phonon at the Gamma point.
+#%%   The computation with ecut=20 Ha and elph2_imagden 0.0 gives 24.482 meV for the
+#%%   HOMO shift at Gamma, while the finite-difference of phonon frequencies
+#%%   gives 28.975 meV, in excellent agreement with frozen-phonon changes of HOMO eigenenergy.
+#%%   The difference is due to the Non-Site-Diagonal Debye-Waller contribution, that
+#%%   was explicitly obtained by a finite-difference approach.
+#%%<END TEST_INFO>

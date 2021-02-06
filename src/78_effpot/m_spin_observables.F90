@@ -123,22 +123,22 @@ contains
     self%nspin=supercell%spin%nspin
     self%nsublatt=maxval(supercell%spin%ispin_prim)
 
-    ABI_ALLOCATE(self%S, (3, self%nspin))
-    ABI_ALLOCATE(self%Snorm, (self%nspin))
+    ABI_MALLOC(self%S, (3, self%nspin))
+    ABI_MALLOC(self%Snorm, (self%nspin))
 
-    ABI_ALLOCATE(self%isublatt,(self%nspin) )
+    ABI_MALLOC(self%isublatt,(self%nspin) )
     self%isublatt(:)=supercell%spin%ispin_prim(:)
 
-    ABI_ALLOCATE(self%nspin_sub, (self%nsublatt))
+    ABI_MALLOC(self%nspin_sub, (self%nsublatt))
     self%nspin_sub(:)=0
     do i =1, self%nspin
        self%nspin_sub(self%isublatt(i)) = self%nspin_sub(self%isublatt(i)) + 1
     end do
 
-    ABI_ALLOCATE(self%Ms_coeff,(self%nspin))
-    ABI_ALLOCATE(self%Mst_sub, (3, self%nsublatt))
-    ABI_ALLOCATE(self%Mst_sub_norm, (self%nsublatt))
-    ABI_ALLOCATE(self%Avg_Mst_sub_norm, (self%nsublatt))
+    ABI_MALLOC(self%Ms_coeff,(self%nspin))
+    ABI_MALLOC(self%Mst_sub, (3, self%nsublatt))
+    ABI_MALLOC(self%Mst_sub_norm, (self%nsublatt))
+    ABI_MALLOC(self%Avg_Mst_sub_norm, (self%nsublatt))
 
     do i = 1, self%nspin
       self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_projection_qpoint, supercell%spin%rvec(:,i))))
@@ -179,33 +179,33 @@ contains
   subroutine finalize(self)
     class(spin_observable_t) :: self
     if (allocated(self%isublatt)) then
-       ABI_DEALLOCATE(self%isublatt)
+       ABI_FREE(self%isublatt)
     endif
 
     if (allocated(self%nspin_sub)) then
-       ABI_DEALLOCATE(self%nspin_sub)
+       ABI_FREE(self%nspin_sub)
     endif
 
     if(allocated(self%S)) then
-       ABI_DEALLOCATE(self%S)
+       ABI_FREE(self%S)
     endif
 
     if(allocated(self%Snorm)) then
-       ABI_DEALLOCATE(self%Snorm)
+       ABI_FREE(self%Snorm)
     endif
 
     if (allocated(self%Ms_coeff)) then
-       ABI_DEALLOCATE(self%Ms_coeff)
+       ABI_FREE(self%Ms_coeff)
     endif
 
     if (allocated(self%Mst_sub)) then
-       ABI_DEALLOCATE(self%Mst_sub)
+       ABI_FREE(self%Mst_sub)
     endif
     if (allocated(self%Mst_sub_norm)) then
-       ABI_DEALLOCATE(self%Mst_sub_norm)
+       ABI_FREE(self%Mst_sub_norm)
     endif
     if (allocated(self%Avg_Mst_sub_norm)) then
-       ABI_DEALLOCATE(self%Avg_Mst_sub_norm)
+       ABI_FREE(self%Avg_Mst_sub_norm)
     endif
 
   end subroutine finalize

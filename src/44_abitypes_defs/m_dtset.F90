@@ -1,3 +1,5 @@
+! CP modified
+
 !!****m* ABINIT/m_dtset
 !! NAME
 !!  m_dtset
@@ -133,6 +135,7 @@ type, public :: dataset_type
  integer :: dmft_read_occnd
  integer :: dmft_solv
  integer :: dmft_t2g
+ integer :: dmft_wanorthnorm
 !integer :: dmft_x2my2d
  integer :: dmftbandi
  integer :: dmftbandf
@@ -243,6 +246,8 @@ type, public :: dataset_type
  integer :: gwmem = 11
  integer :: gwpara = 2
  integer :: gwrpacorr = 0
+ integer :: gwgmcorr = 0
+ integer :: gw1rdm = 0
 
  integer :: gw_customnfreqsp
  integer :: gw_frqim_inzgrid = 0
@@ -273,6 +278,7 @@ type, public :: dataset_type
  integer :: iprcel
  integer :: iprcfc
  integer :: irandom
+ integer :: irdchkprdm = 0
  integer :: irdddb = 0
  integer :: irddvdb = 0
  integer :: irdddk = 0
@@ -297,6 +303,7 @@ type, public :: dataset_type
  integer :: istatimg
  integer :: istatr
  integer :: istatshft
+ integer :: ivalence ! CP added for occopt==9 purposes
  integer :: ixc
  integer :: ixc_sigma
  integer :: ixcpositron
@@ -460,6 +467,7 @@ type, public :: dataset_type
  integer :: prepgkk = 0
  integer :: prtbbb = 0
  integer :: prtbltztrp = 0
+ integer :: prtchkprdm = 1
  integer :: prtcif = 0
  integer :: prtden
  integer :: prtdensph = 1
@@ -597,6 +605,7 @@ type, public :: dataset_type
  integer :: w90prtunk
 !X
  integer :: xclevel
+ integer :: x1rdm  = 0
 
 !Integer arrays
  integer :: bdberry(4)
@@ -740,6 +749,8 @@ type, public :: dataset_type
  real(dp) :: mdwall
  real(dp) :: mep_mxstep
  real(dp) :: nelect
+ real(dp) :: ne_qFD = zero ! CP added
+ real(dp) :: nh_qFD = zero  ! CP added
  real(dp) :: noseinert
  real(dp) :: omegasimax = 50/Ha_eV
  real(dp) :: omegasrdmax = 1.0_dp/Ha_eV  ! = 1eV
@@ -1034,15 +1045,24 @@ subroutine dtset_chkneu(dtset, charge, occopt)
 !(2) Optionally initialize occ with semiconductor occupancies
 !(even for a metal : at this stage, the eigenenergies are unknown)
 !Note that nband(1)=nband(2) in this section, as occopt=2 is avoided.
- if(occopt==1 .or. (occopt>=3 .and. occopt<=8) )then
+ ! CP modified
+ !if(occopt==1 .or. (occopt>=3 .and. occopt<=8) )then
+ if(occopt==1 .or. (occopt>=3 .and. occopt<=9) )then
+ ! End CP modified
 !  Here, initialize a real(dp) variable giving the
 !  maximum occupation number per band
    maxocc=2.0_dp/real(dtset%nsppol*dtset%nspinor,dp)
 
 !  Determine the number of bands fully or partially occupied
-   nocc=int((dtset%nelect-1.0d-8)/maxocc) + 1
+   ! CP modified
+   !nocc=int((dtset%nelect-1.0d-8)/maxocc) + 1
+   nocc=int((dtset%nelect-dtset%nh_qFD-1.0d-8)/maxocc) + 1
+   !End CP modified
 !  Occupation number of the highest level
-   occlast=dtset%nelect-maxocc*(nocc-1)
+   ! CP modified
+   !occlast=dtset%nelect-maxocc*(nocc-1)
+   occlast=dtset%nelect-dtset%nh_qFD-maxocc*(nocc-1)
+   ! End CP modified
    !write(std_out,*)' maxocc,nocc,occlast=',maxocc,nocc,occlast
 
 !  The number of allowed bands must be sufficiently large
@@ -1061,9 +1081,33 @@ subroutine dtset_chkneu(dtset, charge, occopt)
        if (1<nocc) tmpocc(1:nocc-1)=maxocc
 !      Then, do it for highest occupied band
        if (1<=nocc) tmpocc(nocc)=occlast
-!      Finally do it for eventual unoccupied bands
-       if ( nocc<dtset%nband(1)*dtset%nsppol ) tmpocc(nocc+1:dtset%nband(1)*dtset%nsppol)=0.0_dp
+       ! CP added to treat the case occopt = 9
+       if (occopt==9) then
+          if (nocc > dtset%ivalence*dtset%nsppol) then
+             write(msg,'(a,i5,a,f17.8,a)') 'In occopt = 9 case, ivalence = ', dtset%ivalence, &
+&           ' is too small compared to the number of electrons in the valence bands, nelect-nh_qFD = ', &
+&           dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
+            ABI_ERROR(msg)
+          end if
+       
+       if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=0.0_dp
+       ! now do it for excited electrons in the conduction bands > ivalence
+       nocc   = (dtset%ne_qFD-1.0d-8)/maxocc + 1
+       occlast= dtset%ne_qFD-maxocc*(nocc-1)
+       if ( (nocc+dtset%ivalence*dtset%nsppol) > dtset%nband(1)*dtset%nsppol) then
+          write(msg,'(a)') 'Occopt = 9: Not enough band above ivalence. Increase nband or reduce ivalence'
+          ABI_ERROR(msg)
+       end if
 
+       if(nocc > 1)  tmpocc(dtset%ivalence*dtset%nsppol+1:dtset%ivalence*dtset%nsppol+nocc-1)=maxocc
+       if(nocc >= 1) tmpocc(dtset%ivalence*dtset%nsppol+nocc)=occlast
+       if ((dtset%ivalence*dtset%nsppol + nocc) < dtset%nband(1)*dtset%nsppol) &
+&             tmpocc(dtset%ivalence*dtset%nsppol+nocc+1:dtset%nband(1)*dtset%nsppol)=0.0_dp
+       else
+!      Finally do it for eventual unoccupied bands
+         if ( nocc<dtset%nband(1)*dtset%nsppol ) tmpocc(nocc+1:dtset%nband(1)*dtset%nsppol)=0.0_dp
+       end if
+       ! End CP added
 !      Now copy the tmpocc array in the occ array, taking into account the spin
        if(dtset%nsppol==1)then
          do ikpt=1,dtset%nkpt
@@ -1109,7 +1153,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
            'This combination is not possible, because of a lack of bands.',ch10,&
            'Action: modify input file',ch10,&
            '(you should likely increase nband, but also check nspden, nspinor, nsppol, and spinmagntarget)'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          do ikpt=1,dtset%nkpt
            ! Fill all bands, except the upper one
@@ -1130,7 +1174,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
        'This combination is not possible.',ch10,&
        'Action: modify input file ... ',ch10,&
        '(check nspden, nspinor, nsppol and spinmagntarget)'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      ! Now print the values (only the first image, since they are all the same)
@@ -1171,7 +1215,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
      'Action: modify input file ',ch10,&
      '(check the pseudopotential charges, the variable charge,',ch10,&
      'and the declared number of bands, nband)'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -1217,7 +1261,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
 !        The discrepancy is not so severe
          write(msg, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than: ',tol11
        end if
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
 
        write(msg, '(6a)' ) &
        'Action: check input file for occ,wtk, and charge.',ch10,&
@@ -1227,7 +1271,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
 
        ! If the discrepancy is severe, stop
        if (abs(nelect_occ-dtset%nelect)>tol8)then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
      end if
@@ -1339,6 +1383,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 !dtout%dmft_x2my2d        = dtin%dmft_x2my2d
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
+ dtout%dmft_wanorthnorm   = dtin%dmft_wanorthnorm
  dtout%dmftbandi          = dtin%dmftbandi
  dtout%dmftbandf          = dtin%dmftbandf
  dtout%dmftcheck          = dtin%dmftcheck
@@ -1487,6 +1532,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
+ dtout%gwgmcorr           = dtin%gwgmcorr
+ dtout%gw1rdm             = dtin%gw1rdm
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
@@ -1533,6 +1580,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%iprcel             = dtin%iprcel
  dtout%iprcfc             = dtin%iprcfc
  dtout%irandom            = dtin%irandom
+ dtout%irdchkprdm         = dtin%irdchkprdm
  dtout%irdbseig           = dtin%irdbseig
  dtout%irdbsreso          = dtin%irdbsreso
  dtout%irdbscoup          = dtin%irdbscoup
@@ -1557,6 +1605,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%istatimg           = dtin%istatimg
  dtout%istatr             = dtin%istatr
  dtout%istatshft          = dtin%istatshft
+ dtout%ivalence           = dtin%ivalence ! CP added for occopt == 9 purposes
  dtout%ixc                = dtin%ixc
  dtout%ixc_sigma          = dtin%ixc_sigma
  dtout%ixcpositron        = dtin%ixcpositron
@@ -1710,6 +1759,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prepgkk            = dtin%prepgkk
  dtout%prtbbb             = dtin%prtbbb
  dtout%prtbltztrp         = dtin%prtbltztrp
+ dtout%prtchkprdm         = dtin%prtchkprdm
  dtout%prtcif             = dtin%prtcif
  dtout%prtden             = dtin%prtden
  dtout%prtdensph          = dtin%prtdensph
@@ -1855,6 +1905,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%w90prtunk          = dtin%w90prtunk
  dtout%xclevel            = dtin%xclevel
  dtout%xc_denpos          = dtin%xc_denpos
+ dtout%x1rdm              = dtin%x1rdm
 
 !Copy allocated integer arrays from dtin to dtout
  dtout%bdberry(:)         = dtin%bdberry(:)
@@ -1930,6 +1981,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mdwall             = dtin%mdwall
  dtout%mep_mxstep         = dtin%mep_mxstep
  dtout%nelect             = dtin%nelect
+ dtout%ne_qFD             = dtin%ne_qFD ! CP added for occopt == 9 purposes
+ dtout%nh_qFD             = dtin%nh_qFD ! CP added for occopt == 9 purposes
  dtout%nnos               = dtin%nnos
  dtout%noseinert          = dtin%noseinert
  dtout%omegasimax         = dtin%omegasimax
@@ -2308,7 +2361,7 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
         'The component number ',idtset,' of the input variable ',trim(getname),',',' equal to ',getvalue,',',ch10,&
         'does not correspond to an existing index.',ch10,&
         'Action: correct ',trim(getname),' or jdtset in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
    write(msg, '(3a,i3,2a)' )&
@@ -2935,7 +2988,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        write(msg, '(a,a,a)' )&
          'accuracy >6 is forbidden !',ch10,&
          'Action: check your input data file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      if (ecutmax(3)>zero) dtsets(idtset)%ecut=ecutmax(3)
@@ -3093,9 +3146,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_entropy dmft_iter dmft_kspectralfunc'
  list_vars=trim(list_vars)//' dmft_mxsf dmft_nlambda dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
-!list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
- list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g'
- list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage'
+ list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
+ list_vars=trim(list_vars)//' dmft_wanorthnorm dosdeltae dtion dynamics dynimage'
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
@@ -3140,7 +3192,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'
+ list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_invalid_freq'
  list_vars=trim(list_vars)//' gw_icutcoul'
@@ -3158,13 +3210,13 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irddvdb irdefmas'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
  list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot'
- list_vars=trim(list_vars)//' irdvdw'
+ list_vars=trim(list_vars)//' irdvdw ival' ! CP added ival for occopt 9 case
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'
 !K
@@ -3192,7 +3244,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
- list_vars=trim(list_vars)//' np_slk nqpt nqptdm nscforder nshiftk nshiftq nqshft'
+ list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqFD nscforder nshiftk nshiftq nqshft' ! CP added nqFD for occopt 9
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nwfshist nzchempot'
 !O
@@ -3215,7 +3267,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
- list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
+ list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
  list_vars=trim(list_vars)//' prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar'
@@ -3300,7 +3352,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
 !X
- list_vars=trim(list_vars)//' xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile'
+ list_vars=trim(list_vars)//' xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile x1rdm'
 !Y
 !Z
  list_vars=trim(list_vars)//' zcut zeemanfield znucl'

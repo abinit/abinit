@@ -441,7 +441,7 @@ program lapackprof
 #ifdef HAVE_LINALG_GEMM3M
           call ZGEMM3M("C", "N", nband, nband, npw, cone, cg1, npw, cg2, npw, czero, cg3, nband)
 #else
-          MSG_ERROR("ZGEMM3M is not available")
+          ABI_ERROR("ZGEMM3M is not available")
 #endif
         end if
         call cwtime(ctime, wtime, gflops, "stop")
@@ -472,7 +472,7 @@ program lapackprof
 #ifdef HAVE_LINALG_GEMMT
           call ZGEMMT("U", "C", "N", nband, npw, cone, cg1, npw, cg2, npw, czero, cg3, nband)
 #else
-          MSG_ERROR("ZGEMMT is not available")
+          ABI_ERROR("ZGEMMT is not available")
 #endif
         end if
         call cwtime(ctime, wtime, gflops, "stop")
@@ -631,7 +631,7 @@ program lapackprof
    write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ",command))
 
  case default
-   MSG_ERROR(sjoin("Wrong command:", command))
+   ABI_ERROR(sjoin("Wrong command:", command))
  end select
 
  ABI_FREE(sizes)

@@ -169,7 +169,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  call wrtout(std_out, msg, "COLL", do_flush=.True.)
 
  if (psps%usepaw == 1) then
-   MSG_ERROR("PAW not implemented")
+   ABI_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
@@ -347,7 +347,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
    call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
  else
-   MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
+   ABI_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
  end if
 
  ! Allocate vlocal1 with correct cplex. Note nvloc
@@ -736,7 +736,7 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
  NCF_CHECK(nf90_close(ncid))
 
 #else
- MSG_ERROR("NETCDF support required to write Pi.nc file.")
+ ABI_ERROR("NETCDF support required to write Pi.nc file.")
 #endif
 
 end subroutine out_phpi_nc

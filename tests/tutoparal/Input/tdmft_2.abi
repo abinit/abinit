@@ -1,0 +1,115 @@
+# SrVO3, a simple archetypal correlated material
+#
+# In this test, we compute the DFT electronic structure of SrVO3 in the first
+# dataset and then run a DFT+DMFT calculation from the DFT one.
+#
+# DATASET 1: DFT
+# DATASET 2: DFT+DMFT
+# Multi-dataset parameters
+ndtset 2
+jdtset 1 2
+getwfk -1
+
+#Definition of the unit cell
+acell   3*7.2605        # Cubic cell with
+rprim 1.0 0.0 0.0       # real space primitive translation vectors
+      0.0 1.0 0.0
+      0.0 0.0 1.0 
+
+#Definition of the atom types and pseudopotentials
+natom 5                 # Five atoms
+ntypat 3                # Three types
+znucl  23 38 8          # First atom type should be the correlated on V
+                        # then, we have Sr and O.
+typat 1 2 3 3 3         # V Sr O3
+xred 0.00 0.00 0.00     # This keyword indicates that the location of the atoms
+                        # will follow, one triplet of number for each atom.
+                        # We use relative distance, along the translational
+                        # lattice vectors.
+     0.50 0.50 0.50 
+     0.50 0.00 0.00 
+     0.00 0.50 0.00 
+     0.00 0.00 0.50
+pp_dirpath "$ABI_PSPDIR"        # This is the path to the directory where
+                                # pseudopotentials for tests are stored
+pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml" # Name and location of the pseudopotentials
+
+#Planewave basis set, number of bands and occupations
+ecut      12.0          # Maximal plane-wave kinetic energy cut-off, in Hartree
+pawecutdg 20.0          # PAW: Energy Cutoff for the Double Grid
+nband     30            # Number of bands
+occopt    3             # Occupation option for metal
+tsmear    1200 K        # Temperature of smearing
+
+pawprtvol 3             # Printing additional information
+prtvol    4
+
+#First dataset specific parameters
+nstep1    30            # Number of iterations for the DFT convergence
+nline1     5            # Number of line minimisations
+nnsclo1    5            # Number of non-self consistent loops
+tolvrs 1.0d-7
+#K point grid
+ngkpt   3 3 3           # Reciprocal space vectors are built from
+                        # the rprim parameters. This is the size of the
+                        # reciprocal k-points.
+nshiftk 4               # Convergence of the density with regular shifts.
+shiftk 1/2 1/2 1/2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
+istwfk *1
+#DFT alone
+usedmft1 0
+
+#Second dataset specific parameters
+nstep2    10            # Number of iterations for the DFT+DMFT convergence
+nline2    10            # Number of line minimisations
+nnsclo2   10            # Number of non-self consistent loops
+#DFT+DMFT
+usedmft2  1             # Active DMFT
+dmftbandi 21            # First band included in the projection. Initial
+dmftbandf 23            # and final bands.
+dmft_nwlo 100           # Logarythmic frequency mesh
+dmft_nwli 100000        # Linear freqeuncy mesh
+dmft_iter 1             # Number of iterations of the DMFT part.
+                        # We often use single-shot, since anyway the charge density
+                        # changes through the DFT+DMFT anyway.
+dmftcheck 0
+dmft_rslf 1             # Read self-energy, if nothing (like here) initialize.
+dmft_mxsf 0.7           # Mixing of the old and new self-energy at every iterations.
+dmft_dc   1             # Double counting type. 1 is Fully Localized Limit (FLL)
+dmft_t2g  1             # Special value for t2g only calculation.
+#CTQMC
+dmft_solv        5      # Choice of solver: Internal CT-SEG.
+dmftqmc_l        50     # Number of time slices for G(tau).
+dmftqmc_n        3.d6   # Number of QMC sweeps
+dmftqmc_therm    10000  # Thermalization
+dmftctqmc_gmove  0      # Global move occurence in QMC
+dmftctqmc_order  50     # Perturbation order
+#DFT+U
+usepawu     1           # For density matrix printout.
+dmatpuopt   1           # The density matrix: the simplest expression.
+lpawu       2 -1 -1     # Angular momentum for the projected Hamiltonian
+f4of2_sla3  0.0  0.0  0.0 
+upawu1      0.00  0.0  0.0  eV
+upawu2      3.1333333333333333  0.0  0.0  eV  # Values of U for each angular momentum
+jpawu2      0.7583333333333333  0.0  0.0  eV  # Values of J
+
+##############################################################
+## This section is used only for regression testing of ABINIT #
+###############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% max_nprocs = 24
+#%% nprocs_to_test = 24
+#%% [NCPU_24]
+#%% files_to_test = tdmft_2_MPI24.abo,  tolnlines =1, tolabs =5.0e-07, tolrel = 2.0e-03, fld_options=-medium ;
+#%% [extra_info]
+#%% authors = B. Amadon, O. Gingras
+#%% keywords = DMFT, CTQMC
+#%% description = Tutorial DFT+DMFT on SrVO3
+#%%<END TEST_INFO>

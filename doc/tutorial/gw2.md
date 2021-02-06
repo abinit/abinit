@@ -40,35 +40,32 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 This tutorial should take about one hour to be completed (also including the
 reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## The preliminary Kohn-Sham band structure calculation
 
 *Before beginning, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_gw2?*
 
-In [tutorial 4](base4), we have computed different properties of
-Aluminum within the DFT(LDA). Unlike for silicon, in this approximation, there is
+In [basic tutorial 4](base4), we have computed different properties of
+Aluminum within DFT(LDA). Unlike for silicon, in this approximation, there is
 no outstanding problem in the computed band structure. Nevertheless, as you
 will see, the agreement of the band structure with experiment can be improved
-significantly if one relies on the GW approximation.
+significantly if one uses the GW approximation.
 
-In the directory *Work_gw2*, copy the files *tgw2_x.files* and *tgw2_1.in* located
-in *\$ABI_TESTS/tutorial/Input*, and modify the *tgw2_x.files* file as usual (see [the first tutorial](base1)).
+In the directory *Work_gw2*, copy the file *tgw2_1.abi* located in *\$ABI_TESTS/tutorial/Input*.
 
 ```sh
-cd $ABI_TESTS/tutorial/Input
-mkdir Work_gw2
-cd Work_gw2
-cp ../tgw2_x.files .  # modify this file as usual (see tutorial 1)
-cp ../tgw2_1.in .
+    mkdir Work_gw2
+    cd Work_gw2
+    cp $ABI_TESTS/tutorial/Input/tgw2_1.abi .
 ```
 
 Then issue:
 
-    abinit < tgw2_x.files > tgw2_1.log 2> err &
+    abinit tgw2_1.abi > tgw2_1.log 2> err &
 
-{% dialog tests/tutorial/Input/tgw2_x.files tests/tutorial/Input/tgw2_1.in %}
+{% dialog tests/tutorial/Input/tgw2_1.abi %}
 
 This run generates the WFK file for the subsequent GW computation and also
 provides the band width of Aluminum. Note that the simple Fermi-Dirac smearing
@@ -81,26 +78,36 @@ point, at which the valence band structure reaches its minimum.
 
 The output file presents the Fermi energy
 
-     Fermi (or HOMO) energy (eV) =   7.14774   Average Vxc (eV)=  -9.35982
+```
+ Fermi (or HOMO) energy (eV) =   6.76526   Average Vxc (eV)=  -9.88844
+```
 
 as well as the lowest energy, at the $\Gamma$ point
 
-     Eigenvalues (   eV  ) for nkpt=   8  k points:
-     kpt#   1, nband=  6, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-      -3.76175  19.92114  19.92114  19.92114  21.00078  21.00078
+```
+ Eigenvalues (   eV  ) for nkpt=   8  k points:
+ kpt#   1, nband=  6, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -4.22031   19.66151   19.66151   19.66151   21.09462   21.09462
+```
 
-So, the occupied band width is 10.90 eV. More converged calculations would give 11.06 eV (see [[cite:Bruneval2006]]).
+
+So, the occupied band width is 10.98 eV within PBE.
 This is to be compared to the experimental value of 10.6 eV (see references in [[cite:Bruneval2006]]).
 
 ## Calculation of the screening file
 
-In order not to lose time, let us start the calculation of the screening file
-before the examination of the corresponding input file. So, copy the file
-*tgw2_2.in*, and modify the *tgw2_x.files* file as usual (replace occurrences of
-twg2_x by tgw2_2). Also, copy the WFK file (*tgw2_1o_WFK*) to *tgw2_2i_WFK*. Then
-run the calculation (it should take about 30 seconds).
+Let's run the calculation of the screening file immediately.
+So, copy the file *tgw2_2.abi*. Also, copy the WFK file (*tgw2_1o_WFK*) to *tgw2_2i_WFK*. Then
+run the calculation (it should take about 3 seconds).
 
-{% dialog tests/tutorial/Input/tgw2_2.in %}
+```sh
+    cp $ABI_TESTS/tutorial/Input/tgw2_2.abi .
+    cp tgw2_1o_WFK tgw2_2i_WFK
+    abinit tgw2_2.abi >& log &
+```
+
+
+{% dialog tests/tutorial/Input/tgw2_2.abi %}
 
 We now have to consider starting a GW calculation. However, unlike in the case
 of Silicon in the previous GW tutorial, where we were focussing on quantities
@@ -112,17 +119,17 @@ classical plasma frequency for a homogeneous electron gas with a density equal
 to the average valence density of Aluminum is 15.77 eV. Hence, using
 plasmon-pole models may be not really appropriate.
 
-In what follows, one will compute the GW band structure without a plasmon-pole
-model, by performing explicitly the numerical frequency convolution. In
+In what follows, we will compute the GW band structure without a plasmon-pole
+model, by performing the numerical frequency convolution. In
 practice, it is convenient to extend all the functions of frequency to the
 full complex plane. And then, making use of the residue theorem, the
 integration path can be deformed: one transforms an integral along the real
 axis into an integral along the imaginary axis plus residues enclosed in the
 new contour of integration. The method is extensively described in [[cite:Lebegue2003]].
 
-Examine the input file *tgw2_2.in*.
+Examine the input file *tgw2_2.abi*.
 
-{% dialog tests/tutorial/Input/tgw2_2.in %}
+{% dialog tests/tutorial/Input/tgw2_2.abi %}
 
 The ten first lines contain the important information.
 There, you find some input variables that you are already
@@ -139,22 +146,25 @@ the real axis set with the variable [[nfreqre]] is usually larger.
 
 ## Finding the Fermi energy and the bottom of the valence band
 
-In order not to lose time, let us start the calculation of the band width
-before the study of the input file. So, copy the file *tgw2_3.in*, and modify
-the *tgw3_x.files* file as usual (replace occurrences of twg2_x by tgw2_3).
-Also, copy the WFK file (*tgw2_1o_WFK*) to *tgw2_3i_WFK*, and the screening file
-(*tgw2_2o_SCR*) to *tgw2_3i_SCR*.
-Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
+Let's run the calculation of the band width immediately and
+then we'll study of the input file. So, get the file *tgw2_3.abi*.
+
+```sh
+    cp $ABI_TESTS/tutorial/Input/tgw2_3.abi .
+    cp tgw2_1o_WFK tgw2_3i_WFK
+    cp tgw2_2o_SCR tgw2_3i_SCR
+    abinit tgw2_3.abi >& log &
+```
 
 The computation of the GW quasiparticle energy at the $\Gamma$ point of Aluminum
 does not differ from the one of quasiparticle in Silicon. However, the
 determination of the Fermi energy raises a completely new problem: one should
-sample the Brillouin Zone, to get new energies (quasiparticle energies) and
+sample the whole Brillouin Zone to get new energies (quasiparticle energies) and
 then determine the Fermi energy. This is actually the first step towards a self-consistency!
 
-Examine the input file *tgw2_3.in*:
+Examine the input file *tgw2_3.abi*:
 
-{% dialog tests/tutorial/Input/tgw2_3.in %}
+{% dialog tests/tutorial/Input/tgw2_3.abi %}
 
 The first thirty lines contain the important information.
 There, you find some input variables with values that you are
@@ -168,7 +178,7 @@ the same as [[nkpt]] and [[kpt]]. One might have specified less **k**-points,
 though (only those needing an update). The list of band ranges [[bdgw]] has
 been generated on the basis of the DFT(LDA) eigenenergies. We considered only the
 bands in the vicinity of the Fermi level: bands much below or much above are
-likely to remain much or much above the Fermi region. In the present run, we
+likely to remain much below or much above the Fermi region. In the present run, we
 are just interested in the states that may cross the Fermi level, when going
 from DFT to GW. Of course, it would have been easier to select an homogeneous range
 for the whole Brillouin zone, e.g. from 1 to 5, but this would have been more time-consuming.
@@ -177,6 +187,7 @@ In the output file, one finds the quasiparticle energy at $\Gamma$, for the lowe
 
 ```yaml
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    0.000
@@ -184,19 +195,28 @@ QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -3.762    -9.451    -3.762     5.689   -15.617     5.940     0.761    -0.313    -9.623    -0.173    -3.934    -3.988
+        1    -4.220    -9.458    -4.220     5.238   -15.616     5.931     0.903    -0.107    -9.663    -0.206    -4.426    -4.448
+        2    19.662    -9.585    19.662    29.246    -2.718    -7.097     0.802    -0.246    -9.770    -0.185    19.477    19.430
+        3    19.662    -9.585    19.662    29.246    -2.718    -7.098     0.802    -0.247    -9.770    -0.185    19.476    19.430
+        4    19.662    -9.585    19.662    29.246    -2.718    -7.098     0.802    -0.247    -9.770    -0.185    19.476    19.431
+        5    21.095    -9.387    21.095    30.482    -2.461    -7.390     0.713    -0.402    -9.718    -0.331    20.764    20.631
+        6    21.095    -9.387    21.095    30.482    -2.461    -7.390     0.713    -0.402    -9.718    -0.331    20.764    20.631
+        7    21.095    -9.387    21.095    30.482    -2.461    -7.390     0.713    -0.403    -9.718    -0.331    20.764    20.631
 ...
 ```
 
 (the last column is the relevant quantity). The updated Fermi energy is also mentioned:
 
-     New Fermi energy :        2.558310E-01 Ha ,    6.961515E+00 eV
+```text
+ New Fermi energy :        2.425933E-01 Ha ,    6.601299E+00 eV
+```
+
 
 The last information is not printed in case of [[gwcalctyp]] lower than 10.
 
 Combining the quasiparticle energy at $\Gamma$ and the Fermi energy, gives the
-band width, 10.404 eV. Using converged parameters, the band width will be
-10.54 eV (see [[cite:Bruneval2006]]). This is in excellent agreement with the experimental value of 10.6 eV.
+band width, 11.05 eV.
+Remember the experimental value is around 10.6 eV.
 
 ## Computing a GW spectral function, and the plasmon satellite of Aluminum
 
@@ -219,16 +239,18 @@ You will see that the spectral function of Aluminum consists of a main peak
 which corresponds to the quasiparticle excitation and some additional peaks
 which correspond to quasiparticle and plasmon excitations together.
 
-In order not to lose time, this calculation can be started before the
-examination of the input file. So, copy the file *tgw2_4.in*, and modify the
-*tgw4_x.files* file as usual (replace occurrences of twg2_x by tgw2_4). Also,
-copy the WFK file (*tgw2_1o_WFK*) to *tgw2_4i_WFK*, and the screening file
-(*tgw2_2o_SCR*) to *tgw2_4i_SCR*.
-Then run the calculation (it should take about 2 minutes on a 3 GHz PC).
+Let's run this calculation immediately:
 
-{% dialog tests/tutorial/Input/tgw2_4.in %}
+```sh
+    cp $ABI_TESTS/tutorial/Input/tgw2_4.abi .
+    cp tgw2_1o_WFK tgw2_4i_WFK
+    cp tgw2_2o_SCR tgw2_4i_SCR
+    abinit tgw2_4.abi >& log &
+```
 
-Compared to the previous file (*tgw2_3.in*), the input file contains two
+{% dialog tests/tutorial/Input/tgw2_4.abi %}
+
+Compared to the previous file (*tgw2_3.abi*), the input file contains two
 additional keywords: [[nfreqsp]], and [[freqspmax]]. Also, the computation of
 the GW self-energy is done only at the $\Gamma$ point.
 

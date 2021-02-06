@@ -16,11 +16,13 @@ With this lesson, you will learn to:
   * Determine the critical temperature for a magnetic phase transition
   * Calculate spin canting angles for systems with Dzyaloshinskii-Moriya interaction
 
-The TB2J python package, which can be used to generate a spin model, can be found on the ABINIT gitlab website at https://gitlab.abinit.org/xuhe/TB2J. This package will be included in the ABINIT package in the future.
+The TB2J python package, which can be used to generate a spin model, can be found on the website at [https://github.com/mailhexu/TB2J](https://github.com/mailhexu/TB2J). The online documenation can be found at [https://tb2j.readthedocs.io](https://tb2j.readthedocs.io/en/latest/) .
+
+
 
 *Before beginning, you might consider to work in a subdirectory for this tutorial. Why not Work_spindyn?*
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 Heisenberg Model formalism
 
@@ -62,9 +64,9 @@ where $m_i$ denotes the magnetic moment of site $i$, and $\vec{H}$ is the magnet
 
 ## 2. Build spin model file
 
-One way to calculate the Heisenberg model parameters is to use the spin force theorem (see [[cite:Liechtenstein1983]], [[cite:Katsnelson2000]]), for which one perturbs the system by rotating  localized spins. In ABINIT, the Hamiltonian uses plane waves as a basis set, thus the localized spin is not directly accessible. We can construct localized Wannier functions and rewrite the Hamiltonian in the Wannier basis. Then, the exchange parameters can be calculated from this Hamiltonian ( [[cite:Korotin2015]] ).
+One way to calculate the Heisenberg model parameters is to use the spin force theorem (see [[cite:Liechtenstein1983]], [[cite:Katsnelson2000]]), for which one perturbs the system by rotating  localized spins. In ABINIT, the Hamiltonian uses plane waves as a basis set, thus the localized spin is not directly accessible. We can construct localized Wannier functions and rewrite the Hamiltonian in the Wannier basis. Then, the exchange parameters can be calculated from this Hamiltonian ( [[cite:Korotin2015]] ). 
 
-For building the Wannier function Hamiltonian from ABINIT, see the tutorial [wannier90](wannier90). Other DFT codes interfaced with [Wannier90](http://www.wannier.org) can also be used. Then, the  [TB2J](https://gitlab.abinit.org/xuhe/TB2J) package can be used to calculate the Heisenberg model parameters and generate the input model for MULTIBINIT. The data will be stored in a xml (.xml) or a netcdf (.nc) file which is used as input for the MULTIBINIT calculation. For the tutorial, this file is provided. Please read the [TB2J tutorial](https://gitlab.abinit.org/xuhe/TB2J/blob/master/README.md) to see how to create your own xml/netcdf file. 
+For building the Wannier function Hamiltonian from ABINIT, see the tutorial [wannier90](wannier90). Other DFT codes interfaced with [Wannier90](http://www.wannier.org) , can also be used. Then, the  [TB2J](https://github.com/mailhexu/TB2J) package can be used to calculate the Heisenberg model parameters and generate the input model for MULTIBINIT. The data will be stored in a xml (.xml) or a netcdf (.nc) file which is used as input for the MULTIBINIT calculation. For the tutorial, this file is provided. Please read the [TB2J tutorial](https://tb2j.readthedocs.io/en/latest/) to see how to create your own xml/netcdf file. 
 ## 3. Run spin dynamics
 
 ### Basic: how to use MULTIBINIT to run spin dynamics
@@ -72,7 +74,7 @@ For building the Wannier function Hamiltonian from ABINIT, see the tutorial [wan
 Once we have the spin model xml file, we can run a spin dynamics calculation with MULTIBINIT. Example input files can be found at ~abinit/tests/tutomultibinit/Input/tmulti5_1.* .  There are three files:
 
 * "tmulti5_1.files" is the "files" file, which gives the names of the input and output files for  MULTIBINIT.
-* "tmulti5_1.in" is the main input file containing the parameters for the spin dynamics simulation.
+* "tmulti5_1.abi" is the main input file containing the parameters for the spin dynamics simulation.
 * "tmulti5_1.xml" is the file containing the Heisenberg model parameters. 
 
 You can copy these three files into a directory (e.g. Work_spindyn).
@@ -80,14 +82,14 @@ You can copy these three files into a directory (e.g. Work_spindyn).
 In tmulti5_1.files, three file names are given:
 
 ```
-tmulti5_1.in
-tmulti5_1.out
+tmulti5_1.abi
+tmulti5_1.abo
 tmulti5_1.xml
 ```
 
 which gives the input, output and xml file names. The file tmulti5_1.xml contains the $J_{ij}$ values for a simple toy system which has a cubic lattice and one atom per unit cell. Its critical temperature is around 600K.
 
-In tmulti5_1.in, the variables for running a spin dynamics calculation are given:
+In tmulti5_1.abi, the variables for running a spin dynamics calculation are given:
 
 ```
 prt_model = 0
@@ -112,12 +114,25 @@ To run spin dynamics with MULTIBINIT
 
 ```
 cd Work_spindyn
-multibinit < tmulti5_1.files > tmulti5_1.txt
+multibinit --F03 < tmulti5_1.files > tmulti5_1.txt 
 ```
 
-After the calculation is done, you will find an output file named tmulti5_1.out and a netcdf file tmulti5_1.out_spinhist.nc.
+Note that the .files file will be deprecated in the next version of ABINIT and MULTIBINIT. Then only two files are required. The following variables in the input file can be used to specify the spin potential file and the prefix of the output files. 
 
-In the .out file, you can find the lines below, which give a overview of the evolution of the system with time:
+```
+spin_pot_fname = "tmulti5_1.xml"
+outdata_prefix = "tmulti5_1.abo"
+```
+
+To run the spin dynamics without using the files file, 
+
+```
+multibinit tmulti5_1.abi --F03 > tmulti5_1.txt 
+```
+
+After the calculation is done, you will find an output file named tmulti5_1.abo and a netcdf file tmulti5_1.abo_spinhist.nc.
+
+In the .abo file, you can find the lines below, which give a overview of the evolution of the system with time:
 
 ```
 Beginning spin dynamic steps :
@@ -125,14 +140,14 @@ Beginning spin dynamic steps :
     Iteration          time(s)         Avg_Mst/Ms      ETOT(Ha/uc)
 ------------------------------------------------------------------
 Thermalization run:
--           100      9.90000E-15      6.50748E-01     -2.20454E-03
--           200      1.99000E-14      5.57558E-01     -1.89219E-03
--           300      2.99000E-14      5.28279E-01     -1.85341E-03
+-           100      9.90000E-15      6.52530E-01     -2.13916E-03
+-           200      1.99000E-14      5.58122E-01     -1.82158E-03
+-           300      2.99000E-14      5.28037E-01     -1.78953E-03
   .....
 Measurement run:
--           100      9.90000E-15      4.58081E-01     -1.79152E-03
--           200      1.99000E-14      4.30639E-01     -1.74361E-03
--           300      2.99000E-14      4.07684E-01     -1.66528E-03
+-           100      9.90000E-15      4.45356E-01     -1.70973E-03
+-           200      1.99000E-14      4.23270E-01     -1.68122E-03
+-           300      2.99000E-14      4.07006E-01     -1.61948E-03
   .....
 ```
 
@@ -190,7 +205,7 @@ The following observables are printed, which are:
 
 In the netcdf file, the trajectories of the spins can be found. They can be further analyzed using post-processing tools.
 
-We are now coming back to the values chosen for the input variables in the tmulti5_1.in file. It is essential to choose these values such that the results of the calculation are meaningful. Therefore, we recommend a convergence study concerning the following parameters:
+We are now coming back to the values chosen for the input variables in the tmulti5_1.abi file. It is essential to choose these values such that the results of the calculation are meaningful. Therefore, we recommend a convergence study concerning the following parameters:
 
 * time step ([[multibinit: spin_dt]]):
 
@@ -224,8 +239,8 @@ By setting [[multibinit:spin_var_temperature]] to 1 and specifying the starting 
 dynamics =  0                   ! Disable molecular dynamics
 ncell =   6 6 6                 ! Size of supercell (Is this too small?)
 spin_dynamics=1                 ! Run spin dynamics
-spin_ntime_pre = 1000           ! Thermolization steps (Is this enough?)
-spin_ntime = 20000              ! Measurement steps. (Is this enough?)
+spin_ntime_pre = 10000          ! Thermolization steps (Is this enough?)
+spin_ntime = 10000              ! Measurement steps. (Is this enough?)
 spin_nctime = 100               ! Number of time steps between two writes
                                 ! into netcdf
 spin_dt = 1e-16 s               ! Time step (Is this too large?)
@@ -236,6 +251,13 @@ spin_var_temperature = 1        ! Variable temperature calculation
 spin_temperature_start = 0      ! Starting temperature
 spin_temperature_end = 500      ! Final temperature (Smaller than Neel temp.?)
 spin_temperature_nstep = 6      ! Number of temperature steps (Is this enough?)
+
+spin_sia_add = 1              ! add a single ion anistropy (SIA) term?
+spin_sia_k1amp = 1e-6         ! amplitude of SIA (in Ha), how large should be used?
+spin_sia_k1dir = 0.0 0.0 1.0  ! direction of SIA
+
+spin_calc_thermo_obs = 1      ! calculate thermodynamics related observables
+
 ```
 
 Note that you are now running several calculations for different temperatures, so this might take a minute or two. After the run, the trajectories for each temperature will be written into the \*\_T0001_spin_hist.nc to \*\_T0006_spin_hist.nc files if spin_temperature_step=6.
@@ -309,9 +331,7 @@ It shows that the the spins have anti-parallel alignment along the easy axis (x)
 
 
 
-## 5. Postprocessing
 
-<!-- TODO: agate -->
 
 ### Tips:
 
@@ -322,9 +342,7 @@ It shows that the the spins have anti-parallel alignment along the easy axis (x)
   ```
   spin_projection_qpoint = 0.5 0.5 0.5
   ```
-
-
-#####
+  
 
 
 

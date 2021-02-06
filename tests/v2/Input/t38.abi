@@ -1,0 +1,132 @@
+#MgO in NaCl structure : compute the response at a non-gamma q point,
+#using pseudopotentials with non-linear XC core correction
+#This file was provided by P.Tepesch
+#The ecut is much too small, of course...
+#For dataset 5 , a non-type-ordered set of atoms is used.
+
+ ndtset 5
+
+#DATASET 1 : SC run with 2 kpoints (MP 222)
+  prtden1  1
+    nqpt1  0
+  kptopt1  1
+    nkpt1  2
+  tolwfr1  1.0d-22
+
+#DATASET 2 : NSC run with 32 kpoints, without q-wavevector shift
+   iscf2  -2
+   nqpt2   0
+ getden2   1
+ tolwfr2   1.0d-22
+
+#DATASET 3
+  getden3    1
+  getwfk3    2
+    iscf3   -2
+    nqpt3    1
+     qpt3    0.5d0 0.5d0 0.5d0
+  tolwfr3    1.0d-22
+
+#DATASET 4
+  diemac4   2.0
+  diemix4   0.9
+  getwfk4   2
+  getwfq4   3
+    nqpt4   1
+  prtvol4   10
+     qpt4   0.5d0 0.5d0 0.5d0
+ rfatpol4   1 2
+   rfdir4   1 1 1
+  rfphon4   1
+  tolwfr4   1.0d-10
+
+#DATASET 5
+  diemac5   2.0
+  diemix5   0.9
+  getwfk5   2
+  getwfq5   3
+    nqpt5   1
+  prtvol5   10
+     qpt5   0.5d0 0.5d0 0.5d0
+ rfatpol5   1 1    # Only one perturbation
+   rfdir5   1 1 1
+  rfphon5   1
+  tolwfr5   1.0d-10
+# The atom types and positions are exchanged : the ordering
+# is different, but the physical situation is the same.
+    typat5   2 1
+    xred5   3*0.50d0 3*0.0d0
+
+
+
+#Common data
+ kptopt  3
+ nkpt  32
+ ngkpt  2 2 2
+ nshiftk 4
+ shiftk  0.5 0.5 0.5
+         0.5 0.0 0.0
+         0.0 0.5 0.0
+         0.0 0.0 0.5
+ acell   3*7.814807105064
+ amu 24.3  16.0
+ ecut  4.50
+ getden 0
+ nloc_alg 3
+ natom  2
+ nband 4   nbdbuf 0
+ nstep 40
+ ntypat  2
+ occopt 1
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ xred 3*0.00d0 3*0.5d0
+ nsym  48
+ symrel   1  0  0   0  1  0   0  0  1      -1  0  0  -1  0  1  -1  1  0
+          0 -1  1   0 -1  0   1 -1  0       0  1 -1   1  0 -1   0  0 -1
+          0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+          1 -1  0   0 -1  1   0 -1  0       0  0 -1   0  1 -1   1  0 -1
+          0  1  0   0  0  1   1  0  0      -1  0  1  -1  1  0  -1  0  0
+          0 -1  0   1 -1  0   0 -1  1       1  0 -1   0  0 -1   0  1 -1
+          0 -1  0  -1  0  0   0  0 -1       1  0 -1   1  0  0   1 -1  0
+          0  1  0   0  1 -1  -1  1  0      -1  0  1   0 -1  1   0  0  1
+         -1  0  0   0  0 -1   0 -1  0       1  0  0   1 -1  0   1  0 -1
+          0  1 -1  -1  1  0   0  1  0       0 -1  1   0  0  1  -1  0  1
+          0  0 -1   0 -1  0  -1  0  0       1 -1  0   1  0 -1   1  0  0
+         -1  1  0   0  1  0   0  1 -1       0  0  1  -1  0  1   0 -1  1
+         -1  0  0   0 -1  0   0  0 -1       1  0  0   1  0 -1   1 -1  0
+          0  1 -1   0  1  0  -1  1  0       0 -1  1  -1  0  1   0  0  1
+          0  0 -1  -1  0  0   0 -1  0       1 -1  0   1  0  0   1  0 -1
+         -1  1  0   0  1 -1   0  1  0       0  0  1   0 -1  1  -1  0  1
+          0 -1  0   0  0 -1  -1  0  0       1  0 -1   1 -1  0   1  0  0
+          0  1  0  -1  1  0   0  1 -1      -1  0  1   0  0  1   0 -1  1
+          0  1  0   1  0  0   0  0  1      -1  0  1  -1  0  0  -1  1  0
+          0 -1  0   0 -1  1   1 -1  0       1  0 -1   0  1 -1   0  0 -1
+          1  0  0   0  0  1   0  1  0      -1  0  0  -1  1  0  -1  0  1
+          0 -1  1   1 -1  0   0 -1  0       0  1 -1   0  0 -1   1  0 -1
+          0  0  1   0  1  0   1  0  0      -1  1  0  -1  0  1  -1  0  0
+          1 -1  0   0 -1  0   0 -1  1       0  0 -1   1  0 -1   0  1 -1
+ tnons 144*0.0
+ typat  1 2
+ znucl  12 8
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/12mg.pspnc, PseudosTM_pwteter/8o.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t38.abo, tolnlines = 12, tolabs = 6.000e-08, tolrel = 1.001e+00, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC, DFPT
+#%% authors = Unknown
+#%% description = 
+#%%   MgO FCC crystal, with very low cut-off, and 32 k points. 
+#%%   Pseudopotentials WITH a non-linear core correction.
+#%%   Compute the dynamical matrix at q(0.5 0.5 0.5) .
+#%%   Also test the non-type-ordering of atoms.
+#%%<END TEST_INFO>

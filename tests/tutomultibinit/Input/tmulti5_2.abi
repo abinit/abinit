@@ -1,0 +1,59 @@
+##############################################################################
+#Test for multibinit, read xml  and run spin dynamics. MvT calculation.
+##############################################################################
+prt_model = 0
+
+#--------------------------------------------------------------
+#Monte carlo / molecular dynamics
+#--------------------------------------------------------------
+dynamics =  0    ! disable molecular dynamics
+
+ncell =   6 6 6  ! size of supercell. Is it too small?
+#-------------------------------------------------------------
+#Spin dynamics
+#------------------------------------------------------------
+spin_dynamics=1  ! enable spin dynamics
+spin_mag_field= 0.0 0.0 0.0   ! external magnetic field
+spin_ntime_pre =10000          ! warming up steps. Is it enough?
+spin_ntime =10000             ! number of steps. Is it enough?
+spin_nctime=100               ! number of  time steps between two nc file write
+spin_dt=1e-16 s               ! time step. Is it too small?
+spin_init_state = 3           ! User specified initial state. 
+spin_init_qpoint=  0 0 0      ! Initial spin wave vector set to 0. FM. May casuse some trouble
+
+spin_var_temperature=1        ! switch on variable temperature calculation
+spin_temperature_start=0      ! starting point of temperature
+spin_temperature_end=900      ! ending point of temperature. smaller than Neel T?
+spin_temperature_nstep= 10    ! number of temperature steps. Enough?
+
+spin_sia_add = 1              ! add a single ion anistropy (SIA) term?
+spin_sia_k1amp = 1e-6         ! amplitude of SIA (in Ha), how large should be used?
+spin_sia_k1dir = 0.0 0.0 1.0  ! direction of SIA
+
+spin_calc_thermo_obs = 1      ! calculate thermodynamics related observables
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% need_cpp_vars = HAVE_XML
+#%% system_xml = tmulti5_2.xml
+#%% exclude_builders = .*_nag_7.0_.*
+#%% coeff_xml = no
+#%% [files]
+#%% files_to_test = 
+#%%   tmulti5_2.abo, tolnlines = 4, tolabs = 1e+2, tolrel = 0.4, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. He
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   read xml  and run spin dynamics. MvT calculation. 
+#%%   LaFeO3 Pnma with U(Fe)=4 eV; PBEsol; exchange parameter generated with TB2J.  
+#%%   Parameters in this file does not give reasonable results and should be
+#%%   tuned, which is designed for the tutorial. It also serve the purpose  of
+#%%   limiting the test run to a short enough time.
+#%%<END TEST_INFO>
+

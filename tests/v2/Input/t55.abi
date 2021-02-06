@@ -1,0 +1,69 @@
+# Test different features of the symmetry finder
+
+ ndtset 4
+
+#Handling of non-primitive cells
+   acell1 1.0 1.0 1.0
+ chkprim1 0
+   rprim1 4.0 0.0 0.0
+          0.0 5.0 0.0
+          0.0 0.0 6.0
+    xred1 0.0 0.0 0.0
+          0.0 0.0 0.5
+
+   acell2 1.0 1.0 1.0
+ chkprim2 0
+   rprim2 4.0 0.0 0.0
+          0.0 5.0 0.0
+          0.2 0.0 6.0
+    xred2 0.0 0.0 0.0
+          0.5 0.5 0.0
+
+#Handling a glide plane
+   acell3 4.0 5.0 6.0
+    xred3 0.0 0.0 -0.2
+          0.0 0.5  0.2
+
+#Handling screw axis
+   acell4 5.0 5.0 6.0
+  angdeg4 90 90 120
+   natom4 3
+    xred4 0.5  0.0  0.0
+          0.0  0.5  0.333333333333
+         -0.5 -0.5  0.666666666666
+
+#Common data (completely silly)
+ ecut 3.0
+ intxc 1
+ kptopt 0
+ kpt 3*0.0
+ natom 2
+ nkpt 1
+ nsym 0
+ nstep 1
+ ntypat  1
+ toldff 1.d-8
+ typat  1 1 1
+ wtk 1.0d0
+ znucl  12.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/12mg.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t55.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Test different additional features of the symmetry finder :
+#%%   - handling non-primitive cells
+#%%   - handling glide planes
+#%%   - handling screw axes
+#%%<END TEST_INFO>

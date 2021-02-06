@@ -1,0 +1,48 @@
+#   Si in Box : comparison with the result of Corning code (LLN version).
+
+ acell 3*6
+ diemac 1.0d0
+ diemix 1.0d0
+ ecut 15
+ enunit 2
+ intxc 1
+ kptopt 0
+
+ kpt   3*0.0   kptnrm 1
+ natom  1 nband 4
+ nkpt  1
+ nline 3  nstep 2
+ nsym  1 ntypat  1
+ occopt 0 occ 1*2.0d0 3*1.33333333333333d0
+ prtvol 10
+ rprim  1 0 0 0 1 0 0 0 1
+ symrel
+       1  0  0    0  1  0    0  0  1
+ tnons  3*0d0
+ tolwfr 1.0d-16
+ typat  1
+ wtk   1
+ xred  0.0 0.0 0.0
+ znucl 8
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/8o.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = t36.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Isolated oxygen atom, with pspnc pseudopotential. 6 6 6 box and 15 Ha, for speed.
+#%%   Spherically symmetric, without spin-polarization. ixc=1.
+#%%   It has non-linear core correction, but because of an insufficient cut-off,
+#%%   and the use of intxc=1, the density is slightly negative at few points. 
+#%%   The present test makes sure that this is properly handled.
+#%%<END TEST_INFO>

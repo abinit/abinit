@@ -1,0 +1,73 @@
+#  H2 molecule
+
+ndtset 2
+
+#Dataset 1 : ground state density, relaxation
+nqpt1       0
+ieig2rf1    0
+smdelta1    0
+rfphon1     0
+getwfk1     0          # Use GS wave functions from dataset1
+ionmov1     2
+ntime1      5
+getxcart1   0
+tolmxf1     1.0e-9
+
+
+nqpt        1
+ieig2rf     1
+bdeigrf     2
+smdelta     1
+getxcart    1
+getwfk      1          # Use GS wave functions from dataset1
+kptopt      3          # Need full k-point set for finite-Q response
+rfphon      1          # Do phonon response
+rfatpol     1 2        # Treat displacements of all atoms
+rfdir       1 1 1      # Do all directions (symmetry will be used)
+
+#Dataset 2 : phonon frequencies and band corrections
+qpt2   0.0 0.0 0.0
+
+#Size-dependent parameters
+ acell 15 2*10
+
+ natom  2
+ typat  1 1
+ xcart    -0.7 0.0 0.0    # Triplet giving the cartesian coordinates of atom 1, in Bohr
+           0.7 0.0 0.0    # Triplet giving the cartesian coordinates of atom 2, in Bohr
+
+ nband 2
+
+# Miscellaneous
+ nkpt 1
+ ngkpt 1 1 1
+ shiftk 0.0 0.0 0.0
+ ntypat  1
+ znucl 1
+ diemac 2.0d0
+ ecut 20.00
+ enunit 2
+ nstep 10
+ nsym 1
+ tolwfr 1.0d-18
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/1h.1.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t68.abi, t69.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t68.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   H2 molecule in a reasonably large box
+#%%   Compute the Fan and Diagonal Debye-Waller corrections to the eigenenergies.
+#%%<END TEST_INFO>

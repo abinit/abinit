@@ -28,7 +28,7 @@ The AGATE software, used to make the analysis of the results, is also required f
     sudo add-apt-repository ppa:piti-diablotin/abiout
     sudo apt-get update && sudo apt-get install abiout
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 The Harmonic part of the lattice model
 
@@ -87,31 +87,31 @@ In this tutorial, we will take as an example of a material without lattice insta
 The file ~abinit/tests/tutomultibinit/Input/tmulti1_1.files lists the file names and root names.
 You can copy it in the **Work_latticeModel** directory and look at this file content, you should see:
 
-      tutomulti1_1.in
-      tutomulti1_1.out
+      tutomulti1_1.abi
+      tutomulti1_1.abo
       tmulti1_DDB
 
 As mentioned in the guide of [[help:multibinit | MULTIBINIT]]:
 
-   * "tutomulti1_1.in" is the main input file
-   * "tutomulti1_1.out" is the main output
+   * "tutomulti1_1.abi" is the main input file
+   * "tutomulti1_1.abo" is the main output
    * "tmulti1_DDB" is the DDB which contains the system definition and the list of the energy derivatives
 
 It is now time to copy the file ~abinit/tests/tutomultibinit/Input/tmulti1_DDB and ~abinit/tests/tutomultibinit/Input/tmulti1_DDB in your **Work_latticeModel** directory.
 You should read carefully the input file:
 
-{% dialog tests/tutomultibinit/Input/tmulti1_1.in %}
+{% dialog tests/tutomultibinit/Input/tmulti1_1.abi %}
 
 You should now run (it would take less than a second):
 
     multibinit < tmulti1_1.files > tmulti1_1_stdout
 
-The resulting output file, tmulti1_1.out, should be similar to the one below.
-{% dialog tests/tutomultibinit/Refs/tmulti1_1.out %}
+The resulting output file, tmulti1_1.abo, should be similar to the one below.
+{% dialog tests/tutomultibinit/Refs/tmulti1_1.abo %}
 
 
 The run you performed was aimed at reading the DDB file, generating the short range interatomic force constants and extract all the other informations related to the harmonic part of the model.
-You can find inside the output file, the Born effective charges, the clamped-ion elastic tensor and the internal strain coupling parameters. Take some time to open and read the tmulti1_1.out file.
+You can find inside the output file, the Born effective charges, the clamped-ion elastic tensor and the internal strain coupling parameters. Take some time to open and read the tmulti1_1.abo file.
 If the DDB file is complete, the generation of the XML file requires only few input variables:
 
    * [[multibinit:prt_model]] = 1 $\Longrightarrow$ the generation of the XML file is activated, takes the time to read the possible options for [[multibinit:prt_model]].
@@ -122,25 +122,25 @@ After this run, you should see in your directory tmulti1_1_model.xml, you can ta
 
 Your XML file is now ready and you can use it as input for MULTIBINIT. To do that, copy now in your work directory the file ~abinit/tests/tutomultibinit/Input/tmulti1_2.files; you should see inside it:
 
-      tutomulti1_2.in
-      tutomulti1_2.out
+      tutomulti1_2.abi
+      tutomulti1_2.abo
       tmulti1_1_model.xml
 
-Here, the DDB file is replaced by the XML file. Do not forget to copy the ~abinit/tests/tutomultibinit/Input/tutomulti1_2.in in your directory before you run:
+Here, the DDB file is replaced by the XML file. Do not forget to copy the ~abinit/tests/tutomultibinit/Input/tutomulti1_2.abi in your directory before you run:
 
     multibinit < tmulti1_2.files > tmulti1_2_stdout
 
-In tutomulti1_2.in, [[multibinit:prt_model]] is still set to one so multibinit will write again the model XML file, which is useless at this stage, being a copy of the one read as input. Set this input variable to 0 and, in this case, MULTIBINIT will just read (and not write) the XML file.
+In tutomulti1_2.abi, [[multibinit:prt_model]] is still set to one so multibinit will write again the model XML file, which is useless at this stage, being a copy of the one read as input. Set this input variable to 0 and, in this case, MULTIBINIT will just read (and not write) the XML file.
 
 With the two last examples, we have shown that MULTIBINIT is able to read either a DDB file or a XML as inputs for the system definition and the harmonic part of the potential.
 
 We can now run our *first dynamics*: you can copy the files ~abinit/tests/tutomultibinit/Input/tutomulti1_3.* in your work directly and have a look them.
 
-{% dialog tests/tutomultibinit/Input/tmulti1_3.in %}
+{% dialog tests/tutomultibinit/Input/tmulti1_3.abi %}
 
 The simulation starts from the DDB to correctly account for the dipole-dipole interactions. You can visualize your dynamics with the agate software:
 
-    agate tmulti1_3.out_HIST.nc
+    agate tmulti1_3.abo_HIST.nc
 
 Also try to use the effective potential from the xml file instead, in which the dipole-dipole interactions were not corrected. What do you see when you visualize the track?
 

@@ -110,10 +110,10 @@ subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
  size = sum(send_counts)
  if(size /=sum(rec_counts))then
    msg = 'the total sizes of sent and receved msg are not equal'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  endif
 
- ABI_ALLOCATE(totbuff,(size))
+ ABI_MALLOC(totbuff,(size))
    !--join all the vector in to a single one
    call MPI_ALLGATHERV(xval,send_counts(me),MPI_DOUBLE_PRECISION,totbuff,&
 &                      send_counts,send_displs,MPI_DOUBLE_PRECISION,spaceComm,ier)
@@ -124,7 +124,7 @@ subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
 &                    recvbuf,rec_counts(me),MPI_DOUBLE_PRECISION,&
 &                    0,spaceComm,ier)
 
-   ABI_DEALLOCATE(totbuff)
+   ABI_FREE(totbuff)
  end if
 #endif
 end subroutine xredistribute_mpi_dp
@@ -183,10 +183,10 @@ subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
  size = sum(send_counts)
  if(size /=sum(rec_counts))then
    msg = 'the total sizes of sent and receved msg are not equal'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  endif
 
- ABI_ALLOCATE(totbuff,(size))
+ ABI_MALLOC(totbuff,(size))
    !--join all the vector in to a single one
    call MPI_ALLGATHERV(xval,send_counts(me),MPI_DOUBLE_PRECISION,totbuff,&
 &                      send_counts,send_displs,MPI_DOUBLE_PRECISION,spaceComm,ier)
@@ -196,7 +196,7 @@ subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
    call MPI_SCATTERV(totbuff,rec_counts,rec_displs,MPI_DOUBLE_PRECISION,&
 &                    recvbuf,rec_counts(me),MPI_DOUBLE_PRECISION,&
 &                    0,spaceComm,ier)
-   ABI_DEALLOCATE(totbuff)
+   ABI_FREE(totbuff)
  end if
 #endif
 end subroutine xredistribute_mpi_2d_dp

@@ -199,7 +199,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  if (my_rank == master) then
    ! Accept WFK file in Fortran or netcdf format.
    if (nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
-     MSG_ERROR(sjoin("Cannot find GS WFK file:", ch10, msg))
+     ABI_ERROR(sjoin("Cannot find GS WFK file:", ch10, msg))
    end if
  end if
  call xmpi_bcast(wfk0_path, master, comm, ierr)
@@ -397,7 +397,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  !case ("paw_aeden")
 
  case default
-   MSG_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
+   ABI_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
  end select
 
  ! Free memory

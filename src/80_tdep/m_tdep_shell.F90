@@ -97,7 +97,7 @@ contains
     write(InVar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
     write(InVar%stdout,*) '         In the present calculation, the number of shells is:',Shell1at%nshell
     write(InVar%stdout,*) '         Action: increase nshell_max'
-    MSG_ERROR('The maximum number of shells allowed by the code is reached')
+    ABI_ERROR('The maximum number of shells allowed by the code is reached')
   end if  
 
 
@@ -229,7 +229,7 @@ contains
     write(InVar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
     write(InVar%stdout,*) '         In the present calculation, the number of shells is:',Shell2at%nshell
     write(InVar%stdout,*) '         Action: increase nshell_max'
-    MSG_ERROR('The maximum number of shells allowed by the code is reached')
+    ABI_ERROR('The maximum number of shells allowed by the code is reached')
   end if
 
 
@@ -514,7 +514,7 @@ contains
           nshell_tmp=nshell_tmp+1
 !         Check that the new shell is allowed
           if (nshell_tmp.gt.Shell3at%nshell) then
-            MSG_ERROR('The shell number index is greater than the shell number max computed previously')
+            ABI_ERROR('The shell number index is greater than the shell number max computed previously')
           end if  
           Shell3at%iatref(nshell_tmp)=iatom
           Shell3at%jatref(nshell_tmp)=jatom
@@ -543,7 +543,7 @@ contains
 !FB          write(6,*) 'For ishell and eatom=',ishell,watom
 !FB          write(6,*) '  --> the number of interactions in the shell is=',interactions(watom,ishell)
           if (interactions(watom,ishell).gt.Shell3at%neighbours(watom,ishell)%n_interactions) then
-            MSG_ERROR('The interaction number index is greater than the interaction number max computed previously')
+            ABI_ERROR('The interaction number index is greater than the interaction number max computed previously')
           end if
           Shell3at%neighbours(watom,ishell)%atomj_in_shell(interactions(watom,ishell))=xatom
           Shell3at%neighbours(watom,ishell)%atomk_in_shell(interactions(watom,ishell))=yatom
@@ -568,7 +568,7 @@ contains
             write(std_out,'(a,2(1x,i5))') 'For ishell and iatom =',ishell,iatom
             write(std_out,'(a,i5,a,i5,a,i5)') '  the interactions ',ninter,&
 &             ' and ',tmpinter,' have both the same symmetry isym=',Shell3at%neighbours(iatom,ishell)%sym_in_shell(  ninter)
-            MSG_ERROR('Some interactions are equals due to the symmetry')
+            ABI_ERROR('Some interactions are equals due to the symmetry')
           end if
         end do
       end do
@@ -579,7 +579,7 @@ contains
     do iatom=1,natom
       if (Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%n_interactions.ne.&
 &         Shell3at%neighbours(                        iatom,ishell)%n_interactions) then
-        MSG_ERROR('The interaction number index is not equal to the interaction number max computed previously')
+        ABI_ERROR('The interaction number index is not equal to the interaction number max computed previously')
       end if
 !FB      do ninter=1,Shell3at%neighbours(iatom,ishell)%n_interactions
 !FB        jatom=Shell3at%neighbours(iatom,ishell)%atomj_in_shell(ninter)
@@ -619,7 +619,7 @@ contains
 !FB            write(6,*) Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%atomj_in_shell(tmpinter),Shell3at%neighbours(iatom,ishell)%atomj_in_shell(tmpinter)
 !FB            write(6,*) Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%atomk_in_shell(tmpinter),Shell3at%neighbours(iatom,ishell)%atomk_in_shell(tmpinter)
 !FB	  end do
-!FB          MSG_ERROR('Some symmetries are not found')
+!FB          ABI_ERROR('Some symmetries are not found')
 !FB	end if
 !FB      end do
     end do

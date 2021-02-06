@@ -1,0 +1,32 @@
+#---------------------------------------------------------------
+#Print the model into XML file:
+#---------------------------------------------------------------
+prt_model = 1
+
+#---------------------------------------------------------------
+#Generation of the short-range interaction
+#---------------------------------------------------------------
+ngqpt =  2  2  2    # Mesh of Q-points in the DDB
+
+#---------------------------------------------------------------
+#Generation of the dipole-dipole interation
+#---------------------------------------------------------------
+dipdip  = 0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% input_ddb = tmulti1_DDB
+#%% [files]
+#%% files_to_test =
+#%%   tmulti1_1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   tmulti1_1_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = A. MARTIN
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   read ddb and generate effective potential
+#%% topics = LatticeModel
+#%%<END TEST_INFO>

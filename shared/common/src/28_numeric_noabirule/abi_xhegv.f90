@@ -177,14 +177,14 @@ subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  if (ABI_LINALG_PLASMA_ISON.and.LSAME(jobz,'N')) then
 #if defined HAVE_LINALG_PLASMA
    if (eigen_c_lwork==0) then
-     ABI_ALLOCATE(work,(n**2))
+     ABI_MALLOC(work,(n**2))
    end if
    call PLASMA_Alloc_Workspace_chegv(n,n,plasma_work,info)
    info = call PLASMA_chegv(itype,jobz_plasma(jobz),uplo_plasma(uplo),n,a,lda,b,ldb,w,&
 &                           plasma_work,c_loc(work),n)
    call PLASMA_Dealloc_handle(plasma_work,info)
    if (eigen_c_lwork==0) then
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
    end if
 #endif
 
@@ -192,17 +192,17 @@ subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  else
    if (eigen_c_lwork==0) then
      lwork=2*n-1
-     ABI_ALLOCATE(work,(lwork))
+     ABI_MALLOC(work,(lwork))
    end if
    if (eigen_c_lrwork==0) then
-     ABI_ALLOCATE(rwork,(3*n-2))
+     ABI_MALLOC(rwork,(3*n-2))
    end if
    call chegv(itype,jobz,uplo,n,a,lda,b,ldb,w,work,lwork,rwork,info)
    if (eigen_c_lwork==0) then
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
    end if
    if (eigen_c_lrwork==0) then
-     ABI_DEALLOCATE(rwork)
+     ABI_FREE(rwork)
    end if
  end if
 
@@ -261,14 +261,14 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  if (ABI_LINALG_PLASMA_ISON.and.LSAME(jobz,'N')) then
 #if defined HAVE_LINALG_PLASMA
    if (eigen_z_lwork==0) then
-     ABI_ALLOCATE(work,(n**2))
+     ABI_MALLOC(work,(n**2))
    end if
    call PLASMA_Alloc_Workspace_zhegv(n,n,plasma_work,info)
    call PLASMA_zhegv(itype,jobz_plasma(jobz),uplo_plasma(uplo),n,a,lda,b,ldb,w,&
 &                    plasma_work,c_loc(work),n)
    call PLASMA_Dealloc_handle(plasma_work,info)
    if (eigen_z_lwork==0) then
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
    end if
 #endif
 
@@ -276,17 +276,17 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  else
    if (eigen_z_lwork==0) then
      lwork=2*n-1
-     ABI_ALLOCATE(work,(lwork))
+     ABI_MALLOC(work,(lwork))
    end if
    if (eigen_z_lrwork==0) then
-     ABI_ALLOCATE(rwork,(3*n-2))
+     ABI_MALLOC(rwork,(3*n-2))
    end if
    call zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w,work,lwork,rwork,info)
    if (eigen_z_lwork==0) then
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
    end if
    if (eigen_z_lrwork==0) then
-     ABI_DEALLOCATE(rwork)
+     ABI_FREE(rwork)
    end if
  end if
 

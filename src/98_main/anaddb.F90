@@ -116,7 +116,7 @@ program anaddb
  real(dp),allocatable :: qdrp_cart(:,:,:,:)
  character(len=10) :: procstr
  character(len=24) :: codename, start_datetime
- character(len=strlen) :: string
+ character(len=strlen) :: string, raw_string
  character(len=fnlen) :: filnam(8),elph_base_name,tmpfilename, phibz_prefix
  character(len=500) :: msg
  type(args_t) :: args
@@ -178,7 +178,7 @@ program anaddb
    ABI_CHECK((procstr(1:1)/='#'),'Bug: string length too short!')
    tmpfilename = trim(filnam(2)) // "_LOG_P" // trim(procstr)
    if (open_file(tmpfilename, msg, unit=std_out, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -200,16 +200,17 @@ program anaddb
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module
  if (iam_master) then
-   call instrng(filnam(1), lenstr, 1, strlen, string)
+   call instrng(filnam(1), lenstr, 1, strlen, string, raw_string)
    ! To make case-insensitive, map characters to upper case.
    call inupper(string(1:lenstr))
  end if
 
  call xmpi_bcast(string, master, comm, ierr)
+ call xmpi_bcast(raw_string, master, comm, ierr)
  call xmpi_bcast(lenstr, master, comm, ierr)
 
  ! Save input string in global variable so that we can access it in ntck_open_create
- INPUT_STRING = string
+ INPUT_STRING = raw_string
 
  ! Read the inputs
  call invars9(inp, lenstr, natom, string)
@@ -227,7 +228,7 @@ program anaddb
    tmpfilename = filnam(2)
    call isfile(tmpfilename,'new')
    if (open_file(tmpfilename,msg,unit=ab_out,form='formatted',status='new') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    rewind (unit=ab_out)
    call herald(codename,abinit_version,ab_out)
@@ -330,7 +331,7 @@ program anaddb
  iblok = ddb%get_dielt_zeff(crystal,inp%rfmeth,inp%chneut,inp%selectz,epsinf,zeff)
 
  ! Try to get epsinf, in case just the DDE are present
- if (iblok_epsinf == 0) then
+ if (iblok == 0) then
    iblok_epsinf = ddb%get_dielt(inp%rfmeth,epsinf)
  end if
 
@@ -340,7 +341,7 @@ program anaddb
      ' The DDB file does not contain the derivatives w.r.t. electric field perturbation. ',ch10,&
      ' The program will continue by setting the electronic dielectric tensor to 1. ',ch10
   ! call wrtout([ab_out], msg)
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  if (my_rank == master) then
@@ -388,13 +389,13 @@ program anaddb
         "relaxation at constant polarisation (Na Sai's method)",ch10,&
         'However, this was not found in the DDB.',ch10,&
         'Action: complete your DDB with the dynamical matrix at Gamma.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if ! iblok not found
 
    ! Extract the block with the total energy
    if (ddb%get_etotal(etotal) == 0) then
-     MSG_ERROR("DDB file does not contain GS etotal")
+     ABI_ERROR("DDB file does not contain GS etotal")
    end if
 
    ! Extract the block with the gradients
@@ -448,7 +449,7 @@ program anaddb
    ABI_MALLOC(rsus, (3*natom,3,3))
 
    if (ddb%get_dchidet(inp%ramansr,inp%nlflag,dchide,dchidt) == 0) then
-     MSG_ERROR("Cannot find block corresponding to non-linear optical susceptibilities in DDB file")
+     ABI_ERROR("Cannot find block corresponding to non-linear optical susceptibilities in DDB file")
    end if
 
    ! Save to the netcdf
@@ -609,7 +610,7 @@ program anaddb
 !**********************************************************************
  call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(8),comm)
 
- 
+
  ! Interpolate the DDB onto the first list of vectors and write the file.
  if (inp%prtddb == 1 .and. inp%ifcflag == 1) then
    call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
@@ -635,18 +636,18 @@ program anaddb
 ! and related properties: mode effective charges, oscillator strength
 ! - Raman tensor (at q=0 with only TO modes) and EO coef. (nlflag)
 !**********************************************************************
- 
+
  ABI_MALLOC(fact_oscstr, (2,3,3*natom))
  ABI_MALLOC(lst,(inp%nph2l+1))
  lst(:)=zero
 
  ! Print the electronic contribution to the dielectric tensor
  ! It can be extracted directly from the DDB if perturbation with E-field is present
- if (inp%dieflag/=0 .or. inp%nph2l/=0 .or. inp%nlflag==1) then
- 
+ if ((inp%dieflag/=0 .and. inp%dieflag/=2) .or. inp%nph2l/=0 .or. inp%nlflag==1) then
+
   !***************************************************************
   ! Generates the dynamical matrix at Gamma
-  ! TODO: Check if we can avoid recomputing the phonon freq and eigendispla at Gamma becasue 
+  ! TODO: Check if we can avoid recomputing the phonon freq and eigendispla at Gamma becasue
   ! it is already done before in this routine. (EB)
   ! The problem is that it is done through mkphbs, which has only printing and does not retrun anything as out... (EB)
 
@@ -678,7 +679,7 @@ program anaddb
     mpert,msym,natom,nsym,ntypat,phfrq,qphnrm(1),qphon,&
     Crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
 
-  ! calculation of the oscillator strengths, mode effective charge and 
+  ! calculation of the oscillator strengths, mode effective charge and
   ! dielectric tensor, frequency dependent dielectric tensor (dieflag)
   ! and mode by mode decomposition of epsilon if dieflag==3
   if (inp%dieflag/=0) then
@@ -688,14 +689,14 @@ program anaddb
        ' The DDB file does not contain the derivatives w.r.t. electric field perturbation. ',ch10,&
        ' This is mandatory to calculate the dielectric constant,',ch10,&
        ' Please check your DDB file or use dieflag=0.',ch10
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
 
     write(msg, '(a,(80a),a)' ) ch10,('=',ii=1,80),ch10
     call wrtout([std_out, ab_out], msg)
 
     call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-      ab_out,lst,mpert,natom,0,phfrq,comm,ana_ncid) 
+      ab_out,lst,mpert,natom,0,phfrq,comm,ana_ncid)
   end if
 
 end if ! dieflag!=0 or inp%nph2l/=0
@@ -800,10 +801,10 @@ end if ! condition on nlflag
    if (inp%dieflag/=2 .and. inp%dieflag/=0) then
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
        ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
-   end if 
- end if ! nph2l/=0   
+   end if
+ end if ! nph2l/=0
  ! End of second list of wv stuff (nph2l/=0)
-   
+
 
  ABI_FREE(fact_oscstr)
  ABI_FREE(lst)
@@ -832,7 +833,7 @@ end if ! condition on nlflag
 
      call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      if (iblok == 0) then
-       MSG_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
+       ABI_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
      end if
 
      ! then print the internal stain tensor
@@ -866,7 +867,7 @@ end if ! condition on nlflag
      ! for both diagonal and shear parts
      call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      if (iblok == 0) then
-       MSG_ERROR("DDB file must contain both uniaxial and shear strain when elaflag != 0, Check your calculations")
+       ABI_ERROR("DDB file must contain both uniaxial and shear strain when elaflag != 0, Check your calculations")
      end if
 
      ! print the elastic tensor
@@ -895,7 +896,7 @@ end if ! condition on nlflag
      ! for both diagonal and shear parts
      call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      if (iblok == 0) then
-       MSG_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
+       ABI_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
      end if
 
      ! then print out the piezoelectric constants

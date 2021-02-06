@@ -231,7 +231,7 @@ end subroutine tdep_make_inbox
     rprim(2,1)= 0.5d0 ; rprim(2,2)=-0.5d0 ; rprim(2,3)= 0.5d0
     rprim(3,1)= 0.5d0 ; rprim(3,2)= 0.5d0 ; rprim(3,3)=-0.5d0
   else
-    MSG_ERROR('THIS BRAVAIS IS NOT DEFINED')
+    ABI_ERROR('THIS BRAVAIS IS NOT DEFINED')
   end if
 ! Compute gprim and (transpose of gprim) gprimt
   call matr3inv(rprim,Lattice%gprimt)
@@ -275,21 +275,21 @@ end subroutine tdep_make_inbox
 !FB    end if
     if ((acell_unitcell(1).gt.acell_unitcell(3)).or.&
 &       (acell_unitcell(2).gt.acell_unitcell(3))) then
-      MSG_ERROR('You must set a,b <= c in the conventional lattice')
+      ABI_ERROR('You must set a,b <= c in the conventional lattice')
     end if
   else if ((InVar%bravais(1).eq.3).and.(InVar%bravais(2).eq.3)) then !C face centered orthorombique
     if (acell_unitcell(1).ge.acell_unitcell(2)) then
-      MSG_ERROR('You must set a < b in the conventional lattice')
+      ABI_ERROR('You must set a < b in the conventional lattice')
     end if
   else if (InVar%bravais(1).eq.6) then !hexagonal
     if(abs(acell_unitcell(1)-acell_unitcell(2)).gt.tol8) then
-      MSG_ERROR(' STOP: THE PRECISION ON THE LATTICE PARAMETERS IS NOT SUFFICIENT')
+      ABI_ERROR(' STOP: THE PRECISION ON THE LATTICE PARAMETERS IS NOT SUFFICIENT')
     end if
     acell_unitcell(2)=acell_unitcell(1)
   else if (InVar%bravais(1).eq.7) then !cubic
     if((abs(acell_unitcell(1)-acell_unitcell(2)).gt.tol8).or.&
 &      (abs(acell_unitcell(2)-acell_unitcell(3)).gt.tol8)) then
-      MSG_ERROR('THE PRECISION ON THE LATTICE PARAMETERS IS NOT SUFFICIENT')
+      ABI_ERROR('THE PRECISION ON THE LATTICE PARAMETERS IS NOT SUFFICIENT')
     end if
     acell_unitcell(2)=acell_unitcell(1)
     acell_unitcell(3)=acell_unitcell(1)
