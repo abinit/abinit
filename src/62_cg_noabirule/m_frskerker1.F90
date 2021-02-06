@@ -95,9 +95,9 @@ subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,die
    nspden=nspden_in
    ngfft=ngfft_in
    nfft=nfft_in
-   ABI_ALLOCATE(deltaW,(size(deltaW_in,1),size(deltaW_in,2)))
-   ABI_ALLOCATE(mat,(size(mat_in,1),size(mat_in,2)))
-   ABI_ALLOCATE(g2cart,(size(g2cart_in,1)))
+   ABI_MALLOC(deltaW,(size(deltaW_in,1),size(deltaW_in,2)))
+   ABI_MALLOC(mat,(size(mat_in,1),size(mat_in,2)))
+   ABI_MALLOC(g2cart,(size(g2cart_in,1)))
    deltaW=deltaW_in
    dielng=dielng_in
    mat=mat_in
@@ -135,9 +135,9 @@ subroutine frskerker1__end()
 !  ! set ok to false which prevent using the pf and dpf
    ok = .false.
 !  ! free memory
-   ABI_DEALLOCATE(deltaW)
-   ABI_DEALLOCATE(mat)
-   ABI_DEALLOCATE(g2cart)
+   ABI_FREE(deltaW)
+   ABI_FREE(mat)
+   ABI_FREE(g2cart)
   end if
 
  end subroutine frskerker1__end

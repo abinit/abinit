@@ -119,7 +119,7 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
  groupsize=0
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
 
  call initialize_DFT_local_fields(den%denspot, ixc, nsppol)
@@ -151,7 +151,7 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 !Aditional information.
  den%symObj = wvl%atoms%astruct%sym%symObj
 
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
 #else
  BIGDFT_NOTENABLED_ERROR()

@@ -65,7 +65,7 @@ contains
 subroutine end_sortph()
 
  if (allocated(eigvecLast))  then
-   ABI_DEALLOCATE(eigvecLast)
+   ABI_FREE(eigvecLast)
  end if
 
  if (ufreq /= -1) then
@@ -160,14 +160,14 @@ end do
    file_freq  = trim(filnam)//".freq" !---------------------------------------------------
    write(std_out,'(a,a)' )' sortph : opening file ',trim(file_freq)
    if (open_file(file_freq,msg,newunit=ufreq,STATUS='replace',ACTION='write') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    file_displ = trim(filnam)//".displ" !--------------------------------------------------
    write(std_out,'(a,a)' )' sortph : opening file ',trim(file_displ)
    if (open_file(file_displ,msg,newunit=udispl,STATUS='replace',ACTION='write') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
-   ABI_ALLOCATE(eigvecLast,(3*natom,3*natom))
+   ABI_MALLOC(eigvecLast,(3*natom,3*natom))
    phfrqNew(:)   =  phfrq(:)
    displNew(:,:) =  displIn(:,:)
    eigvecNew(:,:) = eigvecIn(:,:)

@@ -180,7 +180,7 @@ subroutine interpolator_init(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
    nvert = 1
  CASE DEFAULT
    write(msg,'(a,i0)') "Wrong interpolation method: ",method
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  END SELECT
 
  interpolator%nvert = nvert

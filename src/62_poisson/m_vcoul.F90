@@ -587,7 +587,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    test=COUNT(Vcp%pdir==1)
    ABI_CHECK((test==1),'Wrong pdir for cylinder')
    if (Vcp%pdir(3)/=1) then
-     MSG_ERROR("The cylinder must be along the z-axis")
+     ABI_ERROR("The cylinder must be along the z-axis")
    end if
 
    call cutoff_cylinder(Qmesh%nibz,Qmesh%ibz,ng,Gsph%gvec,Vcp%rcut,Vcp%hcyl,Vcp%pdir,&
@@ -603,7 +603,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      ABI_MALLOC(qfit,(3,npt))
      ABI_MALLOC(vcfit,(1,npt))
      if (Qmesh%nibz==1) then
-       MSG_ERROR("nqibz == 1 not supported when Beigi's method is used")
+       ABI_ERROR("nqibz == 1 not supported when Beigi's method is used")
      endif
      qfit(:,:)=zero
      step=half/(npt*(Qmesh%nibz-1))              ; qfit(3,:)=arth(tol6,step,npt)
@@ -701,7 +701,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      ABI_MALLOC(qcart,(3,npt))
      ABI_MALLOC(vcfit,(1,npt))
      if (Qmesh%nibz==1) then
-       MSG_ERROR("nqibz == 1 not supported when Beigi's method is used")
+       ABI_ERROR("nqibz == 1 not supported when Beigi's method is used")
      endif
      qfit(:,:)=zero
      qcart(:,:)=zero
@@ -948,7 +948,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    Vcp%i_sz=pi*Vcp%rcut**2 ! Final result stored here
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Unknown cutoff mode:',Vcp%mode))
+   ABI_BUG(sjoin('Unknown cutoff mode:',Vcp%mode))
  END SELECT
  !
  ! === Store final results in complex array ===
@@ -1189,7 +1189,7 @@ subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
    filnam='_VCoulFT_'
    call isfile(filnam,'new')
    if (open_file(filnam,msg,newunit=unt,status='new',form='formatted') /=0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(unt,'(a,i3,a,i6,a)')&
 &    '#   |q+G|       q-point (Tot no.',nqibz,')        Gvec (',ng,')     vc_bare(q,G)    vc_cutoff(q,G) '
@@ -1263,7 +1263,7 @@ subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
    filnam='_VCoulR_'
    call isfile(filnam,'new')
    if (open_file(filnam,msg,newunit=unt,status='new',form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(unt,'(a)')'# length  vc_bare(r)   vc_cut(r) '
    do ir=1,nr
@@ -1404,7 +1404,7 @@ subroutine vcoul_print(Vcp,unit,prtvol,mode_paral)
    call wrtout(my_unt,msg,my_mode)
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Unknown cutoff mode: ', Vcp%mode))
+   ABI_BUG(sjoin('Unknown cutoff mode: ', Vcp%mode))
  END SELECT
 
  if (Vcp%nqlwl>0) then
@@ -1479,13 +1479,13 @@ function K0cos_dy_r0(xx)
  xx_=xx; yx=SQRT(r0_**2-xx**2)
  call quadrature(K0cos,-hb_,-yx,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
  if (ierr/=0) then
-   MSG_ERROR("Accuracy not reached")
+   ABI_ERROR("Accuracy not reached")
  end if
  K0cos_dy_r0=quad
 
  call quadrature(K0cos,+yx,+hb_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
  if (ierr/=0) then
-   MSG_ERROR("Accuracy not reached")
+   ABI_ERROR("Accuracy not reached")
  end if
 
  K0cos_dy_r0=quad+K0cos_dy_r0
@@ -1514,7 +1514,7 @@ function K0cos_dth_r0(rho)
  rho_=rho
  call quadrature(Fcos_th,zero,two_pi,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
  if (ierr/=0) then
-   MSG_ERROR("Accuracy not reached")
+   ABI_ERROR("Accuracy not reached")
  end if
 
  arg=qpg_para_*rho_
@@ -1567,7 +1567,7 @@ function K0fit(mq,nn) result(vals)
  ! *************************************************************************
 
  if (nn>8.or.nn<1) then
-   MSG_ERROR("nn>8.or.nn<1 not implemented")
+   ABI_ERROR("nn>8.or.nn<1 not implemented")
  end if
 
  ! === Eq 9.8.5 in Abramovitz ===
@@ -1596,7 +1596,7 @@ function K0fit_int(mq,par,nn) result(integ)
  ! *************************************************************************
 
  if (nn>8.or.nn<1) then
-   MSG_ERROR("nn>8.or.nn<1 not implemented")
+   ABI_ERROR("nn>8.or.nn<1 not implemented")
  end if
 
  mqh=mq*half
@@ -1636,11 +1636,11 @@ function int_xmln(xx,mm)  result(res)
 ! *********************************************************************
 
  if (mm==-1) then
-   MSG_BUG('invalid value for mm')
+   ABI_BUG('invalid value for mm')
  end if
 
  if (xx<=zero) then
-   MSG_BUG(' invalid value for xx')
+   ABI_BUG(' invalid value for xx')
  end if
 
  res= (xx**(mm+1))/(mm+1) * (LOG(xx) - one/(mm+1))

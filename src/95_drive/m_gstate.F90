@@ -351,7 +351,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if(dtset%usepaw==0) then
 !    nullify PAW proj_G in NC case:
 #if defined HAVE_BIGDFT
-     ABI_DATATYPE_ALLOCATE(wvl%projectors%G,(dtset%ntypat))
+     ABI_MALLOC(wvl%projectors%G,(dtset%ntypat))
      do itypat=1,dtset%ntypat
        call nullify_gaussian_basis(wvl%projectors%G(itypat))
      end do
@@ -388,9 +388,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).or.dtset%usewvl==1) then
    results_gs%ngrvdw=dtset%natom
    if (allocated(results_gs%grvdw)) then
-     ABI_DEALLOCATE(results_gs%grvdw)
+     ABI_FREE(results_gs%grvdw)
    end if
-   ABI_ALLOCATE(results_gs%grvdw,(3,dtset%natom))
+   ABI_MALLOC(results_gs%grvdw,(3,dtset%natom))
    results_gs%grvdw(:,:)=zero
  end if
  call energies_init(results_gs%energies)
@@ -409,16 +409,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
 
 !Set up the basis sphere of planewaves
- ABI_ALLOCATE(npwarr,(dtset%nkpt))
+ ABI_MALLOC(npwarr,(dtset%nkpt))
  if (dtset%usewvl == 0 .and. dtset%tfkinfunc /= 2) then
-   ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
+   ABI_MALLOC(kg,(3,dtset%mpw*dtset%mkmem))
    call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg, &
 &   dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,&
 &   dtset%mpw,npwarr,npwtot,dtset%nsppol)
    call bandfft_kpt_init1(bandfft_kpt,dtset%istwfk,kg,dtset%mgfft,dtset%mkmem,mpi_enreg,&
 &   dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol)
  else
-   ABI_ALLOCATE(kg,(0,0))
+   ABI_MALLOC(kg,(0,0))
    npwarr(:) = 0
    npwtot(:) = 0
  end if
@@ -437,8 +437,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
-   ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
-   ABI_ALLOCATE(ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
+   ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
+   ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
    if (psps%useylm==1) then
      ylm_option=0
      if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) ylm_option=1 ! compute gradients of YLM
@@ -449,8 +449,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     npwarr,dtset%nsppol,ylm_option,rprimd,ylm,ylmgr)
   end if
  else
-   ABI_ALLOCATE(ylm,(0,0))
-   ABI_ALLOCATE(ylmgr,(0,0,0))
+   ABI_MALLOC(ylm,(0,0))
+   ABI_MALLOC(ylmgr,(0,0,0))
  end if
 
 !SCF history management (allocate it at first call)
@@ -537,7 +537,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Initialize band structure datatype
  if (dtset%paral_kgb/=0) then     !  We decide to store total npw in bstruct,
-   ABI_ALLOCATE(npwarr_,(dtset%nkpt))
+   ABI_MALLOC(npwarr_,(dtset%nkpt))
    npwarr_(:)=npwarr(:)
    call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
  else
@@ -547,7 +547,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  bstruct = ebands_from_dtset(dtset, npwarr_)
 
  if (dtset%paral_kgb/=0)  then
-   ABI_DEALLOCATE(npwarr_)
+   ABI_FREE(npwarr_)
  end if
  nullify(npwarr_)
 
@@ -555,7 +555,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (scf_history%history_size>=0) then
    pawrhoij => scf_history%pawrhoij_last
  else
-   ABI_DATATYPE_ALLOCATE(pawrhoij,(my_natom*psps%usepaw))
+   ABI_MALLOC(pawrhoij,(my_natom*psps%usepaw))
  end if
  if (psps%usepaw==1.and.has_to_init) then
    call initrhoij(dtset%pawcpxocc,dtset%lexexch,&
@@ -594,9 +594,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      "The number of eigenvectors cannot be greater that the size of the Hamiltonian!",ch10,&
      "Action: decrease nband or, alternatively, increase ecut"
      if (dtset%ionmov/=23) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      else
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
 
    else if (dtset%mband >= 0.9 * npwmin) then
@@ -605,7 +605,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     "Number of bands nband= ",dtset%mband," >= 0.9 * maximum number of planewaves= ",0.9*npwmin,ch10,&
 &     "The problem is ill-defined and the GS algorithm will show numerical instabilities!",ch10,&
 &     "Assume experienced user. Execution will continue."
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end if
 
@@ -622,10 +622,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    BIGDFT_NOTENABLED_ERROR()
 #endif
  end if
- ABI_ALLOCATE(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_ALLOCATE(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_ALLOCATE(indsym,(4,dtset%nsym,dtset%natom))
- ABI_ALLOCATE(symrec,(3,3,dtset%nsym))
+ ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_MALLOC(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_MALLOC(indsym,(4,dtset%nsym,dtset%natom))
+ ABI_MALLOC(symrec,(3,3,dtset%nsym))
  irrzon(:,:,:)=0
  phnons(:,:,:)=zero
  indsym(:,:,:)=0
@@ -671,7 +671,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (cnt == 0) then
    mcg = 0
    write(msg,"(2(a,i0))")"rank: ",mpi_enreg%me, "does not have wavefunctions to treat. Setting mcg to: ",mcg
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  if (dtset%usewvl == 0 .and. dtset%mpw > 0 .and. cnt /= 0)then
@@ -682,12 +682,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
 &     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
 &     "to decrease the memory requirements. Consider also OpenMP threads."
-     MSG_ERROR_NOSTOP(msg,ii)
+     ABI_ERROR_NOSTOP(msg,ii)
      write (msg,'(5(a,i0), 2a)')&
 &     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
 &     ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
 &     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -696,10 +696,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    eigen => scf_history%eigen(:,1)
  else
    ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
-   ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   ABI_MALLOC(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  end if
 
- ABI_ALLOCATE(resid,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(resid,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen(:)=zero ; resid(:)=zero
 !mpi_enreg%paralbd=0 ; ask_accurate=0
  ask_accurate=0
@@ -783,18 +783,18 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      write(msg, '(a,a,a)' )&
 &     'It is not yet possible to use non-zero restartxf,',ch10,&
 &     'in parallel, when localrdwf=0. Sorry for this ...'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
-   ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,0))
+   ABI_MALLOC(ab_xfh%xfhist,(3,dtset%natom+4,2,0))
    call outxfhist(ab_xfh,dtset%natom,2,wff1,ios)
-   ABI_DEALLOCATE(ab_xfh%xfhist)
+   ABI_FREE(ab_xfh%xfhist)
 
    if(ios>0)then
      write(msg,'(a,a,a)')&
 &     'An error occurred reading the input wavefunction file,',ch10,&
 &     'with restartxf=1.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else if(ios==0)then
      write(msg, '(a,a,i4,a)' )ch10,&
 &     ' gstate : reading',ab_xfh%nxfh,' (x,f) history pairs from input wf file.'
@@ -809,7 +809,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !be computed, governed by dtset%ntime, and some additional pairs
 !(needed when it will be possible to use xfhist for move.f)
  ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5
- ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
+ ABI_MALLOC(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
  ab_xfh%xfhist(:,:,:,:) = zero
 !WARNING : should check that the number of atoms in the wf file and natom are the same
 
@@ -836,14 +836,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !### 07. Calls setup2
 
 !Further setup
- ABI_ALLOCATE(start,(3,dtset%natom))
+ ABI_MALLOC(start,(3,dtset%natom))
  call setup2(dtset,npwtot,start,wvl%wfs,xred)
 
 !Allocation of previous atomic positions
  if (scf_history%history_size>=0) then
    xred_old => scf_history%xred_last
  else
-   ABI_ALLOCATE(xred_old,(3,dtset%natom))
+   ABI_MALLOC(xred_old,(3,dtset%natom))
  end if
  if (has_to_init) xred_old=xred
 
@@ -864,10 +864,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 ! End CP modified
 & (dtset%iscf>0 .or. dtset%iscf==-3) .and. dtset%positron/=1 ) then
 
-   ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
 !  Do not take into account the possible STM bias
-! CP modified 
+! CP modified
 !   call newocc(doccde,eigen,results_gs%energies%entropy,&
 !&   results_gs%energies%e_fermie,&
 !&   dtset%spinmagntarget,dtset%mband,dtset%nband,&
@@ -881,7 +881,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 ! End CP modified
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
-   ABI_DEALLOCATE(doccde)
+   ABI_FREE(doccde)
 
 !  Transfer occupations to bigdft object:
    if(dtset%usewvl==1 .and. .not. wvlbigdft) then
@@ -899,9 +899,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Definition of atindx array
 !Generate an index table of atoms, in order for them to be used type after type.
- ABI_ALLOCATE(atindx,(dtset%natom))
- ABI_ALLOCATE(atindx1,(dtset%natom))
- ABI_ALLOCATE(nattyp,(psps%ntypat))
+ ABI_MALLOC(atindx,(dtset%natom))
+ ABI_MALLOC(atindx1,(dtset%natom))
+ ABI_MALLOC(nattyp,(psps%ntypat))
  indx=1
  do itypat=1,psps%ntypat
    nattyp(itypat)=0
@@ -917,7 +917,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Compute structure factor phases for current atomic pos:
  if ((.not.read_wf_or_den).or.(scf_history%history_size>0.and.has_to_init)) then
-   ABI_ALLOCATE(ph1df,(2,3*(2*mgfftf+1)*dtset%natom))
+   ABI_MALLOC(ph1df,(2,3*(2*mgfftf+1)*dtset%natom))
    call getph(atindx,dtset%natom,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,xred)
  end if
 
@@ -1020,7 +1020,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (dtset%usefock==1)  usecprj=1
  end if
  if (usecprj==0) then
-   ABI_DATATYPE_ALLOCATE(cprj,(0,0))
+   ABI_MALLOC(cprj,(0,0))
  end if
  if (usecprj==1) then
    mband_cprj=dtset%mband;if (dtset%paral_kgb/=0) mband_cprj=mband_cprj/mpi_enreg%nproc_band
@@ -1028,9 +1028,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Was allocated above for valgrind sake so should always be true (safety)
    if (allocated(cprj)) then
      call pawcprj_free(cprj)
-     ABI_DATATYPE_DEALLOCATE(cprj)
+     ABI_FREE(cprj)
    end if
-   ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
+   ABI_MALLOC(cprj,(dtset%natom,mcprj))
    ncpgr=0
    if (dtset%usefock==1) then
      if (dtset%optforces == 1) then
@@ -1040,7 +1040,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !         ncpgr = 6 ; ctocprj_choice = 3
 !       end if
    end if
-   ABI_ALLOCATE(dimcprj_srt,(dtset%natom))
+   ABI_MALLOC(dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
    call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
  end if
@@ -1055,11 +1055,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    rhor => scf_history%rhor_last
    taur => scf_history%taur_last
  else
-   ABI_ALLOCATE(rhor,(nfftf,dtset%nspden))
-   ABI_ALLOCATE(taur,(nfftf,dtset%nspden*dtset%usekden))
+   ABI_MALLOC(rhor,(nfftf,dtset%nspden))
+   ABI_MALLOC(taur,(nfftf,dtset%nspden*dtset%usekden))
  end if
- ABI_ALLOCATE(rhog,(2,nfftf))
- ABI_ALLOCATE(taug,(2,nfftf*dtset%usekden))
+ ABI_MALLOC(rhog,(2,nfftf))
+ ABI_MALLOC(taug,(2,nfftf*dtset%usekden))
 
  if (has_to_init) then
    if (dtset%iscf>0 .or. (dtset%iscf==0 .and. dtset%usewvl==1 )) then ! .and. dtset%usepaw==1)) then
@@ -1111,8 +1111,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !      tim_mkrho=1 ; mpi_enreg%paralbd=0
        tim_mkrho=1
        if (psps%usepaw==1) then
-         ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
-         ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
+         ABI_MALLOC(rhowfg,(2,dtset%nfft))
+         ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
 !        write(std_out,*) "mkrhogstate"
          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
@@ -1122,8 +1122,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
            call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
          end if
-         ABI_DEALLOCATE(rhowfg)
-         ABI_DEALLOCATE(rhowfr)
+         ABI_FREE(rhowfg)
+         ABI_FREE(rhowfr)
        else
          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
@@ -1147,10 +1147,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !        Update initialized density taking into account jellium slab
          if(dtset%jellslab/=0) then
            option=2
-           ABI_ALLOCATE(work,(nfftf))
+           ABI_MALLOC(work,(nfftf))
            call jellium(gmet,gsqcut_eff,mpi_enreg,nfftf,ngfftf,dtset%nspden,&
 &           option,dtset%slabwsrad,rhog,rhor,rprimd,work,dtset%slabzbeg,dtset%slabzend)
-           ABI_DEALLOCATE(work)
+           ABI_FREE(work)
          end if ! of usejell
 !        Kinetic energy density initialized to zero (used only in metaGGAs ... )
          if(dtset%usekden==1)then
@@ -1191,7 +1191,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
     ! Read density and get Fermi level from hdr_den
      call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
      mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
-     results_gs%etotal = hdr_den%etot; 
+     results_gs%etotal = hdr_den%etot;
      results_gs%energies%e_fermie = hdr_den%fermie; results_gs%energies%e_fermih = hdr_den%fermih ! CP modified, added fermih
      call hdr_den%free()
 
@@ -1220,23 +1220,23 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      scf_history%atmrho_last(:)=rhor(:,1)
    else
 !    If rhor is not an atomic density, has to compute rho_at(r)
-     ABI_ALLOCATE(rhowfg,(2,nfftf))
-     ABI_ALLOCATE(rhowfr,(nfftf,1))
-     ABI_ALLOCATE(spinat_dum,(3,dtset%natom))
+     ABI_MALLOC(rhowfg,(2,nfftf))
+     ABI_MALLOC(rhowfr,(nfftf,1))
+     ABI_MALLOC(spinat_dum,(3,dtset%natom))
      spinat_dum=zero
      call initro(atindx,dtset%densty,gmet,gsqcut_eff,psps%usepaw,mgfftf,mpi_enreg,&
 &     psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,1,psps%ntypat,psps,pawtab,&
 &     ph1df,psps%qgrid_vl,rhowfg,rhowfr,spinat_dum,ucvol,&
 &     psps%usepaw,dtset%ziontypat,dtset%znucl)
      scf_history%atmrho_last(:)=rhowfr(:,1)
-     ABI_DEALLOCATE(rhowfg)
-     ABI_DEALLOCATE(rhowfr)
-     ABI_DEALLOCATE(spinat_dum)
+     ABI_FREE(rhowfg)
+     ABI_FREE(rhowfr)
+     ABI_FREE(spinat_dum)
    end if
  end if
 
  if ((.not.read_wf_or_den).or.(scf_history%history_size>0.and.has_to_init))  then
-   ABI_DEALLOCATE(ph1df)
+   ABI_FREE(ph1df)
  end if
 
 !!Electric field: initialization stage
@@ -1333,7 +1333,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      write(msg, '(a,i0,2a)' )&
      'Disallowed value for ionmov=',dtset%ionmov,ch10,&
      'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24,28 and 30'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    call scfcv_destroy(scfcv_args)
@@ -1376,7 +1376,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  ! End CP modified
 
- ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde=zero
 
  ! CP modified
@@ -1393,7 +1393,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  ebands%fermie = results_gs%energies%e_fermie
  ebands%fermih = results_gs%energies%e_fermih ! CP modified
- ABI_DEALLOCATE(doccde)
+ ABI_FREE(doccde)
  !write(std_out,*)"efermi after ebands_init",ebands%fermie
 
  ! Compute and print the gaps.
@@ -1409,7 +1409,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    write_wfk = .False.
    msg = "GS calculation converged with prtwf=-1 --> Skipping WFK file output"
    call wrtout(ab_out, msg)
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
 !To print out the WFs, need the rprimd that was used to generate the G vectors
@@ -1588,43 +1588,43 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  endif
 
 !Deallocate arrays
- ABI_DEALLOCATE(atindx)
- ABI_DEALLOCATE(atindx1)
- ABI_DEALLOCATE(indsym)
- ABI_DEALLOCATE(npwarr)
- ABI_DEALLOCATE(nattyp)
- ABI_DEALLOCATE(resid)
- ABI_DEALLOCATE(rhog)
- ABI_DEALLOCATE(start)
- ABI_DEALLOCATE(symrec)
- ABI_DEALLOCATE(taug)
- ABI_DEALLOCATE(ab_xfh%xfhist)
+ ABI_FREE(atindx)
+ ABI_FREE(atindx1)
+ ABI_FREE(indsym)
+ ABI_FREE(npwarr)
+ ABI_FREE(nattyp)
+ ABI_FREE(resid)
+ ABI_FREE(rhog)
+ ABI_FREE(start)
+ ABI_FREE(symrec)
+ ABI_FREE(taug)
+ ABI_FREE(ab_xfh%xfhist)
  call pawfgr_destroy(pawfgr)
 
  if(dtset%imgwfstor==0)then
-   ABI_DEALLOCATE(cg)
-   ABI_DEALLOCATE(eigen)
+   ABI_FREE(cg)
+   ABI_FREE(eigen)
  else
    nullify(cg,eigen)
  endif
 
  if (dtset%usewvl == 0 .or. dtset%nsym <= 1) then
 !  In wavelet case, irrzon and phnons are deallocated by wavelet object.
-   ABI_DEALLOCATE(irrzon)
-   ABI_DEALLOCATE(phnons)
+   ABI_FREE(irrzon)
+   ABI_FREE(phnons)
  end if
 
- ABI_DEALLOCATE(ylm)
- ABI_DEALLOCATE(ylmgr)
+ ABI_FREE(ylm)
+ ABI_FREE(ylmgr)
 
  if (scf_history%history_size<0) then
    if (psps%usepaw==1) then
      call pawrhoij_free(pawrhoij)
    end if
-   ABI_DEALLOCATE(rhor)
-   ABI_DEALLOCATE(taur)
-   ABI_DATATYPE_DEALLOCATE(pawrhoij)
-   ABI_DEALLOCATE(xred_old)
+   ABI_FREE(rhor)
+   ABI_FREE(taur)
+   ABI_FREE(pawrhoij)
+   ABI_FREE(xred_old)
  else
    nullify(rhor,taur,pawrhoij,xred_old)
  end if
@@ -1652,7 +1652,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
  end if
 
- ABI_DEALLOCATE(kg)
+ ABI_FREE(kg)
 
  if (dtset%icoulomb /= 0) then
    call psolver_kernel((/ 0._dp, 0._dp, 0._dp /), 0, dtset%icoulomb, 0, kernel_dummy, &
@@ -1660,37 +1660,37 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if (associated(pwind)) then
-   ABI_DEALLOCATE(pwind)
+   ABI_FREE(pwind)
  end if
  if (associated(pwnsfac)) then
-   ABI_DEALLOCATE(pwnsfac)
+   ABI_FREE(pwnsfac)
  end if
  if ((dtset%berryopt<0).or.&
 & (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17)) then
    if (xmpi_paral == 1) then
-     ABI_DEALLOCATE(mpi_enreg%kptdstrb)
+     ABI_FREE(mpi_enreg%kptdstrb)
      if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 &     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
-       ABI_DEALLOCATE(mpi_enreg%kpt_loc2ibz_sp)
+       ABI_FREE(mpi_enreg%kpt_loc2ibz_sp)
      end if
    end if
    if (allocated(mpi_enreg%kpt_loc2ibz_sp))  then
-     ABI_DEALLOCATE(mpi_enreg%kpt_loc2ibz_sp)
+     ABI_FREE(mpi_enreg%kpt_loc2ibz_sp)
    end if
    if (allocated(mpi_enreg%kpt_loc2fbz_sp)) then
-     ABI_DEALLOCATE(mpi_enreg%kpt_loc2fbz_sp)
+     ABI_FREE(mpi_enreg%kpt_loc2fbz_sp)
    end if
    if (allocated(mpi_enreg%mkmem)) then
-     ABI_DEALLOCATE(mpi_enreg%mkmem)
+     ABI_FREE(mpi_enreg%mkmem)
    end if
  end if
  ! deallocate cprj
  if(usecprj==1) then
-   ABI_DEALLOCATE(dimcprj_srt)
+   ABI_FREE(dimcprj_srt)
    call pawcprj_free(cprj)
  end if
- ABI_DATATYPE_DEALLOCATE(cprj)
+ ABI_FREE(cprj)
 
  ! deallocate efield
  call destroy_efield(dtefield)
@@ -2049,12 +2049,12 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fre
 !If needed, print DOS (unitdos is closed in getnel, occ is not changed if option == 2
  if (dtset%prtdos==1 .and. me == master) then
    if (open_file(fnameabo_dos,msg, newunit=unitdos, status='unknown', action="write", form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    rewind(unitdos)
    maxocc=two/(dtset%nspinor*dtset%nsppol)  ! Will not work in the fixed moment case
    option=2
-   ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
    ! CP modified
    !call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,&
 !&   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
@@ -2066,7 +2066,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fre
 &   dtset%tsmear,unitdos,dtset%wtk,1,dtset%nband(1))!CP: added 1, nband(1) to fit new definition of getnel; parameters only used if
 ! occopt 9
    ! End CP modified
-   ABI_DEALLOCATE(doccde)
+   ABI_FREE(doccde)
  end if
 
 end subroutine clnup1
@@ -2541,11 +2541,11 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  DBG_ENTER("COLL")
 
  if (dtset%macro_uj==0) then
-   MSG_BUG('Macro_uj must be set !')
+   ABI_BUG('Macro_uj must be set !')
  end if
 
- ABI_DATATYPE_ALLOCATE(dtpawuj,(0:ndtpawuj))
- ABI_ALLOCATE(cgstart,(2,scfcv_args%mcg))
+ ABI_MALLOC(dtpawuj,(0:ndtpawuj))
+ ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
 
 !DEBUG
 !write(std_out,*)'pawuj_drive: before ini dtpawuj(:)%iuj ', dtpawuj(:)%iuj
@@ -2593,8 +2593,8 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
    call pawuj_free(dtpawuj(iuj))
  end do
 
- ABI_DATATYPE_DEALLOCATE(dtpawuj)
- ABI_DEALLOCATE(cgstart)
+ ABI_FREE(dtpawuj)
+ ABI_FREE(cgstart)
 
  DBG_EXIT("COLL")
 
@@ -2700,7 +2700,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 !    if node is master
      write(msg, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
 &     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
 
      write(unit=wff2%unwff)ab_xfh%nxfh
      do ixfh=1,ab_xfh%nxfh
@@ -2710,7 +2710,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 !    insert mpi broadcast here
 
    else if(wff2%iomode==IO_MODE_MPI)then
-     ABI_ALLOCATE(xfhist_tmp,(3*(natom+4)*2))
+     ABI_MALLOC(xfhist_tmp,(3*(natom+4)*2))
      spaceComm=xmpi_comm_self
      call xderiveWRecInit(wff2,ierr)
      call xderiveWrite(wff2,ab_xfh%nxfh,ierr)
@@ -2721,7 +2721,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
        call xderiveWrite(wff2,xfhist_tmp,3*(natom+4)*2,spaceComm,ierr)
        call xderiveWRecEnd(wff2,ierr)
      end do
-     ABI_DEALLOCATE(xfhist_tmp)
+     ABI_FREE(xfhist_tmp)
 
 #if defined HAVE_NETCDF
    else if (wff2%iomode == IO_MODE_NETCDF) then
@@ -2781,7 +2781,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 
        if (mxfh_tmp /= ab_xfh%mxfh .or. dim2inout_tmp /= 2 .or. xfdim2_tmp /= xfdim2) then
          write (msg,"(A)") 'outxfhist : ERROR xfhist has bad dimensions in NetCDF file. Can not re-write it.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
      end if
@@ -2806,7 +2806,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 !    if node is master
      write(msg, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
 &     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
 
      read(unit=wff2%unwff,iostat=ios)ab_xfh%nxfh
 
@@ -2837,14 +2837,14 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 !    if node is master
      write(msg, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
 &     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
 
      do ixfh=1,ab_xfh%nxfhr
        read(unit=wff2%unwff,iostat=ios)ab_xfh%xfhist(:,:,:,ixfh)
      end do
 
    else if (wff2%iomode == IO_MODE_MPI) then
-     ABI_ALLOCATE(xfhist_tmp,(3*(natom+4)*2))
+     ABI_MALLOC(xfhist_tmp,(3*(natom+4)*2))
      spaceComm=xmpi_comm_self
      do ixfh=1,ab_xfh%nxfhr
        call xderiveRRecInit(wff2,ierr)
@@ -2852,7 +2852,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
        call xderiveRRecEnd(wff2,ierr)
        xfhist_tmp(:)=xfhist_tmp(:)
      end do
-     ABI_DEALLOCATE(xfhist_tmp)
+     ABI_FREE(xfhist_tmp)
    end if
 
 !  FIXME: should this be inside the if not mpi as above for options 1 and 2?
@@ -2877,7 +2877,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 !  write(std_out,*)' outxfhist : option ', option , ' not available '
    write(msg, "(A,A,A,A,I3,A)") ch10, "outxfhist: ERROR -", ch10, &
 &   "option ", option, " not available."
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine outxfhist

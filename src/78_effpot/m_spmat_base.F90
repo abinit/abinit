@@ -65,7 +65,7 @@ contains
     class(base_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
     self%ndim=size(mshape)
-    ABI_ALLOCATE(self%mshape, (self%ndim))
+    ABI_MALLOC(self%mshape, (self%ndim))
     self%mshape=mshape
   end subroutine initialize
 
@@ -76,7 +76,7 @@ contains
     class(base_mat_t), intent(inout) :: self
     self%ndim=0
     if (allocated(self%mshape)) then
-       ABI_DEALLOCATE(self%mshape)
+       ABI_FREE(self%mshape)
     endif
   end subroutine finalize
 

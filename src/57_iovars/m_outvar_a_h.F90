@@ -141,12 +141,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !###########################################################
 !### 01. Initial allocations and initialisations.
 
- ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
- ABI_ALLOCATE(intarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(narrm,(0:ndtset_alloc))
- ABI_ALLOCATE(nimagem,(0:ndtset_alloc))
- ABI_ALLOCATE(prtimg,(mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(narrm,(0:ndtset_alloc))
+ ABI_MALLOC(nimagem,(0:ndtset_alloc))
+ ABI_MALLOC(prtimg,(mxvals%nimage,0:ndtset_alloc))
 
  do idtset=0,ndtset_alloc
    nimagem(idtset)=dtsets(idtset)%nimage
@@ -662,6 +662,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%dmft_tollc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_tollc','DPR',0)
+
+ intarr(1,:)=dtsets(:)%dmft_wanorthnorm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_wanorthnorm','INT',0)
 
  dprarr(1,:)=dtsets(:)%dmft_charge_prec
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_charge_prec','DPR',0)
@@ -1332,12 +1335,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(narrm)
- ABI_DEALLOCATE(nimagem)
- ABI_DEALLOCATE(dprarr_images)
- ABI_DEALLOCATE(prtimg)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(narrm)
+ ABI_FREE(nimagem)
+ ABI_FREE(dprarr_images)
+ ABI_FREE(prtimg)
 
 end subroutine outvar_a_h
 !!***

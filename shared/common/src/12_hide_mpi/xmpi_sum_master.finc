@@ -170,7 +170,7 @@ subroutine xmpi_sum_master_int2d(xval,master,comm,ier)
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = 0 ! See notes
 
@@ -189,7 +189,7 @@ subroutine xmpi_sum_master_int2d(xval,master,comm,ier)
      end if
 
      xval = xsum
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -241,12 +241,12 @@ subroutine xmpi_sum_master_dp1d(xval,master,comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
 !    Accumulate xval on all proc. in comm
-     ABI_STAT_ALLOCATE(xsum,(n1), ier)
+     ABI_STAT_MALLOC(xsum,(n1), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = zero ! See notes
      call MPI_REDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,master,comm,ier)
      xval (:) = xsum(:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -299,7 +299,7 @@ subroutine xmpi_sum_master_dp2d(xval,master,comm,ier)
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = zero ! See notes
 
@@ -318,7 +318,7 @@ subroutine xmpi_sum_master_dp2d(xval,master,comm,ier)
      end if
 
      xval (:,:) = xsum(:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -371,7 +371,7 @@ subroutine xmpi_sum_master_dp3d(xval,master,comm,ier)
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
      n3 = size(xval,dim=3)
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = zero ! See notes
 
@@ -391,7 +391,7 @@ subroutine xmpi_sum_master_dp3d(xval,master,comm,ier)
      end if
 
      xval (:,:,:) = xsum(:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -446,7 +446,7 @@ subroutine xmpi_sum_master_dp4d(xval,master,comm,ier)
      n2 = size(xval,dim=2)
      n3 = size(xval,dim=3)
      n4 = size(xval,dim=4)
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = zero ! See notes
 
@@ -465,7 +465,7 @@ subroutine xmpi_sum_master_dp4d(xval,master,comm,ier)
      end if
 
      xval (:,:,:,:) = xsum(:,:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -522,7 +522,7 @@ subroutine xmpi_sum_master_dp5d(xval,master,comm,ier)
      n4 = size(xval,dim=4)
      n5 = size(xval,dim=5)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = zero ! See notes
 
@@ -541,7 +541,7 @@ subroutine xmpi_sum_master_dp5d(xval,master,comm,ier)
      end if
 
      xval (:,:,:,:,:) = xsum(:,:,:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -599,7 +599,7 @@ subroutine xmpi_sum_master_dp6d(xval,master,comm,ier)
      n5 = size(xval,dim=5)
      n6 = size(xval,dim=6)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = zero ! See notes
 
@@ -618,7 +618,7 @@ subroutine xmpi_sum_master_dp6d(xval,master,comm,ier)
      end if
 
      xval (:,:,:,:,:,:) = xsum(:,:,:,:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -677,7 +677,7 @@ subroutine xmpi_sum_master_dp7d(xval,master,comm,ier)
      n6 = size(xval,dim=6)
      n7 = size(xval,dim=7)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5,n6,n7), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = zero ! See notes
 
@@ -696,7 +696,7 @@ subroutine xmpi_sum_master_dp7d(xval,master,comm,ier)
      end if
 
      xval (:,:,:,:,:,:,:) = xsum(:,:,:,:,:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -752,7 +752,7 @@ subroutine xmpi_sum_master_int4d(xval,master,comm,ier)
      n3 = size(xval,dim=3)
      n4 = size(xval,dim=4)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = 0 ! See notes
 
@@ -771,7 +771,7 @@ subroutine xmpi_sum_master_int4d(xval,master,comm,ier)
      end if
 
      xval (:,:,:,:) = xsum(:,:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -821,13 +821,13 @@ subroutine xmpi_sum_master_c1cplx(xval,master,comm,ier)
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
-     ABI_STAT_ALLOCATE(xsum,(n1), ier)
+     ABI_STAT_MALLOC(xsum,(n1), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_sp,0_sp) ! See notes
 !    Collect xval from processors on master in comm
      call MPI_REDUCE(xval,xsum,n1,MPI_COMPLEX,MPI_SUM,master,comm,ier)
      xval = xsum
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -881,7 +881,7 @@ subroutine xmpi_sum_master_c2cplx(xval,master,comm,ier)
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_sp,0_sp) ! See notes
 
@@ -900,7 +900,7 @@ subroutine xmpi_sum_master_c2cplx(xval,master,comm,ier)
      end if
 
      xval (:,:) = xsum(:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -955,7 +955,7 @@ subroutine xmpi_sum_master_c3cplx(xval,master,comm,ier)
      n2 = size(xval,dim=2)
      n3 = size(xval,dim=3)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_sp,0_sp) ! See notes
 
@@ -974,7 +974,7 @@ subroutine xmpi_sum_master_c3cplx(xval,master,comm,ier)
      end if
 
      xval (:,:,:) = xsum(:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -1030,7 +1030,7 @@ subroutine xmpi_sum_master_c4cplx(xval,master,comm,ier)
      n3 = size(xval,dim=3)
      n4 = size(xval,dim=4)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_sp,0_sp) ! See notes
 
@@ -1049,7 +1049,7 @@ subroutine xmpi_sum_master_c4cplx(xval,master,comm,ier)
      end if
 
      xval (:,:,:,:) = xsum(:,:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -1107,7 +1107,7 @@ subroutine xmpi_sum_master_c5cplx(xval,master,comm,ier)
      n4 = size(xval,dim=4)
      n5 = size(xval,dim=5)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_sp,0_sp) ! See notes
 
@@ -1126,7 +1126,7 @@ subroutine xmpi_sum_master_c5cplx(xval,master,comm,ier)
      end if
 
      xval = xsum
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -1177,12 +1177,12 @@ subroutine xmpi_sum_master_c1dpc(xval,master,comm,ier)
    if (nproc_space_comm /= 1) then
      n1 = size(xval,dim=1)
 !    Collect xval from processors on master in comm
-     ABI_STAT_ALLOCATE(xsum,(n1), ier)
+     ABI_STAT_MALLOC(xsum,(n1), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_dp,0_dp) ! See notes
      call MPI_REDUCE(xval,xsum,n1,MPI_DOUBLE_COMPLEX,MPI_SUM,master,comm,ier)
      xval (:) = xsum(:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -1236,7 +1236,7 @@ subroutine xmpi_sum_master_c2dpc(xval,master,comm,ier)
      n1 = size(xval,dim=1)
      n2 = size(xval,dim=2)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_dp,0_dp) ! See notes
 
@@ -1255,7 +1255,7 @@ subroutine xmpi_sum_master_c2dpc(xval,master,comm,ier)
      end if
 
      xval (:,:) = xsum(:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -1310,7 +1310,7 @@ subroutine xmpi_sum_master_c3dpc(xval,master,comm,ier)
      n2 = size(xval,dim=2)
      n3 = size(xval,dim=3)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_dp,0_dp) ! See notes
 
@@ -1329,7 +1329,7 @@ subroutine xmpi_sum_master_c3dpc(xval,master,comm,ier)
      end if
 
      xval (:,:,:) = xsum(:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -1384,7 +1384,7 @@ subroutine xmpi_sum_master_c4dpc(xval,master,comm,ier)
      n3 = size(xval,dim=3)
      n4 = size(xval,dim=4)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_dp,0_dp) ! See notes
 
@@ -1403,7 +1403,7 @@ subroutine xmpi_sum_master_c4dpc(xval,master,comm,ier)
      end if
 
      xval (:,:,:,:) = xsum(:,:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif
@@ -1459,7 +1459,7 @@ subroutine xmpi_sum_master_c5dpc(xval,master,comm,ier)
      n4 = size(xval,dim=4)
      n5 = size(xval,dim=5)
 
-     ABI_STAT_ALLOCATE(xsum,(n1,n2,n3,n4,n5), ier)
+     ABI_STAT_MALLOC(xsum,(n1,n2,n3,n4,n5), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
      xsum = (0_dp,0_dp) ! See notes
 
@@ -1478,7 +1478,7 @@ subroutine xmpi_sum_master_c5dpc(xval,master,comm,ier)
      end if
 
      xval (:,:,:,:,:) = xsum(:,:,:,:,:)
-     ABI_DEALLOCATE(xsum)
+     ABI_FREE(xsum)
    end if
  end if
 #endif

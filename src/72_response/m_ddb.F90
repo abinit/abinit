@@ -560,7 +560,7 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
    nder=1
  else
    write(msg, '(a,i0,a)')' rftyp is equal to ',rftyp,'. The only allowed values are 0, 1, 2, 3 or 4.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  rfqvec_(:)=0; if(present(rfqvec))rfqvec_(:)=rfqvec(:)
@@ -581,7 +581,7 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
      write(msg,'(a,a,a)')&
       'the sum of the wavevectors of the third-order energy is ',ch10,&
       'not equal to zero'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -595,7 +595,7 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
        write(msg, '(a,a)' )&
         'Not yet able to handle stresses or electric fields',ch10,&
         'with non-zero wavevector.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
  end do
@@ -668,7 +668,7 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
            write(msg,'(a,i0,3a)' )&
             'The block ',iblok,' does not match the requirement',ch10,&
             'because it lacks the total energy'
-           MSG_COMMENT(msg)
+           ABI_COMMENT(msg)
          end if
        end if
      end if
@@ -892,7 +892,7 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    'The following string appears in the DDB in place of',&
    ' the block type description :',ch10,trim(name),ch10,&
    'Action: check your DDB.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Read the 2nd derivative block
@@ -903,7 +903,7 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      write(msg,'(3a)')&
      'There is not enough space to read a second-derivative block.',ch10,&
      'Action: increase msize and recompile.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Read the phonon wavevector
@@ -927,7 +927,7 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      'There is not enough space to read a third-derivative block.',ch10,&
      'The size provided is only ',msize,' although ',3*mpert*3*mpert*3*mpert,' is needed.',ch10,&
      'Action: increase msize and recompile.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Read the perturbation wavevectors
@@ -955,7 +955,7 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
       'There is not enough space to read a total energy block.',ch10,&
       'The size provided is only ',msize,' although 1 is needed.',ch10,&
       'Action: increase msize and recompile.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Read the total energy
@@ -973,7 +973,7 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      'There is not enough space to read a first-derivative block.',ch10,&
      'The size provided is only ',msize,' although ',3*mpert,' is needed.',ch10,&
      'Action: increase msize and recompile.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Read every element
@@ -995,7 +995,7 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      'There is not enough space to read a second-derivative block.',ch10,&
      'The size provided is only ',msize,' although ',3*mpert*3*mpert*mband*nkpt,' is needed.',ch10,&
      'Action: increase msize and recompile.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Read the phonon wavevector
@@ -1375,7 +1375,7 @@ subroutine chkin9(atifc,natifc,natom)
     'The number of atom ifc in the input files',natifc,',',ch10,&
     'is larger than the number of atoms',natom,'.',ch10,&
     'Action: change natifc in the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if(natifc>=1)then
@@ -1389,7 +1389,7 @@ subroutine chkin9(atifc,natifc,natom)
         'analysed is not valid : either negative, ',ch10,&
         'zero, or larger than natom =',natom,'.',ch10,&
         'Action: change atifc in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      work(atifc(iatifc))=1
    end do
@@ -1640,7 +1640,7 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, ddb_hdr, cry
  occopt = ddb_hdr%occopt
 
  if (ddb_natom /= natom) then
-   MSG_ERROR(sjoin("input natom:",itoa(natom),"does not agree with DDB value:",itoa(natom)))
+   ABI_ERROR(sjoin("input natom:",itoa(natom),"does not agree with DDB value:",itoa(natom)))
  end if
 
  mpert = natom+MPERT_MAX
@@ -1689,7 +1689,7 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, ddb_hdr, cry
         'and the one of rprim(1,2) is zero.',ch10,&
         'These are incompatible',ch10,&
         'Action: check the value of brav and rprim(1,2) in your DDB.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      factor=abs(rprim(1,2))*two
      acell(:)=acell(:)*factor
@@ -2795,7 +2795,7 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
    ABI_FREE(d2asr_res)
 
  case default
-   MSG_ERROR(sjoin("Wrong value for asr:", itoa(asr)))
+   ABI_ERROR(sjoin("Wrong value for asr:", itoa(asr)))
  end select
 
 end function ddb_get_asrq0
@@ -2874,7 +2874,7 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
 
  call ddb%get_block(iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
  if (iblok == 0) then
-   MSG_ERROR(sjoin("Cannot find q-point ", ktoa(qpt)," in DDB file"))
+   ABI_ERROR(sjoin("Cannot find q-point ", ktoa(qpt)," in DDB file"))
  end if
 
  ! Copy the dynamical matrix in d2cart
@@ -2939,7 +2939,7 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
 ! ************************************************************************
 
  if (asrq0%asr /= 0 .and. asrq0%iblok == 0) then
-   MSG_WARNING("asr != 0 but DDB file does not contain q=Gamma. D(q) cannot be corrected")
+   ABI_WARNING("asr != 0 but DDB file does not contain q=Gamma. D(q) cannot be corrected")
    return
  end if
 
@@ -2952,7 +2952,7 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
    ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
    call asrprs(asrq0%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,xcart)
  case default
-   MSG_ERROR(sjoin("Wrong value for asr:", itoa(asrq0%asr)))
+   ABI_ERROR(sjoin("Wrong value for asr:", itoa(asrq0%asr)))
  end select
 
 end subroutine asrq0_apply
@@ -3511,7 +3511,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
     'Action: you should use DDBs that include the symmetry',&
     'information (and that can be used and merged without',&
     'initialisation), or you should use ABINITv2.0.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Evaluate the maximal dimensions of arrays
@@ -3601,7 +3601,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
        'No comparison/check is performed for the current and input DDB information ',ch10,&
        'because argument --nostrict was passed to the command line. ',ch10,&
        'Use at your own risk!'
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
 
    call wrtout(std_out,' Will try to merge this input DDB with the current one.')
@@ -3616,7 +3616,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
      write(msg, '(a,i0,3a,i0,a)' )&
      'The expected number of blocks',nblokt,' is larger than',ch10,&
      'the maximum number of blocks',mblok,'.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Read the bloks from the temporary database, and close it.
@@ -3832,7 +3832,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
     'Action: you should use DDBs that include the symmetry',&
     'information (and that can be used and merged without',&
     'initialisation), or you should use ABINITv2.0.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Evaluate the maximal dimensions of arrays
@@ -3930,7 +3930,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
        'No comparison/check is performed for the current and input DDB information ',&
        'because argument --nostrict was passed to the command line. ',&
        'Use at your own risk !'
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
 
    call wrtout(std_out,' Will try to merge this input DDB with the current one.')
@@ -3945,7 +3945,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
      write(msg, '(a,i0,a,a,a,i0,a)' )&
       'The expected number of blocks',nblokt,' is larger than',ch10,&
       'the maximum number of blocks',mblok,'.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Read the bloks from the temporary database, and close it.
@@ -4676,10 +4676,10 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
       'has been found.',ch10,&
       'Action: add the required block in the DDB, or modify the q-mesh your input file.'
      if (.not.allow_qmiss) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      else
        !continue
-       MSG_COMMENT(msg)
+       ABI_COMMENT(msg)
      end if
    end if
  end do
@@ -4741,7 +4741,7 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
              '(idir1, ipert1, idir2, ipert2): ',idir1,ipert1,idir2,ipert2,ch10,&
              'Action: add the required information in the DDB with mrgddb,',ch10,&
              'and/or check that all irreducible perturbations have been computed.'
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
            end if
          end do
        end do

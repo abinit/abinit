@@ -100,7 +100,7 @@ contains
   subroutine finalize(self)
     class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
     call self%coeff%finalize()
-    ABI_DEALLOCATE(self%Rlist)
+    ABI_FREE(self%Rlist)
     nullify(self%primcell)
     self%natom=0
     self%label="Destroyed lattice_harmonic_primitive_potential"
@@ -147,12 +147,12 @@ contains
     ierr=nctk_get_dim(ncid, "natom3", natom3)
 
 
-    ABI_ALLOCATE(masses, (natom))
-    ABI_ALLOCATE(xcart, (3, natom))
-    ABI_ALLOCATE(zion,(natom))
+    ABI_MALLOC(masses, (natom))
+    ABI_MALLOC(xcart, (3, natom))
+    ABI_MALLOC(zion,(natom))
 
-    ABI_ALLOCATE(ifc_vallist, (natom3, natom3, nR))
-    ABI_ALLOCATE(self%Rlist,(3, nR))
+    ABI_MALLOC(ifc_vallist, (natom3, natom3, nR))
+    ABI_MALLOC(self%Rlist,(3, nR))
 
 
     ierr =nf90_inq_varid(ncid, "ref_energy", varid)
@@ -218,10 +218,10 @@ contains
     ierr=nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
 
-    ABI_DEALLOCATE(masses)
-    ABI_DEALLOCATE(xcart)
-    ABI_DEALLOCATE(zion)
-    ABI_DEALLOCATE(ifc_vallist)
+    ABI_FREE(masses)
+    ABI_FREE(xcart)
+    ABI_FREE(zion)
+    ABI_FREE(ifc_vallist)
 #else
     NETCDF_NOTENABLED_ERROR()
 #endif
@@ -260,7 +260,7 @@ contains
 
     !! NOTE: the code below can be used as a pattern to build supercell from primitivecell.
     ! Step 1: allocate the scpot as a corresponding supercell potential
-    ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_potential_t, scpot)
+    ABI_MALLOC_TYPE_SCALAR(lattice_harmonic_potential_t, scpot)
     ! Fortran does not know the functions specific to the derived class pointer.
     ! Only the ones inheritated from abstract class,
     ! unless select type is used:

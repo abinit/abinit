@@ -269,16 +269,16 @@ subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,c
  myfh = fh
 
  if (bufsz < 2 * PRODUCT(subsizes) ) then
-   MSG_ERROR("bufsz is too small")
+   ABI_ERROR("bufsz is too small")
  end if
 
  if (sc_mode==xmpio_single) then
    ! This makes the automatic tests fail (cut3d)
-   !MSG_WARNING("comm != xmpi_comm_self")
+   !ABI_WARNING("comm != xmpi_comm_self")
  else if (sc_mode==xmpio_collective) then
    continue
  else
-   MSG_ERROR("Wrong sc_mode")
+   ABI_ERROR("Wrong sc_mode")
  end if
 
  subs_x  = subsizes(1)
@@ -410,7 +410,7 @@ subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,
  myfh = fh
 
  if (bufsz < 2 * PRODUCT(subsizes) ) then
-   MSG_ERROR("bufsz is too small")
+   ABI_ERROR("bufsz is too small")
  end if
 
  if (sc_mode==xmpio_single) then
@@ -418,7 +418,7 @@ subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,
  else if (sc_mode==xmpio_collective) then
    call setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr)
  else
-   MSG_ERROR("Wrong sc_mode")
+   ABI_ERROR("Wrong sc_mode")
  end if
  if (ierr/=0) RETURN
 
@@ -548,7 +548,7 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  myfh = fh
 
  if (bufsz < PRODUCT(subsizes) ) then
-   MSG_ERROR("bufsz is too small")
+   ABI_ERROR("bufsz is too small")
  end if
 
  if (sc_mode==xmpio_single) then
@@ -556,7 +556,7 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  else if (sc_mode==xmpio_collective) then
    continue
  else
-   MSG_ERROR("Wrong sc_mode")
+   ABI_ERROR("Wrong sc_mode")
  end if
 
  size_x  = sizes(1)
@@ -744,7 +744,7 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  myfh = fh
 
  if (bufsz < PRODUCT(subsizes) ) then
-   MSG_ERROR("bufsz is too small")
+   ABI_ERROR("bufsz is too small")
  end if
 
  if (sc_mode==xmpio_single) then
@@ -752,7 +752,7 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  else if (sc_mode==xmpio_collective) then
    continue
  else
-   MSG_ERROR("Wrong sc_mode")
+   ABI_ERROR("Wrong sc_mode")
  end if
 
  size_x  = sizes(1)

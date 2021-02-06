@@ -148,16 +148,16 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 
 !Allocate some memory
  if (optder/=0) then
-   ABI_ALLOCATE(ylmgr_cart,(3,2))
+   ABI_MALLOC(ylmgr_cart,(3,2))
  end if
  if (optder/=0.and.optder/=2) then
-   ABI_ALLOCATE(ylmgr_red,(3,2))
+   ABI_MALLOC(ylmgr_red,(3,2))
  end if
  if (optder==2) then
-   ABI_ALLOCATE(ylmgr2_cart,(3,3,2))
-   ABI_ALLOCATE(ylmgr2_tmp,(3,3))
-   ABI_ALLOCATE(ylmgr_red,(6,2))
-   ABI_ALLOCATE(blm,(5,mpsang*mpsang))
+   ABI_MALLOC(ylmgr2_cart,(3,3,2))
+   ABI_MALLOC(ylmgr2_tmp,(3,3))
+   ABI_MALLOC(ylmgr_red,(6,2))
+   ABI_MALLOC(blm,(5,mpsang*mpsang))
  end if
 
 !Loop over k-points:
@@ -169,7 +169,7 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 
 !  Get k+G-vectors, for this k-point:
    npw_k=npwarr(ikpt)
-   ABI_ALLOCATE(kg_k,(3,npw_k))
+   ABI_MALLOC(kg_k,(3,npw_k))
    kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
 
 !  Special case for l=0
@@ -384,7 +384,7 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 !    End condition l<>0
    end if
 
-   ABI_DEALLOCATE(kg_k)
+   ABI_FREE(kg_k)
 
    ikg=ikg+npw_k
  end do !  End Loop over k-points
@@ -392,16 +392,16 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 !Release the temporary memory
 !Allocate some memory
  if (optder/=0) then
-   ABI_DEALLOCATE(ylmgr_cart)
+   ABI_FREE(ylmgr_cart)
  end if
  if (optder/=0.and.optder/=2) then
-   ABI_DEALLOCATE(ylmgr_red)
+   ABI_FREE(ylmgr_red)
  end if
  if (optder==2) then
-   ABI_DEALLOCATE(ylmgr2_cart)
-   ABI_DEALLOCATE(ylmgr2_tmp)
-   ABI_DEALLOCATE(ylmgr_red)
-   ABI_DEALLOCATE(blm)
+   ABI_FREE(ylmgr2_cart)
+   ABI_FREE(ylmgr2_tmp)
+   ABI_FREE(ylmgr_red)
+   ABI_FREE(blm)
  end if
 
 end subroutine initylmg

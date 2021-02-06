@@ -213,7 +213,7 @@ module m_linked_list
           call llist_append(self,i,val)
           return
        else
-          MSG_BUG("m_linked_list cannot find proper place to insert")
+          ABI_BUG("m_linked_list cannot find proper place to insert")
        endif
     endif
 
@@ -232,8 +232,8 @@ module m_linked_list
     integer, allocatable, intent(inout)::ilist(:)
     real(dp),allocatable, intent(inout)::vallist(:)
     integer::ind=1
-    ABI_ALLOCATE(ilist,(self%length))
-    ABI_ALLOCATE(vallist, (self%length))
+    ABI_MALLOC(ilist,(self%length))
+    ABI_MALLOC(vallist, (self%length))
     call llist_iter_restart(self)
     do while(associated(self%iter))
        ilist(ind)=self%iter%i

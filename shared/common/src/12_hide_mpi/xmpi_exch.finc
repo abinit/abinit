@@ -28,13 +28,13 @@
 
 !--------------------------------------------------------------------
 
-subroutine xmpi_exch_intn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
+subroutine xmpi_exch_intn(vsend,n1,sender,vrecv,recever,comm,ier)
 
 !Arguments----------------
  integer,intent(in) :: n1
  integer, DEV_CONTARRD intent(in) :: vsend(:)
  integer, DEV_CONTARRD intent(inout) :: vrecv(:)
- integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(in) :: sender,recever,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -47,14 +47,14 @@ subroutine xmpi_exch_intn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(n1==0)) return
- call MPI_COMM_RANK(spaceComm,me,ier)
+ if (sender==recever.or.comm==MPI_COMM_NULL.or.(n1==0)) return
+ call MPI_COMM_RANK(comm,me,ier)
  tag = MOD(n1,xmpi_tag_ub)
  if (recever==me) then
-   call MPI_RECV(vrecv,n1,MPI_INTEGER,sender,tag,spaceComm,statux,ier)
+   call MPI_RECV(vrecv,n1,MPI_INTEGER,sender,tag,comm,statux,ier)
  end if
  if (sender==me) then
-   call MPI_SEND(vsend,n1,MPI_INTEGER,recever,tag,spaceComm,ier)
+   call MPI_SEND(vsend,n1,MPI_INTEGER,recever,tag,comm,ier)
  end if
 #endif
 
@@ -76,7 +76,7 @@ end subroutine xmpi_exch_intn
 !!  vsend= send buffer
 !!  sender= node sending the data
 !!  recever= node receiving the data
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -86,13 +86,13 @@ end subroutine xmpi_exch_intn
 !!
 !! SOURCE
 
-subroutine xmpi_exch_int2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
+subroutine xmpi_exch_int2d(vsend,nt,sender,vrecv,recever,comm,ier)
 
 !Arguments----------------
  integer,intent(in) :: nt
  integer, DEV_CONTARRD intent(in) :: vsend(:,:)
  integer, DEV_CONTARRD intent(inout) :: vrecv(:,:)
- integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(in) :: sender,recever,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -105,15 +105,15 @@ subroutine xmpi_exch_int2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(nt==0)) return
- call MPI_COMM_RANK(spaceComm,me,ier)
+ if (sender==recever.or.comm==MPI_COMM_NULL.or.(nt==0)) return
+ call MPI_COMM_RANK(comm,me,ier)
  tag = MOD(nt, xmpi_tag_ub)
 
  if (recever==me) then
-   call MPI_RECV(vrecv,nt,MPI_INTEGER,sender,tag,spaceComm,statux,ier)
+   call MPI_RECV(vrecv,nt,MPI_INTEGER,sender,tag,comm,statux,ier)
  end if
  if (sender==me) then
-   call MPI_SEND(vsend,nt,MPI_INTEGER,recever,tag,spaceComm,ier)
+   call MPI_SEND(vsend,nt,MPI_INTEGER,recever,tag,comm,ier)
  end if
 #endif
 
@@ -135,7 +135,7 @@ end subroutine xmpi_exch_int2d
 !!  vsend= send buffer
 !!  sender= node sending the data
 !!  recever= node receiving the data
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -145,13 +145,13 @@ end subroutine xmpi_exch_int2d
 !!
 !! SOURCE
 
-subroutine xmpi_exch_dpn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
+subroutine xmpi_exch_dpn(vsend,n1,sender,vrecv,recever,comm,ier)
 
 !Arguments----------------
  integer,intent(in) :: n1
  real(dp), DEV_CONTARRD intent(in) :: vsend(:)
  real(dp), DEV_CONTARRD intent(inout) :: vrecv(:)
- integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(in) :: sender,recever,comm
  integer,intent(out)   :: ier
 
 !Local variables--------------
@@ -164,14 +164,14 @@ subroutine xmpi_exch_dpn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(n1==0)) return
- call MPI_COMM_RANK(spaceComm,me,ier)
+ if (sender==recever.or.comm==MPI_COMM_NULL.or.(n1==0)) return
+ call MPI_COMM_RANK(comm,me,ier)
  tag = MOD(n1, xmpi_tag_ub)
  if (recever==me) then
-   call MPI_RECV(vrecv,n1,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+   call MPI_RECV(vrecv,n1,MPI_DOUBLE_PRECISION,sender,tag,comm,statux,ier)
  end if
  if (sender==me) then
-   call MPI_SEND(vsend,n1,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+   call MPI_SEND(vsend,n1,MPI_DOUBLE_PRECISION,recever,tag,comm,ier)
  end if
 #endif
 
@@ -193,7 +193,7 @@ end subroutine xmpi_exch_dpn
 !!  vsend= send buffer
 !!  sender= node sending the data
 !!  recever= node receiving the data
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -203,13 +203,13 @@ end subroutine xmpi_exch_dpn
 !!
 !! SOURCE
 
-subroutine xmpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
+subroutine xmpi_exch_dp2d(vsend,nt,sender,vrecv,recever,comm,ier)
 
 !Arguments----------------
  integer,intent(in) :: nt
  real(dp), DEV_CONTARRD intent(in) :: vsend(:,:)
  real(dp), DEV_CONTARRD intent(inout) :: vrecv(:,:)
- integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(in) :: sender,recever,comm
  integer,intent(out)   :: ier
 
 !Local variables--------------
@@ -221,14 +221,14 @@ subroutine xmpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(nt==0)) return
- call MPI_COMM_RANK(spaceComm,me,ier)
+ if (sender==recever.or.comm==MPI_COMM_NULL.or.(nt==0)) return
+ call MPI_COMM_RANK(comm,me,ier)
  tag=MOD(nt, xmpi_tag_ub)
  if (recever==me) then
-   call MPI_RECV(vrecv,nt,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+   call MPI_RECV(vrecv,nt,MPI_DOUBLE_PRECISION,sender,tag,comm,statux,ier)
  end if
  if (sender==me) then
-   call MPI_SEND(vsend,nt,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+   call MPI_SEND(vsend,nt,MPI_DOUBLE_PRECISION,recever,tag,comm,ier)
  end if
 #endif
 
@@ -250,7 +250,7 @@ end subroutine xmpi_exch_dp2d
 !!  vsend= send buffer
 !!  sender= node sending the data
 !!  recever= node receiving the data
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -260,13 +260,13 @@ end subroutine xmpi_exch_dp2d
 !!
 !! SOURCE
 
-subroutine xmpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
+subroutine xmpi_exch_dp3d(vsend,nt,sender,vrecv,recever,comm,ier)
 
 !Arguments----------------
  integer,intent(in) :: nt
  real(dp), DEV_CONTARRD intent(in) :: vsend(:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: vrecv(:,:,:)
- integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(in) :: sender,recever,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -279,14 +279,14 @@ subroutine xmpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(nt==0)) return
- call MPI_COMM_RANK(spaceComm,me,ier)
+ if (sender==recever.or.comm==MPI_COMM_NULL.or.(nt==0)) return
+ call MPI_COMM_RANK(comm,me,ier)
  tag=MOD(nt, xmpi_tag_ub)
  if (recever==me) then
-   call MPI_RECV(vrecv,nt,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+   call MPI_RECV(vrecv,nt,MPI_DOUBLE_PRECISION,sender,tag,comm,statux,ier)
  end if
  if (sender==me) then
-   call MPI_SEND(vsend,nt,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+   call MPI_SEND(vsend,nt,MPI_DOUBLE_PRECISION,recever,tag,comm,ier)
  end if
 #endif
 
@@ -308,7 +308,7 @@ end subroutine xmpi_exch_dp3d
 !!  vsend= send buffer
 !!  sender= node sending the data
 !!  recever= node receiving the data
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -318,13 +318,13 @@ end subroutine xmpi_exch_dp3d
 !!
 !! SOURCE
 
-subroutine xmpi_exch_dp4d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
+subroutine xmpi_exch_dp4d_tag(vsend,mtag,sender,vrecv,recever,comm,ier)
 
 !Arguments----------------
  integer,intent(in) :: mtag
  real(dp), DEV_CONTARRD intent(in) :: vsend(:,:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: vrecv(:,:,:,:)
- integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(in) :: sender,recever,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -338,8 +338,8 @@ subroutine xmpi_exch_dp4d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (sender==recever.or.spaceComm==MPI_COMM_NULL) return
- call MPI_COMM_RANK(spaceComm,me,ier)
+ if (sender==recever.or.comm==MPI_COMM_NULL) return
+ call MPI_COMM_RANK(comm,me,ier)
  n1 =size(vsend,dim=1)
  n2 =size(vsend,dim=2)
  n3 =size(vsend,dim=3)
@@ -353,19 +353,19 @@ subroutine xmpi_exch_dp4d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
 
  if (recever==me) then
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_RECV(vrecv,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+     call MPI_RECV(vrecv,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,sender,tag,comm,statux,ier)
    else
      call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_RECV(vrecv,1,my_dt,sender,tag,spaceComm,statux,ier)
+     call MPI_RECV(vrecv,1,my_dt,sender,tag,comm,statux,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
  if (sender==me) then
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_SEND(vsend,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+     call MPI_SEND(vsend,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,recever,tag,comm,ier)
    else
      call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_SEND(vsend,1,my_dt,recever,tag,spaceComm,ier)
+     call MPI_SEND(vsend,1,my_dt,recever,tag,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -389,7 +389,7 @@ end subroutine xmpi_exch_dp4d_tag
 !!  vsend= send buffer
 !!  sender= node sending the data
 !!  recever= node receiving the data
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -399,13 +399,13 @@ end subroutine xmpi_exch_dp4d_tag
 !!
 !! SOURCE
 
-subroutine xmpi_exch_dp5d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
+subroutine xmpi_exch_dp5d_tag(vsend,mtag,sender,vrecv,recever,comm,ier)
 
 !Arguments----------------
  integer,intent(in) ::mtag
  real(dp), DEV_CONTARRD intent(in) :: vsend(:,:,:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: vrecv(:,:,:,:,:)
- integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(in) :: sender,recever,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -419,8 +419,8 @@ subroutine xmpi_exch_dp5d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (sender==recever.or.spaceComm==MPI_COMM_NULL) return
- call MPI_COMM_RANK(spaceComm,me,ier)
+ if (sender==recever.or.comm==MPI_COMM_NULL) return
+ call MPI_COMM_RANK(comm,me,ier)
  n1 =size(vsend,dim=1)
  n2 =size(vsend,dim=2)
  n3 =size(vsend,dim=3)
@@ -435,19 +435,19 @@ subroutine xmpi_exch_dp5d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
 
  if (recever==me) then
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_RECV(vrecv,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+     call MPI_RECV(vrecv,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,sender,tag,comm,statux,ier)
    else
      call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_RECV(vrecv,1,my_dt,sender,tag,spaceComm,statux,ier)
+     call MPI_RECV(vrecv,1,my_dt,sender,tag,comm,statux,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
  if (sender==me) then
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_SEND(vsend,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+     call MPI_SEND(vsend,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,recever,tag,comm,ier)
    else
      call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_SEND(vsend,1,my_dt,recever,tag,spaceComm,ier)
+     call MPI_SEND(vsend,1,my_dt,recever,tag,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -468,13 +468,13 @@ end subroutine xmpi_exch_dp5d_tag
 !!
 !! SOURCE
 
-subroutine xmpi_exch_spc_1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
+subroutine xmpi_exch_spc_1d(vsend,n1,sender,vrecv,recever,comm,ier)
 
 !Arguments----------------
  integer,intent(in) :: n1
  complex(spc), DEV_CONTARRD intent(in) :: vsend(:)
  complex(spc), DEV_CONTARRD intent(inout) :: vrecv(:)
- integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(in) :: sender,recever,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -487,14 +487,14 @@ subroutine xmpi_exch_spc_1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(n1==0)) return
- call MPI_COMM_RANK(spaceComm,me,ier)
+ if (sender==recever.or.comm==MPI_COMM_NULL.or.(n1==0)) return
+ call MPI_COMM_RANK(comm,me,ier)
  tag= MOD(n1, xmpi_tag_ub)
  if (recever==me) then
-   call MPI_RECV(vrecv,n1,MPI_COMPLEX,sender, tag,spaceComm,statux,ier)
+   call MPI_RECV(vrecv,n1,MPI_COMPLEX,sender, tag,comm,statux,ier)
  end if
  if (sender==me) then
-   call MPI_SEND(vsend,n1,MPI_COMPLEX,recever,tag,spaceComm,ier)
+   call MPI_SEND(vsend,n1,MPI_COMPLEX,recever,tag,comm,ier)
  end if
 #endif
 
@@ -513,13 +513,13 @@ end subroutine xmpi_exch_spc_1d
 !!
 !! SOURCE
 
-subroutine xmpi_exch_dpc_1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
+subroutine xmpi_exch_dpc_1d(vsend,n1,sender,vrecv,recever,comm,ier)
 
 !Arguments----------------
  integer,intent(in) :: n1
  complex(dpc), DEV_CONTARRD intent(in) :: vsend(:)
  complex(dpc), DEV_CONTARRD intent(inout) :: vrecv(:)
- integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(in) :: sender,recever,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -532,14 +532,14 @@ subroutine xmpi_exch_dpc_1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(n1==0)) return
- call MPI_COMM_RANK(spaceComm,me,ier)
+ if (sender==recever.or.comm==MPI_COMM_NULL.or.(n1==0)) return
+ call MPI_COMM_RANK(comm,me,ier)
  tag = MOD(n1, xmpi_tag_ub)
  if (recever==me) then
-   call MPI_RECV(vrecv,n1,MPI_DOUBLE_COMPLEX,sender, tag,spaceComm,statux,ier)
+   call MPI_RECV(vrecv,n1,MPI_DOUBLE_COMPLEX,sender, tag,comm,statux,ier)
  end if
  if (sender==me) then
-   call MPI_SEND(vsend,n1,MPI_DOUBLE_COMPLEX,recever,tag,spaceComm,ier)
+   call MPI_SEND(vsend,n1,MPI_DOUBLE_COMPLEX,recever,tag,comm,ier)
  end if
 #endif
 
@@ -558,13 +558,13 @@ end subroutine xmpi_exch_dpc_1d
 !!
 !! SOURCE
 
-subroutine xmpi_exch_dpc_2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
+subroutine xmpi_exch_dpc_2d(vsend,nt,sender,vrecv,recever,comm,ier)
 
 !Arguments----------------
  integer,intent(in) :: nt
  complex(dpc), DEV_CONTARRD intent(in) :: vsend(:,:)
  complex(dpc), DEV_CONTARRD intent(inout) :: vrecv(:,:)
- integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(in) :: sender,recever,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -576,14 +576,14 @@ subroutine xmpi_exch_dpc_2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(nt==0)) return
- call MPI_COMM_RANK(spaceComm,me,ier)
+ if (sender==recever.or.comm==MPI_COMM_NULL.or.(nt==0)) return
+ call MPI_COMM_RANK(comm,me,ier)
  tag=MOD(nt, xmpi_tag_ub)
  if (recever==me) then
-   call MPI_RECV(vrecv,nt,MPI_DOUBLE_COMPLEX,sender, tag,spaceComm,statux,ier)
+   call MPI_RECV(vrecv,nt,MPI_DOUBLE_COMPLEX,sender, tag,comm,statux,ier)
  end if
  if (sender==me) then
-   call MPI_SEND(vsend,nt,MPI_DOUBLE_COMPLEX,recever,tag,spaceComm,ier)
+   call MPI_SEND(vsend,nt,MPI_DOUBLE_COMPLEX,recever,tag,comm,ier)
  end if
 #endif
 

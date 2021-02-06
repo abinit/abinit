@@ -662,7 +662,7 @@ subroutine energies_ncwrite(enes, ncid)
  NCF_CHECK(ncerr)
 
 #else
- MSG_ERROR("ETSF-IO support is not activated.")
+ ABI_ERROR("ETSF-IO support is not activated.")
 #endif
 
 end subroutine energies_ncwrite
