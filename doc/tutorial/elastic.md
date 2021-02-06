@@ -814,46 +814,64 @@ heading.  Also find the lattice constants for each case, whose convergence you
 studied in [tutorial 4](base4).
 You should be able to cut-and-paste these into a table like the following,
 
-                C_11           C_12           C_44           acell
-    ngkpt=3*6   0.0037773556   0.0022583541   0.0013453692   7.5710952266
-    ngkpt=3*8   0.0042004431   0.0020423388   0.0013076763   7.5693986665
-    ngkpt=3*10  0.0042034396   0.0020343437   0.0012956768   7.5694820855
+                C_11        C_12        C_44        acell
+    ngkpt=3*6   0.003844    0.002294    0.001377    7.585323
+    ngkpt=3*8   0.004409    0.002088    0.001355    7.583261 
+    ngkpt=3*10  0.004392    0.002092    0.001354    7.583710
 
 We can immediately see that the lattice constant converges considerably more
 rapidly with **k** sample than the elastic constants.   For [[ngkpt]] =3*6,
-acell is converged to 0.02%, while the C's have 5-10% errors.  For [[ngkpt]]
-=3*8, the C's are converged to better than 1%, much better for the largest,
+acell is converged to 0.02%, while the C's have up to 15% error.  For [[ngkpt]]
+=3*8, the C's are converged to better than 0.5%, even for the largest,
 C$_{11}$, which should be acceptable.
 
 As in [tutorial 4](base4), the [[ngkpt]] convergence is controlled by [[tsmear]].  The
 smaller the broadening, the denser the **k** sample that is needed to get a
 smooth variation of occupancy, and presumably stress, with strain.   While we
 will not explore [[tsmear]] convergence in this tutorial, you may wish to do so
-on your own.  We believe that the value [[tsmear]] = 0.02  in telast_6.abi
-gives results within 1% of the fully-converged small-broadening limit.
+on your own.  
 
-**We find that[[occopt]]** **=3, standard Fermi-Dirac broadening** **, gives
-_much better_ convergence of the C's than "cold smearing."**  Changing
-[[occopt]] to 4 in telast_6.abi, the option used in [tutorial 4](base4), the C's show no
-sign of convergence.  At ngkpt=3*16, errors are still ~5%.  The reasons that
-this supposedly superior smoothing function performs so poorly in this context
-is a future research topic.  The main thing to be learned is that checking
+Also, even more than for the lattice parameter, the type of smearing
+function plays an important role. The preferred smearing, [[occopt]]=7,
+apparently performs worse than the the standard Fermi-Dirac broadening
+[[occopt]]=3 that we have used above. Indeed, with [[occopt]]=7
+and the same [[tsmear]]=0.02, one obtains:
+
+
+                C_11        C_12        C_44        acell
+    ngkpt=3*6   0.003113    0.002598    0.001575    7.543949
+    ngkpt=3*8   0.004447    0.001948    0.001441    7.542962
+    ngkpt=3*10  0.004781    0.001816    0.001233    7.544365
+    ngkpt=3*12  0.004257    0.002108    0.001244    7.545547
+    ngkpt=3*14  0.004056    0.002210    0.001300    7.545783
+    ngkpt=3*16  0.004230    0.002120    0.001316    7.545453
+    ngkpt=3*20  0.004271    0.002100    0.001311    7.545363
+
+
+The reasons that this supposedly superior smoothing function performs poorly in this context
+has not been investigated. Of course, [[tsmear]] has a different meaning
+in both cases, and perhaps the value of 0.02Ha (=6315 Kelvin) for [[occopt]]=3 might yield a large error
+anyhow (see the predicted [[acell]]).
+
+The main thing to be learned is that checking
 convergence with respect to all relevant parameters is **always** the user's
 responsibility.   Simple systems that include the main physical features of a
 complex system of interest will usually suffice for this testing.  Don't get
 caught publishing a result that another researcher refutes on convergence
-grounds, and don't blame such a mistake on Abinit!
+grounds, and do not blame such a mistake on Abinit!
 
-Now we make a comparison with experiment.  Converting the C's to standard
+Now we make a comparison with experiment.  Using the above computed values, converting the C's to standard
 units (Ha/Bohr$^3$ = 2.94210119E+04 GPa) and using zero-temperature extrapolated
 experimental results from P. M. Sutton, Phys. Rev. 91, 816 (1953) [[cite:Sutton1953]], we find
 
-                         C_11(GPa)  C_12(GPa)  C_44(GPa)
-         Calculated        123.7      59.9       38.1
-         Experiment (T=0)  123.0      70.8       30.9
+                                      C_11(GPa)  C_12(GPa)  C_44(GPa)
+    Calculated (T=6315K)                129.2      61.5       39.8 
+    Calculated (T=0K, Gaussian 0.02Ha)  125.6      61.8       38.6
+    Experiment (T=0K)                   123.0      70.8       30.9
 
 
-Is this good agreement?  There isn't much literature on DFT calculations of
+Is this good agreement?  The numerical values are not yet definitive,
+as one should do more convergence studies anyhow. This being said, there isn't much literature on DFT calculations of
 full sets of elastic constants.  Many calculations of the bulk modulus
 (K=(C$_{11}$+2C$_{12}$ )/3 in the cubic case) typically are within 10% of experiment
 for the LDA.  Running telast_6 with ixc=11, the Perdew-Burke-Enzerhof GGA,
