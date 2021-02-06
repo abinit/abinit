@@ -5078,37 +5078,35 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  !Local
  !scalars
  integer :: adir,bdir,buff_size,dimffnl,exchn2n3d
- integer :: getcprj_choice,getcprj_cpopt,getcprj_idir,getcprj_useylm,getdc1_optcprj
  integer :: getghc_cpopt,getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc
- integer :: gdir,iatom,icg,icprj,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k,jj
+ integer :: gdir,iatom,icg,icprj,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k,iterms,jj
  integer :: me,mcgk,my_nspinor
  integer :: nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn
  integer :: nkpg,npw_k
  integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_pawopt,nonlop_signs,nonlop_tim
- integer :: nproc,projbd_scprod_io,projbd_tim,projbd_useoverlap,spaceComm
+ integer :: nproc,nterms,nterms3,projbd_scprod_io,projbd_tim,projbd_useoverlap,spaceComm
  integer :: with_vectornd
- real(dp) :: arg,ecut_eff,Enk,finish_time,lambda,start_time,ucvol
+ real(dp) :: arg,dub_dsg_r,dub_dsg_i,dug_dsb_r,dug_dsb_i
+ real(dp) :: ecut_eff,Enk,finish_time,lambda,start_time,ucvol
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
 
  integer :: ilmn,jlmn,klmn,itypat
  real(dp) :: doti,dotr
- complex(dpc) :: cpb,cpk,consite
 
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:)
- real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1)
- real(dp) :: chern(3),chern_total(2,3),orbmag_cc(3),orbmag_total(2,3),orbmag_vv(3)
- real(dp) :: rhodum(1),rmet(3,3)
+ real(dp) :: chern_total(2,3),gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1)
+ real(dp) :: orbmag_total(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwaveg1(:,:)
- real(dp),allocatable :: dcwavef(:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
- real(dp),allocatable :: kinpw(:),kpg_k(:,:)
- real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),scg_k(:,:),scprod(:,:)
+ real(dp),allocatable :: cwavedsdb(:,:),cwavedsdg(:,:)
+ real(dp),allocatable :: dcwavef(:,:),dscg_k(:,:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable :: kinpw(:),kpg_k(:,:),orbmag_terms(:)
+ real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),scg_k(:,:),scg1_k(:,:,:),scprod(:,:)
  real(dp),allocatable :: us1u(:,:,:,:),vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj1(:,:),dcwaveprj(:,:)
- type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_k1(:,:,:),cprj_pk1(:,:,:)
+ type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
  !----------------------------------------------
 
@@ -5128,36 +5126,28 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
  exchn2n3d = 0; ikg1 = 0
 
- ! input parameters for getcprj call for pcg1 wavefunctions
- getcprj_choice =  5 ! compute cprj and k derivs
- getcprj_idir = 0 ! compute derivs in all 3 directions
- getcprj_cpopt = 0 ! no cprj in memory at input
- getcprj_useylm = 1 ! use Ylm's
-
- ! input parameters for calls to getghc at ikpt
- getghc_cpopt = 4   ! cprj and derivatives already in memory
- ndat = 1           ! number of fft's in parallel
- getghc_prtvol = 0
- getghc_sij_opt = 1 ! compute both H|C> and S|C>
- getghc_tim = 0
- ! getghc: type_calc 0 means kinetic, local, nonlocal
- getghc_type_calc = 0
- lambda = zero 
- lambda_ndat = zero 
-
  ! input parameters for calls to nonlop
- nonlop_choice =  1! 
- nonlop_cpopt = 4  ! cprj and derivs in memory already
- nonlop_nnlout = 1
+ ! nonlop_choice will be changed from call to call
+ nonlop_cpopt = -1  ! cprj computed and not saved
  nonlop_pawopt = 3 ! apply only S
  nonlop_signs = 2  ! get <G|Op|C> vector
+ nonlop_nnlout = 1
  nonlop_tim = 0
 
- getdc1_optcprj = 1
-
+ ! input parameters to projbd
  projbd_scprod_io = 0
- projbd_tim = 0 
  projbd_useoverlap = 1
+ projbd_tim = 0 
+
+ ! input parameters for calls to getghc at ikpt
+ getghc_cpopt = -1 ! cprj computed and not saved
+ getghc_sij_opt = 1 ! compute both H|C> and S|C>
+ ndat = 1           ! number of fft's in parallel
+ getghc_prtvol = 0
+ getghc_type_calc = 0 ! type_calc 0 means kinetic, local, nonlocal
+ getghc_tim = 0
+ lambda = zero 
+ lambda_ndat = zero 
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -5176,6 +5166,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  call fftpac(isppol,mpi_enreg,dtset%nspden,&
       & ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vlocal,2)
  ABI_DEALLOCATE(cgrvtrial)
+ call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
  
  !========  compute nuclear dipole vector potential (may be zero) ==========
  with_vectornd=0
@@ -5194,40 +5185,8 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        & ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
    end do
    ABI_DEALLOCATE(cgrvtrial)
+   call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
  end if
-
- !======= add vlocal ====================
- call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
-
- !====== add vectornd if available ==============
- if(has_nucdip) then
-    call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
- end if
-
- ncpgr = 0
- if (getcprj_choice .EQ. 5) ncpgr=3
- ABI_ALLOCATE(dimlmn,(dtset%natom))
- call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'R')
-
- ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
- call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
- ABI_DATATYPE_ALLOCATE(dcwaveprj,(dtset%natom,1))
- call pawcprj_alloc(dcwaveprj,ncpgr,dimlmn)
- ABI_DATATYPE_ALLOCATE(cwaveprj1,(dtset%natom,1))
- call pawcprj_alloc(cwaveprj1,ncpgr,dimlmn)
-
- ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,nband_k))
- call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
-
- ABI_DATATYPE_ALLOCATE(cprj_k1,(dtset%natom,nband_k,3))
- do adir = 1, 3
-   call pawcprj_alloc(cprj_k1(:,:,adir),ncpgr,dimlmn)
- end do
-
- ABI_DATATYPE_ALLOCATE(cprj_pk1,(dtset%natom,nband_k,3))
- do adir = 1, 3
-   call pawcprj_alloc(cprj_pk1(:,:,adir),ncpgr,dimlmn)
- end do
 
  ABI_ALLOCATE(kg_k,(3,dtset%mpw))
  ABI_ALLOCATE(kinpw,(dtset%mpw))
@@ -5237,9 +5196,17 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
  icg = 0
  ikg = 0
- orbmag_cc = zero
- orbmag_vv = zero
- chern = zero
+ nterms = 6 ! various contributing terms in orbmag and chern
+ nterms3 = nterms*3
+ ! 1:3 orbmag CC
+ ! 4:6 orbmag VV II
+ ! 7:9 orbmag VV I+III
+ ! 10:12 chern
+ ! 13:15 alternate orbmag H
+ ! 16:18 alternate orbmag E
+ ABI_ALLOCATE(orbmag_terms,(nterms3))
+ orbmag_terms = zero
+ 
  !============= BIG FAT KPT LOOP :) ===========================
  do ikpt = 1, dtset%nkpt
 
@@ -5300,33 +5267,50 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_ALLOCATE(cg_k,(2,mcgk))
    cg_k = cg(1:2,icg+1:icg+mcgk)
    ABI_ALLOCATE(scg_k,(2,mcgk))
+   ABI_ALLOCATE(scg1_k,(2,mcgk,3))
 
    ! retrieve first order wavefunctions at this k point
    ABI_ALLOCATE(cg1_k,(2,mcgk,3))
    cg1_k = cg1(1:2,icg+1:icg+mcgk,1:3)
 
-   ! compute S|u_nk>
+   ! compute S|u_nk> and S|du/dk>
    ABI_ALLOCATE(cwavef,(2,npw_k))
    ABI_ALLOCATE(gsc,(2,npw_k))
    ABI_ALLOCATE(gvnlc,(2,npw_k))
    ! input parameters for calls to nonlop
    nonlop_choice =  1! apply (I+S)
-   nonlop_cpopt = -1  ! cprj computed and not saved
-   nonlop_pawopt = 3 ! apply only S
-   nonlop_signs = 2  ! get <G|Op|C> vector
    do nn = 1, nband_k
      cwavef = cg_k(:,(nn-1)*npw_k+1:nn*npw_k)
      call nonlop(nonlop_choice,nonlop_cpopt,cwaveprj,nonlop_enlout,gs_hamk,0,&
        & lambda_ndat,mpi_enreg,ndat,nonlop_nnlout,nonlop_pawopt,nonlop_signs,gsc,&
        & nonlop_tim,cwavef,gvnlc)
      scg_k(1:2,(nn-1)*npw_k+1:nn*npw_k) = gsc(1:2,1:npw_k)
+     do adir = 1, 3
+       cwavef = cg1_k(:,(nn-1)*npw_k+1:nn*npw_k,adir)
+       call nonlop(nonlop_choice,nonlop_cpopt,cwaveprj,nonlop_enlout,gs_hamk,0,&
+         & lambda_ndat,mpi_enreg,ndat,nonlop_nnlout,nonlop_pawopt,nonlop_signs,gsc,&
+         & nonlop_tim,cwavef,gvnlc)
+       scg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir) = gsc(1:2,1:npw_k)
+     end do
    end do ! end loop over nn
+
+   ! compute \partial S/\partial k |u_nk>
+   ABI_ALLOCATE(dscg_k,(2,mcgk,3))
+   ! input parameters for calls to nonlop
+   nonlop_choice =  5! apply dS/dk
+   do adir = 1, 3
+     do nn = 1, nband_k
+       cwavef = cg_k(:,(nn-1)*npw_k+1:nn*npw_k)
+       call nonlop(nonlop_choice,nonlop_cpopt,cwaveprj,nonlop_enlout,gs_hamk,adir,&
+         & lambda_ndat,mpi_enreg,ndat,nonlop_nnlout,nonlop_pawopt,nonlop_signs,gsc,&
+         & nonlop_tim,cwavef,gvnlc)
+       dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir) = gsc(1:2,1:npw_k)
+     end do ! end loop over nn
+   end do
 
    ! compute projection of cg1_k on conduction space
    ABI_ALLOCATE(pcg1_k,(2,nband_k*npw_k,3))
    ABI_ALLOCATE(scprod,(2,nband_k))
-   projbd_scprod_io = 0
-   projbd_useoverlap = 1
    do adir = 1, 3
      do nn = 1, nband_k
 
@@ -5342,8 +5326,8 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_ALLOCATE(ghc,(2,npw_k))
    ABI_ALLOCATE(cwaveb1,(2,npw_k))
    ABI_ALLOCATE(cwaveg1,(2,npw_k))
-   getghc_cpopt = -1   ! cprj computed and not saved
-   getghc_sij_opt = 1 ! compute both H|C> and S|C>
+   ABI_ALLOCATE(cwavedsdb,(2,npw_k))
+   ABI_ALLOCATE(cwavedsdg,(2,npw_k))
    do nn = 1, nband_k
 
      ! compute H^0|u_nk> and <u_nk|H^0|u_nk>
@@ -5368,12 +5352,50 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
        cwaveg1(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
        doti=-DOT_PRODUCT(cwaveg1(2,:),ghc(1,:))+DOT_PRODUCT(cwaveg1(1,:),ghc(2,:))
-       orbmag_cc(adir) = orbmag_cc(adir) + doti
+ 
+       ! 1:3 orbmag CC
+       orbmag_terms(adir) = orbmag_terms(adir) + doti
        
-       ! <du/db|S|du/dg> contributes to orbmag_vv and chern number
+       ! <du/db|S|du/dg> contributes to orbmag_vv
+       ! vv needs (i/2)*eps_abg*<du/db|S|du/dg>Enk = -Im<du/db|S|du/dg>Enk =
+       ! +Im<du/dg|S|du/db>Enk
+       ! 4:6 orbmag VV II
        doti=-DOT_PRODUCT(cwaveg1(2,:),gsc(1,:))+DOT_PRODUCT(cwaveg1(1,:),gsc(2,:))
-       orbmag_vv(adir) = orbmag_vv(adir) + doti*Enk
-       chern(adir) = chern(adir) + two*doti
+       orbmag_terms(3+adir) = orbmag_terms(3+adir) + doti*Enk
+
+       ! chern needs i*eps_abg*<du/db|S|du/dg> so contract with eps_abg
+       ! -2*Im<du/db|S|du/dg> = 2*Im<du/dg|S|du/db>
+       ! 10:12 chern 
+       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
+             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir))
+       orbmag_terms(9+adir) = orbmag_terms(9+adir) - two*doti
+       ! 16:18 alternate orbmag E term 
+       orbmag_terms(15+adir) = orbmag_terms(15+adir) - doti*Enk
+
+       cwavedsdb(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+       cwavedsdg(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+
+       dug_dsb_r = DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(1,:)) + DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(2,:))
+       dug_dsb_i = -DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(1,:)) + DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(2,:))
+       dub_dsg_r = DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(2,:))
+       dub_dsg_i = -DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(2,:))
+
+       !VV I term gives (i/2)eps_abg <du/db|dS/dg|u>Enk
+       !VV III term gives (i/2)eps_abg <du|dS/db|du/dg>Enk
+       ! combined with eps_abg contraction they contribute
+       ! -Im(VVI)*Enk
+       ! 7:9 orbmag VV I+III
+       orbmag_terms(6+adir)=orbmag_terms(6+adir)-(dub_dsg_i-dug_dsb_i)*Enk
+
+
+       ! alternate orbmag <du/dk|H|du/dk> directly
+       cwaveg1(1:2,1:npw_k) = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+       call getghc(getghc_cpopt,cwaveg1,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
+         & getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc)
+       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),ghc(1,1:npw_k)) + &
+             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),ghc(2,1:npw_k))
+       ! 13:15 alternate orbmag H term 
+       orbmag_terms(12+adir) = orbmag_terms(12+adir) - doti
 
      end do
 
@@ -5382,11 +5404,15 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_DEALLOCATE(cwavef)
    ABI_DEALLOCATE(cwaveb1)
    ABI_DEALLOCATE(cwaveg1)
+   ABI_DEALLOCATE(cwavedsdb)
+   ABI_DEALLOCATE(cwavedsdg)
    ABI_DEALLOCATE(ghc)
    ABI_DEALLOCATE(gsc)
    ABI_DEALLOCATE(gvnlc)
    ABI_DEALLOCATE(cg_k)
    ABI_DEALLOCATE(scg_k)
+   ABI_DEALLOCATE(scg1_k)
+   ABI_DEALLOCATE(dscg_k)
    ABI_DEALLOCATE(cg1_k)
    ABI_DEALLOCATE(pcg1_k)
    ABI_DEALLOCATE(scprod)
@@ -5404,36 +5430,38 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  end do ! end loop over kpts
 
  if (nproc > 1) then
-   ABI_ALLOCATE(buffer1,(9))
-   ABI_ALLOCATE(buffer2,(9))
-   buff_size=size(buffer1)
-   buffer1(1:3) = orbmag_cc
-   buffer1(4:6) = orbmag_vv
-   buffer1(7:9) = chern
+   buff_size=size(orbmag_terms)
+   ABI_ALLOCATE(buffer1,(buff_size))
+   ABI_ALLOCATE(buffer2,(buff_size))
+   buffer1(1:buff_size) = reshape(orbmag_terms,(/buff_size/))
    call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-   orbmag_cc=buffer2(1:3)
-   orbmag_vv=buffer2(4:6)
-   chern=buffer2(7:9)
+   orbmag_terms(1:nterms3)=reshape(buffer2,(/nterms3/))
    ABI_DEALLOCATE(buffer1)
    ABI_DEALLOCATE(buffer2)
  end if
 
- orbmag_cc(1:3) = ucvol*MATMUL(gprimd,orbmag_cc(1:3))
- orbmag_cc(1:3) = orbmag_cc(1:3) * two/(ucvol*dtset%nkpt)
- orbmag_vv(1:3) = ucvol*MATMUL(gprimd,orbmag_vv(1:3))
- orbmag_vv(1:3) = orbmag_vv(1:3) * two/(ucvol*dtset%nkpt)
- chern(1:3) = ucvol*MATMUL(gprimd,chern(1:3))
- chern(1:3) = chern(1:3) * two/(ucvol*dtset%nkpt*two_pi)
+ do iterms = 1, nterms
+   orbmag_terms((iterms-1)*3+1:iterms*3) = &
+     & ucvol*MATMUL(gprimd,orbmag_terms((iterms-1)*3+1:iterms*3))*two/(ucvol*dtset%nkpt)
+ end do
 
- write(std_out,'(a,3es16.8)')'JWZ debug orbmag_cc ',orbmag_cc(1),orbmag_cc(2),orbmag_cc(3)
- write(std_out,'(a,3es16.8)')'JWZ debug orbmag_vv ',orbmag_vv(1),orbmag_vv(2),orbmag_vv(3)
- write(std_out,'(a,3es16.8)')'JWZ debug chern ',chern(1),chern(2),chern(3)
+ orbmag_terms(10:12) = orbmag_terms(10:12)/two_pi
+ 
+ do iterms = 1, nterms
+   write(std_out,'(a,i4,3es16.8)')'JWZ debug orbmag_terms term ',iterms,&
+     & orbmag_terms((iterms-1)*3+1),&
+     & orbmag_terms((iterms-1)*3+2),&
+     & orbmag_terms((iterms-1)*3+3)
+ end do
 
  orbmag_total=zero;chern_total=zero
- orbmag_total(1,:)=orbmag_cc(:) + orbmag_vv
- chern_total(1,:)=chern(:)
-
+ orbmag_total(1,1:3)=orbmag_terms(1:3)+orbmag_terms(4:6)+orbmag_terms(7:9)
  call output_orbmag(1,orbmag_total)
+ orbmag_total(1,1:3)=orbmag_terms(13:15)+orbmag_terms(16:18)
+ call output_orbmag(1,orbmag_total)
+
+
+ chern_total(1,1:3)=orbmag_terms(10:12)
  call output_orbmag(2,chern_total)
 
 !---------------------------------------------------
@@ -5449,24 +5477,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  ABI_DEALLOCATE(kg_k)
  ABI_DEALLOCATE(kinpw)
  ABI_DEALLOCATE(ph1d)
-
- ABI_DEALLOCATE(dimlmn)
- call pawcprj_free(cwaveprj)
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
- call pawcprj_free(dcwaveprj)
- ABI_DATATYPE_DEALLOCATE(dcwaveprj)
- call pawcprj_free(cwaveprj1)
- ABI_DATATYPE_DEALLOCATE(cwaveprj1)
-
- do adir = 1, 3
-   call pawcprj_free(cprj_k1(:,:,adir))
-   call pawcprj_free(cprj_pk1(:,:,adir))
- end do
- ABI_DATATYPE_DEALLOCATE(cprj_k1)
- ABI_DATATYPE_DEALLOCATE(cprj_pk1)
-
- call pawcprj_free(cprj_k)
- ABI_DATATYPE_DEALLOCATE(cprj_k)
+ ABI_DEALLOCATE(orbmag_terms)
 
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' JWZ debug orbmag_ddk progress: time ',finish_time-start_time
