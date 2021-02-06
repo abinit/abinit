@@ -1,4 +1,4 @@
-#AlP in hypothetical wurzite (hexagonal) structure
+#AlAs in hypothetical wurzite (hexagonal) structure
 #Structural optimization run
 
    ndtset   2       # There are 2 datasets in this calculation
@@ -20,7 +20,7 @@
  getxred2   -1      # Start with relaxed coordinates from dataset 1
   getwfk2   -1      # Start with wave functions from dataset 1
   ionmov2   2       # Use BFGS algorithm
-   ntime2   12      # Maximum number of optimization steps
+   ntime2   14      # Maximum number of optimization steps
  optcell2   2       # Fully optimize unit cell geometry, keeping symmetry
   tolmxf2   1.0e-6  # Convergence limit for forces as above
  strfact2   100     # Test convergence of stresses (Hartree/bohr^3) by
@@ -99,6 +99,6 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% authors = D. Hamann
 #%% keywords = 
 #%% description = 
-#%%   AlP in hypothetical wurzite (hexagonal) structure
+#%%   AlAs in hypothetical wurzite (hexagonal) structure
 #%%   Structural optimization run
 #%%<END TEST_INFO>

@@ -38,20 +38,17 @@
    rfdir3   1 1 1    #the full set of directions is needed
   tolvrs3   1.0d-10  #need reasonable convergence of 1st-order quantities
 
+
 #Common input data
 
-
 # acell  COPY RELAXED RESULT FROM PREVIOUS CALCULATION
-# Here is a default value, for automatic testing : suppress it and fill the previous line
-  acell  7.5389648144E+00  7.5389648144E+00  1.2277795374E+01 
+# Here is a default value, for automatic testing : suppress it and fill with values from the previous run
+  acell  7.2488954246E+00  7.2488954246E+00  1.1879499870E+01 Bohr
 
-
-
-  rprim   sqrt(0.75)  0.5  0.0   #hexagonal primitive vectors must be
-         -sqrt(0.75)  0.5  0.0   #specified with high accuracy to be
+  rprim   sqrt(0.75)  0.5  0.0   #Better to specify hexagonal primitive vectors 
+         -sqrt(0.75)  0.5  0.0   #with high accuracy to be
           0.0         0.0  1.0   #sure that the symmetry is recognized
-                                 #and preserved in the optimization
-                                 #process
+                                 #and preserved in the optimization process
 
 #Definition of the atom types and atoms
  ntypat   2 
@@ -59,16 +56,12 @@
   natom   4
   typat   1 1 2 2
 
-#Starting approximation for atomic positions in REDUCED coordinates
-#based on ideal tetrahedral bond angles
-
 # xred  COPY RELAXED RESULT FROM PREVIOUS CALCULATION
-# Here is a set of default values, for automatic testing : suppress it and fill the previous line
-  xred  1/3    2/3    0
-        2/3    1/3    1/2
-        1/3    2/3    3.7608588373E-01
-        2/3    1/3    8.7608588373E-01
-
+# Here is a set of default values, for automatic testing : suppress it and fill with values from the previous run
+  xred   1/3  2/3  0
+         2/3  1/3  1/2
+         1/3  2/3  3.7517446813E-01
+         2/3  1/3  8.7517446813E-01
 
 #Gives the number of bands, explicitely (do not take the default)
   nband   8              # For an insulator (if described correctly as an 
