@@ -137,7 +137,7 @@ subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmo
 
  ! In order to speed the routine, precompute the components of g+q
  ! Also check if the booked space was large enough...
- ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+ ABI_MALLOC(gq,(3,max(n1,n2,n3)))
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
@@ -148,9 +148,9 @@ subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmo
  ig1max=-1;ig2max=-1;ig3max=-1
  ig1min=n1;ig2min=n2;ig3min=n3
 
- ABI_ALLOCATE(work1,(2,nfft))
- ABI_ALLOCATE(work2,(2,nfft))
- ABI_ALLOCATE(work3,(2,nfft))
+ ABI_MALLOC(work1,(2,nfft))
+ ABI_MALLOC(work2,(2,nfft))
+ ABI_MALLOC(work3,(2,nfft))
  work1=zero; work2=zero; work3=zero
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
@@ -213,7 +213,7 @@ subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmo
    end do ! End loop on i2
  end do ! End loop on i3
 
- ABI_DEALLOCATE(gq)
+ ABI_FREE(gq)
 
  if ( izero .EQ. 1 ) then
    ! Set contribution of unbalanced components to zero
@@ -225,22 +225,22 @@ subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmo
  end if
 
  ! Fourier Transform
- ABI_ALLOCATE(ndvecr,(cplex*nfft))
+ ABI_MALLOC(ndvecr,(cplex*nfft))
  ndvecr=zero
  call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,1)=ndvecr(:)
- ABI_DEALLOCATE(work1)
+ ABI_FREE(work1)
  
  ndvecr=zero
  call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,2) = ndvecr(:)
- ABI_DEALLOCATE(work2)
+ ABI_FREE(work2)
  
  ndvecr=zero
  call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,3) = ndvecr(:)
- ABI_DEALLOCATE(work3)
- ABI_DEALLOCATE(ndvecr)
+ ABI_FREE(work3)
+ ABI_FREE(ndvecr)
 
 end subroutine make_vectornd2
 !!***

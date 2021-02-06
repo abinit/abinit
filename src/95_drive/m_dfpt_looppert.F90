@@ -1459,7 +1459,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    ! space for all 3 ddk wavefunctions if call to orbmag will be needed
    if ( (dtset%orbmag .GE. 11) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_orbmag)) ) then
-     ABI_ALLOCATE(cg1_orbmag,(2,mcg1,3))
+     ABI_MALLOC(cg1_orbmag,(2,mcg1,3))
      has_cg1_orbmag(:) = .FALSE.
    end if
    if (.not.kramers_deg) then
@@ -2166,7 +2166,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      & (COUNT(has_cg1_orbmag) .EQ. 3) ) then
 
      if ( .NOT. ALLOCATED(vtrial_local)) then
-       ABI_ALLOCATE(vtrial_local,(nfftf,dtset%nspden))
+       ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
      call orbmag_ddk(atindx,cg,cg1_orbmag,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
@@ -2174,10 +2174,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        & vtrial_local,xred,ylm,ylmgr)
 
      if( ALLOCATED(vtrial_local) ) then
-       ABI_DEALLOCATE(vtrial_local)
+       ABI_FREE(vtrial_local)
      end if
      if( ALLOCATED(cg1_orbmag) ) then
-       ABI_DEALLOCATE(cg1_orbmag)
+       ABI_FREE(cg1_orbmag)
        has_cg1_orbmag(:) = .FALSE.
      end if
 
