@@ -353,7 +353,7 @@ natom,nblok,prt_internalstr)
 &   '  are too large at Gamma point.',ch10,&
 &   '  Increase cutoff energy or k-points sampling.',ch10,&
 &   '  The three eigenvalues are:',Apmatr(3*natom-2,3*natom-2),Apmatr(3*natom-1,natom-1),Apmatr(3*natom,3*natom)
-   MSG_WARNING(message)
+   ABI_WARNING(message)
    call wrtout(iout,message,'COLL')
  end if
 

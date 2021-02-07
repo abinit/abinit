@@ -103,7 +103,7 @@ contains
     
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%natom, master, comm, ierr)
-    ABI_ALLOCATE(self%ms, (self%nspin))
+    ABI_MALLOC(self%ms, (self%nspin))
   end subroutine initialize
 
   subroutine finalize(self)
@@ -210,16 +210,16 @@ contains
 
     beta = 0.5_dp
 
-    ABI_ALLOCATE(force, (3*self%natom))
+    ABI_MALLOC(force, (3*self%natom))
     if(self%has_bilin) then 
-      ABI_ALLOCATE(self%luref, (3*self%natom))
+      ABI_MALLOC(self%luref, (3*self%natom))
       self%luref=0.0d0
       force = 0.0d0
       call self%liu_sc%vec_product2d(1, spref, 2, force)
       self%luref(:) = - force(:)
     endif
     if(self%has_quadlin) then
-      ABI_ALLOCATE(self%ouref, (3*self%natom))     
+      ABI_MALLOC(self%ouref, (3*self%natom))     
       force = 0.0d0
       call self%oiju_sc%vec_product(1, spref, 2, spref, 3, force)
       self%ouref(:) = - beta*force(:)

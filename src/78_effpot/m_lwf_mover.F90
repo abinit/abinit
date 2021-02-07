@@ -67,7 +67,7 @@ contains
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
     ABI_UNUSED_A(energy_table)
-    MSG_ERROR("run_one_step not implemented for this mover")
+    ABI_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step
 
 

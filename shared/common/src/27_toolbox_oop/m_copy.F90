@@ -1944,7 +1944,7 @@ subroutine addr_copy_int1d(xval,copy)
      ham_ptr=c_loc(xval(1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0))
+     ABI_MALLOC(copy,(0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -1993,7 +1993,7 @@ subroutine addr_copy_int2d(xval,copy)
      ham_ptr=c_loc(xval(1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0))
+     ABI_MALLOC(copy,(0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2042,7 +2042,7 @@ subroutine addr_copy_int3d(xval,copy)
      ham_ptr=c_loc(xval(1,1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0,0))
+     ABI_MALLOC(copy,(0,0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2091,7 +2091,7 @@ subroutine addr_copy_int4d(xval,copy)
      ham_ptr=c_loc(xval(1,1,1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0,0,0))
+     ABI_MALLOC(copy,(0,0,0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2140,7 +2140,7 @@ subroutine addr_copy_dp1d(xval,copy)
      ham_ptr=c_loc(xval(1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0))
+     ABI_MALLOC(copy,(0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2189,7 +2189,7 @@ subroutine addr_copy_dp2d(xval,copy)
      ham_ptr=c_loc(xval(1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0))
+     ABI_MALLOC(copy,(0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2238,7 +2238,7 @@ subroutine addr_copy_dp3d(xval,copy)
      ham_ptr=c_loc(xval(1,1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0,0))
+     ABI_MALLOC(copy,(0,0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2287,7 +2287,7 @@ subroutine addr_copy_dp4d(xval,copy)
      ham_ptr=c_loc(xval(1,1,1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0,0,0))
+     ABI_MALLOC(copy,(0,0,0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2336,7 +2336,7 @@ subroutine addr_copy_dp5d(xval,copy)
      ham_ptr=c_loc(xval(1,1,1,1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0,0,0,0))
+     ABI_MALLOC(copy,(0,0,0,0,0))
    end if
 #else
    copy=transfer(xval,copy)

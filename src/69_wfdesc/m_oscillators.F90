@@ -192,7 +192,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
        end if
 
      CASE DEFAULT
-       MSG_BUG("Wrong map2sphere")
+       ABI_BUG("Wrong map2sphere")
      END SELECT
    end do !iab
 
@@ -201,7 +201,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
    ABI_FREE(cwavef2)
 
  CASE DEFAULT
-   MSG_BUG('Wrong nspinor')
+   ABI_BUG('Wrong nspinor')
  END SELECT
 
 end subroutine rho_tw_g
@@ -301,7 +301,7 @@ subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound
    call gw_box2gsph(nr,ndat,npw,igfftg0,u12prod,usug)
 
  CASE DEFAULT
-   MSG_BUG("Wrong map2sphere")
+   ABI_BUG("Wrong map2sphere")
  END SELECT
 
  ABI_FREE(u12prod)
@@ -409,7 +409,7 @@ subroutine usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12
          u12prod(ir) = GWPC_CONJG(u1_bz(ir)) * GWPC_CONJG(u2_bz(ir))
        end do
      else
-       MSG_ERROR("Wrong time2")
+       ABI_ERROR("Wrong time2")
      end if
    else
      if (time2==1) then
@@ -429,7 +429,7 @@ subroutine usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12
          end do
        end do
      else
-       MSG_ERROR("Wrong time2")
+       ABI_ERROR("Wrong time2")
      end if
    end if
 
@@ -444,7 +444,7 @@ subroutine usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12
          u12prod(ir) = u1_bz(ir) * GWPC_CONJG(u2_bz(ir))
        end do
      else
-       MSG_ERROR("Wrong time2")
+       ABI_ERROR("Wrong time2")
      end if
    else
      if (time2==1) then
@@ -464,11 +464,11 @@ subroutine usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12
          end do
        end do
      else
-       MSG_ERROR("Wrong time2")
+       ABI_ERROR("Wrong time2")
      end if
    end if
  CASE DEFAULT
-   MSG_ERROR("Wrong time1")
+   ABI_ERROR("Wrong time1")
  END SELECT
 
  ABI_FREE(u1_bz)
@@ -605,7 +605,7 @@ subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nr,nspinor,ngfft_gw,wfr_jb,wfr_kb,
      ! Conjugate the product if time-reversal is used to reconstruct this k-point
      wfr2_dpcplx = wfr_jb(ktabr_k) * GWPC_CONJG(wfr_kb(ktabr_k))
    case default
-     MSG_ERROR(sjoin("Wrong ktabi_k:", itoa(ktabi_k)))
+     ABI_ERROR(sjoin("Wrong ktabi_k:", itoa(ktabi_k)))
    end select
 
  else if (nspinor == 2) then
@@ -619,7 +619,7 @@ subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nr,nspinor,ngfft_gw,wfr_jb,wfr_kb,
    ABI_FREE(ukb_bz)
 
  else
-   MSG_ERROR(sjoin("Wrong nspinor:", itoa(nspinor)))
+   ABI_ERROR(sjoin("Wrong nspinor:", itoa(nspinor)))
  end if
 
  ! Transform to Fourier space (result in wfg2_jk)
@@ -697,7 +697,7 @@ function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_s
        rhxtwg_sym( Gsph%rottb(ig,itim_k,isym_k) ) = GWPC_CONJG(rhxtwg_in(ig))
      end do
    CASE DEFAULT
-     MSG_ERROR(sjoin("Wrong value of itim_k:", itoa(itim_k)))
+     ABI_ERROR(sjoin("Wrong value of itim_k:", itoa(itim_k)))
    END SELECT
 
  CASE DEFAULT
@@ -714,7 +714,7 @@ function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_s
        rhxtwg_sym( Gsph%rottb(ig,itim_k,isym_k) ) = GWPC_CONJG( rhxtwg_in(ig) * Gsph%phmSGt(ig,isym_k) )
      end do
    CASE DEFAULT
-     MSG_ERROR(sjoin("Wrong value of itim_k:", itoa(itim_k)))
+     ABI_ERROR(sjoin("Wrong value of itim_k:", itoa(itim_k)))
    END SELECT
  END SELECT
 
@@ -774,7 +774,7 @@ subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, n
    cwork(1:nr) = GWPC_CONJG(ug_ibz(nr+1:2*nr))
    cwork(nr+1:2*nr) = -GWPC_CONJG(ug_ibz(1:nr))
  else
-   MSG_ERROR(sjoin('Wrong itim_kbz:', itoa(itim_kbz)))
+   ABI_ERROR(sjoin('Wrong itim_kbz:', itoa(itim_kbz)))
  end if
 
  do ispinor=1,nspinor

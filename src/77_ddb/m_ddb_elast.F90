@@ -318,7 +318,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &     '  increase cutoff energy or k-points sampling.',ch10,&
 &     '  The three eigenvalues are:',Apmatr(3*natom-2,3*natom-2),&
 &     Apmatr(3*natom-1,natom-1),Apmatr(3*natom,3*natom)
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
 !  then give the value of reduced matrix form Apmatr to Amatr
@@ -347,7 +347,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
      write(message,'(a,a,a,a)') ch10,&
 &     'Unstable eigenvalue detected in force constant matrix at Gamma point.',ch10,&
 &     'The system under calculation is physically unstable.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
 
@@ -496,7 +496,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &     'one needs information about internal strain ',ch10,&
 &     'one should set  instrflag==1;',ch10,&
 &     'otherwise the program will continue but give wrong values.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
 
@@ -562,7 +562,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &     'one needs information about internal strain ',ch10,&
 &     'one should set  instrflag==1;',ch10,&
 &     'otherwise the program will continue but give wrong values.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
    write(message,'(5a)')ch10,&
@@ -639,7 +639,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &     'one needs information about internal strain ',ch10,&
 &     'one should set  instrflag==1;',ch10,&
 &     'otherwise the program will continue but give wrong values.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
    write(message,'(5a)')ch10,&
@@ -731,7 +731,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_relaxed_ion_stress_corrected'), elast_stress))
 
 #else
-   MSG_ERROR("Netcdf support not enabled")
+   ABI_ERROR("Netcdf support not enabled")
 #endif
  end if
 

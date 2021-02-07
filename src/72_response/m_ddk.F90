@@ -278,7 +278,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  if (ds%bmax == -1) ds%bmax = mband
 
  if (ds%bmin < 1 .or. ds%bmin > mband .or. ds%bmax > mband .or. ds%bmin > ds%bmax) then
-   MSG_ERROR(sjoin("Invalid value for bmin, bmax", itoa(ds%bmin), itoa(ds%bmax), "with mband:", itoa(mband)))
+   ABI_ERROR(sjoin("Invalid value for bmin, bmax", itoa(ds%bmin), itoa(ds%bmax), "with mband:", itoa(mband)))
  end if
 
  bmin = ds%bmin; bmax = ds%bmax
@@ -286,7 +286,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  write_ncfile = len_trim(prefix) > 0
  if (write_ncfile .and. .not. (bmin == 1 .and. bmax == mband) ) then
    write_ncfile = .False.
-   MSG_WARNING("Cannot write ncfile if .not. (bmin == 1 .and. bmax == mband)")
+   ABI_WARNING("Cannot write ncfile if .not. (bmin == 1 .and. bmax == mband)")
  end if
 
  if (my_rank == master) then
@@ -1023,7 +1023,7 @@ function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) res
      vk(:, idir) = dotarr
    end do
  else
-   MSG_ERROR("PAW Not Implemented")
+   ABI_ERROR("PAW Not Implemented")
    ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
    ! eshiftkq = half * (eig0mk - self%eig0nk)
    ABI_UNUSED(eig0mk)
@@ -1037,7 +1037,7 @@ function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) res
  case ("reduced")
    continue
  case default
-   MSG_ERROR(sjoin("Invalid vaue for mode:", mode))
+   ABI_ERROR(sjoin("Invalid vaue for mode:", mode))
  end select
 
 end function ddkop_get_braket

@@ -108,7 +108,7 @@ contains
     old_temperature=self%T_ob
     tmp=1.0 +(self%temperature / old_temperature - 1.0) *    tautscl
     if(tmp< 0.0) then
-       MSG_ERROR("The time scale for the Berendsen algorithm should be at least larger than dtion")
+       ABI_ERROR("The time scale for the Berendsen algorithm should be at least larger than dtion")
     else
        scale_temperature=sqrt(tmp)
     end if

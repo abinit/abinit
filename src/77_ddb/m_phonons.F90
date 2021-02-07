@@ -227,12 +227,12 @@ subroutine phdos_print(PHdos,fname)
  case (2)
    write(msg_method,'(a,i0)')'# Tetrahedron method, nqibz= ',PHdos%nqibz
  case default
-   MSG_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
+   ABI_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
  end select
 
  ! Open external file and write results
  if (open_file(fname,msg,newunit=unt,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(msg,'(3a)')'# ',ch10,'# Phonon density of states and atom type projected DOS'
  call wrtout(unt,msg)
@@ -252,7 +252,7 @@ subroutine phdos_print(PHdos,fname)
 
  fname_by_atom = trim(fname) // "_by_atom"
  if (open_file(fname_by_atom,msg,newunit=unt_by_atom,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(msg,'(3a)')'# ',ch10,'# Phonon density of states and atom projected DOS'
  call wrtout(unt_by_atom,msg)
@@ -272,7 +272,7 @@ subroutine phdos_print(PHdos,fname)
 
  fname_msqd = trim(fname) // "_msqd"
  if (open_file(fname_msqd,msg,newunit=unt_msqd,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(msg,'(3a)')'# ',ch10,'# Phonon density of states weighted msq displacement matrix (set to zero below 1e-12)'
  call wrtout(unt_msqd,msg)
@@ -460,7 +460,7 @@ subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
 
  ! open THERMO file
  if (open_file(fname, msg, newunit=tunt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(msg, '(3a)' )&
@@ -736,7 +736,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
 
  ! Consistency check.
  if (all(prtdos /= [1, 2])) then
-   MSG_BUG(sjoin('prtdos should be 1 or 2, but received', itoa(prtdos)))
+   ABI_BUG(sjoin('prtdos should be 1 or 2, but received', itoa(prtdos)))
  end if
  dosdeltae = dosdeltae_in; refine_dosdeltae = .false.
  if (dosdeltae <= zero) then
@@ -744,7 +744,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    ABI_CHECK(nprocs == 1, "refine_dosdeltae cannot be used with nprocs > 1")
  end if
  if (prtdos == 1 .and. dossmear <= zero) then
-   MSG_BUG(sjoin('dossmear should be positive but received', ftoa(dossmear)))
+   ABI_BUG(sjoin('dossmear should be positive but received', ftoa(dossmear)))
  end if
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -925,7 +925,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
      full_eigvec(:,:,:,:,iq_ibz) = eigvec
 
    case default
-     MSG_ERROR(sjoin("Wrong value for prtdos:", itoa(prtdos)))
+     ABI_ERROR(sjoin("Wrong value for prtdos:", itoa(prtdos)))
    end select
  end do ! iq_ibz
 
@@ -1050,7 +1050,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
          write(msg,'(a,f6.2,a,i4,2a,e10.3,a,e10.3)') "The value of the integral is", phdos_int, &
                       " but it should be", crystal%natom*3, ch10,&
                       "I will decrease dosdeltae from: ", dosdeltae, " to: ", dosdeltae/two
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
          dosdeltae = dosdeltae / two
          call phdos%free()
          call phdos_init(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
@@ -1090,7 +1090,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    call htetraq%free()
  else
 #ifdef HAVE_NETCDF
-   MSG_WARNING('The netcdf PHIBZ file is only output for tetrahedron integration and DOS calculations')
+   ABI_WARNING('The netcdf PHIBZ file is only output for tetrahedron integration and DOS calculations')
 #endif
  end if ! tetrahedra
 
@@ -1231,7 +1231,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
      rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
    write (msg, '(4a, 9I6, a)') ' for the moment I have not implemented ', &
      ' non diagonal supercells.',ch10,' rlatt for temp 1 = ', rlatt, ' Returning '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
@@ -1408,7 +1408,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
 &    rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
    write (msg, '(4a, 9I6, a)') ' for the moment I have not implemented ', &
 &    ' non diagonal supercells.',ch10,' rlatt for temp 1 = ', rlatt, ' Returning '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
@@ -1510,7 +1510,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
              write (msg, '(a,I0,a,3es12.5,2a,I0)') ' The amplitude of the unstable mode ',&
 &                int(imode),' of the qpt ',thm_scells(iconfig)%qphon(:), ch10,&
 &                'is set to zero for the configuration ',iconfig
-             MSG_WARNING(msg)
+             ABI_WARNING(msg)
            end if
          end select
        end if
@@ -1768,7 +1768,7 @@ subroutine phdos_ncwrite(phdos, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'shiftq'), phdos%shiftq))
 
 #else
- MSG_ERROR("netcdf support not enabled")
+ ABI_ERROR("netcdf support not enabled")
  ABI_UNUSED((/ncid, phdos%nomega/))
 #endif
 
@@ -2044,14 +2044,14 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      end if
 
    case default
-     MSG_WARNING(sjoin("Don't know how to handle prtphbands:", itoa(inp%prtphbands)))
+     ABI_WARNING(sjoin("Don't know how to handle prtphbands:", itoa(inp%prtphbands)))
    end select
 
    ! write out DOS file for q along this path
    cfact=one
    unitname = 'Ha'
    if (open_file('PHBST_partial_DOS',msg,newunit=unt,form="formatted",action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(msg,'(3a)')'# ',ch10,'# Partial phonon density of states for q along a band structure path'
    call wrtout(unt, msg)
@@ -2268,11 +2268,11 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 
  fname_msqd = trim(fname) //"_MSQD_T"
  if (open_file(fname_msqd, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  fname_veloc = trim(fname) // "_MSQV_T"
  if (open_file(fname_veloc, msg, newunit=junit, form="formatted", status="unknown", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! write the header
@@ -2515,7 +2515,7 @@ end subroutine phonons_ncwrite
  dummy = qpoints(1,1); dummy = weights(1)
 
  if (open_file(path, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (iunit, '(a)')  '# ABINIT generated phonon band structure file. All in Ha atomic units'
@@ -2533,7 +2533,7 @@ end subroutine phonons_ncwrite
 
  if (.False.) then
    if (open_file(strcat(path, "_PHDISPL"), msg, unit=iunit, form="formatted", status="unknown", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write (iunit, '(a)')     '# ABINIT generated phonon displacements, along points in PHFRQ file. All in Ha atomic units'
@@ -2630,7 +2630,7 @@ subroutine phonons_write_xmgrace(filename, natom, nqpts, qpts, phfreqs, qptbound
  end if
 
  if (open_file(filename, msg, newunit=unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(unt,'(a)') "# Grace project file"
@@ -2759,10 +2759,10 @@ subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
 
  datafile = strcat(prefix, "_PHBANDS.data")
  if (open_file(datafile, msg, newunit=unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (open_file(strcat(prefix, "_PHBANDS.gnuplot"), msg, newunit=gpl_unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  basefile = basename(datafile)
 
@@ -2874,7 +2874,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  if (dtset%prtphbands == 0) return
 
  if (dtset%ph_nqpath <= 0 .or. dtset%ph_ndivsm <= 0) then
-   MSG_COMMENT("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. Returning")
+   ABI_COMMENT("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. Returning")
    return
  end if
 
@@ -2961,7 +2961,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    case (3)
      call phonons_write_phfrq(strcat(prefix, "_PHFRQ"), natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
    case default
-     MSG_WARNING(sjoin("Unsupported value for prtphbands:", itoa(dtset%prtphbands)))
+     ABI_WARNING(sjoin("Unsupported value for prtphbands:", itoa(dtset%prtphbands)))
    end select
 
    ABI_FREE(weights)

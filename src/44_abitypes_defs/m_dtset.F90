@@ -135,6 +135,7 @@ type, public :: dataset_type
  integer :: dmft_read_occnd
  integer :: dmft_solv
  integer :: dmft_t2g
+ integer :: dmft_wanorthnorm
 !integer :: dmft_x2my2d
  integer :: dmftbandi
  integer :: dmftbandf
@@ -1086,7 +1087,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
              write(msg,'(a,i5,a,f17.8,a)') 'In occopt = 9 case, ivalence = ', dtset%ivalence, &
 &           ' is too small compared to the number of electrons in the valence bands, nelect-nh_qFD = ', &
 &           dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
-            MSG_ERROR(msg)
+            ABI_ERROR(msg)
           end if
        
        if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=0.0_dp
@@ -1095,7 +1096,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
        occlast= dtset%ne_qFD-maxocc*(nocc-1)
        if ( (nocc+dtset%ivalence*dtset%nsppol) > dtset%nband(1)*dtset%nsppol) then
           write(msg,'(a)') 'Occopt = 9: Not enough band above ivalence. Increase nband or reduce ivalence'
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
        end if
 
        if(nocc > 1)  tmpocc(dtset%ivalence*dtset%nsppol+1:dtset%ivalence*dtset%nsppol+nocc-1)=maxocc
@@ -1152,7 +1153,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
            'This combination is not possible, because of a lack of bands.',ch10,&
            'Action: modify input file',ch10,&
            '(you should likely increase nband, but also check nspden, nspinor, nsppol, and spinmagntarget)'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          do ikpt=1,dtset%nkpt
            ! Fill all bands, except the upper one
@@ -1173,7 +1174,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
        'This combination is not possible.',ch10,&
        'Action: modify input file ... ',ch10,&
        '(check nspden, nspinor, nsppol and spinmagntarget)'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      ! Now print the values (only the first image, since they are all the same)
@@ -1214,7 +1215,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
      'Action: modify input file ',ch10,&
      '(check the pseudopotential charges, the variable charge,',ch10,&
      'and the declared number of bands, nband)'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -1260,7 +1261,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
 !        The discrepancy is not so severe
          write(msg, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than: ',tol11
        end if
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
 
        write(msg, '(6a)' ) &
        'Action: check input file for occ,wtk, and charge.',ch10,&
@@ -1270,7 +1271,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
 
        ! If the discrepancy is severe, stop
        if (abs(nelect_occ-dtset%nelect)>tol8)then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
      end if
@@ -1382,6 +1383,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 !dtout%dmft_x2my2d        = dtin%dmft_x2my2d
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
+ dtout%dmft_wanorthnorm   = dtin%dmft_wanorthnorm
  dtout%dmftbandi          = dtin%dmftbandi
  dtout%dmftbandf          = dtin%dmftbandf
  dtout%dmftcheck          = dtin%dmftcheck
@@ -2359,7 +2361,7 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
         'The component number ',idtset,' of the input variable ',trim(getname),',',' equal to ',getvalue,',',ch10,&
         'does not correspond to an existing index.',ch10,&
         'Action: correct ',trim(getname),' or jdtset in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
    write(msg, '(3a,i3,2a)' )&
@@ -2986,7 +2988,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        write(msg, '(a,a,a)' )&
          'accuracy >6 is forbidden !',ch10,&
          'Action: check your input data file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      if (ecutmax(3)>zero) dtsets(idtset)%ecut=ecutmax(3)
@@ -3144,9 +3146,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_entropy dmft_iter dmft_kspectralfunc'
  list_vars=trim(list_vars)//' dmft_mxsf dmft_nlambda dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
-!list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
- list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g'
- list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage'
+ list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
+ list_vars=trim(list_vars)//' dmft_wanorthnorm dosdeltae dtion dynamics dynimage'
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'

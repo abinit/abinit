@@ -134,12 +134,12 @@ mpi_communicator = mpi_enreg%comm_bandfft
 
 
 !Create seeds
-ABI_ALLOCATE(seeds,(npw_k,nseeds))
+ABI_MALLOC(seeds,(npw_k,nseeds))
 call get_seeds(first_seed, nseeds, seeds)
 
 ! compute the Lanczos basis
-ABI_ALLOCATE(alpha,(nseeds,nseeds,kmax))
-ABI_ALLOCATE(beta ,(nseeds,nseeds,kmax))
+ABI_MALLOC(alpha,(nseeds,nseeds,kmax))
+ABI_MALLOC(beta ,(nseeds,nseeds,kmax))
 
 call block_lanczos_algorithm(mpi_communicator,epsilon_matrix_function,kmax,nseeds,npw_k,        &
 seeds,alpha,beta,Lbasis)
@@ -151,9 +151,9 @@ if (debug) then
   call ritz_analysis_general(mpi_communicator, epsilon_matrix_function,nseeds*kmax,npw_k,Lbasis,epsilon_eigenvalues)
 end if
 
-ABI_DEALLOCATE(seeds)
-ABI_DEALLOCATE(alpha)
-ABI_DEALLOCATE(beta)
+ABI_FREE(seeds)
+ABI_FREE(alpha)
+ABI_FREE(beta)
 
 end subroutine driver_generate_dielectric_matrix
 !!***
@@ -246,17 +246,17 @@ debug = .false.
 lmax = kmax*nseeds
 mpi_communicator = mpi_enreg%comm_bandfft
 !Create seeds
-ABI_ALLOCATE(seeds,(npw_k,nseeds))
+ABI_MALLOC(seeds,(npw_k,nseeds))
 call get_seeds(first_seed, nseeds, seeds)
 
 ! compute the Lanczos basis
-ABI_ALLOCATE(Lbasis_diag,(npw_k,lmax))
-ABI_ALLOCATE(epsilon_eigenvalues,(lmax))
+ABI_MALLOC(Lbasis_diag,(npw_k,lmax))
+ABI_MALLOC(epsilon_eigenvalues,(lmax))
 
-ABI_ALLOCATE(psik,(2,npw_k))
-ABI_ALLOCATE(psir,(2,n4,n5,n6))
-ABI_ALLOCATE(G_array,(npw_k))
-ABI_ALLOCATE(R_array,(n4,n5,n6))
+ABI_MALLOC(psik,(2,npw_k))
+ABI_MALLOC(psir,(2,n4,n5,n6))
+ABI_MALLOC(G_array,(npw_k))
+ABI_MALLOC(R_array,(n4,n5,n6))
 
 psir = zero
 R_array = zero
@@ -365,14 +365,14 @@ end do
 
 close(io_unit)
 
-ABI_DEALLOCATE(seeds)
-ABI_DEALLOCATE(Lbasis_diag)
-ABI_DEALLOCATE(psik)
-ABI_DEALLOCATE(psir)
-ABI_DEALLOCATE(G_array)
-ABI_DEALLOCATE(R_array)
+ABI_FREE(seeds)
+ABI_FREE(Lbasis_diag)
+ABI_FREE(psik)
+ABI_FREE(psir)
+ABI_FREE(G_array)
+ABI_FREE(R_array)
 
-ABI_DEALLOCATE(epsilon_eigenvalues)
+ABI_FREE(epsilon_eigenvalues)
 
 
 10 format(A)
@@ -477,13 +477,13 @@ e            = dtset%gwls_band_index
 
 
 
-ABI_ALLOCATE(Lbasis_exact,(npw_k,kmax_exact*nseeds))
-ABI_ALLOCATE(Lbasis_model,(npw_k,kmax_model*nseeds))
+ABI_MALLOC(Lbasis_exact,(npw_k,kmax_exact*nseeds))
+ABI_MALLOC(Lbasis_model,(npw_k,kmax_model*nseeds))
 
-ABI_ALLOCATE(alpha_exact, (nseeds,nseeds,kmax_exact))
-ABI_ALLOCATE(beta_exact , (nseeds,nseeds,kmax_exact))
-ABI_ALLOCATE(alpha_model, (nseeds,nseeds,kmax_model))
-ABI_ALLOCATE(beta_model , (nseeds,nseeds,kmax_model))
+ABI_MALLOC(alpha_exact, (nseeds,nseeds,kmax_exact))
+ABI_MALLOC(beta_exact , (nseeds,nseeds,kmax_exact))
+ABI_MALLOC(alpha_model, (nseeds,nseeds,kmax_model))
+ABI_MALLOC(beta_model , (nseeds,nseeds,kmax_model))
 
 
 ! set omega=0 for exact dielectric operator
@@ -525,8 +525,8 @@ end if
 lmax = nseeds*kmax
 
 ! Build model operator matrix elements in the exact basis
-ABI_ALLOCATE(model_epsilon_matrix, (lmax,lmax))
-ABI_ALLOCATE(vector, (npw_k))
+ABI_MALLOC(model_epsilon_matrix, (lmax,lmax))
+ABI_MALLOC(vector, (npw_k))
 
 model_epsilon_matrix = cmplx_0
 
@@ -543,7 +543,7 @@ end do
 
 end do
 
-ABI_DEALLOCATE(vector)
+ABI_FREE(vector)
 
 call cpu_time(time2)
 time = time2-time1
@@ -606,14 +606,14 @@ flush(io_unit2)
 ! Iterate every 10 values of k max, or else the linear algebra gets too expensive...
 do k = 4, kmax, 4
 
-ABI_ALLOCATE(sub_Lbasis_exact,(npw_k,k*nseeds))
-ABI_ALLOCATE(sub_Lbasis_model,(npw_k,k*nseeds))
+ABI_MALLOC(sub_Lbasis_exact,(npw_k,k*nseeds))
+ABI_MALLOC(sub_Lbasis_model,(npw_k,k*nseeds))
 
 
-ABI_ALLOCATE(eig_exact,(k*nseeds))
-ABI_ALLOCATE(eig_model,(k*nseeds))
-ABI_ALLOCATE(dummy,(k*nseeds,k*nseeds))
-ABI_ALLOCATE(dummy2,(k*nseeds,k*nseeds))
+ABI_MALLOC(eig_exact,(k*nseeds))
+ABI_MALLOC(eig_model,(k*nseeds))
+ABI_MALLOC(dummy,(k*nseeds,k*nseeds))
+ABI_MALLOC(dummy2,(k*nseeds,k*nseeds))
 
 sub_Lbasis_exact(:,:) = Lbasis_exact(:,1:k*nseeds)
 sub_Lbasis_model(:,:) = Lbasis_model(:,1:k*nseeds)
@@ -652,7 +652,7 @@ dummy2(lm,lm) = eig_exact(lm)
 tr_eps_3 = tr_eps_3 + dble(model_epsilon_matrix(lm,lm)) - dble(eig_exact(lm))
 end do
 
-ABI_ALLOCATE(dummy3,(k*nseeds,k*nseeds))
+ABI_MALLOC(dummy3,(k*nseeds,k*nseeds))
 call ZGEMM(      'N',   & ! Hermitian conjugate the first array
 'N',   & ! Leave second array as is
 k*nseeds,   & ! the number of rows of the  matrix op( A )
@@ -668,7 +668,7 @@ dummy3,   & ! matrix C
 k*nseeds)     ! LDC
 
 dummy2(:,:) = dummy3(:,:)
-ABI_DEALLOCATE(dummy3)
+ABI_FREE(dummy3)
 
 ! find eigenvalues
 !call heevd(dummy2, eig_exact)
@@ -677,9 +677,9 @@ lwork  = k*nseeds+1
 lrwork = k*nseeds
 liwork = 1
 
-ABI_ALLOCATE(work,(lwork))
-ABI_ALLOCATE(rwork,(lrwork))
-ABI_ALLOCATE(iwork,(liwork))
+ABI_MALLOC(work,(lwork))
+ABI_MALLOC(rwork,(lrwork))
+ABI_MALLOC(iwork,(liwork))
 
 call zheevd('N', 'U',k*nseeds, dummy2, k*nseeds, eig_exact, work, lwork, rwork, lrwork, iwork, liwork, info)
 if ( info /= 0) then
@@ -707,19 +707,19 @@ flush(io_unit2)
 
 
 
-ABI_DEALLOCATE(work)
-ABI_DEALLOCATE(rwork)
-ABI_DEALLOCATE(iwork)
+ABI_FREE(work)
+ABI_FREE(rwork)
+ABI_FREE(iwork)
 
 
 
-ABI_DEALLOCATE(sub_Lbasis_exact)
-ABI_DEALLOCATE(sub_Lbasis_model)
+ABI_FREE(sub_Lbasis_exact)
+ABI_FREE(sub_Lbasis_model)
 
-ABI_DEALLOCATE(eig_exact)
-ABI_DEALLOCATE(eig_model)
-ABI_DEALLOCATE(dummy)
-ABI_DEALLOCATE(dummy2)
+ABI_FREE(eig_exact)
+ABI_FREE(eig_model)
+ABI_FREE(dummy)
+ABI_FREE(dummy2)
 end do
 
 close(io_unit)
@@ -730,13 +730,13 @@ time = time2-time1
 write(timing_string,'(A)')  "Time to compute the TRACES of the Dielectric Matrices:   "
 call write_timing_log(timing_string,time)
 
-ABI_DEALLOCATE(Lbasis_exact)
-ABI_DEALLOCATE(Lbasis_model)
-ABI_DEALLOCATE(alpha_exact)
-ABI_DEALLOCATE(beta_exact )
-ABI_DEALLOCATE(alpha_model)
-ABI_DEALLOCATE(beta_model )
-ABI_DEALLOCATE(model_epsilon_matrix)
+ABI_FREE(Lbasis_exact)
+ABI_FREE(Lbasis_model)
+ABI_FREE(alpha_exact)
+ABI_FREE(beta_exact )
+ABI_FREE(alpha_model)
+ABI_FREE(beta_model )
+ABI_FREE(model_epsilon_matrix)
 
 
 

@@ -31,7 +31,7 @@
 !!  sendcont= number of sent elements
 !!  recvcount= number of received elements
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -41,22 +41,22 @@
 !!
 !! SOURCE
 
-subroutine xmpi_gather_int(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_gather_int(xval,sendcount,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
  integer, DEV_CONTARRD intent(in) :: xval(:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
- integer,intent(in) :: root,spaceComm
+ integer,intent(in) :: root,comm
  integer,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   call MPI_gather(xval,sendcount,MPI_INTEGER,recvbuf,recvcount,MPI_INTEGER,root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_gather(xval,sendcount,MPI_INTEGER,recvbuf,recvcount,MPI_INTEGER,root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf=xval
  end if
 #else
@@ -78,7 +78,7 @@ end subroutine xmpi_gather_int
 !!  sendcont= number of sent elements
 !!  recvcount= number of received elements
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -88,22 +88,22 @@ end subroutine xmpi_gather_int
 !!
 !! SOURCE
 
-subroutine xmpi_gather_int2d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_gather_int2d(xval,sendcount,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
  integer, DEV_CONTARRD intent(in) :: xval(:,:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:,:)
- integer,intent(in) :: root,spaceComm
+ integer,intent(in) :: root,comm
  integer,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   call MPI_gather(xval,sendcount,MPI_INTEGER,recvbuf,recvcount,MPI_INTEGER,root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_gather(xval,sendcount,MPI_INTEGER,recvbuf,recvcount,MPI_INTEGER,root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf=xval
  end if
 #else
@@ -125,7 +125,7 @@ end subroutine xmpi_gather_int2d
 !!  sendcont= number of sent elements
 !!  recvcount= number of received elements
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -135,23 +135,23 @@ end subroutine xmpi_gather_int2d
 !!
 !! SOURCE
 
-subroutine xmpi_gather_dp(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_gather_dp(xval,sendcount,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
  real(dp), DEV_CONTARRD intent(in) :: xval(:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:)
- integer,intent(in) :: root,spaceComm
+ integer,intent(in) :: root,comm
  integer,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_gather(xval,sendcount,MPI_DOUBLE_PRECISION,recvbuf,recvcount,MPI_DOUBLE_PRECISION,&
-&   root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf=xval
  end if
 #else
@@ -173,7 +173,7 @@ end subroutine xmpi_gather_dp
 !!  sendcont= number of sent elements
 !!  recvcount= number of received elements
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -183,23 +183,23 @@ end subroutine xmpi_gather_dp
 !!
 !! SOURCE
 
-subroutine xmpi_gather_dp2d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_gather_dp2d(xval,sendcount,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:)
- integer,intent(in) :: root,spaceComm
+ integer,intent(in) :: root,comm
  integer,intent(out)   :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_gather(xval,sendcount,MPI_DOUBLE_PRECISION,recvbuf,recvcount,MPI_DOUBLE_PRECISION,&
-&   root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf=xval
  end if
 #else
@@ -221,7 +221,7 @@ end subroutine xmpi_gather_dp2d
 !!  sendcont= number of sent elements
 !!  recvcount= number of received elements
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -231,23 +231,23 @@ end subroutine xmpi_gather_dp2d
 !!
 !! SOURCE
 
-subroutine xmpi_gather_dp3d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_gather_dp3d(xval,sendcount,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:)
- integer,intent(in) :: root,spaceComm
+ integer,intent(in) :: root,comm
  integer,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_gather(xval,sendcount,MPI_DOUBLE_PRECISION,recvbuf,recvcount,MPI_DOUBLE_PRECISION,&
-&   root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf=xval
  end if
 #else
@@ -270,7 +270,7 @@ end subroutine xmpi_gather_dp3d
 !!  sendcont= number of sent elements
 !!  recvcount= number of received elements
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -280,23 +280,23 @@ end subroutine xmpi_gather_dp3d
 !!
 !! SOURCE
 
-subroutine xmpi_gather_dp4d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_gather_dp4d(xval,sendcount,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  integer,intent(in) :: sendcount,recvcount
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:,:)
- integer,intent(in) :: root,spaceComm
+ integer,intent(in) :: root,comm
  integer,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_gather(xval,sendcount,MPI_DOUBLE_PRECISION,recvbuf,recvcount,MPI_DOUBLE_PRECISION,&
-&   root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf=xval
  end if
 #else

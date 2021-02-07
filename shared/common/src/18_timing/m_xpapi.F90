@@ -75,7 +75,7 @@ subroutine xpapi_init()
  call PAPIf_library_init(check)
 
  if ( check /= PAPI_VER_CURRENT .and. check >0 ) then
-   MSG_WARNING(" PAPI library version mismatch!")
+   ABI_WARNING(" PAPI library version mismatch!")
  end if
  !ABI_CHECK(check>=0," PAPI Initialization error!")
  !XPAPI_CHECK(check," PAPI Initialization error!")
@@ -144,12 +144,12 @@ subroutine xpapi_show_info(unit,mode_paral)
 
  call PAPIf_num_counters(num_hwcntrs)
  if (num_hwcntrs  < 0) then
-   MSG_WARNING(" The installation does not support PAPI")
+   ABI_WARNING(" The installation does not support PAPI")
  end if
 
  if (num_hwcntrs == 0) then
    msg = " The installation supports PAPI, but this machine does not provide hardware counters."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  call PAPIF_get_hardware_info (ncpu,nnodes,totalcpus,vendor,vendor_string,model,model_string,revision,mhz)
@@ -315,7 +315,7 @@ subroutine xpapi_handle_error(check,err_msg,file,line)
      write(std_out,*) "Papi library is not initialized!"
    end if
  end if
- MSG_ERROR("Fatal error")
+ ABI_ERROR("Fatal error")
 #else
  ABI_UNUSED(err_msg)
  if (.FALSE.) write(std_out,*) check
