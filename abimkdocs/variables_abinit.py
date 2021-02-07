@@ -4068,7 +4068,9 @@ The choice is among:
 * -5 --> Interpolate DFPT potentials on the q-path specified by [[ph_qpath]] and [[ph_nqpath]]. Note that, in this case,
          the user has to provide the full list of q-points in the input, [[ph_ndivsm]] is not used to generate the q-path.
 * 6 --> Estimate correction to the ZPR in polar materials using the Frohlich model. Requires EFMAS.nc file.
-* 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file.
+* 7 --> Compute phonon limited transport quantities withing the RTA using lifetimes taken from the SIGEPH.nc file.
+* 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
+        Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task == -4.
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
@@ -21080,16 +21082,64 @@ obtained with a 50x50x50 without having to perform a full lifetime calculation o
 ),
 
 Variable(
-    abivarname="eph_prtsrate",
+    abivarname="ibte_abs_tol",
+    varset="eph",
+    topics=['ElPhonInt_expert'],
+    vartype="real",
+    defaultval="1e-12",
+    dimensions="scalar",
+    mnemonics="Iterative Boltzmann Equation: ALPHA TOLerance for convergence",
+    added_in_version="9.3.0",
+    text=r"""
+This variable is still under development.
+""",
+),
+
+Variable(
+    abivarname="ibte_alpha_mix",
+    varset="eph",
+    topics=['ElPhonInt_expert'],
+    vartype="real",
+    defaultval=0.7,
+    dimensions="scalar",
+    mnemonics="Iterative Boltzmann Equation: ALPHA Mixing factor",
+    added_in_version="9.3.0",
+    text=r"""
+This variable defines the coefficient for the linear mixing used in the IBTE solver.
+If the algorithm has problems to converge try to decrease [[ibte_alpha_mix]] and increase [[ibte_niter]].
+""",
+),
+
+Variable(
+    abivarname="ibte_niter",
+    varset="eph",
+    topics=['ElPhonInt_useful'],
+    vartype="integer",
+    defaultval=100,
+    dimensions="scalar",
+    mnemonics="Iterative Boltzmann Equation: max Number of ITERations",
+    added_in_version="9.3.0",
+    text=r"""
+This variable defines the maximum number of iterations of the IBTE solver.
+""",
+),
+
+Variable(
+    abivarname="ibte_prep",
     varset="eph",
     topics=['ElPhonInt_useful'],
     vartype="integer",
     defaultval=0,
     dimensions="scalar",
-    mnemonics="EPH PRinT Scattering RATE to netcdf file",
+    mnemonics="Iterative Boltzmann Equation PREPare",
     added_in_version="9.3.0",
     text=r"""
-This variable is still under development.
+This variable is used when computing the imaginary part of the e-ph self-energy ([[eph_task]] = - 4)
+to save the collision term to the SIGEPH file.
+This step is required for solving the iterative BTE.
+
+Note that, once you have a SIGEPH file with the collision terms, it is possible to run the IBTE solver in standalone
+mode by using [[eph_task]] = 8 with [[getsigeph_filepath]].
 """,
 ),
 

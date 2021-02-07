@@ -515,6 +515,7 @@ interface xmpi_recv
   module procedure xmpi_recv_dp1d
   module procedure xmpi_recv_dp2d
   module procedure xmpi_recv_dp3d
+  module procedure xmpi_recv_dp4d
 end interface xmpi_recv
 
 !----------------------------------------------------------------------
@@ -557,6 +558,7 @@ interface xmpi_send
   module procedure xmpi_send_dp1d
   module procedure xmpi_send_dp2d
   module procedure xmpi_send_dp3d
+  module procedure xmpi_send_dp4d
 end interface xmpi_send
 
 !----------------------------------------------------------------------
@@ -2849,7 +2851,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_int
@@ -2872,7 +2874,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_real
@@ -2895,7 +2897,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dble
@@ -2918,7 +2920,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_cplx
@@ -2941,7 +2943,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dcplx
@@ -2964,7 +2966,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk).or.invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_lor_log
@@ -2987,7 +2989,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk).and.invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_land_log

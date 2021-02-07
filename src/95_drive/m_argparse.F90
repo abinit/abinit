@@ -280,6 +280,8 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"--verbose                  Enable verbose mode in argparse"
         write(std_out,*)"-h, --help                 Show this help and exit."
 
+        write(std_out,*)""
+        write(std_out,*)""
         write(std_out,*)"=============================="
         write(std_out,*)"=== Options for developers ==="
         write(std_out,*)"=============================="

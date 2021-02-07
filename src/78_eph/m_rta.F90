@@ -58,9 +58,8 @@ module m_rta
  private
 !!****
 
- public :: rta_driver                 ! Driver to compute transport properties within the RTA.
- public :: rta_estimate_sigma_erange
- public :: ibte_driver                ! Driver to compute transport properties within the IBTE.
+ public :: rta_driver      ! Compute transport properties within the RTA.
+ public :: ibte_driver     ! Compute transport properties within the IBTE.
 !!****
 
 !----------------------------------------------------------------------
@@ -1567,149 +1566,6 @@ end subroutine rta_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_rta/rta_estimate_sigma_erange
-!! NAME
-!! rta_estimate_sigma_erange
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
-
-!Arguments ------------------------------------
- integer,intent(in) :: comm
- type(dataset_type),intent(in) :: dtset
- type(ebands_t),intent(in) :: ebands
-
-!Local variables ------------------------------
-!scalars
- integer :: ntemp, order, ie, ne, my_rank, ii, ierr
- real(dp) :: mu, kT, max_occ, vb_max, cb_min, estep, magic_ratio, estart, estop
- logical :: assume_gap
- character(len=500) :: msg
- type(gaps_t) :: gaps
-!arrays
- real(dp) :: est_sigma_erange(2, 0:2), mu_vals(1)
- real(dp),allocatable :: kTmesh(:), ff(:), emesh(:)
-
-!************************************************************************
-
- my_rank = xmpi_comm_rank(comm); if (my_rank /= 0) return
-
- ! Compute kTmesh and take the highest T.
- ntemp = nint(dtset%tmesh(3))
- ABI_CHECK(ntemp > 0, "ntemp <= 0")
- ABI_MALLOC(kTmesh, (ntemp))
- kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), ntemp) * kb_HaK
- kT = kTmesh(ntemp)
- ABI_FREE(kTmesh)
- ntemp = 1
-
- ! Compute the chemical potential for the highest T with Fermi-Dirac.
- call ebands_get_muT_with_fd(ebands, ntemp, [Kt], dtset%spinmagntarget, dtset%prtvol, mu_vals, xmpi_comm_self)
- mu = mu_vals(1)
-
- !call ebands_print(ebands, header="Estimating sigma_erange", unit=ab_out)
-
- ! It's funny that we need dtset%sigma_erange to estimate sigma_erange!
- if (all(dtset%sigma_erange == 0)) then
-   msg = "We need `sigma_erange` to understand if we are dealing with e/h in semiconductors or metals."
-   ABI_ERROR(msg)
- end if
- assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
-
- ! Spin degeneracy
- max_occ = two / (ebands%nspinor * ebands%nsppol)
-
- if (assume_gap) then
-   ! Get gaps. In case of magnetic semiconductor everything is referred to the (highest CBM | smallest VBM).
-   gaps = ebands_get_gaps(ebands, ierr)
-   call gaps%print(unit=std_out); call gaps%print(unit=ab_out)
-   ABI_CHECK(ierr == 0, "ebands_get_gaps returned non-zero exit status. See above warning messages...")
-   vb_max = maxval(gaps%vb_max)
-   cb_min = minval(gaps%cb_min)
-
- else
-   ! metals --> use Fermi level TODO: fermie or mu?
-   vb_max = ebands%fermie
-   cb_min = ebands%fermie
- end if
-
- est_sigma_erange = 0
-
- ! In [24]: integrand_range / integrand_CBM
- ! 0.006325409327517321 in Si
- ! 0.002865971520647022 in GaP
- ! 0.0014470714061475284 in GaAs
- magic_ratio = 0.003_dp
-
- do ii=1,2
-   if (assume_gap .and. dtset%sigma_erange(ii) <= zero) cycle
-
-   if (ii == 1) then
-     ! Valence or metals below ef
-     estart = vb_max
-     estop = vb_max - two * eV_Ha
-   else
-     ! Conduction or metals above ef
-     estart = cb_min
-     estop = estart + two * eV_Ha
-   end if
-
-   ! We build two meshes for Conduction and Valence.
-   ! For valence, the mesh starts at the VBM and decreases monotonically so tha we can use the same loop over ie.
-   estep = tol2 * eV_Ha; if (ii == 1) estep = -estep
-   ne = nint((abs(estop - estart)) / estep) + 1
-   ABI_MALLOC(emesh, (ne))
-   emesh = arth(estart, estep, ne)
-
-   ! Compute (e - mu)^alpha * (-df/de)
-   ABI_MALLOC(ff, (ne))
-
-   do order=0,2
-     if (order == 0) ff(:) = -max_occ * occ_dfde(emesh, kT, mu)
-     if (order > 0)  ff(:) = -max_occ * (emesh - mu) ** order * occ_dfde(emesh, kT, mu)
-     do ie=2,ne
-       if (ff(ie) / ff(1) < magic_ratio) then
-         est_sigma_erange(ii, order) = abs(emesh(ie) - estart)
-         if (.not. assume_gap) est_sigma_erange(ii, order) = est_sigma_erange(ii, order)
-         exit
-       end if
-     end do
-     ABI_CHECK(ie /= ne + 1, sjoin("Cannot find energy such that ratio becomes smaller than!", ftoa(magic_ratio)))
-   end do
-
-   ABI_FREE(ff)
-   ABI_FREE(emesh)
- end do
-
- ! Print results
- do order=0,2
-   write(ab_out, "(a,i0,a,2(f8.3,1x),a)")" For order: ", order, ", sigma_erange = ", est_sigma_erange(:, order) * Ha_eV, " eV"
- end do
-
- write(ab_out, "(/,a)")" Note that this is a qualitative estimate that depends on several factors:"
- write(ab_out, "(a)")" T_max, nelect, doping and the input k-mesh."
- write(ab_out, "(a)")" Systems with small effective masses may require larger energy ranges and better k-sampling"
- write(ab_out, "(a)") &
-   " It is strongly suggested to increase the window if you are using this value to generate the WFK file with KERANGE"
- write(ab_out, "(a,/)") &
-   " Also remember that it's possible to decrease sigma_erange at the level or the RTA calculation"
-
- call gaps%free()
-
-end subroutine rta_estimate_sigma_erange
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_rta/ibte_driver
 !! NAME
 !! ibte_driver
@@ -1749,90 +1605,125 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables ------------------------------
- integer,parameter :: master = 0, max_niter = 10
- integer :: spin, ikcalc, nkcalc, nq_ibzk_eff, nbsum, nbcalc, my_nspins, itemp, iter, ib_k, ib_sum, ierr
+ integer,parameter :: master = 0
+ integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ib_k, ib_sum, ierr
  integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, bsum_start, band_sum, ntemp, ii, jj, iq_sum
- integer :: ikq_ibz, isym_kq, trev_kq
- integer :: my_rank, comm_kpt, comm_spin, isym, itime, isym_lgk, nsym_lgk
+ integer :: ikq_ibz, isym_kq, trev_kq, cnt, tag, nprocs, receiver, my_rank, isym, itime, isym_lgk
 #ifdef HAVE_NETCDF
- integer :: ncid, grp_ncid
+ integer :: ncid, grp_ncid, ncerr
 #endif
- real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, alpha_mix !max_occ,
- logical :: converged
+ real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff
+ logical :: converged, send_data
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(rta_t) :: ibte
 !arrays
- integer :: unts(2)
- integer,allocatable :: my_spins(:)
- real(dp) :: v_nk(3), f0_serta(3), sigma(3,3), vec3(3), sym_vec(3), mat33(3,3), f_skq(3)
+ integer :: unts(2), dims(4)
+ integer,allocatable :: rank_ks(:,:)
+ real(dp) :: f0_serta(3), sigma_eh(3,3,2), vec3(3), sym_vec(3), mat33(3,3), f_kq(3), fsum_eh(3,2) !v_nk(3),
  real(dp),allocatable :: grp_srate(:,:,:,:), fkn_in(:,:,:,:), fkn_out(:,:,:,:), fkn_serta(:,:,:,:), taukn_serta(:,:,:,:)
 
  type :: scatk_t
+   integer :: nq_ibzk_eff
+   ! Number of effective q-points in the IBZ(k)
 
-   integer :: nq_ibzk_eff = 0 !nbcalc = 0, nbsum = 0,
-   integer :: nsym_lgk = 1
+   integer :: lgk_nsym
+   ! Number of symmetry operations in the little group of k.
 
-   !integer,allocatable :: lgk_symtab(:,:)
-   ! lgk_symtab(nsym_lgk, 2)
+   integer,allocatable :: lgk_sym2glob(:,:)
+   ! lgk_sym2glob(2, lgk_nsym)
+   ! Mapping isym_lg --> [isym, itime]
+   ! where isym is the index of the operation in the global array **crystal%symrec**
+   ! and itim is 2 if time-reversal T must be included else 1. Depends on ikcalc
 
-   !integer,allocatable :: kqeff2ibz(:,:)
-   ! kqeff2ibz(nq_ibzk_eff, 6)
+   integer,allocatable :: kq_symtab(:,:)
+   ! kq_symtab(6, nq_ibzk_eff)
 
    real(dp),allocatable :: vals(:,:,:,:)
    ! (nq_ibzk_eff, nbsum, nbcalc, ntemp)
-
  end type scatk_t
 
  type(scatk_t),target,allocatable :: sr(:,:)
+ type(scatk_t),pointer :: sr_p
 
 ! *************************************************************************
 
- my_rank = xmpi_comm_rank(comm)
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  unts = [std_out, ab_out]
 
  call wrtout(unts, ch10//' Entering IBTE computation driver.')
  call wrtout(unts, sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1, do_flush=.True.)
 
- ! Initialize RTA object
+ ! Initialize IBTE object
  ibte = rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, comm)
 
- nkcalc = ibte%nkcalc
- nkibz = ibte%ebands%nkpt
- nsppol = ibte%nsppol
+ nkcalc = ibte%nkcalc; nkibz = ibte%ebands%nkpt; nsppol = ibte%nsppol; ntemp = ibte%ntemp
  bmin = ibte%bmin; bmax = ibte%bmax
- ntemp = ibte%ntemp
+ call wrtout(std_out, sjoin(" nkcalc", itoa(nkcalc), "bmin:", itoa(bmin), "bmax:", itoa(bmax)))
 
- ! Compute RTA transport quantities
- !call rta%compute(cryst, dtset, comm)
+ ! Compute RTA transport quantities.
+ !call ibte%compute(cryst, dtset, comm)
 
- ! Compute RTA mobility
- !call rta%compute_mobility(cryst, dtset, comm)
+ ! Compute RTA mobility.
+ !call ibte%compute_mobility(cryst, dtset, comm)
 
- ! Loops and memory are distributed over k-points and collinear spins.
- comm_kpt = comm; comm_spin = xmpi_comm_self
-
- if (ibte%nsppol == 1) then
-   my_nspins = 1
-   ABI_MALLOC(my_spins, (my_nspins))
-   my_spins = 1
- else
-   ABI_ERROR("Spin parallelism")
- end if
+ ! Loops and memory are distributed over k-points and collinear spins using rank_ks table.
+ ABI_MALLOC(rank_ks, (nkcalc, nsppol))
+ cnt = 0
+ do spin=1,nsppol
+   do ikcalc=1,nkcalc
+     cnt = cnt + 1
+     rank_ks(ikcalc, spin) = mod(cnt, nprocs)
+   end do
+ end do
 
  ABI_MALLOC(sr, (nkcalc, nsppol))
 
 #ifdef HAVE_NETCDF
+ ! Master reads and sends data to rank_ks(ikcalc, spin)
  if (my_rank == master) then
    NCF_CHECK(nctk_open_read(ncid, dtfil%filsigephin, xmpi_comm_self))
-   !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "bsum_start"), sr(ikcalc, spin)%vals))
  end if
 
  do spin=1,nsppol
    do ikcalc=1,nkcalc
+     sr_p => sr(ikcalc, spin)
+     receiver = rank_ks(ikcalc, spin)
+     send_data = master /= receiver
+     if (.not. any(my_rank == [master, receiver])) cycle
+     !call wrtout(std_out, sjoin(" Sending data from my_rank:", itoa(my_rank), " to:", itoa(receiver)))
 
      if (my_rank == master) then
-       ! Note that the file stores:
+       ! Get ncid of group used to store scattering rate for this k-point.
+       ncerr = nf90_inq_ncid(ncid, strcat("srate_k", itoa(ikcalc), "_s", itoa(spin)), grp_ncid)
+       if (ncerr /= NF90_NOERR) then
+         ABI_ERROR("Cannot find collision terms in SIGEPH file. Rerun eph_task -4 with ibte_prep 1")
+       end if
+       NCF_CHECK(nctk_get_dim(grp_ncid, "nq_ibzk_eff", sr_p%nq_ibzk_eff))
+       NCF_CHECK(nctk_get_dim(grp_ncid, "nbsum", nbsum))
+       NCF_CHECK(nctk_get_dim(grp_ncid, "nbcalc", nbcalc))
+       NCF_CHECK(nctk_get_dim(grp_ncid, "lgk_nsym", sr_p%lgk_nsym))
+       dims = [sr_p%nq_ibzk_eff, nbsum, nbcalc, sr_p%lgk_nsym]
+     end if
+
+     if (send_data) then
+       tag = size(dims)
+       if (my_rank == master) call xmpi_send(dims, receiver, tag, comm, ierr)
+       if (my_rank == receiver) then
+         call xmpi_recv(dims, master, tag, comm, ierr)
+         sr_p%nq_ibzk_eff = dims(1); nbsum = dims(2); nbcalc = dims(3); sr_p%lgk_nsym = dims(4)
+       end if
+     end if
+
+     ABI_CALLOC(sr_p%vals, (sr_p%nq_ibzk_eff, bmin:bmax, bmin:bmax, ntemp))
+     ABI_MALLOC(sr_p%kq_symtab, (6, sr_p%nq_ibzk_eff))
+     ABI_MALLOC(sr_p%lgk_sym2glob, (2, sr_p%lgk_nsym))
+
+     if (my_rank == master) then
+       NCF_CHECK(nf90_get_var(grp_ncid, nctk_idname(grp_ncid, "kq_symtab"), sr_p%kq_symtab))
+       NCF_CHECK(nf90_get_var(grp_ncid, nctk_idname(grp_ncid, "lgk_sym2glob"), sr_p%lgk_sym2glob))
+
+       ! Note that on file, we have:
        !
        !      nctkarr_t("srate", "dp", "nq_ibzk_eff, nbsum, nbcalc, ntemp")
        !
@@ -1842,60 +1733,61 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
        !   m index: bsum_start up to bsum_stop to account for phonon emission/absorption.
        !
        ! so we have to insert the values in bmin:bmax slice.
-
-       ! Get ncid of group used to store scattering rate (ragged array implemented with groups).
-       NCF_CHECK(nf90_inq_ncid(ncid, strcat("srate_k", itoa(ikcalc), "_s", itoa(spin)), grp_ncid))
-       NCF_CHECK(nctk_get_dim(grp_ncid, "nq_ibzk_eff", nq_ibzk_eff))
-       NCF_CHECK(nctk_get_dim(grp_ncid, "nbsum", nbsum))
-       NCF_CHECK(nctk_get_dim(grp_ncid, "nbcalc", nbcalc))
-
-       ABI_MALLOC(grp_srate, (nq_ibzk_eff, nbsum, nbcalc, ntemp))
+       ! TODO: Recheck this part.
+       ABI_MALLOC(grp_srate, (sr_p%nq_ibzk_eff, nbsum, nbcalc, ntemp))
        NCF_CHECK(nf90_get_var(grp_ncid, nctk_idname(grp_ncid, "srate"), grp_srate))
-
-       !ABI_MALLOC(kqeff2ibz, (nq_ibzk_eff, 6))
-       !NCF_CHECK(nf90_get_var(grp_ncid, nctk_idname(grp_ncid, "kqeff2ibz"), kqeff2ibz))
-       !ABI_FREE(kqeff2ibz)
-
-       !NCF_CHECK(nctk_get_dim(grp_ncid, "nsym_lgk", nbcalc))
-       !NCF_CHECK(nf90_get_var(grp_ncid, nctk_idname(grp_ncid, "sym_lgk"), sym_lgk))
+       ii = ibte%bstart_ks(ikcalc, spin)
+       jj = ibte%bstop_ks(ikcalc, spin)
+       sr_p%vals(:, bmin:bmax, ii:jj, :) = grp_srate(:, 1:bmax-bmin+1, 1:nbcalc, :)
+       ABI_SFREE(grp_srate)
      end if
 
-     ii = ibte%bstart_ks(ikcalc, spin)
-     jj = ibte%bstop_ks(ikcalc, spin)
+     if (send_data) then
+       tag = size(sr_p%vals)
+       if (my_rank == master) then
+         tag = tag + 1; call xmpi_send(sr_p%vals, receiver, tag, comm, ierr)
+         tag = tag + 1; call xmpi_send(sr_p%kq_symtab, receiver, tag, comm, ierr)
+         tag = tag + 1; call xmpi_send(sr_p%lgk_sym2glob, receiver, tag, comm, ierr)
+       end if
+       if (my_rank == receiver) then
+         tag = tag + 1; call xmpi_recv(sr_p%vals, master, tag, comm, ierr)
+         tag = tag + 1; call xmpi_recv(sr_p%kq_symtab, master, tag, comm, ierr)
+         tag = tag + 1; call xmpi_recv(sr_p%lgk_sym2glob, master, tag, comm, ierr)
+       end if
+     end if
 
-     ABI_CALLOC(sr(ikcalc, spin)%vals, (nq_ibzk_eff, bmin:bmax, bmin:bmax, ntemp))
-     !sr(ikcalc, spin)%vals(:, bmin:bmax, ii:jj, :) = grp_srate(:, bmax-bmin+1, 1:nbcalc, :)
+     if (send_data .and. my_rank /= receiver) call free_sr_ks(ikcalc, spin)
 
-     sr(ikcalc, spin)%nq_ibzk_eff = nq_ibzk_eff
-     sr(ikcalc, spin)%nsym_lgk = nsym_lgk
-
-     ABI_SFREE(grp_srate)
-   end do
- end do
+   end do ! spin
+ end do ! ikcalc
 
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
 
- ! Solve the (linearized) IBTE with B = 0
+ call wrtout(std_out, "before barrier", do_flush=.True.)
+ call xmpi_barrier(comm); call wrtout(std_out, "IO OK")
+
+ ! Solve the linearized BTE with B = 0.
  !
- !   F_\nk = f^'_nk v_\nk * \tau^{SERTA} + \tau^{SERTA} \sum_{mq} Srate_{nk,mq) F_{m,k+q}
+ !   F_\nk = f^'_nk v_\nk * \tau^0 + \tau^0 \sum_{mq} Srate_{nk,mq) F_{m,k+q}
  !
- ! where F is a vector in Cartesian coordinates.
+ ! where F is a vector in Cartesian coordinates and tau^0 is the SERTA relaxation time.
  !
  ! Take advantage of the following symmetry properties:
  !
  ! 1. F_k = F_Sk
- ! 2. F_{-k} = -F_{k} if TR symmetry.
+ ! 2. F_{-k} = -F_k if TR symmetry.
  ! 3. The integral in q-space is reduced to the IBZ(k) using the symmetries of the little group of k
 
- ABI_MALLOC(fkn_serta, (3, nkibz, bmin:bmax, nsppol))
- ABI_MALLOC(taukn_serta, (3, nkibz, bmin:bmax, nsppol))
- ABI_MALLOC(fkn_in, (3, nkibz, bmin:bmax, nsppol))
- ABI_MALLOC(fkn_out, (3, nkibz, bmin:bmax, nsppol))
+ ABI_CALLOC(fkn_in, (3, nkibz, bmin:bmax, nsppol))
+ ABI_CALLOC(fkn_out, (3, nkibz, bmin:bmax, nsppol))
+ ABI_CALLOC(fkn_serta, (3, nkibz, bmin:bmax, nsppol))
+ ABI_CALLOC(taukn_serta, (3, nkibz, bmin:bmax, nsppol))
 
- do itemp=1,ntemp
+ !do itemp=1,ntemp
+ do itemp=ntemp, 1, -1
    kT = ibte%kTmesh(itemp)
    mu_e = ibte%eph_mu_e(itemp)
 
@@ -1905,33 +1797,41 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
        ik_ibz = ibte%kcalc2ibz(ikcalc, 1)
        do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
          e_nk = ebands%eig(band_k, ik_ibz, spin)
-         dfde_nk = occ_dfde(e_nk, kT, mu_e) !; f_nk = occ_fd(e_nk, kT, mu_e)
+         dfde_nk = occ_dfde(e_nk, kT, mu_e)
          lw_nk = ibte%linewidths(itemp, band_k, ik_ibz, spin, 1)
          call safe_div(one, two * lw_nk, zero, tau_nk)
-         v_nk = ibte%velocity(:, band_k, ik_ibz, spin)
          taukn_serta(:, ik_ibz, band_k, spin)  = tau_nk
-         fkn_serta(:, ik_ibz, band_k, spin) = -tau_nk * v_nk * dfde_nk
+         fkn_serta(:, ik_ibz, band_k, spin) = tau_nk * dfde_nk * ibte%velocity(:, band_k, ik_ibz, spin)
        end do
      end do
    end do
 
+   call wrtout(std_out, sjoin(" Begin IBTE looop for itemp:", itoa(itemp), ", KT:", ftoa(kT / kb_HaK), "[K]"), &
+               pre_newlines=1, newlines=1)
+   write(msg, "(a)")" iter, max_adiff, sum(sigma_eh, dim=3), sum(fsum_eh)"
+   call wrtout(std_out, msg)
+
    ! Begin iterative solver.
-   iter_loop: do iter=1,max_niter
+   iter_loop: do iter=1,dtset%ibte_niter
 
      ! Set fkn_out to zero and initialize fkn_in either from SERTA or from previous T.
      if (iter == 1) then
        fkn_out = zero
-       if (itemp /= 1) then
-         fkn_in = fkn_out
-       else
-         fkn_in = fkn_serta
-       end if
+       fkn_in = fkn_serta
+       !if (itemp == 1) then
+       !if (itemp == ntemp) then
+       !  fkn_in = fkn_serta
+       !else
+       !  fkn_in = fkn_out
+       !end if
      end if
 
      ! Loop over the nk index in F_nk.
      do spin=1,nsppol
         do ikcalc=1,nkcalc
-          ! MPI parallelism
+          if (rank_ks(ikcalc, spin) /= my_rank) cycle ! MPI parallelism
+          sr_p => sr(ikcalc, spin)
+
           ! Symmetry indices for kk.
           !kk = sigma%kcalc(:, ikcalc)
           ik_ibz = ibte%kcalc2ibz(ikcalc, 1) !; isym_k = sigma%kcalc2ibz(ikcalc, 2)
@@ -1940,39 +1840,37 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
           !ABI_CHECK(isirr_k, "For the time being the k-point in Sigma_{nk} must be in the IBZ")
           do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
 
-            ! Build F_{m,k+q} in the effective IBZ(k) from fkn_in using symmetries (need k+q --> IBZ map)
-            ! then sum over the q-points and the m band index.
-            ! Finally symmetrize final result using the operations of the litte group of k.
-            ! integation weigts are already included.
+            ! Summing over the q-points in the effective IBZ(k) and the m band index.
+            ! Results stored in vec3. Integation weigts are already included.
             vec3 = zero
             do band_sum=ibte%bmin, ibte%bmax
-              ! Fill work from fkn_in(3, nkibz, bmin:bmax, spin)
-              do iq_sum=1, sr(ikcalc, spin)%nq_ibzk_eff
-                ikq_ibz = 1; isym_kq = 1; trev_kq = 0
-                !ikq_ibz = sr(ikcalc,spin)%kqeff2ibz(iq_sum, 1); isym_kq = sr(ikcalc,spin)%kqeff2ibz(iq_sum, 2)
-                !trev_kq = sr(ikcalc,spin)%kqeff2ibz(iq_sum, 6); g0_kq = sr(ikcalc,spin)%kqeff2ibz(iq_sum, 3:5)
-                !Use transpose(R) because we are using the tables for the wavefunctions
-                !In this case listkk has been called with symrec and use_symrec=False
-                !so q_bz = S^T q_ibz where S is the isym_kq symmetry
-                !vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
+              do iq_sum=1, sr_p%nq_ibzk_eff
+                ikq_ibz = sr_p%kq_symtab(1, iq_sum); isym_kq = sr_p%kq_symtab(2, iq_sum)
+                trev_kq = sr_p%kq_symtab(6, iq_sum) !; g0_kq = sr_p%kq_symtab(3:5, iq_sum)
+                ! Build F_{m,k+q} in the effective IBZ(k) from fkn_in using symmetries (need k+q --> IBZ map)
+                ! Use transpose(R) because we are using the tables for the wavefunctions
+                ! In this case listkk has been called with symrec and use_symrec=False
+                ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
+                ! vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
                 mat33 = transpose(cryst%symrel_cart(:,:,isym_kq))
-                f_skq = matmul(mat33, fkn_in(:, ikq_ibz, band_sum, spin))
-                if (trev_kq == 1) f_skq = -f_skq
-                vec3 = vec3 + sr(ikcalc, spin)%vals(iq_sum, band_sum, band_k, itemp) * f_skq(:)
+                f_kq = matmul(mat33, fkn_in(:, ikq_ibz, band_sum, spin))
+                if (trev_kq == 1) f_kq = -f_kq
+                vec3 = vec3 + sr_p%vals(iq_sum, band_sum, band_k, itemp) * f_kq(:)
               end do ! iq_sum
             end do ! band_k
 
-            ! Apply operations of the little group of k to the unsymmetrized integral.
+            ! Symmetrize final result using the operations of the litte group of k.
             sym_vec = zero
-            nsym_lgk = sr(ikcalc, spin)%nsym_lgk
-            do isym_lgk=1,nsym_lgk
-              !isym = sr(ikcalc, spin)%(, isym_lgk)
-              !itime = sr(ikcalc, spin)%(, isym_lgk)
-              !mat33 = transpose(cryst%symrel_cart(:,:,isym))
-              !if(itime == 1) mat33 = -mat33
-              !sym_vec = sym_vec + matmul(mat33, vec3)
+            do isym_lgk=1,sr_p%lgk_nsym
+              isym = sr_p%lgk_sym2glob(1, isym_lgk)
+              itime = sr_p%lgk_sym2glob(2, isym_lgk)
+              mat33 = transpose(cryst%symrel_cart(:,:,isym))
+              !if(itime == 1) mat33 = -mat33 ! FIXME: here there's a different convention for TR used in m_lgroup
+              if(itime == 2) mat33 = -mat33
+              sym_vec = sym_vec + matmul(mat33, vec3)
             end do
-            sym_vec = sym_vec * taukn_serta(:, ik_ibz, band_k, spin) / nsym_lgk
+            sym_vec = sym_vec * taukn_serta(:, ik_ibz, band_k, spin) / sr_p%lgk_nsym
+            sym_vec = zero ! This to recover RTA
             fkn_out(:, ik_ibz, band_k, spin) = fkn_serta(:, ik_ibz, band_k, spin) + sym_vec
 
           end do ! band_k
@@ -1980,23 +1878,31 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      end do ! spin
 
      call xmpi_sum(fkn_out, comm, ierr)
+     max_adiff = maxval(abs(abs(fkn_out - fkn_in)))
 
      ! Compute transport tensors from fkn_out
-     call ibte_calc_tensors(ibte, cryst, kT, mu_e, fkn_out, sigma, comm)
+     call ibte_calc_tensors(ibte, cryst, kT, mu_e, fkn_out, sigma_eh, fsum_eh, comm)
 
-     converged = all(abs(fkn_out - fkn_in) < tol12)
+     mat33 = sum(sigma_eh, dim=3)
+     write(msg, "(i4, *(es10.2))")iter, max_adiff, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
+     call wrtout(std_out, msg)
+
+     ! Check for convergence by testing F_k^i - F_k^{i-1} so very strict convergence criterion.
+     converged = max_adiff < dtset%ibte_abs_tol
+     converged = .True.
      if (converged) then
+       call wrtout(std_out, sjoin("Converged after:", itoa(iter), "iterations"), newlines=1)
        exit iter_loop
      else
        ! Linear mixing of fkn_in and fkn_out
-       alpha_mix = 0.7_dp
-       fkn_in = (one - alpha_mix) * fkn_in + alpha_mix * fkn_out
+       fkn_in = (one - dtset%ibte_alpha_mix) * fkn_in + dtset%ibte_alpha_mix * fkn_out
        fkn_out = zero
      end if
 
    end do iter_loop
 
    if (.not. converged) then
+     call wrtout(std_out, sjoin("WARNING: Not converged after:", itoa(dtset%ibte_niter), "iterations"), newlines=2)
      ABI_WARNING("Not converged")
    end if
  end do ! itemp
@@ -2006,12 +1912,11 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  ABI_FREE(taukn_serta)
  ABI_FREE(fkn_in)
  ABI_FREE(fkn_out)
+ ABI_FREE(rank_ks)
 
- ABI_FREE(my_spins)
  do spin=1,nsppol
    do ikcalc=1,nkcalc
-     ABI_SFREE(sr(ikcalc, spin)%vals)
-     !ABI_SFREE(sr(ikcalc, spin)%work)
+     call free_sr_ks(ikcalc, spin)
    end do
  end do
  ABI_FREE(sr)
@@ -2031,6 +1936,15 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  ! Free memory
  call ibte%free()
+
+contains
+
+subroutine free_sr_ks(ikc, isp)
+  integer,intent(in) :: ikc, isp
+  ABI_SFREE(sr(ikc, isp)%vals)
+  ABI_SFREE(sr(ikc, isp)%lgk_sym2glob)
+  ABI_SFREE(sr(ikc, isp)%kq_symtab)
+end subroutine free_sr_ks
 
 end subroutine ibte_driver
 !!***
@@ -2053,32 +1967,34 @@ end subroutine ibte_driver
 !!
 !! SOURCE
 
-subroutine ibte_calc_tensors(self, cryst, kT, mu_e, fk, sigma, comm)
+subroutine ibte_calc_tensors(self, cryst, kT, mu_e, fk, sigma_eh, fsum_eh, comm)
 
 !Arguments ------------------------------------
  class(rta_t),intent(inout) :: self
  type(crystal_t),intent(in) :: cryst
  real(dp),intent(in) :: kT, mu_e
  real(dp),intent(in) :: fk(3, self%ebands%nkpt, self%bmin:self%bmax, self%nsppol)
- real(dp),intent(out) :: sigma(3,3)
+ real(dp),intent(out) :: sigma_eh(3,3,2), fsum_eh(3,2)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
- integer :: nsppol, nkpt, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta
- real(dp) :: eig_nk, linewidth, fact, fact0, max_occ, wtk
- real(dp) :: cpu, wall, gflops
- real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
+!scalars
+ integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs
+ real(dp) :: eig_nk, fact, fact0, max_occ, wtk
+!arrays
+ real(dp) :: vr(3), vv_tens(3,3) !, vv_tenslw(3,3)
 
 !************************************************************************
 
  nprocs = xmpi_comm_size(comm)
 
  ! Copy important dimensions
- nkpt = self%ebands%nkpt; nsppol = self%ebands%nsppol
+ nkibz = self%ebands%nkpt; nsppol = self%ebands%nsppol
  max_occ = two / (self%nspinor * self%nsppol)
 
  !ABI_MALLOC(self%mobility_mu, (3, 3, 2, self%ntemp, self%nsppol, self%nrta))
- sigma = zero
+ sigma_eh = zero
+ fsum_eh = zero
 
  ! Compute carriers per unit cell.
  !ABI_CALLOC(self%ne, (self%ntemp))
@@ -2098,39 +2014,33 @@ subroutine ibte_calc_tensors(self, cryst, kT, mu_e, fk, sigma, comm)
  !self%mobility_mu = zero
  cnt = 0
  do spin=1,nsppol
-   do ik_ibz=1,nkpt
+   do ik_ibz=1,nkibz
      !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      wtk = self%ebands%wtk(ik_ibz)
 
      do ib=self%bmin,self%bmax
        eig_nk = self%ebands%eig(ib, ik_ibz, spin)
 
-       ! Store outer product in vv_tens
+       ! Store outer product in vv_tens and symmetrize tensor.
        vr(:) = self%velocity(:, ib, ik_ibz, spin)
        do ii=1,3
          do jj=1,3
-           !vv_tens(ii, jj) = vr(ii) * vr(jj)
            vv_tens(ii, jj) = vr(ii) * fk(jj, ik_ibz, ib, spin)
          end do
        end do
-       ! Symmetrize tensor
        vv_tens = cryst%symmetrize_cart_tens33(vv_tens)
 
-       !ieh = 2; if (eig_nk >= mu_e) ieh = 1
-       !linewidth = self%linewidths(itemp, ib, ik_ibz, spin, irta)
-       !call safe_div( - wtk * vv_tens(:, :) * occ_dfde(eig_nk, kT, mu_e), two * linewidth, zero, vv_tenslw(:, :))
-       !self%mobility_mu(:, :, ieh, itemp, spin, irta) = self%mobility_mu(:, :, ieh, itemp, spin, irta) &
-       !  + vv_tenslw(:, :)
-       !  end do
-       !end do
-       sigma = sigma - wtk * vv_tens(:, :) * occ_dfde(eig_nk, kT, mu_e)
+       ieh = 2; if (eig_nk >= mu_e) ieh = 1
+       sigma_eh(:,:,ieh) = sigma_eh(:,:,ieh) - wtk * vv_tens !* occ_dfde(eig_nk, kT, mu_e)
+       fsum_eh(:,ieh) = fsum_eh(:,ieh) + wtk * cryst%symmetrize_cart_vec3(fk(:, ik_ibz, ib, spin))
      end do
 
    end do ! ik_ibz
  end do ! spin
 
- !call xmpi_sum(sigma, comm, ierr)
- !sigma / cryst%ucvol
+ !call xmpi_sum(sigma_eh, comm, ierr)
+ sigma_eh = sigma_eh * fact
+ !fsum_eh = fsum_eph / cryst%ucvol
 
  ! Scale by the carrier concentration
  !do irta=1,self%nrta
