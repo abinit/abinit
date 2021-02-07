@@ -105,18 +105,17 @@ subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmo
 !Local variables-------------------------------
  !scalars
  integer,parameter :: im=2,re=1
- integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig1,ig2,ig3,ig1max,ig2max,ig3max
+ integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig1max,ig2max,ig3max
  integer :: ig1min,ig2min,ig3min
- integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
+ integer :: ii,ii1,ing,me_fft,n1,n2,n3,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol
+ real(dp) :: cutoff,gs,phase,ucvol
  complex(dpc) :: prefac,cgr
  !arrays
  integer :: id(3)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gcart(3),gprimd(3,3),gred(3),mcgc(3),rmet(3,3)
- real(dp) :: rgbasis(3,3,3)
  real(dp),allocatable :: gq(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
 
 

@@ -945,7 +945,7 @@ subroutine make_pcg1(cg,cg1,cprj_k,cprj_k1,cprj_pk1,dtset,icg,&
 
  !Local variables -------------------------
  !scalars
- integer :: iatom,idir,itypat,ii,ilmn,jj,jlmn,klmn,ncpgr
+ integer :: iatom,idir,itypat,ii,ilmn,jj,jlmn,klmn
  real(dp) :: doti,dotr
  complex(dpc) :: cpb,cpk,consite
  !arrays
@@ -5053,12 +5053,12 @@ end subroutine orbmag
 !! SOURCE
 
 subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
-    & nattyp,nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawtab,psps,rprimd,usecprj,vtrial,&
+    & nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawtab,psps,rprimd,vtrial,&
     & xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: mcg,mcg1,nfftf,usecprj
+ integer,intent(in) :: mcg,mcg1,nfftf
  real(dp),intent(in) :: gsqcut
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
@@ -5067,7 +5067,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
  !arrays
  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
- integer,intent(in) :: nattyp(dtset%ntypat),ngfftf(18),npwarr(dtset%nkpt)
+ integer,intent(in) :: ngfftf(18),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3),rprimd(3,3),xred(3,dtset%natom)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -5079,9 +5079,9 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  !scalars
  integer :: adir,bdir,buff_size,dimffnl,exchn2n3d
  integer :: getghc_cpopt,getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc
- integer :: gdir,iatom,icg,icprj,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k,iterms,jj
+ integer :: gdir,iatom,icg,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k,iterms
  integer :: me,mcgk,my_nspinor
- integer :: nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn
+ integer :: nband_k,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn
  integer :: nkpg,npw_k
  integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_pawopt,nonlop_signs,nonlop_tim
  integer :: nproc,nterms,nterms3,projbd_scprod_io,projbd_tim,projbd_useoverlap,spaceComm
@@ -5091,20 +5091,19 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
 
- integer :: ilmn,jlmn,klmn,itypat
- real(dp) :: doti,dotr
+ real(dp) :: doti
 
  !arrays
- integer,allocatable :: dimlmn(:),kg_k(:,:)
+ integer,allocatable :: kg_k(:,:)
  real(dp) :: chern_total(2,3),gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1)
  real(dp) :: orbmag_total(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwaveg1(:,:)
  real(dp),allocatable :: cwavedsdb(:,:),cwavedsdg(:,:)
- real(dp),allocatable :: dcwavef(:,:),dscg_k(:,:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable :: dscg_k(:,:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:),orbmag_terms(:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),scg_k(:,:),scg1_k(:,:,:),scprod(:,:)
- real(dp),allocatable :: us1u(:,:,:,:),vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
+ real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
