@@ -21,6 +21,8 @@ znucl 13 33            # The keyword "znucl" refers to the atomic number of the
                        # mentioned in the "files" file must correspond
                        # to the type(s) of atom. Here, type 1 is the Aluminum,
                        # type 2 is the Arsenic.
+pp_dirpath "$ABI_PSPDIR"
+pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
 #Definition of the atoms
 natom 2                # There are two atoms
@@ -51,10 +53,6 @@ diemac 9.0             # Although this is not mandatory, it is worth to
                        # function used as the standard preconditioner
                        # is described in the "dielng" input variable section.
                        # The dielectric constant of AlAs is smaller that the one of Si (=12).
-
-
- pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

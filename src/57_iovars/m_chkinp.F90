@@ -586,6 +586,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        endif
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,4,(/0,1,2,5/),iout)
+       cond_string(1)='usedmft' ; cond_values(1)=1
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_wanorthnorm',dt%dmft_wanorthnorm,2,(/2,3/),iout)
        if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0.and.dt%ucrpa==0) then
          write(msg,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
          'When usedmft==1, A WFK file or a DEN file have to be read. In the current calculation:',ch10, &
@@ -1967,6 +1969,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  nscforder
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nscforder',dt%nscforder,10,(/8,14,16,20,24,30,40,50,60,100/),iout)
+
+!  nshiftk
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'nshiftk',dt%nshiftk,8,(/1,2,3,4,5,6,7,8/),iout)
+!  If chksymbreak=1, nshiftk must be equal to 1, 2, 4.
+   if(dt%chksymbreak==1 )then
+     cond_string(1)='chksymbreak' ; cond_values(1)=dt%chksymbreak
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'nshiftk',dt%nshiftk,3,(/1,2,4/),iout)
+   end if
 
 !  nspden
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nspden',nspden,3,(/1,2,4/),iout)
