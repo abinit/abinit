@@ -2,6 +2,9 @@ tfold2bloch_1o_DS2_WFK # WFK file
 1 2 3                  # x y z integers giving the multiplicity 
                        # in the corresponding directions used when constructing the supercell
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = fold2Bloch

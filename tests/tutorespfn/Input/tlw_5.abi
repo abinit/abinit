@@ -11,6 +11,9 @@ tlw_4o_DS11_DDB
 tlw_4o_DS12_DDB
 tlw_4o_DS5_DDB
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
@@ -26,4 +29,3 @@ tlw_4o_DS5_DDB
 #%% description =  Input file for mrgddb
 #%% topics = longwave
 #%%<END TEST_INFO>
-
