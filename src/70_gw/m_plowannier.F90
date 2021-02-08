@@ -419,7 +419,6 @@ subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom
 
  iltot=0
  do iatom=1,wan%natom_wan
-   
    wan%iatom_wan(iatom)       = plowan_iatom(iatom)
    wan%nbl_atom_wan(iatom)    = plowan_nbl  (iatom)
    wan%nbproj_atom_wan(iatom) = plowan_nbl  (iatom)
@@ -823,7 +822,7 @@ endif
 ABI_COMMENT(message)
 
 t2g=dtset%dmft_t2g
-if (t2g==1) then 
+if (t2g==1) then
   write(message,*)ch10,"Using only t2g bands in plowannier, this is under test and may lead to bugs"
 end if
 
@@ -1093,14 +1092,14 @@ ABI_COMMENT(message)
            chinorm=1.d0
            do l1 = 1,wan%nbl_atom_wan(iatom) !l1 is the index of the orbital
              l = wan%latom_wan(iatom)%lcalc(l1) !l is the value of the orbital (linked to index l1)
-             if (t2g==1) then 
+             if (t2g==1) then
                l=2
                m1_t2g=0
              endif
              do ilmn = 1,lmn_size
                if (psps%indlmn(1,ilmn,itypat) .eq. l) then!
                  ph0phiint_used = wan%psichi(1,1,iatom)%atom(l1)%ph0phiint(psps%indlmn(3,ilmn,itypat))
-                 m1 = psps%indlmn(2,ilmn,itypat)+l+1 
+                 m1 = psps%indlmn(2,ilmn,itypat)+l+1
                  if (t2g==1) then
                    if(m1==1.or.m1==2.or.m1==4) then
                      m1_t2g=m1_t2g+1
