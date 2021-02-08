@@ -85,7 +85,7 @@ CONTAINS  !=====================================================================
 !!  natom=total number of atoms in cell
 !!  nspden=number of spin-density components
 !!  ntypat=number of types of atoms in unit cell.
-!!  nucdipmom(3,my_natom) nuclear dipole moments
+!!  nucdipmom(3,natom) nuclear dipole moments
 !!  nzlmopt= if -1, compute all LM-moments of densities
 !!                  initialize "lmselect" (index of non-zero LM-moments of densities)
 !!           if  0, compute all LM-moments of densities
@@ -165,7 +165,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in) :: nucdipmom(3,my_natom),znucl(ntypat)
+ real(dp),intent(in) :: nucdipmom(3,natom),znucl(ntypat)
  real(dp),intent(out),optional :: vpotzero(2)
  type(paw_an_type),intent(inout) :: paw_an(my_natom)
  type(paw_an_type), intent(in) :: paw_an0(my_natom)
