@@ -369,7 +369,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    if (ipert<=dtset%natom.and.ncpgr/=3) then
      ABI_BUG('PAW: wrong value of ncpgr for ipert<=natom!')
    end if
-   if (ipert==dtset%natom+1.and.ncpgr/=1) then
+   if (ipert==dtset%natom+1.and.ncpgr/=1.and.dtset%orbmag==0) then
      ABI_BUG('PAW: wrong value of ncpgr for ipert=natom+1!')
    end if
    if (ipert==dtset%natom+2.and.ncpgr/=3) then
