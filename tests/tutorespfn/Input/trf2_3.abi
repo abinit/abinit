@@ -10,7 +10,9 @@ trf2_1o_DS8_DDB
 trf2_1o_DS9_DDB
 trf2_1o_DS10_DDB
 
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
