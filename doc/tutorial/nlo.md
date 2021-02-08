@@ -86,6 +86,8 @@ cases, were obtained at the optimized lattice constants of 7.273 and 7.251 Bohr.
 who would like to try later, convergence tests and structural optimizations
 can be done using the file *\$ABI_TESTS/tutorespfn/Input/tnlo_1.abi*. 
 
+{% dialog tests/tutorespfn/Input/tnlo_1.abi %}
+
 Before
 going further, you might refresh your memory concerning the other variables:
 [[ecutsm]], [[dilatmx]], and [[nbdbuf]].
@@ -128,7 +130,11 @@ The various steps are combined into a single input file.
 
 **Responses to electric fields, atomic displacements, and strains.**
 
-Let us examine the file *tnlo_2.abi*. Its purpose is to build databases for
+Let us examine the file *tnlo_2.abi*. 
+
+{% dialog tests/tutorespfn/Input/tnlo_2.abi %}
+
+Its purpose is to build databases for
 second and third energy derivatives with respect to electric fields, atomic
 displacements, and strains. You can edit it. It is made of 5 datasets. The first four data
 sets are nearly the same as for a typical linear response calculation: (1)
@@ -208,14 +214,21 @@ stored in individual databases. These must be combined with the
 [[help:mrgddb|MRGDDB]] merge
 utility in order to get a complete database *tnlo_3.ddb.out*. Explicitly, you
 should merge the files *tnlo_2o_DS4_DDB* and *tnlo_2o_DS5_DDB*.
-An input file that can be piped into MRGDDB is provided as *tnlo_3.abi*. You
+An input file that can be piped into MRGDDB is provided as *tnlo_3.abi*. 
+
+{% dialog tests/tutorespfn/Input/tnlo_3.abi %}
+You
 can use it to perform the merge via *\$ABI_HOME/src/98_main/mrgddb < tnlo_3.abi*.
 
 **Analysis of the DDB.**
 
 We are now ready for the analysis of the results using [[help:anaddb|ANADDB]]. You can copy
 the files *\$ABI_TESTS/tutorespfn/Input/tnlo_4.abi* and
-*\$ABI_TESTS/tutorespfn/Input/tnlo_4.files* to *Work-NLO*. You already used
+*\$ABI_TESTS/tutorespfn/Input/tnlo_4.files* to *Work-NLO*. 
+
+{% dialog tests/tutorespfn/Input/tnlo_4.files tests/tutorespfn/Input/tnlo_4.abi %}
+
+You already used
 ANADDB previously. It is located in the same directory as *abinit* and *mrgddb*.
 You might copy it, or make an alias. The present input is in
 very similar to the one you have used for the analysis of dynamical
@@ -351,7 +364,11 @@ a(LO) (Unit: Ang^2)= 4.9983 (5.4234) [7.46]
 For comparison with the DFPT calculation, we can compute $\frac{d \chi}{d \tau}$ for the Al
 nucleus from finite differences. In practice, this is achieved by computing
 the linear optical susceptibility for 3 different positions of the Al nucleus.
-This is done with the file *\$ABI_TESTS/tutorespfn/Input/tnlo_5.abi*. This file
+This is done with the file *\$ABI_TESTS/tutorespfn/Input/tnlo_5.abi*. 
+
+{% dialog tests/tutorespfn/Input/tnlo_5.abi %}
+
+This file
 uses again the unrealistically low cutoff energy [[ecut]] of 2.8 Ha. 
 The calculation takes about 2 or 3 minutes on a standard desktop PC.
 To run this calculation, copy
