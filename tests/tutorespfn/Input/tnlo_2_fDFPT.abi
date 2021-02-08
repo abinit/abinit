@@ -21,11 +21,11 @@ ndtset 7
    tolwfr2    1.0d-22  # convergence criteria on WF, need high precision for response
     prtwf2    1        # save WF on disk, will be used in other datasets
 
-#DATASET3 : derivative of WF with respect to k points
-#****************************************************
+#DATASET3 : derivative of WF with respect to k points (d/dk)
+#**********************************************************
    getwfk3    2        # use GS WF from dataset 2
    kptopt3    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
-   rfelfd3    2        # compute 1st-order WF derivatives with respect to k-points
+   rfelfd3    2        # compute 1st-order WF derivatives (d/dk)
     rfdir3    1 1 1    # compute all directions
    tolwfr3    1.0d-22  # convergence criteria on 1st-order WF
     prtwf3    1        # save 1st-order WF on disk, will be used in other datasets
@@ -47,9 +47,9 @@ ndtset 7
     prtwf4    1        # save 1st-order WF on disk, will be used in other datasets
    prtden4    1        # save 1st-order density on disk, will be used in other datasets
 
-# DATASET5 : 2nd order WF derivatives (dkdk)
-#*******************************
- rf2_dkdk5   1        # compute 2nd-order WF derivatives with respect to k-points
+# DATASET5 : 2nd order WF derivatives with respect to k-points (d/dkdk)
+#**********************************************************************
+ rf2_dkdk5   1        # compute 2nd-order WF derivatives (d/dkdk)
    getwfk5   2        # use GS WF from dataset 2
    kptopt5   2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
    getddk5   3        # use 1st-order WF from dataset 3
@@ -57,14 +57,14 @@ ndtset 7
    tolwfr5   1.0d-22  # convergence criteria on 2nd-order WF
     prtwf5   1        # save 2nd-order WF on disk, will be used in other datasets
 
-# DATASET6 : 2nd order WF derivatives (dkde)
-#*******************************
- rf2_dkde6   1        # compute 2nd-order WF derivatives with respect to electric field and k-points
+# DATASET6 : 2nd order WF derivatives with respect to electric field and k-points (d/dkde)
+#*****************************************************************************************
+ rf2_dkde6   1        # compute 2nd-order WF derivatives (d/dkde)
    getwfk6   2        # use GS WF from dataset 2
-   getddk6   3        # use 1st-order WF (k-points) from dataset 3
+   getddk6   3        # use 1st-order WF (d/dk) from dataset 3
   get1den6   4        # use 1st-order densities from dataset 4
- getdelfd6   4        # use 1st-order WF (electric field) from dataset 4
-  getdkdk6   5        # use 2nd-order WF (k-points) from dataset 5
+ getdelfd6   4        # use 1st-order WF (d/de) from dataset 4
+  getdkdk6   5        # use 2nd-order WF (d/dkdk) from dataset 5
   prepanl6   1        # compute only directions needed for nonlinear computation
    tolwfr6   1.0d-22  # convergence criteria on 2nd-order WF
    kptopt6   2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
@@ -73,10 +73,10 @@ ndtset 7
 #DATASET7 : 3rd derivatives of E
 #*********************************
    getwfk7           2     # use GS WF from dataset 2
-   getddk7           3     # use 1st-order WF (k-points) from dataset 3
+   getddk7           3     # use 1st-order WF (d/dk) from dataset 3
   get1den7           4     # use 1st-order densities from dataset 4
    get1wf7           4     # use 1st-order WFs from dataset 4
-  getdkde7           6     # use 2nd-order WF (k-points and electric field) from dataset 6
+  getdkde7           6     # use 2nd-order WF (d/dkde) from dataset 6
    kptopt7           2     # use Half Brillouin Zone (only time-reversal symmetry taken into account)
 optdriver7           5     # compute 3rd order derivatives of the energy
   usepead7           0     # no use of pead method, so use full DFPT instead

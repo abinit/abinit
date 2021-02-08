@@ -19,11 +19,11 @@ ndtset 5
    tolwfr2    1.0d-22  # convergence criteria on WF, need high precision for response
     prtwf2    1        # save WF on disk, will be used in other datasets
 
-#DATASET3 : derivative of WF with respect to k points
-#****************************************************
+#DATASET3 : derivative of WF with respect to k points (d/dk)
+#**********************************************************
    getwfk3    2        # use GS WF from dataset 2
    kptopt3    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
-   rfelfd3    2        # compute 1st-order WF derivatives with respect to k-points
+   rfelfd3    2        # compute 1st-order WF derivatives (d/dk)
     rfdir3    1 1 1    # compute all directions
    tolwfr3    1.0d-22  # convergence criteria on 1st-order WF
     prtwf3    1        # save 1st-order WF on disk, will be used in other datasets
@@ -128,7 +128,7 @@ prteig 0
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors =  J. Zwanziger, M. Veithen
+#%% authors =  J. Zwanziger, L. Baguet, M. Veithen
 #%% keywords = NC, DFPT, NONLINEAR
 #%% description =
 #%%   Linear and nonlinear response calculation for AlP

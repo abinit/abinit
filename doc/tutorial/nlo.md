@@ -37,7 +37,7 @@ This tutorial should take about 1 hour and 30 minutes.
 For example, create Work_NLO in \$ABI_TESTS/tutorespfn/Input*.
 
 In order to save some time, you might immediately start running a calculation.
-Copy the file *tnlo_2.abi* from *\$ABI_TESTS/tutorespfn/Input* to *Work_NLO*. 
+Copy the file *tnlo_2.abi* from *\$ABI_TESTS/tutorespfn/Input* to *Work_NLO*.
 Run `abinit` on this file; it will take several minutes on a desktop PC.
 
 In this tutorial we will assume that the ground-state properties of AlP have
@@ -51,7 +51,7 @@ the property of interest (thus it is insufficient to determine parameters giving
 proper convergence only on the total energy, and to use them blindly for non-linear
 properties).
 
-We will adopt the following set of generic parameters (quite similar to those 
+We will adopt the following set of generic parameters (quite similar to those
 in the
 [tutorial on Polarization and finite electric field](ffield)):
 ```
@@ -84,10 +84,9 @@ In what follows, the lattice constant has been arbitrarily fixed to 7.139.
 Bohr. For comparison, results with [[ecut]] = 5 and 30 are also reported and, in those
 cases, were obtained at the optimized lattice constants of 7.273 and 7.251 Bohr. For those
 who would like to try later, convergence tests and structural optimizations
-can be done using the file *\$ABI_TESTS/tutorespfn/Input/tnlo_1.abi*. 
+can be done using the file *\$ABI_TESTS/tutorespfn/Input/tnlo_1.abi*.
 
-Before
-going further, you might refresh your memory concerning the other variables:
+Before going further, you might refresh your memory concerning the other variables:
 [[ecutsm]], [[dilatmx]], and [[nbdbuf]].
 
 ## 2 Linear and non-linear responses from density functional perturbation theory (DFPT)
@@ -114,7 +113,7 @@ derivatives are implemented at present in ABINIT, and concern responses to elect
 field and atomic displacements:
 
   * non-linear optical susceptibilities
-    (related to a third-order derivative of the energy 
+    (related to a third-order derivative of the energy
     with respect to electric fields at clamped nuclei positions)
 
   * Raman susceptibilities (mixed third-order derivative of the energy, twice with respect
@@ -126,8 +125,11 @@ field and atomic displacements:
 
 The various steps are combined into a single input file.
 
-There are two implementations for the computation of third-order derivatives.
-First we will present the *PEAD* method, as described in [[cite:Veithen2005]], then we will present the *full DFPT* method, as described in [[cite:Gonze2020]] and [[cite:Romero2020]]. In the latter case, the input file is slightly modified so the reader interested in *full DFPT* should read the *PEAD* part first. In ABINIT, only the *full DFPT* implementation is available for PAW pseudopotentials.
+There are two implementations available in ABINIT for the computation of third-order derivatives which includes at least one electric field perturbation (so all tensors mentioned above).
+First we will present the *PEAD* method, as described in [[cite:Veithen2005]],
+ then we will present the *full DFPT* method, as described in [[cite:Gonze2020]] and [[cite:Romero2020]].
+In the latter case, the input file is slightly modified so the reader interested in *full DFPT* should read the *PEAD* part first.
+Only the *full DFPT* implementation is available for PAW pseudopotentials.
 
 **Responses to electric fields, atomic displacements, and strains (with PEAD)**
 
@@ -135,7 +137,7 @@ Let us examine the file *tnlo_2.abi*. Its purpose is to build databases for
 second and third energy derivatives with respect to electric fields, atomic
 displacements, and strains. You can edit it. It is made of 5 datasets. The first four data
 sets are nearly the same as for a typical linear response calculation: (1)
-a self-consistent calculation of the ground state in the irreducible Brillouin Zone; 
+a self-consistent calculation of the ground state in the irreducible Brillouin Zone;
 (2) non self-consistent calculation of the ground state
 to get the wavefunctions over the full Brillouin Zone; (3) Computation of the derivatives of the
 wavefunctions with respect to k points, using DFPT; (4)
@@ -143,7 +145,7 @@ second derivatives of the energy and related first-order wavefunctions
 with respect to electric field, atomic displacements, and strains; and
 finally (5) the third derivative calculations. Some
 specific features must however be explicitly specified in order to prepare for the
-non-linear response step (dataset 5). First, in dataset 2 it is mandatory to specify:
+non-linear response step (dataset 5). First, it is mandatory to specify:
 ```
 nbdbuf  0
 nband   4 (= number of valence bands)
@@ -154,8 +156,8 @@ Also, in dataset 4, it is required to impose [[prtden]], and [[prepanl]]
 prtden4    1
 prepanl4   1
 ```
-The purpose for [[prtden]] is to obtain the first order densities (in 
-addition to the first order wavefunctions). The purposes 
+The purpose for [[prtden]] is to obtain the first order densities (in
+addition to the first order wavefunctions). The purposes
 of [[prepanl]]  are (i) to constrain [[kptopt]] = 2 even in the
 computation of phonons where ABINIT usually take advantages of symmetry
 irrespective of kptopt and (ii) compute the electric field derivatives in the
@@ -168,9 +170,8 @@ will be examined later.
 The input to dataset 5 trigger the various third-order derivatives to be
 computed. This section includes the following:
 ```
-   getden5    1
-  get1den5    4
    getwfk5    2
+  get1den5    4
    get1wf5    4
    kptopt5    2
 optdriver5    5
@@ -183,7 +184,7 @@ optdriver5    5
   d3e_pert3_elfd5    1
    d3e_pert3_dir5    1 1 1
 ```
-The first four lines retrieve the ground state and first-order densities and wavefunctions.
+The first three lines retrieve the ground state and first-order densities and wavefunctions.
 [[optdriver]] 5 triggers the 3rd-order energy calculation. Finally, the `d3e` input
 variables determine the 3 perturbations of the 3rd order derivatives, and their
 directions. Notice that we compute three derivatives with respect to electric field:
@@ -207,12 +208,56 @@ used later for a global and convenient analysis of the results using ANADDB.
 
 If not already done, the reader should read the part on the *PEAD* method.
 
+Contrary to *PEAD*, with *full DFPT* the electric field is treated analytically, exactly like for second-order derivatives (see [Response-Function 1](rf1)).
+Indeed, for second order energy derivatives, one needs first order wavefunctions derivatives with respect to k-points (dataset 3 of *tnlo_2.abi*).
+to compute second order energy derivatives with an electric field perturbation (dataset 4 of *tnlo_2.abi*).
+It turns out that third order derivatives of the energy, in this context, needs *second* derivatives of wavefunctions with respect to electric fields and k-points.
+However, to compute the latter one needs *second* derivatives of wavefunctions with respect to k-points only, so in total we need two additional sets of wavefunctions derivatives to compute third order derivatives of the energy.
+
 Now you can compare the files *tnlo_2.abi* and *tnlo_2_fDFPT.abi*.
+The first four datasets are identical, so we produce ground state quantities and then
+first-order wavefunctions derivatives and second derivatives of the energy exactly the same way.
+In *tnlo_2_fDFPT.abi*, before computing the non-linear terms there are two additional datasets to compute the needed second-order WFs derivatives, see dataset 5 and 6.
+They are very similar to dataset 3 (computation of d/dk WFs derivatives), except for the keywords activating second order WFs computation and the reading of the needed files:
+```
+rf2_dkdk5    1
+  getddk5    3
+ prepanl5    1
+```
+and
+```
+rf2_dkde6    1
+  getddk6    3
+ getdkdk6    5
+ get1den6    4
+getdelfd6    4
+ prepanl6    1
+```
+The use of *prepanl* here forces the code to compute only directions that will be needed for non-linear terms.
+The latter are computed in dataset 7. Compared to *tnlo_2.abi* it contains three additional lines:
+```
+getddk7     3
+getdkde7    6
+usepead7    0
+```
+The first two arguments specify which files to read to get d/dk and d/dkde WFs derivatives.
+*usepead* is the keyword controlling which implementation to use, it is set to 0 to use *full DFPT*.
+
+If not already done, you can now run the code using *tnlo_2_fDFPT.abi*.
+Even with a very small cutoff of 2.8 Ha, the non-linear susceptibility tensor differs only by few percents comparing *PEAD* and *full DFPT*,
+and the first-order change in the electronic dielectric susceptibility tensor differs by less than one percent.
+These differences can be reduced increasing the cutoff energy and most importantly the number of k-points.
+It is expected that the *full DFPT* method converges faster with the number of k-points than *PEAD*.
+
+As in the *PEAD* case, the code produced DDB files that can be used for the rest of this tutorial.
 
 **Merge of the DDB.**
 
-At this stage, using either the PEAD or full DFPT method, all the relevant energy derivatives have been obtained and are
-stored in individual databases. These must be combined with the 
+At this stage, using either the *PEAD* or *full DFPT* method, all the relevant energy derivatives have been obtained and are
+stored in individual databases.
+In this tutorial we use the data produced with *PEAD*.
+
+The individual databases must be combined with the
 [[help:mrgddb|MRGDDB]] merge
 utility in order to get a complete database *tnlo_3.ddb.out*. Explicitly, you
 should merge the files *tnlo_2o_DS4_DDB* and *tnlo_2o_DS5_DDB*.
@@ -318,7 +363,7 @@ As we asked for mode by mode decomposition the output provides individual
 contributions. We report below a summary of the results. They concern the
 clamped r_63 coefficient.
 ```
-Electronic EO constant (pm/V): -0.953493194  (-1.091488899) 
+Electronic EO constant (pm/V): -0.953493194  (-1.091488899)
 Full Ionic EO constant (pm/V):  0.536131045  ( 0.662692165)
      Total EO constant (pm/V): -0.417362150  (-0.428796933)
 ```
@@ -348,7 +393,7 @@ example *tnlo_2.abo*),
 $\mu$ the reduced mass of
 the system, so here $1/\mu = 1/m_{Al} + 1/m_{P}$, and $\alpha$ the Raman susceptibility
 tensor. The Raman polarizability $a$ has units of length$^2$. Using alpha(TO) and
-alpha(LO) from above, along with $\mu$ and $\Omega_0$, all in atomic units, and then 
+alpha(LO) from above, along with $\mu$ and $\Omega_0$, all in atomic units, and then
 converting length (Bohr) to Angstroms, we find:
 ```
 a(TO) (Unit: Ang^2)= 3.1424 (3.2794) [4.30]
@@ -360,22 +405,22 @@ For comparison with the DFPT calculation, we can compute $\frac{d \chi}{d \tau}$
 nucleus from finite differences. In practice, this is achieved by computing
 the linear optical susceptibility for 3 different positions of the Al nucleus.
 This is done with the file *\$ABI_TESTS/tutorespfn/Input/tnlo_5.abi*. This file
-uses again the unrealistically low cutoff energy [[ecut]] of 2.8 Ha. 
+uses again the unrealistically low cutoff energy [[ecut]] of 2.8 Ha.
 The calculation takes about 2 or 3 minutes on a standard desktop PC.
 To run this calculation, copy
 *\$ABI_TESTS/tutorespfn/Input/tnlo_5.abi* to your working directory and run
 with `abinit`. If you have time,
 modify the cutoff to [[ecut]] = 5 Ha, in order to obtain
-more realistic results.  This run will take about twice as along as the 
+more realistic results.  This run will take about twice as along as the
 2.8 Ha version.
 
 The input file *tnlo_5.abi* contains 12 datasets, arranged in a double loop.
 ```
 ndtset 12
-udtset 3 4 
+udtset 3 4
 ```
 Input variable [[ndtset]] indicates 12 total sets, as usual, while
-the [[udtset]] variable indicates an outer loop of 3 sets, and for each 
+the [[udtset]] variable indicates an outer loop of 3 sets, and for each
 of these, an inner loop of four sets.
 
 The outer loop is over three sets of atomic positions, set by [[xcart]].
@@ -421,9 +466,9 @@ dir pert dir pert     real part    imaginary part
  3    4   1    4        -0.0000000000        -0.0000000000
  3    4   2    4        -0.0000000000        -0.0000000000
  3    4   3    4         6.1221671827        -0.0000000000
-``` 
+```
 For tau = +0.01 :
-``` 
+```
 Dielectric tensor, in cartesian coordinates,
    j1       j2             matrix element
 dir pert dir pert     real part    imaginary part
@@ -474,7 +519,7 @@ and should be used in practice.
 As a guide, we note that the finite-difference approach give results
 very similar to the DFPT ones for a similar cutoff and k-point grid. It is
 however more tedious because individual atomic displacement must be
-successively considered (which becomes cumbersome for complex crystals) 
+successively considered (which becomes cumbersome for complex crystals)
 and the results must then
 be converted into appropriate units with risk of error of manipulations.
 
@@ -486,7 +531,7 @@ considered as the better choice.
 ## Calculation of the Raman Spectra
 
 The ouptut of an ANADDB analysis, for example *tnlo_4.abo* as performed here, can be
-used to plot a simulated Raman spectrum, including both peak positions and intensities, 
+used to plot a simulated Raman spectrum, including both peak positions and intensities,
 which can be compared to experiment. Many details of the process are outlined in [[cite:Caracas2006]].
 
 A post-processing script, written in Python, is available in the ABINIT system:
@@ -496,7 +541,7 @@ parameters. To continue, we suggest copying this script into your working direct
 a link to it.
 
 Running *python Raman_spec.py --help* gives an outline of the input file format,
-but don't be afraid to open and read the Raman_spec.py file itself for further details on the 
+but don't be afraid to open and read the Raman_spec.py file itself for further details on the
 file input.
 As a start, here is a minimal input file to Raman_spec.py for the tnlo_4.abo run:
 ```
@@ -532,12 +577,11 @@ ASCII files and well-documented. For example, to visualize the powder spectrum o
 predicted by your ANADDB run, plot the first two
 columns of AlP.out_spec, which give the frequencies and intensities of the powder-averaged Raman spectrum.
 
-The resulting powder-average spectra, plotted here with Gnuplot, is shown below. For the cubic structure calculated here, 
+The resulting powder-average spectra, plotted here with Gnuplot, is shown below. For the cubic structure calculated here,
 the resulting spectra contains a single Raman TO mode corresponding to an XY polarization.
 
 ![](nlo_assets/AlP-Raman-ecut-2.8.png)
 
-Finally, if one includes a calculation of the frequency dependent dielectric tensor during the ANADDB calculation 
-(see [[anaddb:dieflag]]), 
+Finally, if one includes a calculation of the frequency dependent dielectric tensor during the ANADDB calculation
+(see [[anaddb:dieflag]]),
 this program extracts that dielectric tensor and prints it to its own file.
-
