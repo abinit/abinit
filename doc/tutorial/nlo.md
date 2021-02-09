@@ -214,10 +214,10 @@ to compute second order energy derivatives with an electric field perturbation (
 It turns out that third order derivatives of the energy, in this context, needs *second* derivatives of wavefunctions with respect to electric fields and k-points.
 However, to compute the latter one needs *second* derivatives of wavefunctions with respect to k-points only, so in total we need two additional sets of wavefunctions derivatives to compute third order derivatives of the energy.
 
-Now you can compare the files *tnlo_2.abi* and *tnlo_2_fDFPT.abi*.
+Now you can compare the files *tnlo_2.abi* and *tnlofDFPT_2.abi*.
 The first four datasets are identical, so we produce ground state quantities and then
 first-order wavefunctions derivatives and second derivatives of the energy exactly the same way.
-In *tnlo_2_fDFPT.abi*, before computing the non-linear terms there are two additional datasets to compute the needed second-order WFs derivatives, see dataset 5 and 6.
+In *tnlofDFPT_2.abi*, before computing the non-linear terms there are two additional datasets to compute the needed second-order WFs derivatives, see dataset 5 and 6.
 They are very similar to dataset 3 (computation of d/dk WFs derivatives), except for the keywords activating second order WFs computation and the reading of the needed files:
 ```
 rf2_dkdk5    1
@@ -243,7 +243,7 @@ usepead7    0
 The first two arguments specify which files to read to get d/dk and d/dkde WFs derivatives.
 *usepead* is the keyword controlling which implementation to use, it is set to 0 to use *full DFPT*.
 
-If not already done, you can now run the code using *tnlo_2_fDFPT.abi*.
+If not already done, you can now run the code using *tnlofDFPT_2.abi*.
 Even with a very small cutoff of 2.8 Ha, the non-linear susceptibility tensor differs only by few percents comparing *PEAD* and *full DFPT*,
 and the first-order change in the electronic dielectric susceptibility tensor differs by less than one percent.
 These differences can be reduced increasing the cutoff energy and most importantly the number of k-points.

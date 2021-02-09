@@ -151,11 +151,11 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tnlo_2_fDFPT.abo, tolnlines =1 , tolabs =1.0E-8, tolrel = 1.0E-8
+#%%   tnlofDFPT_2.abo, tolnlines=20 , tolabs=1.1e-07, tolrel=1.0e-08
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = L. Baguet, J. Zwanziger
+#%% authors = L. Baguet
 #%% keywords = NC, DFPT, NONLINEAR
 #%% description =
 #%%   Linear and nonlinear response calculation for AlP
