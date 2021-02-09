@@ -138,8 +138,8 @@ module defs_datatypes
   integer :: nshiftk_orig, nshiftk
   ! original number of shifts given in input and the actual value (changed in inkpts)
 
-  real(dp) :: charge
-  ! nelect = zion - charge
+  real(dp) :: cellcharge
+  ! nelect = zion - cellcharge
   ! Extra charge added to the unit cell when performing GS calculations
   ! To treat a system missing one electron per unit cell, charge is set to +1.
   ! When reading the band structure from an external file,
