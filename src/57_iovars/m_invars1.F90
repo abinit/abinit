@@ -1091,12 +1091,12 @@ end subroutine indefo1
 !!
 !! NOTES
 !! Must set up the geometry of the system, needed to compute k point grids in an automatic fashion.
-!! Treat separately mband_upper, since fband, charge and zionpsp must be known for being able to initialize it.
+!! Treat separately mband_upper, since fband, cellcharge and zionpsp must be known for being able to initialize it.
 !!
 !! Defaults are provided in the calling routine.
 !! Defaults are also provided here for the following variables:
 !!
-!!      mband_upper, occopt, fband, charge
+!!      mband_upper, occopt, fband, cellcharge
 !!
 !! They should be kept consistent with defaults of the same variables provided to the invars routines.
 !!
@@ -1130,7 +1130,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
- real(dp) :: charge,fband,kptnrm,kptrlen,sum_spinat,zelect,zval
+ real(dp) :: cellcharge,fband,kptnrm,kptrlen,sum_spinat,zelect,zval
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
@@ -1308,7 +1308,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !---------------------------------------------------------------------------
 
 ! Here, set up quantities that are related to geometrical description of the system (acell,rprim,xred), as well as
-! initial velocity(vel), charge and spin of atoms (chrgat,spinat), nuclear dipole moments of atoms (nucdipmom),
+! initial velocity(vel), cellcharge and spin of atoms (chrgat,spinat), nuclear dipole moments of atoms (nucdipmom),
 ! the symmetries (symrel,symafm, and tnons) and the list of fixed atoms (iatfix,iatfixx,iatfixy,iatfixz).
 ! Arrays have already been dimensioned thanks to the knowledge of msym and mx%natom
 
@@ -1828,19 +1828,19 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    if(tnband==0)then
 
 !    The old name 'charge' is still tolerated. Will be removed in due time.
-     charge=0.0_dp
+     cellcharge=0.0_dp
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cellcharge',tread,'DPR')
      if(tread==1)then
-        charge=dprarr(1)
+        cellcharge=dprarr(1)
      else
         call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
-        if(tread==1) charge=dprarr(1)
+        if(tread==1) cellcharge=dprarr(1)
      endif
 
-     ! Only take into account negative charge, to compute maximum number of bands
-     if(charge > 0.0_dp)charge=0.0_dp
+     ! Only take into account negative cellcharge, to compute maximum number of bands
+     if(cellcharge > 0.0_dp)cellcharge=0.0_dp
 
-!     mband_upper=nspinor*((nint(zion_max)*natom+1)/2 - floor(charge/2.0_dp)&
+!     mband_upper=nspinor*((nint(zion_max)*natom+1)/2 - floor(cellcharge/2.0_dp)&
 !&     + ceiling(fband*natom-1.0d-10))
      zval=zero
      sum_spinat=zero
@@ -1848,7 +1848,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
        sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
      end do
-     zelect=zval-charge
+     zelect=zval-cellcharge
      mband_upper=nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
 &     + (nsppol-1)*(ceiling(half*(sum_spinat -tol10)))
      nband(:)=mband_upper

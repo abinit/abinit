@@ -131,10 +131,10 @@ module m_hdr
   real(dp) :: stmbias      ! input variable
   real(dp) :: tphysel      ! input variable
   real(dp) :: tsmear       ! input variable
-  real(dp) :: nelect       ! number of electrons (computed from pseudos and charge)
+  real(dp) :: nelect       ! number of electrons (computed from pseudos and cellcharge)
   real(dp) :: ne_qFD=zero  ! CP number of excited electrons (input variable)
   real(dp) :: nh_qFD=zero  ! CP number of excited holes (input variable)
-  real(dp) :: charge       ! input variable
+  real(dp) :: cellcharge       ! input variable
 
   ! This record is not a part of the hdr_type, although it is present in the
   ! header of the files. This is because it depends on the kind of file
@@ -1210,7 +1210,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
  hdr_cp%nelect      = hdr_in%nelect
  hdr_cp%ne_qFD      = hdr_in%ne_qFD ! CP added for occopt 9 case
  hdr_cp%nh_qFD      = hdr_in%nh_qFD ! CP added for occopt 9 case
- hdr_cp%charge      = hdr_in%charge
+ hdr_cp%cellcharge  = hdr_in%cellcharge
 
  Hdr_cp%qptn(:)     = Hdr_in%qptn(:)
  Hdr_cp%rprimd(:,:) = Hdr_in%rprimd(:,:)
@@ -1261,7 +1261,7 @@ end subroutine hdr_copy
 !!
 !! FUNCTION
 !!  Return the number of electrons from the occupation numbers
-!!  This function is mainly used for debugging purposes, use hdr%nelect and hdr%charge
+!!  This function is mainly used for debugging purposes, use hdr%nelect and hdr%cellcharge
 !!
 !! INPUTS
 !!  Hdr<hdr_type>
@@ -1286,7 +1286,7 @@ real(dp) pure function hdr_get_nelect_from_occ(Hdr) result(nelect)
  integer :: idx,isppol,ikibz,nband_k
 ! *************************************************************************
 
- ! Cannot use znucl because we might have additional charge or alchemy.
+ ! Cannot use znucl because we might have additional cellcharge or alchemy.
  nelect=zero ; idx=0
  do isppol=1,Hdr%nsppol
    do ikibz=1,Hdr%nkpt
@@ -1338,7 +1338,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
   codvsn,pertcase,natom,nsym,nspden,ecut,pawecutdg,ecutsm,dilatmx,&
   intxc,ixc,stmbias,usewvl,pawcpxocc,pawspnorb,ngfft,ngfftdg,so_psp,qptn,&
   rprimd,xred,symrel,tnons,symafm,typat,amu,icoulomb,&
-  kptopt,nelect,ne_qFD,nh_qFD,ivalence,charge,kptrlatt_orig,kptrlatt,&
+  kptopt,nelect,ne_qFD,nh_qFD,ivalence,cellcharge,kptrlatt_orig,kptrlatt,&
   nshiftk_orig,nshiftk,shiftk_orig,shiftk,&
   mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
@@ -1348,7 +1348,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  integer,intent(in) :: ivalence ! CP added
  integer,intent(in) :: kptopt,nshiftk_orig,nshiftk,icoulomb
  integer, intent(in),optional :: comm_atom
- real(dp),intent(in) :: ecut,ecutsm,dilatmx,stmbias,pawecutdg,nelect,ne_qFD,nh_qFD,charge ! CP added ne_qFD and nh_qFD
+ real(dp),intent(in) :: ecut,ecutsm,dilatmx,stmbias,pawecutdg,nelect,ne_qFD,nh_qFD,cellcharge ! CP added ne_qFD and nh_qFD
  character(len=8),intent(in) :: codvsn
  type(ebands_t),intent(in) :: ebands
  type(pseudopotential_type),intent(in) :: psps
@@ -1460,7 +1460,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  hdr%ne_qFD        = ne_qFD   ! CP added
  hdr%nh_qFD        = nh_qFD   ! CP added
  hdr%ivalence      = ivalence ! CP added
- hdr%charge        = charge
+ hdr%cellcharge    = cellcharge
  hdr%kptrlatt_orig = kptrlatt_orig
  hdr%kptrlatt      = kptrlatt
  hdr%shiftk_orig   = shiftk_orig(:, 1:hdr%nshiftk_orig)
@@ -2156,7 +2156,7 @@ subroutine hdr_echo(hdr, fform, rdwr, unit, header)
  write(ount, '(a,3es18.10)') ' stmbias,tphysel,tsmear  =',hdr%stmbias,hdr%tphysel, hdr%tsmear
 
 #ifdef DEV_NEW_HDR
- write(ount, "(a,2es18.10,i0)") ' nelect,charge,icoulomb  =',hdr%nelect, hdr%charge, hdr%icoulomb
+ write(ount, "(a,2es18.10,i0)") ' nelect,cellcharge,icoulomb  =',hdr%nelect, hdr%cellcharge, hdr%icoulomb
  write(ount, "(a,2i6)")         ' kptopt,pawcpxocc        =',hdr%kptopt, hdr%pawcpxocc
  write(ount, '(a,9(i0,1x))')    ' kptrlatt_orig           = ',hdr%kptrlatt_orig
  write(ount, '(a,9(i0,1x))' )   ' kptrlatt                = ',hdr%kptrlatt
@@ -2759,7 +2759,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    list_dpr(1+index)=hdr%nelect; index=index+1
    list_dpr(1+index)=hdr%ne_qFD; index=index+1 ! CP added line
    list_dpr(1+index)=hdr%nh_qFD; index=index+1 ! CP added line
-   list_dpr(1+index)=hdr%charge; index=index+1
+   list_dpr(1+index)=hdr%cellcharge; index=index+1
    list_dpr(1+index:index+3*hdr%nshiftk_orig) = reshape(hdr%shiftk_orig, [3*hdr%nshiftk_orig])
    index=index+3*hdr%nshiftk_orig
    list_dpr(1+index:index+3*hdr%nshiftk) = reshape(hdr%shiftk, [3*hdr%nshiftk])
@@ -2803,7 +2803,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    hdr%nelect = list_dpr(1+index); index=index+1
    hdr%ne_qFD = list_dpr(1+index); index=index+1 ! CP added line
    hdr%nh_qFD = list_dpr(1+index); index=index+1 ! CP added line
-   hdr%charge = list_dpr(1+index); index=index+1
+   hdr%cellcharge = list_dpr(1+index); index=index+1
    hdr%shiftk_orig = reshape(list_dpr(1+index:index+3*hdr%nshiftk_orig), [3, hdr%nshiftk_orig])
    index=index+3*hdr%nshiftk_orig
    hdr%shiftk = reshape(list_dpr(1+index:index+3*hdr%nshiftk), [3, hdr%nshiftk])
@@ -3075,7 +3075,7 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  read(unit, err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:)
 
  read(unit, err=10, iomsg=errmsg)&
-    hdr%kptopt,hdr%pawcpxocc,hdr%nelect,hdr%charge,hdr%icoulomb,&
+    hdr%kptopt,hdr%pawcpxocc,hdr%nelect,hdr%cellcharge,hdr%icoulomb,&
     hdr%kptrlatt,hdr%kptrlatt_orig, hdr%shiftk_orig,hdr%shiftk
 
  ! CP added
@@ -3279,7 +3279,7 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  NCF_CHECK(nf90_get_var(ncid, vid("kptopt"), hdr%kptopt))
  NCF_CHECK(nf90_get_var(ncid, vid("pawcpxocc"), hdr%pawcpxocc))
  NCF_CHECK(nf90_get_var(ncid, vid("nelect"), hdr%nelect))
- NCF_CHECK(nf90_get_var(ncid, vid("charge"), hdr%charge))
+ NCF_CHECK(nf90_get_var(ncid, vid("charge"), hdr%cellcharge))
  NCF_CHECK(nf90_get_var(ncid, vid("kptrlatt_orig"), hdr%kptrlatt_orig))
  NCF_CHECK(nf90_get_var(ncid, vid("kptrlatt"), hdr%kptrlatt))
  NCF_CHECK(nf90_get_var(ncid, vid("shiftk_orig"), hdr%shiftk_orig))
@@ -3416,9 +3416,9 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
    hdr%tnons(:,:), hdr%znucltypat(:), hdr%wtk(:)
  ABI_FREE(occ3d)
 
-  write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:) 
+ write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:) 
  write(unit,err=10, iomsg=errmsg) &
-    hdr%kptopt, hdr%pawcpxocc, hdr%nelect, hdr%charge, hdr%icoulomb,&
+    hdr%kptopt, hdr%pawcpxocc, hdr%nelect, hdr%cellcharge, hdr%icoulomb,&
    hdr%kptrlatt,hdr%kptrlatt_orig, hdr%shiftk_orig(:,1:hdr%nshiftk_orig),hdr%shiftk(:,1:hdr%nshiftk)
 
  ! CP added
@@ -3810,7 +3810,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  NCF_CHECK(ncerr)
 
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "nelect", "charge"],[hdr%nelect, hdr%charge])
+   "nelect", "charge"],[hdr%nelect, hdr%cellcharge])
  NCF_CHECK(ncerr)
 
  ! NB: In etsf_io the number of electrons is declared as integer.
@@ -4441,8 +4441,8 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    ABI_WARNING(msg)
  end if
  ! End CP added
- if (abs(hdr%charge - hdr0%charge) > tol6) then
-    ABI_WARNING(sjoin("input charge = ", ftoa(hdr%charge)," /= disk file charge = ", ftoa(hdr0%charge)))
+ if (abs(hdr%cellcharge - hdr0%cellcharge) > tol6) then
+    ABI_WARNING(sjoin("input cellcharge = ", ftoa(hdr%cellcharge)," /= disk file cellcharge = ", ftoa(hdr0%cellcharge)))
  end if
 
  if (hdr%ntypat==hdr0%ntypat) then
@@ -5026,8 +5026,8 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    ABI_ERROR(msg)
  end if
  ! End CP added
- if (abs(Dtset%charge-hdr%charge)>tol6) then
-   write(msg,'(2(a,f8.2))')"File contains charge ", hdr%charge," but charge from input is ",Dtset%charge
+ if (abs(Dtset%cellcharge-hdr%cellcharge)>tol6) then
+   write(msg,'(2(a,f8.2))')"File contains cellcharge ", hdr%cellcharge," but cellcharge from input is ",Dtset%cellcharge
    ABI_ERROR(msg)
  end if
 

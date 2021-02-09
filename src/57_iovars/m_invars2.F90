@@ -254,7 +254,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key, tread_extrael
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image
- real(dp) :: areaxy,charge,fband,kptrlen,nelectjell,sum_spinat
+ real(dp) :: areaxy,cellcharge,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
  real(dp) :: tolmxde_, tolmxf_
@@ -1198,7 +1198,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end do
  end if
 
- charge=dtset%cellcharge
+ cellcharge=dtset%cellcharge
  ! CP added
  dtset%nh_qFD=zero
  dtset%ne_qFD=zero
@@ -1234,7 +1234,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
        sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
      end do
-     zelect=zval-charge
+     zelect=zval-cellcharge
      ! Then select the minimum number of bands, and add the required number.
      ! Note that this number might be smaller than the one computed
      ! by a slightly different formula in invars1 (difference in fband).
@@ -1257,7 +1257,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       if (tread==1)then
         dtset%ne_qFD=dprarr(1)
         dtset%nh_qFD=dprarr(1) ! CP: here we assume that number of excited electrons  = number of excited holes. Potentially can be
-! relaxed in the future if consistent changes with the charge tag are made .
+! relaxed in the future if consistent changes with the cellcharge tag are made .
       end if
    end if
    ! End CP added
@@ -3391,7 +3391,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    areaxy=abs(dtset%rprimd_orig(1,1,1)*dtset%rprimd_orig(2,2,1)-dtset%rprimd_orig(1,2,1)*dtset%rprimd_orig(2,1,1))
    rhoavg=three/(four_pi*dtset%slabwsrad**3)
    nelectjell=areaxy*(dtset%slabzend-dtset%slabzbeg)*rhoavg
-   charge=charge-nelectjell
+   cellcharge=cellcharge-nelectjell
  end if
 
  ! Initialize occ if occopt==1 or 3 ... 8,
@@ -3399,7 +3399,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! If iscf>0, check the charge of the system, and compute nelect.
  occopt_tmp=occopt
  if(getocc/=0)occopt_tmp=1
- call dtset%chkneu(charge, occopt_tmp)
+ call dtset%chkneu(cellcharge, occopt_tmp)
 
  ! Now that the occupation numbers have been initialized, can meaningfully define nbandhf.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')

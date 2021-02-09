@@ -323,7 +323,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  integer :: ii,unt,iln,ir,nmesh,imsh
  integer :: iread1,pspcod,msz,isppol
  integer :: mesh_type,mesh_size
- real(dp) :: charge
+ real(dp) :: corecharge
  real(dp) :: my_rcore
  real(dp) :: rstep,lstep
  real(dp):: occ,ene
@@ -572,9 +572,9 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  call pawrad_print(Atmrad,header="Final mesh",prtvol=prtvol)
 
  ABI_MALLOC(radens,(Atm%mesh_size,Atm%nspden))
- call get_atomorb_charge(Atm,Atmrad,charge,radens=radens)
+ call get_atomorb_charge(Atm,Atmrad,corecharge,radens=radens)
 
- write(std_out,*)"core charge  = ",charge
+ write(std_out,*)"core charge  = ",corecharge
  !do ii=1,Atmrad%mesh_size
  ! write(77,*)Atmrad%rad(ii),(radens(ii,isppol),isppol=1,Atm%nspden)
  !end do
