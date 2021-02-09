@@ -56,7 +56,7 @@ _ WF disk file :      0.560 Mbytes ; DEN or POT disk file :      2.672 Mbytes.
             acell      1.9000000000E+01  9.4500000000E+00  9.4500000000E+00 Bohr
               amu      1.59994000E+01  1.40067400E+01  1.00794000E+00
            bandpp          10
-           charge      1.00000000E+00
+       cellcharge      1.00000000E+00
      densfor_pred           6
              ecut      2.00000000E+01 Hartree
 -          fftalg         312
@@ -1341,7 +1341,7 @@ total_energy_dc_eV  : -8.01212922987486E+02
             acell      1.9000000000E+01  9.4500000000E+00  9.4500000000E+00 Bohr
               amu      1.59994000E+01  1.40067400E+01  1.00794000E+00
            bandpp          10
-           charge      1.00000000E+00
+       cellcharge      1.00000000E+00
      densfor_pred           6
              ecut      2.00000000E+01 Hartree
            etotal     -2.9444034420E+01

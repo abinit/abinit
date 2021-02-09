@@ -92,7 +92,7 @@ _ WF disk file :      0.126 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.6000000000E+00  7.6000000000E+00  7.6000000000E+00 Bohr
               amu      6.94100000E+00  1.00794000E+00
-           charge     -1.00000000E+00
+       cellcharge     -1.00000000E+00
            diemac      2.00000000E+00
              ecut      1.00000000E+01 Hartree
            enunit           1
@@ -892,7 +892,7 @@ total_energy_dc_eV  : -6.67549508395976E+02
  -outvars: echo values of variables after computation  --------
             acell      7.6000000000E+00  7.6000000000E+00  7.6000000000E+00 Bohr
               amu      6.94100000E+00  1.00794000E+00
-           charge     -1.00000000E+00
+       cellcharge     -1.00000000E+00
            diemac      2.00000000E+00
              ecut      1.00000000E+01 Hartree
            enunit           1

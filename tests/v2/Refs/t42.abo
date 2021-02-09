@@ -110,7 +110,7 @@ _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      4.00260200E+00  1.00794000E+00
         boxcenter      0.00000000E+00  0.00000000E+00  0.00000000E+00
-           charge      1.00000000E+00
+       cellcharge      1.00000000E+00
            diecut1     2.20000000E+00 Hartree
            diecut2     3.60000000E+01 Hartree
            diecut3     3.60000000E+01 Hartree
@@ -1204,7 +1204,7 @@ force_length_stats: {min: null, max: null, mean: null, }
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      4.00260200E+00  1.00794000E+00
         boxcenter      0.00000000E+00  0.00000000E+00  0.00000000E+00
-           charge      1.00000000E+00
+       cellcharge      1.00000000E+00
            diecut1     2.20000000E+00 Hartree
            diecut2     3.60000000E+01 Hartree
            diecut3     3.60000000E+01 Hartree
