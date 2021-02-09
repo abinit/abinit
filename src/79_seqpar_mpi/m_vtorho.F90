@@ -1121,9 +1121,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ABI_DEALLOCATE(dphasek)
    end if ! berryflag
    ABI_DEALLOCATE(rhoaug)
-   !temp-------
-   write(0,*) size(vlocal(:,:,:,1)),sum(vlocal(:,:,:,1))
-   !temp-------
    ABI_DEALLOCATE(vlocal)
    if(with_vxctau) then
      ABI_DEALLOCATE(vxctaulocal)
@@ -1236,6 +1233,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
      if(associated(hightemp)) then
+       if(hightemp%iopt_pot==2) then
+         hightemp%vtrial=vtrial
+       end if
        call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
        if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
      end if
@@ -1256,6 +1256,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call hightemp%compute_efreeel(energies%e_fermie,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
        call hightemp%compute_ent_freeel(energies%e_fermie,dtset%tsmear)
+       write(0,*) 'nfreeel',hightemp%version,hightemp%nfreeel
+       write(0,*) 'e_kin_freeel',hightemp%version,hightemp%e_kin_freeel
+       write(0,*) 'ent_freeel',hightemp%version,hightemp%ent_freeel
+       write(0,*) '------------------------------------------'
 !        if(psps%usepaw==1) then
 !          call hightemp_prt_cprj(cprj,eigen,gs_hamk,istep,dtset%mband,&
 ! &         mcprj_local,mpi_enreg,natom,dtset%nkpt,dtset%nsppol,occ)

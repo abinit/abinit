@@ -854,8 +854,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      MSG_ERROR(msg)
    else
      ABI_DATATYPE_ALLOCATE(hightemp,)
-     call hightemp%init(dtset%ht_gcut,dtset%mband,dtset%ht_nbcut,dtset%ht_prt_cg,rprimd,&
-&     dtset%use_hightemp)
+     call hightemp%init(dtset%ht_gcut,dtset%mband,dtset%ht_nbcut,nfftf,&
+&     dtset%nspden,dtset%ht_prt_cg,rprimd,dtset%use_hightemp)
    end if
  end if
 
@@ -895,16 +895,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_DEALLOCATE(doccde)
 
    if(associated(hightemp)) then
-
-     ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
-     vtrial(:,:)=zero
      hightemp%nfreeel=zero
      call hightemp%compute_nfreeel(results_gs%energies%e_fermie,hightemp%nfreeel,&
 &     dtset%tsmear)
      call hightemp%compute_efreeel(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
-&     dtset%tsmear,vtrial)
-
-     ABI_DEALLOCATE(vtrial)
+&     dtset%tsmear,hightemp%vtrial)
    end if
 
 !  Transfer occupations to bigdft object:
