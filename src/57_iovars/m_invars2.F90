@@ -757,8 +757,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'boxcutmin',tread,'DPR')
  if(tread==1) dtset%boxcutmin=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
- if(tread==1) dtset%charge=dprarr(1)
+!The old name "charge" is still recognized. Will be disabled in due time.
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cellcharge',tread,'DPR')
+ if(tread==1)then
+    dtset%charge=dprarr(1)
+ else
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
+   if(tread==1) dtset%charge=dprarr(1)
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dosdeltae',tread,'ENE')
  if(tread==1) dtset%dosdeltae=dprarr(1)

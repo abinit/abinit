@@ -1827,9 +1827,15 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ! to provide an upper limit for mband_upper
    if(tnband==0)then
 
+!    The old name 'charge' is still tolerated. Will be removed in due time.
      charge=0.0_dp
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
-     if(tread==1) charge=dprarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cellcharge',tread,'DPR')
+     if(tread==1)then
+        charge=dprarr(1)
+     else
+        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
+        if(tread==1) charge=dprarr(1)
+     endif
 
      ! Only take into account negative charge, to compute maximum number of bands
      if(charge > 0.0_dp)charge=0.0_dp
