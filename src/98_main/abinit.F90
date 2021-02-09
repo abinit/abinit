@@ -245,7 +245,7 @@ program abinit
    open(unit=ab_out,file=filnam(2),form='formatted',status='new', action="write", iomsg=msg, iostat=ios)
 #endif
    ABI_CHECK(ios == 0, msg)
-   rewind (unit=ab_out)
+!  rewind (unit=ab_out)
    codename='ABINIT'//repeat(' ',18)
    call herald(codename,abinit_version,ab_out)
    call herald(codename,abinit_version,std_out)
