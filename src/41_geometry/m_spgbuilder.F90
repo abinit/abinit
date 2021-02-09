@@ -128,7 +128,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &   'spgroup must be between 1 to 230, but is ',spgroup,ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: modify spgroup in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Checks the orientation
@@ -137,7 +137,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &   'spgaxor must be from 1 to 9, but is',spgaxor,ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: modify spgaxor in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Checks the consistency between the origin and space group
@@ -148,7 +148,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &   'while it should be 0 or 1',ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: modify spgorig in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (spgorig>1) then
@@ -160,7 +160,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &     'spgroup does not accept several origin choices',ch10,&
 &     'This is not allowed.  ',ch10,&
 &     'Action: modify spgorig in the input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end select
  end if
 
@@ -173,7 +173,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &     'spgroup does not accept several orientations',ch10,&
 &     'This is not allowed.  ',ch10,&
 &     'Action: modify spgaxor or spgroup in the input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end select
  end if
 
@@ -183,7 +183,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &   'and it should be an integer from -1 to 7',ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: modify brvltt  in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Assign nsym for each group according first to the order of the group
@@ -357,7 +357,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 &     'The assigned brvltt ',brvltt,' is not equal',ch10,&
 &     'to the input value ',bckbrvltt,ch10,&
 &     'Assume experienced user. Execution will continue.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
  end if
 
@@ -1085,7 +1085,7 @@ subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
 &   'while the magnetic space group is specified, spgroupma= ',spgroupma,ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: specify spgroup in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end select
 
  if (spgrmatch==0) then
@@ -1094,7 +1094,7 @@ subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
 &   'and the magnetic space group ',spgroupma,ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: modify spgroup or spgroupma in the input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !DEBUG
@@ -1320,7 +1320,7 @@ subroutine gensymshub4(genafm,msym,nsym,symafm,symrel,tnons)
    write(message, '(3a)' )&
 &   'The number of symmetries in the Shubnikov type IV space group',ch10,&
 &   'is larger than the maximal allowed number of symmetries.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  do ii=1,nsym

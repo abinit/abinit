@@ -121,7 +121,7 @@ subroutine init_results_respfn(dtsets,ndtset_alloc,results_respfn)
          'For jdtset=',dtsets(idtset)%jdtset,', getgam_eig2nkq=',getgam_eig2nkq,ch10,&
          'However this dataset with idtset=',idtset_gam, ' is not a phonon calculation;',ch10,&
          'Action : correct the value of getgam_eig2nkq for that dataset.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      endif
      if(results_respfn%gam_jdtset==0)then
        results_respfn%gam_jdtset=-getgam_eig2nkq ! Store a negative value, indicating that it is expected.
@@ -130,7 +130,7 @@ subroutine init_results_respfn(dtsets,ndtset_alloc,results_respfn)
          'results_respfn%gam_jdtset=',results_respfn%gam_jdtset,ch10,&
          'dtsets(idtset)%getgam_eig2nkq=',getgam_eig2nkq,ch10,&
          'So, it seems that two gamma q point calculations should be stored, while this is not yet allowed.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      endif
    endif
  enddo

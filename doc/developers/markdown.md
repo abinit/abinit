@@ -337,6 +337,7 @@ Examples:
 | `[[~abinit/tests/tutorial/Refs/tbase1_1.abo]]` |  [[~abinit/tests/tutorial/Refs/tbase1_1.abo]]
 | `[[~abinit/tests/Psps_for_tests/6c_lda.paw]]` | [[~abinit/tests/Psps_for_tests/6c_lda.paw]]
 | `[[tests/Psps_for_tests/6c_lda.paw]]` | [[tests/Psps_for_tests/6c_lda.paw]]
+| `[[:digit:]]' ` | [[:digit:]]
 
 The input variables for anaddb, optic and aim will be recognized if they are used with
 the namespaces `anaddb`, `optic` and `aim`.
@@ -711,6 +712,8 @@ If multiple files are used such as in:
 a modal window with tabs is produced
 
 {% modal tests/v1/Input/t01.abi tests/v1/Input/t02.abi %}
+
+Note however, that these extensions do not work when called within the input variable database files (abimkdocs/variables*.py files).
 
 ## MathJax
 

@@ -211,7 +211,7 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 &     "wvl_descr_psp_fill : bug, chemical element not found in BigDFT table",ch10,&
 &     "Action: upgrade BigDFT table"
      call wrtout(ab_out,message,'COLL')
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    gth_params%set(ipsp) = .true.
  end if
@@ -350,7 +350,7 @@ subroutine wvl_descr_free(wvl)
  call deallocate_atoms_data(wvl%atoms)
 #endif
  if(allocated(wvl%npspcode_paw_init_guess)) then
-   ABI_DEALLOCATE(wvl%npspcode_paw_init_guess)
+   ABI_FREE(wvl%npspcode_paw_init_guess)
  end if
 end subroutine wvl_descr_free
 !!***

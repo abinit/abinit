@@ -309,7 +309,7 @@ subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
    end do
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
+   ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  END SELECT
  !
  ! * Take into account time-reversal symmetry.
@@ -612,7 +612,7 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
  SELECT CASE (PPm%model)
 
  CASE (PPM_NONE)
-   MSG_WARNING("Called with ppmodel==0")
+   ABI_WARNING("Called with ppmodel==0")
    PPm%dm2_botsq = 0
    PPm%dm2_otq   = 0
    PPm%dm_eig    = 0
@@ -634,7 +634,7 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
    PPm%dm_eig    = 1 ! Should be set to 0, but g95 doesnt like zero-sized arrays
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
+   ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  END SELECT
  !
  ! Allocate tables depending on the value of keep_q.
@@ -747,7 +747,7 @@ subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngff
  SELECT CASE (PPm%model)
 
  CASE (PPM_NONE)
-   MSG_COMMENT(' Skipping Plasmompole model calculation')
+   ABI_COMMENT(' Skipping Plasmompole model calculation')
 
  CASE (PPM_GODBY_NEEDS)
    ! * Note: the q-dependency enters only through epsilon^-1.
@@ -769,14 +769,14 @@ subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngff
       n_at_G_zero = SUM(rhor_tot(:))/nfftf
       ! Change the prefactor
       write(msg,'(2(a,es16.8))') 'Forced ppmfreq:',PPm%force_plsmf*Ha_eV,' nelec/ucvol:',n_at_G_zero
-      MSG_WARNING(msg)
+      ABI_WARNING(msg)
       PPm%force_plsmf = (PPm%force_plsmf**2)/(four_pi*n_at_G_zero)
       do iq_ibz=1,PPm%nqibz
         PPm%bigomegatwsq(iq_ibz)%vals = PPm%force_plsmf * PPm%bigomegatwsq(iq_ibz)%vals
         PPm%omegatw(iq_ibz)%vals      = PPm%force_plsmf * PPm%omegatw(iq_ibz)%vals
       end do
       write(msg,'(a,es16.8)') 'Plasma frequency forced in HL ppmodel, new prefactor is:',PPm%force_plsmf
-      MSG_WARNING(msg)
+      ABI_WARNING(msg)
    end if
 
  CASE (PPM_LINDEN_HORSH) ! TODO Check better double precision, this routine is in a messy state
@@ -797,7 +797,7 @@ subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngff
    end do
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
+   ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  END SELECT
 
  DBG_EXIT("COLL")
@@ -942,7 +942,7 @@ subroutine getem1_from_ppm(PPm,mpwc,iqibz,zcut,nomega,omega,Vcp,em1q,only_ig1,on
    end do !iomega
 
  case default
-   MSG_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
+   ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  end select
 
 end subroutine getem1_from_ppm
@@ -1055,7 +1055,7 @@ subroutine getem1_from_ppm_one_ggp(PPm,iqibz,zcut,nomega,omega,Vcp,em1q,ig1,ig2)
    end do !iomega
 
  case default
-   MSG_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
+   ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  end select
 
 end subroutine getem1_from_ppm_one_ggp
@@ -1177,7 +1177,7 @@ subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
      if (negw/=0) then
        write(msg,'(a,i0,a,i0,a,f8.4)')&
 &       'Found negative eigenvalues. No. ',negw,' at iqibz= ',iqibz,' minval= ',MINVAL(REAL(ww))
-        MSG_WARNING(msg)
+        ABI_WARNING(msg)
      end if
 
      eigenvalues(:,iomega)=ww(:)
@@ -1430,7 +1430,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
    write(msg,'(a,i4,3a)')&
 &   'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &   'Enlarge the FFT mesh to get rid of this problem. '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  rhogg=four_pi*rhogg
@@ -1648,7 +1648,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
    write(msg,'(a,i4,3a)')&
 &   'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &   'Enlarge the FFT mesh to get rid of this problem. '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
  !
  ! mm(G,Gp) = (q+G) \cdot (q+Gp) n(G-Gp)
@@ -1715,7 +1715,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
    write (msg,'(2a,i4,a)')&
 &    ' Failed to calculate the eigenvalues and eigenvectors of the dielectric matrix ',ch10,&
 &    ierr*(-1),'-th argument in the matrix has an illegal value. '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (ierr>0) then
@@ -1723,7 +1723,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 &    ' Failed to calculate the eigenvalues and eigenvectors of the dielectric matrix ',ch10,&
 &    ' the algorithm failed to converge; ierr = ', ierr,ch10,&
 &    ' off-diagonal elements of an intermediate tridiagonal form did not converge to zero. '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  !
  ! Calculate the PPM parameters and the eigenpotentials needed for
@@ -1773,7 +1773,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
      if (ABS(num)<1.0d-4) then
        num=1.0d-5
      else
-       MSG_ERROR("One or more imaginary plasmon pole energies")
+       ABI_ERROR("One or more imaginary plasmon pole energies")
      end if
    end if
 
@@ -1908,7 +1908,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
    write(msg,'(a,i0,3a)')&
 &   'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &   'Enlarge the FFT mesh to get rid of this problem. '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  ABI_FREE(rhog)
@@ -2003,7 +2003,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
        eigval(ii) = -1.0d-22
        write(msg,'(a,i6,a,es16.6)')&
 &        ' Imaginary plasmon pole eigenenergy, eigenvector number ',ii,' with eigval',eigval(ii),ch10
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
    !
@@ -2306,7 +2306,7 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
          numf=num*CONJG(num) !MG this means that we cannot do SCGW
 
        CASE DEFAULT
-         MSG_ERROR("Wrong PPm%model")
+         ABI_ERROR("Wrong PPm%model")
        END SELECT
 
        !numf=num*CONJG(num) !MG this means that we cannot do SCGW
@@ -2329,7 +2329,7 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
    ABI_FREE(rhotwgdpcc)
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
+   ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  END SELECT
 
 end subroutine calc_sig_ppm
@@ -2551,7 +2551,7 @@ subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,
  !@ppmodel_t
  !
  if (PPm%has_q(iq_ibz) /= PPM_TAB_ALLOCATED) then
-   MSG_ERROR("ppmodel tables are not allocated")
+   ABI_ERROR("ppmodel tables are not allocated")
  end if
 
  qpt = Qmesh%ibz(:,iq_ibz)
@@ -2562,7 +2562,7 @@ subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,
  SELECT CASE (PPm%model)
 
  CASE (PPM_NONE)
-   MSG_COMMENT('Skipping Plasmonpole model calculation')
+   ABI_COMMENT('Skipping Plasmonpole model calculation')
 
  CASE (PPM_GODBY_NEEDS)
    ! Note: the q-dependency enters only through epsilon^-1.
@@ -2578,12 +2578,12 @@ subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,
       n_at_G_zero = SUM(rhor_tot(:))/nfftf
       ! Change the prefactor
       write(msg,'(2(a,es16.8))') 'Forced ppmfreq:',PPm%force_plsmf*Ha_eV,' nelec/ucvol:',n_at_G_zero
-      MSG_WARNING(msg)
+      ABI_WARNING(msg)
       PPm%force_plsmf = (PPm%force_plsmf**2)/(four_pi*n_at_G_zero)
       PPm%bigomegatwsq(iq_ibz)%vals = PPm%force_plsmf * PPm%bigomegatwsq(iq_ibz)%vals
       PPm%omegatw(iq_ibz)%vals      = PPm%force_plsmf * PPm%omegatw(iq_ibz)%vals
       write(msg,'(a,es16.8)') 'Plasma frequency forced in HL ppmodel, new prefactor is:',PPm%force_plsmf
-      MSG_WARNING(msg)
+      ABI_WARNING(msg)
    end if
 
  CASE (PPM_LINDEN_HORSH)
@@ -2598,7 +2598,7 @@ subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,
 &    PPm%bigomegatwsq(iq_ibz)%vals,PPm%omegatw(iq_ibz)%vals(:,1))
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
+   ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  END SELECT
 
  DBG_EXIT("COLL")
@@ -2775,7 +2775,7 @@ subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu
          numf=num*CONJG(num) !MG this means that we cannot do SCGW
 
        CASE DEFAULT
-         MSG_ERROR("Wrong PPm%model")
+         ABI_ERROR("Wrong PPm%model")
        END SELECT
 
        !numf=num*CONJG(num) !MG this means that we cannot do SCGW
@@ -2798,7 +2798,7 @@ subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu
    ABI_FREE(rhotwgdpcc)
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
+   ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  END SELECT
 
 end subroutine ppm_times_ket

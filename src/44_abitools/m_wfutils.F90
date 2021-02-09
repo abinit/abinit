@@ -141,7 +141,7 @@ integer function wfindex(iblocksize,indtype)
  case ('W')
    wfindex=x_windex(iblocksize)
  case default
-   MSG_ERROR("Wrong indtype: "//trim(indtype))
+   ABI_ERROR("Wrong indtype: "//trim(indtype))
  end select
 
 end function wfindex
@@ -326,7 +326,7 @@ subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indt
      end if
    end if
  else
-   MSG_ERROR("Wrong direction: "//trim(direction))
+   ABI_ERROR("Wrong direction: "//trim(direction))
  endif
 
  if (present(tim_wfcopy).and.present(timopt)) then

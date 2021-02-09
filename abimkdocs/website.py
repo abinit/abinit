@@ -895,22 +895,29 @@ The bibtex file is available [here](../abiref.bib).
 
 !!! note
 
-    Supposing you made your own install of ABINIT, the input files to run the examples
-    are in the *~abinit/tests/* directory where *~abinit* is the absolute path of the abinit top-level directory.
-    If you have NOT made your own install, ask your system administrator where to find the package, especially the executable and test files.
+    Supposing you made your own installation of ABINIT, the input files to run the examples
+    are in the *~abinit/tests/* directory where *~abinit* is the **absolute path** of the abinit top-level directory.
+    If you have NOT made your own install, ask your system administrator where to find the package,
+    especially the executable and test files.
 
-    In case you work on your own PC or workstation, to make things easier, we suggest you define some handy environment variables by
-    executing the following lines in the terminal:
+    In case you work on your own PC or workstation, to make things easier, we suggest you define
+    some handy environment variables by executing the following lines in the terminal:
 
     ```bash
     export ABI_HOME=Replace_with_absolute_path_to_abinit_top_level_dir # Change this line
-    export PATH=$ABI_HOME/src/98_main/:$PATH     # Do not change this line : path to executable
-    export ABI_TESTS=$ABI_HOME/tests/            # Do not change this line : path to tests dir
-    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/ # Do not change this line : path to pseudos dir
+    export PATH=$ABI_HOME/src/98_main/:$PATH      # Do not change this line: path to executable
+    export ABI_TESTS=$ABI_HOME/tests/             # Do not change this line: path to tests dir
+    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Do not change this line: path to pseudos dir
     ```
 
     Examples in this tutorial use these shell variables: copy and paste
-    the code snippets into the terminal (**remember to set ABI_HOME first!**).
+    the code snippets into the terminal (**remember to set ABI_HOME first!**) or, alternatively,
+    source the `set_abienv.sh` script located in the *~abinit* directory:
+
+    ```sh
+    source ~abinit/set_abienv.sh
+    ```
+
     The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
     so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
 
@@ -918,7 +925,7 @@ The bibtex file is available [here](../abiref.bib).
     copy there the input files of the lesson.
 
     Most of the tutorials do not rely on parallelism (except specific [[tutorial:basepar|tutorials on parallelism]]).
-    However you can run most of the tutorial examples in parallel, see the [[topic:parallelism|topic on parallelism]].
+    However you can run most of the tutorial examples in parallel with MPI, see the [[topic:parallelism|topic on parallelism]].
 """
         new_lines = []
         for line in lines:
@@ -1001,6 +1008,10 @@ The bibtex file is available [here](../abiref.bib).
         #if "||" in token:
         #    token, args = token.split("||")
 
+        if token.startswith(":") and token.endswith(":"):
+            # Handle special cases with POSIX regex e.g. [[:digit:]]
+            return None, None, None, token
+
         text = None
         if "|" in token:
             token, text = token.split("|")
@@ -1073,7 +1084,7 @@ The bibtex file is available [here](../abiref.bib).
         if namespace is None:
             if name is None:
                 # Handle [[#internal_link|text]]
-                assert fragment is not None
+                #assert fragment is not None
                 url = ""
                 if a.text is None: a.text = fragment
             else:
@@ -1407,16 +1418,17 @@ Enter any string to search in the database. Clicking without any request will gi
 
     def dialog_from_filename(self, path, title=None, ret_btn_dialog=False):
         """Build customized jquery dialog to show the content of filepath `path`."""
+        abs_path = os.path.join(self.root, path)
 
-        # FIXME: This to faciliate migration to new scheme for file extensions
+        # FIXME: This to facilitate migration to new scheme for file extensions
         # It will be removed when the beautification is completed.
-        if path.endswith(".in") and not os.path.exists(path):
+        if path.endswith(".in") and not os.path.exists(abs_path):
             print("Using old convention for file extension: `.in` instead of `.abi`.\n",
                   "Please change the md tutorial to use the .abi convention for", path)
             root, _ = os.path.splitext(path)
             path = root + ".abi"
 
-        if path.endswith(".out") and not os.path.exists(path):
+        if path.endswith(".out") and not os.path.exists(abs_path):
            print("Using old convention for file extension: `.out` instead of `.abo`.\n",
                  "Please change the md tutorial to use the .abo convention for", path)
            root, _ = os.path.splitext(path)
@@ -1424,7 +1436,7 @@ Enter any string to search in the database. Clicking without any request will gi
 
         title = path if title is None else title
         with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
-            if path.endswith(".in"):
+            if path.endswith(".abi") or path.endswith(".in"):
                 text = highlight(fh.read(), BashLexer(), HtmlFormatter(cssclass="codehilite small-text"))
             elif path.endswith(".py"):
                 text = highlight(fh.read(), PythonLexer(), HtmlFormatter(cssclass="codehilite small-text"))
@@ -1451,24 +1463,21 @@ Enter any string to search in the database. Clicking without any request will gi
 
     def modal_from_filename(self, path, title=None):
         """Return HTML string with bootstrap modal and content taken from file `path`."""
+        abs_path = os.path.join(self.root, path)
 
         # FIXME: This to faciliate migration to new scheme for file extensions
         # It will be removed when the beautification is completed.
-        if path.endswith(".in") and not os.path.exists(path):
+        if path.endswith(".in") and not os.path.exists(abs_path):
             print("Using old convention for file extension: `.in` instead of `.abi`.\n",
                   "Please change the md tutorial to use the .abi convention for:", path)
             root, _ = os.path.splitext(path)
             path = root + ".abi"
 
-        if path.endswith(".out") and not os.path.exists(path):
+        if path.endswith(".out") and not os.path.exists(abs_path):
            print("Using old convention for file extension: `.out` instead of `.abo`.\n",
                  "Please change the md tutorial to use the .abo convention for:", path)
            root, _ = os.path.splitext(path)
            path = root + ".abo"
-
-
-
-
 
         # Based on https://v4-alpha.getbootstrap.com/components/modal/#examples
         # See also https://stackoverflow.com/questions/14971766/load-content-with-ajax-in-bootstrap-modal

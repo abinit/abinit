@@ -107,9 +107,6 @@ module m_yaml
    procedure :: add_ints => yamldoc_add_ints
      ! Add a list of integers to a document
 
-   !procedure :: add_ints_and_reals => yamldoc_add_ints_and_reals
-     ! Add a list of integer and real value a document
-
    procedure :: add_string => yamldoc_add_string
      ! Add a string field to a document
 
@@ -141,7 +138,7 @@ module m_yaml
      ! Add a field containing a list of dictionaries/array of pair_list
 
    procedure :: set_keys_to_string => yamldoc_set_keys_to_string
-     ! Set all keys to a commong (string) value
+     ! Set all keys to a common (string) value
 
  end type yamldoc_t
 !!***
@@ -227,7 +224,7 @@ subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
  case ("icycle")
    ICYCLE_IDX = val
  case default
-   MSG_ERROR(sjoin("Invalid value for label:", label))
+   ABI_ERROR(sjoin("Invalid value for label:", label))
  end select
 
  if (use_yaml == 1) then
@@ -330,7 +327,7 @@ end function yamldoc_open
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [comment]: optional Yaml comment added after the value
-!!  [ignore]= If present, ignore entrie if values is equal to ignore.
+!!  [ignore]= If present, ignore entry if value is equal to ignore.
 !!
 !! PARENTS
 !!
@@ -1528,7 +1525,9 @@ end subroutine yaml_write_dict
 !!  Write Yaml document to unit and free memory.
 !!
 !! INPUTS
-!!  [newline]= set to false to prevent adding newlines after fields. Default: True
+!!  [newline]= set to False to prevent adding newlines after fields. Default: True
+!!  [firstchar]= Add first char to each line. Useful if the Yaml document must be added after shell comments
+!!    with firstchar="#".
 !!
 !! PARENTS
 !!
@@ -1537,12 +1536,13 @@ end subroutine yaml_write_dict
 !!
 !! SOURCE
 
-subroutine yamldoc_write_unit_and_free(self, unit, newline)
+subroutine yamldoc_write_unit_and_free(self, unit, newline, firstchar)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
  integer,intent(in) :: unit
  logical,intent(in),optional :: newline
+ character(len=*),optional,intent(in) :: firstchar
 
 !Local variables-------------------------------
  logical :: nl
@@ -1556,7 +1556,11 @@ subroutine yamldoc_write_unit_and_free(self, unit, newline)
  ! FIXME: In principle, we should not use is_open here but it seems that
  ! ab_out is not set to dev_null if parallelism over images.
  if (is_open(unit)) then
-   call self%stream%flush(unit, newline=nl)
+   if (present(firstchar)) then
+     call self%stream%flush(unit, newline=nl, firstchar=firstchar)
+   else
+     call self%stream%flush(unit, newline=nl)
+   end if
  else
    call self%stream%free()
  end if
@@ -1621,7 +1625,7 @@ end subroutine yamldoc_write_units_and_free
 !! yamldoc_set_keys_to_string
 !!
 !! FUNCTION
-!! Set all keys to a commong (string) value
+!! Set all keys to a common (string) value
 !!
 !! INPUTS
 !!  keylist = List of comma-separated keywords
@@ -1747,7 +1751,7 @@ subroutine forbid_reserved_label(label)
 
  do i=1,size(reserved_keywords)
    if (reserved_keywords(i) == label) then
-     MSG_ERROR(trim(label)//' is a reserved keyword and cannot be used as a YAML label.')
+     ABI_ERROR(trim(label)//' is a reserved keyword and cannot be used as a YAML label.')
    end if
  end do
 end subroutine forbid_reserved_label
@@ -1947,7 +1951,7 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
      write(tmp_s, sfmt) vs
      call yaml_print_string(stream, trim(tmp_s))
    case default
-     MSG_ERROR(sjoin("Invalid type_code:", itoa(type_code)))
+     ABI_ERROR(sjoin("Invalid type_code:", itoa(type_code)))
    end select
 
    if (i > 0 .and. mod(i, vmax) == 0 .and. i /= pl%length()) then

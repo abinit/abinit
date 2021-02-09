@@ -213,7 +213,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
  nspinor=Wfd%nspinor; nsppol =Wfd%nsppol; nspden =Wfd%nspden
- if (nspinor == 2) MSG_WARNING("Remember to ADD SO")
+ if (nspinor == 2) ABI_WARNING("Remember to ADD SO")
 
  ! TODO not used for the time being but it should be a standard input of the routine.
  !  bbks_mask(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)=Logical mask used to select
@@ -233,7 +233,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  call melements_init(Mels,Mflags,nsppol,nspden,Wfd%nspinor,Wfd%nkibz,Wfd%kibz,kstab)
 
  if (Mflags%has_lexexch==1) then
-   MSG_ERROR("Local EXX not coded!")
+   ABI_ERROR("Local EXX not coded!")
  end if
 
  ! Evaluate $v_\xc$ using only the valence charge.
@@ -319,13 +319,13 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ! has_hbare uses veffh0. Why only use it with usepaw=1? Let it be available always
  if (Mflags%has_hbare==1) then
    if (Mflags%has_kinetic/=1) then
-     MSG_ERROR("Kinetic energy mels are required for the construction of Hbare mels!")
+     ABI_ERROR("Kinetic energy mels are required for the construction of Hbare mels!")
    end if
    ! Effective potential of the bare Hamiltonian: valence term is subtracted.
    ABI_MALLOC(veffh0,(nfftf,nspden))
    veffh0=vtrial-vxc_val
    !veffh0=vtrial !this is to retrieve the KS Hamiltonian
- endif 
+ endif
  ! If PAW and qp-SCGW then update Paw_ij and calculate the matrix elements ===
  ! We cannot simply rely on gwcalctyp because I need KS vxc in sigma.
  if (Wfd%usepaw==1.and.Mflags%has_hbare==1) then
@@ -470,10 +470,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
            !if (istwf_k /= 1) then
            !  cdot = two * cdot; if (istwf_k == 2) cdot = cdot - GWPC_CONJG(cg1(1)) * kinwf2(1)
            !end if
-           Mels%kinetic(ib, jb, ik_ibz, is) = cdot 
+           Mels%kinetic(ib, jb, ik_ibz, is) = cdot
            if (wfd%nspinor == 2 .and. wfd%nspden == 1) then
              cg1 => wave_ib%ug(npw_k+1:)
-             Mels%kinetic(ib, jb, ik_ibz, 2) = DOT_PRODUCT(cg1, kinwf2(npw_k+1:)) 
+             Mels%kinetic(ib, jb, ik_ibz, 2) = DOT_PRODUCT(cg1, kinwf2(npw_k+1:))
            end if
          end if
          if (Mflags%has_hbare==1) then
@@ -593,7 +593,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      if (     SIZE(dijexc_core,DIM=1) /= lmn2_size_max  &
 &        .or. SIZE(dijexc_core,DIM=2) /= 1              &
 &        .or. SIZE(dijexc_core,DIM=3) /= Cryst%ntypat ) then
-       MSG_BUG("Wrong sizes in dijexc_core")
+       ABI_BUG("Wrong sizes in dijexc_core")
      end if
    end if
 
@@ -607,8 +607,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      dimlmn(iat)=Pawtab(Cryst%typat(iat))%lmn_size
    end do
 
-   ABI_DATATYPE_ALLOCATE(Cprj_b1ks,(Cryst%natom,nspinor))
-   ABI_DATATYPE_ALLOCATE(Cprj_b2ks,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj_b1ks,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj_b2ks,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj_b1ks,0,dimlmn)
    call pawcprj_alloc(Cprj_b2ks,0,dimlmn)
 
@@ -721,7 +721,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
                      ! FIXME H0 + spinor not implemented
                      if (Mflags%has_hbare==1.or.Mflags%has_sxcore==1) then
-                       MSG_ERROR("not implemented")
+                       ABI_ERROR("not implemented")
                      end if
 
                      if (Mflags%has_vxc==1) then ! * Accumulate vxc[n1+nc] + vxc[n1+tn+nc].
@@ -823,9 +823,9 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
    ABI_FREE(dimlmn)
    call pawcprj_free(Cprj_b1ks)
-   ABI_DATATYPE_DEALLOCATE(Cprj_b1ks)
+   ABI_FREE(Cprj_b1ks)
    call pawcprj_free(Cprj_b2ks)
-   ABI_DATATYPE_DEALLOCATE(Cprj_b2ks)
+   ABI_FREE(Cprj_b2ks)
  end if !PAW
 
  ABI_FREE(bbp_ks_distrb)

@@ -18,6 +18,7 @@
 # Plane wave basis
       ecut      5.00  #This is too low, just for this sample case
       nstep    100     #
+      pawecutdg 20
 
 #kpoint set
   ngkpt1      4 4 4
@@ -65,8 +66,11 @@ w90iniprj3 2
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/14si.pspnc"
+ pseudos "Pseudodojo_paw_pw_standard/Si.xml"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

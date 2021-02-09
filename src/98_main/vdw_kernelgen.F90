@@ -92,7 +92,7 @@ program vdw_kernelgen
    write(message,'(3a)') &
 &   '  In order to use MPI_IO, you must compile with the MPI flag ',ch10,&
 &   '  Action : recompile your code with different CPP flags.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 #endif
 
@@ -104,7 +104,7 @@ program vdw_kernelgen
 #endif
 
  write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',ch10
- MSG_ERROR(message)
+ ABI_ERROR(message)
 
 !=== Write greetings ===
  codename='vdW_KernelGen'//repeat(' ',11)

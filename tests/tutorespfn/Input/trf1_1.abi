@@ -21,6 +21,8 @@ znucl 13 33            # The keyword "znucl" refers to the atomic number of the
                        # mentioned in the "files" file must correspond
                        # to the type(s) of atom. Here, type 1 is the Aluminum,
                        # type 2 is the Arsenic.
+pp_dirpath "$ABI_PSPDIR"
+pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
 #Definition of the atoms
 natom 2                # There are two atoms
@@ -34,9 +36,6 @@ xred                   # This keyword indicate that the location of the atoms
 nband  4               # For an insulator (if described correctly as an insulator 
                        # by DFT), there is no need to include conduction bands 
                        # in response-function calculations
-
-#Exchange-correlation functional
-ixc 1             # LDA Teter Pade parametrization
 
 #Definition of the planewave basis set
 ecut    3.0           # Maximal kinetic energy cut-off, in Hartree
@@ -55,10 +54,9 @@ diemac 9.0             # Although this is not mandatory, it is worth to
                        # is described in the "dielng" input variable section.
                        # The dielectric constant of AlAs is smaller that the one of Si (=12).
 
-
- pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

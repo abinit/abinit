@@ -525,7 +525,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  end if
 
  !if (return_code /= 0) then
- !  MSG_ERROR("Some of the tetrahedron unit tests failed. See above results")
+ !  ABI_ERROR("Some of the tetrahedron unit tests failed. See above results")
  !end if
 
  contains
@@ -591,7 +591,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
   ! Write results to txt file.
   fname = trim(key)//".dat"
   if (open_file(fname, msg, newunit=funit, action="write") /= 0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   if (.not. present(cauchy_ppart)) then
@@ -950,14 +950,14 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  ! Check if the IBZ is the same
  do iq_ibz=1,nqibz
    if (ibz2bz(iq_ibz) == ibz2bz_new(iq_ibz)) cycle
-   MSG_ERROR("The IBZ is different.")
+   ABI_ERROR("The IBZ is different.")
  end do
 
  ! Check if the mapping is the same
  do iq_bz=1,nqbz
    if (bz2ibz_symkpt(1, iq_bz) == bz2ibz_symkpt_new(1, iq_bz)) cycle
    write(msg,*) "Inconsistent mapping:", iq_bz, bz2ibz_symkpt(1,iq_bz), bz2ibz_symkpt_new(1,iq_bz)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end do
 
  ABI_MALLOC(kmap, (nqbz, 6))

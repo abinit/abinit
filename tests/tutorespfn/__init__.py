@@ -53,11 +53,10 @@ inp_files = [
 "teph4mob_7.abi",
 #
 "teph4isotc_1.abi",
-#"teph4isotc_2.abi",
-#"teph4isotc_3.abi",
-#"teph4isotc_4.abi",
-#"teph4isotc_5.abi",
-#"teph4isotc_6.abi",
+"teph4isotc_2.abi",
+"teph4isotc_3.abi",
+"teph4isotc_4.abi",
+"teph4isotc_5.abi",
 #
 "teph4zpr_1.abi",
 "teph4zpr_2.abi",
@@ -74,7 +73,6 @@ inp_files = [
 "tffield_4.abi",
 "tffield_5.abi",
 "tffield_6.abi",
-#"-tffield_7.abi",  # Disabled
 #
 "tlw_1.abi",
 "tlw_2.abi",
@@ -89,12 +87,6 @@ inp_files = [
 "tnlo_3.abi",
 "tnlo_4.abi",
 "tnlo_5.abi",
-"tnlo_6.abi",
-"tnlo_7.abi",
-"tnlo_8.abi",
-"tnlo_9.abi",
-"tnlo_10.abi",
-"tnlo_11.abi",
 #
 "toptic_1.abi",
 "toptic_2.abi",

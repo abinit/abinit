@@ -560,15 +560,15 @@ end subroutine scfcv_run
 !!!  we need to reformat the wavefunctions, taking into acount the new
 !!!  coordinates.
 !!!  We prepare to change rhog (to be removed) and rhor.
-!!   ABI_DEALLOCATE(rhog)
-!!   ABI_DEALLOCATE(rhor)
+!!   ABI_FREE(rhog)
+!!   ABI_FREE(rhor)
 !!
 !!   call wvl_wfsinp_reformat(this%dtset, this%mpi_enreg,&
 !!&   this%psps, rprimd, this%wvl, xred, xred_old)
 !!   this%nfftf = this%dtset%nfft
 !!
-!!   ABI_ALLOCATE(rhog,(2, this%dtset%nfft))
-!!   ABI_ALLOCATE(rhor,(2, this%dtset%nfft))
+!!   ABI_MALLOC(rhog,(2, this%dtset%nfft))
+!!   ABI_MALLOC(rhor,(2, this%dtset%nfft))
 !!   call wvl_mkrho(this%dtset, this%irrzon, this%mpi_enreg,&
 !!&   this%phnons, rhor,this%wvl%wfs,this%wvl%den)
 !! end if

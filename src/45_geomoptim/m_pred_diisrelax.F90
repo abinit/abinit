@@ -135,25 +135,25 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  if(iexit/=0)then
    if (allocated(ipiv))         then
-     ABI_DEALLOCATE(ipiv)
+     ABI_FREE(ipiv)
    end if
    if (allocated(error))        then
-     ABI_DEALLOCATE(error)
+     ABI_FREE(error)
    end if
    if (allocated(diisMatrix))   then
-     ABI_DEALLOCATE(diisMatrix)
+     ABI_FREE(diisMatrix)
    end if
    if (allocated(diisCoeff))    then
-     ABI_DEALLOCATE(diisCoeff)
+     ABI_FREE(diisCoeff)
    end if
    if (allocated(workArray))    then
-     ABI_DEALLOCATE(workArray)
+     ABI_FREE(workArray)
    end if
    if (allocated(workMatrix))   then
-     ABI_DEALLOCATE(workMatrix)
+     ABI_FREE(workMatrix)
    end if
    if (allocated(hessin))       then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
    return
  end if
@@ -186,14 +186,14 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !From a previous dataset with a different ndim
  if(itime==1)then
    if (allocated(error))  then
-     ABI_DEALLOCATE(error)
+     ABI_FREE(error)
    end if
    if (allocated(hessin))  then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
 
-   ABI_ALLOCATE(error,(3, ab_mover%natom, nhist))
-   ABI_ALLOCATE(hessin,(ndim,ndim))
+   ABI_MALLOC(error,(3, ab_mover%natom, nhist))
+   ABI_MALLOC(hessin,(ndim,ndim))
 
    ident(:, :) = zero
    ident(1, 1) = -one
@@ -247,7 +247,7 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  end if
 
 !Need also history in cartesian coordinates
- ABI_ALLOCATE(xcart_hist,(3,ab_mover%natom,diisSize))
+ ABI_MALLOC(xcart_hist,(3,ab_mover%natom,diisSize))
  do ii=1,diisSize
    call xred2xcart(ab_mover%natom,rprimd,xcart_hist(:,:,ii),hist%xred(:,:,ii+shift))
  end do
@@ -346,7 +346,7 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !##########################################################
 !### 07. Create the DIIS Matrix
 
- ABI_ALLOCATE(diisMatrix,(diisSize + 1, diisSize + 1))
+ ABI_MALLOC(diisMatrix,(diisSize + 1, diisSize + 1))
  diisMatrix(:,:) = zero
  if(zDEBUG) write(std_out,*) "DIIS matrix", diisSize+1,'x',diisSize+1
  do ii = 1, diisSize, 1
@@ -364,13 +364,13 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !##########################################################
 !### 08. Solve the system using Lapack
 
- ABI_ALLOCATE(diisCoeff,(diisSize + 1))
+ ABI_MALLOC(diisCoeff,(diisSize + 1))
  diisCoeff(:) = zero
  diisCoeff(diisSize + 1) = -one
  if(zDEBUG) write(std_out,*) "B vector:", diisCoeff(1:diisSize + 1)
- ABI_ALLOCATE(workMatrix,(diisSize + 1, diisSize + 1))
- ABI_ALLOCATE(workArray,((diisSize + 1) ** 2))
- ABI_ALLOCATE(ipiv,(diisSize + 1))
+ ABI_MALLOC(workMatrix,(diisSize + 1, diisSize + 1))
+ ABI_MALLOC(workArray,((diisSize + 1) ** 2))
+ ABI_MALLOC(ipiv,(diisSize + 1))
 !*     DCOPY(N,DX,INCX,DY,INCY)
 !*     copies a vector, x, to a vector, y.
 !*     uses unrolled loops for increments equal to one.
@@ -501,10 +501,10 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    write(std_out,*) 'Sum of coefficients=',suma
  end if
 
- ABI_DEALLOCATE(ipiv)
- ABI_DEALLOCATE(workArray)
- ABI_DEALLOCATE(workMatrix)
- ABI_DEALLOCATE(diisMatrix)
+ ABI_FREE(ipiv)
+ ABI_FREE(workArray)
+ ABI_FREE(workMatrix)
+ ABI_FREE(diisMatrix)
 
 !write(std_out,*) 'diisrelax 09'
 !##########################################################
@@ -543,7 +543,7 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    end if
 
  end do
- ABI_DEALLOCATE(diisCoeff)
+ ABI_FREE(diisCoeff)
 
  error_tmp(:)=RESHAPE( error(:,:,diisSize), (/ 3*ab_mover%natom /) )
  xcart_tmp(:)=RESHAPE( xcart(:,:), (/ 3*ab_mover%natom /) )
@@ -574,7 +574,7 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 &   reshape(fcart_hist(:,:,diisSize-1), (/ ndim /)))
  end if
 
- ABI_DEALLOCATE(xcart_hist)
+ ABI_FREE(xcart_hist)
 
 !write(std_out,*) 'diisrelax 11'
 !##########################################################

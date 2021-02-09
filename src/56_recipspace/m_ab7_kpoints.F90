@@ -250,8 +250,8 @@ contains
     call kpoints_binding_mp_k_1(symid, nkpt, ngkpt, kptrlatt, kptrlen, &
          & nshiftk_, shiftk_, errno)
     if (errno /= AB7_NO_ERROR) return
-    ABI_ALLOCATE(kpt,(3, nkpt))
-    ABI_ALLOCATE(wkpt,(nkpt))
+    ABI_MALLOC(kpt,(3, nkpt))
+    ABI_MALLOC(wkpt,(nkpt))
     call kpoints_binding_mp_k_2(symid, nkpt, kpt, wkpt, &
        & kptrlatt, kptrlen, nshiftk_, shiftk_, errno)
   end subroutine kpoints_get_mp_k_grid
@@ -307,8 +307,8 @@ contains
     if (AB_DBG) write(std_err,*) "AB symmetry: testkgrid -> kptrlatt=", kptrlatt
 
     nkpt=0
-    ABI_ALLOCATE(kpt,(3, nkpt))
-    ABI_ALLOCATE(wkpt,(nkpt))
+    ABI_MALLOC(kpt,(3, nkpt))
+    ABI_MALLOC(wkpt,(nkpt))
 
     call getkgrid(0, 0, 1, kpt, 1, kptrlatt, kptrlen, &
          & AB7_MAX_SYMMETRIES, 0, nkpt, nshiftk, sym%nSym, &
@@ -316,8 +316,8 @@ contains
          & sym%vacuum, wkpt)
     if (AB_DBG) write(std_err,*) "AB symmetry: getkgrid -> nkpt=", nkpt
 
-    ABI_DEALLOCATE(kpt)
-    ABI_DEALLOCATE(wkpt)
+    ABI_FREE(kpt)
+    ABI_FREE(wkpt)
 
   end subroutine kpoints_binding_auto_k_1
 !!***
@@ -414,8 +414,8 @@ contains
     call kpoints_binding_auto_k_1(symid, nkpt, kptrlatt, kptrlen_, &
        & nshiftk, shiftk, errno)
     if (errno /= AB7_NO_ERROR) return
-    ABI_ALLOCATE(kpt,(3, nkpt))
-    ABI_ALLOCATE(wkpt,(nkpt))
+    ABI_MALLOC(kpt,(3, nkpt))
+    ABI_MALLOC(wkpt,(nkpt))
     call kpoints_binding_auto_k_2(symid, nkpt, kpt, wkpt, kptrlatt, kptrlen_, &
        & nshiftk, shiftk, errno)
   end subroutine kpoints_get_auto_k_grid

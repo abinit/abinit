@@ -121,10 +121,10 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  if(iexit/=0)then
    if (allocated(fcart_m))       then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    if (allocated(vel_nexthalf))  then
-     ABI_DEALLOCATE(vel_nexthalf)
+     ABI_FREE(vel_nexthalf)
    end if
    return
  end if
@@ -148,18 +148,18 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  if(itime==1)then
    if (allocated(fcart_m))       then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    if (allocated(vel_nexthalf))  then
-     ABI_DEALLOCATE(vel_nexthalf)
+     ABI_FREE(vel_nexthalf)
    end if
  end if
 
  if (.not.allocated(fcart_m))       then
-   ABI_ALLOCATE(fcart_m,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_m,(3,ab_mover%natom))
  end if
  if (.not.allocated(vel_nexthalf))  then
-   ABI_ALLOCATE(vel_nexthalf,(3,ab_mover%natom))
+   ABI_MALLOC(vel_nexthalf,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'isokinetic 03'

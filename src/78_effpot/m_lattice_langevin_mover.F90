@@ -91,11 +91,11 @@ contains
     ! TODO: add friction 
     self%fr = params%latt_friction
 
-    ABI_ALLOCATE(self%c3, (self%natom))
-    ABI_ALLOCATE(self%c4, (self%natom))
-    ABI_ALLOCATE(self%c5, (self%natom))
-    ABI_ALLOCATE(self%xi, (3,self%natom))
-    ABI_ALLOCATE(self%eta, (3,self%natom))
+    ABI_MALLOC(self%c3, (self%natom))
+    ABI_MALLOC(self%c4, (self%natom))
+    ABI_MALLOC(self%c5, (self%natom))
+    ABI_MALLOC(self%xi, (3,self%natom))
+    ABI_MALLOC(self%eta, (3,self%natom))
 
     call self%update_vars()
   end subroutine initialize
@@ -106,11 +106,11 @@ contains
   !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(lattice_langevin_mover_t), intent(inout) :: self
-    ABI_DEALLOCATE(self%c3)
-    ABI_DEALLOCATE(self%c4)
-    ABI_DEALLOCATE(self%c5)
-    ABI_DEALLOCATE(self%xi)
-    ABI_DEALLOCATE(self%eta)
+    ABI_FREE(self%c3)
+    ABI_FREE(self%c4)
+    ABI_FREE(self%c5)
+    ABI_FREE(self%xi)
+    ABI_FREE(self%eta)
     call self%lattice_mover_t%finalize()
   end subroutine finalize
 
