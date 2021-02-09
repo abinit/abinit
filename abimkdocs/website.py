@@ -1001,6 +1001,10 @@ The bibtex file is available [here](../abiref.bib).
         #if "||" in token:
         #    token, args = token.split("||")
 
+        if token.startswith(":") and token.endswith(":"):
+            # Handle special cases with POSIX regex e.g. [[:digit:]]
+            return None, None, None, token
+
         text = None
         if "|" in token:
             token, text = token.split("|")
@@ -1073,7 +1077,7 @@ The bibtex file is available [here](../abiref.bib).
         if namespace is None:
             if name is None:
                 # Handle [[#internal_link|text]]
-                assert fragment is not None
+                #assert fragment is not None
                 url = ""
                 if a.text is None: a.text = fragment
             else:
