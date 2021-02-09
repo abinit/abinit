@@ -441,7 +441,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'cd_subset_freq','INT',0)
  end if
 
- dprarr(1,:)=dtsets(:)%charge
+ dprarr(1,:)=dtsets(:)%cellcharge
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'cellcharge','DPR',0)
 
 !chempot

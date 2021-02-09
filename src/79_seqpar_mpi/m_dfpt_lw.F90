@@ -674,12 +674,12 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ! CP modified
 ! call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 !& nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-!& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!& dtset%cellcharge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 !& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 & doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 & nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+& dtset%cellcharge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 & dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  ! End CP modified
  ABI_FREE(eigen0)
@@ -2368,11 +2368,11 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ! CP modified
 ! call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 !& nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-!& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!& dtset%cellcharge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 !& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 & doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,&
-& dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz, dtset%charge, dtset%kptopt, &
+& dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz, dtset%cellcharge, dtset%kptopt, &
 & dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  ! End CP modified
  ABI_FREE(eigen0)

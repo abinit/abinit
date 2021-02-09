@@ -682,7 +682,7 @@ type, public :: dataset_type
  real(dp) :: bxctmindg
  real(dp) :: cd_halfway_freq
  real(dp) :: cd_max_freq
- real(dp) :: charge
+ real(dp) :: cellcharge
  real(dp) :: cpus
  real(dp) :: ddamp
  real(dp) :: dfpt_sciss
@@ -971,7 +971,7 @@ CONTAINS  !=====================================================================
 !! Also return nelect, the number of valence electron per unit cell
 !!
 !! INPUTS
-!!  charge=number of electrons missing (+) or added (-) to system (usually 0)
+!!  cellcharge=number of electrons missing (+) or added (-) to system (usually 0)
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | iscf= if>0, SCF calculation ; if<=0, non SCF calculation (wtk might
 !!   |  not be defined)
@@ -994,7 +994,7 @@ CONTAINS  !=====================================================================
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | nelect=number of valence electrons per unit cell
 !!   |  (from counting valence electrons in psps, and taking into
-!!   |   account the input variable "charge")
+!!   |   account the input variable "cellcharge")
 !!
 !! SIDE EFFECTS
 !! Input/Output :
@@ -1010,13 +1010,13 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine dtset_chkneu(dtset, charge, occopt)
+subroutine dtset_chkneu(dtset, cellcharge, occopt)
 
 !Arguments ------------------------------------
 !scalars
  class(dataset_type),intent(inout) :: dtset
  integer,intent(in) :: occopt
- real(dp),intent(in) :: charge
+ real(dp),intent(in) :: cellcharge
 
 !Local variables-------------------------------
 !scalars
@@ -1034,7 +1034,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
    zval=zval+dtset%ziontypat(dtset%typat(iatom))
  end do
  if (dtset%positron/=1) then
-   dtset%nelect=zval-charge
+   dtset%nelect=zval-cellcharge
  else
    dtset%nelect=one
  end if
@@ -1213,7 +1213,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
      'Initialization of occ variables with occopt: ',occopt,ch10,&
      'There are not enough bands to get charge balance right with nelect:', dtset%nelect, ch10, &
      'Action: modify input file ',ch10,&
-     '(check the pseudopotential charges, the variable charge,',ch10,&
+     '(check the pseudopotential charges, the variable cellcharge,',ch10,&
      'and the declared number of bands, nband)'
      ABI_ERROR(msg)
    end if
@@ -1246,25 +1246,25 @@ subroutine dtset_chkneu(dtset, charge, occopt)
        write(msg, &
        '(a,a,e16.8,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
        ' chkneu: nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
-       '         and input value of charge=',charge,',',ch10,&
+       '         and input value of cellcharge=',cellcharge,',',ch10,&
        '   nelec_occ is computed from occ and wtk, iimage=',iimage,ch10,&
        '   zval is nominal charge of all nuclei, computed from zion (read in psp),',ch10,&
-       '   charge is an input variable (usually 0).'
+       '   cellcharge is an input variable (usually 0).'
        call wrtout(std_out,msg)
 
        if (abs(nelect_occ-dtset%nelect)>tol8) then
 !        The discrepancy is severe
          write(msg,'(a,a,e9.2,a,a)')ch10,&
-         'These must obey zval-nelect_occ=charge to better than ',tol8,ch10,&
+         'These must obey zval-nelect_occ=cellcharge to better than ',tol8,ch10,&
          ' This is not the case. '
        else
 !        The discrepancy is not so severe
-         write(msg, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than: ',tol11
+         write(msg, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=cellcharge to better than: ',tol11
        end if
        ABI_WARNING(msg)
 
        write(msg, '(6a)' ) &
-       'Action: check input file for occ,wtk, and charge.',ch10,&
+       'Action: check input file for occ,wtk, and cellcharge.',ch10,&
        'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
        'but IS automatically normalized otherwise.',ch10
        call wrtout(std_out,msg)
@@ -1943,7 +1943,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%bxctmindg          = dtin%bxctmindg
  dtout%cd_halfway_freq    = dtin%cd_halfway_freq
  dtout%cd_max_freq        = dtin%cd_max_freq
- dtout%charge             = dtin%charge
+ dtout%cellcharge         = dtin%cellcharge
  dtout%cpus               = dtin%cpus
  dtout%ddamp              = dtin%ddamp
  dtout%diecut             = dtin%diecut

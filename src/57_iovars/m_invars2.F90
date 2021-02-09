@@ -760,10 +760,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !The old name "charge" is still recognized. Will be disabled in due time.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cellcharge',tread,'DPR')
  if(tread==1)then
-    dtset%charge=dprarr(1)
+    dtset%cellcharge=dprarr(1)
  else
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
-   if(tread==1) dtset%charge=dprarr(1)
+   if(tread==1) dtset%cellcharge=dprarr(1)
  endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dosdeltae',tread,'ENE')
@@ -1198,7 +1198,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end do
  end if
 
- charge=dtset%charge
+ charge=dtset%cellcharge
  ! CP added
  dtset%nh_qFD=zero
  dtset%ne_qFD=zero
