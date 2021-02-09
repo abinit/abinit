@@ -166,7 +166,7 @@ Variable(
     dimensions=['[[ntypat]]'],
     mnemonics="Atomic Mass Units",
     characteristics=['[[EVOLVING]]'],
-    commentdefault="provided by a database of atomic masses.",
+    commentdefault="Defaults provided by a database of atomic masses.",
     added_in_version="before_v9",
     text=r"""
 Gives the masses in atomic mass units for each kind of atom in the input cell. These

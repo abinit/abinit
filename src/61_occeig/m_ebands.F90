@@ -468,7 +468,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
    !  1) highly degenerate doped semiconductor with the Fermi level in the bands.
    !  2) Small gap semiconductor at relatively high T.
    !
-   ! Here I try to compute the gaps of an instrinc semiconductor at low T with Fermi-Dirac.
+   ! Here I try to compute the gaps of an intrinsic semiconductor at low T with Fermi-Dirac.
    ! This might still fail though and the caller should handle that.
    call gaps%free()
    call ebands_copy(ebands, tmp_ebands)
