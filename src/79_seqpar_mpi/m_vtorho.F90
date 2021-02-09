@@ -1256,10 +1256,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call hightemp%compute_efreeel(energies%e_fermie,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
        call hightemp%compute_ent_freeel(energies%e_fermie,dtset%tsmear)
-       write(0,*) 'nfreeel',hightemp%version,hightemp%nfreeel
-       write(0,*) 'e_kin_freeel',hightemp%version,hightemp%e_kin_freeel
-       write(0,*) 'ent_freeel',hightemp%version,hightemp%ent_freeel
-       write(0,*) '------------------------------------------'
 !        if(psps%usepaw==1) then
 !          call hightemp_prt_cprj(cprj,eigen,gs_hamk,istep,dtset%mband,&
 ! &         mcprj_local,mpi_enreg,natom,dtset%nkpt,dtset%nsppol,occ)

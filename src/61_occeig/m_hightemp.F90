@@ -658,7 +658,7 @@ contains
 
     ! *********************************************************************
 
-    step=1e-1
+    step=one
     this%ent_freeel=zero
     if(this%version==1) then
       if(this%iopt_pot==1) then
@@ -687,7 +687,7 @@ contains
         end if
         ABI_DEALLOCATE(valuesent)
       else
-        step=10_dp
+        step=one
         do ifftf=1,this%nfftf
           do ispden=1,this%nspden
             ! Dynamic array find size
