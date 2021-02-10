@@ -214,21 +214,21 @@ used later for a global and convenient analysis of the results using ANADDB.
 
 If not already done, the reader should read the part on the *PEAD* method.
 
-Contrary to *PEAD*, with *full DFPT* the electric field is treated analytically, exactly like for second-order derivatives (see [Response-Function 1](rf1)).
-Indeed, for second order energy derivatives, one needs first order wavefunctions derivatives with respect to k-points (dataset 3 of *tnlo_2.abi*).
+Contrary to *PEAD*, with *full DFPT* the electric field is treated analytically,
+the same way it is done for the computation of second-order derivatives of the energy (see [Response-Function 1](rf1)).
+One needs first order wavefunctions derivatives with respect to k-points (dataset 3 of *tnlo_2.abi*).
 to compute second order energy derivatives with an electric field perturbation (dataset 4 of *tnlo_2.abi*).
-It turns out that third order derivatives of the energy, in this context, needs *second* derivatives of wavefunctions with respect to electric fields and k-points.
-However, to compute the latter one needs *second* derivatives of wavefunctions with respect to k-points only, so in total we need two additional sets of wavefunctions derivatives to compute third order derivatives of the energy.
+It turns out that third-order derivatives of the energy, in this context, needs *second* derivatives of wavefunctions with respect to electric fields and k-points.
+To compute the latter one also needs *second* derivatives of wavefunctions with respect to k-points only, so in total we need two additional sets of wavefunctions derivatives.
 
 Now you can compare the files *tnlo_2.abi* and *tnlofDFPT_2.abi*.
-The first four datasets are identical, so we produce ground state quantities and then
-first-order wavefunctions derivatives and second derivatives of the energy exactly the same way.
-Let us look at the input file *tnlofDFPT_2.abi*
 
 {% dialog tests/tutorespfn/Input/tnlofDFPT_2.abi %}
 
-Before computing the non-linear terms, there are two additional datasets to compute the needed second-order WFs derivatives, see dataset 5 and 6.
-They are very similar to dataset 3 (computation of d/dk WFs derivatives), except for the keywords activating second order WFs computation and the reading of the needed files:
+The first four datasets are identical, so we produce ground state quantities, first-order WF derivatives and second derivatives of the energy exactly the same way.
+Before computing the non-linear terms, there are two additional datasets to compute the needed second-order WF derivatives, see dataset 5 and 6.
+They are very similar to dataset 3 (computation of d/dk WF derivatives), except for the keywords activating second-order WF derivatives computation ([[rf2_dkdk]] and [[rf2_dkde]])
+and the reading of the needed files:
 ```
 rf2_dkdk5    1
   getddk5    3
@@ -243,21 +243,27 @@ rf2_dkde6    1
 getdelfd6    4
  prepanl6    1
 ```
-The use of *prepanl* here forces the code to compute only directions that will be needed for non-linear terms.
-The latter are computed in dataset 7. Compared to *tnlo_2.abi* it contains three additional lines:
+The use of [[prepanl]] here makes use of crystal symmetries to compute only directions that will be needed for non-linear terms.
+The latter are computed in dataset 7. Compared to *tnlo_2.abi*, it contains three additional lines:
 ```
 getddk7     3
 getdkde7    6
 usepead7    0
 ```
-The first two arguments specify which files to read to get d/dk and d/dkde WFs derivatives.
-*usepead* is the keyword controlling which implementation to use, it is set to 0 to use *full DFPT*.
+The first two arguments specify which files to read to get d/dk and d/dkde WF derivatives.
+[[usepead]] is the keyword controlling which implementation to use, which has to be 0 to use *full DFPT*.
 
-If not already done, you can now run the code using *tnlofDFPT_2.abi*.
+If not already done, you can now run the code with *tnlofDFPT_2.abi*.
 Even with a very small cutoff of 2.8 Ha, the non-linear susceptibility tensor differs only by few percents comparing *PEAD* and *full DFPT*,
 and the first-order change in the electronic dielectric susceptibility tensor differs by less than one percent.
-These differences can be reduced increasing the cutoff energy and most importantly the number of k-points.
-It is expected that the *full DFPT* method converges faster with the number of k-points than *PEAD*.
+These differences come from convergence effects which can be reduced increasing the cutoff energy and most importantly the number of k-points.
+
+!!! note
+    With the same set of parameters, the *full DFPT* method takes obviously more CPU times than *PEAD*, 
+    as we have to compute second-order WF derivatives.
+    However, it is expected that the *full DFPT* method converges faster with the number of k-points,
+    so one could actually save CPU time and memory using *full DFPT* to get a converged result.
+
 
 As in the *PEAD* case, the code produced DDB files that can be used for the rest of this tutorial.
 
@@ -265,7 +271,7 @@ As in the *PEAD* case, the code produced DDB files that can be used for the rest
 
 At this stage, using either the *PEAD* or *full DFPT* method, all the relevant energy derivatives have been obtained and are
 stored in individual databases.
-In this tutorial we use the data produced with *PEAD*.
+In the following we use the data produced with *PEAD*, but one can use *full DFPT* instead and compare.
 
 The individual databases must be combined with the
 [[help:mrgddb|MRGDDB]] merge
