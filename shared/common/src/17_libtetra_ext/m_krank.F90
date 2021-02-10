@@ -133,10 +133,10 @@ type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank
  do jj=1,3
    do ii=1,3
      if (ii == jj .and. kptrlatt(ii, ii) == 0) then
-       MSG_ERROR("kptrlatt with zero matrix element on the diagonal!")
+       ABI_ERROR("kptrlatt with zero matrix element on the diagonal!")
      end if
      if (ii /= jj .and. kptrlatt(ii, jj) /= 0) then
-       MSG_ERROR("kptrlatt with non-zero off-diagonal matrix elements is not supported")
+       ABI_ERROR("kptrlatt with non-zero off-diagonal matrix elements is not supported")
      end if
    end do
  end do
@@ -239,7 +239,7 @@ type(krank_t) function krank_new(nkpt, kpts, nsym, symrec, time_reversal, max_li
 
      if (irank > new%max_rank .or. irank < new%min_rank) then
        write(msg,'(a,2i0)')" rank above max_rank or bellow min_rank, ikpt, rank ", ikpt, irank
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      new%invrank(irank) = ikpt
    end do
@@ -250,7 +250,7 @@ type(krank_t) function krank_new(nkpt, kpts, nsym, symrec, time_reversal, max_li
  ! equivalent to the k-point whose rank is provided
  if (present(symrec)) then
    if(.not. present(nsym)) then
-     MSG_ERROR("need both symrec and nsym arguments together")
+     ABI_ERROR("need both symrec and nsym arguments together")
    end if
    do ikpt=1,nkpt
      ! itim == 1 for positive, and itim==2 gives Kramers opposite of k-point
@@ -340,7 +340,7 @@ integer function get_rank(krank, kpt) result(rank)
 
  if (rank > krank%max_rank) then
    write(msg,'(2(a,i0))') ' Rank should be inferior to: ', krank%max_rank, ' but got: ', rank
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end function get_rank

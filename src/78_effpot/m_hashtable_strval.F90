@@ -101,7 +101,7 @@ CONTAINS
        END IF
     ELSE
        IF (.NOT. ALLOCATED(list%key)) &
-            ABI_DATATYPE_ALLOCATE_SCALAR(CHARACTER(len=keylen), list%key)
+            ABI_MALLOC_TYPE_SCALAR(CHARACTER(len=keylen), list%key)
        list%key = key
        list%val = val
     END IF
@@ -156,10 +156,10 @@ CONTAINS
     integer :: length
 
     if((.not. present(prefix)) .and. (.not. present(label))) then
-      MSG_ERROR('Label and prefix not present.')
+      ABI_ERROR('Label and prefix not present.')
     endif
     if(present(label) .and. present(prefix)) then
-      MSG_ERROR('Label and prefix present, only specify one of the two.')
+      ABI_ERROR('Label and prefix present, only specify one of the two.')
     endif
 
     if(present(prefix)) length=len(prefix)
@@ -204,10 +204,10 @@ CONTAINS
     character(len=80) :: msg
 
     if((.not. present(prefix)) .and. (.not. present(label))) then
-      MSG_ERROR('Label and prefix not present.')
+      ABI_ERROR('Label and prefix not present.')
     endif
     if(present(label) .and. present(prefix)) then
-      MSG_ERROR('Label and prefix present, only specify one of the two.')
+      ABI_ERROR('Label and prefix present, only specify one of the two.')
     endif
 
     if(present(prefix)) then
@@ -297,7 +297,7 @@ CONTAINS
        DO i=low,high
           CALL tbl%vec(i)%free()
        END DO
-       ABI_DEALLOCATE(tbl%vec)
+       ABI_FREE(tbl%vec)
     END IF
     tbl%is_init = .FALSE.
   END SUBROUTINE free_hash_table_t

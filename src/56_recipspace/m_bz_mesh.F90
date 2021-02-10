@@ -430,7 +430,7 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
  ABI_CHECK(ltest, sjoin('Wrong value for timrev= ', itoa(Cryst%timrev)))
 
  if (ALL(kptopt/=(/1,3/))) then
-   MSG_WARNING(sjoin("Not allowed value for kptopt: ", itoa(kptopt)))
+   ABI_WARNING(sjoin("Not allowed value for kptopt: ", itoa(kptopt)))
  end if
 
  Kmesh%kptopt = kptopt
@@ -505,7 +505,7 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
  end if
 
  if (do_hack) then
-   MSG_WARNING("Hacking the rottb tables!")
+   ABI_WARNING("Hacking the rottb tables!")
    do ik_bz=1,nkbz
      Kmesh%rottbm1(ik_bz,:,:) = ik_bz
      Kmesh%rottb  (ik_bz,:,:) = ik_bz
@@ -668,7 +668,7 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
 &    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong value for timrev:', itoa(Kmesh%timrev)))
+   ABI_BUG(sjoin('Wrong value for timrev:', itoa(Kmesh%timrev)))
  END SELECT
 
  call wrtout(my_unt,msg,my_mode)
@@ -835,7 +835,7 @@ subroutine setup_k_rotation(nsym,timrev,symrec,nbz,kbz,gmet,krottb,krottbm1)
 &          'Initial k-point ',ik,'/',nbz,kbase(:),ch10,&
 &          'Rotated k-point (not found) ',krot(:),ch10,&
 &          'Through symmetry operation ',isym,' and itim ',itim
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
      end do
@@ -843,7 +843,7 @@ subroutine setup_k_rotation(nsym,timrev,symrec,nbz,kbz,gmet,krottb,krottbm1)
  end do
 
  if (.not.isok) then
-   MSG_ERROR('k-mesh not closed')
+   ABI_ERROR('k-mesh not closed')
  end if
 
  DBG_EXIT("COLL")
@@ -907,7 +907,7 @@ subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
 
  if (ik_bz>Kmesh%nbz.or.ik_bz<=0) then
    write(msg,'(a,2i3)')' Wrong value for ik_bz: ',ik_bz,Kmesh%nbz
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  kbz    = Kmesh%bz(:,ik_bz)
@@ -963,7 +963,7 @@ subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
 ! *********************************************************************
 
  if (ik_ibz>Kmesh%nibz.or.ik_ibz<=0) then
-   MSG_BUG(sjoin('wrong value for ik_ibz: ',itoa(ik_ibz)))
+   ABI_BUG(sjoin('wrong value for ik_ibz: ',itoa(ik_ibz)))
  end if
 
  kibz=Kmesh%ibz(:,ik_ibz)
@@ -1021,7 +1021,7 @@ subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
 
  if (.not.has_BZ_item(Kmesh,k1,ikp,umklp)) then
    write(msg,'(a,3f12.6)')' first point must be in BZ: ',k1
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  kdiff   = k1-k2
@@ -1042,15 +1042,15 @@ subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
  ! * For extremely dense meshes, tol1q in defs_basis might be too large!
  if (nfound/=1) then
    if (nfound==0) then
-     MSG_WARNING(" k1-k2-G0 not found in BZ")
+     ABI_WARNING(" k1-k2-G0 not found in BZ")
    else
-     MSG_WARNING(sjoin(' Multiple k1-k2-G0 found in BZ, nfound= ', itoa(nfound)))
+     ABI_WARNING(sjoin(' Multiple k1-k2-G0 found in BZ, nfound= ', itoa(nfound)))
    end if
    write(msg,'(4a,3(a,3f12.6,a))')&
 &    ' k1    = ',k1   ,ch10,&
 &    ' k2    = ',k2   ,ch10,&
 &    ' k1-k2 = ',kdiff,ch10
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine get_BZ_diff
@@ -1194,7 +1194,7 @@ logical function has_BZ_item(Kmesh,item,ikbz,g0)
  end do
 
  if (yetfound/=0.and.yetfound/=1) then
-   MSG_ERROR('Multiple k-points found')
+   ABI_ERROR('Multiple k-points found')
  end if
 
 end function has_BZ_item
@@ -1255,7 +1255,7 @@ logical function has_IBZ_item(Kmesh,item,ikibz,g0)
  end do
 
  if (yetfound/=0.and.yetfound/=1) then
-   MSG_BUG("multiple k-points found")
+   ABI_BUG("multiple k-points found")
  end if
 
 end function has_IBZ_item
@@ -1364,7 +1364,7 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
  !@kmesh_t
  !if (ALL(kptopt/=(/1,2,3,4/))) then
  if (ALL(kptopt/=(/1,3/))) then
-   MSG_WARNING(sjoin(" Not allowed value for kptopt: ", itoa(kptopt)))
+   ABI_WARNING(sjoin(" Not allowed value for kptopt: ", itoa(kptopt)))
  end if
  !
  ! ======================================================================
@@ -1523,7 +1523,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
            is_irred_set=.FALSE.
            write(msg,'(2(a,3f8.4),2(a,i2))')&
 &            ' k1 = ',k1,' is symmetrical of k2 = ',k2,' through sym = ',isym,' itim = ',itim
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
          end if
        end do
      end do
@@ -1535,7 +1535,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
 
  if (.not.is_irred_set) then
    msg = "Input array kibz does not constitute an irreducible set."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
  !
  ! === Loop over k-points in IBZ ===
@@ -1567,7 +1567,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
          nkbz=nkbz+1
          wtk(ikibz)=wtk(ikibz)+one
          if (nkbz>nkbzmx) then
-           MSG_BUG(sjoin('nkbzmx too small, nkbzmx = ',itoa(nkbzmx),', increase nkbzmx !'))
+           ABI_BUG(sjoin('nkbzmx too small, nkbzmx = ',itoa(nkbzmx),', increase nkbzmx !'))
          end if
          kbz(:,nkbz) = knew(:)
          ktab (nkbz) = ikibz
@@ -1587,7 +1587,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
    ltest = (nkref>=nkbz.and.nkref<=nkbzmx)
    if (.not.ltest) then
      write(msg,'(3(a,i0))')" Wrong value for nkref: nkref= ",nkref," nkbz= ",nkbz," nkbzmx =",nkbzmx
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    do ikref=1,nkref
@@ -1617,7 +1617,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
 
      if (.not.found) then
        write(msg,'(a,3es16.8)')" One of the k-point in ref_bz is not a symmetrical image of the IBZ: ",kref
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
    !
@@ -1764,7 +1764,7 @@ subroutine get_ng0sh(nk1,kbz1,nk2,kbz2,nkfold,kfold,tolq0,opt_ng0)
 &        'Not able to found umklapp G0 vector such as k1-k2 = kf+G0',ch10,&
 &        'point1 = ',i1,kbz1(:,i1),ch10,&
 &        'point2 = ',i2,kbz2(:,i2),ch10
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      else
        ! We have found one k, extracting the max g0
        roundk(:) = ABS(kbigdiff(:) - kbigfold(:,iperm(ind)))
@@ -1823,7 +1823,7 @@ subroutine getkptnorm_bycomponent(vect,factor,norm)
 &       'This is likely related to a truncation error for a k-point in the input file',ch10,&
 &       'Always prefer fractional numbers in the input file instead of truncated ones',ch10,&
 &       '(e.g. 1/6 instead of 0.166666667)',ch10
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  norm = (vect(1)*factor+vect(2))*factor+vect(3)
@@ -1901,7 +1901,7 @@ subroutine make_path(nbounds, bounds, met, space, ndivsm, ndivs, npts, path, uni
    write(msg,'(3a)')&
      'Found two equivalent consecutive points in the path ',ch10,&
      'This is not allowed, modify the path in your input file'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  nfact=nfact/ndivsm
@@ -2179,7 +2179,7 @@ subroutine findq(nkbz,kbz,nsym,symrec,symafm,gprimd,nqibz,qibz,timrev)
    if (.not.found) then
      iq=iq+1
      if (iq>nqibz) then
-       MSG_BUG(sjoin('iq > nqibz= ',itoa(nqibz)))
+       ABI_BUG(sjoin('iq > nqibz= ',itoa(nqibz)))
      end if
      qibz(:,iq)=qposs(:)
    end if
@@ -2187,7 +2187,7 @@ subroutine findq(nkbz,kbz,nsym,symrec,symafm,gprimd,nqibz,qibz,timrev)
 
  if (iq/=nqibz) then
    write(msg,'(2(a,i5))')' iq= ',iq,'/= nqibz= ',nqibz
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  !
  ! * Translate q-points to 1st BZ in the interval [-1/2,1/2[
@@ -2263,7 +2263,7 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
    end do
 
    if (iq==0) then
-     MSG_BUG('Wrong list of q-points: q=0 not present.')
+     ABI_BUG('Wrong list of q-points: q=0 not present.')
    end if
    g0(:)=0; RETURN
 
@@ -2349,7 +2349,7 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
 
    if (iq==0) then
      write(msg,'(a,3f9.5)')' q = k-kp+G0 not found. kmkp = ',kmkp
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  end if
@@ -2489,7 +2489,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 &    'Only the inversion was found in the set of symmetries read from the KSS file ',ch10,&
 &    'Likely you are using a KSS file generated with an old version of Abinit, ',ch10,&
 &    'To run a GW calculation with an old KSS file, use version < 5.5 '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Find operations in the little group as well as umklapp vectors G0 ===
@@ -2622,7 +2622,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
         end do
         if (.not.found) then
           write(msg,'(a,3f12.6,a)')'Not able to find the ',knew(:),' in the array BZ '
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
         end if
       end if
 
@@ -2634,11 +2634,11 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  ABI_FREE(ktest)
 
  if (ntest/=nbz) then
-   MSG_BUG(sjoin('ntest - nbz = ',itoa(ntest-nbz)))
+   ABI_BUG(sjoin('ntest - nbz = ',itoa(ntest-nbz)))
  end if
 
  if (SUM(Ltg%wtksym)/=nbz) then
-   MSG_BUG(sjoin('sum(Ltg%wtksym)-nbz = ', itoa(SUM(Ltg%wtksym)-nbz)))
+   ABI_BUG(sjoin('sum(Ltg%wtksym)-nbz = ', itoa(SUM(Ltg%wtksym)-nbz)))
  end if
 
  Ltg%max_kin_gmG0=zero
@@ -2679,7 +2679,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 &              'Decrease the size of epsilon or, if possible, increase ecutwfn (>ecuteps) ',ch10,&
 &              'Minimum required cutoff energy for G-G0 sphere= ',kin,ch10,&
 &              'G0 = ',g0(:)
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
            end if
          end do
        end if
@@ -2695,7 +2695,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
      write(std_out,*)' sum(Ltg%wtksym,ik)-wtk_folded(ik) = ',sum(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik)
      write(std_out,*)Ltg%wtksym(1,:,ik),Ltg%wtksym(2,:,ik),wtk_folded(ik)
      write(std_out,*)ik,Kmesh%bz(:,ik)
-     MSG_BUG("Wrong weight")
+     ABI_BUG("Wrong weight")
    end if
  end do
  do ik=1,nbz
@@ -2703,7 +2703,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
    if (.not.isamek(knew,Kmesh%bz(:,ik),gg)) then
      write(std_out,*)knew,Kmesh%bz(:,ik)
      write(std_out,*)Ltg%tabo(ik),Ltg%tabi(ik),Ltg%tab(ik)
-     MSG_BUG("Wrong tables")
+     ABI_BUG("Wrong tables")
    end if
  end do
 #endif
@@ -2952,7 +2952,7 @@ function box_len(qpt,gprimd)
    end if
 
    if (ALL(q0box==(/-1,-1,-1/) )) then
-     MSG_BUG("Cannot found q0box")
+     ABI_BUG("Cannot found q0box")
    end if
 
    box_len = normv(q0box,gmet,"G")

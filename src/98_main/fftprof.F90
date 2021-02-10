@@ -319,7 +319,7 @@ program fftprof
    call fft_test_init(Ftest(it),fft_setups(:,it),kpoint,ecut,boxcutmin2,rprimd,nsym,symrel,MPI_enreg)
     ! Ftest%results is allocated using nfftot and the consistency btw libs is tested assuming an equal number of FFT-points.
    if ( ANY(Ftest(it)%ngfft(1:3) /= Ftest(1)%ngfft(1:3)) ) then
-     MSG_ERROR("Consistency check assumes equal FFT meshes. Cannot continue")
+     ABI_ERROR("Consistency check assumes equal FFT meshes. Cannot continue")
    end if
    if (it == 1) then
      call fft_test_print(Ftest(it)) !,header)

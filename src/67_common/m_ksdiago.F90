@@ -300,7 +300,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  if (nprocs > 1) then
-   MSG_WARNING("ksdiago not supported in parallel. Running in sequential.")
+   ABI_WARNING("ksdiago not supported in parallel. Running in sequential.")
  end if
 
  call initmpi_seq(MPI_enreg_seq) ! Fake MPI_type for sequential part.
@@ -341,7 +341,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
    ' States output not programmed for time-reversal symmetry.',ch10,&
    ' Action: change istwfk in input file (put it to 1 for all kpt).',ch10,&
    ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 
@@ -349,7 +349,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
    write(msg,'(3a)')&
    ' paral_kgb /= 0 not allowed:',ch10,&
    ' Program does not stop but _KSS file will not be created...'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr+1
  end if
 
@@ -696,7 +696,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
  Dctl%prtvol = 0; if (PRESENT(prtvol)) Dctl%prtvol = prtvol
  Dctl%abstol = -tol8; if (PRESENT(abstol)) Dctl%abstol = abstol
 
- ABI_ALLOCATE(kg_k,(3,0))
+ ABI_MALLOC(kg_k,(3,0))
 
  ! Total number of G-vectors for this k-point with istwf_k=1.
  call kpgsph(ecut,0,gmet,0,0,1,kg_k,kpoint,0,MPI_enreg_seq,0,Dctl%npwtot)
@@ -705,7 +705,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
  call kpgsph(ecut,0,gmet,0,0,istwf_k,kg_k,kpoint,0,MPI_enreg_seq,0,npw_k)
 
  Dctl%npw_k = npw_k
- ABI_DEALLOCATE(kg_k)
+ ABI_FREE(kg_k)
 
  Dctl%do_full_diago = .FALSE.
 
@@ -743,7 +743,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 
  CASE ("I")
   if (.not.PRESENT(ilu)) then
-    MSG_ERROR(" ilu must be specified when range=I ")
+    ABI_ERROR(" ilu must be specified when range=I ")
   end if
   Dctl%ilu = ilu
 
@@ -754,7 +754,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 
  CASE ("V")
   if (.not.PRESENT(vlu)) then
-    MSG_ERROR(" vlu must be specified when range=V ")
+    ABI_ERROR(" vlu must be specified when range=V ")
   end if
   Dctl%vlu = vlu
 
@@ -765,7 +765,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
   ABI_CHECK(ltest,msg)
 
  CASE DEFAULT
-   MSG_ERROR(" Unknown value for range: "//TRIM(Dctl%range))
+   ABI_ERROR(" Unknown value for range: "//TRIM(Dctl%range))
  END SELECT
 
  ! Consider the case in which we asked for the entire set of eigenvectors

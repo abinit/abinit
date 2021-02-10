@@ -261,7 +261,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
 
      if (BSp%exchange_term>0) then
-       MSG_COMMENT(' f-sum rule should be checked without LF')
+       ABI_COMMENT(' f-sum rule should be checked without LF')
      end if
      call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
 
@@ -366,7 +366,7 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
  end if
 
  if (open_file(fname,msg,newunit=funt,form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  select case (toupper(what))
@@ -403,7 +403,7 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
    write(funt,'(a,f7.4,a)')'# Scissor operator energy = ',BSp%mbpt_sciss*Ha_eV,' [eV]'
 
  case default
-   MSG_ERROR("Unknown value for what: "//trim(what))
+   ABI_ERROR("Unknown value for what: "//trim(what))
  end select
  !
  ! Paramaters common to the different calculations.
@@ -449,7 +449,7 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
    write(funt,'(a)')"# omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ... DOS   IDOS"
    step = DBLE(BSp%omega(2) - BSp%omega(1))
    if ( ABS( step - DBLE((BSp%omega(BSp%nomega) - BSp%omega(BSp%nomega-1)))) > tol6 ) then
-     MSG_WARNING("Frequency mesh must be linear for using simpson_int")
+     ABI_WARNING("Frequency mesh must be linear for using simpson_int")
    end if
    call simpson_int(Bsp%nomega,step,dos,int_dos)
    !write(frm,*)'(f7.3,',2*BSp%nq,'es12.4,2es12.4)'
@@ -669,7 +669,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
  call wrtout(std_out," Calculating excitonic epsilon with antiresonant","COLL")
 
  if (nsppol==2) then
-   MSG_WARNING("nsppol==2 still under development")
+   ABI_WARNING("nsppol==2 still under development")
  end if
 
  exc_size = SUM(BSp%nreh)
@@ -682,7 +682,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
 
  if (ANY(Bsp%nreh/=Bsp%nreh(1))) then
    write(msg,'(a,2(i0,1x))')"BSE does not support different number of transitions for the two spin channels. nreh: ",Bsp%nreh
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
  !
  ! TODO:
@@ -692,25 +692,25 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
 
  call wrtout(std_out," Reading excitonic eigenstates from file: "//TRIM(filbseig),"COLL")
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted",status="old",action="read") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(eig_unt, err=10, iomsg=errmsg) file_do_lifetime
 
  if(do_ep_lifetime .and. .not. file_do_lifetime) then
-  MSG_ERROR("Cannot do lifetime as the data is not present in the file !")
+  ABI_ERROR("Cannot do lifetime as the data is not present in the file !")
  end if
 
  read(eig_unt, err=10, iomsg=errmsg) hsize_read,neig_read
 
  if (hsize_read /= exc_size) then
    write(msg,'(2(a,i0))')" Wrong size of the Hamiltonian: read: ",hsize_read," expected= ",exc_size
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (neig_read /= nstates) then
    write(msg,'(2(a,i0))')" Wrong number of eigenstates: read: ",neig_read," expected= ",nstates
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  !
  ! Read eigenvalues, ignore possibly small imaginary part.
@@ -818,7 +818,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
  !
  ! Write the oscillator strengths to file.
  if (open_file(ost_fname,msg,newunit=ost_unt,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(ost_unt,'("# Oscillator strengths of the excitonic states for the different q-polarizations.")')
@@ -848,7 +848,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
 
  ! Handler IO-error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine exc_eps_resonant
 !!***
@@ -917,7 +917,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  call wrtout(std_out," Calculating absorption strength with full coupling","COLL")
 
  if (nsppol==2) then
-   MSG_WARNING("nsppol==2 is still under development")
+   ABI_WARNING("nsppol==2 is still under development")
  end if
 
  ! Rank of the entire excitonic Hamiltonian including the coupling block.
@@ -937,7 +937,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 
  call wrtout(std_out," Reading excitonic eigenstates from file: "//trim(filbseig),"COLL")
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted", status="old", action="read") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(eig_unt, err=10, iomsg=errmsg) do_lifetime
@@ -1039,7 +1039,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  return
 
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine exc_eps_coupling
 !!***
@@ -1095,7 +1095,7 @@ subroutine exc_write_tensor(BSp,BS_files,what,tensor)
 
  fname = strcat(BS_files%out_basename,'_',toupper(what))
  if (open_file(fname,msg,newunit=funt,form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  select case (toupper(what))
@@ -1155,7 +1155,7 @@ subroutine exc_write_tensor(BSp,BS_files,what,tensor)
    write(funt,'(a,f7.4,a)')'# Scissor operator energy = ',BSp%mbpt_sciss*Ha_eV,' [eV]'
 
  case default
-   MSG_ERROR("Unknown value for what: "//TRIM(what))
+   ABI_ERROR("Unknown value for what: "//TRIM(what))
  end select
  !
  ! Paramaters common to the different calculations.
@@ -1291,7 +1291,7 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
  NCF_CHECK(nf90_put_var(ncid, vid("gwnlf_mdf"), rvals))
 
 #else
- MSG_ERROR("ETSF-IO support is not activated.")
+ ABI_ERROR("ETSF-IO support is not activated.")
 #endif
 
 contains
@@ -1357,13 +1357,13 @@ subroutine check_kramerskronig(n,o,eps)
 
  do ii=2,n
   if (domega-(o(ii)-o(ii-1)) > tol3) then
-    MSG_WARNING("Frequency mesh not linear. Returning")
+    ABI_WARNING("Frequency mesh not linear. Returning")
     return
   end if
  end do
 
  if(o(1) > 0.1/Ha_eV) then
-   MSG_WARNING("First frequency is not zero. Returning")
+   ABI_WARNING("First frequency is not zero. Returning")
    return
  end if
 
@@ -1372,7 +1372,7 @@ subroutine check_kramerskronig(n,o,eps)
 &   ' Im epsilon for omega= ',o(n)*Ha_eV,'eV',ch10,&
 &   ' is not yet zero, epsilon_2= ',aimag(eps(n)),ch10,&
 &   ' Kramers Kronig test could give wrong results. '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 ! Fill array for kramers kronig.
@@ -1484,13 +1484,13 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
 
  do ii=2,n
    if (domega-(o(ii)-o(ii-1)) > tol3) then
-     MSG_WARNING("Frequency mesh not linear. Returning")
+     ABI_WARNING("Frequency mesh not linear. Returning")
      return
    end if
  end do
 
  if (o(1) > 0.1/Ha_eV) then
-   MSG_WARNING("First frequency is not zero. Returning")
+   ABI_WARNING("First frequency is not zero. Returning")
    return
  end if
 
@@ -1499,7 +1499,7 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
 &   ' Im epsilon for omega= ',o(n)*Ha_eV,' eV ',ch10,&
 &   ' is not yet zero, epsilon_2= ',e2(n),ch10,&
 &   ' f-sum rule test could give wrong results.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 ! integrate to obtain f-sum rule
@@ -1518,7 +1518,7 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
 
  integral = real(simpson_cplx(n,domega,intg))
  if(integral < 0) then
-   MSG_ERROR("The integral of the imaginary of dielectric function is negative !!!")
+   ABI_ERROR("The integral of the imaginary of dielectric function is negative !!!")
  else
    omegaplasmaeff = sqrt(integral*two/pi)
  end if

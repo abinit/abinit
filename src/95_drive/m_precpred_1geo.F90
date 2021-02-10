@@ -220,12 +220,12 @@ real(dp), allocatable :: xred(:,:)
    case (28)
      call ipi_pred(ab_mover, hist, itime, ntime, DEBUG, iexit, comm_cell)
    case default
-     MSG_ERROR(sjoin("Wrong value of ionmov:", itoa(ab_mover%ionmov)))
+     ABI_ERROR(sjoin("Wrong value of ionmov:", itoa(ab_mover%ionmov)))
    end select
 
  end do
 
- ABI_ALLOCATE(xred,(3,ab_mover%natom))
+ ABI_MALLOC(xred,(3,ab_mover%natom))
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
  ! check dilatmx here and correct if necessary
@@ -233,7 +233,7 @@ real(dp), allocatable :: xred(:,:)
    call chkdilatmx(dt_chkdilatmx,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
    _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
    if (LEN_TRIM(dilatmx_errmsg) /= 0) then
-     MSG_WARNING(dilatmx_errmsg)
+     ABI_WARNING(dilatmx_errmsg)
      nerr_dilatmx = nerr_dilatmx+1
      if (nerr_dilatmx > 3) then
        ! Write last structure before aborting, so that we can restart from it.
@@ -261,7 +261,7 @@ real(dp), allocatable :: xred(:,:)
         'Action: either first do a calculation with chkdilatmx=0, or ',ch10,&
         'restart your calculation with a larger dilatmx, or larger lattice vectors.',ch10,&
         'Warning: With chkdilatmx = 0 the final computation of lattice parameters might be inaccurate.'
-       MSG_ERROR_CLASS(dilatmx_errmsg, "DilatmxError")
+       ABI_ERROR_CLASS(dilatmx_errmsg, "DilatmxError")
      end if
    else
      nerr_dilatmx=0

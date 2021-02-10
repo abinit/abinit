@@ -85,7 +85,7 @@ program conducti
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  if ( nproc > 1) then
-   MSG_ERROR("conducti is not parallelized: run with one processor.")
+   ABI_ERROR("conducti is not parallelized: run with one processor.")
  end if
 
 !Read data file name
@@ -94,7 +94,7 @@ program conducti
  write(std_out,'(a)')' The name of the data file is :',trim(filnam)
 
  if (open_file(filnam,msg,newunit=inunt,form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  rewind(inunt)
  read(inunt,*) incpaw
@@ -119,7 +119,7 @@ program conducti
  elseif (incpaw==6) then
    call emispec_paw(filnam,filnam_out,mpi_enreg_seq)
  else
-   MSG_ERROR(sjoin("Wrong incpaw:", itoa(incpaw)))
+   ABI_ERROR(sjoin("Wrong incpaw:", itoa(incpaw)))
  end if
 
  call destroy_mpi_enreg(mpi_enreg_seq)

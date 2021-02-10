@@ -253,10 +253,10 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
    my_natom=mpi_enreg%my_natom
 
    if (scf_history%history_size>=0 .and. usecg<2) then
-     ABI_ALLOCATE(scf_history%rhor_last,(nfft,dtset%nspden))
-     ABI_ALLOCATE(scf_history%taur_last,(nfft,dtset%nspden*dtset%usekden))
-     ABI_ALLOCATE(scf_history%xred_last,(3,dtset%natom))
-     ABI_DATATYPE_ALLOCATE(scf_history%pawrhoij_last,(my_natom*dtset%usepaw))
+     ABI_MALLOC(scf_history%rhor_last,(nfft,dtset%nspden))
+     ABI_MALLOC(scf_history%taur_last,(nfft,dtset%nspden*dtset%usekden))
+     ABI_MALLOC(scf_history%xred_last,(3,dtset%natom))
+     ABI_MALLOC(scf_history%pawrhoij_last,(my_natom*dtset%usepaw))
      if (dtset%usepaw==1) then
        call pawrhoij_nullify(scf_history%pawrhoij_last)
      end if
@@ -290,20 +290,20 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
      end if
 
      if (usecg<2) then
-       ABI_ALLOCATE(scf_history%hindex,(scf_history%history_size))
+       ABI_MALLOC(scf_history%hindex,(scf_history%history_size))
        scf_history%alpha=zero
      else
-       ABI_ALLOCATE(scf_history%hindex,(2*scf_history%history_size+1))
+       ABI_MALLOC(scf_history%hindex,(2*scf_history%history_size+1))
        scf_history%alpha=dtset%wfmix
      endif
      scf_history%hindex(:)=0
 
      if (usecg<2) then
-       ABI_ALLOCATE(scf_history%deltarhor,(nfft,dtset%nspden,scf_history%history_size))
-       ABI_ALLOCATE(scf_history%xreddiff,(3,dtset%natom,scf_history%history_size))
-       ABI_ALLOCATE(scf_history%atmrho_last,(nfft))
+       ABI_MALLOC(scf_history%deltarhor,(nfft,dtset%nspden,scf_history%history_size))
+       ABI_MALLOC(scf_history%xreddiff,(3,dtset%natom,scf_history%history_size))
+       ABI_MALLOC(scf_history%atmrho_last,(nfft))
        if (dtset%usepaw==1) then
-         ABI_DATATYPE_ALLOCATE(scf_history%pawrhoij,(my_natom,scf_history%history_size))
+         ABI_MALLOC(scf_history%pawrhoij,(my_natom,scf_history%history_size))
          do jj=1,scf_history%history_size
            call pawrhoij_nullify(scf_history%pawrhoij(:,jj))
          end do
@@ -311,15 +311,15 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
      end if
 
      if (scf_history%usecg>0) then
-       ABI_ALLOCATE(scf_history%cg,(2,scf_history%mcg,scf_history%history_size))
-       ABI_ALLOCATE(scf_history%eigen,(scf_history%meigen,scf_history%history_size))
+       ABI_MALLOC(scf_history%cg,(2,scf_history%mcg,scf_history%history_size))
+       ABI_MALLOC(scf_history%eigen,(scf_history%meigen,scf_history%history_size))
 !      Note that the allocation is made even when usepaw==0. Still, scf_history%mcprj=0 ...
-       ABI_DATATYPE_ALLOCATE(scf_history%cprj,(dtset%natom,scf_history%mcprj,scf_history%history_size))
+       ABI_MALLOC(scf_history%cprj,(dtset%natom,scf_history%mcprj,scf_history%history_size))
      end if
 
      if (scf_history%usecg==2)then
 !      This relatively small matrix is always allocated when usecg==1, even if not used
-       ABI_ALLOCATE(scf_history%dotprod_sumdiag_cgcprj_ij,(2,scf_history%history_size,scf_history%history_size))
+       ABI_MALLOC(scf_history%dotprod_sumdiag_cgcprj_ij,(2,scf_history%history_size,scf_history%history_size))
      endif
 
    end if
@@ -363,50 +363,50 @@ subroutine scf_history_free(scf_history)
 
  if (allocated(scf_history%pawrhoij_last)) then
    call pawrhoij_free(scf_history%pawrhoij_last)
-   ABI_DATATYPE_DEALLOCATE(scf_history%pawrhoij_last)
+   ABI_FREE(scf_history%pawrhoij_last)
  end if
  if (allocated(scf_history%pawrhoij)) then
    do jj=1,size(scf_history%pawrhoij,2)
      call pawrhoij_free(scf_history%pawrhoij(:,jj))
    end do
-   ABI_DATATYPE_DEALLOCATE(scf_history%pawrhoij)
+   ABI_FREE(scf_history%pawrhoij)
  end if
  if (allocated(scf_history%cprj)) then
    do jj=1,size(scf_history%cprj,3)
      call pawcprj_free(scf_history%cprj(:,:,jj))
    end do
-   ABI_DATATYPE_DEALLOCATE(scf_history%cprj)
+   ABI_FREE(scf_history%cprj)
  end if
 
  if (allocated(scf_history%hindex))       then
-   ABI_DEALLOCATE(scf_history%hindex)
+   ABI_FREE(scf_history%hindex)
  end if
  if (allocated(scf_history%deltarhor))    then
-   ABI_DEALLOCATE(scf_history%deltarhor)
+   ABI_FREE(scf_history%deltarhor)
  end if
  if (allocated(scf_history%xreddiff))     then
-   ABI_DEALLOCATE(scf_history%xreddiff)
+   ABI_FREE(scf_history%xreddiff)
  end if
  if (allocated(scf_history%atmrho_last))  then
-   ABI_DEALLOCATE(scf_history%atmrho_last)
+   ABI_FREE(scf_history%atmrho_last)
  end if
  if (allocated(scf_history%xred_last))    then
-   ABI_DEALLOCATE(scf_history%xred_last)
+   ABI_FREE(scf_history%xred_last)
  end if
  if (allocated(scf_history%rhor_last))    then
-   ABI_DEALLOCATE(scf_history%rhor_last)
+   ABI_FREE(scf_history%rhor_last)
  end if
  if (allocated(scf_history%taur_last))    then
-   ABI_DEALLOCATE(scf_history%taur_last)
+   ABI_FREE(scf_history%taur_last)
  end if
  if (allocated(scf_history%cg))           then
-   ABI_DEALLOCATE(scf_history%cg)
+   ABI_FREE(scf_history%cg)
  end if
  if (allocated(scf_history%eigen))           then
-   ABI_DEALLOCATE(scf_history%eigen)
+   ABI_FREE(scf_history%eigen)
  end if
  if (allocated(scf_history%dotprod_sumdiag_cgcprj_ij))           then
-   ABI_DEALLOCATE(scf_history%dotprod_sumdiag_cgcprj_ij)
+   ABI_FREE(scf_history%dotprod_sumdiag_cgcprj_ij)
  end if
 
  scf_history%history_size=-1

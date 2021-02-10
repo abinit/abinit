@@ -68,7 +68,7 @@ contains
   !--Control
   if(nitex < 0) then
     write(message,'(a,i4,a)') '  LOTF: pinterp nitex =',nitex,'smaller than 0'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
 
   elseif(nitex >= 1) then
     ainterpoled = a0 + (n/real(nitex,dp))*(a1-a0) 

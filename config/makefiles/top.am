@@ -30,6 +30,7 @@ EXTRA_DIST += \
 	scripts \
 	setup.cfg \
 	tasks.py \
+	set_abienv.sh \
 	wipeout.sh \
 	upgrade-build-config-file.sh
 

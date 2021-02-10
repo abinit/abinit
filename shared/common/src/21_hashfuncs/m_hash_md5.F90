@@ -155,7 +155,7 @@ function md5_sum_from_file(fname)
 
   ! Translate file name to C
   strlen = len_trim(fname)
-  ABI_ALLOCATE(path,(strlen+1))
+  ABI_MALLOC(path,(strlen+1))
   call f_to_c_string(fname, path)
 
   ! Get MD5 sum from C
@@ -163,7 +163,7 @@ function md5_sum_from_file(fname)
   call c_to_f_string(retval, md5_sum_from_file)
 
   ! Clean up the mess
-  ABI_DEALLOCATE(path)
+  ABI_FREE(path)
 
 end function md5_sum_from_file
 !!***
@@ -325,7 +325,7 @@ subroutine hash_update(ctx, buffer, bufsize)
   ! Translate buffer into C
   strlen = len_trim(buffer)
 ! allocate(c_buffer(strlen+1))
-  ABI_ALLOCATE(c_buffer,(strlen+1))
+  ABI_MALLOC(c_buffer,(strlen+1))
   call f_to_c_string(trim(buffer), c_buffer)
 
   ! Update C MD5 context
@@ -333,7 +333,7 @@ subroutine hash_update(ctx, buffer, bufsize)
 
   ! Clean up the mess
 ! deallocate(c_buffer)
-  ABI_DEALLOCATE(c_buffer)
+  ABI_FREE(c_buffer)
 
 end subroutine hash_update
 !!***

@@ -189,7 +189,7 @@ subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
    call ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,vkbr%fnl,vkbr%fnld)
 
  case default
-   MSG_ERROR(sjoin("Wrong inclvkb= ",itoa(inclvkb)))
+   ABI_ERROR(sjoin("Wrong inclvkb= ",itoa(inclvkb)))
  end select
 
  ABI_FREE(vkbsign)
@@ -375,7 +375,7 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
   rhotwx(:,1) = rhotwx(:,1) + dum(:)
 
  case default
-   MSG_ERROR(sjoin("Wrong inclvkb:", itoa(vkbr%inclvkb)))
+   ABI_ERROR(sjoin("Wrong inclvkb:", itoa(vkbr%inclvkb)))
  end select
 
 end subroutine add_vnlr_commutator
@@ -705,7 +705,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
    write(msg,'(3a)')&
     'Number of angular momentum components bigger than programmed.',ch10,&
     'Taking into account only s p d f '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  a1=cryst%rprimd(:,1); b1=two_pi*Cryst%gprimd(:,1)

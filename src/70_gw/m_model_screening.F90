@@ -432,7 +432,7 @@ subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
     call dfit_re_and_im_screening(re_zvals,im_zvals,imfval,refval,&
 &    nomega,3,thiscoeff,prtvol)
 #else
-    MSG_ERROR(' ABINIT was not compiled with the levmar library!')
+    ABI_ERROR(' ABINIT was not compiled with the levmar library!')
 #endif
     ! Remove current fit
     call re_and_im_screening(omega,pole_func,nomega,thiscoeff,3)
@@ -528,7 +528,7 @@ subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,p
       end if
     else if (ploc(ip)<nfreqre+nfreqim+1) then ! We are right on the imaginary axis
       if (ploc(ip)==nfreqre+nfreqim) then
-        MSG_ERROR(' Peak in upper left corner. This should never happen')
+        ABI_ERROR(' Peak in upper left corner. This should never happen')
       end if
       b2   = AIMAG(omega(ploc(ip)+1))
       val2 = AIMAG(fval(ploc(ip)+1))
@@ -775,7 +775,7 @@ subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
 ! *********************************************************************
 
   if (open_file("grid_peak_tree.dat", msg, newunit=unt_tmp) /= 0) then
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   do iim=nfreqim,1,-1

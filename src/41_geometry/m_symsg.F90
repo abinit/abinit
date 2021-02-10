@@ -2434,7 +2434,7 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
 &   'and it should be greater than one',ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: Contact ABINIT group '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Transfer the generators to bcksymrel
@@ -2530,7 +2530,7 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
    write(message, '(a,i7,a,a,i7)' )&
 &   'The symmetries obtained are  ',nogen,ch10,&
 &   'and they should be ',nsym
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !DEBUG

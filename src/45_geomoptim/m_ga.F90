@@ -104,7 +104,7 @@ subroutine ga_init(dtset,ga_param)
    ga_param%ga_fitness           = dtset%ga_fitness
    ga_param%ga_opt_percent       = dtset%ga_opt_percent
    ga_param%ga_algor             = dtset%ga_algor
-   ABI_ALLOCATE(ga_param%ga_iatfix,(3,dtset%natom))
+   ABI_MALLOC(ga_param%ga_iatfix,(3,dtset%natom))
    ga_param%ga_iatfix            = dtset%iatfix
  end if
 
@@ -144,7 +144,7 @@ subroutine ga_destroy(ga_param)
 !************************************************************************
 
  if(allocated(ga_param%ga_iatfix))then
-   ABI_DEALLOCATE(ga_param%ga_iatfix)
+   ABI_FREE(ga_param%ga_iatfix)
  endif
  call ga_nullify(ga_param)
 

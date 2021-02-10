@@ -116,7 +116,7 @@ contains
     type(multibinit_dtset_type) :: params
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(params)
-    MSG_ERROR("set_params not implemented for this mover")
+    ABI_ERROR("set_params not implemented for this mover")
   end subroutine set_params
 
   !----------------------------------------------------------------------
@@ -140,7 +140,7 @@ contains
     integer, optional, intent(in) :: mode
     character(len=*), optional, intent(in) :: restart_hist_fname
 
-    MSG_ERROR("set_initial_state not implemented for this mover")
+    ABI_ERROR("set_initial_state not implemented for this mover")
     ABI_UNUSED_A(self)
     ABI_UNUSED(mode)
     ABI_UNUSED(restart_hist_fname)
@@ -172,7 +172,7 @@ contains
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
     ABI_UNUSED_A(energy_table)
-    MSG_ERROR("run_one_step not implemented for this mover")
+    ABI_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step
 
   !-------------------------------------------------------------------!
@@ -186,7 +186,7 @@ contains
     ! so it can be reused.
     class(abstract_mover_t), intent(inout) :: self
     ABI_UNUSED_A(self)
-    MSG_ERROR("reset not implemented for this mover")
+    ABI_ERROR("reset not implemented for this mover")
   end subroutine reset
 
   !-------------------------------------------------------------------!
@@ -196,7 +196,7 @@ contains
     ! call functions to calculate observables.
     class(abstract_mover_t), intent(inout) :: self
     ABI_UNUSED_A(self)
-    MSG_ERROR("calc_observables not implemented for this mover")
+    ABI_ERROR("calc_observables not implemented for this mover")
   end subroutine calc_observables
 
   !-------------------------------------------------------------------!
@@ -207,7 +207,7 @@ contains
     ! write to hist file
     class(abstract_mover_t), intent(inout) :: self
     ABI_UNUSED_A(self)
-    MSG_ERROR("write_hist not implemented for this mover")
+    ABI_ERROR("write_hist not implemented for this mover")
   end subroutine write_hist
 
   !-------------------------------------------------------------------!
@@ -225,7 +225,7 @@ contains
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
     ABI_UNUSED_A(ihist)
-    MSG_ERROR("get_state not implemented for this mover")
+    ABI_ERROR("get_state not implemented for this mover")
   end subroutine get_state
 
 

@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_energies
 !! NAME
 !!  m_energies
@@ -40,8 +41,11 @@ module m_energies
  private
 
 !public parameter
+ ! CP modified
+ ! integer, public, parameter :: n_energies=35
  integer, public, parameter :: n_energies=36
-  ! Number of energies stored in energies datastructure
+ ! End CP modified
+ ! Number of energies stored in energies datastructure
 
 !!***
 
@@ -106,6 +110,10 @@ module m_energies
 
   real(dp) :: e_fermie=zero
    ! Fermie energy
+
+  ! CP added
+  real(dp) :: e_fermih=zero
+  ! End CP added
 
   real(dp) :: e_fock=zero
    ! Fock part of total energy (hartree units)
@@ -237,6 +245,7 @@ subroutine energies_init(energies)
  energies%entropy       = zero
  energies%e_ewald       = zero
  energies%e_fermie      = zero
+ energies%e_fermih      = zero ! CP added (useful when occopt = 9)
  energies%e_fock        = zero
  energies%e_fockdc      = zero
  energies%e_fock0       = zero
@@ -311,6 +320,7 @@ end subroutine energies_init
  energies_out%e_ewald              = energies_in%e_ewald
  energies_out%e_exactX             = energies_in%e_exactX
  energies_out%e_fermie             = energies_in%e_fermie
+ energies_out%e_fermih             = energies_in%e_fermih ! CP added
  energies_out%e_fock               = energies_in%e_fock
  energies_out%e_fockdc             = energies_in%e_fockdc
  energies_out%e_fock0              = energies_in%e_fock0
@@ -606,6 +616,27 @@ subroutine energies_ncwrite(enes, ncid)
 ! *************************************************************************
 
 !@energies_type
+ ! CP modified
+ !ncerr = nctk_defnwrite_dpvars(ncid, [character(len=nctk_slen) :: &
+ ! "e_chempot", "e_constrained_dft", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
+ ! "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
+ ! "e_entropy", "entropy", "e_ewald", &
+ ! "e_exactX","e_fermie", &
+ ! "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
+ ! "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", &
+ ! "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd", &
+ ! "e_xc", "e_xcdc", "e_xc_vdw", &
+ ! "h0","e_zeeman"], &
+ ! [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
+ !  enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
+ !  enes%e_entropy, enes%entropy, enes%e_ewald, &
+ !  enes%e_exactX, enes%e_fermie, &
+ !  enes%e_fock, enes%e_fockdc,enes%e_fock0,  enes%e_hartree, &
+ !  enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
+ !  enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, &
+ !  enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
+ !  enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
+ !  enes%h0,enes%e_zeeman])
  ncerr = nctk_defnwrite_dpvars(ncid, [character(len=nctk_slen) :: &
   "e_chempot", "e_constrained_dft", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
   "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
@@ -615,7 +646,7 @@ subroutine energies_ncwrite(enes, ncid)
   "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", "e_nucdip", &
   "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd", &
   "e_xc", "e_xcdc", "e_xc_vdw", &
-  "h0","e_zeeman"], &
+  "h0","e_zeeman", "e_fermih"], & ! CP added fermih 
   [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
    enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
    enes%e_entropy, enes%entropy, enes%e_ewald, &
@@ -625,12 +656,13 @@ subroutine energies_ncwrite(enes, ncid)
    enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, enes%e_nucdip, &
    enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
    enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
-   enes%h0,enes%e_zeeman])
+   enes%h0,enes%e_zeeman,enes%e_fermih]) ! CP added fermih
+ ! End CP modified
 
  NCF_CHECK(ncerr)
 
 #else
- MSG_ERROR("ETSF-IO support is not activated.")
+ ABI_ERROR("ETSF-IO support is not activated.")
 #endif
 
 end subroutine energies_ncwrite

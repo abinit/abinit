@@ -144,17 +144,17 @@ end subroutine abi_dhpgv
 
 !===== LAPACK
  if (eigen_c_lwork==0) then
-   ABI_ALLOCATE(work,(2*n-1))
+   ABI_MALLOC(work,(2*n-1))
  end if
  if (eigen_c_lrwork==0) then
-   ABI_ALLOCATE(rwork,(3*n-2))
+   ABI_MALLOC(rwork,(3*n-2))
  end if
  call chpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
  if (eigen_c_lwork==0) then
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
  if (eigen_c_lrwork==0) then
-   ABI_DEALLOCATE(rwork)
+   ABI_FREE(rwork)
  end if
 
  ABI_CHECK(info==0,"abi_chpgv returned info!=0!")
@@ -203,17 +203,17 @@ subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
 
 !===== LAPACK
  if (eigen_z_lwork==0) then
-   ABI_ALLOCATE(work,(2*n-1))
+   ABI_MALLOC(work,(2*n-1))
  end if
  if (eigen_z_lrwork==0) then
-   ABI_ALLOCATE(rwork,(3*n-2))
+   ABI_MALLOC(rwork,(3*n-2))
  end if
  call zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
  if (eigen_z_lwork==0) then
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
  if (eigen_z_lrwork==0) then
-   ABI_DEALLOCATE(rwork)
+   ABI_FREE(rwork)
  end if
 
  ABI_CHECK(info==0,"abi_zhpgv returned info!=0!")
