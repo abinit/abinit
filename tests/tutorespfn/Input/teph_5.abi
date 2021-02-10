@@ -56,6 +56,9 @@ nph1l 1
 qph1l
               0.00000000E+00  0.00000000E+00  0.00000000E+00 1
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb

@@ -1970,6 +1970,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  nscforder
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nscforder',dt%nscforder,10,(/8,14,16,20,24,30,40,50,60,100/),iout)
 
+!  nshiftk
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'nshiftk',dt%nshiftk,8,(/1,2,3,4,5,6,7,8/),iout)
+!  If chksymbreak=1, nshiftk must be equal to 1, 2, 4.
+   if(dt%chksymbreak==1 )then
+     cond_string(1)='chksymbreak' ; cond_values(1)=dt%chksymbreak
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'nshiftk',dt%nshiftk,3,(/1,2,4/),iout)
+   end if
+
 !  nspden
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nspden',nspden,3,(/1,2,4/),iout)
 
@@ -2456,8 +2464,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
   !  orbmag
-  ! only values of 0 (default) 1, 2, 3, -1, -2, -3 are allowed
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,7,(/-3,-2,-1,0,1,2,3/),iout)
+  ! only values of 0 (default) 1, 2, 3, 11, 12, 13, -1, -2, -3 are allowed
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,10,(/-3,-2,-1,0,1,2,3,11,12,13/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag

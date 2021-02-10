@@ -69,6 +69,9 @@ enunit     1
  pp_dirpath "$ABI_PSPDIR"
  pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

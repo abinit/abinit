@@ -178,7 +178,7 @@ the same as [[nkpt]] and [[kpt]]. One might have specified less **k**-points,
 though (only those needing an update). The list of band ranges [[bdgw]] has
 been generated on the basis of the DFT(LDA) eigenenergies. We considered only the
 bands in the vicinity of the Fermi level: bands much below or much above are
-likely to remain much or much above the Fermi region. In the present run, we
+likely to remain much below or much above the Fermi region. In the present run, we
 are just interested in the states that may cross the Fermi level, when going
 from DFT to GW. Of course, it would have been easier to select an homogeneous range
 for the whole Brillouin zone, e.g. from 1 to 5, but this would have been more time-consuming.

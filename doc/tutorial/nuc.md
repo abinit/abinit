@@ -73,18 +73,18 @@ near the end of the output file:
 Electric Field Gradient Calculation 
 
     Atom   1, typat   1: Cq =      0.000000 MHz     eta =      0.000000
-    
-         efg eigval :     -0.169360
-    -        eigvec :      0.000000     0.000000     1.000000
-         efg eigval :     -0.043909
-    -        eigvec :     -0.707107     0.707107     0.000000
-         efg eigval :      0.213270
-    -        eigvec :      0.707107     0.707107     0.000000
-    
-         total efg :      0.084680     0.128590     0.000000
-         total efg :      0.128590     0.084680     0.000000
-         total efg :      0.000000     0.000000    -0.169360
-
+     
+          efg eigval :     -0.152323
+    -         eigvec :      0.000000     0.000000    -1.000000
+          efg eigval :     -0.054274
+    -         eigvec :      0.707107    -0.707107    -0.000000
+          efg eigval :      0.206597
+    -         eigvec :      0.707107     0.707107     0.000000
+     
+          total efg :      0.076161     0.130436     0.000000
+          total efg :      0.130436     0.076161     0.000000
+          total efg :      0.000000     0.000000    -0.152323
+ 
 This fragment gives the gradient at the first atom, which was silicon. Note
 that the gradient is not zero, but the coupling is---that's because the
 quadrupole moment of Si-29 is zero, so although there's a gradient there's
@@ -92,35 +92,35 @@ nothing in the nucleus for it to couple to.
 
 Atom 3 is an oxygen atom, and its entry in the output is:
 
-    Atom   3, typat   2: Cq =      6.686962 MHz     eta =      0.144581
-    
-         efg eigval :     -1.112565
-    -        eigvec :     -0.707107     0.707107     0.000000
-         efg eigval :      0.475855
-    -        eigvec :      0.000000     0.000000     1.000000
-         efg eigval :      0.636710
-    -        eigvec :     -0.707107    -0.707107    -0.000000
-       
-         total efg :     -0.237927     0.874638     0.000000
-         total efg :      0.874638    -0.237927     0.000000
-         total efg :      0.000000     0.000000     0.475855
-    
-    
-         efg_el :     -0.061260    -0.008494     0.000000
-         efg_el :     -0.008494    -0.061260     0.000000
-         efg_el :      0.000000     0.000000     0.122519
-       
-         efg_ion :     -0.017255     0.306132     0.000000
-         efg_ion :      0.306132    -0.017255     0.000000
-         efg_ion :      0.000000     0.000000     0.034509
-       
-         efg_paw :     -0.159413     0.577000     0.000000
-         efg_paw :      0.577000    -0.159413     0.000000
-         efg_paw :      0.000000     0.000000     0.318826
-
+    Atom   3, typat   2: Cq =      6.615041 MHz     eta =      0.140313
+     
+          efg eigval :     -1.100599
+    -         eigvec :      0.707107    -0.707107     0.000000
+          efg eigval :      0.473085
+    -         eigvec :     -0.000000    -0.000000    -1.000000
+          efg eigval :      0.627514
+    -         eigvec :      0.707107     0.707107    -0.000000
+     
+          total efg :     -0.236543     0.864057    -0.000000
+          total efg :      0.864057    -0.236543    -0.000000
+          total efg :     -0.000000    -0.000000     0.473085
+     
+     
+          efg_el :     -0.036290    -0.075078    -0.000000
+          efg_el :     -0.075078    -0.036290    -0.000000
+          efg_el :     -0.000000    -0.000000     0.072579
+     
+          efg_ion :     -0.016807     0.291185    -0.000000
+          efg_ion :      0.291185    -0.016807    -0.000000
+          efg_ion :     -0.000000    -0.000000     0.033615
+     
+          efg_paw :     -0.183446     0.647950     0.000000
+          efg_paw :      0.647950    -0.183446     0.000000
+          efg_paw :      0.000000     0.000000     0.366891
+ 
 Now we see the electric field gradient coupling, in frequency units, along
 with the asymmetry of the coupling tensor, and, finally, the three
-contributions to the total. Note that the valence part, efg_el, is quite
+contributions to the total. Note that the valence part, efg_el, is 
 small, while the ionic part and the on-site PAW part are larger. In fact, the
 PAW part is largest; this is why these calculations give very poor results
 with norm-conserving pseudopotentials, and need the full accuracy of PAW to capture

@@ -65,7 +65,7 @@ Then, issue:
 Please run this job in background because it takes about 1 minute.
 In the meantime, you should read the following.
 
-#### 1.a The four steps of a GW calculation.
+### 1.a The four steps of a GW calculation.
 
 In order to perform a standard one-shot GW calculation one has to:
 
@@ -73,7 +73,8 @@ In order to perform a standard one-shot GW calculation one has to:
 
   2. Perform a non self-consistent run to compute the KS eigenvalues and the eigenfunctions
      including several empty states. Note that, unlike standard band structure calculations,
-     here the KS states must be computed on a regular grid of **k**-points. (This limitation is also present with hybrid functional calculations)
+     here the KS states *must* be computed on a regular grid of **k**-points. 
+     (This limitation is also present with hybrid functional calculations).
 
   3. Use [[optdriver]] = 3 to compute the independent-particle susceptibility $\chi^0$ on a regular grid of
      **q**-points, for at least two frequencies (usually, $\omega=0$ and a purely imaginary
@@ -89,7 +90,7 @@ The flowchart diagram of a standard one-shot run is depicted in the figure below
 
 ![](gw1_assets/gw_flowchart.png)
 
-The input file tgw1_1.abi has precisely that structure: there are four datasets.
+The input file *tgw1_1.abi* has precisely that structure: there are four datasets.
 
 The first dataset performs the SCF calculation to get the density. The second
 dataset reads the previous density file and performs a NSCF run including
@@ -103,15 +104,18 @@ So, you can edit this *tgw1_1.abi* file.
 
 {% dialog tests/tutorial/Input/tgw1_1.abi %}
 
-The dataset-independent part of this file (the last half of the file),
-contains the usual set of input variables describing the cell, atom types,
+In the first half of the file, 
+you will find specialized input variables for the datasets 1 to 4.
+
+In the second half of the file,
+one find the dataset-independent information, namely,
+input variables describing the cell, atom types,
 number, position, planewave cut-off energy, SCF convergence parameters driving
-the KS band structure calculation. Then, for the fourth datasets, you
-will find specialized additional input variables.
+the KS band structure calculation. 
 
-#### 1.b Generating the Kohn-Sham band structure: the WFK file.
+### 1.b Generating the Kohn-Sham band structure: the WFK file.
 
-Dataset 1 is a rather standard SCF calculation. It is worth noticing that we
+Dataset 1 drives a rather standard SCF calculation. It is worth noticing that we
 use [[tolvrs]] to stop the SCF cycle because we want a well-converged KS potential
 to be used in the subsequent NSCF calculation. Dataset 2 computes 100 bands and
 we set [[nbdbuf]] to 20 so that only the first 80 states must be converged within [[tolwfr]].
@@ -141,10 +145,10 @@ The 20 highest energy states are simply not considered when checking the converg
     The [[nbdbuf]] trick allows us to **save several minimization steps** because the
     last bands usually require more iterations to converge in the iterative diagonalization algorithms.
     Also note that it is a very good idea to increase significantly the value of [[nbdbuf]] when
-    computing many empty states. As a rule of thumb use 10% of [[nband]] or even more
+    computing many empty states. As a rule of thumb, use 10% of [[nband]] or even more
     in complicated systems. This can really make a **huge difference** at the level of the wall time.
 
-#### 1.c Generating the screening: the SCR file.
+### 1.c Generating the screening: the SCR file.
 
 In dataset 3, the calculation of the screening (KS susceptibility $\chi^0$ and then inverse dielectric
 matrix $\epsilon^{-1}$) is performed. We need to set [[optdriver]]=3 to do that:
@@ -181,14 +185,14 @@ the input variable [[ppmfrq]]
 ```
 
 The two frequencies are used to calculate the plasmon-pole model parameters.
-For the non-zero frequency it is recommended to use a value close to the
+For the non-zero frequency, it is recommended to use a value close to the
 plasmon frequency for the plasmon-pole model to work well. Plasmons
 frequencies are usually close to 0.5 Hartree. The parameters for the screening
-calculation are not far from the ones that give converged Energy Loss Function
+calculation are not far from the ones that give converged Electron Energy Loss Function
 ($-\mathrm{Im} \epsilon^{-1}_{00}$) spectra, so that one can start up by using indications
 from EELS calculations existing in literature.
 
-#### 1.d Computing the GW energies.
+### 1.d Computing the GW energies.
 
 In dataset 4 the calculation of the Self-Energy matrix elements is performed.
 One needs to define the driver option as well as the _WFK and _SCR files.
@@ -208,8 +212,8 @@ define the set of bands and two sets of planewaves:
 ```
     nband4       80      # Bands to be used in the Self-Energy calculation
     ecutsigx4   8.0      # Dimension of the G sum in Sigma_x
-```
                          # (the dimension in Sigma_c is controlled by npweps)
+```
 
 In this case, [[nband]] controls the number of bands used to calculate the
 correlation part of the Self-Energy while [[ecutsigx]] gives the number of
@@ -218,8 +222,8 @@ size of the planewave set used to compute $\Sigma_c$ (the correlation part of th
 self-energy) is controlled by [[ecuteps]] and cannot be larger than the value
 used to generate the SCR file.
 For the initial convergence studies, it is advised to set [[ecutsigx]] to a value as high
-as [[ecut]] since, any way, this parameter is not much influential on the total computational time.
-Note that the exact treatment of the exchange part requires, in principle, ecutsigx = 4 ecut.
+as [[ecut]] since, anyway, this parameter is not much influential on the total computational time.
+Note that the exact treatment of the exchange part requires, in principle, [[ecutsigx]] = 4 * [[ecut]].
 
 Then, come the parameters defining the **k**-points and the band indices for which
 the quasiparticle energies will be computed:
@@ -239,11 +243,11 @@ convergence is achieved and shifting it such as at least one k-point is placed
 on the wished position in the Brillouin zone. [[bdgw]] gives the
 minimum/maximum band whose energies are calculated for each selected **k**-point.
 
-There is an additional parameter, called [[zcut]], (not shown here) related to the self-energy
+There is an additional parameter, called [[zcut]], (not studied here) related to the self-energy
 computation. It is meant to avoid some divergences that might occur in the
 calculation due to integrable poles along the integration path.
 
-#### 1.e Examination of the output file.
+### 1.e Examination of the output file.
 
 Your calculation should have ended now. Let's examine the output file.
 Open *tgw1_1.abo* in your preferred editor and find the section
@@ -330,7 +334,7 @@ reasonable value where to adjust the model. The control over this parameter is
 however left to the user in order to check that the result does not change
 when changing [[ppmfrq]]. One has to be careful with finite systems or with systems having semicore electrons.
 If the result depends much on  [[ppmfrq]], then the plasmon-pole model is
-not appropriate and one should go beyond by taking into account a full
+not appropriate and one should go beyond it by taking into account a full
 dynamical dependence in the screening (see later, the contour-deformation
 method). However, the plasmon-pole model has been found to work well for a
 very large range of solid-state systems when focusing only on the real part of the GW
@@ -387,7 +391,8 @@ data: !SigmaeeData |
 ...
 ```
 
-For the desired **k**-point ($\Gamma$ point), for state 4, then state 5, one finds different information:
+For the desired **k**-point ($\Gamma$ point), for state 4, then state 5, one finds different information
+in the SigmaeeData section:
 
   * E0 is the KS eigenenergy
   * VxcDFT gives the KS exchange-correlation potential expectation value
@@ -399,9 +404,9 @@ For the desired **k**-point ($\Gamma$ point), for state 4, then state 5, one fin
   * E-E0 is the difference between GW energy and KS eigenenergy
   * E is the final GW quasiparticle energy
 
-In this case, the direct band gap is also analyzed: E^0_gap is the direct KS gap at
-that particular **k**-point (and spin, in the case of spin-polarized calculations), E^GW_gap
-is the GW one, and DeltaE^GW_gap is the difference. This direct gap is always
+In this case, prior to the SigmaeeData section, the direct band gap was also analyzed: KS_gap is the direct KS gap at
+that particular **k**-point (and spin, in the case of spin-polarized calculations), QP_gap
+is the GW one, and Delta_QP_KS is the difference. This direct gap is always
 computed between the band whose number is equal to the number of electrons in
 the cell divided by two (integer part, in case of spin-polarized calculation),
 and the next one.
@@ -422,8 +427,9 @@ correction. For that state, the correlation correction is small, and the
 difference between KS and GW energies is also small (0.128 eV). By
 contrast, the exchange self-energy is much smaller than the average Kohn-Sham
 potential for the state 5 (a conduction state), but the correlation correction
-is much larger than for state 4. On the whole, the difference between Kohn-
-Sham and GW energies is not very large, but nevertheless, it is quite
+is much larger than for state 4. 
+On the whole, the difference between Kohn-Sham and GW energies is not very large, 
+but nevertheless, it is quite
 important when compared with the size of the gap.
 
 If |AbiPy| is installed on your machine, you can use the |abiopen| script
@@ -488,9 +494,11 @@ For further details about the SIGRES.nc file and the AbiPy API see the |SigresFi
 
 In the following sections, we will perform different convergence studies. In
 order to keep the CPU time at a reasonable level, we will use fake WFK and SCR
-data. We will focus on the GW correction for $\Gamma$ point to determine the convergence.
-We will use a coarser **k**-point grid with one shift only.
-This is a common strategy to find the converged parameters before the final calculations.
+data. We will focus on the GW correction for $\Gamma$ point to determine the values of the GW parameters needed
+to reach the convergence.
+Indeed, we will use a coarse **k**-point grid with one shift only, and we will not vary [[ecut]].
+This is a common strategy to find the adequate specific GW parameters before the final calculations, that should be 
+done with a sufficiently fine **k**-point grid, and an adequate [[ecut]], in addition to adequate specific GW parameters.
 
 In directory *Work_gw1*, copy the file *tgw1_2.abi*:
 ```sh
@@ -507,29 +515,36 @@ Then, issue:
 After this step you will need the WFK and SCR files produced in this run for
 the next runs. Move *tgw1o_DS2_WFK* to *tgw1o_DS1_WFK* and *tgw1o_DS3_SCR* to *tgw1o_DS1_SCR*.
 
-The next sections are intended to show you how to find the converged
-parameters for a GW calculation. In principle, the following parameters might
-be used to decrease the CPU time and/or the memory requirements:
-[[optdriver]] = 3 [[ecuteps]], [[nband]] and, for [[optdriver]] = 4, [[nband]].
+The next sections are intended to show you how to find the converged values
+of parameters that are specific of a GW calculation. The following parameters might
+be used to decrease the CPU time and/or the memory requirements, in addition to the well-known k point sampling and [[ecut]].
+For [[optdriver]] = 3, one needs to study the convergence with respect to [[ecuteps]] and [[nband]] simultaneously,
+while for [[optdriver]] = 4, only the behaviour with respect to [[nband]] should be monitored.
+As mentioned above, the global convergence with respect to [[ecut]] and to the number of k points has
+to be monitored as well, but the determination of the adequate parameters can be done independently from
+the determination of the adequate values for [[ecuteps]] and [[nband]]. Altogether, one has to determine the
+adequate values of four parameters in GW calculations, instead of only two in ground-state calculations ([[ecut]] and the number of k points).
+The adequate values of [[ecut]] and the number of k points for converged results *might* perhaps be the same as for ground-state 
+calculations, but this is not always the case !
 
 We will test the convergence with respect to [[nband]] and [[ecuteps]], simultaneously for [[optdriver]]=3 and =4.
-Indeed, other technical parameters like [[ecutwfn]] or [[ecutsigx]] can use a default value of [[ecut]].
+As a side note, there are actually other technical parameters like [[ecutwfn]] or [[ecutsigx]]. 
+However, for them, one can use the default value of [[ecut]].
 For PAW, [[pawecutdg]] can be tuned as well.
 
-We begin by the convergence study on the only important parameter needed in the self-
-energy calculation ([[optdriver]] = 4): [[nband]].
-This is because for these, we will not need a double dataset loop to check
-this convergence, and we will rely on the previously determined SCR file.
+We begin by the convergence study with respect to [[nband]], the most important parameter needed in the self-energy 
+calculation, [[optdriver]] = 4.
+This is because for the self-energy calculation, we will not need a double dataset loop to check
+this convergence (as [[ecuteps]] is not a parameter of the [[optdriver]] = 4 calculation), and we will rely on the previously determined SCR file.
 
-## 3 Convergence on the number of bands to calculate $\Sigma_c$
+## 3 Convergence of the self-energy with respect to the number of bands
 
-Let us check the convergence on the number of bands in the calculation of $\Sigma_c$
-with a fixed screening file.
-This convergence study is very important. *BUT* 
-Most of the time, the converged [[nband]] is similar for $\Sigma_c$ and for $\chi_0$ so that the same
-value is taken for both. Here we proceed careful and converge the two occurences of [[nband]] independently.
+Let us check the convergence of the band gap with respect to the number of bands in the calculation of $\Sigma_c$
+with a fixed screening file.  This convergence study is very important. 
+*However* most of the time, the converged [[nband]] is similar for $\Sigma_c$ and for $\chi_0$ so that the same
+value is taken for both. Here we will proceed carefully and converge the two occurences of [[nband]] independently.
 
-The convergence on the number of bands to calculate the Self-Energy will be
+The convergence on the number of bands to calculate $\Sigma_c$ will be
 done by defining five datasets, with increasing [[nband]]:
 
 ```
@@ -630,7 +645,7 @@ For further details about the API provided by SigRes Robots see the |SigresFileN
 and the |G0W0LessonNb| for GW calculations powered by AbiPy.
 
 
-## 4 Convergence on the number of bands to calculate the screening ($\epsilon^{-1}$)
+## 4 Convergence of the screening with respect to the number of bands
 
 Now, we come back to the calculation of the screening. Adequate convergence
 studies will couple the change of parameters for [[optdriver]] = 3 with a
@@ -727,7 +742,7 @@ So that the computation using 100 bands can be considered converged within 30 me
 Note that the value of [[nband]] that gives a converged dielectric matrix is usually of the same order of magnitude
 than the one that gives a converged $\Sigma_c$.
 
-## 5 Convergence on the dimension of the screening $\epsilon^{-1}$ matrix
+## 5 Convergence of the screening matrix with respect to the number of planewaves
 
 Then, we check the convergence on the number of plane waves in the
 calculation of the screening. This will be done by defining six datasets, with
@@ -805,10 +820,10 @@ in the sense that one can start from a reasonaby coarse k-mesh to find
 the converged values of [[nband]], [[ecuteps]], [[ecutsigx]] and then
 fix these values and look at the convergence with respect to the BZ mesh.
 
-## 6 Calculation of the GW corrections for the band gap at $\Gamma$
+## 6 Calculation of the GW corrections for the band gap at the zone center
 
 Now we try to perform a GW calculation for a real problem: the calculation of
-the GW corrections for the direct band gap of bulk Silicon at the $\Gamma$ point.
+the GW corrections for the direct band gap of bulk silicon at the $\Gamma$ point.
 
 In directory *Work_gw1*, get the file *tgw1_6.abi*:
 ```sh
@@ -839,7 +854,7 @@ Now, you can examine it.
 {% dialog tests/tutorial/Input/tgw1_6.abi %}
 
 We need the usual part of the input file to perform a ground state
-calculation. This is done in datasets 1 and 2 and at the end we print out the density and wavefunction files.
+calculation. This is done in datasets 1 and 2. At the end of dataset 2, we print out the density and wavefunction files.
 We use a set of 19 **k**-points in the Irreducible Brillouin Zone.
 This set of **k**-points is not shifted so it contains the $\Gamma$ point.
 
@@ -854,7 +869,7 @@ energies is now on the order of 0.2 eV only. This would be annoying for the abso
 as required for band-offset or ionization potential of finite systems.
 However, as long as we are only interested in the gap energy that is fine enough.
 
-Finally in dataset 4 we calculate the self-energy matrix element at $\Gamma$, using
+Finally, in dataset 4, we calculate the self-energy matrix element at $\Gamma$, using
 the previously determined parameters.
 
 You should obtain the following results:
@@ -879,11 +894,12 @@ data: !SigmaeeData |
 ```
 
 
-So that the DFT energy gap in $\Gamma$ is about 2.56 eV, while the GW correction is
-about 0.63 eV, so that the GW band gap found is 3.20 eV.
+So that the DFT energy gap in $\Gamma$ is about 2.564 eV, while the GW correction is
+about 0.632 eV, so that the GW band gap found is 3.196 eV.
 
 One can compare now what have been obtained to what one can get from the literature.
 
+```
      EXP         3.40 eV   Landolt-Boernstein
 
      DFT (LDA)
@@ -899,16 +915,19 @@ One can compare now what have been obtained to what one can get from the literat
      GW  (FLAPW) 3.30 eV   N. Hamada, M. Hwang and A.J. Freeman, PRB 41, 3620 (1990)
      GW  (FLAPW) 3.12 eV   W. Ku and A.G. Eguiluz, PRL 89, 126401 (2002)
      GW          3.20 eV   present work
+```
 
 The values are spread over an interval of 0.2 eV. They depend on the details
 of the calculations. In the case of pseudopotential calculations, they depend
 of course on the pseudopotential used. However, a GW result is hardly
-meaningful within 0.1 eV, in the present state of the art. But this goes also
+more accurate than 0.1 eV, in the present state of the art. But this goes also
 with the other source of inaccuracy, the choice of the pseudopotential, that
 can arrive up to even 0.2 eV. This can also be taken into account when
 choosing the level of accuracy for the convergence parameters in the GW calculation.
+As a reasonable target, the numerical sources of errors, due to insufficient [[ecuteps]], [[nband]], k point grid, 
+should be kept lower than 0.02 or 0.03 eV.
 
-### How to compute GW band structures
+## 7 How to compute GW band structures
 
 Finally, it is possible to calculate a full GW band plot of a system via interpolation.
 There are three possible techniques.
@@ -947,24 +966,24 @@ It should be stressed, however, that this Fourier-based method can have problems
 that may cause unphysical oscillations between the ab-initio points.
 To reduce this spurious effect, we suggest to interpolate the GW corrections instead of the GW energies.
 The corrections, indeed, are usually smoother in k-space and the resulting fit is more stable.
-A python example showing how to construct an energy-dependent scissors operator with AbiPy is available
+A python example showing how to construct an interpolated scissor operator with AbiPy is available
 [here](http://abinit.github.io/abipy/gallery/plot_qpbands_with_interpolation.html#sphx-glr-gallery-plot-qpbands-with-interpolation-py)
 
-The third method uses that fact that the GW corrections are usually linear with the energy,
+The third method uses the fact that the GW corrections are usually linear with the energy,
 for each group of bands. This is evident when reporting on a plot the GW correction with
 respect to the 0-order KS energy for each state.
 One can then simply correct the KS band structure at any point, by using a GW correction for the
 **k**-points where it has not been calculated explicitly, using a fit of the GW
 correction at a sparse set of points.
-A python example showing how to construct an energy-dependent scissors operator with AbiPy is available
+A python example showing how to construct an energy-dependent scissor operator with AbiPy is available
 [here](http://abinit.github.io/abipy/gallery/plot_qpbands_with_scissor.html#sphx-glr-gallery-plot-qpbands-with-scissor-py).
 
-## Advanced features in the GW code
+## 8 Advanced features of GW calculations
 
 The user might switch to the [second GW tutorial](gw2) before
 coming back to the present section.
 
-#### Calculations without using the Plasmon-Pole model
+### Calculations without using the Plasmon-Pole model
 
 In order to circumvent the plasmon-pole model, the GW frequency convolution
 has to be calculated explicitly along the real axis. This is a tough job,
@@ -985,7 +1004,7 @@ in file out.sig). The grid of real frequencies used to calculate the spectral
 function is set by the number of frequencies (input variable [[nfreqsp]]) and
 by the maximum frequency calculated (input variable [[freqspmax]]).
 
-#### Self-consistent calculations
+### Self-consistent calculations
 
 The details in the implementation and the justification for the approximations
 retained can be found in [[cite:Bruneval2006]].
@@ -1007,7 +1026,7 @@ For a full self-consistency calculation, the quasiparticle wavefunctions are
 expanded in the basis set of the KS wavefunctions. The variable
 [[bdgw]] now indicates the size of all matrices to be calculated and
 diagonalized. The quasiparticle wavefunctions are consequently linear
-combinations of the KS wavefunctions in between the min and max values of bdgw.
+combinations of the KS wavefunctions in between the min and max values of [[bdgw]].
 
 A correct self-consistent calculation should consist of the following runs:
 
@@ -1031,10 +1050,18 @@ initialization reasons. Therefore, a correct HF calculations should look like
   * ............ and so on, until the desired accuracy is reached
 
 In the case of a self-consistent calculation, the output is slightly more complex:
-**For instance, iteration 2**
+**For instance, at iteration 2**
 
-     k =    0.500   0.250   0.000
-     Band     E_DFT  <VxcDFT>    E(N-1) <Hhartree>    SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+```yaml
+--- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
+kpoint     : [   0.500,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    3.684
+QP_gap     :    5.764
+Delta_QP_KS:    2.080
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.422   -10.273    -3.761     6.847   -15.232     4.034     1.000     0.000   -11.198    -0.590    -4.351    -4.351
         2    -0.574   -10.245    -0.850     9.666   -13.806     2.998     1.000     0.000   -10.807    -0.291    -1.141    -1.141
         3     2.242    -9.606     2.513    11.841   -11.452     1.931     1.000     0.000    -9.521    -0.193     2.320     2.320
@@ -1043,22 +1070,20 @@ In the case of a self-consistent calculation, the output is slightly more comple
         6    10.247    -9.143    13.462    19.395    -4.063    -1.775     1.000     0.000    -5.838     0.095    13.557    13.557
         7    11.488    -9.704    15.159    21.197    -4.061    -1.863     1.000     0.000    -5.924     0.113    15.273    15.273
         8    11.780    -9.180    15.225    20.958    -3.705    -1.893     1.000     0.000    -5.598     0.135    15.360    15.360
-
-     E^0_gap          3.684
-     E^GW_gap         5.764
-     DeltaE^GW_gap    2.080
+...
+```
 
 The columns are
 
-  * **Band**: index of the band
+  * **Band**: Index of the band
   * **E_DFT**: DFT eigenvalue
-  * **VxcDFT**: diagonal expectation value of the xc potential in between DFT bra and ket
-  * **E(N-1)**: quasiparticle energy of the previous iteration (equal to DFT for the first iteration)
-  * **Hhartree**: diagonal expectation value of the Hartree Hamiltonian (equal to E_DFT - VxcDFT for the first iteration only)
-  * **SigX**: diagonal expectation value of the exchange self-energy
-  * **SigC[E(N-1)]**: diagonal expectation value of the correlation self-energy
+  * **VxcDFT**: Diagonal expectation value of the xc potential in between DFT bra and ket
+  * **E(N-1)**: Quasiparticle energy of the previous iteration (equal to DFT for the first iteration)
+  * **Hhartree**: Diagonal expectation value of the Hartree Hamiltonian (equal to E_DFT - VxcDFT for the first iteration only)
+  * **SigX**: Diagonal expectation value of the exchange self-energy
+  * **SigC[E(N-1)]**: Diagonal expectation value of the correlation self-energy
     (evaluated for the energy of the preceeding iteration)
-  * **Z**: quasiparticle renormalization factor Z (taken equal to 1 in methods HF, SEX, COHSEX and model GW)
+  * **Z**: Quasiparticle renormalization factor Z (taken equal to 1 in methods HF, SEX, COHSEX and model GW)
   * **dSigC/dE**: Derivative of the correlation self-energy with respect to the energy
   * **Sig[E(N)]**: Total self-energy for the new quasiparticle energy
   * **DeltaE**: Energy difference with respect to the previous step
