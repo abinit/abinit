@@ -39,7 +39,7 @@ module m_invars1
 
  use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
  use m_geometry, only : mkrdim
- use m_parser,   only : intagm, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
+ use m_parser,   only : intagm, intagm_img, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
  use m_symtk,    only : mati3det
@@ -116,7 +116,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
+ integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,tread_alt,treadh,treadm,tread_pseudos,cnt, tread_geo
  integer :: treads, use_gpu_cuda
  real(dp) :: cpus
  character(len=500) :: msg
@@ -1130,7 +1130,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
- real(dp) :: cellcharge,fband,kptnrm,kptrlen,sum_spinat,zelect,zval
+ real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,sum_spinat,zelect,zval
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
@@ -1308,7 +1308,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !---------------------------------------------------------------------------
 
 ! Here, set up quantities that are related to geometrical description of the system (acell,rprim,xred), as well as
-! initial velocity(vel), cellcharge and spin of atoms (chrgat,spinat), nuclear dipole moments of atoms (nucdipmom),
+! initial velocity(vel), cellcharge (to compute mband_upper) and spin of atoms (chrgat,spinat), nuclear dipole moments of atoms (nucdipmom),
 ! the symmetries (symrel,symafm, and tnons) and the list of fixed atoms (iatfix,iatfixx,iatfixy,iatfixz).
 ! Arrays have already been dimensioned thanks to the knowledge of msym and mx%natom
 
@@ -1445,11 +1445,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%zeemanfield(1:3) = dprarr(1:3)
  end if
 
+!Initialize geometry of the system, for different images. Also initialize cellcharge_min to be used later for estimating mband_upper..
  ABI_MALLOC(amu,(ntypat))
  ABI_MALLOC(mixalch,(npspalch,ntypalch))
  ABI_MALLOC(vel,(3,natom))
  ABI_MALLOC(vel_cell,(3,3))
  ABI_MALLOC(xred,(3,natom))
+!Only take into account negative cellcharge, to compute maximum number of bands, so initialize cellcharge_min to zero
+ cellcharge_min=zero
  intimage=2 ; if(dtset%nimage==1)intimage=1
  do ii=1,dtset%nimage+1
    iimage=ii
@@ -1510,6 +1513,29 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%vel_cell_orig(1:3,1:3,iimage)=vel_cell
    dtset%xred_orig(1:3,1:natom,iimage)=xred
    call mkrdim(dtset%acell_orig(1:3,iimage),dtset%rprim_orig(1:3,1:3,iimage),dtset%rprimd_orig(1:3,1:3,iimage))
+
+!  Read cellcharge for each image, but use it only to initialize cellcharge_min
+!  The old name 'charge' is still tolerated. Will be removed in due time.
+   cellcharge=zero
+!  Initialize cellcharge with the value for the first image
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cellcharge',tread,'DPR')
+   if(tread==1)then
+     cellcharge=dprarr(1)
+   else
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
+     if(tread==1) cellcharge=dprarr(1)
+   endif
+!  Possibly overwrite cellcharge from the first image with a specific value for the current image
+   call intagm_img(dprarr,iimage,jdtset,lenstr,dtset%nimage,1,string,'cellcharge',tread_alt,'DPR')
+   if(tread_alt==1)then
+     cellcharge=dprarr(1)
+   else
+     call intagm_img(dprarr,iimage,jdtset,lenstr,dtset%nimage,1,string,'charge',tread_alt,'DPR')
+     if(tread_alt==1) cellcharge=dprarr(1)
+   endif
+
+   if(cellcharge < cellcharge_min)cellcharge_min=cellcharge
+
  end do
 
  ABI_FREE(amu)
@@ -1840,7 +1866,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      ! Only take into account negative cellcharge, to compute maximum number of bands
      if(cellcharge > 0.0_dp)cellcharge=0.0_dp
 
-!     mband_upper=nspinor*((nint(zion_max)*natom+1)/2 - floor(cellcharge/2.0_dp)&
+!     mband_upper=nspinor*((nint(zion_max)*natom+1)/2 - floor(cellcharge_min/2.0_dp)&
 !&     + ceiling(fband*natom-1.0d-10))
      zval=zero
      sum_spinat=zero
@@ -1848,7 +1874,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
        sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
      end do
-     zelect=zval-cellcharge
+     zelect=zval-cellcharge_min
      mband_upper=nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
 &     + (nsppol-1)*(ceiling(half*(sum_spinat -tol10)))
      nband(:)=mband_upper
