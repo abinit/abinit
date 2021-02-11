@@ -407,7 +407,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      do iimage=1,dt%nimage
        if(abs(dt%cellcharge(iimage)-dt%cellcharge(1))>tol8)then
          write(msg, '(2a,i4,a,i4,2a,es12.4,a,i4,es12.4)' )ch10,&
-&         ' chkinp : imgmov=',imgmov,', occopt=',occopt,ch10,&
+&         ' chkinp : imgmov=',dt%imgmov,', occopt=',dt%occopt,ch10,&
 &         ' chkinp : cellcharge(1)=',dt%cellcharge(1),', while for image=',iimage,', cellcharge=',dt%cellcharge(iimage)
          call wrtout(iout,msg,'COLL')
          call wrtout(std_out,  msg,'COLL')

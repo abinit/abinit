@@ -2196,7 +2196,7 @@ subroutine anaddb_chkvars(string)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: protocol0=0
- character(len=100) :: list_logicals,list_strings
+ character(len=100) :: list_logicals,list_strings,list_vars_img
  character(len=10000) :: list_vars
 
 !************************************************************************
@@ -2254,6 +2254,9 @@ subroutine anaddb_chkvars(string)
 !Y
 !Z
 
+!
+ list_vars_img=' '
+
 !Logical input variables
  list_logicals=' '
 
@@ -2273,10 +2276,11 @@ subroutine anaddb_chkvars(string)
 
 !Transform to upper case
  call inupper(list_vars)
+ call inupper(list_vars_img)
  call inupper(list_logicals)
  call inupper(list_strings)
 
- call chkvars_in_string(protocol0, list_vars, list_logicals, list_strings, string)
+ call chkvars_in_string(protocol0, list_vars, list_vars_img, list_logicals, list_strings, string)
 
 end subroutine anaddb_chkvars
 !!***

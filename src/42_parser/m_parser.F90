@@ -3751,6 +3751,8 @@ end subroutine prttagm_images
 !!    1 if parser accepts multiple datasets and +* syntax (e.g. abinit)
 !!
 !!  list_vars(len=*)=string with the (upper case) names of the variables (excluding logicals and chars).
+!!  list_vars_img(len=*)=string with the (upper case) names of the variables (excluding logicals and chars),
+!!   for which the image can be specified.
 !!  list_logicals(len=*)=string with the (upper case) names of the logical variables.
 !!  list_strings(len=*)=string with the (upper case) names of the character variables.
 !!  string(len=*)=string (with upper case) from the input file.
@@ -3766,13 +3768,13 @@ end subroutine prttagm_images
 !!
 !! SOURCE
 
-subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, string)
+subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, list_strings, string)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: protocol
  character(len=*),intent(in) :: string
- character(len=*),intent(in) :: list_logicals,list_strings,list_vars
+ character(len=*),intent(in) :: list_logicals,list_strings,list_vars, list_vars_img
 
 !Local variables-------------------------------
  character,parameter :: blank=' '
@@ -3827,8 +3829,9 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
          if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
        end do
 
-       ! Find the index of the potential variable name in the list of variables
-       index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
+       ! Find the index of the potential variable name in the list of variables for which
+       ! the image index can be specified
+       index_list_vars=index(list_vars_img,blank//string(index_current:index_endword)//blank)
      end if
 
      if(index_list_vars==0)then
@@ -3851,18 +3854,16 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
        else if(index(list_strings,blank//string(index_current:index_endword)//blank)/=0)then
          ! Treat possible string input variables
          ! Every following string is accepted
-         !write(std_out,*)"Found string variable: ",string(index_current:index_endword)
-         !write(std_out,*)"in string: ",trim(string(index_current:))
          index_current=index(string(index_current:),blank)+index_current
          index_blank=index(string(index_current:),blank)+index_current-1
-         !write(std_out,*)"next:: ",string(index_current:index_endword)
 
        else
          ! If still not admitted, then there is a problem
-         write(msg, '(7a)' )&
+         write(msg, '(9a)' )&
          'Found token: `',string(index_current:index_endword),'` in the input file.',ch10,&
          'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
-         'Action: check your input file. You likely mistyped the input variable.'
+         'Action: check your input file. Perhaps you mistyped the input variable,',ch10,&
+&        ' or specified an image index, while this was not permitted for this input variable.'
          ABI_ERROR(msg)
        end if
      end if

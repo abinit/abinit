@@ -5026,7 +5026,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    ABI_ERROR(msg)
  end if
  ! End CP added
- if (abs(Dtset%cellcharge-hdr%cellcharge)>tol6) then
+ if (abs(Dtset%cellcharge(1)-hdr%cellcharge)>tol6) then
    write(msg,'(2(a,f8.2))')"File contains cellcharge ", hdr%cellcharge," but cellcharge from input is ",Dtset%cellcharge
    ABI_ERROR(msg)
  end if

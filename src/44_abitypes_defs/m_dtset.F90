@@ -3108,7 +3108,7 @@ subroutine chkvars(string)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: protocol1=1
- character(len=100) :: list_logicals,list_strings
+ character(len=100) :: list_logicals,list_strings, list_vars_img
  character(len=10000) :: list_vars
 
 !************************************************************************
@@ -3361,6 +3361,10 @@ subroutine chkvars(string)
 !Z
  list_vars=trim(list_vars)//' zcut zeemanfield znucl'
 
+!List of input variables for which the image index can be added
+ list_vars_img=' acell amu angdeg cellcharge dmatpawu jpawu mixalch occ rprim scalecart'
+ list_vars_img=trim(list_vars_img)//' vel vel_cell xcart xred'
+
 !Logical input variables
  list_logicals=' SpinPolarized'
 
@@ -3380,10 +3384,11 @@ subroutine chkvars(string)
 
  ! Transform to upper case
  call inupper(list_vars)
+ call inupper(list_vars_img)
  call inupper(list_logicals)
  call inupper(list_strings)
 
- call chkvars_in_string(protocol1, list_vars, list_logicals, list_strings, string)
+ call chkvars_in_string(protocol1, list_vars, list_vars_img, list_logicals, list_strings, string)
 
 end subroutine chkvars
 !!***
