@@ -3415,7 +3415,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! If iscf>0, check the charge of the system, and compute nelect.
  occopt_tmp=occopt
  if(getocc/=0)occopt_tmp=1
- call dtset%chkneu(dtset,nelectjell,occopt_tmp)
+ call dtset%chkneu(nelectjell,occopt_tmp)
 
  ! Now that the occupation numbers have been initialized, can meaningfully define nbandhf.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')

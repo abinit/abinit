@@ -2198,13 +2198,13 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  !call ebands_init(bantot_dense,KS_BSt_dense,Dtset%nelect,doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
 !&  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
 !&  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
-!&  hdr_wfk_dense%cellcharge(1), hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
+!&  hdr_wfk_dense%cellcharge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
 !&  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
  call ebands_init(bantot_dense,KS_BSt_dense,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,& ! CP added
 &  doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
 &  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
 &  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
-&  hdr_wfk_dense%cellcharge(1), hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
+&  hdr_wfk_dense%cellcharge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
 &  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
  ! End CP modified
 

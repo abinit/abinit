@@ -45,27 +45,27 @@ occ_3img
 # SCF procedure  
  iscf 17
  nstep 1000
- ixc 11
  ecut 15  
  pawecutdg 40
  tolrff 0.02   #  Better for geometry optimization 
+ diemac 2.0d0
 
 # k-point grid
-kptopt 0  
-nkpt 1
-kpt 3*0
+ kptopt 0  
+ nkpt 1
+ kpt 3*0
 
 # Common to all images
-occopt 0
-nband 33 33
-nsppol 2
+ occopt 0
+ nband 33 33
+ nsppol 2
 
 #Definition of the unit cell
-acell 3*12.24543
+ acell 3*12.24543
 
-# Definition of the atom types and unit cell
-ntypat 2
-znucl 11 53
+#Definition of the atom types and unit cell
+ ntypat 2
+ znucl 11 53
  pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pbe_standard"
  pseudos "Na.xml, I.xml"
 
@@ -83,5 +83,19 @@ znucl 11 53
         0.0  0.0  0.5
         0.5  0.5  0.5
 
-#Other
-diemac 2.0d0
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t22.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%% [paral_info]
+#%% max_nprocs = 24
+#%% [extra_info]
+#%% authors = X. Gonze, C. Tantardini
+#%% keywords = 
+#%% description =
+#%%   NaI slightly distorted, to allow self-localisation of a hole polaron, using pSIC technique. 
+#%% topics = 
+#%%<END TEST_INFO>
+

@@ -1379,12 +1379,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! CP modified
 ! call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
 !& hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
-!& hdr%cellcharge(1), hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+!& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
 !& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 & doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
 & hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
-& hdr%cellcharge(1), hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
 & hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  ! End CP modified
 

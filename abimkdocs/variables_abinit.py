@@ -1476,7 +1476,7 @@ To treat a neutral system, which is desired in nearly all cases, one must use
 [[cellcharge]] superceeds the old [[charge]] input variable, whose name was rather unspecific.
 
 When there are several images, [[cellcharge]] might depend on the image number, but ONLY 
-when [[imgmov]]=6 and [[occopt]]=2. In the checking routine, [[nelect]] is considered
+when [[imgmov]]=6 and [[occopt]]=0 or 2. In the checking routine, [[nelect]] is considered
 separately for each image, while in the remaining of the code, [[nelect]](1) is propagated,
 so that [[nelect]] is still a scalar. This is consistent with the pSIC algorithm,
 see [[cite:Sadigh2015]] and [[cite:Sadigh2015a]].

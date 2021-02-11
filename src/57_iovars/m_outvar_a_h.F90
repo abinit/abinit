@@ -447,7 +447,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    narrm(idtset)=1
    do iimage=1,nimagem(idtset)
      if (narrm(idtset)>0) then
-       dprarr_images(1:narrm(idtset),iimage,idtset)=results_out(idtset)%cellcharge(iimage)
+       dprarr_images(1:narrm(idtset),iimage,idtset)=dtsets(idtset)%cellcharge(iimage)
      end if
    end do
  end do
