@@ -1,7 +1,4 @@
-# NaI pSIC-PBE - 8 atom cell
-
-# npimage 3   # Explicit parallelism over images.
- autoparal 1
+# NaI pSIC-PBE - 8 atom cell Very low cutoff for testing purposes
 
 ndtset 1
 #optdriver 0    # Not needed for a ground state calculation (including optimization of geometry)
@@ -9,30 +6,21 @@ ndtset 1
 #Parameters for the image dynamics
 imgmov 6
 nimage 3
-ntimimage 1000
+ntimimage 3   # Very low value, only for testing purposes.
 tolimg   1.0d-6
-prtvolimg 1
+prtvol 1
 imgwfstor 0
 mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 
-# Occupation 
-# occopt_1img 2   # Preferable to use occopt 0, common to all images. See below
-# nsppol_1img 2   # Common to all images
-#nspinor_1img 1   # Not needed
-# nspden_1img 2    # Not needed
-#  wtk_1img 1    # Not needed
-#nband_1img 257 256
-# nband_1img 257 257
- occ_1img  32*1 0  32*1 0
- charge_1img 0.0
+# Occupation
+ occ_1img  32*1 0.0         32*1 0.0
+ cellcharge_1img 0.0
 
-occ_2img
- 31*1 0.975 0.0
- 32*1 0.0
+ occ_2img  31*1 0.975 0.0   32*1 0.0
+ cellcharge_2img 0.025
 
-occ_3img
- 31*1 0.950  0
- 32*1 0.0
+ occ_3img  31*1 0.950 0.0   32*1 0.0
+ cellcharge_3img 0.050
 
 ###########################################################################
 #Common to all images
@@ -42,16 +30,16 @@ occ_3img
  ionmov 2
  tolmxf 1.0d-6
 
-# SCF procedure  
- iscf 17
- nstep 1000
- ecut 15  
- pawecutdg 40
- tolrff 0.02   #  Better for geometry optimization 
+# SCF procedure
+ nstep 4 # Very low value, for testing purposes
+#ecut 17  # This would be a reasonable cutoff
+ ecut 3   # Extremely low cut-off for testing purposes
+ pawecutdg 20
+ tolrff 0.02   #  Better for geometry optimization
  diemac 2.0d0
 
 # k-point grid
- kptopt 0  
+ kptopt 0
  nkpt 1
  kpt 3*0
 
@@ -71,7 +59,7 @@ occ_3img
 
 #Definition of atoms and positions
  natom 8
- typat 4*1 4*2 
+ typat 4*1 4*2
 
  xred   0.0  0.0  0.0  # Na atoms
         0.0  0.5  0.5
@@ -79,9 +67,10 @@ occ_3img
         0.5  0.5  0.0
 
         0.49 0.01 0.0  # I atoms    Number 5 and 6 get closer
-        0.01 0.49 0.0 
+        0.01 0.49 0.0
         0.0  0.0  0.5
         0.5  0.5  0.5
+
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -93,9 +82,9 @@ occ_3img
 #%% max_nprocs = 24
 #%% [extra_info]
 #%% authors = X. Gonze, C. Tantardini
-#%% keywords = 
+#%% keywords = pSIC
 #%% description =
-#%%   NaI slightly distorted, to allow self-localisation of a hole polaron, using pSIC technique. 
-#%% topics = 
+#%%   NaI slightly distorted, to allow self-localisation of a hole polaron, using pSIC technique.
+#%%   Very low cut-off for testing purposes
+#%% topics = Coulomb
 #%%<END TEST_INFO>
-

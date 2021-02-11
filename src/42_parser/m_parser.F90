@@ -3779,7 +3779,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, 
 !Local variables-------------------------------
  character,parameter :: blank=' '
 !scalars
- integer :: index_blank,index_current,index_endword,index_endwordnow,index_list_vars
+ integer :: index_blank,index_current,index_endfullword, index_endword,index_endwordnow,index_list_vars
  character(len=500) :: msg
 
 !************************************************************************
@@ -3795,7 +3795,9 @@ subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, 
 
    if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_current:index_current))/=0)then
 
+     index_endfullword = index_blank -1
      index_endword = index_blank -1
+
      if (protocol == 1) then
        ! Skip characters like : + or the digits at the end of the word
        ! Start from the blank that follows the end of the word
@@ -3838,7 +3840,6 @@ subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, 
 
        ! Treat possible logical input variables
        if(index(list_logicals,blank//string(index_current:index_endword)//blank)/=0)then
-         !write(std_out,*)"Found logical variable: ",string(index_current:index_endword)
          index_blank=index(string(index_current:),blank)+index_current-1
          if(index(' F T ',string(index_blank:index_blank+2))==0)then
            write(msg, '(8a)' )&
@@ -3860,10 +3861,10 @@ subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, 
        else
          ! If still not admitted, then there is a problem
          write(msg, '(9a)' )&
-         'Found token: `',string(index_current:index_endword),'` in the input file.',ch10,&
+         'Found token: `',string(index_current:index_endfullword),'` in the input file.',ch10,&
          'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
          'Action: check your input file. Perhaps you mistyped the input variable,',ch10,&
-&        ' or specified an image index, while this was not permitted for this input variable.'
+&        'or specified "img", although this was not permitted for this input variable.'
          ABI_ERROR(msg)
        end if
      end if

@@ -1241,7 +1241,11 @@ subroutine dtset_chkneu(dtset, nelectjell, occopt)
 
 !    (4) if dtset%iscf/=-3, dtset%nelect must equal nelect_occ
 !    if discrepancy exceeds tol11, give warning;  tol8, stop with error
-     nelect_img=zval-(dtset%cellcharge(iimage)-nelectjell)
+     if (dtset%positron/=1) then
+       nelect_img=zval-(dtset%cellcharge(iimage)-nelectjell)
+     else
+       nelect_img=one
+     end if
      if (abs(nelect_occ-nelect_img)>tol11 .and. dtset%iscf/=-3) then
 
 !      There is a discrepancy
@@ -3277,7 +3281,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar'
  list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
- list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
+ list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
  list_vars=trim(list_vars)//' pseudos ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
