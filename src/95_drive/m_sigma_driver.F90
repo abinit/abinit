@@ -2180,7 +2180,7 @@ endif
      call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,dtset%plowan_iatom,&
        &dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,dtset%plowan_nbl,dtset%plowan_nt,&
        &dtset%plowan_projcalc,dtset%acell_orig,dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,&
-       &dtset%nsppol,dtset%wtk,wanibz_in)
+       &dtset%nsppol,dtset%wtk,dtset%dmft_t2g,wanibz_in)
      call get_plowannier(wanibz_in,wanibz,dtset)
      call fullbz_plowannier(dtset,kmesh,cryst,pawang,wanibz,wanbz)
      ABI_MALLOC(rhot1,(sigp%npwx,Qmesh%nibz))

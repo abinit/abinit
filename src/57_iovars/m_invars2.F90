@@ -3518,6 +3518,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%plowan_nt=1
      dtset%plowan_it(:)=0
      dtset%plowan_realspace=1
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
+     if(tread==1) dtset%dmft_t2g=intarr(1)
      do iatom=1,dtset%natom
        lpawu=dtset%lpawu(dtset%typat(iatom))
        if (lpawu/=-1) then

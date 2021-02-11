@@ -34,16 +34,16 @@ xred 0.00 0.00 0.00  #vectors (X) of atom positions in REDuced coordinates
      0.00 0.00 0.50
 znucl  23.0 38.0 8.0
 
+kptopt 4
 ngkpt  4 4 4           #K - PoinTs grid : Real space LATTice
 nshiftk 1            #No shift
-shiftk
-      0.5 0.5 0.5
+shiftk 0.5 0.5 0.5
 istwfk *1
 
 #For all the dataset
 nsym      1
 gw_icutcoul 6
-#symchi   0
+symchi   0
 
 #----------------------------------------------------------------------------
 #-- Parameters for screening for different datasets
@@ -96,6 +96,7 @@ dmftbandf2 23       # Precise the definition of Wannier functions (also used for
 #==================================================================================
 optdriver3     3     # Screening calculation
 gwcalctyp3 2         
+awtr3 0
 getwfk3       -1     # Obtain WFK file from previous dataset
 ecuteps3      5.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
 
