@@ -1704,7 +1704,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    end if
  end if
 
- if( dtset%icoulomb/=1.and.abs(dtset%cellcharge)>tol8) then
+ if( dtset%icoulomb/=1.and.abs(dtset%cellcharge(1))>tol8) then
    write(msg, '(6a)' ) &
      ch10,' Calculation was performed for a charged system with PBC',&
      ch10,' You may consider including the monopole correction to the total energy',&

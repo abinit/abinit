@@ -697,7 +697,7 @@ type(fock_type),pointer, intent(inout) :: fock
 &   (history_level==0.or.history_level==2.or. &
 &   (history_level==3.and.electronpositron%dimocc==0))) need_scocc=.true.
    if (need_scocc) then
-     nelect=-dtset%cellcharge
+     nelect=-dtset%cellcharge(1)
      do iatom=1,dtset%natom
        nelect=nelect+dtset%ziontypat(dtset%typat(iatom))
      end do

@@ -604,6 +604,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%acell_orig,(3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%algalch,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%cellcharge,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%chrgat,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%constraint_kind,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%corecs,(mxntypat))
@@ -1853,19 +1854,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ! to provide an upper limit for mband_upper
    if(tnband==0)then
 
-!    The old name 'charge' is still tolerated. Will be removed in due time.
-     cellcharge=0.0_dp
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cellcharge',tread,'DPR')
-     if(tread==1)then
-        cellcharge=dprarr(1)
-     else
-        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
-        if(tread==1) cellcharge=dprarr(1)
-     endif
-
-     ! Only take into account negative cellcharge, to compute maximum number of bands
-     if(cellcharge > 0.0_dp)cellcharge=0.0_dp
-
 !     mband_upper=nspinor*((nint(zion_max)*natom+1)/2 - floor(cellcharge_min/2.0_dp)&
 !&     + ceiling(fband*natom-1.0d-10))
      zval=zero
@@ -2160,7 +2148,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%cd_subset_freq(1:2)=0
    dtsets(idtset)%cd_frqim_method=1
    dtsets(idtset)%cd_full_grid=0
-   dtsets(idtset)%cellcharge=zero
+   dtsets(idtset)%cellcharge(:)=zero
    dtsets(idtset)%chempot(:,:,:)=zero
    dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0

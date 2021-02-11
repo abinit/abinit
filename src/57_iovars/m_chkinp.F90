@@ -401,6 +401,24 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  builtintest
    call chkint_eq(0,0,cond_string,cond_values,ierr,'builtintest',dt%builtintest,8,(/0,1,2,3,4,5,6,7/),iout)
 
+!  cellcharge
+!  The value  of cellcharge cannot change between images, except when imgmov=6 and occopt=2
+   if(dt%imgmov/=6 .or. dt%occopt/=2)then
+     do iimage=1,dt%nimage
+       if(abs(dt%cellcharge(iimage)-dt%cellcharge(1))>tol8)then
+         write(msg, '(2a,i4,a,i4,2a,es12.4,a,i4,es12.4)' )ch10,&
+&         ' chkinp : imgmov=',imgmov,', occopt=',occopt,ch10,&
+&         ' chkinp : cellcharge(1)=',dt%cellcharge(1),', while for image=',iimage,', cellcharge=',dt%cellcharge(iimage)
+         call wrtout(iout,msg,'COLL')
+         call wrtout(std_out,  msg,'COLL')
+         write(msg, '(a,i4,2a,i4,2a,f8.2,4a)' )&
+          ' This is not allowed : cellcharge is allowed to vary only when imgmov=6 and occopt=2.',ch10,&
+&         ' Action: check the content of the input variables cellcharge, imgmov anf occopt.'
+         ABI_ERROR_NOSTOP(msg, ierr)
+       end if
+     end do
+   end if
+
 !  chkdilatmx
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chkdilatmx',dt%chkdilatmx,2,(/0,1/),iout)
 

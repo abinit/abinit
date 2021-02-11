@@ -254,7 +254,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key, tread_extrael
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image
- real(dp) :: areaxy,cellcharge,fband,kptrlen,nelectjell,sum_spinat
+ real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
  real(dp) :: tolmxde_, tolmxf_
@@ -757,14 +757,32 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'boxcutmin',tread,'DPR')
  if(tread==1) dtset%boxcutmin=dprarr(1)
 
-!The old name "charge" is still recognized. Will be disabled in due time.
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cellcharge',tread,'DPR')
- if(tread==1)then
-    dtset%cellcharge=dprarr(1)
- else
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
-   if(tread==1) dtset%cellcharge=dprarr(1)
- endif
+!Initialize cellcharge, that might differ for each image
+ cellcharge_min=huge(one)
+ do iimage=1,dtset%nimage
+   if (dtset%nimage /= 1) call wrtout(std_out, sjoin(' invars2: cellcharge, treat image number: ',itoa(iimage)))
+
+!  Read cellcharge for each image, but use it only to initialize cellcharge_min
+!  The old name 'charge' is still tolerated. Will be removed in due time.
+   dprarr(1)=dtset%cellcharge(iimage)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cellcharge',tread,'DPR')
+   if(tread==1)then
+     dtset%cellcharge(iimage)=dprarr(1)
+   else
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
+     if(tread==1) dtset%cellcharge(iimage)=dprarr(1)
+   endif
+!  Possibly overwrite cellcharge from the first image with a specific value for the current image
+   call intagm_img(dprarr,iimage,jdtset,lenstr,dtset%nimage,1,string,'cellcharge',tread_alt,'DPR')
+   if(tread_alt==1)then
+     dtset%cellcharge(iimage)=dprarr(1)
+   else
+     call intagm_img(dprarr,iimage,jdtset,lenstr,dtset%nimage,1,string,'charge',tread_alt,'DPR')
+     if(tread_alt==1) dtset%cellcharge(iimage)=dprarr(1)
+   endif
+
+   if(dtset%cellcharge(iimage) < cellcharge_min)cellcharge_min=dtset%cellcharge(iimage)
+ end do
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dosdeltae',tread,'ENE')
  if(tread==1) dtset%dosdeltae=dprarr(1)
@@ -1198,7 +1216,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end do
  end if
 
- cellcharge=dtset%cellcharge
  ! CP added
  dtset%nh_qFD=zero
  dtset%ne_qFD=zero
@@ -1234,7 +1251,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
        sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
      end do
-     zelect=zval-cellcharge
+     zelect=zval-cellcharge_min
      ! Then select the minimum number of bands, and add the required number.
      ! Note that this number might be smaller than the one computed
      ! by a slightly different formula in invars1 (difference in fband).
@@ -3391,7 +3408,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    areaxy=abs(dtset%rprimd_orig(1,1,1)*dtset%rprimd_orig(2,2,1)-dtset%rprimd_orig(1,2,1)*dtset%rprimd_orig(2,1,1))
    rhoavg=three/(four_pi*dtset%slabwsrad**3)
    nelectjell=areaxy*(dtset%slabzend-dtset%slabzbeg)*rhoavg
-   cellcharge=cellcharge-nelectjell
  end if
 
  ! Initialize occ if occopt==1 or 3 ... 8,
@@ -3399,7 +3415,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! If iscf>0, check the charge of the system, and compute nelect.
  occopt_tmp=occopt
  if(getocc/=0)occopt_tmp=1
- call dtset%chkneu(cellcharge, occopt_tmp)
+ call dtset%chkneu(dtset,nelectjell,occopt_tmp)
 
  ! Now that the occupation numbers have been initialized, can meaningfully define nbandhf.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')

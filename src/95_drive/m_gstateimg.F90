@@ -550,7 +550,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        occ(:)       =occ_img(:,iimage)
 
        call args_gs_init(args_gs, &
-&       res_img(iimage)%amu(:),res_img(iimage)%mixalch(:,:),&
+&       res_img(iimage)%amu(:),dtset%cellcharge(ii),res_img(iimage)%mixalch(:,:),&
 &       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii),&
 &       dtset%rprimd_orig(:,:,ii))
 

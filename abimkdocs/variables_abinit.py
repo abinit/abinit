@@ -1456,8 +1456,8 @@ Variable(
     varset="gstate",
     vartype="real",
     topics=['Coulomb_basic'],
-    dimensions="scalar",
-    defaultval=0,
+    dimensions=['[[nimage]]'],
+    defaultval=MultipleValue(number=None, value=0),
     mnemonics="CELL CHARGE",
     added_in_version="v9.3.4",
     text=r"""
@@ -1474,6 +1474,12 @@ To treat a neutral system, which is desired in nearly all cases, one must use
 [[cellcharge]] = 0. To treat a system missing one electron per unit cell, set [[cellcharge]] = +1.
 
 [[cellcharge]] superceeds the old [[charge]] input variable, whose name was rather unspecific.
+
+When there are several images, [[cellcharge]] might depend on the image number, but ONLY 
+when [[imgmov]]=6 and [[occopt]]=2. In the checking routine, [[nelect]] is considered
+separately for each image, while in the remaining of the code, [[nelect]](1) is propagated,
+so that [[nelect]] is still a scalar. This is consistent with the pSIC algorithm,
+see [[cite:Sadigh2015]] and [[cite:Sadigh2015a]].
 """,
 ),
 
@@ -10721,6 +10727,9 @@ This internal variable gives the number of electrons per unit cell, as
 computed from the sum of the valence electrons related to each atom (given in
 the pseudopotential, where it is called "zion"), and the input variable [[cellcharge]]:
 [[nelect]] = zion-[[cellcharge]].
+
+When there are several images, although [[cellcharge]] is an array, [[nelect]] is initialized
+with the first image, namely [[nelect]] = zion-[[cellcharge]](1).
 """,
 ),
 

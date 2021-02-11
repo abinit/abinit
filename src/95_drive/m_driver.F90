@@ -319,7 +319,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
      ! Write info on electrons.
      call ydoc%add_reals("nelect, charge, occopt, tsmear", &
-       [dtset%nelect, dtset%cellcharge, one * dtset%occopt, dtset%tsmear], &
+       [dtset%nelect, dtset%cellcharge(1), one * dtset%occopt, dtset%tsmear], &
        dict_key="electrons")
 
      ! This part depends on optdriver.
