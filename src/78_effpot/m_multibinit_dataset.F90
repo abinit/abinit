@@ -1143,9 +1143,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ncell',tread,'INT')
  if(tread==1) multibinit_dtset%ncell(1:3)=intarr(1:3)
  do ii=1,3
-   if(multibinit_dtset%ncell(ii)<0.or.multibinit_dtset%ncell(ii)>100)then
+   if(multibinit_dtset%ncell(ii)<0.or.multibinit_dtset%ncell(ii)>150)then
      write(message, '(a,i0,a,i0,3a,i0,a)' )&
-&     'ncell(',ii,') is ',multibinit_dtset%ncell(ii),', which is lower than 0 of superior than 50.',&
+&     'ncell(',ii,') is ',multibinit_dtset%ncell(ii),', which is lower than 0 of superior than 150.',&
 &     ch10,'Action: correct ncell(',ii,') in your input file.'
      MSG_ERROR(message)
    end if

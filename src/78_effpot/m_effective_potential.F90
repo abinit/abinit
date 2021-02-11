@@ -639,9 +639,9 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 
 !0 Check the size of the cell
  do ia=1,3
-   if(ncell(ia)<0.or.ncell(ia)>100)then
+   if(ncell(ia)<0.or.ncell(ia)>150)then
      write(msg, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'ncell(',ia,') is ',ncell(ia),', which is lower than 0 of superior than 50.',&
+&     'ncell(',ia,') is ',ncell(ia),', which is lower than 0 of superior than 150.',&
 &     ch10,'Action: correct ncell(',ia,').'
      MSG_ERROR(msg)
    end if
@@ -2309,10 +2309,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     end if
   end if
   do ii=1,3
-    if(eff_pot%supercell%rlatt(ii,ii)<0.or.eff_pot%supercell%rlatt(ii,ii)>100)then
+    if(eff_pot%supercell%rlatt(ii,ii)<0.or.eff_pot%supercell%rlatt(ii,ii)>150)then
       write(msg, '(a,i0,a,i2,a,a,a,i0,a)' )&
 &     'eff_pot%supercell%rlatt(',ii,') is ',int(eff_pot%supercell%rlatt(ii,ii)),&
-&     ', which is lower than 0 or superior than 100.',ch10,'Action: correct ncell(',ii,').'
+&     ', which is lower than 0 or superior than 150.',ch10,'Action: correct ncell(',ii,').'
       MSG_ERROR(msg)
     end if
   end do
