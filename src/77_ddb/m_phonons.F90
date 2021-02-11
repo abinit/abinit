@@ -687,7 +687,7 @@ end subroutine phdos_init
 !! SOURCE
 
 subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
-                   wminmax, count_wminmax, comm)
+                   wminmax, count_wminmax, comm, dos_maxmode)
 
 !Arguments -------------------------------
 !scalars
@@ -697,6 +697,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  type(crystal_t),intent(in) :: crystal
  type(ifc_type),intent(in) :: ifc
  type(phonon_dos_type),intent(out) :: phdos
+ integer, optional, intent(in) :: dos_maxmode
 !arrays
  integer,intent(in) :: dos_ngqpt(3)
  integer,intent(out) :: count_wminmax(2)
@@ -718,6 +719,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  type(htetra_t) :: htetraq
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
+ integer :: dos_maxmode_
  integer,allocatable :: bz2ibz_smap(:,:), bz2ibz(:)
  real(dp) :: speedofsound(3),speedofsound_(3)
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
@@ -845,9 +847,16 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
      nsmallq = nsmallq + wtq_ibz(iq_ibz)
    end if
 
+   dos_maxmode_ = 3*natom
+   if (present(dos_maxmode)) then
+     if (dos_maxmode > 0 .and. dos_maxmode < 3*natom) then
+       dos_maxmode_ = dos_maxmode
+     end if
+   end if
+
    select case (prtdos)
    case (1)
-     do imode=1,3*natom
+     do imode=1,dos_maxmode_
        ! Precompute \delta(w - w_{qnu}) * weight(q)
        xvals = (phdos%omega(:) - phfrq(imode)) * gaussfactor
        where (abs(xvals) < gaussmaxarg)
@@ -975,7 +984,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
      do iq_ibz=1,phdos%nqibz
        if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
 
-       do imode=1,3*natom
+       do imode=1,dos_maxmode_
          ! Compute the weights for this q-point using tetrahedron
          tmp_phfrq(:) = full_phfrq(imode,:)
          call htetraq%get_onewk_wvals(iq_ibz,bcorr0,phdos%nomega,energies,max_occ1,phdos%nqibz,tmp_phfrq,wdt)
