@@ -1090,6 +1090,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  end if
 
+!Write the msg 
 !Prevent writing if iexit==1, which at present only happens for imgmov==6 algo
  if(imgmov/=6 .or. m1geo_param%iexit==0) call wrtout([std_out, ab_out] ,msg)
 
@@ -1343,20 +1344,21 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 !Retrieve the new positions, cell parameters [and velocities ?!]
  call hist2var(acell,m1geo_param%hist_1geo,natom,rprimd,xred,DEBUG)
 
-!Store acell, rprim, xred and vel for the new iteration
- next_itimimage=itimimage_eff+1
- if (next_itimimage>ntimimage_stored)then
-   ABI_ERROR('next_itimimage>ntimimage_stored')
+!Store acell, rprim, xred and vel for the new iteration if relevant
+ if(m1geo_param%iexit==0)then
+   next_itimimage=itimimage_eff+1
+   if (next_itimimage>ntimimage_stored)then
+     ABI_ERROR('next_itimimage>ntimimage_stored')
+   endif
+   do iimage=1,nimage
+     results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:)
+     results_img(iimage,next_itimimage)%acell(:)     =acell(:)
+     results_img(iimage,next_itimimage)%rprim(:,:)   =rprim(:,:)
+!    WARNING : Should also store vel and vel_cell of course ...
+!    results_img(iimage,next_itimimage)%vel(:,:)     =vel(:,:)
+!    results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
+   end do
  endif
-
- do iimage=1,nimage
-   results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:)
-   results_img(iimage,next_itimimage)%acell(:)     =acell(:)
-   results_img(iimage,next_itimimage)%rprim(:,:)   =rprim(:,:)
-!  WARNING : Should also store vel and vel_cell of course ...
-!  results_img(iimage,next_itimimage)%vel(:,:)     =vel(:,:)
-!  results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
- end do
 
  ABI_FREE(fcart)
  ABI_FREE(vel)
