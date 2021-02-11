@@ -1,7 +1,9 @@
 # Linear and nonlinear response calculation for AlP
 # Perturbations: electric fields & atomic displacements
+# Use of 'full DFPT' method for third derivatives,
+# so we need to solve Second Order Sternheimer equation
 
-ndtset 5
+ndtset 7
 
 #DATASET1 : scf calculation: GS WF in the IBZ
 #********************************************
@@ -45,21 +47,47 @@ ndtset 5
     prtwf4    1        # save 1st-order WF on disk, will be used in other datasets
    prtden4    1        # save 1st-order density on disk, will be used in other datasets
 
-#DATASET5 : 3rd derivatives of E
+# DATASET5 : 2nd order WF derivatives with respect to k-points (d/dkdk)
+#**********************************************************************
+ rf2_dkdk5   1        # compute 2nd-order WF derivatives (d/dkdk)
+   getwfk5   2        # use GS WF from dataset 2
+   kptopt5   2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+   getddk5   3        # use 1st-order WF from dataset 3
+  prepanl5   1        # compute only needed directions for the non-linear computation
+   tolwfr5   1.0d-22  # convergence criteria on 2nd-order WF
+    prtwf5   1        # save 2nd-order WF on disk, will be used in other datasets
+
+# DATASET6 : 2nd order WF derivatives with respect to electric field and k-points (d/dkde)
+#*****************************************************************************************
+ rf2_dkde6   1        # compute 2nd-order WF derivatives (d/dkde)
+   getwfk6   2        # use GS WF from dataset 2
+   getddk6   3        # use 1st-order WF (d/dk) from dataset 3
+  get1den6   4        # use 1st-order densities from dataset 4
+ getdelfd6   4        # use 1st-order WF (d/de) from dataset 4
+  getdkdk6   5        # use 2nd-order WF (d/dkdk) from dataset 5
+  prepanl6   1        # compute only directions needed for nonlinear computation
+   tolwfr6   1.0d-22  # convergence criteria on 2nd-order WF
+   kptopt6   2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+    prtwf6   1        # save 2nd-order WF on disk, will be used in other datasets
+
+#DATASET7 : 3rd derivatives of E
 #*********************************
-   getwfk5           2     # use GS WF from dataset 2
-  get1den5           4     # use 1st-order densities from dataset 4
-   get1wf5           4     # use 1st-order WFs from dataset 4
-   kptopt5           2     # use Half Brillouin Zone (only time-reversal symmetry taken into account)
-optdriver5           5     # compute 3rd order derivatives of the energy
-  d3e_pert1_elfd5    1     # activate electric field for 1st perturbation...
-  d3e_pert1_phon5    1     # ...and also atomic displacements...
- d3e_pert1_atpol5    1 2   # ...for all atoms (so here only 1 and 2)...
-   d3e_pert1_dir5    1 1 1 # ...for all directions (for both atomic displacements and electric fields)
-  d3e_pert2_elfd5    1     # activate electric field for 2nd perturbation...
-   d3e_pert2_dir5    1 1 1 # ...for all directions
-  d3e_pert3_elfd5    1     # activate electric field for 3rd perturbation...
-   d3e_pert3_dir5    1 1 1 # ...for all directions
+   getwfk7           2     # use GS WF from dataset 2
+   getddk7           3     # use 1st-order WF (d/dk) from dataset 3
+  get1den7           4     # use 1st-order densities from dataset 4
+   get1wf7           4     # use 1st-order WFs from dataset 4
+  getdkde7           6     # use 2nd-order WF (d/dkde) from dataset 6
+   kptopt7           2     # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+optdriver7           5     # compute 3rd order derivatives of the energy
+  usepead7           0     # no use of pead method, so use full DFPT instead
+  d3e_pert1_elfd7    1     # activate electric field for 1st perturbation...
+  d3e_pert1_phon7    1     # ...and also atomic displacements...
+ d3e_pert1_atpol7    1 2   # ...for all atoms (so here only 1 and 2)...
+   d3e_pert1_dir7    1 1 1 # ...for all directions (for both atomic displacements and electric fields)
+  d3e_pert2_elfd7    1     # activate electric field for 2nd perturbation...
+   d3e_pert2_dir7    1 1 1 # ...for all directions
+  d3e_pert3_elfd7    1     # activate electric field for 3rd perturbation...
+   d3e_pert3_dir7    1 1 1 # ...for all directions
 
 #Definition of the unit cell
 # these cell parameters were derived from a relaxation run done with the
@@ -118,22 +146,20 @@ prtwf 0
 prtden 0
 prteig 0
 
-##############################################################
-# This section is used only for regression testing of ABINIT #
-##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi
 #%% [files]
 #%% files_to_test =
-#%%   tnlo_2.abo, tolnlines= 332, tolabs=  2.000e-04, tolrel=  9.000e-02
+#%%   tnlofDFPT_2.abo, tolnlines=332 , tolabs=2.0e-4, tolrel=9.0e-2
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors =  J. Zwanziger, L. Baguet, M. Veithen
+#%% authors = L. Baguet
 #%% keywords = NC, DFPT, NONLINEAR
 #%% description =
 #%%   Linear and nonlinear response calculation for AlP
-#%%   Perturbations: electric fields & atomic displacements
+#%%   Perturbations: electric fields & atomic displacements.
+#%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
+#%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
 #%%<END TEST_INFO>
