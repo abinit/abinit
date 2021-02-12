@@ -5084,6 +5084,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  integer :: nband_k,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn
  integer :: nkpg,npw_k
  integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_pawopt,nonlop_signs,nonlop_tim
+ integer :: nonlop_tw_choice,nonlop_tw_nnlout,nonlop_tw_pawopt,nonlop_tw_signs
  integer :: nproc,nterms,nterms3,projbd_scprod_io,projbd_tim,projbd_useoverlap,spaceComm
  integer :: with_vectornd
  real(dp) :: arg,dub_dsg_r,dub_dsg_i,dug_dsb_r,dug_dsb_i
@@ -5096,6 +5097,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: chern_total(2,3),gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1)
+ real(dp) :: nonlop_tw_enlout(6)
  real(dp) :: orbmag_total(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwaveg1(:,:)
@@ -5200,9 +5202,9 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  ! 1:3 orbmag CC
  ! 4:6 orbmag VV II
  ! 7:9 orbmag VV I+III
- ! 10:12 chern
- ! 13:15 alternate orbmag H
- ! 16:18 alternate orbmag E
+ ! 10:12 orbmag Tr[\rho^0 H^1] with D^0_ij part
+ ! 13:15 orbmag -Tr[\rho^0 S^1] part
+ ! 16:18 chern
  ABI_MALLOC(orbmag_terms,(nterms3))
  orbmag_terms = zero
  traceH0 = zero
@@ -5339,7 +5341,40 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        & getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc)
      Enk = DOT_PRODUCT(cwavef(1,1:npw_k),ghc(1,1:npw_k)) &
        & + DOT_PRODUCT(cwavef(2,1:npw_k),ghc(2,1:npw_k))
-     traceH0=traceH0+Enk*trnrm
+     ! traceH0=traceH0+Enk*trnrm
+
+     ! compute tr[\rho^0 H^1] part
+     ! i/2 eps_abg <u_nk|dp/dk_b>D^0_ij<dp/dk_g|u_nk> =
+     ! i/2 2*i*Im <u_nk|dp/dk_b>D^0_ij<dp/dk_g|u_nk> =
+     ! -Im<u_nk|dp/dk_b>D^0_ij<dp/dk_g|u_nk> 
+     nonlop_tw_choice = 53
+     nonlop_tw_pawopt = 1
+     nonlop_tw_signs = 1
+     nonlop_tw_nnlout = 6
+     call nonlop(nonlop_tw_choice,nonlop_cpopt,cwaveprj,nonlop_tw_enlout,gs_hamk,adir,&
+       & lambda_ndat,mpi_enreg,ndat,nonlop_tw_nnlout,nonlop_tw_pawopt,nonlop_tw_signs,gsc,&
+       & nonlop_tim,cwavef,gvnlc)
+     do adir=1,3
+       bdir = modulo(adir,3)+1
+       orbmag_terms(9+adir) = orbmag_terms(9+adir) - nonlop_tw_enlout(2*adir)*trnrm
+     end do
+
+     ! compute -tr[\rho^0 S^1] part
+     ! -i/2 eps_abg <u_nk|dp/dk_b>S^0_ij<dp/dk_g|u_nk> =
+     ! i/2 2*i*Im <u_nk|dp/dk_b>S^0_ij<dp/dk_g|u_nk> =
+     ! -Im<u_nk|dp/dk_b>S^0_ij<dp/dk_g|u_nk> 
+     nonlop_tw_choice = 53
+     nonlop_tw_pawopt = 3
+     nonlop_tw_signs = 1
+     nonlop_tw_nnlout = 6
+     call nonlop(nonlop_tw_choice,nonlop_cpopt,cwaveprj,nonlop_tw_enlout,gs_hamk,adir,&
+       & lambda_ndat,mpi_enreg,ndat,nonlop_tw_nnlout,nonlop_tw_pawopt,nonlop_tw_signs,gsc,&
+       & nonlop_tim,cwavef,gvnlc)
+     do adir=1,3
+       bdir = modulo(adir,3)+1
+       orbmag_terms(12+adir) = orbmag_terms(12+adir) - nonlop_tw_enlout(2*adir)*trnrm
+     end do
+
 
      do adir =1, 3
        bdir = modulo(adir,3)+1
@@ -5369,12 +5404,10 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
        ! chern needs i*eps_abg*<du/db|S|du/dg> so contract with eps_abg
        ! -2*Im<du/db|S|du/dg> = 2*Im<du/dg|S|du/db>
-       ! 10:12 chern 
+       ! 16:18 chern 
        doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
              & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir))
-       orbmag_terms(9+adir) = orbmag_terms(9+adir) - two*doti*trnrm
-       ! 16:18 alternate orbmag E term 
-       orbmag_terms(15+adir) = orbmag_terms(15+adir) - doti*Enk*trnrm
+       orbmag_terms(15+adir) = orbmag_terms(15+adir) - two*doti*trnrm
 
        cwavedsdb(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
        cwavedsdg(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
@@ -5390,16 +5423,6 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        ! -Im(VVI)*Enk
        ! 7:9 orbmag VV I+III
        orbmag_terms(6+adir)=orbmag_terms(6+adir)-(dub_dsg_i-dug_dsb_i)*Enk*trnrm
-
-
-       ! alternate orbmag <du/dk|H|du/dk> directly
-       cwaveg1(1:2,1:npw_k) = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
-       call getghc(getghc_cpopt,cwaveg1,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
-         & getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc)
-       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),ghc(1,1:npw_k)) + &
-             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),ghc(2,1:npw_k))
-       ! 13:15 alternate orbmag H term 
-       orbmag_terms(12+adir) = orbmag_terms(12+adir) - doti*trnrm
 
      end do
 
@@ -5444,12 +5467,12 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_FREE(buffer2)
  end if
 
- do iterms = 1, nterms
-   orbmag_terms((iterms-1)*3+1:iterms*3) = &
-     & ucvol*MATMUL(gprimd,orbmag_terms((iterms-1)*3+1:iterms*3))/(two_pi*two_pi)
- end do
+ !do iterms = 1, nterms
+ !  orbmag_terms((iterms-1)*3+1:iterms*3) = &
+ !    & ucvol*MATMUL(gprimd,orbmag_terms((iterms-1)*3+1:iterms*3))/(two_pi*two_pi)
+ !end do
 
- orbmag_terms(10:12) = orbmag_terms(10:12)/two_pi
+ orbmag_terms(16:18) = orbmag_terms(16:18)/two_pi
  
  do iterms = 1, nterms
    write(std_out,'(a,i4,3es16.8)')'JWZ debug orbmag_terms term ',iterms,&
@@ -5459,16 +5482,13 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  end do
 
  orbmag_total=zero;chern_total=zero
- orbmag_total(1,1:3)=orbmag_terms(1:3)+orbmag_terms(4:6)+orbmag_terms(7:9)
+ orbmag_total(1,1:3)=orbmag_terms(1:3)+orbmag_terms(4:6)+&
+   & orbmag_terms(7:9)+orbmag_terms(10:12)+orbmag_terms(13:15)
  call output_orbmag(1,orbmag_total)
- orbmag_total(1,1:3)=orbmag_terms(13:15)+orbmag_terms(16:18)
- call output_orbmag(1,orbmag_total)
-
-
- chern_total(1,1:3)=orbmag_terms(10:12)
+ chern_total(1,1:3)=orbmag_terms(16:18)
  call output_orbmag(2,chern_total)
 
- write(std_out,'(a,es16.8)')'JWZ debug traceH0 ',traceH0
+! write(std_out,'(a,es16.8)')'JWZ debug traceH0 ',traceH0
 
 !---------------------------------------------------
 ! deallocate memory
