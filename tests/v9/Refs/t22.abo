@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 11 Feb 2021.
-- ( at 21h20 )
+.Starting date : Fri 12 Feb 2021.
+- ( at 22h01 )
   
 - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__baguetl/tests/Test_suite/v9_t22/t22.abi
 - output file    -> t22.abo
@@ -1175,6 +1175,31 @@ total_energy_dc_eV  : -5.17956204140939E+03
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES:
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 1, timimage: 1, image: 3, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -1.90246339E+02
+entropy   :   0.00000000E+00
+fermie    :  -1.13386961E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.17341792E-02,  -2.52897098E-05,   0.00000000E+00, ]
+- [ -2.52897098E-05,   2.17341792E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.17439032E-02, ]
+pressure_GPa:  -6.3954E+02
+cartesian_forces: # hartree/bohr
+- [ -1.32289703E-04,  -1.32289703E-04,   0.00000000E+00, ]
+- [  1.18590428E-03,  -1.18590428E-03,   0.00000000E+00, ]
+- [ -1.18590428E-03,   1.18590428E-03,   0.00000000E+00, ]
+- [  1.32289703E-04,   1.32289703E-04,   0.00000000E+00, ]
+- [ -9.83516659E-03,   9.83516659E-03,   0.00000000E+00, ]
+- [  9.83516659E-03,  -9.83516659E-03,   0.00000000E+00, ]
+- [ -1.57681523E-02,  -1.57681523E-02,   8.64641898E-22, ]
+- [  1.57681523E-02,   1.57681523E-02,  -8.64641898E-22, ]
+force_length_stats: {min:   1.87085892E-04, max:   2.22995348E-02, mean:   9.51819215E-03, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     2
@@ -2120,6 +2145,31 @@ total_energy_dc_eV  : -5.17962913401084E+03
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  2.609E-03 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 1, timimage: 2, image: 3, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -1.90273160E+02
+entropy   :   0.00000000E+00
+fermie    :  -1.25721932E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.17883191E-02,  -4.56467146E-05,   0.00000000E+00, ]
+- [ -4.56467146E-05,   2.17883191E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.19212293E-02, ]
+pressure_GPa:  -6.4234E+02
+cartesian_forces: # hartree/bohr
+- [  1.29775599E-02,   1.29775599E-02,   0.00000000E+00, ]
+- [ -1.39719815E-02,   1.39719815E-02,   0.00000000E+00, ]
+- [  1.39719815E-02,  -1.39719815E-02,   0.00000000E+00, ]
+- [ -1.29775599E-02,  -1.29775599E-02,   0.00000000E+00, ]
+- [ -9.56562129E-02,   9.56562129E-02,   2.55069360E-22, ]
+- [  9.56562129E-02,  -9.56562129E-02,  -2.55069360E-22, ]
+- [  4.23009598E-02,   4.23009598E-02,   0.00000000E+00, ]
+- [ -4.23009598E-02,  -4.23009598E-02,   0.00000000E+00, ]
+force_length_stats: {min:   1.83530412E-02, max:   1.35278314E-01, mean:   5.83033279E-02, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     3
@@ -3060,6 +3110,31 @@ total_energy_dc_eV  : -5.17614755835557E+03
 - sigma(2 2)=  6.33696121E+02  sigma(3 1)=  0.00000000E+00
 - sigma(3 3)=  6.51027944E+02  sigma(2 1)=  1.72439935E+00
 
+--- !ResultsGS
+iteration_state: {dtset: 1, timimage: 3, image: 3, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -1.90141307E+02
+entropy   :   0.00000000E+00
+fermie    :  -1.40629930E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.38501154E-02,   1.97474509E-05,   0.00000000E+00, ]
+- [  1.97474509E-05,   2.38501154E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.54018410E-02, ]
+pressure_GPa:  -7.1691E+02
+cartesian_forces: # hartree/bohr
+- [  6.84431564E-02,   6.84431564E-02,   0.00000000E+00, ]
+- [ -4.38311267E-01,   4.38311267E-01,   0.00000000E+00, ]
+- [  4.38311267E-01,  -4.38311267E-01,   0.00000000E+00, ]
+- [ -6.84431564E-02,  -6.84431564E-02,   0.00000000E+00, ]
+- [  9.45438728E-02,  -9.45438728E-02,   1.38342704E-21, ]
+- [ -9.45438728E-02,   9.45438728E-02,  -1.38342704E-21, ]
+- [  4.90312756E-01,   4.90312756E-01,  -6.91713519E-22, ]
+- [ -4.90312756E-01,  -4.90312756E-01,   6.91713519E-22, ]
+force_length_stats: {min:   9.67932401E-02, max:   6.93406949E-01, mean:   3.85942789E-01, }
+...
+
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -3296,10 +3371,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         18.7  wall=         19.0
+- Proc.   0 individual time (sec): cpu=         19.1  wall=         19.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  18 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.7  wall=         19.0
++Overall time at end (sec) : cpu=         19.1  wall=         19.3
