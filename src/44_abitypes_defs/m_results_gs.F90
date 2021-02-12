@@ -851,7 +851,6 @@ subroutine results_gs_yaml_write(results, unit, cryst, occopt, with_conv, info)
  end if
 
  ! Write lattice parameters
- !call ydoc%add_real2d('rprimd', cryst%rprimd, real_fmt="(f11.7)")
  call ydoc%add_real2d('lattice_vectors', cryst%rprimd, real_fmt="(f11.7)")
  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
  call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
@@ -894,13 +893,8 @@ subroutine results_gs_yaml_write(results, unit, cryst, occopt, with_conv, info)
  species = [(cryst%symbol_iatom(ii), ii=1,cryst%natom)]
 
  call ydoc%add_real2d('xred', cryst%xred, slist=species, real_fmt="(es12.4)")
- !call ydoc%add_paired_real2d('xred_xcart_specie', &
- !  cryst%xred, cryst%xcart, slist=species, real_fmt="(es12.4)")
 
  if (results%fcart(1,1) /= MAGIC_UNDEF) then
-   !call ydoc%add_paired_real2d('cartesian_forces_and_xred', &
-   !  results%fcart, cryst%xred, chars=species, real_fmt="(es12.4)")
-
    call ydoc%add_real2d('cartesian_forces', results%fcart, comment="hartree/bohr")
    fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
    ! Write force statistics
