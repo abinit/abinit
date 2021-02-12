@@ -37,6 +37,7 @@ module m_gstateimg
  use m_errors
  use m_rec
  use m_args_gs
+ use m_results_gs
  use m_results_img
  use m_scf_history
  use m_io_redirect
@@ -1272,7 +1273,8 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 !Local variables-------------------------------
 !scalars
  integer :: ihist,iimage,natom,next_itimimage,nspden,nsppol
- real(dp) :: deltae,diffor,energy,entropy,fermie,res2,residm
+ real(dp) :: deltae,diffor,etotal,entropy,fermie,res2,residm
+ type(results_gs_type) :: results_gs_lincomb
 !arrays
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),strten(6),vel_cell(3,3)
  real(dp),allocatable :: fcart(:,:),vel(:,:),xred(:,:)
@@ -1304,30 +1306,34 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  m1geo_param%hist_1geo%time(ihist)=zero
 
 !Compute energy, entropy, fermie, forces and stresses for the 1geo : take the weighted average.
- energy=zero
+!Compute maximum of deltae,diffor,res2,residm
+ etotal=zero
  entropy=zero
  fermie=zero
  fcart(:,:)=zero
  strten(:)=zero
+ deltae=zero
+ diffor=zero
+ res2=zero
+ residm=zero
  do iimage=1,nimage
-   energy=energy+results_img(iimage,itimimage_eff)%results_gs%energy*m1geo_param%mixesimgf(iimage)
+   etotal=etotal+results_img(iimage,itimimage_eff)%results_gs%etotal*m1geo_param%mixesimgf(iimage)
    entropy=entropy+results_img(iimage,itimimage_eff)%results_gs%entropy*m1geo_param%mixesimgf(iimage)
    fermie=fermie+results_img(iimage,itimimage_eff)%results_gs%fermie*m1geo_param%mixesimgf(iimage)
    fcart(:,:)=fcart(:,:)+results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage)
    strten(:) =strten(:) +results_img(iimage,itimimage_eff)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage)
+   if( deltae<results_img(iimage,itimimage_eff)%results_gs%deltae ) deltae=results_img(iimage,itimimage_eff)%results_gs%deltae
+   if( diffor<results_img(iimage,itimimage_eff)%results_gs%diffor ) diffor=results_img(iimage,itimimage_eff)%results_gs%diffor
+   if( res2<results_img(iimage,itimimage_eff)%results_gs%res2 ) res2=results_img(iimage,itimimage_eff)%results_gs%res2
+   if( residm<results_img(iimage,itimimage_eff)%results_gs%residm ) residm=results_img(iimage,itimimage_eff)%results_gs%residm
  enddo
-!Compute maximum of deltae,diffor,res2,residm
- deltae=maxval(results_img(1:nimage,itimimage_eff)%results_gs%deltae)
- diffor=maxval(results_img(1:nimage,itimimage_eff)%results_gs%diffor)
- res2=maxval(results_img(1:nimage,itimimage_eff)%results_gs%res2)
- residm=maxval(results_img(1:nimage,itimimage_eff)%results_gs%residm)
 
 !Set up a results_gs datastructure with the linear combination of images
  nspden=results_img(1,itimimage_eff)%results_gs%nspden
  nsppol=results_img(1,itimimage_eff)%results_gs%nsppol
  call init_results_gs(natom,nspden,nsppol,results_gs_lincomb)
  call copy_results_gs(results_img(1,itimimage_eff)%results_gs,results_gs_lincomb) 
- results_gs_lincomb%energy=energy
+ results_gs_lincomb%etotal=etotal
  results_gs_lincomb%entropy=entropy
  results_gs_lincomb%fermie=fermie
  results_gs_lincomb%fcart=fcart
@@ -1338,9 +1344,10 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  results_gs_lincomb%residm=residm
 
 !Echo result_gs_lincomb
- call results_gs_lincomb%yaml_write(ab_out, crystal, dtset%occopt, dtset%nstep > 0, info="Linear combination of ground state results")
+ call results_gs_lincomb%yaml_write(ab_out, info="Linear combination of ground state results")
 
 !Destroy result_gs_lincomb
+ call destroy_results_gs(results_gs_lincomb)
 
 !Store fcart and strten in hist_1geo
  m1geo_param%hist_1geo%fcart(:,:,ihist)=fcart(:,:)
