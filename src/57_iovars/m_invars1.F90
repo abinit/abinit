@@ -116,7 +116,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,tread_alt,treadh,treadm,tread_pseudos,cnt, tread_geo
+ integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
  integer :: treads, use_gpu_cuda
  real(dp) :: cpus
  character(len=500) :: msg
