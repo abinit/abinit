@@ -9,7 +9,7 @@
 # Then one should update the present script to put the current year (at present, valid for going from 2020 to 2021 !) !
 #
 # Then should be called from the top directory  (here a list of generic filenames, ordered on the basis of the alphanumeric string)
-# developers/maintainers/change_year.sh *.ac */*.ac */*/*.ac */*/*.am */*/*.bat */*/*/*.bat */*/*.c */*/*/*.c */*/*.cf */*/*.cnf */*/*.com */*/*.conf */*/*.cu */*/*.csh 
+# developers/maintainers/change_year.sh *.ac */*.ac */*/*.ac */*/*.am */*/*.c */*/*/*.c */*/*.cnf */*/*.conf */*/*.cu */*/*.csh 
 # developers/maintainers/change_year.sh */*/*.dep */*/*.dir */*.env */*/*.finc */*/*.f90 */*/*.F90 */*/*/*.F90 *.in */*.in */*/*.in 
 # developers/maintainers/change_year.sh */*/*.h */*/*/*.h */*/*.help */*/*/*.help */*/*.html */*/*/*/html */*/*/*.log */*/*.m */*/*/*.m */*/make* */*/*/*bindings*
 # developers/maintainers/change_year.sh */*/*.mk */*/*.m4 */*/*/*.m4 */*/*/*/*.m4 */*/Makefile */*/*.pl */*/*/*.pl bindings/README fallbacks/README tests/README */*/README 
