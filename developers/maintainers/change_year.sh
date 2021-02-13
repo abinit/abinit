@@ -16,6 +16,7 @@
 # developers/maintainers/change_year.sh */*.sh */*/*.src */*/*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*/*.txt */*/*_ */*/*/*_ */*/*_ext
 # developers/maintainers/change_year.sh */*/*/*/*_ */*/*/*/*.src */*/*/*/*.c */*/*/*/*.finc */*/*/*/*.h */*/*/*/*.F90 */*/*/*/*.f90 */*/*/*/*.in */*/*/*/*.cu
 # developers/maintainers/change_year.sh *.md */*.md */*/*.md */*/*-fc */*/*/*abo */*/*/*/*abo
+# developers/maintainers/change_year.sh */*/*/*.out
 
 # Please do not change the permission of py files. Not all py modules must be executable! 
 # Simply issue the in-place command  ! DOES NOT WORK ON MY MAC ?!
@@ -34,6 +35,7 @@
 # developers/maintainers/change_year.sh abichecks/scripts/run-basic-tests.sh 
 # developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* INSTALL 
 # developers/maintainers/change_year.sh tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref scripts/configure/upgrade-build-config packages/debian/copyright 
+# developers/maintainers/change_year.sh doc/tutorial/paw2_assets/tpaw2_*.abo*
 # 
 # Moreover, one should complement the present script with a search 
 # grep 'past_year ABINIT' * */* */*/* */*/*/* */*/*/*/*
