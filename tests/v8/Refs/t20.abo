@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.3.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Sat 13 Feb 2021.
+- ( at 05h33 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t20/t20.in
-- output file    -> t20.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__baguetl/tests/Test_suite/v8_t20/t20.abi
+- output file    -> t20.abo
 - root for input  files -> t20i
 - root for output files -> t20o
 
@@ -282,8 +282,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.05372
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__baguetl/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__baguetl/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
 -  8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -436,6 +436,25 @@ band_energy         : -5.61441142556550E+00
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES:
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 1, timimage: 1, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396975E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.58714336E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.73700149E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.61776847E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.25914134E-03, ]
+pressure_GPa:  -1.0409E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   1.16187173E-02, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.16187173E-02, ]
+force_length_stats: {min:   1.16187173E-02, max:   1.16187173E-02, mean:   1.16187173E-02, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     2
@@ -584,6 +603,25 @@ band_energy         : -5.59665819728439E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  5.664E-05 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 1, timimage: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396409E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.86492405E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.72401846E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.60584185E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.33780669E-03, ]
+pressure_GPa:  -1.0462E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -1.62216510E-02, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.62216510E-02, ]
+force_length_stats: {min:   1.62216510E-02, max:   1.62216510E-02, mean:   1.62216510E-02, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     3
@@ -731,6 +769,25 @@ band_energy         : -5.60690778139438E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  1.118E-04 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 1, timimage: 3, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19397527E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.70346374E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.73156307E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.61282455E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.29214853E-03, ]
+pressure_GPa:  -1.0431E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -1.97986467E-04, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.97986467E-04, ]
+force_length_stats: {min:   1.97986467E-04, max:   1.97986467E-04, mean:   1.97986467E-04, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     4
@@ -876,6 +933,25 @@ band_energy         : -5.60703735450494E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  1.627E-08 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 1, timimage: 4, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19397527E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.70147244E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.73165581E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.61290929E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.29158065E-03, ]
+pressure_GPa:  -1.0431E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   3.52860137E-06, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.52860137E-06, ]
+force_length_stats: {min:   3.52860137E-06, max:   3.52860137E-06, mean:   3.52860137E-06, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     5
@@ -1020,6 +1096,25 @@ band_energy         : -5.60703462641864E+00
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES has reached energy convergence
  with Average[Abs(Etotal(t)-Etotal(t-dt))]=  5.578E-12<tolimg=  1.000E-08
 ================================================================================
+
+--- !ResultsGS
+iteration_state: {dtset: 1, timimage: 5, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19397527E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.70150268E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.73165454E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.61290830E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.29159070E-03, ]
+pressure_GPa:  -1.0431E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -1.65983297E-08, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.65983297E-08, ]
+force_length_stats: {min:   1.65983297E-08, max:   1.65983297E-08, mean:   1.65983297E-08, }
+...
+
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -1340,6 +1435,25 @@ band_energy         : -5.77930755173017E+00
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES:
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 2, timimage: 1, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396975E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.58714336E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.73700149E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.61776847E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.25914134E-03, ]
+pressure_GPa:  -1.0409E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   1.16187173E-02, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.16187173E-02, ]
+force_length_stats: {min:   1.16187173E-02, max:   1.16187173E-02, mean:   1.16187173E-02, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     2
@@ -1635,6 +1749,25 @@ band_energy         : -5.76000999689357E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  4.767E-05 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 2, timimage: 2, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396409E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.86492405E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.72401846E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.60584185E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.33780669E-03, ]
+pressure_GPa:  -1.0462E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -1.62216510E-02, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.62216510E-02, ]
+force_length_stats: {min:   1.62216510E-02, max:   1.62216510E-02, mean:   1.62216510E-02, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     3
@@ -1928,6 +2061,25 @@ band_energy         : -5.77115513067687E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  1.063E-04 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 2, timimage: 3, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19397527E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.70346374E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.73156307E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.61282455E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.29214853E-03, ]
+pressure_GPa:  -1.0431E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -1.97986467E-04, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.97986467E-04, ]
+force_length_stats: {min:   1.97986467E-04, max:   1.97986467E-04, mean:   1.97986467E-04, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     4
@@ -2217,6 +2369,25 @@ band_energy         : -5.77129596784723E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  6.313E-08 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 2, timimage: 4, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19397527E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.70147244E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.73165581E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.61290929E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.29158065E-03, ]
+pressure_GPa:  -1.0431E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   3.52860137E-06, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.52860137E-06, ]
+force_length_stats: {min:   3.52860137E-06, max:   3.52860137E-06, mean:   3.52860137E-06, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     5
@@ -2503,6 +2674,25 @@ band_energy         : -5.77129313699804E+00
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES has reached energy convergence
  with Average[Abs(Etotal(t)-Etotal(t-dt))]=  1.111E-09<tolimg=  1.000E-08
 ================================================================================
+
+--- !ResultsGS
+iteration_state: {dtset: 2, timimage: 5, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19397527E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.70150268E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.73165454E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.61290830E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.29159070E-03, ]
+pressure_GPa:  -1.0431E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -1.65983297E-08, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.65983297E-08, ]
+force_length_stats: {min:   1.65983297E-08, max:   1.65983297E-08, mean:   1.65983297E-08, }
+...
+
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -2823,6 +3013,25 @@ band_energy         : -5.77930755173017E+00
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES:
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 3, timimage: 1, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396795E+01
+entropy   :   0.00000000E+00
+fermie    :  -4.84612681E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.60024801E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.93276977E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.24043504E-03, ]
+pressure_GPa:  -1.0566E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   1.22929593E-02, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.22929593E-02, ]
+force_length_stats: {min:   1.22929593E-02, max:   1.22929593E-02, mean:   1.22929593E-02, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     2
@@ -3118,6 +3327,25 @@ band_energy         : -5.75891483246834E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  7.001E-05 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 3, timimage: 2, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396191E+01
+entropy   :   0.00000000E+00
+fermie    :  -5.12755067E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.58731794E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.91962248E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.32278490E-03, ]
+pressure_GPa:  -1.0621E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -1.69029971E-02, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.69029971E-02, ]
+force_length_stats: {min:   1.69029971E-02, max:   1.69029971E-02, mean:   1.69029971E-02, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     3
@@ -3411,6 +3639,25 @@ band_energy         : -5.77061031171341E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  1.285E-04 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 3, timimage: 3, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19397417E+01
+entropy   :   0.00000000E+00
+fermie    :  -4.96502631E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.59477064E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.92727854E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.27530311E-03, ]
+pressure_GPa:  -1.0589E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -2.24047443E-04, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.24047443E-04, ]
+force_length_stats: {min:   2.24047443E-04, max:   2.24047443E-04, mean:   2.24047443E-04, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     4
@@ -3700,6 +3947,25 @@ band_energy         : -5.77077103478041E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  9.369E-08 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 3, timimage: 4, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19397417E+01
+entropy   :   0.00000000E+00
+fermie    :  -4.96284875E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.59487050E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.92737951E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.27466098E-03, ]
+pressure_GPa:  -1.0589E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   4.26775336E-06, ]
+- [  0.00000000E+00,   0.00000000E+00,  -4.26775336E-06, ]
+force_length_stats: {min:   4.26775336E-06, max:   4.26775336E-06, mean:   4.26775336E-06, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     5
@@ -3986,6 +4252,25 @@ band_energy         : -5.77076765352978E+00
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES has reached energy convergence
  with Average[Abs(Etotal(t)-Etotal(t-dt))]=  1.358E-09<tolimg=  1.000E-08
 ================================================================================
+
+--- !ResultsGS
+iteration_state: {dtset: 3, timimage: 5, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19397417E+01
+entropy   :   0.00000000E+00
+fermie    :  -4.96288608E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.59486886E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.92737803E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.27467299E-03, ]
+pressure_GPa:  -1.0589E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -1.47799048E-08, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.47799048E-08, ]
+force_length_stats: {min:   1.47799048E-08, max:   1.47799048E-08, mean:   1.47799048E-08, }
+...
+
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -4306,6 +4591,25 @@ band_energy         : -5.77930755173017E+00
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES:
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 4, timimage: 1, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19394273E+01
+entropy   :   0.00000000E+00
+fermie    :   5.52810485E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.68569919E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   8.34278789E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.97854681E-03, ]
+pressure_GPa:  -1.2756E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   2.17323461E-02, ]
+- [  0.00000000E+00,   0.00000000E+00,  -2.17323461E-02, ]
+force_length_stats: {min:   2.17323461E-02, max:   2.17323461E-02, mean:   2.17323461E-02, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     2
@@ -4601,6 +4905,25 @@ band_energy         : -5.74386239816878E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  5.994E-04 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 4, timimage: 2, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19393698E+01
+entropy   :   0.00000000E+00
+fermie    :   5.33683098E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.68367579E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   8.30586959E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.10265629E-03, ]
+pressure_GPa:  -1.2840E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -2.33090409E-02, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.33090409E-02, ]
+force_length_stats: {min:   2.33090409E-02, max:   2.33090409E-02, mean:   2.33090409E-02, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     3
@@ -4895,6 +5218,25 @@ band_energy         : -5.76185502744723E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  5.846E-04 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 4, timimage: 3, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396443E+01
+entropy   :   0.00000000E+00
+fermie    :   5.43599342E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.68414264E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   8.32543401E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.03890034E-03, ]
+pressure_GPa:  -1.2797E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -8.01000026E-04, ]
+- [  0.00000000E+00,   0.00000000E+00,   8.01000026E-04, ]
+force_length_stats: {min:   8.01000026E-04, max:   8.01000026E-04, mean:   8.01000026E-04, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     4
@@ -5186,6 +5528,25 @@ band_energy         : -5.76250990281216E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  1.016E-05 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 4, timimage: 4, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396446E+01
+entropy   :   0.00000000E+00
+fermie    :   5.43938531E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.68417912E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   8.32610711E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.03660210E-03, ]
+pressure_GPa:  -1.2795E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   3.22069432E-05, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.22069432E-05, ]
+force_length_stats: {min:   3.22069432E-05, max:   3.22069432E-05, mean:   3.22069432E-05, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     5
@@ -5475,6 +5836,25 @@ band_energy         : -5.76248505512983E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  3.787E-07 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 4, timimage: 5, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396446E+01
+entropy   :   0.00000000E+00
+fermie    :   5.43924774E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.68417935E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   8.32608293E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.03669067E-03, ]
+pressure_GPa:  -1.2795E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -1.43709284E-07, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.43709284E-07, ]
+force_length_stats: {min:   1.43709284E-07, max:   1.43709284E-07, mean:   1.43709284E-07, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     6
@@ -5757,6 +6137,25 @@ band_energy         : -5.76248484792885E+00
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES has reached energy convergence
  with Average[Abs(Etotal(t)-Etotal(t-dt))]=  1.684E-09<tolimg=  1.000E-08
 ================================================================================
+
+--- !ResultsGS
+iteration_state: {dtset: 4, timimage: 6, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396446E+01
+entropy   :   0.00000000E+00
+fermie    :   5.43924883E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.68417886E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   8.32608219E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.03669089E-03, ]
+pressure_GPa:  -1.2795E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   1.16288212E-08, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.16288212E-08, ]
+force_length_stats: {min:   1.16288212E-08, max:   1.16288212E-08, mean:   1.16288212E-08, }
+...
+
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -6077,6 +6476,25 @@ band_energy         : -5.77930755173017E+00
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES:
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 5, timimage: 1, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19393373E+01
+entropy   :   0.00000000E+00
+fermie    :   9.23318759E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.00193176E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.91779436E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.88501529E-03, ]
+pressure_GPa:  -1.3538E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   2.51035556E-02, ]
+- [  0.00000000E+00,   0.00000000E+00,  -2.51035556E-02, ]
+force_length_stats: {min:   2.51035556E-02, max:   2.51035556E-02, mean:   2.51035556E-02, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     2
@@ -6371,6 +6789,25 @@ band_energy         : -5.73861181024998E+00
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES:
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  8.840E-04 Hartree
  Moving images of the cell...
+
+--- !ResultsGS
+iteration_state: {dtset: 5, timimage: 2, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19393243E+01
+entropy   :   0.00000000E+00
+fermie    :   9.13725640E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.00865384E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.86920033E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.01965687E-03, ]
+pressure_GPa:  -1.3629E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -2.41412317E-02, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.41412317E-02, ]
+force_length_stats: {min:   2.41412317E-02, max:   2.41412317E-02, mean:   2.41412317E-02, }
+...
+
 
 
 ================================================================================
@@ -6667,6 +7104,25 @@ band_energy         : -5.75809752362765E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  7.959E-04 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 5, timimage: 3, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396396E+01
+entropy   :   0.00000000E+00
+fermie    :   9.18498508E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.00434924E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.89377734E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.95421772E-03, ]
+pressure_GPa:  -1.3585E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -1.11069485E-03, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.11069485E-03, ]
+force_length_stats: {min:   1.11069485E-03, max:   1.11069485E-03, mean:   1.11069485E-03, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     4
@@ -6958,6 +7414,25 @@ band_energy         : -5.75905938032728E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  2.116E-05 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 5, timimage: 4, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396402E+01
+entropy   :   0.00000000E+00
+fermie    :   9.18725176E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.00418882E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.89492411E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.95102868E-03, ]
+pressure_GPa:  -1.3583E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   5.54876778E-05, ]
+- [  0.00000000E+00,   0.00000000E+00,  -5.54876778E-05, ]
+force_length_stats: {min:   5.54876778E-05, max:   5.54876778E-05, mean:   5.54876778E-05, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     5
@@ -7247,6 +7722,25 @@ band_energy         : -5.75901430726062E+00
  Average[Abs(Etotal(t)-Etotal(t-dt))]=  9.698E-07 Hartree
  Moving images of the cell...
 
+--- !ResultsGS
+iteration_state: {dtset: 5, timimage: 5, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396402E+01
+entropy   :   0.00000000E+00
+fermie    :   9.18714255E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.00420006E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.89487386E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.95118048E-03, ]
+pressure_GPa:  -1.3583E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,  -2.89491949E-07, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.89491949E-07, ]
+force_length_stats: {min:   2.89491949E-07, max:   2.89491949E-07, mean:   2.89491949E-07, }
+...
+
+
 
 ================================================================================
  LINEAR COMBINATION OF CONSTRAINED DFT ENERGIES - TIME STEP     6
@@ -7530,6 +8024,25 @@ band_energy         : -5.75901401571670E+00
  with Average[Abs(Etotal(t)-Etotal(t-dt))]=  5.043E-09<tolimg=  1.000E-08
 ================================================================================
 
+--- !ResultsGS
+iteration_state: {dtset: 5, timimage: 6, image: 2, }
+comment   : Linear combination of ground state results
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
+etotal    :  -3.19396402E+01
+entropy   :   0.00000000E+00
+fermie    :   9.18714195E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.00419861E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.89487186E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.95118088E-03, ]
+pressure_GPa:  -1.3583E+02
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   1.51466099E-08, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.51466099E-08, ]
+force_length_stats: {min:   1.51466099E-08, max:   1.51466099E-08, mean:   1.51466099E-08, }
+...
+
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -7807,10 +8320,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         34.7  wall=         41.8
+- Proc.   0 individual time (sec): cpu=         25.5  wall=         26.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.7  wall=         41.8
+.Delivered   9 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=         25.5  wall=         26.6
