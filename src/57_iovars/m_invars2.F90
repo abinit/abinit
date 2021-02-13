@@ -3398,6 +3398,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  end do
 
+ nelectjell=zero
  if(dtset%jellslab/=0)then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slabwsrad',tread,'LEN')
    if(tread==1) dtset%slabwsrad=dprarr(1)
