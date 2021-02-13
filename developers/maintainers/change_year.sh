@@ -50,10 +50,10 @@ do
 #sed 's&(C) 2019-2020 ABINIT&(C) 2019-2021 ABINIT&' $file
 #for different values replacing 2019 
 #The following uses a regexp. This change the two last digits of the year.
- sed -e 's&\(([cC]) ....-20\)19\( ABINIT\)&\120\2&' $file > $file.tmp
+ sed -e 's&\(([cC]) ....-20\)20\( ABINIT\)&\121\2&' $file > $file.tmp
  rm $file
 #The next line is also needed, as some developers decide to use this syntax, and some the other ...
- sed -e 's&\(([cC]) 20\)19\( ABINIT\)&\119-2020\2&' $file.tmp > $file
+ sed -e 's&\(([cC]) 20\)20\( ABINIT\)&\120-2021\2&' $file.tmp > $file
  rm $file.tmp
  echo "file $file treated "
 done
