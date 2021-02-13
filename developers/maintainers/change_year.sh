@@ -20,6 +20,8 @@
 # Please do not change the permission of py files. Not all py modules must be executable! 
 # Simply issue the in-place command  ! DOES NOT WORK ON MY MAC ?!
 # sed -iTMP 's!2020 ABINIT!2021 ABINIT!' */*.py */*/*.py */*/*/*.py
+# followed by
+# rm */*pyTMP */*/*pyTMP */*/*/*pyTMP
 #
 # In the previous list, files without an extension are not treated (except the Makefile and README files - warning some README are only links ...), 
 # and */*/*.sh are not treated (except tests/*/*.sh), because of conflict with the present script file extension !!
@@ -29,8 +31,8 @@
 # developers/maintainers/change_year.sh config/scripts/a* config/scripts/clean* config/scripts/u* config/m4*/
 # developers/maintainers/change_year.sh developers/maintainers/change2.sh developers/maintainers/change.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
 # developers/maintainers/change_year.sh developers/maintainers/suppress.sh scripts/*/*.sh scripts/*/*/*.sh developers/maintainers/update_refs.sh 
-# developers/maintainers/change_year.sh abichecks/scripts/run-basic-tests.sh *.md */*.md */*/*.md config.h
-# developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* fallbacks/config/scripts/make* INSTALL 
+# developers/maintainers/change_year.sh abichecks/scripts/run-basic-tests.sh 
+# developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* INSTALL 
 # developers/maintainers/change_year.sh tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref scripts/configure/upgrade-build-config packages/debian/copyright 
 # 
 # Moreover, one should complement the present script with a search 

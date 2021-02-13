@@ -6,7 +6,7 @@
 !!  First-order response function contributions to the quadrupole and flexoelectric tensors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
+!!  Copyright (C) 2018-2020 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,12 +69,6 @@ contains
 !! FUNCTION
 !!  This routine computes the band and kpt resolved contributions
 !!  to the quadrupole tensor.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -956,12 +950,6 @@ end subroutine dfpt_qdrpwf
 !! FUNCTION
 !!  This routine computes the band and kpt resolved contributions
 !!  to the flexoelectric tensor.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions at k
@@ -1859,12 +1847,6 @@ end subroutine dfpt_ciflexowf
 !!  This routine computes the band and kpt resolved contributions
 !!  to the first q-gradient of the dynamical matrix.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions at k
@@ -2502,12 +2484,6 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !! FUNCTION
 !!  This routine computes the band and kpt resolved contributions
 !!  to the flexoelectric tensor.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -3475,12 +3451,6 @@ end subroutine dfpt_isdqwf
 !! FUNCTION
 !!  This routine computes the frozen wf contribution to the q-gradient of the
 !!  internal strain tensor
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)

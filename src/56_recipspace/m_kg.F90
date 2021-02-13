@@ -1257,12 +1257,6 @@ end subroutine mkkpgcart
 !! kinetic energy operator in reciprocal
 !! space at given k point wrt cartesian q components.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (DRH, XG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  effmass=effective mass for electrons (1. in common case)
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations

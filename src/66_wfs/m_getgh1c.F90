@@ -1346,12 +1346,6 @@ end subroutine getdc1
 !! and second q-gradient (at q=0) of the 1st-order perturbed Hamiltonian.
 !! The first (second) derivative direction is inferred from idir (qdir1).
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  cwave(2,npw*nspinor)=input wavefunction, in reciprocal space
 !!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C> (and 1st derivatives)

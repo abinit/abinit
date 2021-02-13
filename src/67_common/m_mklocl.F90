@@ -1309,13 +1309,6 @@ end subroutine vlocalstr
 !! atomic displacement potential from the appropriate
 !! atomic pseudopotential with structure and derivative factor.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MR,MS)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cplex: if 1, real space 1-order functions on FFT grid
@@ -1575,13 +1568,6 @@ end subroutine dfpt_vlocaldq
 !! Compute 2nd q-gradient (at q=0) of the local part of 1st-order 
 !! atomic displacement potential from the appropriate
 !! atomic pseudopotential with structure and derivative factor.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MR,MS)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -1865,13 +1851,6 @@ end subroutine dfpt_vlocaldqdq
 !! perturbation.
 !! Cartesian coordinates are employed to define the direction of the 
 !! metric perturbation and the two q-gradients.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MR,MS)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cplex: if 1, real space 1-order functions on FFT grid
