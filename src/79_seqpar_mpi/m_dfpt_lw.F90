@@ -8,7 +8,7 @@
 !!  flexoelectric tensor) from the DFPT long-wave approach.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2020 ABINIT group (MR,MS)
+!!  Copyright (C) 2018-2021 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

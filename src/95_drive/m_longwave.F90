@@ -7,7 +7,7 @@
 !!  DFPT long-wave calculation of spatial dispersion properties
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2020 ABINIT group (MR, MS)
+!!  Copyright (C) 2019-2021 ABINIT group (MR, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
