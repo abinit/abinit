@@ -9,14 +9,14 @@
 # Then one should update the present script to put the current year (at present, valid for going from 2020 to 2021 !) !
 #
 # Then should be called from the top directory  (here a list of generic filenames, ordered on the basis of the alphanumeric string)
-# developers/maintainers/change_year.sh *.ac */*.ac */*/*.ac */*/*.am */*/*.c */*/*/*.c */*/*.cnf */*/*.conf */*/*.cu */*/*.csh 
-# developers/maintainers/change_year.sh */*/*.finc */*/*.f90 */*/*.F90 */*/*/*.F90 *.in */*.in */*/*.in 
+# developers/maintainers/change_year.sh *.ac */*.ac */*/*.ac */*/*.am */*/*/*/*.am */*/*.c */*/*/*.c */*/*.cnf */*/*.conf */*/*.cu */*/*.csh 
+# developers/maintainers/change_year.sh */*/*.finc */*/*/*/*.finc */*/*.f90 */*/*.F90 */*/*/*.F90 *.in */*.in */*/*.in 
 # developers/maintainers/change_year.sh */*/*.h */*/*/*.h */*/*/*.help */*/*.html */*/*/*.m */*/make* */*/*/*bindings*
 # developers/maintainers/change_year.sh */*/*.m4 */*/*/*.m4 */*/*/*/*.m4 */*/Makefile */*/*.pl */*/*/*.pl bindings/README fallbacks/README tests/README */*/README 
-# developers/maintainers/change_year.sh */*.sh */*/*.src */*/*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*/*.txt */*/*_ */*/*/*_ */*/*_ext
+# developers/maintainers/change_year.sh */*.sh */*/*.src */*/*/*.src */*/*/*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*/*.txt */*/*_ */*/*/*_ */*/*_ext
 # developers/maintainers/change_year.sh */*/*/*/*_ */*/*/*/*.src */*/*/*/*.c */*/*/*/*.finc */*/*/*/*.h */*/*/*/*.F90 */*/*/*/*.f90 */*/*/*/*.in */*/*/*/*.cu
 # developers/maintainers/change_year.sh *.md */*.md */*/*.md */*/*-fc */*/*/*abo */*/*/*/*abo
-# developers/maintainers/change_year.sh */*/*/*.out
+# developers/maintainers/change_year.sh */*/*/*.out */*/*/*.output
 
 # Please do not change the permission of py files. Not all py modules must be executable! 
 # Simply issue the in-place command  ! DOES NOT WORK ON MY MAC ?!
@@ -31,7 +31,7 @@
 # So, also issue, one after the other (cut and paste the following):
 # developers/maintainers/change_year.sh config/scripts/a* config/scripts/clean* config/scripts/u* config/m4*/
 # developers/maintainers/change_year.sh developers/maintainers/change2.sh developers/maintainers/change.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
-# developers/maintainers/change_year.sh developers/maintainers/suppress.sh scripts/*/*.sh scripts/*/*/*.sh developers/maintainers/update_refs.sh 
+# developers/maintainers/change_year.sh developers/maintainers/suppress.sh scripts/*/*.sh scripts/*/*/*.sh shared/*/*.sh developers/maintainers/update_refs.sh 
 # developers/maintainers/change_year.sh abichecks/scripts/run-basic-tests.sh 
 # developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* INSTALL 
 # developers/maintainers/change_year.sh tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref scripts/configure/upgrade-build-config packages/debian/copyright 
