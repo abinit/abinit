@@ -6,7 +6,7 @@
 !!  Helper functions to compute integrals
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2020 ABINIT group (Camilo Espejo)
+!!  Copyright (C) 2010-2021 ABINIT group (Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
