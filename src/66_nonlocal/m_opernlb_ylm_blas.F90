@@ -217,6 +217,9 @@ subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  if (cplex_fac/=2) then
    MSG_ERROR('Only cplex_fac=2 is available for now.')
  end if
+ if (nloalg(1)/=3.and.nloalg(1)/=4) then
+   MSG_ERROR('nloalg should be 3 or 4.')
+ end if
 ! if (istwf_k/=1) then
 !   MSG_ERROR('Only istwf_k=1 is available for now.')
 ! end if
