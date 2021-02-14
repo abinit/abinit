@@ -213,14 +213,8 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
    MSG_ERROR('Only abs(choice)<=1 is available for now.')
  end if
  if (nloalg(1)/=3.and.nloalg(1)/=4) then
-   MSG_ERROR('nloalg should be 3 or 4.')
+   MSG_ERROR('nloalg(1) should be 3 or 4.')
  end if
-! if (cplex/=2) then
-!   MSG_ERROR('Only cplex=2 is available for now.')
-! end if
-! if (istwf_k/=1) then
-!   MSG_ERROR('Only istwf_k=1 is available for now.')
-! end if
 
 !Useful variables
  choice_=abs(choice)
@@ -356,13 +350,12 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
            il=mod(indlmn(1,ilmn),4)+1
            ctmp = cil(il)
            buffer = zero
-           if (real(ctmp)>tol14) then
+           if (abs(real(ctmp))>tol14) then
              scal_pointer => scalr
              fact = real(ctmp)
-           end if
-           if (aimag(ctmp)>tol14) then
+           else
              scal_pointer => scali
-             fact = aimag(ctmp)
+             fact = -aimag(ctmp)
            end if
            do ipw=1,npw
              buffer = buffer + scal_pointer(ipw) * ffnl_loc(ipw,ilmn)
