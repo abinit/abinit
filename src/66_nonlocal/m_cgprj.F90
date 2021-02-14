@@ -283,7 +283,7 @@ contains
      end if
 
 !    Compute <p_i|c> scalars (and derivatives) for this block of atoms
-     if (abs(choice_)>1) then
+     if (abs(choice_)>1.or.nloalg(1)==2) then
        call timab(1201,1,tsec)
        call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
 &       ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
