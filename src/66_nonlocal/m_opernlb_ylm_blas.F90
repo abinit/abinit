@@ -211,19 +211,6 @@ subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  if (abs(choice)>1) then
    MSG_ERROR('Only abs(choice)<=1 is available for now.')
  end if
- if (cplex/=2) then
-   MSG_ERROR('Only cplex=2 is available for now.')
- end if
- if (cplex_fac/=2) then
-   MSG_ERROR('Only cplex_fac=2 is available for now.')
- end if
-! if (istwf_k/=1) then
-!   MSG_ERROR('Only istwf_k=1 is available for now.')
-! end if
-! if (paw_opt/=4) then
-!   MSG_ERROR('Only paw_opt=4 is available for now.')
-! end if
- !
 !DDK not compatible with istwkf > 1
  if(cplex==1.and.(any(cplex_dgxdt(:)==2).or.any(cplex_d2gxdt(:)==2)))then
    MSG_BUG("opernlb_ylm_blas+ddk not compatible with istwfk>1")
@@ -299,24 +286,46 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !    Scale gxfac with 4pi/sqr(omega).(-i)^l
      call timab(1151,1,tsec)
      if (paw_opt/=3) then
-       do ilmn=1,nlmn
-         il=mod(indlmn(1,ilmn),4)+1
-         ctmp = cil(il) * cmplx( gxfac(1,ilmn,ia,ispinor), gxfac(2,ilmn,ia,ispinor), kind=DP )
-         gxfac_(ilmn,1) =  real(ctmp)
-         gxfac_(ilmn,2) = aimag(ctmp)
-       end do
+       if (cplex_fac==2) then
+         do ilmn=1,nlmn
+           il=mod(indlmn(1,ilmn),4)+1
+           ctmp = cil(il) * cmplx( gxfac(1,ilmn,ia,ispinor), gxfac(2,ilmn,ia,ispinor), kind=DP )
+           gxfac_(ilmn,1) =  real(ctmp)
+           gxfac_(ilmn,2) = aimag(ctmp)
+         end do
+       else if (cplex_fac==1) then
+         do ilmn=1,nlmn
+           il=mod(indlmn(1,ilmn),4)+1
+           ctmp = cil(il) * gxfac(1,ilmn,ia,ispinor)
+           gxfac_(ilmn,1) =  real(ctmp)
+           gxfac_(ilmn,2) = aimag(ctmp)
+         end do
+       else
+         MSG_BUG('Error : should not be possible to be here')
+       end if
      end if
      call timab(1151,2,tsec)
 
 !    Scale gxfac_sij with 4pi/sqr(omega).(-i)^l
      call timab(1152,1,tsec)
      if (paw_opt>=3) then
-       do ilmn=1,nlmn
-         il=mod(indlmn(1,ilmn),4)+1
-         ctmp = cil(il) * cmplx( gxfac_sij(1,ilmn,ia,ispinor), gxfac_sij(2,ilmn,ia,ispinor), kind=DP )
-         gxfacs_(ilmn,1) =  real(ctmp)
-         gxfacs_(ilmn,2) = aimag(ctmp)
-       end do
+       if (cplex==2) then
+         do ilmn=1,nlmn
+           il=mod(indlmn(1,ilmn),4)+1
+           ctmp = cil(il) * cmplx( gxfac_sij(1,ilmn,ia,ispinor), gxfac_sij(2,ilmn,ia,ispinor), kind=DP )
+           gxfacs_(ilmn,1) =  real(ctmp)
+           gxfacs_(ilmn,2) = aimag(ctmp)
+         end do
+       else if (cplex==1) then
+         do ilmn=1,nlmn
+           il=mod(indlmn(1,ilmn),4)+1
+           ctmp = cil(il) * gxfac_sij(1,ilmn,ia,ispinor)
+           gxfacs_(ilmn,1) =  real(ctmp)
+           gxfacs_(ilmn,2) = aimag(ctmp)
+         end do
+       else
+         MSG_BUG('Error : should not be possible to be here')
+       end if
      end if
      call timab(1152,2,tsec)
 
