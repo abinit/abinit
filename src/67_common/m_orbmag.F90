@@ -5548,47 +5548,15 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        & + DOT_PRODUCT(cwavef(2,1:npw_k),ghc(2,1:npw_k))
      ! traceH0=traceH0+Enk*trnrm
 
-     !! compute tr[\rho^0 H^1] part
-     !! i/2 eps_abg <u_nk|dp/dk_b>D^0_ij<dp/dk_g|u_nk> =
-     !! i/2 2*i*Im <u_nk|dp/dk_b>D^0_ij<dp/dk_g|u_nk> =
-     !! -Im<u_nk|dp/dk_b>D^0_ij<dp/dk_g|u_nk> 
-     !nonlop_tw_choice = 53
-     !nonlop_tw_pawopt = 1
-     !nonlop_tw_signs = 1
-     !nonlop_tw_nnlout = 6
-     !call nonlop(nonlop_tw_choice,nonlop_cpopt,cwaveprj,nonlop_tw_enlout,gs_hamk,adir,&
-     !  & lambda_ndat,mpi_enreg,ndat,nonlop_tw_nnlout,nonlop_tw_pawopt,nonlop_tw_signs,gsc,&
-     !  & nonlop_tim,cwavef,gvnlc)
-     !do adir=1,3
-     !  bdir = modulo(adir,3)+1
-     !  orbmag_terms(9+adir) = orbmag_terms(9+adir) - nonlop_tw_enlout(2*adir)*trnrm
-     !end do
-
-     !! compute -tr[\rho^0 S^1] part
-     !! -i/2 eps_abg <u_nk|dp/dk_b>S^0_ij<dp/dk_g|u_nk> =
-     !! i/2 2*i*Im <u_nk|dp/dk_b>S^0_ij<dp/dk_g|u_nk> =
-     !! -Im<u_nk|dp/dk_b>S^0_ij<dp/dk_g|u_nk> 
-     !nonlop_tw_choice = 53
-     !nonlop_tw_pawopt = 3
-     !nonlop_tw_signs = 1
-     !nonlop_tw_nnlout = 6
-     !call nonlop(nonlop_tw_choice,nonlop_cpopt,cwaveprj,nonlop_tw_enlout,gs_hamk,adir,&
-     !  & lambda_ndat,mpi_enreg,ndat,nonlop_tw_nnlout,nonlop_tw_pawopt,nonlop_tw_signs,gsc,&
-     !  & nonlop_tim,cwavef,gvnlc)
-     !do adir=1,3
-     !  bdir = modulo(adir,3)+1
-     !  orbmag_terms(12+adir) = orbmag_terms(12+adir) - nonlop_tw_enlout(2*adir)*trnrm
-     !end do
-
-
      do adir =1, 3
        bdir = modulo(adir,3)+1
        gdir = modulo(adir+1,3)+1
 
-       ! compute conduction band contribution to orbmag
-       ! -i/2 * eps_{abg}\sum<du_nk/dg|H^0|du_nk/db>
-       ! compute <du/dg|H^0|du/db> - <du/db|H^0|du/dg> = +2*i*Im<du/dg|H^0|du/db>
-       ! orbmag contribution = Im<du/dg|H^0|du/db>
+       ! 1:3 orbmag CC
+       ! -i/2 eps_abg <du/dg|P_c H0 P_c|du/db> =
+       ! -i/2 (<du/dg|P_c H0 P_c|du/db> - <du/db|P_c H0 P_c|du/dg>) =
+       ! -i/2 (2 i Im<du/dg|P_c H0 P_c|du/db>) =
+       ! Im<du/dg|P_c H0 P_c|du/db>
 
        cwaveb1(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
        call getghc(getghc_cpopt,cwaveb1,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
@@ -5596,42 +5564,48 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
        cwaveg1(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
        doti=-DOT_PRODUCT(cwaveg1(2,:),ghc(1,:))+DOT_PRODUCT(cwaveg1(1,:),ghc(2,:))
- 
-       ! 1:3 orbmag CC
+
        orbmag_terms(adir) = orbmag_terms(adir) + doti*trnrm
        
-       ! <du/db|S|du/dg> contributes to orbmag_vv
-       ! vv needs (i/2)*eps_abg*<du/db|S|du/dg>Enk = -Im<du/db|S|du/dg>Enk =
-       ! +Im<du/dg|S|du/db>Enk
        ! 4:6 orbmag VV II
+       ! vv needs (+i/2)*eps_abg*<du/db|P_c S P_c|du/dg>Enk =
+       ! +i/2 (<du/db|P_c S P_c|du/dg> - <du/dg|P_c S P_c|du/db>)Enk =
+       ! -i/2 (<du/dg|P_c S P_c|du/db> - <du/db|P_c S P_c|du/dg>)Enk =
+       ! Im<du/dg|P_c S P_c|du/db>Enk
        doti=-DOT_PRODUCT(cwaveg1(2,:),gsc(1,:))+DOT_PRODUCT(cwaveg1(1,:),gsc(2,:))
        orbmag_terms(3+adir) = orbmag_terms(3+adir) + doti*Enk*trnrm
 
-       ! chern needs i*eps_abg*<du/db|S|du/dg> so contract with eps_abg
-       ! -2*Im<du/db|S|du/dg> = 2*Im<du/dg|S|du/db>
-       ! 16:18 chern 
-       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
-             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir))
-       orbmag_terms(15+adir) = orbmag_terms(15+adir) - two*doti*trnrm
 
+       !VV I term gives (i/2)eps_abg <du/db|P_c dS/dg|u>Enk
+       !VV III term gives (i/2)eps_abg <du|dS/db P_c|du/dg>Enk
+       ! combined with eps_abg contraction they contribute
+       ! -Im(VVI)*Enk
+       ! 7:9 orbmag VV I+III
        cwavedsdb(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
        cwavedsdg(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
 
        dug_dsb_i = -DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(1,:)) + DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(2,:))
        dub_dsg_i = -DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(2,:))
-
-       !VV I term gives (i/2)eps_abg <du/db|dS/dg|u>Enk
-       !VV III term gives (i/2)eps_abg <du|dS/db|du/dg>Enk
-       ! combined with eps_abg contraction they contribute
-       ! -Im(VVI)*Enk
-       ! 7:9 orbmag VV I+III
        orbmag_terms(6+adir)=orbmag_terms(6+adir)-(dub_dsg_i-dug_dsb_i)*Enk*trnrm
-
+      
+       ! Tr[-\rho^0 S^1 \rho^0 H^0] contribution 
+       ! overall sign needs to be checked carefully 
        call make_S1trace_k(adir,cprj_k,dtset,Enk,nn,nband_k,pawtab,S1trace)
-       orbmag_terms(12+adir) = orbmag_terms(12+adir) + real(S1trace)*trnrm
-
+       orbmag_terms(9+adir) = orbmag_terms(9+adir) + real(S1trace)*trnrm
+       
+       ! Tr[\rho^0 H^1] contribution:
+       ! i/2 eps_abg <u|dp/db>D_ij^0<dp/dg|u>
        call make_rhorij1_k(adir,cprj_k,dtset,nn,nband_k,paw_ij,pawtab,rhorij1)
-       orbmag_terms(9+adir) = orbmag_terms(9+adir) + real(rhorij1)*trnrm
+       orbmag_terms(12+adir) = orbmag_terms(12+adir) + real(rhorij1)*trnrm
+
+       ! chern needs i*eps_abg*<du/db|S|du/dg> 
+       ! N.B. the Chern number does not involve H0 so no projection onto conduction
+       ! and valence bands, the "S" here is really I+S from PAW
+       ! i eps_abg <du/db|S|du/dg> = -2*Im<du/db|S|du/dg> 
+       ! 16:18 chern 
+       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
+             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir))
+       orbmag_terms(15+adir) = orbmag_terms(15+adir) - two*doti*trnrm
 
      end do
 
