@@ -1268,7 +1268,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ! CP added 
    if (occopt==9)then
 ! Read the valence band index
-      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ival',tread,'INT')
+      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ivalence',tread,'INT')
       if (tread==1) dtset%ivalence=intarr(1)
       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqFD',tread,'DPR')
       if (tread==1)then

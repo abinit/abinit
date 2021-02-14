@@ -1663,7 +1663,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  end if
 
  if (anaddb_dtset%gruns_nddbs /=0 .and. anaddb_dtset%ifcflag /=1) then
-   ABI_ERROR("ifcflag must be 1 for Grunesein calculation")
+   ABI_ERROR("ifcflag must be 1 for Gruneisen calculation")
  end if
 
  if (anaddb_dtset%vs_qrad_tolkms(1) /= zero .and. anaddb_dtset%ifcflag /=1) then

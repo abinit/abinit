@@ -480,6 +480,10 @@ subroutine outvar_i_n (dtsets,iout,&
    ABI_FREE(istwfk_2)
  end if
 
+!ivalence
+ intarr(1,:)=dtsets(:)%ivalence
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ivalence','INT',0)
+
 !ixc
  intarr(1,:)=dtsets(:)%ixc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixc','INT',0)

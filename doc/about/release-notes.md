@@ -12,8 +12,8 @@ are relative to modifications/improvements of ABINIT v9.4 with respect to v9.2.
 
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, V. Brousseau, F. Bruneval,
-W. Chen, M. Cote, O. Gingras, M. Giantomassi, X. Gonze, F. Goudreault,
-B. Guster, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto, 
+W. Chen, M. Cote, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault,
+B. Guster, T. Karatsu, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto, 
 S. Ponce, Y. Pouillon, G.-M. Rignanese, M. Rodriguez, M. Schmitt,
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
 
@@ -55,8 +55,9 @@ By M. Giantomassi (MR757,MR719,MR718)
 with populations of electrons (in the conduction bands) and holes (in the valence bands)
 has been implemented (gapped materials only, of course).
 This has been used e.g. in [[cite:Paillard2019]].
-See the variable [[occopt]]=9. Also, related input variables : ival (or ivalence) ? (TO BE DOCUMENTED),
-nqFD (TO BE DOCUMENTED). NOT : ne_qFD, nh_qFD.
+See the variables [[occopt]]=9, and nqFD. (TO BE DOCUMENTED). 
+Also, related input variables : ivalence  (TO BE DOCUMENTED. NOTE XG20_02_14: I have replaced ival by ivalence in m_invars2 and in the test v9_91),
+Internal variables ne_qFD and nh_qFD are presently initialized to nqFD, which is NOT INTERNAL..
 See test [[test:v9_91]].
 
 By Ch. Paillard (MR755).
@@ -181,7 +182,7 @@ By V. Brousseau (MR736)
 
 **D.10** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
 in the upgrade of tutorials)..
-By B. Amadon, F. Bruneval, G. Petretto, Y. Pouillon, M. Torrent, J. Zwanziger, 
+By B. Amadon, F. Bruneval, T. Karatsu, G. Petretto, Y. Pouillon, M. Torrent, J. Zwanziger. 
 
 * * *
  

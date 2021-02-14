@@ -29,7 +29,7 @@ Prepare release notes ... [=add a new -first- section to doc/about/release-notes
 D.1 To ease comparison, checkout starting revision of corresponding development version (see Wiki planning)
     e.g. in a separate develop, issue git checkout <commitnumber>
 D.2 Identify new tests : issue ls tests/*/Input/*abi > list.abi in the two dirs, and compare (wc, then diff)
-D.3 Identify new input variables : git diff  of the src/44_abitypes_defs/m_dtset.F90 file,
+D.3 Identify new input variables : diff of the src/44_abitypes_defs/m_dtset.F90 file,
    also m_anaddb_dataset.F90, m_multibinit_dataset.F90, m_tdep_readwrite.F90 (and possibly chkvars or dtset_copy)
 D.4 Identify new tutorial doc files.
 D.5 From the developers : scan the merge requests
