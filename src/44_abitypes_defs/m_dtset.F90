@@ -3224,7 +3224,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
  list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot'
- list_vars=trim(list_vars)//' irdvdw ival' ! CP added ival for occopt 9 case
+ list_vars=trim(list_vars)//' irdvdw ivalence' ! CP added ival for occopt 9 case
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'
 !K
