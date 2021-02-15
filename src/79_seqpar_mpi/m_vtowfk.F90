@@ -478,9 +478,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
 &       subham,subovl,use_subovl,0,mpi_enreg%me_g0)
        call timab(585,2,tsec)
-       !LTEST
-       !call cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,'after subdiago',mpi_enreg)
-       !LTEST
        call timab(578,1,tsec)
        call cprj_rotate(cprj_cwavef_bands,evec,&
          &   gs_hamk%dimcprj,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%lmnmax,mpi_enreg,&
@@ -1348,6 +1345,7 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
          cg(1,ii)=-cg(1,ii)
          cg(2,ii)=-cg(2,ii)
        end do
+       if (do_cprj) call pawcprj_zaxpby((/zero,zero/),(/-one,zero/),cprj(:,iband:iband),cprj(:,iband:iband))
        if(useoverlap==1)then
          indx=igsc+(iband-1)*npw_k
          do ii=1+indx,npw_k+indx

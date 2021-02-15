@@ -4882,7 +4882,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,ovl_mat,useoverlap,
        if(istwf_k/=2)then
          summ=zero;ii0=1
        else
-         if (me_g0 ==1) then
+         if (me_g0==1) then
            summ=half*vecnm(1,1+nelem*(ivec-1)+icg)**2
            ii0=2
          else
@@ -4903,7 +4903,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,ovl_mat,useoverlap,
      !write(std_out,'(a,es21.10e3)') '(pw_ortho) sum',summ
      !LTEST
 
-     if(istwf_k>=2)summ=two*summ
+     !if(istwf_k>=2)summ=two*summ
      xnorm = sqrt(abs(summ)) ;  summ=1.0_dp/xnorm
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
      do ii=1+nelem*(ivec-1)+icg,nelem*ivec+icg
@@ -4944,7 +4944,8 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,ovl_mat,useoverlap,
 !    Remove projection in all higher states.
      if (ivec<nvec) then
 
-       if(istwf_k==1)then
+!       if(istwf_k==1)then
+       if(.true.)then
 !        Cannot use time-reversal symmetry
 
          if (useoverlap==1) then ! Using overlap.

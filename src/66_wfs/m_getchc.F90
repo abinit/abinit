@@ -283,16 +283,27 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
    if (gs_ham%nvloc==1) then
 
      chc = zero
-     do i3=1,gs_ham%n6
-       do i2=1,gs_ham%n5
-         do i1=1,gs_ham%n4
-           z_tmp(1) = cwavef_r(1,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)+cwavef_r(2,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
-           z_tmp(2) = cwavef_r(2,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)-cwavef_r(1,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
-           chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(1)
-           chc(2) = chc(2) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(2)
+     if (gs_ham%istwf_k==1) then
+       do i3=1,gs_ham%n6
+         do i2=1,gs_ham%n5
+           do i1=1,gs_ham%n4
+             z_tmp(1) = cwavef_r(1,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)+cwavef_r(2,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
+             z_tmp(2) = cwavef_r(2,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)-cwavef_r(1,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
+             chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(1)
+             chc(2) = chc(2) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(2)
+           end do
          end do
        end do
-     end do
+     else
+       do i3=1,gs_ham%n6
+         do i2=1,gs_ham%n5
+           do i1=1,gs_ham%n4
+             chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)
+           end do
+         end do
+       end do
+       chc(2)=zero
+     end if
      chc = chc / dble(nffttot)
 
    else
@@ -336,6 +347,8 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
      paw_opt=gs_ham%usepaw ; if (sij_opt/=0) paw_opt=sij_opt+3
      lambda_ndat = lambda
 
+     enlout=zero
+     enlout_im=zero
      call nonlop(choice,cpopt_here,cwaveprj,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,1,&
 &     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
 &     cprjin_left=cwaveprj_left,enlout_im=enlout_im,ndat_left=ndat)
@@ -360,20 +373,50 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
      call timab(1372,1,tsec)
 !    Add modified kinetic contributions
      !  to <CP|H|C(n,k)>.
-     do idat=1,ndat
-!      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
-       do ispinor=1,my_nspinor
-         do ig=1,npw_k2
-           igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-           if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-             chc(1) = chc(1) +  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
-             chc(1) = chc(1) +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
-             chc(2) = chc(2) +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(re,igspinor)
-             chc(2) = chc(2) -  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(im,igspinor)
+     if (gs_ham%istwf_k==1) then
+       do idat=1,ndat
+!        !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+         do ispinor=1,my_nspinor
+           do ig=1,npw_k2
+             igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+             if (kinpw_k2(ig)<huge(zero)*1.d-11) then
+               chc(1) = chc(1) +  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+               chc(1) = chc(1) +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
+               chc(2) = chc(2) +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(re,igspinor)
+               chc(2) = chc(2) -  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(im,igspinor)
+             end if
+           end do ! ig
+         end do ! ispinor
+       end do ! idat
+     else if (gs_ham%istwf_k==2.and.mpi_enreg%me_g0==1) then
+       do idat=1,ndat
+         do ispinor=1,my_nspinor
+           do ig=2,npw_k2
+             igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+             if (kinpw_k2(ig)<huge(zero)*1.d-11) then
+               chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+               chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
+             end if
+           end do ! ig
+           if (kinpw_k2(ig)<huge(zero)*1.d-11) then
+             igspinor=1+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+             chc(1) = chc(1) + kinpw_k2(1)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
            end if
-         end do ! ig
-       end do ! ispinor
-     end do ! idat
+         end do ! ispinor
+       end do ! idat
+     else
+       do idat=1,ndat
+         do ispinor=1,my_nspinor
+           do ig=1,npw_k2
+             igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+             if (kinpw_k2(ig)<huge(zero)*1.d-11) then
+               chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+               chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
+             end if
+           end do ! ig
+         end do ! ispinor
+       end do ! idat
+     end if
 !    Special case of PAW + Fock : only return Fock operator contribution in gvnlxc
 !     if (gs_ham%usepaw==1 .and. has_fock)then
 !       gvnlxc=gvnlxc-gvnlc
@@ -468,19 +511,21 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
 
 !Local variables-------------------------------
 !scalars
- integer :: choice,idat,idir
+ integer :: choice,idat,idir,istwf_k
  integer :: npw,nspinor,paw_opt,select_k_,signs,tim_nonlop,nnlout
  !character(len=500) :: msg
 !arrays
- real(dp) :: tsec(2)
+ real(dp) :: tsec(2),dum
  real(dp),allocatable :: gsc(:,:),gvnlxc(:,:)
  real(dp),allocatable :: enlout(:),enlout_im(:)
+ real(dp),pointer :: cwavef_left_idat(:,:)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
 
  call timab(1360+tim_getcsc,1,tsec)
 
+ istwf_k = gs_ham%istwf_k
  npw = gs_ham%npw_k
  nspinor = gs_ham%nspinor
 
@@ -498,8 +543,17 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
  end if
 
  call timab(1361,1,tsec)
- call zgemv('C',npw*nspinor,ndat,cone,cwavef_left,npw*nspinor,cwavef,1,czero,csc,1)
+ if (istwf_k==1) then
+   call zgemv('C',npw*nspinor,ndat,cone,cwavef_left,npw*nspinor,cwavef,1,czero,csc,1)
+ else
+   do idat=1,ndat
+     cwavef_left_idat => cwavef_left(:,1+npw*nspinor*(idat-1):npw*nspinor*idat)
+     call dotprod_g(csc(2*idat-1),dum,istwf_k,npw*nspinor,1,cwavef_left_idat,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+     csc(2*idat)=zero
+   end do
+ end if
  call timab(1361,2,tsec)
+
 
  if (gs_ham%usepaw==1) then
    select_k_=1;if (present(select_k)) select_k_=select_k
@@ -508,6 +562,8 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
    ABI_ALLOCATE(gvnlxc,(0,0))
    ABI_ALLOCATE(enlout   ,(ndat))
    ABI_ALLOCATE(enlout_im,(ndat))
+   enlout=zero
+   enlout_im=zero
    signs=1
    call nonlop(choice,cpopt,cprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,1,&
 &   nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
