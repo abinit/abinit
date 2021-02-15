@@ -95,7 +95,7 @@ $\chi_0$ with [[inclvkb]].
 By Mauricio Rodriguez and F. Bruneval (MR722).
 
 **B.5** The pSIC (polaron self-interaction corrected methodology) has been implemented.
-See [[Sadigh2015]] and [[Sadigh2015a]]. This is based on the `images` capabilities 
+See [[cite:Sadigh2015]] and [[cite:Sadigh2015a]]. This is based on the `images` capabilities 
 of ABINIT, where the capability to have different values of the input variable [[cellcharge]] 
 for different images has been implemented, to be used with [[imgmov]]=6.  
 AT PRESENT : PROBLEM with the parallel implementation (npimage larger than 1).
@@ -137,36 +137,23 @@ By JM Beuken
 <a name="v9.4.D.1"></a>
 ### **D.**  Other changes (or on-going developments, not yet finalized)
 
-**D.1** Miscellaneous improvements of Multibinit (lattice part) 
-Introduction of new input variables:
-
-- [[spin_calc_thermo_obs]]
-- [[spin_projection_qpoint]]
-
-By He Xu
-
-**D.2** Introduction of the new input variable [[rifcsph]] in ABINIT, for the electron-phonon driver ([[optdriver]]=7).
-A similar input variable was already present (and documented) 
-for anaddb, multibinit and tdep (although not tested in the latter two cases).
-By WHO DID THIS ?
-
-**D.3** Introduction of the new input variable [[dmft_x2my2d]] in ABINIT.
+**D.1** Introduction of the new input variable dmft_x2my2d in ABINIT.
 NOT DOCUMENTED, NOT TESTED.
 By ?? B. Amadon ?? R. Outerovich ??
 
-**D.4** New test [[test:v9_90]] of the treatment of the Coulomb interation for low dimensional materials (0D and 2D).
+**D.2** New test [[test:v9_90]] of the treatment of the Coulomb interation for low dimensional materials (0D and 2D).
 By B. Guster.
 
-**D.5** DFPT (including ddk perturbation) can now be done in the presence of [[nucdipmom]].
+**D.3** DFPT (including ddk perturbation) can now be done in the presence of [[nucdipmom]].
 By J. Zwanziger (MR749)
 
-**D.6** Bug fix and new test [[test:v9_43]] for the use of ANADDB in the presence of a large [[tolsym]] value.
+**D.4** Bug fix and new test [[test:v9_43]] for the use of ANADDB in the presence of a large [[tolsym]] value.
 By G. Petretto
 
-**D.7** Several bug fixes related to the treatment of inaccurate atomic positions (and large tolsym).
+**D.5** Several bug fixes related to the treatment of inaccurate atomic positions (and large tolsym).
 Several test have been created ([[test:v9_17]] to [[test:v9_20]]).
 
-**D.8** AiiDA+ABINIT developments
+**D.6** AiiDA+ABINIT developments
 
   - A AiiDA plugin for Abinit has been developed: <https://github.com/sponce24/aiida-abinit>, also indexed at <https://aiidateam.github.io/aiida-registry/>.
   - AiiDA is now supporting .psp8 type pseudopotentials, <https://github.com/aiidateam/aiida-pseudo>. This also implied modifications of the 
@@ -175,13 +162,13 @@ Several test have been created ([[test:v9_17]] to [[test:v9_20]]).
 
 By S. Ponce, also with G.-M. Rignanese, G. Petretto, M. Giantomassi.
 
-**D.8** Calculation of Luttinger parameters (in the Frohlich model) and echo (see [[test:v8_57]]).
+**D.7** Calculation of Luttinger parameters (in the Frohlich model) and echo (see [[test:v8_57]]).
 By V. Brousseau (MR736)
 
-**D.9** Introduction of the new input variable dmft_wanorthonorm. NOT DOCUMENTED? NOT TESTED? WHO DID THIS ?
+**D.8** Introduction of the new input variable dmft_wanorthonorm. NOT DOCUMENTED? NOT TESTED? WHO DID THIS ?
 
 
-**D.10** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
+**D.9** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
 in the upgrade of tutorials)..
 By B. Amadon, F. Bruneval, T. Karatsu, G. Petretto, Y. Pouillon, M. Torrent, J. Zwanziger. 
 
