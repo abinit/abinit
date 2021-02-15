@@ -106,7 +106,7 @@ By X. Gonze (initial test from C. Tantardini).
 **B.6** The computation of the electric conductivity has been implemented for metals
 in the RTA approximation, actually computing the imaginary part of the Fan-Migdal self-energy 
 in this case.
-See tests [[test:v9_62]] to [[test:v9_66]].
+See tests [[test:v9_62]] to [[test:v9_65]].
 
 By O. Nadeau (MR756, MR716), with help from M. Giantomassi
 
