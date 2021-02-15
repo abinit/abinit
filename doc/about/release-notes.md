@@ -57,7 +57,7 @@ has been implemented (gapped materials only, of course).
 This has been used e.g. in [[cite:Paillard2019]].
 See the variables [[occopt]]=9, and nqFD. (TO BE DOCUMENTED). 
 Also, related input variables : ivalence  (TO BE DOCUMENTED. NOTE XG20_02_14: I have replaced ival by ivalence in m_invars2 and in the test v9_91),
-Internal variables ne_qFD and nh_qFD are presently initialized to nqFD, which is NOT INTERNAL..
+Internal variables ne_qFD and nh_qFD are presently initialized to nqFD, which is NOT INTERNAL.
 See test [[test:v9_91]].
 
 By Ch. Paillard (MR755).
@@ -72,7 +72,8 @@ In particular:
 with populations of electrons (in the conduction bands) and holes (in the valence bands)
 
 Also, a new tutorial, [[tutorial:eph4isotc]], is available (with tests [[test:eph4isotc_1]] to [[test:eph4isotc_4]], 
-and [[tutorial:nlo]] and [[tutorial:eph4zpr]] have been enlarged to new developments (see [[test:eph4zpr_8]] and [[test:nloDFPT_2]])..
+and [[tutorial:nlo]] and [[tutorial:eph4zpr]] have been enlarged to new developments 
+(see [[test:eph4zpr_8]] and test nlofDFPT_2 - NAME TO BE CHANGED.
 
 By B. Amadon, L. Baguet, J. Bieder, E. Bousquet, F. Bruneval, 
 W. Chen, M. Cote, O. Gingras, M. Giantomassi, X. Gonze, F. Goudreault, 
