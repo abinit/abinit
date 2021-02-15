@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 14 Feb 2021.
-- ( at 20h59 )
+.Starting date : Mon 15 Feb 2021.
+- ( at 06h17 )
   
 - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze/tests/Test_suite/v9_t91/t91.abi
 - output file    -> t91.abo
@@ -74,8 +74,10 @@ _ WF disk file :      0.360 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 P           mkmem          10
             natom           2
             nband           8
+           ne_qFD      5.0000000000E-01
             ngfft          20      20      20
           ngfftdg          27      27      27
+           nh_qFD      5.0000000000E-01
              nkpt          10
             nstep          10
              nsym          48
@@ -453,8 +455,10 @@ total_energy_dc_eV  : -2.15396297374739E+02
 P           mkmem          10
             natom           2
             nband           8
+           ne_qFD      5.0000000000E-01
             ngfft          20      20      20
           ngfftdg          27      27      27
+           nh_qFD      5.0000000000E-01
              nkpt          10
             nstep          10
              nsym          48
@@ -636,10 +640,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          3.2
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          3.2
++Overall time at end (sec) : cpu=          1.3  wall=          1.3
