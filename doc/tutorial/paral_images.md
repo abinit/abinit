@@ -97,7 +97,7 @@ Open the `timages_01.abi` file and look at it carefully. The unit cell is define
 at the begining. Note that the keywords [[natfix]] and [[iatfix]] are used to keep
 fixed the positions of the O and N atoms. The cell is tetragonal and its size
 is larger along x so that the periodic images of the system are separated by
-4.0 Å (7.5589 bohr) of vacuum in the three directions. The keyword [[charge]] is used to
+4.0 Å (7.5589 bohr) of vacuum in the three directions. The keyword [[cellcharge]] is used to
 remove an electron of the system and thus obtain a protonated molecule
 (neutrality is recovered by adding a uniform compensating charge background).
 

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -441,8 +441,18 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'cd_subset_freq','INT',0)
  end if
 
- dprarr(1,:)=dtsets(:)%charge
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'charge','DPR',0)
+!cellcharge
+ prtimg(:,:)=1
+ do idtset=0,ndtset_alloc
+   narrm(idtset)=1
+   do iimage=1,nimagem(idtset)
+     if (narrm(idtset)>0) then
+       dprarr_images(1:narrm(idtset),iimage,idtset)=dtsets(idtset)%cellcharge(iimage)
+     end if
+   end do
+ end do
+ call prttagm_images(dprarr_images,iout,jdtset_,1,marr,narrm,ncid,ndtset_alloc,'cellcharge','DPR',&
+& mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
 !chempot
  narr=3*mxvals%nzchempot*mxvals%ntypat ! default size for all datasets

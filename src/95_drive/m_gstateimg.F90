@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG, AR, GG, MT)
+!!  Copyright (C) 1998-2021 ABINIT group (XG, AR, GG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,6 +37,7 @@ module m_gstateimg
  use m_errors
  use m_rec
  use m_args_gs
+ use m_results_gs
  use m_results_img
  use m_scf_history
  use m_io_redirect
@@ -550,7 +551,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        occ(:)       =occ_img(:,iimage)
 
        call args_gs_init(args_gs, &
-&       res_img(iimage)%amu(:),res_img(iimage)%mixalch(:,:),&
+&       res_img(iimage)%amu(:),dtset%cellcharge(ii),res_img(iimage)%mixalch(:,:),&
 &       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii),&
 &       dtset%rprimd_orig(:,:,ii))
 
@@ -1090,6 +1091,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  end if
 
+!Write the msg 
 !Prevent writing if iexit==1, which at present only happens for imgmov==6 algo
  if(imgmov/=6 .or. m1geo_param%iexit==0) call wrtout([std_out, ab_out] ,msg)
 
@@ -1270,7 +1272,10 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 
 !Local variables-------------------------------
 !scalars
- integer :: ihist,iimage,natom,next_itimimage
+ integer :: ihist,iimage,natom,next_itimimage,nspden,nsppol
+ real(dp) :: deltae,diffor,etotal,entropy,fermie,res2,residm
+ type(results_gs_type) :: results_gs_lincomb
+!arrays
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),strten(6),vel_cell(3,3)
  real(dp),allocatable :: fcart(:,:),vel(:,:),xred(:,:)
  logical :: DEBUG=.FALSE.
@@ -1300,15 +1305,51 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  call vel2hist(m1geo_param%ab_mover%amass,m1geo_param%hist_1geo,vel,vel_cell)
  m1geo_param%hist_1geo%time(ihist)=zero
 
-!Compute forces and stresses for the 1geo : take the weighted average.
+!Compute energy, entropy, fermie, forces and stresses for the 1geo : take the weighted average.
+!Compute maximum of deltae,diffor,res2,residm
+ etotal=zero
+ entropy=zero
+ fermie=zero
  fcart(:,:)=zero
  strten(:)=zero
+ deltae=zero
+ diffor=zero
+ res2=zero
+ residm=zero
  do iimage=1,nimage
+   etotal=etotal+results_img(iimage,itimimage_eff)%results_gs%etotal*m1geo_param%mixesimgf(iimage)
+   entropy=entropy+results_img(iimage,itimimage_eff)%results_gs%entropy*m1geo_param%mixesimgf(iimage)
+   fermie=fermie+results_img(iimage,itimimage_eff)%results_gs%fermie*m1geo_param%mixesimgf(iimage)
    fcart(:,:)=fcart(:,:)+results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage)
    strten(:) =strten(:) +results_img(iimage,itimimage_eff)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage)
+   if( deltae<results_img(iimage,itimimage_eff)%results_gs%deltae ) deltae=results_img(iimage,itimimage_eff)%results_gs%deltae
+   if( diffor<results_img(iimage,itimimage_eff)%results_gs%diffor ) diffor=results_img(iimage,itimimage_eff)%results_gs%diffor
+   if( res2<results_img(iimage,itimimage_eff)%results_gs%res2 ) res2=results_img(iimage,itimimage_eff)%results_gs%res2
+   if( residm<results_img(iimage,itimimage_eff)%results_gs%residm ) residm=results_img(iimage,itimimage_eff)%results_gs%residm
  enddo
 
-!Store them in hist_1geo
+!Set up a results_gs datastructure with the linear combination of images
+ nspden=results_img(1,itimimage_eff)%results_gs%nspden
+ nsppol=results_img(1,itimimage_eff)%results_gs%nsppol
+ call init_results_gs(natom,nspden,nsppol,results_gs_lincomb)
+ call copy_results_gs(results_img(1,itimimage_eff)%results_gs,results_gs_lincomb) 
+ results_gs_lincomb%etotal=etotal
+ results_gs_lincomb%entropy=entropy
+ results_gs_lincomb%fermie=fermie
+ results_gs_lincomb%fcart=fcart
+ results_gs_lincomb%strten=strten
+ results_gs_lincomb%deltae=deltae
+ results_gs_lincomb%diffor=diffor
+ results_gs_lincomb%res2=res2
+ results_gs_lincomb%residm=residm
+
+!Echo result_gs_lincomb
+ call results_gs_lincomb%yaml_write(ab_out, info="Linear combination of ground state results")
+
+!Destroy result_gs_lincomb
+ call destroy_results_gs(results_gs_lincomb)
+
+!Store fcart and strten in hist_1geo
  m1geo_param%hist_1geo%fcart(:,:,ihist)=fcart(:,:)
  m1geo_param%hist_1geo%strten(:,ihist) =strten(:)
 
@@ -1343,20 +1384,21 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 !Retrieve the new positions, cell parameters [and velocities ?!]
  call hist2var(acell,m1geo_param%hist_1geo,natom,rprimd,xred,DEBUG)
 
-!Store acell, rprim, xred and vel for the new iteration
- next_itimimage=itimimage_eff+1
- if (next_itimimage>ntimimage_stored)then
-   ABI_ERROR('next_itimimage>ntimimage_stored')
+!Store acell, rprim, xred and vel for the new iteration if relevant
+ if(m1geo_param%iexit==0)then
+   next_itimimage=itimimage_eff+1
+   if (next_itimimage>ntimimage_stored)then
+     ABI_ERROR('next_itimimage>ntimimage_stored')
+   endif
+   do iimage=1,nimage
+     results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:)
+     results_img(iimage,next_itimimage)%acell(:)     =acell(:)
+     results_img(iimage,next_itimimage)%rprim(:,:)   =rprim(:,:)
+!    WARNING : Should also store vel and vel_cell of course ...
+!    results_img(iimage,next_itimimage)%vel(:,:)     =vel(:,:)
+!    results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
+   end do
  endif
-
- do iimage=1,nimage
-   results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:)
-   results_img(iimage,next_itimimage)%acell(:)     =acell(:)
-   results_img(iimage,next_itimimage)%rprim(:,:)   =rprim(:,:)
-!  WARNING : Should also store vel and vel_cell of course ...
-!  results_img(iimage,next_itimimage)%vel(:,:)     =vel(:,:)
-!  results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
- end do
 
  ABI_FREE(fcart)
  ABI_FREE(vel)

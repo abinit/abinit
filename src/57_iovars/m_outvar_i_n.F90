@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -480,6 +480,10 @@ subroutine outvar_i_n (dtsets,iout,&
    ABI_FREE(istwfk_2)
  end if
 
+!ivalence
+ intarr(1,:)=dtsets(:)%ivalence
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ivalence','INT',0)
+
 !ixc
  intarr(1,:)=dtsets(:)%ixc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ixc','INT',0)
@@ -925,6 +929,9 @@ subroutine outvar_i_n (dtsets,iout,&
  dprarr(2,:)=dtsets(:)%neb_spring(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'neb_spring','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%ne_qFD
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ne_qFD','DPR',0)
+
  intarr(1,:)=dtsets(:)%nfreqim
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nfreqim','INT',0)
 
@@ -943,6 +950,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(2,:)=dtsets(:)%ngfftdg(2)
  intarr(3,:)=dtsets(:)%ngfftdg(3)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'ngfftdg','INT',0)
+
+ dprarr(1,:)=dtsets(:)%nh_qFD
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nh_qFD','DPR',0)
 
  intarr(1,:)=dtsets(:)%nimage
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nimage','INT',0)

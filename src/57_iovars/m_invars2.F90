@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (XG)
+!!  Copyright (C) 1999-2021 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -254,7 +254,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key, tread_extrael
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image
- real(dp) :: areaxy,charge,fband,kptrlen,nelectjell,sum_spinat
+ real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
  real(dp) :: tolmxde_, tolmxf_
@@ -757,8 +757,32 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'boxcutmin',tread,'DPR')
  if(tread==1) dtset%boxcutmin=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
- if(tread==1) dtset%charge=dprarr(1)
+!Initialize cellcharge, that might differ for each image
+ cellcharge_min=huge(one)
+ do iimage=1,dtset%nimage
+   if (dtset%nimage /= 1) call wrtout(std_out, sjoin(' invars2: cellcharge, treat image number: ',itoa(iimage)))
+
+!  Read cellcharge for each image, but use it only to initialize cellcharge_min
+!  The old name 'charge' is still tolerated. Will be removed in due time.
+   dprarr(1)=dtset%cellcharge(iimage)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cellcharge',tread,'DPR')
+   if(tread==1)then
+     dtset%cellcharge(iimage)=dprarr(1)
+   else
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
+     if(tread==1) dtset%cellcharge(iimage)=dprarr(1)
+   endif
+!  Possibly overwrite cellcharge from the first image with a specific value for the current image
+   call intagm_img(dprarr,iimage,jdtset,lenstr,dtset%nimage,1,string,'cellcharge',tread_alt,'DPR')
+   if(tread_alt==1)then
+     dtset%cellcharge(iimage)=dprarr(1)
+   else
+     call intagm_img(dprarr,iimage,jdtset,lenstr,dtset%nimage,1,string,'charge',tread_alt,'DPR')
+     if(tread_alt==1) dtset%cellcharge(iimage)=dprarr(1)
+   endif
+
+   if(dtset%cellcharge(iimage) < cellcharge_min)cellcharge_min=dtset%cellcharge(iimage)
+ end do
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dosdeltae',tread,'ENE')
  if(tread==1) dtset%dosdeltae=dprarr(1)
@@ -1192,7 +1216,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end do
  end if
 
- charge=dtset%charge
  ! CP added
  dtset%nh_qFD=zero
  dtset%ne_qFD=zero
@@ -1228,7 +1251,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
        sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
      end do
-     zelect=zval-charge
+     zelect=zval-cellcharge_min
      ! Then select the minimum number of bands, and add the required number.
      ! Note that this number might be smaller than the one computed
      ! by a slightly different formula in invars1 (difference in fband).
@@ -1245,13 +1268,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ! CP added 
    if (occopt==9)then
 ! Read the valence band index
-      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ival',tread,'INT')
+      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ivalence',tread,'INT')
       if (tread==1) dtset%ivalence=intarr(1)
       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqFD',tread,'DPR')
       if (tread==1)then
         dtset%ne_qFD=dprarr(1)
         dtset%nh_qFD=dprarr(1) ! CP: here we assume that number of excited electrons  = number of excited holes. Potentially can be
-! relaxed in the future if consistent changes with the charge tag are made .
+! relaxed in the future if consistent changes with the cellcharge tag are made .
       end if
    end if
    ! End CP added
@@ -3375,6 +3398,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  end do
 
+ nelectjell=zero
  if(dtset%jellslab/=0)then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slabwsrad',tread,'LEN')
    if(tread==1) dtset%slabwsrad=dprarr(1)
@@ -3385,7 +3409,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    areaxy=abs(dtset%rprimd_orig(1,1,1)*dtset%rprimd_orig(2,2,1)-dtset%rprimd_orig(1,2,1)*dtset%rprimd_orig(2,1,1))
    rhoavg=three/(four_pi*dtset%slabwsrad**3)
    nelectjell=areaxy*(dtset%slabzend-dtset%slabzbeg)*rhoavg
-   charge=charge-nelectjell
  end if
 
  ! Initialize occ if occopt==1 or 3 ... 8,
@@ -3393,7 +3416,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! If iscf>0, check the charge of the system, and compute nelect.
  occopt_tmp=occopt
  if(getocc/=0)occopt_tmp=1
- call dtset%chkneu(charge, occopt_tmp)
+ call dtset%chkneu(nelectjell,occopt_tmp)
 
  ! Now that the occupation numbers have been initialized, can meaningfully define nbandhf.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')

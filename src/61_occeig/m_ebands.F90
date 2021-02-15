@@ -7,7 +7,7 @@
 !!  This module contains utilities to analyze and retrieve information from the ebands_t.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, MJV, BXu)
+!! Copyright (C) 2008-2021 ABINIT group (MG, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -468,7 +468,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
    !  1) highly degenerate doped semiconductor with the Fermi level in the bands.
    !  2) Small gap semiconductor at relatively high T.
    !
-   ! Here I try to compute the gaps of an instrinc semiconductor at low T with Fermi-Dirac.
+   ! Here I try to compute the gaps of an intrinsic semiconductor at low T with Fermi-Dirac.
    ! This might still fail though and the caller should handle that.
    call gaps%free()
    call ebands_copy(ebands, tmp_ebands)
@@ -476,7 +476,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
    call ebands_set_scheme(tmp_ebands, occopt3, tsmear, spinmagntarget_, prtvol0, update_occ=.False.)
    ! Remove extrael to go back to intrinsic system
    if (ebands%extrael /= zero) tmp_ebands%nelect = ebands%nelect - ebands%extrael
-   !if (ebands%charge /= zero) tmp_ebands%nelect = ebands%nelect + ebands%charge
+   !if (ebands%cellcharge /= zero) tmp_ebands%nelect = ebands%nelect + ebands%cellcharge
    call ebands_update_occ(tmp_ebands, spinmagntarget_, stmbias0)
 
    ! Try to compute gaps the again with new Fermi level at FD T = tsmear computed from update_occ.
@@ -803,7 +803,7 @@ end subroutine gaps_print
 !! tphysel=Physical temperature (input variable)
 !! tsmear=Temperature of smearing.
 !! wtk(nkpt)=weight assigned to each k point
-!! charge=Additional charge added to the unit cell (input variable).
+!! cellcharge=Additional charge added to the unit cell (input variable).
 !! kptopt=Option for k-point generation (see input variable)
 !! kptrlatt_orig=Original value of kptrlatt given in input
 !! nshiftk_orig=Original number of shifts given in input
@@ -826,7 +826,7 @@ end subroutine gaps_print
 
 subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde, eig, istwfk, kptns, &
   nband, nkpt, npwarr, nsppol, nspinor, tphysel, tsmear, occopt, occ, wtk, &
-  charge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
+  cellcharge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
 ! CP modified input list: added ne_qFD, nh_qFD, ivalence.
 !Arguments ------------------------------------
 !scalars
@@ -838,7 +838,7 @@ subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde,
  real(dp),intent(in) :: doccde(bantot),eig(bantot),kptns(3,nkpt),occ(bantot)
  real(dp),intent(in) :: wtk(nkpt)
  integer,intent(in) :: kptopt, nshiftk_orig, nshiftk
- real(dp),intent(in) :: charge
+ real(dp),intent(in) :: cellcharge
  integer,intent(in) :: kptrlatt_orig(3,3),kptrlatt(3,3)
  real(dp),intent(in) :: shiftk_orig(3,nshiftk_orig),shiftk(3,nshiftk)
 
@@ -895,7 +895,7 @@ subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde,
  ebands%kptopt = kptopt
  ebands%nshiftk_orig = nshiftk_orig
  ebands%nshiftk = nshiftk
- ebands%charge = charge
+ ebands%cellcharge = cellcharge
  ebands%kptrlatt_orig = kptrlatt_orig
  ebands%kptrlatt = kptrlatt
 
@@ -963,11 +963,11 @@ type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands
 ! CP modify
 ! call ebands_init(hdr%bantot, ebands, my_nelect, ugly_doccde, ugly_ene, hdr%istwfk, hdr%kptns, hdr%nband, hdr%nkpt, &
 !   hdr%npwarr, hdr%nsppol, hdr%nspinor, hdr%tphysel, hdr%tsmear, hdr%occopt, hdr%occ, hdr%wtk, &
-!   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+!   hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  call ebands_init(hdr%bantot, ebands, my_nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence, &
    ugly_doccde, ugly_ene, hdr%istwfk, hdr%kptns, hdr%nband, hdr%nkpt, &
    hdr%npwarr, hdr%nsppol, hdr%nspinor, hdr%tphysel, hdr%tsmear, hdr%occopt, hdr%occ, hdr%wtk, &
-   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+   hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  ! End CP modify
 
  ! Copy the fermi level reported in the header
@@ -1027,12 +1027,12 @@ type(ebands_t) function ebands_from_dtset(dtset, npwarr) result(new)
  ! CP modified
  !call ebands_init(bantot, new, dtset%nelect, ugly_doccde, ugly_ene, dtset%istwfk, dtset%kptns, dtset%nband, dtset%nkpt, &
  ! npwarr, dtset%nsppol, dtset%nspinor, dtset%tphysel, dtset%tsmear, dtset%occopt, ugly_occ, dtset%wtk,&
- ! dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+ ! dtset%cellcharge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
  ! dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot, new, dtset%nelect, dtset%ne_qFD, dtset%nh_qFD, dtset%ivalence, ugly_doccde, ugly_ene, &
   dtset%istwfk, dtset%kptns, dtset%nband, dtset%nkpt, &
   npwarr, dtset%nsppol, dtset%nspinor, dtset%tphysel, dtset%tsmear, dtset%occopt, ugly_occ, dtset%wtk,&
-  dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  ! End CP modified
 
@@ -1140,7 +1140,7 @@ subroutine ebands_copy(ibands, obands)
  obands%nshiftk_orig = ibands%nshiftk_orig
  obands%nshiftk      = ibands%nshiftk
 
- obands%charge  = ibands%charge
+ obands%cellcharge   = ibands%cellcharge
  obands%extrael = ibands%extrael
  obands%entropy = ibands%entropy
  obands%fermie  = ibands%fermie
@@ -1269,7 +1269,7 @@ subroutine ebands_print(ebands, header, unit, prtvol)
 
  write(msg,'(3(a,f14.2,a),4(a,f14.6,a))')&
    '  Number of valence electrons ......... ',ebands%nelect,ch10,&
-   '  Extra charge (from GS run)........... ',ebands%charge,ch10,&
+   '  Extra cell charge (from GS run)...... ',ebands%cellcharge,ch10,&
    '  Extra electrons (after GS run)....... ',ebands%extrael,ch10,&
    '  Fermi level  ........................ ',ebands%fermie,ch10,&
    '  Entropy ............................. ',ebands%entropy,ch10,&
@@ -3210,7 +3210,7 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("occopt"), ebands%occopt))
  NCF_CHECK(nf90_put_var(ncid, vid("istwfk"), ebands%istwfk))
  NCF_CHECK(nf90_put_var(ncid, vid("kptopt"), ebands%kptopt))
- NCF_CHECK(nf90_put_var(ncid, vid("charge"), ebands%charge))
+ NCF_CHECK(nf90_put_var(ncid, vid("charge"), ebands%cellcharge))
  NCF_CHECK(nf90_put_var(ncid, vid("extrael"), ebands%extrael))
  NCF_CHECK(nf90_put_var(ncid, vid("nelect"), ebands%nelect))
  NCF_CHECK(nf90_put_var(ncid, vid('kptrlatt_orig'), ebands%kptrlatt_orig))
@@ -4159,10 +4159,10 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  ! CP modified
  !call ebands_init(bantot, outb, inb%nelect, doccde, eig, istwfk, kfull, &
  !  nband, nkfull, npwarr, nsppol, inb%nspinor, inb%tphysel, inb%tsmear, inb%occopt, occ, wtk, &
- !  inb%charge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
+ !  inb%cellcharge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
  call ebands_init(bantot, outb, inb%nelect, inb%ne_qFD, inb%nh_qFD, inb%ivalence, doccde, eig, istwfk, kfull, &
    nband, nkfull, npwarr, nsppol, inb%nspinor, inb%tphysel, inb%tsmear, inb%occopt, occ, wtk, &
-   inb%charge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
+   inb%cellcharge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
  ! End CP modified
 
  ABI_FREE(istwfk)
@@ -4291,10 +4291,10 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
  ! CP modified: added self%ne_qFD, self%nh_qFD, self%ivalence in the list of arguments
  !call ebands_init(bantot, new, self%nelect, doccde, eig, istwfk, new_kibz, &
  !  nband, new_nkibz, npwarr, self%nsppol, self%nspinor, self%tphysel, self%tsmear, self%occopt, occ, new_wtk, &
- !  self%charge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
+ !  self%cellcharge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
  call ebands_init(bantot, new, self%nelect, self%ne_qFD, self%nh_qFD, self%ivalence, doccde, eig, istwfk, new_kibz, &
    nband, new_nkibz, npwarr, self%nsppol, self%nspinor, self%tphysel, self%tsmear, self%occopt, occ, new_wtk, &
-   self%charge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
+   self%cellcharge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
  ! End CP modified
 
  new%fermie = self%fermie
@@ -4529,12 +4529,12 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  !call ebands_init(new_bantot, new, ebands%nelect, new_doccde, new_eig, new_istwfk, new_kibz,&
  !  new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear,&
  !  ebands%occopt, new_occ, new_wtk, &
- !  ebands%charge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+ !  ebands%cellcharge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
  call ebands_init(new_bantot, new, ebands%nelect, ebands%ne_qFD,ebands%nh_qFD,ebands%ivalence,&
    new_doccde, new_eig, new_istwfk, new_kibz,&
    new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear,&
    ebands%occopt, new_occ, new_wtk, &
-   ebands%charge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+   ebands%cellcharge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
  ! End CP modify
 
  ! Get fermi level from input ebands.
@@ -4705,12 +4705,12 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  !call ebands_init(new_bantot, new, ebands%nelect, new_doccde, new_eig, new_istwfk, kpath%points, &
  !  new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear, &
  !  ebands%occopt, new_occ, new_wtk,&
- !  ebands%charge, new_kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+ !  ebands%cellcharge, new_kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
  call ebands_init(new_bantot, new, ebands%nelect, ebands%ne_qFD,ebands%nh_qFD,ebands%ivalence, &
    new_doccde, new_eig, new_istwfk, kpath%points, &
    new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear, &
    ebands%occopt, new_occ, new_wtk,&
-   ebands%charge, new_kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+   ebands%cellcharge, new_kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
  ! End CP modified
 
  new%fermie = ebands%fermie

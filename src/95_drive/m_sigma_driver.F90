@@ -8,7 +8,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!!  Copyright (C) 1999-2021 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -987,7 +987,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &   Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
 &   Dtset%nspden,Cryst%ntypat,KS_paw_an,KS_paw_ij,Pawang,Pawfgrtab,&
 &   Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-&   k0,Dtset%spnorbscl,Cryst%ucvol,dtset%charge,ks_vtrial,ks_vxc,Cryst%xred,&
+&   k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,&
 &   nucdipmom=Dtset%nucdipmom)
 
     !  Symmetrize KS Dij
@@ -1364,7 +1364,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &     Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
 &     Dtset%nspden,Cryst%ntypat,QP_paw_an,QP_paw_ij,Pawang,Pawfgrtab,&
 &     Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-&     k0,Dtset%spnorbscl,Cryst%ucvol,dtset%charge,qp_vtrial,qp_vxc,Cryst%xred,&
+&     k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),qp_vtrial,qp_vxc,Cryst%xred,&
 &     nucdipmom=Dtset%nucdipmom)
 
      ! Symmetrize total Dij
@@ -3407,12 +3407,12 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 ! CP modified
 ! call ebands_init(bantot,KS_BSt,Dtset%nelect,doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
 !   Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-!   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
-!   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+!   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
+!   dtset%kptrlatt(1), dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot,KS_BSt,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
 &  doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
    Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
+   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
    dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
 ! End CP modified
 

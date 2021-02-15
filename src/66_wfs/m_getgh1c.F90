@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG, DRH, MT, SPr)
+!!  Copyright (C) 1998-2021 ABINIT group (XG, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1345,12 +1345,6 @@ end subroutine getdc1
 !! dH^(1)/dq_{gamma} and d^2H^(1)/dq_{gamma}dq_{delta} are the first
 !! and second q-gradient (at q=0) of the 1st-order perturbed Hamiltonian.
 !! The first (second) derivative direction is inferred from idir (qdir1).
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  cwave(2,npw*nspinor)=input wavefunction, in reciprocal space
