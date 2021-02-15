@@ -1609,21 +1609,22 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
- integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ib_k, ib_sum, ierr
- integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, bsum_start, band_sum, ntemp, ii, jj, iq_sum
+ integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr, converged
+ integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, band_sum, ntemp, ii, jj, iq_sum
  integer :: ikq_ibz, isym_kq, trev_kq, cnt, tag, nprocs, receiver, my_rank, isym, itime, isym_lgk
 #ifdef HAVE_NETCDF
  integer :: ncid, grp_ncid, ncerr
 #endif
  real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff
- logical :: converged, send_data
+ logical :: send_data
  character(len=500) :: msg
- character(len=fnlen) :: path
+ !character(len=fnlen) :: path
  type(rta_t) :: ibte
 !arrays
  integer :: unts(2), dims(4)
  integer,allocatable :: rank_ks(:,:)
- real(dp) :: f0_serta(3), sigma_eh(3,3,2), mob_eh(3,3,2), vec3(3), sym_vec(3), mat33(3,3), f_kq(3), fsum_eh(3,2) !v_nk(3),
+ real(dp) :: sigma_eh(3,3,2), mob_eh(3,3,2), vec3(3), sym_vec(3), mat33(3,3), f_kq(3), fsum_eh(3,2) !v_nk(3),
+ real(dp) :: onsager(3,3,3,ebands%nsppol)
  real(dp),allocatable :: grp_srate(:,:,:,:), fkn_in(:,:,:,:), fkn_out(:,:,:,:), fkn_serta(:,:,:,:), taukn_serta(:,:,:,:)
 
  type :: scatk_t
@@ -1776,7 +1777,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  ! Solve the linearized BTE with B = 0.
  !
- !   F_\nk = f^'_nk v_\nk * \tau^0 + \tau^0 \sum_{mq} Srate_{nk,mq) F_{m,k+q}
+ !   F_\nk = f^'_\nk v_\nk \tau^0 + \tau^0 \sum_{mq} Srate_{nk,mq} F_{m,k+q}
  !
  ! where F is a vector in Cartesian coordinates and tau^0 is the SERTA relaxation time.
  !
@@ -1792,19 +1793,19 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  ABI_CALLOC(taukn_serta, (3, nkibz, bmin:bmax, nsppol))
 
  cnt = 0
- !do itemp=1,ntemp
- do itemp=ntemp, 1, -1
+ do itemp=1,ntemp
+ !do itemp=ntemp, 1, -1
    cnt = cnt + 1
    kT = ibte%kTmesh(itemp)
    mu_e = ibte%eph_mu_e(itemp)
 
-   ! Precompute tau_serta and fkn_serta for this T.
+   ! Precompute tau_serta and fkn_serta for this T: f^'_nk v_\nk * \tau^0
    do spin=1,nsppol
      do ikcalc=1,nkcalc
        ik_ibz = ibte%kcalc2ibz(ikcalc, 1)
        do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
          e_nk = ebands%eig(band_k, ik_ibz, spin)
-         lw_nk = ibte%linewidths(itemp, band_k, ik_ibz, spin, 1)
+         lw_nk = ibte%linewidths(itemp, band_k, ik_ibz, spin, 1)  ! SERTA
          call safe_div(one, two * lw_nk, zero, tau_nk)
          taukn_serta(:, ik_ibz, band_k, spin)  = tau_nk
          dfde_nk = occ_dfde(e_nk, kT, mu_e)
@@ -1817,19 +1818,33 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
                pre_newlines=1, newlines=1)
 
    if (ibte%assume_gap) then
-     write(msg, "(a)")" Iter max_adiff sum(mob_eh, dim=3) sum(fsum_eh)"
+     write(msg, "(a5, a9, *(1x, a16))")" ITER", "max_adiff", "sum(mob_eh, dim=3)", "sum(fsum_eh)"
    else
-     write(msg, "(a)")" Iter max_adiff sum(cond_eh, dim=3) sum(fsum_eh)"
+     write(msg, "(a5, a9, *(1x, a16))")" ITER", "max_adiff", "sum(cond_eh, dim=3)", "sum(fsum_eh)"
    end if
    call wrtout(std_out, msg)
 
-   ! Initialize fkn_in either from SERTA or from previous T.
-   if (cnt == 1) then
-     fkn_in = fkn_serta
+   ! Compute transport tensors from SERTA just for reference (iter = 0)
+   ! then print mobility for semiconductors, conductivity for metals.
+   call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_serta, onsager, sigma_eh, mob_eh, fsum_eh, comm)
+
+   if (ibte%assume_gap) then
+     mat33 = sum(mob_eh, dim=3)
    else
-     fkn_in = fkn_out
+     mat33 = sum(sigma_eh, dim=3)
    end if
+   write(msg, "(i5, es9.1, *(1x, f16.2))")0, zero, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
+   call wrtout(std_out, msg)
+
+   fkn_in = fkn_serta
+   ! Initialize fkn_in either from SERTA or from previous T.
+   !if (cnt == 1) then
+   !  fkn_in = fkn_serta
+   !else
+   !  fkn_in = fkn_out
+   !end if
    fkn_out = zero
+   converged = 0
 
    ! Begin iterative solver.
    iter_loop: do iter=1,dtset%ibte_niter
@@ -1849,7 +1864,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
           do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
 
             ! Summing over the q-points in the effective IBZ(k) and the m band index.
-            ! Results stored in vec3. Integation weigts are already included.
+            ! Results stored in vec3. Integration weights are already included.
             vec3 = zero
             do band_sum=ibte%bmin, ibte%bmax
               do iq_sum=1, sr_p%nq_ibzk_eff
@@ -1890,20 +1905,20 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      max_adiff = maxval(abs(abs(fkn_out - fkn_in)))
 
      ! Compute transport tensors from fkn_out
-     call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_out, sigma_eh, mob_eh, fsum_eh, comm)
+     ! then print mobility for semiconductors, conductivity for metals.
+     call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_out, onsager, sigma_eh, mob_eh, fsum_eh, comm)
 
-     ! Print mobility for semiconductors, conductivity for metals.
      if (ibte%assume_gap) then
        mat33 = sum(mob_eh, dim=3)
      else
        mat33 = sum(sigma_eh, dim=3)
      end if
-     write(msg, "(i4, es8.1, *(1x, f16.2))")iter, max_adiff, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
+     write(msg, "(i5, es9.1, *(1x, f16.2))")iter, max_adiff, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
      call wrtout(std_out, msg)
 
      ! Check for convergence by testing F_k^i - F_k^{i-1} so very strict convergence criterion.
-     converged = max_adiff < dtset%ibte_abs_tol
-     if (converged) then
+     if (max_adiff < dtset%ibte_abs_tol) converged = converged + 1
+     if (converged > 1) then
        call wrtout(std_out, sjoin(" IBTE solver converged after:", itoa(iter), &
                    "iterations within ibte_abs_tol::", ftoa(dtset%ibte_abs_tol)), pre_newlines=1)
        exit iter_loop
@@ -1911,11 +1926,12 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
        ! Linear mixing of fkn_in and fkn_out
        fkn_in = (one - dtset%ibte_alpha_mix) * fkn_in + dtset%ibte_alpha_mix * fkn_out
        fkn_out = zero
+       converged = 0
      end if
 
    end do iter_loop
 
-   if (.not. converged) then
+   if (.not. converged > 1) then
      call wrtout(std_out, sjoin("WARNING: Not converged after:", itoa(dtset%ibte_niter), "max iterations"), &
                  pre_newlines=1, newlines=1)
      !ABI_WARNING("Not converged")
@@ -1924,7 +1940,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  if (my_rank == master) then
    ! Print IBTE results to stdout and other external txt files (for the test suite)
-   ! call rta%print_txt_files(cryst, dtset, dtfil)
+    !call ibte%print_txt_files(cryst, dtset, dtfil)
    ! ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
    ! path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
@@ -1981,7 +1997,7 @@ end subroutine ibte_driver
 !!
 !! SOURCE
 
-subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, sigma_eh, mob_eh, fsum_eh, comm)
+subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh, mob_eh, fsum_eh, comm)
 
 !Arguments ------------------------------------
  class(rta_t),intent(inout) :: self
@@ -1989,13 +2005,13 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, sigma_eh, mob_eh,
  integer,intent(in) :: itemp
  real(dp),intent(in) :: kT, mu_e
  real(dp),intent(in) :: fk(3, self%ebands%nkpt, self%bmin:self%bmax, self%nsppol)
- real(dp),intent(out) :: sigma_eh(3,3,2), mob_eh(3,3,2), fsum_eh(3,2)
+ real(dp),intent(out) :: sigma_eh(3,3,2), mob_eh(3,3,2), fsum_eh(3,2), onsager(3,3,3,self%nsppol)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
 !scalars
- integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, ieh, cnt, nprocs
- real(dp) :: eig_nk, fact, fact0, max_occ, wtk
+ integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, ieh, cnt, nprocs, ia
+ real(dp) :: eig_nk, fact, fact0, max_occ, wtk, emu_alpha
 !arrays
  real(dp) :: vr(3), vv_tens(3,3)
 
@@ -2010,6 +2026,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, sigma_eh, mob_eh,
  ! sigma_IBTE = (-S e^ / omega sum_\nk) (v_\nk \otimes F_\nk)
  ! with S the spin degeneracy factor.
  sigma_eh = zero; fsum_eh = zero
+ onsager = zero
 
  ! Get units conversion factor and spin degeneracy
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
@@ -2032,18 +2049,30 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, sigma_eh, mob_eh,
 
        ! Store outer product in vv_tens and symmetrize tensor.
        vr(:) = self%velocity(:, ib, ik_ibz, spin)
-       do ii=1,3
-         do jj=1,3
-           vv_tens(ii, jj) = vr(ii) * fk(jj, ik_ibz, ib, spin)
+
+       do ia=1,3
+         if (ia == 1) then
+            emu_alpha = one
+         else
+            emu_alpha = (eig_nk - mu_e) ** (ia - 1)
+         end if
+
+         do ii=1,3
+           do jj=1,3
+             vv_tens(ii, jj) = vr(ii) * fk(jj, ik_ibz, ib, spin) * emu_alpha
+           end do
          end do
-       end do
-       vv_tens = cryst%symmetrize_cart_tens33(vv_tens)
+         vv_tens = cryst%symmetrize_cart_tens33(vv_tens)
 
-       ieh = 2; if (eig_nk >= mu_e) ieh = 1
-       sigma_eh(:,:,ieh) = sigma_eh(:,:,ieh) - wtk * vv_tens !* occ_dfde(eig_nk, kT, mu_e)
-       fsum_eh(:,ieh) = fsum_eh(:,ieh) + wtk * cryst%symmetrize_cart_vec3(fk(:, ik_ibz, ib, spin))
-     end do
+         if (ia == 1) then
+           ieh = 2; if (eig_nk >= mu_e) ieh = 1
+           sigma_eh(:,:,ieh) = sigma_eh(:,:,ieh) - wtk * vv_tens
+           fsum_eh(:,ieh) = fsum_eh(:,ieh) + wtk * cryst%symmetrize_cart_vec3(fk(:, ik_ibz, ib, spin))
+         end if
+         onsager(:,:,ia,spin) = onsager(:,:,ia,spin) - wtk * vv_tens
+       end do ! ia
 
+     end do ! ib
    end do ! ik_ibz
  end do ! spin
 

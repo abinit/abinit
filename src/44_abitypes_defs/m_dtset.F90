@@ -266,7 +266,7 @@ type, public :: dataset_type
  integer :: hmcsst
  integer :: hmctt
 !I
- real(dp) :: ibte_abs_tol = tol12
+ real(dp) :: ibte_abs_tol = tol4
  real(dp) :: ibte_alpha_mix = 0.7_dp
  integer :: ibte_niter = 100
  integer :: ibte_prep = 0

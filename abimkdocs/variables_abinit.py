@@ -21107,7 +21107,7 @@ Variable(
     varset="eph",
     topics=['ElPhonInt_expert'],
     vartype="real",
-    defaultval="1e-12",
+    defaultval="1e-4",
     dimensions="scalar",
     mnemonics="Iterative Boltzmann Equation: ALPHA TOLerance for convergence",
     added_in_version="9.3.0",

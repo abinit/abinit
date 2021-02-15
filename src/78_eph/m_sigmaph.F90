@@ -4589,7 +4589,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
 !Local variables-------------------------------
  integer,parameter :: master = 0, max_ntemp = 50
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band_ks,ik_ibz,ibc,ib_val,ib_cond,jj
- integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k
+ integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
  logical :: iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: cpu, wall, gflops, invsig2fmts, tau
@@ -4989,7 +4989,8 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
    ! Get ncid of group used to store scattering rate (ragged array implemented with groups).
    ! FIXME: Unfortunately, this algo cannot be used if parallelism over kcalc/spin is on since
    ! we have to change the metadata at runtime.
-   NCF_CHECK(nf90_inq_ncid(self%ncid, strcat("srate_k", itoa(ikcalc), "_s", itoa(spin)), grp_ncid))
+   sr_ncid = self%ncid
+   NCF_CHECK(nf90_inq_ncid(sr_ncid, strcat("srate_k", itoa(ikcalc), "_s", itoa(spin)), grp_ncid))
 
    ! Define dimensions and arrays inside group at runtime).
    ncerr = nctk_def_dims(grp_ncid, [ &
@@ -5008,7 +5009,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
    NCF_CHECK(ncerr)
 
    ! Write data.
-   NCF_CHECK(nctk_set_datamode(self%ncid))
+   NCF_CHECK(nctk_set_datamode(sr_ncid))
    NCF_CHECK(nf90_put_var(grp_ncid, nctk_idname(grp_ncid, "lgk_sym2glob"), self%lgk_sym2glob))
    NCF_CHECK(nf90_put_var(grp_ncid, nctk_idname(grp_ncid, "kq_symtab"), kq_symtab))
    ABI_FREE(kq_symtab)
