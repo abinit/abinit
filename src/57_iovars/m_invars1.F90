@@ -952,6 +952,7 @@ subroutine indefo1(dtset)
  dtset%iatfix(:,:)=0
  dtset%icoulomb=0
  dtset%imgmov=0
+ dtset%ivalence=0
 !J
  dtset%jellslab=0
  dtset%jfielddir(:)=0
@@ -974,6 +975,8 @@ subroutine indefo1(dtset)
  dtset%natvshift=0
  dtset%nconeq=0
  dtset%ndynimage=1
+ dtset%ne_qFD=zero
+ dtset%nh_qFD=zero
  dtset%nkpt=-1
  dtset%nkptgw=0
  dtset%nkpthf=0
