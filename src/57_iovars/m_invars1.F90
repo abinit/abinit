@@ -2465,7 +2465,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    end if
 
 !  nloalg is also a special case
-   dtsets(idtset)%nloalg(1)=4
+   dtsets(idtset)%nloalg(1)=2
    dtsets(idtset)%nloalg(2)=1
    dtsets(idtset)%nloalg(3)=dtsets(idtset)%usepaw
    !if (dtsets(idtset)%optdriver == RUNL_EPH) dtsets(idtset)%nloalg(3) = 1
