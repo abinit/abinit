@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2020 ABINIT group (XG)
+!!  Copyright (C) 2005-2021 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -372,12 +372,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! CP modified
  !call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
  !  hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
- !  hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+ !  hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
  !  hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
    doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
    hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
-   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+   hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
    hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  ! End CP modified
 
@@ -402,7 +402,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! YAML output
  if (me == master) then
-   call results_gs%yaml_write(ab_out, crystal, dtset%occopt, dtset%nstep > 0, info="Summary of ground state results")
+   call results_gs%yaml_write(ab_out, cryst=crystal, info="Summary of ground state results",&
+&   occopt=dtset%occopt, with_conv=(dtset%nstep > 0) )
  end if
 
 !wannier interface
@@ -1130,7 +1131,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,&
 &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
 &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
-&dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan)
+&dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,dtset%dmft_t2g,wan)
    call compute_coeff_plowannier(crystal,cprj,dimcprj,dtset,eigen,e_fermie,&
 &   mpi_enreg,occ,wan,pawtab,psps,usecprj,dtfil%unpaw,pawrad,dtfil)
    if (me==master) then
@@ -1258,7 +1259,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Optionally provide output for electric field gradient calculation
  if (dtset%prtefg > 0) then
    call timab(967,1,tsec)
-   call calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nspden,dtset%nsym,ntypat,&
+   call calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,dtset%nsym,ntypat,&
 &   paw_an,pawang,pawrad,pawrhoij,pawtab,&
 &   dtset%ptcharge,dtset%prtefg,dtset%quadmom,rhor,rprimd,dtset%symrel,&
 &   dtset%tnons,dtset%typat,ucvol,psps%usepaw,xred,psps%zionpsp,&

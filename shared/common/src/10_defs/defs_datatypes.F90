@@ -26,7 +26,7 @@
 !! * pspheader_type: for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (XG)
+!! Copyright (C) 2001-2021 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,8 +138,8 @@ module defs_datatypes
   integer :: nshiftk_orig, nshiftk
   ! original number of shifts given in input and the actual value (changed in inkpts)
 
-  real(dp) :: charge
-  ! nelect = zion - charge
+  real(dp) :: cellcharge
+  ! nelect = zion - cellcharge
   ! Extra charge added to the unit cell when performing GS calculations
   ! To treat a system missing one electron per unit cell, charge is set to +1.
   ! When reading the band structure from an external file,

@@ -9,7 +9,7 @@
 !! the linear and non-linear optical responses in the RPA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2020 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
+!! Copyright (C) 2002-2021 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -560,12 +560,12 @@ program optic
 ! CP modified
 ! call ebands_init(bantot, ks_ebands, nelect, doccde, eigen0, istwfk, kpt, &
 !& nband, nkpt, npwarr, nsppol, nspinor, tphysel, broadening, occopt, occ, wtk, &
-!& hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+!& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
 !& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  call ebands_init(bantot, ks_ebands, nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
 & doccde, eigen0, istwfk, kpt, &
 & nband, nkpt, npwarr, nsppol, nspinor, tphysel, broadening, occopt, occ, wtk, &
-& hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
 & hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
 ! End CP modified
 

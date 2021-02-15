@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
+!!  Copyright (C) 1999-2021 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -904,7 +904,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call pawdij(cplex,dtset%enunit,gprimd,ipert,my_natom,dtset%natom,&
 &     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1,paw_ij1,pawang,&
 &     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1,dtset%pawspnorb,pawtab,&
-&     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%charge,vtrial1_tmp,vxc1,xred,&
+&     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial1_tmp,vxc1,xred,&
 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
      if (has_dijfr>0) then
        ABI_FREE(vtrial1_tmp)

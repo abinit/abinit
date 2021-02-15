@@ -8,7 +8,7 @@
 !!      - Define list of k-points and bands in sel-energy matrix elements from input variables.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MG)
+!!  Copyright (C) 2008-2021 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -705,14 +705,14 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 !   dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
 !   dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &
 !   dtset%amu_orig(:, image1), dtset%icoulomb, &
-!   dtset%kptopt, dtset%nelect, dtset%charge, fine_kptrlatt, fine_kptrlatt, &
+!   dtset%kptopt, dtset%nelect, dtset%cellcharge(1), fine_kptrlatt, fine_kptrlatt, &
 !   dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
  call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, codvsn, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
    dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &
    dtset%amu_orig(:, image1), dtset%icoulomb, &
-   dtset%kptopt, dtset%nelect, dtset%ne_qFD, dtset%nh_qFD, dtset%ivalence, dtset%charge, &
+   dtset%kptopt, dtset%nelect, dtset%ne_qFD, dtset%nh_qFD, dtset%ivalence, dtset%cellcharge(1), &
    fine_kptrlatt, fine_kptrlatt, dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
 ! End CP modified
 

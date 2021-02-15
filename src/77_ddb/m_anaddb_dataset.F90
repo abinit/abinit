@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2021 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1663,7 +1663,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  end if
 
  if (anaddb_dtset%gruns_nddbs /=0 .and. anaddb_dtset%ifcflag /=1) then
-   ABI_ERROR("ifcflag must be 1 for Grunesein calculation")
+   ABI_ERROR("ifcflag must be 1 for Gruneisen calculation")
  end if
 
  if (anaddb_dtset%vs_qrad_tolkms(1) /= zero .and. anaddb_dtset%ifcflag /=1) then
@@ -2196,7 +2196,7 @@ subroutine anaddb_chkvars(string)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: protocol0=0
- character(len=100) :: list_logicals,list_strings
+ character(len=100) :: list_logicals,list_strings,list_vars_img
  character(len=10000) :: list_vars
 
 !************************************************************************
@@ -2254,6 +2254,9 @@ subroutine anaddb_chkvars(string)
 !Y
 !Z
 
+!
+ list_vars_img=' '
+
 !Logical input variables
  list_logicals=' '
 
@@ -2273,10 +2276,11 @@ subroutine anaddb_chkvars(string)
 
 !Transform to upper case
  call inupper(list_vars)
+ call inupper(list_vars_img)
  call inupper(list_logicals)
  call inupper(list_strings)
 
- call chkvars_in_string(protocol0, list_vars, list_logicals, list_strings, string)
+ call chkvars_in_string(protocol0, list_vars, list_vars_img, list_logicals, list_strings, string)
 
 end subroutine anaddb_chkvars
 !!***

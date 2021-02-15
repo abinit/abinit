@@ -7,7 +7,7 @@
 !! DFT calculations of non linear response functions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2020 ABINIT group (MVeithen,MB,LB)
+!!  Copyright (C) 2002-2021 ABINIT group (MVeithen,MB,LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -931,7 +931,7 @@ end if
    call pawdij(cplex,dtset%enunit,gprimd,ipert,my_natom,natom,nfftf,nfftotf,&
 &   dtset%nspden,ntypat,paw_an,paw_ij,pawang,pawfgrtab,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,k0,&
-&   dtset%spnorbscl,ucvol,dtset%charge,vtrial,vxc,xred,nucdipmom=dtset%nucdipmom,&
+&   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call symdij(gprimd,indsym,ipert,my_natom,natom,dtset%nsym,ntypat,0,&
 &   paw_ij,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,&

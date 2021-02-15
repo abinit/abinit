@@ -166,7 +166,7 @@ Variable(
     dimensions=['[[ntypat]]'],
     mnemonics="Atomic Mass Units",
     characteristics=['[[EVOLVING]]'],
-    commentdefault="provided by a database of atomic masses.",
+    commentdefault="Defaults provided by a database of atomic masses.",
     added_in_version="before_v9",
     text=r"""
 Gives the masses in atomic mass units for each kind of atom in the input cell. These
@@ -1452,6 +1452,38 @@ merged with the **mrgscr** utility.
 ),
 
 Variable(
+    abivarname="cellcharge",
+    varset="gstate",
+    vartype="real",
+    topics=['Coulomb_basic'],
+    dimensions=['[[nimage]]'],
+    defaultval=MultipleValue(number=None, value=0),
+    mnemonics="CELL CHARGE",
+    added_in_version="v9.3.4",
+    text=r"""
+Used to establish charge balance between the number of electrons filling the
+bands and the nominal charge associated with the atomic cores.
+The code adds up the number of valence electrons provided by the
+pseudopotentials of each type (call this "zval"), then add [[cellcharge]], to get
+the number of electrons per unit cell, [[nelect]].
+Then, if [[iscf]] is positive, the code adds up the band occupancies (given in
+array [[occ]]) for all bands at each k point, then multiplies by the k point
+weight [[wtk]] at each k point. Call this sum "nelect_occ" (for the number of
+electrons from occupation numbers). It is then required that: nelect_occ = [[nelect]].
+To treat a neutral system, which is desired in nearly all cases, one must use
+[[cellcharge]] = 0. To treat a system missing one electron per unit cell, set [[cellcharge]] = +1.
+
+[[cellcharge]] superceeds the old [[charge]] input variable, whose name was rather unspecific.
+
+When there are several images, [[cellcharge]] might depend on the image number, but ONLY 
+when [[imgmov]]=6 and [[occopt]]=0 or 2. In the checking routine, [[nelect]] is considered
+separately for each image, while in the remaining of the code, [[nelect]](1) is propagated,
+so that [[nelect]] is still a scalar. This is consistent with the pSIC algorithm,
+see [[cite:Sadigh2015]] and [[cite:Sadigh2015a]].
+""",
+),
+
+Variable(
     abivarname="charge",
     varset="gstate",
     vartype="real",
@@ -1459,21 +1491,13 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="CHARGE",
-    added_in_version="before_v9",
+    added_in_version="before_v9, obsolete",
     text=r"""
-Used to establish charge balance between the number of electrons filling the
-bands and the nominal [[charge]] associated with the atomic cores.
-The code adds up the number of valence electrons provided by the
-pseudopotentials of each type (call this "zval"), then add [[charge]], to get
-the number of electrons per unit cell, [[nelect]].
-Then, if [[iscf]] is positive, the code adds up the band occupancies (given in
-array [[occ]]) for all bands at each k point, then multiplies by the k point
-weight [[wtk]] at each k point. Call this sum "nelect_occ" (for the number of
-electrons from occupation numbers). It is then required that: nelect_occ = [[nelect]].
-To treat a neutral system, which is desired in nearly all cases, one must use
-[[charge]] = 0. To treat a system missing one electron per unit cell, set [[charge]] = +1.
+The [[charge]] input variable is obsolete, and has been replaced by [[cellcharge]].
+It is still read during a transitional period, likely up to the end of v9 life cycle.
 """,
 ),
+
 
 Variable(
     abivarname="chempot",
@@ -10703,8 +10727,11 @@ Variable(
     text=r"""
 This internal variable gives the number of electrons per unit cell, as
 computed from the sum of the valence electrons related to each atom (given in
-the pseudopotential, where it is called "zion"), and the input variable [[charge]]:
-[[nelect]] = zion-[[charge]].
+the pseudopotential, where it is called "zion"), and the input variable [[cellcharge]]:
+[[nelect]] = zion-[[cellcharge]].
+
+When there are several images, although [[cellcharge]] is an array, [[nelect]] is initialized
+with the first image, namely [[nelect]] = zion-[[cellcharge]](1).
 """,
 ),
 

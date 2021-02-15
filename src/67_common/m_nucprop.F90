@@ -7,7 +7,7 @@
 !!  electric field gradient and Fermi contact
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (MT, JWZ)
+!! Copyright (C) 1998-2021 ABINIT group (MT, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,6 +74,7 @@ contains
 !!  natom=number of atoms in cell.
 !!  nfft=number of points on fft grid
 !!  ngfft(18)=details of fft
+!!  nhat(nfft,nspden)=compensation charge density
 !!  nspden=number of spin densities
 !!  nsym=number of symmetries in space group
 !!  ntypat=number of atom types
@@ -106,7 +107,7 @@ contains
 !!
 !! SOURCE
 
-  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nspden,nsym,ntypat,&
+  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,nsym,ntypat,&
                       paw_an,pawang,pawrad,pawrhoij,pawtab,&
                       ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
                       mpi_atmtab,comm_atom) ! optional arguments (parallelism)
@@ -121,7 +122,7 @@ contains
     !arrays
     integer,intent(in) :: ngfft(18),symrel(3,3,nsym),typat(natom)
     integer,optional,target,intent(in) :: mpi_atmtab(:)
-    real(dp),intent(in) :: ptcharge(ntypat)
+    real(dp),intent(in) :: nhat(nfft,nspden),ptcharge(ntypat)
     real(dp),intent(in) :: quadmom(ntypat),rhor(nfft,nspden),rprimd(3,3)
     real(dp),intent(in) :: tnons(3,nsym),zion(ntypat)
     real(dp),intent(inout) :: xred(3,natom)
@@ -166,7 +167,7 @@ contains
     efg_paw(:,:,:) = zero
     efg_point_charge(:,:,:) = zero
 
-    call make_efg_el(efg_el,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
+    call make_efg_el(efg_el,mpi_enreg,natom,nfft,ngfft,nhat,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
 
     call make_efg_ion(efg_ion,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
 
@@ -683,6 +684,7 @@ end subroutine make_efg_ion
 !! mpi_enreg=information about MPI parallelization
 !! natom, number of atoms in unit cell
 !! nfft,ngfft(18), number of FFT points and details of FFT
+!! nhat(nfft,nspden) compensation charge density
 !! nspden, number of spin components
 !! nsym=number of symmetries in space group
 !! rhor(nfft,nspden), valence electron density, here $\tilde{n} + \hat{n}$
@@ -718,7 +720,7 @@ end subroutine make_efg_ion
 !!
 !! SOURCE
 
-subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
+subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nhat,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
 
   !Arguments ------------------------------------
   !scalars
@@ -726,7 +728,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
   integer,intent(in) :: ngfft(18),symrel(3,3,nsym)
-  real(dp),intent(in) :: rhor(nfft,nspden),rprimd(3,3),tnons(3,nsym),xred(3,natom)
+  real(dp),intent(in) :: nhat(nfft,nspden),rhor(nfft,nspden),rprimd(3,3),tnons(3,nsym),xred(3,natom)
   real(dp),intent(out) :: efg(3,3,natom)
 
   !Local variables-------------------------------
@@ -760,12 +762,12 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
   tim_fourdp = 0 ! timing code, not using
   fftdir = -1 ! FT from R to G
   cplex = 1 ! fofr is real
-  !here we are only interested in the total charge density including nhat, which is rhor(:,1)
+  !here we are only interested in the valence pseudo charge density, which is rhor(:,1)-nhat(:,1)
   !regardless of the value of nspden. This may change in the future depending on
   !developments with noncollinear magnetization and so forth. Such a change will
   !require an additional loop over nspden.
   !Multiply by -1 to convert the electron particle density to the charge density
-  fofr(:) = -rhor(:,1)
+  fofr(:) = -(rhor(:,1)-nhat(:,1))
 
   ! Get the distrib associated with this fft_grid  See hartre.F90 for another example where
   ! this is done

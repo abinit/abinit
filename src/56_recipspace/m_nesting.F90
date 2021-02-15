@@ -7,7 +7,7 @@
 !!      N(\qq) = \sum_{mn\kk} \delta(\ee_{\kpq m}) \delta(\ee_{\kk n})
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, MJV)
+!! Copyright (C) 2008-2021 ABINIT group (MG, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

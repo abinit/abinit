@@ -8,7 +8,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2021 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -187,7 +187,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  real(dp),intent(in) ::  vxc(:,:),xred(3,natom)
  real(dp),intent(in),target :: vtrial(cplex*nfft,nspden)
  real(dp),intent(in),optional :: atvshift(:,:,:)
- real(dp),intent(in),optional :: nucdipmom(3,my_natom)
+ real(dp),intent(in),optional :: nucdipmom(3,natom)
  type(paw_an_type),intent(in) :: paw_an(my_natom)
  type(paw_ij_type),target,intent(inout) :: paw_ij(my_natom)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
@@ -795,18 +795,23 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Dijnd already computed
      if (paw_ij(iatom)%has_dijnd==2) then
-       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
-&                    paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:) &
-&                   +paw_ij(iatom)%dijnd(1:cplex_dij*lmn2_size,:)
+       if (dij_need) then
+         paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
+&          paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:) +  &
+&          paw_ij(iatom)%dijnd(1:cplex_dij*lmn2_size,:)
+       end if
+
      else
 
 !    ===== Need to compute Dijnd
        LIBPAW_ALLOCATE(dijnd,(cplex_dij*lmn2_size,ndij))
        call pawdijnd(dijnd,cplex_dij,ndij,nucdipmom(:,iatom),pawrad(itypat),pawtab(itypat))
        if (dijnd_need) paw_ij(iatom)%dijnd(:,:)=dijnd(:,:)
-       if (dij_need) paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
-&                    paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:) &
-&                   +dijnd(1:cplex_dij*lmn2_size,:)
+       if (dij_need) then
+         paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
+&        paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:) + &
+&        dijnd(1:cplex_dij*lmn2_size,:)
+       end if
        LIBPAW_DEALLOCATE(dijnd)
      end if
 
@@ -2439,7 +2444,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: idir,ij_size,il,ilm,im,jl,jlm,jm,klmn,kln,lmn2_size,mesh_size
+ integer :: idir,ij_size,il,ilmn,im,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
  complex(dpc) :: lms
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
@@ -2467,57 +2472,58 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
  dijnd = zero
 
- ! only calculate if some nucdipmom component nonzero
+ !-------------------------------------------------------------------
+ ! Computation of (<phi_i|phi_j>-<tphi_i|tphi_j>)/r^3 radial integral
+ !-------------------------------------------------------------------
 
- if ( ANY(ABS(nucdipmom) .GT. tol12 )) then
-   
-   !-------------------------------------------------------------------
-   ! Computation of (<phi_i|phi_j>-<tphi_i|tphi_j>)/r^3 radial integral
-   !-------------------------------------------------------------------
+ LIBPAW_ALLOCATE(intgr3,(ij_size))
 
-   LIBPAW_ALLOCATE(intgr3,(ij_size))
+ LIBPAW_ALLOCATE(ff,(mesh_size))
+ do kln=1,ij_size
+   ff(2:mesh_size)=(pawtab%phiphj(2:mesh_size,kln) - &
+&    pawtab%tphitphj(2:mesh_size,kln))/pawrad%rad(2:mesh_size)**3
+   call pawrad_deducer0(ff,mesh_size,pawrad)
+   call simp_gen(intgr3(kln),ff,pawrad)
+ end do
+ LIBPAW_DEALLOCATE(ff)
 
-   LIBPAW_ALLOCATE(ff,(mesh_size))
-   do kln=1,ij_size
-     ff(2:mesh_size)=(pawtab%phiphj(2:mesh_size,kln) - &
-&      pawtab%tphitphj(2:mesh_size,kln))/pawrad%rad(2:mesh_size)**3
-     call pawrad_deducer0(ff,mesh_size,pawrad)
-     call simp_gen(intgr3(kln),ff,pawrad)
-   end do
-   LIBPAW_DEALLOCATE(ff)
+ !---------------------------
+ ! accumulate matrix elements
+ !---------------------------
+ do klmn=1,lmn2_size
 
-   !---------------------------
-   ! accumulate matrix elements
-   !---------------------------
-   do klmn=1,lmn2_size
+   ilmn=indklmn(7,klmn)
+   jlmn=indklmn(8,klmn)
 
-     ilm=indklmn(5,klmn)
-     jlm=indklmn(6,klmn)
+   il=indlmn(1,ilmn)
+   jl=indlmn(1,jlmn)
 
-     il=indlmn(1,ilm)
-     jl=indlmn(1,jlm)
-     if ( il .NE. jl ) cycle
+   im=indlmn(2,ilmn) 
+   jm=indlmn(2,jlmn)
+   kln=indklmn(2,klmn)
 
-     im=indlmn(2,ilm)
-     jm=indlmn(2,jlm)
-     kln=indklmn(2,klmn)
+   ! Matrix elements of interest are <S_l'm'|L_i|S_lm>
+   ! these are zero if l' /= l and also if l' == l == 0
+   if ( il .NE. jl ) cycle
+   if ( il .EQ. 0  ) cycle
 
-     do idir = 1, 3
-       if ( ABS(nucdipmom(idir)) .LT. tol12 ) cycle
-       call slxyzs(il,im,idir,jl,jm,lms)
+   do idir = 1, 3
 
-       dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
-         & intgr3(kln)*dreal(lms)*nucdipmom(idir)*FineStructureConstant2
-       dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
-         & intgr3(kln)*dimag(lms)*nucdipmom(idir)*FineStructureConstant2
+     ! this loop accumulates a dot product so if no dipole moment in direction idir, nothing to do
+     if( ABS(nucdipmom(idir)) .LT. tol8 ) cycle
 
-     end do ! end loop over idir
+     call slxyzs(il,im,idir,jl,jm,lms)
 
-   end do ! end loop over basis states
+     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
+       & intgr3(kln)*dreal(lms)*nucdipmom(idir)*FineStructureConstant2*pawtab%dltij(klmn)
+     dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
+       & intgr3(kln)*dimag(lms)*nucdipmom(idir)*FineStructureConstant2*pawtab%dltij(klmn)
 
-   LIBPAW_DEALLOCATE(intgr3)
+   end do ! end loop over idir
 
- end if ! end check on nonzero dipole component
+ end do ! end loop over basis states
+
+ LIBPAW_DEALLOCATE(intgr3)
 
  ! in case of ndij > 1, note that there is no spin-flip in this term
  ! so therefore down-down = up-up, and up-down and down-up terms are still zero
