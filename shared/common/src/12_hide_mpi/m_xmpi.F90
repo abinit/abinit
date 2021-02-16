@@ -30,10 +30,10 @@ MODULE m_xmpi
 
  use defs_basis
  use m_profiling_abi
-! use m_errors
+ !use m_errors
  use iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
- use ISO_FORTRAN_ENV, only : int16,int32,int64
+ use ISO_FORTRAN_ENV, only : int16, int32, int64
 #endif
 #ifdef HAVE_MPI2
  use mpi
@@ -41,6 +41,7 @@ MODULE m_xmpi
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
+ use m_clib, only : ulimit_stack
 
  implicit none
 
@@ -696,7 +697,8 @@ CONTAINS  !===========================================================
 subroutine xmpi_init()
 
 !Local variables-------------------
- integer :: mpierr,ierr,unt
+ integer :: mpierr, ierr, unt
+ integer(c_long) :: rlim_cur, rlim_max
  logical :: exists
 #ifdef HAVE_MPI
  integer :: attribute_val
@@ -758,6 +760,13 @@ subroutine xmpi_init()
        if (ierr == 0) close(unit=unt, status="delete", iostat=ierr)
        if (ierr /= 0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
     end if
+ end if
+
+ ! Increase stack size.
+ call ulimit_stack(rlim_cur, rlim_max, ierr)
+ if (ierr /= 0) then
+   write(std_out,*)" WARNING: cannot increase stack size limit. ",
+   !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
  end if
 
 end subroutine xmpi_init

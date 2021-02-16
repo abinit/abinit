@@ -1777,7 +1777,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  ! Solve the linearized BTE with B = 0.
  !
- !   F_\nk = f^'_\nk v_\nk \tau^0 + \tau^0 \sum_{mq} Srate_{nk,mq} F_{m,k+q}
+ !   F_\nk = e df/de_\nk v_\nk \tau^0 + \tau^0 \sum_{mq} Srate_{nk,mq} F_{m,k+q}
  !
  ! where F is a vector in Cartesian coordinates and tau^0 is the SERTA relaxation time.
  !
@@ -1940,8 +1940,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  if (my_rank == master) then
    ! Print IBTE results to stdout and other external txt files (for the test suite)
-    !call ibte%print_txt_files(cryst, dtset, dtfil)
-   ! ! Creates the netcdf file used to store the results of the calculation.
+   !call ibte%print_txt_files(cryst, dtset, dtfil)
+   ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
    ! path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
    ! call wrtout(unts, ch10//sjoin("- Writing RTA transport results to:", path))

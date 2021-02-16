@@ -31,6 +31,7 @@ MODULE m_clib
  public :: clib_etime
  public :: clib_mtrace
  public :: clib_print_mallinfo
+ public :: ulimit_stack
 
 !FIXME the interfaces below have been commented out since abilint
 ! JB : because interface must have a name in abilint
@@ -95,14 +96,23 @@ MODULE m_clib
      import
      integer(c_int),intent(out) :: ierr
    end subroutine
- end interface 
+ end interface
 
  interface
    subroutine clib_mcheck(ierr) bind(C, name="clib_mcheck")
      import
      integer(c_int),intent(out) :: ierr
-   end subroutine 
+   end subroutine
  end interface
+
+ interface
+   subroutine ulimit_stack(rlim_cur, rlim_max, ierr) bind(C, name="ulimit_stack")
+     import
+     integer(c_long),intent(out) :: rlim_cur, rlim_max
+     integer(c_int),intent(out) :: ierr
+   end subroutine
+ end interface
+
 
 ! ==========================================
 ! ==== Fortran-bindings for file_lock.c ====
