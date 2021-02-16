@@ -283,7 +283,7 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
    if (gs_ham%nvloc==1) then
 
      chc = zero
-     if (gs_ham%istwf_k==1) then
+     if (gs_ham%istwf_k/=2) then
        do i3=1,gs_ham%n6
          do i2=1,gs_ham%n5
            do i1=1,gs_ham%n4
@@ -374,48 +374,42 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
 !    Add modified kinetic contributions
      !  to <CP|H|C(n,k)>.
      if (gs_ham%istwf_k==1) then
-       do idat=1,ndat
-!        !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
-         do ispinor=1,my_nspinor
-           do ig=1,npw_k2
-             igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             if (kinpw_k2(ig)<huge(zero)*1.d-11) then
-               chc(1) = chc(1) +  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
-               chc(1) = chc(1) +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
-               chc(2) = chc(2) +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(re,igspinor)
-               chc(2) = chc(2) -  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(im,igspinor)
-             end if
-           end do ! ig
-         end do ! ispinor
-       end do ! idat
-     else if (gs_ham%istwf_k==2.and.mpi_enreg%me_g0==1) then
-       do idat=1,ndat
-         do ispinor=1,my_nspinor
-           do ig=2,npw_k2
-             igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             if (kinpw_k2(ig)<huge(zero)*1.d-11) then
-               chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
-               chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
-             end if
-           end do ! ig
+!      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+       do ispinor=1,my_nspinor
+         do ig=1,npw_k2
+           igspinor=ig+npw_k2*(ispinor-1)
            if (kinpw_k2(ig)<huge(zero)*1.d-11) then
-             igspinor=1+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             chc(1) = chc(1) + kinpw_k2(1)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+             chc(1) = chc(1) +  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+             chc(1) = chc(1) +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
+             chc(2) = chc(2) +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(re,igspinor)
+             chc(2) = chc(2) -  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(im,igspinor)
            end if
-         end do ! ispinor
-       end do ! idat
+         end do ! ig
+       end do ! ispinor
+     else if (gs_ham%istwf_k==2.and.mpi_enreg%me_g0==1) then
+       do ispinor=1,my_nspinor
+         do ig=2,npw_k2
+           igspinor=ig+npw_k2*(ispinor-1)
+           if (kinpw_k2(ig)<huge(zero)*1.d-11) then
+             chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+             chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
+           end if
+         end do ! ig
+         if (kinpw_k2(ig)<huge(zero)*1.d-11) then
+           igspinor=1+npw_k2*(ispinor-1)
+           chc(1) = chc(1) + kinpw_k2(1)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+         end if
+       end do ! ispinor
      else
-       do idat=1,ndat
-         do ispinor=1,my_nspinor
-           do ig=1,npw_k2
-             igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             if (kinpw_k2(ig)<huge(zero)*1.d-11) then
-               chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
-               chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
-             end if
-           end do ! ig
-         end do ! ispinor
-       end do ! idat
+       do ispinor=1,my_nspinor
+         do ig=1,npw_k2
+           igspinor=ig+npw_k2*(ispinor-1)
+           if (kinpw_k2(ig)<huge(zero)*1.d-11) then
+             chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+             chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
+           end if
+         end do ! ig
+       end do ! ispinor
      end if
 !    Special case of PAW + Fock : only return Fock operator contribution in gvnlxc
 !     if (gs_ham%usepaw==1 .and. has_fock)then
