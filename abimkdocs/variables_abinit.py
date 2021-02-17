@@ -6326,10 +6326,10 @@ Variable(
     abivarname="gwgmcorr",
     varset="gw",
     vartype="integer",
-    topics=['GW_expert', 'SelfEnergy_expert'],
+    topics=['RPACorrEn_expert','GW_expert', 'SelfEnergy_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="GW Galitskii-Migdal CORRelation energy"
+    mnemonics="GW Galitskii-Migdal CORRelation energy",
     requires="[[optdriver]] == 3",
     added_in_version="9.4.0",
     text=r"""
@@ -7824,7 +7824,7 @@ Variable(
     topics=['GW_expert', 'SelfEnergy_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Integer that governs ReaDing of CHecK-Point files for the GW 1-RDM"
+    mnemonics="Integer that governs ReaDing of CHecK-Point files for the GW 1-RDM",
     requires="[[optdriver]] == 4",
     added_in_version="9.4.0",
     text=r"""
@@ -14795,7 +14795,7 @@ Variable(
     topics=['GW_expert', 'SelfEnergy_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM"
+    mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM",
     requires="[[optdriver]] == 4",
     added_in_version="9.4.0",
     text=r"""
@@ -20663,7 +20663,7 @@ Variable(
     topics=['GW_expert', 'SelfEnergy_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="EXchange-only 1-Reduced Density Matrix"
+    mnemonics="EXchange-only 1-Reduced Density Matrix",
     requires="[[optdriver]] == 4",
     added_in_version="9.4.0",
     text=r"""
