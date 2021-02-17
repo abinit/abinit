@@ -13,7 +13,7 @@ are relative to modifications/improvements of ABINIT v9.4 with respect to v9.2.
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, V. Brousseau, F. Bruneval,
 W. Chen, M. Cote, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault,
-B. Guster, T. Karatsu, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto, 
+B. Guster, T. Karatsu, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto,
 S. Ponce, Y. Pouillon, G.-M. Rignanese, M. Rodriguez, M. Schmitt,
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
 
@@ -26,14 +26,15 @@ Xavier
 ### **A.** Important remarks and warnings.
 
 **A.1** The [[charge]] variable is obsolete, and has been replaced by [[cellcharge]]. Indeed, [[charge]] was quite ambiguous,
-and the string `charge` present in some other input variables. For the time being, ABINIT stil recognizes [[charge]]
-in the input file, but this might not last longer than in ABINITv9.  
+and the string `charge` present in some other input variables. For the time being, ABINIT still recognizes [[charge]]
+in the input file, but this might not last longer than in ABINITv9.
 
 **A.2** There is a new check governed by the input variable [[chksymtnons]], whether the [[tnons]] of all symmetry operations
-is a rational number with small denominator, which is required for GW calculations as implemented in ABINIT. 
+is a rational number with small denominator, which is required for GW calculations as implemented in ABINIT.
 It is always possible to choose
 the origin of coordinate with such properties, and ABINIT can gives suggestions. If you do not want to change
-your coordinate origin (e.g. you have no intention to perform a GW callculation), set [[chksymtnons]] to zero.
+your coordinate origin (e.g. you have no intention to perform a GW calculation), set [[chksymtnons]] to zero
+or set the meta-variable [[expert_user]] to zero to disable several tests at once.
 
 By X. Gonze (MR712)
 
@@ -42,20 +43,23 @@ By X. Gonze (MR712)
 ### **B.** Most noticeable achievements
 
 **B.1** The RMM-DIIS algorithm has been implemented.
-This SCF (ground-state) algorithm is faster, but potentially more instable, 
-than the CG, Pulay, or LOBPCG algorithms, for medium to large size systems,
-as it has less cubic scaling steps (e.g. orthogonalisation). Typically used for mmolecular dynamics,
-as the restart from the previous time step gives RMM-DIIS less opportunities to fail.
+This SCF (ground-state) algorithm is faster, but potentially more unstable,
+than the CG or LOBPCG algorithms, for medium to large size systems,
+as it has less cubic scaling steps (e.g. orthogonalisation). Typically used for molecular dynamics
+or structural relaxations as the restart from the previous time step gives RMM-DIIS less opportunities to fail.
 See input variables [[rmm_diis]] and [[rmm_diis_savemem]].
-Several tests exist ([[test:paral_32]], [[test:paral_63]], [[test:paral_64]], [[test:v9_29]], [[test:v9_30]]) 
+Several tests exist ([[test:paral_32]], [[test:paral_63]], [[test:paral_64]], [[test:v9_29]], [[test:v9_30]])
 covering many cases, including NC/PAW and spin-orbit.
-By M. Giantomassi (MR757,MR719,MR718)
+Note that the PAW version of RMM-DIIS is more unstable than the NC one and extra operations are needed to make it convergence.
+So the speedup for PAW calculations is not as good as the one observed for NC.
+
+By M. Giantomassi (MR757, MR719, MR718)
 
 **B.2** The treatment of quasi-Fermi energies in the valence and conduction band,
 with populations of electrons (in the conduction bands) and holes (in the valence bands)
 has been implemented (gapped materials only, of course).
 This has been used e.g. in [[cite:Paillard2019]].
-See the variables [[occopt]]=9, and nqFD. (TO BE DOCUMENTED). 
+See the variables [[occopt]]=9, and nqFD. (TO BE DOCUMENTED).
 Also, related input variables : ivalence  (TO BE DOCUMENTED. NOTE XG20_02_14: I have replaced ival by ivalence in m_invars2 and in the test v9_91),
 Internal variables ne_qFD and nh_qFD are presently initialized to nqFD, which is NOT INTERNAL.
 See test [[test:v9_91]].
@@ -63,52 +67,53 @@ See test [[test:v9_91]].
 By Ch. Paillard (MR755).
 
 **B.3** All the tutorials have been carefully reexamined and improved, when appropriate.
-In particular: 
+In particular:
 
-- the old pseudopotentials have been replaced by new (e.g. [pseudodojo](http://www.pseudo-dojo.org/) or [JTH](https://www.abinit.org/psp-tables) pseudopotentials);
+- the old pseudopotentials have been replaced by new ones from e.g. [pseudodojo](http://www.pseudo-dojo.org/) or [JTH](https://www.abinit.org/psp-tables);
 - the text of the tutorial uses the new convention for launching abinit (e.g. `abinit input_file` instead of `abinit < files_file`) and the pseudopotentials are mentioned in the input file;
 - the input file suffix has been changed from `.in` to `.abi`and the output file suffix has been changed from `.out`to `.abo`;
 - the input files have been cleaned when adequate, and many have been restructured using a template;
 with populations of electrons (in the conduction bands) and holes (in the valence bands)
 
-Also, a new tutorial, [[tutorial:eph4isotc]], is available (with tests [[test:eph4isotc_1]] to [[test:eph4isotc_4]], 
-and [[tutorial:nlo]] and [[tutorial:eph4zpr]] have been enlarged to new developments 
+<!--
+Also, a new tutorial, [[tutorial:eph4isotc]], is available (with tests [[test:eph4isotc_1]] to [[test:eph4isotc_4]],
+-->
+Also, [[tutorial:nlo]] and [[tutorial:eph4zpr]] have been enlarged to new developments
 (see [[test:eph4zpr_8]] and [[test:nlo_6]]).
 
-By B. Amadon, L. Baguet, J. Bieder, E. Bousquet, F. Bruneval, 
-W. Chen, M. Cote, O. Gingras, M. Giantomassi, X. Gonze, F. Goudreault, 
-B. Guster, O. Nadeau, R. Outerovich, S. Ponce, M. Schmitt, 
+By B. Amadon, L. Baguet, J. Bieder, E. Bousquet, F. Bruneval,
+W. Chen, M. Cote, O. Gingras, M. Giantomassi, X. Gonze, F. Goudreault,
+B. Guster, O. Nadeau, R. Outerovich, S. Ponce, M. Schmitt,
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger (numerous MRs)
 
-**B.4** (DESCRIPTION TO BE IMPROVED - AT THIS STAGE, NOT SURE IT CAN BE CONSIDERED TO BE IN PRODUCTION and /MOST NOTICEABLE) 
+**B.4** (DESCRIPTION TO BE IMPROVED - AT THIS STAGE, NOT SURE IT CAN BE CONSIDERED TO BE IN PRODUCTION and /MOST NOTICEABLE)
 The treatment of GW with optimization of the 1-reduced density matrix (1-RDM) has been implemented.
 Also, evaluation of the Galitskii-Migdal correlation energy is available.
 See input variables gw1rdm, x1rdm, also irdchkprdm, prtchkprdm and gwgmcorr.
-No test for prtchkprdm. 
+No test for prtchkprdm.
 See tests [[test:v9_33]] to [[test:v9_36]].
 
-GW calculations based on Hartree-Fock wavefunctions can use mini Brillouin Zone integration technique, see [[test:v9_31]].
+GW calculations based on Hartree-Fock wavefunctions can use the mini Brillouin Zone integration technique, see [[test:v9_31]].
 
-Also, a new test [[test:v9_40]] has been provided for the computation of the susceptibility matrix 
+Also, a new test [[test:v9_40]] has been provided for the computation of the susceptibility matrix
 $\chi_0$ with [[inclvkb]].
 
 By Mauricio Rodriguez and F. Bruneval (MR722).
 
 **B.5** The pSIC (polaron self-interaction corrected methodology) has been implemented.
-See [[cite:Sadigh2015]] and [[cite:Sadigh2015a]]. This is based on the `images` capabilities 
-of ABINIT, where the capability to have different values of the input variable [[cellcharge]] 
-for different images has been implemented, to be used with [[imgmov]]=6.  
-AT PRESENT : PROBLEM with the parallel implementation (npimage larger than 1).
+See [[cite:Sadigh2015]] and [[cite:Sadigh2015a]]. This is based on the `images` capabilities
+of ABINIT, where the capability to have different values of the input variable [[cellcharge]]
+for different images has been implemented, to be used with [[imgmov]]=6.
+AT PRESENT: PROBLEM with the parallel implementation (npimage larger than 1).
 See the test example [[test:v9_22]].
 
 By X. Gonze (initial test from C. Tantardini).
 
 **B.6** The computation of the electric conductivity has been implemented for metals
-in the RTA approximation, actually computing the imaginary part of the Fan-Migdal self-energy 
-in this case.
+in the relaxation-time approximation with transport lifetimes computed from the imaginary part of the Fan-Migdal self-energy
 See tests [[test:v9_62]] to [[test:v9_65]].
 
-By O. Nadeau (MR756, MR716), with help from M. Giantomassi
+By O. Nadeau (MR756, MR716)
 
 * * *
 
@@ -116,7 +121,7 @@ By O. Nadeau (MR756, MR716), with help from M. Giantomassi
 
 **C.2** Test farm: new and obsolete bots
 
-* Bots introduced in the test farm: scopu_gnu_10.2_paral 
+* Bots introduced in the test farm: scopu_gnu_10.2_paral
 * Bots removed: cronos2 (replaced by scope_gnu_10.2_paral)
 
 Bigdft tests have been activated on ALPS.
@@ -141,7 +146,7 @@ By JM Beuken
 NOT DOCUMENTED, NOT TESTED.
 By ?? B. Amadon ?? R. Outerovich ??
 
-**D.2** New test [[test:v9_90]] of the treatment of the Coulomb interation for low dimensional materials (0D and 2D).
+**D.2** New test [[test:v9_90]] of the treatment of the Coulomb interaction for low dimensional materials (0D and 2D).
 By B. Guster.
 
 **D.3** DFPT (including ddk perturbation) can now be done in the presence of [[nucdipmom]].
@@ -156,9 +161,9 @@ Several test have been created ([[test:v9_17]] to [[test:v9_20]]).
 **D.6** AiiDA+ABINIT developments
 
   - A AiiDA plugin for Abinit has been developed: <https://github.com/sponce24/aiida-abinit>, also indexed at <https://aiidateam.github.io/aiida-registry/>.
-  - AiiDA is now supporting .psp8 type pseudopotentials, <https://github.com/aiidateam/aiida-pseudo>. This also implied modifications of the 
-     pseudodojo <http://www.pseudo-dojo.org>, that now includes .djrepo for each type of pseudopotential.
-  - Work on a common relaxation workflow https://github.com/aiidateam/aiida-common-workflows for a dozen of codes, including ABINIT.
+  - AiiDA is now supporting psp8 type pseudopotentials, <https://github.com/aiidateam/aiida-pseudo>. This also implied modifications of the
+    [pseudodojo](http://www.pseudo-dojo.org), that now includes .djrepo for each type of pseudopotential.
+  - Work on a [common relaxation workflow](https://github.com/aiidateam/aiida-common-workflows) for a dozen of codes, including ABINIT.
 
 By S. Ponce, also with G.-M. Rignanese, G. Petretto, M. Giantomassi.
 
@@ -170,10 +175,10 @@ By V. Brousseau (MR736)
 
 **D.9** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
 in the upgrade of tutorials)..
-By B. Amadon, F. Bruneval, T. Karatsu, G. Petretto, Y. Pouillon, M. Torrent, J. Zwanziger. 
+By B. Amadon, F. Bruneval, T. Karatsu, G. Petretto, Y. Pouillon, M. Torrent, J. Zwanziger.
 
 * * *
- 
+
 ## v9.2
 
 Version 9.2, released on September 30, 2020.
@@ -213,9 +218,9 @@ In particular:
    See also the specialized INSTALL notes for
    [CentOS](../INSTALL_CentOS), [EasyBuild](../INSTALL_EasyBuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
-   This means that some user-developed parsing tools might not work anymore, 
-   and should be adapted to the new ABINITv9 output file (see [B.9](#v9.2.B.9)). 
-   Note that the YAML output is still under development and modifications may appear in the next versions. 
+   This means that some user-developed parsing tools might not work anymore,
+   and should be adapted to the new ABINITv9 output file (see [B.9](#v9.2.B.9)).
+   Note that the YAML output is still under development and modifications may appear in the next versions.
    A python API to extract the results of the calculation will be provided when the implementation is finalized.
 4. Several default values have been changed, see [A.3](#v9.2.A.3).
 
@@ -467,7 +472,7 @@ List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23
 
 By Xu He, N. Helbig, J. Bieder, E. Bousquet, Ph. Ghosez, M. Verstraete
 
-
+<a name="v9.2.B.5"></a>
 **B.5** Constrained DFT
 
 Constrained Density-Functional Theory (see [[topic:ConstrainedDFT]]) is available,
@@ -477,7 +482,7 @@ or a combination thereof for different atoms. The constraints are smeared spheri
 with ajustable sphere radius, centered on atoms. The algorithms has been demonstrated for norm-conserving pseudopotentials
 as well as PAW. Forces and derivatives with respect to the constraints
 are available (i.e. magnetic torque for the non-collinear spin case).
-Stresses are still to be coded, will be available in ABINITv9.4.
+Stresses are still to be coded, will be available in ABINITv9.4 or ABINITv9.6.
 
 New tests: v8#24-29, v8#95-97 and v9#1-3.
 New input variables: [[chrgat]], [[constraint_kind]], [[ratsm]].
@@ -499,7 +504,7 @@ If the user does not provide the path to these libraries,
 the build system will try to find them in the "usual" directories, and inform the user that it has done so.
 The build system also can make suggestions to the user, to complete its *.ac9 file.
 
-Specialized INSTALL notes are available to help the user for 
+Specialized INSTALL notes are available to help the user for
 [CentOS](../INSTALL_CentOS), [EasyBuild](../INSTALL_EasyBuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
 
 By Y. Pouillon and JM Beuken
