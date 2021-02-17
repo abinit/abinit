@@ -8,7 +8,7 @@
 !!  flexoelectric tensor) from the DFPT long-wave approach.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
+!!  Copyright (C) 2018-2021 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,13 +89,6 @@ contains
 !!  are fixed by the rfatpol and rfdir variables in the input, rfdir also
 !!  fixes the directions for the dq2 derivative, whereas dq1 is evaluated
 !!  in all three directions.
-!!
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -674,12 +667,12 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ! CP modified
 ! call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 !& nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-!& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!& dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 !& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 & doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 & nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+& dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 & dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  ! End CP modified
  ABI_FREE(eigen0)
@@ -1076,12 +1069,6 @@ end subroutine dfpt_qdrpole
 !!  perfofms the transformation from reduced to cartesian coordinates and
 !!  writes out the quadrupole tensor in external files. It also writes the firts
 !!  q-gradient of the polarization response to an atomic displacement.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  eqgradhart(2,natpert,nq2grad,nq1grad)=electrostatic contribution from the
@@ -1562,12 +1549,6 @@ end subroutine dfpt_qdrpout
 !! This routine computes the elements of the flexoelectric tensor as:
 !!     --> Electronic contribution: second q-gradient of the second mixed derivative
 !!         of the energy w.r.t an electric field and a metric perturbation.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -2368,11 +2349,11 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ! CP modified
 ! call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 !& nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-!& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!& dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 !& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 & doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,&
-& dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz, dtset%charge, dtset%kptopt, &
+& dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz, dtset%cellcharge(1), dtset%kptopt, &
 & dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  ! End CP modified
  ABI_FREE(eigen0)
@@ -3029,12 +3010,6 @@ end subroutine dfpt_flexo
 !!  perfofms the transformation from reduced to cartesian coordinates and
 !!  writes out the tensor in output files.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  elqgradhart(2,3,3,3,3)=electronic electrostatic contribution from the
 !!                                             q-gradient of the Hartree potential
@@ -3576,12 +3551,6 @@ end subroutine dfpt_ciflexoout
 !!  matrix, perfofms the transformation from reduced to cartesian coordinates and
 !!  writes out the tensor in output files.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  ddmdq_flg(natpert,natpert,nq1grad)=array that indicates which elements of the first q derivative
 !!                                             of dynamical matrix have been calculated
@@ -3944,12 +3913,6 @@ end subroutine dfpt_ciflexoout
 !!  This subroutine gathers the different terms entering the q-gradient of the
 !!  internal strain tensor, perfofms the transformation from reduced to cartesian coordinates and
 !!  writes out the tensor in output files in type-II formulation.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  dyewdqdq(2,3,natom,3,3,3)= Second q-gradient of Ewald part of the dynamical matrix

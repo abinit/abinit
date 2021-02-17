@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group ()
+!!  Copyright (C) 2008-2021 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -100,7 +100,7 @@ contains
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2021 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -319,7 +319,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
      ! Write info on electrons.
      call ydoc%add_reals("nelect, charge, occopt, tsmear", &
-       [dtset%nelect, dtset%charge, one * dtset%occopt, dtset%tsmear], &
+       [dtset%nelect, dtset%cellcharge(1), one * dtset%occopt, dtset%tsmear], &
        dict_key="electrons")
 
      ! This part depends on optdriver.

@@ -6,7 +6,7 @@ usepotzero1 0            # old potential alignment: the average smooth potential
 usepotzero2 1            # new potential alignment: the average physical potential is set to zero
 usepotzero3 2            # PWscf potential alignment: the average potential of equivalent point charges is set to zero
 
-charge     -1
+cellcharge     -1
 nband      12
 
 optstress 0

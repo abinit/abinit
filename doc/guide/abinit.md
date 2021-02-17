@@ -967,7 +967,7 @@ following Fortran90 instructions (format 9.0):
 
      write(unit=unit) residm,xred(1:3,1:natom),etotal,fermie,amu(1:ntypat)
 
-     write(unit=unit) kptopt,pawcpxocc,nelect,charge,icoulomb,&
+     write(unit=unit) kptopt,pawcpxocc,nelect,cellcharge,icoulomb,&
     & kptrlatt(3,3),kptrlatt_orig(3,3),shiftk_orig(3),shiftk(3)
 
      do ipsp=1,npsp
@@ -992,7 +992,7 @@ where the type of the different variables is:
     integer :: bantot,cplex,date,icoulomb,intxc,ixc,kptopt,mband,natom,ngfft(3),&
     & nkpt,npsp,nshiftk_orig,nshiftk,nspden,nspinor,nsppol,nsym,ntypat,occopt,&
     & pawcpxocc,pertcase,usepaw,usewvl
-    double precision :: acell(3),charge,ecut,ecutdg,ecutsm,ecut_eff,etotal,&
+    double precision :: acell(3),cellcharge,ecut,ecutdg,ecutsm,ecut_eff,etotal,&
     & fermie,nelect,qptn(3),residm,rprimd(3,3),shiftk(3),shiftk_orig(3),&
     & stmbias,tphysel,tsmear
     integer :: istwfk(nkpt),kptrlatt(3,3),kptrlatt_orig(3,3),nband(nkpt*nsppol),&

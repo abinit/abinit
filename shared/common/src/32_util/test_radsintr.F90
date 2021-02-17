@@ -7,7 +7,7 @@
 !!  radial Fourier transform.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2020 ABINIT group (CE)
+!!  Copyright (C) 2011-2021 ABINIT group (CE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-## Copyright (C) 2017-2019 Yann Pouillon <devops@materialsevolution.es>
+## Copyright (C) 2017-2021 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
 
 # Note: this script is for maintainers and testers working with GCC
 

@@ -7,7 +7,7 @@
 !!  used to handle orbital magnetization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2020 ABINIT group (JWZ)
+!! Copyright (C) 2011-2021 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -295,7 +295,7 @@ CONTAINS  !=====================================================================
 !! Initialization of orbital magnetization calculation; similar to initberry
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2020 ABINIT group.
+!! Copyright (C) 2004-2021 ABINIT group.
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -907,7 +907,7 @@ end subroutine initorbmag
 !! Routine to compute Pcg1 from cg1 via |u_i> = |u_i> + 1/2\sum_j |u_j><u_j|S^1|u_i>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1036,7 +1036,7 @@ end subroutine make_pcg1
 !! Routine to compute <umk|S1|unk> where S1=\partial S\partial k
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1114,7 +1114,7 @@ end subroutine make_us1u
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1233,7 +1233,7 @@ end subroutine rho_norm_check
 !! Generate cprj multiplied by S^{-1}, similarly to the wavefunctions in smatrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1311,7 +1311,7 @@ end subroutine covar_cprj
 !! Routine to play with and check covariant derivative Q|\partial_k u_{nk}\rangle$
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1502,7 +1502,7 @@ end subroutine covar_test
 !! u at the gamma point only
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1810,7 +1810,7 @@ end subroutine covar_gamma
 !! Q projects onto the conduction space. Single k point formula.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1962,7 +1962,7 @@ end subroutine duqdu_gamma
 !! Q projects onto the conduction space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2285,7 +2285,7 @@ end subroutine duqdu
 !! get wavefunction and cprj in mpi communication loop
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2427,7 +2427,7 @@ end subroutine mpicomm_helper
 !! Q projects onto the conduction space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2939,7 +2939,7 @@ end subroutine duqhqdu
 !! the Chern number (integral over Berry curvature).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3321,7 +3321,7 @@ end subroutine udsqdu
 !! the Chern number (integral over Berry curvature). Single k point formula.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3576,7 +3576,7 @@ end subroutine udsqdu_gamma
 !! Return i*epsabg\sum_{n,n}<u_kn|\partial_b S|u_kn'><u_kn|\partial_g S|u_kn>E_nk
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3868,7 +3868,7 @@ end subroutine udsdsu
 !! Compute 1/2 <L_R> onsite contribution to orbital magnetization at given k point and idir
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3960,7 +3960,7 @@ end subroutine make_onsite_l_k
 !! Compute 1/2 <L_R> onsite contribution to orbital magnetization in direction idir
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4068,7 +4068,7 @@ end subroutine make_onsite_l
 !! Compute A_0.A_N onsite term for magnetic field + nuclear magnetic dipole moment
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4271,7 +4271,7 @@ end subroutine make_onsite_bm
 !! Compute the energy eigenvalues at each k point
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4649,7 +4649,7 @@ end subroutine make_S1trace_k
 !! Compute Trace[\rho_0 S^{(1)} \rho_0] in orbital magnetism context
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4865,7 +4865,7 @@ end subroutine make_rhorij1_k
 !! Compute Trace[\rho_0 \rho_Rij(1) ] in orbital magnetism context
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4996,7 +4996,7 @@ end subroutine make_rhorij1
 !! Compute <u_kg|p_i>dij<p_j|u_kb> energy contribution
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -5077,7 +5077,7 @@ end subroutine cpg_dij_cpb
 !! This routine is a driver for orbital magnetization computations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -5200,7 +5200,7 @@ end subroutine orbmag
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -5715,7 +5715,7 @@ end subroutine orbmag_ddk
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -6038,7 +6038,7 @@ end subroutine orbmag_wf
 !! This routine outputs orbmag and chern number
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -6124,7 +6124,7 @@ end subroutine output_orbmag
 !! appears in the Chern number
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -6307,7 +6307,7 @@ end subroutine make_dpdp
 !! filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2021 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -6769,7 +6769,7 @@ end subroutine make_smat
 !! at k points on current processor and all bands
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -7002,7 +7002,7 @@ end subroutine ctocprjb
 !! Compute k-shifted kinetic energy: |u_{nkg}> -> T_k |u_{nkg}>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -7095,7 +7095,7 @@ end subroutine kgk_ke
 !! apply nuclear dipole term A.p
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -7204,7 +7204,7 @@ end subroutine applyap
 !! Compute matrix elements <u_k+g|H_k|u_k+b>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -7682,7 +7682,7 @@ end subroutine make_eeig123
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -8055,7 +8055,7 @@ end subroutine orbmag_rho
 !! This routine computes term CCI for orbital magnetization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -8169,7 +8169,7 @@ end subroutine make_dpHdp
 !! This routine computes term Tr[(1-\rho)d\rho d\rho H (1-\rho)]
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -8284,7 +8284,7 @@ end subroutine make_qdpdpH
 !! This routine computes term Tr[\rho d\rho d\rho H]
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -8398,7 +8398,7 @@ end subroutine make_pdpdpH
 !! If H is not present, then H -> 1 and get analogous term appearing in Chern number.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2021 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

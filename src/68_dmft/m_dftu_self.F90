@@ -6,7 +6,7 @@
 !! Compute DFT+U self energy for DMFT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,7 +60,7 @@ contains
 !! Use DFT+U to compute self-energy
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

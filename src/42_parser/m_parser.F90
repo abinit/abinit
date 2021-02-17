@@ -6,7 +6,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2021 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3751,6 +3751,8 @@ end subroutine prttagm_images
 !!    1 if parser accepts multiple datasets and +* syntax (e.g. abinit)
 !!
 !!  list_vars(len=*)=string with the (upper case) names of the variables (excluding logicals and chars).
+!!  list_vars_img(len=*)=string with the (upper case) names of the variables (excluding logicals and chars),
+!!   for which the image can be specified.
 !!  list_logicals(len=*)=string with the (upper case) names of the logical variables.
 !!  list_strings(len=*)=string with the (upper case) names of the character variables.
 !!  string(len=*)=string (with upper case) from the input file.
@@ -3766,18 +3768,18 @@ end subroutine prttagm_images
 !!
 !! SOURCE
 
-subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, string)
+subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, list_strings, string)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: protocol
  character(len=*),intent(in) :: string
- character(len=*),intent(in) :: list_logicals,list_strings,list_vars
+ character(len=*),intent(in) :: list_logicals,list_strings,list_vars, list_vars_img
 
 !Local variables-------------------------------
  character,parameter :: blank=' '
 !scalars
- integer :: index_blank,index_current,index_endword,index_endwordnow,index_list_vars
+ integer :: index_blank,index_current,index_endfullword, index_endword,index_endwordnow,index_list_vars
  character(len=500) :: msg
 
 !************************************************************************
@@ -3793,7 +3795,9 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 
    if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_current:index_current))/=0)then
 
+     index_endfullword = index_blank -1
      index_endword = index_blank -1
+
      if (protocol == 1) then
        ! Skip characters like : + or the digits at the end of the word
        ! Start from the blank that follows the end of the word
@@ -3827,15 +3831,15 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
          if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
        end do
 
-       ! Find the index of the potential variable name in the list of variables
-       index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
+       ! Find the index of the potential variable name in the list of variables for which
+       ! the image index can be specified
+       index_list_vars=index(list_vars_img,blank//string(index_current:index_endword)//blank)
      end if
 
      if(index_list_vars==0)then
 
        ! Treat possible logical input variables
        if(index(list_logicals,blank//string(index_current:index_endword)//blank)/=0)then
-         !write(std_out,*)"Found logical variable: ",string(index_current:index_endword)
          index_blank=index(string(index_current:),blank)+index_current-1
          if(index(' F T ',string(index_blank:index_blank+2))==0)then
            write(msg, '(8a)' )&
@@ -3851,18 +3855,16 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
        else if(index(list_strings,blank//string(index_current:index_endword)//blank)/=0)then
          ! Treat possible string input variables
          ! Every following string is accepted
-         !write(std_out,*)"Found string variable: ",string(index_current:index_endword)
-         !write(std_out,*)"in string: ",trim(string(index_current:))
          index_current=index(string(index_current:),blank)+index_current
          index_blank=index(string(index_current:),blank)+index_current-1
-         !write(std_out,*)"next:: ",string(index_current:index_endword)
 
        else
          ! If still not admitted, then there is a problem
-         write(msg, '(7a)' )&
-         'Found token: `',string(index_current:index_endword),'` in the input file.',ch10,&
+         write(msg, '(9a)' )&
+         'Found token: `',string(index_current:index_endfullword),'` in the input file.',ch10,&
          'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
-         'Action: check your input file. You likely mistyped the input variable.'
+         'Action: check your input file. Perhaps you mistyped the input variable,',ch10,&
+&        'or specified "img", although this was not permitted for this input variable.'
          ABI_ERROR(msg)
        end if
      end if

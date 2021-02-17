@@ -18,6 +18,7 @@ subsuites = [
 "ffield",
 "lw",
 "nlo",
+"nlofDFPT",
 "optic",
 "rf1",
 "rf2",
@@ -84,6 +85,7 @@ inp_files = [
 #
 "tnlo_1.abi",
 "tnlo_2.abi",
+"tnlofDFPT_2.abi",
 "tnlo_3.abi",
 "tnlo_4.abi",
 "tnlo_5.abi",

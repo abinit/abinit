@@ -34,6 +34,7 @@ inp_files = [
 "t19.abi", # disable all checks thanks to expert_user
 "t20.abi", # test treatment of inaccurate POSCAR file
 "t21.abi", # test treatment of inaccurate POSCAR file
+"t22.abi", # test different cellcharge for different images, algo pSIC
 "t29.abi", # RMM-DIIS eigsolver for NC.
 "t30.abi", # RMM-DIIS eigsolver for PAW.
 # GW/BSE
