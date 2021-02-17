@@ -32,7 +32,7 @@ getscr3       -1       # Obtain SCR file from previous dataset
 nband3         8       # Bands to be used in the Self-Energy calculation
 ecutsigx3    8.0
 nomegasi3     40       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
-ptchkprdm     1        # Print checkpoint files for each k-points
+prtchkprdm3    1       # Print checkpoint files for each k-points
 
 nkptgw3        6       # number of k-point where to calculate the GW correction
 kptgw3                 # k-points in reduced coordinates, read from output

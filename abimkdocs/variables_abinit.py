@@ -6195,7 +6195,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="GW 1-Reduced Density Matrix",
-    requires="[[optdriver]] == [4]",
+    requires="[[optdriver]] == 4",
     added_in_version="9.4.0",
     text=r"""
 [[gw1rdm]] governs the calculation of the density matrix within the linearized GW approximation.
@@ -6330,7 +6330,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="GW Galitskii-Migdal CORRelation energy"
-    requires="[[optdriver]] == [3]",
+    requires="[[optdriver]] == 3",
     added_in_version="9.4.0",
     text=r"""
 [[gwgmcorr]]==1 allows to compute the GW correlation energy with the Galitskii-Migdal (GM) formula.
@@ -7825,7 +7825,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Integer that governs ReaDing of CHecK-Point files for the GW 1-RDM"
-    requires="[[optdriver]] == [4]",
+    requires="[[optdriver]] == 4",
     added_in_version="9.4.0",
     text=r"""
 [[irdchkprdm]]==1 triggers the reading of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
@@ -14796,7 +14796,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM"
-    requires="[[optdriver]] == [4]",
+    requires="[[optdriver]] == 4",
     added_in_version="9.4.0",
     text=r"""
 [[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
@@ -20664,7 +20664,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="EXchange-only 1-Reduced Density Matrix"
-    requires="[[optdriver]] == [4]",
+    requires="[[optdriver]] == 4",
     added_in_version="9.4.0",
     text=r"""
 [[x1rdm]]==1 forces the update of the density-matrix using only the exchange operator (instead of exchange and GW correlation).
