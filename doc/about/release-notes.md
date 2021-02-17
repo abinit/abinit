@@ -73,7 +73,7 @@ with populations of electrons (in the conduction bands) and holes (in the valenc
 
 Also, a new tutorial, [[tutorial:eph4isotc]], is available (with tests [[test:eph4isotc_1]] to [[test:eph4isotc_4]], 
 and [[tutorial:nlo]] and [[tutorial:eph4zpr]] have been enlarged to new developments 
-(see [[test:eph4zpr_8]] and test nlofDFPT_2 - NAME TO BE CHANGED.
+(see [[test:eph4zpr_8]] and [[test:nlo_6]]).
 
 By B. Amadon, L. Baguet, J. Bieder, E. Bousquet, F. Bruneval, 
 W. Chen, M. Cote, O. Gingras, M. Giantomassi, X. Gonze, F. Goudreault, 
