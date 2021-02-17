@@ -765,7 +765,7 @@ subroutine xmpi_init()
  ! Increase stack size.
  call ulimit_stack(rlim_cur, rlim_max, ierr)
  if (ierr /= 0) then
-   write(std_out,*)" WARNING: cannot increase stack size limit. ",
+   write(std_out,*)" WARNING: cannot increase stack size limit. "
    !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
  end if
 
