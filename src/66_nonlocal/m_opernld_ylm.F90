@@ -107,6 +107,7 @@ contains
 !! --If (paw_opt==3)
 !!      if choice=1 : enlout(1)             -> contribution to <c|S|c> (note: not including <c|c>)
 !!      if choice=2 : enlout(3*natom)       -> contribution to <c|dS/d_atm.pos|c>
+!!      if choice=53: enlout(3)             -> 1st deriv. (twist) of energy wrt k
 !!      if choice=54: enlout(18*natom)      -> 2nd deriv. of energy wrt atm. pos and right k (Born eff. charge)
 !!      if choice=55: enlout(36)            -> 2nd deriv. of energy wrt strain and right k (piezoelastic tensor)
 !!      if choice=8 : enlout(6)             -> 2nd deriv. of energy wrt 2 k
@@ -145,7 +146,8 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,iashift,ilmn,iplex,ishift,ispinor,mu,mua,mua1,mua2,mub,mushift,mut,muu,nu,nushift
+ integer :: ia,iashift,ilmn,iplex,ishift,ispinor
+ integer :: mu,mua,mua1,mua2,mub,mushift,mut,muu,nu,nushift
  real(dp) :: dummy
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
@@ -302,15 +304,16 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
    end if
 
 !  ======== Accumulate the contributions of twist derivatives of E wrt to k ==========
+! accumulate <u|dp_i/dk_(idir+1)>D_ij<dp_j/dk(idir+2)|u>
    if (choice==53) then
-     enlj(1:3)=zero
+     enlj(:)=zero
      ABI_MALLOC(cft,(3,nlmn))
      ABI_MALLOC(cfu,(3,nlmn))
 !    If cplex=1, dgxdt is pure imaginary;
 !    If cplex_fac=1, dgxdtfac is pure imaginary;
      do ispinor=1,nspinor
        do ia=1,nincat
-         if(cplex==2)then
+        if(cplex==2)then
            cft(1:3,1:nlmn)=cmplx(dgxdt(1,1:3,1:nlmn,ia,ispinor),dgxdt(2,1:3,1:nlmn,ia,ispinor))
          else
            cft(1:3,1:nlmn)=cmplx(zero,dgxdt(1,1:3,1:nlmn,ia,ispinor))
@@ -324,13 +327,24 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
            do mu=1,3
              mut = twist_dir(2*mu-1)
              muu = twist_dir(2*mu)
-             enlj(mu) = enlj(mu) + aimag(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
-             enlj(mu) = enlj(mu) - aimag(conjg(cft(muu,ilmn))*cfu(mut,ilmn))
-           end do
-         end do
-       end do
-     end do
-     enlout(1:3)=enlout(1:3)+enlj(1:3)
+             if (cplex == 2) then
+               enlj(2*mu-1) = enlj(2*mu-1) + real(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+               enlj(2*mu)   = enlj(2*mu)   + aimag(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+             else
+               enlj(mu) = enlj(mu) + real(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+             end if
+           end do ! end loop over mu=1,3
+         end do ! end loop over ilmn states
+       end do ! end loop over ia atoms
+     end do ! end loop over ispinor
+     do mu = 1, 3
+       if (cplex == 2) then
+         enlout(2*mu-1)=enlout(2*mu-1)+enlj(2*mu-1)
+         enlout(2*mu)  =enlout(2*mu)  +enlj(2*mu)
+       else
+         enlout(mu)=enlout(mu)+enlj(mu)
+       end if
+     end do ! end loop over mu = 1, 3
      ABI_FREE(cft)
      ABI_FREE(cfu)
    end if
@@ -751,6 +765,52 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
        enlj(2)=-enlj(2);enlj(4)=-enlj(4);enlj(6)=-enlj(6)
      end if
      enlout(1:6)=enlout(1:6)+enlj(1:6)
+   end if
+
+!  ====== Accumulate the contributions of twist derivatives of <c|S|c> wrt to k ==========
+! Choice 53: <u|dp_i/dk_(idir+1)>Sij<dp_j/dk_(idir+2)|u>
+   if (choice==53) then
+     enlj(:)=zero
+     ABI_MALLOC(cft,(3,nlmn))
+     ABI_MALLOC(cfu,(3,nlmn))
+!    If cplex=1, dgxdt is pure imaginary;
+!    If cplex_fac=1, dgxdtfac is pure imaginary;
+     do ispinor=1,nspinor
+       do ia=1,nincat
+        if(cplex==2)then
+           cft(1:3,1:nlmn)=cmplx(dgxdt(1,1:3,1:nlmn,ia,ispinor),dgxdt(2,1:3,1:nlmn,ia,ispinor))
+         else
+           cft(1:3,1:nlmn)=cmplx(zero,dgxdt(1,1:3,1:nlmn,ia,ispinor))
+         end if
+         if(cplex_fac==2)then
+           cfu(1:3,1:nlmn)=cmplx(dgxdtfac_sij(1,1:3,1:nlmn,ia,ispinor),dgxdtfac_sij(2,1:3,1:nlmn,ia,ispinor))
+         else
+           cfu(1:3,1:nlmn)=cmplx(zero,dgxdtfac_sij(1,1:3,1:nlmn,ia,ispinor))
+         end if
+         do ilmn=1,nlmn
+           do mu=1,3
+             mut = twist_dir(2*mu-1)
+             muu = twist_dir(2*mu)
+             if (cplex == 2) then
+               enlj(2*mu-1) = enlj(2*mu-1) + real(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+               enlj(2*mu)   = enlj(2*mu)   + aimag(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+             else
+               enlj(mu) = enlj(mu) + real(conjg(cft(mut,ilmn))*cfu(muu,ilmn))
+             end if
+           end do ! end loop over mu=1,3
+         end do ! end loop over ilmn states
+       end do ! end loop over ia atoms
+     end do ! end loop over ispinor
+     do mu = 1, 3
+       if (cplex == 2) then
+         enlout(2*mu-1)=enlout(2*mu-1)+enlj(2*mu-1)
+         enlout(2*mu)  =enlout(2*mu)  +enlj(2*mu)
+       else
+         enlout(mu)=enlout(mu)+enlj(mu)
+       end if
+     end do ! end loop over mu = 1, 3
+     ABI_FREE(cft)
+     ABI_FREE(cfu)
    end if
 
 !  ====== Accumulate contribution to <c|d2S/d_atm_pos d_left_k|c> =========

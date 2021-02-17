@@ -95,8 +95,8 @@ contains
 !!          =52 =>left 1st derivative(s) with respect to k wavevector, typically
 !!                sum_ij [ |dp_i/dk> D_ij < p_j| ]
 !!          =53 =>twist 1st derivative(s) with respect to k, typically
-!!                sum_ij [ |dp_i/dk_(idir+1)> D_ij <dp_j//dk_(idir-1)|
-!!                        -|dp_i/dk_(idir-1)> D_ij <dp_j//dk_(idir+1)|]
+!!                sum_ij [ |dp_i/dk_(idir+1)> D_ij <dp_j//dk_(idir+2)|
+!!                where idir, idir+1, idir+2 taken mod 3
 !!          =54=> mixed 2nd derivative(s) with respect to atomic pos. and left k wavevector
 !!          =55=> mixed 2nd derivative(s) with respect to strain and right k wavevector
 !!          =7 => apply operator $\sum_i [ |p_i> <p_i| ],
@@ -162,7 +162,7 @@ contains
 !!          will be applied. (used fi to apply derivative of NL operator wrt an atomic displacement)
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5,51,or 52)
-!!                          for choice 53 signs=2, cross derivatives are in idir-1 and idir+1 directions
+!!                          for choice 53 signs=2, cross derivatives are in idir+1 and idir+2 directions (mod 3)
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
 !!                        - strain component (1:9) in the case (choice=33,signs=2)
 !!                        - (1:9) components to specify the atom to be moved and the second q-gradient
@@ -176,7 +176,7 @@ contains
 !!         choice   nnlout     |  choice   nnlout
 !!              1   1          |      51   6 (complex)
 !!              2   3*natom    |      52   6 (complex)
-!!              3   6          |      53   6
+!!              3   6          |      53   6 (complex)
 !!              4   6*natom    |      54   9*natom
 !!             23   6+3*natom  |      55   36 (complex)
 !!             24   9*natom    |       6   36+18*natom
@@ -835,7 +835,7 @@ end subroutine nonlop
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2),
 !!                        - k point direction in the case (choice=5,signs=2)
-!!                          for choice 53, twisted derivative involves idir+1 and idir-1
+!!                          for choice 53, twisted derivative involves idir+1 and idir+2 (mod 3)
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
 !!  indlmn(6,i,ntypat)= array giving l,m,n,lm,ln,s for i=lmn
 !!  istwf_k=option parameter that describes the storage of wfs
