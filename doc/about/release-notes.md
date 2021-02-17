@@ -472,7 +472,7 @@ List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23
 
 By Xu He, N. Helbig, J. Bieder, E. Bousquet, Ph. Ghosez, M. Verstraete
 
-
+<a name="v9.2.B.5"></a>
 **B.5** Constrained DFT
 
 Constrained Density-Functional Theory (see [[topic:ConstrainedDFT]]) is available,
@@ -482,7 +482,7 @@ or a combination thereof for different atoms. The constraints are smeared spheri
 with ajustable sphere radius, centered on atoms. The algorithms has been demonstrated for norm-conserving pseudopotentials
 as well as PAW. Forces and derivatives with respect to the constraints
 are available (i.e. magnetic torque for the non-collinear spin case).
-Stresses are still to be coded, will be available in ABINITv9.4.
+Stresses are still to be coded, will be available in ABINITv9.4 or ABINITv9.6.
 
 New tests: v8#24-29, v8#95-97 and v9#1-3.
 New input variables: [[chrgat]], [[constraint_kind]], [[ratsm]].
