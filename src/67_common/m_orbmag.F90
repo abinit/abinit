@@ -5651,8 +5651,12 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  end if
 
  do iterms = 1, nterms
+   ! the following scaling converts to cartesian coordinates. 
    orbmag_terms((iterms-1)*3+1:iterms*3) = &
      & ucvol*MATMUL(gprimd,orbmag_terms((iterms-1)*3+1:iterms*3))
+   ! following scaling is semi-empirical
+   orbmag_terms((iterms-1)*3+1:iterms*3) = &
+     & orbmag_terms((iterms-1)*3+1:iterms*3)/(two*two_pi*two_pi)
  end do
 
  orbmag_terms(16:18) = orbmag_terms(16:18)/two_pi
