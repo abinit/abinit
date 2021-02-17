@@ -6188,6 +6188,26 @@ the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV)
 ),
 
 Variable(
+    abivarname="gw1rdm",
+    varset="gw",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GW 1-Reduced Density Matrix",
+    requires="[[optdriver]] == [4]",
+    added_in_version="9.4.0",
+    text=r"""
+[[gw1rdm]] governs the calculation of the density matrix within the linearized GW approximation.
+It must be used with [[gwcalctyp]]=21.
+
+    * [[gw1rdm]] = 0: Do not update the density matrix.
+    * [[gw1rdm]] = 1: Compute the update of the density matrix for the k-point list specified with the keyword [[kptgw]]. 
+    * [[gw1rdm]] = 2: Same as 1 but also compute the correction to the Fock operator and update total energies.
+""",
+),
+
+Variable(
     abivarname="gwaclowrank",
     varset="gw",
     vartype="integer",
@@ -6299,6 +6319,22 @@ can be disregarded [[cite:Chen2016]].
 
 [[gwgamma]] = -8 activates the RPA bootstrap-like kernel (one-shot) (see [[cite:Berger2015]]
 and [[cite:Rigamonti2015]]).
+""",
+),
+
+Variable(
+    abivarname="gwgmcorr",
+    varset="gw",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GW Galitskii-Migdal CORRelation energy"
+    requires="[[optdriver]] == [3]",
+    added_in_version="9.4.0",
+    text=r"""
+[[gwgmcorr]]==1 allows to compute the GW correlation energy with the Galitskii-Migdal (GM) formula.
+It must be used with [[gwrpacorr]]>0. For [[gwrpacorr]]=1 it will be obtained for free, while for [[gwrpacorr]]>1 it will require an extra inversion of the polarizability matrix. 
 """,
 ),
 
@@ -7778,6 +7814,22 @@ Variable(
     text=r"""
 Start the Bethe-Salpeter calculation from the BSR file containing the resonant
 block produced in a previous run.
+""",
+),
+
+Variable(
+    abivarname="irdchkprdm",
+    varset="files",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs ReaDing of CHecK-Point files for the GW 1-RDM"
+    requires="[[optdriver]] == [4]",
+    added_in_version="9.4.0",
+    text=r"""
+[[irdchkprdm]]==1 triggers the reading of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
+It is only meaningful when [[gw1rdm]]>0. The files that are read use the usual ABINIT input files naming convention with extension _CHKP_RDM_1.
 """,
 ),
 
@@ -14737,6 +14789,22 @@ present run (cell size shape and atomic positions).
 ),
 
 Variable(
+    abivarname="prtchkprdm",
+    varset="files",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM"
+    requires="[[optdriver]] == [4]",
+    added_in_version="9.4.0",
+    text=r"""
+[[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
+It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usual ABINIT output files naming convention with extension _CHKP_RDM_1.
+""",
+),
+
+Variable(
     abivarname="prtden",
     varset="files",
     vartype="integer",
@@ -20585,6 +20653,22 @@ In the wavelet computation case, the wavefunctions are directly minimised
 using a real-space preconditioner. This preconditioner has internally some
 conjugate gradient iterations. This value defines a boundary for the number of
 conjugate gradient iterations on each wavefunction convergence step.
+""",
+),
+
+Variable(
+    abivarname="x1rdm",
+    varset="gw",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EXchange-only 1-Reduced Density Matrix"
+    requires="[[optdriver]] == [4]",
+    added_in_version="9.4.0",
+    text=r"""
+[[x1rdm]]==1 forces the update of the density-matrix using only the exchange operator (instead of exchange and GW correlation).
+It must be used with [[gwcalctyp]]==21 and [[gw1rdm]]>0.
 """,
 ),
 

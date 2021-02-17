@@ -14,7 +14,7 @@ The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, V. Brousseau, F. Bruneval,
 W. Chen, M. Cote, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault,
 B. Guster, T. Karatsu, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto, 
-S. Ponce, Y. Pouillon, G.-M. Rignanese, M. Rodriguez, M. Schmitt,
+S. Ponce, Y. Pouillon, G.-M. Rignanese, M. Rodriguez-Mayorga, M. Schmitt,
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
@@ -44,7 +44,7 @@ By X. Gonze (MR712)
 **B.1** The RMM-DIIS algorithm has been implemented.
 This SCF (ground-state) algorithm is faster, but potentially more instable, 
 than the CG, Pulay, or LOBPCG algorithms, for medium to large size systems,
-as it has less cubic scaling steps (e.g. orthogonalisation). Typically used for mmolecular dynamics,
+as it has less cubic scaling steps (e.g. orthogonalisation). Typically used for molecular dynamics,
 as the restart from the previous time step gives RMM-DIIS less opportunities to fail.
 See input variables [[rmm_diis]] and [[rmm_diis_savemem]].
 Several tests exist ([[test:paral_32]], [[test:paral_63]], [[test:paral_64]], [[test:v9_29]], [[test:v9_30]]) 
@@ -80,19 +80,19 @@ W. Chen, M. Cote, O. Gingras, M. Giantomassi, X. Gonze, F. Goudreault,
 B. Guster, O. Nadeau, R. Outerovich, S. Ponce, M. Schmitt, 
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger (numerous MRs)
 
-**B.4** (DESCRIPTION TO BE IMPROVED - AT THIS STAGE, NOT SURE IT CAN BE CONSIDERED TO BE IN PRODUCTION and /MOST NOTICEABLE) 
-The treatment of GW with optimization of the 1-reduced density matrix (1-RDM) has been implemented.
-Also, evaluation of the Galitskii-Migdal correlation energy is available.
+**B.4** The GW 1-body reduced density matrix (1RDM) from the linearized Dyson equation has been implemented.
+Its effect on the Hartree-Fock expectation values and therefore on the GW quasiparticle energies can be evaluated.
+The resulting total energy parts, kinetic energy (including correlation), electron-nucleus, Hartree, Exchange, can be calculated.
+Together with the Galitskii-Migdal correlation, it gives a new approximation the self-consistent GW total energy.
 See input variables gw1rdm, x1rdm, also irdchkprdm, prtchkprdm and gwgmcorr.
-No test for prtchkprdm. 
 See tests [[test:v9_33]] to [[test:v9_36]].
 
-GW calculations based on Hartree-Fock wavefunctions can use mini Brillouin Zone integration technique, see [[test:v9_31]].
-
-Also, a new test [[test:v9_40]] has been provided for the computation of the susceptibility matrix 
+Also, some missing tests have been added:
+- GW calculations based on Hartree-Fock wavefunctions can use mini Brillouin Zone integration technique, see [[test:v9_31]].
+- A new test [[test:v9_40]] has been provided for the computation of the susceptibility matrix 
 $\chi_0$ with [[inclvkb]].
 
-By Mauricio Rodriguez and F. Bruneval (MR722).
+By Mauricio Rodriguez-Mayorga and F. Bruneval (MR722).
 
 **B.5** The pSIC (polaron self-interaction corrected methodology) has been implemented.
 See [[cite:Sadigh2015]] and [[cite:Sadigh2015a]]. This is based on the `images` capabilities 
