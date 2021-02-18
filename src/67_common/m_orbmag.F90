@@ -4605,7 +4605,7 @@ subroutine make_S1trace_k(adir,cprj_k,dtset,ENK,iband,nband_occ,pawtab,S1trace)
 
   !Local variables -------------------------
   !scalars
-  integer :: bdir,epsabg,gdir,iatom,ilmn,itypat,jlmn,klmn,nn
+  integer :: bdir,epsabg,gdir,iatom,ilmn,itypat,jlmn,klmn
   complex(dpc) :: cpb,cpk
 
 !----------------------------------------------------------------
@@ -5259,10 +5259,9 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  integer :: nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn
  integer :: nkpg,npw_k
  integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_pawopt,nonlop_signs,nonlop_tim
- integer :: nonlop_tw_choice,nonlop_tw_nnlout,nonlop_tw_pawopt,nonlop_tw_signs
  integer :: nproc,nterms,nterms3,projbd_scprod_io,projbd_tim,projbd_useoverlap,spaceComm
  integer :: with_vectornd
- real(dp) :: arg,dub_dsg_r,dub_dsg_i,dug_dsb_r,dug_dsb_i
+ real(dp) :: arg,dub_dsg_i,dug_dsb_i
  real(dp) :: ecut_eff,Enk,finish_time,lambda,start_time,traceH0,trnrm,ucvol
  complex(dpc) :: rhorij1,S1trace
  logical :: has_nucdip
@@ -5273,7 +5272,6 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:),nattyp_dum(:)
  real(dp) :: chern_total(2,3),gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1)
- real(dp) :: nonlop_tw_enlout(6)
  real(dp) :: orbmag_total(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwaveg1(:,:)
