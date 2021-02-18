@@ -83,7 +83,6 @@ contains
 !!  mcg=second dimension of the cg array
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands.
-!!  nbdblock=number of bands in a block
 !!  nkpt=number of k points
 !!  nline=number of line minimizations per band.
 !!  npw=number of planewaves in basis sphere at given k.
@@ -122,20 +121,19 @@ contains
 !!
 !! SOURCE
 
-subroutine cgwf_paw(cg,chkexit,cprj_cwavef_bands,cpus,eig,&
-&                filnam_ds1,gs_hamk,icg,inonsc,&
+subroutine cgwf_paw(cg,cprj_cwavef_bands,eig,&
+&                gs_hamk,icg,inonsc,&
 &                mcg,mpi_enreg,&
-&                nband,nbdblock,nline,npw,&
+&                nband,nline,npw,&
 &                nspinor,optforces,ortalg,prtvol,quit,resid,subham,&
 &                tolrde,tolwfr,wfoptalg)
 !Arguments ------------------------------------
- integer,intent(in) :: chkexit,icg,inonsc
- integer,intent(in) :: mcg,nband,nbdblock,nline
+ integer,intent(in) :: icg,inonsc
+ integer,intent(in) :: mcg,nband,nline
  integer,intent(in) :: npw,nspinor,optforces,ortalg,prtvol
  integer,intent(in) :: wfoptalg
  integer,intent(in) :: quit
- real(dp),intent(in) :: cpus,tolrde,tolwfr
- character(len=*),intent(in) :: filnam_ds1
+ real(dp),intent(in) :: tolrde,tolwfr
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 !arrays
@@ -149,10 +147,9 @@ integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
 integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  integer,save :: nskip=0
  integer :: choice,counter,cpopt
- integer :: i1,i2,i3,iband,ibandmin,ibandmax,isubh,isubh0,jband,me_g0
- integer :: ibdblock,iblock,igs
+ integer :: i1,i2,i3,iband,isubh,isubh0,jband,me_g0,igs
  integer :: iline,ipw,ispinor,istwf_k
- integer :: n4,n5,n6,natom,ncpgr,nblock
+ integer :: n4,n5,n6,natom,ncpgr
  integer :: optekin,sij_opt
  integer :: useoverlap,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
@@ -178,15 +175,6 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 !Starting the routine
  call timab(1300,1,tsec)
 
-!Touching chkexit, cpus,filnam_ds to avoid warning for abirules. This is dirty...
- if(chkexit<0)then
-   MSG_BUG('chkexit should be positive!')
- end if
-
- if(cpus<0 .and. filnam_ds1=='a')then
-   MSG_BUG('cpus should be positive!')
- end if
-
 !======================================================================
 !========= LOCAL VARIABLES DEFINITIONS AND ALLOCATIONS ================
 !======================================================================
@@ -201,19 +189,13 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  weight_fft = one
 
 !Initializations and allocations
- nblock=(nband-1)/nbdblock+1
- if(nbdblock>1)then
-   MSG_BUG('cgwf_paw not implemented for nbdblock>1!')
- end if
 
  istwf_k=gs_hamk%istwf_k
  wfopta10=mod(wfoptalg,10)
  if (wfopta10/=0) then
    MSG_BUG('cgwf_paw is implemented only for wfopta10==0')
  end if
- if (ortalg>=0) then
-   MSG_BUG('cgwf_paw tested only for ortalg<0')
- end if
+
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
  kinpw => gs_hamk%kinpw_k
@@ -227,8 +209,8 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
  ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
 
- ABI_DATATYPE_ALLOCATE(cprj_direc ,(natom,nbdblock))
- ABI_DATATYPE_ALLOCATE(cprj_conjgr ,(natom,nbdblock))
+ ABI_DATATYPE_ALLOCATE(cprj_direc ,(natom,1))
+ ABI_DATATYPE_ALLOCATE(cprj_conjgr ,(natom,1))
 
  n4=gs_hamk%ngfft(4);n5=gs_hamk%ngfft(5);n6=gs_hamk%ngfft(6)
 ! ABI_ALLOCATE(cwavef_r_bands,(2,n4,n5,n6,nband))
@@ -255,7 +237,7 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  call pawcprj_alloc(cprj_direc,ncpgr,gs_hamk%dimcprj)
  call pawcprj_alloc(cprj_conjgr,ncpgr,gs_hamk%dimcprj)
 
- cwavef_bands => cg(:,1+icg:nblock*npw*nspinor+icg)
+ cwavef_bands => cg(:,1+icg:nband*npw*nspinor+icg)
 
 ! do iblock=1,nblock
 !   ibandmin=1+(iblock-1)*nbdblock
@@ -284,186 +266,139 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  isubh=1
  isubh0=1
 
- ! Loop over blocks of bands. In the standard band-sequential algorithm, nblock=nband.
- do iblock=1,nblock
-   counter=100*iblock*nbdblock+inonsc
+ ! Big iband loop
+ do iband=1,nband
 
-   ! Loop over bands in a block
-   ! This loop can be MPI-parallelized, over processors attached to the same k point
-   ibandmin=1+(iblock-1)*nbdblock
-   ibandmax=min(iblock*nbdblock,nband)
+   counter=100*iband+inonsc
 
-   ! Big iband loop
-   do iband=ibandmin,ibandmax
-     ibdblock=iband-(iblock-1)*nbdblock
-     counter=100*iband+inonsc
+   ! ======================================================================
+   ! ========== INITIALISATION OF MINIMIZATION ITERATIONS =================
+   ! ======================================================================
 
-     ! ======================================================================
-     ! ========== INITIALISATION OF MINIMIZATION ITERATIONS =================
-     ! ======================================================================
+   if (prtvol>=10) then ! Tell us what is going on:
+     write(message, '(a,i6,2x,a,i3,a)' )' --- cgwf is called for band',iband,'for',nline,' lines'
+     call wrtout(std_out,message,'PERS')
+   end if
 
-     if (prtvol>=10) then ! Tell us what is going on:
-       write(message, '(a,i6,2x,a,i3,a)' )' --- cgwf is called for band',iband,'for',nline,' lines'
-       call wrtout(std_out,message,'PERS')
-     end if
+   dotgp=one
 
-     dotgp=one
+   ! Extraction of the vector that is iteratively updated
+   cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
+   cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+!   cwavef_r => cwavef_r_bands(:,:,:,:,iband)
 
-     ! Extraction of the vector that is iteratively updated
-     cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
-     cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
-!     cwavef_r => cwavef_r_bands(:,:,:,:,iband)
+   ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
+   ! WARNING : It might be interesting to skip the following operation.
+   ! The associated routines should be reexamined to see whether cwavef is not already normalized.
+   call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
+&   gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
+   xnorm=one/sqrt(dot(1))
+   z_tmp = (/xnorm,zero/)
+   ! cwavef = xnorm * cwavef
+   call cg_zscal(npw*nspinor,z_tmp,cwavef)
+   ! cprj = xnorm * cprj
+   call pawcprj_axpby(zero,xnorm,cprj_cwavef,cprj_cwavef)
+!   call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_cwavef,z_tmp,z_tmp2,&
+!            gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!            natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+!   cwavef_r=cwavef_r*xnorm
+   !LTEST
+   !call cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,'after xnorm',mpi_enreg)
+   !LTEST
 
-     ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
-     ! WARNING : It might be interesting to skip the following operation.
-     ! The associated routines should be reexamined to see whether cwavef is not already normalized.
-     call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
-&     gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
-     xnorm=one/sqrt(dot(1))
-     z_tmp = (/xnorm,zero/)
-     ! cwavef = xnorm * cwavef
-     call cg_zscal(npw*nspinor,z_tmp,cwavef)
-     ! cprj = xnorm * cprj
-     call pawcprj_axpby(zero,xnorm,cprj_cwavef,cprj_cwavef)
-!     call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_cwavef,z_tmp,z_tmp2,&
-!&             gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-!&             natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
-!     cwavef_r=cwavef_r*xnorm
-     !LTEST
-     !call cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,'after xnorm',mpi_enreg)
-     !LTEST
+   ! Compute wavefunction in real space
+   call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
+&    gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
+&    n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
 
-     ! Compute wavefunction in real space
-     call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
-&      gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
-&      n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
+   if (prtvol==-level) then
+     write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
+     call wrtout(std_out,message,'PERS')
+   end if
 
-     if (prtvol==-level) then
-       write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
-       call wrtout(std_out,message,'PERS')
-     end if
+   ! ======================================================================
+   ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
+   ! ======================================================================
+   if(nline/=0)then
+     do iline=1,nline
 
-     ! ======================================================================
-     ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
-     ! ======================================================================
-     if(nline/=0)then
-       do iline=1,nline
+       ! === COMPUTE THE RESIDUAL ===
+       ! Compute lambda = <C|H|C>
+       sij_opt = 0
+       call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
+         &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
+       chc=z_tmp(1)
+       lam0=chc
+       eval=chc
+       eig(iband)=chc
 
-         ! === COMPUTE THE RESIDUAL ===
-         ! Compute lambda = <C|H|C>
-         sij_opt = 0
-         call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
-           &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
-         chc=z_tmp(1)
-         lam0=chc
-         eval=chc
-         eig(iband)=chc
-
-         ! Check that lam0 is decreasing on succeeding lines:
-         if (iline==1) then
-           lamold=lam0
-         else
-           if (lam0 > lamold+tol12) then
-             write(message, '(a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
-&             'New trial energy at line ',iline,' = ',lam0,ch10,&
-&             'is higher than former =',lamold,ch10
-             MSG_WARNING(message)
-           end if
-           lamold=lam0
+       ! Check that lam0 is decreasing on succeeding lines:
+       if (iline==1) then
+         lamold=lam0
+       else
+         if (lam0 > lamold+tol12) then
+           write(message, '(a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
+&           'New trial energy at line ',iline,' = ',lam0,ch10,&
+&           'is higher than former =',lamold,ch10
+           MSG_WARNING(message)
          end if
+         lamold=lam0
+       end if
 
-         ! Compute residual vector:
-         ! Note that vresid is precomputed to garantee cancellation of errors
-         ! and allow residuals to reach values as small as 1.0d-24 or better.
+       ! Compute residual vector:
+       ! Note that vresid is precomputed to garantee cancellation of errors
+       ! and allow residuals to reach values as small as 1.0d-24 or better.
 
-         ! ======================================================================
-         ! =========== COMPUTE THE STEEPEST DESCENT DIRECTION ===================
-         ! ======================================================================
+       ! ======================================================================
+       ! =========== COMPUTE THE STEEPEST DESCENT DIRECTION ===================
+       ! ======================================================================
 
-         sij_opt = -1
-         call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
-           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
+       sij_opt = -1
+       call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
+         &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
 
-         ! Compute residual (squared) norm
-         call sqnorm_g(resid(iband),istwf_k,npw*nspinor,direc,me_g0,mpi_enreg%comm_fft)
+       ! Compute residual (squared) norm
+       call sqnorm_g(resid(iband),istwf_k,npw*nspinor,direc,me_g0,mpi_enreg%comm_fft)
 
-         if (prtvol==-level) then
-           write(message,'(a,i0,2es21.10e3)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
+       if (prtvol==-level) then
+         write(message,'(a,i0,2es21.10e3)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
+         call wrtout(std_out,message,'PERS')
+       end if
+
+       ! ======================================================================
+       ! ============== CHECK FOR CONVERGENCE CRITERIA ========================
+       ! ======================================================================
+
+       ! If residual sufficiently small stop line minimizations
+       if (resid(iband)<tolwfr) then
+         if (prtvol>=10) then
+           write(message, '(a,i4,a,i2,a,es12.4)' ) &
+&           ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
            call wrtout(std_out,message,'PERS')
          end if
+         nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
+         exit                         ! Exit from the loop on iline
+       end if
 
-         ! ======================================================================
-         ! ============== CHECK FOR CONVERGENCE CRITERIA ========================
-         ! ======================================================================
+       ! If user require exiting the job, stop line minimisations
+       if (quit==1) then
+         write(message, '(a,i0)' )' cgwf: user require exiting => skip update of band ',iband
+         call wrtout(std_out,message,'PERS')
 
-         ! If residual sufficiently small stop line minimizations
-         if (resid(iband)<tolwfr) then
-           if (prtvol>=10) then
-             write(message, '(a,i4,a,i2,a,es12.4)' ) &
-&             ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
-             call wrtout(std_out,message,'PERS')
-           end if
-           nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
-           exit                         ! Exit from the loop on iline
-         end if
+         nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
+         exit                         ! Exit from the loop on iline
+       end if
 
-         ! If user require exiting the job, stop line minimisations
-         if (quit==1) then
-           write(message, '(a,i0)' )' cgwf: user require exiting => skip update of band ',iband
-           call wrtout(std_out,message,'PERS')
+       ! =========== PROJECT THE STEEPEST DESCENT DIRECTION ===================
+       ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
 
-           nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
-           exit                         ! Exit from the loop on iline
-         end if
+       ! The following projection over the subspace orthogonal to occupied bands
+       ! is optional. It is a bit more accurate, but doubles the number of N^3 ops.
+       ! It is done only if ortalg>=0.
 
-         ! =========== PROJECT THE STEEPEST DESCENT DIRECTION ===================
-         ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
-
-         ! The following projection over the subspace orthogonal to occupied bands
-         ! is optional. It is a bit more accurate, but doubles the number of N^3 ops.
-         ! It is done only if ortalg>=0.
-
-         ! Project the steepest descent direction:
-         ! direc(2,npw)=<G|H|Cnk> - \sum_{(i<=n)} <G|H|Cik> , normalized.
-         if(ortalg>=0)then
-           call getcprj(choice,0,direc,cprj_direc,&
-&           gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&           gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
-&           gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-&           gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
-           call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
-&           gs_hamk,mpi_enreg,nband,prtvol,tim_getcsc_band)
-           if (iline==1) then
-             scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
-           end if
-           scprod = reshape(scprod_csc,(/2,nband/))
-           call projbd(cg,direc,iband,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
-&           direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
-         end if
-
-         ! For a generalized eigenpb, store the steepest descent direction
-         direc_tmp=direc
-
-         ! ======================================================================
-         ! ======== PRECONDITION THE STEEPEST DESCENT DIRECTION =================
-         ! ======================================================================
-
-         ! If wfoptalg>=10, the precondition matrix is kept constant during iteration ; otherwise it is recomputed
-         if (wfoptalg<10.or.iline==1) then
-           call cg_precon(cwavef,zero,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
-         else
-           do ispinor=1,nspinor
-             igs=(ispinor-1)*npw
-!$OMP PARALLEL DO
-             do ipw=1+igs,npw+igs
-               direc(1,ipw)=direc(1,ipw)*pcon(ipw-igs)
-               direc(2,ipw)=direc(2,ipw)*pcon(ipw-igs)
-             end do
-           end do
-         end if
-
-         ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
-         ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
+       ! Project the steepest descent direction:
+       ! direc(2,npw)=<G|H|Cnk> - \sum_{(i<=n)} <G|H|Cik> , normalized.
+       if(ortalg>=0)then
          call getcprj(choice,0,direc,cprj_direc,&
 &         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
 &         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
@@ -471,341 +406,377 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 &         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &         gs_hamk,mpi_enreg,nband,prtvol,tim_getcsc_band)
-         !LTEST
-         !call cprj_check_oneband(direc,cprj_direc,gs_hamk,'direc',mpi_enreg)
-         !LTEST
          if (iline==1) then
            scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
          end if
-         ! Projecting again out all bands (not normalized).
          scprod = reshape(scprod_csc,(/2,nband/))
-         call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
+         call projbd(cg,direc,iband,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
-         if (iline==1) then
-           z_tmp = -scprod_csc(2*iband-1:2*iband)*(1.0_dp/xnorm-1.0_dp)
-           do ispinor=1,nspinor
-             igs=(ispinor-1)*npw
-             do ipw=1+igs,npw+igs
-               direc(1,ipw)=direc(1,ipw) + z_tmp(1)*cwavef(1,ipw) - z_tmp(2)*cwavef(2,ipw)
-               direc(2,ipw)=direc(2,ipw) + z_tmp(1)*cwavef(2,ipw) + z_tmp(2)*cwavef(1,ipw)
-             end do
-           end do
-         end if
-         !LTEST
-         !write(std_out,'(a,es21.10e3)') 'direc',sum(abs(direc))
-         !LTEST
-         ! Apply projbd to cprj_direc
-         z_tmp = (/one,zero/)
-         !scprod_csc = -scprod_csc
-         scprod=-scprod
-         call pawcprj_projbd(scprod,cprj_cwavef_bands,cprj_direc)
-         !LTEST
-!         call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef_bands,z_tmp,scprod_csc,&
-!&                 gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-!&                 natom,gs_hamk%nattyp,nband,nspinor,gs_hamk%ntypat)
-         !LTEST
-         if (iline==1) then
-           z_tmp2 = scprod(:,iband)*(1.0_dp/xnorm-1.0_dp)
-           ! cprj = z_tmp2*cprjx + z_tmp*cprj
-           call pawcprj_zaxpby(z_tmp2,z_tmp,cprj_cwavef,cprj_direc)
-!           call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef,z_tmp,z_tmp2,&
-!&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-!&                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
-         end if
-         !LTEST
-         !call cprj_check_oneband(direc,cprj_direc,gs_hamk,'direc (after projbd)',mpi_enreg)
-         !LTEST
-         !LTEST
-!         call getcprj(1,0,direc,cprj_conjgr,&
-!&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-!&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
-!&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-!&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
-!         do jband=1,natom
-!           dotr=sum(abs(cprj_conjgr(jband,1)%cp-cprj_direc(jband,1)%cp))
-!           if (dotr>tol12) then
-!             write(std_out,'(a,es21.10e3)') 'dif:',dotr
-!             MSG_ERROR('stop here')
-!           end if
-!         end do
-         !LTEST
+       end if
 
-         ! ======================================================================
-         ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
-         ! ======================================================================
+       ! For a generalized eigenpb, store the steepest descent direction
+       direc_tmp=direc
 
-         call dotprod_g(dotgg,doti,istwf_k,npw*nspinor,1,direc,direc_tmp,me_g0,mpi_enreg%comm_spinorfft)
+       ! ======================================================================
+       ! ======== PRECONDITION THE STEEPEST DESCENT DIRECTION =================
+       ! ======================================================================
 
-         ! MJV: added 5 Feb 2012 - causes divide by 0 on next iteration of iline
-         if (abs(dotgg) < TINY(0.0_dp)*1.e50_dp) dotgg = TINY(0.0_dp)*1.e50_dp
-
-         ! At first iteration, gamma is set to zero
-         if (iline==1) then
-           gamma=zero
-           dotgp=dotgg
-           call cg_zcopy(npw*nspinor,direc,conjgr)
-           call pawcprj_copy(cprj_direc,cprj_conjgr)
-!           z_tmp  = (/one,zero/)
-!           z_tmp2 = (/zero,zero/)
-!           call cprj_axpby(cprj_conjgr,cprj_direc,cprj_direc,z_tmp,z_tmp2,&
-!&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-!&                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
-           if (prtvol==-level)then
-             write(message,'(a,es21.10e3)')' cgwf: dotgg = ',dotgg
-             call wrtout(std_out,message,'PERS')
-           end if
-
-         else
-           gamma=dotgg/dotgp
-           dotgp=dotgg
-
-           if (prtvol==-level)then
-             write(message,'(a,2es21.10e3)')' cgwf: dotgg,gamma = ',dotgg,gamma
-             call wrtout(std_out,message,'PERS')
-           end if
-
+       ! If wfoptalg>=10, the precondition matrix is kept constant during iteration ; otherwise it is recomputed
+       if (wfoptalg<10.or.iline==1) then
+         call cg_precon(cwavef,zero,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+       else
+         do ispinor=1,nspinor
+           igs=(ispinor-1)*npw
 !$OMP PARALLEL DO
-           do ipw=1,npw*nspinor
-             conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
-             conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
+           do ipw=1+igs,npw+igs
+             direc(1,ipw)=direc(1,ipw)*pcon(ipw-igs)
+             direc(2,ipw)=direc(2,ipw)*pcon(ipw-igs)
            end do
-           call pawcprj_axpby(one,gamma,cprj_direc,cprj_conjgr)
-!           z_tmp   = (/one,zero/)
-!           z_tmp2  = (/gamma,zero/)
-!           call cprj_axpby(cprj_conjgr,cprj_direc,cprj_conjgr,z_tmp,z_tmp2,&
-!&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-!&                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
-         end if
+         end do
+       end if
 
-         ! ======================================================================
-         ! ============ PROJECTION OF THE CONJUGATED GRADIENT ===================
-         ! ======================================================================
-
-         call getcsc(dot,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
-&         gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
-         dotr=dot(1)
-         doti=dot(2)
-         !LTEST
-         !write(std_out,'(a,es21.10e3)') 'dotr',dotr
-         !write(std_out,'(a,es21.10e3)') 'doti',doti
-         !LTEST
-
-         ! Project the conjugated gradient onto the current band
-         ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
-         ! that direc --> conjgr
-         if(istwf_k==1)then
-
-!$OMP PARALLEL DO
-           do ipw=1,npw*nspinor
-             direc(1,ipw)=conjgr(1,ipw)-(dotr*cwavef(1,ipw)-doti*cwavef(2,ipw))
-             direc(2,ipw)=conjgr(2,ipw)-(dotr*cwavef(2,ipw)+doti*cwavef(1,ipw))
+       ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
+       ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
+       call getcprj(choice,0,direc,cprj_direc,&
+&       gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&       gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&       gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&       gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+       call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
+&       gs_hamk,mpi_enreg,nband,prtvol,tim_getcsc_band)
+       !LTEST
+       !call cprj_check_oneband(direc,cprj_direc,gs_hamk,'direc',mpi_enreg)
+       !LTEST
+       if (iline==1) then
+         scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
+       end if
+       ! Projecting again out all bands (not normalized).
+       scprod = reshape(scprod_csc,(/2,nband/))
+       call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
+&       direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
+       if (iline==1) then
+         z_tmp = -scprod_csc(2*iband-1:2*iband)*(1.0_dp/xnorm-1.0_dp)
+         do ispinor=1,nspinor
+           igs=(ispinor-1)*npw
+           do ipw=1+igs,npw+igs
+             direc(1,ipw)=direc(1,ipw) + z_tmp(1)*cwavef(1,ipw) - z_tmp(2)*cwavef(2,ipw)
+             direc(2,ipw)=direc(2,ipw) + z_tmp(1)*cwavef(2,ipw) + z_tmp(2)*cwavef(1,ipw)
            end do
-         else
-!$OMP PARALLEL DO
-           do ipw=1,npw*nspinor
-             direc(1,ipw)=conjgr(1,ipw)-dotr*cwavef(1,ipw)
-             direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
-           end do
-         end if
-         !LTEST
-         !write(std_out,'(a,es21.10e3)') 'cwavef',sum(abs(cwavef))
-         !write(std_out,'(a,es21.10e3)') 'conjgr',sum(abs(conjgr))
-         !write(std_out,'(a,es21.10e3)') 'direc ',sum(abs(direc))
-         !LTEST
-         call pawcprj_copy(cprj_conjgr,cprj_direc)
-         z_tmp   = (/one,zero/)
-         z_tmp2  = (/-dotr,-doti/)
+         end do
+       end if
+       !LTEST
+       !write(std_out,'(a,es21.10e3)') 'direc',sum(abs(direc))
+       !LTEST
+       ! Apply projbd to cprj_direc
+       z_tmp = (/one,zero/)
+       !scprod_csc = -scprod_csc
+       scprod=-scprod
+       call pawcprj_projbd(scprod,cprj_cwavef_bands,cprj_direc)
+       !LTEST
+!       call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef_bands,z_tmp,scprod_csc,&
+!&               gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!&               natom,gs_hamk%nattyp,nband,nspinor,gs_hamk%ntypat)
+       !LTEST
+       if (iline==1) then
+         z_tmp2 = scprod(:,iband)*(1.0_dp/xnorm-1.0_dp)
+         ! cprj = z_tmp2*cprjx + z_tmp*cprj
          call pawcprj_zaxpby(z_tmp2,z_tmp,cprj_cwavef,cprj_direc)
-         !LTEST
-!         call pawcprj_zaxpby(cprj_direc,cprj_conjgr,cprj_cwavef,z_tmp,z_tmp2,&
-!&         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-!&         natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
-         !LTEST
+!         call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef,z_tmp,z_tmp2,&
+!&                 gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!&                 natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+       end if
+       !LTEST
+       !call cprj_check_oneband(direc,cprj_direc,gs_hamk,'direc (after projbd)',mpi_enreg)
+       !LTEST
+       !LTEST
+!       call getcprj(1,0,direc,cprj_conjgr,&
+!&       gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+!&       gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+!&       gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+!&       gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+!       do jband=1,natom
+!         dotr=sum(abs(cprj_conjgr(jband,1)%cp-cprj_direc(jband,1)%cp))
+!         if (dotr>tol12) then
+!           write(std_out,'(a,es21.10e3)') 'dif:',dotr
+!           MSG_ERROR('stop here')
+!         end if
+!       end do
+       !LTEST
 
-         ! ======================================================================
-         ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
-         ! ======================================================================
+       ! ======================================================================
+       ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
+       ! ======================================================================
 
-         ! Compute norm of direc
-         call getcsc(dot,cpopt,direc,direc,cprj_direc,cprj_direc,&
-&         gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
-         xnorm=one/sqrt(abs(dot(1)))
-         !LTEST
-         !write(std_out,'(a,es21.10e3)') 'xnorm (D)',xnorm
-         !LTEST
+       call dotprod_g(dotgg,doti,istwf_k,npw*nspinor,1,direc,direc_tmp,me_g0,mpi_enreg%comm_spinorfft)
 
-         sij_opt=0
-         ! Compute dhc = Re{<D|H|C>}
-         ! Compute direc in real space
-         call fourwf(0,denpot_dum,direc,fofgout_dum,direc_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
-&          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
-&          n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
-         call getchc(z_tmp,cpopt,cwavef,direc,cprj_cwavef,cprj_direc,cwavef_r,direc_r,&
-           &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
-         dhc=z_tmp(1)
-         dhc=dhc*xnorm
+       ! MJV: added 5 Feb 2012 - causes divide by 0 on next iteration of iline
+       if (abs(dotgg) < TINY(0.0_dp)*1.e50_dp) dotgg = TINY(0.0_dp)*1.e50_dp
 
-         ! Compute <D|H|D> or <D|(H-zshift)^2|D>
-         call getchc(z_tmp,cpopt,direc,direc,cprj_direc,cprj_direc,direc_r,direc_r,&
-&          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
-         dhd=z_tmp(1)
-         dhd=dhd*xnorm**2
-
-         if(prtvol==-level)then
-           write(message,'(a,3es21.10e3)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
+       ! At first iteration, gamma is set to zero
+       if (iline==1) then
+         gamma=zero
+         dotgp=dotgg
+         call cg_zcopy(npw*nspinor,direc,conjgr)
+         call pawcprj_copy(cprj_direc,cprj_conjgr)
+!         z_tmp  = (/one,zero/)
+!         z_tmp2 = (/zero,zero/)
+!         call cprj_axpby(cprj_conjgr,cprj_direc,cprj_direc,z_tmp,z_tmp2,&
+!&                 gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!&                 natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+         if (prtvol==-level)then
+           write(message,'(a,es21.10e3)')' cgwf: dotgg = ',dotgg
            call wrtout(std_out,message,'PERS')
          end if
 
-         ! ======================================================================
-         ! ======= COMPUTE MIXING FACTORS - CHECK FOR CONVERGENCE ===============
-         ! ======================================================================
+       else
+         gamma=dotgg/dotgp
+         dotgp=dotgg
 
-         ! Compute tan(2 theta),sin(theta) and cos(theta)
-         tan2th=2.0_dp*dhc/(chc-dhd)
-
-         if (abs(tan2th)<1.d-05) then
-           costh=1.0_dp-0.125_dp*tan2th**2
-           sinth=0.5_dp*tan2th*(1.0_dp-0.375_dp*tan2th**2)
-
-           ! Check that result is above machine precision
-           if (abs(sinth)<epsilon(0._dp)) then
-             write(message, '(a,es16.4)' ) ' cgwf: converged with tan2th=',tan2th
-             call wrtout(std_out,message,'PERS')
-             ! Number of one-way 3D ffts skipped
-             nskip=nskip+2*(nline-iline)
-             exit ! Exit from the loop on iline
-           end if
-
-         else
-           root=sqrt(1.0_dp+tan2th**2)
-           costh=sqrt(0.5_dp+0.5_dp/root)
-           sinth=sign(sqrt(0.5_dp-0.5_dp/root),tan2th)
+         if (prtvol==-level)then
+           write(message,'(a,2es21.10e3)')' cgwf: dotgg,gamma = ',dotgg,gamma
+           call wrtout(std_out,message,'PERS')
          end if
-
-         ! Check for lower of two possible roots (same sign as curvature at theta where slope is zero)
-         diff=(chc-dhd)
-         ! Swap c and d if value of diff is positive
-         if (diff>zero) then
-           swap=costh
-           costh=-sinth
-           sinth=swap
-           if(prtvol<0 .or. prtvol>=10)then
-             write(message,*)'   Note: swap roots, iline,diff=',iline,diff
-             call wrtout(std_out,message,'PERS')
-           end if
-         end if
-
-         ! ======================================================================
-         ! =========== GENERATE NEW |wf>, H|wf>, Vnl|Wf>, S|Wf> ... =============
-         ! ======================================================================
-
-         sintn=sinth*xnorm
 
 !$OMP PARALLEL DO
          do ipw=1,npw*nspinor
-           cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
-           cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
+           conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
+           conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
          end do
-         call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
-         !LTEST
-         !call cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,'after update',mpi_enreg)
-         !LTEST
-!         z_tmp  = (/costh,zero/)
-!         z_tmp2 = (/sintn,zero/)
-!         call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_direc,z_tmp,z_tmp2,&
-!&         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-!&         natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
-         do i3=1,gs_hamk%n6
-           do i2=1,gs_hamk%n5
-             do i1=1,gs_hamk%n4
-               cwavef_r(1,i1,i2,i3)=cwavef_r(1,i1,i2,i3)*costh+direc_r(1,i1,i2,i3)*sintn
-               cwavef_r(2,i1,i2,i3)=cwavef_r(2,i1,i2,i3)*costh+direc_r(2,i1,i2,i3)*sintn
-             end do
+         call pawcprj_axpby(one,gamma,cprj_direc,cprj_conjgr)
+!         z_tmp   = (/one,zero/)
+!         z_tmp2  = (/gamma,zero/)
+!         call cprj_axpby(cprj_conjgr,cprj_direc,cprj_conjgr,z_tmp,z_tmp2,&
+!                  gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!                  natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+       end if
+
+       ! ======================================================================
+       ! ============ PROJECTION OF THE CONJUGATED GRADIENT ===================
+       ! ======================================================================
+
+       call getcsc(dot,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
+&       gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
+       dotr=dot(1)
+       doti=dot(2)
+       !LTEST
+       !write(std_out,'(a,es21.10e3)') 'dotr',dotr
+       !write(std_out,'(a,es21.10e3)') 'doti',doti
+       !LTEST
+
+       ! Project the conjugated gradient onto the current band
+       ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
+       ! that direc --> conjgr
+       if(istwf_k==1)then
+
+!$OMP PARALLEL DO
+         do ipw=1,npw*nspinor
+           direc(1,ipw)=conjgr(1,ipw)-(dotr*cwavef(1,ipw)-doti*cwavef(2,ipw))
+           direc(2,ipw)=conjgr(2,ipw)-(dotr*cwavef(2,ipw)+doti*cwavef(1,ipw))
+         end do
+       else
+!$OMP PARALLEL DO
+         do ipw=1,npw*nspinor
+           direc(1,ipw)=conjgr(1,ipw)-dotr*cwavef(1,ipw)
+           direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
+         end do
+       end if
+       !LTEST
+       !write(std_out,'(a,es21.10e3)') 'cwavef',sum(abs(cwavef))
+       !write(std_out,'(a,es21.10e3)') 'conjgr',sum(abs(conjgr))
+       !write(std_out,'(a,es21.10e3)') 'direc ',sum(abs(direc))
+       !LTEST
+       call pawcprj_copy(cprj_conjgr,cprj_direc)
+       z_tmp   = (/one,zero/)
+       z_tmp2  = (/-dotr,-doti/)
+       call pawcprj_zaxpby(z_tmp2,z_tmp,cprj_cwavef,cprj_direc)
+       !LTEST
+!       call pawcprj_zaxpby(cprj_direc,cprj_conjgr,cprj_cwavef,z_tmp,z_tmp2,&
+!&       gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!&       natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+       !LTEST
+
+       ! ======================================================================
+       ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
+       ! ======================================================================
+
+       ! Compute norm of direc
+       call getcsc(dot,cpopt,direc,direc,cprj_direc,cprj_direc,&
+&       gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
+       xnorm=one/sqrt(abs(dot(1)))
+       !LTEST
+       !write(std_out,'(a,es21.10e3)') 'xnorm (D)',xnorm
+       !LTEST
+
+       sij_opt=0
+       ! Compute dhc = Re{<D|H|C>}
+       ! Compute direc in real space
+       call fourwf(0,denpot_dum,direc,fofgout_dum,direc_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
+&        gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
+&        n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
+       call getchc(z_tmp,cpopt,cwavef,direc,cprj_cwavef,cprj_direc,cwavef_r,direc_r,&
+         &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
+       dhc=z_tmp(1)
+       dhc=dhc*xnorm
+
+       ! Compute <D|H|D> or <D|(H-zshift)^2|D>
+       call getchc(z_tmp,cpopt,direc,direc,cprj_direc,cprj_direc,direc_r,direc_r,&
+&        gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
+       dhd=z_tmp(1)
+       dhd=dhd*xnorm**2
+
+       if(prtvol==-level)then
+         write(message,'(a,3es21.10e3)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
+         call wrtout(std_out,message,'PERS')
+       end if
+
+       ! ======================================================================
+       ! ======= COMPUTE MIXING FACTORS - CHECK FOR CONVERGENCE ===============
+       ! ======================================================================
+
+       ! Compute tan(2 theta),sin(theta) and cos(theta)
+       tan2th=2.0_dp*dhc/(chc-dhd)
+
+       if (abs(tan2th)<1.d-05) then
+         costh=1.0_dp-0.125_dp*tan2th**2
+         sinth=0.5_dp*tan2th*(1.0_dp-0.375_dp*tan2th**2)
+
+         ! Check that result is above machine precision
+         if (abs(sinth)<epsilon(0._dp)) then
+           write(message, '(a,es16.4)' ) ' cgwf: converged with tan2th=',tan2th
+           call wrtout(std_out,message,'PERS')
+           ! Number of one-way 3D ffts skipped
+           nskip=nskip+2*(nline-iline)
+           exit ! Exit from the loop on iline
+         end if
+
+       else
+         root=sqrt(1.0_dp+tan2th**2)
+         costh=sqrt(0.5_dp+0.5_dp/root)
+         sinth=sign(sqrt(0.5_dp-0.5_dp/root),tan2th)
+       end if
+
+       ! Check for lower of two possible roots (same sign as curvature at theta where slope is zero)
+       diff=(chc-dhd)
+       ! Swap c and d if value of diff is positive
+       if (diff>zero) then
+         swap=costh
+         costh=-sinth
+         sinth=swap
+         if(prtvol<0 .or. prtvol>=10)then
+           write(message,*)'   Note: swap roots, iline,diff=',iline,diff
+           call wrtout(std_out,message,'PERS')
+         end if
+       end if
+
+       ! ======================================================================
+       ! =========== GENERATE NEW |wf>, H|wf>, Vnl|Wf>, S|Wf> ... =============
+       ! ======================================================================
+
+       sintn=sinth*xnorm
+
+!$OMP PARALLEL DO
+       do ipw=1,npw*nspinor
+         cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
+         cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
+       end do
+       call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
+       !LTEST
+       !call cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,'after update',mpi_enreg)
+       !LTEST
+!       z_tmp  = (/costh,zero/)
+!       z_tmp2 = (/sintn,zero/)
+!       call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_direc,z_tmp,z_tmp2,&
+!&       gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!&       natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+       do i3=1,gs_hamk%n6
+         do i2=1,gs_hamk%n5
+           do i1=1,gs_hamk%n4
+             cwavef_r(1,i1,i2,i3)=cwavef_r(1,i1,i2,i3)*costh+direc_r(1,i1,i2,i3)*sintn
+             cwavef_r(2,i1,i2,i3)=cwavef_r(2,i1,i2,i3)*costh+direc_r(2,i1,i2,i3)*sintn
            end do
          end do
+       end do
 
-         ! ======================================================================
-         ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
-         ! ======================================================================
+       ! ======================================================================
+       ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
+       ! ======================================================================
 
-         ! Compute delta(E)
-         deltae=chc*(costh**2-1._dp)+dhd*sinth**2+2._dp*costh*sinth*dhc
+       ! Compute delta(E)
+       deltae=chc*(costh**2-1._dp)+dhd*sinth**2+2._dp*costh*sinth*dhc
 
-!        Check convergence and eventually exit
-         if (iline==1) then
-           deold=deltae
-         else if (abs(deltae)<tolrde*abs(deold) .and. iline/=nline .and. wfopta10<2)then
-           if(prtvol>=10)then
-             write(message, '(a,i4,1x,a,1p,e12.4,a,e12.4,a)' ) &
-&             ' cgwf: line',iline,&
-&             ' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
-             call wrtout(std_out,message,'PERS')
-           end if
-           ! Update chc before exit
-           call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
-             &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
-           eig(iband)=z_tmp(1)
-           nskip=nskip+2*(nline-iline)  ! Number of one-way 3D ffts skipped
-           exit                         ! Exit from the loop on iline
+!      Check convergence and eventually exit
+       if (iline==1) then
+         deold=deltae
+       else if (abs(deltae)<tolrde*abs(deold) .and. iline/=nline .and. wfopta10<2)then
+         if(prtvol>=10)then
+           write(message, '(a,i4,1x,a,1p,e12.4,a,e12.4,a)' ) &
+&           ' cgwf: line',iline,&
+&           ' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
+           call wrtout(std_out,message,'PERS')
          end if
+         ! Update chc before exit
+         call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
+           &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
+         eig(iband)=z_tmp(1)
+         nskip=nskip+2*(nline-iline)  ! Number of one-way 3D ffts skipped
+         exit                         ! Exit from the loop on iline
+       end if
 
-         ! Update chc only if last iteration, otherwise it will be done at the beginning of the next one
-         if (iline==nline) then
-           call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
-             &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
-           eig(iband)=z_tmp(1)
-         end if
+       ! Update chc only if last iteration, otherwise it will be done at the beginning of the next one
+       if (iline==nline) then
+         call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
+           &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
+         eig(iband)=z_tmp(1)
+       end if
 
-       end do ! END LOOP FOR A GIVEN BAND Note that there are three "exit" instructions inside
+     end do ! END LOOP FOR A GIVEN BAND Note that there are three "exit" instructions inside
 
-     else ! nline==0 , needs to provide a residual
-       resid(iband)=-one
-     end if ! End nline==0 case
+   else ! nline==0 , needs to provide a residual
+     resid(iband)=-one
+   end if ! End nline==0 case
 
-     ! ======================================================================
-     ! =============== END OF CURRENT BAND: CLEANING ========================
-     ! ======================================================================
+   ! ======================================================================
+   ! =============== END OF CURRENT BAND: CLEANING ========================
+   ! ======================================================================
 
-     ! At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
-     if (xmpi_paral==0 .and. mpi_enreg%paral_kgb==0 .and. iband==nband .and. prtvol/=0) then
-       write(message,'(a,i0)')' cgwf: number of one-way 3D ffts skipped in cgwf until now =',nskip
-       call wrtout(std_out,message,'PERS')
-     end if
+   ! At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
+   if (xmpi_paral==0 .and. mpi_enreg%paral_kgb==0 .and. iband==nband .and. prtvol/=0) then
+     write(message,'(a,i0)')' cgwf: number of one-way 3D ffts skipped in cgwf until now =',nskip
+     call wrtout(std_out,message,'PERS')
+   end if
 
-   end do !  End big iband loop. iband in a block
+ end do !  End big iband loop.
 
-   !  ======================================================================
-   !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
-   !  ======================================================================
+ !  ======================================================================
+ !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
+ !  ======================================================================
 
-   sij_opt=0
-   do iband=ibandmin,ibandmax
-     cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
-     cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
-!     cwavef_r => cwavef_r_bands(:,:,:,:,iband)
-     ! Compute local+kinetic part
-     call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
-       &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,3)
-     isubh=isubh0
-     do jband=1,iband
-       cwavef_left => cwavef_bands(:,1+(jband-1)*npw*nspinor:jband*npw*nspinor)
-       call dotprod_g(subham(isubh),subham(isubh+1),istwf_k,npw*nspinor,2,cwavef_left,direc,me_g0,mpi_enreg%comm_spinorfft)
-       isubh=isubh+2
-     end do
-     cprj_cwavef_left => cprj_cwavef_bands(:,1:iband)
-     ! Add the nonlocal part
-     call getchc(subham(isubh0:isubh0+2*iband-1),cpopt,cwavef,cwavef,&
-       &          cprj_cwavef,cprj_cwavef_left,cwavef_r,cwavef_r,&
-       &          gs_hamk,zero,mpi_enreg,iband,sij_opt,4)
-     ! Compute csc matrix
-!     cwavef_left => cwavef_bands(:,1:iband*npw*nspinor)
-!     call getcsc(subovl(isubh0:isubh0+2*iband-1),cpopt,cwavef,cwavef_left,&
-!       &          cprj_cwavef,cprj_cwavef_left,&
-!       &          gs_hamk,mpi_enreg,iband,tim_getcsc_band)
-     isubh0=isubh
+ sij_opt=0
+ do iband=1,nband
+   cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
+   cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+!   cwavef_r => cwavef_r_bands(:,:,:,:,iband)
+   ! Compute local+kinetic part
+   call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
+     &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,3)
+   isubh=isubh0
+   do jband=1,iband
+     cwavef_left => cwavef_bands(:,1+(jband-1)*npw*nspinor:jband*npw*nspinor)
+     call dotprod_g(subham(isubh),subham(isubh+1),istwf_k,npw*nspinor,2,cwavef_left,direc,me_g0,mpi_enreg%comm_spinorfft)
+     isubh=isubh+2
    end do
-
- end do ! iblock End loop over block of bands
+   cprj_cwavef_left => cprj_cwavef_bands(:,1:iband)
+   ! Add the nonlocal part
+   call getchc(subham(isubh0:isubh0+2*iband-1),cpopt,cwavef,cwavef,&
+     &          cprj_cwavef,cprj_cwavef_left,cwavef_r,cwavef_r,&
+     &          gs_hamk,zero,mpi_enreg,iband,sij_opt,4)
+   ! Compute csc matrix
+!   cwavef_left => cwavef_bands(:,1:iband*npw*nspinor)
+!   call getcsc(subovl(isubh0:isubh0+2*iband-1),cpopt,cwavef,cwavef_left,&
+!     &          cprj_cwavef,cprj_cwavef_left,&
+!     &          gs_hamk,mpi_enreg,iband,tim_getcsc_band)
+   isubh0=isubh
+ end do
 
  ! Debugging ouputs
  if(prtvol==-level)then

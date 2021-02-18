@@ -425,8 +425,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          !LTEST
          !call cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,'before cgwf_paw',mpi_enreg)
          !LTEST
-         call cgwf_paw(cg,dtset%chkexit,cprj_cwavef_bands,cpus,eig_k,dtfil%filnam_ds(1),&
-&         gs_hamk,icg,inonsc,mcg,mpi_enreg,nband_k,dtset%nbdblock,dtset%nline,npw_k,my_nspinor,&
+         call cgwf_paw(cg,cprj_cwavef_bands,eig_k,&
+&         gs_hamk,icg,inonsc,mcg,mpi_enreg,nband_k,dtset%nline,npw_k,my_nspinor,&
 &         optforces,dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
          !LTEST
          !call cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,'after cgwf_paw',mpi_enreg)
