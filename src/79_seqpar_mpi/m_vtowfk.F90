@@ -324,7 +324,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !   ncpgr = 0 ! no need of gradients here
 !   ABI_DATATYPE_ALLOCATE(cprj_cwavef_bands,(natom,nband_k))
 !   call pawcprj_alloc(cprj_cwavef_bands,ncpgr,gs_hamk%dimcprj)
-   cprj_cwavef_bands => cprj(:,1+(ikpt-1)*my_nspinor*nband_k:ikpt*my_nspinor*nband_k)
+!   cprj_cwavef_bands => cprj(:,1+(ikpt-1)*my_nspinor*nband_k:ikpt*my_nspinor*nband_k)
+   cprj_cwavef_bands => cprj(:,1+ibg:nband_k*my_nspinor+ibg)
  end if
 
 !Electric field: initialize dphase_k

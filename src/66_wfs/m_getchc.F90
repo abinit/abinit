@@ -387,29 +387,22 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
          end do ! ig
        end do ! ispinor
      else if (gs_ham%istwf_k==2.and.mpi_enreg%me_g0==1) then
-       do ispinor=1,my_nspinor
-         do ig=2,npw_k2
-           igspinor=ig+npw_k2*(ispinor-1)
-           if (kinpw_k2(ig)<huge(zero)*1.d-11) then
-             chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
-             chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
-           end if
-         end do ! ig
+       if (kinpw_k2(1)<huge(zero)*1.d-11) then
+         chc(1) = chc(1) + kinpw_k2(1)*cwavef(re,1)*cwavef_left(re,1)
+       end if
+       do ig=2,npw_k2
          if (kinpw_k2(ig)<huge(zero)*1.d-11) then
-           igspinor=1+npw_k2*(ispinor-1)
-           chc(1) = chc(1) + kinpw_k2(1)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+           chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(re,ig)*cwavef_left(re,ig)
+           chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(im,ig)*cwavef_left(im,ig)
          end if
-       end do ! ispinor
+       end do
      else
-       do ispinor=1,my_nspinor
-         do ig=1,npw_k2
-           igspinor=ig+npw_k2*(ispinor-1)
-           if (kinpw_k2(ig)<huge(zero)*1.d-11) then
-             chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
-             chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
-           end if
-         end do ! ig
-       end do ! ispinor
+       do ig=1,npw_k2
+         if (kinpw_k2(ig)<huge(zero)*1.d-11) then
+           chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(re,ig)*cwavef_left(re,ig)
+           chc(1) = chc(1) + 2*kinpw_k2(ig)*cwavef(im,ig)*cwavef_left(im,ig)
+         end if
+       end do ! ig
      end if
 !    Special case of PAW + Fock : only return Fock operator contribution in gvnlxc
 !     if (gs_ham%usepaw==1 .and. has_fock)then
