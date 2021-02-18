@@ -29,8 +29,9 @@ Xavier
 and the string `charge` present in some other input variables. For the time being, ABINIT still recognizes [[charge]]
 in the input file, but this might not last longer than in ABINITv9.
 
-**A.2** There is a new check governed by the input variable [[chksymtnons]], whether the [[tnons]] of all symmetry operations
-is a rational number with small denominator, which is required for GW calculations as implemented in ABINIT.
+**A.2** There is a new check, governed by the input variable [[chksymtnons]], to examine 
+whether the [[tnons]] of all symmetry operations
+is zero or a rational number with small denominator, which is required for GW calculations as implemented in ABINIT.
 It is always possible to choose
 the origin of coordinate with such properties, and ABINIT can gives suggestions. If you do not want to change
 your coordinate origin (e.g. you have no intention to perform a GW calculation), set [[chksymtnons]] to zero,
@@ -171,7 +172,6 @@ By S. Ponce, also with G.-M. Rignanese, G. Petretto, M. Giantomassi.
 By V. Brousseau (MR736)
 
 **D.8** Introduction of the new input variable dmft_wanorthonorm. NOT DOCUMENTED? NOT TESTED? WHO DID THIS ?
-
 
 **D.9** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
 in the upgrade of tutorials)..
