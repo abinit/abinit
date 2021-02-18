@@ -33,8 +33,8 @@ in the input file, but this might not last longer than in ABINITv9.
 is a rational number with small denominator, which is required for GW calculations as implemented in ABINIT.
 It is always possible to choose
 the origin of coordinate with such properties, and ABINIT can gives suggestions. If you do not want to change
-your coordinate origin (e.g. you have no intention to perform a GW calculation), set [[chksymtnons]] to zero
-or set the meta-variable [[expert_user]] to zero to disable several tests at once.
+your coordinate origin (e.g. you have no intention to perform a GW calculation), set [[chksymtnons]] to zero,
+or (but this is more dangerous) set the meta-variable [[expert_user]] to one to disable several checks of input variables at once.
 
 By X. Gonze (MR712)
 
@@ -121,7 +121,7 @@ By O. Nadeau (MR756, MR716)
 
 **C.2** Test farm: new and obsolete bots
 
-* Bots introduced in the test farm: scopu_gnu_10.2_paral
+* Bots introduced in the test farm: scope_gnu_10.2_paral
 * Bots removed: cronos2 (replaced by scope_gnu_10.2_paral)
 
 Bigdft tests have been activated on ALPS.
