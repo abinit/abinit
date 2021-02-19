@@ -212,8 +212,8 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
  if (abs(choice)>1) then
    MSG_ERROR('Only abs(choice)<=1 is available for now.')
  end if
- if (nloalg(1)/=3.and.nloalg(1)/=4) then
-   MSG_ERROR('nloalg(1) should be 3 or 4.')
+ if (nloalg(1)/=2.and.nloalg(1)/=3) then
+   MSG_ERROR('nloalg(1) should be 2 or 3.')
  end if
 
 !Useful variables
@@ -331,7 +331,7 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
              end do
            end do
            call timab(1132,2,tsec)
-         else if (nloalg(1)==4) then
+         else if (nloalg(1)==2) then
            call timab(1134,1,tsec)
            call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scalr,1,0.0_DP,scalr_lmn,1)
            call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scali,1,0.0_DP,scali_lmn,1)

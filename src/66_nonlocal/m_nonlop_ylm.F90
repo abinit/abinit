@@ -855,7 +855,7 @@ contains
 
 !      Computation or <p_lmn|c> (and derivatives) for this block of atoms
        if ((cpopt<4.and.choice_a/=-1.and.choice_a/=0).or.choice==8.or.choice==81) then
-         if (abs(choice_a)>1.or.nloalg(1)==2) then
+         if (abs(choice_a)>1.or.nloalg(1)==4) then
            call timab(1101,1,tsec)
            call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &           ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
@@ -977,7 +977,7 @@ contains
            if(nloalg(2)<=0) then
              call ph1d3d(ia3,ia4,kgout,matblk,natom,npwout,n1,n2,n3,phkxredout,ph1d,ph3dout)
            end if
-           if (abs(choice_b)>1.or.nloalg(1)==2) then
+           if (abs(choice_b)>1.or.nloalg(1)==4) then
              call timab(1103,1,tsec)
              call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &             d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&

@@ -211,8 +211,8 @@ subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  if (abs(choice)>1) then
    MSG_ERROR('Only abs(choice)<=1 is available for now.')
  end if
- if (nloalg(1)/=3.and.nloalg(1)/=4) then
-   MSG_ERROR('nloalg(1) should be 3 or 4.')
+ if (nloalg(1)/=2.and.nloalg(1)/=3) then
+   MSG_ERROR('nloalg(1) should be 2 or 3.')
  end if
 !DDK not compatible with istwkf > 1
  if(cplex==1.and.(any(cplex_dgxdt(:)==2).or.any(cplex_d2gxdt(:)==2)))then
@@ -347,7 +347,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            end do
          end do
          call timab(1153,2,tsec)
-       else if (nloalg(1)==4) then
+       else if (nloalg(1)==2) then
          call timab(1157,1,tsec)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,1),1,0.0_DP,scalr,1)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,2),1,0.0_DP,scali,1)
@@ -379,7 +379,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            end do
          end do
          call timab(1154,2,tsec)
-       else if (nloalg(1)==4) then
+       else if (nloalg(1)==2) then
          call timab(1158,1,tsec)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,1),1,0.0_DP,scalr,1)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,2),1,0.0_DP,scali,1)
