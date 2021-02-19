@@ -993,16 +993,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 ! Initialisation of cprj
  usecprj=0; mcprj=0;mband_cprj=0
  if (dtset%usepaw==1) then
-   !if (associated(electronpositron)) then
-   !  if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
-   !end if
-   !if (dtset%prtnabla>0) usecprj=1
-   !if (dtset%extrapwf>0) usecprj=1
-   !if (dtset%pawfatbnd>0)usecprj=1
-   !if (dtset%prtdos==3)  usecprj=1
-   !if (dtset%usewvl==1)  usecprj=1
-   !if (dtset%nstep==0) usecprj=0
-   !if (dtset%usefock==1)  usecprj=1
    usecprj=1
  end if
  if (usecprj==0) then

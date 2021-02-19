@@ -5210,15 +5210,10 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,c
 !Local variables-------------------------------
 !scalars
  logical :: do_cprj
- integer :: ierr,ii,ii0,ii1,ii2,ivec,ivec2,ivec3,iv1,iv2,iv3,iv1l,iv2l,iv3l
- integer :: ncprj,rvectsiz,vectsize,cg_idx!,gsc_idx
+ integer :: ierr,ii,ii1,ii2,ivec,ivec2,ivec3,iv1,iv2,iv3,iv1l,iv2l,iv3l,ncprj
  real(dp) :: doti,dotr,summ,xnorm
- character(len=500) :: msg
 !arrays
  real(dp) :: buffer2(2),tsec(2),ovl_row_tmp(2*nvec),ovl_col_tmp(2*nvec)
- real(dp),allocatable :: rblockvectorbx(:,:),rblockvectorx(:,:),rgramxbx(:,:)
- complex(dpc),allocatable :: cblockvectorbx(:,:),cblockvectorx(:,:)
- complex(dpc),allocatable :: cgramxbx(:,:)
  real(dp) :: re,im
 
 ! *************************************************************************
@@ -5245,10 +5240,6 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,c
    call timab(48,1,tsec)
    call xmpi_sum(summ,comm,ierr)
    call timab(48,2,tsec)
-   !LTEST
-   !write(std_out,'(a,i5)') '(pw_ortho) iband',ivec
-   !write(std_out,'(a,es21.10e3)') '(pw_ortho) sum',summ
-   !LTEST
 
    xnorm = sqrt(abs(summ)) ;  summ=1.0_dp/xnorm
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
@@ -5283,23 +5274,10 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,c
 !      First compute scalar product
        dotr=zero ; doti=zero
        ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)
-!       do ii=1,nelem
-!         dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
-!         doti=doti+vecnm(1,ii1+ii)*ovl_vecnm(2,ii2+ii)-vecnm(2,ii1+ii)*ovl_vecnm(1,ii2+ii)
-!       end do
        iv2l=ivec2*(ivec2-1)
        iv2 =2*ivec2-1
-!       ovl_mat(iv2l+iv1  ) = ovl_mat(iv2l+iv1  )*summ
-!       ovl_mat(iv2l+iv1+1) = ovl_mat(iv2l+iv1+1)*summ
        dotr = ovl_mat(iv2l+iv1  )
        doti = ovl_mat(iv2l+iv1+1)
-       !LTEST
-       !if (ivec<=2) then
-       !  write(std_out,'(a,i5)') '(pw_ortho) jband',ivec2
-       !  write(std_out,'(a,es21.10e3)') '(pw_ortho) dotr',dotr
-       !  write(std_out,'(a,es21.10e3)') '(pw_ortho) doti',doti
-       !end if
-       !LTEST
 
        call timab(48,1,tsec)
        buffer2(1)=doti;buffer2(2)=dotr
@@ -5310,15 +5288,6 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,c
 
 !      Then subtract the appropriate amount of the lower state
        ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
-#ifdef FC_INTEL
-!        DIR$ ivdep
-#endif
-       !LTEST
-       !if (ivec<=2) then
-       !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))
-       !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (im)',sum(abs(vecnm(2,ii2+1:ii2+nelem)))
-       !end if
-       !LTEST
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
        do ii=1,nelem
          vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
@@ -5326,34 +5295,10 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,c
        end do
        if (do_cprj) call pawcprj_zaxpby((/-dotr,-doti/),(/one,zero/),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),&
 &                                                                    cprj(:,nspinor*(ivec2-1)+1:nspinor*ivec2))
-       !LTEST
-       !if (ivec<=2) then
-       !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))
-       !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (im)',sum(abs(vecnm(2,ii2+1:ii2+nelem)))
-       !end if
-       !LTEST
        do ivec3=1,ivec
          iv3=2*ivec3-1
          ovl_col_tmp(iv3  ) = ovl_mat(iv2l+iv3  ) - dotr*ovl_mat(iv1l+iv3) + doti*ovl_mat(iv1l+iv3+1)
          ovl_col_tmp(iv3+1) = ovl_mat(iv2l+iv3+1) - doti*ovl_mat(iv1l+iv3) - dotr*ovl_mat(iv1l+iv3+1)
-         !LTEST
-         if (ivec3==ivec) then
-           re = ovl_mat(iv1l+iv3  )
-           im = ovl_mat(iv1l+iv3+1)
-           if (abs(re-1)>tol12.or.abs(im)>tol12) then
-             write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
-             write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
-             MSG_ERROR('Should be one!')
-           end if
-           re = ovl_col_tmp(iv3  )
-           im = ovl_col_tmp(iv3+1)
-           if (abs(re)>tol12.or.abs(im)>tol12) then
-             write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
-             write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
-             MSG_ERROR('Should be zero!')
-           end if
-         end if
-         !LTEST
        end do
        do ivec3=ivec+1,ivec2
          iv3l=ivec3*(ivec3-1)
@@ -5372,17 +5317,6 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,c
          ovl_mat(iv2l+iv3  ) = ovl_col_tmp(iv3  )
          ovl_mat(iv2l+iv3+1) = ovl_col_tmp(iv3+1)
        end do
-!       ovl_mat(iv2l+iv2  ) = ovl_mat(iv2l+iv2  ) + ovl_row_tmp(iv2  )
-!       ovl_mat(iv2l+iv2+1) = ovl_mat(iv2l+iv2+1) + ovl_row_tmp(iv2+1)
-       !LTEST
-       re = ovl_mat(iv2l+iv2  )
-       im = ovl_mat(iv2l+iv2+1)
-       if (abs(im)>tol12) then
-         write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
-         write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
-         MSG_ERROR('Should be real!')
-       end if
-       !LTEST
        do ivec3=ivec2+1,nvec
          iv3l=ivec3*(ivec3-1)
          iv3=2*ivec3-1

@@ -399,7 +399,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    end if
  end if ! finite_field
 
-
  ! ======================================================================
  ! If generalized eigenproblem: has to know <g|S|c> for all
  ! bands (for orthogonalization purpose); take benefit of this
@@ -480,7 +479,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      if (gen_eigenpb) then
        call cg_zcopy(npw*nspinor,gsc(1,1+igsc_shift),scwavef)
      end if
-
 
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
      ! WARNING : It might be interesting to skip the following operation.
@@ -606,7 +604,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          call sqnorm_g(resid(iband),istwf_k,npw*nspinor,vresid,me_g0,mpi_enreg%comm_fft)
 
          if (prtvol==-level) then
-           write(message,'(a,i0,2es21.10e3)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
+           write(message,'(a,i0,2f14.6)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
            call wrtout(std_out,message,'PERS')
          end if
 
@@ -786,7 +784,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            dotgp=dotgg
 
            if (prtvol==-level)then
-             write(message,'(a,2es21.10e3)')' cgwf: dotgg,gamma = ',dotgg,gamma
+             write(message,'(a,2es16.6)')' cgwf: dotgg,gamma = ',dotgg,gamma
              call wrtout(std_out,message,'PERS')
            end if
 
@@ -832,6 +830,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
            end do
          end if
+
          ! In case of generalized eigenproblem, normalization of direction vector
          ! cannot be done here (because S|D> is not known here).
          if (.not.gen_eigenpb) then
@@ -887,7 +886,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          dhd=dhd*xnorm**2
 
          if(prtvol==-level)then
-           write(message,'(a,3es21.10e3)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
+           write(message,'(a,3f14.6)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
            call wrtout(std_out,message,'PERS')
          end if
 
@@ -1244,14 +1243,12 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    if (use_subvnlx==0) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)'
    do iband=1,nband
      do ii=1,iband
-       if (ii<=10) then
-         if (use_subvnlx==1) then
-           write(message,'(i7,4es21.10e3)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
-         else
-           write(message,'(i7,2es21.10e3)')isubh,subham(isubh:isubh+1)
-         end if
-         call wrtout(std_out,message,'PERS')
+       if (use_subvnlx==1) then
+         write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
+       else
+         write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
        end if
+       call wrtout(std_out,message,'PERS')
        isubh=isubh+2
      end do
    end do
