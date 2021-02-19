@@ -5196,13 +5196,13 @@ end subroutine pw_orthon
 !!
 !! SOURCE
 
-subroutine pw_orthon_paw(icg,mcg,nelem,nvec,ortalgo,ovl_mat,vecnm,comm,cprj)
+subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,cprj)
 
  use m_abi_linalg
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icg,mcg,nelem,nvec,ortalgo,comm
+ integer,intent(in) :: icg,mcg,nelem,nspinor,nvec,ortalgo,comm
 !arrays
  real(dp),intent(inout) :: ovl_mat(nvec*(nvec+1)),vecnm(2,mcg)
  type(pawcprj_type),intent(inout),optional,target :: cprj(:,:)
@@ -5230,7 +5230,7 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nvec,ortalgo,ovl_mat,vecnm,comm,cprj)
  if (present(cprj)) then
    do_cprj=.true.
    ncprj = size(cprj,2)
-   if (ncprj/=nvec) then
+   if (ncprj/=nspinor*nvec) then
      MSG_ERROR('bad size for cprj')
    end if
  end if
@@ -5256,7 +5256,7 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nvec,ortalgo,ovl_mat,vecnm,comm,cprj)
      vecnm(1,ii)=vecnm(1,ii)*summ
      vecnm(2,ii)=vecnm(2,ii)*summ
    end do
-   if (do_cprj) call pawcprj_axpby(zero,summ,cprj(:,ivec:ivec),cprj(:,ivec:ivec))
+   if (do_cprj) call pawcprj_axpby(zero,summ,cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec))
 
    do ivec2=ivec,nvec
      iv2l=ivec2*(ivec2-1)
@@ -5324,7 +5324,8 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nvec,ortalgo,ovl_mat,vecnm,comm,cprj)
          vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
          vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-dotr*vecnm(2,ii1+ii)
        end do
-       if (do_cprj) call pawcprj_zaxpby((/-dotr,-doti/),(/one,zero/),cprj(:,ivec:ivec),cprj(:,ivec2:ivec2))
+       if (do_cprj) call pawcprj_zaxpby((/-dotr,-doti/),(/one,zero/),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),&
+&                                                                    cprj(:,nspinor*(ivec2-1)+1:nspinor*ivec2))
        !LTEST
        !if (ivec<=2) then
        !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))

@@ -40,7 +40,6 @@ module m_getchc
  use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_fft,         only : fourwf
  use m_cgtools,     only : dotprod_g
- use m_getghc,      only : getghc,getghc_mGGA,getghc_nucdip
 
  implicit none
 
@@ -142,14 +141,14 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
  type(gs_hamiltonian_type),intent(inout),target :: gs_ham
 !arrays
  integer,intent(in),optional,target :: kg_fft_k(:,:),kg_fft_kp(:,:)
- real(dp),intent(inout) :: cwavef(:,:),cwavef_left(:,:),cwavef_r(:,:,:,:),cwavef_left_r(:,:,:,:)
+ real(dp),intent(inout) :: cwavef(:,:),cwavef_left(:,:),cwavef_r(:,:,:,:,:),cwavef_left_r(:,:,:,:,:)
  type(pawcprj_type),intent(inout),target :: cwaveprj(:,:),cwaveprj_left(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: re=1,im=2
  integer :: choice,cpopt_here,i1,i2,i3,idat,idir
- integer :: ig,igspinor,ispinor,my_nspinor
+ integer :: ig,igspinor,ispinor,ispinor_left,my_nspinor
  integer :: nnlout,nffttot,npw,npw_k1,npw_k2,nspinortot
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
  logical :: k1_eq_k2,has_fock
@@ -279,18 +278,21 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
    end if
 
    nffttot = gs_ham%ngfft(1)*gs_ham%ngfft(2)*gs_ham%ngfft(3)
+   chc = zero
 !  Treat scalar local potentials
    if (gs_ham%nvloc==1) then
-
-     chc = zero
      if (gs_ham%istwf_k/=2) then
-       do i3=1,gs_ham%n6
-         do i2=1,gs_ham%n5
-           do i1=1,gs_ham%n4
-             z_tmp(1) = cwavef_r(1,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)+cwavef_r(2,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
-             z_tmp(2) = cwavef_r(2,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)-cwavef_r(1,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
-             chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(1)
-             chc(2) = chc(2) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(2)
+       do ispinor=1,my_nspinor
+         do i3=1,gs_ham%n6
+           do i2=1,gs_ham%n5
+             do i1=1,gs_ham%n4
+               z_tmp(1) = cwavef_r(1,i1,i2,i3,ispinor)*cwavef_left_r(1,i1,i2,i3,ispinor) &
+&                 +cwavef_r(2,i1,i2,i3,ispinor)*cwavef_left_r(2,i1,i2,i3,ispinor)
+               z_tmp(2) = cwavef_r(2,i1,i2,i3,ispinor)*cwavef_left_r(1,i1,i2,i3,ispinor) &
+&                 -cwavef_r(1,i1,i2,i3,ispinor)*cwavef_left_r(2,i1,i2,i3,ispinor)
+               chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(1)
+               chc(2) = chc(2) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(2)
+             end do
            end do
          end do
        end do
@@ -298,17 +300,43 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
        do i3=1,gs_ham%n6
          do i2=1,gs_ham%n5
            do i1=1,gs_ham%n4
-             chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)
+             chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3,1)*cwavef_left_r(1,i1,i2,i3,1)
            end do
          end do
        end do
        chc(2)=zero
      end if
-     chc = chc / dble(nffttot)
-
-   else
-     MSG_BUG('Only gs_ham%nvloc=1 is implemented')
+   else ! nvloc = 4
+     do ispinor=1,my_nspinor
+       do ispinor_left=1,my_nspinor
+         do i3=1,gs_ham%n6
+           do i2=1,gs_ham%n5
+             do i1=1,gs_ham%n4
+               z_tmp(1) = cwavef_r(1,i1,i2,i3,ispinor)*cwavef_left_r(1,i1,i2,i3,ispinor_left) &
+&                        +cwavef_r(2,i1,i2,i3,ispinor)*cwavef_left_r(2,i1,i2,i3,ispinor_left)
+               z_tmp(2) = cwavef_r(2,i1,i2,i3,ispinor)*cwavef_left_r(1,i1,i2,i3,ispinor_left) &
+&                        -cwavef_r(1,i1,i2,i3,ispinor)*cwavef_left_r(2,i1,i2,i3,ispinor_left)
+               if (ispinor==ispinor_left) then
+                 ! Then vloc is real : vloc_uu = vloc(1) and vloc_dd = vloc(2)
+                 chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,ispinor)*z_tmp(1)
+                 chc(2) = chc(2) + gs_ham%vlocal(i1,i2,i3,ispinor)*z_tmp(2)
+               else if (ispinor==1.and.ispinor_left==2) then ! Psi(left)_d^* Psi_u vloc_ud^*
+                 ! Otherwise vloc is complex Re(vloc_ud) = vloc(3)
+                 !                           Im(vloc_ud) = vloc(4)
+                 !                               vloc_du = (vloc_ud)^*
+                 chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,3)*z_tmp(1) + gs_ham%vlocal(i1,i2,i3,4)*z_tmp(2)
+                 chc(2) = chc(2) + gs_ham%vlocal(i1,i2,i3,3)*z_tmp(1) - gs_ham%vlocal(i1,i2,i3,4)*z_tmp(2)
+               else if (ispinor==2.and.ispinor_left==1) then ! Psi(left)_u^* Psi_d vloc_ud
+                 chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,3)*z_tmp(1) - gs_ham%vlocal(i1,i2,i3,4)*z_tmp(2)
+                 chc(2) = chc(2) + gs_ham%vlocal(i1,i2,i3,3)*z_tmp(1) + gs_ham%vlocal(i1,i2,i3,4)*z_tmp(2)
+               end if
+             end do
+           end do
+         end do
+       end do
+     end do
    end if
+   chc = chc / dble(nffttot)
 
    call timab(1371,2,tsec)
 

@@ -526,7 +526,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ortalgo=mpi_enreg%paral_kgb
    if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
      if (enable_cgwf_paw) then
-       call pw_orthon_paw(icg,mcg,npw_k*my_nspinor,nband_k,ortalgo,subovl,cg,&
+       call pw_orthon_paw(icg,mcg,npw_k*my_nspinor,my_nspinor,nband_k,ortalgo,subovl,cg,&
 &       mpi_enreg%comm_bandspinorfft,cprj=cprj_cwavef_bands)
      else
        call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
@@ -543,10 +543,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    if (xmpi_paral/=1 .or. mpi_enreg%paral_kgb/=1) then
      if ( .not. newlobpcg .and. .not. enable_cgwf_paw ) then
        call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
-     else
+     else if (newlobpcg) then
        ! GSC is local to vtowfk and is completely useless since everything
        ! is calcultated in my lobpcg, we don't care about the phase of gsc !
-       call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0,cprj=cprj_cwavef_bands)
+       call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
+     else
+       call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0,&
+         & cprj=cprj_cwavef_bands,nspinor=dtset%nspinor)
      end if
    end if
    !LTEST
@@ -1111,7 +1114,7 @@ end subroutine vtowfk
 !!
 !! SOURCE
 
-subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useoverlap,cprj)
+subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useoverlap,cprj,nspinor)
 
 !Arguments ------------------------------------
 !scalars
@@ -1120,6 +1123,7 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
 !arrays
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc*useoverlap)
  type(pawcprj_type),intent(inout),optional,target :: cprj(:,:)
+ integer,intent(in),optional :: nspinor
 
 !Local variables-------------------------------
 !scalars
@@ -1138,7 +1142,7 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
  if (present(cprj)) then
    do_cprj=.true.
    ncprj = size(cprj,2)
-   if (ncprj/=nband_k) then
+   if (ncprj/=nband_k*nspinor) then
      MSG_ERROR('bad size for cprj')
    end if
  end if
@@ -1290,7 +1294,8 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
        cg(1,ii)=xx*cre-yy*cim
        cg(2,ii)=xx*cim+yy*cre
      end do
-     if (do_cprj) call pawcprj_zaxpby((/zero,zero/),(/xx,yy/),cprj(:,iband:iband),cprj(:,iband:iband))
+     if (do_cprj) call pawcprj_zaxpby((/zero,zero/),(/xx,yy/),cprj(:,nspinor*(iband-1)+1:nspinor*iband),&
+&                                                             cprj(:,nspinor*(iband-1)+1:nspinor*iband))
 
 !    Alter phase of array S|cg>
      if (useoverlap==1) then

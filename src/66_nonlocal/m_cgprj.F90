@@ -1135,13 +1135,13 @@ contains
  cplex=2;if (istwf_k>1) cplex=1
 
  ncpgr=cprj_in(1,1)%ncpgr
- ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,nband))
+ ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,nspinor*nband))
  call pawcprj_alloc(cprj_tmp,ncpgr,dimcprj)
 ! call pawcprj_set_zero(cprj_tmp)
 
  do iband=1,nband
-   cprj_iband => cprj_tmp(:,iband:iband)
    z_tmp  = reshape(evec(:,iband),(/2,nband/))
+   cprj_iband => cprj_tmp(:,nspinor*(iband-1)+1:nspinor*iband)
    call pawcprj_lincom(z_tmp,cprj_in,cprj_iband,nband)
 !   z_tmp2 = (/zero,zero/)
 !   call cprj_axpby(cprj_iband,cprj_iband,cprj_iband,z_tmp,z_tmp2,&
