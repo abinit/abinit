@@ -270,6 +270,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  n1=gs_hamk%ngfft(1); n2=gs_hamk%ngfft(2); n3=gs_hamk%ngfft(3)
 
  enable_cgwf_paw = (gs_hamk%usepaw==1).and.(wfopta10==0)
+ if (enable_cgwf_paw) then
+   if (dtset%berryopt/=0) then
+     MSG_ERROR('cgwf_paw not implemented yet for berryopt')
+   end if
+ end if
  mgsc=0
  igsc=0
  if ( .not. newlobpcg .and. .not. enable_cgwf_paw) then
