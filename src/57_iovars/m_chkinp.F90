@@ -932,7 +932,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%eph_task == 1 .and. .not. isdiagmat(dt%kptrlatt)) then
        ABI_ERROR_NOSTOP("kptrlatt must be diagonal in phgamma.", ierr)
      end if
-
      if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
        ABI_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
@@ -962,7 +961,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          ABI_ERROR_NOSTOP("sigma_bsum_range cannot be used when eph_stern /= 0", ierr)
        end if
      end if
-   end if
+
+     if (dt%ibte_prep /= 0 .and. any(dt%sigma_ngkpt /= 0)) then
+       ABI_ERROR_NOSTOP("sigma_ngkpt cannot be used to downsample the k-mesh when ibte_prep is used.", ierr)
+     end if
+
+   end if ! RUNL_EPH
 
    if (any(dt%eph_np_pqbks /= 0)) then
      ! Perform basic consistency check for MPI grid.
@@ -1073,14 +1077,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    ! gw_invalid_freq
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_invalid_freq',dt%gw_invalid_freq,3,(/0,1,2/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_invalid_freq',dt%gw_invalid_freq,3,[0,1,2],iout)
 
    ! gw_icutcoul
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_icutcoul',dt%gw_icutcoul,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_icutcoul',dt%gw_icutcoul,11,[0,1,2,3,4,5,6,7,14,15,16],iout)
 
    ! gw_sctype
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sctype',dt%gw_sctype,&
-     4,(/GWSC_one_shot,GWSC_only_W,GWSC_only_G,GWSC_both_G_and_W/),iout)
+     4,[GWSC_one_shot,GWSC_only_W,GWSC_only_G,GWSC_both_G_and_W],iout)
 
    ! gw_sigxcore
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sigxcore',dt%gw_sigxcore,2,[0,1],iout)

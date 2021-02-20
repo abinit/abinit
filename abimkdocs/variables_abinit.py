@@ -1475,7 +1475,7 @@ To treat a neutral system, which is desired in nearly all cases, one must use
 
 [[cellcharge]] superceeds the old [[charge]] input variable, whose name was rather unspecific.
 
-When there are several images, [[cellcharge]] might depend on the image number, but ONLY 
+When there are several images, [[cellcharge]] might depend on the image number, but ONLY
 when [[imgmov]]=6 and [[occopt]]=0 or 2. In the checking routine, [[nelect]] is considered
 separately for each image, while in the remaining of the code, [[nelect]](1) is propagated,
 so that [[nelect]] is still a scalar. This is consistent with the pSIC algorithm,
@@ -21188,6 +21188,11 @@ This step is required for solving the iterative BTE.
 
 Note that, once you have a SIGEPH file with the collision terms, it is possible to run the IBTE solver in standalone
 mode by using [[eph_task]] = 8 with [[getsigeph_filepath]].
+
+!!! important
+
+    IBTE calculations cannot use [[sigma_ngkpt]] to donwsample the k-mesh.
+    The k-mesh ([[ngkpt]] and the q-mesh [[eph_ngqpt_fine]] must be equal.
 """,
 ),
 
