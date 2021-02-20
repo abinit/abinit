@@ -8407,10 +8407,10 @@ Variable(
     text=r"""
 Only used if [[occopt] = 9.
 
-When [[occopt]]==9, the lowest ivalence bands are considered to be 
+When [[occopt]]==9, the lowest [[ivalence]] bands are considered to be 
 valence bands and [[nqfd]] holes are constrained to exist in them. 
-Accordingly, higher energy bands (with index >= ivalence + 1) are 
-considered to be conduction bands, and nqfd electrons are constrained there. 
+Accordingly, higher energy bands (with index >= [[ivalence]] + 1) are 
+considered to be conduction bands, and [[nqfd]] electrons are constrained there. 
 See [[cite:Paillard2019]] for more details about the general method implemented.
 """,
 ),
@@ -11934,7 +11934,7 @@ Only used if [[occopt] = 9.
 
 Controls the numbers of electrons constrained in conduction bands with index 
 strictly greater than [[ivalence]], and the number of holes constrained in 
-valence bands with index between 1 and ivalence.
+valence bands with index between 1 and [[ivalence]].
 """,
 ),
 
