@@ -11932,9 +11932,10 @@ Variable(
     text=r"""
 Only used if [[occopt] = 9.
 
-Controls the numbers of electrons constrained in conduction bands with index 
-strictly greater than [[ivalence]], and the number of holes constrained in 
+Controls the numbers of electrons per cell constrained in conduction bands with index 
+strictly greater than [[ivalence]], and the number of holes per cell constrained in 
 valence bands with index between 1 and [[ivalence]].
+Internal variables ne_qFD (number of electrons) and nh_qFD (number of holes) are presently initialized to [[nqfd]], which is NOT INTERNAL.
 """,
 ),
 
