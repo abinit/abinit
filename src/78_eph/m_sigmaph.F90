@@ -3754,7 +3754,7 @@ end function sigmaph_read
 !!
 !! SOURCE
 
-type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidths, velocity, comm, indq2ebands) result(new)
+type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2ebands, linewidths, velocity, comm) result(new)
 
 !Arguments -----------------------------------------------
  integer,intent(in) :: comm
@@ -3762,8 +3762,8 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  integer,intent(in) :: brange(2)
+ integer, allocatable, intent(out) :: kcalc2ebands(:,:)
  real(dp), allocatable, intent(out) :: linewidths(:,:,:,:,:), velocity(:,:,:,:)
- integer, allocatable, optional, intent(out) :: indq2ebands(:)
 
 !Local variables -----------------------------------------
 !scalars
@@ -3776,7 +3776,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
  type(krank_t) :: krank
  character(len=500) :: msg
 !arrays
- integer,allocatable :: indkk(:,:)
+ !integer,allocatable :: kcalc2ebands(:,:)
  real(dp) :: dksqmax
 
 ! *************************************************************************
@@ -3787,11 +3787,11 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
  nsppol = self%nsppol; nkpt = ebands%nkpt
 
  ! Map input ebands kpoints to kcalc k-points stored in sigmaph file.
- ABI_MALLOC(indkk, (6, self%nkcalc))
+ ABI_MALLOC(kcalc2ebands, (6, self%nkcalc))
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
- call krank%get_mapping(self%nkcalc, self%kcalc, dksqmax, cryst%gmet, indkk, &
+ call krank%get_mapping(self%nkcalc, self%kcalc, dksqmax, cryst%gmet, kcalc2ebands, &
                         cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
  call krank%free()
 
@@ -3803,10 +3803,10 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
  end if
 
  ! store mapping to return
- if (present(indq2ebands)) then
-   ABI_MALLOC(indq2ebands, (self%nkcalc))
-   indq2ebands(:) = indkk(1, :)
- end if
+ !if (present(kcalc2ebands)) then
+ !  ABI_MALLOC(kcalc2ebands, (self%nkcalc))
+ !  kcalc2ebands(:) = indkk(1, :)
+ !end if
 
  ! Allocate using only the relevant bands for transport
  ! including valence states to allow to compute different doping
@@ -3835,7 +3835,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
          ! band index in global array.
          band_ks = iband + bstart_ks - 1
          ! kcalc --> ibz index
-         ikpt = indkk(1, ikcalc)
+         ikpt = kcalc2ebands(1, ikcalc)
 
          do itemp=1,self%ntemp
            ! Read SERTA lifetimes
@@ -3863,7 +3863,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
  end if
 #endif
 
- ABI_FREE(indkk)
+ !ABI_FREE(indkk)
 
  ! This so that output linewidths are always positive independently
  ! of the kind of self-energy used (retarded or advanced)

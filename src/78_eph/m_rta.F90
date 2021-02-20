@@ -129,9 +129,15 @@ type,public :: rta_t
    ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
    ! Depends on spin because all denerate states should be included when symmetries are used.
 
-  integer,allocatable :: kcalc2ibz(:,:)
+  !integer,allocatable :: kcalc2ibz(:,:)
    !kcalc2ibz(nkcalc, 6))
    ! Mapping ikcalc --> IBZ as reported by listkk.
+
+  integer,allocatable :: kcalc2ebands(:,:)
+   ! Mapping ikcalc --> ebands IBZ
+   ! Note that this array is not necessarily equation to kcalc2ibz computed in sigmaph
+   ! because we may have used sigma_nkpt to downsample the initial nkpt mesh.
+   ! This array is computed in get_ebands and is equal to kcalc2ibz if sigma_nkpt == ngkpt
 
    real(dp),allocatable :: kTmesh(:)
    ! (%ntemp)
@@ -401,7 +407,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  call alloc_copy(sigmaph%bstart_ks, new%bstart_ks)
  call alloc_copy(sigmaph%bstop_ks, new%bstop_ks)
  call alloc_copy(sigmaph%nbcalc_ks, new%nbcalc_ks)
- call alloc_copy(sigmaph%kcalc2ibz, new%kcalc2ibz)
+ !call alloc_copy(sigmaph%kcalc2ibz, new%kcalc2ibz)
 
  new%bmin = minval(sigmaph%bstart_ks); new%bmax = maxval(sigmaph%bstop_ks)
  !new%bmin = 1; new%bmax = ebands%mband  ! This for debugging purposes, results should not change
@@ -447,11 +453,13 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
 
    tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, dtset%sigma_nshiftk, dtset%sigma_shiftk)
-   new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, [new%bmin, new%bmax], new%linewidths, new%velocity, xmpi_comm_self)
+   new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, [new%bmin, new%bmax], &
+                                   new%kcalc2ebands, new%linewidths, new%velocity, xmpi_comm_self)
    call ebands_free(tmp_ebands)
  else
    !call wrtout(unts, sjoin(" Computing integrals with SIGEPH k-mesh:", ebands_kmesh2str(ebands))
-   new%ebands = sigmaph%get_ebands(cryst, ebands, [new%bmin, new%bmax], new%linewidths, new%velocity, xmpi_comm_self)
+   new%ebands = sigmaph%get_ebands(cryst, ebands, [new%bmin, new%bmax], &
+                                   new%kcalc2ebands, new%linewidths, new%velocity, xmpi_comm_self)
    kptrlatt = new%ebands%kptrlatt
  end if
 
@@ -1538,7 +1546,8 @@ subroutine rta_free(self)
  ABI_SFREE(self%bstart_ks)
  ABI_SFREE(self%bstop_ks)
  ABI_SFREE(self%nbcalc_ks)
- ABI_SFREE(self%kcalc2ibz)
+ !ABI_SFREE(self%kcalc2ibz)
+ ABI_SFREE(self%kcalc2ebands)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%eminmax_spin)
  ABI_SFREE(self%eph_mu_e)
@@ -1616,6 +1625,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  integer :: ncid, grp_ncid, ncerr
 #endif
  real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff
+ real(dp) :: cpu, wall, gflops
  logical :: send_data, converged
  character(len=500) :: msg
  !character(len=fnlen) :: path
@@ -1655,14 +1665,15 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  unts = [std_out, ab_out]
 
- call wrtout(unts, ch10//' Entering IBTE computation driver.')
+ call wrtout(unts, ch10//' Entering IBTE driver.')
  call wrtout(unts, sjoin("- Reading SERTA lifetimes and scattering matrix elements from:", &
              dtfil%filsigephin), newlines=1, do_flush=.True.)
 
  ! Initialize IBTE object
  ibte = rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, comm)
 
- nkcalc = ibte%nkcalc; nkibz = ibte%ebands%nkpt; nsppol = ibte%nsppol; ntemp = ibte%ntemp
+ nkcalc = ibte%nkcalc
+ nkibz = ibte%ebands%nkpt; nsppol = ibte%nsppol; ntemp = ibte%ntemp
  bmin = ibte%bmin; bmax = ibte%bmax
  call wrtout(std_out, sjoin(" nkcalc", itoa(nkcalc), "bmin:", itoa(bmin), "bmax:", itoa(bmax)))
 
@@ -1689,6 +1700,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  ABI_MALLOC(sr, (nkcalc, nsppol))
 
+ call cwtime(cpu, wall, gflops, "start")
 #ifdef HAVE_NETCDF
  ! Master reads and sends data to rank_ks(ikcalc, spin)
  if (my_rank == master) then
@@ -1775,6 +1787,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
+ call cwtime_report(" sigeph IO", cpu, wall, gflops)
 
  ! Solve the linearized BTE with B = 0.
  !
@@ -1803,7 +1816,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    ! Precompute tau_serta and fkn_serta for this T: f^'_nk v_\nk * \tau^0
    do spin=1,nsppol
      do ikcalc=1,nkcalc
-       ik_ibz = ibte%kcalc2ibz(ikcalc, 1)
+       !ik_ibz = ibte%kcalc2ibz(ikcalc, 1)
+       ik_ibz = ibte%kcalc2ebands(1, ikcalc)
        do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
          e_nk = ebands%eig(band_k, ik_ibz, spin)
          lw_nk = ibte%linewidths(itemp, band_k, ik_ibz, spin, 1)  ! SERTA
@@ -1857,10 +1871,12 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
           ! Symmetry indices for kk.
           !kk = sigma%kcalc(:, ikcalc)
-          ik_ibz = ibte%kcalc2ibz(ikcalc, 1) !; isym_k = sigma%kcalc2ibz(ikcalc, 2)
+          !ik_ibz = ibte%kcalc2ibz(ikcalc, 1) !; isym_k = sigma%kcalc2ibz(ikcalc, 2)
           !trev_k = sigma%kcalc2ibz(ikcalc, 6); g0_k = sigma%kcalc2ibz(ikcalc, 3:5)
           !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
           !ABI_CHECK(isirr_k, "For the time being the k-point in Sigma_{nk} must be in the IBZ")
+
+          ik_ibz = ibte%kcalc2ebands(1, ikcalc)
           do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
 
             ! Summing over the q-points in the effective IBZ(k) and the m band index.
