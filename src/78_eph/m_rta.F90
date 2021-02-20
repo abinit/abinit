@@ -1609,14 +1609,14 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
- integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr, converged
+ integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr
  integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, band_sum, ntemp, ii, jj, iq_sum
  integer :: ikq_ibz, isym_kq, trev_kq, cnt, tag, nprocs, receiver, my_rank, isym, itime, isym_lgk
 #ifdef HAVE_NETCDF
  integer :: ncid, grp_ncid, ncerr
 #endif
  real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff
- logical :: send_data
+ logical :: send_data, converged
  character(len=500) :: msg
  !character(len=fnlen) :: path
  type(rta_t) :: ibte
@@ -1656,7 +1656,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  unts = [std_out, ab_out]
 
  call wrtout(unts, ch10//' Entering IBTE computation driver.')
- call wrtout(unts, sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1, do_flush=.True.)
+ call wrtout(unts, sjoin("- Reading SERTA lifetimes and scattering matrix elements from:", &
+             dtfil%filsigephin), newlines=1, do_flush=.True.)
 
  ! Initialize IBTE object
  ibte = rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, comm)
@@ -1844,7 +1845,6 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    !  fkn_in = fkn_out
    !end if
    fkn_out = zero
-   converged = 0
 
    ! Begin iterative solver.
    iter_loop: do iter=1,dtset%ibte_niter
@@ -1917,8 +1917,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      call wrtout(std_out, msg)
 
      ! Check for convergence by testing F_k^i - F_k^{i-1} so very strict convergence criterion.
-     if (max_adiff < dtset%ibte_abs_tol) converged = converged + 1
-     if (converged > 1) then
+     converged = max_adiff < dtset%ibte_abs_tol
+     if (converged) then
        call wrtout(std_out, sjoin(" IBTE solver converged after:", itoa(iter), &
                    "iterations within ibte_abs_tol::", ftoa(dtset%ibte_abs_tol)), pre_newlines=1)
        exit iter_loop
@@ -1926,12 +1926,11 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
        ! Linear mixing of fkn_in and fkn_out
        fkn_in = (one - dtset%ibte_alpha_mix) * fkn_in + dtset%ibte_alpha_mix * fkn_out
        fkn_out = zero
-       converged = 0
      end if
 
    end do iter_loop
 
-   if (.not. converged > 1) then
+   if (.not. converged) then
      call wrtout(std_out, sjoin("WARNING: Not converged after:", itoa(dtset%ibte_niter), "max iterations"), &
                  pre_newlines=1, newlines=1)
      !ABI_WARNING("Not converged")
@@ -2025,8 +2024,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
  ! sigma_IBTE = (-S e^ / omega sum_\nk) (v_\nk \otimes F_\nk)
  ! with S the spin degeneracy factor.
- sigma_eh = zero; fsum_eh = zero
- onsager = zero
+ sigma_eh = zero; fsum_eh = zero; onsager = zero
 
  ! Get units conversion factor and spin degeneracy
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
@@ -2052,9 +2050,9 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
        do ia=1,3
          if (ia == 1) then
-            emu_alpha = one
+           emu_alpha = one
          else
-            emu_alpha = (eig_nk - mu_e) ** (ia - 1)
+           emu_alpha = (eig_nk - mu_e) ** (ia - 1)
          end if
 
          do ii=1,3

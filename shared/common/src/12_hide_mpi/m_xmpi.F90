@@ -710,6 +710,13 @@ subroutine xmpi_init()
 
 ! *************************************************************************
 
+ ! Increase stack size.
+ call ulimit_stack(rlim_cur, rlim_max, ierr)
+ if (ierr /= 0) then
+   write(std_out,*)" WARNING: cannot increase stack size limit. "
+   !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
+ end if
+
  mpierr=0
 #ifdef HAVE_MPI
 
@@ -760,13 +767,6 @@ subroutine xmpi_init()
        if (ierr == 0) close(unit=unt, status="delete", iostat=ierr)
        if (ierr /= 0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
     end if
- end if
-
- ! Increase stack size.
- call ulimit_stack(rlim_cur, rlim_max, ierr)
- if (ierr /= 0) then
-   write(std_out,*)" WARNING: cannot increase stack size limit. "
-   !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
  end if
 
 end subroutine xmpi_init
