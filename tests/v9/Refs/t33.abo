@@ -170,6 +170,9 @@ P           mkmem           6
         optdriver1          0
         optdriver2          3
         optdriver3          4
+       prtchkprdm1          0
+       prtchkprdm2          0
+       prtchkprdm3          1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -2865,6 +2868,9 @@ P           mkmem           6
         optdriver1          0
         optdriver2          3
         optdriver3          4
+       prtchkprdm1          0
+       prtchkprdm2          0
+       prtchkprdm3          1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

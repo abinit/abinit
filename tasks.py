@@ -433,13 +433,13 @@ def branchoff(ctx, start_point):
         remote = "trunk"
 
     def run(cmd):
-        cprint(f"Executing: `{cmd}`", "green", color="green")
+        cprint(f"Executing: `{cmd}`", color="green")
         ctx.run(cmd)
 
     run(f"git fetch {remote}")
     # Create new branch `test_v9.0` using trunk/release-9.0 as start_point:
     # git checkout [-q] [-f] [-m] [[-b|-B|--orphan] <new_branch>] [<start_point>]
-    my_branch = "my_" + start_point
+    my_branch = "my_" + start_point.replace("/", "-")
     run(f"git checkout -b {my_branch} {start_point}")
     # Change default upstream. If you forget this step, you will be pushing to trunk
     run("git branch --set-upstream-to origin")

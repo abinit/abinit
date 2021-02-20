@@ -6188,6 +6188,26 @@ the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV)
 ),
 
 Variable(
+    abivarname="gw1rdm",
+    varset="gw",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GW 1-Reduced Density Matrix",
+    requires="[[optdriver]] == 4",
+    added_in_version="9.4.0",
+    text=r"""
+[[gw1rdm]] governs the calculation of the density matrix within the linearized GW approximation.
+It must be used with [[gwcalctyp]]=21.
+
+    * [[gw1rdm]] = 0: Do not update the density matrix.
+    * [[gw1rdm]] = 1: Compute the update of the density matrix for the k-point list specified with the keyword [[kptgw]]. 
+    * [[gw1rdm]] = 2: Same as 1 but also compute the correction to the Fock operator and update total energies.
+""",
+),
+
+Variable(
     abivarname="gwaclowrank",
     varset="gw",
     vartype="integer",
@@ -6299,6 +6319,22 @@ can be disregarded [[cite:Chen2016]].
 
 [[gwgamma]] = -8 activates the RPA bootstrap-like kernel (one-shot) (see [[cite:Berger2015]]
 and [[cite:Rigamonti2015]]).
+""",
+),
+
+Variable(
+    abivarname="gwgmcorr",
+    varset="gw",
+    vartype="integer",
+    topics=['RPACorrEn_expert','GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GW Galitskii-Migdal CORRelation energy",
+    requires="[[optdriver]] == 3",
+    added_in_version="9.4.0",
+    text=r"""
+[[gwgmcorr]]==1 allows to compute the GW correlation energy with the Galitskii-Migdal (GM) formula.
+It must be used with [[gwrpacorr]]>0. For [[gwrpacorr]]=1 it will be obtained for free, while for [[gwrpacorr]]>1 it will require an extra inversion of the polarizability matrix. 
 """,
 ),
 
@@ -7778,6 +7814,22 @@ Variable(
     text=r"""
 Start the Bethe-Salpeter calculation from the BSR file containing the resonant
 block produced in a previous run.
+""",
+),
+
+Variable(
+    abivarname="irdchkprdm",
+    varset="files",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs ReaDing of CHecK-Point files for the GW 1-RDM",
+    requires="[[optdriver]] == 4",
+    added_in_version="9.4.0",
+    text=r"""
+[[irdchkprdm]]==1 triggers the reading of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
+It is only meaningful when [[gw1rdm]]>0. The files that are read use the usual ABINIT input files naming convention with extension _CHKP_RDM_1.
 """,
 ),
 
@@ -12892,7 +12944,7 @@ Variable(
 [[nspinor]] == 1;
 [[paral_atom]] == 0;
 [[paral_kgb]] == 0;
-[[kptopt]] == 3 """,
+([[kptopt]] == 3 or [[kptopt]] == 0) """,
     added_in_version="before_v9",
     text=r"""
 Compute quantities related to orbital magnetization. The
@@ -12905,18 +12957,22 @@ Compute quantities related to orbital magnetization. The
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
     standard output file, search for "Orbital magnetization" and "Chern number".
 
-* [[orbmag]] = 1: Compute Chern number (really, the integral of the Berry curvature
-over the Brillouin zone) [[cite:Ceresoli2006]]. This computation is
+* [[orbmag]] = 11: Compute orbital magnetization and Chern number (integral of the 
+Berry curvature over the Brillouin zone) using both GS and DDK wavefunctions. This is
+the most robust method. 
+* [[orbmag]] = 1: Compute Chern number using discretized wavefunctions. This computation is
 faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
 electronic current.
 * [[orbmag]] = 2: Compute electronic orbital magnetization.
 * [[orbmag]] = 3: Compute both Chern number and electronic orbital magnetization.
 
-The above settings use an implementation based on a discretization of the wavefunction
+[[orbmag]] values 1--3 use an implementation based on a discretization of the wavefunction
 derivatives, as in [[cite:Ceresoli2006]]. Using [[orbmag]] -1, -2, -3 delivers the
 same computations as the corresponding 1, 2, 3 values, but based on an implementation
 using a discretization of the density operator itself. Both methods should converge to
-the same values but in our experience the wavefunction-based method converges faster.
+the same values but in our experience the wavefunction-based method converges faster. The 
+DDK method converges considerably faster than either of the above methods and is also robust 
+in case of only a single kpt.
 """,
 ),
 
@@ -14733,6 +14789,22 @@ Variable(
     text=r"""
 If set to 1, a CIF file is output with the crystallographic data for the
 present run (cell size shape and atomic positions).
+""",
+),
+
+Variable(
+    abivarname="prtchkprdm",
+    varset="files",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM",
+    requires="[[optdriver]] == 4",
+    added_in_version="9.4.0",
+    text=r"""
+[[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
+It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usual ABINIT output files naming convention with extension _CHKP_RDM_1.
 """,
 ),
 
@@ -20585,6 +20657,22 @@ In the wavelet computation case, the wavefunctions are directly minimised
 using a real-space preconditioner. This preconditioner has internally some
 conjugate gradient iterations. This value defines a boundary for the number of
 conjugate gradient iterations on each wavefunction convergence step.
+""",
+),
+
+Variable(
+    abivarname="x1rdm",
+    varset="gw",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EXchange-only 1-Reduced Density Matrix",
+    requires="[[optdriver]] == 4",
+    added_in_version="9.4.0",
+    text=r"""
+[[x1rdm]]==1 forces the update of the density-matrix using only the exchange operator (instead of exchange and GW correlation).
+It must be used with [[gwcalctyp]]==21 and [[gw1rdm]]>0.
 """,
 ),
 
