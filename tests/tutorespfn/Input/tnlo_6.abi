@@ -151,7 +151,7 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tnlofDFPT_2.abo, tolnlines=332 , tolabs=2.0e-4, tolrel=9.0e-2
+#%%   tnlo_6.abo, tolnlines=332 , tolabs=2.0e-4, tolrel=9.0e-2
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

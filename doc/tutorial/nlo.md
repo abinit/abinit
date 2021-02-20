@@ -221,9 +221,9 @@ to compute second order energy derivatives with an electric field perturbation (
 It turns out that third-order derivatives of the energy, in this context, needs *second* derivatives of wavefunctions with respect to electric fields and k-points.
 To compute the latter one also needs *second* derivatives of wavefunctions with respect to k-points only, so in total we need two additional sets of wavefunctions derivatives.
 
-Now you can compare the files *tnlo_2.abi* and *tnlofDFPT_2.abi*.
+Now you can compare the files *tnlo_2.abi* and *tnlo_6.abi*.
 
-{% dialog tests/tutorespfn/Input/tnlofDFPT_2.abi %}
+{% dialog tests/tutorespfn/Input/tnlo_6.abi %}
 
 The first four datasets are identical, so we produce ground state quantities, first-order WF derivatives and second derivatives of the energy exactly the same way.
 Before computing the non-linear terms, there are two additional datasets to compute the needed second-order WF derivatives, see dataset 5 and 6.
@@ -253,7 +253,7 @@ usepead7    0
 The first two arguments specify which files to read to get d/dk and d/dkde WF derivatives.
 [[usepead]] is the keyword controlling which implementation to use, which has to be 0 to use *full DFPT*.
 
-If not already done, you can now run the code with *tnlofDFPT_2.abi*.
+If not already done, you can now run the code with *tnlo_6.abi*.
 Even with a very small cutoff of 2.8 Ha, the non-linear susceptibility tensor differs only by few percents comparing *PEAD* and *full DFPT*,
 and the first-order change in the electronic dielectric susceptibility tensor differs by less than one percent.
 These differences come from convergence effects which can be reduced increasing the cutoff energy and most importantly the number of k-points.

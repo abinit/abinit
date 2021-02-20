@@ -196,7 +196,9 @@ module m_orbmag
   private :: make_onsite_bm
   private :: make_pcg1
   private :: make_rhorij1
+  private :: make_rhorij1_k
   private :: make_S1trace
+  private :: make_S1trace_k
   private :: make_us1u
   private :: output_orbmag
 
@@ -4555,6 +4557,89 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
 end subroutine make_eeig
 !!***
 
+!!****f* ABINIT/make_S1trace_k
+!! NAME
+!! make_S1trace_k
+!!
+!! FUNCTION
+!! Compute Trace[\rho^0_k S_k^{(1)} ] in orbital magnetism context
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
+!!
+!! SOURCE
+
+subroutine make_S1trace_k(adir,cprj_k,dtset,ENK,iband,nband_occ,pawtab,S1trace)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: adir,iband,nband_occ
+  real(dp),intent(in) :: ENK
+  complex(dpc),intent(out) :: S1trace
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_occ)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: bdir,epsabg,gdir,iatom,ilmn,itypat,jlmn,klmn
+  complex(dpc) :: cpb,cpk
+
+!----------------------------------------------------------------
+
+  S1trace = czero
+
+  do epsabg = 1, -1, -2
+
+    if (epsabg .EQ. 1) then
+       bdir = modulo(adir,3)+1
+       gdir = modulo(adir+1,3)+1
+    else
+       bdir = modulo(adir+1,3)+1
+       gdir = modulo(adir,3)+1
+    end if
+
+    do iatom=1,dtset%natom
+      itypat=dtset%typat(iatom)
+      do ilmn=1,pawtab(itypat)%lmn_size
+        do jlmn=1,pawtab(itypat)%lmn_size
+          klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+          cpb=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
+          cpk=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)
+          S1trace=S1trace+half*j_dpc*epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
+        end do ! end loop over jlmn
+      end do ! end loop over ilmn
+    end do ! end loop over atoms
+  end do ! end loop over epsabg
+
+end subroutine make_S1trace_k
+
+!!***
+
+
 
 !!****f* ABINIT/make_S1trace
 !! NAME
@@ -4682,6 +4767,95 @@ subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
 
 end subroutine make_S1trace
 !!***
+
+!!****f* ABINIT/make_rhorij1_k
+!! NAME
+!! make_rhorij1_k
+!!
+!! FUNCTION
+!! Compute Trace[\rho^0_k \rho_Rij(1)_k ] in orbital magnetism context
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
+!!
+!! SOURCE
+
+subroutine make_rhorij1_k(adir,cprj_k,dtset,iband,nband_occ,&
+    & paw_ij,pawtab,rhorij1)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: adir,iband,nband_occ
+  complex(dpc),intent(out) :: rhorij1
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_occ)
+  type(paw_ij_type),intent(in) :: paw_ij(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: bdir,epsabg,gdir,iatom,ilmn,itypat,jlmn,klmn
+  complex(dpc) :: cpb,cdij,cpk
+
+!----------------------------------------------------------------
+
+  rhorij1 = czero
+
+  do epsabg = 1, -1, -2
+
+    if (epsabg .EQ. 1) then
+       bdir = modulo(adir,3)+1
+       gdir = modulo(adir+1,3)+1
+    else
+       bdir = modulo(adir+1,3)+1
+       gdir = modulo(adir,3)+1
+    end if
+
+    do iatom=1,dtset%natom
+      itypat=dtset%typat(iatom)
+      do ilmn=1,pawtab(itypat)%lmn_size
+        do jlmn=1,pawtab(itypat)%lmn_size
+          klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+          cpb=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
+          cpk=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)
+          if (paw_ij(iatom)%cplex_dij .EQ. 2) then
+             cdij=cmplx(paw_ij(iatom)%dij(2*klmn-1,1),paw_ij(iatom)%dij(2*klmn,1),KIND=dpc)
+             if (jlmn .GT. ilmn) cdij=conjg(cdij)
+          else
+             cdij=cmplx(paw_ij(iatom)%dij(klmn,1),zero,KIND=dpc)
+          end if
+          rhorij1=rhorij1+half*j_dpc*epsabg*conjg(cpb)*cdij*cpk
+        end do ! end loop over jlmn
+      end do ! end loop over ilmn
+    end do ! end loop over atoms
+  end do ! end loop over epsabg
+
+end subroutine make_rhorij1_k
+!!***
+
 
 !!****f* ABINIT/make_rhorij1
 !! NAME
@@ -5053,7 +5227,7 @@ end subroutine orbmag
 !! SOURCE
 
 subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawtab,psps,rprimd,vtrial,&
+    & nattyp,nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawtab,psps,rprimd,vtrial,&
     & xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
@@ -5067,7 +5241,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
  !arrays
  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
- integer,intent(in) :: ngfftf(18),npwarr(dtset%nkpt)
+ integer,intent(in) :: nattyp(dtset%natom),ngfftf(18),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3),rprimd(3,3),xred(3,dtset%natom)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -5078,23 +5252,25 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  !Local
  !scalars
  integer :: adir,bdir,buff_size,dimffnl,exchn2n3d
+ integer :: getcprj_choice,getcprj_cpopt
  integer :: getghc_cpopt,getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc
  integer :: gdir,iatom,icg,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k,iterms
  integer :: me,mcgk,my_nspinor
- integer :: nband_k,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn
+ integer :: nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn
  integer :: nkpg,npw_k
  integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_pawopt,nonlop_signs,nonlop_tim
  integer :: nproc,nterms,nterms3,projbd_scprod_io,projbd_tim,projbd_useoverlap,spaceComm
  integer :: with_vectornd
- real(dp) :: arg,dub_dsg_r,dub_dsg_i,dug_dsb_r,dug_dsb_i
- real(dp) :: ecut_eff,Enk,finish_time,lambda,start_time,ucvol
+ real(dp) :: arg,dub_dsg_i,dug_dsb_i
+ real(dp) :: ecut_eff,Enk,finish_time,lambda,start_time,traceH0,trnrm,ucvol
+ complex(dpc) :: rhorij1,S1trace
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
 
  real(dp) :: doti
 
  !arrays
- integer,allocatable :: kg_k(:,:)
+ integer,allocatable :: dimlmn(:),kg_k(:,:),nattyp_dum(:)
  real(dp) :: chern_total(2,3),gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1)
  real(dp) :: orbmag_total(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
@@ -5105,7 +5281,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),scg_k(:,:),scg1_k(:,:,:),scprod(:,:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
+ type(pawcprj_type),allocatable :: cprj_k(:,:),cwaveprj(:,:)
 
  !----------------------------------------------
 
@@ -5149,6 +5325,14 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  lambda_ndat = zero 
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ ncpgr = 3
+ ABI_MALLOC(dimlmn,(dtset%natom))
+ call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
+ ABI_MALLOC(cprj_k,(dtset%natom,dtset%mband))
+ call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
+ ABI_MALLOC(cwaveprj,(dtset%natom,1))
+ call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
 
  !==== Initialize most of the Hamiltonian ====
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -5200,17 +5384,21 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  ! 1:3 orbmag CC
  ! 4:6 orbmag VV II
  ! 7:9 orbmag VV I+III
- ! 10:12 chern
- ! 13:15 alternate orbmag H
- ! 16:18 alternate orbmag E
+ ! 10:12 orbmag Tr[\rho^0 H^1] with D^0_ij part
+ ! 13:15 orbmag -Tr[\rho^0 S^1] part
+ ! 16:18 chern
  ABI_MALLOC(orbmag_terms,(nterms3))
  orbmag_terms = zero
+ traceH0 = zero
  
  !============= BIG FAT KPT LOOP :) ===========================
  do ikpt = 1, dtset%nkpt
 
    ! if the current kpt is not on the current processor, cycle
    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
+
+   ! trace norm: assume occupation of two for each band and weight by kpts
+   trnrm = two*dtset%wtk(ikpt)
 
    kpoint(:)=dtset%kptns(:,ikpt)
    npw_k = npwarr(ikpt)
@@ -5247,7 +5435,10 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
    ! Compute nonlocal form factors ffnl at all (k+G):
    ider=1 ! ffnl and 1st derivatives
-   idir=0 ! ignored when ider = 0; idir=0 means d ffnl/ dk_red in all 3 directions
+   idir=4 ! ignored when ider = 0; idir=0 means d ffnl/ dk in reduced units referenced 
+          ! to reciprocal translations
+          ! idir=4 meand d ffnl / dk in reduced units referenced to real space
+          ! translations. rfddk = 1 wavefunctions are computed using this convention.
    dimffnl=4 ! 1 + number of derivatives
    ABI_MALLOC(ffnl_k,(npw_k,dimffnl,psps%lmnmax,dtset%ntypat))
    call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_k,psps%ffspl,&
@@ -5272,18 +5463,36 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_MALLOC(cg1_k,(2,mcgk,3))
    cg1_k = cg1(1:2,icg+1:icg+mcgk,1:3)
 
-   ! compute S|u_nk> and S|du/dk>
+   ! compute cprj_k, S|u_nk>, and S|du/dk>
    ABI_MALLOC(cwavef,(2,npw_k))
    ABI_MALLOC(gsc,(2,npw_k))
    ABI_MALLOC(gvnlc,(2,npw_k))
    ! input parameters for calls to nonlop
    nonlop_choice =  1! apply (I+S)
+   ! input parameters for calls to getcprj
+   getcprj_choice = 5 ! cprj and d cprj/dk
+   getcprj_cpopt = 0 ! compute both cprj and d cprj/dk
    do nn = 1, nband_k
      cwavef = cg_k(:,(nn-1)*npw_k+1:nn*npw_k)
      call nonlop(nonlop_choice,nonlop_cpopt,cwaveprj,nonlop_enlout,gs_hamk,0,&
        & lambda_ndat,mpi_enreg,ndat,nonlop_nnlout,nonlop_pawopt,nonlop_signs,gsc,&
        & nonlop_tim,cwavef,gvnlc)
      scg_k(1:2,(nn-1)*npw_k+1:nn*npw_k) = gsc(1:2,1:npw_k)
+
+     do adir = 1, 3
+       call getcprj(getcprj_choice,getcprj_cpopt,cwavef,cwaveprj,ffnl_k,&
+         & adir,psps%indlmn,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
+         & dtset%mgfft,mpi_enreg,dtset%natom,nattyp,dtset%ngfft,&
+         & dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,&
+         & phkxred,ph1d,ph3d,ucvol,psps%useylm)
+
+       call pawcprj_put(atindx1,cwaveprj,cprj_k,dtset%natom,&
+         & nn,0,ikpt,0,isppol,nband_k,dtset%mkmem,&
+         & dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0,&
+         & mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+
+     end do
+
      do adir = 1, 3
        cwavef = cg1_k(:,(nn-1)*npw_k+1:nn*npw_k,adir)
        call nonlop(nonlop_choice,nonlop_cpopt,cwaveprj,nonlop_enlout,gs_hamk,0,&
@@ -5335,15 +5544,17 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        & getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc)
      Enk = DOT_PRODUCT(cwavef(1,1:npw_k),ghc(1,1:npw_k)) &
        & + DOT_PRODUCT(cwavef(2,1:npw_k),ghc(2,1:npw_k))
+     ! traceH0=traceH0+Enk*trnrm
 
      do adir =1, 3
        bdir = modulo(adir,3)+1
        gdir = modulo(adir+1,3)+1
 
-       ! compute conduction band contribution to orbmag
-       ! -i/2 * eps_{abg}\sum<du_nk/dg|H^0|du_nk/db>
-       ! compute <du/dg|H^0|du/db> - <du/db|H^0|du/dg> = +2*i*Im<du/dg|H^0|du/db>
-       ! orbmag contribution = Im<du/dg|H^0|du/db>
+       ! 1:3 orbmag CC
+       ! -i/2 eps_abg <du/dg|P_c H0 P_c|du/db> =
+       ! -i/2 (<du/dg|P_c H0 P_c|du/db> - <du/db|P_c H0 P_c|du/dg>) =
+       ! -i/2 (2 i Im<du/dg|P_c H0 P_c|du/db>) =
+       ! Im<du/dg|P_c H0 P_c|du/db>
 
        cwaveb1(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
        call getghc(getghc_cpopt,cwaveb1,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
@@ -5351,50 +5562,48 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
        cwaveg1(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
        doti=-DOT_PRODUCT(cwaveg1(2,:),ghc(1,:))+DOT_PRODUCT(cwaveg1(1,:),ghc(2,:))
- 
-       ! 1:3 orbmag CC
-       orbmag_terms(adir) = orbmag_terms(adir) + doti
+
+       orbmag_terms(adir) = orbmag_terms(adir) + doti*trnrm
        
-       ! <du/db|S|du/dg> contributes to orbmag_vv
-       ! vv needs (i/2)*eps_abg*<du/db|S|du/dg>Enk = -Im<du/db|S|du/dg>Enk =
-       ! +Im<du/dg|S|du/db>Enk
        ! 4:6 orbmag VV II
+       ! vv needs (+i/2)*eps_abg*<du/db|P_c S P_c|du/dg>Enk =
+       ! +i/2 (<du/db|P_c S P_c|du/dg> - <du/dg|P_c S P_c|du/db>)Enk =
+       ! -i/2 (<du/dg|P_c S P_c|du/db> - <du/db|P_c S P_c|du/dg>)Enk =
+       ! Im<du/dg|P_c S P_c|du/db>Enk
        doti=-DOT_PRODUCT(cwaveg1(2,:),gsc(1,:))+DOT_PRODUCT(cwaveg1(1,:),gsc(2,:))
-       orbmag_terms(3+adir) = orbmag_terms(3+adir) + doti*Enk
+       orbmag_terms(3+adir) = orbmag_terms(3+adir) + doti*Enk*trnrm
 
-       ! chern needs i*eps_abg*<du/db|S|du/dg> so contract with eps_abg
-       ! -2*Im<du/db|S|du/dg> = 2*Im<du/dg|S|du/db>
-       ! 10:12 chern 
-       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
-             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir))
-       orbmag_terms(9+adir) = orbmag_terms(9+adir) - two*doti
-       ! 16:18 alternate orbmag E term 
-       orbmag_terms(15+adir) = orbmag_terms(15+adir) - doti*Enk
 
-       cwavedsdb(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
-       cwavedsdg(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
-
-       dug_dsb_r = DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(1,:)) + DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(2,:))
-       dug_dsb_i = -DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(1,:)) + DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(2,:))
-       dub_dsg_r = DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(2,:))
-       dub_dsg_i = -DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(2,:))
-
-       !VV I term gives (i/2)eps_abg <du/db|dS/dg|u>Enk
-       !VV III term gives (i/2)eps_abg <du|dS/db|du/dg>Enk
+       !VV I term gives (i/2)eps_abg <du/db|P_c dS/dg|u>Enk
+       !VV III term gives (i/2)eps_abg <du|dS/db P_c|du/dg>Enk
        ! combined with eps_abg contraction they contribute
        ! -Im(VVI)*Enk
        ! 7:9 orbmag VV I+III
-       orbmag_terms(6+adir)=orbmag_terms(6+adir)-(dub_dsg_i-dug_dsb_i)*Enk
+       cwavedsdb(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+       cwavedsdg(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
 
+       dug_dsb_i = -DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(1,:)) + DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(2,:))
+       dub_dsg_i = -DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(2,:))
+       orbmag_terms(6+adir)=orbmag_terms(6+adir)-(dub_dsg_i-dug_dsb_i)*Enk*trnrm
+      
+       ! Tr[-\rho^0 S^1 \rho^0 H^0] contribution 
+       ! overall sign needs to be checked carefully 
+       call make_S1trace_k(adir,cprj_k,dtset,Enk,nn,nband_k,pawtab,S1trace)
+       orbmag_terms(9+adir) = orbmag_terms(9+adir) + real(S1trace)*trnrm
+       
+       ! Tr[\rho^0 H^1] contribution:
+       ! i/2 eps_abg <u|dp/db>D_ij^0<dp/dg|u>
+       call make_rhorij1_k(adir,cprj_k,dtset,nn,nband_k,paw_ij,pawtab,rhorij1)
+       orbmag_terms(12+adir) = orbmag_terms(12+adir) + real(rhorij1)*trnrm
 
-       ! alternate orbmag <du/dk|H|du/dk> directly
-       cwaveg1(1:2,1:npw_k) = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
-       call getghc(getghc_cpopt,cwaveg1,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
-         & getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc)
-       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),ghc(1,1:npw_k)) + &
-             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),ghc(2,1:npw_k))
-       ! 13:15 alternate orbmag H term 
-       orbmag_terms(12+adir) = orbmag_terms(12+adir) - doti
+       ! chern needs i*eps_abg*<du/db|S|du/dg> 
+       ! N.B. the Chern number does not involve H0 so no projection onto conduction
+       ! and valence bands, the "S" here is really I+S from PAW
+       ! i eps_abg <du/db|S|du/dg> = -2*Im<du/db|S|du/dg> 
+       ! 16:18 chern 
+       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
+             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir))
+       orbmag_terms(15+adir) = orbmag_terms(15+adir) - two*doti*trnrm
 
      end do
 
@@ -5440,11 +5649,15 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  end if
 
  do iterms = 1, nterms
+   ! the following scaling converts to cartesian coordinates. 
    orbmag_terms((iterms-1)*3+1:iterms*3) = &
-     & ucvol*MATMUL(gprimd,orbmag_terms((iterms-1)*3+1:iterms*3))*two/(ucvol*dtset%nkpt)
+     & ucvol*MATMUL(gprimd,orbmag_terms((iterms-1)*3+1:iterms*3))
+   ! following scaling is semi-empirical
+   orbmag_terms((iterms-1)*3+1:iterms*3) = &
+     & orbmag_terms((iterms-1)*3+1:iterms*3)/(two*two_pi*two_pi)
  end do
 
- orbmag_terms(10:12) = orbmag_terms(10:12)/two_pi
+ orbmag_terms(16:18) = orbmag_terms(16:18)/two_pi
  
  do iterms = 1, nterms
    write(std_out,'(a,i4,3es16.8)')'JWZ debug orbmag_terms term ',iterms,&
@@ -5454,14 +5667,13 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  end do
 
  orbmag_total=zero;chern_total=zero
- orbmag_total(1,1:3)=orbmag_terms(1:3)+orbmag_terms(4:6)+orbmag_terms(7:9)
+ orbmag_total(1,1:3)=orbmag_terms(1:3)+orbmag_terms(4:6)+&
+   & orbmag_terms(7:9)+orbmag_terms(10:12)+orbmag_terms(13:15)
  call output_orbmag(1,orbmag_total)
- orbmag_total(1,1:3)=orbmag_terms(13:15)+orbmag_terms(16:18)
- call output_orbmag(1,orbmag_total)
-
-
- chern_total(1,1:3)=orbmag_terms(10:12)
+ chern_total(1,1:3)=orbmag_terms(16:18)
  call output_orbmag(2,chern_total)
+
+! write(std_out,'(a,es16.8)')'JWZ debug traceH0 ',traceH0
 
 !---------------------------------------------------
 ! deallocate memory
@@ -5477,6 +5689,12 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  ABI_FREE(kinpw)
  ABI_FREE(ph1d)
  ABI_FREE(orbmag_terms)
+
+ ABI_FREE(dimlmn)
+ call pawcprj_free(cprj_k)
+ ABI_FREE(cprj_k)
+ call pawcprj_free(cwaveprj)
+ ABI_FREE(cwaveprj)
 
  call cpu_time(finish_time)
  write(std_out,'(a,es16.8)')' JWZ debug orbmag_ddk progress: time ',finish_time-start_time
