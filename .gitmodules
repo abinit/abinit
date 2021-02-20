@@ -2,3 +2,7 @@
 	path = tests/modules_with_data/MgO_eph_zpr
 	url = git://github.com/abinit/MgO_eph_zpr.git
 	branch = master
+[submodule "tests/modules_with_data/MgB2_eph4isotc"]
+	path = tests/modules_with_data/MgB2_eph4isotc
+	url = git://github.com/abinit/MgB2_eph4isotc.git
+	branch = main

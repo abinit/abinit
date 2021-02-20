@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DC)
+!!  Copyright (C) 1998-2021 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,14 +119,14 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
    write(message,'(a,a,a,i0,a)')&
 &   '  Option argument is wrong,', ch10, &
 &   '  awaited values are -1 or  1 but option = ', option, '.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  comm=mpi_enreg%comm_wvl
  me=xmpi_comm_rank(comm)
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, dtset%natom))
- ABI_ALLOCATE(xcart_old,(3, dtset%natom))
+ ABI_MALLOC(xcart,(3, dtset%natom))
+ ABI_MALLOC(xcart_old,(3, dtset%natom))
  call xred2xcart(dtset%natom, rprimd, xcart, xred)
 
  write(message,'(2a)') ch10,' wvl_read:  read wavefunctions from file.'
@@ -136,7 +136,7 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
    bandSize = wfs%ks%lzd%Glr%wfd%nvctr_c + 7 * wfs%ks%lzd%Glr%wfd%nvctr_f
 !  Read in the ABINIT way.
    if (wff%iomode == IO_MODE_FORTRAN .or. (wff%iomode == IO_MODE_FORTRAN_MASTER .and. wff%master==wff%me)) then
-     ABI_ALLOCATE(psifscf,(wvl%Glr%d%n1i, wvl%Glr%d%n2i, wvl%Glr%d%n3i))
+     ABI_MALLOC(psifscf,(wvl%Glr%d%n1i, wvl%Glr%d%n2i, wvl%Glr%d%n3i))
      do iBand = 1, dtset%mband * dtset%nsppol, 1
        call readonewave(wff%unwff, .false., iBand, me, &
 &       wvl%Glr%d%n1, wvl%Glr%d%n2, wvl%Glr%d%n3, &
@@ -146,13 +146,13 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
 &       bandSize * (iBand - me * wfs%ks%orbs%norbp - 1) + bandSize), &
 &       wfs%ks%orbs%eval(iBand), psifscf)
      end do
-     ABI_DEALLOCATE(psifscf)
+     ABI_FREE(psifscf)
 
    else
      write(message,'(4a,i0,a)') ch10,&
 &     '  wff%iomode argument is wrong,', ch10, &
 &     '  awaited values are -1, 0 (or 3 if netcdf/etsf_io is available) but value = ', wff%iomode, '.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  else
    call readmywaves(me, "wavefunctions", WF_FORMAT_NONE, wfs%ks%orbs, &
@@ -161,8 +161,8 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
 &   xcart_old, xcart, wfs%ks%lzd%Glr%wfd, wfs%ks%psi)
  end if
 
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xcart_old)
+ ABI_FREE(xcart)
+ ABI_FREE(xcart_old)
 #else
  BIGDFT_NOTENABLED_ERROR()
  if (.false.) write(std_out,*) option,dtset%nstep,hdr0%ecut,hdr%ecut,mpi_enreg%nproc,wff%me,&
@@ -241,13 +241,13 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
    write(message,'(a,a,a,i0,a)')&
 &   '  Option argument is wrong,', ch10, &
 &   '  awaited values are -2 or  2 but option = ', option, '.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  comm=mpi_enreg%comm_wvl
  me=xmpi_comm_rank(comm)
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, dtset%natom))
+ ABI_MALLOC(xcart,(3, dtset%natom))
  call xred2xcart(dtset%natom, rprimd, xcart, xred)
 
  write(message, '(a,a,a,a)' ) ch10,&
@@ -279,7 +279,7 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
      write(message,'(3a,i0,a)')&
 &     '  wff%iomode argument is wrong,', ch10, &
 &     '  awaited values are -1, 0 (or 3 if netcdf/etsf_io is available) but value = ', wff%iomode, '.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  else
 !  Write in the BigDFT way.
@@ -289,7 +289,7 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
 &   xcart, wfs%ks%lzd%Glr%wfd, wfs%ks%psi)
  end if
 
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
 #else
  BIGDFT_NOTENABLED_ERROR()

@@ -8,7 +8,7 @@
 !!  to store energies from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MT, DC)
+!! Copyright (C) 2008-2021 ABINIT group (MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -662,7 +662,7 @@ subroutine energies_ncwrite(enes, ncid)
  NCF_CHECK(ncerr)
 
 #else
- MSG_ERROR("ETSF-IO support is not activated.")
+ ABI_ERROR("ETSF-IO support is not activated.")
 #endif
 
 end subroutine energies_ncwrite

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,10 +136,10 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  if(iexit/=0)then
    if (allocated(fcart_m))     then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    if (allocated(fcart_mold))  then
-     ABI_DEALLOCATE(fcart_mold)
+     ABI_FREE(fcart_mold)
    end if
    return
  end if
@@ -150,18 +150,18 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  if(itime==1)then
    if (allocated(fcart_m))     then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    if (allocated(fcart_mold))  then
-     ABI_DEALLOCATE(fcart_mold)
+     ABI_FREE(fcart_mold)
    end if
  end if
 
  if(.not.allocated(fcart_m))     then
-   ABI_ALLOCATE(fcart_m,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_m,(3,ab_mover%natom))
  end if
  if(.not.allocated(fcart_mold))  then
-   ABI_ALLOCATE(fcart_mold,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_mold,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'nose 02'

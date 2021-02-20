@@ -16,6 +16,9 @@
   natifc  1      ! Number of atoms in the cell for which ifc's are analysed
    atifc  1      ! List of atoms
   
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb

@@ -7,7 +7,7 @@
 !!  Interfaces of GPU subroutines wrapper
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2020 ABINIT group (FDahm ))
+!!  Copyright (C) 2011-2021 ABINIT group (FDahm ))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -438,10 +438,10 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
  if ( x_cplx == 1 ) then
    tr='t'
-   ABI_ALLOCATE(d_sqgram,(blocksize,blocksize))
+   ABI_MALLOC(d_sqgram,(blocksize,blocksize))
  else
    tr='c'
-   ABI_ALLOCATE(z_sqgram,(blocksize,blocksize))
+   ABI_MALLOC(z_sqgram,(blocksize,blocksize))
  end if
 
  call gpu_xgemm(x_cplx,tr,'n',blocksize,blocksize,vectsize, &
@@ -461,16 +461,16 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
  if (info /= 0 ) then
    write(message,'(a,i3)') '  xpotrf, info=',info
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  call gpu_xtrsm(x_cplx,'r','u','n','n',vectsize,blocksize,cone,sqgram_gpu,blocksize,&
 &               blockvectorx_gpu,vectsize)
 
  if(x_cplx==1) then
-   ABI_DEALLOCATE(d_sqgram)
+   ABI_FREE(d_sqgram)
  else
-   ABI_DEALLOCATE(z_sqgram)
+   ABI_FREE(z_sqgram)
  end if
  if (present(tim_xortho).and.present(timopt)) then
    if(abs(timopt)==3) then
@@ -481,7 +481,7 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
 #else
  message='  This routine is not allowed when Cuda is disabled !'
- MSG_BUG(message)
+ ABI_BUG(message)
  if (.false.) then
    write(std_out,*) blocksize,vectsize,spaceComm,x_cplx
    if (present(timopt))  write(std_out,*) timopt

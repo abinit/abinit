@@ -40,7 +40,7 @@ subroutine farr_real_dp1(farray, varname, ncid)
  NCF_CHECK(nf90_put_var(ncid, varid, farray))
 
 #else 
- MSG_ERROR("netcdf support is not activated.")
+ ABI_ERROR("netcdf support is not activated.")
 #endif
 
 end subroutine farr_real_dp1
@@ -87,7 +87,7 @@ subroutine farr_complex_dpc1(farray, varname, ncid)
  NCF_CHECK(nf90_put_var(ncid, varid, c2r(farray)))
 
 #else 
- MSG_ERROR("netcdf support is not activated.")
+ ABI_ERROR("netcdf support is not activated.")
 #endif
 
 end subroutine farr_complex_dpc1

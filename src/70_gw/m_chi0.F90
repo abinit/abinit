@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2021 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -308,7 +308,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      ! Include the term <n,k|[Vnl,iqr]|n"k>' for q->0.
      ABI_CHECK(nspinor==1,"nspinor+inclvkb not coded")
    else
-     MSG_WARNING('Neglecting <n,k|[Vnl,iqr]|m,k>')
+     ABI_WARNING('Neglecting <n,k|[Vnl,iqr]|m,k>')
    end if
  else
    ! For PAW+DFT+U, precalculate <\phi_i|[Hu,r]|phi_j\>
@@ -366,7 +366,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    weight=one/Kmesh%nbz; spin_fact=one
 
  CASE DEFAULT
-   MSG_BUG("Wrong nsppol")
+   ABI_BUG("Wrong nsppol")
  END SELECT
 
  ! Weight for points in the IBZ_q
@@ -507,7 +507,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &     0,Ep%zcut,zero,my_wl,my_wr,kkweight)
 
    if (.not.use_tr) then
-     MSG_BUG('Hilbert transform requires time-reversal')
+     ABI_BUG('Hilbert transform requires time-reversal')
    end if
 
    ! allocate heads and wings of the spectral function.
@@ -522,13 +522,13 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0q0:       ',memreq,' [Gb]'
    call wrtout(std_out,msg,'PERS')
    if (memreq > two) then
-     MSG_WARNING(' Memory required for sf_chi0q0 is larger than 2.0 Gb!')
+     ABI_WARNING(' Memory required for sf_chi0q0 is larger than 2.0 Gb!')
    end if
    ABI_MALLOC_OR_DIE(sf_chi0,(Ep%npwe,Ep%npwe,my_wl:my_wr), ierr)
    sf_chi0=czero_gw
 
  CASE DEFAULT
-   MSG_BUG("Wrong spmeth")
+   ABI_BUG("Wrong spmeth")
  END SELECT
 
  nkpt_summed=Kmesh%nbz
@@ -867,7 +867,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &            Gsph_epsG0,deltaf_b1b2,my_wl,iomegal,wl,my_wr,iomegar,wr,rhotwx,rhotwg,Ep%nomegasf,sf_chi0,sf_head,sf_lwing,sf_uwing)
 
          CASE DEFAULT
-           MSG_BUG("Wrong spmeth")
+           ABI_BUG("Wrong spmeth")
          END SELECT
 
          ! Accumulating the sum rule on chi0. Eq. (5.284) in G.D. Mahan Many-Particle Physics 3rd edition. [[cite:Mahan2000]]
@@ -930,7 +930,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &   chi0_uwing,chi0_head,Ep%spmeth)
 
  CASE DEFAULT
-   MSG_BUG("Wrong spmeth")
+   ABI_BUG("Wrong spmeth")
  END SELECT
 
  ! Divide by the volume
@@ -1073,7 +1073,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  end if
 
  if(dtset%ucrpa>=1 .AND. dtset%plowan_compute <10 ) then
-   ABI_DEALLOCATE(coeffW_BZ)
+   ABI_FREE(coeffW_BZ)
  endif
 
  call cwtime(cpu_time,wall_time,gflops,"stop")
@@ -1324,7 +1324,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  CASE (2)
    weight=one/Kmesh%nbz; spin_fact=one
  CASE DEFAULT
-   MSG_BUG("Wrong nsppol")
+   ABI_BUG("Wrong nsppol")
  END SELECT
 
  ! Weight for points in the IBZ_q.
@@ -1409,7 +1409,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &    0,Ep%zcut,zero,my_wl,my_wr,kkweight)
 
    if (.not.use_tr) then
-     MSG_BUG('spectral method requires time-reversal')
+     ABI_BUG('spectral method requires time-reversal')
    end if
 
    memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
@@ -1418,13 +1418,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0: ',memreq,' [Gb]'
    call wrtout(std_out,msg,'PERS')
    if (memreq > two) then
-     MSG_WARNING(' Memory required for sf_chi0 is larger than 2.0 Gb!')
+     ABI_WARNING(' Memory required for sf_chi0 is larger than 2.0 Gb!')
    end if
    ABI_MALLOC_OR_DIE(sf_chi0,(Ep%npwe,Ep%npwe,my_wl:my_wr), ierr)
    sf_chi0=czero_gw
 
  CASE DEFAULT
-   MSG_BUG("Wrong spmeth")
+   ABI_BUG("Wrong spmeth")
  END SELECT
 
  nkpt_summed=Kmesh%nbz
@@ -1500,7 +1500,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
      call get_BZ_diff(Kmesh,kbz,qpoint,ikmq_bz,G0,nfound)
      if (nfound==0) then
-       MSG_ERROR("Cannot find kbz - qpoint in Kmesh")
+       ABI_ERROR("Cannot find kbz - qpoint in Kmesh")
      end if
 
      ! Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
@@ -1509,18 +1509,18 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 !BEGIN DEBUG
      !if (ANY(umklp_k /=0)) then
      !  write(msg,'(a,3i2)')" umklp_k /= 0 ",umklp_k
-     !  MSG_ERROR(msg)
+     !  ABI_ERROR(msg)
      !end if
      !if (ANY( g0 /= -umklp_kmq + umklp_k) ) then
      !if (ANY( g0 /= -umklp_kmq ) ) then
      !  write(msg,'(a,3(1x,3i2))')" g0 /= -umklp_kmq + umklp_k ",g0, umklp_kmq, umklp_k
-     !  MSG_ERROR(msg)
+     !  ABI_ERROR(msg)
      !end if
      !g0 = -umklp_k + umklp_kmq
      !g0 = +umklp_k - umklp_kmq
      !if (ANY (ABS(g0) > Ep%mg0) ) then
      !  write(msg,'(a,6(1x,i0))')"  ABS(g0) > Ep%mg0 ",g0,Ep%mg0
-     !  MSG_ERROR(msg)
+     !  ABI_ERROR(msg)
      !end if
 !END DEBUG
 
@@ -1801,7 +1801,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &            deltaf_b1kmq_b2k,my_wl,iomegal,wl,my_wr,iomegar,wr,Ep%nomegasf,sf_chi0)
 
          CASE DEFAULT
-           MSG_BUG("Wrong spmeth")
+           ABI_BUG("Wrong spmeth")
          END SELECT
 
          ! Accumulating the sum rule on chi0. Eq. (5.284) in G.D. Mahan Many-Particle Physics 3rd edition. [[cite:Mahan2000]]
@@ -1894,7 +1894,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    end do
 
  CASE DEFAULT
-   MSG_BUG("Wrong spmeth")
+   ABI_BUG("Wrong spmeth")
  END SELECT
 
  ! Divide by the volume
@@ -1963,7 +1963,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  end if
 
  if(dtset%ucrpa>=1 .AND. dtset%plowan_compute<10) then
-   ABI_DEALLOCATE(coeffW_BZ)
+   ABI_FREE(coeffW_BZ)
  endif
 
  call timab(331,2,tsec)
@@ -2231,7 +2231,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 ! CP: adding 1 and BSt%nband(1) as dummy arguments since here we already test for occopt==9
    write(std_out,*)"nelect1: ",o_nelect
  else
-   MSG_ERROR('occopt 9 not implemented for GW calculations')
+   ABI_ERROR('occopt 9 not implemented for GW calculations')
  end if
  ! End CP modified
  !
@@ -2249,7 +2249,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 &    o_nelect,BSt%nkpt,BSt%nsppol,o_occ_mdelta,BSt%occopt,option1,BSt%tphysel,BSt%tsmear,unitdos0,BSt%wtk,1,BSt%nband(1))
    write(std_out,*)"nelect2: ",o_nelect
  else
-   MSG_ERROR("occopt 9 not implemented for GW calculations")
+   ABI_ERROR("occopt 9 not implemented for GW calculations")
  end if
  ! End CP modified
 
@@ -2271,7 +2271,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    end do
  end do
 
-! MSG_ERROR("DONE")
+! ABI_ERROR("DONE")
 ! do spin=1,nsppol
 !   do ik_ibz=1,Wfd%nkibz
 !     nband_k = Wfd%nband(ik_ibz,spin)
@@ -2323,7 +2323,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  CASE (2)
    weight=one/Kmesh%nbz; spin_fact=one
  CASE DEFAULT
-   MSG_BUG("Wrong nsppol")
+   ABI_BUG("Wrong nsppol")
  END SELECT
 
  use_umklp=0

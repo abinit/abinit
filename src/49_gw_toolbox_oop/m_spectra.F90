@@ -10,7 +10,7 @@
 !! matrix as calculated in the GW part of ABINIT (screening.F90)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG)
+!! Copyright (C) 2008-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -224,7 +224,7 @@ subroutine spectra_write(Spectra,write_bits,fname)
  maxo = MAXVAL(Spectra%omega)
 
  if (open_file(fname,msg,newunit=unt) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !write(unt,'(a,i5,2(a,f9.1),a)')'# nomega : ',Spectra%nomega,' from ',mino*Ha_eV,' up to ',maxo*Ha_eV,' [eV] '

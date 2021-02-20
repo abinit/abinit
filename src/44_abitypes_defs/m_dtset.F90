@@ -7,7 +7,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2020 ABINIT group (XG, MG, FJ, DCA, MT)
+!! Copyright (C) 1992-2021 ABINIT group (XG, MG, FJ, DCA, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -135,6 +135,7 @@ type, public :: dataset_type
  integer :: dmft_read_occnd
  integer :: dmft_solv
  integer :: dmft_t2g
+ integer :: dmft_wanorthnorm
 !integer :: dmft_x2my2d
  integer :: dmftbandi
  integer :: dmftbandf
@@ -466,7 +467,7 @@ type, public :: dataset_type
  integer :: prepgkk = 0
  integer :: prtbbb = 0
  integer :: prtbltztrp = 0
- integer :: prtchkprdm = 1
+ integer :: prtchkprdm = 0
  integer :: prtcif = 0
  integer :: prtden
  integer :: prtdensph = 1
@@ -681,7 +682,6 @@ type, public :: dataset_type
  real(dp) :: bxctmindg
  real(dp) :: cd_halfway_freq
  real(dp) :: cd_max_freq
- real(dp) :: charge
  real(dp) :: cpus
  real(dp) :: ddamp
  real(dp) :: dfpt_sciss
@@ -866,6 +866,7 @@ type, public :: dataset_type
  real(dp), allocatable :: amu_orig(:,:)     ! amu(ntypat,nimage)
  real(dp), allocatable :: atvshift(:,:,:)   ! atvshift(16,nsppol,natom)
  real(dp), allocatable :: cd_imfrqs(:)      ! cd_imfrqs(cd_customnimfrqs)
+ real(dp), allocatable :: cellcharge(:)     ! cellcharge(nimage)
  real(dp), allocatable :: chrgat(:)         ! chrgat(natom)
  real(dp), allocatable :: chempot(:,:,:)    ! chempot(3,nzchempot,ntypat)
  real(dp), allocatable :: corecs(:)         ! corecs(ntypat)
@@ -970,8 +971,9 @@ CONTAINS  !=====================================================================
 !! Also return nelect, the number of valence electron per unit cell
 !!
 !! INPUTS
-!!  charge=number of electrons missing (+) or added (-) to system (usually 0)
 !!  dtset <type(dataset_type)>=all input variables in this dataset
+!!   | cellcharge(nimage)=number of electrons missing (+) or added (-) to system (usually 0)
+!!   |  might depend on the image, but only with occopt=2 
 !!   | iscf= if>0, SCF calculation ; if<=0, non SCF calculation (wtk might
 !!   |  not be defined)
 !!   | natom=number of atoms in unit cell
@@ -986,6 +988,7 @@ CONTAINS  !=====================================================================
 !!   | typat(natom)=atom type (integer) for each atom
 !!   | wtk(nkpt)=k point weights (defined if iscf>0 or iscf==-3)
 !!   | ziontypat(ntypat)=ionic charge of each pseudoatom
+!!  nelectjell=number of electrons brought by the jellium
 !!  occopt=option for occupancies
 !!
 !! OUTPUT
@@ -993,7 +996,7 @@ CONTAINS  !=====================================================================
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | nelect=number of valence electrons per unit cell
 !!   |  (from counting valence electrons in psps, and taking into
-!!   |   account the input variable "charge")
+!!   |   account the input variable "cellcharge" for the first image)
 !!
 !! SIDE EFFECTS
 !! Input/Output :
@@ -1009,18 +1012,18 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine dtset_chkneu(dtset, charge, occopt)
+subroutine dtset_chkneu(dtset, nelectjell, occopt)
 
 !Arguments ------------------------------------
 !scalars
  class(dataset_type),intent(inout) :: dtset
  integer,intent(in) :: occopt
- real(dp),intent(in) :: charge
+ real(dp),intent(in) :: nelectjell
 
 !Local variables-------------------------------
 !scalars
  integer :: bantot,iatom,iband,ii,iimage,ikpt,isppol,nocc
- real(dp) :: maxocc,nelect_occ,nelect_spin,occlast,sign_spin,zval
+ real(dp) :: maxocc,nelect_img,nelect_occ,nelect_spin,occlast,sign_spin,zval
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: tmpocc(:)
@@ -1033,7 +1036,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
    zval=zval+dtset%ziontypat(dtset%typat(iatom))
  end do
  if (dtset%positron/=1) then
-   dtset%nelect=zval-charge
+   dtset%nelect=zval-(dtset%cellcharge(1)-nelectjell)
  else
    dtset%nelect=one
  end if
@@ -1086,7 +1089,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
              write(msg,'(a,i5,a,f17.8,a)') 'In occopt = 9 case, ivalence = ', dtset%ivalence, &
 &           ' is too small compared to the number of electrons in the valence bands, nelect-nh_qFD = ', &
 &           dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
-            MSG_ERROR(msg)
+            ABI_ERROR(msg)
           end if
        
        if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=0.0_dp
@@ -1095,7 +1098,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
        occlast= dtset%ne_qFD-maxocc*(nocc-1)
        if ( (nocc+dtset%ivalence*dtset%nsppol) > dtset%nband(1)*dtset%nsppol) then
           write(msg,'(a)') 'Occopt = 9: Not enough band above ivalence. Increase nband or reduce ivalence'
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
        end if
 
        if(nocc > 1)  tmpocc(dtset%ivalence*dtset%nsppol+1:dtset%ivalence*dtset%nsppol+nocc-1)=maxocc
@@ -1152,7 +1155,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
            'This combination is not possible, because of a lack of bands.',ch10,&
            'Action: modify input file',ch10,&
            '(you should likely increase nband, but also check nspden, nspinor, nsppol, and spinmagntarget)'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          do ikpt=1,dtset%nkpt
            ! Fill all bands, except the upper one
@@ -1173,7 +1176,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
        'This combination is not possible.',ch10,&
        'Action: modify input file ... ',ch10,&
        '(check nspden, nspinor, nsppol and spinmagntarget)'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      ! Now print the values (only the first image, since they are all the same)
@@ -1212,9 +1215,9 @@ subroutine dtset_chkneu(dtset, charge, occopt)
      'Initialization of occ variables with occopt: ',occopt,ch10,&
      'There are not enough bands to get charge balance right with nelect:', dtset%nelect, ch10, &
      'Action: modify input file ',ch10,&
-     '(check the pseudopotential charges, the variable charge,',ch10,&
+     '(check the pseudopotential charges, the variable cellcharge, the variable jellslab,',ch10,&
      'and the declared number of bands, nband)'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -1238,39 +1241,44 @@ subroutine dtset_chkneu(dtset, charge, occopt)
 
 !    (4) if dtset%iscf/=-3, dtset%nelect must equal nelect_occ
 !    if discrepancy exceeds tol11, give warning;  tol8, stop with error
-
-     if (abs(nelect_occ-dtset%nelect)>tol11 .and. dtset%iscf/=-3) then
+     if (dtset%positron/=1) then
+       nelect_img=zval-(dtset%cellcharge(iimage)-nelectjell)
+     else
+       nelect_img=one
+     end if
+     if (abs(nelect_occ-nelect_img)>tol11 .and. dtset%iscf/=-3) then
 
 !      There is a discrepancy
        write(msg, &
-       '(a,a,e16.8,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
-       ' chkneu: nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
-       '         and input value of charge=',charge,',',ch10,&
+       '(a,a,i4,a,e16.8,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
+       ' chkneu: image=',iimage,', nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
+       '         and input value of cellcharge=',dtset%cellcharge(iimage),',',ch10,&
        '   nelec_occ is computed from occ and wtk, iimage=',iimage,ch10,&
        '   zval is nominal charge of all nuclei, computed from zion (read in psp),',ch10,&
-       '   charge is an input variable (usually 0).'
+       '   cellcharge is an input variable (usually 0).'
        call wrtout(std_out,msg)
 
        if (abs(nelect_occ-dtset%nelect)>tol8) then
 !        The discrepancy is severe
          write(msg,'(a,a,e9.2,a,a)')ch10,&
-         'These must obey zval-nelect_occ=charge to better than ',tol8,ch10,&
+         'These must obey zval-nelect_occ=cellcharge-nelectjell to better than ',tol8,ch10,&
          ' This is not the case. '
        else
 !        The discrepancy is not so severe
-         write(msg, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than: ',tol11
+         write(msg, '(2a,e9.2)' )ch10,&
+&         'These should obey zval-nelect_occ=cellcharge-nelectjell to better than: ',tol11
        end if
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
 
        write(msg, '(6a)' ) &
-       'Action: check input file for occ,wtk, and charge.',ch10,&
+       'Action: check input file for occ,wtk, and cellcharge.',ch10,&
        'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
        'but IS automatically normalized otherwise.',ch10
        call wrtout(std_out,msg)
 
        ! If the discrepancy is severe, stop
-       if (abs(nelect_occ-dtset%nelect)>tol8)then
-         MSG_ERROR(msg)
+       if (abs(nelect_occ-nelect_img)>tol8)then
+         ABI_ERROR(msg)
        end if
 
      end if
@@ -1382,6 +1390,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 !dtout%dmft_x2my2d        = dtin%dmft_x2my2d
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
+ dtout%dmft_wanorthnorm   = dtin%dmft_wanorthnorm
  dtout%dmftbandi          = dtin%dmftbandi
  dtout%dmftbandf          = dtin%dmftbandf
  dtout%dmftcheck          = dtin%dmftcheck
@@ -1941,7 +1950,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%bxctmindg          = dtin%bxctmindg
  dtout%cd_halfway_freq    = dtin%cd_halfway_freq
  dtout%cd_max_freq        = dtin%cd_max_freq
- dtout%charge             = dtin%charge
  dtout%cpus               = dtin%cpus
  dtout%ddamp              = dtin%ddamp
  dtout%diecut             = dtin%diecut
@@ -2095,9 +2103,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%acell_orig, dtout%acell_orig)
  call alloc_copy(dtin%amu_orig, dtout%amu_orig)
  call alloc_copy(dtin%atvshift, dtout%atvshift)
- call alloc_copy(dtin%chrgat, dtout%chrgat)
  call alloc_copy(dtin%cd_imfrqs, dtout%cd_imfrqs)
+ call alloc_copy(dtin%cellcharge, dtout%cellcharge)
  call alloc_copy(dtin%chempot, dtout%chempot)
+ call alloc_copy(dtin%chrgat, dtout%chrgat)
  call alloc_copy(dtin%corecs, dtout%corecs)
  call alloc_copy(dtin%densty, dtout%densty)
  call alloc_copy(dtin%dmatpawu, dtout%dmatpawu)
@@ -2213,6 +2222,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%amu_orig)
  ABI_SFREE(dtset%atvshift)
  ABI_SFREE(dtset%cd_imfrqs)
+ ABI_SFREE(dtset%cellcharge)
  ABI_SFREE(dtset%chrgat)
  ABI_SFREE(dtset%chempot)
  ABI_SFREE(dtset%corecs)
@@ -2359,7 +2369,7 @@ subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,n
         'The component number ',idtset,' of the input variable ',trim(getname),',',' equal to ',getvalue,',',ch10,&
         'does not correspond to an existing index.',ch10,&
         'Action: correct ',trim(getname),' or jdtset in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
    write(msg, '(3a,i3,2a)' )&
@@ -2986,7 +2996,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        write(msg, '(a,a,a)' )&
          'accuracy >6 is forbidden !',ch10,&
          'Action: check your input data file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      if (ecutmax(3)>zero) dtsets(idtset)%ecut=ecutmax(3)
@@ -3102,7 +3112,7 @@ subroutine chkvars(string)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: protocol1=1
- character(len=100) :: list_logicals,list_strings
+ character(len=100) :: list_logicals,list_strings, list_vars_img
  character(len=10000) :: list_vars
 
 !************************************************************************
@@ -3128,7 +3138,7 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim'
+ list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chkdilatmx chkexit chkprim'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
@@ -3144,9 +3154,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_entropy dmft_iter dmft_kspectralfunc'
  list_vars=trim(list_vars)//' dmft_mxsf dmft_nlambda dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
-!list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
- list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g'
- list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage'
+ list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
+ list_vars=trim(list_vars)//' dmft_wanorthnorm dosdeltae dtion dynamics dynimage'
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
@@ -3215,7 +3224,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
  list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot'
- list_vars=trim(list_vars)//' irdvdw ival' ! CP added ival for occopt 9 case
+ list_vars=trim(list_vars)//' irdvdw ivalence' ! CP added ival for occopt 9 case
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'
 !K
@@ -3272,7 +3281,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar'
  list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
- list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
+ list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
  list_vars=trim(list_vars)//' pseudos ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
@@ -3356,6 +3365,10 @@ subroutine chkvars(string)
 !Z
  list_vars=trim(list_vars)//' zcut zeemanfield znucl'
 
+!List of input variables for which the image index can be added
+ list_vars_img=' acell amu angdeg cellcharge dmatpawu jpawu mixalch occ rprim scalecart'
+ list_vars_img=trim(list_vars_img)//' vel vel_cell xcart xred'
+
 !Logical input variables
  list_logicals=' SpinPolarized'
 
@@ -3375,10 +3388,11 @@ subroutine chkvars(string)
 
  ! Transform to upper case
  call inupper(list_vars)
+ call inupper(list_vars_img)
  call inupper(list_logicals)
  call inupper(list_strings)
 
- call chkvars_in_string(protocol1, list_vars, list_logicals, list_strings, string)
+ call chkvars_in_string(protocol1, list_vars, list_vars_img, list_logicals, list_strings, string)
 
 end subroutine chkvars
 !!***

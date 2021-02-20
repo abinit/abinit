@@ -19,7 +19,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,7 +67,7 @@ contains
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
     ABI_UNUSED_A(energy_table)
-    MSG_ERROR("run_one_step not implemented for this mover")
+    ABI_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step
 
 

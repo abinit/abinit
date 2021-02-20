@@ -7,7 +7,7 @@
 !! and for each angular momentum.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MT, DRH)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -242,10 +242,10 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
    write(msg,'(a,i0,a,a)')&
    'Called with mpsang > 4, =',mpsang,ch10,&
    'This subroutine will not accept lmax+1 > 4.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (idir<-7.or.idir>4) then
-   MSG_BUG('Called with idir<-6 or idir>4 !')
+   ABI_BUG('Called with idir<-6 or idir>4 !')
  end if
  if (useylm==0) then
    iffnl=1+ider
@@ -265,7 +265,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  if (iffnl/=dimffnl) then
    write(msg,'(2(a,i1),a,i2)') 'Incompatibility between ider, idir and dimffnl : ider = ',ider,&
                                ' idir = ',idir,' dimffnl = ',dimffnl
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (useylm==1) then
    ABI_CHECK(size(ylm,1)==npw,'BUG: wrong ylm size (1)')

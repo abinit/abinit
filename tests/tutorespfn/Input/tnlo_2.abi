@@ -3,64 +3,63 @@
 
 ndtset 5
 
-#DATASET1 : scf calculation: GS WF in the BZ
+#DATASET1 : scf calculation: GS WF in the IBZ
 #********************************************
-   prtden1    1
-    prtwf1    1
-   kptopt1    1
-   toldfe1    1.0d-12
+   prtden1    1        # save density on disk, will be used in other datasets
+    prtwf1    1        # save WF on disk, will be used in other datasets
+   kptopt1    1        # use Irreducible Brillouin Zone (all symmetry taken into account)
+   toldfe1    1.0d-12  # SCF convergence criteria (could be tolwfr or tolvrs)
 
-#DATASET2 : non scf calculation: GS WF in the whole BZ
+#DATASET2 : non scf calculation: GS WF in half BZ
 #*****************************************************
-   getden2    1
-   kptopt2    2
-     iscf2   -2
-   getwfk2    1
-   tolwfr2    1.0d-22
-    prtwf2    1
+   getden2    1        # use density from dataset 1
+   kptopt2    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+   getwfk2    1        # use GS WF from dataset 1 (as input)
+     iscf2   -2        # non-self-consistent calculation
+   tolwfr2    1.0d-22  # convergence criteria on WF, need high precision for response
+    prtwf2    1        # save WF on disk, will be used in other datasets
 
-#DATASET3 : ddk on the MP grid of k-points
-#*****************************************
-   getwfk3    2
-    rfdir3    1 1 1
-   rfelfd3    2
-   tolwfr3    1.0d-22
-    prtwf3    1
-   kptopt3    2
+#DATASET3 : derivative of WF with respect to k points (d/dk)
+#**********************************************************
+   getwfk3    2        # use GS WF from dataset 2
+   kptopt3    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+   rfelfd3    2        # compute 1st-order WF derivatives (d/dk)
+    rfdir3    1 1 1    # compute all directions
+   tolwfr3    1.0d-22  # convergence criteria on 1st-order WF
+    prtwf3    1        # save 1st-order WF on disk, will be used in other datasets
 
-#DATASET4 : ddE on the MP grid of k-points
-# phonons, electric fields, and strains are all done
-#*****************************************
-   prtden4    1
-   getwfk4    2
-   getddk4    3
-    rfdir4    1 1 1
-   rfphon4    1
-  rfatpol4    1 2
-   tolvrs4    1.0d-12
-    prtwf4    1
-   rfelfd4    3
-   rfstrs4    3
-   kptopt4    2
-  prepanl4    1
+#DATASET4 : response functions (2nd derivatives of E)
+#           and corresponding 1st order WF derivatives
+#           phonons, electric fields, and strains are all done
+#**************************************************************
+   getwfk4    2        # use GS WF from dataset 2
+   kptopt4    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+   getddk4    3        # use ddk WF from dataset 3 (needed for electric field)
+   rfphon4    1        # compute 1st-order WF derivatives with respect to atomic displacements...
+  rfatpol4    1 2      # ...for all atoms (so here only 1 and 2)
+    rfdir4    1 1 1    # compute all directions
+   rfelfd4    3        # compute 1st-order WF derivatives with respect to electric field
+   rfstrs4    3        # compute 1st-order WF derivatives with respect to strains
+   tolvrs4    1.0d-12  # SCF convergence criteria (could be tolwfr)
+  prepanl4    1        # make sure that response functions are correctly prepared for a non-linear computation
+    prtwf4    1        # save 1st-order WF on disk, will be used in other datasets
+   prtden4    1        # save 1st-order density on disk, will be used in other datasets
 
-#DATASET5 : 3DTE calculation
-#***************************
-   getden5    1
-  get1den5    4
-   getwfk5    2
-   get1wf5    4
-    nband5    4
-   kptopt5    2
-optdriver5    5
-  d3e_pert1_elfd5    1
-  d3e_pert1_phon5    1
- d3e_pert1_atpol5    1 2
-   d3e_pert1_dir5    1 1 1
-  d3e_pert2_elfd5    1
-   d3e_pert2_dir5    1 1 1
-  d3e_pert3_elfd5    1
-   d3e_pert3_dir5    1 1 1
+#DATASET5 : 3rd derivatives of E
+#*********************************
+   getwfk5           2     # use GS WF from dataset 2
+  get1den5           4     # use 1st-order densities from dataset 4
+   get1wf5           4     # use 1st-order WFs from dataset 4
+   kptopt5           2     # use Half Brillouin Zone (only time-reversal symmetry taken into account)
+optdriver5           5     # compute 3rd order derivatives of the energy
+  d3e_pert1_elfd5    1     # activate electric field for 1st perturbation...
+  d3e_pert1_phon5    1     # ...and also atomic displacements...
+ d3e_pert1_atpol5    1 2   # ...for all atoms (so here only 1 and 2)...
+   d3e_pert1_dir5    1 1 1 # ...for all directions (for both atomic displacements and electric fields)
+  d3e_pert2_elfd5    1     # activate electric field for 2nd perturbation...
+   d3e_pert2_dir5    1 1 1 # ...for all directions
+  d3e_pert3_elfd5    1     # activate electric field for 3rd perturbation...
+   d3e_pert3_dir5    1 1 1 # ...for all directions
 
 #Definition of the unit cell
 # these cell parameters were derived from a relaxation run done with the
@@ -74,7 +73,7 @@ rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
            7.0710678119E-01  7.0710678119E-01  0.0000000000E+00
 
 #Definition of the atom types and pseudopotentials
- ntypat 2 # two types of atoms 
+ ntypat 2 # two types of atoms
  znucl 15 13 # the atom types are Phosphorous and Aluminum
 
 # the following norm-conserving pseudopotentials are stored in the abinit distribution, but are freely
@@ -86,7 +85,7 @@ rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
 #Definition of the atoms
  natom 2 # two atoms in the cell
  typat 1 2 # type 1 is Phosphorous, type 2 is Aluminum (order defined by znucl above and pseudos list)
- nband 4 # nband is restricted here to the number of filled bands only, no empty bands. 
+ nband 4 # nband is restricted here to the number of filled bands only, no empty bands.
  nbdbuf 0
 
 # atomic positions in units of cell vectors
@@ -110,28 +109,31 @@ shiftk 0.5 0.5 0.5
        0.0 0.0 0.5
 
 # scf parameters
-nstep 8  # limit number of steps for the tutorial, in general this should be set to its 
+nstep 8  # limit number of steps for the tutorial, in general this should be set to its
          # default (30) or higher
 
-# suppress printing of density, wavefunctions, etc except what is 
+# suppress printing of density, wavefunctions, etc except what is
 # explicitly requested above in the ndtset section
 prtwf 0
 prtden 0
 prteig 0
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi
 #%% [files]
-#%% files_to_test = 
-#%%   tnlo_2.abo, tolnlines= 330, tolabs=  2.000e-04, tolrel=  9.000e-02
+#%% files_to_test =
+#%%   tnlo_2.abo, tolnlines= 332, tolabs=  2.000e-04, tolrel=  9.000e-02
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors =  J. Zwanziger, M. Veithen
+#%% authors =  J. Zwanziger, L. Baguet, M. Veithen
 #%% keywords = NC, DFPT, NONLINEAR
-#%% description = 
+#%% description =
 #%%   Linear and nonlinear response calculation for AlP
 #%%   Perturbations: electric fields & atomic displacements
 #%%<END TEST_INFO>

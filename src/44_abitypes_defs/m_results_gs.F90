@@ -8,7 +8,7 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2020 ABINIT group (MT)
+!! Copyright (C) 2011-2021 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -288,32 +288,32 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  call energies_init(results_gs%energies)
 
  results_gs%strten=zero
- ABI_ALLOCATE(results_gs%fcart,(3,natom))
+ ABI_MALLOC(results_gs%fcart,(3,natom))
  results_gs%fcart=zero
- ABI_ALLOCATE(results_gs%fred,(3,natom))
+ ABI_MALLOC(results_gs%fred,(3,natom))
  results_gs%fred =zero
- ABI_ALLOCATE(results_gs%gaps,(3,nsppol))
+ ABI_MALLOC(results_gs%gaps,(3,nsppol))
  results_gs%gaps =zero
- ABI_ALLOCATE(results_gs%intgres,(nspden,natom))
+ ABI_MALLOC(results_gs%intgres,(nspden,natom))
  results_gs%intgres=zero
 
  if (full_init) then
    results_gs%pel=zero
    results_gs%pion=zero
 
-   ABI_ALLOCATE(results_gs%grchempottn,(3,natom))
+   ABI_MALLOC(results_gs%grchempottn,(3,natom))
    results_gs%grchempottn=zero
-   ABI_ALLOCATE(results_gs%grcondft,(3,natom))
+   ABI_MALLOC(results_gs%grcondft,(3,natom))
    results_gs%grcondft=zero
-   ABI_ALLOCATE(results_gs%gresid,(3,natom))
+   ABI_MALLOC(results_gs%gresid,(3,natom))
    results_gs%gresid=zero
-   ABI_ALLOCATE(results_gs%grewtn,(3,natom))
+   ABI_MALLOC(results_gs%grewtn,(3,natom))
    results_gs%grewtn=zero
-   ABI_ALLOCATE(results_gs%grvdw,(3,natom))
+   ABI_MALLOC(results_gs%grvdw,(3,natom))
    results_gs%grvdw=zero
-   ABI_ALLOCATE(results_gs%grxc,(3,natom))
+   ABI_MALLOC(results_gs%grxc,(3,natom))
    results_gs%grxc  =zero
-   ABI_ALLOCATE(results_gs%synlgr,(3,natom))
+   ABI_MALLOC(results_gs%synlgr,(3,natom))
    results_gs%synlgr=zero
  end if
 
@@ -393,31 +393,31 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        call energies_init(results_gs(jj,ii)%energies)
 
        results_gs(jj,ii)%strten=zero
-       ABI_ALLOCATE(results_gs(jj,ii)%fcart,(3,natom))
+       ABI_MALLOC(results_gs(jj,ii)%fcart,(3,natom))
        results_gs(jj,ii)%fcart=zero
-       ABI_ALLOCATE(results_gs(jj,ii)%fred,(3,natom))
+       ABI_MALLOC(results_gs(jj,ii)%fred,(3,natom))
        results_gs(jj,ii)%fred =zero
-       ABI_ALLOCATE(results_gs(jj,ii)%gaps,(3,nsppol))
+       ABI_MALLOC(results_gs(jj,ii)%gaps,(3,nsppol))
        results_gs(jj,ii)%gaps =zero
-       ABI_ALLOCATE(results_gs(jj,ii)%intgres,(nspden,natom))
+       ABI_MALLOC(results_gs(jj,ii)%intgres,(nspden,natom))
        results_gs(jj,ii)%intgres =zero
 
        if (full_init) then
          results_gs(jj,ii)%pel=zero
          results_gs(jj,ii)%pion=zero
-         ABI_ALLOCATE(results_gs(jj,ii)%grchempottn,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%grchempottn,(3,natom))
          results_gs(jj,ii)%grchempottn=zero
-         ABI_ALLOCATE(results_gs(jj,ii)%grcondft,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%grcondft,(3,natom))
          results_gs(jj,ii)%grcondft=zero
-         ABI_ALLOCATE(results_gs(jj,ii)%gresid,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%gresid,(3,natom))
          results_gs(jj,ii)%gresid=zero
-         ABI_ALLOCATE(results_gs(jj,ii)%grewtn,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%grewtn,(3,natom))
          results_gs(jj,ii)%grewtn=zero
-         ABI_ALLOCATE(results_gs(jj,ii)%grxc,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%grxc,(3,natom))
          results_gs(jj,ii)%grxc  =zero
-         ABI_ALLOCATE(results_gs(jj,ii)%grvdw,(3,results_gs(jj,ii)%ngrvdw))
+         ABI_MALLOC(results_gs(jj,ii)%grvdw,(3,results_gs(jj,ii)%ngrvdw))
          results_gs(jj,ii)%grvdw  =zero
-         ABI_ALLOCATE(results_gs(jj,ii)%synlgr,(3,natom))
+         ABI_MALLOC(results_gs(jj,ii)%synlgr,(3,natom))
          results_gs(jj,ii)%synlgr=zero
        end if
 
@@ -605,45 +605,45 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
    ABI_SFREE(results_gs_out%synlgr)
 
    if (allocated(results_gs_in%fcart))   then
-     ABI_ALLOCATE(results_gs_out%fcart,(3,natom_in))
+     ABI_MALLOC(results_gs_out%fcart,(3,natom_in))
    end if
    if (allocated(results_gs_in%fred))    then
-     ABI_ALLOCATE(results_gs_out%fred,(3,natom_in))
+     ABI_MALLOC(results_gs_out%fred,(3,natom_in))
    end if
    if (allocated(results_gs_in%gresid))  then
-     ABI_ALLOCATE(results_gs_out%gresid,(3,natom_in))
+     ABI_MALLOC(results_gs_out%gresid,(3,natom_in))
    end if
    if (allocated(results_gs_in%grchempottn))  then
-     ABI_ALLOCATE(results_gs_out%grchempottn,(3,natom_in))
+     ABI_MALLOC(results_gs_out%grchempottn,(3,natom_in))
    end if
    if (allocated(results_gs_in%grcondft))  then
-     ABI_ALLOCATE(results_gs_out%grcondft,(3,natom_in))
+     ABI_MALLOC(results_gs_out%grcondft,(3,natom_in))
    end if
    if (allocated(results_gs_in%grewtn))  then
-     ABI_ALLOCATE(results_gs_out%grewtn,(3,natom_in))
+     ABI_MALLOC(results_gs_out%grewtn,(3,natom_in))
    end if
    if (allocated(results_gs_in%grvdw))  then
-     ABI_ALLOCATE(results_gs_out%grvdw,(3,ngrvdw_in))
+     ABI_MALLOC(results_gs_out%grvdw,(3,ngrvdw_in))
    end if
    if (allocated(results_gs_in%grxc))    then
-     ABI_ALLOCATE(results_gs_out%grxc,(3,natom_in))
+     ABI_MALLOC(results_gs_out%grxc,(3,natom_in))
    end if
    if (allocated(results_gs_in%synlgr))  then
-     ABI_ALLOCATE(results_gs_out%synlgr,(3,natom_in))
+     ABI_MALLOC(results_gs_out%synlgr,(3,natom_in))
    end if
  end if
 
  if (nsppol_in>nsppol_out) then
    ABI_SFREE(results_gs_out%gaps)
    if (allocated(results_gs_in%gaps))    then
-     ABI_ALLOCATE(results_gs_out%gaps,(3,nsppol_in))
+     ABI_MALLOC(results_gs_out%gaps,(3,nsppol_in))
    end if
  endif
 
  if (nspden_in>nspden_out .or. natom_in>natom_out) then
    ABI_SFREE(results_gs_out%intgres)
    if (allocated(results_gs_in%intgres))    then
-     ABI_ALLOCATE(results_gs_out%intgres,(max(nspden_in,nspden_out),max(natom_in,natom_out)))
+     ABI_MALLOC(results_gs_out%intgres,(max(nspden_in,nspden_out),max(natom_in,natom_out)))
    end if
  endif
 
@@ -786,7 +786,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
  call energies_ncwrite(res%energies, ncid)
 
 #else
- MSG_ERROR("netcdf support is not activated.")
+ ABI_ERROR("netcdf support is not activated.")
 #endif
 
 contains
@@ -811,9 +811,10 @@ end function results_gs_ncwrite
 !! INPUTS
 !!  results <type(results_gs_type)>=miscellaneous information about the system after ground state computation
 !!  unit= unit of output file
-!!  cryst: Crystal structure
-!!  with_conv: True if the convergence dictionary with residuals and diffs should be written.
+!!  [cryst]: optional Crystal structure
 !!  [info]: optional info for the final document
+!!  [occopt]: optional Input variable occopt
+!!  [with_conv]: optional True if the convergence dictionary with residuals and diffs should be written.
 !!
 !! PARENTS
 !!
@@ -822,14 +823,14 @@ end function results_gs_ncwrite
 !! SOURCE
 ! CP modified argument list
 !subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
-subroutine results_gs_yaml_write(results, unit, cryst, occopt, with_conv, info)
+subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
 ! End CP modified
 
  class(results_gs_type),intent(in) :: results
  integer,intent(in) :: unit
- type(crystal_t),intent(in) :: cryst
- integer, intent(in) :: occopt ! CP added for special output in the case occopt 9
- logical,intent(in) :: with_conv
+ type(crystal_t),intent(in),optional :: cryst
+ integer, intent(in),optional :: occopt ! CP added for special output in the case occopt 9
+ logical,intent(in),optional :: with_conv
  character(len=*),intent(in),optional :: info
 
 !Local variables-------------------------------
@@ -851,39 +852,48 @@ subroutine results_gs_yaml_write(results, unit, cryst, occopt, with_conv, info)
  end if
 
  ! Write lattice parameters
- !call ydoc%add_real2d('rprimd', cryst%rprimd, real_fmt="(f11.7)")
- call ydoc%add_real2d('lattice_vectors', cryst%rprimd, real_fmt="(f11.7)")
- abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
- call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
- call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)", comment="degrees, (23, 13, 12)")
- call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
+ if (present(cryst)) then
+  call ydoc%add_real2d('lattice_vectors', cryst%rprimd, real_fmt="(f11.7)")
+  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+  call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
+  call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)", comment="degrees, (23, 13, 12)")
+  call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
+ endif
 
  ! Write convergence degree.
  ! It seems there's a portability problem for residm computed with nstep = 0 and iscf -3
  ! because one may get very small value e.g. 7.91-323. residm with nstep > 0 are OK though
  ! so print zero if residm < tol30 or allow the caller not to write the convergence dict.
- if (with_conv) then
-   call ydoc%add_reals( &
-     "deltae, res2, residm, diffor", &
-     [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
-     real_fmt="(es10.3)", dict_key="convergence")
+ if(present(with_conv))then
+   if (with_conv) then
+     call ydoc%add_reals( &
+      "deltae, res2, residm, diffor", &
+       [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
+       real_fmt="(es10.3)", dict_key="convergence")
+   else
+     call ydoc%set_keys_to_string("deltae, res2, residm, diffor", "null", dict_key="convergence")
+   end if
  else
    call ydoc%set_keys_to_string("deltae, res2, residm, diffor", "null", dict_key="convergence")
- end if
+ endif
 
  ! Write energies.
  ! CP modified
  !call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
  ! CP add modificatopm for occopt 9: fermih
- if (occopt == 9) then
-    call ydoc%add_reals("etotal, entropy, fermie, fermih", [results%etotal, results%entropy, results%fermie, results%fermih])
+ if (present(occopt))then
+   if (occopt == 9) then
+     call ydoc%add_reals("etotal, entropy, fermie, fermih", [results%etotal, results%entropy, results%fermie, results%fermih])
+   else
+     call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
+   endif
  else
-    call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
- end if
+   call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
+ endif
  ! End CP modified
+
  ! Cartesian stress tensor and forces.
  call stress_voigt_to_mat(results%strten, strten)
-
  if (strten(1,1) /= MAGIC_UNDEF) then
    call ydoc%add_real2d('cartesian_stress_tensor', strten, comment="hartree/bohr^3")
    call ydoc%add_real('pressure_GPa', - get_trace(strten) * HaBohr3_GPa / three, real_fmt="(es12.4)")
@@ -891,22 +901,17 @@ subroutine results_gs_yaml_write(results, unit, cryst, occopt, with_conv, info)
    call ydoc%set_keys_to_string("cartesian_stress_tensor, pressure_GPa", "null")
  end if
 
- species = [(cryst%symbol_iatom(ii), ii=1,cryst%natom)]
-
- call ydoc%add_real2d('xred', cryst%xred, slist=species, real_fmt="(es12.4)")
- !call ydoc%add_paired_real2d('xred_xcart_specie', &
- !  cryst%xred, cryst%xcart, slist=species, real_fmt="(es12.4)")
+ if(present(cryst))then
+   species = [(cryst%symbol_iatom(ii), ii=1,cryst%natom)]
+   call ydoc%add_real2d('xred', cryst%xred, slist=species, real_fmt="(es12.4)")
+ endif
 
  if (results%fcart(1,1) /= MAGIC_UNDEF) then
-   !call ydoc%add_paired_real2d('cartesian_forces_and_xred', &
-   !  results%fcart, cryst%xred, chars=species, real_fmt="(es12.4)")
-
    call ydoc%add_real2d('cartesian_forces', results%fcart, comment="hartree/bohr")
    fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
    ! Write force statistics
    call ydoc%add_reals('min, max, mean', &
      values=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom], dict_key="force_length_stats")
-
  else
    ! Set entries to null (python None) to facilitate life to the parsing routines!
    call ydoc%add_string('cartesian_forces', "null")

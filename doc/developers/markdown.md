@@ -337,6 +337,7 @@ Examples:
 | `[[~abinit/tests/tutorial/Refs/tbase1_1.abo]]` |  [[~abinit/tests/tutorial/Refs/tbase1_1.abo]]
 | `[[~abinit/tests/Psps_for_tests/6c_lda.paw]]` | [[~abinit/tests/Psps_for_tests/6c_lda.paw]]
 | `[[tests/Psps_for_tests/6c_lda.paw]]` | [[tests/Psps_for_tests/6c_lda.paw]]
+| `[[:digit:]]' ` | [[:digit:]]
 
 The input variables for anaddb, optic and aim will be recognized if they are used with
 the namespaces `anaddb`, `optic` and `aim`.

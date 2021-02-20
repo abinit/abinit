@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -122,7 +122,7 @@ program abinit
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
- use m_driver,       only : driver
+ use m_driver,        only : driver
 
 #ifdef HAVE_GPU_CUDA
  use m_gpu_toolbox
@@ -245,7 +245,7 @@ program abinit
    open(unit=ab_out,file=filnam(2),form='formatted',status='new', action="write", iomsg=msg, iostat=ios)
 #endif
    ABI_CHECK(ios == 0, msg)
-   rewind (unit=ab_out)
+!  rewind (unit=ab_out)
    codename='ABINIT'//repeat(' ',18)
    call herald(codename,abinit_version,ab_out)
    call herald(codename,abinit_version,std_out)

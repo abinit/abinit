@@ -6,7 +6,7 @@
 !!  Utility for profiling the FFT libraries supported by ABINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2020 ABINIT group (MG)
+!! Copyright (C) 2004-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -319,7 +319,7 @@ program fftprof
    call fft_test_init(Ftest(it),fft_setups(:,it),kpoint,ecut,boxcutmin2,rprimd,nsym,symrel,MPI_enreg)
     ! Ftest%results is allocated using nfftot and the consistency btw libs is tested assuming an equal number of FFT-points.
    if ( ANY(Ftest(it)%ngfft(1:3) /= Ftest(1)%ngfft(1:3)) ) then
-     MSG_ERROR("Consistency check assumes equal FFT meshes. Cannot continue")
+     ABI_ERROR("Consistency check assumes equal FFT meshes. Cannot continue")
    end if
    if (it == 1) then
      call fft_test_print(Ftest(it)) !,header)
