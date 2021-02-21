@@ -8397,6 +8397,27 @@ used in the RF calculations.
 ),
 
 Variable(
+    abivarname="ivalence",
+    varset="gstate",
+    vartype="integer",
+    dimensions="scalar",
+    topics=['BandOcc_useful','DeltaSCF_expert'],
+    defaultval=0,
+    mnemonics="Index of the highest VALENCE band",
+    characteristics=['[[INPUT_ONLY]]'],
+    added_in_version="v9",
+    text=r"""
+Only used if [[occopt] = 9.
+
+When [[occopt]]==9, the lowest [[ivalence]] bands are considered to be 
+valence bands and [[nqfd]] holes are constrained to exist in them. 
+Accordingly, higher energy bands (with index >= [[ivalence]] + 1) are 
+considered to be conduction bands, and [[nqfd]] electrons are constrained there. 
+See [[cite:Paillard2019]] for more details about the general method implemented.
+""",
+),
+
+Variable(
     abivarname="ixc",
     varset="basic",
     vartype="integer",
@@ -11901,6 +11922,26 @@ For further information about the *files file*, consult the [[help:abinit#files-
 ),
 
 Variable(
+    abivarname="nqfd",
+    varset="gstate",
+    vartype="real",
+    dimensions="scalar",
+    defaultval=0.0,
+    topics=['BandOcc_useful','DeltaSCF_expert'],
+    mnemonics="Number of Quasi Fermi-Dirac excited carriers",
+    characteristics=['[[INPUT_ONLY]]'],
+    added_in_version="v9",
+    text=r"""
+Only used if [[occopt] = 9.
+
+Controls the numbers of electrons per cell constrained in conduction bands with index 
+strictly greater than [[ivalence]], and the number of holes per cell constrained in 
+valence bands with index between 1 and [[ivalence]].
+Internal variables ne_qFD (number of electrons) and nh_qFD (number of holes) are presently initialized to [[nqfd]], which is NOT INTERNAL.
+""",
+),
+
+Variable(
     abivarname="nqptdm",
     varset="gw",
     vartype="integer",
@@ -12742,8 +12783,8 @@ Uniform smearing (the delta function is replaced by a constant function of
 value one over ]-1/2,1/2[ (with one-half value at the boundaries). Used for
 testing purposes only.
 
-  * [[occopt]] = 9:
-(TO BE DOCUMENTED : Separate electron and hole thermalized carriers, with fixed number of transferred electrons, also connected to input variable nqfd, number of electrons per unit cell, and ival, See [[cite:Paillard2019]]).
+    * [[occopt]] = 9:
+Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]] holes are forced in bands 1 to [[ivalence]] and [[nqfd]] electrons are forced in bands with index > [[ivalence]]. See details in [[cite:Paillard2019]]. At present, the number of holes and electrons should be the same. Note that occopt = 9 cannot be used with fixed magnetization calculation.
 
 !!! note
 

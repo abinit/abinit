@@ -757,6 +757,7 @@ type, public :: dataset_type
  real(dp) :: ne_qFD = zero ! CP added
  real(dp) :: nh_qFD = zero  ! CP added
  real(dp) :: noseinert
+ real(dp) :: nqfd = zero 
  real(dp) :: omegasimax = 50/Ha_eV
  real(dp) :: omegasrdmax = 1.0_dp/Ha_eV  ! = 1eV
  real(dp) :: pawecutdg
@@ -2002,6 +2003,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nh_qFD             = dtin%nh_qFD ! CP added for occopt == 9 purposes
  dtout%nnos               = dtin%nnos
  dtout%noseinert          = dtin%noseinert
+ dtout%nqfd               = dtin%nqfd
  dtout%omegasimax         = dtin%omegasimax
  dtout%omegasrdmax        = dtin%omegasrdmax
  dtout%pawecutdg          = dtin%pawecutdg
@@ -3264,7 +3266,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
- list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqFD nscforder nshiftk nshiftq nqshft' ! CP added nqFD for occopt 9
+ list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft' ! CP added nqfd for occopt 9
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nwfshist nzchempot'
 !O
