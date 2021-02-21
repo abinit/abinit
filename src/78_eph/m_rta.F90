@@ -1117,8 +1117,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
 
 !Local variables ------------------------------
  integer :: nsppol, nkpt, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta
- real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk
- real(dp) :: cpu, wall, gflops
+ real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk, cpu, wall, gflops
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
 
 !************************************************************************
@@ -1833,9 +1832,9 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
                pre_newlines=1, newlines=1)
 
    if (ibte%assume_gap) then
-     write(msg, "(a5, a9, *(1x, a16))")" ITER", "max_adiff", "sum(mob_eh, dim=3)", "sum(fsum_eh)"
+     write(msg, "(a5,1x,a9,*(1x, a16))")" ITER", "max_adiff", "sum(mob_eh, dim=3)", "sum(fsum_eh)"
    else
-     write(msg, "(a5, a9, *(1x, a16))")" ITER", "max_adiff", "sum(cond_eh, dim=3)", "sum(fsum_eh)"
+     write(msg, "(a5,1x,a9,*(1x, a16))")" ITER", "max_adiff", "sum(cond_eh, dim=3)", "sum(fsum_eh)"
    end if
    call wrtout(std_out, msg)
 
@@ -1845,10 +1844,12 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
    if (ibte%assume_gap) then
      mat33 = sum(mob_eh, dim=3)
+     write(msg, "(i5,1x,es9.1, *(1x, f16.2))")0, zero, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
    else
      mat33 = sum(sigma_eh, dim=3)
+     write(msg, "(i5,1x,es9.1, *(1x, es16.2))")0, zero, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
    end if
-   write(msg, "(i5, es9.1, *(1x, f16.2))")0, zero, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
+
    call wrtout(std_out, msg)
 
    fkn_in = fkn_serta
@@ -1918,7 +1919,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      end do ! spin
 
      call xmpi_sum(fkn_out, comm, ierr)
-     max_adiff = maxval(abs(abs(fkn_out - fkn_in)))
+     max_adiff = maxval(abs(fkn_out - fkn_in))
+     !stats = stats_eval(abs(fkn_out - fkn_in))
 
      ! Compute transport tensors from fkn_out
      ! then print mobility for semiconductors, conductivity for metals.
@@ -1926,20 +1928,21 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
      if (ibte%assume_gap) then
        mat33 = sum(mob_eh, dim=3)
+       write(msg, "(i5,1x,es9.1,*(1x, f16.2))")iter, max_adiff, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
      else
        mat33 = sum(sigma_eh, dim=3)
+       write(msg, "(i5,1x,es9.1,*(1x, es16.2))")iter, max_adiff, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
      end if
-     write(msg, "(i5, es9.1, *(1x, f16.2))")iter, max_adiff, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
      call wrtout(std_out, msg)
 
      ! Check for convergence by testing F_k^i - F_k^{i-1} so very strict convergence criterion.
      converged = max_adiff < dtset%ibte_abs_tol
      if (converged) then
        call wrtout(std_out, sjoin(" IBTE solver converged after:", itoa(iter), &
-                   "iterations within ibte_abs_tol::", ftoa(dtset%ibte_abs_tol)), pre_newlines=1)
+                   "iterations within ibte_abs_tol:", ftoa(dtset%ibte_abs_tol)), pre_newlines=1)
        exit iter_loop
      else
-       ! Linear mixing of fkn_in and fkn_out
+       ! Linear mixing of fkn_in and fkn_out.
        fkn_in = (one - dtset%ibte_alpha_mix) * fkn_in + dtset%ibte_alpha_mix * fkn_out
        fkn_out = zero
      end if
@@ -1947,9 +1950,9 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    end do iter_loop
 
    if (.not. converged) then
-     call wrtout(std_out, sjoin("WARNING: Not converged after:", itoa(dtset%ibte_niter), "max iterations"), &
-                 pre_newlines=1, newlines=1)
-     !ABI_WARNING("Not converged")
+     msg = sjoin("Not converged after:", itoa(dtset%ibte_niter), "max iterations")
+     call wrtout(ab_out, msg, pre_newlines=1, newlines=1)
+     ABI_WARNING(msg)
    end if
  end do ! itemp
 

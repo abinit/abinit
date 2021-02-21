@@ -205,16 +205,6 @@
 
 #endif
 
-
-/* FIXME
-#define _ABI_ALLOCATE(arr, size) ABI_MALLOC(arr, size)
-#define _ABI_DEALLOCATE(arr) ABI_FREE(arr)
-#define _MSG_ERROR(msg) ABI_ERROR(msg)
-#define _MSG_WARNING(msg) ABI_WARNING(msg)
-#define _MSG_BUG(msg) ABI_BUG(msg)
- * Alias to preserve previous behaviour. Just to facilitate the migration */
-
-
 /* Macros to allocate zero-initialized arrays. */
 #define ABI_CALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = zero
 #define ABI_ICALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = 0
