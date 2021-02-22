@@ -91,7 +91,7 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 #%% description =
 #%%   NaI slightly distorted, to allow self-localisation of a hole polaron, using pSIC technique.
 #%%   Very low cut-off for testing purposes, which means that this is not a test of polaron formation !
-#%%   WARNING : this capability of ABINIT is not fully operational. 
+#%%   WARNING : this capability of ABINIT is still to be tested more completely.
 #%%   - This test is not portable, and the -ridiculous fld_option does not yield pass unless crazy tolerances (see above) are used.
 #%% topics = Coulomb
 #%%<END TEST_INFO>
