@@ -6,7 +6,9 @@ ndtset 1
 #Parameters for the image dynamics
 imgmov 6
 nimage 3
+#npimage 3   # For parallelism on images
 ntimimage 3   # Very low value, only for testing purposes.
+#ntimimage 50   # More realistic
 tolimg   1.0d-6
 prtvol 1
 imgwfstor 0
@@ -32,8 +34,9 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 
 # SCF procedure
  nstep 4 # Very low value, for testing purposes
-#ecut 17  # This would be a reasonable cutoff
+#nstep 20 # More realistic
  ecut 3   # Extremely low cut-off for testing purposes
+#ecut 17  # This would be a reasonable cutoff
  pawecutdg 20
  tolrff 0.02   #  Better for geometry optimization
  diemac 2.0d0
@@ -56,6 +59,7 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
  znucl 11 53
  pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pbe_standard"
  pseudos "Na.xml, I.xml"
+ pawovlp 45
 
 #Definition of atoms and positions
  natom 8
@@ -86,10 +90,8 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 #%% keywords = pSIC
 #%% description =
 #%%   NaI slightly distorted, to allow self-localisation of a hole polaron, using pSIC technique.
-#%%   Very low cut-off for testing purposes
+#%%   Very low cut-off for testing purposes, which means that this is not a test of polaron formation !
 #%%   WARNING : this capability of ABINIT is not fully operational. 
 #%%   - This test is not portable, and the -ridiculous fld_option does not yield pass unless crazy tolerances (see above) are used.
-#%%   - In parallel (npimage 3), the etotal delivered in the YAML section is erroneous
-#%%   - Trying with nstep 20 and ntime 50 crashes in sequential.
 #%% topics = Coulomb
 #%%<END TEST_INFO>
