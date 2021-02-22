@@ -319,7 +319,7 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
 
      if (choice>=0) then
 
-       if (cplex==2) then
+!       if (cplex==2) then
          if (nloalg(1)==3) then
            call timab(1132,1,tsec)
            scalr_lmn(:)=0.0_DP
@@ -338,31 +338,39 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
            call timab(1134,2,tsec)
          end if
          call timab(1133,1,tsec)
-         do ilmn=1,nlmn
-           il=mod(indlmn(1,ilmn),4)+1
-           ctmp = cil(il) * cmplx(scalr_lmn(ilmn),scali_lmn(ilmn),kind=DP)
-           gx(1,ilmn,ia,ispinor) = real(ctmp)
-           gx(2,ilmn,ia,ispinor) = aimag(ctmp)
-         end do
-         call timab(1133,2,tsec)
-       else ! cplex==1
-         do ilmn=1,nlmn
-           il=mod(indlmn(1,ilmn),4)+1
-           ctmp = cil(il)
-           buffer = zero
-           if (abs(real(ctmp))>tol14) then
-             scal_pointer => scalr
-             fact = real(ctmp)
-           else
-             scal_pointer => scali
-             fact = -aimag(ctmp)
-           end if
-           do ipw=1,npw
-             buffer = buffer + scal_pointer(ipw) * ffnl_loc(ipw,ilmn)
+         if (cplex==2) then
+           do ilmn=1,nlmn
+             il=mod(indlmn(1,ilmn),4)+1
+             ctmp = cil(il) * cmplx(scalr_lmn(ilmn),scali_lmn(ilmn),kind=DP)
+             gx(1,ilmn,ia,ispinor) = real(ctmp)
+             gx(2,ilmn,ia,ispinor) = aimag(ctmp)
            end do
-           gx(1,ilmn,ia,ispinor) = fact * buffer
-         end do
-       end if
+         else
+           do ilmn=1,nlmn
+             il=mod(indlmn(1,ilmn),4)+1
+             ctmp = cil(il) * cmplx(scalr_lmn(ilmn),scali_lmn(ilmn),kind=DP)
+             gx(1,ilmn,ia,ispinor) = real(ctmp)
+           end do
+         end if
+         call timab(1133,2,tsec)
+!       else ! cplex==1
+!         do ilmn=1,nlmn
+!           il=mod(indlmn(1,ilmn),4)+1
+!           ctmp = cil(il)
+!           buffer = zero
+!           if (abs(real(ctmp))>tol14) then
+!             scal_pointer => scalr
+!             fact = real(ctmp)
+!           else
+!             scal_pointer => scali
+!             fact = -aimag(ctmp)
+!           end if
+!           do ipw=1,npw
+!             buffer = buffer + scal_pointer(ipw) * ffnl_loc(ipw,ilmn)
+!           end do
+!           gx(1,ilmn,ia,ispinor) = fact * buffer
+!         end do
+!       end if
 
      end if
 
