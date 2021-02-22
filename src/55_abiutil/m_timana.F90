@@ -900,10 +900,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1201)='getcprj%opernla                 '
  names(1202)='getcprj%opernla_blas            '
  names(1210)='getcprj(other)                  '
- names(1211)='cprj_axpby                      '; basic(1211) = 1
 
  names(1300)='cgwf_paw                        '
  names(1301)='cgwf_paw%other                  '
+ names(1302)='pawcprj(zxpby)                  '
+ names(1303)='pawcprj(projbd)                 '
+ names(1304)='subham(dotprod_g)               '
 
  names(1360)='getcsc(all)                     '
  names(1361)='getcsc%dotprod_g                '; basic(1361)= 1
@@ -1332,7 +1334,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:4)=(/1210,1200,-1201,-1202/)
    case(51)
 !      Estimate the complement of cgwf_paw
-     tslots(:10)=(/1301,1300,-1200,-1211,-1363,-1364,-1370,-201,-211,-880/)
+     tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1200,-1363,-1364,-1370,-201,-211,-880/)
    case(52)
 !      Sum calls of getcsc
      tslots(:3)=(/1360,1363,1364/)
@@ -1730,7 +1732,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
          msg='low-level xgTransposer type '
        case(79)
-         list(:10)=(/1300,1200,1211,1363,1364,1370,201,211,880,1301/)
+         list(:12)=(/1300,1200,1302,1303,1304,1363,1364,1370,201,211,880,1301/)
          msg='cgwf_paw'
        case(80)
          list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)

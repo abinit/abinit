@@ -144,7 +144,7 @@ subroutine cgwf_paw(cg,cprj_cwavef_bands,eig,&
 
 !Local variables-------------------------------
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
-integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
+integer,parameter :: tim_getcsc_1band=3,tim_getcsc_band=4,tim_fourwf=40
  integer,save :: nskip=0
  integer :: choice,counter,cpopt
  integer :: i1,i2,i3,iband,isubh,isubh0,jband,me_g0,igs
@@ -260,13 +260,15 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
    ! WARNING : It might be interesting to skip the following operation.
    ! The associated routines should be reexamined to see whether cwavef is not already normalized.
    call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
-&   gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
+&   gs_hamk,mpi_enreg,1,prtvol,tim_getcsc_1band)
    xnorm=one/sqrt(dot(1))
    z_tmp = (/xnorm,zero/)
    ! cwavef = xnorm * cwavef
    call cg_zscal(npw*nspinor,z_tmp,cwavef)
    ! cprj = xnorm * cprj
+   call timab(1302,1,tsec)
    call pawcprj_axpby(zero,xnorm,cprj_cwavef,cprj_cwavef)
+   call timab(1302,2,tsec)
 
    ! Compute wavefunction in real space
    if (nspinor==1) then
@@ -438,11 +440,15 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
        z_tmp = (/one,zero/)
        !scprod_csc = -scprod_csc
        scprod=-scprod
+       call timab(1303,1,tsec)
        call pawcprj_projbd(scprod,cprj_cwavef_bands,cprj_direc)
+       call timab(1303,2,tsec)
        if (iline==1) then
          z_tmp2 = scprod(:,iband)*(1.0_dp/xnorm-1.0_dp)
          ! cprj = z_tmp2*cprjx + z_tmp*cprj
+         call timab(1302,1,tsec)
          call pawcprj_zaxpby(z_tmp2,z_tmp,cprj_cwavef,cprj_direc)
+         call timab(1302,2,tsec)
        end if
 
        ! ======================================================================
@@ -478,7 +484,9 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
            conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
            conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
          end do
+         call timab(1302,1,tsec)
          call pawcprj_axpby(one,gamma,cprj_direc,cprj_conjgr)
+         call timab(1302,2,tsec)
        end if
 
        ! ======================================================================
@@ -486,7 +494,7 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
        ! ======================================================================
 
        call getcsc(dot,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
-&       gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
+&       gs_hamk,mpi_enreg,1,prtvol,tim_getcsc_1band)
        dotr=dot(1)
        doti=dot(2)
 
@@ -510,7 +518,9 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
        call pawcprj_copy(cprj_conjgr,cprj_direc)
        z_tmp   = (/one,zero/)
        z_tmp2  = (/-dotr,-doti/)
+       call timab(1302,1,tsec)
        call pawcprj_zaxpby(z_tmp2,z_tmp,cprj_cwavef,cprj_direc)
+       call timab(1302,2,tsec)
 
        ! ======================================================================
        ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
@@ -518,7 +528,7 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 
        ! Compute norm of direc
        call getcsc(dot,cpopt,direc,direc,cprj_direc,cprj_direc,&
-&       gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
+&       gs_hamk,mpi_enreg,1,prtvol,tim_getcsc_1band)
        xnorm=one/sqrt(abs(dot(1)))
 
        sij_opt=0
@@ -604,7 +614,9 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
          cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
        end do
+       call timab(1302,1,tsec)
        call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
+       call timab(1302,2,tsec)
        do ispinor=1,nspinor
          do i3=1,gs_hamk%n6
            do i2=1,gs_hamk%n5
@@ -678,11 +690,13 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
    call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
      &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,3)
    isubh=isubh0
+   call timab(1304,1,tsec)
    do jband=1,iband
      cwavef_left => cwavef_bands(:,1+(jband-1)*npw*nspinor:jband*npw*nspinor)
      call dotprod_g(subham(isubh),subham(isubh+1),istwf_k,npw*nspinor,2,cwavef_left,direc,me_g0,mpi_enreg%comm_spinorfft)
      isubh=isubh+2
    end do
+   call timab(1304,2,tsec)
    cprj_cwavef_left => cprj_cwavef_bands(:,1:nspinor*iband)
    ! Add the nonlocal part
    call getchc(subham(isubh0:isubh0+2*iband-1),cpopt,cwavef,cwavef,&
