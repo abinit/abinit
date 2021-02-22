@@ -144,7 +144,7 @@ subroutine cgwf_paw(cg,cprj_cwavef_bands,eig,&
 
 !Local variables-------------------------------
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
-integer,parameter :: tim_getcsc_1band=3,tim_getcsc_band=4,tim_fourwf=40
+integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
  integer,save :: nskip=0
  integer :: choice,counter,cpopt
  integer :: i1,i2,i3,iband,isubh,isubh0,jband,me_g0,igs
@@ -260,7 +260,7 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_band=4,tim_fourwf=40
    ! WARNING : It might be interesting to skip the following operation.
    ! The associated routines should be reexamined to see whether cwavef is not already normalized.
    call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
-&   gs_hamk,mpi_enreg,1,prtvol,tim_getcsc_1band)
+&   gs_hamk,mpi_enreg,1,tim_getcsc_1band)
    xnorm=one/sqrt(dot(1))
    z_tmp = (/xnorm,zero/)
    ! cwavef = xnorm * cwavef
@@ -380,7 +380,7 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_band=4,tim_fourwf=40
 &         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
-&         gs_hamk,mpi_enreg,nband,prtvol,tim_getcsc_band)
+&         gs_hamk,mpi_enreg,nband,tim_getcsc_bands)
          if (iline==1) then
            scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
          end if
@@ -418,7 +418,7 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_band=4,tim_fourwf=40
 &       gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &       gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
        call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
-&       gs_hamk,mpi_enreg,nband,prtvol,tim_getcsc_band)
+&       gs_hamk,mpi_enreg,nband,tim_getcsc_bands)
        if (iline==1) then
          scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
        end if
@@ -494,7 +494,7 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_band=4,tim_fourwf=40
        ! ======================================================================
 
        call getcsc(dot,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
-&       gs_hamk,mpi_enreg,1,prtvol,tim_getcsc_1band)
+&       gs_hamk,mpi_enreg,1,tim_getcsc_1band)
        dotr=dot(1)
        doti=dot(2)
 
@@ -528,7 +528,7 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_band=4,tim_fourwf=40
 
        ! Compute norm of direc
        call getcsc(dot,cpopt,direc,direc,cprj_direc,cprj_direc,&
-&       gs_hamk,mpi_enreg,1,prtvol,tim_getcsc_1band)
+&       gs_hamk,mpi_enreg,1,tim_getcsc_1band)
        xnorm=one/sqrt(abs(dot(1)))
 
        sij_opt=0
@@ -763,7 +763,7 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
  real(dp),intent(in),target :: cg(:,:)
 
 !Local variables-------------------------------
- integer,parameter :: tim_getcsc_band=4
+ integer,parameter :: tim_getcsc_bands=4
  integer :: cpopt,iband,isubh,nspinor,wfsize
  real(dp), pointer :: cwavef(:,:),cwavef_left(:,:)
  real(dp),pointer :: cwavef_bands(:,:)
@@ -786,7 +786,7 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
    ! Compute csc matrix
    call getcsc(subovl(isubh:isubh+2*iband-1),cpopt,cwavef,cwavef_left,&
      &          cprj_cwavef,cprj_cwavef_left,&
-     &          gs_hamk,mpi_enreg,iband,tim_getcsc_band)
+     &          gs_hamk,mpi_enreg,iband,tim_getcsc_bands)
    isubh=isubh+2*iband
  end do
 
