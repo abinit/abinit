@@ -896,26 +896,29 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 ! names(1158)='opb_b%scal_facs(dgemv)          '
 ! names(1159)='opb_b(other)                    ' 
 
- names(1200)='getcprj                         '; basic(1200) = 1
- names(1201)='getcprj%opernla                 '
- names(1202)='getcprj%opernla_blas            '
+ names(1200)='getcprj(all)                    '
+ names(1201)='getcprj%opernla                 '; basic(1201)=1
+ names(1202)='getcprj%opernla_blas            '; basic(1202)=1
+ names(1203)='getcprj(cgwf_paw)               '
+ names(1204)='getcprj(ctocprj)                '
  names(1210)='getcprj(other)                  '
 
  names(1300)='cgwf_paw                        '
  names(1301)='cgwf_paw%other                  '
  names(1302)='pawcprj(zxpby)                  '
- names(1303)='pawcprj(projbd)                 '
- names(1304)='subham(dotprod_g)               '
+ names(1303)='pawcprj(projbd)                 '; basic(1303)=1
+ names(1304)='subham(dotprod_g)               '; basic(1304)=1
+ names(1305)='cgwf_paw%npw_work               '; basic(1305)=1
 
  names(1360)='getcsc(all)                     '
- names(1361)='getcsc%dotprod_g                '; basic(1361)= 1
+ names(1361)='getcsc%dotprod_g                '; basic(1361)=1
  names(1362)='getcsc%other                    '
- names(1363)='getcsc(1band)                   '
- names(1364)='getcsc(bands)                   '
+ names(1363)='getcsc(cgwf_paw)                '
+ names(1364)='getcsc(subovl)                  '
 
  names(1370)='getchc                          '
- names(1371)='getchc%local                    '; basic(1371) = 1
- names(1372)='getchc%kin                      '; basic(1372) = 1
+ names(1371)='getchc%local                    '; basic(1371)=1
+ names(1372)='getchc%kin                      '; basic(1372)=1
  names(1375)='getchc%other                    '
 
 ! CMartins: TEST for HF
@@ -1234,14 +1237,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:4)=(/-98, 200,-841,-221/)
    case(19)
 !      Estimate the complement of cgwf (non getghc,projbd)
-     tslots(:5)=(/-40, 22,530,-201,-211/)
+     tslots(:6)=(/-40, 22,530,1300,-201,-211/)
    case(20)
 !      Estimate the complement of dfpt_cgwf (non getghc,projbd,nonlop,fourwf)
      tslots(:8)=(/-140, 122,-202,-197,-212,-227,-228,-844/)
    case(21)
 !      Estimate different complements in vtowfk
 !      vtowfk(ssdiag) (= vtowfk(loop)    - cgwf )
-     tslots(:6)=(/-588, 39,-22,-530,-1300, -1600/)
+     tslots(:7)=(/-588, 39,-22,-530,-1300, -1600,-1364/)
    case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)
@@ -1329,19 +1332,25 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !   case(49)
 !     ! opernlb_blas(other)
 !     tslots(:10)=(/1159,1150,-1151,-1152,-1153,-1154,-1155,-1156,-1157,-1158/)
-   case(50)
+!   case(49)
+!     ! opernlb_blas(other)
+!     tslots(:10)=(/1159,1150,-1151,-1152,-1153,-1154,-1155,-1156,-1157,-1158/)
+   case(46)
+!      Sum the calls of getcprj
+     tslots(:3)=(/1200,1203,1204/)
+   case(47)
 !      Estimate the complement of getcprj
      tslots(:4)=(/1210,1200,-1201,-1202/)
-   case(51)
+   case(48)
 !      Estimate the complement of cgwf_paw
-     tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1200,-1363,-1364,-1370,-201,-211,-880/)
-   case(52)
+     tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1305,-1203,-1363,-1370,-201,-211,-880/)
+   case(49)
 !      Sum calls of getcsc
      tslots(:3)=(/1360,1363,1364/)
-   case(53)
+   case(50)
 !      Estimate the complement of getcsc
      tslots(:4)=(/1362,1360,-1361,-236/)
-   case(54)
+   case(51)
 !      Estimate the complement of getchc
      tslots(:5)=(/1375,1370,-235,-1371,-1372/)
 
@@ -1732,7 +1741,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
          msg='low-level xgTransposer type '
        case(79)
-         list(:12)=(/1300,1200,1302,1303,1304,1363,1364,1370,201,211,880,1301/)
+         list(:12)=(/1300,1203,1302,1303,1304,1305,1363,1370,201,211,880,1301/)
          msg='cgwf_paw'
        case(80)
          list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)

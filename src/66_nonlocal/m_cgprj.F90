@@ -495,7 +495,7 @@ contains
  integer,allocatable :: dimlmn(:),kg_k(:,:),kg_k_loc(:,:)
  integer,allocatable :: npw_block(:),npw_disp(:)
  integer,pointer :: atindx_atm(:),indlmn_atm(:,:,:),nattyp_atm(:),pspso_atm(:)
- real(dp) :: kpoint(3),work(6)
+ real(dp) :: kpoint(3),work(6),tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef_tmp(:,:)
  real(dp),allocatable :: ffnl(:,:,:,:),ffnl_npw(:,:,:,:),ffnl_tmp(:,:,:,:),ffnl_tmp_npw(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:)
@@ -876,12 +876,14 @@ contains
        do ibp=1,cg_bandpp   ! Note: we suppose cp_bandpp=cprj_bandpp
          iwf1=1+(ibp-1)*npw_nk*my_nspinor;iwf2=ibp*npw_nk*my_nspinor
          icp1=1+(ibp-1)*my_nspinor;icp2=ibp*my_nspinor
+         call timab(1204,1,tsec)
          do jdir=istart,iend
            call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
 &           ffnl,jdir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
 &           mgfft,mpi_enreg,ncprj,nattyp_atm,ngfft,nloalg,&
 &           npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
          end do
+         call timab(1204,2,tsec)
        end do
 !      Export cwaveprj to big array cprj
        call pawcprj_put(atindx_atm,cwaveprj,cprj,ncprj,iband_start,ibgb,ikpt,iorder_cprj,isppol,&

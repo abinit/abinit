@@ -144,7 +144,7 @@ subroutine cgwf_paw(cg,cprj_cwavef_bands,eig,&
 
 !Local variables-------------------------------
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
-integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
+integer,parameter :: tim_getcsc=3,tim_fourwf=40
  integer,save :: nskip=0
  integer :: choice,counter,cpopt
  integer :: i1,i2,i3,iband,isubh,isubh0,jband,me_g0,igs
@@ -260,11 +260,13 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
    ! WARNING : It might be interesting to skip the following operation.
    ! The associated routines should be reexamined to see whether cwavef is not already normalized.
    call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
-&   gs_hamk,mpi_enreg,1,tim_getcsc_1band)
+&   gs_hamk,mpi_enreg,1,tim_getcsc)
    xnorm=one/sqrt(dot(1))
    z_tmp = (/xnorm,zero/)
    ! cwavef = xnorm * cwavef
+   call timab(1305,1,tsec)
    call cg_zscal(npw*nspinor,z_tmp,cwavef)
+   call timab(1305,2,tsec)
    ! cprj = xnorm * cprj
    call timab(1302,1,tsec)
    call pawcprj_axpby(zero,xnorm,cprj_cwavef,cprj_cwavef)
@@ -333,7 +335,9 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
          &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
 
        ! Compute residual (squared) norm
+       call timab(1305,1,tsec)
        call sqnorm_g(resid(iband),istwf_k,npw*nspinor,direc,me_g0,mpi_enreg%comm_fft)
+       call timab(1305,2,tsec)
 
        if (prtvol==-level) then
          write(message,'(a,i0,2es21.10e3)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
@@ -374,13 +378,15 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
        ! Project the steepest descent direction:
        ! direc(2,npw)=<G|H|Cnk> - \sum_{(i<=n)} <G|H|Cik> , normalized.
        if(ortalg>=0)then
+         call timab(1203,1,tsec)
          call getcprj(choice,0,direc,cprj_direc,&
 &         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
 &         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
 &         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+         call timab(1203,2,tsec)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
-&         gs_hamk,mpi_enreg,nband,tim_getcsc_bands)
+&         gs_hamk,mpi_enreg,nband,tim_getcsc)
          if (iline==1) then
            scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
          end if
@@ -397,6 +403,7 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
        ! ======================================================================
 
        ! If wfoptalg>=10, the precondition matrix is kept constant during iteration ; otherwise it is recomputed
+       call timab(1305,1,tsec)
        if (wfoptalg<10.or.iline==1) then
          call cg_precon(cwavef,zero,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
        else
@@ -409,16 +416,19 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
            end do
          end do
        end if
+       call timab(1305,2,tsec)
 
        ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
        ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
+       call timab(1203,1,tsec)
        call getcprj(choice,0,direc,cprj_direc,&
 &       gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
 &       gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
 &       gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &       gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+       call timab(1203,2,tsec)
        call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
-&       gs_hamk,mpi_enreg,nband,tim_getcsc_bands)
+&       gs_hamk,mpi_enreg,nband,tim_getcsc)
        if (iline==1) then
          scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
        end if
@@ -428,6 +438,7 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
 &       direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
        if (iline==1) then
          z_tmp = -scprod_csc(2*iband-1:2*iband)*(1.0_dp/xnorm-1.0_dp)
+         call timab(1305,1,tsec)
          do ispinor=1,nspinor
            igs=(ispinor-1)*npw
            do ipw=1+igs,npw+igs
@@ -435,6 +446,7 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
              direc(2,ipw)=direc(2,ipw) + z_tmp(1)*cwavef(2,ipw) + z_tmp(2)*cwavef(1,ipw)
            end do
          end do
+         call timab(1305,2,tsec)
        end if
        ! Apply projbd to cprj_direc
        z_tmp = (/one,zero/)
@@ -455,7 +467,9 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
        ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
        ! ======================================================================
 
+       call timab(1305,1,tsec)
        call dotprod_g(dotgg,doti,istwf_k,npw*nspinor,1,direc,direc_tmp,me_g0,mpi_enreg%comm_spinorfft)
+       call timab(1305,2,tsec)
 
        ! MJV: added 5 Feb 2012 - causes divide by 0 on next iteration of iline
        if (abs(dotgg) < TINY(0.0_dp)*1.e50_dp) dotgg = TINY(0.0_dp)*1.e50_dp
@@ -464,8 +478,12 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
        if (iline==1) then
          gamma=zero
          dotgp=dotgg
+         call timab(1305,1,tsec)
          call cg_zcopy(npw*nspinor,direc,conjgr)
+         call timab(1305,2,tsec)
+         call timab(1302,1,tsec)
          call pawcprj_copy(cprj_direc,cprj_conjgr)
+         call timab(1302,2,tsec)
          if (prtvol==-level)then
            write(message,'(a,es21.10e3)')' cgwf: dotgg = ',dotgg
            call wrtout(std_out,message,'PERS')
@@ -479,11 +497,13 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
            call wrtout(std_out,message,'PERS')
          end if
 
+         call timab(1305,1,tsec)
 !$OMP PARALLEL DO
          do ipw=1,npw*nspinor
            conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
            conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
          end do
+         call timab(1305,2,tsec)
          call timab(1302,1,tsec)
          call pawcprj_axpby(one,gamma,cprj_direc,cprj_conjgr)
          call timab(1302,2,tsec)
@@ -494,13 +514,14 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
        ! ======================================================================
 
        call getcsc(dot,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
-&       gs_hamk,mpi_enreg,1,tim_getcsc_1band)
+&       gs_hamk,mpi_enreg,1,tim_getcsc)
        dotr=dot(1)
        doti=dot(2)
 
        ! Project the conjugated gradient onto the current band
        ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
        ! that direc --> conjgr
+       call timab(1305,1,tsec)
        if(istwf_k==1)then
 
 !$OMP PARALLEL DO
@@ -515,10 +536,11 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
            direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
          end do
        end if
+       call timab(1305,2,tsec)
+       call timab(1302,1,tsec)
        call pawcprj_copy(cprj_conjgr,cprj_direc)
        z_tmp   = (/one,zero/)
        z_tmp2  = (/-dotr,-doti/)
-       call timab(1302,1,tsec)
        call pawcprj_zaxpby(z_tmp2,z_tmp,cprj_cwavef,cprj_direc)
        call timab(1302,2,tsec)
 
@@ -528,7 +550,7 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
 
        ! Compute norm of direc
        call getcsc(dot,cpopt,direc,direc,cprj_direc,cprj_direc,&
-&       gs_hamk,mpi_enreg,1,tim_getcsc_1band)
+&       gs_hamk,mpi_enreg,1,tim_getcsc)
        xnorm=one/sqrt(abs(dot(1)))
 
        sij_opt=0
@@ -609,14 +631,12 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
 
        sintn=sinth*xnorm
 
+       call timab(1305,1,tsec)
 !$OMP PARALLEL DO
        do ipw=1,npw*nspinor
          cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
          cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
        end do
-       call timab(1302,1,tsec)
-       call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
-       call timab(1302,2,tsec)
        do ispinor=1,nspinor
          do i3=1,gs_hamk%n6
            do i2=1,gs_hamk%n5
@@ -627,6 +647,10 @@ integer,parameter :: tim_getcsc_1band=3,tim_getcsc_bands=4,tim_fourwf=40
            end do
          end do
        end do
+       call timab(1305,2,tsec)
+       call timab(1302,1,tsec)
+       call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
+       call timab(1302,2,tsec)
 
        ! ======================================================================
        ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
@@ -763,7 +787,7 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
  real(dp),intent(in),target :: cg(:,:)
 
 !Local variables-------------------------------
- integer,parameter :: tim_getcsc_bands=4
+ integer,parameter :: tim_getcsc=4
  integer :: cpopt,iband,isubh,nspinor,wfsize
  real(dp), pointer :: cwavef(:,:),cwavef_left(:,:)
  real(dp),pointer :: cwavef_bands(:,:)
@@ -786,7 +810,7 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
    ! Compute csc matrix
    call getcsc(subovl(isubh:isubh+2*iband-1),cpopt,cwavef,cwavef_left,&
      &          cprj_cwavef,cprj_cwavef_left,&
-     &          gs_hamk,mpi_enreg,iband,tim_getcsc_bands)
+     &          gs_hamk,mpi_enreg,iband,tim_getcsc)
    isubh=isubh+2*iband
  end do
 
