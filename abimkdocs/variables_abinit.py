@@ -5935,7 +5935,7 @@ Variable(
     topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=6,
-    mnemonics="Integer that governs the CUT-off for COULomb interaction",
+    mnemonics="GW CUT-off for COULomb interaction",
     requires="[[optdriver]] in [3,4]",
     added_in_version="9.1",
     text=r"""
@@ -6713,7 +6713,7 @@ Variable(
     abivarname="gwmem",
     varset="gw",
     vartype="integer",
-    topics=['Susceptibility_expert', 'SelfEnergy_expert'],
+    topics=['Susceptibility_expert', 'SelfEnergy_expert', 'GW_expert'],
     dimensions="scalar",
     defaultval=11,
     mnemonics="GW MEMory",
@@ -6742,7 +6742,7 @@ Variable(
     dimensions="scalar",
     defaultval=2,
     mnemonics="GW PARAllelization level",
-    commentdefault="The default value has been changed in v8. From 1 to 2",
+    commentdefault="The default value has been changed in v8, from 1 to 2.",
     requires="[[optdriver]] in [3,4]",
     added_in_version="before_v9",
     text=r"""
