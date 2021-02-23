@@ -653,6 +653,7 @@ contains
     ! Scalars
     integer :: ii,ifftf,ispden
     real(dp) :: ix,step,fn,minocc
+    real(dp) :: temp_ent,gamma,xcut
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
 
@@ -686,6 +687,15 @@ contains
           this%ent_freeel=simpson(step,valuesent)
         end if
         ABI_DEALLOCATE(valuesent)
+
+        !!temp work on entropy
+        gamma=(fermie-this%e_shiftfactor)/tsmear
+        xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
+        temp_ent=5./3.*this%e_kin_freeel/tsmear+gamma*this%nfreeel
+        write(0,*) temp_ent
+        temp_ent=temp_ent+2./3.*sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(1.5)*xcut**(1.5)/(exp(xcut-gamma)+1)*(xcut+gamma)
+
+        write(0,*) 'Entropy:',this%ent_freeel,temp_ent
       else
         step=one
         do ifftf=1,this%nfftf
