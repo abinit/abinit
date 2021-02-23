@@ -559,7 +559,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(575)='prep_bandfft_tabs               '; basic(575)=1
 
  names(578)='vtowfk(cprj_rotate)             '
- names(579)='vtowfk(mksubovl)                '
  names(581)='prep_nonlop(alltoall)           '
  names(583)='vtowfk(pw_orthon)               '
  names(584)='xcopy%lobpcg                    '
@@ -1306,8 +1305,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:7)=(/-788,781,782,783,784,785,786/)
    case(40)
 !      More complements in vtowfk
-!      vtowfk (2) = vtowfk (loop) - cgwf - lobpcg - subdiago - pw_orthon - cprj_rotate - mksubovl
-     tslots(:10)=(/590,39,-22,-1300,-1600,-530,-585,-583,-578,-579/)
+!      vtowfk (2) = vtowfk (loop) - cgwf - lobpcg - subdiago - pw_orthon - cprj_rotate
+     tslots(:9)=(/590,39,-22,-1300,-1600,-530,-585,-583,-578/)
    case(41)
 !      vtowfk (3) = vtowfk (afterloop) - nonlop%vtowfk - prep_nonlop%vtowfk - fourwf%vtowfk - prep_fourwf%vtowfk - vtowfk(nonlocalpart)
      tslots(:7)=(/-591,30,-222,-572,-842,-537,-586/)
@@ -1613,7 +1612,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,TIMER_SIZE/)
          msg= 'vtorho '
        case(7)
-         list(:18)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,578,579,1300,1600,TIMER_SIZE/) ; msg='vtowfk '
+         list(:17)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,578,1300,1600,TIMER_SIZE/) ; msg='vtowfk '
        case(8)
          if(abs(timopt)==3)then
            list(:11)=(/530,204,205,571,532,533,630,535,536,584,587/)  ; msg='lobpcgwf (abs(timopt)==3)'

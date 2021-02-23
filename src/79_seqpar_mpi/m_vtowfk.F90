@@ -312,7 +312,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
    end if
 
-   if (use_subovl==1.or.enable_cgwf_paw) then
+   if (use_subovl==1) then
      ABI_ALLOCATE(subovl,(nband_k*(nband_k+1)))
    else
      ABI_ALLOCATE(subovl,(0))
@@ -468,7 +468,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      else
        call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
-&       subham,subovl,use_subovl,0,mpi_enreg%me_g0)
+&       subham,subovl,0,0,mpi_enreg%me_g0)
        call timab(585,2,tsec)
        call timab(578,1,tsec)
        call cprj_rotate(cprj_cwavef_bands,evec,&
@@ -509,11 +509,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
-   if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
-     if (enable_cgwf_paw) then
-       call timab(579,1,tsec)
+   if ((wfoptalg/=14 .and. wfoptalg /= 1 .and. dtset%ortalg>-10).or.dtset%ortalg>0) then
+     if (enable_cgwf_paw.and.ortalgo==0) then
+       ABI_DEALLOCATE(subovl)
+       ABI_ALLOCATE(subovl,(nband_k*(nband_k+1)))
        call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
-       call timab(579,2,tsec)
        call pw_orthon_paw(icg,mcg,npw_k*my_nspinor,my_nspinor,nband_k,ortalgo,subovl,cg,&
 &       mpi_enreg%comm_bandspinorfft,cprj=cprj_cwavef_bands)
      else
