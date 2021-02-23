@@ -13,6 +13,12 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
+!! NOTES
+!!  Dimensional analysis for conductivity (sigma), mobility (mu).
+!!
+!!   [sigma] = Siemens/m  with S = Ampere/Volt = Ohm^-1
+!!   [mu] = S L^2 Q
+!!
 !! PARENTS
 !!
 !! SOURCE
@@ -654,7 +660,6 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  !   2) Decrease energy window in the trasport part to analyze the behaviour of transport tensors.
 
  ! sigmaph is not needed anymore. Free it.
-
  sigmaph%ncid = nctk_noid
  call sigmaph%free()
 
@@ -1138,14 +1143,10 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ABI_CALLOC(self%nh, (self%ntemp))
  call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%nh, self%ne)
 
- ! Get units conversion factor and spin degeneracy
- fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
- fact = max_occ * fact0 / e_Cb * 100**2
-
  ! Compute mobility_mu i.e. results in which lifetimes have been computed in a consistent way
  ! with the same the Fermi level. In all the other cases, indeed, we assume that tau does not depend on ef.
  !
- ! sigma_RTA = (-S e^2 / omega sum_\nk) (v_\nk \otimes v_\nk) \tau_\nk (df^0/de_\nk)
+ ! sigma_RTA = -S e^2 / (N_k omega) sum_\nk (v_\nk \otimes v_\nk) \tau_\nk (df^0/de_\nk)
  ! with S the spin degeneracy factor.
  !
  ! TODO: Implement other tensors. Compare these results with the ones obtained with spectral sigma
@@ -1191,6 +1192,10 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  !call xmpi_sum(self%mobility_mu, comm, ierr)
 
  ! Scale by the carrier concentration
+ ! Get units conversion factor and spin degeneracy
+ fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
+ fact = max_occ * fact0 / e_Cb * 100**2
+
  do irta=1,self%nrta
    do spin=1,nsppol
      do itemp=1,self%ntemp
@@ -1623,11 +1628,10 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 #ifdef HAVE_NETCDF
  integer :: ncid, grp_ncid, ncerr
 #endif
- real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff
- real(dp) :: cpu, wall, gflops
+ real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff, cpu, wall, gflops
  logical :: send_data, converged
  character(len=500) :: msg
- !character(len=fnlen) :: path
+ character(len=fnlen) :: path
  type(rta_t) :: ibte
 !arrays
  integer :: unts(2), dims(4)
@@ -1667,6 +1671,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  call wrtout(unts, ch10//' Entering IBTE driver.')
  call wrtout(unts, sjoin("- Reading SERTA lifetimes and scattering matrix elements from:", &
              dtfil%filsigephin), newlines=1, do_flush=.True.)
+
+ !call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  ! Initialize IBTE object
  ibte = rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, comm)
@@ -1854,11 +1860,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
    fkn_in = fkn_serta
    ! Initialize fkn_in either from SERTA or from previous T.
-   !if (cnt == 1) then
-   !  fkn_in = fkn_serta
-   !else
-   !  fkn_in = fkn_out
-   !end if
+   !if (cnt == 1) fkn_in = fkn_serta
+   !if (cnt > 1) fkn_in = fkn_out
    fkn_out = zero
 
    ! Begin iterative solver.
@@ -1869,14 +1872,6 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
         do ikcalc=1,nkcalc
           if (rank_ks(ikcalc, spin) /= my_rank) cycle ! MPI parallelism
           sr_p => sr(ikcalc, spin)
-
-          ! Symmetry indices for kk.
-          !kk = sigma%kcalc(:, ikcalc)
-          !ik_ibz = ibte%kcalc2ibz(ikcalc, 1) !; isym_k = sigma%kcalc2ibz(ikcalc, 2)
-          !trev_k = sigma%kcalc2ibz(ikcalc, 6); g0_k = sigma%kcalc2ibz(ikcalc, 3:5)
-          !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-          !ABI_CHECK(isirr_k, "For the time being the k-point in Sigma_{nk} must be in the IBZ")
-
           ik_ibz = ibte%kcalc2ebands(1, ikcalc)
           do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
 
@@ -1910,8 +1905,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
               sym_vec = sym_vec + matmul(mat33, vec3)
             end do
             sym_vec = taukn_serta(:, ik_ibz, band_k, spin) * sym_vec / sr_p%lgk_nsym
-            ! This to recover RTA
-            !sym_vec = zero
+            !sym_vec = zero ! This to recover RTA
             fkn_out(:, ik_ibz, band_k, spin) = fkn_serta(:, ik_ibz, band_k, spin) + sym_vec
 
           end do ! band_k
@@ -1961,11 +1955,11 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    !call ibte%print_txt_files(cryst, dtset, dtfil)
    ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
-   ! path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
-   ! call wrtout(unts, ch10//sjoin("- Writing RTA transport results to:", path))
-   ! NCF_CHECK(nctk_open_create(ncid, path , xmpi_comm_self))
-   ! call rta_ncwrite(rta, cryst, dtset, ncid)
-   ! NCF_CHECK(nf90_close(ncid))
+   !path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
+   !call wrtout(unts, ch10//sjoin("- Writing RTA transport results to:", path))
+   !NCF_CHECK(nctk_open_create(ncid, path , xmpi_comm_self))
+   !call rta_ncwrite(ibte, cryst, dtset, ncid)
+   !NCF_CHECK(nf90_close(ncid))
 #endif
  end if
 
@@ -2045,10 +2039,6 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
  ! with S the spin degeneracy factor.
  sigma_eh = zero; fsum_eh = zero; onsager = zero
 
- ! Get units conversion factor and spin degeneracy
- fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
- fact = max_occ * fact0 / e_Cb * 100**2
-
  ! Compute mobility_mu i.e. results in which lifetimes have been computed in a consistent way
  ! with the same the Fermi level. In all the other cases, indeed, we assume that tau does not depend on ef.
  !
@@ -2094,13 +2084,18 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
  end do ! spin
 
  !call xmpi_sum(sigma_eh, comm, ierr)
- sigma_eh = fact * sigma_eh
+ ! Get units conversion factor including spin degeneracy.
+ fact0 = max_occ * (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol) / 100
+ fact = 100**3 / e_Cb
+
+ sigma_eh = fact0 * sigma_eh  ! siemens / cm1
  fsum_eh = fsum_eh / cryst%ucvol
 
  ! Scale by the carrier concentration.
+ ! TODO: Spin
  do spin=1,nsppol
    do ieh=1,2
-     call safe_div(sigma_eh(:,:, ieh), &
+     call safe_div(sigma_eh(:,:, ieh) * fact, &
                    self%ne(itemp) / cryst%ucvol / Bohr_meter**3, zero, mob_eh(:,:,ieh))
    end do
  end do

@@ -6454,7 +6454,7 @@ end subroutine klinterp_eval_bsd
 !! ebands_get_carriers
 !!
 !! FUNCTION
-!!  Compute number of holes (nh) and electrons (ne) per unit cell from a given list of `ntemp`
+!!  Compute number of holes (nh) and electrons (ne) per unit cell summed over spins from a given list of `ntemp`
 !!  temperatures `kTmesh` and chemical potentials `mu_e`.
 !!
 !! SOURCE
