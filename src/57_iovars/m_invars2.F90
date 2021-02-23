@@ -1270,8 +1270,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 ! Read the valence band index
       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ivalence',tread,'INT')
       if (tread==1) dtset%ivalence=intarr(1)
-      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqFD',tread,'DPR')
+      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqfd',tread,'DPR')
       if (tread==1)then
+        dtset%nqfd=dprarr(1)
         dtset%ne_qFD=dprarr(1)
         dtset%nh_qFD=dprarr(1) ! CP: here we assume that number of excited electrons  = number of excited holes. Potentially can be
 ! relaxed in the future if consistent changes with the cellcharge tag are made .
