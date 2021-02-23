@@ -143,9 +143,8 @@ By JM Beuken
 <a name="v9.4.D.1"></a>
 ### **D.**  Other changes (or on-going developments, not yet finalized)
 
-**D.1** Introduction of the new input variable dmft_x2my2d in ABINIT.
-NOT DOCUMENTED, NOT TESTED.
-By ?? B. Amadon ?? R. Outerovich ??
+**D.1** Calculation of Luttinger parameters (in the Frohlich model) and echo (see [[test:v8_57]]).
+By V. Brousseau (MR736)
 
 **D.2** New test [[test:v9_90]] of the treatment of the Coulomb interaction for low dimensional materials (0D and 2D).
 By B. Guster.
@@ -168,12 +167,7 @@ Several test have been created ([[test:v9_17]] to [[test:v9_20]]).
 
 By S. Ponce, also with G.-M. Rignanese, G. Petretto, M. Giantomassi.
 
-**D.7** Calculation of Luttinger parameters (in the Frohlich model) and echo (see [[test:v8_57]]).
-By V. Brousseau (MR736)
-
-**D.8** Introduction of the new input variable dmft_wanorthonorm. NOT DOCUMENTED? NOT TESTED? WHO DID THIS ?
-
-**D.9** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
+**D.7** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
 in the upgrade of tutorials)..
 By B. Amadon, F. Bruneval, T. Karatsu, G. Petretto, Y. Pouillon, M. Torrent, J. Zwanziger.
 
