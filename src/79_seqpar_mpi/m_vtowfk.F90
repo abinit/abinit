@@ -475,9 +475,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          &   gs_hamk%dimcprj,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%lmnmax,mpi_enreg,&
          &   natom,gs_hamk%nattyp,nband_k,gs_hamk%nspinor,gs_hamk%ntypat)
        call timab(578,2,tsec)
-       call timab(579,1,tsec)
-       call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
-       call timab(579,2,tsec)
      end if
    end if
 
@@ -514,6 +511,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ortalgo=mpi_enreg%paral_kgb
    if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
      if (enable_cgwf_paw) then
+       call timab(579,1,tsec)
+       call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
+       call timab(579,2,tsec)
        call pw_orthon_paw(icg,mcg,npw_k*my_nspinor,my_nspinor,nband_k,ortalgo,subovl,cg,&
 &       mpi_enreg%comm_bandspinorfft,cprj=cprj_cwavef_bands)
      else
