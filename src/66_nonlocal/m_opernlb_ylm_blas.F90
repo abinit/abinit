@@ -30,7 +30,7 @@ module m_opernlb_ylm_blas
 #if defined HAVE_OPENMP
  use OMP_LIB
 #endif
- use m_time,only : timab
+! use m_time,only : timab
 
  implicit none
 
@@ -203,7 +203,7 @@ subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 
  DBG_ENTER("COLL")
 
- call timab(1150,1,tsec)
+! call timab(1150,1,tsec)
 
 !Nothing to do when choice=4, 6 or 23
  if (choice==4.or.choice==6.or.choice==23) return
@@ -287,7 +287,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
    do ia=1,nincat
      iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 !    Scale gxfac with 4pi/sqr(omega).(-i)^l
-     call timab(1151,1,tsec)
+!     call timab(1151,1,tsec)
      if (paw_opt/=3) then
        if (cplex_fac==2) then
          do ilmn=1,nlmn
@@ -307,10 +307,10 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          MSG_BUG('Error : should not be possible to be here')
        end if
      end if
-     call timab(1151,2,tsec)
+!     call timab(1151,2,tsec)
 
 !    Scale gxfac_sij with 4pi/sqr(omega).(-i)^l
-     call timab(1152,1,tsec)
+!     call timab(1152,1,tsec)
      if (paw_opt>=3) then
        if (cplex==2) then
          do ilmn=1,nlmn
@@ -330,14 +330,14 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          MSG_BUG('Error : should not be possible to be here')
        end if
      end if
-     call timab(1152,2,tsec)
+!     call timab(1152,2,tsec)
 
 !    Compute <g|Vnl|c> (or derivatives) for each plane wave:
 
      if (paw_opt/=3) then
 
        if (nloalg(1)==3) then
-         call timab(1153,1,tsec)
+!         call timab(1153,1,tsec)
          scalr(:) = zero
          scali(:) = zero
          do ilmn=1,nlmn
@@ -346,21 +346,21 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,2)
            end do
          end do
-         call timab(1153,2,tsec)
+!         call timab(1153,2,tsec)
        else if (nloalg(1)==2) then
-         call timab(1157,1,tsec)
+!         call timab(1157,1,tsec)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,1),1,0.0_DP,scalr,1)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,2),1,0.0_DP,scali,1)
-         call timab(1157,2,tsec)
+!         call timab(1157,2,tsec)
        end if
 
-       call timab(1155,1,tsec)
+!       call timab(1155,1,tsec)
        do ipw=1,npw
          jpw=ipw+ipwshft
          vect(1,jpw)=vect(1,jpw)+scalr(ipw)*ph3d(1,ipw,iaph3d)+scali(ipw)*ph3d(2,ipw,iaph3d)
          vect(2,jpw)=vect(2,jpw)-scalr(ipw)*ph3d(2,ipw,iaph3d)+scali(ipw)*ph3d(1,ipw,iaph3d)
        end do
-       call timab(1155,2,tsec)
+!       call timab(1155,2,tsec)
 
      end if
 
@@ -369,7 +369,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
      if (paw_opt>=3) then
 
        if (nloalg(1)==3) then
-         call timab(1154,1,tsec)
+!         call timab(1154,1,tsec)
          scalr(:) = zero
          scali(:) = zero
          do ilmn=1,nlmn
@@ -378,21 +378,21 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,2)
            end do
          end do
-         call timab(1154,2,tsec)
+!         call timab(1154,2,tsec)
        else if (nloalg(1)==2) then
-         call timab(1158,1,tsec)
+!         call timab(1158,1,tsec)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,1),1,0.0_DP,scalr,1)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,2),1,0.0_DP,scali,1)
-         call timab(1158,2,tsec)
+!         call timab(1158,2,tsec)
        end if
 
-       call timab(1156,1,tsec)
+!       call timab(1156,1,tsec)
        do ipw=1,npw
          jpw=ipw+ipwshft
          svect(1,jpw)=svect(1,jpw)+scalr(ipw)*ph3d(1,ipw,iaph3d)+scali(ipw)*ph3d(2,ipw,iaph3d)
          svect(2,jpw)=svect(2,jpw)-scalr(ipw)*ph3d(2,ipw,iaph3d)+scali(ipw)*ph3d(1,ipw,iaph3d)
        end do
-       call timab(1156,2,tsec)
+!       call timab(1156,2,tsec)
 
      end if
 
@@ -424,7 +424,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
    end if
  end if
 
- call timab(1150,2,tsec)
+! call timab(1150,2,tsec)
 
  DBG_EXIT("COLL")
 

@@ -863,38 +863,38 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1108)='nlo_ylm%opernld(l+im)           '
  names(1119)='nlo_ylm(other)                  '
 
- names(1120)='opernla                         '
- names(1121)='opa%scal                        '
- names(1122)='opa%scal_lmn                    '
- names(1123)='opa%gx                          '
- names(1129)='opa(other)                      '
-
- names(1130)='opernla_blas                    '
- names(1131)='opa_b%scal                      '
- names(1132)='opa_b%scal_lmn                  '
- names(1133)='opa_b%gx                        '
- names(1134)='opa_b%scal_lmn(dgemv)           '
- names(1139)='opa_b(other)                    '
-
- names(1140)='opernlb                         '
- names(1141)='opb%gxfac_                      '
- names(1142)='opb%gxfacs_                     '
- names(1143)='opb%scal_fac                    '
- names(1144)='opb%scal_facs                   '
- names(1145)='opb%vect                        '
- names(1146)='opb%vects                       '
- names(1149)='opb(other)                      '
-
- names(1150)='opernlb_blas                    '
- names(1151)='opb_b%gxfac_                    '
- names(1152)='opb_b%gxfacs_                   '
- names(1153)='opb_b%scal_fac                  '
- names(1154)='opb_b%scal_facs                 '
- names(1155)='opb_b%vect                      '
- names(1156)='opb_b%vects                     '
- names(1157)='opb_b%scal_fac(dgemv)           '
- names(1158)='opb_b%scal_facs(dgemv)          '
- names(1159)='opb_b(other)                    ' 
+! names(1120)='opernla                         '
+! names(1121)='opa%scal                        '
+! names(1122)='opa%scal_lmn                    '
+! names(1123)='opa%gx                          '
+! names(1129)='opa(other)                      '
+!
+! names(1130)='opernla_blas                    '
+! names(1131)='opa_b%scal                      '
+! names(1132)='opa_b%scal_lmn                  '
+! names(1133)='opa_b%gx                        '
+! names(1134)='opa_b%scal_lmn(dgemv)           '
+! names(1139)='opa_b(other)                    '
+!
+! names(1140)='opernlb                         '
+! names(1141)='opb%gxfac_                      '
+! names(1142)='opb%gxfacs_                     '
+! names(1143)='opb%scal_fac                    '
+! names(1144)='opb%scal_facs                   '
+! names(1145)='opb%vect                        '
+! names(1146)='opb%vects                       '
+! names(1149)='opb(other)                      '
+!
+! names(1150)='opernlb_blas                    '
+! names(1151)='opb_b%gxfac_                    '
+! names(1152)='opb_b%gxfacs_                   '
+! names(1153)='opb_b%scal_fac                  '
+! names(1154)='opb_b%scal_facs                 '
+! names(1155)='opb_b%vect                      '
+! names(1156)='opb_b%vects                     '
+! names(1157)='opb_b%scal_fac(dgemv)           '
+! names(1158)='opb_b%scal_facs(dgemv)          '
+! names(1159)='opb_b(other)                    ' 
 
  names(1200)='getcprj                         '; basic(1200) = 1
  names(1201)='getcprj%opernla                 '
@@ -1317,18 +1317,18 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(45)
 !      Estimate the complement of nonlop_ylm
      tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
-   case(46)
-     ! opernla(other)
-     tslots(:5)=(/1129,1120,-1121,-1122,-1123/)
-   case(47)
-     ! opernla_blas(other)
-     tslots(:6)=(/1139,1130,-1131,-1132,-1133,-1134/)
-   case(48)
-     ! opernlb(other)
-     tslots(:8)=(/1149,1140,-1141,-1142,-1143,-1144,-1145,-1146/)
-   case(49)
-     ! opernlb_blas(other)
-     tslots(:10)=(/1159,1150,-1151,-1152,-1153,-1154,-1155,-1156,-1157,-1158/)
+!   case(46)
+!     ! opernla(other)
+!     tslots(:5)=(/1129,1120,-1121,-1122,-1123/)
+!   case(47)
+!     ! opernla_blas(other)
+!     tslots(:6)=(/1139,1130,-1131,-1132,-1133,-1134/)
+!   case(48)
+!     ! opernlb(other)
+!     tslots(:8)=(/1149,1140,-1141,-1142,-1143,-1144,-1145,-1146/)
+!   case(49)
+!     ! opernlb_blas(other)
+!     tslots(:10)=(/1159,1150,-1151,-1152,-1153,-1154,-1155,-1156,-1157,-1158/)
    case(50)
 !      Estimate the complement of getcprj
      tslots(:4)=(/1210,1200,-1201,-1202/)
@@ -1737,18 +1737,18 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(80)
          list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)
          msg='nonlop_ylm'
-       case(81)
-         list(:5)=(/1120,1121,1122,1123,1129/)
-         msg='opernla'
-       case(82)
-         list(:6)=(/1130,1131,1132,1134,1133,1139/)
-         msg='opernla_blas'
-       case(83)
-         list(:8)=(/1140,1141,1142,1143,1144,1145,1146,1149/)
-         msg='opernlb'
-       case(84)
-         list(:10)=(/1150,1151,1152,1153,1157,1154,1158,1155,1156,1159/)
-         msg='opernlb_blas'
+!       case(81)
+!         list(:5)=(/1120,1121,1122,1123,1129/)
+!         msg='opernla'
+!       case(82)
+!         list(:6)=(/1130,1131,1132,1134,1133,1139/)
+!         msg='opernla_blas'
+!       case(83)
+!         list(:8)=(/1140,1141,1142,1143,1144,1145,1146,1149/)
+!         msg='opernlb'
+!       case(84)
+!         list(:10)=(/1150,1151,1152,1153,1157,1154,1158,1155,1156,1159/)
+!         msg='opernlb_blas'
        case(85)
          list(:4)=(/1200,1201,1202,1210/)
          msg='getcprj'

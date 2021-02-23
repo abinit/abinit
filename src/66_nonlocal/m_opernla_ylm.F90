@@ -201,7 +201,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 
  if (choice==-1) return
 
- call timab(1120,1,tsec)
+! call timab(1120,1,tsec)
 
 !Useful variables
  choice_=abs(choice)
@@ -271,7 +271,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
      do ia=1,nincat
        iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 !      Compute c(g).exp(2pi.i.g.R)
-       call timab(1121,1,tsec)
+!       call timab(1121,1,tsec)
        do ipw=ipw0,npw
          jpw=ipw+ipwshft
          scalr(ipw)=(vect(1,jpw)*ph3d(1,ipw,iaph3d)-vect(2,jpw)*ph3d(2,ipw,iaph3d))
@@ -282,7 +282,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
          scalr(1)=half*vect(1,1+ipwshft)*ph3d(1,1,iaph3d)
          scali(1)=half*vect(1,1+ipwshft)*ph3d(2,1,iaph3d)
        end if
-       call timab(1121,2,tsec)
+!       call timab(1121,2,tsec)
 
 !      --------------------------------------------------------------------
 !      ALL CHOICES:
@@ -294,41 +294,41 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
            if (cplex==2) then
-             call timab(1122,1,tsec)
+!             call timab(1122,1,tsec)
              buffer_r1 = zero ; buffer_i1 = zero
              do ipw=1,npw
                buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,1,ilmn)
                buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,1,ilmn)
              end do
-             call timab(1122,2,tsec)
-             call timab(1123,1,tsec)
+!             call timab(1122,2,tsec)
+!             call timab(1123,1,tsec)
              if (parity) then
                gx(1,ilmn,ia,ispinor) = scale*buffer_r1 ; gx(2,ilmn,ia,ispinor) = scale*buffer_i1
              else
                gx(1,ilmn,ia,ispinor) =-scale*buffer_i1 ; gx(2,ilmn,ia,ispinor) = scale*buffer_r1
              end if
-             call timab(1123,2,tsec)
+!             call timab(1123,2,tsec)
            else
              if (parity) then
-               call timab(1122,1,tsec)
+!               call timab(1122,1,tsec)
                buffer_r1 =  zero
                do ipw=1,npw
                  buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,1,ilmn)
                end do
-               call timab(1122,2,tsec)
-               call timab(1123,1,tsec)
+!               call timab(1122,2,tsec)
+!               call timab(1123,1,tsec)
                gx(1,ilmn,ia,ispinor) = scale*buffer_r1
-               call timab(1123,2,tsec)
+!               call timab(1123,2,tsec)
              else
-               call timab(1122,1,tsec)
+!               call timab(1122,1,tsec)
                buffer_i1 = zero
                do ipw=1,npw
                  buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,1,ilmn)
                end do
-               call timab(1122,2,tsec)
-               call timab(1123,1,tsec)
+!               call timab(1122,2,tsec)
+!               call timab(1123,1,tsec)
                gx(1,ilmn,ia,ispinor) =-scale*buffer_i1
-               call timab(1123,2,tsec)
+!               call timab(1123,2,tsec)
              end if
            end if
          end do
@@ -3147,7 +3147,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
    call timab(48,2,tsec)
  end if
 
- call timab(1120,2,tsec)
+! call timab(1120,2,tsec)
 
 end subroutine opernla_ylm
 !!***

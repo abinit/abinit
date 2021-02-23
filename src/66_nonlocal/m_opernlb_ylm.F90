@@ -30,7 +30,7 @@ module m_opernlb_ylm
 #if defined HAVE_OPENMP
  use OMP_LIB
 #endif
- use m_time,only : timab
+! use m_time,only : timab
 
  implicit none
 
@@ -200,7 +200,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 
  DBG_ENTER("COLL")
 
- call timab(1140,1,tsec)
+! call timab(1140,1,tsec)
 
 !Nothing to do when choice=4, 6 or 23
  if (choice==4.or.choice==6.or.choice==23) return
@@ -260,7 +260,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
        iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 !      Scale gxfac with 4pi/sqr(omega).(-i)^l
        if (paw_opt/=3) then
-         call timab(1141,1,tsec)
+!         call timab(1141,1,tsec)
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -276,7 +276,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              end if
            end if
          end do
-         call timab(1141,2,tsec)
+!         call timab(1141,2,tsec)
          if (choice>1) then
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -349,7 +349,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 !      Scale gxfac_sij with 4pi/sqr(omega).(-i)^l
        if (paw_opt>=3) then
-         call timab(1142,1,tsec)
+!         call timab(1142,1,tsec)
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -365,7 +365,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              end if
            end if
          end do
-         call timab(1142,2,tsec)
+!         call timab(1142,2,tsec)
          if (choice>1) then
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -440,7 +440,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
        if (paw_opt/=3) then
 
-         call timab(1143,1,tsec)
+!         call timab(1143,1,tsec)
          ztab(:)=czero
 
 !        ------
@@ -448,7 +448,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            do ilmn=1,nlmn
              ztab(:)=ztab(:)+ffnl(:,1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
            end do
-           call timab(1143,2,tsec)
+!           call timab(1143,2,tsec)
          end if
 
 !        ------
@@ -621,12 +621,12 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          end if
 
 !        ------
-         call timab(1145,1,tsec)
+!         call timab(1145,1,tsec)
          ztab(:)=ztab(:)*cmplx(ph3d(1,:,iaph3d),-ph3d(2,:,iaph3d),kind=dp)
 
          vect(1,1+ipwshft:npw+ipwshft)=vect(1,1+ipwshft:npw+ipwshft)+real(ztab(:))
          vect(2,1+ipwshft:npw+ipwshft)=vect(2,1+ipwshft:npw+ipwshft)+aimag(ztab(:))
-         call timab(1145,2,tsec)
+!         call timab(1145,2,tsec)
 
        end if
 
@@ -634,7 +634,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
        if (paw_opt>=3) then
 
-         call timab(1144,1,tsec)
+!         call timab(1144,1,tsec)
          ztab(:)=czero
 
 !        ------
@@ -642,7 +642,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            do ilmn=1,nlmn
              ztab(:)=ztab(:)+ffnl(:,1,ilmn)*cmplx(gxfacs_(1,ilmn),gxfacs_(2,ilmn),kind=dp)
            end do
-           call timab(1144,2,tsec)
+!           call timab(1144,2,tsec)
          end if
 
 !        ------
@@ -748,11 +748,11 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 
 !        ------
-         call timab(1146,1,tsec)
+!         call timab(1146,1,tsec)
          ztab(:)=ztab(:)*cmplx(ph3d(1,:,iaph3d),-ph3d(2,:,iaph3d),kind=dp)
          svect(1,1+ipwshft:npw+ipwshft)=svect(1,1+ipwshft:npw+ipwshft)+real(ztab(:))
          svect(2,1+ipwshft:npw+ipwshft)=svect(2,1+ipwshft:npw+ipwshft)+aimag(ztab(:))
-         call timab(1146,2,tsec)
+!         call timab(1146,2,tsec)
        end if
 
 !      End loop on atoms
@@ -1433,7 +1433,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
    end if
  end if
 
- call timab(1140,2,tsec)
+! call timab(1140,2,tsec)
 
  DBG_EXIT("COLL")
 
