@@ -32,6 +32,7 @@
   optcell 0        # no optimization of cell geometry 
   hmcsst  0        # number of strain steps (optimization of unit cell geometry)
   ntime   4        # number of HMC sweeps
+  nnos    1        # Number of thermostats for isothermal mover 
 
   kptopt   1
   ngkpt    2 2 2

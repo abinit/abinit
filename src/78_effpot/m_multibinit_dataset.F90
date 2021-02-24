@@ -136,6 +136,7 @@ module m_multibinit_dataset
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
+  logical :: prt_GF_csv
 
   ! parameters for spin
  ! integer :: spin_calc_traj_obs
@@ -403,6 +404,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%prt_model=0
  multibinit_dtset%prt_phfrq=0
  multibinit_dtset%prt_ifc = 0
+ multibinit_dtset%prt_GF_csv = .FALSE.
  multibinit_dtset%strcpling = -1
  multibinit_dtset%qrefine=1
  multibinit_dtset%restartxf=0
@@ -1323,6 +1325,21 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct fit_generateCoeff in your input file.'
    MSG_ERROR(message)
  end if
+
+!Default is no output of GF values per processor to csv file 
+ multibinit_dtset%prt_GF_csv = .FALSE.
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_GF_csv',tread,'INT')
+ if(tread==1)then 
+    if(intarr(1) == 1) multibinit_dtset%prt_GF_csv = .TRUE.
+    if(intarr(1) == 0) multibinit_dtset%prt_GF_csv = .FALSE.
+    if(intarr(1) < 0 .or. intarr(1) > 1) then
+      write(message, '(a,i0,a,a,a,a,a)' )&
+&     'prt_GF_csv is',intarr(1),'. The only allowed values',ch10,&
+&     'are 0 (no output) or 1 (print GF values per processor into csv files)',ch10,  &
+&     'Action: correct prt_GF_csv in your input file.'
+      MSG_ERROR(message)
+    end if
+ endif 
 
 !Default is no output of the real space IFC to file
  multibinit_dtset%prt_ifc = 0

@@ -127,7 +127,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,fit_tolGF,&
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_anh,& 
-&                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors)
+&                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors,prt_GF_csv)
 
  implicit none
 
@@ -145,7 +145,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),optional,intent(in) :: fit_tolGF
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
  logical,optional,intent(in) :: only_odd_power,only_even_power
- logical,optional,intent(in) :: initialize_data,prt_files
+ logical,optional,intent(in) :: initialize_data,prt_files,prt_GF_csv
  logical,optional,intent(in) :: fit_on(3), sel_on(3)
  real(dp),optional,intent(in) :: fit_factors(3)
 !Local variables-------------------------------
@@ -159,7 +159,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical :: iam_master,need_verbose,need_positive,converge,file_opened
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients,need_prt_anh
  logical :: need_only_odd_power,need_only_even_power,need_initialize_data
- logical :: need_prt_files
+ logical :: need_prt_files,need_prt_GF_csv
 !arrays
  real(dp) :: mingf(4)
  integer :: sc_size(3)
@@ -206,8 +206,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(prt_anh))then
    if(prt_anh == 1) need_prt_anh = .TRUE.
  end if
+ need_prt_GF_csv = .FALSE. 
+ if(present(prt_GF_csv)) need_prt_GF_csv = .TRUE.
  need_prt_files = .TRUE.
-
  if(present(prt_files))need_prt_files=prt_files
  need_only_even_power = .FALSE.
  if(present(only_even_power)) need_only_even_power = only_even_power
@@ -689,12 +690,15 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        call wrtout(std_out,message,'COLL')
      end if!End if verbose
 
+     !Print all GF VALUES in CSV if wanted 
      !Open *csv file for storing GF values of all cores for this iteration
-     write(filename,'(a,I1,a,I3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom,"_proc",my_rank,"_iter",icycle,".csv"
-     unit_GF_val = get_unit()
-     if (open_file(filename,message,unit=unit_GF_val,form="formatted",&
+     if(need_prt_GF_csv)then
+        write(filename,'(a,I1,a,I3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom,"_proc",my_rank,"_iter",icycle,".csv"
+        unit_GF_val = get_unit()
+        if (open_file(filename,message,unit=unit_GF_val,form="formatted",&
 &          status="unknown",action="write") /= 0) then
            MSG_ERROR(message)
+        end if
      end if
 !    Reset gf_values
      gf_values(:,:) = zero
@@ -759,34 +763,40 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   gf_values(1,icoeff)*HaBohr_meVAng**2,&
 &                                   gf_values(2,icoeff)*HaBohr_meVAng**2,&
 &                                   gf_values(3,icoeff)*HaBohr_meVAng**2
-           write(message2, '(I7.7,3a,ES18.10,a,ES18.10,a,ES18.10,a,ES18.10)') my_coeffindexes(icoeff),",",&
+           if(need_prt_GF_csv)then
+             write(message2, '(I7.7,3a,ES18.10,a,ES18.10,a,ES18.10,a,ES18.10)') my_coeffindexes(icoeff),",",&
 !&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2,",",&
 &                                   trim(my_coeffs(icoeff)%name),",",&
 &                                   gf_values(4,icoeff)*HaBohr_meVAng**2,",",&
 &                                   gf_values(1,icoeff)*HaBohr_meVAng**2,",",&
 &                                   gf_values(2,icoeff)*HaBohr_meVAng**2,",",&
 &                                   gf_values(3,icoeff)*HaBohr_meVAng**2
+           end if
          end if
        else!In this case the matrix is singular
          gf_values(:,icoeff) = zero
          singular_coeffs(icoeff) = 1
          write(message, '(a)') ' The matrix is singular...'
-         write(message2, '(I7.7,10a)') my_coeffindexes(icoeff),",",&
+         if(need_prt_GF_csv)then
+           write(message2, '(I7.7,10a)') my_coeffindexes(icoeff),",",&
 !&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2,",",&
 &                                   trim(my_coeffs(icoeff)%name),",",&
 &                                  "None",",",&
 &                                  "None",",",&
 &                                  "None",",",&
-&                                  "None"                                  
+&                                  "None"          
+         endif                        
        end if
        if(need_verbose)then
            call wrtout(std_out,message,'COLL')
-           call wrtout(unit_GF_val,message2,'PERS',do_flush=.TRUE.)
+           if(need_prt_GF_csv)then
+             call wrtout(unit_GF_val,message2,'PERS',do_flush=.TRUE.)
+           end if 
        endif
      end do !icoeff=1,my_ncoeff
 
      !Close *csv file for GF values of this iteration 
-     close(unit_GF_val) 
+     if(need_prt_GF_csv)close(unit_GF_val) 
 
 !    find the best coeff on each CPU
      mingf(:)  = 9D99
