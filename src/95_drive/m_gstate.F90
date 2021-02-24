@@ -277,7 +277,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
- logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
+ logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk,compute_cprj
  logical :: is_dfpt=.false.,wvlbigdft=.false.,wvl_debug=.false.
  character(len=500) :: message
  character(len=fnlen) :: ddbnm,dscrpt,filnam,wfkfull_path
@@ -992,8 +992,24 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 ! Initialisation of cprj
  usecprj=0; mcprj=0;mband_cprj=0
- if (dtset%usepaw==1) then
+ compute_cprj=.false.
+ ! PAW keeping cprj in memory : some cases are excluded for now...
+ if (dtset%usepaw==1.and.dtset%wfoptalg==10.and.dtset%berryopt==0.and.dtset%usefock==0) then
+   compute_cprj=.true.
    usecprj=1
+ else
+   if (dtset%usepaw==1) then
+     if (associated(electronpositron)) then
+       if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
+     end if
+     if (dtset%prtnabla>0) usecprj=1
+     if (dtset%extrapwf>0) usecprj=1
+     if (dtset%pawfatbnd>0)usecprj=1
+     if (dtset%prtdos==3)  usecprj=1
+     if (dtset%usewvl==1)  usecprj=1
+     if (dtset%nstep==0) usecprj=0
+     if (dtset%usefock==1)  usecprj=1
+   end if
  end if
  if (usecprj==0) then
    ABI_DATATYPE_ALLOCATE(cprj,(0,0))
@@ -1008,32 +1024,36 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
    ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
    ncpgr=0
-   if (dtset%optforces == 1) then
-     ncpgr = 3
-   end if
+   if (compute_cprj.or.dtset%usefock==1) then
+     if (dtset%optforces == 1) then
+       ncpgr = 3
+     end if
 !       if (dtset%optstress /= 0) then
 !         ncpgr = 6 ; ctocprj_choice = 3
 !       end if
+   end if
    ABI_ALLOCATE(dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
    call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
-   if (dtset%optforces/=1) then
-     choice=1 ! no derivative
-   else
-     choice=2 ! forces
+   if (compute_cprj) then
+     if (dtset%optforces/=1) then
+       choice=1 ! no derivative
+     else
+       choice=2 ! forces
+     end if
+     idir        = 0 ! all directions
+     iatom       = 0 ! all atoms
+     iorder_cprj = 0 ! ordered by atom types
+     ncprj       = dtset%natom
+!    Compute structure factor phases and large sphere cut-off (gsqcut):
+     ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+     call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred)
+     call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
+&   iorder_cprj,dtset%istwfk,kg,dtset%kpt,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&   dtset%mpw,dtset%natom,nattyp,dtset%nband,ncprj,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
+&   dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
+     ABI_DEALLOCATE(ph1d)
    end if
-   idir        = 0 ! all directions
-   iatom       = 0 ! all atoms
-   iorder_cprj = 0 ! ordered by atom types
-   ncprj       = dtset%natom
-!  Compute structure factor phases and large sphere cut-off (gsqcut):
-   ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
-   call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred)
-   call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
-& iorder_cprj,dtset%istwfk,kg,dtset%kpt,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
-& dtset%mpw,dtset%natom,nattyp,dtset%nband,ncprj,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-& dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
-   ABI_DEALLOCATE(ph1d)
  end if
 
 
