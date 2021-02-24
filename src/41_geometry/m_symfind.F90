@@ -1660,23 +1660,26 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mgen=4
- integer :: center,fact,found,foundc,ia,ib,icase,igen,iholohedry,ii,index,isym
+ integer :: center,fact,found,foundc,ia,iaxis1,iaxis2
+ integer :: isign1,isign2,ib,icase,igen,iholohedry,ii,index,isym
  integer :: itrial,jj,jsym,ngen=0,orthogonal,sign12,sign13,sign23,sumsign
  real(dp) :: determinant,norm2a,norm2b,norm2c,norm2trial,reduceda,reducedb,sca
- real(dp) :: scalarprod,scb,trace,val
+ real(dp) :: scalarprod,scb,trace,trace_best,val
  character(len=500) :: message
 !arrays
  integer,parameter :: list_holo(7)=(/7,6,4,3,5,2,1/)
  integer :: ang90(3),equal(3),gen(3,3,mgen),gen2xy(3,3),gen2y(3,3),gen2z(3,3)
  integer :: gen3(3,3),gen6(3,3),icoord(3,3),identity(3,3),nvecta(3),nvectb(3)
  integer :: order(mgen)
- real(dp) :: axes(3,3),axesinvt(3,3),cell_base(3,3),coord(3,3),metmin(3,3)
+ real(dp) :: axes(3,3),axesinvt(3,3),axes_best(3,3),axes_try(3,3)
+ real(dp) :: cell_base(3,3),coord(3,3),metmin(3,3)
  real(dp) :: minim(3,3),scprods(3,3),vecta(3),vectb(3),vectc(3),vin1(3),vin2(3),vext(3)
 
 !**************************************************************************
 
 !DEBUG
-!write(std_out,'(a)') ' symlatt : enter '
+!write(std_out,'(a)') ' m_symfind%symlatt : enter '
+!call flush(std_out)
 !ENDDEBUG
 
  identity(:,:)=0 ; identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
@@ -1692,6 +1695,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !write(std_out,*)' symlatt : minim(:,1)=',minim(:,1)
 !write(std_out,*)' symlatt : minim(:,2)=',minim(:,2)
 !write(std_out,*)' symlatt : minim(:,3)=',minim(:,3)
+!call flush(std_out)
 !ENDDEBUG
 
 !--------------------------------------------------------------------------
@@ -1708,6 +1712,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !DEBUG
 !write(std_out,*)' ang90=',ang90(:)
 !write(std_out,*)' equal=',equal(:)
+!call flush(std_out)
 !ENDDEBUG
 
 !-----------------------------------------------------------------------
@@ -2307,6 +2312,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !write(std_out,*)' symlatt : done with centering tests, foundc=',foundc
 !write(std_out,*)'  center=',center
 !write(std_out,*)'  iholohedry=',iholohedry
+!call flush(std_out)
 !ENDDEBUG
 
 !--------------------------------------------------------------------------
@@ -2335,6 +2341,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !write(std_out,*)' symlatt : recompute the  metric tensor '
 !write(std_out,*)'  ang90=',ang90
 !write(std_out,*)'  equal=',equal
+!call flush(std_out)
 !ENDDEBUG
 
 !The axes will be aligned with the previously determined
@@ -2432,6 +2439,11 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
  call wrtout(std_out,message,'COLL')
 
+!DEBUG
+!write(std_out,*)' symlatt : after checking conventional orthogonal cell '
+!call flush(std_out)
+!ENDDEBUG
+
 !--------------------------------------------------------------------------
 !Make sure that axes form a right-handed coordinate system
 !(Note : this should be done in the body of the routine,
@@ -2443,14 +2455,30 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 & -axes(1,1)*axes(3,2)*axes(2,3) &
 & -axes(1,3)*axes(2,2)*axes(3,1) &
 & -axes(1,2)*axes(2,1)*axes(3,3)
- if(determinant<0.0d0)then
+ if(determinant<zero)then
    axes(:,:)=-axes(:,:)
  end if
+
+!DEBUG
+!write(std_out,'(a,i4)')' symlatt : before itrial do loop, iholohedry= ',iholohedry
+!write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' rprimd=',&
+!&  rprimd(:,1),ch10,rprimd(:,2),ch10,rprimd(:,3)
+!call flush(std_out)
+!ENDDEBUG
 
 !--------------------------------------------------------------------------
 !Prefer symmetry axes on the same side as the primitive axes,
 !when the changes are allowed
- do
+ do itrial=1,100
+
+!  DEBUG
+!  write(std_out,'(a)')' '
+!  write(std_out,'(a,i5)')' symlatt : itrial do loop, itrial= ',itrial
+!  write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' axes  =',&
+!  &  axes(:,1),ch10,axes(:,2),ch10,axes(:,3)
+!  call flush(std_out)
+!  ENDDEBUG
+
    do ia=1,3
      scprods(ia,:)=axes(1,ia)*rprimd(1,:)+&
 &     axes(2,ia)*rprimd(2,:)+&
@@ -2462,6 +2490,11 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      norm2trial=sum(rprimd(:,ia)**2)
      scprods(:,ia)=scprods(:,ia)/sqrt(norm2trial)
    end do
+
+!DEBUG
+!  write(std_out,'(a,3f12.6)')' diagonal scalar products ',scprods(1,1),scprods(2,2),scprods(3,3) 
+!  call flush(std_out)
+!ENDDEBUG
 
 !  One should now try all the generators of the
 !  proper rotations of each Bravais lattice, coupled with change of
@@ -2499,9 +2532,9 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      end if
 !    This case is observed when the three new vectors
 !    are pointing opposite to the three original vectors
-!    One takes their opposite, then switch to of them, then process
+!    One takes their opposite, then switch two of them, then process
 !    them again in the loop
-     if(sum(scprods(:,:))<tolsym)then
+     if(sum(scprods(:,:))<-tolsym)then
        axes(:,1)=-axes(:,1)
        vecta(:)=-axes(:,2)
        axes(:,2)=-axes(:,3)
@@ -2509,17 +2542,76 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
        cycle
      end if
    end if
+
+!  Actually, for iholohedry==7, can test specifically all possibilities
+!  and take the best one.
+   if(iholohedry==7)then
+
+!DEBUG
+!write(std_out,'(a,a)')ch10,' enter search of all possibilities for iholohedry==7 '
+!write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' axes  =',&
+!&  axes(:,1),ch10,axes(:,2),ch10,axes(:,3)
+!call flush(std_out)
+!ENDDEBUG
+
+     do iaxis1=1,3
+       axes_try(:,1)=axes(:,iaxis1)
+       do iaxis2=1,2
+         if(iaxis1==1)axes_try(:,2)=axes(:,1+iaxis2)
+         if(iaxis1==2)axes_try(:,2)=axes(:,2*iaxis2-1)
+         if(iaxis1==3)axes_try(:,2)=axes(:,iaxis2)
+         if(iaxis2==1)axes_try(:,3)=axes(:,3)
+         if(iaxis2==2)axes_try(:,3)=axes(:,1)
+         if(iaxis1==1.and.iaxis2==2)axes_try(:,3)=axes(:,2)
+         if(iaxis1==3.and.iaxis2==1)axes_try(:,3)=axes(:,2)
+         do isign1=1,-1,-2
+           axes_try(:,1)=-axes_try(:,1)
+           do isign2=1,-1,-2
+             axes_try(:,2)=-axes_try(:,2)
+             determinant=axes_try(1,1)*axes_try(2,2)*axes_try(3,3) &
+&                       +axes_try(1,2)*axes_try(2,3)*axes_try(3,1) &
+&                       +axes_try(1,3)*axes_try(3,2)*axes_try(2,1) &
+&                       -axes_try(1,1)*axes_try(3,2)*axes_try(2,3) &
+&                       -axes_try(1,3)*axes_try(2,2)*axes_try(3,1) &
+&                       -axes_try(1,2)*axes_try(2,1)*axes_try(3,3)
+             if(determinant<zero)axes_try(:,3)=-axes_try(:,3)
+             do ia=1,3
+               scprods(ia,:)=axes_try(1,ia)*rprimd(1,:)+&
+&                            axes_try(2,ia)*rprimd(2,:)+&
+&                            axes_try(3,ia)*rprimd(3,:)
+               norm2trial=sum(axes_try(:,ia)**2)
+               scprods(ia,:)=scprods(ia,:)/sqrt(norm2trial)
+             end do
+             do ia=1,3
+               norm2trial=sum(rprimd(:,ia)**2)
+               scprods(:,ia)=scprods(:,ia)/sqrt(norm2trial)
+             end do
+             trace=scprods(1,1)+scprods(2,2)+scprods(3,3) 
+             if(iaxis1==1.and.iaxis2==1.and.isign1==1.and.isign2==1)then
+               trace_best=trace
+               axes_best=axes_try
+             else if (trace>trace_best+tolsym)then
+               trace_best=trace
+               axes_best=axes_try
+             endif
+           enddo ! isign2
+         enddo ! isign1
+       enddo ! iaxes2
+     enddo ! iaxes1
+     axes=axes_best
+   endif ! iholohedry=7
    exit
-!  Other cases might be coded ...
  end do
 
 !--------------------------------------------------------------------------
 
 !DEBUG
+!write(std_out,'(a,a)')ch10,' after order/sign optimization do-loop '
 !write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' rprimd=',&
 !&  rprimd(:,1),ch10,rprimd(:,2),ch10,rprimd(:,3)
 !write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' axes  =',&
 !&  axes(:,1),ch10,axes(:,2),ch10,axes(:,3)
+!call flush(std_out)
 !ENDDEBUG
 
 !Compute the coordinates of rprimd in the system defined by axes(:,:)
@@ -2625,6 +2717,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !DEBUG
 !write(std_out,'(a)') ' symlatt : exit '
+!call flush(std_out)
 !stop
 !ENDDEBUG
 

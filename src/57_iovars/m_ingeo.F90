@@ -196,6 +196,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
 ! *************************************************************************
 
+!DEBUG
+!write(std_out,'(a)')' m_ingeo%ingeo : enter '
+!call flush(std_out)
+!ENDDEBUG
+
  marr=max(12,3*natom,9*msym)
  ABI_MALLOC(intarr,(marr))
  ABI_MALLOC(dprarr,(marr))
@@ -344,6 +349,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  end do
 
  ! 6) Read coordinates for each atom in the primitive set--------
+
  ABI_MALLOC(xcart_read,(3,natrd))
  ABI_MALLOC(xred_read,(3,natrd))
 
@@ -424,6 +430,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  !7) Eventually read the symmetries
  !Take care of the symmetries
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsym',tread,'INT')
  if(tread==1) nsym=intarr(1)
 
@@ -879,14 +886,15 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          ABI_FREE(symrec)
 
          if(print_comment_tolsym==1)then
-           write(msg,'(a,es12.3,14a)')&
+           write(msg,'(a,es12.3,17a)')&
 &           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
 &           'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
 &           'symmetrized before storing them in the dataset internal variable.',ch10,&
 &           'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
 &           'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-&           'This is not a problem per se. Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
-&           ' decrease tolsym to 1.0e-8 or lower.',ch10,&
+&           'This is not a problem per se.',ch10,&
+&           'Still, in order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower,',ch10,&
+&           'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.',ch10,&
 &           'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
            ABI_COMMENT(msg)
            print_comment_tolsym=0
@@ -967,7 +975,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tol8)
 
    if(iexit==-1)then
-      write(msg,'(5a,es11.3,13a)')&
+      write(msg,'(5a,es11.3,14a)')&
         'It is observed that the input primitive vectors are not accurate:',ch10,&
         'the lattice is not left invariant within 1.0e-8 when applying symmetry operations.',ch10,&
         'However, they are only slightly inaccurate, as inaccuracies are within the input tolsym=', tolsym,ch10,&
@@ -975,8 +983,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
         'symmetrized before storing them in the dataset internal variable.',ch10,&
         'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
         'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-        'This is not a problem per se. Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
-        ' decrease tolsym to 1.0e-8 or lower,',ch10,&
+&       'This is not a problem per se.',ch10,& 
+&       'Still, in order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.',ch10,&
         'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.'
      ABI_WARNING(msg)
 
@@ -1164,7 +1172,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ABI_FREE(dprarr)
 
 !DEBUG
-!write(std_out,'(a)')' m_ingeo : end ingeo '
+!write(std_out,'(a)')' m_ingeo%ingeo : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine ingeo

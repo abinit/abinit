@@ -3102,6 +3102,7 @@ subroutine smallprim(metmin,minim,rprimd)
 !write(std_out,'(3f16.8)' )rmet(:,1)
 !write(std_out,'(3f16.8)' )rmet(:,2)
 !write(std_out,'(3f16.8)' )rmet(:,3)
+!call flush(std_out)
 !ENDDEBUG
 
 !Note this loop without index
@@ -3260,6 +3261,8 @@ subroutine smallprim(metmin,minim,rprimd)
 !write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' rprimd=',rprimd(:,1),ch10,rprimd(:,2),ch10,rprimd(:,3)
 !write(std_out,'(a,3es16.8,a,3es16.8,a,3es16.8)')' minim =',minim(:,1),ch10,minim(:,2),ch10,minim(:,3)
 !write(std_out,'(a,3es16.8,a,3es16.8,a,3es16.8)')' metmin =',metmin(:,1),ch10,metmin(:,2),ch10,metmin(:,3)
+!write(std_out,'(a)')' smallprim : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine smallprim
