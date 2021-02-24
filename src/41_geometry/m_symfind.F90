@@ -853,10 +853,11 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 !scalars
  integer :: iaxis,ii,bravais1now,ideform,iholohedry,invariant,isym
  integer :: jaxis,next_stage,nptsym,problem,maxsym
+ integer, parameter :: naxes_ortho=22, naxes_hexa=7
  real(dp) :: norm,scprod
  character(len=500) :: message
 !arrays
- integer :: identity(3,3),axis_trial(3),hexa_axes(3,7),ortho_axes(3,13)
+ integer :: identity(3,3),axis_trial(3),hexa_axes(3,naxes_hexa),ortho_axes(3,naxes_ortho)
  integer,allocatable :: ptsymrel(:,:,:),symrelconv(:,:,:)
  real(dp) :: axes(3,3),axis_cart(3),axis_red(3)
  real(dp) :: rprimdconv(3,3),rprimdtry(3,3),rprimdnow(3,3)
@@ -882,10 +883,19 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
  ortho_axes(:,7)=(/0,1,-1/)
  ortho_axes(:,8)=(/-1,0,1/)
  ortho_axes(:,9)=(/1,-1,0/)
- ortho_axes(:,10)=(/1,1,1/)
- ortho_axes(:,11)=(/-1,1,1/)
- ortho_axes(:,12)=(/1,-1,1/)
- ortho_axes(:,13)=(/1,1,-1/)
+ ortho_axes(:,10)=(/0,1,2/)
+ ortho_axes(:,11)=(/2,0,1/)
+ ortho_axes(:,12)=(/1,2,0/)
+ ortho_axes(:,13)=(/1,1,1/)
+ ortho_axes(:,14)=(/-1,1,1/)
+ ortho_axes(:,15)=(/1,-1,1/)
+ ortho_axes(:,16)=(/1,1,-1/)
+ ortho_axes(:,17)=(/2,1,1/)
+ ortho_axes(:,18)=(/1,2,1/)
+ ortho_axes(:,19)=(/1,1,2/)
+ ortho_axes(:,20)=(/2,1,-1/)
+ ortho_axes(:,21)=(/-1,2,1/)
+ ortho_axes(:,22)=(/1,-1,2/)
 
  hexa_axes(:,:)=0
  hexa_axes(1,1)=1
@@ -922,19 +932,28 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
  rprimdtry(:,:)=rprimd(:,:)
  ABI_MALLOC(symrelconv,(3,3,nsym))
 
-!At most will have to try 65 deformations (13 axes, five stages)
- do ideform=1,65
-
-!DEBUG
-!write(std_out,*)' symbrav: inside loop with ideform=',ideform
-!call flush(std_out)
-!write(std_out,'(a,9f10.4)')' rprimdtry=',rprimdtry(:,:)
-!ENDDEBUG
+!At most will have to try naxes_ortho*5 deformations (naxes_ortho axes, five stages)
+!First, test whether the current recognition of Bravais lattice is problematic (iholohedry differs from bravais(1)).
+!Then, if there is a problem, test different deformations of rprimd, one after the other. 
+!For each try, there is a new rprimdtry from the different set of deformation, that is generated later in the loop 
+!Also bravais1now and rprimdnow might changed (and progressively lowered). 
+!The latter change induces at most 5 stages for the computation (cubic->tetragonal->orthorhombic->monoclinic->triclinic).
+!After an upgrade of bravais1now and rprimdnow, one has to restart the full set of deformations.
+!Not sure that this procedure resolves all cases, but seems to work on >40000 inaccurate POSCAR files.
+ do ideform=1,naxes_ortho*5
 
    maxsym=max(192,msym)
    ABI_MALLOC(ptsymrel,(3,3,maxsym))
    call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimdtry,tolsym)
    ABI_FREE(ptsymrel)
+
+!DEBUG
+!write(std_out,*)' symbrav: inside loop with ideform,iaxis=',ideform,iaxis
+!write(std_out,'(a,9f12.6)')' rprimdtry=',rprimdtry(:,:)
+!write(std_out,'(a,2i4)')' bravais(1:2)=',bravais(1:2)
+!call flush(std_out)
+!ENDDEBUG
+
 
 !  Examine the agreement with bravais(1)
 !  Warning : might change Bravais lattice hR to hP, if hexagonal axes
@@ -1018,6 +1037,13 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      end if
    end if ! problem==1
 
+!  One is here when problem=1 (iholohedry < bravais(1)) and either
+!  - iaxis=0 (no deformation has been tried yet),
+!  - some deformation iaxis has been tried giving bravais(1), but iholohedry < bravais(1) < bravais1now
+!  - some deformation iaxis has been tried giving bravais(1), but iholohedry < bravais(1) = bravais1now and iaxis/=1 .
+!  Also, note that next_stage is still 0 when bravais(1)=bravais1now .
+!  The loop has been ended (so, the search failed) when bravais(1)=bravais1now and iaxis==1.
+
    if(next_stage==1)then
      bravais1now=bravais(1)
      rprimdnow(:,:)=rprimdtry(:,:)
@@ -1030,13 +1056,23 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      symrelconv(:,:,1:nsym)=symrel(:,:,1:nsym)
      call symrelrot(nsym,rprimdconv,axes,symrelconv,tolsym)
      if(bravais(1)/=6)then
-       iaxis=14
+       iaxis=naxes_ortho+1
      else
-       iaxis=8
+       iaxis=naxes_hexa+1
      end if
      next_stage=0
+!DEBUG
+!    write(std_out,*)' symbrav: next stage, bravais(1), bravais(2) and symrelconv'
+!    write(std_out,'(a,2i4)')' bravais(1:2)=',bravais(1:2)
+!    write(std_out,'(a,9f12.6)')' rprimdconv=',rprimdconv(:,:)
+!    do isym=1,nsym
+!      write(std_out,'(9i4)')symrelconv(:,:,isym)
+!    enddo
+!    call flush(std_out)
+!ENDDEBUG
    end if
 
+!  Go to the next iaxis that will be left invariant
    iaxis=iaxis-1
    do jaxis=iaxis,1,-1
      if(bravais(1)/=6)then

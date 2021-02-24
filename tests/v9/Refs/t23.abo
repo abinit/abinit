@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 23 Feb 2021.
-- ( at 20h38 )
+.Starting date : Wed 24 Feb 2021.
+- ( at 13h52 )
   
 - input  file    -> /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Test_suite/v9_t23/t23.abi
 - output file    -> t23.abo
@@ -218,7 +218,7 @@ P           mkmem           1
  chkinp: Checking input parameters for consistency, jdtset=   1.
 
  chkinp: Checking input parameters for consistency, jdtset=   2.
-   Found potentially symmetry-breaking value of tnons. 
+   Found potentially symmetry-breaking value of tnons (see input variable chksymtnons). 
    The following shift of all reduced symmetry-corrected atomic positions might possibly remove this problem:
     0.0000000000E+00   -2.8275000000E-04    2.8275000000E-04
 
@@ -1116,10 +1116,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.1
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.0  wall=          4.1
++Overall time at end (sec) : cpu=          3.9  wall=          4.0
