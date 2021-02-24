@@ -975,9 +975,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
         'symmetrized before storing them in the dataset internal variable.',ch10,&
         'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
         'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-        'In order to avoid this symmetrization (e.g. for specific debugging/development),',&
+        'This is not a problem per se. Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
         ' decrease tolsym to 1.0e-8 or lower,',ch10,&
-        'or use input primitive vectors that are accurate to better than 1.0e-8.'
+        'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.'
      ABI_WARNING(msg)
 
      call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tol8)

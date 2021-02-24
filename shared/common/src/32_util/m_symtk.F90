@@ -676,7 +676,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
      end do
    end do
 
-   if(sqrt(residual) > two*tolsym*sqrt(rmet2))then
+   if(sqrt(residual) > three*tolsym*sqrt(rmet2))then
      if(iexit==0)then
        write(std_out, '(a)') ' Matrix rprimd :'
        do ii=1,3
@@ -907,9 +907,9 @@ subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
      do jj=1,3
        val=matr2(ii,jj)
 !      Need to allow for four times tolsym, in case of centered Bravais lattices (but do it for all lattices ...)
-       if(abs(val-nint(val))>four*tolsym)then
+       if(abs(val-nint(val))>six*tolsym)then
          write(msg,'(2a,a,i3,a,a,3es14.6,a,a,3es14.6,a,a,3es14.6)')&
-         'One of the components of symrel is non-integer within 4*tolsym,',ch10,&
+         'One of the components of symrel is non-integer within 6*tolsym,',ch10,&
          '  for isym=',isym,ch10,&
          '  symrel=',matr2(:,1),ch10,&
          '         ',matr2(:,2),ch10,&

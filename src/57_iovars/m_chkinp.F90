@@ -443,7 +443,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          write(msg, '(2a)' ) ch10,' chkinp: COMMENT -'
          call wrtout(std_out,msg,'COLL')
          write(msg, '(4a,3es20.10)' )  &
-&          '   Found potentially symmetry-breaking value of tnons. ', ch10,&
+&          '   Found potentially symmetry-breaking value of tnons (see input variable chksymtnons). ', ch10,&
 &          '   The following shift of all reduced symmetry-corrected atomic positions might possibly remove this problem:',ch10,&
 &          xred(:,1)-dt%xred_orig(:,1,1)
          call wrtout(std_out,msg,'COLL')
