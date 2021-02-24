@@ -160,7 +160,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
  integer :: iterm1,iterm2
  integer :: ii,nterm_tmp
  real(dp):: coefficient_tmp
- logical :: check_in = .false.
+ logical :: check_in 
 !arrays
  real(dp) :: weights(nterm)
  character(len=200) :: name_tmp
@@ -168,7 +168,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
 
 !First free before initilisation
  call polynomial_coeff_free(polynomial_coeff)
-
+ check_in = .false.
  if(present(check)) check_in = check
  if(check_in)then
 !  Check if the list of term is available or contains identical terms
@@ -457,7 +457,7 @@ subroutine polynomial_coeff_getName(name,polynomial_coeff,symbols,recompute,iter
 !Local variables-------------------------------
 !scalar
  integer :: ii,idisp,iterm_in
- logical :: need_recompute = .FALSE.
+ logical :: need_recompute
 !arrays
  integer :: cell_atm1(3),cell_atm2(3)
  character(len=1) :: mutodir(9) = (/"x","y","z","1","2","3","4","5","6"/)
@@ -474,6 +474,7 @@ subroutine polynomial_coeff_getName(name,polynomial_coeff,symbols,recompute,iter
  iterm_in = 1
 
 !Set the optional arguments
+ need_recompute = .FALSE.
  if(present(recompute)) need_recompute = recompute
  if(present(iterm)) then
    iterm_in = iterm
@@ -853,7 +854,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace
 !scalar
  integer :: icoeff,idisp,iterm
  integer :: unit_xml
- logical :: need_header = .TRUE.,need_to_replace = .FALSE.
+ logical :: need_header,need_to_replace
  character(len=500) :: message
  character(len=fnlen) :: namefile
  character(len=1)  :: direction
@@ -872,10 +873,12 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace
    namefile='coefficients.xml'
  end if
 
+ need_to_replace = .FALSE.
  if(present(replace))then
    need_to_replace = replace
  end if
-
+ 
+ need_header = .TRUE.
  if(present(newfile))then
    if (newfile) then
      unit_xml = get_unit()

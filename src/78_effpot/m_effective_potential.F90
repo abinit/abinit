@@ -615,7 +615,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  integer :: my_nrpt,nrpt_alone
  real(dp) :: ucvol
  character(len=500) :: msg
- logical :: iam_master=.FALSE.
+ logical :: iam_master
 !array
  integer,allocatable :: my_index_rpt(:,:)
  integer,allocatable :: bufsize(:),bufdisp(:)
@@ -634,6 +634,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 
 !0 MPI variables
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master=.FALSE.
  iam_master = (my_rank == master)
  ierr=0
 
@@ -1075,7 +1076,7 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 !Local variables-------------------------------
 !scalar
  integer :: ii,jj
- logical :: has_straincoupling=.FALSE.
+ logical :: has_straincoupling
  character(len=500) :: msg
 !array
 ! *************************************************************************
@@ -1085,6 +1086,7 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
  end if
 
 ! Check if the strain coupling is present
+ has_straincoupling=.FALSE.
  do ii=1,ncoeff
    do jj=1,coeffs(ii)%nterm
      if (coeffs(ii)%terms(jj)%nstrain > 0) then
@@ -1332,7 +1334,7 @@ subroutine effective_potential_setConfinement(cutoff_disp,cutoff_strain,eff_pot,
  type(effective_potential_type),intent(inout) :: eff_pot
 !Local variables-------------------------------
 !scalar
- logical  :: need_confinement_tmp = .FALSE.
+ logical  :: need_confinement_tmp
 !arrays
  !character(len=500) :: msg
 
@@ -1346,6 +1348,7 @@ subroutine effective_potential_setConfinement(cutoff_disp,cutoff_strain,eff_pot,
 !First free the type
  call  polynomial_conf_free(eff_pot%confinement)
 
+ need_confinement_tmp = .FALSE.
  if (present(need_confinement)) need_confinement_tmp = need_confinement
 
  call  polynomial_conf_init(cutoff_disp,cutoff_strain,factor_disp,factor_strain,ndisp,&
@@ -1730,7 +1733,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
  character(len=500) :: msg
  character(len=fnlen) :: namefile
  character(len=10) :: natom
- logical :: new_file = .FALSE.,need_prtdipdip = .FALSE.
+ logical :: new_file,need_prtdipdip
 !arrays
  real(dp) :: strain(9,6)
 
@@ -1976,6 +1979,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
  end if!end option
 
 !Print the coefficients into XML file
+ new_file = .FALSE.
  if (option==1 .or. option == 2 .or. option==4) then
 !   Compute the name of the XML file
    if(present(filename)) then
@@ -2240,10 +2244,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !scalar
   integer :: alpha,ii,ia,mu,ncell,comm,natom_for_scup
   real(dp):: energy_part,ucvol
-  logical :: has_strain = .FALSE.,need_verbose
+  logical :: has_strain,need_verbose
   logical :: iam_master,need_anharmonic
   logical :: err_eng, err_for
-  logical*1 :: update_dens=.TRUE.
+  logical*1 :: update_dens
   logical :: need_elec_eval
   integer, parameter:: master = 0
 !array
@@ -2327,8 +2331,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !--------------------------------------------
 ! 1 - Set the perturbations and intialisation
 !--------------------------------------------
-
 ! Get strain
+  has_strain = .FALSE.
   strain_tmp(:) = zero
   if (present(strain)) then
     strain_tmp(:) = strain(:)
@@ -2601,6 +2605,7 @@ fcart_part = 0
 
 if(need_elec_eval)then
 #if defined DEV_MS_SCALEUP
+   update_dens = .TRUE.
    write(msg,'(a)') ' wohoo i was here and call scale-up now!---STILL WOHOOO!---'
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
@@ -2769,7 +2774,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   integer :: ii,ia,ib,mu
   integer :: ierr,nproc,my_rank,natom_alone,my_natom
   character(len=500) :: msg
-  logical :: has_strain = .FALSE.
+  logical :: has_strain 
   logical :: need_displacement,need_duDelta
 !array
   integer,parameter :: alpha(9)=(/1,2,3,3,3,2,2,1,1/),beta(9)=(/1,2,3,2,1,1,3,3,2/)
@@ -2820,7 +2825,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 !--------------------------------------------
 ! 1 - Get the strain for this step
 !--------------------------------------------
-
+  has_strain = .FALSE.
   call strain_get(strain,rprim=rprimd_ref,rprim_def=rprimd_hist)
   if (strain%name /= "reference")  then
     has_strain = .TRUE.

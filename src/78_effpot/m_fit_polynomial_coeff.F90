@@ -2382,7 +2382,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
 !Uncommend for dipdip test
  integer :: ifirst
  real(dp):: energy,energy_harm
- logical :: need_anharmonic = .TRUE.,need_print=.FALSE.,need_elec_eval,iam_master
+ logical :: need_anharmonic,need_print,need_elec_eval,iam_master
  logical :: need_prt_ph 
  !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
@@ -2413,6 +2413,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
    MSG_BUG(msg)
  end if
 
+ need_anharmonic = .TRUE.
  if(present(compute_anharmonic))then
    need_anharmonic = compute_anharmonic
  end if
