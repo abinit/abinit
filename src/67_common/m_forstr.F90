@@ -1168,8 +1168,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    if (nsym>1) then
      call stresssym(gs_hamk%gprimd,nsym,kinstr,symrec)
      call stresssym(gs_hamk%gprimd,nsym,npsstr,symrec)
-     if ((usefock_loc).and.(fockcommon%optstr)) then
-       call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
+     if (usefock_loc) then
+       if (fockcommon%optstr) then
+         call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
+       end if
      end if
    end if
  end if
