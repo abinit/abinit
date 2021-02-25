@@ -649,6 +649,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !write(std_out,*)' invars0 : nimage, mxnimage = ',dtsets(:)%nimage, mxnimage
 !write(std_out,*)' invars0 : natom = ',dtsets(:)%natom
 !write(std_out,*)' invars0 : mxnatom = ',mxnatom
+!write(std_out,*)' m_invars1%invars0 : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine invars0
@@ -715,6 +717,11 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  real(dp),allocatable :: tnons_(:,:,:),tnons(:,:)
 
 !******************************************************************
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1m : enter '
+!call flush(std_out)
+!ENDDEBUG
 
  ! Here, allocation of the arrays that depend on msym.
  ABI_MALLOC(symrel_,(3,3,msym,0:ndtset_alloc))
@@ -874,6 +881,11 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  ABI_FREE(symafm)
  ABI_FREE(symrel)
  ABI_FREE(tnons)
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1m : exit '
+!call flush(std_out)
+!ENDDEBUG
 
 end subroutine invars1m
 !!***
@@ -1153,6 +1165,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  type(geo_t) :: geo
 
 !************************************************************************
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : enter '
+!call flush(std_out)
+!ENDDEBUG
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -2007,6 +2024,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ABI_FREE(ratsph)
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : exit '
+!call flush(std_out)
+!ENDDEBUG
 
 end subroutine invars1
 !!***
