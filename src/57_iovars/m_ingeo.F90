@@ -886,14 +886,15 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          ABI_FREE(symrec)
 
          if(print_comment_tolsym==1)then
-           write(msg,'(a,es12.3,17a)')&
+           write(msg,'(a,es12.3,18a)')&
 &           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
 &           'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
 &           'symmetrized before storing them in the dataset internal variable.',ch10,&
 &           'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
 &           'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
 &           'This is not a problem per se.',ch10,&
-&           'Still, in order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower,',ch10,&
+&           'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
+&           ' decrease tolsym to 1.0e-8 or lower,',ch10,&
 &           'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.',ch10,&
 &           'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
            ABI_COMMENT(msg)
@@ -975,7 +976,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tol8)
 
    if(iexit==-1)then
-      write(msg,'(5a,es11.3,14a)')&
+      write(msg,'(5a,es11.3,15a)')&
         'It is observed that the input primitive vectors are not accurate:',ch10,&
         'the lattice is not left invariant within 1.0e-8 when applying symmetry operations.',ch10,&
         'However, they are only slightly inaccurate, as inaccuracies are within the input tolsym=', tolsym,ch10,&
@@ -984,7 +985,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
         'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
         'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
 &       'This is not a problem per se.',ch10,& 
-&       'Still, in order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.',ch10,&
+&       'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
+&       ' decrease tolsym to 1.0e-8 or lower.',ch10,&
         'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.'
      ABI_WARNING(msg)
 
