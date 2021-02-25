@@ -2545,7 +2545,9 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !  Actually, for iholohedry==7, can test specifically all possibilities
 !  and take the best one.
-   if(iholohedry==7)then
+!  Not activated, because changing the order of symmetries in many tests !
+   if(iholohedry==7 .and. .false.)then
+!  if(iholohedry==7)then
 
 !DEBUG
 !write(std_out,'(a,a)')ch10,' enter search of all possibilities for iholohedry==7 '
