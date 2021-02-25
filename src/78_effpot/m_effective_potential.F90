@@ -2877,7 +2877,6 @@ endif
     call xred2xcart(natom,rprimd_ref,xcart_hist_tmp,xred_hist_tmp) 
     do ii = 1,natom 
         displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref(:,ii) 
-        write(*,*) displacement(:,ii)
     enddo 
   end if  
 
