@@ -165,7 +165,10 @@ Several test have been created ([[test:v9_17]] to [[test:v9_20]]).
 
 By S. Ponce, also with G.-M. Rignanese, G. Petretto, M. Giantomassi.
 
-**D.7** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
+**D.7** The new input variable dmft_wanorthnorm has been introduced, see [[test:v6_07]] and [[test:v6_46]]. However, it should still be documented.
+By B. Amadon.
+
+**D.8** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
 in the upgrade of tutorials)..
 By B. Amadon, F. Bruneval, T. Karatsu, G. Petretto, Y. Pouillon, M. Torrent, J. Zwanziger.
 
