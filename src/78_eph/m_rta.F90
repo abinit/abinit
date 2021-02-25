@@ -8,9 +8,9 @@
 !!  or within the Iterative Bolztmann Equation (IBTE).
 !!  The RTA has two different flavors: Self-energy Relaxation Time Approximation (SERTA)
 !!  in which the back-scattering term is completely ignored and the Momentum-Relaxation Time Approximation (MRTA)
-!!  in which backscattering is partly accounter for by multiplying the e-ph self-energy integral by the efficiency
-!!  factor alpha that depends on on the incoming/outgoing electron group velocity.
-!!  The implementation assumems e-ph scattering although additional scattering mechanims (e.g. ionized impurities)
+!!  in which backscattering is partly accounter for by multiplying the e-ph self-energy integrand function
+!!  by the efficiency factor alpha that depends on the incoming/outgoing electron group velocity.
+!!  The implementation assumes e-ph scattering although additional scattering mechanims (e.g. ionized impurities)
 !!  can be easily included once an appropriate model is added to the ab-initio e-ph scattering rates.
 !!
 !! COPYRIGHT
@@ -59,7 +59,7 @@ module m_rta
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : bisect, simpson_int, safe_div, arth
- use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
+ use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa, yesno
  use m_kpts,           only : kpts_timrev_from_kptopt
  use m_occ,            only : occ_fd, occ_dfde
  use m_pawtab,         only : pawtab_type
@@ -94,7 +94,7 @@ type,public :: rta_t
    ! Number of spinorial components.
 
    integer :: nkcalc
-   ! Number of computed k-points i.e. k-points inside sigma_erange energy window.
+   ! Number of computed k-points i.e. k-points inside the sigma_erange energy window.
 
    integer :: ntemp
    ! Number of temperatures.
@@ -172,7 +172,7 @@ type,public :: rta_t
    ! Linewidth in the IBZ computed in the SERTA/MRTA.
    ! Non-zero only for the kcalc k-points.
 
-   real(dp),allocatable :: velocity(:,:,:,:)
+   real(dp),allocatable :: vbks(:,:,:,:)
    ! (3, bmin:bmax, nkpt, nsppol))
    ! band velocity in Cartesian coordinates in the IBZ
    ! Non-zero only for the kcalc k-points.
@@ -208,10 +208,8 @@ type,public :: rta_t
     ! The first dimension is for electrons/holes.
     ! If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.
 
-   real(dp),allocatable :: l0(:,:,:,:,:,:)
-   real(dp),allocatable :: l1(:,:,:,:,:,:)
-   real(dp),allocatable :: l2(:,:,:,:,:,:)
-   ! (3, 3, nw, ntemp, nsppol, nrta)
+   real(dp),allocatable :: l0(:,:,:,:,:,:), l1(:,:,:,:,:,:), l2(:,:,:,:,:,:)
+   ! (3, 3, nw, nsppol, ntemp, nrta)
    ! Onsager coeficients in Cartesian coordinates
 
    real(dp),allocatable :: sigma(:,:,:,:,:,:)
@@ -219,7 +217,7 @@ type,public :: rta_t
    real(dp),allocatable :: kappa(:,:,:,:,:,:)
    real(dp),allocatable :: pi(:,:,:,:,:,:)
    real(dp),allocatable :: zte(:,:,:,:,:,:)
-   ! (3, 3, nw, ntemp, nsppol, nrta)
+   ! (3, 3, nw, nsppol, ntemp, nrta)
    ! Transport coefficients in Cartesian coordinates
 
    real(dp),allocatable :: mobility(:,:,:,:,:,:,:)
@@ -235,20 +233,20 @@ type,public :: rta_t
    ! (nw, ntemp, 2) carrier density for e/h (n/cm^3)
 
    real(dp),allocatable :: mobility_mu(:,:,:,:,:,:)
-   ! (3, 3, 2, ntemp, nsppol, nrta)
+   ! (3, 3, 2, nsppol, ntemp, nrta)
    ! mobility for electrons and holes (third dimension) at transport_mu_e(ntemp)
-   ! Third index is for electron/hole
+   ! Third dimension is for electron/hole
 
    real(dp),allocatable :: conductivity_mu(:,:,:,:,:,:)
-   ! (3, 3, 2, ntemp, nsppol, nrta)
+   ! (3, 3, 2, nsppol, ntemp, nrta)
    ! Conductivity in Siemens * cm-1 (computes by summing over k-points rather that by performing an energy integration).
 
  contains
 
-   procedure :: compute => rta_compute
-   procedure :: compute_mobility => rta_compute_mobility
-   procedure :: print_txt_files => rta_print_txt_files
-   procedure :: write_tensor => rta_write_tensor
+   procedure :: compute_rta
+   procedure :: compute_rta_mobility
+   procedure :: print_rta_txt_files
+   procedure :: write_tensor
    procedure :: free => rta_free
 
  end type rta_t
@@ -323,14 +321,14 @@ subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  rta = rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, comm)
 
  ! Compute RTA transport quantities
- call rta%compute(cryst, dtset, comm)
+ call rta%compute_rta(cryst, dtset, comm)
 
  ! Compute RTA mobility
- call rta%compute_mobility(cryst, comm)
+ call rta%compute_rta_mobility(cryst, comm)
 
  if (my_rank == master) then
    ! Print RTA results to stdout and other external txt files (for the test suite)
-   call rta%print_txt_files(cryst, dtset, dtfil)
+   call rta%print_rta_txt_files(cryst, dtset, dtfil)
 
    ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
@@ -466,7 +464,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  ! =================================================
  ! After this point we have:
  !
- !      velocity(3, bmin:bmax, nkpt, nsppol)
+ !      vbks(3, bmin:bmax, nkpt, nsppol)
  !      linewidths(self%ntemp, bmin:bmax, nkpt, nsppol, 2)
  !
  if (any(dtset%sigma_ngkpt /= 0)) then
@@ -478,12 +476,12 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
    tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, dtset%sigma_nshiftk, dtset%sigma_shiftk)
    new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, [new%bmin, new%bmax], &
-                                   new%kcalc2ebands, new%linewidths, new%velocity, xmpi_comm_self)
+                                   new%kcalc2ebands, new%linewidths, new%vbks, xmpi_comm_self)
    call ebands_free(tmp_ebands)
  else
    !call wrtout(unts, sjoin(" Computing integrals with SIGEPH k-mesh:", ebands_kmesh2str(ebands))
    new%ebands = sigmaph%get_ebands(cryst, ebands, [new%bmin, new%bmax], &
-                                   new%kcalc2ebands, new%linewidths, new%velocity, xmpi_comm_self)
+                                   new%kcalc2ebands, new%linewidths, new%vbks, xmpi_comm_self)
    kptrlatt = new%ebands%kptrlatt
  end if
 
@@ -518,10 +516,10 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    ds%only_diago = .True.; ds%bmin = new%bmin; ds%bmax = new%bmax; ds%mode = "cart"
    call ds%compute_ddk(wfk_fname_dense, "", dtset, psps, pawtab, ngfftc, comm)
 
-   ! Transfer data to new%velocity
-   ABI_MOVE_ALLOC(ds%vdiago, new%velocity)
+   ! Transfer data to new%vbks
+   ABI_MOVE_ALLOC(ds%vdiago, new%vbks)
    call ds%free()
-   !print *, "velocity:", new%velocity
+   !print *, "vbks:", new%vbks
 
    ! Linear interpolation in k-space of the linewidths from input SIGEPH to the dense IBZ provided by fine WFK file.
    ! First of all transfer linewidths to values_bksd to prepare call to klinterp_new.
@@ -632,10 +630,10 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    end do
    ABI_FREE(tmp_array5)
 
-   ABI_MOVE_ALLOC(new%velocity, tmp_array4)
-   ABI_REMALLOC(new%velocity, (3, new%bmin:new%bmax, tmp_ebands%nkpt, nsppol))
+   ABI_MOVE_ALLOC(new%vbks, tmp_array4)
+   ABI_REMALLOC(new%vbks, (3, new%bmin:new%bmax, tmp_ebands%nkpt, nsppol))
    do ikpt=1,tmp_ebands%nkpt
-     new%velocity(:,:,ikpt,:) = tmp_array4(:,:,indkk(1, ikpt),:)
+     new%vbks(:,:,ikpt,:) = tmp_array4(:,:,indkk(1, ikpt),:)
    end do
    ABI_FREE(tmp_array4)
 
@@ -688,9 +686,9 @@ end function rta_new
 
 !----------------------------------------------------------------------
 
-!!****f* m_rta/rta_compute
+!!****f* m_rta/compute_rta
 !! NAME
-!! rta_compute
+!! compute_rta
 !!
 !! FUNCTION
 !!
@@ -705,7 +703,7 @@ end function rta_new
 !!
 !! SOURCE
 
-subroutine rta_compute(self, cryst, dtset, comm)
+subroutine compute_rta(self, cryst, dtset, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -715,7 +713,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
 !Local variables ------------------------------
  integer,parameter :: nvecs0 = 0, master = 0
- integer :: nsppol, nkpt, ib, ik_ibz, iw, spin, ii, jj, itemp, irta, itens, iscal, cnt
+ integer :: nsppol, nkibz, ib, ik_ibz, iw, spin, ii, jj, itemp, irta, itens, iscal, cnt
  integer :: ntens, edos_intmeth, ifermi, iel, nvals, my_rank
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT, Tkelv, linewidth, fact0, cpu, wall, gflops
  real(dp) :: vr(3), dummy_vecs(1,1,1,1,1), work_33(3,3), S_33(3,3)
@@ -728,7 +726,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  my_rank = xmpi_comm_rank(comm)
 
  ! Basic dimensions
- nsppol = self%ebands%nsppol; nkpt = self%ebands%nkpt
+ nsppol = self%ebands%nsppol; nkibz = self%ebands%nkpt
 
  ! Allocate vv tensors with and without the lifetimes. Eq 8 of [[cite:Madsen2018]]
  ! The total number of tensorial entries is ntens and accounts for nrta
@@ -737,18 +735,18 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ! Also, note how we store only the states in the energy window.
 
  nvals = self%ntemp * self%nrta
- ABI_CALLOC(tau_vals, (self%ntemp, self%nrta, self%bmin:self%bmax, nkpt, nsppol))
+ ABI_CALLOC(tau_vals, (self%ntemp, self%nrta, self%bmin:self%bmax, nkibz, nsppol))
 
  ntens = (1 + self%ntemp) * self%nrta
- ABI_CALLOC(vv_tens, (3, 3, 1 + self%ntemp, self%nrta, self%bmin:self%bmax, nkpt, nsppol))
+ ABI_CALLOC(vv_tens, (3, 3, 1 + self%ntemp, self%nrta, self%bmin:self%bmax, nkibz, nsppol))
 
  cnt = 0
  do spin=1,nsppol
-   do ik_ibz=1,nkpt
+   do ik_ibz=1,nkibz
      !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      do ib=self%bmin,self%bmax
 
-       vr(:) = self%velocity(:, ib, ik_ibz, spin)
+       vr(:) = self%vbks(:, ib, ik_ibz, spin)
        ! Store outer product (v_bks x v_bks) in vv_tens. This part does not depend on T and irta.
        do ii=1,3
          do jj=1,3
@@ -772,7 +770,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
  !call xmpi_sum(vv_tens, comm, ierr)
  !call xmpi_sum(tau_vals, comm, ierr)
- call cwtime_report(" rta_compute_loop1", cpu, wall, gflops)
+ call cwtime_report(" compute_rta_loop1", cpu, wall, gflops)
 
  ! Compute DOS and VV_DOS and VV_TAU_DOS
  ! Define integration method and mesh step.
@@ -819,7 +817,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
    call self%edos%print(unit=ab_out,  header="Computation of DOS, VV_DOS and VVTAU_DOS")
  end if
 
- call cwtime_report(" rta_compute_edos", cpu, wall, gflops)
+ call cwtime_report(" compute_rta_edos", cpu, wall, gflops)
 
  ! Unpack data stored in out_tensdos with shape (nw, 2, 3, 3, ntens, nsppol)
  self%nw = self%edos%nw
@@ -867,25 +865,25 @@ subroutine rta_compute(self, cryst, dtset, comm)
  !
  ! with \sigma(e, T) stored in vvtau_dos
 
- ABI_MALLOC(self%l0, (3, 3, self%nw, self%ntemp, self%nsppol, self%nrta))
- ABI_MALLOC(self%l1, (3, 3, self%nw, self%ntemp, self%nsppol, self%nrta))
- ABI_MALLOC(self%l2, (3, 3, self%nw, self%ntemp, self%nsppol, self%nrta))
+ ABI_MALLOC(self%l0, (3, 3, self%nw, self%nsppol, self%ntemp, self%nrta))
+ ABI_MALLOC(self%l1, (3, 3, self%nw, self%nsppol, self%ntemp, self%nrta))
+ ABI_MALLOC(self%l2, (3, 3, self%nw, self%nsppol, self%ntemp, self%nrta))
 
  call onsager(0, self%l0)
  call onsager(1, self%l1)
  call onsager(2, self%l2)
 
- call cwtime_report(" rta_compute_onsanger", cpu, wall, gflops)
+ call cwtime_report(" compute_rta_onsanger", cpu, wall, gflops)
 
  ! Compute transport tensors, Eqs 12-15 of [[cite:Madsen2018]] and convert to SI units.
- ABI_CALLOC(self%sigma,   (3, 3, self%nw, self%ntemp, self%nsppol, self%nrta))
- ABI_CALLOC(self%seebeck, (3, 3, self%nw, self%ntemp, self%nsppol, self%nrta))
- ABI_CALLOC(self%kappa,   (3, 3, self%nw, self%ntemp, self%nsppol, self%nrta))
- ABI_CALLOC(self%pi,      (3, 3, self%nw, self%ntemp, self%nsppol, self%nrta))
- ABI_CALLOC(self%zte,     (3, 3, self%nw, self%ntemp, self%nsppol, self%nrta))
+ ABI_CALLOC(self%sigma,   (3, 3, self%nw, self%nsppol, self%ntemp, self%nrta))
+ ABI_CALLOC(self%seebeck, (3, 3, self%nw, self%nsppol, self%ntemp, self%nrta))
+ ABI_CALLOC(self%kappa,   (3, 3, self%nw, self%nsppol, self%ntemp, self%nrta))
+ ABI_CALLOC(self%pi,      (3, 3, self%nw, self%nsppol, self%ntemp, self%nrta))
+ ABI_CALLOC(self%zte,     (3, 3, self%nw, self%nsppol, self%ntemp, self%nrta))
 
  ! Sigma = L0
- fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
+ fact0 = (siemens_SI / Bohr_meter / cryst%ucvol)
  self%sigma = fact0 * self%l0
 
  ! Used to stored L0^-1
@@ -899,9 +897,9 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
        ! S = -1/T L0^-1 L1 = -1/T sigma L1
        do iw=1,self%nw
-         call inv33(self%l0(:, :, iw, itemp, spin, irta), work_33)
+         call inv33(self%l0(:, :, iw, spin, itemp, irta), work_33)
          l0inv_33nw(:,:,iw) = work_33
-         self%seebeck(:,:,iw,itemp,spin,irta) = - (volt_SI / TKelv) * matmul(work_33, self%l1(:,:,iw,itemp,spin,irta))
+         self%seebeck(:,:,iw,spin,itemp,irta) = - (volt_SI / TKelv) * matmul(work_33, self%l1(:,:,iw,itemp,spin,irta))
        end do
 
        ! kappa = 1/T [L2 - L1 L0^-1 L1]
@@ -910,22 +908,22 @@ subroutine rta_compute(self, cryst, dtset, comm)
        do iw=1,self%nw
          work_33 = self%l1(:, :, iw, itemp, spin, irta)
          work_33 = self%l2(:, :, iw, itemp, spin, irta) - matmul(work_33, matmul(l0inv_33nw(:, :, iw), work_33))
-         !self%kappa(:,:,iw,itemp,spin,irta) = - (volt_SI**2 * fact0 / TKelv) * work_33
-         self%kappa(:,:,iw,itemp,spin,irta) = + (volt_SI**2 * fact0 / TKelv) * work_33
+         !self%kappa(:,:,iw,spin, itemp,spin,irta) = - (volt_SI**2 * fact0 / TKelv) * work_33
+         self%kappa(:,:,iw,spin,itemp,irta) = + (volt_SI**2 * fact0 / TKelv) * work_33
        end do
 
        ! Peltier pi = -L1 L0^-1
        do iw=1,self%nw
          work_33 = self%l1(:, :, iw, itemp, spin, irta)
-         self%pi(:,:,iw,itemp,spin,irta) = - volt_SI * matmul(work_33, l0inv_33nw(:, :, iw))
+         self%pi(:,:,iw,spin,itemp,irta) = - volt_SI * matmul(work_33, l0inv_33nw(:, :, iw))
        end do
 
        ! ZT:  S^T sigma S k^-1 T (tensor form with k=k_electronic only):
        do iw=1,self%nw
-         S_33 = self%seebeck(:,:,iw,itemp,spin,irta)
-         S_33 = matmul(matmul(transpose(S_33), self%sigma(:,:,iw,itemp,spin,irta)), S_33)
-         call inv33(self%kappa(:,:,iw,itemp,spin,irta), work_33)
-         self%zte(:,:,iw,itemp,spin,irta) = matmul(S_33, work_33) * TKelv
+         S_33 = self%seebeck(:,:,iw,spin,itemp,irta)
+         S_33 = matmul(matmul(transpose(S_33), self%sigma(:,:,iw,spin,itemp,irta)), S_33)
+         call inv33(self%kappa(:,:,iw,spin,itemp,irta), work_33)
+         self%zte(:,:,iw,spin,itemp,irta) = matmul(S_33, work_33) * TKelv
        end do
 
      end do
@@ -949,7 +947,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
      do irta=1,self%nrta
        do jj=1,3
          do ii=1,3
-           self%conductivity(ii,jj,itemp,spin,irta) = self%sigma(ii, jj, ifermi, itemp, spin, irta) * 0.01 !m^-1 to cm^-1
+           self%conductivity(ii,jj,itemp,spin,irta) = self%sigma(ii, jj, ifermi, spin, itemp, irta) * 0.01 !m^-1 to cm^-1
          end do
        end do
      end do
@@ -986,7 +984,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
          do iw=1,self%nw
            do jj=1,3
              do ii=1,3
-               call safe_div(self%sigma(ii, jj, iw, itemp, spin, irta) * 100**2, &
+               call safe_div(self%sigma(ii, jj, iw, spin, itemp, irta) * 100**2, &
                              e_Cb * self%n(iw, itemp, iel), &
                              zero, self%mobility(ii, jj, iw, itemp, iel, spin, irta))
              end do
@@ -997,7 +995,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
    end do ! itemp
  end do ! spin
 
- call cwtime_report(" rta_compute", cpu, wall, gflops)
+ call cwtime_report(" compute_rta", cpu, wall, gflops)
 
 contains
 
@@ -1064,7 +1062,7 @@ pure subroutine inv33(aa, ait)
 
  !Arguments -------------------------------------------
  integer,intent(in) :: order
- real(dp),intent(out) :: lorder(3, 3, self%nw, self%ntemp,self%nsppol,self%nrta)
+ real(dp),intent(out) :: lorder(3, 3, self%nw, self%nsppol, self%ntemp, self%nrta)
 
  !Local variables -------------------------------------
  integer :: spin, iw, imu, irta
@@ -1096,7 +1094,7 @@ pure subroutine inv33(aa, ait)
          do jj=1,3
            do ii=1,3
              call simpson_int(self%nw, edos_step, kernel(:,ii,jj, spin), integral)
-             lorder(ii, jj, imu, itemp, spin, irta) = integral(self%nw)
+             lorder(ii, jj, imu, spin, itemp, irta) = integral(self%nw)
            end do
          end do
        end do
@@ -1107,14 +1105,14 @@ pure subroutine inv33(aa, ait)
 
  end subroutine onsager
 
-end subroutine rta_compute
+end subroutine compute_rta
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_rta/rta_compute_mobility
+!!****f* m_rta/compute_rta_mobility
 !! NAME
-!! rta_compute_mobility
+!! compute_rta_mobility
 !!
 !! FUNCTION
 !!
@@ -1128,7 +1126,7 @@ end subroutine rta_compute
 !!
 !! SOURCE
 
-subroutine rta_compute_mobility(self, cryst, comm)
+subroutine compute_rta_mobility(self, cryst, comm)
 
 !Arguments ------------------------------------
  class(rta_t),intent(inout) :: self
@@ -1136,7 +1134,7 @@ subroutine rta_compute_mobility(self, cryst, comm)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
- integer :: nsppol, nkpt, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta
+ integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk, cpu, wall, gflops
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
 
@@ -1145,12 +1143,10 @@ subroutine rta_compute_mobility(self, cryst, comm)
  call cwtime(cpu, wall, gflops, "start")
 
  nprocs = xmpi_comm_size(comm)
+ nkibz = self%ebands%nkpt; nsppol = self%ebands%nsppol
 
- ! Copy important dimensions
- nkpt = self%ebands%nkpt; nsppol = self%ebands%nsppol
-
- ABI_CALLOC(self%mobility_mu, (3, 3, 2, self%ntemp, self%nsppol, self%nrta))
- ABI_CALLOC(self%conductivity_mu, (3, 3, 2, self%ntemp, self%nsppol, self%nrta))
+ ABI_CALLOC(self%mobility_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
+ ABI_CALLOC(self%conductivity_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
 
  ! Compute (e/h) carriers per unit cell at the different temperatures.
  ABI_CALLOC(self%n_ehst, (2, self%nsppol, self%ntemp))
@@ -1168,7 +1164,7 @@ subroutine rta_compute_mobility(self, cryst, comm)
  ! around the band edge.
  cnt = 0
  do spin=1,nsppol
-   do ik_ibz=1,nkpt
+   do ik_ibz=1,nkibz
      !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      wtk = self%ebands%wtk(ik_ibz)
 
@@ -1176,13 +1172,13 @@ subroutine rta_compute_mobility(self, cryst, comm)
        eig_nk = self%ebands%eig(ib, ik_ibz, spin)
 
        ! Store outer product in vv_tens
-       vr(:) = self%velocity(:, ib, ik_ibz, spin)
+       vr(:) = self%vbks(:, ib, ik_ibz, spin)
        do ii=1,3
          do jj=1,3
            vv_tens(ii, jj) = vr(ii) * vr(jj)
          end do
        end do
-       ! Symmetrize tensor
+       ! Symmetrize tensor.
        vv_tens = cryst%symmetrize_cart_tens33(vv_tens)
 
        ! Multiply by the lifetime (SERTA or MRTA)
@@ -1193,7 +1189,7 @@ subroutine rta_compute_mobility(self, cryst, comm)
            ieh = 2; if (eig_nk >= mu_e) ieh = 1
            linewidth = self%linewidths(itemp, ib, ik_ibz, spin, irta)
            call safe_div( - wtk * vv_tens * occ_dfde(eig_nk, kT, mu_e), two * linewidth, zero, vv_tenslw)
-           self%conductivity_mu(:, :, ieh, itemp, spin, irta) = self%conductivity_mu(:, :, ieh, itemp, spin, irta) &
+           self%conductivity_mu(:, :, ieh, spin, itemp, irta) = self%conductivity_mu(:, :, ieh, spin, itemp, irta) &
              + vv_tenslw(:, :)
          end do
        end do
@@ -1202,33 +1198,30 @@ subroutine rta_compute_mobility(self, cryst, comm)
    end do ! ik_ibz
  end do ! spin
 
- !call xmpi_sum(self%mobility_mu, comm, ierr)
+ !call xmpi_sum(self%conductivity_mu, comm, ierr)
 
  ! Get units conversion factor including spin degeneracy.
- ! TODO: Get rid of Time_Sec. There's an erroneous 1/Time_Sec in the definitio of siemems_SI
- ! so two errors cancel each other yet the abs value of siemens_SI is wrong.
  max_occ = two / (self%nspinor * self%nsppol)
- fact0 = max_occ * (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol) / 100
+ fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
  self%conductivity_mu = fact0 * self%conductivity_mu  ! siemens cm^-1
 
  ! Scale by the carrier concentration
- !fact = fact0 / e_Cb * 100**2
  fact = 100**3 / e_Cb
  do irta=1,self%nrta
    do spin=1,nsppol
      do itemp=1,self%ntemp
        do ieh=1,2 ! e/h
-         call safe_div(fact * self%conductivity_mu(:,:,ieh,itemp,spin,irta), &
+         call safe_div(fact * self%conductivity_mu(:,:,ieh,spin,itemp, irta), &
                        self%n_ehst(ieh, spin, itemp) / cryst%ucvol / Bohr_meter**3, zero, &
-                       self%mobility_mu(:,:,ieh,itemp,spin,irta))
+                       self%mobility_mu(:,:,ieh,spin,itemp,irta))
        end do
      end do
    end do
  end do
 
- call cwtime_report(" rta_compute_mobility", cpu, wall, gflops)
+ call cwtime_report(" compute_rta_mobility", cpu, wall, gflops)
 
-end subroutine rta_compute_mobility
+end subroutine compute_rta_mobility
 !!***
 
 !----------------------------------------------------------------------
@@ -1292,18 +1285,19 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
     nctkarr_t('vv_dos', "dp", "edos_nw, three, three, nsppol"), &
     nctkarr_t('vvtau_dos', "dp", "edos_nw, three, three, ntemp, nsppol, nrta"), &
     nctkarr_t('tau_dos', "dp", "edos_nw, ntemp, nsppol, nrta"), &
-    nctkarr_t('L0', "dp", "three, three, edos_nw, ntemp, nsppol, nrta"), &
-    nctkarr_t('L1', "dp", "three, three, edos_nw, ntemp, nsppol, nrta"), &
-    nctkarr_t('L2', "dp", "three, three, edos_nw, ntemp, nsppol, nrta"), &
-    nctkarr_t('sigma',   "dp", "three, three, edos_nw, ntemp, nsppol, nrta"), &
-    nctkarr_t('kappa',   "dp", "three, three, edos_nw, ntemp, nsppol, nrta"), &
-    nctkarr_t('zte',   "dp", "three, three, edos_nw, ntemp, nsppol, nrta"), &
-    nctkarr_t('seebeck', "dp", "three, three, edos_nw, ntemp, nsppol, nrta"), &
-    nctkarr_t('pi',      "dp", "three, three, edos_nw, ntemp, nsppol, nrta"), &
+    nctkarr_t('L0', "dp", "three, three, edos_nw, nsppol, ntemp, nrta"), &
+    nctkarr_t('L1', "dp", "three, three, edos_nw, nsppol, ntemp, nrta"), &
+    nctkarr_t('L2', "dp", "three, three, edos_nw, nsppol, ntemp, nrta"), &
+    nctkarr_t('sigma',   "dp", "three, three, edos_nw, nsppol, ntemp, nrta"), &
+    nctkarr_t('kappa',   "dp", "three, three, edos_nw, nsppol, ntemp, nrta"), &
+    nctkarr_t('zte',   "dp", "three, three, edos_nw, nsppol, ntemp, nrta"), &
+    nctkarr_t('seebeck', "dp", "three, three, edos_nw, nsppol, ntemp, nrta"), &
+    nctkarr_t('pi',      "dp", "three, three, edos_nw, nsppol, ntemp, nrta"), &
     nctkarr_t('mobility',"dp", "three, three, edos_nw, ntemp, two, nsppol, nrta"), &
     nctkarr_t('conductivity',"dp", "three, three, ntemp, nsppol, nrta"), &
     nctkarr_t('N',  "dp", "edos_nw, ntemp, two"), &
-    nctkarr_t('mobility_mu',"dp", "three, three, two, ntemp, nsppol, nrta")], &
+    !nctkarr_t('conductivity_mu',"dp", "three, three, two, nsppol, ntemp, nrta")], &
+    nctkarr_t('mobility_mu',"dp", "three, three, two, nsppol, ntemp, nrta")], &
  defmode=.True.)
  NCF_CHECK(ncerr)
 
@@ -1346,6 +1340,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility"), self%mobility))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "conductivity"), self%conductivity))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu))
+ !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu))
 #endif
 
  call cwtime_report(" rta_ncwrite", cpu, wall, gflops)
@@ -1355,9 +1350,9 @@ end subroutine rta_ncwrite
 
 !----------------------------------------------------------------------
 
-!!****f* m_rta/rta_print_txt_files
+!!****f* m_rta/print_rta_txt_files
 !! NAME
-!! rta_print_txt_files
+!! print_rta_txt_files
 !!
 !! FUNCTION
 !!
@@ -1372,7 +1367,7 @@ end subroutine rta_ncwrite
 !!
 !! SOURCE
 
-subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
+subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
 
 !Arguments --------------------------------------
  class(rta_t),intent(in) :: self
@@ -1412,7 +1407,7 @@ subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
            self%kTmesh(itemp) / kb_HaK, &
            self%n_ehst(1, spin, itemp) / cryst%ucvol / Bohr_cm**3, &
            self%n_ehst(2, spin, itemp) / cryst%ucvol / Bohr_cm**3, &
-           self%mobility_mu(ii, ii, 1, itemp, spin, irta), self%mobility_mu(ii, ii, 2, itemp, spin, irta)
+           self%mobility_mu(ii, ii, 1, spin, itemp, irta), self%mobility_mu(ii, ii, 2, spin, itemp, irta)
            call wrtout(unts, msg)
          end do ! itemp
        end do ! spin
@@ -1456,12 +1451,12 @@ subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
    call self%write_tensor(dtset, irta, "pi", self%pi(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_PI"))
  end do
 
-end subroutine rta_print_txt_files
+end subroutine print_rta_txt_files
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_rta/rta_write_tensor
+!!****f* m_rta/write_tensor
 !! NAME
 !!
 !! FUNCTION
@@ -1470,7 +1465,7 @@ end subroutine rta_print_txt_files
 !!
 !! SOURCE
 
-subroutine rta_write_tensor(self, dtset, irta, header, values, path)
+subroutine write_tensor(self, dtset, irta, header, values, path)
 
 !Arguments --------------------------------------
  class(rta_t),intent(in) :: self
@@ -1509,13 +1504,13 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
    tmp_values = zero
  end where
 
- ! (nw, 3, 3, ntemp, nsppol)
+ ! (nw, 3, 3, nsppol, ntemp)
  if (self%nsppol == 1) then
    do itemp=1, self%ntemp
      write(ount, "(/, a, 1x, f16.2)")"# T = ", self%kTmesh(itemp) / kb_HaK
      write(ount, "(a)")"# Energy [Ha], (xx, yx, zx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor."
      do iw=1,self%nw
-       write(ount, "(10(es16.6))")self%edos%mesh(iw), tmp_values(:, :, iw, itemp, 1)
+       write(ount, "(10(es16.6))")self%edos%mesh(iw), tmp_values(:, :, iw, 1, itemp)
      end do
    end do
   write(ount, "(a)")""
@@ -1525,7 +1520,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
      write(ount, "(a)") &
        "# Energy [Ha], (xx, yx, zx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor for spin up followed by spin down."
      do iw=1,self%nw
-       write(ount, "(19(es16.6))")self%edos%mesh(iw), tmp_values(:, :, iw, itemp, 1), tmp_values(:, :, iw, itemp, 2)
+       write(ount, "(19(es16.6))")self%edos%mesh(iw), tmp_values(:, :, iw, 1, itemp), tmp_values(:, :, iw, 2, itemp)
      end do
    end do
   write(ount, "(a)")""
@@ -1535,7 +1530,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
 
  ABI_FREE(tmp_values)
 
-end subroutine rta_write_tensor
+end subroutine write_tensor
 !!***
 
 !----------------------------------------------------------------------
@@ -1573,7 +1568,7 @@ subroutine rta_free(self)
  ABI_SFREE(self%eminmax_spin)
  ABI_SFREE(self%eph_mu_e)
  ABI_SFREE(self%transport_mu_e)
- ABI_SFREE(self%velocity)
+ ABI_SFREE(self%vbks)
  ABI_SFREE(self%linewidths)
  ABI_SFREE(self%l0)
  ABI_SFREE(self%l1)
@@ -1639,28 +1634,30 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 !Local variables ------------------------------
  integer,parameter :: master = 0
  integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr
- integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, band_sum, ntemp, ii, jj, iq_sum
+ integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, band_sum, ntemp, ii, jj, iq_sum, btype
  integer :: ikq_ibz, isym_kq, trev_kq, cnt, tag, nprocs, receiver, my_rank, isym, itime, isym_lgk
 #ifdef HAVE_NETCDF
  integer :: ncid, grp_ncid, ncerr
 #endif
- real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff, cpu, wall, gflops
+ real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff, cpu, wall, gflops, btype_fact
  logical :: send_data
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(rta_t) :: ibte
 !arrays
  integer :: unts(2), dims(4)
- integer,allocatable :: rank_ks(:,:)
  logical,allocatable :: converged(:)
- real(dp) vec3(3), sym_vec(3), mat33(3,3), f_kq(3), fsum_eh(3,2)
+ real(dp) vec3(3), sym_vec(3), mat33(3,3), f_kq(3), fsum_eh(3,2,ebands%nsppol), max_adiff_spin(ebands%nsppol)
  real(dp) :: onsager(3,3,3,ebands%nsppol)
- real(dp),pointer :: sig_p(:,:,:), mob_p(:,:,:)
- real(dp),target,allocatable :: ibte_sigma_eht(:,:,:,:), ibte_mob_eht(:,:,:,:)
+ real(dp),pointer :: sig_p(:,:,:,:), mob_p(:,:,:,:)
+ real(dp),target,allocatable :: ibte_sigma(:,:,:,:,:), ibte_mob(:,:,:,:,:)
  real(dp),allocatable :: grp_srate(:,:,:,:), fkn_in(:,:,:,:), fkn_out(:,:,:,:), fkn_serta(:,:,:,:), taukn_serta(:,:,:,:)
  character(len=2) :: components(3)
 
  type :: scatk_t
+
+   integer :: rank = xmpi_undefined_rank
+
    integer :: nq_ibzk_eff
    ! Number of effective q-points in the IBZ(k)
 
@@ -1692,41 +1689,39 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  call wrtout(unts, sjoin("- Reading SERTA lifetimes and e-ph scattering operator from:", &
              dtfil%filsigephin), newlines=1, do_flush=.True.)
 
- !call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
-
  ! Initialize IBTE object
  ibte = rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, comm)
 
  nkcalc = ibte%nkcalc
  nkibz = ibte%ebands%nkpt; nsppol = ibte%nsppol; ntemp = ibte%ntemp
  bmin = ibte%bmin; bmax = ibte%bmax
- call wrtout(std_out, sjoin(" nkcalc", itoa(nkcalc), "bmin:", itoa(bmin), "bmax:", itoa(bmax)))
+ !call wrtout(std_out, sjoin(" nkcalc", itoa(nkcalc), "bmin:", itoa(bmin), "bmax:", itoa(bmax)))
 
  ! Compute RTA transport quantities.
- call ibte%compute(cryst, dtset, comm)
+ call ibte%compute_rta(cryst, dtset, comm)
 
  ! Compute RTA mobility.
- call ibte%compute_mobility(cryst, comm)
+ call ibte%compute_rta_mobility(cryst, comm)
 
  if (my_rank == master) then
    ! Print RTA results to stdout and other external txt files (for the test suite)
-   call ibte%print_txt_files(cryst, dtset, dtfil)
+   call ibte%print_rta_txt_files(cryst, dtset, dtfil)
  end if
 
- ! Loops and memory are distributed over k-points and collinear spins using rank_ks table.
- ABI_MALLOC(rank_ks, (nkcalc, nsppol))
+ !call ibte%read_scattering()
+ ! Loops and memory are distributed over k-points and collinear spins
+ ABI_MALLOC(sr, (nkcalc, nsppol))
  cnt = 0
  do spin=1,nsppol
    do ikcalc=1,nkcalc
      cnt = cnt + 1
-     rank_ks(ikcalc, spin) = mod(cnt, nprocs)
+     sr(ikcalc, spin)%rank = mod(cnt, nprocs)
    end do
  end do
 
- ABI_MALLOC(sr, (nkcalc, nsppol))
  call cwtime(cpu, wall, gflops, "start")
 #ifdef HAVE_NETCDF
- ! Master reads and sends data to rank_ks(ikcalc, spin)
+ ! Master reads and sends data to the rank treating (ikcalc, spin).
  if (my_rank == master) then
    NCF_CHECK(nctk_open_read(ncid, dtfil%filsigephin, xmpi_comm_self))
  end if
@@ -1734,7 +1729,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  do spin=1,nsppol
    do ikcalc=1,nkcalc
      sr_p => sr(ikcalc, spin)
-     receiver = rank_ks(ikcalc, spin)
+     receiver = sr_p%rank
      send_data = master /= receiver
      if (.not. any(my_rank == [master, receiver])) cycle
      !call wrtout(std_out, sjoin(" Sending data from my_rank:", itoa(my_rank), " to:", itoa(receiver)))
@@ -1825,22 +1820,25 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  ! 2. F_{-k} = -F_k if TR symmetry.
  ! 3. The q-space integration is reduced to the IBZ(k) using the symmetries of the little group of k.
 
+ !call ibte%solve_ibte(solver_type=1)
+
  ABI_CALLOC(fkn_in, (3, nkibz, bmin:bmax, nsppol))
  ABI_CALLOC(fkn_out, (3, nkibz, bmin:bmax, nsppol))
  ABI_CALLOC(fkn_serta, (3, nkibz, bmin:bmax, nsppol))
  ABI_CALLOC(taukn_serta, (3, nkibz, bmin:bmax, nsppol))
- ABI_MALLOC(ibte_sigma_eht, (3, 3, 2, ntemp))
- ABI_MALLOC(ibte_mob_eht, (3, 3, 2, ntemp))
+ ABI_MALLOC(ibte_sigma, (3, 3, 2, nsppol, ntemp))
+ ABI_MALLOC(ibte_mob, (3, 3, 2, nsppol, ntemp))
  ABI_MALLOC(converged, (ntemp))
 
  cnt = 0
+ btype = 1
  do itemp=1,ntemp
  !do itemp=ntemp, 1, -1
    cnt = cnt + 1
    kT = ibte%kTmesh(itemp)
    mu_e = ibte%eph_mu_e(itemp)
-   sig_p => ibte_sigma_eht(:,:,:,itemp)
-   mob_p => ibte_mob_eht(:,:,:,itemp)
+   sig_p => ibte_sigma(:,:,:,:,itemp)
+   mob_p => ibte_mob(:,:,:,:,itemp)
 
    ! Precompute tau_serta and fkn_serta for this T: f^'_nk v_\nk * \tau^0
    do spin=1,nsppol
@@ -1848,12 +1846,15 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
        !ik_ibz = ibte%kcalc2ibz(ikcalc, 1)
        ik_ibz = ibte%kcalc2ebands(1, ikcalc)
        do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
-         e_nk = ebands%eig(band_k, ik_ibz, spin)
-         lw_nk = ibte%linewidths(itemp, band_k, ik_ibz, spin, 1)  ! SERTA
+         lw_nk = ibte%linewidths(itemp, band_k, ik_ibz, spin, 1)  ! 1 --> SERTA linewidths.
          call safe_div(one, two * lw_nk, zero, tau_nk)
-         taukn_serta(:, ik_ibz, band_k, spin)  = tau_nk
+         taukn_serta(:, ik_ibz, band_k, spin) = tau_nk
+         e_nk = ebands%eig(band_k, ik_ibz, spin)
          dfde_nk = occ_dfde(e_nk, kT, mu_e)
-         fkn_serta(:, ik_ibz, band_k, spin) = tau_nk * dfde_nk * ibte%velocity(:, band_k, ik_ibz, spin)
+         btype_fact = one
+         if (btype == 2) btype_fact = (e_nk - mu_e) ! / (Kt / kb_HaK)
+         if (btype == 3) btype_fact = (e_nk - mu_e) ** 2 ! / (Kt / kb_HaK)
+         fkn_serta(:, ik_ibz, band_k, spin) = tau_nk * dfde_nk * btype_fact * ibte%vbks(:, band_k, ik_ibz, spin)
        end do
      end do
    end do
@@ -1864,25 +1865,31 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    if (ibte%assume_gap) then
      write(msg, "(a5,1x,a9,*(1x, a16))")" ITER", "max_adiff", "mobility_e+h", "sum_k(d_fk)"
    else
-     write(msg, "(a5,1x,a9,*(1x, a16))")" ITER", "max_adiff", "conductivity", "sum_k(df_k"
+     write(msg, "(a5,1x,a9,*(1x, a16))")" ITER", "max_adiff", "conductivity", "sum_k(df_k)"
    end if
    call wrtout(std_out, msg)
 
-   ! iter = 0 --> Compute SERTA transport tensors just for reference.
-   ! then print mobility for semiconductors, conductivity for metals.
+   ! iter = 0 --> Compute SERTA transport tensors just for initial reference.
    call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_serta, onsager, sig_p, mob_p, fsum_eh, comm)
 
+   ! Print mobility for semiconductors, conductivity for metals.
    if (ibte%assume_gap) then
-     mat33 = sum(mob_p, dim=3)
-     write(msg, "(i5,1x,es9.1, *(1x, f16.2))")0, zero, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
+     do spin=1,nsppol
+       mat33 = sum(mob_p(:,:,:,spin), dim=3)
+       write(msg, "(i5,1x,es9.1, *(1x, f16.2))")&
+         0, zero, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
+     end do
    else
-     mat33 = sum(sig_p, dim=3)
-     write(msg, "(i5,1x,es9.1, *(1x, es16.2))")0, zero, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
+     do spin=1,nsppol
+       mat33 = sum(sig_p(:,:,:,spin), dim=3)
+       write(msg, "(i5,1x,es9.1, *(1x, es16.2))")&
+         0, zero, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
+     end do
    end if
-
    call wrtout(std_out, msg)
 
    fkn_in = fkn_serta
+   ! TODO: B-field
    ! Initialize fkn_in either from SERTA or from previous T.
    !if (cnt == 1) fkn_in = fkn_serta
    !if (cnt > 1 ) fkn_in = fkn_out
@@ -1894,8 +1901,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      ! Loop over the nk index in F_nk.
      do spin=1,nsppol
         do ikcalc=1,nkcalc
-          if (rank_ks(ikcalc, spin) /= my_rank) cycle ! MPI parallelism
           sr_p => sr(ikcalc, spin)
+          if (sr_p%rank /= my_rank) cycle ! MPI parallelism
           ik_ibz = ibte%kcalc2ebands(1, ikcalc)
           do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
 
@@ -1936,22 +1943,31 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      end do ! spin
 
      call xmpi_sum(fkn_out, comm, ierr)
-     max_adiff = maxval(abs(fkn_out - fkn_in))
+     do spin=1,nsppol
+       max_adiff_spin(spin) = maxval(abs(fkn_out(:,:,:,spin) - fkn_in(:,:,:,spin)))
+     end do
+     max_adiff = maxval(max_adiff_spin)
 
      ! Compute transport tensors from fkn_out
      ! then print mobility for semiconductors, conductivity for metals.
      call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_out, onsager, sig_p, mob_p, fsum_eh, comm)
 
      if (ibte%assume_gap) then
-       mat33 = sum(mob_p, dim=3)
-       write(msg, "(i5,1x,es9.1,*(1x, f16.2))")iter, max_adiff, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
+       do spin=1,nsppol
+         mat33 = sum(mob_p(:,:,:,spin), dim=3)
+         write(msg, "(i5,1x,es9.1,*(1x, f16.2))")&
+           iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
+       end do
      else
-       mat33 = sum(sig_p, dim=3)
-       write(msg, "(i5,1x,es9.1,*(1x, es16.2))")iter, max_adiff, mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh)
+       do spin=1,nsppol
+         mat33 = sum(sig_p(:,:,:,spin), dim=3)
+         write(msg, "(i5,1x,es9.1,*(1x, es16.2))")&
+           iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
+       end do
      end if
      call wrtout(std_out, msg)
 
-     ! Check for convergence by testing F_k^i - F_k^{i-1} so very strict convergence criterion.
+     ! Check for convergence by testing |F_k^i - F_k^{i-1}| so very strict convergence criterion.
      converged(itemp) = max_adiff < dtset%ibte_abs_tol
      if (converged(itemp)) then
        call wrtout(std_out, sjoin(" IBTE solver converged after:", itoa(iter), &
@@ -1973,24 +1989,25 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  end do ! itemp
 
  if (my_rank == master) then
-   ! Write to main output
+   ! Write final results to main output.
    components = ["xx", "yy", "zz"]
    if (ibte%assume_gap) then
      ! SemiConductor
      do ii=1,3
        call wrtout(unts, sjoin(" Cartesian component of IBTE mobility tensor:", components(ii)))
-       write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
+       write(msg, "(a16,2(a32),a16)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]', "Converged"
        call wrtout(unts, msg)
 
        do spin=1,ibte%nsppol
          if (ibte%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
 
          do itemp=1,ibte%ntemp
-           !write(msg,"(f16.2,2e16.2,2f16.2)") &
-           !ibte%kTmesh(itemp) / kb_HaK, &
-           !ibte%n_ehst(1, spin, itemp) / cryst%ucvol / Bohr_cm **3, &
-           !ibte%n_ehst(2, spin, itemp) / cryst%ucvol / Bohr_cm **3, &
-           !ibte%mobility_mu(ii, ii, 1, itemp, spin), ibte%mobility_mu(ii, ii, 2, itemp, spin)
+           write(msg,"(f16.2,2e16.2,2f16.2,a16)") &
+             ibte%kTmesh(itemp) / kb_HaK, &
+             ibte%n_ehst(1, spin, itemp) / cryst%ucvol / Bohr_cm **3, &
+             ibte%n_ehst(2, spin, itemp) / cryst%ucvol / Bohr_cm **3, &
+             ibte_mob(ii, ii, 1, spin, itemp), ibte_mob(ii, ii, 2, spin, itemp), &
+             yesno(converged(itemp))
            call wrtout(unts, msg)
          end do ! itemp
        end do ! spin
@@ -2003,17 +2020,18 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
      do spin=1, ibte%nsppol
        if (ibte%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
-       write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+       write(msg, "(5a16)") 'Temperature (K)', 'xx', 'yy', 'zz', "Converged"
        call wrtout(unts, msg)
        do itemp=1,ibte%ntemp
-         !write(msg,"(f16.2,3e16.2)") &
-         !ibte%kTmesh(itemp) / kb_HaK, &
-         !ibte%conductivity(1,1, itemp, spin), &
-         !ibte%conductivity(2,2, itemp, spin), &
-         !ibte%conductivity(3,3, itemp, spin)
+         write(msg,"(f16.2,3e16.2,a16)") &
+           ibte%kTmesh(itemp) / kb_HaK, &
+           sum(ibte_sigma(1,1,:,spin,itemp)), &
+           sum(ibte_sigma(2,2,:,spin,itemp)), &
+           sum(ibte_sigma(3,3,:,spin,itemp)), &
+           yesno(converged(itemp))
          call wrtout(unts, msg)
-       end do !itemp
-     end do !spin
+       end do ! itemp
+     end do ! spin
      call wrtout(unts, ch10)
    end if
 
@@ -2027,7 +2045,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  if (my_rank == master) then
    ! Print IBTE results to stdout and other external txt files (for the test suite)
-   !call ibte%print_txt_files(cryst, dtset, dtfil)
+   !call ibte%print_rta_txt_files(cryst, dtset, dtfil)
    ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
    !path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
@@ -2043,9 +2061,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  ABI_FREE(taukn_serta)
  ABI_FREE(fkn_in)
  ABI_FREE(fkn_out)
- ABI_FREE(rank_ks)
- ABI_FREE(ibte_sigma_eht)
- ABI_FREE(ibte_mob_eht)
+ ABI_FREE(ibte_sigma)
+ ABI_FREE(ibte_mob)
  ABI_FREE(converged)
 
  do spin=1,nsppol
@@ -2095,7 +2112,8 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
  integer,intent(in) :: itemp
  real(dp),intent(in) :: kT, mu_e
  real(dp),intent(in) :: fk(3, self%ebands%nkpt, self%bmin:self%bmax, self%nsppol)
- real(dp),intent(out) :: sigma_eh(3,3,2), mob_eh(3,3,2), fsum_eh(3,2), onsager(3,3,3,self%nsppol)
+ real(dp),intent(out) :: sigma_eh(3,3,2,self%nsppol), mob_eh(3,3,2,self%nsppol)
+ real(dp),intent(out) :: fsum_eh(3,2,self%nsppol), onsager(3,3,3,self%nsppol)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
@@ -2133,7 +2151,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
        eig_nk = self%ebands%eig(ib, ik_ibz, spin)
 
        ! Compute outer product in vv_tens and symmetrize tensor.
-       vr(:) = self%velocity(:, ib, ik_ibz, spin)
+       vr(:) = self%vbks(:, ib, ik_ibz, spin)
        do ia=1,3
          if (ia == 1) then
            emu_alpha = one
@@ -2150,8 +2168,8 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
          if (ia == 1) then
            ieh = 2; if (eig_nk >= mu_e) ieh = 1
-           sigma_eh(:,:,ieh) = sigma_eh(:,:,ieh) - wtk * vv_tens
-           fsum_eh(:,ieh) = fsum_eh(:,ieh) + wtk * cryst%symmetrize_cart_vec3(fk(:, ik_ibz, ib, spin))
+           sigma_eh(:,:,ieh,spin) = sigma_eh(:,:,ieh,spin) - wtk * vv_tens
+           fsum_eh(:,ieh,spin) = fsum_eh(:,ieh,spin) + wtk * cryst%symmetrize_cart_vec3(fk(:, ik_ibz, ib, spin))
          end if
          onsager(:,:,ia,spin) = onsager(:,:,ia,spin) - wtk * vv_tens
        end do ! ia
@@ -2163,18 +2181,17 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
  !call xmpi_sum(sigma_eh, comm, ierr)
  !call xmpi_sum(onsager, comm, ierr)
  ! Get units conversion factor including spin degeneracy.
- fact0 = max_occ * (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol) / 100
+ fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
  fact = 100**3 / e_Cb
 
  sigma_eh = fact0 * sigma_eh  ! siemens cm^-1
  fsum_eh = fsum_eh / cryst%ucvol
 
  ! Scale by the carrier concentration.
- ! TODO: Spin
  do spin=1,nsppol
    do ieh=1,2
-     call safe_div(sigma_eh(:,:,ieh) * fact, &
-                   self%n_ehst(ieh, spin, itemp) / cryst%ucvol / Bohr_meter**3, zero, mob_eh(:,:,ieh))
+     call safe_div(sigma_eh(:,:,ieh,spin) * fact, &
+                   self%n_ehst(ieh, spin, itemp) / cryst%ucvol / Bohr_meter**3, zero, mob_eh(:,:,ieh,spin))
    end do
  end do
 
