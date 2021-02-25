@@ -127,7 +127,7 @@ pages:
     - topics/TDepES.md
     - topics/Temperature.md
     - topics/TransPath.md
-    - topics/TuningSpeed.md
+    - topics/TuningSpeedMem.md
     - topics/Unfolding.md
     - topics/UnitCell.md
     - topics/vdw.md
