@@ -1233,11 +1233,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
      if(associated(hightemp)) then
-       if(hightemp%iopt_pot==2) then
-         hightemp%vtrial=vtrial
-       end if
        call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
        if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
+       if(hightemp%iopt_pot==2) then
+         hightemp%vtrial=vtrial
+         write(0,*) sum(vtrial)/(nfftf*dtset%nspden),hightemp%e_shiftfactor
+       end if
      end if
 
 !    Compute the new occupation numbers from eigen

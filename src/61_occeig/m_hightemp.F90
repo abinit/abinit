@@ -487,6 +487,7 @@ contains
     step=1e-1
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
     this%e_kin_freeel=zero
+    this%ent_freeel=zero
     if(this%iopt_pot==1) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       if(this%version==1) then
@@ -599,6 +600,10 @@ contains
         !END TEMPORARY
       end if
       this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
+
+      ! Compute entropy
+      this%ent_freeel=5./3.*this%e_kin_freeel/tsmear-gamma*this%nfreeel+&
+      & 2./3.*factor/tsmear*xcut**(1.5)/(exp(xcut-gamma)+1)*(xcut-gamma)
     else
       do ifftf=1,this%nfftf
         do ispden=1,this%nspden
@@ -687,15 +692,6 @@ contains
           this%ent_freeel=simpson(step,valuesent)
         end if
         ABI_DEALLOCATE(valuesent)
-
-        !!temp work on entropy
-        gamma=(fermie-this%e_shiftfactor)/tsmear
-        xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
-        temp_ent=5./3.*this%e_kin_freeel/tsmear+gamma*this%nfreeel
-        write(0,*) temp_ent
-        temp_ent=temp_ent+2./3.*sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(1.5)*xcut**(1.5)/(exp(xcut-gamma)+1)*(xcut+gamma)
-
-        write(0,*) 'Entropy:',this%ent_freeel,temp_ent
       else
         step=one
         do ifftf=1,this%nfftf
