@@ -9,7 +9,7 @@
 !!  and orthonormalizes it:
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2020 ABINIT group (LNguyen,FDahm (CS), FBottin, GZ, AR, MT)
+!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm (CS), FBottin, GZ, AR, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,8 +58,6 @@
 subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize,&
 &                          x_cplx,timopt,tim_xortho) ! optional arguments
 
-
- implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: blocksize,vectsize,spaceComm,x_cplx
@@ -96,7 +94,7 @@ subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
 
  if (info /= 0 )  then
    write(message,'(a,i0)')'abi_xpotrf, info=',info
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  !Find X  X*sqgram=blockvectorx
@@ -154,8 +152,6 @@ end subroutine xorthonormalize
 
 subroutine ortho_reim(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: blocksize,vectsize,spaceComm
@@ -181,7 +177,7 @@ subroutine ortho_reim(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vect
 
  if (info /= 0 )  then
    write(message,'(a,i0)')'dpotrf, info=',info
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Find X  X*sqgram=blockvectorx
@@ -228,9 +224,8 @@ end subroutine ortho_reim
 !!      wrtout,xmpi_sum,zgemm,zpotrf,ztrsm
 !!
 !! SOURCE
-subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
 
- implicit none
+subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
 
 !Arguments ------------------------------------
 !scalars
@@ -256,7 +251,7 @@ subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
 
  if (info /= 0 )  then
    write(message,'(a,i0)')'zpotrf, info=',info
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call abi_xtrsm('r','u','n','n',vectsize,blocksize,cone,sqgram,blocksize,blockvectorx,vectsize)

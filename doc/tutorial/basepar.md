@@ -171,45 +171,38 @@ be given in the next sections.
 
 ## A simple example of parallelism in ABINIT
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ### Running a job
 
 *Before starting, you might consider working in a different subdirectory as
 for the other tutorials. Why not Work_paral?*
 
-Copy the `files` file and the input file from the *\$ABI_TESTS/tutorial*
-directory to your work directory. They are named *tbasepar_1.files* and *tbasepar_1.in*.
+First one needs to copy the input file from the *\$ABI_TESTS/tutorial*
+directory to your work directory, namely *tbasepar_1.abi*.
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work_paral
 cd Work_paral
-cp ../tbasepar_1.files .   # You might need to edit this file.
-cp ../tbasepar_1.in .
+cp ../tbasepar_1.abi .
 ```
 
 You can start immediately a sequential run with
 
-    abinit < tbasepar_1.files > log 2> err
+    abinit tbasepar_1.abi >& log 2> err &
 
 to have a reference CPU time.
 On a Intel Xeon 20C 2.1 GHz, it runs in about 40 seconds.
 
-Contrary to the sequential case, it is worth to have a look at the `files`
-file. It might possibly be modified for parallel execution, as one should avoid
+The input file (*.abi) might possibly be modified for parallel execution, as one should avoid
 unnecessary network communications. Indeed, if every node has its own temporary or
 scratch directory (so not in the multicore case), you can achieve this by providing a path to a local disk
-for the temporary files in `abinit.files`. Supposing each processor has access
-to a local temporary disk space named `/scratch/user`, then you might modify
-the 5th line of the `files` file so that it becomes:
+for the temporary files in the input file by using the [[tmpdata_prefix]] variable. Supposing each processor has access
+to a local temporary disk space named `/scratch/user`, then you might add to the input *.abi file the following line
 
-    tbasepar_1.in
-    tbasepar_1.out
-    tbasepar_1i
-    tbasepar_1o
-    /scratch/user/tbasepar_1
-    ../../Psps_for_tests/HGH/82pb.4.hgh
+	tmpdata_prefix="/scratch/user/tbasepar_1"
+
 
 Note that determining ahead of time the precise resources you will need for
 your run will save you a lot of time if you are using a batch queue system.
@@ -228,7 +221,7 @@ On the contrary, you can create a *_NOLOG* file if you want to avoid all log fil
 The most favorable case for a parallel run is to treat the k-points
 concurrently, since most calculations can be done independently for each one of them.
 
-Actually, *tbasepar_1.in* corresponds to the investigation of a *FCC* crystal of
+Actually, *tbasepar_1.abi* corresponds to the investigation of a *FCC* crystal of
 lead, which requires a large number of k-points if one wants to get an
 accurate description of the ground state. Examine this file. Note that the
 cut-off is realistic, as well as the grid of k-points (giving 182 k points in
@@ -243,7 +236,7 @@ implementation, and mention the number of processors you want to use, as well
 as the abinit command:
 
 ```bash
-mpirun -n 2 abinit < tbasepar_1.files >& tbasepar_1.log &
+mpirun -n 2 abinit tbasepar_1.abi >& tbasepar_1.log &
 ```
 
 Depending on your particular machine, *mpirun* might have to be replaced by
@@ -269,7 +262,7 @@ command and the file containing the CPU addresses.
 On a PC bi-processor machine, this gives the following:
 
 ```bash
-mpirun -np 2 -machinefile cluster ../../src/main/abinit < tbasepar_1.files >& tbasepar_1.log &
+mpirun -np 2 -machinefile cluster ../../src/main/abinit tbasepar_1.abi >& tbasepar_1.log &
 ```
 
 Now, examine the corresponding output file. If you have kept the output from
@@ -330,17 +323,17 @@ once in a while that all processors are alive.
 ### Parallelism over the spins
 
 The parallelization over the spins (up, down) is done along with the one over
-the k-points, so it works exactly the same way. The files
-*tbasepar_2.in* and *tbasepar_2.files* in *\$ABI_TESTS/tutorial* treat a spin-polarized system
+the k-points, so it works exactly the same way. The file
+*tbasepar_2.abi* in *\$ABI_TESTS/tutorial* treats a spin-polarized system
 (distorted FCC Iron) with only one k-point in the Irreducible Brillouin Zone.
 This is quite unphysical, and has the sole purpose to show the spin
 parallelism with as few as two processors: the k-point parallelism has
 precedence over the spin parallelism, so that with 2 processors, one ought
 to have only one k-point to see the spin parallelism.
-If needed, modify the _files_ file, to provide a local temporary disk space.
+If needed, modify the input file, to provide a local temporary disk space.
 Run this test case, in sequential, then in parallel.
 
-While the jobs are running, read the input and files file. Then look closely
+While the jobs are running, read the input. Then look closely
 at the output and log files in the sequential and parallel cases. They are quite similar. 
 Actually, apart the mention of two processors and the speedup, there is no other
 manifestation of the parallelism.

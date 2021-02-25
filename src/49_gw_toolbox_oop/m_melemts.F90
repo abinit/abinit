@@ -9,7 +9,7 @@
 !!  using the perturbative approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG)
+!! Copyright (C) 2008-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,6 +74,7 @@ MODULE m_melemts
 
  type,public :: melflags_t
 
+  integer :: has_kinetic=0
   integer :: has_hbare=0
   integer :: has_lexexch=0
   integer :: has_sxcore=0
@@ -132,6 +133,10 @@ MODULE m_melemts
   ! kibz(3,nkibz)
   ! The list of k-points in reduced coordinates.
 
+  complex(dpc), allocatable :: kinetic(:,:,:,:)
+  ! kinetic(b1:b2,b1:b2,nkibz,nsppol*nspinor**2)
+  ! Matrix elements of the kinetic energy.
+
   complex(dpc), allocatable :: hbare(:,:,:,:)
   ! hbare(b1:b2,b1:b2,nkibz,nsppol*nspinor**2)
   ! Matrix elements of the bare Hamiltonian.
@@ -177,7 +182,7 @@ MODULE m_melemts
  !public :: mels_get_exene_core
 !!***
 
- integer,parameter,private :: NNAMES=8
+ integer,parameter,private :: NNAMES=9
  integer,parameter,private :: NAMELEN=13
 
 ! List of matrix element names.
@@ -191,6 +196,7 @@ MODULE m_melemts
 &                    "vu           ",&
 &                    "vlexx        ",&
 &                    "vhartree     ",&
+&                    "kinetic      ",&
 &                    "hbare        "/)
 
 CONTAINS  !========================================================================================
@@ -220,6 +226,7 @@ subroutine melflags_reset(Mflags)
 ! *************************************************************************
 
  ! @melflags_t
+ Mflags%has_kinetic         = 0
  Mflags%has_hbare           = 0
  Mflags%has_sxcore          = 0
  Mflags%has_vhartree        = 0
@@ -267,6 +274,7 @@ subroutine melflags_copy(Mflags_in, Mflags_out)
  call melflags_reset(Mflags_out)
 
  ! @melflags_t
+ Mflags_out%has_kinetic         = Mflags_in%has_kinetic
  Mflags_out%has_hbare           = Mflags_in%has_hbare
  Mflags_out%has_sxcore          = Mflags_in%has_sxcore
  Mflags_out%has_vhartree        = Mflags_in%has_vhartree
@@ -322,6 +330,7 @@ subroutine melements_free(Mels)
  ABI_SFREE(Mels%kibz)
 
 !complex arrays
+ ABI_SFREE(Mels%kinetic)
  ABI_SFREE(Mels%hbare)
  ABI_SFREE(Mels%sxcore)
  ABI_SFREE(Mels%vhartree)
@@ -377,6 +386,9 @@ subroutine my_select_melements(Mels,aname,flag_p,arr_p)
 ! *************************************************************************
 
  SELECT CASE (tolower(aname))
+ CASE ("kinetic")
+   flag_p => Mels%flags%has_kinetic
+   arr_p  => Mels%kinetic
  CASE ("hbare")
    flag_p => Mels%flags%has_hbare
    arr_p  => Mels%hbare
@@ -402,7 +414,7 @@ subroutine my_select_melements(Mels,aname,flag_p,arr_p)
    flag_p => Mels%flags%has_vxcval_hybrid
    arr_p  => Mels%vxcval_hybrid
  CASE DEFAULT
-   MSG_ERROR(sjoin("Wrong aname: ", aname))
+   ABI_ERROR(sjoin("Wrong aname: ", aname))
  END SELECT
 
 end subroutine my_select_melements
@@ -457,7 +469,6 @@ subroutine melements_init(Mels,Mflags_in,nsppol,nspden,nspinor,nkibz,kibz,bands_
 
  ! * Copy flags.
  call melflags_copy(Mflags_in, Mels%flags)
-
  ! * Copy dimensions.
  Mels%nkibz   = nkibz
  Mels%nsppol  = nsppol
@@ -485,7 +496,7 @@ subroutine melements_init(Mels,Mflags_in,nsppol,nspden,nspinor,nkibz,kibz,bands_
  end do
 
  if (bmin==HUGE(1).or.bmax==-HUGE(1)) then
-   MSG_BUG("Wrong bands_idx")
+   ABI_BUG("Wrong bands_idx")
  end if
 
  Mels%bmin = bmin
@@ -499,6 +510,10 @@ subroutine melements_init(Mels,Mflags_in,nsppol,nspden,nspinor,nkibz,kibz,bands_
  Mels%kibz = kibz
 
 ! complex arrays
+ if (Mels%flags%has_kinetic == 1) then
+   ABI_CALLOC(Mels%kinetic,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+ end if
+
  if (Mels%flags%has_hbare == 1) then
    ABI_CALLOC(Mels%hbare,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
@@ -681,7 +696,7 @@ subroutine melements_mpisum(Mels,comm,aname)
      call xmpi_sum(arr_p,comm,ierr)
      if (ierr/=0) then
        write(msg,'(a,i4,2a)')" xmpi_sum reported ierr= ",ierr," for key= ",TRIM(key)
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      flag_p=2 ! Tag this array as calculated
    end if
@@ -752,7 +767,7 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
  my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
- if (Mels%nspinor == 2) MSG_WARNING("nspinor=2 not coded")
+ if (Mels%nspinor == 2) ABI_WARNING("nspinor=2 not coded")
 
  if (PRESENT(names_list)) then
    my_nkeys=SIZE(names_list)

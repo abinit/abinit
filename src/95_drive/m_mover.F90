@@ -6,7 +6,7 @@
 !! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +45,7 @@ module m_mover
 #endif
 
  use defs_abitypes,        only : MPI_type
- use m_fstrings,           only : strcat, sjoin, indent
+ use m_fstrings,           only : strcat, sjoin, indent, itoa
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
  use m_time,               only : abi_wtime, sec2str
@@ -79,6 +79,7 @@ module m_mover
  use scup_global, only : global_set_parent_iter,global_set_print_parameters
 #endif
  use m_scup_dataset
+
  implicit none
 
  private
@@ -115,7 +116,7 @@ contains
 !!   | nsppol=1 for unpolarized, 2 for spin-polarized
 !!   | nsym=number of symmetry elements in space group
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfftf=(effective) number of FFT grid points (for this processor)
 !!       for the "fine" grid (see NOTES below)
 !!  npwarr(nkpt)=number of planewaves in basis and boundary at this k point.
@@ -228,7 +229,7 @@ integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelim
 integer :: ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
-character(len=500) :: message
+character(len=500) :: msg
 !character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
@@ -237,7 +238,7 @@ character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
-logical :: change,useprtxfase
+logical :: changed,useprtxfase
 logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
@@ -289,9 +290,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !
  call abimover_ini(ab_mover,amu_curr,dtfil,scfcv_args%dtset,specs)
 
- if(ab_mover%ionmov==10 .or. ab_mover%ionmov==11)then
-   call delocint_ini(deloc)
- end if
+ if (ab_mover%ionmov==10 .or. ab_mover%ionmov==11) call delocint_ini(deloc)
 
  if (ab_mover%ionmov==13 .or. ab_mover%ionmov==25)then
    call mttk_ini(mttk_vars,ab_mover%nnos)
@@ -299,8 +298,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !###########################################################
 !### 03. Set the number of iterations ntime
-!###     By default ntime==1 but if the user enter a lower
-!###     value mover will execute at least one iteration
+!###     By default ntime==1 but if the user enters a lower
+!###     value, mover will execute at least one iteration
 
  if (scfcv_args%dtset%ntime<1)then
    ntime=1
@@ -310,7 +309,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !###########################################################
 !### 04. Try to read history of previous calculations
-!###     It requires access to the NetCDF library
+!###     It requires NetCDF library
 
 !Init MPI data
  comm=scfcv_args%mpi_enreg%comm_cell
@@ -350,11 +349,11 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      call abihist_free(hist_prev)
    end if
 !  If restarxf specifies to start to the last iteration
-   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then 
+   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
      if(present(effective_potential))then
        call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose,sc_size) ! Map Hist to Ref to order atoms
        xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
-       hist%ihist = 1 
+       hist%ihist = 1
      end if
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
@@ -388,17 +387,16 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
 !###########################################################
-!### 06. First output before any itime or icycle
+!### 06. First output before any itime or icycle iteration
 
-!If effective potential is present,
-!  forces will be compute with it
+!If effective potential is present forces will be compute with it
  if (present(effective_potential))then
    need_scfcv_cycle = .FALSE.
    if(need_verbose)then
-     write(message,'(2a,i2,5a,80a)')&
+     write(msg,'(2a,i2,5a,80a)')&
 &     ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),' with effective potential',&
 &     ch10,('=',kk=1,80)
-     call wrtout([std_out, ab_out], message)
+     call wrtout([std_out, ab_out], msg)
    end if
    need_elec_eval = .FALSE.
    if(present(scup_dtset))then
@@ -406,20 +404,20 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    endif
  else
    if(need_verbose)then
-     write(message,'(a,a,i2,a,a,a,80a)')&
+     write(msg,'(a,a,i2,a,a,a,80a)')&
 &     ch10,'=== [ionmov=',ab_mover%ionmov,'] ',specs%method,&
 &     ch10,('=',kk=1,80)
-     call wrtout([std_out, ab_out], message)
+     call wrtout([std_out, ab_out], msg)
    end if
  end if
 
 !Format for printing on each cycle
  write(fmt,'(a6,i2,a4,i2,a4,i2,a4,i2,a9)')&
-& '(a,a,i',int(log10(real(ntime))+1),&
-& ',a,i',int(log10(real(ntime))+1),&
-& ',a,i',int(log10(real(ncycle))+1),&
-& ',a,i',int(log10(real(ncycle))+1),&
-& ',a,a,80a)'
+  '(a,a,i',int(log10(real(ntime))+1),&
+  ',a,i',int(log10(real(ntime))+1),&
+  ',a,i',int(log10(real(ncycle))+1),&
+  ',a,i',int(log10(real(ncycle))+1),&
+  ',a,a,80a)'
 
 !###########################################################
 !### 07. Fill the history of the first SCFCV
@@ -435,7 +433,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
     end if
     INQUIRE(FILE=filename, EXIST=file_exists)
 
-    MSG_ERROR("This section has been disabled, ph_freez_disp is not defined in main ABINIT")
+    ABI_ERROR("This section has been disabled, ph_freez_disp is not defined in main ABINIT")
 
 ! XG 20200322 : The input variables ph_freez_disp are not documented neither tested, so they
 ! have been removed from the allowed list in the parser. Also, you should not be here !
@@ -453,27 +451,27 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  else
 
-   !Fill history with the values of xred, acell and rprimd
+   ! Fill history with the values of xred, acell and rprimd
    call var2hist(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
-   !Fill velocities and ionic kinetic energy
+   ! Fill velocities and ionic kinetic energy
    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
    hist%time(hist%ihist)=zero
 
  end if
+
 !Decide if prtxfase will be called
  useprtxfase=.FALSE.
  do ii=1,ab_mover%natom
    if (ab_mover%prtatlist(ii)/=0)then
-     useprtxfase=.TRUE.
-     exit
+     useprtxfase=.TRUE.; exit
    end if
  end do
 
 !At beginning no error
  nerr_dilatmx = 0
 
- ABI_ALLOCATE(xred_prev,(3,scfcv_args%dtset%natom))
+ ABI_MALLOC(xred_prev,(3,scfcv_args%dtset%natom))
 
 !###########################################################
 !### 08. Loop for itime (From 1 to ntime)
@@ -489,16 +487,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     write(message,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
-     if(need_verbose)call wrtout(std_out, message)
+     write(msg,*)sjoin("{mover_itime:", itoa(itime - 1), ", wall_time: '", sec2str(wtime_step), "'} <<< TIME")
+     if(need_verbose)call wrtout(std_out, msg)
      if (have_timelimit_in(MY_NAME)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
-           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),&
-&           ". Will exit itime loop in mover."
-           if(need_verbose)MSG_COMMENT(message)
-           if(need_verbose)call wrtout(ab_out, message)
+           write(msg,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())), ". Will exit itime loop in mover."
+           if(need_verbose) ABI_COMMENT(msg)
+           if(need_verbose) call wrtout(ab_out, msg)
            timelimit_exit = 1
            exit
          end if
@@ -514,6 +511,17 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    if(ab_mover%ionmov==23 .and. .not. lotf_extrapolation(itime)) skipcycle=.True.
 #endif
 
+   ! If RMM-DIIS is used, decrease the number of NSCF steps done with wfoptalg before activating RMM-DIIS.
+   ! In vtowfk we have the condition: istep > 3 + dtset%rmm_diis
+   ! so setting rmm_diis = 1 gives:
+   !    4 NSCF iterations for itime == 1
+   !    1 NSCF iterations for itime >= 2.
+   if (scfcv_args%dtset%rmm_diis /= 0 .and. itime == 2) then
+     scfcv_args%dtset%rmm_diis = scfcv_args%dtset%rmm_diis - 3
+     if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1
+     call wrtout(std_out, sjoin(" itime == 2 with RMM-DIIS --> setting rmm_diis to:", itoa(scfcv_args%dtset%rmm_diis)))
+   end if
+
 !  ###########################################################
 !  ### 09. Loop for icycle (From 1 to ncycle)
    do icycle=1,ncycle
@@ -525,25 +533,23 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    ###########################################################
 !    ### 10. Output for each icycle (and itime)
      if(need_verbose)then
-       write(message,fmt)&
-&       ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
-        call wrtout([std_out, ab_out], message)
+       write(msg,fmt)&
+        ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
+        call wrtout([std_out, ab_out], msg)
      end if
-     if (useprtxfase) then
-       call prtxfase(ab_mover,hist,itime_hist,std_out,mover_BEFORE)
-     end if
+     if (useprtxfase) call prtxfase(ab_mover,hist,itime_hist,std_out,mover_BEFORE)
 
      xred_prev(:,:)=xred(:,:)
      rprimd_prev(:,:)=rprimd(:,:)
 
 !    ###########################################################
 !    ### 11. Symmetrize atomic coordinates over space group elements
-     
-     call symmetrize_xred(ab_mover%natom,&
-&     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred,indsym=scfcv_args%indsym)
 
-     change=any(xred(:,:)/=xred_prev(:,:))
-     if (change)then
+     call symmetrize_xred(ab_mover%natom,&
+      scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred,indsym=scfcv_args%indsym)
+
+     changed = any(xred /= xred_prev)
+     if (changed)then
        hist%xred(:,:,hist%ihist)=xred(:,:)
        if(need_verbose) then
          write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED'
@@ -559,13 +565,13 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    ### 12. => Call to SCFCV routine and fill history with forces
      if (need_verbose) then
        if (need_scfcv_cycle) then
-         write(message,'(a,3a,33a,44a)')&
+         write(msg,'(a,3a,33a,44a)')&
           ch10,('-',kk=1,3),'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
        else
-         write(message,'(a,3a,33a,44a)')&
+         write(msg,'(a,3a,33a,44a)')&
           ch10,('-',kk=1,3),'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
        end if
-       call wrtout([std_out, ab_out], message)
+       call wrtout([std_out, ab_out], msg)
      end if
 
      if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
@@ -587,16 +593,16 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
          !WVL - reformat the wavefunctions in the case of xred != xred_old
          if (scfcv_args%dtset%usewvl == 1 .and. maxval(xred_old - xred) > zero) then
-          !Before running scfcv, on non-first geometry step iterations,
-          ! we need to reformat the wavefunctions, taking into acount the new
-          ! coordinates. We prepare to change rhog (to be removed) and rhor.
-           ABI_DEALLOCATE(rhog)
-           ABI_DEALLOCATE(rhor)
+           ! Before running scfcv, on non-first geometry step iterations,
+           ! we need to reformat the wavefunctions, taking into acount the new
+           ! coordinates. We prepare to change rhog (to be removed) and rhor.
+           ABI_FREE(rhog)
+           ABI_FREE(rhor)
            call wvl_wfsinp_reformat(scfcv_args%dtset, scfcv_args%mpi_enreg,&
 &           scfcv_args%psps, rprimd, scfcv_args%wvl, xred, xred_old)
            scfcv_args%nfftf = scfcv_args%dtset%nfft
-           ABI_ALLOCATE(rhog,(2, scfcv_args%dtset%nfft))
-           ABI_ALLOCATE(rhor,(2, scfcv_args%dtset%nfft))
+           ABI_MALLOC(rhog,(2, scfcv_args%dtset%nfft))
+           ABI_MALLOC(rhor,(2, scfcv_args%dtset%nfft))
            call wvl_mkrho(scfcv_args%dtset, scfcv_args%irrzon, scfcv_args%mpi_enreg,&
 &           scfcv_args%phnons, rhor,scfcv_args%wvl%wfs,scfcv_args%wvl%den)
          end if
@@ -605,15 +611,14 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
          if (need_scfcv_cycle) then
 
            call dtfil_init_time(dtfil,iapp)
-           call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+           call scfcv_run(scfcv_args, itime, electronpositron, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
            if (conv_retcode == -1) then
-               message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
-               MSG_WARNING(message)
+               msg = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
+               ABI_WARNING(msg)
            end if
 
          else
-!          For monte carlo don't need to recompute energy here
-!          (done in pred_montecarlo)
+!          For monte carlo don't need to recompute energy here (done in pred_montecarlo)
            name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                if(icycle==1)call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,need_verbose,sc_size=sc_size) ! Map Hist to Ref to order atoms
@@ -645,7 +650,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !            We set to false the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
-               MSG_WARNING("The simulation is diverging, please check your effective potential")
+               ABI_WARNING("The simulation is diverging, please check your effective potential")
              end if
 !            Set the flag to finish the simulation
              iexit=1
@@ -660,9 +665,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 #endif
 !      ANOMALOUS SITUATION
 !      This is the only case where rprimd could change inside scfcv
-!      It generates an weird condition, we start with a certain
-!      value for rprimd before scfcv and after we finish with
-!      a different value.
+!      It generates a weird condition, we start with a certain
+!      value for rprimd before scfcv and after we finish with a different value.
 !      Notice that normally scfcv should not change rprimd
 !      And even worse if optcell==0
 !      The solution here is to recompute acell and store these value
@@ -681,8 +685,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !      * Inside scfcv_core.F90 there is a call to symmetrize_xred.F90
 !      for the first SCF cycle symmetrize_xred could change xred
        if (ab_mover%ionmov<10)then
-         change=any(xred(:,:)/=xred_prev(:,:))
-         if (change)then
+         changed = any(xred /= xred_prev)
+         if (changed)then
            hist%xred(:,:,hist%ihist)=xred(:,:)
            if(need_verbose)then
              write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED AFTER SCFCV'
@@ -691,7 +695,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
                write(std_out,*) xred(:,kk)-xred_prev(:,kk)
              end do
            end if
-         end if !if (change)
+         end if
        end if
 
 !      Fill velocities and ionic kinetic energy
@@ -708,10 +712,10 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !    Store trajectory in xfh file
      if((ab_xfh%nxfh==0.or.itime/=1)) then
-       ABI_ALLOCATE(fred_corrected,(3,scfcv_args%dtset%natom))
+       ABI_MALLOC(fred_corrected,(3,scfcv_args%dtset%natom))
        call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
 !      Get rid of mean force on whole unit cell,
-!       but only if no generalized constraints are in effect
+!      but only if no generalized constraints are in effect
        if (ab_mover%nconeq==0)then
          do ii=1,3
            if (ii/=3.or.ab_mover%jellslab==0) then
@@ -731,7 +735,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
            call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,hist%strten(:,hist%ihist),xred)
          end if
        end if
-       ABI_DEALLOCATE(fred_corrected)
+       ABI_FREE(fred_corrected)
      end if
 
 !    ###########################################################
@@ -749,8 +753,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    ###########################################################
 !    ### 14. Output after SCFCV
      if(need_verbose.and.need_scfcv_cycle)then
-       write(message,'(a,3a,a,72a)')ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
-       call wrtout([std_out, ab_out], message)
+       write(msg,'(a,3a,a,72a)')ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
+       call wrtout([std_out, ab_out], msg)
      end if
      if (useprtxfase) then
        call prtxfase(ab_mover,hist,itime_hist,ab_out,mover_AFTER)
@@ -823,18 +827,18 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if(iexit/=0) exit
 
 !    ###########################################################
-!    ### 18. Use the history  to extract the new values
-!    ###     acell, rprimd and xred
+!    ### 18. Use the history  to extract the new values of acell, rprimd and xred
 
      call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
-     if(ab_mover%optcell/=0)then
+     if (ab_mover%optcell/=0) then
+       ! Cell may change
 
        call matr3inv(rprimd,gprimd)
 
 !      If metric has changed since the initialization, update the Ylm's
        if (scfcv_args%psps%useylm==1)then
-         option=0;
+         option=0
          if (scfcv_args%dtset%iscf>0) option=1
          call initylmg(gprimd,&
 &         scfcv_args%kg,&
@@ -880,27 +884,24 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 
      if (need_verbose) then
-       write(message,*) 'ICYCLE',icycle,skipcycle
-       call wrtout(std_out,message)
-       write(message,*) 'NCYCLE',ncycle
-       call wrtout(std_out,message)
+       write(msg,*) 'ICYCLE',icycle,skipcycle
+       call wrtout(std_out,msg)
+       write(msg,*) 'NCYCLE',ncycle
+       call wrtout(std_out,msg)
      end if
      if (skipcycle) exit
-
-     !write(std_out,*)' m_mover : will call precpred_1geo'
-
 
 !    ###########################################################
 !    ### 19. End loop icycle
 
-   end do ! do icycle=1,ncycle
+   end do ! icycle
 
    if(iexit/=0)exit
 
 !  ###########################################################
 !  ### 20. End loop itime
 
- end do ! do itime=1,ntime
+ end do ! itime
 
  ! Call fconv here if we exited due to wall time limit.
  if (timelimit_exit==1 .and. specs%isFconv) then
@@ -929,8 +930,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  call xmpi_wait(quitsum_request,ierr)
 
 !###########################################################
-!### 21. Set the final values of xred with the last
-!###     computed values (not the last predicted)
+!### 21. Set the final values of xred with the last computed values (not the last predicted)
 
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
  vel(:,:)=hist%vel(:,:,hist%ihist)
@@ -956,24 +956,19 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !### 23. Deallocate hist and ab_mover datatypes
 
 !This call is needed to free an internal matrix. However, this is not optimal ...
-!One should instead have a datastructure associated with the preconditioner...
- if (ab_mover%goprecon>0)then
-   call prec_simple(ab_mover,preconforstr,hist,1,1,1)
- end if
+!One should instead have a datastructure associated with the preconditioner.
+ if (ab_mover%goprecon>0) call prec_simple(ab_mover,preconforstr,hist,1,1,1)
 
  if (ab_mover%ionmov==13 .or. ab_mover%ionmov==25)then
    call mttk_fin(mttk_vars)
  end if
 
- if (ab_mover%ionmov==10 .or. ab_mover%ionmov==11)then
-   call delocint_fin(deloc)
- end if
+ if (ab_mover%ionmov==10 .or. ab_mover%ionmov==11) call delocint_fin(deloc)
 
- ABI_DEALLOCATE(xred_prev)
+ ABI_FREE(xred_prev)
 
  call abihist_free(hist)
  call abihist_free(hist_prev)
-
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 
@@ -986,11 +981,11 @@ contains
 !! fconv
 !!
 !! FUNCTION
-!! Check maximal absolute value of force (hartree/bohr) against
-!! input tolerance; if below tolerance, return iexit=1.
+!! Check maximal absolute value of force (hartree/bohr) against input tolerance; if below tolerance, return iexit=1.
 !! Takes into account the fact that the Broyden (or moldyn) step
 !! might be the last one (last itime), to print eventually modified message.
 !! Stresses are also included in the check, provided that optcell/=0.
+!!
 !! If optcell=1, takes only the trace into account
 !!    optcell=2, takes all components into account
 !!    optcell=3, takes traceless stress into account
@@ -1000,8 +995,7 @@ contains
 !!    optcell=7, takes sigma(2,2),(2,3) and (3 3) into account
 !!    optcell=8, takes sigma(1,1),(1,3) and (3 3) into account
 !!    optcell=9, takes sigma(1,1),(1,2) and (2 2) into account
-!! In the case of stresses, target the tensor strtarget, and
-!! take into account the factor strfact
+!! In the case of stresses, target the tensor strtarget, and take into account the factor strfact
 !!
 !! INPUTS
 !!  fcart(3,natom)= forces on atoms in hartree/bohr in cartesian coordinates
@@ -1046,7 +1040,7 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !scalars
  integer :: iatom,idir,istr
  real(dp) :: fmax,strdiag
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: dstr(6)
 
@@ -1098,29 +1092,29 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
  end if
 
  if (fmax<tolmxf) then
-   write(message, '(a,a,i4,a,a,a,es11.4,a,es11.4,a,a)' ) ch10,&
-&   ' At Broyd/MD step',itime,', gradients are converged : ',ch10,&
-&   '  max grad (force/stress) =',fmax,' < tolmxf=',tolmxf,' ha/bohr (free atoms)',ch10
-   call wrtout([std_out, ab_out], message)
+   write(msg, '(a,a,i4,a,a,a,es11.4,a,es11.4,a,a)' ) ch10,&
+    ' At Broyd/MD step',itime,', gradients are converged : ',ch10,&
+    '  max grad (force/stress) =',fmax,' < tolmxf=',tolmxf,' ha/bohr (free atoms)',ch10
+   call wrtout([std_out, ab_out], msg)
    iexit=1
  else
    if(iexit==1)then
-     write(message, '(a,a,a,a,i5,a,a,a,es11.4,a,es11.4,a,a)' ) ch10,&
-&     ' fconv : WARNING -',ch10,&
-&     '  ntime=',ntime,' was not enough Broyd/MD steps to converge gradients: ',ch10,&
-&     '  max grad (force/stress) =',fmax,' > tolmxf=',tolmxf,' ha/bohr (free atoms)',ch10
-     call wrtout([std_out, ab_out], message)
+     write(msg, '(a,a,a,a,i5,a,a,a,es11.4,a,es11.4,a,a)' ) ch10,&
+      ' fconv : WARNING -',ch10,&
+      '  ntime=',ntime,' was not enough Broyd/MD steps to converge gradients: ',ch10,&
+      '  max grad (force/stress) =',fmax,' > tolmxf=',tolmxf,' ha/bohr (free atoms)',ch10
+     call wrtout([std_out, ab_out], msg)
 
      write(std_out,"(8a)")ch10,&
-&     "--- !RelaxConvergenceWarning",ch10,&
-&     "message: | ",ch10,TRIM(indent(message)),ch10,&
-&     "..."
+       "--- !RelaxConvergenceWarning",ch10,&
+       "message: | ",ch10,TRIM(indent(msg)),ch10,&
+       "..."
 
    else
-     write(message, '(a,i4,a,a,a,es11.4,a,es11.4,a,a)' ) &
-&     ' fconv : at Broyd/MD step',itime,', gradients have not converged yet. ',ch10,&
-&     '  max grad (force/stress) =',fmax,' > tolmxf=',tolmxf,' ha/bohr (free atoms)',ch10
-     call wrtout(std_out,message,'COLL')
+     write(msg, '(a,i4,a,a,a,es11.4,a,es11.4,a,a)' ) &
+       ' fconv : at Broyd/MD step',itime,', gradients have not converged yet. ',ch10,&
+      '  max grad (force/stress) =',fmax,' > tolmxf=',tolmxf,' ha/bohr (free atoms)',ch10
+     call wrtout(std_out,msg,'COLL')
    end if
    iexit=0
  end if
@@ -1136,10 +1130,8 @@ end subroutine fconv
 !!  FIXME: add description.
 !!
 !! INPUTS
-!!  argin(sizein)=description
 !!
 !! OUTPUT
-!!  argout(sizeout)=description
 !!
 !! PARENTS
 !!      m_mover
@@ -1162,13 +1154,13 @@ subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 !Local variables-------------------------------
  integer :: ihist,ihist_prev,ihist_prev2
  real(dp) :: ediff1,ediff2,maxediff
- character(len=500) :: message
+ character(len=500) :: msg
 ! *************************************************************************
 
  if (itime_hist<3) then
-   write(message, '(a,a,a)' ) ch10,&
-&   ' erlxconv : minimum 3 Broyd/MD steps to check convergence of energy in relaxations',ch10
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,a,a)' ) ch10,&
+   ' erlxconv : minimum 3 Broyd/MD steps to check convergence of energy in relaxations',ch10
+   call wrtout(std_out,msg,'COLL')
  else
    ihist = hist%ihist
    ihist_prev  = abihist_findIndex(hist,-1)
@@ -1176,30 +1168,30 @@ subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
    ediff1 = hist%etot(ihist) - hist%etot(ihist_prev)
    ediff2 = hist%etot(ihist) - hist%etot(ihist_prev2)
    if ((abs(ediff1)<tolmxde).and.(abs(ediff2)<tolmxde)) then
-     write(message, '(a,a,i4,a,a,a,a,a,es11.4,a,a)' ) ch10,&
-&     ' At Broyd/MD step',itime,', energy is converged : ',ch10,&
-&     '  the difference in energy with respect to the two ',ch10,&
-&     '  previous steps is < tolmxde=',tolmxde,' ha',ch10
-     call wrtout([std_out, ab_out], message)
+     write(msg, '(a,a,i4,a,a,a,a,a,es11.4,a,a)' ) ch10,&
+     ' At Broyd/MD step',itime,', energy is converged : ',ch10,&
+     '  the difference in energy with respect to the two ',ch10,&
+     '  previous steps is < tolmxde=',tolmxde,' ha',ch10
+     call wrtout([std_out, ab_out], msg)
      iexit=1
    else
      maxediff = max(abs(ediff1),abs(ediff2))
      if(iexit==1)then
-       write(message, '(a,a,a,a,i5,a,a,a,es11.4,a,es11.4,a,a)' ) ch10,&
-&       ' erlxconv : WARNING -',ch10,&
-&       '  ntime=',ntime,' was not enough Broyd/MD steps to converge energy: ',ch10,&
-&       '  max difference in energy =',maxediff,' > tolmxde=',tolmxde,' ha',ch10
-       call wrtout([std_out, ab_out], message)
+       write(msg, '(a,a,a,a,i5,a,a,a,es11.4,a,es11.4,a,a)' ) ch10,&
+       ' erlxconv : WARNING -',ch10,&
+       '  ntime=',ntime,' was not enough Broyd/MD steps to converge energy: ',ch10,&
+       '  max difference in energy =',maxediff,' > tolmxde=',tolmxde,' ha',ch10
+       call wrtout([std_out, ab_out], msg)
 
        write(std_out,"(8a)")ch10,&
-&       "--- !RelaxConvergenceWarning",ch10,&
-&       "message: | ",ch10,TRIM(indent(message)),ch10,&
-&       "..."
+       "--- !RelaxConvergenceWarning",ch10,&
+       "message: | ",ch10,TRIM(indent(msg)),ch10,&
+       "..."
      else
-       write(message, '(a,a,i4,a,a,a,es11.4,a,es11.4,a,a)' ) ch10,&
-&       ' erlxconv : at Broyd/MD step',itime,', energy has not converged yet. ',ch10,&
-&       '  max difference in energy=',maxediff,' > tolmxde=',tolmxde,' ha',ch10
-       call wrtout(std_out,message,'COLL')
+       write(msg, '(a,a,i4,a,a,a,es11.4,a,es11.4,a,a)' ) ch10,&
+       ' erlxconv : at Broyd/MD step',itime,', energy has not converged yet. ',ch10,&
+       '  max difference in energy=',maxediff,' > tolmxde=',tolmxde,' ha',ch10
+       call wrtout(std_out,msg,'COLL')
      end if
    end if
  end if
@@ -1222,15 +1214,13 @@ end subroutine mover
 !! Also compute absolute and relative differences with previous calculation
 !!
 !! INPUTS
-!! ab_mover<type abimover>=Subset of dtset only related with
-!!          |                 movement of ions and acell, contains:
+!! ab_mover<type abimover>=Subset of dtset only related with movement of ions and acell, contains:
 !!          | dtion:  Time step
 !!          ! natom:  Number of atoms
 !!          | vis:    viscosity
 !!          | iatfix: Index of atoms and directions fixed
 !!          | amass:  Mass of ions
-!! hist<type abihist>=Historical record of positions, forces,
-!!                               stresses, cell and energies,
+!! hist<type abihist>=Historical record of positions, forces, stresses, cell and energies,
 !! itime= time step
 !! iout=unit number for printing
 !!
@@ -1300,7 +1290,7 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 !###########################################################
 !### 1. Positions
 
- ABI_ALLOCATE(xcart,(3,ab_mover%natom))
+ ABI_MALLOC(xcart,(3,ab_mover%natom))
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
  write(msg, '(a,a)' )ch10,' Cartesian coordinates (xcart) [bohr]'
@@ -1309,14 +1299,14 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
  write(msg, '(a)' )' Reduced coordinates (xred)'
  call prtnatom(atlist,iout,msg,ab_mover%natom,prtallatoms,xred)
 
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
 !###########################################################
 !### 2. Forces
 
  if(pos==mover_AFTER)then
 
-   ABI_ALLOCATE(fred,(3,ab_mover%natom))
+   ABI_MALLOC(fred,(3,ab_mover%natom))
    call fcart2fred(fcart,fred,rprimd,ab_mover%natom)
 
 !  Compute max |f| and rms f,
@@ -1340,7 +1330,7 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 
    write(msg, '(a)' )' Reduced forces (fred)'
    call prtnatom(atlist,iout,msg,ab_mover%natom,prtallatoms,fred)
-   ABI_DEALLOCATE(fred)
+   ABI_FREE(fred)
  end if
 
 !###########################################################
@@ -1474,9 +1464,9 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
      dErel=2*dEabs/(abs(hist%etot(hist%ihist))+abs(hist%etot(jj)))
      write(msg, '(a,a,a,a)' )TRIM(msg),ch10,ch10,' Difference of energy with previous step (new-old):'
      write(msg, '(a,a,10a,a,1p,e12.5,a,10a,a,1p,e12.5)')&
-&     TRIM(msg),ch10,&
-&     (' ',jj=1,10),' Absolute (Ha)=',dEabs,ch10,&
-&     (' ',jj=1,10),' Relative     =',dErel
+      TRIM(msg),ch10,&
+      (' ',jj=1,10),' Absolute (Ha)=',dEabs,ch10,&
+      (' ',jj=1,10),' Relative     =',dErel
    end if
    call wrtout(iout,msg,'COLL')
  end if
@@ -1519,8 +1509,6 @@ subroutine gettag(atlist,index,natom,prtallatoms,tag)
   integer,intent(in) :: index
   character(len=7),intent(out)   :: tag
 
-!Local variables -------------------------
-
 ! *********************************************************************
 !The numbering will be from (1) to (9999)
 
@@ -1548,7 +1536,6 @@ subroutine gettag(atlist,index,natom,prtallatoms,tag)
 !!
 !! FUNCTION
 !! Print information for N atoms
-!!
 !!
 !! INPUTS
 !! prtallatoms = Logical for PRTint ALL ATOMS
@@ -1596,7 +1583,6 @@ subroutine prtnatom(atlist,iout,message,natom,prtallatoms,thearray)
      write(message,fmt)TRIM(message),ch10,thearray(:,kk),tag
    end if
  end do
- !MGNAG Runtime Error: wrtout_cpp.f90, line 896: Buffer overflow on output
  call wrtout(iout,message,'COLL')
 
  end subroutine prtnatom
@@ -1614,13 +1600,6 @@ end subroutine prtxfase
 !!  - MOLDYN.nc (netcdf format) : evolution of key quantities with time (pressure, energy, ...)
 !!  - POSABIN : values of coordinates and velocities for the next time step
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (FLambert,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !!  amass(natom)=mass of each atom, in unit of electronic mass (=amu*1822...)
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -1629,7 +1608,7 @@ end subroutine prtxfase
 !!         2: write POSABIN file
 !!         3: write both
 !!  moldyn_file=name of the MD netcdf file
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  results_gs <type(results_gs_type)>=results (energy and its components,
 !!   forces and its components, the stress tensor) of a ground-state computation
 !!  rprimd(3,3)=real space primitive translations
@@ -1681,7 +1660,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 !scalars
  integer,save :: ipos=0
  integer :: iatom,ii
- character(len=500) :: message
+ character(len=500) :: msg
 #if defined HAVE_NETCDF
  integer :: AtomNumDimid,AtomNumId,CelId,CellVolumeId,DimCoordid,DimScalarid,DimVectorid
  integer :: EkinDimid,EkinId,EpotDimid,EpotId,EntropyDimid,EntropyId,MassDimid,MassId,NbAtomsid
@@ -1712,7 +1691,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
 !  Xcart from Xred
 #if defined HAVE_NETCDF
-   ABI_ALLOCATE(xcart,(3,dtset%natom))
+   ABI_MALLOC(xcart,(3,dtset%natom))
    call xred2xcart(dtset%natom,rprimd,xcart,xred)
 #endif
 
@@ -1725,8 +1704,8 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
 #if defined HAVE_NETCDF
 !    Write message
-     write(message,'(4a)')ch10,' Open file ',trim(ficname),' to store molecular dynamics information.'
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(4a)')ch10,' Open file ',trim(ficname),' to store molecular dynamics information.'
+     call wrtout(std_out,msg,'COLL')
 
 !    Create netcdf file
      ncerr = nf90_create(ficname, NF90_CLOBBER , ncid)
@@ -1840,8 +1819,8 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
 #if defined HAVE_NETCDF
 !    Write message
-     write(message,'(3a)')ch10,' Store molecular dynamics information in file ',trim(ficname)
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(3a)')ch10,' Store molecular dynamics information in file ',trim(ficname)
+     call wrtout(std_out,msg,'COLL')
 
 !    Open netcdf file
      ncerr = nf90_open(ficname, nf90_write, ncid)
@@ -1876,8 +1855,8 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
      if (dtset%ionmov==1.or.(.not.atom_fix)) then
        vcart => vel
      else
-       ABI_ALLOCATE(vcart,(3,dtset%natom))
-       ABI_ALLOCATE(vred,(3,dtset%natom))
+       ABI_MALLOC(vcart,(3,dtset%natom))
+       ABI_MALLOC(vred,(3,dtset%natom))
        vtmp => vel
        call xcart2xred(dtset%natom,rprimd,vtmp,vred)
        do iatom=1,dtset%natom
@@ -1886,7 +1865,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
          end do
        end do
        call xred2xcart(dtset%natom,rprimd,vcart,vred)
-       ABI_DEALLOCATE(vred)
+       ABI_FREE(vred)
      end if
      do iatom=1,dtset%natom
        do ii=1,3
@@ -1894,7 +1873,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
        end do
      end do
      if (dtset%ionmov/=1.and.atom_fix)  then
-       ABI_DEALLOCATE(vcart)
+       ABI_FREE(vcart)
      end if
      ncerr = nf90_inq_varid(ncid, "E_kin", EkinId)
      NCF_CHECK_MSG(ncerr,'nf90_inq_varid')
@@ -1958,8 +1937,8 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
    if ((mod(itime, dtset%nctime)==0.and.option==3).or.(option==2)) then
 
 !    Open file for writing
-     if (open_file('POSABIN',message,unit=unpos,status='replace',form='formatted') /= 0 ) then
-       MSG_ERROR(message)
+     if (open_file('POSABIN',msg,unit=unpos,status='replace',form='formatted') /= 0 ) then
+       ABI_ERROR(msg)
      end if
 
 !    Write Positions
@@ -1983,7 +1962,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
    end if
 
 #if defined HAVE_NETCDF
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
 #endif
 
 !  ==========================================================================

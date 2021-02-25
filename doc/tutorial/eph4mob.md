@@ -165,14 +165,14 @@ Post-processing and visualisation tools are provided by AbiPy.
 See e.g. the README of [AbiPy](https://github.com/abinit/abipy)
 and the [AbiPy tutorials](https://github.com/abinit/abitutorials).
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## Ground state and phonons of fcc AlAs
 
 *Before beginning, you might consider creating a different subdirectory to work in.
 Why not create Work_eph4mob ?*
 
-The file *teph4mob_1.in* is the input file for the first step
+The file *teph4mob_1.abi* is the input file for the first step
 (GS + DFPT perturbations for all the $\qq$-points in the IBZ).
 Copy it to the working directory with:
 
@@ -180,15 +180,15 @@ Copy it to the working directory with:
 cd $ABI_TUTORESPFN/Input
 mkdir Work_eph4mob
 cd Work_eph4mob
-cp ../teph4mob_1.in .
+cp ../teph4mob_1.abi .
 ```
 
-{% dialog tests/tutorespfn/Input/teph4mob_1.in %}
+{% dialog tests/tutorespfn/Input/teph4mob_1.abi %}
 
 This step might be quite time-consuming so you may want to immediately start the job in background with:
 
 ```sh
-abinit teph4mob_1.in > teph4mob_1.log 2> err &
+abinit teph4mob_1.abi > teph4mob_1.log 2> err &
 ```
 
 The calculation is done for AlAs, the same crystalline material as in the first two DFPT tutorials.
@@ -216,14 +216,14 @@ These partial DDB files contain the dynamical matrices for the
 8 $\qq$-points in the IBZ, as well as the dielectric tensor and the Born effective charges.
 Name the new DDB file *teph4mob_2_DDB*.
 
-File *\$ABI_TUTORESPFN/Input/teph4mob_2.in* is an example of input file for *mrgddb*.
+File *\$ABI_TUTORESPFN/Input/teph4mob_2.abi* is an example of input file for *mrgddb*.
 
-{% dialog tests/tutorespfn/Input/teph4mob_2.in %}
+{% dialog tests/tutorespfn/Input/teph4mob_2.abi %}
 
 Copy the file in the *Work_eph4mob* directory, and run *mrgddb* using:
 
 ```sh
-mrgddb < teph4mob_2.in
+mrgddb < teph4mob_2.abi
 ```
 
 !!! tip
@@ -241,14 +241,14 @@ mrgddb < teph4mob_2.in
 Now use the *mrgdv* tool to merge the 29 DFPT POT files corresponding to datasets 3-10 of *teph4mob_1*.
 Name the new file *teph4mob_3_DVDB*.
 
-File *\$ABI_TUTORESPFN/Input/teph4mob_3.in* is an example of input file for *mrgdv*.
+File *\$ABI_TUTORESPFN/Input/teph4mob_3.abi* is an example of input file for *mrgdv*.
 
-{% dialog tests/tutorespfn/Input/teph4mob_3.in %}
+{% dialog tests/tutorespfn/Input/teph4mob_3.abi %}
 
 You can copy it in the *Work_eph4mob* directory, and then merge the files with:
 
 ```sh
-mrgdv < teph4mob_3.in
+mrgdv < teph4mob_3.abi
 ```
 
 !!! tip
@@ -290,9 +290,9 @@ hence a single $\kk$-mesh is used in all our examples.
 The computation of the dense WFK file is similar to a NSCF band structure computation.
 The main difference is that we need wavefunctions on a $\kk$-mesh instead of a $\kk$-path
 because these wavevectors are needed to evaluate integrals in the BZ.
-The file *\$ABI_TUTORESPFN/Input/teph4mob_4.in* is an example of such computation.
+The file *\$ABI_TUTORESPFN/Input/teph4mob_4.abi* is an example of such computation.
 
-{% dialog tests/tutorespfn/Input/teph4mob_4.in %}
+{% dialog tests/tutorespfn/Input/teph4mob_4.abi %}
 
 It consists of two parts:
 
@@ -305,7 +305,7 @@ It consists of two parts:
 Copy the file in the *Work_eph4mob* directory, and run ABINIT:
 
 ```sh
-abinit teph4mob_4.in > teph4mob_4.log 2> err &
+abinit teph4mob_4.abi > teph4mob_4.log 2> err &
 ```
 
 !!! important
@@ -319,9 +319,9 @@ abinit teph4mob_4.in > teph4mob_4.log 2> err &
 ## Calculation of the mobility
 
 We begin by explaining how to specify the basic input variables required for a standard mobility calculation.
-The file *\$ABI_TUTORESPFN/Input/teph4mob_5.in* is an example of such computation.
+The file *\$ABI_TUTORESPFN/Input/teph4mob_5.abi* is an example of such computation.
 
-{% dialog tests/tutorespfn/Input/teph4mob_5.in %}
+{% dialog tests/tutorespfn/Input/teph4mob_5.abi %}
 
 First of all, we need to read the **WFK**, the **DDB** and the **DVDB** files produced previously.
 Since it is not possible to run mobility calculations with a single input file
@@ -336,7 +336,7 @@ getdvdb_filepath "teph4mob_3_DVDB"
 Now copy the input file in the *Work_eph4mob* directory, and run the code with:
 
 ```sh
-abinit teph4mob_5.in > teph4mob_5.log 2> err &
+abinit teph4mob_5.abi > teph4mob_5.log 2> err &
 ```
 
 The job should take $\sim$15 seconds on a recent CPU.
@@ -496,7 +496,7 @@ You can find various information for each $\kk$-point, such as:
 
 * the wall-time each step takes.
 
-Finally, we have the results for the lifetimes (TAU) in the *teph4mob_5.out* file:
+Finally, we have the results for the lifetimes (TAU) in the *teph4mob_5.abo* file:
 
 ```sh
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
@@ -504,7 +504,7 @@ K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    5   3.573    0.000  36639.9    0.000
 ```
 
-{% dialog tests/tutorespfn/Refs/teph4mob_5.out %}
+{% dialog tests/tutorespfn/Refs/teph4mob_5.abo %}
 
 
 !!! tip
@@ -584,14 +584,14 @@ and increasing values of [[sigma_erange]].
     Moreover electrons and holes may require a different $\kk$-sampling to convergence depending on the dispersion
     of the bands. As a consequence, **we suggest to compute electrons and holes with different input files**.
 
-The file *$\$ABI_TUTORESPFN/Input/teph4mob_6.in* is an example of such computation.
+The file *$\$ABI_TUTORESPFN/Input/teph4mob_6.abi* is an example of such computation.
 
-{% dialog tests/tutorespfn/Input/teph4mob_6.in %}
+{% dialog tests/tutorespfn/Input/teph4mob_6.abi %}
 
 Copy the input file in the *Work_eph4mob* directory, and run ABINIT:
 
 ```sh
-abinit teph4mob_6.in > teph4mob_6.log 2> err &
+abinit teph4mob_6.abi > teph4mob_6.log 2> err &
 ```
 
 This run should take a few minutes.
@@ -705,14 +705,14 @@ You can specify the path to the fine WFK file using [[getwfkfine_filepath]] as i
 getwfkfine_filepath "teph4mob_4o_DS3_WFK"
 ```
 
-The file *$\$ABI_TUTORESPFN/Input/teph4mob_7.in* (first dataset) is an example of such computation.
+The file *$\$ABI_TUTORESPFN/Input/teph4mob_7.abi* (first dataset) is an example of such computation.
 
-{% dialog tests/tutorespfn/Input/teph4mob_7.in %}
+{% dialog tests/tutorespfn/Input/teph4mob_7.abi %}
 
 Copy the input file in the *Work_eph4mob* directory, and run ABINIT:
 
 ```sh
-abinit teph4mob_7.in > teph4mob_7.log 2> err &
+abinit teph4mob_7.abi > teph4mob_7.log 2> err &
 ```
 
 In the log file, you will now find information about the double-grid method:

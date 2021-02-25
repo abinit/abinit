@@ -1,0 +1,58 @@
+#GaAs crystal : ground-state with few bands,
+ builtintest 7
+
+
+#First dataset : SC run with kpoints in the IBZ
+  nband   8     
+  nstep  2
+ irdwfk 0
+ prtwant 2
+ useylm 1
+# prtdos 3
+
+#Data common to all datasets
+  kptopt 0
+ nshiftk 1
+ shiftk  0.0 0.0 0.0
+# kptopt 2
+# ngkpt  2  2  2        ! This is much too low : should be at least 24x24x24
+ kpt 0.00000 0.00000 0.00000              ! K-points list
+     0.00000 0.00000 0.50000
+     0.00000 0.50000 0.00000
+     0.00000 0.50000 0.50000
+     0.50000 0.00000 0.00000
+     0.50000 0.00000 0.50000
+     0.50000 0.50000 0.00000
+     0.50000 0.50000 0.50000
+nkpt 8
+istwfk 8*1
+
+ acell   3*10.60
+ amu 69.72  74.9216
+ diemac 10.0
+ ecut 4.00             ! This is also too low
+# pawecutdg 40.00             ! This is also too low
+ ixc 1
+ natom  2  
+ ntypat  2
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ xred 3*0.00d0 3*0.25d0
+ typat  1 2  tolwfr  1.e-10
+ znucl  31 33
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/31ga.pspnc, PseudosTM_pwteter/33as.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = t00.abo, tolnlines=5, tolabs=2.3e-05, tolrel=4.00e-04
+#%% extra_inputs = t00o_w90.win
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% description = GaAs crystal with few bands. Very quick built-in test, to check that Wannier90 is installed.
+#%%<END TEST_INFO>

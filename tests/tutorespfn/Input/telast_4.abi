@@ -1,0 +1,115 @@
+#AlP in hypothetical wurzite (hexagonal) structure
+#Finite-difference calculation for c-axis strain increment +/- 0.0001
+
+   ndtset   4
+
+# Set 1 : Self-consistent run for stress
+
+  kptopt1   1
+   rprim1   0.866025403784439  0.5  0.0
+           -0.866025403784439  0.5  0.0
+            0.0                0.0  0.9999  #strained value
+
+# Set 2 : Run for electric polarization
+
+berryopt2  -1  #preferred method to calulate electric polarization
+  getwfk2  -1  #previous wf's will be transformed to full k set as needed
+  kptopt2   3  #berry phase calculation requires full k set
+
+   rprim2   0.866025403784439  0.5  0.0
+           -0.866025403784439  0.5  0.0
+            0.0                0.0  0.9999
+
+   rfdir2   1 1 1 #will calculate Cartesian polarization
+
+# Set 3 : Self-consistent run for stress
+
+  getwfk3  -1  #wave function shouldn't change much
+  kptopt3   1
+   rprim3   0.866025403784439  0.5  0.0
+           -0.866025403784439  0.5  0.0
+            0.0                0.0  1.0001  #strained value
+
+# Set 4 : Run for electric polarization
+
+berryopt4  -1
+  getwfk4  -1
+  kptopt4   3
+   rprim4   0.866025403784439  0.5  0.0
+           -0.866025403784439  0.5  0.0
+            0.0                0.0  1.0001
+   rfdir4   1 1 1
+
+#Common input data
+
+#Starting approximation for the unit cell
+
+# relaxed lattice constants
+# acell  COPY RELAXED RESULT FROM PREVIOUS CALCULATION
+# Here is a default value, for automatic testing : suppress it and fill with values from the previous run
+     acell  7.2488954246E+00  7.2488954246E+00  1.1879499870E+01 Bohr
+
+#Definition of the atom types and atoms
+ ntypat   2 
+  znucl   13 15
+  natom   4
+  typat   1 1 2 2
+
+#Starting approximation for atomic positions in REDUCED coordinates
+#based on ideal tetrahedral bond angles
+
+# xred  COPY RELAXED RESULT FROM PREVIOUS CALCULATION
+# Here is a set of default values, for automatic testing : suppress it and fill with values from the previous run
+  xred   1/3  2/3  0
+         2/3  1/3  1/2
+         1/3  2/3  3.7517446813E-01
+         2/3  1/3  8.7517446813E-01
+
+#Gives the number of bands, explicitely (do not take the default)
+  nband   8              # For an insulator (if described correctly as an 
+                         # insulator by DFT), conduction bands should not
+                         # be included in response-function calculations
+
+#Definition of the plane wave basis set
+   ecut   6.0            # Maximum kinetic energy cutoff (Hartree)
+ ecutsm   0.5            # Smoothing energy needed for lattice paramete
+                         # optimization.  This will be retained for
+                         # consistency throughout.
+
+#Definition of the k-point grid
+ kptopt   1              # Use symmetry and treat only inequivalent points
+  ngkpt   4 4 4          # 4x4x4 Monkhorst-Pack grid
+nshiftk   1              # Use one copy of grid only (default)
+ shiftk   0.0 0.0 0.5    # This choice of origin for the k point grid
+                         # preserves the hexagonal symmetry of the grid,
+                         # which would be broken by the default choice.
+
+#Definition of the self-consistency procedure
+ diemac   9.0            # Model dielectric preconditioner
+  nstep   40             # Maxiumum number of SCF iterations
+ tolvrs   1.0d-18        # Needed for good stress and polarization convergence
+# enforce calculation of forces at each SCF step
+ optforces 1
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   telast_4.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = D. Hamann
+#%% keywords = NC, DFPT 
+#%% description = 
+#%%    AlP in hypothetical wurzite (hexagonal) structure
+#%%    Finite-difference calculation for c-axis strain increment +/- 0.0001
+#%%<END TEST_INFO>

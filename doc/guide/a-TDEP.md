@@ -61,7 +61,7 @@ can be found in [[test:v8_37]]. The 2 input files are
 given in the `tests/v8/Input` directory.  
 Let us describe briefly this [[test:v8_37]] file:
 
-{% dialog tests/v8/Input/t37.in %}
+{% dialog tests/v8/Input/t37.abi %}
 
 The input file format is fixed. So:
 
@@ -98,11 +98,11 @@ from the `HIST.nc` file. In particular, the features of the supercell.
 
 A large number of output files are obtained after an execution of |a-TDEP|.
 
-{% dialog tests/v8/Refs/t37.out %}
+{% dialog tests/v8/Refs/t37.abo %}
 {% dialog tests/v8/Refs/t37omega.dat %}
 {% dialog tests/v8/Refs/t37thermo.dat %}
 
-1. `*.out` is the main output file. It includes an echo of the input variables,
+1. `*.abo` is the main output file. It includes an echo of the input variables,
    some intermediary results, the definition of the various shells of interaction,
    the second order IFCs for all the atoms in each shell, the elastic constants and moduli,
    the energy of the model...

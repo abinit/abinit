@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (MVer, DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2021 ABINIT group (MVer, DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,8 +98,6 @@ contains
 
 subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(abimover),intent(in)       :: ab_mover
@@ -150,22 +148,22 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
  if(iexit/=0)then
    if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
+     ABI_FREE(vout_prev)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
    if (allocated(u_matrix))     then
-     ABI_DEALLOCATE(u_matrix)
+     ABI_FREE(u_matrix)
    end if
    return
  end if
@@ -210,25 +208,25 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !From a previous dataset with a different ndim
  if(itime==1)then
    if (allocated(vin))        then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))       then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))   then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vout_prev))  then
-     ABI_DEALLOCATE(vout_prev)
+     ABI_FREE(vout_prev)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin)
+     ABI_FREE(hessin)
    end if
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vout_prev,(ndim))
-   ABI_ALLOCATE(hessin,(ndim,ndim))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vout_prev,(ndim))
+   ABI_MALLOC(hessin,(ndim,ndim))
 
  end if
 
@@ -296,7 +294,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
    call make_prim_internals(deloc,ab_mover%natom,&
 &   ab_mover%ntypat,rprimd,ab_mover%typat,xcart,ab_mover%znucl)
 
-   ABI_ALLOCATE(prim_int,(deloc%ninternal))
+   ABI_MALLOC(prim_int,(deloc%ninternal))
 
    if(DEBUG)then
      write (message,'(a,i6)') 'Number of primitive internal coordinates (ninternal): ',deloc%ninternal
@@ -304,9 +302,9 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
    end if
 
    if (allocated(u_matrix))  then
-     ABI_DEALLOCATE(u_matrix)
+     ABI_FREE(u_matrix)
    end if
-   ABI_ALLOCATE(u_matrix,(deloc%ninternal,ndeloc))
+   ABI_MALLOC(u_matrix,(deloc%ninternal,ndeloc))
 
    call calc_prim_int(deloc,ab_mover%natom,rprimd,xcart,prim_int)
 
@@ -342,7 +340,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
      end do
    end if
 
-   ABI_DEALLOCATE(prim_int)
+   ABI_FREE(prim_int)
 
 !  equal weight on all internal coordinates as a starting point.
    u_matrix(:,:) = one / dble (ndeloc)
@@ -352,7 +350,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
  end if
 
- ABI_ALLOCATE(prim_int,(deloc%ninternal))
+ ABI_MALLOC(prim_int,(deloc%ninternal))
 
 !write(std_out,*) 'delocint 06'
 !##########################################################
@@ -461,7 +459,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
  end if
 
- ABI_DEALLOCATE(prim_int)
+ ABI_FREE(prim_int)
 
  if(itime>1)then
 !  Update the hessian matrix, by taking into account the
@@ -693,8 +691,6 @@ end subroutine pred_delocint
 
 subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -829,7 +825,7 @@ subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
 
  if (iiter == niter+1) then
    write (message,'(a,i6,a,E20.10)') 'deloc2xcart : Error, xcart not converged in ', niter, 'iterations ', tot_diff
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(DEBUG)then
@@ -868,8 +864,6 @@ end subroutine deloc2xcart
 !! SOURCE
 
 subroutine fred2fdeloc(btinv,deloc_force,fred,natom,gprimd)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -947,8 +941,6 @@ end subroutine fred2fdeloc
 !! SOURCE
 
 subroutine calc_b_matrix(deloc,natom,rprimd,xcart,b_matrix)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1089,8 +1081,6 @@ end subroutine calc_b_matrix
 
 subroutine dbond_length_d1(r1,r2,bb)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: r1(3),r2(3)
@@ -1124,8 +1114,6 @@ end subroutine dbond_length_d1
 !!
 
 subroutine dang_d1(r1,r2,r3,bb)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -1191,8 +1179,6 @@ end subroutine dang_d1
 
 subroutine dang_d2(r1,r2,r3,bb)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: r1(3),r2(3),r3(3)
@@ -1256,8 +1242,6 @@ end subroutine dang_d2
 !!
 
 subroutine ddihedral_d1(r1,r2,r3,r4,bb)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -1363,8 +1347,6 @@ end subroutine ddihedral_d1
 !!
 
 subroutine ddihedral_d2(r1,r2,r3,r4,bb)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -1518,8 +1500,6 @@ end subroutine ddihedral_d2
 
 subroutine xcart2deloc(deloc,natom,rprimd,xcart,bt_inv_matrix,u_matrix,deloc_int,prim_int)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -1598,8 +1578,6 @@ end subroutine xcart2deloc
 
  subroutine calc_btinv_matrix(b_matrix,natom,ninternal,bt_inv_matrix,u_matrix)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ninternal,natom
  real(dp),intent(in) :: b_matrix(ninternal,3*natom)
@@ -1623,24 +1601,24 @@ end subroutine xcart2deloc
 & b_matrix,ninternal,b_matrix,ninternal,zero,f_matrix,3*natom)
 
  lwork = max(1,3*3*natom-1)
- ABI_ALLOCATE(work,(lwork))
+ ABI_MALLOC(work,(lwork))
  s_matrix(:,:) = f_matrix(:,:)
 
  call dsyev('V','L',3*natom,s_matrix,3*natom,f_eigs,work,lwork,info)
 
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
  if (abs(f_eigs(1)) + abs(f_eigs(2)) + abs(f_eigs(3)) > tol10 ) then
    write(std_out,*) 'Error: 3 lowest eigenvalues are not zero'
    write(std_out,*) '  internal coordinates do NOT span the full degrees of freedom !'
    write(std_out,'(6E16.6)') f_eigs
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
  if ( abs(f_eigs(4)) < tol10 ) then
    write(std_out,*) 'Error: fourth eigenvalue is zero'
    write(std_out,*) '  internal coordinates do NOT span the full degrees of freedom !'
    write(std_out,'(6E16.6)') f_eigs
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
 !calculate U matrix from U = B * S_red * lambda^{-1/2}
@@ -1694,8 +1672,6 @@ end subroutine calc_btinv_matrix
 !! SOURCE
 
  subroutine align_u_matrices(natom,ninternal,u_matrix,u_matrix_old,s_matrix,f_eigs)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1784,8 +1760,6 @@ subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
 & fred,hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
 & vout,vout_prev,xred,deloc,deloc_int,deloc_force,btinv,gprimd,prim_int,&
 & u_matrix)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars

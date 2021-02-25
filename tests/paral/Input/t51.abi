@@ -1,0 +1,80 @@
+#   FCC Al; 10 special points
+
+#timopt -1
+
+ acell 3*7.56
+ densty 1.2
+ ecut 10
+
+ enunit 2  
+
+ localrdwf 1
+ nkpt 10
+ ngkpt 4 4 4 
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+
+ natom  1 nband 6
+ nline 3  nstep 20
+ ntypat  1
+ occopt  4  prtden 1   prtvol 10
+  tsmear 0.04 # to ensure good portability of the test
+ paral_kgb 0
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ timopt 2
+ tnons   72*0.0d0
+ tolvrs 1.0d-18
+ typat  1  
+ xred  0.0 0.0 0.0
+ znucl 13.0
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/13al.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t51.abi, t52.abi, t53.abi
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 10
+#%% [NCPU_1]
+#%% files_to_test = t51_MPI1.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% post_commands = 
+#%%   ww_cp t51_MPI1o_DEN t52_MPI1i_DS1_DEN;
+#%%   ww_mv t51_MPI1o_DEN t52_MPI1i_DS2_DEN;
+#%%   ww_cp t51_MPI1o_WFK t53_MPI1i_WFK;
+#%%   ww_mv t51_MPI1o_WFK t53_MPI1i_WFQ;
+#%% [NCPU_2]
+#%% files_to_test = t51_MPI2.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% post_commands = 
+#%%   ww_cp t51_MPI2o_DEN t52_MPI2i_DS1_DEN;
+#%%   ww_mv t51_MPI2o_DEN t52_MPI2i_DS2_DEN;
+#%%   ww_cp t51_MPI2o_WFK t53_MPI2i_WFK;
+#%%   ww_mv t51_MPI2o_WFK t53_MPI2i_WFQ;
+#%% [NCPU_4]
+#%% files_to_test = t51_MPI4.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% post_commands = 
+#%%   ww_cp t51_MPI4o_DEN t52_MPI4i_DS1_DEN;
+#%%   ww_mv t51_MPI4o_DEN t52_MPI4i_DS2_DEN;
+#%%   ww_cp t51_MPI4o_WFK t53_MPI4i_WFK;
+#%%   ww_mv t51_MPI4o_WFK t53_MPI4i_WFQ;
+#%% [NCPU_10]
+#%% files_to_test = t51_MPI10.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% post_commands = 
+#%%   ww_cp t51_MPI10o_DEN t52_MPI10i_DS1_DEN;
+#%%   ww_mv t51_MPI10o_DEN t52_MPI10i_DS2_DEN;
+#%%   ww_cp t51_MPI10o_WFK t53_MPI10i_WFK;
+#%%   ww_mv t51_MPI10o_WFK t53_MPI10i_WFQ;
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = FCC Al metallic; 10 special points
+#%% topics = parallelism
+#%%<END TEST_INFO>

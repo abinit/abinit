@@ -72,6 +72,7 @@ dmft_rslf 0
 dmft_mxsf 0.3
 # for historical reasons, do not use this elsewhere
 dmft_occnd_imag2 0
+dmft_wanorthnorm2 3
 
 ##### DFT+U
 usepawu1    1   # DFT+U is not used.

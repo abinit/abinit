@@ -6,7 +6,7 @@
 !!   object and procedures dealing with input/output filenames
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (XG, MT)
+!!  Copyright (C) 2008-2021 ABINIT group (XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -290,8 +290,11 @@ module m_dtfil
   character(len=fnlen) :: fnameabi_qps
   character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
   character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
+  character(len=fnlen) :: fnameabi_chkp_rdm       ! Checkpoint for GW@DFA to read     
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
+  character(len=fnlen) :: fnameabo_ks_den         ! KS DEN file at Sigma level
+  character(len=fnlen) :: fnameabo_chkp_rdm       ! Checkpoint for GW@DFA to write
   character(len=fnlen) :: fnameabo_dos
   character(len=fnlen) :: fnameabo_dvdb
   character(len=fnlen) :: fnameabo_eelf
@@ -551,7 +554,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    'case, while for idtset = ',idtset,',',ch10,&
    'they are irdwfk= ',dtset%irdwfk,', and getwfk= ',dtset%getwfk,'.',ch10,&
    'Action: correct irdwfk or getwfk in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Treatment of the other get wavefunction variable, if response function case or nonlinear case
@@ -764,6 +767,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabi_hes=trim(dtfil%filnam_ds(3))//'_HES'
  dtfil%fnameabi_phfrq=trim(dtfil%filnam_ds(3))//'_PHFRQ'
  dtfil%fnameabi_phvec=trim(dtfil%filnam_ds(3))//'_PHVEC'
+ dtfil%fnameabi_chkp_rdm =trim(dtfil%filnam_ds(3))//'_CHKP_RDM_'
 
 !-------------------------------------------------------------------------------------------
  ! Build name of files from dtfil%filnam_ds(4)
@@ -793,6 +797,8 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_qp_eig=trim(dtfil%filnam_ds(4))//'_QP_DB.nc' ! TODO change name
  dtfil%fnameabo_rpa=trim(dtfil%filnam_ds(4))//'_RPA'
  dtfil%fnameabo_scr=trim(dtfil%filnam_ds(4))//'_SCR'
+ dtfil%fnameabo_ks_den=trim(dtfil%filnam_ds(4))//'_KS_DEN'
+ dtfil%fnameabo_chkp_rdm=trim(dtfil%filnam_ds(4))//'_CHKP_RDM_'
  dtfil%fnameabo_sgm=trim(dtfil%filnam_ds(4))//'_SGM'
  dtfil%fnameabo_sgr=trim(dtfil%filnam_ds(4))//'_SGR'
  dtfil%fnameabo_sig=trim(dtfil%filnam_ds(4))//'_SIG'
@@ -1110,7 +1116,7 @@ subroutine fappnd(filapp,filnam,iapp,&
         'Action: resubmit the job with smaller value for ntime.',ch10,&
         'Value computed here was ndig=',ndig,ch10,&
         'iapp= ',iapp,' filnam= ',trim(filnam)
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 !    Concatenate into character string, picking off exact number of digits
 !    The potential or density label will be appended in ioarr
@@ -1316,7 +1322,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
        'simultaneously non-zero, while for idtset = ',idtset,',',ch10,&
        'they are ',ird,', and ',get,'.',ch10,&
        'Action: correct ird',trim(stringvar),' or get',trim(stringvar),' in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      filnam_out = rmquotes(getpath)
      write(msg, '(5a)' )' mkfilename: get',trim(stringvar) ," from: ",trim(filnam_out), ch10
@@ -1324,7 +1330,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
      ! Check whether file exists taking into account a possible NC file extension.
      if (xmpi_comm_rank(xmpi_world) == 0) then
        if (.not. file_exists(filnam_out) .and. .not. file_exists(strcat(filnam_out, ".nc"))) then
-         MSG_ERROR(sjoin("Cannot find file:", filnam_out, "(with or without .nc extension)"))
+         ABI_ERROR(sjoin("Cannot find file:", filnam_out, "(with or without .nc extension)"))
        end if
      end if
      will_read = 1; return
@@ -1340,7 +1346,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
      'If you want to refer to a previously computed dataset,',ch10, &
      'you should give the absolute index of it (i.e. ', jdtset_(idtset)+get,' instead of ',get,').',ch10, &
      'Action: correct get',trim(stringvar),' in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (idtset + get < 0) then
@@ -1348,7 +1354,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
      'The sum of idtset and get',trim(stringvar),' cannot be negative,',ch10,&
      'while they are idtset = ',idtset,', and get',trim(stringvar),' = ',get,ch10,&
      'Action: correct get',trim(stringvar),' in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if(get>0 .or. (get<0 .and. idtset+get>0) )then
@@ -1359,7 +1365,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
        'simultaneously non-zero, while for idtset = ',idtset,',',ch10,&
        'they are ',ird,', and ',get,'.',ch10,&
        'Action: correct ird',trim(stringvar),' or get',trim(stringvar),' in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      will_read=1
@@ -1442,13 +1448,13 @@ subroutine isfile(filnam, status)
      'Checks for existence of file: ',trim(filnam),ch10,&
      'but INQUIRE statement returns error code',ios,ch10,&
      'Action: identify which problem appears with this file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else if (.not.ex) then
      write(msg, '(5a)' )&
      'Checks for existence of file: ',trim(filnam),ch10,&
      'but INQUIRE finds file does not exist.',&
      'Action: check file name and re-run.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  else if (status=='new') then
@@ -1462,12 +1468,12 @@ subroutine isfile(filnam, status)
      write(msg,'(3a)') &
      'Something is wrong with permissions for reading/writing on this filesystem.',ch10,&
      'Action: Check permissions.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if ( ex .eqv. .true. ) then
      write(msg,'(3a)')'Output file: ',trim(trialnam),' already exists.'
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
      found=.false.
 
      ii=1
@@ -1485,28 +1491,28 @@ subroutine isfile(filnam, status)
          'Check for permissions of reading/writing files on the filesystem', &
          '10 INQUIRE statements returned an error code like ',ios,ch10,&
          'Action: Check permissions'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        ii=ii+1
      end do
      if ( found .eqv. .true. ) then
        write(msg,'(4a)') 'Renaming old: ',trim(filnam),' to: ',trim(trialnam)
-       MSG_COMMENT(msg)
+       ABI_COMMENT(msg)
        ioserr = clib_rename(filnam, trialnam)
        if ( ioserr /= 0 ) then
          write(msg,'(4a)') 'Failed to rename file: ', trim(filnam),' to: ',trim(trialnam)
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      else
        write(msg,'(3a)')&
        'Have used all names of the form filenameXXXX, X in [0-9]',ch10,&
        'Action: clean up your directory and start over.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
    ! if ii > 0 we iterated so rename abi_out to abi_outXXXX and just write to abi_out
  else
-   MSG_BUG(sjoin('Input status:', status, ' not recognized.'))
+   ABI_BUG(sjoin('Input status:', status, ' not recognized.'))
  end if
 
 end subroutine isfile
@@ -1630,14 +1636,14 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      call isfile(tmpfil,'new')
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(tmpfil,msg,unit=std_out,form='formatted',status='new',action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 #endif
    else
      ! Redirect standard output to null
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(NULL_FILE, msg, unit=std_out, action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 
@@ -1648,11 +1654,11 @@ subroutine iofn1(input_path, filnam, filstat, comm)
    write(msg, '(4a)' )&
     'Because of CPP option READ_FROM_FILE,',ch10,&
     'read file "ab.files" instead of standard input ' ,ch10
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
    call isfile(tmpfil,'old')
    close(std_in, err=10, iomsg=errmsg)
    if (open_file(tmpfil,msg,unit=std_in,form='formatted',status='old',action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 #endif
 
@@ -1664,7 +1670,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      ! Legacy Files file mode.
      write(std_out, "(2a)")" DeprecationWarning: ",ch10
      write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
-     write(std_out, "(2a)")"     Use the syntax `abinit t01.abi` where t01.abi is an input with pseudopotenials.",ch10
+     write(std_out, "(2a)")"     Use the syntax `abinit t01.abi` where t01.abi is an input with pseudopotentials e.g.",ch10
      write(std_out, "(3a)")'            pseudos = "al.psp8, as.psp8"',ch10,ch10
 
      write(std_out,*,err=10,iomsg=errmsg)' Give name for formatted input file: '
@@ -1731,7 +1737,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      write(msg, '(3a)' )&
      'Root name for generic input and output files must differ ',ch10,&
      'Action: correct your "file" file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Check that root names are at least 20 characters less than fnlen
@@ -1741,7 +1747,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      'It must be 20 characters less than the maximal allowed ',ch10,&
      'length of names, that is ',fnlen,', while it is: ',len_trim(filnam(3)),ch10,&
      'Action: correct your "file" file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if ( len_trim(filnam(4)) >= (fnlen-20) ) then
      write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
@@ -1749,7 +1755,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      'It must be 20 characters less than the maximal allowed ',ch10,&
      'length of names, that is ',fnlen,', while it is: ',len_trim(filnam(4)),ch10,&
      'Action: correct your "file" file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if ( len_trim(filnam(5)) >= (fnlen-20) ) then
      write(msg, '(a,a,a,a,a,i0,a,i0,a,a)' )&
@@ -1757,7 +1763,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      'It must be 20 characters less than the maximal allowed ',ch10,&
      'length of names, that is ',fnlen,', while it is: ',len_trim(filnam(5)),ch10,&
      'Action: correct your "file" file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  end if ! master only
@@ -1777,12 +1783,12 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      fillog=trim(filnam(5))//'_LOG_'//trim(tag)
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(fillog,msg,unit=std_out,status='unknown',action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(NULL_FILE,msg,unit=std_out,action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
  end if
@@ -1792,7 +1798,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
  ! Handle possibe IO errors
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine iofn1
 !!***

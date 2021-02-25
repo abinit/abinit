@@ -9,7 +9,7 @@
 !! Contain also routine to evaluate the energy,forces and stresses
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2020 ABINIT group (AM)
+!! Copyright (C) 2010-2021 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -127,7 +127,7 @@ module m_effective_potential
 !     type with all information for anharmonics terms
 
    type(polynomial_conf_type) :: confinement
-!     type with all the informations for the confinement
+!     type with all the information for the confinement
 
    type(supercell_type) :: supercell
 !     super cell type
@@ -247,14 +247,14 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one atom.',ch10,&
 &   'The number of atom is  ',crystal%natom,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (crystal%ntypat < 1) then
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one type of atom.',ch10,&
 &   'The number of type of atom is  ',crystal%ntypat,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !3-Fill energy of the crystal (hartree)
@@ -275,7 +275,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
  call anharmonics_terms_init(eff_pot%anharmonics_terms,crystal%natom,ncoeff)
 
 !5-Fill optional inputs
- ABI_ALLOCATE(eff_pot%fcart,(3,eff_pot%crystal%natom))
+ ABI_MALLOC(eff_pot%fcart,(3,eff_pot%crystal%natom))
  eff_pot%fcart = zero
  if(present(fcart))then
    eff_pot%fcart = fcart
@@ -333,7 +333,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 !Allocation of the coefficients
  if(present(coeffs))then
    if(ncoeff /= size(coeffs))then
-     MSG_BUG('ncoeff has not the same size than coeffs array')
+     ABI_BUG('ncoeff has not the same size than coeffs array')
    end if
    call effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
  end if
@@ -364,7 +364,7 @@ end subroutine effective_potential_init
 !!  effective_potential_initmpi
 !!
 !! FUNCTION
-!!  Initializes the mpi informations for parallelism over supercell.
+!!  Initializes the mpi information for parallelism over supercell.
 !!  Only the parallelisation over cell is done here.
 !!  The parallelisation over cell and coeff is disable for now (experimental)
 !!
@@ -412,7 +412,7 @@ subroutine effective_potential_initmpi(eff_pot,comm)
 
 !Do some checks
  if (any(cell_number <= 0).or.ncell<=0) then
-   MSG_ERROR('No supercell found for setting')
+   ABI_ERROR('No supercell found for setting')
  end if
 
 !First mpi_ifc
@@ -474,7 +474,7 @@ subroutine effective_potential_free(eff_pot)
 
    if(allocated(eff_pot%fcart)) then
      eff_pot%fcart=zero
-     ABI_DEALLOCATE(eff_pot%fcart)
+     ABI_FREE(eff_pot%fcart)
    end if
 
 ! Free others datatypes
@@ -644,7 +644,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
      write(msg, '(a,i0,a,i0,a,a,a,i0,a)' )&
 &     'ncell(',ia,') is ',ncell(ia),', which is lower than 0 of superior than 150.',&
 &     ch10,'Action: correct ncell(',ia,').'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -778,14 +778,14 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    end do
 
    ifc_tmp%nrpt = irpt
-   ABI_ALLOCATE(ifc_tmp%cell,(3,ifc_tmp%nrpt))
+   ABI_MALLOC(ifc_tmp%cell,(3,ifc_tmp%nrpt))
    ifc_tmp%cell(:,:) = 0
 
 !  Set MPI here and not at the begining because the number of cell is adjust just before
 !  Here we store in my_irpt a list with the number of each cell to be treat by this CPU
 !  Determine the number of cell for each CPU
-   ABI_ALLOCATE(bufsize,(nproc))
-   ABI_ALLOCATE(bufdisp,(nproc))
+   ABI_MALLOC(bufsize,(nproc))
+   ABI_MALLOC(bufdisp,(nproc))
 
    nrpt_alone = mod(ifc_tmp%nrpt,nproc)
    my_nrpt = int(real(ifc_tmp%nrpt,sp)/nproc)
@@ -794,12 +794,12 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    end if
 
 !  Initialisation of ifc temporary
-   ABI_ALLOCATE(buff_ewald,(2,3,natom_uc,3,natom_uc,my_nrpt))
-   ABI_ALLOCATE(ifc_tmp%short_atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
-   ABI_ALLOCATE(ifc_tmp%ewald_atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
-   ABI_ALLOCATE(ifc_tmp%atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
-   ABI_ALLOCATE(my_irpt,(my_nrpt))
-   ABI_ALLOCATE(my_index_rpt,(3,my_nrpt))
+   ABI_MALLOC(buff_ewald,(2,3,natom_uc,3,natom_uc,my_nrpt))
+   ABI_MALLOC(ifc_tmp%short_atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
+   ABI_MALLOC(ifc_tmp%ewald_atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
+   ABI_MALLOC(ifc_tmp%atmfrc,(3,natom_uc,3,natom_uc,ifc_tmp%nrpt))
+   ABI_MALLOC(my_irpt,(my_nrpt))
+   ABI_MALLOC(my_index_rpt,(3,my_nrpt))
 
    my_irpt = 0
    my_index_rpt(:,:) = 0
@@ -836,12 +836,12 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    end do
 
 !  Allocate and initialize some array
-   ABI_ALLOCATE(xred_tmp,(3,2*natom_uc))
-   ABI_ALLOCATE(xred,(3,supercell%natom))
-   ABI_ALLOCATE(zeff_tmp,(3,3,2*natom_uc))
-   ABI_ALLOCATE(qdrp_cart,(3,3,3,2*natom_uc))
-   ABI_ALLOCATE(dyew,(2,3,2*natom_uc,3,2*natom_uc))
-   ABI_ALLOCATE(dyewq0,(2,3,natom_uc,3,natom_uc))
+   ABI_MALLOC(xred_tmp,(3,2*natom_uc))
+   ABI_MALLOC(xred,(3,supercell%natom))
+   ABI_MALLOC(zeff_tmp,(3,3,2*natom_uc))
+   ABI_MALLOC(qdrp_cart,(3,3,3,2*natom_uc))
+   ABI_MALLOC(dyew,(2,3,2*natom_uc,3,2*natom_uc))
+   ABI_MALLOC(dyewq0,(2,3,natom_uc,3,natom_uc))
 
    dyew            = zero
    dyewq0          = zero
@@ -890,14 +890,14 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    end do
 
 !  DEALLOCATION OF ARRAYS
-   ABI_DEALLOCATE(my_index_rpt)
-   ABI_DEALLOCATE(my_irpt)
-   ABI_DEALLOCATE(xred_tmp)
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(zeff_tmp)
-   ABI_DEALLOCATE(qdrp_cart)
-   ABI_DEALLOCATE(dyew)
-   ABI_DEALLOCATE(dyewq0)
+   ABI_FREE(my_index_rpt)
+   ABI_FREE(my_irpt)
+   ABI_FREE(xred_tmp)
+   ABI_FREE(xred)
+   ABI_FREE(zeff_tmp)
+   ABI_FREE(qdrp_cart)
+   ABI_FREE(dyew)
+   ABI_FREE(dyewq0)
 
 !  Set the bufsize for mpi allgather
    do ii = 1,nproc
@@ -915,9 +915,9 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    size_tmp = 3*natom_uc*3*natom_uc*my_nrpt
    call xmpi_allgatherv(buff_ewald(1,:,:,:,:,:),size_tmp,ifc_tmp%ewald_atmfrc,bufsize,bufdisp, comm, ierr)
 
-   ABI_DEALLOCATE(bufsize)
-   ABI_DEALLOCATE(bufdisp)
-   ABI_DEALLOCATE(buff_ewald)
+   ABI_FREE(bufsize)
+   ABI_FREE(bufdisp)
+   ABI_FREE(buff_ewald)
 
 
 
@@ -945,7 +945,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    !ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
    ! Set the full cell according to the largest box
    full_nrpt = max(ifc_tmp%nrpt,eff_pot%harmonics_terms%ifcs%nrpt)
-   ABI_ALLOCATE(full_cell,(3,full_nrpt))
+   ABI_MALLOC(full_cell,(3,full_nrpt))
    ABI_CALLOC(full_cell_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
    ABI_CALLOC(full_cell_short_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
    ABI_CALLOC(full_cell_ewald_atmfrc,(3,natom_uc,3,natom_uc,full_nrpt)) ! Allocate and set to 0
@@ -996,10 +996,10 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 
 !  Fill the effective potential with new atmfr
     eff_pot%harmonics_terms%ifcs%nrpt = irpt2
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%atmfrc,(3,natom_uc,3,natom_uc,irpt2))
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%short_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%ewald_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
-    ABI_ALLOCATE(eff_pot%harmonics_terms%ifcs%cell,(3,irpt2))
+    ABI_MALLOC(eff_pot%harmonics_terms%ifcs%atmfrc,(3,natom_uc,3,natom_uc,irpt2))
+    ABI_MALLOC(eff_pot%harmonics_terms%ifcs%short_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
+    ABI_MALLOC(eff_pot%harmonics_terms%ifcs%ewald_atmfrc,(3,natom_uc,3,natom_uc,irpt2))
+    ABI_MALLOC(eff_pot%harmonics_terms%ifcs%cell,(3,irpt2))
 
     irpt2 = 0
     do irpt = 1,full_nrpt
@@ -1015,10 +1015,10 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 !  Free temporary ifc
    call ifc_tmp%free()
    !Deallocate temporary arrays
-   ABI_DEALLOCATE(full_cell)
-   ABI_DEALLOCATE(full_cell_atmfrc) ! Allocate and set to 0
-   ABI_DEALLOCATE(full_cell_short_atmfrc) ! Allocate and set to 0
-   ABI_DEALLOCATE(full_cell_ewald_atmfrc) ! Allocate and set to 0
+   ABI_FREE(full_cell)
+   ABI_FREE(full_cell_atmfrc) ! Allocate and set to 0
+   ABI_FREE(full_cell_short_atmfrc) ! Allocate and set to 0
+   ABI_FREE(full_cell_ewald_atmfrc) ! Allocate and set to 0
 
  end if
 
@@ -1082,7 +1082,7 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 ! *************************************************************************
 
  if(ncoeff /= size(coeffs))then
-   MSG_BUG('ncoeff has not the same size than coeffs array')
+   ABI_BUG('ncoeff has not the same size than coeffs array')
  end if
 
 ! Check if the strain coupling is present
@@ -1342,7 +1342,7 @@ subroutine effective_potential_setConfinement(cutoff_disp,cutoff_strain,eff_pot,
 
 !Checks
  if (ndisp <= 0) then
-   MSG_ERROR('ndisp can not be inferior or equal to zero')
+   ABI_ERROR('ndisp can not be inferior or equal to zero')
  end if
 
 !First free the type
@@ -1402,7 +1402,7 @@ subroutine effective_potential_setSupercell(eff_pot,comm,ncell,supercell)
 
 !Checks
  if (.not.present(supercell).and..not.present(ncell)) then
-   MSG_ERROR(' You should at least set ncell of supercell type')
+   ABI_ERROR(' You should at least set ncell of supercell type')
  end if
 
  call destroy_supercell(eff_pot%supercell)
@@ -1591,10 +1591,10 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
    write(msg, '(3a)' )&
 &  ' There is not the same numbers of atoms in the two supercell',ch10,&
 &   'Action: modify the code'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
- ABI_ALLOCATE(xred,(3,supercell_tmp%natom))
+ ABI_MALLOC(xred,(3,supercell_tmp%natom))
 
 !**********************************************************************
 ! Write basics values
@@ -1678,7 +1678,7 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
   call wrtout(std_out,msg,'COLL')
 
 ! Deallocation array
-  ABI_DEALLOCATE(xred)
+  ABI_FREE(xred)
 
 end subroutine effective_potential_printSupercell
 !!***
@@ -1774,7 +1774,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
 
    if (open_file(namefile,msg,unit=unit_xml,form="formatted",&
 &      status="new",action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write(msg,'(a,a,a)')ch10,&
@@ -1863,7 +1863,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
            write(msg, '(a,a,a,a)' )&
 &         ' There is no total range but short range in your effective potential',ch10,&
 &         'Action: contact abinit group'
-           MSG_BUG(msg)
+           ABI_BUG(msg)
          end if
        else
          WRITE(unit_xml,'("  <total_force_constant units=""hartree/bohrradius**2"">")')
@@ -2086,7 +2086,7 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
  call isfile(namefile,'new')
 
  if (open_file(namefile,msg,unit=unit,form="formatted",status="new",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
   write(msg,'(a,a,a,a)')ch10,&
@@ -2295,21 +2295,21 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   if (natom /= eff_pot%supercell%natom) then
     write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',natom,&
 &   ' in argument istead of ',eff_pot%supercell%natom, ' in supercell'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
   if (present(displacement))then
     if(size(displacement(1,:)) /= eff_pot%supercell%natom) then
       write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(displacement(1,:)),&
 &      ' in displacement array instead of ',eff_pot%supercell%natom, ' in supercell'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
   end if
   if (present(du_delta))then
     if(size(du_delta,3) /= eff_pot%supercell%natom) then
       write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(du_delta,3),&
 &      ' in du_delta array instead of ',eff_pot%supercell%natom, ' in supercell'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
   end if
   do ii=1,3
@@ -2317,7 +2317,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       write(msg, '(a,i0,a,i2,a,a,a,i0,a)' )&
 &     'eff_pot%supercell%rlatt(',ii,') is ',int(eff_pot%supercell%rlatt(ii,ii)),&
 &     ', which is lower than 0 or superior than 150.',ch10,'Action: correct ncell(',ii,').'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
   end do
 
@@ -2363,7 +2363,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     end if
   end if
 ! Get displacement and the variation of the displacmeent wr to strain
-  ABI_ALLOCATE(xcart,(3,natom))
+  ABI_MALLOC(xcart,(3,natom))
   disp_tmp(:,:) = zero
   du_delta_tmp(:,:,:) = zero
   if((.not.present(displacement).or..not.present(du_delta)).and.present(xred))then
@@ -2713,7 +2713,7 @@ endif
 
 
 
-  ABI_DEALLOCATE(xcart)
+  ABI_FREE(xcart)
 
 end subroutine effective_potential_evaluate
 !!***
@@ -2787,13 +2787,13 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   if (.not.(present(xred_ref).or.present(xcart_ref))) then
      write(msg, '(3a)' )&
 &         'You need at least give xcart_ref or xred_ref '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
   end if
 
   if (.not.(present(xred_hist).or.present(xcart_hist))) then
      write(msg, '(3a)' )&
 &         'You need at least give xcart_hist or xred_hist '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
   end if
 
   need_duDelta = .TRUE.
@@ -2811,7 +2811,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   if(my_rank >= (nproc-natom_alone)) then
     my_natom = my_natom  + 1
   end if
-  ABI_ALLOCATE(my_atoms,(my_natom))
+  ABI_MALLOC(my_atoms,(my_natom))
   my_atoms = 0
   do ii=1,my_natom
     if(my_rank >= (nproc-natom_alone))then
@@ -2888,7 +2888,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
     call xmpi_sum(du_delta , comm, ierr)
   end if
 
-  ABI_DEALLOCATE(my_atoms)
+  ABI_FREE(my_atoms)
 
 end subroutine effective_potential_getDisp
 !!***
@@ -3162,12 +3162,12 @@ end function effective_potential_compare
 !     ddb%acell  = one
 !     msym   = 1
 ! !  Setup crystal type
-!     ABI_ALLOCATE(xred,(3,ddb%natom))
+!     ABI_MALLOC(xred,(3,ddb%natom))
 ! !    call xcar2xred(ddb%natom,eff_pot%crystal%rprimd,eff_pot%crystal%xcart,xred)
 ! !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
-!     ABI_ALLOCATE(symrel,(3,3,msym))
-!     ABI_ALLOCATE(symafm,(msym))
-!     ABI_ALLOCATE(tnons,(3,msym))
+!     ABI_MALLOC(symrel,(3,3,msym))
+!     ABI_MALLOC(symafm,(msym))
+!     ABI_MALLOC(tnons,(3,msym))
 
 ! !    call crystal_init(ddb%amu,crystal,1,ddb%natom,size(eff_pot%crystal%znucl),eff_pot%crystal%ntypat,1,&
 ! !&       eff_pot%crystal%rprimd,eff_pot%crystal%typat,xred,eff_pot%crystal%znucl,&
@@ -3176,11 +3176,11 @@ end function effective_potential_compare
 ! !    call crystal_print(crystal)
 ! !    stop
 ! !TEST_AM
-!     ABI_DEALLOCATE(symrel)
-!     ABI_DEALLOCATE(symafm)
-!     ABI_DEALLOCATE(tnons)
+!     ABI_FREE(symrel)
+!     ABI_FREE(symafm)
+!     ABI_FREE(tnons)
 
-!     ABI_DEALLOCATE(xred)
+!     ABI_FREE(xred)
 
 !    else  if (option==2) then
 ! !   Compute different matrices in real and reciprocal space, also
@@ -3376,11 +3376,11 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 
 ! Allocation of forces arrays
 
- ABI_ALLOCATE(disp,(3,natom))
- ABI_ALLOCATE(diff,(npt))
- ABI_ALLOCATE(fred,(3,natom))
- ABI_ALLOCATE(fcart,(3,natom))
- ABI_ALLOCATE(xred,(3,natom))
+ ABI_MALLOC(disp,(3,natom))
+ ABI_MALLOC(diff,(npt))
+ ABI_MALLOC(fred,(3,natom))
+ ABI_MALLOC(fcart,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
 
  fcart_out = zero
 
@@ -3431,11 +3431,11 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 !TEST_AM
 
 ! Deallocation of arrays
- ABI_DEALLOCATE(disp)
- ABI_DEALLOCATE(diff)
- ABI_DEALLOCATE(fred)
- ABI_DEALLOCATE(fcart)
- ABI_DEALLOCATE(xred)
+ ABI_FREE(disp)
+ ABI_FREE(diff)
+ ABI_FREE(fred)
+ ABI_FREE(fcart)
+ ABI_FREE(xred)
 
 
  end subroutine effective_potential_computeGradient
@@ -3493,16 +3493,16 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  !Do some checks
  if(ntime /= hist%mxhist)then
    write(msg,'(a)')'ntime is not correct'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(natom /= size(hist%xred,2)) then
    write(msg,'(a)')'natom is not correct'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 
- ABI_ALLOCATE(xred,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
  xred = zero
 
 !option 1 => set the reference for the test
@@ -3728,7 +3728,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
 
    npsp = size(eff_pot%crystal%znucl)
    if (npsp /= eff_pot%crystal%ntypat) then
-     MSG_WARNING("HIST file does not support alchemical mixing!")
+     ABI_WARNING("HIST file does not support alchemical mixing!")
    end if
    ncerr = nf90_def_dim(ncid,"npsp",npsp,npsp_id)
    NCF_CHECK_MSG(ncerr," define dimension npsp")

@@ -6,7 +6,7 @@
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2021 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -160,16 +160,15 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  integer,allocatable :: list(:)
  real(dp) :: ftimes(2,TIMER_SIZE),ftsec(2),mflops(TIMER_SIZE),nflops(TIMER_SIZE),times(2,TIMER_SIZE),tsec(2),my_tsec(2)
  character(len=32) :: names(-1:TIMER_SIZE),entry_name
- character(len=*),parameter :: format01040 ="('- ',a24,f12.3,f6.1,f11.3,f6.1,i15,16x,f7.2,1x,f10.2)"
- character(len=*),parameter :: format01041 ="('- ',a24,f12.3,f6.1,f11.3,f6.1,i15,3x,g12.3,1x,f7.2,1x,f10.2)"
- character(len=*),parameter :: format01042 ="('- ',a24,f12.3,f6.1,f11.3,g12.3,i15)"
- character(len=*),parameter :: format01045 ="('-',i3,a19,f15.3,f6.1,f11.3,f6.1)"
- !character(len=*),parameter ::  format01200 ="('- subtotal     ',f15.3,f6.1,f11.3,f6.1)"
+ character(len=*),parameter :: format01040 ="('- ',a24,f15.3,f6.1,f14.3,f6.1,i15,16x,f7.2,1x,f10.2)"
+ character(len=*),parameter :: format01041 ="('- ',a24,f15.3,f6.1,f14.3,f6.1,i15,3x,g12.3,1x,f7.2,1x,f10.2)"
+ character(len=*),parameter :: format_head1="(a,t38,a,t46,a,t57,a,t66,a,t72,a,t88,a,3x,a7,1x,a10)"
+ character(len=*),parameter :: format_head2="(a,t38,a,t46,a,t57,a,t66,a,t72,a,t84,a)"
 
 ! *************************************************************************
 
- 01200 format('- subtotal             ',f15.3,f6.1,f11.3,f6.1,31x,f7.2,1x,f10.2)
- 01201 format(/,'- subtotal             ',f15.3,f6.1,f11.3,f6.1,31x,f7.2,1x,f10.2)
+ 01200 format(  '- subtotal             ',f18.3,f6.1,f14.3,f6.1,31x,f7.2,1x,f10.2)
+ 01201 format(/,'- subtotal             ',f18.3,f6.1,f14.3,f6.1,31x,f7.2,1x,f10.2)
 
  ount = ab_out
 
@@ -889,6 +888,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1621) = 'mkinvovl(build_d)             '
  names(1622) = 'mkinvovl(build_ptp)           '
 
+ names(1633) = "rmm_diis:build_hij            "; basic(1633) = 1
+ names(1634) = "rmm_diis:band_opt             "; basic(1634) = 1
+
  ! lobpcg2
  names(1650) = 'lobpcgwf2                     '; basic(1650) = 1
  names(1651) = 'lobpcg_init                    '
@@ -1354,7 +1356,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
    write(ount,  '(a,a,a,a,/,a,a,a)' ) '-',ch10,&
     '- For major independent code sections,',' cpu and wall times (sec),',&
-    '-  as well as % of the time and number of calls for node 0',&
+    '-  as well as % of the time and number of calls for node 0',ch10,&
     '-'
 
    write(ount,"(3(a,i0),a)")&
@@ -1364,9 +1366,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    write(ount,"(2(a,f13.1))")"- cpu_time =  ",my_tsec(1),", wall_time =  ",my_tsec(2)
    write(ount,"(a)")"-"
 
-   write(ount, '(a,t34,a,t42,a,t50,a,t59,a,t65,a,t82,a,3x,a7,1x,a10)' )&
+   write(ount,format_head1)&
      '- routine','cpu','%','wall','%',' number of calls ',' Gflops ', 'Speedup', 'Efficacity'
-   write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t78,a)')&
+   write(ount,format_head2)&
      '-                ','   ',' ','    ',' ','  (-1=no count)'
 
 !  Sort the list by decreasing CPU time
@@ -1448,13 +1450,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      "-<BEGIN_TIMER mpi_nprocs = ",nproc,", omp_nthreads = ",nthreads,", mpi_rank = world>"
 
    write(ount,"(2(a,f13.1))")"- cpu_time = ",tsec(1),   ", wall_time = ",tsec(2)
-!  write(ount,"(2(a,f13.1))")"- my_cpu_time =  ",my_tsec(1),", my_wall_time =  ",my_tsec(2)
    write(ount,"(a)")"-"
 
-   write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t82,a,3x,a7,1x,a10)')&
+   write(ount,format_head1)&
     '- routine        ','cpu','%','wall','%', ' number of calls ',' Gflops ', &
     'Speedup', 'Efficacity'
-   write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t78,a)')&
+   write(ount,format_head2)&
     '-                ','   ',' ','    ',' ','  (-1=no count)'
 
 !  Sort the list by decreasing CPU time

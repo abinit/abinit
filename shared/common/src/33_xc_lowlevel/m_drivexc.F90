@@ -7,7 +7,7 @@
 !! of the XC kernel (the third derivative of the XC energy)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2020 ABINIT group (MT, MJV, CE, TD, XG)
+!!  Copyright (C) 2012-2021 ABINIT group (MT, MJV, CE, TD, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -198,7 +198,7 @@ subroutine echo_xc_name (ixc)
      citation = 'Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) ' ! [[cite:Ichimaru1987]]
    case default
      write(message,'(a,i0)')" echo_xc_name does not know how to handle ixc = ",ixc
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end select
 
    message = " Exchange-correlation functional for the present dataset will be:" // ch10 &
@@ -293,7 +293,7 @@ subroutine check_kxc(ixc,optdriver)
 &     '>Possible action (3):',ch10,&
 &     'Switch to another value of densfor_pred (=5, for instance).'
    end if
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine check_kxc
@@ -619,7 +619,7 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 !scalars
  integer :: ifft,ispden,numneg
  real(dp) :: rhotmp,worst
- character(len=500) :: message
+ character(len=600) :: message
 !arrays
  real(dp) :: rho(2)
 
@@ -695,16 +695,20 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
    end if  ! option
 
  else
-   MSG_BUG('nspden>2 not allowed !')
+   ABI_BUG('nspden>2 not allowed !')
  end if ! End choice between non-spin polarized and spin-polarized.
 
  if (numneg>0) then
    if (iwarn==0) then
-     write(message,'(a,i0,a,a,a,es10.2,a,e10.2,a,a,a,a)')&
+     write(message,'(a,i0,a,a,a,es10.2,a,e10.2,11a)')&
 &     'Density went too small (lower than xc_denpos) at ',numneg,' points',ch10,&
 &     'and was set to xc_denpos = ',xc_denpos,'. Lowest was ',worst,'.',ch10,&
-&     'Likely due to too low boxcut or too low ecut for',' pseudopotential core charge.'
-     MSG_WARNING(message)
+&     'This might be due to (1) too low boxcut or (2) too low ecut for',ch10,&
+&     ' pseudopotential core charge, or (3) too low ecut for estimated initial density.',ch10,&
+&     ' Possible workarounds : increase ecut, or define the input variable densty,',ch10,&
+&     ' with a value larger than the guess for the decay length, or initialize your,',ch10,&
+&     ' density with a preliminary LDA or GGA-PBE if you are using a more exotic xc functional.'
+     ABI_WARNING(message)
    end if
    iwarn=iwarn+1
  end if
@@ -894,7 +898,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      write(message, '(a,i0,2a,i0)')&
 &     'The value of ixc specified in input, ixc = ',ixc,ch10,&
 &     'differs from the one used to initialize the functional ',ixc_from_lib
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -902,66 +906,66 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
  if( (order<1.and.order/=-2).or.order>4)then
    write(message, '(a,i0)' )&
 &   'The only allowed values for order are 1, 2, -2 or 3, while it is found to be ',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Determine quantities available in input arguments
  has_gradient=.false.;has_laplacian=.false.;has_kden=.false.
  if (usegradient==1) then
    if (.not.present(grho2_updn)) then
-     MSG_BUG('missing grho2_updn argument!')
+     ABI_BUG('missing grho2_updn argument!')
    end if
    if (nvxcgrho>0) then
      if (.not.present(vxcgrho)) then
-       MSG_BUG('missing vxcgrho argument!')
+       ABI_BUG('missing vxcgrho argument!')
      end if
      has_gradient=.true.
    end if
  else if (nvxcgrho>0) then
-   MSG_BUG('nvxcgrho>0 and usegradient=0!')
+   ABI_BUG('nvxcgrho>0 and usegradient=0!')
  end if
  if (uselaplacian==1) then
    if (.not.present(lrho_updn)) then
-     MSG_BUG('missing lrho_updn argument!')
+     ABI_BUG('missing lrho_updn argument!')
    end if
    if (nvxclrho>0) then
      if (.not.present(vxclrho)) then
-       MSG_BUG('missing vxclrho argument!')
+       ABI_BUG('missing vxclrho argument!')
      end if
      has_laplacian=.true.
    end if
  else if (nvxclrho>0) then
-   MSG_BUG('nvxclrho>0 and uselaplacian=0!')
+   ABI_BUG('nvxclrho>0 and uselaplacian=0!')
  end if
  if (usekden==1) then
    if (.not.present(tau_updn)) then
-     MSG_BUG('missing tau_updn argument!')
+     ABI_BUG('missing tau_updn argument!')
    end if
    if (nvxctau>0) then
      if (.not.present(vxctau)) then
-       MSG_BUG('missing vxctau argument!')
+       ABI_BUG('missing vxctau argument!')
      end if
      has_kden=.true.
    end if
  else if (nvxctau>0) then
-   MSG_BUG('nvxctau>0 and usekden=0!')
+   ABI_BUG('nvxctau>0 and usekden=0!')
  end if
  if (abs(order)>=2) then
    if (.not.present(dvxc)) then
      message='order>=2 needs argument dvxc!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    else if (ndvxc==0) then
      message='order>=2 needs ndvxc>0!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
  if (abs(order)>=3) then
    if (.not.present(d2vxc)) then
      message='order>=3 needs argument d2vxc!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    else if (nd2vxc==0) then
      message='order>=3 needs nd2vxc>0!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -984,7 +988,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    write(message, '(3a)' )&
 &    'one of the arguments usegradient/uselaplacian/usesekden',ch10,&
 &    'doesnt match the requirements of the XC functional!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if ((has_gradient.and.need_nvxcgrho>nvxcgrho).or.&
 &    (has_laplacian.and.need_nvxclrho>nvxclrho).or.&
@@ -993,25 +997,25 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    write(message, '(3a)' )&
 &    'one of the arguments nvxcgrho/nvxclrho/nvxctau/ndvxc/nd2vxc',ch10,&
 &    'doesnt match the requirements of the XC functional!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if (abs(order)>1.and.ixc<0.and.(need_laplacian==1.or.need_kden==1)) then
    message='Derivatives of XC potential are not available in mGGA!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Check other optional arguments
  if (my_exexch/=0.and.usegradient==0) then
    message='exexch argument only valid for GGA!'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if(ixc==50) then
    if(.not.(present(el_temp)).or.(.not.present(fxcT)))then
      message = 'el_temp or fxcT is not present but are needed for IIT XC functional.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if (size(fxcT)/=npts) then
-     MSG_BUG('fxcT size must be npts!')
+     ABI_BUG('fxcT size must be npts!')
    end if
  end if
 
@@ -1022,8 +1026,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !If needed, compute rhotot and rs
  if (ixc==1.or.ixc==2.or.ixc==3.or.ixc==4.or.ixc==5.or.&
 &    ixc==6.or.ixc==21.or.ixc==22.or.ixc==50) then
-   ABI_ALLOCATE(rhotot,(npts))
-   ABI_ALLOCATE(rspts,(npts))
+   ABI_MALLOC(rhotot,(npts))
+   ABI_MALLOC(rspts,(npts))
    if(nspden==1)then
      rhotot(:)=two*rho_updn(:,1)
    else
@@ -1035,7 +1039,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 
 !If needed, compute zeta
  if (ixc==1.or.ixc==21.or.ixc==22) then
-   ABI_ALLOCATE(zeta,(npts))
+   ABI_MALLOC(zeta,(npts))
    if(nspden==1)then
      zeta(:)=zero
    else
@@ -1161,8 +1165,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !>>>>> RPA correlation from Perdew-Wang
  else if (ixc==10) then
    if (order**2 <= 1) then
-     ABI_ALLOCATE(exci_rpa,(npts))
-     ABI_ALLOCATE(vxci_rpa,(npts,2))
+     ABI_MALLOC(exci_rpa,(npts))
+     ABI_MALLOC(vxci_rpa,(npts,2))
      optpbe=3
      call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,nd2vxc)
      optpbe=1
@@ -1170,22 +1174,22 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      exc(:)=exc(:)-exci_rpa(:)
 !    PMA: second index of vxcrho is nspden while that of rpa is 2 they can mismatch
      vxcrho(:,1:min(nspden,2))=vxcrho(:,1:min(nspden,2))-vxci_rpa(:,1:min(nspden,2))
-     ABI_DEALLOCATE(exci_rpa)
-     ABI_DEALLOCATE(vxci_rpa)
+     ABI_FREE(exci_rpa)
+     ABI_FREE(vxci_rpa)
    else if (order /=3) then
-     ABI_ALLOCATE(exci_rpa,(npts))
-     ABI_ALLOCATE(vxci_rpa,(npts,2))
+     ABI_MALLOC(exci_rpa,(npts))
+     ABI_MALLOC(vxci_rpa,(npts,2))
      optpbe=3
      call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,nd2vxc,dvxci=dvxc)
      optpbe=1
      call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,dvxci=dvxc)
      exc(:)=exc(:)-exci_rpa(:)
      vxcrho(:,:)=vxcrho(:,:)-vxci_rpa(:,:)
-     ABI_DEALLOCATE(exci_rpa)
-     ABI_DEALLOCATE(vxci_rpa)
+     ABI_FREE(exci_rpa)
+     ABI_FREE(vxci_rpa)
    else if (order ==3) then
-     ABI_ALLOCATE(exci_rpa,(npts))
-     ABI_ALLOCATE(vxci_rpa,(npts,2))
+     ABI_MALLOC(exci_rpa,(npts))
+     ABI_MALLOC(vxci_rpa,(npts,2))
      optpbe=3
      call xcpbe(exci_rpa,npts,nspden,optpbe,order,rho_updn,vxci_rpa,ndvxc,nd2vxc,&
 &     d2vxci=d2vxc,dvxci=dvxc)
@@ -1194,8 +1198,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &     d2vxci=d2vxc,dvxci=dvxc)
      exc(:)=exc(:)-exci_rpa(:)
      vxcrho(:,:)=vxcrho(:,:)-vxci_rpa(:,:)
-     ABI_DEALLOCATE(exci_rpa)
-     ABI_DEALLOCATE(vxci_rpa)
+     ABI_FREE(exci_rpa)
+     ABI_FREE(vxci_rpa)
    end if
 
 !>>>>> LDA xc energy like ixc==7, and Leeuwen-Baerends GGA xc potential
@@ -1313,9 +1317,9 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !  Requires to evaluate exchange-correlation with PBE (optpbe=2)
 !  minus hyb_mixing*exchange with PBE (optpbe=-2)
    ndvxc_x=8
-   ABI_ALLOCATE(exc_x,(npts))
-   ABI_ALLOCATE(vxcrho_x,(npts,nspden))
-   ABI_ALLOCATE(vxcgrho_x,(npts,nvxcgrho))
+   ABI_MALLOC(exc_x,(npts))
+   ABI_MALLOC(vxcrho_x,(npts,nspden))
+   ABI_MALLOC(vxcgrho_x,(npts,nvxcgrho))
    exc_x=zero;vxcrho_x=zero;vxcgrho_x=zero
    if (order**2 <= 1) then
      optpbe=2 !PBE exchange correlation
@@ -1328,7 +1332,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      vxcrho=vxcrho-vxcrho_x*my_hyb_mixing
      vxcgrho=vxcgrho-vxcgrho_x*my_hyb_mixing
    else if (order /=3) then
-     ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
+     ABI_MALLOC(dvxc_x,(npts,ndvxc_x))
      optpbe=2 !PBE exchange correlation
      call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
      dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
@@ -1339,12 +1343,12 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      vxcrho=vxcrho-vxcrho_x*my_hyb_mixing
      vxcgrho=vxcgrho-vxcgrho_x*my_hyb_mixing
      dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*my_hyb_mixing
-     ABI_DEALLOCATE(dvxc_x)
+     ABI_FREE(dvxc_x)
    else if (order ==3) then
 !    The size of exchange-correlation with PBE (optpbe=2)
 !    is the one which defines the size for ndvxc.
-     ABI_ALLOCATE(dvxc_x,(npts,ndvxc_x))
-     ABI_ALLOCATE(d2vxc_x,(npts,nd2vxc))
+     ABI_MALLOC(dvxc_x,(npts,ndvxc_x))
+     ABI_MALLOC(d2vxc_x,(npts,nd2vxc))
      optpbe=2 !PBE exchange correlation
      call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc,&
 &     d2vxci=d2vxc,dvxcdgr=vxcgrho,dvxci=dvxc,grho2_updn=grho2_updn)
@@ -1356,12 +1360,12 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      vxcgrho=vxcgrho-vxcgrho_x*my_hyb_mixing
      d2vxc=d2vxc-d2vxc_x*my_hyb_mixing
      dvxc(:,1:ndvxc_x)=dvxc(:,1:ndvxc_x)-dvxc_x(:,1:ndvxc_x)*my_hyb_mixing
-     ABI_DEALLOCATE(dvxc_x)
-     ABI_DEALLOCATE(d2vxc_x)
+     ABI_FREE(dvxc_x)
+     ABI_FREE(d2vxc_x)
    end if
-   ABI_DEALLOCATE(exc_x)
-   ABI_DEALLOCATE(vxcrho_x)
-   ABI_DEALLOCATE(vxcgrho_x)
+   ABI_FREE(exc_x)
+   ABI_FREE(vxcrho_x)
+   ABI_FREE(vxcgrho_x)
 
 !>>>>> Ichimaru,Iyetomi,Tanaka,  XC at finite temp (e- gaz)
  else if (ixc==50) then
@@ -1403,13 +1407,13 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    end if
 
 !  Then renormalize B3LYP and subtract VWN3 contribution
-   ABI_ALLOCATE(exc_c,(npts))
-   ABI_ALLOCATE(vxcrho_c,(npts,nspden))
+   ABI_MALLOC(exc_c,(npts))
+   ABI_MALLOC(vxcrho_c,(npts,nspden))
    if(order**2>1)then
-     ABI_ALLOCATE(dvxc_c,(npts,ndvxc))
+     ABI_MALLOC(dvxc_c,(npts,ndvxc))
    end if
    if(order**2>4)then
-     ABI_ALLOCATE(d2vxc_c,(npts,nd2vxc))
+     ABI_MALLOC(d2vxc_c,(npts,nd2vxc))
    end if
    exc_c=zero;vxcrho_c=zero
    call libxc_functionals_init(-30,nspden,xc_functionals=xc_funcs_vwn3)
@@ -1453,13 +1457,13 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    if(order**2>4)d2vxc=d2vxc-quarter*0.81d0*d2vxc_c
    call libxc_functionals_end(xc_functionals=xc_funcs_lyp)
 
-   ABI_DEALLOCATE(exc_c)
-   ABI_DEALLOCATE(vxcrho_c)
+   ABI_FREE(exc_c)
+   ABI_FREE(vxcrho_c)
    if(allocated(dvxc_c))then
-     ABI_DEALLOCATE(dvxc_c)
+     ABI_FREE(dvxc_c)
    end if
    if(allocated(d2vxc_c))then
-     ABI_DEALLOCATE(d2vxc_c)
+     ABI_FREE(d2vxc_c)
    end if
 
 !>>>>> All libXC functionals
@@ -1569,13 +1573,13 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 ! =================================================
 !Deallocate arrays
  if(allocated(rhotot)) then
-   ABI_DEALLOCATE(rhotot)
+   ABI_FREE(rhotot)
  end if
  if(allocated(rspts)) then
-   ABI_DEALLOCATE(rspts)
+   ABI_FREE(rspts)
  end if
  if(allocated(zeta)) then
-   ABI_DEALLOCATE(zeta)
+   ABI_FREE(zeta)
  end if
 
 end subroutine drivexc

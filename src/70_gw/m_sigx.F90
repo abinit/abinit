@@ -6,7 +6,7 @@
 !!  Calculate diagonal and off-diagonal matrix elements of the exchange part of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2021 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -157,7 +157,7 @@ contains
 
 subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,&
 & Ltg_k,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
-& prtvol,pawcross)
+& prtvol,pawcross,tol_empty_in)
 
 !Arguments ------------------------------------
 !scalars
@@ -173,6 +173,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  type(sigma_t),intent(inout) :: Sr
  type(pawang_type),intent(in) :: Pawang
  type(wfd_t),target,intent(inout) :: Wfd,Wfdf
+ real(dp),intent(in) :: tol_empty_in
 !arrays
  integer,intent(in) :: gwx_ngfft(18),ngfftf(18)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat)
@@ -193,9 +194,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  integer :: isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
  integer :: gwx_nfftot,nfftf,mgfftf,nhat12_grdim,npwx
  real(dp) :: cpu_time,wall_time,gflops
- real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty
+ real(dp) :: fact_sp,theta_mu_minus_esum,theta_mu_minus_esum2,tol_empty
  complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
- complex(gwpc) :: gwpc_sigxme
+ complex(gwpc) :: gwpc_sigxme,gwpc_sigxme2,xdot_tmp
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
@@ -215,7 +216,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_ibz(:)
  complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
  complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
- complex(dpc),allocatable :: sigxme_tmp(:,:,:),sym_sigx(:,:,:),sigx(:,:,:,:)
+ complex(dpc),allocatable  :: sigxcme_tmp(:,:)
+ complex(dpc),allocatable  :: sigxme_tmp(:,:,:),sym_sigx(:,:,:),sigx(:,:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
  logical :: can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
@@ -279,12 +281,12 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 &          "Symmetrization cannot be performed for spin: ",spin,ch10,&
 &          "band classification encountered the following problem: ",ch10,&
 &          TRIM(QP_sym(spin)%err_msg)
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
      end do
    end if
    if (nspinor == 2) then
-     MSG_WARNING('Symmetrization with nspinor=2 not implemented')
+     ABI_WARNING('Symmetrization with nspinor=2 not implemented')
    end if
  end if
 
@@ -294,18 +296,19 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ABI_MALLOC(rhotwgp, (npwx*nspinor))
  ABI_MALLOC(vc_sqrt_qbz, (npwx))
 
+ ! MRM allow lower occ numbers
  ! Normalization of theta_mu_minus_esum
  ! If nsppol==2, qp_occ $\in [0,1]$
  SELECT CASE (nsppol)
  CASE (1)
-   fact_sp=half; tol_empty=0.01   ! below this value the state is assumed empty
+   fact_sp=half; tol_empty=tol_empty_in       ! below this value the state is assumed empty
    if (Sigp%nspinor==2) then
-    fact_sp=one; tol_empty=0.005  ! below this value the state is assumed empty
+    fact_sp=one; tol_empty=half*tol_empty_in  ! below this value the state is assumed empty
    end if
  CASE (2)
-   fact_sp=one; tol_empty=0.005 ! to be consistent and obtain similar results if a metallic
- CASE DEFAULT                    ! spin unpolarized system is treated using nsppol==2
-   MSG_BUG('Wrong nsppol')
+   fact_sp=one;  tol_empty=half*tol_empty_in  ! to be consistent and obtain similar results if a metallic
+ CASE DEFAULT                                 ! spin unpolarized system is treated using nsppol==2
+   ABI_BUG('Wrong nsppol')
  END SELECT
 
  ! Table for \Sigmax_ij matrix elements.
@@ -318,7 +321,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    do ik_bz=1,Kmesh%nbz
      ik_ibz = Kmesh%tab(ik_bz)
      do ib_sum=1,Sigp%nbnds
-       bks_mask(ib_sum,ik_bz,spin) = qp_occ(ib_sum,ik_ibz,spin) >= tol_empty
+       bks_mask(ib_sum,ik_bz,spin) = (abs(qp_occ(ib_sum,ik_ibz,spin)) >= tol_empty)  ! MRM allow negative occ
      end do
    end do
  end do
@@ -342,7 +345,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ABI_MALLOC(irottb,(gwx_nfftot,Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,gwx_ngfft,irottb,iscompatibleFFT)
  if (.not. iscompatibleFFT) then
-   MSG_WARNING("FFT mesh is not compatible with symmetries. Results might be affected by large errors!")
+   ABI_WARNING("FFT mesh is not compatible with symmetries. Results might be affected by large errors!")
  end if
 
  ABI_MALLOC(ktabr,(gwx_nfftot,Kmesh%nbz))
@@ -384,8 +387,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  end if
 
  ABI_MALLOC(sigxme_tmp, (minbnd:maxbnd, minbnd:maxbnd, Wfd%nsppol*Sigp%nsig_ab))
+ ABI_MALLOC(sigxcme_tmp, (minbnd:maxbnd, Wfd%nsppol*Sigp%nsig_ab))
  ABI_MALLOC(sigx,(2, ib1:ib2, ib1:ib2, nsppol*Sigp%nsig_ab))
- sigxme_tmp = czero; sigx = czero
+ sigxme_tmp = czero; sigxcme_tmp = czero; sigx = czero
 
  nq_summed=Kmesh%nbz
  if (Sigp%symsigma > 0) then
@@ -536,7 +540,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        if (proc_distrb(ib_sum,ik_bz,spin)/=Wfd%my_rank) CYCLE
 
        ! Skip empty states.
-       if (qp_occ(ib_sum,ik_ibz,spin)<tol_empty) CYCLE
+       if (abs(qp_occ(ib_sum,ik_ibz,spin))<tol_empty) CYCLE  ! MRM allow negative occ numbers
 
        call wfd%get_ur(ib_sum,ik_ibz,spin,ur_ibz)
 
@@ -556,7 +560,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        do jb=ib1,ib2
 
          if (Psps%usepaw==1 .and. use_pawnhat==1) then
-           MSG_ERROR("use_pawnhat is disabled")
+           ABI_ERROR("use_pawnhat is disabled")
            i2=jb; if (nspinor==2) i2=(2*jb-1)
            spad=(nspinor-1)
 
@@ -625,41 +629,43 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
          end if
        end do ! jb Got all matrix elements from minbnd up to maxbnd.
 
-       theta_mu_minus_esum = fact_sp * qp_occ(ib_sum,ik_ibz,spin)
-
-       do kb=ib1,ib2
-         ! Compute the ket Sigma_x |phi_{k,kb}>.
-         rhotwgp(:) = rhotwg_ki(:,kb)
-
-         ! Loop over the non-zero row elements of this column.
-         ! If gwcalctyp <  20: only diagonal elements since QP == KS.
-         ! If gwcalctyp >= 20:
-         !      * Only off-diagonal elements connecting states with same character.
-         !      * Only the upper triangle if HF, SEX, or COHSEX.
-         do irow=1,Sigxij_tab(spin)%col(kb)%size1
-           jb = Sigxij_tab(spin)%col(kb)%bidx(irow)
-           rhotwg = rhotwg_ki(:,jb)
-
-           ! Calculate bare exchange <phi_j|Sigma_x|phi_k>.
-           ! Do the scalar product only if ib_sum is occupied.
-           if (theta_mu_minus_esum/fact_sp >= tol_empty) then
+       theta_mu_minus_esum  = fact_sp * qp_occ(ib_sum,ik_ibz,spin)
+       theta_mu_minus_esum2 = sqrt(abs(fact_sp * qp_occ(ib_sum,ik_ibz,spin))) ! MBB Nat. orb. funct. approx. sqrt(occ)
+       if (abs(theta_mu_minus_esum/fact_sp) >= tol_empty) then     ! MRM: allow negative occ numbers
+         do kb=ib1,ib2
+           ! Compute the ket Sigma_x |phi_{k,kb}>.
+           rhotwgp(:) = rhotwg_ki(:,kb)
+           ! Loop over the non-zero row elements of this column.
+           ! If gwcalctyp <  20: only diagonal elements since QP == KS.
+           ! If gwcalctyp >= 20:
+           !      * Only off-diagonal elements connecting states with same character.
+           !      * Only the upper triangle if HF, SEX, or COHSEX.
+           do irow=1,Sigxij_tab(spin)%col(kb)%size1
+             jb = Sigxij_tab(spin)%col(kb)%bidx(irow)
+             rhotwg(:) = rhotwg_ki(:,jb)
+             ! Calculate bare exchange <phi_j|Sigma_x|phi_k>.
+             ! Do the scalar product only if ib_sum is occupied.
              do iab=1,Sigp%nsig_ab
                spadx1 = spinor_padx(1, iab); spadx2 = spinor_padx(2, iab)
-               gwpc_sigxme = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1) * theta_mu_minus_esum
-
+               xdot_tmp = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1)
+               gwpc_sigxme  = xdot_tmp * theta_mu_minus_esum
+               gwpc_sigxme2 = xdot_tmp * theta_mu_minus_esum2
                ! Accumulate and symmetrize Sigma_x
                ! -wtqm comes from time-reversal (exchange of band indeces)
                is_idx = spin; if (nspinor == 2) is_idx = iab
                sigxme_tmp(jb, kb, is_idx) = sigxme_tmp(jb, kb, is_idx) + &
 &                (wtqp + wtqm)*DBLE(gwpc_sigxme) + (wtqp - wtqm)*j_gw*AIMAG(gwpc_sigxme)
+               if(jb==kb) then
+                 sigxcme_tmp(jb, is_idx) = sigxcme_tmp(jb, is_idx) + &
+&                (wtqp + wtqm)*DBLE(gwpc_sigxme2) + (wtqp - wtqm)*j_gw*AIMAG(gwpc_sigxme2)
+               end if
 
                sigx(1, jb, kb, is_idx) = sigx(1, jb, kb, is_idx) + wtqp *      gwpc_sigxme
                sigx(2, jb, kb, is_idx) = sigx(2, jb, kb, is_idx) + wtqm *CONJG(gwpc_sigxme)
              end do
-           end if
-         end do ! jb used to calculate matrix elements of Sigma_x
-
-       end do ! kb to calculate matrix elements of Sigma_x
+           end do ! jb used to calculate matrix elements of Sigma_x
+         end do ! kb to calculate matrix elements of Sigma_x
+       end if
      end do ! ib_sum
 
      ! Deallocate k-dependent quantities.
@@ -693,11 +699,13 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  ! Gather contributions from all the CPUs.
  call xmpi_sum(sigxme_tmp, wfd%comm, ierr)
+ call xmpi_sum(sigxcme_tmp, wfd%comm, ierr)
  call xmpi_sum(sigx, wfd%comm, ierr)
 
  ! Multiply by constants. For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
- sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * Sigp%sigma_mixing
- sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * Sigp%sigma_mixing
+ sigxme_tmp  = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp  * Sigp%sigma_mixing
+ sigxcme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxcme_tmp * Sigp%sigma_mixing
+ sigx        = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx        * Sigp%sigma_mixing
 
  !
  ! If we have summed over the IBZ_q now we have to average over degenerate states.
@@ -757,7 +765,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        call hermitianize(sigxme_tmp(:,:,spin), "Upper")
      end do
    else
-     MSG_WARNING("Should hermitianize non-collinear sigma!")
+     ABI_WARNING("Should hermitianize non-collinear sigma!")
    end if
  end if
 
@@ -768,9 +776,11 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      do iab=1,Sigp%nsig_ab
        is_idx = spin; if (Sigp%nsig_ab > 1) is_idx = iab
        if (is_idx <= 2) then
-         Sr%sigxme(jb,jk_ibz,is_idx) = DBLE(sigxme_tmp(jb,jb,is_idx))
+         Sr%sigxme(jb,jk_ibz,is_idx)     = DBLE( sigxme_tmp(jb,jb,is_idx))
+         Sr%sigxcnofme(jb,jk_ibz,is_idx) = DBLE(sigxcme_tmp(jb,is_idx))
        else
-         Sr%sigxme(jb,jk_ibz,is_idx) = sigxme_tmp(jb,jb,is_idx)
+         Sr%sigxme(jb,jk_ibz,is_idx)     =  sigxme_tmp(jb,jb,is_idx)
+         Sr%sigxcnofme(jb,jk_ibz,is_idx) = sigxcme_tmp(jb,is_idx)
        end if
      end do
      !if (Sigp%nsig_ab>1) then
@@ -782,6 +792,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ! Save full exchange matrix in Sr%
  Sr%x_mat(minbnd:maxbnd,minbnd:maxbnd,jk_ibz,:) = sigxme_tmp(minbnd:maxbnd,minbnd:maxbnd,:)
  ABI_FREE(sigxme_tmp)
+ ABI_FREE(sigxcme_tmp)
 
  ! ===========================
  ! ==== Deallocate memory ====

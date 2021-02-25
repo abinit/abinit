@@ -1,0 +1,69 @@
+# ================================================================
+# Fe hcp structure - non-magnetic
+#
+# Test for Abinit: PAW
+# Low cut-off for test; too few k-points
+# ================================================================
+
+# Datasets
+   ndtset 2
+   #mkmem1 0  ! 1st dataset with mkmem=0       (no k-point in memory)
+   #          ! 2nd dataset with default mkmem (all k-points in memory)
+   prtwf1 1
+  getwfk2 -1
+
+# Unit cell
+  acell   2*4.62  7.52
+  rprim   sqrt(0.75) 0.5 0.0
+         -sqrt(0.75) 0.5 0.0
+          0.0        0.0 1.0
+ ntypat   1
+  natom   2
+  typat   2*1
+   xred   1/3 2/3 1/4
+          2/3 1/3 3/4
+  znucl   26
+  nband   20
+
+# K-points and symmmetries
+ kptopt   1
+  ngkpt   6 6 6
+nshiftk   1
+ shiftk   0.5 0.5 0.5
+ chksymbreak 0
+ occopt   7
+ tsmear   0.01
+
+# Self-consistent cycle
+ tolvrs   1.0d-7
+  nstep   15
+
+# Basis sets
+   ecut   6.
+pawecutdg 10.
+
+# Miscelaneous
+    prtwf 0
+   prtden 0
+   prteig 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t09.abo, tolnlines = 3, tolabs = 1.010e-06, tolrel = 1.100e-03, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = PAW
+#%% description = 
+#%%   Fe in HCP structure. Low cut-offs and few k-points.
+#%%   This test is done within GGA and no magnetism in PAW formalism.
+#%%   The same job is done twice with two differents values of mkmem.
+#%%<END TEST_INFO>

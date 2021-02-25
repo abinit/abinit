@@ -7,7 +7,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
+!! Copyright (C) 2008-2021 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -366,12 +366,12 @@ function laguerre(x,n,a)
  else
    aa=0
  end if
- ABI_ALLOCATE(ff,(nn+1))
+ ABI_MALLOC(ff,(nn+1))
  ff=0.0_dp
  ff=(/ (binomcoeff(nn+aa,nn-ii)*((-1.0_dp)*x)**ii/factorial(ii) ,ii=0,nn) /)
  laguerre=sum(ff)
 
- ABI_DEALLOCATE(ff)
+ ABI_FREE(ff)
 
 end function laguerre
 !!***
@@ -1245,7 +1245,7 @@ subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 
  else
    write(message, '(a,i0,a)' )' besjm only defined for nn in [0,5]; input was nn=',nn,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 end subroutine besjm
@@ -1311,7 +1311,7 @@ subroutine sbf8(nm,xx,sb_out)
    else
      nlim=nm+int(1.36e0_dp*xx)+15
    end if
-   ABI_ALLOCATE(sb,(nlim+1))
+   ABI_MALLOC(sb,(nlim+1))
    nn=nlim
    xi=one/xx
    sb(nn+1)=zero
@@ -1325,7 +1325,7 @@ subroutine sbf8(nm,xx,sb_out)
    end do
    fn=1.d0/sqrt(sn)
    sb_out(:)=fn*sb(1:nm)
-   ABI_DEALLOCATE(sb)
+   ABI_FREE(sb)
  end if
 
 end subroutine sbf8
@@ -1417,11 +1417,11 @@ function bose_einstein(energy, temperature)
      bose_einstein = one / (exp(arg)  - one)
    else if (arg < tol12) then
      write(message,'(a)') 'No Bose Einstein for negative energies'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
  else if (arg < tol12) then
    write(message,'(a)') 'No Bose Einstein for negative or 0 T'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 
@@ -1571,7 +1571,7 @@ type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
 ! *********************************************************************
 
  if (nx < 2) then
-   MSG_ERROR('need more than one point for the interpolation routines')
+   ABI_ERROR('need more than one point for the interpolation routines')
  end if
 
  new%nx = nx; new%mlang = mlang; new%delta = delta; new%maxarg = (nx-1) * delta
@@ -1690,7 +1690,7 @@ real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
    write(std_out,*)"x[0], x[-1]",jlspl%xx(1),jlspl%xx(jlspl%nx)
    write(std_out,*)"minval xfit: ",minval(xfit)
    write(std_out,*)"maxval xfit: ",maxval(xfit)
-   MSG_ERROR("splint returned ierr != 0")
+   ABI_ERROR("splint returned ierr != 0")
  end if
 
  if (powr /= 1) yfit = yfit * (rr ** powr)

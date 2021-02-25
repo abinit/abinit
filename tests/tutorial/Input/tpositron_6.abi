@@ -1,0 +1,98 @@
+# Input for Positron tutorial
+# Sixth step (part 1) of the tutorial on electron-positron annihilation
+# Positron lifetime calculation within PAW - 12 valence electrons
+# Si, 2 atoms in the box
+
+# This input file is similar to tpositron_1.abi, except:
+#   - the number of bands, because of the additional 8 electrons states
+
+#Define the different datasets
+ndtset 2          # 2 datasets
+
+#FIRST DATASET
+positron1  0      # Dataset 1 is a simple electronic GS calculation
+
+#SECOND DATASET
+positron2  1      # Dataset 2 is a positronic GS calculation
+getden2    1      #   in presence of the previous electronic density
+
+kptopt2    0      #   Use only k=gamma point
+
+ixcpositron2 1    # We are using the Boronski and Nieminen parametrization
+
+posocc2      1    # Occupation number for the positron
+                  #  (should be set <1 for bulk calculation with a small cell).
+                  # Here the zero positron density limit is used,
+                  #   so results do not depend on posocc.
+
+
+#-------------------------------------------------------------------------------
+#Definition of data common to all datasets
+
+#Definition of the unit cell
+acell 3*5.43 angstrom  # Lengths of the primitive vectors (exp. param. in angstrom)
+rprim             # 3 orthogonal primitive vectors (FCC lattice)
+  0.0 1/2 1/2 
+  1/2 0.0 1/2
+  1/2 1/2 0.0
+
+#Definition of the atom types and pseudopotentials
+ntypat 1          # There is only one type of atom
+znucl 14          # Atomic number of the possible type(s) of atom. Here silicon.
+pp_dirpath "$ABI_PSPDIR"        # Path to the directory were
+                                #   pseudopotentials for tests are stored
+pseudos "Si_paw_pw_12el.xml"    # Name and location of the pseudopotential
+                         
+#Definition of the atoms
+natom 2           # There are two atoms
+typat 1 1         # They both are of type 1, that is, Silicon
+xred              # Location of the atoms:
+  0.0 0.0 0.0     #  Triplet giving the reduced coordinates of atom 1
+  1/4 1/4 1/4     #  Triplet giving the reduced coordinates of atom 2
+
+#Definition of bands and occupation numbers
+nband 14          # Compute 14 bands (we have semicore states)
+occopt 1          # Automatic generation of occupation numbers, as a semiconductor
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 8.           # Maximal plane-wave kinetic energy cut-off, in Hartree
+pawecutdg 15.     # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
+kptopt 1          # Automatic generation of k points, taking into account the symmetry
+ngkpt 4 4 4       # This is a 4x4x4 grid based on the primitive vectors of the recip. space
+nshiftk 1         # We do not shift the grid in order to have Gamma point in it
+shiftk 0. 0. 0.
+
+#Parameters for the SCF procedure
+nstep 50          # Maximal number of SCF cycles
+tolvrs 1.0d-8     # Will stop when, twice in a row, the difference 
+                  # between two consecutive evaluations of potential residual 
+                  # differ by less than tolvrs 
+
+#Miscelaneous parameters
+prtwf 0           # Do not print wavefunctions
+prtden 1          # Print density (electronic and/or positronic)
+prteig 0          # Do not print eigenvalues
+optforces 0       # Forces computation is not relevant here
+optstress 0       # Stress tensor computation is not relevant here
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   tpositron_6.abo, tolnlines=  0, tolabs= 0.0, tolrel= 0.0, fld_options= -easy
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = J. Wiktor
+#%% keywords = POSITRON,PAW
+#%% description =
+#%%   Input for Positron tutorial
+#%%   Sixth step (part 1) of the tutorial on electron-positron annihilation
+#%%   Positron lifetime calculation within PAW - 12 valence electrons
+#%%   Si, 2 atoms in the box
+#%%<END TEST_INFO>

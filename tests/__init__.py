@@ -214,7 +214,8 @@ class Suite(object):
             for k in subsuite_names: self.subsuites[k] = []
 
             for name in subsuite_names:
-                pattern = re.compile("-?t" + name + "_\d+\.in")
+                #pattern = re.compile("-?t" + name + "_\d+\.in")
+                pattern = re.compile("-?t" + name + "_\d+\.abi")
                 for inp in module.inp_files:
                     if pattern.match(inp):
                         #print(inp, "--> subsuite: ", name)

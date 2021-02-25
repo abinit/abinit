@@ -7,7 +7,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2020 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2021 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -192,6 +192,9 @@ module defs_basis
  real(dp), parameter :: tol14=0.00000000000001_dp
  real(dp), parameter :: tol15=0.000000000000001_dp
  real(dp), parameter :: tol16=0.0000000000000001_dp
+ real(dp), parameter :: tol17=0.00000000000000010_dp
+ real(dp), parameter :: tol18=0.000000000000000001_dp
+ real(dp), parameter :: tol19=0.0000000000000000001_dp
  real(dp), parameter :: tol20=0.00000000000000000001_dp
  real(dp), parameter :: tol30=1.0d-30
 

@@ -12,7 +12,7 @@
 !!  B is also positive definite.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2020 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,13 +37,6 @@
   subroutine abi_dhegv(itype,jobz,uplo,n,a,lda,b,ldb,w, &
 &            x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhegv'
-!End of the abilint section
-
- implicit none
 !Arguments ------------------------------------
  integer, intent(in) :: itype
  character(len=1), intent(in) :: jobz
@@ -151,12 +144,6 @@ end subroutine abi_dhegv
 !!
 subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chegv'
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -190,14 +177,14 @@ subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  if (ABI_LINALG_PLASMA_ISON.and.LSAME(jobz,'N')) then
 #if defined HAVE_LINALG_PLASMA
    if (eigen_c_lwork==0) then
-     ABI_ALLOCATE(work,(n**2))
+     ABI_MALLOC(work,(n**2))
    end if
    call PLASMA_Alloc_Workspace_chegv(n,n,plasma_work,info)
    info = call PLASMA_chegv(itype,jobz_plasma(jobz),uplo_plasma(uplo),n,a,lda,b,ldb,w,&
 &                           plasma_work,c_loc(work),n)
    call PLASMA_Dealloc_handle(plasma_work,info)
    if (eigen_c_lwork==0) then
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
    end if
 #endif
 
@@ -205,17 +192,17 @@ subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  else
    if (eigen_c_lwork==0) then
      lwork=2*n-1
-     ABI_ALLOCATE(work,(lwork))
+     ABI_MALLOC(work,(lwork))
    end if
    if (eigen_c_lrwork==0) then
-     ABI_ALLOCATE(rwork,(3*n-2))
+     ABI_MALLOC(rwork,(3*n-2))
    end if
    call chegv(itype,jobz,uplo,n,a,lda,b,ldb,w,work,lwork,rwork,info)
    if (eigen_c_lwork==0) then
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
    end if
    if (eigen_c_lrwork==0) then
-     ABI_DEALLOCATE(rwork)
+     ABI_FREE(rwork)
    end if
  end if
 
@@ -240,12 +227,6 @@ end subroutine abi_chegv
 !! SOURCE
 
 subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhegv'
-!End of the abilint section
 
  implicit none
 
@@ -280,14 +261,14 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  if (ABI_LINALG_PLASMA_ISON.and.LSAME(jobz,'N')) then
 #if defined HAVE_LINALG_PLASMA
    if (eigen_z_lwork==0) then
-     ABI_ALLOCATE(work,(n**2))
+     ABI_MALLOC(work,(n**2))
    end if
    call PLASMA_Alloc_Workspace_zhegv(n,n,plasma_work,info)
    call PLASMA_zhegv(itype,jobz_plasma(jobz),uplo_plasma(uplo),n,a,lda,b,ldb,w,&
 &                    plasma_work,c_loc(work),n)
    call PLASMA_Dealloc_handle(plasma_work,info)
    if (eigen_z_lwork==0) then
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
    end if
 #endif
 
@@ -295,17 +276,17 @@ subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
  else
    if (eigen_z_lwork==0) then
      lwork=2*n-1
-     ABI_ALLOCATE(work,(lwork))
+     ABI_MALLOC(work,(lwork))
    end if
    if (eigen_z_lrwork==0) then
-     ABI_ALLOCATE(rwork,(3*n-2))
+     ABI_MALLOC(rwork,(3*n-2))
    end if
    call zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w,work,lwork,rwork,info)
    if (eigen_z_lwork==0) then
-     ABI_DEALLOCATE(work)
+     ABI_FREE(work)
    end if
    if (eigen_z_lrwork==0) then
-     ABI_DEALLOCATE(rwork)
+     ABI_FREE(rwork)
    end if
  end if
 

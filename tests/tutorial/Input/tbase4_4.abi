@@ -1,0 +1,72 @@
+# Crystalline aluminum
+#
+# A first step in the determination of the surface energy of aluminum :
+# changing the orientation of the cell.
+
+#Definition of the unit cell
+acell 3*7.5593333886E+00 # Lattice parameters of bulk aluminum obtained
+                         # in the previous calculation.
+rprim  0.5 -0.5  0.0     # These values will define a cell with two atoms,
+       0.5  0.5  0.0     # non-primitive, with a different orientation
+       0.0  0.0  1.0     # than the primitive cell.
+chkprim 0                # This input variable allows to use non-primitive unit
+                         # cells. Please, do not use it in other cases,
+                         # you might miss a primitive cell, faster to handle.
+
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 13          # The keyword "znucl" refers to the atomic number of the
+                  # possible type(s) of atom. The pseudopotential(s)
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Aluminum
+pp_dirpath "$ABI_PSPDIR"       # This is the path to the directory were
+                               # pseudopotentials for tests are stored
+pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+                               # Name and location of the pseudopotential
+
+#Definition of the atoms
+natom 2           # There are two atoms in this doubled cell
+typat 2*1         # These atoms are of type 1, that is, Aluminum
+xred              # This keyword indicate that the location of the atoms
+                  # will follow, one triplet of number for each atom
+0.0  0.0  0.0     # Triplet giving the REDUCED coordinate of atom 1.
+0.5  0.5  0.5     # Triplet giving the REDUCED coordinate of atom 2.
+
+#Definition of the planewave basis set
+ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the k-point grids
+ngkpt  4 4 4
+nshiftk 2
+shiftk  0.5 0.0 0.5
+        0.0 0.5 0.5
+
+#Definition of the SCF procedure
+nstep 10          # Maximal number of SCF cycles
+toldfe 1.0d-6     # This value is way too large for most realistic studies of materials
+
+#Definition of occupation numbers
+occopt 4
+tsmear 0.04
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%    tbase4_4.abo, tolnlines=  7, tolabs=  2.008e-10, tolrel=  4.000e-06
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords =
+#%% description =
+#%%   Crystalline aluminum
+#%%
+#%%   A first step in the determination of the surface energy of aluminum :
+#%%   changing the orientation of the cell.
+#%% topics = UnitCell
+#%%<END TEST_INFO>

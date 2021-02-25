@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -102,6 +102,8 @@ contains
 !! of ehart, enxc, and eei.
 !! WARNING XG180913 : At present, Fock energy not computed !
 !!
+!! NOTE that this routine is callned in m_scfcv_core only when nstep == 0
+!!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=<G|Cnk>=Fourier coefficients of wavefunction
@@ -151,7 +153,7 @@ contains
 !!  symrec(3,3,nsym)=symmetry operations in reciprocal space
 !!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
 !!  vpsp(nfftf)=local pseudopotential in real space (hartree)
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!  wvl <type(wvl_internal_type)>=wavelets internal data
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!  xred(3,natom)=reduced coordinates of atoms (dimensionless)
@@ -288,12 +290,12 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1),vzeeman(4)
  real(dp) :: magvec(dtset%nspden)
  real(dp),target :: vxctau_dum(0,0,0)
- real(dp),allocatable :: buffer(:),cgrvtrial(:,:)
+ real(dp),allocatable :: buffer(:)
  real(dp),allocatable :: cwavef(:,:),eig_k(:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
  real(dp),allocatable :: kinpw(:),kinpw_sav(:),kxc(:,:),occ_k(:),occblock(:)
  real(dp),allocatable :: ph3d(:,:,:),ph3d_sav(:,:,:)
  real(dp),allocatable :: resid_k(:),rhowfg(:,:),rhowfr(:,:),vlocal(:,:,:,:)
- real(dp),allocatable :: vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),v_constr_dft_r(:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),v_constr_dft_r(:,:)
  real(dp),pointer :: vxctau_(:,:,:)
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
@@ -311,7 +313,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
  nfftotf=PRODUCT(ngfftf(1:3))
  if ((psps%usepaw==1.and.pawfgr%nfft/=nfftf).or.(psps%usepaw==0.and.dtset%nfft/=nfftf)) then
-   MSG_BUG('wrong values for nfft, nfftf!')
+   ABI_BUG('wrong values for nfft, nfftf!')
  end if
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
@@ -358,7 +360,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfftf,ngfftf,&
                  &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
      call xcdata_init(xcdata,dtset=dtset)
-     ABI_ALLOCATE(kxc,(1,nkxc))
+     ABI_MALLOC(kxc,(1,nkxc))
 !    to be adjusted for the call to rhotoxc
      nk3xc=1
      if (ipositron==0) then
@@ -375,7 +377,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &       electronpositron=electronpositron,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      end if
-     ABI_DEALLOCATE(kxc)
+     ABI_FREE(kxc)
    else if (dtset%usewvl == 0) then
 !    Use the free boundary solver.
      call psolver_rhohxc(energies%e_hartree, energies%e_xc, evxc, &
@@ -451,7 +453,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !the values coming from mag_penalty may be different from those calculated
 !calling mag_penalty with nfft in setvtr and rhotov
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   ABI_ALLOCATE(v_constr_dft_r, (nfftf,dtset%nspden))
+   ABI_MALLOC(v_constr_dft_r, (nfftf,dtset%nspden))
    v_constr_dft_r = zero
    call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
 !   call mag_penalty(dtset%natom, dtset%spinat, dtset%nspden, dtset%magconon, dtset%magcon_lambda, rprimd, &
@@ -462,7 +464,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
        vtrial(ifft,ispden)=vtrial(ifft,ispden)+v_constr_dft_r(ifft,ispden)
      end do
    end do
-   ABI_DEALLOCATE(v_constr_dft_r)
+   ABI_FREE(v_constr_dft_r)
  end if
 
 !Compute Hartree energy - use up+down rhor
@@ -493,11 +495,11 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
          energies%e_xcdc=energies%e_xcdc+e_xcdc_vxctau
        end if
      else
-       ABI_ALLOCATE(rhowfr,(nfftf,dtset%nspden))
+       ABI_MALLOC(rhowfr,(nfftf,dtset%nspden))
        rhowfr=rhor-nhat
        call dotprod_vn(1,rhowfr,energies%e_xcdc,doti,nfftf,nfftotf,dtset%nspden,1,vxc,&
 &       ucvol_local,mpi_comm_sphgrid=mpi_comm_sphgrid)
-       ABI_DEALLOCATE(rhowfr)
+       ABI_FREE(rhowfr)
      end if
      if (ipositron==2) energies%e_xcdc=energies%e_xcdc-electronpositron%e_xcdc
    else
@@ -529,23 +531,23 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,&
 & nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
- ABI_ALLOCATE(vlocal,(n4,n5,n6,gs_hamk%nvloc))
+ ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamk%nvloc))
  if (with_vxctau) then
-   ABI_ALLOCATE(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
+   ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
  end if
 
 !PAW: additional initializations
  if (psps%usepaw==1) then
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,my_nspinor))
+   ABI_MALLOC(cwaveprj,(dtset%natom,my_nspinor))
    call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
    if (mpi_enreg%paral_spinor==1) then
-     ABI_DATATYPE_ALLOCATE(cwaveprj_gat,(dtset%natom,dtset%nspinor))
+     ABI_MALLOC(cwaveprj_gat,(dtset%natom,dtset%nspinor))
      call pawcprj_alloc(cwaveprj_gat,0,gs_hamk%dimcprj)
    else
      cwaveprj_gat => cwaveprj
    end if
    if (paral_atom) then
-     ABI_DATATYPE_ALLOCATE(pawrhoij_unsym,(dtset%natom))
+     ABI_MALLOC(pawrhoij_unsym,(dtset%natom))
      call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
 &                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
@@ -557,61 +559,24 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    option_rhoij=1
    usetimerev=(dtset%kptopt>0.and.dtset%kptopt<3)
  else
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
+   ABI_MALLOC(cwaveprj,(0,0))
  end if
 
 !LOOP OVER SPINS
  do isppol=1,dtset%nsppol
    ikg=0
 
-!  Set up local potential vlocal with proper dimensioning, from vtrial
-!  Also take into account the spin.
-   if(dtset%nspden/=4)then
-     if (psps%usepaw==0.or.pawfgr%usefinegrid==0) then
-       call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal,2)
-       if(with_vxctau) then
-         do ispden=1,4
-           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-&           vxctau(:,:,ispden),vxctaulocal(:,:,:,:,ispden),2)
-         end do
-       end if
-     else
-       ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-       call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vlocal,2)
-       if(with_vxctau) then
-         do ispden=1,4
-           call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-&                         rhodum,rhodum,cgrvtrial,vxctau(:,:,ispden))
-           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-&                      cgrvtrial,vxctaulocal(:,:,:,:,ispden),2)
-         end do
-       end if
-       ABI_DEALLOCATE(cgrvtrial)
-     end if
-   else
-     ABI_ALLOCATE(vlocal_tmp,(n4,n5,n6))
-     if (psps%usepaw==0) then
-       do ispden=1,dtset%nspden
-         call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal_tmp,2)
-         vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-       end do
-     else
-       ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-       do ispden=1,dtset%nspden
-         call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vlocal_tmp,2)
-         vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-       end do
-       ABI_DEALLOCATE(cgrvtrial)
-     end if
-     ABI_DEALLOCATE(vlocal_tmp)
-   end if
+   ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
+   ! Also take into account the spin.
 
-!  Continue Hamiltonian initialization
+   call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                 dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, vtrial, vlocal)
    call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
+
    if (with_vxctau) then
-     call gs_hamk%load_spin(isppol,vxctaulocal=vxctaulocal)
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                   dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+     call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
    end if
 
 !  Loop over k points
@@ -639,10 +604,10 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      end if
      blocksize=nband_k/nblockbd
 
-     ABI_ALLOCATE(eig_k,(nband_k))
-     ABI_ALLOCATE(occ_k,(nband_k))
-     ABI_ALLOCATE(resid_k,(nband_k))
-     ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
+     ABI_MALLOC(eig_k,(nband_k))
+     ABI_MALLOC(occ_k,(nband_k))
+     ABI_MALLOC(resid_k,(nband_k))
+     ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
      resid_k(:)=zero
      kpoint(:)=dtset%kptns(:,ikpt)
      occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
@@ -650,10 +615,10 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      if (minval(eig_k)>1.d100) eig_k=zero
      eeigk=zero ; ekk=zero ; enlk=zero
 
-     ABI_ALLOCATE(kg_k,(3,npw_k))
+     ABI_MALLOC(kg_k,(3,npw_k))
      kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
 
-     ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+     ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
      if (psps%useylm==1) then
        do ilm=1,psps%mpsang*psps%mpsang
          ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
@@ -661,7 +626,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      end if
 
 !    Compute kinetic energy
-     ABI_ALLOCATE(kinpw,(npw_k))
+     ABI_MALLOC(kinpw,(npw_k))
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !    Compute kinetic energy of each band
@@ -679,7 +644,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
 !    Compute nonlocal form factors ffnl at all (k+G):
      ider=0;dimffnl=1;nkpg=0
-     ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
+     ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
      call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
 &     gmet,gprimd,ider,ider,psps%indlmn,kg_k,kpg_dum,kpoint,psps%lmnmax,&
 &     psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
@@ -690,7 +655,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !     - Compute 3D phase factors
 !     - Prepare various tabs in case of band-FFT parallelism
 !     - Load k-dependent quantities in the Hamiltonian
-     ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
+     ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
      call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,&
 &     kinpw_k=kinpw,kg_k=kg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
 &     compute_ph3d=.true.,compute_gbound=(mpi_enreg%paral_kgb/=1))
@@ -722,8 +687,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 #endif
 
 !    Compute nonlocal psp energy (NCPP) or Rhoij (PAW)
-     ABI_ALLOCATE(enlout,(blocksize))
-     ABI_ALLOCATE(occblock,(blocksize))
+     ABI_MALLOC(enlout,(blocksize))
+     ABI_MALLOC(occblock,(blocksize))
      do iblock=1,nblockbd
        iband=(iblock-1)*blocksize+1;iband_last=min(iband+blocksize-1,nband_k)
        if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband_last,isppol,me_distrb)) cycle
@@ -794,17 +759,17 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      end if
 #endif
 
-     ABI_DEALLOCATE(eig_k)
-     ABI_DEALLOCATE(occ_k)
-     ABI_DEALLOCATE(resid_k)
-     ABI_DEALLOCATE(enlout)
-     ABI_DEALLOCATE(occblock)
-     ABI_DEALLOCATE(ffnl)
-     ABI_DEALLOCATE(kinpw)
-     ABI_DEALLOCATE(ph3d)
-     ABI_DEALLOCATE(cwavef)
-     ABI_DEALLOCATE(kg_k)
-     ABI_DEALLOCATE(ylm_k)
+     ABI_FREE(eig_k)
+     ABI_FREE(occ_k)
+     ABI_FREE(resid_k)
+     ABI_FREE(enlout)
+     ABI_FREE(occblock)
+     ABI_FREE(ffnl)
+     ABI_FREE(kinpw)
+     ABI_FREE(ph3d)
+     ABI_FREE(cwavef)
+     ABI_FREE(kg_k)
+     ABI_FREE(ylm_k)
 
 !    End loops on isppol and ikpt
    end do
@@ -814,7 +779,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
  if(xmpi_paral==1)then
 !  Accumulate enl eeig and ek on all proc.
-   ABI_ALLOCATE(buffer,(3+dtset%mband*dtset%nkpt*dtset%nsppol))
+   ABI_MALLOC(buffer,(3+dtset%mband*dtset%nkpt*dtset%nsppol))
    buffer(1)=energies%e_nlpsp_vfock ; buffer(2)=energies%e_kinetic ; buffer(3)=energies%e_eigenvalues
    do iresid=1,dtset%mband*dtset%nkpt*dtset%nsppol
      buffer(iresid+3)=resid(iresid)
@@ -826,7 +791,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    do iresid=1,dtset%mband*dtset%nkpt*dtset%nsppol
      resid(iresid)=buffer(iresid+3)
    end do
-   ABI_DEALLOCATE(buffer)
+   ABI_FREE(buffer)
 !  Accumulate rhoij_
    if (psps%usepaw==1) then
      call pawrhoij_mpisum_unpacked(pawrhoij_unsym,spaceComm,comm2=mpi_enreg%comm_band)
@@ -888,7 +853,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    call pawrhoij_free_unpacked(pawrhoij_unsym)
    if (paral_atom) then
      call pawrhoij_free(pawrhoij_unsym)
-     ABI_DATATYPE_DEALLOCATE(pawrhoij_unsym)
+     ABI_FREE(pawrhoij_unsym)
    end if
    ider=0;izero=0;cplex=1;ipert=0;idir=0;qpt(:)=zero
    call pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
@@ -899,8 +864,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &   distribfft=mpi_enreg%distribfft,mpi_comm_wvl=mpi_enreg%comm_wvl)
 
-   ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
-   ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
+   ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
+   ABI_MALLOC(rhowfg,(2,dtset%nfft))
    rhowfr(:,:)=zero
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs)
@@ -912,25 +877,25 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &               rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl_den,wfs,option=1)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
    end if
-   ABI_DEALLOCATE(rhowfr)
-   ABI_DEALLOCATE(rhowfg)
+   ABI_FREE(rhowfr)
+   ABI_FREE(rhowfg)
  end if
 
- MSG_COMMENT('New density rho(r) made from input wfs')
+ ABI_COMMENT('New density rho(r) made from input wfs')
 
  call timab(59,2,tsec)
 
- ABI_DEALLOCATE(vlocal)
+ ABI_FREE(vlocal)
  if (with_vxctau) then
-   ABI_DEALLOCATE(vxctaulocal)
+   ABI_FREE(vxctaulocal)
  end if
 
  if (psps%usepaw==1) then
    call pawcprj_free(cwaveprj)
-   ABI_DATATYPE_DEALLOCATE(cwaveprj)
+   ABI_FREE(cwaveprj)
    if (mpi_enreg%paral_spinor==1) then
      call pawcprj_free(cwaveprj_gat)
-     ABI_DATATYPE_DEALLOCATE(cwaveprj_gat)
+     ABI_FREE(cwaveprj_gat)
    else
      nullify(cwaveprj_gat)
    end if
@@ -1013,13 +978,13 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  blocksize=nband/nblockbd
 
  npw_k=gs_hamk%npw_k
- ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))
- ABI_ALLOCATE(ghc,(2,npw_k*my_nspinor))
- ABI_ALLOCATE(gvnlxc,(2,npw_k*my_nspinor))
+ ABI_MALLOC(cwavef,(2,npw_k*my_nspinor))
+ ABI_MALLOC(ghc,(2,npw_k*my_nspinor))
+ ABI_MALLOC(gvnlxc,(2,npw_k*my_nspinor))
  if (gs_hamk%usepaw==1)  then
-   ABI_ALLOCATE(gsc,(2,npw_k*my_nspinor))
+   ABI_MALLOC(gsc,(2,npw_k*my_nspinor))
  else
-   ABI_ALLOCATE(gsc,(0,0))
+   ABI_MALLOC(gsc,(0,0))
  end if
 
 !Loop over (blocks of) bands
@@ -1045,6 +1010,11 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 &     prtvol,gs_hamk%usepaw,cpopt,cwaveprj,&
 &     already_transposed=.false.)
    end if
+
+   !call cg_get_eigens(usepaw, istwf_k, npwsp, nband, cg, ghc, gsc, eig, me_g0, comm_bsf)
+   !call cg_get_residvecs(usepaw, npwsp, nband, eig, cg, ghc, gsc, gwork)
+   !call cg_norm2g(istwf_k, npwsp, nband, gwork, resid, me_g0, comm_bsf)
+   ! MG: Communicators are wrongi if paral_kgb. One should use mpi_enreg%comm_bandspinorfft
 
 !  Compute the residual, <Cn|(H-<Cn|H|Cn>)**2|Cn>:
    do iblocksize=1,blocksize
@@ -1083,10 +1053,10 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 
  end do ! iblock
 
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(ghc)
- ABI_DEALLOCATE(gvnlxc)
- ABI_DEALLOCATE(gsc)
+ ABI_FREE(cwavef)
+ ABI_FREE(ghc)
+ ABI_FREE(gvnlxc)
+ ABI_FREE(gsc)
 
  call timab(13,2,tsec)
 

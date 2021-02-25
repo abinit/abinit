@@ -8,7 +8,7 @@
 !!  strings, numbers, dictionaries from m_pair_list and 1D arrays of dictionaries.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2021 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -87,8 +87,6 @@ module m_yaml
  contains
 
    procedure :: write_and_free => yamldoc_write_unit_and_free
-    !, yamldoc_write_units_and_free ! ifort13-16 does not generic interfaces
-    !
     ! Write Yaml document to unit and free memory.
 
    procedure :: write_units_and_free => yamldoc_write_units_and_free
@@ -108,9 +106,6 @@ module m_yaml
 
    procedure :: add_ints => yamldoc_add_ints
      ! Add a list of integers to a document
-
-   !procedure :: add_ints_and_reals => yamldoc_add_ints_and_reals
-     ! Add a list of integer and real value a document
 
    procedure :: add_string => yamldoc_add_string
      ! Add a string field to a document
@@ -143,7 +138,7 @@ module m_yaml
      ! Add a field containing a list of dictionaries/array of pair_list
 
    procedure :: set_keys_to_string => yamldoc_set_keys_to_string
-     ! Set all keys to a commong (string) value
+     ! Set all keys to a common (string) value
 
  end type yamldoc_t
 !!***
@@ -153,6 +148,9 @@ module m_yaml
 
  public :: yaml_single_dict
   ! Create a full document from a single dictionary
+
+ public :: yaml_write_dict
+  ! Write a dictionary in a Yaml document.
 
  public :: yaml_iterstart
   ! Set the value of the iteration indices used to build the iteration_state dict in the Yaml documents
@@ -226,7 +224,7 @@ subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
  case ("icycle")
    ICYCLE_IDX = val
  case default
-   MSG_ERROR(sjoin("Invalid value for label:", label))
+   ABI_ERROR(sjoin("Invalid value for label:", label))
  end select
 
  if (use_yaml == 1) then
@@ -255,6 +253,7 @@ end subroutine yaml_iterstart
 !!  [width]: optional, impose a minimum width of the field name side of the column (padding with spaces)
 !!  [int_fmt]: Default format for integers.
 !!  [real_fmt]: Default format for real.
+!!  [with_iter_state]: True if dict with iteration state should be added. Default: True
 !!
 !! PARENTS
 !!
@@ -262,7 +261,7 @@ end subroutine yaml_iterstart
 !!
 !! SOURCE
 
-type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_fmt) result(new)
+type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_fmt, with_iter_state) result(new)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: tag
@@ -270,9 +269,10 @@ type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_f
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
  character(len=*),optional,intent(in) :: int_fmt, real_fmt
+ logical,optional,intent(in) :: with_iter_state
 
 !Local variables-------------------------------
- logical :: nl
+ logical :: nl, with_iter_state_
  type(pair_list) :: dict
 ! *************************************************************************
 
@@ -284,7 +284,8 @@ type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_f
 
  call new%stream%push(ch10//'---'//' !'//trim(tag)//ch10)
 
- if (DTSET_IDX /= -1) then
+ with_iter_state_ = .True.; if (present(with_iter_state)) with_iter_state_ = with_iter_state
+ if (with_iter_state_ .and. DTSET_IDX /= -1) then
    ! Write dictionary with iteration state.
    call dict%set('dtset', i=DTSET_IDX)
    if (TIMIMAGE_IDX /= -1) call dict%set("timimage", i=TIMIMAGE_IDX)
@@ -326,7 +327,7 @@ end function yamldoc_open
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [comment]: optional Yaml comment added after the value
-!!  [ignore]= If present, ignore entrie if values is equal to ignore.
+!!  [ignore]= If present, ignore entry if value is equal to ignore.
 !!
 !! PARENTS
 !!
@@ -535,12 +536,12 @@ end subroutine yamldoc_add_int
 !!  Add a list of integer numbers to the document
 !!
 !! INPUTS
-!!  keylist = List of comma-separated keywords
-!!  values = List of values
+!!  keylist = List of comma-separated keywords e.g. "foo, bar"
+!!  values = List of integer values
 !!  [int_fmt] = override the default formatting
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [dict_key]=If present, a dictionary with key `dict_key` is created instead of a list.
-!!  [multiline_trig] = optional minimum number of elements before switching to multiline representation
+!!  [multiline_trig] = minimum number of elements before switching to multiline representation
 !!  [ignore]= If present, ignore entrie if values is equal to ignore.
 !!
 !! PARENTS
@@ -1474,6 +1475,48 @@ subroutine yaml_single_dict(unit, tag, comment, pl, key_size, string_size, &
 end subroutine yaml_single_dict
 !!***
 
+!!****f* m_yaml/yaml_write_dict
+!! NAME
+!! yaml_write_dict
+!!
+!! FUNCTION
+!!  Write a dictionary in a Yaml document.
+!!
+!! INPUTS
+!!  tag: Yaml tag
+!!  dict_name: Dictionary name
+!!  dict: Dictionary
+!!  unit: Unit numver
+!!  [with_iter_state]: True if dict with iteration state should be added. Default: False
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine yaml_write_dict(tag, dict_name, dict, unit, with_iter_state)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: tag, dict_name
+ type(pair_list),intent(inout) :: dict
+ integer,intent(in) :: unit
+ logical,optional,intent(in) :: with_iter_state
+
+!Local variables-------------------------------
+ type(yamldoc_t) :: ydoc
+ logical :: with_iter_state_
+! *************************************************************************
+
+ with_iter_state_ = .False.; if (present(with_iter_state)) with_iter_state_ = with_iter_state
+
+ ydoc = yamldoc_open(tag, with_iter_state=with_iter_state_)
+ call ydoc%add_dict(dict_name, dict)
+ call ydoc%write_and_free(unit)
+
+end subroutine yaml_write_dict
+!!***
+
 !!****f* m_yaml/yamldoc_write_unit_and_free
 !! NAME
 !! yamldoc_write_unit_and_free
@@ -1482,7 +1525,9 @@ end subroutine yaml_single_dict
 !!  Write Yaml document to unit and free memory.
 !!
 !! INPUTS
-!!  [newline]= set to false to prevent adding newlines after fields. Default: True
+!!  [newline]= set to False to prevent adding newlines after fields. Default: True
+!!  [firstchar]= Add first char to each line. Useful if the Yaml document must be added after shell comments
+!!    with firstchar="#".
 !!
 !! PARENTS
 !!
@@ -1491,12 +1536,13 @@ end subroutine yaml_single_dict
 !!
 !! SOURCE
 
-subroutine yamldoc_write_unit_and_free(self, unit, newline)
+subroutine yamldoc_write_unit_and_free(self, unit, newline, firstchar)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
  integer,intent(in) :: unit
  logical,intent(in),optional :: newline
+ character(len=*),optional,intent(in) :: firstchar
 
 !Local variables-------------------------------
  logical :: nl
@@ -1510,7 +1556,11 @@ subroutine yamldoc_write_unit_and_free(self, unit, newline)
  ! FIXME: In principle, we should not use is_open here but it seems that
  ! ab_out is not set to dev_null if parallelism over images.
  if (is_open(unit)) then
-   call self%stream%flush(unit, newline=nl)
+   if (present(firstchar)) then
+     call self%stream%flush(unit, newline=nl, firstchar=firstchar)
+   else
+     call self%stream%flush(unit, newline=nl)
+   end if
  else
    call self%stream%free()
  end if
@@ -1575,7 +1625,7 @@ end subroutine yamldoc_write_units_and_free
 !! yamldoc_set_keys_to_string
 !!
 !! FUNCTION
-!! Set all keys to a commong (string) value
+!! Set all keys to a common (string) value
 !!
 !! INPUTS
 !!  keylist = List of comma-separated keywords
@@ -1701,7 +1751,7 @@ subroutine forbid_reserved_label(label)
 
  do i=1,size(reserved_keywords)
    if (reserved_keywords(i) == label) then
-     MSG_ERROR(trim(label)//' is a reserved keyword and cannot be used as a YAML label.')
+     ABI_ERROR(trim(label)//' is a reserved keyword and cannot be used as a YAML label.')
    end if
  end do
 end subroutine forbid_reserved_label
@@ -1901,7 +1951,7 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
      write(tmp_s, sfmt) vs
      call yaml_print_string(stream, trim(tmp_s))
    case default
-     MSG_ERROR(sjoin("Invalid type_code:", itoa(type_code)))
+     ABI_ERROR(sjoin("Invalid type_code:", itoa(type_code)))
    end select
 
    if (i > 0 .and. mod(i, vmax) == 0 .and. i /= pl%length()) then

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -130,8 +130,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_energy(cryst_struc,energies_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(crystal_t),intent(in) :: cryst_struc
@@ -139,11 +137,11 @@ subroutine init_energy(cryst_struc,energies_dmft)
 !Local variables ------------------------------------
 !************************************************************************
 
- ABI_ALLOCATE(energies_dmft%e_dc,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu_dftu,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu_mig,(cryst_struc%natom))
- ABI_ALLOCATE(energies_dmft%e_hu_qmc,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_dc,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu_dftu,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu_mig,(cryst_struc%natom))
+ ABI_MALLOC(energies_dmft%e_hu_qmc,(cryst_struc%natom))
  energies_dmft%e_dc=zero
  energies_dmft%e_hu=zero
  energies_dmft%e_hu_dftu=zero
@@ -184,8 +182,6 @@ end subroutine init_energy
 
 subroutine destroy_energy(energies_dmft,paw_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(energy_type),intent(inout) :: energies_dmft
@@ -194,19 +190,19 @@ subroutine destroy_energy(energies_dmft,paw_dmft)
 ! *********************************************************************
   paw_dmft%edmft=energies_dmft%edmft
  if ( allocated(energies_dmft%e_dc) )   then
-   ABI_DEALLOCATE(energies_dmft%e_dc)
+   ABI_FREE(energies_dmft%e_dc)
  end if
  if ( allocated(energies_dmft%e_hu) )   then
-   ABI_DEALLOCATE(energies_dmft%e_hu)
+   ABI_FREE(energies_dmft%e_hu)
  end if
  if ( allocated(energies_dmft%e_hu_dftu) )  then
-   ABI_DEALLOCATE(energies_dmft%e_hu_dftu)
+   ABI_FREE(energies_dmft%e_hu_dftu)
  end if
  if ( allocated(energies_dmft%e_hu_mig) )  then
-   ABI_DEALLOCATE(energies_dmft%e_hu_mig)
+   ABI_FREE(energies_dmft%e_hu_mig)
  end if
   if ( allocated(energies_dmft%e_hu_qmc) )  then
-   ABI_DEALLOCATE(energies_dmft%e_hu_qmc)
+   ABI_FREE(energies_dmft%e_hu_qmc)
  end if
 
 
@@ -234,8 +230,6 @@ end subroutine destroy_energy
 !! SOURCE
 
 subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -321,8 +315,6 @@ end subroutine print_energy
 
 subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ_type,part)
 
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(energy_type),intent(inout) :: energies_dmft
@@ -359,7 +351,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 ! Only imaginary frequencies here
  if(green%w_type=="real".or.self%w_type=="real") then
    message = 'compute_energy not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
  natom=cryst_struc%natom
  nsppol=paw_dmft%nsppol
@@ -403,13 +395,13 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 
 ! == Compute Correlation energy from Migdal formula
 ! -----------------------------------------------------------------------
-   ABI_ALLOCATE(e_hu_migdal,(cryst_struc%natom))
+   ABI_MALLOC(e_hu_migdal,(cryst_struc%natom))
    e_hu_migdal(:) = zero
    call compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,pawprtvol,self)
    energies_dmft%e_hu_mig(:)= e_hu_migdal(:)
    energies_dmft%e_hu_mig_tot = e_hu_migdal_tot
 ! write(std_out,*) "MIGDAL",e_hu_migdal_tot,e_hu_migdal
-   ABI_DEALLOCATE(e_hu_migdal)
+   ABI_FREE(e_hu_migdal)
 
 ! == Compute Correlation energy from QMC correlations.
 ! -----------------------------------------------------------------------
@@ -433,7 +425,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
      if((abs(energies_dmft%e_hu_tot-energies_dmft%e_hu_mig_tot).ge.0.000001).and.(occ_type/=" lda")) then
        write(message,'(2a,2e18.8,a)') ch10,'   BUG: Migdal energy and DFT+U energy do not coincide',&
 &       energies_dmft%e_hu_tot,energies_dmft%e_hu_mig_tot,occ_type
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      endif
    else if(paw_dmft%dmft_solv==2.or.paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
      energies_dmft%e_hu= energies_dmft%e_hu_mig
@@ -495,8 +487,6 @@ end subroutine compute_energy
 !! SOURCE
 
 subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,fcalc_dft,ecalc_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -643,7 +633,6 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -667,7 +656,7 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 ! Only imaginary frequencies here
  if(green%w_type=="real".or.self%w_type=="real") then
    message = 'compute_migdal_energy not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
 ! == Compute Correlation energy from Migdal formula
@@ -679,7 +668,7 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
  nwlo=green%nw
  if (green%nw/=self%nw) then
    message = 'self and green do not contains the same number of frequencies'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 ! write(std_out,*) "beta",beta
 
@@ -787,8 +776,6 @@ end subroutine compute_migdal_energy
 
 subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,renorm)
 
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(energy_type),intent(inout) :: energies_dmft
@@ -833,9 +820,9 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
-     
-     ABI_ALLOCATE(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
-     ABI_ALLOCATE(nocctot,(nocc))
+
+     ABI_MALLOC(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
+     ABI_MALLOC(nocctot,(nocc))
      noccmmp(:,:,:,:)=zero ; nocctot(:)=zero
 
 ! - Setup nocctot and noccmmp
@@ -918,8 +905,8 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
      energies_dmft%e_dc(iatom)=e_dc-xe1
      energies_dmft%e_hu_dftu(iatom)=e_ee-xe2
 
-     ABI_DEALLOCATE(noccmmp)
-     ABI_DEALLOCATE(nocctot)
+     ABI_FREE(noccmmp)
+     ABI_FREE(nocctot)
    endif ! lpawu/=-1
  enddo
 
@@ -954,8 +941,6 @@ end subroutine compute_dftu_energy
 !! SOURCE
 
 subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1059,8 +1044,6 @@ end subroutine compute_noninterentropy
 !! SOURCE
 
  function occup_fd(eig,fermie,temp)
-
- implicit none
 
 !Arguments ------------------------------------
 !type

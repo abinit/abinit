@@ -12,7 +12,7 @@
 !!  stored in packed format  and B is also positive definite.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2020 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,15 +33,6 @@
 !! SOURCE
 !!
   subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpgv'
-
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: itype
@@ -77,9 +68,10 @@
  if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize)  then
 #if defined HAVE_LINALG_SCALAPACK
    z = zero
-   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_,10)
-   call init_matrix_scalapack(sca_b,n,n,slk_processor,istwf_k_,10)
-   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_,10)
+   ! MG: Tbloc is not used here
+   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_, tbloc=10)
+   call init_matrix_scalapack(sca_b,n,n,slk_processor,istwf_k_, tbloc=10)
+   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_, tbloc=10)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
    call matrix_from_global_sym(sca_b,b,istwf_k_)
@@ -93,8 +85,8 @@
    call matrix_to_global(sca_b,b,istwf_k_)
    call matrix_to_reference(sca_ev,z,istwf_k_)
    call xmpi_sum(z,slk_communicator,ierr)
-   call destruction_matrix_scalapack(sca_a)
-   call destruction_matrix_scalapack(sca_ev)
+   call sca_a%free()
+   call sca_ev%free()
 #endif
 
 !===== LAPACK
@@ -127,14 +119,6 @@ end subroutine abi_dhpgv
 !!
   subroutine abi_chpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpgv'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: itype
  character(len=1), intent(in) :: jobz
@@ -160,17 +144,17 @@ end subroutine abi_dhpgv
 
 !===== LAPACK
  if (eigen_c_lwork==0) then
-   ABI_ALLOCATE(work,(2*n-1))
+   ABI_MALLOC(work,(2*n-1))
  end if
  if (eigen_c_lrwork==0) then
-   ABI_ALLOCATE(rwork,(3*n-2))
+   ABI_MALLOC(rwork,(3*n-2))
  end if
  call chpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
  if (eigen_c_lwork==0) then
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
  if (eigen_c_lrwork==0) then
-   ABI_DEALLOCATE(rwork)
+   ABI_FREE(rwork)
  end if
 
  ABI_CHECK(info==0,"abi_chpgv returned info!=0!")
@@ -193,14 +177,6 @@ end subroutine abi_chpgv
 !! SOURCE
 
 subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpgv'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: itype
@@ -227,17 +203,17 @@ subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
 
 !===== LAPACK
  if (eigen_z_lwork==0) then
-   ABI_ALLOCATE(work,(2*n-1))
+   ABI_MALLOC(work,(2*n-1))
  end if
  if (eigen_z_lrwork==0) then
-   ABI_ALLOCATE(rwork,(3*n-2))
+   ABI_MALLOC(rwork,(3*n-2))
  end if
  call zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
  if (eigen_z_lwork==0) then
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
  if (eigen_z_lrwork==0) then
-   ABI_DEALLOCATE(rwork)
+   ABI_FREE(rwork)
  end if
 
  ABI_CHECK(info==0,"abi_zhpgv returned info!=0!")

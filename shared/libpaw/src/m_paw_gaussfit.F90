@@ -6,7 +6,7 @@
 !!  Module to fit PAW related data to sums of gaussians
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2020 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2021 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -673,7 +673,7 @@ end subroutine gaussfit_main
  if(jproc==-1) then
 !  One should not get here!
    msg = 'error in accomodate_mpi'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !assign this term for jproc
@@ -1504,7 +1504,7 @@ end subroutine gaussfit_calc_deriv_c4
 !!  Uses the Levenberg-Marquardt algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2020 ABINIT group (T. Rangel)
+!!  Copyright (C) 2011-2021 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1686,7 +1686,7 @@ end subroutine gaussfit_rlsf
 !!  Finds chisq, alpha and beta parameters for LSF using the Levenberg-Marquardt algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2020 ABINIT group (T. Rangel)
+!!  Copyright (C) 2011-2021 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2279,7 +2279,7 @@ subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbita
 
  if(size(tproj,2)<basis_size) then
    msg = 'wrong size for tproj in gaussfit_projector!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  option=4  !see gaussfit_main
@@ -2347,7 +2347,7 @@ subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbita
      write(msg,'(a,a,a,a)')ch10,&
 &     "ib (basis index) is too big!",ch10,&
 &     "Action: check your pseudopotentials"
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
    if(present(comm_mpi)) then
