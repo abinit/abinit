@@ -441,7 +441,7 @@ elec_eval = .FALSE.
                            & 'fit_ncoeff_per_iatom = ', inp%fit_ncoeff_per_iatom,ch10,& 
                            & 'is not a divider of fit_ncoeff = ', inp%fit_ncoeff,ch10,&
                            & 'Action: Change fit_ncoeff and/or fit_ncoeff_per_iatom',ch10   
-                      MSG_ERROR(message)
+                      ABI_ERROR(message)
                    endif
                    niter = inp%fit_ncoeff/inp%fit_ncoeff_per_iatom 
                    if (mod(niter,reference_effective_potential%crystal%nirredat) /= 0)then 
@@ -450,7 +450,7 @@ elec_eval = .FALSE.
                            & 'times the number of irreducible atoms = ',reference_effective_potential%crystal%nirredat,ch10,&
                            & 'is not a divider of fit_ncoeff = ', inp%fit_ncoeff,ch10,&
                            & 'Action: Change fit_ncoeff and/or fit_ncoeff_per_iatom',ch10   
-                      MSG_ERROR(message)
+                      ABI_ERROR(message)
                    endif
                    niter = niter/reference_effective_potential%crystal%nirredat
                 else if (inp%fit_ncoeff_per_iatom == 0)then      
@@ -459,7 +459,7 @@ elec_eval = .FALSE.
                            & 'The number of irreducible atoms = ',reference_effective_potential%crystal%nirredat,ch10,&
                            & 'is not a divider of fit_ncoeff = ', inp%fit_ncoeff,ch10,&
                            & 'Action: Change fit_ncoeff',ch10   
-                      MSG_ERROR(message)
+                      ABI_ERROR(message)
                    endif
                    inp%fit_ncoeff_per_iatom = inp%fit_ncoeff/reference_effective_potential%crystal%nirredat
                    niter = 1

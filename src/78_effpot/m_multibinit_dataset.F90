@@ -703,7 +703,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    write(message, '(a,i8,a,a,a)' )&
 &   'bound_EFS is',multibinit_dtset%bound_EFS,', but the only allowed values are 0 and 1',ch10,&
 &   'Action: correct bound_EFS in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  multibinit_dtset%bound_factors=(/1,1,1/)
@@ -713,7 +713,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    write(message, '(a,i8,a,a,a)' )&
 &   'bound_factors is',multibinit_dtset%bound_factors,', but the only allowed values are positive',ch10,&
 &   'Action: correct bound_factors in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -875,7 +875,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'fit_ncoeff_per_iatom is',multibinit_dtset%fit_ncoeff_per_iatom,', but the only allowed values',ch10,&
 &   'are positives for multibinit.',ch10,&
 &   'Action: correct fit_ncoeff_per_iatom in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  multibinit_dtset%fit_nbancoeff=0
@@ -921,7 +921,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    write(message, '(a,i8,a,a,a)' )&
 &   'fit_factors is',multibinit_dtset%fit_factors,', but the only allowed values are positive',ch10,&
 &   'Action: correct fit_factors in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  
  multibinit_dtset%sel_EFS=(/0,1,1/)
@@ -999,7 +999,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    write(message, '(a,i0,a,a,a)' )&
 &   'hmctt is',multibinit_dtset%hmctt,', but only positive values are allowed .',ch10,&
 &   'Action: correct hmctt in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  multibinit_dtset%hmcsst=0 ! or -1 -> max number of ifc
@@ -1009,7 +1009,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    write(message, '(a,i0,a,a,a)' )&
 &   'hmcsst is',multibinit_dtset%hmcsst,', but only positive values are allowed .',ch10,&
 &   'Action: correct hmcsst in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -1266,7 +1266,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    write(message, '(a,i8,a,a,a)' )&
 &   'opt_EFS is',multibinit_dtset%opt_EFS,', but the only allowed values are 0 and 1',ch10,&
 &   'Action: correct opt_EFS in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif 
 
  multibinit_dtset%opt_factors=(/1,1,1/)
@@ -1276,7 +1276,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    write(message, '(a,i8,a,a,a)' )&
 &   'opt_factors is',multibinit_dtset%opt_factors,', but the only allowed values are positive',ch10,&
 &   'Action: correct opt_factors in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
    !P
@@ -1337,7 +1337,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &     'prt_GF_csv is',intarr(1),'. The only allowed values',ch10,&
 &     'are 0 (no output) or 1 (print GF values per processor into csv files)',ch10,  &
 &     'Action: correct prt_GF_csv in your input file.'
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
  endif 
 
@@ -1794,7 +1794,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'strprecon is ',multibinit_dtset%strprecon,'. The only allowed values',ch10,&
 &   'are positives values smaller or equal than 1.',ch10,&
 &   'Action: correct strprecon in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !T
@@ -2258,7 +2258,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'fit_tolGF is',multibinit_dtset%fit_tolGF,', but the only allowed values',ch10,&
 &   'are positives for multibinit.',ch10,&
 &   'Action: correct fit_tolGF in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !G

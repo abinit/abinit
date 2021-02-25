@@ -639,7 +639,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    call wrtout(std_out,message,'COLL')
  end if
 
- ABI_ALLOCATE(gf_values_iter,(4,ncycle+1))
+ ABI_MALLOC(gf_values_iter,(4,ncycle+1))
  gf_values_iter(:,:) = zero 
  !Store initial gf_values as first value in gf_values_iter 
  gf_values_iter(:,1) = gf_values(:,1)
@@ -700,7 +700,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
         unit_GF_val = get_unit()
         if (open_file(filename,message,unit=unit_GF_val,form="formatted",&
 &          status="unknown",action="write") /= 0) then
-           MSG_ERROR(message)
+           ABI_ERROR(message)
         end if
      end if
 !    Reset gf_values
@@ -1227,7 +1227,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  end do
 
  ABI_FREE(my_coeffs)
- ABI_DEALLOCATE(gf_values_iter)
+ ABI_FREE(gf_values_iter)
  ABI_FREE(buffsize)
  ABI_FREE(buffdisp)
  ABI_FREE(buffGF)
