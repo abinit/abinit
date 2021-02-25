@@ -40,6 +40,10 @@ GW calculations can be made less memory and CPU time consuming,
 at the expense of numerical precision,
 by compiling ABINIT with the option enable_gw_dpc=“no" in the *.ac9 file.
 
+The GW 1-body reduced density matrix (1RDM) from the linearized Dyson equation
+can be computed, and when used self-consistently with the Galitskii-Migdal correlation, provides an approximation 
+the self-consistent GW total energy.
+
 ## Related Input Variables
 
 {{ related_variables }}

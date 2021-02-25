@@ -1,14 +1,13 @@
 ## v9.4
 
-Version 9.4, released on February 14, 2021.
+Version 9.4, released on February 25, 2021.
 List of changes with respect to version 9.2.
-<!-- Release notes updated on November 10, 2021. -->
+<!-- Release notes updated on February 25, 2021. -->
 
 Many thanks to the contributors to the ABINIT project between
-November 2020 and January 2021. These release notes
+November 2020 and February 2021. These release notes
 are relative to modifications/improvements of ABINIT v9.4 with respect to v9.2.
-<!-- Merge requests up to and including MR763 are taken into account -->
-<!-- Merge requests up to and including MR692 are taken into account, also MR 697-702, 705, 707-710, 712, 715. -->
+<!-- Merge requests up to and including MR766 are taken into account also MR768 (backported), MR769 and MR770. -->
 
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, V. Brousseau, F. Bruneval,
@@ -91,7 +90,7 @@ M. Torrent, M. Verstraete, He Xu, J. Zwanziger (numerous MRs)
 Its effect on the Hartree-Fock expectation values and therefore on the GW quasiparticle energies can be evaluated.
 The resulting total energy parts, kinetic energy (including correlation), electron-nucleus, Hartree, Exchange, can be calculated.
 Together with the Galitskii-Migdal correlation, it gives a new approximation the self-consistent GW total energy.
-See input variables gw1rdm, x1rdm, also irdchkprdm, prtchkprdm and gwgmcorr.
+See input variables [[gw1rdm]], [[x1rdm]], also [[irdchkprdm]], [[prtchkprdm]] and [[gwgmcorr]].
 See tests [[test:v9_33]] to [[test:v9_36]].
 
 Also, some missing tests have been added:
@@ -101,14 +100,13 @@ $\chi_0$ with [[inclvkb]].
 
 By Mauricio Rodriguez-Mayorga and F. Bruneval (MR722).
 
-**B.5** The pSIC (polaron self-interaction corrected methodology) has been implemented.
-See [[cite:Sadigh2015]] and [[cite:Sadigh2015a]]. This is based on the `images` capabilities
-of ABINIT, where the capability to have different values of the input variable [[cellcharge]]
-for different images has been implemented, to be used with [[imgmov]]=6.
-AT PRESENT: PROBLEM with the parallel implementation (npimage larger than 1).
+**B.5** The pSIC (polaron self-interaction corrected) methodology has been implemented.
+See [[cite:Sadigh2015]] and [[cite:Sadigh2015a]]. This is based on the `images` capability
+of ABINIT, that has been extended to different values of the input variable [[cellcharge]]
+for different images, and also parallelized. To activate pSIC, use [[imgmov]]=6 with the proper occupation numbers.
 See the test example [[test:v9_22]].
 
-By X. Gonze (initial test from C. Tantardini).
+By X. Gonze (initial test from C. Tantardini) (MR770).
 
 **B.6** The computation of the electric conductivity has been implemented for metals
 in the relaxation-time approximation with transport lifetimes computed from the imaginary part of the Fan-Migdal self-energy

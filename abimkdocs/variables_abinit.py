@@ -22145,7 +22145,7 @@ Variable(
     abivarname="rmm_diis",
     varset="gstate",
     vartype="integer",
-    topics=['TuningSpeedMem_useful'],
+    topics=['TuningSpeedMem_useful','SCFAlgorithms_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Activate the RMM-DIIS eigensolver for GS calculations.",
