@@ -136,6 +136,7 @@ module m_multibinit_dataset
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
+  logical :: prt_GF_csv
 
   ! parameters for spin
  ! integer :: spin_calc_traj_obs
@@ -173,6 +174,7 @@ module m_multibinit_dataset
   real(dp) :: fit_tolMSDE
   real(dp) :: fit_tolMSDFS
   real(dp) :: fit_tolGF
+  real(dp) :: strprecon
   real(dp) :: strfact
   real(dp) :: temperature
   real(dp) :: rifcsph
@@ -402,12 +404,14 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%prt_model=0
  multibinit_dtset%prt_phfrq=0
  multibinit_dtset%prt_ifc = 0
+ multibinit_dtset%prt_GF_csv = .FALSE.
  multibinit_dtset%strcpling = -1
  multibinit_dtset%qrefine=1
  multibinit_dtset%restartxf=0
  multibinit_dtset%rfmeth=1
  multibinit_dtset%rifcsph=zero
  multibinit_dtset%strfact=100.0d0
+ multibinit_dtset%strprecon=1.0d0
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
  multibinit_dtset%test_effpot=0 
@@ -940,7 +944,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(multibinit_dtset%ts_option<0.or.multibinit_dtset%ts_option>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'ts_option is',multibinit_dtset%ts_option,', but the only allowed values',ch10,&
-&   'are positives for multibinit.',ch10,&
+&   'are zero and one for multibinit.',ch10,&
 &   'Action: correct ts_option in your input file.'
    MSG_ERROR(message)
  end if
@@ -1141,9 +1145,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ncell',tread,'INT')
  if(tread==1) multibinit_dtset%ncell(1:3)=intarr(1:3)
  do ii=1,3
-   if(multibinit_dtset%ncell(ii)<0.or.multibinit_dtset%ncell(ii)>100)then
+   if(multibinit_dtset%ncell(ii)<0.or.multibinit_dtset%ncell(ii)>150)then
      write(message, '(a,i0,a,i0,3a,i0,a)' )&
-&     'ncell(',ii,') is ',multibinit_dtset%ncell(ii),', which is lower than 0 of superior than 50.',&
+&     'ncell(',ii,') is ',multibinit_dtset%ncell(ii),', which is lower than 0 of superior than 150.',&
 &     ch10,'Action: correct ncell(',ii,') in your input file.'
      MSG_ERROR(message)
    end if
@@ -1219,10 +1223,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%optcell=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
  if(tread==1) multibinit_dtset%optcell=intarr(1)
- if(multibinit_dtset%optcell<0.or.multibinit_dtset%optcell>10)then
+ if(multibinit_dtset%optcell<0.or.multibinit_dtset%optcell>9)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'optcell is',multibinit_dtset%optcell,', but the only allowed values',ch10,&
-&   'are 0, 1, 2, 3, 4, 5, 6 ,7, 8 and 9.',ch10,&
+&   'are 0, 1, 2, 3, 4, 5, 6 , 7, 8, 9.',ch10,&
 &   'Action: correct optcell in your input file.'
    MSG_ERROR(message)
  end if
@@ -1321,6 +1325,21 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct fit_generateCoeff in your input file.'
    MSG_ERROR(message)
  end if
+
+!Default is no output of GF values per processor to csv file 
+ multibinit_dtset%prt_GF_csv = .FALSE.
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_GF_csv',tread,'INT')
+ if(tread==1)then 
+    if(intarr(1) == 1) multibinit_dtset%prt_GF_csv = .TRUE.
+    if(intarr(1) == 0) multibinit_dtset%prt_GF_csv = .FALSE.
+    if(intarr(1) < 0 .or. intarr(1) > 1) then
+      write(message, '(a,i0,a,a,a,a,a)' )&
+&     'prt_GF_csv is',intarr(1),'. The only allowed values',ch10,&
+&     'are 0 (no output) or 1 (print GF values per processor into csv files)',ch10,  &
+&     'Action: correct prt_GF_csv in your input file.'
+      MSG_ERROR(message)
+    end if
+ endif 
 
 !Default is no output of the real space IFC to file
  multibinit_dtset%prt_ifc = 0
@@ -1764,6 +1783,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'strfact is ',multibinit_dtset%strfact,'. The only allowed values',ch10,&
 &   'are positives values.',ch10,&
 &   'Action: correct strfact in your input file.'
+   MSG_ERROR(message)
+ end if
+ 
+ multibinit_dtset%strprecon=1.0d0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strprecon',tread,'DPR')
+ if(tread==1) multibinit_dtset%strprecon=dprarr(1)
+ if(multibinit_dtset%strprecon<tol8 .or. multibinit_dtset%strprecon >1.0d0)then
+   write(message, '(a,f10.1,a,a,a,a,a)' )&
+&   'strprecon is ',multibinit_dtset%strprecon,'. The only allowed values',ch10,&
+&   'are positives values smaller or equal than 1.',ch10,&
+&   'Action: correct strprecon in your input file.'
    MSG_ERROR(message)
  end if
 

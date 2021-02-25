@@ -401,7 +401,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,comm,p
  type(polynomial_coeff_type),allocatable :: singledisp_terms(:),HOsingledisp_terms(:)
  type(polynomial_coeff_type),allocatable :: HOcrossdisp_terms(:)
 !Logicals
- logical :: need_print_anh=.FALSE. ! MARCUS FOR THE MOMENT PRINT NO FILES
+ logical :: need_print_anh ! MARCUS FOR THE MOMENT PRINT NO FILES
  logical :: to_skip,iam_master
 !Strings
  character(len=5),allocatable :: symbols(:)
@@ -424,6 +424,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,comm,p
   natom_sc = size(hist%xred,2)
   factor   = 1._dp/natom_sc
   nterm =eff_pot%anharmonics_terms%ncoeff
+  need_print_anh=.FALSE.
   if(present(print_anh)) need_print_anh = print_anh
   ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
   ABI_ALLOCATE(terms,(nterm))

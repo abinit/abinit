@@ -146,6 +146,23 @@ sampling (Warning: not BCC lattice, BCC *sampling*), and 4 for FCC sampling
 ),
 
 Variable(
+    abivarname="prt_GF_csv@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['LatticeModel_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Effective potential XML output",
+    added_in_version="v9",
+    text=r"""
+* 0 --> do nothing (Default)
+* 1 --> Print the Goal-Function Values (GF) for all coefficients on a given processor 
+        at a given fit iteration into a csv file. Each iteration each processor 
+        prints a csv file. The colums are the GF on Energy, Force+Stresses, Forces, Stresses.
+""",
+),
+
+Variable(
     abivarname="prt_model@multibinit",
     varset="multibinit",
     vartype="integer",
