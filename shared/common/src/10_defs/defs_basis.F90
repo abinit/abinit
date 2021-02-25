@@ -221,7 +221,7 @@ module defs_basis
  real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
  real(dp), parameter :: Ang_Bohr = one / Bohr_Ang  ! 1 Angstrom in Bohr
  real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
- !real(dp), parameter :: Bohr_cm=Bohr_meter * 100_dp ! 1 Bohr in cm
+ real(dp), parameter :: Bohr_cm=Bohr_meter * 100_dp ! 1 Bohr in cm
  real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree in cm^-1
  real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree in eV
  real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree

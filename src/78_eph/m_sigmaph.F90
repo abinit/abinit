@@ -289,7 +289,7 @@ module m_sigmaph
   integer,allocatable :: bstart_ks(:,:)
    ! bstart_ks(nkcalc, nsppol)
    ! Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
-   ! Depends on spin because all denerate states should be included when symmetries are used.
+   ! Depends on spin because all degenerate states should be included when symmetries are used.
 
   integer,allocatable :: bstop_ks(:,:)
    ! bstop_ks(nkcalc, nsppol)
@@ -297,7 +297,7 @@ module m_sigmaph
   integer,allocatable :: nbcalc_ks(:,:)
    ! nbcalc_ks(nkcalc, nsppol)
    ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
-   ! Depends on spin because all denerate states should be included when symmetries are used.
+   ! Depends on spin because all degenerate states should be included when symmetries are used.
 
   integer,allocatable :: kcalc2ibz(:,:)
    !kcalc2ibz(nkcalc, 6))

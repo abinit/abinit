@@ -6454,12 +6454,14 @@ end subroutine klinterp_eval_bsd
 !! ebands_get_carriers
 !!
 !! FUNCTION
-!!  Compute number of holes (nh) and electrons (ne) per unit cell summed over spins from a given list of `ntemp`
+!!  Compute number of electrons (e) and holes (h) per unit cell from a given list of `ntemp`
 !!  temperatures `kTmesh` and chemical potentials `mu_e`.
+!!  Return n_ehst(2, nsppol, ntemp) where the first dimension if for electrons/holes.
+!!  If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.
 !!
 !! SOURCE
 
-subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
+subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, n_ehst)
 
 !Arguments ------------------------------------
 !scalars
@@ -6467,7 +6469,7 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
  integer,intent(in) :: ntemp
 !arrays
  real(dp),intent(in) :: kTmesh(ntemp), mu_e(ntemp)
- real(dp),intent(out) :: nh(ntemp), ne(ntemp)
+ real(dp),intent(out) :: n_ehst(2, self%nsppol, ntemp)
 
 !Local variables-------------------------------
  integer :: spin, ik_ibz, ib, itemp
@@ -6476,7 +6478,7 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
 ! *********************************************************************
 
  max_occ = two / (self%nspinor * self%nsppol)
- ne = zero; nh = zero
+ n_ehst = zero
 
  do spin=1,self%nsppol
    do ik_ibz=1,self%nkpt
@@ -6486,9 +6488,11 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
 
        do itemp=1,ntemp
          if (eig_nk >= mu_e(itemp)) then
-           ne(itemp) = ne(itemp) + wtk * occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp)) * max_occ
+           n_ehst(1, spin, itemp) = n_ehst(1, spin, itemp) + &
+                                    wtk * occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp)) * max_occ
          else
-           nh(itemp) = nh(itemp) + wtk * (one - occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp))) * max_occ
+           n_ehst(2, spin, itemp) = n_ehst(2, spin, itemp) + &
+                                    wtk * (one - occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp))) * max_occ
          end if
        end do
 
