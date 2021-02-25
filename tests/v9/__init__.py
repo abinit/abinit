@@ -35,6 +35,12 @@ inp_files = [
 "t20.abi", # test treatment of inaccurate POSCAR file
 "t21.abi", # test treatment of inaccurate POSCAR file
 "t22.abi", # test different cellcharge for different images, algo pSIC
+"t23.abi", # test treatment of inaccurate POSCAR file
+"t24.abi", # test treatment of inaccurate POSCAR file
+"t25.abi", # test treatment of inaccurate POSCAR file
+"t26.abi", # test treatment of inaccurate POSCAR file
+"t27.abi", # test treatment of inaccurate POSCAR file
+"t28.abi", # test treatment of inaccurate POSCAR file
 "t29.abi", # RMM-DIIS eigsolver for NC.
 "t30.abi", # RMM-DIIS eigsolver for PAW.
 # GW/BSE
