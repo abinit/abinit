@@ -11087,10 +11087,13 @@ to define the images:
   * [[acell]]
   * [[amu]]
   * [[angdeg]]
+  * [[cellcharge]]
   * [[dmatpawu]]
   * [[jpawu]]
   * [[mixalch]]
+  * [[occ]]
   * [[rprim]]
+  * [[scalecart]]
   * [[upawu]]
   * [[vel]]
   * [[vel_cell]]
@@ -12692,6 +12695,8 @@ k-points spin down.
 The total number of array elements which must be provided is
 ( [[nband]](1)+[[nband]](2)+...+ [[nband]]([[nkpt]]) ) * [[nsppol]].
 The occupation numbers evolve only for metallic occupations, that is, [[occopt]] ≥ 3.
+
+When there are several images, [[occ]] might depend on the image number, see the description in [[nimage]].
 """,
 ),
 

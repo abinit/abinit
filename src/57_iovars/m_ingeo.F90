@@ -1123,6 +1123,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  vel_cell(:,:)=zero
  call intagm(dprarr,intarr,jdtset,marr,3*3,string(1:lenstr),'vel_cell',tread,'DPR')
  if(tread==1)vel_cell(:,:)=reshape( dprarr(1:9), [3,3])
+ call intagm_img(vel_cell,iimage,jdtset,lenstr,nimage,3,3,string,"vel_cell",tread,'DPR')
 
  ! mixalch
  if(ntypalch>0)then
