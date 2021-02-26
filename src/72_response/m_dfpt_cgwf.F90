@@ -7,7 +7,7 @@
 !! Uses a conjugate-gradient algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (XG,DRH,XW,FJ,MT,LB)
+!!  Copyright (C) 1999-2021 ABINIT group (XG,DRH,XW,FJ,MT,LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -285,25 +285,25 @@ print *, 'bands_skipped_now ', bands_skipped_now
  kinpw1 => gs_hamkq%kinpw_kp
 
  ! Memory allocations
- ABI_ALLOCATE(gh1c,(2,npw1*nspinor))
- ABI_ALLOCATE(pcon,(npw1))
- ABI_ALLOCATE(scprod,(2,nband_me))
+ ABI_MALLOC(gh1c,(2,npw1*nspinor))
+ ABI_MALLOC(pcon,(npw1))
+ ABI_MALLOC(scprod,(2,nband_me))
 
  if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. berryopt==14.or.berryopt==16.or.berryopt==17) then
-   ABI_ALLOCATE(gberry,(2,npw1*nspinor))
+   ABI_MALLOC(gberry,(2,npw1*nspinor))
    gberry(:,1:npw1*nspinor)=grad_berry(:,1:npw1*nspinor,band)
 #ifdef DEV_MJV
 print *, 'gberry 294 ', gberry(:,1:10)
 #endif
  else
-   ABI_ALLOCATE(gberry,(0,0))
+   ABI_MALLOC(gberry,(0,0))
  end if
 
 !TODO MJV: this should probably be adjusted as well for natom+10/11 perts: set to band_me instead of band
  dc_shift_band=(band-1)*npw1*nspinor
 
 ! this is used many times - no use de and re allocating
- ABI_ALLOCATE(work,(2,npw1*nspinor))
+ ABI_MALLOC(work,(2,npw1*nspinor))
 
 #ifdef DEV_MJV
 print *, 'bands_treated_now 308 ', bands_treated_now
@@ -314,7 +314,7 @@ print *, 'bands_skipped_now 308 ', bands_skipped_now
    write(msg,'(a)') " ** cgwf3 : debugging mode, tests will be done"
    ! Search CGWF3_WARNING in the log file to find errors (if any)
    call wrtout(std_out,msg)
-   ABI_ALLOCATE(work1,(2,npw1*nspinor))
+   ABI_MALLOC(work1,(2,npw1*nspinor))
    !  ===== Check <Psi_k+q^(0)|S(0)|Psi_k+q^(0)>=delta_{ij}
    if (.not.gen_eigenpb) work1(:,:)=cgq(:,1+npw1*nspinor*(band_me-1)+icgq:npw1*nspinor*band_me+icgq)
    if (     gen_eigenpb) work1(:,:)=gscq(:,1+npw1*nspinor*(band_me-1)+igscq:npw1*nspinor*band_me+igscq)
@@ -466,7 +466,7 @@ print *, 'bands_skipped_now 308 ', bands_skipped_now
        end if
      end do
    end if
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
  end if
 !ENDDEBUG!! Several checking statements
 
@@ -482,14 +482,14 @@ print *, 'bands_skipped_now 308 ', bands_skipped_now
    ! Compute H(1) applied to GS wavefunction Psi(0)
    if (gen_eigenpb) then
      sij_opt=1
-     ABI_ALLOCATE(gs1c,(2,npw1*nspinor))
+     ABI_MALLOC(gs1c,(2,npw1*nspinor))
    else
-     ABI_ALLOCATE(gs1c,(0,0))
+     ABI_MALLOC(gs1c,(0,0))
      sij_opt=0
    end if
    usevnl=1; optlocal=1; optnl=2
    if (prtvol==-level.or.prtvol==-19) then
-     ABI_ALLOCATE(gvnlx1_saved,(2,npw1*nspinor))
+     ABI_MALLOC(gvnlx1_saved,(2,npw1*nspinor))
      gvnlx1_saved(:,:) = gvnlx1(:,:)
    end if
    call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,&
@@ -537,7 +537,7 @@ print *, 'dcwavef 490 ', dcwavef(:,1:10)
 
  if (prtvol==-level.and.usedcwavef==2) then
    !Check that Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1) is zero ! This is a consequence of P_c delta_Psi^(1) = 0
-   ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
+   ABI_MALLOC(cwwork,(2,npw1*nspinor))
    do iband = 1, nband
      if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
      if (iband == band) then
@@ -545,12 +545,12 @@ print *, 'dcwavef 490 ', dcwavef(:,1:10)
        !  - Apply H^(0)-E.S^(0) to delta_Psi^(1)
        sij_opt=0;if (gen_eigenpb) sij_opt=-1
        cpopt=-1
-       ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
-       ABI_ALLOCATE(work2,(2,npw1*nspinor))
+       ABI_MALLOC(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
+       ABI_MALLOC(work2,(2,npw1*nspinor))
        call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,mpi_enreg,&
          1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
-       ABI_DEALLOCATE(work1)
-       ABI_DEALLOCATE(work2)
+       ABI_FREE(work1)
+       ABI_FREE(work2)
      end if
      call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
      cwwork=work
@@ -572,7 +572,7 @@ print *, 'dcwavef 490 ', dcwavef(:,1:10)
        call wrtout(std_out,msg)
      end if
    end do
-   ABI_DEALLOCATE(cwwork)
+   ABI_FREE(cwwork)
  end if ! prtvol==-level.and.usedcwavef==2
 
  call cg_zcopy(npw1*nspinor,gh1c,gh1c_n)
@@ -681,7 +681,7 @@ print *, 'me ', me_band, ' eig1_k_loc 672 line for iband ', iband, eig1_k_loc(:,
    end if ! PAW and generalized eigenproblem
 
    ! No more need of gs1c
-   ABI_DEALLOCATE(gs1c)
+   ABI_FREE(gs1c)
 
    ! reduce over band procs to fill in the matrix for all jband (distributed over procs)
    ! must only do this once for eig1_k_loc: now have all jband for current ibands on all procs
@@ -792,15 +792,15 @@ print *, 'skipping for buffer band'
 
  ! If not a buffer band, perform the optimisation
 
- ABI_ALLOCATE(conjgr,(2,npw1*nspinor))
- ABI_ALLOCATE(direc,(2,npw1*nspinor))
- ABI_ALLOCATE(gresid,(2,npw1*nspinor))
- ABI_ALLOCATE(cwaveq,(2,npw1*nspinor))
+ ABI_MALLOC(conjgr,(2,npw1*nspinor))
+ ABI_MALLOC(direc,(2,npw1*nspinor))
+ ABI_MALLOC(gresid,(2,npw1*nspinor))
+ ABI_MALLOC(cwaveq,(2,npw1*nspinor))
  if (usepaw==1) then
-   ABI_DATATYPE_ALLOCATE(conjgrprj,(natom,nspinor))
+   ABI_MALLOC(conjgrprj,(natom,nspinor))
    call pawcprj_alloc(conjgrprj,0,gs_hamkq%dimcprj)
  else
-   ABI_DATATYPE_ALLOCATE(conjgrprj,(0,0))
+   ABI_MALLOC(conjgrprj,(0,0))
  end if
 
  cwaveq(:,:)=cgq(:,1+npw1*nspinor*(band_me-1)+icgq:npw1*nspinor*band_me+icgq)
@@ -1118,12 +1118,12 @@ print *, 'skipping for resid'
 print *, 'gresid 781 ', gresid(1:2,1:5)
 #endif
    if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) call wrtout(std_out,' CGWF3_WARNING : dedt>0')
-   ABI_ALLOCATE(gvnlx_direc,(2,npw1*nspinor))
-   ABI_ALLOCATE(gh_direc,(2,npw1*nspinor))
+   ABI_MALLOC(gvnlx_direc,(2,npw1*nspinor))
+   ABI_MALLOC(gh_direc,(2,npw1*nspinor))
    if (gen_eigenpb)  then
-     ABI_ALLOCATE(sconjgr,(2,npw1*nspinor))
+     ABI_MALLOC(sconjgr,(2,npw1*nspinor))
    else
-     ABI_ALLOCATE(sconjgr,(0,0))
+     ABI_MALLOC(sconjgr,(0,0))
    end if
    sij_opt=0;if (gen_eigenpb) sij_opt=1
    cpopt=-1+usepaw
@@ -1244,9 +1244,10 @@ print *, ' cwavef 1174 ', cwavef(:,1:5)
      end if
    end if
 
-   ABI_DEALLOCATE(gh_direc)
-   ABI_DEALLOCATE(gvnlx_direc)
-   ABI_DEALLOCATE(sconjgr)
+<<<<<<< HEAD
+   ABI_FREE(gh_direc)
+   ABI_FREE(gvnlx_direc)
+   ABI_FREE(sconjgr)
 
    ! ======================================================================
    ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
@@ -1311,7 +1312,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
  ! Check that final cwavef (Psi^(1)) satisfies the orthogonality condition
  if (prtvol==-level.or.prtvol==-19) then
    sij_opt=0 ; usevnl=1 ; optlocal=1 ; optnl=2 ; if (gen_eigenpb)  sij_opt=1
-   ABI_ALLOCATE(work2,(2,npw1*nspinor*sij_opt))
+   ABI_MALLOC(work2,(2,npw1*nspinor*sij_opt))
    iband_me = 0
    do iband=1,nband
      if (bands_treated_now(iband) == 0) cycle
@@ -1361,16 +1362,16 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
        call wrtout(std_out,msg)
      end if
    end do
-   ABI_DEALLOCATE(work1)
-   ABI_DEALLOCATE(work2)
+   ABI_FREE(work1)
+   ABI_FREE(work2)
    if (ipert/=natom+10.and.ipert/=natom+11) then
-     ABI_DEALLOCATE(gvnlx1_saved)
+     ABI_FREE(gvnlx1_saved)
    end if
  end if ! prtvol==-level.or.prtvol==-19
 
  if (prtvol==-level.or.prtvol==-19)then
    !  Check that final cwavef Psi^(1) is Pc.Psi^(1)+delta_Psi^(1)
-   ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
+   ABI_MALLOC(cwwork,(2,npw1*nspinor))
    ! -Apply Pc to Psi^(1)
    do iband = 1, nband
      if (bands_treated_now(iband) == 0) cycle
@@ -1402,7 +1403,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
    ! -Compare to Psi^(1)
    cwwork=cwwork-cwavef
    call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
-   ABI_DEALLOCATE(cwwork)
+   ABI_FREE(cwwork)
    if(sqrt(dotr)>tol10) then
 !       if (gen_eigenpb) then
 !         write(msg,'(a,i3,a,es22.15)') &
@@ -1416,7 +1417,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
 
  if(prtvol==-level.or.prtvol==-19.or.prtvol==-20)then
    ! Check that final cwavef (Psi^(1)) solves the Sternheimer equation
-   ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
+   ABI_MALLOC(cwwork,(2,npw1*nspinor))
    ! -Apply Pc to Psi^(1)
    do iband = 1, nband
      if (bands_treated_now(iband) == 0) cycle
@@ -1445,8 +1446,8 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
    ! - Apply H^(0)-E.S^(0)
    sij_opt=0;if (gen_eigenpb) sij_opt=1
    cpopt=-1
-   ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
-   ABI_ALLOCATE(work2,(2,npw1*nspinor))
+   ABI_MALLOC(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
+   ABI_MALLOC(work2,(2,npw1*nspinor))
    call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,&
      mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
    if (gen_eigenpb) then
@@ -1454,8 +1455,8 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
    else
      cwwork=work-eshift*cwwork
    end if
-   ABI_DEALLOCATE(work1)
-   ABI_DEALLOCATE(work2)
+   ABI_FREE(work1)
+   ABI_FREE(work2)
   
    ! The following is not mandatory, as Pc has been already applied to Psi^(1)
    ! and Pc^* H^(0) Pc = Pc^* H^(0) = H^(0) Pc (same for S^(0)).
@@ -1488,7 +1489,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
    ! - Add Pc^*(H^(1)-E.S^(1)).Psi^(0)
    cwwork=cwwork+gh1c
    call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
-   ABI_DEALLOCATE(cwwork)
+   ABI_FREE(cwwork)
    write(msg,'(a,i3,a,es22.15,2a,i4)') &
      '*** CGWF3 Sternheimer equation test for band ',band,'=',sqrt(dotr),ch10,&
      'It should go to zero for large nline : nlines_done = ',nlines_done
@@ -1497,13 +1498,13 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
 
  if(prtvol==-level.or.prtvol==-19.or.prtvol==-20)then
    ! Check that < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is in agreement with eig^(1)
-   ABI_ALLOCATE(cwwork,(2,npw1*nspinor))
+   ABI_MALLOC(cwwork,(2,npw1*nspinor))
    cwwork=cwavef
    ! - Apply H^(0)-E.S^(0)
    sij_opt=0;if (gen_eigenpb) sij_opt=1
    cpopt=-1
-   ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
-   ABI_ALLOCATE(work2,(2,npw1*nspinor))
+   ABI_MALLOC(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
+   ABI_MALLOC(work2,(2,npw1*nspinor))
    call getghc(cpopt,cwwork,conjgrprj,work,work1,gs_hamkq,work2,eshift,&
      mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
    if (gen_eigenpb) then
@@ -1511,8 +1512,8 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
    else
      cwwork=work-eshift*cwwork
    end if
-   ABI_DEALLOCATE(work1)
-   ABI_DEALLOCATE(work2)
+   ABI_FREE(work1)
+   ABI_FREE(work2)
    cwwork=cwwork+gh1c_n
    jband=(band-1)*2*nband
    iband_me = 0
@@ -1536,26 +1537,26 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
      end if
    end do
    !write(std_out,'(a)') '< Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > is done.'
-   ABI_DEALLOCATE(cwwork)
+   ABI_FREE(cwwork)
  end if ! prtvol==-level.or.prtvol==-19.or.prtvol==-20
 !--------------------------------------------------------------------------
 !            END DEBUG
 !--------------------------------------------------------------------------
 
  if (allocated(gh_direc))  then
-   ABI_DEALLOCATE(gh_direc)
+   ABI_FREE(gh_direc)
  end if
  if (allocated(gvnlx_direc))  then
-   ABI_DEALLOCATE(gvnlx_direc)
+   ABI_FREE(gvnlx_direc)
  end if
- ABI_DEALLOCATE(conjgr)
- ABI_DEALLOCATE(cwaveq)
- ABI_DEALLOCATE(direc)
- ABI_DEALLOCATE(gresid)
+ ABI_FREE(conjgr)
+ ABI_FREE(cwaveq)
+ ABI_FREE(direc)
+ ABI_FREE(gresid)
  if (usepaw==1) then
    call pawcprj_free(conjgrprj)
  end if
- ABI_DATATYPE_DEALLOCATE(conjgrprj)
+ ABI_FREE(conjgrprj)
 
 #ifdef DEV_MJV
 print *, 'cgwf band, resid 1553   ', band, resid
@@ -1572,11 +1573,11 @@ print *, 'cgwf band, resid 1553   ', band, resid
    call wrtout(std_out,msg)
  end if
 
- ABI_DEALLOCATE(work)
- ABI_DEALLOCATE(gh1c)
- ABI_DEALLOCATE(pcon)
- ABI_DEALLOCATE(scprod)
- ABI_DEALLOCATE(gberry)
+ ABI_FREE(work)
+ ABI_FREE(gh1c)
+ ABI_FREE(pcon)
+ ABI_FREE(scprod)
+ ABI_FREE(gberry)
 
  call timab(122,2,tsec)
 

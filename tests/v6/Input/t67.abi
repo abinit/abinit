@@ -29,7 +29,7 @@ ndtset 10    udtset 2 5
    typat 2*1
    znucl       2.0
 
-   charge 1
+   cellcharge 1
    occopt 2
    occ   *1   #not needed when occopt 1
    nband 5*2 5*1

@@ -7,7 +7,7 @@
 !!  on the fine grid around a given atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2021 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,15 +128,15 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !==========================================================
  if (size(rfgd)/=3*nfgd) then
    msg='rfgd array must be allocated at rfgd(3,nfgd)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (pawtab%lcut_size>9) then
    msg='l_size>10 forbidden!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (pawtab%shape_type==1.and.pawtab%shape_lambda<2) then
    msg='Exponent lambda of gaussian shape function must be > 1!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
 !Initializations
@@ -1161,7 +1161,7 @@ subroutine pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,rcut,rfgd,rprimd,ucvol,xred, &
              nfgd=nfgd+1
              if (nfgd>ncmax) then
                msg='Number of fft points around atom exceeds max. allowed!'
-               MSG_BUG(msg)
+               LIBPAW_BUG(msg)
              end if
              rfgd_tmp(1,nfgd)=rx
              rfgd_tmp(2,nfgd)=ry
@@ -1421,7 +1421,7 @@ subroutine pawexpiqr(expiqr,gprimd,nfgd,qphon,rfgd,xred)
 
  if (size(rfgd)/=3*nfgd) then
    msg='rfgd array must be allocated!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  qne0=(qphon(1)**2+qphon(2)**2+qphon(3)**2>=1.d-15)

@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,12 +58,12 @@ contains
   subroutine dense_mat_t_initialize(self,  mshape)
     class(dense_mat_t), intent(inout) :: self
     integer, intent(in)::mshape(:)
-    if(size(mshape)/=2) MSG_ERROR("mshape should be size 2 for dense_mat_t")
+    if(size(mshape)/=2) ABI_ERROR("mshape should be size 2 for dense_mat_t")
     self%nrow=mshape(1)
     self%ncol=mshape(2)
-    ABI_ALLOCATE(self%mshape, (2))
+    ABI_MALLOC(self%mshape, (2))
     self%mshape(:)=mshape(:)
-    ABI_ALLOCATE(self%mat, (self%nrow, self%ncol))
+    ABI_MALLOC(self%mat, (self%nrow, self%ncol))
     self%mat(:,:)=0.0d0
   end subroutine dense_mat_t_initialize
 
@@ -72,8 +72,8 @@ contains
   !-----------------------------------------------------------------------
   subroutine dense_mat_t_finalize(self)
     class(dense_mat_t), intent(inout) :: self
-    if (allocated(self%mat))  ABI_DEALLOCATE(self%mat)
-    if (allocated(self%mshape)) ABI_DEALLOCATE(self%mat)
+    if (allocated(self%mat))  ABI_FREE(self%mat)
+    if (allocated(self%mshape)) ABI_FREE(self%mat)
     self%ncol=0
     self%nrow=0
     self%ndim=0

@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/defs_datatypes
 !! NAME
 !! defs_datatypes
@@ -25,7 +26,7 @@
 !! * pspheader_type: for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (XG)
+!! Copyright (C) 2001-2021 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,6 +65,7 @@ module defs_datatypes
  type ebands_t
 
   integer :: bantot                ! total number of bands (sum(nband(:))
+  integer :: ivalence              ! CP added: highest valence band index (useful when occopt=9 only)
   integer :: mband                 ! Max number of bands i.e MAXVAL(nband) (to dimension arrays)
   integer :: nkpt                  ! number of k points
   integer :: nspinor               ! 1 for collinear, 2 for noncollinear.
@@ -72,8 +74,12 @@ module defs_datatypes
   integer :: occopt                ! Occupation option, see input variable.
 
   real(dp) :: entropy              ! Entropy associated with the smearing (adimensional)
-  real(dp) :: fermie               ! Fermi energy
+  real(dp) :: fermie               ! Fermi energy ! CP: when occopt = 9, fermi energy of the quasi-FD distribution of excited
+! electrons in the conduction bands above ivalence
+  real(dp) :: fermih               ! CP added: Fermi energy of the excited holes in the valence bands <= ivalence (occopt = 9 only)
   real(dp) :: nelect               ! Number of electrons.
+  real(dp) :: ne_qFD               ! CP added: Number of electrons excited in the bands > ivalence (occopt = 9 only)
+  real(dp) :: nh_qFD               ! CP added: Number of holes     excited in the bands <=ivalence (occopt = 9 only)
   real(dp) :: tphysel              ! Physical temperature of electrons.
   real(dp) :: tsmear               ! Temperature of smearing.
 
@@ -132,8 +138,8 @@ module defs_datatypes
   integer :: nshiftk_orig, nshiftk
   ! original number of shifts given in input and the actual value (changed in inkpts)
 
-  real(dp) :: charge
-  ! nelect = zion - charge
+  real(dp) :: cellcharge
+  ! nelect = zion - cellcharge
   ! Extra charge added to the unit cell when performing GS calculations
   ! To treat a system missing one electron per unit cell, charge is set to +1.
   ! When reading the band structure from an external file,

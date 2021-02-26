@@ -7,7 +7,7 @@
 !!  of PAW data over atomic sites
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2020 ABINIT group (MT, MD)
+!! Copyright (C) 2012-2021 ABINIT group (MT, MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -193,7 +193,7 @@ print *, 'get_my_atmtab, my_atmtab, natom_bef, nmod, nproc, me ', &
      if (present(my_natom_ref).and.(my_natom>0)) then
        if (my_natom_ref/=size(my_atmtab)) then
          msg='my_atmtab should have a size equal to my_natom !'
-         MSG_BUG(msg)
+         LIBPAW_BUG(msg)
        end if
      end if
    end if
@@ -339,7 +339,7 @@ end subroutine get_proc_atmtab
 !!  containing the corresponding processor indexes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2020 ABINIT group (MD)
+!! Copyright (C) 2012-2021 ABINIT group (MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

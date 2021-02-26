@@ -6,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (JB)
+!!  Copyright (C) 2014-2021 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,7 +75,7 @@ module m_scfcv
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (JB)
+!!  Copyright (C) 2014-2021 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -560,15 +560,15 @@ end subroutine scfcv_run
 !!!  we need to reformat the wavefunctions, taking into acount the new
 !!!  coordinates.
 !!!  We prepare to change rhog (to be removed) and rhor.
-!!   ABI_DEALLOCATE(rhog)
-!!   ABI_DEALLOCATE(rhor)
+!!   ABI_FREE(rhog)
+!!   ABI_FREE(rhor)
 !!
 !!   call wvl_wfsinp_reformat(this%dtset, this%mpi_enreg,&
 !!&   this%psps, rprimd, this%wvl, xred, xred_old)
 !!   this%nfftf = this%dtset%nfft
 !!
-!!   ABI_ALLOCATE(rhog,(2, this%dtset%nfft))
-!!   ABI_ALLOCATE(rhor,(2, this%dtset%nfft))
+!!   ABI_MALLOC(rhog,(2, this%dtset%nfft))
+!!   ABI_MALLOC(rhor,(2, this%dtset%nfft))
 !!   call wvl_mkrho(this%dtset, this%irrzon, this%mpi_enreg,&
 !!&   this%phnons, rhor,this%wvl%wfs,this%wvl%den)
 !! end if

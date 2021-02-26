@@ -28,6 +28,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = bob_gnu_7.5_openmp
 #%% test_chain = t32.abi, t33.abi, t34.abi
 #%% [files]
 #%% files_to_test = 

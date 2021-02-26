@@ -29,6 +29,9 @@ MgO_eph_zpr/flow_zpr_mgo/w1/t28/outdata/out_POT2.nc
 MgO_eph_zpr/flow_zpr_mgo/w1/t29/outdata/out_POT4.nc
 MgO_eph_zpr/flow_zpr_mgo/w1/t30/outdata/out_POT5.nc
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  Copyright (C) 1999-2021 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -271,17 +271,17 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  iscf_mod=dtset%iscf;if(ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11) iscf_mod=-3
 
  kinpw1 => gs_hamkq%kinpw_kp
- ABI_ALLOCATE(gh0c1,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnlxc,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
- ABI_ALLOCATE(cwave0,(2,npw_k*nspinor))
- ABI_ALLOCATE(cwavef,(2,npw1_k*nspinor))
- ABI_ALLOCATE(cwave1,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gh1c_n,(2,npw1_k*nspinor))
+ ABI_MALLOC(gh0c1,(2,npw1_k*nspinor))
+ ABI_MALLOC(gvnlxc,(2,npw1_k*nspinor))
+ ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor))
+ ABI_MALLOC(cwave0,(2,npw_k*nspinor))
+ ABI_MALLOC(cwavef,(2,npw1_k*nspinor))
+ ABI_MALLOC(cwave1,(2,npw1_k*nspinor))
+ ABI_MALLOC(gh1c_n,(2,npw1_k*nspinor))
  if (gs_hamkq%usepaw==1) then
-   ABI_ALLOCATE(gsc,(2,npw1_k*nspinor))
+   ABI_MALLOC(gsc,(2,npw1_k*nspinor))
  else
-   ABI_ALLOCATE(gsc,(0,0))
+   ABI_MALLOC(gsc,(0,0))
  end if
 
 !Read the npw and kg records of wf files
@@ -295,7 +295,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  end if
 
 !Additional stuff for PAW
- ABI_DATATYPE_ALLOCATE(cwaveprj0,(0,0))
+ ABI_MALLOC(cwaveprj0,(0,0))
  if (gs_hamkq%usepaw==1) then
 !  1-Compute all <g|S|Cnk+q>
    igscq=0
@@ -308,22 +308,22 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !  2-Initialize additional scalars/arrays
    iorder_cprj=0;iorder_cprj1=0
    dim_dcwf=npw1_k*nspinor;if (ipert==natom+2.or.ipert==natom+10.or.ipert==natom+11) dim_dcwf=0
-   ABI_ALLOCATE(dcwavef,(2,dim_dcwf))
+   ABI_MALLOC(dcwavef,(2,dim_dcwf))
    if (gs_hamkq%usecprj==1) then
-     ABI_DATATYPE_DEALLOCATE(cwaveprj0)
-     ABI_DATATYPE_ALLOCATE(cwaveprj0,(natom,nspinor))
+     ABI_FREE(cwaveprj0)
+     ABI_MALLOC(cwaveprj0,(natom,nspinor))
      call pawcprj_alloc(cwaveprj0,1,gs_hamkq%dimcprj)
    end if
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,nspinor))
-   ABI_DATATYPE_ALLOCATE(cwaveprj1,(natom,nspinor))
+   ABI_MALLOC(cwaveprj,(natom,nspinor))
+   ABI_MALLOC(cwaveprj1,(natom,nspinor))
    call pawcprj_alloc(cwaveprj ,0,gs_hamkq%dimcprj)
    call pawcprj_alloc(cwaveprj1,0,gs_hamkq%dimcprj)
  else
    igscq=0;mgscq=0;dim_dcwf=0
-   ABI_ALLOCATE(gscq,(0,0))
-   ABI_ALLOCATE(dcwavef,(0,0))
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
-   ABI_DATATYPE_ALLOCATE(cwaveprj1,(0,0))
+   ABI_MALLOC(gscq,(0,0))
+   ABI_MALLOC(dcwavef,(0,0))
+   ABI_MALLOC(cwaveprj,(0,0))
+   ABI_MALLOC(cwaveprj1,(0,0))
  end if
 #ifdef DEV_MJV
 print *, 'vtowfk dims of cprj ', shape(cwaveprj)
@@ -542,7 +542,7 @@ print *, ' ik isppol iband ar kinpw1 ', ikpt, isppol, iband, ar, kinpw1(1:5)
 !      Compute the 0-order nuclear dipole contribution (with cwavef)
 !      only relevant for DDK
        if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(gs_hamkq%vectornd)) ) then
-         ABI_ALLOCATE(ghc_vectornd,(2,npw_k))
+         ABI_MALLOC(ghc_vectornd,(2,npw_k))
          ! ndat hard-coded as 1; my_nspinor hard-coded as 1
          call getghc_nucdip(cwavef,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpt_k,&
 &          gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
@@ -550,13 +550,13 @@ print *, ' ik isppol iband ar kinpw1 ', ikpt, isppol, iband, ar, kinpw1(1:5)
 !        There is an additional factor of 2 with respect to the bare matrix element
          end0_k(iband)=energy_factor*(DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
            & DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k)))
-         ABI_DEALLOCATE(ghc_vectornd)
+         ABI_FREE(ghc_vectornd)
        end if
  
 !      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.
 !      only relevant for DDK
        if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(rf_hamkq%vectornd)) ) then
-         ABI_ALLOCATE(ghc_vectornd,(2,npw_k))
+         ABI_MALLOC(ghc_vectornd,(2,npw_k))
          ! ndat hard-coded as 1; my_nspinor hard-coded as 1
          call getgh1ndc(cwave1,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
            & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
@@ -564,7 +564,7 @@ print *, ' ik isppol iband ar kinpw1 ', ikpt, isppol, iband, ar, kinpw1(1:5)
 !        There is an additional factor of 4 with respect to the bare matrix element
          end1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
            & DOT_PRODUCT(cwave0(2,1:npw_k),ghc_vectornd(2,1:npw_k)))
-         ABI_DEALLOCATE(ghc_vectornd)
+         ABI_FREE(ghc_vectornd)
        end if
 ! 
 !      Compute eigenvalue part of total energy (with cwavef)
@@ -696,13 +696,13 @@ print *, 'vtowfk residk 647', resid_k
  call timab(139,2,tsec)
  call timab(130,1,tsec)
 
- ABI_DEALLOCATE(cwave0)
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(cwave1)
- ABI_DEALLOCATE(gh0c1)
- ABI_DEALLOCATE(gvnlxc)
- ABI_DEALLOCATE(gvnlx1)
- ABI_DEALLOCATE(gh1c_n)
+ ABI_FREE(cwave0)
+ ABI_FREE(cwavef)
+ ABI_FREE(cwave1)
+ ABI_FREE(gh0c1)
+ ABI_FREE(gvnlxc)
+ ABI_FREE(gvnlx1)
+ ABI_FREE(gh1c_n)
 
  if (gs_hamkq%usepaw==1) then
    call pawcprj_free(cwaveprj)
@@ -711,12 +711,12 @@ print *, 'vtowfk residk 647', resid_k
      call pawcprj_free(cwaveprj0)
    end if
  end if
- ABI_DEALLOCATE(dcwavef)
- ABI_DEALLOCATE(gscq)
- ABI_DEALLOCATE(gsc)
- ABI_DATATYPE_DEALLOCATE(cwaveprj0)
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
- ABI_DATATYPE_DEALLOCATE(cwaveprj1)
+ ABI_FREE(dcwavef)
+ ABI_FREE(gscq)
+ ABI_FREE(gsc)
+ ABI_FREE(cwaveprj0)
+ ABI_FREE(cwaveprj)
+ ABI_FREE(cwaveprj1)
 
 
 !###################################################################
@@ -735,7 +735,7 @@ print *, 'vtowfk residk 647', resid_k
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then
    write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  call timab(130,2,tsec)
@@ -1127,7 +1127,6 @@ print *, 'cwavef 1055 ', cwavef(:,1:5)
 #endif
 
 !In the PAW case, compute <Psi^(1)_ortho|H-Eig0_k.S|Psi^(1)_parallel> contribution to 2DTE
- if (usepaw==1 .and. wf_corrected==1) then
 !$OMP WORKSHARE
    cwcorr(:,:)=cwave1(:,:)-cwavef(:,:)
 !$OMP END WORKSHARE
@@ -1140,7 +1139,7 @@ print *, 'edocc 1068 ', edocc
 print *, ' ghc 1068 ', ghc(:,1:5)
 #endif
 
- ABI_DEALLOCATE(cwcorr)
+ ABI_FREE(cwcorr)
  if (usepaw==1) then
    call pawcprj_free(cwaveprj1_corr)
  end if
