@@ -37,6 +37,10 @@ wavefunctions with their real part, instead of both their real and complex parts
 This allows halving the memory needs, as well as the CPU time. 
 See [[istwfk]].
 
+GW calculations can be made less memory and CPU time consuming,
+at the expense of numerical precision,
+by compiling ABINIT with the option enable_gw_dpc=“no" in the *.ac9 file.
+
 Other input variables related to tuning the speed or the memory usage are for expert users only.
 
 ## Related Input Variables
