@@ -853,8 +853,12 @@ contains
          end if
        end if
 
-!      Computation or <p_lmn|c> (and derivatives) for this block of atoms
-       if ((cpopt<4.and.choice_a/=-1.and.choice_a/=0).or.choice==8.or.choice==81) then
+       ! Computation or <p_lmn|c> (and derivatives) for this block of atoms if :
+       !    <p_lmn|c> are not in memory : cpopt<=1
+       ! OR <p_lmn|c> are in memory, but we need derivatives : cpopt<=3 and abs(choice_a)>1
+       ! OR <p_lmn|c> and first derivatives are in memory, but we need second derivatives : choice=8 or 81
+       if (cpopt<=1.or.(cpopt<=3.and.abs(choice_a)>1).or.choice==8.or.choice==81) then
+!       if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
          if (abs(choice_a)>1.or.nloalg(1)==4) then
            call timab(1101,1,tsec)
            call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
