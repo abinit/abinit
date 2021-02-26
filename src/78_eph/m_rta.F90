@@ -999,44 +999,6 @@ subroutine compute_rta(self, cryst, dtset, comm)
 
 contains
 
-! Invert 3x3 matrix, copied from matr3inv
-pure subroutine inv33(aa, ait)
-
-!Arguments ------------------------------------
-!arrays
- real(dp),intent(in) :: aa(3,3)
- real(dp),intent(out) :: ait(3,3)
-
-!Local variables-------------------------------
-!scalars
- real(dp) :: dd,det,t1,t2,t3
-
-! *************************************************************************
-
- t1 = aa(2,2) * aa(3,3) - aa(3,2) * aa(2,3)
- t2 = aa(3,2) * aa(1,3) - aa(1,2) * aa(3,3)
- t3 = aa(1,2) * aa(2,3) - aa(2,2) * aa(1,3)
- det = aa(1,1) * t1 + aa(2,1) * t2 + aa(3,1) * t3
-
- ! Make sure matrix is not singular
- if (abs(det) > 100 * tiny(one)) then
-   dd = one / det
-   ait(1,1) = t1 * dd
-   ait(2,1) = t2 * dd
-   ait(3,1) = t3 * dd
-   ait(1,2) = (aa(3,1)*aa(2,3)-aa(2,1)*aa(3,3)) * dd
-   ait(2,2) = (aa(1,1)*aa(3,3)-aa(3,1)*aa(1,3)) * dd
-   ait(3,2) = (aa(2,1)*aa(1,3)-aa(1,1)*aa(2,3)) * dd
-   ait(1,3) = (aa(2,1)*aa(3,2)-aa(3,1)*aa(2,2)) * dd
-   ait(2,3) = (aa(3,1)*aa(1,2)-aa(1,1)*aa(3,2)) * dd
-   ait(3,3) = (aa(1,1)*aa(2,2)-aa(2,1)*aa(1,2)) * dd
-   ait = transpose(ait)
- else
-   ait = zero
- end if
-
- end subroutine inv33
-
  real(dp) function carriers(wmesh, dos, istart, istop, kT, mu)
 
  !Arguments -------------------------------------------
@@ -1380,6 +1342,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
  integer :: unts(2)
  character(len=500) :: msg, pre, rta_type
  character(len=2) :: components(3)
+ real(dp) :: work33(3,3), mat33(3,3)
 
 !************************************************************************
 
@@ -1404,10 +1367,11 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
 
          do itemp=1,self%ntemp
            write(msg,"(f16.2,2e16.2,2f16.2)") &
-           self%kTmesh(itemp) / kb_HaK, &
-           self%n_ehst(1, spin, itemp) / cryst%ucvol / Bohr_cm**3, &
-           self%n_ehst(2, spin, itemp) / cryst%ucvol / Bohr_cm**3, &
-           self%mobility_mu(ii, ii, 1, spin, itemp, irta), self%mobility_mu(ii, ii, 2, spin, itemp, irta)
+             self%kTmesh(itemp) / kb_HaK, &
+             self%n_ehst(1, spin, itemp) / cryst%ucvol / Bohr_cm**3, &
+             self%n_ehst(2, spin, itemp) / cryst%ucvol / Bohr_cm**3, &
+             self%mobility_mu(ii, ii, 1, spin, itemp, irta), &
+             self%mobility_mu(ii, ii, 2, spin, itemp, irta)
            call wrtout(unts, msg)
          end do ! itemp
        end do ! spin
@@ -1415,24 +1379,29 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
      end do ! ii
 
    else
-     ! Metals # TODO: This is siemens / cm
-     call wrtout(unts, sjoin(" Conductivity(V^-1 s^-1 cm^-1) using ", rta_type, "approximation"))
-
-     do spin=1, self%nsppol
-       if (self%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
-       write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+     ! Metals
+     do ii=1,2
+       if (ii == 1) msg = sjoin(" Conductivity [Siemens cm^-1] using ", rta_type, "approximation")
+       if (ii == 2) msg = sjoin(" Resistivity [micro-Ohm cm] using ", rta_type, "approximation")
        call wrtout(unts, msg)
-       do itemp=1,self%ntemp
-         write(msg,"(f16.2,3e16.2)") &
-           self%kTmesh(itemp) / kb_HaK, &
-           self%conductivity(1,1, itemp, spin, irta), &
-           self%conductivity(2,2, itemp, spin, irta), &
-           self%conductivity(3,3, itemp, spin, irta)
+
+       do spin=1, self%nsppol
+         if (self%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+         write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
          call wrtout(unts, msg)
-       end do !itemp
-     end do !spin
-     call wrtout(unts, ch10)
+         do itemp=1,self%ntemp
+           mat33 = self%conductivity(:,:, itemp, spin, irta)
+           if (ii == 2) then
+             work33 = mat33; call inv33(work33, mat33); mat33 = 1e+6_dp * mat33
+           end if
+           write(msg,"(f16.2,3e16.2)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
+           call wrtout(unts, msg)
+         end do !itemp
+       end do !spin
+       call wrtout(unts, ch10)
+     end do
    end if
+
  end do ! irta
 
  do irta=1,self%nrta
@@ -1647,7 +1616,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 !arrays
  integer :: unts(2), dims(4)
  logical,allocatable :: converged(:)
- real(dp) vec3(3), sym_vec(3), mat33(3,3), f_kq(3), fsum_eh(3,2,ebands%nsppol), max_adiff_spin(ebands%nsppol)
+ real(dp) :: vec3(3), sym_vec(3), mat33(3,3), f_kq(3), work33(3,3)
+ real(dp) :: fsum_eh(3,2,ebands%nsppol), max_adiff_spin(ebands%nsppol)
  real(dp) :: onsager(3,3,3,ebands%nsppol)
  real(dp),pointer :: sig_p(:,:,:,:), mob_p(:,:,:,:)
  real(dp),target,allocatable :: ibte_sigma(:,:,:,:,:), ibte_mob(:,:,:,:,:)
@@ -1863,7 +1833,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
                pre_newlines=1, newlines=1)
 
    if (ibte%assume_gap) then
-     write(msg, "(a5,1x,a9,*(1x, a16))")" ITER", "max_adiff", "mobility_e+h", "sum_k(d_fk)"
+     write(msg, "(a5,1x,a9,*(1x, a16))")" ITER", "max_adiff", "mobility_e+h", "sum_k(df_k)"
    else
      write(msg, "(a5,1x,a9,*(1x, a16))")" ITER", "max_adiff", "conductivity", "sum_k(df_k)"
    end if
@@ -1949,19 +1919,19 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      max_adiff = maxval(max_adiff_spin)
 
      ! Compute transport tensors from fkn_out
-     ! then print mobility for semiconductors, conductivity for metals.
+     ! then print mobility for semiconductors or conductivity for metals.
      call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_out, onsager, sig_p, mob_p, fsum_eh, comm)
 
      if (ibte%assume_gap) then
        do spin=1,nsppol
          mat33 = sum(mob_p(:,:,:,spin), dim=3)
-         write(msg, "(i5,1x,es9.1,*(1x, f16.2))")&
+         write(msg, "(i5,1x,es9.1,*(1x, f16.2))") &
            iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
        end do
      else
        do spin=1,nsppol
          mat33 = sum(sig_p(:,:,:,spin), dim=3)
-         write(msg, "(i5,1x,es9.1,*(1x, es16.2))")&
+         write(msg, "(i5,1x,es9.1,*(1x, es16.2))") &
            iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
        end do
      end if
@@ -2016,23 +1986,27 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
    else
      ! Metals
-     call wrtout(unts, " Conductivity(V^-1 s^-1 cm^-1) using IBTE")
-
-     do spin=1, ibte%nsppol
-       if (ibte%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
-       write(msg, "(5a16)") 'Temperature (K)', 'xx', 'yy', 'zz', "Converged"
+     do ii=1,2
+       if (ii == 1) msg = " Conductivity [Siemens cm^-1] using IBTE"
+       if (ii == 2) msg = " Resistivity [micro-Ohm cm] using IBTE"
        call wrtout(unts, msg)
-       do itemp=1,ibte%ntemp
-         write(msg,"(f16.2,3e16.2,a16)") &
-           ibte%kTmesh(itemp) / kb_HaK, &
-           sum(ibte_sigma(1,1,:,spin,itemp)), &
-           sum(ibte_sigma(2,2,:,spin,itemp)), &
-           sum(ibte_sigma(3,3,:,spin,itemp)), &
-           yesno(converged(itemp))
+
+       do spin=1, ibte%nsppol
+         if (ibte%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+         write(msg, "(5a16)") 'Temperature (K)', 'xx', 'yy', 'zz', "Converged"
          call wrtout(unts, msg)
-       end do ! itemp
-     end do ! spin
-     call wrtout(unts, ch10)
+         do itemp=1,ibte%ntemp
+           mat33 = sum(ibte_sigma(:,:,:,spin,itemp), dim=3)
+           if (ii == 2) then
+             work33 = mat33; call inv33(work33, mat33); mat33 = 1e+6_dp * mat33
+           end if
+           write(msg,"(f16.2,3e16.2,a16)") &
+             ibte%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3), yesno(converged(itemp))
+           call wrtout(unts, msg)
+         end do ! itemp
+       end do ! spin
+       call wrtout(unts, ch10)
+     end do ! ii
    end if
 
    !pre = "_IBTE"
@@ -2197,6 +2171,44 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
 end subroutine ibte_calc_tensors
 !!***
+
+! Invert 3x3 matrix, copied from matr3inv
+pure subroutine inv33(aa, ait)
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: aa(3,3)
+ real(dp),intent(out) :: ait(3,3)
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: dd,det,t1,t2,t3
+
+! *************************************************************************
+
+ t1 = aa(2,2) * aa(3,3) - aa(3,2) * aa(2,3)
+ t2 = aa(3,2) * aa(1,3) - aa(1,2) * aa(3,3)
+ t3 = aa(1,2) * aa(2,3) - aa(2,2) * aa(1,3)
+ det = aa(1,1) * t1 + aa(2,1) * t2 + aa(3,1) * t3
+
+ ! Make sure matrix is not singular
+ if (abs(det) > 100 * tiny(one)) then
+   dd = one / det
+   ait(1,1) = t1 * dd
+   ait(2,1) = t2 * dd
+   ait(3,1) = t3 * dd
+   ait(1,2) = (aa(3,1)*aa(2,3)-aa(2,1)*aa(3,3)) * dd
+   ait(2,2) = (aa(1,1)*aa(3,3)-aa(3,1)*aa(1,3)) * dd
+   ait(3,2) = (aa(2,1)*aa(1,3)-aa(1,1)*aa(2,3)) * dd
+   ait(1,3) = (aa(2,1)*aa(3,2)-aa(3,1)*aa(2,2)) * dd
+   ait(2,3) = (aa(3,1)*aa(1,2)-aa(1,1)*aa(3,2)) * dd
+   ait(3,3) = (aa(1,1)*aa(2,2)-aa(2,1)*aa(1,2)) * dd
+   ait = transpose(ait)
+ else
+   ait = zero
+ end if
+
+ end subroutine inv33
 
 end module m_rta
 !!***

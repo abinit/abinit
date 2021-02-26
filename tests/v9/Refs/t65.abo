@@ -863,16 +863,28 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
 
  Transport (RTA) calculation results:
 
- Conductivity(V^-1 s^-1 cm^-1) using SERTA approximation
+ Conductivity [Siemens cm^-1] using SERTA approximation
  Temperature (K)              xx              yy              zz
             0.00       -0.00E+00       -0.00E+00       -0.00E+00
           300.00        0.46E+06        0.46E+06        0.46E+06
 
 
- Conductivity(V^-1 s^-1 cm^-1) using MRTA approximation
+ Resistivity [micro-Ohm cm] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            0.00        0.00E+00        0.00E+00        0.00E+00
+          300.00        0.22E+01        0.22E+01        0.22E+01
+
+
+ Conductivity [Siemens cm^-1] using MRTA approximation
  Temperature (K)              xx              yy              zz
             0.00       -0.00E+00       -0.00E+00       -0.00E+00
           300.00        0.37E+06        0.37E+06        0.37E+06
+
+
+ Resistivity [micro-Ohm cm] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            0.00        0.00E+00        0.00E+00        0.00E+00
+          300.00        0.27E+01        0.27E+01        0.27E+01
 
 
 

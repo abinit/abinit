@@ -85,7 +85,7 @@ program abitk
  real(dp) :: skw_params(4), tmesh(3)
  real(dp),allocatable :: bounds(:,:), kTmesh(:), mu_e(:)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
- real(dp),allocatable :: n_ehst(:,:,:), ne(:), nh(:)
+ real(dp),allocatable :: n_ehst(:,:,:)
 
 !*******************************************************
 
@@ -361,31 +361,28 @@ program abitk
         n_ehst(1,spin,itemp) / cryst%ucvol / Bohr_cm**3
      end do
    end do
-   ABI_FREE(n_ehst)
 
    ABI_CHECK(get_arg("intmeth", intmeth, msg, default=2) == 0, msg)
    ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
    ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
 
-   ABI_MALLOC(ne, (ntemp))
-   ABI_MALLOC(nh, (ntemp))
    edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    call edos%print(std_out, header="Electron DOS")
-   call edos%get_carriers(ntemp, kTmesh, mu_e, nh, ne)
+   call edos%get_carriers(ntemp, kTmesh, mu_e, n_ehst)
 
    !write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
-   do itemp=1,ntemp
-     write(std_out, "(a, 2f16.2, 2e16.2)")&
-      " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
-      nh(itemp) / cryst%ucvol / Bohr_cm**3, &
-      ne(itemp) / cryst%ucvol / Bohr_cm**3
+   do spin=1,ebands%nsppol
+     do itemp=1,ntemp
+       write(std_out, "(a, 2f16.2, 2e16.2)")&
+        " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
+        n_ehst(2, itemp, spin) / cryst%ucvol / Bohr_cm**3, &
+        n_ehst(1, itemp, spin) / cryst%ucvol / Bohr_cm**3
+     end do
    end do
 
    ABI_FREE(kTmesh)
    ABI_FREE(mu_e)
-   ABI_FREE(ne)
-   ABI_FREE(nh)
-
+   ABI_FREE(n_ehst)
 
  !case ("ebands_dope")
 

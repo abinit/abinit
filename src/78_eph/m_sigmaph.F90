@@ -4986,6 +4986,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  end if
 
  if (dtset%ibte_prep > 0) then
+   call wrtout(std_out, "Writing scattering matrix elements to disk...")
    ! Get ncid of group used to store scattering rate (ragged array implemented with groups).
    ! FIXME: Unfortunately, this algo cannot be used if parallelism over kcalc/spin is on since
    ! we have to change the metadata at runtime.

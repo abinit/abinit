@@ -200,6 +200,8 @@ MODULE m_ebands
    ! Write eDOS to netcdf file.
 
    procedure :: get_carriers => edos_get_carriers
+   ! Compute number of holes (nh) and electrons (ne) per unit cell from a given
+   ! list of `ntemp` temperatures `kTmesh` and chemical potentials `mu_e`.
 
  end type edos_t
 !!***
@@ -3834,66 +3836,64 @@ end subroutine edos_print
 !! FUNCTION
 !!  Compute number of holes (nh) and electrons (ne) per unit cell from a given
 !!  list of `ntemp` temperatures `kTmesh` and chemical potentials `mu_e`.
+!!  Return n_ehst(2, nsppol, ntemp) where the first dimension if for electrons/holes.
+!!  If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.!!
+!!  To discern between electrons and holes in semiconductors we assume that ef is inside the gap.
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine edos_get_carriers(edos, ntemp, kTmesh, mu_e, nh, ne)
+subroutine edos_get_carriers(edos, ntemp, kTmesh, mu_e, n_ehst)
 
 !Arguments ------------------------------------
  class(edos_t),intent(in) :: edos
  integer,intent(in) :: ntemp
 !arrays
  real(dp),intent(in) :: kTmesh(ntemp), mu_e(ntemp)
- real(dp),intent(out) :: nh(ntemp), ne(ntemp)
+ real(dp),intent(out) :: n_ehst(2, edos%nsppol, ntemp)
 
 !Local variables-------------------------------
- integer :: itemp, iw
- !real(dp) :: max_occ
+ integer :: itemp, iw, spin
  real(dp),allocatable :: values(:)
 
 ! *************************************************************************
 
  ! Copy important dimensions
- !max_occ = two / (edos%nspinor * edos%nsppol)
- ne = zero; nh = zero
-
+ n_ehst = zero
  ABI_MALLOC(values, (edos%nw))
-
- ! TODO: May spline the DOS to improve accuracy of the results.
- !new_edos = edos%spline()
 
  do itemp=1,ntemp
 
+   ! For electrons (assuming ef inside the gap if semiconductor)
+   do spin=1,edos%nsppol
+     do iw=1,edos%nw
+       if (edos%mesh(iw) >= mu_e(itemp)) then
+         values(iw) = edos%dos(iw, spin) * occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp))
+       else
+         values(iw) = zero
+       end if
+     end do
+     n_ehst(1, spin, itemp) = simpson(edos%step, values)
+   end do ! spin
+
    ! For holes
-   do iw=1,edos%nw
-     if (edos%mesh(iw) < mu_e(itemp)) then
-       values(iw) = edos%dos(iw, 0) * (one - occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp)))
-     else
-       values(iw) = zero
-     end if
-   end do
-   nh(itemp) = simpson(edos%step, values)
+   do spin=1,edos%nsppol
+     do iw=1,edos%nw
+       if (edos%mesh(iw) < mu_e(itemp)) then
+         values(iw) = edos%dos(iw, spin) * (one - occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp)))
+       else
+         values(iw) = zero
+       end if
+     end do
+     n_ehst(2, spin, itemp) = simpson(edos%step, values)
+   end do ! spin
 
-   ! For electrons
-   do iw=1,edos%nw
-     if (edos%mesh(iw) >= mu_e(itemp)) then
-       values(iw) = edos%dos(iw, 0) * occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp))
-     else
-       values(iw) = zero
-     end if
-   end do
-   ne(itemp) = simpson(edos%step, values)
+ end do ! itemp
 
- end do
-
+ if (edos%nsppol == 1 .and. edos%nspinor == 1) n_ehst = two * n_ehst
  ABI_FREE(values)
 
 end subroutine edos_get_carriers
@@ -6458,6 +6458,7 @@ end subroutine klinterp_eval_bsd
 !!  temperatures `kTmesh` and chemical potentials `mu_e`.
 !!  Return n_ehst(2, nsppol, ntemp) where the first dimension if for electrons/holes.
 !!  If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.
+!!  To discern between electrons and holes in semiconductors we assume that ef is inside the gap.
 !!
 !! SOURCE
 
@@ -6488,9 +6489,11 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, n_ehst)
 
        do itemp=1,ntemp
          if (eig_nk >= mu_e(itemp)) then
+           ! electron (assuming ef inside the gap if semiconductor)
            n_ehst(1, spin, itemp) = n_ehst(1, spin, itemp) + &
                                     wtk * occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp)) * max_occ
          else
+           ! electron
            n_ehst(2, spin, itemp) = n_ehst(2, spin, itemp) + &
                                     wtk * (one - occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp))) * max_occ
          end if

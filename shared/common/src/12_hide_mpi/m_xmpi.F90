@@ -41,7 +41,7 @@ MODULE m_xmpi
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
- use m_clib, only : ulimit_stack
+ use m_clib, only : clib_ulimit_stack, clib_usleep
 
  implicit none
 
@@ -711,7 +711,7 @@ subroutine xmpi_init()
 ! *************************************************************************
 
  ! Increase stack size.
- call ulimit_stack(rlim_cur, rlim_max, ierr)
+ call clib_ulimit_stack(rlim_cur, rlim_max, ierr)
  if (ierr /= 0) then
    write(std_out,*)" WARNING: cannot increase stack size limit. "
    !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
@@ -896,7 +896,7 @@ end subroutine xmpi_end
 !!
 !! SOURCE
 
-subroutine xmpi_abort(comm,mpierr,msg,exit_status)
+subroutine xmpi_abort(comm, mpierr, msg, exit_status)
 
 !Arguments-------------------------
  integer,optional,intent(in) :: comm,mpierr,exit_status
@@ -951,6 +951,7 @@ subroutine xmpi_abort(comm,mpierr,msg,exit_status)
  !  write(std_out,'(2a)')" MPI_ERROR_STRING: ",TRIM(mpi_msg_error)
  !end if
 
+ ierr = clib_usleep(300000_c_int32_t)
  call MPI_ABORT(my_comm, my_errorcode, ierr)
 #endif
 
