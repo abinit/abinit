@@ -718,7 +718,7 @@ subroutine mapkptsets(chksymbreak,gmet,k_in,nk_in,&
 
  if (timrev/=1 .and. timrev/=0) then
    write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ! Find the identity symmetry operation
@@ -779,7 +779,7 @@ subroutine mapkptsets(chksymbreak,gmet,k_in,nk_in,&
            !find this point
            ikpt_found = krank%get_index(ksym)
            !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
-           !  MSG_ERROR('Wrong k-point mapping found by krank')
+           !  ABI_ERROR('Wrong k-point mapping found by krank')
            !end if
            !if k-point not found
            if (ikpt_found < 0) then
@@ -791,7 +791,7 @@ subroutine mapkptsets(chksymbreak,gmet,k_in,nk_in,&
              'does not belong to the k point grid.',ch10,&
              'Read the description of the input variable chksymbreak,',ch10,&
              'You might switch it to zero, or change your k point grid to one that is symmetric.'
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
          end do ! itim
        end do ! isym
@@ -877,7 +877,7 @@ print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(ikpt_fou
 !do ik_in=1, nk_in
 !print *, k_in(:,ik_in)
 !end do
-   MSG_ERROR('Could not find mapping k-point sets')
+   ABI_ERROR('Could not find mapping k-point sets')
  end if
 
  !do ikpt=1,nkbz
