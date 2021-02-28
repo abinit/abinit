@@ -828,18 +828,23 @@ subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
  real(dp),intent(inout),target :: cg(:,:)
 
 !Local variables-------------------------------
- integer :: iband,wfsize
+ integer :: choice,iband,wfsize
  real(dp),pointer :: cwavef(:,:),cwavef_bands(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:)
 
  wfsize=gs_hamk%npw_k*gs_hamk%nspinor
  cwavef_bands => cg(:,1+icg:nband*wfsize+icg)
 
+ choice = 1
+ if (cprj_cwavef_bands(1,1)%ncpgr==3) then
+   choice = 2
+ end if
+
  do iband=1,nband
    cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
    cprj_cwavef => cprj_cwavef_bands(:,gs_hamk%nspinor*(iband-1)+1:gs_hamk%nspinor*iband)
 
-   call getcprj(1,0,cwavef,cprj_cwavef,&
+   call getcprj(choice,0,cwavef,cprj_cwavef,&
 &    gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
 &    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
 &    gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
