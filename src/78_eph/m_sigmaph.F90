@@ -1579,7 +1579,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! For the time being use mpw1 = 0 because mpw1 is not used in this call to dfpt_cgwf
            ! still it's clear that the treatment of this array must be completely refactored in the DFPT code.
            !
-           ABI_ALLOCATE (band_procs, (nbcalc_ks))
+           ABI_MALLOC (band_procs, (nbcalc_ks))
            call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ik_ibz,1,nbcalc_ks,&
 &               mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
@@ -1634,7 +1634,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            end do ! ib_k
 
-           ABI_DEALLOCATE (band_procs)
+           ABI_FREE (band_procs)
 
            ABI_FREE(cgq)
            ABI_FREE(gscq)

@@ -1397,12 +1397,12 @@ print *, ' getdc1, after sum band_ band ierr ', band_, band, ierr
 
  end do ! procs in my band pool
 
- ABI_DEALLOCATE(dummy)
- ABI_DEALLOCATE(scprod)
- ABI_DEALLOCATE(dcwavef_tmp)
+ ABI_FREE(dummy)
+ ABI_FREE(scprod)
+ ABI_FREE(dcwavef_tmp)
  if (optcprj == 1) then
    call pawcprj_free(dcwaveprj_tmp)
-   ABI_DATATYPE_DEALLOCATE(dcwaveprj_tmp)
+   ABI_DATATYPE_FREE(dcwaveprj_tmp)
  end if
 
  DBG_EXIT("COLL")

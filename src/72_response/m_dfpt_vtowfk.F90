@@ -503,7 +503,7 @@ print *,'vtowfk after corrmetal iband, cwave1 ', iband, cwave1(:,1:5)
 ii = (iband-1)*nband_k*2
 print *, 'vtowfk iband, eig1_k ', iband, eig1_k(ii+1:ii+min(10,nband_k))
 #endif
-       ABI_DEALLOCATE (cycle_bands)
+       ABI_FREE (cycle_bands)
      else
        tocceig=0
        call cg_zcopy(npw1_k*nspinor,cwavef,cwave1)
@@ -1010,7 +1010,7 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
 !At this stage, the 1st order function cwavef is orthogonal to cgq (unlike when it is input to dfpt_cgwf).
 !Here, restore the "active space" content of the 1st-order wavefunction, to give cwave1 .
 
- ABI_ALLOCATE(cwcorr,(2,npw1*nspinor))
+ ABI_MALLOC(cwcorr,(2,npw1*nspinor))
 
  wf_corrected=0
 

@@ -459,7 +459,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 
  mcg=dtset%mpw*dtset%nspinor*dtset%mband_mem*dtset%mkmem*dtset%nsppol
- ABI_ALLOCATE(cg,(2,mcg))
+ ABI_MALLOC(cg,(2,mcg))
  !ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
  ABI_MALLOC(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -468,13 +468,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 print *, 'respfn dtset%mkmem ', dtset%mkmem
 ! Initialize the wave function type and read GS WFK
- ABI_ALLOCATE(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
+ ABI_MALLOC(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
  distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
  call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spaceworld, dtset%ecut*(dtset%dilatmx)**2, &
 &          formeig, dtset%istwfk, dtset%kptns, mcg, dtset%mband, dtset%mband_mem,dtset%mkmem,dtset%mpw,&
 &          dtset%natom, dtset%nkpt, npwarr, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg, eigen=eigen0, pawrhoij=hdr%pawrhoij)
- ABI_DEALLOCATE(distrb_flags)
+ ABI_FREE(distrb_flags)
 
  if (psps%usepaw==1.and.ireadwf0==1) then
 !  if parallelism, pawrhoij is distributed, hdr%pawrhoij is not

@@ -142,7 +142,7 @@ subroutine cleanup_Lanczos_basis()
 ! *************************************************************************
 
 ! if(allocated()) ABI_FREE() can cause a segfault if used in this form, without the THEN.
-! This is because ABI_ALLOCATE is expanded at compilation time in many statements; and the if() can only prevent the execution of
+! This is because ABI_MALLOC is expanded at compilation time in many statements; and the if() can only prevent the execution of
 ! the first.
 ! So, the deallocation takes place even if allocated() returns .false. without the THEN.
 if (allocated(Lbasis_lanczos))  then

@@ -838,9 +838,9 @@ subroutine proc_distrb_cycle_bands(cycle_bands,distrb,ikpt,isppol,me)
 ! *************************************************************************
 
  if (allocated(cycle_bands)) then
-   ABI_DEALLOCATE (cycle_bands)
+   ABI_FREE (cycle_bands)
  end if
- ABI_ALLOCATE (cycle_bands, (size(distrb, 2)))
+ ABI_MALLOC (cycle_bands, (size(distrb, 2)))
  cycle_bands=.false.
  if (allocated(distrb)) then
    if (isppol==-1) then
@@ -884,9 +884,9 @@ subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
 ! *************************************************************************
 
  if (allocated(kpt_band_procs)) then
-    ABI_DEALLOCATE (kpt_band_procs)
+    ABI_FREE (kpt_band_procs)
  end if
- ABI_ALLOCATE (kpt_band_procs, (size(distrb, 2)))
+ ABI_MALLOC (kpt_band_procs, (size(distrb, 2)))
  kpt_band_procs=-1
  if (allocated(distrb)) then
    if (isppol==-1) then
@@ -2319,7 +2319,7 @@ print *, ' spacecomm,nrank,ranks ', spacecomm,nrank,ranks, '    me_band ', mpi_e
 print *, ' mpi_enreg%comm_band me ', mpi_enreg%comm_band, mpi_enreg%me_band
 #endif
 
-   ABI_DEALLOCATE(ranks)
+   ABI_FREE(ranks)
 
  end if
 

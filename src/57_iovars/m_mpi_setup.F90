@@ -615,7 +615,7 @@ print *,  'bandpp ', dtsets(idtset)%bandpp
          if(nkpt_me>nkpt)nkpt_me=nkpt
 
 !        mband_mem
-         ABI_ALLOCATE (mybands, (mband_upper))
+         ABI_MALLOC (mybands, (mband_upper))
          mband_mem = 0
          do isppol=1,nsppol
            do iikpt=1,nkpt
@@ -628,7 +628,7 @@ print *,  'bandpp ', dtsets(idtset)%bandpp
              mband_mem = max(mband_mem, sum(mybands))
            end do ! iikpt
          end do ! isppol
-         ABI_DEALLOCATE (mybands)
+         ABI_FREE (mybands)
        end if ! response case
      end if
    end if

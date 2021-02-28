@@ -1944,8 +1944,8 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
  nband_disk   = Wfk%nband(ik_ibz,spin)
  nb_block     = (band_block(2) - band_block(1) + 1)
  npw_tot      = npw_disk * nspinor_disk * nb_block
- ABI_ALLOCATE (eig_buffer, (2*nband_disk))
- ABI_ALLOCATE (cg_buffer, (2,npw_disk*nspinor_disk))
+ ABI_MALLOC (eig_buffer, (2*nband_disk))
+ ABI_MALLOC (cg_buffer, (2,npw_disk*nspinor_disk))
  if (PRESENT(kg_k)) then
    ABI_CHECK(SIZE(kg_k,DIM=2) >= npw_disk,"kg_k too small")
 #ifdef DEV_MJV
@@ -2349,8 +2349,8 @@ print *, ' bufsz sc_mode, xmpio_collective, xmpio_single ', bufsz, sc_mode, xmpi
    ABI_ERROR(sjoin('Wrong value of iomode:', itoa(Wfk%iomode)))
  end select
 
- ABI_DEALLOCATE (eig_buffer)
- ABI_DEALLOCATE (cg_buffer)
+ ABI_FREE (eig_buffer)
+ ABI_FREE (cg_buffer)
 
  DBG_EXIT("COLL")
 
@@ -3300,9 +3300,9 @@ print *, 'fform ', ask_accurate
  cryst = wfk_disk%hdr%get_crystal(itimrev + 1)
 
  sppoldbl = 1
- ABI_ALLOCATE (rbz2disk, (sppoldbl*nkpt_in, 6))
+ ABI_MALLOC (rbz2disk, (sppoldbl*nkpt_in, 6))
 
- ABI_ALLOCATE (symrelT, (3,3,cryst%nsym))
+ ABI_MALLOC (symrelT, (3,3,cryst%nsym))
 ! TODO: from Matteo, this should be symrel straight, not transposed. Perhaps the logic in mapkptsets is transposed?
  do isym=1,cryst%nsym
    symrelT(:,:,isym) = transpose(cryst%symrel(:,:,isym))
@@ -3358,10 +3358,10 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
 ! prepare offsets for k-points, which could arrive in a random order from the irred k
 ! these are valid in the output arrays, not in the disk file
 !TODO: if nband_me is not constant over the k-points, this becomes a huge pain to predict...
- ABI_ALLOCATE(icg, (nkpt_in,nsppol))
- ABI_ALLOCATE(ikg, (nkpt_in))
- ABI_ALLOCATE(ibdeig, (nkpt_in,nsppol))
- ABI_ALLOCATE(ibdocc, (nkpt_in,nsppol))
+ ABI_MALLOC(icg, (nkpt_in,nsppol))
+ ABI_MALLOC(ikg, (nkpt_in))
+ ABI_MALLOC(ibdeig, (nkpt_in,nsppol))
+ ABI_MALLOC(ibdocc, (nkpt_in,nsppol))
  icg = 0
  ikg = 0
  ibdeig = 0
@@ -3758,10 +3758,10 @@ print *, 'formeig,outpath, mkmem_in ', formeig, outpath, mkmem_in
    kg => kg_in
  end if
 
- ABI_ALLOCATE(icg, (nkpt_in,nsppol_in))
- ABI_ALLOCATE(ikg, (nkpt_in))
- ABI_ALLOCATE(ibdeig, (nkpt_in,nsppol_in))
- ABI_ALLOCATE(ibdocc, (nkpt_in,nsppol_in))
+ ABI_MALLOC(icg, (nkpt_in,nsppol_in))
+ ABI_MALLOC(ikg, (nkpt_in))
+ ABI_MALLOC(ibdeig, (nkpt_in,nsppol_in))
+ ABI_MALLOC(ibdocc, (nkpt_in,nsppol_in))
  icg = 0
  ikg = 0
  ibdeig = 0
@@ -3868,13 +3868,13 @@ print *, 'no occ, could be printing RF WFK formeig ', formeig
 
  call cwtime_report(" MY_KPT_BANDS part of WFK written to file. ", cpu, wall, gflops)
 
- ABI_DEALLOCATE(icg)
- ABI_DEALLOCATE(ikg)
- ABI_DEALLOCATE(ibdeig)
- ABI_DEALLOCATE(ibdocc)
+ ABI_FREE(icg)
+ ABI_FREE(ikg)
+ ABI_FREE(ibdeig)
+ ABI_FREE(ibdocc)
  if (mkmem_in == 0) then
-   ABI_DEALLOCATE(cg)
-   ABI_DEALLOCATE(kg)
+   ABI_FREE(cg)
+   ABI_FREE(kg)
  end if
 
 end subroutine wfk_write_my_kptbands

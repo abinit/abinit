@@ -812,7 +812,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                  gh2c = gh2c - eig_k*gs2c
                end if
                ideg = efmasdeg(ikpt)%ideg(iband)
-               ABI_ALLOCATE( ch2c_tmp, (size(efmasval(ideg,ikpt)%ch2c, dim=3)) )
+               ABI_MALLOC( ch2c_tmp, (size(efmasval(ideg,ikpt)%ch2c, dim=3)) )
 
 ! share gh2c
                call xmpi_bcast(gh2c, band_procs(iband), mpi_enreg%comm_band,ierr)
@@ -838,7 +838,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                !mpi_sum ch2c_tmp to get all jband contribs 
                call xmpi_sum(ch2c_tmp,mpi_enreg%comm_band,ierr)
                efmasval(ideg,ikpt)%ch2c(mu,nu,:,isub)=ch2c_tmp(:)
-               ABI_DEALLOCATE( ch2c_tmp )
+               ABI_FREE( ch2c_tmp )
              end do ! nu
            end do ! mu
          end do ! iband_
