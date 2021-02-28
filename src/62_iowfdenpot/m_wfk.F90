@@ -381,7 +381,7 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
      Wfk%fname = nctk_ncify(fname)
    end if
    if (.not. file_exists(Wfk%fname)) then
-     MSG_ERROR('Missing data file: '//TRIM(Wfk%fname))
+     ABI_ERROR('Missing data file: '//TRIM(Wfk%fname))
    end if
  end if
 
@@ -2316,7 +2316,7 @@ print *, ' bufsz sc_mode, xmpio_collective, xmpio_single ', bufsz, sc_mode, xmpi
        ABI_ERROR("Don't pass occ_k when formeig==1 and ETSF-IO")
      end if
      if (present(eig_k)) then
-!       MSG_WARNING("Don't pass eig_k when formeig==1 and ETSF-IO")
+!       ABI_WARNING("Don't pass eig_k when formeig==1 and ETSF-IO")
 
        NCF_CHECK(nf90_inq_varid(wfk%fh, "h1_matrix_elements", h1_varid))
        if (sc_mode == xmpio_collective .and. wfk%nproc > 1) then
@@ -3231,7 +3231,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
      inpath = nctk_ncify(inpath)
    end if
    if (.not. file_exists(inpath)) then
-     MSG_ERROR('Missing data file: '//TRIM(inpath))
+     ABI_ERROR('Missing data file: '//TRIM(inpath))
    end if
  end if
 

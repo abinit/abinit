@@ -757,7 +757,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          "message: |",ch10,&
          '    nstep ',nstep,' was not enough SCF cycles to converge.',ch10,&
          "..."
-           !MSG_WARNING_CLASS(message, "ScfConvergenceWarning")
+           !ABI_WARNING_CLASS(message, "ScfConvergenceWarning")
        else
          write(message, '(a,a,a,a,i5,a)' ) ch10,&
          ' scprqt:  WARNING -',ch10,&
@@ -767,7 +767,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          "--- !NscfConvergenceWarning",ch10,&
          "message: |",ch10,TRIM(indent(message)),ch10,&
          "..."
-           !MSG_WARNING_CLASS(message, "NScfConvergenceWarning")
+           !ABI_WARNING_CLASS(message, "NScfConvergenceWarning")
        end if
        call wrtout([std_out, ab_out], message)
 

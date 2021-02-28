@@ -993,7 +993,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
            if ((det_inv_smat == 10).or.(det_inv_smat == 11)) then
 
              if (sqrt(dtm_k(1)*dtm_k(1) + dtm_k(2)*dtm_k(2)) < tol12) then
-               ! EB: the MSG_BUG has been replaced here by what is done in 67_common/m_cgwf.F90
+               ! EB: the ABI_BUG has been replaced here by what is done in 67_common/m_cgwf.F90
                ! This avoid the code to stop for phonons under E-field too.
                ! TODO: Since the same is done in m_cgwf.F90 and in m_berryphase_new.F90,
                ! rationalization should be done with one single module.

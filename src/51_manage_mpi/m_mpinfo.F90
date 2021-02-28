@@ -848,7 +848,7 @@ subroutine proc_distrb_cycle_bands(cycle_bands,distrb,ikpt,isppol,me)
 !   could return an OR of the two spin channels, if appropriate
      cycle_bands=(distrb(ikpt,:,1)/=me)
      write (msg, "(a)") " for the moment proc_distrb_cycle_bands does not handle the 'any spin' option nsppol -1"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      cycle_bands=(distrb(ikpt,:,isppol)/=me)
    end if
@@ -893,7 +893,7 @@ subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
 ! TODO : should raise error here - the output rank will be all wrong for isppol 2!
      kpt_band_procs=distrb(ikpt,:,1)
      write (msg, "(a)") " for the moment proc_distrb_kptband does not handle the 'any spin' option nsppol -1"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      kpt_band_procs=distrb(ikpt,:,isppol)
    end if
