@@ -97,6 +97,7 @@ type, public :: dataset_type
  integer :: chkprim
  integer :: chksymbreak
  integer :: cineb_start
+ integer :: cprj_update_lvl
  integer :: delayperm
  integer :: densfor_pred
  integer :: diismemory
@@ -1315,6 +1316,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chkprim            = dtin%chkprim
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%cineb_start        = dtin%cineb_start
+ dtout%cprj_update_lvl    = dtin%cprj_update_lvl
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
  dtout%dmatpuopt          = dtin%dmatpuopt
@@ -3057,7 +3059,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
  list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim'
- list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
+ list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients constraint_kind cprj_update_lvl cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'

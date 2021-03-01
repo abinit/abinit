@@ -1024,7 +1024,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
    ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
    ncpgr=0
-   if (compute_cprj.or.dtset%usefock==1) then
+   if (dtset%usefock==1) then ! Note that compute_cprj = false if usefock/=0
      if (dtset%optforces == 1) then
        ncpgr = 3
      end if
@@ -1036,12 +1036,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
    call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
    if (compute_cprj) then
-     if (dtset%optforces/=1) then
-       choice=1 ! no derivative
-     else
-       choice=2 ! forces
-     end if
-     idir        = 0 ! all directions
+     choice      = 1 ! no derivative...
+     idir        = 0 ! ...so no direction
      iatom       = 0 ! all atoms
      iorder_cprj = 0 ! ordered by atom types
      ncprj       = dtset%natom

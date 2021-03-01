@@ -189,7 +189,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout),target :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
- logical :: has_fock,newlobpcg,enable_cgwf_paw
+ logical :: has_fock,newlobpcg,enable_cgwf_paw,update_cprj
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -422,9 +422,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
 !      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
        if (enable_cgwf_paw) then
-         call cgwf_paw(cg,cprj_cwavef_bands,eig_k,&
+         call cgwf_paw(cg,cprj_cwavef_bands,dtset%cprj_update_lvl,eig_k,&
 &         gs_hamk,icg,inonsc,mcg,mpi_enreg,nband_k,dtset%nline,npw_k,my_nspinor,&
-&         optforces,dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
+&         dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
        else
          call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
 &         gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
@@ -563,6 +563,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  call timab(39,2,tsec)
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
 
+ if (enable_cgwf_paw) then
+   update_cprj=dtset%cprj_update_lvl/=2.and.dtset%cprj_update_lvl<=3
+   if (update_cprj) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg)
+ end if
+
 !###################################################################
 
 !Compute kinetic energy and non-local energy for each band, and in the SCF
@@ -582,10 +587,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  else
    choice=2*optforces
    paw_opt=2;cpopt=0;tim_nonlop=10-8*optforces
-   if (enable_cgwf_paw) then
-     cpopt=2
-     if (optforces>0) cpopt=4
-   end if
+   if (enable_cgwf_paw) cpopt=2 ! cprj are in memory (but not the derivatives)
    if (dtset%usefock==1) then
 !     if (dtset%optforces/= 0) then
      if (optforces/= 0) then
@@ -658,7 +660,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !TODO: xmpi_sum is missing but I have to understand the logic used to deal with the different
 !MPI options and communicators.
 #endif
-
 
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
@@ -825,6 +826,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
    end if ! End of SCF calculation
 
+
 !    Call to nonlocal operator:
 !    - Compute nonlocal forces from most recent wfs
 !    - PAW: compute projections of WF onto NL projectors (cprj)
@@ -839,9 +841,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !&         mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
 !         call timab(572,2,tsec)
 !       else
-         call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k(1+(iblock-1)*blocksize:iblock*blocksize),&
-&         mpi_enreg,blocksize,nnlout,&
-&         paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
+       call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k(1+(iblock-1)*blocksize:iblock*blocksize),&
+&       mpi_enreg,blocksize,nnlout,&
+&       paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
 !       end if
 !      Acccumulate forces
        iband=(iblock-1)*blocksize

@@ -121,16 +121,16 @@ contains
 !!
 !! SOURCE
 
-subroutine cgwf_paw(cg,cprj_cwavef_bands,eig,&
+subroutine cgwf_paw(cg,cprj_cwavef_bands,cprj_update_lvl,eig,&
 &                gs_hamk,icg,inonsc,&
 &                mcg,mpi_enreg,&
 &                nband,nline,npw,&
-&                nspinor,optforces,ortalg,prtvol,quit,resid,subham,&
+&                nspinor,ortalg,prtvol,quit,resid,subham,&
 &                tolrde,tolwfr,wfoptalg)
 !Arguments ------------------------------------
- integer,intent(in) :: icg,inonsc
+ integer,intent(in) :: cprj_update_lvl,icg,inonsc
  integer,intent(in) :: mcg,nband,nline
- integer,intent(in) :: npw,nspinor,optforces,ortalg,prtvol
+ integer,intent(in) :: npw,nspinor,ortalg,prtvol
  integer,intent(in) :: wfoptalg
  integer,intent(in) :: quit
  real(dp),intent(in) :: tolrde,tolwfr
@@ -144,7 +144,7 @@ subroutine cgwf_paw(cg,cprj_cwavef_bands,eig,&
 
 !Local variables-------------------------------
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
-integer,parameter :: tim_getcsc=3,tim_fourwf=40
+integer,parameter :: tim_getcsc=3
  integer,save :: nskip=0
  integer :: choice,counter,cpopt
  integer :: i1,i2,i3,iband,isubh,isubh0,jband,me_g0,igs
@@ -153,14 +153,14 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
  integer :: optekin,sij_opt
  integer :: useoverlap,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
- real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,weight_fft,xnorm
+ real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,xnorm
  real(dp) :: dot(2)
  character(len=500) :: message
 ! integer,allocatable :: dimlmn(:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: conjgr(:,:),gvnlxc(:,:),denpot_dum(:,:,:),fofgout_dum(:,:)
+ real(dp),allocatable :: conjgr(:,:),gvnlxc(:,:)
  real(dp), pointer :: cwavef(:,:),cwavef_left(:,:),cwavef_bands(:,:)
- real(dp), pointer :: cwavef_fft1(:,:),cwavef_fft2(:,:),direc_fft1(:,:),direc_fft2(:,:)
+! real(dp), pointer :: cwavef_fft1(:,:),cwavef_fft2(:,:),direc_fft1(:,:),direc_fft2(:,:)
  real(dp), allocatable :: cwavef_r(:,:,:,:,:)
 ! real(dp),allocatable,target :: cwavef_r_bands(:,:,:,:,:)
  real(dp),allocatable,target :: direc(:,:)
@@ -189,8 +189,6 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
 
  cpopt = 2
 
- weight_fft = one
-
 !Initializations and allocations
 
  istwf_k=gs_hamk%istwf_k
@@ -218,15 +216,9 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
  n4=gs_hamk%ngfft(4);n5=gs_hamk%ngfft(5);n6=gs_hamk%ngfft(6)
  ABI_ALLOCATE(cwavef_r,(2,n4,n5,n6,nspinor))
  ABI_ALLOCATE(direc_r, (2,n4,n5,n6,nspinor))
- ABI_ALLOCATE(denpot_dum, (0,0,0))
- ABI_ALLOCATE(fofgout_dum, (0,0))
 
  ncpgr  = 0 ! no need of gradients here...
  choice = 1
- if (optforces==1) then
-   choice = 2
-   ncpgr  = 3 ! ...unless forces are computed at every step
- end if
 
  call pawcprj_alloc(cprj_direc,ncpgr,gs_hamk%dimcprj)
  call pawcprj_alloc(cprj_conjgr,ncpgr,gs_hamk%dimcprj)
@@ -255,6 +247,7 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
    ! Extraction of the vector that is iteratively updated
    cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
    cprj_cwavef => cprj_cwavef_bands(:,nspinor*(iband-1)+1:nspinor*iband)
+   if (cprj_update_lvl<0) call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
 
    ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
    ! WARNING : It might be interesting to skip the following operation.
@@ -273,20 +266,7 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
    call timab(1302,2,tsec)
 
    ! Compute wavefunction in real space
-   if (nspinor==1) then
-     cwavef_fft1 => cwavef
-   else
-     cwavef_fft1 => cwavef(:,1:npw)
-     cwavef_fft2 => cwavef(:,1+npw:2*npw)
-   end if
-   call fourwf(0,denpot_dum,cwavef_fft1,fofgout_dum,cwavef_r(:,:,:,:,1),gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
-&    gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
-&    n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
-   if (nspinor==2) then
-     call fourwf(0,denpot_dum,cwavef_fft2,fofgout_dum,cwavef_r(:,:,:,:,2),gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
-&      gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
-&      n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
-   end if
+   call get_cwavefr(cwavef,cwavef_r,gs_hamk,mpi_enreg)
 
    if (prtvol==-level) then
      write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
@@ -379,11 +359,7 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
        ! direc(2,npw)=<G|H|Cnk> - \sum_{(i<=n)} <G|H|Cik> , normalized.
        if(ortalg>=0)then
          call timab(1203,1,tsec)
-         call getcprj(choice,0,direc,cprj_direc,&
-&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
-&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+         call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
          call timab(1203,2,tsec)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &         gs_hamk,mpi_enreg,nband,tim_getcsc)
@@ -421,11 +397,7 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
        ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
        ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
        call timab(1203,1,tsec)
-       call getcprj(choice,0,direc,cprj_direc,&
-&       gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&       gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
-&       gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-&       gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+       call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
        call timab(1203,2,tsec)
        call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &       gs_hamk,mpi_enreg,nband,tim_getcsc)
@@ -554,22 +526,9 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
        xnorm=one/sqrt(abs(dot(1)))
 
        sij_opt=0
-       ! Compute dhc = Re{<D|H|C>}
        ! Compute direc in real space
-       if (nspinor==1) then
-         direc_fft1 => direc
-       else
-         direc_fft1 => direc(:,1:npw)
-         direc_fft2 => direc(:,npw+1:2*npw)
-       end if
-       call fourwf(0,denpot_dum,direc_fft1,fofgout_dum,direc_r(:,:,:,:,1),gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
-&        gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
-&        n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
-       if (nspinor==2) then
-         call fourwf(0,denpot_dum,direc_fft2,fofgout_dum,direc_r(:,:,:,:,2),gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
-&          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
-&          n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
-       end if
+       call get_cwavefr(direc,direc_r,gs_hamk,mpi_enreg)
+       ! Compute dhc = Re{<D|H|C>}
        call getchc(z_tmp,cpopt,cwavef,direc,cprj_cwavef,cprj_direc,cwavef_r,direc_r,&
          &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
        dhc=z_tmp(1)
@@ -648,9 +607,15 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
          end do
        end do
        call timab(1305,2,tsec)
-       call timab(1302,1,tsec)
-       call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
-       call timab(1302,2,tsec)
+       if (cprj_update_lvl<=0) then
+         call timab(1203,1,tsec)
+         call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
+         call timab(1203,1,tsec)
+       else
+         call timab(1302,1,tsec)
+         call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
+         call timab(1302,2,tsec)
+       end if
 
        ! ======================================================================
        ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
@@ -705,6 +670,8 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
  !  ======================================================================
  !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
  !  ======================================================================
+
+ if (cprj_update_lvl<=2) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
 
  sij_opt=0
  do iband=1,nband
@@ -763,8 +730,6 @@ integer,parameter :: tim_getcsc=3,tim_fourwf=40
  ABI_DEALLOCATE(direc_tmp)
  ABI_DEALLOCATE(cwavef_r)
  ABI_DEALLOCATE(direc_r)
- ABI_DEALLOCATE(denpot_dum)
- ABI_DEALLOCATE(fofgout_dum)
 
 ! Do not delete this line, needed to run with open MP
  write(unit=message,fmt=*) resid(1)
@@ -852,6 +817,34 @@ subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
  end do
 
 end subroutine cprj_update
+!!***
+
+subroutine cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
+
+!Arguments ------------------------------------
+!arrays
+ type(pawcprj_type),intent(inout) :: cprj_cwavef(:,:)
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ type(MPI_type),intent(in) :: mpi_enreg
+ real(dp),intent(inout) :: cwavef(:,:)
+
+!Local variables-------------------------------
+ integer :: choice,wfsize
+
+ wfsize=gs_hamk%npw_k*gs_hamk%nspinor
+
+ choice = 1
+ if (cprj_cwavef(1,1)%ncpgr==3) then
+   choice = 2
+ end if
+
+ call getcprj(choice,0,cwavef,cprj_cwavef,&
+&  gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&  gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+&  gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&  gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+
+end subroutine cprj_update_oneband
 !!***
 
 subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
@@ -993,6 +986,49 @@ subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
  ABI_DATATYPE_DEALLOCATE(cprj_tmp)
 
 end subroutine cprj_check_oneband
+!!***
+
+subroutine get_cwavefr(cwavef,cwavef_r,gs_hamk,mpi_enreg)
+
+!Arguments ------------------------------------
+!arrays
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ type(MPI_type),intent(in) :: mpi_enreg
+ real(dp),intent(in),target :: cwavef(:,:)
+ real(dp),intent(out) :: cwavef_r(:,:,:,:,:)
+
+!Local variables-------------------------------
+ integer,parameter :: tim_fourwf=40
+ integer :: n4,n5,n6,npw
+ real(dp),parameter :: weight_fft = one
+ real(dp), pointer :: cwavef_fft1(:,:),cwavef_fft2(:,:)
+ real(dp),allocatable :: denpot_dum(:,:,:),fofgout_dum(:,:)
+
+ n4=gs_hamk%ngfft(4);n5=gs_hamk%ngfft(5);n6=gs_hamk%ngfft(6)
+ npw=gs_hamk%npw_k
+
+ ABI_ALLOCATE(denpot_dum, (0,0,0))
+ ABI_ALLOCATE(fofgout_dum, (0,0))
+
+ if (gs_hamk%nspinor==1) then
+   cwavef_fft1 => cwavef
+ else
+   cwavef_fft1 => cwavef(:,1:npw)
+   cwavef_fft2 => cwavef(:,1+npw:2*npw)
+ end if
+ call fourwf(0,denpot_dum,cwavef_fft1,fofgout_dum,cwavef_r(:,:,:,:,1),gs_hamk%gbound_k,gs_hamk%gbound_k,gs_hamk%istwf_k,&
+&  gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
+&  n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
+ if (gs_hamk%nspinor==2) then
+   call fourwf(0,denpot_dum,cwavef_fft2,fofgout_dum,cwavef_r(:,:,:,:,2),gs_hamk%gbound_k,gs_hamk%gbound_k,gs_hamk%istwf_k,&
+&    gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
+&    n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
+ end if
+
+ ABI_DEALLOCATE(denpot_dum)
+ ABI_DEALLOCATE(fofgout_dum)
+
+end subroutine get_cwavefr
 !!***
 
 end module m_cgwf_paw
