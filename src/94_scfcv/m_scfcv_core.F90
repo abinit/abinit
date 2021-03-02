@@ -2679,10 +2679,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !  Blanchet Add the energy contribution to the internal energy
    if(associated(hightemp)) then
-     !temp
-     if(mpi_enreg%me==0) then
-       write(0,*) energies%entropy,hightemp%ent_freeel
-     end if
      energies%entropy=energies%entropy+hightemp%ent_freeel
      energies%e_kin_freeel=hightemp%e_kin_freeel
      energies%e_shiftfactor=hightemp%e_shiftfactor

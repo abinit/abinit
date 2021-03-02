@@ -1237,7 +1237,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
        if(hightemp%iopt_pot==2) then
          hightemp%vtrial=vtrial
-         write(0,*) sum(vtrial)/(nfftf*dtset%nspden),hightemp%e_shiftfactor
        end if
      end if
 
