@@ -1402,7 +1402,7 @@ print *, ' getdc1, after sum band_ band ierr ', band_, band, ierr
  ABI_FREE(dcwavef_tmp)
  if (optcprj == 1) then
    call pawcprj_free(dcwaveprj_tmp)
-   ABI_DATATYPE_FREE(dcwaveprj_tmp)
+   ABI_FREE(dcwaveprj_tmp)
  end if
 
  DBG_EXIT("COLL")
