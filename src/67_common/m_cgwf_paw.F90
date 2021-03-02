@@ -165,8 +165,8 @@ integer,parameter :: tim_getcsc=3
 ! real(dp),allocatable,target :: cwavef_r_bands(:,:,:,:,:)
  real(dp),allocatable,target :: direc(:,:)
  real(dp),allocatable :: direc_tmp(:,:),pcon(:),scprod(:,:),scwavef_dum(:,:)
- real(dp),allocatable :: direc_r(:,:,:,:,:)
- real(dp),pointer :: scprod_csc(:),kinpw(:)
+ real(dp),allocatable :: direc_r(:,:,:,:,:),scprod_csc(:)
+ real(dp),pointer :: kinpw(:)
  real(dp) :: z_tmp(2),z_tmp2(2)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:),cprj_cwavef_left(:,:)
  type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_conjgr(:,:)
@@ -726,6 +726,7 @@ integer,parameter :: tim_getcsc=3
  ABI_DEALLOCATE(direc)
  ABI_DEALLOCATE(pcon)
  ABI_DEALLOCATE(scprod)
+ ABI_DEALLOCATE(scprod_csc)
 
  ABI_DEALLOCATE(direc_tmp)
  ABI_DEALLOCATE(cwavef_r)
