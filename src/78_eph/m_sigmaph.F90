@@ -3389,7 +3389,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
      "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
      "ph_intmeth", "eph_intmeth", "qint_method", "eph_transport", &
-     "imag_only", "symv1scf", "dvdb_add_lr", "mrta"])
+     "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
      "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear", "eph_phwinfact"])
