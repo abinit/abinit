@@ -281,7 +281,16 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
    chc = zero
 !  Treat scalar local potentials
    if (gs_ham%nvloc==1) then
-     if (gs_ham%istwf_k/=2) then
+     if (gs_ham%istwf_k==2) then
+       do i3=1,gs_ham%n6
+         do i2=1,gs_ham%n5
+           do i1=1,gs_ham%n4
+             chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3,1)*cwavef_left_r(1,i1,i2,i3,1)
+           end do
+         end do
+       end do
+       chc(2)=zero
+     else
        do ispinor=1,my_nspinor
          do i3=1,gs_ham%n6
            do i2=1,gs_ham%n5
@@ -296,15 +305,6 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
            end do
          end do
        end do
-     else
-       do i3=1,gs_ham%n6
-         do i2=1,gs_ham%n5
-           do i1=1,gs_ham%n4
-             chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3,1)*cwavef_left_r(1,i1,i2,i3,1)
-           end do
-         end do
-       end do
-       chc(2)=zero
      end if
    else ! nvloc = 4
      do ispinor=1,my_nspinor
@@ -320,7 +320,7 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
                  ! Then vloc is real : vloc_uu = vloc(1) and vloc_dd = vloc(2)
                  chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,ispinor)*z_tmp(1)
                  chc(2) = chc(2) + gs_ham%vlocal(i1,i2,i3,ispinor)*z_tmp(2)
-               else if (ispinor==1.and.ispinor_left==2) then ! Psi(left)_d^* Psi_u vloc_ud^*
+               else if (ispinor==1.and.ispinor_left==2) then ! Psi(left)_d^* Psi_u vloc_ud
                  ! Otherwise vloc is complex Re(vloc_ud) = vloc(3)
                  !                           Im(vloc_ud) = vloc(4)
                  !                               vloc_du = (vloc_ud)^*

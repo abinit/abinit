@@ -423,7 +423,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
        if (enable_cgwf_paw) then
          call cgwf_paw(cg,cprj_cwavef_bands,dtset%cprj_update_lvl,eig_k,&
-&         gs_hamk,icg,inonsc,mcg,mpi_enreg,nband_k,dtset%nline,npw_k,my_nspinor,&
+&         gs_hamk,icg,mcg,mpi_enreg,nband_k,dtset%nline,npw_k,my_nspinor,&
 &         dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
        else
          call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
@@ -914,6 +914,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      call pawcprj_free(cwaveprj)
    end if
    ABI_DATATYPE_DEALLOCATE(cwaveprj)
+ else
+   nullify(cwaveprj)
  end if
 
 
@@ -1036,6 +1038,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  if(dtset%optdriver==RUNL_GWLS) then
    call build_H(dtset,mpi_enreg,cpopt,cg,gs_hamk,kg_k,kinpw)
  end if
+
+ if (enable_cgwf_paw) nullify(cprj_cwavef_bands)
 
  if(wfopta10 /= 1 .and. .not. newlobpcg) then
    ABI_DEALLOCATE(evec)

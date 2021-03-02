@@ -122,13 +122,13 @@ contains
 !! SOURCE
 
 subroutine cgwf_paw(cg,cprj_cwavef_bands,cprj_update_lvl,eig,&
-&                gs_hamk,icg,inonsc,&
+&                gs_hamk,icg,&
 &                mcg,mpi_enreg,&
 &                nband,nline,npw,&
 &                nspinor,ortalg,prtvol,quit,resid,subham,&
 &                tolrde,tolwfr,wfoptalg)
 !Arguments ------------------------------------
- integer,intent(in) :: cprj_update_lvl,icg,inonsc
+ integer,intent(in) :: cprj_update_lvl,icg
  integer,intent(in) :: mcg,nband,nline
  integer,intent(in) :: npw,nspinor,ortalg,prtvol
  integer,intent(in) :: wfoptalg
@@ -146,7 +146,7 @@ subroutine cgwf_paw(cg,cprj_cwavef_bands,cprj_update_lvl,eig,&
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
 integer,parameter :: tim_getcsc=3
  integer,save :: nskip=0
- integer :: choice,counter,cpopt
+ integer :: choice,cpopt
  integer :: i1,i2,i3,iband,isubh,isubh0,jband,me_g0,igs
  integer :: iline,ipw,ispinor,istwf_k
  integer :: n4,n5,n6,natom,ncpgr
@@ -154,19 +154,16 @@ integer,parameter :: tim_getcsc=3
  integer :: useoverlap,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
  real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,xnorm
- real(dp) :: dot(2)
  character(len=500) :: message
-! integer,allocatable :: dimlmn(:)
+!arrays
+ real(dp) :: dot(2)
  real(dp) :: tsec(2)
  real(dp),allocatable :: conjgr(:,:),gvnlxc(:,:)
  real(dp), pointer :: cwavef(:,:),cwavef_left(:,:),cwavef_bands(:,:)
-! real(dp), pointer :: cwavef_fft1(:,:),cwavef_fft2(:,:),direc_fft1(:,:),direc_fft2(:,:)
  real(dp), allocatable :: cwavef_r(:,:,:,:,:)
-! real(dp),allocatable,target :: cwavef_r_bands(:,:,:,:,:)
  real(dp),allocatable,target :: direc(:,:)
  real(dp),allocatable :: direc_tmp(:,:),pcon(:),scprod(:,:),scwavef_dum(:,:)
  real(dp),allocatable :: direc_r(:,:,:,:,:),scprod_csc(:)
- real(dp),pointer :: kinpw(:)
  real(dp) :: z_tmp(2),z_tmp2(2)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:),cprj_cwavef_left(:,:)
  type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_conjgr(:,:)
@@ -199,7 +196,6 @@ integer,parameter :: tim_getcsc=3
 
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
- kinpw => gs_hamk%kinpw_k
 
  ABI_ALLOCATE(pcon,(npw))
  ABI_ALLOCATE(conjgr,(2,npw*nspinor))
@@ -225,13 +221,8 @@ integer,parameter :: tim_getcsc=3
 
  cwavef_bands => cg(:,1+icg:nband*npw*nspinor+icg)
 
- isubh=1
- isubh0=1
-
  ! Big iband loop
  do iband=1,nband
-
-   counter=100*iband+inonsc
 
    ! ======================================================================
    ! ========== INITIALISATION OF MINIMIZATION ITERATIONS =================
@@ -247,7 +238,7 @@ integer,parameter :: tim_getcsc=3
    ! Extraction of the vector that is iteratively updated
    cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
    cprj_cwavef => cprj_cwavef_bands(:,nspinor*(iband-1)+1:nspinor*iband)
-   if (cprj_update_lvl<0) call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
+   if (cprj_update_lvl<0) call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
 
    ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
    ! WARNING : It might be interesting to skip the following operation.
@@ -381,7 +372,7 @@ integer,parameter :: tim_getcsc=3
        ! If wfoptalg>=10, the precondition matrix is kept constant during iteration ; otherwise it is recomputed
        call timab(1305,1,tsec)
        if (wfoptalg<10.or.iline==1) then
-         call cg_precon(cwavef,zero,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
+         call cg_precon(cwavef,zero,istwf_k,gs_hamk%kinpw_k,npw,nspinor,me_g0,optekin,pcon,direc,mpi_enreg%comm_fft)
        else
          do ispinor=1,nspinor
            igs=(ispinor-1)*npw
@@ -674,6 +665,9 @@ integer,parameter :: tim_getcsc=3
  if (cprj_update_lvl<=2) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
 
  sij_opt=0
+
+ isubh=1
+ isubh0=1
  do iband=1,nband
    cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
    cprj_cwavef => cprj_cwavef_bands(:,nspinor*(iband-1)+1:nspinor*iband)
@@ -715,7 +709,11 @@ integer,parameter :: tim_getcsc=3
  ! FINAL DEALLOCATIONS
  ! ===================
 
+ nullify(cwavef_left)
+ nullify(cwavef_bands)
+ nullify(cwavef)
  nullify(cprj_cwavef)
+ nullify(cprj_cwavef_left)
  call pawcprj_free(cprj_direc)
  call pawcprj_free(cprj_conjgr)
  ABI_DATATYPE_DEALLOCATE(cprj_direc)
@@ -755,7 +753,7 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
 !Local variables-------------------------------
  integer,parameter :: tim_getcsc=4
  integer :: cpopt,iband,isubh,nspinor,wfsize
- real(dp), pointer :: cwavef(:,:),cwavef_left(:,:)
+ real(dp),pointer :: cwavef(:,:),cwavef_left(:,:)
  real(dp),pointer :: cwavef_bands(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:),cprj_cwavef_left(:,:)
 
