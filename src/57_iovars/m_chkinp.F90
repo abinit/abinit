@@ -954,7 +954,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
      if (dt%eph_stern /= 0) then
        ! Check requirements for Sternheimer.
-       ABI_ERROR_NOSTOP(dt%tolwfr == zero, "tolwfr must be specified when eph_stern /= 0", ierr)
+       if (dt%tolwfr == zero) then
+         ABI_ERROR_NOSTOP("tolwfr must be specified when eph_stern /= 0", ierr)
+       end if
        if (dt%getpot_filepath == ABI_NOFILE) then
          ABI_ERROR_NOSTOP(" getpot_filepath is required when eph_stern /= 0", ierr)
        end if
