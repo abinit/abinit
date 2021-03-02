@@ -41,7 +41,7 @@ MODULE m_xmpi
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
- use m_clib, only : clib_ulimit_stack, clib_usleep
+ use m_clib, only : clib_ulimit_stack !, clib_usleep
 
  implicit none
 
@@ -951,7 +951,7 @@ subroutine xmpi_abort(comm, mpierr, msg, exit_status)
  !  write(std_out,'(2a)')" MPI_ERROR_STRING: ",TRIM(mpi_msg_error)
  !end if
 
- ierr = clib_usleep(300000_c_int32_t)
+ !ierr = clib_usleep(300000_c_int32_t)
  call MPI_ABORT(my_comm, my_errorcode, ierr)
 #endif
 

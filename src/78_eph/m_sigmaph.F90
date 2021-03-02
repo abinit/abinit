@@ -3485,10 +3485,10 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
      "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", &
      "symdynmat", "ph_intmeth", "eph_intmeth", "qint_method", &
-     "eph_transport", "imag_only", "symv1scf", "dvdb_add_lr", "mrta"], &
+     "eph_transport", "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep"], &
      [dtset%eph_task, self%symsigma, self%nbsum, self%bsum_start, self%bsum_stop, &
      dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, self%qint_method, &
-     dtset%eph_transport, ii, dtset%symv1scf, dtset%dvdb_add_lr, self%mrta])
+     dtset%eph_transport, ii, dtset%symv1scf, dtset%dvdb_add_lr, self%mrta, dtset%ibte_prep])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
      "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear", "eph_phwinfact"], &
@@ -4986,7 +4986,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  end if
 
  if (dtset%ibte_prep > 0) then
-   call wrtout(std_out, "Writing scattering matrix elements to disk...")
+   call wrtout(std_out, " Writing scattering matrix elements to disk...")
    ! Get ncid of group used to store scattering rate (ragged array implemented with groups).
    ! FIXME: Unfortunately, this algo cannot be used if parallelism over kcalc/spin is on since
    ! we have to change the metadata at runtime.

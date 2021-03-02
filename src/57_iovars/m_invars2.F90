@@ -252,8 +252,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol,ixc_current
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,natomcor,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
- integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key, tread_extrael
- integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image
+ integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
+ integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
@@ -1415,8 +1415,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
  if(tread==1) dtset%asr=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
- if(tread==1) dtset%dipdip=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread_dipdip,'INT')
+ if(tread_dipdip==1) dtset%dipdip=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
  if(tread==1) dtset%chneut=intarr(1)
@@ -1674,7 +1674,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%ionmov=12
    write(msg, '(4a)' )&
      'LOTF is disabled, ionmov can not be 23.',ch10,&
-    'Set ionmov to 12.',ch10
+     'Set ionmov to 12.',ch10
    ABI_COMMENT(msg)
 #endif
  end if
@@ -3565,7 +3565,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ! band range for self-energy corrections.
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_erange', tread, 'ENE')
- if (tread == 1) dtset%sigma_erange = dprarr(1:2)
+ if (tread == 1) then
+   dtset%sigma_erange = dprarr(1:2)
+   !if (all(dtset%sigma_erange < zero) .and. .not. tread_dipdip == 1) dtset%dipdip = 0
+ end if
 
  ! IBZ k-points for transport calculation in terms of transport_ngkpt
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'transport_ngkpt', tread, 'INT')
