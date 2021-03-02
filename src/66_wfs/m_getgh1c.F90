@@ -1315,7 +1315,7 @@ print *, ' getdc1 check ', band, ibgq,icgq, ' s1cwave0 ', any(isnan(s1cwave0))
  ABI_MALLOC(scprod,(2,nband_me))
  ABI_MALLOC(dcwavef_tmp,(2,npw1*nspinor))
  if (optcprj == 1) then
-   ABI_DATATYPE_ALLOCATE(dcwaveprj_tmp,(natom,nspinor*optcprj))
+   ABI_MALLOC(dcwaveprj_tmp,(natom,nspinor*optcprj))
    call pawcprj_alloc(dcwaveprj_tmp, 0, dcwaveprj(:,1)%nlmn)
  end if
 
