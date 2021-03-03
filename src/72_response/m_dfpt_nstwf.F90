@@ -1678,10 +1678,10 @@ print *, 'nstpaw d2ovl_drho(1,idir1,ipert1,idir,ipert) ', idir1,ipert1,idir,iper
      ABI_FREE(dnhat1)
      ABI_FREE(drho1wfr)
      do iatom=1,my_natom
-       if (pawfgrtab(iatom)%nhatfr_MALLOCd>0)  then
+       if (pawfgrtab(iatom)%nhatfr_allocated>0)  then
          ABI_FREE(pawfgrtab(iatom)%nhatfr)
        end if
-       pawfgrtab(iatom)%nhatfr_MALLOCd=0
+       pawfgrtab(iatom)%nhatfr_allocated=0
      end do
      if (paral_atom) then
        do kdir1=1,mdir1
