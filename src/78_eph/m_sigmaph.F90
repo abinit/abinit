@@ -4439,7 +4439,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ABI_FREE(mask_qibz_k)
 
        if (my_rank == master) then
-         write(std_out, "(a, 2(es16.6,1x))")" Removing q-points with integration weights < ", dtset%eph_tols_idelta / ndiv
+         !write(std_out, "(a, 2(es16.6,1x))")" Removing q-points with integration weights < ", dtset%eph_tols_idelta / ndiv
          write(std_out, "(a,i0,a,f5.1,a)")" Total number of q-points contributing to Im(Sigma(eKS)): ", nqeff, &
            " (nqeff / nqibz_k): ", (100.0_dp * nqeff) / self%nqibz_k, " [%]"
        end if
