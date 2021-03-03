@@ -1244,7 +1244,6 @@ print *, ' cwavef 1174 ', cwavef(:,1:5)
      end if
    end if
 
-<<<<<<< HEAD
    ABI_FREE(gh_direc)
    ABI_FREE(gvnlx_direc)
    ABI_FREE(sconjgr)
