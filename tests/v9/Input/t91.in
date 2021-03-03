@@ -39,7 +39,7 @@ pseudos = "Al.LDA-PW-paw.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t91.out, tolnlines = 55, tolabs = 1.0E-5, tolrel = 1.0E-5;
+#%%   t91.out, tolnlines = 55, tolabs = 1.0E-3, tolrel = 1.0E-3;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
