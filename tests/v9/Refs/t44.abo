@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 18 Feb 2021.
-- ( at 09h49 )
+.Starting date : Thu  4 Mar 2021.
+- ( at 09h57 )
   
 - input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
@@ -701,9 +701,9 @@ tolerances: {tolwfr: 1.00E-20, }
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
  
- Orb Mag(   1) : real, imag  -5.66774368E-04  0.00000000E+00
- Orb Mag(   2) : real, imag   1.71027607E-09  0.00000000E+00
- Orb Mag(   3) : real, imag   3.75896871E-09  0.00000000E+00
+ Orb Mag(   1) : real, imag  -8.50293569E-04  0.00000000E+00
+ Orb Mag(   2) : real, imag   3.08379766E-09  0.00000000E+00
+ Orb Mag(   3) : real, imag   7.83278721E-09  0.00000000E+00
  
 ====================================================
  
@@ -713,9 +713,9 @@ tolerances: {tolwfr: 1.00E-20, }
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
  
- C(   1) : real, imag  -1.90127836E-04  0.00000000E+00
- C(   2) : real, imag   9.41653978E-10  0.00000000E+00
- C(   3) : real, imag   1.99758584E-09  0.00000000E+00
+ C(   1) : real, imag  -1.50118922E-02  0.00000000E+00
+ C(   2) : real, imag   7.43500161E-08  0.00000000E+00
+ C(   3) : real, imag   1.57723059E-07  0.00000000E+00
  
 ====================================================
  
@@ -941,10 +941,10 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.5
+- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.6
  
 ================================================================================
  
  Calculation completed.
 .Delivered  10 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.3  wall=          5.5
++Overall time at end (sec) : cpu=          5.3  wall=          5.6
