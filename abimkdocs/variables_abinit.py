@@ -12988,7 +12988,7 @@ Variable(
 ([[kptopt]] == 3 or [[kptopt]] == 0) """,
     added_in_version="before_v9",
     text=r"""
-Compute quantities related to orbital magnetization. The
+Compute quantities related to orbital magnetic moment. The
     implementation assumes an insulator, so no empty or partially
     filled bands, and currently restricted to [[nspinor]] 1. Such
     insulators have orbital magnetization zero, except in the presence
@@ -12996,11 +12996,14 @@ Compute quantities related to orbital magnetization. The
     is parallelized over k points only. The implementation follows the
     theory outlined in [[cite:Gonze2011a]] extended to the PAW case;
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
-    standard output file, search for "Orbital magnetization" and "Chern number".
+    standard output file, search for "Orbital magnetic moment".
 
-* [[orbmag]] = 11: Compute orbital magnetization and Chern number (integral of the 
-Berry curvature over the Brillouin zone) using both GS and DDK wavefunctions. This is
+* [[orbmag]] = 11: Compute orbital magnetization and integral of the 
+Berry curvature (Chern number) over the Brillouin zone using both GS and DDK wavefunctions. This is
 the most robust method. 
+* [[orbmag]] = 12: Same as [[orbmag]] 11 but also print out values of each term making up total
+orbital magnetic moment. 
+* [[orbmag]] = 13: Same as [[orbmag]] 12 but print out values of each term for each band.
 * [[orbmag]] = 1: Compute Chern number using discretized wavefunctions. This computation is
 faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
 electronic current.
