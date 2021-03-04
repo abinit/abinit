@@ -621,113 +621,116 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_ent_freeel(this,fermie,tsmear)
+  subroutine compute_ent_freeel(this,fermie,mpi_enreg,tsmear)
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
     real(dp),intent(in) :: fermie,tsmear
+    type(MPI_type),intent(inout) :: mpi_enreg
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifftf,ispden
+    integer :: ii,ifftf,ispden,mpierr
     real(dp) :: ix,step,fn,minocc
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
 
     ! *********************************************************************
-
-    step=one
     this%ent_freeel=zero
-    if(this%version==1) then
-      if(this%iopt_pot==1) then
+    if(mpi_enreg%me==0) then
+      step=one
+      if(this%version==1) then
+        if(this%iopt_pot==1) then
+          ! Dynamic array find size
+          ix=dble(this%bcut)
+          ii=0
+          fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+          minocc=tol16
+          do while(fn>minocc)
+            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+            ii=ii+1
+            ix=ix+step
+          end do
+          ABI_ALLOCATE(valuesent,(ii))
+          ix=dble(this%bcut)
+          ii=0
+          fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+          do while(fn>minocc)
+            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+            ii=ii+1
+            valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
+            ix=ix+step
+          end do
+          if (ii>1) then
+            this%ent_freeel=simpson(step,valuesent)
+          end if
+          ABI_DEALLOCATE(valuesent)
+        else
+          step=one
+          do ifftf=1,this%nfftf
+            do ispden=1,this%nspden
+              ! Dynamic array find size
+              ix=dble(this%bcut)
+              ii=0
+              fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
+              & this%vtrial(ifftf,ispden),fermie,tsmear)
+              minocc=tol16
+              do while(fn>minocc)
+                fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
+                & this%vtrial(ifftf,ispden),fermie,tsmear)
+                ii=ii+1
+                ix=ix+step
+              end do
+              ABI_ALLOCATE(valuesent,(ii))
+              ix=dble(this%bcut)
+              ii=0
+              fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
+              & this%vtrial(ifftf,ispden),fermie,tsmear)
+              do while(fn>minocc)
+                fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
+                & this%vtrial(ifftf,ispden),fermie,tsmear)
+                ii=ii+1
+                valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
+                ix=ix+step
+              end do
+              if (ii>1) then
+                this%ent_freeel=this%ent_freeel+simpson(step,valuesent)/&
+                & (this%nfftf*this%nspden)
+              end if
+              ABI_DEALLOCATE(valuesent)
+            end do
+          end do
+        end if
+      else if(this%version == 2) then
         ! Dynamic array find size
-        ix=dble(this%bcut)
+        ix=this%ebcut
         ii=0
-        fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        fn=fermi_dirac(ix,fermie,tsmear)
         minocc=tol16
         do while(fn>minocc)
-          fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+          fn=fermi_dirac(ix,fermie,tsmear)
           ii=ii+1
           ix=ix+step
         end do
+
         ABI_ALLOCATE(valuesent,(ii))
-        ix=dble(this%bcut)
+        ix=this%ebcut
         ii=0
-        fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        fn=fermi_dirac(ix,fermie,tsmear)
         do while(fn>minocc)
-          fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+          fn=fermi_dirac(ix,fermie,tsmear)
           ii=ii+1
-          valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
+          valuesent(ii)=-(fn*log(fn)+(1.-fn)*log(1.-fn))*&
+          & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
           ix=ix+step
         end do
         if (ii>1) then
           this%ent_freeel=simpson(step,valuesent)
         end if
         ABI_DEALLOCATE(valuesent)
-      else
-        step=one
-        do ifftf=1,this%nfftf
-          do ispden=1,this%nspden
-            ! Dynamic array find size
-            ix=dble(this%bcut)
-            ii=0
-            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
-            & this%vtrial(ifftf,ispden),fermie,tsmear)
-            minocc=tol16
-            do while(fn>minocc)
-              fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
-              & this%vtrial(ifftf,ispden),fermie,tsmear)
-              ii=ii+1
-              ix=ix+step
-            end do
-            ABI_ALLOCATE(valuesent,(ii))
-            ix=dble(this%bcut)
-            ii=0
-            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
-            & this%vtrial(ifftf,ispden),fermie,tsmear)
-            do while(fn>minocc)
-              fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
-              & this%vtrial(ifftf,ispden),fermie,tsmear)
-              ii=ii+1
-              valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
-              ix=ix+step
-            end do
-            if (ii>1) then
-              this%ent_freeel=this%ent_freeel+simpson(step,valuesent)/&
-              & (this%nfftf*this%nspden)
-            end if
-            ABI_DEALLOCATE(valuesent)
-          end do
-        end do
       end if
-    else if(this%version == 2) then
-      ! Dynamic array find size
-      ix=this%ebcut
-      ii=0
-      fn=fermi_dirac(ix,fermie,tsmear)
-      minocc=tol16
-      do while(fn>minocc)
-        fn=fermi_dirac(ix,fermie,tsmear)
-        ii=ii+1
-        ix=ix+step
-      end do
-
-      ABI_ALLOCATE(valuesent,(ii))
-      ix=this%ebcut
-      ii=0
-      fn=fermi_dirac(ix,fermie,tsmear)
-      do while(fn>minocc)
-        fn=fermi_dirac(ix,fermie,tsmear)
-        ii=ii+1
-        valuesent(ii)=-(fn*log(fn)+(1.-fn)*log(1.-fn))*&
-        & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
-        ix=ix+step
-      end do
-      if (ii>1) then
-        this%ent_freeel=simpson(step,valuesent)
-      end if
-      ABI_DEALLOCATE(valuesent)
     end if
+    call xmpi_sum(this%ent_freeel,mpi_enreg%comm_world,mpierr)
   end subroutine compute_ent_freeel
   !!***
 
@@ -812,17 +815,17 @@ contains
         & gprimd(3,1)*kpg1+gprimd(3,2)*kpg2+gprimd(3,3)*kpg3,&
         & kinpw(ipw)
       end do
-      close(23)
+      close(unit)
 
       write(filenameoutpw,'(A,I5.5)') '_PW_EIG_k',ikpt
       open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
       write(unit,'(ES12.5)') eig_k
-      close(23)
+      close(unit)
 
       write(filenameoutpw,'(A,I5.5)') '_PW_KIN_k',ikpt
       open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
       write(unit,'(ES12.5)') ek_k
-      close(23)
+      close(unit)
     end if
 
     ! Parallelism over FFT and/or bands: define sizes and tabs
