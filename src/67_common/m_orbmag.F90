@@ -4879,7 +4879,7 @@ subroutine make_S1trace_k(adir,cprj_k,dtset,ENK,iband,nband_occ,pawtab,S1trace)
           klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
           cpb=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
           cpk=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)
-          S1trace=S1trace+half*j_dpc*epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
+          S1trace=S1trace-half*j_dpc*epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
         end do ! end loop over jlmn
       end do ! end loop over ilmn
     end do ! end loop over atoms
@@ -5097,7 +5097,7 @@ subroutine make_rhorij1_k(adir,cprj_k,dtset,iband,nband_occ,&
           else
              cdij=cmplx(paw_ij(iatom)%dij(klmn,1),zero,KIND=dpc)
           end if
-          rhorij1=rhorij1+half*j_dpc*epsabg*conjg(cpb)*cdij*cpk
+          rhorij1=rhorij1-half*j_dpc*epsabg*conjg(cpb)*cdij*cpk
         end do ! end loop over jlmn
       end do ! end loop over ilmn
     end do ! end loop over atoms
@@ -5839,12 +5839,11 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        orbmag_terms(adir,vvi,nn)= orbmag_terms(adir,vvi,nn) - (dub_dsg_i-dug_dsb_i)*Enk*trnrm
       
        ! 4 Tr[-\rho^0 S^1 \rho^0 H^0] contribution 
-       ! overall sign needs to be checked carefully 
        call make_S1trace_k(adir,cprj_k,dtset,Enk,nn,nband_k,pawtab,S1trace)
-       orbmag_terms(adir,rho0s1,nn) = orbmag_terms(adir,rho0s1,nn) + real(S1trace)*trnrm
+       orbmag_terms(adir,rho0s1,nn) = orbmag_terms(adir,rho0s1,nn) - real(S1trace)*trnrm
        
        ! 5 Tr[\rho^0 H^1] contribution:
-       ! i/2 eps_abg <u|dp/db>D_ij^0<dp/dg|u>
+       ! -i/2 eps_abg <u|dp/db>D_ij^0<dp/dg|u>
        call make_rhorij1_k(adir,cprj_k,dtset,nn,nband_k,paw_ij,pawtab,rhorij1)
        orbmag_terms(adir,rho0h1,nn) = orbmag_terms(adir,rho0h1,nn) + real(rhorij1)*trnrm
 
@@ -5916,19 +5915,13 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    orbmag_trace(1:3,1:nterms) = orbmag_trace(1:3,1:nterms) + orbmag_terms(1:3,1:nterms,nn)
  end do
 
- do iterms = 1, nterms
-   ! terms 6 and 7, the L_R/r^3 and A0.An terms, are already cartesian and properly normed
-   if ( (iterms .NE. lrr3) .AND. (iterms .NE. a0an) ) then
-     ! the following scaling converts to cartesian coordinates. 
-     orbmag_trace(1:3,iterms) = ucvol*MATMUL(gprimd,orbmag_trace(1:3,iterms))
-     ! following scaling is semi-empirical
-     orbmag_trace(1:3,iterms) = orbmag_trace(1:3,iterms)/(two_pi*two_pi)
-   end if
- end do
+ orbmag_trace(1:3,cci) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_trace(1:3,cci))
+ orbmag_trace(1:3,vvii) = (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_trace(1:3,vvii))
+ orbmag_trace(1:3,vvi) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_trace(1:3,vvi))
+ orbmag_trace(1:3,rho0h1) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_trace(1:3,rho0h1))
+ orbmag_trace(1:3,rho0s1) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_trace(1:3,rho0s1))
+ orbmag_trace(1:3,chern) =  ucvol*MATMUL(gprimd,orbmag_trace(1:3,chern))/two_pi
 
- ! additional scaling from definition of chern
- orbmag_trace(1:3,chern) = orbmag_trace(1:3,chern)/two_pi
- 
  write(std_out,'(a,3es16.8)')'JWZ debug orbmag_trace term cci ',&
    & orbmag_trace(1,cci),&
    & orbmag_trace(2,cci),&
