@@ -714,7 +714,7 @@ Variable(
     abivarname="boxcutmin",
     varset="gstate",
     vartype="real",
-    topics=['Planewaves_useful', 'TuningSpeed_basic'],
+    topics=['Planewaves_useful', 'TuningSpeedMem_basic'],
     dimensions="scalar",
     defaultval=2.0,
     mnemonics="BOX CUT-off MINimum",
@@ -4189,7 +4189,7 @@ Variable(
     abivarname="exchn2n3d",
     varset="dev",
     vartype="integer",
-    topics=['TuningSpeed_expert'],
+    topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="EXCHange N2 and N3 Dimensions",
@@ -4225,7 +4225,7 @@ Variable(
     abivarname="extrapwf",
     varset="dev",
     vartype="integer",
-    topics=['TuningSpeed_expert', 'MolecularDynamics_expert'],
+    topics=['TuningSpeedMem_expert', 'MolecularDynamics_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="flag - EXTRAPolation of the Wave-Functions",
@@ -4335,7 +4335,7 @@ Variable(
     abivarname="fftalg",
     varset="dev",
     vartype="integer",
-    topics=['TuningSpeed_useful'],
+    topics=['TuningSpeedMem_useful'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[FFTW3]] and [[usedmft]] == 0': 312, '[[paral_kgb]] == 1': 401, 'defaultval': 112}),
     mnemonics="Fast Fourier Transform ALGorithm",
@@ -4386,7 +4386,7 @@ Variable(
     abivarname="fftcache",
     varset="dev",
     vartype="integer",
-    topics=['TuningSpeed_expert'],
+    topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval=16,
     mnemonics="Fast Fourier Transform CACHE size",
@@ -5935,7 +5935,7 @@ Variable(
     topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=6,
-    mnemonics="Integer that governs the CUT-off for COULomb interaction",
+    mnemonics="GW CUT-off for COULomb interaction",
     requires="[[optdriver]] in [3,4]",
     added_in_version="9.1",
     text=r"""
@@ -6713,7 +6713,7 @@ Variable(
     abivarname="gwmem",
     varset="gw",
     vartype="integer",
-    topics=['Susceptibility_expert', 'SelfEnergy_expert'],
+    topics=['Susceptibility_expert', 'SelfEnergy_expert', 'GW_expert'],
     dimensions="scalar",
     defaultval=11,
     mnemonics="GW MEMory",
@@ -6742,7 +6742,7 @@ Variable(
     dimensions="scalar",
     defaultval=2,
     mnemonics="GW PARAllelization level",
-    commentdefault="The default value has been changed in v8. From 1 to 2",
+    commentdefault="The default value has been changed in v8, from 1 to 2.",
     requires="[[optdriver]] in [3,4]",
     added_in_version="before_v9",
     text=r"""
@@ -7039,7 +7039,7 @@ Variable(
     abivarname="iboxcut",
     varset="paw",
     vartype="integer",
-    topics=['TuningSpeed_expert'],
+    topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Integer governing the internal use of BOXCUT - not a very good choice of variable name",
@@ -8357,7 +8357,7 @@ Variable(
     abivarname="istwfk",
     varset="dev",
     vartype="integer",
-    topics=['k-points_useful', 'TuningSpeed_basic'],
+    topics=['k-points_useful', 'TuningSpeedMem_basic'],
     dimensions=['[[nkpt]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="Integer for choice of STorage of WaveFunction at each k point",
@@ -9976,7 +9976,7 @@ Variable(
     abivarname="mixprec",
     varset="dev",
     vartype="integer",
-    topics=['TuningSpeed_useful'],
+    topics=['TuningSpeedMem_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="MIXed PRECision",
@@ -10443,7 +10443,7 @@ Variable(
     abivarname="nbdblock",
     varset="dev",
     vartype="integer",
-    topics=['TuningSpeed_expert'],
+    topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Number of BanDs in a BLOCK",
@@ -11087,10 +11087,13 @@ to define the images:
   * [[acell]]
   * [[amu]]
   * [[angdeg]]
+  * [[cellcharge]]
   * [[dmatpawu]]
   * [[jpawu]]
   * [[mixalch]]
+  * [[occ]]
   * [[rprim]]
+  * [[scalecart]]
   * [[upawu]]
   * [[vel]]
   * [[vel_cell]]
@@ -11249,7 +11252,7 @@ Variable(
     abivarname="nloc_alg",
     varset="dev",
     vartype="integer",
-    topics=['TuningSpeed_expert'],
+    topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval=4,
     mnemonics="Non LOCal ALGorithm",
@@ -11277,7 +11280,7 @@ Variable(
     abivarname="nloc_mem",
     varset="dev",
     vartype="integer",
-    topics=['TuningSpeed_expert'],
+    topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[usepaw]] == 1': 2, 'defaultval': 1}),
     mnemonics="Non LOCal MEMOry",
@@ -12692,6 +12695,8 @@ k-points spin down.
 The total number of array elements which must be provided is
 ( [[nband]](1)+[[nband]](2)+...+ [[nband]]([[nkpt]]) ) * [[nsppol]].
 The occupation numbers evolve only for metallic occupations, that is, [[occopt]] ≥ 3.
+
+When there are several images, [[occ]] might depend on the image number, see the description in [[nimage]].
 """,
 ),
 
@@ -13021,7 +13026,7 @@ Variable(
     abivarname="ortalg",
     varset="dev",
     vartype="integer",
-    topics=['TuningSpeed_expert'],
+    topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[wfoptalg]] >= 10 ': -2, 'defaultval': 2}),
     mnemonics="ORThogonalisation ALGorithm",
@@ -19589,7 +19594,7 @@ Variable(
     abivarname="useylm",
     varset="dev",
     vartype="integer",
-    topics=['TuningSpeed_expert'],
+    topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[tfkinfunc]] == 1': 1, '[[usepaw]] == 1': 1, 'defaultval': 0}),
     mnemonics="USE YLM (the spherical harmonics)",
@@ -22149,7 +22154,7 @@ Variable(
     abivarname="rmm_diis",
     varset="gstate",
     vartype="integer",
-    topics=['TuningSpeed_useful'],
+    topics=['TuningSpeedMem_useful','SCFAlgorithms_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Activate the RMM-DIIS eigensolver for GS calculations.",
@@ -22245,7 +22250,7 @@ Variable(
     abivarname="rmm_diis_savemem",
     varset="gstate",
     vartype="integer",
-    topics=['TuningSpeed_useful'],
+    topics=['TuningSpeedMem_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Save memory in the RMM-DIIS eigensolver.",

@@ -1058,6 +1058,11 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
 ! *************************************************************************
 
+!DEBUG
+!  write(std_out,'(a)')' m_gstate_img : enter '
+!  call flush(std_out)
+!ENDDEBUG
+
  is_pimd=(imgmov==9.or.imgmov==10.or.imgmov==13)
 
 !Write convergence info
@@ -1118,7 +1123,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 &   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(6)
-   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
+   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(9, 10, 13)
 !    Path Integral Molecular Dynamics
@@ -1260,27 +1265,35 @@ end subroutine predict_copy
 !!
 !! SOURCE
 
-subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
+subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: itimimage_eff,nimage,ntimimage_stored
+ integer,intent(in) :: itimimage_eff,nimage,nimage_tot,ntimimage_stored
  type(MPI_type),intent(in) :: mpi_enreg
  type(m1geo_type),intent(inout) :: m1geo_param
 !arrays
- type(results_img_type),intent(inout) :: results_img(nimage,ntimimage_stored)
+ type(results_img_type),target,intent(inout) :: results_img(nimage,ntimimage_stored)
 
 !Local variables-------------------------------
 !scalars
  integer :: ihist,iimage,natom,next_itimimage,nspden,nsppol
  real(dp) :: deltae,diffor,etotal,entropy,fermie,res2,residm
+ logical :: test_img
  type(results_gs_type) :: results_gs_lincomb
 !arrays
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),strten(6),vel_cell(3,3)
  real(dp),allocatable :: fcart(:,:),vel(:,:),xred(:,:)
  logical :: DEBUG=.FALSE.
+ type(results_img_type),pointer :: resimg_all(:)
 
 ! *************************************************************************
+
+!DEBUG
+!write(std_out,'(a)')' m_gstateimg, move_1geo : enter'
+!write(std_out,'(a,i4)')' itimimage_eff=',itimimage_eff
+!call flush(std_out)
+!ENDDEBUG
 
  natom=m1geo_param%ab_mover%natom
  ihist=m1geo_param%hist_1geo%ihist
@@ -1305,6 +1318,16 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  call vel2hist(m1geo_param%ab_mover%amass,m1geo_param%hist_1geo,vel,vel_cell)
  m1geo_param%hist_1geo%time(ihist)=zero
 
+!In case of image parallelism, collect results accross processors
+ test_img=(nimage_tot/=1.and.mpi_enreg%paral_img==1)
+ if (test_img) then
+   ABI_MALLOC(resimg_all,(nimage_tot))
+   call gather_results_img(mpi_enreg,results_img(1:nimage,itimimage_eff),resimg_all,&
+&   allgather=.true.,only_one_per_img=.false.)
+ else
+   resimg_all => results_img(:,itimimage_eff)
+ end if
+
 !Compute energy, entropy, fermie, forces and stresses for the 1geo : take the weighted average.
 !Compute maximum of deltae,diffor,res2,residm
  etotal=zero
@@ -1316,23 +1339,24 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  diffor=zero
  res2=zero
  residm=zero
- do iimage=1,nimage
-   etotal=etotal+results_img(iimage,itimimage_eff)%results_gs%etotal*m1geo_param%mixesimgf(iimage)
-   entropy=entropy+results_img(iimage,itimimage_eff)%results_gs%entropy*m1geo_param%mixesimgf(iimage)
-   fermie=fermie+results_img(iimage,itimimage_eff)%results_gs%fermie*m1geo_param%mixesimgf(iimage)
-   fcart(:,:)=fcart(:,:)+results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage)
-   strten(:) =strten(:) +results_img(iimage,itimimage_eff)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage)
-   if( deltae<results_img(iimage,itimimage_eff)%results_gs%deltae ) deltae=results_img(iimage,itimimage_eff)%results_gs%deltae
-   if( diffor<results_img(iimage,itimimage_eff)%results_gs%diffor ) diffor=results_img(iimage,itimimage_eff)%results_gs%diffor
-   if( res2<results_img(iimage,itimimage_eff)%results_gs%res2 ) res2=results_img(iimage,itimimage_eff)%results_gs%res2
-   if( residm<results_img(iimage,itimimage_eff)%results_gs%residm ) residm=results_img(iimage,itimimage_eff)%results_gs%residm
+
+ do iimage=1,nimage_tot
+   etotal=etotal+resimg_all(iimage)%results_gs%etotal*m1geo_param%mixesimgf(iimage)
+   entropy=entropy+resimg_all(iimage)%results_gs%entropy*m1geo_param%mixesimgf(iimage)
+   fermie=fermie+resimg_all(iimage)%results_gs%fermie*m1geo_param%mixesimgf(iimage)
+   fcart(:,:)=fcart(:,:)+resimg_all(iimage)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage)
+   strten(:) =strten(:) +resimg_all(iimage)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage)
+   if( deltae<resimg_all(iimage)%results_gs%deltae ) deltae=resimg_all(iimage)%results_gs%deltae
+   if( diffor<resimg_all(iimage)%results_gs%diffor ) diffor=resimg_all(iimage)%results_gs%diffor
+   if( res2<resimg_all(iimage)%results_gs%res2 ) res2=resimg_all(iimage)%results_gs%res2
+   if( residm<resimg_all(iimage)%results_gs%residm ) residm=resimg_all(iimage)%results_gs%residm
  enddo
 
 !Set up a results_gs datastructure with the linear combination of images
- nspden=results_img(1,itimimage_eff)%results_gs%nspden
- nsppol=results_img(1,itimimage_eff)%results_gs%nsppol
+ nspden=resimg_all(1)%results_gs%nspden
+ nsppol=resimg_all(1)%results_gs%nsppol
  call init_results_gs(natom,nspden,nsppol,results_gs_lincomb)
- call copy_results_gs(results_img(1,itimimage_eff)%results_gs,results_gs_lincomb) 
+ call copy_results_gs(resimg_all(1)%results_gs,results_gs_lincomb) 
  results_gs_lincomb%etotal=etotal
  results_gs_lincomb%entropy=entropy
  results_gs_lincomb%fermie=fermie
@@ -1342,6 +1366,14 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  results_gs_lincomb%diffor=diffor
  results_gs_lincomb%res2=res2
  results_gs_lincomb%residm=residm
+
+!From now on, all procs contain the same information about the geometry, etotal, forces, stress, etc.
+!Nothing more needs to be transmitted, and resimg_all is not needed anymore.
+ if (test_img) then
+   call destroy_results_img(resimg_all)
+   ABI_FREE(resimg_all)
+ end if
+ nullify(resimg_all)
 
 !Echo result_gs_lincomb
  call results_gs_lincomb%yaml_write(ab_out, info="Linear combination of ground state results")
@@ -1369,8 +1401,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 & m1geo_param%hmctt,&
 & m1geo_param%icycle,&
 & m1geo_param%iexit,&
-!& m1geo_param%itime,&
-  itimimage_eff,&       ! m1geo_param%itime should be eliminated, no need for it
+& itimimage_eff,&     
 & m1geo_param%mttk_vars,&
 & m1geo_param%nctime,&
 & m1geo_param%ncycle,&
@@ -1403,6 +1434,11 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  ABI_FREE(fcart)
  ABI_FREE(vel)
  ABI_FREE(xred)
+
+!DEBUG
+!write(std_out,'(a)')' m_gstateimg, move_1geo : exit'
+!call flush(std_out)
+!ENDDEBUG
 
 end subroutine move_1geo
 !!***

@@ -168,47 +168,54 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
    end do
  end do
 
- stop_on_error=(abs(pawovlp)<=tol6.or.(pawovlp>tol6.and.ratio_percent_max(1)>pawovlp))
+ stop_on_error=(abs(pawovlp)<=tol6.or.(pawovlp>tol6.and.(maxval(ratio_percent_max(1:2))>pawovlp)))
 
 !Print adapted message with overlap value
  if (iovl(1)+iovl(2)>0) then
 
-   !ii=1: PAW augmentation regions overlap
-   !ii=2: compensation charges overlap
-   if (iovl(2)==0) ii=1
-   if (iovl(2)> 0) ii=2
+   do ii=1,2
 
-   if (iovl(ii)>0) then
+     if(ratio_percent_max(ii)>zero)then
+       if (ii==1) write(message,' (a)' ) 'PAW SPHERES ARE OVERLAPPING!'
+       if (ii==2) write(message, '(a)' ) 'PAW COMPENSATION DENSITIES ARE OVERLAPPING !'
 
-     if (ii==1) write(message,' (a)' ) 'PAW SPHERES ARE OVERLAPPING!'
-     if (ii==2) write(message, '(2a)' )'PAW COMPENSATION DENSITIES ARE OVERLAPPING !!!!'
+       if (iovl(ii)==1) then
+         write(message, '(3a)' ) trim(message),ch10,&
+&         '   There is one pair of overlapping atoms.'
+       else
+         write(message, '(3a,i5,a)' ) trim(message),ch10,&
+&         '   There are ', iovl(ii),' pairs of overlapping atoms.'
+       end if
+       write(message, '(3a,i3,a,i3,a)' ) trim(message),ch10,&
+        '   The maximum overlap percentage is obtained for the atoms ',iamax(ii),' and ',ibmax(ii),'.'
+       write(message, '(2a,2(a,i3),a,f9.5)' ) trim(message),ch10,&
+&       '    | Distance between atoms ',iamax(ii),' and ',ibmax(ii),' is  : ',sqrt(norm2_min(ii))
+       if(ii==1)then
+         write(message, '(2a,2(a,i3,a,f9.5,a))' ) trim(message),ch10,&
+&         '    | PAW radius of the sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rpaw,ch10,&
+&         '    | PAW radius of the sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rpaw,ch10
+       else if(ii==2)then
+         write(message, '(2a,2(a,i3,a,f9.5,a))' ) trim(message),ch10,&
+&         '    | Radius of the compensation sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rshp,ch10,&
+&         '    | Radius of the compensation sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rshp,ch10
+       endif
+       write(message, '(2a,f5.2,a)' ) trim(message),&
+&       '    | This leads to a (voluminal) overlap ratio of ',ratio_percent_max(ii),' %'
+       if (ii==1) then
+         write(message, '(3a)' ) trim(message),ch10,&
+&         'THIS IS DANGEROUS, as PAW formalism assumes non-overlapping PAW spheres.'
+       else if (ii==2) then
+         write(message, '(3a)' ) trim(message),ch10,&
+&         'THIS IS DANGEROUS, as PAW formalism assumes non-overlapping compensation densities.'
+       end if
+       if (stop_on_error) then
+         ABI_ERROR_NOSTOP(message,ia) !ia is dummy
+       else
+         ABI_WARNING(message)
+       end if
+     endif ! ratio_percent_max(ii)>zero
 
-     if (iovl(ii)==1) then
-       write(message, '(3a)' ) trim(message),ch10,&
-&       '   There is one pair of overlapping atoms.'
-     else
-       write(message, '(3a,i5,a)' ) trim(message),ch10,&
-&       '   There are ', iovl(1),' pairs of overlapping atoms.'
-     end if
-     write(message, '(3a,i3,a,i3,a)' ) trim(message),ch10,&
-     '   The maximum overlap percentage is obtained for the atoms ',iamax(ii),' and ',ibmax(ii),'.'
-     write(message, '(2a,2(a,i3),a,f9.5,a,2(a,i3,a,f9.5,a),a,f5.2,a)' ) trim(message),ch10,&
-&     '    | Distance between atoms ',iamax(ii),' and ',ibmax(ii),' is  : ',sqrt(norm2_min(ii)),ch10,&
-&     '    | PAW radius of the sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rpaw,ch10,&
-&     '    | PAW radius of the sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rpaw,ch10,&
-&     '    | This leads to a (voluminal) overlap ratio of ',ratio_percent_max(ii),' %'
-     if (ii==2) then
-       write(message, '(3a)' ) trim(message),ch10,&
-&       'THIS IS DANGEROUS !, as PAW formalism assumes non-overlapping compensation densities.'
-     end if
-
-     if (stop_on_error) then
-       ABI_ERROR_NOSTOP(message,ia) !ia is dummy
-     else
-       ABI_WARNING(message)
-     end if
-
-   end if
+   enddo ! ii
 
 !  Print advice
    if (stop_on_error) then
