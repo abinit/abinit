@@ -124,13 +124,13 @@ contains
     this%bcut=mband
     this%nbcut=nbcut
     this%version=version
+    ABI_ALLOCATE(this%vtrial,(nfftf,nspden))
+    this%vtrial(:,:)=zero
+    this%nfftf=nfftf
+    this%nspden=nspden
     if(version==3) then
       this%iopt_pot=2
       this%version=1
-      ABI_ALLOCATE(this%vtrial,(nfftf,nspden))
-      this%vtrial(:,:)=zero
-      this%nfftf=nfftf
-      this%nspden=nspden
     else
       this%iopt_pot=1
     end if
@@ -176,12 +176,10 @@ contains
     class(hightemp_type),intent(inout) :: this
 
     ! *********************************************************************
-    if(this%iopt_pot==2) then
-      this%vtrial(:,:)=zero
-      ABI_DEALLOCATE(this%vtrial)
-      this%nfftf=0
-      this%nspden=0
-    end if
+    this%vtrial(:,:)=zero
+    ABI_DEALLOCATE(this%vtrial)
+    this%nfftf=0
+    this%nspden=0
     this%iopt_pot=0
     this%bcut=0
     this%nbcut=0
@@ -1430,7 +1428,7 @@ contains
   !!
   !! FUNCTION
   !! Compute the energy shift factor $U_0$ corresponding to constant potential contribution
-  !! directly from wavefunction
+  !! directly from wavefunction (Used when reading _WFK)
   !!
   !! INPUTS
   !! cg(2,mpw*dtset%nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions.
