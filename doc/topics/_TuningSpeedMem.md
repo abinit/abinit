@@ -41,6 +41,9 @@ GW calculations can be made less memory and CPU time consuming,
 at the expense of numerical precision,
 by compiling ABINIT with the option enable_gw_dpc=“no" in the *.ac9 file.
 
+Aside of using input variables, sometimes, to solve memory problems, the user has to increase the cache size limit.
+Uusing Linux, one can get the cache using "ulimit -s", and set it to a larger limit using e.g. "ulimit -s 16384" for 16MB cache size.
+
 Other input variables related to tuning the speed or the memory usage are for expert users only.
 
 ## Related Input Variables
