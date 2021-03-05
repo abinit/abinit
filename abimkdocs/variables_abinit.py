@@ -13001,27 +13001,15 @@ Compute quantities related to orbital magnetic moment. The
     is parallelized over k points only. The implementation follows the
     theory outlined in [[cite:Gonze2011a]] extended to the PAW case;
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
-    standard output file, search for "Orbital magnetic moment".
+    standard output file, search for "Orbital magnetic moment". This calculation requires
+    both the ground state and DDK wavefunctions, and is triggered at the end of a 
+    DDK calculation.
 
-* [[orbmag]] = 11: Compute orbital magnetization and integral of the 
-Berry curvature (Chern number) over the Brillouin zone using both GS and DDK wavefunctions. This is
-the most robust method. 
-* [[orbmag]] = 12: Same as [[orbmag]] 11 but also print out values of each term making up total
+* [[orbmag]] = 1: Compute orbital magnetization and integral of the 
+Berry curvature (Chern number) over the Brillouin zone.
+* [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
 orbital magnetic moment. 
-* [[orbmag]] = 13: Same as [[orbmag]] 12 but print out values of each term for each band.
-* [[orbmag]] = 1: Compute Chern number using discretized wavefunctions. This computation is
-faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
-electronic current.
-* [[orbmag]] = 2: Compute electronic orbital magnetization.
-* [[orbmag]] = 3: Compute both Chern number and electronic orbital magnetization.
-
-[[orbmag]] values 1--3 use an implementation based on a discretization of the wavefunction
-derivatives, as in [[cite:Ceresoli2006]]. Using [[orbmag]] -1, -2, -3 delivers the
-same computations as the corresponding 1, 2, 3 values, but based on an implementation
-using a discretization of the density operator itself. Both methods should converge to
-the same values but in our experience the wavefunction-based method converges faster. The 
-DDK method converges considerably faster than either of the above methods and is also robust 
-in case of only a single kpt.
+* [[orbmag]] = 3: Same as [[orbmag]] 2 but print out values of each term for each band.
 """,
 ),
 

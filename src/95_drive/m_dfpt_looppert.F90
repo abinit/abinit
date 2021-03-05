@@ -1107,7 +1107,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ncpgr=3 ! Valid for ipert<=natom (phonons), ipert=natom+2 (elec. field)
              ! or for ipert==natom+10,11
      if (ipert==dtset%natom+1) then
-       if (dtset%orbmag.GT.10) then
+       if (dtset%orbmag.NE.0) then
          ncpgr=3
        else
          ncpgr=1
@@ -1122,7 +1122,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (ipert<=dtset%natom) then
          choice=2; iorder_cprj=0; idir0=0
        else if (ipert==dtset%natom+1) then
-         if (dtset%orbmag.GT.10) then
+         if (dtset%orbmag.NE.0) then
            choice=5; iorder_cprj=0; idir0=0
          else
            choice=5; iorder_cprj=0; idir0=idir
@@ -1458,7 +1458,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    ! space for all 3 ddk wavefunctions if call to orbmag will be needed
-   if ( (dtset%orbmag .GE. 11) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_orbmag)) ) then
+   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_orbmag)) ) then
      ABI_MALLOC(cg1_orbmag,(2,mcg1,3))
      has_cg1_orbmag(:) = .FALSE.
    end if
@@ -2077,7 +2077,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    ! store DDK wavefunctions in memory for later call to orbmag-ddk
    ! only relevant for DDK pert with orbmag calculation
-   if( (dtset%orbmag .GE. 11) .AND. (ipert .EQ. dtset%natom+1) ) then
+   if( (dtset%orbmag .NE. 0) .AND. (ipert .EQ. dtset%natom+1) ) then
      cg1_orbmag(:,:,idir) = cg1(:,:)
      has_cg1_orbmag(idir) = .TRUE.
    end if
@@ -2162,7 +2162,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
 
    ! call orbmag if needed
-   if ( (dtset%orbmag .GE. 11) .AND. (dtset%rfddk .EQ. 1) .AND. &
+   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
      & (COUNT(has_cg1_orbmag) .EQ. 3) ) then
 
      if ( .NOT. ALLOCATED(vtrial_local)) then
