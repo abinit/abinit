@@ -80,7 +80,6 @@ module m_scfcv_core
  use m_paw_denpot,       only : pawdenpot
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp,setrhoijpbe0
- use m_orbmag,           only : orbmag_type
  use m_paw_mkrho,        only : pawmkrho
  use m_paw_uj,           only : pawuj_red, macro_uj_type
  use m_paw_dfpt,         only : pawgrnl
@@ -196,7 +195,6 @@ contains
 !!  cg(2,mcg)=updated wavefunctions; if mkmem>=nkpt, these are kept in a disk file.
 !!  cprj(natom,mcprj*usecprj)=<p_lmn|Cnk> coefficients for each WF |Cnk> and each NL proj |p_lmn>
 !!  dtefield <type(efield_type)> = variables related to Berry phase
-!!  dtorbmag <type(orbmag_type)> = variables related to orbital magnetization
 !!  dtpawuj(ndtpawuj)= data used for the automatic determination of U
 !!     (relevant only for PAW+U) calculations (see initberry.f)
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
@@ -263,7 +261,7 @@ contains
 !!
 !! SOURCE
 
-subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
+subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &  dtset,ecore,eigen,electronpositron,fatvshift,hdr,indsym,&
 &  initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
@@ -280,7 +278,6 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield
- type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer:: electronpositron
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
@@ -2089,12 +2086,10 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 & dtset%prtnabla > 0  .or. &
 & dtset%prtdos   ==3  .or. &
 & dtset%berryopt /=0  .or. &
-& dtset%orbmag /=0    .or. &
 & dtset%kssform  ==3  .or. &
 & dtset%pawfatbnd> 0  .or. &
 & dtset%pawprtwf > 0  )
 
- if(dtset%orbmag .NE. 0) recompute_cprj=.TRUE.
  if(ANY(ABS(dtset%nucdipmom)>tol8)) recompute_cprj=.TRUE.
  if (recompute_cprj) then
    usecprj=1
@@ -2110,9 +2105,6 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
      else if (forces_needed == 0 .and. stress_needed /= 0) then
        ncpgr = 6 ; ctocprj_choice = 3
      end if
-   end if
-   if ((dtset%orbmag .GT. 1) .OR. (dtset%orbmag .LT. -1) ) then
-      ncpgr=3; ctocprj_choice=5; idir=0
    end if
    call pawcprj_alloc(cprj_local,ncpgr,dimcprj)
    cprj=> cprj_local
@@ -2165,7 +2157,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,grcondft,&
 & gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
