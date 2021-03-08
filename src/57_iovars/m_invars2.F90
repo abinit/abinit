@@ -455,9 +455,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%gwls_first_seed=dtset%gwls_band_index
  end if
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ht_gcut',tread,'DPR')
- if(tread==1) dtset%ht_gcut=dprarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ht_nbcut',tread,'INT')
  if(tread==1) dtset%ht_nbcut=intarr(1)
 

@@ -853,7 +853,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      MSG_ERROR(msg)
    else
      ABI_DATATYPE_ALLOCATE(hightemp,)
-     call hightemp%init(dtset%ht_gcut,dtset%mband,dtset%ht_nbcut,nfftf,&
+     call hightemp%init(dtset%mband,dtset%ht_nbcut,nfftf,&
 &     dtset%nspden,dtset%ht_prt_cg,rprimd,dtset%use_hightemp)
    end if
  end if

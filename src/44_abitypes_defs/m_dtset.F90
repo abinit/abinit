@@ -727,7 +727,6 @@ type, public :: dataset_type
  real(dp) :: gwencomp = 2.0_dp
  real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
  real(dp) :: gw_toldfeig
- real(dp) :: ht_gcut
  real(dp) :: hyb_mixing
  real(dp) :: hyb_mixing_sr
  real(dp) :: hyb_range_dft
@@ -1513,7 +1512,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwls_correlation     = dtin%gwls_correlation
  dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
- dtout%ht_gcut              = dtin%ht_gcut
  dtout%ht_nbcut             = dtin%ht_nbcut
  dtout%ht_prt_cg            = dtin%ht_prt_cg
  dtout%ht_prt_eigocc        = dtin%ht_prt_eigocc
@@ -3154,7 +3152,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
 !H
- list_vars=trim(list_vars)//' ht_gcut ht_nbcut ht_prt_cg ht_prt_eigocc'
+ list_vars=trim(list_vars)//' ht_nbcut ht_prt_cg ht_prt_eigocc'
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'

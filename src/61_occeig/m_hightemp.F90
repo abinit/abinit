@@ -47,7 +47,6 @@ module m_hightemp
 
   implicit none
   public :: dip12,djp12,dip32,djp32,hightemp_e_heg
-  public :: hightemp_gaussian_jintegral,hightemp_gaussian_kintegral
   public :: hightemp_dosfreeel,hightemp_get_e_shiftfactor
   public :: hightemp_prt_eigocc
   !!***
@@ -65,7 +64,7 @@ module m_hightemp
   type,public :: hightemp_type
     integer :: bcut,iopt_pot,nbcut,nfftf,nspden,version
     real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,ent_freeel
-    real(dp) :: gcut,std_init,nfreeel,e_shiftfactor,ucvol
+    real(dp) :: std_init,nfreeel,e_shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
     logical :: prt_cg
   contains
@@ -90,7 +89,6 @@ contains
   !!
   !! INPUTS
   !! this=hightemp_type object concerned
-  !! gcut=band number separating gaussian shape and pure planewaves orbitals
   !! mband=maximum number of bands
   !! nbcut=number of states used to average the constant potential value
   !! prt_cg=debug input to print wavefunctions planewaves coefficients.
@@ -105,13 +103,12 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine init(this,gcut,mband,nbcut,nfftf,nspden,prt_cg,rprimd,version)
+  subroutine init(this,mband,nbcut,nfftf,nspden,prt_cg,rprimd,version)
 
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
     integer,intent(in) :: mband,nbcut,nfftf,nspden,version,prt_cg
-    real(dp),intent(in) :: gcut
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
 
@@ -138,7 +135,6 @@ contains
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%ent_freeel=zero
-    this%gcut=gcut
     this%std_init=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
@@ -185,7 +181,6 @@ contains
     this%nbcut=0
     this%version=1
     this%ebcut=zero
-    this%gcut=zero
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%ent_freeel=zero
@@ -317,83 +312,9 @@ contains
     if(this%iopt_pot==1) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       if(this%version==1) then
-        if(this%gcut>dble(this%bcut)) then
-          ! Dynamic array find size
-          ix=dble(this%bcut)
-          ii=0
-          do while(ix<=this%gcut)
-            ii=ii+1
-            ix=ix+step
-          end do
-          ABI_ALLOCATE(valuesnel,(ii))
-          ix=dble(this%bcut)
-          ii=0
-          do while(ix<=this%gcut)
-            ii=ii+1
-            valuesnel(ii)=2*fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-            ix=ix+step
-          end do
-          if (ii>1) then
-            nelect=nelect+simpson(step,valuesnel)
-          end if
-          ABI_DEALLOCATE(valuesnel)
-          ! Change Fermi-Dirac integral lower bound.
-          xcut=hightemp_e_heg(dble(this%gcut),this%ucvol)/tsmear
-        else
-          xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
-        end if
-        !TEMPORARY
-        ! ix=dble(this%bcut)
-        ! ii=0
-        ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        ! minocc=tol16
-        ! do while(fn>minocc)
-        !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        !   ii=ii+1
-        !   ix=ix+step
-        ! end do
-        ! ABI_ALLOCATE(valuesn,(ii))
-        ! ix=dble(this%bcut)
-        ! ii=0
-        ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        ! do while(fn>minocc)
-        !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        !   ii=ii+1
-        !   valuesn(ii)=2*fn
-        !   ix=ix+step
-        ! end do
-        ! if (ii>1) then
-        !   nelect=nelect+simpson(step,valuesn)
-        ! end if
-        ! ABI_DEALLOCATE(valuesn)
-        !END TEMPORARY
+        xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       else if(this%version==2) then
         xcut=(this%ebcut-this%e_shiftfactor)/tsmear
-        !TEMPORARY
-        ! ix=this%ebcut
-        ! ii=0
-        ! fn=fermi_dirac(ix,fermie,tsmear)
-        ! minocc=tol16
-        ! do while(fn>minocc)
-        !   fn=fermi_dirac(ix,fermie,tsmear)
-        !   ii=ii+1
-        !   ix=ix+step
-        ! end do
-        ! ABI_ALLOCATE(valuesn,(ii))
-        ! ix=this%ebcut
-        ! ii=0
-        ! fn=fermi_dirac(ix,fermie,tsmear)
-        ! do while(fn>minocc)
-        !   fn=fermi_dirac(ix,fermie,tsmear)
-        !   ii=ii+1
-        !   valuesn(ii)=fn*hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
-        !   ix=ix+step
-        ! end do
-        ! if (ii>1) then
-        !   nelect=nelect+simpson(step,valuesn)
-        ! end if
-        ! ABI_DEALLOCATE(valuesn)
-        !END TEMPORARY
       end if
       nelect=nelect+factor*djp12(xcut,gamma)
     else
@@ -462,113 +383,9 @@ contains
     if(this%iopt_pot==1) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       if(this%version==1) then
-        if(this%gcut>dble(this%bcut)) then
-
-          ! Dynamic array find size
-          ix=dble(this%bcut)
-          ii=0
-          do while(ix<=this%gcut)
-            ii=ii+1
-            ix=ix+step
-          end do
-
-          ABI_ALLOCATE(valueseel,(ii))
-          ix=dble(this%bcut)
-          ii=0
-          sigma=this%std_init
-          ! open(file='Gauss',unit=23,status='OLD')
-          ! close(23,status="DELETE")
-          ! open(file='Gauss',unit=23,status='NEW')
-          do while(ix<=this%gcut)
-            ii=ii+1
-            sigma=sigma-0.0002*sigma
-            valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
-            & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
-            & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
-            ! write(23,*) ix,0.5*hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
-            ! & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
-            ix=ix+step
-          end do
-          ! close(23)
-          if (ii>1) then
-            this%e_kin_freeel=this%e_kin_freeel+simpson(step,valueseel)
-          end if
-          ABI_DEALLOCATE(valueseel)
-
-          ! Change Fermi-Dirac integral lower bound.
-          xcut=hightemp_e_heg(ix-step,this%ucvol)/tsmear
-
-          ! Check if 6-sigma uncertainty is respected.
-          zero_gaussian=exp(-(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))**2/(2*sigma**2))/&
-          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
-          if(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)) < 3*sigma) then
-            write(msg,'(5a,f6.4,3a,f10.6,a,f10.6,3a)') &
-            & "WARNING: The planewaves module standard deviation is too high.",ch10,&
-            & "The gaussian distribution of planewaves is not null at gamma point.",ch10,&
-            & "(= ",zero_gaussian,") Planewaves module meanvalue should be ideally > 3*sigma.",ch10,&
-            & "Mean value = ",sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol))," < ",&
-            & 3*sigma," = 3*sigma",ch10,&
-            & "Action: Increase nband. Assuming experienced user. Execution will continue."
-            MSG_WARNING(msg)
-          end if
-        else
-          xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
-        end if
-
-        !TEMPORARY
-        ! ix=dble(this%bcut)
-        ! ii=0
-        ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        ! minocc=tol16
-        ! do while(fn>minocc)
-        !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        !   ii=ii+1
-        !   ix=ix+step
-        ! end do
-        ! ABI_ALLOCATE(valuese,(ii))
-        ! ix=dble(this%bcut)
-        ! ii=0
-        ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        ! do while(fn>minocc)
-        !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        !   ii=ii+1
-        !   valuese(ii)=2*fn*hightemp_e_heg(ix,this%ucvol)
-        !   ix=ix+step
-        ! end do
-        ! if (ii>1) then
-        !   this%e_kin_freeel=this%e_kin_freeel+simpson(step,valuese)
-        ! end if
-        ! ABI_DEALLOCATE(valuese)
-        !END TEMPORARY
+        xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       else if(this%version==2) then
         xcut=(this%ebcut-this%e_shiftfactor)/tsmear
-
-        !TEMPORARY
-        ! ix=this%ebcut
-        ! ii=0
-        ! fn=fermi_dirac(ix,fermie,tsmear)
-        ! minocc=tol16
-        ! do while(fn>minocc)
-        !   fn=fermi_dirac(ix,fermie,tsmear)
-        !   ii=ii+1
-        !   ix=ix+step
-        ! end do
-        ! ABI_ALLOCATE(valuese,(ii))
-        ! ix=this%ebcut
-        ! ii=0
-        ! fn=fermi_dirac(ix,fermie,tsmear)
-        ! do while(fn>minocc)
-        !   fn=fermi_dirac(ix,fermie,tsmear)
-        !   ii=ii+1
-        !   valuese(ii)=fn*hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)*&
-        !   & (ix-this%e_shiftfactor)
-        !   ix=ix+step
-        ! end do
-        ! if (ii>1) then
-        !   this%e_kin_freeel=this%e_kin_freeel+simpson(step,valuese)
-        ! end if
-        ! ABI_DEALLOCATE(valuese)
-        !END TEMPORARY
       end if
       this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
     else
@@ -1346,76 +1163,6 @@ contains
     ! *********************************************************************
     hightemp_e_heg=.5*(iband*6*PI*PI/ucvol)**(2./3.)
   end function hightemp_e_heg
-  !!***
-
-  !!****f* ABINIT/m_hightemp/hightemp_gaussian_jintegral
-  !! NAME
-  !! hightemp_gaussian_jintegral
-  !!
-  !! FUNCTION
-  !! Returns the value of the first integral J(\sigma,\rho_{0_n}) =
-  !! \int_0^\infty \rho^2 e^{-(\rho_{0_n}- \rho)^2/(2\sigma^2)}d\rho
-  !! used to describe wavefunctions with gaussian shape of planewaves
-  !!
-  !! INPUTS
-  !! sigma=standard deviation
-  !! alpha=center of the gaussian
-  !!
-  !! OUTPUT
-  !! hightemp_gaussian_jintegral=value of the integral
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  function hightemp_gaussian_jintegral(sigma,alpha)
-
-    ! Arguments -------------------------------
-    ! Scalars
-    real(dp),intent(in) :: sigma,alpha
-    real(dp) :: hightemp_gaussian_jintegral
-
-    ! *********************************************************************
-
-    hightemp_gaussian_jintegral=alpha*sigma**2*exp(-alpha**2/(2*sigma**2))+.5*sigma*sqrt(2*PI)&
-    & *(alpha**2+sigma**2)*(1+erf(alpha/(sigma*sqrt(2.))))
-  end function hightemp_gaussian_jintegral
-  !!***
-
-  !!****f* ABINIT/m_hightemp/hightemp_gaussian_kintegral
-  !! NAME
-  !! hightemp_gaussian_kintegral
-  !!
-  !! FUNCTION
-  !! Returns the value of the second integral K(\sigma,\rho_{0_n}) =
-  !! \int_0^\infty \rho^4 e^{-(\rho_{0_n}- \rho)^2/(2\sigma^2)}d\rho
-  !! used to describe wavefunctions with gaussian shape of planewaves
-  !!
-  !! INPUTS
-  !! sigma=standard deviation
-  !! alpha=center of the gaussian
-  !!
-  !! OUTPUT
-  !! hightemp_gaussian_kintegral=value of the integral
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  function hightemp_gaussian_kintegral(sigma,alpha)
-
-    ! Arguments -------------------------------
-    ! Scalars
-    real(dp),intent(in) :: sigma,alpha
-    real(dp) :: hightemp_gaussian_kintegral
-
-    ! *********************************************************************
-
-    hightemp_gaussian_kintegral=sigma**2*(alpha**3+5*alpha*sigma**2)*exp(-alpha**2/(2*sigma**2))&
-    & +.5*sigma*sqrt(2*PI)*(alpha**4+6*alpha**2*sigma**2+3*sigma**4)*(1+erf(alpha/(sigma*sqrt(2.))))
-  end function hightemp_gaussian_kintegral
   !!***
 
   !!****f* ABINIT/m_hightemp/hightemp_get_e_shiftfactor
