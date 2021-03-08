@@ -104,7 +104,6 @@ contains
   !!
   !! SOURCE
   subroutine init(this,mband,nbcut,nfftf,nspden,prt_cg,rprimd,version)
-
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
@@ -218,7 +217,6 @@ contains
   !!
   !! SOURCE
   subroutine compute_e_shiftfactor(this,eigen,eknk,mband,nband,nkpt,nsppol,wtk)
-
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
@@ -291,7 +289,6 @@ contains
   !!
   !! SOURCE
   subroutine compute_nfreeel(this,fermie,nelect,tsmear)
-
     ! Arguments -------------------------------
     ! Scalars
     real(dp),intent(in) :: fermie,tsmear
@@ -353,7 +350,6 @@ contains
   !!
   !! SOURCE
   subroutine compute_efreeel(this,fermie,nfftf,nspden,tsmear,vtrial)
-
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
@@ -369,11 +365,6 @@ contains
     character(len=500) :: msg
     ! Arrays
     real(dp),dimension(:),allocatable :: valueseel
-
-    ! Debugging purpose
-    ! real(dp) :: fn,minocc
-    ! real(dp),dimension(:),allocatable :: valuese
-
 
     ! *********************************************************************
     step=1e-1
@@ -441,7 +432,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifftf,ispden,mpierr
+    integer :: ii,ifftf,ispden,mpierr,nsize
     real(dp) :: ix,step,fn,minocc
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
@@ -458,21 +449,23 @@ contains
           fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
           minocc=tol16
           do while(fn>minocc)
-            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
             ii=ii+1
-            ix=ix+step
+            ix=dble(this%bcut)+(dble(ii)-one)*step
+            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
           end do
-          ABI_ALLOCATE(valuesent,(ii))
-          ix=dble(this%bcut)
-          ii=0
-          fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-          do while(fn>minocc)
+          nsize=ii
+          ! Allocate the array to prepare the Simpson integration
+          ABI_ALLOCATE(valuesent,(nsize))
+
+          !$OMP PARALLEL DO SHARED(valuesent,nsize)
+          do ii=1,nsize
+            ix=dble(this%bcut)+(dble(ii)-one)*step
             fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-            ii=ii+1
             valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
-            ix=ix+step
           end do
-          if (ii>1) then
+          !$OMP END PARALLEL DO
+
+          if (nsize>1) then
             this%ent_freeel=simpson(step,valuesent)
           end if
           ABI_DEALLOCATE(valuesent)
@@ -584,7 +577,6 @@ contains
   subroutine compute_pw_avg_std(this,cg,eig_k,ek_k,fnameabo,&
   & gprimd,icg,ikpt,istwf_k,kg_k,kinpw,kpt,mcg,mpi_enreg,nband_k,&
   & nkpt,npw_k,nspinor,wtk)
-
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: icg,ikpt,istwf_k,mcg,nband_k,nkpt,npw_k,nspinor
@@ -774,7 +766,6 @@ contains
   !!
   !! SOURCE
   function djp12(xcut,gamma)
-
     ! Arguments -------------------------------
     ! Scalars
     real(dp),intent(in) :: xcut,gamma
@@ -985,7 +976,6 @@ contains
   !!
   !! SOURCE
   function djp32(xcut,gamma)
-
     ! Arguments -------------------------------
     ! Scalars
     real(dp),intent(in) :: xcut,gamma
@@ -1122,7 +1112,6 @@ contains
   !!
   !! SOURCE
   function hightemp_dosfreeel(energy,e_shiftfactor,ucvol)
-
     ! Arguments -------------------------------
     ! Scalars
     real(dp),intent(in) :: energy,e_shiftfactor,ucvol
@@ -1154,7 +1143,6 @@ contains
   !!
   !! SOURCE
   function hightemp_e_heg(iband,ucvol)
-
     ! Arguments -------------------------------
     ! Scalars
     real(dp),intent(in) :: iband,ucvol
@@ -1318,7 +1306,6 @@ contains
   subroutine hightemp_prt_eigocc(e_kin_freeel,e_shiftfactor,eigen,etotal,energies,fnameabo,&
   & iout,iter,kptns,mband,nband,nfreeel,nkpt,nsppol,occ,rprimd,tsmear,usepaw,wtk,&
   & strten,istep) ! Optional arguments
-
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: iout,iter,mband,nkpt,nsppol,usepaw
