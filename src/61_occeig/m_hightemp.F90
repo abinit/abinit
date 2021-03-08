@@ -571,10 +571,6 @@ contains
         !END TEMPORARY
       end if
       this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
-
-      ! Compute entropy
-      this%ent_freeel=5./3.*this%e_kin_freeel/tsmear-gamma*this%nfreeel+&
-      & 2./3.*factor/tsmear*xcut**(1.5)/(exp(xcut-gamma)+1)*(xcut-gamma)
     else
       do ifftf=1,this%nfftf
         do ispden=1,this%nspden
