@@ -38,25 +38,27 @@ $$
 
 In the same way as previously, it is then possible to obtain the 3$^{rd}$ and 4$^{th}$ order **effective** IFC $\overset{(3)}{\Theta}\vphantom{\Theta}$ and $\overset{(4)}{\Theta}\vphantom{\Theta}$ by using a least squares method. These **effective** IFC are no longer constant and become temperature dependent by taking into account in an **effective** way all the terms neglected (above the truncation). The anharmonicity comes from both the presence of 3$^{rd}$ and 4$^{th}$ order **effective** IFC and their temperature dependancy.
 
-## 2. Temperature effect on Gr\"uneisen parameter : MgO.
-
-This calculation is similar to the one performed in the following article [[cite:Bouchet2019]].
-
-###	2.1 Convergence with respect to Rcut
-
-###	2.2 Another question?
-
-## 3. A negative thermal expansion : Si-d
+## 2. Negative thermal expansion : Si-d
 
 This calculation is similar to the one performed in the following article [[cite:Bottin2020]].
 
+###	2.0 NetCDF input files
+
+###	2.1 Convergence with respect to Rcut
+
+###	2.2 Etot/FcatMDvsTDEP
+
+###	2.3 The mode Gr\"uneisen parameters and the thermal expansion
+
+###	2.4 Another question?
+
+## 3. Temperature effect on the Gr\"uneisen parameters : MgO.
+
+This calculation is similar to the one performed in the following article [[cite:Bouchet2019]].
+
 ###	3.1 Convergence with respect to Rcut
 
-###	3.2 Effect of the number of configurations
-
-###	3.3 Another question?
-
-
+###	3.2 Another question?
 
 ## 4. Temperature effects on the sound speed : Fe-$\epsilon$
 
@@ -66,3 +68,12 @@ This calculation is similar to the one performed in the following article [[cite
 
 ###	4.2 Another question?
 
+## 5. Description of an alloy using VCA : UMo-$\gamma$
+
+This calculation is similar to the one performed in the following article [[cite:Castellano2020]].
+
+###	5.1 Convergence with respect to Rcut
+
+###	5.2 Another question?
+
+![Harmonic Potential](https://upload.wikimedia.org/wikipedia/commons/6/60/Potential_approximation.png)

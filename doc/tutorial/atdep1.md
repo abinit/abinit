@@ -52,7 +52,7 @@ $$
 F_{i,AIMD}^\alpha(t)=  - \sum_{j,\beta} \overset{(2)}{\Theta}\vphantom{\Theta}_{ij}^{\alpha\beta} u_{j,AIMD}^\beta(t)
 $$
 
-It is then possible to obtain the 2nd order **effective** IFC $\overset{(2)}{\Theta}$ by using a least squares method : $\overset{(2)}{\Theta} = \mathbf{F} . \mathbf{u}^{-1}$. This fitting procedure modifies the 2nd order IFC by including (in an effective way) the anharmonic contributions coming from the terms above the truncation. Therefore, the IFC are no longer constant and become temperature dependent. That is the reason why we change the notation: in the following, the $\Phi$ will be referred to as the ‘‘true IFC’’ and the $\Theta$ as the ‘‘effective IFC’’.
+It is then possible to obtain the 2nd order **effective** IFC $\overset{(2)}{\Theta}$ by using a least squares method : $\mathbf{\overset{(2)}{\Theta}} = \mathbf{F} . \mathbf{u}^{-1}$. This fitting procedure modifies the 2nd order IFC by including (in an effective way) the anharmonic contributions coming from the terms above the truncation. Therefore, the IFC are no longer constant and become temperature dependent. That is the reason why we change the notation: in the following, the $\Phi$ will be referred to as the ‘‘true IFC’’ and the $\Theta$ as the ‘‘effective IFC’’.
 
 
 ## 2. A simple case : Al-fcc
@@ -75,11 +75,11 @@ cp ../tatdep1_1.* .
 
 Let us discuss the meaning of these five files :
 
-1. The data files *tatdep1_1xred.dat*, *tatdep1_1fcart.dat* and *tatdep1_1etotal.dat* :
+#### 		^^2.1.1 The data files *tatdep1_1xred.dat*, *tatdep1_1fcart.dat* and *tatdep1_1etotal.dat*^^
 
 These ones store some data coming from the AIMD simulations : the reduced coordinates, the cartesian forces and the total energy of all the atoms in the supercell, respectively. In the present example, only 20 snapshots are extracted from a very long trajectory with thousands molecular dynamic time steps.
 
-2. The input file *tatdep1_1.abi* :
+#### 		^^2.1.2 The input file *tatdep1_1.abi*^^ 
 
 {% dialog tests/tutoatdep/Input/tatdep1_1.abi %}
 
@@ -120,7 +120,9 @@ Input variable | Meaning
 ---------------|--------
 [[atdep:enunit]] | Defines the ENergy UNIT used for the phonon spectrum. For the present calculation : 3 (in THz)
 
-3. The files file *tatdep1_1.files* lists the input file name and the root of input and output files :
+#### 		^^2.1.3 The files file *tatdep1_1.files*^^
+
+This one lists the input file name and the root of input and output files :
 
 {% dialog tests/tutoatdep/Input/tatdep1_1.files %}
 
@@ -136,7 +138,7 @@ The code should run very quickly.
 
 The ATDEP code writes **many** output files (some of them are available in *$ABI_TESTS/tutoatdep/Refs/). The reason is twofold : to remove all the "details" of the calculations from the main output file and to give all the thermodynamic data in an handable format. Let us detail these output files in the following :
 
-#### 		2.2.1 The main output file *tatdep1_1.abo* :
+#### 		^^2.2.1 The main output file *tatdep1_1.abo*^^
 
 {% dialog tests/tutoatdep/Refs/tatdep1_1.abo %}
 
@@ -157,7 +159,7 @@ This file reproduces all the steps encountered during the execution of ATDEP. Yo
 13. writes in a file the thermodynamics of the system (see below)
 14. finishes with the standard aknowlegment section of ABINIT output files 
 
-* The phonon frequencies file *tatdep1_1omega.dat* :
+#### 		^^2.2.2 The phonon frequencies file *tatdep1_1omega.dat*^^
 
 {% dialog tests/tutoatdep/Refs/tatdep1_1omega.dat %}
 
@@ -178,7 +180,7 @@ The BZ boundaries and all the **q**-points included in the path are available in
 
 {% dialog tests/tutoatdep/Refs/tatdep1_1qpt.dat %}
 
-As you can see, in the present calculation the path is as follows : $\Gamma$ - X - W - X' - K - $\Gamma$ - L. Concerning the results, you can compare the phonon spectrum obtained in this tutorial with the first figure of [this paper](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.91.135501). As you can see, the overall agreement is very good but not perfect due the too small number of configurations (20 time steps) and the difference between the experimental (80 K) and theoretical (900 K) temperatures. If you perform AIMD simulations at various temperatures and store more than 20 uncorrelated configurations, you will obtain the following picture : 
+As you can see, in the present calculation the path is as follows : $\Gamma$ - X - W - X' - K - $\Gamma$ - L. Concerning the results, you can compare the phonon spectrum obtained in this tutorial with the first figure of [this paper](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.91.135501). As you can see, the overall agreement is very good but not perfect due the too small number of atomic configurations (20 time steps) and the difference between the experimental (80 K) and theoretical (900 K) temperatures. If you perform AIMD simulations at various temperatures and store more than 20 atomic configurations, you will obtain the following picture : 
 
 ![Al experimental spectrum](atdep1_assets/tatdep1_1exp.jpg)
 
@@ -186,17 +188,17 @@ As you can see, in the present calculation the path is as follows : $\Gamma$ - X
     The *tatdep1_1qpt.dat* file do not be confused with the *tatdep1_1qbz.dat* file which defines the Monkhorst-Pack **q**-point mesh used to compute the vDOS : $g(\omega)=\frac{1}{3N_a}\sum_{s=1}^{3N_a}\sum_{\mathbf{q}\in BZ} \delta(\omega-\omega_s(\mathbf{q}))$ such as $\int_0^{\omega_{max}} g(\omega)d\omega =1$, with $\omega_{max}$ the highest phonon frequency of the system. The vDOS is written in the *tatdep1_1vdos.dat* file. You may plot it to verify that the vDOS is consistent with the phonon spectrum.
 
 
-#### 		2.2.2 The thermodynamic file *tatdep1_1thermo.dat* :
+#### 		^^2.2.3 The thermodynamic file *tatdep1_1thermo.dat*^^
 
 {% dialog tests/tutoatdep/Refs/tatdep1_1thermo.dat %}
 
-In this file, we print all the thermodynamic data that we can compute by using the phonon spectrum and/or the vDOS. The main quantity is the free energy. This one can be splitted in two parts:
+In this file, we print all the thermodynamic data that we can compute by using the phonon spectrum and/or the vDOS. The main quantity is the free energy $\mathcal{F}$. This one can be splitted in two parts:
 
 $$
 \mathcal{F}(V,T)=U_0(V)+\mathcal{F}_{\rm vib}(V,T) 
 $$
 
-The first part is the cold contribution (at T = 0 K) whereas the second one is the vibrational contribution (with T $\neq$ 0). The cold contribution can be computed using a dedicated calculation or using the following formulation :
+The first part is the cold contribution (at T = 0 K) whereas the second one is the vibrational contribution (with T $\neq$ 0). The cold contribution can be computed using a ground state specific calculation or using the following formulation :
 
 $$
 U_0(V)=< U_{\rm MD}(t)-\frac{1}{2!}\sum_{ij,\alpha\beta} \overset{(2)}{\Theta}\vphantom{\Theta}_{ij}^{\alpha\beta} u_i^\alpha u_j^\beta >
@@ -220,59 +222,99 @@ $$
   S_{\rm vib} = 3N_a k_B \int_0^{\omega_{max}} \left[\frac{\beta\hbar\omega}{2}\coth(\frac{\beta\hbar\omega}{2}) - \ln \left(2\sinh(\frac{\beta\hbar\omega}{2})\right)\right] g(\omega)d\omega
 $$
 
-All these thermodynamic data are computed and written in the *tatdep1_1thermo.dat*. Note that this file is splitted in two parts :
+All these thermodynamic data are computed and written in the *tatdep1_1thermo.dat*. Note that this file is divided in two parts :
  
-- the first one is dedicated to these data obtained at the temperature defined by [[atdep:temperature]].
-- whereas in the second one, these data are extrapolated at all the temperatures using a fixed vDOS.
+- the first one is dedicated to the thermodynamic data obtained at the temperature defined by input variable [[atdep:temperature]].
+- whereas in the second one, the thermodynamic data are **extrapolated** at all the temperatures using a fixed vDOS.
 
 !!! note
-    This last point corresponds to the harmonic approximation (HA). In this case, the phonon frequencies (so, the vDOS) do not depend on the temperature : $\omega_{HA} = \omega(V)$. Using HA, it's then possible to compute all the thermodynamic data, whathever the temperature, since the vDOS remains constant. In this case, the temperature variation of the thermodynamic quantity only comes from the filling of phononic states by the Bose-Einstein statistics. To go beyond, and capture the thermal expansion for example, we can assume that the temperature effects are **implicit** through the variation of the volume. It is the quasi-harmonic approximations (QHA) : $\omega_{QHA}=\omega(V(T))$. If in many cases the QHA gives excellent results, it fails to reproduce an **explicit** variation of the thermodynamic data with respect to the temperature (the phonon frequencies cannot vary at constant volume, along an isochore). This **explicit** variation comes from the anharmonic effects and we have $\omega_{Anh}=\omega(T,V(T)$.
+    This last point corresponds to the harmonic approximation (HA). In this case, the phonon frequencies do not depend on the temperature but only on the volume $V$, so we have $\omega_{\rm HA} = \omega(V)$. Using a constant vDOS, it's then possible to compute all the thermodynamic data, whathever the temperature. In this case, the temperature variation of the thermodynamic quantities only comes from the filling of phononic states using the Bose-Einstein statistics. To go beyond, and capture the thermal expansion for example, we can assume that the temperature effects are **implicit** through the variation of the volume. This is the quasi-harmonic approximations (QHA) : $\omega_{\rm QHA}=\omega(V(T))$. If in many cases the QHA gives excellent results, it fails to reproduce an **explicit** variation of the thermodynamic data with respect to the temperature (by definition, the phonon frequencies cannot vary at constant volume, along an isochore). This **explicit** variation comes from anharmonic effects and only be captured by going beyond the second order in the energy expansion. That is the work done by aTDEP, by recasting all the 3rd, 4th... terms of the energy expansion within the 2nd order, in an **effective** way. Since the 2nd order effective IFC now takes into account all these terms, it capture the temperature effects and we have $\omega_{\rm Anh}=\omega(T,V(T)$.
 
+In the *tatdep1_1thermo.dat* file corresponding to the present calculation, several remarks can be done. You can see that the specific heat $C_{\rm vib,V}$ is equal to 2.972 (in $k_B$ units) at $T$ = 900 K. In the second part of this file, you see that this quantity converges towards 3 at high temperature, as expected by the Dulong-Petit law (in this part we are in HA, so this law is fulfilled). This result is consistent with the experimental Debye temperature $\Theta_D \approx$ 400 K ; at $T$ = 900 K the behaviour of aluminum is classic and no longer quantic, since all the phononic states are filled. This can be seen also for another quantity. Plot the vibrational internal energy $U_{\rm vib}^{ \rm HA}$ as the function of temperature (see the second part of the file). And plot also $U_{\rm vib}^{\rm Classic}=3k_B T$ corresponding to the classic formulation (in eV, so use the conversion factor 1 eV = 11 604 K). You will see that the classic limit is achieved between 400 and 600 K, as expected.
 
-### 	2.3 The convergency with respect to some input variables
+### 	2.3 Numerical convergence (accuracy and precision)
 
-1. The cutoff radius
+Several input variables have strong impact on the convergence of the effective IFC, phonon frequencies and thermodynamic data. Two of them are in the *tatdep1_1.abi* input file (in the "DEFINE_COMPUTATIONAL_DETAILS" section) and others comes from the AIMD simulations. 
 
-2. The number of configurations
+####		^^2.3.1 The cutoff radius [[atdep:rcut]]^^
 
-3. Other parameters
+The first one is the number of coordination shells included in the calculation of the 2nd order effective IFC. 
 
-- **k**-points
+![Shells at 2nd order](atdep1_assets/tatdep1_1shell.jpg)
 
-## 3. Two atoms in the unitcell : Si-d
+Let us see again the *tatdep1_1.abo* output file and go to the "SECOND ORDER" section. You will see the list of the five shells included in the present calculation and sorted as a function of the shell radius : 0.0000000000 (the onsite interaction), 5.3997030363 (the 2nd shell), 7.6363332667 (the 3rd), 9.3525600046 (the 4th) and 10.7994060725 a.u. (the 5th).  
 
-This calculation is similar to the one performed in the following article [[cite:Bottin2020]].
+In the *tatdep1_1.abi* input file the cutoff radius [[atdep:rcut]] equals to 11.45 (a.u.). Now, we will change this value to 6.0, 8.0 and 10.0 in order to have 2, 3 and 4 shells in the calculation, respectively. To do that, you can replace the third line of the *tatdep1_1.files* file by "Rcut6", then set "rcut 6.0" in the input file *tatdep1_1.abi" and finally launch `atdep`. Repeat this process for "Rcut8" and "Rcut10" and plot all the phonon spectra :  
 
-###	3.1 Convergence with respect to Rcut
+      xmgrace -nxy Rcut6omega.dat -nxy Rcut8omega.dat -nxy Rcut10omega.dat -nxy tatdep1_1omega.dat
 
-###	3.2 Effect of the number of configurations
+You should get the following picture :
 
-###	3.3 Another question?
+![Al phonon spectrum wrt rcut](atdep1_assets/tatdep1_1rcut.png)
 
+Concerning this very simple case, the frequencies are almost converged with only two shells (the onsite interaction and the 1st shell of coordination). In most situations, this is not the case. Here, we can see that some differences remain for rcut = 6.0 and 8.0 a.u. with respect to higher shell radii. With 4 shells and rcut = 10.0, the phonon spectrum seems to be converged and almost equal to 5 shells and rcut = 11.45. This is confirmed by AIMD simulations with 216 atoms in the supercell and a higher shell radius (not shown here).
 
+!!! warning
+    The cutoff radius [[atdep:rcut]] cannot be greater than the shortest dimension of the supercell. Otherwise, the shell will include spurious atomic vibrations. The only way to have a larger cutoff radius is to perform AIMD simulations with a larger supercell/number of atoms.    
 
-## 4. Temperature dependency of a soft mode : U-$\alpha$
+####		^^2.3.2 The number of atomic configurations^^
+
+Another key quantity is the number of atomic configurations used in the calculation. This one is defined by the difference between two input variables : [[atdep:nstep_max]] - [[atdep:nstep_min]]. For simplicity, we generally use as input data files (*etot.dat*, *xred.dat* and *fcart.dat*) the whole trajectory coming from the AIMD simulations, with thousands of atomic configurations. So, for an AIMD trajectory with 10 000 time steps including a thermalization over 5 000 time steps, we can set [[atdep:nstep_max]] to 10 000 and [[atdep:nstep_min]] to 5 000. However, all the AIMD time steps are not uncorrelated and 99% of the information coming from them is in general useless.
+
+The number of uncorrelated configurations needed for the calculation is direcly related to the number of non-zero and independent IFC coefficients which has to be computed. At the 2nd order, the whole effective IFC $\mathbf{\Theta}$ is a $3N_a\times 3N_a$ matrix. For instance, in the present calculation with $N_a$ = 108 atoms, the whole IFC has 104 976 coefficients. So, if one wants to obtain them (using a least square method $\mathbf{\Theta} = \mathbf{F} . \mathbf{u}^{-1}$), it would require tens of thousands time steps, which is out of reach (see the seminal article of Hellman and coworkers [[cite:Hellman2011]]), 
+
+Thanks to crystal symmetries, tensor symmetries (of the IFC, of the dynamical matrix, of the elastic tensor...) and invariances (translational and rotational) this huge number can be drastically reduced. For example, in the present calculation, we only need to compute 12 IFC coefficients (see "Total number of coefficients at the second order" in the *tatdep1_1.abo* output file) : 0 for the 1st shell then 3, 2, 4 and 3 coefficients for the higher shells. You can see their value in the output file (have a look at "List of (second order) IFC"). In fact, many of them are zero, symmetric or anti-symmetric, which gives the following picture of the whole IFC :
+
+$$ 
+\begin{pmatrix}
+\begin{pmatrix} \theta_{21} & 0      & 0       \\  0      & \theta_{21} &  0     \\  0      & 0      & \theta_{21} \end{pmatrix} \quad
+\begin{pmatrix} \theta_{22} & \theta_{23} & \theta_{24}  \\ -\theta_{23} & \theta_{22} & \theta_{26} \\  \theta_{25} & \theta_{26} & \theta_{22} \end{pmatrix} \quad  
+\begin{matrix}  ... \\ ... \\ ... \end{matrix} \\
+\begin{pmatrix} \theta_{22} &-\theta_{23} & \theta_{25}  \\ \theta_{23}  & \theta_{22} & \theta_{26} \\  \theta_{24} & \theta_{26} & \theta_{22} \end{pmatrix} \quad
+\begin{pmatrix} \theta_{27} & 0      & 0       \\  0      & \theta_{27} & 0      \\  0      & 0      & \theta_{27} \end{pmatrix} \quad  
+\begin{matrix}  ... \\ ... \\ ... \end{matrix} \\
+\quad
+\begin{matrix}  ... & ... & ... \end{matrix} \quad \quad \quad  
+\begin{matrix}  ... & ... & ... \end{matrix} \quad \quad
+\begin{matrix}  \ddots \end{matrix}
+\end{pmatrix}
+$$     
+
+Thanks to this drastic reduction of the IFC coefficients, only 50 to 100 atomic uncorrelated configurations are generally needed to obtain converged properties at the 2nd order (in this example, and in the whole ABINIT package, we only propose examples with a maximum of 20 uncorrelated configurations in order to avoid a too huge amount of data). As previously for the cutoff radius, we can study the convergence of the calculation with respect to the number of uncorrelated atomic configurations. Set [[atdep:nstep_max]] equal to 5 in *tatdep1_1.abi*, replace the root of the ouput file name by "Ntep5" in the *tatdep1_1.files* and launch `atdep`. Do it again for 8 time steps then plot :
+
+      xmgrace -nxy Nstep5omega.dat -nxy Nstep8omega.dat -nxy tatdep1_1omega.dat
+
+You should get the following picture :
+
+![Al phonon spectrum wrt nstep](atdep1_assets/tatdep1_1nstep.png)
+
+In conclusion, a too small number of uncorrelated atomic configurations lead to a large error in the phonon spectrum. Therefore, do not hesitate to pursue the AIMD simulation (in order to accumulate a larger number of configurations) until achieving the convergence of the phonon spectrum.   
+
+!!! note
+    Another input variable impact the number of atomic configurations : [[atdep:slice]]. This optional variable select one configuration over [[atdep:slice]], so the calculation will have ([[atdep:nstep_max]]-[[atdep:nstep_min]])/[[atdep:slice]] configurations at all. To test its utility, you can add a line "slice 4" in the section "optional input variable", change the root of the output file name by "slice" and launch `atdep`. The value of this optional variable is now echoed at the begining of the output file and you can find that the "real number of time steps" is now 5 (and no longer 20). Finally, you can plot the phonon spectrum and see the differences with respect to have the 20 configurations (*tatdep1_1omega.dat*) or only the 5 first (*Nstep5omega.dat*). 
+
+####		^^2.3.3 Other important parameters^^
+
+- **k**-points [[cite:Anzellini2020]]
+- size of the supercell
+
+## 3. Temperature dependency of a soft mode : U-$\alpha$
 
 This calculation is similar to the one performed in the following article [[cite:Bouchet2015]].
 
-###	4.1 Convergence with respect to Rcut
+###	3.1 Failure of the QHA
 
-###	4.2 Another question?
+###	3.2 Elastic moduli
 
-## 5. Dynamic stabilization due to anharmonic effects : Zr-$\beta$
+###	3.3 Another question?
+
+## 4. Dynamic stabilization due to anharmonic effects : U-$\gamma$
 
 This calculation is similar to the ones performed in the following articles [[cite:Anzellini2020]] and [[cite:Bottin2020]].
 
-###	4.1 Convergence with respect to Rcut
+###	4.1 Strong anharmonicity
 
-###	4.2 Another question?
+###	4.2 Thermodynamics
 
-## 6. Description of an alloy using VCA : UMo-$\gamma$
+###	4.3 Another question?
 
-This calculation is similar to the one performed in the following article [[cite:Castellano2020]].
-
-###	4.1 Convergence with respect to Rcut
-
-###	4.2 Another question?
-
-![Harmonic Potential](https://upload.wikimedia.org/wikipedia/commons/6/60/Potential_approximation.png)
