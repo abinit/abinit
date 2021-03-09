@@ -472,6 +472,7 @@ contains
       if (Invar%enunit.eq.0) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in meV)'
       if (Invar%enunit.eq.1) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in cm-1)'
       if (Invar%enunit.eq.2) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in Ha)'
+      if (Invar%enunit.eq.3) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in THz)'
     else if (string.eq.nproc) then  
       read(40,*) string,Invar%nproc(1),Invar%nproc(2)
       write(Invar%stdout,'(1x,a20,1x,i4,1x,i4)') string,Invar%nproc(1),Invar%nproc(2)

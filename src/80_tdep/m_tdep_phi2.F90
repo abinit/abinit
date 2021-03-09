@@ -610,6 +610,7 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,Lattice,qpt)
   if (Invar%enunit.eq.0) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*Ha_eV*1000,ii=1,3*Invar%natom_unitcell)
   if (Invar%enunit.eq.1) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*Ha_cmm1   ,ii=1,3*Invar%natom_unitcell)
   if (Invar%enunit.eq.2) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)           ,ii=1,3*Invar%natom_unitcell)
+  if (Invar%enunit.eq.3) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*Ha_THz    ,ii=1,3*Invar%natom_unitcell)
 
 ! Print the eigenvectors (eigenV) 
   write(51,*) 'For iqpt=',iqpt
