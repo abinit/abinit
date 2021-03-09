@@ -970,7 +970,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        !blanchet WORK ON PLANEWAVES
        if(associated(hightemp)) then
-         if(hightemp%version==1) then
+         if(hightemp%version==1.or.hightemp%version==3) then
            call hightemp%compute_pw_avg_std(cg,eig_k,ek_k,dtfil%filnam_ds(4),&
 &           gprimd,icg,ikpt,istwf_k,kg_k,kinpw,dtset%kptns,mcg,mpi_enreg,nband_k,&
 &           dtset%nkpt,npw_k,my_nspinor,dtset%wtk(ikpt))
@@ -1235,9 +1235,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(hightemp)) then
        call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
        if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
-       if(hightemp%iopt_pot==2) then
-         hightemp%vtrial=vtrial
-       end if
+       hightemp%vtrial=vtrial
      end if
 
 !    Compute the new occupation numbers from eigen

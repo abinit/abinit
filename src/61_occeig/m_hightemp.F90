@@ -62,7 +62,7 @@ module m_hightemp
   !!
   !! SOURCE
   type,public :: hightemp_type
-    integer :: bcut,iopt_pot,nbcut,nfftf,nspden,version
+    integer :: bcut,nbcut,nfftf,nspden,version
     real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,ent_freeel
     real(dp) :: std_init,nfreeel,e_shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
@@ -124,12 +124,6 @@ contains
     this%vtrial(:,:)=zero
     this%nfftf=nfftf
     this%nspden=nspden
-    if(version==3) then
-      this%iopt_pot=2
-      this%version=1
-    else
-      this%iopt_pot=1
-    end if
     this%ebcut=zero
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
@@ -175,7 +169,6 @@ contains
     ABI_DEALLOCATE(this%vtrial)
     this%nfftf=0
     this%nspden=0
-    this%iopt_pot=0
     this%bcut=0
     this%nbcut=0
     this%version=1
@@ -253,6 +246,7 @@ contains
     ! U_{K_0}
     if(this%version==2) then
       this%e_shiftfactor=zero
+      this%ebcut=0
       band_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
@@ -260,6 +254,7 @@ contains
           do ii=nband_k-this%nbcut+1,nband_k
             this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
           end do
+          this%ebcut=this%ebcut+wtk(ikpt)*eigen(band_index+nband_k)
           band_index=band_index+nband_k
         end do
       end do
@@ -297,24 +292,20 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifftf,ispden
-    real(dp) :: factor,gamma,ix,step,xcut
-    ! Arrays
-    real(dp),dimension(:),allocatable :: valuesnel
-
+    integer :: ifftf,ispden
+    real(dp) :: factor,gamma,xcut
     ! *********************************************************************
 
-    step=1e-1
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(1.5)
-    if(this%iopt_pot==1) then
+    if(this%version==1) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
-      if(this%version==1) then
-        xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
-      else if(this%version==2) then
-        xcut=(this%ebcut-this%e_shiftfactor)/tsmear
-      end if
+      xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
-    else
+    else if(this%version==2) then
+      gamma=(fermie-this%e_shiftfactor)/tsmear
+      xcut=(this%ebcut-this%e_shiftfactor)/tsmear
+      nelect=nelect+factor*djp12(xcut,gamma)
+    else if(this%version==3) then
       do ifftf=1,this%nfftf
         do ispden=1,this%nspden
           gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
@@ -360,25 +351,21 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifftf,ispden
-    real(dp) :: factor,ix,gamma,zero_gaussian,sigma,step,xcut
-    character(len=500) :: msg
-    ! Arrays
-    real(dp),dimension(:),allocatable :: valueseel
+    integer :: ifftf,ispden
+    real(dp) :: factor,gamma,xcut
 
     ! *********************************************************************
-    step=1e-1
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
     this%e_kin_freeel=zero
-    if(this%iopt_pot==1) then
+    if(this%version==1) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
-      if(this%version==1) then
-        xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
-      else if(this%version==2) then
-        xcut=(this%ebcut-this%e_shiftfactor)/tsmear
-      end if
+      xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
-    else
+    else if(this%version==2) then
+      gamma=(fermie-this%e_shiftfactor)/tsmear
+      xcut=(this%ebcut-this%e_shiftfactor)/tsmear
+      this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
+    else if(this%version==3) then
       do ifftf=1,this%nfftf
         do ispden=1,this%nspden
           gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
@@ -433,8 +420,6 @@ contains
     ! Scalars
     integer :: ii,ifftf,ispden,mpierr,nsize
     real(dp) :: ix,step,factor,fn,gamma,minocc
-
-    real(dp) :: start_time,end_time
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
 
@@ -443,132 +428,152 @@ contains
     if(mpi_enreg%me==0) then
       step=one
       if(this%version==1) then
-        if(this%iopt_pot==1) then
-          call cpu_time(start_time)
-          ! Dynamic array find size
-          ix=dble(this%bcut)
-          ii=0
+        ! ******* OLD WAY TO COMPUTE ENTROPY *******
+        ! ! Dynamic array find size
+        ! ix=dble(this%bcut)
+        ! ii=0
+        ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        ! minocc=tol16
+        ! do while(fn>minocc)
+        !   ii=ii+1
+        !   ix=dble(this%bcut)+(dble(ii)-one)*step
+        !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        ! end do
+        ! nsize=ii
+        ! ! Allocate the array to prepare the Simpson integration
+        ! ABI_ALLOCATE(valuesent,(nsize))
+        !
+        ! !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent,nsize)
+        ! do ii=1,nsize
+        !   ix=dble(this%bcut)+(dble(ii)-one)*step
+        !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        !   if(one-fn>tol16) then
+        !     valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
+        !   else
+        !     valuesent(ii)=zero
+        !   end if
+        ! end do
+        ! !$OMP END PARALLEL DO
+        !
+        ! if (size(valuesent)>=6) then
+        !   this%ent_freeel=simpson(step,valuesent)
+        ! end if
+        ! ABI_DEALLOCATE(valuesent)
+        ! ******************************************
+
+        ! Other way to find entropy
+        this%ent_freeel=zero
+        factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
+        gamma=(fermie-this%e_shiftfactor)/tsmear
+        ABI_ALLOCATE(valuesent,(this%bcut+1))
+
+        !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent,nsize)
+        do ii=1,this%bcut+1
+          ix=dble(ii)-one
           fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-          minocc=tol16
-          do while(fn>minocc)
-            ii=ii+1
-            ix=dble(this%bcut)+(dble(ii)-one)*step
-            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-          end do
-          nsize=ii
-          call cpu_time(end_time)
-          write(0,*) this%ent_freeel,end_time-start_time
-          call cpu_time(start_time)
-          ! Allocate the array to prepare the Simpson integration
-          ABI_ALLOCATE(valuesent,(nsize))
-
-          !$OMP PARALLEL DO SHARED(valuesent,nsize)
-          do ii=1,nsize
-            ix=dble(this%bcut)+(dble(ii)-one)*step
-            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-            if(one-fn>tol16) then
-              valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
-            else
-              valuesent(ii)=zero
-            end if
-          end do
-          !$OMP END PARALLEL DO
-
-          if (size(valuesent)>=6) then
-            this%ent_freeel=simpson(step,valuesent)
+          if(one-fn>tol16) then
+            valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
+          else
+            valuesent(ii)=zero
           end if
-          ABI_DEALLOCATE(valuesent)
-          call cpu_time(end_time)
-          write(0,*) this%ent_freeel,end_time-start_time
-
-          call cpu_time(start_time)
-          ! Other way to find entropy
-          this%ent_freeel=zero
-          factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-          gamma=(fermie-this%e_shiftfactor)/tsmear
-          ABI_ALLOCATE(valuesent,(this%bcut+1))
-          do ii=1,this%bcut+1
-            ix=dble(ii)-one
-            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-            if(one-fn>tol16) then
-              valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
-            else
-              valuesent(ii)=zero
-            end if
-          end do
-          if(size(valuesent)>=6) then
-            this%ent_freeel=5./3.*factor*dip32(gamma)/tsmear-&
-            & gamma*factor*dip12(gamma)/tsmear-&
-            simpson(one,valuesent)
-          end if
-          ABI_DEALLOCATE(valuesent)
-          call cpu_time(end_time)
-          write(0,*) this%ent_freeel,end_time-start_time
-          write(0,*) '----'
-
-        else
-          step=one
-          do ifftf=1,this%nfftf
-            do ispden=1,this%nspden
-              ! Dynamic array find size
-              ix=dble(this%bcut)
-              ii=0
-              fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
-              & this%vtrial(ifftf,ispden),fermie,tsmear)
-              minocc=tol16
-              do while(fn>minocc)
-                fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
-                & this%vtrial(ifftf,ispden),fermie,tsmear)
-                ii=ii+1
-                ix=ix+step
-              end do
-              ABI_ALLOCATE(valuesent,(ii))
-              ix=dble(this%bcut)
-              ii=0
-              fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
-              & this%vtrial(ifftf,ispden),fermie,tsmear)
-              do while(fn>minocc)
-                fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
-                & this%vtrial(ifftf,ispden),fermie,tsmear)
-                ii=ii+1
-                valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
-                ix=ix+step
-              end do
-              if (ii>1) then
-                this%ent_freeel=this%ent_freeel+simpson(step,valuesent)/&
-                & (this%nfftf*this%nspden)
-              end if
-              ABI_DEALLOCATE(valuesent)
-            end do
-          end do
-        end if
-      else if(this%version == 2) then
-        ! Dynamic array find size
-        ix=this%ebcut
-        ii=0
-        fn=fermi_dirac(ix,fermie,tsmear)
-        minocc=tol16
-        do while(fn>minocc)
-          fn=fermi_dirac(ix,fermie,tsmear)
-          ii=ii+1
-          ix=ix+step
         end do
+        !$OMP END PARALLEL DO
 
-        ABI_ALLOCATE(valuesent,(ii))
-        ix=this%ebcut
-        ii=0
-        fn=fermi_dirac(ix,fermie,tsmear)
-        do while(fn>minocc)
-          fn=fermi_dirac(ix,fermie,tsmear)
-          ii=ii+1
-          valuesent(ii)=-(fn*log(fn)+(1.-fn)*log(1.-fn))*&
-          & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
-          ix=ix+step
-        end do
-        if (ii>1) then
-          this%ent_freeel=simpson(step,valuesent)
+        if(size(valuesent)>=6) then
+          this%ent_freeel=5./3.*factor*dip32(gamma)/tsmear-&
+          & gamma*factor*dip12(gamma)/tsmear-&
+          simpson(one,valuesent)
         end if
         ABI_DEALLOCATE(valuesent)
+      else if(this%version==2) then
+        ! ******* OLD WAY TO COMPUTE ENTROPY *******
+        ! ! Dynamic array find size
+        ! ix=this%ebcut
+        ! ii=0
+        ! fn=fermi_dirac(ix,fermie,tsmear)
+        ! minocc=tol16
+        ! do while(fn>minocc)
+        !   fn=fermi_dirac(ix,fermie,tsmear)
+        !   ii=ii+1
+        !   ix=ix+step
+        ! end do
+        !
+        ! ABI_ALLOCATE(valuesent,(ii))
+        ! ix=this%ebcut
+        ! ii=0
+        ! fn=fermi_dirac(ix,fermie,tsmear)
+        ! do while(fn>minocc)
+        !   fn=fermi_dirac(ix,fermie,tsmear)
+        !   ii=ii+1
+        !   valuesent(ii)=-(fn*log(fn)+(1.-fn)*log(1.-fn))*&
+        !   & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
+        !   ix=ix+step
+        ! end do
+        ! if (ii>1) then
+        !   this%ent_freeel=simpson(step,valuesent)
+        ! end if
+        ! ABI_DEALLOCATE(valuesent)
+        ! ******************************************
+
+        this%ent_freeel=zero
+        factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
+        gamma=(fermie-this%e_shiftfactor)/tsmear
+        ABI_ALLOCATE(valuesent,(this%bcut+1))
+
+        !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent,nsize)
+        do ii=1,this%bcut+1
+          ix=dble(ii)-one
+          fn=fermi_dirac(ix,fermie,tsmear)
+          if(one-fn>tol16) then
+            valuesent(ii)=-(fn*log(fn)+(1.-fn)*log(1.-fn))*&
+            & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
+          else
+            valuesent(ii)=zero
+          end if
+        end do
+        !$OMP END PARALLEL DO
+
+        if(size(valuesent)>=6) then
+          this%ent_freeel=5./3.*factor*dip32(gamma)/tsmear-&
+          & gamma*factor*dip12(gamma)/tsmear-&
+          simpson(one,valuesent)
+        end if
+        ABI_DEALLOCATE(valuesent)
+      else if(this%version==3) then
+        step=one
+        do ifftf=1,this%nfftf
+          do ispden=1,this%nspden
+            ! Dynamic array find size
+            ix=dble(this%bcut)
+            ii=0
+            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
+            & this%vtrial(ifftf,ispden),fermie,tsmear)
+            minocc=tol16
+            do while(fn>minocc)
+              fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
+              & this%vtrial(ifftf,ispden),fermie,tsmear)
+              ii=ii+1
+              ix=ix+step
+            end do
+            ABI_ALLOCATE(valuesent,(ii))
+            ix=dble(this%bcut)
+            ii=0
+            fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
+            & this%vtrial(ifftf,ispden),fermie,tsmear)
+            do while(fn>minocc)
+              fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
+              & this%vtrial(ifftf,ispden),fermie,tsmear)
+              ii=ii+1
+              valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
+              ix=ix+step
+            end do
+            if (ii>1) then
+              this%ent_freeel=this%ent_freeel+simpson(step,valuesent)/&
+              & (this%nfftf*this%nspden)
+            end if
+            ABI_DEALLOCATE(valuesent)
+          end do
+        end do
       end if
     end if
     call xmpi_sum(this%ent_freeel,mpi_enreg%comm_world,mpierr)
