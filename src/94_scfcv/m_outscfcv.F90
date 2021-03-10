@@ -1362,7 +1362,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
- call timab(950,2,tsec) ! outscfcv
+ call timab(1150,2,tsec) ! outscfcv
 
  DBG_EXIT("COLL")
 
