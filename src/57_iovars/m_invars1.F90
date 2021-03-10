@@ -2039,7 +2039,8 @@ end subroutine invars1
 !!
 !! FUNCTION
 !! Initialisation phase: default values for most input variables
-!! (some are initialized earlier, see indefo1 routine)
+!! (some are initialized earlier, see indefo1 routine, or even 
+!!  at the definition of the input variables (m_dtset.F90))
 !!
 !! INPUTS
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
@@ -2093,6 +2094,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
 !Set up default values. All variables to be output in outvars.f
 !should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
+!Some default values are also set at the definition of the input variables (m_dtset.F90).
 
 !These variables have already been initialized, for idtset/=0
  dtsets(0)%istatr=0
@@ -2541,11 +2543,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%postoldff=zero
    dtsets(idtset)%prepalw=0
    dtsets(idtset)%prepanl=0
-   dtsets(idtset)%prtden=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtden=0
-   dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
-   dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
+   dtsets(idtset)%prtden=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtden=0
+   dtsets(idtset)%prtebands=1 ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
+   dtsets(idtset)%prteig=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
+   dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
-   dtsets(idtset)%prtwf=1; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
+   dtsets(idtset)%prtwf=1     ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
    !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    do ii=1,dtsets(idtset)%natom,1
      dtsets(idtset)%prtatlist(ii)=ii

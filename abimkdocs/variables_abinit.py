@@ -15334,7 +15334,7 @@ Variable(
     vartype="integer",
     topics=['printing_prgs'],
     dimensions="scalar",
-    defaultval="prtgsr = 0",
+    defaultval=ValueWithConditions({'[[nimage]] > 1': 0, 'defaultval': 1}),
     mnemonics="PRinT the GSR file",
     added_in_version="before_v9",
     text=r"""
@@ -15970,10 +15970,11 @@ will be the root output name, followed by _WFK. If [[nqpt]] = 1, the root name
 will be followed by _WFQ. For response-function calculations, the root name
 will be followed by _1WFx, where x is the number of the perturbation. The
 dataset information will be added as well, if relevant.
-No wavefunction output is provided by [[prtwf]] = 0.
+
+If [[prtwf]] = 0, no wavefunction output is provided.
+
 If [[prtwf]] = -1, the code writes the wavefunction file only if convergence is
 not achieved in the self-consistent cycle.
-
 
 If [[prtwf]] = 2, a file pwfn.data is produced, to be used as input for the
 CASINO QMC code. See more explanation at the end of this section.
