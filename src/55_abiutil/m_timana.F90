@@ -849,12 +849,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1182)='outscfcv(prtblztrp)             '
  names(1183)='outscfcv(ebands_interpol_kpath) '
 
- names(1190)='outscfcv(gsr1) '
- names(1191)='outscfcv(gsr2) '
- names(1192)='outscfcv(gsr3) '
- names(1193)='outscfcv(gsr4) '
- names(1194)='outscfcv(gsr5) '
- names(1195)='outscfcv(gsr6) '
+!names(1190)='outscfcv(gsr1) '
+!names(1191)='outscfcv(gsr2) '
+!names(1192)='outscfcv(gsr3) '
+!names(1193)='outscfcv(gsr4) '
+!names(1194)='outscfcv(gsr5) '
+!names(1195)='outscfcv(gsr6) '
 
 
  names(1200)='gstateimg                       '
