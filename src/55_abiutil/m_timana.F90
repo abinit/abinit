@@ -1544,124 +1544,112 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !            msg='lobpcgwf (light analysis: for a deeper one, use abs(timopt)=3 or 4)'
          end if
        case(9)
-         list(:4)=(/22,201,40,211/)                            ; msg='cgwf '
+         list(:4)=(/22,201,40,211/)                                  ; msg='cgwf '
        case(10)
-         list(:8)=(/132,133,134,135,136,137,138,141/)          ; msg='respfn '
+         list(:8)=(/132,133,134,135,136,137,138,141/)                ; msg='respfn '
        case(11)
          list(:8)=(/141,142,143,144,120,146,147,TIMER_SIZE/)         ; msg='dfpt_looppert '
        case(12)
-         list(:9)=(/120,154,121,157,152,158,160,150,564/) ; msg='dfpt_scfcv '
+         list(:9)=(/120,154,121,157,152,158,160,150,564/)            ; msg='dfpt_scfcv '
        case(13)
-         list(:9)=(/121,118,128,126,287,166,129,127,556/)      ; msg='dfpt_vtorho '
+         list(:9)=(/121,118,128,126,287,166,129,127,556/)            ; msg='dfpt_vtorho '
        case(14)
-         list(:9)=(/128,131,122,845,288,214,108,130,565/)      ; msg='dfpt_vtowfk '
+         list(:9)=(/128,131,122,845,288,214,108,130,565/)            ; msg='dfpt_vtowfk '
        case(15)
-         list(:8)=(/122,140,202,197,212,227,228,844/)          ; msg='dfpt_cgwf '
+         list(:8)=(/122,140,202,197,212,227,228,844/)                ; msg='dfpt_cgwf '
        case(16)
-         list(:4)=(/200,841,221,98/)                           ; msg='getghc '
+         list(:4)=(/200,841,221,98/)                                 ; msg='getghc '
        case(17)
          list(:20)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858/)
          msg='fourwf (upwards partitioning)'
        case(18)
-         list(:5)=(/933,934,936,937,938/)                      ; msg='outkss '
+         list(:5)=(/933,934,936,937,938/)                            ; msg='outkss '
        case(19)
          list(:14)=(/301,302,315,316,319,304,305,320,321,306,307,308,309,310/)
          msg='screening '
        case(20)
          list(:13)=(/401,402,403,404,405,406,407,408,409,421,423,424,425/); msg='sigma  '
        case(21)
-         list(:9)=(/431,432,433,434,435,445,440,441,442/)     ; msg='calc_sigc_me '
+         list(:9)=(/431,432,433,434,435,445,440,441,442/)            ; msg='calc_sigc_me '
        case(23)
          list(:11)=(/630,631,632,633,634,545,635,636,637,638,TIMER_SIZE/)         ; msg='prep_getghc '
        case(24)
-         list(:4)=(/539,856,547,548/)                          ; msg='prep_fourwf '
+         list(:4)=(/539,856,547,548/)                                ; msg='prep_fourwf '
        case(25)
          list(:5)=(/570,231,232,581,TIMER_SIZE/)                     ; msg='prep_nonlop '
        case(26)
-         list(:6)=(/790,791,792,793,794,795/)                  ; msg='mkrho (upwards partitioning)'
+         list(:6)=(/(ii,ii=790,795,1)/)                  ; msg='mkrho (upwards partitioning)'
 !          Disabled (temporarily ?) because the partitioning was not correct
 !          case(27);list(:17)=(/600,601,602,603,604,605,617,606,607,608,609,610,611,612,613,614,615/)
 !          msg='vtorhorec '
        case(28)
-         list(:10)=(/650,651,653,654,655,656,658,659,660,661/)
-         msg='bethe_salpeter '
+         list(:10)=(/650,651,653,654,655,656,658,659,660,661/)       ; msg='bethe_salpeter '
        case(29)
-         list(:8)=(/740,741,742,743,744,745,746,747/)          ; msg='suscep_stat '
+         list(:8)=(/ (ii,ii=740,747,1) /)                            ; msg='suscep_stat '
        case(30)
-         list(:9)=(/750,751,848,849,753,756,859,757,755/)      ; msg='susk '
+         list(:9)=(/750,751,848,849,753,756,859,757,755/)            ; msg='susk '
        case(31)
-         list(:8)=(/760,761,764,861,871,765,862,872/)          ; msg='suskmm '
+         list(:8)=(/760,761,764,861,871,765,862,872/)                ; msg='suskmm '
        case(32)
-         list(:8)=(/710,711,712,713,714,715,716,717/)          ; msg='inwffil '
+         list(:8)=(/ (ii,ii=710,717,1) /)                            ; msg='inwffil '
        case(33)
-         list(:10)=(/720,721,722,723,724,725,726,727,67,TIMER_SIZE/)  ; msg='wfsinp '
+         list(:10)=(/720,721,722,723,724,725,726,727,67,TIMER_SIZE/) ; msg='wfsinp '
        case(34)
-         list(:5)=(/770,771,772,272,290/)                      ; msg='initwf '
+         list(:5)=(/770,771,772,272,290/)                            ; msg='initwf '
        case(35)
-         list(:9)=(/780,781,782,783,784,785,786,291,292/)      ; msg='newkpt '
+         list(:9)=(/780,781,782,783,784,785,786,291,292/)            ; msg='newkpt '
        case(36)
          list(:8)=(/93,901,902,903,904,905,268,TIMER_SIZE/)          ; msg='newvtr '
        case(37)
-         list(:2)=(/94,269/)                                   ; msg='newrho '
+         list(:2)=(/94,269/)                                         ; msg='newrho '
        case(38)
-         list(:11)=(/9,260,261,262,263,264,265,266,267,268,269/) ; msg=' fourdp (upwards partitioning)'
+         list(:11)=(/9,260,261,262,263,264,265,266,267,268,269/)     ; msg=' fourdp (upwards partitioning)'
        case(39)
-         list(:8)=(/250,251,252,253,254,255,256,257/)          ; msg='afterscfloop '
+         list(:8)=(/ (ii,ii=250,257,1) /)                            ; msg='afterscfloop '
        case(40)
-         list(:5)=(/910,911,912,913,914/)                      ; msg='forstr '
+         list(:5)=(/ (ii,ii=910,914,1) /)                            ; msg='forstr '
        case(41)
          list(:10)=(/920,921,927,922,923,926,924,65,925,TIMER_SIZE/) ; msg='forstrnps '
        case(42)
-         list(:4)=(/670,671,672,673/)                          ; msg='exc_build_ham '
+         list(:4)=(/670,671,672,673/)                                ; msg='exc_build_ham '
        case(43)
-         list(:7)=(/680,681,682,683,684,685,686/)              ; msg='exc_build_block'
+         list(:7)=(/ (ii,ii=680,686,1) /)                            ; msg='exc_build_block'
        case(44)
-         list(:8)=(/690,691,692,693,694,695,696,697/)                  ; msg='exc_haydock_driver '
+         list(:8)=(/ (ii,ii=690,697,1) /)                            ; msg='exc_haydock_driver '
        case(45)
-         list(:20)=(/950,951,952,953,954,955,956,957,958,959,960,961,962,963,964,965,966,967,968,969/)
-         msg='outscfcv '
+         list(:50)=(/ (ii,ii=1150,1199,1) /)                         ; msg='outscfcv '
        case(46)
-         list(:8)=(/620,621,622,623,624,625,626,627/)          ; msg='dmft '
+         list(:8)=(/ (ii,ii=620,627,1) /)                            ; msg='dmft '
        case(47)
-         list(:9)=(/1001,1002,1003,1004,1005,1006,1007,1008,1009/)
-         msg='initberry '
+         list(:9)=(/ (ii,ii=1001,1009,1) /)                          ; msg='initberry '
        case(50)
-         list(:3)=(/1501,1502,1515/)                           ; msg='hartreefock '
+         list(:3)=(/1501,1502,1515/)                                 ; msg='hartreefock '
        case(60)
          list(:13) = (/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/)
          msg = 'chebfi'
        case(61)
-         list(:3) = (/1620,1621,1622/)
-         msg = 'mkinvovl'
+         list(:3) = (/1620,1621,1622/)                               ; msg = 'mkinvovl'
        case(70)
-         list(:5)=(/1701,1702,1703,1721,1722/)
-         msg='gwls GW code'
+         list(:5)=(/1701,1702,1703,1721,1722/)                       ; msg='gwls GW code'
        case(71)
-         list(:16)=(/1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1715,1716,1717,1718/)
-         msg='gwls: compute_correlations_shift_lanczos'
+         list(:16)=(/ (ii,ii=1703,1718,1) /)                         ; msg='gwls: compute_correlations_shift_lanczos'
        case(72)
-         list(:10)=(/1724,1725,1726,1727,1728,1729,1730,1731,1732,1733/)
-         msg='gwls: Applying the susceptibility Pk'
+         list(:10)=(/ (ii,ii=1724,1733,1) /)                         ; msg='gwls: Applying the susceptibility Pk'
        case(73)
-         list(:7)=(/1734,1735,1736,1737,1738,1739,1740/)
-         msg='gwls: Applying the model susceptibility Pk_model'
+         list(:7)=(/ (ii,ii=1734,1740,1) /)                          ; msg='gwls: Applying the model susceptibility Pk_model'
        case(74)
-         list(:7)=(/1741,1742,1743,1744,1745,1746,1747/)
-         msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
+         list(:7)=(/ (ii,ii=1741,1747,1) /)                          ; msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
        case(75)
-         list(:12)=(/1650,1651,1652,1653,1654,1655,1656,1657,1658,1659,1660,1661/)
-         msg='lobpcgwf2 core engine '
+         list(:12)=(/ (ii,ii=1650,1661,1) /)                         ; msg='lobpcgwf2 core engine '
        case(76)
-         list(:18)=(/1670,1671,1672,1673,1674,1675,1676,1677,1678,1679,1680,1681,1682,1683,1684,1685,1686,1687/)
-         msg='low-level xgBlock type '
+         list(:18)=(/ (ii,ii=1670,1687,1) /)                         ; msg='low-level xgBlock type '
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/)
          msg='low-level xgScalapack type '
        case(78)
-         list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
-         msg='low-level xgTransposer type '
+         list(:8)=(/ (ii,ii=1662,1669,1) /)                          ; msg='low-level xgTransposer type '
        case default
-         cycle ! This allows to disable temporarily some partitionings
+         cycle ! This allows one to disable temporarily some partitionings
 
        end select
 
