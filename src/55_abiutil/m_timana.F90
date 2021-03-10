@@ -229,11 +229,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(28)='vtowfk                          '
  names(30)='vtowfk  (afterloop)             '
  names(31)='vtowfk  (1)                     '; basic(31)=1
- names(32)='gstate                          '
- names(33)='gstate->kpgsph                  '
- names(34)='gstate  (2)                     '
- names(35)='gstate(...scfcv)                '
- names(36)='gstate  (3)                     '
  names(37)='stress                          '; basic(37)=1   ! Actually, should not be basic !
  names(38)='ewald2 (+vdw_dftd)              '; basic(38)=1
  names(39)='vtowfk (loop)                   '
@@ -660,17 +655,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(697)='exc_haydock_driver(matmul)      '
 !Slots up to 699 are reserved for bethe_salpeter code.
 
- names(700)='gstateimg                       '
- names(701)='gstate(pspini)                  '
- names(702)='gstateimg(leave_test)           '
- names(703)='gstateimg(init)                 '
- names(704)='gstateimg(bef. loop img)        '
- names(705)='gstateimg(bef. gstate)          '
- names(706)='gstateimg(aft. gstate)          '
- names(707)='gstateimg(aft. loop img)        '
- names(708)='gstateimg(finalize)             '
-
-
  names(710)='inwffil                         '
  names(711)='inwffil(read header)            '
  names(712)='inwffil(init params)            '
@@ -871,6 +855,29 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1193)='outscfcv(gsr4) '
  names(1194)='outscfcv(gsr5) '
  names(1195)='outscfcv(gsr6) '
+
+
+ names(1200)='gstateimg                       '
+ names(1203)='gstateimg(init)                 '
+ names(1204)='gstateimg(bef. loop img)        '
+ names(1205)='gstateimg(bef. gstate)          '
+ names(1206)='gstateimg(aft. gstate)          '
+ names(1208)='gstateimg(leave_test)           '
+ names(1209)='gstateimg(aft. loop img)        '
+ names(1210)='gstateimg(finalize)             '
+
+ names(1211)='gstate(pspini)                  '
+ names(1213)='gstate->kpgsph                  '
+ names(1214)='gstate  (2)                     '
+ names(1215)='gstate(...scfcv)                '
+ names(1216)='gstate(prt gap)                 '
+ names(1217)='gstate(prtwf)                   '
+ names(1218)='gstate(clnup1)                  '
+ names(1219)='gstate(prtelfield)              '
+ names(1220)='gstate(DDB)                     '
+ names(1221)='gstate(clnup2)                  '
+
+ names(1222)='gstate                          '
 
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
@@ -1529,9 +1536,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(1)
          list(:11)=(/1,41,42,43,44,45,640,46,49,50,TIMER_SIZE/)      ; msg='abinit '
        case(2)
-         list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)  ; msg='driver '
+         list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)        ; msg='driver '
        case(3)
-         list(:13)=(/700,703,704,705,33,701,34,35,36,706,702,707,708/)       ; msg='gstateimg+gstate '
+         list(:22)=(/ (ii,ii=1200,1221,1) /)                         ; msg='gstateimg+gstate '
        case(4)
          list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,TIMER_SIZE/); msg='scfcv_core '
        case(5)
