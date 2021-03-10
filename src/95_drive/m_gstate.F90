@@ -1382,7 +1382,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! Write wavefunctions file only if convergence was not achieved.
  !write(std_out,*)"conv_retcode", conv_retcode
  write_wfk = .True.
- if (dtset%prtwf==0)write_wfk = .False.
  if (dtset%prtwf==-1 .and. conv_retcode == 0) then
    write_wfk = .False.
    msg = "GS calculation converged with prtwf=-1 --> Skipping WFK file output"
