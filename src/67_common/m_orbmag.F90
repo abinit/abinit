@@ -576,7 +576,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
 
- real(dp) :: doti
+ real(dp) :: doti,dotr
 
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:),nattyp_dum(:)
@@ -917,7 +917,10 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        ! 8 chern 
        doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
              & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir))
+       !dotr = DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,adir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,adir)) + &
+       !      & DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,adir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,adir))
        orbmag_terms(adir,chern,nn) = orbmag_terms(adir,chern,nn) - two*doti*trnrm
+       !orbmag_terms(adir,chern,nn) = orbmag_terms(adir,chern,nn) + dotr*trnrm
 
      end do
 
@@ -971,7 +974,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    orbmag_terms(1:3,vvi,nn) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_terms(1:3,vvi,nn))
    orbmag_terms(1:3,rho0h1,nn) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_terms(1:3,rho0h1,nn))
    orbmag_terms(1:3,rho0s1,nn) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_terms(1:3,rho0s1,nn))
-   orbmag_terms(1:3,chern,nn) =  ucvol*MATMUL(gprimd,orbmag_terms(1:3,chern,nn))
+   orbmag_terms(1:3,chern,nn) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_terms(1:3,chern,nn))
  end do
 
  ! compute trace of each term
@@ -1129,6 +1132,8 @@ subroutine orbmag_ddk_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      write(message,'(a,3es16.8)') '   H(1) on-site L_R : ',(orbmag_terms(adir,lrr3,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' H(1) on-site A0.An : ',(orbmag_terms(adir,a0an,iband),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '    Berry curvature : ',(orbmag_terms(adir,chern,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
    end do
  end if
