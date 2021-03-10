@@ -23,7 +23,7 @@
 MODULE m_exc_diago
 
  use defs_basis
- use m_slk
+
  use m_bs_defs
  use m_abicore
  use m_errors
@@ -33,6 +33,7 @@ MODULE m_exc_diago
 #endif
  use m_hdr
  use m_sort
+ use m_slk
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
@@ -1408,7 +1409,7 @@ write(668,*)ovlp
    do el=1,my_nel
      iloc = myel2loc(1,el)
      jloc = myel2loc(2,el)
-     call idx_glob(Slk_Hbar,iloc,jloc,iglob,jglob)
+     call Slk_Hbar%loc2glob(iloc,jloc,iglob,jglob)
      ctmp = tmp_cbuffer(el)
      if (iglob==jglob.and..not.Bsp%have_complex_ene) ctmp = DBLE(ctmp) ! Force the diagonal to be real.
      rrs_kind = rrs_of_glob(iglob,jglob,Slk_Hbar%sizeb_global)
@@ -1470,7 +1471,7 @@ write(668,*)ovlp
    do el=1,my_nel
      iloc = myel2loc(1,el)
      jloc = myel2loc(2,el)
-     call idx_glob(Slk_Hbar,iloc,jloc,iglob,jglob)
+     call Slk_Hbar%loc2glob(iloc, jloc, iglob, jglob)
      ccs_kind = ccs_of_glob(iglob,jglob,Slk_Hbar%sizeb_global)
      ctmp = tmp_cbuffer(el)
      if (ccs_kind==-1) ctmp = DCONJG(ctmp) ! Anti-coupling (Diagonal is included).
@@ -1501,7 +1502,7 @@ write(668,*)ovlp
    !            (0 -1)
    do jloc=1,Slk_F%sizeb_local(2)
      do iloc=1,Slk_F%sizeb_local(1)
-       call idx_glob(Slk_F,iloc,jloc,iglob,jglob)
+       call Slk_F%loc2glob(iloc, jloc, iglob, jglob)
        if (iglob==jglob) then
          if (iglob<=SUM(Bsp%nreh)) then
            Slk_F%buffer_cplx(iloc,jloc) =  cone
@@ -1642,16 +1643,12 @@ write(668,*)ovlp
 !END DEBUG
 
 #else
-   ! call slk_zdhp_invert(Slk_ovlp,uplo)
+   ! call Slk_ovlp%zdhp_invert(uplo)
    ! call hermitianize(Slk_ovlp%buffer_cplx,uplo)
    ! !call slk_symmetrize(Slk_ovlp,uplo,"Hermitian")
 
-   call slk_zinvert(Slk_ovlp)  ! Version for generic complex matrix.
+   call Slk_ovlp%zinvert()  ! Version for generic complex matrix.
 #endif
-
-   if (allocated(exc_ham))  then
-     ABI_FREE(exc_ham)
-   end if
 
 #ifdef DEV_MG_DEBUG_THIS
    ABI_MALLOC(exc_ham,(exc_size,exc_size))
