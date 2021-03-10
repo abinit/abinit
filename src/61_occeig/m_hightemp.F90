@@ -520,9 +520,10 @@ contains
         gamma=(fermie-this%e_shiftfactor)/tsmear
         ABI_ALLOCATE(valuesent,(this%bcut+1))
 
+        step=(this%ebcut-this%e_shiftfactor)/(this%bcut)
         !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent,nsize)
         do ii=1,this%bcut+1
-          ix=dble(ii)-one
+          ix=this%e_shiftfactor+(dble(ii)-one)*step
           fn=fermi_dirac(ix,fermie,tsmear)
           if(one-fn>tol16) then
             valuesent(ii)=-(fn*log(fn)+(1.-fn)*log(1.-fn))*&
@@ -536,7 +537,7 @@ contains
         if(size(valuesent)>=6) then
           this%ent_freeel=5./3.*factor*dip32(gamma)/tsmear-&
           & gamma*factor*dip12(gamma)/tsmear-&
-          simpson(one,valuesent)
+          simpson(step,valuesent)
         end if
         ABI_DEALLOCATE(valuesent)
       else if(this%version==3) then
