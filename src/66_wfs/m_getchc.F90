@@ -149,7 +149,7 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
  integer,parameter :: re=1,im=2
  integer :: choice,cpopt_here,i1,i2,i3,idat,idir
  integer :: ig,igspinor,ispinor,ispinor_left,my_nspinor
- integer :: nnlout,nffttot,npw,npw_k1,npw_k2,nspinortot
+ integer :: nnlout,nffttot,npw,npw_k1,npw_k2,nspinortot,n1,n2,n3
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
  logical :: k1_eq_k2,has_fock
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
@@ -277,14 +277,17 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
      MSG_BUG('vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
 
-   nffttot = gs_ham%ngfft(1)*gs_ham%ngfft(2)*gs_ham%ngfft(3)
+   n1=gs_ham%ngfft(1)
+   n2=gs_ham%ngfft(2)
+   n3=gs_ham%ngfft(3)
+   nffttot=n1*n2*n3
    chc = zero
 !  Treat scalar local potentials
    if (gs_ham%nvloc==1) then
      if (gs_ham%istwf_k==2) then
-       do i3=1,gs_ham%n6
-         do i2=1,gs_ham%n5
-           do i1=1,gs_ham%n4
+       do i3=1,n3
+         do i2=1,n2
+           do i1=1,n1
              chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3,1)*cwavef_left_r(1,i1,i2,i3,1)
            end do
          end do
@@ -292,9 +295,9 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
        chc(2)=zero
      else
        do ispinor=1,my_nspinor
-         do i3=1,gs_ham%n6
-           do i2=1,gs_ham%n5
-             do i1=1,gs_ham%n4
+         do i3=1,n3
+           do i2=1,n2
+             do i1=1,n1
                z_tmp(1) = cwavef_r(1,i1,i2,i3,ispinor)*cwavef_left_r(1,i1,i2,i3,ispinor) &
 &                 +cwavef_r(2,i1,i2,i3,ispinor)*cwavef_left_r(2,i1,i2,i3,ispinor)
                z_tmp(2) = cwavef_r(2,i1,i2,i3,ispinor)*cwavef_left_r(1,i1,i2,i3,ispinor) &
@@ -309,9 +312,9 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
    else ! nvloc = 4
      do ispinor=1,my_nspinor
        do ispinor_left=1,my_nspinor
-         do i3=1,gs_ham%n6
-           do i2=1,gs_ham%n5
-             do i1=1,gs_ham%n4
+         do i3=1,n3
+           do i2=1,n2
+             do i1=1,n1
                z_tmp(1) = cwavef_r(1,i1,i2,i3,ispinor)*cwavef_left_r(1,i1,i2,i3,ispinor_left) &
 &                        +cwavef_r(2,i1,i2,i3,ispinor)*cwavef_left_r(2,i1,i2,i3,ispinor_left)
                z_tmp(2) = cwavef_r(2,i1,i2,i3,ispinor)*cwavef_left_r(1,i1,i2,i3,ispinor_left) &
