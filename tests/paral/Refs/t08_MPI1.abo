@@ -9157,8 +9157,8 @@ P           mkmem          20
         optforces           1
            prtden           0
         prtebands           0
-           prtgsr           0
            prteig           0
+           prtgsr           0
         prtvolimg1          0
         prtvolimg2          1
         prtvolimg3          2
