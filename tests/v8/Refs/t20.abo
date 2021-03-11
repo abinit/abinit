@@ -216,6 +216,11 @@ P           mkmem           1
            prteig3          0
            prteig4          0
            prteig5          0
+           prtgsr1          1
+           prtgsr2          0
+           prtgsr3          0
+           prtgsr4          0
+           prtgsr5          0
             prtwf1          1
             prtwf2          0
             prtwf3          0

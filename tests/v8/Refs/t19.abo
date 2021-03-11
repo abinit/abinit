@@ -86,6 +86,7 @@ P           mkmem           1
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
             prtwf           0
           spgroup          47
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
@@ -1437,6 +1438,7 @@ P           mkmem           1
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
             prtwf           0
           spgroup          47
            strten      3.7316565188E-03  3.6129100545E-03  3.2915808647E-03
