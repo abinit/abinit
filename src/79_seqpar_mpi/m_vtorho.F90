@@ -1233,9 +1233,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
      if(associated(hightemp)) then
-       call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
-       if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
        hightemp%vtrial=vtrial
+       if(hightemp%version==1.or.hightemp%version==2) then
+         call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,dtset%nband,&
+&         dtset%nkpt,dtset%nsppol,dtset%wtk)
+       else if(hightemp%version==3) then
+         hightemp%e_shiftfactor=sum(vtrial)/(nfftf*dtset%nspden)
+       end if
+       ! if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
      end if
 
 !    Compute the new occupation numbers from eigen
@@ -1251,7 +1256,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(hightemp)) then
        hightemp%nfreeel=zero
        call hightemp%compute_nfreeel(energies%e_fermie,hightemp%nfreeel,dtset%tsmear)
-       write(0,*) hightemp%e_shiftfactor,sum(hightemp%vtrial)/(nfftf*dtset%nspden),hightemp%nfreeel
        call hightemp%compute_efreeel(energies%e_fermie,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
        call hightemp%compute_ent_freeel(energies%e_fermie,mpi_enreg,dtset%tsmear)
