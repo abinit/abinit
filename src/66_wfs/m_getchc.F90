@@ -533,10 +533,11 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
  integer :: npw,nspinor,paw_opt,select_k_,signs,tim_nonlop,nnlout
  !character(len=500) :: msg
 !arrays
- real(dp) :: tsec(2),dum
+ real(dp) :: tsec(2),real_csc(ndat)
  real(dp),allocatable :: gsc(:,:),gvnlxc(:,:)
  real(dp),allocatable :: enlout(:),enlout_im(:)
- real(dp),pointer :: cwavef_left_idat(:,:)
+! real(dp) :: dum
+! real(dp),pointer :: cwavef_left_idat(:,:)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -563,13 +564,25 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
  call timab(1361,1,tsec)
  if (istwf_k==1) then
    call zgemv('C',npw*nspinor,ndat,cone,cwavef_left,npw*nspinor,cwavef,1,czero,csc,1)
- else
+ else ! nspinor==1 in that case
+   call dgemv('C',2*npw,ndat,one,cwavef_left,2*npw,cwavef,1,zero,real_csc,1)
    do idat=1,ndat
-     cwavef_left_idat => cwavef_left(:,1+npw*nspinor*(idat-1):npw*nspinor*idat)
-     call dotprod_g(csc(2*idat-1),dum,istwf_k,npw*nspinor,1,cwavef_left_idat,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-     csc(2*idat)=zero
+     csc(2*idat-1) = two*real_csc(idat)
+     csc(2*idat  ) = zero
    end do
+   if (istwf_k==2 .and. mpi_enreg%me_g0==1) then ! Gamma k-point and I have G=0
+     do idat=1,ndat
+       csc(2*idat-1) = csc(2*idat-1) - cwavef_left(1,1+npw*(idat-1))*cwavef(1,1)
+     end do
+   end if
  end if
+! else
+!   do idat=1,ndat
+!     cwavef_left_idat => cwavef_left(:,1+npw*nspinor*(idat-1):npw*nspinor*idat)
+!     call dotprod_g(csc(2*idat-1),dum,istwf_k,npw*nspinor,1,cwavef_left_idat,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!     csc(2*idat)=zero
+!   end do
+! end if
  call timab(1361,2,tsec)
 
 

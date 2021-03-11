@@ -687,7 +687,6 @@ integer,parameter :: tim_getcsc=3
    call getchc(subham(isubh0:isubh0+2*iband-1),cpopt,cwavef,cwavef,&
      &          cprj_cwavef,cprj_cwavef_left,cwavef_r,cwavef_r,&
      &          gs_hamk,zero,mpi_enreg,iband,sij_opt,4)
-   ! Compute csc matrix
    isubh0=isubh
  end do
 
