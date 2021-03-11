@@ -1479,7 +1479,7 @@ To treat a neutral system, which is desired in nearly all cases, one must use
 
 [[cellcharge]] superceeds the old [[charge]] input variable, whose name was rather unspecific.
 
-When there are several images, [[cellcharge]] might depend on the image number, but ONLY 
+When there are several images, [[cellcharge]] might depend on the image number, but ONLY
 when [[imgmov]]=6 and [[occopt]]=0 or 2. In the checking routine, [[nelect]] is considered
 separately for each image, while in the remaining of the code, [[nelect]](1) is propagated,
 so that [[nelect]] is still a scalar. This is consistent with the pSIC algorithm,
@@ -1641,8 +1641,8 @@ So, it was decided to warn the user about such problem already at
 the level of the ground state calculations, although such warning might be irrelevant.
 
 Concerning the values of [[nshiftk]], usage of values other then 1, 2, or 4 can hardly be understood,
-as it will yield in many cases a non-homogeneous or non-symmetric k point grid. 
-So, it is usually an error of the user. 
+as it will yield in many cases a non-homogeneous or non-symmetric k point grid.
+So, it is usually an error of the user.
 
 If you encounter a problem outlined above, you have some choices: change your
 k point grid, to make it more symmetric, and/or respect [[nshiftk]]=1, 2, or 4, or ignore the problem, and set **chksymbreak** = 0.
@@ -6206,7 +6206,7 @@ Variable(
 It must be used with [[gwcalctyp]]=21.
 
     * [[gw1rdm]] = 0: Do not update the density matrix.
-    * [[gw1rdm]] = 1: Compute the update of the density matrix for the k-point list specified with the keyword [[kptgw]]. 
+    * [[gw1rdm]] = 1: Compute the update of the density matrix for the k-point list specified with the keyword [[kptgw]].
     * [[gw1rdm]] = 2: Same as 1 but also compute the correction to the Fock operator and update total energies.
 """,
 ),
@@ -6338,7 +6338,7 @@ Variable(
     added_in_version="9.4.0",
     text=r"""
 [[gwgmcorr]]==1 allows to compute the GW correlation energy with the Galitskii-Migdal (GM) formula.
-It must be used with [[gwrpacorr]]>0. For [[gwrpacorr]]=1 it will be obtained for free, while for [[gwrpacorr]]>1 it will require an extra inversion of the polarizability matrix. 
+It must be used with [[gwrpacorr]]>0. For [[gwrpacorr]]=1 it will be obtained for free, while for [[gwrpacorr]]>1 it will require an extra inversion of the polarizability matrix.
 """,
 ),
 
@@ -6766,10 +6766,10 @@ code distributes the wavefunctions such that each processing unit owns the
 FULL set of occupied bands while the empty states are DISTRIBUTED among the
 nodes. Thus the parallelisation is over the unoccupied states.
 
-The parallelism of the self-energy calculation [[optdriver]]=4, 
+The parallelism of the self-energy calculation [[optdriver]]=4,
 with [[gwpara]]=2, is somehow different. It is over the entire set of bands,
 and has different characteristics for the correlation calculation and for the exchange calculation..
-The MPI computation of the correlation part is efficient when the number of processors divides [[nband]]. 
+The MPI computation of the correlation part is efficient when the number of processors divides [[nband]].
 Optimal scaling in the exchange part is obtained only when each node possesses the full set of occupied states.
 """,
 ),
@@ -7593,9 +7593,10 @@ No meaning for RF calculations.
    For instance, a server that wants to performs calculations with varying unit cells
    should set [[optcell]] > 0 in the initial input.
 
-   Note that this feature is still under DEVELOPMENT and is mainly used to interface ABINIT
-   with the ASE optimization routines.
-   Examples will be provided when the feature is ready for production.
+   Note that, at present, this feature is mainly used to interface ABINIT
+   with the ASE optimization routines. Moreover the user is responsible for creating an input
+   file with tuned tolerances to prevent Abinit from exiting when internal convergence is reached.
+   See examples available in the [ASE documentation](https://wiki.fysik.dtu.dk/ase/dev/ase/calculators/socketio/socketio.html)
 
    **Purpose:** Structural optimization driver by the server (MD runs are not yet supported)
    **Cell optimization:** Yes (provide [[optcell]] > 0 in the initial input)
@@ -8422,10 +8423,10 @@ Variable(
     text=r"""
 Only used if [[occopt] = 9.
 
-When [[occopt]]==9, the lowest [[ivalence]] bands are considered to be 
-valence bands and [[nqfd]] holes are constrained to exist in them. 
-Accordingly, higher energy bands (with index >= [[ivalence]] + 1) are 
-considered to be conduction bands, and [[nqfd]] electrons are constrained there. 
+When [[occopt]]==9, the lowest [[ivalence]] bands are considered to be
+valence bands and [[nqfd]] holes are constrained to exist in them.
+Accordingly, higher energy bands (with index >= [[ivalence]] + 1) are
+considered to be conduction bands, and [[nqfd]] electrons are constrained there.
 See [[cite:Paillard2019]] for more details about the general method implemented.
 """,
 ),
@@ -11950,8 +11951,8 @@ Variable(
     text=r"""
 Only used if [[occopt] = 9.
 
-Controls the numbers of electrons per cell constrained in conduction bands with index 
-strictly greater than [[ivalence]], and the number of holes per cell constrained in 
+Controls the numbers of electrons per cell constrained in conduction bands with index
+strictly greater than [[ivalence]], and the number of holes per cell constrained in
 valence bands with index between 1 and [[ivalence]].
 Internal variables ne_qFD (number of electrons) and nh_qFD (number of holes) are presently initialized to [[nqfd]], which is NOT INTERNAL.
 """,
@@ -12012,7 +12013,7 @@ generate the full grid of k points. It can be used with primitive grids
 defined either from [[ngkpt]] or [[kptrlatt]]. The maximum allowed value of
 [[nshiftk]] is 8. The values of the shifts are given by [[shiftk]].
 
-The use of [[nshiftk]]=1, 2, or 4 is quite common, see the values suggested in the 
+The use of [[nshiftk]]=1, 2, or 4 is quite common, see the values suggested in the
 description of [[shiftk]]. The other values are either for debugging purposes by experts,
 or can indicate an error. Such other values are allowed only if [[chksymbreak]]=0.
 """,
@@ -12726,7 +12727,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
-Possible values are from 0 to 9. 
+Possible values are from 0 to 9.
 For gapped materials (semiconductors, molecules, ...), [[occopt]]=1 is the favourite for most usages.
 For metallic situations (also molecules with degenerate levels at Fermi energy), [[occopt]]=7 is the favourite for most usages,
 and one need to pay attention to the input variable [[tsmear]].
@@ -12772,8 +12773,8 @@ can be obtained by using both [[tsmear]] and [[tphysel]].
     * [[occopt]] = 3:
 Fermi-Dirac smearing (finite-temperature metal) Smeared delta function:
 0.25/(cosh(xx/2.0)**2). For usual calculations, at zero temperature, do not use [[occopt]]=3,
-but likely [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the 
-information about [[tphysel]]. 
+but likely [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
+information about [[tphysel]].
 
     * [[occopt]] = 4:
 "Cold smearing" of N. Marzari (see his thesis work), with a=-.5634
@@ -17359,13 +17360,13 @@ much less exhaustive than the above-mentioned automatic procedure.
 1) The default (shifted) Monkhorst-Pack grids are formed by using
 [[nshiftk]] = 1 and [[shiftk]] 0.5 0.5 0.5. This is often the preferred k point
 sampling, as the shift improves the sampling efficiency with respect
-to the other simple (non-shifted) possibility [[nshiftk]] = 1 and [[shiftk]] 0.0 0.0 0.0. 
+to the other simple (non-shifted) possibility [[nshiftk]] = 1 and [[shiftk]] 0.0 0.0 0.0.
 There are other interesting possibilities for FCC, BCC and HCP lattices, see later.
-However, this default can also break symmetry, if the 111 direction 
-is not an axis of rotation. This happens e.g. in tetragonal or hexagonal systems. 
+However, this default can also break symmetry, if the 111 direction
+is not an axis of rotation. This happens e.g. in tetragonal or hexagonal systems.
 Abinit will complain about this breaking, and
-you should adapt [[shiftk]]. 
-Easy back-up : use [[nshiftk]] = 1 and [[shiftk]] 0.0 0.0 0.0, 
+you should adapt [[shiftk]].
+Easy back-up : use [[nshiftk]] = 1 and [[shiftk]] 0.0 0.0 0.0,
 to get a non-shifted Monkhorst-Pack grid, which will be compatible with all
 symmetries, and is necessary for some features such as k-point interpolation.
 

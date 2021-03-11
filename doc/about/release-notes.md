@@ -114,6 +114,23 @@ See tests [[test:v9_62]] to [[test:v9_65]].
 
 By O. Nadeau (MR756, MR716)
 
+
+**B.6** Implementation of the  i-pi client-server protocol as described in [[cite:Kapil2019]].
+This option requires [[ionmov]] 28 and the specification of the socket via command line options.
+For UNIX socket, use: --ipi {unixsocket}:UNIX
+For INET socket, use  --ipi {host}:{port}. 
+Usage example:
+
+     abinit run.abi --ipi {unixsocket}:UNIX > run.log
+
+Note that, at present, this feature is mainly used to interface ABINIT
+with the ASE optimization routines. Moreover the user is responsible for creating an input
+file with tuned tolerances to prevent Abinit from exiting when internal convergence is reached.
+See examples available in the [ASE documentation](https://wiki.fysik.dtu.dk/ase/dev/ase/calculators/socketio/socketio.html)
+
+By M. Giantomassi and A. H. Larsen.
+
+
 * * *
 
 ### **C.** Changes for the developers (including information about compilers)
