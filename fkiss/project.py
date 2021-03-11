@@ -999,8 +999,8 @@ class AbinitProject(NotebookWriter):
             # since m_xmpi uses m_clib but 02_clib is not passed to the linker when compiling
             # test_spline_integrate
             # https://buildbot.abinit.org/builders/abiref_gnu_9.2_debug/builds/1551/steps/distchkn/logs/distchecklog
-            if "12_hide_mpi" in outside_dir:
-                outside_dir.append("02_clib")
+            #if "12_hide_mpi" in outside_dir:
+            #    outside_dir.append("02_clib")
 
 	        # Write abinit.dir
             s = template.format(kind="outside the directory", directory=os.path.basename(dirpath))
