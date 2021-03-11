@@ -76,4 +76,6 @@ This calculation is similar to the one performed in the following article [[cite
 
 ###	5.2 Another question?
 
+## 6. HOWTO use `qtdep` ?
+
 ![Harmonic Potential](https://upload.wikimedia.org/wikipedia/commons/6/60/Potential_approximation.png)
