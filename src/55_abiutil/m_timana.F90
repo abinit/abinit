@@ -1652,7 +1652,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(73)
          list(:7)=(/ (ii,ii=1734,1740,1) /)                          ; msg='gwls: Applying the model susceptibility Pk_model'
        case(74)
-         list(:7)=(/ (ii,ii=1741,1747,1) /)                          ; msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
+         list(:7)=(/ (ii,ii=1741,1747,1) /)              ; msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
        case(75)
          list(:12)=(/ (ii,ii=1650,1661,1) /)                         ; msg='lobpcgwf2 core engine '
        case(76)
