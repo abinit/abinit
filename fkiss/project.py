@@ -995,7 +995,14 @@ class AbinitProject(NotebookWriter):
             for fort_file in fort_files:
                 outside_dir.extend(m.dirname for m in fort_file.all_used_mods)
 
-	    # Write abinit.dir
+            # FIXME: Temporary hack to inlude 02_clib in abinit.dir if module uses m_xmpi
+            # since m_xmpi uses m_clib but 02_clib is not passed to the linker when compiling
+            # test_spline_integrate
+            # https://buildbot.abinit.org/builders/abiref_gnu_9.2_debug/builds/1551/steps/distchkn/logs/distchecklog
+            if "12_hide_mpi" in outside_dir:
+                outside_dir.append("02_clib")
+
+	        # Write abinit.dir
             s = template.format(kind="outside the directory", directory=os.path.basename(dirpath))
             s += "include_dirs = \\\n" + pformat(sorted(set(outside_dir)))
             abinitdir_path = os.path.join(dirpath, "abinit.dir")
