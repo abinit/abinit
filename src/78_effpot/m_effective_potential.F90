@@ -2624,6 +2624,7 @@ endif
 ! 9 - Add variation of the atomic
 !     displacement due to the strain
 !-----------------------------------
+  has_strain=.TRUE.
   if (has_strain) then
     strten_part(:) = zero
     do ia = 1,eff_pot%supercell%natom
@@ -2781,7 +2782,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   integer,allocatable :: my_atoms(:)
   type(strain_type) :: strain
   real(dp) :: xcart_hist_tmp(3,natom),xcart_ref_tmp(3,natom)
-  real(dp) :: xred_ref_tmp(3,natom),xred_hist_tmp(3,natom)
+  real(dp) :: xred_ref_tmp(3,natom),strain_inv(3,3),strain_inv_u(3) 
 ! *************************************************************************
 
   if (.not.(present(xred_ref).or.present(xcart_ref))) then
@@ -2827,60 +2828,63 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 !--------------------------------------------
   has_strain = .FALSE.
   call strain_get(strain,rprim=rprimd_ref,rprim_def=rprimd_hist)
+  strain_inv = zero
+  strain_inv(1,1) = 1
+  strain_inv(2,2) = 1
+  strain_inv(3,3) = 1
   if (strain%name /= "reference")  then
     has_strain = .TRUE.
-  end if
+    ! get (1+eta)^-1 
+    strain_inv = zero
+    call matr3inv(strain%strain,strain_inv)
+    strain_inv(1,1) = strain_inv(1,1) 
+    strain_inv(2,2) = strain_inv(2,2) 
+    strain_inv(3,3) = strain_inv(3,3) 
+  end if 
+  write(*,*) "---- STRAIN ----" 
+  write(*,*) strain%strain
 
-if(present(xred_hist))then 
-    xred_hist_tmp(:,:) = xred_hist(:,:) 
-endif  
-if(present(xcart_hist))then 
-    call xcart2xred(natom,rprimd_hist,xcart_hist,xred_hist_tmp)
-endif
 
-!MS Comment old way 
 ! fill the history position
-!  if(present(xcart_hist)) then
-!    xcart_hist_tmp(:,:) = xcart_hist(:,:)
-!  else
-!    call xred2xcart(natom, rprimd_hist, xcart_hist_tmp, xred_hist)
-!  end if
+  if(present(xcart_hist)) then
+    xcart_hist_tmp(:,:) = xcart_hist(:,:)
+  else
+    call xred2xcart(natom, rprimd_hist, xcart_hist_tmp, xred_hist)
+  end if
 
 ! Fill the reference position and change the cartesian coordinates
 ! if the rprimd is different
-!  if(has_strain) then
-!    if(present(xcart_ref)) then
-!      call xcart2xred(natom, rprimd_ref,  xcart_ref,     xred_ref_tmp)
-!      call xred2xcart(natom, rprimd_hist, xcart_ref_tmp, xred_ref_tmp)
-!    else
-!      call xred2xcart(natom, rprimd_hist, xcart_ref_tmp, xred_ref)
-!    end if
-!  else
-!    if(present(xcart_ref)) then
-!      xcart_ref_tmp(:,:) = xcart_ref(:,:)
-!    else
-!      call xred2xcart(natom, rprimd_ref, xcart_ref_tmp, xred_ref)
-!    end if
-!  end if
+  if(has_strain) then
+    if(present(xcart_ref)) then
+      call xcart2xred(natom, rprimd_ref,  xcart_ref,     xred_ref_tmp)
+      call xred2xcart(natom, rprimd_hist, xcart_ref_tmp, xred_ref_tmp)
+    else
+      call xred2xcart(natom, rprimd_hist, xcart_ref_tmp, xred_ref)
+    end if
+  else
+    if(present(xcart_ref)) then
+      xcart_ref_tmp(:,:) = xcart_ref(:,:)
+    else
+      call xred2xcart(natom, rprimd_ref, xcart_ref_tmp, xred_ref)
+    end if
+  end if
 
 ! Compute displacement
-!  if(need_displacement)then
-!    displacement(:,:) = zero
-!    do ii = 1, natom
-!      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)
-!    end do
-!  end if
+  if(need_displacement)then
+    displacement(:,:) = zero
+    write(*,*) "-----   DISP -----"
+    do ii = 1, natom
+      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)
+      do ia =1,3 
+        displacement(ia,ii) = ANINT(displacement(ia,ii)*10d2)
+        displacement(ia,ii) = displacement(ia,ii)/10d2
+      enddo 
+      write(*,*) displacement(:,ii) 
+    end do
+  end if
 
-!MS new way calculate u in ref cell and du_delta = 0 
-  if(need_displacement) then 
-    displacement(:,:) = 0
-    call xred2xcart(natom,rprimd_ref,xcart_hist_tmp,xred_hist_tmp) 
-    do ii = 1,natom 
-        displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref(:,ii) 
-    enddo 
-  end if  
 
- need_duDelta = .FALSE.
+  has_strain = .TRUE.
 ! Get also the variation of the displacmeent wr to strain
   if(has_strain.and.need_duDelta) then
     du_delta(:,:,:)   = zero
@@ -2888,6 +2892,7 @@ endif
 !   within the metric tensor formulation
 !   \frac{\partial u_{k}}{\partial \epsilon_{\alpha\beta}}=
 !    \frac{1}{2} (\delta_{\alpha,k} u_{\beta}+ \delta_{\beta,k} u_{\alpha})
+!   Don HAMAN 
     do ia=1,my_natom
       ib = my_atoms(ia)
       do ii=1,6
@@ -2902,8 +2907,27 @@ endif
       end do
     end do
     call xmpi_sum(du_delta , comm, ierr)
-  else 
-      du_delta(:,:,:) = zero
+!    CARLOS
+    du_delta=zero
+    do ia=1,my_natom
+      ib = my_atoms(ia)
+      !Calc (1+eta)⁻1 * disp(ib) 
+      strain_inv_u = MATMUL(strain_inv,displacement(:,ib))
+      write(*,*) "--- strain_inv_u ---" 
+      write(*,*) strain_inv_u
+      ! fill du_delta_e 
+      do ii = 1,6 
+        do mu = 1,3
+          if(alpha(ii)==mu)then
+            du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * strain_inv_u(beta(ii)) 
+          end if
+          if(beta(ii)==mu)then
+            du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * strain_inv_u(alpha(ii))
+          end if
+        enddo 
+      enddo  
+    enddo 
+    call xmpi_sum(du_delta , comm, ierr)
   end if
 
   ABI_FREE(my_atoms)
