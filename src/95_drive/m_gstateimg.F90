@@ -281,8 +281,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
  DBG_ENTER("COLL")
 
- call timab(700,1,tsec)
- call timab(703,3,tsec)
+ call timab(1200,1,tsec)
+ call timab(1203,3,tsec)
 
 !Arguments check
  if (dtset%nimage>1) then
@@ -425,7 +425,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  call pimd_init(dtset,pimd_param,is_master)
  dtion=one;if (is_pimd) dtion=pimd_param%dtion
 
- call timab(703,2,tsec)
+ call timab(1203,2,tsec)
 
 !-----------------------------------------------------------------------------------------
 !Big loop on the propagation of all images
@@ -462,7 +462,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end if
    end if
 
-   call timab(704,1,tsec)
+   call timab(1204,1,tsec)
    call localfilnam(mpi_enreg%comm_img,mpi_enreg%comm_cell,mpi_enreg%comm_world,filnam,'_IMG',dtset%nimage)
    compute_all_images=(compute_static_images.and.itimimage==1)
 
@@ -502,19 +502,19 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
    if (dtset%use_yaml == 1) call yaml_iterstart('timimage', itimimage, ab_out, dtset%use_yaml)
 
-   call timab(704,2,tsec)
+   call timab(1204,2,tsec)
 
 !  Loop on the dynamical images
    idynimage=0
    do iimage=1,nimage
-
-     call timab(705,1,tsec)
 
      ii=mpi_enreg%my_imgtab(iimage)
      if (dtset%dynimage(ii)==1) idynimage=idynimage+1
 
 !    Compute static image only at first time step
      if (dtset%dynimage(ii)==1.or.compute_all_images) then
+
+       call timab(1205,1,tsec)
 
 !      Change file names according to image index (if nimage>1)
        if (dtset%nimage>1) then
@@ -555,14 +555,14 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii),&
 &       dtset%rprimd_orig(:,:,ii))
 
-       call timab(705,2,tsec)
+       call timab(1205,2,tsec)
 
        call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),&
 &       mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,&
 &       res_img(iimage)%results_gs,&
 &       rprim,scf_history(iimage),vel,vel_cell,wvl,xred)
 
-       call timab(706,1,tsec)
+       call timab(1206,1,tsec)
 
        call args_gs_free(args_gs)
 
@@ -580,7 +580,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 !      Close output units ; restore defaults
        call localredirect(mpi_enreg%comm_cell,mpi_enreg%comm_world,dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg)
-       call timab(706,2,tsec)
+       call timab(1206,2,tsec)
 
      else if (itimimage>1) then ! For static images, simply copy one time step to the other
        itimimage_prev=itimimage_eff-1
@@ -607,12 +607,12 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end do ! iimage
 
    if(mpi_enreg%paral_img==1)then
-     call timab(702,1,tsec)
+     call timab(1208,1,tsec)
      call xmpi_barrier(mpi_enreg%comm_img)
-     call timab(702,2,tsec)
+     call timab(1208,2,tsec)
    end if
 
-   call timab(707,1,tsec)
+   call timab(1209,1,tsec)
 
 !  Output when images are used
    if (dtset%nimage>1) then
@@ -675,7 +675,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &         ' with Average[Abs(Etotal(t)-Etotal(t-dt))]=',delta_energy,'<tolimg=',dtset%tolimg
        end if
        call wrtout([std_out, ab_out] ,msg,'COLL')
-       call timab(707,2,tsec)
+       call timab(1209,2,tsec)  ! This is the first place where counter 1209 is stopped.
        exit   ! exit itimimage
      end if
    end if
@@ -702,12 +702,12 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end do
    end if
 
-   call timab(707,2,tsec)
+   call timab(1209,2,tsec)  ! This is the second place where counter 1209 is stopped.
 
  end do ! itimimage
 !-----------------------------------------------------------------------------------------
 
- call timab(708,1,tsec)
+ call timab(1210,1,tsec)
 
 !Copy the results of the computation in the appropriate arguments of the routine
  do iimage=1,nimage
@@ -784,8 +784,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  call m1geo_destroy(m1geo_param)
  call pimd_destroy(pimd_param)
 
- call timab(708,2,tsec)
- call timab(700,2,tsec)
+ call timab(1210,2,tsec)
+ call timab(1200,2,tsec)
 
  DBG_EXIT("COLL")
 

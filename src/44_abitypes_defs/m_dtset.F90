@@ -480,7 +480,7 @@ type, public :: dataset_type
  integer :: prtdipole = 0
  integer :: prtdos = 0
  integer :: prtdosm = 0
- integer :: prtebands = 1
+ integer :: prtebands
  integer :: prtefg = 0
  integer :: prtefmas = 1
  integer :: prteliash = 0

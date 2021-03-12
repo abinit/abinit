@@ -330,6 +330,9 @@ subroutine spectra_repr(Spectra,str)
 !scalars
  integer :: iqpt
  real(dp) :: epsilon0,epsilon0_nlf
+ character(len=15), parameter :: format_f84   = '(1x,a,  f8.4,a)'
+ character(len=15), parameter :: format_es135 = '(1x,a,es13.5,a)'
+ character(len=15) :: format_diel
  character(len=500) :: msg
 
 ! *********************************************************************
@@ -347,10 +350,12 @@ subroutine spectra_repr(Spectra,str)
    epsilon0    = REAL(Spectra%emacro_lf (1,iqpt))
    epsilon0_nlf= REAL(Spectra%emacro_nlf(1,iqpt))
    write(msg,'(a,3f9.6,a)')' For q-point: ',Spectra%qpts(:,iqpt),ch10
+   format_diel=format_f84
+   if(abs(epsilon0)>1000.0d0 .or. abs(epsilon0_nlf)>1000.0d0) format_diel=format_es135 
    str = strcat(str,msg)
-   write(msg,'(1x,a,f8.4,a)')' dielectric constant = ',epsilon0,ch10
+   write(msg,format_diel)' dielectric constant = ',epsilon0,ch10
    str = strcat(str,msg)
-   write(msg,'(1x,a,f8.4,a)')' dielectric constant without local fields = ',epsilon0_nlf,ch10
+   write(msg,format_diel)' dielectric constant without local fields = ',epsilon0_nlf,ch10
    str = strcat(str,msg)
  end do
 

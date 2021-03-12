@@ -61,6 +61,7 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  natom=number of atoms in cell.
+!!  nremit [optional] = if non-zero initialize the number of possible remits before stop
 !!  ntypat=number of types of atoms in unit cell.
 !!  pawovlp=percentage of voluminal overlap ratio allowed to continue execution
 !!          (if negative value, execution always continues)
@@ -86,11 +87,12 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
+subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
+ integer,intent(in),optional :: nremit
  real(dp) :: pawovlp
 !arrays
  integer,intent(in) :: typat(natom)
@@ -100,6 +102,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 !Local variables ---------------------------------------
 !scalars
  integer :: ia,ib,ii,t1,t2,t3
+ integer,save :: nremit_counter=0
  logical :: stop_on_error
  real(dp) :: dd,dif1,dif2,dif3,ha,hb,norm2
  real(dp) :: ratio_percent,va,vb,vv
@@ -112,6 +115,12 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+ if(present(nremit))then
+   if(nremit/=0)nremit_counter=abs(nremit)
+ else
+   nremit_counter=0
+ endif
 
  iamax(:)=-1;ibmax(:)=-1
  norm2_min(:)=-1.d0;ratio_percent_max(:)=-1.d0
@@ -208,10 +217,11 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
          write(message, '(3a)' ) trim(message),ch10,&
 &         'THIS IS DANGEROUS, as PAW formalism assumes non-overlapping compensation densities.'
        end if
-       if (stop_on_error) then
+       if (stop_on_error .and. nremit_counter==0) then
          ABI_ERROR_NOSTOP(message,ia) !ia is dummy
        else
          ABI_WARNING(message)
+         if(nremit_counter/=0)nremit_counter=nremit_counter-1
        end if
      endif ! ratio_percent_max(ii)>zero
 

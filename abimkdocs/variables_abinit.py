@@ -18,7 +18,7 @@ Variable(
     mnemonics="ACCURACY",
     added_in_version="before_v9",
     text=r"""
-Allows to tune the accuracy of a calculation by setting automatically the
+Allows to tune the accuracy of a ground-state or DFPT calculation [[optdriver]]=0 or 1, by setting automatically the
 variables according to the following table:
 
 accuracy         | 1         | 2          | 3            | 4            | 5         | 6
@@ -51,6 +51,10 @@ If the user wants to modify one of the input variable automatically tuned by *ac
 they must put it in the input file. The other input variables automatically tuned
 by *accuracy* will not be affected.
 *accuracy* = 0 means that this input variable is deactivated.
+
+For the other values of [[optdriver]], many of the above input variables have no meaning,
+so the accuracy has to be tuned by the user (e.g. for GW calculations, perform convergence studies
+with respect to [[ecuteps]] and other relevant input variables).
 """,
 ),
 
@@ -6204,7 +6208,7 @@ Variable(
 It must be used with [[gwcalctyp]]=21.
 
     * [[gw1rdm]] = 0: Do not update the density matrix.
-    * [[gw1rdm]] = 1: Compute the update of the density matrix for the k-point list specified with the keyword [[kptgw]]. 
+    * [[gw1rdm]] = 1: Compute the update of the density matrix for the k-point list specified with the keyword [[kptgw]].
     * [[gw1rdm]] = 2: Same as 1 but also compute the correction to the Fock operator and update total energies.
 """,
 ),
@@ -6336,7 +6340,7 @@ Variable(
     added_in_version="9.4.0",
     text=r"""
 [[gwgmcorr]]==1 allows to compute the GW correlation energy with the Galitskii-Migdal (GM) formula.
-It must be used with [[gwrpacorr]]>0. For [[gwrpacorr]]=1 it will be obtained for free, while for [[gwrpacorr]]>1 it will require an extra inversion of the polarizability matrix. 
+It must be used with [[gwrpacorr]]>0. For [[gwrpacorr]]=1 it will be obtained for free, while for [[gwrpacorr]]>1 it will require an extra inversion of the polarizability matrix.
 """,
 ),
 
@@ -6715,7 +6719,7 @@ Variable(
     abivarname="gwmem",
     varset="gw",
     vartype="integer",
-    topics=['Susceptibility_expert', 'SelfEnergy_expert', 'GW_expert'],
+    topics=['Susceptibility_expert', 'SelfEnergy_expert', 'GW_expert', 'TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval=11,
     mnemonics="GW MEMory",
@@ -6758,6 +6762,17 @@ In the present status of the code, only the parallelization over bands
 ([[gwpara]] = 2) allows one to reduce the memory allocated by each processor.
 Using [[gwpara]] = 1, indeed, requires the same amount of memory as a sequential
 run, irrespectively of the number of CPUs used.
+
+In the screening calculation [[optdriver]]=3, with [[gwpara]]=2, the
+code distributes the wavefunctions such that each processing unit owns the
+FULL set of occupied bands while the empty states are DISTRIBUTED among the
+nodes. Thus the parallelisation is over the unoccupied states.
+
+The parallelism of the self-energy calculation [[optdriver]]=4,
+with [[gwpara]]=2, is somehow different. It is over the entire set of bands,
+and has different characteristics for the correlation calculation and for the exchange calculation..
+The MPI computation of the correlation part is efficient when the number of processors divides [[nband]].
+Optimal scaling in the exchange part is obtained only when each node possesses the full set of occupied states.
 """,
 ),
 
@@ -7580,9 +7595,10 @@ No meaning for RF calculations.
    For instance, a server that wants to performs calculations with varying unit cells
    should set [[optcell]] > 0 in the initial input.
 
-   Note that this feature is still under DEVELOPMENT and is mainly used to interface ABINIT
-   with the ASE optimization routines.
-   Examples will be provided when the feature is ready for production.
+   Note that, at present, this feature is mainly used to interface ABINIT
+   with the ASE optimization routines. Moreover the user is responsible for creating an input
+   file with tuned tolerances to prevent Abinit from exiting when internal convergence is reached.
+   See examples available in the [ASE documentation](https://wiki.fysik.dtu.dk/ase/dev/ase/calculators/socketio/socketio.html)
 
    **Purpose:** Structural optimization driver by the server (MD runs are not yet supported)
    **Cell optimization:** Yes (provide [[optcell]] > 0 in the initial input)
@@ -8409,10 +8425,10 @@ Variable(
     text=r"""
 Only used if [[occopt] = 9.
 
-When [[occopt]]==9, the lowest [[ivalence]] bands are considered to be 
-valence bands and [[nqfd]] holes are constrained to exist in them. 
-Accordingly, higher energy bands (with index >= [[ivalence]] + 1) are 
-considered to be conduction bands, and [[nqfd]] electrons are constrained there. 
+When [[occopt]]==9, the lowest [[ivalence]] bands are considered to be
+valence bands and [[nqfd]] holes are constrained to exist in them.
+Accordingly, higher energy bands (with index >= [[ivalence]] + 1) are
+considered to be conduction bands, and [[nqfd]] electrons are constrained there.
 See [[cite:Paillard2019]] for more details about the general method implemented.
 """,
 ),
@@ -11937,8 +11953,8 @@ Variable(
     text=r"""
 Only used if [[occopt] = 9.
 
-Controls the numbers of electrons per cell constrained in conduction bands with index 
-strictly greater than [[ivalence]], and the number of holes per cell constrained in 
+Controls the numbers of electrons per cell constrained in conduction bands with index
+strictly greater than [[ivalence]], and the number of holes per cell constrained in
 valence bands with index between 1 and [[ivalence]].
 Internal variables ne_qFD (number of electrons) and nh_qFD (number of holes) are presently initialized to [[nqfd]], which is NOT INTERNAL.
 """,
@@ -15325,7 +15341,7 @@ Variable(
     vartype="integer",
     topics=['printing_prgs'],
     dimensions="scalar",
-    defaultval="prtgsr = 0",
+    defaultval=ValueWithConditions({'[[nimage]] > 1': 0, 'defaultval': 1}),
     mnemonics="PRinT the GSR file",
     added_in_version="before_v9",
     text=r"""
@@ -15961,10 +15977,11 @@ will be the root output name, followed by _WFK. If [[nqpt]] = 1, the root name
 will be followed by _WFQ. For response-function calculations, the root name
 will be followed by _1WFx, where x is the number of the perturbation. The
 dataset information will be added as well, if relevant.
-No wavefunction output is provided by [[prtwf]] = 0.
+
+If [[prtwf]] = 0, no wavefunction output is provided.
+
 If [[prtwf]] = -1, the code writes the wavefunction file only if convergence is
 not achieved in the self-consistent cycle.
-
 
 If [[prtwf]] = 2, a file pwfn.data is produced, to be used as input for the
 CASINO QMC code. See more explanation at the end of this section.
