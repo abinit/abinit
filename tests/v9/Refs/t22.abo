@@ -126,7 +126,6 @@ P           mkmem           1
            occopt           0
         optforces           1
         pawecutdg      2.00000000E+01 Hartree
-          pawovlp      4.5000000000E+01
            prtden           0
         prtebands           0
            prteig           0
@@ -3237,7 +3236,6 @@ P           mkmem           1
            occopt           0
         optforces           1
         pawecutdg      2.00000000E+01 Hartree
-          pawovlp      4.5000000000E+01
            prtden           0
         prtebands           0
            prteig           0
