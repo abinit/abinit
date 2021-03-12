@@ -115,7 +115,7 @@ contains
 !!   | nspden=number of spin-density components
 !!   | nsppol=1 for unpolarized, 2 for spin-polarized
 !!   | nsym=number of symmetry elements in space group
-!!  itimimage= [optional] counter for the itimimage loop, in the calling routine.
+!!  itimimage_gstate= [optional] counter for the itimimage loop, in the calling routine.
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
 !!  nfftf=(effective) number of FFT grid points (for this processor)
@@ -196,11 +196,11 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,itimimage,verbose,writeHIST,scup_dtset)
+& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset)
 
 !Arguments ------------------------------------
 !scalars
-integer, intent(in), optional :: itimimage
+integer, intent(in), optional :: itimimage_gstate
 type(scfcv_t),intent(inout) :: scfcv_args
 type(datafiles_type),intent(inout),target :: dtfil
 type(electronpositron_type),pointer :: electronpositron
@@ -612,9 +612,13 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
            call dtfil_init_time(dtfil,iapp)
            itimes(1)=itime ; itimes(2)=1
-           if(present(itimimage))then
-             itimes(2)=itimimage
+           if(present(itimimage_gstate))then
+             itimes(2)=itimimage_gstate
            endif
+
+!DEBUG
+ write(std_out,'(a,5i4)')' m_mover, before scfcv_run : itimes(1:2)=',itimes(1:2)
+!ENDDEBUG
            call scfcv_run(scfcv_args, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
            if (conv_retcode == -1) then
                msg = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"

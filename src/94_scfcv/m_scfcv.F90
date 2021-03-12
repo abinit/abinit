@@ -467,7 +467,7 @@ end subroutine scfcv_destroy
 !!  FIXME: add description.
 !!
 !! INPUTS
-!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage=itimes(2) from outer loops
+!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
 !!  scfcv=structure of scfcv
 !!
 !! OUTPUT
@@ -584,7 +584,7 @@ end subroutine scfcv_run
 !!  FIXME: add description.
 !!
 !! INPUTS
-!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage=itimes(2) from outer loops
+!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
 !!  scfcv=structure of scfcv
 !!  argin(sizein)=description
 !!
@@ -670,7 +670,7 @@ end subroutine scfcv_runWEntropyDMFT
 !!
 !! INPUTS
 !!  scfcv=structure of scfcv
-!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage=itimes(2) from outer loops
+!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
 !!
 !! OUTPUT
 !!

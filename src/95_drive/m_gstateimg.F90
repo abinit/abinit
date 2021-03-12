@@ -227,7 +227,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !scalars
  integer,parameter :: formeig=0,level=100,ndtpawuj=0,response=0
  integer :: history_size,idelta,idynimage,ierr,ifirst
- integer :: ii,iimage,ih,itimimage,itimimage_eff,itimimage_prev,ndynimage,nocc
+ integer :: ii,iimage,ih,itimimage,itimimage_eff,itimimage_gstate,itimimage_prev,ndynimage,nocc
  integer :: ntimimage,ntimimage_stored,ntimimage_max
  logical :: check_conv,compute_all_images,compute_static_images
  logical :: isVused,isARused,is_master,is_mep,is_pimd
@@ -429,7 +429,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 !-----------------------------------------------------------------------------------------
 !Big loop on the propagation of all images
- itimimage_eff=1
+ itimimage_eff=1 ; itimimage_gstate=1
  do itimimage=1,ntimimage
 
    res_img => results_img(:,itimimage_eff)
@@ -557,10 +557,11 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
        call timab(1205,2,tsec)
 
-       call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),itimimage,&
+       call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),itimimage_gstate,&
 &       mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,&
 &       res_img(iimage)%results_gs,&
 &       rprim,scf_history(iimage),vel,vel_cell,wvl,xred)
+       itimimage_gstate=itimimage_gstate+1
 
        call timab(1206,1,tsec)
 

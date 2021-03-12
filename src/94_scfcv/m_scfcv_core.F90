@@ -163,7 +163,7 @@ contains
 !!   | nsym=number of symmetry elements in space group
 !!  ecore=core psp energy (part of total energy) (hartree)
 !!  fatvshift=factor to multiply dtset%atvshift
-!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage=itimes(2) from outer loops
+!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mcg=size of wave-functions array (cg) =mpw*my_nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
@@ -412,6 +412,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 ! *********************************************************************
 
  _IBM6("Hello, I'm running on IBM6")
+
+!DEBUG
+ write(std_out,'(a,5i4)')' scfcv_core, enter : itimes(1:2)=',itimes(1:2)
+!ENDDEBUG
 
  DBG_ENTER("COLL")
 
@@ -1087,10 +1091,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        nremit=0
        if(dtset%ionmov>0 .and. itimes(1)==1)nremit=1
        if(dtset%imgmov>0 .and. itimes(2)==1)nremit=1
-!DEBUG
-       write(std_out,'(a,4i4)')&
-               & ' before chkpawovlp : dtset%ionmov,dtset%imgmov,itime,nremit=',dtset%ionmov,dtset%imgmov,itime,nremit
-!ENDDEBUG
        call chkpawovlp(dtset%natom,psps%ntypat,dtset%pawovlp,pawtab,rmet,dtset%typat,xred,nremit=nremit)
 
 !      Identify parts of the rectangular grid where the density has to be calculated

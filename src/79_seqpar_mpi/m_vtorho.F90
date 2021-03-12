@@ -114,7 +114,7 @@ contains
 !! The main part of it is a wf update over all k points.
 !!
 !! INPUTS
-!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage=itimes(2) from outer loops
+!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
 !!  afford=used to dimension susmat
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)

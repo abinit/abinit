@@ -143,7 +143,7 @@ contains
 !!                              Possibly different from dtset
 !!  codvsn=code version
 !!  cpui=initial CPU time
-!!  itimimage=counter for calling do loop
+!!  itimimage_gstate=counter for calling do loop
 !!
 !! OUTPUT
 !!  npwtot(nkpt) = total number of plane waves at each k point
@@ -233,13 +233,13 @@ contains
 !! SOURCE
 
 subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
-&                 itimimage,mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,&
+&                 itimimage_gstate,mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,&
 &                 psps,results_gs,rprim,scf_history,vel,vel_cell,wvl,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(inout) :: iexit,initialized
- integer,intent(in) :: itimimage
+ integer,intent(in) :: itimimage_gstate
  real(dp),intent(in) :: cpui
  character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -1301,7 +1301,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !    Should merge this call with the call for dtset%ionmov==4 and 5
      if (dtset%macro_uj==0) then
-       itimes(1)=itime0 ; itimes(2)=itimimage
+       itimes(1)=itime0 ; itimes(2)=itimimage_gstate
        call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
      else
 !      Conduct determination of U
@@ -1315,7 +1315,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
      ! TODO: return conv_retcode
      call mover(scfcv_args,ab_xfh,acell,args_gs%amu,dtfil,&
-&     electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,itimimage=itimimage)
+&     electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,itimimage_gstate=itimimage_gstate)
 
 !    Compute rprim from rprimd and acell
      do kk=1,3
