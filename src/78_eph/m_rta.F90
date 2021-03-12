@@ -885,22 +885,22 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
        do iw=1,self%nw
          call inv33(self%l0(:, :, iw, spin, itemp, irta), work_33)
          l0inv_33nw(:,:,iw) = work_33
-         self%seebeck(:,:,iw,spin,itemp,irta) = - (volt_SI / TKelv) * matmul(work_33, self%l1(:,:,iw,itemp,spin,irta))
+         self%seebeck(:,:,iw,spin,itemp,irta) = - (volt_SI / TKelv) * matmul(work_33, self%l1(:,:,iw,spin,itemp,irta))
        end do
 
        ! kappa = 1/T [L2 - L1 L0^-1 L1]
        ! HM: Check why do we need minus sign here to get consistent results with Boltztrap!
        ! MG: Likely because of a different definition of kappa.
        do iw=1,self%nw
-         work_33 = self%l1(:, :, iw, itemp, spin, irta)
-         work_33 = self%l2(:, :, iw, itemp, spin, irta) - matmul(work_33, matmul(l0inv_33nw(:, :, iw), work_33))
+         work_33 = self%l1(:, :, iw, spin, itemp, irta)
+         work_33 = self%l2(:, :, iw, spin, itemp, irta) - matmul(work_33, matmul(l0inv_33nw(:, :, iw), work_33))
          !self%kappa(:,:,iw,spin, itemp,spin,irta) = - (volt_SI**2 * fact0 / TKelv) * work_33
          self%kappa(:,:,iw,spin,itemp,irta) = + (volt_SI**2 * fact0 / TKelv) * work_33
        end do
 
        ! Peltier pi = -L1 L0^-1
        do iw=1,self%nw
-         work_33 = self%l1(:, :, iw, itemp, spin, irta)
+         work_33 = self%l1(:, :, iw, spin, itemp, irta)
          self%pi(:,:,iw,spin,itemp,irta) = - volt_SI * matmul(work_33, l0inv_33nw(:, :, iw))
        end do
 
@@ -1108,7 +1108,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
- integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta
+ integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta, time_opt
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk, cpu, wall, gflops
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
 
@@ -1118,6 +1118,8 @@ subroutine compute_rta_mobility(self, cryst, comm)
 
  nprocs = xmpi_comm_size(comm)
  nkibz = self%ebands%nkpt; nsppol = self%ebands%nsppol
+
+ time_opt = 0 ! This to preserve the previous behaviour in which TR was not used.
 
  ABI_CALLOC(self%mobility_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
  ABI_CALLOC(self%conductivity_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
@@ -1153,7 +1155,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
          end do
        end do
        ! Symmetrize tensor.
-       vv_tens = cryst%symmetrize_cart_tens33(vv_tens)
+       vv_tens = cryst%symmetrize_cart_tens33(vv_tens, time_opt)
 
        ! Multiply by the lifetime (SERTA or MRTA)
        do irta=1,self%nrta
@@ -2130,7 +2132,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
 !Local variables ------------------------------
 !scalars
- integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, ieh, cnt, nprocs, ia
+ integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, ieh, cnt, nprocs, ia, time_opt
  real(dp) :: eig_nk, fact, fact0, max_occ, wtk, emu_alpha
 !arrays
  real(dp) :: vr(3), vv_tens(3,3)
@@ -2141,6 +2143,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
  ! Copy important dimensions
  nkibz = self%ebands%nkpt; nsppol = self%ebands%nsppol
+ time_opt = 0 ! This to preserve the previous behaviour in which TR was not used.
 
  ! sigma_IBTE = (-S e^ / omega sum_\nk) (v_\nk \otimes F_\nk)
  ! with S the spin degeneracy factor.
@@ -2175,12 +2178,12 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
              vv_tens(ii, jj) = vr(ii) * fk(jj, ik_ibz, ib, spin) * emu_alpha
            end do
          end do
-         vv_tens = cryst%symmetrize_cart_tens33(vv_tens)
+         vv_tens = cryst%symmetrize_cart_tens33(vv_tens, time_opt)
 
          if (ia == 1) then
            ieh = 2; if (eig_nk >= mu_e) ieh = 1
            sigma_eh(:,:,ieh,spin) = sigma_eh(:,:,ieh,spin) - wtk * vv_tens
-           fsum_eh(:,ieh,spin) = fsum_eh(:,ieh,spin) + wtk * cryst%symmetrize_cart_vec3(fk(:, ik_ibz, ib, spin))
+           fsum_eh(:,ieh,spin) = fsum_eh(:,ieh,spin) + wtk * cryst%symmetrize_cart_vec3(fk(:, ik_ibz, ib, spin), time_opt)
          end if
          onsager(:,:,ia,spin) = onsager(:,:,ia,spin) - wtk * vv_tens
        end do ! ia
