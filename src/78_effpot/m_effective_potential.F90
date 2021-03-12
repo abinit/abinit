@@ -2782,7 +2782,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   integer,allocatable :: my_atoms(:)
   type(strain_type) :: strain
   real(dp) :: xcart_hist_tmp(3,natom),xcart_ref_tmp(3,natom)
-  real(dp) :: xred_ref_tmp(3,natom),strain_inv(3,3),strain_inv_u(3) 
+  real(dp) :: xred_ref_tmp(3,natom),strain_inv(3,3),strain_inv_u(3),strain_tmp(3,3) 
 ! *************************************************************************
 
   if (.not.(present(xred_ref).or.present(xcart_ref))) then
@@ -2828,22 +2828,28 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 !--------------------------------------------
   has_strain = .FALSE.
   call strain_get(strain,rprim=rprimd_ref,rprim_def=rprimd_hist)
-  strain_inv = zero
-  strain_inv(1,1) = 1
-  strain_inv(2,2) = 1
-  strain_inv(3,3) = 1
   if (strain%name /= "reference")  then
     has_strain = .TRUE.
+    strain_tmp = strain%strain 
+    strain_tmp(1,1) = strain_tmp(1,1) + 1
+    strain_tmp(2,2) = strain_tmp(2,2) + 1
+    strain_tmp(3,3) = strain_tmp(3,3) + 1
     ! get (1+eta)^-1 
-    strain_inv = zero
-    call matr3inv(strain%strain,strain_inv)
-    strain_inv(1,1) = strain_inv(1,1) 
-    strain_inv(2,2) = strain_inv(2,2) 
-    strain_inv(3,3) = strain_inv(3,3) 
+    call matr3inv(strain_tmp,strain_inv)
+  else if (strain%name == "reference")  then
+    strain_inv(:,:) = zero
+    strain_inv(1,1) = 1
+    strain_inv(2,2) = 1
+    strain_inv(3,3) = 1
   end if 
   write(*,*) "---- STRAIN ----" 
-  write(*,*) strain%strain
-
+  do ii = 1,3 
+    write(*,*) strain%strain(ii,:)
+  enddo 
+  write(*,*) "---- 1+STRAIN inv ----" 
+  do ii = 1,3 
+    write(*,*) strain_inv(ii,:)
+  enddo 
 
 ! fill the history position
   if(present(xcart_hist)) then
@@ -2883,52 +2889,27 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
     end do
   end if
 
-
-  has_strain = .TRUE.
-! Get also the variation of the displacmeent wr to strain
-  if(has_strain.and.need_duDelta) then
-    du_delta(:,:,:)   = zero
-!   Compute displacmeent wr to strain
-!   within the metric tensor formulation
-!   \frac{\partial u_{k}}{\partial \epsilon_{\alpha\beta}}=
-!    \frac{1}{2} (\delta_{\alpha,k} u_{\beta}+ \delta_{\beta,k} u_{\alpha})
-!   Don HAMAN 
-    do ia=1,my_natom
-      ib = my_atoms(ia)
-      do ii=1,6
-        do mu=1,3
-          if(alpha(ii)==mu)then
-            du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * displacement(beta(ii),ib)
-          end if
-          if(beta(ii)==mu)then
-            du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * displacement(alpha(ii),ib)
-          end if
-        end do
-      end do
-    end do
-    call xmpi_sum(du_delta , comm, ierr)
-!    CARLOS
-    du_delta=zero
-    do ia=1,my_natom
-      ib = my_atoms(ia)
-      !Calc (1+eta)⁻1 * disp(ib) 
-      strain_inv_u = MATMUL(strain_inv,displacement(:,ib))
-      write(*,*) "--- strain_inv_u ---" 
-      write(*,*) strain_inv_u
-      ! fill du_delta_e 
-      do ii = 1,6 
-        do mu = 1,3
-          if(alpha(ii)==mu)then
-            du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * strain_inv_u(beta(ii)) 
-          end if
-          if(beta(ii)==mu)then
-            du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * strain_inv_u(alpha(ii))
-          end if
-        enddo 
-      enddo  
-    enddo 
-    call xmpi_sum(du_delta , comm, ierr)
-  end if
+!   Du_Delta after Equation A4 in 2017 Paper Carlos 
+  du_delta=zero
+  do ia=1,my_natom
+    ib = my_atoms(ia)
+    !Calc (1+eta)⁻1 * disp(ib) 
+    strain_inv_u = MATMUL(strain_inv,displacement(:,ib))
+    write(*,*) "--- strain_inv_u ---" 
+    write(*,*) strain_inv_u
+    ! fill du_delta_e 
+    do ii = 1,6 
+      do mu = 1,3
+        if(alpha(ii)==mu)then
+          du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * strain_inv_u(beta(ii)) 
+        end if
+        if(beta(ii)==mu)then
+          du_delta(ii,mu,ib) = du_delta(ii,mu,ib) + half * strain_inv_u(alpha(ii))
+        end if
+      enddo 
+    enddo  
+  enddo 
+  call xmpi_sum(du_delta , comm, ierr)
 
   ABI_FREE(my_atoms)
 
