@@ -163,6 +163,7 @@ contains
 !!   | nsym=number of symmetry elements in space group
 !!  ecore=core psp energy (part of total energy) (hartree)
 !!  fatvshift=factor to multiply dtset%atvshift
+!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage=itimes(2) from outer loops
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mcg=size of wave-functions array (cg) =mpw*my_nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
@@ -263,16 +264,16 @@ contains
 !!
 !! SOURCE
 
-subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
+subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
 &  dtset,ecore,eigen,electronpositron,fatvshift,hdr,indsym,&
-&  initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
+&  initialized,irrzon,itimes,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
 &  pwind_alloc,pwnsfac,rec_set,resid,results_gs,rhog,rhor,rprimd,&
 &  scf_history,symrec,taug,taur,wffnew,wvl,xred,xred_old,ylm,ylmgr,conv_retcode)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: itime, mcg,my_natom,ndtpawuj,pwind_alloc
+ integer,intent(in) :: mcg,my_natom,ndtpawuj,pwind_alloc
  integer,intent(inout) :: initialized,nfftf,mcprj
  integer,intent(out) :: conv_retcode
  real(dp),intent(in) :: cpus,ecore,fatvshift
@@ -293,7 +294,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
  type(wvl_data),intent(inout) :: wvl
 !arrays
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom)
- integer,intent(in) :: indsym(4,dtset%nsym,dtset%natom)
+ integer,intent(in) :: indsym(4,dtset%nsym,dtset%natom),itimes(2)
 !no_abirules
  integer, intent(in) :: irrzon(dtset%nfft**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
   !(nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise)
@@ -1082,11 +1083,10 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 !    Initialization of atomic data for PAW
      if (psps%usepaw==1) then
 
-!      Check for non-overlapping spheres, allow one remittance in case of optimization or MD
+!      Check for non-overlapping spheres, allow one remittance in case of optimization or MD or image algorithms
        nremit=0
-       if(dtset%ionmov>0 .or. dtset%imgmov>0)then
-         if(itime==1)nremit=1
-       endif
+       if(dtset%ionmov>0 .and. itimes(1)==1)nremit=1
+       if(dtset%imgmov>0 .and. itimes(2)==1)nremit=1
        call chkpawovlp(dtset%natom,psps%ntypat,dtset%pawovlp,pawtab,rmet,dtset%typat,xred,nremit=nremit)
 
 !      Identify parts of the rectangular grid where the density has to be calculated
@@ -1512,7 +1512,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
      scfcv_jdtset = dtset%jdtset
      scfcv_itime = 0
    end if
-   if ( istep .eq. 1 ) scfcv_itime = scfcv_itime + 1
+   if ( istep==1 ) scfcv_itime = scfcv_itime + 1
    if(dtset%ionmov==4 .and. mod(scfcv_itime,2)/=1 .and. dtset%iscf>=0 ) moved_atm_inside=1
    if(dtset%ionmov==5 .and. scfcv_itime/=1 .and. istep==1 .and. dtset%iscf>=0) moved_atm_inside=1
    ! /< Hack to remove iapp from scfcv_core
@@ -1561,11 +1561,11 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
    if (dtset%tfkinfunc==0) then
      if(VERBOSE) call wrtout(std_out,'*. Compute the density from the trial potential (vtorho)',"COLL")
 
-     call vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
+     call vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &     eigen,electronpositron,energies,etotal,gbound_diel,&
 &     gmet,gprimd,grnl,gsqcut,hdr,indsym,irrzon,irrzondiel,&
-&     istep,istep_mix,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
+&     istep,istep_mix,itimes,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
 &     my_natom,dtset%natom,nattyp,nfftf,nfftdiel,ngfftdiel,nhat,nkxc,&
 &     npwarr,npwdiel,res2,psps%ntypat,nvresid,occ,&
 &     computed_forces,optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,&

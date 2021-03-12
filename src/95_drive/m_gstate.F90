@@ -143,6 +143,7 @@ contains
 !!                              Possibly different from dtset
 !!  codvsn=code version
 !!  cpui=initial CPU time
+!!  itimimage=counter for calling do loop
 !!
 !! OUTPUT
 !!  npwtot(nkpt) = total number of plane waves at each k point
@@ -232,12 +233,13 @@ contains
 !! SOURCE
 
 subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
-&                 mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,&
+&                 itimimage,mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,&
 &                 psps,results_gs,rprim,scf_history,vel,vel_cell,wvl,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(inout) :: iexit,initialized
+ integer,intent(in) :: itimimage
  real(dp),intent(in) :: cpui
  character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -298,7 +300,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(ddb_hdr_type) :: ddb_hdr
  type(scfcv_t) :: scfcv_args
 !arrays
- integer :: ngfft(18),ngfftf(18)
+ integer :: itimes(2),ngfft(18),ngfftf(18)
  integer,allocatable :: atindx(:),atindx1(:),indsym(:,:,:),dimcprj_srt(:)
  integer,allocatable :: irrzon(:,:,:),kg(:,:),nattyp(:),symrec(:,:,:)
  integer,allocatable,target :: npwarr(:)
@@ -1298,9 +1300,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (dtset%ionmov==0 .or. dtset%imgmov==6) then
 
 !    Should merge this call with the call for dtset%ionmov==4 and 5
-
      if (dtset%macro_uj==0) then
-       call scfcv_run(scfcv_args,itime0,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+       itimes(1)=itime0 ; itimes(2)=itimimage
+       call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
      else
 !      Conduct determination of U
        call pawuj_drive(scfcv_args,dtset,electronpositron,rhog,rhor,rprimd,xred,xred_old)
@@ -1313,7 +1315,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
      ! TODO: return conv_retcode
      call mover(scfcv_args,ab_xfh,acell,args_gs%amu,dtfil,&
-&     electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old)
+&     electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,itimimage=itimimage)
 
 !    Compute rprim from rprimd and acell
      do kk=1,3
@@ -2515,6 +2517,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  integer,parameter :: itime0 = 0
  integer,target :: ndtpawuj=4
  integer :: iuj,conv_retcode
+ integer :: itimes(2)
  real(dp) :: ures
  !character(len=500) :: msg
 !arrays
@@ -2563,7 +2566,8 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 
    !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
 !&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
-   call scfcv_run(scfcv_args,itime0,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   itimes(1)=itime0 ; itimes(2)=1
+   call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
    scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
  end do

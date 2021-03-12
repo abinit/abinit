@@ -557,7 +557,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
        call timab(1205,2,tsec)
 
-       call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),&
+       call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),itimimage,&
 &       mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,&
 &       res_img(iimage)%results_gs,&
 &       rprim,scf_history(iimage),vel,vel_cell,wvl,xred)
