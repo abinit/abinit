@@ -130,6 +130,7 @@ P           mkmem           1
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
            prtvol           1
             prtwf           0
           spgroup          65
@@ -3240,6 +3241,7 @@ P           mkmem           1
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
            prtvol           1
             prtwf           0
           spgroup          65

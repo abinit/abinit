@@ -199,6 +199,7 @@ P           mkmem          20
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
             prtwf           0
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           8
@@ -14169,6 +14170,7 @@ P           mkmem          20
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
             prtwf           0
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           8

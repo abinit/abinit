@@ -86,6 +86,7 @@ P           mkmem           1
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
         prtvolimg           2
             prtwf           0
         restartxf          -1
@@ -1158,6 +1159,7 @@ P           mkmem           1
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
         prtvolimg           2
             prtwf           0
         restartxf          -1
