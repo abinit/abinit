@@ -2881,10 +2881,6 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
     write(*,*) "-----   DISP -----"
     do ii = 1, natom
       displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)
-      do ia =1,3 
-        displacement(ia,ii) = ANINT(displacement(ia,ii)*10d2)
-        displacement(ia,ii) = displacement(ia,ii)/10d2
-      enddo 
       write(*,*) displacement(:,ii) 
     end do
   end if
