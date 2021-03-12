@@ -18,7 +18,6 @@ ionmov2     2    #Broyden algorithm does not work well. This is to be fixed ...
 dtion2      10
 ntime2      50   #Need much more time steps to converge
 
-
 #Start with molecule aligned with z, the molecule is slightly stretched.
 
 xcart     -1.5 0.0 0.0
