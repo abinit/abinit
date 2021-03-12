@@ -2862,6 +2862,20 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        n4,n5,n6,ndat,option,weight_r,weight_i,comm_fft)
    end if
 
+   if (option==0.and.(fftalga==FFT_SG.or.fftalga==FFT_SG2002)) then
+     ! In these cases, add the periodic image of the borders so all fofr components are computed
+     do i3=1,n3
+       if (n1==n4-1) then
+         do i2=1,n2
+           fofr(:,n4,i2,i3)=fofr(:,1,i2,i3)
+         end do
+       end if
+       if (n2==n5-1) then
+         fofr(:,:,n5,i3)=fofr(:,:,1,i3)
+       end if
+     end do
+   end if
+
    if (allocated(work4))  then
      ABI_FREE(work4)
    end if
