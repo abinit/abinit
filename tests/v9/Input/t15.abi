@@ -7,7 +7,7 @@ tolsym 1.0d-5
 #PAW Choose low values, for speed up
 pawecutdg 10
 pawxcdev 0
-pawovlp 15
+#pawovlp 15
 pawnphi 10
 pawntheta 10
                

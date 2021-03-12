@@ -1087,6 +1087,10 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
        if(dtset%ionmov>0 .or. dtset%imgmov>0)then
          if(itime==1)nremit=1
        endif
+!DEBUG
+       write(std_out,'(a,4i4)')&
+               & ' before chkpawovlp : dtset%ionmov,dtset%imgmov,itime,nremit=',dtset%ionmov,dtset%imgmov,itime,nremit
+!ENDDEBUG
        call chkpawovlp(dtset%natom,psps%ntypat,dtset%pawovlp,pawtab,rmet,dtset%typat,xred,nremit=nremit)
 
 !      Identify parts of the rectangular grid where the density has to be calculated

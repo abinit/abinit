@@ -101,8 +101,6 @@ P           mkmem           1
         nzchempot2       2
               occ      2.000000  0.000000
         optforces           1
-          pawovlp1     5.0000000000E+00
-          pawovlp2     3.0000000000E+01
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup1         99
           spgroup2          6
@@ -2169,8 +2167,6 @@ P           mkmem           1
         nzchempot2       2
               occ      2.000000  0.000000
         optforces           1
-          pawovlp1     5.0000000000E+00
-          pawovlp2     3.0000000000E+01
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup1         99
           spgroup2          6

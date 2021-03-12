@@ -116,11 +116,21 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
 
  DBG_ENTER("COLL")
 
+!DEBUG
+     write(std_out,'(a,a,i4)')ch10,' m_paw_tools, chkpawovlp : enter, saved nremit_counter=',nremit_counter
+!ENDDEBUG
+
  if(present(nremit))then
    if(nremit/=0)nremit_counter=abs(nremit)
+!DEBUG
+     write(std_out,'(a,i4)')' m_paw_tools, chkpawovlp : optional arg nremit present, nremit=',nremit
+!ENDDEBUG
  else
    nremit_counter=0
  endif
+ !DEBUG
+     write(std_out,'(a,i4)')' m_paw_tools, chkpawovlp : after init, nremit_counter=',nremit_counter
+!ENDDEBUG
 
  iamax(:)=-1;ibmax(:)=-1
  norm2_min(:)=-1.d0;ratio_percent_max(:)=-1.d0
@@ -176,6 +186,10 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
      end do
    end do
  end do
+
+ !DEBUG
+ write(std_out,'(a,f8.4)')' chkpawovlp : maxval(ratio_percent_max(1:2))=',maxval(ratio_percent_max(1:2))
+ !ENDDEBUG
 
  stop_on_error=(abs(pawovlp)<=tol6.or.(pawovlp>tol6.and.(maxval(ratio_percent_max(1:2))>pawovlp)))
 
