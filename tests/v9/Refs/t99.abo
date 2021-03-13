@@ -1,6 +1,6 @@
 
 .Version 9.4.1 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin18.7.0_gnu9.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 12 Mar 2021.
-- ( at 22h08 )
+.Starting date : Sat 13 Mar 2021.
+- ( at 08h13 )
   
-- input  file    -> /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Test_suite/v9_t99/t99.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Test_suite/v9_t99/t99.abi
 - output file    -> t99.abo
 - root for input  files -> t99i
 - root for output files -> t99o
@@ -156,8 +156,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.01722
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for Mg,  from PRB58, 3641 (1998)
 - 12.00000   2.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -179,8 +179,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.063023
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/21sc.3.hgh
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/21sc.3.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/21sc.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/21sc.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Sc,  from PRB58, 3641 (1998)
 - 21.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -205,8 +205,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -0.219749
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/23v.5.hgh
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/23v.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/23v.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/23v.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for V,  from PRB58, 3641 (1998)
 - 23.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -231,8 +231,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -0.086204
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   4  psp file is /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/16s.6.hgh
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/16s.6.hgh
+- pspini: atom type   4  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/16s.6.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/16s.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for S,  from PRB58, 3641 (1998)
 - 16.00000   6.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -379,7 +379,7 @@ force_length_stats: {min:   2.16694698E-02, max:   5.74120677E-01, mean:   2.862
     6       0.106765695626      0.431621697550      0.331510982701
     7      -7.858189800879     -4.863486532033     -4.857570148992
     8       1.504982090480     -2.997349533232     -4.581787994041
-    9       0.489518209939     -3.823768150497     -3.133909112933
+    9       0.489518209938     -3.823768150497     -3.133909112933
    10      -6.993770242573     -2.633270550823     -3.046630634365
    11       0.416564856503      4.156672381333      3.965050836143
    12       7.708993455844      3.292883608366      2.928191076560
@@ -387,16 +387,16 @@ force_length_stats: {min:   2.16694698E-02, max:   5.74120677E-01, mean:   2.862
    14      -0.938216766683      3.029180016622      3.230595246936
 
  cartesian coordinates (angstrom) at end:
-    1      7.54476453846618     5.27531170240843    12.97324554995354
+    1      7.54476453846618     5.27531170240843    12.97324554995355
     2      1.07365782195829     0.75711168362590     1.86019910346155
     3      4.30947118827535     3.01543403913793     7.41818183309994
     4      1.08858842301368     3.01557728169910     5.55524583998729
     5      4.32079864724235     3.01976852079799    11.11745049231070
     6      3.23319069813277     0.00331598597398     5.56084825890954
-    7      6.29748079626584     4.50476387880736    10.99738759891616
+    7      6.29748079626584     4.50476387880736    10.99738759891615
     8      2.25350185240892     1.49031711335213     7.25709746594055
     9      3.27065621208188     4.36360044084636     5.49599620633777
-   10      5.18251640369388     1.52770736971023     5.48826165426660
+   10      5.18251640369389     1.52770736971023     5.48826165426660
    11      5.34799343972555     1.66865080231679     9.33778399257915
    12      3.43586686445842     4.50489530652996     9.34540488112529
    13      2.32109860268202     1.52741908663149     3.83584040140161
@@ -415,25 +415,25 @@ force_length_stats: {min:   2.16694698E-02, max:   5.74120677E-01, mean:   2.862
    10      0.45818024198719    -0.06014303139688     0.21671663725957
    11      0.13840225037271    -0.23403650745868    -0.28348749916837
    12     -0.50431064127392     0.02465724997228    -0.20760187818436
-   13     -0.34222416320988     0.00097945935103    -0.33613230939845
-   14      0.21950770706002    -0.19617058072019    -0.23125631809302
+   13     -0.34222416320987     0.00097945935103    -0.33613230939845
+   14      0.21950770706002    -0.19617058072020    -0.23125631809303
  frms,max,avg= 2.0727416E-01 5.0431064E-01  -8.815E-03 -2.513E-03 -2.071E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -1.85033196911785     2.13020240017349     0.89130992438206
-    2      3.06398460199299    -2.41647764396443    -3.06651380721990
-    3     -0.60625317197037     1.12062817945697    -0.35941261014119
-    4      1.32970997558251    -0.17623649716056     0.95711939891506
-    5     -0.51868394402893    -0.97077941626063    -0.17376399260495
-    6      0.70595866994466    -1.15946839154959    -1.20786539085635
-    7     23.36946915524688     2.94785273044935    17.79759236810338
-    8    -15.65275950301460     9.01387395185899    16.89834491734056
-    9     -8.27556940917831    13.40692703527212    11.54829542879123
-   10     23.56057335689411    -3.09267876106247    11.14401661596815
-   11      7.11692926461151   -12.03464007582773   -14.57751209644143
-   12    -25.93269366409907     1.26792666622083   -10.67531689882059
-   13    -17.59787254648440     0.05036582064292   -17.28461685483532
-   14     11.28753918362086   -10.08749599824926   -11.89167700258071
+    1     -1.85033196911782     2.13020240017348     0.89130992438209
+    2      3.06398460199290    -2.41647764396444    -3.06651380721988
+    3     -0.60625317197037     1.12062817945694    -0.35941261014120
+    4      1.32970997558250    -0.17623649716061     0.95711939891502
+    5     -0.51868394402899    -0.97077941626055    -0.17376399260491
+    6      0.70595866994466    -1.15946839154959    -1.20786539085636
+    7     23.36946915524679     2.94785273044935    17.79759236810332
+    8    -15.65275950301455     9.01387395185905    16.89834491734054
+    9     -8.27556940917828    13.40692703527207    11.54829542879122
+   10     23.56057335689417    -3.09267876106247    11.14401661596816
+   11      7.11692926461150   -12.03464007582782   -14.57751209644146
+   12    -25.93269366409908     1.26792666622089   -10.67531689882046
+   13    -17.59787254648434     0.05036582064298   -17.28461685483531
+   14     11.28753918362091   -10.08749599824928   -11.89167700258076
  frms,max,avg= 1.0658465E+01 2.5932694E+01  -4.533E-01 -1.292E-01 -1.065E-02 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
@@ -459,7 +459,7 @@ local_psp           : -3.48700732126151E+01
 non_local_psp       :  2.21578888910940E+01
 total_energy        : -8.76667237467738E+01
 total_energy_eV     : -2.38553287162204E+03
-band_energy         :  5.02826626748792E+00
+band_energy         :  5.02826626748791E+00
 ...
 
 
