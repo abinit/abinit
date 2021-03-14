@@ -1334,7 +1334,7 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
    write(msg, '(a,1p,2e12.5,a)' ) ' Cartesian forces (fcart) [Ha/bohr]; max,rms=',sqrt(val_max),val_rms,' (free atoms)'
    call prtnatom(atlist,iout,msg,ab_mover%natom,prtallatoms,fcart)
 
-   write(msg, '(a)' )' Reduced forces (fred)'
+   write(msg, '(a)' )' Gradient of E wrt nuclear positions in reduced coordinates (gred)'
    call prtnatom(atlist,iout,msg,ab_mover%natom,prtallatoms,fred)
    ABI_FREE(fred)
  end if

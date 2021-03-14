@@ -221,7 +221,7 @@ subroutine prtxvf(fcart,fred,iatfix,iout,natom,prtvel,vel,xcart,xred)
    call wrtout(iout,msg,'COLL')
  end do
 
- write(msg, '(a)' ) ' Reduced forces (fred)'
+ write(msg, '(a)' ) ' Gradient of E wrt nuclear positions in reduced coordinates (gred)'
  call wrtout(iout,msg,'COLL')
  do iatom=1,natom
    write(msg, '(1p,3e22.14)' )fred(:,iatom)
