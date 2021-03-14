@@ -1279,6 +1279,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
 !Local variables-------------------------------
 !scalars
  integer :: ihist,iimage,natom,next_itimimage,nspden,nsppol
+!integer :: iatom
  real(dp) :: deltae,diffor,etotal,entropy,fermie,res2,residm
  logical :: test_img
  type(results_gs_type) :: results_gs_lincomb
@@ -1309,6 +1310,14 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
  rprim(:,:)   =results_img(1,itimimage_eff)%rprim(:,:)
  vel(:,:)     =results_img(1,itimimage_eff)%vel(:,:)
  vel_cell(:,:)=results_img(1,itimimage_eff)%vel_cell(:,:)
+
+!DEBUG
+!write(std_out,'(a,i4)')' m_gstateimg, move_1geo, init : ionmov=',m1geo_param%ab_mover%ionmov
+!do iatom=1,natom
+!  write(std_out,'(i4,3es14.6)') iatom,xred(1:3,iatom)
+!enddo
+!ENDDEBUG
+
 
  call mkrdim(acell,rprim,rprimd)
 
@@ -1431,6 +1440,13 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
 !    results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
    end do
  endif
+
+!DEBUG
+!write(std_out,'(a,i4)')' m_gstateimg, move_1geo, moved : ionmov=',m1geo_param%ab_mover%ionmov
+!do iatom=1,natom
+!  write(std_out,'(i4,3es14.6)') iatom,xred(1:3,iatom)
+!enddo
+!ENDDEBUG
 
  ABI_FREE(fcart)
  ABI_FREE(vel)

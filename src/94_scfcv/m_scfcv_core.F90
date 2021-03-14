@@ -414,7 +414,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  _IBM6("Hello, I'm running on IBM6")
 
 !DEBUG
- write(std_out,'(a,5i4)')' scfcv_core, enter : itimes(1:2)=',itimes(1:2)
+!write(std_out,'(a,5i4)')' scfcv_core, enter : itimes(1:2)=',itimes(1:2)
 !ENDDEBUG
 
  DBG_ENTER("COLL")
@@ -1090,7 +1090,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !      Check for non-overlapping spheres, allow one remittance in case of optimization or MD or image algorithms
        nremit=0
        if(dtset%ionmov>0 .and. itimes(1)==1)nremit=1
-       if(dtset%imgmov>0 .and. itimes(2)==1)nremit=1
+       if(dtset%imgmov>0 .and. itimes(2)==1)nremit=mpi_enreg%my_nimage
        call chkpawovlp(dtset%natom,psps%ntypat,dtset%pawovlp,pawtab,rmet,dtset%typat,xred,nremit=nremit)
 
 !      Identify parts of the rectangular grid where the density has to be calculated

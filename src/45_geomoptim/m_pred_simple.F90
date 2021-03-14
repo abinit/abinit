@@ -49,7 +49,8 @@ contains
 !! pred_simple
 !!
 !! FUNCTION
-!! Ionmov predictors (4 & 6) Internal to SCFV
+!! Ionmov predictors (4 & 5) Internal to scfcv.
+!! Actually, this routine does nothing (only copy) as all operations are internal to scfcv ...
 !!
 !! IONMOV 4:
 !! Conjugate gradient algorithm for simultaneous optimization
