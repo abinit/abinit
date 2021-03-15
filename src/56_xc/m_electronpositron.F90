@@ -470,7 +470,7 @@ end subroutine destroy_electronpositron
 !!  electronpositron=<type(electronpositron_type)>=electronpositron datastructure
 !!  energies <type(energies_type)>=all part of total energy.
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
-!!  fred(3,natom)=forces in reduced coordinates
+!!  fred(3,natom)=gradients wrt nuclear positions in reduced coordinates
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  occ(mband*nkpt*nsppol)=occupation number for each band at each k point

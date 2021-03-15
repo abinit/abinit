@@ -105,7 +105,7 @@ contains
 !!  etotal=current value of total energy
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  forces_needed=if >0 forces are needed
-!!  fred(3,natom)=forces in reduced coordinates
+!!  fred(3,natom)=gradients wrt nuclear positions in reduced coordinates
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space
 !!  gmet(3,3)=reciprocal space metric
 !!  grchempottn(3,natom)=d(E_chemical_potential)/d(xred) (hartree)

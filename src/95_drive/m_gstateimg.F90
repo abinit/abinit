@@ -96,7 +96,7 @@ contains
 !! OUTPUT
 !!  etotal_img=total energy, for each image
 !!  fcart_img(3,natom,nimage)=forces, in cartesian coordinates, for each image
-!!  fred_img(3,natom,nimage)=forces, in reduced coordinates, for each image
+!!  fred_img(3,natom,nimage)=gradient of E wrt nuclear positions, in reduced coordinates, for each image
 !!  intgres_img(nspden,natom,nimage)=gradient wrt constraints, for each image
 !!  npwtot(nkpt) = total number of plane waves at each k point
 !!  strten_img(6,nimage)=stress tensor, for each image

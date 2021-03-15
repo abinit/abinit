@@ -109,7 +109,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !Local variables-------------------------------
 !scalars
  integer  :: ii,istopped,jj,kk,ndim,nstopped
- real(dp) :: amass_tot,etotal,diag,favg,ekin_corr,scprod,taylor,ucvol0
+ real(dp) :: amass_tot,etotal,diag,gr_avg,ekin_corr,scprod,taylor,ucvol0
  real(dp),save :: ucvol,ucvol_next
  character(len=500) :: message
 !arrays
@@ -249,8 +249,8 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
    amass_tot=sum(ab_mover%amass(:))
    do kk=1,3
      if (kk/=3.or.ab_mover%jellslab==0) then
-       favg=sum(fred_corrected(kk,:))/dble(ab_mover%natom)
-       fred_corrected(kk,:)=fred_corrected(kk,:)-favg*ab_mover%amass(:)/amass_tot
+       gr_avg=sum(fred_corrected(kk,:))/dble(ab_mover%natom)
+       fred_corrected(kk,:)=fred_corrected(kk,:)-gr_avg*ab_mover%amass(:)/amass_tot
      end if
    end do
  end if

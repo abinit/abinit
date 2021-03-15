@@ -236,7 +236,7 @@ character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename,fname_ddb,name_file
 character(len=500) :: MY_NAME = "mover"
-real(dp) :: favg
+real(dp) :: gr_avg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
 logical :: changed,useprtxfase
@@ -727,8 +727,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
        if (ab_mover%nconeq==0)then
          do ii=1,3
            if (ii/=3.or.ab_mover%jellslab==0) then
-             favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-             fred_corrected(ii,:)=fred_corrected(ii,:)-favg
+             gr_avg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
+             fred_corrected(ii,:)=fred_corrected(ii,:)-gr_avg
            end if
          end do
        end if

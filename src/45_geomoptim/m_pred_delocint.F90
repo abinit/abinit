@@ -92,7 +92,7 @@ contains
 !!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -138,7 +138,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !real(dp) :: residual_corrected(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xcart(3,ab_mover%natom)
  real(dp) :: strten(6)
- real(dp) :: deloc_force(3*(ab_mover%natom-1))
+ real(dp) :: deloc_gred(3*(ab_mover%natom-1))
  real(dp) :: deloc_int(3*(ab_mover%natom-1))
  real(dp) :: bt_inv_matrix(3*(ab_mover%natom-1),3*ab_mover%natom)
 
@@ -187,7 +187,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
  ndeloc = 3*(ab_mover%natom-1)
  ndim=ndeloc
  deloc_int(:)=zero
- deloc_force(:)=zero
+ deloc_gred(:)=zero
  if(ab_mover%optcell==1 .or.&
 & ab_mover%optcell==4 .or.&
 & ab_mover%optcell==5 .or.&
@@ -346,7 +346,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
    u_matrix(:,:) = one / dble (ndeloc)
 
 !  Zero the arrays before first use
-   deloc_force(:) = zero
+   deloc_gred(:) = zero
 
  end if
 
@@ -362,16 +362,16 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
  call xcart2deloc(deloc,ab_mover%natom,rprimd,xcart,&
 & bt_inv_matrix,u_matrix,deloc_int,prim_int)
 
-!fred ---> deloc_force
+!fred ---> deloc_gred
 
-!Convert forces to delocalized coordinates for next step
- call fred2fdeloc(bt_inv_matrix,deloc_force,residual,ab_mover%natom,gprimd)
+!Convert gradients to delocalized coordinates for next step
+ call fred2gdeloc(bt_inv_matrix,deloc_gred,residual,ab_mover%natom,gprimd)
 
 !write(std_out,*) 'delocint 07'
 !##########################################################
 !### 07. Fill the vectors vin and vout
 
-!DEBUG deloc_int and deloc_force before pack
+!DEBUG deloc_int and deloc_gred before pack
  if(DEBUG)then
    write (std_out,*) 'Delocalized internals and forces (ndeloc):',ndeloc
    write(std_out,*) 'deloc_int'
@@ -382,18 +382,18 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
        write(std_out,*) ii,deloc_int(ii:ndeloc)
      end if
    end do
-   write(std_out,*) 'deloc_force'
+   write(std_out,*) 'deloc_gred'
    do ii=1,ndeloc,3
      if (ii+2<=ndeloc)then
-       write(std_out,*) ii,deloc_force(ii:ii+2)
+       write(std_out,*) ii,deloc_gred(ii:ii+2)
      else
-       write(std_out,*) ii,deloc_force(ii:ndeloc)
+       write(std_out,*) ii,deloc_gred(ii:ndeloc)
      end if
    end do
  end if
 
 !DELOCINT
-!Instead of fred_corrected we use deloc_force
+!Instead of fred_corrected we use deloc_gred
 !Instead of xred e use deloc_int
 !
 !Initialize input vectors : first vin, then vout
@@ -404,7 +404,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 & ab_mover%symrel, ucvol, ucvol0, vin, deloc_int)
 !end if
 
- call xfpack_f2vout(deloc_force, ab_mover%natom-1, ndim,&
+ call xfpack_f2vout(deloc_gred, ab_mover%natom-1, ndim,&
 & ab_mover%optcell, ab_mover%strtarget, strten, ucvol, &
 & vout)
 
@@ -452,7 +452,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
      call xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
 &     residual,hessin,ndim,rprimd,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
-&     vout,vout_prev,xred,deloc,deloc_int,deloc_force,bt_inv_matrix,gprimd,prim_int,&
+&     vout,vout_prev,xred,deloc,deloc_int,deloc_gred,bt_inv_matrix,gprimd,prim_int,&
 &     u_matrix)
 
    end if
@@ -685,7 +685,7 @@ end subroutine pred_delocint
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -839,9 +839,9 @@ subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
 end subroutine deloc2xcart
 !!***
 
-!!****f* ABINIT/fred2fdeloc
+!!****f* ABINIT/fred2gdeloc
 !! NAME
-!! fred2fdeloc
+!! fred2gdeloc
 !!
 !! FUNCTION
 !!  calculate delocalized forces from reduced coordinate ones
@@ -852,25 +852,25 @@ end subroutine deloc2xcart
 !! gprimd(3,3)=dimensional translations in reciprocal space (bohr-1)
 !!
 !! OUTPUT
-!! deloc_force(3*(natom-1))=delocalized forces from reduced coordinate ones
-!! fred(3,natom)=delocalized forces in reduced coordinates
+!! deloc_gred(3*(natom-1))=delocalized gradients from reduced coordinate ones
+!! fred(3,natom)=delocalized gradients in reduced coordinates
 !!
 !! PARENTS
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
-subroutine fred2fdeloc(btinv,deloc_force,fred,natom,gprimd)
+subroutine fred2gdeloc(btinv,deloc_gred,fred,natom,gprimd)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom
 !arrays
  real(dp),intent(in) :: btinv(3*(natom-1),3*natom),gprimd(3,3),fred(3,natom)
- real(dp),intent(out) :: deloc_force(3*(natom-1))
+ real(dp),intent(out) :: deloc_gred(3*(natom-1))
 
 !Local variables-------------------------------
  integer :: ii
@@ -887,17 +887,17 @@ subroutine fred2fdeloc(btinv,deloc_force,fred,natom,gprimd)
 
 !turn cartesian to delocalized forces
  call dgemv('N',3*(natom-1),3*natom,one,&
-& btinv,3*(natom-1),fcart,1,zero,deloc_force,1)
+& btinv,3*(natom-1),fcart,1,zero,deloc_gred,1)
 
- write (message,'(a)') 'fred2fdeloc : deloc_force = '
+ write (message,'(a)') 'fred2gdeloc : deloc_gred = '
  call wrtout(std_out,message,'COLL')
 
  do ii = 1, 3*(natom-1)
-   write (message,'(I6,E16.6)') ii, deloc_force(ii)
+   write (message,'(I6,E16.6)') ii, deloc_gred(ii)
    call wrtout(std_out,message,'COLL')
  end do
 
-end subroutine fred2fdeloc
+end subroutine fred2gdeloc
 !!***
 
 !!****f* ABINIT/calc_b_matrix
@@ -936,7 +936,7 @@ end subroutine fred2fdeloc
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1074,7 +1074,7 @@ end subroutine calc_b_matrix
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1108,7 +1108,7 @@ end subroutine dbond_length_d1
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1172,7 +1172,7 @@ end subroutine dang_d1
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1236,7 +1236,7 @@ end subroutine dang_d2
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1341,7 +1341,7 @@ end subroutine ddihedral_d1
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1494,7 +1494,7 @@ end subroutine ddihedral_d2
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1572,7 +1572,7 @@ end subroutine xcart2deloc
 !!    coordinate B matrix. b_matrix is the primitive internal B matrix
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1667,7 +1667,7 @@ end subroutine calc_btinv_matrix
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1752,13 +1752,13 @@ end subroutine align_u_matrices
 !!      m_pred_delocint
 !!
 !! CHILDREN
-!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
+!!      fred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
 subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
 & fred,hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
-& vout,vout_prev,xred,deloc,deloc_int,deloc_force,btinv,gprimd,prim_int,&
+& vout,vout_prev,xred,deloc,deloc_int,deloc_gred,btinv,gprimd,prim_int,&
 & u_matrix)
 
 !Arguments ------------------------------------
@@ -1786,7 +1786,7 @@ real(dp),intent(inout) :: vin_prev(:)
 real(dp),intent(inout) :: vout(:)
 real(dp),intent(inout) :: vout_prev(:)
 ! DELOCINT specials
-real(dp),intent(inout) :: deloc_force(3*(ab_mover%natom-1))
+real(dp),intent(inout) :: deloc_gred(3*(ab_mover%natom-1))
 real(dp),intent(inout) :: deloc_int(3*(ab_mover%natom-1))
 real(dp),intent(inout) :: btinv(3*(ab_mover%natom-1),3*ab_mover%natom)
 real(dp),intent(inout) :: prim_int(:),u_matrix(:,:),gprimd(3,3)
@@ -1836,13 +1836,13 @@ real(dp) :: xcart(3,ab_mover%natom)
      call xcart2deloc(deloc,ab_mover%natom,rprimd0,xcart,&
 &     btinv,u_matrix,deloc_int,prim_int)
 !    Convert forces to delocalized coordinates for next step
-     call fred2fdeloc(btinv,deloc_force,fred,ab_mover%natom,gprimd)
+     call fred2gdeloc(btinv,deloc_gred,fred,ab_mover%natom,gprimd)
 
 !    Transfer it in vin, vout
      call xfpack_x2vin(acell,acell0,ab_mover%natom-1,&
 &     ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &     ab_mover%symrel,ucvol,ucvol0,vin,deloc_int)
-     call xfpack_f2vout(deloc_force,ab_mover%natom-1,&
+     call xfpack_f2vout(deloc_gred,ab_mover%natom-1,&
 &     ndim,ab_mover%optcell,ab_mover%strtarget,strten,&
 &     ucvol,vout)
 !    Get old time step, if any, and update inverse hessian
@@ -1862,13 +1862,13 @@ real(dp) :: xcart(3,ab_mover%natom)
        call xcart2deloc(deloc,ab_mover%natom,rprimd0,xcart,&
 &       btinv,u_matrix,deloc_int,prim_int)
 !      Convert forces to delocalized coordinates for next step
-       call fred2fdeloc(btinv,deloc_force,fred,ab_mover%natom,gprimd)
+       call fred2gdeloc(btinv,deloc_gred,fred,ab_mover%natom,gprimd)
 
 !      Tranfer it in vin_prev, vout_prev
        call xfpack_x2vin(acell,acell0,ab_mover%natom-1,&
 &       ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &       ab_mover%symrel,ucvol,ucvol0,vin_prev,deloc_int)
-       call xfpack_f2vout(deloc_force,ab_mover%natom-1,&
+       call xfpack_f2vout(deloc_gred,ab_mover%natom-1,&
 &       ndim,ab_mover%optcell,ab_mover%strtarget,strten,&
 &       ucvol,vout_prev)
 

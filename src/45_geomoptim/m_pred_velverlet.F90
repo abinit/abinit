@@ -108,7 +108,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
  real(dp) :: xcart(3,ab_mover%natom)                                            ! Cartesian coordinates of all ions
  real(dp) :: xred(3,ab_mover%natom)                                             ! reduced coordinates of all ions
  real(dp) :: vel(3,ab_mover%natom)                                              ! ionic velocities in Cartesian coordinates
- real(dp) :: fcart(3,ab_mover%natom),fred(3,ab_mover%natom)                     ! forces, Cartesian and reduced coordinates
+ real(dp) :: fcart(3,ab_mover%natom),fred(3,ab_mover%natom)                     ! cartesian forces, and gradient in reduced coordinates
  !real(dp) :: factor                                                             ! factor, indicating change of time step at last iteration
  integer :: hmcflag_
  integer :: icycle_

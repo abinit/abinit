@@ -56,8 +56,8 @@ MODULE m_geometry
  public :: chkdilatmx         ! check if dilatation of unit cell is consistent with initial G-sphere
  public :: xcart2xred         ! From cart coords to reduced
  public :: xred2xcart         ! From reduced coords to cart.
- public :: fred2fcart         ! Convert reduced forces into cartesian forces
- public :: fcart2fred         ! Convert cartesian forces into reduced forces
+ public :: fred2fcart         ! Convert reduced gradients into cartesian forces
+ public :: fcart2fred         ! Convert cartesian forces into reduced gradients
  public :: bonds_lgth_angles  ! Write GEO file
  public :: randomcellpos      ! Creates unit cell with random atomic positions.
  public :: ioniondist         ! Compute ion-ion distances

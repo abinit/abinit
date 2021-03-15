@@ -2205,7 +2205,7 @@ end subroutine effective_potential_writeAbiInput
 !! OUTPUTS
 !! energy =  energy of the structure (Ha)
 !! fcart(3,natom) =  forces in cartesian coordinates (Ha/Bohr)
-!! fred(3,natom)  =  forces in reduced coordinates
+!! fred(3,natom)  =  gradient wrt nuclear positions in reduced coordinates
 !! strten(6) = stress tensor (Ha/Bohr^3)
 !!
 !! PARENTS

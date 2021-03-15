@@ -271,7 +271,7 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
        if(abs(fred_ref(ii,iatom)-fred(ii,iatom))&
 &       >fred_mxdev)then
          tok=0
-         write(temp_unit, '(a,i1,a,i1,a)' )' Error for force fred(',ii,',',iatom,')'
+         write(temp_unit, '(a,i1,a,i1,a)' )' Error for gradients fred(',ii,',',iatom,')'
          write(temp_unit,format01000)'        expected ',fred_ref(ii,iatom),'  with maximum   deviation',fred_mxdev
          write(temp_unit,format01000)'        computed ',fred(ii,iatom),'  with effective deviation',&
 &         abs( fred(ii,iatom)-fred_ref(ii,iatom) )

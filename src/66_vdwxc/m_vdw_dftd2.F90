@@ -75,7 +75,7 @@ contains
 !!  === optional outputs ===
 !!  [dyn_vdw_dftd2(2,3,natom,3,natom)]=contribution to dynamical matrix from DFT-D2 dispersion potential
 !!  [elt_vdw_dftd2(6+3*natom,6)]=contribution to elastic tensor and internal strains from DFT-D2 disp. pot.
-!!  [fred_vdw_dftd2(3,natom)]=contribution to forces from DFT-D2 dispersion potential
+!!  [fred_vdw_dftd2(3,natom)]=contribution to gradients wrt nuclear positions from DFT-D2 dispersion potential
 !!  [str_vdw_dftd2(6)]=contribution to stress tensor from DFT-D2 dispersion potential
 !!
 !! NOTES
@@ -298,7 +298,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
                    rcart(2)=rprimd(2,1)*r1+rprimd(2,2)*r2+rprimd(2,3)*r3
                    rcart(3)=rprimd(3,1)*r1+rprimd(3,2)*r2+rprimd(3,3)*r3
 
-!                  Contribution to forces
+!                  Contribution to gradients wrt nuclear positions
                    if (need_forces.and.ia/=ja) then
                      vec(1:3)=grad*rcart(1:3)
                      fred_vdw_dftd2(1:3,ia)=fred_vdw_dftd2(1:3,ia)+vec(1:3)
