@@ -873,13 +873,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & (dtset%occopt>=3.and.dtset%occopt<=8) .and. &
 & (dtset%iscf>0 .or. dtset%iscf==-3) .and. dtset%positron/=1 ) then
 
-   if(associated(hightemp)) then
-     call hightemp_get_e_shiftfactor(cg,dtset%ecut,dtset%ecutsm,dtset%effmass_free,&
-&     eigen,gmet,hightemp,dtset%istwfk,kg,dtset%kptns,&
-&     dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,my_nspinor,&
-&     dtset%nband,dtset%nkpt,dtset%nsppol,npwarr,dtset%wtk)
-   end if
-
    ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
 !  Do not take into account the possible STM bias

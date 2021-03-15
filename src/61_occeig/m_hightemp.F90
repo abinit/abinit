@@ -47,7 +47,7 @@ module m_hightemp
 
   implicit none
   public :: dip12,djp12,dip32,djp32,hightemp_e_heg
-  public :: hightemp_dosfreeel,hightemp_get_e_shiftfactor
+  public :: hightemp_dosfreeel
   public :: hightemp_prt_eigocc
   !!***
 
@@ -1189,116 +1189,6 @@ contains
     ! *********************************************************************
     hightemp_e_heg=.5*(iband*6*PI*PI/ucvol)**(2./3.)
   end function hightemp_e_heg
-  !!***
-
-  !!****f* ABINIT/m_hightemp/hightemp_get_e_shiftfactor
-  !! NAME
-  !! hightemp_get_e_shiftfactor
-  !!
-  !! FUNCTION
-  !! Compute the energy shift factor $U_0$ corresponding to constant potential contribution
-  !! directly from wavefunction (Used when reading _WFK)
-  !!
-  !! INPUTS
-  !! cg(2,mpw*dtset%nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions.
-  !! ecut=kinetic energy planewave cutoff (hartree).
-  !! ecutsm=smearing energy for plane wave kinetic energy (Ha)
-  !! effmass_free=effective mass for electrons (1. in common case)
-  !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
-  !! gmet(3,3)=metric tensor for G vecs (in bohr**-2)
-  !! hightemp=hightemp_type object concerned
-  !! istwfk=parameter that describes the storage of wfs
-  !! kg(3,mpw*mkmem)=reduced planewave coordinates
-  !! kptns(3,nkpt),kptns0(3,nkpt0)=k point sets (reduced coordinates)
-  !! mband=maximum number of bands
-  !! mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-  !! mkmem=number of k points treated by this node.
-  !! mpi_enreg=information about MPI parallelization
-  !! mpw=maximum allowed value for npw
-  !! my_nspinor=number of spinorial components of the wavefunctions (on current proc)
-  !! nband(nkpt*nsppol)=desired number of bands at each k point
-  !! nkpt=number of k points
-  !! nsppol=1 for unpolarized, 2 for spin-polarized
-  !! npwarr(nkpt) = array holding npw for each k point
-  !! wtk(nkpt)=k point weights
-  !!
-  !! OUTPUT
-  !! hightemp=hightemp_type object concerned
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine hightemp_get_e_shiftfactor(cg,ecut,ecutsm,effmass_free,eigen,gmet,hightemp,&
-  & istwfk,kg,kptns,mband,mcg,mkmem,mpi_enreg,mpw,my_nspinor,nband,nkpt,nsppol,npwarr,wtk)
-    ! Arguments -------------------------------
-    ! Scalars
-    integer,intent(in) :: mband,mcg,mpw,mkmem,my_nspinor,nkpt,nsppol
-    real(dp),intent(in) :: ecut,ecutsm,effmass_free
-    type(MPI_type),intent(inout) :: mpi_enreg
-    type(hightemp_type),pointer,intent(inout) :: hightemp
-    ! Arrays
-    integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol),npwarr(nkpt)
-    integer,intent(in) :: kg(3,mpw*mkmem)
-    real(dp),intent(in) :: cg(2,mcg),eigen(mband*nkpt*nsppol)
-    real(dp),intent(in) :: kptns(3,nkpt),gmet(3,3)
-    real(dp),intent(in) :: wtk(nkpt)
-
-    ! Local variables -------------------------
-    ! Scalars
-    integer :: bdtot_index,blocksize,iband,iblock,iblocksize
-    integer :: ikpt,isppol,nband_k,nblockbd,npw_k
-    real(dp) :: ar
-    ! Arrays
-    integer,allocatable :: kg_k(:,:)
-    real(dp),allocatable :: eknk(:),ek_k(:),kinpw(:)
-
-    ! *********************************************************************
-
-    bdtot_index=0
-
-    ABI_ALLOCATE(eknk,(mband*nkpt*nsppol))
-    do isppol=1,nsppol
-      do ikpt=1,nkpt
-        npw_k=npwarr(ikpt)
-        nband_k=nband(ikpt+(isppol-1)*nkpt)
-
-        ABI_ALLOCATE(kg_k,(3,npw_k))
-        ABI_ALLOCATE(kinpw,(npw_k))
-        ABI_ALLOCATE(ek_k,(nband_k))
-
-        kg_k(:,1:npw_k)=kg(:,1:npw_k)
-        nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
-        blocksize=nband_k/nblockbd
-
-        call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,kinpw,kptns(:,ikpt),npw_k,0,0)
-
-        do iblock=1,nblockbd
-          do iblocksize=1,blocksize
-            iband=(iblock-1)*blocksize+iblocksize
-            call meanvalue_g(ar,kinpw,0,istwfk(ikpt),mpi_enreg,npw_k,my_nspinor,&
-            & cg(:,1+(iband-1)*npw_k*my_nspinor:iband*npw_k*my_nspinor),&
-            & cg(:,1+(iband-1)*npw_k*my_nspinor:iband*npw_k*my_nspinor),0)
-
-            ek_k(iband)=ar
-          end do
-        end do
-
-        eknk (1+bdtot_index : nband_k+bdtot_index)=ek_k (:)
-        ABI_DEALLOCATE(ek_k)
-        ABI_DEALLOCATE(kinpw)
-        ABI_DEALLOCATE(kg_k)
-
-        bdtot_index=bdtot_index+nband_k
-      end do
-    end do
-
-    call hightemp%compute_e_shiftfactor(eigen,eknk,mband,&
-    & nband,nkpt,nsppol,wtk)
-
-    ABI_DEALLOCATE(eknk)
-  end subroutine hightemp_get_e_shiftfactor
   !!***
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_eigocc
