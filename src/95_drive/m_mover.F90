@@ -47,7 +47,7 @@ module m_mover
  use defs_abitypes,        only : MPI_type
  use m_fstrings,           only : strcat, sjoin, indent, itoa
  use m_symtk,              only : matr3inv, symmetrize_xred
- use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
+ use m_geometry,           only : fcart2gred, chkdilatmx, xred2xcart
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_electronpositron,   only : electronpositron_type
@@ -248,7 +248,7 @@ real(dp) :: minE,wtime_step,now,prev
 !arrays
 integer :: itimes(2)
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
-real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
+real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 ! ***************************************************************
  need_verbose=.TRUE.
  if(present(verbose)) need_verbose = verbose
@@ -649,7 +649,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 #endif
 
            call effective_potential_evaluate( &
-&           effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+&           effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
 &           filename=name_file,elec_eval=need_elec_eval)
 
@@ -720,15 +720,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !    Store trajectory in xfh file
      if((ab_xfh%nxfh==0.or.itime/=1)) then
-       ABI_MALLOC(fred_corrected,(3,scfcv_args%dtset%natom))
-       call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
+       ABI_MALLOC(gred_corrected,(3,scfcv_args%dtset%natom))
+       call fcart2gred(hist%fcart(:,:,hist%ihist),gred_corrected,rprimd,ab_mover%natom)
 !      Get rid of mean force on whole unit cell,
 !      but only if no generalized constraints are in effect
        if (ab_mover%nconeq==0)then
          do ii=1,3
            if (ii/=3.or.ab_mover%jellslab==0) then
-             gr_avg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-             fred_corrected(ii,:)=fred_corrected(ii,:)-gr_avg
+             gr_avg=sum(gred_corrected(ii,:))/dble(ab_mover%natom)
+             gred_corrected(ii,:)=gred_corrected(ii,:)-gr_avg
            end if
          end do
        end if
@@ -740,10 +740,10 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !        The size of ab_xfh%xfhist is to big for very large supercell.
 !        Call it only for specific ionmov
          if(any((/2,3,10,11,22/)==ab_mover%ionmov)) then
-           call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,hist%strten(:,hist%ihist),xred)
+           call xfh_update(ab_xfh,acell,gred_corrected,ab_mover%natom,rprim,hist%strten(:,hist%ihist),xred)
          end if
        end if
-       ABI_FREE(fred_corrected)
+       ABI_FREE(gred_corrected)
      end if
 
 !    ###########################################################
@@ -1266,7 +1266,7 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
  logical :: prtallatoms
 !arrays
  logical :: atlist(ab_mover%natom)
- real(dp),allocatable :: fred(:,:),xcart(:,:)
+ real(dp),allocatable :: gred(:,:),xcart(:,:)
  real(dp),pointer :: acell(:),fcart(:,:),rprimd(:,:),strten(:),vel(:,:),xred(:,:)
 
 ! ***********************************************************
@@ -1312,8 +1312,8 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 
  if(pos==mover_AFTER)then
 
-   ABI_MALLOC(fred,(3,ab_mover%natom))
-   call fcart2fred(fcart,fred,rprimd,ab_mover%natom)
+   ABI_MALLOC(gred,(3,ab_mover%natom))
+   call fcart2gred(fcart,gred,rprimd,ab_mover%natom)
 
 !  Compute max |f| and rms f,
 !  EXCLUDING the components determined by iatfix
@@ -1335,8 +1335,8 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
    call prtnatom(atlist,iout,msg,ab_mover%natom,prtallatoms,fcart)
 
    write(msg, '(a)' )' Gradient of E wrt nuclear positions in reduced coordinates (gred)'
-   call prtnatom(atlist,iout,msg,ab_mover%natom,prtallatoms,fred)
-   ABI_FREE(fred)
+   call prtnatom(atlist,iout,msg,ab_mover%natom,prtallatoms,gred)
+   ABI_FREE(gred)
  end if
 
 !###########################################################

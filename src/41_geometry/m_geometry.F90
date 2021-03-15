@@ -56,8 +56,8 @@ MODULE m_geometry
  public :: chkdilatmx         ! check if dilatation of unit cell is consistent with initial G-sphere
  public :: xcart2xred         ! From cart coords to reduced
  public :: xred2xcart         ! From reduced coords to cart.
- public :: fred2fcart         ! Convert reduced gradients into cartesian forces
- public :: fcart2fred         ! Convert cartesian forces into reduced gradients
+ public :: gred2fcart         ! Convert reduced gradients into cartesian forces
+ public :: fcart2gred         ! Convert cartesian forces into reduced gradients
  public :: bonds_lgth_angles  ! Write GEO file
  public :: randomcellpos      ! Creates unit cell with random atomic positions.
  public :: ioniondist         ! Compute ion-ion distances
@@ -1766,15 +1766,15 @@ subroutine xred2xcart(natom,rprimd,xcart,xred)
 end subroutine xred2xcart
 !!***
 
-!!****f* m_geometry/fred2fcart
+!!****f* m_geometry/gred2fcart
 !! NAME
-!! fred2fcart
+!! gred2fcart
 !!
 !! FUNCTION
 !! Convert reduced forces into cartesian forces
 !!
 !! INPUTS
-!!  fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
+!!  gred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!  natom=Number of atoms in the unitary cell
 !!  Favgz_null=TRUE if the average cartesian force has to be set to zero
 !!             FALSE if it is set to zero only in x,y directions (not z)
@@ -1784,7 +1784,7 @@ end subroutine xred2xcart
 !!  fcart(3,natom)=forces in cartesian coordinates (Ha/Bohr)
 !!
 !! NOTES
-!!    Unlike fred, fcart has been corrected by enforcing
+!!    Unlike gred, fcart has been corrected by enforcing
 !!    the translational symmetry, namely that the sum of force
 !!    on all atoms is zero (except is a slab is used)
 !!
@@ -1795,7 +1795,7 @@ end subroutine xred2xcart
 !!
 !! SOURCE
 
-subroutine fred2fcart(favg,Favgz_null,fcart,fred,gprimd,natom)
+subroutine gred2fcart(favg,Favgz_null,fcart,gred,gprimd,natom)
 
 !Arguments ------------------------------------
 !scalars
@@ -1803,7 +1803,7 @@ subroutine fred2fcart(favg,Favgz_null,fcart,fred,gprimd,natom)
  logical :: Favgz_null
 !arrays
  real(dp),intent(out) :: fcart(3,natom)
- real(dp),intent(in) :: fred(3,natom)
+ real(dp),intent(in) :: gred(3,natom)
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(out) :: favg(3)
 
@@ -1818,9 +1818,9 @@ subroutine fred2fcart(favg,Favgz_null,fcart,fred,gprimd,natom)
  favg(:)=zero
  do iatom=1,natom
    do mu=1,3
-     fcart(mu,iatom)= - (gprimd(mu,1)*fred(1,iatom)+&
-&     gprimd(mu,2)*fred(2,iatom)+&
-&     gprimd(mu,3)*fred(3,iatom))
+     fcart(mu,iatom)= - (gprimd(mu,1)*gred(1,iatom)+&
+&     gprimd(mu,2)*gred(2,iatom)+&
+&     gprimd(mu,3)*gred(3,iatom))
      favg(mu)=favg(mu)+fcart(mu,iatom)
    end do
  end do
@@ -1833,13 +1833,13 @@ subroutine fred2fcart(favg,Favgz_null,fcart,fred,gprimd,natom)
    fcart(:,iatom)=fcart(:,iatom)-favg(:)
  end do
 
-end subroutine fred2fcart
+end subroutine gred2fcart
 !!***
 
-!!****f* m_geometry/fcart2fred
+!!****f* m_geometry/fcart2gred
 !!
 !! NAME
-!! fcart2fred
+!! fcart2gred
 !!
 !! FUNCTION
 !! Convert cartesian forces into reduced forces
@@ -1850,10 +1850,10 @@ end subroutine fred2fcart
 !!  rprimd(3,3)=dimensional primitive
 !!
 !! OUTPUT
-!!  fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
+!!  gred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!
 !! NOTES
-!!  Unlike fred, fcart has been corrected by enforcing
+!!  Unlike gred, fcart has been corrected by enforcing
 !!  the translational symmetry, namely that the sum of force
 !!  on all atoms is zero.
 !!
@@ -1865,14 +1865,14 @@ end subroutine fred2fcart
 !!
 !! SOURCE
 
-subroutine fcart2fred(fcart,fred,rprimd,natom)
+subroutine fcart2gred(fcart,gred,rprimd,natom)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
 !arrays
  real(dp),intent(in) :: fcart(3,natom)
- real(dp),intent(out) :: fred(3,natom)
+ real(dp),intent(out) :: gred(3,natom)
  real(dp),intent(in) :: rprimd(3,3)
 
 !Local variables-------------------------------
@@ -1881,10 +1881,10 @@ subroutine fcart2fred(fcart,fred,rprimd,natom)
 
 ! *************************************************************************
 
-!MT, april 2012: the coding was not consistent with fred2fcart
+!MT, april 2012: the coding was not consistent with gred2fcart
  do iatom=1,natom
    do mu=1,3
-     fred(mu,iatom)= - (rprimd(1,mu)*fcart(1,iatom)+&
+     gred(mu,iatom)= - (rprimd(1,mu)*fcart(1,iatom)+&
 &     rprimd(2,mu)*fcart(2,iatom)+&
 &     rprimd(3,mu)*fcart(3,iatom))
    end do
@@ -1893,13 +1893,13 @@ subroutine fcart2fred(fcart,fred,rprimd,natom)
 !Previous version
 !do iatom=1,natom
 !do mu=1,3
-!fred(mu,iatom)= - (rprimd(mu,1)*fcart(1,iatom)+&
+!gred(mu,iatom)= - (rprimd(mu,1)*fcart(1,iatom)+&
 !&     rprimd(mu,2)*fcart(2,iatom)+&
 !&     rprimd(mu,3)*fcart(3,iatom))
 !end do
 !end do
 
-end subroutine fcart2fred
+end subroutine fcart2gred
 !!***
 
 !!****f* m_geometry/bonds_lgth_angles

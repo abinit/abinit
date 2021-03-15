@@ -54,7 +54,7 @@ module m_effective_potential
  use m_symtk,          only : matr3inv
  use m_effpot_mpi,     only : effpot_mpi_init,effpot_mpi_type,effpot_mpi_free
  use m_abihist,        only : abihist
- use m_geometry,       only : fred2fcart,fcart2fred, xcart2xred, xred2xcart, metric
+ use m_geometry,       only : gred2fcart,fcart2gred, xcart2xred, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init
  !use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
 
@@ -2205,7 +2205,7 @@ end subroutine effective_potential_writeAbiInput
 !! OUTPUTS
 !! energy =  energy of the structure (Ha)
 !! fcart(3,natom) =  forces in cartesian coordinates (Ha/Bohr)
-!! fred(3,natom)  =  gradient wrt nuclear positions in reduced coordinates
+!! gred(3,natom)  =  gradient wrt nuclear positions in reduced coordinates
 !! strten(6) = stress tensor (Ha/Bohr^3)
 !!
 !! PARENTS
@@ -2216,7 +2216,7 @@ end subroutine effective_potential_writeAbiInput
 !!
 !! SOURCE
 
-subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                       displacement,du_delta,strain,xred,&
 &                                       compute_anharmonic,verbose,filename,elec_eval)
 
@@ -2228,7 +2228,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   type(effective_potential_type),intent(in) :: eff_pot
   real(dp),intent(out) :: energy
   real(dp),intent(out) :: fcart(3,natom)
-  real(dp),intent(out) :: fred(3,natom)
+  real(dp),intent(out) :: gred(3,natom)
   real(dp),intent(out) :: strten(6)
   real(dp),intent(in)  :: rprimd(3,3)
   real(dp),intent(in),optional  :: xred(3,natom)
@@ -2644,7 +2644,7 @@ endif
 ! Redistribute the residuale of the forces
   call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom)
 
-  call fcart2fred(fcart,fred,rprimd,natom)
+  call fcart2gred(fcart,gred,rprimd,natom)
 
 !------------------------------------
 ! 11 - Final Print:
@@ -3337,7 +3337,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 !array
  real(dp):: strten(6)
  real(dp),allocatable :: disp(:,:),diff(:)
- real(dp),allocatable :: fred(:,:),fcart(:,:),xred(:,:)
+ real(dp),allocatable :: gred(:,:),fcart(:,:),xred(:,:)
 
 ! *************************************************************************
 
@@ -3373,7 +3373,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 
  ABI_MALLOC(disp,(3,natom))
  ABI_MALLOC(diff,(npt))
- ABI_MALLOC(fred,(3,natom))
+ ABI_MALLOC(gred,(3,natom))
  ABI_MALLOC(fcart,(3,natom))
  ABI_MALLOC(xred,(3,natom))
 
@@ -3389,12 +3389,12 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
        delt = (-(npt/2+1)+ii) * delta
        disp = zero
        disp(mu,ia) = delt * eff_pot%supercell%rprimd(mu,mu)
-       call effective_potential_evaluate(eff_pot,energy,fcart,fred,&
+       call effective_potential_evaluate(eff_pot,energy,fcart,gred,&
 &                                        strten,natom,eff_pot%supercell%rprimd,&
 &                                        displacement=disp,&
 &                                        compute_anharmonic=.FALSE.,verbose=.false.)
 
-       !       diff(ii,:,:) = fred(:,:)
+       !       diff(ii,:,:) = gred(:,:)
        diff(ii) = energy
      end do
 
@@ -3428,7 +3428,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 ! Deallocation of arrays
  ABI_FREE(disp)
  ABI_FREE(diff)
- ABI_FREE(fred)
+ ABI_FREE(gred)
  ABI_FREE(fcart)
  ABI_FREE(xred)
 
@@ -3476,7 +3476,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  real(dp):: energy,delt,delta,ucvol
  !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),mat_def(3,3),identity(3,3)
- real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3)
+ real(dp):: fcart(3,natom),gred(3,natom),strten(6),rprimd(3,3)
  real(dp):: rprimd_def(3,3),rprimd_ref(3,3),deltalist(5)
  real(dp):: disp(3,natom),disp_red(3,natom),strain(6),du_delta(6,3,natom),diff(5)
  real(dp),allocatable :: xred(:,:)
@@ -3535,7 +3535,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
          disp_red(mu,ia) = disp_red(mu,ia) + delt
          call xred2xcart(natom, rprimd, disp, disp_red)
 
-         call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+         call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                          xred=xred,du_delta=du_delta,&
 &                                          displacement=disp,compute_anharmonic=.true.,verbose=.false.)
          diff(ii) = energy
@@ -3548,13 +3548,13 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 &                                   xcart_ref=eff_pot%supercell%xcart,&
 &                                   compute_displacement = .true.,compute_duDelta = .true.)
 
-   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                    xred=xred,du_delta=du_delta,&
 &                                    displacement=disp,compute_anharmonic=.true.,verbose=.false.)
 
-   write(std_out,*) "Analyti:",fred(mu,ia)
+   write(std_out,*) "Analyti:",gred(mu,ia)
    write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta)
-   write(std_out,*) "Diff(%):",abs(100*(fred(mu,ia)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
+   write(std_out,*) "Diff(%):",abs(100*(gred(mu,ia)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
 &             / (12*delta) )) / ((-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) ))
 
  end do
@@ -3589,13 +3589,13 @@ forall(ii=1:3)identity(ii,ii)=1
 ! &                                     xcart_ref=eff_pot%supercell%xcart,&
 ! &                                     compute_displacement = .true.,compute_duDelta = .true.)
 
-!      call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd_def,&
+!      call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd_def,&
 ! &                                      xred=xred,du_delta=du_delta,&
 ! &                                      displacement=disp,strain=strain,&
 ! &                                      compute_anharmonic=.true.,verbose=.false.)
 
 !   Option 2 => compute the disps within evaluate
-    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd_def,&
+    call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd_def,&
 &                                     xred=xred,compute_anharmonic=.true.,verbose=.false.)
 
 
@@ -3611,13 +3611,13 @@ forall(ii=1:3)identity(ii,ii)=1
 ! &                                   xcart_ref=eff_pot%supercell%xcart,&
 ! &                                   compute_displacement = .true.,compute_duDelta = .true.)
 
-!    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+!    call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 ! &                                    xred=xred,du_delta=du_delta,&
 ! &                                    displacement=disp,&
 ! &                                    compute_anharmonic=.true.,verbose=.false.)
 
 !  Option 2 => compute the disps within evaluate
-   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.true.,verbose=.false.)
 
  write(std_out,*) "Analyti:",strten(jj)
@@ -3740,7 +3740,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
    ncerr = nf90_def_dim(ncid,"two",2,two_id)
    NCF_CHECK_MSG(ncerr," define dimension two")
 
-!  Dimensions for xcart,xred,fcart,fred and vel
+!  Dimensions for xcart,xred,fcart,gred and vel
    dimXids = (/ xyz_id, natom_id /)
 !  Dimensions for rprimd
    dimRids = (/ xyz_id, xyz_id /)

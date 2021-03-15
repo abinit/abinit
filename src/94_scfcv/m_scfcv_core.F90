@@ -390,7 +390,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !    defined by Eq.(27) and (29) Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp),allocatable :: dielinv(:,:,:,:,:),dtn_pc(:,:)
- real(dp),allocatable :: fcart(:,:),forold(:,:),fred(:,:),gresid(:,:)
+ real(dp),allocatable :: fcart(:,:),forold(:,:),gred(:,:),gresid(:,:)
  real(dp),allocatable :: grchempottn(:,:),grcondft(:,:),grewtn(:,:)
  real(dp),allocatable :: grhf(:,:),grnl(:),grvdw(:,:),grxc(:,:)
  real(dp),allocatable :: intgres(:,:),kxc(:,:),nhat(:,:),nhatgr(:,:,:),nvresid(:,:),nvtauresid(:,:)
@@ -605,8 +605,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !nstep, tollist and iscf - still, diffor and res2 are here initialized to 0)
  choice=1 ; diffor=zero ; res2=zero
  ABI_MALLOC(fcart,(3,dtset%natom))
- ABI_MALLOC(fred,(3,dtset%natom))
- fred(:,:)=zero
+ ABI_MALLOC(gred,(3,dtset%natom))
+ gred(:,:)=zero
  fcart(:,:)=results_gs%fcart(:,:) ! This is a side effect ...
 !results_gs should not be used as input of scfcv_core
 !HERE IS PRINTED THE FIRST LINE OF SCFCV
@@ -1294,7 +1294,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !  Initialize/update data in the electron-positron case
    if (dtset%positron<0.or.(dtset%positron>0.and.istep==1)) then
      call setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eigen,&
-&     etotal,electronpositron,energies,fock,forces_needed,fred,gmet,gprimd,&
+&     etotal,electronpositron,energies,fock,forces_needed,gred,gmet,gprimd,&
 &     grchempottn,grcondft,grewtn,grvdw,gsqcut,hdr,initialized0,indsym,istep,istep_mix,kg,&
 &     kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,&
 &     nkxc,npwarr,nvresid,occ,optres,paw_ij,pawang,pawfgr,pawfgrtab,&
@@ -1648,7 +1648,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !    TODO: add nvtauresid if needed (for forces?)
      call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     elast,electronpositron,energies,&
-&     etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,grcondft,gresid,grewtn,grhf,grnl,grvdw,&
+&     etotal,favg,fcart,fock,forold,gred,gmet,grchempottn,grcondft,gresid,grewtn,grhf,grnl,grvdw,&
 &     grxc,gsqcut,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
 &     nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,psps%ntypat,nvresid,n1xccc,n3xccc,&
 &     optene,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
@@ -1860,7 +1860,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 ! TODO: add nvtauresid if needed (for forces?)
        call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &       elast,electronpositron,energies,&
-&       etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,grcondft,gresid,grewtn,grhf,grnl,grvdw,&
+&       etotal,favg,fcart,fock,forold,gred,gmet,grchempottn,grcondft,gresid,grewtn,grhf,grnl,grvdw,&
 &       grxc,gsqcut,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
 &       nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,dtset%ntypat,nvresid,n1xccc, &
 &       n3xccc,0,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,&
@@ -2175,7 +2175,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,grcondft,&
+& energies,etotal,favg,fcart,fock,forold,gred,grchempottn,grcondft,&
 & gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
 & kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
@@ -2243,7 +2243,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  call prc_mem_free()
 
  ABI_FREE(fcart)
- ABI_FREE(fred)
+ ABI_FREE(gred)
  ABI_FREE(forold)
  ABI_FREE(grchempottn)
  ABI_FREE(grcondft)
@@ -2430,8 +2430,8 @@ end subroutine scfcv_core
 !!  ===== if optforces==1
 !!   diffor=maximum absolute change in component of forces between present and previous SCF cycle.
 !!   favg(3)=mean of fcart before correction for translational symmetry
-!!   fcart(3,natom)=cartesian forces from fred (hartree/bohr)
-!!   fred(3,natom)=symmetrized form of grtn (grads of Etot) (hartree)
+!!   fcart(3,natom)=cartesian forces from gred (hartree/bohr)
+!!   gred(3,natom)=symmetrized form of grtn (grads of Etot) (hartree)
 !!   gresid(3,natom)=forces due to the residual of the density/potential
 !!   grhf(3,natom)=Hellman-Feynman derivatives of the total energy
 !!   grxc(3,natom)=d(Exc)/d(xred) derivatives (0 without core charges)
@@ -2497,7 +2497,7 @@ end subroutine scfcv_core
 
 subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  elast,electronpositron,energies,&
-&  etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,grcondft,gresid,grewtn,grhf,grnl,grvdw,&
+&  etotal,favg,fcart,fock,forold,gred,gmet,grchempottn,grcondft,gresid,grewtn,grhf,grnl,grvdw,&
 &  grxc,gsqcut,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
 &  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
@@ -2534,7 +2534,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  real(dp),intent(inout) :: nhat(nfft,dtset%nspden*psps%usepaw)
  real(dp),intent(inout),target :: nvresid(nfft,dtset%nspden)
  real(dp),intent(inout) :: xred(3,dtset%natom)
- real(dp),intent(out) :: favg(3),fred(3,dtset%natom)
+ real(dp),intent(out) :: favg(3),gred(3,dtset%natom)
  real(dp),intent(inout) :: fcart(3,dtset%natom)
  real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(out) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
@@ -2752,7 +2752,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    else
      resid => nvresid
    end if
-   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,grcondft,gresid,grewtn,&
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,gred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
 &   n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,pawrad,pawtab,&
 &   ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,vxctau,wvl,wvl_den,xred,&
@@ -2761,13 +2761,13 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      ABI_FREE(resid)
    end if
 
-!  Returned fred are full symmetrized gradients of Etotal
+!  Returned gred are full symmetrized gradients of Etotal
 !  wrt reduced coordinates xred, d(Etotal)/d(xred)
 !  Forces are contained in array fcart
 
  else   ! if optforces==0
    fcart=zero
-   fred=zero
+   gred=zero
    favg=zero
    diffor=zero
    gresid=zero

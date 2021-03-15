@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!Reduced forces (fred)!Gradient of E wrt nuclear positions in reduced coordinates (gred)!' $file > tmp.file
+ sed -e 's!fred!gred!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

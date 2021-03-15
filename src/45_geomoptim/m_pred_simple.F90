@@ -30,7 +30,7 @@ module m_pred_simple
  use m_abimover
  use m_abihist
 
- use m_geometry,  only : fcart2fred, xred2xcart
+ use m_geometry,  only : fcart2gred, xred2xcart
 
  implicit none
 
@@ -75,7 +75,7 @@ contains
 !!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
+!!      bonds_free,dsyev,dsysv,fcart2gred,make_bonds_new,xred2xcart
 !!
 !! SOURCE
 
@@ -151,7 +151,7 @@ end subroutine pred_simple
 !!      m_mover,m_precpred_1geo
 !!
 !! CHILDREN
-!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
+!!      bonds_free,dsyev,dsysv,fcart2gred,make_bonds_new,xred2xcart
 !!
 !! SOURCE
 
@@ -457,7 +457,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
  write(std_out,fmt) B(:)
 
  forstr%fcart=reshape(B,(/ 3, ab_mover%natom /) )
- call fcart2fred(forstr%fcart,forstr%fred,rprimd,ab_mover%natom)
+ call fcart2gred(forstr%fcart,forstr%gred,rprimd,ab_mover%natom)
 
 end subroutine prec_simple
 !!***
