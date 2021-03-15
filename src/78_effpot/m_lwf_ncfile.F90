@@ -145,8 +145,6 @@ contains
          &      start=[1], count=[supercell%lwf%nlwf])
     NCF_CHECK_MSG(ncerr, "Error when writting lwf_masses in lwf history file.")
 
-
-
 #endif
 
   end subroutine write_cell
@@ -184,9 +182,6 @@ contains
     ncerr=nf90_enddef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when finishing defining variables in lwf history file.")
 #endif
-
-
-
 
   end subroutine def_lwf_var
 

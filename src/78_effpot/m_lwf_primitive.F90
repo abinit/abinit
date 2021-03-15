@@ -257,10 +257,10 @@ contains
     ierr = nf90_get_var(ncid, varid, self%Rlist)
     NCF_CHECK_MSG(ierr, "wann_Rlist")
 
-    ierr =nf90_inq_varid(ncid, "wann_ifc_real", varid)
-    NCF_CHECK_MSG(ierr, "wann_ifc_real")
+    ierr =nf90_inq_varid(ncid, "wann_HamR_real", varid)
+    NCF_CHECK_MSG(ierr, "wann_HamR_real")
     ierr = nf90_get_var(ncid, varid, ifc)
-    NCF_CHECK_MSG(ierr, "wann_ifc_real")
+    NCF_CHECK_MSG(ierr, "wann_HamR_real")
 
 
     ifc(:,:,:) = ifc(:,:,:) * eV_Ha * (Bohr_Ang * Bohr_Ang)
