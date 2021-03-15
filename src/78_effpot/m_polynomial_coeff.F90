@@ -1078,10 +1078,11 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
         do idisp1=1,ndisp_tot
 !         Set to one the acculation of forces and strain
           tmp2 = one
-          tmp3 = one
+          tmp3 = zero
 
 !         Strain case idisp > ndisp
           if (idisp1 > ndisp)then
+            tmp3 = one 
 !           Set the power_strain of the strain:
             idisp1_strain = idisp1 - ndisp
             power_strain = coefficients(icoeff)%terms(iterm)%power_strain(idisp1_strain)
