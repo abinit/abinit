@@ -1658,7 +1658,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
    call ab_define_var(ncid,dim4,fcart_id,NF90_DOUBLE,&
 &   "fcart","atom Forces in CARTesian coordinates","Ha/bohr" )
    call ab_define_var(ncid,dim4,gred_id,NF90_DOUBLE,&
-&   "f__red","atom Forces in REDuced coordinates","dimensionless" ) ! XG210315 : should be "Gradients in REDuced ..."
+&   "fred","atom Forces in REDuced coordinates","dimensionless" ) ! XG210315 : should be "Gradients in REDuced ..."
    call ab_define_var(ncid,dim4,vel_id,NF90_DOUBLE,&
 &   "vel","VELocities of atoms","bohr*Ha/hbar" )
  else
@@ -1670,7 +1670,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
    call ab_define_var(ncid,dim3,fcart_id,NF90_DOUBLE,&
 &   "fcart","atom Forces in CARTesian coordinates","Ha/bohr" )
    call ab_define_var(ncid,dim3,gred_id,NF90_DOUBLE,&
-&   "f__red","atom Forces in REDuced coordinates","dimensionless" ) ! XG210315 : should be "Gradients in REDuced ..."
+&   "fred","atom Forces in REDuced coordinates","dimensionless" ) ! XG210315 : should be "Gradients in REDuced ..."
    call ab_define_var(ncid,dim3,vel_id,NF90_DOUBLE,&
 &   "vel","VELocities of atoms","bohr*Ha/hbar" )
  end if
@@ -1875,8 +1875,8 @@ subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell
  ncerr = nf90_inq_varid(ncid, "fcart", fcart_id)
  NCF_CHECK_MSG(ncerr," get the id for fcart")
 
- ncerr = nf90_inq_varid(ncid, "f__red", gred_id)
- NCF_CHECK_MSG(ncerr," get the id for f__red") ! XG210315 : should be "gred"
+ ncerr = nf90_inq_varid(ncid, "fred", gred_id)
+ NCF_CHECK_MSG(ncerr," get the id for fred") ! XG210315 : should be "gred"
 
  ncerr = nf90_inq_varid(ncid, "vel", vel_id)
  NCF_CHECK_MSG(ncerr," get the id for vel")
@@ -2143,7 +2143,7 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
    NCF_CHECK_MSG(ncerr," write variable fcart")
    call fcart2gred(fcart,conv,rprimd,natom)
    ncerr = nf90_put_var(ncid,gred_id,conv, start = start4,count = count4)
-   NCF_CHECK_MSG(ncerr," write variable f__red") ! XG210315 : should be "gred"
+   NCF_CHECK_MSG(ncerr," write variable fred") ! XG210315 : should be "gred"
    ncerr = nf90_put_var(ncid,vel_id,vel, start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable vel")
  else
@@ -2157,7 +2157,7 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
    NCF_CHECK_MSG(ncerr," write variable fcart")
    call fcart2gred(fcart,conv,rprimd,natom)
    ncerr = nf90_put_var(ncid,gred_id,conv, start = start3,count = count3)
-   NCF_CHECK_MSG(ncerr," write variable f__red")
+   NCF_CHECK_MSG(ncerr," write variable fred") ! XG210315 : should be "gred"
    ncerr = nf90_put_var(ncid,vel_id,vel, start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable vel")
  end if
