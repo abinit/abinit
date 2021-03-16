@@ -407,16 +407,15 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_ent_freeel(this,fermie,mpi_enreg,tsmear)
+  subroutine compute_ent_freeel(this,fermie,tsmear)
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
     real(dp),intent(in) :: fermie,tsmear
-    type(MPI_type),intent(inout) :: mpi_enreg
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifftf,ispden,mpierr,nsize
+    integer :: ii,ifftf,ispden
     real(dp) :: ix,step,factor,fn,gamma,minocc
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
@@ -462,7 +461,7 @@ contains
       gamma=(fermie-this%e_shiftfactor)/tsmear
       ABI_ALLOCATE(valuesent,(this%bcut+1))
 
-      !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent,nsize)
+      !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
       do ii=1,this%bcut+1
         ix=dble(ii)-one
         fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
@@ -517,7 +516,7 @@ contains
       ABI_ALLOCATE(valuesent,(this%bcut+1))
 
       step=(this%ebcut-this%e_shiftfactor)/(this%bcut)
-      !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent,nsize)
+      !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
       do ii=1,this%bcut+1
         ix=this%e_shiftfactor+(dble(ii)-one)*step
         fn=fermi_dirac(ix,fermie,tsmear)
