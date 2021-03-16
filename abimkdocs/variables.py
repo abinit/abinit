@@ -248,7 +248,7 @@ ABI_TOPICS = [
     "TDepES",
     "Temperature",
     "TransPath",
-    "TuningSpeed",
+    "TuningSpeedMem",
     "Unfolding",
     "UnitCell",
     "vdw",

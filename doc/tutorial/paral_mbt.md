@@ -82,15 +82,15 @@ distributed among the nodes. This test uses an unshifted 4x4x3 grid (48 k
 points in the full Brillouin Zone, folding to 9 k-points in the irreducible
 wedge) hence the theoretical maximum speedup is 9.
 
-Now run ABINIT over nn CPU cores using
+Now run ABINIT over nn CPU cores using (here, nn=9)
 
     mpirun -n 9 abinit tmbt_1.abi > tmbt_1.log 2> err &
 
-but keep in mind that, to avoid idle processors, the number of CPUs should
+but keep in mind that, to avoid idle processors, the number of CPUs (nn) should
 divide 9. At the end of the run, the code will produce the file *tmbt_1o_DS2_WFK*
 needed for the subsequent GW calculations.
 
-With three nodes, the wall clock time is around 1.5 minutes.
+With three cores, the wall clock time is around 1.5 minutes.
 
     >>> tail tmbt_1.out
 
@@ -151,12 +151,15 @@ Each method presents advantages and drawbacks that are discussed in the
 documentation of the variable. In this tutorial, we will be focusing on
 **gwpara** =2 since this is the algorithm with the best MPI-scalability and,
 mostly important, it is the only one that allows for a significant reduction
-of the memory requirement.
+of the memory requirement. By the way, this is the default value, so you do not
+need to mention it explicitly in your input file.
 
 The option [[awtr]] = 1 specifies that the system presents time reversal
 symmetry so that it is possible to halve the number of transitions that have
 to be calculated explicitly (only resonant transitions are needed). Note that
-[[awtr]] = 1 is MANDATORY when [[gwpara]] = 2 is used.
+[[awtr]] = 1 is MANDATORY when [[gwpara]] = 2 is used. By the way, [[awtr]] = 1 
+is also the default value,  so you do not
+need to mention it explicitly in your input file.
 
 Before running the calculation in parallel, it is worth discussing some
 important technical details of the implementation. For our purposes, it
@@ -166,13 +169,13 @@ FULL set of occupied bands while the empty states are distributed among the
 nodes. The parallel computation of the inverse dielectric matrix is done in
 three different steps that can be schematically described as follows:
 
-1. Each node computes the partial contribution to the RPA polarizability:
+**Step 1.** Each node computes the partial contribution to the RPA polarizability:
 
 $$ \sum_{c,\nu} = \sum^\text{occ}_\nu \sum^\text{mystop}_\text{c=mystart} $$
 
-2. The partial results are collected on each node.
+**Step 2.** The partial results are collected on each node.
 
-3. The master node performs the matrix inversion to obtain the inverse dielectric matrix and writes the final result on file.
+**Step 3.** The master node performs the matrix inversion to obtain the inverse dielectric matrix and writes the final result on file.
 
 Both the first and second step of the algorithm are expected to scale well
 with the number of processors. Step 3, on the contrary, is performed in

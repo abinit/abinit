@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -140,6 +140,7 @@ P           mkmem          10
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
         prtvolimg1          0
         prtvolimg2          1
         prtvolimg3          2
@@ -9159,6 +9160,7 @@ P           mkmem          10
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
         prtvolimg1          0
         prtvolimg2          1
         prtvolimg3          2

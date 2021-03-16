@@ -65,7 +65,9 @@ ntime  10
 dilatmx 1.05
 ecutsm  0.5
 
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

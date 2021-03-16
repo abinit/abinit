@@ -87,6 +87,7 @@ inp_files = [
 "tnlo_3.abi",
 "tnlo_4.abi",
 "tnlo_5.abi",
+"tnlo_6.abi",
 #
 "toptic_1.abi",
 "toptic_2.abi",

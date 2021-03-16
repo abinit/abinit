@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG, AR, GG, MT)
+!!  Copyright (C) 1998-2021 ABINIT group (XG, AR, GG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,6 +37,7 @@ module m_gstateimg
  use m_errors
  use m_rec
  use m_args_gs
+ use m_results_gs
  use m_results_img
  use m_scf_history
  use m_io_redirect
@@ -280,8 +281,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
  DBG_ENTER("COLL")
 
- call timab(700,1,tsec)
- call timab(703,3,tsec)
+ call timab(1200,1,tsec)
+ call timab(1203,3,tsec)
 
 !Arguments check
  if (dtset%nimage>1) then
@@ -424,7 +425,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  call pimd_init(dtset,pimd_param,is_master)
  dtion=one;if (is_pimd) dtion=pimd_param%dtion
 
- call timab(703,2,tsec)
+ call timab(1203,2,tsec)
 
 !-----------------------------------------------------------------------------------------
 !Big loop on the propagation of all images
@@ -461,7 +462,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end if
    end if
 
-   call timab(704,1,tsec)
+   call timab(1204,1,tsec)
    call localfilnam(mpi_enreg%comm_img,mpi_enreg%comm_cell,mpi_enreg%comm_world,filnam,'_IMG',dtset%nimage)
    compute_all_images=(compute_static_images.and.itimimage==1)
 
@@ -501,19 +502,19 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
    if (dtset%use_yaml == 1) call yaml_iterstart('timimage', itimimage, ab_out, dtset%use_yaml)
 
-   call timab(704,2,tsec)
+   call timab(1204,2,tsec)
 
 !  Loop on the dynamical images
    idynimage=0
    do iimage=1,nimage
-
-     call timab(705,1,tsec)
 
      ii=mpi_enreg%my_imgtab(iimage)
      if (dtset%dynimage(ii)==1) idynimage=idynimage+1
 
 !    Compute static image only at first time step
      if (dtset%dynimage(ii)==1.or.compute_all_images) then
+
+       call timab(1205,1,tsec)
 
 !      Change file names according to image index (if nimage>1)
        if (dtset%nimage>1) then
@@ -550,18 +551,18 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        occ(:)       =occ_img(:,iimage)
 
        call args_gs_init(args_gs, &
-&       res_img(iimage)%amu(:),res_img(iimage)%mixalch(:,:),&
+&       res_img(iimage)%amu(:),dtset%cellcharge(ii),res_img(iimage)%mixalch(:,:),&
 &       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii),&
 &       dtset%rprimd_orig(:,:,ii))
 
-       call timab(705,2,tsec)
+       call timab(1205,2,tsec)
 
        call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),&
 &       mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,&
 &       res_img(iimage)%results_gs,&
 &       rprim,scf_history(iimage),vel,vel_cell,wvl,xred)
 
-       call timab(706,1,tsec)
+       call timab(1206,1,tsec)
 
        call args_gs_free(args_gs)
 
@@ -579,7 +580,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 !      Close output units ; restore defaults
        call localredirect(mpi_enreg%comm_cell,mpi_enreg%comm_world,dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg)
-       call timab(706,2,tsec)
+       call timab(1206,2,tsec)
 
      else if (itimimage>1) then ! For static images, simply copy one time step to the other
        itimimage_prev=itimimage_eff-1
@@ -606,12 +607,12 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end do ! iimage
 
    if(mpi_enreg%paral_img==1)then
-     call timab(702,1,tsec)
+     call timab(1208,1,tsec)
      call xmpi_barrier(mpi_enreg%comm_img)
-     call timab(702,2,tsec)
+     call timab(1208,2,tsec)
    end if
 
-   call timab(707,1,tsec)
+   call timab(1209,1,tsec)
 
 !  Output when images are used
    if (dtset%nimage>1) then
@@ -674,7 +675,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &         ' with Average[Abs(Etotal(t)-Etotal(t-dt))]=',delta_energy,'<tolimg=',dtset%tolimg
        end if
        call wrtout([std_out, ab_out] ,msg,'COLL')
-       call timab(707,2,tsec)
+       call timab(1209,2,tsec)  ! This is the first place where counter 1209 is stopped.
        exit   ! exit itimimage
      end if
    end if
@@ -701,12 +702,12 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end do
    end if
 
-   call timab(707,2,tsec)
+   call timab(1209,2,tsec)  ! This is the second place where counter 1209 is stopped.
 
  end do ! itimimage
 !-----------------------------------------------------------------------------------------
 
- call timab(708,1,tsec)
+ call timab(1210,1,tsec)
 
 !Copy the results of the computation in the appropriate arguments of the routine
  do iimage=1,nimage
@@ -783,8 +784,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  call m1geo_destroy(m1geo_param)
  call pimd_destroy(pimd_param)
 
- call timab(708,2,tsec)
- call timab(700,2,tsec)
+ call timab(1210,2,tsec)
+ call timab(1200,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -1057,6 +1058,11 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
 ! *************************************************************************
 
+!DEBUG
+!  write(std_out,'(a)')' m_gstate_img : enter '
+!  call flush(std_out)
+!ENDDEBUG
+
  is_pimd=(imgmov==9.or.imgmov==10.or.imgmov==13)
 
 !Write convergence info
@@ -1090,6 +1096,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  end if
 
+!Write the msg 
 !Prevent writing if iexit==1, which at present only happens for imgmov==6 algo
  if(imgmov/=6 .or. m1geo_param%iexit==0) call wrtout([std_out, ab_out] ,msg)
 
@@ -1116,7 +1123,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 &   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(6)
-   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
+   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(9, 10, 13)
 !    Path Integral Molecular Dynamics
@@ -1258,24 +1265,35 @@ end subroutine predict_copy
 !!
 !! SOURCE
 
-subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
+subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: itimimage_eff,nimage,ntimimage_stored
+ integer,intent(in) :: itimimage_eff,nimage,nimage_tot,ntimimage_stored
  type(MPI_type),intent(in) :: mpi_enreg
  type(m1geo_type),intent(inout) :: m1geo_param
 !arrays
- type(results_img_type),intent(inout) :: results_img(nimage,ntimimage_stored)
+ type(results_img_type),target,intent(inout) :: results_img(nimage,ntimimage_stored)
 
 !Local variables-------------------------------
 !scalars
- integer :: ihist,iimage,natom,next_itimimage
+ integer :: ihist,iimage,natom,next_itimimage,nspden,nsppol
+ real(dp) :: deltae,diffor,etotal,entropy,fermie,res2,residm
+ logical :: test_img
+ type(results_gs_type) :: results_gs_lincomb
+!arrays
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),strten(6),vel_cell(3,3)
  real(dp),allocatable :: fcart(:,:),vel(:,:),xred(:,:)
  logical :: DEBUG=.FALSE.
+ type(results_img_type),pointer :: resimg_all(:)
 
 ! *************************************************************************
+
+!DEBUG
+!write(std_out,'(a)')' m_gstateimg, move_1geo : enter'
+!write(std_out,'(a,i4)')' itimimage_eff=',itimimage_eff
+!call flush(std_out)
+!ENDDEBUG
 
  natom=m1geo_param%ab_mover%natom
  ihist=m1geo_param%hist_1geo%ihist
@@ -1300,15 +1318,70 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  call vel2hist(m1geo_param%ab_mover%amass,m1geo_param%hist_1geo,vel,vel_cell)
  m1geo_param%hist_1geo%time(ihist)=zero
 
-!Compute forces and stresses for the 1geo : take the weighted average.
+!In case of image parallelism, collect results accross processors
+ test_img=(nimage_tot/=1.and.mpi_enreg%paral_img==1)
+ if (test_img) then
+   ABI_MALLOC(resimg_all,(nimage_tot))
+   call gather_results_img(mpi_enreg,results_img(1:nimage,itimimage_eff),resimg_all,&
+&   allgather=.true.,only_one_per_img=.false.)
+ else
+   resimg_all => results_img(:,itimimage_eff)
+ end if
+
+!Compute energy, entropy, fermie, forces and stresses for the 1geo : take the weighted average.
+!Compute maximum of deltae,diffor,res2,residm
+ etotal=zero
+ entropy=zero
+ fermie=zero
  fcart(:,:)=zero
  strten(:)=zero
- do iimage=1,nimage
-   fcart(:,:)=fcart(:,:)+results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage)
-   strten(:) =strten(:) +results_img(iimage,itimimage_eff)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage)
+ deltae=zero
+ diffor=zero
+ res2=zero
+ residm=zero
+
+ do iimage=1,nimage_tot
+   etotal=etotal+resimg_all(iimage)%results_gs%etotal*m1geo_param%mixesimgf(iimage)
+   entropy=entropy+resimg_all(iimage)%results_gs%entropy*m1geo_param%mixesimgf(iimage)
+   fermie=fermie+resimg_all(iimage)%results_gs%fermie*m1geo_param%mixesimgf(iimage)
+   fcart(:,:)=fcart(:,:)+resimg_all(iimage)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage)
+   strten(:) =strten(:) +resimg_all(iimage)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage)
+   if( deltae<resimg_all(iimage)%results_gs%deltae ) deltae=resimg_all(iimage)%results_gs%deltae
+   if( diffor<resimg_all(iimage)%results_gs%diffor ) diffor=resimg_all(iimage)%results_gs%diffor
+   if( res2<resimg_all(iimage)%results_gs%res2 ) res2=resimg_all(iimage)%results_gs%res2
+   if( residm<resimg_all(iimage)%results_gs%residm ) residm=resimg_all(iimage)%results_gs%residm
  enddo
 
-!Store them in hist_1geo
+!Set up a results_gs datastructure with the linear combination of images
+ nspden=resimg_all(1)%results_gs%nspden
+ nsppol=resimg_all(1)%results_gs%nsppol
+ call init_results_gs(natom,nspden,nsppol,results_gs_lincomb)
+ call copy_results_gs(resimg_all(1)%results_gs,results_gs_lincomb) 
+ results_gs_lincomb%etotal=etotal
+ results_gs_lincomb%entropy=entropy
+ results_gs_lincomb%fermie=fermie
+ results_gs_lincomb%fcart=fcart
+ results_gs_lincomb%strten=strten
+ results_gs_lincomb%deltae=deltae
+ results_gs_lincomb%diffor=diffor
+ results_gs_lincomb%res2=res2
+ results_gs_lincomb%residm=residm
+
+!From now on, all procs contain the same information about the geometry, etotal, forces, stress, etc.
+!Nothing more needs to be transmitted, and resimg_all is not needed anymore.
+ if (test_img) then
+   call destroy_results_img(resimg_all)
+   ABI_FREE(resimg_all)
+ end if
+ nullify(resimg_all)
+
+!Echo result_gs_lincomb
+ call results_gs_lincomb%yaml_write(ab_out, info="Linear combination of ground state results")
+
+!Destroy result_gs_lincomb
+ call destroy_results_gs(results_gs_lincomb)
+
+!Store fcart and strten in hist_1geo
  m1geo_param%hist_1geo%fcart(:,:,ihist)=fcart(:,:)
  m1geo_param%hist_1geo%strten(:,ihist) =strten(:)
 
@@ -1328,8 +1401,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 & m1geo_param%hmctt,&
 & m1geo_param%icycle,&
 & m1geo_param%iexit,&
-!& m1geo_param%itime,&
-  itimimage_eff,&       ! m1geo_param%itime should be eliminated, no need for it
+& itimimage_eff,&     
 & m1geo_param%mttk_vars,&
 & m1geo_param%nctime,&
 & m1geo_param%ncycle,&
@@ -1343,24 +1415,30 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 !Retrieve the new positions, cell parameters [and velocities ?!]
  call hist2var(acell,m1geo_param%hist_1geo,natom,rprimd,xred,DEBUG)
 
-!Store acell, rprim, xred and vel for the new iteration
- next_itimimage=itimimage_eff+1
- if (next_itimimage>ntimimage_stored)then
-   ABI_ERROR('next_itimimage>ntimimage_stored')
+!Store acell, rprim, xred and vel for the new iteration if relevant
+ if(m1geo_param%iexit==0)then
+   next_itimimage=itimimage_eff+1
+   if (next_itimimage>ntimimage_stored)then
+     ABI_ERROR('next_itimimage>ntimimage_stored')
+   endif
+   do iimage=1,nimage
+     results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:)
+     results_img(iimage,next_itimimage)%acell(:)     =acell(:)
+     results_img(iimage,next_itimimage)%rprim(:,:)   =rprim(:,:)
+!    WARNING : Should also store vel and vel_cell of course ...
+!    results_img(iimage,next_itimimage)%vel(:,:)     =vel(:,:)
+!    results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
+   end do
  endif
-
- do iimage=1,nimage
-   results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:)
-   results_img(iimage,next_itimimage)%acell(:)     =acell(:)
-   results_img(iimage,next_itimimage)%rprim(:,:)   =rprim(:,:)
-!  WARNING : Should also store vel and vel_cell of course ...
-!  results_img(iimage,next_itimimage)%vel(:,:)     =vel(:,:)
-!  results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
- end do
 
  ABI_FREE(fcart)
  ABI_FREE(vel)
  ABI_FREE(xred)
+
+!DEBUG
+!write(std_out,'(a)')' m_gstateimg, move_1geo : exit'
+!call flush(std_out)
+!ENDDEBUG
 
 end subroutine move_1geo
 !!***

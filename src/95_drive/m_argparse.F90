@@ -6,7 +6,7 @@
 !!   Simple argument parser used in main programs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MG)
+!!  Copyright (C) 2008-2021 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -263,6 +263,12 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"                           Note that some MPI libs e.g. intel-mpi may not implement this feature"
         write(std_out,*)"                           correctly so it is adviced to test this option with e.g. structural"
         write(std_out,*)"                           relaxations before running production calculations."
+        write(std_out,*)"--ipi                      Activate socket-driven calculation using i-pi protocol."
+        write(std_out,*)"                           For UNIX socket, use: --ipi {unixsocket}:UNIX"
+        write(std_out,*)"                           For INET socket, use  --ipi {host}:{port}. Usage example:"
+        write(std_out,*)"                           `abinit run.abi --ipi {unixsocket}:UNIX > run.log`"
+        write(std_out,*)"                           NB: Requires ionmov 28 and some tuning of input variables. See:"
+        write(std_out,*)"                           https://wiki.fysik.dtu.dk/ase/dev/ase/calculators/socketio/socketio.html"
         write(std_out,*)"--log                      Enable log files and status files in parallel execution."
         write(std_out,*)"--netcdf-classic           Use netcdf classic mode for new files if parallel-IO is not needed."
         write(std_out,*)"                           Default is netcdf4/hdf5"

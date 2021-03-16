@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -479,6 +479,10 @@ subroutine outvar_i_n (dtsets,iout,&
      write(iout,'(23x,a,i3,a)' ) 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
    ABI_FREE(istwfk_2)
  end if
+
+!ivalence
+ intarr(1,:)=dtsets(:)%ivalence
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ivalence','INT',0)
 
 !ixc
  intarr(1,:)=dtsets(:)%ixc
@@ -1034,6 +1038,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%np_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'np_slk','INT',0,firstchar="-")
+
+ dprarr(1,:)=dtsets(:)%nqfd
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nqfd','DPR',0)
 
  intarr(1,:)=dtsets(:)%nqpt
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nqpt','INT',0)

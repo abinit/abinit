@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG, DRH, MT, SPr)
+!!  Copyright (C) 1998-2021 ABINIT group (XG, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -507,8 +507,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      if(associated(gs_hamkq%vectornd)) cpopt=-1
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnlx1_)
-!     write(std_out,'(a,4es16.8)')'JWZ debug nonlop cwave gvnlx1_ ',cwave(1,1),cwave(2,1),gvnlx1_(1,1),gvnlx1_(2,1)
-!     write(std_out,'(a,4es16.8)')'JWZ debug nonlop cwave gs1c ',cwave(1,1),cwave(2,1),gs1c(1,1),gs1c(2,1)
      if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
        ABI_FREE(cwaveprj_tmp)
@@ -1348,12 +1346,6 @@ end subroutine getdc1
 !! and second q-gradient (at q=0) of the 1st-order perturbed Hamiltonian.
 !! The first (second) derivative direction is inferred from idir (qdir1).
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  cwave(2,npw*nspinor)=input wavefunction, in reciprocal space
 !!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C> (and 1st derivatives)
@@ -1891,9 +1883,6 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
     gh1ndc=two_pi*FineStructureConstant2*ghc1
 
     ABI_FREE(ghc1)
-
-    ! JWZ debug blank this term for now
-    ! gh1ndc = zero
 
  else ! nspinortot==2
 

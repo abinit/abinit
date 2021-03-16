@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon,AGerossier,ROuterovitch)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon,AGerossier,ROuterovitch)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -357,13 +357,13 @@ CONTAINS  !=====================================================================
 
 subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom,plowan_it,&
 &plowan_lcalc,plowan_natom,plowan_nbl,plowan_nt,plowan_projcalc,acell_orig,kpt,nimage,nkpt,&
-&nspinor,nsppol,wtk,wan)
+&nspinor,nsppol,wtk,t2g,wan)
 
 !Arguments ----------------------------------
 !scalars
 ! type(dataset_type), intent(in) :: dtset
  integer,intent(in) ::plowan_bandi,plowan_bandf,plowan_natom,plowan_nt,plowan_compute
- integer,intent(in) ::nkpt,nsppol,nspinor,nimage
+ integer,intent(in) ::nkpt,nsppol,nspinor,nimage,t2g
  integer,intent(in) ::plowan_iatom(plowan_natom)
  integer,intent(in) ::plowan_nbl(plowan_natom)
  integer,intent(in) ::plowan_lcalc(sum(plowan_nbl(:)))
@@ -419,7 +419,6 @@ subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom
 
  iltot=0
  do iatom=1,wan%natom_wan
-
    wan%iatom_wan(iatom)       = plowan_iatom(iatom)
    wan%nbl_atom_wan(iatom)    = plowan_nbl  (iatom)
    wan%nbproj_atom_wan(iatom) = plowan_nbl  (iatom)
@@ -431,6 +430,9 @@ subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom
      iltot=iltot+1
      wan%latom_wan(iatom)%lcalc(il)=plowan_lcalc(iltot)
      wan%projector_wan(iatom)%lproj(il)=plowan_projcalc(iltot)
+     if (t2g==1 .and. plowan_lcalc(iltot)==2) then
+       wan%latom_wan(iatom)%lcalc(il)=1
+     endif
    enddo
 
   !For each iatom , pos is an array of two dimensions. The first one is
@@ -752,7 +754,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  integer :: iatom,iatom1,iatom2,iband,ibandc,ibg,ierr,ikpt
  integer :: iband1,owrunt,opt
  integer :: ilmn,iorder_cprj,ispinor,isppol,itypat,ilmn2
- integer :: lmn_size
+ integer :: lmn_size, t2g, m1_t2g, m1_t2g_mod
  integer :: m1,maxnproju,me,natom,nband_k,nband_k_cprj
  integer :: nnn,nprocband,spaceComm
  integer :: plowan_greendos,plowan_hybrid,plowan_inter,plowan_computegreen
@@ -816,6 +818,13 @@ if (opt==0) then
 else
   write(message,*)ch10,"Normalization of plowannier on the sum of the k-points"
 endif
+
+ABI_COMMENT(message)
+
+t2g=dtset%dmft_t2g
+if (t2g==1) then
+  write(message,*)ch10,"Using only t2g bands in plowannier, this is under test and may lead to bugs"
+end if
 
 ABI_COMMENT(message)
 !opt=1
@@ -1001,6 +1010,9 @@ ABI_COMMENT(message)
      count = 0
      count_total = 0
      l = wan%latom_wan(iatom)%lcalc(il)
+     if (t2g==1) then
+       l=2
+     endif
      proj = wan%projector_wan(iatom)%lproj(il)
      itypat = dtset%typat(wan%iatom_wan(iatom))
      lmn_size = pawtab(itypat)%lmn_size
@@ -1080,14 +1092,29 @@ ABI_COMMENT(message)
            chinorm=1.d0
            do l1 = 1,wan%nbl_atom_wan(iatom) !l1 is the index of the orbital
              l = wan%latom_wan(iatom)%lcalc(l1) !l is the value of the orbital (linked to index l1)
+             if (t2g==1) then
+               l=2
+               m1_t2g=0
+             endif
              do ilmn = 1,lmn_size
                if (psps%indlmn(1,ilmn,itypat) .eq. l) then!
                  ph0phiint_used = wan%psichi(1,1,iatom)%atom(l1)%ph0phiint(psps%indlmn(3,ilmn,itypat))
                  m1 = psps%indlmn(2,ilmn,itypat)+l+1
-                 wan%psichi(ikpt,ibandc,iatom)%atom(l1)%matl(m1,isppol,ispinor)=&
-                   wan%psichi(ikpt,ibandc,iatom)%atom(l1)%matl(m1,isppol,ispinor)+&
-                   cmplx(cwaveprj(wan%iatom_wan(iatom),ispinor)%cp(1,ilmn)*ph0phiint_used,cwaveprj(&
-                   wan%iatom_wan(iatom),ispinor)%cp(2,ilmn)*ph0phiint_used,kind=dp)
+                 if (t2g==1) then
+                   if(m1==1.or.m1==2.or.m1==4) then
+                     m1_t2g=m1_t2g+1
+                     m1_t2g_mod=mod(m1_t2g-1,3)+1
+                     wan%psichi(ikpt,ibandc,iatom)%atom(l1)%matl(m1_t2g_mod,isppol,ispinor)=&
+                       wan%psichi(ikpt,ibandc,iatom)%atom(l1)%matl(m1_t2g_mod,isppol,ispinor)+&
+                       cmplx(cwaveprj(wan%iatom_wan(iatom),ispinor)%cp(1,ilmn)*ph0phiint_used,cwaveprj(&
+                       wan%iatom_wan(iatom),ispinor)%cp(2,ilmn)*ph0phiint_used,kind=dp)
+                   endif
+                 else
+                   wan%psichi(ikpt,ibandc,iatom)%atom(l1)%matl(m1,isppol,ispinor)=&
+                     wan%psichi(ikpt,ibandc,iatom)%atom(l1)%matl(m1,isppol,ispinor)+&
+                     cmplx(cwaveprj(wan%iatom_wan(iatom),ispinor)%cp(1,ilmn)*ph0phiint_used,cwaveprj(&
+                     wan%iatom_wan(iatom),ispinor)%cp(2,ilmn)*ph0phiint_used,kind=dp)
+                 end if
                end if
              end do
            end do
@@ -2430,7 +2457,11 @@ end subroutine compute_coeff_plowannier
  !Local variables-------------------
  character(len=500) :: msg
  integer :: unt,iatom,spin,ikpt,iband,ibandc,il,ispinor,im,dummy,natom,bandi,bandf,nbl,nspin,nkpt
+  integer :: t2g
  real(dp) ::xx,yy
+
+t2g=dtset%dmft_t2g
+
 
  !Opening of the data.plowann file
  if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='old') /= 0) then
@@ -2460,7 +2491,7 @@ end subroutine compute_coeff_plowannier
  call init_plowannier(bandf,bandi,dtset%plowan_compute,&
      &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
      &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
-     &dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan_out)
+     &dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,dtset%dmft_t2g,wan_out)
 
  call destroy_plowannier(wan_in)
 
@@ -2541,7 +2572,7 @@ end subroutine get_plowannier
    call init_plowannier(wanibz%bandf_wan,wanibz%bandi_wan,dtset%plowan_compute,&
      &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
      &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
-     &kmesh%bz,dtset%nimage,kmesh%nbz,dtset%nspinor,dtset%nsppol,wtk,wanbz)
+     &kmesh%bz,dtset%nimage,kmesh%nbz,dtset%nspinor,dtset%nsppol,wtk,dtset%dmft_t2g,wanbz)
 
    write(msg,'(a)')" Reconstruction of the full Brillouin Zone using data.plowann in the IBZ"
    call wrtout(std_out,msg,'COLL');call wrtout(ab_out,msg,'COLL')

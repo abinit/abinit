@@ -6,7 +6,7 @@
 !! Echo acknowledgments for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (XG)
+!!  Copyright (C) 2008-2021 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,11 +90,12 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
- nrefs=40
+ nrefs=43
  ABI_MALLOC(cite,(nrefs))
  ABI_MALLOC(ref,(nrefs))
  ABI_MALLOC(comment,(nrefs))
 
+!Array to specify the priority
  ABI_MALLOC(priority,(nrefs))
 !The highest, the best, except that one from -1 and -2 should be cited.
 !0 means, cite if there are less than five papers total, otherwise forget, and any case, mention that it is optional.
@@ -446,10 +447,36 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
  ref(39)=' Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, '//ch10//&
   ' using density-functional theory.'//ch10//&
-  ' M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).'
+  ' M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).'
  comment(39)=' Comment: Some pseudopotential generated using the FHI code were used.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999'
  priority(39)=3
+
+ ref(40)=' First-Principles Theory of Spatial Dispersion: Dynamical Quadrupoles and Flexoelectricity, '//ch10//&
+  ' M. Royo and M. Stengel, Phys. Rev. X 9, 021050 (2019).'
+ comment(40)=' Comment : Flexoelectricity (see lw_flexo) or dynamical quadrupoles (see lw_qdrpl) have been computed.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#royo2019'
+ priority(40)=20
+
+ ref(41)=' Phonon-limited electron mobility in Si, GaAs, and GaP with exact treatment of dynamical quadrupoles, '//ch10//&
+  ' G. Brunin, H. P. C. Miranda, M. Giantomassi, M. Royo, M. Stengel, M. J. Verstraete,'//ch10//&
+  ' X. Gonze, G.-M. Rignanese and G. Hautier, Phys. Rev. B 102, 094308 (2020).'
+ comment(41)=' Comment : Phonon-limited electron mobility has been computed using eph_task=7.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#brunin2020b'
+ priority(41)=20
+
+ ref(42)=' Predominance of non-adiabatic effects in zero-point renormalization of the electronic band gap,  '//ch10//&
+  ' A. Miglio, V. Brousseau-Couture, E. Godbout, G. Antonius, Y.-H. Chan, S.G. Louie,  M. Cote, M. Giantomassi'//ch10//&
+  ' and X. Gonze, npj Computational Materials 6, 167 (2020).'
+ comment(42)=' Comment : Generalized Frohlich model calculations using eph_task=6.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#miglio2020'
+ priority(42)=20
+
+ ref(43)=' Photoinduced Phase Transitions in Ferroelectrics, '//ch10//&
+  ' C. Paillard, E. Torun, L. Wirtz, J. Iniguez and L. Bellaiche, Phys. Rev. Lett. 123, 087601 (2019).'
+ comment(43)=' Comment : Thermalized carriers eph_task=6.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#paillard2019'
+ priority(43)=20
 
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
@@ -565,6 +592,19 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 !  If iscf=5 or iscf=15 used, cite Gonze96
    if(dtsets(idtset)%iscf==5)cite(38)=1
    if(dtsets(idtset)%iscf==15)cite(38)=1
+
+!  If lw_flexo/=0 or lw_qdrpl/=0, cite Royo2020
+   if(dtsets(idtset)%lw_flexo/=0)cite(40)=1
+   if(dtsets(idtset)%lw_qdrpl/=0)cite(40)=1
+
+!  If eph_task==7, cite Brunin2020b
+   if(dtsets(idtset)%eph_task==7 )cite(41)=1
+
+!  If eph_task==6, cite Miglio2020
+   if(dtsets(idtset)%eph_task==6 )cite(42)=1
+
+!  If occopt==9, cite Paillard2019
+   if(dtsets(idtset)%occopt==9 )cite(43)=1
 
  end do
 

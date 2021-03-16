@@ -8,7 +8,7 @@
 !!  strings, numbers, dictionaries from m_pair_list and 1D arrays of dictionaries.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2021 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

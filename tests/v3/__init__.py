@@ -13,9 +13,6 @@ keywords = [
 inp_files = [
 "t01.abi",
 "t02.abi",
-"-t03.abi", # Moved to seq
-"-t04.abi", # Moved to seq
-"-t05.abi", # Moved to seq
 "t06.abi",
 "t07.abi",
 "t08.abi",

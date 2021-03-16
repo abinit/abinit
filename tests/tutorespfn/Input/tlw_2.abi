@@ -5,6 +5,9 @@ tlw_1o_DS1_DDB
 tlw_1o_DS4_DDB
 tlw_1o_DS5_DDB
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb

@@ -139,7 +139,9 @@ gwpara4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
 pp_dirpath "$ABI_PSPDIR"
 pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
 
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

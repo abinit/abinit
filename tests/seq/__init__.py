@@ -38,5 +38,5 @@ inp_files = [
 "tsv6_124.abi",
 "tsv6_125.abi",
 "tsv6_126.abi",
-"tsv7_70.abi",
+"tsv7_70.abi",  # Note that the test v7#70 has been replaced by another test
 ]

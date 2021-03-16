@@ -7,7 +7,7 @@
 !! Check consistency of Abinit input data against itself.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -401,6 +401,24 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  builtintest
    call chkint_eq(0,0,cond_string,cond_values,ierr,'builtintest',dt%builtintest,8,(/0,1,2,3,4,5,6,7/),iout)
 
+!  cellcharge
+!  The value  of cellcharge cannot change between images, except when imgmov=6 and (occopt=0 or occopt=2)
+   if(dt%imgmov/=6 .or. (dt%occopt/=0 .and. dt%occopt/=2))then
+     do iimage=1,dt%nimage
+       if(abs(dt%cellcharge(iimage)-dt%cellcharge(1))>tol8)then
+         write(msg, '(2a,i4,a,i4,2a,es12.4,a,i4,es12.4)' )ch10,&
+&         ' chkinp : imgmov=',dt%imgmov,', occopt=',dt%occopt,ch10,&
+&         ' chkinp : cellcharge(1)=',dt%cellcharge(1),', while for image=',iimage,', cellcharge=',dt%cellcharge(iimage)
+         call wrtout(iout,msg,'COLL')
+         call wrtout(std_out,  msg,'COLL')
+         write(msg, '(a,i4,2a,i4,2a,f8.2,4a)' )&
+          ' This is not allowed : cellcharge is allowed to vary only when imgmov=6 and occopt=0 or 2.',ch10,&
+&         ' Action: check the content of the input variables cellcharge, imgmov anf occopt.'
+         ABI_ERROR_NOSTOP(msg, ierr)
+       end if
+     end do
+   end if
+
 !  chkdilatmx
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chkdilatmx',dt%chkdilatmx,2,(/0,1/),iout)
 
@@ -425,7 +443,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          write(msg, '(2a)' ) ch10,' chkinp: COMMENT -'
          call wrtout(std_out,msg,'COLL')
          write(msg, '(4a,3es20.10)' )  &
-&          '   Found potentially symmetry-breaking value of tnons. ', ch10,&
+&          '   Found potentially symmetry-breaking value of tnons (see input variable chksymtnons). ', ch10,&
 &          '   The following shift of all reduced symmetry-corrected atomic positions might possibly remove this problem:',ch10,&
 &          xred(:,1)-dt%xred_orig(:,1,1)
          call wrtout(std_out,msg,'COLL')
@@ -1973,6 +1991,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  nscforder
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nscforder',dt%nscforder,10,(/8,14,16,20,24,30,40,50,60,100/),iout)
 
+!  nshiftk
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'nshiftk',dt%nshiftk,8,(/1,2,3,4,5,6,7,8/),iout)
+!  If chksymbreak=1, nshiftk must be equal to 1, 2, 4.
+   if(dt%chksymbreak==1 )then
+     cond_string(1)='chksymbreak' ; cond_values(1)=dt%chksymbreak
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'nshiftk',dt%nshiftk,3,(/1,2,4/),iout)
+   end if
+
 !  nspden
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nspden',nspden,3,(/1,2,4/),iout)
 
@@ -2459,8 +2485,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
   !  orbmag
-  ! only values of 0 (default) 1, 2, 3, -1, -2, -3 are allowed
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,7,(/-3,-2,-1,0,1,2,3/),iout)
+  ! only values of 0 (default) 1, 2, 3, 11, -1, -2, -3 are allowed
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,8,(/-3,-2,-1,0,1,2,3,11/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
@@ -2472,11 +2498,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/0,3/),iout)
   end if
   ! only kpt parallelism is allowed at present
-  if(dt%orbmag .GT. 0) then
+  if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
   end if
-  if(dt%orbmag .GT. 0) then
+  if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
   end if
@@ -2816,9 +2842,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  prepanl
 !  Must have prtden=1 to prepare a nonlinear calculation
-   if (dt%prtden /= 1) then
-     cond_string(1)='prtden' ; cond_values(1)=dt%prtden
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'prepanl',dt%prepanl,1,(/1/),iout)
+   if (dt%prepanl==1.and.(dt%rfelfd/=0.or.dt%rfphon/=0)) then
+     cond_string(1)='rfelfd'  ; cond_values(1)=dt%rfelfd
+     cond_string(2)='rfphon'  ; cond_values(2)=dt%rfphon
+     cond_string(3)='prepanl' ; cond_values(3)=dt%prepanl
+     call chkint_eq(1,3,cond_string,cond_values,ierr,'prtden',dt%prtden,1,(/1/),iout)
    end if
 
 !  prtbbb

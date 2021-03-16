@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (GJ, MT, JW)
+!!  Copyright (C) 1998-2021 ABINIT group (GJ, MT, JW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -697,7 +697,7 @@ type(fock_type),pointer, intent(inout) :: fock
 &   (history_level==0.or.history_level==2.or. &
 &   (history_level==3.and.electronpositron%dimocc==0))) need_scocc=.true.
    if (need_scocc) then
-     nelect=-dtset%charge
+     nelect=-dtset%cellcharge(1)
      do iatom=1,dtset%natom
        nelect=nelect+dtset%ziontypat(dtset%typat(iatom))
      end do

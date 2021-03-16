@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,7 @@ module m_invars1
 
  use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
  use m_geometry, only : mkrdim
- use m_parser,   only : intagm, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
+ use m_parser,   only : intagm, intagm_img, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
  use m_symtk,    only : mati3det
@@ -604,6 +604,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%acell_orig,(3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%algalch,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%cellcharge,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%chrgat,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%constraint_kind,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%corecs,(mxntypat))
@@ -648,6 +649,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !write(std_out,*)' invars0 : nimage, mxnimage = ',dtsets(:)%nimage, mxnimage
 !write(std_out,*)' invars0 : natom = ',dtsets(:)%natom
 !write(std_out,*)' invars0 : mxnatom = ',mxnatom
+!write(std_out,*)' m_invars1%invars0 : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine invars0
@@ -714,6 +717,11 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  real(dp),allocatable :: tnons_(:,:,:),tnons(:,:)
 
 !******************************************************************
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1m : enter '
+!call flush(std_out)
+!ENDDEBUG
 
  ! Here, allocation of the arrays that depend on msym.
  ABI_MALLOC(symrel_,(3,3,msym,0:ndtset_alloc))
@@ -874,6 +882,11 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  ABI_FREE(symrel)
  ABI_FREE(tnons)
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1m : exit '
+!call flush(std_out)
+!ENDDEBUG
+
 end subroutine invars1m
 !!***
 
@@ -951,6 +964,7 @@ subroutine indefo1(dtset)
  dtset%iatfix(:,:)=0
  dtset%icoulomb=0
  dtset%imgmov=0
+ dtset%ivalence=0
 !J
  dtset%jellslab=0
  dtset%jfielddir(:)=0
@@ -973,6 +987,8 @@ subroutine indefo1(dtset)
  dtset%natvshift=0
  dtset%nconeq=0
  dtset%ndynimage=1
+ dtset%ne_qFD=zero
+ dtset%nh_qFD=zero
  dtset%nkpt=-1
  dtset%nkptgw=0
  dtset%nkpthf=0
@@ -1091,12 +1107,12 @@ end subroutine indefo1
 !!
 !! NOTES
 !! Must set up the geometry of the system, needed to compute k point grids in an automatic fashion.
-!! Treat separately mband_upper, since fband, charge and zionpsp must be known for being able to initialize it.
+!! Treat separately mband_upper, since fband, cellcharge and zionpsp must be known for being able to initialize it.
 !!
 !! Defaults are provided in the calling routine.
 !! Defaults are also provided here for the following variables:
 !!
-!!      mband_upper, occopt, fband, charge
+!!      mband_upper, occopt, fband, cellcharge
 !!
 !! They should be kept consistent with defaults of the same variables provided to the invars routines.
 !!
@@ -1130,7 +1146,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
- real(dp) :: charge,fband,kptnrm,kptrlen,sum_spinat,zelect,zval
+ real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,sum_spinat,zelect,zval
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
@@ -1149,6 +1165,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  type(geo_t) :: geo
 
 !************************************************************************
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : enter '
+!call flush(std_out)
+!ENDDEBUG
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -1308,7 +1329,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !---------------------------------------------------------------------------
 
 ! Here, set up quantities that are related to geometrical description of the system (acell,rprim,xred), as well as
-! initial velocity(vel), charge and spin of atoms (chrgat,spinat), nuclear dipole moments of atoms (nucdipmom),
+! initial velocity(vel), cellcharge (to compute mband_upper) and spin of atoms (chrgat,spinat), nuclear dipole moments of atoms (nucdipmom),
 ! the symmetries (symrel,symafm, and tnons) and the list of fixed atoms (iatfix,iatfixx,iatfixy,iatfixz).
 ! Arrays have already been dimensioned thanks to the knowledge of msym and mx%natom
 
@@ -1445,11 +1466,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%zeemanfield(1:3) = dprarr(1:3)
  end if
 
+!Initialize geometry of the system, for different images. Also initialize cellcharge_min to be used later for estimating mband_upper..
  ABI_MALLOC(amu,(ntypat))
  ABI_MALLOC(mixalch,(npspalch,ntypalch))
  ABI_MALLOC(vel,(3,natom))
  ABI_MALLOC(vel_cell,(3,3))
  ABI_MALLOC(xred,(3,natom))
+!Only take into account negative cellcharge, to compute maximum number of bands, so initialize cellcharge_min to zero
+ cellcharge_min=zero
  intimage=2 ; if(dtset%nimage==1)intimage=1
  do ii=1,dtset%nimage+1
    iimage=ii
@@ -1510,6 +1534,29 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%vel_cell_orig(1:3,1:3,iimage)=vel_cell
    dtset%xred_orig(1:3,1:natom,iimage)=xred
    call mkrdim(dtset%acell_orig(1:3,iimage),dtset%rprim_orig(1:3,1:3,iimage),dtset%rprimd_orig(1:3,1:3,iimage))
+
+!  Read cellcharge for each image, but use it only to initialize cellcharge_min
+!  The old name 'charge' is still tolerated. Will be removed in due time.
+   cellcharge=zero
+!  Initialize cellcharge with the value for the first image
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cellcharge',tread,'DPR')
+   if(tread==1)then
+     cellcharge=dprarr(1)
+   else
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
+     if(tread==1) cellcharge=dprarr(1)
+   endif
+!  Possibly overwrite cellcharge from the first image with a specific value for the current image
+   call intagm_img(dprarr,iimage,jdtset,lenstr,dtset%nimage,1,string,'cellcharge',tread_alt,'DPR')
+   if(tread_alt==1)then
+     cellcharge=dprarr(1)
+   else
+     call intagm_img(dprarr,iimage,jdtset,lenstr,dtset%nimage,1,string,'charge',tread_alt,'DPR')
+     if(tread_alt==1) cellcharge=dprarr(1)
+   endif
+
+   if(cellcharge < cellcharge_min)cellcharge_min=cellcharge
+
  end do
 
  ABI_FREE(amu)
@@ -1827,14 +1874,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ! to provide an upper limit for mband_upper
    if(tnband==0)then
 
-     charge=0.0_dp
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'charge',tread,'DPR')
-     if(tread==1) charge=dprarr(1)
-
-     ! Only take into account negative charge, to compute maximum number of bands
-     if(charge > 0.0_dp)charge=0.0_dp
-
-!     mband_upper=nspinor*((nint(zion_max)*natom+1)/2 - floor(charge/2.0_dp)&
+!     mband_upper=nspinor*((nint(zion_max)*natom+1)/2 - floor(cellcharge_min/2.0_dp)&
 !&     + ceiling(fband*natom-1.0d-10))
      zval=zero
      sum_spinat=zero
@@ -1842,7 +1882,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
        sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
      end do
-     zelect=zval-charge
+     zelect=zval-cellcharge_min
      mband_upper=nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
 &     + (nsppol-1)*(ceiling(half*(sum_spinat -tol10)))
      nband(:)=mband_upper
@@ -1990,6 +2030,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : exit '
+!call flush(std_out)
+!ENDDEBUG
+
 end subroutine invars1
 !!***
 
@@ -1999,7 +2044,8 @@ end subroutine invars1
 !!
 !! FUNCTION
 !! Initialisation phase: default values for most input variables
-!! (some are initialized earlier, see indefo1 routine)
+!! (some are initialized earlier, see indefo1 routine, or even 
+!!  at the definition of the input variables (m_dtset.F90))
 !!
 !! INPUTS
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
@@ -2053,6 +2099,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
 !Set up default values. All variables to be output in outvars.f
 !should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
+!Some default values are also set at the definition of the input variables (m_dtset.F90).
 
 !These variables have already been initialized, for idtset/=0
  dtsets(0)%istatr=0
@@ -2133,7 +2180,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%cd_subset_freq(1:2)=0
    dtsets(idtset)%cd_frqim_method=1
    dtsets(idtset)%cd_full_grid=0
-   dtsets(idtset)%charge=zero
+   dtsets(idtset)%cellcharge(:)=zero
    dtsets(idtset)%chempot(:,:,:)=zero
    dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0
@@ -2502,11 +2549,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%postoldff=zero
    dtsets(idtset)%prepalw=0
    dtsets(idtset)%prepanl=0
-   dtsets(idtset)%prtden=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtden=0
-   dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
-   dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
+   dtsets(idtset)%prtden=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtden=0
+   dtsets(idtset)%prtebands=1 ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
+   dtsets(idtset)%prteig=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
+   dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
-   dtsets(idtset)%prtwf=1; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
+   dtsets(idtset)%prtwf=1     ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
    !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    do ii=1,dtsets(idtset)%natom,1
      dtsets(idtset)%prtatlist(ii)=ii

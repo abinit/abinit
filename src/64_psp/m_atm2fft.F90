@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2021 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -734,29 +734,31 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !Get local potential or density back to real space
  if(optatm==1)then
 !  Allow for the addition of a perturbing potential
-   if ((optv==1).and.(vprtrb(1)**2+vprtrb(2)**2) > 1.d-30) then
-!    Find the linear indices which correspond with the input wavevector qprtrb
-!    The double modulus handles both i>=n and i<0, mapping into [0,n-1];
-!    then add 1 to get range [1,n] for each
-     i3=1+mod(n3+mod(qprtrb(3),n3),n3)
-     i2=1+mod(n2+mod(qprtrb(2),n2),n2)
-     i1=1+mod(n1+mod(qprtrb(1),n1),n1)
-!    Compute the linear index in the 3 dimensional array
-     ii=i1+n1*((ffti2_local(i2)-1)+(n2/nproc_fft)*(i3-1))
-!    Add in the perturbation at G=qprtrb
-     workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
-     workv(im,ii)=workv(im,ii)+0.5_dp*vprtrb(2)
-!    Same thing for G=-qprtrb
-     i3=1+mod(n3+mod(-qprtrb(3),n3),n3)
-     i2=1+mod(n2+mod(-qprtrb(2),n2),n2)
-     i1=1+mod(n1+mod(-qprtrb(1),n1),n1)
-!    ii=i1+n1*((i2-1)+n2*(i3-1))
-     workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
-     workv(im,ii)=workv(im,ii)-0.5_dp*vprtrb(2)
-     write(message, '(a,1p,2e12.4,a,0p,3i4,a)' )&
-&     ' atm2fft: perturbation of vprtrb=', vprtrb,&
-&     ' and q=',qprtrb,' has been added'
-     call wrtout(std_out,message,'COLL')
+   if (optv==1) then
+     if ((vprtrb(1)**2+vprtrb(2)**2) > 1.d-30) then
+!      Find the linear indices which correspond with the input wavevector qprtrb
+!      The double modulus handles both i>=n and i<0, mapping into [0,n-1];
+!      then add 1 to get range [1,n] for each
+       i3=1+mod(n3+mod(qprtrb(3),n3),n3)
+       i2=1+mod(n2+mod(qprtrb(2),n2),n2)
+       i1=1+mod(n1+mod(qprtrb(1),n1),n1)
+!      Compute the linear index in the 3 dimensional array
+       ii=i1+n1*((ffti2_local(i2)-1)+(n2/nproc_fft)*(i3-1))
+!      Add in the perturbation at G=qprtrb
+       workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
+       workv(im,ii)=workv(im,ii)+0.5_dp*vprtrb(2)
+!      Same thing for G=-qprtrb
+       i3=1+mod(n3+mod(-qprtrb(3),n3),n3)
+       i2=1+mod(n2+mod(-qprtrb(2),n2),n2)
+       i1=1+mod(n1+mod(-qprtrb(1),n1),n1)
+!      ii=i1+n1*((i2-1)+n2*(i3-1))
+       workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
+       workv(im,ii)=workv(im,ii)-0.5_dp*vprtrb(2)
+       write(message, '(a,1p,2e12.4,a,0p,3i4,a)' )&
+&       ' atm2fft: perturbation of vprtrb=', vprtrb,&
+&       ' and q=',qprtrb,' has been added'
+       call wrtout(std_out,message,'COLL')
+     end if
    end if
 
    if (optv==1.or.optn==1) then
