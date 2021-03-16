@@ -1,0 +1,105 @@
+# Crystalline silicon
+# Computation of the non-self-consistent kinetic energy,
+# from a fixed density, but with a different number of k points
+
+  ndtset 5
+
+#First dataset
+  ngkpt1 2 2 2
+ toldfe1 1.0d-8
+
+#Second dataset   Should reproduce the same energies as in dataset 1
+   iscf2 -3
+ getden2 1
+  ngkpt2 2 2 2
+ tolwfr2 1.0d-14
+
+#Third dataset    ngkpt is changed
+   iscf3 -3
+ getden3 1
+  ngkpt3 4 4 4
+ tolwfr3 1.0d-14
+  prtwf3 1
+
+#Fourth dataset   ngkpt is still different. Read WFK from third dataset to speed up the computation
+   iscf4 -3
+ getden4 1
+ getwfk4 3
+  ngkpt4 6 6 6
+ tolwfr4 1.0d-14
+
+#Fifth dataset    Another way to get the non-self-consistent kinetic energy
+ getden5 1
+ getwfk5 3
+  ngkpt5 4 4 4
+  nstep5  1
+ nnsclo5 10
+ tolwfr5 1.0d-14
+
+
+#Definition of the unit cell
+acell 3*10.18          # This is equivalent to   10.18 10.18 10.18
+rprim  0.0  0.5  0.5   # In tutorials 1 and 2, these primitive vectors
+       0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1
+       0.5  0.5  0.0   # that is, the default.
+
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 14          # The keyword "znucl" refers to the atomic number of the
+                  # possible type(s) of atom. The pseudopotential(s)
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Silicon.
+
+
+#Definition of the atoms
+natom 2           # There are two atoms
+typat 1 1         # They both are of type 1, that is, Silicon.
+xred              # This keyword indicate that the location of the atoms
+                  # will follow, one triplet of number for each atom
+   0.0  0.0  0.0  # Triplet giving the REDUCED coordinate of atom 1.
+   1/4  1/4  1/4  # Triplet giving the REDUCED coordinate of atom 2.
+                  # Note the use of fractions (remember the limited
+                  # interpreter capabilities of ABINIT)
+
+#Definition of the planewave basis set
+ecut  8.0         # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the k-point grid
+ngkpt 2 2 2       # This is a 2x2x2 grid based on the primitive vectors
+nshiftk 4         # of the reciprocal space (that form a BCC lattice !),
+                  # repeated four times, with different shifts :
+shiftk 0.5 0.5 0.5
+       0.5 0.0 0.0
+       0.0 0.5 0.0
+       0.0 0.0 0.5
+                  # In cartesian coordinates, this grid is simple cubic, and
+                  # actually corresponds to the
+                  # so-called 4x4x4 Monkhorst-Pack grid
+
+#Definition of the SCF procedure
+nstep 12          # Maximal number of SCF cycles or non-self-consistent optimisations
+diemac 12.0       # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t60.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% nprocs_to_test = 
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Crystalline Silicon
+#%%   Computation of the non-self-consistent kinetic energy at fixed density.
+#%%<END TEST_INFO>

@@ -1,0 +1,68 @@
+# N2 system, PBE0 and HSE06, interatomic distance optimization
+
+ ndtset    3
+
+#DATASET 1  PBE (because the PAW pseudopotential for N is with PBE XC)
+ xcart1 -0.550  0 0  0.550 0 0 Angstrom   
+
+#DATASET 2 PBE0
+ ixc2    41
+ getwfk2   1
+ xcart2 -0.5415  0 0  0.5415 0 0 Angstrom   
+
+#DATASET 3 HSE06
+ ixc3    -428
+ getwfk3   2
+ xcart3 -0.5415  0 0  0.5415 0 0 Angstrom   
+
+#Common
+ acell 5  2*4 Angstrom
+ diemac 1.0d0   diemix 0.5d0
+ ecut 18  pawecutdg 35.0
+ ionmov 2
+ ntime 15
+ tolrff 0.01 
+ tolmxf 2.0d-4  # For testing. Should be more stringent.
+
+ kptopt 1
+ ngkpt 1 1 1
+ shiftk 3*0.0
+ istwfk 1
+ natom  2
+ nband 5
+ nbdbuf 0
+
+ nstep 6 
+ ntypat  1
+ typat  1 1
+ znucl  7
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pbe_standard/N.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t67.abo, tolnlines = 5, tolabs = 1.100e-3, tolrel = 3.000e-01, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = 
+#%% description = 
+#%%   N2 molecule non-spin-polarized, in a big box.
+#%%   PAW : first PBE, then PBE0, then HSE06. Interatomic distance optimization.
+#%%   Test the geometry convergence in the hybrid functional case
+#%%   The results obtained with underconverged ecut (ecut 18) and box size (5 4 4 Angstrom)
+#%%   compare favourably with those mentioned in Arnardi's report, as well as with those of VASP.
+#%%   Values for the distance d, in Angstrom, for PBE, PBE0 and HSE06 respectively :
+#%%   Present calculation  (ecut 18, 5 4 4 box) : 1.101, 1.084, 1.085 Angstrom
+#%%   Better  calculation  (ecut 22, 6 5 5 box) : 1.102, 1.086, 1.086 Angstrom
+#%%   ABINIT Arnardi report (ecut acell unknown): 1.103, 1.091, 1.092 Angstrom
+#%%   VASP Arnardi report (ecut acell unknown)  : 1.103, 1.089,  NA   Angstrom
+#%%   Experimental : 1.098 Angstrom.
+#%% topics = Hybrids
+#%%<END TEST_INFO>

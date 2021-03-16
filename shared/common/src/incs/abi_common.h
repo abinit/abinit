@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2020 ABINIT Group (MG)
+ * Copyright (C) 2008-2021 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -63,13 +63,20 @@
  2) Traditional CPP
 **/
 
-#if defined (FC_INTEL)
+#if defined (FC_INTEL) || defined (FC_AOCC)
 #define CONCAT(x,y) x ## y
 #else
 #define CONCAT(x,y) x/**/y
 #endif
 
 #define BYTE_SIZE(array)  PRODUCT(SHAPE(array)) * DBLE(KIND(array))
+
+/* var = var + increment
+ * Because Fortran does not provide inplace add.
+ * but NAG does not like this CPP macro so we cannot use it!
+ *
+#define IADD(var, increment) var = var + increment
+*/ 
 
 /*
  * ABI_  abinit macros.
@@ -81,22 +88,23 @@
 #define ABI_CHECK(expr, msg) if (.not.(expr)) call assert(.FALSE., msg _FILE_LINE_ARGS_)
 
 /* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
-#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; ABI_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
 
 /* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
-#define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+#define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
 
 /* Stop execution with message `msg` if int1 > int2 */
-#define ABI_CHECK_ILEQ(int1, int2, msg) if (int1 > int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_ILEQ(int1, int2, msg) if (int1 > int2) ABI_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
 
 /* Stop execution with message `msg` if int1 < int2 */
-#define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) ABI_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
 
 /* Stop execution with message `msg` if double1 < double2 */
-#define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+#define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
 
 /* Stop execution with message `msg` if int not in [start, stop] */
-#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) MSG_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
+#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) ABI_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
 
 #define ABI_CHECK_NOSTOP(expr, msg, ierr) \
    if (.not. (expr)) then NEWLINE ierr=ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
@@ -115,14 +123,9 @@
  * Add option to check automatically the exit status of allocate so that we can abort gracefully if oom.
  * and abipy can detect the problem.
  *
- *   ABI_ALLOCATE   --> Allocate memory for intrinsic datatypes (real, integer, complex).
- *   ABI_CALLOC     --> Clear alloc: same as ABI_ALLOCATE but initializes memory with zeros
- *   ABI_DEALLOCATE --> Free memory allocated by ABI_ALLOCATE
- *
- * To allocate/deallocate arrays of user-defined type use:
- *
- *   ABI_DT_ALLOCATE
- *   ABI_DT_DEALLOCATE
+ *   ABI_MALLOC    --> Allocate memory for intrinsic datatypes (real, integer, complex).
+ *   ABI_CALLOC     --> Clear alloc: same as ABI_MALLOC but initializes memory with zeros
+ *   ABI_FREE --> Free memory allocated by ABI_MALLOC
  *
  * To allocate scalars, use:
  *
@@ -149,7 +152,7 @@
 #  define _LOC(x)  int(loc(x), kind=8) 
 
 /* and now the debugging macros */
-#  define ABI_ALLOCATE(ARR, SIZE) \
+#  define ABI_MALLOC(ARR, SIZE) \
    allocate(ARR SIZE) NEWLINE \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
 
@@ -161,21 +164,13 @@
    call abimem_record(0, QUOTE(scalar), _LOC(scalar), "D", -storage_size(scalar, kind=8),  __FILE__, __LINE__) NEWLINE \
    deallocate(scalar)
 
-#  define ABI_DEALLOCATE(ARR) \
+#  define ABI_FREE(ARR) \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - ABI_MEM_BITS(ARR), __FILE__,  __LINE__) NEWLINE \
    deallocate(ARR) 
 
-#  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) \
+#  define ABI_STAT_MALLOC(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
-
-#  define ABI_DATATYPE_ALLOCATE(ARR,SIZE) \
-   allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
-
-#  define ABI_DATATYPE_DEALLOCATE(ARR)  \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - ABI_MEM_BITS(ARR), __FILE__, __LINE__) NEWLINE \
-   deallocate(ARR) 
 
 #  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
@@ -190,21 +185,15 @@
 
 
 /* Allocate a polymophic scalar that is: allocate(datatype:: scalar) */
-#  define ABI_DATATYPE_ALLOCATE_SCALAR(type, scalar)                    \
+#  define ABI_MALLOC_TYPE_SCALAR(type, scalar)                    \
   allocate(type::scalar) NEWLINE                                        \
     call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
 
-#  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)                        \
-  call abimem_record(0, QUOTE(scalar), _LOC(scalar), "D", -storage_size(scalar, kind=8), __FILE__, __LINE__) NEWLINE \
-    deallocate(scalar) 
-
 #else
 /* macros used in production */
-#  define ABI_ALLOCATE(ARR,SIZE) allocate(ARR SIZE)
-#  define ABI_DEALLOCATE(ARR)  deallocate(ARR)
-#  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) allocate(ARR SIZE, stat=ierr)
-#  define ABI_DATATYPE_ALLOCATE(ARR,SIZE)  allocate(ARR SIZE)
-#  define ABI_DATATYPE_DEALLOCATE(ARR)   deallocate(ARR)
+#  define ABI_MALLOC(ARR,SIZE) allocate(ARR SIZE)
+#  define ABI_FREE(ARR)  deallocate(ARR)
+#  define ABI_STAT_MALLOC(ARR,SIZE,ierr) allocate(ARR SIZE, stat=ierr)
 #  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
         allocate(ARR SIZE, stat=ierr) NEWLINE \
         ABI_CHECK(ierr == 0, "out-of-memory")
@@ -212,26 +201,24 @@
 #  define ABI_FREE_SCALAR(scalar) deallocate(scalar)
 #  define ABI_MOVE_ALLOC(from, to) call move_alloc(from, to)
 
-
-#  define ABI_DATATYPE_ALLOCATE_SCALAR(type,scalar)  allocate(type::scalar)
-#  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)   deallocate(scalar)
-
+#  define ABI_MALLOC_TYPE_SCALAR(type,scalar)  allocate(type::scalar)
 
 #endif
 
 
-/* Macros to allocate zero-initialized arrays.
- * defined in terms of previous macros */
-#define ABI_CALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
-#define ABI_ICALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = 0
+/* FIXME
+#define _ABI_ALLOCATE(arr, size) ABI_MALLOC(arr, size)
+#define _ABI_DEALLOCATE(arr) ABI_FREE(arr)
+#define _MSG_ERROR(msg) ABI_ERROR(msg)
+#define _MSG_WARNING(msg) ABI_WARNING(msg)
+#define _MSG_BUG(msg) ABI_BUG(msg)
+ * Alias to preserve previous behaviour. Just to facilitate the migration */
+
+
+/* Macros to allocate zero-initialized arrays. */
+#define ABI_CALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = zero
+#define ABI_ICALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = 0
 #define ABI_CALLOC_OR_DIE(ARR,SIZE,ierr) ABI_MALLOC_OR_DIE(ARR, SIZE, ierr) NEWLINE ARR = zero
-
-/* Shorthand versions */
-#define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
-
-#define ABI_FREE(ARR) ABI_DEALLOCATE(ARR)
-
-#define ABI_STAT_MALLOC(ARR,SIZE,ierr) ABI_STAT_ALLOCATE(ARR,SIZE,ierr)
 
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
  * or allocate arrays before calling MOVE_ALLOC.
@@ -252,6 +239,9 @@
 #define ABI_REMALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_MALLOC(ARR, SIZE)
 #define ABI_RECALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_CALLOC(ARR, SIZE)
 
+/* Allocate and fill with random numbers */
+#define ABI_MALLOC_RAND(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE call random_number(ARR)
+
 /* Macros used in debug mode */
 #ifdef DEBUG_MODE
 
@@ -262,7 +252,7 @@
 #  define DBG_ENTER(mode) call sentinel(1,mode _FILE_ABIFUNC_LINE_ARGS_)
 #  define DBG_EXIT(mode)  call sentinel(2,mode _FILE_ABIFUNC_LINE_ARGS_)
 /* Stop if two arrays have different shape */
-#  define DBG_EQSHAPE(arr1, arr2) if (any(shape(arr1)/=shape(arr2))) MSG_ERROR("Different shape")
+#  define DBG_EQSHAPE(arr1, arr2) if (any(shape(arr1)/=shape(arr2))) ABI_ERROR("Different shape")
 
 #else
 /* nops */
@@ -276,42 +266,28 @@
 #endif
 
 /* Macro for basic messages */
-#define MSG_COMMENT(msg) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_)
-#define MSG_WARNING(msg) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_)
-#define MSG_COMMENT_UNIT(msg, unt) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
-#define MSG_WARNING_UNIT(msg, unt) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
-#define MSG_ERROR(msg) call msg_hndl(msg, "ERROR", "PERS" _FILE_LINE_ARGS_)
-#define MSG_ERROR_CLASS(msg, cls) call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
-#define MSG_BUG(msg) call msg_hndl(msg, "BUG", "PERS" _FILE_LINE_ARGS_)
-#define MSG_STOP(msg) call msg_hndl(msg, "STOP", "PERS")
+#define ABI_COMMENT(msg) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_)
+#define ABI_WARNING(msg) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_)
+#define ABI_COMMENT_UNIT(msg, unt) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define ABI_WARNING_UNIT(msg, unt) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define ABI_ERROR(msg) call msg_hndl(msg, "ERROR", "PERS" _FILE_LINE_ARGS_)
+#define ABI_ERROR_CLASS(msg, cls) call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
+#define ABI_BUG(msg) call msg_hndl(msg, "BUG", "PERS" _FILE_LINE_ARGS_)
+#define ABI_STOP(msg) call msg_hndl(msg, "STOP", "PERS")
 
-#define MSG_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
-#define MSG_ERROR_NOSTOP(msg, ierr) \
+#define ABI_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
+#define ABI_ERROR_NOSTOP(msg, ierr) \
    ierr=ierr+1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_)
 #define MSG_ERROR_NOSTOP_IF(condition, msg, ierr) \
-   if (condition)  then NEWLINE MSG_ERROR_NOSTOP(msg, ierr) NEWLINE endif
+   if (condition)  then NEWLINE ABI_ERROR_NOSTOP(msg, ierr) NEWLINE endif
 
-#define ETSF_WARN(lstat,Error_data) call abietsf_warn(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
-
-#define ETSF_CHECK_ERROR(lstat,Error_data) if (.not. lstat) call abietsf_msg_hndl(lstat,Error_data,"PERS" _FILE_LINE_ARGS_)
 #define NCF_CHECK(ncerr) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,"No msg from caller" _FILE_LINE_ARGS_)
 #define NCF_CHECK_MSG(ncerr,msg) if (ncerr/=nf90_noerr) call netcdf_check(ncerr,msg _FILE_LINE_ARGS_)
 
-#define NOT_IMPLEMENTED_ERROR() MSG_ERROR("Not Implemented Error")
-
-/* Macro to deprecate particular features. */
-#define MSG_DEPRECATE(msg) call wrtout(ab_out, msg, "COLL")
-/*
-#define MSG_DEPRECATE(msg) MSG_ERROR(msg)
-*/
-
-/* Macro for clean exit */
-/*
-#define ABI_EXIT(exit_status) call abi_abort("COLL",exit_status=exit_status,print_config=.False.)
-*/
+#define NOT_IMPLEMENTED_ERROR() ABI_ERROR("Not Implemented Error")
 
 /* Macros used for stopping the code if external libraries have not been enabled */
-#define NETCDF_NOTENABLED_ERROR() MSG_ERROR("netcdf is not activated. Use configure --enable-netcdf")
+#define NETCDF_NOTENABLED_ERROR() ABI_ERROR("netcdf is not activated. Use configure --enable-netcdf")
 
 #ifdef HAVE_FC_LONG_LINES
 #define BIGDFT_NOTENABLED_ERROR() call bigdft_lib_error(__FILE__, __LINE__)
@@ -320,7 +296,7 @@
 #endif
 
 /* Write a warning if condition  */
-#define MSG_WARNING_IF(expr, msg) if ((expr)) MSG_WARNING(msg)
+#define ABI_WARNING_IF(expr, msg) if ((expr)) ABI_WARNING(msg)
 
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
@@ -353,7 +329,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 
 
 /* F2003 support  */
-#define ABI_CHECK_CNULL(cptr,msg) if (.not.C_ASSOCIATED(cptr)) MSG_ERROR(msg)
+#define ABI_CHECK_CNULL(cptr,msg) if (.not.C_ASSOCIATED(cptr)) ABI_ERROR(msg)
 
 #ifdef HAVE_FC_ASYNC
 #define ABI_ASYNC ,asynchronous

@@ -13,7 +13,7 @@
 !! Subroutines:
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu,nehelbig)
+!! Copyright (C) 2001-2021 ABINIT group (hexu,nehelbig)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -185,7 +185,7 @@ contains
       write(std_out,'(A25)') 'Could not close netcdf file'
     endif
 #else
-    MSG_ERROR("Multibint should be installed with netcdf enabled to run this.")
+    ABI_ERROR("Multibint should be installed with netcdf enabled to run this.")
 
 #endif
 
@@ -210,9 +210,9 @@ contains
     else
       self%has_bilin=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Liu_number_of_entries", ndata)
-      ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(ulist, (4,ndata))
-      ABI_ALLOCATE(vallist, (ndata))
+      ABI_MALLOC(ilist, (ndata))
+      ABI_MALLOC(ulist, (4,ndata))
+      ABI_MALLOC(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Liu_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
@@ -239,7 +239,7 @@ contains
 
     write(std_out,'(A8,I10,A11)') 'L_iu:  ', ndata, 'terms read'  
 #else
-    MSG_ERROR("Multibinit should be installed with netcdf.")
+    ABI_ERROR("Multibinit should be installed with netcdf.")
 #endif
 
   end subroutine read_liu
@@ -262,10 +262,10 @@ contains
     else
       self%has_linquad=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Niuv_number_of_entries", ndata)
-      ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(ulist, (4,ndata))
-      ABI_ALLOCATE(vlist, (4,ndata))
-      ABI_ALLOCATE(vallist, (ndata))
+      ABI_MALLOC(ilist, (ndata))
+      ABI_MALLOC(ulist, (4,ndata))
+      ABI_MALLOC(vlist, (4,ndata))
+      ABI_MALLOC(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Niuv_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
@@ -297,7 +297,7 @@ contains
 
     write(std_out,'(A8,I10,A11)') 'N_iuv: ', ndata, 'terms read'  
 #else
-    MSG_ERROR("Multibinit should be installed with netcdf") 
+    ABI_ERROR("Multibinit should be installed with netcdf") 
 #endif
 
   end subroutine read_niuv
@@ -320,10 +320,10 @@ contains
     else
       self%has_quadlin=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Oiju_number_of_entries", ndata)
-      ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(jlist, (4,ndata))
-      ABI_ALLOCATE(ulist, (4,ndata))
-      ABI_ALLOCATE(vallist, (ndata))
+      ABI_MALLOC(ilist, (ndata))
+      ABI_MALLOC(jlist, (4,ndata))
+      ABI_MALLOC(ulist, (4,ndata))
+      ABI_MALLOC(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Oiju_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
@@ -355,7 +355,7 @@ contains
       ABI_SFREE(vallist)
     endif
 #else
-    MSG_ERROR('Multibinit should be install with netcdf to run this.')
+    ABI_ERROR('Multibinit should be install with netcdf to run this.')
 #endif
 
   end subroutine read_oiju
@@ -378,11 +378,11 @@ contains
     else
       self%has_biquad=.True.
       ncerr = nctk_get_dim(ncid, "spin_lattice_Tijuv_number_of_entries", ndata)
-      ABI_ALLOCATE(ilist, (ndata))
-      ABI_ALLOCATE(jlist, (4, ndata))
-      ABI_ALLOCATE(ulist, (4, ndata))
-      ABI_ALLOCATE(vlist, (4, ndata))
-      ABI_ALLOCATE(vallist, (ndata))
+      ABI_MALLOC(ilist, (ndata))
+      ABI_MALLOC(jlist, (4, ndata))
+      ABI_MALLOC(ulist, (4, ndata))
+      ABI_MALLOC(vlist, (4, ndata))
+      ABI_MALLOC(vallist, (ndata))
 
       varid = nctk_idname(ncid, "spin_lattice_Tijuv_ilist")
       ncerr = nf90_get_var(ncid, varid, ilist)
@@ -420,7 +420,7 @@ contains
     endif
 
 #else
-    MSG_ERROR('Multibinit should be install with netcdf to run this.')
+    ABI_ERROR('Multibinit should be install with netcdf to run this.')
 #endif
 
 
@@ -538,6 +538,7 @@ contains
       end do
     endif
 
+    call self%oiju%sum_duplicates()
   end subroutine set_oiju
 
   !-------------------------------------
@@ -585,6 +586,8 @@ contains
                                 & jlist(2:4,idx), ulist(2:4,idx), vlist(2:4,idx), vallist(idx))
       end do
     endif
+
+    call self%tijuv%sum_duplicates()
 
   end subroutine set_tijuv
 
@@ -636,7 +639,7 @@ contains
     
     call xmpi_bcast(sc_nspin, master, comm, ierr)
     call xmpi_bcast(sc_natom, master, comm, ierr)
-    ABI_DATATYPE_ALLOCATE_SCALAR(slc_potential_t, scpot)
+    ABI_MALLOC_TYPE_SCALAR(slc_potential_t, scpot)
 
     select type(scpot) ! use select type because properties only defined for slc_potential are used
     type is (slc_potential_t) 
@@ -673,7 +676,7 @@ contains
         call self%liu%sum_duplicates()
         call self%set_liu_sc(scpot, scmaker)
       else
-        MSG_ERROR("No parameters for bilinear coupling available. Check your input and parameter files.")
+        ABI_ERROR("No parameters for bilinear coupling available. Check your input and parameter files.")
         scpot%has_bilin = .False.
       endif
     endif
@@ -689,7 +692,7 @@ contains
         call self%niuv%sum_duplicates()
         call self%set_niuv_sc(scpot, scmaker)
       else
-        MSG_ERROR("No parameters for linear-quadratic coupling available. Check your input and parameter files.")
+        ABI_ERROR("No parameters for linear-quadratic coupling available. Check your input and parameter files.")
         scpot%has_linquad = .False.
       endif
     endif
@@ -705,7 +708,7 @@ contains
         call self%oiju%sum_duplicates()
         call self%set_oiju_sc(scpot, scmaker)
        else
-         MSG_ERROR("No parameters for quadratic-linear coupling available. Check your input and parameter files.")
+         ABI_ERROR("No parameters for quadratic-linear coupling available. Check your input and parameter files.")
          scpot%has_quadlin = .False.
        endif
      endif
@@ -721,7 +724,7 @@ contains
         call self%tijuv%sum_duplicates()
         call self%set_tijuv_sc(scpot, scmaker)
       else
-        MSG_ERROR("No parameters for biquadratic coupling available. Check your input and parameter files.")
+        ABI_ERROR("No parameters for biquadratic coupling available. Check your input and parameter files.")
         scpot%has_biquad = .False.
       endif
     endif
@@ -834,7 +837,7 @@ contains
   !------------------------------
   subroutine set_oiju_sc(self, scpot, scmaker)
     class(slc_primitive_potential_t), intent(inout) :: self
-    type(slc_potential_t),            intent(inout) :: scpot
+    class(slc_potential_t),            intent(inout) :: scpot
     type(supercell_maker_t),          intent(inout) :: scmaker
         
     integer :: icell, Rj_prim(3), Ru_prim(3), oiju_ind(5), iRj, iRu, i_prim, j_prim, u_prim, inz
@@ -887,9 +890,7 @@ contains
     type(supercell_maker_t),          intent(inout) :: scmaker
         
     integer :: icell, Rj(3), Ru(3), Rv(3), tijuv_ind(7), iRj, iRu, iRv, ii, ij, iu, iv, inz
-    integer :: ngroup
     integer, allocatable :: i_sc(:), j_sc(:), u_sc(:), v_sc(:), Rj_sc(:, :), Ru_sc(:,:), Rv_sc(:,:)
-    integer, allocatable :: i1list(:), ise(:)
     real(dp) :: val_sc(scmaker%ncells)
 
     integer :: master, my_rank, comm, nproc
@@ -899,6 +900,7 @@ contains
 
     if(iam_master) then
       call scpot%tijuv_sc%initialize(mshape=[self%nspin*3, self%nspin*3, self%natom*3, self%natom*3])
+      call scpot%tuvij_sc%initialize(mshape=[self%natom*3, self%natom*3, self%nspin*3, self%nspin*3])
     endif
 
     do inz=1, self%tijuv%nnz
@@ -930,9 +932,8 @@ contains
       ABI_SFREE(Rv_sc)
     end do
     
-    call scpot%tijuv_sc%group_by_1dim(ngroup, i1list, ise)
-    ABI_SFREE(i1list)
-    ABI_SFREE(ise)
+    call scpot%tijuv_sc%group_by_pair()
+    call scpot%tuvij_sc%group_by_pair()
 
   end subroutine set_tijuv_sc
 

@@ -7,7 +7,7 @@
 !!  Uses some functions from a previous implementation by MJV
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2020 ABINIT group (HM,MJV)
+!!  Copyright (C) 2010-2021 ABINIT group (HM,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -928,7 +928,7 @@ subroutine htetra_init_mapping_ibz(tetra)
    mem_mb = mem_mb + 2 * tetra%tetra_count(ikibz) * 4 * b2Mb
  end do
 
- call wrtout(std_out, sjoin(" Allocating tetra%ibz%indexes with memory:", ftoa(mem_mb, fmt="f8.1"), " (Mb) <<< MEM"))
+ !call wrtout(std_out, sjoin(" Allocating tetra%ibz%indexes with memory:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
 
  ! Create mapping from IBZ to unique tetrahedra
  tetra_count = 0
@@ -1834,7 +1834,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  if (.not.allocated(tetra%ibz)) call htetra_init_mapping_ibz(tetra)
 
  if (all(opt /= [1, 2])) then
-   MSG_ERROR(sjoin("Invalid opt:", itoa(opt)))
+   ABI_ERROR(sjoin("Invalid opt:", itoa(opt)))
  end if
 
  my_erange = [-huge(one), huge(one)]; if (present(erange)) my_erange = erange

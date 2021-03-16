@@ -1,0 +1,58 @@
+# FCC Fe (ferromagnetic for fun) with four atoms per cell
+# Distorted with a A1 phonon, so as to keep the symmetry ...
+# Only one k point in the IBZ
+# Test the parallelism over the spins 
+
+#Definition of the unit cell
+acell 3*7.00
+
+#Definition of the atom types and pseudopotentials
+ntypat  1
+znucl 26.0
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8"
+
+#Definition of the atoms and atoms positions
+natom  4
+typat  4*1
+xred   0.01 0.01 0.01
+       0.49 0.49 0.01
+       0.49 0.01 0.49
+       0.01 0.49 0.49
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut   39
+ngkpt  2 2 2
+shiftk 0.5 0.5 0.5
+occopt 7
+nband  40
+nsppol 2
+spinat 0.0 0.0 3.0
+       0.0 0.0 3.0
+       0.0 0.0 3.0
+       0.0 0.0 3.0
+
+#Parameters for the SCF procedure
+nstep  5
+tolvrs 1.0d-13
+nline  5
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = tbasepar_2.abo, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   FCC Fe (ferromagnetic for fun) with four atoms per cell
+#%%   Distorted with a A1 phonon, so as to keep the symmetry ...
+#%%   Only one k point in the IBZ
+#%%   Test the parallelism over the spins 
+#%%<END TEST_INFO>

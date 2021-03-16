@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DC)
+!!  Copyright (C) 1998-2021 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,13 +61,13 @@ contains
 !!  dtset <type(dataset_type)>=internal variables used by wavelets, describing
 !!   | wvl_internal=desciption of the wavelet box.
 !!   | natom=number of atoms.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!   | keys=its access keys for compact storage.
 !!
 !! PARENTS
@@ -121,7 +121,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 
  parallel = (nproc > 1)
 
-!Consistency checks, are all pseudo true GTH pseudo with geometric informations?
+!Consistency checks, are all pseudo true GTH pseudo with geometric information?
 !Skip for PAW case: we do not have GTH parameters
  do idata = 1, psps%npsp, 1
    if (.not. psps%gth_params%set(idata) .and. psps%usepaw==0) then
@@ -129,19 +129,19 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 &     ' wvl_wfs_set:  consistency checks failed,', ch10, &
 &     '  no GTH parameters found for type number ', idata, '.', ch10, &
 &     '  Check your input pseudo files.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if (.not. psps%gth_params%hasGeometry(idata)) then
      write(message, '(a,a,a,a,a,a)' ) ch10,&
 &     ' wvl_wfs_set:  consistency checks failed,', ch10, &
-&     '  the given GTH parameters has no geometry informations.', ch10, &
-&     '  Upgrade your input pseudo files to GTH with geometric informations.'
-     MSG_ERROR(message)
+&     '  the given GTH parameters has no geometry information.', ch10, &
+&     '  Upgrade your input pseudo files to GTH with geometric information.'
+     ABI_ERROR(message)
    end if
  end do
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
 
 !Nullify possibly unset pointers
@@ -164,18 +164,18 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
    norbu = norb
    norbd = 0
  end if
- ABI_ALLOCATE(kpt_, (3, nkpt))
+ ABI_MALLOC(kpt_, (3, nkpt))
  do ii = 1, nkpt
    kpt_(:,ii) = kpt(:,ii) / (/ rprimd(1,1), rprimd(2,2), rprimd(3,3) /) * two_pi
  end do
 
  call orbitals_descriptors(me, nproc,norb,norbu,norbd,nsppol,nspinor, &
 & nkpt,kpt_,wtk,wfs%ks%orbs,.false.)
- ABI_DEALLOCATE(kpt_)
+ ABI_FREE(kpt_)
 !We copy occ_orig to wfs%ks%orbs%occup
  wfs%ks%orbs%occup(1:norb * nkpt) = occ(1:norb * nkpt)
 !We allocate the eigen values storage.
- ABI_ALLOCATE(wfs%ks%orbs%eval,(wfs%ks%orbs%norb * wfs%ks%orbs%nkpts))
+ ABI_MALLOC(wfs%ks%orbs%eval,(wfs%ks%orbs%norb * wfs%ks%orbs%nkpts))
 
  write(message, '(a,a)' ) ch10,&
 & ' wvl_wfs_set: Create access keys for wavefunctions.'
@@ -204,7 +204,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 & sum(wfs%ks%comms%ncntt(0:nproc-1)), wfs%ks%orbs%nkptsp, wfs%ks%orbs%nspinor, &
 & wfs%ks%diis)
 
- ABI_DATATYPE_ALLOCATE(wfs%ks%confdatarr, (wfs%ks%orbs%norbp))
+ ABI_MALLOC(wfs%ks%confdatarr, (wfs%ks%orbs%norbp))
  call default_confinement_data(wfs%ks%confdatarr,wfs%ks%orbs%norbp)
 
  call check_linear_and_create_Lzd(me,nproc,INPUT_IG_OFF,wfs%ks%lzd,&
@@ -215,7 +215,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
  call check_communications(me,nproc,wfs%ks%orbs,wfs%ks%Lzd,wfs%ks%comms)
 
 !Deallocations
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
 !DEBUG
  write(std_out,*) 'wvl_wfs_set: TODO, update BigDFT sic_input_variables_default()'
@@ -331,7 +331,7 @@ end subroutine derf_ab
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  wfs <type(wvl_wf_type)>=wavefunctions informations in a wavelet basis.
+!!  wfs <type(wvl_wf_type)>=wavefunctions information in a wavelet basis.
 !!
 !! PARENTS
 !!      m_gstate,m_wvl_wfsinp
@@ -365,9 +365,9 @@ subroutine wvl_wfs_free(wfs)
  call deallocate_orbs(wfs%ks%orbs)
  call deallocate_comms(wfs%ks%comms)
  if (associated(wfs%ks%orbs%eval))  then
-   ABI_DEALLOCATE(wfs%ks%orbs%eval)
+   ABI_FREE(wfs%ks%orbs%eval)
  end if
- ABI_DATATYPE_DEALLOCATE(wfs%ks%confdatarr)
+ ABI_FREE(wfs%ks%confdatarr)
 
  if (associated(wfs%ks%psi)) then
    call f_free_ptr(wfs%ks%psi)

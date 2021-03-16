@@ -13,7 +13,7 @@
 !! Subroutines:
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -243,12 +243,12 @@ contains
     NCF_CHECK_MSG(ierr, "getting nspin in spin potential file")
 
     ! allocate for primcell
-    ABI_ALLOCATE(xcart, (3, natom))
-    ABI_ALLOCATE(spinat, (3, natom))
-    ABI_ALLOCATE(index_spin, (natom))
-    ABI_ALLOCATE(gyroratio, (nspin))
-    ABI_ALLOCATE(gilbert_damping, (nspin))
-    ABI_ALLOCATE(ref_spin_orientation, (3, nspin))
+    ABI_MALLOC(xcart, (3, natom))
+    ABI_MALLOC(spinat, (3, natom))
+    ABI_MALLOC(index_spin, (natom))
+    ABI_MALLOC(gyroratio, (nspin))
+    ABI_MALLOC(gilbert_damping, (nspin))
+    ABI_MALLOC(ref_spin_orientation, (3, nspin))
 
     ierr =nf90_inq_varid(ncid, "ref_cell", varid)
     NCF_CHECK_MSG(ierr, "ref_cell")
@@ -268,7 +268,7 @@ contains
       ierr = nf90_get_var(ncid, varid, ref_spin_orientation)
       NCF_CHECK_MSG(ierr, "spin_ref_orientation")
     else
-      MSG_WARNING("Could not read spin_ref_orientation from nc file, will use z-direction.")
+      ABI_WARNING("Could not read spin_ref_orientation from nc file, will use z-direction.")
       ref_spin_orientation(1,:)=0.0d0
       ref_spin_orientation(2,:)=0.0d0
       ref_spin_orientation(3,:)=1.0d0
@@ -283,7 +283,7 @@ contains
       ierr = nf90_get_var(ncid, varid, ref_spin_qpoint)
       NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
     else
-      MSG_WARNING("Could not read spin_ref_qpoint from nc file, will use Gamma point.")
+      ABI_WARNING("Could not read spin_ref_qpoint from nc file, will use Gamma point.")
       ref_spin_qpoint(:)=0.0d0
     endif
     !NCF_CHECK_MSG(ierr, "spin_ref_qpoint")
@@ -295,7 +295,7 @@ contains
       ierr = nf90_get_var(ncid, varid, ref_spin_rotate_axis)
       NCF_CHECK_MSG(ierr, "spin_ref_rotate_axis")
     else
-      MSG_WARNING("Could not read spin_ref_rotate_axis from nc file, will use x-axis.")
+      ABI_WARNING("Could not read spin_ref_rotate_axis from nc file, will use x-axis.")
       ref_spin_rotate_axis(1)=1.0d0
       ref_spin_rotate_axis(2)=0.0d0
       ref_spin_rotate_axis(3)=0.0d0
@@ -341,10 +341,10 @@ contains
     ierr=nf90_inq_dimid(ncid, "spin_exchange_nterm", spin_exchange_nterm)
     if (ierr==0) then ! if has exchange
        ierr=nctk_get_dim(ncid, "spin_exchange_nterm", spin_exchange_nterm)
-       ABI_ALLOCATE(spin_exchange_ilist, (spin_exchange_nterm))
-       ABI_ALLOCATE(spin_exchange_jlist, (spin_exchange_nterm))
-       ABI_ALLOCATE(spin_exchange_Rlist, (3,spin_exchange_nterm))
-       ABI_ALLOCATE(spin_exchange_vallist, (3,spin_exchange_nterm))
+       ABI_MALLOC(spin_exchange_ilist, (spin_exchange_nterm))
+       ABI_MALLOC(spin_exchange_jlist, (spin_exchange_nterm))
+       ABI_MALLOC(spin_exchange_Rlist, (3,spin_exchange_nterm))
+       ABI_MALLOC(spin_exchange_vallist, (3,spin_exchange_nterm))
 
        ierr =nf90_inq_varid(ncid, "spin_exchange_ilist", varid)
        NCF_CHECK_MSG(ierr, "spin_exchange_ilist")
@@ -386,10 +386,10 @@ contains
     if (ierr==0) then ! if has dmi
        ierr=nctk_get_dim(ncid, "spin_dmi_nterm", spin_dmi_nterm)
        NCF_CHECK_MSG(ierr, "spin_dmi_nterm found but is not readable")
-       ABI_ALLOCATE(spin_dmi_ilist, (spin_dmi_nterm))
-       ABI_ALLOCATE(spin_dmi_jlist, (spin_dmi_nterm))
-       ABI_ALLOCATE(spin_dmi_Rlist, (3,spin_dmi_nterm))
-       ABI_ALLOCATE(spin_dmi_vallist, (3,spin_dmi_nterm))
+       ABI_MALLOC(spin_dmi_ilist, (spin_dmi_nterm))
+       ABI_MALLOC(spin_dmi_jlist, (spin_dmi_nterm))
+       ABI_MALLOC(spin_dmi_Rlist, (3,spin_dmi_nterm))
+       ABI_MALLOC(spin_dmi_vallist, (3,spin_dmi_nterm))
 
        ierr =nf90_inq_varid(ncid, "spin_dmi_ilist", varid)
        NCF_CHECK_MSG(ierr, "spin_dmi_ilist")
@@ -428,9 +428,9 @@ contains
     ierr=nf90_inq_dimid(ncid, "spin_SIA_nterm", spin_SIA_nterm)
     if (ierr==0) then ! if has SIA
        ierr=nctk_get_dim(ncid, "spin_SIA_nterm", spin_SIA_nterm)
-       ABI_ALLOCATE(spin_SIA_ilist, (spin_SIA_nterm))
-       ABI_ALLOCATE(spin_SIA_k1list, (spin_SIA_nterm))
-       ABI_ALLOCATE(spin_SIA_k1dirlist, (3,spin_SIA_nterm))
+       ABI_MALLOC(spin_SIA_ilist, (spin_SIA_nterm))
+       ABI_MALLOC(spin_SIA_k1list, (spin_SIA_nterm))
+       ABI_MALLOC(spin_SIA_k1dirlist, (3,spin_SIA_nterm))
 
        ierr =nf90_inq_varid(ncid, "spin_SIA_ilist", varid)
        NCF_CHECK_MSG(ierr, "spin_SIA_ilist")
@@ -463,10 +463,10 @@ contains
     ! read bilinear terms
     ierr=nf90_inq_dimid(ncid, "spin_bilinear_nterm", varid)
     if (ierr==0) then  ! if has bilinear
-       ABI_ALLOCATE(spin_bilinear_ilist, (spin_bilinear_nterm))
-       ABI_ALLOCATE(spin_bilinear_jlist, (spin_bilinear_nterm))
-       ABI_ALLOCATE(spin_bilinear_Rlist, (3,spin_bilinear_nterm))
-       ABI_ALLOCATE(spin_bilinear_vallist, (3,3,spin_bilinear_nterm))
+       ABI_MALLOC(spin_bilinear_ilist, (spin_bilinear_nterm))
+       ABI_MALLOC(spin_bilinear_jlist, (spin_bilinear_nterm))
+       ABI_MALLOC(spin_bilinear_Rlist, (3,spin_bilinear_nterm))
+       ABI_MALLOC(spin_bilinear_vallist, (3,3,spin_bilinear_nterm))
 
        ierr =nf90_inq_varid(ncid, "spin_bilinear_ilist", varid)
        NCF_CHECK_MSG(ierr, "spin_bilinear_ilist")
@@ -850,7 +850,7 @@ contains
     sc_nspin= nspin * scmaker%ncells
     call xmpi_bcast(sc_nspin, master, comm, ierr)
     !ABI_MALLOC_SCALAR(spin_potential_t::scpot)
-    ABI_DATATYPE_ALLOCATE_SCALAR(spin_potential_t, scpot)
+    ABI_MALLOC_TYPE_SCALAR(spin_potential_t, scpot)
     select type(scpot) ! use select type because properties only defined for spin_potential is used.
     type is (spin_potential_t) 
       call scpot%initialize(sc_nspin)
@@ -868,9 +868,9 @@ contains
           do i=1, scmaker%ncells
             call scpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
           end do
-          if(allocated(i_sc)) ABI_DEALLOCATE(i_sc)
-          if(allocated(j_sc)) ABI_DEALLOCATE(j_sc)
-          if(allocated(Rj_sc)) ABI_DEALLOCATE(Rj_sc)
+          if(allocated(i_sc)) ABI_FREE(i_sc)
+          if(allocated(j_sc)) ABI_FREE(j_sc)
+          if(allocated(Rj_sc)) ABI_FREE(Rj_sc)
         end do
       endif
     end select

@@ -7,7 +7,7 @@
 !!  Interfaces of GPU subroutines wrapper
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2020 ABINIT group (FDahm ))
+!!  Copyright (C) 2011-2021 ABINIT group (FDahm ))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,8 +42,6 @@
 #ifndef HAVE_GPU_CUDA
 
 subroutine alloc_on_gpu(gpu_ptr,size)
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: size ! size in bytes to allocate
@@ -85,8 +83,6 @@ end subroutine alloc_on_gpu
 !! SOURCE
 
 subroutine copy_from_gpu(dtab,gpu_ptr,size)
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: size ! taille en octet a transferer
@@ -130,8 +126,6 @@ end subroutine copy_from_gpu
 
 subroutine copy_on_gpu(dtab,gpu_ptr,size)
 
- implicit none
-
 !Arguments ------------------------------------
  integer :: size ! size in byte (to be transfered)
  real(dp), dimension(*),optional :: dtab
@@ -171,8 +165,6 @@ end subroutine copy_on_gpu
 
 subroutine dealloc_on_gpu(gpu_ptr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(c_ptr) :: gpu_ptr
 
@@ -208,7 +200,6 @@ end subroutine dealloc_on_gpu
 
 subroutine gpu_linalg_init()
 
- implicit none
 
 end subroutine gpu_linalg_init
 !!***
@@ -235,8 +226,6 @@ end subroutine gpu_linalg_init
 !!
 !! SOURCE
 subroutine gpu_linalg_shutdown()
-
- implicit none
 
 end subroutine gpu_linalg_shutdown
 !!***
@@ -281,8 +270,6 @@ end subroutine gpu_linalg_shutdown
 !! SOURCE
 
 subroutine gpu_xgemm(cplx,transa,transb,m,n,k,alpha,a_gpu,lda,b_gpu,ldb,beta,c_gpu,ldc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
@@ -361,8 +348,6 @@ end subroutine gpu_xgemm
 !! SOURCE
 subroutine gpu_xtrsm(cplx,side,uplo,transa,diag,m,n,alpha,a_gpu,lda,b_gpu,ldb)
 
- implicit none
-
 ! !Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
  complex(dpc), intent(in) :: alpha
@@ -425,8 +410,6 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 &                              sqgram_gpu,vectsize,&
 &                              x_cplx,timopt,tim_xortho) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: blocksize,spaceComm,vectsize,x_cplx
@@ -455,10 +438,10 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
  if ( x_cplx == 1 ) then
    tr='t'
-   ABI_ALLOCATE(d_sqgram,(blocksize,blocksize))
+   ABI_MALLOC(d_sqgram,(blocksize,blocksize))
  else
    tr='c'
-   ABI_ALLOCATE(z_sqgram,(blocksize,blocksize))
+   ABI_MALLOC(z_sqgram,(blocksize,blocksize))
  end if
 
  call gpu_xgemm(x_cplx,tr,'n',blocksize,blocksize,vectsize, &
@@ -478,16 +461,16 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
  if (info /= 0 ) then
    write(message,'(a,i3)') '  xpotrf, info=',info
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  call gpu_xtrsm(x_cplx,'r','u','n','n',vectsize,blocksize,cone,sqgram_gpu,blocksize,&
 &               blockvectorx_gpu,vectsize)
 
  if(x_cplx==1) then
-   ABI_DEALLOCATE(d_sqgram)
+   ABI_FREE(d_sqgram)
  else
-   ABI_DEALLOCATE(z_sqgram)
+   ABI_FREE(z_sqgram)
  end if
  if (present(tim_xortho).and.present(timopt)) then
    if(abs(timopt)==3) then
@@ -498,7 +481,7 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
 #else
  message='  This routine is not allowed when Cuda is disabled !'
- MSG_BUG(message)
+ ABI_BUG(message)
  if (.false.) then
    write(std_out,*) blocksize,vectsize,spaceComm,x_cplx
    if (present(timopt))  write(std_out,*) timopt

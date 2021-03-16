@@ -253,7 +253,16 @@ A typical workflow for ZPR calculations involves the following steps (see the [i
 
 ## Getting started
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
+
+Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
+Why not create Work_eph4zpr in $ABI_TESTS/tutorespfn/Input?
+
+```sh
+cd $ABI_TESTS/tutorespfn/Input
+mkdir Work_eph4zpr
+cd Work_eph4zpr
+```
 
 In this tutorial, we prefer to focus on the use of the EPH code hence
 we will be using **pre-computed** DDB and DFPT POT files to bypass the DFPT part.
@@ -413,12 +422,12 @@ The VBM is three-fold degenerate when SOC is not included.
 First of all, let's merge the partial DDB files with the command
 
 ```sh
-mrgddb < teph4zpr_1.in
+mrgddb < teph4zpr_1.abi
 ```
 
 and the following input file:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_1.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_1.abi %}
 
 that lists the **relative paths** of the **partial DDB files** in the
 `MgO_eph_zpr` directory.
@@ -499,12 +508,12 @@ that produces the following figure:
 Now we can merge the DFPT potential with the *mrgdv* tool using the command.
 
 ```sh
-mrgdv < teph4zpr_2.in
+mrgdv < teph4zpr_2.abi
 ```
 
 and the following input file:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_2.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_2.abi %}
 
 !!! tip
 
@@ -604,12 +613,12 @@ Note the use of [[getden_filepath]] to read the DEN.nc file instead of [[getden]
 You may now run the NSCF calculation by issuing:
 
 ```sh
-abinit teph4zpr_3.in > teph4zpr_3.log 2> err &
+abinit teph4zpr_3.abi > teph4zpr_3.log 2> err &
 ```
 
 with the input file given by:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_3.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_3.abi %}
 
 At this point, it is worth commenting about the use of [[nbdbuf]].
 As mentioned in the documentation, **the highest energy states require more iterations to convergence**.
@@ -636,19 +645,19 @@ discuss the most important input variables and the content of the main output fi
 First of all, you may want to start immediately the computation by issuing:
 
 ```sh
-abinit teph4zpr_4.in > teph4zpr_4.log 2> err &
+abinit teph4zpr_4.abi > teph4zpr_4.log 2> err &
 ```
 
 with the following input file:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_4.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_4.abi %}
 
 !!! tip
 
     To run the examples in parallel with e.g 2 MPI processes use:
 
     ```sh
-    mpirun -n 2 abinit teph4zpr_4.in > teph4zpr_4.log 2> err &
+    mpirun -n 2 abinit teph4zpr_4.abi > teph4zpr_4.log 2> err &
     ```
 
     The EPH code will automatically distribute the workload using a predefined distribution scheme
@@ -692,7 +701,7 @@ The linear tetrahedron method is also implemented but it is not very efficient.
 
 We can now have a look at the main output file:
 
-{% dialog tests/tutorespfn/Refs/teph4zpr_4.out %}
+{% dialog tests/tutorespfn/Refs/teph4zpr_4.abo %}
 
 First of all, we find a section that summarizes the most important parameters:
 
@@ -891,25 +900,17 @@ nband+ 20
 
 An example is given in
 
-{% dialog tests/tutorespfn/Input/teph4zpr_5.in %}
-
-<!--
-!!! important
-
-    The multidataset syntax is quite handy when running small calculations but you can achieve a much better
-    speedup if you split the calculation using different input files as these jobs are independent
-    and can be thus executed in parallel.
--->
+{% dialog tests/tutorespfn/Input/teph4zpr_5.abi %}
 
 Run the calculation, as usual, using
 
 ```sh
-abinit teph4zpr_5.in > teph4zpr_5.log 2> err &
+abinit teph4zpr_5.abi > teph4zpr_5.log 2> err &
 ```
 
 Now we can extract the results from the output file
 
-{% dialog tests/tutorespfn/Refs/teph4zpr_5.out %}
+{% dialog tests/tutorespfn/Refs/teph4zpr_5.abo %}
 
 or, alternatively, use the AbiPy |abicomp| script to post-process the results stored in the **SIGPEPH** files:
 
@@ -973,12 +974,12 @@ getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
 
 An example of input file is provided in:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_6.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_6.abi %}
 
 and can be run with:
 
 ```sh
-abinit teph4zpr_6.in > teph4zpr_6.log 2> err &
+abinit teph4zpr_6.abi > teph4zpr_6.log 2> err &
 ```
 
 Four calculations are performed with different values of [[nband]]:
@@ -993,7 +994,7 @@ in order to monitor the convergence of the QP corrections.
 
 To analyze the convergence behavior, we can extract the results from the main output file
 
-{% dialog tests/tutorespfn/Refs/teph4zpr_6.out %}
+{% dialog tests/tutorespfn/Refs/teph4zpr_6.abo %}
 
 
 or, alternatively, we can pass the list of SIGEPH files to the |abicomp| script and use the
@@ -1023,7 +1024,7 @@ This is the value one should obtain when summing all the bands up to maximum num
     Note, however, that the cost of the Sternheimer method quickly increases with [[nband]]
     due to the orthogonalization process. This means that a ZPR calculation with 300 bands (occ + empty)
     **without** the Sternheimer method is much faster than the same computation done with [[eph_stern]] 1.
-    As a matter of fact, we use the Sternheimer method so that we don't need 300 bands to convergence the results.
+    As a matter of fact, we use the Sternheimer method so that we don't need 300 bands to converge the results.
 
 ??? note "Exercise"
 
@@ -1037,7 +1038,7 @@ Now we fix this value of *nband* to 20 and perform a convergence study for the $
 Unfortunately, we won't be able to fully convergence the results but, at least,
 you will get an idea on how to perform this kind of convergence study.
 
-In the input *teph4zpr_3.in*, we have computed WFK files on different $\kk$-meshes
+In the input *teph4zpr_3.abi*, we have computed WFK files on different $\kk$-meshes
 and a relatively small number of empty states (25 - 5 = 20).
 We can finally use these WFK files to perform ZPR calculations by just adding:
 
@@ -1053,17 +1054,17 @@ eph_stern 1
 getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
 ```
 
-{% dialog tests/tutorespfn/Input/teph4zpr_7.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_7.abi %}
 
 Run the calculation, as usual, with:
 
 ```sh
-abinit teph4zpr_7.in > teph4zpr_7.log 2> err &
+abinit teph4zpr_7.abi > teph4zpr_7.log 2> err &
 ```
 
 The output file is reported here for your convenience:
 
-{% dialog tests/tutorespfn/Refs/teph4zpr_7.out %}
+{% dialog tests/tutorespfn/Refs/teph4zpr_7.abo %}
 
 Now use:
 
@@ -1098,16 +1099,15 @@ freqspmax 1.0 eV
 
 An example of input file is available here:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_8.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_8.abi %}
 
 Execute it with:
 
 ```sh
-abinit teph4zpr_8.in > teph4zpr_8.log 2> err &
+abinit teph4zpr_8.abi > teph4zpr_8.log 2> err &
 ```
 
-To plot the spectral function $A_\nk(\ww)$ in an easy way, use AbiPy
-to extract the data from the netcdf file.
+To plot the spectral function $A_\nk(\ww)$ in an easy way, use AbiPy to extract the data from the netcdf file.
 We can do it in two different ways:
 
 - using a small python script that calls the AbiPy API
@@ -1204,7 +1204,7 @@ on the OTMS results in most of this tutorial.
 Now we focus on more technical aspects and, in particular, on how to **compare spectral functions
 and self-energies obtained with different settings**.
 
-Remember that in *teph4zpr_8.in* we computed $A_\nk(\ww)$ with/without the Sternheimer method.
+Remember that in *teph4zpr_8.abi* we computed $A_\nk(\ww)$ with/without the Sternheimer method.
 So the question is "how can we compare the two calculations and what can we learn from this analysis?"
 
 To compare the results obtained with/wo the Sternheimer, use |abicomp|

@@ -6,7 +6,7 @@
 !! Main routine for the unfolding of the wavefuntion.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2020 ABINIT group (AB)
+!! Copyright (C) 2014-2021 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,7 +90,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
 #endif
 
  if (xmpi_comm_size(comm) /= 1) then
-   MSG_ERROR("fold2bloch not programmed for parallel execution.")
+   ABI_ERROR("fold2bloch not programmed for parallel execution.")
  end if
 
  nargs = command_argument_count()
@@ -111,7 +111,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  !call nctk_test_mpiio()
 
  if (nctk_try_fort_or_ncfile(fname, msg) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  pos=INDEX(fname, "_")
@@ -127,9 +127,9 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  call wfk_open_read(wfk,fname,0,iomode,get_unit(),comm)
 
  nkpt=wfk%hdr%nkpt
- ABI_ALLOCATE(npwarr,(nkpt))
- ABI_ALLOCATE(nband,(nkpt))
- ABI_ALLOCATE(kpts,(3,nkpt))
+ ABI_MALLOC(npwarr,(nkpt))
+ ABI_MALLOC(nband,(nkpt))
+ ABI_MALLOC(kpts,(3,nkpt))
 
  nsppol=wfk%hdr%nsppol
  nspinor=wfk%hdr%nspinor
@@ -187,24 +187,24 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
    if (nspinor==2) then
      !open output file
      if (open_file(trim(seedname)//"_SPOR_1.f2b", msg, newunit=outfile1, form="formatted", status="unknown") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if (open_file(trim(seedname)//"_SPOR_2.f2b", msg, newunit=outfile2, form="formatted", status="unknown") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      if (open_file(outname, msg, newunit=outfile1,form="formatted", status="unknown") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 
    do ikpt=1, nkpt !For each K point
-     ABI_ALLOCATE(cg,(2,mcg))
-     ABI_ALLOCATE(eig,((2*mband)**0*mband))
-     ABI_ALLOCATE(kg,(3,npwarr(ikpt)))
-     ABI_ALLOCATE(coefc,(2,nspinor*npwarr(ikpt)))
-     ABI_ALLOCATE(weights, (nfold))
-     ABI_ALLOCATE(nkval,(3, nfold))
+     ABI_MALLOC(cg,(2,mcg))
+     ABI_MALLOC(eig,((2*mband)**0*mband))
+     ABI_MALLOC(kg,(3,npwarr(ikpt)))
+     ABI_MALLOC(coefc,(2,nspinor*npwarr(ikpt)))
+     ABI_MALLOC(weights, (nfold))
+     ABI_MALLOC(nkval,(3, nfold))
      call progress(ikpt,nkpt,kpts(:,ikpt)) !Write progress information
 
      !Read a block of data
@@ -255,12 +255,12 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
        cg_b=cg_b+nspinor*npwarr(ikpt) !shift coefficient pointer for next eigenvalue
      end do ! iband
 
-     ABI_DEALLOCATE(cg)
-     ABI_DEALLOCATE(eig)
-     ABI_DEALLOCATE(kg)
-     ABI_DEALLOCATE(coefc)
-     ABI_DEALLOCATE(weights)
-     ABI_DEALLOCATE(nkval)
+     ABI_FREE(cg)
+     ABI_FREE(eig)
+     ABI_FREE(kg)
+     ABI_FREE(coefc)
+     ABI_FREE(weights)
+     ABI_FREE(nkval)
    end do
    if (nspinor==2) then
      close(outfile1) !close output file

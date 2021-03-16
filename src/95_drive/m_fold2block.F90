@@ -6,7 +6,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (AB)
+!! Copyright (C) 2008-2021 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,10 +84,10 @@ CONTAINS  !===========================================================
 
 ! *************************************************************************
 
- ABI_ALLOCATE(TGroupC,(FX, FY, FZ, NV))
- ABI_ALLOCATE(Sums,(FX*FY*FZ))
- ABI_ALLOCATE(counter,(FX,FY,FZ))
- ABI_ALLOCATE(coefsqr,(NV))
+ ABI_MALLOC(TGroupC,(FX, FY, FZ, NV))
+ ABI_MALLOC(Sums,(FX*FY*FZ))
+ ABI_MALLOC(counter,(FX,FY,FZ))
+ ABI_MALLOC(coefsqr,(NV))
 
  !Convert to sum of squares
  do jj=1, NV
@@ -136,10 +136,10 @@ CONTAINS  !===========================================================
  do jj=1, (FX*FY*FZ)
    Weights(jj)=Sums(jj)/sumtot
  end do
- ABI_DEALLOCATE(TGroupC)
- ABI_DEALLOCATE(Sums)
- ABI_DEALLOCATE(counter)
- ABI_DEALLOCATE(coefsqr)
+ ABI_FREE(TGroupC)
+ ABI_FREE(Sums)
+ ABI_FREE(counter)
+ ABI_FREE(coefsqr)
 
  end subroutine SortC
 !!***
@@ -277,13 +277,13 @@ subroutine getargs(folds, fname)
 
  !get number of args
  num_args=command_argument_count()
- ABI_ALLOCATE(args,(num_args))
+ ABI_MALLOC(args,(num_args))
 
  !Check for errors in arguments
  if (num_args>2) then
    write(std_out,*) "     Too many arguments."
    write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  elseif (num_args<2) then
    if (num_args==1) then
      call get_command_argument(1,args(1))
@@ -292,18 +292,18 @@ subroutine getargs(folds, fname)
        write(std_out,*) "     file_WFK is the WFK file name (ex. Ex_WFK)"
        write(std_out,*) "     x:y:z integers, greater than 0 that represent a multiplicity"
        write(std_out,*) "     in the corresponding directions used when constructing the supercell."
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      else
        write(std_out,*) "     Not all arguments are present."
        write(std_out,*) "     Make sure that file name and number of folds are indicated."
        write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
    else
      write(std_out,*) "     Not all arguments are present."
      write(std_out,*) "     Make sure that file name and number of folds are indicated."
      write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
  else
    do argcount=1, num_args
@@ -321,7 +321,7 @@ subroutine getargs(folds, fname)
  if (.not.(dir)) then
    write(std_out,*) "     Case file not found: ", trim(fname)
    write(std_out,*) "     Usage: $fold2Bloch file_WFK x:y:z (folds)"
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
  !Was the number of folds entered in correct format?
@@ -331,11 +331,11 @@ subroutine getargs(folds, fname)
    write(std_out,*) "     Unknown number of folds. See below or type:"
    write(std_out,*) "     fold2Bloch <-h> or fold2Bloch <--help> for more information."
    write(std_out,*) '     Usage: $fold2Bloch file_WFK x:y:z (folds)'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
  read (argfolds(1:ii-1), *, iostat=ios) folds(1) !read X folds
  if ((ios/=0).or.(folds(1)<=0)) then
-   MSG_ERROR('Number of folds has to be a positive integer greater than 0')
+   ABI_ERROR('Number of folds has to be a positive integer greater than 0')
  end if
  argfolds=argfolds(ii+1:) !Start argfolds from the first ":"
  ii=0
@@ -344,18 +344,18 @@ subroutine getargs(folds, fname)
    write(std_out,*) '     Unknown number of folds. See below or type:'
    write(std_out,*) "     fold2Bloch <-h> or fold2Bloch <--help> for more information."
    write(std_out,*) '     Usage: $fold2Bloch file_WFK x:y:z (folds)'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
  read (argfolds(1:ii-1),*, iostat=ios) folds(2) !read Y folds
  if ((ios/=0).or.(folds(2)<=0)) then
-   MSG_ERROR('Number of folds has to be a positive integer greater than 0')
+   ABI_ERROR('Number of folds has to be a positive integer greater than 0')
  end if
  read(argfolds(ii+1:),*, iostat=ios) Folds(3) !read Z folds
  if ((ios/=0).or.(folds(3)<=0)) then
-   MSG_ERROR('Number of folds has to be a positive integer greater than 0')
+   ABI_ERROR('Number of folds has to be a positive integer greater than 0')
  end if
 
- ABI_DEALLOCATE(args)
+ ABI_FREE(args)
 
 end subroutine getargs
 !!***

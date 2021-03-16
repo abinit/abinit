@@ -9,7 +9,7 @@
 !!  Boese and Handy , J. Chem. Phys. 114, 5497 (2001) [[cite:Boese2001]] for HCTH-407.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2020 ABINIT group (XG,LG)
+!!  Copyright (C) 2002-2021 ABINIT group (XG,LG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -147,7 +147,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
 
  if (order/=1) then
    write(message, '(a,i0)' )' Order must be 1 ; argument was ',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(initialized==0)then
@@ -200,7 +200,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
    ccab0=0.589076_dp ; ccab1=4.42374_dp  ; ccab2=-19.2218_dp; ccab3=42.5721_dp  ; ccab4=-42.0052_dp
  else
    write(message, '(a,i0)' )' xchcth : ixc must be 16, 17, 26, or 27 ; argument was ',ixc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Parameters for the Perdew-Wang 92 LSD as well as LSD-RPA,
@@ -269,9 +269,9 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
    factfpp_zeta= third * factfp_zeta * alpha_zeta2
  end if
 
- ABI_ALLOCATE(rhoarr,(npts))
- ABI_ALLOCATE(rhom1_3,(npts))
- ABI_ALLOCATE(rho_updnm1_3,(npts,2))
+ ABI_MALLOC(rhoarr,(npts))
+ ABI_MALLOC(rhom1_3,(npts))
+ ABI_MALLOC(rho_updnm1_3,(npts,2))
  do ispden=1,nspden
    call invcb(rho_updn(:,ispden),rho_updnm1_3(:,ispden),npts)
  end do
@@ -282,10 +282,10 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
  else
    rhoarr(:)=rho_updn(:,1)+rho_updn(:,2)
    call invcb(rhoarr,rhom1_3,npts)
-   ABI_ALLOCATE(zetm,(npts))
-   ABI_ALLOCATE(zetmm1_3,(npts))
-   ABI_ALLOCATE(zetp,(npts))
-   ABI_ALLOCATE(zetpm1_3,(npts))
+   ABI_MALLOC(zetm,(npts))
+   ABI_MALLOC(zetmm1_3,(npts))
+   ABI_MALLOC(zetp,(npts))
+   ABI_MALLOC(zetpm1_3,(npts))
    do ipts=1,npts
      rhotmot=rhom1_3(ipts)
      rhotot_inv=rhotmot*rhotmot*rhotmot
@@ -1146,7 +1146,7 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
    write(message, '(3a,i0)' )&
 &   '  Argument nspden must be 1 or 2; ',ch10,&
 &   '  Value provided as argument was ',nspden
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !DEBUG
@@ -1203,14 +1203,14 @@ subroutine xchcth(dvxcdgr,exci,grho2_updn,ixc,npts,nspden,order,rho_updn,vxci)
 !end if
 !ENDDEBUG
 
- ABI_DEALLOCATE(rhoarr)
- ABI_DEALLOCATE(rhom1_3)
- ABI_DEALLOCATE(rho_updnm1_3)
+ ABI_FREE(rhoarr)
+ ABI_FREE(rhom1_3)
+ ABI_FREE(rho_updnm1_3)
  if(nspden==2) then
-   ABI_DEALLOCATE(zetm)
-   ABI_DEALLOCATE(zetmm1_3)
-   ABI_DEALLOCATE(zetp)
-   ABI_DEALLOCATE(zetpm1_3)
+   ABI_FREE(zetm)
+   ABI_FREE(zetmm1_3)
+   ABI_FREE(zetp)
+   ABI_FREE(zetpm1_3)
  end if
 
 !DEBUG

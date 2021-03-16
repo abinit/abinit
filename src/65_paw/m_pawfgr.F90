@@ -8,7 +8,7 @@
 !!  pawfgr_type variables define Fine rectangular GRid parameters and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2021 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -196,7 +196,7 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
  if ((present(gsqcutc_eff).or.present(gsqcutf_eff)).and.&
 &    ((.not.present(gmet)).or.(.not.present(k0)))) then
    msg='To compute gsqcut[c,f]_eff, both k0 and gmet must be present as argument !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  ngfftc(:)=Dtset%ngfft(:)
@@ -207,8 +207,8 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
   ! === Norm-conserving pseudopotentials ===
   nfftf=Dtset%nfft ; mgfftf=Dtset%mgfft ; ngfftf(:)=Dtset%ngfft(:)
   Pawfgr%usefinegrid=0
-  ABI_ALLOCATE(Pawfgr%coatofin,(0))
-  ABI_ALLOCATE(Pawfgr%fintocoa,(0))
+  ABI_MALLOC(Pawfgr%coatofin,(0))
+  ABI_MALLOC(Pawfgr%fintocoa,(0))
   ecut_eff  =Dtset%ecut*Dtset%dilatmx**2
   ecutdg_eff=ecut_eff
 
@@ -221,15 +221,15 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
    nfftc_tot =ngfftc(1)*ngfftc(2)*ngfftc(3)
    nfftf_tot =ngfftf(1)*ngfftf(2)*ngfftf(3)
    Pawfgr%usefinegrid=1
-   ABI_ALLOCATE(Pawfgr%coatofin,(nfftc_tot))
-   ABI_ALLOCATE(Pawfgr%fintocoa,(nfftf_tot))
+   ABI_MALLOC(Pawfgr%coatofin,(nfftc_tot))
+   ABI_MALLOC(Pawfgr%fintocoa,(nfftf_tot))
    call indgrid(Pawfgr%coatofin,Pawfgr%fintocoa,nfftc_tot,nfftf_tot,ngfftc,ngfftf)
   else
    ! * Do not use fine FFT mesh. Simple transfer that can be done in parallel with only local info.
    nfftf=Dtset%nfft ; mgfftf=Dtset%mgfft ; ngfftf(:)=Dtset%ngfft(:)
    Pawfgr%usefinegrid=0
-   ABI_ALLOCATE(Pawfgr%coatofin,(Dtset%nfft))
-   ABI_ALLOCATE(Pawfgr%fintocoa,(Dtset%nfft))
+   ABI_MALLOC(Pawfgr%coatofin,(Dtset%nfft))
+   ABI_MALLOC(Pawfgr%fintocoa,(Dtset%nfft))
    do ii=1,Dtset%nfft
     Pawfgr%coatofin(ii)=ii ; Pawfgr%fintocoa(ii)=ii
    end do
@@ -239,7 +239,7 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
 
  CASE DEFAULT
   write(msg,'(a,i4)')' Wrong value of usepaw: ',Dtset%usepaw
-  MSG_BUG(msg)
+  ABI_BUG(msg)
  END SELECT
 
 ! == Store useful dimensions in Pawfgr ===
@@ -272,7 +272,7 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
 &   ' boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
 &   ' Need larger ngfft to use intxc=1.',ch10,&
 &   ' Action : you could increase ngfft, or decrease ecut, or put intxc=0.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  DBG_EXIT("COLL")
@@ -317,10 +317,10 @@ subroutine pawfgr_destroy(Pawfgr)
 !@Pawfgr_type
 
  if (associated(Pawfgr%coatofin))  then
-   ABI_DEALLOCATE(Pawfgr%coatofin)
+   ABI_FREE(Pawfgr%coatofin)
  end if
  if (associated(Pawfgr%fintocoa))  then
-   ABI_DEALLOCATE(Pawfgr%fintocoa)
+   ABI_FREE(Pawfgr%fintocoa)
  end if
 
  Pawfgr%usefinegrid=0
@@ -382,7 +382,7 @@ end subroutine pawfgr_nullify
 !! Calculate the correspondance between the coarse grid and the fine grid
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2021 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -436,7 +436,7 @@ subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
  n1c=ngfftc(1);n2c=ngfftc(2);n3c=ngfftc(3)
  n1f=ngfftf(1);n2f=ngfftf(2);n3f=ngfftf(3)
 
- ABI_ALLOCATE(gc,(3,max(n1c,n2c,n3c)))
+ ABI_MALLOC(gc,(3,max(n1c,n2c,n3c)))
  do ii=1,3
    id(ii)=ngfftc(ii)/2+2
    do ing=1,ngfftc(ii)
@@ -444,7 +444,7 @@ subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
    end do
  end do
 
- ABI_ALLOCATE(gf,(3,max(n1f,n2f,n3f)))
+ ABI_MALLOC(gf,(3,max(n1f,n2f,n3f)))
  do ii=1,3
    id(ii)=ngfftf(ii)/2+2
    do ing=1,ngfftf(ii)
@@ -483,12 +483,12 @@ subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
  do ii=1,ubound(coatofin,1)
    if (coatofin(ii)==0) then
      msg = 'A zero was found in coatofin. Check that the fine FFT mesh is finer in each dimension than the coarse FFT mesh.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
- ABI_DEALLOCATE(gf)
- ABI_DEALLOCATE(gc)
+ ABI_FREE(gf)
+ ABI_FREE(gc)
 
  DBG_EXIT("COLL")
 

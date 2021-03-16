@@ -1,0 +1,72 @@
+# Oxygen molecule, treated like a metal, but with nsppol=2, for testing purposes
+
+ ndtset 3
+
+#Dataset 1.  Use atomic units and usual input variables
+   xcart1   0.0 0.0  1.0393493737
+            0.0 0.0 -1.0393493737    Bohr
+   acell1   7 7 9    Bohr
+  toldfe1   1.d-7   Hartree
+  nsppol1   2
+     ixc1   7
+
+#Dataset 2. Use other units or input variables
+   xcart2   0.0 0.0  0.55
+            0.0 0.0 -0.55  Angstrom
+   acell2   2*3.704240458   4.7625948747  Angstrom
+  toldfe2   27.2113834d-7 eV
+  nsppol2   2
+     ixc2   7
+
+#Dataset 3. Still other units or input variables
+  xcart3   0.0 0.0  0.55
+           0.0 0.0 -0.55   Angstrom
+   acell3   2*3.704240458   4.7625948747  Angstrom
+  toldfe3   2d-7 Ry
+  SpinPolarized3     T     ! This is a SIESTA input variable
+  xcname3   "PW92"
+
+
+#Common data
+ diemac 1.0d0
+ diemix 1/3
+ ecut 14
+  kptopt 0
+ kpt   3*0.0
+ natom  2
+ nband 8
+ nkpt 1
+ nstep 5
+ nsym  1
+ ntypat  1
+ occopt 4
+ rprim 1 0 0  0 1 0  0 0 1
+ spinat 0.0 0.0 1.0
+        0.0 0.0 1.0
+ toldfe 1.d-7
+ typat  1 1
+ wtk  1
+ znucl  8.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/8o.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t53.abo, tolnlines = 2, tolabs = 2.0e-10, tolrel = 2.0e-9
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   O2 molecule, treated like a metal (there is a degeneracy at the
+#%%   Fermi level), occopt=4 and tsmear=0.04 , with nsppol=2 .
+#%%   Use spinat to polarize the molecule at start.
+#%%   Same as test v1 #8, except use different energy and length units.
+#%%   Test the use of dimensional and logical input
+#%%   variables.
+#%%<END TEST_INFO>

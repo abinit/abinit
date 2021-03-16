@@ -15,7 +15,7 @@
 !! *  The matrix X is overwritten on B.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2020 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,8 +37,6 @@
 !! SOURCE
 
 subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
-
- implicit none
 
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side
@@ -92,8 +90,6 @@ end subroutine abi_ztrsm
 
   subroutine abi_dtrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,&
 &       x_cplx)
-
- implicit none
 
  !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag
@@ -159,7 +155,6 @@ end subroutine abi_dtrsm
  subroutine abi_d2ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,&
 &  x_cplx)
 
- implicit none
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag
  integer, intent(in) :: m,n,lda,ldb
@@ -223,8 +218,6 @@ end subroutine abi_d2ztrsm
 !!
 
   subroutine abi_d2ztrsm_3d(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
-
- implicit none
 
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG, MJV, DCA, GMR, JCC, SE)
+!!  Copyright (C) 1998-2021 ABINIT group (XG, MJV, DCA, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,8 +91,6 @@ contains
 subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
 & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ndim,nsym,optcell
@@ -147,7 +145,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=0, ndim MUST be equal to 3*natom,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom=',3*natom,'.'
-   MSG_BUG(messagE)
+   ABI_BUG(messagE)
  end if
 
  if( (optcell==1 .or. optcell==4 .or. optcell==5 .or. optcell==6) &
@@ -155,7 +153,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=1,4,5 or 6, ndim MUST be equal to 3*natom+1,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+1=',3*natom+1,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==2 .or. optcell==3) &
@@ -163,14 +161,14 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( optcell>=7 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !##########################################################
@@ -288,8 +286,6 @@ end subroutine xfpack_vin2x
 subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
   & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ndim,nsym,optcell
@@ -343,7 +339,7 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=0, ndim MUST be equal to 3*natom,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom=',3*natom,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==1 .or. optcell==4 .or. optcell==5 .or. optcell==6) &
@@ -351,7 +347,7 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=1,4,5 or 6, ndim MUST be equal to 3*natom+1,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+1=',3*natom+1,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==2 .or. optcell==3) &
@@ -359,14 +355,14 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( optcell>=7 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !##########################################################
@@ -462,8 +458,6 @@ end subroutine xfpack_x2vin
 
 subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ndim,optcell
@@ -499,7 +493,7 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=0, ndim MUST be equal to 3*natom,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom=',3*natom,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==1 .or. optcell==4 .or. optcell==5 .or. optcell==6) &
@@ -507,7 +501,7 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=1,4,5 or 6, ndim MUST be equal to 3*natom+1,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+1=',3*natom+1,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==2 .or. optcell==3) &
@@ -515,14 +509,14 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( optcell>=7 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !
@@ -585,8 +579,6 @@ end subroutine xfpack_f2vout
 subroutine xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,fred,&
 & hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,vout,&
 & vout_prev,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -736,11 +728,8 @@ end subroutine xfh_recover_new
 
 subroutine xfh_update(ab_xfh,acell,fred_corrected,natom,rprim,strten,xred)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
-
 type(ab_xfh_type),intent(inout) :: ab_xfh
 integer,intent(in) :: natom
 

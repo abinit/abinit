@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2019-2021 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -627,10 +627,6 @@ CPPFLAGS=""
 
 # FIXME: Temporary options to remove
 case "${ABINIT_LEGACY_OPTION}" in
-  etsf_io)
-    AC_DEFINE([HAVE_ETSF_IO], 1,
-     [Define to 1 if you want to use ETSF_IO (obsolete, orphan project).])   
-    ;;
   mpi1)
     AC_DEFINE([HAVE_MPI1], 1,
       [Define to 1 if you have a MPI-1 implementation (obsolete, broken).])

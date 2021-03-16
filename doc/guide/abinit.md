@@ -9,71 +9,45 @@ This document explains the i/o parameters and format needed for the main code (a
 The new user is advised to read first the [new user's guide](..),
 before reading the present file. 
 It will be easier to discover the present file with the help of the [[tutorial:index|tutorial]].
-
-When the user will be sufficiently familiarized with ABINIT, reading the
-~abinit/doc/users/tuning.txt file might be useful (this file, as many
-additional documentation files, is not available on the Web, but is available in the package). 
-For calculating response properties using abinit, the complementary [[help:respfn]] is needed.
+Many user guides are also present on the Web.
+As an example, for calculating response properties using abinit, the complementary [[help:respfn]] is needed.
+Some additional specialized documentation is not available on the Web, but inside the package, but this should be for
+advanced users only.
 
 <a id="intro"></a>
 ## 1 How to run the code?
 
-### 1.1 Introducing the 'files' file
-  
-Given an input file (parameters described below) and the required
-pseudopotential files, the user must create a "files" file which lists names
-for the files the job will require, including the main input file, the main
-output file, root names for other input, output, or temporary files, and the
-names of different pseudopotential or PAW atomic data files (one per line).
-The files file (called for example ab.files) could look like:
-    
-       ab_in
-       ab_out
-       abi
-       abo
-       tmp
-       Si-GGA.psp8
-       O-GGA.psp8
-
-In this example:  
-
-* The main input file is called "ab_in".  
-* The main output will be put into the file called "ab_out".  
-* The name of input wavefunctions (if any) will be built from the root "abi"
-    (namely abi_WFK, see later).  
-* The output wavefunctions will be written to abo_WFK. Other output files
-  might be build from this root.  
-* The temporary files will have a name that use the root "tmp". (for example tmp_STATUS).  
-* The pseudopotentials needed for this job are "Si-GGA.psp8" and "O-GGA.psp8".  
-  
-Other examples are given in the subdirectories of the ~abinit/tests directory.
-
-!!! important 
-
-    The maximal length of names for the main input or output files is presently
-    132 characters. It is 112 characters for the root strings, since they will be
-    supplemented by different character strings.
-
-<a id="exec"></a>
-### 1.2 Running the code
-  
-The main executable file is called abinit. Supposing that the "files" file is
-called ab.files, and that the executable is placed in your working directory,
+The main executable file is called abinit. Supposing that the "input" file is
+called run.abi, and that the executable is placed in your working directory,
 abinit is run interactively (in Unix) with the command
 
-    abinit < ab.files >& log
+    abinit run.abi >& log
   
 or, in the background, with the command
 
-    abinit < ab.files >& log &
+    abinit run.abi >& log &
 
 where standard out and standard error are piped to the log file called "log"
 (piping the standard error, thanks to the '&' sign placed after '>' is
 **really important** for the analysis of eventual failures, when not due to
-ABINIT, but to other sources, like disk full problem...). The user can
-specify any names he/she wishes for any of these files. Variations of the
-above commands could be needed, depending on the flavor of UNIX that is used
+ABINIT, but to other sources, like disk full problem...). It is also possible 
+to dissociate the standard error file from the standard output file with the
+command
+
+    abinit run.abi > log 2> err &
+
+or even more explicitly 
+
+    abinit run.abi > run.log 2> run.err &
+
+Actually, the user can specify any names he/she wishes for any of these files. 
+The suffix .abi is the most usual for the abinit input file, likewise the suffix .abo for the main output file.
+Nevertheless, the names of all input/output/temporary abinit files can also be tuned. See e.g. [[output_file]] or [[topic:Control]]. 
+
+Variations of the
+above commands could be needed, depending on the flavor of Unix that is used
 on the platform that is considered for running the code.  
+If you do not underderstand the syntax above, which is standard Unix, please get familiarized with Unix before continuing.
 
 <a id="2"></a>
 ## 2 The underlying theoretical framework and algorithms
@@ -111,9 +85,9 @@ appendices L and M of [[cite:Martin2004|this book]] by R. M. Martin
 
 ### 3.1 Format of the input file
   
-Note that this input file was called ab_in in the example of section 1.1.  
+Note that this input file was called ab_in in the example of the [introduction](#intro).
 We first explain the content of the input file without use of the 
-"multi-dataset" possibility (that will be explained in section 3.3).
+"multi-dataset" possibility (that will be explained in section [3.3](#multidatasets)).
 
 The parameters are input to the code from a single input file. Each parameter
 value is provided by giving the name of the input variable and then placing
@@ -189,10 +163,10 @@ ABINIT has also some (very limited) interpretor capabilities:
 
   * A string might be formed by concatenating two strings with the // operator (even blanks before or after // are accepted)
 
-  * Environment variables are accepted, in the form $VAR where VAR is the name of the environment variable.
+  * Environment variables are accepted, in the form `$VAR` where VAR is the name of the environment variable.
     The end of the name of the environment variable, VAR, is determined by finding the closest separator 
     among a blank, a slash, or a double quote. 
-    The parser will automatically substitute the value of the environment variable to the $VAR string.
+    The parser will automatically substitute the value of the environment variable to the `$VAR` string.
     As an example, "$PSPDIR/PseudosHGH_pwteter" with PSPDIR being Psps_for_tests will give
     "Psps_for_tests/PseudosHGH_pwteter".
 
@@ -232,8 +206,171 @@ where geometry.inc gives the crystalline structure in the Abinit format:
     znucl 14.0
 
 
+
+
+<a id="files-file"></a>
+### 3.2 File names in ABINIT
+
+File names in ABINIT are either given automatically by ABINIT, or build from
+different input variables, like [[output_file]], [[pseudos]], [[indata_prefix]], [[outdata_prefix]]
+or [[tmpdata_prefix]].
+
+**[[output_file]]**
+
+Filename of the main file in which formatted output will be placed (the main
+output file). Error messages and other diagnostics will NOT be placed in this
+file, but sent to unit 06 (terminal or log file); the unit 06 output can be
+ignored unless something goes wrong. The code repeats a lot of information to
+both unit 06 and to the main output file. The unit 06 output is intended to be
+discarded if the run completes successfully, with the main output file keeping
+the record of the run in a nicer looking format.
+
+**[[pseudos]]**
+
+Give filenames of the different pseudopotential input files. The pseudopotential data files
+are formatted. There must be as many filenames provided sequentially here as
+there are types of atoms in the system, and the order in which the names are
+given establishes the identity of the atoms in the unit cell, as listed in [[typat]].
+
+**abi or [[indata_prefix]]**
+
+The other files READ by the code will have a name that is constructed from the
+root "abi" or another root defined by [[indata_prefix]]. This apply to optionally read wavefunction, density or potential
+files. In the multi-dataset mode, this root will be complemented by **_DS**
+and the dataset index. The list of possible input files, with their name
+created from the root 'abi', is the following (a similar list exist when
+**_DS** and the dataset index are appended to 'abi'):
+
+  * **abi_WFK**
+filename of file containing input wavefunction coefficients created from an
+earlier run (with [[nqpt]]=0). Will be opened and read if [[irdwfk]] is 1.
+The wavefunction file is unformatted and can be very large. **Warning**: in
+the multi dataset mode, if getwfk is non-zero, a wavefunction file build from
+**abo** will be read.
+
+  * **abi_WFQ**
+filename of file containing input wavefunction coefficients created from an
+earlier run (with [[nqpt]]=1), as needed for response function calculations.
+The wavefunction file is unformatted and can be very large. **Warning**: in
+the multi dataset mode, if getwfk is non-zero, a wavefunction file build from
+**abo** will be read.
+
+  * **abi_1WFxx**
+filename of file containing input first-order wavefunctions created from an
+earlier RF run. xx is the index of the perturbation
+
+  * **abi_DEN**
+filename of file containing density created from an earlier run. See
+explanations related to negative values of [[iscf]]. This file is also
+unformatted. **Warning**: in the multi dataset mode, if getwfk is non-zero, a
+density file build from **abo** will be read.
+
+  * **abi_HES**
+filename of file containing an approximate hessian, for eventual
+(re)initialisation of Broyden minimisation. See brdmin.F90 routine. The use of
+[[restartxf]] is preferred.
+
+**abo or [[outdata_prefix]]**
+
+Except [[output_file]] and "log", the other files WRITTEN by the code will have a
+name that is constructed from the root "abo" or [[outdata_prefix]]. 
+This applies to optionally written
+wavefunction, density, potential, or density of states files. In the multi-
+dataset mode, this root will be complemented by **_DS** and the dataset
+index. Also in the multi-dataset mode, the root "abo" can be used to build the
+name of **input** files, thanks to the 'get' variables. The list of possible
+output files, with their name created from the root 'abo' is the following (a
+similar list exists when **_DS** and the dataset index are appended to 'abo'):
+
+  * **abo_WFK**
+Filename of file containing output wavefunction coefficients, if [[nqpt]]=0.
+The wavefunction file is unformatted and can be very large.
+
+  * **abo_WFQ**
+Same as **abo_WFK**, but for the case [[nqpt]]=1. The wavefunctions are
+always output, either with the name **abo_WFK**, or with the name
+**abo_WFQ**.
+
+  * **abo_1WFxx**
+Same as **abo_WFK**, but for first-order wavefunctions, xx is the index of
+the perturbation, see the section [[help:respfn#6.3|section 6.3]] of the [[help:respfn]].
+
+  * **abo_DDB**
+The derivative database, produced by a response-function dataset, see [[help:respfn#ddb|this section]]
+of the respfn help file.
+
+  * **abo_DEN**
+filename of file containing density, in the case [[ionmov]]=0. See the keyword
+[[prtden]]. This file is unformatted, but can be read by cut3d.
+
+  * **abo_TIMx_DEN**
+filenames of files containing density, in the case [[ionmov]]/=0. The value of
+"x" after " **TIM** " is described hereafter. See the keyword [[prtden]]. This
+file is unformatted, but can be read by cut3d.
+
+  * **abo_POT**
+filename of file containing Kohn-Sham potential See the keyword [[prtpot]].
+This file is unformatted, but can be read by cut3d.
+
+  * **abo_TIMx_POT**
+filenames of files containing Kohn-Sham potential in the case [[ionmov]]/=0.
+The value of "x" after "TIM" is described hereafter. See the keyword
+[[prtpot]]. This file is unformatted, but can be read by cut3d.
+
+  * **abo_DOS**
+filename of file containing density of states. See the keyword [[prtdos]].
+This file is formatted.
+
+  * **abo_TIMx_DOS**
+filenames of files containing the density of states in the case [[prtdos]]=2
+and [[ionmov]]=1 or 2. The value of "x" after "TIM" is described hereafter.
+See also the keyword [[prtdos]]. This file is formatted.
+
+  * **abo_GEO**
+filename of file containing the geometrical analysis (bond lengths and bond
+angles) in the case [[ionmov]]=0. See the keyword [[prtgeo]]. This file is
+formatted.
+
+  * **abo_TIMx_GEO**
+filenames of files containing the geometrical analysis (bond lengths and bond
+angles) in the case [[ionmov]]=1 or 2. The value of "x" after "TIM" is
+described hereafter. See also the keyword [[prtgeo]]. This file is formatted.
+
+  * **abo_KSS**
+filename of file containing output wavefunction coefficients, if
+[[nbandkss]]/=0. This wavefunction file is unformatted and can be very large.
+Its purpose is to start a GW calculation using M.Torrent's code. A different
+format than for **abo_WFK** is used, see the file
+~abinit/doc/developers/format_KSS.txt.
+
+  * **abo_EIG**
+A file containing the electronic eigenvalues, for subsequent plotting of band
+structure.
+
+When [[ionmov]]/=0, the **POT**, **DEN**, or **GEO** files are output each
+time that a SCF cycle is finished. The " **x** " of **TIMx** aims at giving
+each of these files a different name. It is attributed as follows:
+\- case ionmov==1: there is an initialization phase, that takes 4 calls to
+the SCF calculation. The value of x will be A, B, C, and D. Then, x will be 1,
+2, 3 ..., actually in agreement with the value of itime (see the keyword
+[[ntime]])
+\- other ionmov cases: the initialisation phase take only one SCF call. The
+value of x will be 0 for that call. Then, the value of x is 1, 2, 3... in
+agreement with the value of itime (see the keyword [[ntime]])
+
+**tmp or [[tmpdata_prefix]]**
+
+The temporary files created by the codes will have a name that is constructed
+from the root " **tmp** " or [[tmpdata_prefix]]. tmp should usually be chosen such as to give access
+to a disk of the machine that is running the job, not a remote (NFS) disk.
+Under Unix, the name might be something like `/tmp/user_name/temp`. As an
+example, **tmp_STATUS**
+gives the status of advancement of the calculation, and is updated very
+frequently
+
+
 <a id="parameters"></a>
-### 3.2 More about ABINIT input variables
+### 3.3 More about ABINIT input variables
   
 In each section of the ABINIT input variables files, a generic information on
 the input variable is given: a **mnemonics**, possibly some
@@ -251,7 +388,7 @@ The **characteristics** can be one of the following:
 -   **LENGTH**
 -   **MAGNETIC FIELD**
 
-#### Physical information
+#### **Physical information**
 
 The **ENERGY**, **LENGTH** and **MAGNETIC FIELD** characteristics indicate
 that the physical meaning of the variable is known by ABINIT, so that ABINIT
@@ -306,9 +443,9 @@ The initial atomic positions can be input in Bohr or Angstrom through
 [[xcart]] (possibly use the Angstrom unit), or
 even in reduced coordinates, through [[xred]].
 
-#### Flow information
+#### **Flow information**
 
-Most of the variables can be used in the multi-dataset mode (see section 3.3),
+Most of the variables can be used in the multi-dataset mode (see section [3.3](#multidatasets)),
 but those that must have a unique value throughout all the datasets are
 signaled with the indication **NO_MULTI**.
 
@@ -328,7 +465,7 @@ velocities, the cell shape, and the occupation numbers. Their echo, after the
 run has proceeded, will of course differ from their input value. They are
 signaled by the indication **EVOLVING**.
 
-#### Other information
+#### **Other information**
 
 **DEVELOP** refers to input variables that are not used in production
 runs, but have been introduced during development time, of a feature that is
@@ -348,8 +485,10 @@ directory where the job was started. The code should also smoothly end. In
 both cases, the stop is not immediate. It can take a significant fraction
 (about 20% at most) of one SCF step to execute properly the instruction still needed.
 
+
+
 <a id="multidatasets"></a>
-### 3.3 The multi-dataset mode
+### 3.4 The multi-dataset mode
   
 Until now, we have assumed that the user wants to make computations
 corresponding to one set of data: for example, determination of the total
@@ -377,7 +516,7 @@ understand when one looks at examples, see below):
     of the dataset (e.g. [[jdtset]]=2), exists (e.g. "ecut2" ). It will take the data that follows this keyword, if it exists.
 
   * (2) If this modified variable name does not exist, it will look whether a metacharacter, 
-    a series or a double-loop data set has been defined, see sections 3.4 or 3.5.
+    a series or a double-loop data set has been defined, see sections [3.4](#series) or [3.5](#loop).
 
   * (3) If the variable name appended with the index of the dataset does not exist, and 
     if there is no series nor double-loop dataset for this keyword, it looks for an occurrence 
@@ -429,8 +568,10 @@ and the second run will use "acell5" and "ecut5":
 
 Note that ecut1, ecut2 and ecut3 are not used.
 
+
+
 <a id="series"></a>
-### 3.4 Defining a series
+### 3.5 Defining a series
   
 Rule (2) is split in three parts: (2a), (2b) and (2c). Series relate with (2b):
 
@@ -470,8 +611,10 @@ is equivalent to
 
 In both cases, there are six datasets, with increasing values of [[ecut]].
 
+
+
 <a id="loop"></a>
-### 3.5 Defining a double loop dataset
+### 3.6 Defining a double loop dataset
   
 To define a double loop dataset, one has first to define the upper limit of
 two loop counters, thanks to the variable [[udtset]]. The inner loop will
@@ -535,8 +678,10 @@ is equivalent to
 
     More examples can be found in the directory ~abinit/tests/v1, cases 59 and later.
 
+
+
 <a id="filenames-multidataset"></a>
-### 3.6 File names in the multi-dataset mode
+### 3.7 File names in the multi-dataset mode
   
 The root names for input and output files (potential, density, wavefunctions
 and so on) will receive an appendix: **_DS** followed by the index of the
@@ -560,170 +705,10 @@ variables, some output variables are also summarized, using the same conventions
   * **fcart** (cartesian forces) 
   * **strten** (the stress tensor). 
 
-<a id="files-file"></a>
-## 4 More detailed presentation of the files file
-  
-Note: _This "files" file is called _ab.files_ in section 1._
 
-As mentioned in section 1 (you might read it again if needed), the "files"
-file contains the file names or root names needed to build file names. These
-are listed below: there are 5 names or root names for input, output and
-temporaries, and then a list of pseudopotentials (one per line). These names
-may be provided from unit 05 interactively during the run but are more
-typically provided by piping from a file in Unix (the "files" file).
 
-**ab_in**  
-Filename of file containing the input data, described in the preceding sections.
-
-**ab_out**  
-Filename of the main file in which formatted output will be placed (the main
-output file). Error messages and other diagnostics will NOT be placed in this
-file, but sent to unit 06 (terminal or log file); the unit 06 output can be
-ignored unless something goes wrong. The code repeats a lot of information to
-both unit 06 and to the main output file. The unit 06 output is intended to be
-discarded if the run completes successfully, with the main output file keeping
-the record of the run in a nicer looking format.
-
-**abi**  
-The other files READ by the code will have a name that is constructed from the
-root "abi". This apply to optionally read wavefunction, density or potential
-files. In the multi-dataset mode, this root will be complemented by **_DS**
-and the dataset index. The list of possible input files, with their name
-created from the root 'abi', is the following (a similar list exist when 
-**_DS** and the dataset index are appended to 'abi'):
-
-  * **abi_WFK**   
-filename of file containing input wavefunction coefficients created from an
-earlier run (with [[nqpt]]=0). Will be opened and read if [[irdwfk]] is 1.
-The wavefunction file is unformatted and can be very large. **Warning**: in
-the multi dataset mode, if getwfk is non-zero, a wavefunction file build from
-**abo** will be read.
-
-  * **abi_WFQ**   
-filename of file containing input wavefunction coefficients created from an
-earlier run (with [[nqpt]]=1), as needed for response function calculations.
-The wavefunction file is unformatted and can be very large. **Warning**: in
-the multi dataset mode, if getwfk is non-zero, a wavefunction file build from
-**abo** will be read.
-
-  * **abi_1WFxx**   
-filename of file containing input first-order wavefunctions created from an
-earlier RF run. xx is the index of the perturbation
-
-  * **abi_DEN**   
-filename of file containing density created from an earlier run. See
-explanations related to negative values of [[iscf]]. This file is also
-unformatted. **Warning**: in the multi dataset mode, if getwfk is non-zero, a
-density file build from **abo** will be read.
-
-  * **abi_HES**   
-filename of file containing an approximate hessian, for eventual
-(re)initialisation of Broyden minimisation. See brdmin.F90 routine. The use of
-[[restartxf]] is preferred.
-
-**abo**  
-Except "ab_out" and "log", the other files WRITTEN by the code will have a
-name that is constructed from the root "abo". This apply to optionally written
-wavefunction, density, potential, or density of states files. In the multi-
-dataset mode, this root will be complemented by **_DS** and the dataset
-index. Also in the multi-dataset mode, the root "abo" can be used to build the
-name of **input** files, thanks to the 'get' variables. The list of possible
-output files, with their name created from the root 'abo' is the following (a
-similar list exists when **_DS** and the dataset index are appended to 'abo'):
-
-  * **abo_WFK**   
-Filename of file containing output wavefunction coefficients, if [[nqpt]]=0.
-The wavefunction file is unformatted and can be very large.
-
-  * **abo_WFQ**   
-Same as **abo_WFK**, but for the case [[nqpt]]=1. The wavefunctions are
-always output, either with the name **abo_WFK**, or with the name
-**abo_WFQ**.
-
-  * **abo_1WFxx**   
-Same as **abo_WFK**, but for first-order wavefunctions, xx is the index of
-the perturbation, see the section [[help:respfn#6.3|section 6.3]] of the [[help:respfn]].
-
-  * **abo_DDB**   
-The derivative database, produced by a response-function dataset, see [[help:respfn#ddb|this section]]
-of the respfn help file.
-
-  * **abo_DEN**   
-filename of file containing density, in the case [[ionmov]]=0. See the keyword
-[[prtden]]. This file is unformatted, but can be read by cut3d.
-
-  * **abo_TIMx_DEN**   
-filenames of files containing density, in the case [[ionmov]]/=0. The value of
-"x" after " **TIM** " is described hereafter. See the keyword [[prtden]]. This
-file is unformatted, but can be read by cut3d.
-
-  * **abo_POT**   
-filename of file containing Kohn-Sham potential See the keyword [[prtpot]].
-This file is unformatted, but can be read by cut3d.
-
-  * **abo_TIMx_POT**   
-filenames of files containing Kohn-Sham potential in the case [[ionmov]]/=0.
-The value of "x" after "TIM" is described hereafter. See the keyword
-[[prtpot]]. This file is unformatted, but can be read by cut3d.
-
-  * **abo_DOS**   
-filename of file containing density of states. See the keyword [[prtdos]].
-This file is formatted.
-
-  * **abo_TIMx_DOS**   
-filenames of files containing the density of states in the case [[prtdos]]=2
-and [[ionmov]]=1 or 2. The value of "x" after "TIM" is described hereafter.
-See also the keyword [[prtdos]]. This file is formatted.
-
-  * **abo_GEO**   
-filename of file containing the geometrical analysis (bond lengths and bond
-angles) in the case [[ionmov]]=0. See the keyword [[prtgeo]]. This file is
-formatted.
-
-  * **abo_TIMx_GEO**   
-filenames of files containing the geometrical analysis (bond lengths and bond
-angles) in the case [[ionmov]]=1 or 2. The value of "x" after "TIM" is
-described hereafter. See also the keyword [[prtgeo]]. This file is formatted.
-
-  * **abo_KSS**   
-filename of file containing output wavefunction coefficients, if
-[[nbandkss]]/=0. This wavefunction file is unformatted and can be very large.
-Its purpose is to start a GW calculation using M.Torrent's code. A different
-format than for **abo_WFK** is used, see the file
-~abinit/doc/developers/format_KSS.txt.
-
-  * **abo_EIG**   
-A file containing the electronic eigenvalues, for subsequent plotting of band
-structure.
-
-When [[ionmov]]/=0, the **POT**, **DEN**, or **GEO** files are output each
-time that a SCF cycle is finished. The " **x** " of **TIMx** aims at giving
-each of these files a different name. It is attributed as follows:  
-\- case ionmov==1: there is an initialization phase, that takes 4 calls to
-the SCF calculation. The value of x will be A, B, C, and D. Then, x will be 1,
-2, 3 ..., actually in agreement with the value of itime (see the keyword
-[[ntime]])  
-\- other ionmov cases: the initialisation phase take only one SCF call. The
-value of x will be 0 for that call. Then, the value of x is 1, 2, 3... in
-agreement with the value of itime (see the keyword [[ntime]])
-
-**tmp**  
-The temporary files created by the codes will have a name that is constructed
-from the root " **tmp** ". tmp should usually be chosen such as to give access
-to a disk of the machine that is running the job, not a remote (NFS) disk.
-Under Unix, the name might be something like `/tmp/user_name/temp`. As an
-example, **tmp_STATUS**  
-gives the status of advancement of the calculation, and is updated very
-frequently
-
-**psp1**  
-filename of first pseudopotential input file. The pseudopotential data files
-are formatted. There must be as many filenames provided sequentially here as
-there are types of atoms in the system, and the order in which the names are
-given establishes the identity of the atoms in the unit cell. (psp2, psp3, ...)
-
-<a id="5"></a>
-## 5 The pseudopotential files and PAW atomic data files
+<a id="pseudopotential-files"></a>
+## 4 The pseudopotential files and PAW atomic data files
   
 Actually, no real understanding of these files is needed to run the code. The
 recommended pseudopotentials can be downloaded from the ABINIT Web site at
@@ -744,14 +729,16 @@ pseudopotential files can be found in the abinit wiki at
 [[https://wiki.abinit.org/doku.php?id=developers:pseudos]], that you should
 read now (do not pursue with the description of each format, though).
 
-## 6 The different output files
+
+
+## 5 The different output files
   
 Explanation of the output from the code
 
 Output from the code goes to several places listed below.
 
 <a id="logfile"></a>
-### 6.1 The log file
+### 5.1 The log file
   
 The "log" file (this is the standard UNIX output file, and corresponds to
 Fortran unit number 06): a file which echoes the values of the input
@@ -779,12 +766,13 @@ advised to read at least the **WARNING** messages, during the first month of
 ABINIT use.
 
 <a id="outputfile"></a>
-### 6.2 The main output file
+### 5.2 The main output file
   
 The **main output file** is a formatted output file to be kept as the permanent record of the run.
 
 Note that it is expected **not** to exist at the beginning of the run:  
-If a file with the name specified in the "files" file already exists, the code
+If a file with the same name as the one specified by the input variable [[output_file]] 
+(see also the default output file name description) already exists, the code
 will generate, from the given one, another name, appended with **.A**. If
 this new name already exists, it will try to append **.B**, and so on, until **.Z**.  
 Then, the code stops, and asks you to clean the directory.
@@ -800,8 +788,8 @@ Then, for each dataset, it reports the point symmetry group and Bravais
 lattice, and the expected memory needs. It echoes the input data, and report
 on checks of data consistency for each dataset.
 
-<a id="6.3"></a>
-### 6.3 More on the main output file
+<a id="main-output-file"></a>
+### 5.3 More on the main output file
   
 Then, for each dataset, the real computation is done, and the code will report
 on some initialisations, the SCF convergence, and the final analysis of
@@ -810,24 +798,19 @@ details.
 
 The code reports:
 
-  * the real and reciprocal space translation vectors ( _Note_: the definition of the reciprocal vector is such that Ri.Gj= deltaij)
-  * the volume of the unit cell
-  * the ratio between linear dimension of the FFT box and the sphere of plane waves, called boxcut
-
-It must be above 2 for exact treatment of convolutions by FFT. 
-[[ngfft]] has been automatically chosen to give a boxcut value larger than 2, but not much
-larger, since more CPU time is needed for larger FFT grids;
-
-  * the code also mention that for the same FFT grid you might treat (slightly) larger [[ecut]] 
-    (so, with a rather small increase of CPU time) 
-
-  * the heading for each pseudopotential which has been input 
-
-  * from the inwffil subroutine, a description of the wavefunction initialization 
-  (random number initialization or input from a disk file), that is, a report 
-  of the number of planewaves (npw) in the basis at each k point
-
-  * from the setup2 subroutine, the average number of planewaves over all k points is reported in two forms, 
+  * The real and reciprocal space translation vectors ( _Note_: the definition of the reciprocal vector is such that $R_i.G_j= \delta_{ij}$).
+  * The volume of the unit cell.
+  * The ratio between linear dimension of the FFT box and the sphere of plane waves, called boxcut.
+    It must be above 2 for exact treatment of convolutions by FFT. 
+    [[ngfft]] has been automatically chosen to give a boxcut value larger than 2, but not much
+    larger, since more CPU time is needed for larger FFT grids.
+  * The code also mention that for the same FFT grid you might treat (slightly) larger [[ecut]] 
+    (so, with a rather small increase of CPU time). 
+  * The heading for each pseudopotential which has been input.
+  * From the inwffil subroutine, a description of the wavefunction initialization 
+    (random number initialization or input from a disk file), that is, a report 
+    of the number of planewaves (npw) in the basis at each k point
+  * From the setup2 subroutine, the average number of planewaves over all k points is reported in two forms, 
   arithmetic average and geometric average. 
 
 Until here, the output of a ground-state computation is identical to the one
@@ -836,22 +819,21 @@ especially [[help:respfn#6.2|section 6.2]].
 
 Next the code reports information for each SCF iteration:
 
-  * the iteration number 
-  * the (pseudo) total energy (Etot) in Hartree [This is not the total energy of the system, 
+  * The iteration number.
+  * The (pseudo) total energy (Etot) in Hartree [This is not the total energy of the system, 
     since the pseudopotential approximation has been made: a constant energy (in the frozen-core approximation) 
     should be added to the present pseudo total energy in order to obtain a total energy, 
     that includes the contributions from the core electrons. Since only differences of total energy matter 
     (except is extremely rare cases), one can work with this pseudo energy like if it were the true total energy, 
     except that the missing constant depends on the pseudopotential that has been used. 
     Thus one has to perform differences of pseudo energies between simulations that use the same pseudopotentials]. 
-  * the change in Etot since last iteration (deltaE) 
-  * the maximum squared residual residm over all bands and k points 
+  * The change in Etot since last iteration (deltaE).
+  * The maximum squared residual residm over all bands and k points 
     (residm - the residual measures the quality of the wavefunction convergence) 
-  * the squared residual of the potential in the SCF procedure (vres2) 
-  * the maximum change in the gradients of Etot with respect to fractional coordinates (diffor, in Hartree) 
-  * the rms value of the gradients of Etot with respect to fractional coordinates (maxfor, in Hartree).  
+  * The squared residual of the potential in the SCF procedure (vres2).
+  * The maximum change in the gradients of Etot with respect to fractional coordinates (diffor, in Hartree).
+  * The rms value of the gradients of Etot with respect to fractional coordinates (maxfor, in Hartree).  
     The latter two are directly related to forces on each atom.
-
   * Then comes an assessment of the SCF convergence: the criterion for fulfillment of the SCF criterion 
     (defined by [[toldfe]], [[toldff]], [[tolwfr]] or [[tolvrs]]) might be satisfied or not... 
   * Then the stresses are reported. 
@@ -949,18 +931,98 @@ at fixed atomic positions, these subroutines are:
 8. **getghc**: computes $\langle G|H|C\rangle$, that is, applies the Hamiltonian operator to an input vector. 
 
 <a id="header"></a>
-### 6.4 The header
+### 5.4 The header
   
-The **wavefunction files**, **density files**, and **potential files** all
-begin with the same records, called the "header".
+The **wavefunction files**, **density files**, and **potential files** are not plain text files (as they are quite big,
+and need some kind of compressed storage mode), but either binary files (from FORTRAN write statements), or netcdf files. 
+See the input variable [[iomode]].
+FORTRAN binary format is the default, and will be the focus of the following sections. 
+Reading a netcdf file is actually much easier than reading a FORTRAN binary file, as netcdf
+files can be addressed by content.
+
+In order to provide the relevant metadata about the run that generated such numerical data,
+the **wavefunction files**, **density files**, and **potential files** (irrespective of the format) 
+contain standardized basic information. In case of FORTRAN,  
+such files begin with the same records, called the "header".
 This header is treated using the hdr_type Fortran data structure inside ABINIT. 
 There are dedicated routines inside ABINIT for initializing a header, updating it,
 reading the header of an unformatted disk file, writing a header to an unformatted disk file,
 echoing a header to a formatted disk file, cleaning a header data structure.
 
 The header is made of 4 + [[ntypat]] unformatted records, obtained by the
-following Fortran90 instructions (format 5.7):
+following Fortran90 instructions (format 9.0):
+
+```fortran
+     write(unit=header) codvsn,headform,fform
+
+     write(unit=header) bantot,date,intxc,ixc,natom,ngfft(1:3),&
+    & nkpt,nspden,nspinor,nsppol,nsym,npsp,ntypat,occopt,pertcase,usepaw,&
+    & ecut,ecutdg,ecutsm,ecut_eff,qptn(1:3),rprimd(1:3,1:3),stmbias,&
+    & tphysel,tsmear,usewvl,nshiftk_orig,nshiftk,mband
+
+     write(unit=header) istwfk(1:nkpt),nband(1:nkpt*nsppol),&
+    & npwarr(1:nkpt),so_psp(1:npsp),symafm(1:nsym),symrel(1:3,1:3,1:nsym),&
+    & typat(1:natom),kpt(1:3,1:nkpt),occ(1:bantot),tnons(1:3,1:nsym),&
+    & znucltypat(1:ntypat),wtk(1:nkpt)
+
+     write(unit=unit) residm,xred(1:3,1:natom),etotal,fermie,amu(1:ntypat)
+
+     write(unit=unit) kptopt,pawcpxocc,nelect,cellcharge,icoulomb,&
+    & kptrlatt(3,3),kptrlatt_orig(3,3),shiftk_orig(3),shiftk(3)
+
+     do ipsp=1,npsp
+    ! (npsp lines, 1 for each pseudo; npsp=ntypat, except if alchemical pseudo-atoms)
+      write(unit=unit) title,znuclpsp,zionpsp,pspso,&
+    &  pspdat,pspcod,pspxc,lmn_size,md5_pseudos
+     enddo
+
+    !(in case of usepaw==1, there are some additional records)
+     if (usepaw==1)then
+      write(unit=unit)( pawrhoij(iatom)%nrhoijsel(1:nspden),iatom=1,natom), cplex, nspden
+      write(unit=unit)((pawrhoij(iatom)%rhoijselect(1:      nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom),&
+    &                 ((pawrhoij(iatom)%rhoijp     (1:cplex*nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom)
+     endif
+```
+
+where the type of the different variables is:
     
+```fortran
+    character*8 :: codvsn
+    integer :: headform,fform
+    integer :: bantot,cplex,date,icoulomb,intxc,ixc,kptopt,mband,natom,ngfft(3),&
+    & nkpt,npsp,nshiftk_orig,nshiftk,nspden,nspinor,nsppol,nsym,ntypat,occopt,&
+    & pawcpxocc,pertcase,usepaw,usewvl
+    double precision :: acell(3),cellcharge,ecut,ecutdg,ecutsm,ecut_eff,etotal,&
+    & fermie,nelect,qptn(3),residm,rprimd(3,3),shiftk(3),shiftk_orig(3),&
+    & stmbias,tphysel,tsmear
+    integer :: istwfk(nkpt),kptrlatt(3,3),kptrlatt_orig(3,3),nband(nkpt*nsppol),&
+    & npwarr(nkpt),so_psp(npsp),symafm(nsym),symrel(3,3,nsym),typat(natom),&
+    & nrhoijsel(nspden),rhoijselect(*,nspden)
+    double precision :: amu(ntypat),kpt(3,nkpt),occ(bantot),tnons(3,nsym),&
+    & znucltypat(ntypat),wtk(nkpt),xred(3,natom)
+    character*132 :: title
+    character*32 :: md5_pseudos
+    double precision :: znuclpsp,zionpsp
+    integer :: pspso,pspdat,pspcod,pspxc,lmn_size
+    double precision :: rhoij(*,nspden)
+```
+
+NOTE: _etotal is set to its true value only for density and potential files.
+For other files, it is set to 1.0d20_  
+NOTE: _ecut_eff= [[ecut]]*([[dilatmx]])$^2$_  
+NOTE: _For all cases where occupation numbers are defined (that is, positive
+iscf, and iscf=-3), and for non-metallic occupation numbers, the Fermi energy
+is set to the highest occupied eigenenergy. This might not correspond to the
+expected Fermi energy for a later non-self-consistent calculation (e.g. the band structure)_
+
+The header might differ for different versions of ABINIT. One pre-v5.3 format
+is described below. Note however, that the current version of ABINIT should be
+able to read all the previous formats (not to write them), with the exception
+of wavefunction files for which the [[ecutsm]] value was non-zero (there has
+been a change of definition of the smearing function in v4.4).
+
+The format for ABINIT versions 8.0 to 8.11 was:
+
 ```fortran
      write(unit=header) codvsn,headform,fform
      write(unit=header) bantot,date,intxc,ixc,natom,ngfft(1:3),&
@@ -984,8 +1046,8 @@ following Fortran90 instructions (format 5.7):
      endif
 ```
 
-where the type of the different variables is:
-    
+where the type of the different variables was:
+
 ```fortran
     character*6 :: codvsn
     integer :: headform,fform
@@ -1001,50 +1063,12 @@ where the type of the different variables is:
     integer :: pspso,pspdat,pspcod,pspxc,lmax,lloc,mmax=integers
     double precision :: residm,xred(3,natom),etotal,fermie,rhoij(*,nspden)
 ```
-
-NOTE: _etotal is set to its true value only for density and potential files.
-For other files, it is set to 1.0d20_  
-NOTE: _ecut_eff= [[ecut]]* [[dilatmx]] 2_  
-NOTE: _For all cases where occupation numbers are defined (that is, positive
-iscf, and iscf=-3), and for non-metallic occupation numbers, the Fermi energy
-is set to the highest occupied eigenenergy. This might not correspond to the
-expected Fermi energy for a later non-self-consistent calculation (e.g. the band structure)_
-
-The header might differ for different versions of ABINIT. One pre-v5.3 format
-is described below. Note however, that the current version of ABINIT should be
-able to read all the previous formats (not to write them), with the exception
-of wavefunction files for which the [[ecutsm]] value was non-zero (there has
-been a change of definition of the smearing function in v4.4).
-
-The format for version 4.4, 4.5, 4.6, 5.0, 5.1 and 5.2 was:
    
-```fortran
-     write(unit=header) codvsn,headform,fform
-     write(unit=header) bantot,date,intxc,ixc,natom,ngfft(1:3),&
-    & nkpt,nspden,nspinor,nsppol,nsym,npsp,ntypat,occopt,pertcase,usepaw,&
-    & ecut,ecutdg,ecutsm,ecut_eff,qptn(1:3),rprimd(1:3,1:3),stmbias,tphysel,tsmear
-     write(unit=header) istwfk(1:nkpt),nband(1:nkpt*nsppol),&
-    & npwarr(1:nkpt),so_typat(1:ntypat),symafm(1:nsym),symrel(1:3,1:3,1:nsym),typat(1:natom),&
-    & kpt(1:3,1:nkpt),occ(1:bantot),tnons(1:3,1:nsym),znucltypat(1:ntypat)
-     do ipsp=1,npsp
-    ! (npsp lines, 1 for each pseudopotential; npsp=ntypat, except if alchemical pseudo-atoms)
-      write(unit=unit) title,znuclpsp,zionpsp,pspso,pspdat,pspcod,pspxc,lmn_size
-     enddo
-    !(in case of usepaw==0, final record: residm, coordinates, total energy, Fermi energy)
-     write(unit=unit) residm,xred(1:3,1:natom),etotal,fermie
-    !(in case of usepaw==1, there are some additional records)
-     if (usepaw==1)then
-      write(unit=unit)(pawrhoij(iatom)%nrhoijsel(1:nspden),iatom=1,natom)
-      write(unit=unit)((pawrhoij(iatom)%rhoijselect(1:nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom),&
-    &                 ((pawrhoij(iatom)%rhoijp     (1:nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom)
-     endif
-```
-
 <a id="denfile"></a>
-### 6.5 The density output file
+### 5.5 The density output file
   
 This is an unformatted data file containing the electron density on the real
-space FFT grid. It consists of the header records followed by
+space FFT grid. It consists of the [header records](#header) followed by
 
 ```fortran
     do ispden=1,nspden
@@ -1052,17 +1076,17 @@ space FFT grid. It consists of the header records followed by
     enddo
 ```
 
-where **rhor** is the electron density in electrons/Bohr^3, and cplex is the
-number of complex components of the density (cplex=1 for GS calculations -the
-density is real-, and cplex=1 or 2 for RF). The input variable [[nspden]]
+where **rhor** is the electron density in electrons/Bohr^3, and **cplex** is the
+number of complex components of the density (**cplex**=1 for GS calculations -the
+density is real-, and **cplex**=1 or 2 for RF). The input variable [[nspden]]
 describes the number of components of the density. The first component (the
 only one present when [[nspden]]=1) is always the total charge density. When
 [[nspden]]=2, the second component is the density associated with spin-up
 electrons. When [[nspden]]=4, the second, third and fourth components
 correspond to the x, y and z projections of the local magnetization, in units
-of hbar/2. Note that the meaning of the different components of the density
+of $\hbar/2$. Note that the meaning of the different components of the density
 differs for the density array (rhor) and for the different potential arrays
-(vxc...), see section  6.6.
+(vxc...), see the [next section](#localpotfile).
 
 To identify the points in real space which correspond with the index "ir"
 above, consider the following.  
@@ -1085,9 +1109,9 @@ diagonally opposite from the origin, or right alongside the origin if the
 whole grid is viewed as being periodically repeated.
 
 <a id="localpotfile"></a>
-### 6.6 The potential files
+### 5.6 The potential files
   
-Also unformatted files consisting of the header records and
+Also unformatted files consisting of the [header records](#header) and
     
 ```fortran
     do ispden=1,nspden
@@ -1109,13 +1133,13 @@ to use the same format as for the other potential files, the spin-independent
 array is written twice, once for spin-up and one for spin-down.
 
 <a id="wfkfile"></a>
-**6.7. The wavefunction output file**
+###5.7 The wavefunction output file
 
 This is an unformatted data file containing the planewaves coefficients of all
 the wavefunctions, and different supplementary data.
 
-The **ground-state** wf file consists of the header records, and data written
-with the following lines of FORTRAN (version 4.0 and more recent versions):
+The **ground-state** wf file consists of the [header records](#header), and data written
+with the following lines of FORTRAN:
 
 ```fortran    
           bantot=0                                    <-- counts over all bands
@@ -1155,8 +1179,8 @@ cell, and the stresses. The type of the different variables is:
     double precision :: cg,dummy,eigen,fred,occ,xred
 ```
 
-The **response-function** wf file consists of the header records, and data
-written with the following lines of FORTRAN (version 4.0 and more recent versions):
+The **response-function** wf file consists of the [header records](#header), and data
+written with the following lines of FORTRAN:
     
 ```fortran
     bantot=0                                    <-- counts over all bands
@@ -1173,18 +1197,10 @@ written with the following lines of FORTRAN (version 4.0 and more recent version
     enddo
 ```
 
-In version previous to 4.0, npw and nspinor were combined:
-    
-```fortran
-    write(unit) npw*nspinor,nband
-```
-
-while the planewave coordinate record was not present (in both GS and RF cases).
-
 Note that there is an alternative format (_KSS) for the output of the
 wavefunction coefficients, activated by a non-zero value of [[nbandkss]].
 
-### 6.8 Other output files
+### 5.8 Other output files
 
   
 There are many other output files, optionally written, all formatted files at
@@ -1197,29 +1213,30 @@ information on such files:
   * [[prtgeo]] to print a file with a geometrical analysis (bond lengths and bond angles), that also contains an XMOL section
   * [[prt1dm]] to print a one-dimensional projection of potential and density, for the three axes.
 
-### 6.9 Control of output in the parallel case
+### 5.9 Control of output in the parallel case
   
 For massively parallel runs, one cannot afford to have some of the output
 files that are usually created. Explicitly, the log file and also the status
-file become problematic. By default, with less than N processors, they are
-created, but beyond N processors, they are deactivated except for the main log
+file become problematic. By default, with $N=2$ processors or less than $N=2$ processors, they are
+created, but beyond $N=2$ processors, they are deactivated except for the main log
 file (master processor).
 
 This default behaviour can be changed as follows. If a file named "_NOLOG"
 exists in the current directory, then no log file and no status file will be
-created, even with less than N processors. By contrast, if a file "_LOG"
+created, even with less than $N=2$ processors. By contrast, if a file "_LOG"
 exists in the current directory, then a log file and the status files will be
-created, even with more than N processors. Alternatively, if a file named
-"_MAINLOG" exists and there are less than N processors, only the master
+created, even with more than $N=2$ processors. Alternatively, if a file named
+"_MAINLOG" exists and there are less than $N=2$ processors, only the master
 processor writes the log and status files (this mimic the default behavior
-when using more than N processors but with less than N processors)
+when using more than $N=2$ processors but with less than $N=2$ processors)
 
-In ABINITv7, N was set at N=100. However, with ABINITv8, N has been switched
-to 2. It can be changed "by hand", though: modify NPROC_NO_EXTRA_LOG in
-src/10_defs/defs_basis.F90 and recompile. See src/95_drive/iofn1.F90 for more explanation.
+In ABINITv7, $N$ was set at $N=100$. However, with ABINITv8, $N$ has been switched
+to $2$. It can be changed "by hand", though: modify NPROC_NO_EXTRA_LOG in
+src/10_defs/defs_basis.F90 and recompile. See 44_abitypes_defs/m_dtfil.F90 for more explanation.
 
-<a id="7"></a>
-## 7 Numerical quality of the calculations
+
+<a id="numerical-quality"></a>
+## 6 Numerical quality of the calculations
   
 The following section describes various parameters which affect convergence
 and the numerical quality of calculations.
@@ -1240,12 +1257,15 @@ basis for a given set of atoms. Some atoms (notably those in the first row or
 first transition series row) have relatively deep pseudopotentials which
 require many planewaves for convergence. In contrast are atoms like Si for
 which fewer planewaves are needed. A typical value of [[ecut]] for silicon
-might be 5-10 Hartree for quite good convergence, while the value for oxygen
-might be 25-35 Hartree or more depending on the convergence desired and the
-design of the pseudo- potential.
+with a norm-conserving pseudopotential
+might be 10...15 Hartree for quite good convergence, while the value for oxygen
+might be 35...40 Hartree or more depending on the convergence desired and the
+design of the pseudo-potential. With PAW, the [[ecut]] to be used is usually 
+smaller, e.g. 17 Hartree for oxygen. The pseudo-dojo <http://www.pseudo-dojo.org/>
+provides hints with the available pseudopotentials.
 
-NOTE: It is necessary in every new problem to **TEST** the convergence by
-**RAISING** [[ecut]] for a given calculation until the results being computed
+NOTE: It is necessary in every new problem to **TEST** the convergence, by
+**RAISING** [[ecut]] for a given calculation, until the results being computed
 are constant to within some tolerance. This is up to the user and is very
 important. For a given [[acell]] and [[rprim]], [[ecut]] is the parameter
 which controls the number of planewaves. Of course if [[rprim]] or [[acell]]
@@ -1256,14 +1276,12 @@ the convergence of _e.g._ the total energy within some range of planewave
 number or [[ecut]]. It is appropriate to attempt to optimize this convergence,
 especially for difficult atoms like oxygen or copper, as long as one does not
 significantly compromise the quality or transferability of the
-pseudopotential. There are many people working on new techniques for
-optimizing convergence.
+pseudopotential. 
 
-For information on extended norm conservation, see E. L. Shirley, D. C. Allan,
-R. M. Martin, and J. D. Joannopoulos, Phys. Rev. B 40, 3652 (1989).
-
-For information on optimizing the convergence of pseudopotentials, see A. M.
-Rappe, K. M. Rabe, E. Kaxiras, and J. D. Joannopoulos, Phys. Rev. B 41, 1227 (1990).
+For information on optimizing the convergence of pseudopotentials, see 
+[[cite:Rappe1990]]. For the generation of ONCVPSP pseudopotentials, see 
+[[cite:Hamann2013]]. For the pseudodojo, see [[cite:Vansetten2018]].
+For the JTH table of PAW atomic data, see [[cite:Jollet2014]].
 
 (2) In addition to achieving convergence in the number of planewaves in the
 basis, one must ensure that the SCF iterations which solve the electronic

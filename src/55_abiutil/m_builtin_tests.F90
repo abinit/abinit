@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA,XG,GMR)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA,XG,GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -108,7 +108,7 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
 
 !Now, open the status file, and either delete it, or produce a report
  if (open_file(filstat,msg,newunit=temp_unit,form='formatted',status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if(builtintest==0)then

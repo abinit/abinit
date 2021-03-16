@@ -6,7 +6,7 @@
 !! Initialize geometry variables for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG, RC)
+!!  Copyright (C) 1998-2021 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,8 @@ module m_ingeo
  use m_sort
  use m_dtset
 
- use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, symmetrize_rprimd, symmetrize_xred, symatm
+ use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, &
+&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred, symatm
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symanal, symlatt
  use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
@@ -173,13 +174,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
- integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
- integer :: ipsp,irreducible,isym,itypat,jsym,marr,multiplicity,natom_uc,natfix,natrd
+ integer, save :: print_comment_tolsym=1
+ integer :: bckbrvltt,brvltt,chkprim,expert_user,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
+ integer :: ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,ucvol,sumalch
- character(len=600) :: msg
+ character(len=1000) :: msg
  character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
  type(geo_t) :: geo
@@ -189,14 +191,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:)
- real(dp),allocatable :: tnons_cart(:,:)
+ real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
 ! *************************************************************************
 
+!DEBUG
+!write(std_out,'(a)')' m_ingeo%ingeo : enter '
+!call flush(std_out)
+!ENDDEBUG
+
  marr=max(12,3*natom,9*msym)
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
  ! Try from geo_string
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, 'KEY', key_value=geo_string)
@@ -258,7 +265,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  tolsym = tol5
  !if (tread_geo /= 0 .and. geo%filetype == "poscar") then
  !  tolsym = tol4
- !  MSG_COMMENT("Reading structure from POSCAR --> default value of tolsym is set to 1e-4")
+ !  ABI_COMMENT("Reading structure from POSCAR --> default value of tolsym is set to 1e-4")
  !end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolsym',tread,'DPR')
@@ -267,7 +274,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ! Find a tentative Bravais lattice and its point symmetries (might not use them)
  ! Note that the Bravais lattice might not be the correct one yet (because the
  ! actual atomic locations might lower the symmetry obtained from the lattice parameters only)
- ABI_ALLOCATE(ptsymrel,(3,3,msym))
+ ABI_MALLOC(ptsymrel,(3,3,msym))
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
  ! 3) Possibly, initialize a jellium slab
@@ -299,25 +306,25 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        write(msg, '(3a)' )&
         'The number of atoms to be read (natrd) can not be used with supercell_latt.',ch10,&
         'Action: Remove natrd or supercell_latt in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      else
        write(msg,'(3a,I0,a,I0,a,I0,2a)')&
        'The input variable supercell_latt is present',ch10,&
        'thus a supercell ',supercell_lattice(1),' ',supercell_lattice(2),&
        ' ',supercell_lattice(3),' is generated',ch10
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    else
      write(msg, '(3a,i0,a,i0,2a,a)' )&
       'The number of atoms to be read (natrd) must be positive and not bigger than natom.',ch10,&
       'This is not the case: natrd=',natrd,', natom=',natom,ch10,&
       'Action: correct natrd or natom in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
  ! 5) Read the type and initial spin of each atom in the primitive set--------
- ABI_ALLOCATE(typat_read,(natrd))
+ ABI_MALLOC(typat_read,(natrd))
  typat_read(1)=1
 
  if (tread_geo == 0) then
@@ -337,13 +344,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
       'The input type of atom number ',iatom,' is equal to ',typat_read(iatom),',',ch10,&
       'while it should be between 1 and ntypat= ',ntypat,'.',ch10,&
       'Action: change either the variable typat or the variable ntypat.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
  ! 6) Read coordinates for each atom in the primitive set--------
- ABI_ALLOCATE(xcart_read,(3,natrd))
- ABI_ALLOCATE(xred_read,(3,natrd))
+
+ ABI_MALLOC(xcart_read,(3,natrd))
+ ABI_MALLOC(xred_read,(3,natrd))
 
  random_atpos=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_atpos',txrandom,'INT')
@@ -352,7 +360,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    write(msg,'(3a)')&
     'Random positions is a variable defined between 0 and 5. Error in the input file. ',ch10,&
     'Action: define one of these in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !if(nimage/=1 .and. iimage/=1)then
@@ -390,7 +398,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    write(msg, '(3a)' )&
     'Neither xred nor xcart are present in input file. ',ch10,&
     'Action: define one of these in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (txred==1)   write(msg, '(a)' ) '  xred   is defined in input file'
@@ -403,7 +411,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    write(msg, '(3a)' )&
     'Too many input channels for atomic positions are defined.',ch10,&
     'Action: choose to define only one of these.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (txred==1 .or. txrandom /=0 ) then
@@ -418,10 +426,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! Here, allocate the variable that will contain the completed
  ! sets of xcart, after the use of the geometry builder or the symmetry builder
- ABI_ALLOCATE(xcart,(3,natom))
+ ABI_MALLOC(xcart,(3,natom))
 
  !7) Eventually read the symmetries
  !Take care of the symmetries
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsym',tread,'INT')
  if(tread==1) nsym=intarr(1)
 
@@ -430,18 +439,18 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    write(msg, '(a,i0,4a)' )&
     'Input nsym must be positive or 0, but was ',nsym,ch10,&
     'This is not allowed.',ch10,'Action: correct nsym in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  ! Check that nsym is not bigger than msym
  if (nsym>msym) then
    write(msg, '(2(a,i0),5a)')&
     'Input nsym = ',nsym,' exceeds msym = ',msym,'.',ch10,&
     'This is not allowed.',ch10,'Action: correct nsym in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (multiplicity>1) then
    nsym = 1
-   MSG_WARNING('Input nsym is now set to one due to the supercell_latt input')
+   ABI_WARNING('Input nsym is now set to one due to the supercell_latt input')
  end if
 
  ! Read symmorphi
@@ -455,7 +464,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      write(msg,'(3a)')&
        'When nsym>1, symrel must be defined in the input file.',ch10,&
        'Action: either change nsym, or define symrel in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if(tread==1) symrel(:,:,1:nsym)=reshape( intarr(1:9*nsym) , [3, 3, nsym])
 
@@ -472,7 +481,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          'a symmetry operation must vanish.',ch10,&
          'However, for the symmetry operation number ',isym,', tnons =',tnons(:,isym),'.',ch10,&
          'Action: either change your list of allowed symmetry operations, or use the symmetry finder (nsym=0).'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -496,14 +505,22 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    write(msg, '(3a)' )&
     'nobj can not be used with supercell_latt.',ch10,&
     'Action: Remove nobj or supercell_latt in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
- ! If there are objects, chkprim will not be used immediately
- ! But, if there are no objects, but a space group, it will be used directly.
- chkprim=1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
- if(tread==1) chkprim=intarr(1)
+!If there are objects, chkprim will not be used immediately
+!But, if there are no objects, but a space group, it will be used directly.
+!Need first to check the value of expert_user
+ expert_user=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'expert_user',tread,'INT')
+ if(tread==1) expert_user=intarr(1)
+ if(expert_user==0)then
+   chkprim=1
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
+   if(tread==1) chkprim=intarr(1)
+ else
+   chkprim=0
+ endif
 
  if(nobj/=0)then
 
@@ -522,7 +539,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
       'When nspden=4 or (nspden==2 and nsppol==1), the input variable spinat must be',ch10,&
       'defined in the input file, which is apparently not the case.',ch10,&
       'Action: define spinat or use nspden=1 in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! nucdipmom is read for each atom, from 1 to natom
@@ -538,14 +555,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
       'in the input file, when nobj= ',nobj,'.',ch10,&
       'This is not the case.',ch10,&
       'Action: initialize natrd in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if(jellslab/=0)then
      write(msg, '(a,i0,3a)' )&
       'A jellium slab cannot be used when nobj= ',nobj,'.',ch10,&
       'Action: change one of the input variables jellslab or nobj in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
@@ -601,7 +618,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
         'For the time being, a jellium slab can only be used',ch10,&
         'either with the symmetry finder (nsym=0) or with the space group 1 (nsym=1)',ch10,&
         'Action: change one of the input variables jellslab or nsym or spgroup in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      if(nzchempot/=0 .and. nsym/=1 .and. spgroup/=1)then
@@ -609,7 +626,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
         'For the time being, a spatially-varying chemical potential can only be used',ch10,&
         'either with the symmetry finder (nsym=0) or with the space group 1 (nsym=1)',ch10,&
         'Action: change one of the input variables nzchempot or nsym or spgroup in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      typat(1:natrd)=typat_read(1:natrd)
@@ -622,7 +639,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          'either using spgroup OR using nsym, but not both.',ch10,&
          'Action: modify your input file',ch10,&
          '(either set spgroup to 0, or nsym to 0)'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      brvltt=0
@@ -653,7 +670,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
            'either using spgroupma OR using genafm, but not both.',ch10,&
            'Action: modify your input file',ch10,&
            '(either define spgroupma or genafm)'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        ! TODO: all the symmetry generation operations should be in one big routine
@@ -723,10 +740,10 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          call xred2xcart(natrd,rprimd,xcart,xred)
          call xcart2xred(natrd,rprimd_new,xcart,xred)
 !        Produce tnons in the new system of coordinates
-         ABI_ALLOCATE(tnons_cart,(3,nsym))
+         ABI_MALLOC(tnons_cart,(3,nsym))
          call xred2xcart(nsym,rprimd,tnons_cart,tnons)
          call xcart2xred(nsym,rprimd_new,tnons_cart,tnons)
-         ABI_DEALLOCATE(tnons_cart)
+         ABI_FREE(tnons_cart)
 
          ! write(std_out,*)' after change of coordinates, nsym =',nsym
          ! write(std_out,*)' Describe the different symmetry operations (index,symrel,tnons,symafm)'
@@ -800,7 +817,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          'generate the missing atomic coordinates is not available.',ch10,&
          'Action: modify your input file',ch10,&
          '(either natrd, or natom, or spgroup, or nsym)'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      else
 
        if (multiplicity==1) typat(:)=typat_read(:)
@@ -809,7 +826,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        noncoll=0; if (nspden == 4) noncoll=1
        use_inversion=1
        if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
-         MSG_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+         ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
          use_inversion=0
        end if
 
@@ -844,40 +861,57 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
          chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
 
-       !If the group closure is not obtained which should be exceptional, try with a larger tolsym (three times larger)
+       !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
        if(ierr/=0)then
+         ABI_WARNING('Will try to obtain group closure by using a tripled tolsym.')
          call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
            nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,two*tolsym,typat,use_inversion,xred,&
            chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
          ABI_CHECK(ierr==0,"Error in group closure")
-         MSG_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
+         ABI_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
        endif
 
-       ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
-       ! and recompute the symmetry operations (tnons might not be accurate enough)
+       ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize tnons for gliding or screw operations, 
+       ! symmetrize the atomic positions and recompute the symmetry operations 
        if(tolsym>1.00001e-8)then
-         ABI_ALLOCATE(indsym,(4,natom,nsym))
-         ABI_ALLOCATE(symrec,(3,3,nsym))
+         call symmetrize_tnons(nsym,symrel,tnons,tolsym)
+         ABI_MALLOC(indsym,(4,natom,nsym))
+         ABI_MALLOC(symrec,(3,3,nsym))
          do isym=1,nsym
            call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
          end do
          call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
-         call symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
-         ABI_DEALLOCATE(indsym)
-         ABI_DEALLOCATE(symrec)
+         call symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym=indsym)
+         ABI_FREE(indsym)
+         ABI_FREE(symrec)
 
-         write(msg,'(a,es14.6,11a)')&
-          'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
-          'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
-          'symmetrized before storing them in the dataset internal variable.',ch10,&
-          'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
-          'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-          'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
-         MSG_WARNING(msg)
+         if(print_comment_tolsym==1)then
+           write(msg,'(a,es12.3,18a)')&
+&           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
+&           'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
+&           'symmetrized before storing them in the dataset internal variable.',ch10,&
+&           'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
+&           'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+&           'This is not a problem per se.',ch10,&
+&           'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
+&           ' decrease tolsym to 1.0e-8 or lower,',ch10,&
+&           'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.',ch10,&
+&           'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
+           ABI_COMMENT(msg)
+           print_comment_tolsym=0
+         endif
 
          call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
            nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
            chrgat=chrgat,nucdipmom=nucdipmom)
+
+         !Needs one more resymmetrization, for the tnons
+         ABI_MALLOC(tnons_new,(3,nsym))
+
+         call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
+&          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
+         tnons(:,1:nsym)=tnons_new(:,:)
+         ABI_FREE(tnons_new)
 
        end if
      end if
@@ -888,11 +922,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  end if ! check of existence of an object
 
- ABI_DEALLOCATE(ptsymrel)
- ABI_DEALLOCATE(xcart_read)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xred_read)
- ABI_DEALLOCATE(typat_read)
+ ABI_FREE(ptsymrel)
+ ABI_FREE(xcart_read)
+ ABI_FREE(xcart)
+ ABI_FREE(xred_read)
+ ABI_FREE(typat_read)
 
  call geo%free()
 
@@ -921,7 +955,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      tnons(:,isym)=matmul(symrel(:,:,isym),rcm(:))-rcm(:)+tnons(:,isym)
    end do
 
-   MSG_WARNING('icoulomb is 1 --> the average center of coordinates has been translated to (0.5,0.5,0.5)')
+   ABI_WARNING('icoulomb is 1 --> the average center of coordinates has been translated to (0.5,0.5,0.5)')
  end if
 
  !========================================================================================================
@@ -942,16 +976,30 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tol8)
 
    if(iexit==-1)then
-     write(msg,'(a,es14.6,11a)')&
-       'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
-       'In order to avoid spurious effects, the primitive vectors have been',ch10,&
-       'symmetrized before storing them in the dataset internal variable.',ch10,&
-       'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
-       'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-       'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
-     MSG_WARNING(msg)
+      write(msg,'(5a,es11.3,15a)')&
+        'It is observed that the input primitive vectors are not accurate:',ch10,&
+        'the lattice is not left invariant within 1.0e-8 when applying symmetry operations.',ch10,&
+        'However, they are only slightly inaccurate, as inaccuracies are within the input tolsym=', tolsym,ch10,&
+        'In order to avoid spurious effects, the primitive vectors have been',ch10,&
+        'symmetrized before storing them in the dataset internal variable.',ch10,&
+        'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
+        'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+&       'This is not a problem per se.',ch10,& 
+&       'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
+&       ' decrease tolsym to 1.0e-8 or lower.',ch10,&
+        'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.'
+     ABI_WARNING(msg)
+
      call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tol8)
      call mkradim(acell,rprim,rprimd)
+
+     !Needs one more resymmetrization, for the tnons
+     ABI_MALLOC(tnons_new,(3,nsym))
+     call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
+&          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
+     tnons(:,1:nsym)=tnons_new(:,:)
+     ABI_FREE(tnons_new)
+
    end if
 
  end if
@@ -1013,7 +1061,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        'The input variables natfix, natfixx, natfixy and natfixz must be',ch10,&
        'between 0 and natom (= ',natom,'), while one of them is ',natfix,'.',ch10,&
        'Action: correct that occurence in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    !Read iatfix
@@ -1033,7 +1081,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        'For direction ',idir,' the corresponding natfix is zero,',ch10,&
        'while iatfix specifies some atoms to be fixed.',ch10,&
        'Action: either specify a non-zero natfix(x,y,z) or suppress iatfix(x,y,z).'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! If natfix is non-zero, iatfix must be defined
@@ -1042,7 +1090,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        'For direction ',idir,' no iatfix has been specified,',ch10,&
        'while natfix specifies that some atoms to be fixed, natfix= ',natfix,'.',ch10,&
        'Action: either set natfix(x,y,z) to zero or define iatfix(x,y,z).'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if(tread==1)then
@@ -1053,7 +1101,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
            'The input variables iatfix, iatfixx, iatfixy and iatfixz must be',ch10,&
            'between 1 and natom, while one of them is ',intarr(ii),'.',ch10,&
            'Action: correct that occurence in your input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        ! Finally set the value of the internal iatfix array
        do iatom=1,natom
@@ -1075,6 +1123,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  vel_cell(:,:)=zero
  call intagm(dprarr,intarr,jdtset,marr,3*3,string(1:lenstr),'vel_cell',tread,'DPR')
  if(tread==1)vel_cell(:,:)=reshape( dprarr(1:9), [3,3])
+ call intagm_img(vel_cell,iimage,jdtset,lenstr,nimage,3,3,string,"vel_cell",tread,'DPR')
 
  ! mixalch
  if(ntypalch>0)then
@@ -1088,7 +1137,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          'the sum of the pseudopotential coefficients is',sumalch,ch10,&
          'while it should be one.',ch10,&
          'Action: check the content of the input variable mixalch.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
    call intagm_img(mixalch,iimage,jdtset,lenstr,nimage,npspalch,ntypalch,string,"mixalch",tread,'DPR')
@@ -1096,7 +1145,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! amu (needs mixalch to be initialized ...)
  ! Find the default mass
- ABI_ALLOCATE(mass_psp,(npsp))
+ ABI_MALLOC(mass_psp,(npsp))
  do ipsp=1,npsp
    call atomdata_from_znucl(atom,znucl(ipsp))
    amu_default = atom%amu
@@ -1116,14 +1165,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      end do
    end do
  end if
- ABI_DEALLOCATE(mass_psp)
+ ABI_FREE(mass_psp)
 
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'amu',tread,'DPR')
  if(tread==1)amu(:)=dprarr(1:ntypat)
  call intagm_img(amu,iimage,jdtset,lenstr,nimage,ntypat,string,"amu",tread,'DPR')
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
+
+!DEBUG
+!write(std_out,'(a)')' m_ingeo%ingeo : exit '
+!call flush(std_out)
+!ENDDEBUG
 
 end subroutine ingeo
 !!***
@@ -1194,8 +1248,8 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 ! *************************************************************************
 
  marr=max(12,3*natom)
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
 !1) Set up the number of vacancies.
 
@@ -1205,7 +1259,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  if(tread==1) vacnum=intarr(1)
 
  if (vacnum>0)then
-   ABI_ALLOCATE(vaclst,(vacnum))
+   ABI_MALLOC(vaclst,(vacnum))
 !  Read list of atoms to be suppressed to create vacancies
    call intagm(dprarr,intarr,jdtset,marr,vacnum,string(1:lenstr),'vaclst',tread,'INT')
    if(tread==1) vaclst(:)=intarr(1:vacnum)
@@ -1214,7 +1268,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &     'The array vaclst MUST be initialized in the input file',ch10,&
 &     'when vacnum is non-zero.',ch10,&
 &     'Action: initialize vaclst in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -1248,7 +1302,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &   'The number of object (nobj) must be either 1 or 2,',ch10,&
 &   'while the input file has  nobj=',nobj,'.',ch10,&
 &   'Action: correct nobj in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if(nobj==1 .or. nobj==2)then
@@ -1263,7 +1317,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &     'in the input file, when nobj=',nobj,'.',ch10,&
 &     'This is not the case.',ch10,&
 &     'Action: correct objan in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write(iout, '(a)' ) ' '
@@ -1277,12 +1331,12 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &     'and smaller than natom.',ch10,&
 &     'It is equal to ',objan,', an unacceptable value.',ch10,&
 &     'Action: correct objan in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  Read list of atoms in object a
    call intagm(dprarr,intarr,jdtset,marr,objan,string(1:lenstr),'objaat',tread,'INT')
-   ABI_ALLOCATE(objaat,(objan))
+   ABI_MALLOC(objaat,(objan))
    if(tread==1) objaat(1:objan)=intarr(1:objan)
 
    if(tread/=1)then
@@ -1291,7 +1345,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &     'in the input file, when nobj=',nobj,'.',ch10,&
 &     'This is not the case.',ch10,&
 &     'Action: initialize objaat in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write(iout,'(1x,a6,1x,(t9,20i3))') 'objaat',objaat(:)
@@ -1304,7 +1358,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &       'is equal to ',objaat(iatom),', an unacceptable value :',ch10,&
 &       'it should be between 1 and natom. ',&
 &       'Action: correct the array objaat in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
 
@@ -1316,7 +1370,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &         'is larger or equal to the one of the next atom,',ch10,&
 &         'while this list should be ordered, and an atom cannot be repeated.',ch10,&
 &         'Action: correct the array objaat in your input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -1335,7 +1389,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &         'The input values of objarf(1:3) must be positive,',ch10,&
 &         'while it is ',objarf(1:3),'.',ch10,&
 &         'Action: correct objarf in your input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -1377,7 +1431,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &       'in the input file, when rotations (objaro) are present.',ch10,&
 &       'This is not the case.',ch10,&
 &       'Action: initialize objaax in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      write(iout,format01160) 'objaax',objaax(1:6)
      write(std_out,format01160) 'objaax',objaax(1:6)
@@ -1391,7 +1445,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &     'The two points defined by the input array objaax are too',ch10,&
 &     'close to each other, and will not be used to define an axis.',ch10,&
 &     'Action: correct objaax in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    axisa(1:3)=axisa(1:3)/sqrt(norma)
  end if !  End condition of existence of a first object
@@ -1408,7 +1462,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &     'in the input file, when nobj=',nobj,'.',ch10,&
 &     'This is not the case.',ch10,&
 &     'Action: initialize objbn in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write(iout, '(a)' ) ' '
@@ -1422,12 +1476,12 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &     'and smaller than natom.',ch10,&
 &     'It is equal to ',objbn,', an unacceptable value.',ch10,&
 &     'Action: correct objbn in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  Read list of atoms in object b
    call intagm(dprarr,intarr,jdtset,marr,objbn,string(1:lenstr),'objbat',tread,'INT')
-   ABI_ALLOCATE(objbat,(objbn))
+   ABI_MALLOC(objbat,(objbn))
 
    if(tread==1) objbat(1:objbn)=intarr(1:objbn)
    if(tread/=1)then
@@ -1436,7 +1490,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &     'in the input file, when nobj=',nobj,'.',ch10,&
 &     'This is not the case.',ch10,&
 &     'Action: initialize objbat in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write(iout,'(1x,a6,1x,(t9,20i3))') 'objbat',objbat(:)
@@ -1449,7 +1503,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &       'is equal to ',objbat(iatom),', an unacceptable value :',ch10,&
 &       'it should be between 1 and natom. ',ch10,&
 &       'Action: correct objbat in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
 
@@ -1461,7 +1515,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &         'is larger or equal to the one of the next atom,',ch10,&
 &         'while this list should be ordered, and an atom cannot be repeated.',ch10,&
 &         'Action: correct the array objbat in the input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -1480,7 +1534,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &         'The input values of objbrf(1:3) must be positive,',ch10,&
 &         'while it is ',objbrf(1:3),'.',ch10,&
 &         'Action: correct objbrf in your input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -1521,7 +1575,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &       'in the input file, when rotations (objbro) are present.',ch10,&
 &       'This is not the case.',ch10,&
 &       'Action: initialize objbax in your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      write(iout,format01160) 'objbax',objbax(1:6)
      write(std_out,format01160) 'objbax',objbax(1:6)
@@ -1533,7 +1587,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &     'The two points defined by the input array objbax are too',ch10,&
 &     'close to each other, and will not be used to define an axis.',ch10,&
 &     'Action: correct objbax in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    axisb(1:3)=axisb(1:3)/sqrt(normb)
 
@@ -1547,7 +1601,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &         ' are identical, for their',ch10,&
 &         'atoms number ',iatom,' and ',ii,'.',ch10,&
 &         'Action: change objaat and/or objbat so that they have no common atom anymore.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end do
@@ -1583,7 +1637,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    write(msg,'(3a)' )&
 &   '  Action : check the correspondence between natom+vacnum on one side,',ch10,&
 &   '           and natrd, objan, objbn, objarf and objbrf on the other side.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !6) Produce full set of atoms
@@ -1594,8 +1648,8 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  write(iout,format01160) '      ',xcart_read(:,:)
  write(std_out,format01160) '      ',xcart_read(:,:)
 
- ABI_ALLOCATE(typat_full,(natom+vacnum))
- ABI_ALLOCATE(xcart_full,(3,natom+vacnum))
+ ABI_MALLOC(typat_full,(natom+vacnum))
+ ABI_MALLOC(xcart_full,(3,natom+vacnum))
 
 !Use the work array xcart_full to produce full set of atoms,
 !including those coming from repeated objects.
@@ -1752,19 +1806,19 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  xcart(:,1:natom)=xcart_full(:,1:natom)
  typat(1:natom)=typat_full(1:natom)
 
- ABI_DEALLOCATE(typat_full)
- ABI_DEALLOCATE(xcart_full)
+ ABI_FREE(typat_full)
+ ABI_FREE(xcart_full)
  if(allocated(objaat)) then
-   ABI_DEALLOCATE(objaat)
+   ABI_FREE(objaat)
  end if
  if(allocated(objbat)) then
-   ABI_DEALLOCATE(objbat)
+   ABI_FREE(objbat)
  end if
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
  if (vacnum>0)  then
-   ABI_DEALLOCATE(vaclst)
+   ABI_FREE(vaclst)
  end if
 
 end subroutine ingeobld
@@ -1906,7 +1960,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
 &   'is greater than the input number of atoms, natom=',natom,ch10,&
 &   'This is not allowed.',ch10,&
 &   'Action: modify natom or the symmetry data in the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (curat<natom) then
@@ -1915,7 +1969,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
 &   'is lower than the input number of atoms, natom=',natom,ch10,&
 &   'This is not allowed.',ch10,&
 &   'Action: modify natom or the symmetry data in the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Assignment of symmetry to xred
@@ -1989,8 +2043,8 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
 
 !Compute the maximum size of arrays intarr and dprarr
  marr=3
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
 !Get metric quantities
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -2008,8 +2062,8 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
    vacuum(1:3)=intarr(1:3)
  else
 !  For each direction, determine whether a vacuum space exists
-   ABI_ALLOCATE(list,(natom))
-   ABI_ALLOCATE(xred_sorted,(natom))
+   ABI_MALLOC(list,(natom))
+   ABI_MALLOC(xred_sorted,(natom))
    do ii=1,3
 !    This is the minimum xred difference needed to have vacwidth
      vacxred=vacwidth*sqrt(sum(gprimd(:,ii)**2))
@@ -2032,16 +2086,16 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
      end if
      if(vacxred<max_diff_xred+tol10)vacuum(ii)=1
    end do
-   ABI_DEALLOCATE(list)
-   ABI_DEALLOCATE(xred_sorted)
+   ABI_FREE(list)
+   ABI_FREE(xred_sorted)
  end if
 
 !DEBUG
 !write(std_out,*)' invacuum : vacuum=',vacuum(1:3)
 !ENDDEBUG
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 end subroutine invacuum
 !!***

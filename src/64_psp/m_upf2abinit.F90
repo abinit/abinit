@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2020 ABINIT group (MJV)
+!!  Copyright (C) 2009-2021 ABINIT group (MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -162,7 +162,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 
 !call pwscf routine for reading in UPF
  if (open_file (filpsp,msg,newunit=iunit,status='old',form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !read in psp data to static data in pseudo module, for ipsx == 1
@@ -176,7 +176,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 
 !if upf file is a USPP one, stop
  if (pseudotype == 'US') then
-   MSG_ERROR('upf2abinit: USPP UPF files not supported')
+   ABI_ERROR('upf2abinit: USPP UPF files not supported')
  end if
 
 !copy over to abinit internal arrays and vars
@@ -185,7 +185,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 
 !Check if the local component is one of the angular momentum channels
 !effectively if one of the ll is absent from the NL projectors
- ABI_ALLOCATE(found_l,(0:lmax_))
+ ABI_MALLOC(found_l,(0:lmax_))
  found_l = .true.
  do ll = 0, lmax_
    if (any(lll(1:nbeta(1),1) == ll)) then
@@ -202,7 +202,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
      end if
    end do
  end if
- ABI_DEALLOCATE(found_l)
+ ABI_FREE(found_l)
 !FIXME: do something about lloc == -1
 
  call atomdata_from_symbol(atom,psd(1))
@@ -214,16 +214,16 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 & vlspl(:,1),r(1:mmax,1),vloc0(1:mmax,1),yp1,ypn,zion)
 
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_ALLOCATE(work_space,(psps%mqgrid_vl))
- ABI_ALLOCATE(work_spl,(psps%mqgrid_vl))
+ ABI_MALLOC(work_space,(psps%mqgrid_vl))
+ ABI_MALLOC(work_spl,(psps%mqgrid_vl))
  call spline (psps%qgrid_vl,vlspl(:,1),psps%mqgrid_vl,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
- ABI_DEALLOCATE(work_space)
- ABI_DEALLOCATE(work_spl)
+ ABI_FREE(work_space)
+ ABI_FREE(work_spl)
 
 !this has to do the FT of the projectors to reciprocal space
 ! allocate proj to avoid temporary copy.
- ABI_ALLOCATE(proj, (mmax,1:nbeta(1)))
+ ABI_MALLOC(proj, (mmax,1:nbeta(1)))
  proj = betar(1:mmax,1:nbeta(1),1)
 
  call psp11nl(ffspl, indlmn, mmax, psps%lnmax, psps%lmnmax, psps%mqgrid_ff, &
@@ -249,9 +249,9 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 !rho_atc contains the nlcc density
 !rho_at contains the total density
  if (nlcc(1)) then
-   ABI_ALLOCATE(ff,(mmax))
-   ABI_ALLOCATE(ff1,(mmax))
-   ABI_ALLOCATE(ff2,(mmax))
+   ABI_MALLOC(ff,(mmax))
+   ABI_MALLOC(ff1,(mmax))
+   ABI_MALLOC(ff2,(mmax))
    ff(1:mmax) = rho_atc(1:mmax,1) ! model core charge without derivative factor
 
    ff1 = zero
@@ -271,14 +271,14 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
        exit
      end if
    end do
-   ABI_ALLOCATE(rad_cc,(mmax))
+   ABI_MALLOC(rad_cc,(mmax))
    rad_cc = r(1:mmax,1)
    rad_cc(1) = zero ! force this so that the core charge covers whole spline interval.
    call cc_derivatives(rad_cc,ff,ff1,ff2,mmax,psps%n1xccc,xcccrc,xccc1d)
-   ABI_DEALLOCATE(rad_cc)
-   ABI_DEALLOCATE(ff)
-   ABI_DEALLOCATE(ff1)
-   ABI_DEALLOCATE(ff2)
+   ABI_FREE(rad_cc)
+   ABI_FREE(ff)
+   ABI_FREE(ff1)
+   ABI_FREE(ff2)
 
  end if !if nlcc present
 
@@ -363,15 +363,15 @@ subroutine psp11nl(ffspl,indlmn,mmax,lnmax,lmnmax,mqgrid,n_proj,&
 
    if (iproj > lmnmax) then
      write(message,'(a,2i0)') ' Too many projectors found. n_proj, lmnmax =  ',n_proj, lmnmax
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    np = proj_np(iproj)
-   ABI_ALLOCATE(work,(np))
+   ABI_MALLOC(work,(np))
    ll = proj_l(iproj)
    if (ll < llold) then
      message = 'psp11nl : Error: UPF projectors are not in order of increasing ll'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    else if (ll == llold) then
      iproj_1l = iproj_1l + 1
    else
@@ -404,15 +404,15 @@ subroutine psp11nl(ffspl,indlmn,mmax,lnmax,lmnmax,mqgrid,n_proj,&
 
      ffspl(iq, 1, iproj) = res
    end do
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end do  ! iproj
 
 !add derivative of ffspl(:,1,:) for spline interpolation later
- ABI_ALLOCATE(work,(mqgrid))
+ ABI_MALLOC(work,(mqgrid))
  do ipsang = 1, lnmax
    call spline(qgrid,ffspl(:,1,ipsang),mqgrid,zero,zero,ffspl(:,2,ipsang))
  end do
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
 end subroutine psp11nl
 !!***
@@ -479,7 +479,7 @@ subroutine psp11lo(drdi,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(work,(mmax))
+ ABI_MALLOC(work,(mmax))
 
 !Do q=0 separately (compute epsatm)
 !Do integral from 0 to r1
@@ -559,7 +559,7 @@ subroutine psp11lo(drdi,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
  call ctrap(mmax,work,one,result_ctrap)
  ypn=2.0d0 * (ztor1 + result_ctrap)
 
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
 end subroutine psp11lo
 !!***

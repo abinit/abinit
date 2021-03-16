@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -745,7 +745,7 @@ EOF
 #
 AC_DEFUN([ABI_MPI_INIT], [
   # Delegate most of the init stage to Steredeg
-  SD_MPI_INIT([optional fail], [-lmpi])
+  SD_MPI_INIT([auto optional fail], [-lmpi])
 
   # Allow MPI flavors
   AC_ARG_WITH([mpi-flavor],

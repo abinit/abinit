@@ -120,7 +120,7 @@ contains
     this%bcut=mband
     this%nbcut=nbcut
     this%version=version
-    ABI_ALLOCATE(this%vtrial,(nfftf,nspden))
+    ABI_MALLOC(this%vtrial,(nfftf,nspden))
     this%vtrial(:,:)=zero
     this%nfftf=nfftf
     this%nspden=nspden
@@ -166,7 +166,7 @@ contains
 
     ! *********************************************************************
     this%vtrial(:,:)=zero
-    ABI_DEALLOCATE(this%vtrial)
+    ABI_FREE(this%vtrial)
     this%nfftf=0
     this%nspden=0
     this%bcut=0
@@ -436,7 +436,7 @@ contains
       ! end do
       ! nsize=ii
       ! ! Allocate the array to prepare the Simpson integration
-      ! ABI_ALLOCATE(valuesent,(nsize))
+      ! ABI_MALLOC(valuesent,(nsize))
       !
       ! !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent,nsize)
       ! do ii=1,nsize
@@ -453,13 +453,13 @@ contains
       ! if (size(valuesent)>=6) then
       !   this%ent_freeel=simpson(step,valuesent)
       ! end if
-      ! ABI_DEALLOCATE(valuesent)
+      ! ABI_FREE(valuesent)
       ! ******************************************
 
       ! Other way to find entropy
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
       gamma=(fermie-this%e_shiftfactor)/tsmear
-      ABI_ALLOCATE(valuesent,(this%bcut+1))
+      ABI_MALLOC(valuesent,(this%bcut+1))
 
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
       do ii=1,this%bcut+1
@@ -479,7 +479,7 @@ contains
         & gamma*factor*dip12(gamma)/tsmear-&
         simpson(one,valuesent)
       end if
-      ABI_DEALLOCATE(valuesent)
+      ABI_FREE(valuesent)
     else if(this%version==3) then
       ! ******* OLD WAY TO COMPUTE ENTROPY *******
       ! ! Dynamic array find size
@@ -493,7 +493,7 @@ contains
       !   ix=ix+step
       ! end do
       !
-      ! ABI_ALLOCATE(valuesent,(ii))
+      ! ABI_MALLOC(valuesent,(ii))
       ! ix=this%ebcut
       ! ii=0
       ! fn=fermi_dirac(ix,fermie,tsmear)
@@ -507,13 +507,13 @@ contains
       ! if (ii>1) then
       !   this%ent_freeel=simpson(step,valuesent)
       ! end if
-      ! ABI_DEALLOCATE(valuesent)
+      ! ABI_FREE(valuesent)
       ! ******************************************
 
       ! Other way to find entropy
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
       gamma=(fermie-this%e_shiftfactor)/tsmear
-      ABI_ALLOCATE(valuesent,(this%bcut+1))
+      ABI_MALLOC(valuesent,(this%bcut+1))
 
       step=(this%ebcut-this%e_shiftfactor)/(this%bcut)
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
@@ -535,7 +535,7 @@ contains
         & gamma*factor*dip12(gamma)/tsmear-&
         simpson(step,valuesent)
       end if
-      ABI_DEALLOCATE(valuesent)
+      ABI_FREE(valuesent)
     else if(this%version==4) then
       step=one
       do ifftf=1,this%nfftf
@@ -552,7 +552,7 @@ contains
             ii=ii+1
             ix=ix+step
           end do
-          ABI_ALLOCATE(valuesent,(ii))
+          ABI_MALLOC(valuesent,(ii))
           ix=dble(this%bcut)
           ii=0
           fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+&
@@ -568,7 +568,7 @@ contains
             this%ent_freeel=this%ent_freeel+simpson(step,valuesent)/&
             & (this%nfftf*this%nspden)
           end if
-          ABI_DEALLOCATE(valuesent)
+          ABI_FREE(valuesent)
         end do
       end do
     end if
@@ -1266,7 +1266,7 @@ contains
     write(msg,'(a,a)') ' prt_eigocc : about to open file ',trim(fnameabo_eigocc)
     call wrtout(iout,msg,'COLL')
     if (open_file(fnameabo_eigocc,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
     rewind(temp_unit)
 

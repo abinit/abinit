@@ -7,7 +7,7 @@
 !! elements and calculates related properties - Tc, phonon linewidths...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2020 ABINIT group (MVer, BXu, MG, JPC)
+!! Copyright (C) 2004-2021 ABINIT group (MVer, BXu, MG, JPC)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -116,7 +116,7 @@ contains
 !!     rpt(3,nprt) =canonical positions of R points in the unit cell
 !!     nrpt =number of real space points used to integrate IFC (for interpolation of dynamical matrices)
 !!     wghatm(natom,natom,nrpt) =Weight for the pair of atoms and the R vector
-!! filnam(7)=character strings giving file names
+!! filnam(8)=character strings giving file names
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -147,7 +147,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  type(ifc_type),intent(inout) :: Ifc
  integer,intent(in) :: comm
 !arrays
- character(len=fnlen),intent(in) :: filnam(7)
+ character(len=fnlen),intent(in) :: filnam(8)
 
 !Local variables-------------------------------
 !scalars
@@ -214,11 +214,11 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    gkk_fname = filnam(5)
    ABI_CHECK(len_trim(gkk_fname) > 0, "gkk_fname is not defined")
    if (open_file(gkk_fname,message,newunit=unitgkk,form="unformatted",status="old",action="read") /=0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
- elph_base_name=trim(filnam(2))//"_ep"
+ elph_base_name=trim(filnam(8))//"_ep"
  ddkfilename=trim(filnam(7))
  ABI_CHECK(len_trim(ddkfilename) > 0, "ddkfilename is not defined")
 
@@ -304,14 +304,14 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
    if ( ANY( ABS(Cryst%tnons(:,1)) > tol10) ) then
-     MSG_ERROR('nsym==1 but the symmetry is not the identity')
+     ABI_ERROR('nsym==1 but the symmetry is not the identity')
    end if
  end if
 
  if (anaddb_dtset%ifcflag/=1) then
    write(message,'(a,i0)')&
 &   ' ifcflag should be set to 1 since the IFC matrices are supposed to exist but ifcflag= ',anaddb_dtset%ifcflag
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call timein(tcpu,twall)
@@ -369,7 +369,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !number of 1WF files contributing to the GKK file
 !==================================================
 
- ABI_ALLOCATE(eigenGS,(nband,hdr%nkpt,elph_ds%nsppol))
+ ABI_MALLOC(eigenGS,(nband,hdr%nkpt,elph_ds%nsppol))
 
  if (master == me) then
    do isppol=1,elph_ds%nsppol
@@ -509,15 +509,15 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    elph_ds%ngkkband = elph_ds%nFSband
  else
    write(message,'(a,i0)')' ep_keepbands must be 0 or 1 while it is: ',elph_ds%ep_keepbands
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  write(message,'(a,i0,2x,i0)')' elphon : minFSband, maxFSband = ',elph_ds%minFSband,elph_ds%maxFSband
  call wrtout(std_out,message,'COLL')
 
 
- ABI_ALLOCATE(elph_ds%k_phon%kptirr,(3,elph_ds%k_phon%nkptirr))
- ABI_ALLOCATE(elph_ds%k_phon%irredtoGS,(elph_ds%k_phon%nkptirr))
+ ABI_MALLOC(elph_ds%k_phon%kptirr,(3,elph_ds%k_phon%nkptirr))
+ ABI_MALLOC(elph_ds%k_phon%irredtoGS,(elph_ds%k_phon%nkptirr))
 
 !====================================================================
 !2) order irred k-points
@@ -537,12 +537,12 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 ! check that kptrlatt is coherent with kpt found here
  nkpt_tmp = elph_ds%kptrlatt(1,1)*elph_ds%kptrlatt(2,2)*elph_ds%kptrlatt(3,3)
  if (sum(abs(elph_ds%kptrlatt(:,:))) /= nkpt_tmp) then
-   MSG_WARNING(' the input kptrlatt is not diagonal... ')
+   ABI_WARNING(' the input kptrlatt is not diagonal... ')
  end if
  if (anaddb_dtset%ifltransport > 1 .and. nkpt_tmp /= elph_ds%k_phon%nkpt) then
    write(message,'(a,i0,a,i0)')&
 &   ' the input kptrlatt is inconsistent  ', nkpt_tmp, " /= ", elph_ds%k_phon%nkpt
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (anaddb_dtset%ifltransport==3 ) then
@@ -550,10 +550,10 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 ! The real irred kpt, now only used by get_tau_k
 !====================================================================
 
-   ABI_ALLOCATE(indkpt1,(elph_ds%k_phon%nkpt))
-   ABI_ALLOCATE(wtk_fullbz,(elph_ds%k_phon%nkpt))
-   ABI_ALLOCATE(wtk_folded,(elph_ds%k_phon%nkpt))
-   ABI_ALLOCATE(bz2ibz_smap, (6, elph_ds%k_phon%nkpt))
+   ABI_MALLOC(indkpt1,(elph_ds%k_phon%nkpt))
+   ABI_MALLOC(wtk_fullbz,(elph_ds%k_phon%nkpt))
+   ABI_MALLOC(wtk_folded,(elph_ds%k_phon%nkpt))
+   ABI_MALLOC(bz2ibz_smap, (6, elph_ds%k_phon%nkpt))
 
    wtk_fullbz(:) = one/dble(elph_ds%k_phon%nkpt) !weights normalized to unity
    call symkpt(0,cryst%gmet,indkpt1,0,elph_ds%k_phon%kpt,elph_ds%k_phon%nkpt,elph_ds%k_phon%new_nkptirr,&
@@ -564,9 +564,9 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    write (message,'(2a,i0)')ch10,' Number of irreducible k-points = ',elph_ds%k_phon%new_nkptirr
    call wrtout(std_out,message,'COLL')
 
-   ABI_ALLOCATE(elph_ds%k_phon%new_kptirr,(3,elph_ds%k_phon%new_nkptirr))
-   ABI_ALLOCATE(elph_ds%k_phon%new_wtkirr,(elph_ds%k_phon%new_nkptirr))
-   ABI_ALLOCATE(elph_ds%k_phon%new_irredtoGS,(elph_ds%k_phon%new_nkptirr))
+   ABI_MALLOC(elph_ds%k_phon%new_kptirr,(3,elph_ds%k_phon%new_nkptirr))
+   ABI_MALLOC(elph_ds%k_phon%new_wtkirr,(elph_ds%k_phon%new_nkptirr))
+   ABI_MALLOC(elph_ds%k_phon%new_irredtoGS,(elph_ds%k_phon%new_nkptirr))
 
    ikpt_irr = 0
    do ikpt=1,elph_ds%k_phon%nkpt
@@ -579,12 +579,12 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    end do
    if (ikpt_irr .ne. elph_ds%k_phon%new_nkptirr) then
      write (message,'(a)')' The number of irred nkpt does not match! '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
-   ABI_DEALLOCATE(indkpt1)
-   ABI_DEALLOCATE(wtk_fullbz)
-   ABI_DEALLOCATE(wtk_folded)
+   ABI_FREE(indkpt1)
+   ABI_FREE(wtk_fullbz)
+   ABI_FREE(wtk_folded)
  end if
 
 !====================================================================
@@ -593,7 +593,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  elph_ds%k_phon%nband = elph_ds%nFSband
  elph_ds%k_phon%nsppol = elph_ds%nsppol
  elph_ds%k_phon%nsym = Cryst%nsym
- ABI_ALLOCATE(elph_ds%k_phon%wtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,elph_ds%k_phon%nsppol))
+ ABI_MALLOC(elph_ds%k_phon%wtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,elph_ds%k_phon%nsppol))
 
  call ep_fs_weights(anaddb_dtset%ep_b_min, anaddb_dtset%ep_b_max, eigenGS, anaddb_dtset%elphsmear, &
 & elph_ds%fermie, cryst%gprimd, elph_ds%k_phon%irredtoGS, elph_ds%kptrlatt, max_occ, elph_ds%minFSband, nband, elph_ds%nFSband, &
@@ -609,12 +609,12 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
    if (abs(anaddb_dtset%band_gap) < 10.0d0) then
      write (message,'(a)')' Not coded yet when use_k_fine and band_gap are both used'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    if (master == me) then
      if (open_file("densergrid_GKK",message,newunit=unitfskgrid,form="unformatted",status="old") /=0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      !read the header of file
      call hdr_fort_read(hdr1, unitfskgrid, fform)
@@ -622,7 +622,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    end if
    call hdr1%bcast(master,me,comm)
 
-   ABI_ALLOCATE(eigenGS_fine,(nband,hdr1%nkpt,elph_ds%nsppol))
+   ABI_MALLOC(eigenGS_fine,(nband,hdr1%nkpt,elph_ds%nsppol))
 
    if (master == me) then
      do isppol=1,elph_ds%nsppol
@@ -640,8 +640,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    bst = ebands_from_hdr(hdr1,nband,eigenGS_fine)
 
    elph_ds%k_fine%nkptirr = hdr1%nkpt
-   ABI_ALLOCATE(elph_ds%k_fine%kptirr,(3,elph_ds%k_fine%nkptirr))
-   ABI_ALLOCATE(elph_ds%k_fine%irredtoGS,(elph_ds%k_fine%nkptirr))
+   ABI_MALLOC(elph_ds%k_fine%kptirr,(3,elph_ds%k_fine%nkptirr))
+   ABI_MALLOC(elph_ds%k_fine%irredtoGS,(elph_ds%k_fine%nkptirr))
 
    call order_fs_kpts(hdr1%kptns, hdr1%nkpt, elph_ds%k_fine%kptirr,&
 &   elph_ds%k_fine%nkptirr,elph_ds%k_fine%irredtoGS)
@@ -654,7 +654,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    elph_ds%k_fine%nsppol = elph_ds%nsppol
    elph_ds%k_fine%nsym = Cryst%nsym
 
-   ABI_ALLOCATE(elph_ds%k_fine%wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol))
+   ABI_MALLOC(elph_ds%k_fine%wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol))
 
    kptrlatt_fine = elph_ds%kptrlatt_fine
 
@@ -674,39 +674,39 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
    elph_ds%k_fine%my_nkpt = elph_ds%k_phon%my_nkpt
 
-   ABI_ALLOCATE(elph_ds%k_fine%my_kpt,(elph_ds%k_fine%nkpt))
+   ABI_MALLOC(elph_ds%k_fine%my_kpt,(elph_ds%k_fine%nkpt))
    elph_ds%k_fine%my_kpt = elph_ds%k_phon%my_kpt
 
-   ABI_ALLOCATE(elph_ds%k_fine%my_ikpt,(elph_ds%k_fine%my_nkpt))
+   ABI_MALLOC(elph_ds%k_fine%my_ikpt,(elph_ds%k_fine%my_nkpt))
    elph_ds%k_fine%my_ikpt = elph_ds%k_phon%my_ikpt
 
-   ABI_ALLOCATE(elph_ds%k_fine%kptirr,(3,elph_ds%k_fine%nkptirr))
+   ABI_MALLOC(elph_ds%k_fine%kptirr,(3,elph_ds%k_fine%nkptirr))
    elph_ds%k_fine%kptirr = elph_ds%k_phon%kptirr
-   ABI_ALLOCATE(elph_ds%k_fine%wtkirr,(elph_ds%k_fine%nkptirr))
+   ABI_MALLOC(elph_ds%k_fine%wtkirr,(elph_ds%k_fine%nkptirr))
    elph_ds%k_fine%wtkirr = elph_ds%k_phon%wtkirr
 
-   ABI_ALLOCATE(elph_ds%k_fine%wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%k_fine%nsppol))
+   ABI_MALLOC(elph_ds%k_fine%wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%k_fine%nsppol))
    elph_ds%k_fine%wtk = elph_ds%k_phon%wtk
-   ABI_ALLOCATE(elph_ds%k_fine%kpt,(3,elph_ds%k_fine%nkpt))
+   ABI_MALLOC(elph_ds%k_fine%kpt,(3,elph_ds%k_fine%nkpt))
    elph_ds%k_fine%kpt = elph_ds%k_phon%kpt
 
    elph_ds%k_fine%krank = elph_ds%k_phon%krank%copy()
 
-   ABI_ALLOCATE(elph_ds%k_fine%irr2full,(elph_ds%k_fine%nkptirr))
+   ABI_MALLOC(elph_ds%k_fine%irr2full,(elph_ds%k_fine%nkptirr))
    elph_ds%k_fine%irr2full = elph_ds%k_phon%irr2full
-   ABI_ALLOCATE(elph_ds%k_fine%full2irr,(3,elph_ds%k_fine%nkpt))
+   ABI_MALLOC(elph_ds%k_fine%full2irr,(3,elph_ds%k_fine%nkpt))
    elph_ds%k_fine%full2irr = elph_ds%k_phon%full2irr
-   ABI_ALLOCATE(elph_ds%k_fine%full2full,(2,elph_ds%k_fine%nsym,elph_ds%k_fine%nkpt))
+   ABI_MALLOC(elph_ds%k_fine%full2full,(2,elph_ds%k_fine%nsym,elph_ds%k_fine%nkpt))
    elph_ds%k_fine%full2full = elph_ds%k_phon%full2full
 
-   ABI_ALLOCATE(elph_ds%k_fine%irredtoGS,(elph_ds%k_fine%nkptirr))
+   ABI_MALLOC(elph_ds%k_fine%irredtoGS,(elph_ds%k_fine%nkptirr))
    elph_ds%k_fine%irredtoGS = elph_ds%k_phon%irredtoGS
 
 !  call elph_k_copy(elph_ds%k_phon, elph_ds%k_fine)
 
    kptrlatt_fine = elph_ds%kptrlatt
 
-   ABI_ALLOCATE(eigenGS_fine,(nband,elph_ds%k_fine%nkptirr,elph_ds%nsppol))
+   ABI_MALLOC(eigenGS_fine,(nband,elph_ds%k_fine%nkptirr,elph_ds%nsppol))
 
    eigenGS_fine = eigenGS
  end if ! k_fine or not
@@ -725,7 +725,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !====================================================================
 !5) calculate DOS at Ef
 !====================================================================
- ABI_ALLOCATE(elph_ds%n0,(elph_ds%nsppol))
+ ABI_MALLOC(elph_ds%n0,(elph_ds%nsppol))
 
 !SPPOL sum over spin channels to get total DOS
 !channels decoupled => use separate values for DOS_up(Ef) resp down
@@ -746,10 +746,10 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 &   sum(elph_ds%k_fine%wtk(:,:,2)),elph_ds%k_fine%nkpt
  else
    write (message,'(a,i0)') 'bad value for nsppol ', elph_ds%nsppol
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
- ABI_ALLOCATE(elph_ds%gkk_intweight,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,elph_ds%nsppol))
+ ABI_MALLOC(elph_ds%gkk_intweight,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,elph_ds%nsppol))
 
  if (elph_ds%ep_keepbands == 0) then
 !  use trivial integration weights  for single band,
@@ -764,7 +764,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    elph_ds%gkk_intweight(:,:,:) = elph_ds%k_phon%wtk(:,:,:)
  else
    write(message,'(a,i0)')' ep_keepbands must be 0 or 1 while it is : ',elph_ds%ep_keepbands
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  ep_prt_wtk = 0
@@ -788,7 +788,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  if (anaddb_dtset%prtfsurf == 1 .and. master == me) then
    fname=trim(elph_ds%elph_base_name) // '_BXSF'
    if (ebands_write_bxsf(Bst, Cryst, fname) /= 0) then
-     MSG_WARNING("Cannot produce file for Fermi surface, check log file for more info")
+     ABI_WARNING("Cannot produce file for Fermi surface, check log file for more info")
    end if
  end if
 
@@ -799,10 +799,10 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !=========================================================
 
 !mapping of k + q onto k' for k and k' in full BZ
- ABI_ALLOCATE(FSfullpqtofull,(elph_ds%k_phon%nkpt,elph_ds%nqpt_full))
+ ABI_MALLOC(FSfullpqtofull,(elph_ds%k_phon%nkpt,elph_ds%nqpt_full))
 
 !qpttoqpt(itim,isym,iqpt) = qpoint index which transforms to iqpt under isym and with time reversal itim.
- ABI_ALLOCATE(qpttoqpt,(2,Cryst%nsym,elph_ds%nqpt_full))
+ ABI_MALLOC(qpttoqpt,(2,Cryst%nsym,elph_ds%nqpt_full))
 
  call wrtout(std_out,'elphon: calling mkqptequiv to set up the FS qpoint set',"COLL")
 
@@ -885,7 +885,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    write (std_out,*) ' elphon: will perform scalar product with phonon'
    write (std_out,*) '  displacement vectors in read_gkk. ep_scalprod==1'
  else
-   MSG_ERROR('illegal value for ep_scalprod')
+   ABI_ERROR('illegal value for ep_scalprod')
  end if
 
  call timein(tcpu,twall)
@@ -915,16 +915,16 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !  TODO: should be done at earlier stage of initialization and checking
    if (elph_ds%ngkkband /= elph_ds%nFSband) then
      write (message,'(a)') 'need to keep electron band dependency in memory for transport calculations'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  bxu, moved the allocation from get_veloc_tr to elphon
    if (anaddb_dtset%use_k_fine == 1) then
-     ABI_ALLOCATE(elph_tr_ds%el_veloc,(elph_ds%k_fine%nkpt,nband,3,elph_ds%nsppol))
+     ABI_MALLOC(elph_tr_ds%el_veloc,(elph_ds%k_fine%nkpt,nband,3,elph_ds%nsppol))
    else
-     ABI_ALLOCATE(elph_tr_ds%el_veloc,(elph_ds%k_phon%nkpt,nband,3,elph_ds%nsppol))
+     ABI_MALLOC(elph_tr_ds%el_veloc,(elph_ds%k_phon%nkpt,nband,3,elph_ds%nsppol))
    end if
-   ABI_ALLOCATE(elph_tr_ds%FSelecveloc_sq,(3,elph_ds%nsppol))
+   ABI_MALLOC(elph_tr_ds%FSelecveloc_sq,(3,elph_ds%nsppol))
 
 !  this only needs to be read in once - the fermi level average is later done many times with get_veloc_tr
    if (me == master) then
@@ -964,7 +964,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    nk2 = elph_ds%kptrlatt_fine(2,2)
    nk3 = elph_ds%kptrlatt_fine(3,3)
 
-   ABI_ALLOCATE(v_surf,(nband,nk1+1,nk2+1,nk3+1,3,elph_ds%nsppol))
+   ABI_MALLOC(v_surf,(nband,nk1+1,nk2+1,nk3+1,3,elph_ds%nsppol))
    v_surf = zero
    do isppol=1,elph_ds%nsppol
      do iband=1,nband
@@ -990,7 +990,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 &   elph_ds%kptrlatt_fine,nband,hdr%nkpt,hdr%kptns,&
 &   Cryst%nsym,use_afm,Cryst%symrec,Cryst%symafm,use_tr,elph_ds%nsppol,shiftk,1,fname,ierr)
 
-   ABI_DEALLOCATE(v_surf)
+   ABI_FREE(v_surf)
 
  end if !anaddb_dtset%prtfsurf
 
@@ -1008,8 +1008,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !Get FS averaged gamma matrices and Fourier transform to real space
 !========================================================
 
- ABI_ALLOCATE(coskr, (elph_ds%nqpt_full,Ifc%nrpt))
- ABI_ALLOCATE(sinkr, (elph_ds%nqpt_full,Ifc%nrpt))
+ ABI_MALLOC(coskr, (elph_ds%nqpt_full,Ifc%nrpt))
+ ABI_MALLOC(sinkr, (elph_ds%nqpt_full,Ifc%nrpt))
  call ftgam_init(ifc%gprim, elph_ds%nqpt_full,Ifc%nrpt, elph_ds%qpt_full, Ifc%rpt, coskr, sinkr)
 
  call timein(tcpu,twall)
@@ -1030,7 +1030,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !Now FT to real space too
 !NOTE: gprim (not gprimd) is used for all FT interpolations,
 !to be consistent with the dimensions of the rpt, which come from anaddb.
- ABI_ALLOCATE(elph_ds%gamma_rpt, (2,elph_ds%nbranch**2,elph_ds%nsppol,Ifc%nrpt))
+ ABI_MALLOC(elph_ds%gamma_rpt, (2,elph_ds%nbranch**2,elph_ds%nsppol,Ifc%nrpt))
  elph_ds%gamma_rpt = zero
 
  qtor = 1 ! q --> r
@@ -1061,10 +1061,10 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    call complete_gamma_tr(cryst,elph_ds%ep_scalprod,elph_ds%nbranch,elph_ds%nqptirred,&
 &   elph_ds%nqpt_full,elph_ds%nsppol,elph_tr_ds%gamma_qpt_trin,elph_ds%qirredtofull,qpttoqpt)
 
-   ABI_ALLOCATE(elph_tr_ds%gamma_rpt_trout,(2,9,elph_ds%nbranch**2,elph_ds%nsppol,Ifc%nrpt))
+   ABI_MALLOC(elph_tr_ds%gamma_rpt_trout,(2,9,elph_ds%nbranch**2,elph_ds%nsppol,Ifc%nrpt))
    elph_tr_ds%gamma_rpt_trout = zero
 
-   ABI_ALLOCATE(elph_tr_ds%gamma_rpt_trin,(2,9,elph_ds%nbranch**2,elph_ds%nsppol,Ifc%nrpt))
+   ABI_MALLOC(elph_tr_ds%gamma_rpt_trin,(2,9,elph_ds%nbranch**2,elph_ds%nsppol,Ifc%nrpt))
    elph_tr_ds%gamma_rpt_trin = zero
 
 !  Now FT to real space too
@@ -1093,7 +1093,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    if (master == me) then
      fname = trim(elph_ds%elph_base_name) // '_EPTS'
      if (open_file(fname,message,newunit=unit_epts,status="unknown") /=0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      do isppol = 1, elph_ds%nsppol
        write(unit_epts,"(a,i6)") '# E, N(E), v^2(E), dE for spin channel ', isppol
@@ -1105,14 +1105,14 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
      close(unit=unit_epts)
    end if
 
-   ABI_ALLOCATE(tmp_veloc_sq1,(3,elph_ds%nsppol))
-   ABI_ALLOCATE(tmp_veloc_sq2,(3,elph_ds%nsppol))
-   ABI_ALLOCATE(elph_tr_ds%tmp_gkk_intweight1,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,elph_ds%nsppol))
-   ABI_ALLOCATE(elph_tr_ds%tmp_gkk_intweight2,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,elph_ds%nsppol))
-   ABI_ALLOCATE(elph_tr_ds%tmp_velocwtk1,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,elph_ds%nsppol))
-   ABI_ALLOCATE(elph_tr_ds%tmp_velocwtk2,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,elph_ds%nsppol))
-   ABI_ALLOCATE(elph_tr_ds%tmp_vvelocwtk1,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol))
-   ABI_ALLOCATE(elph_tr_ds%tmp_vvelocwtk2,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol))
+   ABI_MALLOC(tmp_veloc_sq1,(3,elph_ds%nsppol))
+   ABI_MALLOC(tmp_veloc_sq2,(3,elph_ds%nsppol))
+   ABI_MALLOC(elph_tr_ds%tmp_gkk_intweight1,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,elph_ds%nsppol))
+   ABI_MALLOC(elph_tr_ds%tmp_gkk_intweight2,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,elph_ds%nsppol))
+   ABI_MALLOC(elph_tr_ds%tmp_velocwtk1,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,elph_ds%nsppol))
+   ABI_MALLOC(elph_tr_ds%tmp_velocwtk2,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,elph_ds%nsppol))
+   ABI_MALLOC(elph_tr_ds%tmp_vvelocwtk1,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol))
+   ABI_MALLOC(elph_tr_ds%tmp_vvelocwtk2,(elph_ds%ngkkband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol))
 
    tmp_veloc_sq1 = zero
    tmp_veloc_sq2 = zero
@@ -1129,7 +1129,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
      tmp_nenergy = elph_ds%nenergy
    else
      write(message,'(a,i0)')' ep_lova must be 0 or 1 while it is : ', elph_ds%ep_lova
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  This only works for ONE temperature!! for test only
@@ -1137,7 +1137,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
 !  bxu, no need for complete sets of ie1 and ie2
 !  Only save those within the range of omega_max from Ef
-   ABI_ALLOCATE(pair2red,(tmp_nenergy,tmp_nenergy))
+   ABI_MALLOC(pair2red,(tmp_nenergy,tmp_nenergy))
    pair2red = 0
 
    elph_ds%n_pair = 0
@@ -1189,7 +1189,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    write(message,'(a,i3,a)')' There are  ', elph_ds%n_pair, '  energy pairs. '
    call wrtout(std_out,message,'COLL')
 
-   ABI_ALLOCATE(red2pair,(2,elph_ds%n_pair))
+   ABI_MALLOC(red2pair,(2,elph_ds%n_pair))
    red2pair = 0
    elph_ds%n_pair = 0
    do ie1 = 1, tmp_nenergy
@@ -1203,8 +1203,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    end do
 
 !  moved from integrate_gamma_tr to here
-   ABI_ALLOCATE(elph_tr_ds%gamma_qpt_tr,(2,9,elph_ds%nbranch**2,elph_ds%nsppol,elph_ds%nqpt_full))
-   ABI_ALLOCATE(elph_tr_ds%gamma_rpt_tr,(2,9,elph_ds%nbranch**2,elph_ds%nsppol,Ifc%nrpt,4,elph_ds%n_pair))
+   ABI_MALLOC(elph_tr_ds%gamma_qpt_tr,(2,9,elph_ds%nbranch**2,elph_ds%nsppol,elph_ds%nqpt_full))
+   ABI_MALLOC(elph_tr_ds%gamma_rpt_tr,(2,9,elph_ds%nbranch**2,elph_ds%nsppol,Ifc%nrpt,4,elph_ds%n_pair))
    elph_tr_ds%gamma_rpt_tr = zero
 
    s1ofssp = (/1,1,-1,-1/)
@@ -1249,12 +1249,12 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
      end do !ss
    end do !ie
 
-   ABI_DEALLOCATE(tmp_veloc_sq1)
-   ABI_DEALLOCATE(tmp_veloc_sq2)
+   ABI_FREE(tmp_veloc_sq1)
+   ABI_FREE(tmp_veloc_sq2)
  end if ! ifltransport
 
- ABI_DEALLOCATE(qpttoqpt)
- ABI_DEALLOCATE(FSfullpqtofull)
+ ABI_FREE(qpttoqpt)
+ ABI_FREE(FSfullpqtofull)
 
 
 !==============================================================
@@ -1280,8 +1280,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 !Calculate alpha^2 F integrating over fine kpt_phon grid
 !======================================================
 
- ABI_ALLOCATE(a2f_1d,(elph_ds%na2f))
- ABI_ALLOCATE(dos_phon,(elph_ds%na2f))
+ ABI_MALLOC(a2f_1d,(elph_ds%na2f))
+ ABI_MALLOC(dos_phon,(elph_ds%na2f))
 
  call mka2f(Cryst,Ifc,a2f_1d,dos_phon,elph_ds,elph_ds%kptrlatt_fine,elph_ds%mustar)
 
@@ -1294,8 +1294,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
    call mka2f_tr(cryst,ifc,elph_ds,elph_ds%ntemper,elph_ds%tempermin,elph_ds%temperinc,pair2red,elph_tr_ds)
 
-   ABI_DEALLOCATE(pair2red)
-   ABI_DEALLOCATE(red2pair)
+   ABI_FREE(pair2red)
+   ABI_FREE(red2pair)
 
  else if (elph_tr_ds%ifltransport==3 )then ! get k-dependent tau
 
@@ -1303,8 +1303,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    !call trans_rta(elph_ds,elph_tr_ds,cryst%gprimd,eigenGS,max_occ,cryst%ucvol)
  end if ! ifltransport
 
- ABI_DEALLOCATE(eigenGS)
- ABI_DEALLOCATE(eigenGS_fine)
+ ABI_FREE(eigenGS)
+ ABI_FREE(eigenGS_fine)
 
 
 !evaluate a2F only using the input Q-grid (without using interpolated matrices)
@@ -1320,8 +1320,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
  call eliashberg_1d(a2f_1d,elph_ds,anaddb_dtset%mustar)
 
- ABI_DEALLOCATE(a2f_1d)
- ABI_DEALLOCATE(dos_phon)
+ ABI_FREE(a2f_1d)
+ ABI_FREE(dos_phon)
 
 !MJV: 20070805 should exit here. None of the rest is tested or used yet to my knowledge
 
@@ -1381,8 +1381,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  call elph_tr_ds_clean(elph_tr_ds)
  call hdr%free()
 
- ABI_DEALLOCATE(coskr)
- ABI_DEALLOCATE(sinkr)
+ ABI_FREE(coskr)
+ ABI_FREE(sinkr)
 
  if (is_open(elph_ds%unitgkq)) close(elph_ds%unitgkq)
 
@@ -1437,7 +1437,7 @@ subroutine outelph(elph_ds,enunit,fname)
 
  if ( ALL (enunit /= (/0,1,2/)) )  then
    write(msg,'(a,i0)')' enunit should be 0 or 1 or 2 while it is ',enunit
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  nbranch   = elph_ds%nbranch
@@ -1448,7 +1448,7 @@ subroutine outelph(elph_ds,enunit,fname)
 !write header
 !==========================================================
  if (open_file(fname,msg,newunit=nfile,form="formatted",status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(msg,'(2a,80a,4a,80a)')ch10,' ',('=',ii=1,80),ch10,&
@@ -1472,7 +1472,7 @@ subroutine outelph(elph_ds,enunit,fname)
 &   ' mustar    = ',elph_ds%mustar
    call wrtout(nfile,msg,'COLL')
  else
-   MSG_BUG("bad value for nsppol")
+   ABI_BUG("bad value for nsppol")
  end if
 
  write(msg,'(2a,i10,a,i10,a,i10)')ch10,&
@@ -1488,7 +1488,7 @@ subroutine outelph(elph_ds,enunit,fname)
 !NOTE: in this part of the code atomic units are used
 !==========================================================
 
- ABI_ALLOCATE(lambda_q,(nqptirred,nsppol))
+ ABI_MALLOC(lambda_q,(nqptirred,nsppol))
  lambda_q=zero
  lambda_tot=zero ; lambda_q_max=zero
  qmax=0          ; lambda_qbranch_max=zero
@@ -1600,7 +1600,7 @@ subroutine outelph(elph_ds,enunit,fname)
 !==========================================================
 
 !fill irreducile q-grid
- ABI_ALLOCATE(qirred,(3,nqptirred))
+ ABI_MALLOC(qirred,(3,nqptirred))
  qirred(:,:)=zero
 
  do iqirr=1,nqptirred
@@ -1609,13 +1609,13 @@ subroutine outelph(elph_ds,enunit,fname)
 
  krank = krank_new(elph_ds%k_phon%nkpt, elph_ds%k_phon%kpt)
 
- ABI_ALLOCATE(nestfactor,(nqptirred))
+ ABI_MALLOC(nestfactor,(nqptirred))
 
 !NOTE: weights are not normalised, the normalisation factor in reintroduced in bfactor
  call bfactor(elph_ds%k_phon%nkpt,elph_ds%k_phon%kpt,nqptirred,qirred,krank,&
 & elph_ds%k_phon%nkpt,elph_ds%k_phon%wtk,elph_ds%nFSband,nestfactor)
 
- ABI_DEALLOCATE(qirred)
+ ABI_FREE(qirred)
  call krank%free()
 
 
@@ -1737,8 +1737,8 @@ subroutine outelph(elph_ds,enunit,fname)
    end do !nqptirred
  end do !nsppol
 
- ABI_DEALLOCATE(nestfactor)
- ABI_DEALLOCATE(lambda_q)
+ ABI_FREE(nestfactor)
+ ABI_FREE(lambda_q)
 
  close (nfile)
 
@@ -1795,14 +1795,14 @@ subroutine rchkGSheader (hdr,natom,nband,unitgkk)
  ABI_CHECK(fform/=0," GKK header mis-read. fform == 0")
 
  if (hdr%natom /= natom) then
-   MSG_ERROR('natom in gkk file is different from anaddb input')
+   ABI_ERROR('natom in gkk file is different from anaddb input')
  end if
 
  if (any(hdr%nband(:) /= hdr%nband(1))) then
    write(message,'(3a)')&
 &   'Use the same number of bands for all kpts: ',ch10,&
 &   'could have spurious effects if efermi is too close to the last band '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call hdr%echo(fform, 4, unit=std_out)
@@ -1874,20 +1874,20 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 
  if(timrev /= 1 .and. timrev /= 0)then
    write (message,'(a,i0)')' timrev must be 1 or 0 but found timrev= ',timrev
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
- ABI_ALLOCATE(tmpkphon_full2irr,(3,2*elph_k%nkptirr*nsym))
+ ABI_MALLOC(tmpkphon_full2irr,(3,2*elph_k%nkptirr*nsym))
  tmpkphon_full2irr = -1
 
- ABI_ALLOCATE(tmpkpt,(3,2*elph_k%nkptirr*nsym))
+ ABI_MALLOC(tmpkpt,(3,2*elph_k%nkptirr*nsym))
 
- ABI_ALLOCATE(elph_k%wtkirr,(elph_k%nkptirr))
+ ABI_MALLOC(elph_k%wtkirr,(elph_k%nkptirr))
  elph_k%wtkirr(:) = zero
 
 !first allocation for irred kpoints - will be destroyed below
  elph_k%krank = krank_new(elph_k%nkptirr, elph_k%kptirr)
- ABI_ALLOCATE(rankallk,(elph_k%krank%max_rank))
+ ABI_MALLOC(rankallk,(elph_k%krank%max_rank))
 
 !elph_k%krank%invrank is used as a placeholder in the following loop
  rankallk = -1
@@ -1937,9 +1937,9 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 !copy the kpoints and full --> irred kpt map
 !reorder the kpts to get rank increasing monotonically with a sort
 !also reorder tmpkphon_full2irr
- ABI_ALLOCATE(elph_k%kpt,(3,elph_k%nkpt))
- ABI_ALLOCATE(elph_k%full2irr,(3,elph_k%nkpt))
- ABI_ALLOCATE(sortindexing,(elph_k%nkpt))
+ ABI_MALLOC(elph_k%kpt,(3,elph_k%nkpt))
+ ABI_MALLOC(elph_k%full2irr,(3,elph_k%nkpt))
+ ABI_MALLOC(sortindexing,(elph_k%nkpt))
 
  do ikpt1=1,elph_k%nkpt
    sortindexing(ikpt1)=ikpt1
@@ -1947,23 +1947,23 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  call sort_int(elph_k%nkpt, rankallk, sortindexing)
  do ikpt1=1,elph_k%nkpt
    if (sortindexing(ikpt1) < 1 .or. sortindexing(ikpt1) > elph_k%nkpt) then
-     MSG_BUG('sorted k ranks are out of bounds: 1 to nkpt')
+     ABI_BUG('sorted k ranks are out of bounds: 1 to nkpt')
    end if
    elph_k%kpt(:,ikpt1) = tmpkpt(:,sortindexing(ikpt1))
    elph_k%full2irr(:,ikpt1) = tmpkphon_full2irr(:,sortindexing(ikpt1))
  end do
 
- ABI_DEALLOCATE(sortindexing)
- ABI_DEALLOCATE(rankallk)
- ABI_DEALLOCATE(tmpkphon_full2irr)
- ABI_DEALLOCATE(tmpkpt)
+ ABI_FREE(sortindexing)
+ ABI_FREE(rankallk)
+ ABI_FREE(tmpkphon_full2irr)
+ ABI_FREE(tmpkpt)
  call elph_k%krank%free()
 
 !make proper full rank arrays
  elph_k%krank = krank_new(elph_k%nkpt, elph_k%kpt)
 
 !find correspondence table between irred FS kpoints and a full one
- ABI_ALLOCATE(elph_k%irr2full,(elph_k%nkptirr))
+ ABI_MALLOC(elph_k%irr2full,(elph_k%nkptirr))
  elph_k%irr2full(:) = 0
 
  do ikpt1=1,elph_k%nkptirr
@@ -1972,7 +1972,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  end do
 
 !find correspondence table between FS kpoints under symmetry
- ABI_ALLOCATE(elph_k%full2full,(2,nsym,elph_k%nkpt))
+ ABI_MALLOC(elph_k%full2full,(2,nsym,elph_k%nkpt))
  elph_k%full2full(:,:,:) = -999
 
  do ikpt1=1,elph_k%nkpt
@@ -1997,7 +1997,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
          write(std_out,*) ' mkfskgrid Error: FS kpt ',ikpt1,' has no symmetric under sym', isym,' with itim ',itim
          write(std_out,*) ' redkpt = ', redkpt
          write(std_out,*) ' symrankkpt,ikpt2 = ', symrankkpt,ikpt2
-         MSG_ERROR("Fatal error, cannot continue")
+         ABI_ERROR("Fatal error, cannot continue")
        end if
      end do
    end do
@@ -2143,7 +2143,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  ! only open the file for the first sppol
  fname = trim(base_name) // '_A2F'
  if (open_file(fname,msg,newunit=unit_a2f,status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !write (std_out,*) ' a2f function integrated over the FS'
@@ -2161,7 +2161,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  ! Open file for PH DOS
  fname = trim(base_name) // '_PDS'
  if (open_file(fname,msg,newunit=unit_phdos,status="replace") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! output the phonon DOS header
@@ -2180,12 +2180,12 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  write (unit_phdos,'(a)') '#'
 
 !Get the integration weights, using tetrahedron method or gaussian
- ABI_ALLOCATE(tmp_wtq,(nbranch,elph_ds%k_fine%nkpt,na2f+1))
- ABI_ALLOCATE(elph_ds%k_fine%wtq,(nbranch,elph_ds%k_fine%nkpt,na2f))
- ABI_ALLOCATE(elph_ds%k_phon%wtq,(nbranch,nkpt,na2f))
+ ABI_MALLOC(tmp_wtq,(nbranch,elph_ds%k_fine%nkpt,na2f+1))
+ ABI_MALLOC(elph_ds%k_fine%wtq,(nbranch,elph_ds%k_fine%nkpt,na2f))
+ ABI_MALLOC(elph_ds%k_phon%wtq,(nbranch,nkpt,na2f))
 
- ABI_ALLOCATE(phfrq,(nbranch,elph_ds%k_fine%nkpt))
- ABI_ALLOCATE(pheigvec,(2*nbranch*nbranch,elph_ds%k_fine%nkpt))
+ ABI_MALLOC(phfrq,(nbranch,elph_ds%k_fine%nkpt))
+ ABI_MALLOC(pheigvec,(2*nbranch*nbranch,elph_ds%k_fine%nkpt))
 
  do iFSqpt=1,elph_ds%k_fine%nkpt
    call ifc%fourq(cryst,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ_cart,out_eigvec=pheigvec(:,iFSqpt))
@@ -2202,18 +2202,18 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  do iomega = 1, na2f
    elph_ds%k_fine%wtq(:,:,iomega) = tmp_wtq(:,:,iomega+1)
  end do
- ABI_DEALLOCATE(tmp_wtq)
+ ABI_FREE(tmp_wtq)
 
  if (elph_ds%use_k_fine == 1) then
    call d2c_wtq(elph_ds)
  end if
 
- ABI_ALLOCATE(coskr, (nkpt,nrpt))
- ABI_ALLOCATE(sinkr, (nkpt,nrpt))
+ ABI_MALLOC(coskr, (nkpt,nrpt))
+ ABI_MALLOC(sinkr, (nkpt,nrpt))
  call ftgam_init(Ifc%gprim, nkpt, nrpt, kpt, Ifc%rpt, coskr, sinkr)
 
- ABI_DEALLOCATE(phfrq)
- ABI_DEALLOCATE(pheigvec)
+ ABI_FREE(phfrq)
+ ABI_FREE(pheigvec)
 
  do isppol=1,nsppol
    write (std_out,*) '##############################################'
@@ -2230,8 +2230,8 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
    dos_phon(:) = zero
 
 !  reduce the dimenstion from fine to phon for phfrq and pheigvec
-   ABI_ALLOCATE(phfrq,(nbranch,elph_ds%k_phon%nkpt))
-   ABI_ALLOCATE(pheigvec,(2*nbranch*nbranch,elph_ds%k_phon%nkpt))
+   ABI_MALLOC(phfrq,(nbranch,elph_ds%k_phon%nkpt))
+   ABI_MALLOC(pheigvec,(2*nbranch*nbranch,elph_ds%k_phon%nkpt))
 
 !  loop over qpoint in full kpt grid (presumably dense)
 !  MG TODO : This loop can be performed using the IBZ and appropriated weights.
@@ -2265,7 +2265,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 
          if (abs(imeigval(jbranch)) > tol8) then
            write (msg,'(a,i0,a,es16.8)')" imaginary values  branch = ",jbranch,' imeigval = ',imeigval(jbranch)
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
          end if
 
        end do
@@ -2293,12 +2293,12 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 
        if (diagerr > tol12) then
          write(msg,'(a,es15.8)') 'mka2f: residual in diagonalization of gamma with phon eigenvectors: ', diagerr
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
 
      else
        write (msg,'(a,i0)')' Wrong value for ep_scalprod = ',ep_scalprod
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
 
 !    MG20060603MG
@@ -2400,13 +2400,13 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 !
 !  Do isotropic calculation of lambda and output lambda, Tc(MacMillan)
 !
-   ABI_ALLOCATE(a2f_1mom,(na2f))
-   ABI_ALLOCATE(a2f1mom,(na2f))
-   ABI_ALLOCATE(a2f2mom,(na2f))
-   ABI_ALLOCATE(a2f3mom,(na2f))
-   ABI_ALLOCATE(a2f4mom,(na2f))
-   ABI_ALLOCATE(linewidth_integrand,(na2f,ntemp))
-   ABI_ALLOCATE(linewidth_of_t,(ntemp))
+   ABI_MALLOC(a2f_1mom,(na2f))
+   ABI_MALLOC(a2f1mom,(na2f))
+   ABI_MALLOC(a2f2mom,(na2f))
+   ABI_MALLOC(a2f3mom,(na2f))
+   ABI_MALLOC(a2f4mom,(na2f))
+   ABI_MALLOC(linewidth_integrand,(na2f,ntemp))
+   ABI_MALLOC(linewidth_of_t,(ntemp))
 
    a2f_1mom=zero
    a2f1mom=zero;  a2f2mom=zero
@@ -2450,15 +2450,15 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
    end do
 
 
-   ABI_DEALLOCATE(phfrq)
-   ABI_DEALLOCATE(pheigvec)
-   ABI_DEALLOCATE(a2f_1mom)
-   ABI_DEALLOCATE(a2f1mom)
-   ABI_DEALLOCATE(a2f2mom)
-   ABI_DEALLOCATE(a2f3mom)
-   ABI_DEALLOCATE(a2f4mom)
-   ABI_DEALLOCATE(linewidth_integrand)
-   ABI_DEALLOCATE(linewidth_of_t)
+   ABI_FREE(phfrq)
+   ABI_FREE(pheigvec)
+   ABI_FREE(a2f_1mom)
+   ABI_FREE(a2f1mom)
+   ABI_FREE(a2f2mom)
+   ABI_FREE(a2f3mom)
+   ABI_FREE(a2f4mom)
+   ABI_FREE(linewidth_integrand)
+   ABI_FREE(linewidth_of_t)
 
    write (std_out,*) 'mka2f: elphon coupling lambdas for spin = ', isppol
    write (std_out,*) 'mka2f: isotropic lambda', lambda_iso(isppol)
@@ -2469,8 +2469,8 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
    write (std_out,*) 'lambda <omega^5> = ', lambda_5
 !
 !  Get log moment of alpha^2F
-   ABI_ALLOCATE(a2flogmom,(na2f))
-   ABI_ALLOCATE(a2flogmom_int,(na2f))
+   ABI_MALLOC(a2flogmom,(na2f))
+   ABI_MALLOC(a2flogmom_int,(na2f))
    omega = omega_min
    a2flogmom(:) = zero
    do iomega=1,na2f
@@ -2485,8 +2485,8 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 !  exp(moment/lambda) which is an actual frequency
    omegalog(isppol) = two*spinfact*a2flogmom_int(na2f)
 
-   ABI_DEALLOCATE(a2flogmom)
-   ABI_DEALLOCATE(a2flogmom_int)
+   ABI_FREE(a2flogmom)
+   ABI_FREE(a2flogmom_int)
 
    if (nsppol > 1) then
      write (msg, '(3a)' ) ch10,&
@@ -2556,11 +2556,11 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  close(unit=unit_a2f)
  close(unit=unit_phdos)
 
- ABI_DEALLOCATE(elph_ds%k_fine%wtq)
- ABI_DEALLOCATE(elph_ds%k_phon%wtq)
+ ABI_FREE(elph_ds%k_fine%wtq)
+ ABI_FREE(elph_ds%k_phon%wtq)
 
- ABI_DEALLOCATE(coskr)
- ABI_DEALLOCATE(sinkr)
+ ABI_FREE(coskr)
+ ABI_FREE(sinkr)
 
  DBG_EXIT("COLL")
 
@@ -2621,7 +2621,7 @@ subroutine mka2fQgrid(elph_ds,fname)
  nunit = get_unit()
  open (unit=nunit,file=fname,form='formatted',status='unknown',iostat=iost)
  if (iost /= 0) then
-   MSG_ERROR("Opening file: " //trim(fname))
+   ABI_ERROR("Opening file: " //trim(fname))
  end if
 
  write (msg,'(3a)')&
@@ -2651,13 +2651,13 @@ subroutine mka2fQgrid(elph_ds,fname)
  write (msg,'(3a)')'#      Smear(Ha) Lambda_Iso  isppol  <ln w> (K)    Tc_McMill (K) ',ch10,'#'
  call wrtout(nunit,msg,'COLL')
 
- ABI_ALLOCATE(a2f_1mom,(elph_ds%na2f))
- ABI_ALLOCATE(a2f_1mom_int,(elph_ds%na2f))
- ABI_ALLOCATE(a2flogmom,(elph_ds%na2f))
- ABI_ALLOCATE(a2flogmom_int,(elph_ds%na2f))
- ABI_ALLOCATE(a2f_1d,(elph_ds%na2f))
- ABI_ALLOCATE(tmpa2f,(elph_ds%na2f))
- ABI_ALLOCATE(eli_smear,(nsmear,elph_ds%nsppol,elph_ds%na2f))
+ ABI_MALLOC(a2f_1mom,(elph_ds%na2f))
+ ABI_MALLOC(a2f_1mom_int,(elph_ds%na2f))
+ ABI_MALLOC(a2flogmom,(elph_ds%na2f))
+ ABI_MALLOC(a2flogmom_int,(elph_ds%na2f))
+ ABI_MALLOC(a2f_1d,(elph_ds%na2f))
+ ABI_MALLOC(tmpa2f,(elph_ds%na2f))
+ ABI_MALLOC(eli_smear,(nsmear,elph_ds%nsppol,elph_ds%na2f))
  eli_smear(:,:,:)=zero
 
  do ismear=0,nsmear-1
@@ -2731,10 +2731,10 @@ subroutine mka2fQgrid(elph_ds,fname)
 
  end do !ismear
 
- ABI_DEALLOCATE(a2f_1mom)
- ABI_DEALLOCATE(a2f_1mom_int)
- ABI_DEALLOCATE(a2flogmom)
- ABI_DEALLOCATE(a2flogmom_int)
+ ABI_FREE(a2f_1mom)
+ ABI_FREE(a2f_1mom_int)
+ ABI_FREE(a2flogmom)
+ ABI_FREE(a2flogmom_int)
 
 !write to file
  write(msg,'(4a)')'#',ch10,'# Eliashberg function calculated for different gaussian smearing values',ch10
@@ -2750,9 +2750,9 @@ subroutine mka2fQgrid(elph_ds,fname)
    write(nunit,*)
  end do
 
- ABI_DEALLOCATE(eli_smear)
- ABI_DEALLOCATE(a2f_1d)
- ABI_DEALLOCATE(tmpa2f)
+ ABI_FREE(eli_smear)
+ ABI_FREE(a2f_1d)
+ ABI_FREE(tmpa2f)
 
  close (nunit)
 
@@ -2925,9 +2925,9 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
      iscf = 3
 
      mqpt = anaddb_dtset%ngqpt(1)*anaddb_dtset%ngqpt(2)*anaddb_dtset%ngqpt(3)*anaddb_dtset%nqshft
-     ABI_ALLOCATE(qpt_full,(3,mqpt))
-     ABI_ALLOCATE(wtq,(mqpt))
-     ABI_ALLOCATE(tmpshifts,(3,MAX_NSHIFTK))
+     ABI_MALLOC(qpt_full,(3,mqpt))
+     ABI_MALLOC(wtq,(mqpt))
+     ABI_MALLOC(tmpshifts,(3,MAX_NSHIFTK))
 
      wtq(:) = one
 
@@ -2945,14 +2945,14 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
      call getkgrid(0,0,iscf,qpt_full,3,qptrlatt,qptrlen, &
 &     1,mqpt,nqpt_computed,nqshft,1,crystal%rprimd,tmpshifts,crystal%symafm, &
 &     crystal%symrel,vacuum,wtq)
-     ABI_DEALLOCATE(qpt_full)
-     ABI_DEALLOCATE(wtq)
-     ABI_DEALLOCATE(tmpshifts)
+     ABI_FREE(qpt_full)
+     ABI_FREE(wtq)
+     ABI_FREE(tmpshifts)
 
      if (anaddb_dtset%nqshft /= 1) then
        write (message,'(a,i0)')&
 &       ' multiple qpt shifts not treated yet (should be possible), nqshft= ', anaddb_dtset%nqshft
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end if  ! end multiple shifted qgrid
 
@@ -2969,13 +2969,13 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 &   -qptrlatt(1,3)*qptrlatt(2,2)*qptrlatt(3,1) &
 &   -qptrlatt(1,1)*qptrlatt(2,3)*qptrlatt(3,2)
 
-   ABI_ALLOCATE(qpt_full,(3,mqpt))
+   ABI_MALLOC(qpt_full,(3,mqpt))
    iout = 6
    call smpbz(anaddb_dtset%brav,iout,qptrlatt,mqpt,elph_ds%nqpt_full,anaddb_dtset%nqshft,option,anaddb_dtset%q1shft,qpt_full)
 
 
 !  save the q-grid for future reference
-   ABI_ALLOCATE(elph_ds%qpt_full,(3,elph_ds%nqpt_full))
+   ABI_MALLOC(elph_ds%qpt_full,(3,elph_ds%nqpt_full))
 
 !  reduce qpt_full to correct zone
    do iqpt=1,elph_ds%nqpt_full
@@ -2985,7 +2985,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
      qpt_full(:,iqpt) = kpt
      elph_ds%qpt_full(:,iqpt)=kpt
    end do
-   ABI_DEALLOCATE(qpt_full)
+   ABI_FREE(qpt_full)
 
  else if (anaddb_dtset%qgrid_type==2) then ! use explicit list of qpoints from anaddb input
    qptrlatt(:,:)=0
@@ -2994,7 +2994,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
    qptrlatt(3,3)=1
 
    elph_ds%nqpt_full=anaddb_dtset%ep_nqpt
-   ABI_ALLOCATE(elph_ds%qpt_full,(3,elph_ds%nqpt_full))
+   ABI_MALLOC(elph_ds%qpt_full,(3,elph_ds%nqpt_full))
 
    elph_ds%qpt_full = anaddb_dtset%ep_qptlist
 
@@ -3007,10 +3007,10 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 !=================================================================
  call wrtout(std_out,' setqgrid : calling symkpt to find irred q points',"COLL")
 
- ABI_ALLOCATE(indqpt1,(elph_ds%nqpt_full))
- ABI_ALLOCATE(wtq_folded,(elph_ds%nqpt_full))
- ABI_ALLOCATE(wtq,(elph_ds%nqpt_full))
- ABI_ALLOCATE(bz2ibz_smap, (6, elph_ds%nqpt_full))
+ ABI_MALLOC(indqpt1,(elph_ds%nqpt_full))
+ ABI_MALLOC(wtq_folded,(elph_ds%nqpt_full))
+ ABI_MALLOC(wtq,(elph_ds%nqpt_full))
+ ABI_MALLOC(bz2ibz_smap, (6, elph_ds%nqpt_full))
 
  wtq(:) = one/dble(elph_ds%nqpt_full) !weights normalized to unity
 
@@ -3040,13 +3040,13 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 
  call wrtout(std_out,ch10,'COLL')
 
- ABI_ALLOCATE(elph_ds%wtq,(elph_ds%nqpt_full))
+ ABI_MALLOC(elph_ds%wtq,(elph_ds%nqpt_full))
 
  elph_ds%wtq(:)=wtq_folded(:)
 !MEMO indqpt could be useful to test the qgrid read by abinit
- ABI_DEALLOCATE(indqpt1)
- ABI_DEALLOCATE(wtq_folded)
- ABI_DEALLOCATE(wtq)
+ ABI_FREE(indqpt1)
+ ABI_FREE(wtq_folded)
+ ABI_FREE(wtq)
 
 end subroutine ep_setupqpt
 !!***
@@ -3126,7 +3126,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !Definition of the q path along which ph linwid will be interpolated
 !===================================================================
  call make_path(nqpath,qpath_vertices,Cryst%gmet,'G',20,ndiv,npt_tot,finepath)
- ABI_ALLOCATE(indxprtqpt,(npt_tot))
+ ABI_MALLOC(indxprtqpt,(npt_tot))
  indxprtqpt = 0
 
 !==========================================================
@@ -3134,7 +3134,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !==========================================================
  fname=trim(base_name) // '_LWD'
  if (open_file(fname,msg,newunit=unit_lwd,status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (unit_lwd,'(a)')       '#'
@@ -3164,7 +3164,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !==========================================================
  fname=trim(base_name) // '_BST'
  if (open_file(fname,msg,newunit=unit_bs,status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (unit_bs, '(a)')      '#'
@@ -3186,7 +3186,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !==========================================================
  fname=trim(base_name) // '_LAMBDA'
  if (open_file(fname,msg,newunit=unit_lambda,status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (unit_lambda,'(a)')      '#'
@@ -3213,8 +3213,8 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
  elph_ds%omega_min = zero
  elph_ds%omega_max = zero
 
- ABI_ALLOCATE(coskr, (npt_tot,nrpt))
- ABI_ALLOCATE(sinkr, (npt_tot,nrpt))
+ ABI_MALLOC(coskr, (npt_tot,nrpt))
+ ABI_MALLOC(sinkr, (npt_tot,nrpt))
  call ftgam_init(ifc%gprim, npt_tot, nrpt, finepath, ifc%rpt, coskr, sinkr)
 
  write (std_out,*) ' mkph_linwid : shape(elph_ds%gamma_qpt) = ',shape(elph_ds%gamma_qpt)
@@ -3273,7 +3273,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 
          if (abs(imeigval(jbranch)) > tol8) then
            write (msg,'(a,i0,a,es16.8)')' imaginary values for branch = ',jbranch,' imeigval = ',imeigval(jbranch)
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
          end if
        end do
 
@@ -3303,12 +3303,12 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 
        if (diagerr > tol12) then
          write (msg,'(a,es14.6)')' Numerical error in diagonalization of gamma with phon eigenvectors: ', diagerr
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
 
      else
        write (msg,'(a,i0)')' Wrong value for elph_ds%ep_scalprod = ',elph_ds%ep_scalprod
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if ! end elph_ds%ep_scalprod if
 !
 !    ==========================================================
@@ -3372,15 +3372,15 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
    call wrtout(ab_out,msg,'COLL')
  end do ! isppol
 
- ABI_DEALLOCATE(coskr)
- ABI_DEALLOCATE(sinkr)
+ ABI_FREE(coskr)
+ ABI_FREE(sinkr)
 
  close(unit=unit_lwd)
  close(unit=unit_bs)
  close(unit=unit_lambda)
 
- ABI_DEALLOCATE(finepath)
- ABI_DEALLOCATE(indxprtqpt)
+ ABI_FREE(finepath)
+ ABI_FREE(indxprtqpt)
 
  write(std_out,*) ' elph_linwid : omega_min, omega_max = ',elph_ds%omega_min, elph_ds%omega_max
 
@@ -3579,7 +3579,7 @@ subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
 ! *************************************************************************
 
  if (elph_ds%nsppol /= 1) then
-   MSG_ERROR('get_all_gkk2: nsppol>1 not coded yet!')
+   ABI_ERROR('get_all_gkk2: nsppol>1 not coded yet!')
  end if
 
  onediaggkksize = elph_ds%nbranch*elph_ds%k_phon%nkpt*kind(realdp_ex)
@@ -3593,7 +3593,7 @@ subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
    sz2=elph_ds%ngkkband
    sz3=elph_ds%ngkkband
    sz4=elph_ds%k_phon%nkpt
-   ABI_ALLOCATE(elph_ds%gkk2,(sz1,sz2,sz3,sz4,elph_ds%k_phon%nkpt,1))
+   ABI_MALLOC(elph_ds%gkk2,(sz1,sz2,sz3,sz4,elph_ds%k_phon%nkpt,1))
    elph_ds%gkk2(:,:,:,:,:,:) = zero
 
  else if (elph_ds%gkk2write == 1) then
@@ -3602,7 +3602,7 @@ subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
    open (unit=elph_ds%unit_gkk2,file='gkk2file',access='direct',&
 &   recl=onediaggkksize,form='unformatted',status='new',iostat=iost)
    if (iost /= 0) then
-     MSG_ERROR('error opening gkk2file as new')
+     ABI_ERROR('error opening gkk2file as new')
    end if
 !  rewind (elph_ds%unit_gkk2)
    write(std_out,*) 'get_all_gkk2 : disk file with gkk^2 created'
@@ -3611,11 +3611,11 @@ subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
    write(std_out,*) ' size = ', 4.0*dble(onediaggkksize)*dble(elph_ds%k_phon%nkpt)/&
 &   1024.0_dp/1024.0_dp, ' Mb'
  else
-   MSG_ERROR('bad value of gkk2write')
+   ABI_ERROR('bad value of gkk2write')
  end if
 
 !here do the actual calculation of |g_kk|^2
- MSG_ERROR("MGNOTE: interpolate_gkk is broken")
+ ABI_ERROR("MGNOTE: interpolate_gkk is broken")
  ABI_UNUSED(kptirr_phon(1,1))
  call interpolate_gkk (crystal,ifc,elph_ds,kpt_phon)
 
@@ -3703,7 +3703,7 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
  gprim = ifc%gprim
 
  if (elph_ds%nsppol /= 1) then
-   MSG_ERROR("interpolate_gkk not coded with nsppol>1 yet")
+   ABI_ERROR("interpolate_gkk not coded with nsppol>1 yet")
  end if
  isppol = 1
 
@@ -3720,11 +3720,11 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
 !allocate (gkk_tmp_full(2,sz1,sz1,sz2,elph_ds%nFSband,sz3))
 !allocate (gkk_tmp_full(2,s2,sz4,sz4,sz3))
 !ENDDEBUG
- ABI_ALLOCATE(gkk2_tmp,(2,sz1,sz1,sz2,sz2,sz3,1))
- ABI_ALLOCATE(gkk2_diag_tmp,(sz1,sz1,sz2,sz3))
- ABI_ALLOCATE(zhpev1,(2,2*3*natom-1))
- ABI_ALLOCATE(zhpev2,(3*3*natom-2))
- ABI_ALLOCATE(matrx,(2,(3*natom*(3*natom+1))/2))
+ ABI_MALLOC(gkk2_tmp,(2,sz1,sz1,sz2,sz2,sz3,1))
+ ABI_MALLOC(gkk2_diag_tmp,(sz1,sz1,sz2,sz3))
+ ABI_MALLOC(zhpev1,(2,2*3*natom-1))
+ ABI_MALLOC(zhpev2,(3*3*natom-2))
+ ABI_MALLOC(matrx,(2,(3*natom*(3*natom+1))/2))
 
  qphnrm = one
 !in this part use the inverse Fourier transform to get 1 (arbitrary) qpt at a
@@ -3734,7 +3734,7 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
  unit_gkkp = 150
  open (unit=unit_gkkp,file='gkkp_file_ascii',form='formatted',status='unknown',iostat=iost)
  if (iost /= 0) then
-   MSG_ERROR("error opening gkkpfile as new")
+   ABI_ERROR("error opening gkkpfile as new")
  end if
 
 !loop over all FS pairs.
@@ -3859,9 +3859,9 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
  end do
 !end do on iFSqpt
 
- ABI_DEALLOCATE(matrx)
- ABI_DEALLOCATE(zhpev1)
- ABI_DEALLOCATE(zhpev2)
+ ABI_FREE(matrx)
+ ABI_FREE(zhpev1)
+ ABI_FREE(zhpev2)
 
 end subroutine interpolate_gkk
 !!***
@@ -3981,7 +3981,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
 &   recl=onegkksize,form='unformatted')
    if (iost /= 0) then
      write (message,'(2a)')' get_all_gkq : ERROR- opening file ',trim(fname)
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    write (message,'(5a)')&
@@ -3991,7 +3991,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
 
  else
    write(message,'(a,i0)')' gkqwrite must be 0 or 1 while it is : ',elph_ds%gkqwrite
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if !if gkqwrite
 
 !=====================================================
@@ -4032,7 +4032,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
  end if !symgkq
 
 !TODO Do we need gkk_flag in elphon?
- ABI_DEALLOCATE(gkk_flag)
+ ABI_FREE(gkk_flag)
 
 end subroutine get_all_gkq
 !!***
@@ -4097,7 +4097,7 @@ subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
 &   recl=onegkksize,form='unformatted',&
 &   status='new',iostat=iost)
    if (iost /= 0) then
-     MSG_ERROR('get_all_gkr : error opening gkk_rpt_file as new')
+     ABI_ERROR('get_all_gkr : error opening gkk_rpt_file as new')
    end if
    write(std_out,*) ' get_all_gkr : will write real space gkk to a disk file.'
    write(std_out,*) ' size = ', 4.0*dble(onegkksize)*dble(nrpt)/&
@@ -4112,7 +4112,7 @@ subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
    sz3=elph_ds%nbranch*elph_ds%nbranch
    sz4=elph_ds%k_phon%nkpt
    sz5=elph_ds%nsppol
-   ABI_ALLOCATE(elph_ds%gkk_rpt,(2,sz2,sz3,sz4,sz5,nrpt))
+   ABI_MALLOC(elph_ds%gkk_rpt,(2,sz2,sz3,sz4,sz5,nrpt))
 !  write(std_out,*) ' get_all_gkr: invalid value for gkk_rptwrite'
 !  stop
  end if
@@ -4244,8 +4244,8 @@ subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprim
  sz2=elph_ds%nbranch*elph_ds%nbranch
 
 !these arrays are not parallelized, to enable symmetrization: syms swap k-points.
- ABI_ALLOCATE(gkk_qpt_new,(2,sz1,sz2,elph_ds%k_phon%nkpt,elph_ds%nsppol))
- ABI_ALLOCATE(gkk_qpt_tmp,(2,sz1,sz2,elph_ds%k_phon%nkpt,elph_ds%nsppol))
+ ABI_MALLOC(gkk_qpt_new,(2,sz1,sz2,elph_ds%k_phon%nkpt,elph_ds%nsppol))
+ ABI_MALLOC(gkk_qpt_tmp,(2,sz1,sz2,elph_ds%k_phon%nkpt,elph_ds%nsppol))
 
  do iqpt=1,elph_ds%nqpt_full
 
@@ -4464,8 +4464,8 @@ subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprim
  end do
 !end iqpt do
 
- ABI_DEALLOCATE(gkk_qpt_new)
- ABI_DEALLOCATE(gkk_qpt_tmp)
+ ABI_FREE(gkk_qpt_new)
+ ABI_FREE(gkk_qpt_tmp)
 
 end subroutine complete_gkk
 !!***
@@ -4573,19 +4573,19 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
 
  in_nenergy = elph_ds%nenergy
 
- ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,4))
- ABI_ALLOCATE(dos_e1,(elph_ds%nsppol,3))
+ ABI_MALLOC(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,4))
+ ABI_MALLOC(dos_e1,(elph_ds%nsppol,3))
 
- ABI_ALLOCATE(phfrq,(elph_ds%nbranch, elph_ds%k_phon%nkpt))
- ABI_ALLOCATE(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_phon%nkpt))
+ ABI_MALLOC(phfrq,(elph_ds%nbranch, elph_ds%k_phon%nkpt))
+ ABI_MALLOC(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_phon%nkpt))
 
  do iFSqpt=1,elph_ds%k_phon%nkpt
    call ifc%fourq(crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt))
  end do
 
  omega_max = maxval(phfrq)*1.1_dp
- ABI_DEALLOCATE(phfrq)
- ABI_DEALLOCATE(displ)
+ ABI_FREE(phfrq)
+ ABI_FREE(displ)
 
  write(message,'(a,E20.12)')' The max phonon energy is  ', omega_max
  call wrtout(std_out,message,'COLL')
@@ -4735,21 +4735,21 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
    end if ! metal or insulator
  end do ! isppol
 
- ABI_DEALLOCATE(tmp_wtk)
+ ABI_FREE(tmp_wtk)
 
  if (elph_ds%nenergy .lt. 2) then
-   MSG_ERROR('There are too few energy levels for non-LOVA')
+   ABI_ERROR('There are too few energy levels for non-LOVA')
  end if
 
  sz1=elph_ds%ngkkband;sz2=elph_ds%k_phon%nkpt
  sz3=elph_ds%nsppol;sz4=elph_ds%nenergy+1
- ABI_ALLOCATE(elph_tr_ds%dos_n,(sz4,sz3))
- ABI_ALLOCATE(elph_tr_ds%veloc_sq,(3,sz3,sz4))
- ABI_ALLOCATE(elph_tr_ds%en_all,(sz3,sz4))
- ABI_ALLOCATE(elph_tr_ds%de_all,(sz3,sz4+1))
- ABI_ALLOCATE(elph_tr_ds%tmp_gkk_intweight,(sz1,sz2,sz3,sz4))
- ABI_ALLOCATE(elph_tr_ds%tmp_velocwtk,(sz1,sz2,3,sz3,sz4))
- ABI_ALLOCATE(elph_tr_ds%tmp_vvelocwtk,(sz1,sz2,3,3,sz3,sz4))
+ ABI_MALLOC(elph_tr_ds%dos_n,(sz4,sz3))
+ ABI_MALLOC(elph_tr_ds%veloc_sq,(3,sz3,sz4))
+ ABI_MALLOC(elph_tr_ds%en_all,(sz3,sz4))
+ ABI_MALLOC(elph_tr_ds%de_all,(sz3,sz4+1))
+ ABI_MALLOC(elph_tr_ds%tmp_gkk_intweight,(sz1,sz2,sz3,sz4))
+ ABI_MALLOC(elph_tr_ds%tmp_velocwtk,(sz1,sz2,3,sz3,sz4))
+ ABI_MALLOC(elph_tr_ds%tmp_vvelocwtk,(sz1,sz2,3,3,sz3,sz4))
 
  elph_tr_ds%dos_n = zero
  elph_tr_ds%veloc_sq = zero
@@ -4772,7 +4772,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
      enemin = elph_ds%fermie - max_e - elph_ds%delta_e
      enemax = elph_ds%fermie + max_e
 
-     ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,elph_ds%nenergy+1))
+     ABI_MALLOC(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,elph_ds%nenergy+1))
      call ep_el_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
 &     enemin, enemax, elph_ds%nenergy+1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
 &     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
@@ -4798,13 +4798,13 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
          en1(isppol) = en1(isppol) + elph_ds%delta_e
        end do
      end do
-     ABI_DEALLOCATE(tmp_wtk)
+     ABI_FREE(tmp_wtk)
 
    else ! low_T = 0
      enemin = e1 - elph_ds%delta_e
      enemax = e1 + (out_nenergy-1)*elph_ds%delta_e
 
-     ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,out_nenergy+1))
+     ABI_MALLOC(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,out_nenergy+1))
      call ep_el_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
 &     enemin, enemax, out_nenergy+1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
 &     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
@@ -4830,13 +4830,13 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
          en1(isppol) = en1(isppol) + elph_ds%delta_e
        end do
      end do
-     ABI_DEALLOCATE(tmp_wtk)
+     ABI_FREE(tmp_wtk)
 
      e1 = en1(1)
      enemin = e1 - de0
      enemax = e1 + in_nenergy*2*de0
 
-     ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,in_nenergy*2+2))
+     ABI_MALLOC(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,in_nenergy*2+2))
      call ep_el_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
 &     enemin, enemax, in_nenergy*2+2, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
 &     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
@@ -4863,13 +4863,13 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
          en1(isppol) = en1(isppol) + de0
        end do
      end do
-     ABI_DEALLOCATE(tmp_wtk)
+     ABI_FREE(tmp_wtk)
 
      e1 = en1(1)
      enemin = e1 - elph_ds%delta_e
      enemax = e1 + (out_nenergy-1)*elph_ds%delta_e
 
-     ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,out_nenergy+1))
+     ABI_MALLOC(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt,elph_ds%nsppol,out_nenergy+1))
      call ep_el_weights(elph_ds%ep_b_min, elph_ds%ep_b_max, eigenGS, elph_ds%elphsmear, &
 &     enemin, enemax, out_nenergy+1, gprimd, elph_ds%k_fine%irredtoGS, elph_ds%kptrlatt_fine, max_occ, &
 &     elph_ds%minFSband, elph_ds%nband, elph_ds%nFSband, &
@@ -4897,7 +4897,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
          en1(isppol) = en1(isppol) + elph_ds%delta_e
        end do
      end do
-     ABI_DEALLOCATE(tmp_wtk)
+     ABI_FREE(tmp_wtk)
    end if
 
 !semiconductor
@@ -4978,10 +4978,10 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
      end if
    end do ! ie_all
  else
-   MSG_BUG('check i_metal!')
+   ABI_BUG('check i_metal!')
  end if ! metal or insulator
 
- ABI_DEALLOCATE(dos_e1)
+ ABI_FREE(dos_e1)
 
 end subroutine get_nv_fs_en
 !!***
@@ -5054,12 +5054,12 @@ subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(elph_tr_ds%dos_n0,(elph_ds%ntemper,elph_ds%nsppol))
- ABI_ALLOCATE(elph_tr_ds%veloc_sq0,(elph_ds%ntemper,3,elph_ds%nsppol))
+ ABI_MALLOC(elph_tr_ds%dos_n0,(elph_ds%ntemper,elph_ds%nsppol))
+ ABI_MALLOC(elph_tr_ds%veloc_sq0,(elph_ds%ntemper,3,elph_ds%nsppol))
 !if (elph_ds%use_k_fine == 1) then
-!ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt))
+!ABI_MALLOC(tmp_wtk,(elph_ds%nFSband,elph_ds%k_fine%nkpt))
 !else
-!ABI_ALLOCATE(tmp_wtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt))
+!ABI_MALLOC(tmp_wtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt))
 !end if
 
  elph_tr_ds%dos_n0 = zero
@@ -5253,10 +5253,10 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
  nbranch  = elph_ds%nbranch
  ngkkband = elph_ds%ngkkband
 
- ABI_ALLOCATE(elph_ds%gamma_qpt,(2,nbranch**2,nsppol,elph_ds%nqpt_full))
+ ABI_MALLOC(elph_ds%gamma_qpt,(2,nbranch**2,nsppol,elph_ds%nqpt_full))
  elph_ds%gamma_qpt = zero
 
- ABI_ALLOCATE(tmp_gkk ,(2,ngkkband**2,nbranch**2,nsppol))
+ ABI_MALLOC(tmp_gkk ,(2,ngkkband**2,nbranch**2,nsppol))
 
  if (elph_ds%gkqwrite == 0) then
    call wrtout(std_out,' integrate_gamma : keeping gamma matrices in memory','COLL')
@@ -5266,7 +5266,7 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
    call wrtout(std_out,message,'COLL')
  else
    write (message,'(a,i0)')' Wrong value for gkqwrite = ',elph_ds%gkqwrite
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 
@@ -5308,7 +5308,7 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
 
  call xmpi_sum (elph_ds%gamma_qpt, comm, ierr)
 
- ABI_DEALLOCATE(tmp_gkk)
+ ABI_FREE(tmp_gkk)
 
 !need prefactor of 1/nkpt for each integration over 1 kpoint index. NOT INCLUDED IN elph_ds%gkk_intweight
  do iqpt=1,elph_ds%nqptirred
@@ -5393,7 +5393,7 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
  else
    write (message,'(3a,i3)')' integrate_gamma_tr : BUG-',ch10,&
 &   ' Wrong value for gkqwrite = ',elph_ds%gkqwrite
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !allocate temp variables
@@ -5473,7 +5473,7 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
 
  call xmpi_sum (elph_tr_ds%gamma_qpt_tr, comm, ierr)
 
- ABI_DEALLOCATE(tmp_gkk)
+ ABI_FREE(tmp_gkk)
 
 
 !need prefactor of 1/nkpt for each integration over 1 kpoint index.
@@ -5558,7 +5558,7 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
  else
    write (message,'(3a,i3)')' integrate_gamma_tr : BUG-',ch10,&
 &   ' Wrong value for gkqwrite = ',elph_ds%gkqwrite
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !allocate temp variables
@@ -5626,7 +5626,7 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
 
  end do ! iq
 
- ABI_DEALLOCATE(tmp_gkk)
+ ABI_FREE(tmp_gkk)
 
  call xmpi_sum (elph_tr_ds%gamma_qpt_trout, comm, ierr)
  call xmpi_sum (elph_tr_ds%gamma_qpt_trin, comm, ierr)
@@ -5929,7 +5929,7 @@ subroutine ftgkk (wghatm,gkk_qpt,gkk_rpt,gkqwrite,gkrwrite,gprim,ikpt_phon0,&
    write(message,'(a,a,a,i0,a)' )&
 &   'The only allowed values for qtor are 0 or 1, while',ch10,&
 &   'qtor=',qtor,' has been required.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 end subroutine ftgkk

@@ -6,7 +6,7 @@
 !! Low-level procedeures used in nonlop_pl to contract tensors
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, MT, GZ)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, MT, GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1734,7 +1734,7 @@ subroutine metcon(rank,gmet,aa,bb)
    write(message, '(a,i0,a,a,a)' )&
 &   'Input rank=',rank,' not allowed.',ch10,&
 &   'Possible values are 0,1,2,3 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  contains
@@ -2015,7 +2015,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
    write(message, '(a,i0,a,a,a)' )&
 &   'Input rank=',rank,' not allowed.',ch10,&
 &   'Possible values are 0,1,2,3 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  contains

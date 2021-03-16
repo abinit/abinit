@@ -17,7 +17,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,6 +79,7 @@ module m_potential_list
      procedure :: initialize ! make an empty list
      procedure :: ipot       ! return the i'th potential
      procedure :: set_supercell ! pointer to supercell and set_supercell for all pot in list
+     procedure :: set_params
      procedure :: finalize
      procedure :: append  ! add a potential to the list
      procedure :: calculate ! each potential in list do calculate and then sum.
@@ -137,13 +138,13 @@ contains
        call self%list(i)%ptr%finalize()
        ! Intel compiler complains
        if(associated(self%list(i)%ptr)) then
-          ABI_DATATYPE_DEALLOCATE_SCALAR(self%list(i)%ptr)
+          ABI_FREE(self%list(i)%ptr)
        endif 
        
        nullify(self%list(i)%ptr)
     end do
     if (allocated(self%list)) then
-       ABI_DEALLOCATE(self%list)
+       ABI_FREE(self%list)
     end if
     self%size=0
     self%capacity=0
@@ -182,6 +183,17 @@ contains
     self%has_strain= (self%has_strain.or. effpot%has_strain)
     self%has_lwf =(self%has_lwf.or. effpot%has_lwf)
   end subroutine append
+
+  subroutine set_params(self, params)
+    class(potential_list_t), intent(inout) :: self  ! the effpot may save the states.
+    type(multibinit_dtset_type), intent(inout) :: params
+    integer :: i
+    do i=1, self%size
+       call self%list(i)%ptr%set_params(params)
+    end do
+  end subroutine set_params
+
+
 
   !----------------------------------------------------------------------
   !> @brief calculate energy and 1st derivatives

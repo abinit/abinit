@@ -208,8 +208,8 @@ def mksite(ctx):
     Build the Abinit documentation by running the mksite.py script and open the main page in the browser.
     """
     with cd(ABINIT_ROOTDIR):
+        webbrowser.open_new_tab("http://127.0.0.1:8000")
         ctx.run("./mksite.py serve --dirtyreload", pty=True)
-        return webbrowser.open_new_tab("http://127.0.0.1:8000")
 
 
 @task
@@ -234,7 +234,7 @@ def ctags(ctx):
     Update ctags file.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = "ctags -R shared/ src/"
+        cmd = "ctags -R --langmap=fortran:+.finc.f90 shared/ src/"
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
         #ctx.run('ctags -R --exclude="_*"', pty=True)
@@ -250,7 +250,8 @@ def fgrep(ctx, pattern):
     #    -i - case-insensitive search
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
+        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc]" "%s" src shared' % pattern
+        #cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -289,6 +290,55 @@ def vimt(ctx, tagname):
             cmd  = "vim -t %s" % tagname
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
+
+
+@task
+def env(ctx):
+    """Print sh code to set $PATH and $ABI_PSPDIR in order to work with build directory."""
+    print("\nExecute the following lines in the shell to set the env:\n")
+    top = find_top_build_tree(".", with_abinit=True)
+    binpath = os.path.join(top, "src", "98_main")
+    print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Psps_for_tests")
+    print(f"export PATH={binpath}:$PATH")
+
+@task
+def diff2(ctx, filename="run.abo"):
+    """
+    Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.
+    """
+    vimdiff = "vimdiff"
+    if which("mvimdiff") is not None: vimdiff = "mvimdiff"
+    files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
+    if not files: return
+    cmd = "%s %s %s" % (vimdiff, filename, files[-1])
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+
+
+@task
+def diff3(ctx, filename="run.abo"):
+    """
+    Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.
+    """
+    vimdiff = "vimdiff"
+    if which("mvimdiff") is not None: vimdiff = "vimdiff"
+    files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
+    if not files: return
+    if len(files) > 2:
+        cmd = "%s %s %s %s" % (vimdiff, filename, files[-2], files[-1])
+    else:
+        cmd = "%s %s %s" % (vimdiff, filename, files[-1])
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+
+
+@task
+def add_trunk(ctx):
+    """Register trunk as remote."""
+    cmd = "git remote add trunk git@gitlab.abinit.org:trunk/abinit.git"
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+
 
 #@task
 #def gdb(ctx, input_name, exec_name="abinit", run_make=False):
@@ -364,6 +414,16 @@ def pull(ctx):
     ctx.run("git pull --recurse-submodules")
     ctx.run("git stash apply")
 
+
+@task
+def submodules(ctx):
+    """Update submodules."""
+    with cd(ABINIT_ROOTDIR):
+        # https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules
+        ctx.run("git submodule update --remote --init")
+        #ctx.run("git submodule update --remote")
+        ctx.run("git submodule update --recursive --remote")
+
 @task
 def branchoff(ctx, start_point):
     """"Checkout new branch from start_point e.g. `trunk/release-9.0` and set default upstream to origin."""
@@ -373,13 +433,13 @@ def branchoff(ctx, start_point):
         remote = "trunk"
 
     def run(cmd):
-        cprint(f"Executing: `{cmd}`", "green", color="green")
+        cprint(f"Executing: `{cmd}`", color="green")
         ctx.run(cmd)
 
     run(f"git fetch {remote}")
     # Create new branch `test_v9.0` using trunk/release-9.0 as start_point:
     # git checkout [-q] [-f] [-m] [[-b|-B|--orphan] <new_branch>] [<start_point>]
-    my_branch = "my_" + start_point
+    my_branch = "my_" + start_point.replace("/", "-")
     run(f"git checkout -b {my_branch} {start_point}")
     # Change default upstream. If you forget this step, you will be pushing to trunk
     run("git branch --set-upstream-to origin")

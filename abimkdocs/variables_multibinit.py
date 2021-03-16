@@ -486,7 +486,7 @@ Variable(
     topics=['FitProcess_useful'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="FIT Training Set OPTION",
+    mnemonics="fit Training Set OPTION",
     added_in_version="before_v9",
     text=r"""
 * 0 --> the Training is hist from ABINIT
@@ -502,7 +502,7 @@ Variable(
     topics=['BoundingProcess_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="BOUND COEFFicient",
+    mnemonics="BOUND MODEL",
     added_in_version="before_v9",
     text=r"""
 Flag to activate the bound process:
@@ -1468,6 +1468,21 @@ Variable(
 * 1 --> Evaluate the effective potential with respect to given test-set and calculate mean square differences between ab-initio energy/forces and model energy/forces
 """,
 ),
+
+Variable(
+    abivarname="tolmxf@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=2e-5,
+    mnemonics="TOLerance on the MaXimal Force",
+    added_in_version="v9",
+    text=r"""
+Sets a maximal absolute force tolerance (in hartree/Bohr) below which BFGS structural relaxation iterations will stop. Corresponds to [[tolmxf]] of Abinit.
+""",
+),
+
 
 Variable(
 abivarname="analyze_anh_pot@multibinit",

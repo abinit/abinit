@@ -90,7 +90,7 @@ contains
     iout=-1
     call metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 
-    ABI_ALLOCATE(kpgnorm,(npw_k))
+    ABI_MALLOC(kpgnorm,(npw_k))
     call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
 
     mcg_tot=mcg
@@ -100,9 +100,9 @@ contains
     call xmpi_sum(mcg_tot,mpi_enreg%comm_world,mpierr)
 
     npw_tot=sum(nppw_tot)
-    ABI_ALLOCATE(cg_tot,(2,mcg_tot))
-    ABI_ALLOCATE(kpgnorm_tot,(npw_tot))
-    ABI_ALLOCATE(kg_tot,(3,npw_tot))
+    ABI_MALLOC(cg_tot,(2,mcg_tot))
+    ABI_MALLOC(kpgnorm_tot,(npw_tot))
+    ABI_MALLOC(kg_tot,(3,npw_tot))
 
     cg_tot(:,:)=zero
     kpgnorm_tot(:)=zero
@@ -156,7 +156,7 @@ contains
       write(23,'(ES12.5)') ek_k
       close(23)
 
-      ABI_ALLOCATE(tempwfk,(npw_tot, 3))
+      ABI_MALLOC(tempwfk,(npw_tot, 3))
       do iband=1, nband(ckpt)
 
         tempwfk(:,:) = zero
@@ -176,12 +176,12 @@ contains
 
         close(23)
       end do
-      ABI_DEALLOCATE(tempwfk)
+      ABI_FREE(tempwfk)
     end if
-    ABI_DEALLOCATE(kpgnorm)
-    ABI_DEALLOCATE(kg_tot)
-    ABI_DEALLOCATE(cg_tot)
-    ABI_DEALLOCATE(kpgnorm_tot)
+    ABI_FREE(kpgnorm)
+    ABI_FREE(kg_tot)
+    ABI_FREE(cg_tot)
+    ABI_FREE(kpgnorm_tot)
   end subroutine hightemp_prt_cg
   !!***
 

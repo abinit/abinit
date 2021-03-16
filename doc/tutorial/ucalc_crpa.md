@@ -22,7 +22,7 @@ to compute the screening, and how to converge the relevant parameters
 
 This tutorial should take two hours to complete (you should have access to more than 8 processors).
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 The cRPA method to compute effective interaction: summary and key parameters
 
@@ -60,7 +60,7 @@ Several parameters (both physical and technical) are important for the cRPA calc
     the more localized is the radial part of the Wannier orbital. Finally, note that Wannier orbitals
     are used in DMFT and cRPA implementations but this is not the most usual choice of correlated orbitals
     in the DFT+_U_ implementation in particular in ABINIT (see [[cite:Amadon2008a]]).
-    The relation between the two expressions is briefly discussed in [[cite:Geneste2016]].
+    The relation between the two expressions is briefly discussed in [[cite:Geneste2017]].
 
   * **The constrained polarization calculation.** As we will discuss in section
     2, there are different ways to define the constrained polarizability, by suppressing in the polarization,
@@ -87,19 +87,18 @@ for the other tutorials. Why not Work_crpa?
 In what follows, the name of files are mentioned as if you were in this subdirectory.
 All the input files can be found in the `$ABI_TESTS/tutoparal/Input` directory.*
 
-Copy the files *tucrpa_1.in* and *tucrpa_1.files* from *ABI_TESTS/tutoparal/Input* to *Work_crpa* with:
+Copy the files *tucrpa_1.abi* from *ABI_TESTS/tutoparal/Input* to *Work_crpa* with:
 
 ```sh
 cd $ABI_TESTS/tutoparal/Input
 mkdir Work_crpa
 cd Work_crpa
-cp ../tucrpa_1.files .
-cp ../tucrpa_1.in .
+cp ../tucrpa_1.abi .
 ```
 
 and run the code with:
 
-    mpirun -n 32 abinit < tucrpa_1.files > log_1  &
+    mpirun -n 32 abinit tucrpa_1.abi > log_1  &
 
 This run should take some time. It is recommended that you use at least 10
 processors (and 32 should be fast). It calculates the LDA ground state of
@@ -139,7 +138,7 @@ However, we clearly see an important hybridization. The Fermi level (at 0 eV)
 is in the middle of bands 21-23.
 
 One can easily check that bands 21-23 are mainly _d-t<sub>2g</sub>_ and bands 24-25 are
-mainly _e<sub>g</sub>_: just use [[pawfatbnd]] = 2 in *tucrpa_1.in* and relaunch the
+mainly _e<sub>g</sub>_: just use [[pawfatbnd]] = 2 in *tucrpa_1.abi* and relaunch the
 calculations. Then the file *tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m-2*,
 *tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m-1* and
 *tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m1* give you respectively the _xy_, _yz_ and
@@ -186,7 +185,7 @@ interactions is carried out, the choice of models is discussed in [[cite:Amadon2
 
 In this section, we will present the input variables and discuss how to
 extract useful information in the log file in the case of the _d-d_ model. The
-input file for a typical cRPA calculation (*tucrpa_2.in*) contains four datasets
+input file for a typical cRPA calculation (*tucrpa_2.abi*) contains four datasets
 (as usual _GW_ calculations, see the [GW tutorial](gw1.md#1a)): the
 first one is a well converged LDA calculation, the second is non self-consistent calculation
 to compute accurately full and empty states, the third
@@ -194,19 +193,18 @@ computes the constrained non interacting polarizability, and the fourth
 computes effective interaction parameters _U_ and _J_. We discuss these four
 datasets in the next four subsections.
 
-Copy the files in your *Work_crpa* directory with:
+Copy the file in your *Work_crpa* directory with:
 
 ```sh
-cp ../tucrpa_2.in .
-cp ../tucrpa_2.files
+cp ../tucrpa_2.abi .
 ```
 
-The input file *tucrpa_2.in* contains standard data to perform a LDA
+The input file *tucrpa_2.abi* contains standard data to perform a LDA
 calculation on SrVO<sub>3</sub>. We focus in the next subsections on some peculiar input
 variables related to the fact that we perform a cRPA calculation. Before
 reading the following section, launch the abinit calculation:
 
-    abinit < tucrpa_2.files > log_2
+    abinit tucrpa_2.abi > log_2
 
 ##### 3.2.1. The first DATASET: A converged LDA calculation
 
@@ -220,7 +218,7 @@ the full interaction matrix described in section 3.2.4 will not be correct.
 Before presenting the input variables for this dataset, we discuss two
 important physical parameters relevant to this dataset.
 
-  * Diagonalization of Kohn-Sham Hamiltonian: As in the case of DFT+DMFT or _GW_ calculation, a cRPA calculation requires that the LDA is perfectly converged and the Kohn Sham eigenstates are precisely determined, including the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the polarizability. For this reason we choose a very low value of [[tolwfr]] in the input file tucrpa_1.in.
+  * Diagonalization of Kohn-Sham Hamiltonian: As in the case of DFT+DMFT or _GW_ calculation, a cRPA calculation requires that the LDA is perfectly converged and the Kohn Sham eigenstates are precisely determined, including the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the polarizability. For this reason we choose a very low value of [[tolwfr]] in the input file tucrpa_1.abi.
 
   * Wannier functions: Once the calculation is converged, we compute Wannier functions, as in a DFT+DMFT calculation. To do this, we only precise that we are using the DFT+DMFT implementation (usedmft=0), but only with the Wannier keywords ([[dmftbandi]] and [[dmftbandf]]). We emphasize that with respect to the discussion on models on section 3.1, [[dmftbandi]] and [[dmftbandf]] are used to define the so called A bands. We will see in dataset 2 how B bands are defined. In our case, as we are in the _d-d_ model, we choose only the _d_ -like bands as a starting point and [[dmftbandi]] and [[dmftbandf]] are thus equal to the first and last _d_ -like bands, namely 21 and 25.
 
@@ -457,7 +455,7 @@ interaction computed on Wannier orbitals.
 
 We give here the results of some convergence studies, than can be made by the
 readers. Some are computationally expensive. It is recommanded to use at least
-32 processors. Input files are provided in *tucrpa_3.in* and *tucrpa_3.files* for the first case.
+32 processors. Input file is provided in *tucrpa_3.abi* for the first case.
 
 ### 4.1 Cutoff in energy for the polarisability [[ecuteps]]
 
@@ -550,17 +548,17 @@ of bare and effective interactions.
 
 <center>
 
-model                | _d - d_ |   _t<sub>2g</sub>-t<sub>2g</sub>_  |_dp-dp_  |  _d -dp_ (a) |  _d -dp_ (b)
----------------------|---------|--------------|---------|--------------|---------------
-[[ucrpa]]                |    1    |     1        |    1    |     1        |     2
-[[dmftbandi]]/[[dmftbandf]]  |   21/25 |    21/25     |    12/25|    12/25     |    12/25
-[[ucrpa_bands]]          |   21 25 |    21 25     |    12 25|    21 25     |    12 25
-_U_<sub>bare</sub> (eV)       |   15.4  |    15.3      |    19.4 |    19.4      |    19.4
-_U_<sub>bare diag</sub> (eV) |   16.3  |    16.0      |    20.6 |    20.6      |    20.6
-_J_<sub>bare</sub> (eV)     |   0.66  |    0.54      |   0.96  |    0.96      |    0.96
-_U_ (eV)                 |   2.8   |    2.8       |    10.8 |    3.4       |    1.6
-_U_<sub>diag</sub> (eV)      |   3.5   |    3.4       |    12.0 |    4.4       |    2.6
-_J_ (eV)                 |   0.60  |    0.47      |     0.91|    0.87      |    0.86
+model                        | _d - d_ |   _t<sub>2g</sub>-t<sub>2g</sub>_  |_dp-dp_  |  _d -dp_ (a) |  _d -dp_ (b)
+-----------------------------|---------|------------------------------------|---------|--------------|---------------
+[[ucrpa]]                    |    1    |     1                              |    1    |     1        |     2
+[[dmftbandi]]/[[dmftbandf]]  |   21/25 |    23/25                           |    12/25|    12/25     |    12/25
+[[ucrpa_bands]]              |   21 25 |    23 25                           |    12 25|    21 25     |    12 25
+_U_<sub>bare</sub> (eV)      |   15.4  |    15.3                            |    19.4 |    19.4      |    19.4
+_U_<sub>bare diag</sub> (eV) |   16.3  |    16.0                            |    20.6 |    20.6      |    20.6
+_J_<sub>bare</sub> (eV)      |   0.66  |    0.86                            |   0.96  |    0.96      |    0.96
+_U_ (eV)                     |   2.8   |    2.8                             |    10.8 |    3.4       |    1.6
+_U_<sub>diag</sub> (eV)      |   3.5   |    3.4                             |    12.0 |    4.4       |    2.6
+_J_ (eV)                     |   0.60  |    0.76                            |     0.91|    0.87      |    0.86
 
 
 </center>
@@ -571,8 +569,8 @@ agreement (within 0.1 or 0.2 eV) with results obtained in Table V of
 [[cite:Amadon2014]] and references cited in this table.
 
 To obtain the results with only the _t<sub>2g</sub>_ orbitals, one must use a specific
-input file, which is tucrpa_4.in, which uses specific keywords, peculiar to
-this case (compare it with tucrpa_2.in). In this peculiar case, the most
+input file, which is tucrpa_4.abi, which uses specific keywords, peculiar to
+this case (compare it with tucrpa_2.abi). In this peculiar case, the most
 common definition of J has to be deduced by direct calculation from the
 interaction matrices using the Slater Kanamori expression (see e.g.
 [[cite:Lechermann2006]] or [[cite:Vaugier2012]]) and not using the value of _J_ computed in the code).
@@ -616,7 +614,7 @@ decrease the computational cost.
      freqspmax4 30 eV
      freqspmin4  0 eV
 
-An example of input file can be found in *tucrpa_5.in*. Note that we have
+An example of input file can be found in *tucrpa_5.abi*. Note that we have
 decreased some parameters to speed-up the calculations. Importantly, however,
 we have increased the number of Kohn Sham bands, because calculation of
 screening at high frequency involves high energy transitions which requires

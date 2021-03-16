@@ -6,7 +6,7 @@
 !! This program merges DFPT potentials for different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2020 ABINIT group (MG)
+!! Copyright (C) 2004-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +59,7 @@ program mrgdv
  integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, rspace_cell, symv1scf, npert_miss, abimem_level
  real(dp) :: dvdb_qdamp, abimem_limit_mb
  character(len=24) :: codename
- character(len=500) :: command,arg, msg
+ character(len=500) :: command, arg, msg
  character(len=fnlen) :: dvdb_filepath, dump_file, ddb_filepath
  type(dvdb_t) :: dvdb
 !arrays
@@ -143,7 +143,7 @@ program mrgdv
      ABI_CHECK(nargs > 1, "Additional arguments are missing")
      call get_command_argument(2, dvdb_filepath)
      if (file_exists(dvdb_filepath)) then
-       MSG_ERROR(sjoin("Cannot overwrite existing file:", dvdb_filepath))
+       ABI_ERROR(sjoin("Cannot overwrite existing file:", dvdb_filepath))
      end if
 
      nfiles = nargs - 2
@@ -212,7 +212,7 @@ program mrgdv
    !  call dvdb_convert_fort2nc(dvdb_filepath, dump_file, comm)
 
    case default
-     MSG_ERROR(sjoin("Unknown command:", command))
+     ABI_ERROR(sjoin("Unknown command:", command))
    end select
 
  end if

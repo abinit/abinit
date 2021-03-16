@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2020 ABINIT group (MT,TRangel)
+!!  Copyright (C) 2016-2021 ABINIT group (MT,TRangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,7 +64,7 @@ contains
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
 !!  [mpi_comm_wvl]=MPI communicator (optional)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
 !!  nfft=dimension of vxc (XC potential)
@@ -161,11 +161,11 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 !Make sure option is acceptable
  if (option<0.or.option>3) then
    write(msg,'(a,i2,a)') 'Option= ',option,' is not allowed!'
-   MSG_BUG(MSG)
+   ABI_BUG(MSG)
  end if
  if(nfft/=n3xccc)then
    write(msg,'(a)') 'nfft and n3xccc should be equal!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !MPI
@@ -210,7 +210,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 !  For spin-polarization, replace vxc by (1/2)*(vxc(up)+vxc(down))
 !  For non-collinear magnetism, replace vxc by (1/2)*(vxc^{11}+vxc^{22})
    if (nspden>=2) then
-     ABI_ALLOCATE(vxc_eff,(nfft))
+     ABI_MALLOC(vxc_eff,(nfft))
      do jj=1,nfft
        vxc_eff(jj)=half*(vxc(jj,1)+vxc(jj,2))
      end do
@@ -280,19 +280,19 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 !    Allocate temporary memory
      !npts12=1+int(((range/hh(1))*(range/hh(2))*pi))
      npts12=(iex-isx+1)*(iey-isy+1)
-     ABI_ALLOCATE(rnorm,(npts12))
-     ABI_ALLOCATE(vecx,(npts12))
-     ABI_ALLOCATE(vecy,(npts12))
-     ABI_ALLOCATE(ivec,(npts12))
-     ABI_ALLOCATE(indx,(npts12))
+     ABI_MALLOC(rnorm,(npts12))
+     ABI_MALLOC(vecx,(npts12))
+     ABI_MALLOC(vecy,(npts12))
+     ABI_MALLOC(ivec,(npts12))
+     ABI_MALLOC(indx,(npts12))
      if (option==1.or.option==3) then
-       ABI_ALLOCATE(tcore,(npts12))
+       ABI_MALLOC(tcore,(npts12))
      end if
      if (option>=2) then
-       ABI_ALLOCATE(dtcore,(npts12))
+       ABI_MALLOC(dtcore,(npts12))
      end if
      if (option==4) then
-       ABI_ALLOCATE(d2tcore,(npts12))
+       ABI_MALLOC(d2tcore,(npts12))
      end if
 
 !    Explore range of vectors
@@ -330,7 +330,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
        if (npts==0) cycle
        if (npts>npts12) then
          msg='npts>npts12!'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
 
 !      Evaluate core density (and derivatives) on the set of selected points
@@ -426,19 +426,19 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
      end do ! i3
 
 !    Release temporary memory
-     ABI_DEALLOCATE(rnorm)
-     ABI_DEALLOCATE(vecx)
-     ABI_DEALLOCATE(vecy)
-     ABI_DEALLOCATE(ivec)
-     ABI_DEALLOCATE(indx)
+     ABI_FREE(rnorm)
+     ABI_FREE(vecx)
+     ABI_FREE(vecy)
+     ABI_FREE(ivec)
+     ABI_FREE(indx)
      if (allocated(tcore)) then
-       ABI_DEALLOCATE(tcore)
+       ABI_FREE(tcore)
      end if
      if (allocated(dtcore)) then
-       ABI_DEALLOCATE(dtcore)
+       ABI_FREE(dtcore)
      end if
      if (allocated(d2tcore)) then
-       ABI_DEALLOCATE(d2tcore)
+       ABI_FREE(d2tcore)
      end if
 
      if (option==2) then
@@ -458,7 +458,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
  end do
 
  if(option>=2.and.nspden>=2)  then
-   ABI_DEALLOCATE(vxc_eff)
+   ABI_FREE(vxc_eff)
  end if
 
 !Density: make it positive
@@ -608,21 +608,21 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 
  if(nspden >1) then
    write(message, '(a)')'mkcore_wvl_old: this is not yet generalized to npsden>1'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(option>4 .or. option<1 )then
    write(message,'(a,a,a,a,a,a,i6)') ch10,&
 &   ' mkcore_wvl_old: BUG -',ch10,&
 &   '  The argument option should be between 1 and 4,',ch10,&
 &   '  however, option=',option
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if(nfft .ne. n3xccc)then
    write(message,'(a,a,a,a,a,a,2i6)') ch10,&
 &   ' mkcore_wvl_old: BUG -',ch10,&
 &   '  nfft and n3xccc should be equal,',ch10,&
 &   '  however, nfft and n3xccc=',nfft,n3xccc
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !MPI
@@ -647,7 +647,7 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
    write(message, '(a,a,a,a)' ) ch10,&
 &   ' mkcore_wvl_old: BUG -',ch10,&
 &   '  Can''t be here ! (bad option).'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  write(message,'(a,a)') ch10,&
@@ -699,12 +699,12 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
      ncmax=1
    end if
 
-   ABI_ALLOCATE(ifftsph_tmp,(ncmax))
-   ABI_ALLOCATE(rr,(ncmax))
+   ABI_MALLOC(ifftsph_tmp,(ncmax))
+   ABI_MALLOC(rr,(ncmax))
    if(option>1) then
-     ABI_ALLOCATE(rred,(3,ncmax))
+     ABI_MALLOC(rred,(3,ncmax))
    else
-     ABI_ALLOCATE(rred,(0,0))
+     ABI_MALLOC(rred,(0,0))
    end if
 
 !  Create mesh_core object
@@ -817,9 +817,9 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 
 !  Deallocate
    call pawrad_free(core_mesh)
-   ABI_DEALLOCATE(ifftsph_tmp)
-   ABI_DEALLOCATE(rr)
-   ABI_DEALLOCATE(rred)
+   ABI_FREE(ifftsph_tmp)
+   ABI_FREE(rr)
+   ABI_FREE(rred)
 
  end do !itypat
 
@@ -949,16 +949,16 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
 !Checks
  if(nspden >1) then
    write(message, '(a)')'mkcore_inner: this is not yet generalized to npsden>1'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (present(rred)) then
    if (option>1.and.size(rred)/=3*ncmax) then
      write(message, '(a)')'mkcore_inner: incorrect size for rred'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  else if (option>1) then
    write(message, '(a)')'mkcore_inner: rred is not present and option >1'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Retrieve values of pseudo core density (and derivative)
@@ -1012,7 +1012,7 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
 
 !Compute frozen-wf contribution to Dynamical matrix
  else if (option==4) then
-   ABI_ALLOCATE(d2tcore,(nfgd))
+   ABI_MALLOC(d2tcore,(nfgd))
    if(nfgd>0) then
 !    Evaluate spline fit of 2nd der of pseudo core density
      call paw_splint(msz,core_mesh%rad,pawtab%tcoredens(:,3),pawtab%tcoredens(:,5),&
@@ -1044,7 +1044,7 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
        end do
      end do
    end if
-   ABI_DEALLOCATE(d2tcore)
+   ABI_FREE(d2tcore)
 
  end if !option
 
@@ -1062,13 +1062,13 @@ end module m_mkcore_wvl
 !%% !!  FIXME: add description.
 !%% !!
 !%% !! COPYRIGHT
-!%% !!  Copyright (C) 2012-2020 ABINIT group (TRangel)
+!%% !!  Copyright (C) 2012-2021 ABINIT group (TRangel)
 !%% !!  This file is distributed under the terms of the
 !%% !!  GNU General Public License, see ~abinit/COPYING
 !%% !!  or http://www.gnu.org/copyleft/gpl.txt .
 !%% !!
 !%% !! INPUTS
-!%% !!  mpi_enreg=informations about MPI parallelization
+!%% !!  mpi_enreg=information about MPI parallelization
 !%% !!
 !%% !! OUTPUT
 !%% !!  argout(sizeout)=description
@@ -1151,7 +1151,7 @@ end module m_mkcore_wvl
 !%%
 !%%  if(nspden >1) then
 !%%    write(message, '(a)')'mkcore_paw: this is not yet generalized to npsden>1'
-!%%    MSG_ERROR(message)
+!%%    ABI_ERROR(message)
 !%%  end if
 !%%
 !%%  geocode='P'
@@ -1169,7 +1169,7 @@ end module m_mkcore_wvl
 !%%  me    =xmpi_comm_rank(mpi_enreg%comm_fft);    me_fft= ngfft(11)
 !%%
 !%%  if(me /= me_fft .or. nproc /= nproc_fft) then
-!%%    MSG_BUG("mkcore_paw: comm_size or comm_rank not equal to the corresponding values in ngfft")
+!%%    ABI_BUG("mkcore_paw: comm_size or comm_rank not equal to the corresponding values in ngfft")
 !%%  end if
 !%%
 !%%  n1 = ngfft(1)
@@ -1185,7 +1185,7 @@ end module m_mkcore_wvl
 !%%  call xred2xcart(natom, rprimd, xcart, xred)
 !%%
 !%% !Store cartesian coordinates for each grid points
-!%%  ABI_ALLOCATE(gridcart,(3, nfft))
+!%%  ABI_MALLOC(gridcart,(3, nfft))
 !%%  call mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
 !%%
 !%% !definition of the grid spacings
@@ -1198,7 +1198,7 @@ end module m_mkcore_wvl
 !%% &   ' mkcore_paw: BUG -',ch10,&
 !%% &   '  nfft and n3xccc should be equal,',ch10,&
 !%% &   '  however, nfft and n3xccc=',nfft,n3xccc
-!%%    MSG_BUG(message)
+!%%    ABI_BUG(message)
 !%%  end if
 !%%
 !%%  if (option==1) then
@@ -1218,7 +1218,7 @@ end module m_mkcore_wvl
 !%%    write(message, '(a,a,a,a)' ) ch10,&
 !%% &   ' mkcore_paw: BUG -',ch10,&
 !%% &   '  Can''t be here ! (bad option).'
-!%%    MSG_BUG(message)
+!%%    ABI_BUG(message)
 !%%  end if
 !%%
 !%%  write(message,'(a,a)') ch10,&
@@ -1247,12 +1247,12 @@ end module m_mkcore_wvl
 !%% !  1+int(1.1* factors are included just for cautioness
 !%%    ncmax=1+int(1.1d0*((rshp/hh(1))*(rshp/hh(2))*pi))
 !%%
-!%%    ABI_ALLOCATE(ifftsph_tmp,(ncmax))
-!%%    ABI_ALLOCATE(rr,(ncmax))
+!%%    ABI_MALLOC(ifftsph_tmp,(ncmax))
+!%%    ABI_MALLOC(rr,(ncmax))
 !%%    if(option>1) then
-!%%      ABI_ALLOCATE(rred,(3,ncmax))
+!%%      ABI_MALLOC(rred,(3,ncmax))
 !%%    else
-!%%      ABI_ALLOCATE(rred,(0,0))
+!%%      ABI_MALLOC(rred,(0,0))
 !%%    end if
 !%%
 !%% !  Create mesh_core object
@@ -1360,9 +1360,9 @@ end module m_mkcore_wvl
 !%%
 !%% !  Deallocate
 !%%    call pawrad_free(core_mesh)
-!%%    ABI_DEALLOCATE(ifftsph_tmp)
-!%%    ABI_DEALLOCATE(rr)
-!%%    ABI_DEALLOCATE(rred)
+!%%    ABI_FREE(ifftsph_tmp)
+!%%    ABI_FREE(rr)
+!%%    ABI_FREE(rred)
 !%%
 !%%  end do !itypat
 !%%

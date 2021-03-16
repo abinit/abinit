@@ -6,7 +6,7 @@
 !! Echo acknowledgments for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (XG)
+!!  Copyright (C) 2008-2021 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_out_acknowl
  use m_abicore
  use m_dtset
 
- use m_fstrings,     only : prep_dash
+ use m_fstrings,     only : prep_char
  use defs_datatypes, only : pspheader_type
 
  implicit none
@@ -90,12 +90,13 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
- nrefs=40
- ABI_ALLOCATE(cite,(nrefs))
- ABI_ALLOCATE(ref,(nrefs))
- ABI_ALLOCATE(comment,(nrefs))
+ nrefs=43
+ ABI_MALLOC(cite,(nrefs))
+ ABI_MALLOC(ref,(nrefs))
+ ABI_MALLOC(comment,(nrefs))
 
- ABI_ALLOCATE(priority,(nrefs))
+!Array to specify the priority
+ ABI_MALLOC(priority,(nrefs))
 !The highest, the best, except that one from -1 and -2 should be cited.
 !0 means, cite if there are less than five papers total, otherwise forget, and any case, mention that it is optional.
 !1-19 means specific papers, that must be cited. However, they might not appear in the top list of papers.
@@ -109,8 +110,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  ref(1)=' The Abinit project: Impact, environment and recent developments.'//ch10//&
    ' Computer Phys. Comm. 248, 107042 (2020).'//ch10//&
    ' X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,'//ch10//&
-   ' J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,'//ch10//& 
-   ' G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,'//ch10//& 
+   ' J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,'//ch10//&
+   ' G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,'//ch10//&
    ' J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,'//ch10
  ref(1)=trim(ref(1))//&
    ' D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,'//ch10//&
@@ -125,7 +126,27 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020'
  priority(1)=3
 
- ref(2)=' Recent developments in the ABINIT software package.'//ch10//&
+ ref(2)=' ABINIT: Overview, and focus on selected capabilities'//ch10//&
+   ' J. Chem. Phys. 152, 124102 (2020).'//ch10//&
+   ' A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,'//ch10//&
+   ' J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,'//ch10//&
+   ' G.Brunin, D.Caliste, M.Cote,'//ch10//&
+   ' J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,'//ch10
+ ref(2)=trim(ref(2))//&
+   ' D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,'//ch10//&
+   ' A.Martin, '//ch10//&
+   ' H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,'//ch10//&
+   ' S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,'//ch10//&
+   ' M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.'
+ comment(2)=' Comment: a global overview of ABINIT, with focus on selected capabilities .'//ch10//&
+   ' Note that a version of this paper, that is not formatted for J. Chem. Phys '//ch10//&
+   ' is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .'//ch10//&
+   ' The licence allows the authors to put it on the Web.'//ch10//&
+   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020'
+ priority(2)=2
+
+
+ ref(3)=' Recent developments in the ABINIT software package.'//ch10//&
    ' Computer Phys. Comm. 205, 106 (2016).'//ch10//&
    ' X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,'//ch10//&
    ' C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval'//ch10//&
@@ -133,79 +154,72 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
    ' B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,'//ch10//&
    ' Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,'//ch10//&
    ' A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,'//ch10
- ref(2)=trim(ref(2))//&
+ ref(3)=trim(ref(3))//&
    ' M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,'//ch10//&
    ' A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,'//ch10//&
    ' M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,'//ch10//&
    ' B.Xu, A.Zhou, J.W.Zwanziger.'
- comment(2)=' Comment: the fourth generic paper describing the ABINIT project.'//ch10//&
+ comment(3)=' Comment: the fourth generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
    ' is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016'
- priority(2)=2
+ priority(3)=1
 
- ref(3)=' ABINIT: First-principles approach of materials and nanosystem properties.'//ch10//&
+ ref(4)=' ABINIT: First-principles approach of materials and nanosystem properties.'//ch10//&
    ' Computer Phys. Comm. 180, 2582-2615 (2009).'//ch10//&
    ' X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,'//ch10//&
    ' D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi'//ch10//&
    ' S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,'//ch10//&
    ' M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,'//ch10//&
    ' M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger'
- comment(3)=' Comment: the third generic paper describing the ABINIT project.'//ch10//&
+ comment(4)=' Comment: the third generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
    ' is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009'
- priority(3)=1
+ priority(4)=0
 
- ref(4)=' A brief introduction to the ABINIT software package.'//ch10//&
+ ref(5)=' A brief introduction to the ABINIT software package.'//ch10//&
    ' Z. Kristallogr. 220, 558-562 (2005).'//ch10//&
    ' X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,'//ch10//&
    ' M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,'//ch10//&
    ' L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.'
- comment(4)=' Comment: the second generic paper describing the ABINIT project. Note that this paper'//ch10//&
+ comment(5)=' Comment: the second generic paper describing the ABINIT project. Note that this paper'//ch10//&
    ' should be cited especially if you are using the GW part of ABINIT, as several authors'//ch10//&
    ' of this part are not in the list of authors of the first or third paper.'//ch10//&
    ' The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.'//ch10//&
    ' Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,'//ch10//&
    ' the licence allows the authors to put it on the Web).'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005'
- priority(4)=0
+ priority(5)=0
 
- ref(5)=' First-principles computation of material properties: the ABINIT software project. '//ch10//&
+ ref(6)=' First-principles computation of material properties: the ABINIT software project. '//ch10//&
    ' X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,'//ch10//&
    ' M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.'//ch10//&
    ' Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7'
- comment(5)=' Comment: the original paper describing the ABINIT project.'//ch10//&
+ comment(6)=' Comment: the original paper describing the ABINIT project.'//ch10//&
    ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002'
- priority(5)=0
+ priority(6)=0
 
- ref(6)=' First-principles responses of solids to atomic displacements and homogeneous electric fields:,'//ch10//&
+ ref(7)=' First-principles responses of solids to atomic displacements and homogeneous electric fields:,'//ch10//&
   ' implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).'
- comment(6)=' Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.'//ch10//&
-  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997'
- priority(6)=3
-
- ref(7)=' Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,'//ch10//&
-  ' interatomic force constants from density-functional perturbation theory,'//ch10//&
-  ' X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).'
  comment(7)=' Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.'//ch10//&
-  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a'
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997'
  priority(7)=3
 
- ref(8)=' Metric tensor formulation of strain in density-functional perturbation theory, '//ch10//&
-  ' D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).'
- comment(8)=' Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.'//ch10//&
-  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005'
- priority(8)=18
+ ref(8)=' Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,'//ch10//&
+  ' interatomic force constants from density-functional perturbation theory,'//ch10//&
+  ' X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).'
+ comment(8)=' Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a'
+ priority(8)=3
 
- ref(9)=' Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, '//ch10//&
-  ' using density-functional theory.'//ch10//&
-  ' M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).'
- comment(9)=' Comment: Some pseudopotential generated using the FHI code were used.'//ch10//&
-  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999'
- priority(9)=3
+ ref(9)=' Metric tensor formulation of strain in density-functional perturbation theory, '//ch10//&
+  ' D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).'
+ comment(9)=' Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005'
+ priority(9)=18
 
  ref(10)=' Nonlinear optical susceptibilities, Raman efficiencies, and electrooptic tensors'//ch10//&
   ' from first principles density functional theory.'//ch10//&
@@ -431,6 +445,38 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1996'
  priority(38)=0
 
+ ref(39)=' Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, '//ch10//&
+  ' using density-functional theory.'//ch10//&
+  ' M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).'
+ comment(39)=' Comment: Some pseudopotential generated using the FHI code were used.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999'
+ priority(39)=3
+
+ ref(40)=' First-Principles Theory of Spatial Dispersion: Dynamical Quadrupoles and Flexoelectricity, '//ch10//&
+  ' M. Royo and M. Stengel, Phys. Rev. X 9, 021050 (2019).'
+ comment(40)=' Comment : Flexoelectricity (see lw_flexo) or dynamical quadrupoles (see lw_qdrpl) have been computed.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#royo2019'
+ priority(40)=20
+
+ ref(41)=' Phonon-limited electron mobility in Si, GaAs, and GaP with exact treatment of dynamical quadrupoles, '//ch10//&
+  ' G. Brunin, H. P. C. Miranda, M. Giantomassi, M. Royo, M. Stengel, M. J. Verstraete,'//ch10//&
+  ' X. Gonze, G.-M. Rignanese and G. Hautier, Phys. Rev. B 102, 094308 (2020).'
+ comment(41)=' Comment : Phonon-limited electron mobility has been computed using eph_task=7.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#brunin2020b'
+ priority(41)=20
+
+ ref(42)=' Predominance of non-adiabatic effects in zero-point renormalization of the electronic band gap,  '//ch10//&
+  ' A. Miglio, V. Brousseau-Couture, E. Godbout, G. Antonius, Y.-H. Chan, S.G. Louie,  M. Cote, M. Giantomassi'//ch10//&
+  ' and X. Gonze, npj Computational Materials 6, 167 (2020).'
+ comment(42)=' Comment : Generalized Frohlich model calculations using eph_task=6.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#miglio2020'
+ priority(42)=20
+
+ ref(43)=' Photoinduced Phase Transitions in Ferroelectrics, '//ch10//&
+  ' C. Paillard, E. Torun, L. Wirtz, J. Iniguez and L. Bellaiche, Phys. Rev. Lett. 123, 087601 (2019).'
+ comment(43)=' Comment : Thermalized carriers eph_task=6.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#paillard2019'
+ priority(43)=20
 
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
@@ -442,19 +488,19 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  do idtset=1,ndtset_alloc
 
 !  If iscf=5 or iscf=15 used, cite Gonze96
-   if(dtsets(idtset)%iscf==5)cite(5)=1
-   if(dtsets(idtset)%iscf==15)cite(5)=1
+   if(dtsets(idtset)%iscf==5)cite(6)=1
+   if(dtsets(idtset)%iscf==15)cite(6)=1
 
 !  If rfphon/=0 or rfelfd/=0, cite Gonze97a
-   if(dtsets(idtset)%rfphon/=0)cite(6)=1
-   if(dtsets(idtset)%rfelfd/=0)cite(6)=1
-
-!  If rfphon/=0 or rfelfd/=0, cite Gonze97b
    if(dtsets(idtset)%rfphon/=0)cite(7)=1
    if(dtsets(idtset)%rfelfd/=0)cite(7)=1
 
+!  If rfphon/=0 or rfelfd/=0, cite Gonze97b
+   if(dtsets(idtset)%rfphon/=0)cite(8)=1
+   if(dtsets(idtset)%rfelfd/=0)cite(8)=1
+
 !  If rfstrs/=0, cite Hamann05
-   if(dtsets(idtset)%rfstrs/=0)cite(8)=1
+   if(dtsets(idtset)%rfstrs/=0)cite(9)=1
 
 !  If optdriver==5, cite Veithen2005
    if(dtsets(idtset)%optdriver==5)cite(10)=1
@@ -547,13 +593,26 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
    if(dtsets(idtset)%iscf==5)cite(38)=1
    if(dtsets(idtset)%iscf==15)cite(38)=1
 
+!  If lw_flexo/=0 or lw_qdrpl/=0, cite Royo2020
+   if(dtsets(idtset)%lw_flexo/=0)cite(40)=1
+   if(dtsets(idtset)%lw_qdrpl/=0)cite(40)=1
+
+!  If eph_task==7, cite Brunin2020b
+   if(dtsets(idtset)%eph_task==7 )cite(41)=1
+
+!  If eph_task==6, cite Miglio2020
+   if(dtsets(idtset)%eph_task==6 )cite(42)=1
+
+!  If occopt==9, cite Paillard2019
+   if(dtsets(idtset)%occopt==9 )cite(43)=1
+
  end do
 
 !Go through the pseudopotentials
  do ipsp=1,npsp
 
 !  If FHI pseudopotential, cite Fuchs 1999
-   if(pspheads(ipsp)%pspcod==6)cite(9)=1
+   if(pspheads(ipsp)%pspcod==6)cite(39)=1
 !  If psp8, cite Hamann 2013
    if(pspheads(ipsp)%pspcod==8)cite(27)=1
  end do
@@ -591,10 +650,10 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
            end if
            if(len_trim(comment(iref))/=0)then
              write(string, '(2a,i0,4a)')ch10,' [',ncited,']',trim(ref(iref)),ch10,trim(comment(iref))
-             call wrtout(iout,trim(prep_dash(string)))
+             call wrtout(iout,trim(prep_char(string, "-")))
            else
              write(string, '(2a,i0,4a)')ch10,' [',ncited,']',trim(ref(iref))
-             call wrtout(iout,trim(prep_dash(string)))
+             call wrtout(iout,trim(prep_char(string, "-")))
            end if
          end if
        end if
@@ -604,10 +663,10 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  end do
 
 !Cleaning
- ABI_DEALLOCATE(cite)
- ABI_DEALLOCATE(ref)
- ABI_DEALLOCATE(comment)
- ABI_DEALLOCATE(priority)
+ ABI_FREE(cite)
+ ABI_FREE(ref)
+ ABI_FREE(comment)
+ ABI_FREE(priority)
 
 end subroutine out_acknowl
 !!***

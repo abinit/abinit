@@ -8,7 +8,7 @@
 !!  methods bound to the object.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2021 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,6 +32,7 @@ MODULE m_sigma
  use iso_c_binding
  use m_nctk
  use m_yaml
+ use m_melemts
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -41,7 +42,7 @@ MODULE m_sigma
  use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : c2r
- use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w
+ use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w, unt_sigc ! MRM
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
  use m_screening,      only : epsilonm1_results
@@ -132,6 +133,10 @@ MODULE m_sigma
   ! sigxme(b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! Diagonal matrix elements $\<nks|\Sigma_x|nks\>$
 
+  real(dp),allocatable :: sigxcnofme(:,:,:)
+  ! sigxcnofme(b1gw:b2gw,nkibz,nsppol*nsig_ab))
+  ! Diagonal matrix elements $\<nks|\Sigma_xc|nks\>$ taking sqrt(occs) in \Sigma_x, occs in [0,1]
+
   complex(dp),allocatable :: x_mat(:,:,:,:)
   ! x_mat(b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! Matrix elements of $\<nks|\Sigma_x|nk's\>$
@@ -219,6 +224,9 @@ MODULE m_sigma
  public  :: sigma_init                  ! Initialize the object
  public  :: sigma_free                  ! Deallocate memory
  public  :: sigma_get_exene             ! Compute exchange energy.
+ public  :: sigma_get_excene            ! Compute exchange-correlation MBB (Nat. Orb. Funct. Approx.) energy.
+ public  :: mels_get_haene              ! Compute hartree energy.
+ public  :: mels_get_kiene              ! Compute kinetic energy.
  public  :: sigma_ncwrite               ! Write data in netcdf format.
  public  :: write_sigma_header
  public  :: write_sigma_results
@@ -297,7 +305,7 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
    write(msg,'(a)')' MODEL GW without PLASMON POLE MODEL'
  CASE DEFAULT
    write(msg,'(a,i3)')' Wrong value for Sigp%gwcalctyp = ',Sigp%gwcalctyp
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  END SELECT
  call wrtout([std_out, ab_out], msg)
 
@@ -342,8 +350,11 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
  if (mod10==1) then
    write(msg,'(a,i12)')' number of imaginary frequencies for Sigma',Sigp%nomegasi
    call wrtout([std_out, ab_out], msg)
-   write(msg,'(a,f12.2)')' max omega for Sigma on imag axis  [eV]   ',Sigp%omegasimax*Ha_eV
-   call wrtout([std_out, ab_out], msg)
+   ! MRM not needed for GW 1RDM
+   if(gwcalctyp/=21) then
+    write(msg,'(a,f12.2)')' max omega for Sigma on imag axis  [eV]   ',Sigp%omegasimax*Ha_eV
+    call wrtout([std_out, ab_out], msg)
+   endif 
  end if
 
  if (sigma_needs_w(Sigp)) then
@@ -367,8 +378,11 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
    call wrtout([std_out, ab_out], msg)
  end if
 
- write(msg,'(3a)')ch10,' matrix elements of self-energy operator (all in [eV])',ch10
- call wrtout([std_out, ab_out], msg)
+! MRM not needed for GW 1RDM
+  if(gwcalctyp/=21) then
+   write(msg,'(3a)')ch10,' matrix elements of self-energy operator (all in [eV])',ch10
+   call wrtout([std_out, ab_out], msg)
+  endif
 
  if (gwcalctyp<10) then
    write(msg,'(a)')' Perturbative Calculation'
@@ -437,6 +451,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
  !unt_gw  File with GW corrections.
  !unt_sig Self-energy as a function of frequency.
  !unt_sgr Derivative wrt omega of the Self-energy.
+ !unt_sigc Sigma_c(eik) MRM
  !unt_sgm Sigma on the Matsubara axis.
 
  tag_spin=(/'            ','            '/); if (Sr%nsppol==2) tag_spin=(/',  SPIN UP  ',',  SPIN DOWN'/)
@@ -478,6 +493,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
    write(unt_sgr,'("# k = ",3f10.6)')Sigp%kptgw(:,ikcalc)
    write(unt_sgr,'("# b = ",2i10)')Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
+
+   write(unt_sigc,'("# k = ",3f10.6)')Sigp%kptgw(:,ikcalc)
+   write(unt_sigc,'("# b = ",2i10)')Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      if (gwcalctyp>=10) then
@@ -538,6 +556,16 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
          REAL (Sr%omega4sd  (ib,ikibz,io,is)) *Ha_eV,&
          REAL (Sr%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV,&
          AIMAG(Sr%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV
+     end do
+   end do
+   !MRM
+   do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
+     write(unt_sigc,'("# ik, ib",2i5)')ikibz,ib
+     do io=1,Sr%nomega4sd
+       write(unt_sigc,'(100(e12.5,2x))')              &
+         REAL (Sr%omega4sd  (ib,ikibz,io,is)) *Ha_eV,&
+         REAL (Sr%sigcme4sd(ib,ikibz,io,is)) *Ha_eV,&
+         AIMAG(Sr%sigcme4sd(ib,ikibz,io,is)) *Ha_eV
      end do
    end do
    !
@@ -871,7 +899,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,yd
 
  else
    ! PAW+U+GW calculation.
-   MSG_ERROR("PAW+U+GW not yet implemented")
+   ABI_ERROR("PAW+U+GW not yet implemented")
  end if
 
 end subroutine print_Sigma_QPSC
@@ -970,6 +998,7 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
  ABI_CALLOC(Sr%vxcme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
  ABI_CALLOC(Sr%vUme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
  ABI_CALLOC(Sr%sigxme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%sigxcnofme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
  ABI_CALLOC(Sr%x_mat, (b1gw:b2gw,b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
  ABI_CALLOC(Sr%sigcme, (b1gw:b2gw,Sr%nkibz,Sr%nomega_r,Sr%nsppol*Sr%nsig_ab))
  ABI_CALLOC(Sr%sigxcme, (b1gw:b2gw,Sr%nkibz,Sr%nomega_r,Sr%nsppol*Sr%nsig_ab))
@@ -1052,6 +1081,7 @@ subroutine sigma_free(Sr)
  ABI_SFREE(Sr%omega_r)
  ABI_SFREE(Sr%kptgw)
  ABI_SFREE(Sr%sigxme)
+ ABI_SFREE(Sr%sigxcnofme)
  ABI_SFREE(Sr%x_mat)
  ABI_SFREE(Sr%vxcme)
  ABI_SFREE(Sr%vUme)
@@ -1129,6 +1159,187 @@ pure function sigma_get_exene(sigma,kmesh,bands) result(ex_energy)
  end do
 
 end function sigma_get_exene
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigma/sigma_get_excene
+!! NAME
+!!  sigma_get_excene
+!!
+!! FUNCTION
+!!  Compute exchange correlation energy using MBB (nat. orb. functional approx.).
+!!
+!! INPUTS
+!!  sigma<sigma_t>=Sigma results
+!!  kmesh<kmesh_t>=BZ sampling.
+!!  bands<band_t>=Bands with occupation factors
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+pure function sigma_get_excene(sigma,kmesh,bands) result(exc_energy)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: exc_energy
+ type(sigma_t),intent(in) :: sigma
+ type(kmesh_t),intent(in) :: kmesh
+ type(ebands_t),intent(in) :: bands
+
+!Local variables-------------------------------
+!scalars
+ integer :: ik,ib,spin
+ real(dp) :: wtk,occ_bks
+
+! *************************************************************************
+
+ exc_energy = zero
+
+ do spin=1,sigma%nsppol
+   do ik=1,sigma%nkibz
+     wtk = kmesh%wt(ik)
+     do ib=sigma%b1gw,sigma%b2gw
+       occ_bks = bands%occ(ib,ik,spin)
+       if (sigma%nsig_ab==1) then
+         if (sigma%nsppol==1) then
+           exc_energy = exc_energy + sqrt( abs( half * occ_bks ) ) * wtk * sigma%sigxcnofme(ib,ik,spin)   ! 2*sqrt(occ_i), occ in [0,2] -> [0,1].
+         else
+           exc_energy = exc_energy + half * sqrt( abs( occ_bks ) ) * wtk * sigma%sigxcnofme(ib,ik,spin)   ! 2*sqrt(occ_i), occ in [0,1] -> [0,1].
+         end if
+       else
+         exc_energy = exc_energy + half * sqrt( abs( occ_bks ) ) * wtk * SUM(sigma%sigxcnofme(ib,ik,:)) ! 2*sqrt(occ_i), occ in [0,1].
+       end if
+     end do
+   end do
+ end do
+
+end function sigma_get_excene
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/mels_get_haene
+!! NAME
+!! mels_get_haene
+!!
+!! FUNCTION
+!! Compute the Hartree energy
+!!
+!! INPUTS
+!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
+!! Sr=sigma_t (see the definition of this structured datatype)
+!! bands=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
+!!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
+!!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
+!! Mels
+!!  %vhartr=matrix elements of $v_H$.
+!!
+!! OUTPUT
+!! Compute the Hartree energy on eh_energy
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function mels_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: eh_energy
+ type(sigma_t),intent(in) :: sigma
+ type(kmesh_t),intent(in) :: kmesh
+ type(ebands_t),intent(in) :: bands
+ type(melements_t),intent(in) :: Mels
+!Local variables-------------------------------
+!scalars
+ integer :: ik,ib,spin
+ real(dp) :: wtk,occ_bks
+
+! *************************************************************************
+
+ eh_energy=zero
+
+ do spin=1,sigma%nsppol
+   do ik=1,sigma%nkibz
+     wtk = kmesh%wt(ik)
+     do ib=sigma%b1gw,sigma%b2gw
+       occ_bks = bands%occ(ib,ik,spin)
+       if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
+         eh_energy=eh_energy+occ_bks*wtk*Mels%vhartree(ib,ib,ik,spin)
+       end if
+     end do
+   end do
+ end do
+
+ eh_energy=half*eh_energy
+
+end function mels_get_haene
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/mels_get_kiene
+!! NAME
+!! mels_get_kiene
+!!
+!! FUNCTION
+!! Compute the kinetic energy
+!!
+!! INPUTS
+!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
+!! Sr=sigma_t (see the definition of this structured datatype)
+!! bands=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
+!!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
+!!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
+!! Mels
+!!  %kinetic=matrix elements of $T$.
+!!
+!! OUTPUT
+!! Compute the kinetic energy on ek_energy
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function mels_get_kiene(sigma,Mels,kmesh,bands) result(ek_energy)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: ek_energy
+ type(sigma_t),intent(in) :: sigma
+ type(kmesh_t),intent(in) :: kmesh
+ type(ebands_t),intent(in) :: bands
+ type(melements_t),intent(in) :: Mels
+!Local variables-------------------------------
+!scalars
+ integer :: ik,ib,spin
+ real(dp) :: wtk,occ_bks
+
+! *************************************************************************
+
+ ek_energy=zero
+
+ do spin=1,sigma%nsppol
+   do ik=1,sigma%nkibz
+     wtk = kmesh%wt(ik)
+     do ib=sigma%b1gw,sigma%b2gw
+       occ_bks = bands%occ(ib,ik,spin)
+       if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
+         ek_energy=ek_energy+occ_bks*wtk*Mels%kinetic(ib,ib,ik,spin)
+       end if
+     end do
+   end do
+ end do
+
+ ek_energy=ek_energy
+
+end function mels_get_kiene
 !!***
 
 !----------------------------------------------------------------------
@@ -1500,7 +1711,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
  ABI_FREE(rdata5)
 
 #else
-  MSG_ERROR('netcdf support is not activated.')
+  ABI_ERROR('netcdf support is not activated.')
 #endif
 
 contains
@@ -1597,7 +1808,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
      do ik_bz=1,Kmesh%nbz
        ik_ibz = Kmesh%tab(ik_bz)
        kgwmk= kptgw-Kmesh%bz(:,ik_bz) ! kptgw must be inside the BZ
-       call findqg0(iq_bz,g0,kgwmk,Qmesh%nbz,Qmesh%bz,mG0) ! Identify q_bz and G0 where q_bz+G0=k_gw-k_bz
+       call findqg0(iq_bz,g0,kgwmk,Qmesh%nbz,Qmesh%bz,mG0) ! <- (mg0=mG0) Identify q_bz and G0 where q_bz+G0=k_gw-k_bz
        if (Ltg_kgw%ibzq(iq_bz)==1) then
          bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
          if (PRESENT(bks_mask)) bmask = bks_mask(:,ik_bz,spin)
@@ -1635,7 +1846,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
      !end where
      !if (.not.ltest) then
      !  write(std_out,*)proc_distrb
-     !  MSG_BUG("Bug in the generation of proc_distrb table")
+     !  ABI_BUG("Bug in the generation of proc_distrb table")
      !end if
    end if
  end if

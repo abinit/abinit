@@ -6,7 +6,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2021 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -226,7 +226,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 !scalars
  integer,parameter :: master=0, option1= 1
  integer :: marr,tread,lenstr_noxyz,ierr
- character(len=strlen) :: string_raw
+ character(len=strlen) :: string_raw, string_with_comments
  character(len=500) :: msg
 !arrays
  integer :: intarr(1)
@@ -240,7 +240,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  if (xmpi_comm_rank(comm) == master) then
 
    ! strlen from defs_basis module
-   call instrng(filnamin, lenstr, option1, strlen, string)
+   call instrng(filnamin, lenstr, option1, strlen, string, string_with_comments)
 
    ! Copy original file, without change of case
    string_raw=string
@@ -256,7 +256,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
    ! Make sure we don't have unmatched quotation marks
    if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
-     MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
+     ABI_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
    end if
 
    ! Take ndtset from the input string
@@ -268,7 +268,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
      write(msg, '(a,i0,4a)' )&
      'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
      'This is not allowed.',ch10,'Action: modify ndtset in the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if ! master
 
@@ -281,10 +281,10 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  end if
 
  ! Save input string in global variable so that we can access it in ntck_open_create
- ! XG20200720 : Why not saving string ? string_raw is less processed than string ...
- ! MG: Because the string will be use by python or users to recreate an input file.
- ! and input file in lower-case is nicer
- INPUT_STRING = string_raw
+ ! XG20200720: Why not saving string ? string_raw is less processed than string ...
+ ! MG: Because we don't want a processed string without comments.
+ ! Abipy may use the commented section to extract additional metadata e.g. the pseudos md5
+ INPUT_STRING = string_with_comments
 
  !write(std_out,'(a)')string(:lenstr)
 
@@ -300,8 +300,7 @@ end subroutine parsefile
 !! at first character in string, reading ndig digits (including possible
 !! sign, decimal, and exponent) by computing the appropriate format and
 !! performing a formatted read (list-directed read would be perfect for
-!! this application but is inconsistent with internal read according to
-!! Fortran90 standard).
+!! this application but is inconsistent with internal read according to Fortran90 standard).
 !! In case of a real number, this routine
 !! is also able to read SQRT(number): return the square root of the number.
 !!
@@ -359,7 +358,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
        "Attempted to read ndig: ",ndig," integer digits", ch10, &
        "from string(1:ndig)= `",string(1:ndig),"` to initialize an integer variable",ch10,&
        "iomsg: ", trim(iomsg)
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      errcod=1
    end if
 
@@ -431,7 +430,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
         'Attempted to read ndig: ',ndig,' floating point digits,',ch10, &
         'from string(1:ndig): `',string(1:ndig),'` to initialize a floating variable.',ch10, &
         "iomsg: ", trim(iomsg)
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      errcod=2
    end if
 
@@ -445,7 +444,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
        "Attempted to read ndig: ",ndig," integer digits", ch10, &
        "from string(1:ndig): `",string(1:ndig),"` to initialize a logical variable.",ch10,&
        "iomsg: ", trim(iomsg)
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      errcod=3
    end if
 
@@ -456,7 +455,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    write(msg,'(4a)' ) &
    'Argument typevarphys must be INT, DPR, LEN, ENE, BFI, TIM or LOG ',ch10,&
    'but input value was: ',trim(typevarphys)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (errcod /= 0)then
@@ -465,7 +464,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
        write(msg,'(3a)' ) &
        'Note that this string contains the letter O. ',ch10,&
        'It is likely that this letter should be replaced by the number 0.'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        exit
      end if
    end do
@@ -496,7 +495,8 @@ end subroutine inread
 !!
 !! OUTPUT
 !!  lenstr=actual number of character in string
-!!  string*(strln)=string of character
+!!  string*(strln)=preprocessed string of character
+!!  raw_string=string without any preprocessine (comments are included.
 !!
 !! PARENTS
 !!      anaddb,importcml,localorb_S,lwf,parsefile
@@ -506,7 +506,7 @@ end subroutine inread
 !!
 !! SOURCE
 
-recursive subroutine instrng(filnam, lenstr, option, strln, string)
+recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
 
 !Arguments ------------------------------------
 !scalars
@@ -514,13 +514,14 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  integer,intent(out) :: lenstr
  character(len=*),intent(in) :: filnam
  character(len=*),intent(out) :: string
+ character(len=*),intent(out) :: raw_string
 
 !Local variables-------------------------------
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
  integer :: b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
- integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign
+ integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign,lenstr_raw
  logical :: include_found, ex
 !arrays
  integer :: bs(2)
@@ -529,7 +530,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  character(len=500) :: filnam_inc,msg
  character(len=fnlen) :: shell_var, shell_value
  character(len=fnlen+20) :: line
- character(len=strlen),pointer :: string_inc
+ character(len=strlen),pointer :: string_inc, raw_string_inc
 
 !************************************************************************
 
@@ -545,19 +546,20 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
    write(msg, '(3a)' ) &
    'At least 4 levels of included files are present in input file !',ch10,&
    'This is not allowed. Action: change your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Open data file and read one line at a time, compressing data
  ! and concatenating into single string:
  if (open_file(filnam,msg,newunit=input_unit,form="formatted",status="old",action="read") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  rewind (unit=input_unit)
 
  ! Initialize string to blanks
  string=blank
  lenstr=1
+ lenstr_raw = 0
 
  ! Set maximum number lines to be read to some large number
  mline=500000
@@ -571,18 +573,16 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
    !  The number of lines in the commentary is also resulting from
    !  a long tuning..
 
-   !  DEBUG
-   !  write(std_out,*)' instrng, iline=',iline,' ios=',ios,' echo :',trim(line(1:fnlen+20))
-   !  ENDDEBUG
+   ! write(std_out,*)' instrng, iline=',iline,' ios=',ios,' echo :',trim(line(1:fnlen+20))
 
    ! Exit the reading loop when arrived at the end
-   if(ios/=0)then
+   if (ios/=0) then
      backspace(input_unit)
      read (unit=input_unit,fmt= '(a1)' ,iostat=ios) string1
      if(ios/=0)exit
      backspace(input_unit)
      read (unit=input_unit,fmt= '(a3)' ,iostat=ios) string3
-     if(string3=='end')exit
+     if(string3=='end') exit
      write(msg, '(3a,i0,11a)' ) &
       'It is observed in the input file: ',TRIM(filnam),', line number ',iline,',',ch10,&
       'that there is a non-zero IO signal.',ch10,&
@@ -590,8 +590,23 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
       'However, it seems that the error appears while your file has not been completely read.',ch10,&
       'Action: correct your file. If your file seems correct, then,',ch10,&
       'add the keyword ''end'' at the very beginning of the last line of your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
+
+   ! Save raw line in raw_string including comments that may be needed by external processors
+   ! e.g. AbiPy may need the JSON section with pseudos. Also add new line.
+   ii2 = len_trim(line) + 1
+   if (lenstr_raw + ii2 > strln) then
+     write(msg, '(8a)' ) &
+      'The size of your input file: ',trim(filnam),' is such that the internal',ch10,&
+      'character string that should contain it is too small.',ch10,&
+      'Action: decrease the size of your input file,',ch10,&
+      'or contact the ABINIT group.'
+     ABI_ERROR(msg)
+   end if
+
+   raw_string(lenstr_raw+1:lenstr_raw+ii2) = trim(line) // new_line("A")
+   lenstr_raw = lenstr_raw + ii2
 
    ! TODO: Ignore sections inside TEST_INFO markers so that we don't need to prepend comment markers.
    !in_testinfo = 0
@@ -627,7 +642,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
           'It is observed in the input file: ',TRIM(filnam),' line number ',iline,',',ch10,&
           'that more than ',fnlen,' columns are used.',ch10,&
           'This is not allowed. Change this line of your input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -643,7 +658,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
        'If the minus sign is meaningful, do not leave a blank',ch10,&
        'between it and the number to which it applies.',ch10,&
        'Otherwise, remove it.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      ! Check for the occurence of a tab
      ij=index(line(1:ii),char(9))
@@ -651,7 +666,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
        write(msg, '(3a,i0,3a)' ) &
         'The occurence of a tab, in the input file: ',TRIM(filnam),' line number ',iline,',',ch10,&
         'is observed. This sign is confusing, and has been forbidden.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      ! Check for the occurence of a include statement
@@ -682,7 +697,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
             'A "include" statement has been found in input file: ',TRIM(filnam),ch10,&
             'but there must be a problem with the quotes.',ch10,&
             'Action: change your input file.'
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          ! Store included file name
          filnam_inc=line(ij+7+ii1:ij+5+ii1+ii2)
@@ -709,7 +724,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
       'character string that should contain it is too small.',ch10,&
       'Action: decrease the size of your input file,',ch10,&
       'or contact the ABINIT group.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (lenc>0) then
@@ -727,23 +742,25 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
      if (.not. ex .or. iost /= 0) then
        write(msg, '(5a)' ) &
         'Input file: ',TRIM(filnam),' reading: the included file ',trim(filnam_inc),' cannot be found !'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      ! Read included file (warning: recursive call !)
-     ABI_ALLOCATE(string_inc,)
-     call instrng(trim(filnam_inc),lenstr_inc,option,strln-lenstr,string_inc)
+     ABI_MALLOC(string_inc,)
+     ABI_MALLOC(raw_string_inc,)
+     call instrng(trim(filnam_inc),lenstr_inc,option,strln-lenstr,string_inc,raw_string_inc)
      ! Check resulting total string length
      if (lenstr+lenstr_inc>strln) then
        write(msg, '(6a)' ) &
         'The size of your input file: ',TRIM(filnam),' (including included files) is such that',ch10,&
         'the internal character string that should contain it is too small !',ch10,&
         'Action: decrease the size of your input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      ! Concatenate total string
      string(lenstr+1:lenstr+lenstr_inc)=string_inc(1:lenstr_inc)
      lenstr=lenstr+lenstr_inc
      ABI_FREE(string_inc)
+     ABI_FREE(raw_string_inc)
    end if
 
    ! If mline is reached, something is wrong
@@ -753,7 +770,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
      'is equal or greater than maximum allowed mline: ',mline,ch10,&
      'Action: you could decrease the length of the input file, or',ch10,&
      'increase mline in this routine.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  end do !  End loop on iline. Note that there is an "exit" instruction in the loop
@@ -761,9 +778,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  nline1=iline-1
  close (unit=input_unit)
 
-!DEBUG
-!    write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
-!ENDDEBUG
+ !write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
 
 !Substitute environment variables, if any
  b1=0
@@ -781,24 +796,20 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
    if(b3/=0 .and. b3<b2)b2=b3
    if(b2/=0)then
      shell_var=string(b1+1:b1+b2-1)
-!DEBUG
-!write(std_out,'(a,a)')' shell_var=',shell_var(:b2-1)
-!ENDDEBUG
+     !write(std_out,'(a,a)')' shell_var=',shell_var(:b2-1)
      call get_environment_variable(shell_var(:b2-1),shell_value,status=ierr,length=len_val)
-     if (ierr == -1) MSG_ERROR(sjoin(shell_var(:b2-1), "is present but value of environment variable is too long"))
-     if (ierr == +1) MSG_ERROR(sjoin(shell_var(:b2-1), "environment variable is not defined!"))
-     if (ierr == +2) MSG_ERROR(sjoin(shell_var(:b2-1), "used in input file but processor does not support environment variables"))
+     if (ierr == -1) ABI_ERROR(sjoin(shell_var(:b2-1), "is present but value of environment variable is too long"))
+     if (ierr == +1) ABI_ERROR(sjoin(shell_var(:b2-1), "environment variable is not defined!"))
+     if (ierr == +2) ABI_ERROR(sjoin(shell_var(:b2-1), "used in input file but processor does not support environment variables"))
      call wrtout(std_out, sjoin(shell_var(:b2-1), " found in environment, with value ",shell_value(:len_val)))
      string(1:lenstr-(b2-b1)+len_val)=string(1:b1-1)//shell_value(:len_val)//string(b1+b2:lenstr)
      lenstr=lenstr-(b2-b1)+len_val
    endif
  enddo
-!DEBUG
-!write(std_out,'(a)')string(:lenstr)
-!ENDDEBUG
+ !write(std_out,'(a)')string(:lenstr)
 
-!Identify concatenate string '" // "' with an arbitrary number of blanks before and after the //
-!Actually, at this stage, there is no consecutive blanks left...
+ ! Identify concatenate string '" // "' with an arbitrary number of blanks before and after the //
+ ! Actually, at this stage, there is no consecutive blanks left...
  do
    b1 = index(string(1:lenstr), '//')
    if(b1/=0)then
@@ -827,13 +838,11 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
    endif
  enddo
 
-!DEBUG
-!write(std_out,'(a,a)')' incomprs : 2, string=',string(:lenstr)
-!ENDDEBUG
+ !write(std_out,'(a,a)')' incomprs : 2, string=',string(:lenstr)
 
  ! Make sure we don't have unmatched quotation marks
  if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
-   MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
+   ABI_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
  end if
 
  include_level = include_level - 1
@@ -1017,7 +1026,7 @@ subroutine incomprs(string,length)
        'no double blanks or tabs were found.',ch10,&
        'This is unusual for an input file (or any file),',ch10,&
        'and may cause parsing trouble.  Is this a binary file?',ch10
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      else
        length=lcut+1
        string(length:length)=blank
@@ -1174,12 +1183,12 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
  if(jdtset<0)then
    write(msg,'(a,i0,a)')' jdtset: ',jdtset,', while it should be non-negative.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if(jdtset > 9999)then
    write(msg,'(a,i0,a)')' jdtset: ',jdtset,', while it must be lower than 10000.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Default values: nothing has been read
@@ -1221,7 +1230,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
        'Action: remove one of the two occurences.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      if(itoken/=0) then
@@ -1249,7 +1258,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
         'There are two occurences of the keyword: "',cs(1:cslen),'" in the input file.',ch10,&
         'This is confusing, so it has been forbidden.',ch10,&
         'Action: remove one of the two occurences.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if(itoken/=0) then
        opttoken=1
@@ -1270,7 +1279,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        'There are two occurences of the keyword "',cs1(1:cslen),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
        'Action: remove one of the two occurences.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      if(itoken/=0 .and. itoken1/=0)then
@@ -1278,7 +1287,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cslen),'"',ch10,&
        'cannot be used together in the input file.',ch10,&
        'Action: remove one of the two keywords.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      if(itoken1/=0)then
@@ -1355,7 +1364,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          'This is not allowed.',ch10,&
          'Action: remove the appended keyword, or',ch10,&
          'use the multi-dataset mode (ndtset/=0).'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        if(itoken_1colon+itoken_1plus+itoken_1times > 0 ) then
          write(msg, '(a,a,a,a,a,a,a,a,a,a,a,a,a)' )&
@@ -1365,7 +1374,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          'This is not allowed.',ch10,&
          'Action: remove the appended keyword, or',ch10,&
          'use the multi-dataset mode (ndtset/=0).'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
      else
@@ -1389,7 +1398,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          'This is not allowed, since it should be used once with ":",',ch10,&
          'and once with "+" or "*".',ch10,&
          'Action: change the number of occurences of this keyword.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        ! If the multi-dataset mode is used, make sure that no twice the same combined keyword happens
@@ -1426,7 +1435,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
          'This is confusing, so it has been forbidden.',ch10,&
          'Action: remove one of the two occurences.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        ! Select the series according to the presence of a colon flag
@@ -1456,13 +1465,13 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          'but there is no occurence of "',csplus(1:cslen),'" or "',cstimes(1:cslen),'".',ch10,&
          'Action: either suppress the series, or make the increment',ch10,&
          'or the factor available.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        if(itoken_plus/=0 .and. itoken_times/=0)then
          write(msg, '(a,a, a,a,a,a,a)' )&
          'The combined occurence of keywords "',csplus(1:cslen),'" and "',cstimes(1:cslen),'" is not allowed.',ch10,&
          'Action: suppress one of them in your input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        if(itoken_colon==0 .and. (itoken_plus/=0 .or. itoken_times/=0) ) then
          cs=csplus
@@ -1472,7 +1481,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          'However, the keyword "',cs(1:cslen),'" appears.',ch10,&
          'This is forbidden.',ch10,&
          'Action: make the first appear, or suppress the second.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        ! At this stage, either
@@ -1503,7 +1512,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
        'Action: remove one of the two occurences.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      if(itoken/=0) then
@@ -1542,7 +1551,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
            'This is forbidden when ndtset==0 .',ch10,&
            'Action: remove this occurence, or change ndtset.'
          end if
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
    end do
@@ -1570,14 +1579,14 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
      'a series has been defined in the input file.',ch10,&
      'This is forbidden.',ch10,'Action: check your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (narr>=2) then
      write(msg, '(9a)' )&
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
      'the number of data requested is larger than 1.',ch10,&
      'This is forbidden.',ch10,'Action: check your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -1598,7 +1607,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      ABI_CHECK(b3 /= 0, sjoin('Cannot find second " defining string for token:', token))
      b3 = b3 + b2 - 2
      if ((b3 - b2 + 1) > len(key_value)) then
-       MSG_ERROR("Len of key_value too small to contain value parsed from file")
+       ABI_ERROR("Len of key_value too small to contain value parsed from file")
      end if
      key_value = adjustl(string(b2:b3))
 
@@ -1613,10 +1622,10 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  else if(opttoken>=2) then
 
    ! write(std_out,*)' intagm : opttoken>=2 , token has been found, will read '
-   ABI_ALLOCATE(dpr1,(narr))
-   ABI_ALLOCATE(dpr2,(narr))
-   ABI_ALLOCATE(int1,(narr))
-   ABI_ALLOCATE(int2,(narr))
+   ABI_MALLOC(dpr1,(narr))
+   ABI_MALLOC(dpr2,(narr))
+   ABI_MALLOC(int1,(narr))
+   ABI_MALLOC(int2,(narr))
 
    ! Absolute location in string of blank which follows token//':':
    b1=itoken_colon+cslen-1
@@ -1740,8 +1749,8 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
  if (nimage<=1) return
 
  marr=size1
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
 !First, try to read data for current image
  tread_current=0
@@ -1767,8 +1776,8 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
  if (tread_current==0) then
 
 !  The current image is not directly defined in the input string
-   ABI_ALLOCATE(dp_data_before,(size1))
-   ABI_ALLOCATE(dp_data_after,(size1))
+   ABI_MALLOC(dp_data_before,(size1))
+   ABI_MALLOC(dp_data_after,(size1))
 
 !  Find the nearest previous defined image
    tread_before=0;iimage_before=iimage
@@ -1814,13 +1823,13 @@ subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,
      tread_ok=1
    end if
 
-   ABI_DEALLOCATE(dp_data_before)
-   ABI_DEALLOCATE(dp_data_after)
+   ABI_FREE(dp_data_before)
+   ABI_FREE(dp_data_after)
 
  end if
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 end subroutine intagm_img_1D
 !!***
@@ -1871,8 +1880,8 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
  if (nimage<=1) return
 
  marr=size1*size2
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
 !First, try to read data for current image
  tread_current=0
@@ -1898,8 +1907,8 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
  if (tread_current==0) then
 
 !  The current image is not directly defined in the input string
-   ABI_ALLOCATE(dp_data_before,(size1,size2))
-   ABI_ALLOCATE(dp_data_after,(size1,size2))
+   ABI_MALLOC(dp_data_before,(size1,size2))
+   ABI_MALLOC(dp_data_after,(size1,size2))
 
 !  Find the nearest previous defined image
    tread_before=0;iimage_before=iimage
@@ -1948,13 +1957,13 @@ subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,
      tread_ok=1
    end if
 
-   ABI_DEALLOCATE(dp_data_before)
-   ABI_DEALLOCATE(dp_data_after)
+   ABI_FREE(dp_data_before)
+   ABI_FREE(dp_data_after)
 
  end if
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 end subroutine intagm_img_2D
 !!***
@@ -2074,7 +2083,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    else if(typevar=='DPR')then
      dprarr(1+ii:min(nrep+ii,narr))=real8
    else
-     MSG_BUG('Disallowed typevar: '//typevar)
+     ABI_BUG('Disallowed typevar: '//typevar)
    end if
    ii=min(ii+nrep,narr)
 
@@ -2091,7 +2100,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    'Maybe a disagreement between the declared dimension of the array,',ch10,&
    'and the number of items provided. ',ch10,&
    'Action: correct your input file and especially the keyword: ', trim(cs)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
@@ -2232,7 +2241,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
      'index_xyz_fname_end should be non-zero, while it is :',ch10,&
      'index_xyz_fname_end=',index_xyz_fname_end,ch10,&
      'Action: check the filename that was provided after the XYZFILE input variable keyword.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    index_xyz_fname_end=index_xyz_fname_end+index_xyz_fname-1
@@ -2352,7 +2361,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
 
  ! open file with xyz data
  if (open_file(xyz_fname, msg, newunit=unitxyz, status="unknown") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(msg, '(3a)')' importxyz : Opened file ',trim(xyz_fname),'; content stored in string_xyz'
  call wrtout(std_out,msg)
@@ -2365,8 +2374,8 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  lenstr_new=lenstr_new+7+len_trim(dtset_char)+1+5
  string(lenstr_old+1:lenstr_new)=" _NATOM"//trim(dtset_char)//blank//string5
 
- ABI_ALLOCATE(xcart,(3,natom))
- ABI_ALLOCATE(elementtype,(natom))
+ ABI_MALLOC(xcart,(3,natom))
+ ABI_MALLOC(elementtype,(natom))
 
  ! read dummy line
  read(unitxyz,*)
@@ -2382,7 +2391,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
      write (msg,'(5a)')&
      'found element beyond Z=200 ', ch10,&
      'Solution: increase size of atomspecies in append_xyz', ch10
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! found a new atom type
    if (atomspecies(int(znucl)) == 0) then
@@ -2429,7 +2438,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
    write(msg,'(3a)')&
    'The maximal size of the input variable string has been exceeded.',ch10,&
    'The use of a xyz file is more character-consuming than the usual input file. Sorry.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  !Update the length of the string
@@ -2503,7 +2512,7 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 
  if(cond_number<0 .or. cond_number>4)then
    write(msg,'(a,i0,a)' )'The value of cond_number is ',cond_number,'but it should be positive and < 5.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Checks the allowed values
@@ -2550,7 +2559,7 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
    end if
 
    call wrtout(unit,msg)
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine chkdpr
@@ -2815,7 +2824,7 @@ subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
  minmax_flag=1
  if(input_value>=minmax_value)ok=1
  list_number=1
- ABI_ALLOCATE(list_values,(1))
+ ABI_MALLOC(list_values,(1))
  list_values=minmax_value
 
  !If there is something wrong, compose the message, and print it
@@ -2903,7 +2912,7 @@ subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
  !write(std_out,*)' chkint_le : input_value,minmax_value=',input_value,minmax_value
 
  list_number=1
- ABI_ALLOCATE(list_values,(1))
+ ABI_MALLOC(list_values,(1))
  list_values=minmax_value
 
  !If there is something wrong, compose the message, and print it
@@ -3092,12 +3101,12 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 
  if(cond_number<0 .or. cond_number>4)then
    write(msg,'(a,i0,a)' )'The value of cond_number is ',cond_number,' but it should be positive and < 5.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(list_number<0 .or. list_number>40)then
    write(msg,'(a,i0,a)' )'The value of list_number is',list_number,' but it should be between 0 and 40.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  !Compose the message, and print it
@@ -3285,26 +3294,26 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
    write(msg, '(3a,i0,2a)' )&
    'The length of the name of the input variable ',trim(token),' is ',len_trim(token),ch10,&
    'This exceeds 16 characters, the present maximum in routine prttagm.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if(ndtset_alloc<1)then
    write(msg, '(a,i0,a,a,a,a,a)' )&
    'ndtset_alloc=',ndtset_alloc,', while it should be >= 1.',ch10,&
    'This happened for token=',token,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(ndtset_alloc>9999)then
    write(msg, '(a,i0,a,a,a,a,a)' )&
    'ndtset_alloc=',ndtset_alloc,', while it must be lower than 10000.',ch10,&
    'This happened for token=',token,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(narr>99 .and. (typevarphys=='ENE'.or.typevarphys=='LEN'))then
    write(msg, '(3a,i0,a)' )' typevarphys=',typevarphys,' with narr=',narr,'  is not allowed.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if ((narr>0).or.(use_narrm/=0)) then
@@ -3538,7 +3547,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 !    ###########################################################
 !    ### 04. The type is neither 'INT' nor 'DPR','ENE','LEN','BFI','TIM'
    else
-     MSG_BUG('Disallowed typevarphys = '//TRIM(typevarphys))
+     ABI_BUG('Disallowed typevarphys = '//TRIM(typevarphys))
    end if
 
  end if ! End condition of narr>0
@@ -3630,8 +3639,9 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
  if(.not.test_multiimages)then
 
    narr=narrm(1)
-   ABI_ALLOCATE(intarr,(marr,0:ndtset_alloc))
-   ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
+   ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
+   ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
+   dprarr=zero
    do idtset=0,ndtset_alloc
      dprarr(1:narrm(idtset),idtset)=dprarr_images(1:narrm(idtset),1,idtset)
    end do
@@ -3742,6 +3752,8 @@ end subroutine prttagm_images
 !!    1 if parser accepts multiple datasets and +* syntax (e.g. abinit)
 !!
 !!  list_vars(len=*)=string with the (upper case) names of the variables (excluding logicals and chars).
+!!  list_vars_img(len=*)=string with the (upper case) names of the variables (excluding logicals and chars),
+!!   for which the image can be specified.
 !!  list_logicals(len=*)=string with the (upper case) names of the logical variables.
 !!  list_strings(len=*)=string with the (upper case) names of the character variables.
 !!  string(len=*)=string (with upper case) from the input file.
@@ -3757,18 +3769,18 @@ end subroutine prttagm_images
 !!
 !! SOURCE
 
-subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, string)
+subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, list_strings, string)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: protocol
  character(len=*),intent(in) :: string
- character(len=*),intent(in) :: list_logicals,list_strings,list_vars
+ character(len=*),intent(in) :: list_logicals,list_strings,list_vars, list_vars_img
 
 !Local variables-------------------------------
  character,parameter :: blank=' '
 !scalars
- integer :: index_blank,index_current,index_endword,index_endwordnow,index_list_vars
+ integer :: index_blank,index_current,index_endfullword, index_endword,index_endwordnow,index_list_vars
  character(len=500) :: msg
 
 !************************************************************************
@@ -3784,7 +3796,9 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 
    if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_current:index_current))/=0)then
 
+     index_endfullword = index_blank -1
      index_endword = index_blank -1
+
      if (protocol == 1) then
        ! Skip characters like : + or the digits at the end of the word
        ! Start from the blank that follows the end of the word
@@ -3818,15 +3832,15 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
          if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
        end do
 
-       ! Find the index of the potential variable name in the list of variables
-       index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
+       ! Find the index of the potential variable name in the list of variables for which
+       ! the image index can be specified
+       index_list_vars=index(list_vars_img,blank//string(index_current:index_endword)//blank)
      end if
 
      if(index_list_vars==0)then
 
        ! Treat possible logical input variables
        if(index(list_logicals,blank//string(index_current:index_endword)//blank)/=0)then
-         !write(std_out,*)"Found logical variable: ",string(index_current:index_endword)
          index_blank=index(string(index_current:),blank)+index_current-1
          if(index(' F T ',string(index_blank:index_blank+2))==0)then
            write(msg, '(8a)' )&
@@ -3834,7 +3848,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
             'This variable should be given a logical value (T or F), but the following string was found:',&
             string(index_blank:index_blank+2),ch10,&
             'Action: check your input file. You likely misused the input variable.'
-            MSG_ERROR(msg)
+            ABI_ERROR(msg)
          else
            index_blank=index_blank+2
          end if
@@ -3842,19 +3856,17 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
        else if(index(list_strings,blank//string(index_current:index_endword)//blank)/=0)then
          ! Treat possible string input variables
          ! Every following string is accepted
-         !write(std_out,*)"Found string variable: ",string(index_current:index_endword)
-         !write(std_out,*)"in string: ",trim(string(index_current:))
          index_current=index(string(index_current:),blank)+index_current
          index_blank=index(string(index_current:),blank)+index_current-1
-         !write(std_out,*)"next:: ",string(index_current:index_endword)
 
        else
          ! If still not admitted, then there is a problem
-         write(msg, '(7a)' )&
-         'Found token: `',string(index_current:index_endword),'` in the input file.',ch10,&
+         write(msg, '(9a)' )&
+         'Found token: `',string(index_current:index_endfullword),'` in the input file.',ch10,&
          'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
-         'Action: check your input file. You likely mistyped the input variable.'
-         MSG_ERROR(msg)
+         'Action: check your input file. Perhaps you mistyped the input variable,',ch10,&
+&        'or specified "img", although this was not permitted for this input variable.'
+         ABI_ERROR(msg)
        end if
      end if
    end if
@@ -3866,7 +3878,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
        index_current = index_current + 1
        if (string(index_current:index_current) == '"') exit
        if (index_current > len_trim(string)) then
-         MSG_ERROR('Cannot find closing quotation mark " in string. You likely forgot to close a string')
+         ABI_ERROR('Cannot find closing quotation mark " in string. You likely forgot to close a string')
        end if
      end do
 
@@ -3924,11 +3936,11 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
      new = geo_from_netcdf_path(trim(string(ii+1:)), comm)
    else
      ! Assume Fortran file with Abinit header.
-     MSG_ERROR("structure variable with Fortran file is not yet implemented.")
+     ABI_ERROR("structure variable with Fortran file is not yet implemented.")
      !new = geo_from_fortran_file_with_hdr(string(ii+1:), comm)
      !cryst = crystal_from_file(string(ii+1:), comm)
      !if (cryst%isalchemical()) then
-     !  MSG_ERROR("Alchemical mixing is not compatibile with `structure` input variable!")
+     !  ABI_ERROR("Alchemical mixing is not compatibile with `structure` input variable!")
      !end if
      !new%natom = cryst%natom
      !new%ntypat = cryst%ntypat
@@ -3940,7 +3952,7 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
    end if
 
  case default
-   MSG_ERROR(sjoin("Invalid prefix: `", prefix, "`"))
+   ABI_ERROR(sjoin("Invalid prefix: `", prefix, "`"))
  end select
 
 end function geo_from_abivar_string
@@ -3965,7 +3977,7 @@ type(geo_t) function geo_from_abivars_path(path, comm) result(new)
  integer :: jdtset, iimage, nimage, iatom, itypat
  integer :: my_rank, lenstr, ierr, ii, start, tread, marr
  !character(len=500) :: msg
- character(len=strlen) :: string
+ character(len=strlen) :: string, raw_string
 !arrays
  integer,allocatable :: intarr(:)
  real(dp) :: acell(3), rprim(3,3)
@@ -3979,7 +3991,7 @@ type(geo_t) function geo_from_abivars_path(path, comm) result(new)
 
  if (my_rank == master) then
    ! Below part copied from `parsefile`. strlen from defs_basis module
-   call instrng(path, lenstr, option1, strlen, string)
+   call instrng(path, lenstr, option1, strlen, string, raw_string)
    ! To make case-insensitive, map characters of string to upper case.
    call inupper(string(1:lenstr))
    !call chkvars_in_string(protocol1, list_vars, list_logicals, list_strings, string)
@@ -4113,7 +4125,7 @@ type(geo_t) function geo_from_poscar_path(path, comm) result(new)
 
  if (my_rank == master) then
    if (open_file(path, msg, newunit=unt, form='formatted', status='old', action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    new = geo_from_poscar_unit(unt)
    close(unt)
@@ -4216,7 +4228,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
 
  if (any(duplicated)) then
    ! Need to recompute ntypat and symbols taking into account duplication.
-   MSG_WARNING("Found POSCAR with duplicated symbols")
+   ABI_WARNING("Found POSCAR with duplicated symbols")
    ABI_MOVE_ALLOC(symbols, dupe_symbols)
    new%ntypat = count(.not. duplicated)
    ABI_MALLOC(symbols, (new%ntypat))
@@ -4240,7 +4252,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
  read(unit, *, err=10, iomsg=iomsg) system
  system = tolower(system)
  if (system /= "cartesian" .and. system /= "direct") then
-   MSG_ERROR(sjoin("Expecting `cartesian` or `direct` for the coordinate system but got:", system))
+   ABI_ERROR(sjoin("Expecting `cartesian` or `direct` for the coordinate system but got:", system))
  end if
 
  ! Parse atomic positions.
@@ -4250,10 +4262,10 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
    read(unit, *, err=10, iomsg=iomsg) new%xred(:, iatom), symbol
    if (len_trim(symbol) == 0) then
      if (new%ntypat == 1) then
-       MSG_COMMENT("POTCAR without element symbol after coords but this is not critical because ntypat == 1")
+       ABI_COMMENT("POTCAR without element symbol after coords but this is not critical because ntypat == 1")
        symbol = symbols(1)
      else
-       MSG_ERROR("POTCAR positions should be followed by element symbol.")
+       ABI_ERROR("POTCAR positions should be followed by element symbol.")
      end if
    end if
 
@@ -4268,7 +4280,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
      end if
    end do
    if (itypat == new%ntypat + 1) then
-     MSG_ERROR(sjoin("Cannot find symbol:`", symbol, " `in initial symbol list. Typo or POSCAR without symbols?."))
+     ABI_ERROR(sjoin("Cannot find symbol:`", symbol, " `in initial symbol list. Typo or POSCAR without symbols?."))
    end if
  end do
 
@@ -4285,7 +4297,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
  if (system == "cartesian") then
    ! Go from cartesian to reduced.
    ABI_MALLOC(xcart, (3, new%natom))
-   xcart = new%xred
+   xcart = new%xred * Ang_Bohr
    call xcart2xred(new%natom, new%rprimd, xcart, new%xred)
    ABI_FREE(xcart)
  end if
@@ -4294,7 +4306,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
  ABI_FREE(duplicated)
  return
 
- 10 MSG_ERROR(sjoin("Error while parsing POSCAR file,", ch10, "iomsg:", trim(iomsg)))
+ 10 ABI_ERROR(sjoin("Error while parsing POSCAR file,", ch10, "iomsg:", trim(iomsg)))
 
 end function geo_from_poscar_unit
 !!***
@@ -4375,7 +4387,7 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
    if (endswith(path, "_HIST.nc")) then
      ! See def_file_hist.
-     !MSG_ERROR("Cannot yet read structure from HIST.nc file")
+     !ABI_ERROR("Cannot yet read structure from HIST.nc file")
      NCF_CHECK(nctk_get_dim(ncid, "natom", new%natom))
      NCF_CHECK(nctk_get_dim(ncid, "ntypat", new%ntypat))
 
@@ -4591,7 +4603,7 @@ subroutine get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, 
       'Length scale ',mu,' is input as acell: ',acell(mu),ch10,&
       'However, length scales must be > 0 ==> stop',ch10,&
       'Action: correct acell in input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -4617,7 +4629,7 @@ subroutine get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, 
           'Angle number ',mu,' is input as angdeg: ',angdeg(mu),ch10,&
           'However, angles must be > 0 ==> stop',ch10,&
           'Action: correct angdeg in the input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
 
@@ -4627,7 +4639,7 @@ subroutine get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, 
         'The sum of input angles (angdeg(1:3)) must be lower than 360 degrees',ch10,&
         'while it is: ',angdeg(1)+angdeg(2)+angdeg(3),'.',ch10,&
         'Action: correct angdeg in the input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      if( abs(angdeg(1)-angdeg(2))<tol12 .and. &

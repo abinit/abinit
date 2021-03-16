@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -38,7 +38,7 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.3.0],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[9.5.0],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -1049,7 +1049,7 @@ fi
 # Help to produce libraires
 if test ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
-fi
+fi 
 
 if test ! -z "${status}" -o ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
@@ -1172,10 +1172,6 @@ CPPFLAGS=""
 
 # FIXME: Temporary options to remove
 case "${ABINIT_LEGACY_OPTION}" in
-  etsf_io)
-    AC_DEFINE([HAVE_ETSF_IO], 1,
-     [Define to 1 if you want to use ETSF_IO (obsolete, orphan project).])
-    ;;
   mpi1)
     AC_DEFINE([HAVE_MPI1], 1,
       [Define to 1 if you have a MPI-1 implementation (obsolete, broken).])

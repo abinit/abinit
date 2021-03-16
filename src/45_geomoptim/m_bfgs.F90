@@ -7,7 +7,7 @@
 !!  Broyden-Fletcher-Goldfarb-Shanno (BFGS) minimization algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2020 ABINIT group (XG,JCC)
+!! Copyright (C) 2012-2021 ABINIT group (XG,JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,7 +105,7 @@ subroutine hessinit(ab_mover, hessin, init_matrix, ndim, ucvol)
    write(message, '(a,a,a)' )&
 &   'the size of the given hessian matrix is too small.', ch10, &
 &   'This is an internal error, contact ABINIT developers.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Special arrangement: if input hessian file exists, read data from there
@@ -115,7 +115,7 @@ subroutine hessinit(ab_mover, hessin, init_matrix, ndim, ucvol)
  if (ex) then
    ! Read inverse hessian data from file; format is
    if (open_file(ab_mover%fnameabi_hes,message,newunit=temp_unit,form='formatted',status='old') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    read (temp_unit,*)
    read (temp_unit,*) ndim0
@@ -125,7 +125,7 @@ subroutine hessinit(ab_mover, hessin, init_matrix, ndim, ucvol)
 &     'Tried to read inverse hessian from file',trim(ab_mover%fnameabi_hes),' but',ch10,&
 &     'ndim of that file =',ndim0,' , is not equal to input ndim =',ndim,ch10,&
 &     ' => initialize inverse hessian with identity matrix.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
      close(unit=temp_unit)
    else
      ! Read inverse hessian
@@ -220,7 +220,7 @@ subroutine hessupdt(hessin,iatfix,natom,ndim,vin,vin_prev,vout,vout_prev, &
 !scalars
  integer :: iatom,idir,ii,jj,nimage_
  real(dp) :: den1,den2,den3
- character(len=100) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: bfgs(ndim),din(ndim),dout(ndim),hdelta(ndim)
 
@@ -263,8 +263,7 @@ subroutine hessupdt(hessin,iatfix,natom,ndim,vin,vin_prev,vout,vout_prev, &
 !end do
 
  if (mod(ndim,nimage_)/=0) then
-   msg='nimage must be a dividor of ndim !'
-   MSG_BUG(msg)
+   ABI_BUG('nimage must be a dividor of ndim !')
  end if
 
 !Difference between new and previous vectors
@@ -380,9 +379,9 @@ subroutine brdene(etotal,etotal_prev,hessin,ndim,vin,vin_prev,vout,vout_prev)
 
 !***************************************************************************
 
- ABI_ALLOCATE(dvin,(ndim))
- ABI_ALLOCATE(vin_min,(ndim))
- ABI_ALLOCATE(vout_min,(ndim))
+ ABI_MALLOC(dvin,(ndim))
+ ABI_MALLOC(vin_min,(ndim))
+ ABI_MALLOC(vout_min,(ndim))
 
  lambda_1=1.0_dp       ; lambda_2=0.0_dp
  etotal_1=etotal      ; etotal_2=etotal_prev
@@ -420,9 +419,9 @@ subroutine brdene(etotal,etotal_prev,hessin,ndim,vin,vin_prev,vout,vout_prev)
 !Previous atomic forces
  vout_prev(:)=vout(:)
 
- ABI_DEALLOCATE(dvin)
- ABI_DEALLOCATE(vin_min)
- ABI_DEALLOCATE(vout_min)
+ ABI_FREE(dvin)
+ ABI_FREE(vin_min)
+ ABI_FREE(vout_min)
 
 end subroutine brdene
 !!***

@@ -8,7 +8,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2021 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -162,11 +162,11 @@ integer function fftcore_set_mixprec(wp) result(old_wp)
 
  select case (fftcore_mixprec)
  case (0)
-   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " fftcore_mixprec 0 --> Activating FFT in double-precision.")
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " fftcore_mixprec 0 --> Using double-precision FFT", newlines=1)
  case (1)
-   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " fftcore_mixprec 1 --> Activating FFT in mixed precision.")
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " fftcore_mixprec 1 --> Using mixed precision FFT", newlines=1)
  case default
-   MSG_ERROR(sjoin("Wrong value for input wp:", itoa(fftcore_mixprec)))
+   ABI_ERROR(sjoin("Wrong value for input wp:", itoa(fftcore_mixprec)))
  end select
 
 end function fftcore_set_mixprec
@@ -664,7 +664,7 @@ subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
    'Action : check that kpt lies',&
    'reasonably within first Brillouin zone; ',ch10,&
    'else code bug, contact ABINIT group.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  gbound(1)=i1min
@@ -862,7 +862,7 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
      !write(msg,'(a,i0,a,i0,2a,i0)')&
      ! 'The second and third dimension of the FFT grid: ',ngfft(2),", ",ngfft(3),ch10,&
      ! 'were imposed to be multiple of the number of processors for the FFT: ', nproc_fft
-     !if (ount /= dev_null) MSG_COMMENT(msg)
+     !if (ount /= dev_null) ABI_COMMENT(msg)
    else
      msrch(2)=msrch(1)
      srch(:,2)=srch(:,1)
@@ -908,7 +908,7 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
         'ngfft is bigger than allowed value =',ngfft(plane),'.',ch10,&
         'This indicates that desired ngfft is larger than getng',ch10,&
         'can handle. The code has to be changed and compiled.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end do
 
@@ -1044,7 +1044,7 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
       'The best FFT grid will lead to indices larger',ch10,&
       'than the largest representable integer on this machine.',ch10,&
       'Action: try to deal with smaller problems. Also contact ABINIT group.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  end if ! testok==0
@@ -1081,23 +1081,23 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  if (paral_fft_==1) then
    ! For the time being, one need ngfft(2) and ngfft(3) to be multiple of nproc_fft
    if(modulo(ngfft(2),nproc_fft)/=0)then
-     write(msg,'(3a,i5,a,i5)')&
-      'The second dimension of the FFT grid, ngfft(2), should be',&
-      'a multiple of the number of processors for the FFT, nproc_fft.',&
+     write(msg,'(4a,i5,a,i5)')&
+      'The second dimension of the FFT grid, ngfft(2), should be ',&
+      'a multiple of the number of processors for the FFT, nproc_fft.',ch10,&
       'However, ngfft(2)=',ngfft(2),' and nproc_fft=',nproc_fft
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if(modulo(ngfft(3),nproc_fft)/=0)then
-     write(msg,'(3a,i5,a,i5)')&
-      'The third dimension of the FFT grid, ngfft(3), should be',&
-      'a multiple of the number of processors for the FFT, nproc_fft.',&
+     write(msg,'(4a,i5,a,i5)')&
+      'The third dimension of the FFT grid, ngfft(3), should be ',&
+      'a multiple of the number of processors for the FFT, nproc_fft.',ch10,&
       'However, ngfft(3)=',ngfft(3),' and nproc_fft=',nproc_fft
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
  else if (paral_fft_/=0) then
    write(msg,'(a,i0)')'paral_fft_ should be 0 or 1, but its value is ',paral_fft_
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 ! Compute effective number of FFT points (for this MPI node if parall FFT)
@@ -1374,7 +1374,7 @@ subroutine sphereboundary(gbound, istwf_k, kg_k, mgfft, npw)
              "   istwfk, mgfft, npw = ",istwf_k, mgfft, npw, ch10, &
              "   minval(kg_k) = ",minval(kg_k, dim=2), ch10, &
              "   maxval(kg_k) = ",maxval(kg_k, dim=2), ch10
-           MSG_BUG(msg)
+           ABI_BUG(msg)
          end if
 
          gbound(igb,ii)=gmin_b
@@ -1804,7 +1804,7 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 
  else
    write(msg,'(a,i0,a)')'  iflag=',iflag,' not acceptable.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  DBG_EXIT("COLL")
@@ -3246,7 +3246,7 @@ pure subroutine mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot,max1,md1,m1,n1,md2proc
        if (mfft.gt.n1dfft) then
          Jp2stb=Jp2
          J2stb=J2
-         !MSG_WARNING("Returning from mpiswithc_cent")
+         !ABI_WARNING("Returning from mpiswithc_cent")
          return
        end if
 
@@ -3281,7 +3281,7 @@ pure subroutine mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot,max1,md1,m1,n1,md2proc
        if (mfft.gt.n1dfft) then
          Jp2stb=Jp2
          J2stb=J2
-         !MSG_WARNING("Returning from mpiswithc_cent")
+         !ABI_WARNING("Returning from mpiswithc_cent")
          return
        end if
 
@@ -3592,7 +3592,7 @@ pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_l
            frbase=2*n1*(i2-1+n2*(i3_local-1)) + (idat - 1) * cplex * nfft
            !if (frbase > cplex*nfft*ndat - 2*n1) then
            !   write(std_out,*)i2,i3_local,frbase,cplex*nfft*ndat
-           !   MSG_ERROR("frbase")
+           !   ABI_ERROR("frbase")
            !end if
            do i1=1,n1
              fofr(2*i1-1+frbase)=workr(1,i1,i2,i3_ldat)
@@ -3604,7 +3604,7 @@ pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_l
    end do
 
  case default
-   !MSG_BUG("Wrong cplex")
+   !ABI_BUG("Wrong cplex")
    fofr = huge(one)
  end select
 
@@ -3680,7 +3680,7 @@ pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,fft
    end do
 
  case default
-   !MSG_BUG("Wrong cplex")
+   !ABI_BUG("Wrong cplex")
    fofr = huge(one)
  end select
 
@@ -3757,7 +3757,7 @@ pure subroutine mpifft_fr2dbox(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3
    end do
 
  case default
-   !MSG_BUG("Wrong cplex")
+   !ABI_BUG("Wrong cplex")
    workr = huge(one)
  end select
 
@@ -3832,7 +3832,7 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
    end do
 
  case default
-   !MSG_BUG("Wrong cplex")
+   !ABI_BUG("Wrong cplex")
    workr = huge(one)
  end select
 
@@ -3892,7 +3892,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
 
 !First, generate a 2d index for each column of data
- ABI_ALLOCATE(index2d,(n1,n2))
+ ABI_MALLOC(index2d,(n1,n2))
  index2d(:,:)=0
  index=1
  igb=3
@@ -3954,7 +3954,7 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
    end do
  end do
 
- ABI_DEALLOCATE(index2d)
+ ABI_FREE(index2d)
 
 end subroutine indfftrisc
 !!***
@@ -4041,7 +4041,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
    write(msg,'(3a,i0,a)' )&
     'The variable istwf_k must be between 1 and 9, while',ch10,&
     'the argument of the routine istwf_k =',istwf_k,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(ikg+mpw>mkmem*mpw)then
@@ -4051,15 +4051,15 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
     'ikg =',ikg,', mkmem =',mkmem,', mpw =',mpw,ch10,&
     'Probable cause: Known error in invars1 for parallel spin-polarized case.',ch10,&
     'Temporary solution: Change the number of parallel processes.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  np_band=0
  if (mpw>0) then
    np_band=1; if(mpi_enreg%paral_kgb==1) np_band=max(1,mpi_enreg%nproc_band)
    alloc_size=max(alloc_size,(mpw+1)*np_band)
-   ABI_ALLOCATE(kg_small,(3, alloc_size))
-   ABI_ALLOCATE(kg_ind,(alloc_size))
+   ABI_MALLOC(kg_small,(3, alloc_size))
+   ABI_MALLOC(kg_ind,(alloc_size))
    kg_ind(:)=0
  end if
 
@@ -4083,7 +4083,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  do ii=1,3
    xx=gmet(ii,ii)*minor(ii)-numer(ii)
    if(xx<tol10*gmet_trace**3 .or. minor(ii)<tol10*gmet_trace**2)then
-     MSG_BUG('The metric tensor seem incorrect')
+     ABI_BUG('The metric tensor seem incorrect')
    end if
    kmax(ii)=sqrt(gscut*minor(ii)/xx)
    nmax(ii)=floor(kmax(ii)-kpt(ii)+tol10)
@@ -4099,12 +4099,12 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 !0 1 2 3 ... nmax nmin ... -1
 !If the mode is not standard, then some part of the FFT grid must be selected
 !
- ABI_ALLOCATE(ig1arr,(ngrid(1)))
- ABI_ALLOCATE(ig2arr,(ngrid(2)))
- ABI_ALLOCATE(ig3arr,(ngrid(3)))
- ABI_ALLOCATE(kg1arr,(ngrid(1)))
- ABI_ALLOCATE(kg2arr,(ngrid(2)))
- ABI_ALLOCATE(kg3arr,(ngrid(3)))
+ ABI_MALLOC(ig1arr,(ngrid(1)))
+ ABI_MALLOC(ig2arr,(ngrid(2)))
+ ABI_MALLOC(ig3arr,(ngrid(3)))
+ ABI_MALLOC(kg1arr,(ngrid(1)))
+ ABI_MALLOC(kg2arr,(ngrid(2)))
+ ABI_MALLOC(kg3arr,(ngrid(3)))
 
  do ig1p=1,ngrid(1)
    ig1arr(ig1p)=ig1p-1
@@ -4116,7 +4116,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 !---------------------------------------------------------------------
  ig2pmax=ngrid(2)
  if(istwf_k>=2 .and. exchn2n3d==0) ig2pmax=nmax(2)+1
- ABI_ALLOCATE(array_ipw,(-ig2pmax:ig2pmax))
+ ABI_MALLOC(array_ipw,(-ig2pmax:ig2pmax))
  array_ipw(:)=0
  do ig2p=1,ig2pmax
    ig2arr(ig2p)=ig2p-1
@@ -4249,18 +4249,18 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  end if
  alloc_size = max(alloc_size,npw)
 
- ABI_DEALLOCATE(ig1arr)
- ABI_DEALLOCATE(ig2arr)
- ABI_DEALLOCATE(ig3arr)
- ABI_DEALLOCATE(kg1arr)
- ABI_DEALLOCATE(kg2arr)
- ABI_DEALLOCATE(kg3arr)
+ ABI_FREE(ig1arr)
+ ABI_FREE(ig2arr)
+ ABI_FREE(ig3arr)
+ ABI_FREE(kg1arr)
+ ABI_FREE(kg2arr)
+ ABI_FREE(kg3arr)
 
 !BandFFT: plane-wave load balancing
  if (mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_fft>1.and. mpi_enreg%pw_unbal_thresh>zero.and. istwf_k==1) then
 !  Check for reequilibration
    np_fft=max(1,mpi_enreg%nproc_fft)
-   ABI_ALLOCATE(npw_gather,(np_fft)) ! Count pw before balancing
+   ABI_MALLOC(npw_gather,(np_fft)) ! Count pw before balancing
    call xmpi_allgather(npw,npw_gather,mpi_enreg%comm_fft,ierr)
    gap_pw = 100._dp*(maxval(npw_gather(:))-minval(npw_gather))/(1.*sum(npw_gather(:))/np_fft)
    write(msg,'(a,f5.2)' ) ' Relative gap for number of plane waves between process (%): ',gap_pw
@@ -4282,13 +4282,13 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 #endif
      alloc_size = max(alloc_size,npw)
      if(mpw>0 ) then  !Step for requilibration between fft process
-       ABI_ALLOCATE(npw_disp,(np_fft))
+       ABI_MALLOC(npw_disp,(np_fft))
        npw_disp=0
        do i1=2,np_fft
          npw_disp(i1) = npw_disp(i1-1) + npw_gather(i1-1)
        end do
-       ABI_ALLOCATE(kg_ind_gather,(npw_split))
-       ABI_ALLOCATE(kg_small_gather,(3,npw_split))
+       ABI_MALLOC(kg_ind_gather,(npw_split))
+       ABI_MALLOC(kg_small_gather,(3,npw_split))
        call xmpi_allgatherv(kg_ind, npw_gather(mpi_enreg%me_fft+1) , &
 &            kg_ind_gather,npw_gather,npw_disp,mpi_enreg%comm_fft,ierr)
        call xmpi_allgatherv(kg_small,3*npw_gather(mpi_enreg%me_fft+1), &
@@ -4299,12 +4299,12 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 #ifdef DEBUG_MODE
        call wrtout(std_out,"keeping values done")
 #endif
-       ABI_DEALLOCATE(npw_disp)
-       ABI_DEALLOCATE(kg_ind_gather)
-       ABI_DEALLOCATE(kg_small_gather)
+       ABI_FREE(npw_disp)
+       ABI_FREE(kg_ind_gather)
+       ABI_FREE(kg_small_gather)
      end if
    end if!End of reequilibration step for paral KGB
-   ABI_DEALLOCATE(npw_gather)
+   ABI_FREE(npw_gather)
  end if
 
 !BandFFT: band load balancing
@@ -4327,11 +4327,11 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
        mpi_enreg%my_kgtab(i1,ikpt_this_proc) = kg_ind(i1)
      end if
    end do
-   ABI_DEALLOCATE(kg_small)
-   ABI_DEALLOCATE(kg_ind)
+   ABI_FREE(kg_small)
+   ABI_FREE(kg_ind)
  end if
 
- ABI_DEALLOCATE(array_ipw)
+ ABI_FREE(array_ipw)
 
 !Take care of the me_g0 flag
  if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>0) then
@@ -4350,7 +4350,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
     'Please decrease the number of npband*npfft MPI processes!',ch10,&
     'One of the MPI process has no plane-wave to handle.',ch10,&
     'Action: decrease npband and/or npfft.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  endif
 
  call timab(23,2,tsec)
@@ -4434,7 +4434,7 @@ subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
    do ii=1,3
      xx=gmet(ii,ii)*minor(ii)-numer(ii)
      if(xx<tol10*gmet_trace**3.or.minor(ii)<tol10*gmet_trace**2)then
-       MSG_BUG('The metric tensor seem incorrect')
+       ABI_BUG('The metric tensor seem incorrect')
      end if
      kmax=sqrt(gscut*minor(ii)/xx)
      nmax(ii)=floor(kmax-kpt(ii,ikpt)+tol10)
@@ -4601,7 +4601,7 @@ subroutine kgindex(indpw_k, kg_k, mask, mpi_enreg, ngfft, npw_k)
    fftn2_distrib => mpi_enreg%distribfft%tab_fftdp2dg_distrib
    ffti2_local => mpi_enreg%distribfft%tab_fftdp2dg_local
  else
-   MSG_BUG("Unable to find an allocated distrib for this fft grid")
+   ABI_BUG("Unable to find an allocated distrib for this fft grid")
  end if
 
  !call ptabs_fourwf(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -4620,7 +4620,7 @@ subroutine kgindex(indpw_k, kg_k, mask, mpi_enreg, ngfft, npw_k)
    end if
    if (any(kg_k(:,ig) > ngfft(1:3)/2) .or. any(kg_k(:,ig) < -(ngfft(1:3)-1)/2) ) then
      write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ig)," falls outside the FFT box. Increase boxcutmin (?)"
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -4750,7 +4750,7 @@ subroutine multpot(icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft,pot,zw)
    ! Real u(r)
 
    if (icplex==2) then
-     MSG_BUG('multpot: icplexwf=1 and icplex=2')
+     ABI_BUG('multpot: icplexwf=1 and icplex=2')
    else
      ! TO BE SPEEDED UP : should use the same trick as Stefan
      if(includelast==1)then

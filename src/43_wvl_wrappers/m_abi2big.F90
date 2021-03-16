@@ -6,7 +6,7 @@
 !!  Module to copy objects from ABINIT to BigDFT and viceversa.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2020 ABINIT group (TR,DC,MT)
+!!  Copyright (C) 2012-2021 ABINIT group (TR,DC,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,14 +149,14 @@ subroutine wvl_vtrial_abi2big(opt,vtrial,wvl_den)
 
    if(wvl_den%denspot%rhov_is .ne. KS_POTENTIAL) then
      message='wvl_vtrial_abi2big: rhov should contain the KS_POTENTIAL'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
    call wvl_rhov_abi2big(opt,vtrial,wvl_den%denspot%rhov,shift=shiftV)
 
  else
    message='wvl_vtrial_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -234,13 +234,13 @@ subroutine wvl_rho_abi2big(opt,rhor,wvl_den)
 
    if(wvl_den%denspot%rhov_is .ne. ELECTRONIC_DENSITY) then
      message='wvl_rho_abi2big: rhov should contain the ELECTRONIC_DENSITY'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    call wvl_rhov_abi2big(opt,rhor,wvl_den%denspot%rhov)
 
  else
    message='wvl_rho_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -321,13 +321,13 @@ subroutine wvl_vhartr_abi2big(opt,vhartr,wvl_den)
 
    if(wvl_den%denspot%rhov_is .ne. HARTREE_POTENTIAL) then
      message='wvl_vhartr_abi2big: rhov should contain the HARTREE_POTENTIAL'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    call wvl_rhov_abi2big(opt,vhartr,wvl_den%denspot%rhov,shift=shiftV)
 
  else
    message='wvl_vhartr_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -481,7 +481,7 @@ subroutine wvl_occ_abi2big(mband,nkpt,nsppol,occ,opt,wvl_wfs)
    end if
  else
    message='wvl_occ_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -566,7 +566,7 @@ subroutine wvl_eigen_abi2big(mband,nkpt,nsppol,eigen,opt,wvl_wfs)
    end if
  else
    message='wvl_eigen_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -644,7 +644,7 @@ subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
      write(message,'(4a)') ch10,&
 &     ' wvl_occopt_abi2big: occopt does not have a corresponding option in BigDFT.',ch10,&
 &     ' Action: change the value of occopt to a number between 3 and 6'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  elseif(opt==2) then !BigDFT -> ABINIT
    if(occopt_big==SMEARING_DIST_FERMI) then
@@ -660,11 +660,11 @@ subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
      write(message,'(4a)') ch10,&
 &     ' wvl_occopt_abi2big: occopt in BigDFT does not have a corresponding option in ABINIT.',ch10,&
 &     ' Action: contact the ABINIT group'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  else
    message='wvl_occopt_abi2big: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 #else
@@ -725,7 +725,7 @@ subroutine wvl_rhov_abi2big_2D_4D(opt,rhov_abi,rhov_big,shift)
  nspden=size(rhov_abi,2)
  if (size(rhov_big,4)/=nspden) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  nfft_abi=size(rhov_abi)/nspden ; nfft_big=size(rhov_big)/nspden
  shift_=0;if (present(shift)) shift_=shift
@@ -785,7 +785,7 @@ subroutine wvl_rhov_abi2big_1D_4D(opt,rhov_abi,rhov_big,shift)
 #if defined HAVE_BIGDFT
  if (size(rhov_big,4)/=1) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  nfft_abi=size(rhov_abi) ; nfft_big=size(rhov_big)
  shift_=0;if (present(shift)) shift_=shift
@@ -846,7 +846,7 @@ subroutine wvl_rhov_abi2big_2D_2D(opt,rhov_abi,rhov_big,shift)
  nspden=size(rhov_abi,2)
  if (size(rhov_big,2)/=nspden) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  nfft_abi=size(rhov_abi)/nspden ; nfft_big=size(rhov_big)/nspden
  shift_=0;if (present(shift)) shift_=shift
@@ -906,7 +906,7 @@ subroutine wvl_rhov_abi2big_1D_2D(opt,rhov_abi,rhov_big,shift)
 #if defined HAVE_BIGDFT
  if (size(rhov_big,2)/=1) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  nfft_abi=size(rhov_abi) ; nfft_big=size(rhov_big)
  shift_=0;if (present(shift)) shift_=shift
@@ -1098,19 +1098,19 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
 
  if (nfft_abi<nfft+shift) then
    message='wvl_rhov_abi2big: cannot handle nfft(abi)<nfft(big)+shift case'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  if(nspden==4) then
    message='wvl_rhov_abi2big: nspden=4 not yet supported'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (hmem.and.nspden==2) then
    if (opt==1) then
-     ABI_ALLOCATE(rhoup,(nfft))
-     ABI_ALLOCATE(rhodn,(nfft))
+     ABI_MALLOC(rhoup,(nfft))
+     ABI_MALLOC(rhodn,(nfft))
    else if (opt==2)  then
-     ABI_ALLOCATE(rhotot,(nfft))
+     ABI_MALLOC(rhotot,(nfft))
    end if
  end if
 
@@ -1168,15 +1168,15 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
 
  else
    message='wvl_rhov_abi2big_gen: wrong option'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (hmem.and.nspden==2) then
    if (opt==1) then
-     ABI_DEALLOCATE(rhoup)
-     ABI_DEALLOCATE(rhodn)
+     ABI_FREE(rhoup)
+     ABI_FREE(rhodn)
    else if (opt==2) then
-     ABI_DEALLOCATE(rhotot)
+     ABI_FREE(rhotot)
    end if !opt
  end if
 
@@ -1208,7 +1208,7 @@ end subroutine wvl_rhov_abi2big_gen
 !! see doc/variables/vargs.html#ngfft for details about ngfft
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization (description of the
+!!  mpi_enreg=information about MPI parallelization (description of the
 !!            density and potentials scatterring is allocated and updated).
 !!  dtset <type(dataset_type)>=the FFT grid is changed.
 !!
@@ -1227,10 +1227,10 @@ subroutine wvl_setngfft(me_wvl, mgfft, nfft, ngfft, nproc_wvl, n1i, n2i, n3i,n3d
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(out) :: mgfft, nfft
+ integer, intent(inout) :: mgfft, nfft
  integer, intent(in)  :: n1i, n2i, n3i,n3d, nproc_wvl, me_wvl
 !arrays
- integer, intent(out) :: ngfft(18)
+ integer, intent(inout) :: ngfft(18)
 
 !Local variables-------------------------------
 !scalars
@@ -1297,7 +1297,7 @@ end subroutine wvl_setngfft
 !!
 !! FUNCTION
 !! When wavelets are used, the box definition needs to be changed.
-!! The box size is recomputed knowing some psp informations such as
+!! The box size is recomputed knowing some psp information such as
 !! the radius for coarse and fine grid. Then, the atoms are translated
 !! to be included in the new box. Finally the FFT grid is computed using
 !! the fine wavelet mesh and a buffer characteristic of used wavelets plus
@@ -1361,7 +1361,7 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
  end if
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, wvl%atoms%astruct%nat))
+ ABI_MALLOC(xcart,(3, wvl%atoms%astruct%nat))
  call xred2xcart(wvl%atoms%astruct%nat, rprimd, xcart, xred)
 
  call nullify_locreg_descriptors(wvl%Glr)
@@ -1390,7 +1390,7 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
 
 !Save shifted atom positions into xred
  call xcart2xred(wvl%atoms%astruct%nat, rprimd, xcart, xred)
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
  if (prtvol == 0) then
    write(message, '(a,3I12)' ) &

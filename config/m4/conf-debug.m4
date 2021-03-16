@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2009-2020 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2009-2021 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -124,4 +124,5 @@ AC_DEFUN([ABI_DEBUG_INIT],[
       [Define to 1 to turn on verbose debug messages in the source code.])
   fi
   AC_MSG_RESULT([${abi_debug_verbose}])
+  AC_SUBST(abi_debug_flavor)
 ]) # ABI_DEBUG_INIT

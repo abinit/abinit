@@ -6,7 +6,7 @@
 !!  Routines to initialize k-point and q-point sampling from input file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -177,8 +177,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 
  ! Compute the maximum size of arrays intarr and dprarr
  marr = max(3*nkpt,3*MAX_NSHIFTK)
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
  ! Use zero to signal that these values have not been read.
  ngkpt = 0
@@ -233,14 +233,14 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
        write(msg, '(3a)' )&
        'This sum is too close to zero. ',ch10,&
        'Action: correct the array wtk in the input file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      if (abs(wtksum - one) > tol6) then
        if (occopt==2) then
          write(msg, '(a,1p,e18.8,a,a,a)' )&
           'wtksum= ',wtksum,' /= 1.0 means wts do not add to 1 , while occopt=2.',ch10,&
           'Action: correct the array wtk in input file.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        else
          write(msg,'(a,i0,a)')' With present occopt= ',occopt,', renormalize it to one'
          call wrtout(std_out,msg)
@@ -265,7 +265,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
      NCF_CHECK(nf90_close(ncid))
 #else
-     MSG_ERROR("getkerange_filepath requires NETCDF support")
+     ABI_ERROR("getkerange_filepath requires NETCDF support")
 #endif
    end if
 
@@ -293,19 +293,19 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
       'For a negative kptopt, iscf must be -2,',ch10,&
       'while it is found to be ',iscf,'.',ch10,&
       'Action: change the value of iscf in your input file, or change kptopt.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if(marr<3*nsegment+3)then
      marr=3*nsegment+3
-     ABI_DEALLOCATE(dprarr)
-     ABI_DEALLOCATE(intarr)
-     ABI_ALLOCATE(dprarr,(marr))
-     ABI_ALLOCATE(intarr,(marr))
+     ABI_FREE(dprarr)
+     ABI_FREE(intarr)
+     ABI_MALLOC(dprarr,(marr))
+     ABI_MALLOC(intarr,(marr))
    end if
 
-   ABI_ALLOCATE(kptbounds,(3,nsegment+1))
-   ABI_ALLOCATE(ndivk,(nsegment))
+   ABI_MALLOC(kptbounds,(3,nsegment+1))
+   ABI_MALLOC(ndivk,(nsegment))
 
    call intagm(dprarr,intarr,jdtset,marr,3*nsegment+3,string(1:lenstr),'kptbounds',tread,'DPR')
 
@@ -316,7 +316,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      'When kptopt is negative, kptbounds must be initialized ',ch10,&
      'in the input file, which is not the case.',ch10,&
      'Action: initialize kptbounds in your input file, or change kptopt.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,nsegment,string(1:lenstr),'ndivk',tread,'INT')
@@ -328,7 +328,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      ! ndivk and ndivsm are mutually exclusive
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ndivsm',tread,'INT')
      if (tread == 1) then
-       MSG_ERROR("ndivk and ndivsm are mutually exclusive. Choose only one variable")
+       ABI_ERROR("ndivk and ndivsm are mutually exclusive. Choose only one variable")
      end if
 
    else
@@ -344,7 +344,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
         'When kptopt is negative, ndivsm or ndivk must be initialized ',ch10,&
         'in the input file, which is not the case.',ch10,&
         'Action: initialize ndivsm or ndivk in your input file, or change kptopt.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 
@@ -357,7 +357,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      'However, note that it might due to the user,',ch10,&
      'if nkpt is explicitely defined in the input file.',ch10,&
      'In this case, please check your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (nkpt/=0) then
@@ -370,7 +370,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
        'When kptopt is negative, kptbounds must be initialized ',ch10,&
        'in the input file, which is not the case.',ch10,&
        'Action: initialize kptbounds in your input file, or change kptopt.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      ! First k point
@@ -391,8 +391,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptnrm',tread,'DPR')
    if(tread==1) kptnrm=dprarr(1)
 
-   ABI_DEALLOCATE(kptbounds)
-   ABI_DEALLOCATE(ndivk)
+   ABI_FREE(kptbounds)
+   ABI_FREE(ndivk)
 
  else if (kptopt>=1 .and. kptopt<=4) then
    ! Read ngkpt
@@ -403,9 +403,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
        if(ngkpt(ii)<1)then
          write(msg,'(a,i0,3a,i0,3a)') &
          'The input variable ngkpt(',ii,') must be strictly positive,',ch10,&
-         'while it is found to be',ngkpt(ii),'.',ch10,&
+         'while it is found to be ',ngkpt(ii),'.',ch10,&
          'Action: change it in your input file, or change kptopt.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -418,7 +418,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      'The input variables ngkpt and kptrlatt cannot both ',ch10,&
      'be defined in the input file.',ch10,&
      'Action: change one of ngkpt or kptrlatt in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else if(tread_ngkpt==1)then
      kptrlatt(:,:)=0
      kptrlatt(1,1)=ngkpt(1)
@@ -436,7 +436,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
      'while it is found to be',nshiftk,'.',ch10,&
      'Action: change the value of nshiftk in your input file, or change kptopt.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,3*nshiftk,string(1:lenstr),'shiftk',tread,'DPR')
@@ -451,7 +451,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
        'When nshiftk is not equal to 1, shiftk must be defined in the input file.',ch10,&
        'However, shiftk is not defined, while nshiftk=',nshiftk,ch10,&
        'Action: change the value of nshiftk in your input file, or define shiftk.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      ! Default values used in indefo
      nshiftk_orig = 1
@@ -491,7 +491,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    'The only values of kptopt allowed are smaller than 4.',ch10,&
    'The input value of kptopt is: ',kptopt,'.',ch10,&
    'Action: change kptopt in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (kptnrm < tol10) then
@@ -499,7 +499,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    'The input variable kptnrm is lower than 1.0d-10,',ch10,&
    'while it must be a positive, non-zero number.   ',ch10,&
    'Action: correct the kptnrm in the input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! The k point number has been computed, and, if nkpt/=0, also the list of k points.
@@ -538,8 +538,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  ! If nkpt was to be computed, transfer it from nkpt_computed
  if (nkpt == 0) nkpt = nkpt_computed
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
  call timab(192,2,tsec)
 
@@ -611,8 +611,8 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 
  ! Compute the maximum size of arrays intarr and dprarr (nshiftq is MAX_NSHIFTK at maximum)
  marr=630
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
  tread_q_sum=0
 
  ! Find the method to generate the q-points
@@ -638,7 +638,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      'The input variable qptnrm is lower than 1.0d-10,',ch10,&
      'while it must be a positive, non-zero number.   ',ch10,&
      'Action: correct the qptnrm in the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    qptn(:)=qpt(:)/qptnrm
@@ -662,7 +662,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
          'The input variable ngqpt(',ii,') must be strictly positive,',ch10,&
          'while it is found to be',ngqpt(ii),'.',ch10,&
          'Action: change it in your input file, or change qptopt.'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end if
@@ -676,7 +676,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      'The input variables ngqpt and qptrlatt cannot both ',ch10,&
      'be defined in the input file.',ch10,&
      'Action: change one of ngqpt or qptrlatt in your input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else if(tread_ngqpt==1)then
      qptrlatt(:,:)=0
      qptrlatt(1,1)=ngqpt(1)
@@ -694,7 +694,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      'The only allowed values of nshiftq are between 1 and,',MAX_NSHIFTK,ch10,&
      'while it is found to be',nshiftq,'.',ch10,&
      'Action: change the value of nshiftq in your input file, or change qptopt.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    shiftq=zero
@@ -709,17 +709,17 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
        'When nshiftq is not equal to 1, shiftq must be defined in the input file.',ch10,&
        'However, shiftq is not defined, while nshiftq=',nshiftq,ch10,&
        'Action: change the value of nshiftq in your input file, or define shiftq.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
 
    ! Re-generate symmetry operations from the lattice and atomic coordinates
    ! This is a fundamental difference with respect to the k point generation.
    tolsym=tol8
-   ABI_ALLOCATE(ptsymrel,(3,3,msym))
-   ABI_ALLOCATE(symafm_new,(msym))
-   ABI_ALLOCATE(symrel_new,(3,3,msym))
-   ABI_ALLOCATE(tnons_new,(3,msym))
+   ABI_MALLOC(ptsymrel,(3,3,msym))
+   ABI_MALLOC(symafm_new,(msym))
+   ABI_MALLOC(symrel_new,(3,3,msym))
+   ABI_MALLOC(tnons_new,(3,msym))
    call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -731,15 +731,15 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 
    ! Compute the maximum number of q points
    nqpt_max=0
-   ABI_ALLOCATE(qpts,(3,nqpt_max))
-   ABI_ALLOCATE(wtq,(nqpt_max))
+   ABI_MALLOC(qpts,(3,nqpt_max))
+   ABI_MALLOC(wtq,(nqpt_max))
    call getkgrid(chksymbreak,0,iscf_fake,qpts,qptopt,qptrlatt,qptrlen,&
      msym,nqpt_max,nqpt_computed,nshiftq,nsym_new,rprimd,&
      shiftq,symafm_new,symrel_new,vacuum,wtq)
 
    nqpt_max=nqpt_computed
-   ABI_DEALLOCATE(qpts)
-   ABI_DEALLOCATE(wtq)
+   ABI_FREE(qpts)
+   ABI_FREE(wtq)
 
    ! Find the index of the q point within the set of q points that will be generated
    iqpt=0
@@ -752,7 +752,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      write(msg, '(a,i0,3a)' )&
       'The input variable iqpt,',iqpt,' is negative, while it should be 0 or positive.',ch10,&
       'Action: correct iqpt in the input file.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    if (iqpt > nqpt_computed) then
@@ -762,12 +762,12 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
       'The latter has been computed from the input variables qptrlatt, ngqpt, nshiftq,',ch10,&
       'shiftq, as well as qptopt, the symmetries of the lattice, and spinat.',ch10,&
       'Action: correct iqpt in the input file, or correct the computed q-point grid.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Compute the q-point grid in the BZ or the IBZ
-   ABI_ALLOCATE(qpts,(3,nqpt_max))
-   ABI_ALLOCATE(wtq,(nqpt_max))
+   ABI_MALLOC(qpts,(3,nqpt_max))
+   ABI_MALLOC(wtq,(nqpt_max))
 
    call getkgrid(chksymbreak,iout,iscf_fake,qpts,qptopt,qptrlatt,qptrlen,&
     msym,nqpt_max,nqpt_computed,nshiftq,nsym_new,rprimd,&
@@ -780,19 +780,19 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      wtqc = wtq(iqpt)
    end if
 
-   ABI_DEALLOCATE(ptsymrel)
-   ABI_DEALLOCATE(symafm_new)
-   ABI_DEALLOCATE(symrel_new)
-   ABI_DEALLOCATE(tnons_new)
-   ABI_DEALLOCATE(qpts)
-   ABI_DEALLOCATE(wtq)
+   ABI_FREE(ptsymrel)
+   ABI_FREE(symafm_new)
+   ABI_FREE(symrel_new)
+   ABI_FREE(tnons_new)
+   ABI_FREE(qpts)
+   ABI_FREE(wtq)
 
  else
    write(msg, '(3a,i0,3a)' ) &
     'The only values of qptopt allowed are smaller than 4.',ch10,&
     'The input value of qptopt is',qptopt,'.',ch10,&
     'Action: change qptopt in your input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 ! See issue #31 on gitlab. Not really a good idea.
@@ -801,11 +801,11 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 !   'When nqpt is zero, the following input variables cannot be defined :',ch10, &
 !   ' iqpt, ngqpt, nshiftq, qptopt, qpt, qptnrm, qptrlatt, shiftq, wtq . ',ch10, &
 !   'Action: change nqpt to 1, or un-define all the variables above.'
-!  MSG_ERROR(msg)
+!  ABI_ERROR(msg)
 !endif
 
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 end subroutine inqpt
 !!***

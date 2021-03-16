@@ -1,0 +1,93 @@
+#O2 in a box.
+#Tests: 
+#NC implementation with wvl_bigdft_comp =0
+#Test: density and potential mixing within the DIIS.
+#Test parallelism as well.
+#
+
+ndtset 2
+
+#Variables for Wavelets
+usewvl 1
+
+#Wavelets basis set:
+wvl_ngauss 1 10
+wvl_hgrid 0.4
+wvl_frmult 1.0
+wvl_crmult 3.0        #Rise it to converge
+nsym  1
+nscforder 14
+wvl_nprccg 5
+
+#
+wvl_bigdft_comp 0      #Follow the ABINIT path
+
+#Gamma point
+nkpt 1
+kpt 0.0 0.0 0.0
+istwfk 1               #This is mandatory for WVLs
+
+# Self-consistent run to get the density
+
+
+#Variables to control convergency:
+iscf1     17  # Density mixing
+iscf2     7   # Potential mixing
+diemix   0.7
+nstep    20
+nnsclo   3
+
+# Self-consistent run to get the density
+tolvrs     1.00d-06
+amu 1.00
+
+#semiconducting case:
+nband 7             #important give only occupied bands
+occopt 0
+occ 2 2 2 2 2 1 1   #occupations must be given as well
+
+ixc 1
+icoulomb 1 #isolated system
+
+# O2 in a box
+acell   16.800000   14.400000   14.400000
+rprim      1.00   0.00   0.00
+           0.00   1.00   0.00
+           0.00   0.00   1.00
+natom      2
+xcart  7.5567156896E+00  8.7000000000E+00  8.7000000000E+00
+       9.8432843104E+00  8.7000000000E+00  8.7000000000E+00
+ntypat      1
+typat      1 1
+znucl     8.00
+
+#Minimal test: do not print WFK files etc..
+chksymbreak 0
+#optforces  0 
+optstress 0
+kptopt 0
+prtden 0
+prtwf 0
+prteig 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/08o.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% nprocs_to_test = 4, 10
+#%%[NCPU_4]
+#%% files_to_test = t01_MPI4.abo, tolnlines = 15, tolabs = 2.0e-6, tolrel = 2.0e-4
+#%%[NCPU_10]
+#%% files_to_test = t01_MPI10.abo, tolnlines = 15, tolabs = 1.100e-7, tolrel = 5.0e-7
+#%% [extra_info]
+#%% authors = T. Rangel, M. Torrent
+#%% keywords =  NC, WVL
+#%% description = O2 in a box (NC). ABINIT routines are used (wvl_bigdft_comp=0)
+#%%   Test: DIIS, potential/density mixing and parallelism
+#%% topics = Wavelets
+#%%<END TEST_INFO>

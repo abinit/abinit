@@ -1,0 +1,47 @@
+# Test Fe XML pseudopotential with and without sppol - ONCVPSP
+
+ndtset 2
+nsppol1 1
+nsppol2 2
+spinat2 0 0 5.0
+
+acell 3*2.870 Angstr
+ecut 10
+kptopt 1
+ngkpt 6 6 6
+occopt 4
+tsmear 0.001
+nstep1 20
+nstep2 40
+natom 1
+ntypat 1
+typat 1
+znucl 26
+xred 3*0
+
+rprim  
+-0.5  0.5  0.5
+ 0.5 -0.5  0.5
+ 0.5  0.5 -0.5
+toldfe1 1.0d-8
+toldfe2 1.0d-5
+nband 12
+ixc -101130
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26_Fe_oncv.psml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t06.abo, tolnlines = 32, tolabs = 1.1e-06, tolrel = 9.00e-01
+#%% [paral_info]
+#%% max_nprocs = 14
+#%% [extra_info]
+#%% authors = M. Verstraete, Y. Pouillon
+#%% keywords = NC
+#%% description = 
+#%%   Bulk iron, with and without spin-polarization 
+#%%<END TEST_INFO>

@@ -9,7 +9,7 @@
 !!  for a given atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2021 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -199,7 +199,7 @@ MODULE m_paw_ij
   real(dp), allocatable :: dijnd(:,:)
    ! dijnd(cplex_dij*lmn2_size,ndij)
    ! On-site matrix elements of -\frac{1}{c}\mu\cdot L/r^3
-   ! Same storage as Dij (see above); not available for RF (i.e. qphase=2)
+   ! Same storage as Dij (see above)
 
   real(dp), allocatable :: dijso(:,:)
    ! dijso(cplex_dij*qphase*lmn2_size,ndij)
@@ -798,7 +798,7 @@ character(len=500) :: msg
        paw_ij_out => paw_ij_cpy
      else
        msg=' npaw_ij_out should be equal to my_paw_ij !'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    else                            ! Parallelism: the copy operation is a gather
      call get_my_natom(my_comm_atom,my_paw_ij,npaw_ij_out)
@@ -806,7 +806,7 @@ character(len=500) :: msg
        paral_case=2;npaw_ij_max=npaw_ij_in
      else
        msg=' npaw_ij_in should be equal to my_paw_ij !'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
  end if
@@ -1150,7 +1150,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
      end if
 
      !Dij nuclear dipole
-     if (Paw_ij(iatom)%has_dijnd/=0.and.my_ipert<=0) then
+     if (Paw_ij(iatom)%has_dijnd/=0) then
        write(msg,'(a)') '   *********** Dij Nuclear Dipole **********'
        call wrtout(my_unt,msg,my_mode)
        call get_dij_parts(cplex_dij,1,Paw_ij(iatom)%dijnd,always_img=.true.)
@@ -1536,12 +1536,12 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
   if (master==-1) then
    if (npaw_ij_out/=npaw_ij_in_sum) then
      msg='Wrong sizes sum[npaw_ij_ij]/=npaw_ij_out !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  else
    if (me_atom==master.and.npaw_ij_out/=npaw_ij_in_sum) then
      msg='(2) paw_ij_gathered wrongly allocated !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1738,7 +1738,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
  if ((indx_int/=buf_int_size).or.(indx_dp/=buf_dp_size)) then
    write(msg,*) 'Wrong buffer sizes: buf_int_size=',buf_int_size, &
      ' indx_int_size=',indx_int,' buf_dp_size=',buf_dp_size , ' indx_dp=', indx_dp
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Communicate (1 gather for integers, 1 gather for reals)
@@ -1966,7 +1966,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
    if ((indx_int/=buf_int_size_all).or.(indx_dp/=buf_dp_size_all)) then
      write(msg,*) 'Wrong buffer sizes: buf_int_size_all=',buf_int_size_all, &
 &      ' indx_int=',indx_int, ' buf_dp_size_all=',buf_dp_size_all,' indx_dp=',indx_dp
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -2657,7 +2657,7 @@ subroutine paw_ij_isendreceive_getbuffer(paw_ij,npaw_ij_send,atm_indx_recv,buf_i
 
  if ((indx_int/=1+buf_int_size).or.(indx_dp /=1+buf_dp_size)) then
    write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 end subroutine paw_ij_isendreceive_getbuffer
@@ -2911,7 +2911,7 @@ subroutine paw_ij_isendreceive_fillbuffer(paw_ij,atmtab_send,atm_indx_send,npaw_
  indx_int=indx_int-1;indx_dp=indx_dp-1
  if ((indx_int/=buf_int_size).or.(indx_dp/=buf_dp_size)) then
    write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 end subroutine paw_ij_isendreceive_fillbuffer

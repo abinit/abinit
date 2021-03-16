@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2020 ABINIT group (XG, DRH, FR, EB, SPr)
+!!  Copyright (C) 2001-2021 ABINIT group (XG, DRH, FR, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -168,12 +168,12 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
  call timab(181,1,tsec)
 
  if(nspden/=1 .and. nspden/=2) then
-   MSG_BUG('For nspden==4 please use dfpt_mkvxc_noncoll!')
+   ABI_BUG('For nspden==4 please use dfpt_mkvxc_noncoll!')
  end if
 
 !Special case: no XC applied
  if (ixc==0.or.nkxc==0) then
-   MSG_WARNING('Note that no xc is applied (ixc=0)')
+   ABI_WARNING('Note that no xc is applied (ixc=0)')
    vxc1=zero
    return
  end if
@@ -184,7 +184,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 !  PAW: eventually substract compensation density
    if (option/=0) then
      if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
-       ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
+       ABI_MALLOC(rhor1_,(cplex*nfft,nspden))
        if (usexcnhat==0.and.nhat1dim==1) then
          rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
        else
@@ -315,7 +315,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    end if ! n3xccc==0
 
    if (option/=0.and.((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc))) then
-     ABI_DEALLOCATE(rhor1_)
+     ABI_FREE(rhor1_)
    end if
 
 !  Treat GGA
@@ -324,7 +324,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 !  Transfer the data to spin-polarized storage
 
 !  Treat the density change
-   ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
+   ABI_MALLOC(rhor1_,(cplex*nfft,nspden))
    if (option==1 .or. option==2) then
      if (nspden==1) then
        do ir=1,cplex*nfft
@@ -365,7 +365,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 !  PAW: treat also compensation density (and gradients)
    nhat1dim_=nhat1dim ; nhat1rgdim_=nhat1grdim
    if (option/=0.and.nhat1dim==1.and.nspden==2) then
-     ABI_ALLOCATE(nhat1_,(cplex*nfft,nspden))
+     ABI_MALLOC(nhat1_,(cplex*nfft,nspden))
      if (non_magnetic_xc) then
        do ir=1,cplex*nfft
          rho1_dn=nhat1(ir,1)*half
@@ -379,13 +379,13 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
        end do
      end if
    else if (option==0) then
-     ABI_ALLOCATE(nhat1_,(0,0))
+     ABI_MALLOC(nhat1_,(0,0))
      nhat1dim_=0
    else
      nhat1_ => nhat1
    end if
    if (option/=0.and.nhat1grdim==1.and.nspden==2) then
-     ABI_ALLOCATE(nhat1gr_,(cplex*nfft,nspden,3))
+     ABI_MALLOC(nhat1gr_,(cplex*nfft,nspden,3))
      if (non_magnetic_xc) then
        do ii=1,3
          do ir=1,cplex*nfft
@@ -403,7 +403,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
        end do
      end if
    else if (option==0) then
-     ABI_ALLOCATE(nhat1gr_,(0,0,0))
+     ABI_MALLOC(nhat1gr_,(0,0,0))
      nhat1rgdim_=0
    else
      nhat1gr_ => nhat1gr
@@ -414,16 +414,16 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    call dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nhat1_,nhat1dim_,&
 &   nhat1gr_,nhat1rgdim_,nkxc,nspden,qphon,rhor1_,usexcnhat,vxc1)
 
-   ABI_DEALLOCATE(rhor1_)
+   ABI_FREE(rhor1_)
    if ((option==0).or.(nhat1dim==1.and.nspden==2)) then
-     ABI_DEALLOCATE(nhat1_)
+     ABI_FREE(nhat1_)
    end if
    if ((option==0).or.(nhat1grdim==1.and.nspden==2)) then
-     ABI_DEALLOCATE(nhat1gr_)
+     ABI_FREE(nhat1gr_)
    end if
 
  else
-   MSG_BUG('Invalid nkxc!')
+   ABI_BUG('Invalid nkxc!')
 
  end if ! LDA or GGA
 
@@ -450,7 +450,7 @@ end subroutine dfpt_mkvxc
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box.
 !!  kxc(nfft,nkxc)=exchange and correlation kernel (see below)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  nhat1(cplex*nfft,2*nhat1dim)= -PAW only- 1st-order compensation density
@@ -547,7 +547,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
  if (nkxc/=12*min(nspden,2)-5) then
    msg='Wrong nkxc value for GGA!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !metaGGA contributions are not taken into account here
@@ -556,7 +556,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !PAW: substract 1st-order compensation density from 1st-order density
  test_nhat=((nhat1dim==1).and.(usexcnhat==0.or.nhat1grdim==1))
  if (test_nhat) then
-   ABI_ALLOCATE(rhor1_ptr,(cplex*nfft,nspden))
+   ABI_MALLOC(rhor1_ptr,(cplex*nfft,nspden))
    rhor1_ptr(:,:)=rhor1(:,:)-nhat1(:,:)
  else
    rhor1_ptr => rhor1
@@ -568,7 +568,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !rho1now(:,:,1) contains the first-order density, and
 !rho1now(:,:,2:4) contains the gradients of the first-order density
  ishift=0 ; ngrad=2
- ABI_ALLOCATE(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
+ ABI_MALLOC(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
  call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
 
 !PAW: add "exact" gradients of compensation density
@@ -581,12 +581,12 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
    end do
  end if
  if (test_nhat) then
-   ABI_DEALLOCATE(rhor1_ptr)
+   ABI_FREE(rhor1_ptr)
  end if
 
 !Apply the XC kernel
  nspgrad=2; if (nspden==2) nspgrad=5
- ABI_ALLOCATE(dnexcdn,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dnexcdn,(cplex*nfft,nspgrad))
 
  if (cplex==1) then  ! Treat real case first
    if (nspden==1) then
@@ -723,8 +723,8 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
 !call filterpot(paral_kgb,cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)
 
- ABI_DEALLOCATE(dnexcdn)
- ABI_DEALLOCATE(rho1now)
+ ABI_FREE(dnexcdn)
+ ABI_FREE(rho1now)
 
  DBG_EXIT("COLL")
 
@@ -824,16 +824,16 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  call timab(181,1,tsec)
 
  if(nspden/=4) then
-   MSG_BUG('only for nspden=4!')
+   ABI_BUG('only for nspden=4!')
  end if
 
  if(nkxc/=2*min(nspden,2)-1) then
-   MSG_BUG('nspden=4 works only with LSDA.')
+   ABI_BUG('nspden=4 works only with LSDA.')
  end if
 
 !Special case: no XC applied
  if (ixc==0.or.nkxc==0) then
-   MSG_WARNING('Note that no xc is applied (ixc=0)')
+   ABI_WARNING('Note that no xc is applied (ixc=0)')
    vxc1(:,:)=zero
    return
  end if
@@ -847,7 +847,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 
 !  PAW: possibly substract compensation density
    if ((usexcnhat==0.and.nhatdim==1).or.(non_magnetic_xc)) then
-     ABI_ALLOCATE(rhor_,(nfft,nspden))
+     ABI_MALLOC(rhor_,(nfft,nspden))
      if (usexcnhat==0.and.nhatdim==1) then
        rhor_(:,:) =rhor(:,:)-nhat(:,:)
      else
@@ -861,7 +861,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
      rhor_ => rhor
    end if
    if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
-     ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
+     ABI_MALLOC(rhor1_,(cplex*nfft,nspden))
      if (usexcnhat==0.and.nhatdim==1) then
        rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
      else
@@ -877,9 +877,9 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 
 !  Magnetization
    mag => rhor_(:,2:4)
-   ABI_ALLOCATE(rhor1_diag,(cplex*nfft,2))
-   ABI_ALLOCATE(vxc1_diag,(cplex*nfft,2))
-   ABI_ALLOCATE(m_norm,(nfft))
+   ABI_MALLOC(rhor1_diag,(cplex*nfft,2))
+   ABI_MALLOC(vxc1_diag,(cplex*nfft,2))
+   ABI_MALLOC(m_norm,(nfft))
 
 !  -- Rotate rho(r)^(1)
 !  SPr: for option=0 the rhor is not used, only core density xccc3d1
@@ -910,14 +910,14 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
      vxc1(:,3:4)=zero
    end if
 
-   ABI_DEALLOCATE(rhor1_diag)
-   ABI_DEALLOCATE(vxc1_diag)
-   ABI_DEALLOCATE(m_norm)
+   ABI_FREE(rhor1_diag)
+   ABI_FREE(vxc1_diag)
+   ABI_FREE(m_norm)
    if ((usexcnhat==0.and.nhatdim==1).or.(non_magnetic_xc)) then
-     ABI_DEALLOCATE(rhor_)
+     ABI_FREE(rhor_)
    end if
    if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
-     ABI_DEALLOCATE(rhor1_)
+     ABI_FREE(rhor1_)
    end if
 
  end if ! nkxc=1 or nkxc=3

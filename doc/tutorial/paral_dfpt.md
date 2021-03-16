@@ -1,5 +1,6 @@
 ---
 authors: XG
+plotly: true
 ---
 
 # Parallelism in the DFPT formalism
@@ -38,7 +39,7 @@ explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
 This tutorial should take less than two hours to be done if a powerful parallel
 computer is available.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 The structure of the parallelism for the DFPT part of ABINIT
 
@@ -113,30 +114,36 @@ the computer you are using. This can be for instance: mpirun -np 16 abinit
 ## 2 Computation of one dynamical matrix (q =0.25 -0.125 0.125) for FCC aluminum
 
 We start by treating the case of a small systems, namely FCC aluminum, for
-which there is only one atom per unit cell. Of course, many k points are needed.
+which there is only one atom per unit cell. Of course, many k points are needed, since this is a metal.
 
 **2.1.** The first step is the pre-computation of the ground state
-wavefunctions. This is driven by the files *tdfpt_01.files* (and *tdfpt_01.in*).
-You should edit them and examine them.
+wavefunctions. This is driven by the files *tdfpt_01.abi*.
+You should edit it and examine it.
 
-{% dialog tests/tutoparal/Input/tdfpt_01.files tests/tutoparal/Input/tdfpt_01.in %}
+{% dialog tests/tutoparal/Input/tdfpt_01.abi %}
 
 One relies on a k-point grid of 8x8x8 x 4 shifts (=2048 k points), and 5 bands.
+The k-point grid sampling is well converged, actually.
 For this ground-state calculation, symmetries can be used to reduce
 drastically the number of k points: there are 60 k points in the irreducible
 Brillouin zone (this cannot be deduced from the examination of the input file, though).
+In order to treat properly the phonon calculation, the number of bands is larger than the
+default value, that would have given [[nband]]=3. Indeed, several of the unoccupied bands 
+plays a role in the response calculations in the case of etallic occupations.
+For example, the acoustic sum rule might be largely violated when too few unoccopied 
+bands are treated. 
+
 This calculation is very fast, actually.
 You can launch it:
 
-    mpirun -n 4  abinit < tdfpt_01.files > tdfpt_01.log &
+    mpirun -n 4  abinit tdfpt_01.abi > log &
 
 A reference output file is available in *\$ABI_TESTS/tutoparal/Refs*, under
-the name *tdfpt_01.out*. It was obtained using 4 computing cores, and took a few seconds.
+the name *tdfpt_01.abo*. It was obtained using 4 computing cores, and took a few seconds.
 
-**2.2.** The second step is the DFPT calculation, for which the files are
-*tdfpt_02.files* (and *tdfpt_02.in*).
+**2.2.** The second step is the DFPT calculation, see the file *tdfpt_02.abi*
 
-{% dialog tests/tutoparal/Input/tdfpt_02.files tests/tutoparal/Input/tdfpt_02.in %}
+{% dialog tests/tutoparal/Input/tdfpt_02.abi %}
 
 There are three perturbations (three atomic displacements). For the two first
 perturbations, no symmetry can be used, while for the third, two symmetries
@@ -145,206 +152,259 @@ scalable sections of the code, the maximum speed up is 5120 (=1024 k points *
 5 bands), if you have access to 5120 computing cores. However, the sequential
 parts of the code dominate at a much, much lower value. Indeed, the sequential
 parts is actually a few percents of the code on one processor, depending on
-the machine you run. The speed-up might saturate beyond 4 and 8 (depending on
-the machine).
+the machine you run. The speed-up might saturate beyond 8...16 (depending on
+the machine). Note that the number of processors that you use for this second step
+is independent of the number of processors that you used for the first step.
+The only relevant information from the first step is the *_WFK file.
 
 First copy the output of the ground-state calculation so that it can be used
 as the input of the DFPT calculation:
 
     cp tdfpt_01.o_WFK tdfpt_02.i_WFK
-    cp tdfpt_01.o_WFK tdfpt_02.i_WFQ
 
+(A _WFQ file is not needed, as all GS wavefunctions at k+q are present in the GW wavefuction at k).
 Then, you can launch the calculation:
 
-    mpirun -n 4 abinit < tdfpt_02.files > tdfpt_02.log &
+    mpirun -n 4 abinit tdfpt_02.abi > tdfpt_02.log &
 
 A reference output file is given in *\$ABI_TESTS/tutoparal/Refs*, under the name
-*tdfpt_02.out*. Edit it, and examine some information.
+*tdfpt_02.abo*. Edit it, and examine some information.
 The calculation has been made with four computing cores:
 
 ```
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 ```
 
 The wall clock time is less than 50 seconds :
 
 ```
 -
-- Proc.   0 individual time (sec): cpu=         48.5  wall=         48.5
+- Proc.   0 individual time (sec): cpu=         28.8  wall=         28.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered    0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        194.1  wall=        194.1
+.Delivered   0 WARNINGs and   0 COMMENTs to log file.
++Overall time at end (sec) : cpu=        115.4  wall=        115.8
 ```
 
 The major result is the phonon frequencies:
 
       Phonon wavevector (reduced coordinates) :  0.25000 -0.12500  0.12500
      Phonon energies in Hartree :
-       6.944980E-04  7.756637E-04  1.145943E-03
-     Phonon energies in meV     :
-    -  1.889825E+01  2.110688E+01  3.118270E+01
+       6.521506E-04  7.483301E-04  1.099648E-03
      Phonon frequencies in cm-1    :
-    -  1.524247E+02  1.702385E+02  2.515054E+02
-     Phonon frequencies in Thz     :
-    -  4.569578E+00  5.103622E+00  7.539943E+00
-     Phonon energies in Kelvin  :
-    -  2.193049E+02  2.449349E+02  3.618597E+02
+    -  1.431305E+02  1.642395E+02  2.413447E+02
 
 **2.3.** Because this test case is quite fast, you should play a bit with it.
 In particular, run it several times, with an increasing number of computing
-cores (let's say, up to 32 computing cores, at which stage you should have
+cores (let us say, up to 40 computing cores, at which stage you should have
 obtained a saturation of the speed-up).
-You should be able to obtain the following.
+You should be able to obtain a decent speedup up to 8 processors, then the gain becomes more and more marginal.
+Note however that the result is independent (to an exquisite accuracy) of the number of computing cores that is used
 
-1. The result is independent (to an exquisite accuracy) of the number of computing cores that is used
-2. The timing section reveals that the reading of the ground-state wavefunction file is the limiting step for the parallelisation
-
-Concerning the latter, you will need to understand, in the output file, the
-timing section. It is present a bit before the end of the output file:
+Let us explain the timing section. It is present a bit before the end of the output file:
 
     -
     - For major independent code sections, cpu and wall times (sec),
     -  as well as % of the time and number of calls for node 0-
-    - routine                        cpu     %       wall     %      number of calls
-    - fourwf(pot)                   19.834  10.2     19.794  10.2         187989
-    - inwffil                        7.387   3.8      7.390   3.8             10
-    - fourwf(G->r)                   6.721   3.5      6.869   3.5         116049
-    - cgwf3-O(npw)                   2.226   1.1      2.228   1.1             -1
-    - vtorho3-kpt loop               2.181   1.1      2.163   1.1             33
-    - nonlop(forces)                 1.924   1.0      1.947   1.0          90880
-    - projbd                         1.775   0.9      1.734   0.9         318634
-    - nonlop(apply)                  1.690   0.9      1.719   0.9         116309
-    - vtowfk3(contrib)               1.654   0.9      1.556   0.8             -1
-    - 61   others                    2.819   1.5      2.803   1.4
+    -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
+    - cpu_time =           28.8, wall_time =           28.9
     -
-    - subtotal                      48.211  24.8     48.203  24.8
+    - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+    -                                                                  (-1=no count)
+    - fourwf%(pot)                  14.392  12.5     14.443  12.5         170048      -1.00        1.00       1.00
+    - nonlop(apply)                  2.787   2.4      2.802   2.4         125248      -1.00        0.99       0.99
+    - nonlop(forces)                 2.609   2.3      2.620   2.3          64000      -1.00        1.00       1.00
+    - fourwf%(G->r)                  2.044   1.8      2.052   1.8          47124      -1.00        1.00       1.00
+    - dfpt_vtorho-kpt loop           1.174   1.0      1.177   1.0             21      -1.00        1.00       1.00
+    - getgh1c_setup                  1.111   1.0      1.114   1.0           8960      -1.00        1.00       1.00
+    - mkffnl                         1.087   0.9      1.092   0.9          20992      -1.00        1.00       1.00
+    - projbd                         1.023   0.9      1.036   0.9         286336      -1.00        0.99       0.99
+    - dfpt_vtowfk(contrib)           0.806   0.7      0.805   0.7             -1      -1.00        1.00       1.00
+    - others (120)                  -2.787  -2.4     -2.825  -2.4             -1      -1.00        0.99       0.99
+    -<END_TIMER>
+    -
+    - subtotal                      24.246  21.0     24.317  21.0                                  1.00       1.00
 
     - For major independent code sections, cpu and wall times (sec),
     - as well as % of the total time and number of calls
-
-    - routine                         cpu     %       wall     %      number of calls
+    
+    -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
+    - cpu_time =         115.3, wall_time =         115.6
+    -
+    - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
     -                                                                  (-1=no count)
-    - fourwf(pot)                   79.067  40.7     79.326  40.9         752230
-    - inwffil                       29.548  15.2     29.560  15.2             40
-    - fourwf(G->r)                  25.828  13.3     25.898  13.3         447552
-    - cgwf3-O(npw)                   9.096   4.7      9.081   4.7             -4
-    - vtorho3-kpt loop               8.672   4.5      8.611   4.4            132
-    - nonlop(forces)                 7.707   4.0      7.716   4.0         363520
-    - projbd                         6.925   3.6      6.668   3.4        1275084
-    - nonlop(apply)                  6.810   3.5      6.864   3.5         465510
-    - vtowfk3(contrib)               6.280   3.2      6.199   3.2             -4
-    - getghc-other                   3.176   1.6      3.195   1.6             -4
-    - status                         2.615   1.3      2.534   1.3         919162
-    - vtorho3:synchro                2.029   1.0      2.040   1.1            132
-    - 58   others                    4.175   2.2      4.217   2.2
+    - fourwf%(pot)                  51.717  44.8     51.909  44.9         679543      -1.00        1.00       1.00
+    - dfpt_vtorho:MPI               12.267  10.6     12.292  10.6             84      -1.00        1.00       1.00
+    - nonlop(apply)                 10.092   8.8     10.149   8.8         500343      -1.00        0.99       0.99
+    - nonlop(forces)                 9.520   8.3      9.562   8.3         256000      -1.00        1.00       1.00
+    - fourwf%(G->r)                  7.367   6.4      7.398   6.4         187320      -1.00        1.00       1.00
+    - dfpt_vtorho-kpt loop           4.182   3.6      4.193   3.6             84      -1.00        1.00       1.00
+    - getgh1c_setup                  3.955   3.4      3.967   3.4          35840      -1.00        1.00       1.00
+    - mkffnl                         3.911   3.4      3.929   3.4          83968      -1.00        1.00       1.00
+    - projbd                         3.735   3.2      3.780   3.3        1144046      -1.00        0.99       0.99
+    - dfpt_vtowfk(contrib)           2.754   2.4      2.748   2.4             -4      -1.00        1.00       1.00
+    - getghc-other                   1.861   1.6      1.790   1.5             -4      -1.00        1.04       1.04
+    - pspini                         0.861   0.7      0.865   0.7              4      -1.00        0.99       0.99
+    - newkpt(excl. rwwf   )          0.754   0.7      0.757   0.7             -4      -1.00        1.00       1.00
+    - others (116)                 -14.132 -12.3    -14.220 -12.3             -1      -1.00        0.99       0.99
+    -<END_TIMER>
 
-    - subtotal                     191.928  98.9    191.909  98.9
+    - subtotal                      98.845  85.7     99.120  85.7                                  1.00       1.00
 
 It is made of two groups of data. The first one corresponds to the analysis of
 the timing for the computing core (node) number 0. The second one is the sum
 over all computing cores of the data of the first group. Note that there is a
 factor of four between these two groups, reflecting that the load balance is good.
 
-Let's examine the second group of data in more detail. It corresponds to a
+Let us examine the second group of data in more detail. It corresponds to a
 decomposition of the most time-consuming parts of the code. Note that the
-subtotal is 98.9 percent, thus the statistics is quite good. Without going
-into the detail of each routine, for the present purpose, the most significant
-information is that among all the timed sections of the code, only "inwffil"
-and "vtorho3:synchro" will not benefit from parallelism.
-"inwffil" is a subroutine whose job is to read the ground-state wavefunctions
-(you can find the source of the "inwffil" routine on [GitHub](https://github.com/abinit/abinit/tree/master/src/79_seqpar_mpi) or
-[on the ABINIT Web site](https://www.abinit.org/sites/default/files/robodoc-html/masterindex.html)).
+subtotal is 85.7 percent, thus the statistics is not very accurate, as it should be close to 100%.
+Actually, as of ABINIT v9, there is must be a bug in the timing decomposition, since, 
+e.g. there is a negative time announced for the "others" subroutines.
 
-As mentioned in the section 1, the reading of the ground-state wavefunctions is not done in parallel in the case
-of the DFPT computations (note that the reading is actually parallelized for
-e.g. ground-state calculations). In the output file provided as a reference
-(with four computing cores), the "inwffil" wall clock time is 7.387 seconds,
-on a total of 48.211 secs. By increasing the number of computing cores, it
-will be possible to decrease the total time, but not below the value of 7.387
-seconds in any case. You should observe a similar behaviour with your own tests.
+Anyhow, several of the most time-consuming parts are directly related to application of the Hamiltonian to wavefunctions,
+namely, fourwf%(pot) (application of the local potential, which implies two Fourier transforms), nonlop(apply) 
+(application of the non-local part of the Hamiltonian), nonlop(forces) (computation of the non-local part of the
+interatomic forces), fourwf%(G->r) (fourier transform needed to build the first-order density). Also, quite noticeable
+is dfpt_vtorho:MPI , synchronisation of the MPI parallelism. 
+
+A study of the speed-up brought by the k-point parallelism for this simple test case
+gives the following behaviour, between 1 and 40 cores:
+
+<div id="plotly_plot" style="width:90%;height:450px;"></div>
+<script>
+$(function() {
+    Plotly.newPlot(document.getElementById('plotly_plot'), 
+        [{ x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], name: 'Ideal'},
+         { x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 1.92, 3.75, 5.50, 7.17, 9.34, 11.1, 14.4, 17.8, 19.7], name: 'Observed' }], 
+        { title: "Parallel speed-up", 
+          xaxis: {title:'Number of cores'} }
+    );
+});
+</script>
+
+At 8 processors, one gets a speed-up of 7.17, which is quite decent (about 90% efficiency),
+but 16 processors, the speed-up is only 11.1 (about 70% efficiency), and the efficiency is below 50% at 40 processors,
+for a speed-up of 19.7 ..
 
 ## 3 Computation of one perturbation for a slab of 29 atoms of barium titanate
 
-**3.1.** This test, with 29 atoms, is slower, but scales better than the Al
-FCC case. It consists in the computation of one perturbation at qpt 0.0 0.25
+**3.1.** This test, with 29 atoms, is slower, but highlights other aspects 
+of the DFPT parallelism than the Al FCC case. 
+It consists in the computation of one perturbation at [[qpt]] 0.0 0.25
 0.0 for a 29 atom slab of barium titanate, artificially terminated by a double
-TiO2 layer on each face, with a reasonable k-point sampling of the Brillouin zone.
+TiO<sub>2</sub> layer on each face, with a reasonable k-point sampling of the Brillouin zone.
 
 The symmetry of the system and perturbation will allow to decrease this
 sampling to one quarter of the Brillouin zone. E.g. with the k-point sampling
-ngkpt 4 4 1, there will be actually 4 k-points in the irreducible Brillouin
-zone for the Ground state calculations. For the DFPT case, only one symmetry
+[[ngkpt]] 4 4 1, there will be actually 4 k-points in the irreducible Brillouin
+zone for the Ground state calculations. For the DFPT case, only one (binary) symmetry
 will survive, so that, after the calculation of the frozen-wavefunction part
 (for which no symmetry is used), the self-consistent part will be done with 8
-k points in the corresponding irreducible Brillouin zone. With the sampling 8
-8 1, there will be 32 k points in the irreducible Brillouin zone for the DFPT
-case. There are 120 bands. Note that the value of [[ecut]] that is used in the
+k points in the corresponding irreducible Brillouin zone. Beyond 8 cores, the parallelisation
+will be done also on the bands. This will prove to be much more dependent
+on the computer architecture than the (low-communication) parallelism over k-points.
+
+With the sampling 8 8 1, there will be 32 k points in the irreducible Brillouin zone for the DFPT
+case. This will allow potentially to use efficiently a larger number of processors, provided the
+computer architecture and network is good enough.
+
+There are 116 occupied bands. For the ground state calculation, 4 additional conduction
+bands will be explicitly treated, which will allow better SCF stability thanks to [[iprcel]] 45.
+Note that the value of [[ecut]] that is used in the
 present tutorial is too low to obtain physical results (it should be around 40 Hartree).
+Also, only one atomic displacement is considered, so that the phonon frequencies
+delivered at the end of the run are meaningless.
 
 As in the previous case, a preparatory ground-state calculation is needed.
+We use the input variable [[autoparal]]=1 . It does not delivers the best repartition of
+processors among [[npkpt]], [[npband]] and [[npfft]], but achieves a decent repartition, usually within a factor of two.
+With 24 processors, it selects [[npkpt]]=4 (optimal), [[npband]]=3 and [[npfft]]=2, while [[npband]]=6 and [[npband]]=1 would do better.
+For information, the speeup going from 24 cores to 64 cores is 1.76, not quite the increase of number of processor (2.76).
+Anyhow, the topics of the tutorial is not the GS calculation.
 
 The input files are provided, in the directory *\$ABI_TESTS/tutoparal/Input*.
-The preparatory step is governed by *tdfpt_03.files* (and *tdfpt_03.in*). The real
-(=DFPT) test case is governed by *tdfpt_04.files* (and *tdfpt_04.in*). The
+The preparatory step is driven by *tdfpt_03.abi*. The real
+(=DFPT) test case is driven by *tdfpt_04.abi*. The
 reference output files are present in *\$ABI_TESTS/tutoparal/Refs*:
-*tdfpt_0324.out* and *tdfpt_0432.out*. The naming convention is such that the
+*tdfpt_03_MPI24.abo* and *tdfpt_04_MPI24.abo*. The naming convention is such that the
 number of cores used to run them is added after the name of the test: the
-*tdfpt_03.in* file was run with 24 cores, while the *tdfpt_04.in* was run with 32
-cores. The preparatory step took about 5 minutes, and the DFPT step took about
-5 minutes as well.
+*tdfpt_03.abi* files are run with 24 cores.
+The preparatory step takes about 3 minutes, and the DFPT step takes about
+3 minutes as well.
 
-{% dialog tests/tutoparal/Input/tdfpt_03.in tests/tutoparal/Input/tdfpt_04.in %}
+{% dialog tests/tutoparal/Input/tdfpt_03.abi tests/tutoparal/Input/tdfpt_04.abi %}
 
-You can run now these test cases. For tdfpt_03, you might
-need to change the [[npband]] value (presently 6), if you are not using 24
-processors. At variance, for tdfpt_04, no adaptation of the input file is
+You can run now these test cases. For tdfpt_03, with [[autoparal]]=1, 
+you will be able to run on different numbers of processors compatible with [[nkpt]]=4,
+[[nband]]=120 and [[ngfft]]=[30 30 192], detected by ABINIT. Alternatively, you might decide to explicitly 
+define [[npkpt]], [[npband]] and [[npfft]].
+At variance, for tdfpt_04, no adaptation of the input file is
 needed to be able to run on an arbitrary number of processors.
 To launch the ground-state computation, type:
 
-    mpirun -n 24 abinit < tdfpt_03.files > tdfpt_03.log &
+    mpirun -n 24 abinit tdfpt_03.abi > log &
 
 then copy the output of the ground-state calculation so that it can be used as
 the input of the DFPT calculation:
 
-    cp tdfpt_03.o_WFK tdfpt_04.i_WFK
-    cp tdfpt_03.o_WFK tdfpt_04.i_WFQ
+    mv tdfpt_03o_WFK.nc tdfpt_04i_WFK.nc
 
 and launch the calculation:
 
-    mpirun -n 24 abinit < tdfpt_04.files > tdfpt_04.log &
+    mpirun -n 24 abinit tdfpt_04.abi > log &
 
 Now, examine the obtained output file for test 04, especially the timing.
 
-In the reference file *\$ABI_TESTS/tutoparal/Refs/tdfpt_0432.out*,
-with 32 computing cores, the timing section delivers:
+In the reference file *\$ABI_TESTS/tutoparal/Refs/tdfpt_04_MPI24.abo*,
+with 24 computing cores, the timing section delivers:
+
+    - For major independent code sections, cpu and wall times (sec),
+    -  as well as % of the time and number of calls for node 0-
+    -<BEGIN_TIMER mpi_nprocs = 24, omp_nthreads = 1, mpi_rank = 0>
+    - cpu_time =          159.9, wall_time =          160.0
+    -
+    - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+    -                                                                  (-1=no count)
+    - projbd                        46.305   1.2     46.345   1.2          11520      -1.00        1.00       1.00
+    - nonlop(apply)                 42.180   1.1     42.183   1.1           5760      -1.00        1.00       1.00
+    - dfpt_vtorho:MPI               25.087   0.7     25.085   0.7             30      -1.00        1.00       1.00
+    - fourwf%(pot)                  22.435   0.6     22.436   0.6           6930      -1.00        1.00       1.00
+    - nonlop(forces)                 5.485   0.1      5.486   0.1           4563      -1.00        1.00       1.00
+    - fourwf%(G->r)                  4.445   0.1      4.446   0.1           2340      -1.00        1.00       1.00
+    - pspini                         2.311   0.1      2.311   0.1              1      -1.00        1.00       1.00
+
+    <...>
 
     - For major independent code sections, cpu and wall times (sec),
     - as well as % of the total time and number of calls
 
-    - routine                         cpu     %       wall     %      number of calls
+    -<BEGIN_TIMER mpi_nprocs = 24, omp_nthreads = 1, mpi_rank = world>
+    - cpu_time =        3826.4, wall_time =        3828.0
+    -
+    - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
     -                                                                  (-1=no count)
-    - projbd                      3046.599  34.0   3065.259  34.0         171639
-    - fourwf%(pot)                2545.342  28.4   2561.313  28.4         103098
-    - nonlop(apply)               1059.279  11.8   1066.034  11.8          85818
-    - fourwf%(G->r)                531.322   5.9    534.929   5.9          50112
-    - vtorho3:synchro              444.450   5.0    448.598   5.0            576
-    - nonlop(forces)               195.017   2.2    195.487   2.2         100800
-    - newkpt(excl. rwwf   )        179.142   2.0    179.185   2.0            -32
-    - vtowfk3(contrib)             137.486   1.5    137.878   1.5            -32
-    - pspini                        97.276   1.1     99.901   1.1             32
+    - projbd                      1238.539  32.4   1239.573  32.4         278400      -1.00        1.00       1.00
+    - nonlop(apply)               1012.783  26.5   1012.982  26.5         139200      -1.00        1.00       1.00
+    - fourwf%(pot)                 544.047  14.2    544.201  14.2         167040      -1.00        1.00       1.00
+    - dfpt_vtorho:MPI              450.196  11.8    450.170  11.8            720      -1.00        1.00       1.00
+    - nonlop(forces)               131.081   3.4    131.129   3.4         108576      -1.00        1.00       1.00
+    - fourwf%(G->r)                107.885   2.8    107.930   2.8          55680      -1.00        1.00       1.00
+    - pspini                        54.945   1.4     54.943   1.4             24      -1.00        1.00       1.00
 
     <...>
 
-    - 45   others                    0.000   0.0      0.000   0.0
+    - others (99)                  -98.669  -2.6    -99.848  -2.6             -1      -1.00        0.99       0.99
+    -<END_TIMER>
 
-    - subtotal                    8760.405  97.8   8811.874  97.8
+    - subtotal                    3569.873  93.3   3570.325  93.3                                  1.00       1.00
 
-You will notice that the sum of the major independent code sections is again
-very close to 100%. You might now explore the behaviour of the CPU time for
-different numbers of compute cores (consider values below and above 32
+You will notice that the run took about 160 seconds (wall clock time)..
+The sum of the major independent code sections is reasonably
+close to 100%. You might now explore the behaviour of the CPU time for
+different numbers of compute cores (consider values below and above 24
 processors). Some time-consuming routines will benefit from the parallelism, some other will not.
 
 The kpoint + band parallelism will efficiently work for many important sections
@@ -354,22 +414,39 @@ perturbation) times nband is 8*120=960. Of course, the total speed-up will
 saturate well below this value, as there are some non-parallelized sections of the code.
 
 In the above-mentioned list, the kpoint+band parallelism cannot be exploited
-(or is badly exploited) in several sections of the code : "vtorho3:synchro",
-about 5 percents of the total time of the run on 32 processors, "newkpt(excl.rwwf)",
-about 2 percents, vtowfk3(contrib), about 1.5 percent, "pspini", about
-1 percent. This amounts to about 10% of the total, and, according to Amdahl's
-law, the saturation will happen soon, with less than 100 processors.
+(or is badly exploited) in several sections of the code : "dfpt_vtorho:MPI",
+about 12 percents of the total time of the run on 24 processors, "pspini", about 1.4 percent. 
+This amounts to about 1/8 of the total.
+However, the scalability of the band parallelisation is rather poor, and effective saturation
+in this case already happens at 16 processor.
+
+A study of the speed-up brought by the combined k-point and band parallelism for this test case
+on a 2 AMD EPYC 7502 machine (2 CPUS, each with 32 cores)
+gives the following behaviour, between 1 and 40 cores:
+
+<div id="plotly_plot2" style="width:90%;height:450px;"></div>
+<script>
+$(function() {
+    Plotly.newPlot(document.getElementById('plotly_plot2'), 
+        [{ x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], name: 'Ideal'},
+         { x: [1, 2, 4, 6, 8, 12, 16, 24, 32, 40], y: [1, 1.97, 3.93, 3.86, 7.67, 7.53, 14.77, 16.44, 15.47, 14.37], name: 'Observed' }],
+        { title: "Parallel speed-up", 
+          xaxis: {title:'Number of cores'} }
+    );
+}); 
+</script>
+
+The additional band parallelism is very efficient when running with 16 cores, bringing 14.77 speed-up,
+while using only the k point parallelism, with 6 cores, gives 7.67 speed-up. However, the behaviour
+is disappointing beyond 16 cores, or even for a number of processors which is not a multiple of 8.
+
+Such a behaviour might be different on your machine.
 
 **3.2.** A better parallelism can be seen if the number of k-points is brought
-back to a converged value (8x8x1).
+back to a converged value (8x8x1). Again, 
 Try this if you have more than 100 processors at hand.
 
-Set in your input file *tdfpt_03.in*:
-
-       ngkpt 8 8 1    ! This should replace ngkpt 4 4 1
-       npkpt 16       ! This should replace npkpt 4
-
-Also, set in *tdfpt_04.in*:
+Set in your input files *tdfpt_03.abi* and *tdfpt_04.abo* :
 
        ngkpt 8 8 1    ! This should replace ngkpt 4 4 1
 
@@ -377,14 +454,15 @@ and launch again the preliminary step, then the DFPT step. Then, you can
 practice the DFPT calculation by varying the number of computing cores. For
 the latter, you could even consider varying the number of self-consistent
 iterations to see the initialisation effects (small value of nstep), or target
-a value giving converged results (nstep 50 instead of nstep 18). The energy
-cut-off might also be increased (e.g. ecut 40 Hartree gives a much better
+a value giving converged results ([[nstep]] 50 instead of [[nstep]] 18). The energy
+cut-off might also be increased (e.g. [[ecut]] 40 Hartree gives a much better
 value). Indeed, with a large value of k points, and large value of nstep, you
-should be able to obtain a speed-up of more than one hundred for the DFPT
+might be able to obtain a speed-up of more than one hundred for the DFPT
 calculation, when compared to a sequential run (see below). Keep track of the
 time for each computing core number, to observe the scaling.
 
-As a typical observation, the Wall clock timing decreases from
+On a machine with a good communication network, the following results were observed in 2011.
+The Wall clock timing decreases from
 
     - Proc.   0 individual time (sec): cpu=       2977.3  wall=       2977.3
 
@@ -400,10 +478,32 @@ number of computing cores (also, the efficiency of the calculation).
 ![Schema 1](paral_dfpt_assets/Speedup.jpeg)
 
 Beyond 300 computing cores, the sequential parts of the code start to dominate.
-With more realistic computing parameters (ecut 40), they dominate only beyond 600 processors.
+With more realistic computing parameters ([[ecut]] 40), they dominate only beyond 600 processors.
 
-This last example is the end of the present tutorial. You have been explained
-the basics of the current implementation of the parallelism for the DFPT part
-of ABINIT, then you have explored two test cases: one for a small cell
+However, on the same (recent, but with slow connection beyond 32 cores) computer than for the [[ngkpt]] 4 4 1 case,
+the saturation sets in already beyond 16 cores, with the following behaviour (the reference is taken with respect to the timing at 4 processors):
+
+<div id="plotly_plot3" style="width:90%;height:450px;"></div>
+<script>
+$(function() {
+    Plotly.newPlot(document.getElementById('plotly_plot3'),
+        [{ x: [1,4, 8, 12, 16, 24, 32, 40], y: [1, 4, 8, 12, 16, 24, 32, 40], name: 'Ideal'},
+         { x: [4, 8, 12, 16, 24, 32, 40], y: [4, 7.86, 10.46, 14.92, 13.82, 16.15, 15.27], name: 'Observed' }],
+        { title: "Parallel speed-up",
+          xaxis: {title:'Number of cores'} }
+    );
+});
+</script>
+
+Thus, it is very important that you gain some understanding of the scaling of your typical runs
+for your particular computer, and that you know the parameters (especially [[nkpt]]) of your calculations. 
+Up to 4 or 8 cores, the ABINIT scaling will usually be very good, if
+k-point parallelism is possible. In the range between 10 and 100 cores, the speed-up might still be good,
+but this will depend on details.
+
+This last example is the end of the present tutorial. 
+The basics of the current implementation of the parallelism for the DFPT part of ABINIT have been explained,
+then you have explored two test cases: one for a small cell
 materials, with lots of k points, and another one, medium-size, in which the k
-point and band parallelism can be used efficiently even for more than one hundred computing cores.
+point and band parallelism must be used. It might reveal efficient, but this will depend on the detail of your calculation
+and your computer architecture.
