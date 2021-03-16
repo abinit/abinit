@@ -1,70 +1,63 @@
+{#-
+  This file was automatically generated - do not edit
+-#}
 <header class="md-header" data-md-component="header">
-  <nav class="md-header-nav md-grid">
-    <div class="md-flex">
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="https://www.abinit.org" title="{{ config.site_name }}" class="md-header-nav__button md-logo">
-          {% if config.theme.logo.icon %}
-            <i class="md-icon">{{ config.theme.logo.icon }}</i>
-          {% else %}
-            <img src="{{ base_url }}/{{ config.theme.logo }}" width="48" height="48">
-          {% endif %}
-        </a>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
-      </div>
-      <div class="md-flex__cell md-flex__cell--stretch">
-        <span class="md-flex__ellipsis md-header-nav__title">
-          {% block site_name %}
-            {% if page %}
-              {% for parent in page.ancestors %}
-                <span class="md-header-nav__parent">
-                  {{ parent.title }}
-                </span>
-              {% endfor %}
+  <nav class="md-header__inner md-grid" aria-label="{{ lang.t('header.title') }}">
+    <a href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}" title="{{ config.site_name | e }}" class="md-header__button md-logo" aria-label="{{ config.site_name }}" data-md-component="logo">
+      {% include "partials/logo.html" %}
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      {% include ".icons/material/menu" ~ ".svg" %}
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            {{ config.site_name }}
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            {% if page and page.meta and page.meta.title %}
+              {{ page.meta.title }}
+            {% else %}
+              {{ page.title }}
             {% endif %}
-            {{ page.title | default(config.site_name, true) }}
-          {% endblock %}
-        </span>
+          </span>
+        </div>
       </div>
-      <!-- Guided Tour with introjs. Add glow effect to button only if homepage -->
-      <div class="md-flex__cell md-flex__cell--shrink">
-          {% set glow = ' ' %} 
-          {% if page and page.is_homepage %}
-            {% set glow = 'glow' %}
-          {% endif %}
-          <a href="#" class="btn btn-xs btn-default {{glow}}" id="guided-tour-button" title="Guided Tour" 
-              onclick="abidocs_guidedtour()">
-           <span class="fa fa-info-circle"></span></a>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        {% block search_box %}
-          {% if "search" in config["plugins"] %}
-            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
-            {% include "partials/search.html" %}
-          {% endif %}
-        {% endblock %}
-      </div>
-      {% if config.repo_url %}
-        <div class="md-flex__cell md-flex__cell--shrink">
-          <div class="md-header-nav__source">
-            {% include "partials/source.html" %}
+    </div>
+    <div class="md-header__options">
+      {% if config.extra.alternate %}
+        <div class="md-select">
+          {% set icon = config.theme.icon.alternate or "material/translate" %}
+          <span class="md-header__button md-icon">
+            {% include ".icons/" ~ icon ~ ".svg" %}
+          </span>
+          <div class="md-select__inner">
+            <ul class="md-select__list">
+              {% for alt in config.extra.alternate %}
+                <li class="md-select__item">
+                  <a href="{{ alt.link | url }}" class="md-select__link">
+                    {{ alt.name }}
+                  </a>
+                </li>
+                {% endfor %}
+            </ul>
           </div>
         </div>
       {% endif %}
-      <div class="md-flex__cell md-flex__cell--shrink" id="previous_published_versions">
-        <div class="dropdown">
-          <button class="btn btn-basic btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
-            {{ config.extra.version }}
-          <span class="caret"></span></button>
-          <ul class="dropdown-menu">
-            {% for version in config.extra.previous_published_versions %}
-            <li><a href="#">{{version}}</a></li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-
     </div>
+    {% if "search" in config["plugins"] %}
+      <label class="md-header__button md-icon" for="__search">
+        {% include ".icons/material/magnify.svg" %}
+      </label>
+      {% include "partials/search.html" %}
+    {% endif %}
+    {% if config.repo_url %}
+      <div class="md-header__source">
+        {% include "partials/source.html" %}
+      </div>
+    {% endif %}
   </nav>
 </header>

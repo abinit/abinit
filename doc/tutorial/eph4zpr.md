@@ -623,8 +623,8 @@ with the input file given by:
 At this point, it is worth commenting about the use of [[nbdbuf]].
 As mentioned in the documentation, **the highest energy states require more iterations to convergence**.
 To avoid wasting precious computing time, we use a buffer that is ~10% of [[nband]].
-This tricks significantly reduces the wall-time as the NSCF calculation completes when
-only the first [[nband]] - [[nbdbuf]] states are converged within [[tolwfr]].
+This trick significantly reduces the wall-time as the NSCF calculation completes
+only when the first [[nband]] - [[nbdbuf]] states are converged within [[tolwfr]].
 Obviously, one should not use the last [[nbdbuf]] states in the subsequent EPH calculation.
 The same trick is highly recommended when computing WFK files for $GW$ calculations.
 
@@ -733,9 +733,10 @@ First of all, we find a section that summarizes the most important parameters:
     are activated by default in v9.
 
 Then we find another section related to MPI parallelism.
-In this case we are running in sequential but the output will change if we run in paralle
+In this case we are running in sequential but the output will change if we run in parallel
 (see also [[eph_np_pqbks]]).
-The final message informs the user that the EPH code will either read the qpts from file (if the DVDB contains all of them, in case
+The final message informs the user that the EPH code will either read the qpts from file 
+(if the DVDB contains all of them, in case
 [[eph_ngqpt_fine]] is not defined in the input) or interpolate the scattering potentials
 from [[ddb_ngqpt]] to [[eph_ngqpt_fine]].
 
@@ -804,10 +805,10 @@ teph4zpr_4o_PHDOS.nc    teph4zpr_4o_PHBST.nc    teph4zpr_4o_SIGEPH.nc
 where:
 
 - EBANDS.agr --> Electron bands in |xmgrace| format. See also [[prtebands]]
-- PHBST.agr --> Phonon bands in |xmgrace| format. See also [[prtphbands]]
-                [[ph_ndivsm]], [[ph_nqpath]], and [[ph_qpath]].
-- PHDOS.nc  --> Phonon DOS in netcdf format (see [[prtphdos]] is given by [[ph_ngqpt]]).
-- PHPBST.nc  --> Phonon band structure in netcdf format
+- PHBST.agr  --> Phonon bands in |xmgrace| format. See also [[prtphbands]]
+                 [[ph_ndivsm]], [[ph_nqpath]], and [[ph_qpath]].
+- PHDOS.nc   --> Phonon DOS in netcdf format (see [[prtphdos]] is given by [[ph_ngqpt]]).
+- PHBST.nc   --> Phonon band structure in netcdf format
 - SIGEPH.nc  --> Netcdf file with $\Sigma^{\text{e-ph}}$ results.
 
 All the QP results are stored in the **SIGPEPH.nc** netcdf file for all $\kk$-points, spins and temperatures.
@@ -872,9 +873,9 @@ In our calculation, the Z factor for the VBM is 0.644 while for the CBM we obtai
 On physical grounds, these values are reasonable as Z corresponds to the area under the QP peak
 in the spectral function and values in [~0.7, 1] indicates a well-defined QP excitations.
 -->
-These values are reasonable, still it's not so uncommon to obtain unphysical Z factors in e-ph calculations i.e. values > 1,
-especially for states far from the band edge as the e-ph self-energy has a lot of structure in frequency-space
-and the linearized QP approach is not always justified.
+These values are reasonable, still it's not so uncommon to obtain **unphysical Z factors** in e-ph calculations 
+i.e. values > 1, especially for states far from the band edge as the e-ph self-energy has a lot of structure 
+in frequency-space and the linearized QP approach is not always justified.
 For this reason, in the rest of the tutorial, **we will be focusing on the analysis of the OTMS results**.
 
 !!! important

@@ -13,7 +13,7 @@ Then we discuss how to run isotropic $T_c$-calculations and how to perform typic
 for MgB$_2$, a well-known phonon-mediated superconductor with $T_c$ = 39 K.
 For a more complete theoretical introduction, see [[cite:Giustino2017]] and references therein.
 
-It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
+It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
 and that he/she is familiar with the calculation of ground state and vibrational properties **in metals**.
 The user should have read the [fourth lesson on Al](base4) as well
 as the [introduction page for the EPH code](eph_intro) before running these examples.
@@ -420,7 +420,7 @@ Snince MgB$_2$ is formally **isoelectronic to graphite**,
 its band dispersion is expected to show some similarity to that
 of graphite and graphite intercalation compounds.
 
-![](eph4isotc_assets/MgB2_structure.png)
+![](../eph4isotc_assets/MgB2_structure.png)
 
 Now use the |abiopen| script to plot the electronic bands stored in the GSR file produced
 by the NSCF calculation (the second task of the first Work i.e. *w0/t1*):

@@ -14,7 +14,7 @@ edit_uri: edit/master/doc/
 use_directory_urls: True
 #use_directory_urls: False
 
-pages:
+pages:  # TODO Should be replaced by nav but then the search plugin does not work (bug?)
 #- Quick Start:
 #- Home: index.md
 - User Guide:
@@ -302,25 +302,35 @@ theme:
     name: material
     custom_dir: abinit_theme
     logo: images/logo-abinit-2015.png
+    #icon: 
+    #  logo: images/logo-abinit-2015.png
     favicon: images/favicon.ico
     palette:
         primary: deep orange
         accent: deep orange
-    feature:
-        tabs: true
+    features:
+      - navigation.tabs
+      #- navigation.tabs.sticky  # Nice but for insiders only
+      #- toc.integrate
 
 plugins:
     - abimkdocs
-    #- search    # Deactivated
+    - search:
+          separator: '[\s\-\.]+'
+          lang:
+            - en
 
 extra_css:
     - css/extra.css
     - css/gallery.css
     - css/my_codehilite.css
+    #- extra_javascript/jquery-ui-1.12.1.custom/jquery-ui.min.css
 
 extra_javascript:
-    - extra_javascript/jquery.dialogextend.min.js
+    #- extra_javascript/jquery-ui-1.12.1.custom/external/jquery/jquery.js
+    #- extra_javascript/jquery-ui-1.12.1.custom/jquery-ui.min.js
     - extra_javascript/abidocs.js
+
 
 copyright: Copyright &copy; 2020-2021 The Abinit Group
 
@@ -331,21 +341,21 @@ extra:
     version: 9.4.1
     previous_published_versions: [] #8.2.0
     social:
-        - type: github-alt
+        - icon: fontawesome/brands/github
           link: https://github.com/abinit/abinit
-        - type: twitter
-          link: https://twitter.com/hashtag/abinit
-        - type: facebook
-          link: http://www.facebook.com/abinit.org
-        - type: youtube
+        - icon: fontawesome/brands/youtube
           link: https://www.youtube.com/watch?v=gcbfb_Mteo4
+        - icon: fontawesome/brands/facebook
+          link: http://www.facebook.com/abinit.org
+        - icon: fontawesome/brands/twitter
+          link: https://twitter.com/hashtag/abinit
     # Dictionary with aliases mapping token --> value
     # |token| will be replaced by value by the Markdown preprocessor
     # NB: white spaces in token are not allowed, `token` is ignored
     abimkdocs_aliases:
         # Special macros:
         today:  'Expands to datetime.date.today().strftime("%B %d, %Y")'
-        # Links to doc pages (AbiPy script)
+        # Links to doc pages (AbiPy scripts)
         AbiPy: "[AbiPy](https://github.com/abinit/abipy)"
         abistruct: "[abistruct](http://abinit.github.io/abipy/scripts/abistruct.html)"
         abiopen: "[abiopen](http://abinit.github.io/abipy/scripts/abiopen.html)"
@@ -400,6 +410,6 @@ extra:
         pyprocar: "[pyprocar](https://romerogroup.github.io/pyprocar/)"
         fermisurfer: "[fermisurfer](http://fermisurfer.osdn.jp/)"
         #netcdf: https://www.unidata.ucar.edu/software/netcdf/docs/faq.html#whatisit
-        #YAML: https://en.wikipedia.org/wiki/YAML
-        #JSON: https://en.wikipedia.org/wiki/JSON
+        YAML: "[Yaml](https://en.wikipedia.org/wiki/YAML)"
+        JSON: "[JSON](https://en.wikipedia.org/wiki/JSON)"
         aTDEP: '<span style="font-variant:small-caps;">a</span>-TDEP'

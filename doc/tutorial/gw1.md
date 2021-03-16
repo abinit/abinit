@@ -23,7 +23,7 @@ the GW part of ABINIT, by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic tutorials of ABINIT,
 see the [[help:index|tutorial home page]]
-After this first tutorial on GW, you should read the [second GW tutorial](gw2).
+After this first tutorial on GW, you should read the [second GW tutorial](/tutorial/gw2).
 
 This tutorial should take about 2 hours.
 
@@ -34,7 +34,7 @@ This tutorial should take about 2 hours.
 *Before beginning, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_gw1?*
 
-At the end of [tutorial 3](base3), we computed the KS band
+At the end of [tutorial 3](/tutorial/base3), we computed the KS band
 structure of silicon. In this approximation, the band dispersion as well as
 the band widths are reasonable but the band gaps are qualitatively wrong.
 Now we will compute the band gaps much more accurately, using the so-called
@@ -235,13 +235,16 @@ the quasiparticle energies will be computed:
 ```
 
 [[nkptgw]] defines the number of **k**-points for which the GW corrections will be
-computed. The **k**-point reduced coordinates are specified in [[kptgw]].
-They **must belong** to the k-mesh used to generate the WFK file. Hence
-if you wish the GW correction in a particular **k**-point, you should choose a
-grid containing it. Usually this is done by taking the **k**-point grid where the
-convergence is achieved and shifting it such as at least one k-point is placed
-on the wished position in the Brillouin zone. [[bdgw]] gives the
+computed. The **k**-point reduced coordinates are specified in [[kptgw]] while [[bdgw]] gives the
 minimum/maximum band whose energies are calculated for each selected **k**-point.
+
+!!! important
+
+    These k-points **must belong** to the k-mesh used to generate the WFK file. Hence
+    if you wish the GW correction in a particular **k**-point, you should choose a
+    grid containing it. Usually this is done by taking the **k**-point grid where the
+    convergence is achieved and shifting it such as at least one k-point is placed
+    on the wished position in the Brillouin zone. 
 
 There is an additional parameter, called [[zcut]], (not studied here) related to the self-energy
 computation. It is meant to avoid some divergences that might occur in the

@@ -7,7 +7,6 @@ For the different between Absolute, Relative, and Root-relative URLs see:
 
     <http://ifyoucodeittheywill.com/2009/03/absolute-relative-and-root-relative-urls/>
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
 
 import sys
 import os
@@ -209,6 +208,7 @@ class MyEntry(Entry):
 
 _WEBSITE = None
 
+
 class Website(object):
     """
     This object is a singleton. It stores all the information required to generate the HTML documentation
@@ -239,7 +239,7 @@ class Website(object):
         """Return Website instance. Assume object already initialized with build_website."""
         global _WEBSITE
         if _WEBSITE is None:
-            raise RuntimeError("website must be constructuted by calling `Website.build`")
+            raise RuntimeError("website must be constructed by calling `Website.build`")
         return _WEBSITE
 
     def __init__(self, root, deploy, verbose=0):
@@ -828,7 +828,9 @@ The bibtex file is available [here](../abiref.bib).
             return md_files
 
         pages_in_toolbar = []
-        for entry in self.mkdocs_config["pages"]:
+        entries = self.mkdocs_config.get("pages")
+        if entries is None: entries = self.mkdocs_config.get("nav") # Old mkdocs syntax
+        for entry in entries:
             pages_in_toolbar.extend(find_mds(entry))
         #for p in pages_in_toolbar: print(p)
 
@@ -1331,10 +1333,13 @@ The bibtex file is available [here](../abiref.bib).
         else:
             if not page_rpath.startswith("/"): page_rpath = "/" + page_rpath
             page_rpath = os.path.dirname(page_rpath.replace(".md", ""))
-            url = os.path.relpath(url, page_rpath)
+            # Hacking previous implementation to make it work with new mkdocs (?)
+            #url = os.path.relpath(url, page_rpath)
             if end: url = "%s#%s" % (url, end)
+            #print("url", url)
 
-        if self.verbose: print("token", token, "page_rpath", page_rpath, "url", url)
+        #if self.verbose:
+        #print("token", token, "page_rpath", page_rpath, "url", url)
         a.set('href', url.strip())
         if target: a.set('target', target)
         return a
@@ -1612,7 +1617,8 @@ class MarkdownPage(Page):
         self.meta = {}
         with io.open(self.path, "rt", encoding="utf-8") as fh:
            string = fh.read()
-        lines = string.split("\n")
+
+        #lines = string.split("\n")
         #""" Parse Meta-Data and store in Markdown.Meta. """
         # https://github.com/Python-Markdown/markdown/blob/master/markdown/extensions/meta.py
         #self.meta = self._get_meta(string.split("\n"))

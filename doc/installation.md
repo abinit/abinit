@@ -5,21 +5,13 @@ ABINIT package and the compilation of the executables.
 It also discusses how to test whether the compilation was successful by running the internal test suite.
 Finally, it gives related complements for the developers.
 
-<!--
-See a recent version of the [new user's guide](..),
-for an introduction to the abinit package.
-See a recent version of the [[help:abinit]] file for learning how to use the code.
-Both of them can be found either on the Web, or in the doc subdirectory of the package.
--->
-
 Any comment or suggestion to improve the procedure or this page is welcome!
 Simply contact the ABINIT group on the [forum](https://forum.abinit.org).
 
 ## Overview
 
 For the vast majority of people willing to use ABINIT (simple users -not developers-, with Unix/Linux or MacOS
-working in the terminal),
-the installation/compilation steps are:
+working in the terminal), the installation/compilation steps are:
 
   1. **Prerequisite**: you need a Fortran compiler, a C compiler, the Python interpreter (>= 2.7.5),
      some mandatory libraries (**BLAS/LAPACK**, **FFT**, **NetCDF4**, **HDF5** and **LibXC**),
@@ -219,8 +211,7 @@ the configure script so you do not have to care anymore about this file after th
 On the other hand, if you want to play with several configurations, 
 you can place the hostname.ac9 file in the ~abinit directory, where such a
 hostname.ac9 file will be also seen by the build system (and preferred over the
-one located in ~/.abinit/build) or inside your build directory (like
-~abinit/tmp). 
+one located in ~/.abinit/build) or inside your build directory (like ~abinit/tmp). 
 As mentioned above, you might even input the options contained in the hostname.ac9 file
 directly on the command line.
 
@@ -285,7 +276,7 @@ appropriate library to be installed in order to work properly.
 
 For further information on these internal tests, see the ~abinit/tests/built-in/README file.
 
-You might now read the [new user's guide](..), in
+You might now read the [new user's guide](/doc/guide/new_user), in
 order to learn how to use the code, and then follow the four basic
 tutorials, see the [entry page for the tutorials](tutorial/index.md).
 This is useful if you consider that the installation has been successful. Or
@@ -404,8 +395,7 @@ in the first column of the output files, so a typical error message
 By contrast, it will identify the floating numbers and ignore their
 differences if they are within some prescribed tolerance, or if the difference
 is not relevant. For example, it is able to ignore the differences in timings.
-If everything goes fine for a test, fldiff should identify only the
-differences in:
+If everything goes fine for a test, fldiff should identify only the differences in:
 
   * the dates of execution (possibly);
   * the version numbers (possibly);
@@ -512,12 +502,12 @@ If it is only very occasional, you might as well rely on the [ABINIT Github Web 
 It is strongly advised to subscribe to the [ABINIT forum](https://forum.abinit.org/)
 to receive the latest information concerning new developments.
 
-After having installed git, and obtained a gitlab (or github) branch on the ABINIT internal server, 
+After having installed git, and obtained a gitlab branch on the ABINIT internal server, 
 create an autonomous copy of the source code, on top of which you have to make your development.
 This is explained in the ABINIT wiki
-[git(lab): ABINIT specificities](https://wiki.abinit.org/doku.php?id=developers:git:specificities_git_abinit)
+[gitlab: ABINIT specificities](https://wiki.abinit.org/doku.php?id=developers:git:specificities_git_abinit)
 
-For your gitlab branches on the internal repository, you will have the
+For your gitlab branches on the internal server, you will have the
 permission not only to clone/fetch/pull, but also to commit/push your
 modifications. You might alternatively download other branches of the
 archives, but you will not be able to commit to these branches. So, do not
@@ -540,8 +530,8 @@ At this stage, before being able to compile, cd to the newly created abinit dire
 ```
 
 This command initializes a whole set of files and scripts, needed for the
-autotools, as well as for the global work on ABINIT sources. This
-initialization might take up to two minutes.
+autotools, as well as for the global work on ABINIT sources. 
+This initialization might take up to two minutes.
 After this initialisation, you can proceed with the configure/make procedure
 as described in section 2.
 

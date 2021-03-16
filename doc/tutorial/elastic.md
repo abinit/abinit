@@ -460,7 +460,7 @@ can be analyzed by anaddb. One particular usage would be to combine the DDB
 file produced by the GS run, which contains first-derivative information such
 as stresses and forces with the RF DDB. It is anticipated that anaddb in a
 future release will implement the finite-stress corrections to the elastic
-tensor discussed in [notes by A. R. Oganov](../../theory/documents/elasticity-oganov.pdf) .
+tensor discussed in [notes by A. R. Oganov](/theory/documents/elasticity-oganov.pdf) .
 
 Now would be a good time to edit *telast_3.abi* and observe that it is very
 simple, consisting of nothing more than the four variables listed above set to
@@ -640,7 +640,7 @@ The good agreement we found from this simple numerical differentiation
 required that we had accurately relaxed the lattice so that the stress of the
 unstrained structure was very small. Similar numerical-derivative comparisons
 for systems with finite stress are more complicated, as discussed in
-[notes by A. R. Oganov](../../theory/documents/elasticity-oganov.pdf).
+[notes by A. R. Oganov](/theory/documents/elasticity-oganov.pdf).
 Numerical-derivative comparisons for the relaxed-ion results are extremely challenging
 since they require relaxing atomic forces to exceedingly small limits.
 

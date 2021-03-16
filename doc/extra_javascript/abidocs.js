@@ -2,11 +2,11 @@
 $(function() {
 
     // Enable all bootstrap popovers and tooltips in the document
-    $('[data-toggle="popover"]').popover(); 
-    $('[data-toggle="tooltip"]').tooltip();
+    //$('[data-toggle="popover"]').popover(); 
+    //$('[data-toggle="tooltip"]').tooltip();
 
     // Make bootstrap modal draggable and resizable with jquery-ui
-    $('.modal-dialog').draggable().resizable();
+    //$('.modal-dialog').draggable().resizable();
 
     // This for the floating action button: https://bootsnipp.com/snippets/featured/inbox-by-gmail
     $('.fab').hover(function () {
@@ -142,6 +142,7 @@ function defaultClick(first) {
 
 function abidocs_jqueryui_dialog(dialog_id, btn_id) { 
 
+    //return;
     var e = $(dialog_id);
     e.dialog({
         width: 500,
@@ -170,17 +171,17 @@ function abidocs_jqueryui_dialog(dialog_id, btn_id) {
       }
    });
 
-   e.dialogExtend({
-       "maximizable": false, "minimizable": true, "collapsable": true, "minimizeLocation": "left",
-       "dblclick": "collapse",
-       "icons": {
-            "close": "ui-icon-close",
-            //"maximize": "ui-icon-extlink",
-            "minimize": "ui-icon-minus",
-            "restore": "ui-icon-newwin",
-            "collapse": "ui-icon-triangle-1-s"
-       }
-   });
+   //e.dialogExtend({
+   //    "maximizable": false, "minimizable": true, "collapsable": true, "minimizeLocation": "left",
+   //    "dblclick": "collapse",
+   //    "icons": {
+   //         "close": "ui-icon-close",
+   //         //"maximize": "ui-icon-extlink",
+   //         "minimize": "ui-icon-minus",
+   //         "restore": "ui-icon-newwin",
+   //         "collapse": "ui-icon-triangle-1-s"
+   //    }
+   //});
 
    $(btn_id).click(function() { e.removeAttr('hidden').dialog('open'); });
 }
