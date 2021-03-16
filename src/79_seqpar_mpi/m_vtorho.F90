@@ -970,11 +970,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        !blanchet WORK ON PLANEWAVES
        if(associated(hightemp)) then
-         if(hightemp%version==1.or.hightemp%version==3) then
+         if(hightemp%version==1.or.hightemp%version==2) then
            call hightemp%compute_pw_avg_std(cg,eig_k,ek_k,dtfil%filnam_ds(4),&
 &           gprimd,icg,ikpt,istwf_k,kg_k,kinpw,dtset%kptns,mcg,mpi_enreg,nband_k,&
 &           dtset%nkpt,npw_k,my_nspinor,dtset%wtk(ikpt))
-         else if((hightemp%version==2).and.(hightemp%prt_cg)) then
+         else if((hightemp%version==3).and.(hightemp%prt_cg)) then
            call hightemp_prt_cg(cg,ikpt,eig_k,ek_k,dtfil%filnam_ds(4),&
 &           kg_k,dtset%kptns,mcg,mpi_enreg,dtset%nband,&
 &           dtset%nkpt,npw_k,rprimd)
@@ -1234,10 +1234,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
      if(associated(hightemp)) then
        hightemp%vtrial=vtrial
-       if(hightemp%version==1.or.hightemp%version==2) then
+       if(hightemp%version==2.or.hightemp%version==3) then
          call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,dtset%nband,&
 &         dtset%nkpt,dtset%nsppol,dtset%wtk)
-       else if(hightemp%version==3) then
+       else if(hightemp%version==1) then
          hightemp%e_shiftfactor=sum(vtrial)/(nfftf*dtset%nspden)
        end if
        ! if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra

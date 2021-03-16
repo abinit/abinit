@@ -227,7 +227,7 @@ contains
     ! *********************************************************************
 
     ! U_{HEG_0}
-    if(this%version==1) then
+    if(this%version==2) then
       this%e_shiftfactor=zero
       band_index=0
       do isppol=1,nsppol
@@ -243,7 +243,7 @@ contains
       this%ebcut=hightemp_e_heg(dble(this%bcut),this%ucvol)+this%e_shiftfactor
     end if
     ! U_{K_0}
-    if(this%version==2) then
+    if(this%version==3) then
       this%e_shiftfactor=zero
       this%ebcut=0
       band_index=0
@@ -295,11 +295,11 @@ contains
     real(dp) :: factor,gamma,xcut
     ! *********************************************************************
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(1.5)
-    if(this%version==1.or.this%version==3) then
+    if(this%version==1.or.this%version==2) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
-    else if(this%version==2) then
+    else if(this%version==3) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       xcut=(this%ebcut-this%e_shiftfactor)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
@@ -355,11 +355,11 @@ contains
     ! *********************************************************************
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
     this%e_kin_freeel=zero
-    if(this%version==1.or.this%version==3) then
+    if(this%version==1.or.this%version==2) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
-    else if(this%version==2) then
+    else if(this%version==3) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       xcut=(this%ebcut-this%e_shiftfactor)/tsmear
       this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
@@ -423,7 +423,7 @@ contains
 
     ! *********************************************************************
     this%ent_freeel=zero
-    if(this%version==1.or.this%version==3) then
+    if(this%version==1.or.this%version==2) then
       ! ******* OLD WAY TO COMPUTE ENTROPY *******
       ! ! Dynamic array find size
       ! ix=dble(this%bcut)
@@ -481,7 +481,7 @@ contains
         simpson(one,valuesent)
       end if
       ABI_DEALLOCATE(valuesent)
-    else if(this%version==2) then
+    else if(this%version==3) then
       ! ******* OLD WAY TO COMPUTE ENTROPY *******
       ! ! Dynamic array find size
       ! ix=this%ebcut

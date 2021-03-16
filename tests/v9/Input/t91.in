@@ -1,8 +1,9 @@
 # Al at high temperature using extended FPMD model
-ndtset 2
+ndtset 3
 
 use_hightemp1 1
 use_hightemp2 2
+use_hightemp3 3
 ht_nbcut 10
 
 nband 50
@@ -27,7 +28,7 @@ pawecutdg 10.0
 chksymbreak 0
 ngkpt 2 2 2
 nstep 150
-tolvrs 1.0d-10
+toldfe 1.0d-6
 tolsym 1.0d-8
 
 # Pseudopotential file
@@ -39,7 +40,7 @@ pseudos = "Al.LDA-PW-paw.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t91.out, tolnlines = 55, tolabs = 1.0E-3, tolrel = 1.0E-3;
+#%%   t91.out, tolnlines = 55, tolabs = 1.0E-4, tolrel = 1.0E-4;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
