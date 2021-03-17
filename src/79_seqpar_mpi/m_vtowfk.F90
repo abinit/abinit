@@ -459,9 +459,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    if( .not. wfopta10 == 1 .and. .not. newlobpcg ) then
      call timab(585,1,tsec) !"vtowfk(subdiago)"
      if (enable_cgwf_paw) then
-       call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
-&       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
-&       subham,subovl,0,0,mpi_enreg%me_g0)
+       call subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
+&       mcg,nband_k,npw_k,my_nspinor,dtset%paral_kgb,subham)
+!       call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
+!&       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
+!&       subham,subovl,0,0,mpi_enreg%me_g0)
        call timab(585,2,tsec)
        call timab(578,1,tsec)
        call cprj_rotate(cprj_cwavef_bands,evec,&

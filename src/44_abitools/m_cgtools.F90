@@ -115,6 +115,7 @@ MODULE m_cgtools
  public :: fxphas_seq               ! Fix phase of all bands. Keep normalization but maximize real part
  public :: overlap_g                ! Compute the scalar product between WF at two different k-points
  public :: subdiago                 ! Diagonalizes the Hamiltonian in the eigenfunction subspace
+ public :: subdiago_low_memory      ! Diagonalizes the Hamiltonian in the eigenfunction subspace
  public :: pw_orthon                ! Normalize nvec complex vectors each of length nelem and then
                                     ! orthogonalize by modified Gram-Schmidt.
  public :: pw_orthon_paw            ! Normalize nvec complex vectors each of length nelem and then
@@ -4605,6 +4606,224 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
  end function gscindex_subd
 
 end subroutine subdiago
+!!***
+
+!!****f* ABINIT/subdiago_low_memory
+!! NAME
+!! subdiago_low_memory
+!!
+!! FUNCTION
+!! This routine diagonalizes the Hamiltonian in the eigenfunction subspace
+!!
+!! INPUTS
+!!  icg=shift to be applied on the location of data in the array cg
+!!  igsc=shift to be applied on the location of data in the array gsc
+!!  istwf_k=input parameter that describes the storage of wfs
+!!  mcg=second dimension of the cg array
+!!  mgsc=second dimension of the gsc array
+!!  nband_k=number of bands at this k point for that spin polarization
+!!  npw_k=number of plane waves at this k point
+!!  nspinor=number of spinorial components of the wavefunctions (on current proc)
+!!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
+!!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
+!!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
+!!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  me_g0=1 if this processors has G=0, 0 otherwise.
+!!
+!! OUTPUT
+!!  eig_k(nband_k)=array for holding eigenvalues (hartree)
+!!  evec(2*nband_k,nband_k)=array for holding eigenvectors
+!!
+!! SIDE EFFECTS
+!!  cg(2,mcg)=wavefunctions
+!!  gsc(2,mgsc)=<g|S|c> matrix elements (S=overlap)
+!!
+!! PARENTS
+!!      rayleigh_ritz,vtowfk
+!!
+!! CHILDREN
+!!      abi_xcopy,abi_xgemm,abi_xhpev,abi_xhpgv,cg_normev,hermit
+!!
+!! SOURCE
+
+subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
+&                   mcg,nband_k,npw_k,nspinor,paral_kgb,&
+&                   subham)
+
+ use m_linalg_interfaces
+ use m_abi_linalg
+
+!Arguments ------------------------------------
+ integer,intent(in) :: icg,istwf_k,mcg,nband_k,npw_k
+ integer,intent(in) :: nspinor,paral_kgb
+ real(dp),intent(inout) :: subham(nband_k*(nband_k+1))
+ real(dp),intent(out) :: eig_k(nband_k),evec(2*nband_k,nband_k)
+ real(dp),intent(inout),target :: cg(2,mcg)
+
+!Local variables-------------------------------
+ integer :: ig,igfirst,block_size,iblock,nblock,block_size_tmp,wfsize
+ integer :: iband,ii,ierr,vectsize,use_slk
+ character(len=500) :: message
+ ! real(dp) :: tsec(2)
+ real(dp),allocatable :: evec_tmp(:,:),subham_tmp(:)
+ real(dp),allocatable :: work(:,:)
+ real(dp),allocatable :: blockvectora(:,:),blockvectorb(:,:),blockvectorc(:,:)
+ real(dp),pointer :: cg_block(:,:)
+
+! *********************************************************************
+
+ if (paral_kgb<0) then
+   MSG_BUG('paral_kgb should be positive ')
+ end if
+
+ ! 1 if Scalapack version is used.
+ use_slk = paral_kgb
+
+!Impose Hermiticity on diagonal elements of subham (and subovl, if needed)
+! MG FIXME: In these two calls we are aliasing the args
+ call hermit(subham,subham,ierr,nband_k)
+
+!Diagonalize the Hamitonian matrix
+ if(istwf_k==2) then
+   ABI_ALLOCATE(evec_tmp,(nband_k,nband_k))
+   ABI_ALLOCATE(subham_tmp,(nband_k*(nband_k+1)/2))
+   subham_tmp=subham(1:nband_k*(nband_k+1):2)
+   evec_tmp=zero
+   call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
+   evec(:,:)=zero;evec(1:2*nband_k:2,:) =evec_tmp
+   ABI_DEALLOCATE(evec_tmp)
+   ABI_DEALLOCATE(subham_tmp)
+ else
+   call abi_xhpev('V','U',nband_k,subham,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
+ end if
+
+!Normalize each eigenvector and set phase:
+!The problem with minus/plus signs might be present also if .not. use_subovl
+!if(use_subovl == 0) then
+ call cg_normev(evec,nband_k,nband_k)
+!end if
+
+ if(istwf_k==2)then
+   do iband=1,nband_k
+     do ii=1,nband_k
+       if(abs(evec(2*ii,iband))>1.0d-10)then
+         write(message,'(3a,2i0,2es16.6,a,a)')ch10,&
+&         ' subdiago: For istwf_k=2, observed the following element of evec :',ch10,&
+&         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,'  with a non-negligible imaginary part.'
+         MSG_BUG(message)
+       end if
+     end do
+   end do
+ end if
+
+!=====================================================
+!Carry out rotation of bands C(G,n) according to evecs
+! ZGEMM if istwfk==1, DGEMM if istwfk==2
+!=====================================================
+ wfsize=npw_k*nspinor
+
+ block_size=100
+
+ if (wfsize<block_size) block_size=wfsize
+
+ nblock=wfsize/block_size
+ if (mod(wfsize,block_size)/=0) nblock=nblock+1
+
+ if (istwf_k>1) then ! evec is real
+
+   vectsize=2*block_size
+
+   ABI_MALLOC_OR_DIE(blockvectora,(vectsize,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorb,(nband_k,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorc,(vectsize,nband_k), ierr)
+
+   do iband=1,nband_k
+     call abi_xcopy(nband_k,evec(2*iband-1,1),2*nband_k,blockvectorb(iband,1),nband_k)
+   end do
+
+   do iblock=1,nblock
+
+     igfirst=(iblock-1)*block_size
+     block_size_tmp=block_size
+     if (igfirst+block_size>wfsize) then
+       block_size_tmp=wfsize-igfirst
+     end if
+
+     do iband=1,nband_k
+       call abi_xcopy(block_size_tmp,cg(1,1+cgindex_subd(iblock,iband)),2,blockvectora(1,iband),1)
+       call abi_xcopy(block_size_tmp,cg(2,1+cgindex_subd(iblock,iband)),2,blockvectora(block_size+1,iband),1)
+       if (block_size_tmp<block_size) then
+         blockvectora(block_size_tmp+1:block_size,iband) = zero
+         blockvectora(block_size+block_size_tmp+1:2*block_size,iband) = zero
+       end if
+     end do
+
+     call abi_xgemm('N','N',vectsize,nband_k,nband_k,&
+&     cone,blockvectora,vectsize,blockvectorb,nband_k,czero,blockvectorc,vectsize)
+
+     do iband=1,nband_k
+       call abi_xcopy(block_size_tmp,blockvectorc(1,iband),1,cg(1,1+cgindex_subd(iblock,iband)),2)
+       call abi_xcopy(block_size_tmp,blockvectorc(block_size+1,iband),1,cg(2,1+cgindex_subd(iblock,iband)),2)
+     end do
+
+   end do
+
+   ABI_DEALLOCATE(blockvectora)
+   ABI_DEALLOCATE(blockvectorb)
+   ABI_DEALLOCATE(blockvectorc)
+
+ else ! evec is complex
+
+   ABI_MALLOC_OR_DIE(work,(2,block_size*nband_k), ierr)
+   if (nblock==1) then
+     cg_block => cg(:,icg+1:icg+nband_k*wfsize)
+   else
+     ABI_MALLOC_OR_DIE(cg_block,(2,block_size*nband_k), ierr)
+   end if
+
+   do iblock=1,nblock
+     igfirst=(iblock-1)*block_size
+     block_size_tmp=block_size
+     if (igfirst+block_size>wfsize) then
+       block_size_tmp=wfsize-igfirst
+     end if
+     if (nblock/=1) then
+       do iband=1,nband_k
+         do ig=1,block_size_tmp
+           cg_block(:,ig+(iband-1)*block_size) = cg(:,ig+cgindex_subd(iblock,iband))
+         end do
+         if (block_size_tmp<block_size) then
+           do ig=block_size_tmp+1,block_size
+             cg_block(:,ig+(iband-1)*block_size) = zero
+           end do
+         end if
+       end do
+     end if
+     call abi_xgemm('N','N',block_size,nband_k,nband_k,cone,cg_block,block_size,evec,nband_k,czero,work,&
+       &     block_size,x_cplx=2)
+     do iband=1,nband_k
+       do ig=1,block_size_tmp
+         cg(:,ig+cgindex_subd(iblock,iband)) = work(:,ig+(iband-1)*block_size) 
+       end do
+     end do
+   end do
+
+   ABI_DEALLOCATE(work)
+   if (nblock/=1) then
+     ABI_DEALLOCATE(cg_block)
+   end if
+
+ end if
+
+ contains
+
+   function cgindex_subd(iblock,iband)
+
+   integer :: iband,iblock,cgindex_subd
+   cgindex_subd=(iblock-1)*block_size+(iband-1)*wfsize+icg
+ end function cgindex_subd
+
+end subroutine subdiago_low_memory
 !!***
 
 !!****f* m_cgtools/pw_orthon
