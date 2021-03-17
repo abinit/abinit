@@ -151,11 +151,25 @@ class MyEntry(Entry):
             #s += 'DOI: <{doi}>  \n'.format(doi=doi)
             s += 'DOI: <a href="{doi}" target="_blank">{doi}</a><br>'.format(doi=doi)
 
-        # Add modal window with bibtex button/link.
         if bibtex_ui is not None:
-            assert bibtex_ui in ("link", "button")
-            btn, modal = self.get_bibtex_btn_modal(link=bibtex_ui=="link")
-            s += btn + modal
+            # Add modal window with bibtex button/link.
+            # Use https://github.com/kylefox/jquery-modal
+            bibtex = highlight(self.to_bibtex(), BibTeXLexer(), HtmlFormatter(cssclass="codehilite"))
+            modal_id = "modal-id-%s" % self.key
+            s = f"""
+{s}
+
+<div id="{modal_id}" class="modal" style="height: initial; max-height: 90%; max-width: 90%; width: initial;">
+  <p>{bibtex}</p>
+  <a href="#" rel="modal:close">Close</a>
+</div>
+
+<!-- Link to open the modal -->
+<p><a href="#{modal_id}" rel="modal:open">bibtex</a></p>
+"""
+            #assert bibtex_ui in ("link", "button")
+            #btn, modal = self.get_bibtex_btn_modal(link=bibtex_ui=="link")
+            #s += btn + modal
 
         return s
 
@@ -167,43 +181,43 @@ class MyEntry(Entry):
         """Return the data as a unicode string in the given format."""
         return BibliographyData({self.key: self}).to_string("bibtex")
 
-    def get_bibtex_btn_modal(self, link=False):
-        """
-        Build HTML string with bootstrap modal and link to open the modal.
-
-        Args:
-            link: True if a link instead of a button is wanted.
-
-        Return: (link, modal)
-        """
-        # https://v4-alpha.getbootstrap.com/components/modal/#examples
-        #text = escape(self.to_bibtex(), tag="pre")
-        text = highlight(self.to_bibtex(), BibTeXLexer(), HtmlFormatter(cssclass="codehilite"))
-        # Construct ids from self.key as they are unique.
-        modal_id, modal_label_id = "modal-id-%s" % self.key, "modal-label-id-%s" % self.key
-
-        if link:
-            btn = """<a data-toggle="modal" href="#{modal_id}">bibtex</a>""".format(**locals())
-        else:
-            btn = """\
-<button type="button" class="btn btn-primary btn-xsm btn-labeled small-text" data-toggle="modal" data-target="#{modal_id}">
-  <span class="btn-label"><i class="fa fa-id-card" aria-hidden="true"></i></span>bibtex
-</button>""".format(**locals())
-
-        modal = """\
-<div class="modal fade" id="{modal_id}" tabindex="-1" role="dialog" aria-labelledby="{modal_label_id}">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="{modal_label_id}">bibtex</h4>
-      </div>
-      <div class="modal-body">{text}</div>
-    </div>
-  </div>
-</div>""".format(**locals())
-
-        return btn, modal
+#    def get_bibtex_btn_modal(self, link=False):
+#        """
+#        Build HTML string with bootstrap modal and link to open the modal.
+#
+#        Args:
+#            link: True if a link instead of a button is wanted.
+#
+#        Return: (link, modal)
+#        """
+#        # https://v4-alpha.getbootstrap.com/components/modal/#examples
+#        #text = escape(self.to_bibtex(), tag="pre")
+#        text = highlight(self.to_bibtex(), BibTeXLexer(), HtmlFormatter(cssclass="codehilite"))
+#        # Construct ids from self.key as they are unique.
+#        modal_id, modal_label_id = "modal-id-%s" % self.key, "modal-label-id-%s" % self.key
+#
+#        if link:
+#            btn = """<a data-toggle="modal" href="#{modal_id}">bibtex</a>""".format(**locals())
+#        else:
+#            btn = """\
+#<button type="button" class="btn btn-primary btn-xsm btn-labeled small-text" data-toggle="modal" data-target="#{modal_id}">
+#  <span class="btn-label"><i class="fa fa-id-card" aria-hidden="true"></i></span>bibtex
+#</button>""".format(**locals())
+#
+#        modal = """\
+#<div class="modal fade" id="{modal_id}" tabindex="-1" role="dialog" aria-labelledby="{modal_label_id}">
+#  <div class="modal-dialog modal-lg" role="document">
+#    <div class="modal-content">
+#      <div class="modal-header">
+#        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+#        <h4 class="modal-title" id="{modal_label_id}">bibtex</h4>
+#      </div>
+#      <div class="modal-body">{text}</div>
+#    </div>
+#  </div>
+#</div>""".format(**locals())
+#
+#        return btn, modal
 
 
 _WEBSITE = None
@@ -738,7 +752,7 @@ in order of number of occurrence in the input files provided with the package.
 
 This document lists all the bibliographical references mentioned in the ABINIT documentation,
 with link(s) to the Web pages where such references are mentioned, as well as to the bibtex formatted reference.
-The bibtex file is available [here](../abiref.bib).
+The full bibtex file is available [here](../abiref.bib).
 
 """)
             for name in sorted(self.bib_data.entries.keys()):
@@ -979,12 +993,7 @@ The bibtex file is available [here](../abiref.bib).
                 if self.verbose: print("Triggering action:", action, "with args:", str(args))
 
                 # Dispatch according to action.
-                if action == "modal":
-                    if len(args) > 1:
-                        new_lines.extend(self.modal_with_tabs(args).splitlines())
-                    else:
-                        new_lines.extend(self.modal_from_filename(args[0]).splitlines())
-                elif action == "dialog":
+                if action == "dialog":
                     if len(args) > 1:
                         new_lines.extend(self.dialogs_from_filenames(args).splitlines())
                     else:
@@ -1468,118 +1477,6 @@ View {path}
             return button + dialog
         else:
             return button, dialog
-
-    def modal_from_filename(self, path, title=None):
-        """Return HTML string with bootstrap modal and content taken from file `path`."""
-        abs_path = os.path.join(self.root, path)
-
-        # FIXME: This to faciliate migration to new scheme for file extensions
-        # It will be removed when the beautification is completed.
-        if path.endswith(".in") and not os.path.exists(abs_path):
-            print("Using old convention for file extension: `.in` instead of `.abi`.\n",
-                  "Please change the md tutorial to use the .abi convention for:", path)
-            root, _ = os.path.splitext(path)
-            path = root + ".abi"
-
-        if path.endswith(".out") and not os.path.exists(abs_path):
-           print("Using old convention for file extension: `.out` instead of `.abo`.\n",
-                 "Please change the md tutorial to use the .abo convention for:", path)
-           root, _ = os.path.splitext(path)
-           path = root + ".abo"
-
-        title = path if title is None else title
-        with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
-            text = escape(fh.read(), tag="pre", cls="small-text")
-
-#        return """\
-#<div id="{modal_id}" class="modal" data-jbox-title="{title}" data-jbox-content="{text}">Click me to open a modal window!</div>
-##""".format(modal_id=gen_id(), **locals())
-#
-#        return """\
-#<!-- Modal HTML embedded directly into document -->
-#<div id="{modal_id}" class="modal">
-#  <p>{text}</p>
-#  <a href="#" rel="modal:close">Close</a>
-#</div>
-#
-#<!-- Link to open the modal -->
-#<p><a href="{modal_id}" class="md-button md-button--secondary" rel="modal:open">{title}</a></p>
-#""".format(modal_id=gen_id(), **locals())
-
-
-        # Based on https://v4-alpha.getbootstrap.com/components/modal/#examples
-        # See also https://stackoverflow.com/questions/14971766/load-content-with-ajax-in-bootstrap-modal
-        return """\
-<div class="text-center"> <!-- Button trigger modal -->
-  <button type="button" class="btn btn-primary btn-labeled" data-toggle="modal" data-target="#{modal_id}">
-    <span class="btn-label"><i class="glyphicon glyphicon-modal-window" aria-hidden="true"></i></span>View {path}
-  </button>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="{modal_id}" tabindex="-1" role="dialog" aria-labelledby="{modal_label_id}">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="{modal_label_id}">{title}</h4>
-      </div>
-      <div class="modal-body">{text}</div>
-    </div>
-  </div>
-</div>""".format(modal_id=gen_id(), modal_label_id=gen_id(), **locals())
-
-    def modal_with_tabs(self, paths, title=None):
-        # Based on http://jsfiddle.net/n__o/19rhfnqm/
-        title = title if title else ""
-        apaths = [os.path.join(self.root, p) for p in paths]
-        button_label = "View " + ", ".join(paths)
-
-        text_list = []
-        for p in apaths:
-            with io.open(p, "rt", encoding="utf-8") as fh:
-                text_list.append(escape(fh.read(), tag="pre", cls="small-text"))
-        tab_ids = gen_id(n=len(apaths))
-        #print("paths", paths, "\ntab_ids", tab_ids)
-
-        s = """\
-<div class="text-center"> <!-- Button trigger modal -->
-  <button type="button" class="btn btn-primary btn-labeled" data-toggle="modal" data-target="#{modal_id}">
-    <span class="btn-label"><i class="glyphicon glyphicon-modal-window" aria-hidden="true"></i></span>{button_label}
-  </button>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="{modal_id}" tabindex="-1" role="dialog" aria-labelledby="{modal_label_id}" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="{modal_label_id}">{title}</h4>
-      </div>
-      <div class="modal-body">
-        <div role="tabpanel">
-          <!-- Nav tabs -->
-          <ul class="nav nav-tabs" role="tablist">""".format(modal_id=gen_id(), modal_label_id=gen_id(), **locals())
-
-        for i, (path, tid) in enumerate(zip(paths, tab_ids)):
-            s += """\
-          <li role="presentation" class="{li_class}">
-          <a href="{href}" aria-controls="uploadTab" role="tab" data-toggle="tab">{path}</a>
-          </li> """.format(li_class="active" if i == 0 else " ", href="#%s" % tid, path=path)
-
-        s +=  """\
-          </ul>
-          <!-- Tab panes -->
-          <div class="tab-content">"""
-
-        for i, (text, tid) in enumerate(zip(text_list, tab_ids)):
-            s += """<div role="tabpanel" class="tab-pane {active}" id="{tid}">{text}</div>""".format(
-                    active="active" if i == 0 else " ", tid=tid, text=text)
-
-        s += 6 * "</div>"
-
-        return s
 
 
 class Page(object):

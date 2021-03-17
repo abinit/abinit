@@ -687,33 +687,10 @@ If multiple files are used such as in:
 
     {% dialog tests/v1/Input/t01.abi tests/v1/Input/t02.abi tests/v1/Input/t03.abi %}
 
-a modal window with tabs is produced:
+multiple buttons are produced:
 
 {% dialog tests/v1/Input/t01.abi tests/v1/Input/t02.abi tests/v1/Input/t03.abi %}
 
-
-To create a ==button== that opens a modal window containing an **input file**, use:
-
-```
-    {% modal tests/v1/Input/t01.abi %}
-```
-
-that produces:
-
-{% modal tests/v1/Input/t01.abi %}
-
-This is useful for tutorials to give direct access to the input files.
-If multiple files are used such as in:
-
-```
-    {% modal tests/v1/Input/t01.abi tests/v1/Input/t02.abi %}
-```
-
-a modal window with tabs is produced
-
-{% modal tests/v1/Input/t01.abi tests/v1/Input/t02.abi %}
-
-Note however, that these extensions do not work when called within the input variable database files (abimkdocs/variables*.py files).
 
 ## MathJax
 
