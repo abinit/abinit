@@ -423,7 +423,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
        if (enable_cgwf_paw) then
          call cgwf_paw(cg,cprj_cwavef_bands,dtset%cprj_update_lvl,eig_k,&
-&         gs_hamk,icg,mcg,mpi_enreg,nband_k,dtset%nline,npw_k,my_nspinor,&
+&         gs_hamk,icg,mcg,mpi_enreg,nband_k,dtset%nline,&
 &         dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
        else
          call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
@@ -466,9 +466,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !&       subham,subovl,0,0,mpi_enreg%me_g0)
        call timab(585,2,tsec)
        call timab(578,1,tsec)
-       call cprj_rotate(cprj_cwavef_bands,evec,&
-         &   gs_hamk%dimcprj,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-         &   natom,gs_hamk%nattyp,nband_k,gs_hamk%nspinor,gs_hamk%ntypat)
+       call cprj_rotate(cprj_cwavef_bands,evec,gs_hamk%dimcprj,natom,nband_k,gs_hamk%nspinor)
        call timab(578,2,tsec)
      else
        call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&

@@ -122,24 +122,19 @@ contains
 !! SOURCE
 
 subroutine cgwf_paw(cg,cprj_cwavef_bands,cprj_update_lvl,eig,&
-&                gs_hamk,icg,&
-&                mcg,mpi_enreg,&
-&                nband,nline,npw,&
-&                nspinor,ortalg,prtvol,quit,resid,subham,&
+&                gs_hamk,icg,mcg,mpi_enreg,nband,nline,ortalg,prtvol,quit,resid,subham,&
 &                tolrde,tolwfr,wfoptalg)
 !Arguments ------------------------------------
  integer,intent(in) :: cprj_update_lvl,icg
- integer,intent(in) :: mcg,nband,nline
- integer,intent(in) :: npw,nspinor,ortalg,prtvol
- integer,intent(in) :: wfoptalg
- integer,intent(in) :: quit
+ integer,intent(in) :: mcg,nband,nline,ortalg,prtvol
+ integer,intent(in) :: wfoptalg,quit
  real(dp),intent(in) :: tolrde,tolwfr
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 !arrays
  real(dp),intent(inout),target :: cg(2,mcg)
- real(dp), intent(inout) :: eig(nband)
- real(dp),intent(out) :: resid(nband),subham(nband*(nband+1))
+ real(dp), intent(inout) :: eig(:)
+ real(dp),intent(out) :: resid(:),subham(:)
  type(pawcprj_type),intent(inout),target :: cprj_cwavef_bands(:,:)
 
 !Local variables-------------------------------
@@ -149,7 +144,7 @@ integer,parameter :: tim_getcsc=3
  integer :: choice,cpopt
  integer :: i1,i2,i3,iband,isubh,isubh0,jband,me_g0,igs
  integer :: iline,ipw,ispinor,istwf_k
- integer :: n4,n5,n6,natom,ncpgr
+ integer :: n4,n5,n6,natom,ncpgr,npw,nspinor
  integer :: optekin,sij_opt
  integer :: useoverlap,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
@@ -196,6 +191,8 @@ integer,parameter :: tim_getcsc=3
 
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
+ npw=gs_hamk%npw_k
+ nspinor=gs_hamk%nspinor
 
  ABI_ALLOCATE(pcon,(npw))
  ABI_ALLOCATE(conjgr,(2,npw*nspinor))

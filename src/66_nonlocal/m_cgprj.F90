@@ -981,25 +981,22 @@ contains
 !!
 !! SOURCE
 
- subroutine cprj_rotate(cprj_in,evec,&
-&                   dimcprj,indlmn,istwf_k,lmnmax,mpi_enreg,&
-&                   natom,nattyp,nband,nspinor,ntypat)
+ subroutine cprj_rotate(cprj_in,evec,dimcprj,natom,nband,nspinor)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: istwf_k,lmnmax
- integer,intent(in) :: natom,nband,nspinor,ntypat
- type(MPI_type),intent(in) :: mpi_enreg
+ integer,intent(in) :: natom,nband,nspinor
 !arrays
- integer,intent(in) :: indlmn(7,lmnmax,ntypat),nattyp(ntypat),dimcprj(:)
+ integer,intent(in) :: dimcprj(:)
  real(dp) :: evec(:,:)
  type(pawcprj_type),intent(inout) :: cprj_in(natom,nspinor*nband)
 
 !Local variables-------------------------------
 !scalars
- integer :: iband,cplex,ncpgr
+ integer :: iband,ncpgr
 !arrays
- real(dp) :: tsec(2),z_tmp(2,nband)!,z_tmp2(2)
+! real(dp) :: tsec(2)
+ real(dp) :: z_tmp(2,nband)!,z_tmp2(2)
  type(pawcprj_type),pointer :: cprj_iband(:,:)!,cprj_jband(:,:)
  type(pawcprj_type),allocatable,target :: cprj_tmp(:,:)
 
@@ -1009,9 +1006,6 @@ contains
  DBG_ENTER('COLL')
 
 ! call timab(1211,1,tsec)
-
-!Some other dims
- cplex=2;if (istwf_k>1) cplex=1
 
  ncpgr=cprj_in(1,1)%ncpgr
  ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,nspinor*nband))
