@@ -11092,10 +11092,13 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give the number of images (or replicas) of the system, for which the forces
-and stresses might be computed independently, in the context of the string
-method, the genetic algorithm, hyperdynamics or Path-Integral Molecular
-Dynamics depending on the value of [[imgmov]]). Related input variables:
+and stresses might be computed independently, in the context of string
+or NEB method, genetic algorithm, hyperdynamics, Path-Integral Molecular
+Dynamics, linear combination of images, pSIC, genetic algorithm, etc, depending on the value of [[imgmov]]). Related input variables:
 [[dynimage]], [[npimage]], [[ntimimage]] and [[prtvolimg]].
+If [[nimage]]>1, the default choice for printing many files is set to zero, and the user might
+want to manually reestablish the printing, using, e.g. [[prtgsr]], [[prtwf]], [[prtebands]], [[prteig]], etc.
+
 Images might differ by the position of atoms in the unit cell, their velocity,
 as well as by their cell geometry. The following input variables might be used
 to define the images:
