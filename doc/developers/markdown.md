@@ -924,66 +924,10 @@ one should take into account the *extra directory* created by Mkdocs.
 In a nutshell, **prepend** a `../` to the relative path you would use inside the shell to specify the location
 of that resource with respect to the present page.
 
-For instance, to build a Bootstrap carousel in this page using the images located in 
-the `~abinit/doc/tutorial/bse_assets/` directory, one should use:
-
-```html
-<div id="myCarousel" class="carousel slide" data-ride="carousel">
-  <!-- Indicators -->
-  <ol class="carousel-indicators">
-    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-    <li data-target="#myCarousel" data-slide-to="1"></li>
-  </ol>
-  <!-- Wrapper for slides -->
-  <div class="carousel-inner" role="listbox">
-    <div class="item active">
-      <img src="../../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
-      <div class="carousel-caption">Unconverged BSE optical spectrum</div>
-    </div>
-    <div class="item">
-      <img src="../../tutorial/bse_assets/tbs5.png" alt="Converged BSE spectrum">
-      <div class="carousel-caption">Convergenge of BSE optical spectrum wrt k-point sampling</div>
-    </div>
-  </div>
-  ...
-  ...
-</div>
-```
-
-that produces:
-
-<div id="myCarousel" class="carousel slide" data-ride="carousel">
-  <!-- Indicators -->
-  <ol class="carousel-indicators">
-    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-    <li data-target="#myCarousel" data-slide-to="1"></li>
-  </ol>
-
-  <!-- Wrapper for slides -->
-  <div class="carousel-inner" role="listbox">
-    <div class="item active">
-      <img src="../../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
-      <div class="carousel-caption">Unconverged BSE optical spectrum</div>
-    </div>
-    <div class="item">
-      <img src="../../tutorial/bse_assets/tbs5.png" alt="Converged BSE spectrum">
-      <div class="carousel-caption">Convergenge of BSE optical spectrum wrt k-point sampling</div>
-    </div>
-  </div>
-
-  <!-- Left and right controls -->
-  <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
-    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-    <span class="sr-only">Previous</span>
-  </a>
-  <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
-    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-    <span class="sr-only">Next</span>
-  </a>
-</div>
-
+<!--
 !!! warning
     Do not use root-relative URLs (e.g. `/tutorial/bse_assets/tbs5.png`) in HTML code 
     because this will create problems when the site is deployed.
     Besides relative URLs allow us to serve multiple versions of the Abinit documentation 
     associated to the different versions of the code.
+-->

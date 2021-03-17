@@ -1412,6 +1412,7 @@ Enter any string to search in the database. Clicking without any request will gi
 </ul>""".format(**locals())
 
     def dialogs_from_filenames(self, paths):
+        """Build customized jquery dialog to show the content of a list of filepaths."""
         buttons, dialogs = [], []
         for path in paths:
             btn, dialog = self.dialog_from_filename(path, ret_btn_dialog=True)
@@ -1449,15 +1450,17 @@ Enter any string to search in the database. Clicking without any request will gi
                 text = escape(fh.read(), tag="pre", cls="small-text")
 
         btn_id, dialog_id = gen_id(n=2)
-        button = """\
-<button type="button" id="{btn_id}" class="btn btn-default btn-labeled">
-  <span class="btn-label"><i class="fa fa-window-restore" aria-hidden="true"></i></span>View {path}
-</button>""".format(**locals())
 
         dialog = """
 <div id="{dialog_id}" class="my_dialog" title="{title}" hidden><div>{text}</div></div>
 
 <script> $(function() {{ abidocs_jqueryui_dialog("#{dialog_id}", "#{btn_id}") }}); </script>
+""".format(**locals())
+
+        button = """\
+<button id="{btn_id}" class="md-button md-button--secondary">
+View {path}
+</button>
 """.format(**locals())
 
         if not ret_btn_dialog:
@@ -1484,13 +1487,28 @@ Enter any string to search in the database. Clicking without any request will gi
            root, _ = os.path.splitext(path)
            path = root + ".abo"
 
-        # Based on https://v4-alpha.getbootstrap.com/components/modal/#examples
-        # See also https://stackoverflow.com/questions/14971766/load-content-with-ajax-in-bootstrap-modal
-
         title = path if title is None else title
         with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
             text = escape(fh.read(), tag="pre", cls="small-text")
 
+#        return """\
+#<div id="{modal_id}" class="modal" data-jbox-title="{title}" data-jbox-content="{text}">Click me to open a modal window!</div>
+##""".format(modal_id=gen_id(), **locals())
+#
+#        return """\
+#<!-- Modal HTML embedded directly into document -->
+#<div id="{modal_id}" class="modal">
+#  <p>{text}</p>
+#  <a href="#" rel="modal:close">Close</a>
+#</div>
+#
+#<!-- Link to open the modal -->
+#<p><a href="{modal_id}" class="md-button md-button--secondary" rel="modal:open">{title}</a></p>
+#""".format(modal_id=gen_id(), **locals())
+
+
+        # Based on https://v4-alpha.getbootstrap.com/components/modal/#examples
+        # See also https://stackoverflow.com/questions/14971766/load-content-with-ajax-in-bootstrap-modal
         return """\
 <div class="text-center"> <!-- Button trigger modal -->
   <button type="button" class="btn btn-primary btn-labeled" data-toggle="modal" data-target="#{modal_id}">

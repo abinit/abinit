@@ -8,11 +8,12 @@ body {
     border-bottom: .1rem solid rgba(0,0,0,.26);
 } 
 
-/* Increase logo width because mkdocs material enforces 48 x 48 */
+/* Increase logo width because mkdocs material enforces 48 x 48 
 .md-logo img {
     width: 48px;
     height: auto;
 }
+*/
 
 
 /* Add vertical rhythm

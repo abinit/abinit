@@ -8,6 +8,15 @@ $(function() {
     // Make bootstrap modal draggable and resizable with jquery-ui
     //$('.modal-dialog').draggable().resizable();
 
+
+    // https://stephanwagner.me/jBox/documentation
+    //new jBox('Modal', {
+    //  attach: '.modal',
+    //  getTitle: 'data-jbox-title',
+    //  getContent: 'data-jbox-content'
+    //});
+
+
     // This for the floating action button: https://bootsnipp.com/snippets/featured/inbox-by-gmail
     $('.fab').hover(function () {
         $(this).toggleClass('active');
@@ -185,112 +194,3 @@ function abidocs_jqueryui_dialog(dialog_id, btn_id) {
 
    $(btn_id).click(function() { e.removeAttr('hidden').dialog('open'); });
 }
-
-/* Guided Tour with introjs */
-function abidocs_guidedtour() {
-    var tab_links = $(".md-tabs__link");
-    var intro = introJs();
-    intro.setOptions({
-      steps: [
-        { 
-          intro: "Welcome to the Abinit documentation! Let me explain how to use the website..."
-        },
-        {
-          element: 'nav.md-tabs',
-          intro:  "Pages are grouped in categories that can be browsed by clicking the links in this navigation bar. " +
-                  "These links are also available in the footer and can be accessed from the menu button in the bottom right corner."
-        },
-        {
-          element: tab_links[0],
-          intro: "The User Guide contains pages describing the usage of the different executables " + 
-                 "as well as a detailed guide to the configuration and compilation of the code."
-        },
-        {
-          element: tab_links[1],
-          intro: "This section gives an overview of the features implemented in the code. " + 
-                 "Each page provides links to related input variables, input files and scientific articles."
-        },
-        {
-          element: tab_links[2],
-          intro: "Pages with the documentation of the input variables of the different executables. " +
-                 "In the main page, there is also a search form to find variables by name."
-        },
-        {
-          element: tab_links[3],
-          intro: "The Abinit tutorials grouped according to the difficulty level and topics."
-        },
-        {
-          element: tab_links[4],
-          intro: "Documents discussing the formalism and implementation details relevant to Abinit."
-        },
-        {
-          element: tab_links[5],
-          intro: "Documents for developers and complete list of the tests with links to input files. " +
-                 "Please read the markdown section if you plan to contribute to the documentation."
-        },
-        {
-          element: tab_links[6],
-          intro: "Release notes and license."
-        },
-        {
-          element: 'a.md-logo',
-          intro: "Click the logo to go back to the Abinit homepage."
-        },
-        //{
-        //  element: 'input.md-search__input',
-        //  intro: "In this form, you can search in the entire website."
-        //},
-        {
-          element: 'div.md-source__repository',
-          intro: "Check out our organization on github for other Abinit-related software packages."
-        },
-        {
-          element: '#previous_published_versions',
-          intro: 'Links to previous versions of the Abinit documentation.'
-        },
-        {
-          //element: 'div.md-sidebar--primary',
-          element: 'nav.md-nav--primary',
-          intro: "This sidebar lists the pages available in this section.",
-          position: 'right'
-        },
-        {
-          element: $('div.md-sidebar__scrollwrap')[1], // This is the only query that gives decent results. Don't know why...
-          intro: 'Table of Contents with links to the paragraphs within this page.',
-          position: 'left'
-        },
-        //{
-        //  element: 'nav.md-footer-nav__inner',
-        //  intro: "Use the next (previous) button to go to the next (previous) page.",
-        //  position: 'left'
-        //},
-        {
-          //element: '#return-to-top',
-          element: '.fa-map-signs',
-          intro: "Click the button to go to the beginning of the page. Hover over the button " +
-                 "to open a menu with links to the main sections.",
-          position: 'left'
-        },
-        {
-          element: "a.md-footer-social__link.fa-github-alt",
-          intro: "Help us improve the documentation: click the github icon to edit the markdown file " +
-                 " and then send us a pull request.",
-          position: 'left'
-        }
-      ],
-      showProgress: true,
-      overlayOpacity: 0.3
-    });
-
-    intro.start();
-}
-
-//function set_warning(txt) {
-//  var warningbox = document.getElementById('warning_box');
-//  warningbox.innerHTML = "<div class='alert warning'><span id='cbn' class='closebtn'>&times;</span><strong>Warning!</strong> ".concat(txt, "</div>");
-//  var close = document.getElementById("cbn");
-//  close.onclick = function(){
-//     var div = document.getElementById('warning_box');
-//     setTimeout(function(){ div.innerHTML = ""; }, 100);
-//  }
-//}

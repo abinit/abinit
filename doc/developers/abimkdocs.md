@@ -27,10 +27,12 @@ MkDocs includes a couple built-in themes as well as various third party themes,
 all of which can easily be customized with extra CSS or JavaScript or overridden from the theme directory. 
 The Abinit website uses [Mkdocs-Material](http://squidfunk.github.io/mkdocs-material/), a theme
 built using Google's [Material Design](https://www.google.com/design/spec/material-design) guidelines.
+<!--
 We also use [fontawesome icons](https://fontawesome.com/) and
 [Bootstrap](http://getbootstrap.com/) a popular HTML, CSS, and Javascript framework 
 for developing responsive, mobile first projects on the web 
 (shrink the browser window to see how the menu and the navigation bars react).
+-->
 
 Note that the majority of the Abinit developers do not need to know how to use these technologies
 since they will mainly interact with markdown files (plain text files that can be easily modified in the editor)
