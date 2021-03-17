@@ -501,7 +501,7 @@ end subroutine make_rhorij1_k_n
 !! orbmag_ddk
 !!
 !! FUNCTION
-!! This routine computes the orbital magnetization and Chern number  based on input 
+!! This routine computes the orbital magnetization and Berry curvature based on input 
 !! wavefunctions and DDK wavefuntions.
 !! It is assumed that only completely filled bands are present.
 !!
@@ -569,7 +569,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_pawopt,nonlop_signs,nonlop_tim
  integer :: nproc,nterms,projbd_scprod_io,projbd_tim,projbd_useoverlap,spaceComm
  integer :: with_vectornd
- integer,parameter :: cci=1,vvii=2,vvi=3,rho0h1=4,rho0s1=5,lrr3=6,a0an=7,chern=8
+ integer,parameter :: cci=1,vvii=2,vvi=3,rho0h1=4,rho0s1=5,lrr3=6,a0an=7,berrycurve=8
  real(dp) :: arg,doti,dub_dsg_i,dug_dsb_i
  real(dp) :: ecut_eff,Enk,lambda,local_fermie,trnrm,ucvol
  complex(dpc) :: onsite_bm_k_n,onsite_l_k_n,rhorij1,S1trace
@@ -578,8 +578,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:),nattyp_dum(:)
- real(dp) :: chern_total(2,3),gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1)
- real(dp) :: orbmag_total(2,3),rhodum(1),rmet(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwaveg1(:,:)
  real(dp),allocatable :: cwavedsdb(:,:),cwavedsdg(:,:)
@@ -684,7 +683,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
  icg = 0
  ikg = 0
- nterms = 8 ! various contributing terms in orbmag and chern
+ nterms = 8 ! various contributing terms in orbmag and berrycurve
  ! 1 orbmag CC
  ! 2 orbmag VV II
  ! 3 orbmag VV I+III
@@ -692,7 +691,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  ! 5 orbmag -Tr[\rho^0 S^1] part
  ! 6 orbmag onsite L_R/r^3
  ! 7 orbmag onsite A0.An
- ! 8 chern
+ ! 8 berrycurve
  ABI_MALLOC(orbmag_terms,(3,nterms,nband_k))
  orbmag_terms = zero
  local_fermie = -1.0D10
@@ -911,14 +910,14 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
          & pawang,pawrad,pawtab)
        orbmag_terms(adir,a0an,nn) = orbmag_terms(adir,a0an,nn) + real(onsite_bm_k_n)*trnrm
 
-       ! chern needs i*eps_abg*<du/db|S|du/dg> 
-       ! N.B. the Chern number does not involve H0 so no projection onto conduction
+       ! berrycurve needs i*eps_abg*<du/db|S|du/dg> 
+       ! N.B. the Berry curvature does not involve H0 so no projection onto conduction
        ! and valence bands, the "S" here is really I+S from PAW
        ! i eps_abg <du/db|S|du/dg> = -2*Im<du/db|S|du/dg> 
-       ! 8 chern 
+       ! 8 berrycurve
        doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
              & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir))
-       orbmag_terms(adir,chern,nn) = orbmag_terms(adir,chern,nn) - two*doti*trnrm
+       orbmag_terms(adir,berrycurve,nn) = orbmag_terms(adir,berrycurve,nn) - two*doti*trnrm
 
      end do
 
@@ -972,11 +971,11 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    orbmag_terms(1:3,vvi,nn) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_terms(1:3,vvi,nn))
    orbmag_terms(1:3,rho0h1,nn) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_terms(1:3,rho0h1,nn))
    orbmag_terms(1:3,rho0s1,nn) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_terms(1:3,rho0s1,nn))
-   orbmag_terms(1:3,chern,nn) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_terms(1:3,chern,nn))
+   orbmag_terms(1:3,berrycurve,nn) =  (ucvol/(two_pi*two_pi))*MATMUL(gprimd,orbmag_terms(1:3,berrycurve,nn))
  end do
 
  ! from -2E_f\int\Omega
- orbmag_terms(:,chern,:) = -two*local_fermie*orbmag_terms(:,chern,:)
+ !orbmag_terms(:,berrycurve,:) = -two*local_fermie*orbmag_terms(:,berrycurve,:)
 
  ! compute trace of each term
  ABI_MALLOC(orbmag_trace,(3,nterms))
@@ -1060,19 +1059,19 @@ subroutine orbmag_ddk_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_tra
  !Local variables -------------------------
  !scalars
  integer :: adir,iband,iterms
- integer,parameter :: cci=1,vvii=2,vvi=3,rho0h1=4,rho0s1=5,lrr3=6,a0an=7,chern=8
+ integer,parameter :: cci=1,vvii=2,vvi=3,rho0h1=4,rho0s1=5,lrr3=6,a0an=7,berrycurve=8
  character(len=500) :: message
 
  !arrays
- real(dp) :: orbmag_total(3),chern_total(3)
+ real(dp) :: berrycurve_total(3),orbmag_total(3)
 
  ! ***********************************************************************
 
- orbmag_total=zero;chern_total=zero
+ orbmag_total=zero;berrycurve_total=zero
  do iterms = 1, nterms-1
    orbmag_total(1:3)=orbmag_total(1:3) + orbmag_trace(1:3,iterms)
  end do
- chern_total(1:3)=orbmag_trace(1:3,chern)
+ berrycurve_total(1:3)=orbmag_trace(1:3,berrycurve)
 
  write(message,'(a,a,a)')ch10,'====================================================',ch10
  call wrtout(ab_out,message,'COLL')
@@ -1084,11 +1083,11 @@ subroutine orbmag_ddk_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_tra
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a)')' -2 E_f Integral of Berry curvature, Cartesian directions : '
+   write(message,'(a)')' Integral of Berry curvature, Cartesian directions : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(3es16.8)') (chern_total(adir),adir=1,3)
+   write(message,'(3es16.8)') (berrycurve_total(adir),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,es16.8)')' Fermie energy used : ',fermie
+   write(message,'(a,es16.8)')' Fermie energy : ',fermie
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -1111,7 +1110,7 @@ subroutine orbmag_ddk_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_tra
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' H(1) on-site A0.An : ',(orbmag_trace(adir,a0an),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '    Berry curvature : ',(orbmag_trace(adir,chern),adir=1,3)
+   write(message,'(a,3es16.8)') '    Berry curvature : ',(orbmag_trace(adir,berrycurve),adir=1,3)
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -1139,7 +1138,7 @@ subroutine orbmag_ddk_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_tra
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' H(1) on-site A0.An : ',(orbmag_terms(adir,a0an,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '    Berry curvature : ',(orbmag_terms(adir,chern,iband),adir=1,3)
+     write(message,'(a,3es16.8)') '    Berry curvature : ',(orbmag_terms(adir,berrycurve,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
    end do
  end if
