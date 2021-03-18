@@ -205,14 +205,13 @@ and return to Top button (based on https://codepen.io/rdallaire/pen/apoyx)
           "fa-user-circle-o", 
           ] %}
         {% for nav_item in nav | reverse %}
-          <li><a href="{{ (nav_item.children | first).canonical_url }}" data-toggle="tooltip" data-placement="left" 
-                  title="{{ nav_item.title }}"><i class="fa {{ icons[loop.index0] }}"></i></a></li>
+          <li>
+            <a href="{{ (nav_item.children | first).canonical_url }}" 
+               data-toggle="popover" data-tippy-content="{{ nav_item.title }}">
+               <i class="fa {{ icons[loop.index0] }}"></i>
+            </a>
+          </li>
         {% endfor %}
-        <!--
-        Example: 
-        <li><a href="/index.html" data-toggle="tooltip" data-placement="left" title="User-Guide">
-              <i class="fa fa-user-circle-o"></i></a></li>
-        -->
         </ul>
       </div>
     </div>
