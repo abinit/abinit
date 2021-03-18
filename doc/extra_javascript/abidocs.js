@@ -8,15 +8,6 @@ $(function() {
     // Make bootstrap modal draggable and resizable with jquery-ui
     //$('.modal-dialog').draggable().resizable();
 
-
-    // https://stephanwagner.me/jBox/documentation
-    //new jBox('Modal', {
-    //  attach: '.modal',
-    //  getTitle: 'data-jbox-title',
-    //  getContent: 'data-jbox-content'
-    //});
-
-
     // This for the floating action button: https://bootsnipp.com/snippets/featured/inbox-by-gmail
     $('.fab').hover(function () {
         $(this).toggleClass('active');
@@ -180,6 +171,7 @@ function abidocs_jqueryui_dialog(dialog_id, btn_id) {
       }
    });
 
+   // This does not work and raises `dialogExtend is not a function`
    //e.dialogExtend({
    //    "maximizable": false, "minimizable": true, "collapsable": true, "minimizeLocation": "left",
    //    "dblclick": "collapse",

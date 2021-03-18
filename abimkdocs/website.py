@@ -181,45 +181,6 @@ class MyEntry(Entry):
         """Return the data as a unicode string in the given format."""
         return BibliographyData({self.key: self}).to_string("bibtex")
 
-#    def get_bibtex_btn_modal(self, link=False):
-#        """
-#        Build HTML string with bootstrap modal and link to open the modal.
-#
-#        Args:
-#            link: True if a link instead of a button is wanted.
-#
-#        Return: (link, modal)
-#        """
-#        # https://v4-alpha.getbootstrap.com/components/modal/#examples
-#        #text = escape(self.to_bibtex(), tag="pre")
-#        text = highlight(self.to_bibtex(), BibTeXLexer(), HtmlFormatter(cssclass="codehilite"))
-#        # Construct ids from self.key as they are unique.
-#        modal_id, modal_label_id = "modal-id-%s" % self.key, "modal-label-id-%s" % self.key
-#
-#        if link:
-#            btn = """<a data-toggle="modal" href="#{modal_id}">bibtex</a>""".format(**locals())
-#        else:
-#            btn = """\
-#<button type="button" class="btn btn-primary btn-xsm btn-labeled small-text" data-toggle="modal" data-target="#{modal_id}">
-#  <span class="btn-label"><i class="fa fa-id-card" aria-hidden="true"></i></span>bibtex
-#</button>""".format(**locals())
-#
-#        modal = """\
-#<div class="modal fade" id="{modal_id}" tabindex="-1" role="dialog" aria-labelledby="{modal_label_id}">
-#  <div class="modal-dialog modal-lg" role="document">
-#    <div class="modal-content">
-#      <div class="modal-header">
-#        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-#        <h4 class="modal-title" id="{modal_label_id}">bibtex</h4>
-#      </div>
-#      <div class="modal-body">{text}</div>
-#    </div>
-#  </div>
-#</div>""".format(**locals())
-#
-#        return btn, modal
-
-
 _WEBSITE = None
 
 
@@ -414,10 +375,15 @@ Change the input yaml files or the python code
         self.markdown.reset()
         return my_unicode(self.markdown.convert(source))
 
-    def new_mdfile(self, dirname, mdname, meta=None, with_comment=True):
+    def new_mdfile(self, dirname, mdname, meta=None, with_comment=True, hide_navigation=False, hide_toc=False):
         """
         Create new markdown file with name `mdname` in directory `dirname`.
         `meta` is an optional dictionary with meta-variables added to the front matter.
+
+        Args:
+            with_comment: Add "DO_NOT_EDIT comment to md file.
+            hide_navigation: hide navigation sidebar.
+            hide_toc: hide TOC sidebar.
 
         Return: File object.
 
@@ -433,6 +399,18 @@ Change the input yaml files or the python code
         if self.verbose: print("Generating markdown file: `%s`" % path)
 
         mdf = io.open(path, "wt", encoding="utf-8")
+
+        if hide_navigation or hide_toc:
+            # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#hide-the-sidebars
+            # hide:
+            #   - navigation # Hide navigation
+            #   - toc        # Hide table of contents
+            if meta is None: meta = {}
+            assert "hide" not in meta
+            meta["hide"] = []
+            if hide_navigation: meta["hide"].append("navigation")
+            if hide_toc: meta["hide"].append("top")
+
         if meta is not None:
             # Must convert to ASCII to avoid !!python/unicode tags in YAML doc
             # (mkdocs does not use yaml to parse the front matter).
@@ -441,8 +419,8 @@ Change the input yaml files or the python code
             s = yaml.dump(meta, indent=4, default_flow_style=False).strip().replace(" !!python/unicode", "")
             mdf.write("---\n%s\n---\n" % s)
 
-        if with_comment:
-            mdf.write(self.do_not_edit_comment)
+        if with_comment: mdf.write(self.do_not_edit_comment)
+
         mdf.rpath = "/" + os.path.relpath(path, self.root)
 
         return mdf
@@ -533,13 +511,8 @@ and [builder matrix](https://wiki.abinit.org/doku.php?id=bb:builder).
 
         # Write index.md with the description of the input variables.
         meta = {"description": "Complete list of Abinit input variables"}
-        with self.new_mdfile("variables", "index.md", meta=meta) as mdf:
+        with self.new_mdfile("variables", "index.md", meta=meta, hide_toc=True) as mdf:
             mdf.write("\n\n# Input variables \n\n")
-            for code, vd in self.codevars.items():
-                mdf.write("## %s variables   \n\n" % code)
-                mdf.write(vd.get_vartabs_html(self, mdf.rpath))
-
-            # This for the table of variables implemented by Jordan
             mdf.write(self.build_varsearch_html(mdf.rpath))
 
         # Build markdown page with external parameters.
@@ -1354,7 +1327,8 @@ The full bibtex file is available [here](../abiref.bib).
         return a
 
     def build_varsearch_html(self, page_rpath):
-        """Build single dictionary mapping varname --> var. Add @code if not abinit."""
+        """"Return HTML string with table of variables plus search bar implemented by Jordan."""
+        # Build single dictionary mapping varname --> var. Add @code if not abinit.
         allvars = {}
         for code, vd in self.codevars.items():
             allvars.update({v.abivarname: v for v in vd.values()})
@@ -1366,18 +1340,6 @@ The full bibtex file is available [here](../abiref.bib).
         for char, group in sort_and_groupby(list(allvars.items()), key=lambda t: t[0][0].upper()):
             lis = "\n".join("<li>{link}</li>".format(
                 link=var.internal_link(self, page_rpath, label=var.abivarname, cls="small-grey-link")) for _, var in sorted(group))
-
-        #for char, group in sort_and_groupby(allvars, key=lambda t: t[0][0].upper()):
-        #    group = list(group)
-        #    lis = []
-        #    for i, (abivarname, var) in enumerate(group):
-        #        if (i % 4) == 0 and i != 0: lis.append('</div>')
-        #        if (i % 4) == 0 and i != len(group) - 1 : lis.append('<div class="row">')
-        #        lis.append("""<li class="{col_cls}">{link}</li>""".format(
-        #            col_cls="col-md-3",
-        #            link=var.internal_link(self, page_rpath, label=abivarname, cls="")))
-        #    if lis[-1] != '</div>': lis.append('</div>')
-        #    lis = "\n".join(lis)
 
             html_vars += """
 <li><ul id="{char}" class="TabContentLetter">
@@ -1401,24 +1363,20 @@ The full bibtex file is available [here](../abiref.bib).
 
 <script> $(function() {defaultClick(true);}); </script>
 """
-        return """
+        return f"""
 
-## All variables
-
-See aim, anaddb, atdep, multibinit or optic for the subset of input variables for the executables
-AIM(Bader), ANADDB, ATDEP, MULTIBINIT and OPTIC.
-Such input variables are specifically labelled @aim, @anaddb, @atdep, @multibinit or @optic in the input variable database.
-Enter any string to search in the database. Clicking without any request will give all variables.
+Enter any string to search in the database.
+Enter empty string to show all variables for all executables.
+Variables specific to `executable` are denoted with the syntax `varname@executable` e.g. `a2fsmear@anaddb`.
+Enter `@anaddb` in the search bar to show only the variables of `anaddb`.
 
 {search_form}
 
-<div class="TabsLetter">
-{tabs}
-</div>
+<div class="TabsLetter"> {tabs} </div>
 
 <ul id="Letters">
 {html_vars}
-</ul>""".format(**locals())
+</ul>"""
 
     def dialogs_from_filenames(self, paths):
         """Build customized jquery dialog to show the content of a list of filepaths."""

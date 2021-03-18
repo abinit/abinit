@@ -211,7 +211,7 @@ tr:hover {
     background-color: rgba(144, 144, 144, 0.10);
 }
 
-/* This for bootstrap buttons with labels. See https://bootsnipp.com/snippets/featured/buttons-with-labels */
+/* This for bootstrap buttons with labels. See https://bootsnipp.com/snippets/featured/buttons-with-labels 
 .btn-label {
     position: relative;
     left: -12px;
@@ -226,7 +226,7 @@ tr:hover {
     padding-top: 0;
     padding-bottom: 0;
 }
-/* .btn { margin-bottom:10px; } */
+*/
 
 /* Decrease font-size e.g in <pre class="small-text"> elements */
 .small-text {

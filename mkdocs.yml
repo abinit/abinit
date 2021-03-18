@@ -312,24 +312,22 @@ theme:
       - navigation.tabs
       #- navigation.tabs.sticky  # Nice but for insiders only
       #- toc.integrate
+      - header.autohide
 
 plugins:
     - abimkdocs
     - search:
           separator: '[\s\-\.]+'
-          lang:
-            - en
+          min_search_length: 2
+          #prebuild_index: true
 
 extra_css:
     - css/extra.css
     - css/gallery.css
     - css/my_codehilite.css
-    #- extra_javascript/my_bootstrap/css/bootstrap.min.css
-    #- extra_javascript/my_bootstrap/css/bootstrap-theme.min.css
 
 extra_javascript:
     - extra_javascript/abidocs.js
-    #- extra_javascript/my_bootstrap/js/bootstrap.min.js
 
 
 copyright: Copyright &copy; 2020-2021 The Abinit Group
