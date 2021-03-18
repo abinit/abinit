@@ -327,10 +327,10 @@ http://tech.deepumohan.com/2013/09/javascript-ace-editor-positioning-bootstrap.h
 
 #inbox .btn-io {
     border-radius: 50%;
-    height: 54px;
-    width: 54px;
+    height: 60px;
+    width: 60px;
     padding: 0 !important;
-    box-shadow: 0px 3px 7px 0px rgba(202, 124, 124, 0.72);
+    background: #3C80F6;
 }
 
 #inbox .dropup .dropdown-menu, 

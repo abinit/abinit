@@ -158,12 +158,11 @@ class MyEntry(Entry):
             modal_id = "modal-id-%s" % self.key
             s = f"""
 {s}
-
-<div id="{modal_id}" class="modal" style="height: initial; max-height: 90%; max-width: 90%; width: initial;"
+<div id="{modal_id}" class="modal" style="height: initial; max-height: 90%; max-width: 90%; width: initial;">
 {bibtex}
 <a href="#" rel="modal:close">Close</a>
 </div>
-<p><a href="#{modal_id}" class="small-text" rel="modal:open">bibtex</a></p> <!-- Link to open the modal -->
+<p><a href="#{modal_id}" rel="modal:open">bibtex</a></p> <!-- Link to open the modal -->
 """
             #assert bibtex_ui in ("link", "button")
             #btn, modal = self.get_bibtex_btn_modal(link=bibtex_ui=="link")
@@ -1464,6 +1463,7 @@ def add_popover(element, content=None, title=None, html=False):
     # NB: Unfortunately, cannot subclass etree.Element in py2.7.
     def tos(s):
         return s if html else escape(s)
+
     element.set("data-toggle", "popover")
     if title: element.set("title", tos(title))
     if content:

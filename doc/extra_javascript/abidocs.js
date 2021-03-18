@@ -7,6 +7,7 @@ $(function() {
         position:'right',
     	animation:'scale',
         allowHTML: true,
+        duration: [200, 100],
     	arrow:'true'
     });
 
