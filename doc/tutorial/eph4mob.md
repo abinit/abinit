@@ -165,7 +165,7 @@ Post-processing and visualisation tools are provided by AbiPy.
 See e.g. the README of [AbiPy](https://github.com/abinit/abipy)
 and the [AbiPy tutorials](https://github.com/abinit/abitutorials).
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Ground state and phonons of fcc AlAs
 

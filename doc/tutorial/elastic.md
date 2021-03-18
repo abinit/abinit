@@ -26,7 +26,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about two hours.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 The ground-state geometry of (hypothetical) wurtzite AlP
 

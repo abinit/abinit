@@ -29,7 +29,7 @@ The user should have already completed several advanced tutorials, including:
 
 This tutorial should take about 1 hour and 30 minutes.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Ground-state properties of AlP and general parameters
 

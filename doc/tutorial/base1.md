@@ -30,7 +30,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about 2 hours.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Computing the (pseudo) total energy and some associated quantities
 

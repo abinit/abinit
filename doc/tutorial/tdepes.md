@@ -65,7 +65,7 @@ There are three ways to compute the temperature dependence with Abinit:
           LibXC          : yes
           Wannier90      : no
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,

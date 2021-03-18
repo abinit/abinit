@@ -20,7 +20,7 @@ to do similar comparisons with their own datasets.
 
 This tutorial should take about 3h-4h.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1. Introduction - the quantities to be compared
 

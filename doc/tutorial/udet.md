@@ -15,7 +15,7 @@ to generate PAW atomic data.
 
 This tutorial should take about 1/2 hour.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Summary of linear response method to determine *U*
 

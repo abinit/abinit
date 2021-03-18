@@ -20,7 +20,7 @@ thermodynamical properties, please consult the [second tutorial on DFPT](/tutori
 
 This tutorial should take about 2 hours.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 The ground-state geometry of AlAs
 

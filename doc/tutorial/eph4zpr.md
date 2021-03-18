@@ -254,7 +254,7 @@ A typical workflow for ZPR calculations involves the following steps
 
 ## Getting started
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
 Why not create Work_eph4zpr in $ABI_TESTS/tutorespfn/Input?

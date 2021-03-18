@@ -28,7 +28,7 @@ and the [[usewvl]] keyword).
        the `--with-bigdft`, `BIGDFT_LIBS`, `BIGDFT_FCFLAGS`, etc. flags during the
        `configure` step.
  
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Wavelets variables and parallelism
 

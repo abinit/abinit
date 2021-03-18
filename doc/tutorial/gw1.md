@@ -27,7 +27,7 @@ After this first tutorial on GW, you should read the [second GW tutorial](/tutor
 
 This tutorial should take about 2 hours.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 General example of an almost converged GW calculation
 

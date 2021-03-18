@@ -26,7 +26,7 @@ or the use of a specific submission file.
 This tutorial should take about 1.5 hour and requires a modern 
 computer cluster of 20 CPU cores or more.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Generating the WFK file in parallel
 

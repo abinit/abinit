@@ -16,7 +16,7 @@ Please follow the two tutorials on PAW in ABINIT ([PAW1](/tutorial/paw1), [PAW2]
 
 This tutorial should take about 1 hour to complete.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 0 Short summary of the DFT+U method
 

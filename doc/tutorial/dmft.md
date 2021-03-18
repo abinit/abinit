@@ -21,7 +21,7 @@ variables common to DFT+_U_ and DFT+DMFT.
 This tutorial should take about one hour to complete
 (less if you have access to several processors).
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 The DFT+DMFT method: summary and key parameters
 

@@ -262,7 +262,7 @@ lowest-order variational approximation (LOVA)
 
 ## Getting started
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 Before beginning, you might consider to work in a different subdirectory as for the other tutorials.
 Why not create *Work_eph4isotc* in $ABI_TESTS/tutorespfn/Input?

@@ -39,7 +39,7 @@ explained in the tutorial [A first introduction to ABINIT in parallel](/tutorial
 This tutorial should take less than two hours to be done if a powerful parallel
 computer is available.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 The structure of the parallelism for the DFPT part of ABINIT
 

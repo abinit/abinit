@@ -850,38 +850,6 @@ The full bibtex file is available [here](../abiref.bib).
 
 !!! note
 
-    Supposing you made your own install of ABINIT, the input files to run the examples
-    are in the *~abinit/tests/* directory where *~abinit* is the absolute path of the abinit top-level directory.
-    If you have NOT made your own install, ask your system administrator where to find the package, especially the executable and test files.
-
-    To execute the tutorials, create a working directory (`Work*`) and
-    copy there the input files and the *files* file of the lesson. This will be explicitly mentioned in the first lessons,
-    that will tell you more about the *files* file (see also [[help:abinit#intro|section 1.1]]).
-    The *files* file ending with *_x* (e.g. *tbase1_x.files*) **must be edited** every time you start to use a new input file.
-
-    Most of the tutorials do not rely on parallelism (except specific [[tutorial:basepar|tutorials on parallelism]]).
-    However you can run most of the tutorial examples in parallel, see the [[topic:parallelism|topic on parallelism]].
-
-    In case you work on your own PC or workstation, to make things easier, we suggest you define some handy environment variables by
-    executing the following lines in the terminal:
-
-    ```bash
-    export ABI_HOME=Replace_with_absolute_path_to_abinit_top_level_dir
-    export PATH=$ABI_HOME/src/98_main/:$PATH
-    export ABI_TESTS=$ABI_HOME/tests/
-    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Pseudopotentials used in examples.
-    ```
-
-    Examples in this tutorial use these shell variables: copy and paste
-    the code snippets into the terminal (**remember to set ABI_HOME first!**).
-    The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
-    so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
-
-"""
-        tutorial_readmev9 = """
-
-!!! note
-
     Supposing you made your own installation of ABINIT, the input files to run the examples
     are in the *~abinit/tests/* directory where *~abinit* is the **absolute path** of the abinit top-level directory.
     If you have NOT made your own install, ask your system administrator where to find the package,
@@ -917,10 +885,9 @@ The full bibtex file is available [here](../abiref.bib).
         new_lines = []
         for line in lines:
             if "[TUTORIAL_README]" in line:
-                raise RuntimeError("Warning using old TUTORIAL_README")
                 new_lines.extend(tutorial_readme.splitlines())
             elif "[TUTORIAL_READMEV9]" in line:
-                new_lines.extend(tutorial_readmev9.splitlines())
+                raise RuntimeError("Replace TUTORIAL_README9 with TUTORIAL_README")
             else:
                 new_lines.append(line)
 
@@ -1319,8 +1286,8 @@ The full bibtex file is available [here](../abiref.bib).
             if end: url = "%s#%s" % (url, end)
             #print("url", url)
 
-        #if self.verbose:
-        #print("token", token, "page_rpath", page_rpath, "url", url)
+        if self.verbose: print("token", token, "page_rpath", page_rpath, "url", url)
+
         a.set('href', url.strip())
         if target: a.set('target', target)
         return a
@@ -1391,20 +1358,6 @@ Enter `@anaddb` in the search bar to show only the variables of `anaddb`.
     def dialog_from_filename(self, path, title=None, ret_btn_dialog=False):
         """Build customized jquery dialog to show the content of filepath `path`."""
         abs_path = os.path.join(self.root, path)
-
-        # FIXME: This to facilitate migration to new scheme for file extensions
-        # It will be removed when the beautification is completed.
-        if path.endswith(".in") and not os.path.exists(abs_path):
-            print("Using old convention for file extension: `.in` instead of `.abi`.\n",
-                  "Please change the md tutorial to use the .abi convention for", path)
-            root, _ = os.path.splitext(path)
-            path = root + ".abi"
-
-        if path.endswith(".out") and not os.path.exists(abs_path):
-           print("Using old convention for file extension: `.out` instead of `.abo`.\n",
-                 "Please change the md tutorial to use the .abo convention for", path)
-           root, _ = os.path.splitext(path)
-           path = root + ".abo"
 
         title = path if title is None else title
         with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:

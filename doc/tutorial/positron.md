@@ -20,7 +20,7 @@ The user should be familiar with the four basic tutorials of `ABINIT` and the [f
 
 This tutorial should take about 2 hours.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Computing the positron lifetime in Si lattice
 

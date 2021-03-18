@@ -171,7 +171,7 @@ be given in the next sections.
 
 ## A simple example of parallelism in ABINIT
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ### Running a job
 

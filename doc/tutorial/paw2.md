@@ -13,7 +13,7 @@ You already should know how to use ABINIT in the PAW case (see the tutorial [PAW
 
 This tutorial should take about 2h00.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1. The PAW atomic dataset - introduction
 
