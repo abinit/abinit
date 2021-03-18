@@ -1,12 +1,14 @@
+
 // Code executed on page ready
 $(function() {
 
-    // Enable all bootstrap popovers and tooltips in the document
-    //$('[data-toggle="popover"]').popover(); 
-    //$('[data-toggle="tooltip"]').tooltip();
-
-    // Make bootstrap modal draggable and resizable with jquery-ui
-    //$('.modal-dialog').draggable().resizable();
+    // Activate popovers with tippyjs: https://atomiks.github.io/tippyjs/
+    tippy('[data-toggle="popover"]', {
+        position:'right',
+    	animation:'scale',
+        allowHTML: true,
+    	arrow:'true'
+    });
 
     // This for the floating action button: https://bootsnipp.com/snippets/featured/inbox-by-gmail
     $('.fab').hover(function () {
@@ -68,6 +70,7 @@ function TabLetterLinkDeactive() {
   }
 }
 
+
 function openLetter(evt, letter) {
   // Declare all variables
   var i, TabContentLetter, TabLetterLink;
@@ -86,6 +89,7 @@ function openLetter(evt, letter) {
   myLetter.getElementsByClassName('HeaderLetter')[0].style.display = "none";
   evt.currentTarget.className += " active";
 } 
+
 
 function searchInput() {
   // Declare variables
@@ -122,6 +126,7 @@ function searchInput() {
     }
   }
 }
+
 
 function defaultClick(first) {
   if ( !first) {
@@ -165,13 +170,10 @@ function abidocs_jqueryui_dialog(dialog_id, btn_id) {
          var titlebar = e.parent().children('.ui-dialog-titlebar');
          titlebar.prepend('<button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only PinDialog" role="button" aria-disabled="false" title="pin down"><span class="ui-button-icon-primary ui-icon ui-icon-pin-w"></span></button>');
 
-        // This to solve the conflict between bootstrap and jquery-ui close button.
-        //titlebar.find(".ui-dialog-titlebar-close").replaceWith('<a class="ui-dialog-titlebar-close ui-corner-all ui-state-default" href="#" role="button"><span class="ui-icon ui-icon-close" title="close">close</span></a>');
-        //titlebar.find(".ui-dialog-titlebar-close").click(function(){{ e.dialog("close"); }});
       }
    });
 
-   // This does not work and raises `dialogExtend is not a function`
+   // This does not work anylonger as it raises `dialogExtend is not a function`
    //e.dialogExtend({
    //    "maximizable": false, "minimizable": true, "collapsable": true, "minimizeLocation": "left",
    //    "dblclick": "collapse",

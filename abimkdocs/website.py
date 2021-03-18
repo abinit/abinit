@@ -159,13 +159,11 @@ class MyEntry(Entry):
             s = f"""
 {s}
 
-<div id="{modal_id}" class="modal" style="height: initial; max-height: 90%; max-width: 90%; width: initial;">
-  <p>{bibtex}</p>
-  <a href="#" rel="modal:close">Close</a>
+<div id="{modal_id}" class="modal" style="height: initial; max-height: 90%; max-width: 90%; width: initial;"
+{bibtex}
+<a href="#" rel="modal:close">Close</a>
 </div>
-
-<!-- Link to open the modal -->
-<p><a href="#{modal_id}" rel="modal:open">bibtex</a></p>
+<p><a href="#{modal_id}" class="small-text" rel="modal:open">bibtex</a></p> <!-- Link to open the modal -->
 """
             #assert bibtex_ui in ("link", "button")
             #btn, modal = self.get_bibtex_btn_modal(link=bibtex_ui=="link")
@@ -534,13 +532,13 @@ You can change these parameters at compile or run time usually.
                 var_list = [v for v in vd.values() if v.varset == varset]
                 meta = {"description": "%s input variables" % varset}
                 with self.new_mdfile("variables", varset + ".md", meta=meta) as mdf:
-                    mdf.write("""\
+                    mdf.write(f"""\
 # {varset} input variables
 
 This document lists and provides the description of the name (keywords) of the
-{varset} input variables to be used in the input file for the {executable} executable.
+{varset} input variables to be used in the input file for the {vd.executable} executable.
 
-""".format(varset=varset, executable=vd.executable))
+""")  #.format(varset=varset, executable=vd.executable))
 
                     for i, var in enumerate(var_list):
                         mdf.write(var.to_abimarkdown(with_hr=False))
@@ -1123,7 +1121,7 @@ The full bibtex file is available [here](../abiref.bib).
                                "You can change these parameters at compile or runtime usually.\n")
                     url = "/variables/external_parameters#%s" % self.slugify(name)
                     if a.text is None: a.text = name
-                    add_popover(a, title=self.codevars.all_external_params[name], content=content)
+                    add_popover(a, content=content, title=self.codevars.all_external_params[name])
 
                 else:
                     self.warn("Don't know how to handle wikilink token `%s` in `%s`" % (token, page_rpath))
@@ -1341,9 +1339,9 @@ The full bibtex file is available [here](../abiref.bib).
             lis = "\n".join("<li>{link}</li>".format(
                 link=var.internal_link(self, page_rpath, label=var.abivarname, cls="small-grey-link")) for _, var in sorted(group))
 
-            html_vars += """
+            html_vars += f"""
 <li><ul id="{char}" class="TabContentLetter">
-<li class="HeaderLetter">{char}</li> {lis} </ul></li>""".format(char=char, lis=lis)
+<li class="HeaderLetter">{char}</li> {lis} </ul></li>""" #.format(char=char, lis=lis)
 
         # NB: <form> is needed in order not to trigger the f/s keydown event registered by mkdocs-material.
         search_form = """
@@ -1418,17 +1416,13 @@ Enter `@anaddb` in the search bar to show only the variables of `anaddb`.
 
         btn_id, dialog_id = gen_id(n=2)
 
-        dialog = """
+        dialog = f"""\
 <div id="{dialog_id}" class="my_dialog" title="{title}" hidden><div>{text}</div></div>
 
 <script> $(function() {{ abidocs_jqueryui_dialog("#{dialog_id}", "#{btn_id}") }}); </script>
-""".format(**locals())
+"""
 
-        button = """\
-<button id="{btn_id}" class="md-button md-button--secondary">
-View {path}
-</button>
-""".format(**locals())
+        button = f'<button id="{btn_id}" class="md-button md-button--secondary"> View {path} </button>'
 
         if not ret_btn_dialog:
             button = '<div class="text-center">%s</div>' % button
@@ -1462,19 +1456,18 @@ class Page(object):
         return ("/" + self.relpath).replace(".md", "")
 
 
-def add_popover(element, title=None, content=None, html=False):
+def add_popover(element, content=None, title=None, html=False):
     """
     Helper function to add popover to an anchor element.
+    using https://atomiks.github.io/tippyjs. See also abidocs.js.
     """
     # NB: Unfortunately, cannot subclass etree.Element in py2.7.
     def tos(s):
         return s if html else escape(s)
     element.set("data-toggle", "popover")
     if title: element.set("title", tos(title))
-    element.set("data-placement", "auto right")
-    element.set("data-trigger", "hover focus")
-    if content: element.set("data-content", tos(content))
-    if html: element.set("data-html", "true")
+    if content:
+        element.set("data-tippy-content", tos(content))
 
 
 def a2s(element, cls=None):

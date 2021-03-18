@@ -3,43 +3,41 @@
 {% block libs %}
     {{ super() }}
 
-    <!-- Jquery from Google CDN 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> 
+    <!-- 
+    IMPORTANT: Don't use boostrap in particular boostrap.css since it comes into conflict with mkdocs-material theme.
+    Prefer low-level tools based on Jquery or JS library such as Tippyjs to get the work done.
     -->
+
+    <!-- Jquery from Google CDN -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Load Jquery UI -->
-    <!-- Handle jQuery plugin naming conflict between jQuery UI and Bootstrap 
-    https://stackoverflow.com/questions/13731400/jqueryui-tooltips-are-competing-with-twitter-bootstrap
-    -->
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
-    <!--
+    <!-- Handle jQuery plugin naming conflict between jQuery UI and Bootstrap
+    https://stackoverflow.com/questions/13731400/jqueryui-tooltips-are-competing-with-twitter-bootstrap
     <script>
       $.widget.bridge('uibutton', $.ui.button);
       $.widget.bridge('uitooltip', $.ui.tooltip);
     </script>
     -->
 
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
     <!-- jQuery Modal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
 
+    <!-- Tippyjs for popovers https://atomiks.github.io/tippyjs/ -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
 
     <!-- font-awesome -->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-    <!-- Support for bootstrap table http://bootstrap-table.wenzhixin.net.cn/ -->
-    <!--
-    {% if page.meta and page.meta.bootstrap_table %}
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/bootstrap-table.min.css">
-        <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
-    {% endif %}
-    -->
-
     <!--Pace support. http://github.hubspot.com/pace/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/white/pace-theme-big-counter.min.css" />
+
     <script>
         paceOptions = {
             ajax: true,      // disabled
@@ -50,23 +48,18 @@
         };
     </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/white/pace-theme-big-counter.min.css" />
     <!-- MathJax support
     <script type="text/javascript" async 
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
     </script> 
     -->
-    <!--
-    This is compatible with plotly.
-    -->
+
+    <!-- This version is compatible with plotly. -->
     <script type="text/javascript" async 
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_SVG">
     </script> 
 
-    <!--
-    Configure MathJax to produce automatic equation numbers http://docs.mathjax.org/en/latest/tex.html
-    -->
+    <!-- Configure MathJax to produce automatic equation numbers http://docs.mathjax.org/en/latest/tex.html -->
     <script type="text/x-mathjax-config">
       MathJax.Hub.Config({
         //jax: ["input/TeX","output/HTML-CSS"],
@@ -177,9 +170,6 @@
     {% endif %}
 
     <!-- Load fonts used for input variables -->
-    <!--
-    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono" rel="stylesheet">
-    -->
     <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
 {% endblock %}
 
