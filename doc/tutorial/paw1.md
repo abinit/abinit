@@ -148,7 +148,7 @@ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  32  32  32
 ```
 
 
-* A specific description of the PAW dataset (you might follow the tutorial [PAW2](paw2),
+* A specific description of the PAW dataset (you might follow the tutorial [PAW2](/tutorial/paw2),
 devoted to the building of the PAW atomic data, for a complete understanding of the file):
 
 ```
@@ -545,7 +545,7 @@ You can compare other results in the 3 output files: total energy, eigenvalues, 
     The CPU time increases with the size of the partial wave basis. This is why it is
     not recommended to use systematically high-precision PAW datasets.  
     If you want to learn how to generate PAW datasets with different *partial wave* basis,
-    you might follow the [tutorial on generating PAW datasets (PAW2)](paw2).
+    you might follow the [tutorial on generating PAW datasets (PAW2)](/tutorial/paw2).
 
 ## 7. Checking the validity of PAW results
 
@@ -616,7 +616,7 @@ The overlap check can even be by-passed with [[pawovlp]]=-1 (not recommended!).
     is eventually printed.
 
 Also note that you can control the compensation charge radius and shape
-function while generating the PAW dataset (see [tutorial on generating PAW datasets (PAW2)](paw2)).
+function while generating the PAW dataset (see [tutorial on generating PAW datasets (PAW2)](/tutorial/paw2)).
 
 
 ### 8.b. Mixing scheme for the Self-Consistent cycle; decomposition of the total energy###
@@ -664,7 +664,7 @@ computed; it is indeed a very good approximation.
 
 Converging a _Self-Consistent Cycle_, or ensuring the global minimum is reached,
 with PAW+U is sometimes difficult. Using [[usedmatpu]] and [[dmatpawu]] can help.
-See [tutorial on DFT+U](dftu).
+See [tutorial on DFT+U](/tutorial/dftu).
 
 ### 8.d. Printing volume for PAW###
 

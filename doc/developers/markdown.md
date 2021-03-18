@@ -256,7 +256,7 @@ The video below gives an overwiew of the command line options of `runtests.py`
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
 More advanced features such as video galleries require a bit of HTML/CSS/JS code in the Markdown page.
-See for example the [Abinit video gallery](../topics/external_resources#abinit-videos)
+See for example the [Abinit video gallery](/topics/external_resources#abinit-videos)
 built with [lightGallery](http://sachinchoolur.github.io/lightGallery/).
 
 
@@ -269,8 +269,8 @@ The Markdown syntax for links is:
 | Markdown | Result | Extension required |
 | :-- | :-- | :--
 | `[Links for videos](#videos)` | [Links for videos](#videos)  | --
-| `[About topics](abimkdocs#topics)` | [About topics](abimkdocs#topics)  | --
-| `[MBPT document](../theory/mbt)` | [MBPT document](../theory/mbt) | --
+| `[About topics](/developers/abimkdocs#topics)` | [About topics](/developers/abimkdocs#topics)  | --
+| `[MBPT document](/theory/mbt)` | [MBPT document](/theory/mbt) | --
 | `[The Abinit website](https://www.abinit.org)` | [The Abinit website](https://www.abinit.org)  | --
 | `<https://www.abinit.org>` | <https://www.abinit.org> | --
 

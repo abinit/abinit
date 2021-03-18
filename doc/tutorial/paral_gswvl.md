@@ -16,7 +16,7 @@ This tutorial should take about 90 minutes and requires you have several CPU
 cores (up to 64 if possible).
 
 You are supposed to know already some basics of parallelism in ABINIT,
-explained in the tutorial [A first introduction to ABINIT in parallel](basepar).  
+explained in the tutorial [A first introduction to ABINIT in parallel](/tutorial/basepar).  
 
 The tutorial will be more profitable if you have already performed calculations
 using the wavelet formalism (see the [[topic:Wavelets|topic page on wavelets]]

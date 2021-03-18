@@ -83,7 +83,7 @@ and
             xcart1    -7.4307169181E-01  0.0000000000E+00  0.0000000000E+00
                        7.4307169181E-01  0.0000000000E+00  0.0000000000E+00
 
-These are similar to those determined in [tutorial 1](base1),
+These are similar to those determined in [tutorial 1](/tutorial/base1),
 although they have been obtained in one run.
 You can also check that the residual forces are lower than `5.0d-4`.
 Convergence issues are discussed in [[help:abinit#numerical-quality|section 6]] of the abinit help file, on numerical quality.

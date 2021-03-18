@@ -20,7 +20,7 @@ elements and phonon frequencies and eigenvectors, from a standard ABINIT
 phonon calculation, which will be reviewed succinctly.
 
 Note that this tutorial covers a legacy version of the electron-phonon calculation.
-A new, more efficient workflow is presented in Tutorials [Introduction to the new EPH workflow](eph_intro).
+A new, more efficient workflow is presented in Tutorials [Introduction to the new EPH workflow](/tutorial/eph_intro).
 The old workflow is still useful because it is compatible with spinors (spin orbit coupling), PAW, and
 therefore also DFT+U, but it will be deprecated at some time in the future.
 
@@ -38,7 +38,7 @@ This tutorial should take about 1 hour.
 *Before beginning, you might consider making a different subdirectory to work
 in. Why not create Work_eph in \$ABI_TESTS/tutorespfn/Input?*
 
-It is presumed that the user has already followed the Tutorials [RF1](rf1) and [RF2](rf2),
+It is presumed that the user has already followed the Tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
 and understands the calculation of ground state and response (phonon using density-functional
 perturbation theory (DFPT)) properties with ABINIT.
 
@@ -111,7 +111,7 @@ wedge. One way to check this is to set iqpt to a very large value: the error mes
 gives you the size of the irreducible set.
 
 The value of [[acell]] is fixed to a rounded value from experiment.
-It, too, should be converged to get physical results (see [Tutorial 3](base3)).
+It, too, should be converged to get physical results (see [Tutorial 3](/tutorial/base3)).
 
 Note that the value of 1.0E-14 for [[tolwfr]] is tight, and should be even
 lower (down to 1.0E-20 or even 1.0E-22) for accurate results. This is because the wavefunctions
@@ -135,7 +135,7 @@ directions of the fcc unit cell. This is done for three different phonons,
 Gamma, (1/2,0,0), and X=(1/2,1/2,0), which generate the 2x2x2 q-point grid
 (take care with the reduced coordinates of the reciprocal space points! They
 are not along cartesian directions, but along the reciprocal space lattice
-vectors.). The whole calculation follows the same lines as [Tutorial RF1](rf1).
+vectors.). The whole calculation follows the same lines as [Tutorial RF1](/tutorial/rf1).
 As an example, DATASET 3 calculates the perturbed
 wavefunctions at k+q, for k in the ground state k-point mesh, and q=(1/2,0,0).
 Then, DATASET 3 calculates
@@ -143,7 +143,7 @@ Then, DATASET 3 calculates
      2DTE 6.9410188336E-01 Ha
 
 for the second-order energy variation for movement of the (unique) atom along
-the first reduced direction for q=(1/2,0,0). The main differences with [Tutorial RF1](rf1)
+the first reduced direction for q=(1/2,0,0). The main differences with [Tutorial RF1](/tutorial/rf1)
 are that Given we are dealing with a metal, no
 perturbation wrt electric fields is considered ; However, if you want to do
 transport calculations, you need the ddk calculation anyway, to get the
@@ -257,7 +257,7 @@ The new variables are at the head of the file:
 [[anaddb:elphflag]] is a flag to turn on the calculation of the electron-
 phonon quantities. The first quantities which will be calculated are the
 phonon linewidths along a path in reciprocal space (exactly like the band
-structure in [the tutorial 3](base3). The path is specified by the
+structure in [the tutorial 3](/tutorial/base3). The path is specified by the
 variable [[anaddb:qpath]] giving the apexes of the path in reciprocal space,
 which are usually special points of high symmetry. The number of points is
 given by [[anaddb:nqpath]]. Note that qpath can be used in normal phonon band
@@ -353,7 +353,7 @@ the Fermi surface. This is the "true" velocity the charge will move at, once
 you have displaced the Fermi sphere a little bit in k space (see, e.g.
 [[cite:Ashcroft1976|Ashcroft and Mermin]]). The velocity can be related simply to a
 commutator of the position, which is also used for dielectric response, using
-a DDK calculation (see [the first DFPT tutorial (DFPT1)](rf1).
+a DDK calculation (see [the first DFPT tutorial (DFPT1)](/tutorial/rf1).
 The phonon calculation at Gamma need not include the electric field (this is a metal after all, so the effect on the
 phonons should be negligible), but we need an additional dataset to calculate
 the 3 DDK files along the 3 primitive directions of the unit cell. To be more

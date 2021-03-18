@@ -13,8 +13,8 @@ main input variables that govern convergence and numerical efficiency.
 
 You are supposed to know already some basics of parallelism in ABINIT,
 explained in the tutorial
-[A first introduction to ABINIT in parallel](basepar), and
-[ground state with plane waves](paral_gspw).
+[A first introduction to ABINIT in parallel](/tutorial/basepar), and
+[ground state with plane waves](/tutorial/paral_gspw).
 
 This tutorial should take about 1.5 hour to be done and requires to have at
 least a 200 CPU core parallel computer.

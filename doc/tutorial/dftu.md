@@ -12,7 +12,7 @@ You will learn what is a DFT+U calculation and what are the main input
 variables controlling this type of calculation.
 
 It is supposed that you already know how to do PAW calculations using ABINIT.
-Please follow the two tutorials on PAW in ABINIT ([PAW1](paw1), [PAW2](paw2)), if this is not the case.
+Please follow the two tutorials on PAW in ABINIT ([PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2)), if this is not the case.
 
 This tutorial should take about 1 hour to complete.
 
@@ -86,8 +86,8 @@ and [[nspden]], that define this antiferromagnetic ordering along the <111>
 direction (of a conventional cubic cell).
 
 If you take a look at the output file (tdftu_1.out), you can see the
-integrated total density in the PAW spheres (see the [PAW1](paw1)
-and [PAW2](paw2) tutorials on PAW formalism). This value roughly
+integrated total density in the PAW spheres (see the [PAW1](/tutorial/paw1)
+and [PAW2](/tutorial/paw2) tutorials on PAW formalism). This value roughly
 estimates the magnetic moment of NiO:
 
      Integrated electronic and magnetization densities in atomic spheres:
@@ -324,4 +324,4 @@ spin. The AMF should be used when orbital occupations are near the average occup
 ## 5 Projected density of states in DFT+U
 
 Using [[prtdos]] 3, you can now compute the projected d and f density of states.
-For more information about projected density of states, for more details see the [PAW1](paw1) tutorial.
+For more information about projected density of states, for more details see the [PAW1](/tutorial/paw1) tutorial.

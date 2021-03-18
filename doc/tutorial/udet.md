@@ -9,8 +9,8 @@ authors: DJA
 This tutorial aims to show how you can determine *U* for further DFT+*U*
 calculations consistently and in a fast an easy way. You will learn how to prepare
 the input files for the determination and how to use the main parameters implemented for this aim.
-It is supposed that you already know how to run ABINIT with PAW  (tutorial [PAW1](paw1)).
-Obviously, you should also read the tutorial [DFT+U](dftu), and likely the tutorial [PAW2](paw2),
+It is supposed that you already know how to run ABINIT with PAW  (tutorial [PAW1](/tutorial/paw1)).
+Obviously, you should also read the tutorial [DFT+U](/tutorial/dftu), and likely the tutorial [PAW2](/tutorial/paw2),
 to generate PAW atomic data.
 
 This tutorial should take about 1/2 hour.

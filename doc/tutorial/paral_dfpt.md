@@ -19,7 +19,7 @@ Such computations are realized when one of the input variables [[rfphon]],
 [[rfelfd]] or [[rfstrs]] are non-zero, which activates [[optdriver]]=1.
 You are supposed to be well-familiarized with such calculations before starting
 the present tutorial. See the input variables described in [[varset:dfpt]] and
-the tutorial [Response-Function 1](rf1) and subsequent tutorials.
+the tutorial [Response-Function 1](/tutorial/rf1) and subsequent tutorials.
 
 You will learn about the basic implementation of parallelism for DFPT
 calculations, then will execute a very simple, quick calculation for one
@@ -34,7 +34,7 @@ the tutorial, a 16-computing-core machine is recommended, in order to perform
 the scalability measurements.
 
 You are supposed to know already some basics of parallelism in ABINIT,
-explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
+explained in the tutorial [A first introduction to ABINIT in parallel](/tutorial/basepar).
 
 This tutorial should take less than two hours to be done if a powerful parallel
 computer is available.
@@ -55,7 +55,7 @@ The step 2 and step 3 are the time-consuming DFPT steps, to which the present
 tutorial is dedicated, and for which the implementation of the parallelism
 will be explained. They generate different files, and in particular, one (or several) DDB file(s).
 As explained in related tutorials (see e.g.
-[Response-Function 1](rf1)), several perturbations are usually treated in
+[Response-Function 1](/tutorial/rf1)), several perturbations are usually treated in
 one dataset (hence the "Do for each perturbation"-loop in step 2 of this
 Schema). For example, in one dataset, although one considers only one phonon
 wavevector, all the primitive atomic displacements for this wavevector (as

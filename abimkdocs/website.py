@@ -812,8 +812,9 @@ The full bibtex file is available [here](../abiref.bib).
             return md_files
 
         pages_in_toolbar = []
-        entries = self.mkdocs_config.get("pages")
-        if entries is None: entries = self.mkdocs_config.get("nav") # Old mkdocs syntax
+        entries = self.mkdocs_config.get("nav")
+        #entries = self.mkdocs_config.get("pages")
+        #if entries is None: entries = self.mkdocs_config.get("nav") # Old mkdocs syntax
         for entry in entries:
             pages_in_toolbar.extend(find_mds(entry))
         #for p in pages_in_toolbar: print(p)
@@ -916,6 +917,7 @@ The full bibtex file is available [here](../abiref.bib).
         new_lines = []
         for line in lines:
             if "[TUTORIAL_README]" in line:
+                raise RuntimeError("Warning using old TUTORIAL_README")
                 new_lines.extend(tutorial_readme.splitlines())
             elif "[TUTORIAL_READMEV9]" in line:
                 new_lines.extend(tutorial_readmev9.splitlines())

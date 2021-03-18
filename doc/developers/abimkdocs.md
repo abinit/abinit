@@ -8,7 +8,7 @@ Most of the documentation is written in [Markdown](https://en.wikipedia.org/wiki
 a lightweight markup language with plain text 
 [formatting syntax](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 The documentation includes the User Guide, the Abinit tutorial, the topics, the release notes
-as well as the pages with the [input variables](../variables/) and the [bibliographic references](../theory/bibliography.md)
+as well as the pages with the [input variables](/variables/) and the [bibliographic references](/theory/bibliography)
 that are generated *automatically* in python from the information reported in 
 `~abinit/mkdocs/variables_abinit.py` (and similar files in the same directory for other main executables) and the bibtex 
 entries given in the `~abinit/doc/abiref.bib` file.
@@ -40,9 +40,9 @@ while Mkdocs will handle the HTML/CSS/Javascript part.
 
 In addition to the basic markdown syntax, the Abinit documentation supports extensions and shortcuts
 to ease the writing of hyperlinks and the inclusion of bibliographic citations.
-A detailed description of *our markdown dialect* is given in [our markdown page](markdown).
+A detailed description of *our markdown dialect* is given in [our markdown page](/developers/markdown).
 Also [MathJax](https://www.mathjax.org/) for equations in LaTeX is activated, 
-and the (few) specificities of its usage in the Abinit docs are explained [in this section](markdown.md#mathjax).
+and the (few) specificities of its usage in the Abinit docs are explained [in this section](/developers/markdown#mathjax).
 
 As a net result, Abinit developers can write nice-looking documentation and release notes without having to use 
 HTML explicitly while working in an environment that is well-integrated with the Abinit ecosystem 
@@ -237,12 +237,12 @@ to the HTML meta section.
   Also avoid sentences like *If you follow the tutorial, you should go back to the tutorial window now.*
 
 * Number the paragraphs only if really needed: the links in the navigation bar are not readable and besides
-  the number will appear in the [permalink](/developers/markdown.md#permalinks).
+  the number will appear in the [permalink](/developers/markdown#permalinks).
   This means that you may need to change several links if you decide to add a new section to the page later on.
   Users may want to share or bookmarks links to the Abinit documentation so broken links should be avoided 
   as much as possible.
 
-* The fact the [wikilink syntax](markdown.md#wikilinks) facilitates the inclusion of hyperlinks does not 
+* The fact the [wikilink syntax](/developers/markdown#wikilinks) facilitates the inclusion of hyperlinks does not 
   mean that we have to add links *everywhere*. 
   This is especially true in the documentation of the input variables in which it does not make sense to
   put links to the same variable we are describing or the same link over and over again in the same paragraph.
@@ -343,7 +343,7 @@ Run the tests with:
 
 with pytest to validate your changes.
 
-In order to refer to a bibliography entry, use the [Wikilink syntax](markdown#wikilinks) with the "cite" namespace.
+In order to refer to a bibliography entry, use the [Wikilink syntax](/developers/markdown#wikilinks) with the "cite" namespace.
 
 ## Topics
 
@@ -414,7 +414,7 @@ for topic "parallelism" and topic "GW".
 
 ## Release Notes
 
-Release notes are written in Markdown so it is possible to use the [wikilink syntax](markdown.md#wikilinks)
+Release notes are written in Markdown so it is possible to use the [wikilink syntax](/developers/markdown#wikilinks)
 to insert links to new tests, new autoconf files and even links to pull-requests and issues that will redirect
 the reader to the Abinit repository on github.
 For example, the following markdown text

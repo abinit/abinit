@@ -416,11 +416,11 @@ MgB$_2$ crystallizes in the so-called
 [AlB$_2$ prototype structure](http://aflow.org/prototype-encyclopedia/AB2_hP3_191_a_d)
 with Boron atoms forming graphite-like (honeycomb) layers separated by layers of Mg atoms.
 This structure may be regarded as that of completely intercalated graphite with C replaced by B.
-Snince MgB$_2$ is formally **isoelectronic to graphite**,
+Since MgB$_2$ is formally **isoelectronic to graphite**,
 its band dispersion is expected to show some similarity to that
 of graphite and graphite intercalation compounds.
 
-![](../eph4isotc_assets/MgB2_structure.png)
+![](eph4isotc_assets/mgb2_structure.png)
 
 Now use the |abiopen| script to plot the electronic bands stored in the GSR file produced
 by the NSCF calculation (the second task of the first Work i.e. *w0/t1*):

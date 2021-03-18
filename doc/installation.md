@@ -18,7 +18,7 @@ working in the terminal), the installation/compilation steps are:
      possibly some recommended libraries (MPI) and other optional libraries such as Wannier90.
      The libraries can be installed with the help of the "fallback" procedure, see below for more info on this step.
      Alternatively, you may want to install everything from source using the procedure detailed in
-     this [tutorial](tutorial/compilation).
+     this [tutorial](/tutorial/compilation).
   2. Get the [latest version of the ABINIT package](https://www.abinit.org/packages) (abinit-x.y.z.tar.gz)
      from the abinit web site.
      More information are available [here](#how-to-get-a-version-of-abinit).
@@ -38,10 +38,10 @@ working in the terminal), the installation/compilation steps are:
 
 Note that the details of step 1 and 3 might vary significantly depending on the operating system.
 Further details are provided by 
-[this tutorial](tutorial/compilation) that cover the scenario in which you want to build everything from source
+[this tutorial](/tutorial/compilation) that cover the scenario in which you want to build everything from source
 and install libraries in your $HOME directory.
 There are also other pages focusing on
-[macOS](INSTALL_MacOS), [CentOS](INSTALL_CentOS) and [Ubuntu](INSTALL_Ubuntu)
+[macOS](/INSTALL_MacOS), [CentOS](/INSTALL_CentOS) and [Ubuntu](/INSTALL_Ubuntu)
 that discuss how to bypass the compilation of the external libraries
 using homebrew or MacPorts (for macOS), dnf (for CentOS) or apt (for Ubuntu).
 
@@ -49,7 +49,7 @@ Examples of configuration files to compile Abinit on clusters are available
 in the |abiconfig| package on github
 (specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)),
 while the configuration files
-used for our buildbot testfarm are available in the [autoconf_examples section](developers/autoconf_examples/).
+used for our buildbot testfarm are available in the [autoconf_examples section](/developers/autoconf_examples/).
 The [ABINIT Wiki](https://wiki.abinit.org) also has a **build abinit** section, that might be useful.
 In particular, the current documentation for the fallback procedure is available
 [here](https://wiki.abinit.org/doku.php?id=build:fallbacks) while configuration options are documented
@@ -192,7 +192,7 @@ There is a template for such "hostname".ac9 file, located in ~abinit/doc/config.
 Its name is *config-template.ac9*. 
 Examples of such files, that are used for testing the package on our testfarm, 
 can be found in ~abinit/doc/build/config-examples,
-or equivalently in the [autoconf_examples section](developers/autoconf_examples/).
+or equivalently in the [autoconf_examples section](/developers/autoconf_examples/).
 Additional examples of configuration files for clusters are provided by the *abiconfig* project 
 and are available [here](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters).
 
@@ -276,9 +276,9 @@ appropriate library to be installed in order to work properly.
 
 For further information on these internal tests, see the ~abinit/tests/built-in/README file.
 
-You might now read the [new user's guide](/doc/guide/new_user), in
+You might now read the [new user's guide](/guide/new_user), in
 order to learn how to use the code, and then follow the four basic
-tutorials, see the [entry page for the tutorials](tutorial/index.md).
+tutorials, see the [entry page for the tutorials](/tutorial/).
 This is useful if you consider that the installation has been successful. Or
 you might continue to read the present Web page, and try to perform the speed
 tests, as well as the other tests.
@@ -471,7 +471,7 @@ fldiff.report and report files are produced automatically.
 
 ## For developers
 
-Note the documentation available in the pages labelled [Developers](developers),
+Note the documentation available in the pages labelled [Developers](/developers/git_and_gitlab/),
 as well as the [developer's corner of the Wiki](https://wiki.abinit.org)
 The following sections are complements for the installation from gitlab, and the generation of the
 ABINIT distribution.
