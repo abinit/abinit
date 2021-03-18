@@ -16,8 +16,8 @@
 !! PARENTS
 !!
 !! TODO
-!! 1) Add contribution to conductivity
-!! 2) Add multiple planewaves description of intermediate energy orbitals.
+!! 1) Add contribution to conductivity.
+!! 2) Smooth the contributions.
 !!
 !! CHILDREN
 !!
@@ -58,7 +58,7 @@ module m_hightemp
   !! hightemp_type
   !!
   !! FUNCTION
-  !! Store hightemp functions and parameters
+  !! Store hightemp functions and parameters.
   !!
   !! SOURCE
   type,public :: hightemp_type
@@ -82,25 +82,27 @@ contains
 
   !!****f* ABINIT/m_hightemp/init
   !! NAME
-  !! init
+  !!  init
   !!
   !! FUNCTION
-  !! Initialize hightemp_type object, memory allocation of arrays...
+  !!  Initialize hightemp_type object, memory allocation of arrays...
   !!
   !! INPUTS
-  !! this=hightemp_type object concerned
-  !! mband=maximum number of bands
-  !! nbcut=number of states used to average the constant potential value
-  !! prt_cg=debug input to print wavefunctions planewaves coefficients.
-  !! rprimd(3,3)=dimensional primitive translations in real space (bohr)
-  !! version=hightemp implementation version
+  !!  this=hightemp_type object concerned
+  !!  mband=maximum number of bands
+  !!  nbcut=number of states used to average the constant potential value
+  !!  prt_cg=debug input to print wavefunctions planewaves coefficients.
+  !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+  !!  version=hightemp implementation version
   !!
   !! OUTPUT
-  !! this=hightemp_type object concerned
+  !!  this=hightemp_type object concerned
   !!
   !! PARENTS
+  !!  m_gstate
   !!
   !! CHILDREN
+  !!  metric
   !!
   !! SOURCE
   subroutine init(this,mband,nbcut,nfftf,nspden,prt_cg,rprimd,version)
@@ -142,18 +144,19 @@ contains
 
   !!****f* ABINIT/m_hightemp/destroy
   !! NAME
-  !! destroy
+  !!  destroy
   !!
   !! FUNCTION
-  !! Destroy hightemp_type object, memory deallocation of arrays...
+  !!  Destroy hightemp_type object, memory deallocation of arrays...
   !!
   !! INPUTS
-  !! this=hightemp_type object concerned
+  !!  this=hightemp_type object concerned
   !!
   !! OUTPUT
-  !! this=hightemp_type object concerned
+  !!  this=hightemp_type object concerned
   !!
   !! PARENTS
+  !!  m_gstate
   !!
   !! CHILDREN
   !!
@@ -165,6 +168,7 @@ contains
     class(hightemp_type),intent(inout) :: this
 
     ! *********************************************************************
+
     this%vtrial(:,:)=zero
     ABI_FREE(this%vtrial)
     this%nfftf=0
@@ -186,25 +190,27 @@ contains
 
   !!****f* ABINIT/m_hightemp/compute_e_shiftfactor
   !! NAME
-  !! compute_e_shiftfactor
+  !!  compute_e_shiftfactor
   !!
   !! FUNCTION
-  !! Compute the energy shift factor $U_0$ corresponding to constant potential contribution
+  !!  Compute the energy shift factor $U_0$ corresponding to constant
+  !!  potential contribution.
   !!
   !! INPUTS
-  !! this=hightemp_type object concerned
-  !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
-  !! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
-  !! mband=maximum number of bands
-  !! nband(nkpt*nsppol)=desired number of bands at each k point
-  !! nkpt=number of k points
-  !! nsppol=1 for unpolarized, 2 for spin-polarized
-  !! wtk(nkpt)=k point weights
+  !!  this=hightemp_type object concerned
+  !!  eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+  !!  eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
+  !!  mband=maximum number of bands
+  !!  nband(nkpt*nsppol)=desired number of bands at each k point
+  !!  nkpt=number of k points
+  !!  nsppol=1 for unpolarized, 2 for spin-polarized
+  !!  wtk(nkpt)=k point weights
   !!
   !! OUTPUT
-  !! this=hightemp_type object concerned
+  !!  this=hightemp_type object concerned
   !!
   !! PARENTS
+  !!  m_vtorho
   !!
   !! CHILDREN
   !!
@@ -226,7 +232,16 @@ contains
 
     ! *********************************************************************
 
-    ! U_{HEG_0}
+    ! Compute U_0 from the sum of local
+    ! potentials (vtrial), averaging over all space.
+    ! Simplest and most precise way to evaluate U_0.
+    if(this%version==1) then
+      this%e_shiftfactor=sum(this%vtrial)/(this%nfftf*this%nspden)
+    end if
+
+    ! Compute U_0^{HEG} from the difference between
+    ! eigenvalues and Fermi gas energies, averaged
+    ! over lasts nbcut bands.
     if(this%version==2) then
       this%e_shiftfactor=zero
       band_index=0
@@ -234,15 +249,18 @@ contains
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           do ii=nband_k-this%nbcut+1,nband_k
-            this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-hightemp_e_heg(dble(ii),this%ucvol))
+            this%e_shiftfactor=this%e_shiftfactor+&
+            & wtk(ikpt)*(eigen(band_index+ii)-hightemp_e_heg(dble(ii),this%ucvol))
           end do
           band_index=band_index+nband_k
         end do
       end do
       this%e_shiftfactor=this%e_shiftfactor/this%nbcut
-      this%ebcut=hightemp_e_heg(dble(this%bcut),this%ucvol)+this%e_shiftfactor
     end if
-    ! U_{K_0}
+
+    ! Compute U_0^K from the difference between
+    ! eigenvalues and kinetic energies, averaged
+    ! over lasts nbcut bands.
     if(this%version==3) then
       this%e_shiftfactor=zero
       this%ebcut=0
@@ -251,7 +269,8 @@ contains
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           do ii=nband_k-this%nbcut+1,nband_k
-            this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
+            this%e_shiftfactor=this%e_shiftfactor+&
+            & wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
           end do
           this%ebcut=this%ebcut+wtk(ikpt)*eigen(band_index+nband_k)
           band_index=band_index+nband_k
@@ -264,20 +283,24 @@ contains
 
   !!****f* ABINIT/m_hightemp/compute_nfreeel
   !! NAME
-  !! compute_nfreeel
+  !!  compute_nfreeel
   !!
   !! FUNCTION
-  !! Compute the value of the integral corresponding to the missing free electrons contribution after band cut.
+  !!  Compute the value of the integral corresponding to the missing
+  !!  free electrons contribution after band cut, with an order 1/2
+  !!  incomplete Fermi-Dirac integral.
   !!
   !! INPUTS
-  !! this=hightemp_type object concerned
-  !! fermie=chemical potential (Hartree)
-  !! tsmear=smearing width (or temperature)
+  !!  this=hightemp_type object concerned
+  !!  fermie=chemical potential (Hartree)
+  !!  nelect=number of electrons per unit cell
+  !!  tsmear=smearing width (or temperature)
   !!
   !! OUTPUT
-  !! this=hightemp_type object concerned
+  !!  this=hightemp_type object concerned
   !!
   !! PARENTS
+  !!  m_gstate,m_vtorho,m_occ
   !!
   !! CHILDREN
   !!
@@ -293,17 +316,33 @@ contains
     ! Scalars
     integer :: ifftf,ispden
     real(dp) :: factor,gamma,xcut
+
     ! *********************************************************************
+
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(1.5)
+
+    ! Compute hightemp contribution to nelect integrating
+    ! over accessible states from bcut to infinity with
+    ! order 1/2 incomplete Fermi-Dirac integral.
     if(this%version==1.or.this%version==2) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
-    else if(this%version==3) then
+    end if
+
+    ! Compute hightemp contribution to nelect integrating
+    ! over energy from ebcut to infinity with order 1/2
+    ! incomplete Fermi-Dirac integral.
+    if(this%version==3) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       xcut=(this%ebcut-this%e_shiftfactor)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
-    else if(this%version==4) then
+    end if
+
+    ! Compute hightemp contribution to nelect using a sum
+    ! of Fermi gas contributions for each point of the fftf grid.
+    ! Warning: This is not yet operational. Work in progress.
+    if(this%version==4) then
       do ifftf=1,this%nfftf
         do ispden=1,this%nspden
           gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
@@ -317,23 +356,26 @@ contains
 
   !!****f* ABINIT/m_hightemp/compute_efreeel
   !! NAME
-  !! compute_efreeel
+  !!  compute_efreeel
   !!
   !! FUNCTION
-  !! Compute the value of the integral corresponding to the missing kinetic energy contribution of free electrons after band cut.
+  !!  Compute the value of the integral corresponding to the missing
+  !!  kinetic energy contribution of free electrons after band cut,
+  !!  with an order 3/2 incomplete Fermi-Dirac integral.
   !!
   !! INPUTS
-  !! this=hightemp_type object concerned
-  !! fermie=chemical potential (Hartree)
-  !! nfftf=number of points in the fine FFT mesh (for this processor)
-  !! nspden=number of spin-density components
-  !! tsmear=smearing width (or temperature)
-  !! vtrial(nfft,nspden)= trial potential (Hartree)
+  !!  this=hightemp_type object concerned
+  !!  fermie=chemical potential (Hartree)
+  !!  nfftf=number of points in the fine FFT mesh (for this processor)
+  !!  nspden=number of spin-density components
+  !!  tsmear=smearing width (or temperature)
+  !!  vtrial(nfft,nspden)= trial potential (Hartree)
   !!
   !! OUTPUT
-  !! this=hightemp_type object concerned
+  !!  this=hightemp_type object concerned
   !!
   !! PARENTS
+  !!  m_gstate,m_vtorho
   !!
   !! CHILDREN
   !!
@@ -353,17 +395,32 @@ contains
     real(dp) :: factor,gamma,xcut
 
     ! *********************************************************************
-    factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
+
     this%e_kin_freeel=zero
+    factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
+
+    ! Compute hightemp contribution to kinetic energy integrating
+    ! over accessible states from bcut to infinity with
+    ! order 3/2 incomplete Fermi-Dirac integral.
     if(this%version==1.or.this%version==2) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
-    else if(this%version==3) then
+    end if
+
+    ! Compute hightemp contribution to kinetic energy integrating
+    ! over energy from ebcut to infinity with order 3/2
+    ! incomplete Fermi-Dirac integral.
+    if(this%version==3) then
       gamma=(fermie-this%e_shiftfactor)/tsmear
       xcut=(this%ebcut-this%e_shiftfactor)/tsmear
       this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
-    else if(this%version==4) then
+    end if
+
+    ! Compute hightemp contribution to kinetic energy using a sum
+    ! of Fermi gas contributions for each point of the fftf grid.
+    ! Warning: This is not yet operational. Work in progress.
+    if(this%version==4) then
       do ifftf=1,this%nfftf
         do ispden=1,this%nspden
           gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
@@ -374,35 +431,37 @@ contains
       end do
     end if
 
-    ! Computation of edc_kin_freeel
+    ! Compute the double counting term of the contribution to
+    ! kinetic energy from the vtrial potential.
     this%edc_kin_freeel=zero
     do ispden=1,nspden
       do ifftf=1,nfftf
         this%edc_kin_freeel=this%edc_kin_freeel+vtrial(ifftf,ispden)
       end do
     end do
-
-    ! Verifier la constante (/nspden**2)
     this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
   end subroutine compute_efreeel
   !!***
 
   !!****f* ABINIT/m_hightemp/compute_ent_freeel
   !! NAME
-  !! compute_ent_freeel
+  !!  compute_ent_freeel
   !!
   !! FUNCTION
-  !! Compute the value of the integral corresponding to the missing entropy contribution of free electrons after band cut.
+  !!  Compute the value of the integral corresponding to the missing
+  !!  entropy contribution of free electrons after band cut using
+  !!  incomplete Fermi-Dirac integrals.
   !!
   !! INPUTS
-  !! this=hightemp_type object concerned
-  !! fermie=chemical potential (Hartree)
-  !! tsmear=smearing width (or temperature)
+  !!  this=hightemp_type object concerned
+  !!  fermie=chemical potential (Hartree)
+  !!  tsmear=smearing width (or temperature)
   !!
   !! OUTPUT
-  !! this=hightemp_type object concerned
+  !!  this=hightemp_type object concerned
   !!
   !! PARENTS
+  !!  m_vtorho
   !!
   !! CHILDREN
   !!
@@ -421,42 +480,13 @@ contains
     real(dp),dimension(:),allocatable :: valuesent
 
     ! *********************************************************************
-    this%ent_freeel=zero
-    if(this%version==1.or.this%version==2) then
-      ! ******* OLD WAY TO COMPUTE ENTROPY *******
-      ! ! Dynamic array find size
-      ! ix=dble(this%bcut)
-      ! ii=0
-      ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      ! minocc=tol16
-      ! do while(fn>minocc)
-      !   ii=ii+1
-      !   ix=dble(this%bcut)+(dble(ii)-one)*step
-      !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      ! end do
-      ! nsize=ii
-      ! ! Allocate the array to prepare the Simpson integration
-      ! ABI_MALLOC(valuesent,(nsize))
-      !
-      ! !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent,nsize)
-      ! do ii=1,nsize
-      !   ix=dble(this%bcut)+(dble(ii)-one)*step
-      !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      !   if(one-fn>tol16) then
-      !     valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
-      !   else
-      !     valuesent(ii)=zero
-      !   end if
-      ! end do
-      ! !$OMP END PARALLEL DO
-      !
-      ! if (size(valuesent)>=6) then
-      !   this%ent_freeel=simpson(step,valuesent)
-      ! end if
-      ! ABI_FREE(valuesent)
-      ! ******************************************
 
-      ! Other way to find entropy
+    this%ent_freeel=zero
+
+    ! Compute hightemp contribution to the entropy integrating
+    ! over accessible states with Fermi-Dirac complete integrals and
+    ! substracting 0 to bcut contribution with numeric integration.
+    if(this%version==1.or.this%version==2) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
       gamma=(fermie-this%e_shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
@@ -473,44 +503,19 @@ contains
       end do
       !$OMP END PARALLEL DO
 
-      ! We need at least 6 elements in valuesent to call simpson function
+      ! We need at least 6 elements in valuesent to call simpson function.
       if(size(valuesent)>=6) then
         this%ent_freeel=5./3.*factor*dip32(gamma)/tsmear-&
         & gamma*factor*dip12(gamma)/tsmear-&
         simpson(one,valuesent)
       end if
       ABI_FREE(valuesent)
-    else if(this%version==3) then
-      ! ******* OLD WAY TO COMPUTE ENTROPY *******
-      ! ! Dynamic array find size
-      ! ix=this%ebcut
-      ! ii=0
-      ! fn=fermi_dirac(ix,fermie,tsmear)
-      ! minocc=tol16
-      ! do while(fn>minocc)
-      !   fn=fermi_dirac(ix,fermie,tsmear)
-      !   ii=ii+1
-      !   ix=ix+step
-      ! end do
-      !
-      ! ABI_MALLOC(valuesent,(ii))
-      ! ix=this%ebcut
-      ! ii=0
-      ! fn=fermi_dirac(ix,fermie,tsmear)
-      ! do while(fn>minocc)
-      !   fn=fermi_dirac(ix,fermie,tsmear)
-      !   ii=ii+1
-      !   valuesent(ii)=-(fn*log(fn)+(1.-fn)*log(1.-fn))*&
-      !   & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
-      !   ix=ix+step
-      ! end do
-      ! if (ii>1) then
-      !   this%ent_freeel=simpson(step,valuesent)
-      ! end if
-      ! ABI_FREE(valuesent)
-      ! ******************************************
+    end if
 
-      ! Other way to find entropy
+    ! Compute hightemp contribution to the entropy integrating
+    ! over energy with Fermi-Dirac complete integrals and
+    ! substracting 0 to bcut contribution with numeric integration.
+    if(this%version==3) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
       gamma=(fermie-this%e_shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
@@ -529,14 +534,20 @@ contains
       end do
       !$OMP END PARALLEL DO
 
-      ! We need at least 6 elements in valuesent to call simpson function
+      ! We need at least 6 elements in valuesent to call simpson function.
       if(size(valuesent)>=6) then
         this%ent_freeel=5./3.*factor*dip32(gamma)/tsmear-&
         & gamma*factor*dip12(gamma)/tsmear-&
         simpson(step,valuesent)
       end if
       ABI_FREE(valuesent)
-    else if(this%version==4) then
+    end if
+
+    ! Compute hightemp contribution to the entropy using a sum
+    ! of Fermi gas contributions for each point of the fftf grid,
+    ! as we do for version=1 and version=2.
+    ! Warning: This is not yet operational. Work in progress.
+    if(this%version==4) then
       step=one
       do ifftf=1,this%nfftf
         do ispden=1,this%nspden
@@ -577,34 +588,34 @@ contains
 
   !!****f* ABINIT/m_hightemp/compute_pw_avg_std
   !! NAME
-  !! compute_pw_avg_std
+  !!  compute_pw_avg_std
   !!
   !! FUNCTION
-  !! Compute the planewaves average standard deviation over lasts bands.
+  !!  Compute the planewaves average standard deviation over lasts bands.
   !!
   !! INPUTS
-  !! this=hightemp_type object concerned
-  !! cg(2,mpw*dtset%nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions.
-  !! eig_k(nband_k)=array for holding eigenvalues (hartree)
-  !! ek_k(nband_k)=contribution from each band to kinetic energy, at this k-point
-  !! fnameabo=filename for printing of the planewaves coefficients
-  !! gprimd(3,3)=dimensional reciprocal space primitive translations
-  !! icg=shift to be applied on the location of data in the array cg
-  !! ikpt=number of the k-point
-  !! istwf_k=parameter that describes the storage of wfs
-  !! kg_k(3,npw)=integer coordinates of G vectors in basis sphere
-  !! kinpw(npw_k)=(modified) kinetic energy for each plane wave (Hartree)
-  !! kpt(3,nkpt)=reduced coordinates of k points.
-  !! mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-  !! mpi_enreg=information about MPI parallelization
-  !! nband_k=number of bands at each k point
-  !! nkpt=number of k points.
-  !! npw_k=number of plane waves at this k point
-  !! nspinor=Number of spinor components
-  !! wtk(nkpt)=weight assigned to each k point
+  !!  this=hightemp_type object concerned
+  !!  cg(2,mpw*dtset%nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions.
+  !!  eig_k(nband_k)=array for holding eigenvalues (hartree)
+  !!  ek_k(nband_k)=contribution from each band to kinetic energy, at this k-point
+  !!  fnameabo=filename for printing of the planewaves coefficients
+  !!  gprimd(3,3)=dimensional reciprocal space primitive translations
+  !!  icg=shift to be applied on the location of data in the array cg
+  !!  ikpt=number of the k-point
+  !!  istwf_k=parameter that describes the storage of wfs
+  !!  kg_k(3,npw)=integer coordinates of G vectors in basis sphere
+  !!  kinpw(npw_k)=(modified) kinetic energy for each plane wave (Hartree)
+  !!  kpt(3,nkpt)=reduced coordinates of k points.
+  !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+  !!  mpi_enreg=information about MPI parallelization
+  !!  nband_k=number of bands at each k point
+  !!  nkpt=number of k points.
+  !!  npw_k=number of plane waves at this k point
+  !!  nspinor=Number of spinor components
+  !!  wtk(nkpt)=weight assigned to each k point
   !!
   !! OUTPUT
-  !! this=hightemp_type object concerned
+  !!  this=hightemp_type object concerned
   !!
   !! PARENTS
   !!
@@ -635,6 +646,7 @@ contains
     real(dp) :: cgnk(2,npw_k*nspinor),cgnk2(npw_k*nspinor)
 
     ! *********************************************************************
+
     unit=96+mpi_enreg%me
 
     ! Debug : Priting Eigenvalues, Kinetic and PW grid if requested
@@ -709,16 +721,16 @@ contains
 
   !!****f* ABINIT/m_hightemp/dip12
   !! NAME
-  !! dip12
+  !!  dip12
   !!
   !! FUNCTION
-  !! Returns the complete Fermi integral of order 1/2
+  !!  Returns the complete Fermi integral of order 1/2.
   !!
   !! INPUTS
-  !! gamma=complete Fermi integral argument
+  !!  gamma=complete Fermi integral argument
   !!
   !! OUTPUT
-  !! dip12=resulting function
+  !!  dip12=resulting function
   !!
   !! PARENTS
   !!
@@ -785,17 +797,17 @@ contains
 
   !!****f* ABINIT/m_hightemp/djp12
   !! NAME
-  !! djp12
+  !!  djp12
   !!
   !! FUNCTION
-  !! Returns the incomplete Fermi integral of order 1/2
+  !!  Returns the incomplete Fermi integral of order 1/2.
   !!
   !! INPUTS
-  !! xcut=lower bound of the incomplete Fermi integral
-  !! gamma=incomplete Fermi integral argument
+  !!  xcut=lower bound of the incomplete Fermi integral
+  !!  gamma=incomplete Fermi integral argument
   !!
   !! OUTPUT
-  !! djp12=resulting function
+  !!  djp12=resulting function
   !!
   !! PARENTS
   !!
@@ -914,16 +926,16 @@ contains
 
   !!****f* ABINIT/m_hightemp/dip32
   !! NAME
-  !! dip32
+  !!  dip32
   !!
   !! FUNCTION
-  !! Returns the complete Fermi integral of order 3/2
+  !!  Returns the complete Fermi integral of order 3/2.
   !!
   !! INPUTS
-  !! gamma=complete Fermi integral argument
+  !!  gamma=complete Fermi integral argument
   !!
   !! OUTPUT
-  !! dip32=resulting function
+  !!  dip32=resulting function
   !!
   !! PARENTS
   !!
@@ -995,17 +1007,17 @@ contains
 
   !!****f* ABINIT/m_hightemp/djp32
   !! NAME
-  !! djp32
+  !!  djp32
   !!
   !! FUNCTION
-  !! Returns the incomplete Fermi integral of order 3/2
+  !!  Returns the incomplete Fermi integral of order 3/2.
   !!
   !! INPUTS
-  !! xcut=lower bound of the incomplete Fermi integral
-  !! gamma=incomplete Fermi integral argument
+  !!  xcut=lower bound of the incomplete Fermi integral
+  !!  gamma=incomplete Fermi integral argument
   !!
   !! OUTPUT
-  !! djp32=resulting function
+  !!  djp32=resulting function
   !!
   !! PARENTS
   !!
@@ -1130,18 +1142,18 @@ contains
 
   !!****f* ABINIT/m_hightemp/hightemp_dosfreeel
   !! NAME
-  !! hightemp_dosfreeel
+  !!  hightemp_dosfreeel
   !!
   !! FUNCTION
-  !! Returns the free particle density of states for a given energy (in Hartree)
+  !!  Returns the free particle density of states for a given energy.
   !!
   !! INPUTS
-  !! energy=get the value of the free particle density of states at this energy
-  !! e_shiftfactor=energy shift factor
-  !! ucvol=unit cell volume (bohr^3)
+  !!  energy=get the value of the free particle density of states at this energy
+  !!  e_shiftfactor=energy shift factor
+  !!  ucvol=unit cell volume (bohr^3)
   !!
   !! OUTPUT
-  !! hightemp_dosfreeel=value of free particle density of states at given energy
+  !!  hightemp_dosfreeel=value of free particle density of states at given energy
   !!
   !! PARENTS
   !!
@@ -1162,17 +1174,18 @@ contains
 
   !!****f* ABINIT/m_hightemp/hightemp_e_heg
   !! NAME
-  !! hightemp_e_heg
+  !!  hightemp_e_heg
   !!
   !! FUNCTION
-  !! Returns the energy of homogeneous electron gas for a given number of accessible states
+  !!  Returns the energy of the Fermi gas for a given number of
+  !!  accessible states.
   !!
   !! INPUTS
-  !! iband=number of accessible states
-  !! ucvol=unit cell volume (bohr^3)
+  !!  iband=number of accessible states
+  !!  ucvol=unit cell volume (bohr^3)
   !!
   !! OUTPUT
-  !! hightemp_e_heg=energy of homogeneous electron gas for a given number of accessible states
+  !!  hightemp_e_heg=energy of homogeneous electron gas for a given number of accessible states
   !!
   !! PARENTS
   !!
@@ -1186,42 +1199,43 @@ contains
     real(dp) :: hightemp_e_heg
 
     ! *********************************************************************
+
     hightemp_e_heg=.5*(iband*6*PI*PI/ucvol)**(2./3.)
   end function hightemp_e_heg
   !!***
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_eigocc
   !! NAME
-  !! hightemp_prt_eigocc
+  !!  hightemp_prt_eigocc
   !!
   !! FUNCTION
-  !! Printing in a _EIGOCC file many informations like Fermi energy, Unit cell volume,
-  !! electronic temperature (tsmear when occopt=3), eigenvalues and occupation for each k-point,
-  !! wheight of the k-point, number of bands, number of k-points and more...
-  !! This file is intended to be used for custom DOS computation with external tools for example.
+  !!  Printing in a _EIGOCC file many informations like Fermi energy, Unit cell volume,
+  !!  electronic temperature (tsmear when occopt=3), eigenvalues and occupation for each k-point,
+  !!  weight of the k-point, number of bands, number of k-points and more...
+  !!  This file is intended to be used for custom DOS computation with external tools for example.
   !!
   !! INPUTS
-  !! e_kin_freeel=kinetic energy contribution of free electrons after band cut
-  !! e_shiftfactor=energy shift factor
-  !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
-  !! etotal=total energy
-  !! energies=object containing all energies
-  !! fnameabo=filename for printing of the planewaves coefficients
-  !! iout=out file number
-  !! iter=MD iteration step
-  !! kptns(3,nkpt),kptns0(3,nkpt0)=k point sets (reduced coordinates)
-  !! mband=maximum number of bands
-  !! nband(nkpt*nsppol)=desired number of bands at each k point
-  !! nfreeel=number free electrons
-  !! nkpt=number of k points
-  !! nsppol=1 for unpolarized, 2 for spin-polarized
-  !! occ(mband*nkpt*nsppol) = occupation number for each band and k
-  !! rprimd(3,3)=dimensional primitive translation vectors (bohr)
-  !! tsmear=temperature (Hartree)
-  !! usepaw=1 if PAW, 0 otherwise
-  !! wtk(nkpt)=k point weights
-  !! strten(6)=components of the stress tensor (hartree/bohr^3)
-  !! istep=SCF electronic iteration number
+  !!  e_kin_freeel=kinetic energy contribution of free electrons after band cut
+  !!  e_shiftfactor=energy shift factor
+  !!  eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+  !!  etotal=total energy
+  !!  energies=object containing all energies
+  !!  fnameabo=filename for printing of the planewaves coefficients
+  !!  iout=out file number
+  !!  iter=MD iteration step
+  !!  kptns(3,nkpt),kptns0(3,nkpt0)=k point sets (reduced coordinates)
+  !!  mband=maximum number of bands
+  !!  nband(nkpt*nsppol)=desired number of bands at each k point
+  !!  nfreeel=number free electrons
+  !!  nkpt=number of k points
+  !!  nsppol=1 for unpolarized, 2 for spin-polarized
+  !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
+  !!  rprimd(3,3)=dimensional primitive translation vectors (bohr)
+  !!  tsmear=temperature (Hartree)
+  !!  usepaw=1 if PAW, 0 otherwise
+  !!  wtk(nkpt)=k point weights
+  !!  strten(6)=components of the stress tensor (hartree/bohr^3)
+  !!  istep=SCF electronic iteration number
   !!
   !! OUTPUT
   !!
