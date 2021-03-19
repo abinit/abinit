@@ -290,9 +290,9 @@ contains
        call timab(1201,2,tsec)
      else
        call timab(1202,1,tsec)
-       call opernla_ylm_mv(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
-&       ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
-&       nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
+       call opernla_ylm_mv(choice_,cplex,dimffnl,ffnl_typ,gx,&
+&       ia3,indlmn_typ,istwf_k,matblk,mpi_enreg,nincat,nlmn,&
+&       nloalg,npw_k,nspinor,ph3d_,ucvol,cwavef)
        call timab(1202,2,tsec)
      end if
 

@@ -143,7 +143,7 @@ contains
 !!                          for choice 53, twisted derivative involves idir+1 and idir-1
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
 !!                        - strain component (1:9) in the case (choice=33,signs=2)
-!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient
 !!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,i,ntypat)= array giving l,m,n,lm,ln,s for i=lmn
 !!  istwf_k=option parameter that describes the storage of wfs
@@ -251,7 +251,7 @@ contains
 !! ==== if (signs==2) ====
 !! --if (paw_opt=0)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
-!!                or one of its derivatives to the input vect.  
+!!                or one of its derivatives to the input vect.
 !!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
 !!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
 !!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
@@ -329,17 +329,17 @@ contains
 !! Notes about choice==33:
 !!  **Since the 2nd derivative w.r.t q-vector is calculated along cartesian
 !!    directions, the 1/twopi**2 factor (that in the rest of the code is applied
-!!    in the reduced to cartesian derivative conversion process) is here 
+!!    in the reduced to cartesian derivative conversion process) is here
 !!    explicictly included in the formulas.
-!!  
+!!
 !!  **Notice that idir=1-9, in contrast to the strain perturbation (idir=1-6),
 !!    because this term is not symmetric w.r.t permutations of the two strain
 !!    indices.(Also applies for choice=25)
 !!
 !!  **A -i factor has been factorized out in all the contributions of the second
 !!    q-gradient of the metric Hamiltonian and in the first and second q-gradients
-!!    of the atomic displacement Hamiltonian. This is lately included in the 
-!!    matrix element calculation. 
+!!    of the atomic displacement Hamiltonian. This is lately included in the
+!!    matrix element calculation.
 !!
 !! TODO
 !! * Complete implementation of spin-orbit
@@ -553,7 +553,7 @@ contains
    if(signs==2) ndgxdtfac=2
    if(signs==2) nd2gxdt=3
    if(signs==2) nd2gxdtfac=3
- end if 
+ end if
  if (choice==51) then
    if(signs==1) ndgxdt=3
    if(signs==2) ndgxdt=1
@@ -665,7 +665,7 @@ contains
      call mkkpgcart(gprimd,kgin,kpgin_,kptin,nkpgin_,npwin)
    else
      call mkkpg(kgin,kpgin_,kptin,nkpgin_,npwin)
-   end if 
+   end if
 
  else
    nkpgin_ = nkpgin
@@ -682,7 +682,7 @@ contains
      call mkkpgcart(gprimd,kgout,kpgout_,kptout,nkpgout_,npwout)
    else
      call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
-   end if 
+   end if
 
  else
    nkpgout_ = nkpgout
@@ -867,9 +867,9 @@ contains
            call timab(1101,2,tsec)
          else
            call timab(1102,1,tsec)
-           call opernla_ylm_mv(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
-&           ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
-&           nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
+           call opernla_ylm_mv(choice_a,cplex,dimffnlin,ffnlin_typ,gx,&
+&           ia3,indlmn_typ,istwf_k,matblk,mpi_enreg,nincat,nlmn,&
+&           nloalg,npwin,nspinor,ph3din,ucvol,vectin)
            call timab(1102,2,tsec)
          end if
        end if
@@ -990,10 +990,9 @@ contains
              call timab(1103,2,tsec)
            else
              call timab(1104,1,tsec)
-             call opernlb_ylm_mv(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
-&             d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
-&             idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
-&             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)
+             call opernlb_ylm_mv(choice_b,cplex,cplex_fac,&
+&             dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,indlmn_typ,matblk,nincat,nlmn,&
+&             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout)
              call timab(1104,2,tsec)
            end if
          end if

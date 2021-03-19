@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (MT)
+!!  Copyright (C) 2021-2021 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,38 +48,41 @@ contains
 !! opernlb_ylm_mv
 !!
 !! FUNCTION
+!! "matrix-vector" alternative implementation of "opernlrb_ylm".
+!!
 !! * Operate with the non-local part of the hamiltonian,
 !!   from projected scalars to reciprocal space.
 !! * Operate with the non-local projectors and the overlap matrix,
 !!   from projected scalars to reciprocal space.
 !!
+!!   The input is gxfac (gxfac_sij):
+!!   gxfac(lmn) = Sum_l'm'n' D_l'm'n'.<p_l'm'n|c> (or S_l'm'n' for gxfac_sij)
+!!   and here we compute :
+!!   Sum_lmn <g|p_lmn> gxfac(lmn) = 4pi/sqrt(vol) exp(-2pi.i.g.R) Sum_lmn (-i)^l f_nl(g).Y_lm(g) gxfac(lmn)
+!!   Here this is done in 3 steps:
+!!   (1) compute for every lmn : gxfac_(lmn) = 4pi/sqrt(vol).(-i)^l.gxfac(lmn)
+!!   (2) compute for every g   : scal(g)     = Sum_lmn f_nl(g).Y_lm(g).gxfac_(lmn)
+!!   (3) compute for every g   : vect(g)     = exp(-2pi.i.g.R).scal(g)
+!!
+!!   Step (2) is a real-matrix/complex-vector multiplication, here two options are possible:
+!!   - case nloalg(1)=2 : compute the real and imaginary parts separately using two calls of DGMEV
+!!   - case nloalg(1)=3 : in order to read the matrix only once, we compute both real and imaginary parts at the same time "by hand"
+!!
+!!   Depending on the achitecture and the available blas library, one option could be more interesting than an other...
+!!
 !! INPUTS
 !!  choice=chooses possible output (see below)
 !!  cplex=1 if <p_lmn|c> scalars are real (equivalent to istwfk>1)
 !!        2 if <p_lmn|c> scalars are complex
-!!  cplex_dgxdt(ndgxdt_fac) = used only when cplex = 1
-!!    cplex_dgxdt(i)=1 if dgxdt(1,i,:,:) is real, 2 if it is pure imaginary
 !!  cplex_fac=1 if gxfac scalars are real, 2 if gxfac scalars are complex
-!!  dgxdtfac(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor)= gradients of gxfac related to Vnl (NL operator)
-!!  dgxdtfac_sij(cplex,ndgxdtfac,nlmn,nincat,nspinor)= gradients of gxfacrelated to Sij (overlap)
 !!  dimffnl=second dimension of ffnl
 !!  ffnl(npw,dimffnl,nlmn)= nonlocal quantities containing nonlocal form factors
 !!  gxfac(cplex_fac,nlmn,nincat,nspinor)= reduced projected scalars related to Vnl (NL operator)
 !!  gxfac_sij(cplex,nlmn,nincat,nspinor*(paw_opt/3))= reduced projected scalars related to Sij (overlap)
 !!  ia3=gives the number of the first atom in the subset presently treated
-!!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
-!!                        - k point direction in the case (choice=5, 51, 52 and signs=2)
-!!                        - strain component (1:6) in the case (choice=2,signs=2) or (choice=6,signs=1)
-!!                        - strain component (1:9) in the case (choice=33,signs=2)
-!!                        - (1:9) components to specify the atom to be moved and the second q-gradient
-!!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
-!!  kpg(npw,nkpg)=(k+G) components (if nkpg=3).
-!!                (k+G) Cartesian components for choice=33
 !!  matblk=dimension of the array ph3d
-!!  ndgxdtfac=second dimension of dgxdtfac
 !!  nincat=number of atoms in the subset here treated
-!!  nkpg=second dimension of array kpg (0 or 3)
 !!  nlmn=number of (l,m,n) numbers for current type of atom
 !!  nloalg(3)=governs the choice of the algorithm for non-local operator.
 !!  npw=number of plane waves in reciprocal space
@@ -91,7 +94,6 @@ contains
 !!           paw_opt=3 : PAW overlap matrix (Sij)
 !!           paw_opt=4 : both PAW nonlocal part of H (Dij) and overlap matrix (Sij)
 !!  ph3d(2,npw,matblk)=three-dimensional phase factors
-!!  [qdir]= optional, direction of the q-gradient (only for choice=22, choice=25 and choice=33)
 !!  ucvol=unit cell volume (bohr^3)
 !!
 !! OUTPUT
@@ -101,55 +103,23 @@ contains
 !! --if (paw_opt=0)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
 !!                or one of its derivatives to the input vect.
-!!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
-!!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
-!!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
 !! --if (paw_opt=0, 1 or 4)
 !!    vect(2,npwout*nspinor)=result of the aplication of the concerned operator
 !!                or one of its derivatives to the input vect.:
 !!      if (choice=1)  <G|V_nonlocal|vect_in>
-!!      if (choice=2)  <G|dV_nonlocal/d(atm. pos)|vect_in>
-!!      if (choice=3)  <G|dV_nonlocal/d(strain)|vect_in>
-!!      if (choice=5)  <G|dV_nonlocal/d(k)|vect_in>
-!!      if (choice=51) <G|d(right)V_nonlocal/d(k)|vect_in>
-!!      if (choice=52) <G|d(left)V_nonlocal/d(k)|vect_in>
-!!      if (choice=53) <G|d(twist)V_nonlocal/d(k)|vect_in>
-!!      if (choice=54) <G|d[d(right)V_nonlocal/d(k)]/d(atm. pos)|vect_in>
-!!      if (choice=8)  <G|d2V_nonlocal/d(k)d(k)|vect_in>
-!!      if (choice=81) <G|d[d(right)V_nonlocal/d(k)]/d(k)|vect_in>
 !!  if (paw_opt=2)
 !!    vect(2,npwout*nspinor)=final vector in reciprocal space:
 !!      if (choice=1)  <G|V_nonlocal-lamdba.(I+S)|vect_in> (note: not including <G|I|c>)
-!!      if (choice=2)  <G|d[V_nonlocal-lamdba.(I+S)]/d(atm. pos)|vect_in>
-!!      if (choice=3)  <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
-!!      if (choice=5)  <G|d[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=51) <G|d(right)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=52) <G|d(left)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=53) <G|d(twist)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
-!!      if (choice=54) <G|d[d(right)V_nonlocal/d(k)]/d(atm. pos)|vect_in>
-!!      if (choice=8)  <G|d2[V_nonlocal-lamdba.(I+S)]/d(k)d(k)|vect_in>
-!!      if (choice=81) <G|d[d(right[V_nonlocal-lamdba.(I+S)]/d(k)]/d(k)|vect_in>
 !! --if (paw_opt=3 or 4)
 !!    svect(2,npwout*nspinor)=result of the aplication of Sij (overlap matrix)
 !!                  or one of its derivatives to the input vect.:
 !!      if (choice=1)  <G|I+S|vect_in> (note: not including <G|I|c>)
-!!      if (choice=2)  <G|dS/d(atm. pos)|vect_in>
-!!      if (choice=3)  <G|dS/d(strain)|vect_in>
-!!      if (choice=5)  <G|dS/d(k)|vect_in>
-!!      if (choice=51) <G|d(right)S/d(k)|vect_in>
-!!      if (choice=52) <G|d(left)S/d(k)|vect_in>
-!!      if (choice=53) <G|d(twist)S/d(k)|vect_in>
-!!      if (choice=54) <G|d[d(right)V_nonlocal/d(k)]/d(atm. pos)|vect_in>
-!!      if (choice=7)  <G|sum_i[p_i><p_i]|vect_in>
-!!      if (choice=8)  <G|d2S/d(k)d(k)|vect_in>
-!!      if (choice=81) <G|d[d(right)S/d(k)]/d(k)|vect_in>
 !!
 !! NOTES
-!! 1-The openMP version is different from the standard version:
-!!   the standard version is more effifient on one CPU core.
+!! 1-No openMP available for now
 !! 2-Operate for one type of atom, and within this given type of atom,
 !!   for a subset of at most nincat atoms.
-!!
+!! 3-projector derivatives (abs(choice)>1) are not implemented yet
 !!
 !! PARENTS
 !!      nonlop_ylm_mv
@@ -158,45 +128,34 @@ contains
 !!
 !! SOURCE
 
-subroutine opernlb_ylm_mv(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
-&                      d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnl,ffnl,gxfac,gxfac_sij,&
-&                      ia3,idir,indlmn,kpg,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpg,nlmn,nloalg,npw,&
-&                      nspinor,paw_opt,ph3d,svect,ucvol,vect,qdir)
+subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
+&                      dimffnl,ffnl,gxfac,gxfac_sij,&
+&                      ia3,indlmn,matblk,nincat,nlmn,nloalg,npw,&
+&                      nspinor,paw_opt,ph3d,svect,ucvol,vect)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: choice,cplex,cplex_fac,dimffnl,ia3,idir,matblk,ndgxdtfac,nd2gxdtfac,nincat
- integer,intent(in) :: nkpg,nlmn,npw,nspinor,paw_opt
- integer,intent(in),optional :: qdir
+ integer,intent(in) :: choice,cplex,cplex_fac,dimffnl,ia3,matblk,nincat
+ integer,intent(in) :: nlmn,npw,nspinor,paw_opt
  real(dp),intent(in) :: ucvol
 !arrays
- integer,intent(in) ::  cplex_dgxdt(ndgxdtfac),cplex_d2gxdt(nd2gxdtfac),indlmn(6,nlmn),nloalg(3)
- real(dp),intent(in) :: d2gxdtfac(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor)
- real(dp),intent(in) :: dgxdtfac(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor)
- real(dp),intent(in) :: dgxdtfac_sij(cplex,ndgxdtfac,nlmn,nincat*(paw_opt/3),nspinor)
- real(dp),intent(in) :: d2gxdtfac_sij(cplex,nd2gxdtfac,nlmn,nincat*(paw_opt/3),nspinor)
+ integer,intent(in) ::  indlmn(6,nlmn),nloalg(3)
  real(dp),intent(in),target :: ffnl(npw,dimffnl,nlmn)
  real(dp),intent(in) :: gxfac(cplex_fac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: gxfac_sij(cplex,nlmn,nincat,nspinor*(paw_opt/3))
- real(dp),intent(in) :: kpg(npw,nkpg),ph3d(2,npw,matblk)
+ real(dp),intent(in) :: ph3d(2,npw,matblk)
  real(dp),intent(inout) :: svect(:,:),vect(:,:)
 !Local variables-------------------------------
 !Arrays
 !scalars
- integer :: fdb,fdf,ia,ialpha,iaph3d,ibeta,ic,idelta,idelgam,igamma
- integer :: ii,il,ilmn,ipw,jpw,ipwshft,ispinor,jc,nthreads,ffnl_dir1,ffnl_dir(3)
- real(dp) :: scale,two_piinv,wt
- logical :: parity
+ integer :: ia,iaph3d
+ integer :: il,ilmn,ipw,jpw,ipwshft,ispinor,nthreads
+ real(dp) :: wt
 !arrays
- integer,parameter :: ffnl_dir_dat(6)=(/3,4,4,2,2,3/)
- integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
- integer,parameter :: idir1(9)=(/1,1,1,2,2,2,3,3,3/),idir2(9)=(/1,2,3,1,2,3,1,2,3/)
- integer,parameter :: nalpha(9)=(/1,2,3,3,3,2,2,1,1/),nbeta(9)=(/1,2,3,2,1,1,3,3,2/)
  real(dp) :: tsec(2)
- real(dp),allocatable :: d2gxdtfac_(:,:,:),d2gxdtfacs_(:,:,:),dgxdtfac_(:,:,:),dgxdtfacs_(:,:,:),gxfac_(:,:),gxfacs_(:,:)
+ real(dp),allocatable :: gxfac_(:,:),gxfacs_(:,:)
  real(dp),allocatable :: scalr(:),scali(:)
  real(dp),pointer :: ffnl_loc(:,:)
-! complex(dpc),allocatable :: ztab(:)
  complex(dp) :: ctmp, cil(4)
 
 ! *************************************************************************
@@ -205,22 +164,7 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 
 ! call timab(1150,1,tsec)
 
-!Nothing to do when choice=4, 6 or 23
- if (choice==4.or.choice==6.or.choice==23) return
-
- if (abs(choice)>1) then
-   MSG_ERROR('Only abs(choice)<=1 is available for now.')
- end if
- if (nloalg(1)/=2.and.nloalg(1)/=3) then
-   MSG_ERROR('nloalg(1) should be 2 or 3.')
- end if
-!DDK not compatible with istwkf > 1
- if(cplex==1.and.(any(cplex_dgxdt(:)==2).or.any(cplex_d2gxdt(:)==2)))then
-   MSG_BUG("opernlb_ylm_mv+ddk not compatible with istwfk>1")
- end if
-
-!Inits
- wt=four_pi/sqrt(ucvol)
+!Some checks
  nthreads=1
 #if defined HAVE_OPENMP
  nthreads=OMP_GET_NUM_THREADS()
@@ -229,43 +173,25 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
    MSG_ERROR('Only nthreads=1 is available for now.')
  end if
 
-! ABI_ALLOCATE(ffnl_loc,(npw,nlmn))
-! ffnl_loc(:,:) = ffnl(:,1,:)
+ if (abs(choice)>1) then
+   MSG_ERROR('Only abs(choice)<=1 is available for now.')
+ end if
+ if (nloalg(1)/=2.and.nloalg(1)/=3) then
+   MSG_ERROR('nloalg(1) should be 2 or 3.')
+ end if
+
+!Inits
+ wt=four_pi/sqrt(ucvol)
+
  ffnl_loc => ffnl(:,1,:)
-! do ilmn=1,nlmn
-!   do ipw=1,npw
-!     ffnl_loc(ipw,ilmn) = ffnl(ipw,1,ilmn)
-!   end do
-! end do
 
  if (paw_opt/=3) then
    ABI_ALLOCATE(gxfac_,(nlmn,2))
-!   gxfac_(:,:)=zero
-!   if (choice>1) then
-!     ABI_ALLOCATE(dgxdtfac_,(2,ndgxdtfac,nlmn))
-!     if(ndgxdtfac>0) dgxdtfac_(:,:,:)=zero
-!   end if
-!   if (choice==54.or.choice==8.or.choice==81.or.choice==33) then
-!     ABI_ALLOCATE(d2gxdtfac_,(2,nd2gxdtfac,nlmn))
-!     if(nd2gxdtfac>0) d2gxdtfac_(:,:,:)=zero
-!   end if
  end if
  if (paw_opt>=3) then
    ABI_ALLOCATE(gxfacs_,(nlmn,2))
-!   gxfacs_(:,:)=zero
-!   if (choice>1) then
-!     ABI_ALLOCATE(dgxdtfacs_,(2,ndgxdtfac,nlmn))
-!     if (ndgxdtfac>0) dgxdtfacs_(:,:,:)=zero
-!   end if
-!   if (choice==54.or.choice==8.or.choice==81) then
-!     ABI_ALLOCATE(d2gxdtfacs_,(2,nd2gxdtfac,nlmn))
-!     if (nd2gxdtfac>0) d2gxdtfacs_(:,:,:)=zero
-!   end if
  end if
 
-if (choice==33) two_piinv=1.0_dp/two_pi
-
-! ABI_ALLOCATE(ztab,(npw))
  ABI_ALLOCATE(scalr,(npw))
  ABI_ALLOCATE(scali,(npw))
 
@@ -286,7 +212,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !  Loop on atoms (blocking)
    do ia=1,nincat
      iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
-!    Scale gxfac with 4pi/sqr(omega).(-i)^l
+!    Step (1) : scale gxfac with 4pi/sqr(omega).(-i)^l
 !     call timab(1151,1,tsec)
      if (paw_opt/=3) then
        if (cplex_fac==2) then
@@ -309,8 +235,8 @@ if (choice==33) two_piinv=1.0_dp/two_pi
      end if
 !     call timab(1151,2,tsec)
 
-!    Scale gxfac_sij with 4pi/sqr(omega).(-i)^l
-!     call timab(1152,1,tsec)
+!    Step (1) bis: Scale gxfac_sij with 4pi/sqr(omega).(-i)^l
+!    call timab(1152,1,tsec)
      if (paw_opt>=3) then
        if (cplex==2) then
          do ilmn=1,nlmn
@@ -333,9 +259,9 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !     call timab(1152,2,tsec)
 
 !    Compute <g|Vnl|c> (or derivatives) for each plane wave:
-
      if (paw_opt/=3) then
 
+!      Step (2) scal(g) = Sum_lmn f_nl(g).Y_lm(g).gxfac_(lmn)
        if (nloalg(1)==3) then
 !         call timab(1153,1,tsec)
          scalr(:) = zero
@@ -354,6 +280,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !         call timab(1157,2,tsec)
        end if
 
+!      Step (3) : vect(g) = exp(2pi.i.g.R).scal(g)
 !       call timab(1155,1,tsec)
        do ipw=1,npw
          jpw=ipw+ipwshft
@@ -365,9 +292,9 @@ if (choice==33) two_piinv=1.0_dp/two_pi
      end if
 
 !    Compute <g|S|c> (or derivatives) for each plane wave:
-
      if (paw_opt>=3) then
 
+!      Step (2) (bis) scal(g) = Sum_lmn f_nl(g).Y_lm(g).gxfacs_(lmn)
        if (nloalg(1)==3) then
 !         call timab(1154,1,tsec)
          scalr(:) = zero
@@ -386,6 +313,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !         call timab(1158,2,tsec)
        end if
 
+!      Step (3) (bis) : svect(g) = exp(-2pi.i.g.R).scal(g)
 !       call timab(1156,1,tsec)
        do ipw=1,npw
          jpw=ipw+ipwshft
@@ -400,38 +328,19 @@ if (choice==33) two_piinv=1.0_dp/two_pi
    end do
  end do !  End loop on spinors
 
-! ABI_DEALLOCATE(ffnl_loc)
-! ABI_DEALLOCATE(ztab)
  ABI_DEALLOCATE(scalr)
  ABI_DEALLOCATE(scali)
 
  if (paw_opt/=3) then
    ABI_DEALLOCATE(gxfac_)
-   if (choice>1) then
-     ABI_DEALLOCATE(dgxdtfac_)
-   end if
-   if (choice==54.or.choice==8.or.choice==81.or.choice==33) then
-     ABI_DEALLOCATE(d2gxdtfac_)
-   end if
  end if
  if (paw_opt>=3) then
    ABI_DEALLOCATE(gxfacs_)
-   if (choice>1) then
-     ABI_DEALLOCATE(dgxdtfacs_)
-   end if
-   if (choice==54.or.choice==8.or.choice==81) then
-     ABI_DEALLOCATE(d2gxdtfacs_)
-   end if
  end if
 
 ! call timab(1150,2,tsec)
 
  DBG_EXIT("COLL")
-
-#if !defined HAVE_OPENMP
-!Fake use of unused variable
- if (.false.) write(std_out,*) ipw
-#endif
 
 end subroutine opernlb_ylm_mv
 !!***
