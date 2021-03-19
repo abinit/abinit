@@ -34,9 +34,9 @@ module m_nonlop_ylm
  use m_kg,               only : ph1d3d, mkkpg
  use m_pawcprj,          only : pawcprj_type
  use m_opernla_ylm,      only : opernla_ylm
- use m_opernla_ylm_blas, only : opernla_ylm_blas
+ use m_opernla_ylm_mv,   only : opernla_ylm_mv
  use m_opernlb_ylm,      only : opernlb_ylm
- use m_opernlb_ylm_blas, only : opernlb_ylm_blas
+ use m_opernlb_ylm_mv,   only : opernlb_ylm_mv
  use m_opernlc_ylm,      only : opernlc_ylm
  use m_opernld_ylm,      only : opernld_ylm
  use m_kg,               only : mkkpgcart
@@ -867,7 +867,7 @@ contains
            call timab(1101,2,tsec)
          else
            call timab(1102,1,tsec)
-           call opernla_ylm_blas(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
+           call opernla_ylm_mv(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &           ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
 &           nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
            call timab(1102,2,tsec)
@@ -990,7 +990,7 @@ contains
              call timab(1103,2,tsec)
            else
              call timab(1104,1,tsec)
-             call opernlb_ylm_blas(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
+             call opernlb_ylm_mv(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &             d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
 &             idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
 &             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)

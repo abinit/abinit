@@ -39,7 +39,7 @@ module m_cgprj
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, &
                         pawcprj_set_zero, pawcprj_mpi_sum, pawcprj_copy, pawcprj_lincom
  use m_opernla_ylm, only : opernla_ylm
- use m_opernla_ylm_blas, only : opernla_ylm_blas
+ use m_opernla_ylm_mv, only : opernla_ylm_mv
  use m_time,             only : timab
 
  implicit none
@@ -290,7 +290,7 @@ contains
        call timab(1201,2,tsec)
      else
        call timab(1202,1,tsec)
-       call opernla_ylm_blas(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
+       call opernla_ylm_mv(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
 &       ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
 &       nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
        call timab(1202,2,tsec)

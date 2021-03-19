@@ -853,9 +853,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(1100)='nonlop_ylm                      '
  names(1101)='nlo_ylm%opernla                 '
- names(1102)='nlo_ylm%opernla_blas            '
+ names(1102)='nlo_ylm%opernla_mv              '
  names(1103)='nlo_ylm%opernlb                 '
- names(1104)='nlo_ylm%opernlb_blas            '
+ names(1104)='nlo_ylm%opernlb_mv              '
  names(1105)='nlo_ylm%opernlc                 '
  names(1106)='nlo_ylm%opernld                 '
  names(1107)='nlo_ylm%opernld(l)              '
@@ -897,7 +897,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(1200)='getcprj(all)                    '
  names(1201)='getcprj%opernla                 '; basic(1201)=1
- names(1202)='getcprj%opernla_blas            '; basic(1202)=1
+ names(1202)='getcprj%opernla_mv              '; basic(1202)=1
  names(1203)='getcprj(cgwf_paw)               '
  names(1204)='getcprj(ctocprj)                '
  names(1210)='getcprj(other)                  '

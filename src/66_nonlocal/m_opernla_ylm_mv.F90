@@ -22,7 +22,7 @@
 
 #include "abi_common.h"
 
-module m_opernla_ylm_blas
+module m_opernla_ylm_mv
 
  use defs_basis
  use m_abicore
@@ -40,7 +40,7 @@ module m_opernla_ylm_blas
  private
 !!***
 
- public :: opernla_ylm_blas
+ public :: opernla_ylm_mv
 !!***
 
 contains
@@ -154,7 +154,7 @@ contains
 !!
 !! SOURCE
 
-subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl,gx,&
+subroutine opernla_ylm_mv(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl,gx,&
 &       ia3,idir,indlmn,istwf_k,kpg,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg,nlmn,&
 &       nloalg,npw,nspinor,ph3d,signs,ucvol,vect,qdir)
 
@@ -396,7 +396,7 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
 !         call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scali,1,0.0_DP,scali_lmn,1)
 !         call timab(1134,2,tsec)
 !       end if
-!       
+!
 !     end if
 
    end do ! End loop on atoms
@@ -428,8 +428,8 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
 
 ! call timab(1130,2,tsec)
 
-end subroutine opernla_ylm_blas
+end subroutine opernla_ylm_mv
 !!***
 
-end module m_opernla_ylm_blas
+end module m_opernla_ylm_mv
 !!***

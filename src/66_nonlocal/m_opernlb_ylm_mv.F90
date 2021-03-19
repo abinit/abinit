@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_opernlb_ylm_blas
+!!****m* ABINIT/m_opernlb_ylm_mv
 !! NAME
-!!  m_opernlb_ylm_blas
+!!  m_opernlb_ylm_mv
 !!
 !! FUNCTION
 !!
@@ -22,7 +22,7 @@
 
 #include "abi_common.h"
 
-module m_opernlb_ylm_blas
+module m_opernlb_ylm_mv
 
  use defs_basis
  use m_abicore
@@ -37,15 +37,15 @@ module m_opernlb_ylm_blas
  private
 !!***
 
- public :: opernlb_ylm_blas
+ public :: opernlb_ylm_mv
 !!***
 
 contains
 !!***
 
-!!****f* ABINIT/opernlb_ylm_blas
+!!****f* ABINIT/opernlb_ylm_mv
 !! NAME
-!! opernlb_ylm_blas
+!! opernlb_ylm_mv
 !!
 !! FUNCTION
 !! * Operate with the non-local part of the hamiltonian,
@@ -152,13 +152,13 @@ contains
 !!
 !!
 !! PARENTS
-!!      nonlop_ylm_blas
+!!      nonlop_ylm_mv
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
+subroutine opernlb_ylm_mv(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &                      d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnl,ffnl,gxfac,gxfac_sij,&
 &                      ia3,idir,indlmn,kpg,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpg,nlmn,nloalg,npw,&
 &                      nspinor,paw_opt,ph3d,svect,ucvol,vect,qdir)
@@ -216,7 +216,7 @@ subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  end if
 !DDK not compatible with istwkf > 1
  if(cplex==1.and.(any(cplex_dgxdt(:)==2).or.any(cplex_d2gxdt(:)==2)))then
-   MSG_BUG("opernlb_ylm_blas+ddk not compatible with istwfk>1")
+   MSG_BUG("opernlb_ylm_mv+ddk not compatible with istwfk>1")
  end if
 
 !Inits
@@ -433,8 +433,8 @@ if (choice==33) two_piinv=1.0_dp/two_pi
  if (.false.) write(std_out,*) ipw
 #endif
 
-end subroutine opernlb_ylm_blas
+end subroutine opernlb_ylm_mv
 !!***
 
-end module m_opernlb_ylm_blas
+end module m_opernlb_ylm_mv
 !!***
