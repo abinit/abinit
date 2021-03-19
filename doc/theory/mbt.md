@@ -494,7 +494,7 @@ in comparison to [[ecut]], [[ecutwfn]] and [[ecuteps]].
 Another point worth noting is the presence in the expression of the Coulomb
 singularity for $| \qq + \GG | \rightarrow 0$ . 
 From a mathematical point of view, the integral is well-defined since the singularity is integrable in three-
-dimensional space once the thermodynamical limit, $N_\qq \rightarrow \infty$, is reached.
+dimensional space once the thermodynamic limit, $N_\qq \rightarrow \infty$, is reached.
 
 On the other hand, only a finite number of $\qq$-points can be used for
 practical applications, and a careful numerical treatment is needed to avoid

@@ -9,11 +9,13 @@ body {
 } 
 
 /* Increase logo width because mkdocs material enforces 48 x 48 
-.md-logo img {
     width: 48px;
+*/
+.md-logo img {
+    width: 48px  ! Important;
     height: auto;
 }
-*/
+
 
 
 /* Add vertical rhythm

@@ -156,7 +156,7 @@
         <!-- Plotly support -->
         <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script> 
     {% endif %}
-    
+
     {% if page.meta and page.meta.light_gallery %}
         <!-- lightgallery support. See https://github.com/sachinchoolur/lightGallery-->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css" 
@@ -217,14 +217,6 @@ and return to Top button (based on https://codepen.io/rdallaire/pen/apoyx)
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block footer %}
-    <!-- Add tabs to footer -->
-    {% if config.theme.features.tabs %}
-        {% include "partials/tabs.html" %}
-    {% endif %}
-    {{ super() }}
 {% endblock %}
 
 <!--

@@ -300,8 +300,6 @@ theme:
     name: material
     custom_dir: abinit_theme
     logo: images/logo-abinit-2015.png
-    #icon: 
-    #  logo: images/logo-abinit-2015.png
     favicon: images/favicon.ico
     palette:
         primary: deep orange
@@ -317,7 +315,7 @@ plugins:
     - search:
           separator: '[\s\-\.]+'
           min_search_length: 2
-          #prebuild_index: true
+          #prebuild_index: true  # Should test whether this makes search faster.
 
 extra_css:
     - css/extra.css
