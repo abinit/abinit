@@ -158,16 +158,12 @@ class MyEntry(Entry):
             modal_id = "modal-id-%s" % self.key
             s = f"""
 {s}
+<a href="#{modal_id}" rel="modal:open">bibtex</a> <!-- Link to open the modal -->
 <div id="{modal_id}" class="modal" style="height: initial; max-height: 90%; max-width: 90%; width: initial;">
 {bibtex}
 <a href="#" rel="modal:close">Close</a>
 </div>
-<p><a href="#{modal_id}" rel="modal:open">bibtex</a></p> <!-- Link to open the modal -->
 """
-            #assert bibtex_ui in ("link", "button")
-            #btn, modal = self.get_bibtex_btn_modal(link=bibtex_ui=="link")
-            #s += btn + modal
-
         return s
 
     def to_html(self):

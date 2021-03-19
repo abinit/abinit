@@ -526,9 +526,12 @@ numerically (see [[nomegasrd]] and [[omegasrdmax]]).
 Note that here, in contrast to the exchange term, the sum over the band index
 $n$ should extend up to infinity although in practice only a finite number of
 states can be used (specified by [[nband]]). 
-It is also advised to take special care of the convergence with respect to [[nband]] and [[ecuteps]]. 
-In a GW calculation these two parameters tend not to be independent. 
-Converging one at a low value of the other and vice versa can easily lead to under converged results [[cite:Setten2017]].
+
+!!! important
+
+    It is also advised to take special care of the convergence with respect to [[nband]] and [[ecuteps]]. 
+    In a GW calculation these two parameters tend not to be independent. 
+    Converging one at a low value of the other and vice versa can easily lead to under converged results [[cite:Setten2017]].
 
 ## Plasmon-pole models
   
@@ -621,8 +624,9 @@ $$ (1) \equiv (\rr_1,t_1) $$
 $$ \delta(12) = \delta(\rr_1-\rr_2)\,\delta(t_1-t_2) $$ 
 
 $$ \int \dd1 = \int
-\dd\rr_1 \int_{-\infty}^{+\infty} \dd t_1 $$ $$ v(12)=
-v(\rr_1,\rr_2)\,\delta(t_1-t_2) $$ 
+\dd\rr_1 \int_{-\infty}^{+\infty} \dd t_1 $$ 
+
+$$ v(12)= v(\rr_1,\rr_2)\,\delta(t_1-t_2) $$ 
 
 $$ 1^+ = (\rr_1,t_1 + \eta)_{\eta \rightarrow 0^+} $$ 
 
