@@ -200,6 +200,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else 
 !    npkpt is obsolete, but still read
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npkpt',tread(4),'INT')
+     dtsets(idtset)%np_spkpt=intarr(1)
    endif
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npspinor',tread(5),'INT')
@@ -419,8 +420,10 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
          ABI_WARNING('Set npfft, npband, nspinor and np_spkpt to 1')
        end if
      else if(dtsets(idtset)%np_spkpt*dtsets(idtset)%npfft*dtsets(idtset)%npband*dtsets(idtset)%npspinor < nproc)then
-       write(msg,'(2a)')&
-       'The number of processor must not be greater than npfft*npband*np_spkpt*npspinor ',&
+       write(msg,'(a,5i6,4a)')&
+       'np_spkpt,npband,npspinor,npfft,nproc=',&
+&      dtsets(idtset)%np_spkpt,dtsets(idtset)%npfft,dtsets(idtset)%npband,dtsets(idtset)%npspinor,nproc,ch10,&
+       'The number of processors must not be greater than npfft*npband*np_spkpt*npspinor ',ch10,&
        'when npfft or np_spkpt or npband or npspinor are chosen manually in the input file.'
        ABI_ERROR(msg)
      end if
