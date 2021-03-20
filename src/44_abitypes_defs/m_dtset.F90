@@ -380,7 +380,7 @@ type, public :: dataset_type
  integer :: npfft
  integer :: nphf
  integer :: npimage
- integer :: npkpt
+ integer :: np_spkpt
  integer :: nppert
  integer :: npspinor
  integer :: npsp
@@ -1685,7 +1685,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%npfft              = dtin%npfft
  dtout%nphf               = dtin%nphf
  dtout%npimage            = dtin%npimage
- dtout%npkpt              = dtin%npkpt
+ dtout%np_spkpt           = dtin%np_spkpt
  dtout%nppert             = dtin%nppert
  dtout%npspinor           = dtin%npspinor
  dtout%npsp               = dtin%npsp
@@ -3253,7 +3253,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nloc_alg nloc_mem nnos nnsclo nnsclohf'
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
- list_vars=trim(list_vars)//' npfft nphf nph1l npimage npkpt nppert npsp npspinor'
+ list_vars=trim(list_vars)//' npfft nphf nph1l npimage npkpt nppert npsp npspinor npspkpt'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft' ! CP added nqfd for occopt 9
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'

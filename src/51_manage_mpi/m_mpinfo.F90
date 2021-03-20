@@ -1158,11 +1158,11 @@ subroutine initmpi_grid(mpi_enreg)
    nproc_eff=mpi_enreg%nproc_fft*mpi_enreg%nproc_band *mpi_enreg%nproc_kpt*mpi_enreg%nproc_spinor
    if(nproc_eff/=nproc) then
      write(msg,'(4a,5(a,i0))') &
-      '  The number of band*FFT*kpt*spinor processors, npband*npfft*npkpt*npspinor should be',ch10,&
+      '  The number of band*FFT*spin*kpt*spinor processors, npband*npfft*np_spkpt*npspinor should be',ch10,&
       '  equal to the total number of processors, nproc.',ch10,&
       '  However, npband   =',mpi_enreg%nproc_band,&
       '           npfft    =',mpi_enreg%nproc_fft,&
-      '           npkpt    =',mpi_enreg%nproc_kpt,&
+      '           np_spkpt =',mpi_enreg%nproc_kpt,&
       '           npspinor =',mpi_enreg%nproc_spinor,&
       '       and nproc    =',nproc
      ABI_WARNING(msg)
@@ -1293,7 +1293,7 @@ subroutine initmpi_grid(mpi_enreg)
    end if
 
    !Write some data
-   !write(msg,'(a,4i5)') 'npfft, npband, npspinor and npkpt: ',&
+   !write(msg,'(a,4i5)') 'npfft, npband, npspinor and np_spkpt: ',&
    !mpi_enreg%nproc_fft,mpi_enreg%nproc_band, mpi_enreg%nproc_spinor,mpi_enreg%nproc_kpt
    !call wrtout(std_out,msg,'COLL')
    !write(msg,'(a,4i5)') 'me_fft, me_band, me_spinor , me_kpt: ',&
@@ -1351,7 +1351,7 @@ subroutine initmpi_grid(mpi_enreg)
    call xmpi_comm_free(commcart_2d)
 
 !* Write some data
-   write(msg,'(a,2(1x,i0))') 'nphf and npkpt: ',mpi_enreg%nproc_hf, mpi_enreg%nproc_kpt
+   write(msg,'(a,2(1x,i0))') 'nphf and np_spkpt: ',mpi_enreg%nproc_hf, mpi_enreg%nproc_kpt
    call wrtout(std_out,msg,'COLL')
    write(msg,'(a,2(1x,i0))') 'me_hf, me_kpt: ',mpi_enreg%me_hf, mpi_enreg%me_kpt
    call wrtout(std_out,msg,'COLL')
