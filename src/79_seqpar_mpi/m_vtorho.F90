@@ -40,7 +40,6 @@ module m_vtorho
  use m_dtset
  use m_dtfil
  use m_hightemp
- use m_hightemp_top
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
@@ -726,10 +725,6 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
         call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
      end if
 
-!    Reset hightemp standard deviation
-     if(associated(hightemp)) then
-       hightemp%std_init=zero
-     end if
      call timab(982,2,tsec)
 
 !    BIG FAT k POINT LOOP
@@ -943,10 +938,6 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
            call hightemp%compute_pw_avg_std(cg,eig_k,ek_k,dtfil%filnam_ds(4),&
 &           gprimd,icg,ikpt,istwf_k,kg_k,kinpw,dtset%kptns,mcg,mpi_enreg,nband_k,&
 &           dtset%nkpt,npw_k,my_nspinor,dtset%wtk(ikpt))
-         else if((hightemp%version==3).and.(hightemp%prt_cg)) then
-           call hightemp_prt_cg(cg,ikpt,eig_k,ek_k,dtfil%filnam_ds(4),&
-&           kg_k,dtset%kptns,mcg,mpi_enreg,dtset%nband,&
-&           dtset%nkpt,npw_k,rprimd)
          end if
        end if
        call timab(985,1,tsec)
@@ -1226,10 +1217,6 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        call hightemp%compute_efreeel(energies%e_fermie,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
        call hightemp%compute_ent_freeel(energies%e_fermie,dtset%tsmear)
-!        if(psps%usepaw==1) then
-!          call hightemp_prt_cprj(cprj,eigen,gs_hamk,istep,dtset%mband,&
-! &         mcprj_local,mpi_enreg,natom,dtset%nkpt,dtset%nsppol,occ)
-!        end if
      end if
 
 !    Blanchet write eigocc output file

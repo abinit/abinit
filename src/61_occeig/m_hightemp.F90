@@ -64,7 +64,7 @@ module m_hightemp
   type,public :: hightemp_type
     integer :: bcut,nbcut,nfftf,nspden,version
     real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,ent_freeel
-    real(dp) :: std_init,nfreeel,e_shiftfactor,ucvol
+    real(dp) :: nfreeel,e_shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
     logical :: prt_cg
   contains
@@ -130,7 +130,6 @@ contains
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%ent_freeel=zero
-    this%std_init=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
     if(prt_cg==1) then
@@ -180,7 +179,6 @@ contains
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%ent_freeel=zero
-    this%std_init=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
     this%prt_cg=.false.
@@ -591,7 +589,7 @@ contains
   !!  compute_pw_avg_std
   !!
   !! FUNCTION
-  !!  Compute the planewaves average standard deviation over lasts bands.
+  !!  Debug subroutine to print wave functions coefficients in a precise way.
   !!
   !! INPUTS
   !!  this=hightemp_type object concerned
@@ -618,6 +616,7 @@ contains
   !!  this=hightemp_type object concerned
   !!
   !! PARENTS
+  !!  m_vtorho
   !!
   !! CHILDREN
   !!
@@ -639,7 +638,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: blocksize,iband,iblock,iblocksize,ipw,nblockbd,unit
+    integer :: blocksize,i1,iband,iblock,iblocksize,ipw,nblockbd,unit
     real(dp) :: kpg1,kpg2,kpg3,tmp_std
     character(len=50) :: filenameoutpw
     ! Arrays
@@ -648,11 +647,8 @@ contains
     ! *********************************************************************
 
     unit=96+mpi_enreg%me
-
-    ! Debug : Priting Eigenvalues, Kinetic and PW grid if requested
+    ! Debug: Printing Eigenvalues, Kinetic and PW grid if requested
     if(this%prt_cg.and.(mpi_enreg%me==mpi_enreg%me_kpt)) then
-
-      ! Not sure of this debug block if istwf_k>1
       write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ikpt
       open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
       do ipw=1,npw_k
@@ -690,27 +686,41 @@ contains
       do iblocksize=1,blocksize
         iband=(iblock-1)*blocksize+iblocksize
 
-        ! Not sure of this debug block if istwf_k>1
-        if(this%prt_cg) then
+        ! Not sure of this debug block if we parallelise over bands.
+        ! Forcing disable if npband > 1.
+        if(this%prt_cg.and.mpi_enreg%nproc_band==1) then
           cgnk(:,:)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
           cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
+
           write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ikpt,'_b',iband
           open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
+
+          ! if(istwf_k==1)then
+          !   do ipw=1,npw_k
+          !     write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,kinpw(ipw),&
+          !     & sqrt(cgnk(1,ipw)*cgnk(1,ipw)+cgnk(2,ipw)*cgnk(2,ipw))
+          !   end do
+          ! else if(istwf_k>=2)then
+          !   i1=1
+          !   if(istwf_k==2.and.mpi_enreg%me_g0==1)then ! MPIWF need to know which proc has G=0
+          !     write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,kinpw(ipw),&
+          !     & sqrt(cgnk(1,1)*cgnk(1,1))
+          !     i1=2
+          !   end if
+          !   do ipw=i1,npw_k
+          !     write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,kinpw(ipw),&
+          !     & sqrt(cgnk(1,ipw)*cgnk(1,ipw)+cgnk(2,ipw)*cgnk(2,ipw))
+          !     ! write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,kinpw(ipw),&
+          !     ! & sqrt(cgnk(1,ipw)*cgnk(1,ipw)+cgnk(2,ipw)*cgnk(2,ipw))
+          !   end do
+          ! end if
+
           do ipw=1,npw_k
             write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,&
             & kinpw(ipw),sqrt(cgnk2(ipw))
           end do
-          close(unit)
-        end if
 
-        ! Computing planewaves energy standard deviation over lasts bands.
-        if(iband>=nband_k-this%nbcut+1) then
-          tmp_std=zero
-          call meanvalue_g(tmp_std,(sqrt(2*kinpw(:))-sqrt(2*ek_k(iband)))**2,0,&
-          & istwf_k,mpi_enreg,npw_k,nspinor,&
-          & cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg),&
-          & cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg),0)
-          this%std_init=this%std_init+wtk*sqrt(tmp_std)/this%nbcut
+          close(unit)
         end if
       end do
     end do

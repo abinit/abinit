@@ -44,7 +44,6 @@ module m_scfcv_core
  use m_dtfil
  use m_distribfft
  use m_hightemp
- use m_hightemp_top
 
  use m_nonlop,           only : nonlop_counter
  use defs_datatypes,     only : pseudopotential_type

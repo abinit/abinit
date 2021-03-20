@@ -48,7 +48,6 @@ module m_gstate
  use m_ebands
  use m_dtfil
  use m_hightemp
- use m_hightemp_top
 
  use defs_datatypes,     only : pseudopotential_type, ebands_t
  use defs_abitypes,      only : MPI_type
