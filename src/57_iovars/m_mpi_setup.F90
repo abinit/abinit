@@ -494,7 +494,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !  Set mpi_enreg
    mpi_enregs(idtset)%paral_kgb=dtsets(idtset)%paral_kgb
    if(dtsets(idtset)%paral_kgb/=0)then
-     mpi_enregs(idtset)%nproc_kpt=dtsets(idtset)%np_spkpt
+     mpi_enregs(idtset)%nproc_spkpt=dtsets(idtset)%np_spkpt
      mpi_enregs(idtset)%nproc_fft=dtsets(idtset)%npfft
      mpi_enregs(idtset)%nproc_band=dtsets(idtset)%npband
      mpi_enregs(idtset)%nproc_spinor=min(dtsets(idtset)%npspinor,dtsets(idtset)%nspinor)
@@ -511,12 +511,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        if (dtsets(idtset)%nphf>1) mpi_enregs(idtset)%paral_hf=1
        mpi_enregs(idtset)%nproc_hf = dtsets(idtset)%nphf
        if (dtsets(idtset)%np_spkpt/=1) then
-         mpi_enregs(idtset)%nproc_kpt = dtsets(idtset)%np_spkpt
+         mpi_enregs(idtset)%nproc_spkpt = dtsets(idtset)%np_spkpt
        else
-         mpi_enregs(idtset)%nproc_kpt = mpi_enregs(idtset)%nproc_cell/mpi_enregs(idtset)%nproc_hf
+         mpi_enregs(idtset)%nproc_spkpt = mpi_enregs(idtset)%nproc_cell/mpi_enregs(idtset)%nproc_hf
        end if
      else
-       mpi_enregs(idtset)%nproc_kpt = mpi_enregs(idtset)%nproc_cell
+       mpi_enregs(idtset)%nproc_spkpt = mpi_enregs(idtset)%nproc_cell
      end if
    end if
 
@@ -530,7 +530,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
          ABI_ERROR('The number of processors must not be smaller than nppert !')
        end if
        call initmpi_pert(dtsets(idtset),mpi_enregs(idtset))
-       mpi_enregs(idtset)%nproc_kpt = mpi_enregs(idtset)%nproc_cell
+       mpi_enregs(idtset)%nproc_spkpt = mpi_enregs(idtset)%nproc_cell
        nproc=mpi_enregs(idtset)%nproc_cell
      end if
 !    Cycle if the processor is not used
@@ -771,10 +771,10 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
            end do
 
            if (xmpi_paral==1) then
-             if(modulo(nkpt*nsppol,mpi_enregs(idtset)%nproc_kpt)/=0)then
+             if(modulo(nkpt*nsppol,mpi_enregs(idtset)%nproc_spkpt)/=0)then
                write(msg,'(3a,i0,a,i0)') &
                'The number of KPT processors, np_spkpt, should be a multiple of nkpt*nsppol.',ch10,&
-               'However, np_spkpt=',mpi_enregs(idtset)%nproc_kpt,' and nkpt*nsppol=',nkpt*nsppol
+               'However, np_spkpt=',mpi_enregs(idtset)%nproc_spkpt,' and nkpt*nsppol=',nkpt*nsppol
                ABI_WARNING(msg)
              end if
            end if

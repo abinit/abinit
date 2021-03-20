@@ -1089,7 +1089,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if((.not.fixed_occ) .and. (iscf>0.or.iscf==-3)) then
 
 !    Parallel case
-     if (mpi_enreg%nproc_kpt>1) then
+     if (mpi_enreg%nproc_spkpt>1) then
 
        call timab(989,1,tsec)
 
@@ -1178,7 +1178,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_FREE(buffer1)
        call timab(989,2,tsec)
 
-     end if ! nproc_kpt>1
+     end if ! nproc_spkpt>1
 
 !    Compute the new occupation numbers from eigen
      call timab(990,1,tsec)
@@ -1459,7 +1459,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Treat fixed occupation numbers or non-self-consistent case
    else
 
-     if (mpi_enreg%nproc_kpt>1) then
+     if (mpi_enreg%nproc_spkpt>1) then
 
        call timab(989,1,tsec)
 
@@ -1546,7 +1546,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_FREE(buffer1)
        call timab(989,2,tsec)
 
-     end if ! nproc_kpt>1
+     end if ! nproc_spkpt>1
 
 !    Compute the highest occupied eigenenergy
      if(iscf/=-1 .and. iscf/=-2)then

@@ -1884,7 +1884,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  integer :: nband_cprj_eff_pos,nband_cprj_k,nband_cprj_k_pos
  integer :: nband_eff_pos,nband_k,nband_k_pos
  integer :: nblock_band,nblock_band_eff_pos,nkpt
- integer :: nproc_band,nproc_fft,nproc_kpt,nproc_kptband,npw_k,npw_k_pos
+ integer :: nproc_band,nproc_fft,nproc_spkpt,nproc_kptband,npw_k,npw_k_pos
  integer :: nspden_rhoij,option,tag,unit_doppler
  integer :: tim_fourdp=0,tim_fourwf=-36
  integer :: ylmr_normchoice,ylmr_npts,ylmr_option
@@ -2000,7 +2000,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
 !Parallel settings
  if (mpi_enreg%paral_kgb/=0) then
-   nproc_kpt=mpi_enreg%nproc_kpt
+   nproc_spkpt=mpi_enreg%nproc_spkpt
    nproc_band=mpi_enreg%nproc_band
    nproc_fft=mpi_enreg%nproc_fft
    nproc_kptband=xmpi_comm_size(mpi_enreg%comm_kptband)
@@ -2012,9 +2012,9 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    my_n2=n2/nproc_fft
    accessfil=IO_MODE_FORTRAN;if(nproc_fft>1)accessfil=IO_MODE_MPI
  else
-   nproc_kpt=mpi_enreg%nproc_kpt
+   nproc_spkpt=mpi_enreg%nproc_spkpt
    nproc_band=1;nproc_fft=1
-   nproc_kptband=nproc_kpt
+   nproc_kptband=nproc_spkpt
    me_band=0;me_fft=0
    me_kpt=mpi_enreg%me_kpt
    me_kptband=me_kpt
@@ -2446,11 +2446,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        jj=mpi_enreg%my_kpttab(ikpt_pos)
        bandfft_kpt_pos => bandfft_kpt(jj)
      end if
-     do ii=0,mpi_enreg%nproc_kpt-1
+     do ii=0,mpi_enreg%nproc_spkpt-1
        if (ii/=mpi_enreg%me_kpt) then
          tag=ikpt_pos+(isppol_pos-1)*nkpt+2*nkpt*ii
          call xmpi_send(cg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
-         tag=tag+nkpt*(1+2*mpi_enreg%nproc_kpt)
+         tag=tag+nkpt*(1+2*mpi_enreg%nproc_spkpt)
          if (mpi_enreg%paral_kgb==0) then
            call xmpi_send(kg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
          else
@@ -2465,7 +2465,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      ii=0;if (allocated(mpi_enreg%proc_distrb)) ii=mpi_enreg%proc_distrb(ikpt_pos,1,isppol_pos)
      tag=ikpt_pos+(isppol_pos-1)*nkpt+2*nkpt*mpi_enreg%me_kpt
      call xmpi_recv(cg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
-     tag=tag+nkpt*(1+2*mpi_enreg%nproc_kpt)
+     tag=tag+nkpt*(1+2*mpi_enreg%nproc_spkpt)
      if (mpi_enreg%paral_kgb==0) then
        call xmpi_recv(kg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
      else
@@ -3118,7 +3118,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
    jkpt=0
    do ikpt=1,nkpt
-     if (nproc_kpt==1) then
+     if (nproc_spkpt==1) then
        rho_moment_k(1:nfft)=rho_moment_v2(1:nfft,ikpt)
      else
        if (my_gridtab(ikpt)/=0) jkpt=jkpt+1
@@ -3150,7 +3150,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
            call xmpi_send(rho_moment_v2(1:nfft,jkpt),0,tag,mpi_enreg%comm_kpt,ierr)
          end if
        end if
-     end if ! nproc_kpt>1
+     end if ! nproc_spkpt>1
      if (me_kpt==0) then
        indx=0
        do i3=1,n3
