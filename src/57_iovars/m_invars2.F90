@@ -105,7 +105,7 @@ contains
 !!      m_common
 !!
 !! CHILDREN
-!!      dtset%chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
+!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
 !!      libxc_functionals_end,libxc_functionals_get_hybridparams
 !!      libxc_functionals_init,sort_int,timab,wrtout
 !!
@@ -228,7 +228,7 @@ end subroutine invars2m
 !!      m_invars2
 !!
 !! CHILDREN
-!!      dtset%chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
+!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
 !!      libxc_functionals_end,libxc_functionals_get_hybridparams
 !!      libxc_functionals_init,sort_int,timab,wrtout
 !!
@@ -3322,7 +3322,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        ! (make a separate copy for each k point and spin)
        if(nkpt>1)then
          do isppol=nsppol,1,-1
-           do ikpt=2,nkpt
+           do ikpt=1,nkpt
              dtset%occ_orig(1+(ikpt-1)*nband1+nkpt*nband1*(isppol-1):ikpt*nband1+nkpt*nband1*(isppol-1),iimage)=&
 &             dtset%occ_orig(1+nband1*(isppol-1):nband1*isppol,iimage)
            end do
@@ -3417,7 +3417,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! If iscf>0, check the charge of the system, and compute nelect.
  occopt_tmp=occopt
  if(getocc/=0)occopt_tmp=1
- call dtset%chkneu(nelectjell,occopt_tmp)
+ call dtset%initocc_chkneu(nelectjell,occopt_tmp)
 
  ! Now that the occupation numbers have been initialized, can meaningfully define nbandhf.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')
