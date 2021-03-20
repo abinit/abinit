@@ -1029,7 +1029,7 @@ end subroutine mpi_setup
  real(dp),parameter :: relative_nband_range=0.025
  integer :: wf_algo,wf_algo_global,bpp,bpp_max,bpp_min,optdriver,autoparal,nblocks,blocksize
  integer :: npi_max,npi_min,npc,npc_max,npc_min
- integer :: npk,npk_max,npk_min,npp_max,npp_min
+ integer :: np_sk,np_sk_max,np_sk_min,npp_max,npp_min
  integer :: nps,nps_max,nps_min,npf,npf_max,npf_min
  integer :: npb,npb_max,npb_min,max_ncpus,ount,paral_kgb
  integer :: work_size,nks_per_proc,tot_ncpus
@@ -1152,12 +1152,12 @@ end subroutine mpi_setup
  end if
 
 !Parallelization over k-points and spin components (GS)
- npk_min=1;npk_max=1;nkpt_eff=0
+ np_sk_min=1;np_sk_max=1;nkpt_eff=0
  if (optdriver==RUNL_GSTATE) then
    nkpt_eff=dtset%nkpt*dtset%nsppol
-   npk_min=max(1,dtset%np_spkpt)
-   npk_max=min(nproc,nkpt_eff)
-   if (tread(4)==1) npk_max=dtset%np_spkpt
+   np_sk_min=max(1,dtset%np_spkpt)
+   np_sk_max=min(nproc,nkpt_eff)
+   if (tread(4)==1) np_sk_max=dtset%np_spkpt
  end if
 
 !Parallelization over perturbations, k-points and spin components (DFPT)
@@ -1179,14 +1179,14 @@ end subroutine mpi_setup
          ABI_WARNING(msg)
        end if
      end if
-     npk_min=1
-     npk_max=min(nproc,nkpt_eff)
+     np_sk_min=1
+     np_sk_max=min(nproc,nkpt_eff)
      ABI_FREE(nkpt_rbz)
      ABI_FREE(nband_rbz)
    else
      nkpt_eff=nproc
-     npk_min=nproc-5
-     npk_max=nproc
+     np_sk_min=nproc-5
+     np_sk_max=nproc
    end if
  end if
 
@@ -1307,7 +1307,7 @@ end subroutine mpi_setup
  ! Which levels of parallelism do we have?
  with_image =(npi_min/=1.or.npi_max/=1)
  with_pert  =(npp_min/=1.or.npp_max/=1)
- with_kpt   =(npk_min/=1.or.npk_max/=1)
+ with_kpt   =(np_sk_min/=1.or.np_sk_max/=1)
  with_spinor=(nps_min/=1.or.nps_max/=1)
  with_fft   =(npf_min/=1.or.npf_max/=1)
  with_band  =(npb_min/=1.or.npb_max/=1)
@@ -1352,10 +1352,10 @@ end subroutine mpi_setup
    acc_c=one;if (npc>1) acc_c=0.99_dp*speedup_fdp(ncell_eff,npc)
 
 !  >>>>> K-POINTS
-   do npk=npk_min,npk_max
-!    -> for DFPT runs, impose that nsppol divide npk
-     if (optdriver==RUNL_RESPFN.and.modulo(npk,dtset%nsppol)>0.and.npk>1) cycle
-     acc_k=one;if (npk>1) acc_k=0.96_dp*speedup_fdp(nkpt_eff,npk)
+   do np_sk=np_sk_min,np_sk_max
+!    -> for DFPT runs, impose that nsppol divide np_sk
+     if (optdriver==RUNL_RESPFN.and.modulo(np_sk,dtset%nsppol)>0.and.np_sk>1) cycle
+     acc_k=one;if (np_sk>1) acc_k=0.96_dp*speedup_fdp(nkpt_eff,np_sk)
 
 !    >>>>> SPINORS
      do nps=nps_min,nps_max
@@ -1390,7 +1390,7 @@ end subroutine mpi_setup
 
 !        >>>>> BANDS
          do npb=npb_min,npb_max
-           nproc1=npc*npk*nps*npf*npb
+           nproc1=npc*np_sk*nps*npf*npb
            if (nproc1<nprocmin)     cycle
            if (nproc1>nproc)        cycle
            if (modulo(mband,npb)>0) cycle
@@ -1468,19 +1468,19 @@ end subroutine mpi_setup
 
 !            Resulting "weight"
 !            weight0=acc_c*acc_k*acc_s*acc_kgb
-             weight0=nproc1*(acc_c+acc_k+acc_s+acc_kgb)/(npc+npk+nps+(npf*npb))
+             weight0=nproc1*(acc_c+acc_k+acc_s+acc_kgb)/(npc+np_sk+nps+(npf*npb))
 
 !            Store data
              icount=icount+1
              if (icount<=MAXCOUNT) then
                my_algo(icount)=merge(ALGO_CG,wf_algo,wf_algo==ALGO_NOT_SET)
-               my_distp(1:7,icount)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
+               my_distp(1:7,icount)=(/npc,np_sk,nps,npf,npb,bpp,nproc1/)
                weight(icount)=weight0
                if (weight0<weight(imin)) imin=icount
              else
                if (weight0>weight(imin)) then
                  my_algo(imin)=merge(ALGO_CG,wf_algo,wf_algo==ALGO_NOT_SET)
-                 my_distp(1:7,imin)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
+                 my_distp(1:7,imin)=(/npc,np_sk,nps,npf,npb,bpp,nproc1/)
                  weight(imin)=weight0
                  idum=minloc(weight);imin=idum(1)
                end if
@@ -1490,7 +1490,7 @@ end subroutine mpi_setup
          end do ! npb
        end do ! npf
      end do ! nps
-   end do ! npk
+   end do ! np_sk
  end do ! npc
 
 !Compute number of selected distributions
@@ -1650,7 +1650,7 @@ end subroutine mpi_setup
    msg='|'
    write(strg,'(i4,a,i4,a)') npi_min,'<<',npi_max,'|';if (with_image)  msg=trim(msg)//trim(strg)
    write(strg,'(i4,a,i4,a)') npp_min,'<<',npp_max,'|';if (with_pert)   msg=trim(msg)//trim(strg)
-   write(strg,'(i5,a,i5,a)') npk_min,'<<',npk_max,'|';                 msg=trim(msg)//trim(strg)
+   write(strg,'(i5,a,i5,a)') np_sk_min,'<<',np_sk_max,'|';                 msg=trim(msg)//trim(strg)
    write(strg,'(i5,a,i2,a)') nps_min,'<<',nps_max,'|';if (with_spinor) msg=trim(msg)//trim(strg)
    write(strg,'(i5,a,i5,a)') npf_min,'<<',npf_max,'|';if (with_fft)    msg=trim(msg)//trim(strg)
    write(strg,'(i5,a,i5,a)') npb_min,'<<',npb_max,'|';if (with_band)   msg=trim(msg)//trim(strg)
@@ -1693,19 +1693,19 @@ end subroutine mpi_setup
 &         my_algo(1:mcount)==ALGO_CHEBFI))) then
    if (mcount>0) then
      icount=isort(mcount)
-     npc=my_distp(1,icount);npk=my_distp(2,icount)
+     npc=my_distp(1,icount);np_sk=my_distp(2,icount)
      nps=my_distp(3,icount);npf=my_distp(4,icount)
    else
      npc=1;if (with_image ) npc=npi_min
-     npk=1;if (with_kpt   ) npk=npk_min
+     np_sk=1;if (with_kpt   ) np_sk=np_sk_min
      nps=1;if (with_spinor) nps=nps_min
      npf=1;if (with_fft   ) npf=npf_min
    end if
-   nproc1=npc*npk*nps*npf
+   nproc1=npc*np_sk*nps*npf
    msg=ch10//' >>> Possible (best) choices for the number of bands (nband) are:'
    if (with_image.or.with_kpt.or.with_spinor.or.with_fft) msg=trim(msg)//ch10//'     with:'
    write(strg,'(a,i0)') ' npimage=' ,npc;if (with_image)  msg=trim(msg)//trim(strg)
-   write(strg,'(a,i0)') ' np_spkpt=' ,npk;if (with_kpt)    msg=trim(msg)//trim(strg)
+   write(strg,'(a,i0)') ' np_spkpt=' ,np_sk;if (with_kpt)    msg=trim(msg)//trim(strg)
    write(strg,'(a,i0)') ' npspinor=',nps;if (with_spinor) msg=trim(msg)//trim(strg)
    write(strg,'(a,i0)') ' npfft='   ,npf;if (with_fft)    msg=trim(msg)//trim(strg)
    call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
