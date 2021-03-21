@@ -104,7 +104,7 @@ P           mkmem          15
           ngfftdg          36      36      36
              nkpt          30
 -           npfft           2
--           npkpt           2
+-        np_spkpt           2
             nstep           5
              nsym          12
             ntime           3
@@ -936,7 +936,7 @@ P           mkmem          15
           ngfftdg          36      36      36
              nkpt          30
 -           npfft           2
--           npkpt           2
+-        np_spkpt           2
             nstep           5
              nsym          12
             ntime           3

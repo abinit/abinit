@@ -130,7 +130,7 @@ P           mkmem           5
             ngfft          12      12      12
            nimage           7
              nkpt          20
--           npkpt           4
+-        np_spkpt           4
             nstep          20
              nsym           2
         ntimimage          10
@@ -9150,7 +9150,7 @@ P           mkmem           5
             ngfft          12      12      12
            nimage           7
              nkpt          20
--           npkpt           4
+-        np_spkpt           4
             nstep          20
              nsym           2
         ntimimage          10

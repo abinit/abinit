@@ -42,7 +42,7 @@ configurations:
       efficiency:  0.661381768
       vars: {
             npimage: 1,
-            npkpt: 1,
+         np_spkpt: 1,
             npspinor: 1,
             npfft: 4,
             npband: 16,
@@ -54,7 +54,7 @@ configurations:
       efficiency:  0.653809390
       vars: {
             npimage: 1,
-            npkpt: 1,
+         np_spkpt: 1,
             npspinor: 1,
             npfft: 8,
             npband: 8,
@@ -66,7 +66,7 @@ configurations:
       efficiency:  0.652034578
       vars: {
             npimage: 1,
-            npkpt: 1,
+         np_spkpt: 1,
             npspinor: 1,
             npfft: 16,
             npband: 4,
@@ -78,7 +78,7 @@ configurations:
       efficiency:  0.668215873
       vars: {
             npimage: 1,
-            npkpt: 1,
+         np_spkpt: 1,
             npspinor: 1,
             npfft: 6,
             npband: 10,
@@ -90,7 +90,7 @@ configurations:
       efficiency:  0.650905287
       vars: {
             npimage: 1,
-            npkpt: 1,
+         np_spkpt: 1,
             npspinor: 1,
             npfft: 15,
             npband: 4,
@@ -102,7 +102,7 @@ configurations:
  Searching for all possible proc distributions for this input with #CPUs<=64:
 
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- |       npkpt|       npfft|      npband|      bandpp|  #MPI(proc)|    WEIGHT|
+ |    np_spkpt|       npfft|      npband|      bandpp|  #MPI(proc)|    WEIGHT|
  |    1<<    1|    1<<   22|    1<<   64|    1<<  640|    1<<   64|  <=    64|
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  |           1|           4|          16|          10|          64|    42.328|
@@ -135,7 +135,7 @@ configurations:
  >>> The present nband value (   640) seems to be the best choice!
 
  Launch a parallel version of ABINIT with a distribution of processors among the above list,
- and the associated input variables (npkpt, npband, npfft, bandpp, etc.).
+ and the associated input variables (np_spkpt, npband, npfft, bandpp, etc.).
  The higher weight should be better.
  ====================================================================================================
 

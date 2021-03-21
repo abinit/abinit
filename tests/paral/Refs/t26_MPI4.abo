@@ -377,15 +377,15 @@ P           mkmem9          1
 -           npfft7          1
 -           npfft8          1
 -           npfft9          1
--           npkpt1          1
--           npkpt2          1
--           npkpt3          2
--           npkpt4          2
--           npkpt5          1
--           npkpt6          1
--           npkpt7          2
--           npkpt8          2
--           npkpt9          2
+-        np_spkpt1          1
+-        np_spkpt2          1
+-        np_spkpt3          2
+-        np_spkpt4          2
+-        np_spkpt5          1
+-        np_spkpt6          1
+-        np_spkpt7          2
+-        np_spkpt8          2
+-        np_spkpt9          2
            nspden1          1
            nspden2          1
            nspden3          1
@@ -4671,15 +4671,15 @@ P           mkmem9          1
 -           npfft7          1
 -           npfft8          1
 -           npfft9          1
--           npkpt1          1
--           npkpt2          1
--           npkpt3          2
--           npkpt4          2
--           npkpt5          1
--           npkpt6          1
--           npkpt7          2
--           npkpt8          2
--           npkpt9          2
+-        np_spkpt1          1
+-        np_spkpt2          1
+-        np_spkpt3          2
+-        np_spkpt4          2
+-        np_spkpt5          1
+-        np_spkpt6          1
+-        np_spkpt7          2
+-        np_spkpt8          2
+-        np_spkpt9          2
            nspden1          1
            nspden2          1
            nspden3          1

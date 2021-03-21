@@ -114,7 +114,7 @@ P           mkmem           3
           ngfftdg          24      24      48
              nkpt           3
 -          npband           2
--           npkpt           2
+-        np_spkpt           2
            nspden           2
            nsppol           2
             nstep1        100
@@ -1706,7 +1706,7 @@ P           mkmem           3
           ngfftdg          24      24      48
              nkpt           3
 -          npband           2
--           npkpt           2
+-        np_spkpt           2
            nspden           2
            nsppol           2
             nstep1        100
