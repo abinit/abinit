@@ -1133,15 +1133,17 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        end if
        call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
        ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
-       if (dtset%usepaw==1.and.dtset%wfoptalg==10.and.dtset%berryopt==0.and.dtset%usefock==0) then
+       if (dtset%usepaw==1.and.dtset%wfoptalg==10.and.dtset%berryopt==0.and.dtset%usefock==0.and.dtset%paral_kgb==0) then
          iatom=0
          idir=0
          iorder_cprj=0
+         call wrtout(std_out,' Computing cprj from wavefunctions (scfcv_core)')
          call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,idir,&
 &          iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &          dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 &          dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &          xred,ylm,ylmgr)
+         call wrtout(std_out,' cprj is computed')
        end if
      end if
 

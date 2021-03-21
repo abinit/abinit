@@ -994,7 +994,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  usecprj=0; mcprj=0;mband_cprj=0
  compute_cprj=.false.
  ! PAW keeping cprj in memory : some cases are excluded for now...
- if (dtset%usepaw==1.and.dtset%wfoptalg==10.and.dtset%berryopt==0.and.dtset%usefock==0) then
+ if (dtset%usepaw==1.and.dtset%wfoptalg==10.and.dtset%berryopt==0.and.dtset%usefock==0.and.dtset%paral_kgb==0) then
    compute_cprj=.true.
    usecprj=1
  else
@@ -1044,10 +1044,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Compute structure factor phases and large sphere cut-off (gsqcut):
      ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
      call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred)
+     call wrtout(std_out,' Computing cprj from initial wavefunctions (gstate)')
      call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
 &   iorder_cprj,dtset%istwfk,kg,dtset%kpt,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,ncprj,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 &   dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
+     call wrtout(std_out,' cprj is computed')
      ABI_DEALLOCATE(ph1d)
    end if
  end if
