@@ -29,7 +29,7 @@ In the following, we will make extensive use of the bash shell hence familiarity
 For a quick introduction to the command line, please consult
 this [Ubuntu tutorial](https://ubuntu.com/tutorials/command-line-for-beginners#1-overview).
 If this is the first time you use the **configure && make** approach to build software,
-we **strongly** recommended to read this
+we **strongly** recommend to read this
 [guide](https://www.codecoffee.com/software-installation-configure-make-install/)
 before proceeding with the next steps.
 If, on the other hand, you are not interested in compiling all the components from source,
@@ -150,7 +150,7 @@ can proceed with the next steps.
     Alternatively, one can install *gfortran* using one of the standalone DMG installers
     provided by the [gfortran-for-macOS project](https://github.com/fxcoudert/gfortran-for-macOS/releases).
     Note also that macOS users will need to install **make** via [Xcode](https://developer.apple.com/xcode/).
-    More info can be found in [this page](INSTALL_MacOS).
+    More info can be found in [this page](../INSTALL_MacOS).
 
 ## How to compile BLAS and LAPACK
 
