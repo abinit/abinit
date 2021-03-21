@@ -83,7 +83,7 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 #%% [files]
 #%% [paral_info]
 #%% max_nprocs = 24
-##%% nprocs_to_test = 24
+#%% nprocs_to_test = 24
 #%% [NCPU_24]
 #%% files_to_test =
 #%%   tpsic_02_MPI24.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
