@@ -38,6 +38,9 @@ or (but this is more dangerous) set the meta-variable [[expert_user]] to one to 
 
 By X. Gonze (MR712)
 
+**A.3** The input variable npkpt has been changed to np_spkpt . Indeed the parallelism governed by npkpt was about spin and k points,
+not only k points. For the time being npkpt is still admitted, but will become obsolete at the next major version change.
+
 * * *
 
 ### **B.** Most noticeable achievements
