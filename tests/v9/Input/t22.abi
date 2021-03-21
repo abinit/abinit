@@ -16,13 +16,13 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
  nband 32
  occopt 0
 
- occ_1img  32*1 0.0         32*1 0.0
+ occ_1img  32*1          32*1 
  cellcharge_1img 0.0
 
- occ_2img  31*1 0.975 0.0   32*1 0.0
+ occ_2img  31*1 0.975   32*1 
  cellcharge_2img 0.025
 
- occ_3img  31*1 0.950 0.0   32*1 0.0
+ occ_3img  31*1 0.950    32*1
  cellcharge_3img 0.050
 
 ###########################################################################
