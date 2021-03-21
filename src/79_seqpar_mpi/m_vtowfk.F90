@@ -560,13 +560,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end do ! End loop over inonsc (NON SELF-CONSISTENT LOOP)
 
- call timab(39,2,tsec)
- call timab(30,1,tsec) ! "vtowfk  (afterloop)"
-
  if (enable_cgwf_paw) then
    update_cprj=dtset%cprj_update_lvl/=2.and.dtset%cprj_update_lvl<=3
-   if (update_cprj) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg)
+   if (update_cprj) then
+     call timab(1205,1,tsec)
+     call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg)
+     call timab(1205,2,tsec)
+   end if
  end if
+
+ call timab(39,2,tsec)
+ call timab(30,1,tsec) ! "vtowfk  (afterloop)"
 
 !###################################################################
 

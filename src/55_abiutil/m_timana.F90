@@ -900,6 +900,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1202)='getcprj%opernla_mv              '; basic(1202)=1
  names(1203)='getcprj(cgwf_paw)               '
  names(1204)='getcprj(ctocprj)                '
+ names(1205)='getcprj(vtowfk)                 '
  names(1210)='getcprj(other)                  '
 
  names(1300)='cgwf_paw                        '
@@ -1336,10 +1337,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !     tslots(:10)=(/1159,1150,-1151,-1152,-1153,-1154,-1155,-1156,-1157,-1158/)
    case(46)
 !      Sum the calls of getcprj
-     tslots(:3)=(/1200,1203,1204/)
+     tslots(:4)=(/1200,1203,1204,1205/)
    case(47)
 !      Estimate the complement of getcprj
-     tslots(:4)=(/1210,1200,-1201,-1202/)
+     tslots(:5)=(/1210,1200,-1203,-1204,-1205/)
    case(48)
 !      Estimate the complement of cgwf_paw
      tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1305,-1203,-1363,-1370,-201,-211,-880/)
@@ -1758,7 +1759,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !         list(:10)=(/1150,1151,1152,1153,1157,1154,1158,1155,1156,1159/)
 !         msg='opernlb_blas'
        case(85)
-         list(:4)=(/1200,1201,1202,1210/)
+         list(:4)=(/1200,1203,1204,1205,1210/)
          msg='getcprj'
        case(86)
          list(:4)=(/1360,1361,236,1362/)

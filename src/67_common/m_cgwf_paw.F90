@@ -235,7 +235,11 @@ integer,parameter :: tim_getcsc=3
    ! Extraction of the vector that is iteratively updated
    cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
    cprj_cwavef => cprj_cwavef_bands(:,nspinor*(iband-1)+1:nspinor*iband)
-   if (cprj_update_lvl<0) call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
+   if (cprj_update_lvl<0) then
+     call timab(1203,1,tsec)
+     call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
+     call timab(1203,2,tsec)
+   end if
 
    ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
    ! WARNING : It might be interesting to skip the following operation.
@@ -659,7 +663,11 @@ integer,parameter :: tim_getcsc=3
  !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
  !  ======================================================================
 
- if (cprj_update_lvl<=2) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
+ if (cprj_update_lvl<=2) then
+   call timab(1203,1,tsec)
+   call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
+   call timab(1203,2,tsec)
+ end if
 
  sij_opt=0
 
