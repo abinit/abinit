@@ -152,7 +152,7 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
  integer :: il,ilmn,ipw,jpw,ipwshft,ispinor,nthreads
  real(dp) :: wt
 !arrays
- real(dp) :: tsec(2)
+! real(dp) :: tsec(2)
  real(dp),allocatable :: gxfac_(:,:),gxfacs_(:,:)
  real(dp),allocatable :: scalr(:),scali(:)
  real(dp),pointer :: ffnl_loc(:,:)
