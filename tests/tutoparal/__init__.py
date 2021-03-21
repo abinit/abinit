@@ -57,7 +57,9 @@ inp_files = [
 #"tmoldyn_05.abi",    # Run is too long : more than 20 minutes on 64 procs
 #"tmoldyn_06.abi",
 #"tmoldyn_07.abi",    # Run is too long : more than 20 minutes on 2 procs.
-"tpsic_02.abi", 
+"tpsic_01.abi", 
+#"tpsic_02.abi",   # Still a problem with NaN presently
+"tpsic_03.abi", 
 "tucrpa_1.abi",
 "tucrpa_2.abi",
 #"tucrpa_3.abi",

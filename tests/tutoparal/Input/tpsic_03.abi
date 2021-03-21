@@ -1,13 +1,10 @@
 # NaI pSIC-PBE - 8 atom cell. Too small number of atoms, still a polaron forms with an expanded lattice parameter.
-#
-
-ndtset 5
 
 #Parameters for the image dynamics
 imgmov 6
 nimage 3
 #ntimimage 30     # This value will give a converged result
- ntimimage 3  # This value is simply to start the optimization.
+ ntimimage 6  # This value is simply to start the optimization, and show the reduction of forces of about a factor 5.
 tolimg   5.0d-6   # Note that for the time being, this is the only stopping criterion for the itimimage loop, except for ntimimage.
                   # It would be better to implement another stopping criterion ...
 prtvol 1
@@ -71,24 +68,14 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
  natom 8
  typat 4*1 4*2
 
-
- natfix 2
- iatfix 5 6
-
- xred: 0.0  0.0  0.0
-       0.0  0.5  0.5
-       0.5  0.0  0.5
-       0.5  0.5  0.0
-
-       0.48  0.02  0.0
-       0.02  0.48  0.0
-       0.0   0.0   0.5
-       0.5   0.5   0.5
-
-xred+  12*0.0
-      -0.02  0.02 0.0
-       0.02 -0.02 0.0
-       6*0.0
+        xred          -3.0863689067E-02 -3.0863689067E-02  2.5197195346E-31
+                       1.9850978742E-02  4.8014902126E-01  5.0000000000E-01
+                       4.8014902126E-01  1.9850978742E-02  5.0000000000E-01
+                       5.3086368907E-01  5.3086368907E-01 -1.5606781514E-30
+                       4.2000000000E-01  8.0000000000E-02  0.0000000000E+00
+                       8.0000000000E-02  4.2000000000E-01  0.0000000000E+00
+                      -2.1313787448E-02 -2.1313787448E-02  5.0000000000E-01
+                       5.2131378745E-01  5.2131378745E-01  5.0000000000E-01
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -99,14 +86,14 @@ xred+  12*0.0
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
 #%% files_to_test =
-#%%   tpsic_02_MPI24.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   tpsic_03_MPI24.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% authors = X. Gonze, C. Tantardini
 #%% keywords = pSIC
 #%% description =
 #%%   NaI with a sligthly expanded lattice, to allow self-localisation of a hole polaron, using pSIC technique.
 #%%   Realistic ecut and reasonable k point sampling, but small cell of only 8 atoms for testing.
-#%%   The present test at a set of decreasing I-I interatomic distances 
+#%%   The present test starts from a reasonable I-I interatomic distance, and search for the optimized polaron geometry, without constraint.
 #%%
 #%%   Parallelism until 12 procs is quite efficient. However, setting npband 2 does not bring noticeable improvement.
 #%%   Although this is still subject for further investigation, the hypothesis is that the density/xc/potential part
