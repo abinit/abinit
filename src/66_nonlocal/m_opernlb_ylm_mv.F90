@@ -280,7 +280,7 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
 !         call timab(1157,2,tsec)
        end if
 
-!      Step (3) : vect(g) = exp(2pi.i.g.R).scal(g)
+!      Step (3) : vect(g) = exp(-2pi.i.g.R).scal(g)
 !       call timab(1155,1,tsec)
        do ipw=1,npw
          jpw=ipw+ipwshft

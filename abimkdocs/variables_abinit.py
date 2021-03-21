@@ -2918,7 +2918,7 @@ Variable(
     text=r"""
 Tolerance for the variation of Local Charge for convergence of the DMFT Loop.
 Most of the time however, DFT+DMFT calculations can converge fastly using [[dmft_iter]]=1, so
-that this variable is not required. 
+that this variable is not required.
 """,
 ),
 
@@ -10669,7 +10669,7 @@ Variable(
     requires="[[nqpt]] == 1 and [[kptopt]] >= 0",
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done,
 and the default value of [[ngqpt]] is kept.
 
 Similar to [[ngkpt]], but for the q-wavevector. At variance with [[ngkpt]], note that only one q point is selected per dataset
@@ -10875,20 +10875,51 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-Allows to choose the algorithm for non-local operator application. On super-
-scalar architectures, the default [[nloc_alg]] = 4 is the best.
-More detailed explanations:
+Allows to choose the algorithm for non-local operator application.
+The default value is [[nloc_alg]] = 4, and the meaning of this variable depends on [[useylm]].
 
-- [[nloc_alg]] = 2: Should be efficient on vector machines. It is indeed the
-  fastest algorithm for the NEC, but actual tests on Fujitsu machine did not
-  gave better performances than the other options.
-- [[nloc_alg]] = 3: same as [[nloc_alg]] == 2, but the loop order is inverted.
-- [[nloc_alg]] = 4: same as [[nloc_alg]] == 3, but maximal use of registers has
-   been coded. This should be especially efficient on scalar and super-scalar
-   machines. This has been confirmed by tests.
+For [[useylm]] = 0 :
+
+  On super-scalar architectures, [[nloc_alg]] = 4 is the best.
+  More detailed explanations:
+
+  - [[nloc_alg]] = 2: Should be efficient on vector machines. It is indeed the
+    fastest algorithm for the NEC, but actual tests on Fujitsu machine did not
+    gave better performances than the other options.
+  - [[nloc_alg]] = 3: same as [[nloc_alg]] == 2, but the loop order is inverted.
+  - [[nloc_alg]] = 4: same as [[nloc_alg]] == 3, but maximal use of registers has
+     been coded. This should be especially efficient on scalar and super-scalar
+     machines. This has been confirmed by tests.
+
+For [[useylm]] = 1 :
+
+  [[nloc_alg]] = 4 is historically the first implementation, in which some operations are treated "line-by-line".
+  In an other implementation these operations are gathered as matrix-vector multiplications.
+  One dimension of the matrix is the number of plane waves (see [[ecut]]), and the other is the number of projectors from the pseudo-potential.
+  The matrix is real whereas the vector is complex, so it is not a standard case treated by linear algebra libraries,
+  and the optimal implementation depends on the architecture and the available libraries.
+  The best option could also be system dependent.
+  More detailed explanations:
+
+  - [[nloc_alg]] = 2: matrix-vector operations are done with two BLAS calls (dgemv), one for the real part and one for the imaginary part.
+  - [[nloc_alg]] = 3: matrix-vector operations are done "by hand", so real and imaginary parts are computed at the same time, and compared to [[nloc_alg]] = 2 the matrix elements are read only once, not twice.
+  - [[nloc_alg]] = 4: matrix-vector operations are not treated as such, and are done "line-by-line" instead.
+    In some cases, there are simplifications which are not possible using matrix-vector operations.
+
+  The optimal choice is difficult to predict a priori, but the impact on performances could be large.
+  Indeed, there could be a factor of 2 between the computation time (of non-local operations only) of the worst choice of [[nloc_alg]] compared with the best choice.
+  [[nloc_alg]] = 2 seems to be the best choice if combined with the Intel MKL, but could be the worst choice otherwise.
+  Then [[nloc_alg]] = 3 could be prefered, especially if the vectorization is activated.
+  In order to know which option is the best, one can do quick tests with [[timopt]] /= 0, and look for the time spent in "nonlop(apply)" and in "getcprj%opernla" (or "opernla_mv").
+  Depending on the computation only "nonlop(apply)" could be present.
+
+  For now, only ground state quantities can be computed with matrix-vector operations.
+  The computations of derivatives (i.e. for forces, stress or DFPT) are done with the "line-by-line" implementation.
+  If [[nloc_alg]] /= 4, the code uses automatically the matrix-vector implementation for ground state quantities and the "line-by-line" implementation for derivatives.
 
 Note: internally, [[nloc_alg]] is stored in `dtset%nloalg(1)`. See also
 [[nloc_mem]] for the tuning of the memory used in the non-local operator application.
+
 """,
 ),
 
@@ -11606,7 +11637,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done,
 and the default value of [[nshiftq]] is kept.
 
 This parameter gives the number of shifted grids to be used concurrently to
@@ -15741,7 +15772,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done,
 and the default value of [[qpt]], namely the null vector, is kept.
 
 Combined with [[qptnrm]], define the q vector [[qptn]](1:3) in the case
@@ -15832,7 +15863,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done,
 and the default value of [[qptopt]] is kept.
 
 Controls the set up to generate the Q point [[qptn]](1:3) to be used for the
@@ -15884,7 +15915,7 @@ Variable(
     excludes="[[ngqpt]]",
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done,
 and the default value of [[qptrlatt]] is kept.
 
 This input variable is used only when [[qptopt]] is positive. It partially
@@ -16938,7 +16969,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done,
 and the default value of [[shiftq]] is kept.
 
 It is used only when [[qptopt]] >= 0, and must be defined if [[nshiftq]] is larger than 1.
@@ -20284,7 +20315,7 @@ redundant with that supplied by array [[xred]]. By default,
 although Angstrom can be specified, if preferred, since [[xcart]] has the [[LENGTH]] characteristics.
 If [[xred]] are ABSENT from the input file and [[xcart]] is
 provided, then the values of [[xred]] will be computed from the provided
-[[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]] 
+[[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]]
 to provide starting coordinates).
 One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
@@ -20338,7 +20369,7 @@ must be absent from the input file.
 One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
 
-The echo of [[xcart]] in the main output file is accompanied by its echo in Angstrom, 
+The echo of [[xcart]] in the main output file is accompanied by its echo in Angstrom,
 named `xangst`.
 """,
 ),
@@ -21271,10 +21302,10 @@ Variable(
     added_in_version="before v9",
     text=r"""
 Factor that multiplies the three primitive vectors to generate a supercell.
-The starting nuclei types [[typat]] and coordinates [[xred]] and [[xcart]] 
+The starting nuclei types [[typat]] and coordinates [[xred]] and [[xcart]]
 are simply replicated in the different images of the original primitive cell.
 If present, [[spinat]] and [[chrgat]] are also replicated without change.
-Note that [[supercell_latt]] is not echoed. It is immediately used to change 
+Note that [[supercell_latt]] is not echoed. It is immediately used to change
 [[natom]], [[typat]], and all input variables that depend on [[natom]] and [[typat]].
 
 This input variable cannot be used jointly with non-default values of [[natrd]] and [[nobj]].
