@@ -76,7 +76,7 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 #%% exclude_builders = .*_nag_7.0_.*
 #%% [files]
 #%% files_to_test =
-#%%   t22.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t22.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -easy;
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]
@@ -85,6 +85,5 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
 #%% description =
 #%%   NaI with a sligthly expanded lattice, to allow self-localisation of a hole polaron, using pSIC technique.
 #%%   Realistic ecut and reasonable k point sampling, but small cell of only 8 atoms for testing.
-#%%   - This test is not portable, and the -ridiculous fld_option does not yield pass unless crazy tolerances (see above) are used.
 #%% topics = CrossingBarriers
 #%%<END TEST_INFO>
