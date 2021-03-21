@@ -12705,8 +12705,8 @@ Typical band occupancy is either 2.0 or 0.0, but will usually be 1.0 or 0.0 for 
 or half-occupied band, or other choices in special circumstances.
 
 If [[occopt]] is not 2, then the occupancies must be the same for each k point.
-If [[nsppo]]=1, the total number of arrays which must be provided is [[nband]], in order of increasing energy.
-If [[nsppo]]=2, the total number of arrays which must be provided is [[nband]]*[[nsppol]], 
+If [[nsppol]]=1, the total number of arrays which must be provided is [[nband]], in order of increasing energy.
+If [[nsppol]]=2, the total number of arrays which must be provided is [[nband]]*[[nsppol]], 
 first spin up, in order of increasing electronic eigenenergy, then spin down, in order of increasing electronic eigenenergy.
 
 If [[occopt]] = 2, then the band occupancies must be provided explicitly for
