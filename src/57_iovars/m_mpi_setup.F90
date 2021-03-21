@@ -200,7 +200,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else 
 !    npkpt is obsolete, but still read
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npkpt',tread(4),'INT')
-     dtsets(idtset)%np_spkpt=intarr(1)
+     if(tread(4)==1)then
+       dtsets(idtset)%np_spkpt=intarr(1)
+     endif
    endif
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npspinor',tread(5),'INT')
