@@ -369,7 +369,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call timab(1203,2,tsec)
        call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &       gs_hamk,mpi_enreg,nband,tim_getcsc)
-       if (abs(xnorm-one)>tol10) then ! True if iline==1 and if input WFs are random
+!       if (abs(xnorm-one)>tol10) then ! True if iline==1 and if input WFs are random
+       if (iline==1) then
          ! We compensate the normalization of the current band
          scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband)/xnorm
        end if
@@ -377,7 +378,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        scprod = reshape(scprod_csc,(/2,nband/))
        call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &       direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
-       if (abs(xnorm-one)>tol10) then
+!       if (abs(xnorm-one)>tol10) then
+       if (iline==1) then
          ! Again we have to compensate the normalization of the current band.
          ! Indeed, by calling projbd we compute:
          ! |direc'_i> = |direc_i> - \sum_j <c'_j|S|direc_i>|c'_j>
@@ -410,7 +412,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call timab(1303,1,tsec)
        call pawcprj_projbd(scprod,cprj_cwavef_bands,cprj_direc)
        call timab(1303,2,tsec)
-       if (abs(xnorm-one)>tol10) then
+!       if (abs(xnorm-one)>tol10) then
+       if (iline==1) then
          ! Same correction than for WFs
          z_tmp  = -scprod_csc(2*iband-1:2*iband)*(one-xnorm)/xnorm
          z_tmp2 = (/one,zero/)
