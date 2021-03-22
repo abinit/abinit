@@ -41,7 +41,7 @@ MODULE m_cut3d
  use m_symtk,            only : matr3inv
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_geometry,         only : xcart2xred, metric
- use m_hightemp,         only : prt_cg_from_wf
+ use m_hightemp,         only : hightemp_prt_cg
  use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg, initmpi_seq
@@ -1908,7 +1908,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      call wfk%close()
 
      ! Blanchet (temporary)
-     ! call prt_cg_from_wf()
+     call hightemp_prt_cg(ckpt,ecut,exchn2n3d,gmet,gprimd,istwfk,kpt,mpi_enreg,&
+&     mpw,nband,nkpt,npwarr,nsppol,wfk_fname)
    end if
 
    if (csppol/=oldcsppol .or. ckpt/=oldckpt .or. cband/=oldcband .or. cspinor/=oldcspinor ) then
