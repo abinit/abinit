@@ -16,12 +16,12 @@ e.g. path-integral molecular dynamics, hyperdynamics, linear combination of imag
 The parallelism on images can be used for all these algorithms.
 
 You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
-[A first introduction to ABINIT in parallel](basepar), and  [ground state with plane waves](paral_gspw).
+[A first introduction to ABINIT in parallel](/tutorial/basepar), and  [ground state with plane waves](/tutorial/paral_gspw).
 
 This tutorial should take about 1.5 hour and requires to have at least a 10 CPU
 core parallel computer.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Summary of the String Method
 

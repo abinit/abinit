@@ -16,11 +16,11 @@ In this tutorial you will learn how to get the following physical properties (of
 
 In order to learn the use of the associated codes *mrgddb* and *anaddb*,
 to produce phonon band structures and the associated
-thermodynamical properties, please consult the [second tutorial on DFPT](rf2).
+thermodynamical properties, please consult the [second tutorial on DFPT](/tutorial/rf2).
 
 This tutorial should take about 2 hours.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 The ground-state geometry of AlAs
 
@@ -586,6 +586,6 @@ close to their values at $\Gamma$ : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
 
 !!! note
     This ABINIT tutorial is now finished.
-    You are advised to go through the [second tutorial on DFPT](rf2) to
+    You are advised to go through the [second tutorial on DFPT](/tutorial/rf2) to
     make some post-processing analysis (phonon dispersions, thermodynamical properties, *etc*)
 
