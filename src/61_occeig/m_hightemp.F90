@@ -1409,7 +1409,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: cgshift,iband,ikpt,ioffkg,ipw,mkmem,npw_k
+    integer :: cgshift,iband,ikpt,index,ioffkg,ipw,mkmem,npw_k
     character(len=4) :: mode_paral
     character(len=50) :: filenameoutpw
     ! Arrays
@@ -1424,23 +1424,28 @@ contains
     ABI_MALLOC(npwtot1,(nkpt))
 
     ! Create positions index for pw
+    write(0,*) ecut,exchn2n3d,mkmem,nband,nkpt,&
+    & mode_paral,mpw,nsppol
+
     call kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kpt,mkmem,nband,nkpt,&
     & mode_paral,mpi_enreg,mpw,npwarr1,npwtot1,nsppol)
 
-    ioffkg=0
-    do ikpt=1,ckpt-1
-      ioffkg=ioffkg+npwarr1(ikpt)
-    end do
-    npw_k=npwarr(ckpt)
-    ABI_MALLOC(kg_k,(3,npw_k))
-    kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
+    ! ioffkg=0
+    ! do ikpt=1,ckpt-1
+    !   ioffkg=ioffkg+npwarr1(ikpt)
+    ! end do
+    ! npw_k=npwarr(ckpt)
+    ! ABI_MALLOC(kg_k,(3,npw_k))
+    ! kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
 
     ! Compute the norms of the k+G vectors
-    ABI_MALLOC(kpgnorm,(npw_k))
-    call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
+    ! ABI_MALLOC(kpgnorm,(npw_k))
+    ! call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
 
-    write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ckpt
-    write(0,*) wfk_name[1:2]
+    ! index=SCAN(wfk_fname,'_WFK')
+    ! filenameoutpw=wfk_fname(1:index-1)
+    ! write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ckpt
+    ! write(0,*) filenameoutpw
 
     ! open(file=trim(wfk_fname)//trim(filenameoutpw),unit=96)
     ! do ipw=1,npw_k
@@ -1472,8 +1477,8 @@ contains
     !   ABI_FREE(cgnk2)
     ! end do
 
-    ABI_FREE(kpgnorm)
-    ABI_FREE(kg_k)
+    ! ABI_FREE(kpgnorm)
+    ! ABI_FREE(kg_k)
     ABI_FREE(npwtot1)
     ABI_FREE(npwarr1)
   end subroutine hightemp_prt_cg
