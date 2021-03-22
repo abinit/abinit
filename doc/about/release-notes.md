@@ -49,7 +49,7 @@ By X. Gonze
 
 **A.5** The code does not stop anymore at the first occurence of overlap between PAW spheres being larger than [[pawovlp]]
 in case of [[ionmov]]/=0 or [[imgmov]]/=0, but only at the second occurrence per dataset. Indeed, such trespassing might only be transient.
-See the description of [[chkpawovlp]].
+See the description of [[pawovlp]].
 
 By X. Gonze
 
