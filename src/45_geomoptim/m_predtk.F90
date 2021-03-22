@@ -163,7 +163,7 @@ function fdtion(ab_mover,itime,xcart,fcart,vel)
 !!
 !! SOURCE
 
-subroutine prtxvf(fcart,fred,iatfix,iout,natom,prtvel,vel,xcart,xred)
+subroutine prtxvf(fcart,gred,iatfix,iout,natom,prtvel,vel,xcart,xred)
 
  implicit none
 
@@ -172,7 +172,7 @@ subroutine prtxvf(fcart,fred,iatfix,iout,natom,prtvel,vel,xcart,xred)
  integer,intent(in) :: iout,natom,prtvel
 !arrays
  integer,intent(in) :: iatfix(3,natom)
- real(dp),intent(in) :: fcart(3,natom),fred(3,natom)
+ real(dp),intent(in) :: fcart(3,natom),gred(3,natom)
  real(dp),intent(in) :: xcart(3,natom),xred(3,natom)
  real(dp),intent(in) :: vel(3,natom)
 !Local variables-------------------------------
@@ -221,10 +221,10 @@ subroutine prtxvf(fcart,fred,iatfix,iout,natom,prtvel,vel,xcart,xred)
    call wrtout(iout,msg,'COLL')
  end do
 
- write(msg, '(a)' ) ' Reduced forces (fred)'
+ write(msg, '(a)' ) ' Gradient of E wrt nuclear positions in reduced coordinates (gred)'
  call wrtout(iout,msg,'COLL')
  do iatom=1,natom
-   write(msg, '(1p,3e22.14)' )fred(:,iatom)
+   write(msg, '(1p,3e22.14)' )gred(:,iatom)
    call wrtout(iout,msg,'COLL')
  end do
 

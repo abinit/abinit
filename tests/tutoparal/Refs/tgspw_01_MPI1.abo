@@ -1,6 +1,6 @@
 
-.Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.Version 9.4.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 12 Jan 2021.
-- ( at 11h44 )
+.Starting date : Sun 21 Mar 2021.
+- ( at 09h28 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/biederj_beauty/tests/Test_suite/tutoparal_tgspw_01/tgspw_01.abi
-- output file    -> tgspw_01.abo
-- root for input  files -> tgspw_01i
-- root for output files -> tgspw_01o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/TestBot_MPI1/tutoparal_tgspw_01_MPI1/tgspw_01.abi
+- output file    -> tgspw_01_MPI1.abo
+- root for input  files -> tgspw_01_MPI1i
+- root for output files -> tgspw_01_MPI1o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/biederj_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Au.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Au.xml
 
 --- !Autoparal
 #Autoparal section for GS calculations with paral_kgb
@@ -42,8 +42,8 @@ configurations:
       efficiency:  0.661381768
       vars: {
             npimage: 1,
-            npkpt: 1,
-            npspinor: 1,
+            np_spkpt:1,
+            npspinor:1,
             npfft: 4,
             npband: 16,
             bandpp: 10,
@@ -54,8 +54,8 @@ configurations:
       efficiency:  0.653809390
       vars: {
             npimage: 1,
-            npkpt: 1,
-            npspinor: 1,
+            np_spkpt:1,
+            npspinor:1,
             npfft: 8,
             npband: 8,
             bandpp: 20,
@@ -66,8 +66,8 @@ configurations:
       efficiency:  0.652034578
       vars: {
             npimage: 1,
-            npkpt: 1,
-            npspinor: 1,
+            np_spkpt:1,
+            npspinor:1,
             npfft: 16,
             npband: 4,
             bandpp: 40,
@@ -78,8 +78,8 @@ configurations:
       efficiency:  0.668215873
       vars: {
             npimage: 1,
-            npkpt: 1,
-            npspinor: 1,
+            np_spkpt:1,
+            npspinor:1,
             npfft: 6,
             npband: 10,
             bandpp: 16,
@@ -90,8 +90,8 @@ configurations:
       efficiency:  0.650905287
       vars: {
             npimage: 1,
-            npkpt: 1,
-            npspinor: 1,
+            np_spkpt:1,
+            npspinor:1,
             npfft: 15,
             npband: 4,
             bandpp: 40,
@@ -102,7 +102,7 @@ configurations:
  Searching for all possible proc distributions for this input with #CPUs<=64:
 
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- |       npkpt|       npfft|      npband|      bandpp|  #MPI(proc)|    WEIGHT|
+ |       np_spkpt|       npfft|      npband|      bandpp|  #MPI(proc)|    WEIGHT|
  |    1<<    1|    1<<   22|    1<<   64|    1<<  640|    1<<   64|  <=    64|
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  |           1|           4|          16|          10|          64|    42.328|
@@ -135,7 +135,7 @@ configurations:
  >>> The present nband value (   640) seems to be the best choice!
 
  Launch a parallel version of ABINIT with a distribution of processors among the above list,
- and the associated input variables (npkpt, npband, npfft, bandpp, etc.).
+ and the associated input variables (np_spkpt, npband, npfft, bandpp, etc.).
  The higher weight should be better.
  ====================================================================================================
 

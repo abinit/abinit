@@ -111,8 +111,8 @@ P           mkmem2          4
 -          npband2          1
 -           npfft1          1
 -           npfft2          2
--           npkpt1          1
--           npkpt2          2
+-        np_spkpt1          1
+-        np_spkpt2          2
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
@@ -720,8 +720,8 @@ P           mkmem2          4
 -          npband2          1
 -           npfft1          1
 -           npfft2          2
--           npkpt1          1
--           npkpt2          2
+-        np_spkpt1          1
+-        np_spkpt2          2
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000

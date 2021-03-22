@@ -50,9 +50,9 @@ ixc2 40           # Calculation with HF
 getwfk2 -1        # Start from previous LDA wavefunctions to ease convergence
 
 #Parameters for parallelization with Hartree-Fock
-#npkpt2 2           # Number of processors for k-point parallelization
+#np_spkpt2 2           # Number of processors for k-point parallelization
 #nphf2  2           # Number of processors for occupied states parallelization
-                   # The calculation thus requires npkpt*nphf processors.
+                   # The calculation thus requires np_spkpt*nphf processors.
 
 fockdownsampling 1 1 1 # Keep the same grid as the kpt one
 
