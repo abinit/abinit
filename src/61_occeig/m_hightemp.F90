@@ -493,8 +493,8 @@ contains
       do ii=1,this%bcut+1
         ix=dble(ii)-one
         fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        if(one-fn>tol16) then
-          valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
+        if(fn>tol16) then
+          valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
         else
           valuesent(ii)=zero
         end if
@@ -523,8 +523,8 @@ contains
       do ii=1,this%bcut+1
         ix=this%e_shiftfactor+(dble(ii)-one)*step
         fn=fermi_dirac(ix,fermie,tsmear)
-        if(one-fn>tol16) then
-          valuesent(ii)=-(fn*log(fn)+(1.-fn)*log(1.-fn))*&
+        if(fn>tol16) then
+          valuesent(ii)=-(fn*log(fn)+(one-fn)*log(one-fn))*&
           & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
         else
           valuesent(ii)=zero
