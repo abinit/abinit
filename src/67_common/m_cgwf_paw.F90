@@ -139,16 +139,14 @@ subroutine cgwf_paw(cg,cprj_cwavef_bands,cprj_update_lvl,eig,&
 
 !Local variables-------------------------------
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
-integer,parameter :: tim_getcsc=3
+integer,parameter :: useoverlap=0,tim_getcsc=3
  integer,save :: nskip=0
- integer :: choice,cpopt
- integer :: i1,i2,i3,iband,isubh,isubh0,jband,me_g0,igs
+ integer :: cpopt,i1,i2,i3,iband,isubh,isubh0,jband,me_g0,igs
  integer :: iline,ipw,ispinor,istwf_k
  integer :: n4,n5,n6,natom,ncpgr,npw,nspinor
- integer :: optekin,sij_opt
- integer :: useoverlap,wfopta10
+ integer :: optekin,sij_opt,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
- real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,xnorm
+ real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,xnorm,xnormd
  character(len=500) :: message
 !arrays
  real(dp) :: dot(2)
@@ -177,12 +175,10 @@ integer,parameter :: tim_getcsc=3
 !MPI data
  me_g0 = mpi_enreg%me_g0
 
- useoverlap=0
-
+! cprj are already in memory
  cpopt = 2
 
 !Initializations and allocations
-
  istwf_k=gs_hamk%istwf_k
  wfopta10=mod(wfoptalg,10)
  if (wfopta10/=0) then
@@ -211,8 +207,6 @@ integer,parameter :: tim_getcsc=3
  ABI_ALLOCATE(direc_r, (2,n4,n5,n6,nspinor))
 
  ncpgr  = 0 ! no need of gradients here...
- choice = 1
-
  call pawcprj_alloc(cprj_direc,ncpgr,gs_hamk%dimcprj)
  call pawcprj_alloc(cprj_conjgr,ncpgr,gs_hamk%dimcprj)
 
@@ -242,8 +236,6 @@ integer,parameter :: tim_getcsc=3
    end if
 
    ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
-   ! WARNING : It might be interesting to skip the following operation.
-   ! The associated routines should be reexamined to see whether cwavef is not already normalized.
    call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
 &   gs_hamk,mpi_enreg,1,tim_getcsc)
    xnorm=one/sqrt(dot(1))
@@ -348,17 +340,15 @@ integer,parameter :: tim_getcsc=3
        ! It is done only if ortalg>=0.
 
        ! Project the steepest descent direction:
-       ! direc(2,npw)=<G|H|Cnk> - \sum_{(i<=n)} <G|H|Cik> , normalized.
+       ! direc(2,npw)=<G|H|Cnk> - \sum_{(i/=n)} <G|H|Cik> , normalized.
        if(ortalg>=0)then
          call timab(1203,1,tsec)
          call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
          call timab(1203,2,tsec)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &         gs_hamk,mpi_enreg,nband,tim_getcsc)
-         if (iline==1) then
-           scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
-         end if
          scprod = reshape(scprod_csc,(/2,nband/))
+         ! Note that the actual band (|C_iband>) is not used here
          call projbd(cg,direc,iband,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
        end if
@@ -393,15 +383,32 @@ integer,parameter :: tim_getcsc=3
        call timab(1203,2,tsec)
        call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &       gs_hamk,mpi_enreg,nband,tim_getcsc)
-       if (iline==1) then
-         scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
+       if (abs(xnorm-one)>tol10) then ! True if iline==1 and if input WFs are random
+         ! We compensate the normalization of the actual band
+         scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband)/xnorm
        end if
        ! Projecting again out all bands (not normalized).
        scprod = reshape(scprod_csc,(/2,nband/))
        call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &       direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
-       if (iline==1) then
-         z_tmp = -scprod_csc(2*iband-1:2*iband)*(1.0_dp/xnorm-1.0_dp)
+       if (abs(xnorm-one)>tol10) then
+         ! Again we have to compensate the normalization of the actual band.
+         ! Indeed, by calling projbd we compute:
+         ! |direc'_i> = |direc_i> - \sum_j <c'_j|S|direc_i>|c'_j>
+         !            = |direc_i> - \sum_{j/=i} <c_j|S|direc_i>|c_j> - <c'_i|S|direc_i>|c'_i>
+         ! where |c'_j> = |c_j> for j/=i and |c'_i> = xnorm.|c_i>
+         ! As we compensated "scprod" before the call of projbd we actually computed:
+         ! |direc'_i> = |direc_i> - \sum_{j/=i} <c_j|S|direc_i>|c_j> - <c_i|S|direc_i>|c'_i>
+         !            = |direc_i> - \sum_{j/=i} <c_j|S|direc_i>|c_j> - xnorm.<c_i|S|direc_i>|c_i>
+         ! The correct projected direction should be:
+         ! |projdirec_i> = |direc_i> - \sum_j <c_j|S|direc_i>|c_j>
+         !               = |direc_i> - \sum_{j/=i} <c_j|S|direc_i>|c_j> - <c_i|S|direc_i>|c_i>
+         ! So:
+         ! |projdirec_i> = |direc'_i> - <c_i|S|direc_i>|c_i> + xnorm.<c_i|S|direc_i>|c_i>
+         !               = |direc'_i> - (1-xnorm) <c_i|S|direc_i>|c_i>
+         !               = |direc'_i> - (1-xnorm)/xnorm <c_i|S|direc_i>|c'_i>
+         ! 
+         z_tmp = -scprod_csc(2*iband-1:2*iband)*(one-xnorm)/xnorm
          call timab(1305,1,tsec)
          do ispinor=1,nspinor
            igs=(ispinor-1)*npw
@@ -413,17 +420,17 @@ integer,parameter :: tim_getcsc=3
          call timab(1305,2,tsec)
        end if
        ! Apply projbd to cprj_direc
-       z_tmp = (/one,zero/)
-       !scprod_csc = -scprod_csc
        scprod=-scprod
        call timab(1303,1,tsec)
        call pawcprj_projbd(scprod,cprj_cwavef_bands,cprj_direc)
        call timab(1303,2,tsec)
-       if (iline==1) then
-         z_tmp2 = scprod(:,iband)*(1.0_dp/xnorm-1.0_dp)
-         ! cprj = z_tmp2*cprjx + z_tmp*cprj
+       if (abs(xnorm-one)>tol10) then
+         ! Same correction than for WFs
+         z_tmp  = -scprod_csc(2*iband-1:2*iband)*(one-xnorm)/xnorm
+         z_tmp2 = (/one,zero/)
+         ! cprj = z_tmp*cprjx + z_tmp2*cprj
          call timab(1302,1,tsec)
-         call pawcprj_zaxpby(z_tmp2,z_tmp,cprj_cwavef,cprj_direc)
+         call pawcprj_zaxpby(z_tmp,z_tmp2,cprj_cwavef,cprj_direc)
          call timab(1302,2,tsec)
        end if
 
@@ -515,7 +522,7 @@ integer,parameter :: tim_getcsc=3
        ! Compute norm of direc
        call getcsc(dot,cpopt,direc,direc,cprj_direc,cprj_direc,&
 &       gs_hamk,mpi_enreg,1,tim_getcsc)
-       xnorm=one/sqrt(abs(dot(1)))
+       xnormd=one/sqrt(abs(dot(1)))
 
        sij_opt=0
        ! Compute direc in real space
@@ -524,13 +531,13 @@ integer,parameter :: tim_getcsc=3
        call getchc(z_tmp,cpopt,cwavef,direc,cprj_cwavef,cprj_direc,cwavef_r,direc_r,&
          &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
        dhc=z_tmp(1)
-       dhc=dhc*xnorm
+       dhc=dhc*xnormd
 
        ! Compute <D|H|D> or <D|(H-zshift)^2|D>
        call getchc(z_tmp,cpopt,direc,direc,cprj_direc,cprj_direc,direc_r,direc_r,&
 &        gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
        dhd=z_tmp(1)
-       dhd=dhd*xnorm**2
+       dhd=dhd*xnormd**2
 
        if(prtvol==-level)then
          write(message,'(a,3es21.10e3)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
@@ -580,7 +587,7 @@ integer,parameter :: tim_getcsc=3
        ! =========== GENERATE NEW |wf>, H|wf>, Vnl|Wf>, S|Wf> ... =============
        ! ======================================================================
 
-       sintn=sinth*xnorm
+       sintn=sinth*xnormd
 
        call timab(1305,1,tsec)
 !$OMP PARALLEL DO

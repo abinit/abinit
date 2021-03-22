@@ -462,9 +462,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      if (enable_cgwf_paw) then
        call subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
 &       mcg,nband_k,npw_k,my_nspinor,dtset%paral_kgb,subham)
-!       call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
-!&       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
-!&       subham,subovl,0,0,mpi_enreg%me_g0)
        call timab(585,2,tsec)
        call timab(578,1,tsec)
        call cprj_rotate(cprj_cwavef_bands,evec,gs_hamk%dimcprj,natom,nband_k,gs_hamk%nspinor)
@@ -508,6 +505,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
+   ! The orthogonalization is completely disabled with ortalg<=-10.
+   ! This option is usefull for testing only and is not documented.
    if ((wfoptalg/=14 .and. wfoptalg /= 1 .and. dtset%ortalg>-10).or.dtset%ortalg>0) then
      if (enable_cgwf_paw.and.ortalgo==0) then
        ABI_DEALLOCATE(subovl)
@@ -837,19 +836,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    - PAW: compute projections of WF onto NL projectors (cprj)
    if (enable_cgwf_paw) then
      if (optforces>0) then
-!      Treat all wavefunctions in case of varying occupation numbers or PAW
+!      Treat all wavefunctions in case of PAW
        cwaveprj => cprj(:,1+(iblock-1)*my_nspinor*blocksize+ibg:iblock*my_nspinor*blocksize+ibg)
-!       if (mpi_enreg%paral_kgb==1) then
-!         call timab(572,1,tsec) ! 'prep_nonlop%vtowfk'
-!         call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir, &
-!&         eig_k(1+(iblock-1)*blocksize:iblock*blocksize),blocksize,&
-!&         mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
-!         call timab(572,2,tsec)
-!       else
        call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k(1+(iblock-1)*blocksize:iblock*blocksize),&
 &       mpi_enreg,blocksize,nnlout,&
 &       paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
-!       end if
 !      Acccumulate forces
        iband=(iblock-1)*blocksize
        do iblocksize=1,blocksize
