@@ -2327,6 +2327,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   end if
 
   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+!  write(*,*) "---- UCVOL ----" 
+!  write(*,*) ucvol
 
 !--------------------------------------------
 ! 1 - Set the perturbations and intialisation
@@ -2466,6 +2468,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   fcart_part(:,:)= zero
   strten_part(:) = zero
 
+! write(*,*) "--- STRTEN before harmonics evaluate --- " 
+! write(*,*) strten(:)
   call harmonics_terms_evaluateElastic(eff_pot%harmonics_terms%elastic_constants,disp_tmp,energy_part,&
 &                                fcart_part,eff_pot%supercell%natom,eff_pot%crystal%natom,&
 &                                ncell,eff_pot%harmonics_terms%strain_coupling,strten_part,strain_tmp)
@@ -2481,6 +2485,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   energy = energy + energy_part
   fcart(:,:) = fcart(:,:)  + fcart_part(:,:)
   strten(:) = strten(:) + strten_part(:)
+! write(*,*) "--- STRTEN after harmonics evaluate --- " 
+! write(*,*) strten(:)
 
 !------------------------------------
 ! 5 - Treat 3rd order strain-coupling:
@@ -2637,6 +2643,8 @@ endif
     strten(:) = strten(:) + strten_part(:)
   end if
 
+! write(*,*) "--- STRTEN after du/deta application --- " 
+! write(*,*) strten(:)
 !---------------------------------
 ! 10 - Apply factors
 !---------------------------------
@@ -2644,6 +2652,8 @@ endif
 ! divide stess tensor by ucvol
   strten = strten / ucvol
 
+! write(*,*) "--- STRTEN after /ucvol  --- " 
+! write(*,*) strten(:)
 ! multiply forces by -1
   fcart = -1 * fcart
 
@@ -2842,14 +2852,14 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
     strain_inv(2,2) = 1
     strain_inv(3,3) = 1
   end if 
-  write(*,*) "---- STRAIN ----" 
-  do ii = 1,3 
-    write(*,*) strain%strain(ii,:)
-  enddo 
-  write(*,*) "---- 1+STRAIN inv ----" 
-  do ii = 1,3 
-    write(*,*) strain_inv(ii,:)
-  enddo 
+!  write(*,*) "---- STRAIN ----" 
+!  do ii = 1,3 
+!    write(*,*) strain%strain(ii,:)
+!  enddo 
+!  write(*,*) "---- 1+STRAIN inv ----" 
+!  do ii = 1,3 
+!    write(*,*) strain_inv(ii,:)
+!  enddo 
 
 ! fill the history position
   if(present(xcart_hist)) then
@@ -2878,10 +2888,10 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 ! Compute displacement
   if(need_displacement)then
     displacement(:,:) = zero
-    write(*,*) "-----   DISP -----"
+!    write(*,*) "-----   DISP -----"
     do ii = 1, natom
       displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)
-      write(*,*) displacement(:,ii) 
+!      write(*,*) displacement(:,ii) 
     end do
   end if
 
@@ -2891,8 +2901,8 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
     ib = my_atoms(ia)
     !Calc (1+eta)⁻1 * disp(ib) 
     strain_inv_u = MATMUL(strain_inv,displacement(:,ib))
-    write(*,*) "--- strain_inv_u ---" 
-    write(*,*) strain_inv_u
+!    write(*,*) "--- strain_inv_u ---" 
+!    write(*,*) strain_inv_u
     ! fill du_delta_e 
     do ii = 1,6 
       do mu = 1,3
