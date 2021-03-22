@@ -3172,13 +3172,13 @@ simulation. Slow down the simulation.
 ),
 
 Variable(
-    abivarname="dmftctqmc_configs",
+    abivarname="dmftctqmc_config",
     varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Dynamical Mean Field Theory: CTQMC: calculation of weight of CONFIGurationS",
+    mnemonics="Dynamical Mean Field Theory: CTQMC: calculation of weight of CONFIGurations",
     characteristics=['[[DEVELOP]]'],
     requires="[[dmft_solv]] in [5, 8]",
     added_in_version="9.5.0",
