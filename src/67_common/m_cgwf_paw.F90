@@ -66,35 +66,22 @@ contains
 !!
 !! FUNCTION
 !! Update all wavefunction |C>, non self-consistently.
-!! also compute the corresponding H|C> and Vnl|C> (and S|C> if paw).
 !! Uses a conjugate-gradient algorithm.
-!! In case of paw, resolves a generalized eigenproblem using an
-!!  overlap matrix (not used for norm conserving psps).
+!! This version is available for PAW only, as it needs the cprj in memory.
 !!
 !! INPUTS
-!!  chkexit= if non-zero, check whether the user wishes to exit
-!!  cpus = CPU time limit
-!!  filnam_ds1=name of input file (used for exit checking)
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  icg=shift to be applied on the location of data in the array cg
-!!  ikpt=number of the k-point
-!!  inonsc=index of non self-consistent loop
-!!  isppol=spin polarization currently treated
 !!  mcg=second dimension of the cg array
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands.
-!!  nkpt=number of k points
 !!  nline=number of line minimizations per band.
-!!  npw=number of planewaves in basis sphere at given k.
-!!  nspinor=number of spinorial components of the wavefunctions (on current proc)
-!!  nsppol=number of spin polarizations
 !!  ortalg=governs the choice of the algorithm for orthogonalisation.
 !!  prtvol=control print volume and debugging output
 !!  tolrde=tolerance on the ratio of differences of energies (for the line minimisation)
 !!  tolwfr=tolerance on largest wf residual
 !!  wfoptalg=govern the choice of algorithm for wf optimisation
 !!   (0, 1, 10 and 11 : in the present routine, usual CG algorithm ;
-!!   (2 and 3 : use shifted square Hamiltonian)
 !!
 !! OUTPUT
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
@@ -104,10 +91,10 @@ contains
 !!    at input =wavefunction <G|C band,k> coefficients for ALL bands
 !!    at output same as input except that
 !!      the current band, with number 'band' has been updated
+!!  cprj_cwavef_bands=<p_i|c_n> coefficients for all bands n, they are updated when the WFs change.
 !!  quit= if 1, proceeds to smooth ending of the job.
 !!
 !! NOTES
-!!  1) cg should not be filtered and normalized : it should already be OK at input !
 !!
 !! PARENTS
 !!      vtowfk
@@ -168,6 +155,12 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 !Starting the routine
  call timab(1300,1,tsec)
 
+!Some checks
+!Only wfoptalg==10 for now
+ if (wfoptalg/=10) then
+   MSG_ERROR("cgwf_paw is implemented for wfoptalg==10 only")
+ end if
+
 !======================================================================
 !========= LOCAL VARIABLES DEFINITIONS AND ALLOCATIONS ================
 !======================================================================
@@ -181,9 +174,6 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 !Initializations and allocations
  istwf_k=gs_hamk%istwf_k
  wfopta10=mod(wfoptalg,10)
- if (wfopta10/=0) then
-   MSG_BUG('cgwf_paw is implemented only for wfopta10==0')
- end if
 
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
@@ -235,7 +225,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
      call timab(1203,2,tsec)
    end if
 
-   ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
+   ! Normalize incoming wf:
    call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
 &   gs_hamk,mpi_enreg,1,tim_getcsc)
    xnorm=one/sqrt(dot(1))
@@ -285,10 +275,6 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          end if
          lamold=lam0
        end if
-
-       ! Compute residual vector:
-       ! Note that vresid is precomputed to garantee cancellation of errors
-       ! and allow residuals to reach values as small as 1.0d-24 or better.
 
        ! ======================================================================
        ! =========== COMPUTE THE STEEPEST DESCENT DIRECTION ===================
@@ -340,7 +326,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        ! It is done only if ortalg>=0.
 
        ! Project the steepest descent direction:
-       ! direc(2,npw)=<G|H|Cnk> - \sum_{(i/=n)} <G|H|Cik> , normalized.
+       ! direc(2,npw)=<G|H|Cnk> - \sum_{(i/=n)} <G|H|Cik>
        if(ortalg>=0)then
          call timab(1203,1,tsec)
          call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
@@ -348,7 +334,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &         gs_hamk,mpi_enreg,nband,tim_getcsc)
          scprod = reshape(scprod_csc,(/2,nband/))
-         ! Note that the actual band (|C_iband>) is not used here
+         ! Note that the current band (|C_iband>) is not used here
          call projbd(cg,direc,iband,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
        end if
@@ -384,7 +370,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &       gs_hamk,mpi_enreg,nband,tim_getcsc)
        if (abs(xnorm-one)>tol10) then ! True if iline==1 and if input WFs are random
-         ! We compensate the normalization of the actual band
+         ! We compensate the normalization of the current band
          scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband)/xnorm
        end if
        ! Projecting again out all bands (not normalized).
@@ -392,7 +378,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &       direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
        if (abs(xnorm-one)>tol10) then
-         ! Again we have to compensate the normalization of the actual band.
+         ! Again we have to compensate the normalization of the current band.
          ! Indeed, by calling projbd we compute:
          ! |direc'_i> = |direc_i> - \sum_j <c'_j|S|direc_i>|c'_j>
          !            = |direc_i> - \sum_{j/=i} <c_j|S|direc_i>|c_j> - <c'_i|S|direc_i>|c'_i>
@@ -490,8 +476,6 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        doti=dot(2)
 
        ! Project the conjugated gradient onto the current band
-       ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
-       ! that direc --> conjgr
        call timab(1305,1,tsec)
        if(istwf_k==1)then
 
@@ -583,9 +567,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          end if
        end if
 
-       ! ======================================================================
-       ! =========== GENERATE NEW |wf>, H|wf>, Vnl|Wf>, S|Wf> ... =============
-       ! ======================================================================
+       ! ============================================================
+       ! =========== GENERATE NEW wf(G), wf(r) and cprj =============
+       ! ============================================================
 
        sintn=sinth*xnormd
 
@@ -751,6 +735,34 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 end subroutine cgwf_paw
 !!***
 
+!!****f* m_cgwf/mksubovl
+!! NAME
+!! mksubovl
+!!
+!! FUNCTION
+!!   Compute the triangular matrix <c_m|S|c_n> for m<=n
+!!
+!! INPUTS
+!!  cg(2,mcg)=wavefunction <G|C band,k> coefficients for ALL bands
+!!  cprj_cwavef_bands=<p_i|c_n> coefficients for all bands n
+!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!  icg=shift to be applied on the location of data in the array cg
+!!  nband=number of bands.
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! OUTPUT
+!!  subovl(nband*(nband+1)) = <c_m|S|c_n> for m<=n
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!!
 subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
 !Arguments ------------------------------------
  integer,intent(in) :: icg,nband
@@ -792,6 +804,33 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
 end subroutine mksubovl
 !!***
 
+!!****f* m_cgwf/cprj_update
+!! NAME
+!! cprj_update
+!!
+!! FUNCTION
+!!   Compute the cprj = <p_i|c_n> from input cg (at fixed k point).
+!!
+!! INPUTS
+!!  cg(2,mcg)=wavefunction <G|C band,k> coefficients for ALL bands
+!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!  icg=shift to be applied on the location of data in the array cg
+!!  nband=number of bands.
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! OUTPUT
+!!  cprj_cwavef_bands=<p_i|c_n> coefficients for all bands n
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!!
 subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
 
 !Arguments ------------------------------------
@@ -829,6 +868,32 @@ subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
 end subroutine cprj_update
 !!***
 
+!!****f* m_cgwf/cprj_update_oneband
+!! NAME
+!! cprj_update_oneband
+!!
+!! FUNCTION
+!!   Compute the cprj = <p_i|c_n> from input wavefunction (one band only).
+!!
+!! INPUTS
+!!  cwavef(2,npw)=a wavefunction <G|C band,k>
+!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!  icg=shift to be applied on the location of data in the array cg
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! OUTPUT
+!!  cprj_cwavef=<p_i|c_n> coefficients of the input WF
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!!
 subroutine cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
 
 !Arguments ------------------------------------
@@ -857,6 +922,34 @@ subroutine cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
 end subroutine cprj_update_oneband
 !!***
 
+!!****f* m_cgwf/cprj_check
+!! NAME
+!! cprj_check
+!!
+!! FUNCTION
+!!   Check if the cprj are consistent with the bands contained in cg.
+!!   Useful for debugging only.
+!!
+!! INPUTS
+!!  cwavef(2,npw)=a wavefunction <G|C band,k>
+!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!  icg=shift to be applied on the location of data in the array cg
+!!  message=string to specify the context of the test
+!!  mpi_enreg=information about MPI parallelization
+!!  nband=number of bands.
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!!
 subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
 
 !Arguments ------------------------------------
@@ -931,6 +1024,33 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
 
 end subroutine cprj_check
 
+!!****f* m_cgwf/cprj_check_oneband
+!! NAME
+!! cprj_check_oneband
+!!
+!! FUNCTION
+!!   Check if the input cprj is consistent with the input WF.
+!!   Useful for debugging only.
+!!
+!! INPUTS
+!!  cwavef(2,npw)=a wavefunction <G|C band,k>
+!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!  icg=shift to be applied on the location of data in the array cg
+!!  message=string to specify the context of the test
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!!
 subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
 
 !Arguments ------------------------------------
@@ -998,6 +1118,31 @@ subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
 end subroutine cprj_check_oneband
 !!***
 
+!!****f* m_cgwf/get_cwavefr
+!! NAME
+!! get_cwavefr
+!!
+!! FUNCTION
+!!   Compute the real space wavefunction by FFT of the input WF in reciprocal space.
+!!
+!! INPUTS
+!!  cwavef(2,npw)=a wavefunction <G|C band,k>
+!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! OUTPUT
+!!  cwavef_r(2,n4,n5,n6,nspinor) = real space coefficients of the WF
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!!
 subroutine get_cwavefr(cwavef,cwavef_r,gs_hamk,mpi_enreg)
 
 !Arguments ------------------------------------

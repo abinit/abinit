@@ -512,8 +512,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        ABI_DEALLOCATE(subovl)
        ABI_ALLOCATE(subovl,(nband_k*(nband_k+1)))
        call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
-       call pw_orthon_paw(icg,mcg,npw_k*my_nspinor,my_nspinor,nband_k,ortalgo,subovl,cg,&
-&       mpi_enreg%comm_bandspinorfft,cprj=cprj_cwavef_bands)
+       call pw_orthon_paw(icg,mcg,npw_k*my_nspinor,my_nspinor,nband_k,ortalgo,subovl,cg,cprj=cprj_cwavef_bands)
      else
        call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
 &        mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)

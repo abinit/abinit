@@ -4614,21 +4614,16 @@ end subroutine subdiago
 !!
 !! FUNCTION
 !! This routine diagonalizes the Hamiltonian in the eigenfunction subspace
+!! Separate the computation in blocks of plane waves to save memory
 !!
 !! INPUTS
 !!  icg=shift to be applied on the location of data in the array cg
-!!  igsc=shift to be applied on the location of data in the array gsc
 !!  istwf_k=input parameter that describes the storage of wfs
 !!  mcg=second dimension of the cg array
-!!  mgsc=second dimension of the gsc array
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  npw_k=number of plane waves at this k point
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
-!!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
-!!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
-!!  usepaw= 0 for non paw calculation; =1 for paw calculation
-!!  me_g0=1 if this processors has G=0, 0 otherwise.
 !!
 !! OUTPUT
 !!  eig_k(nband_k)=array for holding eigenvalues (hartree)
@@ -4636,7 +4631,6 @@ end subroutine subdiago
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)=wavefunctions
-!!  gsc(2,mgsc)=<g|S|c> matrix elements (S=overlap)
 !!
 !! PARENTS
 !!      rayleigh_ritz,vtowfk
@@ -5368,60 +5362,43 @@ end subroutine pw_orthon
 !!
 !! FUNCTION
 !! Normalize nvec complex vectors each of length nelem and then orthogonalize by modified Gram-Schmidt.
-!! Two orthogonality conditions are available:
-!!  Simple orthogonality: ${<Vec_{i}|Vec_{j}>=Delta_ij}$
-!!  Orthogonality with overlap S: ${<Vec_{i}|S|Vec_{j}>=Delta_ij}$
+!! The overlap matrix <c_m|S|c_n> (S can be identity) has to be provided as input, and is overwritten.
 !!
 !! INPUTS
 !!  icg=shift to be given to the location of the data in cg(=vecnm)
-!!  igsc=shift to be given to the location of the data in gsc(=ovl_vecnm)
-!!  istwf_k=option parameter that describes the storage of wfs
 !!  mcg=maximum size of second dimension of cg(=vecnm)
-!!  mgsc=maximum size of second dimension of gsc(=ovl_vecnm)
 !!  nelem=number of complex elements in each vector
+!!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  nvec=number of vectors to be orthonormalized
 !!  ortalgo= option for the choice of the algorithm
 !!         -1: no orthogonalization (direct return)
-!!          0 or 2: old algorithm (use of buffers)
-!!          1: new algorithm (use of blas)
-!!          3: new new algorithm (use of lapack without copy)
-!!  useoverlap=select the orthogonality condition
-!!               0: no overlap between vectors
-!!               1: vectors are overlapping
-!!  me_g0=1 if this processor has G=0, 0 otherwise
+!!          0: do orthogonalization
 !!  comm=MPI communicator
 !!
 !! SIDE EFFECTS
+!!  cprj(optional)=<p_i|c_n> coefficients, updated to keep them consistent with the WF at output
+!!  ovl_mat=overlap matrix <c_m|S|c_n> for m<=n
 !!  vecnm= input: vectors to be orthonormalized; array of nvec column
 !!                vectors,each of length nelem,shifted by icg
 !!                This array is complex or else real(dp) of twice length
 !!         output: orthonormalized set of vectors
-!!  if (useoverlap==1) only:
-!!    ovl_vecnm= input: product of overlap and input vectors:
-!!                      S|vecnm>,where S is the overlap operator
-!!               output: updated S|vecnm> according to vecnm
 !!
 !! NOTES
 !! Note that each vector has an arbitrary phase which is not fixed in this routine.
 !!
-!! WARNING: not yet suited for nspinor=2 with istwfk/=1
-!!
 !! PARENTS
-!!      lapackprof,vtowfk,wfconv
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
-subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,cprj)
+subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 
  use m_abi_linalg
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icg,mcg,nelem,nspinor,nvec,ortalgo,comm
+ integer,intent(in) :: icg,mcg,nelem,nspinor,nvec,ortalgo
 !arrays
  real(dp),intent(inout) :: ovl_mat(nvec*(nvec+1)),vecnm(2,mcg)
  type(pawcprj_type),intent(inout),optional,target :: cprj(:,:)
@@ -5429,10 +5406,10 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,c
 !Local variables-------------------------------
 !scalars
  logical :: do_cprj
- integer :: ierr,ii,ii1,ii2,ivec,ivec2,ivec3,iv1,iv2,iv3,iv1l,iv2l,iv3l,ncprj
+ integer :: ii,ii1,ii2,ivec,ivec2,ivec3,iv1,iv2,iv3,iv1l,iv2l,iv3l,ncprj
  real(dp) :: doti,dotr,summ,xnorm
 !arrays
- real(dp) :: buffer2(2),tsec(2),ovl_row_tmp(2*nvec),ovl_col_tmp(2*nvec)
+ real(dp) :: ovl_row_tmp(2*nvec),ovl_col_tmp(2*nvec)
  real(dp) :: re,im
 
 ! *************************************************************************
@@ -5450,27 +5427,37 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,c
  end if
 
  do ivec=1,nvec
-!  Normalize each vecnm(n,m) in turn:
 
-   iv1l = ivec*(ivec-1)
-   iv1  = 2*ivec-1
-   summ=ovl_mat(iv1l+iv1)
-
-   call timab(48,1,tsec)
-   call xmpi_sum(summ,comm,ierr)
-   call timab(48,2,tsec)
-
+   ! First we normalize the current vector
+   
+   ! Only the upper triangular part of the (complex) overlap matrix is stored 
+   ! -- shift for the ith row    : 2.(i.(i-1)/2) = i.(i-1)
+   ! -- shift for the ith column : 2.i-1
+   ! => index of real part of elem in the jth column and ith row : 2.i-1+j.(j-1) (for i<=j)
+   ! -- index of imaginary part = index of real part + 1
+   ! where the overlap matrix is :
+   !  ovl(i,j) = <psi_i|S|psi_j> = (<psi_j|S|psi_i>)^*
+   ! so the column index stands for the "right" band index
+   ! and the row index stands for the "left"  band index
+   iv1l = ivec*(ivec-1) ! ith column
+   iv1  = 2*ivec-1      ! ith row
+   ! ovl(i1,i1) = <psi_i1|S|psi_i1>
+   summ = ovl_mat(iv1l+iv1)
    xnorm = sqrt(abs(summ)) ;  summ=1.0_dp/xnorm
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
    do ii=1+nelem*(ivec-1)+icg,nelem*ivec+icg
      vecnm(1,ii)=vecnm(1,ii)*summ
      vecnm(2,ii)=vecnm(2,ii)*summ
    end do
+!  Apply the normalization to cprj coeffs
    if (do_cprj) call pawcprj_axpby(zero,summ,cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec))
 
+   ! As |psi_i> changed, we update the overlap matrix accordingly.
+   ! TO FINISH
    do ivec2=ivec,nvec
      iv2l=ivec2*(ivec2-1)
      if (ivec<ivec2) then
+       ! ovl(i2,i1) = <psi_i2|S|psi_i1>
        ovl_mat(iv2l+iv1  ) = ovl_mat(iv2l+iv1  )*summ
        ovl_mat(iv2l+iv1+1) = ovl_mat(iv2l+iv1+1)*summ
      else if (ivec==ivec2) then
@@ -5478,10 +5465,10 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,c
        ovl_mat(iv2l+iv1+1) = ovl_mat(iv2l+iv1+1)*summ*summ
        re = ovl_mat(iv2l+iv1  )
        im = ovl_mat(iv2l+iv1+1)
-       if (abs(re-1)>tol12.or.abs(im)>tol12) then
+       if (abs(re-1)>tol10.or.abs(im)>tol10) then
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
-         MSG_ERROR('Should be one!')
+         MSG_WARNING('In pw_orthon : the result should be equal to one!')
        end if
      end if
    end do
@@ -5490,23 +5477,16 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,comm,c
    if (ivec<nvec) then
 
      do ivec2=ivec+1,nvec
-!      First compute scalar product
-       dotr=zero ; doti=zero
-       ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)
-       iv2l=ivec2*(ivec2-1)
-       iv2 =2*ivec2-1
+
+       iv2l = ivec2*(ivec2-1)
+       iv2  = 2*ivec2-1
+       ! (dotr,doti) = <psi_i2|S|psi_i>
        dotr = ovl_mat(iv2l+iv1  )
        doti = ovl_mat(iv2l+iv1+1)
 
-       call timab(48,1,tsec)
-       buffer2(1)=doti;buffer2(2)=dotr
-       call xmpi_sum(buffer2,comm,ierr)
-       call timab(48,2,tsec)
-       doti=buffer2(1)
-       dotr=buffer2(2)
-
 !      Then subtract the appropriate amount of the lower state
        ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+       ! |psi_i2> = |psi_i2> - <psi_i2|S|psi_i> |psi_i>
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
        do ii=1,nelem
          vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)

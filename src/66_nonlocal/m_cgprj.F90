@@ -970,6 +970,9 @@ contains
 !! cprj_rotate
 !!
 !! FUNCTION
+!!   Compute cprj_nk = \sum_m z_m cprj_mk
+!!   where z_m is an array of complex values.
+!!   The input is overwritten.
 !!
 !! INPUTS
 !!
@@ -996,8 +999,8 @@ contains
  integer :: iband,ncpgr
 !arrays
 ! real(dp) :: tsec(2)
- real(dp) :: z_tmp(2,nband)!,z_tmp2(2)
- type(pawcprj_type),pointer :: cprj_iband(:,:)!,cprj_jband(:,:)
+ real(dp) :: z_tmp(2,nband)
+ type(pawcprj_type),pointer :: cprj_iband(:,:)
  type(pawcprj_type),allocatable,target :: cprj_tmp(:,:)
 
 
@@ -1010,33 +1013,16 @@ contains
  ncpgr=cprj_in(1,1)%ncpgr
  ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,nspinor*nband))
  call pawcprj_alloc(cprj_tmp,ncpgr,dimcprj)
-! call pawcprj_set_zero(cprj_tmp)
 
  do iband=1,nband
    z_tmp  = reshape(evec(:,iband),(/2,nband/))
    cprj_iband => cprj_tmp(:,nspinor*(iband-1)+1:nspinor*iband)
    call pawcprj_lincom(z_tmp,cprj_in,cprj_iband,nband)
-!   z_tmp2 = (/zero,zero/)
-!   call cprj_axpby(cprj_iband,cprj_iband,cprj_iband,z_tmp,z_tmp2,&
-!&                   indlmn,istwf_k,lmnmax,mpi_enreg,&
-!&                   natom,nattyp,1,nspinor,ntypat)
-!   call cprj_axpby(cprj_iband,cprj_iband,cprj_in,z_tmp,evec(:,iband),&
-!&                     indlmn,istwf_k,lmnmax,mpi_enreg,&
-!&                     natom,nattyp,nband,nspinor,ntypat)
  end do
 
  call pawcprj_copy(cprj_tmp,cprj_in)
  call pawcprj_free(cprj_tmp)
  ABI_DATATYPE_DEALLOCATE(cprj_tmp)
-! z_tmp  = (/one,zero/)
-! z_tmp2 = (/zero,zero/)
-! do iband=1,nband
-!   cprj_iband => cprj_in(:,iband:iband)
-!   cprj_jband => cprj_out(:,iband:iband)
-!   call cprj_axpby(cprj_jband,cprj_iband,cprj_iband,z_tmp,z_tmp2,&
-!&                 indlmn,istwf_k,lmnmax,mpi_enreg,&
-!&                 natom,nattyp,1,nspinor,ntypat)
-! end do
 
 ! call timab(1211,2,tsec)
 

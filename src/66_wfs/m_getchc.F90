@@ -32,13 +32,12 @@ module m_getchc
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim, pawcprj_copy
- use m_bandfft_kpt, only : bandfft_kpt, bandfft_kpt_get_ikpt
+ use m_pawcprj,     only : pawcprj_type!, pawcprj_alloc, pawcprj_free, pawcprj_getdim
+! use m_bandfft_kpt, only : bandfft_kpt, bandfft_kpt_get_ikpt
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
  use m_nonlop,      only : nonlop
- use m_fock,        only : fock_common_type, fock_get_getghc_call
- use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
- use m_fft,         only : fourwf
+! use m_fock,        only : fock_common_type, fock_get_getghc_call
+! use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_cgtools,     only : dotprod_g
 
  implicit none
@@ -46,9 +45,8 @@ module m_getchc
  private
 !!***
 
- public :: getchc     ! Compute <CP|H|C> for input vector |C> expressed in reciprocal space
- public :: getcsc     ! Compute <CP|S|C> for all input vectors |Cnk> at a given k-point
-! public :: multithreaded_getchc
+ public :: getchc
+ public :: getcsc
 !!***
 
 contains
@@ -60,11 +58,8 @@ contains
 !! getchc
 !!
 !! FUNCTION
-!! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
-!! Result is put in array ghc.
-!! <G|Vnonlocal + VfockACE|C> is also returned in gvnlxc if either NLoc NCPP or FockACE.
-!! if required, <G|S|C> is returned in gsc (S=overlap - PAW only)
-!! Note that left and right k points can be different, i.e. ghc=<k^prime+G|H|C_k>.
+!! Compute <C_left|H|C> for input vectors |C> and |C_left>.
+!! Note that |C_left> can be an array of "ndat" wavefunctions if only the non-local part is computed
 !!
 !! INPUTS
 !! cpopt=flag defining the status of cwaveprj%cp(:)=<Proj_i|Cnk> scalars (PAW only)
@@ -75,17 +70,20 @@ contains
 !!       if cpopt= 2  <p_lmn|in> are already in memory;
 !!       if cpopt= 3  <p_lmn|in> are already in memory; first derivatives are computed here and saved
 !!       if cpopt= 4  <p_lmn|in> and first derivatives are already in memory;
-!! cwavef(2,npw*my_nspinor*ndat)=planewave coefficients of wavefunction.
+!! cwavef(2,npw*my_nspinor)=planewave coefficients of wavefunction.
+!! cwavef_left(2,npw*my_nspinor)=planewave coefficients of wavefunction left.
+!! cwaveprj(natom,my_nspinor*(1+cpopt))= wave function projected on nl projectors
+!! cwaveprj_left(natom,my_nspinor*(1+cpopt))= wave function projected on nl projectors (for left WF)
+!! cwavef_r(2,n4,n5,n6,nspinor) = wave function in real space
+!! cwavef_left_r(2,n4,n5,n6,nspinor) = wave function in real space (for left WF)
 !! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
 !! lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
 !!        Typically lambda is the eigenvalue (or its guess)
 !! mpi_enreg=information about MPI parallelization
-!! ndat=number of FFT to do in parallel
-!! prtvol=control print volume and debugging output
+!! ndat=number of left wavefunctions
 !! sij_opt= -PAW ONLY-  if  0, only matrix elements <G|H|C> have to be computed
 !!    (S=overlap)       if  1, matrix elements <G|S|C> have to be computed in gsc in addition to ghc
 !!                      if -1, matrix elements <G|H-lambda.S|C> have to be computed in ghc (gsc not used)
-!! tim_getchc=timing code of the calling subroutine(can be set to 0 if not attributed)
 !! type_calc= option governing which part of Hamitonian is to be applied:
 !             0: whole Hamiltonian
 !!            1: local part only
@@ -105,23 +103,17 @@ contains
 !!             if select_k=4, <k^prime|H|k^prime> is applied
 !!
 !! OUTPUT
-!!  ghc(2,npw*my_nspinor*ndat)=matrix elements <G|H|C> (if sij_opt>=0)
-!!                                          or <G|H-lambda.S|C> (if sij_opt=-1)
-!!  gvnlxc(2,npw*my_nspinor*ndat)=matrix elements <G|Vnonlocal+VFockACE|C> (if sij_opt>=0)
-!!                                            or <G|Vnonlocal+VFockACE-lambda.S|C> (if sij_opt=-1)
-!!      include Vnonlocal if NCPP and non-local Fock if associated(gs_ham%fockcommon)
-!!  if (sij_opt=1)
-!!    gsc(2,npw*my_nspinor*ndat)=matrix elements <G|S|C> (S=overlap).
-!!
+!!   chc(2*ndat)=matrix elements <C_left|H|C> (if sij_opt>=0)
+!!                           or <C_left|H-lambda.S|C> (if sij_opt=-1)
 !! SIDE EFFECTS
-!!  cwaveprj(natom,my_nspinor*(1+cpopt)*ndat)= wave function projected on nl projectors (PAW only)
 !!
 !! PARENTS
-!!      cgwf,chebfi,dfpt_cgwf,gwls_hamiltonian,ks_ddiago,lobpcgwf,m_io_kss
-!!      m_rf2,mkresi,multithreaded_getchc
+!!   cgwf_paw
+!!
+!! NOTE
+!!   Case k_left/=k is not implemented yet
 !!
 !! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 
@@ -199,6 +191,9 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
    kinpw_k1  => gs_ham%kinpw_kp  ; kinpw_k2  => gs_ham%kinpw_kp
  end if
  k1_eq_k2=(all(abs(kpt_k1(:)-kpt_k2(:))<tol8))
+ if (.not.k1_eq_k2) then
+   MSG_ERROR('getchc is not implemented yet for k1/=k2')
+ end if
 
 !Check sizes
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
@@ -254,8 +249,6 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
 
  npw=gs_ham%npw_k
  nspinortot=gs_ham%nspinor
- ABI_ALLOCATE(gvnlxc,(0,0))
- ABI_ALLOCATE(gsc,(0,0))
 
 !============================================================
 ! Application of the local potential
@@ -270,11 +263,6 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
    end if
    if (ndat>1) then
      MSG_ERROR("ndat should be 1 for the local part")
-   end if
-
-!  fourwf can only process with one value of istwf_k
-   if (.not.k1_eq_k2) then
-     MSG_BUG('vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
 
    n1=gs_ham%ngfft(1)
@@ -355,6 +343,8 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
 
      signs=1 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=15
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
+     ABI_ALLOCATE(gvnlxc,(0,0))
+     ABI_ALLOCATE(gsc,(0,0))
 !     if (has_fock) then
 !       if (gs_ham%usepaw==1) then
 !         cpopt_here=max(cpopt,0)
@@ -388,6 +378,9 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
        chc(2*idat-1) = chc(2*idat-1) + enlout(idat)
        chc(2*idat  ) = chc(2*idat  ) + enlout_im(idat)
      end do
+
+     ABI_DEALLOCATE(gvnlxc)
+     ABI_DEALLOCATE(gsc)
 
    end if ! if(type_calc...
 
@@ -452,9 +445,6 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
 
  end if ! type_calc
 
- ABI_DEALLOCATE(gvnlxc)
- ABI_DEALLOCATE(gsc)
-
  call timab(1370,2,tsec)
 
  DBG_EXIT("COLL")
@@ -469,44 +459,35 @@ end subroutine getchc
 !! getcsc
 !!
 !! FUNCTION
-!! Compute <G|S|C> for all input vectors |Cnk> at a given k-point,
-!!              OR for one input vector |Cnk>.
-!! |Cnk> are expressed in reciprocal space.
-!! S is the overlap operator between |Cnk> (used for PAW).
+!! Compute <C_left|S|C> for input vectors |C> and |C_left>.
+!! Note that |C_left> can be an array of "ndat" wavefunctions
 !!
 !! INPUTS
-!!  cg(2,mcg)=planewave coefficients of wavefunctions
-!!  cprj(natom,mcprj)= wave functions projected with non-local projectors: cprj=<p_i|Cnk>
-!!  gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
-!!  ibg=shift to be applied on the location of data in the array cprj (beginning of current k-point)
-!!  icg=shift to be applied on the location of data in the array cg (beginning of current k-point)
-!!  igsc=shift to be applied on the location of data in the array gsc (beginning of current k-point)
-!!  ikpt,isppol=indexes of current (spin.kpoint)
-!!  mcg=second dimension of the cg array
-!!  mcprj=second dimension of the cprj array
-!!  mgsc=second dimension of the gsc array
+!!  cpopt=flag defining the status of cwaveprj%cp(:)=<Proj_i|Cnk> scalars (PAW only)
+!!        (same meaning as in nonlop.F90 routine)
+!!        if cpopt=-1, <p_lmn|in> (and derivatives) are computed here (and not saved)
+!!        if cpopt= 0, <p_lmn|in> are computed here and saved
+!!        if cpopt= 1, <p_lmn|in> and first derivatives are computed here and saved
+!!        if cpopt= 2  <p_lmn|in> are already in memory;
+!!        if cpopt= 3  <p_lmn|in> are already in memory; first derivatives are computed here and saved
+!!        if cpopt= 4  <p_lmn|in> and first derivatives are already in memory;
+!!  cwavef(2,npw*my_nspinor)=planewave coefficients of wavefunction.
+!!  cwavef_left(2,npw*my_nspinor)=planewave coefficients of wavefunction left.
+!!  cprj(natom,my_nspinor*(1+cpopt))= wave function projected on nl projectors
+!!  cprj_left(natom,my_nspinor*(1+cpopt))= wave function projected on nl projectors (for left WF)
+!!  gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
+!!  lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
+!!         Typically lambda is the eigenvalue (or its guess)
 !!  mpi_enreg=information about MPI parallelization
-!!  natom=number of atoms in unit cell.
-!!  nband= if positive: number of bands at this k point for that spin polarization
-!!         if negative: abs(nband) is the index of the only band to be computed
-!!  npw_k=number of planewaves in basis for given k point.
-!!  nspinor=number of spinorial components of the wavefunctions
-!! [select_k]=optional, option governing the choice of k points to be used.
-!!             gs_ham datastructure contains quantities needed to apply overlap operator
-!!             in reciprocal space between 2 kpoints, k and k^prime (equal in most cases);
-!!             if select_k=1, <k^prime|S|k>       is applied [default]
-!!             if select_k=2, <k|S|k^prime>       is applied
-!!             if select_k=3, <k|S|k>             is applied
-!!             if select_k=4, <k^prime|S|k^prime> is applied
+!!  ndat=number of left wavefunctions
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! OUTPUT
-!!  gsc(2,mgsc)= <g|S|Cnk> or <g|S^(1)|Cnk> (S=overlap)
+!!   csc(2*ndat)=matrix elements <C_left|S|C>
 !!
 !! PARENTS
-!!      dfpt_vtowfk
 !!
 !! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -576,13 +557,6 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
      end do
    end if
  end if
-! else
-!   do idat=1,ndat
-!     cwavef_left_idat => cwavef_left(:,1+npw*nspinor*(idat-1):npw*nspinor*idat)
-!     call dotprod_g(csc(2*idat-1),dum,istwf_k,npw*nspinor,1,cwavef_left_idat,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!     csc(2*idat)=zero
-!   end do
-! end if
  call timab(1361,2,tsec)
 
 
