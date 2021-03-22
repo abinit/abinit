@@ -40,7 +40,7 @@ module m_hightemp
   use m_xmpi
   use m_energies,       only : energies_type
   use m_gsphere,        only : getkpgnorm
-  use m_kg,             only : mkkin
+  use m_kg,             only : mkkin, kpgio
   use m_mpinfo,         only : ptabs_fourdp, proc_distrb_cycle
   use m_numeric_tools,  only : simpson, simpson_int
   use m_spacepar,       only : meanvalue_g
@@ -49,7 +49,7 @@ module m_hightemp
   public :: dip12,djp12,dip32,djp32,hightemp_e_heg
   public :: hightemp_dosfreeel
   public :: hightemp_prt_eigocc
-  public :: prt_cg_from_wf
+  public :: hightemp_prt_cg
   !!***
 
   !----------------------------------------------------------------------
@@ -1379,12 +1379,69 @@ contains
   end subroutine hightemp_prt_eigocc
   !!***
 
-  subroutine prt_cg_from_wf()
-    write(0,*) 'TEST'
-    ! !BLANCHET TEMPORARY
-    ! cgshift=(iband-1)*npw_k*nspinor + (cspinor-1)*npw_k
-    ! write(0,*) 'TEST'
-    ! write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ckpt
+  !!****f* ABINIT/m_hightemp/hightemp_prt_eigocc
+  !! NAME
+  !!  hightemp_prt_eigocc
+  !!
+  !! FUNCTION
+  !!  Printing plane wave coefficients in PW files.
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine hightemp_prt_cg(ckpt,ecut,exchn2n3d,gmet,gprimd,istwfk,kpt,&
+  & mpi_enreg,mpw,nband,nkpt,npwarr,nsppol,wfk_fname)
+    ! Arguments -------------------------------
+    ! Scalars
+    integer,intent(in) :: ckpt,exchn2n3d,mpw,nkpt,nsppol
+    real(dp),intent(in) :: ecut
+    type(MPI_type) :: mpi_enreg
+    character(len=*),intent(in) :: wfk_fname
+    ! Arrays
+    integer,intent(in) :: istwfk(nkpt),nband(nkpt),npwarr(nkpt)
+    real(dp) :: gmet(3,3),gprimd(3,3),kpt(3,nkpt)
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: cgshift,iband,ikpt,ioffkg,ipw,mkmem,npw_k
+    character(len=4) :: mode_paral
+    character(len=50) :: filenameoutpw
+    ! Arrays
+    integer,allocatable :: kg(:,:),kg_k(:,:),npwarr1(:),npwtot1(:)
+    real(dp),allocatable :: kpgnorm(:)
+
+    ! *********************************************************************
+
+    mode_paral='PERS'
+    mkmem=nkpt
+    ABI_MALLOC(npwarr1,(nkpt))
+    ABI_MALLOC(npwtot1,(nkpt))
+
+    ! Create positions index for pw
+    call kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kpt,mkmem,nband,nkpt,&
+    & mode_paral,mpi_enreg,mpw,npwarr1,npwtot1,nsppol)
+
+    ioffkg=0
+    do ikpt=1,ckpt-1
+      ioffkg=ioffkg+npwarr1(ikpt)
+    end do
+    npw_k=npwarr(ckpt)
+    ABI_MALLOC(kg_k,(3,npw_k))
+    kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
+
+    ! Compute the norms of the k+G vectors
+    ABI_MALLOC(kpgnorm,(npw_k))
+    call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
+
+    write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ckpt
+    write(0,*) wfk_name[1:2]
+
     ! open(file=trim(wfk_fname)//trim(filenameoutpw),unit=96)
     ! do ipw=1,npw_k
     !   kpg1=kpt(1,ikpt)+dble(kg_k(1,ipw))
@@ -1414,6 +1471,12 @@ contains
     !   ABI_FREE(cgnk)
     !   ABI_FREE(cgnk2)
     ! end do
-  end subroutine prt_cg_from_wf
+
+    ABI_FREE(kpgnorm)
+    ABI_FREE(kg_k)
+    ABI_FREE(npwtot1)
+    ABI_FREE(npwarr1)
+  end subroutine hightemp_prt_cg
+  !!***
 end module m_hightemp
 !!***
