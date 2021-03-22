@@ -49,6 +49,7 @@ module m_hightemp
   public :: dip12,djp12,dip32,djp32,hightemp_e_heg
   public :: hightemp_dosfreeel
   public :: hightemp_prt_eigocc
+  public :: prt_cg_from_wf
   !!***
 
   !----------------------------------------------------------------------
@@ -493,7 +494,7 @@ contains
       do ii=1,this%bcut+1
         ix=dble(ii)-one
         fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-        if(fn>tol16) then
+        if(fn>tol16.and.(one-fn)>tol16) then
           valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
         else
           valuesent(ii)=zero
@@ -523,7 +524,7 @@ contains
       do ii=1,this%bcut+1
         ix=this%e_shiftfactor+(dble(ii)-one)*step
         fn=fermi_dirac(ix,fermie,tsmear)
-        if(fn>tol16) then
+        if(fn>tol16.and.(one-fn)>tol16) then
           valuesent(ii)=-(fn*log(fn)+(one-fn)*log(one-fn))*&
           & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
         else
@@ -639,7 +640,7 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: blocksize,i1,iband,iblock,iblocksize,ipw,nblockbd,unit
-    real(dp) :: kpg1,kpg2,kpg3,tmp_std
+    real(dp) :: kpg1,kpg2,kpg3
     character(len=50) :: filenameoutpw
     ! Arrays
     real(dp) :: cgnk(2,npw_k*nspinor),cgnk2(npw_k*nspinor)
@@ -1378,5 +1379,41 @@ contains
   end subroutine hightemp_prt_eigocc
   !!***
 
+  subroutine prt_cg_from_wf()
+    write(0,*) 'TEST'
+    ! !BLANCHET TEMPORARY
+    ! cgshift=(iband-1)*npw_k*nspinor + (cspinor-1)*npw_k
+    ! write(0,*) 'TEST'
+    ! write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ckpt
+    ! open(file=trim(wfk_fname)//trim(filenameoutpw),unit=96)
+    ! do ipw=1,npw_k
+    !   kpg1=kpt(1,ikpt)+dble(kg_k(1,ipw))
+    !   kpg2=kpt(2,ikpt)+dble(kg_k(2,ipw))
+    !   kpg3=kpt(3,ikpt)+dble(kg_k(3,ipw))
+    !   write(96,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
+    !   & ipw,&
+    !   & gprimd(1,1)*kpg1+gprimd(1,2)*kpg2+gprimd(1,3)*kpg3,&
+    !   & gprimd(2,1)*kpg1+gprimd(2,2)*kpg2+gprimd(2,3)*kpg3,&
+    !   & gprimd(3,1)*kpg1+gprimd(3,2)*kpg2+gprimd(3,3)*kpg3,&
+    !   & half*(two_pi*kpgnorm(ipw))**2
+    ! end do
+    ! close(96)
+    ! ABI_MALLOC(cgnk,(2,npw_k*nspinor))
+    ! ABI_MALLOC(cgnk2,(npw_k*nspinor))
+    ! do iband=1,nband(ckpt)
+    !   cgshift=(iband-1)*npw_k*nspinor + (cspinor-1)*npw_k
+    !   cgnk(:,:)=cg_k(:,cgshift+1:cgshift+npw_k)
+    !   cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
+    !   write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ckpt,'_b',cband
+    !   open(file=trim(wfk_fname)//trim(filenameoutpw),unit=96)
+    !   do ipw=1,npw_k
+    !     write(96,'(i14,ES14.6,ES14.6,i14)') ipw,&
+    !     & half*(two_pi*kpgnorm(ipw))**2,sqrt(cgnk2(ipw))
+    !   end do
+    !   close(96)
+    !   ABI_FREE(cgnk)
+    !   ABI_FREE(cgnk2)
+    ! end do
+  end subroutine prt_cg_from_wf
 end module m_hightemp
 !!***
