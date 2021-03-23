@@ -230,7 +230,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
 &         '    | Radius of the compensation sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rshp,ch10,&
 &         '    | Radius of the compensation sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rshp,ch10
        endif
-       write(message, '(2a,f5.2,a)' ) trim(message),&
+       write(message, '(2a,f7.4,a)' ) trim(message),&
 &       '    | This leads to a (voluminal) overlap ratio of ',ratio_percent_max(ii),' %'
        if (ii==1) then
          write(message, '(3a)' ) trim(message),ch10,&
