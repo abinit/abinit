@@ -150,7 +150,7 @@ can proceed with the next steps.
     Alternatively, one can install *gfortran* using one of the standalone DMG installers
     provided by the [gfortran-for-macOS project](https://github.com/fxcoudert/gfortran-for-macOS/releases).
     Note also that macOS users will need to install **make** via [Xcode](https://developer.apple.com/xcode/).
-    More info can be found in [this page](INSTALL_MacOS).
+    More info can be found in [this page](/INSTALL_MacOS).
 
 ## How to compile BLAS and LAPACK
 
