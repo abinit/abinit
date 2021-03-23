@@ -75,7 +75,6 @@ module m_dtset
 
 type, public :: dataset_type
 
-! Integer
 !A
  integer :: accuracy
  integer :: adpimd
@@ -757,7 +756,7 @@ type, public :: dataset_type
  real(dp) :: ne_qFD = zero ! CP added
  real(dp) :: nh_qFD = zero  ! CP added
  real(dp) :: noseinert
- real(dp) :: nqfd = zero 
+ real(dp) :: nqfd = zero
  real(dp) :: omegasimax = 50/Ha_eV
  real(dp) :: omegasrdmax = 1.0_dp/Ha_eV  ! = 1eV
  real(dp) :: pawecutdg
@@ -980,7 +979,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | cellcharge(nimage)=number of electrons missing (+) or added (-) to system (usually 0)
-!!   |  might depend on the image, but only with occopt=2 
+!!   |  might depend on the image, but only with occopt=2
 !!   | iscf= if>0, SCF calculation ; if<=0, non SCF calculation (wtk might
 !!   |  not be defined)
 !!   | natom=number of atoms in unit cell
