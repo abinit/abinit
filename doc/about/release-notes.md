@@ -12,7 +12,7 @@ are relative to modifications/improvements of ABINIT v9.4 with respect to v9.2.
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, V. Brousseau, F. Bruneval,
 W. Chen, M. Cote, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault,
-B. Guster, T. Karatsu, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto, 
+B. Guster, T. Karatsu, A. H. Larsen, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto, 
 S. Ponce, Y. Pouillon, G.-M. Rignanese, M. Rodriguez-Mayorga, M. Schmitt,
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
 
@@ -124,16 +124,15 @@ See the test examples [[test:v9_22]], [[test:psic_01]] and [[test:psic_03]].
 By X. Gonze (initial test from C. Tantardini) (MR770).
 
 **B.6** The computation of the electric conductivity has been implemented for metals
-in the relaxation-time approximation with transport lifetimes computed from the imaginary part of the Fan-Migdal self-energy
+in the relaxation-time approximation with transport lifetimes computed from the imaginary part of the Fan-Migdal self-energy.
 See tests [[test:v9_62]] to [[test:v9_65]].
 
 By O. Nadeau (MR756, MR716)
 
-
-**B.6** Implementation of the  i-pi client-server protocol as described in [[cite:Kapil2019]].
+**B.7** Implementation of the  i-pi client-server protocol as described in [[cite:Kapil2019]].
 This option requires [[ionmov]] 28 and the specification of the socket via command line options.
-For UNIX socket, use: --ipi {unixsocket}:UNIX
-For INET socket, use  --ipi {host}:{port}. 
+For UNIX socket, use: --ipi {unixsocket}:UNIX .
+For INET socket, use  --ipi {host}:{port} . 
 Usage example:
 
      abinit run.abi --ipi {unixsocket}:UNIX > run.log
