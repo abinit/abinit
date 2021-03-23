@@ -1320,9 +1320,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%ht_nbcut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ht_nbcut','INT',0)
 
- intarr(1,:)=dtsets(:)%ht_prt_cg
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ht_prt_cg','INT',0)
-
  intarr(1,:)=dtsets(:)%ht_prt_eigocc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ht_prt_eigocc','INT',0)
 

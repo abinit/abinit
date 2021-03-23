@@ -1908,8 +1908,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      call wfk%close()
 
      ! Blanchet (temporary)
-     call hightemp_prt_cg(ckpt,ecut,exchn2n3d,gmet,gprimd,istwfk,kpt,mpi_enreg,&
-&     mpw,nband,nkpt,npwarr,nsppol,wfk_fname)
+     call hightemp_prt_cg(cg_k,ckpt,cspinor,ecut,exchn2n3d,gmet,gprimd,istwfk,&
+     & kpt,mcg,mpi_enreg,mpw,nband,nkpt,npwarr,nspinor,nsppol,wfk_fname)
    end if
 
    if (csppol/=oldcsppol .or. ckpt/=oldckpt .or. cband/=oldcband .or. cspinor/=oldcspinor ) then

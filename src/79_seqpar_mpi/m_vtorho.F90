@@ -931,15 +931,6 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
 
-
-       !blanchet WORK ON PLANEWAVES
-       if(associated(hightemp)) then
-         if(hightemp%version==1.or.hightemp%version==2) then
-           call hightemp%compute_pw_avg_std(cg,eig_k,ek_k,dtfil%filnam_ds(4),&
-&           gprimd,icg,ikpt,istwf_k,kg_k,kinpw,dtset%kptns,mcg,mpi_enreg,nband_k,&
-&           dtset%nkpt,npw_k,my_nspinor,dtset%wtk(ikpt))
-         end if
-       end if
        call timab(985,1,tsec)
 
 #if defined HAVE_GPU_CUDA
