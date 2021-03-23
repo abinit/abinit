@@ -12,17 +12,17 @@ and _J_ as they can be used in DFT+DMFT. The implementation is described in [[ci
 
 It might be useful that you already know how to do PAW calculations using
 ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
-ABINIT ([PAW1](paw1), [PAW2](paw2))).
-The DFT+_U_ tutorial in ABINIT ([DFT+U](dftu)) might be useful to know some
+ABINIT ([PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2))).
+The DFT+_U_ tutorial in ABINIT ([DFT+U](/tutorial/dftu)) might be useful to know some
 basic variables about correlated orbitals.
 
-The first GW tutorial in ABINIT ([GW](gw1)) is useful to learn how
+The first GW tutorial in ABINIT ([GW](/tutorial/gw1)) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
 (energy cutoffs and number of bands for the polarizability).
 
 This tutorial should take two hours to complete (you should have access to more than 8 processors).
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 The cRPA method to compute effective interaction: summary and key parameters
 
