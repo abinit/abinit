@@ -42,7 +42,7 @@ you may want to consider the following alternatives:
   More info available [here](/INSTALL_CentOS).
 
 * Homebrew bottles or macports for **macOS**.
-  More info available [here](../INSTALL_MacOS).
+  More info available [here](/INSTALL_MacOS).
 
 * Automatic compilation and generation of modules on clusters with **EasyBuild**.
   More info available [here](/INSTALL_EasyBuild).
