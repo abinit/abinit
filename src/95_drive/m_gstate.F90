@@ -856,7 +856,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else
      ABI_MALLOC(hightemp,)
      call hightemp%init(dtset%mband,dtset%ht_nbcut,nfftf,&
-&     dtset%nspden,dtset%ht_prt_cg,rprimd,dtset%use_hightemp)
+&     dtset%nspden,rprimd,dtset%use_hightemp)
    end if
  end if
 

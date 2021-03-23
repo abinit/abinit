@@ -472,9 +472,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ht_nbcut',tread,'INT')
  if(tread==1) dtset%ht_nbcut=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ht_prt_cg',tread,'INT')
- if(tread==1) dtset%ht_prt_cg=intarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ht_prt_eigocc',tread,'INT')
  if(tread==1) dtset%ht_prt_eigocc=intarr(1)
 

@@ -265,7 +265,6 @@ type, public :: dataset_type
  integer :: hmcsst
  integer :: hmctt
  integer :: ht_nbcut = 25
- integer :: ht_prt_cg = 0
  integer :: ht_prt_eigocc = 0
 !I
  integer :: iboxcut
@@ -755,7 +754,7 @@ type, public :: dataset_type
  real(dp) :: ne_qFD = zero ! CP added
  real(dp) :: nh_qFD = zero  ! CP added
  real(dp) :: noseinert
- real(dp) :: nqfd = zero 
+ real(dp) :: nqfd = zero
  real(dp) :: omegasimax = 50/Ha_eV
  real(dp) :: omegasrdmax = 1.0_dp/Ha_eV  ! = 1eV
  real(dp) :: pawecutdg
@@ -978,7 +977,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | cellcharge(nimage)=number of electrons missing (+) or added (-) to system (usually 0)
-!!   |  might depend on the image, but only with occopt=2 
+!!   |  might depend on the image, but only with occopt=2
 !!   | iscf= if>0, SCF calculation ; if<=0, non SCF calculation (wtk might
 !!   |  not be defined)
 !!   | natom=number of atoms in unit cell
@@ -1096,7 +1095,7 @@ subroutine dtset_chkneu(dtset, nelectjell, occopt)
 &           dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
             ABI_ERROR(msg)
           end if
-       
+
        if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=0.0_dp
        ! now do it for excited electrons in the conduction bands > ivalence
        nocc   = (dtset%ne_qFD-1.0d-8)/maxocc + 1
@@ -1574,7 +1573,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
  dtout%ht_nbcut             = dtin%ht_nbcut
- dtout%ht_prt_cg            = dtin%ht_prt_cg
  dtout%ht_prt_eigocc        = dtin%ht_prt_eigocc
  dtout%hyb_mixing      = dtin%hyb_mixing
  dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
@@ -3223,7 +3221,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
 !H
- list_vars=trim(list_vars)//' ht_nbcut ht_prt_cg ht_prt_eigocc'
+ list_vars=trim(list_vars)//' ht_nbcut ht_prt_eigocc'
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'

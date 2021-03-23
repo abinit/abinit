@@ -67,12 +67,10 @@ module m_hightemp
     real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,ent_freeel
     real(dp) :: nfreeel,e_shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
-    logical :: prt_cg
   contains
     procedure :: compute_efreeel
     procedure :: compute_ent_freeel
     procedure :: compute_nfreeel
-    procedure :: compute_pw_avg_std
     procedure :: compute_e_shiftfactor
     procedure :: init
     procedure :: destroy
@@ -92,7 +90,6 @@ contains
   !!  this=hightemp_type object concerned
   !!  mband=maximum number of bands
   !!  nbcut=number of states used to average the constant potential value
-  !!  prt_cg=debug input to print wavefunctions planewaves coefficients.
   !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
   !!  version=hightemp implementation version
   !!
@@ -106,11 +103,11 @@ contains
   !!  metric
   !!
   !! SOURCE
-  subroutine init(this,mband,nbcut,nfftf,nspden,prt_cg,rprimd,version)
+  subroutine init(this,mband,nbcut,nfftf,nspden,rprimd,version)
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
-    integer,intent(in) :: mband,nbcut,nfftf,nspden,version,prt_cg
+    integer,intent(in) :: mband,nbcut,nfftf,nspden,version
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
 
@@ -133,11 +130,6 @@ contains
     this%ent_freeel=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
-    if(prt_cg==1) then
-      this%prt_cg=.true.
-    else
-      this%prt_cg=.false.
-    end if
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
   !!***
@@ -182,7 +174,6 @@ contains
     this%ent_freeel=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
-    this%prt_cg=.false.
     this%ucvol=zero
   end subroutine destroy
   !!***
@@ -583,149 +574,6 @@ contains
       end do
     end if
   end subroutine compute_ent_freeel
-  !!***
-
-  !!****f* ABINIT/m_hightemp/compute_pw_avg_std
-  !! NAME
-  !!  compute_pw_avg_std
-  !!
-  !! FUNCTION
-  !!  Debug subroutine to print wave functions coefficients in a precise way.
-  !!
-  !! INPUTS
-  !!  this=hightemp_type object concerned
-  !!  cg(2,mpw*dtset%nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions.
-  !!  eig_k(nband_k)=array for holding eigenvalues (hartree)
-  !!  ek_k(nband_k)=contribution from each band to kinetic energy, at this k-point
-  !!  fnameabo=filename for printing of the planewaves coefficients
-  !!  gprimd(3,3)=dimensional reciprocal space primitive translations
-  !!  icg=shift to be applied on the location of data in the array cg
-  !!  ikpt=number of the k-point
-  !!  istwf_k=parameter that describes the storage of wfs
-  !!  kg_k(3,npw)=integer coordinates of G vectors in basis sphere
-  !!  kinpw(npw_k)=(modified) kinetic energy for each plane wave (Hartree)
-  !!  kpt(3,nkpt)=reduced coordinates of k points.
-  !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-  !!  mpi_enreg=information about MPI parallelization
-  !!  nband_k=number of bands at each k point
-  !!  nkpt=number of k points.
-  !!  npw_k=number of plane waves at this k point
-  !!  nspinor=Number of spinor components
-  !!  wtk(nkpt)=weight assigned to each k point
-  !!
-  !! OUTPUT
-  !!  this=hightemp_type object concerned
-  !!
-  !! PARENTS
-  !!  m_vtorho
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine compute_pw_avg_std(this,cg,eig_k,ek_k,fnameabo,&
-  & gprimd,icg,ikpt,istwf_k,kg_k,kinpw,kpt,mcg,mpi_enreg,nband_k,&
-  & nkpt,npw_k,nspinor,wtk)
-    ! Arguments -------------------------------
-    ! Scalars
-    integer,intent(in) :: icg,ikpt,istwf_k,mcg,nband_k,nkpt,npw_k,nspinor
-    real(dp),intent(in) :: wtk
-    class(hightemp_type),intent(inout) :: this
-    type(MPI_type),intent(in) :: mpi_enreg
-    character(len=*),intent(in) :: fnameabo
-    ! Arrays
-    integer,intent(in) :: kg_k(3,npw_k)
-    real(dp),intent(in) :: eig_k(nband_k),ek_k(nband_k),gprimd(3,3)
-    real(dp),intent(in) :: kpt(3,nkpt),kinpw(npw_k),cg(2,mcg)
-
-    ! Local variables -------------------------
-    ! Scalars
-    integer :: blocksize,i1,iband,iblock,iblocksize,ipw,nblockbd,unit
-    real(dp) :: kpg1,kpg2,kpg3
-    character(len=50) :: filenameoutpw
-    ! Arrays
-    real(dp) :: cgnk(2,npw_k*nspinor),cgnk2(npw_k*nspinor)
-
-    ! *********************************************************************
-
-    unit=96+mpi_enreg%me
-    ! Debug: Printing Eigenvalues, Kinetic and PW grid if requested
-    if(this%prt_cg.and.(mpi_enreg%me==mpi_enreg%me_kpt)) then
-      write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ikpt
-      open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
-      do ipw=1,npw_k
-        kpg1=kpt(1,ikpt)+dble(kg_k(1,ipw))
-        kpg2=kpt(2,ikpt)+dble(kg_k(2,ipw))
-        kpg3=kpt(3,ikpt)+dble(kg_k(3,ipw))
-
-        write(unit,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
-        & ipw,&
-        & gprimd(1,1)*kpg1+gprimd(1,2)*kpg2+gprimd(1,3)*kpg3,&
-        & gprimd(2,1)*kpg1+gprimd(2,2)*kpg2+gprimd(2,3)*kpg3,&
-        & gprimd(3,1)*kpg1+gprimd(3,2)*kpg2+gprimd(3,3)*kpg3,&
-        & kinpw(ipw)
-      end do
-      close(unit)
-
-      write(filenameoutpw,'(A,I5.5)') '_PW_EIG_k',ikpt
-      open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
-      write(unit,'(ES12.5)') eig_k
-      close(unit)
-
-      write(filenameoutpw,'(A,I5.5)') '_PW_KIN_k',ikpt
-      open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
-      write(unit,'(ES12.5)') ek_k
-      close(unit)
-    end if
-
-    ! Parallelism over FFT and/or bands: define sizes and tabs
-    nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
-    blocksize=nband_k/nblockbd
-
-    ! Loop over bands or blocks of bands. Note that in sequential mode
-    ! iblock=iband, nblockbd=nband_k and blocksize=1
-    do iblock=1,nblockbd
-      do iblocksize=1,blocksize
-        iband=(iblock-1)*blocksize+iblocksize
-
-        ! Not sure of this debug block if we parallelise over bands.
-        ! Forcing disable if npband > 1.
-        if(this%prt_cg.and.mpi_enreg%nproc_band==1) then
-          cgnk(:,:)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
-          cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
-
-          write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ikpt,'_b',iband
-          open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
-
-          ! if(istwf_k==1)then
-          !   do ipw=1,npw_k
-          !     write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,kinpw(ipw),&
-          !     & sqrt(cgnk(1,ipw)*cgnk(1,ipw)+cgnk(2,ipw)*cgnk(2,ipw))
-          !   end do
-          ! else if(istwf_k>=2)then
-          !   i1=1
-          !   if(istwf_k==2.and.mpi_enreg%me_g0==1)then ! MPIWF need to know which proc has G=0
-          !     write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,kinpw(ipw),&
-          !     & sqrt(cgnk(1,1)*cgnk(1,1))
-          !     i1=2
-          !   end if
-          !   do ipw=i1,npw_k
-          !     write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,kinpw(ipw),&
-          !     & sqrt(cgnk(1,ipw)*cgnk(1,ipw)+cgnk(2,ipw)*cgnk(2,ipw))
-          !     ! write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,kinpw(ipw),&
-          !     ! & sqrt(cgnk(1,ipw)*cgnk(1,ipw)+cgnk(2,ipw)*cgnk(2,ipw))
-          !   end do
-          ! end if
-
-          do ipw=1,npw_k
-            write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,&
-            & kinpw(ipw),sqrt(cgnk2(ipw))
-          end do
-
-          close(unit)
-        end if
-      end do
-    end do
-  end subroutine compute_pw_avg_std
   !!***
 
   !----------------------------------------------------------------------
@@ -1395,91 +1243,111 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_prt_cg(ckpt,ecut,exchn2n3d,gmet,gprimd,istwfk,kpt,&
-  & mpi_enreg,mpw,nband,nkpt,npwarr,nsppol,wfk_fname)
+  subroutine hightemp_prt_cg(cg_k,ckpt,cspinor,ecut,exchn2n3d,gmet,gprimd,istwfk,kpt,&
+  & mcg,mpi_enreg,mpw,nband,nkpt,npwarr,nspinor,nsppol,wfk_fname)
     ! Arguments -------------------------------
     ! Scalars
-    integer,intent(in) :: ckpt,exchn2n3d,mpw,nkpt,nsppol
+    integer,intent(in) :: ckpt,cspinor,exchn2n3d,mcg,mpw,nkpt,nspinor,nsppol
     real(dp),intent(in) :: ecut
     type(MPI_type) :: mpi_enreg
     character(len=*),intent(in) :: wfk_fname
     ! Arrays
     integer,intent(in) :: istwfk(nkpt),nband(nkpt),npwarr(nkpt)
-    real(dp) :: gmet(3,3),gprimd(3,3),kpt(3,nkpt)
+    real(dp) :: cg_k(2,mcg),gmet(3,3),gprimd(3,3),kpt(3,nkpt)
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: cgshift,iband,ikpt,index,ioffkg,ipw,mkmem,npw_k
+    integer :: cgshift,iband,ikpt,index,ioffkg,ipw,mkmem,npw_k,unit
+    real(dp) :: ar,kpg1,kpg2,kpg3
     character(len=4) :: mode_paral
     character(len=50) :: filenameoutpw
+    character(len=50) :: fnameabo
     ! Arrays
     integer,allocatable :: kg(:,:),kg_k(:,:),npwarr1(:),npwtot1(:)
-    real(dp),allocatable :: kpgnorm(:)
+    real(dp),allocatable :: ek_k(:),kpgnorm(:),cgnk(:,:),cgnk2(:),kinpw(:)
 
     ! *********************************************************************
 
+    unit=96
     mode_paral='PERS'
     mkmem=nkpt
     ABI_MALLOC(npwarr1,(nkpt))
+    ABI_MALLOC(kg,(3,mpw*mkmem))
     ABI_MALLOC(npwtot1,(nkpt))
+    ABI_MALLOC(ek_k,(nband(ckpt)))
 
     ! Create positions index for pw
-    write(0,*) ecut,exchn2n3d,mkmem,nband,nkpt,&
-    & mode_paral,mpw,nsppol
-
     call kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kpt,mkmem,nband,nkpt,&
     & mode_paral,mpi_enreg,mpw,npwarr1,npwtot1,nsppol)
-
-    ! ioffkg=0
-    ! do ikpt=1,ckpt-1
-    !   ioffkg=ioffkg+npwarr1(ikpt)
-    ! end do
-    ! npw_k=npwarr(ckpt)
-    ! ABI_MALLOC(kg_k,(3,npw_k))
-    ! kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
+    ioffkg=0
+    do ikpt=1,ckpt-1
+      ioffkg=ioffkg+npwarr1(ikpt)
+    end do
+    npw_k=npwarr(ckpt)
+    ABI_MALLOC(kinpw,(npw_k))
+    ABI_MALLOC(kg_k,(3,npw_k))
+    kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
 
     ! Compute the norms of the k+G vectors
-    ! ABI_MALLOC(kpgnorm,(npw_k))
-    ! call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
+    ABI_MALLOC(kpgnorm,(npw_k))
+    call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
+    kinpw(:)=half*(two_pi*kpgnorm(:))**2
 
-    ! index=SCAN(wfk_fname,'_WFK')
-    ! filenameoutpw=wfk_fname(1:index-1)
-    ! write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ckpt
-    ! write(0,*) filenameoutpw
+    ! Get fnameabo
+    index=SCAN(wfk_fname,'_',.true.)
+    fnameabo=wfk_fname(1:index-1)
 
-    ! open(file=trim(wfk_fname)//trim(filenameoutpw),unit=96)
-    ! do ipw=1,npw_k
-    !   kpg1=kpt(1,ikpt)+dble(kg_k(1,ipw))
-    !   kpg2=kpt(2,ikpt)+dble(kg_k(2,ipw))
-    !   kpg3=kpt(3,ikpt)+dble(kg_k(3,ipw))
-    !   write(96,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
-    !   & ipw,&
-    !   & gprimd(1,1)*kpg1+gprimd(1,2)*kpg2+gprimd(1,3)*kpg3,&
-    !   & gprimd(2,1)*kpg1+gprimd(2,2)*kpg2+gprimd(2,3)*kpg3,&
-    !   & gprimd(3,1)*kpg1+gprimd(3,2)*kpg2+gprimd(3,3)*kpg3,&
-    !   & half*(two_pi*kpgnorm(ipw))**2
-    ! end do
-    ! close(96)
-    ! ABI_MALLOC(cgnk,(2,npw_k*nspinor))
-    ! ABI_MALLOC(cgnk2,(npw_k*nspinor))
-    ! do iband=1,nband(ckpt)
-    !   cgshift=(iband-1)*npw_k*nspinor + (cspinor-1)*npw_k
-    !   cgnk(:,:)=cg_k(:,cgshift+1:cgshift+npw_k)
-    !   cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
-    !   write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ckpt,'_b',cband
-    !   open(file=trim(wfk_fname)//trim(filenameoutpw),unit=96)
-    !   do ipw=1,npw_k
-    !     write(96,'(i14,ES14.6,ES14.6,i14)') ipw,&
-    !     & half*(two_pi*kpgnorm(ipw))**2,sqrt(cgnk2(ipw))
-    !   end do
-    !   close(96)
-    !   ABI_FREE(cgnk)
-    !   ABI_FREE(cgnk2)
-    ! end do
+    ! Print MESH file
+    write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ckpt
+    open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
+    do ipw=1,npw_k
+      kpg1=kpt(1,ikpt)+dble(kg_k(1,ipw))
+      kpg2=kpt(2,ikpt)+dble(kg_k(2,ipw))
+      kpg3=kpt(3,ikpt)+dble(kg_k(3,ipw))
+      write(unit,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
+      & ipw,&
+      & gprimd(1,1)*kpg1+gprimd(1,2)*kpg2+gprimd(1,3)*kpg3,&
+      & gprimd(2,1)*kpg1+gprimd(2,2)*kpg2+gprimd(2,3)*kpg3,&
+      & gprimd(3,1)*kpg1+gprimd(3,2)*kpg2+gprimd(3,3)*kpg3,&
+      & kinpw(ipw)
+    end do
+    close(unit)
 
-    ! ABI_FREE(kpgnorm)
-    ! ABI_FREE(kg_k)
+    ! Print planewave coefficients
+    ABI_MALLOC(cgnk,(2,npw_k*nspinor))
+    ABI_MALLOC(cgnk2,(npw_k*nspinor))
+    do iband=1,nband(ckpt)
+      cgshift=(iband-1)*npw_k*nspinor + (cspinor-1)*npw_k
+      cgnk(:,:)=cg_k(:,cgshift+1:cgshift+npw_k)
+      cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
+
+      call meanvalue_g(ar,kinpw,0,istwfk(ckpt),mpi_enreg,npw_k,nspinor,&
+      & cgnk(:,:),cgnk(:,:),0)
+      ek_k(iband)=ar
+
+      write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ckpt,'_b',iband
+      open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
+      do ipw=1,npw_k
+        write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,&
+        & half*(two_pi*kpgnorm(ipw))**2,sqrt(cgnk2(ipw))
+      end do
+      close(unit)
+    end do
+
+    write(filenameoutpw,'(A,I5.5)') '_PW_KIN_k',ckpt
+    open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
+    write(unit,'(ES12.5)') ek_k
+    close(unit)
+
+    ! Free arrays
+    ABI_FREE(cgnk2)
+    ABI_FREE(cgnk)
+    ABI_FREE(kpgnorm)
+    ABI_FREE(kg_k)
+    ABI_FREE(kinpw)
+    ABI_FREE(ek_k)
     ABI_FREE(npwtot1)
+    ABI_FREE(kg)
     ABI_FREE(npwarr1)
   end subroutine hightemp_prt_cg
   !!***
