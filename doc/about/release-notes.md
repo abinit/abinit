@@ -2,12 +2,12 @@
 
 Version 9.4, released on February 25, 2021.
 List of changes with respect to version 9.2.
-<!-- Release notes updated on February 25, 2021. -->
+<!-- Release notes updated on March 22, 2021. -->
 
 Many thanks to the contributors to the ABINIT project between
-November 2020 and February 2021. These release notes
+November 2020 and March 2021. These release notes
 are relative to modifications/improvements of ABINIT v9.4 with respect to v9.2.
-<!-- Merge requests up to and including MR766 are taken into account also MR768 (backported), MR769 and MR770. -->
+<!-- Merge requests up to and including MR766 are taken into account also MR768 (backported) up to MR772. -->
 
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, V. Brousseau, F. Bruneval,
@@ -37,6 +37,21 @@ your coordinate origin (e.g. you have no intention to perform a GW calculation),
 or (but this is more dangerous) set the meta-variable [[expert_user]] to one to disable several checks of input variables at once.
 
 By X. Gonze (MR712)
+
+**A.3** The input variable npkpt has been changed to np_spkpt . Indeed the parallelism governed by npkpt was about spin and k points,
+not only k points. For the time being npkpt is still admitted, but will become obsolete at the next major version change.
+
+By X. Gonze 
+
+**A.4** When [[nimage]]>1, the default value of [[prtgsr]] is now 0, like for several prt* variables.
+
+By X. Gonze
+
+**A.5** The code does not stop anymore at the first occurence of overlap between PAW spheres being larger than [[pawovlp]]
+in case of [[ionmov]]/=0 or [[imgmov]]/=0, but only at the second occurrence per dataset. Indeed, such trespassing might only be transient.
+See the description of [[pawovlp]].
+
+By X. Gonze
 
 * * *
 
@@ -104,7 +119,7 @@ By Mauricio Rodriguez-Mayorga and F. Bruneval (MR722).
 See [[cite:Sadigh2015]] and [[cite:Sadigh2015a]]. This is based on the `images` capability
 of ABINIT, that has been extended to different values of the input variable [[cellcharge]]
 for different images, and also parallelized. To activate pSIC, use [[imgmov]]=6 with the proper occupation numbers.
-See the test example [[test:v9_22]].
+See the test examples [[test:v9_22]], [[test:psic_01]] and [[test:psic_03]].
 
 By X. Gonze (initial test from C. Tantardini) (MR770).
 
@@ -185,9 +200,15 @@ By S. Ponce, also with G.-M. Rignanese, G. Petretto, M. Giantomassi.
 **D.7** The new input variable dmft_wanorthnorm has been introduced, see [[test:v6_07]] and [[test:v6_46]]. However, it should still be documented.
 By B. Amadon.
 
-**D.8** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
+**D.8** Increase stack size limit inside xmpi_init using POSIX C-API
+By M. Giantomassi. MR 770.
+
+**D.9** Document i-pi interface with links to ASE docs.
+By M. Giantomassi. MR 770.
+
+**D.10** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
 in the upgrade of tutorials)..
-By B. Amadon, F. Bruneval, T. Karatsu, G. Petretto, Y. Pouillon, M. Torrent, J. Zwanziger.
+By B. Amadon, L. Baguet, F. Bruneval, T. Karatsu, G. Petretto, Y. Pouillon, M. Torrent, J. Zwanziger.
 
 * * *
 

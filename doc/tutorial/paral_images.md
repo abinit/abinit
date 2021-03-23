@@ -12,7 +12,7 @@ path (MEP) using the string method.
 You will learn how to run the string method on a parallel architecture and
 what are the main input variables that govern convergence and numerical
 efficiency of the parallelism on *images*. Other algorithms use images, 
-e.g. path-integral molecular dynamics, hyperdynamics, linear combination of images, ... with different values of [[ionmov]].
+e.g. path-integral molecular dynamics, hyperdynamics, linear combination of images, ... with different values of [[imgmov]].
 The parallelism on images can be used for all these algorithms.
 
 You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
@@ -152,7 +152,9 @@ Let us first have a look at the related keywords.
         For the string method, choose 2.
 
 [[nimage]]
-:       gives the number of replicas of the unit cell including the initial and final ones.
+:       gives the number of replicas of the unit cell including the initial and final ones. Note that when [[nimage]]>1, 
+        the default value of several print input variables changes from one to zero. You might want to explicitly set [[prtgsr]] to 1
+        to print the _GSR file, and get some visualization possibilities using Abipy.
 
 [[dynimage]]([[nimage]])
 :       arrays of flags specifying if the image evolves or not (0: does not evolve; 1: evolves).

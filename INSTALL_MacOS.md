@@ -15,8 +15,8 @@ This file describes how to install ABINIT on macOS using one of the following ap
 Tested with:
 
 1. macOS 10.13 (High Sierra)
-2. 10.14 (Mojave)
-3. 10.15 (Catalina)
+2. macOS 10.14 (Mojave)
+3. macOS 10.15 (Catalina)
 
 A Homebrew official formula for ABINIT is available in this [github repository](https://github.com/abinit/homebrew-tap).
 

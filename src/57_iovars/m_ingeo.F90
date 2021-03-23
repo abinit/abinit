@@ -865,7 +865,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        if(ierr/=0)then
          ABI_WARNING('Will try to obtain group closure by using a tripled tolsym.')
          call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-           nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,two*tolsym,typat,use_inversion,xred,&
+           nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,three*tolsym,typat,use_inversion,xred,&
            chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
          ABI_CHECK(ierr==0,"Error in group closure")
          ABI_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')

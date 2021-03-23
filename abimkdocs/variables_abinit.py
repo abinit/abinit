@@ -11094,10 +11094,13 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give the number of images (or replicas) of the system, for which the forces
-and stresses might be computed independently, in the context of the string
-method, the genetic algorithm, hyperdynamics or Path-Integral Molecular
-Dynamics depending on the value of [[imgmov]]). Related input variables:
+and stresses might be computed independently, in the context of string
+or NEB method, genetic algorithm, hyperdynamics, Path-Integral Molecular
+Dynamics, linear combination of images, pSIC, genetic algorithm, etc, depending on the value of [[imgmov]]). Related input variables:
 [[dynimage]], [[npimage]], [[ntimimage]] and [[prtvolimg]].
+If [[nimage]]>1, the default choice for printing many files is set to zero, and the user might
+want to manually reestablish the printing, using, e.g. [[prtgsr]], [[prtwf]], [[prtebands]], [[prteig]], etc.
+
 Images might differ by the position of atoms in the unit cell, their velocity,
 as well as by their cell geometry. The following input variables might be used
 to define the images:
@@ -12691,18 +12694,22 @@ Variable(
     varset="gstate",
     vartype="real",
     topics=['BandOcc_basic'],
-    dimensions=['[[nband]]', "[[mband]]", "[[nsppol]]"],
+    dimensions=['[[nband]]', '[[nsppol]]'],
+    commentdims="in case [[occopt]]=2, dimensions are ([[mband]],[[nkpt]],[[nsppol]])",
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="OCCupation numbers",
     characteristics=['[[EVOLVING]]'],
     added_in_version="before_v9",
     text=r"""
 Gives occupation numbers for all bands in the problem. Needed if [[occopt]] == 0
-or [[occopt]] == 2. Ignored otherwise. Also ignored when [[iscf]] = -2.
-Typical band occupancy is either 2 or 0, but can be 1 for half-occupied band
-or other choices in special circumstances.
+or [[occopt]] == 2. Ignored otherwise (automatically computed). Also ignored when [[iscf]] = -2.
+Typical band occupancy is either 2.0 or 0.0, but will usually be 1.0 or 0.0 for [[nsppol]]=2, or [[nspinor]]=2,
+or half-occupied band, or other choices in special circumstances.
 
 If [[occopt]] is not 2, then the occupancies must be the same for each k point.
+If [[nsppol]]=1, the total number of arrays which must be provided is [[nband]], in order of increasing energy.
+If [[nsppol]]=2, the total number of arrays which must be provided is [[nband]]*[[nsppol]], 
+first spin up, in order of increasing electronic eigenenergy, then spin down, in order of increasing electronic eigenenergy.
 
 If [[occopt]] = 2, then the band occupancies must be provided explicitly for
 each band, EACH k POINT, and EACH SPIN-POLARIZATION, in an array which runs
@@ -12712,6 +12719,7 @@ point (spin up), then all bands at the second k point (spin up), etc, then all
 k-points spin down.
 The total number of array elements which must be provided is
 ( [[nband]](1)+[[nband]](2)+...+ [[nband]]([[nkpt]]) ) * [[nsppol]].
+
 The occupation numbers evolve only for metallic occupations, that is, [[occopt]] ≥ 3.
 
 When there are several images, [[occ]] might depend on the image number, see the description in [[nimage]].
@@ -12732,7 +12740,7 @@ Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
 Possible values are from 0 to 9.
 For gapped materials (semiconductors, molecules, ...), [[occopt]]=1 is the favourite for most usages.
 For metallic situations (also molecules with degenerate levels at Fermi energy), [[occopt]]=7 is the favourite for most usages,
-and one need to pay attention to the input variable [[tsmear]].
+and one needs to pay attention to the input variable [[tsmear]].
 Use [[occopt]]=9 for quasi-Fermi energy calculations of excited states in gapped materials.
 
   * [[occopt]] = 0:
@@ -13540,6 +13548,10 @@ The following values are permitted for **pawovlp**:
 - **pawovlp** < 0 --> overlap is always allowed
 - **pawovlp** = 0 --> no overlap is allowed
 - **pawovlp** > 0 and < 100 --> overlap is allowed only if it is less than **pawovlp** %
+
+Note that ABINIT will not stop at the first time a too large overlap is identified, in case of [[ionmov]]/=0
+or [[imgmov]]/=0, but only at the second time in the same dataset. Indeed, such trespassing might only be transient.
+However, a second trespassing in the same dataset, or if both [[ionmov]]=0 and [[imgmov]]=0 will induce stop.
 """,
 ),
 
