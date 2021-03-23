@@ -31,11 +31,11 @@ kptopt1 0
 # DATASET 2
 ############
 optdriver2 7
-eph_task2 -4             # Compute imaginary part of e-ph self-energy
-#ibte_prep2      1       # Save scattering operator to disk
-#ibte_niter2     50      # The three lines below just to test IBTE variables.   
-#ibte_abs_tol2   1e-3
-#ibte_alpha_mix2 0.6     # Default
+eph_task2 -4            # Compute imaginary part of e-ph self-energy
+ibte_prep2      1       # Save scattering operator to disk
+ibte_niter2     50      # The three lines below just to test the IBTE variables.   
+ibte_abs_tol2   1e-3
+ibte_alpha_mix2 0.6     # Default
 getwfk2     1    # Read GS wavefunctions from o_DS1_WFK
 getddb2   20     # Read DDB files from DS20_DDB
 getdvdb2  20
@@ -74,7 +74,7 @@ shiftk2   0.0 0.0 0.0
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = O. Nadeau
-#%% keywords = NC, DFPT, EPH, RTA
+#%% keywords = NC, DFPT, EPH, RTA, IBTE
 #%% description = 
-#%%   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+#%%   Calculation of conductivity in metals.
 #%%<END TEST_INFO>
