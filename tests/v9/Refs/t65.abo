@@ -855,8 +855,8 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
    1  -4.048    0.000 999999.0    0.000
 ============================================================================================
 
- Entering transport RTA computation driver.
-- Reading carrier lifetimes from: t65o_DS2_SIGEPH.nc
+ Entering IBTE driver.
+- Reading SERTA lifetimes and e-ph scattering operator from: t65o_DS2_SIGEPH.nc
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 

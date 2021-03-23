@@ -35,7 +35,7 @@ eph_task2 -4            # Compute imaginary part of e-ph self-energy
 ibte_prep2      1       # Save scattering operator to disk
 ibte_niter2     50      # The three lines below just to test the IBTE variables.   
 ibte_abs_tol2   1e-3
-ibte_alpha_mix2 0.6     # Default
+ibte_alpha_mix2 0.6     # Default is 0.7
 getwfk2     1    # Read GS wavefunctions from o_DS1_WFK
 getddb2   20     # Read DDB files from DS20_DDB
 getdvdb2  20
