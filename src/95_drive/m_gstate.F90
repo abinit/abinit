@@ -848,7 +848,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Initialize (eventually) hightemp object
  if(dtset%use_hightemp>=1.and.dtset%occopt==3) then
-   if(dtset%mband<dtset%ht_nbcut) then
+   if(dtset%use_hightemp/=1.and.dtset%mband<dtset%ht_nbcut) then
      write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate hightemp routines.",ch10,&
      & "nband=",dtset%mband," < ht_nbcut=",dtset%ht_nbcut,".",ch10,&
      & "Action: Increase nband or decrease ht_nbcut."

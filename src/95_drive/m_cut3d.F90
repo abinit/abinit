@@ -1907,7 +1907,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      call wfk%read_band_block([1,nband(ckpt)],ckpt,csppol,xmpio_single,cg_k=cg_k,eig_k=eig_k,occ_k=occ_k)
      call wfk%close()
 
-     ! Blanchet (temporary)
+     ! Blanchet - Print planewaves coefficients in a custom format.
      call hightemp_prt_cg(cg_k,ckpt,cspinor,ecut,exchn2n3d,gmet,gprimd,istwfk,&
      & kpt,mcg,mpi_enreg,mpw,nband,nkpt,npwarr,nspinor,nsppol,wfk_fname)
    end if
