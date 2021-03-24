@@ -629,10 +629,10 @@ Variable(
   * 1 --> the polarization will be kept in the same branch on each iteration.
     At the end of the run, a file "POLSAVE" will be saved containing the reduced polarization in atomic units.
 
-    !!! note
+!!! note
 
-        Make sure that "POLSAVE" is empty or it does not exist before the calculation, or else that
-        it specifies the desired polarization branch.
+    Make sure that "POLSAVE" is empty or it does not exist before the calculation, or else that
+    it specifies the desired polarization branch.
 """,
 ),
 
@@ -6735,6 +6735,12 @@ Variable(
 The default is [[gwmem]] = 11, which is the fastest, but also the most memory
 consuming. When experiencing memory shortage, one should try [[gwmem]] = 0.
 The first digit is only meaningful when performing sigma calculations.
+
+!!! important
+
+    Note that reading the screening file the SCR file during the sigma run leads to a **significant increase of the IO**
+    with a subsequent slowdown. Use this option if you really need it and make sure the sysadmin won't complain
+    about an abnormal IO activity of your jobs.
 """,
 ),
 
@@ -11092,10 +11098,13 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give the number of images (or replicas) of the system, for which the forces
-and stresses might be computed independently, in the context of the string
-method, the genetic algorithm, hyperdynamics or Path-Integral Molecular
-Dynamics depending on the value of [[imgmov]]). Related input variables:
+and stresses might be computed independently, in the context of string
+or NEB method, genetic algorithm, hyperdynamics, Path-Integral Molecular
+Dynamics, linear combination of images, pSIC, genetic algorithm, etc, depending on the value of [[imgmov]]). Related input variables:
 [[dynimage]], [[npimage]], [[ntimimage]] and [[prtvolimg]].
+If [[nimage]]>1, the default choice for printing many files is set to zero, and the user might
+want to manually reestablish the printing, using, e.g. [[prtgsr]], [[prtwf]], [[prtebands]], [[prteig]], etc.
+
 Images might differ by the position of atoms in the unit cell, their velocity,
 as well as by their cell geometry. The following input variables might be used
 to define the images:
@@ -12689,18 +12698,22 @@ Variable(
     varset="gstate",
     vartype="real",
     topics=['BandOcc_basic'],
-    dimensions=['[[nband]]', "[[mband]]", "[[nsppol]]"],
+    dimensions=['[[nband]]', '[[nsppol]]'],
+    commentdims="in case [[occopt]]=2, dimensions are ([[mband]],[[nkpt]],[[nsppol]])",
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="OCCupation numbers",
     characteristics=['[[EVOLVING]]'],
     added_in_version="before_v9",
     text=r"""
 Gives occupation numbers for all bands in the problem. Needed if [[occopt]] == 0
-or [[occopt]] == 2. Ignored otherwise. Also ignored when [[iscf]] = -2.
-Typical band occupancy is either 2 or 0, but can be 1 for half-occupied band
-or other choices in special circumstances.
+or [[occopt]] == 2. Ignored otherwise (automatically computed). Also ignored when [[iscf]] = -2.
+Typical band occupancy is either 2.0 or 0.0, but will usually be 1.0 or 0.0 for [[nsppol]]=2, or [[nspinor]]=2,
+or half-occupied band, or other choices in special circumstances.
 
 If [[occopt]] is not 2, then the occupancies must be the same for each k point.
+If [[nsppol]]=1, the total number of arrays which must be provided is [[nband]], in order of increasing energy.
+If [[nsppol]]=2, the total number of arrays which must be provided is [[nband]]*[[nsppol]], 
+first spin up, in order of increasing electronic eigenenergy, then spin down, in order of increasing electronic eigenenergy.
 
 If [[occopt]] = 2, then the band occupancies must be provided explicitly for
 each band, EACH k POINT, and EACH SPIN-POLARIZATION, in an array which runs
@@ -12710,6 +12723,7 @@ point (spin up), then all bands at the second k point (spin up), etc, then all
 k-points spin down.
 The total number of array elements which must be provided is
 ( [[nband]](1)+[[nband]](2)+...+ [[nband]]([[nkpt]]) ) * [[nsppol]].
+
 The occupation numbers evolve only for metallic occupations, that is, [[occopt]] ≥ 3.
 
 When there are several images, [[occ]] might depend on the image number, see the description in [[nimage]].
@@ -12730,7 +12744,7 @@ Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
 Possible values are from 0 to 9.
 For gapped materials (semiconductors, molecules, ...), [[occopt]]=1 is the favourite for most usages.
 For metallic situations (also molecules with degenerate levels at Fermi energy), [[occopt]]=7 is the favourite for most usages,
-and one need to pay attention to the input variable [[tsmear]].
+and one needs to pay attention to the input variable [[tsmear]].
 Use [[occopt]]=9 for quasi-Fermi energy calculations of excited states in gapped materials.
 
   * [[occopt]] = 0:
@@ -13019,9 +13033,9 @@ Compute quantities related to orbital magnetization. The
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
     standard output file, search for "Orbital magnetization" and "Chern number".
 
-* [[orbmag]] = 11: Compute orbital magnetization and Chern number (integral of the 
+* [[orbmag]] = 11: Compute orbital magnetization and Chern number (integral of the
 Berry curvature over the Brillouin zone) using both GS and DDK wavefunctions. This is
-the most robust method. 
+the most robust method.
 * [[orbmag]] = 1: Compute Chern number using discretized wavefunctions. This computation is
 faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
 electronic current.
@@ -13032,8 +13046,8 @@ electronic current.
 derivatives, as in [[cite:Ceresoli2006]]. Using [[orbmag]] -1, -2, -3 delivers the
 same computations as the corresponding 1, 2, 3 values, but based on an implementation
 using a discretization of the density operator itself. Both methods should converge to
-the same values but in our experience the wavefunction-based method converges faster. The 
-DDK method converges considerably faster than either of the above methods and is also robust 
+the same values but in our experience the wavefunction-based method converges faster. The
+DDK method converges considerably faster than either of the above methods and is also robust
 in case of only a single kpt.
 """,
 ),
@@ -13538,6 +13552,10 @@ The following values are permitted for **pawovlp**:
 - **pawovlp** < 0 --> overlap is always allowed
 - **pawovlp** = 0 --> no overlap is allowed
 - **pawovlp** > 0 and < 100 --> overlap is allowed only if it is less than **pawovlp** %
+
+Note that ABINIT will not stop at the first time a too large overlap is identified, in case of [[ionmov]]/=0
+or [[imgmov]]/=0, but only at the second time in the same dataset. Indeed, such trespassing might only be transient.
+However, a second trespassing in the same dataset, or if both [[ionmov]]=0 and [[imgmov]]=0, will induce stop.
 """,
 ),
 
@@ -15530,8 +15548,10 @@ Variable(
     text=r"""
 Print out VASP-style POSCAR and FORCES files, for use with PHON or frophon
 codes for frozen phonon calculations. See the associated script in
-{% modal ../scripts/post_processing/phondisp2abi.py %} for further details on
-interfacing with PHON, PHONOPY, etc...
+
+{% dialog ../scripts/post_processing/phondisp2abi.py %}
+
+for further details on interfacing with PHON, PHONOPY, etc...
 """,
 ),
 
@@ -16928,7 +16948,7 @@ elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
 assume values larger than [[natom]], denoting perturbations of electric field
-or stress type (see [the DFPT help file](../guide/respfn)).
+or stress type (see [the DFPT help file](/guide/respfn)).
 """,
 ),
 
@@ -20546,7 +20566,7 @@ The different possibilities are:
   where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms.
   By design, it will **not** converge the last bands: it is recommended to use slightly more bands than necessary.
   For usage with [[tolwfr]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]].
-  For more information, see the [performance guide](../../theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable.
+  For more information, see the [performance guide](/theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable.
   Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
 """,
 ),
@@ -21467,7 +21487,7 @@ allocated for the wavefunctions, especially when we have to sum over empty state
     parallelize along this dimension. The parallelization over q-points seem to be more efficient than
     the one over perturbations although it introduces some load imbalance because, due to memory reasons,
     the code distributes the q-points in the IBZ (nqibz) instead of the q-points in the full BZ (nqbz).
-    Moreover non all the q-points in the IBZ contribute to the imaginary part of $\Sigma_nk$.
+    Moreover non all the q-points in the IBZ contribute to the imaginary part of $\Sigma_{nk}$.
     The MPI parallelism over k-points and spins is supported with similar behaviour as in **eph_task** +4.
 
 
@@ -21660,9 +21680,9 @@ to integrate the Frohlich divergence.
 
 Possible values:
 
-    - = 0 --> Approximate oscillators with $ \delta_{b_1 b_2} $
-    - > 0 --> Use full expression with G-dependence
-    - < 0 --> Deactivate computation of oscillators.
+- = 0 --> Approximate oscillators with $ \delta_{b_1 b_2} $
+- > 0 --> Use full expression with G-dependence
+- < 0 --> Deactivate computation of oscillators.
 
 !!! important
 
@@ -22046,9 +22066,9 @@ to go from $W(\rr,\RR)$ to $v1scf(\rr,\qq)$.
 
 Possible values are:
 
-    0 --> Use unit super cell for $\RR$ space. All weights set to 1.
-    1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algorithm as for the dynamical matrix).
-          Note that this option leads to more $\RR$-points with a non-negligible increase of the memory allocated.
+0 --> Use unit super cell for $\RR$ space. All weights set to 1.
+1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algorithm as for the dynamical matrix).
+      Note that this option leads to more $\RR$-points with a non-negligible increase of the memory allocated.
 
 !!! tip
 

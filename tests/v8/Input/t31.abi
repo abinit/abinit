@@ -17,8 +17,6 @@ chempot2   -0.2 -0.01 0.05  #This is for the Li atom, defines the chemical poten
 ionmov2     2    #Broyden algorithm does not work well. This is to be fixed ...
 dtion2      10
 ntime2      50   #Need much more time steps to converge
-pawovlp2    30 
-
 
 #Start with molecule aligned with z, the molecule is slightly stretched.
 

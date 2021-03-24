@@ -130,12 +130,12 @@ MODULE m_results_gs
   real(dp), allocatable :: fcart(:,:)
    ! fcart(3,natom)
    ! Cartesian forces (Hartree/Bohr)
-   ! Note: unlike fred, this array has been corrected by enforcing
+   ! Note: unlike gred, this array has been corrected by enforcing
    ! the translational symmetry, namely that the sum of force
    ! on all atoms is zero.
 
-  real(dp), allocatable :: fred(:,:)
-   ! fred(3,natom)
+  real(dp), allocatable :: gred(:,:)
+   ! gred(3,natom)
    ! Forces in reduced coordinates (Hartree)
    ! Actually, gradient of the total energy with respect
    ! to change of reduced coordinates
@@ -237,7 +237,7 @@ CONTAINS
 !!  nsppol=number of spin channels for this dataset
 !!  only_part= --optional, default=false--
 !!            if this flag is activated only the following parts of results_gs
-!!            are initalized: all scalars, fcart,fred,strten
+!!            are initalized: all scalars, fcart,gred,strten
 !!
 !! OUTPUT
 !!
@@ -290,8 +290,8 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%strten=zero
  ABI_MALLOC(results_gs%fcart,(3,natom))
  results_gs%fcart=zero
- ABI_MALLOC(results_gs%fred,(3,natom))
- results_gs%fred =zero
+ ABI_MALLOC(results_gs%gred,(3,natom))
+ results_gs%gred =zero
  ABI_MALLOC(results_gs%gaps,(3,nsppol))
  results_gs%gaps =zero
  ABI_MALLOC(results_gs%intgres,(nspden,natom))
@@ -334,7 +334,7 @@ end subroutine init_results_gs
 !!  nsppol=number of spin channels for this dataset
 !!  only_part= --optional, default=false--
 !!            if this flag is activated only the following parts of results_gs
-!!            are initalized: all scalars, fcart,fred,strten
+!!            are initalized: all scalars, fcart,gred,strten
 !!
 !! OUTPUT
 !!
@@ -395,8 +395,8 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%strten=zero
        ABI_MALLOC(results_gs(jj,ii)%fcart,(3,natom))
        results_gs(jj,ii)%fcart=zero
-       ABI_MALLOC(results_gs(jj,ii)%fred,(3,natom))
-       results_gs(jj,ii)%fred =zero
+       ABI_MALLOC(results_gs(jj,ii)%gred,(3,natom))
+       results_gs(jj,ii)%gred =zero
        ABI_MALLOC(results_gs(jj,ii)%gaps,(3,nsppol))
        results_gs(jj,ii)%gaps =zero
        ABI_MALLOC(results_gs(jj,ii)%intgres,(nspden,natom))
@@ -468,7 +468,7 @@ subroutine destroy_results_gs(results_gs)
  results_gs%berryopt=0
 
  ABI_SFREE(results_gs%fcart)
- ABI_SFREE(results_gs%fred)
+ ABI_SFREE(results_gs%gred)
  ABI_SFREE(results_gs%gaps)
  ABI_SFREE(results_gs%grcondft)
  ABI_SFREE(results_gs%gresid)
@@ -530,7 +530,7 @@ subroutine destroy_results_gs_array(results_gs)
        results_gs(jj,ii)%berryopt=0
 
        ABI_SFREE(results_gs(jj,ii)%fcart)
-       ABI_SFREE(results_gs(jj,ii)%fred)
+       ABI_SFREE(results_gs(jj,ii)%gred)
        ABI_SFREE(results_gs(jj,ii)%gaps)
        ABI_SFREE(results_gs(jj,ii)%grchempottn)
        ABI_SFREE(results_gs(jj,ii)%grcondft)
@@ -594,7 +594,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
 
  if (natom_in>natom_out) then
    ABI_SFREE(results_gs_out%fcart)
-   ABI_SFREE(results_gs_out%fred)
+   ABI_SFREE(results_gs_out%gred)
    ABI_SFREE(results_gs_out%grchempottn)
    ABI_SFREE(results_gs_out%grcondft)
    ABI_SFREE(results_gs_out%gresid)
@@ -607,8 +607,8 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
    if (allocated(results_gs_in%fcart))   then
      ABI_MALLOC(results_gs_out%fcart,(3,natom_in))
    end if
-   if (allocated(results_gs_in%fred))    then
-     ABI_MALLOC(results_gs_out%fred,(3,natom_in))
+   if (allocated(results_gs_in%gred))    then
+     ABI_MALLOC(results_gs_out%gred,(3,natom_in))
    end if
    if (allocated(results_gs_in%gresid))  then
      ABI_MALLOC(results_gs_out%gresid,(3,natom_in))
@@ -670,7 +670,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%strten(:)=results_gs_in%strten(:)
 
  if (allocated(results_gs_in%fcart))  results_gs_out%fcart(:,1:natom_in) =results_gs_in%fcart(:,1:natom_in)
- if (allocated(results_gs_in%fred))   results_gs_out%fred(:,1:natom_in)  =results_gs_in%fred(:,1:natom_in)
+ if (allocated(results_gs_in%gred))   results_gs_out%gred(:,1:natom_in)  =results_gs_in%gred(:,1:natom_in)
  if (allocated(results_gs_in%gaps))   results_gs_out%gaps(:,1:nsppol_in) =results_gs_in%gaps(:,1:nsppol_in)
  if (allocated(results_gs_in%grchempottn))&
 &  results_gs_out%grchempottn(:,1:natom_in)=results_gs_in%grchempottn(:,1:natom_in)
@@ -743,7 +743,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
  ! arrays
  !
- ! Note: unlike fred, this array has been corrected by enforcing
+ ! Note: unlike gred, this array has been corrected by enforcing
  ! the translational symmetry, namely that the sum of force on all atoms is zero.
 
  ncerr = nctk_def_arrays(ncid, [&

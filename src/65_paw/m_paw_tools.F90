@@ -101,7 +101,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: ia,ib,ii,t1,t2,t3
+ integer :: decrease_nremit,ia,ib,ii,t1,t2,t3
  integer,save :: nremit_counter=0
  logical :: stop_on_error
  real(dp) :: dd,dif1,dif2,dif3,ha,hb,norm2
@@ -116,11 +116,28 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
 
  DBG_ENTER("COLL")
 
+! if(present(nremit))then
+!   if(nremit/=0)nremit_counter=abs(nremit)
+! else
+!   nremit_counter=0
+! endif
+
+!DEBUG
+!    write(std_out,'(a,a,i4)')ch10,' m_paw_tools, chkpawovlp : enter, saved nremit_counter=',nremit_counter
+!ENDDEBUG
+
  if(present(nremit))then
    if(nremit/=0)nremit_counter=abs(nremit)
+!DEBUG
+!    write(std_out,'(a,i4)')' m_paw_tools, chkpawovlp : optional arg nremit present, nremit=',nremit
+!ENDDEBUG
  else
    nremit_counter=0
  endif
+ !DEBUG
+!    write(std_out,'(a,i4)')' m_paw_tools, chkpawovlp : after init, nremit_counter=',nremit_counter
+!ENDDEBUG
+
 
  iamax(:)=-1;ibmax(:)=-1
  norm2_min(:)=-1.d0;ratio_percent_max(:)=-1.d0
@@ -177,7 +194,12 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
    end do
  end do
 
+ !DEBUG
+ !write(std_out,'(a,f8.4)')' chkpawovlp : maxval(ratio_percent_max(1:2))=',maxval(ratio_percent_max(1:2))
+ !ENDDEBUG
+
  stop_on_error=(abs(pawovlp)<=tol6.or.(pawovlp>tol6.and.(maxval(ratio_percent_max(1:2))>pawovlp)))
+ decrease_nremit=0
 
 !Print adapted message with overlap value
  if (iovl(1)+iovl(2)>0) then
@@ -208,7 +230,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
 &         '    | Radius of the compensation sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rshp,ch10,&
 &         '    | Radius of the compensation sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rshp,ch10
        endif
-       write(message, '(2a,f5.2,a)' ) trim(message),&
+       write(message, '(2a,f7.4,a)' ) trim(message),&
 &       '    | This leads to a (voluminal) overlap ratio of ',ratio_percent_max(ii),' %'
        if (ii==1) then
          write(message, '(3a)' ) trim(message),ch10,&
@@ -221,7 +243,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
          ABI_ERROR_NOSTOP(message,ia) !ia is dummy
        else
          ABI_WARNING(message)
-         if(nremit_counter/=0)nremit_counter=nremit_counter-1
+         if(stop_on_error .and. nremit_counter/=0)decrease_nremit=1
        end if
      endif ! ratio_percent_max(ii)>zero
 
@@ -232,8 +254,12 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
      write(message, '(3a)' )&
 &     '  Action: 1- decrease cutoff radius of PAW dataset',ch10,&
 &     '    OR  2- ajust "pawovlp" input variable to allow overlap (risky)'
-     ABI_ERROR(message)
+     if(nremit_counter==0)then
+       ABI_ERROR(message)
+     endif
    end if
+
+   nremit_counter=nremit_counter-decrease_nremit
 
 !  Print last message if execution continues:
    if (pawovlp<=tol6) then
@@ -242,12 +268,17 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
 &     '       and even inaccurate (if overlap is too big) !',ch10,&
 &     '       Assume experienced user. Execution will continue.',ch10
      call wrtout(std_out,message,'COLL')
-   else if (ratio_percent_max(1)<=pawovlp) then
+   else if (ratio_percent_max(1)<=pawovlp .and. ratio_percent_max(2)<=pawovlp) then
      write(message, '(8a)' ) &
 &     '       Overlap ratio seems to be acceptable (less than value',ch10,&
 &     '       of "pawovlp" input parameter): execution will continue.',ch10,&
 &     '       But be aware that results might be approximate,',ch10,&
 &     '       and even inaccurate (depending on your physical system) !',ch10
+     call wrtout(std_out,message,'COLL')
+   else if(decrease_nremit==1)then
+          write(message, '(3a)' ) &
+&     '       First time that overlap is bigger than "pawovlp" input parameter.',ch10,&
+&     '       Execution will continue, but such overlap will not be tolerated twice.'
      call wrtout(std_out,message,'COLL')
    end if
 

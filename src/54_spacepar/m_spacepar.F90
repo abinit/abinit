@@ -115,7 +115,7 @@ subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmo
  integer :: id(3)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gmet(3,3),gcart(3),gprimd(3,3),gred(3),mcgc(3),rmet(3,3)
+ real(dp) :: gmet(3,3),gqcart(3),gprimd(3,3),gqred(3),mcgc(3),rmet(3,3)
  real(dp),allocatable :: gq(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
 
 
@@ -171,20 +171,20 @@ subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmo
        do i1=ii1,n1
          ii=i1+i23
 
-         gred(1) = gq(1,i1); gred(2) = gq(2,i2); gred(3) = gq(3,i3)
-         gcart(1:3) = MATMUL(gprimd,gred)
-         gs = DOT_PRODUCT(gcart,gcart)
+         gqred(1) = gq(1,i1); gqred(2) = gq(2,i2); gqred(3) = gq(3,i3)
+         gqcart(1:3) = MATMUL(gprimd,gqred)
+         gs = DOT_PRODUCT(gqcart,gqcart)
          
          if( (gs .LE. cutoff) .AND. (gs .gt. tol8) )then
 
             do iatom = 1, natom
               if (.NOT. ANY(ABS(nucdipmom(:,iatom)) .GT. tol8 )) cycle
-              phase = -two_pi*DOT_PRODUCT(xred(:,iatom),gred(:))
+              phase = -two_pi*DOT_PRODUCT(xred(:,iatom),gqred(:))
               cgr = cmplx(cos(phase),sin(phase))
 
-              mcgc(1) = nucdipmom(2,iatom)*gcart(3) - nucdipmom(3,iatom)*gcart(2)
-              mcgc(2) = nucdipmom(3,iatom)*gcart(1) - nucdipmom(1,iatom)*gcart(3)
-              mcgc(3) = nucdipmom(1,iatom)*gcart(2) - nucdipmom(2,iatom)*gcart(1)
+              mcgc(1) = nucdipmom(2,iatom)*gqcart(3) - nucdipmom(3,iatom)*gqcart(2)
+              mcgc(2) = nucdipmom(3,iatom)*gqcart(1) - nucdipmom(1,iatom)*gqcart(3)
+              mcgc(3) = nucdipmom(1,iatom)*gqcart(2) - nucdipmom(2,iatom)*gqcart(1)
 
               mcgc = MATMUL(TRANSPOSE(gprimd),mcgc)
 
@@ -297,7 +297,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  integer,allocatable :: nd_list(:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gmet(3,3),gprimd(3,3),gred(3),mcgc(3),rmet(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),gqred(3),mcgc(3),rmet(3,3)
  real(dp) :: rgbasis(3,3,3)
  real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
 
@@ -397,17 +397,17 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
           ig1 = i1 - (i1/id1)*n1 -1 
           ii=i1+i23
 
-          gred(1) = gq(1,i1); gred(2) = gq(2,i2); gred(3) = gq(3,i3)
+          gqred(1) = gq(1,i1); gqred(2) = gq(2,i2); gqred(3) = gq(3,i3)
          
           if( (gs .LE. cutoff) .AND. (gs .gt. tol8) )then
 
              do iatom = 1, nd_atom_tot
                 nd_atom = nd_list(iatom)
-                phase = -two_pi*DOT_PRODUCT(xred(:,nd_atom),gred(:))
+                phase = -two_pi*DOT_PRODUCT(xred(:,nd_atom),gqred(:))
                 cgr = cmplx(cos(phase),sin(phase))
 
                 ! cross product m x G
-                call wedge_product(mcgc,nd_m(:,iatom),gred,rgbasis)
+                call wedge_product(mcgc,nd_m(:,iatom),gqred,rgbasis)
                 
                 ! express mcgc relative to rprimd translations. This is done because
                 ! we wish ultimately to apply A.p to |cwavef>; in getghc_nucdip, the

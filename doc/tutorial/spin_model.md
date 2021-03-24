@@ -16,13 +16,13 @@ With this lesson, you will learn to:
   * Determine the critical temperature for a magnetic phase transition
   * Calculate spin canting angles for systems with Dzyaloshinskii-Moriya interaction
 
-The TB2J python package, which can be used to generate a spin model, can be found on the website at [https://github.com/mailhexu/TB2J](https://github.com/mailhexu/TB2J). The online documenation can be found at [https://tb2j.readthedocs.io](https://tb2j.readthedocs.io/en/latest/) .
+The TB2J python package, which can be used to generate a spin model, can be found on the website at [https://github.com/mailhexu/TB2J](https://github.com/mailhexu/TB2J). The online documenation can be found at [https://tb2j.readthedocs.io](https://tb2j.readthedocs.io/en/latest/).
 
 
 
 *Before beginning, you might consider to work in a subdirectory for this tutorial. Why not Work_spindyn?*
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Heisenberg Model formalism
 
@@ -66,7 +66,8 @@ where $m_i$ denotes the magnetic moment of site $i$, and $\vec{H}$ is the magnet
 
 One way to calculate the Heisenberg model parameters is to use the spin force theorem (see [[cite:Liechtenstein1983]], [[cite:Katsnelson2000]]), for which one perturbs the system by rotating  localized spins. In ABINIT, the Hamiltonian uses plane waves as a basis set, thus the localized spin is not directly accessible. We can construct localized Wannier functions and rewrite the Hamiltonian in the Wannier basis. Then, the exchange parameters can be calculated from this Hamiltonian ( [[cite:Korotin2015]] ). 
 
-For building the Wannier function Hamiltonian from ABINIT, see the tutorial [wannier90](wannier90). Other DFT codes interfaced with [Wannier90](http://www.wannier.org) , can also be used. Then, the  [TB2J](https://github.com/mailhexu/TB2J) package can be used to calculate the Heisenberg model parameters and generate the input model for MULTIBINIT. The data will be stored in a xml (.xml) or a netcdf (.nc) file which is used as input for the MULTIBINIT calculation. For the tutorial, this file is provided. Please read the [TB2J tutorial](https://tb2j.readthedocs.io/en/latest/) to see how to create your own xml/netcdf file. 
+For building the Wannier function Hamiltonian from ABINIT, see the tutorial [wannier90](/tutorial/wannier90). Other DFT codes interfaced with [Wannier90](http://www.wannier.org) , can also be used. Then, the  [TB2J](https://github.com/mailhexu/TB2J) package can be used to calculate the Heisenberg model parameters and generate the input model for MULTIBINIT. The data will be stored in a xml (.xml) or a netcdf (.nc) file which is used as input for the MULTIBINIT calculation. For the tutorial, this file is provided. Please read the [TB2J tutorial](https://tb2j.readthedocs.io/en/latest/) to see how to create your own xml/netcdf file. 
+
 ## 3. Run spin dynamics
 
 ### Basic: how to use MULTIBINIT to run spin dynamics
