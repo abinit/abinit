@@ -8,7 +8,7 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2020 ABINIT group (MT)
+!! Copyright (C) 2011-2021 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -130,12 +130,12 @@ MODULE m_results_gs
   real(dp), allocatable :: fcart(:,:)
    ! fcart(3,natom)
    ! Cartesian forces (Hartree/Bohr)
-   ! Note: unlike fred, this array has been corrected by enforcing
+   ! Note: unlike gred, this array has been corrected by enforcing
    ! the translational symmetry, namely that the sum of force
    ! on all atoms is zero.
 
-  real(dp), allocatable :: fred(:,:)
-   ! fred(3,natom)
+  real(dp), allocatable :: gred(:,:)
+   ! gred(3,natom)
    ! Forces in reduced coordinates (Hartree)
    ! Actually, gradient of the total energy with respect
    ! to change of reduced coordinates
@@ -237,7 +237,7 @@ CONTAINS
 !!  nsppol=number of spin channels for this dataset
 !!  only_part= --optional, default=false--
 !!            if this flag is activated only the following parts of results_gs
-!!            are initalized: all scalars, fcart,fred,strten
+!!            are initalized: all scalars, fcart,gred,strten
 !!
 !! OUTPUT
 !!
@@ -290,8 +290,8 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%strten=zero
  ABI_MALLOC(results_gs%fcart,(3,natom))
  results_gs%fcart=zero
- ABI_MALLOC(results_gs%fred,(3,natom))
- results_gs%fred =zero
+ ABI_MALLOC(results_gs%gred,(3,natom))
+ results_gs%gred =zero
  ABI_MALLOC(results_gs%gaps,(3,nsppol))
  results_gs%gaps =zero
  ABI_MALLOC(results_gs%intgres,(nspden,natom))
@@ -334,7 +334,7 @@ end subroutine init_results_gs
 !!  nsppol=number of spin channels for this dataset
 !!  only_part= --optional, default=false--
 !!            if this flag is activated only the following parts of results_gs
-!!            are initalized: all scalars, fcart,fred,strten
+!!            are initalized: all scalars, fcart,gred,strten
 !!
 !! OUTPUT
 !!
@@ -395,8 +395,8 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%strten=zero
        ABI_MALLOC(results_gs(jj,ii)%fcart,(3,natom))
        results_gs(jj,ii)%fcart=zero
-       ABI_MALLOC(results_gs(jj,ii)%fred,(3,natom))
-       results_gs(jj,ii)%fred =zero
+       ABI_MALLOC(results_gs(jj,ii)%gred,(3,natom))
+       results_gs(jj,ii)%gred =zero
        ABI_MALLOC(results_gs(jj,ii)%gaps,(3,nsppol))
        results_gs(jj,ii)%gaps =zero
        ABI_MALLOC(results_gs(jj,ii)%intgres,(nspden,natom))
@@ -468,7 +468,7 @@ subroutine destroy_results_gs(results_gs)
  results_gs%berryopt=0
 
  ABI_SFREE(results_gs%fcart)
- ABI_SFREE(results_gs%fred)
+ ABI_SFREE(results_gs%gred)
  ABI_SFREE(results_gs%gaps)
  ABI_SFREE(results_gs%grcondft)
  ABI_SFREE(results_gs%gresid)
@@ -530,7 +530,7 @@ subroutine destroy_results_gs_array(results_gs)
        results_gs(jj,ii)%berryopt=0
 
        ABI_SFREE(results_gs(jj,ii)%fcart)
-       ABI_SFREE(results_gs(jj,ii)%fred)
+       ABI_SFREE(results_gs(jj,ii)%gred)
        ABI_SFREE(results_gs(jj,ii)%gaps)
        ABI_SFREE(results_gs(jj,ii)%grchempottn)
        ABI_SFREE(results_gs(jj,ii)%grcondft)
@@ -594,7 +594,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
 
  if (natom_in>natom_out) then
    ABI_SFREE(results_gs_out%fcart)
-   ABI_SFREE(results_gs_out%fred)
+   ABI_SFREE(results_gs_out%gred)
    ABI_SFREE(results_gs_out%grchempottn)
    ABI_SFREE(results_gs_out%grcondft)
    ABI_SFREE(results_gs_out%gresid)
@@ -607,8 +607,8 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
    if (allocated(results_gs_in%fcart))   then
      ABI_MALLOC(results_gs_out%fcart,(3,natom_in))
    end if
-   if (allocated(results_gs_in%fred))    then
-     ABI_MALLOC(results_gs_out%fred,(3,natom_in))
+   if (allocated(results_gs_in%gred))    then
+     ABI_MALLOC(results_gs_out%gred,(3,natom_in))
    end if
    if (allocated(results_gs_in%gresid))  then
      ABI_MALLOC(results_gs_out%gresid,(3,natom_in))
@@ -670,7 +670,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%strten(:)=results_gs_in%strten(:)
 
  if (allocated(results_gs_in%fcart))  results_gs_out%fcart(:,1:natom_in) =results_gs_in%fcart(:,1:natom_in)
- if (allocated(results_gs_in%fred))   results_gs_out%fred(:,1:natom_in)  =results_gs_in%fred(:,1:natom_in)
+ if (allocated(results_gs_in%gred))   results_gs_out%gred(:,1:natom_in)  =results_gs_in%gred(:,1:natom_in)
  if (allocated(results_gs_in%gaps))   results_gs_out%gaps(:,1:nsppol_in) =results_gs_in%gaps(:,1:nsppol_in)
  if (allocated(results_gs_in%grchempottn))&
 &  results_gs_out%grchempottn(:,1:natom_in)=results_gs_in%grchempottn(:,1:natom_in)
@@ -743,7 +743,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
  ! arrays
  !
- ! Note: unlike fred, this array has been corrected by enforcing
+ ! Note: unlike gred, this array has been corrected by enforcing
  ! the translational symmetry, namely that the sum of force on all atoms is zero.
 
  ncerr = nctk_def_arrays(ncid, [&
@@ -811,9 +811,10 @@ end function results_gs_ncwrite
 !! INPUTS
 !!  results <type(results_gs_type)>=miscellaneous information about the system after ground state computation
 !!  unit= unit of output file
-!!  cryst: Crystal structure
-!!  with_conv: True if the convergence dictionary with residuals and diffs should be written.
+!!  [cryst]: optional Crystal structure
 !!  [info]: optional info for the final document
+!!  [occopt]: optional Input variable occopt
+!!  [with_conv]: optional True if the convergence dictionary with residuals and diffs should be written.
 !!
 !! PARENTS
 !!
@@ -822,14 +823,14 @@ end function results_gs_ncwrite
 !! SOURCE
 ! CP modified argument list
 !subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
-subroutine results_gs_yaml_write(results, unit, cryst, occopt, with_conv, info)
+subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
 ! End CP modified
 
  class(results_gs_type),intent(in) :: results
  integer,intent(in) :: unit
- type(crystal_t),intent(in) :: cryst
- integer, intent(in) :: occopt ! CP added for special output in the case occopt 9
- logical,intent(in) :: with_conv
+ type(crystal_t),intent(in),optional :: cryst
+ integer, intent(in),optional :: occopt ! CP added for special output in the case occopt 9
+ logical,intent(in),optional :: with_conv
  character(len=*),intent(in),optional :: info
 
 !Local variables-------------------------------
@@ -851,39 +852,48 @@ subroutine results_gs_yaml_write(results, unit, cryst, occopt, with_conv, info)
  end if
 
  ! Write lattice parameters
- !call ydoc%add_real2d('rprimd', cryst%rprimd, real_fmt="(f11.7)")
- call ydoc%add_real2d('lattice_vectors', cryst%rprimd, real_fmt="(f11.7)")
- abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
- call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
- call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)", comment="degrees, (23, 13, 12)")
- call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
+ if (present(cryst)) then
+  call ydoc%add_real2d('lattice_vectors', cryst%rprimd, real_fmt="(f11.7)")
+  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+  call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
+  call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)", comment="degrees, (23, 13, 12)")
+  call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
+ endif
 
  ! Write convergence degree.
  ! It seems there's a portability problem for residm computed with nstep = 0 and iscf -3
  ! because one may get very small value e.g. 7.91-323. residm with nstep > 0 are OK though
  ! so print zero if residm < tol30 or allow the caller not to write the convergence dict.
- if (with_conv) then
-   call ydoc%add_reals( &
-     "deltae, res2, residm, diffor", &
-     [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
-     real_fmt="(es10.3)", dict_key="convergence")
+ if(present(with_conv))then
+   if (with_conv) then
+     call ydoc%add_reals( &
+      "deltae, res2, residm, diffor", &
+       [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
+       real_fmt="(es10.3)", dict_key="convergence")
+   else
+     call ydoc%set_keys_to_string("deltae, res2, residm, diffor", "null", dict_key="convergence")
+   end if
  else
    call ydoc%set_keys_to_string("deltae, res2, residm, diffor", "null", dict_key="convergence")
- end if
+ endif
 
  ! Write energies.
  ! CP modified
  !call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
  ! CP add modificatopm for occopt 9: fermih
- if (occopt == 9) then
-    call ydoc%add_reals("etotal, entropy, fermie, fermih", [results%etotal, results%entropy, results%fermie, results%fermih])
+ if (present(occopt))then
+   if (occopt == 9) then
+     call ydoc%add_reals("etotal, entropy, fermie, fermih", [results%etotal, results%entropy, results%fermie, results%fermih])
+   else
+     call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
+   endif
  else
-    call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
- end if
+   call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
+ endif
  ! End CP modified
+
  ! Cartesian stress tensor and forces.
  call stress_voigt_to_mat(results%strten, strten)
-
  if (strten(1,1) /= MAGIC_UNDEF) then
    call ydoc%add_real2d('cartesian_stress_tensor', strten, comment="hartree/bohr^3")
    call ydoc%add_real('pressure_GPa', - get_trace(strten) * HaBohr3_GPa / three, real_fmt="(es12.4)")
@@ -891,22 +901,17 @@ subroutine results_gs_yaml_write(results, unit, cryst, occopt, with_conv, info)
    call ydoc%set_keys_to_string("cartesian_stress_tensor, pressure_GPa", "null")
  end if
 
- species = [(cryst%symbol_iatom(ii), ii=1,cryst%natom)]
-
- call ydoc%add_real2d('xred', cryst%xred, slist=species, real_fmt="(es12.4)")
- !call ydoc%add_paired_real2d('xred_xcart_specie', &
- !  cryst%xred, cryst%xcart, slist=species, real_fmt="(es12.4)")
+ if(present(cryst))then
+   species = [(cryst%symbol_iatom(ii), ii=1,cryst%natom)]
+   call ydoc%add_real2d('xred', cryst%xred, slist=species, real_fmt="(es12.4)")
+ endif
 
  if (results%fcart(1,1) /= MAGIC_UNDEF) then
-   !call ydoc%add_paired_real2d('cartesian_forces_and_xred', &
-   !  results%fcart, cryst%xred, chars=species, real_fmt="(es12.4)")
-
    call ydoc%add_real2d('cartesian_forces', results%fcart, comment="hartree/bohr")
    fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
    ! Write force statistics
    call ydoc%add_reals('min, max, mean', &
      values=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom], dict_key="force_length_stats")
-
  else
    ! Set entries to null (python None) to facilitate life to the parsing routines!
    call ydoc%add_string('cartesian_forces', "null")

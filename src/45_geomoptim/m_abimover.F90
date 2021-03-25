@@ -7,7 +7,7 @@
 !! and their related ini and free routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
+!! Copyright (C) 2001-2021 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -291,7 +291,7 @@ type, public :: abiforstr
   ! arrays
   real(dp),allocatable :: fcart(:,:)
    ! Cartesian forces
-  real(dp),allocatable :: fred(:,:)
+  real(dp),allocatable :: gred(:,:)
    ! Reduced forces
   real(dp) :: strten(6)
     ! Stress tensor (Symmetrical 3x3 matrix)
@@ -1029,7 +1029,7 @@ subroutine abiforstr_ini(forstr,natom)
  type(abiforstr), intent(out) :: forstr
 
  ABI_MALLOC(forstr%fcart,(3,natom))
- ABI_MALLOC(forstr%fred,(3,natom))
+ ABI_MALLOC(forstr%gred,(3,natom))
 
 end subroutine abiforstr_ini
 !!***
@@ -1062,7 +1062,7 @@ subroutine abiforstr_fin(forstr)
  type(abiforstr), intent(inout) :: forstr
 
  ABI_SFREE(forstr%fcart)
- ABI_SFREE(forstr%fred)
+ ABI_SFREE(forstr%gred)
 
 end subroutine abiforstr_fin
 !!***

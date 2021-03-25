@@ -20,7 +20,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about 1 hour.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Generation of a derivative database
 
@@ -46,7 +46,7 @@ It takes about 1-2 minutes to be completed on a PC 2.8 GHz.
 In order to do interatomic force constant (IFC) calculations, and to compute
 associated phonon band structure and thermodynamical properties, you should
 first have some theoretical background.
-Let us assume that you have read the litterature relative to the [first tutorial on DFPT](rf1).
+Let us assume that you have read the litterature relative to the [first tutorial on DFPT](/tutorial/rf1).
 You might find additional material, related to the present section, in
 [[cite:Gonze1997a]] -especially section IX-, [[cite:Lee1995]] and [[cite:Baroni2001]].
 If you haven't read parts of these references, we strongly advise you take the time to read them now.

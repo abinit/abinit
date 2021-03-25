@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2020 ABINIT group (BVT)
+!!  Copyright (C) 2015-2021 ABINIT group (BVT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,7 +89,7 @@ contains
 !!  === optional outputs ===
 !!  [elt_vdw_dftd3(6+3*natom,6)]= contribution to elastic constant and
 !!  internal strains from DFT-D3 dispersion potential
-!!  [fred_vdw_dftd3(3,natom)]=contribution to gradient w.r.to atomic displ.
+!!  [gred_vdw_dftd3(3,natom)]=contribution to gradient w.r.to atomic displ.
 !!  from DFT-D3 dispersion potential
 !!  [str_vdw_dftd3(6)]=contribution to stress tensor from DFT-D3 dispersion potential
 !!  [dyn_vdw_dftd3(2,3,natom,3,natom)]= contribution to the interatomic force
@@ -115,7 +115,7 @@ contains
 
 subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
 &          vdw_tol,vdw_tol_3bt,xred,znucl,dyn_vdw_dftd3,elt_vdw_dftd3,&
-&          fred_vdw_dftd3,str_vdw_dftd3,qphon)
+&          gred_vdw_dftd3,str_vdw_dftd3,qphon)
 
 implicit none
 
@@ -130,7 +130,7 @@ implicit none
  real(dp),intent(in),optional :: qphon(3)
  real(dp),intent(out),optional :: dyn_vdw_dftd3(2,3,natom,3,natom)
  real(dp),intent(out),optional :: elt_vdw_dftd3(6+3*natom,6)
- real(dp),intent(out),optional :: fred_vdw_dftd3(3,natom)
+ real(dp),intent(out),optional :: gred_vdw_dftd3(3,natom)
  real(dp),intent(out),optional :: str_vdw_dftd3(6)
 
 !Local variables-------------------------------
@@ -264,8 +264,8 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  real(dp),allocatable :: d2c6ri(:,:),d2c6rj(:,:),d2c6rirj(:,:)
  real(dp),allocatable:: elt_cn(:,:,:),e3bt_ij(:,:),e3bt_jk(:,:),e3bt_ki(:,:),e_no_c(:,:)
  real(dp),allocatable:: e_alpha1(:),e_alpha2(:),e_alpha3(:),e_alpha4(:)
- real(dp) :: fred(3),fredij(3),fredjk(3),fredki(3)
- real(dp),allocatable:: fe_no_c(:,:,:),cfdcn(:,:,:,:),fdcn(:,:,:,:),fgrad_no_c(:,:,:,:),fred_vdw_3bt(:,:)
+ real(dp) :: gred(3),gredij(3),gredjk(3),gredki(3)
+ real(dp),allocatable:: fe_no_c(:,:,:),cfdcn(:,:,:,:),fdcn(:,:,:,:),fgrad_no_c(:,:,:,:),gred_vdw_3bt(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3)
  real(dp),allocatable:: grad_no_cij(:,:,:)
  real(dp) :: mcart(3,3)
@@ -300,7 +300,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 & vdw_dftd3_cnj,index_cnj)
 ! Determine the properties which have to be studied
  bol_3bt = (vdw_tol_3bt>0)
- need_forces = present(fred_vdw_dftd3)
+ need_forces = present(gred_vdw_dftd3)
  need_stress= present(str_vdw_dftd3)
  need_dynmat= present(dyn_vdw_dftd3)
  need_elast= present(elt_vdw_dftd3)
@@ -314,7 +314,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    dyn_vdw_dftd3=zero
  end if
  e_vdw_dftd3 = zero
- if (need_forces) fred_vdw_dftd3=zero
+ if (need_forces) gred_vdw_dftd3=zero
  if (need_stress) str_vdw_dftd3=zero
  if (need_elast) elt_vdw_dftd3=zero
 
@@ -962,10 +962,10 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                           Contribution to gradients wr to atomic displacement
 !                           (forces)
                    if (need_forces.and.ia/=ja) then
-                     fred(:)=grad*rred(:)
+                     gred(:)=grad*rred(:)
                      do alpha=1,3
-                       fred_vdw_dftd3(alpha,ia)=fred_vdw_dftd3(alpha,ia)-fred(alpha)
-                       fred_vdw_dftd3(alpha,ja)=fred_vdw_dftd3(alpha,ja)+fred(alpha)
+                       gred_vdw_dftd3(alpha,ia)=gred_vdw_dftd3(alpha,ia)-gred(alpha)
+                       gred_vdw_dftd3(alpha,ja)=gred_vdw_dftd3(alpha,ja)+gred(alpha)
                      end do
                    elseif (need_stress) then
 !                              Computation of the DFT-D3 contribution to stress
@@ -1103,10 +1103,10 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      do ka=1,natom
        do ia=1,natom
              !do ja=1,natom
-                !fred_vdw_dftd3(:,ka) = fred_vdw_dftd3(:,ka)+e_no_c(ia,ja)*(&
+                !gred_vdw_dftd3(:,ka) = gred_vdw_dftd3(:,ka)+e_no_c(ia,ja)*(&
 !&               !dcn(:,ia,ka)*dc6ri(ia,ja)+dcn(:,ja,ka)*dc6rj(ia,ja))
              !end do
-         fred_vdw_dftd3(:,ka) = fred_vdw_dftd3(:,ka)+e_alpha1(ia)*dcn(:,ia,ka)+&
+         gred_vdw_dftd3(:,ka) = gred_vdw_dftd3(:,ka)+e_alpha1(ia)*dcn(:,ia,ka)+&
 &         e_alpha2(ia)*dcn(:,ia,ka)
        end do
      end do
@@ -1255,7 +1255,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  call wrtout(std_out,msg,'COLL')
 
 !print *, 'Evdw', e_vdw_dftd3
-!if (need_forces) print *, 'fvdw', fred_vdw_dftd3(3,:)
+!if (need_forces) print *, 'fvdw', gred_vdw_dftd3(3,:)
 !if (need_stress) print *, 'strvdw', str_vdw_dftd3(6)
 !if (need_elast) print *, 'Elast(3,3,3,3)', elt_vdw_dftd3(3,3)
 !if (need_elast) print *, 'Elast(3,3,3,3)', elt_vdw_dftd3(6,6)
@@ -1275,10 +1275,10 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      ABI_MALLOC(e3bt_ij,(natom,natom))
      ABI_MALLOC(e3bt_jk,(natom,natom))
      ABI_MALLOC(e3bt_ki,(natom,natom))
-     ABI_MALLOC(fred_vdw_3bt,(3,natom))
+     ABI_MALLOC(gred_vdw_3bt,(3,natom))
      e3bt_ij=zero; e3bt_jk=zero; e3bt_ki=zero
      if (need_forces) then
-       fred_vdw_3bt = zero
+       gred_vdw_3bt = zero
      elseif (need_stress) then
        str_3bt=zero
      end if
@@ -1373,25 +1373,25 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                                        Contribution to gradients wr to atomic displacement
 !                                        (forces)
                          if (need_forces) then
-                           if (ia/=ja) fredij=d_drij*matmul(transpose(rprimd),rcartij)
-                           if (ja/=ka) fredjk=d_drjk*matmul(transpose(rprimd),rcartjk)
-                           if (ka/=ia) fredki=d_drki*matmul(transpose(rprimd),rcartki)
+                           if (ia/=ja) gredij=d_drij*matmul(transpose(rprimd),rcartij)
+                           if (ja/=ka) gredjk=d_drjk*matmul(transpose(rprimd),rcartjk)
+                           if (ka/=ia) gredki=d_drki*matmul(transpose(rprimd),rcartki)
                            if (ia/=ja.and.ka/=ia) then
-                             fred_vdw_3bt(:,ia)=fred_vdw_3bt(:,ia)-fredij(:)+fredki(:)
-                             fred_vdw_3bt(:,ja)=fred_vdw_3bt(:,ja)+fredij(:)-fredjk(:)
-                             fred_vdw_3bt(:,ka)=fred_vdw_3bt(:,ka)-fredki(:)+fredjk(:)
+                             gred_vdw_3bt(:,ia)=gred_vdw_3bt(:,ia)-gredij(:)+gredki(:)
+                             gred_vdw_3bt(:,ja)=gred_vdw_3bt(:,ja)+gredij(:)-gredjk(:)
+                             gred_vdw_3bt(:,ka)=gred_vdw_3bt(:,ka)-gredki(:)+gredjk(:)
                            else if (ia==ja.and.ia/=ka) then
-                             fred_vdw_3bt(:,ia)=fred_vdw_3bt(:,ia)+fredki(:)
-                             fred_vdw_3bt(:,ja)=fred_vdw_3bt(:,ja)-fredjk(:)
-                             fred_vdw_3bt(:,ka)=fred_vdw_3bt(:,ka)-fredki(:)+fredjk(:)
+                             gred_vdw_3bt(:,ia)=gred_vdw_3bt(:,ia)+gredki(:)
+                             gred_vdw_3bt(:,ja)=gred_vdw_3bt(:,ja)-gredjk(:)
+                             gred_vdw_3bt(:,ka)=gred_vdw_3bt(:,ka)-gredki(:)+gredjk(:)
                            elseif (ia==ka.and.ia/=ja) then
-                             fred_vdw_3bt(:,ia)=fred_vdw_3bt(:,ia)-fredij(:)
-                             fred_vdw_3bt(:,ja)=fred_vdw_3bt(:,ja)+fredij(:)-fredjk(:)
-                             fred_vdw_3bt(:,ka)=fred_vdw_3bt(:,ka)+fredjk(:)
+                             gred_vdw_3bt(:,ia)=gred_vdw_3bt(:,ia)-gredij(:)
+                             gred_vdw_3bt(:,ja)=gred_vdw_3bt(:,ja)+gredij(:)-gredjk(:)
+                             gred_vdw_3bt(:,ka)=gred_vdw_3bt(:,ka)+gredjk(:)
                            elseif (ja==ka.and.ia/=ja) then
-                             fred_vdw_3bt(:,ia)=fred_vdw_3bt(:,ia)-fredij(:)+fredki(:)
-                             fred_vdw_3bt(:,ja)=fred_vdw_3bt(:,ja)+fredij(:)
-                             fred_vdw_3bt(:,ka)=fred_vdw_3bt(:,ka)-fredki(:)
+                             gred_vdw_3bt(:,ia)=gred_vdw_3bt(:,ia)-gredij(:)+gredki(:)
+                             gred_vdw_3bt(:,ja)=gred_vdw_3bt(:,ja)+gredij(:)
+                             gred_vdw_3bt(:,ka)=gred_vdw_3bt(:,ka)-gredki(:)
                            end if
                          end if
 !                                        Contribution to stress tensor
@@ -1419,9 +1419,9 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      do ia=1,natom
        do ja=1,natom
          do la=1,natom
-           fred_vdw_3bt(:,la) = fred_vdw_3bt(:,la)+e3bt_ij(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
-           fred_vdw_3bt(:,la) = fred_vdw_3bt(:,la)+e3bt_jk(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
-           fred_vdw_3bt(:,la) = fred_vdw_3bt(:,la)+e3bt_ki(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
+           gred_vdw_3bt(:,la) = gred_vdw_3bt(:,la)+e3bt_ij(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
+           gred_vdw_3bt(:,la) = gred_vdw_3bt(:,la)+e3bt_jk(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
+           gred_vdw_3bt(:,la) = gred_vdw_3bt(:,la)+e3bt_ki(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
          end do
        end do
      end do
@@ -1435,7 +1435,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      end do
    end if
    e_vdw_dftd3 = e_vdw_dftd3+e_3bt
-   if (need_forces) fred_vdw_dftd3= fred_vdw_dftd3+fred_vdw_3bt
+   if (need_forces) gred_vdw_dftd3= gred_vdw_dftd3+gred_vdw_3bt
    if (need_stress) str_vdw_dftd3 = str_vdw_dftd3+str_3bt
    ABI_FREE(dc9ijri)
    ABI_FREE(dc9ijrj)
@@ -1444,7 +1444,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    ABI_FREE(e3bt_ki)
    ABI_FREE(vdw_c9)
    ABI_FREE(r0ijk)
-   ABI_FREE(fred_vdw_3bt)
+   ABI_FREE(gred_vdw_3bt)
  end if
  if (need_stress) str_vdw_dftd3=str_vdw_dftd3/ucvol
 

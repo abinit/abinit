@@ -8,7 +8,7 @@
 !!  and the procedures to perform this calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2020 ABINIT group (CMartins,FJ,FA,MT)
+!!  Copyright (C) 2012-2021 ABINIT group (CMartins,FJ,FA,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -613,7 +613,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 !* Compute the dimension of arrays in "spin" w.r.t parallelism
    my_nsppol=dtset%nsppol
-   if (mpi_enreg%nproc_kpt>1) my_nsppol=1
+   if (mpi_enreg%nproc_spkpt>1) my_nsppol=1
 !* my_nsppol=1 when nsppol=1 or nsppol=2 and only one spin is treated by the processor.
 !* my_nsppol=2 when nsppol=2 and no parallelization over kpt (both spins are treated by the processor).
 
@@ -641,7 +641,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
    call copy_mpi_enreg(mpi_enreg,fockbz%mpi_enreg)
    fockbz%mpi_enreg%me_kpt=mpi_enreg%me_hf
    fockbz%mpi_enreg%comm_kpt=mpi_enreg%comm_hf
-   fockbz%mpi_enreg%nproc_kpt=mpi_enreg%nproc_hf
+   fockbz%mpi_enreg%nproc_spkpt=mpi_enreg%nproc_hf
    if (allocated(fockbz%mpi_enreg%proc_distrb)) then
      ABI_FREE(fockbz%mpi_enreg%proc_distrb)
    end if
@@ -1676,8 +1676,8 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
      do isppol=1,nsppol
        jbg=0 ; jcg=0 ; jkg=0 ; icp=0
        my_jsppol=isppol
-       if ((isppol==2).and.(mpi_enreg%nproc_kpt/=1)) my_jsppol=1
-!* Both spins are treated on the same proc., only in the case where nproc_kpt=1;
+       if ((isppol==2).and.(mpi_enreg%nproc_spkpt/=1)) my_jsppol=1
+!* Both spins are treated on the same proc., only in the case where nproc_spkpt=1;
 !* otherwise each proc. treats only one spin.
 
        ! MG: This loop is not effient!
@@ -1783,7 +1783,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
              end if
              call timab(1503,2,tsec2)
 !* Keep the processors in %comm_kpt which needs the values in cgocc_tmp to build their own %cwaveocc and %occ_bz.
-             if ((mpi_enreg%nproc_kpt/=1).and.(nsppol==2)) then
+             if ((mpi_enreg%nproc_spkpt/=1).and.(nsppol==2)) then
                if (fockbz%timerev(my_jkpt)==mpi_enreg%my_isppoltab(isppol)) cycle
 !* In the case of a parallel spin-polarized calculation
 !* when time reversal symmetry is applied at this k-point (timrev==1), only the processors with the opposite spin (my_isppoltab==0) are kept.
@@ -1816,7 +1816,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 !* apply time reversal symmetry if necessary
              if (fockbz%timerev(my_jkpt)==1) then
                cgocc(2,:) = - cgocc(2,:)
-               if((mpi_enreg%nproc_kpt==1).and.(nsppol==2)) my_jsppol=mod(my_jsppol,2)+1
+               if((mpi_enreg%nproc_spkpt==1).and.(nsppol==2)) my_jsppol=mod(my_jsppol,2)+1
 !* exchange spin (1 ->2 ; 2-> 1) in the sequential case.
              end if
 

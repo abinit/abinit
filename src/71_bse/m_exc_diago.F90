@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2021 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 MODULE m_exc_diago
 
  use defs_basis
- use m_slk
+
  use m_bs_defs
  use m_abicore
  use m_errors
@@ -33,6 +33,7 @@ MODULE m_exc_diago
 #endif
  use m_hdr
  use m_sort
+ use m_slk
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
@@ -1185,9 +1186,11 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 ! ...
 
  use_scalapack = .FALSE.
-!#ifdef HAVE_LINALG_SCALAPACK
-! use_scalapack = (nprocs > 1)
-!#endif
+#ifdef HAVE_LINALG_SCALAPACK
+ ! This is alway false. I use this trick so that the second case below is always compiled
+ ! to avoid regressions.
+ use_scalapack = nprocs > 1 .and. nsppol > 5
+#endif
  !use_scalapack = .FALSE.
  !use_scalapack = .TRUE.
 
@@ -1206,7 +1209,6 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    call wrtout(std_out, msg)
 
    ABI_MALLOC_OR_DIE(exc_ham,(exc_size,exc_size), ierr)
-
    ABI_MALLOC_OR_DIE(fmat,(exc_size,exc_size), ierr)
 
    write(msg,'(3a,f8.1,3a,f8.1,a)')&
@@ -1242,9 +1244,9 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    call exc_fullh_from_blocks(hcoup_unt,"Coupling",nsppol,row_sign,diago_is_real,Bsp%nreh,exc_size,exc_ham)
    close(hcoup_unt)
 
-#ifdef DEV_MG_DEBUG_THIS
-write(666)exc_ham
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!write(666)exc_ham
+!#endif
    !
    ! Fill fmat = (1  0)
    !             (0 -1)
@@ -1300,10 +1302,10 @@ write(666)exc_ham
      write(eig_unt) CMPLX(exc_rvect(:,mi),kind=dpc)
    end do
 
-#ifdef DEV_MG_DEBUG_THIS
-   write(888)exc_rvect
-   write(888)exc_ene
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!   write(888)exc_rvect
+!   write(888)exc_ene
+!#endif
 
    ABI_MALLOC_OR_DIE(ovlp,(nstates,nstates), ierr)
 
@@ -1312,9 +1314,9 @@ write(666)exc_ham
    call xgemm("C","N",exc_size,nstates,nstates,cone,exc_rvect,exc_size,exc_rvect,exc_size,czero,ovlp,nstates)
    ABI_FREE(exc_rvect)
 
-#ifdef DEV_MG_DEBUG_THIS
-write(667)ovlp
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!write(667)ovlp
+!#endif
 
    call wrtout(std_out," Inverting overlap matrix... ")
    !
@@ -1325,9 +1327,9 @@ write(667)ovlp
    ! Version for generic complex matrix.
    !call xginv(ovlp,nstates)
 
-#ifdef DEV_MG_DEBUG_THIS
-write(668,*)ovlp
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!write(668,*)ovlp
+!#endif
 
    call wrtout(std_out,' Writing overlap matrix O^-1 on file: '//TRIM(bseig_fname))
    do it=1,nstates
@@ -1408,7 +1410,7 @@ write(668,*)ovlp
    do el=1,my_nel
      iloc = myel2loc(1,el)
      jloc = myel2loc(2,el)
-     call idx_glob(Slk_Hbar,iloc,jloc,iglob,jglob)
+     call Slk_Hbar%loc2glob(iloc,jloc,iglob,jglob)
      ctmp = tmp_cbuffer(el)
      if (iglob==jglob.and..not.Bsp%have_complex_ene) ctmp = DBLE(ctmp) ! Force the diagonal to be real.
      rrs_kind = rrs_of_glob(iglob,jglob,Slk_Hbar%sizeb_global)
@@ -1470,7 +1472,7 @@ write(668,*)ovlp
    do el=1,my_nel
      iloc = myel2loc(1,el)
      jloc = myel2loc(2,el)
-     call idx_glob(Slk_Hbar,iloc,jloc,iglob,jglob)
+     call Slk_Hbar%loc2glob(iloc, jloc, iglob, jglob)
      ccs_kind = ccs_of_glob(iglob,jglob,Slk_Hbar%sizeb_global)
      ctmp = tmp_cbuffer(el)
      if (ccs_kind==-1) ctmp = DCONJG(ctmp) ! Anti-coupling (Diagonal is included).
@@ -1483,13 +1485,13 @@ write(668,*)ovlp
    !max_r=20; max_c=10
    !call print_arr(Slk_Hbar%buffer_cplx,max_r=max_r,max_c=max_c,unit=std_out)
 
-#ifdef DEV_MG_DEBUG_THIS
-   ABI_MALLOC(exc_ham,(exc_size,exc_size))
-   read(666)exc_ham
-
-   write(std_out,*)"Error Hbar: ",MAXVAL(ABS(exc_ham-Slk_Hbar%buffer_cplx))
-   ABI_FREE(exc_ham)
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!   ABI_MALLOC(exc_ham,(exc_size,exc_size))
+!   read(666)exc_ham
+!
+!   write(std_out,*)"Error Hbar: ",MAXVAL(ABS(exc_ham-Slk_Hbar%buffer_cplx))
+!   ABI_FREE(exc_ham)
+!#endif
 
    call MPI_FILE_CLOSE(mpi_fh, mpi_err)
    ABI_CHECK_MPI(mpi_err,"FILE_CLOSE")
@@ -1501,7 +1503,7 @@ write(668,*)ovlp
    !            (0 -1)
    do jloc=1,Slk_F%sizeb_local(2)
      do iloc=1,Slk_F%sizeb_local(1)
-       call idx_glob(Slk_F,iloc,jloc,iglob,jglob)
+       call Slk_F%loc2glob(iloc, jloc, iglob, jglob)
        if (iglob==jglob) then
          if (iglob<=SUM(Bsp%nreh)) then
            Slk_F%buffer_cplx(iloc,jloc) =  cone
@@ -1522,34 +1524,34 @@ write(668,*)ovlp
    itype=2; vl=1; vu=1; il=1; iu=nstates
    abstol=zero !ABSTOL = PDLAMCH(comm,'U')
 
-#if 1
+!#if 1
    if (do_full_diago) then
      call slk_pzhegvx(itype,"Vectors","All","Upper",Slk_F,Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    else
      ABI_WARNING("Partial diago is still under testing")
      call slk_pzhegvx(itype,"Vectors","Index","Upper",Slk_F,Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    end if
-#else
-   call xhegv(itype,"Vectors","Upper",exc_size,Slk_F%buffer_cplx,Slk_Hbar%buffer_cplx,exc_ene)
-   Slk_vec%buffer_cplx = Slk_F%buffer_cplx
-#endif
+!#else
+!   call xhegv(itype,"Vectors","Upper",exc_size,Slk_F%buffer_cplx,Slk_Hbar%buffer_cplx,exc_ene)
+!   Slk_vec%buffer_cplx = Slk_F%buffer_cplx
+!#endif
 
-#ifdef DEV_MG_DEBUG_THIS
-   if (PRODUCT(Slk_Hbar%sizeb_local) /= exc_size**2) then
-     ABI_ERROR("Wrong size")
-   end if
-
-   ABI_MALLOC(exc_ham,(exc_size,exc_size))
-   read(888)exc_ham
-
-   write(std_out,*)"Error rvec: ",MAXVAL(ABS(exc_ham-Slk_vec%buffer_cplx))
-   ABI_FREE(exc_ham)
-
-   ABI_MALLOC(test_ene,(exc_size))
-   read(888)test_ene
-   write(std_out,*)"Error ene: ",MAXVAL(ABS(exc_ene-test_ene))
-   ABI_FREE(test_ene)
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!   if (PRODUCT(Slk_Hbar%sizeb_local) /= exc_size**2) then
+!     ABI_ERROR("Wrong size")
+!   end if
+!
+!   ABI_MALLOC(exc_ham,(exc_size,exc_size))
+!   read(888)exc_ham
+!
+!   write(std_out,*)"Error rvec: ",MAXVAL(ABS(exc_ham-Slk_vec%buffer_cplx))
+!   ABI_FREE(exc_ham)
+!
+!   ABI_MALLOC(test_ene,(exc_size))
+!   read(888)test_ene
+!   write(std_out,*)"Error ene: ",MAXVAL(ABS(exc_ene-test_ene))
+!   ABI_FREE(test_ene)
+!#endif
 
    call Slk_F%free()
    call Slk_Hbar%free()
@@ -1609,13 +1611,13 @@ write(668,*)ovlp
 
    call slk_pzgemm("C","N",Slk_vec,cone,Slk_vec,czero,Slk_ovlp)
 
-#ifdef DEV_MG_DEBUG_THIS
-   ABI_MALLOC(exc_ham,(exc_size,exc_size))
-   read(667)exc_ham
-
-   write(std_out,*)"Error Ovlp: ",MAXVAL(ABS(exc_ham-Slk_ovlp%buffer_cplx))
-   !Slk_ovlp%buffer_cplx = exc_ham
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!   ABI_MALLOC(exc_ham,(exc_size,exc_size))
+!   read(667)exc_ham
+!
+!   write(std_out,*)"Error Ovlp: ",MAXVAL(ABS(exc_ham-Slk_ovlp%buffer_cplx))
+!   !Slk_ovlp%buffer_cplx = exc_ham
+!#endif
 
    !max_r=20; max_c=10
    !call print_arr(Slk_ovlp%buffer_cplx,max_r=max_r,max_c=max_c,unit=std_out)
@@ -1625,49 +1627,45 @@ write(668,*)ovlp
    call wrtout(std_out," Inverting overlap matrix... ")
    uplo="Upper"
 
-#if 0
-!DEBUG
-   call xhdp_invert(uplo,Slk_ovlp%buffer_cplx,exc_size)
-
-   !call slk_symmetrize(Slk_ovlp,uplo,"Hermitian")
-   call hermitianize(Slk_ovlp%buffer_cplx,uplo)
-
-   exc_ham = MATMUL(exc_ham,Slk_ovlp%buffer_cplx)
-   do it=1,exc_size
-     exc_ham(it,it) = exc_ham(it,it) - cone
-   end do
-
-   write(std_out,*)"Error Inversion: ",MAXVAL(ABS(exc_ham))
-   ABI_FREE(exc_ham)
-!END DEBUG
-
-#else
-   ! call slk_zdhp_invert(Slk_ovlp,uplo)
+!#if 0
+!!DEBUG
+!   call xhdp_invert(uplo,Slk_ovlp%buffer_cplx,exc_size)
+!
+!   !call slk_symmetrize(Slk_ovlp,uplo,"Hermitian")
+!   call hermitianize(Slk_ovlp%buffer_cplx,uplo)
+!
+!   exc_ham = MATMUL(exc_ham,Slk_ovlp%buffer_cplx)
+!   do it=1,exc_size
+!     exc_ham(it,it) = exc_ham(it,it) - cone
+!   end do
+!
+!   write(std_out,*)"Error Inversion: ",MAXVAL(ABS(exc_ham))
+!   ABI_FREE(exc_ham)
+!!END DEBUG
+!
+!#else
+   ! call Slk_ovlp%zdhp_invert(uplo)
    ! call hermitianize(Slk_ovlp%buffer_cplx,uplo)
    ! !call slk_symmetrize(Slk_ovlp,uplo,"Hermitian")
 
-   call slk_zinvert(Slk_ovlp)  ! Version for generic complex matrix.
-#endif
+   call Slk_ovlp%zinvert()  ! Version for generic complex matrix.
+!#endif
 
-   if (allocated(exc_ham))  then
-     ABI_FREE(exc_ham)
-   end if
-
-#ifdef DEV_MG_DEBUG_THIS
-   ABI_MALLOC(exc_ham,(exc_size,exc_size))
-   read(668)exc_ham
-   write(std_out,*)"Error in Inv Ovlp: ",MAXVAL(ABS(exc_ham-Slk_ovlp%buffer_cplx))
-
-   !exc_ham = exc_ham-Slk_ovlp%buffer_cplx
-   !do it=1,exc_size
-   !  if ( MAXVAL(ABS(exc_ham(:,it))) > 0.1 ) write(std_out,*)"it: ",it,exc_ham(:,it)
-   !end do
-
-   !Slk_ovlp%buffer_cplx = exc_ham
-   ABI_FREE(exc_ham)
-
-   !write(std_out,*)"MAX ERR",MAXVAL(ABS(Slk_ovlp%buffer_cplx - TRANSPOSE(DCONJG(Slk_ovlp%buffer_cplx))))
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!   ABI_MALLOC(exc_ham,(exc_size,exc_size))
+!   read(668)exc_ham
+!   write(std_out,*)"Error in Inv Ovlp: ",MAXVAL(ABS(exc_ham-Slk_ovlp%buffer_cplx))
+!
+!   !exc_ham = exc_ham-Slk_ovlp%buffer_cplx
+!   !do it=1,exc_size
+!   !  if ( MAXVAL(ABS(exc_ham(:,it))) > 0.1 ) write(std_out,*)"it: ",it,exc_ham(:,it)
+!   !end do
+!
+!   !Slk_ovlp%buffer_cplx = exc_ham
+!   ABI_FREE(exc_ham)
+!
+!   !write(std_out,*)"MAX ERR",MAXVAL(ABS(Slk_ovlp%buffer_cplx - TRANSPOSE(DCONJG(Slk_ovlp%buffer_cplx))))
+!#endif
 
    call wrtout(std_out,' Writing overlap matrix S^-1 on file: '//TRIM(bseig_fname))
 

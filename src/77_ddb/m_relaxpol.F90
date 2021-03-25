@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2021 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,7 @@ contains
 !!   is not in the data block), (1=> the element is in the data blok)
 !! blkval(2,msize) = matrix that contains the second-order energy derivatives
 !! etotal = Kohn-Sham energy at zero electric field
-!! fred(3,natom) = -1 times the forces in reduced coordinates
+!! gred(3,natom) = -1 times the forces in reduced coordinates
 !! iatfix(natom) = indices of the atoms that are held fixed in the relaxation
 !! iout = unit number for output
 !! istrfix(6) = indices of the elements of the strain tensor that
@@ -104,7 +104,7 @@ contains
 !!
 !! SOURCE
 
-subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
+subroutine relaxpol(Crystal,blkflg,blkval,etotal,gred,iatfix,iout,istrfix,&
 & mpert,msize,natfix,natom,nstrfix,pel,red_ptot,relaxat,relaxstr,&
 & strten,targetpol,usepaw)
 
@@ -117,7 +117,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 !arrays
  integer,intent(in) :: blkflg(msize),iatfix(natom)
  integer,intent(in) :: istrfix(6)
- real(dp),intent(in) :: fred(3,natom),pel(3),strten(6)
+ real(dp),intent(in) :: gred(3,natom),pel(3),strten(6)
  real(dp),intent(in) :: red_ptot(3)
  real(dp),intent(inout) :: blkval(2,msize),targetpol(3)
 
@@ -233,9 +233,9 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
    favg(:) = zero
    do iatom = 1, natom
      do idir = 1, 3
-       fcart(idir,iatom) = -(gprimd(idir,1)*fred(1,iatom) + &
-&       gprimd(idir,2)*fred(2,iatom) + &
-&       gprimd(idir,3)*fred(3,iatom))
+       fcart(idir,iatom) = -(gprimd(idir,1)*gred(1,iatom) + &
+&       gprimd(idir,2)*gred(2,iatom) + &
+&       gprimd(idir,3)*gred(3,iatom))
        favg(idir) = favg(idir) + fcart(idir,iatom)
      end do
    end do

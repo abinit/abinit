@@ -9,7 +9,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2020 ABINIT group (MG, YG)
+!! Copyright (C) 2009-2021 ABINIT group (MG, YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -709,7 +709,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
      Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
      Dtset%nspden,Cryst%ntypat,KS_paw_an,KS_paw_ij,Pawang,Pawfgrtab,&
      Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-     k0,Dtset%spnorbscl,Cryst%ucvol,dtset%charge,ks_vtrial,ks_vxc,Cryst%xred,&
+     k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,&
      nucdipmom=Dtset%nucdipmom)
 
    ! Symmetrize KS Dij
@@ -1565,12 +1565,12 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  ! CP modified
  !call ebands_init(bantot,KS_BSt,Dtset%nelect,doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
 !&  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-!&  dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!&  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 !&  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot,KS_BSt,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
 &  doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
 &  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-&  dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+&  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  ! End CP modified
 
@@ -2198,13 +2198,13 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  !call ebands_init(bantot_dense,KS_BSt_dense,Dtset%nelect,doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
 !&  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
 !&  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
-!&  hdr_wfk_dense%charge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
+!&  hdr_wfk_dense%cellcharge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
 !&  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
  call ebands_init(bantot_dense,KS_BSt_dense,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,& ! CP added
 &  doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
 &  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
 &  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
-&  hdr_wfk_dense%charge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
+&  hdr_wfk_dense%cellcharge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
 &  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
  ! End CP modified
 

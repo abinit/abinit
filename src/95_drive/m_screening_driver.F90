@@ -8,7 +8,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2021 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -924,7 +924,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &   Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
 &   Dtset%nspden,Cryst%ntypat,Paw_an,Paw_ij,Pawang,Pawfgrtab,Dtset%pawprtvol,&
 &   Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,k0,Dtset%spnorbscl,&
-&   Cryst%ucvol,dtset%charge,ks_vtrial,ks_vxc,Cryst%xred,&
+&   Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,&
 &   nucdipmom=Dtset%nucdipmom)
 
 !  Symmetrize KS Dij
@@ -2123,12 +2123,12 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! CP modified
 ! call ebands_init(bantot,KS_BSt,Dtset%nelect,doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
 !& Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-!& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!& dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 !& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot,KS_BSt,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
 & doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
 & Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+& dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 & dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  ! End CP modified
 
@@ -2384,7 +2384,7 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
  real(dp),parameter :: zp=1.0_dp              ! Hard-coded charge of the impinging particle
  real(dp) :: omega_p
  real(dp) :: im_epsm1_int(1)
- real(dp) :: qbz(3),qpgcart(3),qpgred(3)
+ real(dp) :: qbz(3),qpgcart(3),qpg_red(3)
  real(dp) :: pvel(3,npvel),pvel_norm(npvel)
  real(dp) :: ypp_i(Ep%nomega)
  real(dp) :: vcoul(Ep%npwe)
@@ -2453,11 +2453,11 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
      ! Loop over velocities
      do ipvel=1,npvel
 
-       qpgred(:) = qbz(:) + Gsph_epsG0%gvec(:,ig)
+       qpg_red(:) = qbz(:) + Gsph_epsG0%gvec(:,ig)
        ! Transform q + G from reduced to cartesian with the symmetry operation
-       qpgcart(:) = two_pi * Cryst%gprimd(:,1) * qpgred(1) &
-&                 + two_pi * Cryst%gprimd(:,2) * qpgred(2) &
-&                 + two_pi * Cryst%gprimd(:,3) * qpgred(3)
+       qpgcart(:) = two_pi * Cryst%gprimd(:,1) * qpg_red(1) &
+&                 + two_pi * Cryst%gprimd(:,2) * qpg_red(2) &
+&                 + two_pi * Cryst%gprimd(:,3) * qpg_red(3)
 
        ! omega_p = ( q + G ) . v
        omega_p =  DOT_PRODUCT( qpgcart(:) , pvel(:,ipvel) )

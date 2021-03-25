@@ -7,7 +7,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2021 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,6 +41,7 @@ MODULE m_xmpi
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
+ use m_clib, only : clib_ulimit_stack !, clib_usleep
 
  implicit none
 
@@ -694,7 +695,8 @@ CONTAINS  !===========================================================
 subroutine xmpi_init()
 
 !Local variables-------------------
- integer :: mpierr,ierr,unt
+ integer :: mpierr, ierr, unt
+ integer(c_long) :: rlim_cur, rlim_max
  logical :: exists
 #ifdef HAVE_MPI
  integer :: attribute_val
@@ -705,6 +707,13 @@ subroutine xmpi_init()
 #endif
 
 ! *************************************************************************
+
+ ! Increase stack size.
+ call clib_ulimit_stack(rlim_cur, rlim_max, ierr)
+ if (ierr /= 0) then
+   write(std_out,*)" WARNING: cannot increase stack size limit. "
+   !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
+ end if
 
  mpierr=0
 #ifdef HAVE_MPI
@@ -2849,7 +2858,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_int
@@ -2872,7 +2881,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_real
@@ -2895,7 +2904,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dble
@@ -2918,7 +2927,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_cplx
@@ -2941,7 +2950,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dcplx
@@ -2964,7 +2973,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk).or.invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_lor_log
@@ -2987,7 +2996,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk).and.invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_land_log

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (AM)
+!!  Copyright (C) 2008-2021 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -167,7 +167,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  real(dp),pointer :: rhog(:,:),rhor(:,:)
  real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: xred(:,:),xred_old(:,:),xcart(:,:)
- real(dp),allocatable :: fred(:,:),fcart(:,:)
+ real(dp),allocatable :: gred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
@@ -487,44 +487,7 @@ ABI_FREE(xcart)
 
 !  set psps
    psps%useylm = dtset%useylm
-!    if(option == -3)then
-!      mtypalch = 0
-!      npsp = dtset%ntypat
-!      call psps_free(psps)
-!      filename_psp(1) = "/home/alex/calcul/psp/Sr.LDA_PW-JTH.xml"
-!      filename_psp(2) = "/home/alex/calcul/psp/Ti.LDA_PW-JTH.xml"
-!      filename_psp(3) = "/home/alex/calcul/psp/O.LDA_PW-JTH.xml"
-!      ABI_MALLOC(pspheads,(npsp))
-!      call inpspheads-rw-rw-r-- 1 mschmitt mschmitt  22004 Nov 28 14:30 log-MPI16-t98-new-4-8-from-ddb-large-coeff_ini-(filename_psp,npsp,pspheads,ecut_tmp)
-!      call psps_init_global(mtypalch, npsp, psps, pspheads)
-!      call psps_init_from_dtset(dtset, 1, psps, pspheads)
-!    end if
 
-! !  The correct dimension of pawrad/tab is ntypat. In case of alchemical psps
-! !  pawrad/tab(ipsp) is invoked with ipsp<=npsp. So, in order to avoid any problem,
-! !  declare pawrad/tab at paw_size=max(ntypat,npsp).
-!    paw_size=0;if (psps%usepaw==1) paw_size=max(dtset%ntypat,dtset%npsp)
-!    if (paw_size/=paw_size_old) then
-!      if (paw_size_old/=-1) then
-!        call pawrad_free(pawrad)
-!        call pawtab_free(pawtab)
-!        ABI_FREE(pawrad)
-!        ABI_FREE(pawtab)
-!      end if
-!      ABI_MALLOC(pawrad,(paw_size))
-!      ABI_MALLOC(pawtab,(paw_size))
-!      call pawtab_nullify(pawtab)
-!      paw_size_old=paw_size
-!    end if
-
-!  set args_gs
-!    if (option == -3 then
-!      call args_gs_init(args_gs, &
-! &       effective_potential%crystal%amu(:),dtset%mixalch_orig(:,:,1),&
-! &       dtset%dmatpawu(:,:,:,:,1),dtset%upawu(:,1),dtset%jpawu(:,1),&
-! &       dtset%rprimd_orig(:,:,1))
-!      ABI_MALLOC(npwtot,(dtset%nkpt))
-!    end if
 !  initialisation of results_gs
    call init_results_gs(dtset%natom,1,1,results_gs)
 
@@ -581,7 +544,7 @@ ABI_FREE(xcart)
    ABI_MALLOC(xred,(3,dtset%natom))
    ABI_MALLOC(xred_old,(3,dtset%natom))
    ABI_MALLOC(vel,(3,dtset%natom))
-   ABI_MALLOC(fred,(3,dtset%natom))
+   ABI_MALLOC(gred,(3,dtset%natom))
    ABI_MALLOC(fcart,(3,dtset%natom))
 
    call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
@@ -717,7 +680,7 @@ ABI_FREE(xcart)
            xred_old = xred
            vel_cell(:,:) = zero
            vel(:,:)      = zero
-           fred(:,:)     = zero
+           gred(:,:)     = zero
            fcart(:,:)    = zero
 
 !          Run mover to check if the model is bound
@@ -902,7 +865,7 @@ ABI_FREE(xcart)
                  xred_old = xred
                  vel_cell(:,:) = zero
                  vel(:,:)      = zero
-                 fred(:,:)     = zero
+                 gred(:,:)     = zero
                  fcart(:,:)    = zero
 
 !              Run mover
@@ -1025,7 +988,7 @@ ABI_FREE(xcart)
 ! 5   Deallocation of array
 !***************************************************************
 
-   ABI_FREE(fred)
+   ABI_FREE(gred)
    ABI_FREE(fcart)
    ABI_FREE(indsym)
    ABI_FREE(rhog)

@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
+!!  Copyright (C) 1999-2021 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1043,12 +1043,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ! CP modified
    !call ebands_init(bantot_rbz,ebands_k,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
    !  nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-   !  dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+   !  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
    !  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    call ebands_init(bantot_rbz,ebands_k,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
      doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
      nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-     dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+     dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
      dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    ! End CP modified
    ABI_FREE(eigen0)
@@ -1208,12 +1208,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ! CP modified
    !call ebands_init(bantot_rbz,ebands_kq,dtset%nelect,doccde_rbz,eigenq,istwfk_rbz,kpq_rbz,&
 !&   nband_rbz,nkpt_rbz,npwar1,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-!&   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!&   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 !&   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    call ebands_init(bantot_rbz,ebands_kq,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &   doccde_rbz,eigenq,istwfk_rbz,kpq_rbz,&
 &   nband_rbz,nkpt_rbz,npwar1,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-&   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+&   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    ! End CP modified
    if (.not.kramers_deg) then
@@ -1221,12 +1221,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! CP modified
      ! call ebands_init(bantot_rbz,ebands_kmq,dtset%nelect,doccde_rbz,eigenq,istwfk_rbz,kmq_rbz,&
 !&     nband_rbz,nkpt_rbz,npwar1_mq,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-!&     dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+!&     dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 !&     dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
      call ebands_init(bantot_rbz,ebands_kmq,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &     doccde_rbz,eigenq,istwfk_rbz,kmq_rbz,&
 &     nband_rbz,nkpt_rbz,npwar1_mq,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-&     dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+&     dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &     dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
       ! End CP modified
    end if
@@ -2016,13 +2016,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      !call ebands_init(bantot,gkk_ebands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 !&     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 !&     hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
-!&     hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
+!&     hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 !&     hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
      call ebands_init(bantot,gkk_ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &     doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &     hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
-&     hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
+&     hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 &     hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
       ! End CP modified
 
@@ -2170,7 +2170,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
      vtrial_local = vtrial
      call orbmag_ddk(atindx,cg,cg1_orbmag,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
-       & nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawtab,psps,rprimd,&
+       & nattyp,nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawtab,psps,rprimd,&
        & vtrial_local,xred,ylm,ylmgr)
 
      if( ALLOCATED(vtrial_local) ) then
@@ -2402,13 +2402,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          !call ebands_init(bantot,gkk_ebands,dtset%nelect,doccde,eigen0_pert,hdr0%istwfk,hdr0%kptns,&
 !&         hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 !&         hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
-!&         hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
+!&         hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 !&         hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
          call ebands_init(bantot,gkk_ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &         doccde,eigen0_pert,hdr0%istwfk,hdr0%kptns,&
 &         hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &         hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
-&         hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
+&         hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 &         hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
           ! End CP modified
 
@@ -2645,7 +2645,7 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
 
  ABI_MALLOC(my_kpt, (nkpt_rbz, dtset%nsppol))
  my_kpt = .true.
- if (mpi_enreg%nproc_kpt > 1) then
+ if (mpi_enreg%nproc_spkpt > 1) then
    do isppol = 1, dtset%nsppol
      do ikpt = 1, nkpt_rbz
        my_kpt(ikpt, isppol) = .not.(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,&

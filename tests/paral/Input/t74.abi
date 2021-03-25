@@ -15,7 +15,7 @@
 #  paral_kgb  1
 #    npband   1
 #     npfft   1
-#     npkpt   2
+#     np_spkpt   2
 #     nproc   2
 
 # Parameters common to all runs

@@ -16,7 +16,7 @@ This tutorial describes how to obtain the following physical properties, for an 
 
 The case of the linear responses (for the Born effective charge, dielectric constant,
 piezoelectric tensor) is treated independently in other tutorials
-([Response-Function 1](rf1), [Elastic properties](elastic)),
+([Response-Function 1](/tutorial/rf1), [Elastic properties](/tutorial/elastic)),
 using Density-Functional Perturbation Theory.
 You will learn here how to obtain these quantities using finite
 difference techniques within ABINIT. To that end, we will describe how to
@@ -39,7 +39,7 @@ discussed in [[cite:Gonze2009]] and [[cite:Zwanziger2012]].
 
 This tutorial should take about 1 hour and 30 minutes.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Ground-state properties of AlP and general parameters
 
@@ -84,7 +84,7 @@ Note as well that the pseudopotentials used here are freely available
 from [[http://www.pseudo-dojo.org|Pseudo Dojo]]. The ones chosen here for P and Al
 use the Perdew-Wang parameterization of the local density approximation (LDA); this is
 done to facilitate comparison of the results of this tutorial with those of 
-[Non-linear properties](nlo).
+[Non-linear properties](/tutorial/nlo).
 
 ## 2 Berry phase calculation of polarization in zero field
 
@@ -231,8 +231,9 @@ Actually, the file *tffield_2.abi*
 not only leads to the computation of the Born effective charges, but also the
 computation of the piezoelectric constants (see later).
 You can review how to use DFPT in the
-[tutorial Response-function 1](rf1) and 
-[tutorial Response-function 2](rf2) tutorials. 
+[tutorial Response-function 1](/tutorial/rf1) and 
+[tutorial Response-function 2](/tutorial/rf2) tutorials. 
+
 !!! note
     An interesting feature of *tffield_2.abi* is the use of `berryopt2 -2` in
     the second data set. This input variable causes the computation of the DDK

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
+!!  Copyright (C) 1998-2021 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -295,9 +295,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !    For a periodic system bearing a finite charge, the monopole correction to the
 !    energy is relevant.
 !    See Leslie and Gillan, JOURNAL OF PHYSICS C-SOLID STATE PHYSICS 18, 973 (1985)
-     if(abs(dtset%charge)>tol8) then
+     if(abs(dtset%cellcharge(1))>tol8) then
        call ewald(energies%e_monopole,gmet,grewtn_fake,gsqcut,dtset%icutcoul,1,ngfft,dtset%nkpt,1,&
-            &dtset%rcut,rmet,rprimd,(/1/),ucvol,dtset%vcutgeo,(/0.0_dp,0.0_dp,0.0_dp/),(/dtset%charge/))
+            &dtset%rcut,rmet,rprimd,(/1/),ucvol,dtset%vcutgeo,(/0.0_dp,0.0_dp,0.0_dp/),(/dtset%cellcharge(1)/))
        energies%e_monopole=-energies%e_monopole
      end if
    else if (dtset%icoulomb == 1) then
@@ -314,12 +314,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    end if
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
-&     dtset%vdw_tol,xred,psps%znucltypat,fred_vdw_dftd2=grvdw)
+&     dtset%vdw_tol,xred,psps%znucltypat,gred_vdw_dftd2=grvdw)
    end if
    if ((dtset%vdw_xc==6.or.dtset%vdw_xc==7).and.ngrvdw==dtset%natom) then
      call vdw_dftd3(energies%e_vdw_dftd,dtset%ixc,dtset%natom,&
 &     ntypat,1,dtset%typat,rprimd,dtset%vdw_xc,dtset%vdw_tol,dtset%vdw_tol_3bt,&
-&     xred,psps%znucltypat,fred_vdw_dftd3=grvdw)
+&     xred,psps%znucltypat,gred_vdw_dftd3=grvdw)
    end if
  else
    energies%e_ewald=zero

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2020 ABINIT group (LB)
+!!  Copyright (C) 2018-2021 ABINIT group (LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ contains
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2020 ABINIT group (LB)
+!! Copyright (C) 2018-2021 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -664,7 +664,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      call pawdij(cplex,dtset%enunit,gprimd,i2pert,natom,dtset%natom,&
 &                     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1_i2pert,paw_ij1_i2pert,pawang,&
 &                     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,&
-&                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%charge,vtrial1_tmp,vxc1_i2pert,xred,&
+&                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial1_tmp,vxc1_i2pert,xred,&
 &                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
                      if (has_dijfr>0) then
                        ABI_FREE(vtrial1_tmp)

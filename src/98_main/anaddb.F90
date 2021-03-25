@@ -6,7 +6,7 @@
 !! Main routine for analysis of the interatomic force constants and associated properties.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,DCA,JCC,CL,XW,GA,MR)
+!! Copyright (C) 1999-2021 ABINIT group (XG,DCA,JCC,CL,XW,GA,MR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,7 +110,7 @@ program anaddb
  real(dp),allocatable :: d2cart(:,:),dchide(:,:,:),lst(:)
  real(dp),allocatable :: dchidt(:,:,:,:),displ(:),eigval(:,:)
  real(dp),allocatable :: eigvec(:,:,:,:,:),fact_oscstr(:,:,:),instrain(:,:)
- real(dp),allocatable :: fred(:,:),phfrq(:)
+ real(dp),allocatable :: gred(:,:),phfrq(:)
  real(dp),allocatable :: rsus(:,:,:)
  real(dp),allocatable :: zeff(:,:,:)
  real(dp),allocatable :: qdrp_cart(:,:,:,:)
@@ -399,7 +399,7 @@ program anaddb
    end if
 
    ! Extract the block with the gradients
-   ABI_MALLOC(fred, (3,natom))
+   ABI_MALLOC(gred, (3,natom))
    qphon(:,:) = zero; qphnrm(:) = zero
    rfphon(:) = 0; rfstrs(:) = 0; rfelfd(:) = 2
    if (inp%relaxat == 1) rfphon(:) = 1
@@ -412,7 +412,7 @@ program anaddb
      do iatom = 1, natom
        do idir = 1, 3
          index = index + 1
-         fred(idir,iatom) = ddb%val(1,index,iblok)
+         gred(idir,iatom) = ddb%val(1,index,iblok)
        end do
      end do
    end if
@@ -430,12 +430,12 @@ program anaddb
    ! when called from here red_ptot is not set! So set it to zero
    red_ptot(:)=zero
 
-   call relaxpol(Crystal,d2flg,d2cart,etotal,fred,inp%iatfix,&
+   call relaxpol(Crystal,d2flg,d2cart,etotal,gred,inp%iatfix,&
 &   ab_out,inp%istrfix,mpert,msize,inp%natfix,natom,&
 &   inp%nstrfix,pel,red_ptot,inp%relaxat,inp%relaxstr,&
 &   strten,inp%targetpol,usepaw)
 
-   ABI_FREE(fred)
+   ABI_FREE(gred)
    ABI_FREE(d2flg)
  end if
 

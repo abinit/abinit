@@ -4,7 +4,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2020 ABINIT group (CMartins, FJ, MT, XG)
+!!  Copyright (C) 2013-2021 ABINIT group (CMartins, FJ, MT, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -255,7 +255,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !* jbg = shift to be applied on the location of data in the array cprj/occ
  jbg=0;jcg=0
  my_jsppol=fockcommon%isppol
- if((fockcommon%isppol==2).and.(mpi_enreg%nproc_kpt/=1)) my_jsppol=1
+ if((fockcommon%isppol==2).and.(mpi_enreg%nproc_spkpt/=1)) my_jsppol=1
 
  call timab(1505,2,tsec)
  call timab(1506,1,tsec)
@@ -1264,7 +1264,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
  ABI_FREE(xi)
 
 !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
-! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_kpt + ghc1(:,:)
+! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_spkpt + ghc1(:,:)
  ghc(:,:)=ghc(:,:) + ghc1(:,:)
 
 ! call xmpi_sum(ghc,mpi_enreg%comm_kpt,ier)

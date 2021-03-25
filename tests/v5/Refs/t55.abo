@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -273,7 +273,7 @@ force_length_stats: {min:   3.09441726E-06, max:   3.09441726E-06, mean:   3.094
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.78656E-06 1.78656E-06 (free atoms)
   1.78656263990518E-06  1.78656263990518E-06  1.78656263990518E-06
  -1.78656263990518E-06 -1.78656263990518E-06 -1.78656263990518E-06
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.23029359370169E-05 -2.23029359370169E-05 -2.23029359370169E-05
   2.23029359370169E-05  2.23029359370169E-05  2.23029359370169E-05
  Total energy (etotal) [Ha]= -1.10751783418201E+01

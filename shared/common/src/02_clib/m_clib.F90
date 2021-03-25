@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (MG)
+!! Copyright (C) 2009-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +26,13 @@ MODULE m_clib
 
  private
 
- public :: clib_rename
+ public :: clib_rename        !  Rename a file with a new name using the rename function from C stdlib
  public :: clib_cclock
  public :: clib_etime
  public :: clib_mtrace
  public :: clib_print_mallinfo
+ public :: clib_ulimit_stack   ! Set stack size limit to maximum allowed value.
+ !public :: clib_usleep        ! Suspend calling thread for microseconds of clock time
 
 !FIXME the interfaces below have been commented out since abilint
 ! JB : because interface must have a name in abilint
@@ -95,14 +97,42 @@ MODULE m_clib
      import
      integer(c_int),intent(out) :: ierr
    end subroutine
- end interface 
+ end interface
 
  interface
    subroutine clib_mcheck(ierr) bind(C, name="clib_mcheck")
      import
      integer(c_int),intent(out) :: ierr
-   end subroutine 
+   end subroutine
  end interface
+
+ interface
+   ! Set stack size limit to maximum allowed value. Return soft and hard limit and exit status.
+   subroutine clib_ulimit_stack(rlim_cur, rlim_max, ierr) bind(C, name="ulimit_stack")
+     import
+     integer(c_long),intent(out) :: rlim_cur, rlim_max
+     integer(c_int),intent(out) :: ierr
+   end subroutine
+ end interface
+
+  !interface
+  !  ! suspend calling thread for microseconds of clock time
+  !  ! uses unistd.h for Fortran standard compliant sleep.
+  !  ! sleep() is a GNU extension, not standard Fortran
+  !  subroutine usleep(us) bind(C)
+  !    import
+  !    integer(c_int), value :: us
+  !  end subroutine usleep
+  !end interface
+
+  !interface
+  !  ! int usleep(useconds_t useconds)
+  !  function clib_usleep(useconds) bind(c, name='usleep')
+  !    import
+  !    integer(kind=c_int32_t), value :: useconds
+  !    integer(kind=c_int)            :: c_usleep
+  !  end function clib_usleep
+  !end interface
 
 ! ==========================================
 ! ==== Fortran-bindings for file_lock.c ====
@@ -130,9 +160,9 @@ MODULE m_clib
 contains
 !!***
 
-!!****f* m_clib/fmallinfo
+!!****f* m_clib/clib_print_fmallinfo
 !! NAME
-!!   fmallinfo
+!!   clib_print_fmallinfo
 !!
 !! FUNCTION
 !!

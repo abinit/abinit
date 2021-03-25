@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@ module m_pred_verlet
  use m_abihist
  use m_xfpack
 
- use m_geometry,       only : mkrdim, xcart2xred, xred2xcart, fcart2fred, metric
+ use m_geometry,       only : mkrdim, xcart2xred, xred2xcart, fcart2gred, metric
 
  implicit none
 
@@ -87,7 +87,7 @@ contains
 !!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      fcart2fred,hist2var,metric,mkrdim,var2hist,wrtout,xcart2xred
+!!      fcart2gred,hist2var,metric,mkrdim,var2hist,wrtout,xcart2xred
 !!      xfpack_f2vout,xfpack_vin2x,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
@@ -109,13 +109,13 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !Local variables-------------------------------
 !scalars
  integer  :: ii,istopped,jj,kk,ndim,nstopped
- real(dp) :: amass_tot,etotal,diag,favg,ekin_corr,scprod,taylor,ucvol0
+ real(dp) :: amass_tot,etotal,diag,gr_avg,ekin_corr,scprod,taylor,ucvol0
  real(dp),save :: ucvol,ucvol_next
  character(len=500) :: message
 !arrays
  integer  :: stopped(ab_mover%natom)
  real(dp) :: acell0(3),fcart(3,ab_mover%natom)
- real(dp) :: fred_corrected(3,ab_mover%natom)
+ real(dp) :: gred_corrected(3,ab_mover%natom)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3), strten(6)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
@@ -244,13 +244,13 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
- call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
+ call fcart2gred(fcart,gred_corrected,rprimd,ab_mover%natom)
  if(ab_mover%nconeq==0)then
    amass_tot=sum(ab_mover%amass(:))
    do kk=1,3
      if (kk/=3.or.ab_mover%jellslab==0) then
-       favg=sum(fred_corrected(kk,:))/dble(ab_mover%natom)
-       fred_corrected(kk,:)=fred_corrected(kk,:)-favg*ab_mover%amass(:)/amass_tot
+       gr_avg=sum(gred_corrected(kk,:))/dble(ab_mover%natom)
+       gred_corrected(kk,:)=gred_corrected(kk,:)-gr_avg*ab_mover%amass(:)/amass_tot
      end if
    end do
  end if
@@ -263,7 +263,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
  call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
- call xfpack_f2vout(fred_corrected, ab_mover%natom, ndim,&
+ call xfpack_f2vout(gred_corrected, ab_mover%natom, ndim,&
 & ab_mover%optcell, ab_mover%strtarget, strten, ucvol,&
 & vout)
 

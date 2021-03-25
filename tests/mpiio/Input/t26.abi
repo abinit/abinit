@@ -35,23 +35,23 @@ ndtset 6
 
 # Dataset 1
 # Output the GS WFK with MPI-FFT.
-npband1 1 npkpt1 2 npfft1 2
+npband1 1 np_spkpt1 2 npfft1 2
 prtdos1 3
 
 # Dataset 2
 # Read the previous GS WFK. Use MPI-FFT but with different number of procs
-npband2 1 npkpt2 1 npfft2 4
+npband2 1 np_spkpt2 1 npfft2 4
 prtdos2 3
 
 # Dataset 3
 # Read the previous GS WFK in band-only mode.
-npband3 4 npkpt3 1 npfft3 1
+npband3 4 np_spkpt3 1 npfft3 1
 
 # Dataset 4
 # Read the previous DEN file in band-fft mode
 getwfk4 0
 getden4 -1
-npband4 2 npkpt4 1 npfft4 2
+npband4 2 np_spkpt4 1 npfft4 2
 nstep4 5  #   Improves the portability of the test
 
 # Dataset 5
@@ -64,7 +64,7 @@ prtdos5 3
 # Read previous WFK file and DEN file with interpolation of rhor(r)
 ngfftdg6 48 48 48
 getden6 -1
-npband6 1 npkpt6 1 npfft6 4
+npband6 1 np_spkpt6 1 npfft6 4
 getwfk6 1
 
 # SCF parameters
@@ -116,7 +116,7 @@ natom 2
 #%% description = 
 #%%   C-diamond, Bulk, 2 atoms, with PAW.
 #%%   Test the IO routines with paral_kgb in [1, 0] and different combinations
-#%%   of parameters (npfft, npband, npkpt). 
+#%%   of parameters (npfft, npband, np_spkpt). 
 #%%   Test the plane wave load balancing procedure (pw_unbal_thresh).
 #%%   Test also the computation of PJDOS.
 #%%<END TEST_INFO>

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@ module m_forces
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
- use m_geometry,         only : fred2fcart, metric, xred2xcart
+ use m_geometry,         only : gred2fcart, metric, xred2xcart
  use m_fock,             only : fock_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
@@ -135,7 +135,7 @@ contains
 !!         force between the input and the output.
 !!  favg(3)=mean of the forces before correction for translational symmetry
 !!  forold(3,natom)=cartesian forces of previous SCF cycle (hartree/bohr)
-!!  fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
+!!  gred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!  gresid(3,natom)=forces due to the residual of the density/potential
 !!  grhf(3,natom)=Hellman-Feynman derivatives of the total energy
 !!  grxc(9+3*natom)=d(Exc)/d(xred) if core charges are used
@@ -145,7 +145,7 @@ contains
 !! SIDE EFFECTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  fcart(3,natom)=forces in cartesian coordinates (Ha/Bohr)
-!!    Note : unlike fred, this array has been corrected by enforcing
+!!    Note : unlike gred, this array has been corrected by enforcing
 !!    the translational symmetry, namely that the sum of force
 !!    on all atoms is zero.
 !!
@@ -173,7 +173,7 @@ contains
 !! SOURCE
 
 subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
-&                  forold,fred,grchempottn,grcondft,gresid,grewtn,&
+&                  forold,gred,grchempottn,grcondft,gresid,grewtn,&
 &                  grhf,grnl,grvdw,grxc,gsqcut,indsym,&
 &                  maxfor,mgfft,mpi_enreg,n1xccc,n3xccc,&
 &                  nattyp,nfft,ngfft,ngrvdw,ntypat,&
@@ -204,7 +204,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  real(dp),intent(in) :: vxc(nfft,dtset%nspden),vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: fcart(3,dtset%natom),forold(3,dtset%natom)
  real(dp),intent(inout) :: vresid(nfft,dtset%nspden),xred(3,dtset%natom)
- real(dp),intent(out) :: favg(3),fred(3,dtset%natom),gresid(3,dtset%natom)
+ real(dp),intent(out) :: favg(3),gred(3,dtset%natom),gresid(3,dtset%natom)
  real(dp),intent(out) :: grhf(3,dtset%natom),rprimd(3,3)
  real(dp),intent(inout) :: grxc(3,dtset%natom)
  real(dp),intent(out) :: synlgr(3,dtset%natom)
@@ -538,7 +538,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 
  if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)+grvdw(:,:)
 ! note that fionred is subtracted, because it really is a force and we need to
-! turn it back into a gradient. The fred2fcart routine below includes the minus
+! turn it back into a gradient. The gred2fcart routine below includes the minus
 ! sign to convert gradients back to forces
  if ( efield_flag ) grtn(:,:)=grtn(:,:)-fionred(:,:)
 ! epawf3red is added, because it actually is a gradient, not a force
@@ -563,7 +563,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  ipositron=0
  if (present(electronpositron)) then
    if (associated(electronpositron)) then
-     if (allocated(electronpositron%fred_ep)) ipositron=electronpositron_calctype(electronpositron)
+     if (allocated(electronpositron%gred_ep)) ipositron=electronpositron_calctype(electronpositron)
    end if
  end if
  if (abs(ipositron)==1) then
@@ -577,22 +577,22 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      fionred(:,:)=zero
    end if
  end if
- if (ipositron>0) grtn(:,:)=grtn(:,:)+electronpositron%fred_ep(:,:)
+ if (ipositron>0) grtn(:,:)=grtn(:,:)+electronpositron%gred_ep(:,:)
 
 !Symmetrize all grads explicitly for given space group:
  if (dtset%usewvl == 0) then
-   call sygrad(fred,dtset%natom,grtn,dtset%nsym,symrec,indsym)
+   call sygrad(gred,dtset%natom,grtn,dtset%nsym,symrec,indsym)
  else
-   fred = grtn
+   gred = grtn
  end if
 
 !Conversion to cartesian coordinates (bohr) AND
 !Subtract off average force from each force component
 !to avoid spurious drifting of atoms across cell.
-! notice that fred2fcart multiplies fred by -1 to convert it
+! notice that gred2fcart multiplies gred by -1 to convert it
 ! from a gradient (input) to a force (output)
 
- call fred2fcart(favg,(dtset%jellslab==0 .and. dtset%nzchempot==0),fcart,fred,gprimd,dtset%natom)
+ call gred2fcart(favg,(dtset%jellslab==0 .and. dtset%nzchempot==0),fcart,gred,gprimd,dtset%natom)
 
 !Compute maximal force and maximal difference
  maxfor=zero;diffor=zero
@@ -611,7 +611,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  end do
 
 !Apply any generalized constraints to the forces
- if (dtset%nconeq>0) call constrf(diffor,fcart,forold,fred,dtset%iatfix,dtset%ionmov,maxfor,&
+ if (dtset%nconeq>0) call constrf(diffor,fcart,forold,gred,dtset%iatfix,dtset%ionmov,maxfor,&
 & dtset%natom,dtset%nconeq,dtset%prtvol,rprimd,dtset%wtatcon,xred)
 
 !=======================================================================
@@ -638,8 +638,8 @@ end subroutine forces
 !!
 !! FUNCTION
 !! Symmetrize derivatives of energy with respect to coordinates.
-!! Unsymmetrized gradients are input as dedt; symmetrized grads are then placed in fred.
-!! If nsym=1 simply copy dedt into fred (only symmetry is identity).
+!! Unsymmetrized gradients are input as dedt; symmetrized grads are then placed in gred.
+!! If nsym=1 simply copy dedt into gred (only symmetry is identity).
 !!
 !! INPUTS
 !!  natom=number of atoms in cell
@@ -653,7 +653,7 @@ end subroutine forces
 !!   see symatm where this is computed)
 !!
 !! OUTPUT
-!! fred(3,3,natom)=symmetrized gradients wrt reduced coordinates (hartree)
+!! gred(3,3,natom)=symmetrized gradients wrt reduced coordinates (hartree)
 !!
 !! NOTES
 !! symmetrization of gradients with respect to reduced
@@ -678,7 +678,7 @@ end subroutine forces
 !!
 !! SOURCE
 
-subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
+subroutine sygrad(gred,natom,dedt,nsym,symrec,indsym)
 
 !Arguments ------------------------------------
 !scalars
@@ -686,7 +686,7 @@ subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym)
  real(dp),intent(in) :: dedt(3,natom)
- real(dp),intent(out) :: fred(3,natom)
+ real(dp),intent(out) :: gred(3,natom)
 
 !Local variables-------------------------------
 !scalars
@@ -698,7 +698,7 @@ subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
 !
  if (nsym==1) then
 !  only symmetry is identity so simply copy
-   fred(:,:)=dedt(:,:)
+   gred(:,:)=dedt(:,:)
  else
 !  actually conduct symmetrization
    do ia=1,natom
@@ -710,8 +710,8 @@ subroutine sygrad(fred,natom,dedt,nsym,symrec,indsym)
 &         dble(symrec(mu,2,isym))*dedt(2,ind)+&
 &         dble(symrec(mu,3,isym))*dedt(3,ind)
        end do
-       fred(mu,ia)=summ/dble(nsym)
-       if(abs(fred(mu,ia))<tol)fred(mu,ia)=0.0_dp
+       gred(mu,ia)=summ/dble(nsym)
+       if(abs(gred(mu,ia))<tol)gred(mu,ia)=0.0_dp
      end do
    end do
  end if
@@ -1508,7 +1508,7 @@ end subroutine fresid
 !! OUTPUT
 !!  diffor=maximum absolute change in component of projected fcart between present
 !!          and previous SCF cycle
-!!  fred(3,natom)=grads of Etot wrt reduced coordinates (hartree)
+!!  gred(3,natom)=grads of Etot wrt reduced coordinates (hartree)
 !!  maxfor=maximum absolute value of fcart
 !!
 !! SIDE EFFECTS
@@ -1525,7 +1525,7 @@ end subroutine fresid
 !!
 !! SOURCE
 
-subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
+subroutine constrf(diffor,fcart,forold,gred,iatfix,ionmov,maxfor,natom,&
 & nconeq,prtvol,rprimd,wtatcon,xred)
 
  use m_linalg_interfaces
@@ -1538,7 +1538,7 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
  integer,intent(in) :: iatfix(3,natom)
  real(dp),intent(in) :: rprimd(3,3),wtatcon(3,natom,nconeq)
  real(dp),intent(inout) :: fcart(3,natom),forold(3,natom),xred(3,natom)
- real(dp),intent(inout) :: fred(3,natom) !vz_i
+ real(dp),intent(inout) :: gred(3,natom) !vz_i
 
 !Local variables -------------------------
 !scalars
@@ -1566,7 +1566,7 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
    call wrtout(std_out,message,'COLL')
    call xred2xcart(natom,rprimd,xcart,xred)
    prtvel=0
-   call prtxvf(fcart,fred,iatfix,06,natom,prtvel,vel_dummy,xcart,xred)
+   call prtxvf(fcart,gred,iatfix,06,natom,prtvel,vel_dummy,xcart,xred)
  end if
 
 !Transfer fcart and wtatcon to flat vectors
@@ -1609,10 +1609,10 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
    fpcart(:,:)=fpcart(:,:)-wtcoeffs(iconeq)*wtatcon(:,:,iconeq)
  end do
 
-!Reconvert constrained forces back from fpcart to fred
+!Reconvert constrained forces back from fpcart to gred
  do iatom=1,natom
    do mu=1,3
-     fred(mu,iatom)= - (rprimd(1,mu)*fpcart(1,iatom)+&
+     gred(mu,iatom)= - (rprimd(1,mu)*fpcart(1,iatom)+&
 &     rprimd(2,mu)*fpcart(2,iatom)+&
 &     rprimd(3,mu)*fpcart(3,iatom))
    end do
@@ -1623,7 +1623,7 @@ subroutine constrf(diffor,fcart,forold,fred,iatfix,ionmov,maxfor,natom,&
    write(message,'(a)')' constrf - coordinates and forces after constraint projections:'
    call wrtout(std_out,message,'COLL')
    prtvel=0
-   call prtxvf(fpcart,fred,iatfix,06,natom,prtvel,vel_dummy,xcart,xred)
+   call prtxvf(fpcart,gred,iatfix,06,natom,prtvel,vel_dummy,xcart,xred)
  end if
 
 !Copy the constrained forces, fpcart, back to fcart

@@ -7,7 +7,7 @@
 !! and functions to get cpu and wall time.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (MG, XG, MT, TD)
+!! Copyright (C) 2009-2021 ABINIT group (MG, XG, MT, TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

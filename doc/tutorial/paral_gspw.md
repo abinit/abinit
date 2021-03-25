@@ -20,7 +20,7 @@ This tutorial should take about 1.5 hour and requires access to 64 CPU core para
 You are supposed to know already some basics of ABINIT.
 Some useful references: [[cite:Levitt2015]], [[cite:Bottin2008]], [[cite:Knyazev2001]]
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Introduction
 

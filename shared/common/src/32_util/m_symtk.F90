@@ -6,7 +6,7 @@
 !!  Low-level tools related to symmetries
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (RC, XG, GMR, MG, JWZ)
+!!  Copyright (C) 1998-2021 ABINIT group (RC, XG, GMR, MG, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -551,8 +551,11 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
      if (.not. iseq .and. echo==1) then
        if(echo==1)then
          ! The test is negative
-         write(msg, '(a,2(i0,1x),a,7a)' )&
+         write(msg, '(a,2(i0,1x),2a,3i3,f11.6,i3,a,2(3i3,f11.6,a),5a)' )&
            'Product of symmetries:',sym1,sym2,' is not in group.',ch10,&
+           prd_symrel(1,1:3),prd_tnons(1),prd_symafm,ch10,&
+           prd_symrel(2,1:3),prd_tnons(2),ch10,&
+           prd_symrel(3,1:3),prd_tnons(3),ch10,&
            'This indicates that the input symmetry elements',ch10,&
            'do not possess closure under group composition.',ch10,&
            'Action: check symrel, symafm and fix them.'
@@ -676,7 +679,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
      end do
    end do
 
-   if(sqrt(residual) > two*tolsym*sqrt(rmet2))then
+   if(sqrt(residual) > four*tolsym*sqrt(rmet2))then
      if(iexit==0)then
        write(std_out, '(a)') ' Matrix rprimd :'
        do ii=1,3
@@ -702,7 +705,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
         'The symmetry operation number ',isym,' does not preserve',ch10,&
         'vector lengths and angles.',ch10,&
         'The value of the square root of residual is: ',sqrt(residual),&
-&       '  that is greater than threshold:', two*tolsym*sqrt(rmet2),ch10,&
+&       '  that is greater than threshold:', four*tolsym*sqrt(rmet2),ch10,&
         'Action: modify rprim, acell and/or symrel so that',ch10,&
         'vector lengths and angles are preserved.',ch10,&
         'Beware, the tolerance on symmetry operations is very small.'
@@ -906,10 +909,10 @@ subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
    do ii=1,3
      do jj=1,3
        val=matr2(ii,jj)
-!      Need to allow for four times tolsym, in case of centered Bravais lattices (but do it for all lattices ...)
-       if(abs(val-nint(val))>four*tolsym)then
+!      Need to allow for ten times tolsym, in case of centered Bravais lattices (but do it for all lattices ...)
+       if(abs(val-nint(val))>ten*tolsym)then
          write(msg,'(2a,a,i3,a,a,3es14.6,a,a,3es14.6,a,a,3es14.6)')&
-         'One of the components of symrel is non-integer within 4*tolsym,',ch10,&
+         'One of the components of symrel is non-integer within 10*tolsym,',ch10,&
          '  for isym=',isym,ch10,&
          '  symrel=',matr2(:,1),ch10,&
          '         ',matr2(:,2),ch10,&
@@ -2028,7 +2031,7 @@ end subroutine symchk
 !! Equivalent to $S*t(b)+tnons-x(a)=another$ $integer$ for $x(b)=x(inv(S))$.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3102,6 +3105,7 @@ subroutine smallprim(metmin,minim,rprimd)
 !write(std_out,'(3f16.8)' )rmet(:,1)
 !write(std_out,'(3f16.8)' )rmet(:,2)
 !write(std_out,'(3f16.8)' )rmet(:,3)
+!call flush(std_out)
 !ENDDEBUG
 
 !Note this loop without index
@@ -3260,6 +3264,8 @@ subroutine smallprim(metmin,minim,rprimd)
 !write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' rprimd=',rprimd(:,1),ch10,rprimd(:,2),ch10,rprimd(:,3)
 !write(std_out,'(a,3es16.8,a,3es16.8,a,3es16.8)')' minim =',minim(:,1),ch10,minim(:,2),ch10,minim(:,3)
 !write(std_out,'(a,3es16.8,a,3es16.8,a,3es16.8)')' metmin =',metmin(:,1),ch10,metmin(:,2),ch10,metmin(:,3)
+!write(std_out,'(a)')' smallprim : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine smallprim

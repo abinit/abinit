@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_pred_simple
  use m_abimover
  use m_abihist
 
- use m_geometry,  only : fcart2fred, xred2xcart
+ use m_geometry,  only : fcart2gred, xred2xcart
 
  implicit none
 
@@ -49,7 +49,8 @@ contains
 !! pred_simple
 !!
 !! FUNCTION
-!! Ionmov predictors (4 & 6) Internal to SCFV
+!! Ionmov predictors (4 & 5) Internal to scfcv.
+!! Actually, this routine does nothing (only copy) as all operations are internal to scfcv ...
 !!
 !! IONMOV 4:
 !! Conjugate gradient algorithm for simultaneous optimization
@@ -74,7 +75,7 @@ contains
 !!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
+!!      bonds_free,dsyev,dsysv,fcart2gred,make_bonds_new,xred2xcart
 !!
 !! SOURCE
 
@@ -150,7 +151,7 @@ end subroutine pred_simple
 !!      m_mover,m_precpred_1geo
 !!
 !! CHILDREN
-!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
+!!      bonds_free,dsyev,dsysv,fcart2gred,make_bonds_new,xred2xcart
 !!
 !! SOURCE
 
@@ -456,7 +457,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
  write(std_out,fmt) B(:)
 
  forstr%fcart=reshape(B,(/ 3, ab_mover%natom /) )
- call fcart2fred(forstr%fcart,forstr%fred,rprimd,ab_mover%natom)
+ call fcart2gred(forstr%fcart,forstr%gred,rprimd,ab_mover%natom)
 
 end subroutine prec_simple
 !!***

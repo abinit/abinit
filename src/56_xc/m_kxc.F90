@@ -8,7 +8,7 @@
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -664,7 +664,7 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
  integer :: i1,i2,i3,ig,ii,ikg11,ikg12,ikg13,ikg21,ikg22,ikg23,ipw1,ipw2
  integer :: j1,j2,j3,jg,jj
  real(dp),parameter :: diffgsq=1.d-2
- real(dp) :: gred1,gred2,gred3,gsquar,tpisq
+ real(dp) :: kg_red1,kg_red2,kg_red3,gsquar,tpisq
 !arrays
  integer :: kgmax(3)
  integer,allocatable :: index_g_inv(:,:,:),jgarr(:)
@@ -709,12 +709,12 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
 !  write(std_out,'(i5,2x,3i3,2x,i4)') ipw1,kg(1,ipw1),kg(2,ipw1),kg(3,ipw1)
 !  ENDDEBUG
 
-   gred1=dble(kg(1,ipw1))
-   gred2=dble(kg(2,ipw1))
-   gred3=dble(kg(3,ipw1))
-   gsquar=tpisq*(gmet(1,1)*gred1**2+gmet(2,2)*gred2**2+gmet(3,3)*gred3**2 &
-&   +2.0_dp*( (gmet(1,2)*gred2+gmet(1,3)*gred3)* gred1 +      &
-&   gmet(2,3)*gred2*gred3) )
+   kg_red1=dble(kg(1,ipw1))
+   kg_red2=dble(kg(2,ipw1))
+   kg_red3=dble(kg(3,ipw1))
+   gsquar=tpisq*(gmet(1,1)*kg_red1**2+gmet(2,2)*kg_red2**2+gmet(3,3)*kg_red3**2 &
+&   +2.0_dp*( (gmet(1,2)*kg_red2+gmet(1,3)*kg_red3)* kg_red1 +      &
+&   gmet(2,3)*kg_red2*kg_red3) )
 !  Distinguish G=0 from other elements
    if(gsquar > 1.0d-12)then
      vcoul(ipw1)=four_pi/gsquar*(1._dp-cos(sqrt(gsquar)*rcut_coulomb))

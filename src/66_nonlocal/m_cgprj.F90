@@ -6,7 +6,7 @@
 !!   Routines to compute <Proj_i|Cnk> with |Cnk> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (MT)
+!!  Copyright (C) 1998-2021 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,7 +82,7 @@ contains
 !!  indlmn(6,i,ntypat)= array giving l,m,n,lm,ln,s for i=lmn
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  kg_k(3,npw_k)=reduced planewave coordinates
-!!  kpg(npw_k,npk)=(k+G) components and related data
+!!  kpg(npw_k,npkg)=(k+G) components and related data
 !!  kpoint(3)=k point in terms of recip. translations
 !!  lmnmax=max. number of (l,m,n) components over all types of atoms
 !!  mgfft=maximum size of 1D FFTs

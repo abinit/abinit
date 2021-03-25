@@ -22,7 +22,7 @@
 !! * MPI_type: the data related to MPI parallelization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (XG)
+!! Copyright (C) 2001-2021 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -210,8 +210,8 @@ module defs_abitypes
    integer :: me_kpt
    ! Rank of my proc in the communicator over kpt
 
-   integer :: nproc_kpt
-   ! Number of procs on which we distribute kpt
+   integer :: nproc_spkpt
+   ! Number of procs on which we distribute spins and kpt
 
    integer, allocatable :: proc_distrb(:,:,:)
     ! proc_distrb(nkpt,mband,nsppol)
