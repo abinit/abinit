@@ -23,13 +23,13 @@ Finally, we will also compute the derivative of the susceptibility tensor with
 respect to atomic positions (Raman tensor), using finite differences.
 
 The user should have already completed several advanced tutorials, including:
-[Response-Function 1](rf1), [Response-Function 2](rf2),
-[Polarization and Finite electric fields](ffield), and the
-[Elastic properties](elastic).
+[Response-Function 1](/tutorial/rf1), [Response-Function 2](/tutorial/rf2),
+[Polarization and Finite electric fields](/tutorial/ffield), and the
+[Elastic properties](/tutorial/elastic).
 
 This tutorial should take about 1 hour and 30 minutes.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Ground-state properties of AlP and general parameters
 
@@ -53,7 +53,7 @@ properties).
 
 We will adopt the following set of generic parameters (quite similar to those
 in the
-[tutorial on Polarization and finite electric field](ffield)):
+[tutorial on Polarization and finite electric field](/tutorial/ffield)):
 ```
 acell   3*7.1391127387E+00
 rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
@@ -215,7 +215,7 @@ used later for a global and convenient analysis of the results using ANADDB.
 If not already done, the reader should read the part on the *PEAD* method.
 
 Contrary to *PEAD*, with *full DFPT* the electric field is treated analytically,
-the same way it is done for the computation of second-order derivatives of the energy (see [Response-Function 1](rf1)).
+the same way it is done for the computation of second-order derivatives of the energy (see [Response-Function 1](/tutorial/rf1)).
 One needs first order wavefunctions derivatives with respect to k-points (dataset 3 of *tnlo_2.abi*).
 to compute second order energy derivatives with an electric field perturbation (dataset 4 of *tnlo_2.abi*).
 It turns out that third-order derivatives of the energy, in this context, needs *second* derivatives of wavefunctions with respect to electric fields and k-points.

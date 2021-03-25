@@ -4,10 +4,9 @@ authors: DCA,  XG
 
 # ABINIT, the main code  
 
-This document explains the i/o parameters and format needed for the main code (abinit) in the ABINIT package.  
+This document explains the IO parameters and format needed for the main code (abinit) in the ABINIT package.  
 
-The new user is advised to read first the [new user's guide](..),
-before reading the present file. 
+The new user is advised to read first the [new user's guide](../new_user), before reading the present file. 
 It will be easier to discover the present file with the help of the [[tutorial:index|tutorial]].
 Many user guides are also present on the Web.
 As an example, for calculating response properties using abinit, the complementary [[help:respfn]] is needed.
@@ -17,8 +16,8 @@ advanced users only.
 <a id="intro"></a>
 ## 1 How to run the code?
 
-The main executable file is called abinit. Supposing that the "input" file is
-called run.abi, and that the executable is placed in your working directory,
+The main executable file is called abinit. Supposing that the input file is
+called **run.abi**, and that the executable is placed in your working directory,
 abinit is run interactively (in Unix) with the command
 
     abinit run.abi >& log
@@ -30,9 +29,8 @@ or, in the background, with the command
 where standard out and standard error are piped to the log file called "log"
 (piping the standard error, thanks to the '&' sign placed after '>' is
 **really important** for the analysis of eventual failures, when not due to
-ABINIT, but to other sources, like disk full problem...). It is also possible 
-to dissociate the standard error file from the standard output file with the
-command
+ABINIT, but to other sources, like disk quota issues). It is also possible 
+to separate the standard error file from the standard output file with the command
 
     abinit run.abi > log 2> err &
 
@@ -42,12 +40,12 @@ or even more explicitly
 
 Actually, the user can specify any names he/she wishes for any of these files. 
 The suffix .abi is the most usual for the abinit input file, likewise the suffix .abo for the main output file.
-Nevertheless, the names of all input/output/temporary abinit files can also be tuned. See e.g. [[output_file]] or [[topic:Control]]. 
+Nevertheless, the names of all input/output/temporary abinit files can also be tuned. 
+See e.g. [[output_file]] or [[topic:Control]]. 
 
-Variations of the
-above commands could be needed, depending on the flavor of Unix that is used
+Variations of the above commands could be needed, depending on the flavor of Unix that is used
 on the platform that is considered for running the code.  
-If you do not underderstand the syntax above, which is standard Unix, please get familiarized with Unix before continuing.
+If you do not underderstand the standard Unix syntax above, please get familiarized with Unix before continuing.
 
 <a id="2"></a>
 ## 2 The underlying theoretical framework and algorithms
@@ -63,7 +61,7 @@ which is a potential-based conjugate gradient algorithm.
 
 The representation of potential, density and wavefunctions in real space will
 be done on a regular 3D grid of points. Its spacing will be determined by the
-cut-off energy (see the input variable [[ecut]]) of the planewave basis in
+cut-off energy [[ecut]] of the planewave basis in
 reciprocal space. This grid of points will also be the starting point of Fast
 Fourier Transforms between real and reciprocal space. The number of such
 points, called [[ngfft]], should be sufficiently large for adequate
@@ -87,15 +85,15 @@ appendices L and M of [[cite:Martin2004|this book]] by R. M. Martin
   
 Note that this input file was called ab_in in the example of the [introduction](#intro).
 We first explain the content of the input file without use of the 
-"multi-dataset" possibility (that will be explained in section [3.3](#multidatasets)).
+**multi-dataset** possibility that will be explained in section [3.3](#multidatasets).
 
-The parameters are input to the code from a single input file. Each parameter
-value is provided by giving the name of the input variable and then placing
-the numerical value(s) beside the name, separated by one or more spaces, or
+The parameters are input to the code from a single input file. 
+Each parameter is provided by giving the name of the input variable and then placing
+the numerical value(s) after the name, separated by one or more spaces, or
 even an equal sign (equal signs are replaced by blanks by the parser).
 Depending on the input variable, the numerical value may be an integer or a
 real number (internal representation as double precision number), or 
-a character string (delimited with double quotes) and may
+a character string (delimited with **double quotes**) and may
 actually represent an array of values. If it represents an array, the next set
 of numbers separated by spaces are taken as the values for the array.
 
@@ -117,11 +115,12 @@ in different "variable set" files, some of which are listed here:
   * Density Functional Perturbation Theory variables, [[varset:dfpt]]
 
 In the actual input file, these parameters may be given in any desired order,
-and more than one may be given per line. Spaces are used to separate values
-and additional spaces are ignored.  
+and more than one may be given per line. 
+Spaces are used to separate values and additional spaces are ignored.  
 An as example of input, the parameter for length scales is called [[acell]]
 and is an array [[acell]](3) for the lengths of the primitive translations in
-Bohr atomic units. To input a typical Si diamond lattice one would have the line
+Bohr atomic units. 
+To input a typical Si diamond lattice one would have the line
 
     acell 10.25311 10.25311 10.25311
 
@@ -134,7 +133,7 @@ and will still be parsed correctly: it is equivalent to the above line. Even
     acell *10.25311
 
 will work. In the latter case the '*' sign means that the parser should use
-the given value to fill the array, by repeating it as many time as needed.  
+the given value to fill the array, by repeating it as **many time as needed**.  
 Multiple spaces are ignored, as is any text which does not contain the
 character strings which correspond to some input parameters. In case of
 arrays, only the needed numbers will be considered, and the eventual numbers
@@ -171,7 +170,7 @@ ABINIT has also some (very limited) interpretor capabilities:
     "Psps_for_tests/PseudosHGH_pwteter".
 
 Comments should be placed to the right of the comment characters # or !;
-anything to the right of a "#" or a "!" on any line is simply ignored by the
+anything to the right of a "#" or a "!" on any line is **simply ignored** by the
 parser. Additional text, not preceded by a "#" or a "!" would not otherwise
 cause trouble unless the text inadvertently contained character strings which
 were the same as variable names (e.g. [[acell]]). The characters "#" or "!"
@@ -179,7 +178,7 @@ can also be used to "store" old values of variables or place anything else of
 convenience into the file in such a way as to be ignored by the parser when
 the data is read.  
 
-Case is irrelevant as the entire input string is mapped to upper case before
+**Case is irrelevant** as the entire input string is mapped to upper case before
 parsing, to remove case sensitivity.  
 More than one parameter per line may be given. If a given parameter name is
 given more than once in the input file, an error message is printed, and the code stops.
@@ -205,7 +204,8 @@ where geometry.inc gives the crystalline structure in the Abinit format:
            0.25  0.25  0.25
     znucl 14.0
 
-
+Alternatively, one can use the [[structure]] variable to read the structure from POSCAR files, netcdf files
+produced by Abinit or text files with a reduced set of ABINIT variables.
 
 
 <a id="files-file"></a>
@@ -379,14 +379,14 @@ the input variable is given: a **mnemonics**, possibly some
 
 The **characteristics** can be one of the following: 
 
--   **DEVELOP**,
--   **NO_MULTI**
--   **INTERNAL_ONLY**
--   **INPUT_ONLY**
--   **EVOLVING**
--   **ENERGY**
--   **LENGTH**
--   **MAGNETIC FIELD**
+- **DEVELOP**,
+- **NO_MULTI**
+- **INTERNAL_ONLY**
+- **INPUT_ONLY**
+- **EVOLVING**
+- **ENERGY**
+- **LENGTH**
+- **MAGNETIC FIELD**
 
 #### **Physical information**
 
@@ -422,9 +422,8 @@ mix thereof. Here is the list of recognized chains of characters:
   * T or Tesla --> Tesla (for magnetic fields) 
   * S or Sec or Second --> second (for time) 
 
-Other character chains, like "au" (for
-atomic units) or "Hartree", or "Bohr" are not recognized, but make the parser
-choose (by default) atomic units, which is the correct behaviour. Example:
+Other character chains, like "au" (for atomic units) or "Hartree", or "Bohr" are not recognized, 
+but make the parser choose (by default) atomic units, which is the correct behaviour. Example:
     
         acell 8 8 8 angstrom
         ecut 8 Ry
@@ -434,14 +433,13 @@ or
     
          acell 3*10 Bohr  ecut 270 eV  tsmear 0.01
 
-The use of the atomic units is mandatory for other dimensioned input
+The use of the atomic units is **mandatory** for other dimensioned input
 variables, like the tolerance on forces ([[toldff]]), parameters that define
 an 'object' ([[objaax]], [[objaax]], [[objbax]], [[objatr]], [[objbtr]]), and
 the initial velocity of atoms ([[vel]] if needed).
 
 The initial atomic positions can be input in Bohr or Angstrom through
-[[xcart]] (possibly use the Angstrom unit), or
-even in reduced coordinates, through [[xred]].
+[[xcart]] (possibly use the Angstrom unit), or even in reduced coordinates, through [[xred]].
 
 #### **Flow information**
 
@@ -529,9 +527,9 @@ understand when one looks at examples, see below):
         1st example.
     
         ndtset   2
-         acell   8 8 8
-          ecut1  10
-          ecut2  15
+        acell   8 8 8
+        ecut1  10
+        ecut2  15
 
 means that there are 2 datasets: a first in which
     
@@ -956,55 +954,55 @@ following Fortran90 instructions (format 9.0):
      write(unit=header) codvsn,headform,fform
 
      write(unit=header) bantot,date,intxc,ixc,natom,ngfft(1:3),&
-    & nkpt,nspden,nspinor,nsppol,nsym,npsp,ntypat,occopt,pertcase,usepaw,&
-    & ecut,ecutdg,ecutsm,ecut_eff,qptn(1:3),rprimd(1:3,1:3),stmbias,&
-    & tphysel,tsmear,usewvl,nshiftk_orig,nshiftk,mband
+       nkpt,nspden,nspinor,nsppol,nsym,npsp,ntypat,occopt,pertcase,usepaw,&
+       ecut,ecutdg,ecutsm,ecut_eff,qptn(1:3),rprimd(1:3,1:3),stmbias,&
+       tphysel,tsmear,usewvl,nshiftk_orig,nshiftk,mband
 
      write(unit=header) istwfk(1:nkpt),nband(1:nkpt*nsppol),&
-    & npwarr(1:nkpt),so_psp(1:npsp),symafm(1:nsym),symrel(1:3,1:3,1:nsym),&
-    & typat(1:natom),kpt(1:3,1:nkpt),occ(1:bantot),tnons(1:3,1:nsym),&
-    & znucltypat(1:ntypat),wtk(1:nkpt)
+       npwarr(1:nkpt),so_psp(1:npsp),symafm(1:nsym),symrel(1:3,1:3,1:nsym),&
+       typat(1:natom),kpt(1:3,1:nkpt),occ(1:bantot),tnons(1:3,1:nsym),&
+       znucltypat(1:ntypat),wtk(1:nkpt)
 
      write(unit=unit) residm,xred(1:3,1:natom),etotal,fermie,amu(1:ntypat)
 
      write(unit=unit) kptopt,pawcpxocc,nelect,cellcharge,icoulomb,&
-    & kptrlatt(3,3),kptrlatt_orig(3,3),shiftk_orig(3),shiftk(3)
+       kptrlatt(3,3),kptrlatt_orig(3,3),shiftk_orig(3),shiftk(3)
 
      do ipsp=1,npsp
     ! (npsp lines, 1 for each pseudo; npsp=ntypat, except if alchemical pseudo-atoms)
       write(unit=unit) title,znuclpsp,zionpsp,pspso,&
-    &  pspdat,pspcod,pspxc,lmn_size,md5_pseudos
+       pspdat,pspcod,pspxc,lmn_size,md5_pseudos
      enddo
 
     !(in case of usepaw==1, there are some additional records)
      if (usepaw==1)then
       write(unit=unit)( pawrhoij(iatom)%nrhoijsel(1:nspden),iatom=1,natom), cplex, nspden
       write(unit=unit)((pawrhoij(iatom)%rhoijselect(1:      nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom),&
-    &                 ((pawrhoij(iatom)%rhoijp     (1:cplex*nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom)
+                      ((pawrhoij(iatom)%rhoijp     (1:cplex*nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom)
      endif
 ```
 
 where the type of the different variables is:
     
 ```fortran
-    character*8 :: codvsn
-    integer :: headform,fform
-    integer :: bantot,cplex,date,icoulomb,intxc,ixc,kptopt,mband,natom,ngfft(3),&
-    & nkpt,npsp,nshiftk_orig,nshiftk,nspden,nspinor,nsppol,nsym,ntypat,occopt,&
-    & pawcpxocc,pertcase,usepaw,usewvl
-    double precision :: acell(3),cellcharge,ecut,ecutdg,ecutsm,ecut_eff,etotal,&
-    & fermie,nelect,qptn(3),residm,rprimd(3,3),shiftk(3),shiftk_orig(3),&
-    & stmbias,tphysel,tsmear
-    integer :: istwfk(nkpt),kptrlatt(3,3),kptrlatt_orig(3,3),nband(nkpt*nsppol),&
-    & npwarr(nkpt),so_psp(npsp),symafm(nsym),symrel(3,3,nsym),typat(natom),&
-    & nrhoijsel(nspden),rhoijselect(*,nspden)
-    double precision :: amu(ntypat),kpt(3,nkpt),occ(bantot),tnons(3,nsym),&
-    & znucltypat(ntypat),wtk(nkpt),xred(3,natom)
-    character*132 :: title
-    character*32 :: md5_pseudos
-    double precision :: znuclpsp,zionpsp
-    integer :: pspso,pspdat,pspcod,pspxc,lmn_size
-    double precision :: rhoij(*,nspden)
+character*8 :: codvsn
+integer :: headform,fform
+integer :: bantot,cplex,date,icoulomb,intxc,ixc,kptopt,mband,natom,ngfft(3),&
+  nkpt,npsp,nshiftk_orig,nshiftk,nspden,nspinor,nsppol,nsym,ntypat,occopt,&
+  pawcpxocc,pertcase,usepaw,usewvl
+double precision :: acell(3),cellcharge,ecut,ecutdg,ecutsm,ecut_eff,etotal,&
+  fermie,nelect,qptn(3),residm,rprimd(3,3),shiftk(3),shiftk_orig(3),&
+  stmbias,tphysel,tsmear
+integer :: istwfk(nkpt),kptrlatt(3,3),kptrlatt_orig(3,3),nband(nkpt*nsppol),&
+  npwarr(nkpt),so_psp(npsp),symafm(nsym),symrel(3,3,nsym),typat(natom),&
+  nrhoijsel(nspden),rhoijselect(*,nspden)
+double precision :: amu(ntypat),kpt(3,nkpt),occ(bantot),tnons(3,nsym),&
+  znucltypat(ntypat),wtk(nkpt),xred(3,natom)
+character*132 :: title
+character*32 :: md5_pseudos
+double precision :: znuclpsp,zionpsp
+integer :: pspso,pspdat,pspcod,pspxc,lmn_size
+double precision :: rhoij(*,nspden)
 ```
 
 NOTE: _etotal is set to its true value only for density and potential files.

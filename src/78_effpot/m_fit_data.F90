@@ -318,7 +318,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: energy_diff(:)
  real(dp),allocatable :: du_delta(:,:,:,:),displacement(:,:,:),strain(:,:)
- real(dp),allocatable :: fcart_diff(:,:,:),fred_fixed(:,:,:),fcart_fixed(:,:,:)
+ real(dp),allocatable :: fcart_diff(:,:,:),gred_fixed(:,:,:),fcart_fixed(:,:,:)
  real(dp),allocatable :: strten_diff(:,:),strten_fixed(:,:),sqomega(:),ucvol(:)
  type(strain_type) :: strain_t
  type(training_set_type) :: ts
@@ -345,7 +345,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  ABI_MALLOC(energy_diff,(ntime))
  ABI_MALLOC(fcart_fixed,(3,natom,ntime))
  ABI_MALLOC(fcart_diff,(3,natom,ntime))
- ABI_MALLOC(fred_fixed,(3,natom,ntime))
+ ABI_MALLOC(gred_fixed,(3,natom,ntime))
  ABI_MALLOC(strain,(6,ntime))
  ABI_MALLOC(strten_fixed,(6,ntime))
  ABI_MALLOC(strten_diff,(6,ntime))
@@ -356,7 +356,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  du_delta = zero 
  strain = zero; 
  fcart_fixed  = zero 
- fred_fixed  = zero
+ gred_fixed  = zero
  strain = zero 
  strten_fixed = zero 
  strten_diff = zero
@@ -385,7 +385,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 &                                   compute_displacement=.TRUE.,compute_duDelta=.TRUE.)
 
 !  Get forces and stresses from harmonic part (fixed part)     
-   call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),fred_fixed(:,:,itime),&
+   call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),gred_fixed(:,:,itime),&
 &                                    strten_fixed(:,itime),natom,hist%rprimd(:,:,itime),&
 &                                    displacement=displacement(:,:,itime),&
 &                                    du_delta=du_delta(:,:,:,itime),strain=strain(:,itime),&
@@ -415,7 +415,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  ABI_FREE(energy_diff)
  ABI_FREE(fcart_fixed)
  ABI_FREE(fcart_diff)
- ABI_FREE(fred_fixed)
+ ABI_FREE(gred_fixed)
  ABI_FREE(strain)
  ABI_FREE(strten_fixed)
  ABI_FREE(strten_diff)

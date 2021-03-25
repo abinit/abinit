@@ -16,7 +16,7 @@ in the Casida approach, within Time-Dependent Density Functional Theory.
 
 This tutorial should take about 30 minutes.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Brief theoretical introduction
 
