@@ -221,7 +221,7 @@ subroutine make_onsite_bm_k_n(cprj_k,dtset,iband,idir,nband_k,onsite_bm_k_n,&
   !Local variables -------------------------
   !scalars
   integer :: gint,iatom,il,im,ilmn,itypat
-  integer :: jl,jm,jlmn,klmn,klm,kln,lpmp,me,mesh_size
+  integer :: jl,jm,jlmn,klmn,klm,kln,lpmp,mesh_size
   real(dp) :: bm1,bm2,d00,d20,d22,dij,intg,scale_conversion
   complex(dpc) :: cpb,cpk
 
@@ -562,7 +562,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  integer :: adir,bdir,buff_size,dimffnl,exchn2n3d
  integer :: getcprj_choice,getcprj_cpopt
  integer :: getghc_cpopt,getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc
- integer :: gdir,iatom,icg,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k,iterms
+ integer :: gdir,iatom,icg,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k
  integer :: me,mcgk,my_nspinor
  integer :: nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn,nnp
  integer :: nkpg,npw_k
