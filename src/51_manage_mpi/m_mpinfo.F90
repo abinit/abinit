@@ -2506,12 +2506,12 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !******************************************************************
 
- nproc_kpt=mpi_enreg%nproc_spkpt
+ nproc_spkpt=mpi_enreg%nproc_spkpt
 #ifdef DEV_MJV
-print *, ' nproc_kpt, nproc, mpi_enreg%paral_pertmpi_enreg%nproc_pert ', nproc_kpt, nproc, mpi_enreg%paral_pert, mpi_enreg%nproc_pert
+print *, ' nproc_spkpt, nproc, mpi_enreg%paral_pertmpi_enreg%nproc_pert ', nproc_spkpt, nproc, mpi_enreg%paral_pert, mpi_enreg%nproc_pert
 #endif
  if (mpi_enreg%paral_pert==1) nproc_spkpt=nproc
-! if (mpi_enreg%paral_pert==1) nproc_kpt=nproc/mpi_enreg%nproc_pert
+! if (mpi_enreg%paral_pert==1) nproc_spkpt=nproc/mpi_enreg%nproc_pert
 
  mband_mem_out = 0
 

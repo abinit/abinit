@@ -1127,6 +1127,7 @@ print *, 'cwavef 1055 ', cwavef(:,1:5)
 #endif
 
 !In the PAW case, compute <Psi^(1)_ortho|H-Eig0_k.S|Psi^(1)_parallel> contribution to 2DTE
+ if (usepaw==1.and.wf_corrected==1) then
 !$OMP WORKSHARE
    cwcorr(:,:)=cwave1(:,:)-cwavef(:,:)
 !$OMP END WORKSHARE

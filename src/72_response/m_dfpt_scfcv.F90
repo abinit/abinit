@@ -1327,7 +1327,7 @@ print *, 'istep loop finished'
 
 !Deallocate the no more needed arrays
  if (iscf_mod>0.and.nstep>0) then
-   call ab7_mixing_FREE(mix)
+   call ab7_mixing_deallocate(mix)
  end if
  if( (nstep>0 .and. iscf_mod>0) .or. iscf_mod==-1 ) then
    ABI_FREE(dielinv)
@@ -2309,7 +2309,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  end if
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
- call ab7_mixing_eval_FREE(mix)
+ call ab7_mixing_eval_deallocate(mix)
 
 !Restore potential
  if (ispmix==1.and.nfft==nfftmix) then
