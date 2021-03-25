@@ -527,7 +527,7 @@ force_length_stats: {min:   3.24644498E-02, max:   3.24644498E-02, mean:   3.246
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.24644E-02 1.87434E-02 (free atoms)
  -3.24644498432639E-02 -0.00000000000000E+00 -0.00000000000000E+00
   3.24644498432639E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.89573398119167E-01  0.00000000000000E+00  0.00000000000000E+00
  -3.89573398119167E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -606,7 +606,7 @@ force_length_stats: {min:   3.24644535E-02, max:   3.24644535E-02, mean:   3.246
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.24645E-02 1.87434E-02 (free atoms)
  -3.24644535018461E-02 -0.00000000000000E+00 -0.00000000000000E+00
   3.24644535018461E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.89573442022153E-01  0.00000000000000E+00  0.00000000000000E+00
  -3.89573442022153E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 8.83453E-04 5.10062E-04 (free atoms)
@@ -691,7 +691,7 @@ force_length_stats: {min:   9.65687866E-04, max:   9.65687866E-04, mean:   9.656
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.65688E-04 5.57540E-04 (free atoms)
  -9.65687866469016E-04 -0.00000000000000E+00 -0.00000000000000E+00
   9.65687866469016E-04 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.15882543976282E-02  0.00000000000000E+00  0.00000000000000E+00
  -1.15882543976282E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.52068E-03 8.77965E-04 (free atoms)
@@ -777,7 +777,7 @@ force_length_stats: {min:   2.35363027E-01, max:   2.35363027E-01, mean:   2.353
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.35363E-01 1.35887E-01 (free atoms)
  -2.35363026781542E-01 -0.00000000000000E+00 -0.00000000000000E+00
   2.35363026781542E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.82435632137851E+00  0.00000000000000E+00  0.00000000000000E+00
  -2.82435632137851E+00 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 8.32899E-03 4.80874E-03 (free atoms)
@@ -863,7 +863,7 @@ force_length_stats: {min:   3.66957398E-02, max:   3.66957398E-02, mean:   3.669
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.66957E-02 2.11863E-02 (free atoms)
   3.66957398312782E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -3.66957398312782E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -4.40348877975338E-01 -0.00000000000000E+00 -0.00000000000000E+00
   4.40348877975338E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 3.36321E-03 1.94175E-03 (free atoms)
@@ -948,7 +948,7 @@ force_length_stats: {min:   8.23970971E-03, max:   8.23970971E-03, mean:   8.239
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.23971E-03 4.75720E-03 (free atoms)
   8.23970971357489E-03 -0.00000000000000E+00 -0.00000000000000E+00
  -8.23970971357489E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -9.88765165628987E-02 -0.00000000000000E+00 -0.00000000000000E+00
   9.88765165628987E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 3.36321E-03 1.94175E-03 (free atoms)
@@ -1033,7 +1033,7 @@ force_length_stats: {min:   2.25576593E-02, max:   2.25576593E-02, mean:   2.255
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.25577E-02 1.30237E-02 (free atoms)
   2.25576592930982E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -2.25576592930982E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.70691911517178E-01 -0.00000000000000E+00 -0.00000000000000E+00
   2.70691911517178E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.91291E-04 1.10442E-04 (free atoms)
@@ -1118,7 +1118,7 @@ force_length_stats: {min:   1.27227672E-03, max:   1.27227672E-03, mean:   1.272
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.27228E-03 7.34549E-04 (free atoms)
   1.27227671644145E-03 -0.00000000000000E+00 -0.00000000000000E+00
  -1.27227671644145E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.52673205972973E-02 -0.00000000000000E+00 -0.00000000000000E+00
   1.52673205972973E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.74420E-04 1.00702E-04 (free atoms)
@@ -1202,7 +1202,7 @@ force_length_stats: {min:   1.01003524E-02, max:   1.01003524E-02, mean:   1.010
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.01004E-02 5.83144E-03 (free atoms)
   1.01003523932047E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -1.01003523932047E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.21204228718456E-01 -0.00000000000000E+00 -0.00000000000000E+00
   1.21204228718456E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 7.25166E-05 4.18675E-05 (free atoms)
@@ -1287,7 +1287,7 @@ force_length_stats: {min:   2.46353228E-03, max:   2.46353228E-03, mean:   2.463
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.46353E-03 1.42232E-03 (free atoms)
  -2.46353227799534E-03 -0.00000000000000E+00 -0.00000000000000E+00
   2.46353227799534E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.95623873359441E-02  0.00000000000000E+00  0.00000000000000E+00
  -2.95623873359441E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.72878E-05 3.88486E-05 (free atoms)
@@ -1371,7 +1371,7 @@ force_length_stats: {min:   5.00777995E-03, max:   5.00777995E-03, mean:   5.007
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.00778E-03 2.89124E-03 (free atoms)
   5.00777994505463E-03 -0.00000000000000E+00 -0.00000000000000E+00
  -5.00777994505463E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -6.00933593406556E-02 -0.00000000000000E+00 -0.00000000000000E+00
   6.00933593406556E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.08772E-05 6.27993E-06 (free atoms)
@@ -1455,7 +1455,7 @@ force_length_stats: {min:   2.82811276E-03, max:   2.82811276E-03, mean:   2.828
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.82811E-03 1.63281E-03 (free atoms)
  -2.82811275545356E-03 -0.00000000000000E+00 -0.00000000000000E+00
   2.82811275545356E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.39373530654428E-02  0.00000000000000E+00  0.00000000000000E+00
  -3.39373530654428E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.47101E-05 1.42664E-05 (free atoms)
@@ -1539,7 +1539,7 @@ force_length_stats: {min:   3.01223231E-03, max:   3.01223231E-03, mean:   3.012
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.01223E-03 1.73911E-03 (free atoms)
   3.01223231272300E-03 -0.00000000000000E+00 -0.00000000000000E+00
  -3.01223231272300E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -3.61467877526759E-02 -0.00000000000000E+00 -0.00000000000000E+00
   3.61467877526759E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.99066E-06 2.88136E-06 (free atoms)
@@ -1622,7 +1622,7 @@ force_length_stats: {min:   2.25253925E-03, max:   2.25253925E-03, mean:   2.252
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.25254E-03 1.30050E-03 (free atoms)
  -2.25253925269383E-03 -0.00000000000000E+00 -0.00000000000000E+00
   2.25253925269383E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.70304710323259E-02  0.00000000000000E+00  0.00000000000000E+00
  -2.70304710323259E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.14458E-05 6.60825E-06 (free atoms)
@@ -1706,7 +1706,7 @@ force_length_stats: {min:   2.02174443E-03, max:   2.02174443E-03, mean:   2.021
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.02174E-03 1.16725E-03 (free atoms)
   2.02174443080370E-03 -0.00000000000000E+00 -0.00000000000000E+00
  -2.02174443080370E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.42609331696445E-02 -0.00000000000000E+00 -0.00000000000000E+00
   2.42609331696445E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.40027E-06 3.69520E-06 (free atoms)
@@ -1891,7 +1891,7 @@ force_length_stats: {min:   3.24644498E-02, max:   3.24644498E-02, mean:   3.246
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.24644E-02 1.87434E-02 (free atoms)
  -3.24644498432639E-02 -0.00000000000000E+00 -0.00000000000000E+00
   3.24644498432639E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.89573398119167E-01  0.00000000000000E+00  0.00000000000000E+00
  -3.89573398119167E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12022191430919E+00
@@ -1968,7 +1968,7 @@ force_length_stats: {min:   8.56631429E-03, max:   8.56631429E-03, mean:   8.566
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.56631E-03 4.94576E-03 (free atoms)
  -8.56631428782846E-03 -0.00000000000000E+00 -0.00000000000000E+00
   8.56631428782846E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.02795771453941E-01  0.00000000000000E+00  0.00000000000000E+00
  -1.02795771453941E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12153022660234E+00
@@ -2048,7 +2048,7 @@ force_length_stats: {min:   1.00886344E-03, max:   1.00886344E-03, mean:   1.008
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.00886E-03 5.82468E-04 (free atoms)
  -1.00886344096137E-03 -0.00000000000000E+00 -0.00000000000000E+00
   1.00886344096137E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.21063612915365E-02  0.00000000000000E+00  0.00000000000000E+00
  -1.21063612915365E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12164070603777E+00
@@ -2127,7 +2127,7 @@ force_length_stats: {min:   4.03646846E-05, max:   4.03646846E-05, mean:   4.036
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.03647E-05 2.33046E-05 (free atoms)
  -4.03646845974956E-05 -0.00000000000000E+00 -0.00000000000000E+00
   4.03646845974956E-05 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   4.84376215169947E-04  0.00000000000000E+00  0.00000000000000E+00
  -4.84376215169947E-04 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12164233273005E+00
@@ -2312,7 +2312,7 @@ force_length_stats: {min:   3.24644498E-02, max:   3.24644498E-02, mean:   3.246
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.24644E-02 1.87434E-02 (free atoms)
  -3.24644498432639E-02 -0.00000000000000E+00 -0.00000000000000E+00
   3.24644498432639E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.89573398119167E-01  0.00000000000000E+00  0.00000000000000E+00
  -3.89573398119167E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12022191430919E+00
@@ -2389,7 +2389,7 @@ force_length_stats: {min:   8.56631429E-03, max:   8.56631429E-03, mean:   8.566
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.56631E-03 4.94576E-03 (free atoms)
  -8.56631428782846E-03 -0.00000000000000E+00 -0.00000000000000E+00
   8.56631428782846E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.02795771453941E-01  0.00000000000000E+00  0.00000000000000E+00
  -1.02795771453941E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12153022660234E+00
@@ -2469,7 +2469,7 @@ force_length_stats: {min:   3.82420430E-05, max:   3.82420430E-05, mean:   3.824
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.82420E-05 2.20791E-05 (free atoms)
   3.82420430418751E-05 -0.00000000000000E+00 -0.00000000000000E+00
  -3.82420430418751E-05 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -4.58904516502501E-04 -0.00000000000000E+00 -0.00000000000000E+00
   4.58904516502501E-04  0.00000000000000E+00  0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12164233289472E+00
@@ -2654,7 +2654,7 @@ force_length_stats: {min:   3.24644477E-02, max:   3.24644477E-02, mean:   3.246
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.24644E-02 1.87434E-02 (free atoms)
  -3.24644477073622E-02 -0.00000000000000E+00 -0.00000000000000E+00
   3.24644477073622E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.89573372488346E-01  0.00000000000000E+00  0.00000000000000E+00
  -3.89573372488346E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12022191430929E+00
@@ -2735,7 +2735,7 @@ force_length_stats: {min:   1.39462701E-05, max:   1.39462701E-05, mean:   1.394
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.39463E-05 8.05188E-06 (free atoms)
  -1.39462701260430E-05 -0.00000000000000E+00 -0.00000000000000E+00
   1.39462701260430E-05 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.67355241512516E-04  0.00000000000000E+00  0.00000000000000E+00
  -1.67355241512516E-04 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12164233479144E+00
@@ -2814,7 +2814,7 @@ force_length_stats: {min:   1.44038489E-05, max:   1.44038489E-05, mean:   1.440
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.44038E-05 8.31607E-06 (free atoms)
  -1.44038489332207E-05 -0.00000000000000E+00 -0.00000000000000E+00
   1.44038489332207E-05 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.72846187198648E-04  0.00000000000000E+00  0.00000000000000E+00
  -1.72846187198648E-04 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12164233481039E+00
@@ -2999,7 +2999,7 @@ force_length_stats: {min:   3.24644498E-02, max:   3.24644498E-02, mean:   3.246
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.24644E-02 1.87434E-02 (free atoms)
  -3.24644498432639E-02 -0.00000000000000E+00 -0.00000000000000E+00
   3.24644498432639E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.89573398119167E-01  0.00000000000000E+00  0.00000000000000E+00
  -3.89573398119167E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12022191430919E+00
@@ -3076,7 +3076,7 @@ force_length_stats: {min:   1.20068011E-02, max:   1.20068011E-02, mean:   1.200
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.20068E-02 6.93213E-03 (free atoms)
  -1.20068010701727E-02 -0.00000000000000E+00 -0.00000000000000E+00
   1.20068010701727E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.44081612842072E-01  0.00000000000000E+00  0.00000000000000E+00
  -1.44081612842072E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12008945641789E+00
@@ -3157,7 +3157,7 @@ force_length_stats: {min:   1.19892030E-03, max:   1.19892030E-03, mean:   1.198
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.19892E-03 6.92197E-04 (free atoms)
  -1.19892029891241E-03 -0.00000000000000E+00 -0.00000000000000E+00
   1.19892029891241E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.43870435869490E-02  0.00000000000000E+00  0.00000000000000E+00
  -1.43870435869490E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12163849741788E+00
@@ -3237,7 +3237,7 @@ force_length_stats: {min:   5.40889628E-04, max:   5.40889628E-04, mean:   5.408
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.40890E-04 3.12283E-04 (free atoms)
  -5.40889628358279E-04 -0.00000000000000E+00 -0.00000000000000E+00
   5.40889628358279E-04 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   6.49067554029935E-03  0.00000000000000E+00  0.00000000000000E+00
  -6.49067554029935E-03 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12164158893833E+00
@@ -3317,7 +3317,7 @@ force_length_stats: {min:   1.77226003E-04, max:   1.77226003E-04, mean:   1.772
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.77226E-04 1.02321E-04 (free atoms)
  -1.77226002622118E-04 -0.00000000000000E+00 -0.00000000000000E+00
   1.77226002622118E-04 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.12671203146542E-03  0.00000000000000E+00  0.00000000000000E+00
  -2.12671203146542E-03 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.12164227135563E+00
@@ -3502,7 +3502,7 @@ force_length_stats: {min:   3.24644498E-02, max:   3.24644498E-02, mean:   3.246
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.24644E-02 1.87434E-02 (free atoms)
  -3.24644498432639E-02 -0.00000000000000E+00 -0.00000000000000E+00
   3.24644498432639E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.89573398119167E-01  0.00000000000000E+00  0.00000000000000E+00
  -3.89573398119167E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -3584,7 +3584,7 @@ force_length_stats: {min:   2.35801381E-02, max:   2.35801381E-02, mean:   2.358
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.35801E-02 1.36140E-02 (free atoms)
   2.35801381207761E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -2.35801381207761E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.82961657449314E-01 -0.00000000000000E+00 -0.00000000000000E+00
   2.82961657449314E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -3672,7 +3672,7 @@ force_length_stats: {min:   1.42570265E-02, max:   1.42570265E-02, mean:   1.425
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.42570E-02 8.23130E-03 (free atoms)
  -1.42570265252951E-02 -0.00000000000000E+00 -0.00000000000000E+00
   1.42570265252951E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.71084318303541E-01  0.00000000000000E+00  0.00000000000000E+00
  -1.71084318303541E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -3759,7 +3759,7 @@ force_length_stats: {min:   1.02385204E-02, max:   1.02385204E-02, mean:   1.023
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.02385E-02 5.91121E-03 (free atoms)
   1.02385203747333E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -1.02385203747333E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.22862244496800E-01 -0.00000000000000E+00 -0.00000000000000E+00
   1.22862244496800E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -3846,7 +3846,7 @@ force_length_stats: {min:   6.80307759E-03, max:   6.80307759E-03, mean:   6.803
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.80308E-03 3.92776E-03 (free atoms)
  -6.80307758584068E-03 -0.00000000000000E+00 -0.00000000000000E+00
   6.80307758584068E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   8.16369310300881E-02  0.00000000000000E+00  0.00000000000000E+00
  -8.16369310300881E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -3932,7 +3932,7 @@ force_length_stats: {min:   4.81825874E-03, max:   4.81825874E-03, mean:   4.818
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.81826E-03 2.78182E-03 (free atoms)
   4.81825874152309E-03 -0.00000000000000E+00 -0.00000000000000E+00
  -4.81825874152309E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -5.78191048982771E-02 -0.00000000000000E+00 -0.00000000000000E+00
   5.78191048982771E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -4018,7 +4018,7 @@ force_length_stats: {min:   3.28729896E-03, max:   3.28729896E-03, mean:   3.287
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.28730E-03 1.89792E-03 (free atoms)
  -3.28729895753169E-03 -0.00000000000000E+00 -0.00000000000000E+00
   3.28729895753169E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.94475874903803E-02  0.00000000000000E+00  0.00000000000000E+00
  -3.94475874903803E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -4104,7 +4104,7 @@ force_length_stats: {min:   2.30695429E-03, max:   2.30695429E-03, mean:   2.306
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.30695E-03 1.33192E-03 (free atoms)
   2.30695428733003E-03 -0.00000000000000E+00 -0.00000000000000E+00
  -2.30695428733003E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.76834514479604E-02 -0.00000000000000E+00 -0.00000000000000E+00
   2.76834514479604E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -4189,7 +4189,7 @@ force_length_stats: {min:   1.57957372E-03, max:   1.57957372E-03, mean:   1.579
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.57957E-03 9.11967E-04 (free atoms)
  -1.57957372288211E-03 -0.00000000000000E+00 -0.00000000000000E+00
   1.57957372288211E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.89548846745854E-02  0.00000000000000E+00  0.00000000000000E+00
  -1.89548846745854E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -4274,7 +4274,7 @@ force_length_stats: {min:   1.08704550E-03, max:   1.08704550E-03, mean:   1.087
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.08705E-03 6.27606E-04 (free atoms)
   1.08704549600647E-03 -0.00000000000000E+00 -0.00000000000000E+00
  -1.08704549600647E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.30445459520776E-02 -0.00000000000000E+00 -0.00000000000000E+00
   1.30445459520776E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -4359,7 +4359,7 @@ force_length_stats: {min:   7.41556664E-04, max:   7.41556664E-04, mean:   7.415
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 7.41557E-04 4.28138E-04 (free atoms)
  -7.41556663530834E-04 -0.00000000000000E+00 -0.00000000000000E+00
   7.41556663530834E-04 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   8.89867996237000E-03  0.00000000000000E+00  0.00000000000000E+00
  -8.89867996237000E-03 -0.00000000000000E+00 -0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)

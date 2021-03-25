@@ -114,7 +114,7 @@ contains
 !! The main part of it is a wf update over all k points.
 !!
 !! INPUTS
-!!  itime=Relaxation step.
+!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
 !!  afford=used to dimension susmat
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
@@ -280,11 +280,11 @@ contains
 !!
 !! SOURCE
 
-subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
+subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &           eigen,electronpositron,energies,etotal,gbound_diel,&
 &           gmet,gprimd,grnl,gsqcut,hdr,indsym,irrzon,irrzondiel,&
-&           istep,istep_mix,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
+&           istep,istep_mix,itimes,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
 &           my_natom,natom,nattyp,nfftf,nfftdiel,ngfftdiel,nhat,nkxc,&
 &           npwarr,npwdiel,nres2,ntypat,nvresid,occ,optforces,&
 &           optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
@@ -295,7 +295,8 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 &           ylm,ylmgr,ylmdiel, rmm_diis_status)
 
 !Arguments -------------------------------
- integer, intent(in) :: itime,afford,dbl_nnsclo,dielop,dielstrt,istep,istep_mix,lmax_diel,mcg,mcprj,mgfftdiel
+!scalars
+ integer, intent(in) :: afford,dbl_nnsclo,dielop,dielstrt,istep,istep_mix,lmax_diel,mcg,mcprj,mgfftdiel
  integer, intent(in) :: my_natom,natom,nfftf,nfftdiel,nkxc,npwdiel
  integer, intent(in) :: ntypat,optforces,optres,pwind_alloc,usecprj,with_vectornd
  real(dp), intent(in) :: cpus,etotal,gsqcut,ucvol
@@ -314,10 +315,12 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  type(fock_type),pointer, intent(inout) :: fock
  type(wffile_type), intent(inout) :: wffnew
  type(wvl_data), intent(inout) :: wvl
+!arrays
  integer, intent(in) :: atindx(natom),atindx1(natom),gbound_diel(2*mgfftdiel+8,2)
  integer, intent(in) :: indsym(4,dtset%nsym,natom)
  integer, intent(in) :: irrzon(dtset%nfft**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  integer, intent(in) :: irrzondiel(nfftdiel**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
+ integer, intent(in) :: itimes(2)
  integer, intent(in) :: kg(3,dtset%mpw*dtset%mkmem),kg_diel(3,npwdiel),nattyp(ntypat),ngfftdiel(18),npwarr(dtset%nkpt)
  integer, intent(in) :: pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
  integer, intent(inout) :: rmm_diis_status(2, dtset%nkpt, dtset%nsppol)
@@ -534,7 +537,8 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        ! MG: I don't understand why we need to perform 2 NSCF loops after the first SCF cycle
        ! when we are relaxing the structure as the initial density and wavefunctions should be already good enough.
        ! Here I change the default behavior to avoid the extra loop but only if RMM-DIIS is used.
-       if (itime > 1 .and. dtset%rmm_diis /= 0) nnsclo_now = 1
+       ! XG 20210312 : I prefectly agree with you. This is historical, and should be changed, after testing and update of reference files.
+       if ((itimes(1) > 1 .or. (itimes(2)>1)) .and. dtset%rmm_diis /= 0) nnsclo_now = 1
      else
        ! Wavelets
        if (iscf==0) then
@@ -1085,7 +1089,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
    if((.not.fixed_occ) .and. (iscf>0.or.iscf==-3)) then
 
 !    Parallel case
-     if (mpi_enreg%nproc_kpt>1) then
+     if (mpi_enreg%nproc_spkpt>1) then
 
        call timab(989,1,tsec)
 
@@ -1174,7 +1178,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        ABI_FREE(buffer1)
        call timab(989,2,tsec)
 
-     end if ! nproc_kpt>1
+     end if ! nproc_spkpt>1
 
 !    Compute the new occupation numbers from eigen
      call timab(990,1,tsec)
@@ -1455,7 +1459,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 !    Treat fixed occupation numbers or non-self-consistent case
    else
 
-     if (mpi_enreg%nproc_kpt>1) then
+     if (mpi_enreg%nproc_spkpt>1) then
 
        call timab(989,1,tsec)
 
@@ -1542,7 +1546,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        ABI_FREE(buffer1)
        call timab(989,2,tsec)
 
-     end if ! nproc_kpt>1
+     end if ! nproc_spkpt>1
 
 !    Compute the highest occupied eigenenergy
      if(iscf/=-1 .and. iscf/=-2)then

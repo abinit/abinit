@@ -280,7 +280,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
          ABI_CHECK(info == 0, sjoin("zheev returned info:", itoa(info)))
        enddo
 
-       !Check degereracies in (100) direction, and evaluate A and B.
+       !Check degeneracies in (100) direction, and evaluate A and B.
        !Eigenvalues are 2*A (d=1), 2*B (d=2)
        if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,3))<tol5) then
          lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,3))/2)

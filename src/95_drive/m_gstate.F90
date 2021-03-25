@@ -143,6 +143,7 @@ contains
 !!                              Possibly different from dtset
 !!  codvsn=code version
 !!  cpui=initial CPU time
+!!  itimimage_gstate=counter for calling do loop
 !!
 !! OUTPUT
 !!  npwtot(nkpt) = total number of plane waves at each k point
@@ -232,12 +233,13 @@ contains
 !! SOURCE
 
 subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
-&                 mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,&
+&                 itimimage_gstate,mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,&
 &                 psps,results_gs,rprim,scf_history,vel,vel_cell,wvl,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(inout) :: iexit,initialized
+ integer,intent(in) :: itimimage_gstate
  real(dp),intent(in) :: cpui
  character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -298,7 +300,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(ddb_hdr_type) :: ddb_hdr
  type(scfcv_t) :: scfcv_args
 !arrays
- integer :: ngfft(18),ngfftf(18)
+ integer :: itimes(2),ngfft(18),ngfftf(18)
  integer,allocatable :: atindx(:),atindx1(:),indsym(:,:,:),dimcprj_srt(:)
  integer,allocatable :: irrzon(:,:,:),kg(:,:),nattyp(:),symrec(:,:,:)
  integer,allocatable,target :: npwarr(:)
@@ -319,8 +321,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  DBG_ENTER("COLL")
 
- call timab(32,1,tsec)
- call timab(33,3,tsec)
+ call timab(1222,1,tsec)
+ call timab(1213,3,tsec)
 
 !###########################################################
 !### 01. Initializations XML, MPI, WVL, etc
@@ -462,8 +464,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
  has_to_init=(initialized==0.or.scf_history%history_size<0)
 
- call timab(33,2,tsec)
- call timab(701,3,tsec)
+ call timab(1213,2,tsec)
+ call timab(1211,3,tsec)
 
 !###########################################################
 !### 03. Calls pspini
@@ -472,8 +474,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  comm_psp=mpi_enreg%comm_cell;if (dtset%usewvl==1) comm_psp=mpi_enreg%comm_wvl
  if (dtset%nimage>1) psps%mixalch(:,:)=args_gs%mixalch(:,:) ! mixalch can evolve for some image algos
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,psps,rprimd,comm_mpi=comm_psp)
- call timab(701,2,tsec)
- call timab(33,3,tsec)
+ call timab(1211,2,tsec)
+ call timab(1213,3,tsec)
 
 !In case of isolated computations, ecore must set to zero
 !because its contribution is counted in the ewald energy as the ion-ion interaction.
@@ -845,8 +847,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (has_to_init) xred_old=xred
 
 !Timing for initialisation period
- call timab(33,2,tsec)
- call timab(34,3,tsec)
+ call timab(1213,2,tsec)
+ call timab(1214,3,tsec)
 
 !###########################################################
 !### 08. Compute new occupation numbers
@@ -1271,7 +1273,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 #endif
 
- call timab(34,2,tsec)
+ call timab(1214,2,tsec)
 
  conv_retcode = 0
 
@@ -1280,7 +1282,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  ###########################################################
 !  ### 14. Move atoms and acell according to ionmov value
 
-   call timab(35,3,tsec)
+   call timab(1215,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
 &   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
@@ -1298,9 +1300,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (dtset%ionmov==0 .or. dtset%imgmov==6) then
 
 !    Should merge this call with the call for dtset%ionmov==4 and 5
-
      if (dtset%macro_uj==0) then
-       call scfcv_run(scfcv_args,itime0,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+       itimes(1)=itime0 ; itimes(2)=itimimage_gstate
+       call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
      else
 !      Conduct determination of U
        call pawuj_drive(scfcv_args,dtset,electronpositron,rhog,rhor,rprimd,xred,xred_old)
@@ -1313,7 +1315,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
      ! TODO: return conv_retcode
      call mover(scfcv_args,ab_xfh,acell,args_gs%amu,dtfil,&
-&     electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old)
+&     electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,itimimage_gstate=itimimage_gstate)
 
 !    Compute rprim from rprimd and acell
      do kk=1,3
@@ -1335,14 +1337,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    call scfcv_destroy(scfcv_args)
 
-   call timab(35,2,tsec)
+   call timab(1215,2,tsec)
 
 !  ###########################################################
 !  ### 15. Final operations and output for gstate
 
  end if !  End of the check of hasty exit
 
- call timab(36,3,tsec)
+ call timab(1216,3,tsec)
 
  write(msg, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
 & ' ----iterations are completed or convergence reached----',ch10
@@ -1351,42 +1353,19 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Mark this GS computation as done
  initialized=1
 
-!Will be put here later.
-!! ! WVL - maybe compute the tail corrections to energy
-!! if (dtset%tl_radius > zero) then
-!!    ! Store xcart for each atom
-!!    allocate(xcart(3, dtset%natom))
-!!    call xred2xcart(dtset%natom, rprimd, xcart, xred)
-!!    ! Use the tails to improve energy precision.
-!!    call wvl_tail_corrections(dtset, results_gs%energies, results_gs%etotal, &
-!!         & mpi_enreg, occ, psps, vtrial, wvl, xcart)
-!!    deallocate(xcart)
-!! end if
-
 !Update the header, before using it
- ! CP modified
- !call hdr%update(bantot,results_gs%etotal,results_gs%energies%e_fermie,&
- !  results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
- !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  call hdr%update(bantot,results_gs%etotal,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
    results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
- ! End CP modified
 
  ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde=zero
 
- ! CP modified
-! call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
-!& hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
-!& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
-!& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 & doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
 & hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
 & hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
 & hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
- ! End CP modified
 
  ebands%fermie = results_gs%energies%e_fermie
  ebands%fermih = results_gs%energies%e_fermih ! CP modified
@@ -1395,6 +1374,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  ! Compute and print the gaps.
  call ebands_report_gap(ebands,header="Gap info",unit=std_out,mode_paral="COLL",gaps=results_gs%gaps)
+
+ call timab(1216,2,tsec)
+ call timab(1217,3,tsec)
 
  if(dtset%nqpt==0)filnam=dtfil%fnameabo_wfk
  if(dtset%nqpt==1)filnam=dtfil%fnameabo_wfq
@@ -1444,20 +1426,20 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call cryst%free()
  end if
 
- ! CP modified
-! call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,&
-!& dtfil%fnameabo_dos,dtfil%fnameabo_eig,results_gs%fred,&
-!& mpi_enreg,nfftf,ngfftf,occ,dtset%optforces,&
-!& resid,rhor,rprimd,results_gs%vxcavg,xred)
+ call timab(1217,2,tsec)
+ call timab(1218,3,tsec)
+
  call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
-& dtfil%fnameabo_dos,dtfil%fnameabo_eig,results_gs%fred,&
+& dtfil%fnameabo_dos,dtfil%fnameabo_eig,results_gs%gred,&
 & mpi_enreg,nfftf,ngfftf,occ,dtset%optforces,&
 & resid,rhor,rprimd,results_gs%vxcavg,xred)
- ! End CP modified
 
  if ( (dtset%iscf>=0 .or. dtset%iscf==-3) .and. dtset%prtstm==0) then
    call prtene(dtset,results_gs%energies,ab_out,psps%usepaw)
  end if
+
+ call timab(1218,2,tsec)
+ call timab(1219,3,tsec)
 
 !write final electric field components HONG
 
@@ -1495,6 +1477,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    write(msg,'(a)')  '--------------------------------------------------------------------------------'
    call wrtout([std_out, ab_out], msg)
  end if
+
+ call timab(1219,2,tsec)
+ call timab(1220,3,tsec)
 
 !Open the formatted derivative database file, and write the preliminary information
 !In the // case, only one processor writes the energy and the gradients to the DDB
@@ -1547,7 +1532,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        do idir = 1, 3
          indx = indx + 1
          ddb%flg(indx,1) = 1
-         ddb%val(1,indx,1) = results_gs%fred(idir,iatom)
+         ddb%val(1,indx,1) = results_gs%gred(idir,iatom)
        end do
      end do
    end if
@@ -1576,8 +1561,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    close(dtfil%unddb)
  end if
 
+ call timab(1220,2,tsec)
+ call timab(1221,3,tsec)
+
+
  if (dtset%nstep>0 .and. dtset%prtstm==0 .and. dtset%positron/=1) then
-   call clnup2(psps%n1xccc,results_gs%fred,results_gs%grchempottn,results_gs%gresid,&
+   call clnup2(psps%n1xccc,results_gs%gred,results_gs%grchempottn,results_gs%gresid,&
 &   results_gs%grewtn,results_gs%grvdw,results_gs%grxc,dtset%iscf,dtset%natom,&
 &   results_gs%ngrvdw,dtset%optforces,dtset%optstress,dtset%prtvol,start,&
 &   results_gs%strten,results_gs%synlgr,xred)
@@ -1741,8 +1730,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 #endif
 
- call timab(36,2,tsec)
- call timab(32,2,tsec)
+ call timab(1221,2,tsec)
+ call timab(1222,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -1864,7 +1853,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!  fermih=fermi energy for holes (Hartree) ! CP added for occopt 9
 !!  fnameabo_dos=filename of output DOS file
 !!  fnameabo_eig=filename of output EIG file
-!!  fred(3,natom)=d(E)/d(xred) (hartree)
+!!  gred(3,natom)=d(E)/d(xred) (hartree)
 !!  iatfix(3,natom)=0 if not fixed along specified direction,
 !!                  1 if fixed
 !!  iscf=parameter controlling scf or non-scf choice
@@ -1908,7 +1897,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!
 !! SOURCE
 ! CP added fermih to the list of arguments
-subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fred,&
+subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gred,&
                   mpi_enreg,nfft,ngfft,occ,prtfor, resid,rhor,rprimd,vxcavg,xred)
 
 !Arguments ------------------------------------
@@ -1922,7 +1911,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fre
  integer,intent(in)  :: ngfft(18)
  real(dp),intent(in) :: acell(3)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp),intent(in) :: fred(3,dtset%natom)
+ real(dp),intent(in) :: gred(3,dtset%natom)
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rhor(nfft,dtset%nspden)
  real(dp),intent(in) :: rprimd(3,3)
@@ -1962,9 +1951,9 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fre
    do iatom=1,dtset%natom
      do ii=1,3
 !      To be activated in v5.5
-!      grmax=max(grmax,abs(fred(ii,iatom)))
-       grmax=max(grmax,fred(ii,iatom))
-       grsum=grsum+fred(ii,iatom)**2
+!      grmax=max(grmax,abs(gred(ii,iatom)))
+       grmax=max(grmax,gred(ii,iatom))
+       grsum=grsum+gred(ii,iatom)**2
      end do
    end do
    grsum=sqrt(grsum/dble(3*dtset%natom))
@@ -1972,7 +1961,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fre
    write(msg, '(1x,a,1p,e12.4,a,e12.4,a)' )'rms dE/dt=',grsum,'; max dE/dt=',grmax,'; dE/dt below (all hartree)'
    call wrtout(ab_out, msg)
    do iatom=1,dtset%natom
-     write(msg, '(i5,1x,3f20.12)' ) iatom,fred(1:3,iatom)
+     write(msg, '(i5,1x,3f20.12)' ) iatom,gred(1:3,iatom)
      call wrtout(ab_out, msg)
    end do
 
@@ -1990,7 +1979,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,fre
      iwfrc=1
    end if
 
-   call prtxf(fred,dtset%iatfix,ab_out,iwfrc,dtset%natom,rprimd,xred)
+   call prtxf(gred,dtset%iatfix,ab_out,iwfrc,dtset%natom,rprimd,xred)
 
 !  Write length scales
    write(msg, '(1x,a,3f16.12,a)' )'length scales=',acell,' bohr'
@@ -2089,11 +2078,11 @@ end subroutine clnup1
 !!  and $ dt(m)/dx(n) = (R^{-1})_{mn} = G_{nm}$ because G is the
 !!  inverse transpose of R.  Finally then
 !!  $d(E)/dx(n) = G_{nm} [d(E)/dt(m)]$.
-!!  The vector $d(E)/dt(m)$ for each atom is input in fred
+!!  The vector $d(E)/dt(m)$ for each atom is input in gred
 !!  (grad. wrt xred).
 !!
 !! INPUTS
-!!  fred(3,natom)=gradients of Etot (hartree) wrt xred(3,natom)
+!!  gred(3,natom)=gradients of Etot (hartree) wrt xred(3,natom)
 !!  iatfix(3,natom)=1 for each fixed atom along specified
 !!  direction, else 0
 !!  iout=unit number for output file
@@ -2116,14 +2105,14 @@ end subroutine clnup1
 !!
 !! SOURCE
 
-subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
+subroutine prtxf(gred,iatfix,iout,iwfrc,natom,rprimd,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,iwfrc,natom
 !arrays
  integer,intent(in) :: iatfix(3,natom)
- real(dp),intent(in) :: fred(3,natom),rprimd(3,3),xred(3,natom)
+ real(dp),intent(in) :: gred(3,natom),rprimd(3,3),xred(3,natom)
 
 !Local variables-------------------------------
 !scalars
@@ -2172,9 +2161,9 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
 !  First compute (spurious) average force favg
    do iatom=1,natom
      do mu=1,3
-       ff(mu)=-(gprimd(mu,1)*fred(1,iatom)+&
-&       gprimd(mu,2)*fred(2,iatom)+&
-&       gprimd(mu,3)*fred(3,iatom))
+       ff(mu)=-(gprimd(mu,1)*gred(1,iatom)+&
+&       gprimd(mu,2)*gred(2,iatom)+&
+&       gprimd(mu,3)*gred(3,iatom))
        favg(mu)=favg(mu)+ff(mu)
      end do
    end do
@@ -2189,9 +2178,9 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
    do iatom=1,natom
      format_line=format_line21
      do mu=1,3
-       ff(mu)=-(gprimd(mu,1)*fred(1,iatom)+&
-&       gprimd(mu,2)*fred(2,iatom)+&
-&       gprimd(mu,3)*fred(3,iatom))-favg(mu)
+       ff(mu)=-(gprimd(mu,1)*gred(1,iatom)+&
+&       gprimd(mu,2)*gred(2,iatom)+&
+&       gprimd(mu,3)*gred(3,iatom))-favg(mu)
        if(ff(mu)>99999 .or. ff(mu)<-9999)format_line=format_line25
 !      For rms and max force, include only unfixed components
        if (iatfix(mu,iatom) /= 1) then
@@ -2226,9 +2215,9 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
      do iatom=1,natom
        format_line=format_line21
        do mu=1,3
-         ff(mu)=(-(gprimd(mu,1)*fred(1,iatom)+&
-&         gprimd(mu,2)*fred(2,iatom)+&
-&         gprimd(mu,3)*fred(3,iatom))-favg(mu))*convt
+         ff(mu)=(-(gprimd(mu,1)*gred(1,iatom)+&
+&         gprimd(mu,2)*gred(2,iatom)+&
+&         gprimd(mu,3)*gred(3,iatom))-favg(mu))*convt
          if(ff(mu)>99999 .or. ff(mu)<-9999)format_line=format_line25
        end do
        write(msg, format_line) iatom,ff
@@ -2253,7 +2242,7 @@ end subroutine prtxf
 !! information, shifts of atomic positions, and stresses.
 !!
 !! INPUTS
-!!  fred(3,natom)=d(E_total)/d(xred) derivatives (hartree)
+!!  gred(3,natom)=d(E_total)/d(xred) derivatives (hartree)
 !!  grchempottn(3,natom)=d(E_chempot)/d(xred) derivatives (hartree)
 !!  grewtn(3,natom)=d(E_Ewald)/d(xred) derivatives (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
@@ -2283,14 +2272,14 @@ end subroutine prtxf
 !!
 !! SOURCE
 
-subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
+subroutine clnup2(n1xccc,gred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
 &                 prtfor,prtstr,prtvol,start,strten,synlgr,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iscf,n1xccc,natom,ngrvdw,prtfor,prtstr,prtvol
 !arrays
- real(dp),intent(in) :: fred(3,natom),grchempottn(3,natom),gresid(3,natom)
+ real(dp),intent(in) :: gred(3,natom),grchempottn(3,natom),gresid(3,natom)
  real(dp),intent(in) :: grewtn(3,natom),grvdw(3,ngrvdw)
  real(dp),intent(in) :: grxc(3,natom),start(3,natom),strten(6),synlgr(3,natom)
  real(dp),intent(in) :: xred(3,natom)
@@ -2338,13 +2327,13 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
      call wrtout(ab_out, ' local psp contribution to red. grads')
      if (n1xccc /= 0) then
        do iatom=1,natom
-         write(msg,format01020) iatom,fred(:,iatom) - &
+         write(msg,format01020) iatom,gred(:,iatom) - &
           (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+grxc(:,iatom)+gresid(:,iatom))
          call wrtout(ab_out,msg)
        end do
      else
        do iatom=1,natom
-         write(msg,format01020) iatom,fred(:,iatom) - &
+         write(msg,format01020) iatom,gred(:,iatom) - &
          (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+gresid(:,iatom))
          call wrtout(ab_out,msg)
        end do
@@ -2532,6 +2521,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  integer,parameter :: itime0 = 0
  integer,target :: ndtpawuj=4
  integer :: iuj,conv_retcode
+ integer :: itimes(2)
  real(dp) :: ures
  !character(len=500) :: msg
 !arrays
@@ -2580,7 +2570,8 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 
    !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
 !&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
-   call scfcv_run(scfcv_args,itime0,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   itimes(1)=itime0 ; itimes(2)=1
+   call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
    scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
  end do

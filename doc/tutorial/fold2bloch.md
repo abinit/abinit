@@ -22,7 +22,7 @@ the *fold2Bloch* utility. See also the [[help:fold2bloch]].
 
 This tutorial should take about 1 hour.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Creating a Hydrogen supercell structure
 

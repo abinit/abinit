@@ -1940,9 +1940,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  At present, parallelism over images is not coded ...
 !  call chkint_eq(0,0,cond_string,cond_values,ierr,'npimage',dt%npimage,1,(/1/),iout)
 
-!  npkpt
+!  np_spkpt
 !  Must be greater or equal to 1
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'npkpt',dt%npkpt,1,iout)
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'np_spkpt',dt%np_spkpt,1,iout)
 
 !  nppert
    cond_string(1)='paral_rf' ; cond_values(1)=1

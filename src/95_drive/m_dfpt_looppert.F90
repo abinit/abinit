@@ -2705,7 +2705,7 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
 
  ABI_MALLOC(my_kpt, (nkpt_rbz, dtset%nsppol))
  my_kpt = .true.
- if (mpi_enreg%nproc_kpt > 1) then
+ if (mpi_enreg%nproc_spkpt > 1) then
    do isppol = 1, dtset%nsppol
      do ikpt = 1, nkpt_rbz
        my_kpt(ikpt, isppol) = .not.(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,&

@@ -203,7 +203,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer,allocatable :: jdtset_(:),npwtot(:)
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),tsec(2)
  real(dp),allocatable :: acell_img(:,:),amu_img(:,:),rprim_img(:,:,:)
- real(dp),allocatable :: fcart_img(:,:,:),fred_img(:,:,:),intgres_img(:,:,:)
+ real(dp),allocatable :: fcart_img(:,:,:),gred_img(:,:,:),intgres_img(:,:,:)
  real(dp),allocatable :: etotal_img(:),mixalch_img(:,:,:),strten_img(:,:),miximage(:,:)
  real(dp),allocatable :: occ(:),xcart(:,:),xred(:,:),xredget(:,:)
  real(dp),allocatable :: occ_img(:,:),vel_cell_img(:,:,:),vel_img(:,:,:),xred_img(:,:,:)
@@ -773,13 +773,13 @@ print *, 'driver dtset%mkmem ', dtset%mkmem
    case(RUNL_GSTATE)
 
      ABI_MALLOC(fcart_img,(3,dtset%natom,nimage))
-     ABI_MALLOC(fred_img,(3,dtset%natom,nimage))
+     ABI_MALLOC(gred_img,(3,dtset%natom,nimage))
      ABI_MALLOC(intgres_img,(dtset%nspden,dtset%natom,nimage))
      ABI_MALLOC(etotal_img,(nimage))
      ABI_MALLOC(strten_img,(6,nimage))
 
      call gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-       fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
+       gred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
        pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
        filnam,filstat,idtset,jdtset_,ndtset)
 
@@ -805,18 +805,18 @@ print *, 'driver dtset%mkmem ', dtset%mkmem
      ! and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
      ABI_MALLOC(etotal_img,(nimage))
      ABI_MALLOC(fcart_img,(3,dtset%natom,nimage))
-     ABI_MALLOC(fred_img,(3,dtset%natom,nimage))
+     ABI_MALLOC(gred_img,(3,dtset%natom,nimage))
      ABI_MALLOC(intgres_img,(dtset%nspden,dtset%natom,nimage))
      ABI_MALLOC(strten_img,(6,nimage))
 
      call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-       fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
+       gred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
        pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
        filnam,filstat,idtset,jdtset_,ndtset)
 
      ABI_FREE(etotal_img)
      ABI_FREE(fcart_img)
-     ABI_FREE(fred_img)
+     ABI_FREE(gred_img)
      ABI_FREE(intgres_img)
      ABI_FREE(strten_img)
 
@@ -846,7 +846,7 @@ print *, 'driver dtset%mkmem ', dtset%mkmem
 
 !  Transfer of multi dataset outputs from temporaries:
 !  acell, xred, occ rprim, and vel might be modified from their input values
-!  etotal, fcart, fred, intgres, and strten have been computed
+!  etotal, fcart, gred, intgres, and strten have been computed
 !  npwtot was already computed before, but is stored only now
 
    if(dtset%optdriver==RUNL_GSTATE)then
@@ -857,7 +857,7 @@ print *, 'driver dtset%mkmem ', dtset%mkmem
        results_out(idtset)%rprim(:,:,iimage)              =rprim_img(:,:,iimage)
        results_out(idtset)%strten(:,iimage)                =strten_img(:,iimage)
        results_out(idtset)%fcart(1:3,1:dtset%natom,iimage)=fcart_img(:,:,iimage)
-       results_out(idtset)%fred(1:3,1:dtset%natom,iimage) =fred_img(:,:,iimage)
+       results_out(idtset)%gred(1:3,1:dtset%natom,iimage) =gred_img(:,:,iimage)
        if(dtset%nspden/=2)then
          results_out(idtset)%intgres(1:dtset%nspden,1:dtset%natom,iimage) =intgres_img(:,:,iimage)
        else
@@ -875,7 +875,7 @@ print *, 'driver dtset%mkmem ', dtset%mkmem
      end do
      ABI_FREE(etotal_img)
      ABI_FREE(fcart_img)
-     ABI_FREE(fred_img)
+     ABI_FREE(gred_img)
      ABI_FREE(intgres_img)
      ABI_FREE(strten_img)
    else

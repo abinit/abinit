@@ -82,7 +82,7 @@ contains
 !!  indlmn(6,i,ntypat)= array giving l,m,n,lm,ln,s for i=lmn
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  kg_k(3,npw_k)=reduced planewave coordinates
-!!  kpg(npw_k,npk)=(k+G) components and related data
+!!  kpg(npw_k,npkg)=(k+G) components and related data
 !!  kpoint(3)=k point in terms of recip. translations
 !!  lmnmax=max. number of (l,m,n) components over all types of atoms
 !!  mgfft=maximum size of 1D FFTs

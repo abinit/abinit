@@ -7,7 +7,7 @@ authors: XG
 ## Overview of the ABINIT tutorials.
 
 These tutorials are aimed at teaching the use of ABINIT, in the
-UNIX/Linux OS and its variants (MacOS, AIX ...).
+UNIX/Linux OS and its variants (MacOS, AIX etc.).
 They might be used for other operating systems, but the commands have to be adapted.
 
 At present, nearly forty tutorials are available. Each of them is at most
@@ -59,7 +59,7 @@ The following schema should help you to understand these dependencies.
 <img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v10.png" usemap="#map1"/>
 </center>
 
-The "base" tutorials are presented at the top, in orange. The blocks in red represents additional tutorials related
+The base tutorials are presented at the top, in orange. The blocks in red represents additional tutorials related
 to ground-state features. Response-function features are explained
 in the tutorials in the light brown blocks. Finally, the Many-Body Perturbation Theory
 capabilities are demonstrated in the tutorials belonging to the dark brown blocks.
@@ -70,8 +70,7 @@ Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
-Before following the tutorials, you should have read the
-[new user's guide](..),
+Before following the tutorials, you should have read the [new user's guide](/guide/new_user),
 as well as the pages
 1045-1058 of [[cite:Payne1992|Rev. Mod. Phys. 64, 1045 (1992)]].
 If you have more time, you should browse through the Chaps. 1 to 13, and appendices L and M of the book
@@ -84,6 +83,12 @@ v1, v2, ... , that provide many example input files.
 You should have a look at the README files of these directories.
 
 ### Tutorials on basic concepts
+
+* [The compilation howto tutorial](compilation) explains how to compile ABINIT from source 
+  including the external libraries. 
+  More advanced topics such as using **modules** in supercomputing centers,
+  compiling and linking with the **intel compilers** and the **MKL library** as well as **OpenMP threads** 
+  are also discussed.
 
 **The tutorials 1-4 present the basic concepts, and form a global entity: you
 should not skip any of these.**
@@ -158,7 +163,7 @@ prerequisite than the tutorials 1 to 4, and that you can do in any order (there 
     thanks to the Time-Dependent Density Functional Theory approach, in the Casida formalism.
 
   * [The "howto guide for developers"](../developers/developers_howto) introduces the new developer to the development
-    of new functionalities in ABINIT ...
+    of new functionalities in ABINIT.
 
 ### DFPT-related tutorials
 **There is an additional group of tutorials on density-functional
@@ -213,7 +218,7 @@ the tutorial on non-linear optics, and the group of electron-phonon tutorials:**
 
 **Two obsolete tutorials on electron-phonon interaction are still present. 
 The implementations are still available at time of writing,
-but have been superceded by the new implementations, described in the above-mentioned tutorials.
+but have been superseded by the new implementations, described in the above-mentioned tutorials.
 Their prerequisite is also tutorials DFPT1 and DFPT2 (Optic not needed):**
 
   * [The obsolete tutorial on the electron-phonon interaction](eph) presents the use of the utility MRGKK and ANADDB
