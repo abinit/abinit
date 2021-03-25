@@ -291,8 +291,8 @@ contains
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,grcondft,&
-& gresid,grewtn,grhf,grhor,grvdw,&
+& energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
+& gred,gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&

@@ -262,7 +262,7 @@ contains
 !!
 !! SOURCE
 
-subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
+subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &  dtset,ecore,eigen,electronpositron,fatvshift,hdr,indsym,&
 &  initialized,irrzon,itimes,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
@@ -2167,8 +2167,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,grcondft,&
-& gresid,grewtn,grhf,grhor,grvdw,&
+& energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
+& gred,gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
 & kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&

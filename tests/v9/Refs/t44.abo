@@ -1,5 +1,5 @@
 
-.Version 9.5.0 of ABINIT 
+.Version 9.5.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  4 Mar 2021.
-- ( at 13h29 )
+.Starting date : Thu 25 Mar 2021.
+- ( at 12h16 )
   
 - input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
@@ -140,7 +140,7 @@ P          mk1mem          32
         optforces           0
         optstress           0
            orbmag1          0
-           orbmag2         13
+           orbmag2          3
         pawcpxocc           2
         pawecutdg      6.00000000E+00 Hartree
            prtden           0
@@ -699,21 +699,24 @@ tolerances: {tolwfr: 1.00E-20, }
 ====================================================
  
  Orbital magnetic moment, Cartesian directions :
- -8.50293569E-04  3.08379765E-09  7.83278719E-09
+ -8.50288592E-04  3.08371720E-09  7.83348195E-09
  
  
  Integral of Berry curvature, Cartesian directions :
- -9.43225007E-02  4.67154919E-07  9.91003205E-07
+ -2.38921685E-03  1.18331723E-08  2.51024044E-08
+ Fermie energy :   1.86490921E-01
  
  
  Orbital magnetic moment, Term-by-term breakdown :
    Conduction space :  -7.37937175E-04  2.00322521E-09  3.71732857E-09
    Valence space II :  -2.54416099E-04  1.23485231E-09  4.04287183E-09
-   Valence space I  :  -3.55680212E-06 -9.98660121E-12 -5.03269652E-11
+  Valence space Ia  :   4.97766663E-09 -8.04465942E-14  6.94761056E-13
+  Valence space Ib  :  -3.55680212E-06 -9.98660121E-12 -5.03269652E-11
    S(1) PAW overlap :  -8.60171452E-07 -1.03700101E-12  2.47367089E-12
           H(1) cprj :   1.36778488E-04 -1.93498246E-10  1.94409743E-10
    H(1) on-site L_R :   7.26595573E-06  5.06768907E-11 -7.39796508E-11
  H(1) on-site A0.An :   2.43223514E-06 -4.34910261E-13  9.99587237E-15
+    Berry curvature :  -2.38921685E-03  1.18331723E-08  2.51024044E-08
  
  
  Orbital magnetic moment, Term-by-term breakdown for each band :
@@ -722,41 +725,49 @@ tolerances: {tolwfr: 1.00E-20, }
  band  1 of  4
    Conduction space :  -9.69751225E-06 -2.86475835E-10  2.50617933E-11
    Valence space II :  -9.50545304E-07  1.29579105E-10 -1.58996687E-11
-   Valence space I  :   1.81779327E-06  4.95427497E-12  1.53881868E-12
+  Valence space Ia  :   3.60596613E-08 -5.02748786E-14  6.01277964E-13
+  Valence space Ib  :   1.81779327E-06  4.95427497E-12  1.53881868E-12
    S(1) PAW overlap :   3.79688561E-08  6.27626705E-13  7.36697877E-14
           H(1) cprj :   4.14080180E-05 -3.36531997E-11 -2.44726678E-12
    H(1) on-site L_R :   2.27449466E-07  5.39483576E-12  5.65939436E-13
  H(1) on-site A0.An :   3.04606991E-07  3.61481614E-13  3.60182236E-14
+    Berry curvature :   9.40623895E-06 -1.69178258E-09  1.19178010E-10
  
  
  band  2 of  4
    Conduction space :  -5.12510669E-05  4.65629959E-10 -2.73483332E-10
    Valence space II :   1.07525699E-05  1.58861948E-10 -7.35017691E-11
-   Valence space I  :  -9.64068896E-07  8.03655975E-13  1.98158881E-12
+  Valence space Ia  :   2.34307559E-08  3.65174668E-14 -3.95776431E-14
+  Valence space Ib  :  -9.64068896E-07  8.03655975E-13  1.98158881E-12
    S(1) PAW overlap :   1.02713096E-07  6.47146280E-14  4.26359439E-14
           H(1) cprj :   1.73822813E-04 -2.77165882E-11 -8.98740665E-13
    H(1) on-site L_R :  -3.43542504E-06  3.27762428E-12 -2.23787080E-13
  H(1) on-site A0.An :   6.75166353E-07 -8.24165964E-14  4.69918781E-15
+    Berry curvature :   5.54828526E-04  3.69045073E-09 -1.48779251E-09
  
  
  band  3 of  4
    Conduction space :   2.89489102E-01 -2.96070154E-08 -1.72769659E-06
    Valence space II :   2.14460149E-01  3.61310164E-08 -1.28308969E-06
-   Valence space I  :  -6.51528825E-03 -5.74375755E-09  3.86889591E-08
+  Valence space Ia  :  -6.43044712E-05 -2.58370929E-11  3.83465771E-10
+  Valence space Ib  :  -6.51528825E-03 -5.74375755E-09  3.86889591E-08
    S(1) PAW overlap :  -7.59135524E-04 -8.96877658E-10  4.55952778E-09
           H(1) cprj :  -2.68425379E-02 -2.75493719E-08  1.62112181E-07
    H(1) on-site L_R :   4.87530833E-03  4.76098826E-09 -2.97533909E-08
  H(1) on-site A0.An :   6.93563635E-07  1.14010295E-10 -2.57059042E-12
+    Berry curvature :   2.29976557E+00 -2.45164016E-07 -1.38149771E-05
  
  
  band  4 of  4
    Conduction space :  -2.90166090E-01  3.14310864E-08  1.73166234E-06
    Valence space II :  -2.14724368E-01 -3.51846052E-08  1.28722196E-06
-   Valence space I  :   6.51087772E-03  5.72801302E-09 -3.87428064E-08
+  Valence space Ia  :   6.42499584E-05  2.57704037E-11 -3.83332710E-10
+  Valence space Ib  :   6.51087772E-03  5.72801302E-09 -3.87428064E-08
    S(1) PAW overlap :   7.58134671E-04  8.95148315E-10 -4.55717042E-09
           H(1) cprj :   2.67640856E-02  2.74172434E-08 -1.61914425E-07
    H(1) on-site L_R :  -4.86483440E-03 -4.71898383E-09  2.96790691E-08
  H(1) on-site A0.An :   7.58898163E-07 -1.14724270E-10  2.53986889E-12
+    Berry curvature :  -2.30271902E+00  2.54998520E-07  1.38414481E-05
  
 ====================================================
  
@@ -841,7 +852,7 @@ P          mk1mem          32
         optforces           0
         optstress           0
            orbmag1          0
-           orbmag2         13
+           orbmag2          3
         pawcpxocc           2
         pawecutdg      6.00000000E+00 Hartree
            prtden           0
@@ -987,5 +998,5 @@ P          mk1mem          32
 ================================================================================
  
  Calculation completed.
-.Delivered  10 WARNINGs and  19 COMMENTs to log file.
+.Delivered  10 WARNINGs and  17 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          5.4  wall=          5.6

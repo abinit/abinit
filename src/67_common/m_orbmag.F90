@@ -894,6 +894,9 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        dub_dsg_i = -DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(2,:))
        orbmag_terms(adir,vvib,nn)= orbmag_terms(adir,vvib,nn) - (dub_dsg_i-dug_dsb_i)*Enk*trnrm
 
+       ! VV Ia term gives (i/2)eps_abg sum_n' (-)<u_n|dS/db|u_n'><u_n'|dS/dg|u_n>Enk
+       ! = + sum_n' Im{<u_n|dS/db|u_n'><u_n'|dS/dg|u_n>Enk}
+       ! VV IIIa is identical. 
        do nnp=1,nband_k
          cwavefp(1:2,1:npw_k) = cg_k(1:2,(nnp-1)*npw_k+1:nnp*npw_k)
          dbr= DOT_PRODUCT(cwavefp(1,:),cwavedsdb(1,:))+DOT_PRODUCT(cwavefp(2,:),cwavedsdb(2,:))
