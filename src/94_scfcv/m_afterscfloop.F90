@@ -220,10 +220,10 @@ contains
 !!   fcart(3,natom)=forces in cartesian coordinates (Ha/Bohr)
 !!     at input, previous value of forces,
 !!     at output, new value.
-!!     Note : unlike fred, this array has been corrected by enforcing
+!!     Note : unlike gred, this array has been corrected by enforcing
 !!     the translational symmetry, namely that the sum of force
 !!     on all atoms is zero.
-!!   fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
+!!   gred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!   gresid(3,natom)=forces due to the residual of the potential
 !!   grhf(3,natom)=Hellman-Feynman derivatives of the total energy
 !!   grxc(9+3*natom)=d(Exc)/d(xred) if core charges are used
@@ -354,7 +354,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(inout) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),strsxc(6)
  real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
- real(dp),intent(inout) :: favg(3),fcart(3,dtset%natom),fred(3,dtset%natom)
+ real(dp),intent(inout) :: favg(3),fcart(3,dtset%natom),gred(3,dtset%natom)
  real(dp),intent(inout) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
  real(dp),intent(inout) :: grxc(3,dtset%natom),kxc(nfftf,nkxc),strten(6)
  real(dp),intent(inout) :: synlgr(3,dtset%natom)
@@ -925,7 +925,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
    call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
 &   eigen,electronpositron,energies,favg,fcart,fock,&
-&   forold,fred,grchempottn,grcondft,gresid,grewtn,&
+&   forold,gred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grvdw,grxc,gsqcut,indsym,&
 &   kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,&
 &   n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,&
@@ -987,7 +987,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (dtset%positron/=0) then
    electronpositron%scf_converged=.false.
    if (dtset%positron<0.and.electronpositron_calctype(electronpositron)==1) then
-     call exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energies,fred,mcg,mcprj,&
+     call exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energies,gred,mcg,mcprj,&
 &     mpi_enreg,my_natom,nfftf,ngfftf,nhat,npwarr,occ,paw_an,pawrhoij,rhog,rhor,strten,usecprj,vhartr)
    end if
  end if
@@ -1026,12 +1026,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if(dtset%ionmov==23 .and. mpi_enreg%nproc_band>1) then
    bufsz=2+2*dtset%natom;if (moved_atm_inside==1) bufsz=bufsz+dtset%natom
    ABI_MALLOC(mpibuf,(3,bufsz))
-   mpibuf(:,1:dtset%natom)=fred(:,1:dtset%natom)
+   mpibuf(:,1:dtset%natom)=gred(:,1:dtset%natom)
    mpibuf(:,dtset%natom+1:2*dtset%natom)=fcart(:,1:dtset%natom)
    if (moved_atm_inside==1) mpibuf(:,2*dtset%natom+1:3*dtset%natom)=xred(:,1:dtset%natom)
    mpibuf(1:3,bufsz-1:bufsz)=reshape(strten(1:6),(/3,2/))
    call xmpi_sum(mpibuf,mpi_enreg%comm_band,ierr)
-   fred(:,1:dtset%natom)=mpibuf(:,1:dtset%natom)/mpi_enreg%nproc_band
+   gred(:,1:dtset%natom)=mpibuf(:,1:dtset%natom)/mpi_enreg%nproc_band
    fcart(:,1:dtset%natom)=mpibuf(:,dtset%natom+1:2*dtset%natom)/mpi_enreg%nproc_band
    if (moved_atm_inside==1) xred(:,1:dtset%natom)=mpibuf(:,2*dtset%natom+1:3*dtset%natom)/mpi_enreg%nproc_band
    strten(1:6)=reshape(mpibuf(1:3,bufsz-1:bufsz),(/6/))/mpi_enreg%nproc_band
@@ -1044,12 +1044,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (mpi_enreg%nproc_fft>1) then
    bufsz=2+2*dtset%natom;if (moved_atm_inside==1) bufsz=bufsz+dtset%natom
    ABI_MALLOC(mpibuf,(3,bufsz))
-   mpibuf(:,1:dtset%natom)=fred(:,1:dtset%natom)
+   mpibuf(:,1:dtset%natom)=gred(:,1:dtset%natom)
    mpibuf(:,dtset%natom+1:2*dtset%natom)=fcart(:,1:dtset%natom)
    if (moved_atm_inside==1) mpibuf(:,2*dtset%natom+1:3*dtset%natom)=xred(:,1:dtset%natom)
    mpibuf(1:3,bufsz-1:bufsz)=reshape(strten(1:6),(/3,2/))
    call xmpi_sum(mpibuf,mpi_enreg%comm_fft,ierr)
-   fred(:,1:dtset%natom)=mpibuf(:,1:dtset%natom)/mpi_enreg%nproc_fft
+   gred(:,1:dtset%natom)=mpibuf(:,1:dtset%natom)/mpi_enreg%nproc_fft
    fcart(:,1:dtset%natom)=mpibuf(:,dtset%natom+1:2*dtset%natom)/mpi_enreg%nproc_fft
    if (moved_atm_inside==1) xred(:,1:dtset%natom)=mpibuf(:,2*dtset%natom+1:3*dtset%natom)/mpi_enreg%nproc_fft
    strten(1:6)=reshape(mpibuf(1:3,bufsz-1:bufsz),(/6/))/mpi_enreg%nproc_fft
@@ -1064,7 +1064,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%residm     =residm
  results_gs%res2       =res2
  results_gs%fcart(:,:) =fcart(:,:)
- results_gs%fred(:,:)  =fred(:,:)
+ results_gs%gred(:,:)  =gred(:,:)
  results_gs%grchempottn(:,:)=grchempottn(:,:)
  results_gs%gresid(:,:)=gresid(:,:)
  results_gs%grewtn(:,:)=grewtn(:,:)

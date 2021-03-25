@@ -2,7 +2,7 @@
 paral_kgb 1
 npband 8
 npfft 1
-npkpt 1
+np_spkpt 1
 bandpp 19
 
 prtden 0 prtwf 0 prteig 0

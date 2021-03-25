@@ -239,7 +239,8 @@ The second one is the *~abinit/tests/pymods/yaml_tests/conf_parser.py* file. It
 contains the declarations of the available constraints and parameters. A basic
 python understanding is required in order to modify this file. Comments and doc strings
 should help users to grasp the meaning of this file. More details available
-[in this section](./yaml_tools_api#constraints-and-parameters-registration).
+[in this section](#constraints-and-parameters-registration).
+
 The third one is the file *~abinit/tests/pymods/yaml_tests/structures/*. It
 defines the structures used by the YAML parser when encountering a tag (starting
 with !), or in some cases when reaching a given pattern (__undef__ for example).

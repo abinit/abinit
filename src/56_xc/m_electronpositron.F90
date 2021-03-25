@@ -129,8 +129,8 @@ MODULE m_electronpositron
 !  if typecalc=1: electronic eigen energies
 !  if typecalc=2: positronic eigen energies
 
-  real(dp), allocatable :: fred_ep(:,:)
-!  fred_ep(3,natom)
+  real(dp), allocatable :: gred_ep(:,:)
+!  gred_ep(3,natom)
 !  if typecalc=1: forces only due to electrons
 !  if typecalc=2: forces only due to positron
 
@@ -332,8 +332,8 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
   if (dtset%optstress>0.and.dtset%iscf>0.and.(dtset%nstep>0.or.ireadwf==1)) optstr=1
 
   if (optfor>0) then
-   ABI_MALLOC(electronpositron%fred_ep,(3,dtset%natom))
-   electronpositron%fred_ep(:,:)=zero
+   ABI_MALLOC(electronpositron%gred_ep,(3,dtset%natom))
+   electronpositron%gred_ep(:,:)=zero
   end if
 
   if (optstr>0) then
@@ -401,8 +401,8 @@ subroutine destroy_electronpositron(electronpositron)
   if (allocated(electronpositron%lmselect_ep))  then
     ABI_FREE(electronpositron%lmselect_ep)
   end if
-  if (allocated(electronpositron%fred_ep))      then
-    ABI_FREE(electronpositron%fred_ep)
+  if (allocated(electronpositron%gred_ep))      then
+    ABI_FREE(electronpositron%gred_ep)
   end if
   if (allocated(electronpositron%stress_ep))    then
     ABI_FREE(electronpositron%stress_ep)
@@ -470,7 +470,7 @@ end subroutine destroy_electronpositron
 !!  electronpositron=<type(electronpositron_type)>=electronpositron datastructure
 !!  energies <type(energies_type)>=all part of total energy.
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
-!!  fred(3,natom)=forces in reduced coordinates
+!!  gred(3,natom)=gradients wrt nuclear positions in reduced coordinates
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  occ(mband*nkpt*nsppol)=occupation number for each band at each k point
@@ -489,7 +489,7 @@ end subroutine destroy_electronpositron
 !!
 !! SOURCE
 
-subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energies,fred,mcg,mcprj,&
+subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energies,gred,mcg,mcprj,&
 &                                    mpi_enreg,my_natom,nfft,ngfft,nhat,npwarr,occ,paw_an,pawrhoij,&
 &                                    rhog,rhor,stress,usecprj,vhartr)
 
@@ -504,7 +504,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
  integer,intent(in) :: ngfft(18),npwarr(dtset%nkpt)
  real(dp),intent(inout) :: cg(2,mcg)
  real(dp),intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp),intent(inout) :: fred(3,dtset%natom),nhat(nfft,dtset%nspden)
+ real(dp),intent(inout) :: gred(3,dtset%natom),nhat(nfft,dtset%nspden)
  real(dp),intent(inout) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp), intent(inout) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
  real(dp),intent(inout) :: stress(6),vhartr(nfft)
@@ -717,9 +717,9 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
    end if
 
 !  Forces
-   if (allocated(electronpositron%fred_ep)) then
+   if (allocated(electronpositron%gred_ep)) then
     do iatom=1,dtset%natom
-     electronpositron%fred_ep(1:3,iatom)=fred(1:3,iatom)-electronpositron%fred_ep(1:3,iatom)
+     electronpositron%gred_ep(1:3,iatom)=gred(1:3,iatom)-electronpositron%gred_ep(1:3,iatom)
     end do
    end if
 

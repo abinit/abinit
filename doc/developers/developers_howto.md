@@ -73,7 +73,7 @@ As usual, use:
     ../../tests/runtests.py --help
 
 to list the available options.
-A more detailed discussion is given in [this page](testsuite_howto).
+A more detailed discussion is given in [this page](/developers/testsuite_howto).
 
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
@@ -210,8 +210,8 @@ To add a new variables follow the below steps:
 - The logic for checking the consistency of input variables goes to **chkinp**.
   Use the routines *chkint_eq*, *chkint_ne*, *chkint_ge*, *chkint_le*, *chkdpr*.
 
-- Add the documentation of the new variable to `~abinit/abimkdocs/variables_CODE.py`.
-  following the instructions given in [this section](abimkdocs/#how-to-addmodify-an-input-variable).
+- Add the documentation of the new variable to `~abinit/abimkdocs/variables_CODE.py`
+  following the instructions given in [this section](/developers/abimkdocs#how-to-addmodify-an-input-variable).
 
 Finally,
 
@@ -234,7 +234,7 @@ For the treatment of dimensions see **invars0**, **invars1m**
 
 ## How to add a new test in the test suite?
 
-The following information complements the [testsuite documentation](testsuite_howto).
+The following information complements the [testsuite documentation](/developers/testsuite_howto).
 
 In order to introduce a test, one needs to:
 

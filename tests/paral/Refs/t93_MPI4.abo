@@ -123,8 +123,8 @@ P           mkmem2          2
            nkpthf          27
 -            nphf1          1
 -            nphf2          2
--           npkpt1          1
--           npkpt2          2
+-        np_spkpt1          1
+-        np_spkpt2          2
             nstep          20
              nsym          48
            ntypat           1
@@ -616,8 +616,8 @@ P           mkmem2          2
            nkpthf          27
 -            nphf1          1
 -            nphf2          2
--           npkpt1          1
--           npkpt2          2
+-        np_spkpt1          1
+-        np_spkpt2          2
             nstep          20
              nsym          48
            ntypat           1

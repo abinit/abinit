@@ -256,7 +256,7 @@ The video below gives an overwiew of the command line options of `runtests.py`
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
 More advanced features such as video galleries require a bit of HTML/CSS/JS code in the Markdown page.
-See for example the [Abinit video gallery](../topics/external_resources#abinit-videos)
+See for example the [Abinit video gallery](/topics/external_resources#abinit-videos)
 built with [lightGallery](http://sachinchoolur.github.io/lightGallery/).
 
 
@@ -269,8 +269,8 @@ The Markdown syntax for links is:
 | Markdown | Result | Extension required |
 | :-- | :-- | :--
 | `[Links for videos](#videos)` | [Links for videos](#videos)  | --
-| `[About topics](abimkdocs#topics)` | [About topics](abimkdocs#topics)  | --
-| `[MBPT document](../theory/mbt)` | [MBPT document](../theory/mbt) | --
+| `[About topics](/developers/abimkdocs#topics)` | [About topics](/developers/abimkdocs#topics)  | --
+| `[MBPT document](/theory/mbt)` | [MBPT document](/theory/mbt) | --
 | `[The Abinit website](https://www.abinit.org)` | [The Abinit website](https://www.abinit.org)  | --
 | `<https://www.abinit.org>` | <https://www.abinit.org> | --
 
@@ -687,33 +687,10 @@ If multiple files are used such as in:
 
     {% dialog tests/v1/Input/t01.abi tests/v1/Input/t02.abi tests/v1/Input/t03.abi %}
 
-a modal window with tabs is produced:
+multiple buttons are produced:
 
 {% dialog tests/v1/Input/t01.abi tests/v1/Input/t02.abi tests/v1/Input/t03.abi %}
 
-
-To create a ==button== that opens a modal window containing an **input file**, use:
-
-```
-    {% modal tests/v1/Input/t01.abi %}
-```
-
-that produces:
-
-{% modal tests/v1/Input/t01.abi %}
-
-This is useful for tutorials to give direct access to the input files.
-If multiple files are used such as in:
-
-```
-    {% modal tests/v1/Input/t01.abi tests/v1/Input/t02.abi %}
-```
-
-a modal window with tabs is produced
-
-{% modal tests/v1/Input/t01.abi tests/v1/Input/t02.abi %}
-
-Note however, that these extensions do not work when called within the input variable database files (abimkdocs/variables*.py files).
 
 ## MathJax
 
@@ -924,66 +901,10 @@ one should take into account the *extra directory* created by Mkdocs.
 In a nutshell, **prepend** a `../` to the relative path you would use inside the shell to specify the location
 of that resource with respect to the present page.
 
-For instance, to build a Bootstrap carousel in this page using the images located in 
-the `~abinit/doc/tutorial/bse_assets/` directory, one should use:
-
-```html
-<div id="myCarousel" class="carousel slide" data-ride="carousel">
-  <!-- Indicators -->
-  <ol class="carousel-indicators">
-    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-    <li data-target="#myCarousel" data-slide-to="1"></li>
-  </ol>
-  <!-- Wrapper for slides -->
-  <div class="carousel-inner" role="listbox">
-    <div class="item active">
-      <img src="../../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
-      <div class="carousel-caption">Unconverged BSE optical spectrum</div>
-    </div>
-    <div class="item">
-      <img src="../../tutorial/bse_assets/tbs5.png" alt="Converged BSE spectrum">
-      <div class="carousel-caption">Convergenge of BSE optical spectrum wrt k-point sampling</div>
-    </div>
-  </div>
-  ...
-  ...
-</div>
-```
-
-that produces:
-
-<div id="myCarousel" class="carousel slide" data-ride="carousel">
-  <!-- Indicators -->
-  <ol class="carousel-indicators">
-    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-    <li data-target="#myCarousel" data-slide-to="1"></li>
-  </ol>
-
-  <!-- Wrapper for slides -->
-  <div class="carousel-inner" role="listbox">
-    <div class="item active">
-      <img src="../../tutorial/bse_assets/tbs2_1.png" alt="Uncoverged BSE spectrum">
-      <div class="carousel-caption">Unconverged BSE optical spectrum</div>
-    </div>
-    <div class="item">
-      <img src="../../tutorial/bse_assets/tbs5.png" alt="Converged BSE spectrum">
-      <div class="carousel-caption">Convergenge of BSE optical spectrum wrt k-point sampling</div>
-    </div>
-  </div>
-
-  <!-- Left and right controls -->
-  <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
-    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-    <span class="sr-only">Previous</span>
-  </a>
-  <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
-    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-    <span class="sr-only">Next</span>
-  </a>
-</div>
-
+<!--
 !!! warning
     Do not use root-relative URLs (e.g. `/tutorial/bse_assets/tbs5.png`) in HTML code 
     because this will create problems when the site is deployed.
     Besides relative URLs allow us to serve multiple versions of the Abinit documentation 
     associated to the different versions of the code.
+-->
