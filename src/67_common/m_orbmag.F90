@@ -894,9 +894,10 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
        dub_dsg_i = -DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(2,:))
        orbmag_terms(adir,vvib,nn)= orbmag_terms(adir,vvib,nn) - (dub_dsg_i-dug_dsb_i)*Enk*trnrm
 
-       ! VV Ia term gives (i/2)eps_abg sum_n' (-)<u_n|dS/db|u_n'><u_n'|dS/dg|u_n>Enk
+       ! VVIa term gives (i/2)eps_abg sum_n' (-)<u_n|dS/db|u_n'><u_n'|dS/dg|u_n>Enk
        ! = + sum_n' Im{<u_n|dS/db|u_n'><u_n'|dS/dg|u_n>Enk}
-       ! VV IIIa is identical.
+       ! VVIIIa is identical. VVIIa is the negative of VVIa. The total contribution of all
+       ! three terms is thus the same as VVIa itself.
        ! term 3 
        do nnp=1,nband_k
          cwavefp(1:2,1:npw_k) = cg_k(1:2,(nnp-1)*npw_k+1:nnp*npw_k)
@@ -906,7 +907,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
          dgr= DOT_PRODUCT(cwavefp(1,:),cwavedsdg(1,:))+DOT_PRODUCT(cwavefp(2,:),cwavedsdg(2,:))
          dgi=-DOT_PRODUCT(cwavefp(2,:),cwavedsdg(1,:))+DOT_PRODUCT(cwavefp(1,:),cwavedsdg(2,:))
          dgc=cmplx(dgr,dgi,kind=dpc)
-         orbmag_terms(adir,vvia,nn) = orbmag_terms(adir,vvia,nn) + two*AIMAG(CONJG(dbc)*dgc*Enk)*trnrm
+         orbmag_terms(adir,vvia,nn) = orbmag_terms(adir,vvia,nn) + AIMAG(CONJG(dbc)*dgc*Enk)*trnrm
        end do
       
        ! 5 Tr[-\rho^0 S^1 \rho^0 H^0] contribution 
@@ -1112,23 +1113,23 @@ subroutine orbmag_ddk_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_tra
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, Term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '   Conduction space : ',(orbmag_trace(adir,cci),adir=1,3)
+   write(message,'(a,3es16.8)') '           Conduction space : ',(orbmag_trace(adir,cci),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '   Valence space II : ',(orbmag_trace(adir,vvii),adir=1,3)
+   write(message,'(a,3es16.8)') '          Valence space IIb : ',(orbmag_trace(adir,vvii),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '  Valence space Ia  : ',(orbmag_trace(adir,vvia),adir=1,3)
+   write(message,'(a,3es16.8)') '  Valence space Ia+IIa+IIIa : ',(orbmag_trace(adir,vvia),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '  Valence space Ib  : ',(orbmag_trace(adir,vvib),adir=1,3)
+   write(message,'(a,3es16.8)') '          Valence space Ib  : ',(orbmag_trace(adir,vvib),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '   S(1) PAW overlap : ',(orbmag_trace(adir,rho0s1),adir=1,3)
+   write(message,'(a,3es16.8)') '           S(1) PAW overlap : ',(orbmag_trace(adir,rho0s1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '          H(1) cprj : ',(orbmag_trace(adir,rho0h1),adir=1,3)
+   write(message,'(a,3es16.8)') '                  H(1) cprj : ',(orbmag_trace(adir,rho0h1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '   H(1) on-site L_R : ',(orbmag_trace(adir,lrr3),adir=1,3)
+   write(message,'(a,3es16.8)') '           H(1) on-site L_R : ',(orbmag_trace(adir,lrr3),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' H(1) on-site A0.An : ',(orbmag_trace(adir,a0an),adir=1,3)
+   write(message,'(a,3es16.8)') '         H(1) on-site A0.An : ',(orbmag_trace(adir,a0an),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '    Berry curvature : ',(orbmag_trace(adir,berrycurve),adir=1,3)
+   write(message,'(a,3es16.8)') '            Berry curvature : ',(orbmag_trace(adir,berrycurve),adir=1,3)
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -1142,23 +1143,23 @@ subroutine orbmag_ddk_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_tra
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,i2,a,i2)') ' band ',iband,' of ',nband_k
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '   Conduction space : ',(orbmag_terms(adir,cci,iband),adir=1,3)
+     write(message,'(a,3es16.8)') '            Conduction space : ',(orbmag_terms(adir,cci,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '   Valence space II : ',(orbmag_terms(adir,vvii,iband),adir=1,3)
+     write(message,'(a,3es16.8)') '           Valence space IIb : ',(orbmag_terms(adir,vvii,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '  Valence space Ia  : ',(orbmag_terms(adir,vvia,iband),adir=1,3)
+     write(message,'(a,3es16.8)') '  Valence space Ia+IIa+IIIa  : ',(orbmag_terms(adir,vvia,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '  Valence space Ib  : ',(orbmag_terms(adir,vvib,iband),adir=1,3)
+     write(message,'(a,3es16.8)') '           Valence space Ib  : ',(orbmag_terms(adir,vvib,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '   S(1) PAW overlap : ',(orbmag_terms(adir,rho0s1,iband),adir=1,3)
+     write(message,'(a,3es16.8)') '            S(1) PAW overlap : ',(orbmag_terms(adir,rho0s1,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '          H(1) cprj : ',(orbmag_terms(adir,rho0h1,iband),adir=1,3)
+     write(message,'(a,3es16.8)') '                   H(1) cprj : ',(orbmag_terms(adir,rho0h1,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '   H(1) on-site L_R : ',(orbmag_terms(adir,lrr3,iband),adir=1,3)
+     write(message,'(a,3es16.8)') '            H(1) on-site L_R : ',(orbmag_terms(adir,lrr3,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' H(1) on-site A0.An : ',(orbmag_terms(adir,a0an,iband),adir=1,3)
+     write(message,'(a,3es16.8)') '          H(1) on-site A0.An : ',(orbmag_terms(adir,a0an,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '    Berry curvature : ',(orbmag_terms(adir,berrycurve,iband),adir=1,3)
+     write(message,'(a,3es16.8)') '             Berry curvature : ',(orbmag_terms(adir,berrycurve,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
    end do
  end if
