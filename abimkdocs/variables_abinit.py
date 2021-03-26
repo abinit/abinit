@@ -13557,7 +13557,7 @@ The following values are permitted for **pawovlp**:
 
 Note that ABINIT will not stop at the first time a too large overlap is identified, in case of [[ionmov]]/=0
 or [[imgmov]]/=0, but only at the second time in the same dataset. Indeed, such trespassing might only be transient.
-However, a second trespassing in the same dataset, or if both [[ionmov]]=0 and [[imgmov]]=0 will induce stop.
+However, a second trespassing in the same dataset, or if both [[ionmov]]=0 and [[imgmov]]=0, will induce stop.
 """,
 ),
 

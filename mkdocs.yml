@@ -330,7 +330,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.5.0
+    version: 9.5.1
     social:
         - icon: fontawesome/brands/github
           link: https://github.com/abinit/abinit
