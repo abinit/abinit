@@ -226,6 +226,34 @@ some conduction states
     When [[symsigma]] is set to 1 (default), the code may decide to enlarge the initial value of [[bdgw]]
     so that all **degenerate states** for that particular $\kk$-point are included in the calculation.
 
+
+## Eliashberg functions
+
+In the adiabatic approximation the phonon frequencies in the denominator of the Fan-Migdal term are neglected and 
+the FM term simplifies to:
+
+\begin{equation}
+    \Sigma^\FM_{n\kk}(\ee_nk, T) =
+                \sum_{m,\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} |\gkq|^2
+                \dfrac{2  n_\qnu(T)}{{\ee_\nk - \emkq  + \wqnu + i \eta} 
+\label{eq:adiabatci_fan_selfen}
+\end{equation}
+
+The adiabatic ZPR can also be expressed as:
+
+$$
+\int \dd\ww (2  n(\ww, T) + 1) F_2(\ww)
+$$
+
+where $F_2^\nk(\ww)$ is given by:
+
+$$
+F_2^\nk(\ww) = 
+\sum_{m,\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} (|\gkq|^2 - g_{mn\nu}^{2,DW}(\kk, \qq)}) 
+\dfrac{\delta(\ww - \wqnu)}{\ee_\nk - \ee_{m\kq}}
+$$
+
+
 ## Typical workflow for ZPR
 
 A typical workflow for ZPR calculations involves the following steps 

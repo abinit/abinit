@@ -7,8 +7,8 @@ plotly: true
 
 This page is intended as a quick reference to the Markdown syntax and the extensions
 available in the Abinit documentation.
-Markdown can be used *almost everywhere*: user guides, tutorials, release notes, theory notes, the 
-description of the input variables stored in python files inside `abimkdocs`, as well as 
+Markdown can be used *almost everywhere*: user guides, tutorials, release notes, theory notes, the
+description of the input variables stored in python files inside `abimkdocs`, as well as
 in the `TEST_INFO` section of the automatic tests.
 
 As the [original/official Markdown syntax rules](https://daringfireball.net/projects/markdown/syntax#html) &nbsp;
@@ -24,10 +24,10 @@ state:
 >
 > For any markup that is not covered by Markdown’s syntax, you simply use HTML itself.
 
-Basic Markdown syntax already covers most of our needs and the *Abinit extensions* 
+Basic Markdown syntax already covers most of our needs and the *Abinit extensions*
 ([wikilinks](#wikilinks) and [Abinit extensions](#abinit-extensions))
 facilitate the integration between the documentation on the website and the new developments done in the gitlab branch.
-This page, for example, is entirely written in Markdown with the exception of the last 
+This page, for example, is entirely written in Markdown with the exception of the last
 two sections in which we discuss advanced features requiring some HTML code.
 
 ## Markdown quick reference
@@ -94,7 +94,7 @@ Fenced code has three back-ticks around it.
 ```
 ~~~
 
-produces  
+produces
 ```
 Fenced code has three back-ticks around it.
 ```
@@ -109,7 +109,7 @@ produces
 
     abinit run.abi 2> log &
 
-Fenced blocks is an alternative form that allows the specification of the language 
+Fenced blocks is an alternative form that allows the specification of the language
 used for syntax highlighting.
 Fortran code, for example, can be included with:
 
@@ -190,13 +190,13 @@ The caption can contain Latex equations as well as [Abinit wikilinks](#wikilinks
 
 <!--
 !!! note
-    In the two examples, the location of the png files is given by relative URLs (relative to this page). 
+    In the two examples, the location of the png files is given by relative URLs (relative to this page).
     In the first example we have used a root-relative URL (`/tutorial/bse_assets/tbs2_1.png`) where
-    the "root" `/` corresponds to the `~abinit/doc` directory if you are running the webserver locally 
-    or to the Abinit website domain if the documentation is served on the internet. 
-    In the second example, we have used a relative URL (relative to this page). 
+    the "root" `/` corresponds to the `~abinit/doc` directory if you are running the webserver locally
+    or to the Abinit website domain if the documentation is served on the internet.
+    In the second example, we have used a relative URL (relative to this page).
     Mkdocs will convert all Markdown URLs into relative URLs so that the website can be easily deployed.
-    A concise explanation of absolute, relative and root-relative links is given 
+    A concise explanation of absolute, relative and root-relative links is given
     [here](https://mor10.com/html-basics-hyperlink-syntax-absolute-relative-and-root-relative/).
 -->
 
@@ -208,7 +208,7 @@ If you need to customize the height and width of the image, use
 
 ![](../tutorial/eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
 
-Note that this is not standard markdown but an extension provided by 
+Note that this is not standard markdown but an extension provided by
 [Attribute Lists extension](https://python-markdown.github.io/extensions/attr_list/)
 that adds a syntax to define attributes on the various HTML elements in markdown’s output.
 
@@ -262,30 +262,101 @@ built with [lightGallery](http://sachinchoolur.github.io/lightGallery/).
 
 ## Links
 
-### Markdown links 
+### Markdown links
 
-The Markdown syntax for links is:
+To create a link, enclose the link text in brackets (e.g., [Duck Duck Go]) and then follow
+it immediately with the URL in parentheses (e.g., (https://duckduckgo.com)).
+Alternatively, one can enclose the URLs directly between `<>`.
+The table below shows typical scenarios:
 
-| Markdown | Result | Extension required |
+| Markdown | Result
+| :-- | :--
+| `[Duck Duck Go](https://duckduckgo.com)` | [Duck Duck Go](https://duckduckgo.com)
+| `<https://www.abinit.org>` | <https://www.abinit.org>
+| `[Links for videos section in the same page](#videos)` | [Links to videos section in the same page](#videos)
+
+!!! note
+
+    Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) &nbsp; icon:
+    <i class="fa fa-external-link" aria-hidden="true"></i>. See CSS rules in **extra.css**.
+
+Markdown can also be used for creating internal links to **other pages** of the ABINIT website.
+The main problem is that you need to know the **relative URL** (or the root-relative URL) of the HTML page you want to refer to.
+Unfortunately, this is not so easy since the HTML pages are automatically generated by *mksite.py* and *mkdocs* 
+hence you need to understand how these tools work internally.
+Just to make things even more complicated, there are different ways to achieve the same result 
+(**relative urls**, **root-relative urls**, **mkdocs md syntax**).
+Let's try to clarify this point using a very pragmatic approach.
+
+First of all, it is very important to understand that in the *mkdocs.yml* configuration file,
+the [use_directory_urls](https://www.mkdocs.org/user-guide/configuration/#use_directory_urls) option is set to True.
+This means that mkdocs creates a directory with an *index.html* file for each md page
+included in the ABINIT documentation.
+For instance, the **abimkdocs.md** and **markdown.md** files located in ~abinit/doc/developers
+are converted by mkdocs into the following hierarchy of HTML files:
+
+- /developers/abimkdocs/index.html
+- /developers/markdown/index.html
+
+in which the content of e.g. *abimkdocs.md* is used to generate *abimkdocs/index.html*.
+
+!!! important
+
+    In these examples the `/` symbol **does not correspond to the root of your filesystem**
+    but to the root directory used by the web-server for serving HTML files.
+    Roughly speaking, your ~abinit/doc/ directory is consired as the root node.
+
+We use this convention because it leads to more user-friendly URLs as the abimkdocs page
+is now served by the *local web server* at **http://127.0.0.1:8000/developers/abimkdocs**
+instead of the lengthier **http://127.0.0.1:8000/developers/abimkdocs.html**.
+Once the website is deployed in production, the same page will be served at <https://docs.abinit.org/developers/abimkdocs>
+instead of *https://docs.abinit.org/developers/abimkdocs.html*.
+
+At this point it should be clear that the relative path you see on your file system **is not the same**
+as the relative URL seen by the web-server.
+In other words, you should **add an extra** "../" to the relative path you have on your file system
+to account for the creation of the directory.
+This syntax is clearly unintuitive and error-prone but it is worth knowing especially if, for some reason,
+you need to inject in the md page HTML code with relative hrefs.
+
+Fortunately, you are not obliged to use relative URLs in markdown links since there are two other approaches
+that are much more user-friendly and much easier to maintain.
+The first one is based on **root-relative URLs** while the second one relies on
+[preprocessing operations performed by mkdocs](https://www.mkdocs.org/user-guide/writing-your-docs/#internal-links).
+
+In brief, root-relative URLs can be seen as paths relative to your ~abinit/doc/ directory provided you add
+a `/` at the beginning of the string while the mkdocs syntax is activated by using relative paths as seen on your files system
+with the crucial difference that you **must include the .md extension** at the end of the URL.
+As usual, it is much easier to explain the different cases by examples:
+
+| Markdown | Result | Link Type |
 | :-- | :-- | :--
-| `[Links for videos](#videos)` | [Links for videos](#videos)  | --
-| `[About topics](/developers/abimkdocs#topics)` | [About topics](/developers/abimkdocs#topics)  | --
-| `[MBPT document](/theory/mbt)` | [MBPT document](/theory/mbt) | --
-| `[The Abinit website](https://www.abinit.org)` | [The Abinit website](https://www.abinit.org)  | --
-| `<https://www.abinit.org>` | <https://www.abinit.org> | --
+| `[MBPT document](/theory/mbt)` | [MBPT document](/theory/mbt) | root-relative URL (**recommended**)
+| `[MBPT document](../theory/mbt.md)` | [MBPT document](../theory/mbt.md) | mkdocs preprocessed relative URL
+| `[About topics](/developers/abimkdocs#topics)` | [About topics](/developers/abimkdocs#topics)  | root-relative + HTML fragment  (**recommended**)
+| `[About topics](abimkdocs.md#topics)` | [About topics](abimkdocs.md#topics)  | mkdocs preprocessed relative URL + HTML fragment
+| `[About topics](../abimkdocs#topics)` | [About topics](../abimkdocs#topics)  | relative URL (no mkdocs preprocessing) + HTML fragment (**don't use it**)
 
-This is the **recommended** approach to create links to external resources, or internal links to other pages 
-of the website, especially when there is no shortcut available based on the [wikilink syntax](#wikilinks).
-Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) &nbsp; icon:
-<i class="fa fa-external-link" aria-hidden="true"></i> (see CSS rules in *extra.css*).
+!!! important
 
-Note that linking to a page that is located in the same directory is trivial in Markdown.
-All the tutorials, for example, are placed in the same directory (~doc/tutorial).
-To refer to the first PAW tutorial from the second tutorial, use:
+    Relative URLs obviously depend on the location of the page containg the link whereas root-relative URLs are invariant.
+    It is evident that absolute (file-system dependent) paths such as `~gmatteo/abinit/doc/theory/mbt` won't work when
+    the website is deployed so don't use them.
 
-    [The first PAW tutorial](paw1)
 
-There are however cases in which we would like to have an even simpler syntax to generate automatically
+At this point you may ask why do we have all these different approaches and which one should I use when writing the documentation?
+To make a long story short, **we strongly suggest to use root-relative URLs**.
+The reason is that root-relative URLs look like "absolute paths" so one can easily use regular expressions
+to update the links everywhere if md pages are moved around.
+The mkdocs syntax is shorter if you are referring to another md page in the same directory but since the ABINIT
+website does not have so many nested levels, root-relative URLs are not necessarily much longer than the mkdocs syntax.
+
+The mkdocs syntax has the advantage that mkdocs can immediately check whether the internal URL is correct while building
+the web site but, as a matter of fact, we perform a similar check by running linkchecker with our buildbot infrastructure.
+This means that if you use root-relative URLs in the docs, mkdocs won't be able to detect broken links while
+you are working interactively but the error will be automatically detected by our test farm.
+
+There are however cases in which we would like to have an even **simpler syntax** to automatically generate 
 links within our documentation, in particular links to:
 
 * The input variables declared in the `abimkdocs` directory.
@@ -294,7 +365,8 @@ links within our documentation, in particular links to:
 * Website pages commonly mentioned such as e.g. the [[topic:index|topics page]].
 
 For this reason, we use the [extensions API](https://python-markdown.github.io/extensions/api) &nbsp;
-provided by python Markdown to extend the syntax of the parser, using the "Wikilink" syntax.
+provided by python Markdown to extend the syntax of the parser, using the Wikilink syntax so that 
+you don't need to know the root-relative or the relative URL of the HTML page you want to link.
 Typical cases are discussed in the next sections.
 
 ### Wikilinks
@@ -380,14 +452,6 @@ The python code issues a warning in the terminal if the link cannot be establish
 
 Other internal links can be recognized thanks to the namespace.
 
-<!--
-`tutorial`, `topic`, `help`, `theorydoc, and `varset` create a link
-to the corresponding Markdown files inside the `tutorials`, `topic`, `user-guide`, `vari
-A first set of allowed internal namespaces are:
-In such cases, provided there is a corresponding generated HTML file
-that has a name that start with the namespace and end with the name, the link will be established.
--->
-
 Examples:
 
 Namespace      | Markdown                         | Result
@@ -414,7 +478,7 @@ Namespace      | Markdown                         | Result
 ## 4 More detailed presentation of the files file
 ```
 
-Also in this case, it's possible to specify the name of the link 
+Also in this case, it's possible to specify the name of the link
 with the `|` separator so `[[topic:PIMD#1|Introduction]]` becomes [[topic:PIMD#1|Introduction]].
 
 
@@ -481,7 +545,7 @@ which is part of the standard Markdown library.
 The extension inserts an anchor at the end of each headline, which makes it possible to directly link to a subpart of the document.
 
 By default, all headers will automatically have unique id attributes generated based upon the text of the header.
-The name of the anchor is constructed from the header by converting the string to lower-case ASCII, 
+The name of the anchor is constructed from the header by converting the string to lower-case ASCII,
 removing dots and other symbols such as `&` and replacing white spaces with a dash `-`.
 For instance, `#pdf-files` is the anchor associated to the "Pdf Files" section
 in this page and we can thus refer to it with the Markdown syntax:
@@ -520,9 +584,9 @@ Also in this case, we get the correct result:
 
 An example of [root-relative link](/developers/abimkdocs.md#getting-started)
 
-Note that Mkdocs converts all URLs to relative URLs so the two approaches are completely equivalent 
-still the use of relative URLs is strongly suggested because developers will be able to open the link 
-in their editor (provided the editor is Markdown-aware). 
+Note that Mkdocs converts all URLs to relative URLs so the two approaches are completely equivalent
+still the use of relative URLs is strongly suggested because developers will be able to open the link
+in their editor (provided the editor is Markdown-aware).
 -->
 
 !!! note
@@ -559,7 +623,7 @@ Markdown       | Result
 
 ### Definition Lists
 
-The [Definition Lists](https://python-markdown.github.io/extensions/definition_lists) &nbsp; extension 
+The [Definition Lists](https://python-markdown.github.io/extensions/definition_lists) &nbsp; extension
 adds the ability to create definition lists in Markdown documents.
 This extension is included in the standard Markdown library.
 The following text:
@@ -642,7 +706,7 @@ is an extension that creates collapsible elements that hide their content.
 It uses the HTML5 `#!html <details><summary>` tags to accomplish this.
 It supports nesting and you can also force the default state to be open.
 This extension is used in the documentation of the input variable to generate
-a container with the list of tests associated to the variable but it can also be used for 
+a container with the list of tests associated to the variable but it can also be used for
 long FAQs of Q&A sections in the tutorials.
 
 Examples:
@@ -810,7 +874,7 @@ Please do not use unicode characters in Latex equations.
 | GREEK SMALL LETTER OMICRON	  | ο		| &‌#959; | &‌#x03BF	| &‌omicron;
 | GREEK SMALL LETTER PI		  | π		| &‌#960; | &‌#x03C0	| &‌pi;
 | GREEK SMALL LETTER RHO	  | ρ		| &‌#961; | &‌#x03C1	| &‌rho;
-| GREEK SMALL LETTER FINAL SIGMA  | ς		| &‌#962; | &‌#x03C2	|  
+| GREEK SMALL LETTER FINAL SIGMA  | ς		| &‌#962; | &‌#x03C2	|
 | GREEK SMALL LETTER SIGMA	  | σ		| &‌#963; | &‌#x03C3	| &‌sigma;
 | GREEK SMALL LETTER TAU	  | τ		| &‌#964; | &‌#x03C4	| &‌tau;
 | GREEK SMALL LETTER UPSILON	  | υ		| &‌#965; | &‌#x03C5	| &‌upsilon;
@@ -875,10 +939,10 @@ $(function() {
 plotly is used to plot the [code statistics](codestats.md) but it's not required for the proper functioning of the website.
 
 
-## Using HTML directly 
+## Using HTML directly
 
 HTML code can be used in Markdown but keep in mind that
-standard Markdown parsers will ignore text inside block-level HTML tags so
+standard Markdown parsers ignore text inside block-level HTML tags so
 
 ```html
 <div>
@@ -894,17 +958,17 @@ generates a directory with an `index.html` file for every markdown page declared
 This means that a local webserver will serve this page at `http://127.0.0.1:8000/developers/markdown/index.html`
 that can be equivalently reached from the more user friendly URL `http://127.0.0.1:8000/developers/markdown/`.
 
-This implementation detail does not affect links specified either with wikilink or markdown syntax because 
+This implementation detail does not affect links specified either with wikilink or markdown syntax because
 the python code will perform the automatic translation of the URLs.
-It does affect, however, the way you should specify `src` or `href` in HTML code because 
+It does affect, however, the way you should specify `src` or `href` in HTML code because
 one should take into account the *extra directory* created by Mkdocs.
 In a nutshell, **prepend** a `../` to the relative path you would use inside the shell to specify the location
 of that resource with respect to the present page.
 
 <!--
 !!! warning
-    Do not use root-relative URLs (e.g. `/tutorial/bse_assets/tbs5.png`) in HTML code 
+    Do not use root-relative URLs (e.g. `/tutorial/bse_assets/tbs5.png`) in HTML code
     because this will create problems when the site is deployed.
-    Besides relative URLs allow us to serve multiple versions of the Abinit documentation 
+    Besides relative URLs allow us to serve multiple versions of the Abinit documentation
     associated to the different versions of the code.
 -->

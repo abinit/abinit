@@ -598,15 +598,16 @@ module m_sigmaph
    real(dp), ABI_CONTIGUOUS pointer :: qibz(:,:)
 
    real(dp),allocatable :: phfreqs_qibz(:,:)
-   ! (natom3, sigma%nqibz))
+   ! (natom3, %nqibz))
+
    real(dp),allocatable :: pheigvec_qibz(:,:,:,:)
-   ! (2, natom3, natom3, sigma%nqibz))
+   ! (2, natom3, natom3, %nqibz))
 
    real(dp),allocatable :: phfrq(:)
    ! natom3
 
    real(dp),allocatable :: displ_cart(:,:,:,:)
-   ! displ_cart(2, 3, natom, self%natom3)
+   ! displ_cart(2, 3, natom, %natom3)
 
   contains
 
@@ -1878,7 +1879,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 1) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 1) + &
                     rfact * (gkq_nu(1, ib_k, nu) ** 2 + gkq_nu(2, ib_k, nu) ** 2)
 
-               ! Treat Fan term.
+               ! Treat contribution to Eliashberg function due to Fan term.
                if (ediff > wqnu) then
                   rfact = one / ediff
                else
@@ -1892,6 +1893,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  gf_val = frohl_sphcorr(nu) * (four_pi / three * q0rad ** 3)
                end if
                sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 2) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 2) + gf_val * rfact
+               ! TODO: Sternheimer
 
                if (dtset%prteliash == 3) then
                  delta_e_minus_emkq = gaussian(sigma%a2f_emesh - eig0mkq, dtset%tsmear)
@@ -4958,8 +4960,6 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  ! Write frequency dependent data.
  if (self%nwr > 0) then
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "wrmesh_b"), self%wrmesh_b, start=[1,1,ikcalc,spin]))
-
-   !shape4(2:) = shape(self%vals_wr); call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_wr"), c2r(self%vals_wr), start=[1,1,1,1,ikcalc,spin]))
 
    ! Compute spectral function.
