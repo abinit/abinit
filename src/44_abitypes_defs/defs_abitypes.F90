@@ -22,7 +22,7 @@
 !! * MPI_type: the data related to MPI parallelization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (XG)
+!! Copyright (C) 2001-2021 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,10 +76,10 @@ module defs_abitypes
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! Main variables for parallelisation
   integer :: comm_world
-  ! number of the world communicator MPI COMM WORLD
+  ! world communicator MPI COMM WORLD
 
   integer :: me
-  ! number of my processor in the group of all processors
+  ! rank my processor in the group of all processors
 
   integer :: nproc
   ! number of processors
@@ -90,7 +90,7 @@ module defs_abitypes
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! This is for the parallelisation over atoms (PAW)
    integer :: comm_atom
-   ! Communicator over atoms
+   ! Communicator for atom parralelism
 
    integer :: nproc_atom
    ! Size of the communicator over atoms
@@ -210,8 +210,8 @@ module defs_abitypes
    integer :: me_kpt
    ! Rank of my proc in the communicator over kpt
 
-   integer :: nproc_kpt
-   ! Number of procs on which we distribute kpt
+   integer :: nproc_spkpt
+   ! Number of procs on which we distribute spins and kpt
 
    integer, allocatable :: proc_distrb(:,:,:)
     ! proc_distrb(nkpt,mband,nsppol)
@@ -231,7 +231,7 @@ module defs_abitypes
    ! Flag: activation of parallelization over kpt/band/fft
 
    integer :: bandpp
-   ! # of Bands Per Processor
+   ! Number of Bands in the paral_kgb blocl treated by this Processor
 
    integer :: comm_bandspinorfft
    ! Cartesian communicator over band-fft-spinor

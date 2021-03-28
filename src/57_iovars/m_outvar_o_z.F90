@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -151,12 +151,12 @@ contains
 !###########################################################
 !### 01. Initial allocations and initialisations.
 
- ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
- ABI_ALLOCATE(intarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(narrm,(0:ndtset_alloc))
- ABI_ALLOCATE(nimagem,(0:ndtset_alloc))
- ABI_ALLOCATE(prtimg,(mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(narrm,(0:ndtset_alloc))
+ ABI_MALLOC(nimagem,(0:ndtset_alloc))
+ ABI_MALLOC(prtimg,(mxvals%nimage,0:ndtset_alloc))
 
  do idtset=0,ndtset_alloc
    nimagem(idtset)=dtsets(idtset)%nimage
@@ -175,15 +175,15 @@ contains
 !### 02. Specific treatment for occopt, xangst, xcart, xred
 
 !Must compute xangst and xcart
- ABI_ALLOCATE(xangst_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
- ABI_ALLOCATE(xcart_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(xangst_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(xcart_,(3,mxvals%natom,mxvals%nimage,0:ndtset_alloc))
  xangst_(:,:,:,:)=0.0_dp ; xcart_(:,:,:,:)=0.0_dp
 
  do idtset=1,ndtset_alloc
    natom=dtsets(idtset)%natom
-   ABI_ALLOCATE(xred,(3,natom))
-   ABI_ALLOCATE(xangst,(3,natom))
-   ABI_ALLOCATE(xcart,(3,natom))
+   ABI_MALLOC(xred,(3,natom))
+   ABI_MALLOC(xangst,(3,natom))
+   ABI_MALLOC(xcart,(3,natom))
    do iimage=1,dtsets(idtset)%nimage
      xred(:,1:natom)=results_out(idtset)%xred(:,1:natom,iimage)
      call mkrdim(results_out(idtset)%acell(:,iimage),results_out(idtset)%rprim(:,:,iimage),rprimd)
@@ -199,9 +199,9 @@ contains
      xangst_(1:3,1:natom,dtsets(idtset)%nimage+1:mxvals%nimage,idtset)=zero
      xcart_(1:3,1:natom,dtsets(idtset)%nimage+1:mxvals%nimage,idtset)=zero
    end if
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(xangst)
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xred)
+   ABI_FREE(xangst)
+   ABI_FREE(xcart)
  end do
 
 !###########################################################
@@ -512,6 +512,9 @@ contains
  intarr(1,:)=dtsets(:)%prtbltztrp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtbltztrp','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtchkprdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtchkprdm','INT',0)
+
  intarr(1,:)=dtsets(:)%prtcif
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtcif','INT',0)
 
@@ -574,6 +577,9 @@ contains
 
  intarr(1,:)=dtsets(:)%prtnabla
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtnabla','INT',0)
+
+ intarr(1,:)=dtsets(:)%prtnest
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtnest','INT',0)
 
  intarr(1,:)=dtsets(:)%prtphbands
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphbands','INT',0)
@@ -838,6 +844,11 @@ contains
 
  dprarr(1,:)=dtsets(:)%rifcsph
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rifcsph','DPR',0)
+
+ intarr(1,:)=dtsets(:)%rmm_diis
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rmm_diis','INT',0)
+ intarr(1,:)=dtsets(:)%rmm_diis_savemem
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rmm_diis_savemem','INT',0)
 
 !rprim
  prtimg(:,:)=1
@@ -1455,6 +1466,9 @@ contains
  dprarr(1,:)=dtsets(:)%xc_tb09_c
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_tb09_c','DPR',0)
 
+ intarr(1,:)=dtsets(:)%x1rdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'x1rdm','INT',0)
+
 !xred
  prtimg(:,:)=1
  do idtset=0,ndtset_alloc
@@ -1528,14 +1542,14 @@ contains
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(narrm)
- ABI_DEALLOCATE(nimagem)
- ABI_DEALLOCATE(dprarr_images)
- ABI_DEALLOCATE(prtimg)
- ABI_DEALLOCATE(xangst_)
- ABI_DEALLOCATE(xcart_)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(narrm)
+ ABI_FREE(nimagem)
+ ABI_FREE(dprarr_images)
+ ABI_FREE(prtimg)
+ ABI_FREE(xangst_)
+ ABI_FREE(xcart_)
 
 contains
 !!***
@@ -1604,12 +1618,12 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
 
  if(ndtset_alloc<1)then
    write(message, '(a,i0,a)' )' ndtset_alloc=',ndtset_alloc,', while it should be >= 1.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(ndtset_alloc>9999)then
    write(message, '(a,i0,a)' )' ndtset_alloc=',ndtset_alloc,', while it must be lower than 100.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !It is important to take iscf into account, since when it is -2, occupation numbers must be ignored
@@ -1837,7 +1851,7 @@ subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,re
    end do
  end if
 
- ABI_DEALLOCATE(test_multiimages)
+ ABI_FREE(test_multiimages)
 
 end subroutine prtocc
 !!***

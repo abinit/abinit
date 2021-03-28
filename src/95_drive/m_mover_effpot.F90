@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (AM)
+!!  Copyright (C) 2008-2021 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -167,7 +167,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  real(dp),pointer :: rhog(:,:),rhor(:,:)
  real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: xred(:,:),xred_old(:,:),xcart(:,:)
- real(dp),allocatable :: fred(:,:),fcart(:,:)
+ real(dp),allocatable :: gred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
@@ -218,8 +218,8 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
    acell = one
    rprimd = effective_potential%crystal%rprimd
 
-   ABI_ALLOCATE(xred,(3,effective_potential%crystal%natom))
-   ABI_ALLOCATE(xcart,(3,effective_potential%crystal%natom))
+   ABI_MALLOC(xred,(3,effective_potential%crystal%natom))
+   ABI_MALLOC(xcart,(3,effective_potential%crystal%natom))
 
 !  convert new xcart
    call xcart2xred(effective_potential%crystal%natom,effective_potential%crystal%rprimd,&
@@ -228,8 +228,8 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !  Generate supercell for the simulation
    call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
 
-ABI_DEALLOCATE(xred) 
-ABI_DEALLOCATE(xcart)
+ABI_FREE(xred) 
+ABI_FREE(xcart)
 
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
@@ -250,7 +250,7 @@ ABI_DEALLOCATE(xcart)
 !  Set the abinit dataset for mover with fake values
 !  Scalar
    dtset%dmft_entropy = 0
-   dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics informations
+   dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics information
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
    dtset%dilatmx = 1.5  ! DILATation : MaXimal value
    dtset%chkdilatmx = 0 ! No check on dilatmx is needed in multibilint
@@ -298,27 +298,27 @@ ABI_DEALLOCATE(xcart)
 ! &         ' You need to provide DDB file in the input to compute ahnarmonic',ch10,&
 ! &         ' part of effective Hamiltionian',ch10,&
 ! &         'Action: add DDB file in the inputs'
-!        MSG_BUG(message)
+!        ABI_BUG(message)
 !      end if
 !      call ddb_to_dtset(comm, dtset,filnam(3),psps)
-!      ABI_ALLOCATE(dtset%kptns,(3,dtset%nkpt))
+!      ABI_MALLOC(dtset%kptns,(3,dtset%nkpt))
 !      dtset%kptns(:,:) = dtset%kpt(:,:)
-!      ABI_ALLOCATE(dtset%istwfk,(dtset%nkpt))
+!      ABI_MALLOC(dtset%istwfk,(dtset%nkpt))
 !      dtset%istwfk(:) = 1
 
 !    else
  !    Need to init some values
 !   dtset%nsym = 1       ! Number of SYMmetry operations
-!   ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
+!   ABI_MALLOC(symrel,(3,3,dtset%nsym))
 !   symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel)) 
 !   call alloc_copy(symrel,dtset%symrel)
-!   ABI_ALLOCATE(tnons,(3,dtset%nsym))
+!   ABI_MALLOC(tnons,(3,dtset%nsym))
 !   tnons = zero
 !   call alloc_copy(tnons,dtset%tnons)
    call alloc_copy(effective_potential%supercell%typat,dtset%typat)
    call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)
-!   ABI_DEALLOCATE(symrel)
-!   ABI_DEALLOCATE(tnons)
+!   ABI_FREE(symrel)
+!   ABI_FREE(tnons)
 !   end if
  !Find symmetry for simulation 
    if(inp%dyn_chksym == 1)then 
@@ -343,9 +343,9 @@ ABI_DEALLOCATE(xcart)
          call effective_potential_file_mapHistToRef(effective_potential,hist_tmp,comm,verbose=.True.) ! Map Hist to Ref to order atoms
       endif
       msym = 96*PRODUCT(sc_size)
-      ABI_ALLOCATE(symrel,(3,3,msym))
-      ABI_ALLOCATE(symrec,(3,3,msym))
-      ABI_ALLOCATE(tnons,(3,msym))
+      ABI_MALLOC(symrel,(3,3,msym))
+      ABI_MALLOC(symrec,(3,3,msym))
+      ABI_MALLOC(tnons,(3,msym))
       tolsym = inp%dyn_tolsym
       call checksymmetrygroup(hist_tmp%rprimd,hist_tmp%xred,&
 &                             effective_potential%supercell%typat,msym,effective_potential%supercell%natom,&
@@ -355,38 +355,38 @@ ABI_DEALLOCATE(xcart)
         call mati3inv(symrel(:,:,ii),symrec(:,:,ii))
       end do
       !Get Indsym
-      ABI_ALLOCATE(indsym,(4,dtset%nsym,dtset%natom))
+      ABI_MALLOC(indsym,(4,dtset%nsym,dtset%natom))
       call symatm(indsym,dtset%natom,dtset%nsym,symrec,tnons,tolsym,effective_potential%supercell%typat,hist_tmp%xred)
       call alloc_copy(symrel,dtset%symrel)
       call alloc_copy(tnons,dtset%tnons)
       scfcv_args%indsym => indsym
       call abihist_free(hist_tmp)
-      ABI_DEALLOCATE(symrec)
+      ABI_FREE(symrec)
    else 
       dtset%nsym = 1       ! Number of SYMmetry operations
-      ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
+      ABI_MALLOC(symrel,(3,3,dtset%nsym))
       symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel)) 
       call alloc_copy(symrel,dtset%symrel)
-      ABI_ALLOCATE(tnons,(3,dtset%nsym))
+      ABI_MALLOC(tnons,(3,dtset%nsym))
       tnons = zero
       call alloc_copy(tnons,dtset%tnons)
-      ABI_ALLOCATE(indsym,(4,dtset%nsym,dtset%natom))
+      ABI_MALLOC(indsym,(4,dtset%nsym,dtset%natom))
       indsym = 0
       scfcv_args%indsym => indsym
    endif
 
-   ABI_DEALLOCATE(symrel)
-   ABI_DEALLOCATE(tnons)
+   ABI_FREE(symrel)
+   ABI_FREE(tnons)
 
    !array
-   ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
+   ABI_MALLOC(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
    dtset%iatfix = inp%iatfix
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
-   ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
+   ABI_MALLOC(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = 0
-   ABI_ALLOCATE(dtset%mixalch_orig,(dtset%npspalch,dtset%ntypalch,1))
+   ABI_MALLOC(dtset%mixalch_orig,(dtset%npspalch,dtset%ntypalch,1))
    dtset%mixalch_orig(:,:,:)=zero
-   ABI_ALLOCATE(dtset%ph_qshift,(3,dtset%ph_nqshift))
+   ABI_MALLOC(dtset%ph_qshift,(3,dtset%ph_nqshift))
    dtset%ph_qshift = inp%q1shft
    if(option  > 0)then
      verbose = .TRUE.
@@ -452,14 +452,14 @@ ABI_DEALLOCATE(xcart)
 
      if(dtset%nnos==0) then
        dtset%nnos = 1
-       ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
+       ABI_MALLOC(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
        write(message,'(3a,F30.10,a)')&
 &       ' WARNING: nnos is set to zero in the input',ch10,&
 &       '          value by default for qmass: ',dtset%qmass(:),ch10
        if(verbose)call wrtout(std_out,message,"COLL")
      else
-       ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
+       ABI_MALLOC(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
        dtset%qmass(:) = inp%qmass(:)
      end if
      if (abs(inp%bmass) < tol10) then
@@ -480,58 +480,21 @@ ABI_DEALLOCATE(xcart)
        write(message, '(5a)' )&
 &       ' The file ',trim(filnam(3)),' is not a DDB',ch10,&
 &       ' It is not compatible with ionmov 27'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 
    end if
 
 !  set psps
    psps%useylm = dtset%useylm
-!    if(option == -3)then
-!      mtypalch = 0
-!      npsp = dtset%ntypat
-!      call psps_free(psps)
-!      filename_psp(1) = "/home/alex/calcul/psp/Sr.LDA_PW-JTH.xml"
-!      filename_psp(2) = "/home/alex/calcul/psp/Ti.LDA_PW-JTH.xml"
-!      filename_psp(3) = "/home/alex/calcul/psp/O.LDA_PW-JTH.xml"
-!      ABI_DATATYPE_ALLOCATE(pspheads,(npsp))
-!      call inpspheads-rw-rw-r-- 1 mschmitt mschmitt  22004 Nov 28 14:30 log-MPI16-t98-new-4-8-from-ddb-large-coeff_ini-(filename_psp,npsp,pspheads,ecut_tmp)
-!      call psps_init_global(mtypalch, npsp, psps, pspheads)
-!      call psps_init_from_dtset(dtset, 1, psps, pspheads)
-!    end if
 
-! !  The correct dimension of pawrad/tab is ntypat. In case of alchemical psps
-! !  pawrad/tab(ipsp) is invoked with ipsp<=npsp. So, in order to avoid any problem,
-! !  declare pawrad/tab at paw_size=max(ntypat,npsp).
-!    paw_size=0;if (psps%usepaw==1) paw_size=max(dtset%ntypat,dtset%npsp)
-!    if (paw_size/=paw_size_old) then
-!      if (paw_size_old/=-1) then
-!        call pawrad_free(pawrad)
-!        call pawtab_free(pawtab)
-!        ABI_DATATYPE_DEALLOCATE(pawrad)
-!        ABI_DATATYPE_DEALLOCATE(pawtab)
-!      end if
-!      ABI_DATATYPE_ALLOCATE(pawrad,(paw_size))
-!      ABI_DATATYPE_ALLOCATE(pawtab,(paw_size))
-!      call pawtab_nullify(pawtab)
-!      paw_size_old=paw_size
-!    end if
-
-!  set args_gs
-!    if (option == -3 then
-!      call args_gs_init(args_gs, &
-! &       effective_potential%crystal%amu(:),dtset%mixalch_orig(:,:,1),&
-! &       dtset%dmatpawu(:,:,:,:,1),dtset%upawu(:,1),dtset%jpawu(:,1),&
-! &       dtset%rprimd_orig(:,:,1))
-!      ABI_ALLOCATE(npwtot,(dtset%nkpt))
-!    end if
 !  initialisation of results_gs
    call init_results_gs(dtset%natom,1,1,results_gs)
 
 !  Set the pointers of scfcv_args
    zero_integer = 0
    scfcv_args%dtset     => dtset
-   !ABI_ALLOCATE(indsym,(4,dtset%nsym,dtset%natom))
+   !ABI_MALLOC(indsym,(4,dtset%nsym,dtset%natom))
    !indsym = 0
    !scfcv_args%indsym => indsym
    scfcv_args%mpi_enreg => mpi_enreg
@@ -546,20 +509,20 @@ ABI_DEALLOCATE(xcart)
    dtfil%filnam_ds(4)=filnam(2)
    dtfil%filstat='_STATUS'
    nullify (electronpositron)
-   ABI_ALLOCATE(rhog,(2,1))
-   ABI_ALLOCATE(rhor,(2,1))
+   ABI_MALLOC(rhog,(2,1))
+   ABI_MALLOC(rhor,(2,1))
 
 !  Initialize xf history (should be put in inwffil)
 !  Not yet implemented for ionmov 2 3 10 11 22 (memory problem...)
 !  ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5
    ab_xfh%nxfh = 0
    ab_xfh%mxfh = 1
-   ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
+   ABI_MALLOC(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
    if (any((/3,10,11/)==dtset%ionmov)) then
      write(message, '(3a)' )&
 &     ' This dynamics can not be used with effective potential',ch10,&
 &     'Action: correct dynamics input'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
   !Get SCALE-UP INPUT
@@ -572,17 +535,17 @@ ABI_DEALLOCATE(xcart)
 !***************************************************************
 
    if (allocated(dtset%rprimd_orig)) then
-     ABI_DEALLOCATE(dtset%rprimd_orig)
+     ABI_FREE(dtset%rprimd_orig)
    end if
-   ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
+   ABI_MALLOC(dtset%rprimd_orig,(3,3,1))
    dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
 
 
-   ABI_ALLOCATE(xred,(3,dtset%natom))
-   ABI_ALLOCATE(xred_old,(3,dtset%natom))
-   ABI_ALLOCATE(vel,(3,dtset%natom))
-   ABI_ALLOCATE(fred,(3,dtset%natom))
-   ABI_ALLOCATE(fcart,(3,dtset%natom))
+   ABI_MALLOC(xred,(3,dtset%natom))
+   ABI_MALLOC(xred_old,(3,dtset%natom))
+   ABI_MALLOC(vel,(3,dtset%natom))
+   ABI_MALLOC(gred,(3,dtset%natom))
+   ABI_MALLOC(fcart,(3,dtset%natom))
 
    call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
 &   effective_potential%supercell%xcart,xred)
@@ -649,7 +612,7 @@ ABI_DEALLOCATE(xcart)
 !        Fill the list for the fixcoeff input of the fit_polynomial_coeff_fit routine
 !        Store the number of coefficients before adding other coeff for the bounding
          ncoeff = effective_potential%anharmonics_terms%ncoeff
-         ABI_ALLOCATE(listcoeff,(ncoeff))
+         ABI_MALLOC(listcoeff,(ncoeff))
          do ii=1,ncoeff
            listcoeff(ii)=ii
          end do
@@ -666,8 +629,8 @@ ABI_DEALLOCATE(xcart)
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
 !        Store all the coefficients in coeffs_all
-         ABI_DATATYPE_ALLOCATE(coeffs_all,(ncoeff_max))
-         ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncoeff_max))
+         ABI_MALLOC(coeffs_all,(ncoeff_max))
+         ABI_MALLOC(coeffs_tmp,(ncoeff_max))
          do ii=1,ncoeff_max
            call polynomial_coeff_init(&
 &           effective_potential%anharmonics_terms%coefficients(ii)%coefficient,&
@@ -717,7 +680,7 @@ ABI_DEALLOCATE(xcart)
            xred_old = xred
            vel_cell(:,:) = zero
            vel(:,:)      = zero
-           fred(:,:)     = zero
+           gred(:,:)     = zero
            fcart(:,:)    = zero
 
 !          Run mover to check if the model is bound
@@ -763,7 +726,7 @@ ABI_DEALLOCATE(xcart)
          call xmpi_barrier(comm)
 !      Store all the initial coefficients
          ncoeff = effective_potential%anharmonics_terms%ncoeff
-         ABI_DATATYPE_ALLOCATE(coeffs_all,(ncoeff+ncoeff_bound))
+         ABI_MALLOC(coeffs_all,(ncoeff+ncoeff_bound))
          do ii=1,ncoeff
            call polynomial_coeff_init(effective_potential%anharmonics_terms%coefficients(ii)%coefficient,&
 &           effective_potential%anharmonics_terms%coefficients(ii)%nterm,&
@@ -784,7 +747,7 @@ ABI_DEALLOCATE(xcart)
 
 !      Copy the fixed coefficients from the model (without bound coeff)
          ncoeff = effective_potential%anharmonics_terms%ncoeff
-         ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncoeff+ncoeff_bound))
+         ABI_MALLOC(coeffs_tmp,(ncoeff+ncoeff_bound))
          do ii=1,ncoeff
            call polynomial_coeff_init(effective_potential%anharmonics_terms%coefficients(ii)%coefficient,&
 &           effective_potential%anharmonics_terms%coefficients(ii)%nterm,&
@@ -795,7 +758,7 @@ ABI_DEALLOCATE(xcart)
          end do
 
          ncoeff_max = ncoeff+ncoeff_bound
-         ABI_ALLOCATE(listcoeff,(ncoeff_max))
+         ABI_MALLOC(listcoeff,(ncoeff_max))
          listcoeff = 0
          do jj=1,ncoeff
            listcoeff(jj) = jj
@@ -807,8 +770,8 @@ ABI_DEALLOCATE(xcart)
          do ii=2,inp%bound_maxCoeff
 !        Compute the number of possible combination
            nmodels = 1
-           ABI_ALLOCATE(list_bound,(nmodels,ii))
-           ABI_ALLOCATE(list_tmp,(ii))
+           ABI_MALLOC(list_bound,(nmodels,ii))
+           ABI_MALLOC(list_tmp,(ii))
            list_bound = 0; list_tmp = 0; kk = 0;  jj = 1
 
 !        Generate the list of possible combinaison 1st count
@@ -820,13 +783,13 @@ ABI_DEALLOCATE(xcart)
            call wrtout(std_out,message,'COLL')
 
 !        allocate and generate combinaisons
-           ABI_DEALLOCATE(list_bound)
-           ABI_DEALLOCATE(list_tmp)
-           ABI_ALLOCATE(coeff_values,(nmodels,ncoeff+ii))
-           ABI_ALLOCATE(listcoeff_bound,(nmodels,ncoeff+ii))
-           ABI_ALLOCATE(list_bound,(nmodels,ii))
-           ABI_ALLOCATE(list_tmp,(ii))
-           ABI_ALLOCATE(isPositive,(nmodels))
+           ABI_FREE(list_bound)
+           ABI_FREE(list_tmp)
+           ABI_MALLOC(coeff_values,(nmodels,ncoeff+ii))
+           ABI_MALLOC(listcoeff_bound,(nmodels,ncoeff+ii))
+           ABI_MALLOC(list_bound,(nmodels,ii))
+           ABI_MALLOC(list_tmp,(ii))
+           ABI_MALLOC(isPositive,(nmodels))
            list_bound = 0;  listcoeff_bound = 0;  list_tmp = 0; isPositive = 0; kk = 0; jj = 1
            call genereList(kk,jj,ii,ncoeff_bound,list_tmp,list_bound,nmodels,.true.)
 !        Generate the models
@@ -902,7 +865,7 @@ ABI_DEALLOCATE(xcart)
                  xred_old = xred
                  vel_cell(:,:) = zero
                  vel(:,:)      = zero
-                 fred(:,:)     = zero
+                 gred(:,:)     = zero
                  fcart(:,:)    = zero
 
 !              Run mover
@@ -926,9 +889,9 @@ ABI_DEALLOCATE(xcart)
              end do
            end if
 
-           ABI_DEALLOCATE(list_tmp)
-           ABI_DEALLOCATE(list_bound)
-           ABI_DEALLOCATE(isPositive)
+           ABI_FREE(list_tmp)
+           ABI_FREE(list_bound)
+           ABI_FREE(isPositive)
 
 !        Exit if the model is bounded
            if(effective_potential%anharmonics_terms%bounded) then
@@ -946,18 +909,18 @@ ABI_DEALLOCATE(xcart)
 &               coeffs_bound(icoeff_bound)%name,&
 &               check=.false.)
              end do
-             ABI_DEALLOCATE(coeff_values)
-             ABI_DEALLOCATE(listcoeff_bound)
+             ABI_FREE(coeff_values)
+             ABI_FREE(listcoeff_bound)
              exit
            end if
-           ABI_DEALLOCATE(coeff_values)
+           ABI_FREE(coeff_values)
 
          end do
 
          do ii=1,ncoeff_bound
            call polynomial_coeff_free(coeffs_bound(ii))
          end do
-         if(allocated(coeffs_bound)) ABI_DEALLOCATE(coeffs_bound)
+         if(allocated(coeffs_bound)) ABI_FREE(coeffs_bound)
 
        end if
 
@@ -989,16 +952,16 @@ ABI_DEALLOCATE(xcart)
        end do
 
 !      Deallocation
-       ABI_DEALLOCATE(listcoeff)
+       ABI_FREE(listcoeff)
        do ii=1,ncoeff_max
          call polynomial_coeff_free(coeffs_tmp(ii))
        end do
-       if(allocated(coeffs_tmp)) ABI_DEALLOCATE(coeffs_tmp)
+       if(allocated(coeffs_tmp)) ABI_FREE(coeffs_tmp)
 
        do ii=1,ncoeff_max
          call polynomial_coeff_free(coeffs_all(ii))
        end do
-       if(allocated(coeffs_all)) ABI_DEALLOCATE(coeffs_all)
+       if(allocated(coeffs_all)) ABI_FREE(coeffs_all)
 
      end if
 
@@ -1025,15 +988,15 @@ ABI_DEALLOCATE(xcart)
 ! 5   Deallocation of array
 !***************************************************************
 
-   ABI_DEALLOCATE(fred)
-   ABI_DEALLOCATE(fcart)
-   ABI_DEALLOCATE(indsym)
-   ABI_DEALLOCATE(rhog)
-   ABI_DEALLOCATE(rhor)
-   ABI_DEALLOCATE(vel)
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(xred_old)
-   ABI_DEALLOCATE(ab_xfh%xfhist)
+   ABI_FREE(gred)
+   ABI_FREE(fcart)
+   ABI_FREE(indsym)
+   ABI_FREE(rhog)
+   ABI_FREE(rhor)
+   ABI_FREE(vel)
+   ABI_FREE(xred)
+   ABI_FREE(xred_old)
+   ABI_FREE(ab_xfh%xfhist)
 
    ! if(option == -3)then
    !   call args_gs_free(args_gs)
@@ -1041,14 +1004,14 @@ ABI_DEALLOCATE(xcart)
    !   do ii = 1,npsp
    !     call paw_setup_free(paw_setup(ii))
    !   end do
-   !   ABI_DEALLOCATE(paw_setup)
-   !   ABI_DEALLOCATE(ipsp2xml)
-   !   ABI_DEALLOCATE(pspheads)
+   !   ABI_FREE(paw_setup)
+   !   ABI_FREE(ipsp2xml)
+   !   ABI_FREE(pspheads)
    !   call pawrad_free(pawrad)
    !   call pawtab_free(pawtab)
-   !   ABI_DATATYPE_DEALLOCATE(pawrad)
-   !   ABI_DATATYPE_DEALLOCATE(pawtab)
-   !   ABI_DEALLOCATE(npwtot)
+   !   ABI_FREE(pawrad)
+   !   ABI_FREE(pawtab)
+   !   ABI_FREE(npwtot)
    ! end if
    call dtset%free()
    call destroy_results_gs(results_gs)

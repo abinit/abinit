@@ -7,7 +7,7 @@
 !!  when initialized this is a subtype of multibinit_dtset_type
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (AM)
+!!  Copyright (C) 2014-2021 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -190,7 +190,7 @@ subroutine scup_dtset_free(scup_dtset)
 
 
 if(allocated(scup_dtset%scup_speck))then 
-        ABI_DEALLOCATE(scup_dtset%scup_speck)
+        ABI_FREE(scup_dtset%scup_speck)
 endif
 
 call scup_dtset%scup_kpath%free
@@ -334,8 +334,8 @@ implicit none
 !*********************************************************************
 
  marr=30
- ABI_ALLOCATE(intarr,(marr))
- ABI_ALLOCATE(dprarr,(marr))
+ ABI_MALLOC(intarr,(marr))
+ ABI_MALLOC(dprarr,(marr))
 
  jdtset=1
 
@@ -362,7 +362,7 @@ tmp_int=0
 &   'scup_elec_model is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_elec_model in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_elec_model = .TRUE.
  tmp_int = 0 
@@ -375,7 +375,7 @@ tmp_int=0
 &   'scup_freezden is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_freezden in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_freezden = .TRUE.
  tmp_int = 0 
@@ -390,7 +390,7 @@ tmp_int=0
 &   'scup_initorbocc is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_initorbocc in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_initorbocc = .TRUE.
  tmp_int = 0 
@@ -402,7 +402,7 @@ tmp_int=0
 &   'scup_ismagnetic is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_ismagnetic in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_ismagnetic = .TRUE.
  tmp_int = 0 
@@ -414,7 +414,7 @@ tmp_int=0
 &   'scup_istddft is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_istddft in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_istddft = .TRUE.
  tmp_int = 0 
@@ -429,7 +429,7 @@ tmp_int=0
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
 &     'scup_ksamp(',ii,') is',scup_dtset%scup_ksamp(ii),', which is lower than 1 .',ch10,&
 &     'Action: correct scup_ksamp(',ii,') in your input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end do
 
@@ -442,7 +442,7 @@ tmp_int=0
 &   'scup_maxscfstep is',scup_dtset%scup_maxscfstep,', but the only allowed values',ch10,&
 &   'greater than 0',ch10,&
 &   'Action: correct scup_maxscfstep in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !N
@@ -454,7 +454,7 @@ tmp_int=0
 &   'scup_ndivsm is',scup_dtset%scup_ndivsm,', but the only allowed values',ch10,&
 &   'are positiv.',ch10,&
 &   'Action: correct scup_ndivsm in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -465,7 +465,7 @@ tmp_int=0
 &   'scup_nspeck is',scup_dtset%scup_nspeck,', but the only allowed values',ch10,&
 &   'are positiv.',ch10,&
 &   'Action: correct scup_nspeck in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !O
@@ -477,7 +477,7 @@ tmp_int=0
 &   'scup_printbands is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printbands in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printbands = .TRUE.
  tmp_int = 0 
@@ -489,7 +489,7 @@ tmp_int=0
 &   'scup_printeigv is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printeigv in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printeigv = .TRUE.
  tmp_int = 0 
@@ -501,7 +501,7 @@ tmp_int=0
 &   'scup_printeltic is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printeltic in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printeltic = .TRUE.
  tmp_int = 0 
@@ -513,7 +513,7 @@ tmp_int=0
 &   'scup_printgeom is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printgeom in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printgeom = .TRUE.
  tmp_int = 0 
@@ -525,7 +525,7 @@ tmp_int=0
 &   'scup_printniter is',scup_dtset%scup_printniter,', but the only allowed values',ch10,&
 &   'are positiv',ch10,&
 &   'Action: correct scup_printniter in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printorbocc',tread,'INT')
@@ -535,7 +535,7 @@ tmp_int=0
 &   'scup_printorbocc is',tmp_int,', but the only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
 &   'Action: correct scup_printorbocc in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printorbocc = .TRUE.
  tmp_int = 0 
@@ -551,7 +551,7 @@ tmp_int=0
 &   'scup_startpulay is',scup_dtset%scup_startpulay,', but the only allowed values',ch10,&
 &   'are greater than 3',ch10,&
 &   'Action: correct scup_startpulay in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_scfmixing',tread,'DPR')
@@ -561,7 +561,7 @@ tmp_int=0
 &   'scup_scfmixing is',scup_dtset%scup_scfmixing,', but the only allowed value',ch10,&
 &   'is superior to 0.',ch10,&
 &   'Action: correct scup_scfmixing in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_scfthresh',tread,'DPR')
@@ -571,7 +571,7 @@ tmp_int=0
 &   'scup_scfthresh is',scup_dtset%scup_scfthresh,', but the only allowed value',ch10,&
 &   'is superior to 0.',ch10,&
 &   'Action: correct scup_scfthresh in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_smearing',tread,'DPR')
@@ -581,7 +581,7 @@ tmp_int=0
 &   'scup_smearing is',scup_dtset%scup_smearing,', but the only allowed value',ch10,&
 &   'is superior to or equal to 0.',ch10,&
 &   'Action: correct scup_smearing in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !T
@@ -592,7 +592,7 @@ tmp_int=0
 &   'scup_tcharge is',scup_dtset%scup_tcharge,', but the only allowed value',ch10,&
 &   'is superior to 0.',ch10,&
 &   'Action: correct scup_tcharge in your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -629,7 +629,7 @@ tmp_int=0
 !S
    !Allocate
    if(scup_dtset%scup_printbands)then 
-     ABI_ALLOCATE(scup_dtset%scup_speck,(3,scup_dtset%scup_nspeck))
+     ABI_MALLOC(scup_dtset%scup_speck,(3,scup_dtset%scup_nspeck))
     
    call intagm(dprarr,intarr,jdtset,marr,3*scup_dtset%scup_nspeck,string(1:lenstr),'scup_speck',tread,'DPR')
      if(tread==1)then
@@ -639,7 +639,7 @@ tmp_int=0
 &       'When scup_printbands is asked, scup_speck must be initialized ',ch10,&
 &       'in the input file, which is not the case.',ch10,&
 &       'Action: initialize scup_speck in your input file, or change printbands.'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end if
 
@@ -656,8 +656,8 @@ tmp_int=0
 !Finished reading in variables - deallocate
 !=======================================================================
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
 
 end subroutine invars10scup
 !!***
@@ -679,7 +679,7 @@ end subroutine invars10scup
 !!
 !!
 !! OUTPUT
-!! scup_kpath <type(kpath_t)> = kpath_t with all informations about kpath
+!! scup_kpath <type(kpath_t)> = kpath_t with all information about kpath
 !!
 !! NOTES
 !! Should be executed by one processor only.
@@ -724,7 +724,7 @@ scup_kpath = kpath_new(speck,gprimd,ndivsm)
 !Change size of scup_kpath%ndivs(:) variable 
 !from nspeck-1 to nspeck and put 1 to first entry
 nspeck = size(speck,2)
-ABI_ALLOCATE(ndivs_tmp,(nspeck))
+ABI_MALLOC(ndivs_tmp,(nspeck))
 
 !First entry is always 1
  ndivs_tmp(1) = 1 
@@ -732,12 +732,12 @@ ABI_ALLOCATE(ndivs_tmp,(nspeck))
  ndivs_tmp(2:) = scup_kpath%ndivs(:) 
 
 !Delete original segments 
-ABI_DEALLOCATE(scup_kpath%ndivs)
+ABI_FREE(scup_kpath%ndivs)
 !Put new path 
-ABI_ALLOCATE(scup_kpath%ndivs,(nspeck))
+ABI_MALLOC(scup_kpath%ndivs,(nspeck))
 scup_kpath%ndivs = ndivs_tmp
 !Free temporary array
-ABI_DEALLOCATE(ndivs_tmp)
+ABI_FREE(ndivs_tmp)
 
 end subroutine scup_kpath_new
 !!***
@@ -752,7 +752,7 @@ end subroutine scup_kpath_new
 !!
 !! INPUTS
 !!
-!! scup_kpath<tpye(kpath_t) = kpath_t with all informations about kpath  
+!! scup_kpath<tpye(kpath_t) = kpath_t with all information about kpath  
 !!
 !! OUTPUT
 !! Only Printing

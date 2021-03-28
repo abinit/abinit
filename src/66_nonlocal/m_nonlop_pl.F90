@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, GZ, MT, FF, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -247,7 +247,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  integer :: nproj,nspinso,rank
  integer :: sign,spaceComm,  isft
  real(dp) :: e2nl,e2nldd,enlk
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: indlmn_s(:,:,:),jproj(:)
  real(dp) :: amet(2,3,3,2,2),amet_lo(3,3),e2nl_tmp(6),eisnl(3),rank2(6)
@@ -268,48 +268,46 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 
 !Test: spin orbit not allowed for choice=5,6
  if (nspinortot==2 .and. choice==6 ) then
-   message = 'nonlop_pl: For nspinortot=2, choice=6 is not yet allowed.'
-   MSG_BUG(message)
+   ABI_BUG('For nspinortot=2, choice=6 is not yet allowed.')
  end if
 
  if ((choice<1 .or. choice>6) .and. choice/=23 ) then
-   write(message,'(a,i0)')'  Does not presently support this choice=',choice
-   MSG_BUG(message)
+   write(msg,'(a,i0)')'Does not presently support this choice=',choice
+   ABI_BUG(msg)
  end if
 
 !Test: choice 51 and 52 only allowed with nonlop_ylm
 !JWZ, 01-Sep-08
  if (choice==51 .or. choice==52) then
-   message = 'nonlop_pl: choice 51 or 52 is not yet allowed.'
-   MSG_BUG(message)
+   ABI_BUG('choice 51 or 52 is not yet allowed.')
  end if
 
 !Define dimension of work arrays.
  mincat=min(NLO_MINCAT,maxval(nattyp))
  mproj=maxval(indlmn(3,:,:))
- ABI_ALLOCATE(temp,(2,mlang4))
- ABI_ALLOCATE(tmpfac,(2,mlang4))
- ABI_ALLOCATE(wt,(mlang,mproj))
- ABI_ALLOCATE(jproj,(mlang))
+ ABI_MALLOC(temp,(2,mlang4))
+ ABI_MALLOC(tmpfac,(2,mlang4))
+ ABI_MALLOC(wt,(mlang,mproj))
+ ABI_MALLOC(jproj,(mlang))
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
- ABI_ALLOCATE(ekb_s,(mlang,mproj))
- ABI_ALLOCATE(indlmn_s,(6,lmnmax,ntypat))
+ ABI_MALLOC(ekb_s,(mlang,mproj))
+ ABI_MALLOC(indlmn_s,(6,lmnmax,ntypat))
 
 !Eventually compute the spin-orbit metric tensor:
  if (mpssoang>mpsang) then
-   ABI_ALLOCATE(pauli,(2,2,2,3))
+   ABI_MALLOC(pauli,(2,2,2,3))
    call metric_so(amet,gprimd,pauli)
  end if
 
 !Allocate array gxa (contains projected scalars).
- ABI_ALLOCATE(gxa,(2,mlang3,mincat,mproj,nspinortot))
+ ABI_MALLOC(gxa,(2,mlang3,mincat,mproj,nspinortot))
  if(nspinor==2)  then
-   ABI_ALLOCATE(gxa_s,(2,mlang3,mincat,mproj))
+   ABI_MALLOC(gxa_s,(2,mlang3,mincat,mproj))
  else
-   ABI_ALLOCATE(gxa_s,(0,0,0,0))
+   ABI_MALLOC(gxa_s,(0,0,0,0))
  end if
 
- ABI_ALLOCATE(gxafac,(2,mlang3,mincat,mproj))
+ ABI_MALLOC(gxafac,(2,mlang3,mincat,mproj))
  gxa(:,:,:,:,:)=zero
 
 !If choice==2 : first-order atomic displacements
@@ -327,48 +325,48 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  if(choice==4) ndgxdt=9
  if(choice==5) ndgxdt=2
 !Allocate dgxdt (contains derivatives of gxa with respect to atomic displacements or ddk).
- ABI_ALLOCATE(dgxdt,(2,ndgxdt,mlang3,mincat,mproj,nspinortot))
+ ABI_MALLOC(dgxdt,(2,ndgxdt,mlang3,mincat,mproj,nspinortot))
  dgxdt(:,:,:,:,:,:)=zero
  if(nspinor==2)then
-   ABI_ALLOCATE(dgxdt_s,(2,ndgxdt,mlang3,mincat,mproj))
+   ABI_MALLOC(dgxdt_s,(2,ndgxdt,mlang3,mincat,mproj))
    dgxdt_s(:,:,:,:,:)=zero
  else
-   ABI_ALLOCATE(dgxdt_s,(0,0,0,0,0))
+   ABI_MALLOC(dgxdt_s,(0,0,0,0,0))
  end if
  ndgxdtfac=0
  if(signs==2 .and. choice==2) ndgxdtfac=1
  if(choice==4) ndgxdtfac=3
  if(choice==5) ndgxdtfac=2
- ABI_ALLOCATE(dgxdtfac,(2,ndgxdtfac,mlang3,mincat,mproj))
+ ABI_MALLOC(dgxdtfac,(2,ndgxdtfac,mlang3,mincat,mproj))
 
 !Allocate dgxds (contains derivatives of gxa with respect to strains).
- ABI_ALLOCATE(dgxds,(2,mlang4,mincat,mproj,nspinor))
+ ABI_MALLOC(dgxds,(2,mlang4,mincat,mproj,nspinor))
  dgxds(:,:,:,:,:)=zero
- ABI_ALLOCATE(dgxdsfac,(2,mlang4,mincat,mproj,nspinor))
+ ABI_MALLOC(dgxdsfac,(2,mlang4,mincat,mproj,nspinor))
  if(choice==6) then
-   ABI_ALLOCATE(dgxdis,(2,mlang1,mincat,mproj,nspinor))
-   ABI_ALLOCATE(d2gxdis,(2,mlang5,mincat,mproj,nspinor))
-   ABI_ALLOCATE(d2gxds2,(2,mlang6,mincat,mproj,nspinor))
+   ABI_MALLOC(dgxdis,(2,mlang1,mincat,mproj,nspinor))
+   ABI_MALLOC(d2gxdis,(2,mlang5,mincat,mproj,nspinor))
+   ABI_MALLOC(d2gxds2,(2,mlang6,mincat,mproj,nspinor))
  else
-   ABI_ALLOCATE(dgxdis ,(0,0,0,0,0))
-   ABI_ALLOCATE(d2gxdis,(0,0,0,0,0))
-   ABI_ALLOCATE(d2gxds2,(0,0,0,0,0))
+   ABI_MALLOC(dgxdis ,(0,0,0,0,0))
+   ABI_MALLOC(d2gxdis,(0,0,0,0,0))
+   ABI_MALLOC(d2gxds2,(0,0,0,0,0))
  end if
- ABI_ALLOCATE(dgxds_s  ,(0,0,0,0))
- ABI_ALLOCATE(dgxdis_s ,(0,0,0,0))
- ABI_ALLOCATE(d2gxdis_s,(0,0,0,0))
- ABI_ALLOCATE(d2gxds2_s,(0,0,0,0))
+ ABI_MALLOC(dgxds_s  ,(0,0,0,0))
+ ABI_MALLOC(dgxdis_s ,(0,0,0,0))
+ ABI_MALLOC(d2gxdis_s,(0,0,0,0))
+ ABI_MALLOC(d2gxds2_s,(0,0,0,0))
  if(nspinor==2)then
-   ABI_DEALLOCATE(dgxds_s)
-   ABI_ALLOCATE(dgxds_s,(2,mlang4,mincat,mproj))
+   ABI_FREE(dgxds_s)
+   ABI_MALLOC(dgxds_s,(2,mlang4,mincat,mproj))
    dgxds_s(:,:,:,:)=zero
    if(choice==6) then
-     ABI_DEALLOCATE(dgxdis_s)
-     ABI_DEALLOCATE(d2gxdis_s)
-     ABI_DEALLOCATE(d2gxds2_s)
-     ABI_ALLOCATE(dgxdis_s,(2,mlang1,mincat,mproj))
-     ABI_ALLOCATE(d2gxdis_s,(2,mlang5,mincat,mproj))
-     ABI_ALLOCATE(d2gxds2_s,(2,mlang6,mincat,mproj))
+     ABI_FREE(dgxdis_s)
+     ABI_FREE(d2gxdis_s)
+     ABI_FREE(d2gxds2_s)
+     ABI_MALLOC(dgxdis_s,(2,mlang1,mincat,mproj))
+     ABI_MALLOC(d2gxdis_s,(2,mlang5,mincat,mproj))
+     ABI_MALLOC(d2gxds2_s,(2,mlang6,mincat,mproj))
    else
    end if
  end if
@@ -378,11 +376,13 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 
  if(signs==2) vectout(:,:)=zero
 
- if(choice==3.or.choice==23) then
-   strsnl(:)=zero
-   if(mpssoang>mpsang) strsso(:,:)=zero
- end if
+ !if(choice==3.or.choice==23) then
+ !  strsnl(:)=zero
+ !  if(mpssoang>mpsang) strsso(:,:)=zero
+ !end if
  enlk=zero
+ strsso = zero
+ strsnl = zero
 
 !In the case vectin is a spinor, split its second part.
 !Also, eventually take into account the storage format of the wavefunction
@@ -391,8 +391,8 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !that should vanish)
 !In sequential, treat the second spinor part first
  if (nspinor==2)then
-   ABI_ALLOCATE(vectin_s,(2,npwin))
-   ABI_ALLOCATE(vectout_s,(2,npwout))
+   ABI_MALLOC(vectin_s,(2,npwin))
+   ABI_MALLOC(vectout_s,(2,npwout))
 
    isft = npwin;if (mpi_enreg%nproc_spinor>1) isft=0
 
@@ -437,10 +437,10 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
      if(nloalg(2)<=0)then
 !      For nloalg(2)==0, it is needed to compute the phase factors.
        if(mincat>matblk)then
-         write(message,'(a,a,a,i4,a,i4,a)')&
-&         '  With nloc_mem<=0, mincat must be less than matblk.',ch10,&
-&         '  Their value is ',mincat,' and ',matblk,'.'
-         MSG_BUG(message)
+         write(msg,'(a,a,a,i4,a,i4,a)')&
+          'With nloc_mem<=0, mincat must be less than matblk.',ch10,&
+          'Their value is ',mincat,' and ',matblk,'.'
+         ABI_BUG(msg)
        end if
        call ph1d3d(ia3,ia4,kgin,matblk,natom,npwin,n1,n2,n3,phkxredin,ph1d,ph3din)
      end if
@@ -598,8 +598,8 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !                  jjs gives the starting address of the relevant components
                    jjs=1+((ilang-1)*ilang*(ilang+1))/6
                    if (ilang>4) then
-                     write(message,'(a,i0)')' ilang must fall in range [1..4] but value is ',ilang
-                     MSG_BUG(message)
+                     write(msg,'(a,i0)')' ilang must fall in range [1..4] but value is ',ilang
+                     ABI_BUG(msg)
                    end if
 
 !                  Metric & spinorial contraction from gxa to gxafac. The treatment
@@ -914,7 +914,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !                  ----  Accumulate elastic tensor contributions if requested.
 
                    if(choice==6) then
-!                    XG 081121 : Message to the person who has introduced this CPP option (sorry, I did not have to time to locate who did this ...)
+!                    XG 081121 : msg to the person who has introduced this CPP option (sorry, I did not have to time to locate who did this ...)
 !                    This section of ABINIT should be allowed by default to the user. I have found that on the contrary, the build
 !                    system defaults are such that this section is forbidden by default. You might restore this flag if at the same time,
 !                    you modify the build system in such a way that by default this section is included, and if the user wants, it can disable it.
@@ -1200,35 +1200,35 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  end do
 
 !De-allocate temporary space.
- ABI_DEALLOCATE(ekb_s)
- ABI_DEALLOCATE(gxa)
- ABI_DEALLOCATE(gxafac)
- ABI_DEALLOCATE(dgxds)
- ABI_DEALLOCATE(dgxdt)
- ABI_DEALLOCATE(dgxdtfac)
- ABI_DEALLOCATE(wt)
- ABI_DEALLOCATE(jproj)
- ABI_DEALLOCATE(temp)
- ABI_DEALLOCATE(tmpfac)
- ABI_DEALLOCATE(dgxdsfac)
- ABI_DEALLOCATE(indlmn_s)
+ ABI_FREE(ekb_s)
+ ABI_FREE(gxa)
+ ABI_FREE(gxafac)
+ ABI_FREE(dgxds)
+ ABI_FREE(dgxdt)
+ ABI_FREE(dgxdtfac)
+ ABI_FREE(wt)
+ ABI_FREE(jproj)
+ ABI_FREE(temp)
+ ABI_FREE(tmpfac)
+ ABI_FREE(dgxdsfac)
+ ABI_FREE(indlmn_s)
  !if(choice==6)  then
- ABI_DEALLOCATE(dgxdis)
- ABI_DEALLOCATE(d2gxdis)
- ABI_DEALLOCATE(d2gxds2)
+ ABI_FREE(dgxdis)
+ ABI_FREE(d2gxdis)
+ ABI_FREE(d2gxds2)
  !end if
  !if(nspinor==2) then
- ABI_DEALLOCATE(dgxds_s)
- ABI_DEALLOCATE(dgxdt_s)
- ABI_DEALLOCATE(gxa_s)
+ ABI_FREE(dgxds_s)
+ ABI_FREE(dgxdt_s)
+ ABI_FREE(gxa_s)
  !end if
  !if(nspinor==2.and.choice==6) then
- ABI_DEALLOCATE(dgxdis_s)
- ABI_DEALLOCATE(d2gxdis_s)
- ABI_DEALLOCATE(d2gxds2_s)
+ ABI_FREE(dgxdis_s)
+ ABI_FREE(d2gxdis_s)
+ ABI_FREE(d2gxds2_s)
  !end if
  if (mpssoang>mpsang)  then
-   ABI_DEALLOCATE(pauli)
+   ABI_FREE(pauli)
  end if
 
 !Restore the original content of the vectin array.
@@ -1238,12 +1238,12 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  end if
 
  if (nspinor==2)  then
-   ABI_DEALLOCATE(vectin_s)
-   ABI_DEALLOCATE(vectout_s)
+   ABI_FREE(vectin_s)
+   ABI_FREE(vectout_s)
  end if
 
  if (mpi_enreg%paral_spinor==1) then
-   call xmpi_sum(enlout,mpi_enreg%comm_spinor,ierr)
+   if (size(enlout)>0) call xmpi_sum(enlout,mpi_enreg%comm_spinor,ierr)
    call xmpi_sum(strsnl,mpi_enreg%comm_spinor,ierr)
    call xmpi_sum(enlk,mpi_enreg%comm_spinor,ierr)
    call xmpi_sum(strsso,mpi_enreg%comm_spinor,ierr)
@@ -1436,7 +1436,7 @@ end subroutine strsocv
 !!
 !! INPUTS
 !!  istwf_k=storage mode of the vector
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  npw=number of planewaves
 !!  option=1 multiply by 2
 !!        =2 multiply by 1/2
@@ -1472,7 +1472,7 @@ subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
 !scalars
  integer :: ipw
  real(dp) :: scale
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1481,10 +1481,10 @@ subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
  if(istwf_k/=1)then
 
    if(option/=1 .and. option/=2)then
-     write(message,'(a,a,a,i0)')&
-&     'The argument option should be 1 or 2,',ch10,&
-&     'however, option=',option
-     MSG_BUG(message)
+     write(msg,'(a,a,a,i0)')&
+     'The argument option should be 1 or 2,',ch10,&
+     'however, option=',option
+     ABI_BUG(msg)
    end if
 
    scale=two
@@ -1579,15 +1579,15 @@ subroutine ddkten(compact,idir,rank,temp,tmpfac)
 
 !Local variables-------------------------------
 !scalars
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
  if(rank/=1 .and. rank/=2 .and. rank/=3)then
-   write(message, '(a,i10,a,a,a)' )&
-&   'Input rank=',rank,' not allowed.',ch10,&
-&   'Possible values are 1,2,3 only.'
-   MSG_BUG(message)
+   write(msg, '(a,i10,a,a,a)' )&
+   'Input rank=',rank,' not allowed.',ch10,&
+   'Possible values are 1,2,3 only.'
+   ABI_BUG(msg)
  end if
 
 !Take care of p angular momentum

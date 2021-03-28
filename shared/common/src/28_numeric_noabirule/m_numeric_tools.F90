@@ -6,7 +6,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
+!! Copyright (C) 2008-2021 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1719,7 +1719,7 @@ end function imax_loc_rdp
 !!
 !! SOURCE
 
-pure function imin_loc_int(arr,mask)
+pure function imin_loc_int(arr, mask)
 
 !Arguments ------------------------------------
 !scalars
@@ -2331,7 +2331,7 @@ subroutine polyn_interp(xa,ya,x,y,dy)
  do m=1,n-1
   den(1:n-m)=ho(1:n-m)-ho(1+m:n)
   if (ANY(den(1:n-m)==zero)) then
-   MSG_ERROR('Two input xa are identical')
+   ABI_ERROR('Two input xa are identical')
   end if
 
   den(1:n-m)=(c(2:n-m+1)-d(1:n-m))/den(1:n-m)
@@ -2449,7 +2449,7 @@ recursive subroutine trapezoidal_(func,nn,xmin,xmax,quad)
 
  case (:0)
    write(msg,'(a,i3)')'Wrong value for nn ',nn
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 end subroutine trapezoidal_
@@ -2546,7 +2546,7 @@ end subroutine trapezoidal_
 
  case (:0)
    write(msg,'(a,i3)')' wrong value for nn ',nn
-   MSG_BUG('Wrong value for nn')
+   ABI_BUG('Wrong value for nn')
  end select
 
 end subroutine midpoint_
@@ -2760,12 +2760,12 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
 
  case default
    write(msg,'(a,i3)')'Wrong value for qopt',qopt
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
  write(msg,'(a,i0,2(a,es14.6))')&
 &  "Results are not converged within the given accuracy. ntrial= ",NT,"; EPS= ",EPS,"; TOL= ",TOL
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
  ierr = -1
 
 end subroutine quadrature
@@ -2981,7 +2981,7 @@ subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
     write(std_out,'(a)' ) ' '
     write(std_out,'(a)' ) 'CSPINT - Fatal error!'
     write(std_out,'(a,i6)' ) '  NTAB must be at least 3, but input NTAB = ',ntab
-    MSG_ERROR("Aborting now")
+    ABI_ERROR("Aborting now")
   end if
 
   do i = 1, ntab-1
@@ -2993,7 +2993,7 @@ subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
       write(std_out,'(a,i6)' ) '  XTAB(I) <= XTAB(I-1) for I=',i
       write(std_out,'(a,g14.6)' ) '  XTAB(I) = ',xtab(i)
       write(std_out,'(a,g14.6)' ) '  XTAB(I-1) = ',xtab(i-1)
-      MSG_ERROR("Aborting now")
+      ABI_ERROR("Aborting now")
     end if
 
   end do
@@ -3207,7 +3207,7 @@ function simpson_cplx(npts,step,ff)
  my_n=npts; if ((npts/2)*2 == npts) my_n=npts-3
 
  if (my_n<2) then
-   MSG_ERROR("Too few points")
+   ABI_ERROR("Too few points")
  end if
 
  sum_odd=czero
@@ -3312,7 +3312,7 @@ subroutine hermitianize_spc(mat,uplo)
   end do
 
  case default
-   MSG_ERROR("Wrong uplo"//TRIM(uplo))
+   ABI_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
 end subroutine hermitianize_spc
@@ -3399,7 +3399,7 @@ subroutine hermitianize_dpc(mat,uplo)
   end do
 
  case default
-   MSG_ERROR("Wrong uplo"//TRIM(uplo))
+   ABI_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
 end subroutine hermitianize_dpc
@@ -3490,7 +3490,7 @@ end subroutine mkherm
 !!
 !! SOURCE
 
-subroutine hermit(chmin,chmout,ierr,ndim)
+subroutine hermit(chmin, chmout, ierr, ndim)
 
 !Arguments ------------------------------------
 !scalars
@@ -3506,7 +3506,7 @@ subroutine hermit(chmin,chmout,ierr,ndim)
  integer :: idim,merrors,nerrors
  real(dp),parameter :: eps=epsilon(0.0d0)
  real(dp) :: ch_im,ch_re,moduls,tol
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -3531,18 +3531,18 @@ subroutine hermit(chmin,chmout,ierr,ndim)
    if( abs(ch_im) > tol .or. abs(ch_im) > tol8*abs(ch_re)) nerrors=1
 
    if( (abs(ch_im) > tol .and. nmesgs<mmesgs) .or. nerrors==2)then
-     write(message, '(3a,i0,a,es20.12,a,es20.12,a)' )&
-&     'Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-&     'for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
-     call wrtout(std_out,message,'PERS')
+     write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
+     ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
+     ' for component:',idim,' Im part is: ',ch_im,', Re part is: ',ch_re,'.'
+     call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
 
    if( ( abs(ch_im) > tol8*abs(ch_re) .and. nmesgs<mmesgs) .or. nerrors==2)then
-     write(message, '(3a,i0,a,es20.12,a,es20.12,a)' )&
-&     'Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-&     'for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
-     call wrtout(std_out,message,'PERS')
+     write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
+     ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
+     ' for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
+     call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
 
@@ -3561,10 +3561,10 @@ subroutine hermit(chmin,chmout,ierr,ndim)
 
  if(merrors==2)then
    ierr=1
-   write(message, '(3a)' )&
-&   'Imaginary part(s) of diagonal Hermitian matrix element(s) is too large.',ch10,&
-&   'See previous messages.'
-   MSG_BUG(message)
+   write(msg, '(3a)' )&
+    'Imaginary part(s) of diagonal Hermitian matrix element(s) is too large.',ch10,&
+    'See previous messages.'
+   ABI_BUG(msg)
  end if
 
 end subroutine hermit
@@ -3643,7 +3643,7 @@ subroutine symmetrize_spc(mat,uplo)
   end do
 
  case default
-   MSG_ERROR("Wrong uplo"//TRIM(uplo))
+   ABI_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
 end subroutine symmetrize_spc
@@ -3721,7 +3721,7 @@ subroutine symmetrize_dpc(mat,uplo)
   end do
 
  case default
-   MSG_ERROR("Wrong uplo"//TRIM(uplo))
+   ABI_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
 end subroutine symmetrize_dpc
@@ -3736,11 +3736,11 @@ end subroutine symmetrize_dpc
 !!
 !! INPUTS
 !! N: size of matrix
-!! cplx: is the matrix complex
-!! mat_in(2, N*N)= matrix to be packed
+!! cplx: 2 if matrix is complex, 1 for real matrix.
+!! mat_in(cplx, N*N)= matrix to be packed
 !!
 !! OUTPUT
-!! mat_out(N*N+1)= packed matrix
+!! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
 !!
 !! PARENTS
 !!      m_rayleigh_ritz
@@ -3751,10 +3751,11 @@ end subroutine symmetrize_dpc
 
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
-
  integer, intent(in) :: N, cplx
  real(dp), intent(in) :: mat_in(cplx, N*N)
  real(dp), intent(out) :: mat_out(cplx*N*(N+1)/2)
+
+!local variables
  integer :: isubh, i, j
 
  ! *************************************************************************
@@ -3826,7 +3827,7 @@ subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
 
  if (mode/='COLL'.and.mode/='PERS') then
   write(msg,'(2a)')' Wrong value of mode_paral ',mode
-  MSG_BUG(msg)
+  ABI_BUG(msg)
  end if
  !
  ! === Print out matrix ===
@@ -3886,7 +3887,7 @@ subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
 
  if (mode/='COLL'.and.mode/='PERS') then
   write(msg,'(2a)')' Wrong value of mode_paral ',mode
-  MSG_BUG(msg)
+  ABI_BUG(msg)
  end if
  !
  ! === Print out matrix ===
@@ -3947,7 +3948,7 @@ subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
 
  if (mode/='COLL'.and.mode/='PERS') then
    write(msg,'(2a)')'Wrong value of mode_paral ',mode
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  !
  ! === Print out matrix ===
@@ -4012,7 +4013,7 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
 
  if (mode/='COLL'.and.mode/='PERS') then
    write(msg,'(2a)')'Wrong value of mode_paral ',mode
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  !
  ! === Print out matrix ===
@@ -4354,7 +4355,7 @@ subroutine remove_copies(n_in,set_in,n_out,is_equal)
 
 ! *************************************************************************
 
- ABI_DATATYPE_ALLOCATE(Ap,(n_in))
+ ABI_MALLOC(Ap,(n_in))
  Ap(1)%idx = 1
  Ap(1)%rpt => set_in(:,1)
 
@@ -4385,7 +4386,7 @@ subroutine remove_copies(n_in,set_in,n_out,is_equal)
    end do
  end if
 
- ABI_DATATYPE_DEALLOCATE(Ap)
+ ABI_FREE(Ap)
 
 end subroutine remove_copies
 !!***
@@ -4464,7 +4465,7 @@ integer function mincm(ii,jj)
 !************************************************************************
 
  if (ii==0.or.jj==0) then
-   MSG_BUG('ii==0 or jj==0')
+   ABI_BUG('ii==0 or jj==0')
  end if
 
  mincm=MAX(ii,jj)
@@ -4553,7 +4554,7 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
    ! Be careful with the sign of the SQRT.
    div(:) = half*(bb(nlev)/(bb_inf))**2 * ( zpts-aa_inf - SQRT((zpts-aa_inf)**2 - four*bb_inf**2) )
  case (2)
-   MSG_ERROR("To be tested")
+   ABI_ERROR("To be tested")
    div = zero
    if (nlev>4) then
      bg=zero; bu=zero
@@ -4579,7 +4580,7 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
 
  case default
    write(msg,'(a,i0)')" Wrong value for term_type : ",term_type
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end select
 
  do it=nlev,2,-1
@@ -4678,7 +4679,7 @@ subroutine cmplx_sphcart(carr, from, units)
 
  case default
    msg = " Wrong value for from: "//TRIM(from)
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 end subroutine cmplx_sphcart
@@ -4738,7 +4739,7 @@ subroutine pfactorize(nn,nfactors,pfactors,powers)
  end do fact_loop
 
  if ( nn /= tnn * PRODUCT( pfactors**powers(1:nfactors)) ) then
-   MSG_BUG('nn/=tnn!')
+   ABI_BUG('nn/=tnn!')
  end if
 
  powers(nfactors+1) = tnn
@@ -4808,7 +4809,7 @@ function isordered_rdp(nn,arr,direction,tol) result(isord)
 
  CASE DEFAULT
    msg = "Wrong direction: "//TRIM(direction)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  END SELECT
 
 end function isordered_rdp
@@ -4816,13 +4817,12 @@ end function isordered_rdp
 
 !----------------------------------------------------------------------
 
-
 !!****f* m_numeric_tools/stats_eval
 !! NAME
 !!  stats_eval
 !!
 !! FUNCTION
-!!  Helper function used to calculate the statistical parameters of a data set.
+!!  Helper function used to calculate the statistical parameters of a dataset.
 !!
 !! INPUT
 !!  arr(:)=Array with the values.
@@ -4852,13 +4852,11 @@ pure function stats_eval(arr) result(stats)
 
 ! *************************************************************************
 
- !@stats_t
  stats%min   = +HUGE(one)
  stats%max   = -HUGE(one)
  stats%mean  = zero
 
  nn = SIZE(arr)
-
  do ii=1,nn
    xx = arr(ii)
    stats%max  = MAX(stats%max, xx)
@@ -5246,7 +5244,7 @@ subroutine simpson_int(npts, step, values, int_values)
 
  if (npts < 6) then
    write(msg,"(a,i0)")"Number of points in integrand function must be >=6 while it is: ",npts
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !-----------------------------------------------------------------
@@ -5735,15 +5733,15 @@ real(dp) function central_finite_diff(order, ipos, npts) result(fact)
    if (ipos < 1 .or. ipos > 7 .or. npts /= 7) goto 10
    fact = d6(ipos)
  case default
-   MSG_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
+   ABI_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
  end select
 
  if (fact == empty) then
-   MSG_ERROR(sjoin("Invalid ipos:",itoa(ipos),"for order", itoa(order), "npts", itoa(npts)))
+   ABI_ERROR(sjoin("Invalid ipos:",itoa(ipos),"for order", itoa(order), "npts", itoa(npts)))
  end if
  return
 
-10 MSG_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
+10 ABI_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
 
 end function central_finite_diff
 !!***
@@ -5786,7 +5784,7 @@ function uniformrandom(seed)
  integer :: kk
  real(dp) :: im1inv,im2inv
  real(dp), save :: table(97)
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -5819,8 +5817,8 @@ function uniformrandom(seed)
  ii3=mod(ia3*ii3+ic3,im3)
  kk=1+(97*ii3)/im3
  if (kk<1.or.kk>97) then
-   write(message,'(a,2i0,a)' ) ' trouble in uniformrandom; ii3,kk=',ii3,kk,' =>stop'
-   MSG_ERROR(message)
+   write(msg,'(a,2i0,a)' ) ' trouble in uniformrandom; ii3,kk=',ii3,kk,' =>stop'
+   ABI_ERROR(msg)
  end if
  uniformrandom=table(kk)
 
@@ -5896,7 +5894,7 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
  real(dp) :: aa,bb,bbp,cc,ccp,d_lambda,dd
  real(dp) :: discr,ee,eep,lambda_shift,sum1,sum2,sum3,uu
  real(dp) :: uu3,vv,vv3
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -5913,8 +5911,7 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 !ENDDEBUG
 
  if(abs(lambda_1-1.0_dp)>tol12 .or. abs(lambda_2)>tol12) then
-   message = '  For choice=4, lambda_1 must be 1 and lambda_2 must be 0.'
-   MSG_BUG(message)
+   ABI_BUG('For choice=4, lambda_1 must be 1 and lambda_2 must be 0.')
  end if
 
 !Evaluate quartic interpolation
@@ -5937,21 +5934,20 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
    d2edv2_predict=0.0
 
 !  Even if there is a problem, try to keep going ...
-   message = 'The 2nd degree equation has no positive root (choice=4).'
-   MSG_WARNING(message)
+   ABI_WARNING('The 2nd degree equation has no positive root (choice=4).')
    status=2
    if(etotal_1<etotal_2)then
-     write(message, '(a,a,a)' )&
-&     'Will continue, since the new total energy is lower',ch10,&
-&     'than the old. Take a larger step in the same direction.'
-     MSG_COMMENT(message)
+     write(msg, '(a,a,a)' )&
+      'Will continue, since the new total energy is lower',ch10,&
+      'than the old. Take a larger step in the same direction.'
+     ABI_COMMENT(msg)
      lambda_predict=2.5_dp
    else
-     write(message, '(a,a,a,a,a)' )&
-&     'There is a problem, since the new total energy is larger',ch10,&
-&     'than the old (choice=4).',ch10,&
-&     'I take a point between the old and new, close to the old .'
-     MSG_COMMENT(message)
+     write(msg, '(a,a,a,a,a)' )&
+     'There is a problem, since the new total energy is larger',ch10,&
+     'than the old (choice=4).',ch10,&
+     'I take a point between the old and new, close to the old .'
+     ABI_COMMENT(msg)
      lambda_predict=0.25_dp
    end if
 !  Mimick a zero-gradient lambda, in order to avoid spurious
@@ -6014,18 +6010,18 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 
  end if
 
- write(message, '(a,i3)' )'   line minimization, algorithm ',4
- call wrtout(std_out,message,'COLL')
- write(message, '(a,a)' )'                        lambda      etotal ','           dedv        d2edv2    '
- call wrtout(std_out,message,'COLL')
- write(message, '(a,es12.4,es18.10,2es12.4)' )'   old point         :',lambda_2,etotal_2,dedv_2,d2edv2_2
- call wrtout(std_out,message,'COLL')
- write(message, '(a,es12.4,es18.10,2es12.4)' )'   new point         :',lambda_1,etotal_1,dedv_1,d2edv2_1
- call wrtout(std_out,message,'COLL')
- write(message, '(a,es12.4,es18.10,2es12.4)' )'   predicted point   :',lambda_predict,etotal_predict,dedv_predict,d2edv2_predict
- call wrtout(std_out,message,'COLL')
- write(message, '(a)' ) ' '
- call wrtout(std_out,message,'COLL')
+ write(msg, '(a,i3)' )'   line minimization, algorithm ',4
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,a)' )'                        lambda      etotal ','           dedv        d2edv2    '
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,es12.4,es18.10,2es12.4)' )'   old point         :',lambda_2,etotal_2,dedv_2,d2edv2_2
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,es12.4,es18.10,2es12.4)' )'   new point         :',lambda_1,etotal_1,dedv_1,d2edv2_1
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,es12.4,es18.10,2es12.4)' )'   predicted point   :',lambda_predict,etotal_predict,dedv_predict,d2edv2_predict
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a)' ) ' '
+ call wrtout(std_out,msg,'COLL')
 
 end subroutine findmin
 !!***
@@ -6089,10 +6085,10 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  do ii=2,nomega
    if (ABS(domega-(omega(ii)-omega(ii-1))) > 0.001) then
      if (only_check/=1) then
-       MSG_WARNING("Check cannot be performed since the frequency step is not constant")
+       ABI_WARNING("Check cannot be performed since the frequency step is not constant")
        RETURN
      else
-       MSG_ERROR('Cannot perform integration since frequency step is not constant')
+       ABI_ERROR('Cannot perform integration since frequency step is not constant')
      end if
    end if
  end do
@@ -6100,10 +6096,10 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 !Check whether omega(1) is small or not
  if (omega(1) > 0.1/Ha_eV) then
    if (only_check/=1) then
-     MSG_WARNING('Check cannot be performed since first frequency on the grid > 0.1 eV')
+     ABI_WARNING('Check cannot be performed since first frequency on the grid > 0.1 eV')
      RETURN
    else
-     MSG_ERROR('Cannot perform integration since first frequency on the grid > 0.1 eV')
+     ABI_ERROR('Cannot perform integration since first frequency on the grid > 0.1 eV')
    end if
  end if
 
@@ -6114,7 +6110,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 &   'Im epsilon for omega = ',omega(nomega)*Ha_eV,' eV',ch10,&
 &   'is not yet zero, epsilon_2 = ',AIMAG(eps(nomega)),ch10,&
 &   'Kramers Kronig could give wrong results'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    if (enough==50) then
      write(msg,'(3a)')' sufficient number of WARNINGS-',ch10,' stop writing '
      call wrtout(std_out,msg,'COLL')
@@ -6156,7 +6152,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 
  case default
    write(msg,'(a,i0)')' Wrong value for method ',method
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 !at this point real part is in e1kk, need to put it into eps

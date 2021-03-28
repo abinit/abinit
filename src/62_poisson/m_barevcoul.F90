@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group ()
+!! Copyright (C) 1999-2021 ABINIT group ()
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -234,9 +234,9 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
  
- ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
- ABI_ALLOCATE(gpq,(nfft))
- ABI_ALLOCATE(gpq2,(nfft))
+ ABI_MALLOC(gq,(3,max(n1,n2,n3)))
+ ABI_MALLOC(gpq,(nfft))
+ ABI_MALLOC(gpq2,(nfft))
  
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
@@ -322,7 +322,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    test=COUNT(vcut%pdir==1)
    ABI_CHECK((test==1),'Wrong pdir for cylinder')
    if (vcut%pdir(3)/=1) then
-     MSG_ERROR("The cylinder must be along the z-axis")
+     ABI_ERROR("The cylinder must be along the z-axis")
    end if
 
    call cutoff_cylinder(nfft,gq,ng,Gsph%gvec,vcut%rcut,vcut%hcyl,vcut%pdir,&
@@ -334,7 +334,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      ABI_MALLOC(qfit,(3,npt))
      ABI_MALLOC(vcfit,(1,npt))
      if (nfft==1) then
-       MSG_ERROR("nfft == 1 not supported when Beigi's method is used")
+       ABI_ERROR("nfft == 1 not supported when Beigi's method is used")
      endif
      qfit(:,:)=zero
      step=half/(npt*(nfft-1))              ; qfit(3,:)=arth(tol6,step,npt)
@@ -421,7 +421,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      ABI_MALLOC(qcart,(3,npt))
      ABI_MALLOC(vcfit,(1,npt))
      if (nfft==1) then
-       MSG_ERROR("nfft == 1 not supported when Beigi's method is used")
+       ABI_ERROR("nfft == 1 not supported when Beigi's method is used")
      endif
      qfit(:,:)=zero
      qcart(:,:)=zero
@@ -504,12 +504,12 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  CASE DEFAULT
    write(msg,'(a,i3)')'No cut-off applied to the Coulomb Potential.' //&
 &                     'Either icutcoul value not allowed or not defined.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  END SELECT
 
- ABI_DEALLOCATE(gq)
- ABI_DEALLOCATE(gpq)
- ABI_DEALLOCATE(gpq2)
+ ABI_FREE(gq)
+ ABI_FREE(gpq)
+ ABI_FREE(gpq2)
   
 end subroutine barevcoul
 !!***

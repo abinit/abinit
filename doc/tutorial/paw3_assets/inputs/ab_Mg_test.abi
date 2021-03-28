@@ -1,0 +1,98 @@
+# Input for PAW3 tutorial
+# Mg - hexagonal structure
+
+#-------------------------------------------------------------------------------
+#Directories and files
+
+pseudos="Mg.LDA-PW-paw.xml"
+
+pp_dirpath="../"
+outdata_prefix="outputs/ab_Mg_test_o"
+tmpdata_prefix="outputs/ab_Mg_test"
+
+
+#-------------------------------------------------------------------------------
+#Define the different datasets
+
+ndtset 18       # 18 double-index datasets
+udtset 9 2      # 1st index running from 1 to 9 and the 2nd from 1 to 2
+
+#Cutoff variables
+ecut:?  5.0
+ecut+?  5.0
+pawecutdg 110.0
+ecutsm 0.5
+
+#Dataset 1
+#Ground-state run
+kptopt?1 1
+nshiftk?1 1
+shiftk?1 0.0 0.0 0.5
+ngkpt 10 10 10
+tolvrs?1 1.0d-14
+nstep?1  150
+getwfk21 11
+getwfk31 21
+getwfk41 31
+getwfk51 41
+getwfk61 51
+getwfk71 61
+getwfk81 71
+getwfk91 81
+nbdbuf?1 5
+nband?1  25
+
+#Dataset 2
+#Definition of the k-point grid
+#the band structure
+iscf?2    -2
+getden?2  -1
+kptopt?2  -7
+nband?2   20
+nbdbuf?2   0
+ndivk?2    6 6 6 10 6 6 6 # divisions of the 6 segments
+kptbounds?2 
+           0   0   1/2 # A
+           1/2 0   1/2 # L
+           1/3 1/3 1/2 # H
+           0   0   1/2 # A
+           0   0   0   # Gamma
+           1/2 0   0   # M
+           1/3 1/3 0   # K
+           0   0   0   # Gamma
+
+tolwfr?2  1.0d-18
+enunit?2  0             # Will output the eigenenergies in Ha
+nstep?2   150
+
+
+#-------------------------------------------------------------------------------
+#Definition of the Unit cell
+
+#Definition of the unit cell (hexagonal)
+acell 2*3.20927 5.21033 angstrom
+angdeg 90 90 60
+
+#Definition of the atom types
+ntypat 1          # One tom type
+znucl 12           # Magnesium 
+
+#Definition of the atoms
+natom 2           # 2 atoms per cell
+typat 1 1         # each of type carbon
+xred              # This keyword indicates that the location of the atoms
+                  # will follow, one triplet of number for each atom
+   1/3   1/3   1/4
+   2/3   2/3   3/4
+
+#Parameters for metals
+tsmear 0.4109804423E-02
+occopt 7
+
+#-------------------------------------------------------------------------------
+#Miscelaneous
+
+#GS convergence fix
+istwfk *1
+
+

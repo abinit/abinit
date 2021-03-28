@@ -6,7 +6,7 @@
 !! Compute DFT+U self energy for DMFT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,7 +60,7 @@ contains
 !! Use DFT+U to compute self-energy
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,7 +69,7 @@ contains
 !! INPUTS
 !!  cryst_struc
 !!  istep    =  step of iteration for DFT.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawtab <type(pawtab)>
@@ -137,10 +137,10 @@ subroutine dftu_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
    pawtab_ => pawtab(cryst_struc%typat(iatom))
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
-     ABI_ALLOCATE(vpawu,(2,ldim,ldim,nocc))
+     ABI_MALLOC(vpawu,(2,ldim,ldim,nocc))
 
-     ABI_ALLOCATE(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
-     ABI_ALLOCATE(nocctot,(nocc))
+     ABI_MALLOC(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
+     ABI_MALLOC(nocctot,(nocc))
      noccmmp(:,:,:,:)=zero ; nocctot(:)=zero ! contains nmmp in the n m representation
 
 !    ===============================
@@ -255,14 +255,14 @@ subroutine dftu_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
 
      end do ! idijeff
 !    write(std_out,*) "check im,im1 in vpawu",iatom
-     ABI_DEALLOCATE(vpawu)
+     ABI_FREE(vpawu)
 
 !    ===============================
 !    Compute energy
 !    ===============================
 
-     ABI_DEALLOCATE(noccmmp)
-     ABI_DEALLOCATE(nocctot)
+     ABI_FREE(noccmmp)
+     ABI_FREE(nocctot)
    end if
  end do
 

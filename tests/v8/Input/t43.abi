@@ -1,0 +1,22 @@
+t44o_DS20_DVDB
+4
+t41o_DS3_POT1 
+t41o_DS4_POT1    
+t41o_DS4_POT2
+t41o_DS5_POT1
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgdv
+#%% test_chain = t41.abi, t42.abi, t43.abi, t44.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t43.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [shell]
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = Merge the DFPT POT files produced in t41.abi
+#%%<END TEST_INFO>

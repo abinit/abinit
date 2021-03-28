@@ -1,0 +1,111 @@
+# Linear response calculation for AlP
+# Perturbation: atomic displacements, electric fields, & strains
+# Finite difference calculation of the ddk
+
+# DFPT calculations require a series of computations to 
+# to derive all necessary information
+ndtset 3
+
+#DATASET1 : scf calculation: GS WF in the BZ
+#********************************************
+   prtden1    1
+    prtwf1    1
+   kptopt1    1
+   tolvrs1    1.0D-18
+    nstep1    8
+
+#DATASET2 : non scf calculation: GS WF in the whole BZ
+#*****************************************************
+   getden2    1
+   kptopt2    2
+     iscf2   -2
+   getwfk2    1
+   tolwfr2    1.0d-22
+ berryopt2   -2 # berryopt -2 provides the DDK perturbation through a finite
+                # difference formula, roughly |du/dk> = (|u_k+dk> - |u_k-dk>)/(2*dk)
+                # It would also be possible to use rfddk 1 here, and compute the DDK
+                # wavefunctions from within the DFPT formalism
+    rfdir2    1 1 1
+    prtwf2    1
+
+#DATASET3 : linear response to atomic displacements
+#**************************************************
+   getwfk3    2
+    rfdir3    1 1 1
+   rfphon3    1
+  rfatpol3    1 2
+   rfstrs3    3
+   rfelfd3    3
+   getddk3    2
+   tolvrs3    1.0d-12
+   kptopt3    2
+    nstep3    8
+
+#Definition of the unit cell
+# these cell parameters were derived from a relaxation run done with the
+# current ecut and kpt values. The current ecut value used is very low but
+# is done to speed the calculations.
+#
+            acell      7.2728565836E+00  7.2728565836E+00  7.2728565836E+00 Bohr
+            rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
+                       7.0710678119E-01  0.0000000000E+00  7.0710678119E-01
+                       7.0710678119E-01  7.0710678119E-01  0.0000000000E+00
+
+#Definition of the atom types and pseudopotentials
+ ntypat 2 # two types of atoms 
+ znucl 15 13 # the atom types are Phosphorous and Aluminum
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+
+#Definition of the atoms
+ natom 2 # two atoms in the cell
+ typat 1 2 # type 1 is Phosphorous, type 2 is Aluminum (order defined by znucl above and pseudos list)
+ nband 4 # nband is restricted here to the number of filled bands only, no empty bands. 
+
+#atomic positions. 
+xred # atomic positions are given in units of the primitive cell vectors, as is common
+     # in crystallography
+1/4 1/4 1/4 # P position
+0 0 0 # Al position
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut  5 # this value is very low but is used here to achieve very low calculation times.
+        # in a production environment this should be checked carefully for convergence and
+        # a more reasonable value is probably around 20
+ecutsm 0.5
+dilatmx 1.05
+ngkpt 6 6 6
+nshiftk 4 # this Monkhorst-Pack shift pattern is used so that the symmetry of the shifted grid
+          # is correct. A gamma-centered grid would also have the correct symmetry but would be
+          # less efficient.
+shiftk 0.5 0.5 0.5
+       0.5 0.0 0.0
+       0.0 0.5 0.0
+       0.0 0.0 0.5
+
+# by default, don't save files, only save files within each
+# data set as needed
+prtwf 0
+prtden 0
+prteig 0
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tffield_2.abi, tffield_3.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tffield_2.abo, tolnlines=  2, tolabs=  5.000e-07, tolrel=  3.000e-04, fld_options=-medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = J. Zwanziger, M. Veithen
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Linear response calculation for AlP
+#%%   Perturbation: atomic displacements, strains, electric fields
+#%%   Finite difference calculation of the ddk
+#%%<END TEST_INFO>

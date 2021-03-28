@@ -15,7 +15,7 @@ NC SR (ONCVPSP v0.4), LDA, standard, psp8
 
 The O.psp8 has been downloaded on September 26, 2020 from Github 
 https://github.com/abinit/pseudo_dojo/blob/master/pseudo_dojo/pseudos/ONCVPSP-PW-PDv0.4/O/O.psp8
-It was NOT available on the pseudodojo Web site.
+At that time, it was not available on the pseudodojo Web site.
 
 
 

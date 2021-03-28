@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2020 ABINIT group (AM)
+!! Copyright (C) 2010-2021 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,7 +96,7 @@ CONTAINS
 !! cutoff_in = optional,cut off to apply to the range of interation if
 !!           the coefficient are genereted in this routine
 !! max_power_strain = maximum order of the strain of the strain phonon coupling
-!! fit_initializeData = optional, logical !If true, we store all the informations for the fit,
+!! fit_initializeData = optional, logical !If true, we store all the information for the fit,
 !!                      it will reduce the computation time but increase a lot the memory...
 !! fit_tolMSDF = optional, tolerance in eV^2/A^2 on the Forces for the fit process
 !! fit_tolMSDS = optional, tolerance in eV^2/A^2 on the Stresses for the fit process
@@ -212,7 +212,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
       write(message, '(3a)' )&
 &       'need_only_odd_power and need_only_even_power are both true',ch10,&
 &       'Action: contact abinit group'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  max_power_strain_in = 1
  if(present(max_power_strain))then
@@ -222,7 +222,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
       write(message, '(3a)' )&
 &       'max_power_strain can not be inferior or equal to zero',ch10,&
 &       'Action: contact abinit group'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  !Check which atom to fit, if not present do all atoms 
  if(present(fit_iatom))then 
@@ -302,7 +302,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    end if
  end if
 
- ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
+ ABI_MALLOC(symbols,(eff_pot%crystal%natom))
  call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
 &                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
 
@@ -331,7 +331,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                  fit_iatom=fit_iatom_in)
  end if
 
- ABI_DEALLOCATE(symbols)
+ ABI_FREE(symbols)
 
 !Copy the initial coefficients from the model on the CPU 0
  ncoeff_tot = ncoeff_tot + ncoeff_model
@@ -352,13 +352,13 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 ! if CPU0 has 200  Coeff and CPU1 has 203 Coeff then
 ! for CPU0:my_coeffindexes=>1-200 and for CPU1:my_coeffindexes=>201-403
 !Also fill the my_coeffs array with the generated coefficients and/or the coefficient from the input xml
- ABI_ALLOCATE(buffin,(nproc))
+ ABI_MALLOC(buffin,(nproc))
  buffin = 0
  buffin(my_rank+1) = my_ncoeff
  call xmpi_sum(buffin,comm,ierr)
- ABI_ALLOCATE(my_coeffindexes,(my_ncoeff))
- ABI_ALLOCATE(my_coefflist,(my_ncoeff))
- ABI_DATATYPE_ALLOCATE(my_coeffs,(my_ncoeff))
+ ABI_MALLOC(my_coeffindexes,(my_ncoeff))
+ ABI_MALLOC(my_coefflist,(my_ncoeff))
+ ABI_MALLOC(my_coeffs,(my_ncoeff))
  do icoeff=1,my_ncoeff
 
    jcoeff = icoeff
@@ -390,10 +390,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
 !Deallocation
  if(allocated(coeffs_tmp)) then
-   ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
+   ABI_FREE(coeffs_tmp)
  end if
  NULLIFY(coeffs_in)
- ABI_DEALLOCATE(buffin)
+ ABI_FREE(buffin)
 
  !wait everybody
  call xmpi_barrier(comm)
@@ -469,10 +469,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  factor   = 1._dp/natom_sc
 
 !Initialisation of arrays:
- ABI_ALLOCATE(energy_coeffs_tmp,(ncycle_max,ntime))
- ABI_ALLOCATE(list_coeffs,(ncycle_max))
- ABI_ALLOCATE(fcart_coeffs_tmp,(3,natom_sc,ncycle_max,ntime))
- ABI_ALLOCATE(strten_coeffs_tmp,(6,ntime,ncycle_max))
+ ABI_MALLOC(energy_coeffs_tmp,(ncycle_max,ntime))
+ ABI_MALLOC(list_coeffs,(ncycle_max))
+ ABI_MALLOC(fcart_coeffs_tmp,(3,natom_sc,ncycle_max,ntime))
+ ABI_MALLOC(strten_coeffs_tmp,(6,ntime,ncycle_max))
  list_coeffs  = 0
 
 !if ncycle_tot > 0 fill list_coeffs with the fixed coefficients
@@ -505,12 +505,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Get the decomposition for each coefficients of the forces,stresses and energy for
 !each atoms and each step  (see equations 11 & 12 of  
 !PRB95,094115(2017)) [[cite:Escorihuela-Sayalero2017]]+ allocation
-!If the user does not turn off this initialization, we store all the informations for the fit,
+!If the user does not turn off this initialization, we store all the information for the fit,
 !it will reduce the computation time but increase a lot the memory...
  if(need_initialize_data)then
-   ABI_ALLOCATE(energy_coeffs,(my_ncoeff,ntime))
-   ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,my_ncoeff,ntime))
-   ABI_ALLOCATE(strten_coeffs,(6,ntime,my_ncoeff))
+   ABI_MALLOC(energy_coeffs,(my_ncoeff,ntime))
+   ABI_MALLOC(fcart_coeffs,(3,natom_sc,my_ncoeff,ntime))
+   ABI_MALLOC(strten_coeffs,(6,ntime,my_ncoeff))
    call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
 &                                 fit_data%training_set%displacement,&
 &                                 energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
@@ -518,28 +518,28 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                 strten_coeffs,fit_data%training_set%ucvol,my_coefflist,my_ncoeff)
  else
 !  Allocate just 1 dimension ! Save MEMORY !
-   ABI_ALLOCATE(energy_coeffs,(1,ntime))
-   ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,1,ntime))
-   ABI_ALLOCATE(strten_coeffs,(6,ntime,1))   
+   ABI_MALLOC(energy_coeffs,(1,ntime))
+   ABI_MALLOC(fcart_coeffs,(3,natom_sc,1,ntime))
+   ABI_MALLOC(strten_coeffs,(6,ntime,1))   
  end if
 
 !Allocation of arrays
- ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncycle_max))
- ABI_ALLOCATE(singular_coeffs,(max(1,my_ncoeff)))
- ABI_ALLOCATE(coeff_values,(ncycle_max))
- ABI_ALLOCATE(gf_values,(4,max(1,my_ncoeff)))
- ABI_ALLOCATE(list_coeffs_tmp,(ncycle_max))
- ABI_ALLOCATE(list_coeffs_tmp2,(ncycle_max))
- ABI_ALLOCATE(stat_coeff,(ncoeff_tot))
+ ABI_MALLOC(coeffs_tmp,(ncycle_max))
+ ABI_MALLOC(singular_coeffs,(max(1,my_ncoeff)))
+ ABI_MALLOC(coeff_values,(ncycle_max))
+ ABI_MALLOC(gf_values,(4,max(1,my_ncoeff)))
+ ABI_MALLOC(list_coeffs_tmp,(ncycle_max))
+ ABI_MALLOC(list_coeffs_tmp2,(ncycle_max))
+ ABI_MALLOC(stat_coeff,(ncoeff_tot))
  coeff_values = zero
  singular_coeffs = 0
  stat_coeff = 0
 !Set mpi buffer
 !Set the bufsize for mpi allgather
- ABI_ALLOCATE(buffsize,(nproc))
- ABI_ALLOCATE(buffdisp,(nproc))
- ABI_ALLOCATE(buffGF,(5,1))
- ABI_ALLOCATE(gf_mpi,(5,nproc))
+ ABI_MALLOC(buffsize,(nproc))
+ ABI_MALLOC(buffdisp,(nproc))
+ ABI_MALLOC(buffGF,(5,1))
+ ABI_MALLOC(gf_mpi,(5,nproc))
  buffsize(:) = 0
  buffdisp(1) = 0
  do ii= 1,nproc
@@ -1145,31 +1145,31 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  do ii=1,ncycle_max
    call polynomial_coeff_free(coeffs_tmp(ii))
  end do
- ABI_DATATYPE_DEALLOCATE(coeffs_tmp)
+ ABI_FREE(coeffs_tmp)
  do ii=1,my_ncoeff
    call polynomial_coeff_free(my_coeffs(ii))
  end do
 
- ABI_DATATYPE_DEALLOCATE(my_coeffs)
- ABI_DEALLOCATE(buffsize)
- ABI_DEALLOCATE(buffdisp)
- ABI_DEALLOCATE(buffGF)
- ABI_DEALLOCATE(coeff_values)
- ABI_DEALLOCATE(energy_coeffs)
- ABI_DEALLOCATE(energy_coeffs_tmp)
- ABI_DEALLOCATE(fcart_coeffs)
- ABI_DEALLOCATE(fcart_coeffs_tmp)
- ABI_DEALLOCATE(gf_mpi)
- ABI_DEALLOCATE(gf_values)
- ABI_DEALLOCATE(list_coeffs)
- ABI_DEALLOCATE(list_coeffs_tmp)
- ABI_DEALLOCATE(list_coeffs_tmp2)
- ABI_DEALLOCATE(my_coeffindexes)
- ABI_DEALLOCATE(my_coefflist)
- ABI_DEALLOCATE(singular_coeffs)
- ABI_DEALLOCATE(strten_coeffs)
- ABI_DEALLOCATE(strten_coeffs_tmp)
- ABI_DEALLOCATE(stat_coeff)
+ ABI_FREE(my_coeffs)
+ ABI_FREE(buffsize)
+ ABI_FREE(buffdisp)
+ ABI_FREE(buffGF)
+ ABI_FREE(coeff_values)
+ ABI_FREE(energy_coeffs)
+ ABI_FREE(energy_coeffs_tmp)
+ ABI_FREE(fcart_coeffs)
+ ABI_FREE(fcart_coeffs_tmp)
+ ABI_FREE(gf_mpi)
+ ABI_FREE(gf_values)
+ ABI_FREE(list_coeffs)
+ ABI_FREE(list_coeffs_tmp)
+ ABI_FREE(list_coeffs_tmp2)
+ ABI_FREE(my_coeffindexes)
+ ABI_FREE(my_coefflist)
+ ABI_FREE(singular_coeffs)
+ ABI_FREE(strten_coeffs)
+ ABI_FREE(strten_coeffs_tmp)
+ ABI_FREE(stat_coeff)
 
 end subroutine fit_polynomial_coeff_fit
 !!***
@@ -1256,7 +1256,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  if(eff_pot%anharmonics_terms%ncoeff > 0)then
 !  Copy the initial coefficients array
    ncoeff_tot = eff_pot%anharmonics_terms%ncoeff
-   ABI_DATATYPE_ALLOCATE(coeffs_in,(ncoeff_tot))
+   ABI_MALLOC(coeffs_in,(ncoeff_tot))
    do ii=1,ncoeff_tot
      call polynomial_coeff_init(eff_pot%anharmonics_terms%coefficients(ii)%coefficient,&
 &                               eff_pot%anharmonics_terms%coefficients(ii)%nterm,&
@@ -1286,7 +1286,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  end do
 
 !Initialisation of arrays:
- ABI_ALLOCATE(list_coeffs,(ncoeff_tot))
+ ABI_MALLOC(list_coeffs,(ncoeff_tot))
  list_coeffs  = 0
  do ii = 1,ncoeff_tot
    list_coeffs(ii) = ii
@@ -1309,9 +1309,9 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 !Get the decomposition for each coefficients of the forces,stresses and energy for
 !each atoms and each step  (see equations 11 & 12 of  
 ! PRB95,094115(2017)) [[cite:Escorihuela-Sayalero2017]] + allocation
- ABI_ALLOCATE(energy_coeffs,(ncoeff_tot,ntime))
- ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,ncoeff_tot,ntime))
- ABI_ALLOCATE(strten_coeffs,(6,ntime,ncoeff_tot))
+ ABI_MALLOC(energy_coeffs,(ncoeff_tot,ntime))
+ ABI_MALLOC(fcart_coeffs,(3,natom_sc,ncoeff_tot,ntime))
+ ABI_MALLOC(strten_coeffs,(6,ntime,ncoeff_tot))
 
  call fit_polynomial_coeff_getFS(coeffs_in,fit_data%training_set%du_delta,&
 &                                fit_data%training_set%displacement,&
@@ -1329,8 +1329,8 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
    my_nmodel = my_nmodel  + 1
  end if
 
- ABI_ALLOCATE(my_modelindexes,(my_nmodel))
- ABI_ALLOCATE(my_modellist,(my_nmodel))
+ ABI_MALLOC(my_modelindexes,(my_nmodel))
+ ABI_MALLOC(my_modellist,(my_nmodel))
 
 !2:compute the number of model and the list of the corresponding for each CPU.
  do imodel=1,my_nmodel
@@ -1375,13 +1375,13 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
    call polynomial_coeff_free(coeffs_in(ii))
  end do
  call fit_data_free(fit_data)
- ABI_DATATYPE_DEALLOCATE(coeffs_in)
- ABI_DEALLOCATE(energy_coeffs)
- ABI_DEALLOCATE(fcart_coeffs)
- ABI_DEALLOCATE(list_coeffs)
- ABI_DEALLOCATE(my_modelindexes)
- ABI_DEALLOCATE(my_modellist)
- ABI_DEALLOCATE(strten_coeffs)
+ ABI_FREE(coeffs_in)
+ ABI_FREE(energy_coeffs)
+ ABI_FREE(fcart_coeffs)
+ ABI_FREE(list_coeffs)
+ ABI_FREE(my_modelindexes)
+ ABI_FREE(my_modellist)
+ ABI_FREE(strten_coeffs)
 
 end subroutine fit_polynomial_coeff_getPositive
 !!***
@@ -1451,7 +1451,7 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
 !Do check
  if(ncoeff_model == 0)then
    write(msg,'(a)')'ncoeff_model must be different to 0'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Map the hist in order to be consistent with the supercell into reference_effective_potential
@@ -1466,15 +1466,15 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
 
 !Allocation
  ncoeff_max = 2 * ncoeff_model
- ABI_ALLOCATE(odd_coeff,(ncoeff_max))
- ABI_ALLOCATE(need_bound,(ncoeff_max))
+ ABI_MALLOC(odd_coeff,(ncoeff_max))
+ ABI_MALLOC(need_bound,(ncoeff_max))
 
- ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
+ ABI_MALLOC(symbols,(eff_pot%crystal%natom))
  call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
 &                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
 
 
- ABI_DATATYPE_ALLOCATE(coeffs_test,(ncoeff_max))
+ ABI_MALLOC(coeffs_test,(ncoeff_max))
 
  do icoeff=1,ncoeff_model
    call polynomial_coeff_init(coeffs_in(icoeff)%coefficient,coeffs_in(icoeff)%nterm,&
@@ -1538,13 +1538,13 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
        ndisp = coeffs_in(icoeff)%terms(1)%ndisp
        nstrain = coeffs_in(icoeff)%terms(1)%nstrain
 
-       ABI_ALLOCATE(terms,(nterm))
-       ABI_ALLOCATE(atindx,(2,ndisp))
-       ABI_ALLOCATE(cells,(3,2,ndisp))
-       ABI_ALLOCATE(direction,(ndisp))
-       ABI_ALLOCATE(power_disps,(ndisp))
-       ABI_ALLOCATE(power_strain,(nstrain))
-       ABI_ALLOCATE(strain,(nstrain))
+       ABI_MALLOC(terms,(nterm))
+       ABI_MALLOC(atindx,(2,ndisp))
+       ABI_MALLOC(cells,(3,2,ndisp))
+       ABI_MALLOC(direction,(ndisp))
+       ABI_MALLOC(power_disps,(ndisp))
+       ABI_MALLOC(power_strain,(nstrain))
+       ABI_MALLOC(strain,(nstrain))
 
        do iterm=1,coeffs_in(icoeff)%nterm
          atindx(:,:) = coeffs_in(icoeff)%terms(iterm)%atindx(:,:)
@@ -1582,13 +1582,13 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
        do iterm=1,nterm
          call polynomial_term_free(terms(iterm))
        end do
-       ABI_DEALLOCATE(terms)
-       ABI_DEALLOCATE(atindx)
-       ABI_DEALLOCATE(cells)
-       ABI_DEALLOCATE(direction)
-       ABI_DEALLOCATE(power_disps)
-       ABI_DEALLOCATE(power_strain)
-       ABI_DEALLOCATE(strain)
+       ABI_FREE(terms)
+       ABI_FREE(atindx)
+       ABI_FREE(cells)
+       ABI_FREE(direction)
+       ABI_FREE(power_disps)
+       ABI_FREE(power_strain)
+       ABI_FREE(strain)
 
        icoeff_bound = icoeff_bound  + 1
 
@@ -1606,7 +1606,7 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
    counter = counter + 1
  end do
 
- ABI_ALLOCATE(coeffs_out,(ncoeff_bound))
+ ABI_MALLOC(coeffs_out,(ncoeff_bound))
  do ii=1,ncoeff_bound
    icoeff_bound = ncoeff_in + ii
    call polynomial_coeff_init(one,coeffs_test(icoeff_bound)%nterm,coeffs_out(ii),&
@@ -1621,10 +1621,10 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
  do icoeff=1,ncoeff_max
    call polynomial_coeff_free(coeffs_test(icoeff))
  end do
- ABI_DATATYPE_DEALLOCATE(coeffs_test)
- ABI_DEALLOCATE(odd_coeff)
- ABI_DEALLOCATE(need_bound)
- ABI_DEALLOCATE(symbols)
+ ABI_FREE(coeffs_test)
+ ABI_FREE(odd_coeff)
+ ABI_FREE(need_bound)
+ ABI_FREE(symbols)
 
 
 end subroutine fit_polynomial_coeff_getCoeffBound
@@ -1724,17 +1724,17 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  efact = one/(ntime)
 
 !0-Allocation
- ABI_ALLOCATE(A,(LDA,N))
- ABI_ALLOCATE(B,(LDB,NRHS))
- ABI_ALLOCATE(AF,(LDAF,N))
- ABI_ALLOCATE(IPIV,(N))
- ABI_ALLOCATE(R,(N))
- ABI_ALLOCATE(C,(N))
- ABI_ALLOCATE(FERR,(NRHS))
- ABI_ALLOCATE(BERR,(NRHS))
- ABI_ALLOCATE(WORK,(4*N))
- ABI_ALLOCATE(IWORK,(N))
- ABI_ALLOCATE(SWORK,(N*(N+NRHS)))
+ ABI_MALLOC(A,(LDA,N))
+ ABI_MALLOC(B,(LDB,NRHS))
+ ABI_MALLOC(AF,(LDAF,N))
+ ABI_MALLOC(IPIV,(N))
+ ABI_MALLOC(R,(N))
+ ABI_MALLOC(C,(N))
+ ABI_MALLOC(FERR,(NRHS))
+ ABI_MALLOC(BERR,(NRHS))
+ ABI_MALLOC(WORK,(4*N))
+ ABI_MALLOC(IWORK,(N))
+ ABI_MALLOC(SWORK,(N*(N+NRHS)))
  A=zero; B=zero;
  AF = zero; IPIV = 1;
  R = one; C = one;
@@ -1829,17 +1829,17 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 
  info_out = INFO
 
- ABI_DEALLOCATE(AF)
- ABI_DEALLOCATE(IPIV)
- ABI_DEALLOCATE(R)
- ABI_DEALLOCATE(C)
- ABI_DEALLOCATE(FERR)
- ABI_DEALLOCATE(BERR)
- ABI_DEALLOCATE(WORK)
- ABI_DEALLOCATE(IWORK)
- ABI_DEALLOCATE(SWORK)
- ABI_DEALLOCATE(A)
- ABI_DEALLOCATE(B)
+ ABI_FREE(AF)
+ ABI_FREE(IPIV)
+ ABI_FREE(R)
+ ABI_FREE(C)
+ ABI_FREE(FERR)
+ ABI_FREE(BERR)
+ ABI_FREE(WORK)
+ ABI_FREE(IWORK)
+ ABI_FREE(SWORK)
+ ABI_FREE(A)
+ ABI_FREE(B)
 
 end subroutine fit_polynomial_coeff_solve
 !!***
@@ -2317,7 +2317,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE.,need_elec_eval,iam_master
  logical :: need_prt_ph 
  !arrays
- real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
+ real(dp):: fcart(3,natom),gred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
 !Strings/Characters 
  character(len=fnlen) :: file_energy, file_stress, file_anh, name_file
  character(len=500) :: msg
@@ -2337,12 +2337,12 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
  !Do some checks
  if(ntime /= hist%mxhist)then
    write(msg,'(a)')'ntime is not correct'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(natom /= size(hist%xred,2)) then
    write(msg,'(a)')'natom is not correct'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(present(compute_anharmonic))then
@@ -2369,18 +2369,18 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
    unit_energy = get_unit()
    if (open_file(file_energy,msg,unit=unit_energy,form="formatted",&
 &     status="unknown",action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    unit_stress = get_unit()
    file_stress=trim(name_file)//'_stress.dat'
    if (open_file(file_stress,msg,unit=unit_stress,form="formatted",&
 &     status="unknown",action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  else if(need_print .and. .not. present(filename))then 
    write(msg,'(3a)')' You asked for printing of the MSD-values',ch10,& 
 &        ' without specifying a filename'
-   MSG_ERROR(msg) 
+   ABI_ERROR(msg) 
  end if
  
  file_anh=trim(name_file)//'_anharmonic_terms_energy.dat'
@@ -2406,11 +2406,11 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
         end if 
    end if 
 #endif
-   call effective_potential_evaluate(eff_pot,energy_harm,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy_harm,fcart,gred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.False.,verbose=.false.,&
 &                                    elec_eval=need_elec_eval)
 
-   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.,&
 &                                    filename=file_anh,elec_eval=need_elec_eval)
 
@@ -2545,8 +2545,8 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   natom = size(hist%xred,2)   
   factor   = 1._dp/natom
   ntime = hist%mxhist 
-  ABI_ALLOCATE(sqomega,(ntime))
-  ABI_ALLOCATE(ucvol,(ntime))
+  ABI_MALLOC(sqomega,(ntime))
+  ABI_MALLOC(ucvol,(ntime))
   sqomega = zero 
   filename = 'TES_fit_diff'
   ncoeff = eff_pot%anharmonics_terms%ncoeff
@@ -2587,8 +2587,8 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 
 
   !Deallocating
-  ABI_DEALLOCATE(sqomega)
-  ABI_DEALLOCATE(ucvol)
+  ABI_FREE(sqomega)
+  ABI_FREE(ucvol)
 
   INQUIRE(FILE='TES_fit_diff_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_anh)
   if(file_opened) close(unit_anh)
@@ -2653,10 +2653,10 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 &                    eff_pot%crystal%xcart,eff_pot%crystal%znucl, supercell)
 
 !allocation of array
- ABI_ALLOCATE(xcart,(3,supercell%natom))
- ABI_ALLOCATE(fcart,(3,supercell%natom))
- ABI_ALLOCATE(typat_order,(supercell%natom))
- ABI_ALLOCATE(typat_order_uc,(eff_pot%crystal%natom))
+ ABI_MALLOC(xcart,(3,supercell%natom))
+ ABI_MALLOC(fcart,(3,supercell%natom))
+ ABI_MALLOC(typat_order,(supercell%natom))
+ ABI_MALLOC(typat_order_uc,(eff_pot%crystal%natom))
 
  A = (/ 2, 3, 1/)
 
@@ -2686,7 +2686,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 ! BORN CHARGES FILE
  if (open_file('system/Born_Charges',msg,unit=unit_born,form="formatted",&
 &    status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  do ii=1,eff_pot%crystal%ntypat
    jj = A(ii)
@@ -2703,7 +2703,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !DIELECTRIC TENSOR FILE
  if (open_file('system/Dielectric_Tensor',msg,unit=unit_epsiloninf,form="formatted",&
 &    status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  do mu=1,3
    WRITE(unit_epsiloninf,'(3(F23.14))') eff_pot%harmonics_terms%epsilon_inf(:,mu)
@@ -2713,7 +2713,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !REFERENCE STRUCTURE FILE
  if (open_file('system/Reference_structure',msg,unit=unit_ref,form="formatted",&
 &    status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(unit_ref,'("Energy (Hartree)")')
@@ -2737,7 +2737,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !Harmonic XML file
  if (open_file('system/harmonic.xml',msg,unit=unit_harmonic,form="formatted",&
 &     status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Write header
@@ -2772,14 +2772,14 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
 !STRAIN FILE
  if (open_file('system/Strain_Tensor',msg,unit=unit_strain,form="formatted",&
 &     status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(unit_strain,'(6(F23.14))') (eff_pot%harmonics_terms%elastic_constants)
 
 ! SYM FILE
  if (open_file('system/symmetry_operations',msg,unit=unit_sym,form="formatted",&
 &     status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(unit_sym,'("(x,y,z)  (y,-x,z) (z,x,y) (y,z,x) (x,z,y) (y,x,z) (z,y,x) (x,-y,-z) (z,-x,-y)",&
 &                " (y,-z,-x) (x,-z,-y) (y,-x,-z) (z,-y,-x) (-x,y,-z) (-z,x,-y) (-y,z,-x) (-x,z,-y)",&
@@ -2793,7 +2793,7 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  nstep = hist%mxhist
  if (open_file('system/Molecular_dynamic',msg,unit=unit_md,form="formatted",&
 &     status="replace",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  do ii=1,nstep
    write(unit_md,'(I5)') ii-1
@@ -2823,10 +2823,10 @@ subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
  close(unit_sym)
 
 !Deallocation array
- ABI_DEALLOCATE(typat_order)
- ABI_DEALLOCATE(typat_order_uc)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(fcart)
+ ABI_FREE(typat_order)
+ ABI_FREE(typat_order_uc)
+ ABI_FREE(xcart)
+ ABI_FREE(fcart)
  call destroy_supercell(supercell)
 
 end subroutine fit_polynomial_printSystemFiles

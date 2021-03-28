@@ -3,8 +3,7 @@
 !! m_abihist
 !!
 !! FUNCTION
-!! This module contains definition the type abihist
-!! and its related routines
+!! This module contains definition the type abihist and its related routines
 !!
 !! Datatypes:
 !!
@@ -21,7 +20,7 @@
 !! * vel2hist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (XG, SE)
+!! Copyright (C) 2001-2021 ABINIT group (XG, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +44,7 @@ module m_abihist
  use netcdf
 #endif
 
- use m_geometry,  only : fcart2fred, xred2xcart
+ use m_geometry,  only : fcart2gred, xred2xcart
 
  implicit none
 
@@ -61,7 +60,7 @@ module m_abihist
 !! FUNCTION
 !! This type has several vectors, and index scalars to store
 !! a proper history of previous evaluations of forces and
-!! stresses,velocities,positions and energies
+!! stresses, velocities, positions and energies.
 !!
 !! It contains:
 !! * mxhist                  : Maximum size of history
@@ -135,7 +134,7 @@ module m_abihist
  public :: abihist_copy             ! Copy 2 HIST records
  public :: abihist_compare_and_copy ! Compare 2 HIST records; if similar copy
  public :: hist2var                 ! Get xred, acell and rprimd from the history.
- public :: abihist_findIndex            ! Shift history indexes
+ public :: abihist_findIndex        ! Shift history indexes
  public :: var2hist                 ! Append xred, acell and rprimd
  public :: vel2hist                 ! Append velocities and Kinetic Energy
  public :: write_md_hist            ! Write the history into a netcdf file
@@ -149,15 +148,16 @@ module m_abihist
    module procedure abihist_init_0D
    module procedure abihist_init_1D
  end interface abihist_init
+
  interface abihist_free
    module procedure abihist_free_0D
    module procedure abihist_free_1D
  end interface abihist_free
+
  interface abihist_bcast
    module procedure abihist_bcast_0D
    module procedure abihist_bcast_1D
  end interface abihist_bcast
-
 !!***
 
 !----------------------------------------------------------------------
@@ -173,22 +173,17 @@ contains  !=============================================================
 !! Initialize a hist structure - Target: scalar
 !!
 !! INPUTS
-!!
-!!  natom = Number of atoms per unitary cell
+!!  natom = Number of atoms per unit cell
 !!  mxhist = Maximal number of records to store
 !!  isVUsed,isARUsed=flags used to initialize hsit structure
 !!
 !! OUTPUT
 !!  hist <type(abihist)> = The hist to initialize
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      m_abihist
 !!
 !! CHILDREN
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -210,17 +205,17 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  hist%isARused=isARUsed
 
 !Allocate all the histories
- ABI_ALLOCATE(hist%acell,(3,mxhist))
- ABI_ALLOCATE(hist%rprimd,(3,3,mxhist))
- ABI_ALLOCATE(hist%xred,(3,natom,mxhist))
- ABI_ALLOCATE(hist%fcart,(3,natom,mxhist))
- ABI_ALLOCATE(hist%strten,(6,mxhist))
- ABI_ALLOCATE(hist%vel,(3,natom,mxhist))
- ABI_ALLOCATE(hist%vel_cell,(3,3,mxhist))
- ABI_ALLOCATE(hist%etot,(mxhist))
- ABI_ALLOCATE(hist%ekin,(mxhist))
- ABI_ALLOCATE(hist%entropy,(mxhist))
- ABI_ALLOCATE(hist%time,(mxhist))
+ ABI_MALLOC(hist%acell,(3,mxhist))
+ ABI_MALLOC(hist%rprimd,(3,3,mxhist))
+ ABI_MALLOC(hist%xred,(3,natom,mxhist))
+ ABI_MALLOC(hist%fcart,(3,natom,mxhist))
+ ABI_MALLOC(hist%strten,(6,mxhist))
+ ABI_MALLOC(hist%vel,(3,natom,mxhist))
+ ABI_MALLOC(hist%vel_cell,(3,3,mxhist))
+ ABI_MALLOC(hist%etot,(mxhist))
+ ABI_MALLOC(hist%ekin,(mxhist))
+ ABI_MALLOC(hist%entropy,(mxhist))
+ ABI_MALLOC(hist%time,(mxhist))
 
  hist%etot(1)=zero
  hist%ekin(1)=zero
@@ -255,13 +250,9 @@ end subroutine abihist_init_0D
 !! OUTPUT
 !!  hist(:) <type(abihist)> = The hist to initialize
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!
 !! CHILDREN
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -291,21 +282,12 @@ end subroutine abihist_init_1D
 !! abihist_free_0D
 !!
 !! FUNCTION
-!! Deallocate all the pointers in a hist structure - Target: scalar
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  hist <type(abihist)> = The hist to deallocate
+!! Deallocate dynamic memory in a hist structure - Target: scalar
 !!
 !! PARENTS
 !!      m_abihist
 !!
 !! CHILDREN
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -316,50 +298,17 @@ subroutine abihist_free_0D(hist)
 
 ! ***************************************************************
 
-!Vector of (mxhist) values of cell dimensions
- if (allocated(hist%acell))  then
-   ABI_DEALLOCATE(hist%acell)
- end if
-!Vector of (mxhist) values of cell primitive translations
- if (allocated(hist%rprimd))  then
-   ABI_DEALLOCATE(hist%rprimd)
- end if
-!Vector of (mxhist) values of reduced coordinates
- if (allocated(hist%xred))  then
-   ABI_DEALLOCATE(hist%xred)
- end if
-!Vector of (mxhist) values of cartesian forces
- if (allocated(hist%fcart))  then
-   ABI_DEALLOCATE(hist%fcart)
- end if
-!Vector of (mxhist) values of stress tensor
- if (allocated(hist%strten))  then
-   ABI_DEALLOCATE(hist%strten)
- end if
-! Vector of (mxhist) values of atomic velocities
- if (allocated(hist%vel))  then
-   ABI_DEALLOCATE(hist%vel)
- end if
-! Vector of (mxhist) values of cell velocities
- if (allocated(hist%vel_cell))  then
-   ABI_DEALLOCATE(hist%vel_cell)
- end if
-! Vector of (mxhist) values of electronic total energy
- if (allocated(hist%etot))  then
-   ABI_DEALLOCATE(hist%etot)
- end if
-! Vector of (mxhist) values of ionic kinetic energy
- if (allocated(hist%ekin))  then
-   ABI_DEALLOCATE(hist%ekin)
- end if
-! Vector of (mxhist) values of Entropy
- if (allocated(hist%entropy))  then
-   ABI_DEALLOCATE(hist%entropy)
- end if
-! Vector of (mxhist) values of time (relevant for MD calculations)
- if (allocated(hist%time))  then
-   ABI_DEALLOCATE(hist%time)
- end if
+ ABI_SFREE(hist%acell)
+ ABI_SFREE(hist%rprimd)
+ ABI_SFREE(hist%xred)
+ ABI_SFREE(hist%fcart)
+ ABI_SFREE(hist%strten)
+ ABI_SFREE(hist%vel)
+ ABI_SFREE(hist%vel_cell)
+ ABI_SFREE(hist%etot)
+ ABI_SFREE(hist%ekin)
+ ABI_SFREE(hist%entropy)
+ ABI_SFREE(hist%time)
 
 end subroutine abihist_free_0D
 !!***
@@ -371,20 +320,11 @@ end subroutine abihist_free_0D
 !! abihist_free_1D
 !!
 !! FUNCTION
-!! Deallocate all the pointers in a hist structure - Target: 1D array
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  hist(:) <type(abihist)> = The hist to deallocate
+!! Deallocate dynamic memory in a hist structure - Target: 1D array
 !!
 !! PARENTS
 !!
 !! CHILDREN
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -428,8 +368,6 @@ end subroutine abihist_free_1D
 !!
 !! CHILDREN
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine abihist_bcast_0D(hist,master,comm)
@@ -463,7 +401,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
  rank=xmpi_comm_rank(comm)
 
 !=== Broadcast integers and logicals
- ABI_ALLOCATE(buffer_i,(4))
+ ABI_MALLOC(buffer_i,(4))
  if (rank==master) then
    buffer_i(1)=hist%ihist
    buffer_i(2)=hist%mxhist
@@ -477,13 +415,13 @@ subroutine abihist_bcast_0D(hist,master,comm)
    hist%isVused  =(buffer_i(3)==1)
    hist%isARused =(buffer_i(4)==1)
  end if
- ABI_DEALLOCATE(buffer_i)
+ ABI_FREE(buffer_i)
 
 !If history is empty, return
  if (hist%mxhist==0.or.hist%ihist==0) return
 
 !=== Broadcast sizes of arrays
- ABI_ALLOCATE(buffer_i,(23))
+ ABI_MALLOC(buffer_i,(23))
  if (rank==master) then
    sizeA1=size(hist%acell,1);sizeA2=size(hist%acell,2)
    sizeEt=size(hist%etot,1);sizeEk=size(hist%ekin,1);
@@ -523,14 +461,14 @@ subroutine abihist_bcast_0D(hist,master,comm)
    sizeF1 =buffer_i(21);sizeF2 =buffer_i(22)
    sizeF3 =buffer_i(23)
  end if
- ABI_DEALLOCATE(buffer_i)
+ ABI_FREE(buffer_i)
 
 !=== Broadcast reals
  sizeA=sizeA1*sizeA2;sizeR=sizeR1*sizeR2*sizeR3;sizeS=sizeS1*sizeS2
  sizeV=sizeV1*sizeV2*sizeV3;sizeVc=sizeVc1*sizeVc2*sizeVc3;
  sizeX=sizeX1*sizeX2*sizeX3;sizeF=sizeF1*sizeF2*sizeF3
  bufsize=sizeA+sizeEt+sizeEk+sizeEnt+sizeT+sizeR+sizeS+sizeV+sizeVc+sizeX+sizeF
- ABI_ALLOCATE(buffer_r,(bufsize))
+ ABI_MALLOC(buffer_r,(bufsize))
  if (rank==master) then
    indx=0
    buffer_r(indx+1:indx+sizeA)=reshape(hist%acell(1:sizeA1,1:sizeA2),(/sizeA/))
@@ -556,17 +494,17 @@ subroutine abihist_bcast_0D(hist,master,comm)
    buffer_r(indx+1:indx+sizeF)=reshape(hist%fcart(1:sizeF1,1:sizeF2,1:sizeF3),(/sizeF/))
  else
    call abihist_free(hist)
-   ABI_ALLOCATE(hist%acell,(sizeA1,sizeA2))
-   ABI_ALLOCATE(hist%etot,(sizeEt))
-   ABI_ALLOCATE(hist%ekin,(sizeEk))
-   ABI_ALLOCATE(hist%entropy,(sizeEnt))
-   ABI_ALLOCATE(hist%time,(sizeT))
-   ABI_ALLOCATE(hist%rprimd,(sizeR1,sizeR2,sizeR3))
-   ABI_ALLOCATE(hist%strten,(sizeS1,sizeS2))
-   ABI_ALLOCATE(hist%vel,(sizeV1,sizeV2,sizeV3))
-   ABI_ALLOCATE(hist%vel_cell,(sizeVc1,sizeVc2,sizeVc3))
-   ABI_ALLOCATE(hist%xred,(sizeX1,sizeX2,sizeX3))
-   ABI_ALLOCATE(hist%fcart,(sizeF1,sizeF2,sizeF3))
+   ABI_MALLOC(hist%acell,(sizeA1,sizeA2))
+   ABI_MALLOC(hist%etot,(sizeEt))
+   ABI_MALLOC(hist%ekin,(sizeEk))
+   ABI_MALLOC(hist%entropy,(sizeEnt))
+   ABI_MALLOC(hist%time,(sizeT))
+   ABI_MALLOC(hist%rprimd,(sizeR1,sizeR2,sizeR3))
+   ABI_MALLOC(hist%strten,(sizeS1,sizeS2))
+   ABI_MALLOC(hist%vel,(sizeV1,sizeV2,sizeV3))
+   ABI_MALLOC(hist%vel_cell,(sizeVc1,sizeVc2,sizeVc3))
+   ABI_MALLOC(hist%xred,(sizeX1,sizeX2,sizeX3))
+   ABI_MALLOC(hist%fcart,(sizeF1,sizeF2,sizeF3))
  end if
  call xmpi_bcast(buffer_r,master,comm,ierr)
 
@@ -601,7 +539,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
    hist%fcart(1:sizeF1,1:sizeF2,1:sizeF3)=reshape(buffer_r(indx+1:indx+sizeF), &
 &                                                (/sizeF1,sizeF2,sizeF3/))
  end if
- ABI_DEALLOCATE(buffer_r)
+ ABI_FREE(buffer_r)
 
 end subroutine abihist_bcast_0D
 !!***
@@ -627,8 +565,6 @@ end subroutine abihist_bcast_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -659,22 +595,18 @@ end subroutine abihist_bcast_1D
 !! var2hist
 !!
 !! FUNCTION
-!! Set the values of the history "hist"
-!! with the values of xred, acell and rprimd
+!! Set the values of the history "hist" with the values of xred, acell and rprimd
 !!
 !! INPUTS
 !! natom = number of atoms
-!! xred(3,natom) = reduced dimensionless atomic
-!!                           coordinates
+!! xred(3,natom) = reduced dimensionless atomic coordinates
 !! acell(3)    = length scales of primitive translations (bohr)
-!! rprimd(3,3) = dimensionlal real space primitive translations
-!!               (bohr)
+!! rprimd(3,3) = dimensionlal real space primitive translations (bohr)
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies,
+!! hist<type abihist>=Historical record of positions, forces, acell, stresses, and energies,
 !!
 !! PARENTS
 !!      m_fit_polynomial_coeff,m_generate_training_set,m_gstateimg,m_mover
@@ -727,7 +659,7 @@ subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
 end subroutine var2hist
 !!***
 
-!!****f* m_abihist/abihist_fi
+!!****f* m_abihist/abihist_findIndex
 !!
 !! NAME
 !! abihist_findIndex
@@ -735,14 +667,11 @@ end subroutine var2hist
 !! FUNCTION
 !!
 !! INPUTS
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies
+!! hist<type abihist>=Historical record of positions, forces, acell, stresses, and energies
 !! step = value of the needed step
 !!
 !! OUTPUT
 !! index = index of the step in the hist file
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!
@@ -767,11 +696,10 @@ function abihist_findIndex(hist,step) result(index)
 
  mxhist = hist%mxhist
 
- if ((mxhist ==1.and.step/=+1).or.&
-&    (mxhist /=1.and.abs(step) >=mxhist)) then
+ if ((mxhist ==1.and.step/=+1) .or. (mxhist /=1.and.abs(step) >=mxhist)) then
    write(msg,'(a,I0,2a)')' The requested step must be less than ',mxhist,ch10,&
-&                     'Action: increase the number of history stored in the hist'
-   MSG_BUG(msg)
+                         'Action: increase the number of history stored in the history'
+   ABI_BUG(msg)
  end if
 
  ii = hist%ihist + step
@@ -796,21 +724,17 @@ end function abihist_findIndex
 !! hist2var
 !!
 !! FUNCTION
-!! Set the values of xred, acell and rprimd
-!! with the values that comes from the history "hist"
+!! Return the last values of xred, acell and rprimd stored in the history.
 !!
 !! INPUTS
 !! natom = Number of atoms
-!! hist<type abihist>=Historical record of positions, forces
-!!                           acell, stresses, and energies,
+!! hist<type abihist>=Historical record of positions, forces, acell, stresses, and energies,
 !! zDebug = If true some output will be printed
 !!
 !! OUTPUT
 !!  xred(3,natom) = reduced dimensionless atomic coordinates
 !!  acell(3)    = length scales of primitive translations (bohr)
 !!  rprimd(3,3) = dimensional real space primitive translations (bohr)
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!      m_gstateimg,m_mover,m_precpred_1geo,m_pred_bfgs,m_pred_delocint
@@ -881,8 +805,7 @@ end subroutine hist2var
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist<type abihist>=Historical record of positions, forces
-!!                               stresses, cell and energies,
+!! hist<type abihist>=Historical record of positions, forces, stresses, cell and energies,
 !!
 !! PARENTS
 !!      m_gstateimg,m_mover
@@ -949,6 +872,7 @@ end subroutine vel2hist
 !!  hist_in <type(abihist)>
 !!
 !! OUTPUT
+!!
 !! SIDE EFFECTS
 !!  hist_out <type(abihist)>
 !!
@@ -968,14 +892,13 @@ type(abihist),intent(inout) :: hist_out
 
 !Local variables-------------------------------
 !scalars
- character(len=500) :: msg
+! character(len=500) :: msg
 
 ! ***************************************************************
 
 !Check
  if (size(hist_in%xred,2)/=size(hist_out%xred,2)) then
-   msg='Incompatible sizes for hist_in and hist_out!'
-   MSG_BUG(msg)
+   ABI_BUG('Incompatible sizes for hist_in and hist_out!')
  end if
 
 !Copy scalars (except ihist and mxhist)
@@ -1127,12 +1050,11 @@ end subroutine abihist_compare_and_copy
 !!
 !! FUNCTION
 !! Write the history file into a netcdf file
-!! This version is not compatible with multiple images of the
+!! This version is not compatible with multiple images.
 !!
 !! INPUTS
 !!  filname=filename of the file where the history will be stored
-!!  hist<type abihist>=Historical record of positions, forces, stresses,
-!!                        cell dims and energies,
+!!  hist<type abihist>=Historical record of positions, forces, stresses, cell dims and energies,
 !!  ifirst=1 if first access to the file
 !!  itime = index of the step in the hist file
 !!  natom=Number of atoms.
@@ -1174,7 +1096,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 #if defined HAVE_NETCDF
 !scalars
  integer :: itime_file,ncerr,ncid,npsp
- integer :: xcart_id,xred_id,fcart_id,fred_id
+ integer :: xcart_id,xred_id,fcart_id,gred_id
  integer :: vel_id,vel_cell_id,etotal_id,acell_id,rprimd_id,strten_id
  integer :: ekin_id,entropy_id,mdtime_id
  logical :: has_nimage=.false.,need_to_write
@@ -1234,11 +1156,11 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
  if(need_to_write) then
   !##### Write variables into the dataset
   !Get the IDs
-   call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+   call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 !Write
    call write_vars_hist(ncid,hist,natom,has_nimage,1,itime_file,&
-&       xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+&       xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
 !##### Close the file
@@ -1263,8 +1185,7 @@ end subroutine write_md_hist
 !!
 !! INPUTS
 !!  filname= filename of the file where the history will be stored
-!!  hist(:)<type abihist>= Historical record of positions, forces, stresses,
-!!                         cell dims and energies,
+!!  hist(:)<type abihist>= Historical record of positions, forces, stresses, cell dims and energies,
 !!    Size(hist) is equal to a number of images to be written
 !!  ifirst= 1 if first access to the file
 !!  itime = index of the step in the hist file
@@ -1315,12 +1236,12 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
 !scalars
  integer :: ii,iimage,iimg,me_img,my_comm_img,my_nimage,ncerr
  integer :: ncid,nimage_,nproc_img,npsp,imgmov_
- integer :: xcart_id,xred_id,fcart_id,fred_id
+ integer :: xcart_id,xred_id,fcart_id,gred_id
  integer :: vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  integer :: ekin_id,entropy_id,mdtime_id
  logical :: has_nimage, has_imgmov
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(abihist),pointer :: hist_
 !arrays
  integer,allocatable :: my_imgtab(:)
@@ -1339,11 +1260,10 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
  my_comm_img=xmpi_comm_self;if(present(comm_img)) my_comm_img=comm_img
  nproc_img=xmpi_comm_size(my_comm_img)
  me_img=xmpi_comm_rank(my_comm_img)
- ABI_ALLOCATE(my_imgtab,(my_nimage))
+ ABI_MALLOC(my_imgtab,(my_nimage))
  if (present(imgtab)) then
   if (size(my_imgtab)/=my_nimage) then
-    msg='Inconsistency between hist and imgtab!'
-    MSG_BUG(msg)
+    ABI_BUG('Inconsistency between hist and imgtab!')
   end if
   my_imgtab(:)=imgtab(:)
  else
@@ -1379,7 +1299,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
 
 !    ##### Write variables into the dataset (loop over images)
 !    Get the IDs
-     call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+     call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &         rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !    Write
@@ -1387,14 +1307,14 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
        iimg=my_imgtab(iimage)
        hist_ => hist(iimage)
        call write_vars_hist(ncid,hist_,natom,has_nimage,iimg,itime,&
-&           xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+&           xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &           rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
      end do
 
 !    ##### Close the file
      ncerr = nf90_close(ncid)
      NCF_CHECK_MSG(ncerr," close netcdf history file")
-     ABI_DEALLOCATE(my_imgtab)
+     ABI_FREE(my_imgtab)
 
 !  End loop on MPI processes
    end if
@@ -1421,8 +1341,7 @@ end subroutine write_md_hist_img
 !!  isVUsed,isARUsed=flags used to initialize hist structure
 !!
 !! OUTPUT
-!!  hist<type abihist>=Historical record of positions, forces, stresses,
-!!                     cell dims and energies,
+!!  hist<type abihist>=Historical record of positions, forces, stresses, cell dims and energies,
 !!
 !! PARENTS
 !!      m_effective_potential_file,m_mover,m_mover_effpot,m_tdep_readwrite
@@ -1445,7 +1364,7 @@ subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
 !scalars
  integer :: ncerr,ncid,nimage,natom,time,start_time, ntypat
  integer :: nimage_id,natom_id,xyz_id,time_id,six_id, ntypat_id
- integer :: xcart_id,xred_id,fcart_id,fred_id,ekin_id,entropy_id
+ integer :: xcart_id,xred_id,fcart_id,gred_id,ekin_id,entropy_id
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  logical :: has_nimage
@@ -1483,7 +1402,7 @@ subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
  call abihist_init(hist,natom,time,isVused,isARused)
 
 !Get the ID of a variables from their name
- call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+ call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !Read variables from the dataset and write them into hist
@@ -1519,8 +1438,7 @@ end subroutine read_md_hist
 !!               Size must be equal to size(hist)
 !!
 !! OUTPUT
-!!  hist(:)<type abihist>=Historical record of positions, forces, stresses,
-!!                        cell dims and energies,
+!!  hist(:)<type abihist>=Historical record of positions, forces, stresses, cell dims and energies,
 !!    Size(hist) is equal to a number of images to be read
 !!
 !! PARENTS
@@ -1545,11 +1463,11 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
 !scalars
  integer :: iimage,iimg,my_nimage,ncerr,ncid,nimage,natom,time
  integer :: nimage_id,natom_id,xyz_id,time_id,six_id, ntypat, ntypat_id
- integer :: xcart_id,xred_id,fcart_id,fred_id,ekin_id,entropy_id
+ integer :: xcart_id,xred_id,fcart_id,gred_id,ekin_id,entropy_id
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  logical :: has_nimage
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(abihist),pointer :: hist_
  integer,allocatable :: my_imgtab(:)
 #endif
@@ -1573,11 +1491,10 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
  !Manage multiple images of the cell
  my_nimage=size(hist)
  if (my_nimage==0) return
- ABI_ALLOCATE(my_imgtab,(my_nimage))
+ ABI_MALLOC(my_imgtab,(my_nimage))
  if (present(imgtab)) then
   if (size(my_imgtab)/=my_nimage) then
-    msg='Inconsistency between hist and imgtab!'
-    MSG_BUG(msg)
+    ABI_BUG('Inconsistency between hist and imgtab!')
   end if
   my_imgtab(:)=imgtab(:)
  else
@@ -1589,8 +1506,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
 &     natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
  if (nimage<maxval(my_imgtab)) then
-   msg='Not enough images in the HIST file!'
-   MSG_ERROR(msg)
+   ABI_ERROR('Not enough images in the HIST file!')
  end if
 
 !Loop over images
@@ -1602,7 +1518,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
    call abihist_init(hist_,natom,time,isVused,isARused)
 
 !  Get the ID of a variables from their name
-   call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+   call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !  Read variables from the dataset and write them into hist
@@ -1616,7 +1532,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
  ncerr = nf90_close(ncid)
  NCF_CHECK_MSG(ncerr," close netcdf history file")
 
- ABI_DEALLOCATE(my_imgtab)
+ ABI_FREE(my_imgtab)
 
 #endif
 
@@ -1656,7 +1572,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 !scalars
  integer :: ncerr
  integer :: natom_id,nimage_id,ntypat_id,npsp_id,time_id,xyz_id,six_id
- integer :: xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id
+ integer :: xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id
  integer :: rprimd_id,acell_id,strten_id
  integer :: etotal_id,ekin_id,entropy_id,mdtime_id
  integer :: typat_id,znucl_id,amu_id,dtion_id,imgmov_id, two_id,mdtemp_id
@@ -1672,7 +1588,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 !1.Define the dimensions
 
  if (npsp/=ntypat) then
-   MSG_WARNING('HIST file does not support alchemical mixing!')
+   ABI_WARNING('HIST file does not support alchemical mixing!')
  end if
 
  ncerr = nf90_def_dim(ncid,"natom",natom,natom_id)
@@ -1730,7 +1646,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 
 !3.Define the evolving variables
 
-!xcart,xred,fcart,fred,vel
+!xcart,xred,fcart,gred,vel
  if (has_nimage) then
    call ab_define_var(ncid,dim0,imgmov_id,NF90_INT,&
   &  "imgmov","Image mover","Not relevant" )
@@ -1741,8 +1657,8 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 &   "xred","vectors (X) of atom positions in REDuced coordinates","dimensionless" )
    call ab_define_var(ncid,dim4,fcart_id,NF90_DOUBLE,&
 &   "fcart","atom Forces in CARTesian coordinates","Ha/bohr" )
-   call ab_define_var(ncid,dim4,fred_id,NF90_DOUBLE,&
-&   "fred","atom Forces in REDuced coordinates","dimensionless" )
+   call ab_define_var(ncid,dim4,gred_id,NF90_DOUBLE,&
+&   "fred","atom Forces in REDuced coordinates","dimensionless" ) ! XG210315 : should be "Gradients in REDuced ..."
    call ab_define_var(ncid,dim4,vel_id,NF90_DOUBLE,&
 &   "vel","VELocities of atoms","bohr*Ha/hbar" )
  else
@@ -1753,8 +1669,8 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 &   "xred","vectors (X) of atom positions in REDuced coordinates","dimensionless" )
    call ab_define_var(ncid,dim3,fcart_id,NF90_DOUBLE,&
 &   "fcart","atom Forces in CARTesian coordinates","Ha/bohr" )
-   call ab_define_var(ncid,dim3,fred_id,NF90_DOUBLE,&
-&   "fred","atom Forces in REDuced coordinates","dimensionless" )
+   call ab_define_var(ncid,dim3,gred_id,NF90_DOUBLE,&
+&   "fred","atom Forces in REDuced coordinates","dimensionless" ) ! XG210315 : should be "Gradients in REDuced ..."
    call ab_define_var(ncid,dim3,vel_id,NF90_DOUBLE,&
 &   "vel","VELocities of atoms","bohr*Ha/hbar" )
  end if
@@ -1927,13 +1843,13 @@ end subroutine get_dims_hist
 !!
 !! SOURCE
 
-subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &          rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
- integer,intent(out) :: xcart_id,xred_id,fcart_id,fred_id,vel_id
+ integer,intent(out) :: xcart_id,xred_id,fcart_id,gred_id,vel_id
  integer,intent(out) :: vel_cell_id,rprimd_id,acell_id,strten_id
  integer,intent(out) :: etotal_id,ekin_id,entropy_id,mdtime_id
  logical,intent(in)  :: has_nimage
@@ -1959,8 +1875,8 @@ subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell
  ncerr = nf90_inq_varid(ncid, "fcart", fcart_id)
  NCF_CHECK_MSG(ncerr," get the id for fcart")
 
- ncerr = nf90_inq_varid(ncid, "fred", fred_id)
- NCF_CHECK_MSG(ncerr," get the id for fred")
+ ncerr = nf90_inq_varid(ncid, "fred", gred_id)
+ NCF_CHECK_MSG(ncerr," get the id for fred") ! XG210315 : should be "gred"
 
  ncerr = nf90_inq_varid(ncid, "vel", vel_id)
  NCF_CHECK_MSG(ncerr," get the id for vel")
@@ -2171,13 +2087,13 @@ end subroutine write_csts_hist
 !! SOURCE
 
 subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
-&          xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,rprimd_id,&
+&          xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,rprimd_id,&
 &          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,natom,iimg,itime
- integer,intent(in) :: xcart_id,xred_id,fcart_id,fred_id,vel_id
+ integer,intent(in) :: xcart_id,xred_id,fcart_id,gred_id,vel_id
  integer,intent(in) :: vel_cell_id,rprimd_id,acell_id,strten_id
  integer,intent(in) :: etotal_id,ekin_id,entropy_id,mdtime_id
  logical,intent(in) :: has_nimage
@@ -2213,9 +2129,9 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
 
 !Variables depending on images
 
- ABI_ALLOCATE(conv,(3,natom))
+ ABI_MALLOC(conv,(3,natom))
 
-!xcart,xred,fcart,fred,vel
+!xcart,xred,fcart,gred,vel
  if (has_nimage) then
    start4=(/1,1,iimg,itime/);count4=(/3,natom,1,1/)
    call xred2xcart(natom,rprimd,conv,xred)
@@ -2225,9 +2141,9 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
    NCF_CHECK_MSG(ncerr," write variable xred")
    ncerr = nf90_put_var(ncid,fcart_id,fcart,start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable fcart")
-   call fcart2fred(fcart,conv,rprimd,natom)
-   ncerr = nf90_put_var(ncid,fred_id,conv, start = start4,count = count4)
-   NCF_CHECK_MSG(ncerr," write variable fred")
+   call fcart2gred(fcart,conv,rprimd,natom)
+   ncerr = nf90_put_var(ncid,gred_id,conv, start = start4,count = count4)
+   NCF_CHECK_MSG(ncerr," write variable fred") ! XG210315 : should be "gred"
    ncerr = nf90_put_var(ncid,vel_id,vel, start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable vel")
  else
@@ -2239,14 +2155,14 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
    NCF_CHECK_MSG(ncerr," write variable xred")
    ncerr = nf90_put_var(ncid,fcart_id,fcart,start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable fcart")
-   call fcart2fred(fcart,conv,rprimd,natom)
-   ncerr = nf90_put_var(ncid,fred_id,conv, start = start3,count = count3)
-   NCF_CHECK_MSG(ncerr," write variable fred")
+   call fcart2gred(fcart,conv,rprimd,natom)
+   ncerr = nf90_put_var(ncid,gred_id,conv, start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable fred") ! XG210315 : should be "gred"
    ncerr = nf90_put_var(ncid,vel_id,vel, start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable vel")
  end if
 
- ABI_DEALLOCATE(conv)
+ ABI_FREE(conv)
 
 !rprimd,vel_cell
  if (has_nimage) then

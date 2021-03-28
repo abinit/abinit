@@ -97,7 +97,7 @@ module m_tdep_readwrite
 !FB    real(dp), allocatable :: histS(:,:)
 !FB    ! Vector of (x,y,z)X(natom)X(mxhist) values of velocity
 !FB    real(dp), allocatable :: histV(:,:,:)
-!FB    ! Vector of (x,y,z)X(natom)X(xcart,xred,fcart,fred)X(mxhist)
+!FB    ! Vector of (x,y,z)X(natom)X(xcart,xred,fcart,gred)X(mxhist)
 !FB    real(dp), allocatable :: histXF(:,:,:,:)
 !FB
 !FB  end type Hist_type
@@ -239,7 +239,8 @@ contains
   if ( inputfilename == "" ) inputfilename='input.in'
   if ( filename == "" ) filename='HIST.nc'
 
-  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
+  !open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
+  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.abo')
 
 
 #if defined HAVE_NETCDF
@@ -283,9 +284,9 @@ contains
     InVar%debug=.true.
     write(InVar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of PHONONS (Debug)'
   else
-    MSG_ERROR('Please use recent format for the input file')
+    ABI_ERROR('Please use recent format for the input file')
   end if  
-  write(InVar%stdout,'(a)') '.Copyright (C) 1998-2020 ABINIT group (FB,JB).'
+  write(InVar%stdout,'(a)') '.Copyright (C) 1998-2021 ABINIT group (FB,JB).'
   write(InVar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
   write(InVar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
   write(InVar%stdout,'(a)') ' under certain conditions (GNU General Public License,'
@@ -434,7 +435,7 @@ contains
       read(40,*) string,InVar%Order,InVar%Rcut3
       write(InVar%stdout,'(1x,a20,1x,i4,1x,f15.10)') string,InVar%Order,InVar%Rcut3
       if (InVar%Rcut3.gt.InVar%Rcut) then
-        MSG_ERROR('The cutoff radius of the third order cannot be greater than the second order one.')
+        ABI_ERROR('The cutoff radius of the third order cannot be greater than the second order one.')
       end if  
     else if (string.eq.Slice) then  
       read(40,*) string,InVar%Slice
@@ -443,7 +444,7 @@ contains
       nstep_int  =float(int(nstep_float))
       write(InVar%stdout,*) nstep_int,nstep_float
       if (abs(nstep_float-nstep_int).gt.tol8) then
-        MSG_ERROR('Change nstep_min. (nstep_max-nstep_min+1)/Slice has to be an integer.')
+        ABI_ERROR('Change nstep_min. (nstep_max-nstep_min+1)/Slice has to be an integer.')
       end if  
     else if (string.eq.Enunit) then  
       read(40,*) string,InVar%Enunit
@@ -477,10 +478,10 @@ contains
       exit
     else 
       write(InVar%stdout,'(a,1x,a)') 'This keyword is not allowed',string
-      MSG_ERROR('A keyword is not allowed. See the log file.')
+      ABI_ERROR('A keyword is not allowed. See the log file.')
     end if  
   end do
-! Output very important informations 
+! Output very important information 
   write(InVar%stdout,'(a)') ' '
   if (InVar%Impose_Symetry.eq.0) then
     write(InVar%stdout,'(a)') ' STOP IF THE DIJ (IFC) MATRIX IS NOT HERMITIAN (SYMETRIC)'

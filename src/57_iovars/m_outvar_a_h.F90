@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -141,12 +141,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !###########################################################
 !### 01. Initial allocations and initialisations.
 
- ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
- ABI_ALLOCATE(intarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(narrm,(0:ndtset_alloc))
- ABI_ALLOCATE(nimagem,(0:ndtset_alloc))
- ABI_ALLOCATE(prtimg,(mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(narrm,(0:ndtset_alloc))
+ ABI_MALLOC(nimagem,(0:ndtset_alloc))
+ ABI_MALLOC(prtimg,(mxvals%nimage,0:ndtset_alloc))
 
  do idtset=0,ndtset_alloc
    nimagem(idtset)=dtsets(idtset)%nimage
@@ -441,8 +441,18 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'cd_subset_freq','INT',0)
  end if
 
- dprarr(1,:)=dtsets(:)%charge
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'charge','DPR',0)
+!cellcharge
+ prtimg(:,:)=1
+ do idtset=0,ndtset_alloc
+   narrm(idtset)=1
+   do iimage=1,nimagem(idtset)
+     if (narrm(idtset)>0) then
+       dprarr_images(1:narrm(idtset),iimage,idtset)=dtsets(idtset)%cellcharge(iimage)
+     end if
+   end do
+ end do
+ call prttagm_images(dprarr_images,iout,jdtset_,1,marr,narrm,ncid,ndtset_alloc,'cellcharge','DPR',&
+& mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
 !chempot
  narr=3*mxvals%nzchempot*mxvals%ntypat ! default size for all datasets
@@ -662,6 +672,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%dmft_tollc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_tollc','DPR',0)
+
+ intarr(1,:)=dtsets(:)%dmft_wanorthnorm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_wanorthnorm','INT',0)
 
  dprarr(1,:)=dtsets(:)%dmft_charge_prec
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_charge_prec','DPR',0)
@@ -1198,6 +1211,10 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gwcalctyp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcalctyp','INT',0)
 
+ intarr(1,:)=dtsets(:)%gw1rdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw1rdm','INT',0)
+
+
  intarr(1,:)=dtsets(:)%gwcomp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcomp','INT',0)
 
@@ -1215,6 +1232,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%gwrpacorr
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwrpacorr','INT',0)
+
+ intarr(1,:)=dtsets(:)%gwgmcorr
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwgmcorr','INT',0)
 
 !gw_customnfreqsp
 !It actually overrides the content of nfreqsp (which is forbidden !) in dtset.
@@ -1325,12 +1345,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !###########################################################
 !## Deallocation for generic arrays, and for n-z variables
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(narrm)
- ABI_DEALLOCATE(nimagem)
- ABI_DEALLOCATE(dprarr_images)
- ABI_DEALLOCATE(prtimg)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(narrm)
+ ABI_FREE(nimagem)
+ ABI_FREE(dprarr_images)
+ ABI_FREE(prtimg)
 
 end subroutine outvar_a_h
 !!***

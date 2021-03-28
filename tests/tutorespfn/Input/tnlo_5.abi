@@ -1,0 +1,116 @@
+# Finite difference calculation of d chi / d tau of AlP
+
+ndtset 12
+udtset 3 4 # double loop over data sets: first index 1..3, second index 1..4
+
+# atomic positions: three different sets
+# tau = 0.0 equilibrium
+xcart1?    2.5240575146E+00  2.5240575146E+00  2.5240575146E+00
+           0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+
+# tau = 0.01: aluminum shifted along x by 0.01 Bohr
+xcart2?    2.5240575146E+00  2.5240575146E+00  2.5240575146E+00
+           0.0100000000E+00  0.0000000000E+00  0.0000000000E+00
+
+# tau = -0.01: aluminum shifted along x by -0.01 Bohr
+xcart3?    2.5240575146E+00  2.5240575146E+00  2.5240575146E+00
+          -0.0100000000E+00  0.0000000000E+00  0.0000000000E+00
+
+#DATASET1 : scf calculation: GS WF in the BZ
+#********************************************
+   prtden?1   1
+   kptopt?1   1
+   toldfe?1  1.0d-12
+
+#DATASET2 : non scf calculation: GS WF in the whole BZ
+#*****************************************************
+   getden?2  -1
+   getwfk?2  -1
+   kptopt?2   2
+     iscf?2  -2
+   tolwfr?2   1.0d-22
+    nband?2   4
+
+#DATASET3 : ddk on the MP grid of k-points
+#*****************************************
+   getwfk?3  -1
+    rfdir?3   1 1 1
+    rfddk?3   1
+   tolwfr?3   1.0d-22
+    nband?3   4
+   kptopt?3   2
+
+
+#DATASET4 : dielectric tensor calculation
+#****************************************
+   getwfk?4  -2
+   getddk?4  -1
+    rfdir?4   1 1 1
+   tolvrs?4   1.0d-12
+   rfelfd?4   3
+    nband?4   4
+   kptopt?4   2
+    prtwf?4   0
+
+#Definition of the unit cell
+# these cell parameters were derived from a relaxation run done with the
+# current ecut and kpt values. The current ecut value used is very low but
+# is done to speed the calculations.
+# acell      7.2728565836E+00  7.2728565836E+00  7.2728565836E+00 Bohr # ecut 5
+# acell      7.2511099467E+00  7.2511099467E+00  7.2511099467E+00 Bohr # ecut 30
+acell      7.1391127387E+00  7.1391127387E+00  7.1391127387E+00 Bohr # ecut 2.8
+rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
+           7.0710678119E-01  0.0000000000E+00  7.0710678119E-01
+           7.0710678119E-01  7.0710678119E-01  0.0000000000E+00
+
+#Definition of the atom types and pseudopotentials
+ ntypat 2 # two types of atoms 
+ znucl 15 13 # the atom types are Phosphorous and Aluminum
+
+# the following norm-conserving pseudopotentials are stored in the abinit distribution, but are freely
+# available through www.pseudo-dojo.org
+# this set uses the Perdew-Wang parameterization of LDA for the xc model
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+
+#Definition of the atoms
+ natom 2 # two atoms in the cell
+ typat 1 2 # type 1 is Phosphorous, type 2 is Aluminum (order defined by znucl above and pseudos list)
+ nband 4 # nband is restricted here to the number of filled bands only, no empty bands. 
+ nbdbuf 0
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut  2.8 # this value is very low but is used here to achieve very low calculation times.
+        # in a production environment this should be checked carefully for convergence and
+        # a more reasonable value is probably around 30
+ecutsm 0.5
+dilatmx 1.05
+ngkpt 6 6 6 # must be checked carefully for convergence, Raman calculations converge slowly with kpt
+nshiftk 4 # this Monkhorst-Pack shift pattern is used so that the symmetry of the shifted grid
+          # is correct. A gamma-centered grid would also have the correct symmetry but would be
+          # less efficient.
+shiftk 0.5 0.5 0.5
+       0.5 0.0 0.0
+       0.0 0.5 0.0
+       0.0 0.0 0.5
+
+# scf parameters
+nstep 8  # limit number of steps for the tutorial, in general this should be set to its 
+         # default (30) or higher
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tnlo_5.abo, tolnlines= 180, tolabs=  2.0e-6, tolrel= 5e-4 
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = J. Zwanziger, M. Veithen
+#%% keywords = NC, DFPT
+#%% description = Finite difference calculation of d chi / d tau of AlP
+#%%<END TEST_INFO>

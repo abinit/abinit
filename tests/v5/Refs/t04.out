@@ -2,7 +2,7 @@
 .Version 6.1.2  of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.4 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -221,7 +221,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.48721E+00 8.58643E-01 (free atoms)
  -1.48721282532815E+00 -0.00000000000000E+00 -0.00000000000000E+00
   1.48721282532815E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.48721282532815E+01  0.00000000000000E+00  0.00000000000000E+00
  -1.48721282532815E+01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
@@ -270,7 +270,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.79699E+00 1.03749E+00 (free atoms)
  -1.79699158499924E+00 -0.00000000000000E+00 -0.00000000000000E+00
   1.79699158499924E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.79699158499924E+01  0.00000000000000E+00  0.00000000000000E+00
  -1.79699158499924E+01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.54964E-03 1.47204E-03 (free atoms)
@@ -321,7 +321,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.51894E-01 4.91841E-01 (free atoms)
  -8.51893541632868E-01 -0.00000000000000E+00 -0.00000000000000E+00
   8.51893541632868E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   8.51893541632868E+00  0.00000000000000E+00  0.00000000000000E+00
  -8.51893541632868E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.64362E-03 1.52629E-03 (free atoms)
@@ -365,7 +365,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.22130E-01 7.05116E-02 (free atoms)
  -1.22129641209040E-01 -0.00000000000000E+00 -0.00000000000000E+00
   1.22129641209040E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.22129641209040E+00  0.00000000000000E+00  0.00000000000000E+00
  -1.22129641209040E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.01450E-03 1.16307E-03 (free atoms)
@@ -406,7 +406,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.36456E-01 2.51988E-01 (free atoms)
  -4.36455813753221E-01 -0.00000000000000E+00 -0.00000000000000E+00
   4.36455813753221E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   4.36455813753221E+00  0.00000000000000E+00  0.00000000000000E+00
  -4.36455813753221E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 3.23846E-03 1.86973E-03 (free atoms)
@@ -446,7 +446,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 7.90207E-02 4.56226E-02 (free atoms)
  -7.90207306586399E-02 -0.00000000000000E+00 -0.00000000000000E+00
   7.90207306586399E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   7.90207306586399E-01  0.00000000000000E+00  0.00000000000000E+00
  -7.90207306586399E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.60633E-03 1.50476E-03 (free atoms)
@@ -487,7 +487,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.20479E-02 3.58234E-02 (free atoms)
   6.20479365072847E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -6.20479365072847E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -6.20479365072847E-01  0.00000000000000E+00  0.00000000000000E+00
   6.20479365072847E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.85555E-03 1.07130E-03 (free atoms)
@@ -528,7 +528,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.49474E-02 1.44034E-02 (free atoms)
   2.49474029146665E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -2.49474029146665E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.49474029146665E-01  0.00000000000000E+00  0.00000000000000E+00
   2.49474029146665E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.15434E-03 6.66457E-04 (free atoms)
@@ -567,7 +567,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.51106E-01 8.72414E-02 (free atoms)
  -1.51106469110186E-01 -0.00000000000000E+00 -0.00000000000000E+00
   1.51106469110186E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.51106469110186E+00  0.00000000000000E+00  0.00000000000000E+00
  -1.51106469110186E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.87098E-04 5.69901E-04 (free atoms)
@@ -608,7 +608,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.15521E-01 6.66960E-02 (free atoms)
   1.15520884572692E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.15520884572692E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.15520884572692E+00  0.00000000000000E+00  0.00000000000000E+00
   1.15520884572692E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 8.91959E-04 5.14973E-04 (free atoms)
@@ -647,7 +647,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.01065E-01 1.16085E-01 (free atoms)
   2.01064527217116E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -2.01064527217116E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.01064527217116E+00  0.00000000000000E+00  0.00000000000000E+00
   2.01064527217116E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.38484E-05 3.68629E-05 (free atoms)
@@ -687,7 +687,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.27286E-01 7.34886E-02 (free atoms)
   1.27286071055279E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.27286071055279E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.27286071055279E+00  0.00000000000000E+00  0.00000000000000E+00
   1.27286071055279E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.61543E-04 2.66472E-04 (free atoms)
@@ -727,7 +727,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.18212E-02 1.83720E-02 (free atoms)
  -3.18211879999231E-02 -0.00000000000000E+00 -0.00000000000000E+00
   3.18211879999231E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.18211879999231E-01  0.00000000000000E+00  0.00000000000000E+00
  -3.18211879999231E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.66565E-04 2.69371E-04 (free atoms)
@@ -766,7 +766,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.12143E-02 5.26626E-02 (free atoms)
  -9.12143288349553E-02 -0.00000000000000E+00 -0.00000000000000E+00
   9.12143288349553E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   9.12143288349553E-01  0.00000000000000E+00  0.00000000000000E+00
  -9.12143288349552E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.06096E-04 6.12544E-05 (free atoms)
@@ -929,7 +929,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.95555E-02 1.70639E-02 (free atoms)
   2.95554555061923E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -2.95554555061923E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.95554555061923E-01  0.00000000000000E+00  0.00000000000000E+00
   2.95554555061923E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.06096E-04 6.12544E-05 (free atoms)
@@ -968,7 +968,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.70829E-02 1.56363E-02 (free atoms)
   2.70828981306487E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -2.70828981306487E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.70828981306487E-01  0.00000000000000E+00  0.00000000000000E+00
   2.70828981306486E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.38576E-04 8.00070E-05 (free atoms)
@@ -1005,7 +1005,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.63415E-02 1.52083E-02 (free atoms)
   2.63415214986766E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -2.63415214986766E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.63415214986766E-01  0.00000000000000E+00  0.00000000000000E+00
   2.63415214986766E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.28769E-04 7.43447E-05 (free atoms)
@@ -1044,7 +1044,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.37168E-02 1.36929E-02 (free atoms)
   2.37167504116491E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -2.37167504116491E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.37167504116491E-01  0.00000000000000E+00  0.00000000000000E+00
   2.37167504116491E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.52263E-04 8.79089E-05 (free atoms)
@@ -1081,7 +1081,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.35706E-02 1.36085E-02 (free atoms)
   2.35705920750258E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -2.35705920750258E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.35705920750258E-01  0.00000000000000E+00  0.00000000000000E+00
   2.35705920750258E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.52279E-04 8.79183E-05 (free atoms)
@@ -1120,7 +1120,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.73044E-02 9.99068E-03 (free atoms)
   1.73043586573417E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -1.73043586573417E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.73043586573417E-01  0.00000000000000E+00  0.00000000000000E+00
   1.73043586573417E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.66809E-04 9.63072E-05 (free atoms)
@@ -1159,7 +1159,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.26639E-02 7.31148E-03 (free atoms)
   1.26638562514285E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -1.26638562514285E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.26638562514285E-01  0.00000000000000E+00  0.00000000000000E+00
   1.26638562514285E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.60927E-04 9.29112E-05 (free atoms)
@@ -1198,7 +1198,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.03525E-02 5.97701E-03 (free atoms)
   1.03524777956035E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -1.03524777956035E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.03524777956035E-01  0.00000000000000E+00  0.00000000000000E+00
   1.03524777956035E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.46799E-04 8.47545E-05 (free atoms)
@@ -1237,7 +1237,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.02478E-02 5.91656E-03 (free atoms)
   1.02477891305304E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -1.02477891305304E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.02477891305304E-01  0.00000000000000E+00  0.00000000000000E+00
   1.02477891305304E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.33556E-04 7.71086E-05 (free atoms)
@@ -1276,7 +1276,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.20051E-02 6.93115E-03 (free atoms)
   1.20050983661181E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -1.20050983661181E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.20050983661181E-01  0.00000000000000E+00  0.00000000000000E+00
   1.20050983661181E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.26814E-04 7.32160E-05 (free atoms)
@@ -1315,7 +1315,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.55419E-02 8.97313E-03 (free atoms)
   1.55419218080226E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -1.55419218080226E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.55419218080226E-01  0.00000000000000E+00  0.00000000000000E+00
   1.55419218080226E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.29855E-04 7.49718E-05 (free atoms)
@@ -1354,7 +1354,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.13108E-02 1.23038E-02 (free atoms)
   2.13108450786635E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -2.13108450786635E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.13108450786635E-01  0.00000000000000E+00  0.00000000000000E+00
   2.13108450786635E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.45544E-04 8.40300E-05 (free atoms)
@@ -1393,7 +1393,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.05710E-02 1.76502E-02 (free atoms)
   3.05709917687587E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -3.05709917687587E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -3.05709917687587E-01  0.00000000000000E+00  0.00000000000000E+00
   3.05709917687587E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.78401E-04 1.03000E-04 (free atoms)
@@ -1432,7 +1432,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.58835E-02 2.64909E-02 (free atoms)
   4.58835360990015E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -4.58835360990015E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -4.58835360990015E-01  0.00000000000000E+00  0.00000000000000E+00
   4.58835360990015E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.37144E-04 1.36915E-04 (free atoms)
@@ -1594,7 +1594,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.50654E-01 8.69801E-02 (free atoms)
   1.50654031780567E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.50654031780567E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.50654031780567E+00  0.00000000000000E+00  0.00000000000000E+00
   1.50654031780567E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.37144E-04 1.36915E-04 (free atoms)
@@ -1633,7 +1633,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.52452E-01 8.80179E-02 (free atoms)
   1.52451508391537E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.52451508391537E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.52451508391537E+00  0.00000000000000E+00  0.00000000000000E+00
   1.52451508391537E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.54766E-04 2.62559E-04 (free atoms)
@@ -1672,7 +1672,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.53475E-01 8.86089E-02 (free atoms)
   1.53475107277056E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.53475107277056E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.53475107277056E+00  0.00000000000000E+00  0.00000000000000E+00
   1.53475107277056E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.20539E-04 2.42798E-04 (free atoms)
@@ -1711,7 +1711,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.53799E-01 8.87961E-02 (free atoms)
   1.53799420316891E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.53799420316891E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.53799420316891E+00  0.00000000000000E+00  0.00000000000000E+00
   1.53799420316891E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.19180E-04 3.57484E-04 (free atoms)
@@ -1749,7 +1749,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.53749E-01 8.87673E-02 (free atoms)
   1.53749394021883E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.53749394021883E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.53749394021883E+00  0.00000000000000E+00  0.00000000000000E+00
   1.53749394021883E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.11800E-04 3.53223E-04 (free atoms)
@@ -1788,7 +1788,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.38204E-01 7.97922E-02 (free atoms)
   1.38204094960113E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.38204094960113E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.38204094960113E+00  0.00000000000000E+00  0.00000000000000E+00
   1.38204094960113E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 8.62477E-04 4.97952E-04 (free atoms)
@@ -1828,7 +1828,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.03071E-01 5.95083E-02 (free atoms)
   1.03071454543803E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.03071454543803E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.03071454543803E+00  0.00000000000000E+00  0.00000000000000E+00
   1.03071454543803E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.64213E-04 5.56688E-04 (free atoms)
@@ -1867,7 +1867,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.87371E-02 5.12324E-02 (free atoms)
   8.87370955407061E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -8.87370955407061E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -8.87370955407061E-01  0.00000000000000E+00  0.00000000000000E+00
   8.87370955407061E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.52689E-04 5.50036E-04 (free atoms)
@@ -1908,7 +1908,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.19817E-01 6.91765E-02 (free atoms)
   1.19817262914720E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.19817262914720E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.19817262914720E+00  0.00000000000000E+00  0.00000000000000E+00
   1.19817262914720E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.68122E-04 5.58945E-04 (free atoms)
@@ -1948,7 +1948,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.61831E-01 9.34329E-02 (free atoms)
   1.61830515258538E-01 -0.00000000000000E+00 -0.00000000000000E+00
  -1.61830515258538E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.61830515258538E+00  0.00000000000000E+00  0.00000000000000E+00
   1.61830515258538E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.09997E-03 6.35069E-04 (free atoms)
@@ -1990,7 +1990,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.13875E-02 3.54421E-02 (free atoms)
   6.13874873020371E-02 -0.00000000000000E+00 -0.00000000000000E+00
  -6.13874873020371E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -6.13874873020371E-01  0.00000000000000E+00  0.00000000000000E+00
   6.13874873020371E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.14522E-03 6.61191E-04 (free atoms)
@@ -2032,7 +2032,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.02544E-01 1.16939E-01 (free atoms)
  -2.02544389388304E-01 -0.00000000000000E+00 -0.00000000000000E+00
   2.02544389388304E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.02544389388304E+00  0.00000000000000E+00  0.00000000000000E+00
  -2.02544389388304E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.27529E-04 3.62304E-04 (free atoms)
@@ -2071,7 +2071,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.08501E-01 1.20378E-01 (free atoms)
  -2.08501295521851E-01 -0.00000000000000E+00 -0.00000000000000E+00
   2.08501295521851E-01 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.08501295521851E+00  0.00000000000000E+00  0.00000000000000E+00
  -2.08501295521851E+00  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.53788E-04 1.46524E-04 (free atoms)
@@ -2111,7 +2111,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.81249E-02 3.93319E-02 (free atoms)
  -6.81248920151224E-02 -0.00000000000000E+00 -0.00000000000000E+00
   6.81248920151224E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   6.81248920151224E-01  0.00000000000000E+00  0.00000000000000E+00
  -6.81248920151224E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 5.94769E-04 3.43390E-04 (free atoms)

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG, MJV, DCA, GMR, JCC, SE)
+!!  Copyright (C) 1998-2021 ABINIT group (XG, MJV, DCA, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,8 +91,6 @@ contains
 subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
 & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ndim,nsym,optcell
@@ -147,7 +145,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=0, ndim MUST be equal to 3*natom,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom=',3*natom,'.'
-   MSG_BUG(messagE)
+   ABI_BUG(messagE)
  end if
 
  if( (optcell==1 .or. optcell==4 .or. optcell==5 .or. optcell==6) &
@@ -155,7 +153,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=1,4,5 or 6, ndim MUST be equal to 3*natom+1,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+1=',3*natom+1,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==2 .or. optcell==3) &
@@ -163,14 +161,14 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( optcell>=7 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !##########################################################
@@ -288,8 +286,6 @@ end subroutine xfpack_vin2x
 subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
   & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ndim,nsym,optcell
@@ -343,7 +339,7 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=0, ndim MUST be equal to 3*natom,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom=',3*natom,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==1 .or. optcell==4 .or. optcell==5 .or. optcell==6) &
@@ -351,7 +347,7 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=1,4,5 or 6, ndim MUST be equal to 3*natom+1,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+1=',3*natom+1,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==2 .or. optcell==3) &
@@ -359,14 +355,14 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( optcell>=7 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !##########################################################
@@ -431,7 +427,7 @@ end subroutine xfpack_x2vin
 !! xfpack_f2vout
 !!
 !! FUNCTION
-!! Old option=3, transfer fred and strten to vout
+!! Old option=3, transfer gred and strten to vout
 !!
 !! INPUTS
 !! natom=number of atoms in cell
@@ -448,9 +444,9 @@ end subroutine xfpack_x2vin
 !!
 !! SIDE EFFECTS
 !! Input/Output variables
-!! fred(3,natom)=grads of Etot wrt reduced coordinates (hartree)
+!! gred(3,natom)=grads of Etot wrt reduced coordinates (hartree)
 !! strten(6)=components of the stress tensor (hartree/bohr^3)
-!! vout(ndim)=vector that contains fred and some quantity derived from
+!! vout(ndim)=vector that contains gred and some quantity derived from
 !!   strten, depending on the value of optcell, and taking care ot strtarget
 !!
 !! PARENTS
@@ -460,9 +456,7 @@ end subroutine xfpack_x2vin
 !!
 !! SOURCE
 
-subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
-
- implicit none
+subroutine xfpack_f2vout(gred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
 
 !Arguments ------------------------------------
 !scalars
@@ -470,7 +464,7 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
  real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: strtarget(6)
- real(dp),intent(in) :: fred(3,natom),strten(6)
+ real(dp),intent(in) :: gred(3,natom),strten(6)
  real(dp),intent(out) :: vout(ndim)
 
 !Local variables-------------------------------
@@ -499,7 +493,7 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=0, ndim MUST be equal to 3*natom,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom=',3*natom,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==1 .or. optcell==4 .or. optcell==5 .or. optcell==6) &
@@ -507,7 +501,7 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=1,4,5 or 6, ndim MUST be equal to 3*natom+1,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+1=',3*natom+1,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( (optcell==2 .or. optcell==3) &
@@ -515,20 +509,20 @@ subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if( optcell>=7 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !
-!Get vout from fred and strten
+!Get vout from gred and strten
 !
- vout(1:3*natom)= reshape(fred(:,:), (/3*natom/) )
+ vout(1:3*natom)= reshape(gred(:,:), (/3*natom/) )
  dstr(:)=strten(:)-strtarget(:)
 
  if(optcell==1)then
@@ -568,7 +562,7 @@ end subroutine xfpack_f2vout
 !!
 !! FUNCTION
 !! Update the contents of the history xfhist taking values
-!! from xred, acell, rprim, fred_corrected and strten
+!! from xred, acell, rprim, gred_corrected and strten
 !!
 !! INPUTS
 !!
@@ -582,11 +576,9 @@ end subroutine xfpack_f2vout
 !! SOURCE
 
 
-subroutine xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,fred,&
+subroutine xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,gred,&
 & hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,vout,&
 & vout_prev,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -605,7 +597,7 @@ real(dp),intent(inout) :: hessin(:,:)
 real(dp),intent(inout) :: xred(3,ab_mover%natom)
 real(dp),intent(inout) :: rprim(3,3)
 real(dp),intent(inout) :: rprimd0(3,3)
-real(dp),intent(inout) :: fred(3,ab_mover%natom)
+real(dp),intent(inout) :: gred(3,ab_mover%natom)
 real(dp),intent(inout) :: strten(6)
 real(dp),intent(inout) :: vin(:)
 real(dp),intent(inout) :: vin_prev(:)
@@ -626,7 +618,7 @@ integer :: ixfh ! kk,jj
      xred(:,:)     =ab_xfh%xfhist(:,1:ab_mover%natom        ,1,ixfh)
      rprim(1:3,1:3)=ab_xfh%xfhist(:,ab_mover%natom+2:ab_mover%natom+4,1,ixfh)
      acell(:)      =ab_xfh%xfhist(:,ab_mover%natom+1,1,ixfh)
-     fred(:,:)     =ab_xfh%xfhist(:,1:ab_mover%natom,2,ixfh)
+     gred(:,:)     =ab_xfh%xfhist(:,1:ab_mover%natom,2,ixfh)
 !    This use of results_gs is unusual
      strten(1:3)   =ab_xfh%xfhist(:,ab_mover%natom+2,2,ixfh)
      strten(4:6)   =ab_xfh%xfhist(:,ab_mover%natom+3,2,ixfh)
@@ -640,7 +632,7 @@ integer :: ixfh ! kk,jj
 !    end do
 !    write (ab_out,*) 'FRED'
 !    do kk=1,ab_mover%natom
-!    write (ab_out,*) fred(:,kk)
+!    write (ab_out,*) gred(:,kk)
 !    end do
 !    write(ab_out,*) 'RPRIM'
 !    do kk=1,3
@@ -654,7 +646,7 @@ integer :: ixfh ! kk,jj
      call xfpack_x2vin(acell,acell0,ab_mover%natom,&
 &     ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &     ab_mover%symrel,ucvol,ucvol0,vin,xred)
-     call xfpack_f2vout(fred,ab_mover%natom,&
+     call xfpack_f2vout(gred,ab_mover%natom,&
 &     ndim,ab_mover%optcell,ab_mover%strtarget,strten,&
 &     ucvol,vout)
 !    Get old time step, if any, and update inverse hessian
@@ -663,7 +655,7 @@ integer :: ixfh ! kk,jj
        rprim(1:3,1:3)=&
 &       ab_xfh%xfhist(:,ab_mover%natom+2:ab_mover%natom+4,1,ixfh-1)
        acell(:)=ab_xfh%xfhist(:,ab_mover%natom+1,1,ixfh-1)
-       fred(:,:)=ab_xfh%xfhist(:,1:ab_mover%natom,2,ixfh-1)
+       gred(:,:)=ab_xfh%xfhist(:,1:ab_mover%natom,2,ixfh-1)
 !      This use of results_gs is unusual
        strten(1:3)=ab_xfh%xfhist(:,ab_mover%natom+2,2,ixfh-1)
        strten(4:6)=ab_xfh%xfhist(:,ab_mover%natom+3,2,ixfh-1)
@@ -671,7 +663,7 @@ integer :: ixfh ! kk,jj
        call xfpack_x2vin(acell,acell0,ab_mover%natom,&
 &       ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &       ab_mover%symrel,ucvol,ucvol0,vin_prev,xred)
-       call xfpack_f2vout(fred,ab_mover%natom,&
+       call xfpack_f2vout(gred,ab_mover%natom,&
 &       ndim,ab_mover%optcell,ab_mover%strtarget,strten,&
 &       ucvol,vout_prev)
 
@@ -721,7 +713,7 @@ end subroutine xfh_recover_new
 !!
 !! FUNCTION
 !! Update the contents of the history xfhist taking values
-!! from xred, acell, rprim, fred_corrected and strten
+!! from xred, acell, rprim, gred_corrected and strten
 !!
 !! INPUTS
 !!
@@ -734,13 +726,10 @@ end subroutine xfh_recover_new
 !!
 !! SOURCE
 
-subroutine xfh_update(ab_xfh,acell,fred_corrected,natom,rprim,strten,xred)
-
-implicit none
+subroutine xfh_update(ab_xfh,acell,gred_corrected,natom,rprim,strten,xred)
 
 !Arguments ------------------------------------
 !scalars
-
 type(ab_xfh_type),intent(inout) :: ab_xfh
 integer,intent(in) :: natom
 
@@ -748,7 +737,7 @@ integer,intent(in) :: natom
 real(dp),intent(in) :: acell(3)
 real(dp),intent(in) :: xred(3,natom)
 real(dp),intent(in) :: rprim(3,3)
-real(dp),intent(in) :: fred_corrected(3,natom)
+real(dp),intent(in) :: gred_corrected(3,natom)
 real(dp),intent(in) :: strten(6)
 
 !Local variables-------------------------------
@@ -766,7 +755,7 @@ real(dp),intent(in) :: strten(6)
 !end do
 !write (ab_out,*) 'FRED'
 !do kk=1,natom
-!write (ab_out,*) fred_corrected(:,kk)
+!write (ab_out,*) gred_corrected(:,kk)
 !end do
 !write(ab_out,*) 'RPRIM'
 !do kk=1,3
@@ -781,7 +770,7 @@ real(dp),intent(in) :: strten(6)
  ab_xfh%xfhist(:,1:natom,1,ab_xfh%nxfh)=xred(:,:)
  ab_xfh%xfhist(:,natom+1,1,ab_xfh%nxfh)=acell(:)
  ab_xfh%xfhist(:,natom+2:natom+4,1,ab_xfh%nxfh)=rprim(:,:)
- ab_xfh%xfhist(:,1:natom,2,ab_xfh%nxfh)=fred_corrected(:,:)
+ ab_xfh%xfhist(:,1:natom,2,ab_xfh%nxfh)=gred_corrected(:,:)
  ab_xfh%xfhist(:,natom+2,2,ab_xfh%nxfh)=strten(1:3)
  ab_xfh%xfhist(:,natom+3,2,ab_xfh%nxfh)=strten(4:6)
 

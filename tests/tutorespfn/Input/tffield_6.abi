@@ -1,0 +1,108 @@
+# Finite electric field calculation of AlP at clamped atomic positions
+#
+# Here the polarization of the cell is computed as a function of increasing
+# external homogeneous electric field.
+
+# berryopt 4 is used to trigger the finite field calculation, while
+# the efield variable sets the strength (in atomic units) and direction
+# of the field
+
+# we can run many (11) fields, or just 3, to make a quick run.
+# ndtset  11
+  ndtset   3
+jdtset  11
+        21  # 22  23  24  25     # The additional 8 values of the field have been suppressed to save CPU time
+        31  # 32  33  34  35
+
+# the initial run is at zero field and uses berryopt -1                                                                                
+berryopt11 -1       rfdir11    1 1 1
+                                                      
+# runs with finite field use berryopt 4, efield, and
+# must read in the wavefunctions of the previous run with smaller field
+# if variables tagged by numbers like 22, 23, 24, 25 are defined but
+# not called by jdtset (above), they will be quietly ignored. This
+# feature gives a lot of flexibility in an input file.                          
+berryopt21  4       efield21   0.0001  0.0001  0.0001    getwfk21  11
+berryopt22  4       efield22   0.0002  0.0002  0.0002    getwfk22  21
+berryopt23  4       efield23   0.0003  0.0003  0.0003    getwfk23  22
+berryopt24  4       efield24   0.0004  0.0004  0.0004    getwfk24  23
+berryopt25  4       efield25   0.0005  0.0005  0.0005    getwfk25  24
+                                                                                
+berryopt31  4       efield31  -0.0001 -0.0001 -0.0001    getwfk31  11
+berryopt32  4       efield32  -0.0002 -0.0002 -0.0002    getwfk32  31
+berryopt33  4       efield33  -0.0003 -0.0003 -0.0003    getwfk33  32
+berryopt34  4       efield34  -0.0004 -0.0004 -0.0004    getwfk34  33
+berryopt35  4       efield35  -0.0005 -0.0005 -0.0005    getwfk35  34
+
+#Definition of the unit cell
+acell     3*7.2728565836E+00
+rprim       
+0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
+7.0710678119E-01  0.0000000000E+00  7.0710678119E-01
+7.0710678119E-01  7.0710678119E-01  0.0000000000E+00 
+
+#Definition of the atom types and pseudopotentials
+ ntypat 2 # two types of atoms 
+ znucl 15 13 # the atom types are Phosphorous and Aluminum
+
+# the following norm-conserving pseudopotentials are stored in the abinit distribution, but are freely
+# available through www.pseudo-dojo.org
+# this set uses the Perdew-Wang parameterization of LDA for the xc model
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+
+#Definition of the atoms
+ natom 2 # two atoms in the cell
+ typat 1 2 # type 1 is Phosphorous, type 2 is Aluminum (order defined by znucl above and pseudos list)
+ nband 4 # nband is restricted here to the number of filled bands only, no empty bands. The theory of
+         # the Berrys phase polarization formula assumes filled bands only. Our pseudopotential choice
+         # includes 5 valence electrons on P, 3 on Al, for 8 total in the primitive unit cell, hence
+         # 4 filled bands.
+
+#atomic positions, given in units of the cell vectors. Thus as the cell vectors
+#change due to strain the atoms will move as well.
+xred 
+1/4 1/4 1/4
+0 0 0
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut  5 # this value is very low but is used here to achieve very low calculation times.
+        # in a production environment this should be checked carefully for convergence and
+        # a more reasonable value is probably around 20
+ecutsm 0.5
+dilatmx 1.05
+ngkpt 6 6 6
+nshiftk 4 # this Monkhorst-Pack shift pattern is used so that the symmetry of the shifted grid
+          # is correct. A gamma-centered grid would also have the correct symmetry but would be
+          # less efficient.
+shiftk 0.5 0.5 0.5
+       0.5 0.0 0.0
+       0.0 0.5 0.0
+       0.0 0.0 0.5
+
+#Parameters for the SCF procedure
+nstep 8
+toldfe 1.0d-15
+
+# suppress printing of density and eigenvalues for this tutorial, 
+# but we do need the wavefunctions
+prtwf 1
+prtden 0
+prteig 0
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tffield_6.abo, tolnlines=  0, tolabs=  1.001e-04, tolrel=  5.000e-04, fld_options = -ridiculous
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = J. Zwanziger, M. Veithen
+#%% keywords = NC, DFPT
+#%% description = Finite electric field calculation of AlP at clamped atomic positions
+#%%<END TEST_INFO>

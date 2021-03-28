@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 1998-2020 ABINIT group (XG)
+# Copyright (C) 1998-2021 ABINIT group (XG)
 # 
 # The purpose of this script is to change some
 # expression by another in a whole set of files
@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!ti.hpc.paw.xml!Pseudodojo_paw_pw_stringent/Ti.xml!' $file > tmp.file
+ sed -e 's!npkpt!np_spkpt!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2021 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 MODULE m_exc_diago
 
  use defs_basis
- use m_slk
+
  use m_bs_defs
  use m_abicore
  use m_errors
@@ -33,6 +33,7 @@ MODULE m_exc_diago
 #endif
  use m_hdr
  use m_sort
+ use m_slk
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
@@ -87,12 +88,6 @@ contains
 !!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -134,7 +129,7 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
  prtvol  = Wfd%prtvol
 
  if (BSp%have_complex_ene) then
-   MSG_ERROR("Complex energies are not supported yet")
+   ABI_ERROR("Complex energies are not supported yet")
  end if
  !
  ! This trick is needed to restart a CG run, use DDIAGO to calculate the spectra reusing an old BSEIG file.
@@ -163,12 +158,12 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
      if (BSp%use_coupling==0) then
        call exc_iterative_diago(Bsp,BS_files,Hdr_bse,prtvol,comm)
      else
-       MSG_ERROR("CG + coupling not coded")
+       ABI_ERROR("CG + coupling not coded")
      end if
 
    case default
      write(msg,'(a,i0)')" Wrong value for Bsp%algorithm: ",Bsp%algorithm
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end select
    !
    if (my_rank==master) then
@@ -215,12 +210,6 @@ end subroutine exc_diago_driver
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -282,13 +271,13 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  if (BSp%have_complex_ene) then ! QP lifetimes are not included
-   MSG_ERROR("complex energies not coded yet")
+   ABI_ERROR("complex energies not coded yet")
  end if
 
  if (ANY(Bsp%nreh/=Bsp%nreh(1))) then
    write(std_out,*)" Bsp%nreh: ",Bsp%nreh
    write(msg,'(a)')" BSE code does not support different number of transitions for the two spin channels"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  nsppol   = Hdr_bse%nsppol
@@ -308,7 +297,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  if (use_scalapack .and. nsppol == 2) then
    use_scalapack = .False.
    msg = "Scalapack with nsppol==2 not yet available. Using sequential version"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  if (.not.use_scalapack .and. my_rank/=master) GOTO 10 ! Inversion is done by master only.
@@ -323,7 +312,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
  bseig_fname = BS_files%out_eig
  if (BS_files%in_eig /= BSE_NOFILE) then
-   MSG_ERROR("BS_files%in_eig is defined!")
+   ABI_ERROR("BS_files%in_eig is defined!")
  end if
 
  write(msg,'(a,i0)')' Direct diagonalization of the resonant excitonic Hamiltonian, Matrix size= ',exc_size
@@ -368,7 +357,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    !
    ! Read data from file.
    if (open_file(hreso_fname,msg,newunit=hreso_unt,form="unformatted",status="old",action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    !
    ! Read the header and perform consistency checks.
@@ -399,7 +388,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
      !
      ! Read data from file.
      if (open_file(hreso_fname,msg,newunit=hreso_unt,form="unformatted",status="old",action="read") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      !
      ! Read the header and perform consistency checks.
@@ -435,7 +424,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
            !TODO support multiple spins !
            if(ABS(en - (Epren%eigens(ic,ep_ik,isppol)-Epren%eigens(iv,ep_ik,isppol)+BSp%mbpt_sciss)) > tol3) then
-             MSG_ERROR("Eigen from the transition does not correspond to the EP file !")
+             ABI_ERROR("Eigen from the transition does not correspond to the EP file !")
            end if
            exc_mat(ireh,ireh) = exc_mat(ireh,ireh) + (Epren%renorms(1,ic,ik,isppol,itemp) - Epren%renorms(1,iv,ik,isppol,itemp))
 
@@ -480,7 +469,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
      call wrtout(std_out,' Writing eigenvalues and eigenvectors to file: '//TRIM(bseig_fname))
 
      if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      !!! !DBYG
@@ -533,7 +522,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
    if (nsppol==2) then
-     MSG_WARNING("nsppol==2 + scalapack not coded yet")
+     ABI_WARNING("nsppol==2 + scalapack not coded yet")
    end if
 
    istwf_k=1; tbloc=50
@@ -568,7 +557,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
      block_sizes(:,1) = (/neh1,neh1/)
      block_sizes(:,2) = (/neh2,neh2/)
      block_sizes(:,3) = (/neh1,neh2/)
-     MSG_ERROR("Not tested")
+     ABI_ERROR("Not tested")
      !call slk_read_from_blocks(Slk_mat,array_of_sizes,block_sizes,is_fortran_file,mpi_fh=mpi_fh,offset=ehdr_offset)
    end if
 
@@ -587,14 +576,14 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
    exc_ene_c(:) = exc_ene(:)
 
-   call destruction_matrix_scalapack(Slk_mat)
+   call Slk_mat%free()
 
    call wrtout(std_out,' Writing eigenvalues/vectors to file: '//TRIM(bseig_fname), do_flush=.True.)
 
    ! Write distributed matrix on file bseig_fname with Fortran records.
    if (my_rank==master) then ! Write exc eigenvalues. Vectors will be appended in slk_write.
      if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      write(eig_unt) exc_size, nstates
      write(eig_unt) exc_ene_c(1:nstates)
@@ -623,11 +612,11 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    call MPI_FILE_CLOSE(mpi_fh, ierr)
    ABI_CHECK_MPI(ierr,"FILE_CLOSE")
 
-   call destruction_matrix_scalapack(Slk_vec)
+   call Slk_vec%free()
    call end_scalapack(Slk_processor)
    call xmpi_barrier(comm)
 #else
-   MSG_BUG("You should not be here!")
+   ABI_BUG("You should not be here!")
 #endif
 
  END SELECT
@@ -691,12 +680,6 @@ end subroutine exc_diago_resonant
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -726,7 +709,7 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
  exc_gap = czero
 
  if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",status="old",action="read") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(eig_unt) ! do_ep_lifetime
@@ -737,7 +720,7 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 
  if (hsize_exp /= hsize_read) then
    write(msg,'(2(a,i0))')" Wrong dimension: read: ",hsize_read," expected= ",hsize_exp
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_MALLOC(exc_cene,(nstates_read))
@@ -843,12 +826,6 @@ end subroutine exc_print_eig
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -886,11 +863,11 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  nsppol = Hdr_bse%nsppol
  if (nsppol==2) then
-   MSG_WARNING("nsppol==2 with coupling is still under development")
+   ABI_WARNING("nsppol==2 with coupling is still under development")
  end if
 
  if (nprocs > 1) then
-   MSG_WARNING("Scalapack does not provide ZGEEV, diagonalization is done in sequential!")
+   ABI_WARNING("Scalapack does not provide ZGEEV, diagonalization is done in sequential!")
  end if
 
  exc_size = 2*SUM(BSp%nreh)
@@ -900,7 +877,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  bseig_fname = BS_files%out_eig
  if (BS_files%in_eig /= BSE_NOFILE) then
-   MSG_ERROR("BS_files%in_eig is defined!")
+   ABI_ERROR("BS_files%in_eig is defined!")
  end if
  !
  ! Only master performs the diagonalization since ScaLAPACK does not provide the parallel version of ZGEEV.
@@ -932,7 +909,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  call wrtout(std_out,' Reading resonant excitonic Hamiltonian from '//TRIM(hreso_fname))
 
  if (open_file(hreso_fname,msg,newunit=hreso_unt,form="unformatted",status="old",action="read") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  !
  ! Read the header and perform consistency checks.
@@ -958,7 +935,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  call wrtout(std_out,' Reading coupling excitonic Hamiltonian from '//TRIM(hcoup_fname))
  if (open_file(hcoup_fname,msg,newunit=hcoup_unt,form="unformatted",status="old",action="read") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  !
  ! Read the header and perform consistency checks.
@@ -973,7 +950,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 !BEGINDEBUG
  if (ANY(exc_ham==HUGE(one))) then
    write(msg,'(a,2(1x,i0))')"There is a bug in exc_fullh_from_blocks",COUNT(exc_ham==HUGE(one)),exc_size**2
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    bsz = Bsp%nreh(1)
    ABI_MALLOC(cbuff,(bsz,bsz))
    block=0
@@ -990,7 +967,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
    end do
 
    ABI_FREE(cbuff)
-   MSG_ERROR("Cannot continue")
+   ABI_ERROR("Cannot continue")
  end if
 !ENDDEBUG
 
@@ -1005,7 +982,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
    call wrtout(std_out,"Complete direct diagonalization with xgeev...")
    call xgeev("No_left_eigen","Vectors",exc_size,exc_ham,exc_size,exc_ene,vl_dpc,ldvl,exc_rvect,exc_size)
  else
-   MSG_ERROR("Not implemented error")
+   ABI_ERROR("Not implemented error")
  end if
 
  ABI_FREE(exc_ham)
@@ -1037,7 +1014,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  call wrtout(std_out,ch10//" Writing eigenvalues and eigenvectors on file "//TRIM(bseig_fname))
 
  if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !YG : new version with lifetime
@@ -1106,18 +1083,12 @@ end subroutine exc_diago_coupling
 !!  BS_files<excfiles>=Datatype storing names and files used in the Bethe-Salpeter code.
 !!
 !! OUTPUT
-!!  Excitonic eigenvectors and eigenvalues are written on file BS_files%out_eig.
+!!  Excitonic eigenvectors and eigenvalues are written to file BS_files%out_eig.
 !!
 !! PARENTS
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -1171,7 +1142,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  nsppol = Hdr_bse%nsppol
  if (nsppol==2) then
-   MSG_WARNING("nsppol==2 is still under development!")
+   ABI_WARNING("nsppol==2 is still under development!")
  end if
 
  neh1 = BSp%nreh(1); neh2=neh1
@@ -1186,7 +1157,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  bseig_fname = BS_files%out_eig
  if (BS_files%in_eig /= BSE_NOFILE) then
-   MSG_ERROR("BS_files%in_eig is defined!")
+   ABI_ERROR("BS_files%in_eig is defined!")
  end if
 
  if (BS_files%in_hreso /= BSE_NOFILE) then
@@ -1215,9 +1186,11 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 ! ...
 
  use_scalapack = .FALSE.
-!#ifdef HAVE_LINALG_SCALAPACK
-! use_scalapack = (nprocs > 1)
-!#endif
+#ifdef HAVE_LINALG_SCALAPACK
+ ! This is alway false. I use this trick so that the second case below is always compiled
+ ! to avoid regressions.
+ use_scalapack = nprocs > 1 .and. nsppol > 5
+#endif
  !use_scalapack = .FALSE.
  !use_scalapack = .TRUE.
 
@@ -1236,7 +1209,6 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    call wrtout(std_out, msg)
 
    ABI_MALLOC_OR_DIE(exc_ham,(exc_size,exc_size), ierr)
-
    ABI_MALLOC_OR_DIE(fmat,(exc_size,exc_size), ierr)
 
    write(msg,'(3a,f8.1,3a,f8.1,a)')&
@@ -1246,7 +1218,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    call wrtout(std_out, msg)
 
    if (open_file(reso_fname,msg,newunit=hreso_unt,form="unformatted",status="old",action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    !
    ! Read the header and perform consistency checks.
@@ -1261,7 +1233,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    close(hreso_unt)
 
    if (open_file(coup_fname,msg,newunit=hcoup_unt,form="unformatted",status="old",action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    !
    ! Read the header and perform consistency checks.
@@ -1272,9 +1244,9 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    call exc_fullh_from_blocks(hcoup_unt,"Coupling",nsppol,row_sign,diago_is_real,Bsp%nreh,exc_size,exc_ham)
    close(hcoup_unt)
 
-#ifdef DEV_MG_DEBUG_THIS
-write(666)exc_ham
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!write(666)exc_ham
+!#endif
    !
    ! Fill fmat = (1  0)
    !             (0 -1)
@@ -1319,7 +1291,7 @@ write(666)exc_ham
    call wrtout(std_out," Writing eigenvalues and eigenvectors on file: "//TRIM(bseig_fname))
 
    if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    do_ep_lifetime = .FALSE.
@@ -1330,10 +1302,10 @@ write(666)exc_ham
      write(eig_unt) CMPLX(exc_rvect(:,mi),kind=dpc)
    end do
 
-#ifdef DEV_MG_DEBUG_THIS
-   write(888)exc_rvect
-   write(888)exc_ene
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!   write(888)exc_rvect
+!   write(888)exc_ene
+!#endif
 
    ABI_MALLOC_OR_DIE(ovlp,(nstates,nstates), ierr)
 
@@ -1342,9 +1314,9 @@ write(666)exc_ham
    call xgemm("C","N",exc_size,nstates,nstates,cone,exc_rvect,exc_size,exc_rvect,exc_size,czero,ovlp,nstates)
    ABI_FREE(exc_rvect)
 
-#ifdef DEV_MG_DEBUG_THIS
-write(667)ovlp
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!write(667)ovlp
+!#endif
 
    call wrtout(std_out," Inverting overlap matrix... ")
    !
@@ -1355,9 +1327,9 @@ write(667)ovlp
    ! Version for generic complex matrix.
    !call xginv(ovlp,nstates)
 
-#ifdef DEV_MG_DEBUG_THIS
-write(668,*)ovlp
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!write(668,*)ovlp
+!#endif
 
    call wrtout(std_out,' Writing overlap matrix O^-1 on file: '//TRIM(bseig_fname))
    do it=1,nstates
@@ -1414,7 +1386,7 @@ write(668,*)ovlp
      write(msg,"(3a)")&
 &      " Global position index cannot be stored in a standard Fortran integer ",ch10,&
 &      " Excitonic matrix cannot be read with a single MPI-IO call."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Shift the offset because the view starts at the fist matrix element!
@@ -1438,7 +1410,7 @@ write(668,*)ovlp
    do el=1,my_nel
      iloc = myel2loc(1,el)
      jloc = myel2loc(2,el)
-     call idx_glob(Slk_Hbar,iloc,jloc,iglob,jglob)
+     call Slk_Hbar%loc2glob(iloc,jloc,iglob,jglob)
      ctmp = tmp_cbuffer(el)
      if (iglob==jglob.and..not.Bsp%have_complex_ene) ctmp = DBLE(ctmp) ! Force the diagonal to be real.
      rrs_kind = rrs_of_glob(iglob,jglob,Slk_Hbar%sizeb_global)
@@ -1476,7 +1448,7 @@ write(668,*)ovlp
      write(msg,"(3a)")&
 &      " Global position index cannot be stored in a standard Fortran integer ",ch10,&
 &      " Excitonic matrix cannot be read with a single MPI-IO call."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    !
    ! Shift the offset because the view starts at the fist matrix element!
@@ -1500,7 +1472,7 @@ write(668,*)ovlp
    do el=1,my_nel
      iloc = myel2loc(1,el)
      jloc = myel2loc(2,el)
-     call idx_glob(Slk_Hbar,iloc,jloc,iglob,jglob)
+     call Slk_Hbar%loc2glob(iloc, jloc, iglob, jglob)
      ccs_kind = ccs_of_glob(iglob,jglob,Slk_Hbar%sizeb_global)
      ctmp = tmp_cbuffer(el)
      if (ccs_kind==-1) ctmp = DCONJG(ctmp) ! Anti-coupling (Diagonal is included).
@@ -1513,13 +1485,13 @@ write(668,*)ovlp
    !max_r=20; max_c=10
    !call print_arr(Slk_Hbar%buffer_cplx,max_r=max_r,max_c=max_c,unit=std_out)
 
-#ifdef DEV_MG_DEBUG_THIS
-   ABI_MALLOC(exc_ham,(exc_size,exc_size))
-   read(666)exc_ham
-
-   write(std_out,*)"Error Hbar: ",MAXVAL(ABS(exc_ham-Slk_Hbar%buffer_cplx))
-   ABI_FREE(exc_ham)
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!   ABI_MALLOC(exc_ham,(exc_size,exc_size))
+!   read(666)exc_ham
+!
+!   write(std_out,*)"Error Hbar: ",MAXVAL(ABS(exc_ham-Slk_Hbar%buffer_cplx))
+!   ABI_FREE(exc_ham)
+!#endif
 
    call MPI_FILE_CLOSE(mpi_fh, mpi_err)
    ABI_CHECK_MPI(mpi_err,"FILE_CLOSE")
@@ -1531,7 +1503,7 @@ write(668,*)ovlp
    !            (0 -1)
    do jloc=1,Slk_F%sizeb_local(2)
      do iloc=1,Slk_F%sizeb_local(1)
-       call idx_glob(Slk_F,iloc,jloc,iglob,jglob)
+       call Slk_F%loc2glob(iloc, jloc, iglob, jglob)
        if (iglob==jglob) then
          if (iglob<=SUM(Bsp%nreh)) then
            Slk_F%buffer_cplx(iloc,jloc) =  cone
@@ -1552,44 +1524,44 @@ write(668,*)ovlp
    itype=2; vl=1; vu=1; il=1; iu=nstates
    abstol=zero !ABSTOL = PDLAMCH(comm,'U')
 
-#if 1
+!#if 1
    if (do_full_diago) then
      call slk_pzhegvx(itype,"Vectors","All","Upper",Slk_F,Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    else
-     MSG_WARNING("Partial diago is still under testing")
+     ABI_WARNING("Partial diago is still under testing")
      call slk_pzhegvx(itype,"Vectors","Index","Upper",Slk_F,Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    end if
-#else
-   call xhegv(itype,"Vectors","Upper",exc_size,Slk_F%buffer_cplx,Slk_Hbar%buffer_cplx,exc_ene)
-   Slk_vec%buffer_cplx = Slk_F%buffer_cplx
-#endif
+!#else
+!   call xhegv(itype,"Vectors","Upper",exc_size,Slk_F%buffer_cplx,Slk_Hbar%buffer_cplx,exc_ene)
+!   Slk_vec%buffer_cplx = Slk_F%buffer_cplx
+!#endif
 
-#ifdef DEV_MG_DEBUG_THIS
-   if (PRODUCT(Slk_Hbar%sizeb_local) /= exc_size**2) then
-     MSG_ERROR("Wrong size")
-   end if
+!#ifdef DEV_MG_DEBUG_THIS
+!   if (PRODUCT(Slk_Hbar%sizeb_local) /= exc_size**2) then
+!     ABI_ERROR("Wrong size")
+!   end if
+!
+!   ABI_MALLOC(exc_ham,(exc_size,exc_size))
+!   read(888)exc_ham
+!
+!   write(std_out,*)"Error rvec: ",MAXVAL(ABS(exc_ham-Slk_vec%buffer_cplx))
+!   ABI_FREE(exc_ham)
+!
+!   ABI_MALLOC(test_ene,(exc_size))
+!   read(888)test_ene
+!   write(std_out,*)"Error ene: ",MAXVAL(ABS(exc_ene-test_ene))
+!   ABI_FREE(test_ene)
+!#endif
 
-   ABI_MALLOC(exc_ham,(exc_size,exc_size))
-   read(888)exc_ham
-
-   write(std_out,*)"Error rvec: ",MAXVAL(ABS(exc_ham-Slk_vec%buffer_cplx))
-   ABI_FREE(exc_ham)
-
-   ABI_MALLOC(test_ene,(exc_size))
-   read(888)test_ene
-   write(std_out,*)"Error ene: ",MAXVAL(ABS(exc_ene-test_ene))
-   ABI_FREE(test_ene)
-#endif
-
-   call destruction_matrix_scalapack(Slk_F)
-   call destruction_matrix_scalapack(Slk_Hbar)
+   call Slk_F%free()
+   call Slk_Hbar%free()
 
    call wrtout(std_out,ch10//" Writing eigenvalues and eigenvectors on file: "//TRIM(bseig_fname))
    !
    ! Open the file with Fortran-IO to write the Header.
    if (my_rank==master) then
      if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      write(eig_unt) exc_size,nstates
@@ -1622,7 +1594,7 @@ write(668,*)ovlp
 
    call wrtout(std_out,' Calculating overlap matrix... ')
    if (.not.do_full_diago) then
-     MSG_ERROR(" Init of Slk_ovlp is wrong")
+     ABI_ERROR(" Init of Slk_ovlp is wrong")
    end if
 
    call init_matrix_scalapack(Slk_ovlp,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
@@ -1635,69 +1607,65 @@ write(668,*)ovlp
    !call init_matrix_scalapack(Slk_tmp,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
    !Slk_tmp%buffer_cplx = Slk_vec%buffer_cplx
    !call slk_pzgemm("C","N",Slk_tmp,cone,Slk_vec,czero,Slk_ovlp)
-   !call destruction_matrix_scalapack(Slk_tmp)
+   !call Slk_tmp%free()
 
    call slk_pzgemm("C","N",Slk_vec,cone,Slk_vec,czero,Slk_ovlp)
 
-#ifdef DEV_MG_DEBUG_THIS
-   ABI_MALLOC(exc_ham,(exc_size,exc_size))
-   read(667)exc_ham
-
-   write(std_out,*)"Error Ovlp: ",MAXVAL(ABS(exc_ham-Slk_ovlp%buffer_cplx))
-   !Slk_ovlp%buffer_cplx = exc_ham
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!   ABI_MALLOC(exc_ham,(exc_size,exc_size))
+!   read(667)exc_ham
+!
+!   write(std_out,*)"Error Ovlp: ",MAXVAL(ABS(exc_ham-Slk_ovlp%buffer_cplx))
+!   !Slk_ovlp%buffer_cplx = exc_ham
+!#endif
 
    !max_r=20; max_c=10
    !call print_arr(Slk_ovlp%buffer_cplx,max_r=max_r,max_c=max_c,unit=std_out)
 
-   call destruction_matrix_scalapack(Slk_vec)
+   call Slk_vec%free()
 
    call wrtout(std_out," Inverting overlap matrix... ")
    uplo="Upper"
 
-#if 0
-!DEBUG
-   call xhdp_invert(uplo,Slk_ovlp%buffer_cplx,exc_size)
-
-   !call slk_symmetrize(Slk_ovlp,uplo,"Hermitian")
-   call hermitianize(Slk_ovlp%buffer_cplx,uplo)
-
-   exc_ham = MATMUL(exc_ham,Slk_ovlp%buffer_cplx)
-   do it=1,exc_size
-     exc_ham(it,it) = exc_ham(it,it) - cone
-   end do
-
-   write(std_out,*)"Error Inversion: ",MAXVAL(ABS(exc_ham))
-   ABI_FREE(exc_ham)
-!END DEBUG
-
-#else
-   ! call slk_zdhp_invert(Slk_ovlp,uplo)
+!#if 0
+!!DEBUG
+!   call xhdp_invert(uplo,Slk_ovlp%buffer_cplx,exc_size)
+!
+!   !call slk_symmetrize(Slk_ovlp,uplo,"Hermitian")
+!   call hermitianize(Slk_ovlp%buffer_cplx,uplo)
+!
+!   exc_ham = MATMUL(exc_ham,Slk_ovlp%buffer_cplx)
+!   do it=1,exc_size
+!     exc_ham(it,it) = exc_ham(it,it) - cone
+!   end do
+!
+!   write(std_out,*)"Error Inversion: ",MAXVAL(ABS(exc_ham))
+!   ABI_FREE(exc_ham)
+!!END DEBUG
+!
+!#else
+   ! call Slk_ovlp%zdhp_invert(uplo)
    ! call hermitianize(Slk_ovlp%buffer_cplx,uplo)
    ! !call slk_symmetrize(Slk_ovlp,uplo,"Hermitian")
 
-   call slk_zinvert(Slk_ovlp)  ! Version for generic complex matrix.
-#endif
+   call Slk_ovlp%zinvert()  ! Version for generic complex matrix.
+!#endif
 
-   if (allocated(exc_ham))  then
-     ABI_FREE(exc_ham)
-   end if
-
-#ifdef DEV_MG_DEBUG_THIS
-   ABI_MALLOC(exc_ham,(exc_size,exc_size))
-   read(668)exc_ham
-   write(std_out,*)"Error in Inv Ovlp: ",MAXVAL(ABS(exc_ham-Slk_ovlp%buffer_cplx))
-
-   !exc_ham = exc_ham-Slk_ovlp%buffer_cplx
-   !do it=1,exc_size
-   !  if ( MAXVAL(ABS(exc_ham(:,it))) > 0.1 ) write(std_out,*)"it: ",it,exc_ham(:,it)
-   !end do
-
-   !Slk_ovlp%buffer_cplx = exc_ham
-   ABI_FREE(exc_ham)
-
-   !write(std_out,*)"MAX ERR",MAXVAL(ABS(Slk_ovlp%buffer_cplx - TRANSPOSE(DCONJG(Slk_ovlp%buffer_cplx))))
-#endif
+!#ifdef DEV_MG_DEBUG_THIS
+!   ABI_MALLOC(exc_ham,(exc_size,exc_size))
+!   read(668)exc_ham
+!   write(std_out,*)"Error in Inv Ovlp: ",MAXVAL(ABS(exc_ham-Slk_ovlp%buffer_cplx))
+!
+!   !exc_ham = exc_ham-Slk_ovlp%buffer_cplx
+!   !do it=1,exc_size
+!   !  if ( MAXVAL(ABS(exc_ham(:,it))) > 0.1 ) write(std_out,*)"it: ",it,exc_ham(:,it)
+!   !end do
+!
+!   !Slk_ovlp%buffer_cplx = exc_ham
+!   ABI_FREE(exc_ham)
+!
+!   !write(std_out,*)"MAX ERR",MAXVAL(ABS(Slk_ovlp%buffer_cplx - TRANSPOSE(DCONJG(Slk_ovlp%buffer_cplx))))
+!#endif
 
    call wrtout(std_out,' Writing overlap matrix S^-1 on file: '//TRIM(bseig_fname))
 
@@ -1706,11 +1674,10 @@ write(668,*)ovlp
    call MPI_FILE_CLOSE(mpi_fh, mpi_err)
    ABI_CHECK_MPI(mpi_err,"FILE_CLOSE")
 
-   call destruction_matrix_scalapack(Slk_ovlp)
-
+   call Slk_ovlp%free()
    call end_scalapack(Slk_processor)
 #else
-   MSG_BUG("You should not be here!")
+   ABI_BUG("You should not be here!")
 #endif
 
  END SELECT

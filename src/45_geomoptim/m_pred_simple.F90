@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_pred_simple
  use m_abimover
  use m_abihist
 
- use m_geometry,  only : fcart2fred, xred2xcart
+ use m_geometry,  only : fcart2gred, xred2xcart
 
  implicit none
 
@@ -49,7 +49,8 @@ contains
 !! pred_simple
 !!
 !! FUNCTION
-!! Ionmov predictors (4 & 6) Internal to SCFV
+!! Ionmov predictors (4 & 5) Internal to scfcv.
+!! Actually, this routine does nothing (only copy) as all operations are internal to scfcv ...
 !!
 !! IONMOV 4:
 !! Conjugate gradient algorithm for simultaneous optimization
@@ -74,13 +75,11 @@ contains
 !!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
+!!      bonds_free,dsyev,dsysv,fcart2gred,make_bonds_new,xred2xcart
 !!
 !! SOURCE
 
 subroutine pred_simple(ab_mover,hist,iexit)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -152,14 +151,13 @@ end subroutine pred_simple
 !!      m_mover,m_precpred_1geo
 !!
 !! CHILDREN
-!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
+!!      bonds_free,dsyev,dsysv,fcart2gred,make_bonds_new,xred2xcart
 !!
 !! SOURCE
 
 subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -197,7 +195,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 
  if (iexit/=0)then
    if(allocated(matrix))then
-     ABI_DEALLOCATE(matrix)
+     ABI_FREE(matrix)
    endif
    return
  end if
@@ -246,10 +244,10 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    Compute_Matrix=.TRUE.
    order_forces=new_order_forces
    if (allocated(matrix))  then
-     ABI_DEALLOCATE(matrix)
+     ABI_FREE(matrix)
    end if
 
-   ABI_ALLOCATE(matrix,(3*ab_mover%natom,3*ab_mover%natom))
+   ABI_MALLOC(matrix,(3*ab_mover%natom,3*ab_mover%natom))
  else
    Compute_Matrix=.FALSE.
    if ((ab_mover%goprecon==2).and.(order_forces.gt.new_order_forces)) then
@@ -269,10 +267,10 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    bonds%nbonds=1
 
 !  Allocate the arrays with exactly the rigth nbonds
-   ABI_ALLOCATE(bonds%bond_vect,(3,bonds%nbonds))
-   ABI_ALLOCATE(bonds%bond_length,(bonds%nbonds))
-   ABI_ALLOCATE(bonds%indexi,(ab_mover%natom,bonds%nbonds))
-   ABI_ALLOCATE(bonds%nbondi,(ab_mover%natom))
+   ABI_MALLOC(bonds%bond_vect,(3,bonds%nbonds))
+   ABI_MALLOC(bonds%bond_length,(bonds%nbonds))
+   ABI_MALLOC(bonds%indexi,(ab_mover%natom,bonds%nbonds))
+   ABI_MALLOC(bonds%nbondi,(ab_mover%natom))
 
 !  Compute the bonds
    call make_bonds_new(bonds,ab_mover%natom,ab_mover%ntypat,rprimd,&
@@ -284,8 +282,8 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 !  and wich period they coprrespond in the periodic table
    if (bonds%nbonds>0)then
 
-     ABI_ALLOCATE(periods,(2,bonds%nbonds))
-     ABI_ALLOCATE(iatoms,(2,bonds%nbonds))
+     ABI_MALLOC(periods,(2,bonds%nbonds))
+     ABI_MALLOC(iatoms,(2,bonds%nbonds))
      periods(:,:)=0
      iatoms(:,:)=0
 
@@ -380,8 +378,8 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    end do
 
    if (bonds%nbonds>0)then
-     ABI_DEALLOCATE(periods)
-     ABI_DEALLOCATE(iatoms)
+     ABI_FREE(periods)
+     ABI_FREE(iatoms)
    end if
 
    call bonds_free(bonds)
@@ -393,21 +391,21 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
      end do
    end if
 
-   ABI_ALLOCATE(matrix_tmp,(3*ab_mover%natom,3*ab_mover%natom))
-   
+   ABI_MALLOC(matrix_tmp,(3*ab_mover%natom,3*ab_mover%natom))
+
    matrix_tmp(:,:)=matrix(:,:)
    !write(*,*)"matrix_tmp",matrix_tmp
 
-   ABI_ALLOCATE(work,(1))
+   ABI_MALLOC(work,(1))
    lwork=-1
    call DSYEV('V', 'U', 3*ab_mover%natom, matrix_tmp, 3*ab_mover%natom, w , work, lwork, info )
    lwork=work(1)
    write(std_out,*) '[DSYEV] Recommended lwork=',lwork
-   ABI_DEALLOCATE(work)
-   ABI_ALLOCATE(work,(lwork))
+   ABI_FREE(work)
+   ABI_MALLOC(work,(lwork))
    call DSYEV('V', 'U', 3*ab_mover%natom, matrix_tmp, 3*ab_mover%natom, w , work, lwork, info )
-   ABI_DEALLOCATE(work)
-   ABI_DEALLOCATE(matrix_tmp)
+   ABI_FREE(work)
+   ABI_FREE(matrix_tmp)
 
    write(std_out,*) 'DSYEV info=',info
    write(std_out,*) 'Eigenvalues:'
@@ -441,25 +439,25 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 
 !call dsysv( uplo, n, nrhs, a, lda, ipiv, b, ldb, work, lwork, info )
 !MGNAG FIXME: This call causes a floating point exception if NAG+MKL
- ABI_ALLOCATE(work,(1))
+ ABI_MALLOC(work,(1))
  lwork=-1
  call DSYSV( 'U', 3*ab_mover%natom, 1, matrix,&
 & 3*ab_mover%natom, ipiv, B, 3*ab_mover%natom, work, lwork, info )
 
  lwork=work(1)
  write(std_out,*) '[DSYSV] Recomended lwork=',lwork
- ABI_DEALLOCATE(work)
- ABI_ALLOCATE(work,(lwork))
+ ABI_FREE(work)
+ ABI_MALLOC(work,(lwork))
  call DSYSV( 'U', 3*ab_mover%natom, 1, matrix,&
 & 3*ab_mover%natom, ipiv, B, 3*ab_mover%natom, work, lwork, info )
- ABI_DEALLOCATE(work)
+ ABI_FREE(work)
 
  write(std_out,*) 'DSYSV info=',info
  write(std_out,*) 'Solution:'
  write(std_out,fmt) B(:)
 
  forstr%fcart=reshape(B,(/ 3, ab_mover%natom /) )
- call fcart2fred(forstr%fcart,forstr%fred,rprimd,ab_mover%natom)
+ call fcart2gred(forstr%fcart,forstr%gred,rprimd,ab_mover%natom)
 
 end subroutine prec_simple
 !!***

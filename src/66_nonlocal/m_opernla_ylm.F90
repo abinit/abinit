@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MT)
+!!  Copyright (C) 2008-2021 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,7 +70,7 @@ contains
 !!                  and 2nd derivatives wrt atm pos.
 !!           33: compute projected scalars and 2nd derivatives wrt strain and q-vector.
 !!           5,51,52: compute projected scalars and derivatives wrt wave vector k
-!!           53: compute projected scalars and derivatives wrt wave vector k in direction idir+1 and idir-1
+!!           53: compute projected scalars and derivatives wrt wave vector k in direction idir+1 and idir+2 mod 3
 !!           54: compute projected scalars, deriv. wrt atm pos., deriv. wrt wave vector k
 !!               and 2nd derivatives wrt right wave vector k and atm pos.
 !!           55: compute projected scalars, deriv. strains, deriv. wrt wave vector k
@@ -221,7 +221,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  if (signs==2) then
 !  signs=2,less choices
    check=(choice_== 0.or.choice_== 1.or.choice_== 2.or.choice_==3.or.choice_==5.or.&
-&  choice_==22.or.choice_==23.or.choice==25.or.choice_==33.or.choice_==51.or.choice_==52.or.choice_==54.or.choice_==55.or.&
+&  choice_==22.or.choice_==23.or.choice==25.or.choice_==33.or.&
+&  choice_==51.or.choice_==52.or.choice_==53.or.choice_==54.or.choice_==55.or.&
 &   choice_== 8.or.choice_==81)
    ABI_CHECK(check,'BUG: signs=2 not compatible with this choice')
  end if
@@ -262,8 +263,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
      ipwshft=(ispinor-1)*npw
 
 !    Allocate work space
-     ABI_ALLOCATE(scali,(npw))
-     ABI_ALLOCATE(scalr,(npw))
+     ABI_MALLOC(scali,(npw))
+     ABI_MALLOC(scalr,(npw))
 
 !    Loop on atoms (blocking)
      do ia=1,nincat
@@ -921,7 +922,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      Accumulate dGxdt --- derivative wrt k ---
 !                            for direction IDIR (CHOICE=5,51,52)
 !                            for direction IDIR2 (CHOICE=54,81), only if choice > 0
-!                            for directions IDIR-1 & IDIR+1 (CHOICE=53)
+!                            for directions IDIR+1 & IDIR+2 mod 3 (CHOICE=53)
 !                            for 2 directions (CHOICE=8), only if choice > 0
 !      --------------------------------------------------------------------
        if ((signs==2).and.&
@@ -936,7 +937,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
          if (choice_==53) then
 !          Case 53 though need multiple directions and here ffnl will contain the
 !          derivative information in locations 2,3, and 4 corresponding to idir = 1, 2,
-!          and 3. Moreover, choice 53 needs the derivatives in direction idir+1 and idir-1.
+!          and 3. Moreover, choice 53 needs the derivatives in direction idir+1 and idir+2 mod 3.
 !          The parameter vector ffnl_dir_dat contains the necessary translations in
 !          locations 1,2 for idir=1; 3,4 for idir=2; and 5,6 for idir=3.
            ffnl_dir(1)=ffnl_dir_dat(2*idir-1);ffnl_dir(2)=ffnl_dir_dat(2*idir)
@@ -1161,8 +1162,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !        --------------------------------------------------------------------
        if ((signs==1).and.(choice_==6)) then
          mu0=1;if (choice_==6) mu0=37
-         ABI_ALLOCATE(scalarr,(npw,4))
-         ABI_ALLOCATE(scalari,(npw,4))
+         ABI_MALLOC(scalarr,(npw,4))
+         ABI_MALLOC(scalari,(npw,4))
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -1224,8 +1225,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              end if
            end if
          end do
-         ABI_DEALLOCATE(scalarr)
-         ABI_DEALLOCATE(scalari)
+         ABI_FREE(scalarr)
+         ABI_FREE(scalari)
        end if
 
 !      --------------------------------------------------------------------
@@ -1234,8 +1235,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !        --------------------------------------------------------------------
        if ((signs==1).and.(choice_==6)) then
          mu0=1
-         ABI_ALLOCATE(scalarr,(npw,10))
-         ABI_ALLOCATE(scalari,(npw,10))
+         ABI_MALLOC(scalarr,(npw,10))
+         ABI_MALLOC(scalari,(npw,10))
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -1324,8 +1325,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              end if
            end if
          end do
-         ABI_DEALLOCATE(scalarr)
-         ABI_DEALLOCATE(scalari)
+         ABI_FREE(scalarr)
+         ABI_FREE(scalari)
        end if
 
 !      --------------------------------------------------------------------
@@ -1478,8 +1479,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
      end do ! End loop on atoms
 
 !    Deallocate temporary space
-     ABI_DEALLOCATE(scali)
-     ABI_DEALLOCATE(scalr)
+     ABI_FREE(scali)
+     ABI_FREE(scalr)
 
    end do !  End loop on spinorial components
 
@@ -1503,9 +1504,9 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !    Allocate work space
 !$OMP SECTIONS
 !$OMP SECTION
-     ABI_ALLOCATE(scali,(npw))
+     ABI_MALLOC(scali,(npw))
 !$OMP SECTION
-     ABI_ALLOCATE(scalr,(npw))
+     ABI_MALLOC(scalr,(npw))
 !$OMP END SECTIONS
 
 !    Loop on atoms (blocking)
@@ -2698,8 +2699,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !        --------------------------------------------------------------------
        if ((signs==1).and.(choice_==6)) then
          mu0=1;if (choice_==6) mu0=37
-         ABI_ALLOCATE(scalarr,(npw,4))
-         ABI_ALLOCATE(scalari,(npw,4))
+         ABI_MALLOC(scalarr,(npw,4))
+         ABI_MALLOC(scalari,(npw,4))
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -2780,8 +2781,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              end if
            end if
          end do
-         ABI_DEALLOCATE(scalarr)
-         ABI_DEALLOCATE(scalari)
+         ABI_FREE(scalarr)
+         ABI_FREE(scalari)
        end if
 
 !      --------------------------------------------------------------------
@@ -2790,8 +2791,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !        --------------------------------------------------------------------
        if ((signs==1).and.(choice_==6)) then
          mu0=1
-         ABI_ALLOCATE(scalarr,(npw,10))
-         ABI_ALLOCATE(scalari,(npw,10))
+         ABI_MALLOC(scalarr,(npw,10))
+         ABI_MALLOC(scalari,(npw,10))
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -2901,8 +2902,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              end if
            end if
          end do
-         ABI_DEALLOCATE(scalarr)
-         ABI_DEALLOCATE(scalari)
+         ABI_FREE(scalarr)
+         ABI_FREE(scalari)
        end if
 
 !      --------------------------------------------------------------------
@@ -3103,9 +3104,9 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !    Deallocate temporary space
 !$OMP SECTIONS
 !$OMP SECTION
-     ABI_DEALLOCATE(scali)
+     ABI_FREE(scali)
 !$OMP SECTION
-     ABI_DEALLOCATE(scalr)
+     ABI_FREE(scalr)
 !$OMP END SECTIONS
 
    end do !  End loop on spinorial components

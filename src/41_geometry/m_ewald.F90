@@ -6,7 +6,7 @@
 !!  This module gathers routines to compute the Ewald energy and its derivatives
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (DCA, XG, JJC, GMR)
+!!  Copyright (C) 2014-2021 ABINIT group (DCA, XG, JJC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -141,7 +141,7 @@ if(icutcoul.eq.1) then
  grewtn(:,:)=0.0_dp
 
  !Initialize Gcut-off array from m_gtermcutoff
- !ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
+ !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
 !Sum over G space, done shell after shell until all
@@ -155,7 +155,7 @@ if(icutcoul.eq.1) then
 !   if (ng > 20 .and. mod(ng,10)==0) then
 !      write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
 !&       " If you have a metal consider setting dipdip 0.  ng = ", ng
-!      MSG_WARNING(message)
+!      ABI_WARNING(message)
 !   end if
    ii=1
    do ig3=-ng,ng
@@ -272,7 +272,7 @@ if(icutcoul.eq.1) then
 !   if (nr > 20 .and. mod(nr,10)==0) then
 !      write (message,'(3a,I10)') "Very large box of R neighbors in ewald: you probably do not want to do this.", ch10,&
 !&       " If you have a metal consider setting dipdip 0.  nr = ", nr
-!      MSG_WARNING(message)
+!      ABI_WARNING(message)
 !   end if
 !
    do ir3=-nr,nr
@@ -352,7 +352,7 @@ if(icutcoul.eq.1) then
    eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
  end if
 
- ABI_DEALLOCATE(gcutoff) 
+ ABI_FREE(gcutoff) 
 
 !DEBUG
 !write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
@@ -748,9 +748,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    exp2piqx(ia) = exp(arga*j_dpc)
  end do
  ng_expxq = 1000
- ABI_ALLOCATE(expx1, (-ng_expxq:ng_expxq, natom))
- ABI_ALLOCATE(expx2, (-ng_expxq:ng_expxq, natom))
- ABI_ALLOCATE(expx3, (-ng_expxq:ng_expxq, natom))
+ ABI_MALLOC(expx1, (-ng_expxq:ng_expxq, natom))
+ ABI_MALLOC(expx2, (-ng_expxq:ng_expxq, natom))
+ ABI_MALLOC(expx3, (-ng_expxq:ng_expxq, natom))
  do ia = 1, natom
    do ig1 = -ng_expxq, ng_expxq
      expx1(ig1, ia) = exp(ig1*two_pi*xred(1,ia)*j_dpc)
@@ -779,14 +779,14 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
    !Diagonalize dielectric matrix
    lwork=-1
-   ABI_ALLOCATE(work,(10))
+   ABI_MALLOC(work,(10))
    call dsyev('N','U',3, wdielt, 3, eig_dielt, work, lwork,info)
    lwork=nint(work(1))
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 
-   ABI_ALLOCATE(work,(lwork))
+   ABI_MALLOC(work,(lwork))
    call dsyev('V','U',3, wdielt, 3, eig_dielt, work, lwork,info)
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 
    !This is a tentative maximum value for the gaussian width in real space
    sigma_max=three
@@ -814,9 +814,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
  inv4eta = one / four / eta
 
- ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
- ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
- ABI_ALLOCATE(dyqqt,(2,3,natom,3,natom,3,3))
+ ABI_MALLOC(dyddt,(2,3,natom,3,natom))
+ ABI_MALLOC(dydqt,(2,3,natom,3,natom,3))
+ ABI_MALLOC(dyqqt,(2,3,natom,3,natom,3,3))
 
  dyddt = zero
  dydqt = zero
@@ -830,16 +830,16 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 ! if needed, update the complex phases for larger G vectors
    if (ng > ng_expxq) then
      !write(std_out,*)"have to realloc"
-     ABI_DEALLOCATE(expx1)
-     ABI_DEALLOCATE(expx2)
-     ABI_DEALLOCATE(expx3)
+     ABI_FREE(expx1)
+     ABI_FREE(expx2)
+     ABI_FREE(expx3)
 
      ng_expxq = ng_expxq*2
 ! TODO: half of this space is not needed, as it contains the complex conjugate of the other half.
 ! present duplication avoids if statements inside the loop, however
-     ABI_ALLOCATE(expx1, (-ng_expxq:ng_expxq, natom))
-     ABI_ALLOCATE(expx2, (-ng_expxq:ng_expxq, natom))
-     ABI_ALLOCATE(expx3, (-ng_expxq:ng_expxq, natom))
+     ABI_MALLOC(expx1, (-ng_expxq:ng_expxq, natom))
+     ABI_MALLOC(expx2, (-ng_expxq:ng_expxq, natom))
+     ABI_MALLOC(expx3, (-ng_expxq:ng_expxq, natom))
      do ia = 1, natom
        do ig1 = -ng_expxq, ng_expxq
          expx1(ig1, ia) = exp(ig1*two_pi*xred(1,ia)*j_dpc)
@@ -876,7 +876,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 &               'The phonon wavelength should not be zero :',ch10,&
 &               'there are non-analytical terms that cannot be treated.',ch10,&
 &               'Action: subtract this wavelength from the input file.'
-               MSG_ERROR(message)
+               ABI_ERROR(message)
              end if
 
            else
@@ -1013,7 +1013,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 &   'because you not are dealing with an insulator, so that',ch10,&
 &   'your dielectric matrix was simply set to zero in the Derivative DataBase.',ch10,&
 &   'Action: set the input variable dipdip to 0 .'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  inv_detdlt = one / sqrt(detdlt)
@@ -1125,7 +1125,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                        'The distance between two atoms seem to vanish.',ch10,&
                        'This is not allowed.',ch10,&
                        'Action: check the input for the atoms number',ia,' and',ib,'.'
-                     MSG_ERROR(message)
+                     ABI_ERROR(message)
                    else
                      ! This is the correction when the atoms are identical
                      do nu=1,3
@@ -1146,7 +1146,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
    ! Check if new shell must be calculated
    if(newr==0)exit
-   if(newr==1 .and. nr==mr) MSG_BUG('mr is too small')
+   if(newr==1 .and. nr==mr) ABI_BUG('mr is too small')
  end do
  end if ! check if should compute real part
 
@@ -1218,12 +1218,12 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    end do
  end do
 
- ABI_DEALLOCATE(expx1)
- ABI_DEALLOCATE(expx2)
- ABI_DEALLOCATE(expx3)
- ABI_DEALLOCATE(dyddt)
- ABI_DEALLOCATE(dydqt)
- ABI_DEALLOCATE(dyqqt)
+ ABI_FREE(expx1)
+ ABI_FREE(expx2)
+ ABI_FREE(expx3)
+ ABI_FREE(dyddt)
+ ABI_FREE(dydqt)
+ ABI_FREE(dyqqt)
 
  !call timab(1749, 2, tsec)
 

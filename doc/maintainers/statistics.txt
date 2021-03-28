@@ -5,7 +5,7 @@ Then, the other indicators should refer to the first production version
 Size of tar.gz      : ls -l *tar.gz    (on abiref)
 Number of F90 files : ls src/*/*.F90 shared/*/src/*/*.F90 shared/*/src/*.F90 | wc
 Number of F90 lines : cat src/*/*.F90 shared/*/src/*/*.F90 shared/*/src/*.F90 | wc
-Number of tests     : ls tests/*/Input/t*in | wc
+Number of tests     : ls tests/*/Input/t*abi tests/*/Input/t*in | wc
 
 
 Note : the sudden increase of size of tar.gz file in v7.0 is due to the school
@@ -50,3 +50,4 @@ Version  Date       Size         Number        Number        Number
 8.10     2018 Oct   89.0          644          900113       1217
 9.0      2020 Mar   87.4          712          927158       1281
 9.2      2020 Sep   96.5          852         1156302       1318
+9.4      2021 Feb  106.0          857         1164679       1320

@@ -1,0 +1,84 @@
+# Interpolation of electronic bands.
+ndtset 2
+
+prtebands 2    # Output bands in gnuplot format.
+ndivsm   20    # The variables below define the k-path 
+nkpath   12
+kptbounds 
+0.     0.     0.   
+0.5    0.     0.5  
+0.5    0.25   0.75 
+0.375  0.375  0.75 
+0.     0.     0.   
+0.5    0.5    0.5  
+0.625  0.25   0.625
+0.5    0.25   0.75 
+0.5    0.5    0.5  
+0.375  0.375  0.75 
+0.625  0.25   0.625
+0.5    0.     0.5  
+
+#################
+### DATASET 1 ###
+#################
+# SCF run on homogeneous gamma-centered k-mesh.
+# The SCF eigenvalues are then used to interpolate the band structure along the k-path
+# defined by nkpath, kptbounds and ndivsm. 
+ngkpt1        8 8 8 
+#ngkpt1        32 32 32
+nshiftk1      1
+shiftk1       0.0 0.0 0.0
+tolvrs1       1.0d-10
+einterp1      1 5 0 0  # Activate Fourier interpolation at the end of the SCF cycle.
+                       # Use 5 star functions per k-point. 
+
+#################
+### DATASET 2 ###
+#################
+# Standard NSCF band structure calculation (mainly used to analyze the quality of the interpolation).
+# Note that here we have to use kptopt instead of nkpath.
+kptopt2   -11
+iscf2    -2
+tolwfr2   1e-14
+getwfk2   1
+getden2   1
+
+# Common data
+ecut   8.0
+nband  8
+occopt 7    # include metallic occupation function with a small smearing
+tsmear 0.04
+nstep  70
+
+# Geometry
+acell 3*7.5
+rprim
+  0.0 0.5 0.5
+  0.5 0.0 0.5
+  0.5 0.5 0.0
+
+natom  1
+typat  1
+xred   0.00 0.00 0.00
+ntypat 1
+znucl  13
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al-psval.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t04.abo, tolnlines=50, tolabs=5.0e-02, tolrel=1.0e-02;
+#%%   t04o_DS1_INTERP_EBANDS.data, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Giantomassi 
+#%% keywords = NC
+#%% description = 
+#%%   Interpolation of electronic bands with two different techniques (star functions and B-spline interpolation)
+#%% topics = ElecBandStructure
+#%%<END TEST_INFO>

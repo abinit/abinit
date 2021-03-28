@@ -6,7 +6,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -183,7 +183,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    'and Kpt-band-FFT parallelization is active !',ch10,&
    'This is only allowed for testing purposes.',ch10,&
    'The produced WF file will be incomplete and not useable.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 !If parallel HF calculation
@@ -198,7 +198,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    'and HF parallelization is active !',ch10,&
    'This is only allowed for testing purposes.',ch10,&
    'The produced WF file will be incomplete and not useable.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  ! check consistency between dimensions and input hdr.
@@ -391,7 +391,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      if (done) return
      ! If cg_ncwrite cannot handle the IO because HDF5 + MPI-IO support is missing, we fallback to Fortran + MPI-IO.
      msg = "Could not produce a netcdf file in parallel (MPI-IO support is missing). Will fallback to MPI-IO with Fortran"
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      iomode=IO_MODE_MPI
    end if
 #endif
@@ -402,27 +402,20 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    ! Create an ETSF file for the wavefunctions
    if (iomode == IO_MODE_ETSF) then
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
-#ifdef HAVE_ETSF_IO
-     call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
-     !crystal = hdr%get_crystal()
-     !NCF_CHECK(ebands_ncwrite_path(gs_ebands, cryst, filname)
-     !call crystal%free()
-#else
-     MSG_ERROR("ETSF_IO is not activated")
+     ABI_ERROR("ETSF_IO is not activated")
      ABI_UNUSED(psps%ntypat)
-#endif
    end if
 
    call WffOpen(iomode,spaceComm,filnam,ierr,wff2,master,me0,unwff2,spaceComm_io)
    ! Conduct wavefunction output to wff2
 
-   ABI_ALLOCATE(kg_disk,(3,mpw))
+   ABI_MALLOC(kg_disk,(3,mpw))
 
    mcg_disk=mpw*my_nspinor*mband
    formeig=0; if (response==1) formeig=1
 
-   ABI_ALLOCATE(eig_k,( (2*mband)**formeig * mband))
-   ABI_ALLOCATE(occ_k,(mband))
+   ABI_MALLOC(eig_k,( (2*mband)**formeig * mband))
+   ABI_MALLOC(occ_k,(mband))
 
 #ifdef HAVE_MPI
    call xmpi_barrier(spaceComm)
@@ -651,13 +644,13 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      end do ! ikpt
    end do ! spin
 
-   ABI_DEALLOCATE(kg_disk)
+   ABI_FREE(kg_disk)
 #ifdef HAVE_MPI
-   ABI_DEALLOCATE(cg_disk)
+   ABI_FREE(cg_disk)
 #endif
 
-   ABI_DEALLOCATE(eig_k)
-   ABI_DEALLOCATE(occ_k)
+   ABI_FREE(eig_k)
+   ABI_FREE(occ_k)
 
 !  Close the wavefunction file (and do NOT delete it !)
    !if (wff2%iomode /= IO_MODE_NETCDF) then
@@ -778,7 +771,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  ! FIXME
  my_nspinor = max(1, nspinor/nproc_spinor)
  if (nspinor == 2 .and. my_nspinor == 1) then
-   MSG_ERROR("Spinor parallelization not coded yet")
+   ABI_ERROR("Spinor parallelization not coded yet")
  end if
 
  ! TODO: Be careful with response == 1 in parallel because the distribution of the cg
@@ -787,7 +780,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  if (size(hdr%nband) == size(nband)) then
    ABI_CHECK(all(Hdr%nband == nband),"nband")
  else
-   MSG_ERROR("hdr%nband and nband have different size!")
+   ABI_ERROR("hdr%nband and nband have different size!")
  end if
 
  if (xmpi_comm_size(comm_cell) == 1) then
@@ -912,7 +905,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      comm_mpiio = comm_cell
 
      if (min_cnt <= 0) then
-       MSG_COMMENT("Will create subcommunicator to exclude idle processors from MPI-IO collective calls")
+       ABI_COMMENT("Will create subcommunicator to exclude idle processors from MPI-IO collective calls")
        ABI_CHECK(paral_kgb == 0, "paral_kgb == 1 with idle processors should never happen")
 
        ! Prepare the call to xmpi_subcomm that will replace comm_mpiio.
@@ -1035,7 +1028,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 ! HAVE_NETCDF
    else ! single_writer
      if (nproc_cell > 1) then
-       MSG_WARNING("Slow version without MPI-IO support. Processors send data to master...")
+       ABI_WARNING("Slow version without MPI-IO support. Processors send data to master...")
      else
        call wrtout(std_out, "Using netcdf library without MPI-IO support")
      end if

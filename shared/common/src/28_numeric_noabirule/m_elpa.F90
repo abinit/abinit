@@ -7,7 +7,7 @@
 !! See http://elpa.mpcdf.mpg.de
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2020 ABINIT group (MT)
+!! Copyright (C) 2016-2021 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,7 +79,7 @@ module m_elpa
    module procedure elpa_func_hermitian_multiply_complex
  end interface elpa_func_hermitian_multiply
 
-!ELPA gneralized handle
+!ELPA generalized handle
  type,public :: elpa_hdl_t
    logical :: is_allocated=.false.
    logical :: matrix_is_set=.false.
@@ -126,8 +126,6 @@ CONTAINS  !=====================================================================
 
 subroutine elpa_func_init()
 
-!Arguments ------------------------------------
-
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  integer,parameter :: elpa_min_version=20170403
@@ -143,11 +141,11 @@ subroutine elpa_func_init()
 #if (defined HAVE_LINALG_ELPA_2016) || (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02)
 !This case is not supposed to happen
  success=.false.
- MSG_BUG('Wrong ELPA cpp directives!')
+ ABI_BUG('Wrong ELPA cpp directives!')
 #elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
 !This case is not supposed to happen
  success=.false.
- MSG_BUG('Wrong ELPA cpp directives!')
+ ABI_BUG('Wrong ELPA cpp directives!')
 #else
  success=(elpa_init(elpa_min_version)==ELPA_OK)
 #endif
@@ -157,7 +155,7 @@ subroutine elpa_func_init()
 #endif
 
  if (.not.success) then
-   MSG_ERROR('Problem with ELPA (elpa_init)!')
+   ABI_ERROR('Problem with ELPA (elpa_init)!')
  end if
 
 end subroutine elpa_func_init
@@ -186,9 +184,6 @@ end subroutine elpa_func_init
 !! SOURCE
 
 subroutine elpa_func_uninit()
-
-!Arguments ------------------------------------
-!Local variables-------------------------------
 
 ! *********************************************************************
 
@@ -360,7 +355,7 @@ subroutine elpa_func_error_handler(err_code,err_msg,err_varname)
    if (trim(err_varname)/="") write(msg,'(4a)') trim(msg),ch10,'Variable: ',trim(err_varname)
  end if
  if (trim(err_strg)/="") write(msg,'(4a)') trim(msg),ch10,'Error code: ',trim(err_strg)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
 
 end subroutine elpa_func_error_handler
 !!***
@@ -406,7 +401,7 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
  err=0 ; varname=''
 
  if (.not.elpa_hdl%is_allocated) then
-   MSG_BUG('ELPA handle not allocated!')
+   ABI_BUG('ELPA handle not allocated!')
  end if
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
@@ -492,7 +487,7 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
  err=0 ; varname=''
 
  if (.not.elpa_hdl%is_allocated) then
-   MSG_BUG('ELPA handle not allocated!')
+   ABI_BUG('ELPA handle not allocated!')
  end if
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
@@ -579,10 +574,10 @@ subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
  success=.true. ; err=0
 
  if (.not.elpa_hdl%is_allocated) then
-   MSG_BUG('ELPA handle not allocated!')
+   ABI_BUG('ELPA handle not allocated!')
  end if
  if (.not.elpa_hdl%matrix_is_set) then
-   MSG_BUG('Matrix not set in ELPA handle!')
+   ABI_BUG('Matrix not set in ELPA handle!')
  end if
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
@@ -676,10 +671,10 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
  success=.true. ; err=0
 
  if (.not.elpa_hdl%is_allocated) then
-   MSG_BUG('ELPA handle not allocated!')
+   ABI_BUG('ELPA handle not allocated!')
  end if
  if (.not.elpa_hdl%matrix_is_set) then
-   MSG_BUG('Matrix not set in ELPA handle!')
+   ABI_BUG('Matrix not set in ELPA handle!')
  end if
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
@@ -763,10 +758,10 @@ subroutine elpa_func_cholesky_real(elpa_hdl,aa)
  success=.true. ; err=0
 
  if (.not.elpa_hdl%is_allocated) then
-   MSG_BUG('ELPA handle not allocated!')
+   ABI_BUG('ELPA handle not allocated!')
  end if
  if (.not.elpa_hdl%matrix_is_set) then
-   MSG_BUG('Matrix not set in ELPA handle!')
+   ABI_BUG('Matrix not set in ELPA handle!')
  end if
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
@@ -846,10 +841,10 @@ subroutine elpa_func_cholesky_complex(elpa_hdl,aa)
  success=.true. ; err=0
 
  if (.not.elpa_hdl%is_allocated) then
-   MSG_BUG('ELPA handle not allocated!')
+   ABI_BUG('ELPA handle not allocated!')
  end if
  if (.not.elpa_hdl%matrix_is_set) then
-   MSG_BUG('Matrix not set in ELPA handle!')
+   ABI_BUG('Matrix not set in ELPA handle!')
  end if
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
@@ -929,10 +924,10 @@ subroutine elpa_func_invert_triangular_real(elpa_hdl,aa)
  success=.true. ; err=0
 
  if (.not.elpa_hdl%is_allocated) then
-   MSG_BUG('ELPA handle not allocated!')
+   ABI_BUG('ELPA handle not allocated!')
  end if
  if (.not.elpa_hdl%matrix_is_set) then
-   MSG_BUG('Matrix not set in ELPA handle!')
+   ABI_BUG('Matrix not set in ELPA handle!')
  end if
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
@@ -1013,10 +1008,10 @@ subroutine elpa_func_invert_triangular_complex(elpa_hdl,aa)
  success=.true. ; err=0
 
  if (.not.elpa_hdl%is_allocated) then
-   MSG_BUG('ELPA handle not allocated!')
+   ABI_BUG('ELPA handle not allocated!')
  end if
  if (.not.elpa_hdl%matrix_is_set) then
-   MSG_BUG('Matrix not set in ELPA handle!')
+   ABI_BUG('Matrix not set in ELPA handle!')
  end if
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
@@ -1120,10 +1115,10 @@ subroutine elpa_func_hermitian_multiply_real(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb,lo
  success=.true. ; err=0
 
  if (.not.elpa_hdl%is_allocated) then
-   MSG_BUG('ELPA handle not allocated!')
+   ABI_BUG('ELPA handle not allocated!')
  end if
  if (.not.elpa_hdl%matrix_is_set) then
-   MSG_BUG('Matrix not set in ELPA handle!')
+   ABI_BUG('Matrix not set in ELPA handle!')
  end if
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
@@ -1225,10 +1220,10 @@ subroutine elpa_func_hermitian_multiply_complex(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb
  success=.true. ; err=0
 
  if (.not.elpa_hdl%is_allocated) then
-   MSG_BUG('ELPA handle not allocated!')
+   ABI_BUG('ELPA handle not allocated!')
  end if
  if (.not.elpa_hdl%matrix_is_set) then
-   MSG_BUG('Matrix not set in ELPA handle!')
+   ABI_BUG('Matrix not set in ELPA handle!')
  end if
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')

@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu, NH)
+!! Copyright (C) 2001-2021 ABINIT group (hexu, NH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -92,11 +92,11 @@ module  m_slc_dynamics
 
 
    !if(self%spin_mover%total_time .ne. self%lattice_mover%total_time) then
-   !  MSG_ERROR("Total time for spin and lattice dynamics are different, check your input file.")
+   !  ABI_ERROR("Total time for spin and lattice dynamics are different, check your input file.")
    !endif
 
    !if(self%spin_mover%dt .ne. self%lattice_mover%dt) then
-   !  MSG_ERROR("Different time steps for spin and lattice dynamics not yet implemented, check your input file.")
+   !  ABI_ERROR("Different time steps for spin and lattice dynamics not yet implemented, check your input file.")
    !endif
      
 

@@ -5,11 +5,11 @@
 !!
 !! FUNCTION
 !! Retrieve data (tabulated coefficients) for DFT-D3 corrections (see
-!! vdw_dftd3 routine for more informations). It retrieves the tabulated
+!! vdw_dftd3 routine for more information). It retrieves the tabulated
 !! dispersion coefficients C6, the supporting points of the interpolation
 !! and the cut-off radii (R0) for the dispersion correction
 !! COPYRIGHT
-!! Copyright (C) 2015-2020 ABINIT group (BVT)
+!! Copyright (C) 2015-2021 ABINIT group (BVT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

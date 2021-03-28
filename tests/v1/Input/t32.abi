@@ -1,0 +1,61 @@
+#   Sn in Box.
+
+ acell 3*12
+ diemac 1.0d0
+ diemix 0.333333333333d0
+ ecut 14
+ enunit 2
+ intxc 1
+ irdwfk 1
+ kptopt 0
+
+ kpt   0.25 0.25 0.25   kptnrm 1
+ natom  1 nband 4
+ nkpt  1
+ nline 3
+
+ nstep 6
+
+ nsym  8 ntypat  1
+ occopt 0 occ 1*2.0d0 3*0.66666666666666666666666d0
+ prtvol 10
+ rprim  1 0 0 0 1 0 0 0 1
+ symrel
+       1  0  0    0  1  0    0  0  1
+      -1  0  0    0  1  0    0  0  1
+       1  0  0    0 -1  0    0  0  1
+       1  0  0    0  1  0    0  0 -1
+      -1  0  0    0 -1  0    0  0  1
+      -1  0  0    0  1  0    0  0 -1
+       1  0  0    0 -1  0    0  0 -1
+      -1  0  0    0 -1  0    0  0 -1
+ tnons  24*0d0
+ tolwfr 1.0d-16
+ typat  1
+ wtk   1
+ xred  0.5 0.5 0.5
+ znucl 50
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/50sn.4.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% input_prefix = t31o
+#%% test_chain = t31.abi, t32.abi
+#%% [files]
+#%% files_to_test = t32.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Isolated tin atom, with PseudosHGH_pwteter/50sn.4.hgh pseudopotential (Hartwigsen-Goedecker-Hutter), 
+#%%   to be compared with the result of test 31. Same geometry, same cut-off.
+#%%   The energy levels (eV) are found at -7.019, -0.131, and -0.085 (two-fold deg)
+#%%   The difference between these energy levels is 6.888 and 0.046.
+#%%   For speed-up, it begins with the wavefunctions from test 31.
+#%%<END TEST_INFO>

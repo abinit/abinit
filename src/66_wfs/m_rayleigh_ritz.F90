@@ -8,7 +8,7 @@
 !! distributed matrix in block-cyclic form (_distributed)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (AL)
+!!  Copyright (C) 2014-2021 ABINIT group (AL)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,7 @@ contains
 !! hamiltonian/overlap matrices in full and calling the subdiago method
 !!
 !! INPUTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
 !!  nspinor=number of plane waves at this k point
@@ -136,18 +136,18 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
  end if
 
  ! Build, pack and sum suham
- ABI_ALLOCATE(subham, (cplx*nband*(nband+1)/2))
- ABI_ALLOCATE(totham, (cplx, nband*nband))
+ ABI_MALLOC(subham, (cplx*nband*(nband+1)/2))
+ ABI_MALLOC(totham, (cplx, nband*nband))
  call abi_xgemm(blas_transpose,'n',nband,nband,vectsize,cone,ghc,vectsize,&
 & cg,vectsize,czero,totham,nband, x_cplx=cplx)
  call pack_matrix(totham, subham, nband, cplx)
- ABI_DEALLOCATE(totham)
+ ABI_FREE(totham)
  call xmpi_sum(subham,mpi_enreg%comm_bandspinorfft,ierr)
 
 
  ! Same for subovl
- ABI_ALLOCATE(subovl, (cplx*nband*(nband+1)/2))
- ABI_ALLOCATE(totovl, (cplx, nband*nband))
+ ABI_MALLOC(subovl, (cplx*nband*(nband+1)/2))
+ ABI_MALLOC(totovl, (cplx, nband*nband))
  if(usepaw == 1) then
    call abi_xgemm(blas_transpose,'n',nband,nband,vectsize,cone,gsc,vectsize,&
 &   cg,vectsize,czero,totovl,nband, x_cplx=cplx)
@@ -156,7 +156,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
 &   cg,vectsize,czero,totovl,nband, x_cplx=cplx)
  end if
  call pack_matrix(totovl, subovl, nband, cplx)
- ABI_DEALLOCATE(totovl)
+ ABI_FREE(totovl)
  call xmpi_sum(subovl,mpi_enreg%comm_bandspinorfft,ierr)
 
 
@@ -175,22 +175,20 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
 
 
  call timab(timer_subdiago, 1, tsec)
- ABI_ALLOCATE(evec, (cplx*nband, nband))
+ ABI_MALLOC(evec, (cplx*nband, nband))
 
  call abi_xhpgv(1,'V','U',nband,subham,subovl,eig,evec,nband,istwf_k=istwf_k,use_slk=mpi_enreg%paral_kgb)
 
- ABI_DEALLOCATE(subham)
- ABI_DEALLOCATE(subovl)
+ ABI_FREE(subham)
+ ABI_FREE(subovl)
 
 ! Fix the phase (this is because of the simultaneous diagonalisation of this
 ! matrix by different processors, allowing to get different unitary transforms, thus breaking the
 ! coherency of parts of cg stored on different processors).
 ! call cg_normev(evec,nband,nband)  ! Unfortunately, for cg_normev to work, one needs the vectors to be normalized, so uses fxphas_seq
- ABI_ALLOCATE(edummy, (cplx*nband, nband))
+ ABI_MALLOC(edummy, (cplx*nband, nband))
  call fxphas_seq(evec,edummy,0,0,1,nband*nband,nband*nband,nband,nband,0)
- ABI_DEALLOCATE(edummy)
-
-
+ ABI_FREE(edummy)
 
  ! Rotate
  call abi_xgemm('n','n',vectsize,nband, nband,cone,cg , vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
@@ -205,7 +203,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
    call abi_xgemm('n','n',vectsize,nband, nband,cone,gvnlxc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
    gvnlxc = gtempc
  end if
- ABI_DEALLOCATE(evec)
+ ABI_FREE(evec)
  call timab(timer_subdiago, 2, tsec)
 
 #else
@@ -283,7 +281,7 @@ end subroutine rayleigh_ritz_subdiago
 !! hamiltonian/overlap matrices directly, and calling the ScaLapack routines
 !!
 !! INPUTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
 !!  nspinor=number of plane waves at this k point
@@ -353,9 +351,9 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  !======================================================================================================
  ! Init Scalapack matrices
  !======================================================================================================
- call init_matrix_scalapack(sca_ham ,nband,nband,slk_processor,istwf_k,10)
- call init_matrix_scalapack(sca_ovl ,nband,nband,slk_processor,istwf_k,10)
- call init_matrix_scalapack(sca_evec,nband,nband,slk_processor,istwf_k,10)
+ call init_matrix_scalapack(sca_ham ,nband,nband,slk_processor,istwf_k, tbloc=10)
+ call init_matrix_scalapack(sca_ovl ,nband,nband,slk_processor,istwf_k, tbloc=10)
+ call init_matrix_scalapack(sca_evec,nband,nband,slk_processor,istwf_k, tbloc=10)
 
  ! Get info
  blocksize = sca_ham%sizeb_blocs(1) ! Assume square blocs
@@ -395,12 +393,12 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
    buffsize_iproc(2) = NUMROC(nband,blocksize,coords_iproc(2),0,slk_processor%grid%dims(2))
 
    ! Allocate matrices_iproc, that will gather the contribution of this proc to the block owned by iproc
-   ABI_ALLOCATE(ham_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
-   ABI_ALLOCATE(ovl_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
+   ABI_MALLOC(ham_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
+   ABI_MALLOC(ovl_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
 
    ! Build them
-   ABI_ALLOCATE(left_temp,  (2, npw*nspinor*buffsize_iproc(1)))
-   ABI_ALLOCATE(right_temp, (2, npw*nspinor*buffsize_iproc(2)))
+   ABI_MALLOC(left_temp,  (2, npw*nspinor*buffsize_iproc(1)))
+   ABI_MALLOC(right_temp, (2, npw*nspinor*buffsize_iproc(2)))
 
    ! ovl
    call from_mat_to_block_cyclic(cg, npw*nspinor, nband, left_temp, &
@@ -435,10 +433,10 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
      end if
    end if
 
-   ABI_DEALLOCATE(ham_iproc)
-   ABI_DEALLOCATE(ovl_iproc)
-   ABI_DEALLOCATE(left_temp)
-   ABI_DEALLOCATE(right_temp)
+   ABI_FREE(ham_iproc)
+   ABI_FREE(ovl_iproc)
+   ABI_FREE(left_temp)
+   ABI_FREE(right_temp)
  end do
 
  ! Final sum
@@ -494,7 +492,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
    buffsize_iproc(2) = NUMROC(nband,blocksize,coords_iproc(2),0,slk_processor%grid%dims(2))
 
    ! Get data from iproc
-   ABI_ALLOCATE(evec_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
+   ABI_MALLOC(evec_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
    if(iproc == slk_processor%myproc) then
      if(cplx == 2) then
        call DCOPY(cplx*buffsize_iproc(1)*buffsize_iproc(2), sca_evec%buffer_cplx, 1, evec_iproc, 1)
@@ -505,8 +503,8 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
    call xmpi_bcast(evec_iproc,iproc,slk_communicator,ierr)
 
    ! Compute contribution to the rotated matrices from iproc
-   ABI_ALLOCATE(left_temp,  (2,npw*nspinor*buffsize_iproc(1)))
-   ABI_ALLOCATE(right_temp,  (2,npw*nspinor*buffsize_iproc(2)))
+   ABI_MALLOC(left_temp,  (2,npw*nspinor*buffsize_iproc(1)))
+   ABI_MALLOC(right_temp,  (2,npw*nspinor*buffsize_iproc(2)))
 
    ! cg
    call from_mat_to_block_cyclic(cg, npw*nspinor, nband, left_temp, &
@@ -538,9 +536,9 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
    call from_block_cyclic_to_mat(gsc_or_vnlxc_new, npw*nspinor, nband, right_temp, &
 &   buffsize_iproc(2), blocksize, coords_iproc(2), grid_dims(2))
 
-   ABI_DEALLOCATE(evec_iproc)
-   ABI_DEALLOCATE(left_temp)
-   ABI_DEALLOCATE(right_temp)
+   ABI_FREE(evec_iproc)
+   ABI_FREE(left_temp)
+   ABI_FREE(right_temp)
  end do
 
  ! Overwrite with _new
@@ -553,6 +551,10 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
    gvnlxc = gsc_or_vnlxc_new
  end if
  call timab(timer_rotation, 2, tsec)
+
+ call sca_ham%free()
+ call sca_ovl%free()
+ call sca_evec%free()
 
 end subroutine rayleigh_ritz_distributed
 !!***

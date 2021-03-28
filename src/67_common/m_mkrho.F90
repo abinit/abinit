@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,7 +103,7 @@ contains
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  npwarr(nkpt)=number of planewaves and boundary planewaves at each k
 !!  occ(mband*nkpt*nsppol)=
 !!          occupation numbers for each band (usually 2.0) at each k point
@@ -117,8 +117,8 @@ contains
 !!  rprimd(3,3)=dimensional real space primitive translations
 !!  tim_mkrho=timing code of the calling routine(can be set to 0 if not attributed)
 !!  ucvol=unit cell volume (Bohr**3)
-!!  wvl_den <type(wvl_denspot_type)>=density informations for wavelets
-!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets
+!!  wvl_den <type(wvl_denspot_type)>=density information for wavelets
+!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions information for wavelets
 !!
 !! OUTPUT
 !! rhog(2,nfft)=total electron density in G space
@@ -201,7 +201,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  end if
 
  if(ioption/=0.and.paw_dmft%use_sc_dmft==1) then
-   MSG_ERROR('option argument value of this routines should be 0 if usedmft=1.')
+   ABI_ERROR('option argument value of this routines should be 0 if usedmft=1.')
  end if
  if(paw_dmft%use_sc_dmft/=0) then
    nbandc1=(paw_dmft%mbandc-1)*paw_dmft%use_sc_dmft+1
@@ -240,13 +240,13 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  case (1)
    nalpha = 3
    nbeta = 1
-   ABI_ALLOCATE(taur_alphabeta,(dtset%nfft,dtset%nspden,3,1))
+   ABI_MALLOC(taur_alphabeta,(dtset%nfft,dtset%nspden,3,1))
  case (2)
    nalpha = 3
    nbeta = 3
-   ABI_ALLOCATE(taur_alphabeta,(dtset%nfft,dtset%nspden,3,3))
+   ABI_MALLOC(taur_alphabeta,(dtset%nfft,dtset%nspden,3,3))
  case default
-   MSG_BUG('ioption argument value should be 0,1 or 2.')
+   ABI_BUG('ioption argument value should be 0,1 or 2.')
  end select
 
 !Init me
@@ -267,10 +267,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      return
    case (1)
      !call wvl_mkrho(dtset, mpi_enreg, occ, rhor, wvl_wfs, wvl_den)
-     MSG_ERROR("kinetic energy density (taur) is not yet implemented in wavelet formalism.")
+     ABI_ERROR("kinetic energy density (taur) is not yet implemented in wavelet formalism.")
    case (2)
      !call wvl_mkrho(dtset, mpi_enreg, occ, rhor, wvl_wfs, wvl_den)
-     MSG_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented in wavelet formalism.')
+     ABI_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented in wavelet formalism.')
    end select
  end if
 !WVL - Following is done in plane waves.
@@ -288,15 +288,15 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      n1 = dtset%ngfft(1) ; n2 = dtset%ngfft(2) ; n3 = dtset%ngfft(3)
      n4 = dtset%ngfft(4) ; n5 = dtset%ngfft(5) ; n6 = dtset%ngfft(6)
      ndat = 1 ; if (mpi_enreg%paral_kgb==1) ndat = mpi_enreg%bandpp
-     ABI_ALLOCATE(cwavef,(2,dtset%mpw,my_nspinor))
-     ABI_ALLOCATE(rhoaug,(n4,n5,n6))
-     ABI_ALLOCATE(wfraug,(2,n4,n5,n6*ndat))
-     ABI_ALLOCATE(cwavefb,(2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor))
+     ABI_MALLOC(cwavef,(2,dtset%mpw,my_nspinor))
+     ABI_MALLOC(rhoaug,(n4,n5,n6))
+     ABI_MALLOC(wfraug,(2,n4,n5,n6*ndat))
+     ABI_MALLOC(cwavefb,(2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor))
      if(dtset%nspden==4) then
-       ABI_ALLOCATE(rhoaug_up,(n4,n5,n6))
-       ABI_ALLOCATE(rhoaug_down,(n4,n5,n6))
-       ABI_ALLOCATE(rhoaug_mx,(n4,n5,n6))
-       ABI_ALLOCATE(rhoaug_my,(n4,n5,n6))
+       ABI_MALLOC(rhoaug_up,(n4,n5,n6))
+       ABI_MALLOC(rhoaug_down,(n4,n5,n6))
+       ABI_MALLOC(rhoaug_mx,(n4,n5,n6))
+       ABI_MALLOC(rhoaug_my,(n4,n5,n6))
        rhoaug_up(:,:,:)=zero
        rhoaug_down(:,:,:)=zero
        rhoaug_mx(:,:,:)=zero
@@ -318,8 +318,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            cycle
          end if
 
-         ABI_ALLOCATE(gbound,(2*dtset%mgfft+8,2))
-         ABI_ALLOCATE(kg_k,(3,npw_k))
+         ABI_MALLOC(gbound,(2*dtset%mgfft+8,2))
+         ABI_MALLOC(kg_k,(3,npw_k))
 
          kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
          call sphereboundary(gbound,istwf_k,kg_k,dtset%mgfft,npw_k)
@@ -377,7 +377,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      end do
                    end do
                  else if(ioption==2)then
-                   MSG_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
+                   ABI_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
                  end if
 
 !                Non diag occupation in DMFT.
@@ -425,10 +425,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
                      ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
                      ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
-                     ABI_ALLOCATE(cwavef_x,(2,npw_k))
-                     ABI_ALLOCATE(cwavef_y,(2,npw_k))
-                     ABI_ALLOCATE(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
-                     ABI_ALLOCATE(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
+                     ABI_MALLOC(cwavef_x,(2,npw_k))
+                     ABI_MALLOC(cwavef_y,(2,npw_k))
+                     ABI_MALLOC(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
+                     ABI_MALLOC(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
                      ! $(\Psi^{1}+\Psi^{2})$
                      cwavef_x(:,:)=cwavef(:,1:npw_k,1)+cwavef(:,1:npw_k,2)
                      ! $(\Psi^{1}-i \Psi^{2})$
@@ -456,10 +456,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,use_gpu_cuda=dtset%use_gpu_cuda)
 
-                     ABI_DEALLOCATE(cwavef_x)
-                     ABI_DEALLOCATE(cwavef_y)
-                     ABI_DEALLOCATE(cwavefb_x)
-                     ABI_DEALLOCATE(cwavefb_y)
+                     ABI_FREE(cwavef_x)
+                     ABI_FREE(cwavef_y)
+                     ABI_FREE(cwavefb_x)
+                     ABI_FREE(cwavefb_y)
 
                    end if ! dtset%nspden/=4
                  end if
@@ -480,26 +480,26 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            nbdblock=nband_k/(mpi_enreg%nproc_band * mpi_enreg%bandpp)
            blocksize=nband_k/nbdblock
            if(allocated(cwavef))  then
-             ABI_DEALLOCATE(cwavef)
+             ABI_FREE(cwavef)
            end if
-           ABI_ALLOCATE(cwavef,(2,npw_k*blocksize,dtset%nspinor))
+           ABI_MALLOC(cwavef,(2,npw_k*blocksize,dtset%nspinor))
            if(ioption==1)  then
-             ABI_ALLOCATE(kg_k_cart_block,(npw_k))
+             ABI_MALLOC(kg_k_cart_block,(npw_k))
            end if
-           ABI_ALLOCATE(occ_k,(nband_k))
+           ABI_MALLOC(occ_k,(nband_k))
            occ_k(:)=occ(bdtot_index+1:bdtot_index+nband_k)
 
 ! ---------- DMFT
            if(allocated(cwavef_rot))  then
-             ABI_DEALLOCATE(cwavef_rot)
-             ABI_DEALLOCATE(occ_diag)
-             ! ABI_DEALLOCATE(occ_nd)
+             ABI_FREE(cwavef_rot)
+             ABI_FREE(occ_diag)
+             ! ABI_FREE(occ_nd)
            end if
            if(paw_dmft%use_sc_dmft==1) then
              ! Allocation of DMFT temporaries arrays
-             ABI_ALLOCATE(cwavef_rot,(2,npw_k,blocksize,dtset%nspinor))
-             ABI_ALLOCATE(occ_diag,(blocksize))
-             ! ABI_ALLOCATE(occ_nd,(2, blocksize, blocksize, dtset%nspinor))
+             ABI_MALLOC(cwavef_rot,(2,npw_k,blocksize,dtset%nspinor))
+             ABI_MALLOC(occ_diag,(blocksize))
+             ! ABI_MALLOC(occ_nd,(2, blocksize, blocksize, dtset%nspinor))
            end if
 ! ---------- END DMFT
 
@@ -542,7 +542,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  end do
                end do
              else if(ioption==2)then
-               MSG_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
+               ABI_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
              end if
 
 ! ---------- DMFT
@@ -582,8 +582,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 &                   dtset%wtk(ikpt),use_gpu_cuda=dtset%use_gpu_cuda)
                  end if
                else if(dtset%nspden==4 ) then
-                 ABI_ALLOCATE(cwavef_x,(2,npw_k*blocksize))
-                 ABI_ALLOCATE(cwavef_y,(2,npw_k*blocksize))
+                 ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
+                 ABI_MALLOC(cwavef_y,(2,npw_k*blocksize))
                  cwavef_x(:,:)=cwavef(:,:,1)+cwavef(:,:,2)
                  cwavef_y(1,:)=cwavef(1,:,1)+cwavef(2,:,2)
                  cwavef_y(2,:)=cwavef(2,:,1)-cwavef(1,:,2)
@@ -605,22 +605,22 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 &                   dtset%wtk(ikpt),use_gpu_cuda=dtset%use_gpu_cuda)
                  end if
                  call timab(538,2,tsec)
-                 ABI_DEALLOCATE(cwavef_x)
-                 ABI_DEALLOCATE(cwavef_y)
+                 ABI_FREE(cwavef_x)
+                 ABI_FREE(cwavef_y)
                end if
              end if
            end do !iblock
            if(ioption==1)  then
-             ABI_DEALLOCATE(kg_k_cart_block)
+             ABI_FREE(kg_k_cart_block)
            end if
            if (allocated(cwavef))  then
-             ABI_DEALLOCATE(cwavef)
+             ABI_FREE(cwavef)
            end if
-           ABI_DEALLOCATE(occ_k)
+           ABI_FREE(occ_k)
          end if
 
-         ABI_DEALLOCATE(gbound)
-         ABI_DEALLOCATE(kg_k)
+         ABI_FREE(gbound)
+         ABI_FREE(kg_k)
 
          bdtot_index=bdtot_index+nband_k
 
@@ -658,25 +658,25 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,rhor,rhoaug_my,1)
          ispden=4
          call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,rhor,rhoaug_down,1)
-         ABI_DEALLOCATE(rhoaug_up)
-         ABI_DEALLOCATE(rhoaug_down)
-         ABI_DEALLOCATE(rhoaug_mx)
-         ABI_DEALLOCATE(rhoaug_my)
+         ABI_FREE(rhoaug_up)
+         ABI_FREE(rhoaug_down)
+         ABI_FREE(rhoaug_mx)
+         ABI_FREE(rhoaug_my)
        end if
 
      end do ! isppol
 
      if(allocated(cwavef))  then
-       ABI_DEALLOCATE(cwavef)
+       ABI_FREE(cwavef)
      end if
-     ABI_DEALLOCATE(cwavefb)
-     ABI_DEALLOCATE(rhoaug)
-     ABI_DEALLOCATE(wfraug)
+     ABI_FREE(cwavefb)
+     ABI_FREE(rhoaug)
+     ABI_FREE(wfraug)
 
      if(allocated(cwavef_rot))  then
-       ABI_DEALLOCATE(cwavef_rot)
-       ABI_DEALLOCATE(occ_diag)
-       ! ABI_DEALLOCATE(occ_nd)
+       ABI_FREE(cwavef_rot)
+       ABI_FREE(occ_diag)
+       ! ABI_FREE(occ_nd)
      end if
 
 !    Recreate full rhor on all proc.
@@ -739,7 +739,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      end do
    end if
  case(2)
-   MSG_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
+   ABI_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
    !call symtaug(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
    !dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
  end select
@@ -753,7 +753,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  call timab(799,1,tsec)
 
  if(ioption==1 .or. ioption==2)  then
-   ABI_DEALLOCATE(taur_alphabeta)
+   ABI_FREE(taur_alphabeta)
  end if
 
 !Find and print minimum and maximum total electron density
@@ -785,7 +785,7 @@ end subroutine mkrho
 !! gsqcut=cutoff G**2 for included G s in fft box (larger sphere).
 !! izero=if 1, unbalanced components of rho(g) have to be set to zero
 !! mgfft=maximum size of 1D FFTs
-!! mpi_enreg=informations about mpi parallelization
+!! mpi_enreg=information about mpi parallelization
 !! mqgrid=number of grid pts in q array for n^AT(q) spline.
 !! natom=number of atoms in cell.
 !! nattyp(ntypat)=number of atoms of each type in cell.
@@ -863,8 +863,8 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  n3=ngfft(3)
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
- ABI_ALLOCATE(work,(nfft))
- ABI_ALLOCATE(spinat_indx,(3,natom))
+ ABI_MALLOC(work,(nfft))
+ ABI_MALLOC(spinat_indx,(3,natom))
 
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -897,8 +897,8 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  end if
 
 !Compute the decay length of each type of atom
- ABI_ALLOCATE(length,(ntypat))
- ABI_ALLOCATE(use_gaussian,(ntypat))
+ ABI_MALLOC(length,(ntypat))
+ ABI_MALLOC(use_gaussian,(ntypat))
  jtemp=0
  do itypat=1,ntypat
 
@@ -1014,7 +1014,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                      rhoat=(aa*psps%nctab(itypat)%tvalespl(jj,1)+bb*psps%nctab(itypat)%tvalespl(jj+1,1)+&
                      cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
                    else
-                     MSG_BUG('Initialization of density is non consistent.')
+                     ABI_BUG('Initialization of density is non consistent.')
                    end if
 !                  Multiply structure factor times rhoat (atomic density in reciprocal space)
                    rhog(re,ii)=rhog(re,ii)+sfr*rhoat
@@ -1120,7 +1120,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                      rhoat=(aa*psps%nctab(itypat)%tvalespl(jj,1)+bb*psps%nctab(itypat)%tvalespl(jj+1,1)+&
                      cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
                    else
-                     MSG_BUG('Initialization of density is non consistent.')
+                     ABI_BUG('Initialization of density is non consistent.')
                    end if
                  end if
 
@@ -1156,10 +1156,10 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
  end if ! nspden==4
 
- ABI_DEALLOCATE(length)
- ABI_DEALLOCATE(use_gaussian)
- ABI_DEALLOCATE(spinat_indx)
- ABI_DEALLOCATE(work)
+ ABI_FREE(length)
+ ABI_FREE(use_gaussian)
+ ABI_FREE(spinat_indx)
+ ABI_FREE(work)
 
  contains
 
@@ -1297,7 +1297,7 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 
  if(option/=1 .and. option/=2)then
    write(message, '(a,i0)' )' Option must be 1 or 2, while it is ',option
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (mpi_enreg%nproc_wvl>1) then
@@ -1327,10 +1327,10 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
  if(nspden==2)nitems=5   ! Total density, spin up, spin down, magnetization, zeta
  if(nspden==4)nitems=6   ! Total density, x, y, z, magnetization, zeta
 
- ABI_ALLOCATE(value,(2,2,nitems))
- ABI_ALLOCATE(iindex,(2,2,nitems))
- ABI_ALLOCATE(array,(nfft))
- ABI_ALLOCATE(integrated,(nitems))
+ ABI_MALLOC(value,(2,2,nitems))
+ ABI_MALLOC(iindex,(2,2,nitems))
+ ABI_MALLOC(array,(nfft))
+ ABI_MALLOC(integrated,(nitems))
 
  do iitems=1,nitems
 
@@ -1443,7 +1443,7 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 
  end do ! iitems
 
- ABI_DEALLOCATE(array)
+ ABI_FREE(array)
 
 !-------------------------------------------------------------------
 !Enter section for FFT parallel case
@@ -1460,8 +1460,8 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
  if (reduce) then
 
 !  Communicate all data to all processors with only two global communications
-   ABI_ALLOCATE(value_fft,(5,nitems,nproc))
-   ABI_ALLOCATE(index_fft,(2,2,nitems,nproc))
+   ABI_MALLOC(value_fft,(5,nitems,nproc))
+   ABI_MALLOC(index_fft,(2,2,nitems,nproc))
    value_fft(:,:,:)=zero
    index_fft(:,:,:,:)=0
    value_fft(1,:,me + 1)=value(1,1,:)
@@ -1517,15 +1517,15 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
      end do ! iisign
    end do ! iitems
 
-   ABI_DEALLOCATE(value_fft)
-   ABI_DEALLOCATE(index_fft)
+   ABI_FREE(value_fft)
+   ABI_FREE(index_fft)
 
  end if !if(reduce)
 
 !-------------------------------------------------------------------
 
 !Determines the reduced coordinates of the min and max for each item
- ABI_ALLOCATE(coord,(3,2,2,nitems))
+ ABI_MALLOC(coord,(3,2,2,nitems))
  do iitems=1,nitems
    do indsign=1,2
      do ii=1,2
@@ -1857,10 +1857,10 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
    end if
  end if
 
- ABI_DEALLOCATE(coord)
- ABI_DEALLOCATE(value)
- ABI_DEALLOCATE(iindex)
- ABI_DEALLOCATE(integrated)
+ ABI_FREE(coord)
+ ABI_FREE(value)
+ ABI_FREE(iindex)
+ ABI_FREE(integrated)
 
 end subroutine prtrhomxmn
 !!***
@@ -1872,7 +1872,7 @@ end subroutine prtrhomxmn
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2021 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1935,16 +1935,16 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
  a(:) = rprimd(:,1)
  b(:) = rprimd(:,2)
  c(:) = rprimd(:,3)
- ABI_ALLOCATE(rho,(ngrid))
+ ABI_MALLOC(rho,(ngrid))
  if (nspden/=1) then
-   MSG_ERROR('read_atomden: Only nspden=1 allowed.')
+   ABI_ERROR('read_atomden: Only nspden=1 allowed.')
  end if
  rho = rhor_atm(:,1)
  gmet=zero;gprimd=zero;rmet=zero;ucvol=zero
 
 
 !Calculate the r vector (reduced coord.) of the fine gridpoints
- ABI_ALLOCATE(r_vec_grid,(3,ngrid))
+ ABI_MALLOC(r_vec_grid,(3,ngrid))
  igrid = 0
  n1 = ngfft(1)
  n2 = ngfft(2)
@@ -1963,7 +1963,7 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
    end do
  end do
  if (igrid/=ngrid) then
-   MSG_ERROR('read_atomden: igrid not equal to ngrid')
+   ABI_ERROR('read_atomden: igrid not equal to ngrid')
  end if
 
 !Read in atomic density data for each atom type
@@ -1979,7 +1979,7 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
      write(std_out,*) ' Current implementation requires this file to be present'
      write(std_out,*) ' for each type of atom.'
      write(std_out,*)trim(message)
-     MSG_ERROR("Cannot continue")
+     ABI_ERROR("Cannot continue")
    end if
 !  Check number of lines in file
    nlines = 1;io_err=0;
@@ -1993,8 +1993,8 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
  end do ! Atom type
 !Allocate arrays and read in data
  natomgrmax = maxval(natomgr)
- ABI_ALLOCATE(atomrgrid,(natomgrmax,ntypat))
- ABI_ALLOCATE(density,(natomgrmax,ntypat))
+ ABI_MALLOC(atomrgrid,(natomgrmax,ntypat))
+ ABI_MALLOC(density,(natomgrmax,ntypat))
  atomrgrid = zero ; density = zero
  do itypat=1,ntypat
    filename='';io_err=0;
@@ -2003,7 +2003,7 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
    if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), &
 &   '_density_atom_type',itypat,'.dat'
    if (open_file(filename,message,newunit=unt,status='old',action='read') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    read(unt,*) ! Skip comment line
    do i=1,natomgr(itypat)
@@ -2013,7 +2013,7 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
    if (atomrgrid(1,itypat)/=zero) then
      write(std_out,*) 'ERROR in read_atomden, in file: ',filename
      write(std_out,*) ' First gridpoint has to be the origin.'
-     MSG_ERROR("Cannot continue")
+     ABI_ERROR("Cannot continue")
    end if
  end do ! Atom type
 
@@ -2046,16 +2046,16 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
  rhor_atm(:,1) = rho
 
  if (allocated(atomrgrid))  then
-   ABI_DEALLOCATE(atomrgrid)
+   ABI_FREE(atomrgrid)
  end if
  if (allocated(density))  then
-   ABI_DEALLOCATE(density)
+   ABI_FREE(density)
  end if
  if (allocated(r_vec_grid))  then
-   ABI_DEALLOCATE(r_vec_grid)
+   ABI_FREE(r_vec_grid)
  end if
  if (allocated(rho))  then
-   ABI_DEALLOCATE(rho)
+   ABI_FREE(rho)
  end if
 
  return
@@ -2083,7 +2083,7 @@ end subroutine read_atomden
 !! Units are atomic.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2021 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2195,7 +2195,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
  dp_dummy = dot_product(c,(a+b))/(dot_product((a+b),(a+b)))
  dp_vec_dummy = dp_dummy*(a+b)
  delta_c = c - dp_vec_dummy
- ABI_ALLOCATE(rho_temp,(ngrid,ntypat))
+ ABI_MALLOC(rho_temp,(ngrid,ntypat))
  rho_temp = zero
 
 !write(std_out,*) '*** --- In atomden --- ***'
@@ -2243,8 +2243,8 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 
 !allocate arrays
  n = maxval(n_equiv_atoms)
- ABI_ALLOCATE(equiv_atom_pos,(3,n,ntypat))
- ABI_ALLOCATE(equiv_atom_dist,(n,ntypat))
+ ABI_MALLOC(equiv_atom_pos,(3,n,ntypat))
+ ABI_MALLOC(equiv_atom_dist,(n,ntypat))
  equiv_atom_pos = zero
  equiv_atom_dist = zero
 
@@ -2257,7 +2257,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
          do iatom=1,natom
            if (typat(iatom)==itypat) then
              if (i>n_equiv_atoms(itypat)) then
-               MSG_ERROR('atomden: i>n_equiv_atoms')
+               ABI_ERROR('atomden: i>n_equiv_atoms')
              end if
              equiv_atom_pos(:,i,itypat) = (atom_pos(1,iatom)+dble(l))*a &
 &             + (atom_pos(2,iatom)+dble(m))*b &
@@ -2282,9 +2282,9 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 !furthest away can be added first. This is to prevent truncation error.
  do itypat=1,ntypat
    n = n_equiv_atoms(itypat)
-   ABI_ALLOCATE(dp_1d_dummy,(n))
-   ABI_ALLOCATE(new_index,(n))
-   ABI_ALLOCATE(dp_2d_dummy,(3,n))
+   ABI_MALLOC(dp_1d_dummy,(n))
+   ABI_MALLOC(new_index,(n))
+   ABI_MALLOC(dp_2d_dummy,(3,n))
    dp_1d_dummy = equiv_atom_dist(1:n,itypat)
    dp_2d_dummy = equiv_atom_pos(1:3,1:n,itypat)
    do i=1,n
@@ -2296,9 +2296,9 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
      equiv_atom_pos(1:3,n+1-i,itypat) = dp_2d_dummy(1:3,new_index(i))
      equiv_atom_dist(1:n,itypat) = dp_1d_dummy
    end do
-   ABI_DEALLOCATE(dp_1d_dummy)
-   ABI_DEALLOCATE(new_index)
-   ABI_DEALLOCATE(dp_2d_dummy)
+   ABI_FREE(dp_1d_dummy)
+   ABI_FREE(new_index)
+   ABI_FREE(dp_2d_dummy)
 !  write(std_out,*) '*** --- In atomden ---  sorting atoms ***'
 !  write(std_out,*) ' itypat:',itypat
 !  write(std_out,*) ' equiv_atom_pos:'
@@ -2404,9 +2404,9 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 !    to be interpolated
 
 !    Sort points to be interpolated in ascending order
-     ABI_ALLOCATE(dp_1d_dummy,(n_grid_p))
-     ABI_ALLOCATE(new_index,(n_grid_p))
-     ABI_ALLOCATE(i_1d_dummy,(n_grid_p))
+     ABI_MALLOC(dp_1d_dummy,(n_grid_p))
+     ABI_MALLOC(new_index,(n_grid_p))
+     ABI_MALLOC(i_1d_dummy,(n_grid_p))
      dp_1d_dummy = grid_distances(1:n_grid_p)
      do i=1,n_grid_p
        new_index(i) = i
@@ -2418,14 +2418,14 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 !      write(std_out,*) i_1d_dummy(i),' -> ',i_1d_dummy(new_index(i))
        grid_index(i) = i_1d_dummy(new_index(i))
      end do
-     ABI_DEALLOCATE(dp_1d_dummy)
-     ABI_DEALLOCATE(new_index)
-     ABI_DEALLOCATE(i_1d_dummy)
+     ABI_FREE(dp_1d_dummy)
+     ABI_FREE(new_index)
+     ABI_FREE(i_1d_dummy)
 
 !    Interpolate density onto all grid points
-     ABI_ALLOCATE(ypp,(natomgr(itypat)))
-     ABI_ALLOCATE(x_fit,(n_grid_p))
-     ABI_ALLOCATE(y_fit,(n_grid_p))
+     ABI_MALLOC(ypp,(natomgr(itypat)))
+     ABI_MALLOC(x_fit,(n_grid_p))
+     ABI_MALLOC(y_fit,(n_grid_p))
      ypp = zero; y_fit = zero
      ybcbeg = zero; ybcend = zero
      x_fit = grid_distances(1:n_grid_p)
@@ -2440,9 +2440,9 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
      do i=1,n_grid_p
        rho_temp(grid_index(i),itypat) = rho_temp(grid_index(i),itypat) + y_fit(i)
      end do
-     ABI_DEALLOCATE(ypp)
-     ABI_DEALLOCATE(x_fit)
-     ABI_DEALLOCATE(y_fit)
+     ABI_FREE(ypp)
+     ABI_FREE(x_fit)
+     ABI_FREE(y_fit)
 
    end do ! n equiv atoms
  end do ! type of atom
@@ -2469,13 +2469,13 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 
 !deallocations
  if (allocated(rho_temp))  then
-   ABI_DEALLOCATE(rho_temp)
+   ABI_FREE(rho_temp)
  end if
  if (allocated(equiv_atom_pos))  then
-   ABI_DEALLOCATE(equiv_atom_pos)
+   ABI_FREE(equiv_atom_pos)
  end if
  if (allocated(equiv_atom_dist))  then
-   ABI_DEALLOCATE(equiv_atom_dist)
+   ABI_FREE(equiv_atom_dist)
  end if
 !if (allocated()) deallocate()
 

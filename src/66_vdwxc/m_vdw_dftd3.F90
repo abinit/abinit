@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2020 ABINIT group (BVT)
+!!  Copyright (C) 2015-2021 ABINIT group (BVT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,7 +89,7 @@ contains
 !!  === optional outputs ===
 !!  [elt_vdw_dftd3(6+3*natom,6)]= contribution to elastic constant and
 !!  internal strains from DFT-D3 dispersion potential
-!!  [fred_vdw_dftd3(3,natom)]=contribution to gradient w.r.to atomic displ.
+!!  [gred_vdw_dftd3(3,natom)]=contribution to gradient w.r.to atomic displ.
 !!  from DFT-D3 dispersion potential
 !!  [str_vdw_dftd3(6)]=contribution to stress tensor from DFT-D3 dispersion potential
 !!  [dyn_vdw_dftd3(2,3,natom,3,natom)]= contribution to the interatomic force
@@ -115,7 +115,7 @@ contains
 
 subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
 &          vdw_tol,vdw_tol_3bt,xred,znucl,dyn_vdw_dftd3,elt_vdw_dftd3,&
-&          fred_vdw_dftd3,str_vdw_dftd3,qphon)
+&          gred_vdw_dftd3,str_vdw_dftd3,qphon)
 
 implicit none
 
@@ -130,7 +130,7 @@ implicit none
  real(dp),intent(in),optional :: qphon(3)
  real(dp),intent(out),optional :: dyn_vdw_dftd3(2,3,natom,3,natom)
  real(dp),intent(out),optional :: elt_vdw_dftd3(6+3*natom,6)
- real(dp),intent(out),optional :: fred_vdw_dftd3(3,natom)
+ real(dp),intent(out),optional :: gred_vdw_dftd3(3,natom)
  real(dp),intent(out),optional :: str_vdw_dftd3(6)
 
 !Local variables-------------------------------
@@ -264,8 +264,8 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  real(dp),allocatable :: d2c6ri(:,:),d2c6rj(:,:),d2c6rirj(:,:)
  real(dp),allocatable:: elt_cn(:,:,:),e3bt_ij(:,:),e3bt_jk(:,:),e3bt_ki(:,:),e_no_c(:,:)
  real(dp),allocatable:: e_alpha1(:),e_alpha2(:),e_alpha3(:),e_alpha4(:)
- real(dp) :: fred(3),fredij(3),fredjk(3),fredki(3)
- real(dp),allocatable:: fe_no_c(:,:,:),cfdcn(:,:,:,:),fdcn(:,:,:,:),fgrad_no_c(:,:,:,:),fred_vdw_3bt(:,:)
+ real(dp) :: gred(3),gredij(3),gredjk(3),gredki(3)
+ real(dp),allocatable:: fe_no_c(:,:,:),cfdcn(:,:,:,:),fdcn(:,:,:,:),fgrad_no_c(:,:,:,:),gred_vdw_3bt(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3)
  real(dp),allocatable:: grad_no_cij(:,:,:)
  real(dp) :: mcart(3,3)
@@ -300,7 +300,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 & vdw_dftd3_cnj,index_cnj)
 ! Determine the properties which have to be studied
  bol_3bt = (vdw_tol_3bt>0)
- need_forces = present(fred_vdw_dftd3)
+ need_forces = present(gred_vdw_dftd3)
  need_stress= present(str_vdw_dftd3)
  need_dynmat= present(dyn_vdw_dftd3)
  need_elast= present(elt_vdw_dftd3)
@@ -309,23 +309,23 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  if (need_dynmat) then
    if (.not.present(qphon)) then
      msg='Dynamical matrix required without a q-vector'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    dyn_vdw_dftd3=zero
  end if
  e_vdw_dftd3 = zero
- if (need_forces) fred_vdw_dftd3=zero
+ if (need_forces) gred_vdw_dftd3=zero
  if (need_stress) str_vdw_dftd3=zero
  if (need_elast) elt_vdw_dftd3=zero
 
 !Identify type(s) of atoms
- ABI_ALLOCATE(ivdw,(ntypat))
+ ABI_MALLOC(ivdw,(ntypat))
  do itypat=1,ntypat
    call atomdata_from_znucl(atom1,znucl(itypat))
    if (znucl(itypat).gt.94.0_dp) then
      write(msg,'(3a,es14.2)') &
 &     'Van der Waals DFT-D3 correction not available for atom type: ',znucl(itypat),' !'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      ivdw(itypat) = znucl(itypat)
    end if
@@ -354,7 +354,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      vdw_sr6=vdw_sr6*vdw_sr6_pbe0 ; vdw_s8=vdw_s8*vdw_s8_pbe0
    case default
      write(msg,'(a,i8,a)')'  Van der Waals DFT-D3 correction not compatible with ixc=',ixc,' !'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end select
 ! Case DFT-D3(BJ)
  elseif (vdw_xc == 7) then
@@ -380,12 +380,12 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !---------------------------------------------------------------
  refmax = 5
 
- ABI_ALLOCATE(vdw_c6ref,(ntypat,ntypat,refmax,refmax))
- ABI_ALLOCATE(vdw_cnrefi,(ntypat,ntypat,refmax,refmax))
- ABI_ALLOCATE(vdw_cnrefj,(ntypat,ntypat,refmax,refmax))
- ABI_ALLOCATE(vdw_r0,(ntypat,ntypat))
+ ABI_MALLOC(vdw_c6ref,(ntypat,ntypat,refmax,refmax))
+ ABI_MALLOC(vdw_cnrefi,(ntypat,ntypat,refmax,refmax))
+ ABI_MALLOC(vdw_cnrefj,(ntypat,ntypat,refmax,refmax))
+ ABI_MALLOC(vdw_r0,(ntypat,ntypat))
  if (bol_3bt) then
-   ABI_ALLOCATE(r0ijk,(ntypat,ntypat,ntypat))
+   ABI_MALLOC(r0ijk,(ntypat,ntypat,ntypat))
  end if
 
  vdw_c6ref = zero
@@ -462,7 +462,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !Map reduced coordinates into [0,1[
- ABI_ALLOCATE(xred01,(3,natom))
+ ABI_MALLOC(xred01,(3,natom))
  do ia=1,natom
    xred01(:,ia)=xred(:,ia)-aint(xred(:,ia)) ! Map into ]-1,1[
    do alpha=1,3
@@ -480,14 +480,14 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  call wrtout(std_out,msg,'COLL')
 
 ! Allocation of the CN coefficients and derivatives
- ABI_ALLOCATE(cn,(natom))
- ABI_ALLOCATE(dcn,(3,natom,natom))
- ABI_ALLOCATE(dcn_cart,(3,natom,natom))
- ABI_ALLOCATE(str_dcn,(6,natom))
+ ABI_MALLOC(cn,(natom))
+ ABI_MALLOC(dcn,(3,natom,natom))
+ ABI_MALLOC(dcn_cart,(3,natom,natom))
+ ABI_MALLOC(str_dcn,(6,natom))
  ABI_MALLOC_OR_DIE(d2cn, (2,3,natom,3,natom,natom), ierr)
- ABI_ALLOCATE(fdcn,(2,3,natom,natom))
- ABI_ALLOCATE(cfdcn,(2,3,natom,natom))
- ABI_ALLOCATE(elt_cn,(6+3*natom,6,natom))
+ ABI_MALLOC(fdcn,(2,3,natom,natom))
+ ABI_MALLOC(cfdcn,(2,3,natom,natom))
+ ABI_MALLOC(elt_cn,(6+3*natom,6,natom))
 
 ! Initializing the computed quantities to zero
  nshell = 0
@@ -580,7 +580,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                                  coordinates. Note that the phase factor is different
 !                                  if (ka=ia or ka/=ia).
 !                                  This Fourier transform is summed over cell replica
-!                                  See NOTE: add reference for more informations
+!                                  See NOTE: add reference for more information
                        fdcn(1,:,ia,ia) = fdcn(1,:,ia,ia)+grad*rcart(:)
                        fdcn(1,:,ia,ja) = fdcn(1,:,ia,ja)-grad*rcart(:)*re_arg
                        fdcn(2,:,ia,ja) = fdcn(2,:,ia,ja)-grad*rcart(:)*im_arg
@@ -695,17 +695,17 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 & '  required for DFT-D3 energy corrections...'
  call wrtout(std_out,msg,'COLL')
  ! Allocation
- ABI_ALLOCATE(vdw_c6,(natom,natom))
- ABI_ALLOCATE(vdw_c8,(natom,natom))
- ABI_ALLOCATE(dc6ri,(natom,natom))
- ABI_ALLOCATE(dc6rj,(natom,natom))
- ABI_ALLOCATE(d2c6ri,(natom,natom))
- ABI_ALLOCATE(d2c6rj,(natom,natom))
- ABI_ALLOCATE(d2c6rirj,(natom,natom))
+ ABI_MALLOC(vdw_c6,(natom,natom))
+ ABI_MALLOC(vdw_c8,(natom,natom))
+ ABI_MALLOC(dc6ri,(natom,natom))
+ ABI_MALLOC(dc6rj,(natom,natom))
+ ABI_MALLOC(d2c6ri,(natom,natom))
+ ABI_MALLOC(d2c6rj,(natom,natom))
+ ABI_MALLOC(d2c6rirj,(natom,natom))
  if (bol_3bt) then
-   ABI_ALLOCATE(vdw_c9,(natom,natom,natom))
-   ABI_ALLOCATE(dc9ijri,(natom,natom))
-   ABI_ALLOCATE(dc9ijrj,(natom,natom))
+   ABI_MALLOC(vdw_c9,(natom,natom,natom))
+   ABI_MALLOC(dc9ijri,(natom,natom))
+   ABI_MALLOC(dc9ijrj,(natom,natom))
  end if
 ! Set accumulating quantities to zero
  vdw_c6 = zero ; vdw_c8 = zero
@@ -830,9 +830,9 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  call wrtout(std_out,msg,'COLL')
 
 ! Deallocation of used variables not needed anymore
- ABI_DEALLOCATE(vdw_c6ref)
- ABI_DEALLOCATE(vdw_cnrefi)
- ABI_DEALLOCATE(vdw_cnrefj)
+ ABI_FREE(vdw_c6ref)
+ ABI_FREE(vdw_cnrefi)
+ ABI_FREE(vdw_cnrefj)
 
 !----------------------------------------------------
 ! Computation of cut-off radii according to tolerance
@@ -863,21 +863,21 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  call wrtout(std_out,msg,'COLL')
  nshell=0
  npairs=0
- ABI_ALLOCATE(e_alpha1,(natom))
- ABI_ALLOCATE(e_alpha2,(natom))
- ABI_ALLOCATE(e_alpha3,(natom))
- ABI_ALLOCATE(e_alpha4,(natom))
- ABI_ALLOCATE(e_no_c,(natom,natom))
- ABI_ALLOCATE(fe_no_c,(2,natom,natom))
+ ABI_MALLOC(e_alpha1,(natom))
+ ABI_MALLOC(e_alpha2,(natom))
+ ABI_MALLOC(e_alpha3,(natom))
+ ABI_MALLOC(e_alpha4,(natom))
+ ABI_MALLOC(e_no_c,(natom,natom))
+ ABI_MALLOC(fe_no_c,(2,natom,natom))
  e_alpha1 =zero ; e_alpha2 = zero
  e_alpha3 =zero ; e_alpha4 = zero
  e_no_c=zero  ; fe_no_c = zero
- ABI_ALLOCATE(grad_no_cij,(3,natom,natom))
- ABI_ALLOCATE(fgrad_no_c,(2,3,natom,natom))
- ABI_ALLOCATE(cfgrad_no_c,(2,3,natom,natom))
- ABI_ALLOCATE(str_no_c,(6,natom,natom))
- ABI_ALLOCATE(str_alpha1,(6,natom))
- ABI_ALLOCATE(str_alpha2,(6,natom))
+ ABI_MALLOC(grad_no_cij,(3,natom,natom))
+ ABI_MALLOC(fgrad_no_c,(2,3,natom,natom))
+ ABI_MALLOC(cfgrad_no_c,(2,3,natom,natom))
+ ABI_MALLOC(str_no_c,(6,natom,natom))
+ ABI_MALLOC(str_alpha1,(6,natom))
+ ABI_MALLOC(str_alpha2,(6,natom))
  grad_no_cij=zero ; str_no_c=zero
  fgrad_no_c = zero ;  cfgrad_no_c = zero
  str_alpha1 = zero ; str_alpha2 = zero
@@ -962,10 +962,10 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                           Contribution to gradients wr to atomic displacement
 !                           (forces)
                    if (need_forces.and.ia/=ja) then
-                     fred(:)=grad*rred(:)
+                     gred(:)=grad*rred(:)
                      do alpha=1,3
-                       fred_vdw_dftd3(alpha,ia)=fred_vdw_dftd3(alpha,ia)-fred(alpha)
-                       fred_vdw_dftd3(alpha,ja)=fred_vdw_dftd3(alpha,ja)+fred(alpha)
+                       gred_vdw_dftd3(alpha,ia)=gred_vdw_dftd3(alpha,ia)-gred(alpha)
+                       gred_vdw_dftd3(alpha,ja)=gred_vdw_dftd3(alpha,ja)+gred(alpha)
                      end do
                    elseif (need_stress) then
 !                              Computation of the DFT-D3 contribution to stress
@@ -1096,17 +1096,17 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    end do                                    ! Is3
    if(.not.newshell) exit ! Check if new shell must be calculated
  end do ! Loop over shell
- ABI_ALLOCATE(temp_prod,(2,natom))
+ ABI_MALLOC(temp_prod,(2,natom))
  if (need_grad) then
 !   Additional contribution to force due dc6_drk
    if (need_forces) then
      do ka=1,natom
        do ia=1,natom
              !do ja=1,natom
-                !fred_vdw_dftd3(:,ka) = fred_vdw_dftd3(:,ka)+e_no_c(ia,ja)*(&
+                !gred_vdw_dftd3(:,ka) = gred_vdw_dftd3(:,ka)+e_no_c(ia,ja)*(&
 !&               !dcn(:,ia,ka)*dc6ri(ia,ja)+dcn(:,ja,ka)*dc6rj(ia,ja))
              !end do
-         fred_vdw_dftd3(:,ka) = fred_vdw_dftd3(:,ka)+e_alpha1(ia)*dcn(:,ia,ka)+&
+         gred_vdw_dftd3(:,ka) = gred_vdw_dftd3(:,ka)+e_alpha1(ia)*dcn(:,ia,ka)+&
 &         e_alpha2(ia)*dcn(:,ia,ka)
        end do
      end do
@@ -1249,13 +1249,13 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      end if             ! Boolean elastic tensor
    end if                ! Boolean hessian
  end if                   ! Boolean need_gradient
- ABI_DEALLOCATE(temp_prod)
+ ABI_FREE(temp_prod)
  write(msg,'(3a)')&
 & '                                  ...Done.'
  call wrtout(std_out,msg,'COLL')
 
 !print *, 'Evdw', e_vdw_dftd3
-!if (need_forces) print *, 'fvdw', fred_vdw_dftd3(3,:)
+!if (need_forces) print *, 'fvdw', gred_vdw_dftd3(3,:)
 !if (need_stress) print *, 'strvdw', str_vdw_dftd3(6)
 !if (need_elast) print *, 'Elast(3,3,3,3)', elt_vdw_dftd3(3,3)
 !if (need_elast) print *, 'Elast(3,3,3,3)', elt_vdw_dftd3(6,6)
@@ -1272,13 +1272,13 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  e_3bt=zero
  if (bol_3bt) then
    if (need_grad) then
-     ABI_ALLOCATE(e3bt_ij,(natom,natom))
-     ABI_ALLOCATE(e3bt_jk,(natom,natom))
-     ABI_ALLOCATE(e3bt_ki,(natom,natom))
-     ABI_ALLOCATE(fred_vdw_3bt,(3,natom))
+     ABI_MALLOC(e3bt_ij,(natom,natom))
+     ABI_MALLOC(e3bt_jk,(natom,natom))
+     ABI_MALLOC(e3bt_ki,(natom,natom))
+     ABI_MALLOC(gred_vdw_3bt,(3,natom))
      e3bt_ij=zero; e3bt_jk=zero; e3bt_ki=zero
      if (need_forces) then
-       fred_vdw_3bt = zero
+       gred_vdw_3bt = zero
      elseif (need_stress) then
        str_3bt=zero
      end if
@@ -1373,25 +1373,25 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !                                        Contribution to gradients wr to atomic displacement
 !                                        (forces)
                          if (need_forces) then
-                           if (ia/=ja) fredij=d_drij*matmul(transpose(rprimd),rcartij)
-                           if (ja/=ka) fredjk=d_drjk*matmul(transpose(rprimd),rcartjk)
-                           if (ka/=ia) fredki=d_drki*matmul(transpose(rprimd),rcartki)
+                           if (ia/=ja) gredij=d_drij*matmul(transpose(rprimd),rcartij)
+                           if (ja/=ka) gredjk=d_drjk*matmul(transpose(rprimd),rcartjk)
+                           if (ka/=ia) gredki=d_drki*matmul(transpose(rprimd),rcartki)
                            if (ia/=ja.and.ka/=ia) then
-                             fred_vdw_3bt(:,ia)=fred_vdw_3bt(:,ia)-fredij(:)+fredki(:)
-                             fred_vdw_3bt(:,ja)=fred_vdw_3bt(:,ja)+fredij(:)-fredjk(:)
-                             fred_vdw_3bt(:,ka)=fred_vdw_3bt(:,ka)-fredki(:)+fredjk(:)
+                             gred_vdw_3bt(:,ia)=gred_vdw_3bt(:,ia)-gredij(:)+gredki(:)
+                             gred_vdw_3bt(:,ja)=gred_vdw_3bt(:,ja)+gredij(:)-gredjk(:)
+                             gred_vdw_3bt(:,ka)=gred_vdw_3bt(:,ka)-gredki(:)+gredjk(:)
                            else if (ia==ja.and.ia/=ka) then
-                             fred_vdw_3bt(:,ia)=fred_vdw_3bt(:,ia)+fredki(:)
-                             fred_vdw_3bt(:,ja)=fred_vdw_3bt(:,ja)-fredjk(:)
-                             fred_vdw_3bt(:,ka)=fred_vdw_3bt(:,ka)-fredki(:)+fredjk(:)
+                             gred_vdw_3bt(:,ia)=gred_vdw_3bt(:,ia)+gredki(:)
+                             gred_vdw_3bt(:,ja)=gred_vdw_3bt(:,ja)-gredjk(:)
+                             gred_vdw_3bt(:,ka)=gred_vdw_3bt(:,ka)-gredki(:)+gredjk(:)
                            elseif (ia==ka.and.ia/=ja) then
-                             fred_vdw_3bt(:,ia)=fred_vdw_3bt(:,ia)-fredij(:)
-                             fred_vdw_3bt(:,ja)=fred_vdw_3bt(:,ja)+fredij(:)-fredjk(:)
-                             fred_vdw_3bt(:,ka)=fred_vdw_3bt(:,ka)+fredjk(:)
+                             gred_vdw_3bt(:,ia)=gred_vdw_3bt(:,ia)-gredij(:)
+                             gred_vdw_3bt(:,ja)=gred_vdw_3bt(:,ja)+gredij(:)-gredjk(:)
+                             gred_vdw_3bt(:,ka)=gred_vdw_3bt(:,ka)+gredjk(:)
                            elseif (ja==ka.and.ia/=ja) then
-                             fred_vdw_3bt(:,ia)=fred_vdw_3bt(:,ia)-fredij(:)+fredki(:)
-                             fred_vdw_3bt(:,ja)=fred_vdw_3bt(:,ja)+fredij(:)
-                             fred_vdw_3bt(:,ka)=fred_vdw_3bt(:,ka)-fredki(:)
+                             gred_vdw_3bt(:,ia)=gred_vdw_3bt(:,ia)-gredij(:)+gredki(:)
+                             gred_vdw_3bt(:,ja)=gred_vdw_3bt(:,ja)+gredij(:)
+                             gred_vdw_3bt(:,ka)=gred_vdw_3bt(:,ka)-gredki(:)
                            end if
                          end if
 !                                        Contribution to stress tensor
@@ -1419,9 +1419,9 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      do ia=1,natom
        do ja=1,natom
          do la=1,natom
-           fred_vdw_3bt(:,la) = fred_vdw_3bt(:,la)+e3bt_ij(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
-           fred_vdw_3bt(:,la) = fred_vdw_3bt(:,la)+e3bt_jk(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
-           fred_vdw_3bt(:,la) = fred_vdw_3bt(:,la)+e3bt_ki(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
+           gred_vdw_3bt(:,la) = gred_vdw_3bt(:,la)+e3bt_ij(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
+           gred_vdw_3bt(:,la) = gred_vdw_3bt(:,la)+e3bt_jk(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
+           gred_vdw_3bt(:,la) = gred_vdw_3bt(:,la)+e3bt_ki(ia,ja)*(dc9ijri(ia,ja)*dcn(:,ia,la)+dc9ijrj(ia,ja)*dcn(:,ja,la))
          end do
        end do
      end do
@@ -1435,16 +1435,16 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
      end do
    end if
    e_vdw_dftd3 = e_vdw_dftd3+e_3bt
-   if (need_forces) fred_vdw_dftd3= fred_vdw_dftd3+fred_vdw_3bt
+   if (need_forces) gred_vdw_dftd3= gred_vdw_dftd3+gred_vdw_3bt
    if (need_stress) str_vdw_dftd3 = str_vdw_dftd3+str_3bt
-   ABI_DEALLOCATE(dc9ijri)
-   ABI_DEALLOCATE(dc9ijrj)
-   ABI_DEALLOCATE(e3bt_ij)
-   ABI_DEALLOCATE(e3bt_jk)
-   ABI_DEALLOCATE(e3bt_ki)
-   ABI_DEALLOCATE(vdw_c9)
-   ABI_DEALLOCATE(r0ijk)
-   ABI_DEALLOCATE(fred_vdw_3bt)
+   ABI_FREE(dc9ijri)
+   ABI_FREE(dc9ijrj)
+   ABI_FREE(e3bt_ij)
+   ABI_FREE(e3bt_jk)
+   ABI_FREE(e3bt_ki)
+   ABI_FREE(vdw_c9)
+   ABI_FREE(r0ijk)
+   ABI_FREE(gred_vdw_3bt)
  end if
  if (need_stress) str_vdw_dftd3=str_vdw_dftd3/ucvol
 
@@ -1514,36 +1514,36 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 &   '  ----------------------------------------------------------------',ch10
    call wrtout(std_out,msg,'COLL')
  end if
- ABI_DEALLOCATE(ivdw)
- ABI_DEALLOCATE(xred01)
- ABI_DEALLOCATE(vdw_r0)
- ABI_DEALLOCATE(fe_no_c)
- ABI_DEALLOCATE(e_no_c)
- ABI_DEALLOCATE(e_alpha1)
- ABI_DEALLOCATE(e_alpha2)
- ABI_DEALLOCATE(e_alpha3)
- ABI_DEALLOCATE(e_alpha4)
- ABI_DEALLOCATE(grad_no_cij)
- ABI_DEALLOCATE(fgrad_no_c)
- ABI_DEALLOCATE(cfgrad_no_c)
- ABI_DEALLOCATE(vdw_c6)
- ABI_DEALLOCATE(vdw_c8)
- ABI_DEALLOCATE(dc6ri)
- ABI_DEALLOCATE(dc6rj)
- ABI_DEALLOCATE(d2c6ri)
- ABI_DEALLOCATE(d2c6rj)
- ABI_DEALLOCATE(d2c6rirj)
- ABI_DEALLOCATE(cn)
- ABI_DEALLOCATE(d2cn)
- ABI_DEALLOCATE(dcn)
- ABI_DEALLOCATE(fdcn)
- ABI_DEALLOCATE(cfdcn)
- ABI_DEALLOCATE(str_dcn)
- ABI_DEALLOCATE(elt_cn)
- ABI_DEALLOCATE(str_no_c)
- ABI_DEALLOCATE(str_alpha1)
- ABI_DEALLOCATE(str_alpha2)
- ABI_DEALLOCATE(dcn_cart)
+ ABI_FREE(ivdw)
+ ABI_FREE(xred01)
+ ABI_FREE(vdw_r0)
+ ABI_FREE(fe_no_c)
+ ABI_FREE(e_no_c)
+ ABI_FREE(e_alpha1)
+ ABI_FREE(e_alpha2)
+ ABI_FREE(e_alpha3)
+ ABI_FREE(e_alpha4)
+ ABI_FREE(grad_no_cij)
+ ABI_FREE(fgrad_no_c)
+ ABI_FREE(cfgrad_no_c)
+ ABI_FREE(vdw_c6)
+ ABI_FREE(vdw_c8)
+ ABI_FREE(dc6ri)
+ ABI_FREE(dc6rj)
+ ABI_FREE(d2c6ri)
+ ABI_FREE(d2c6rj)
+ ABI_FREE(d2c6rirj)
+ ABI_FREE(cn)
+ ABI_FREE(d2cn)
+ ABI_FREE(dcn)
+ ABI_FREE(fdcn)
+ ABI_FREE(cfdcn)
+ ABI_FREE(str_dcn)
+ ABI_FREE(elt_cn)
+ ABI_FREE(str_no_c)
+ ABI_FREE(str_alpha1)
+ ABI_FREE(str_alpha2)
+ ABI_FREE(dcn_cart)
  DBG_EXIT("COLL")
 
  contains

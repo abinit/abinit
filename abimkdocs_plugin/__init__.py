@@ -34,10 +34,13 @@ class AbiMkdocsPlugin(BasePlugin):
         #for key, value in config["abimkdocs_links"].items():
         #    markdown = markdown.replace(key, value)
 
-
         # (Re)Add header with metadata and rpath
+        #print(dir(page))
+        #print("page.file.src_path:", page.file.src_path)
+        #print("page.file.abs_src_path:", page.file.abs_src_path)
         mymeta = page.meta.copy()
-        mymeta["rpath"] = "/" + page.input_path
+        #mymeta["rpath"] = "/" + page.input_path
+        mymeta["rpath"] = "/" + page.file.src_path
 
         header = "---\n" + "\n".join("%s: %s" % item for item in mymeta.items()) + "\n---\n\n"
         #print(header)

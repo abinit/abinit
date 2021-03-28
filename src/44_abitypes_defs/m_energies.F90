@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_energies
 !! NAME
 !!  m_energies
@@ -7,7 +8,7 @@
 !!  to store energies from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MT, DC)
+!! Copyright (C) 2008-2021 ABINIT group (MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,8 +41,11 @@ module m_energies
  private
 
 !public parameter
- integer, public, parameter :: n_energies=35
-  ! Number of energies stored in energies datastructure
+ ! CP modified
+ ! integer, public, parameter :: n_energies=35
+ integer, public, parameter :: n_energies=36
+ ! End CP modified
+ ! Number of energies stored in energies datastructure
 
 !!***
 
@@ -107,6 +111,10 @@ module m_energies
   real(dp) :: e_fermie=zero
    ! Fermie energy
 
+  ! CP added
+  real(dp) :: e_fermih=zero
+  ! End CP added
+
   real(dp) :: e_fock=zero
    ! Fock part of total energy (hartree units)
 
@@ -146,6 +154,10 @@ module m_energies
 
   real(dp) :: e_nlpsp_vfock=zero
    ! Nonlocal pseudopotential part of total energy.
+
+  real(dp) :: e_nucdip=zero
+   ! Energy due to array of nuclear magnetic dipoles
+   ! valid for direct scheme
 
   real(dp) :: e_paw=zero
    ! PAW spherical part energy
@@ -233,6 +245,7 @@ subroutine energies_init(energies)
  energies%entropy       = zero
  energies%e_ewald       = zero
  energies%e_fermie      = zero
+ energies%e_fermih      = zero ! CP added (useful when occopt = 9)
  energies%e_fock        = zero
  energies%e_fockdc      = zero
  energies%e_fock0       = zero
@@ -245,6 +258,7 @@ subroutine energies_init(energies)
  energies%e_magfield    = zero
  energies%e_monopole    = zero
  energies%e_nlpsp_vfock = zero
+ energies%e_nucdip      = zero
  energies%e_paw         = zero
  energies%e_pawdc       = zero
  energies%e_sicdc       = zero
@@ -306,6 +320,7 @@ end subroutine energies_init
  energies_out%e_ewald              = energies_in%e_ewald
  energies_out%e_exactX             = energies_in%e_exactX
  energies_out%e_fermie             = energies_in%e_fermie
+ energies_out%e_fermih             = energies_in%e_fermih ! CP added
  energies_out%e_fock               = energies_in%e_fock
  energies_out%e_fockdc             = energies_in%e_fockdc
  energies_out%e_fock0              = energies_in%e_fock0
@@ -318,6 +333,7 @@ end subroutine energies_init
  energies_out%e_magfield           = energies_in%e_magfield
  energies_out%e_monopole           = energies_in%e_monopole
  energies_out%e_nlpsp_vfock        = energies_in%e_nlpsp_vfock
+ energies_out%e_nucdip             = energies_in%e_nucdip
  energies_out%e_paw                = energies_in%e_paw
  energies_out%e_pawdc              = energies_in%e_pawdc
  energies_out%e_sicdc              = energies_in%e_sicdc
@@ -408,6 +424,7 @@ end subroutine energies_copy
    energies_array(33)=energies%e_xc_vdw
    energies_array(34)=energies%h0
    energies_array(35)=energies%e_zeeman
+   energies_array(36)=energies%e_nucdip
  end if
 
  if (option==-1) then
@@ -446,6 +463,7 @@ end subroutine energies_copy
    energies%e_xc_vdw             = energies_array(33)
    energies%h0                   = energies_array(34)
    energies%e_zeeman             = energies_array(35)
+   energies%e_nucdip             = energies_array(36)
  end if
 
 end subroutine energies_to_array
@@ -530,7 +548,8 @@ end subroutine energies_to_array
 !&  +two*energies%e_fock-energies%e_fock0+&  ! The Fock energy is already included in the non_local part ...
 !&  energies%e_nlpsp_vfock - energies%e_fock0+&
 &   energies%e_hybcomp_E0 -energies%e_hybcomp_v0 + energies%e_hybcomp_v+&
-&   energies%e_localpsp + energies%e_corepsp + energies%e_constrained_dft
+&   energies%e_localpsp + energies%e_corepsp + energies%e_constrained_dft+&
+&   energies%e_nucdip
 
 !  See similar section in m_scfcv_core.F90
 !  XG 20181025 This gives a variational energy in case of NCPP with all bands occupied - not yet for metals.
@@ -597,31 +616,53 @@ subroutine energies_ncwrite(enes, ncid)
 ! *************************************************************************
 
 !@energies_type
+ ! CP modified
+ !ncerr = nctk_defnwrite_dpvars(ncid, [character(len=nctk_slen) :: &
+ ! "e_chempot", "e_constrained_dft", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
+ ! "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
+ ! "e_entropy", "entropy", "e_ewald", &
+ ! "e_exactX","e_fermie", &
+ ! "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
+ ! "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", &
+ ! "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd", &
+ ! "e_xc", "e_xcdc", "e_xc_vdw", &
+ ! "h0","e_zeeman"], &
+ ! [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
+ !  enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
+ !  enes%e_entropy, enes%entropy, enes%e_ewald, &
+ !  enes%e_exactX, enes%e_fermie, &
+ !  enes%e_fock, enes%e_fockdc,enes%e_fock0,  enes%e_hartree, &
+ !  enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
+ !  enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, &
+ !  enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
+ !  enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
+ !  enes%h0,enes%e_zeeman])
  ncerr = nctk_defnwrite_dpvars(ncid, [character(len=nctk_slen) :: &
   "e_chempot", "e_constrained_dft", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
   "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
   "e_entropy", "entropy", "e_ewald", &
   "e_exactX","e_fermie", &
   "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
-  "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", &
+  "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", "e_nucdip", &
   "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd", &
   "e_xc", "e_xcdc", "e_xc_vdw", &
-  "h0","e_zeeman"], &
+  "h0","e_zeeman", "e_fermih"], & ! CP added fermih 
   [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
    enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
    enes%e_entropy, enes%entropy, enes%e_ewald, &
    enes%e_exactX, enes%e_fermie, &
    enes%e_fock, enes%e_fockdc,enes%e_fock0,  enes%e_hartree, &
    enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
-   enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, &
+   enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, enes%e_nucdip, &
    enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
    enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
-   enes%h0,enes%e_zeeman])
+   enes%h0,enes%e_zeeman,enes%e_fermih]) ! CP added fermih
+ ! End CP modified
 
  NCF_CHECK(ncerr)
 
 #else
- MSG_ERROR("ETSF-IO support is not activated.")
+ ABI_ERROR("ETSF-IO support is not activated.")
 #endif
 
 end subroutine energies_ncwrite

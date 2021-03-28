@@ -13,7 +13,7 @@
 !!    where U is an upper triangular matrix and L is lower triangular.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2020 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,6 @@
 
 subroutine abi_dpotrf(uplo,n,a,lda,info)
 
- implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda
@@ -72,8 +71,6 @@ end subroutine abi_dpotrf
 
 subroutine abi_zpotrf_2d(uplo,n,a,lda,info)
 
- implicit none
-
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: lda,n
@@ -100,8 +97,6 @@ end subroutine abi_zpotrf_2d
 !! SOURCE
 
 subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
@@ -151,7 +146,6 @@ end subroutine abi_d2zpotrf
 
 subroutine abi_zpotrf(uplo,n,a,lda,info)
 
- implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: lda,n
