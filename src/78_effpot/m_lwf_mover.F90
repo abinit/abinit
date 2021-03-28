@@ -96,9 +96,9 @@ contains
     call self%set_params(params)
     call self%set_rng(rng)
     self%nlwf=self%supercell%lwf%nlwf
-    ABI_ALLOCATE(self%lwf, (self%nlwf))
-    ABI_ALLOCATE(self%vcart, (self%nlwf))
-    ABI_ALLOCATE(self%lwf_force, (self%nlwf))
+    ABI_MALLOC(self%lwf, (self%nlwf))
+    ABI_MALLOC(self%vcart, (self%nlwf))
+    ABI_MALLOC(self%lwf_force, (self%nlwf))
     self%lwf(:) = 0.0_dp
     self%lwf_force(:) = 0.0_dp
     self%vcart(:) = 0.0_dp
@@ -176,7 +176,7 @@ contains
     integer :: i, nstep
     character(len=90) :: msg
     if(present(lwf)) then
-       MSG_ERROR("lwf should not be input for lwf mover")
+       ABI_ERROR("lwf should not be input for lwf mover")
     end if
     ABI_UNUSED_A(displacement)
     ABI_UNUSED_A(strain)
@@ -303,7 +303,7 @@ contains
     msg="The number of lwfs in histfile is not equal & & to the present calculation." // &
          & " Please check if the file is consistent."
     if (nlwf/= self%nlwf) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
     end if
 
     ierr=nctk_get_dim(ncid, "ntime", ntime)
@@ -321,7 +321,7 @@ contains
     ierr=nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
 #else
-    MSG_ERROR("lwf_init_state set to 4 but abinit is not compiled with netcdf.")
+    ABI_ERROR("lwf_init_state set to 4 but abinit is not compiled with netcdf.")
 #endif
 
   end subroutine read_hist_lwf_state

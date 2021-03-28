@@ -426,7 +426,7 @@ contains
 
     !LWF 
     if(self%params%lwf_dynamics>0 .or. self%params%latt_lwf_anharmonic==1) then
-       ABI_DATATYPE_ALLOCATE_SCALAR(lwf_primitive_potential_t, lwf_pot)
+       ABI_MALLOC_TYPE_SCALAR(lwf_primitive_potential_t, lwf_pot)
        select type(lwf_pot)
        type is (lwf_primitive_potential_t)
           call lwf_pot%initialize(self%unitcell)
@@ -512,7 +512,7 @@ contains
     character(len=fnlen) :: fname
     select case(self%params%spin_dynamics)
         case (1)
-          ABI_DATATYPE_ALLOCATE_SCALAR(spin_mover_t, self%spin_mover)
+          ABI_MALLOC_TYPE_SCALAR(spin_mover_t, self%spin_mover)
     end select
     fname=trim(self%filenames(2))//"_spinhist_input.nc"
     call self%spin_mover%initialize(params=self%params,&
@@ -553,11 +553,11 @@ contains
     end if
     select case(self%params%lwf_dynamics)
     case (1)  ! Metropolis Monte Carlo
-       ABI_DATATYPE_ALLOCATE_SCALAR(lwf_mc_t, self%lwf_mover)
+       ABI_MALLOC_TYPE_SCALAR(lwf_mc_t, self%lwf_mover)
     case (2) ! dummy 
-       ABI_DATATYPE_ALLOCATE_SCALAR(lwf_dummy_mover_t, self%lwf_mover)
+       ABI_MALLOC_TYPE_SCALAR(lwf_dummy_mover_t, self%lwf_mover)
     case (3)
-       ABI_DATATYPE_ALLOCATE_SCALAR(lwf_berendsen_mover_t, self%lwf_mover)
+       ABI_MALLOC_TYPE_SCALAR(lwf_berendsen_mover_t, self%lwf_mover)
     end select
     call self%lwf_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
     call self%lwf_mover%set_initial_state(mode=self%params%lwf_init_state, &

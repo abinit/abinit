@@ -1085,7 +1085,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
          &   'latt_lwf_anharmonic is ',multibinit_dtset%latt_lwf_anharmonic,', but the only allowed values',ch10,&
          &   'are 0 and 1',ch10,&
          &   'Action: correct latt_lwf_anharmonic in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
 
@@ -1101,7 +1101,7 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'latt_temperature_start is ',multibinit_dtset%latt_temperature_start,'. The only allowed values',ch10,&
          &   'are positives values.',ch10,&
          &   'Action: correct latt_semperature_start in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
  multibinit_dtset%latt_temperature_end=0.0
@@ -1112,7 +1112,7 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'latt_temperature_end is ',multibinit_dtset%latt_temperature_end,'. The only allowed values',ch10,&
          &   'are positives values.',ch10,&
          &   'Action: correct latt_semperature_end in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
  multibinit_dtset%latt_temperature_nstep=1
@@ -1122,7 +1122,7 @@ multibinit_dtset%latt_temperature_start=0.0
     write(message, '(a,i0,a,a,a,a)' )&
          &   'latt_temperature_nstep is',multibinit_dtset%latt_temperature_nstep,', while it should be larger than 0',ch10,&
          &   'Action: correct latt_temperature_nstep in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
  multibinit_dtset%latt_var_temperature=0
@@ -1133,7 +1133,7 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'latt_var_temperature is',multibinit_dtset%latt_var_temperature,'. The only allowed values',ch10,&
          &   'are 0, or 1.',ch10,&
          &   'Action: correct latt_var_temperature in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
 
@@ -1149,7 +1149,7 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'lwf_dt is',multibinit_dtset%lwf_dt,', but the only allowed values',ch10,&
          &   'are superior to 0  .',ch10,&
          &   'Action: correct lwf_dt in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
  multibinit_dtset%lwf_init_state=0
@@ -1160,7 +1160,7 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'lwf_init_state is ',multibinit_dtset%lwf_init_state,', but the only allowed values',ch10,&
          &   'are 0, 1,2,3,4 and negative values.',ch10,&
          &   'Action: correct lwf_init_state in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
 
@@ -1207,7 +1207,7 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'lwf_dynamics is ',multibinit_dtset%lwf_dynamics,', but the only allowed values',ch10,&
          &   'are 0, 1, 2, 3 and negative values.',ch10,&
          &   'Action: correct lwf_dynamics in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
  multibinit_dtset%lwf_mc_avg_amp=0.05
@@ -1218,7 +1218,7 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'lwf_mc_avg_amp is ',multibinit_dtset%lwf_mc_avg_amp,'. The only allowed values',ch10,&
          &   'are non-negative values.',ch10,&
          &   'Action: correct lwf_mc_avg_amp in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
 
@@ -1230,7 +1230,7 @@ multibinit_dtset%latt_temperature_start=0.0
  if( .not. (multibinit_dtset%lwf_nctime >= 0) ) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'lwf_nctime is ',multibinit_dtset%lwf_nctime,', but the only non-negative values allowed.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
 
@@ -1240,7 +1240,7 @@ multibinit_dtset%latt_temperature_start=0.0
  if( .not. (multibinit_dtset%lwf_ntime >= 0) ) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'lwf_ntime is ',multibinit_dtset%lwf_ntime,', but the only non-negative values allowed.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
 
@@ -1261,7 +1261,7 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'lwf_taut is ',multibinit_dtset%lwf_taut,'. The only allowed values',ch10,&
          &   'are non-negative values.',ch10,&
          &   'Action: correct lwf_taut in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
 
@@ -1273,7 +1273,7 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'lwf_temperature is ',multibinit_dtset%lwf_temperature,'. The only allowed values',ch10,&
          &   'are non-negative values.',ch10,&
          &   'Action: correct lwf_temperature in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
 multibinit_dtset%lwf_temperature_start=0.0
@@ -1284,7 +1284,7 @@ multibinit_dtset%lwf_temperature_start=0.0
          &   'lwf_temperature_start is ',multibinit_dtset%lwf_temperature_start,'. The only allowed values',ch10,&
          &   'are positives values.',ch10,&
          &   'Action: correct lwf_semperature_start in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
  multibinit_dtset%lwf_temperature_end=0.0
@@ -1295,7 +1295,7 @@ multibinit_dtset%lwf_temperature_start=0.0
          &   'lwf_temperature_end is ',multibinit_dtset%lwf_temperature_end,'. The only allowed values',ch10,&
          &   'are positives values.',ch10,&
          &   'Action: correct lwf_semperature_end in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
  multibinit_dtset%lwf_temperature_nstep=1
@@ -1305,7 +1305,7 @@ multibinit_dtset%lwf_temperature_start=0.0
     write(message, '(a,i0,a,a,a,a)' )&
          &   'lwf_temperature_nstep is',multibinit_dtset%lwf_temperature_nstep,', while it should be larger than 0',ch10,&
          &   'Action: correct lwf_temperature_nstep in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
  multibinit_dtset%lwf_var_temperature=0
@@ -1316,7 +1316,7 @@ multibinit_dtset%lwf_temperature_start=0.0
          &   'lwf_var_temperature is',multibinit_dtset%lwf_var_temperature,'. The only allowed values',ch10,&
          &   'are 0, or 1.',ch10,&
          &   'Action: correct lwf_var_temperature in your input file.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
  end if
 
 

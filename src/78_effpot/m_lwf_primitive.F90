@@ -195,13 +195,13 @@ contains
     call self%coeff%initialize([ nR, nlwf, nlwf])
     call self%coeff_twobody%initialize([nR, nlwf, nlwf, -1, -1])
 
-    ABI_ALLOCATE(ifc, (nlwf, nlwf, nR))
-    ABI_ALLOCATE(self%Rlist,(3, nR))
-    ABI_ALLOCATE(xcart, (3,natom))
-    ABI_ALLOCATE(masses, (natom))
-    ABI_ALLOCATE(zion, (natom))
+    ABI_MALLOC(ifc, (nlwf, nlwf, nR))
+    ABI_MALLOC(self%Rlist,(3, nR))
+    ABI_MALLOC(xcart, (3,natom))
+    ABI_MALLOC(masses, (natom))
+    ABI_MALLOC(zion, (natom))
 
-    ABI_ALLOCATE(self%lwf_masses, (nlwf))
+    ABI_MALLOC(self%lwf_masses, (nlwf))
 
     ierr =nf90_inq_varid(ncid, "wann_lwf_masses", varid)
     NCF_CHECK_MSG(ierr, "lwf_masses")
@@ -400,7 +400,7 @@ contains
     sc_nlwf= nlwf* scmaker%ncells
 
     ! Step 1: allocate the scpot as a corresponding supercell potential
-    ABI_DATATYPE_ALLOCATE_SCALAR(lwf_potential_t, scpot)
+    ABI_MALLOC_TYPE_SCALAR(lwf_potential_t, scpot)
     ! Fortran does not know the functions specific to the derived class pointer.
     ! Only the ones inheritated from abstract class,
     ! unless select type is used:

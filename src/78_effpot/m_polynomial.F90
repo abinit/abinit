@@ -33,6 +33,7 @@ module m_polynomial
   use m_errors
   use m_abicore
 
+
   implicit none
 !!***
 
@@ -66,8 +67,8 @@ contains
   subroutine elem_alloc(self, n)
     class(polynomial_element_t) ,intent(inout) :: self
     integer, intent(in) :: n
-    ABI_ALLOCATE(self%ids, (n))
-    ABI_ALLOCATE(self%orders, (n))
+    ABI_MALLOC(self%ids, (n))
+    ABI_MALLOC(self%orders, (n))
     self%n=n
   end subroutine elem_alloc
 

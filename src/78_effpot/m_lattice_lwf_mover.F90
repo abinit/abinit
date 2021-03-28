@@ -74,7 +74,7 @@ contains
     integer :: i, nstep
     character(len=90) :: msg
     if(present(displacement) .or. present(strain)) then
-       MSG_ERROR("displacement and strain should not be input for lattice mover")
+       ABI_ERROR("displacement and strain should not be input for lattice mover")
     end if
     ABI_UNUSED_A(effpot)
     ABI_UNUSED_A(spin)

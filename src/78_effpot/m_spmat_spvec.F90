@@ -63,7 +63,7 @@ contains
     integer, intent(in) :: id
     real(dp), intent(in) :: val
     if(id>self%size) then
-        MSG_BUG("id out of range in spvec push")
+        ABI_BUG("id out of range in spvec push")
     end if
     call self%ids%push(id)
     call self%vals%push(val)

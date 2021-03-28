@@ -118,7 +118,7 @@ contains
     integer ::i
     if (present(rel_ihist)) then
        if (rel_ihist>0 .or. abs(rel_ihist)>self%mxhist) then
-          MSG_BUG("Asking for lwf hist which is beyond mxhist.")
+          ABI_BUG("Asking for lwf hist which is beyond mxhist.")
        end if
        i=modulo(self%ihist+rel_ihist, self%mxhist)+1
     else

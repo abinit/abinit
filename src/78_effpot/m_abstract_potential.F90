@@ -223,7 +223,7 @@ contains
     ABI_UNUSED_A(ilwf)
     ABI_UNUSED_A(lwf_new)
     ABI_UNUSED_A(deltaE)
-    MSG_ERROR("get_delta_E_lwf not implemented for this effpot."//self%label)
+    ABI_ERROR("get_delta_E_lwf not implemented for this effpot."//self%label)
   end subroutine get_delta_E_lwf
 
 
