@@ -96,6 +96,10 @@ diemac 13.0
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "14si.fhi"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]

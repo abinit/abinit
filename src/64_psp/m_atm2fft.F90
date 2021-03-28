@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2021 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -255,7 +255,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !Check optional arguments
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     MSG_BUG(' Need paral_kgb and me_g0 with comm_fft !')
+     ABI_BUG(' Need paral_kgb and me_g0 with comm_fft !')
    end if
  end if
 
@@ -267,7 +267,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  if (present(distribfft)) then
    my_distribfft => distribfft
  else
-   ABI_DATATYPE_ALLOCATE(my_distribfft,)
+   ABI_MALLOC(my_distribfft,)
    call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
  end if
  if (n2==my_distribfft%n2_coarse) then
@@ -277,12 +277,12 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
    fftn2_distrib => my_distribfft%tab_fftdp2dg_distrib
    ffti2_local => my_distribfft%tab_fftdp2dg_local
  else
-   MSG_BUG("Unable to find an allocated distrib for this fft grid")
+   ABI_BUG("Unable to find an allocated distrib for this fft grid")
  end if
 
  if (present(is2_in)) then
    if(is2_in<1.or.is2_in>6) then
-     MSG_BUG("is2_in must be between 1 and 6")
+     ABI_BUG("is2_in must be between 1 and 6")
    else
      ndir = 1
    end if
@@ -291,27 +291,27 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
 !Zero out arrays to permit accumulation over atom types
  if (optv==1.and.optatm==1) then
-   ABI_ALLOCATE(workv,(2,nfft))
+   ABI_MALLOC(workv,(2,nfft))
    workv(:,:)=zero
  end if
  if (optn==1.and.optatm==1) then
-   ABI_ALLOCATE(workn,(2,nfft))
+   ABI_MALLOC(workn,(2,nfft))
    workn(:,:)=zero
  end if
  if (optv==1.and.optgr==1) then
-   ABI_ALLOCATE(grv_indx,(3,natom))
+   ABI_MALLOC(grv_indx,(3,natom))
    grv_indx(:,:)=zero
  end if
  if (optn==1.and.optgr==1) then
-   ABI_ALLOCATE(grn_indx,(3,natom))
+   ABI_MALLOC(grn_indx,(3,natom))
    grn_indx(:,:)=zero
  end if
  if (optv==1.and.optdyfr==1) then
-   ABI_ALLOCATE(dyfrv_indx,(3,3,natom))
+   ABI_MALLOC(dyfrv_indx,(3,3,natom))
    dyfrv_indx(:,:,:)=zero
  end if
  if (optn==1.and.optdyfr==1) then
-   ABI_ALLOCATE(dyfrn_indx,(3,3,natom))
+   ABI_MALLOC(dyfrn_indx,(3,3,natom))
    dyfrn_indx(:,:,:)=zero
  end if
  if (optv==1.and.optstr==1) strv(:)=zero
@@ -357,11 +357,11 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  id2=n2/2+2
  id3=n3/2+2
 
- ABI_ALLOCATE(phre_igia,(natom))
- ABI_ALLOCATE(phim_igia,(natom))
+ ABI_MALLOC(phre_igia,(natom))
+ ABI_MALLOC(phim_igia,(natom))
 
  !Initialize Gcut-off array from m_termcutoff
- !ABI_ALLOCATE(gcutoff,(nfft))
+ !ABI_MALLOC(gcutoff,(nfft))
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,1,rcut,rprimd,vcutgeo)
 
  ia1=1
@@ -727,42 +727,44 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !  End loop on type of atoms
  end do
 
- ABI_DEALLOCATE(phre_igia)
- ABI_DEALLOCATE(phim_igia)
- ABI_DEALLOCATE(gcutoff)
+ ABI_FREE(phre_igia)
+ ABI_FREE(phim_igia)
+ ABI_FREE(gcutoff)
 
 !Get local potential or density back to real space
  if(optatm==1)then
 !  Allow for the addition of a perturbing potential
-   if ((optv==1).and.(vprtrb(1)**2+vprtrb(2)**2) > 1.d-30) then
-!    Find the linear indices which correspond with the input wavevector qprtrb
-!    The double modulus handles both i>=n and i<0, mapping into [0,n-1];
-!    then add 1 to get range [1,n] for each
-     i3=1+mod(n3+mod(qprtrb(3),n3),n3)
-     i2=1+mod(n2+mod(qprtrb(2),n2),n2)
-     i1=1+mod(n1+mod(qprtrb(1),n1),n1)
-!    Compute the linear index in the 3 dimensional array
-     ii=i1+n1*((ffti2_local(i2)-1)+(n2/nproc_fft)*(i3-1))
-!    Add in the perturbation at G=qprtrb
-     workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
-     workv(im,ii)=workv(im,ii)+0.5_dp*vprtrb(2)
-!    Same thing for G=-qprtrb
-     i3=1+mod(n3+mod(-qprtrb(3),n3),n3)
-     i2=1+mod(n2+mod(-qprtrb(2),n2),n2)
-     i1=1+mod(n1+mod(-qprtrb(1),n1),n1)
-!    ii=i1+n1*((i2-1)+n2*(i3-1))
-     workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
-     workv(im,ii)=workv(im,ii)-0.5_dp*vprtrb(2)
-     write(message, '(a,1p,2e12.4,a,0p,3i4,a)' )&
-&     ' atm2fft: perturbation of vprtrb=', vprtrb,&
-&     ' and q=',qprtrb,' has been added'
-     call wrtout(std_out,message,'COLL')
+   if (optv==1) then
+     if ((vprtrb(1)**2+vprtrb(2)**2) > 1.d-30) then
+!      Find the linear indices which correspond with the input wavevector qprtrb
+!      The double modulus handles both i>=n and i<0, mapping into [0,n-1];
+!      then add 1 to get range [1,n] for each
+       i3=1+mod(n3+mod(qprtrb(3),n3),n3)
+       i2=1+mod(n2+mod(qprtrb(2),n2),n2)
+       i1=1+mod(n1+mod(qprtrb(1),n1),n1)
+!      Compute the linear index in the 3 dimensional array
+       ii=i1+n1*((ffti2_local(i2)-1)+(n2/nproc_fft)*(i3-1))
+!      Add in the perturbation at G=qprtrb
+       workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
+       workv(im,ii)=workv(im,ii)+0.5_dp*vprtrb(2)
+!      Same thing for G=-qprtrb
+       i3=1+mod(n3+mod(-qprtrb(3),n3),n3)
+       i2=1+mod(n2+mod(-qprtrb(2),n2),n2)
+       i1=1+mod(n1+mod(-qprtrb(1),n1),n1)
+!      ii=i1+n1*((i2-1)+n2*(i3-1))
+       workv(re,ii)=workv(re,ii)+0.5_dp*vprtrb(1)
+       workv(im,ii)=workv(im,ii)-0.5_dp*vprtrb(2)
+       write(message, '(a,1p,2e12.4,a,0p,3i4,a)' )&
+&       ' atm2fft: perturbation of vprtrb=', vprtrb,&
+&       ' and q=',qprtrb,' has been added'
+       call wrtout(std_out,message,'COLL')
+     end if
    end if
 
    if (optv==1.or.optn==1) then
 !    Create fake mpi_enreg to wrap fourdp
      call initmpi_seq(mpi_enreg_fft)
-     ABI_DATATYPE_DEALLOCATE(mpi_enreg_fft%distribfft)
+     ABI_FREE(mpi_enreg_fft%distribfft)
      if (present(comm_fft)) then
        call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
        my_comm_fft=comm_fft;paral_kgb_fft=paral_kgb
@@ -777,13 +779,13 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
        call zerosym(workv,2,n1,n2,n3,comm_fft=my_comm_fft,distribfft=my_distribfft)
        call fourdp(1,workv,atmvloc,1,mpi_enreg_fft,nfft,1,ngfft,0)
        atmvloc(:)=atmvloc(:)*xnorm
-       ABI_DEALLOCATE(workv)
+       ABI_FREE(workv)
      end if
      if (optn==1) then
        call zerosym(workn,2,n1,n2,n3,comm_fft=my_comm_fft,distribfft=my_distribfft)
        call fourdp(1,workn,atmrho,1,mpi_enreg_fft,nfft,1,ngfft,0)
        atmrho(:)=atmrho(:)*xnorm
-       ABI_DEALLOCATE(workn)
+       ABI_FREE(workn)
      end if
 !    Destroy fake mpi_enreg
      call unset_mpi_enreg_fft(mpi_enreg_fft)
@@ -828,13 +830,13 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
      do ia=1,natom
        grv(1:3,atindx1(ia))=grv_indx(1:3,ia)
      end do
-     ABI_DEALLOCATE(grv_indx)
+     ABI_FREE(grv_indx)
    end if
    if (optn==1) then
      do ia=1,natom
        grn(1:3,atindx1(ia))=grn_indx(1:3,ia)
      end do
-     ABI_DEALLOCATE(grn_indx)
+     ABI_FREE(grn_indx)
    end if
  end if
 
@@ -861,19 +863,19 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
      do ia=1,natom
        dyfrv(1:3,1:3,atindx1(ia))=dyfrv_indx(1:3,1:3,ia)
      end do
-     ABI_DEALLOCATE(dyfrv_indx)
+     ABI_FREE(dyfrv_indx)
    end if
    if (optn==1) then
      do ia=1,natom
        dyfrn(1:3,1:3,atindx1(ia))=dyfrn_indx(1:3,1:3,ia)
      end do
-     ABI_DEALLOCATE(dyfrn_indx)
+     ABI_FREE(dyfrn_indx)
    end if
  end if
 
  if (.not.present(distribfft)) then
    call destroy_distribfft(my_distribfft)
-   ABI_DATATYPE_DEALLOCATE(my_distribfft)
+   ABI_FREE(my_distribfft)
  end if
 
  DBG_EXIT("COLL")
@@ -1061,7 +1063,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !  Check optional arguments
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     MSG_BUG('Need paral_kgb and me_g0 with comm_fft !')
+     ABI_BUG('Need paral_kgb and me_g0 with comm_fft !')
    end if
  end if
 
@@ -1070,7 +1072,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      optn2 = 3
    else
      if(optn2_in/=3)then
-       MSG_BUG('optn2 must be set to 3!')
+       ABI_BUG('optn2 must be set to 3!')
      else
        optn2 = optn2_in
      end if
@@ -1084,7 +1086,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      optn = optn_in
    end if
    if (.not.present(optn2_in)) then
-     MSG_BUG('rho1 calculation need optn2 !')
+     ABI_BUG('rho1 calculation need optn2 !')
    else
      optn2 = optn2_in
    end if
@@ -1098,13 +1100,13 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      optv = 1
    else
      if(optv_in/=1)then
-       MSG_BUG('optv_in must be set to 1!')
+       ABI_BUG('optv_in must be set to 1!')
      else
        optv = optv_in
      end if
    end if
    if(.not.present(vspl))then
-     MSG_BUG('vloc1 calculation need vspl!')
+     ABI_BUG('vloc1 calculation need vspl!')
    end if
  else
    optv  = 0
@@ -1150,7 +1152,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    if (present(distribfft)) then
      my_distribfft => distribfft
    else
-     ABI_DATATYPE_ALLOCATE(my_distribfft,)
+     ABI_MALLOC(my_distribfft,)
      call init_distribfft_seq(my_distribfft,'f',n2,n3,'fourdp')
    end if
    if (n2==my_distribfft%n2_coarse) then
@@ -1158,7 +1160,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
    else if (n2 == my_distribfft%n2_fine) then
      fftn2_distrib => my_distribfft%tab_fftdp2dg_distrib
    else
-     MSG_BUG("Unable to find an allocated distrib for this fft grid")
+     ABI_BUG("Unable to find an allocated distrib for this fft grid")
    end if
 
    qeq0=(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15)
@@ -1167,7 +1169,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 &   abs(abs(qphon(3))-half)<tol12)
 
    if (nproc_fft>1.and.qeq05) then
-     MSG_ERROR('not compatible with FFT parallelism')
+     ABI_ERROR('not compatible with FFT parallelism')
    end if
 
    if (optn2==3)then
@@ -1194,11 +1196,11 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 
 !   Zero out temporary arrays
    if (optv==1) then
-     ABI_ALLOCATE(workv,(2,nfft,ndir))
+     ABI_MALLOC(workv,(2,nfft,ndir))
      workv(:,:,:)=zero
    end if
    if (optn==1) then
-     ABI_ALLOCATE(workn,(2,nfft,ndir))
+     ABI_MALLOC(workn,(2,nfft,ndir))
      workn(:,:,:)=zero
    end if
 
@@ -1207,14 +1209,14 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      ia1=1
      type1 = 1
      type2 = ntype
-     ABI_ALLOCATE(phre_igia,(natom))
-     ABI_ALLOCATE(phim_igia,(natom))
+     ABI_MALLOC(phre_igia,(natom))
+     ABI_MALLOC(phim_igia,(natom))
    else
      type1 = itypat
      type2 = itypat
      ntype = 1
-     ABI_ALLOCATE(phre_igia,(iatm:iatm))
-     ABI_ALLOCATE(phim_igia,(iatm:iatm))
+     ABI_MALLOC(phre_igia,(iatm:iatm))
+     ABI_MALLOC(phim_igia,(iatm:iatm))
    end if
 
 
@@ -1443,8 +1445,8 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      ia1=ia2+1
    end do ! end loop itype
 
-   ABI_DEALLOCATE(phre_igia)
-   ABI_DEALLOCATE(phim_igia)
+   ABI_FREE(phre_igia)
+   ABI_FREE(phim_igia)
 
    if(ipert==natom+3.or.ipert==natom+4) then
 !    Set Vloc(G=0)=0:
@@ -1483,7 +1485,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      xnorm=one/ucvol
 !    Create fake mpi_enreg to wrap fourdp
      call initmpi_seq(mpi_enreg_fft)
-     ABI_DATATYPE_DEALLOCATE(mpi_enreg_fft%distribfft)
+     ABI_FREE(mpi_enreg_fft%distribfft)
      if (present(comm_fft)) then
        call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
        my_comm_fft=comm_fft;paral_kgb_fft=paral_kgb
@@ -1505,7 +1507,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
        end do
 
        !if (present(atmvlocg1)) atmvlocg1 = workv
-       ABI_DEALLOCATE(workv)
+       ABI_FREE(workv)
      end if
 
      if (optn==1) then
@@ -1520,7 +1522,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
          atmrhor1(:,id)=atmrhor1(:,id)*xnorm
        end do
        !if (present(atmrhog1)) atmrhog1 = workn
-       ABI_DEALLOCATE(workn)
+       ABI_FREE(workn)
      end if
 
 !    Destroy fake mpi_enreg
@@ -1529,7 +1531,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 
    if (.not.present(distribfft)) then
      call destroy_distribfft(my_distribfft)
-     ABI_DATATYPE_DEALLOCATE(my_distribfft)
+     ABI_FREE(my_distribfft)
    end if
 
 !  End the condition of non-electric-field

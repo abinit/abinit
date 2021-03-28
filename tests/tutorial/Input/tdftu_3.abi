@@ -14,10 +14,11 @@ pawecutdg 30
 tolvrs 1.0d-7
 nband  28
 occopt 7 tsmear 0.015
-#tsmear 300 K
 
 #Structural parameters
-natom 4 ntypat 2 typat 1 1 2 2
+natom 4
+ntypat 2
+typat 1 1 2 2
 znucl 28 8
 xred 0 0 0
     0.0 0.0 0.5
@@ -60,6 +61,9 @@ dmatpawu
  pp_dirpath "$ABI_PSPDIR"
  pseudos "Pseudodojo_paw_pbe_standard/Ni.xml, Pseudodojo_paw_pbe_standard/O.xml"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

@@ -6,7 +6,7 @@
 !!  Calculates van der Waals corrections to exchange-correlation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2020 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2021 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -326,29 +326,29 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   ! Check the status of the switch
   if ( .not. vdw_switch ) return
 
-  ABI_ALLOCATE(exc_lda,(2,npts_rho))
-  ABI_ALLOCATE(vxc_lda,(2,npts_rho))
-  ABI_ALLOCATE(vxcg_lda,(2,3,npts_rho))
-  ABI_ALLOCATE(gvec,(3,npts_rho))
-  ABI_ALLOCATE(theta,(nqpts,nspden,5))
-  ABI_ALLOCATE(t3dr,(nr1,nr2,nr3,nqpts))
-  ABI_ALLOCATE(t3dg,(nr1,nr2,nr3,nqpts))
-  ABI_ALLOCATE(ttmp,(nqpts,nr1*nr2*nr3))
-  ABI_ALLOCATE(ptmp,(nqpts,nqpts,2))
-  ABI_ALLOCATE(utmp,(nqpts))
-  ABI_ALLOCATE(wtmp,(nqpts))
+  ABI_MALLOC(exc_lda,(2,npts_rho))
+  ABI_MALLOC(vxc_lda,(2,npts_rho))
+  ABI_MALLOC(vxcg_lda,(2,3,npts_rho))
+  ABI_MALLOC(gvec,(3,npts_rho))
+  ABI_MALLOC(theta,(nqpts,nspden,5))
+  ABI_MALLOC(t3dr,(nr1,nr2,nr3,nqpts))
+  ABI_MALLOC(t3dg,(nr1,nr2,nr3,nqpts))
+  ABI_MALLOC(ttmp,(nqpts,nr1*nr2*nr3))
+  ABI_MALLOC(ptmp,(nqpts,nqpts,2))
+  ABI_MALLOC(utmp,(nqpts))
+  ABI_MALLOC(wtmp,(nqpts))
 
   ! Calculate XC energy density from LDA / GGA
   call vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho,exc_lda,vxc_lda,vxcg_lda)
 
   ! Build theta in 3D and g-vectors
   if ( npts_rho /= nr1*nr2*nr3 ) then
-    MSG_WARNING('The 3D reconstruction of the density might be wrong (npts /= nr1*nr2*nr3)')
+    ABI_WARNING('The 3D reconstruction of the density might be wrong (npts /= nr1*nr2*nr3)')
   end if
 #if defined DEBUG_VERBOSE
   write(msg,'(a,1x,i8,1x,a)') "Will now call xc_vdw_energy", &
 &   nr1 * nr2 * nr3,"times"
-  MSG_COMMENT(msg)
+  ABI_COMMENT(msg)
 #endif
 
   ip1 = 1
@@ -391,7 +391,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
     t3dg(:,:,:,iq1) = t3dg(:,:,:,iq1) / (nr1 * nr2 * nr3)
   end do
 #else
-  MSG_ERROR('vdW-DF calculations require FFTW3 support')
+  ABI_ERROR('vdW-DF calculations require FFTW3 support')
 #endif
 
   ! Repack theta
@@ -414,7 +414,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   ! FIXME: get values of G-vectors
   do ip1=1,npts_rho
     if ( (ir3 > nr3) .and. (ir1 /= 1) .and. (ir2 /= 1) ) then
-      MSG_WARNING('buffer overflow reconstructing theta in 3D')
+      ABI_WARNING('buffer overflow reconstructing theta in 3D')
     end if
 
     gtmp = sqrt(sum(gvec(:,ip1)**2))
@@ -503,7 +503,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
     call dfftw_destroy_plan(fftw3_plan)
   end do
 #else
-  MSG_ERROR('vdW-DF calculations require FFTW3 support')
+  ABI_ERROR('vdW-DF calculations require FFTW3 support')
 #endif
 
   ! Repack the integrand
@@ -522,7 +522,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 
 #if defined DEBUG_VERBOSE
   write(msg,'(a,1x,i8.8,1x,a)') "Will now call xc_vdw_energy",npts_rho,"times"
-  MSG_COMMENT(msg)
+  ABI_COMMENT(msg)
 #endif
 
   ! Calculate and integrate vdW corrections at each point
@@ -598,17 +598,17 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   end if
 
   ! Clean-up the mess
-  ABI_DEALLOCATE(exc_lda)
-  ABI_DEALLOCATE(vxc_lda)
-  ABI_DEALLOCATE(vxcg_lda)
-  ABI_DEALLOCATE(gvec)
-  ABI_DEALLOCATE(theta)
-  ABI_DEALLOCATE(t3dr)
-  ABI_DEALLOCATE(t3dg)
-  ABI_DEALLOCATE(ptmp)
-  ABI_DEALLOCATE(ttmp)
-  ABI_DEALLOCATE(utmp)
-  ABI_DEALLOCATE(wtmp)
+  ABI_FREE(exc_lda)
+  ABI_FREE(vxc_lda)
+  ABI_FREE(vxcg_lda)
+  ABI_FREE(gvec)
+  ABI_FREE(theta)
+  ABI_FREE(t3dr)
+  ABI_FREE(t3dg)
+  ABI_FREE(ptmp)
+  ABI_FREE(ttmp)
+  ABI_FREE(utmp)
+  ABI_FREE(wtmp)
 
   DBG_EXIT("COLL")
 
@@ -862,17 +862,17 @@ subroutine xc_vdw_done(vdw_params)
 
   call libxc_functionals_end(xc_functionals=vdw_funcs)
 
-  ABI_DEALLOCATE(dmesh)
-  ABI_DEALLOCATE(qmesh)
-  ABI_DEALLOCATE(qpoly_basis)
-  ABI_DEALLOCATE(phi)
-  ABI_DEALLOCATE(phi_bicubic)
-  ABI_DEALLOCATE(phi_u_bicubic)
-  ABI_DEALLOCATE(phir)
-  ABI_DEALLOCATE(phir_u)
-  ABI_DEALLOCATE(d2phidr2)
-  ABI_DEALLOCATE(phig)
-  ABI_DEALLOCATE(d2phidg2)
+  ABI_FREE(dmesh)
+  ABI_FREE(qmesh)
+  ABI_FREE(qpoly_basis)
+  ABI_FREE(phi)
+  ABI_FREE(phi_bicubic)
+  ABI_FREE(phi_u_bicubic)
+  ABI_FREE(phir)
+  ABI_FREE(phir_u)
+  ABI_FREE(d2phidr2)
+  ABI_FREE(phig)
+  ABI_FREE(d2phidg2)
 
   DBG_EXIT("COLL")
 
@@ -987,7 +987,7 @@ subroutine xc_vdw_init(vdw_params)
 
   ! Create d-mesh
   ! Note: avoid zero and make sure the last point is exactly dcut
-  ABI_ALLOCATE(dmesh,(ndpts))
+  ABI_MALLOC(dmesh,(ndpts))
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Build] Generating D-mesh"
   call wrtout(std_out,msg,'COLL')
@@ -998,7 +998,7 @@ subroutine xc_vdw_init(vdw_params)
 &   avoid_zero=.true.,exact_max=.true.)
 
   ! Create q-mesh
-  ABI_ALLOCATE(qmesh,(nqpts))
+  ABI_MALLOC(qmesh,(nqpts))
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Build] Generating Q-mesh"
   call wrtout(std_out,msg,'COLL')
@@ -1010,9 +1010,9 @@ subroutine xc_vdw_init(vdw_params)
   ! Build polynomial basis for cubic-spline interpolation
   !   * qpoly_basis(:,1) = polynomial basis
   !   * qpoly_basis(:,2) = second derivative
-  ABI_ALLOCATE(qpoly_basis,(nqpts,nqpts,2))
-  ABI_ALLOCATE(btmp,(nqpts,nqpts))
-  ABI_ALLOCATE(utmp,(nqpts))
+  ABI_MALLOC(qpoly_basis,(nqpts,nqpts,2))
+  ABI_MALLOC(btmp,(nqpts,nqpts))
+  ABI_MALLOC(utmp,(nqpts))
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Build] Generating polynomial basis"
   call wrtout(std_out,msg,'COLL')
@@ -1043,12 +1043,12 @@ subroutine xc_vdw_init(vdw_params)
 &       qpoly_basis(iq1,iq2+1,2) + utmp(iq2)
     end do
   end do
-  ABI_DEALLOCATE(btmp)
-  ABI_DEALLOCATE(utmp)
+  ABI_FREE(btmp)
+  ABI_FREE(utmp)
 
   ! Create kernel and its derivatives
   ! Note: using 4 neighbours for derivatives
-  ABI_ALLOCATE(phi,(ndpts,ndpts,4))
+  ABI_MALLOC(phi,(ndpts,ndpts,4))
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Build] Building kernel and its derivatives"
   call wrtout(std_out,msg,'COLL')
@@ -1126,23 +1126,23 @@ subroutine xc_vdw_init(vdw_params)
 #endif
 
   ! Calculate coefficients for bicubic interpolation
-  ABI_ALLOCATE(phi_bicubic,(4,4,ndpts,ndpts))
+  ABI_MALLOC(phi_bicubic,(4,4,ndpts,ndpts))
   call spline_bicubic(ndpts,ndpts,dmesh,dmesh,phi(:,:,1),phi(:,:,2),&
 &   phi(:,:,3),phi(:,:,4),phi_bicubic)
 
   ! Build filtered kernel
-  ABI_ALLOCATE(phir,(nrpts,nqpts,nqpts))
-  ABI_ALLOCATE(d2phidr2,(nrpts,nqpts,nqpts))
-  ABI_ALLOCATE(phig,(nrpts,nqpts,nqpts))
-  ABI_ALLOCATE(d2phidg2,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phir,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(d2phidr2,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phig,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(d2phidg2,(nrpts,nqpts,nqpts))
   call vdw_df_filter(nqpts,nrpts,my_vdw_params%rcut,my_vdw_params%gcut,ngpts,sofswt)
   my_vdw_params%ngpts = ngpts
 
   ! Find closest indices in dmesh
   ! FIXME: something is missing or should be removed here
-  ABI_ALLOCATE(kern_spline_der,(ndpts,ndpts,3))
-  ABI_ALLOCATE(deltd,(2))
-  ABI_ALLOCATE(xde,(2))
+  ABI_MALLOC(kern_spline_der,(ndpts,ndpts,3))
+  ABI_MALLOC(deltd,(2))
+  ABI_MALLOC(xde,(2))
 
   kern_spline_der(:,:,:) = zero
 
@@ -1171,15 +1171,15 @@ subroutine xc_vdw_init(vdw_params)
     end do
   end do
 
-  ABI_DEALLOCATE(kern_spline_der)
-  ABI_DEALLOCATE(deltd)
-  ABI_DEALLOCATE(xde)
+  ABI_FREE(kern_spline_der)
+  ABI_FREE(deltd)
+  ABI_FREE(xde)
 
   ! Building of the unsoftened kernel
 
   ! Create unsoftened kernel and its derivatives
   ! Note: using 4 neighbours for derivatives
-  ABI_ALLOCATE(phi_u,(ndpts,ndpts,4))
+  ABI_MALLOC(phi_u,(ndpts,ndpts,4))
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Build] Building unsoftened kernel and its derivatives"
   call wrtout(std_out,msg,'COLL')
@@ -1249,27 +1249,27 @@ subroutine xc_vdw_init(vdw_params)
 #endif
 
   ! Calculate coefficients for bicubic interpolation
-  ABI_ALLOCATE(phi_u_bicubic,(4,4,ndpts,ndpts))
+  ABI_MALLOC(phi_u_bicubic,(4,4,ndpts,ndpts))
   call spline_bicubic(ndpts,ndpts,dmesh,dmesh,phi_u(:,:,1),phi_u(:,:,2),&
 &   phi_u(:,:,3),phi_u(:,:,4),phi_u_bicubic)
 
   ! Build filtered kernel
-  ABI_ALLOCATE(phir_u,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phir_u,(nrpts,nqpts,nqpts))
   ! For the local correction we just need the kernel not its
   ! derivatives.
   sofswt = 0
-  !ABI_ALLOCATE(d2phidr2,(nrpts,nqpts,nqpts))
-  !ABI_ALLOCATE(phig,(nrpts,nqpts,nqpts))
-  !ABI_ALLOCATE(d2phidg2,(nrpts,nqpts,nqpts))
+  !ABI_MALLOC(d2phidr2,(nrpts,nqpts,nqpts))
+  !ABI_MALLOC(phig,(nrpts,nqpts,nqpts))
+  !ABI_MALLOC(d2phidg2,(nrpts,nqpts,nqpts))
   call vdw_df_filter(nqpts,nrpts,my_vdw_params%rcut,my_vdw_params%gcut,ngpts,sofswt)
   !  my_vdw_params%ngpts = ngpts already defined above
 
   ! The following is not needed for the local correction:
   ! Find closest indices in dmesh
   ! FIXME: something is missing or should be removed here
-  ! ABI_ALLOCATE(kern_spline_der,(ndpts,ndpts,3))
-  ! ABI_ALLOCATE(deltd,(2))
-  ! ABI_ALLOCATE(xde,(2))
+  ! ABI_MALLOC(kern_spline_der,(ndpts,ndpts,3))
+  ! ABI_MALLOC(deltd,(2))
+  ! ABI_MALLOC(xde,(2))
 
   ! kern_spline_der(:,:,:) = zero
 
@@ -1298,9 +1298,9 @@ subroutine xc_vdw_init(vdw_params)
   !   end do
   ! end do
 
-  ! ABI_DEALLOCATE(kern_spline_der)
-  ! ABI_DEALLOCATE(deltd)
-  ! ABI_DEALLOCATE(xde)
+  ! ABI_FREE(kern_spline_der)
+  ! ABI_FREE(deltd)
+  ! ABI_FREE(xde)
 
   call vdw_df_internal_checks(1)
 
@@ -1365,12 +1365,12 @@ subroutine xc_vdw_libxc_init(ixc_vdw)
     case (3)
       ix = libxc_functionals_getid(x_vdw3)
       ic = libxc_functionals_getid(c_vdw1)
-      MSG_ERROR('[vdW-DF] C09 not available for now')
+      ABI_ERROR('[vdW-DF] C09 not available for now')
     case default
-      MSG_ERROR('[vdW-DF] invalid setting of vdw_xc')
+      ABI_ERROR('[vdW-DF] invalid setting of vdw_xc')
   end select
   if ( (ix == -1) .or. (ic == -1) ) then
-    MSG_ERROR('[vdW-DF] unable to set LibXC parameters')
+    ABI_ERROR('[vdW-DF] unable to set LibXC parameters')
   end if
   ixc = -(ix * 1000 + ic)
 
@@ -1594,51 +1594,51 @@ subroutine xc_vdw_read(filename)
   NETCDF_VDWXC_CHECK(nf90_inquire_dimension(ncid,nrpts_id,len=nrpts))
 
   ! Get qmesh
-  ABI_ALLOCATE(qmesh,(nqpts))
+  ABI_MALLOC(qmesh,(nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(2),qmesh))
 
   ! Get dmesh
-  ABI_ALLOCATE(dmesh,(ndpts))
+  ABI_MALLOC(dmesh,(ndpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(3),dmesh))
 
   ! Get phi
-  ABI_ALLOCATE(phi,(ndpts,ndpts,nderivs))
+  ABI_MALLOC(phi,(ndpts,ndpts,nderivs))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(4),phi))
 
   ! Get phi_u
-  ABI_ALLOCATE(phi_u,(ndpts,ndpts,nderivs))
+  ABI_MALLOC(phi_u,(ndpts,ndpts,nderivs))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(5),phi_u))
 
   ! Get phi_bicubic
-  ABI_ALLOCATE(phi_bicubic,(nderivs,nderivs,ndpts,ndpts))
+  ABI_MALLOC(phi_bicubic,(nderivs,nderivs,ndpts,ndpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(6),phi_bicubic))
 
   ! Get phi_u_bicubic
-  ABI_ALLOCATE(phi_u_bicubic,(nderivs,nderivs,ndpts,ndpts))
+  ABI_MALLOC(phi_u_bicubic,(nderivs,nderivs,ndpts,ndpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(7),phi_u_bicubic))
 
   ! Get phir
-  ABI_ALLOCATE(phir,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phir,(nrpts,nqpts,nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(8),phir))
 
   ! Get phir_u
-  ABI_ALLOCATE(phir_u,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phir_u,(nrpts,nqpts,nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(9),phir_u))
 
   ! Get d2phidr2
-  ABI_ALLOCATE(d2phidr2,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(d2phidr2,(nrpts,nqpts,nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(10),d2phidr2))
 
   ! Get phig
-  ABI_ALLOCATE(phig,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phig,(nrpts,nqpts,nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(11),phig))
 
   ! Get d2phidg2
-  ABI_ALLOCATE(d2phidg2,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(d2phidg2,(nrpts,nqpts,nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(12),d2phidg2))
 
   ! Get qpoly_basis
-  ABI_ALLOCATE(qpoly_basis,(nqpts,nqpts,npoly))
+  ABI_MALLOC(qpoly_basis,(nqpts,nqpts,npoly))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(13),qpoly_basis))
 
   ! Close file
@@ -1650,7 +1650,7 @@ subroutine xc_vdw_read(filename)
   my_vdw_params%nqpts = nqpts
   my_vdw_params%nrpts = nrpts
 #else
-  MSG_ERROR('reading vdW-DF variables requires NetCDF')
+  ABI_ERROR('reading vdW-DF variables requires NetCDF')
 #endif
 
   DBG_EXIT("COLL")
@@ -2066,7 +2066,7 @@ subroutine xc_vdw_write(filename)
   ! Close file
   NETCDF_VDWXC_CHECK(nf90_close(ncid))
 #else
-  MSG_WARNING('writing vdW-DF variables requires NetCDF - skipping')
+  ABI_WARNING('writing vdW-DF variables requires NetCDF - skipping')
 #endif
 
   DBG_EXIT("COLL")
@@ -2131,15 +2131,15 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
   dg = pi / rcut
   ngpts = 1 + int(gcut/dg)
 
-  ABI_ALLOCATE(utmp,(nrpts))
+  ABI_MALLOC(utmp,(nrpts))
 
   ! Create radial mesh for radial FT: src/32_util/radsintr.F90
-  ABI_ALLOCATE(rmesh,(nrpts))
+  ABI_MALLOC(rmesh,(nrpts))
   forall(ir=1:nrpts) rmesh(ir) = dr * dble(ir-1)
 
   if ( sofswt == 1 ) then
   ! Create reciprocal radial mesh
-   ABI_ALLOCATE(gmesh,(ngpts))
+   ABI_MALLOC(gmesh,(ngpts))
    forall(ig=1:ngpts) gmesh(ig) = dg * dble(ig-1)
   end if
 
@@ -2226,7 +2226,7 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
      end do
    end do
 
-  ABI_DEALLOCATE(utmp)
+  ABI_FREE(utmp)
 
   DBG_EXIT("COLL")
 
@@ -2294,7 +2294,7 @@ function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
     ! Note 2: contrary to RS09, deltad is proportional to dsoft.
 
     if ( phisoft < 0 ) then
-      MSG_ERROR('the softened kernel must be positive')
+      ABI_ERROR('the softened kernel must be positive')
     end if
 
     vdw_df_kernel = phisoft
@@ -2413,16 +2413,16 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
   call wrtout(std_out,msg,'COLL')
 #endif
 
-  ABI_ALLOCATE(amesh,(napts))
-  ABI_ALLOCATE(amesh_cos,(napts))
-  ABI_ALLOCATE(amesh_sin,(napts))
-  ABI_ALLOCATE(dphida,(napts))
-  ABI_ALLOCATE(dphidb,(napts))
-  ABI_ALLOCATE(nu1,(napts))
-  ABI_ALLOCATE(nu2,(napts))
-  ABI_ALLOCATE(ycoef,(3,napts))
-  ABI_ALLOCATE(work,(napts))
-  ABI_ALLOCATE(eint,(napts))
+  ABI_MALLOC(amesh,(napts))
+  ABI_MALLOC(amesh_cos,(napts))
+  ABI_MALLOC(amesh_sin,(napts))
+  ABI_MALLOC(dphida,(napts))
+  ABI_MALLOC(dphidb,(napts))
+  ABI_MALLOC(nu1,(napts))
+  ABI_MALLOC(nu2,(napts))
+  ABI_MALLOC(ycoef,(3,napts))
+  ABI_MALLOC(work,(napts))
+  ABI_MALLOC(eint,(napts))
   ! Init amesh
   !FIXME: allow for other mesh types
   !Now intruducing metyp, setting mesh_cutoff to acut, removing
@@ -2496,16 +2496,16 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
   vdw_df_kernel_value = vdw_df_kernel_value * 2 / pi**2
 
   ! Clean-up the mess
-  ABI_DEALLOCATE(amesh)
-  ABI_DEALLOCATE(amesh_cos)
-  ABI_DEALLOCATE(amesh_sin)
-  ABI_DEALLOCATE(nu1)
-  ABI_DEALLOCATE(nu2)
-  ABI_DEALLOCATE(dphida)
-  ABI_DEALLOCATE(dphidb)
-  ABI_DEALLOCATE(ycoef)
-  ABI_DEALLOCATE(work)
-  ABI_DEALLOCATE(eint)
+  ABI_FREE(amesh)
+  ABI_FREE(amesh_cos)
+  ABI_FREE(amesh_sin)
+  ABI_FREE(nu1)
+  ABI_FREE(nu2)
+  ABI_FREE(dphida)
+  ABI_FREE(dphidb)
+  ABI_FREE(ycoef)
+  ABI_FREE(work)
+  ABI_FREE(eint)
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
   DBG_EXIT("COLL")
@@ -2562,9 +2562,9 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
 
   is_gga=libxc_functionals_isgga(vdw_funcs)
 
-  ABI_ALLOCATE(rho_tmp,(npts_rho,nspden))
+  ABI_MALLOC(rho_tmp,(npts_rho,nspden))
   if (is_gga) then
-    ABI_ALLOCATE(grho2,(npts_rho,2*min(nspden,2)-1))
+    ABI_MALLOC(grho2,(npts_rho,2*min(nspden,2)-1))
   end if
 
   ! Convert the quantities provided by ABINIT to the ones needed by LibXC
@@ -2614,9 +2614,9 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
 &                                 xc_functionals=vdw_funcs)
   end if
 
-  ABI_DEALLOCATE(rho_tmp)
+  ABI_FREE(rho_tmp)
   if (is_gga) then
-    ABI_DEALLOCATE(grho2)
+    ABI_FREE(grho2)
   end if
 
   DBG_EXIT("COLL")
@@ -2714,12 +2714,12 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
         call wrtout(std_out,msg,'COLL')
 #endif
         if (open_file(mesh_file,msg, newunit=unt,status="old",action="read") /= 0) then
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
         end if
         read(unt,'(e20.8)') mesh
         close(unit=unt)
       else
-        MSG_ERROR("  You must specify a mesh file for this mesh type!")
+        ABI_ERROR("  You must specify a mesh file for this mesh type!")
       end if
 
     case(1)
@@ -2760,7 +2760,7 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
         call wrtout(std_out,msg,'COLL')
 #endif
         if ( log_inc < log_tol ) then
-          MSG_WARNING("  The logarithmic increment is very low!")
+          ABI_WARNING("  The logarithmic increment is very low!")
         end if
 
         do im = 1,npts
@@ -2781,7 +2781,7 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
           mesh(npts) = mesh_cutoff
         end if
       else
-        MSG_ERROR("  You must specify a mesh ratio for this mesh type!")
+        ABI_ERROR("  You must specify a mesh ratio for this mesh type!")
       end if
 
       ! Make sure the last point is qcut
@@ -2822,20 +2822,20 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
         call wrtout(std_out,msg,'COLL')
 #endif
         if ( log_inc < log_tol ) then
-          MSG_WARNING("  The logarithmic increment is very low!")
+          ABI_WARNING("  The logarithmic increment is very low!")
         end if
 
         do im = 1,npts
           mesh(im) = exp_ofs / log(exp_inc * (im-1))
         end do
       else
-        MSG_ERROR("  You must specify a mesh ratio for this mesh type!")
+        ABI_ERROR("  You must specify a mesh ratio for this mesh type!")
       end if
 
     case default
 
       write(msg,'(2x,a,1x,i2)') "Unknown mesh type",mesh_type
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
 
   end select
 
@@ -2974,7 +2974,7 @@ function vdw_df_interpolate(d1,d2,sofswt)
       end do
 
     case default
-      MSG_ERROR("  vdW-DF soft switch must be 0 or 1")
+      ABI_ERROR("  vdW-DF soft switch must be 0 or 1")
 
   end select
 
@@ -3038,10 +3038,10 @@ subroutine vdw_df_internal_checks(test_mode)
     ntest = 600
     delta_test = dmesh(ndpts) / (2 * ntest)
 
-    ABI_ALLOCATE(kern_test_c,(ntest))
-    ABI_ALLOCATE(kern_test_i,(ntest))
-    ABI_ALLOCATE(intg_calc,(ntest))
-    ABI_ALLOCATE(intg_int,(ntest))
+    ABI_MALLOC(kern_test_c,(ntest))
+    ABI_MALLOC(kern_test_i,(ntest))
+    ABI_MALLOC(intg_calc,(ntest))
+    ABI_MALLOC(intg_int,(ntest))
 
 #if defined DEBUG_VERBOSE
     write(msg,'(a,4x,3(1x,a10),a)') ch10, "D","Calcul.","Interp.",ch10
@@ -3074,10 +3074,10 @@ subroutine vdw_df_internal_checks(test_mode)
     end if
     call wrtout(std_out,msg,'COLL')
 
-    ABI_DEALLOCATE(kern_test_c)
-    ABI_DEALLOCATE(kern_test_i)
-    ABI_DEALLOCATE(intg_calc)
-    ABI_DEALLOCATE(intg_int)
+    ABI_FREE(kern_test_c)
+    ABI_FREE(kern_test_i)
+    ABI_FREE(intg_calc)
+    ABI_FREE(intg_int)
 
   end if
 

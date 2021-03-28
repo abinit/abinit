@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.3.2 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h37 )
+.Starting date : Thu 10 Dec 2020.
+- ( at 18h38 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/wannier90_t03/t03.in
-- output file    -> t03.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/TestBot_MPI1/wannier90_t03/t03.abi
+- output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
 
@@ -574,8 +574,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -882,8 +882,8 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -961,7 +961,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
-       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2   0.000 -11.867  -0.137  -0.176  -0.145   0.000  -0.000  -0.000  -0.000
        -0.000   0.000   0.000  -0.000   0.000  -5.045  -0.190  -0.229  -0.197
@@ -975,8 +975,8 @@ meta: {optdriver: 3, gwcalctyp: 28, }
        -0.000   0.000  -0.000  -0.000  -0.000  -1.121  -0.044  -0.052  -0.046
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  24.2189
-  dielectric constant without local fields =  25.8186
+  dielectric constant =  24.2185
+  dielectric constant without local fields =  25.8182
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     17.78  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -984,19 +984,19 @@ meta: {optdriver: 3, gwcalctyp: 28, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.041   0.004  -0.012   0.012  -0.004  -0.004   0.012  -0.012   0.004
-     -0.000   0.004  -0.012   0.012  -0.004   0.004  -0.012   0.012  -0.004
+      0.000   0.004  -0.012   0.012  -0.004   0.004  -0.012   0.012  -0.004
        1       2       3       4       5       6       7       8       9
       0.041   0.004  -0.012   0.012  -0.004  -0.004   0.012  -0.012   0.004
-     -0.000  -0.004   0.012  -0.012   0.004  -0.004   0.012  -0.012   0.004
+      0.000  -0.004   0.012  -0.012   0.004  -0.004   0.012  -0.012   0.004
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.5944 [eV]
        1       2       3       4       5       6       7       8       9
-      0.490   0.007  -0.022   0.022  -0.007  -0.007   0.022  -0.022   0.007
-      0.000   0.007  -0.022   0.022  -0.007   0.007  -0.022   0.022  -0.007
+      0.490   0.008  -0.022   0.022  -0.008  -0.008   0.022  -0.022   0.008
+      0.000   0.008  -0.022   0.022  -0.008   0.008  -0.022   0.022  -0.008
        1       2       3       4       5       6       7       8       9
-      0.490   0.007  -0.022   0.022  -0.007  -0.007   0.022  -0.022   0.007
-      0.000  -0.007   0.022  -0.022   0.007  -0.007   0.022  -0.022   0.007
+      0.490   0.008  -0.022   0.022  -0.008  -0.008   0.022  -0.022   0.008
+      0.000  -0.008   0.022  -0.022   0.008  -0.008   0.022  -0.022   0.008
 
 
 
@@ -1297,7 +1297,7 @@ iteration_state: {dtset: 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.521
-QP_gap     :    3.413
+QP_gap     :    3.414
 Delta_QP_KS:    0.892
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
@@ -1583,8 +1583,8 @@ meta: {optdriver: 3, gwcalctyp: 28, }
        -0.000   0.000  -0.000  -0.000   0.000  -1.168  -0.055  -0.062  -0.057
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  11.5395
-  dielectric constant without local fields =  12.2645
+  dielectric constant =  11.5394
+  dielectric constant without local fields =  12.2643
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     18.63  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -1601,10 +1601,10 @@ meta: {optdriver: 3, gwcalctyp: 28, }
    Upper and lower wings at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
       0.554   0.008  -0.024   0.024  -0.008  -0.008   0.024  -0.024   0.008
-      0.000   0.008  -0.024   0.024  -0.008   0.008  -0.024   0.024  -0.008
+     -0.000   0.008  -0.024   0.024  -0.008   0.008  -0.024   0.024  -0.008
        1       2       3       4       5       6       7       8       9
       0.554   0.008  -0.024   0.024  -0.008  -0.008   0.024  -0.024   0.008
-      0.000  -0.008   0.024  -0.024   0.008  -0.008   0.024  -0.024   0.008
+     -0.000  -0.008   0.024  -0.024   0.008  -0.008   0.024  -0.024   0.008
 
 
 
@@ -1859,8 +1859,8 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
   Number of electrons    =    7.9979
 
-  QP Band energy    [Ha] =  4.82813740219224E-01
-  QP Hartree energy [Ha] =  5.50803337179942E-01
+  QP Band energy    [Ha] =  4.82813480892918E-01
+  QP Hartree energy [Ha] =  5.50803341802971E-01
 
 --------------------------------------------------------------------------------
 
@@ -2126,8 +2126,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2206,30 +2206,30 @@ force_length_stats: {min: null, max: null, mean: null, }
    Writing top of the overlap matrix: M_mn(ikb,ik)
    m=n=1:3, ikb=1, ik=1
 
-;   (  -0.983321  -0.153223 ,  -0.071063  -0.018812 ,   0.000318   0.000298 ,    )
-;   (   0.018028   0.004717 ,  -0.393852  -0.170418 ,   0.721710   0.023567 ,    )
-;   (  -0.017827  -0.005012 ,   0.395004   0.171352 ,   0.371261   0.034657 ,    )
+;   (  -0.983320  -0.153228 ,  -0.071063  -0.018812 ,   0.000318   0.000298 ,    )
+;   (   0.018028   0.004717 ,  -0.393851  -0.170417 ,   0.721711   0.023564 ,    )
+;   (  -0.017827  -0.005012 ,   0.395007   0.171348 ,   0.371259   0.034651 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
-;   (  -0.013664   0.820615 ,  -0.000723  -0.000335 ,   0.000156  -0.000163 ,    )
-;   (  -0.000411   0.000071 ,   0.614085   0.758920 ,   0.008974   0.049278 ,    )
-;   (   0.000142   0.000052 ,  -0.037214  -0.033570 ,   0.322625   0.921188 ,    )
+;   (  -0.013662   0.820615 ,  -0.000723  -0.000335 ,   0.000156  -0.000163 ,    )
+;   (  -0.000411   0.000071 ,   0.614117   0.758894 ,   0.008984   0.049278 ,    )
+;   (   0.000142   0.000052 ,  -0.037219  -0.033568 ,   0.322869   0.921102 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
-;   (   0.192207   0.944241 ,   0.192211   0.944255 ,   0.192215   0.944233 ,    )
-;   (  -0.000758   0.499919 ,  -0.001489   0.497788 ,   0.001412  -0.497239 ,    )
-;   (  -0.001425   0.497810 ,   0.002112  -0.500507 ,  -0.002102   0.499933 ,    )
+;   (   0.192204   0.944242 ,   0.192207   0.944255 ,   0.192212   0.944233 ,    )
+;   (  -0.000757   0.499920 ,  -0.001489   0.497787 ,   0.001412  -0.497238 ,    )
+;   (  -0.001419   0.497809 ,   0.002107  -0.500508 ,  -0.002096   0.499934 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
 ;   (  -0.286157   0.191652 ,  -0.286440   0.192027 ,  -0.286425   0.192172 ,    )
-;   (  -0.772680   0.178641 ,   0.393738  -0.116113 ,   0.377432  -0.061430 ,    )
-;   (   0.023660   0.023066 ,   0.649253  -0.197563 ,  -0.672052   0.174215 ,    )
+;   (  -0.772680   0.178638 ,   0.393738  -0.116111 ,   0.377433  -0.061428 ,    )
+;   (   0.023661   0.023065 ,   0.649242  -0.197602 ,  -0.672041   0.174255 ,    )
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see t03o_DS7_w90.wout for details.
@@ -2668,10 +2668,57 @@ P           mkmem7         64
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         12.3        0.20      0.003
+- Total wall clock time (s,m,h):         12.3        0.21      0.003
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           12.3, wall_time =           12.3
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  6.688  54.4      6.705  54.3              2      -1.00        1.00       1.00
+- fourwf%(pot)                   1.671  13.6      1.667  13.5           7072      -1.00        1.00       1.00
+- invars2                        0.551   4.5      0.552   4.5              7      -1.00        1.00       1.00
+- pspini                         0.501   4.1      0.502   4.1              7      -1.00        1.00       1.00
+- mkresi                         0.176   1.4      0.174   1.4             64      -1.00        1.01       1.01
+- abinit(2)                      0.145   1.2      0.145   1.2              1      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.135   1.1      0.131   1.1             -1      -1.00        1.03       1.03
+- projbd                         0.117   1.0      0.107   0.9           8624      -1.00        1.09       1.09
+- nonlop(apply)                  0.107   0.9      0.119   1.0           7328      -1.00        0.90       0.90
+- ewald                          0.105   0.9      0.104   0.8              9      -1.00        1.01       1.01
+- timing timab                   0.103   0.8      0.104   0.8             10      -1.00        0.99       0.99
+- getghc-other                   0.062   0.5      0.064   0.5             -1      -1.00        0.97       0.97
+- others (117)                   0.159   1.3      0.171   1.4             -1      -1.00        0.93       0.93
+-<END_TIMER>
+-
+- subtotal                      10.520  85.5     10.545  85.4                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          12.3, wall_time =          12.3
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  6.688  54.4      6.705  54.3              2      -1.00        1.00       1.00
+- fourwf%(pot)                   1.671  13.6      1.667  13.5           7072      -1.00        1.00       1.00
+- invars2                        0.551   4.5      0.552   4.5              7      -1.00        1.00       1.00
+- pspini                         0.501   4.1      0.502   4.1              7      -1.00        1.00       1.00
+- mkresi                         0.176   1.4      0.174   1.4             64      -1.00        1.01       1.01
+- abinit(2)                      0.145   1.2      0.145   1.2              1      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.135   1.1      0.131   1.1             -1      -1.00        1.03       1.03
+- projbd                         0.117   1.0      0.107   0.9           8624      -1.00        1.09       1.09
+- nonlop(apply)                  0.107   0.9      0.119   1.0           7328      -1.00        0.90       0.90
+- ewald                          0.105   0.9      0.104   0.8              9      -1.00        1.01       1.01
+- timing timab                   0.103   0.8      0.104   0.8             10      -1.00        0.99       0.99
+- getghc-other                   0.062   0.5      0.064   0.5             -1      -1.00        0.97       0.97
+- others (117)                   0.159   1.3      0.171   1.4             -1      -1.00        0.93       0.93
+-<END_TIMER>
 
+- subtotal                      10.520  85.5     10.545  85.4                                  1.00       1.00
 
 ================================================================================
 
@@ -2760,10 +2807,10 @@ P           mkmem7         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         13.2  wall=         13.3
+- Proc.   0 individual time (sec): cpu=         12.3  wall=         12.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  46 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.2  wall=         13.3
++Overall time at end (sec) : cpu=         12.3  wall=         12.3

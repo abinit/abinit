@@ -6,7 +6,7 @@
 !!   Simple argument parser used in main programs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MG)
+!!  Copyright (C) 2008-2021 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -218,8 +218,12 @@ type(args_t) function args_parser() result(args)
       call ipi_setup(arg, xmpi_world)
 
     ! Enable/disable [Z,C]GEMM3
-    else if (begins_with(arg, "--xgemm3m")) then
-      call linalg_allow_gemm3m(parse_yesno(arg, "--xgemm3m"), write_msg=iam_master)
+    else if (begins_with(arg, "--use-xgemm3m")) then
+      call linalg_allow_gemm3m(parse_yesno(arg, "--use-xgemm3m"), write_msg=iam_master)
+
+    ! Enable/disable usage of MPI_IN_PLACE.
+    else if (begins_with(arg, "--use-mpi-in-place")) then
+      call xmpi_set_inplace_operations(parse_yesno(arg, "--use-mpi-in-place"))
 
     ! Enable/disable PLASMA
     else if (begins_with(arg, "--plasma")) then
@@ -237,7 +241,7 @@ type(args_t) function args_parser() result(args)
       call libpaw_log_flag_set(.True.)
 
     else if (arg == "--netcdf-classic") then
-      !  Use netcdf classic mode for new files when only sequential-IO needs to be performed
+      ! Use netcdf classic mode for new files when only sequential-IO needs to be performed
       call nctk_use_classic_for_seq()
 
     else if (arg == "--enforce-fortran-io") then
@@ -254,13 +258,17 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"-b, --build                Show build parameters and exit."
         write(std_out,*)"-d, --dry-run              Validate input file and exit."
         write(std_out,*)"-j, --omp-num-threads      Set the number of OpenMp threads."
-        write(std_out,*)"--abimem-level NUM         Set memory profiling level. Requires HAVE_MEM_PROFILING"
-        write(std_out,*)"--abimem-limit-mb NUM      Log malloc/free only if size > limit in Megabytes. Requires abimem-level 3"
-        write(std_out,*)"--ieee-halt                Halt the code if one of the *usual* IEEE exceptions is raised."
-        write(std_out,*)"--ieee-signal              Signal the occurrence of the *usual* IEEE exceptions."
-        write(std_out,*)"--fft-ialltoall[=bool]     Use non-blocking ialltoall in MPI-FFT (used only if ndat>1 and MPI3)."
-        write(std_out,*)"--xgemm3m[=bool]           Use [Z,C]GEMM3M]"
-        write(std_out,*)"--gnu-mtrace               Enable mtrace (requires GNU and clib)."
+        write(std_out,*)"--use-xgemm3m[=yesno]      Use ZGEMM3M routines instead of ZGEMM. Default: no "
+        write(std_out,*)"--use-mpi-in-place[=yesno] Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum. Default: no"
+        write(std_out,*)"                           Note that some MPI libs e.g. intel-mpi may not implement this feature"
+        write(std_out,*)"                           correctly so it is adviced to test this option with e.g. structural"
+        write(std_out,*)"                           relaxations before running production calculations."
+        write(std_out,*)"--ipi                      Activate socket-driven calculation using i-pi protocol."
+        write(std_out,*)"                           For UNIX socket, use: --ipi {unixsocket}:UNIX"
+        write(std_out,*)"                           For INET socket, use  --ipi {host}:{port}. Usage example:"
+        write(std_out,*)"                           `abinit run.abi --ipi {unixsocket}:UNIX > run.log`"
+        write(std_out,*)"                           NB: Requires ionmov 28 and some tuning of input variables. See:"
+        write(std_out,*)"                           https://wiki.fysik.dtu.dk/ase/dev/ase/calculators/socketio/socketio.html"
         write(std_out,*)"--log                      Enable log files and status files in parallel execution."
         write(std_out,*)"--netcdf-classic           Use netcdf classic mode for new files if parallel-IO is not needed."
         write(std_out,*)"                           Default is netcdf4/hdf5"
@@ -274,9 +282,19 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"                               minutes"
         write(std_out,*)"                               minutes:seconds"
         write(std_out,*)"                               hours:minutes:seconds"
-        write(std_out,*)"--verbose                  Verbose mode"
+        write(std_out,*)"                           At present only GS, relaxations and MD runs support this option"
+        write(std_out,*)"--verbose                  Enable verbose mode in argparse"
         write(std_out,*)"-h, --help                 Show this help and exit."
 
+        write(std_out,*)"=============================="
+        write(std_out,*)"=== Options for developers ==="
+        write(std_out,*)"=============================="
+        write(std_out,*)"--abimem-level NUM         Set memory profiling level. Requires HAVE_MEM_PROFILING"
+        write(std_out,*)"--abimem-limit-mb NUM      Log malloc/free only if size > limit in Megabytes. Requires abimem-level 3"
+        write(std_out,*)"--fft-ialltoall[=yesno]    Use non-blocking ialltoall in MPI-FFT (used only if ndat > 1 and MPI2+)."
+        write(std_out,*)"--gnu-mtrace               Enable mtrace (requires GNU and clib)."
+        write(std_out,*)"--ieee-halt                Halt the code if one of the *usual* IEEE exceptions is raised."
+        write(std_out,*)"--ieee-signal              Signal the occurrence of the *usual* IEEE exceptions."
         ! Multibinit
         write(std_out,*)"--F03                      Run F03 mode (for Multibinit only)."
       end if
@@ -287,7 +305,7 @@ type(args_t) function args_parser() result(args)
 
     else
       if (firstchar(arg, "-")) then
-        MSG_WARNING("Unsupported option: "//trim(arg))
+        ABI_WARNING("Unsupported option: "//trim(arg))
         args%exit = args%exit + 1
       else
         continue
@@ -352,7 +370,7 @@ logical function parse_yesno(arg, optname, default) result(bool)
    bool = .False.
  case default
    write(std_out,*)"Wrong option ",trim(arg),". Will default to ",bool
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end select
 
 end function parse_yesno

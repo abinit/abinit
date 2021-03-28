@@ -39,7 +39,7 @@ xcart1?  -2.6816281699E+00  3.1381646512E+00 -1.1068275904E+00
 typat11 1 3*4
 # with N1s core-hole
 typat12 2 3*4
-charge12  1
+cellcharge12  1
 
 # NH2CH3
 natom2? 7

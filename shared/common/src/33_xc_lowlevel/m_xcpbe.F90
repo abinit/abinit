@@ -6,7 +6,7 @@
 !! Treat XC functionals closely linked with the Perdew-Wang 92 LSD and the PBE GGA.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG,MF,LG,CE)
+!!  Copyright (C) 1998-2021 ABINIT group (XG,MF,LG,CE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -252,13 +252,13 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
    write(message, '(a,a,a,a,i12,a)' ) ch10,&
 &   ' xcpbe : BUG -',ch10,&
 &   '  Option must be 1, 2, 3, 5, 6, 7, 8, -1 or -2 ; argument was ',option,'.'
-!  MSG_BUG(message)
+!  ABI_BUG(message)
  end if
 
 !Checks the compatibility between the presence of dvxci and ndvxci
  if(ndvxci /=0 .neqv. present(dvxci))then
    message = ' If ndvxci/=0 there must the optional argument dvxci'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Checks the compatibility between the inputs and the presence of the optional arguments
@@ -266,7 +266,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
    write(message, '(3a,i8,a)' )&
 &   'The order does not require the presence of dvxci',ch10,&
 &   'that is allowed when |order|>1, while we have',order,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(ndvxci /= 0 .and. (&
@@ -282,21 +282,21 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
 &   '    8          -2',ch10,&
 &   '    15       2, 5,6,7',ch10,&
 &   '  While we have: ndvxc=',ndvxci,', option=',option,', nspden=',nspden,', order=',order
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if ((option == 1 .or. option == -1 .or. option ==3) .and.  (present(grho2_updn) .or. present(dvxcdgr))) then
    write(message, '(a,a,a,i6,a)' )&
 &   'The option chosen does not need the presence',ch10,&
 &   'of the gradient, or of the array dvxcdgr in the input, needed if option/=1,-1,3 , while we have',option,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (order /= 3 .and. present(d2vxci)) then
    write(message, '(a,a,a,i6,a)' )&
 &   'The order chosen does not need the presence',ch10,&
 &   'of the array d2vxci, needed if order=3 , while we have',order,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(initialized==0)then
@@ -418,13 +418,13 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
  end if
 
 
- ABI_ALLOCATE(rhoarr,(npts))
- ABI_ALLOCATE(rhom1_3,(npts))
- ABI_ALLOCATE(rho_updnm1_3,(npts,2))
- ABI_ALLOCATE(zetm,(npts))
- ABI_ALLOCATE(zetmm1_3,(npts))
- ABI_ALLOCATE(zetp,(npts))
- ABI_ALLOCATE(zetpm1_3,(npts))
+ ABI_MALLOC(rhoarr,(npts))
+ ABI_MALLOC(rhom1_3,(npts))
+ ABI_MALLOC(rho_updnm1_3,(npts,2))
+ ABI_MALLOC(zetm,(npts))
+ ABI_MALLOC(zetmm1_3,(npts))
+ ABI_MALLOC(zetp,(npts))
+ ABI_MALLOC(zetpm1_3,(npts))
 
  do ispden=1,nspden
    call invcb(rho_updn(:,ispden),rho_updnm1_3(:,ispden),npts)
@@ -5021,7 +5021,7 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
    write(message, '(a,a,a,i12,a)' )&
 &   '  Argument nspden must be 1 or 2; ',ch10,&
 &   '  Value provided as argument was ',nspden,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !DEBUG
@@ -5138,13 +5138,13 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !
 !end if
 !ENDDEBUG
 
- ABI_DEALLOCATE(rhoarr)
- ABI_DEALLOCATE(rhom1_3)
- ABI_DEALLOCATE(rho_updnm1_3)
- ABI_DEALLOCATE(zetm)
- ABI_DEALLOCATE(zetmm1_3)
- ABI_DEALLOCATE(zetp)
- ABI_DEALLOCATE(zetpm1_3)
+ ABI_FREE(rhoarr)
+ ABI_FREE(rhom1_3)
+ ABI_FREE(rho_updnm1_3)
+ ABI_FREE(zetm)
+ ABI_FREE(zetmm1_3)
+ ABI_FREE(zetp)
+ ABI_FREE(zetpm1_3)
 
 !DEBUG
 !deallocate(wecrsz,d1wecrsz,d2wecrsz,d3wecrsz)

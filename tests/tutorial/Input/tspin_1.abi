@@ -8,37 +8,50 @@
 # The first dataset is without magnetization for comparison
 
  ndtset 2
-#spin related quantities (only second dataset)
+
+# Magnetism: spin related quantities (only second dataset)
  spinat2   0.0 0.0 4.0
  nsppol2   2
-#generate the total density of states in both cases
- prtdos 1
-#Rather standard input for a bcc metal 
- prtden   1
- tolvrs   1.0d-10
-  acell   3*5.42
+
+# cutoff, k-points: 
    ecut   18.0
-  natom   1
-  nband   8
   ngkpt   4 4 4
 nshiftk   1
+ shiftk   0.5 0.5 0.5
 
+# SCF:
   nstep   50
+ tolvrs   1.0d-10
+
+# Crystal cell definition:
+  natom   1
  ntypat   1
- occopt   3
+ znucl    26
+  typat   1
+   xred   0.0  0.0  0.0
+
+  acell   3*5.42
   rprim   -0.5  0.5  0.5
            0.5 -0.5  0.5
            0.5  0.5 -0.5
- shiftk   0.5 0.5 0.5
+
+# Electron occupation:
+ occopt   3
+  nband   10
  tsmear   0.01
-  typat   1
-   xred   0.0  0.0  0.0
- znucl    26
+
+# printing:
+ prtdos   1
+ prtden   1
 
 
+# Pseudo:
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/26fe.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

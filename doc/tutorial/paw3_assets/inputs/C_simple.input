@@ -15,5 +15,5 @@ vanderbilt                                  ! vanderbilt scheme for finding proj
 1.3                                         ! Core radius for occ. 2s state
 1.3                                         ! Core radius for occ. 2p state
 XMLOUT                                      ! Run atompaw2abinit converter
-prtcorewf noxcnhat nospline noptim          ! Abinit conversion options
-0                                           ! Exit
+prtcorewf noxcnhat nospline noptim          ! XML conversion options
+END                                         ! Exit

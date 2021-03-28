@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,7 +68,7 @@ contains
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
     integer, intent(in) :: order
     integer, intent(in) :: nature(order), mshape(order)
-    ABI_ALLOCATE(self%nature, (order))
+    ABI_MALLOC(self%nature, (order))
     self%nature(:)=nature(:)
     self%order=order
     if (find_int(nature, displacement)/=0) self%has_displacement=.True.
@@ -83,7 +83,7 @@ contains
   subroutine finalize(self)
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
     if (allocated(self%nature)) then
-       ABI_DEALLOCATE(self%nature)
+       ABI_FREE(self%nature)
     end if
     !call self%coeff%finalize()
     self%order=0
@@ -108,7 +108,7 @@ contains
     ABI_UNUSED_A(lwf_force)
     ABI_UNUSED_A(energy)
     ABI_UNUSED_A(energy_table)
-    MSG_ERROR("calculate not implemented for this effpot.")
+    ABI_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 
 

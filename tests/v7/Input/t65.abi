@@ -58,9 +58,9 @@ nband 8
 nbandhf 6
 
 # MG These variables are needed to run the test in parallel (bug or feature?)
-#npkpt2 2          # Number of processors for k-point parallelization
+#np_spkpt2 2          # Number of processors for k-point parallelization
 #nphf2  2           # Number of processors for occupied states parallelization
-                   # The calculation thus requires npkpt*nphf processors.
+                   # The calculation thus requires np_spkpt*nphf processors.
 
 
 
@@ -76,7 +76,7 @@ nbandhf 6
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = C. Martins
-#%% keywords = HF, PBE0, FAILS_IFMPI
+#%% keywords = HF, PBE0
 #%% description = Test of PBE0 in sequential case
 #%% topics = Hybrids
 #%%<END TEST_INFO>

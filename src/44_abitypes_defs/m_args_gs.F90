@@ -8,7 +8,7 @@
 !!  especially those depending on the image of the cell.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2020 ABINIT group (MT)
+!! Copyright (C) 2015-2021 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,6 +51,10 @@ MODULE m_args_gs
 ! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
 ! declared in another part of ABINIT, that might need to take into account your modification.
 
+! Real number
+  real(dp) :: cellcharge
+   ! cell charge input variable, for one dataset and one image
+
 ! Real (real(dp)) arrays
 
   real(dp), pointer :: amu(:)
@@ -70,7 +74,7 @@ MODULE m_args_gs
    ! Value of U for the DFT+U or DMFT approach
 
   real(dp), pointer :: jpawu(:)
-   ! upawu(ntypat)
+   ! jpawu(ntypat)
    ! Value of J for the DFT+U or DMFT approach
 
   real(dp), pointer :: rprimd_orig(:,:)
@@ -98,6 +102,7 @@ CONTAINS
 !!
 !! INPUTS
 !!  amu(:)= mass of each atom type
+!!  cellcharge= cell charge
 !!  mixalch(:)= mixing coefficients to generate alchemical pseudo atoms
 !!  dmatpawu(:,:,:,:)= fixed occupation matrix for correlated orbitals (DFT+U or DMFT only)
 !!  upawu(:) =value of U for the DFT+U or DMFT approach
@@ -115,9 +120,10 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine args_gs_init(args_gs,amu,mixalch,dmatpawu,upawu,jpawu,rprimd_orig)
+subroutine args_gs_init(args_gs,amu,cellcharge,mixalch,dmatpawu,upawu,jpawu,rprimd_orig)
 
 !Arguments ------------------------------------
+ real(dp), intent(in) :: cellcharge
 !arrays
  real(dp),intent(in),target :: amu(:),dmatpawu(:,:,:,:),jpawu(:),mixalch(:,:),upawu(:)
  real(dp),intent(in),target :: rprimd_orig(:,:)
@@ -127,7 +133,7 @@ subroutine args_gs_init(args_gs,amu,mixalch,dmatpawu,upawu,jpawu,rprimd_orig)
 !************************************************************************
 
  !@args_gs_type
-
+ args_gs%cellcharge  = cellcharge
  args_gs%amu         => amu
  args_gs%mixalch     => mixalch
  args_gs%dmatpawu    => dmatpawu

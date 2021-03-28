@@ -14,10 +14,10 @@ Additional examples are provided in this
 [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/sigeph/lesson_sigeph.ipynb)
 that explains how to use Abipy to automate the calculations and post-process the results for Diamond.
 
-It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
+It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
 and that he/she is familiar with the calculation of ground state (GS) and response properties
 in particular phonons, Born effective charges and the high-frequency dielectric tensor.
-The user should have read the [introduction tutorial for the EPH code](eph_intro)
+The user should have read the [introduction tutorial for the EPH code](/tutorial/eph_intro)
 before running these examples.
 
 This lesson should take about 1.5 hour.
@@ -28,7 +28,7 @@ The electron-phonon self-energy, $\Sigma^{\text{e-ph}}$, describes the renormali
 charged electronic excitations due to the interaction with phonons.
 This term should be added to the electron-electron (e-e) self-energy $\Sigma^{\text{e-e}}$
 that encodes many-body effects induced by the Coulomb interaction beyond the classical electrostatic Hartree potential.
-The e-e contribution can be estimated using, for instance, the [$GW$ approximation](gw1) but
+The e-e contribution can be estimated using, for instance, the [$GW$ approximation](/tutorial/gw1) but
 in this tutorial we are mainly interested in $\Sigma^{\text{e-ph}}$ and its temperature dependence.
 
 In semiconductors and insulators, indeed, most of the temperature dependence of the electronic properties
@@ -228,7 +228,8 @@ some conduction states
 
 ## Typical workflow for ZPR
 
-A typical workflow for ZPR calculations involves the following steps (see the [introductory e-ph tutorial](eph_intro)):
+A typical workflow for ZPR calculations involves the following steps 
+(see the [introductory e-ph tutorial](/tutorial/eph_intro)):
 
 1. **GS calculation** to obtain the WFK and the DEN file.
    The $\kk$-mesh should be dense enough to converge both electronic and vibrational properties.
@@ -253,7 +254,16 @@ A typical workflow for ZPR calculations involves the following steps (see the [i
 
 ## Getting started
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
+
+Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
+Why not create Work_eph4zpr in $ABI_TESTS/tutorespfn/Input?
+
+```sh
+cd $ABI_TESTS/tutorespfn/Input
+mkdir Work_eph4zpr
+cd Work_eph4zpr
+```
 
 In this tutorial, we prefer to focus on the use of the EPH code hence
 we will be using **pre-computed** DDB and DFPT POT files to bypass the DFPT part.
@@ -413,12 +423,12 @@ The VBM is three-fold degenerate when SOC is not included.
 First of all, let's merge the partial DDB files with the command
 
 ```sh
-mrgddb < teph4zpr_1.in
+mrgddb < teph4zpr_1.abi
 ```
 
 and the following input file:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_1.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_1.abi %}
 
 that lists the **relative paths** of the **partial DDB files** in the
 `MgO_eph_zpr` directory.
@@ -499,12 +509,12 @@ that produces the following figure:
 Now we can merge the DFPT potential with the *mrgdv* tool using the command.
 
 ```sh
-mrgdv < teph4zpr_2.in
+mrgdv < teph4zpr_2.abi
 ```
 
 and the following input file:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_2.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_2.abi %}
 
 !!! tip
 
@@ -604,18 +614,18 @@ Note the use of [[getden_filepath]] to read the DEN.nc file instead of [[getden]
 You may now run the NSCF calculation by issuing:
 
 ```sh
-abinit teph4zpr_3.in > teph4zpr_3.log 2> err &
+abinit teph4zpr_3.abi > teph4zpr_3.log 2> err &
 ```
 
 with the input file given by:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_3.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_3.abi %}
 
 At this point, it is worth commenting about the use of [[nbdbuf]].
 As mentioned in the documentation, **the highest energy states require more iterations to convergence**.
 To avoid wasting precious computing time, we use a buffer that is ~10% of [[nband]].
-This tricks significantly reduces the wall-time as the NSCF calculation completes when
-only the first [[nband]] - [[nbdbuf]] states are converged within [[tolwfr]].
+This trick significantly reduces the wall-time as the NSCF calculation completes
+only when the first [[nband]] - [[nbdbuf]] states are converged within [[tolwfr]].
 Obviously, one should not use the last [[nbdbuf]] states in the subsequent EPH calculation.
 The same trick is highly recommended when computing WFK files for $GW$ calculations.
 
@@ -636,19 +646,19 @@ discuss the most important input variables and the content of the main output fi
 First of all, you may want to start immediately the computation by issuing:
 
 ```sh
-abinit teph4zpr_4.in > teph4zpr_4.log 2> err &
+abinit teph4zpr_4.abi > teph4zpr_4.log 2> err &
 ```
 
 with the following input file:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_4.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_4.abi %}
 
 !!! tip
 
     To run the examples in parallel with e.g 2 MPI processes use:
 
     ```sh
-    mpirun -n 2 abinit teph4zpr_4.in > teph4zpr_4.log 2> err &
+    mpirun -n 2 abinit teph4zpr_4.abi > teph4zpr_4.log 2> err &
     ```
 
     The EPH code will automatically distribute the workload using a predefined distribution scheme
@@ -683,7 +693,7 @@ correspond to the one used for the input WFK file.
 [[ddb_ngqpt]] is set to 4x4x4 as this is the $\qq$-mesh used in the DFPT part to generate the DDB and DVDB files,
 but the integration in $\qq$-space is performed with the [[eph_ngqpt_fine]] mesh.
 As [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]], the code will automatically activate
-the interpolation of the DFPT potentials as discussed in the [introduction to the EPH code](eph_intro).
+the interpolation of the DFPT potentials as discussed in the [introduction to the EPH code](/tutorial/eph_intro).
 The $\qq$-space integration is defined by [[eph_intmeth]] and [[zcut]].
 <!--
 Default is standard quadrature (naive sum over $\qq$-points with weights to account for multiplicity).
@@ -692,7 +702,7 @@ The linear tetrahedron method is also implemented but it is not very efficient.
 
 We can now have a look at the main output file:
 
-{% dialog tests/tutorespfn/Refs/teph4zpr_4.out %}
+{% dialog tests/tutorespfn/Refs/teph4zpr_4.abo %}
 
 First of all, we find a section that summarizes the most important parameters:
 
@@ -724,9 +734,10 @@ First of all, we find a section that summarizes the most important parameters:
     are activated by default in v9.
 
 Then we find another section related to MPI parallelism.
-In this case we are running in sequential but the output will change if we run in paralle
+In this case we are running in sequential but the output will change if we run in parallel
 (see also [[eph_np_pqbks]]).
-The final message informs the user that the EPH code will either read the qpts from file (if the DVDB contains all of them, in case
+The final message informs the user that the EPH code will either read the qpts from file 
+(if the DVDB contains all of them, in case
 [[eph_ngqpt_fine]] is not defined in the input) or interpolate the scattering potentials
 from [[ddb_ngqpt]] to [[eph_ngqpt_fine]].
 
@@ -795,10 +806,10 @@ teph4zpr_4o_PHDOS.nc    teph4zpr_4o_PHBST.nc    teph4zpr_4o_SIGEPH.nc
 where:
 
 - EBANDS.agr --> Electron bands in |xmgrace| format. See also [[prtebands]]
-- PHBST.agr --> Phonon bands in |xmgrace| format. See also [[prtphbands]]
-                [[ph_ndivsm]], [[ph_nqpath]], and [[ph_qpath]].
-- PHDOS.nc  --> Phonon DOS in netcdf format (see [[prtphdos]] is given by [[ph_ngqpt]]).
-- PHPBST.nc  --> Phonon band structure in netcdf format
+- PHBST.agr  --> Phonon bands in |xmgrace| format. See also [[prtphbands]]
+                 [[ph_ndivsm]], [[ph_nqpath]], and [[ph_qpath]].
+- PHDOS.nc   --> Phonon DOS in netcdf format (see [[prtphdos]] is given by [[ph_ngqpt]]).
+- PHBST.nc   --> Phonon band structure in netcdf format
 - SIGEPH.nc  --> Netcdf file with $\Sigma^{\text{e-ph}}$ results.
 
 All the QP results are stored in the **SIGPEPH.nc** netcdf file for all $\kk$-points, spins and temperatures.
@@ -863,9 +874,9 @@ In our calculation, the Z factor for the VBM is 0.644 while for the CBM we obtai
 On physical grounds, these values are reasonable as Z corresponds to the area under the QP peak
 in the spectral function and values in [~0.7, 1] indicates a well-defined QP excitations.
 -->
-These values are reasonable, still it's not so uncommon to obtain unphysical Z factors in e-ph calculations i.e. values > 1,
-especially for states far from the band edge as the e-ph self-energy has a lot of structure in frequency-space
-and the linearized QP approach is not always justified.
+These values are reasonable, still it's not so uncommon to obtain **unphysical Z factors** in e-ph calculations 
+i.e. values > 1, especially for states far from the band edge as the e-ph self-energy has a lot of structure 
+in frequency-space and the linearized QP approach is not always justified.
 For this reason, in the rest of the tutorial, **we will be focusing on the analysis of the OTMS results**.
 
 !!! important
@@ -891,25 +902,17 @@ nband+ 20
 
 An example is given in
 
-{% dialog tests/tutorespfn/Input/teph4zpr_5.in %}
-
-<!--
-!!! important
-
-    The multidataset syntax is quite handy when running small calculations but you can achieve a much better
-    speedup if you split the calculation using different input files as these jobs are independent
-    and can be thus executed in parallel.
--->
+{% dialog tests/tutorespfn/Input/teph4zpr_5.abi %}
 
 Run the calculation, as usual, using
 
 ```sh
-abinit teph4zpr_5.in > teph4zpr_5.log 2> err &
+abinit teph4zpr_5.abi > teph4zpr_5.log 2> err &
 ```
 
 Now we can extract the results from the output file
 
-{% dialog tests/tutorespfn/Refs/teph4zpr_5.out %}
+{% dialog tests/tutorespfn/Refs/teph4zpr_5.abo %}
 
 or, alternatively, use the AbiPy |abicomp| script to post-process the results stored in the **SIGPEPH** files:
 
@@ -973,12 +976,12 @@ getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
 
 An example of input file is provided in:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_6.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_6.abi %}
 
 and can be run with:
 
 ```sh
-abinit teph4zpr_6.in > teph4zpr_6.log 2> err &
+abinit teph4zpr_6.abi > teph4zpr_6.log 2> err &
 ```
 
 Four calculations are performed with different values of [[nband]]:
@@ -993,7 +996,7 @@ in order to monitor the convergence of the QP corrections.
 
 To analyze the convergence behavior, we can extract the results from the main output file
 
-{% dialog tests/tutorespfn/Refs/teph4zpr_6.out %}
+{% dialog tests/tutorespfn/Refs/teph4zpr_6.abo %}
 
 
 or, alternatively, we can pass the list of SIGEPH files to the |abicomp| script and use the
@@ -1037,7 +1040,7 @@ Now we fix this value of *nband* to 20 and perform a convergence study for the $
 Unfortunately, we won't be able to fully convergence the results but, at least,
 you will get an idea on how to perform this kind of convergence study.
 
-In the input *teph4zpr_3.in*, we have computed WFK files on different $\kk$-meshes
+In the input *teph4zpr_3.abi*, we have computed WFK files on different $\kk$-meshes
 and a relatively small number of empty states (25 - 5 = 20).
 We can finally use these WFK files to perform ZPR calculations by just adding:
 
@@ -1053,17 +1056,17 @@ eph_stern 1
 getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
 ```
 
-{% dialog tests/tutorespfn/Input/teph4zpr_7.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_7.abi %}
 
 Run the calculation, as usual, with:
 
 ```sh
-abinit teph4zpr_7.in > teph4zpr_7.log 2> err &
+abinit teph4zpr_7.abi > teph4zpr_7.log 2> err &
 ```
 
 The output file is reported here for your convenience:
 
-{% dialog tests/tutorespfn/Refs/teph4zpr_7.out %}
+{% dialog tests/tutorespfn/Refs/teph4zpr_7.abo %}
 
 Now use:
 
@@ -1098,16 +1101,15 @@ freqspmax 1.0 eV
 
 An example of input file is available here:
 
-{% dialog tests/tutorespfn/Input/teph4zpr_8.in %}
+{% dialog tests/tutorespfn/Input/teph4zpr_8.abi %}
 
 Execute it with:
 
 ```sh
-abinit teph4zpr_8.in > teph4zpr_8.log 2> err &
+abinit teph4zpr_8.abi > teph4zpr_8.log 2> err &
 ```
 
-To plot the spectral function $A_\nk(\ww)$ in an easy way, use AbiPy
-to extract the data from the netcdf file.
+To plot the spectral function $A_\nk(\ww)$ in an easy way, use AbiPy to extract the data from the netcdf file.
 We can do it in two different ways:
 
 - using a small python script that calls the AbiPy API
@@ -1204,7 +1206,7 @@ on the OTMS results in most of this tutorial.
 Now we focus on more technical aspects and, in particular, on how to **compare spectral functions
 and self-energies obtained with different settings**.
 
-Remember that in *teph4zpr_8.in* we computed $A_\nk(\ww)$ with/without the Sternheimer method.
+Remember that in *teph4zpr_8.abi* we computed $A_\nk(\ww)$ with/without the Sternheimer method.
 So the question is "how can we compare the two calculations and what can we learn from this analysis?"
 
 To compare the results obtained with/wo the Sternheimer, use |abicomp|
@@ -1277,7 +1279,7 @@ For ZPR calculations, the priorities are as follows:
 2. Once the memory for the wavefunctions reaches a reasonable level, activate the parallelism
    over perturbations to decrease the memory for $W(\rr, \RR, 3\times\text{natom})$.
    For better efficiency, *eph_nperts* should divide 3 * [[natom]].
-   As explained in the [introduction page for the EPH code](eph_intro), this MPI level
+   As explained in the [introduction page for the EPH code](/tutorial/eph_intro), this MPI level
    allows one to reduce the memory allocated for $W(\rr, \RR, 3\times\text{natom})$ so the number of procs
    in this communicator should divide 3 * [[natom]].
 

@@ -5,7 +5,7 @@ ndtset    2
 nband1    6
 toldfe1   1.0d-8     
 
-iscf2        -2
+iscf2       -2
 getden2      1
 nband2      35
 nbdbuf2      5
@@ -48,15 +48,17 @@ ngkpt       4 4 4
 
 #Definition of the SCF procedure
 nstep 50          
-#toldfe 1.0d-8     
                  
 prtvol     5
 enunit     1
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

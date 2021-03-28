@@ -3,6 +3,17 @@
 # then non-SCF with a larger number of bands, then ddk for different directions
 # Note that the k point sampling shoud be finer for significant results. The cut-off energy is also too low.
 
+# Use of TRS to compute less kpts and use less bands
+# Data common to datasets 2-6
+  nband   9       # Minimal number of bands for linear optics (imaginary part of the spectrum)
+
+# Data common to datasets 3-6
+ kptopt   2      # Need points in the half BZ (use time-reversal symmetry)
+
+#-------------------------------------------------------------------------------
+#The rest of this file is similar to the toptic_1.abi file, except
+#that nband and kptopt have been moved above ...
+
  ndtset 6
 
 #First dataset : SC run with kpoints in the IBZ
@@ -26,7 +37,7 @@
 
 #Fourth dataset : ddk response function along axis 1
    iscf4 -3
-  nstep4  1  nline4  0     prtwf4   3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements
+  nstep4  1  nline4  0   prtwf4   3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements
 
    nqpt4  1  
   rfdir4  1 0 0
@@ -34,7 +45,7 @@
 
 #Fifth dataset : ddk response function along axis 2
    iscf5 -3
-  nstep5  1  nline5  0    prtwf5  3     # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements.
+  nstep5  1  nline5  0   prtwf5  3     # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements.
 
    nqpt5  1  
   rfdir5  0 1 0
@@ -42,17 +53,12 @@
 
 #Sixth dataset : ddk response function along axis 3
    iscf6 -3
-  nstep6  1  nline6  0    prtwf6  3     # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements.
+  nstep6  1  nline6  0   prtwf6  3     # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements.
 
    nqpt6  1  qpt6  0.0d0 0.0d0 0.0d0
   rfdir6  0 0 1
  rfelfd6  2
 
-# Data common to datasets 2-6
-  nband   9       # Minimal number of bands for linear optics (imaginary part of the spectrum)
-
-# Data common to datasets 3-6
- kptopt   2      # Need points in the half BZ (use time-reversal symmetry)
 
 # Data common to datasets 4-6
   getwfk  3
@@ -68,21 +74,21 @@
  ngkpt  3*4        # This is much too low : should be at least 24x24x24
 
  acell   3*10.60
- amu 69.72  74.9216
  diemac 10.0
  ecut 2.00             # This is also too low
- ixc 3
  natom  2  nbdbuf 2
  ntypat  2
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
  xred 3*0.00d0 3*0.25d0
- tnons 72*0.0
  typat  1 2  tolwfr  1.e-20
  znucl  31 33
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/31ga.pspnc, PseudosTM_pwteter/33as.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8, Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  Copyright (C) 1999-2021 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +45,8 @@ module m_dfpt_vtowfk
  use m_spacepar,     only : meanvalue_g
  use m_dfpt_mkrho,   only : dfpt_accrho
  use m_dfpt_cgwf,    only : dfpt_cgwf
- use m_getghc,       only : getgsc
+ use m_getghc,       only : getgsc, getghc_nucdip
+ use m_getgh1c,      only : getgh1ndc
 
  implicit none
 
@@ -139,6 +140,10 @@ contains
 !!      energy from all bands at this k point.
 !!  eloc0_k(nband_k)=zero-order local contribution to 2nd-order total energy
 !!      from all bands at this k point.
+!!  end0_k(nband_k)=0-order nuclear dipole energy contribution to 2nd-order total
+!!      energy from all bands at this k point.
+!!  end1_k(nband_k)=1st-order nuclear dipole energy contribution to 2nd-order total
+!!      energy from all bands at this k point.
 !!  enl0_k(nband_k)=zero-order non-local contribution to 2nd-order total energy
 !!      from all bands at this k point.
 !!  enl1_k(nband_k)=first-order non-local contribution to 2nd-order total energy
@@ -167,7 +172,7 @@ contains
 subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & dim_eig2rf,dtfil,dtset,&
 & edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,&
-& ek0_k,ek1_k,eloc0_k,enl0_k,enl1_k,&
+& ek0_k,ek1_k,eloc0_k,end0_k,end1_k,enl0_k,enl1_k,&
 & fermie1,ffnl1,ffnl1_test,gh0c1_set,gh1c_set,grad_berry,gs_hamkq,&
 & ibg,ibgq,ibg1,icg,icgq,icg1,idir,ikpt,ipert,&
 & isppol,mband,mcgq,mcprjq,mkmem,mk1mem,&
@@ -207,7 +212,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  real(dp),intent(inout) :: edocc_k(nband_k),eeig0_k(nband_k),eig1_k(2*nband_k**2)
  real(dp),intent(out) :: ek0_k(nband_k),eloc0_k(nband_k)
  real(dp),intent(inout) :: ek1_k(nband_k)
- real(dp),intent(out) :: enl0_k(nband_k),enl1_k(nband_k)
+ real(dp),intent(out) :: end0_k(nband_k),end1_k(nband_k),enl0_k(nband_k),enl1_k(nband_k)
  real(dp),intent(out) :: resid_k(nband_k)
  type(pawcprj_type),intent(in) :: cprj(natom,nspinor*mband*mkmem*nsppol*gs_hamkq%usecprj)
  type(pawcprj_type),intent(in) :: cprjq(natom,mcprjq)
@@ -229,7 +234,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
- real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:)
+ real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:),ghc_vectornd(:,:)
  real(dp),allocatable :: gsc(:,:),gscq(:,:),gvnlx1(:,:),gvnlxc(:,:)
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj0(:,:),cwaveprj1(:,:)
@@ -257,17 +262,17 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  iscf_mod=dtset%iscf;if(ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11) iscf_mod=-3
 
  kinpw1 => gs_hamkq%kinpw_kp
- ABI_ALLOCATE(gh0c1,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnlxc,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
- ABI_ALLOCATE(cwave0,(2,npw_k*nspinor))
- ABI_ALLOCATE(cwavef,(2,npw1_k*nspinor))
- ABI_ALLOCATE(cwave1,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gh1c_n,(2,npw1_k*nspinor))
+ ABI_MALLOC(gh0c1,(2,npw1_k*nspinor))
+ ABI_MALLOC(gvnlxc,(2,npw1_k*nspinor))
+ ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor))
+ ABI_MALLOC(cwave0,(2,npw_k*nspinor))
+ ABI_MALLOC(cwavef,(2,npw1_k*nspinor))
+ ABI_MALLOC(cwave1,(2,npw1_k*nspinor))
+ ABI_MALLOC(gh1c_n,(2,npw1_k*nspinor))
  if (gs_hamkq%usepaw==1) then
-   ABI_ALLOCATE(gsc,(2,npw1_k*nspinor))
+   ABI_MALLOC(gsc,(2,npw1_k*nspinor))
  else
-   ABI_ALLOCATE(gsc,(0,0))
+   ABI_MALLOC(gsc,(0,0))
  end if
 
 !Read the npw and kg records of wf files
@@ -281,7 +286,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  end if
 
 !Additional stuff for PAW
- ABI_DATATYPE_ALLOCATE(cwaveprj0,(0,0))
+ ABI_MALLOC(cwaveprj0,(0,0))
  if (gs_hamkq%usepaw==1) then
 !  1-Compute all <g|S|Cnk+q>
    igscq=0
@@ -293,22 +298,22 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !  2-Initialize additional scalars/arrays
    iorder_cprj=0;iorder_cprj1=0
    dim_dcwf=npw1_k*nspinor;if (ipert==natom+2.or.ipert==natom+10.or.ipert==natom+11) dim_dcwf=0
-   ABI_ALLOCATE(dcwavef,(2,dim_dcwf))
+   ABI_MALLOC(dcwavef,(2,dim_dcwf))
    if (gs_hamkq%usecprj==1) then
-     ABI_DATATYPE_DEALLOCATE(cwaveprj0)
-     ABI_DATATYPE_ALLOCATE(cwaveprj0,(natom,nspinor))
+     ABI_FREE(cwaveprj0)
+     ABI_MALLOC(cwaveprj0,(natom,nspinor))
      call pawcprj_alloc(cwaveprj0,1,gs_hamkq%dimcprj)
    end if
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,nspinor))
-   ABI_DATATYPE_ALLOCATE(cwaveprj1,(natom,nspinor))
+   ABI_MALLOC(cwaveprj,(natom,nspinor))
+   ABI_MALLOC(cwaveprj1,(natom,nspinor))
    call pawcprj_alloc(cwaveprj ,0,gs_hamkq%dimcprj)
    call pawcprj_alloc(cwaveprj1,0,gs_hamkq%dimcprj)
  else
    igscq=0;mgscq=0;dim_dcwf=0
-   ABI_ALLOCATE(gscq,(0,0))
-   ABI_ALLOCATE(dcwavef,(0,0))
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
-   ABI_DATATYPE_ALLOCATE(cwaveprj1,(0,0))
+   ABI_MALLOC(gscq,(0,0))
+   ABI_MALLOC(dcwavef,(0,0))
+   ABI_MALLOC(cwaveprj,(0,0))
+   ABI_MALLOC(cwaveprj1,(0,0))
  end if
 
  energy_factor=two
@@ -447,6 +452,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        ek0_k(iband)=zero
        ek1_k(iband)=zero
        eeig0_k(iband)=zero
+       end0_k(iband)=zero
+       end1_k(iband)=zero
        enl0_k(iband)=zero
        enl1_k(iband)=zero
        eloc0_k(iband)=zero
@@ -465,6 +472,34 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          ek1_k(iband)=two*energy_factor*ar
        end if
 
+!      Compute the 0-order nuclear dipole contribution (with cwavef)
+!      only relevant for DDK
+       if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(gs_hamkq%vectornd)) ) then
+         ABI_MALLOC(ghc_vectornd,(2,npw_k))
+         ! ndat hard-coded as 1; my_nspinor hard-coded as 1
+         call getghc_nucdip(cwavef,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpt_k,&
+&          gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
+&          gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,1,gs_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
+!        There is an additional factor of 2 with respect to the bare matrix element
+         end0_k(iband)=energy_factor*(DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
+           & DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k)))
+         ABI_FREE(ghc_vectornd)
+       end if
+ 
+!      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.
+!      only relevant for DDK
+       if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(rf_hamkq%vectornd)) ) then
+         ABI_MALLOC(ghc_vectornd,(2,npw_k))
+         ! ndat hard-coded as 1; my_nspinor hard-coded as 1
+         call getgh1ndc(cwave1,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
+           & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
+           & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,1,rf_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
+!        There is an additional factor of 4 with respect to the bare matrix element
+         end1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
+           & DOT_PRODUCT(cwave0(2,1:npw_k),ghc_vectornd(2,1:npw_k)))
+         ABI_FREE(ghc_vectornd)
+       end if
+! 
 !      Compute eigenvalue part of total energy (with cwavef)
        if (gs_hamkq%usepaw==1) then
          call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwavef,gsc,mpi_enreg%me_g0,&
@@ -558,13 +593,13 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  call timab(139,2,tsec)
  call timab(130,1,tsec)
 
- ABI_DEALLOCATE(cwave0)
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(cwave1)
- ABI_DEALLOCATE(gh0c1)
- ABI_DEALLOCATE(gvnlxc)
- ABI_DEALLOCATE(gvnlx1)
- ABI_DEALLOCATE(gh1c_n)
+ ABI_FREE(cwave0)
+ ABI_FREE(cwavef)
+ ABI_FREE(cwave1)
+ ABI_FREE(gh0c1)
+ ABI_FREE(gvnlxc)
+ ABI_FREE(gvnlx1)
+ ABI_FREE(gh1c_n)
 
  if (gs_hamkq%usepaw==1) then
    call pawcprj_free(cwaveprj)
@@ -573,12 +608,12 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
      call pawcprj_free(cwaveprj0)
    end if
  end if
- ABI_DEALLOCATE(dcwavef)
- ABI_DEALLOCATE(gscq)
- ABI_DEALLOCATE(gsc)
- ABI_DATATYPE_DEALLOCATE(cwaveprj0)
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
- ABI_DATATYPE_DEALLOCATE(cwaveprj1)
+ ABI_FREE(dcwavef)
+ ABI_FREE(gscq)
+ ABI_FREE(gsc)
+ ABI_FREE(cwaveprj0)
+ ABI_FREE(cwaveprj)
+ ABI_FREE(cwaveprj1)
 
 !###################################################################
 
@@ -595,7 +630,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then
    write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  call timab(130,2,tsec)
@@ -883,13 +918,13 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
 
 !In the PAW case, compute <Psi^(1)_ortho|H-Eig0_k.S|Psi^(1)_parallel> contribution to 2DTE
  if (usepaw==1.and.wf_corrected==1) then
-   ABI_ALLOCATE(cwcorr,(2,npw1*nspinor))
+   ABI_MALLOC(cwcorr,(2,npw1*nspinor))
 !$OMP WORKSHARE
    cwcorr(:,:)=cwave1(:,:)-cwavef(:,:)
 !$OMP END WORKSHARE
    call dotprod_g(factr,facti,istwf_k,npw1*nspinor,1,cwcorr,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
    edocc(iband)=edocc(iband)+four*factr
-   ABI_DEALLOCATE(cwcorr)
+   ABI_FREE(cwcorr)
  end if
 
  call timab(214+timcount,2,tsec)

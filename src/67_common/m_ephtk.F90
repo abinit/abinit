@@ -6,7 +6,7 @@
 !!  Helper functions common to e-ph calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MG)
+!!  Copyright (C) 2008-2021 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,8 +74,6 @@ contains  !=====================================================
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -102,7 +100,7 @@ subroutine ephtk_set_phmodes_skip(dtset, phmodes_skip)
    if (minval(dtset%eph_phrange) < 1 .or. &
        maxval(dtset%eph_phrange) > natom3 .or. &
        dtset%eph_phrange(2) < dtset%eph_phrange(1)) then
-     MSG_ERROR('Invalid range for eph_phrange. Should be between [1, 3*natom] and eph_modes(2) > eph_modes(1)')
+     ABI_ERROR('Invalid range for eph_phrange. Should be between [1, 3*natom] and eph_modes(2) > eph_modes(1)')
    end if
    call wrtout(std_out, sjoin(" Including phonon modes between [", &
                itoa(dtset%eph_phrange(1)), ',', itoa(dtset%eph_phrange(2)), "]"))
@@ -140,8 +138,6 @@ end subroutine ephtk_set_phmodes_skip
 !!      m_phgamma,m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -209,8 +205,6 @@ end subroutine ephtk_set_pertables
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -245,7 +239,7 @@ subroutine ephtk_mkqtabs(cryst, nqibz, qibz, nqbz, qbz, qirredtofull, qpttoqpt)
      ABI_CHECK(isamek(qirr, qbz(:,iq_bz), g0), "isamek")
      qirredtofull(iq_ibz) = iq_bz
    else
-     MSG_ERROR(sjoin("Full BZ does not contain IBZ q-point:", ktoa(qirr)))
+     ABI_ERROR(sjoin("Full BZ does not contain IBZ q-point:", ktoa(qirr)))
    end if
  end do
 
@@ -258,7 +252,7 @@ subroutine ephtk_mkqtabs(cryst, nqibz, qibz, nqbz, qbz, qirredtofull, qpttoqpt)
 
      isq_bz = qrank%get_index(tmp_qpt)
      if (isq_bz == -1) then
-       MSG_ERROR("Looks like no kpoint equiv to q by symmetry without time reversal!")
+       ABI_ERROR("Looks like no kpoint equiv to q by symmetry without time reversal!")
      end if
      qpttoqpt(1,isym,isq_bz) = iq_bz
 
@@ -266,7 +260,7 @@ subroutine ephtk_mkqtabs(cryst, nqibz, qibz, nqbz, qbz, qirredtofull, qpttoqpt)
      tmp_qpt = -tmp_qpt
      isq_bz = qrank%get_index(tmp_qpt)
      if (isq_bz == -1) then
-       MSG_ERROR("Looks like no kpoint equiv to q by symmetry with time reversal!")
+       ABI_ERROR("Looks like no kpoint equiv to q by symmetry with time reversal!")
      end if
      qpttoqpt(2,isym,isq_bz) = iq_bz
    end do
@@ -284,7 +278,7 @@ end subroutine ephtk_mkqtabs
 !! ephtk_gam_atm2qnu
 !!
 !! FUNCTION
-!! This routine takes the gamma matrices in the atom representation and
+!! This routine takes the gamma matrices in the atomic representation and
 !! multiplies them by the displ_red matrices. Based on gam_mult_displ
 !!
 !! INPUTS
@@ -299,8 +293,6 @@ end subroutine ephtk_mkqtabs
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -332,7 +324,7 @@ subroutine ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gam_qnu)
      enough = enough + 1
      if (enough <= 30) then
        write (msg,'(a,i0,a,es16.8)')' non-zero imaginary part for branch: ',nu,', img: ',gam_now(2, nu, nu)
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    end if
  end do
@@ -364,8 +356,6 @@ end subroutine ephtk_gam_atm2qnu
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -420,14 +410,10 @@ end subroutine ephtk_gkknu_from_atm
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      m_eph_driver,m_rta
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -475,7 +461,10 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
  else if (abs(dtset%eph_extrael) > zero) then
    call wrtout(unts, sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
    call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
-   call ebands_set_extrael(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
+   ! CP modified
+   ! call ebands_set_extrael(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
+   call ebands_set_extrael(ebands, dtset%eph_extrael, 0.d0, dtset%spinmagntarget, msg)
+   ! End CP modified
    call wrtout(unts, msg)
  end if
 

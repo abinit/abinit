@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.3.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h23 )
+.Starting date : Mon 14 Dec 2020.
+- ( at 14h17 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_5.in
-- output file    -> tgw1_5.out
+- input  file    -> tgw1_5.abi
+- output file    -> tgw1_5.abo
 - root for input  files -> tgw1_5i
 - root for output files -> tgw1_5o
 
@@ -26,204 +26,204 @@
  DATASET   11 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 11.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   12 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   21 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 21.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   22 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   31 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 31.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   32 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 32.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   41 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 41.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   42 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 42.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   51 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 51.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   52 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 52.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   61 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 61.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
  DATASET   62 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 62.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
-    occopt =       1   xclevel =       1
--    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         283          nfft =        8000          nkpt =           1
+    occopt =       1   xclevel =       2
+-    mband =         100        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.511 Mbytes of memory.
+P This job should need less than                       4.704 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      1.384 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -231,13 +231,13 @@ _ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
-            acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
+            acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
              bdgw           4       5
              ecut      8.00000000E+00 Hartree
@@ -255,7 +255,7 @@ _ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
           ecuteps62    8.00000000E+00 Hartree
          ecutsigx      8.00000000E+00 Hartree
           ecutwfn      8.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            getscr11         0
            getscr12        -1
            getscr21         0
@@ -269,17 +269,21 @@ _ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
            getscr61         0
            getscr62        -1
            getwfk           2
-           istwfk        1
+           istwfk        1    1    1
+              ixc          11
            jdtset       11   12   21   22   31   32   41   42   51   52
                         61   62
-         kptrlatt        1    0    0      0    1    0      0    0    1
-          kptrlen      7.22450998E+00
-P           mkmem           1
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+         kptrlatt        2    0    0      0    2    0      0    0    2
+          kptrlen      1.45098311E+01
+P           mkmem           3
             natom           2
             nband         100
            ndtset          12
             ngfft          20      20      20
-             nkpt           1
+             nkpt           3
            nkptgw           1
            npweps11        59
            npweps12        59
@@ -380,10 +384,11 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
             typat      1  1
+              wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3573395400E+00  1.3573395400E+00  1.3573395400E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
+                       2.5650000000E+00  2.5650000000E+00  2.5650000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
@@ -421,7 +426,7 @@ P           mkmem           1
 
 --- !DatasetInfo
 iteration_state: {dtset: 11, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
@@ -430,9 +435,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SCREENING: Calculation of the susceptibility and dielectric matrices 
 
@@ -441,52 +446,53 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
--  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
-- 14.00000   4.00000    940714                znucl, zion, pspdat
-    1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
-    0   5.907  14.692    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    1   2.617   4.181    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
-  pspatm : epsatm=    1.43386982
+- pspini: atom type   1  psp file is /home/bruneval/devel/abinit/tests//Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/bruneval/devel/abinit/tests//Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
+- Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
+- 14.00000   4.00000    170510                znucl, zion, pspdat
+    8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    5.99000000000000    4.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+     nproj     2     2     2
+     extension_switch     1
+  pspatm : epsatm=    9.34321699
          --- l  ekb(1:nproj) -->
-             0    3.287949
-             1    1.849886
+             0    5.168965    0.829883
+             1    2.571282    0.578307
+             2   -2.427311   -0.488097
  pspatm: atomic psp has been read  and splines computed
 
-   2.29419171E+01                                ecore*ucvol(ha*bohr**3)
+   1.49491472E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
@@ -499,9 +505,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Number of bands treated by each node ~96
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -514,45 +520,89 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+    1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524  -0.000  -0.524   0.000
-       -0.000   0.000 -16.920   0.000  -0.161  -0.000  -0.161   0.000  -0.161
+    2   0.000 -19.646   0.000  -0.025  -0.000  -0.025  -0.000  -0.025   0.000
+       -0.000   0.000  -7.719   0.000  -0.121   0.000  -0.121  -0.000  -0.121
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083  -0.000  -0.083   0.000
-       -0.000   0.000  -2.135   0.000   0.098  -0.000   0.098   0.000   0.098
+    2   0.000  -7.587   0.000  -0.065  -0.000  -0.065  -0.000  -0.065   0.000
+       -0.000   0.000  -1.232   0.000  -0.116  -0.000  -0.116  -0.000  -0.116
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  99.2195
-  dielectric constant without local fields = 140.4463
+  dielectric constant =  49.6678
+  dielectric constant without local fields =  56.9816
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     88.92  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     91.37  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+      0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+      0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+      0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+      0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
+
+
+--------------------------------------------------------------------------------
+  q-point number  2        q = ( 0.500000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -15.480  -2.509   4.494  -1.936  -3.721  -1.936  -3.721  -1.936  -3.721
+        0.000  -2.509  -4.494  -1.936   3.721  -1.936   3.721  -1.936   3.721
+
+    2  -2.509 -18.919   0.000   0.207  -0.000   0.207  -0.000   0.207   0.000
+        2.509   0.000  -6.703  -0.000   0.515   0.000   0.515  -0.000   0.515
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -3.398  -1.030   0.576  -0.340  -0.756  -0.340  -0.756  -0.340  -0.756
+        0.000  -1.030  -0.576  -0.340   0.756  -0.340   0.756  -0.340   0.756
+
+    2  -1.030  -8.745   0.000   0.036  -0.000   0.036  -0.000   0.036   0.000
+        1.030   0.000  -0.910  -0.000  -0.015   0.000  -0.015  -0.000  -0.015
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     92.19  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  3        q = ( 0.500000, 0.500000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -20.589  -4.715  -0.216  -0.216  -4.715  -0.216  -4.715  -4.715  -0.216
+        0.000  -4.715   0.216  -0.216   4.715  -0.216   4.715  -4.715   0.216
+
+    2  -4.715 -20.800  -0.000   0.320   0.000   0.321   0.000  -0.804  -0.000
+        4.715   0.000  -4.856   0.000   1.541  -0.000   1.541  -0.000  -0.977
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -4.236  -0.999  -0.205  -0.205  -0.999  -0.205  -0.999  -0.999  -0.205
+        0.000  -0.999   0.205  -0.205   0.999  -0.205   0.999  -0.999   0.205
+
+    2  -0.999  -8.756  -0.000  -0.060   0.000  -0.060   0.000   0.121  -0.000
+        0.999   0.000  -0.716   0.000  -0.007  -0.000  -0.007  -0.000  -0.026
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     92.13  [%]
 
 ================================================================================
 == DATASET 12 ==================================================================
@@ -561,7 +611,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 12, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
@@ -572,9 +622,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET  11.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -583,47 +633,51 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.4432 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6196 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -632,11 +686,11 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  number of bands                                   100
  number of independent spin polarizations            1
  number of spinorial components                      1
- number of k-points in IBZ                           1
- number of q-points in IBZ                           1
+ number of k-points in IBZ                           3
+ number of q-points in IBZ                           3
  number of symmetry operations                      48
- number of k-points in BZ                            1
- number of q-points in BZ                            1
+ number of k-points in BZ                            8
+ number of q-points in BZ                            8
  number of frequencies for dSigma/dE                 9
  frequency step for dSigma/dE [eV]                0.25
  number of omega for Sigma on real axis              0
@@ -648,7 +702,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  dimension of the eps^-1 matrix used                59
  number of plane-waves for wavefunctions           283
  number of bands                                   100
- number of q-points in IBZ                           1
+ number of q-points in IBZ                           3
  number of frequencies                               2
  number of real frequencies                          1
  number of imag frequencies                          1
@@ -661,27 +715,19 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 iteration_state: {dtset: 12, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
-KS_gap     :    2.530
-QP_gap     :    2.984
-Delta_QP_KS:    0.454
+KS_gap     :    2.443
+QP_gap     :    3.052
+Delta_QP_KS:    0.609
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.653 -17.103   4.559   0.787  -0.271 -12.354  -0.700   5.215
-        3   5.915 -11.653 -17.103   4.559   0.787  -0.271 -12.354  -0.700   5.215
-        4   5.915 -11.653 -17.103   4.559   0.787  -0.271 -12.354  -0.700   5.215
-        5   8.445  -9.701  -3.222  -6.790   0.795  -0.259  -9.948  -0.247   8.198
-        6   8.445  -9.701  -3.222  -6.790   0.795  -0.259  -9.948  -0.247   8.198
-        7   8.445  -9.701  -3.222  -6.790   0.795  -0.259  -9.948  -0.247   8.198
+        2   4.665 -11.412 -13.527   1.899   0.786  -0.272 -11.582  -0.169   4.496
+        3   4.665 -11.412 -13.527   1.899   0.786  -0.272 -11.582  -0.169   4.496
+        4   4.665 -11.412 -13.527   1.899   0.786  -0.272 -11.582  -0.169   4.496
+        5   7.108  -9.962  -4.945  -4.462   0.791  -0.264  -9.523   0.440   7.548
+        6   7.108  -9.962  -4.945  -4.462   0.791  -0.264  -9.523   0.440   7.548
+        7   7.108  -9.962  -4.945  -4.462   0.791  -0.264  -9.523   0.440   7.548
 ...
 
-
- New Fermi energy :        2.464594E-01 Ha ,    6.706501E+00 eV
-
- === QP Band Gaps ===
-  >>>> For spin  1
-   Minimum direct gap =   2.9837 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   2.9837 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -690,7 +736,7 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 21, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
@@ -699,9 +745,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SCREENING: Calculation of the susceptibility and dielectric matrices 
 
@@ -710,31 +756,35 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
@@ -747,9 +797,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Number of bands treated by each node ~96
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -762,45 +812,89 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+    1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524  -0.000  -0.524   0.000
-       -0.000   0.000 -16.920   0.000  -0.161  -0.000  -0.161   0.000  -0.161
+    2   0.000 -19.646   0.000  -0.025  -0.000  -0.025  -0.000  -0.025   0.000
+       -0.000   0.000  -7.719   0.000  -0.121   0.000  -0.121  -0.000  -0.121
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083  -0.000  -0.083   0.000
-       -0.000   0.000  -2.135   0.000   0.098  -0.000   0.098   0.000   0.098
+    2   0.000  -7.587   0.000  -0.065  -0.000  -0.065  -0.000  -0.065   0.000
+       -0.000   0.000  -1.232   0.000  -0.116  -0.000  -0.116  -0.000  -0.116
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.3794
-  dielectric constant without local fields = 140.4463
+  dielectric constant =  49.5790
+  dielectric constant without local fields =  56.9816
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     87.13  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     89.66  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+     -0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+     -0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+      0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+      0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
+
+
+--------------------------------------------------------------------------------
+  q-point number  2        q = ( 0.500000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -15.480  -2.509   4.494  -1.936  -3.721  -1.936  -3.721  -1.936  -3.721
+        0.000  -2.509  -4.494  -1.936   3.721  -1.936   3.721  -1.936   3.721
+
+    2  -2.509 -18.919   0.000   0.207  -0.000   0.207  -0.000   0.207   0.000
+        2.509   0.000  -6.703  -0.000   0.515   0.000   0.515  -0.000   0.515
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -3.398  -1.030   0.576  -0.340  -0.756  -0.340  -0.756  -0.340  -0.756
+        0.000  -1.030  -0.576  -0.340   0.756  -0.340   0.756  -0.340   0.756
+
+    2  -1.030  -8.745   0.000   0.036  -0.000   0.036  -0.000   0.036   0.000
+        1.030   0.000  -0.910  -0.000  -0.015   0.000  -0.015  -0.000  -0.015
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     91.23  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  3        q = ( 0.500000, 0.500000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -20.589  -4.715  -0.216  -0.216  -4.715  -0.216  -4.715  -4.715  -0.216
+        0.000  -4.715   0.216  -0.216   4.715  -0.216   4.715  -4.715   0.216
+
+    2  -4.715 -20.800  -0.000   0.320   0.000   0.321   0.000  -0.804  -0.000
+        4.715   0.000  -4.856   0.000   1.541  -0.000   1.541  -0.000  -0.977
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -4.236  -0.999  -0.205  -0.205  -0.999  -0.205  -0.999  -0.999  -0.205
+        0.000  -0.999   0.205  -0.205   0.999  -0.205   0.999  -0.999   0.205
+
+    2  -0.999  -8.756  -0.000  -0.060   0.000  -0.060   0.000   0.121  -0.000
+        0.999   0.000  -0.716   0.000  -0.007  -0.000  -0.007  -0.000  -0.026
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     91.17  [%]
 
 ================================================================================
 == DATASET 22 ==================================================================
@@ -809,7 +903,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 22, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
@@ -820,9 +914,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET  21.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -831,47 +925,51 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.4432 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6196 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -880,11 +978,11 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  number of bands                                   100
  number of independent spin polarizations            1
  number of spinorial components                      1
- number of k-points in IBZ                           1
- number of q-points in IBZ                           1
+ number of k-points in IBZ                           3
+ number of q-points in IBZ                           3
  number of symmetry operations                      48
- number of k-points in BZ                            1
- number of q-points in BZ                            1
+ number of k-points in BZ                            8
+ number of q-points in BZ                            8
  number of frequencies for dSigma/dE                 9
  frequency step for dSigma/dE [eV]                0.25
  number of omega for Sigma on real axis              0
@@ -896,7 +994,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  dimension of the eps^-1 matrix used               113
  number of plane-waves for wavefunctions           283
  number of bands                                   100
- number of q-points in IBZ                           1
+ number of q-points in IBZ                           3
  number of frequencies                               2
  number of real frequencies                          1
  number of imag frequencies                          1
@@ -909,27 +1007,19 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 iteration_state: {dtset: 22, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
-KS_gap     :    2.530
-QP_gap     :    3.079
-Delta_QP_KS:    0.549
+KS_gap     :    2.443
+QP_gap     :    3.124
+Delta_QP_KS:    0.681
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.653 -17.103   4.429   0.785  -0.273 -12.455  -0.802   5.114
-        3   5.915 -11.653 -17.103   4.429   0.785  -0.273 -12.455  -0.802   5.114
-        4   5.915 -11.653 -17.103   4.429   0.785  -0.273 -12.455  -0.802   5.114
-        5   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.252   8.193
-        6   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.252   8.193
-        7   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.252   8.193
+        2   4.665 -11.412 -13.527   1.755   0.784  -0.275 -11.694  -0.282   4.383
+        3   4.665 -11.412 -13.527   1.755   0.784  -0.275 -11.694  -0.282   4.383
+        4   4.665 -11.412 -13.527   1.755   0.784  -0.275 -11.694  -0.282   4.383
+        5   7.108  -9.962  -4.945  -4.513   0.791  -0.264  -9.563   0.400   7.508
+        6   7.108  -9.962  -4.945  -4.513   0.791  -0.264  -9.563   0.400   7.508
+        7   7.108  -9.962  -4.945  -4.513   0.791  -0.264  -9.563   0.400   7.508
 ...
 
-
- New Fermi energy :        2.445019E-01 Ha ,    6.653235E+00 eV
-
- === QP Band Gaps ===
-  >>>> For spin  1
-   Minimum direct gap =   3.0792 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.0792 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
 == DATASET 31 ==================================================================
@@ -938,7 +1028,7 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 31, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
@@ -947,9 +1037,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SCREENING: Calculation of the susceptibility and dielectric matrices 
 
@@ -958,31 +1048,35 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
@@ -995,9 +1089,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Number of bands treated by each node ~96
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -1010,45 +1104,89 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+    1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524  -0.000  -0.524   0.000
-       -0.000   0.000 -16.920   0.000  -0.161  -0.000  -0.161   0.000  -0.161
+    2   0.000 -19.646   0.000  -0.025  -0.000  -0.025  -0.000  -0.025   0.000
+       -0.000   0.000  -7.719   0.000  -0.121   0.000  -0.121  -0.000  -0.121
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083  -0.000  -0.083   0.000
-       -0.000   0.000  -2.135   0.000   0.098  -0.000   0.098   0.000   0.098
+    2   0.000  -7.587   0.000  -0.065  -0.000  -0.065  -0.000  -0.065   0.000
+       -0.000   0.000  -1.232   0.000  -0.116  -0.000  -0.116  -0.000  -0.116
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.3757
-  dielectric constant without local fields = 140.4463
+  dielectric constant =  49.5776
+  dielectric constant without local fields =  56.9816
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.75  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     89.32  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+      0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+      0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+     -0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+     -0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
+
+
+--------------------------------------------------------------------------------
+  q-point number  2        q = ( 0.500000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -15.480  -2.509   4.494  -1.936  -3.721  -1.936  -3.721  -1.936  -3.721
+        0.000  -2.509  -4.494  -1.936   3.721  -1.936   3.721  -1.936   3.721
+
+    2  -2.509 -18.919   0.000   0.207  -0.000   0.207  -0.000   0.207   0.000
+        2.509   0.000  -6.703  -0.000   0.515   0.000   0.515  -0.000   0.515
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -3.398  -1.030   0.576  -0.340  -0.756  -0.340  -0.756  -0.340  -0.756
+        0.000  -1.030  -0.576  -0.340   0.756  -0.340   0.756  -0.340   0.756
+
+    2  -1.030  -8.745   0.000   0.036  -0.000   0.036  -0.000   0.036   0.000
+        1.030   0.000  -0.910  -0.000  -0.015   0.000  -0.015  -0.000  -0.015
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     91.00  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  3        q = ( 0.500000, 0.500000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -20.589  -4.715  -0.216  -0.216  -4.715  -0.216  -4.715  -4.715  -0.216
+        0.000  -4.715   0.216  -0.216   4.715  -0.216   4.715  -4.715   0.216
+
+    2  -4.715 -20.800  -0.000   0.320   0.000   0.321   0.000  -0.804  -0.000
+        4.715   0.000  -4.856   0.000   1.541  -0.000   1.541  -0.000  -0.977
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -4.236  -0.999  -0.205  -0.205  -0.999  -0.205  -0.999  -0.999  -0.205
+        0.000  -0.999   0.205  -0.205   0.999  -0.205   0.999  -0.999   0.205
+
+    2  -0.999  -8.756  -0.000  -0.060   0.000  -0.060   0.000   0.121  -0.000
+        0.999   0.000  -0.716   0.000  -0.007  -0.000  -0.007  -0.000  -0.026
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     90.92  [%]
 
 ================================================================================
 == DATASET 32 ==================================================================
@@ -1057,7 +1195,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 32, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
@@ -1068,9 +1206,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET  31.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -1079,47 +1217,51 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.4432 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6196 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -1128,11 +1270,11 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  number of bands                                   100
  number of independent spin polarizations            1
  number of spinorial components                      1
- number of k-points in IBZ                           1
- number of q-points in IBZ                           1
+ number of k-points in IBZ                           3
+ number of q-points in IBZ                           3
  number of symmetry operations                      48
- number of k-points in BZ                            1
- number of q-points in BZ                            1
+ number of k-points in BZ                            8
+ number of q-points in BZ                            8
  number of frequencies for dSigma/dE                 9
  frequency step for dSigma/dE [eV]                0.25
  number of omega for Sigma on real axis              0
@@ -1144,7 +1286,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  dimension of the eps^-1 matrix used               137
  number of plane-waves for wavefunctions           283
  number of bands                                   100
- number of q-points in IBZ                           1
+ number of q-points in IBZ                           3
  number of frequencies                               2
  number of real frequencies                          1
  number of imag frequencies                          1
@@ -1157,27 +1299,19 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 iteration_state: {dtset: 32, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
-KS_gap     :    2.530
-QP_gap     :    3.099
-Delta_QP_KS:    0.569
+KS_gap     :    2.443
+QP_gap     :    3.141
+Delta_QP_KS:    0.698
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.653 -17.103   4.405   0.785  -0.274 -12.474  -0.820   5.095
-        3   5.915 -11.653 -17.103   4.405   0.785  -0.274 -12.474  -0.820   5.095
-        4   5.915 -11.653 -17.103   4.405   0.785  -0.274 -12.474  -0.820   5.095
-        5   8.445  -9.701  -3.222  -6.796   0.794  -0.260  -9.953  -0.252   8.194
-        6   8.445  -9.701  -3.222  -6.796   0.794  -0.260  -9.953  -0.252   8.194
-        7   8.445  -9.701  -3.222  -6.796   0.794  -0.260  -9.953  -0.252   8.194
+        2   4.665 -11.412 -13.527   1.728   0.784  -0.276 -11.715  -0.303   4.362
+        3   4.665 -11.412 -13.527   1.728   0.784  -0.276 -11.715  -0.303   4.362
+        4   4.665 -11.412 -13.527   1.728   0.784  -0.276 -11.715  -0.303   4.362
+        5   7.108  -9.962  -4.945  -4.518   0.791  -0.264  -9.567   0.395   7.504
+        6   7.108  -9.962  -4.945  -4.518   0.791  -0.264  -9.567   0.395   7.504
+        7   7.108  -9.962  -4.945  -4.518   0.791  -0.264  -9.567   0.395   7.504
 ...
 
-
- New Fermi energy :        2.441686E-01 Ha ,    6.644166E+00 eV
-
- === QP Band Gaps ===
-  >>>> For spin  1
-   Minimum direct gap =   3.0991 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.0991 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
 == DATASET 41 ==================================================================
@@ -1186,7 +1320,7 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 41, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
@@ -1195,9 +1329,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SCREENING: Calculation of the susceptibility and dielectric matrices 
 
@@ -1206,31 +1340,35 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
@@ -1243,9 +1381,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Number of bands treated by each node ~96
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -1258,45 +1396,89 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+    1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524  -0.000  -0.524   0.000
-       -0.000   0.000 -16.920   0.000  -0.161  -0.000  -0.161   0.000  -0.161
+    2   0.000 -19.646   0.000  -0.025  -0.000  -0.025  -0.000  -0.025   0.000
+       -0.000   0.000  -7.719   0.000  -0.121   0.000  -0.121  -0.000  -0.121
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083  -0.000  -0.083   0.000
-       -0.000   0.000  -2.135   0.000   0.098  -0.000   0.098   0.000   0.098
+    2   0.000  -7.587   0.000  -0.065  -0.000  -0.065  -0.000  -0.065   0.000
+       -0.000   0.000  -1.232   0.000  -0.116  -0.000  -0.116  -0.000  -0.116
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.3057
-  dielectric constant without local fields = 140.4463
+  dielectric constant =  49.5723
+  dielectric constant without local fields =  56.9816
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.46  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     89.06  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+      0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+      0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+     -0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+     -0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
+
+
+--------------------------------------------------------------------------------
+  q-point number  2        q = ( 0.500000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -15.480  -2.509   4.494  -1.936  -3.721  -1.936  -3.721  -1.936  -3.721
+        0.000  -2.509  -4.494  -1.936   3.721  -1.936   3.721  -1.936   3.721
+
+    2  -2.509 -18.919   0.000   0.207  -0.000   0.207  -0.000   0.207   0.000
+        2.509   0.000  -6.703  -0.000   0.515   0.000   0.515  -0.000   0.515
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -3.398  -1.030   0.576  -0.340  -0.756  -0.340  -0.756  -0.340  -0.756
+        0.000  -1.030  -0.576  -0.340   0.756  -0.340   0.756  -0.340   0.756
+
+    2  -1.030  -8.745   0.000   0.036  -0.000   0.036  -0.000   0.036   0.000
+        1.030   0.000  -0.910  -0.000  -0.015   0.000  -0.015  -0.000  -0.015
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     90.81  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  3        q = ( 0.500000, 0.500000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -20.589  -4.715  -0.216  -0.216  -4.715  -0.216  -4.715  -4.715  -0.216
+        0.000  -4.715   0.216  -0.216   4.715  -0.216   4.715  -4.715   0.216
+
+    2  -4.715 -20.800  -0.000   0.320   0.000   0.321   0.000  -0.804  -0.000
+        4.715   0.000  -4.856   0.000   1.541  -0.000   1.541  -0.000  -0.977
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -4.236  -0.999  -0.205  -0.205  -0.999  -0.205  -0.999  -0.999  -0.205
+        0.000  -0.999   0.205  -0.205   0.999  -0.205   0.999  -0.999   0.205
+
+    2  -0.999  -8.756  -0.000  -0.060   0.000  -0.060   0.000   0.121  -0.000
+        0.999   0.000  -0.716   0.000  -0.007  -0.000  -0.007  -0.000  -0.026
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     90.71  [%]
 
 ================================================================================
 == DATASET 42 ==================================================================
@@ -1305,7 +1487,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 42, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
@@ -1316,9 +1498,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET  41.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -1327,47 +1509,51 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.4432 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6196 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -1376,11 +1562,11 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  number of bands                                   100
  number of independent spin polarizations            1
  number of spinorial components                      1
- number of k-points in IBZ                           1
- number of q-points in IBZ                           1
+ number of k-points in IBZ                           3
+ number of q-points in IBZ                           3
  number of symmetry operations                      48
- number of k-points in BZ                            1
- number of q-points in BZ                            1
+ number of k-points in BZ                            8
+ number of q-points in BZ                            8
  number of frequencies for dSigma/dE                 9
  frequency step for dSigma/dE [eV]                0.25
  number of omega for Sigma on real axis              0
@@ -1392,7 +1578,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  dimension of the eps^-1 matrix used               169
  number of plane-waves for wavefunctions           283
  number of bands                                   100
- number of q-points in IBZ                           1
+ number of q-points in IBZ                           3
  number of frequencies                               2
  number of real frequencies                          1
  number of imag frequencies                          1
@@ -1405,27 +1591,19 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 iteration_state: {dtset: 42, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
-KS_gap     :    2.530
-QP_gap     :    3.113
-Delta_QP_KS:    0.583
+KS_gap     :    2.443
+QP_gap     :    3.153
+Delta_QP_KS:    0.709
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.653 -17.103   4.386   0.785  -0.274 -12.489  -0.835   5.080
-        3   5.915 -11.653 -17.103   4.386   0.785  -0.274 -12.489  -0.835   5.080
-        4   5.915 -11.653 -17.103   4.386   0.785  -0.274 -12.489  -0.835   5.080
-        5   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
-        6   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
-        7   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
+        2   4.665 -11.412 -13.527   1.708   0.784  -0.276 -11.731  -0.318   4.347
+        3   4.665 -11.412 -13.527   1.708   0.784  -0.276 -11.731  -0.318   4.347
+        4   4.665 -11.412 -13.527   1.708   0.784  -0.276 -11.731  -0.318   4.347
+        5   7.108  -9.962  -4.945  -4.523   0.791  -0.264  -9.571   0.391   7.499
+        6   7.108  -9.962  -4.945  -4.523   0.791  -0.264  -9.571   0.391   7.499
+        7   7.108  -9.962  -4.945  -4.523   0.791  -0.264  -9.571   0.391   7.499
 ...
 
-
- New Fermi energy :        2.438775E-01 Ha ,    6.636245E+00 eV
-
- === QP Band Gaps ===
-  >>>> For spin  1
-   Minimum direct gap =   3.1128 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1128 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
 == DATASET 51 ==================================================================
@@ -1434,7 +1612,7 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 51, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
@@ -1443,9 +1621,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SCREENING: Calculation of the susceptibility and dielectric matrices 
 
@@ -1454,31 +1632,35 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
@@ -1491,9 +1673,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Number of bands treated by each node ~96
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -1506,45 +1688,89 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+    1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524  -0.000  -0.524   0.000
-       -0.000   0.000 -16.920   0.000  -0.161  -0.000  -0.161   0.000  -0.161
+    2   0.000 -19.646   0.000  -0.025  -0.000  -0.025  -0.000  -0.025   0.000
+       -0.000   0.000  -7.719   0.000  -0.121   0.000  -0.121  -0.000  -0.121
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083  -0.000  -0.083   0.000
-       -0.000   0.000  -2.135   0.000   0.098  -0.000   0.098   0.000   0.098
+    2   0.000  -7.587   0.000  -0.065  -0.000  -0.065  -0.000  -0.065   0.000
+       -0.000   0.000  -1.232   0.000  -0.116  -0.000  -0.116  -0.000  -0.116
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.2718
-  dielectric constant without local fields = 140.4463
+  dielectric constant =  49.5688
+  dielectric constant without local fields =  56.9816
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.22  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     88.91  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+      0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+      0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+      0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+      0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
+
+
+--------------------------------------------------------------------------------
+  q-point number  2        q = ( 0.500000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -15.480  -2.509   4.494  -1.936  -3.721  -1.936  -3.721  -1.936  -3.721
+        0.000  -2.509  -4.494  -1.936   3.721  -1.936   3.721  -1.936   3.721
+
+    2  -2.509 -18.919   0.000   0.207  -0.000   0.207  -0.000   0.207   0.000
+        2.509   0.000  -6.703  -0.000   0.515   0.000   0.515  -0.000   0.515
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -3.398  -1.030   0.576  -0.340  -0.756  -0.340  -0.756  -0.340  -0.756
+        0.000  -1.030  -0.576  -0.340   0.756  -0.340   0.756  -0.340   0.756
+
+    2  -1.030  -8.745   0.000   0.036  -0.000   0.036  -0.000   0.036   0.000
+        1.030   0.000  -0.910  -0.000  -0.015   0.000  -0.015  -0.000  -0.015
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     90.66  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  3        q = ( 0.500000, 0.500000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -20.589  -4.715  -0.216  -0.216  -4.715  -0.216  -4.715  -4.715  -0.216
+        0.000  -4.715   0.216  -0.216   4.715  -0.216   4.715  -4.715   0.216
+
+    2  -4.715 -20.800  -0.000   0.320   0.000   0.321   0.000  -0.804  -0.000
+        4.715   0.000  -4.856   0.000   1.541  -0.000   1.541  -0.000  -0.977
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -4.236  -0.999  -0.205  -0.205  -0.999  -0.205  -0.999  -0.999  -0.205
+        0.000  -0.999   0.205  -0.205   0.999  -0.205   0.999  -0.999   0.205
+
+    2  -0.999  -8.756  -0.000  -0.060   0.000  -0.060   0.000   0.121  -0.000
+        0.999   0.000  -0.716   0.000  -0.007  -0.000  -0.007  -0.000  -0.026
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     90.54  [%]
 
 ================================================================================
 == DATASET 52 ==================================================================
@@ -1553,7 +1779,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 52, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
@@ -1564,9 +1790,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET  51.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -1575,47 +1801,51 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.4432 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6196 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -1624,11 +1854,11 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  number of bands                                   100
  number of independent spin polarizations            1
  number of spinorial components                      1
- number of k-points in IBZ                           1
- number of q-points in IBZ                           1
+ number of k-points in IBZ                           3
+ number of q-points in IBZ                           3
  number of symmetry operations                      48
- number of k-points in BZ                            1
- number of q-points in BZ                            1
+ number of k-points in BZ                            8
+ number of q-points in BZ                            8
  number of frequencies for dSigma/dE                 9
  frequency step for dSigma/dE [eV]                0.25
  number of omega for Sigma on real axis              0
@@ -1640,7 +1870,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  dimension of the eps^-1 matrix used               259
  number of plane-waves for wavefunctions           283
  number of bands                                   100
- number of q-points in IBZ                           1
+ number of q-points in IBZ                           3
  number of frequencies                               2
  number of real frequencies                          1
  number of imag frequencies                          1
@@ -1653,27 +1883,19 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 iteration_state: {dtset: 52, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
-KS_gap     :    2.530
-QP_gap     :    3.122
-Delta_QP_KS:    0.592
+KS_gap     :    2.443
+QP_gap     :    3.159
+Delta_QP_KS:    0.716
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.653 -17.103   4.375   0.785  -0.274 -12.497  -0.844   5.071
-        3   5.915 -11.653 -17.103   4.375   0.785  -0.274 -12.497  -0.844   5.071
-        4   5.915 -11.653 -17.103   4.375   0.785  -0.274 -12.497  -0.844   5.071
-        5   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
-        6   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
-        7   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
+        2   4.665 -11.412 -13.527   1.696   0.784  -0.276 -11.740  -0.328   4.338
+        3   4.665 -11.412 -13.527   1.696   0.784  -0.276 -11.740  -0.328   4.338
+        4   4.665 -11.412 -13.527   1.696   0.784  -0.276 -11.740  -0.328   4.338
+        5   7.108  -9.962  -4.945  -4.527   0.791  -0.264  -9.574   0.388   7.496
+        6   7.108  -9.962  -4.945  -4.527   0.791  -0.264  -9.574   0.388   7.496
+        7   7.108  -9.962  -4.945  -4.527   0.791  -0.264  -9.574   0.388   7.496
 ...
 
-
- New Fermi energy :        2.437266E-01 Ha ,    6.632137E+00 eV
-
- === QP Band Gaps ===
-  >>>> For spin  1
-   Minimum direct gap =   3.1217 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1217 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
 == DATASET 61 ==================================================================
@@ -1682,7 +1904,7 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 61, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
@@ -1691,9 +1913,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SCREENING: Calculation of the susceptibility and dielectric matrices 
 
@@ -1702,31 +1924,35 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
@@ -1739,9 +1965,9 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Number of bands treated by each node ~96
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -1754,45 +1980,89 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+    1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524  -0.000  -0.524   0.000
-       -0.000   0.000 -16.920   0.000  -0.161  -0.000  -0.161   0.000  -0.161
+    2   0.000 -19.646   0.000  -0.025  -0.000  -0.025  -0.000  -0.025   0.000
+       -0.000   0.000  -7.719   0.000  -0.121   0.000  -0.121  -0.000  -0.121
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083  -0.000  -0.083   0.000
-       -0.000   0.000  -2.135   0.000   0.098  -0.000   0.098   0.000   0.098
+    2   0.000  -7.587   0.000  -0.065  -0.000  -0.065  -0.000  -0.065   0.000
+       -0.000   0.000  -1.232   0.000  -0.116  -0.000  -0.116  -0.000  -0.116
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.2700
-  dielectric constant without local fields = 140.4463
+  dielectric constant =  49.5676
+  dielectric constant without local fields =  56.9816
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.19  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     88.90  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+     -0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
-      0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+     -0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+      0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
-      0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.339   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
+      0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
+
+
+--------------------------------------------------------------------------------
+  q-point number  2        q = ( 0.500000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -15.480  -2.509   4.494  -1.936  -3.721  -1.936  -3.721  -1.936  -3.721
+        0.000  -2.509  -4.494  -1.936   3.721  -1.936   3.721  -1.936   3.721
+
+    2  -2.509 -18.919   0.000   0.207  -0.000   0.207  -0.000   0.207   0.000
+        2.509   0.000  -6.703  -0.000   0.515   0.000   0.515  -0.000   0.515
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -3.398  -1.030   0.576  -0.340  -0.756  -0.340  -0.756  -0.340  -0.756
+        0.000  -1.030  -0.576  -0.340   0.756  -0.340   0.756  -0.340   0.756
+
+    2  -1.030  -8.745   0.000   0.036  -0.000   0.036  -0.000   0.036   0.000
+        1.030   0.000  -0.910  -0.000  -0.015   0.000  -0.015  -0.000  -0.015
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     90.65  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  3        q = ( 0.500000, 0.500000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -20.589  -4.715  -0.216  -0.216  -4.715  -0.216  -4.715  -4.715  -0.216
+        0.000  -4.715   0.216  -0.216   4.715  -0.216   4.715  -4.715   0.216
+
+    2  -4.715 -20.800  -0.000   0.320   0.000   0.321   0.000  -0.804  -0.000
+        4.715   0.000  -4.856   0.000   1.541  -0.000   1.541  -0.000  -0.977
+
+  chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -4.236  -0.999  -0.205  -0.205  -0.999  -0.205  -0.999  -0.999  -0.205
+        0.000  -0.999   0.205  -0.205   0.999  -0.205   0.999  -0.999   0.205
+
+    2  -0.999  -8.756  -0.000  -0.060   0.000  -0.060   0.000   0.121  -0.000
+        0.999   0.000  -0.716   0.000  -0.007  -0.000  -0.007  -0.000  -0.026
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     90.52  [%]
 
 ================================================================================
 == DATASET 62 ==================================================================
@@ -1801,7 +2071,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 62, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+dimensions: {natom: 2, nkpt: 3, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
@@ -1812,9 +2082,9 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  mkfilename : getscr/=0, take file _SCR from output of DATASET  61.
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
  SIGMA: Calculation of the GW corrections 
 
@@ -1823,47 +2093,51 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 .Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
- R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
- R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
- Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
+ R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
+ R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
+ Unit cell volume ucvol=  2.7001139E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
- Number of points in the irreducible wedge :     1
+ Number of points in the irreducible wedge :     3
  Reduced coordinates and weights : 
 
-     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       1.00000
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
  Together with 48 symmetry operations and time-reversal symmetry 
- yields     1 points in the full Brillouin Zone.
+ yields     8 points in the full Brillouin Zone.
 
 
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
- average of density, n =  0.030004
- r_s =    1.9964
- omega_plasma =   16.7088 [eV]
+ average of density, n =  0.029628
+ r_s =    2.0048
+ omega_plasma =   16.6039 [eV]
 
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   2.5301 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   2.5301 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   2.4432 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6196 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  283
@@ -1872,11 +2146,11 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  number of bands                                   100
  number of independent spin polarizations            1
  number of spinorial components                      1
- number of k-points in IBZ                           1
- number of q-points in IBZ                           1
+ number of k-points in IBZ                           3
+ number of q-points in IBZ                           3
  number of symmetry operations                      48
- number of k-points in BZ                            1
- number of q-points in BZ                            1
+ number of k-points in BZ                            8
+ number of q-points in BZ                            8
  number of frequencies for dSigma/dE                 9
  frequency step for dSigma/dE [eV]                0.25
  number of omega for Sigma on real axis              0
@@ -1888,7 +2162,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  dimension of the eps^-1 matrix used               283
  number of plane-waves for wavefunctions           283
  number of bands                                   100
- number of q-points in IBZ                           1
+ number of q-points in IBZ                           3
  number of frequencies                               2
  number of real frequencies                          1
  number of imag frequencies                          1
@@ -1901,33 +2175,25 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 iteration_state: {dtset: 62, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
-KS_gap     :    2.530
-QP_gap     :    3.122
-Delta_QP_KS:    0.592
+KS_gap     :    2.443
+QP_gap     :    3.159
+Delta_QP_KS:    0.716
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.653 -17.103   4.374   0.785  -0.274 -12.498  -0.845   5.070
-        3   5.915 -11.653 -17.103   4.374   0.785  -0.274 -12.498  -0.845   5.070
-        4   5.915 -11.653 -17.103   4.374   0.785  -0.274 -12.498  -0.845   5.070
-        5   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
-        6   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
-        7   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
+        2   4.665 -11.412 -13.527   1.695   0.784  -0.276 -11.741  -0.329   4.337
+        3   4.665 -11.412 -13.527   1.695   0.784  -0.276 -11.741  -0.329   4.337
+        4   4.665 -11.412 -13.527   1.695   0.784  -0.276 -11.741  -0.329   4.337
+        5   7.108  -9.962  -4.945  -4.527   0.791  -0.264  -9.575   0.388   7.496
+        6   7.108  -9.962  -4.945  -4.527   0.791  -0.264  -9.575   0.388   7.496
+        7   7.108  -9.962  -4.945  -4.527   0.791  -0.264  -9.575   0.388   7.496
 ...
 
-
- New Fermi energy :        2.437039E-01 Ha ,    6.631521E+00 eV
-
- === QP Band Gaps ===
-  >>>> For spin  1
-   Minimum direct gap =   3.1224 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1224 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 == END DATASET(S) ==============================================================
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
-            acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
+            acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
              bdgw           4       5
              ecut      8.00000000E+00 Hartree
@@ -1981,7 +2247,7 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart62    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getscr11         0
            getscr12        -1
            getscr21         0
@@ -1995,17 +2261,21 @@ data: !SigmaeeData |
            getscr61         0
            getscr62        -1
            getwfk           2
-           istwfk        1
+           istwfk        1    1    1
+              ixc          11
            jdtset       11   12   21   22   31   32   41   42   51   52
                         61   62
-         kptrlatt        1    0    0      0    1    0      0    0    1
-          kptrlen      7.22450998E+00
-P           mkmem           1
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+         kptrlatt        2    0    0      0    2    0      0    0    2
+          kptrlen      1.45098311E+01
+P           mkmem           3
             natom           2
             nband         100
            ndtset          12
             ngfft          20      20      20
-             nkpt           1
+             nkpt           3
            nkptgw           1
            npweps11        59
            npweps12        59
@@ -2130,10 +2400,11 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
             typat      1  1
+              wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3573395400E+00  1.3573395400E+00  1.3573395400E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
+                       2.5650000000E+00  2.5650000000E+00  2.5650000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
@@ -2177,7 +2448,12 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] ABINIT: Overview, and focus on selected capabilities
+- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [3] ABINIT: Overview, and focus on selected capabilities
 - J. Chem. Phys. 152, 124102 (2020).
 - A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
@@ -2194,7 +2470,7 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [3] Recent developments in the ABINIT software package.
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -2214,7 +2490,7 @@ P           mkmem           1
 -
 - And optionally:
 -
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -2227,10 +2503,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.8  wall=         12.0
+- Proc.   0 individual time (sec): cpu=         28.6  wall=         28.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  12 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.8  wall=         12.0
+.Delivered  12 WARNINGs and  24 COMMENTs to log file.
++Overall time at end (sec) : cpu=         28.6  wall=         28.8

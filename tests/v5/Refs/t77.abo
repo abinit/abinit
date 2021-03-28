@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -388,7 +388,7 @@ force_length_stats: {min:   2.35563556E-27, max:   2.35563556E-27, mean:   2.355
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.13733E-27 1.36003E-27 (free atoms)
   1.76993401160727E-28 -9.74430019374252E-28 -2.13732972436805E-27
  -1.76993401160727E-28  9.74430019374252E-28  2.13732972436805E-27
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.29246970711411E-26  1.89088602243644E-42 -1.98674618979912E-27
  -1.29246970711411E-26 -4.55956394967831E-43  1.98674618979912E-27
  Scale of Primitive Cell (acell) [bohr]
@@ -554,7 +554,7 @@ force_length_stats: {min:   1.67352283E-28, max:   1.67352283E-28, mean:   1.673
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.34449E-28 9.66209E-29 (free atoms)
   2.39514902831545E-29  9.67299058616419E-29  1.34448645227152E-28
  -2.39514902831545E-29 -9.67299058616419E-29 -1.34448645227152E-28
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -8.07793566946316E-28  9.42772862728805E-44 -2.65846125059481E-28
   8.07793566946316E-28 -9.42772862728805E-44  2.65846125059481E-28
  Scale of Primitive Cell (acell) [bohr]
@@ -724,7 +724,7 @@ force_length_stats: {min:   1.22511008E-28, max:   1.22511008E-28, mean:   1.225
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.66284E-29 7.07318E-29 (free atoms)
   8.66283646647635E-29  8.66283646647635E-29  3.72798244312438E-45
  -8.66283646647635E-29 -8.66283646647635E-29 -3.72798244312438E-45
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.15258898067844E-43  8.00414294710088E-44 -9.58071569390919E-28
   1.15258898067844E-43 -8.00414294710088E-44  9.58071569390919E-28
  Scale of Primitive Cell (acell) [bohr]
@@ -894,7 +894,7 @@ force_length_stats: {min:   1.38920404E-29, max:   1.38920404E-29, mean:   1.389
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.79125E-30 8.02057E-30 (free atoms)
  -5.22556436971819E-30 -9.79124518421600E-30 -8.35546417427481E-30
   5.22556436971819E-30  9.79124518421600E-30  8.35546417427481E-30
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   5.04870979341448E-29  2.94091390088067E-45  5.77840613074391E-29
  -5.04870979341448E-29 -2.94091390088067E-45 -5.77840613074391E-29
  Scale of Primitive Cell (acell) [bohr]
@@ -1064,7 +1064,7 @@ force_length_stats: {min:   4.75132197E-31, max:   4.75132197E-31, mean:   4.751
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.56723E-31 2.74318E-31 (free atoms)
   3.56722729933394E-31  2.85378183946715E-31 -1.30609306509014E-31
  -3.56722729933394E-31 -2.85378183946715E-31  1.30609306509014E-31
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   7.88860905221012E-31  7.90582981766683E-47 -3.94430452610506E-30
  -7.88860905221012E-31 -7.90582981766683E-47  3.94430452610506E-30
  Scale of Primitive Cell (acell) [bohr]
@@ -1361,7 +1361,7 @@ force_length_stats: {min:   2.35563556E-27, max:   2.35563556E-27, mean:   2.355
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.13733E-27 1.36003E-27 (free atoms)
   1.76993401160727E-28 -9.74430019374252E-28 -2.13732972436805E-27
  -1.76993401160727E-28  9.74430019374252E-28  2.13732972436805E-27
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.29246970711411E-26  1.89088602243644E-42 -1.98674618979912E-27
  -1.29246970711411E-26 -4.55956394967831E-43  1.98674618979912E-27
  Scale of Primitive Cell (acell) [bohr]
@@ -1527,7 +1527,7 @@ force_length_stats: {min:   7.44600417E-29, max:   7.44600417E-29, mean:   7.446
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.26512E-29 4.29895E-29 (free atoms)
  -5.26512003935290E-29 -5.26512003935290E-29  3.16666956476199E-46
   5.26512003935290E-29  5.26512003935290E-29 -3.16666956476199E-46
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.13263562860981E-44 -1.32351166845051E-44  5.87701374389654E-28
   1.57906480001730E-44 -1.38818876017660E-44 -5.87701374389654E-28
  Scale of Primitive Cell (acell) [bohr]
@@ -1697,7 +1697,7 @@ force_length_stats: {min:   1.97042645E-27, max:   1.97042645E-27, mean:   1.970
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.16602E-27 1.13763E-27 (free atoms)
   1.16602404315047E-27  1.16602404315047E-27 -1.07858994157528E-27
  -1.16602404315047E-27 -1.16602404315047E-27  1.07858994157528E-27
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.23117426778527E-27  3.23117426778527E-27 -1.58979138229191E-26
  -3.23117426778527E-27 -3.23117426778527E-27  1.58979138229191E-26
  Scale of Primitive Cell (acell) [bohr]
@@ -1867,7 +1867,7 @@ force_length_stats: {min:   2.93855136E-29, max:   2.93855136E-29, mean:   2.938
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.51580E-29 1.69657E-29 (free atoms)
  -1.51207814099949E-29 -1.39411459808464E-30  2.51580369982199E-29
   1.51207814099949E-29  1.39411459808464E-30 -2.51580369982199E-29
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.51461293802434E-28 -3.15463482445743E-44  1.66844081454244E-28
   1.51461293802434E-28  3.15463482445743E-44 -1.66844081454244E-28
  Scale of Primitive Cell (acell) [bohr]
@@ -2037,7 +2037,7 @@ force_length_stats: {min:   4.99598713E-29, max:   4.99598713E-29, mean:   4.995
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.37011E-29 2.88443E-29 (free atoms)
   1.55761313103697E-29  3.37010841078907E-29  3.34306715330786E-29
  -1.55761313103697E-29 -3.37010841078907E-29 -3.34306715330786E-29
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.01948391736579E-28 -1.56425806757059E-44 -1.73549399148623E-28
   2.01948391736579E-28 -6.77819475349113E-45  1.73549399148623E-28
  Scale of Primitive Cell (acell) [bohr]

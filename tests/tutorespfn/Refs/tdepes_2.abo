@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.3.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h19 )
+.Starting date : Tue 22 Dec 2020.
+- ( at 16h12 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorespfn_tdepes_2/tdepes_2.in
-- output file    -> tdepes_2.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/sponce_beauty/tests/TestBot_MPI1/tutorespfn_tdepes_2/tdepes_2.abi
+- output file    -> tdepes_2.abo
 - root for input  files -> tdepes_2i
 - root for output files -> tdepes_2o
 
@@ -26,17 +26,17 @@
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      15  mpssoang =       2    mqgrid =    3001
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       4
+     lnmax =       4     mgfft =      27  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =          12        mffmem =           1         mkmem =           8
-       mpw =         125          nfft =        3375          nkpt =           8
+       mpw =         821          nfft =       19683          nkpt =           8
 ================================================================================
-P This job should need less than                       1.656 Mbytes of memory.
+P This job should need less than                       7.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -53,11 +53,12 @@ _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
             acell      6.6750000000E+00  6.6750000000E+00  6.6750000000E+00 Bohr
               amu      1.20110000E+01
            diemac      6.00000000E+00
-             ecut      1.00000000E+01 Hartree
+             ecut      3.70000000E+01 Hartree
     elph2_imagden      3.67493254E-03 Hartree
            enunit           2
 -          fftalg         312
            istwfk        1    0    1    0    0    0    1    0
+              ixc       -1012
            jdtset        1
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -73,7 +74,7 @@ P           mkmem           8
             natom           2
             nband          12
            ndtset           1
-            ngfft          15      15      15
+            ngfft          27      27      27
              nkpt           8
             nstep           0
              nsym          48

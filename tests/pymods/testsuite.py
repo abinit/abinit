@@ -1966,9 +1966,14 @@ pp_dirpath $ABI_PSPDIR
             self.stderr_fname = os.path.join(self.workdir, self.id + ".stderr")
 
             # Run the code (run_etime is the wall time spent to execute the test)
-            # FIXME: Add support for more executables
+
+            # Here we decided whether we should invoke the executable with/without files file.
+            # Note that not all the executables have removed support for the files file, moreover we still have
+            # a couple of Abinit tests in which the files file sytenx is still used (use_files_file option in TEST_INFO)
+            # just to make sure we still support the legacy mode.
+
             use_files_file = self.use_files_file
-            if self.executable not in ("abinit", "anaddb"):
+            if self.executable not in ("abinit", "anaddb", "optic"):  # FIXME: Add support for more executables
                 use_files_file = True
 
             if use_files_file:
@@ -1980,8 +1985,9 @@ pp_dirpath $ABI_PSPDIR
                 bin_argstr = " " + self.exec_args
 
             else:
-                # New CLI mode: invoke exec with syntax `abinit run.abi`
-                # stdin_fname won't be created
+                # New CLI mode: invoke executable with syntax `abinit run.abi`. stdin_fname won't be created
+                # The subclass should implement prepare_new_cli_invokation that performs all the operations
+                # needed to prepare the input files. May be empty.
                 self.keep_files([self.stdout_fname, self.stderr_fname])
                 stdin_fname = ""
                 self.prepare_new_cli_invokation()
@@ -2028,6 +2034,18 @@ pp_dirpath $ABI_PSPDIR
 
                 if not self.exec_error and f.has_line_count_error: f.do_html_diff = True
 
+                if f.do_html_diff:
+                    # Disable html diff if file size is >= 150 Kb or files do not exist.
+                    html_max_bites = 150 * 1000
+                    out_size_bites = ref_size_bites = html_max_bites
+                    try:
+                        out_size_bites = os.path.getsize(os.path.join(self.workdir, f.name))
+                        ref_size_bites = os.path.getsize(os.path.join(self.ref_dir, f.name))
+                    except OSError:
+                        pass
+                    if out_size_bites >= html_max_bites or ref_size_bites >= html_max_bites:
+                        f.do_html_diff = False
+
                 self.cprint(self.full_id + "[run_etime: %s s]: " % sec2str(self.run_etime) + msg,
                             status2txtcolor[status])
 
@@ -2041,7 +2059,7 @@ pp_dirpath $ABI_PSPDIR
                     if self.exclude_builders: cprint("\t\texclude_builder: %s" % str(self.exclude_builders), color="yellow")
 
                 if status == "failed" and self.use_git_submodule:
-                    cprint("\tTest %s failed. Note, however, that this requires external files in %s" % (
+                    cprint("\tTest %s failed. Note, however, that this test requires external files in %s" % (
                           self.full_id, self.use_git_submodule), color="yellow")
                     cprint("\tUse `git submodule update --recursive --remote` to fetch the last version from the remote url.",
                            color="yellow")
@@ -2467,10 +2485,11 @@ pp_dirpath $ABI_PSPDIR
                 </tr>
                 <py-open>for idx, f in enumerate(self.files_to_test):</py-open>
                  <tr valign="top" align="left">
+                  <py-line code = "out_link = html_link(basename(f.name))"/>
                   <py-line code = "fld_link = html_link(basename(f.fldiff_fname))"/>
                   <py-line code = "txt_diff_link = html_link(basename(f.diff_fname))"/>
                   <py-line code = "html_diff_link = html_link(basename(f.hdiff_fname))"/>
-                  <py-line code = "tab_row = args2htmltr(f.name, status2html(f.fld_status), fld_link, f.fld_options, txt_diff_link, html_diff_link)"/>
+                  <py-line code = "tab_row = args2htmltr(out_link, status2html(f.fld_status), fld_link, f.fld_options, txt_diff_link, html_diff_link)"/>
                   ${tab_row}
                  </tr>
                 <py-close/>
@@ -2813,13 +2832,14 @@ class OpticTest(BaseTest):
     """
     def make_stdin(self):
         t_stdin = StringIO()
-
         t_stdin.write(self.inp_fname + "\n")  # optic input file e.g. .../Input/t57.in
         t_stdin.write(self.id + ".abo\n")     # Output. e.g t57.abo
         t_stdin.write(self.id + "\n")         # Used as suffix to diff and prefix to log file names,
-                                               # and also for roots for temporaries
-
+                                              # and also for roots for temporaries
         return t_stdin.getvalue()
+
+    def prepare_new_cli_invokation(self):
+        """Empty implementation"""
 
 
 class Band2epsTest(BaseTest):
@@ -3641,11 +3661,9 @@ class AbinitTestSuite(object):
                 msg = (
                     "Timeout occured while trying to acquire lock in:\n\t{}\n"
                     "Perhaps a previous run did not exit cleanly or another "
-                    "process is running in the same directory.\n If you are"
-                    "sure no other process is in execution, remove the "
-                    "directory with `rm -rf` and rerun.\n"
+                    "process is running in the same directory.\n If you are "
+                    "sure no other process is in execution, remove the directory with `rm -rf` and rerun.\n"
                 ).format(self.workdir)
-
                 cprint(msg, "red")
                 return
 

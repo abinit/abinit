@@ -1,8 +1,8 @@
 
-.Version 9.3.2 of ABINIT 
+.Version 9.3.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Nov 2020.
-- ( at 17h08 )
+.Starting date : Sun 27 Dec 2020.
+- ( at 18h33 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_rmms/tests/TestBot_MPI1/v9_t30/t30.in
-- output file    -> t30.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__torrent/tests/Test_suite/v9_t30/t30.abi
+- output file    -> t30.abo
 - root for input  files -> t30i
 - root for output files -> t30o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /Users/gmatteo/git_repos/abinit_rmms/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__torrent/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /Users/gmatteo/git_repos/abinit_rmms/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__torrent/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
 
  Symmetries : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -104,7 +104,7 @@ P           mkmem           8
                        0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
                        0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
                        0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
-           tolvrs      1.00000000E-08
+           tolvrs      1.20000000E-08
             typat      1  2
   use_gemm_nonlop           1
            useylm           1
@@ -153,9 +153,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.17791
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit_rmms/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_rmms/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
-- pspatm : Reading pseudopotential header in XML form from /Users/gmatteo/git_repos/abinit_rmms/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__torrent/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__torrent/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__torrent/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10359248
@@ -173,9 +173,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit_rmms/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_rmms/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
-- pspatm : Reading pseudopotential header in XML form from /Users/gmatteo/git_repos/abinit_rmms/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__torrent/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__torrent/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__torrent/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10391912
@@ -203,7 +203,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     593.953     593.920
 --- !BeginCycle
 iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
-tolerances: {tolvrs: 1.00E-08, }
+tolerances: {tolvrs: 1.20E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
@@ -218,7 +218,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  9  -192.96282318332    -7.510E-08 5.993E-08 2.507E-08
  ETOT 10  -192.96282320950    -2.618E-08 7.687E-09 7.904E-09
 
- At SCF step   10       nres2   =  7.90E-09 < tolvrs=  1.00E-08 =>converged.
+ At SCF step   10       nres2   =  7.90E-09 < tolvrs=  1.20E-08 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.38964830E-04  sigma(3 2)=  0.00000000E+00
@@ -468,7 +468,7 @@ P           mkmem           8
                        0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
                        0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
                        0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
-           tolvrs      1.00000000E-08
+           tolvrs      1.20000000E-08
             typat      1  2
   use_gemm_nonlop           1
            useylm           1
@@ -567,10 +567,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.7  wall=          8.7
+- Proc.   0 individual time (sec): cpu=          8.7  wall=          8.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.7  wall=          8.7
++Overall time at end (sec) : cpu=          8.7  wall=          8.8
