@@ -8708,7 +8708,7 @@ See [[cite:Sun2011]] for the formulas.
   * 207 -->  XC_MGGA_X_BJ06  Becke & Johnson correction to Becke-Roussel 89 [[cite:Becke2006]]
 
 !!! warning
-    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92 [[cite:Perdew1992a]].
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92 [[cite:Perdew1992a]], hence [[ixc]]=-12208 ..
 
   * 208 -->  XC_MGGA_X_TB09  Tran-blaha - correction to Becke & Johnson correction to Becke-Roussel 89 [[cite:Tran2009]]
 
@@ -20791,7 +20791,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 The modified Becke-Johnson exchange-correlation functional by
-[[cite:Tran2009 | Tran and Blaha]] reads:
+[[cite:Tran2009 | Tran and Blaha]] (acronym TB09, used when [[ixc]]=-12208, which needs [[usekden]]=1) reads:
 
 $$ V_x(r) =
 c V_x^{BR}(r) +
@@ -20800,7 +20800,7 @@ c V_x^{BR}(r) +
 
 where $\rho(r)$ is the electron density,
 $t(r)$ is the kinetic-energy density, and
-$ V_x^{BR}(r)$ is the Becke-Roussel potential.
+$V_x^{BR}(r)$ is the Becke-Roussel potential.
 
 In this equation the parameter $c$ can be evaluated at each SCF step according
 to the following equation:
