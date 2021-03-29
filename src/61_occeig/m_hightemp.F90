@@ -219,6 +219,7 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: band_index,ii,ikpt,isppol,nband_k
+    real(dp) :: abs_err,rel_err
 
     ! *********************************************************************
 
@@ -227,6 +228,24 @@ contains
     ! Simplest and most precise way to evaluate U_0.
     if(this%version==1) then
       this%e_shiftfactor=sum(this%vtrial)/(this%nfftf*this%nspden)
+      ! Compute the relative error of the model vs last eigenvalues
+      band_index=0
+      rel_err=zero
+      abs_err=zero
+      do isppol=1,nsppol
+        do ikpt=1,nkpt
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k)-&
+          & hightemp_e_heg(dble(nband_k),this%ucvol)-this%e_shiftfactor)/&
+          & eigen(band_index+nband_k))
+          abs_err=abs_err+wtk(ikpt)*abs(eigen(band_index+nband_k)-&
+          & hightemp_e_heg(dble(nband_k),this%ucvol)-this%e_shiftfactor)
+          band_index=band_index+nband_k
+        end do
+      end do
+      write(0,*) '--------'
+      write(0,*) 'rel_err=',rel_err
+      write(0,*) 'abs_err=',abs_err
     end if
 
     ! Compute U_0^{HEG} from the difference between
