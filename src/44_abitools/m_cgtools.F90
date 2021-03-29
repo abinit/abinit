@@ -4797,7 +4797,7 @@ subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
        &     block_size,x_cplx=2)
      do iband=1,nband_k
        do ig=1,block_size_tmp
-         cg(:,ig+cgindex_subd(iblock,iband)) = work(:,ig+(iband-1)*block_size) 
+         cg(:,ig+cgindex_subd(iblock,iband)) = work(:,ig+(iband-1)*block_size)
        end do
      end do
    end do
@@ -5406,7 +5406,7 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 !Local variables-------------------------------
 !scalars
  logical :: do_cprj
- integer :: ii,ii1,ii2,ivec,ivec2,ivec3,iv1,iv2,iv3,iv1l,iv2l,iv3l,ncprj
+ integer :: ii,ii1,ii2,ivec,ivec2,ivec3,iv1l,iv2l,iv3l,iv1r,iv2r,iv3r,ncprj
  real(dp) :: doti,dotr,summ,xnorm
 !arrays
  real(dp) :: ovl_row_tmp(2*nvec),ovl_col_tmp(2*nvec)
@@ -5426,23 +5426,26 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
    end if
  end if
 
+ ! The overlap matrix is : ovl(i,j) = <psi_i|S|psi_j> = (<psi_j|S|psi_i>)^*
+ ! The row index stands for the "left"  band index
+ ! The column index stands for the "right" band index
+ ! Only the upper triangular part of the (complex) overlap matrix is stored, so only elements with i<=j.
+ ! They are stored in the following order: ovl(1,1),ovl(1,2),ovl(2,2),ovl(1,3),ovl(2,3),...
+ ! so:
+ ! -- shift for the ith row    : 2.(i.(i-1)/2) = i.(i-1)
+ ! -- shift for the ith column : 2.(i-1)+1 = 2.i-1
+ ! => index of real part of elem in the jth column and ith row (=ovl(i,j)) : 2.i-1+j.(j-1) (for i<=j)
+ ! => index of imaginary part = index of real part + 1
+ ! After orthogonalizing the first n vectors, we have:
+ ! for i<=n, i<=j : ovl(i,j) = delta_ij
+
  do ivec=1,nvec
 
    ! First we normalize the current vector
-   
-   ! Only the upper triangular part of the (complex) overlap matrix is stored 
-   ! -- shift for the ith row    : 2.(i.(i-1)/2) = i.(i-1)
-   ! -- shift for the ith column : 2.i-1
-   ! => index of real part of elem in the jth column and ith row : 2.i-1+j.(j-1) (for i<=j)
-   ! -- index of imaginary part = index of real part + 1
-   ! where the overlap matrix is :
-   !  ovl(i,j) = <psi_i|S|psi_j> = (<psi_j|S|psi_i>)^*
-   ! so the column index stands for the "right" band index
-   ! and the row index stands for the "left"  band index
-   iv1l = ivec*(ivec-1) ! ith column
-   iv1  = 2*ivec-1      ! ith row
+   iv1r = ivec*(ivec-1) ! ith row
+   iv1l = 2*ivec-1      ! ith column
    ! ovl(i1,i1) = <psi_i1|S|psi_i1>
-   summ = ovl_mat(iv1l+iv1)
+   summ = ovl_mat(iv1r+iv1l)
    xnorm = sqrt(abs(summ)) ;  summ=1.0_dp/xnorm
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
    do ii=1+nelem*(ivec-1)+icg,nelem*ivec+icg
@@ -5452,19 +5455,21 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 !  Apply the normalization to cprj coeffs
    if (do_cprj) call pawcprj_axpby(zero,summ,cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec))
 
-   ! As |psi_i> changed, we update the overlap matrix accordingly.
-   ! TO FINISH
+   ! As the norm of |psi_i1> changed, we update the overlap matrix accordingly.
+   ! From previous iterations, we already have:
+   ! ovl(i2,i1) = <psi_i2|S|psi_i1> = 0 for i2<i1
+   ! so we need to change only:
+   ! ovl(i1,i2) = <psi_i1|S|psi_i2> for i1<=i2
    do ivec2=ivec,nvec
-     iv2l=ivec2*(ivec2-1)
+     iv2r=ivec2*(ivec2-1)
      if (ivec<ivec2) then
-       ! ovl(i2,i1) = <psi_i2|S|psi_i1>
-       ovl_mat(iv2l+iv1  ) = ovl_mat(iv2l+iv1  )*summ
-       ovl_mat(iv2l+iv1+1) = ovl_mat(iv2l+iv1+1)*summ
+       ovl_mat(iv2r+iv1l  ) = ovl_mat(iv2r+iv1l  )*summ
+       ovl_mat(iv2r+iv1l+1) = ovl_mat(iv2r+iv1l+1)*summ
      else if (ivec==ivec2) then
-       ovl_mat(iv2l+iv1  ) = ovl_mat(iv2l+iv1  )*summ*summ
-       ovl_mat(iv2l+iv1+1) = ovl_mat(iv2l+iv1+1)*summ*summ
-       re = ovl_mat(iv2l+iv1  )
-       im = ovl_mat(iv2l+iv1+1)
+       ovl_mat(iv2r+iv1l  ) = ovl_mat(iv2r+iv1l  )*summ*summ
+       ovl_mat(iv2r+iv1l+1) = ovl_mat(iv2r+iv1l+1)*summ*summ
+       re = ovl_mat(iv2r+iv1l  )
+       im = ovl_mat(iv2r+iv1l+1)
        if (abs(re-1)>tol10.or.abs(im)>tol10) then
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
@@ -5478,15 +5483,15 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 
      do ivec2=ivec+1,nvec
 
-       iv2l = ivec2*(ivec2-1)
-       iv2  = 2*ivec2-1
-       ! (dotr,doti) = <psi_i2|S|psi_i>
-       dotr = ovl_mat(iv2l+iv1  )
-       doti = ovl_mat(iv2l+iv1+1)
+       iv2r = ivec2*(ivec2-1)
+       iv2l = 2*ivec2-1
+       ! (dotr,doti) = <psi_i1|S|psi_i2>
+       dotr = ovl_mat(iv2r+iv1l  )
+       doti = ovl_mat(iv2r+iv1l+1)
 
 !      Then subtract the appropriate amount of the lower state
        ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
-       ! |psi_i2> = |psi_i2> - <psi_i2|S|psi_i> |psi_i>
+       ! |psi'_i2> = |psi_i2> - <psi_i1|S|psi_i2> |psi_i1>
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
        do ii=1,nelem
          vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
@@ -5494,33 +5499,53 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
        end do
        if (do_cprj) call pawcprj_zaxpby((/-dotr,-doti/),(/one,zero/),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),&
 &                                                                    cprj(:,nspinor*(ivec2-1)+1:nspinor*ivec2))
-       do ivec3=1,ivec
-         iv3=2*ivec3-1
-         ovl_col_tmp(iv3  ) = ovl_mat(iv2l+iv3  ) - dotr*ovl_mat(iv1l+iv3) + doti*ovl_mat(iv1l+iv3+1)
-         ovl_col_tmp(iv3+1) = ovl_mat(iv2l+iv3+1) - doti*ovl_mat(iv1l+iv3) - dotr*ovl_mat(iv1l+iv3+1)
+       ! As |psi_i2> changed, we update the overlap matrix accordingly.
+       ! We have: <psi'_i3|S|psi'_i2> = <psi'_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi'_i3|S|psi_i1>
+       ! Remember that i2>i1.
+       ! For i3<=i2, we compute the new column i2.
+       ! For i3<i1:
+       ! (1) <psi'_i3|S|psi'_i2> = <psi_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i3|S|psi_i1>
+       !                         = <psi_i3|S|psi_i2>
+       ! as for i3<i1 we have <psi_i3|S|psi_i1> = 0
+       ! For i1<=i3<i2:
+       ! (2) <psi'_i3|S|psi'_i2> = <psi_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i3|S|psi_i1>
+       !                         = <psi_i3|S|psi_i2> - <psi_i1|S|psi_i2> (<psi_i1|S|psi_i3>)^*
+       ! For i3=i2:
+       ! (3) <psi'_i3|S|psi'_i2> =  <psi'_i2|S|psi_i2> - <psi_i1|S|psi_i2> <psi'_i2|S|psi_i1>
+       !                         =   <psi_i2|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i2|S|psi_i1>
+       !                           - <psi_i1|S|psi_i2> <psi_i2|S|psi_i1> + <psi_i1|S|psi_i2> <psi_1|S|psi_1> <psi_i2|S|psi_i1>
+       !                         =   <psi_i2|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i2|S|psi_i1>
+       !                         =   <psi_i2|S|psi_i2> - <psi_i1|S|psi_i2> (<psi_i1|S|psi_i2>)^*
+       ! so the case i3=i2 (3) is equivalent to the case i1<=i3<i2 (2) with i3=i2.
+       ! Here we compute (2) and (3) in a temporary array:
+       do ivec3=ivec,ivec2
+         iv3r=ivec3*(ivec3-1)
+         iv3l=2*ivec3-1
+         ovl_col_tmp(iv3l  ) = ovl_mat(iv2r+iv3l  ) - dotr*ovl_mat(iv3r+iv1l) - doti*ovl_mat(iv3r+iv1l+1)
+         ovl_col_tmp(iv3l+1) = ovl_mat(iv2r+iv3l+1) - doti*ovl_mat(iv3r+iv1l) + dotr*ovl_mat(iv3r+iv1l+1)
        end do
-       do ivec3=ivec+1,ivec2
-         iv3l=ivec3*(ivec3-1)
-         iv3=2*ivec3-1
-         ovl_col_tmp(iv3  ) = ovl_mat(iv2l+iv3  ) - dotr*ovl_mat(iv3l+iv1) - doti*ovl_mat(iv3l+iv1+1)
-         ovl_col_tmp(iv3+1) = ovl_mat(iv2l+iv3+1) - doti*ovl_mat(iv3l+iv1) + dotr*ovl_mat(iv3l+iv1+1)
-       end do
+       ! For i2<i3, we compute the new row i2.
+       ! (4) <psi'_i2|S|psi_i3> = <psi_i2|S|psi_i3> - <psi_i2|S|psi_i1> <psi_i1|S|psi_i3>
+       !                        = <psi_i2|S|psi_i3> - (<psi_i1|S|psi_i2>)^* <psi_i1|S|psi_i3>
+       ! Here we compute (4) in a temporary array:
        do ivec3=ivec2+1,nvec
-         iv3l=ivec3*(ivec3-1)
-         iv3=2*ivec3-1
-         ovl_row_tmp(iv3  ) = ovl_mat(iv3l+iv2  ) - dotr*ovl_mat(iv3l+iv1) - doti*ovl_mat(iv3l+iv1+1)
-         ovl_row_tmp(iv3+1) = ovl_mat(iv3l+iv2+1) + doti*ovl_mat(iv3l+iv1) - dotr*ovl_mat(iv3l+iv1+1)
+         iv3r=ivec3*(ivec3-1)
+         iv3l=2*ivec3-1
+         ovl_row_tmp(iv3l  ) = ovl_mat(iv3r+iv2l  ) - dotr*ovl_mat(iv3r+iv1l) - doti*ovl_mat(iv3r+iv1l+1)
+         ovl_row_tmp(iv3l+1) = ovl_mat(iv3r+iv2l+1) + doti*ovl_mat(iv3r+iv1l) - dotr*ovl_mat(iv3r+iv1l+1)
        end do
-       do ivec3=1,ivec2
-         iv3=2*ivec3-1
-         ovl_mat(iv2l+iv3  ) = ovl_col_tmp(iv3  )
-         ovl_mat(iv2l+iv3+1) = ovl_col_tmp(iv3+1)
+       ! We update the column i2 (starting from ivec and not 1, thanks to (1))
+       do ivec3=ivec,ivec2
+         iv3l=2*ivec3-1
+         ovl_mat(iv2r+iv3l  ) = ovl_col_tmp(iv3l  )
+         ovl_mat(iv2r+iv3l+1) = ovl_col_tmp(iv3l+1)
        end do
+       ! We update the row i2
        do ivec3=ivec2+1,nvec
-         iv3l=ivec3*(ivec3-1)
-         iv3=2*ivec3-1
-         ovl_mat(iv3l+iv2  ) = ovl_row_tmp(iv3  )
-         ovl_mat(iv3l+iv2+1) = ovl_row_tmp(iv3+1)
+         iv3r=ivec3*(ivec3-1)
+         iv3l=2*ivec3-1
+         ovl_mat(iv3r+iv2l  ) = ovl_row_tmp(iv3l  )
+         ovl_mat(iv3r+iv2l+1) = ovl_row_tmp(iv3l+1)
        end do
      end do
 
