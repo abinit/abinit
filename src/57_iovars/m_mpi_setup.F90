@@ -6,7 +6,7 @@
 !!  Initialize MPI parameters and datastructures for parallel execution
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (FJ, MT, FD)
+!!  Copyright (C) 1999-2021 ABINIT group (FJ, MT, FD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -117,7 +117,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 #endif
  logical :: fftalg_read,ortalg_read,wfoptalg_read,do_check
  real(dp) :: dilatmx,ecut,ecut_eff,ecutdg_eff,ucvol
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: ngfft(18),ngfftdg(18),ngfftc(3),tread(12)
  integer,allocatable :: intarr(:),istwfk(:),symrel(:,:,:)
@@ -146,8 +146,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  Read parallel input parameters
    marr=max(5,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
-   ABI_ALLOCATE(intarr,(marr))
-   ABI_ALLOCATE(dprarr,(marr))
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
    nkpt  =dtsets(idtset)%nkpt
    nsppol=dtsets(idtset)%nsppol
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
@@ -165,18 +165,18 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    if(xmpi_paral==0.and.dtsets(idtset)%paral_kgb==1)then
      dtsets(idtset)%paral_kgb=0
-     write(message, '(5a)' ) &
-&     'When ABINIT is compiled without MPI flag,',ch10,&
-&     'setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.',ch10,&
-&     'Action: modify compilation option or paral_kgb in the input file.'
-     MSG_WARNING(message)
+     write(msg, '(5a)' ) &
+     'When ABINIT is compiled without MPI flag,',ch10,&
+     'setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.',ch10,&
+     'Action: modify compilation option or paral_kgb in the input file.'
+     ABI_WARNING(msg)
    end if
 
    if ( ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS]) .and. dtsets(idtset)%paral_kgb/=0) then
      dtsets(idtset)%paral_kgb=0
-     write(message, '(a,i0,a)') &
-&     "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
-     MSG_COMMENT(message)
+     write(msg, '(a,i0,a)') &
+      "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
+     ABI_COMMENT(msg)
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'max_ncpus',tread0,'INT')
@@ -194,8 +194,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nppert',tread(3),'INT')
    if (tread(3)==1.and.optdriver==RUNL_RESPFN) dtsets(idtset)%nppert=intarr(1)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npkpt',tread(4),'INT')
-   if(tread(4)==1) dtsets(idtset)%npkpt=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'np_spkpt',tread(4),'INT')
+   if(tread(4)==1)then
+     dtsets(idtset)%np_spkpt=intarr(1)
+   else 
+!    npkpt is obsolete, but still read
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npkpt',tread(4),'INT')
+     if(tread(4)==1)then
+       dtsets(idtset)%np_spkpt=intarr(1)
+     endif
+   endif
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npspinor',tread(5),'INT')
    if(tread(5)==1) dtsets(idtset)%npspinor=intarr(1)
@@ -249,14 +257,14 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    ! Dump the list of irreducible perturbations and exit.
    if (dtsets(idtset)%paral_rf==-1.and.optdriver/=RUNL_NONLINEAR) then
      call dtsets(idtset)%get_npert_rbz(nband_rbz, nkpt_rbz, npert)
-     ABI_DEALLOCATE(nband_rbz)
-     ABI_DEALLOCATE(nkpt_rbz)
+     ABI_FREE(nband_rbz)
+     ABI_FREE(nkpt_rbz)
      iexit = iexit + 1
    end if
 
 !  From total number of procs, compute all possible distributions
 !  Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
-   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) then 
+   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) then
        iexit = 0
    else
      call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
@@ -264,13 +272,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    !if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
 
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS).and. &
-&   (dtsets(idtset)%npkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
+&   (dtsets(idtset)%np_spkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
 &   dtsets(idtset)%npspinor/=1.or.dtsets(idtset)%bandpp/=1)) then
 !&   .or.(dtsets(idtset)%iscf<0)) then
-     dtsets(idtset)%npkpt=1 ; dtsets(idtset)%npspinor=1 ; dtsets(idtset)%npfft=1
+     dtsets(idtset)%np_spkpt=1 ; dtsets(idtset)%npspinor=1 ; dtsets(idtset)%npfft=1
      dtsets(idtset)%npband=1; dtsets(idtset)%bandpp=1  ; dtsets(idtset)%nphf=1
      dtsets(idtset)%paral_kgb=0
-     MSG_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1')
+     ABI_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor, np_spkpt and nphf to 1')
    end if
 
 !  Take into account a possible change of paral_kgb (change of the default algorithm)
@@ -293,12 +301,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if (dtsets(idtset)%paral_kgb==1) dtsets(idtset)%densfor_pred=6
    end if
    if((dtsets(idtset)%iscf==5.or.dtsets(idtset)%iscf==6) &
-&   .and. dtsets(idtset)%ionmov==4 .and. dtsets(idtset)%densfor_pred/=3 )then
+      .and. dtsets(idtset)%ionmov==4 .and. dtsets(idtset)%densfor_pred/=3 )then
      dtsets(idtset)%densfor_pred=3
-     write(message, '(a,a,a)' )&
-&     'When ionmov==4 and iscf==5 or 6, densfor_pred must be 3.',ch10,&
-&     'Set densfor_pred to 3.'
-     MSG_COMMENT(message)
+     write(msg, '(a,a,a)' )&
+     'When ionmov==4 and iscf==5 or 6, densfor_pred must be 3.',ch10,&
+     'Set densfor_pred to 3.'
+     ABI_COMMENT(msg)
    end if
 
 #ifdef HAVE_LOTF
@@ -342,8 +350,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  Cycle if the processor is not used
    if (mpi_enregs(idtset)%me<0.or.iexit>0) then
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
+     ABI_FREE(intarr)
+     ABI_FREE(dprarr)
      cycle
    end if
 
@@ -354,70 +362,72 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  If no MPI, set all npxxx variables to 1
    if (nproc==1) then
-     dtsets(idtset)%npkpt    = 1 ; dtsets(idtset)%npband   = 1
+     dtsets(idtset)%np_spkpt    = 1 ; dtsets(idtset)%npband   = 1
      dtsets(idtset)%npfft    = 1 ; dtsets(idtset)%npspinor = 1
      dtsets(idtset)%nphf     = 1
    end if
 
 !    --IF CUDA AND RECURSION:ONLY BAND PARALLELISATION
    if(dtsets(idtset)%tfkinfunc==2 .and. nproc/=1)then
-     dtsets(idtset)%npband = dtsets(idtset)%npband*dtsets(idtset)%npkpt*dtsets(idtset)%npspinor*dtsets(idtset)%npfft
-     dtsets(idtset)%npkpt = 1
+     dtsets(idtset)%npband = dtsets(idtset)%npband*dtsets(idtset)%np_spkpt*dtsets(idtset)%npspinor*dtsets(idtset)%npfft
+     dtsets(idtset)%np_spkpt = 1
      dtsets(idtset)%npfft = 1
      dtsets(idtset)%npspinor = 1
-     write(message, '(5a,i6,a)' )&
-&     'If HAVE_GPU_CUDA and recursion are used ',ch10,&
-&     'only the band parallelisation is active, we set:',ch10,&
-&     'npfft= 1, npkpt= 1, npband=',dtsets(idtset)%npband,' .'
-     MSG_WARNING(message)
+     write(msg, '(5a,i6,a)' )&
+     'If HAVE_GPU_CUDA and recursion are used ',ch10,&
+     'only the band parallelisation is active, we set:',ch10,&
+     'npfft= 1, np_spkpt= 1, npband=',dtsets(idtset)%npband,' .'
+     ABI_WARNING(msg)
    end if
 
    if (dtsets(idtset)%npspinor>=2.and.dtsets(idtset)%nspinor==1) then
      dtsets(idtset)%npspinor=1
      dtsets(idtset)%npfft=2*dtsets(idtset)%npfft
-     write(message,'(3a)')&
-&     'npspinor is bigger than nspinor !',ch10,&
-&     'We set npspinor to 1 ; we set npfft to 2*npfft'
-     MSG_WARNING(message)
+     write(msg,'(3a)')&
+     'npspinor is bigger than nspinor !',ch10,&
+     'We set npspinor to 1 ; we set npfft to 2*npfft'
+     ABI_WARNING(msg)
    end if
 
 !  Some checks on parallelization data
    if(dtsets(idtset)%paral_kgb < 0 ) then
      cycle
    else if(dtsets(idtset)%paral_kgb/=0.and.(dtsets(idtset)%bandpp/=1.or.dtsets(idtset)%npband/=1.or.&
-&     dtsets(idtset)%npfft/=1.or.dtsets(idtset)%npkpt/=1.or.dtsets(idtset)%npspinor/=1))then
-     if(dtsets(idtset)%npkpt*dtsets(idtset)%npfft*dtsets(idtset)%npband*dtsets(idtset)%npspinor > nproc )then
-       write(message,'(7a)')&
-&       'The product of npkpt, npfft, npband and npspinor is bigger than the number of processors.',ch10,&
-&       'The user-defined values of npkpt, npfft, npband or npspinor will be modified,',ch10,&
-&       'in order to bring this product below nproc .',ch10,&
-&       'At present, only a very simple algorithm is used ...'
-       MSG_WARNING(message)
+           dtsets(idtset)%npfft/=1.or.dtsets(idtset)%np_spkpt/=1.or.dtsets(idtset)%npspinor/=1))then
+     if(dtsets(idtset)%np_spkpt*dtsets(idtset)%npfft*dtsets(idtset)%npband*dtsets(idtset)%npspinor > nproc )then
+       write(msg,'(7a)')&
+       'The product of np_spkpt, npfft, npband and npspinor is bigger than the number of processors.',ch10,&
+       'The user-defined values of np_spkpt, npfft, npband or npspinor will be modified,',ch10,&
+       'in order to bring this product below nproc .',ch10,&
+       'At present, only a very simple algorithm is used ...'
+       ABI_WARNING(msg)
 
-       if(dtsets(idtset)%npkpt*dtsets(idtset)%npband*dtsets(idtset)%npspinor <= nproc) then
+       if(dtsets(idtset)%np_spkpt*dtsets(idtset)%npband*dtsets(idtset)%npspinor <= nproc) then
          dtsets(idtset)%npfft=1
-         MSG_WARNING('Set npfft to 1')
-       else if(dtsets(idtset)%npkpt*dtsets(idtset)%npspinor <= nproc)then
+         ABI_WARNING('Set npfft to 1')
+       else if(dtsets(idtset)%np_spkpt*dtsets(idtset)%npspinor <= nproc)then
          dtsets(idtset)%npfft=1
          dtsets(idtset)%npband=1
-         MSG_WARNING('Set npfft and npband to 1')
-       else if(dtsets(idtset)%npkpt <= nproc)then
+         ABI_WARNING('Set npfft and npband to 1')
+       else if(dtsets(idtset)%np_spkpt <= nproc)then
          dtsets(idtset)%npfft=1
          dtsets(idtset)%npband=1
          dtsets(idtset)%npspinor=1
-         MSG_WARNING('Set npfft ,npband and npspinor to 1')
+         ABI_WARNING('Set npfft ,npband and npspinor to 1')
        else
          dtsets(idtset)%npfft=1
          dtsets(idtset)%npband=1
-         dtsets(idtset)%npkpt=1
+         dtsets(idtset)%np_spkpt=1
          dtsets(idtset)%npspinor=1
-         MSG_WARNING('Set npfft, npband, nspinor and npkpt to 1')
+         ABI_WARNING('Set npfft, npband, nspinor and np_spkpt to 1')
        end if
-     else if(dtsets(idtset)%npkpt*dtsets(idtset)%npfft*dtsets(idtset)%npband*dtsets(idtset)%npspinor < nproc)then
-       write(message,'(2a)')&
-&       'The number of processor must not be greater than npfft*npband*npkpt*npspinor ',&
-&       'when npfft or npkpt or npband or npspinor are chosen manually in the input file.'
-       MSG_ERROR(message)
+     else if(dtsets(idtset)%np_spkpt*dtsets(idtset)%npfft*dtsets(idtset)%npband*dtsets(idtset)%npspinor < nproc)then
+       write(msg,'(a,5i6,4a)')&
+       'np_spkpt,npband,npspinor,npfft,nproc=',&
+&      dtsets(idtset)%np_spkpt,dtsets(idtset)%npfft,dtsets(idtset)%npband,dtsets(idtset)%npspinor,nproc,ch10,&
+       'The number of processors must not be greater than npfft*npband*np_spkpt*npspinor ',ch10,&
+       'when npfft or np_spkpt or npband or npspinor are chosen manually in the input file.'
+       ABI_ERROR(msg)
      end if
    end if
 
@@ -444,11 +454,11 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
          end do
        end do
        dtsets(idtset)%np_slk=icol
-       write(message,'(5a,i6,a)')&
-&       'The number of band*fft*spinor processors was not consistent with',ch10,&
-&       'the size of communicator used for ELPA library (np_slk).',ch10,&
-&       'np_slk value has been adjusted to ',dtsets(idtset)%np_slk,'.'
-       MSG_COMMENT(message)
+       write(msg,'(5a,i6,a)')&
+       'The number of band*fft*spinor processors was not consistent with',ch10,&
+       'the size of communicator used for ELPA library (np_slk).',ch10,&
+       'np_slk value has been adjusted to ',dtsets(idtset)%np_slk,'.'
+       ABI_COMMENT(msg)
      end if
    end if
 #endif
@@ -459,32 +469,29 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if ((dtsets(idtset)%usefock==1).and.(dtsets(idtset)%nphf/=1)) then
 
      if ((dtsets(idtset)%nphf<0).or.(dtsets(idtset)%nphf==0)) then
-       MSG_ERROR('The value of variable nphf should be a non negative integer.')
+       ABI_ERROR('The value of variable nphf should be a non negative integer.')
      end if
      if (dtsets(idtset)%paral_kgb/=0) then
-       message = 'Option paral_kgb should be turned off (value 0) for a parallelized Hartree-Fock calculation.'
-       MSG_ERROR(message)
+       ABI_ERROR('Option paral_kgb should be turned off (value 0) for a parallelized Hartree-Fock calculation.')
      end if
      if (response/=0) then
-       message = 'A response function calculation is not yet possible with a parallelized Hartree-Fock calculation.'
-       MSG_ERROR(message)
+       ABI_ERROR('A response function calculation is not yet possible with a parallelized Hartree-Fock calculation.')
      end if
      if (dtsets(idtset)%npspinor>1) then
-       message = 'The parallelism on spinors is not supported by a parallelized Hartree-Fock calculation.'
-       MSG_ERROR(message)
+       ABI_ERROR('The parallelism on spinors is not supported by a parallelized Hartree-Fock calculation.')
      end if
-     if (dtsets(idtset)%npkpt*dtsets(idtset)%nphf > nproc )then
-       write(message,'(a,3(a,i0))') ch10,&
-&       'The product of variables npkpt and nphf is bigger than the number of processors: nkpt= ',&
-&       dtsets(idtset)%npkpt,' nphf= ',dtsets(idtset)%nphf  ,' and nproc= ', nproc
-       MSG_ERROR(message)
+     if (dtsets(idtset)%np_spkpt*dtsets(idtset)%nphf > nproc )then
+       write(msg,'(a,3(a,i0))') ch10,&
+       'The product of variables np_spkpt and nphf is bigger than the number of processors: np_spkpt= ',&
+       dtsets(idtset)%np_spkpt,' nphf= ',dtsets(idtset)%nphf  ,' and nproc= ', nproc
+       ABI_ERROR(msg)
      end if
    end if ! Fock
 
    !When using chebfi, the number of blocks is equal to the number of processors
    if((dtsets(idtset)%wfoptalg == 1)) then
      !Nband might have different values for different kpoint, but not bandpp.
-     !In this case, we just use the largest nband, andthe input will probably fail
+     !In this case, we just use the largest nband, and the input will probably fail
      !at the bandpp check later on
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
    end if
@@ -492,7 +499,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !  Set mpi_enreg
    mpi_enregs(idtset)%paral_kgb=dtsets(idtset)%paral_kgb
    if(dtsets(idtset)%paral_kgb/=0)then
-     mpi_enregs(idtset)%nproc_kpt=dtsets(idtset)%npkpt
+     mpi_enregs(idtset)%nproc_spkpt=dtsets(idtset)%np_spkpt
      mpi_enregs(idtset)%nproc_fft=dtsets(idtset)%npfft
      mpi_enregs(idtset)%nproc_band=dtsets(idtset)%npband
      mpi_enregs(idtset)%nproc_spinor=min(dtsets(idtset)%npspinor,dtsets(idtset)%nspinor)
@@ -508,13 +515,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if (dtsets(idtset)%usefock==1) then
        if (dtsets(idtset)%nphf>1) mpi_enregs(idtset)%paral_hf=1
        mpi_enregs(idtset)%nproc_hf = dtsets(idtset)%nphf
-       if (dtsets(idtset)%npkpt/=1) then
-         mpi_enregs(idtset)%nproc_kpt = dtsets(idtset)%npkpt
+       if (dtsets(idtset)%np_spkpt/=1) then
+         mpi_enregs(idtset)%nproc_spkpt = dtsets(idtset)%np_spkpt
        else
-         mpi_enregs(idtset)%nproc_kpt = mpi_enregs(idtset)%nproc_cell/mpi_enregs(idtset)%nproc_hf
+         mpi_enregs(idtset)%nproc_spkpt = mpi_enregs(idtset)%nproc_cell/mpi_enregs(idtset)%nproc_hf
        end if
      else
-       mpi_enregs(idtset)%nproc_kpt = mpi_enregs(idtset)%nproc_cell
+       mpi_enregs(idtset)%nproc_spkpt = mpi_enregs(idtset)%nproc_cell
      end if
    end if
 
@@ -525,17 +532,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if (mpi_enregs(idtset)%paral_pert==1) then
        dtsets(idtset)%nppert=max(1,dtsets(idtset)%nppert)
        if(dtsets(idtset)%nppert>mpi_enregs(idtset)%nproc) then
-         message=' The number of processors must not be smaller than nppert !'
-         MSG_ERROR(message)
+         ABI_ERROR('The number of processors must not be smaller than nppert !')
        end if
        call initmpi_pert(dtsets(idtset),mpi_enregs(idtset))
-       mpi_enregs(idtset)%nproc_kpt = mpi_enregs(idtset)%nproc_cell
+       mpi_enregs(idtset)%nproc_spkpt = mpi_enregs(idtset)%nproc_cell
        nproc=mpi_enregs(idtset)%nproc_cell
      end if
 !    Cycle if the processor is not used
      if (mpi_enregs(idtset)%me<0) then
-       ABI_DEALLOCATE(intarr)
-       ABI_DEALLOCATE(dprarr)
+       ABI_FREE(intarr)
+       ABI_FREE(dprarr)
        cycle
      end if
 
@@ -544,15 +550,15 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if(dtsets(idtset)%usewvl==1) mpi_enregs(idtset)%comm_fft=mpi_enregs(idtset)%comm_cell
 
 !    Initialize tabs used for k/spin parallelism (with sequential-type values)
-     ABI_ALLOCATE(mpi_enregs(idtset)%proc_distrb,(nkpt,mband_upper,nsppol))
-     ABI_ALLOCATE(mpi_enregs(idtset)%my_kpttab,(nkpt))
+     ABI_MALLOC(mpi_enregs(idtset)%proc_distrb,(nkpt,mband_upper,nsppol))
+     ABI_MALLOC(mpi_enregs(idtset)%my_kpttab,(nkpt))
      mpi_enregs(idtset)%proc_distrb(:,:,:)=0
      mpi_enregs(idtset)%my_kpttab(:)=(/(ii,ii=1,nkpt)/)
      mpi_enregs(idtset)%my_isppoltab(:)=1;if (dtsets(idtset)%nsppol==1) mpi_enregs(idtset)%my_isppoltab(2)=0
 
 !    HF or hybrid calculation : initialization of the array distrb_hf
      if (dtsets(idtset)%usefock==1) then
-       ABI_ALLOCATE(mpi_enregs(idtset)%distrb_hf,(dtsets(idtset)%nkpthf,dtsets(idtset)%nbandhf,1))
+       ABI_MALLOC(mpi_enregs(idtset)%distrb_hf,(dtsets(idtset)%nkpthf,dtsets(idtset)%nbandhf,1))
 !      The dimension of distrb_hf are given by %nkpthf and %nbandhf.
 !      We assume that there will be no dependence in spinpol for all the occupied states.
        mpi_enregs(idtset)%distrb_hf=0
@@ -637,19 +643,19 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        mkmem=intarr(1)
        if (mkmem<0) then
 !        mkmem is unreasonable; must be zero or positive
-         write(message, '(4a,i0,4a)')&
-&         nm_mkmem(ii),' must be positive or null but ',nm_mkmem(ii),' =',mkmem,ch10,&
-&         'Use default ',nm_mkmem(ii),' = nkpt .'
-         MSG_WARNING(message)
+         write(msg, '(4a,i0,4a)')&
+         nm_mkmem(ii),' must be positive or null but ',nm_mkmem(ii),' =',mkmem,ch10,&
+         'Use default ',nm_mkmem(ii),' = nkpt .'
+         ABI_WARNING(msg)
          mkmem=nkpt
        end if
 
      else
 
        !  mkmem was not set in the input file so default to incore solution
-       !write(message,'(6a)') &
+       !write(msg,'(6a)') &
        !'mpi_setup: ',nm_mkmem(ii),' undefined in the input file.','Use default ',nm_mkmem(ii),' = nkpt'
-       !call wrtout(std_out,message,'COLL')
+       !call wrtout(std_out,msg,'COLL')
        mkmem=nkpt
      end if
 
@@ -658,21 +664,21 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !    avoiding i/o to disk for wavefunctions and kg data.
 !    mkmem/=0 to avoid i/o; mkmem==0 to use disk i/o for nkpt>=1.
      if (nkpt_me<=mkmem .and. mkmem/=0 ) then
-       write(message, '(a,i0,a,a,a,i0,a)' ) &
+       write(msg, '(a,i0,a,a,a,i0,a)' ) &
         ' mpi_setup: With nkpt_me=',nkpt_me,' and ',nm_mkmem(ii),' = ',mkmem,', ground state wf handled in core.'
-       if (prtvol > 0) call wrtout(std_out,message)
+       if (prtvol > 0) call wrtout(std_out,msg)
        if(nkpt_me<mkmem .and. nkpt_me/=0)then
-         write(message,'(3a)')' Resetting ',nm_mkmem(ii),' to nkpt_me to save memory space.'
+         write(msg,'(3a)')' Resetting ',nm_mkmem(ii),' to nkpt_me to save memory space.'
          mkmem=nkpt_me
-         if (prtvol > 0) call wrtout(std_out,message)
+         if (prtvol > 0) call wrtout(std_out,msg)
        end if
      else if(mkmem/=0)then
-       write(message, '(a,i0,3a,i0,5a)' ) &
+       write(msg, '(a,i0,3a,i0,5a)' ) &
        ' mpi_setup: With nkpt_me=',nkpt_me,'and ',nm_mkmem(ii),' = ',mkmem,&
        ' ground state wf require disk i/o.',ch10,&
        ' Resetting ',nm_mkmem(ii),' to zero to save memory space.'
        mkmem=0
-       if (prtvol > 0) call wrtout(std_out,message)
+       if (prtvol > 0) call wrtout(std_out,msg)
      end if
      if(dtsets(idtset)%usewvl == 0 .or. dtsets(idtset)%usepaw==1)then
        if(ii==1)dtsets(idtset)%mkmem=mkmem
@@ -682,7 +688,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
      if(dtsets(idtset)%usewvl == 1 .and. dtsets(idtset)%usepaw==1 )then
        if(dtsets(idtset)%mkmem .ne. dtsets(idtset)%nkpt) then
-         MSG_ERROR("mkmem is not allowed for WVL+PAW")
+         ABI_ERROR("mkmem is not allowed for WVL+PAW")
        end if
      end if
 
@@ -694,11 +700,11 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH])
    if (dtsets(idtset)%usewvl == 0 .and. do_check) then
      if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),mband_upper,&
-&     dtsets(idtset)%nkpt,dtsets(idtset)%mkmem,nsppol,msg=message)) then
-       write(message,'(5a)') trim(message),ch10,&
-&       'YOU ARE STRONGLY ADVICED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
-&       'PUT "AUTOPARAL=1" IN THE INPUT FILE.'
-       MSG_WARNING(message)
+          dtsets(idtset)%nkpt,dtsets(idtset)%mkmem,nsppol,msg=msg)) then
+       write(msg,'(5a)') trim(msg),ch10,&
+         'YOU ARE STRONGLY ADVICED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
+         'PUT "AUTOPARAL=1" IN THE INPUT FILE.'
+       ABI_WARNING(msg)
      end if
    end if
 
@@ -719,17 +725,17 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
          if(mpi_enregs(idtset)%paral_kgb == 1) then
 
            if((dtsets(idtset)%use_gpu_cuda==1).and.(mpi_enregs(idtset)%nproc_fft/=1))then
-             write(message,'(3a,i0)') &
-&             'When use_gpu_cuda is on, the number of FFT processors, npfft, must be 1',ch10,&
-&             'However, npfft=',mpi_enregs(idtset)%nproc_fft
-             MSG_ERROR(message)
+             write(msg,'(3a,i0)') &
+             'When use_gpu_cuda is on, the number of FFT processors, npfft, must be 1',ch10,&
+             'However, npfft=',mpi_enregs(idtset)%nproc_fft
+             ABI_ERROR(msg)
            end if
 
            if(modulo(dtsets(idtset)%ngfft(2),mpi_enregs(idtset)%nproc_fft)/=0)then
-             write(message,'(3a,i0,a,i0)') &
-&             'The number of FFT processors, npfft, should be a multiple of ngfft(2).',ch10,&
-&             'However, npfft=',mpi_enregs(idtset)%nproc_fft,' and ngfft(2)=',dtsets(idtset)%ngfft(2)
-             MSG_BUG(message)
+             write(msg,'(3a,i0,a,i0)') &
+             'The number of FFT processors, npfft, should be a multiple of ngfft(2).',ch10,&
+             'However, npfft=',mpi_enregs(idtset)%nproc_fft,' and ngfft(2)=',dtsets(idtset)%ngfft(2)
+             ABI_BUG(msg)
            end if
 
            do iikpt=1,nkpt*nsppol
@@ -737,55 +743,55 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
              if ((dtsets(idtset)%istwfk(iikpt_modulo)==2)) then !.and.(dtsets(idtset)%ngfft(7)==401)) then
                if ((mpi_enregs(idtset)%bandpp==0).or. &
                ((mpi_enregs(idtset)%bandpp/=1).and.(modulo(mpi_enregs(idtset)%bandpp,2)/=0))) then
-                 write(message,'(3a,i0)') &
-&                 'The number bandpp should be 1 or a multiple of 2',ch10,&
-&                 'However, bandpp=',mpi_enregs(idtset)%bandpp
-                 MSG_BUG(message)
+                 write(msg,'(3a,i0)') &
+                 'The number bandpp should be 1 or a multiple of 2',ch10,&
+                 'However, bandpp=',mpi_enregs(idtset)%bandpp
+                 ABI_BUG(msg)
                end if
                if(modulo(dtsets(idtset)%nband(iikpt),mpi_enregs(idtset)%nproc_band*mpi_enregs(idtset)%bandpp)/=0)then
-                 write(message,'(3a,i0,a,i0)') &
-&                 'The number of bands for the k-point, nband_k, should be a multiple of nproc_band*bandpp.',ch10,&
-&                 'However, nband_k=',dtsets(idtset)%nband(iikpt),' and nproc_band*bandpp=', &
-&                 mpi_enregs(idtset)%nproc_band* mpi_enregs(idtset)%bandpp
-                 MSG_BUG(message)
+                 write(msg,'(3a,i0,a,i0)') &
+                 'The number of bands for the k-point, nband_k, should be a multiple of nproc_band*bandpp.',ch10,&
+                 'However, nband_k=',dtsets(idtset)%nband(iikpt),' and nproc_band*bandpp=', &
+                 mpi_enregs(idtset)%nproc_band* mpi_enregs(idtset)%bandpp
+                 ABI_BUG(msg)
                end if
              else if ((dtsets(idtset)%istwfk(iikpt_modulo)==2) .and. (dtsets(idtset)%ngfft(7)==400)) then
-               MSG_BUG('The fftalg=400 with istwfk=2 is not valid')
+               ABI_BUG('The fftalg=400 with istwfk=2 is not valid')
              else
                if(modulo(dtsets(idtset)%nband(iikpt),mpi_enregs(idtset)%nproc_band*mpi_enregs(idtset)%bandpp)/=0)then
-                 write(message,'(3a,i0,a,i0)') &
-&                 'The number of band for the k-point, nband_k, should be a multiple of nproc_band*bandpp.',ch10,&
-&                 'However, nband_k=',dtsets(idtset)%nband(iikpt),' and nproc_band*bandpp=', &
-&                 mpi_enregs(idtset)%nproc_band* mpi_enregs(idtset)%bandpp
-                 MSG_BUG(message)
+                 write(msg,'(3a,i0,a,i0)') &
+                 'The number of band for the k-point, nband_k, should be a multiple of nproc_band*bandpp.',ch10,&
+                 'However, nband_k=',dtsets(idtset)%nband(iikpt),' and nproc_band*bandpp=', &
+                 mpi_enregs(idtset)%nproc_band* mpi_enregs(idtset)%bandpp
+                 ABI_BUG(msg)
                end if
                if ((mpi_enregs(idtset)%bandpp==0)) then
-                 write(message,'(a,i0,2a,i0,2a,i0)')&
-&                 'The number bandpp should not be 0 with fftalg=',dtsets(idtset)%ngfft(7),ch10,&
-&                 'and istwfk=',dtsets(idtset)%istwfk(iikpt_modulo),ch10,&
-&                 'However, bandpp=',mpi_enregs(idtset)%bandpp
-                 MSG_BUG(message)
+                 write(msg,'(a,i0,2a,i0,2a,i0)')&
+                 'The number bandpp should not be 0 with fftalg=',dtsets(idtset)%ngfft(7),ch10,&
+                 'and istwfk=',dtsets(idtset)%istwfk(iikpt_modulo),ch10,&
+                 'However, bandpp=',mpi_enregs(idtset)%bandpp
+                 ABI_BUG(msg)
                end if
              end if
            end do
 
            if (xmpi_paral==1) then
-             if(modulo(nkpt*nsppol,mpi_enregs(idtset)%nproc_kpt)/=0)then
-               write(message,'(3a,i0,a,i0)') &
-&               'The number of KPT processors, npkpt, should be a multiple of nkpt*nsppol.',ch10,&
-&               'However, npkpt=',mpi_enregs(idtset)%nproc_kpt,' and nkpt*nsppol=',nkpt*nsppol
-               MSG_WARNING(message)
+             if(modulo(nkpt*nsppol,mpi_enregs(idtset)%nproc_spkpt)/=0)then
+               write(msg,'(3a,i0,a,i0)') &
+               'The number of KPT processors, np_spkpt, should be a multiple of nkpt*nsppol.',ch10,&
+               'However, np_spkpt=',mpi_enregs(idtset)%nproc_spkpt,' and nkpt*nsppol=',nkpt*nsppol
+               ABI_WARNING(msg)
              end if
            end if
          else
            do iikpt=1,nkpt*nsppol
              iikpt_modulo = modulo(iikpt,nkpt)+1
              if(modulo(dtsets(idtset)%nband(iikpt),mpi_enregs(idtset)%nproc_band*mpi_enregs(idtset)%bandpp)/=0)then
-               write(message,'(3a,i0,a,i0)') &
-&               'The number of band for the k-point, nband_k, should be a multiple of npband*bandpp.',ch10,&
-&               'However, nband_k=',dtsets(idtset)%nband(iikpt),' and npband*bandpp=', &
-&               mpi_enregs(idtset)%nproc_band* mpi_enregs(idtset)%bandpp
-               MSG_BUG(message)
+               write(msg,'(3a,i0,a,i0)') &
+               'The number of band for the k-point, nband_k, should be a multiple of npband*bandpp.',ch10,&
+               'However, nband_k=',dtsets(idtset)%nband(iikpt),' and npband*bandpp=', &
+               mpi_enregs(idtset)%nproc_band* mpi_enregs(idtset)%bandpp
+               ABI_BUG(msg)
              end if
            end do
          end if
@@ -796,8 +802,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if
 
 !  Compute mgfft,mpw,nfft for this data set (it is dependent of mpi_enreg)
-   ABI_ALLOCATE(istwfk,(nkpt))
-   ABI_ALLOCATE(kpt_with_shift,(3,nkpt))
+   ABI_MALLOC(istwfk,(nkpt))
+   ABI_MALLOC(kpt_with_shift,(3,nkpt))
 
    ! Set the default value of fftalg for given npfft but allow the user to override it.
    ! Warning: If you need to change npfft, **DO IT** before this point so that here we get the correct fftalg
@@ -822,7 +828,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    nqpt=dtsets(idtset)%nqpt
    qphon(:)=zero;if(nqpt/=0) qphon(:)=dtsets(idtset)%qptn(:)
 
-   ABI_ALLOCATE(symrel,(3,3,nsym))
+   ABI_MALLOC(symrel,(3,3,nsym))
    symrel(:,:,1:nsym)=dtsets(idtset)%symrel(:,:,1:nsym)
    ecut_eff=ecut*dilatmx**2
 
@@ -859,7 +865,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      ! Allocate tables for parallel IO of the wavefunctions.
      if( xmpi_mpiio==1 .and. mpi_enregs(idtset)%paral_kgb == 1 .and. &
 &     any(dtsets(idtset)%iomode == [IO_MODE_MPI, IO_MODE_ETSF])) then
-       ABI_ALLOCATE(mpi_enregs(idtset)%my_kgtab,(mpw,dtsets(idtset)%mkmem))
+       ABI_MALLOC(mpi_enregs(idtset)%my_kgtab,(mpw,dtsets(idtset)%mkmem))
      end if
    else
      mpw = 0
@@ -898,11 +904,11 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if
 
    dtsets(idtset)%mpw=mpw
-   ABI_DEALLOCATE(symrel)
-   ABI_DEALLOCATE(istwfk)
-   ABI_DEALLOCATE(kpt_with_shift)
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
+   ABI_FREE(symrel)
+   ABI_FREE(istwfk)
+   ABI_FREE(kpt_with_shift)
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
 
 !  Initialize data for the parallelization over atomic sites (PAW)
    if (dtsets(idtset)%natom==1) dtsets(idtset)%paral_atom=0
@@ -946,8 +952,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !This is not a very clean exit in case of paral_kgb<0
  if (iexit/=0)then
-   message="Stopping now!"
-   MSG_STOP(message)
+   ABI_STOP("Stopping now!")
  end if
 
  DBG_EXIT("COLL")
@@ -962,7 +967,7 @@ end subroutine mpi_setup
 !! FUNCTION
 !!   Given a total number of processors, find a suitable distribution
 !!   that fill all the different levels of parallelization
-!!   (npimage, nppert, npkpt, npspinor, npband, npfft, bandpp)
+!!   (npimage, nppert, np_spkpt, npspinor, npband, npfft, bandpp)
 !!   Also determine parameters of parallel Linear Algebra routines
 !!   (use_slk, np_slk, gpu_linalg_limit)
 !!
@@ -979,7 +984,7 @@ end subroutine mpi_setup
 !!            tread(1)  : paral_kgb      tread(6) : npfft
 !!            tread(2)  : npimage        tread(7) : npband
 !!            tread(3)  : nppert         tread(8) : bandpp
-!!            tread(4)  : npkpt          tread(9) : use_slk
+!!            tread(4)  : np_spkpt       tread(9) : use_slk
 !!            tread(5)  : nspinor        tread(10): np_slk
 !!            tread(11) : gpu_linalg_limit
 !!
@@ -988,8 +993,8 @@ end subroutine mpi_setup
 !!  dtset%paral_kgb= flag for band-fft parallelism
 !!  dtset%npimage  = number of processors for parallelisation over image
 !!  dtset%nppert   = number of processors for parallelisation over perturbations
-!!  dtset%npspinor = number of processors for parallelisation on k points
-!!  dtset%npkpt    = number of processors for parallelisation on k points
+!!  dtset%npspinor = number of processors for parallelisation on spinor components
+!!  dtset%np_spkpt  = number of processors for parallelisation on spin / k points
 !!  dtset%npfft    = number of processors for parallelisation on fft grid
 !!  dtset%npband   = number of processors for parallelisation on bands
 !!  dtset%nphf     = number of processors for parallelisation on occupied states for fock exchange
@@ -1029,7 +1034,7 @@ end subroutine mpi_setup
  real(dp),parameter :: relative_nband_range=0.025
  integer :: wf_algo,wf_algo_global,bpp,bpp_max,bpp_min,optdriver,autoparal,nblocks,blocksize
  integer :: npi_max,npi_min,npc,npc_max,npc_min
- integer :: npk,npk_max,npk_min,npp_max,npp_min
+ integer :: np_sk,np_sk_max,np_sk_min,npp_max,npp_min
  integer :: nps,nps_max,nps_min,npf,npf_max,npf_min
  integer :: npb,npb_max,npb_min,max_ncpus,ount,paral_kgb
  integer :: work_size,nks_per_proc,tot_ncpus
@@ -1067,10 +1072,10 @@ end subroutine mpi_setup
 
 !Is it available
  if ((dtset%usefock==1).AND.(dtset%nphf/=1)) then
-   MSG_ERROR("autoparal>0 not available for Hartree-Fock or hybrid XC calculations!")
+   ABI_ERROR("autoparal>0 not available for Hartree-Fock or hybrid XC calculations!")
  end if
  if ((autoparal>1).and.dtset%wfoptalg/=4.and.dtset%wfoptalg/=14) then
-   MSG_ERROR("autoparal>1 only available for the old LOBPCG algorithm (wfoptalg=4/14)!")
+   ABI_ERROR("autoparal>1 only available for the old LOBPCG algorithm (wfoptalg=4/14)!")
  end if
 
  ! Unit number used for outputting the autoparal sections
@@ -1102,7 +1107,7 @@ end subroutine mpi_setup
      if (tread(2)==0.or.xmpi_paral==0) dtset%npimage  = 1
      if (tread(3)==0.or.xmpi_paral==0) dtset%nppert   = 1
      if (tread(4)==0.or.xmpi_paral==0) dtset%npspinor = 1
-     if (tread(5)==0.or.xmpi_paral==0) dtset%npkpt    = 1
+     if (tread(5)==0.or.xmpi_paral==0) dtset%np_spkpt = 1
      if (tread(6)==0.or.xmpi_paral==0) dtset%npfft    = 1
      if (tread(7)==0.or.xmpi_paral==0) dtset%npband   = 1
      if (tread(8)==0.or.xmpi_paral==0) dtset%bandpp   = 1
@@ -1116,7 +1121,7 @@ end subroutine mpi_setup
      dtset%npimage  = max(1,dtset%npimage)
      dtset%nppert   = max(1,dtset%nppert)
      dtset%npspinor = max(1,dtset%npspinor)
-     dtset%npkpt    = max(1,dtset%npkpt)
+     dtset%np_spkpt = max(1,dtset%np_spkpt)
      dtset%npfft    = max(1,dtset%npfft)
      dtset%npband   = max(1,dtset%npband)
      dtset%bandpp   = max(1,dtset%bandpp)
@@ -1152,12 +1157,12 @@ end subroutine mpi_setup
  end if
 
 !Parallelization over k-points and spin components (GS)
- npk_min=1;npk_max=1;nkpt_eff=0
+ np_sk_min=1;np_sk_max=1;nkpt_eff=0
  if (optdriver==RUNL_GSTATE) then
    nkpt_eff=dtset%nkpt*dtset%nsppol
-   npk_min=max(1,dtset%npkpt)
-   npk_max=min(nproc,nkpt_eff)
-   if (tread(4)==1) npk_max=dtset%npkpt
+   np_sk_min=max(1,dtset%np_spkpt)
+   np_sk_max=min(nproc,nkpt_eff)
+   if (tread(4)==1) np_sk_max=dtset%np_spkpt
  end if
 
 !Parallelization over perturbations, k-points and spin components (DFPT)
@@ -1176,17 +1181,17 @@ end subroutine mpi_setup
        if (npp_max>npert_eff) then
          npp_min=npert_eff;npp_max=npert_eff
          msg='nppert is bigger than npert; we set nppert=npert'
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
      end if
-     npk_min=1
-     npk_max=min(nproc,nkpt_eff)
-     ABI_DEALLOCATE(nkpt_rbz)
-     ABI_DEALLOCATE(nband_rbz)
+     np_sk_min=1
+     np_sk_max=min(nproc,nkpt_eff)
+     ABI_FREE(nkpt_rbz)
+     ABI_FREE(nband_rbz)
    else
      nkpt_eff=nproc
-     npk_min=nproc-5
-     npk_max=nproc
+     np_sk_min=nproc-5
+     np_sk_max=nproc
    end if
  end if
 
@@ -1216,7 +1221,7 @@ end subroutine mpi_setup
        write(msg,'(3a)') &
         "Value of npfft given in input file is too high for the FFT grid!",ch10,&
         "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
    npf_max=min(npf_max,ngmin(2))
@@ -1253,10 +1258,10 @@ end subroutine mpi_setup
      if (.not.dtset_found) then
        !Retrieve file name
        suffix='_DEN';if (dtset%nimage>1) suffix='_IMG1_DEN'
-       ABI_ALLOCATE(jdtset_,(0:ndtset_alloc))
+       ABI_MALLOC(jdtset_,(0:ndtset_alloc))
        jdtset_=0;if(ndtset_alloc/=0) jdtset_(0:ndtset_alloc)=dtsets(0:ndtset_alloc)%jdtset
        call mkfilename(filnam,filden,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset_alloc,suffix,'den',ii)
-       ABI_DEALLOCATE(jdtset_)
+       ABI_FREE(jdtset_)
        !Retrieve ngfft from file header
        idum3=0
        if (mpi_enreg%me==0) then
@@ -1265,7 +1270,7 @@ end subroutine mpi_setup
            call hdr_read_from_fname(hdr0,filden,ii,xmpi_comm_self)
            idum3(1:2)=hdr0%ngfft(2:3);if (file_found) idum3(3)=1
            call hdr0%free()
-           MSG_WARNING("Cannot find filden"//filden)
+           ABI_WARNING("Cannot find filden"//filden)
          end if
        end if
        call xmpi_bcast(idum3,0,mpi_enreg%comm_world,ii)
@@ -1307,7 +1312,7 @@ end subroutine mpi_setup
  ! Which levels of parallelism do we have?
  with_image =(npi_min/=1.or.npi_max/=1)
  with_pert  =(npp_min/=1.or.npp_max/=1)
- with_kpt   =(npk_min/=1.or.npk_max/=1)
+ with_kpt   =(np_sk_min/=1.or.np_sk_max/=1)
  with_spinor=(nps_min/=1.or.nps_max/=1)
  with_fft   =(npf_min/=1.or.npf_max/=1)
  with_band  =(npb_min/=1.or.npb_max/=1)
@@ -1315,9 +1320,9 @@ end subroutine mpi_setup
  with_thread=(nthreads>1)
 
 !Allocate lists
- ABI_ALLOCATE(my_distp,(10,MAXCOUNT))
- ABI_ALLOCATE(weight,(MAXCOUNT))
- ABI_ALLOCATE(my_algo,(MAXCOUNT))
+ ABI_MALLOC(my_distp,(10,MAXCOUNT))
+ ABI_MALLOC(weight,(MAXCOUNT))
+ ABI_MALLOC(my_algo,(MAXCOUNT))
  my_distp(1:7,:)=0;weight(:)=zero
  my_distp(8,:)=dtset%use_slk
  my_distp(9,:)=dtset%np_slk
@@ -1352,10 +1357,10 @@ end subroutine mpi_setup
    acc_c=one;if (npc>1) acc_c=0.99_dp*speedup_fdp(ncell_eff,npc)
 
 !  >>>>> K-POINTS
-   do npk=npk_min,npk_max
-!    -> for DFPT runs, impose that nsppol divide npk
-     if (optdriver==RUNL_RESPFN.and.modulo(npk,dtset%nsppol)>0.and.npk>1) cycle
-     acc_k=one;if (npk>1) acc_k=0.96_dp*speedup_fdp(nkpt_eff,npk)
+   do np_sk=np_sk_min,np_sk_max
+!    -> for DFPT runs, impose that nsppol divide np_sk
+     if (optdriver==RUNL_RESPFN.and.modulo(np_sk,dtset%nsppol)>0.and.np_sk>1) cycle
+     acc_k=one;if (np_sk>1) acc_k=0.96_dp*speedup_fdp(nkpt_eff,np_sk)
 
 !    >>>>> SPINORS
      do nps=nps_min,nps_max
@@ -1390,7 +1395,7 @@ end subroutine mpi_setup
 
 !        >>>>> BANDS
          do npb=npb_min,npb_max
-           nproc1=npc*npk*nps*npf*npb
+           nproc1=npc*np_sk*nps*npf*npb
            if (nproc1<nprocmin)     cycle
            if (nproc1>nproc)        cycle
            if (modulo(mband,npb)>0) cycle
@@ -1468,19 +1473,19 @@ end subroutine mpi_setup
 
 !            Resulting "weight"
 !            weight0=acc_c*acc_k*acc_s*acc_kgb
-             weight0=nproc1*(acc_c+acc_k+acc_s+acc_kgb)/(npc+npk+nps+(npf*npb))
+             weight0=nproc1*(acc_c+acc_k+acc_s+acc_kgb)/(npc+np_sk+nps+(npf*npb))
 
 !            Store data
              icount=icount+1
              if (icount<=MAXCOUNT) then
                my_algo(icount)=merge(ALGO_CG,wf_algo,wf_algo==ALGO_NOT_SET)
-               my_distp(1:7,icount)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
+               my_distp(1:7,icount)=(/npc,np_sk,nps,npf,npb,bpp,nproc1/)
                weight(icount)=weight0
                if (weight0<weight(imin)) imin=icount
              else
                if (weight0>weight(imin)) then
                  my_algo(imin)=merge(ALGO_CG,wf_algo,wf_algo==ALGO_NOT_SET)
-                 my_distp(1:7,imin)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
+                 my_distp(1:7,imin)=(/npc,np_sk,nps,npf,npb,bpp,nproc1/)
                  weight(imin)=weight0
                  idum=minloc(weight);imin=idum(1)
                end if
@@ -1490,7 +1495,7 @@ end subroutine mpi_setup
          end do ! npb
        end do ! npf
      end do ! nps
-   end do ! npk
+   end do ! np_sk
  end do ! npc
 
 !Compute number of selected distributions
@@ -1502,7 +1507,7 @@ end subroutine mpi_setup
 !  Override here the 0 default value changed in indefo1
    dtset%npimage  = max(1,dtset%npimage)
    dtset%nppert   = max(1,dtset%nppert)
-   dtset%npkpt    = max(1,dtset%npkpt)
+   dtset%np_spkpt = max(1,dtset%np_spkpt)
    dtset%npspinor = max(1,dtset%npspinor)
    dtset%npfft    = max(1,dtset%npfft)
    dtset%npband   = max(1,dtset%npband)
@@ -1510,7 +1515,7 @@ end subroutine mpi_setup
    write(msg,'(a,i0,2a,i0,a)')  &
 &  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
 &  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advices on process distribution.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    if (max_ncpus>0) then
      call wrtout(ab_out,msg)
      call flush_unit(ab_out)
@@ -1520,7 +1525,7 @@ end subroutine mpi_setup
 
 !Sort data by increasing weight
  if (mcount>0) then
-   ABI_ALLOCATE(isort,(mcount))
+   ABI_MALLOC(isort,(mcount))
    isort=(/(ii,ii=1,mcount)/)
    call sort_dp(mcount,weight,isort,tol6)
    ncount=min(mcount,MAXPRINT)
@@ -1542,7 +1547,7 @@ end subroutine mpi_setup
    else if (optdriver==RUNL_RESPFN) then
      write(ount,'(a)')'#Autoparal section for DFPT calculations'
    else
-     MSG_ERROR(sjoin('Unsupported optdriver:', itoa(optdriver)))
+     ABI_ERROR(sjoin('Unsupported optdriver:', itoa(optdriver)))
    end if
    write(ount,"(a)")   "info:"
    write(ount,"(a,i0)")"    autoparal: ",autoparal
@@ -1581,8 +1586,8 @@ end subroutine mpi_setup
        !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
        write(ount,'(a)'   )'      vars: {'
        write(ount,'(a,i0,a)')'            npimage: ',my_distp(1,ii),','
-       write(ount,'(a,i0,a)')'            npkpt: ', my_distp(2,ii),','
-       write(ount,'(a,i0,a)')'            npspinor: ',my_distp(3,ii),','
+       write(ount,'(a,i0,a)')'            np_spkpt:',my_distp(2,ii),','
+       write(ount,'(a,i0,a)')'            npspinor:',my_distp(3,ii),','
        write(ount,'(a,i0,a)')'            npfft: ', my_distp(4,ii),','
        write(ount,'(a,i0,a)')'            npband: ',my_distp(5,ii),','
        write(ount,'(a,i0,a)')'            bandpp: ',my_distp(6,ii),','
@@ -1600,7 +1605,7 @@ end subroutine mpi_setup
        !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
        write(ount,'(a)'   )'      vars: {'
        write(ount,'(a,i0,a)')'             nppert: ', my_distp(1,ii),','
-       write(ount,'(a,i0,a)')'             npkpt: ', my_distp(2,ii),','
+       write(ount,'(a,i0,a)')'             np_spkpt: ', my_distp(2,ii),','
        write(ount,'(a)')   '            }'
       end do
    end if
@@ -1636,7 +1641,7 @@ end subroutine mpi_setup
    msg='|'
    if (with_image)  msg=trim(msg)//'   npimage|'
    if (with_pert)   msg=trim(msg)//'    nppert|'
-   msg=trim(msg)//'       npkpt|'
+   msg=trim(msg)//'       np_spkpt|'
    if (with_spinor) msg=trim(msg)//' npspinor|'
    if (with_fft)    msg=trim(msg)//'       npfft|'
    if (with_band)   msg=trim(msg)//'      npband|'
@@ -1650,7 +1655,7 @@ end subroutine mpi_setup
    msg='|'
    write(strg,'(i4,a,i4,a)') npi_min,'<<',npi_max,'|';if (with_image)  msg=trim(msg)//trim(strg)
    write(strg,'(i4,a,i4,a)') npp_min,'<<',npp_max,'|';if (with_pert)   msg=trim(msg)//trim(strg)
-   write(strg,'(i5,a,i5,a)') npk_min,'<<',npk_max,'|';                 msg=trim(msg)//trim(strg)
+   write(strg,'(i5,a,i5,a)') np_sk_min,'<<',np_sk_max,'|';                 msg=trim(msg)//trim(strg)
    write(strg,'(i5,a,i2,a)') nps_min,'<<',nps_max,'|';if (with_spinor) msg=trim(msg)//trim(strg)
    write(strg,'(i5,a,i5,a)') npf_min,'<<',npf_max,'|';if (with_fft)    msg=trim(msg)//trim(strg)
    write(strg,'(i5,a,i5,a)') npb_min,'<<',npb_max,'|';if (with_band)   msg=trim(msg)//trim(strg)
@@ -1693,26 +1698,26 @@ end subroutine mpi_setup
 &         my_algo(1:mcount)==ALGO_CHEBFI))) then
    if (mcount>0) then
      icount=isort(mcount)
-     npc=my_distp(1,icount);npk=my_distp(2,icount)
+     npc=my_distp(1,icount);np_sk=my_distp(2,icount)
      nps=my_distp(3,icount);npf=my_distp(4,icount)
    else
      npc=1;if (with_image ) npc=npi_min
-     npk=1;if (with_kpt   ) npk=npk_min
+     np_sk=1;if (with_kpt   ) np_sk=np_sk_min
      nps=1;if (with_spinor) nps=nps_min
      npf=1;if (with_fft   ) npf=npf_min
    end if
-   nproc1=npc*npk*nps*npf
+   nproc1=npc*np_sk*nps*npf
    msg=ch10//' >>> Possible (best) choices for the number of bands (nband) are:'
    if (with_image.or.with_kpt.or.with_spinor.or.with_fft) msg=trim(msg)//ch10//'     with:'
    write(strg,'(a,i0)') ' npimage=' ,npc;if (with_image)  msg=trim(msg)//trim(strg)
-   write(strg,'(a,i0)') ' npkpt='   ,npk;if (with_kpt)    msg=trim(msg)//trim(strg)
+   write(strg,'(a,i0)') ' np_spkpt=' ,np_sk;if (with_kpt)    msg=trim(msg)//trim(strg)
    write(strg,'(a,i0)') ' npspinor=',nps;if (with_spinor) msg=trim(msg)//trim(strg)
    write(strg,'(a,i0)') ' npfft='   ,npf;if (with_fft)    msg=trim(msg)//trim(strg)
    call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
    ib1=mband-int(mband*relative_nband_range);if (my_algo(icount)==ALGO_CHEBFI) ib1=mband
    ib2=mband+int(mband*relative_nband_range)
-   ABI_ALLOCATE(nproc_best,(1+ib2-ib1))
-   ABI_ALLOCATE(nband_best,(1+ib2-ib1))
+   ABI_MALLOC(nproc_best,(1+ib2-ib1))
+   ABI_MALLOC(nband_best,(1+ib2-ib1))
    nproc_best(:)=1
    nband_best=(/(ii,ii=ib1,ib2)/)
    bpp=merge(1,nthreads,my_algo(icount)==ALGO_CHEBFI)
@@ -1743,8 +1748,8 @@ end subroutine mpi_setup
      end if
      call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
    end if
-   ABI_DEALLOCATE(nproc_best)
-   ABI_DEALLOCATE(nband_best)
+   ABI_FREE(nproc_best)
+   ABI_FREE(nband_best)
  end if
 
  if (optdriver==RUNL_GSTATE.and.(any(my_algo(1:mcount)==ALGO_CHEBFI))) then
@@ -1763,13 +1768,13 @@ end subroutine mpi_setup
        write(msg,'(5a,9(a10,a1))') ch10, &
 &       ' Values below have been tested with respect to Linear Algebra performance;',ch10,&
 &       ' Weights below are corrected according:',ch10,&
-&       'npimage','|','npkpt' ,'|','npspinor'  ,'|','npfft'     ,'|','npband','|',' bandpp ' ,'|',&
+&       'npimage','|','np_spkpt' ,'|','npspinor'  ,'|','npfft'     ,'|','npband','|',' bandpp ' ,'|',&
 &       'nproc'  ,'|','weight','|','new weight','|'
      else
        write(msg,'(5a,11(a10,a1))') ch10, &
 &       ' Values below have been tested with respect to Linear Algebra performance;',ch10,&
 &       ' Weights below are corrected according:',ch10,&
-&       'npimage','|','npkpt' ,'|','npspinor'  ,'|','npfft'     ,'|','npband','|',' bandpp ' ,'|',&
+&       'npimage','|','np_spkpt' ,'|','npspinor'  ,'|','npfft'     ,'|','npband','|',' bandpp ' ,'|',&
 &       'nproc'  ,'|','weight','|','new weight','|','best npslk','|','linalggpu' ,'|'
      end if
      call wrtout(std_out,msg);if (max_ncpus > 0) call wrtout(ab_out,msg)
@@ -1825,12 +1830,12 @@ end subroutine mpi_setup
    if (optdriver==RUNL_GSTATE) then
      dtset%npimage= my_distp(1,icount)
      dtset%nppert = 1
-     dtset%npkpt  = my_distp(2,icount)
+     dtset%np_spkpt  = my_distp(2,icount)
    end if
    if (optdriver==RUNL_RESPFN) then
      dtset%npimage= 1
      dtset%nppert = my_distp(1,icount)
-     dtset%npkpt  = 1
+     dtset%np_spkpt  = 1
    end if
    dtset%npspinor = my_distp(3,icount)
    dtset%npfft    = my_distp(4,icount)
@@ -1867,18 +1872,18 @@ end subroutine mpi_setup
 !Final advice in case max_ncpus > 0
  if (max_ncpus>0.and.mcount>0) then
    write(msg,'(6a)') ch10,&
-&   ' Launch a parallel version of ABINIT with a distribution of processors among the above list,',ch10,&
-&   ' and the associated input variables (npkpt, npband, npfft, bandpp, etc.).',ch10,&
-&   ' The higher weight should be better.'
+   ' Launch a parallel version of ABINIT with a distribution of processors among the above list,',ch10,&
+   ' and the associated input variables (np_spkpt, npband, npfft, bandpp, etc.).',ch10,&
+   ' The higher weight should be better.'
    call wrtout(std_out,msg);if (max_ncpus>0) call wrtout(ab_out,msg)
  end if
 
  if (mcount>0) then
-   ABI_DEALLOCATE(isort)
+   ABI_FREE(isort)
  end if
- ABI_DEALLOCATE(my_distp)
- ABI_DEALLOCATE(my_algo)
- ABI_DEALLOCATE(weight)
+ ABI_FREE(my_distp)
+ ABI_FREE(my_algo)
+ ABI_FREE(weight)
 
 !Final line
  write(msg,'(a,100("="),2a)') " ",ch10,ch10
@@ -1958,7 +1963,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
  integer :: kgb_comm,my_rank,np_slk,np_slk_max,np_slk_best,nranks
  integer :: use_lapack_gpu,use_slk,vectsize,wfoptalg
  real(dp) :: min_eigen,min_ortho,time_xeigen,time_xortho
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: ranks(:),val_npslk(:)
  real(dp),allocatable :: eigen(:),grama(:,:),gramb(:,:)
@@ -1969,17 +1974,17 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
  DBG_ENTER("COLL")
 
 #ifdef DEBUG_MODE
- write(message,'(a,3i3)') 'compute_kgb_indicator : (bpp,npb,npf) = ', bandpp, npband, npfft
- call wrtout(std_out,message,'PERS')
+ write(msg,'(a,3i3)') 'compute_kgb_indicator : (bpp,npb,npf) = ', bandpp, npband, npfft
+ call wrtout(std_out,msg,'PERS')
 #endif
 
 !Create local communicator for test
  if (xmpi_paral==1) then
    nranks=npfft*npband
-   ABI_ALLOCATE(ranks,(nranks))
+   ABI_MALLOC(ranks,(nranks))
    ranks=(/((my_rank-1),my_rank=1,nranks)/)
    kgb_comm=xmpi_subcomm(glb_comm,nranks,ranks,my_rank_in_group=my_rank)
-   ABI_DEALLOCATE(ranks)
+   ABI_FREE(ranks)
  else
    kgb_comm=xmpi_comm_self
    my_rank=0
@@ -1994,13 +1999,13 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
    vectsize=max(1+mpw/(npband*npfft),blocksize)
    bigorder=3*blocksize
 
-   ABI_ALLOCATE(blockvectorx,(vectsize,blocksize))
-   ABI_ALLOCATE(blockvectorbx,(vectsize,blocksize))
-   ABI_ALLOCATE(sqgram,(blocksize,blocksize))
-   ABI_ALLOCATE(grama,(2*bigorder,bigorder))
-   ABI_ALLOCATE(gramb,(2*bigorder,bigorder))
-   ABI_ALLOCATE(eigen,(bigorder))
-   ABI_ALLOCATE(val_npslk,(max_number_of_npslk)) ! not too much values tested
+   ABI_MALLOC(blockvectorx,(vectsize,blocksize))
+   ABI_MALLOC(blockvectorbx,(vectsize,blocksize))
+   ABI_MALLOC(sqgram,(blocksize,blocksize))
+   ABI_MALLOC(grama,(2*bigorder,bigorder))
+   ABI_MALLOC(gramb,(2*bigorder,bigorder))
+   ABI_MALLOC(eigen,(bigorder))
+   ABI_MALLOC(val_npslk,(max_number_of_npslk)) ! not too much values tested
 
    min_eigen=greatest_real
    min_ortho=greatest_real
@@ -2105,9 +2110,9 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
    end do ! np_slk
 
 #ifdef DEBUG_MODE
-   write(message,'(2(a,es15.3),a,i3)') ' In the best case, xortho took ',min_ortho,&
-&   ' and xeigen took ',min_eigen,' for np_slk=',np_slk_best
-   call wrtout(std_out,message,'PERS')
+   write(msg,'(2(a,es15.3),a,i3)') ' In the best case, xortho took ',min_ortho,&
+    ' and xeigen took ',min_eigen,' for np_slk=',np_slk_best
+   call wrtout(std_out,msg,'PERS')
 #endif
 
 !  Final values to be sent to others process
@@ -2115,13 +2120,13 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
    npslk=max(np_slk_best,1)
    uselinalggpu=keep_gpu
 
-   ABI_DEALLOCATE(blockvectorx)
-   ABI_DEALLOCATE(blockvectorbx)
-   ABI_DEALLOCATE(sqgram)
-   ABI_DEALLOCATE(grama)
-   ABI_DEALLOCATE(gramb)
-   ABI_DEALLOCATE(eigen)
-   ABI_DEALLOCATE(val_npslk)
+   ABI_FREE(blockvectorx)
+   ABI_FREE(blockvectorbx)
+   ABI_FREE(sqgram)
+   ABI_FREE(grama)
+   ABI_FREE(gramb)
+   ABI_FREE(eigen)
+   ABI_FREE(val_npslk)
 
  end if ! my_rank in group
 
@@ -2134,7 +2139,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
  call xmpi_bcast(uselinalggpu,0,glb_comm,ierr)
 
 #ifndef DEBUG_MODE
- ABI_UNUSED(message)
+ ABI_UNUSED(msg)
 #endif
 
  DBG_EXIT("COLL")

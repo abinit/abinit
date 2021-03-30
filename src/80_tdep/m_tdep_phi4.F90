@@ -383,7 +383,7 @@ subroutine tdep_build_phi4_3333(isym,Invar,Phi4_ref,Phi4_3333,Sym,itrans)
 ! Take into account the 6 allowed permutations
   Phi4_tmp(:,:,:,:)=Phi4_3333(:,:,:,:)
   if ((itrans.lt.1).or.(itrans.gt.24)) then  
-    MSG_BUG('This value of the symmetry index is not permitted')
+    ABI_BUG('This value of the symmetry index is not permitted')
   end if
   do ii=1,3
     do jj=1,3

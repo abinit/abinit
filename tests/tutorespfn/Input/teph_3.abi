@@ -13,6 +13,9 @@ teph_1o_DS9_GKK2
 teph_1o_DS9_GKK3
 
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrggkk

@@ -7,7 +7,7 @@
 !!  this file was typically created in a DFT run with usedmft=1 and nbandkss -1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +57,7 @@ contains
 !!  this file was typically created in a DFT run with usedmft=1 and nbandkss -1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -130,7 +130,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
  call wrtout(std_out,message,'COLL')
 
  if (open_file('forlb.ovlp',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  rewind(unt)
  read(unt,*) message
@@ -146,12 +146,12 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
 & 'It might be physically correct and it is possible with the current implementation'
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-!   MSG_ERROR(msg)
+!   ABI_ERROR(msg)
  end if
 
 !Do not dead the bandinf, bandinf redondance information
 
- ABI_ALLOCATE(coeffW_IBZ,(Cryst%nattyp(itypatcor),nsppol,bandinf:bandsup,Kmesh%nibz,nspinor,2*lcor+1))
+ ABI_MALLOC(coeffW_IBZ,(Cryst%nattyp(itypatcor),nsppol,bandinf:bandsup,Kmesh%nibz,nspinor,2*lcor+1))
  coeffW_IBZ=czero
  do spin=1,nsppol
    do ik_ibz=1,Kmesh%nibz
@@ -174,7 +174,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
  end do
  close(unt)
 
- ABI_ALLOCATE(coeffW_BZ,(Cryst%nattyp(itypatcor),nsppol,bandinf:bandsup,Kmesh%nbz,nspinor,2*lcor+1))
+ ABI_MALLOC(coeffW_BZ,(Cryst%nattyp(itypatcor),nsppol,bandinf:bandsup,Kmesh%nbz,nspinor,2*lcor+1))
  coeffW_BZ=czero
 
  if (Kmesh%nbz==Kmesh%nibz) then
@@ -223,7 +223,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
 !     enddo
    enddo
  end if
- ABI_DEALLOCATE(coeffW_IBZ)
+ ABI_FREE(coeffW_IBZ)
 
 
 end subroutine read_plowannier

@@ -1,7 +1,7 @@
 post-processing tools
 =====================
 
-- AbinitBandStructureMaker.py
+- AbinitBandStructureMaker.py  ***** no longer used or maintained *****
     Plot a band structure from an output file.
 
 - ab_extended_scissors_guess.py

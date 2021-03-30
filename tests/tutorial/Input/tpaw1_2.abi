@@ -1,47 +1,71 @@
-# =======================================
 # Input for PAW1 tutorial
 # Diamond at experimental volume
-# =======================================
+# Convergence with respect to the plane-wave cut-off
 
-#Datasets: convergence on ecut
-ndtset 9   ecut: 8. ecut+  2.
+#Define the different datasets
+ndtset 9          # 9 datasets
+ecut: 8.          # The starting values of the plane-wave cut-off energy
+ecut+ 2.          # The increment of ecut from one dataset to the other
+getwfk -1         # The starting wave-functions are those of the previous dataset
 
-#Cell and atoms definition
- acell 3*3.567 angstrom
- rprim 0.0 1/2 1/2
-       1/2 0.0 1/2
-       1/2 1/2 0.0
- ntypat 1  natom 2  typat 2*1
- xred 0.0 0.0 0.0
-      1/4 1/4 1/4
- znucl 6  nband 6
+#-------------------------------------------------------------------------------
+#The rest of this file is similar to the tpaw1_1.abi file
 
-#Basis definitions
- ecut 15.
- ecutsm 0.5
- pawecutdg 50.
+#Definition of the unit cell
+acell 3*3.567 angstrom  # Lengths of the primitive vectors (exp. param. in angstrom)
+rprim             # 3 orthogonal primitive vectors (FCC lattice)
+  0.0 1/2 1/2 
+  1/2 0.0 1/2
+  1/2 1/2 0.0
+nsym 0            # Automatic detection of symetries
 
-#SCF cycle parameters
- tolvrs 1.0d-10
- nstep 20
+#Definition of the atom types and pseudopotentials
+ntypat 1          # There is only one type of atom
+znucl 6           # Atomic number of the possible type(s) of atom. Here carbon.
+pp_dirpath "$ABI_PSPDIR"              # Path to the directory were
+                                      #   pseudopotentials for tests are stored
+pseudos "PseudosTM_pwteter/6c.pspnc"  # Name and location of the pseudopotential
+#pseudos "Pseudodojo_paw_pw_standard/C.xml" # To be uncommented later
+                         
+#Definition of the atoms
+natom 2           # There are two atoms
+typat 1 1         # They both are of type 1, that is, Carbon
+xred              # Location of the atoms:
+  0.0 0.0 0.0     #  Triplet giving the reduced coordinates of atom 1
+  1/4 1/4 1/4     #  Triplet giving the reduced coordinates of atom 2
 
-#K-points and sym
- nsym 0       
- occopt 1
- ngkpt 6 6 6
- nshiftk 4
- shiftk 0.5 0.5 0.5
-        0.5 0.0 0.0
-        0.0 0.5 0.0
-        0.0 0.0 0.5
+#Definition of bands and occupation numbers
+nband 6           # Compute 6 bands (4 occupied, 2 empty)
+occopt 1          # Automatic generation of occupation numbers, as a semiconductor
 
-#I/O parameters
- prtwf 1 prtden 0  prteig 0
- getwfk -1
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 15.0         # Maximal plane-wave kinetic energy cut-off, in Hartree (not used here)
+ecutsm 0.5        # Introduce a smooth PW cutoff within an 0.5 Ha region
+pawecutdg 50.     # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
+kptopt 1          # Automatic generation of k points, taking into account the symmetry
+ngkpt 6 6 6       # This is a 6x6x6 grid based on the primitive vectors
+nshiftk 4         # of the reciprocal space, repeated four times,
+shiftk            # with different shifts:
+  0.5 0.5 0.5
+  0.5 0.0 0.0
+  0.0 0.5 0.0
+  0.0 0.0 0.5
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/6c.pspnc"
+#Parameters for the SCF procedure
+nstep 20          # Maximal number of SCF cycles
+tolvrs 1.0d-10    # Will stop when, twice in a row, the difference 
+                  # between two consecutive evaluations of potential residual 
+                  # differ by less than tolvrs
 
+#Miscelaneous parameters
+prtwf 1           # Print wavefunctions (re-used from one dataset to the other)
+prtden 0          # Do not print density
+prteig 0          # Do not print eigenvalues
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -57,4 +81,5 @@ ndtset 9   ecut: 8. ecut+  2.
 #%% description = 
 #%%   Input for PAW1 tutorial
 #%%   Diamond at experimental volume
+#%%   Convergence with respect to the plane-wave cut-off
 #%%<END TEST_INFO>

@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.3.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h21 )
+.Starting date : Sun 20 Dec 2020.
+- ( at 06h16 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorespfn_trf2_2/trf2_2.in
-- output file    -> trf2_2.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/Olivier7017_beauty/tests/TestBot_MPI1/tutorespfn_trf2_2/trf2_2.abi
+- output file    -> trf2_2.abo
 - root for input  files -> trf2_2i
 - root for output files -> trf2_2o
 
@@ -56,6 +56,7 @@ _ WF disk file :      0.039 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
              ecut      3.00000000E+00 Hartree
 -          fftalg         312
            istwfk        2    0    3    0    0    0    7    0
+              ixc           7
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -122,9 +123,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 ...
 
  Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
@@ -137,8 +138,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05142
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/Olivier7017_beauty/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/Olivier7017_beauty/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -150,8 +151,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/Olivier7017_beauty/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/Olivier7017_beauty/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -179,17 +180,17 @@ tolerances: {tolvrs: 1.00E-18, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -9.5909184173426    -9.591E+00 3.821E-02 7.768E-01
+ ETOT  1  -9.5941097122907    -9.594E+00 3.825E-02 7.752E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.71131145E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.71131145E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.71131145E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.74080449E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.74080449E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.74080449E-04  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
-  potential residual=  7.768E-01 exceeds tolvrs=  1.000E-18
+  potential residual=  7.752E-01 exceeds tolvrs=  1.000E-18
 
 
 --- !ResultsGS
@@ -202,15 +203,15 @@ lattice_vectors:
 lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9859750E+02
-convergence: {deltae: -9.591E+00, res2:  7.768E-01, residm:  3.821E-02, diffor: null, }
-etotal    :  -9.59091842E+00
+convergence: {deltae: -9.594E+00, res2:  7.752E-01, residm:  3.825E-02, diffor: null, }
+etotal    :  -9.59410971E+00
 entropy   :   0.00000000E+00
-fermie    :   1.78694135E-01
+fermie    :   1.78352032E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  3.71131145E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.71131145E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.71131145E-04, ]
-pressure_GPa:  -1.0919E+01
+- [  3.74080449E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.74080449E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.74080449E-04, ]
+pressure_GPa:  -1.1006E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
@@ -223,13 +224,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          1.03077045
-    2        2.00000          2.24011940
+    1        2.00000          1.03076966
+    2        2.00000          2.24053289
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   18.026E-03; max=  38.209E-03
+ Mean square residual over all n,k,spin=   18.040E-03; max=  38.255E-03
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -253,38 +254,38 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  length scales= 10.610000000000 10.610000000000 10.610000000000 bohr
               =  5.614570183140  5.614570183140  5.614570183140 angstroms
  prteigrs : about to open file trf2_2o_EIG
- Fermi (or HOMO) energy (hartree) =   0.17869   Average Vxc (hartree)=  -0.34031
+ Fermi (or HOMO) energy (hartree) =   0.17835   Average Vxc (hartree)=  -0.34059
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.37006    0.06698    0.13534    0.17869
+  -0.37045    0.06657    0.13494    0.17835
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.87703082916916E+00
-hartree             :  6.08367901943382E-01
-xc                  : -3.84832730141236E+00
+kinetic             :  2.87746479175175E+00
+hartree             :  6.08755804285122E-01
+xc                  : -3.85161131160128E+00
 Ewald energy        : -8.47989583509473E+00
 psp_core            :  7.65414498117480E-01
-local_psp           : -2.22357025527420E+00
-non_local_psp       :  7.10061745208687E-01
-total_energy        : -9.59091841734257E+00
-total_energy_eV     : -2.60982162624253E+02
-band_energy         : -6.91839135678955E-01
+local_psp           : -2.22426095960232E+00
+non_local_psp       :  7.10023299853301E-01
+total_energy        : -9.59410971229068E+00
+total_energy_eV     : -2.61069002176096E+02
+band_energy         : -6.94905625731816E-01
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.71131145E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.71131145E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.71131145E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.74080449E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.74080449E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.74080449E-04  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -1.0919E+01 GPa]
-- sigma(1 1)=  1.09190534E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.09190534E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.09190534E+01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.1006E+01 GPa]
+- sigma(1 1)=  1.10058249E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.10058249E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.10058249E+01  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -294,11 +295,12 @@ band_energy         : -6.91839135678955E-01
               amu      2.69815390E+01  7.49215900E+01
            diemac      9.00000000E+00
              ecut      3.00000000E+00 Hartree
-           etotal     -9.5909184173E+00
+           etotal     -9.5941097123E+00
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
            istwfk        2    0    3    0    0    0    7    0
+              ixc           7
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -323,7 +325,7 @@ P           mkmem           8
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         216
-           strten      3.7113114546E-04  3.7113114546E-04  3.7113114546E-04
+           strten      3.7408044910E-04  3.7408044910E-04  3.7408044910E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
                       -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1

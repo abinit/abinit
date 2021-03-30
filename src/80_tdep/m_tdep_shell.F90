@@ -103,7 +103,7 @@ contains
     write(Invar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
     write(Invar%stdout,*) '         In the present calculation, the number of shells is:',Shell1at%nshell
     write(Invar%stdout,*) '         Action: increase nshell_max'
-    MSG_ERROR('The maximum number of shells allowed by the code is reached')
+    ABI_ERROR('The maximum number of shells allowed by the code is reached')
   end if  
 
 
@@ -239,7 +239,7 @@ contains
     write(Invar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
     write(Invar%stdout,*) '         In the present calculation, the number of shells is:',Shell2at%nshell
     write(Invar%stdout,*) '         Action: increase nshell_max'
-    MSG_ERROR('The maximum number of shells allowed by the code is reached')
+    ABI_ERROR('The maximum number of shells allowed by the code is reached')
   end if
 
 
@@ -416,7 +416,7 @@ contains
           if (find_equivalent.eq.0) then
             nshell_tmp=nshell_tmp+1
             if (nshell_tmp.gt.nshell_max) then
-              MSG_ERROR('The shell number index is greater than the shell number max defined in the code')
+              ABI_ERROR('The shell number index is greater than the shell number max defined in the code')
             end if  
             if ((iatom.eq.jatom).and.(jatom.eq.katom)) Shell3at%ishell_self(iatom)=nshell_tmp
             interactions(iatom,nshell_tmp)=interactions(iatom,nshell_tmp)+1
@@ -531,7 +531,7 @@ contains
           nshell_tmp=nshell_tmp+1
 !         Check that the new shell is allowed
           if (nshell_tmp.gt.Shell3at%nshell) then
-            MSG_ERROR('The shell number index is greater than the shell number max computed previously')
+            ABI_ERROR('The shell number index is greater than the shell number max computed previously')
           end if  
           Shell3at%iatref(nshell_tmp)=iatom
           Shell3at%jatref(nshell_tmp)=jatom
@@ -560,12 +560,12 @@ contains
 !FB          write(6,*) 'For ishell and eatom=',ishell,watom
 !FB          write(6,*) '  --> the number of interactions in the shell is=',interactions(watom,ishell)
           if (interactions(watom,ishell).gt.Shell3at%neighbours(watom,ishell)%n_interactions) then
-                write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-                write(6,*) ' >>>>>> Verify that the Rcut used in the input file is lower '
-                write(6,*) ' >>>>>> than half of the smallest lattice parameter'
-                write(6,*) ' >>>>>> Solution : Reduce the Rcut parameter'
-                write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-            MSG_ERROR('The interaction number index is greater than the interaction number max computed previously (3rd order)')
+            write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+            write(6,*) ' >>>>>> Verify that the Rcut used in the input file is lower '
+            write(6,*) ' >>>>>> than half of the smallest lattice parameter'
+            write(6,*) ' >>>>>> Solution : Reduce the Rcut parameter'
+            write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+            ABI_ERROR('The interaction number index is greater than the interaction number max computed previously (3rd order)')
           end if
           Shell3at%neighbours(watom,ishell)%atomj_in_shell(interactions(watom,ishell))=xatom
           Shell3at%neighbours(watom,ishell)%atomk_in_shell(interactions(watom,ishell))=yatom
@@ -590,7 +590,7 @@ contains
             write(std_out,'(a,2(1x,i5))') 'For ishell and iatom =',ishell,iatom
             write(std_out,'(a,i5,a,i5,a,i5)') '  the interactions ',ninter,&
 &             ' and ',tmpinter,' have both the same symmetry isym=',Shell3at%neighbours(iatom,ishell)%sym_in_shell(  ninter)
-            MSG_ERROR('Some interactions are equals due to the symmetry')
+            ABI_ERROR('Some interactions are equals due to the symmetry')
           end if
         end do
       end do
@@ -601,7 +601,7 @@ contains
     do iatom=1,natom
       if (Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%n_interactions.ne.&
 &         Shell3at%neighbours(                        iatom,ishell)%n_interactions) then
-        MSG_ERROR('The interaction number index is not equal to the interaction number max computed previously (2)')
+        ABI_ERROR('The interaction number index is not equal to the interaction number max computed previously (2)')
       end if
 !DEBUG      iatref=Shell3at%iatref(ishell)
 !DEBUG      jatref=Shell3at%jatref(ishell)
@@ -630,7 +630,7 @@ contains
 !DEBUG&             (abs(distance(iatom,katom,ii+1)-vect2(ii)).gt.tol8)) then
 !DEBUG            write(std_out,'(a,4(x,i5))') 'For ishell, iatom, jatom, katom =',ishell,iatom,jatom,katom
 !DEBUG            write(std_out,'(a,5(x,i5))') '  with isym, itrans, iatref, jatref, katref = ',isym,itrans,iatref,jatref,katref
-!DEBUG            MSG_ERROR('We do not recover the triplet with the symmetry found')
+!DEBUG            ABI_ERROR('We do not recover the triplet with the symmetry found')
 !DEBUG          end if
 !DEBUG        end do !ii 
 !DEBUG      end do !ninter
@@ -829,7 +829,7 @@ contains
           if (find_equivalent.eq.0) then
             nshell_tmp=nshell_tmp+1
             if (nshell_tmp.gt.nshell_max) then
-              MSG_ERROR('The shell number index is greater than the shell number max defined in the code')
+              ABI_ERROR('The shell number index is greater than the shell number max defined in the code')
             end if  
             if ((iatom.eq.jatom).and.(jatom.eq.katom).and.(katom.eq.latom)) Shell4at%ishell_self(iatom)=nshell_tmp
             interactions(iatom,nshell_tmp)=interactions(iatom,nshell_tmp)+1
@@ -994,7 +994,7 @@ contains
             nshell_tmp=nshell_tmp+1
 !           Check that the new shell is allowed
             if (nshell_tmp.gt.Shell4at%nshell) then
-              MSG_ERROR('The shell number index is greater than the shell number max computed previously')
+              ABI_ERROR('The shell number index is greater than the shell number max computed previously')
             end if  
             Shell4at%iatref(nshell_tmp)=iatom
             Shell4at%jatref(nshell_tmp)=jatom
@@ -1054,12 +1054,12 @@ contains
 !FB            write(6,*) 'For ishell and eatom=',ishell,watom
 !FB            write(6,*) '  --> the number of interactions in the shell is=',interactions(watom,ishell)
             if (interactions(watom,ishell).gt.Shell4at%neighbours(watom,ishell)%n_interactions) then
-                  write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-                  write(6,*) ' >>>>>> Verify that the Rcut used in the input file is lower '
-                  write(6,*) ' >>>>>> than half of the smallest lattice parameter'
-                  write(6,*) ' >>>>>> Solution : Reduce the Rcut parameter'
-                  write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-              MSG_ERROR('The interaction number index is greater than the interaction number max computed previously (4th order)')
+              write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+              write(6,*) ' >>>>>> Verify that the Rcut used in the input file is lower '
+              write(6,*) ' >>>>>> than half of the smallest lattice parameter'
+              write(6,*) ' >>>>>> Solution : Reduce the Rcut parameter'
+              write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+              ABI_ERROR('The interaction number index is greater than the interaction number max computed previously (4th order)')
             end if
             Shell4at%neighbours(watom,ishell)%atomj_in_shell(interactions(watom,ishell))=xatom
             Shell4at%neighbours(watom,ishell)%atomk_in_shell(interactions(watom,ishell))=yatom
@@ -1086,7 +1086,7 @@ contains
             write(std_out,'(a,2(1x,i5))') 'For ishell and iatom =',ishell,iatom
             write(std_out,'(a,i5,a,i5,a,i5)') '  the interactions ',ninter,&
 &             ' and ',tmpinter,' have both the same symmetry isym=',Shell4at%neighbours(iatom,ishell)%sym_in_shell(  ninter)
-            MSG_ERROR('Some interactions are equals due to the symmetry')
+            ABI_ERROR('Some interactions are equals due to the symmetry')
           end if
         end do
       end do
@@ -1097,7 +1097,7 @@ contains
     do iatom=1,natom
       if (Shell4at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%n_interactions.ne.&
 &         Shell4at%neighbours(                        iatom,ishell)%n_interactions) then
-        MSG_ERROR('The interaction number index is not equal to the interaction number max computed previously (2)')
+        ABI_ERROR('The interaction number index is not equal to the interaction number max computed previously (2)')
       end if
 !DEBUG      iatref=Shell4at%iatref(ishell)
 !DEBUG      jatref=Shell4at%jatref(ishell)
@@ -1126,7 +1126,7 @@ contains
 !DEBUG&             (abs(distance(iatom,katom,ii+1)-vect2(ii)).gt.tol8)) then
 !DEBUG            write(std_out,'(a,4(x,i5))') 'For ishell, iatom, jatom, katom =',ishell,iatom,jatom,katom
 !DEBUG            write(std_out,'(a,5(x,i5))') '  with isym, itrans, iatref, jatref, katref = ',isym,itrans,iatref,jatref,katref
-!DEBUG            MSG_ERROR('We do not recover the quadruplet with the symmetry found')
+!DEBUG            ABI_ERROR('We do not recover the quadruplet with the symmetry found')
 !DEBUG          end if
 !DEBUG        end do !ii 
 !DEBUG      end do !ninter

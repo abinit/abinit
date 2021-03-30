@@ -492,7 +492,7 @@ subroutine tdep_build_phi3_333(isym,Invar,Phi3_ref,Phi3_333,Sym,itrans)
 ! Take into account the 6 allowed permutations
   Phi3_tmp(:,:,:)=Phi3_333(:,:,:)
   if ((itrans.lt.1).or.(itrans.gt.6)) then  
-    MSG_BUG('This value of the symmetry index is not permitted')
+    ABI_BUG('This value of the symmetry index is not permitted')
   end if
   do ii=1,3
     do jj=1,3
@@ -575,10 +575,10 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
     end do
     if (sum(abs(aimag(Grun_mean(:)))).gt.tol8) then
       write(message,'(i5,1x,100(e15.6,1x))') iq_ibz,( real(Grun_mean(ii)),ii=1,nmode)
-      MSG_ERROR_NOSTOP(message,ierr)
+      ABI_ERROR_NOSTOP(message,ierr)
       write(message,'(i5,1x,100(e15.6,1x))') iq_ibz,(aimag(Grun_mean(ii)),ii=1,nmode)
-      MSG_ERROR_NOSTOP(message,ierr)
-      MSG_ERROR('tdep_calc_alpha_gamma : The imaginary part of the Gruneisen is not equal to zero')
+      ABI_ERROR_NOSTOP(message,ierr)
+      ABI_ERROR('tdep_calc_alpha_gamma : The imaginary part of the Gruneisen is not equal to zero')
     end if
 !   If the Gruneisen is isotropic    
 !FB    do ii=1,3
@@ -839,10 +839,10 @@ subroutine tdep_write_gruneisen(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3
           write(54,'(4(i5,1x),500(e15.6,1x))') iqpt,ii,jj,kk,Gruneisen(ii,jj,kk)
           if (abs(aimag(Gruneisen(ii,jj,kk))).gt.tol8) then
             write(message,'(4(i5,1x),100(e15.6,1x))') iqpt,ii,jj,kk,real(Gruneisen(ii,jj,kk))
-            MSG_ERROR_NOSTOP(message,ierr)
+            ABI_ERROR_NOSTOP(message,ierr)
             write(message,'(4(i5,1x),100(e15.6,1x))') iqpt,ii,jj,kk,aimag(Gruneisen(ii,jj,kk))
-            MSG_ERROR_NOSTOP(message,ierr)
-            MSG_ERROR('tdep_write_gruneisen : The imaginary part of the Gruneisen is not equal to zero')
+            ABI_ERROR_NOSTOP(message,ierr)
+            ABI_ERROR('tdep_write_gruneisen : The imaginary part of the Gruneisen is not equal to zero')
          end if  
         end do  
       end do  
@@ -859,10 +859,10 @@ subroutine tdep_write_gruneisen(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3
 !   ===================
     if (sum(abs(aimag(Grun_mean(:)))).gt.3*Invar%natom_unitcell*tol8) then
       write(message,'(i5,1x,100(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode)
-      MSG_ERROR_NOSTOP(message,ierr)
+      ABI_ERROR_NOSTOP(message,ierr)
       write(message,'(i5,1x,100(e15.6,1x))') iqpt,(aimag(Grun_mean(ii)),ii=1,nmode)
-      MSG_ERROR_NOSTOP(message,ierr)
-      MSG_ERROR('tdep_write_gruneisen : The imaginary part of Grun_mean is not equal to zero')
+      ABI_ERROR_NOSTOP(message,ierr)
+      ABI_ERROR('tdep_write_gruneisen : The imaginary part of Grun_mean is not equal to zero')
     else 
 !FB      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode),((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)
       write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode)
@@ -1014,7 +1014,7 @@ end module m_tdep_phi3
 !FB
 !FB ! Build tetrahedra
 !FB tetra = tetra_from_kptrlatt(Crystal, qptopt1, qptrlatt, nshiftq, shiftq, nqibz, qibz, comm, msg, ierr)
-!FB if (ierr /= 0) MSG_ERROR(msg)
+!FB if (ierr /= 0) ABI_ERROR(msg)
 !FB
 !FB ABI_CALLOC(wvols_qibz, (gruns%natom3, gruns%nvols, nqibz))
 !FB ABI_CALLOC(gvals_qibz, (gruns%natom3, nqibz))

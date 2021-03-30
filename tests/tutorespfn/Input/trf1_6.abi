@@ -100,9 +100,6 @@ nband  4               # For an insulator (if described correctly as an insulato
                        # by DFT), there is no need to include conduction bands 
                        # in response-function calculations
 
-#Exchange-correlation functional
-ixc 1                  # LDA Teter Pade parametrization
-
 #Definition of the planewave basis set
  ecut    3.0           # Maximal kinetic energy cut-off, in Hartree
 
@@ -125,6 +122,9 @@ diemac 9.0             # Although this is not mandatory, it is worth to
  pp_dirpath "$ABI_PSPDIR"
  pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

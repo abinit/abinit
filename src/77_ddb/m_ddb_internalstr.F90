@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (XW)
+!!  Copyright (C) 1999-2021 ABINIT group (XW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -353,7 +353,7 @@ natom,nblok,prt_internalstr)
 &   '  are too large at Gamma point.',ch10,&
 &   '  Increase cutoff energy or k-points sampling.',ch10,&
 &   '  The three eigenvalues are:',Apmatr(3*natom-2,3*natom-2),Apmatr(3*natom-1,natom-1),Apmatr(3*natom,3*natom)
-   MSG_WARNING(message)
+   ABI_WARNING(message)
    call wrtout(iout,message,'COLL')
  end if
 

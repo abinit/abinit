@@ -34,6 +34,13 @@ inp_files = [
 "t19.abi", # disable all checks thanks to expert_user
 "t20.abi", # test treatment of inaccurate POSCAR file
 "t21.abi", # test treatment of inaccurate POSCAR file
+"t22.abi", # test different cellcharge for different images, algo pSIC
+"t23.abi", # test treatment of inaccurate POSCAR file
+"t24.abi", # test treatment of inaccurate POSCAR file
+"t25.abi", # test treatment of inaccurate POSCAR file
+"t26.abi", # test treatment of inaccurate POSCAR file
+"t27.abi", # test treatment of inaccurate POSCAR file
+"t28.abi", # test treatment of inaccurate POSCAR file
 "t29.abi", # RMM-DIIS eigsolver for NC.
 "t30.abi", # RMM-DIIS eigsolver for PAW.
 # GW/BSE
@@ -48,6 +55,7 @@ inp_files = [
 "t41.abi",
 "t42.abi",
 "t43.abi",
+"t44.abi", # test nuclear dipoles with DDK perturbation
 # Electron-phonon
 "t50.abi",
 "t51.abi",
@@ -76,4 +84,10 @@ inp_files = [
 "t87.abi", # Spin lattice coupling, Oiju and Tijuv.
 # GS Coulomb cut-off
 "t90.abi", # checkG Coulomb cut-off, large tolerance a.t.m.
+"t91.abi", # occopt 9 tests on Si
+"t95.abi", # test treatment of inaccurate POSCAR file
+"t96.abi", # test treatment of inaccurate POSCAR file
+"t97.abi", # test treatment of inaccurate POSCAR file
+"t98.abi", # test treatment of inaccurate POSCAR file
+"t99.abi", # test treatment of inaccurate POSCAR file
 ]

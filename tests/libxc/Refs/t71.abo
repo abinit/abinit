@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -327,7 +327,7 @@ force_length_stats: {min:   5.84753381E-03, max:   5.84753381E-03, mean:   5.847
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.84753E-03 3.37608E-03 (free atoms)
  -5.84753380642907E-03 -0.00000000000000E+00 -0.00000000000000E+00
   5.84753380642907E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   5.52511872347064E-02  0.00000000000000E+00  0.00000000000000E+00
  -5.52511872347064E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -6.08199486946547E+00
@@ -442,7 +442,7 @@ force_length_stats: {min:   2.55385530E-03, max:   2.55385530E-03, mean:   2.553
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.55386E-03 1.47447E-03 (free atoms)
  -2.55385529561969E-03 -0.00000000000000E+00 -0.00000000000000E+00
   2.55385529561969E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.41304354587046E-02  0.00000000000000E+00  0.00000000000000E+00
  -2.41304354587046E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -6.08204400376967E+00
@@ -560,7 +560,7 @@ force_length_stats: {min:   3.93476924E-05, max:   3.93476924E-05, mean:   3.934
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.93477E-05 2.27174E-05 (free atoms)
  -3.93476924250220E-05 -0.00000000000000E+00 -0.00000000000000E+00
   3.93476924250220E-05 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.71781813221553E-04  0.00000000000000E+00  0.00000000000000E+00
  -3.71781813221552E-04 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -6.08205552348667E+00

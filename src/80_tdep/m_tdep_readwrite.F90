@@ -288,20 +288,20 @@ contains
     Invar%debug=.true.
     write(Invar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of PHONONS (Debug)'
   else
-    MSG_ERROR('Please use recent format for the input file')
+    ABI_ERROR('Please use recent format for the input file')
   end if  
-  write(Invar%stdout,'(a)') '.Copyright (C) 1998-2020 ABINIT group (FB,JB).'
-  write(Invar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
-  write(Invar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
-  write(Invar%stdout,'(a)') ' under certain conditions (GNU General Public License,'
-  write(Invar%stdout,'(a)') ' see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).'
-  write(Invar%stdout,*) ' '
-  write(Invar%stdout,'(a)') ' ABINIT is a project of the Universite Catholique de Louvain,'
-  write(Invar%stdout,'(a)') ' Corning Inc. and other collaborators, see'
-  write(Invar%stdout,'(a)') ' ~abinit/doc/developers/contributors.txt .'
-  write(Invar%stdout,'(a)') ' Please read https://docs.abinit.org/theory/acknowledgments for suggested'
-  write(Invar%stdout,'(a)') ' acknowledgments of the ABINIT effort.'
-  write(Invar%stdout,'(a)') ' For more information, see http://www.abinit.org .'
+  write(InVar%stdout,'(a)') '.Copyright (C) 1998-2021 ABINIT group (FB,JB).'
+  write(InVar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
+  write(InVar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
+  write(InVar%stdout,'(a)') ' under certain conditions (GNU General Public License,'
+  write(InVar%stdout,'(a)') ' see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).'
+  write(InVar%stdout,*) ' '
+  write(InVar%stdout,'(a)') ' ABINIT is a project of the Universite Catholique de Louvain,'
+  write(InVar%stdout,'(a)') ' Corning Inc. and other collaborators, see'
+  write(InVar%stdout,'(a)') ' ~abinit/doc/developers/contributors.txt .'
+  write(InVar%stdout,'(a)') ' Please read https://docs.abinit.org/theory/acknowledgments for suggested'
+  write(InVar%stdout,'(a)') ' acknowledgments of the ABINIT effort.'
+  write(InVar%stdout,'(a)') ' For more information, see http://www.abinit.org .'
 
   call date_and_time(date,time,zone,values)
   write(Invar%stdout,'(/,a,i2,1x,a,1x,i4,a)') '.Starting date : ',values(3),month_names(values(2)),values(1),'.'
@@ -340,7 +340,7 @@ contains
     backspace(40)
     if (string.eq.'ntypat') then
       write(Invar%stdlog,'(1x,a)') 'When the NetCDF file .nc is used, the ntypat keywork is not allowed.' 
-      MSG_ERROR('ACTION : Please modify your input file')
+      ABI_ERROR('ACTION : Please modify your input file')
     end if  
     string='ntypat'
   else
@@ -349,7 +349,7 @@ contains
     if (string.ne.'ntypat') then
       write(Invar%stdlog,'(1x,a)') 'The NetCDF file .nc is not used.' 
       write(Invar%stdlog,'(1x,a,1x,a)') 'In your input file, the code search the ntypat keywork but found :',string
-      MSG_ERROR('ACTION : Please modify your input file')
+      ABI_ERROR('ACTION : Please modify your input file')
     end if  
     read(40,*) string,Invar%ntypat
   end if  
@@ -453,16 +453,16 @@ contains
         read(40,*) string,Invar%order,Invar%rcut3
         write(Invar%stdout,'(1x,a20,1x,i4,1x,f15.10)') string,Invar%order,Invar%rcut3
         if (Invar%rcut3.gt.Invar%rcut) then
-          MSG_ERROR('The cutoff radius of the third order cannot be greater than the second order one.')
+          ABI_ERROR('The cutoff radius of the third order cannot be greater than the second order one.')
         end if  
       else if (Invar%order.eq.4) then
         read(40,*) string,Invar%order,Invar%rcut3,Invar%rcut4
         write(Invar%stdout,'(1x,a20,1x,i4,2(1x,f15.10))') string,Invar%order,Invar%rcut3,Invar%rcut4
         if (Invar%rcut4.gt.Invar%rcut) then
-          MSG_ERROR('The cutoff radius of the fourth order cannot be greater than the second order one.')
+          ABI_ERROR('The cutoff radius of the fourth order cannot be greater than the second order one.')
         end if  
       else
-        MSG_ERROR('Only the 3rd and 4th orders are allowed. Change your input file.')
+        ABI_ERROR('Only the 3rd and 4th orders are allowed. Change your input file.')
       end if
     else if (string.eq.slice) then  
       read(40,*) string,Invar%slice
@@ -510,7 +510,7 @@ contains
       exit
     else 
       write(Invar%stdout,'(a,1x,a)') 'This keyword is not allowed',string
-      MSG_ERROR('A keyword is not allowed. See the log file.')
+      ABI_ERROR('A keyword is not allowed. See the log file.')
     end if  
   end do
 ! Output very important informations 
@@ -525,11 +525,11 @@ contains
 
 ! Allowed values
   if ((Invar%together.ne.1).and.(Invar%together.ne.0)) then
-    MSG_ERROR('STOP: The value of input variable TOGETHER is not allowed') 
+    ABI_ERROR('STOP: The value of input variable TOGETHER is not allowed') 
   end if  
 ! Incompatible variables :
   if ((Invar%readifc.eq.1).and.(Invar%together.eq.1).and.(Invar%order.gt.2)) then
-    MSG_ERROR('STOP: readifc=1, together=1 and order=3 or 4 are incompatible')
+    ABI_ERROR('STOP: readifc=1, together=1 and order=3 or 4 are incompatible')
   end if  
 
 ! Compute Nstep as a function of the slice
@@ -655,7 +655,7 @@ contains
   MPIdata%nproc_step =Invar%nproc(2)
   MPIdata%nproc = xmpi_comm_size(xmpi_world)
   if (MPIdata%nproc_step*MPIdata%nproc_shell.ne.MPIdata%nproc) then
-    MSG_WARNING('The parallelization is performed over steps')
+    ABI_WARNING('The parallelization is performed over steps')
     MPIdata%nproc_step = xmpi_comm_size(xmpi_world)
   end if  
 

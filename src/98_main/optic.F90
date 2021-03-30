@@ -1,3 +1,5 @@
+! CP modified
+
 !!****p* ABINIT/optic
 !! NAME
 !! optic
@@ -7,7 +9,7 @@
 !! the linear and non-linear optical responses in the RPA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2020 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
+!! Copyright (C) 2002-2021 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -232,7 +234,7 @@ program optic
 
    ! Read data file
    if (open_file(filnam,msg,newunit=finunt,form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! Setup some default values:
@@ -255,13 +257,13 @@ program optic
 
    ! Validate input
    if (num_nonlin_comp > 0 .and. all(nonlin_comp(1:num_nonlin_comp) == 0)) then
-     MSG_ERROR("nonlin_comp must be specified when num_nonlin_comp > 0")
+     ABI_ERROR("nonlin_comp must be specified when num_nonlin_comp > 0")
    end if
    if (num_linel_comp > 0 .and. all(linel_comp(1:num_linel_comp) == 0)) then
-     MSG_ERROR("linel_comp must be specified when num_linel_comp > 0")
+     ABI_ERROR("linel_comp must be specified when num_linel_comp > 0")
    end if
    if (num_nonlin2_comp > 0 .and. all(nonlin2_comp(1:num_nonlin2_comp) == 0)) then
-     MSG_ERROR("nonlin2_comp must be specified when num_nonlin2_comp > 0")
+     ABI_ERROR("nonlin2_comp must be specified when num_nonlin2_comp > 0")
    end if
 
    ! Open GS wavefunction file
@@ -270,7 +272,7 @@ program optic
    ! this info is not reported in the header and the offsets in wfk_compute_offsets
    ! are always computed assuming the presence of the cg
    call nctk_fort_or_ncfile(wfkfile, iomode0, msg)
-   if (len_trim(msg) /= 0) MSG_ERROR(msg)
+   if (len_trim(msg) /= 0) ABI_ERROR(msg)
    if (iomode0 == IO_MODE_MPI) iomode0 = IO_MODE_FORTRAN
    call wfk_open_read(wfk0,wfkfile,formeig0,iomode0,get_unit(),xmpi_comm_self)
    ! Get header from the gs file
@@ -286,7 +288,7 @@ program optic
    do ii=1,3
 
      call nctk_fort_or_ncfile(infiles(ii), iomode_ddk(ii), msg)
-     if (len_trim(msg) /= 0) MSG_ERROR(msg)
+     if (len_trim(msg) /= 0) ABI_ERROR(msg)
      if (iomode_ddk(ii) == IO_MODE_MPI) iomode_ddk(ii) = IO_MODE_FORTRAN
 
      if (.not. use_ncevk(ii)) then
@@ -301,7 +303,7 @@ program optic
 
        NCF_CHECK(nf90_close(ncid))
 #else
-       MSG_ERROR("Netcdf not available!")
+       ABI_ERROR("Netcdf not available!")
 #endif
 
      end if
@@ -312,7 +314,7 @@ program optic
 !&      ' The ground-state and ddk files should have the same format,',ch10,&
 !&      ' either FORTRAN binary or NetCDF, which is not the case.',ch10,&
 !&      ' Action : see input variable iomode.'
-!     MSG_ERROR(msg)
+!     ABI_ERROR(msg)
 !   endif
 
    ! Perform basic consistency tests for the GS WFK and the DDK files, e.g.
@@ -334,12 +336,12 @@ program optic
 
      if (hdr%compare(hdr_ddk(1)) /= 0) then
        write(msg, "(3a)")" Ground-state wavefunction file and ddkfile ",trim(infiles(1))," are not consistent. See above messages."
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      do ii=1,2
        if (wfks(ii)%compare(wfks(ii+1)) /= 0) then
          write(msg, "(2(a,i0,a))")" ddkfile", ii," and ddkfile ",ii+1, ", are not consistent. See above messages"
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      enddo
    endif
@@ -357,7 +359,7 @@ program optic
      call eprenorms_from_epnc(Epren,ep_nc_fname)
      ep_ntemp = Epren%ntemp
    else if (do_temperature) then
-     MSG_ERROR("You have asked for temperature but the epfile is not present !")
+     ABI_ERROR("You have asked for temperature but the epfile is not present !")
    end if
 
    ! autoparal section
@@ -389,7 +391,7 @@ program optic
      end do
 
      write(std_out,'(a)')"..."
-     MSG_ERROR_NODUMP("aborting now")
+     ABI_ERROR_NODUMP("aborting now")
    end if
 
  end if
@@ -427,29 +429,29 @@ program optic
  ntypat=hdr%ntypat
  occopt=hdr%occopt
  rprimd(:,:)=hdr%rprimd(:,:)
- ABI_ALLOCATE(nband,(nkpt*nsppol))
- ABI_ALLOCATE(occ,(bantot))
+ ABI_MALLOC(nband,(nkpt*nsppol))
+ ABI_MALLOC(occ,(bantot))
  !fermie=hdr%fermie
  ! YG Fermi energy contained in the header of a NSCF computation is always 0 !!
  occ(1:bantot)=hdr%occ(1:bantot)
  nband(1:nkpt*nsppol)=hdr%nband(1:nkpt*nsppol)
 
  nsym=hdr%nsym
- ABI_ALLOCATE(symrel,(3,3,nsym))
- ABI_ALLOCATE(symrec,(3,3,nsym))
+ ABI_MALLOC(symrel,(3,3,nsym))
+ ABI_MALLOC(symrec,(3,3,nsym))
  symrel(:,:,:) = hdr%symrel(:,:,:)
  do isym=1,nsym
    call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
  end do
 
- ABI_ALLOCATE(kpt,(3,nkpt))
+ ABI_MALLOC(kpt,(3,nkpt))
  kpt(:,:) = hdr%kptns(:,:)
 
 !Get mband, as the maximum value of nband(nkpt)
  mband=maxval(nband(:))
  do ii=1,nkpt
    if (nband(ii) /= mband) then
-     MSG_ERROR("nband must be constant across kpts")
+     ABI_ERROR("nband must be constant across kpts")
    end if
  end do
 
@@ -470,15 +472,15 @@ program optic
  end if
 
  ! Read the eigenvalues of ground-state and ddk files
- ABI_ALLOCATE(eigen0,(mband*nkpt*nsppol))
+ ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
  ! MG: Do not understand why not [...,3]
- ABI_ALLOCATE(eigen11,(2*mband*mband*nkpt*nsppol))
- ABI_ALLOCATE(eigen12,(2*mband*mband*nkpt*nsppol))
- ABI_ALLOCATE(eigen13,(2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen11,(2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen12,(2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen13,(2*mband*mband*nkpt*nsppol))
 
  if (my_rank == master) then
-   ABI_ALLOCATE(eigtmp,(2*mband*mband))
-   ABI_ALLOCATE(eig0tmp,(mband))
+   ABI_MALLOC(eigtmp,(2*mband*mband))
+   ABI_MALLOC(eig0tmp,(mband))
 
    do ii=1,3
      if (.not. use_ncevk(ii)) cycle
@@ -491,7 +493,7 @@ program optic
      NCF_CHECK(nf90_get_var(ncid, varid, outeig, count=[2, mband, mband, nkpt, nsppol]))
      NCF_CHECK(nf90_close(ncid))
 #else
-     MSG_ERROR("Netcdf not available!")
+     ABI_ERROR("Netcdf not available!")
 #endif
    end do
 
@@ -525,8 +527,8 @@ program optic
      if (.not. use_ncevk(ii)) call wfks(ii)%close()
    end do
 
-   ABI_DEALLOCATE(eigtmp)
-   ABI_DEALLOCATE(eig0tmp)
+   ABI_FREE(eigtmp)
+   ABI_FREE(eig0tmp)
  end if ! master
 
  call xmpi_bcast(eigen0,master,comm,ierr)
@@ -541,37 +543,44 @@ program optic
 
 !---------------------------------------------------------------------------------
 !derivative of occupation wrt the energy.
- ABI_ALLOCATE(wtk,(nkpt))
+ ABI_MALLOC(wtk,(nkpt))
  wtk = hdr%wtk
 
- ABI_ALLOCATE(doccde,(mband*nkpt*nsppol))
+ ABI_MALLOC(doccde,(mband*nkpt*nsppol))
 
  !Recompute fermie from header
  !WARNING no guarantee that it works for other materials than insulators
  nelect = hdr%nelect
  tphysel = zero
- ABI_ALLOCATE(istwfk,(nkpt))
- ABI_ALLOCATE(npwarr,(nkpt))
+ ABI_MALLOC(istwfk,(nkpt))
+ ABI_MALLOC(npwarr,(nkpt))
  istwfk = hdr%istwfk
  npwarr = hdr%npwarr
 
- call ebands_init(bantot, ks_ebands, nelect, doccde, eigen0, istwfk, kpt, &
+! CP modified
+! call ebands_init(bantot, ks_ebands, nelect, doccde, eigen0, istwfk, kpt, &
+!& nband, nkpt, npwarr, nsppol, nspinor, tphysel, broadening, occopt, occ, wtk, &
+!& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+!& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+ call ebands_init(bantot, ks_ebands, nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
+& doccde, eigen0, istwfk, kpt, &
 & nband, nkpt, npwarr, nsppol, nspinor, tphysel, broadening, occopt, occ, wtk, &
-& hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
 & hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+! End CP modified
 
  !YG : should we use broadening for ebands_init
  call ebands_update_occ(ks_ebands, -99.99d0)
  fermie = ks_ebands%fermie
- ABI_DEALLOCATE(istwfk)
- ABI_DEALLOCATE(npwarr)
+ ABI_FREE(istwfk)
+ ABI_FREE(npwarr)
 
 !---------------------------------------------------------------------------------
 !size of the frequency range
  nomega=int((maxomega+domega*0.001_dp)/domega)
  maxomega = dble(nomega)*domega
- ABI_ALLOCATE(cond_nd,(nomega))
- ABI_ALLOCATE(cond_kg,(nomega))
+ ABI_MALLOC(cond_nd,(nomega))
+ ABI_MALLOC(cond_kg,(nomega))
 
  optic_ncid = nctk_noid
  if (my_rank == master) then
@@ -672,7 +681,7 @@ program optic
    NCF_CHECK(nctk_set_datamode(optic_ncid))
 
    ! Write wmesh here.
-   ABI_ALLOCATE(wmesh, (nomega))
+   ABI_MALLOC(wmesh, (nomega))
    do ii=1,nomega
      ! This to be consistent with the value used in m_optic_tools
      ! In principle wmesh should be passed to the children and a lot of code
@@ -710,12 +719,12 @@ program optic
 #endif
  end if
 
- ABI_ALLOCATE(symcart,(3,3,nsym))
+ ABI_MALLOC(symcart,(3,3,nsym))
  !YG: we need to transpose gprimd since matrinv give the transpose of the inverse!
  gprimd_trans = transpose(gprimd)
  call sym2cart(gprimd_trans,nsym,rprimd,symrel,symcart)
 
- ABI_ALLOCATE(pmat,(mband,mband,nkpt,3,nsppol))
+ ABI_MALLOC(pmat,(mband,mband,nkpt,3,nsppol))
  call wrtout(std_out," optic : Call pmat2cart","COLL")
 
  call pmat2cart(eigen11,eigen12,eigen13,mband,nkpt,nsppol,pmat,rprimd)
@@ -821,21 +830,21 @@ program optic
 
 !---------------------------------------------------------------------------------
 
- ABI_DEALLOCATE(nband)
- ABI_DEALLOCATE(occ)
- ABI_DEALLOCATE(eigen11)
- ABI_DEALLOCATE(eigen12)
- ABI_DEALLOCATE(eigen13)
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(doccde)
- ABI_DEALLOCATE(wtk)
- ABI_DEALLOCATE(cond_nd)
- ABI_DEALLOCATE(cond_kg)
- ABI_DEALLOCATE(kpt)
- ABI_DEALLOCATE(symrel)
- ABI_DEALLOCATE(symrec)
- ABI_DEALLOCATE(symcart)
- ABI_DEALLOCATE(pmat)
+ ABI_FREE(nband)
+ ABI_FREE(occ)
+ ABI_FREE(eigen11)
+ ABI_FREE(eigen12)
+ ABI_FREE(eigen13)
+ ABI_FREE(eigen0)
+ ABI_FREE(doccde)
+ ABI_FREE(wtk)
+ ABI_FREE(cond_nd)
+ ABI_FREE(cond_kg)
+ ABI_FREE(kpt)
+ ABI_FREE(symrel)
+ ABI_FREE(symrec)
+ ABI_FREE(symcart)
+ ABI_FREE(pmat)
 
  call hdr%free()
  call hdr_ddk(1)%free()

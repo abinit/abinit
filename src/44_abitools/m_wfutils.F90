@@ -6,7 +6,7 @@
 !!  parameters and function for wave functions copy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2020 ABINIT group (CS,GZ,FB)
+!!  Copyright (C) 2001-2021 ABINIT group (CS,GZ,FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -141,7 +141,7 @@ integer function wfindex(iblocksize,indtype)
  case ('W')
    wfindex=x_windex(iblocksize)
  case default
-   MSG_ERROR("Wrong indtype: "//trim(indtype))
+   ABI_ERROR("Wrong indtype: "//trim(indtype))
  end select
 
 end function wfindex
@@ -326,7 +326,7 @@ subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indt
      end if
    end if
  else
-   MSG_ERROR("Wrong direction: "//trim(direction))
+   ABI_ERROR("Wrong direction: "//trim(direction))
  endif
 
  if (present(tim_wfcopy).and.present(timopt)) then

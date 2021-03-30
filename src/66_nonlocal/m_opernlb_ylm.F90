@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (MT)
+!!  Copyright (C) 1998-2021 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -203,7 +203,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 
 !DDK not compatible with istwkf > 1
  if(cplex==1.and.(any(cplex_dgxdt(:)==2).or.any(cplex_d2gxdt(:)==2)))then
-   MSG_BUG("opernlb_ylm+ddk not compatible with istwfk>1")
+   ABI_BUG("opernlb_ylm+ddk not compatible with istwfk>1")
  end if
 
 !Inits
@@ -214,33 +214,33 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 #endif
 
  if (paw_opt/=3) then
-   ABI_ALLOCATE(gxfac_,(2,nlmn))
+   ABI_MALLOC(gxfac_,(2,nlmn))
    gxfac_(:,:)=zero
    if (choice>1) then
-     ABI_ALLOCATE(dgxdtfac_,(2,ndgxdtfac,nlmn))
+     ABI_MALLOC(dgxdtfac_,(2,ndgxdtfac,nlmn))
      if(ndgxdtfac>0) dgxdtfac_(:,:,:)=zero
    end if
    if (choice==54.or.choice==8.or.choice==81.or.choice==33) then
-     ABI_ALLOCATE(d2gxdtfac_,(2,nd2gxdtfac,nlmn))
+     ABI_MALLOC(d2gxdtfac_,(2,nd2gxdtfac,nlmn))
      if(nd2gxdtfac>0) d2gxdtfac_(:,:,:)=zero
    end if
  end if
  if (paw_opt>=3) then
-   ABI_ALLOCATE(gxfacs_,(2,nlmn))
+   ABI_MALLOC(gxfacs_,(2,nlmn))
    gxfacs_(:,:)=zero
    if (choice>1) then
-     ABI_ALLOCATE(dgxdtfacs_,(2,ndgxdtfac,nlmn))
+     ABI_MALLOC(dgxdtfacs_,(2,ndgxdtfac,nlmn))
      if (ndgxdtfac>0) dgxdtfacs_(:,:,:)=zero
    end if
    if (choice==54.or.choice==8.or.choice==81) then
-     ABI_ALLOCATE(d2gxdtfacs_,(2,nd2gxdtfac,nlmn))
+     ABI_MALLOC(d2gxdtfacs_,(2,nd2gxdtfac,nlmn))
      if (nd2gxdtfac>0) d2gxdtfacs_(:,:,:)=zero
    end if
  end if
 
 if (choice==33) two_piinv=1.0_dp/two_pi
 
- ABI_ALLOCATE(ztab,(npw))
+ ABI_MALLOC(ztab,(npw))
 
 !==========================================================================
 !========== STANDARD VERSION ==============================================
@@ -561,14 +561,12 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          end if
 
 !        ------
-         if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>V<dp/dk_(idir-1)|psi>
-!                                                -<G|dp/dk_(idir-1)>V<dp/dk_(idir+1)|psi>
+         if (choice==53) then ! twist derivative: <G|dp_i/dk_(idir+1)>V_ij<dp_j/dk_(idir+2)|psi>
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
            do ilmn=1,nlmn
              ztab(:)=ztab(:) + &
-&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp) - &
-&             ffnl(:,fdb,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
+&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp) 
            end do
          end if
 
@@ -684,14 +682,12 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          end if
 
 !        ------
-         if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>S<dp/dk_(idir-1)|psi>
-!                                                -<G|dp/dk_(idir-1)>S<dp/dk_(idir+1)|psi>
+         if (choice==53) then ! twist derivative: <G|dp_i/dk_(idir+1)>S_ij<dp_j/dk_(idir+2)|psi>
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
            do ilmn=1,nlmn
              ztab(:)=ztab(:) + &
-&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp) - &
-&             ffnl(:,fdb,ilmn)*cmplx(dgxdtfacs_(1,1,ilmn),dgxdtfacs_(2,1,ilmn),kind=dp)
+&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp)
            end do
          end if
 
@@ -1118,8 +1114,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !$OMP END DO
 
 !        ------
-         else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>V<dp/dk_(idir-1)|psi>
-!                                                     -<G|dp/dk_(idir-1)>V<dp/dk_(idir+1)|psi>
+         else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>V<dp/dk_(idir+2)|psi>
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
 !$OMP DO
@@ -1127,8 +1122,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              ztab(ipw)=czero
              do ilmn=1,nlmn
                ztab(ipw)=ztab(ipw) &
-&               +ffnl(ipw,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp) &
-&               -ffnl(ipw,fdb,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
+&               +ffnl(ipw,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp)
              end do
            end do
 !$OMP END DO
@@ -1296,8 +1290,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !$OMP END DO
 
 !        ------
-         else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>S<dp/dk_(idir-1)|psi> -
-!          <G|dp/dk_(idir-1)>V<dp/dk_(idir+1)|psi>
+         else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>S<dp/dk_(idir+2)|psi> 
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
 !$OMP DO
@@ -1305,8 +1298,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              ztab(ipw)=czero
              do ilmn=1,nlmn
                ztab(ipw)=ztab(ipw) &
-&               +ffnl(ipw,fdf,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp) &
-&               -ffnl(ipw,fdb,ilmn)*cmplx(dgxdtfacs_(1,1,ilmn),dgxdtfacs_(2,1,ilmn),kind=dp)
+&               +ffnl(ipw,fdf,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp)
              end do
            end do
 !$OMP END DO
@@ -1396,24 +1388,24 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !  ==========================================================================
  end if
 
- ABI_DEALLOCATE(ztab)
+ ABI_FREE(ztab)
 
  if (paw_opt/=3) then
-   ABI_DEALLOCATE(gxfac_)
+   ABI_FREE(gxfac_)
    if (choice>1) then
-     ABI_DEALLOCATE(dgxdtfac_)
+     ABI_FREE(dgxdtfac_)
    end if
    if (choice==54.or.choice==8.or.choice==81.or.choice==33) then
-     ABI_DEALLOCATE(d2gxdtfac_)
+     ABI_FREE(d2gxdtfac_)
    end if
  end if
  if (paw_opt>=3) then
-   ABI_DEALLOCATE(gxfacs_)
+   ABI_FREE(gxfacs_)
    if (choice>1) then
-     ABI_DEALLOCATE(dgxdtfacs_)
+     ABI_FREE(dgxdtfacs_)
    end if
    if (choice==54.or.choice==8.or.choice==81) then
-     ABI_DEALLOCATE(d2gxdtfacs_)
+     ABI_FREE(d2gxdtfacs_)
    end if
  end if
 

@@ -99,5 +99,5 @@
 
  CASE DEFAULT
    write(msg,"(a,i0)")"Wrong fftalga= ",fftalga
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  END SELECT

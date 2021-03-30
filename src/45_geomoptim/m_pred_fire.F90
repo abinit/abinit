@@ -9,7 +9,7 @@
 !! Michael Moseler, and Peter Gumbsch, Phys. Rev. Lett. 97, 170201 [[cite:Bitzek2006]]
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (hexu)
+!!  Copyright (C) 1998-2021 ABINIT group (hexu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@ module m_pred_fire
  use m_abimover
  use m_abihist
  use m_xfpack
- use m_geometry,    only : mkrdim, fcart2fred, metric, xred2xcart
+ use m_geometry,    only : mkrdim, fcart2gred, metric, xred2xcart
  use m_errors, only: unused_var
 
  implicit none
@@ -91,7 +91,7 @@ contains
 !!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      fcart2fred,hist2var,metric,mkrdim,var2hist,xfpack_f2vout,xfpack_vin2x
+!!      fcart2gred,hist2var,metric,mkrdim,var2hist,xfpack_f2vout,xfpack_vin2x
 !!      xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
@@ -159,16 +159,16 @@ real(dp),allocatable,save :: vel_ioncell(:)
 
  if(iexit/=0)then
    if (allocated(vin))           then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))          then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))           then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vel_ioncell))          then
-     ABI_DEALLOCATE(vel_ioncell)
+     ABI_FREE(vel_ioncell)
    end if
    return
  end if
@@ -197,22 +197,22 @@ real(dp),allocatable,save :: vel_ioncell(:)
 !From a previous dataset with a different ndim
  if(itime==1)then
    if (allocated(vin))           then
-     ABI_DEALLOCATE(vin)
+     ABI_FREE(vin)
    end if
    if (allocated(vout))          then
-     ABI_DEALLOCATE(vout)
+     ABI_FREE(vout)
    end if
    if (allocated(vin_prev))           then
-     ABI_DEALLOCATE(vin_prev)
+     ABI_FREE(vin_prev)
    end if
    if (allocated(vel_ioncell))          then
-     ABI_DEALLOCATE(vel_ioncell)
+     ABI_FREE(vel_ioncell)
    end if
 
-   ABI_ALLOCATE(vin,(ndim))
-   ABI_ALLOCATE(vout,(ndim))
-   ABI_ALLOCATE(vin_prev,(ndim))
-   ABI_ALLOCATE(vel_ioncell,(ndim))
+   ABI_MALLOC(vin,(ndim))
+   ABI_MALLOC(vout,(ndim))
+   ABI_MALLOC(vin_prev,(ndim))
+   ABI_MALLOC(vel_ioncell,(ndim))
    vel_ioncell(:)=0.0
  end if
 
@@ -245,9 +245,9 @@ real(dp),allocatable,save :: vel_ioncell(:)
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   call fcart2fred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
+   call fcart2gred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
  else
-   residual(:,:)=forstr%fred(:,:)
+   residual(:,:)=forstr%gred(:,:)
  end if
 
 !Save initial values
@@ -297,8 +297,8 @@ call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
 
-!transfer fred and strten to vout. 
-!Note: fred is not f in reduced co.
+!transfer gred and strten to vout. 
+!Note: gred is not f in reduced co.
 !but dE/dx
 
  call xfpack_f2vout(residual_corrected, ab_mover%natom, ndim,&

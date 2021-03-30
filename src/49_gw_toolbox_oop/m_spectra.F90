@@ -10,7 +10,7 @@
 !! matrix as calculated in the GW part of ABINIT (screening.F90)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG)
+!! Copyright (C) 2008-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -224,7 +224,7 @@ subroutine spectra_write(Spectra,write_bits,fname)
  maxo = MAXVAL(Spectra%omega)
 
  if (open_file(fname,msg,newunit=unt) /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  !write(unt,'(a,i5,2(a,f9.1),a)')'# nomega : ',Spectra%nomega,' from ',mino*Ha_eV,' up to ',maxo*Ha_eV,' [eV] '
@@ -330,6 +330,9 @@ subroutine spectra_repr(Spectra,str)
 !scalars
  integer :: iqpt
  real(dp) :: epsilon0,epsilon0_nlf
+ character(len=15), parameter :: format_f84   = '(1x,a,  f8.4,a)'
+ character(len=15), parameter :: format_es135 = '(1x,a,es13.5,a)'
+ character(len=15) :: format_diel
  character(len=500) :: msg
 
 ! *********************************************************************
@@ -347,10 +350,12 @@ subroutine spectra_repr(Spectra,str)
    epsilon0    = REAL(Spectra%emacro_lf (1,iqpt))
    epsilon0_nlf= REAL(Spectra%emacro_nlf(1,iqpt))
    write(msg,'(a,3f9.6,a)')' For q-point: ',Spectra%qpts(:,iqpt),ch10
+   format_diel=format_f84
+   if(abs(epsilon0)>1000.0d0 .or. abs(epsilon0_nlf)>1000.0d0) format_diel=format_es135 
    str = strcat(str,msg)
-   write(msg,'(1x,a,f8.4,a)')' dielectric constant = ',epsilon0,ch10
+   write(msg,format_diel)' dielectric constant = ',epsilon0,ch10
    str = strcat(str,msg)
-   write(msg,'(1x,a,f8.4,a)')' dielectric constant without local fields = ',epsilon0_nlf,ch10
+   write(msg,format_diel)' dielectric constant without local fields = ',epsilon0_nlf,ch10
    str = strcat(str,msg)
  end do
 

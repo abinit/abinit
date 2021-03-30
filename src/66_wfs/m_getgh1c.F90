@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (XG, DRH, MT, SPr)
+!!  Copyright (C) 1998-2021 ABINIT group (XG, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,6 +54,7 @@ module m_getgh1c
  public :: getdc1
  public :: getgh1dqc
  public :: getgh1dqc_setup
+ public :: getgh1ndc
 !!***
 
 contains
@@ -150,13 +151,14 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  integer :: choice,cplex1,cpopt,ipw,ipws,ispinor,istr,i1,i2,i3
  integer :: my_nspinor,natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs
  integer :: tim_fourwf,tim_nonlop,usecprj
- logical :: compute_conjugate,has_kin,usevnl2
+ logical :: compute_conjugate,has_kin,has_nd1,usevnl2
  real(dp) :: weight !, cpu, wall, gflops
  !character(len=500) :: msg
 !arrays
  real(dp) :: enlout(1),tsec(2),svectout_dum(1,1),vectout_dum(1,1)
  real(dp),allocatable :: cwave_sp(:,:),cwavef1(:,:),cwavef2(:,:)
- real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:),gvnl2(:,:)
+ real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:)
+ real(dp),allocatable :: gh1ndc(:,:),gvnl2(:,:)
  real(dp),allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:),work(:,:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: gvnlx1_(:,:)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
@@ -182,46 +184,46 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))) .or. &
        (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc)))) then
-     MSG_BUG('ekb derivatives must be allocated for ipert<=natom or natom+3/4 !')
+     ABI_BUG('ekb derivatives must be allocated for ipert<=natom or natom+3/4 !')
    end if
  end if
  if(gs_hamkq%usepaw==1.and.(ipert==natom+2)) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))) .or. &
        (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc)))) then
-     MSG_BUG('ekb derivatives must be allocated for ipert=natom+2 !')
+     ABI_BUG('ekb derivatives must be allocated for ipert=natom+2 !')
    end if
    if (usevnl==0) then
-     MSG_BUG('gvnlx1 must be allocated for ipert=natom+2 !')
+     ABI_BUG('gvnlx1 must be allocated for ipert=natom+2 !')
    end if
  end if
  if(ipert==natom+2.and.opt_gvnlx1==0) then
-   MSG_BUG('opt_gvnlx1=0 not compatible with ipert=natom+2 !')
+   ABI_BUG('opt_gvnlx1=0 not compatible with ipert=natom+2 !')
  end if
  if (mpi_enreg%paral_spinor==1) then
-   MSG_BUG('Not compatible with parallelization over spinorial components !')
+   ABI_BUG('Not compatible with parallelization over spinorial components !')
  end if
 
  ! Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwave)<2*npw*my_nspinor) then
-   MSG_BUG('wrong size for cwave!')
+   ABI_BUG('wrong size for cwave!')
  end if
  if (size(gh1c)<2*npw1*my_nspinor) then
-   MSG_BUG('wrong size for gh1c!')
+   ABI_BUG('wrong size for gh1c!')
  end if
  if (usevnl/=0) then
    if (size(gvnlx1)<2*npw1*my_nspinor) then
-     MSG_BUG('wrong size for gvnlx1!')
+     ABI_BUG('wrong size for gvnlx1!')
    end if
  end if
  if (sij_opt==1) then
    if (size(gs1c)<2*npw1*my_nspinor) then
-     MSG_BUG('wrong size for gs1c!')
+     ABI_BUG('wrong size for gs1c!')
    end if
  end if
  if (berryopt>=4) then
    if (size(grad_berry)<2*npw1*my_nspinor) then
-     MSG_BUG('wrong size for grad_berry!')
+     ABI_BUG('wrong size for grad_berry!')
    end if
  end if
 
@@ -233,17 +235,17 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    if (usecprj/=0) then
      ncpgr=cwaveprj(1,1)%ncpgr
      if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
-       MSG_BUG('wrong size for cwaveprj!')
+       ABI_BUG('wrong size for cwaveprj!')
      end if
      if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
        if (ncpgr/=1)then
-         MSG_BUG('Projected WFs (cprj) derivatives are not correctly stored !')
+         ABI_BUG('Projected WFs (cprj) derivatives are not correctly stored !')
        end if
      end if
    end if
  else
    if(usecprj==1)then
-     MSG_BUG('usecprj==1 not allowed for NC psps !')
+     ABI_BUG('usecprj==1 not allowed for NC psps !')
    end if
  end if
 
@@ -391,7 +393,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_FREE(cwavef1)
        ABI_FREE(cwavef2)
      else
-       MSG_BUG('nspinor/=1 for Non-collinear calculations!')
+       ABI_BUG('nspinor/=1 for Non-collinear calculations!')
      end if
    end if ! nvloc
 
@@ -502,6 +504,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    JLJ: BUG (wrong result) of H^(1) if stored cprj are used in PAW DDKs with nspinor==2 (==1 works fine).
 !    To be debugged, if someone has time...
      if(gs_hamkq%nspinor==2) cpopt=-1
+     if(associated(gs_hamkq%vectornd)) cpopt=-1
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,gs1c,tim_nonlop,cwave,gvnlx1_)
      if (usecprj==0) then
@@ -717,12 +720,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if (associated(gs_hamkq%kinpw_kp)) then
    kinpw1 => gs_hamkq%kinpw_kp
  else if (optnl>=1.or.usevnl2.or.has_kin) then
-   MSG_BUG('need kinpw1 allocated!')
+   ABI_BUG('need kinpw1 allocated!')
  end if
  if (associated(rf_hamkq%dkinpw_k)) then
    dkinpw => rf_hamkq%dkinpw_k
  else if (has_kin) then
-   MSG_BUG('need dkinpw allocated!')
+   ABI_BUG('need dkinpw allocated!')
  end if
 
  if (has_kin) then
@@ -740,6 +743,30 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end if
      end do
    end do
+ end if
+
+!======================================================================
+!== Apply the 1st-order nuclear dipole operator to the wavefunction
+!== Only coded for DDK
+!== (add it to nl contribution)
+!======================================================================
+
+ has_nd1=( (ipert .EQ. natom+1) .AND. ASSOCIATED(rf_hamkq%vectornd) )
+
+ if (has_nd1) then
+   ABI_MALLOC(gh1ndc,(2,npw))
+   call getgh1ndc(cwave,gh1ndc,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
+     & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,&
+     & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,my_nspinor,rf_hamkq%vectornd,&
+     & gs_hamkq%use_gpu_cuda)
+   do ispinor=1,my_nspinor
+     do ipw=1,npw
+       ipws=ipw+npw*(ispinor-1)
+       gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+gh1ndc(1,ipw)
+       gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+gh1ndc(2,ipw)
+     end do
+   end do
+   ABI_FREE(gh1ndc)
  end if
 
 !======================================================================
@@ -984,13 +1011,13 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
  reuse_kpg1_k_ = 0; if (present(reuse_kpg1_k)) reuse_kpg1_k_ = reuse_kpg1_k
 
  if(.not.present(ddkinpw) .and. ipert==natom+10) then
-   MSG_BUG("ddkinpw is not optional for ipert=natom+10.")
+   ABI_BUG("ddkinpw is not optional for ipert=natom+10.")
  end if
  if(.not.present(dkinpw2) .and. ipert==natom+10 .and. idir>3) then
-   MSG_BUG("dkinpw2 is not optional for ipert=natom+10 and idir>3.")
+   ABI_BUG("dkinpw2 is not optional for ipert=natom+10 and idir>3.")
  end if
  if(.not.present(rf_hamk_dir2) .and. ((ipert==natom+10 .and. idir>3) .or. ipert==natom+11)) then
-   MSG_BUG("rf_hamk_dir2 is not optional for ipert=natom+10 (with idir>3) or ipert=natom+11.")
+   ABI_BUG("rf_hamk_dir2 is not optional for ipert=natom+10 (with idir>3) or ipert=natom+11.")
  end if
 
  ntypat = psps%ntypat
@@ -1319,12 +1346,6 @@ end subroutine getdc1
 !! and second q-gradient (at q=0) of the 1st-order perturbed Hamiltonian.
 !! The first (second) derivative direction is inferred from idir (qdir1).
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR,MS)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  cwave(2,npw*nspinor)=input wavefunction, in reciprocal space
 !!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C> (and 1st derivatives)
@@ -1420,18 +1441,18 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 !Compatibility tests
  if (mpi_enreg%paral_spinor==1) then
    msg='Not compatible with parallelization over spinorial components !'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwave)<2*npw*my_nspinor) then
    msg='wrong size for cwave!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(gh1dqc)<2*npw1*my_nspinor) then
    msg='wrong size for gh1dqc!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !=============================================================================
@@ -1533,13 +1554,13 @@ ABI_MALLOC(gvnl1dqc_,(2,npw1*my_nspinor))
    kinpw1 => gs_hamkq%kinpw_kp
  else if (has_kin) then
    msg='need kinpw1 allocated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (associated(rf_hamkq%dkinpw_k)) then
    dqdqkinpw => rf_hamkq%dkinpw_k
  else if (has_kin) then
    msg='need dqdqkinpw allocated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (has_kin) then
@@ -1774,6 +1795,152 @@ end if
 
 end subroutine getgh1dqc_setup
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/getgh1ndc
+!!
+!! NAME
+!! getgh1ndc
+!!
+!! FUNCTION
+!! Compute 1st order magnetic nuclear dipole moment contribution to <G|H|C>
+!! for input vector |C> expressed in reciprocal space.
+!! Only for DDK perturbation
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  gh1ndc(2,npw_k*my_nspinor*ndat)=1st order A.p contribution to <G|H|C> for array of nuclear dipoles
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!! This codes only the DDK response for A.p, so effectively A_ipert|C>. The nuclear dipole Hamiltonian
+!! (to first order in the nuclear dipole strength) is A.p where in atomic units
+!! A.p=\alpha^2 m x (r-R)/(r-R)^3 . p. Here the components of A have been precomputed in real space 
+!! by make_vectornd. The first-order DDK contribution is d A.p/dk = A_idir where idir is the 
+!! direction of the DDK perturbation, or 2\pi A_idir when k is given in reduced coords as is usual
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
+&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,use_gpu_cuda)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,use_gpu_cuda
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
+ real(dp),intent(inout) :: cwavein(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(inout) :: gh1ndc(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(inout) :: vectornd(n4,n5,n6,nvloc)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: tim_fourwf=1
+ integer :: idat,ipw,nspinortot,shift
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ real(dp) :: weight=one
+ !arrays
+ real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:)
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:)
+ real(dp),allocatable :: work(:,:,:,:)
+
+! *********************************************************************
+
+ gh1ndc(:,:)=zero
+ if (nvloc/=1) return
+
+ nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
+ if (mpi_enreg%paral_spinor==0) then
+   shift=npw_k
+   nspinor1TreatedByThisProc=.true.
+   nspinor2TreatedByThisProc=(nspinortot==2)
+ else
+   shift=0
+   nspinor1TreatedByThisProc=(mpi_enreg%me_spinor==0)
+   nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
+ end if
+
+ ABI_MALLOC(work,(2,n4,n5,n6*ndat))
+
+ if (nspinortot==1) then
+
+    ABI_MALLOC(ghc1,(2,npw_k*ndat))
+
+    ! apply vector potential in direction ipert to input wavefunction
+    call fourwf(1,vectornd,cwavein,ghc1,work,gbound_k,gbound_k,&
+      & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+      & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+
+    ! scale by 2\pi\alpha^2
+    gh1ndc=two_pi*FineStructureConstant2*ghc1
+
+    ABI_FREE(ghc1)
+
+ else ! nspinortot==2
+
+    ABI_MALLOC(cwavein1,(2,npw_k*ndat))
+    ABI_MALLOC(cwavein2,(2,npw_k*ndat))
+    do idat=1,ndat
+       do ipw=1,npw_k
+          cwavein1(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+          cwavein2(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
+       end do
+    end do
+
+    if (nspinor1TreatedByThisProc) then
+
+       ABI_MALLOC(ghc1,(2,npw_k*ndat))
+
+       call fourwf(1,vectornd,cwavein1,ghc1,work,gbound_k,gbound_k,&
+         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+         & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+       
+       do idat=1,ndat
+         do ipw=1,npw_k
+           gh1ndc(1:2,ipw+(idat-1)*npw_k)=two_pi*FineStructureConstant2*ghc1(1:2,ipw+(idat-1)*npw_k)
+         end do
+       end do
+
+       ABI_FREE(ghc1)
+
+    end if ! end spinor 1
+
+    if (nspinor2TreatedByThisProc) then
+
+       ABI_MALLOC(ghc2,(2,npw_k*ndat))
+
+       call fourwf(1,vectornd,cwavein2,ghc2,work,gbound_k,gbound_k,&
+         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+         & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+
+       do idat=1,ndat
+         do ipw=1,npw_k
+           gh1ndc(1:2,ipw+(idat-1)*npw_k+shift)=two_pi*FineStructureConstant2*ghc2(1:2,ipw+(idat-1)*npw_k)
+         end do
+       end do
+
+       ABI_FREE(ghc2)
+
+    end if ! end spinor 2
+
+    ABI_FREE(cwavein1)
+    ABI_FREE(cwavein2)
+
+ end if ! nspinortot
+
+ ABI_FREE(work)
+
+end subroutine getgh1ndc
+!!***
+
 
 end module m_getgh1c
 !!***

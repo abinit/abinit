@@ -7,7 +7,7 @@
 !! This is a way to check that the testing capabilities are not lost when the test farm is modified ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017-2020 ABINIT group (XG)
+!! Copyright (C) 2017-2021 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +59,7 @@ program dummy_tests
 !Local variables-------------------------------
 !scalars
  integer :: comm,dummy_out,my_rank
- integer :: unused_arg,unused_variable,used_arg,used_variable
+ integer :: unused_arg,used_arg,used_variable,unused_variable
 !arrays
  character(len=10) :: dummy_string
 

@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -289,7 +289,7 @@ force_length_stats: {min:   2.35134475E-03, max:   2.35134475E-03, mean:   2.351
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.35134E-03 1.35755E-03 (free atoms)
  -4.03394245828988E-19 -8.36196975106977E-20  2.35134474521710E-03
   4.03394245828988E-19  8.36196975106977E-20 -2.35134474521710E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.43636523438378E-02 -1.43636523438378E-02 -1.43636523438378E-02
   1.43636523438378E-02  1.43636523438378E-02  1.43636523438378E-02
  Total energy (etotal) [Ha]= -1.23681175261090E+01
@@ -365,7 +365,7 @@ force_length_stats: {min:   2.04502151E-03, max:   2.04502151E-03, mean:   2.045
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.04502E-03 1.18069E-03 (free atoms)
   1.86503876798328E-19 -2.24341220907421E-20  2.04502151368397E-03
  -1.86503876798328E-19  2.24341220907421E-20 -2.04502151368397E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.24924165705499E-02 -1.24924165705499E-02 -1.24924165705499E-02
   1.24924165705499E-02  1.24924165705499E-02  1.24924165705499E-02
  Total energy (etotal) [Ha]= -1.23681278658731E+01
@@ -445,7 +445,7 @@ force_length_stats: {min:   7.77890807E-06, max:   7.77890807E-06, mean:   7.778
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 7.77891E-06 4.49115E-06 (free atoms)
  -1.89168504218192E-22 -2.17128126757210E-22 -7.77890806578176E-06
   1.89168504218192E-22  2.17128126757210E-22  7.77890806578176E-06
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   4.75189915467919E-05  4.75189915467919E-05  4.75189915467919E-05
  -4.75189915467919E-05 -4.75189915467919E-05 -4.75189915467919E-05
  Total energy (etotal) [Ha]= -1.23681598815834E+01
@@ -657,7 +657,7 @@ force_length_stats: {min:   7.56511036E-06, max:   7.56511036E-06, mean:   7.565
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 7.56511E-06 4.36772E-06 (free atoms)
   1.02615003360228E-21  4.83745366167766E-23 -7.56511035628245E-06
  -1.02615003360228E-21 -4.83745366167766E-23  7.56511035628245E-06
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   4.62129661426467E-05  4.62129661426467E-05  4.62129661426467E-05
  -4.62129661426467E-05 -4.62129661426467E-05 -4.62129661426467E-05
  Scale of Primitive Cell (acell) [bohr]
@@ -748,7 +748,7 @@ force_length_stats: {min:   2.70396368E-04, max:   2.70396368E-04, mean:   2.703
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.70396E-04 1.56113E-04 (free atoms)
   4.38780802989401E-21 -1.54836740902194E-20 -2.70396368109171E-04
  -4.38780802989401E-21  1.54836740902194E-20  2.70396368109171E-04
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.65119582599513E-03  1.65119582599513E-03  1.65119582599513E-03
  -1.65119582599513E-03 -1.65119582599513E-03 -1.65119582599513E-03
  Scale of Primitive Cell (acell) [bohr]
@@ -843,7 +843,7 @@ force_length_stats: {min:   3.55699742E-04, max:   3.55699742E-04, mean:   3.556
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.55700E-04 2.05363E-04 (free atoms)
   3.94003423829177E-20 -9.79748774582837E-21 -3.55699741502949E-04
  -3.94003423829177E-20  9.79748774582837E-21  3.55699741502949E-04
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.16852253887072E-03  2.16852253887072E-03  2.16852253887072E-03
  -2.16852253887072E-03 -2.16852253887072E-03 -2.16852253887072E-03
  Scale of Primitive Cell (acell) [bohr]
@@ -937,7 +937,7 @@ force_length_stats: {min:   1.94248458E-04, max:   1.94248458E-04, mean:   1.942
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.94248E-04 1.12149E-04 (free atoms)
  -7.56944157877503E-21 -1.60517168371048E-20 -1.94248458007888E-04
   7.56944157877503E-21  1.60517168371048E-20  1.94248458007888E-04
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.18322313556874E-03  1.18322313556874E-03  1.18322313556874E-03
  -1.18322313556874E-03 -1.18322313556874E-03 -1.18322313556874E-03
  Scale of Primitive Cell (acell) [bohr]
@@ -1031,7 +1031,7 @@ force_length_stats: {min:   8.62518295E-05, max:   8.62518295E-05, mean:   8.625
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.62518E-05 4.97975E-05 (free atoms)
   5.26462787594442E-21  1.74155387126705E-20  8.62518295311698E-05
  -5.26462787594442E-21 -1.74155387126705E-20 -8.62518295311698E-05
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -5.24606880161585E-04 -5.24606880161585E-04 -5.24606880161585E-04
   5.24606880161585E-04  5.24606880161585E-04  5.24606880161585E-04
  Scale of Primitive Cell (acell) [bohr]

@@ -281,7 +281,7 @@ contains
             if (.not.ok) cycle
           end if
           if (iatom.gt.(Invar%natom+1)) then
-            MSG_ERROR('The number of atoms found in the bigbox exceeds natom' )
+            ABI_ERROR('The number of atoms found in the bigbox exceeds natom' )
           end if  
           xred_ideal(:,iatom)=xred_tmp(:)
           call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,Rlatt(:),1,0.d0,Rlatt_red(:,1,iatom),1)
@@ -292,7 +292,7 @@ contains
   end do
 
   if (iatom.lt.Invar%natom) then
-    MSG_ERROR('The number of atoms found in the bigbox is lower than natom')
+    ABI_ERROR('The number of atoms found in the bigbox is lower than natom')
   end if  
 
 ! Compute the distances between ideal positions in the SUPERcell
@@ -375,7 +375,7 @@ contains
 !FB      write(6,*) 'natom_unitcell (bug)=',Invar%natom_unitcell
 !FB      write(6,*) 'foo2 (bug)=',foo2
 !FB      write(6,*) 'ATOM REF (bug)=',iatom
-      MSG_BUG(' Something wrong: WTF')
+      ABI_BUG(' Something wrong: WTF')
     endif
   end do  
   if (ok) then
@@ -387,8 +387,8 @@ contains
       end do
       close(31)
     end if
-    MSG_ERROR_NOSTOP('The basis of atoms written in input.in file does not appear in the MD trajectory',ierr)
-    MSG_ERROR('Perhaps, you can adjust the tolerance (tolmotif)')
+    ABI_ERROR_NOSTOP('The basis of atoms written in input.in file does not appear in the MD trajectory',ierr)
+    ABI_ERROR('Perhaps, you can adjust the tolerance (tolmotif)')
   end if  
   ABI_FREE(dist_unitcell)
 
@@ -536,7 +536,7 @@ contains
         write(Invar%stdout,'(a,1x,3(f10.6,1x))') 'I',xred_ideal (:,eatom)
         write(Invar%stdout,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,eatom)
       end do
-      MSG_ERROR('Problem to find the average position')
+      ABI_ERROR('Problem to find the average position')
     end if  
   end do
 
@@ -1156,7 +1156,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
               else if (inv==2) then
                 alphaij(isyminv,(mu-1)*3+nu,iconst(isyminv))=lambda*pp(mu,nu)-pp(nu,mu)
               else
-                MSG_BUG('This symetry is neither Keptinvariant nor Reversed')
+                ABI_BUG('This symetry is neither Keptinvariant nor Reversed')
               end if
             end do  
           end do  
@@ -1204,7 +1204,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
                   else if (inv==6) then
                     alphaij(isyminv,(mu-1)*9+(nu-1)*3+xi,iconst(isyminv))=lambda*ppp(mu,nu,xi)-ppp(xi,nu,mu)
                   else
-                    MSG_BUG('This symetry is neither Keptinvariant nor Reversed')
+                    ABI_BUG('This symetry is neither Keptinvariant nor Reversed')
                   end if
                 end do !xi  
               end do !nu 
@@ -1296,7 +1296,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
                       else if (inv==22) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(zeta,nu,xi,mu)
                       else if (inv==23) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(zeta,xi,mu,nu)
                       else if (inv==24) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(zeta,xi,nu,mu)
-                      else ; MSG_BUG('This symetry is neither Keptinvariant nor Reversed')
+                      else ; ABI_BUG('This symetry is neither Keptinvariant nor Reversed')
                       end if
                     end do !zeta  
                   end do !xi  
@@ -1310,7 +1310,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
         end do !jj
       end do !ii
     else
-      MSG_BUG('Only the first, second, third and fourth order are allowed')
+      ABI_BUG('Only the first, second, third and fourth order are allowed')
     end if  
 
 
@@ -1382,16 +1382,16 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       proj(:,:,ishell)=zero   
       return
     else if (order==1.and.(iconst(isyminv).gt.3)) then
-      MSG_BUG(' First order : There are more than 3 constraints')
+      ABI_BUG(' First order : There are more than 3 constraints')
     end if
     if (order==2.and.(iconst(isyminv).gt.8)) then
-      MSG_BUG(' Second order : There are more than 8 constraints')
+      ABI_BUG(' Second order : There are more than 8 constraints')
     end if
     if (order==3.and.(iconst(isyminv).gt.27)) then
-      MSG_BUG(' Third order : There are more than 27 constraints')
+      ABI_BUG(' Third order : There are more than 27 constraints')
     end if
     if (order==4.and.(iconst(isyminv).gt.81)) then
-      MSG_BUG(' Fourth order : There are more than 81 constraints')
+      ABI_BUG(' Fourth order : There are more than 81 constraints')
     end if
   end do !isyminv
 ! ================================================================================================
@@ -1557,7 +1557,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 ! In the case where the matrix has norder**2 inequivalent and non-zero elements  
   if (const_tot==0) then 
     write(message,'(a,1x,i3,1x,a)') 'For shell number=',ishell,'there is no symetry operation reducing the number of coefficients'
-    MSG_WARNING(message)
+    ABI_WARNING(message)
     proj(:,:,ishell)=0.d0
     do ii=1,norder
       proj(ii,ii,ishell)=1.d0
@@ -1594,7 +1594,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
   end if
   if (ii.ne.ncount) then
     write(message,'(i7,1x,a,1x,i7)') ii,' non equal to ',ncount
-    MSG_BUG(message)
+    ABI_BUG(message)
   end if  
   do ii=1,norder
     do jj=1,ncount
@@ -1659,13 +1659,13 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     write(16,'(a,1x,i7,1x,a)') '  ======= Finally, there are ',ncount,' independent vectors'
   end if  
   if (ncount.gt.8.and.order==2) then
-    MSG_ERROR(' Order 2 : There are too many independent vectors')
+    ABI_ERROR(' Order 2 : There are too many independant vectors')
   end if
   if (ncount.gt.27.and.order==3) then
-    MSG_ERROR(' Order 3 : There are too many independent vectors')
+    ABI_ERROR(' Order 3 : There are too many independent vectors')
   end if
   if (ncount.gt.81.and.order==4) then
-    MSG_ERROR(' Order 4 : There are too many independent vectors')
+    ABI_ERROR(' Order 4 : There are too many independent vectors')
   end if
 
 ! On cherche les (norder-ncount) vecteurs orthogonaux aux vecteurs non-nuls
@@ -1704,7 +1704,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     if ((abs(aimag(tab_vec(1,kk))).gt.1.d-6).or.&
 &       (abs(aimag(tab_vec(1,kk))).gt.1.d-6).or.&
 &       (abs(aimag(tab_vec(1,kk))).gt.1.d-6)) then
-      MSG_ERROR('the constraint has an imaginary part')
+      ABI_ERROR('the constraint has an imaginary part')
     end if
   end do  
   ncoeff=norder-ncount

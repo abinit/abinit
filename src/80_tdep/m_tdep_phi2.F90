@@ -646,7 +646,7 @@ subroutine tdep_build_phi2_33(isym,Phi2_ref,Phi2_33,Sym,itrans)
   call DGEMM('N','N',3,3,3,1.d0,Phi2_tmp,3,Sym%S_inv(:,:,isym,1),3,0.d0,Phi2_33,3)
 
   if ((itrans.lt.1).or.(itrans.gt.2)) then
-    MSG_BUG('This value of the symmetry index is not permitted')
+    ABI_BUG('This value of the symmetry index is not permitted')
   end if
 ! Transpose the 3x3 matrix if required
   if (itrans.eq.2) then

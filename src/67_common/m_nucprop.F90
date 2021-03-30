@@ -7,7 +7,7 @@
 !!  electric field gradient and Fermi contact
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (MT, JWZ)
+!! Copyright (C) 1998-2021 ABINIT group (MT, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,6 +74,7 @@ contains
 !!  natom=number of atoms in cell.
 !!  nfft=number of points on fft grid
 !!  ngfft(18)=details of fft
+!!  nhat(nfft,nspden)=compensation charge density
 !!  nspden=number of spin densities
 !!  nsym=number of symmetries in space group
 !!  ntypat=number of atom types
@@ -106,7 +107,7 @@ contains
 !!
 !! SOURCE
 
-  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nspden,nsym,ntypat,&
+  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,nsym,ntypat,&
                       paw_an,pawang,pawrad,pawrhoij,pawtab,&
                       ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
                       mpi_atmtab,comm_atom) ! optional arguments (parallelism)
@@ -121,7 +122,7 @@ contains
     !arrays
     integer,intent(in) :: ngfft(18),symrel(3,3,nsym),typat(natom)
     integer,optional,target,intent(in) :: mpi_atmtab(:)
-    real(dp),intent(in) :: ptcharge(ntypat)
+    real(dp),intent(in) :: nhat(nfft,nspden),ptcharge(ntypat)
     real(dp),intent(in) :: quadmom(ntypat),rhor(nfft,nspden),rprimd(3,3)
     real(dp),intent(in) :: tnons(3,nsym),zion(ntypat)
     real(dp),intent(inout) :: xred(3,natom)
@@ -147,7 +148,7 @@ contains
     !Compatibility tests
     if (usepaw /= 1) then
        message = ' usepaw /= 1 but EFG calculation requires PAW '
-       MSG_ERROR(message)
+       ABI_ERROR(message)
     end if
 
     !Set up parallelism over atoms
@@ -156,17 +157,17 @@ contains
     my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
     call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
-    ABI_ALLOCATE(efg,(3,3,natom))
-    ABI_ALLOCATE(efg_el,(3,3,natom))
-    ABI_ALLOCATE(efg_ion,(3,3,natom))
-    ABI_ALLOCATE(efg_paw,(3,3,natom))
-    ABI_ALLOCATE(efg_point_charge,(3,3,natom))
+    ABI_MALLOC(efg,(3,3,natom))
+    ABI_MALLOC(efg_el,(3,3,natom))
+    ABI_MALLOC(efg_ion,(3,3,natom))
+    ABI_MALLOC(efg_paw,(3,3,natom))
+    ABI_MALLOC(efg_point_charge,(3,3,natom))
     efg_el(:,:,:) = zero
     efg_ion(:,:,:) = zero
     efg_paw(:,:,:) = zero
     efg_point_charge(:,:,:) = zero
 
-    call make_efg_el(efg_el,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
+    call make_efg_el(efg_el,mpi_enreg,natom,nfft,ngfft,nhat,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
 
     call make_efg_ion(efg_ion,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
 
@@ -311,11 +312,11 @@ contains
     write(message,'(3a)')ch10,ch10,ch10
     call wrtout(ab_out,message,'COLL')
 
-    ABI_DEALLOCATE(efg)
-    ABI_DEALLOCATE(efg_el)
-    ABI_DEALLOCATE(efg_ion)
-    ABI_DEALLOCATE(efg_paw)
-    ABI_DEALLOCATE(efg_point_charge)
+    ABI_FREE(efg)
+    ABI_FREE(efg_el)
+    ABI_FREE(efg_ion)
+    ABI_FREE(efg_paw)
+    ABI_FREE(efg_point_charge)
 
     !Destroy atom table used for parallelism
     call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -393,7 +394,7 @@ contains
     !Compatibility tests
     if (usepaw /= 1) then
        message = ' usepaw /= 1 but Fermi-contact calculation requires PAW '
-       MSG_ERROR(message)
+       ABI_ERROR(message)
     end if
 
     !Set up parallelism over atoms
@@ -403,7 +404,7 @@ contains
     call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
     !Initialization
-    ABI_ALLOCATE(fc,(nspden,natom))
+    ABI_MALLOC(fc,(nspden,natom))
 
     !Computation
     if (paral_atom) then
@@ -436,7 +437,7 @@ contains
     call wrtout(ab_out,message,'COLL')
 
     !Memory deallocation
-    ABI_DEALLOCATE(fc)
+    ABI_FREE(fc)
 
     !Destroy atom table used for parallelism
     call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -521,9 +522,9 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
   !write(std_out,*)' make_efg_ion : enter'
   !ENDDEBUG
 
-  ABI_ALLOCATE(efg_g,(3,3,natom))
-  ABI_ALLOCATE(efg_r,(3,3,natom))
-  ABI_ALLOCATE(xcart,(3,natom))
+  ABI_MALLOC(efg_g,(3,3,natom))
+  ABI_MALLOC(efg_r,(3,3,natom))
+  ABI_MALLOC(xcart,(3,natom))
   efg(:,:,:) = zero ! final efg tensor
   efg_g(:,:,:) = zero ! part of tensor accumulated in G space
   efg_r(:,:,:) = zero ! part of tensor accumulated in R space
@@ -660,9 +661,9 @@ subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xr
      call matpointsym(iatom,efg(:,:,iatom),natom,nsym,rprimd,symrel,tnons,xred)
   end do
 
-  ABI_DEALLOCATE(efg_g)
-  ABI_DEALLOCATE(efg_r)
-  ABI_DEALLOCATE(xcart)
+  ABI_FREE(efg_g)
+  ABI_FREE(efg_r)
+  ABI_FREE(xcart)
 
   !DEBUG
   !write(std_out,*)' make_efg_ion : exit '
@@ -683,6 +684,7 @@ end subroutine make_efg_ion
 !! mpi_enreg=information about MPI parallelization
 !! natom, number of atoms in unit cell
 !! nfft,ngfft(18), number of FFT points and details of FFT
+!! nhat(nfft,nspden) compensation charge density
 !! nspden, number of spin components
 !! nsym=number of symmetries in space group
 !! rhor(nfft,nspden), valence electron density, here $\tilde{n} + \hat{n}$
@@ -718,7 +720,7 @@ end subroutine make_efg_ion
 !!
 !! SOURCE
 
-subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
+subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nhat,nspden,nsym,rhor,rprimd,symrel,tnons,xred)
 
   !Arguments ------------------------------------
   !scalars
@@ -726,7 +728,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
   integer,intent(in) :: ngfft(18),symrel(3,3,nsym)
-  real(dp),intent(in) :: rhor(nfft,nspden),rprimd(3,3),tnons(3,nsym),xred(3,natom)
+  real(dp),intent(in) :: nhat(nfft,nspden),rhor(nfft,nspden),rprimd(3,3),tnons(3,nsym),xred(3,natom)
   real(dp),intent(out) :: efg(3,3,natom)
 
   !Local variables-------------------------------
@@ -740,7 +742,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
   integer :: id(3)
   integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
   integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
-  real(dp) :: gprimd(3,3),gred(3),gvec(3),ratom(3)
+  real(dp) :: gprimd(3,3),gqred(3),gvec(3),ratom(3)
   real(dp),allocatable :: fofg(:,:),fofr(:),gq(:,:),xcart(:,:)
 
   ! ************************************************************************
@@ -749,9 +751,9 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
   !write(std_out,*)' make_efg_el : enter'
   !ENDDEBUG
 
-  ABI_ALLOCATE(fofg,(2,nfft))
-  ABI_ALLOCATE(fofr,(nfft))
-  ABI_ALLOCATE(xcart,(3,natom))
+  ABI_MALLOC(fofg,(2,nfft))
+  ABI_MALLOC(fofr,(nfft))
+  ABI_MALLOC(xcart,(3,natom))
 
   efg(:,:,:) = zero
   call xred2xcart(natom,rprimd,xcart,xred) ! get atomic locations in cartesian coords
@@ -760,12 +762,12 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
   tim_fourdp = 0 ! timing code, not using
   fftdir = -1 ! FT from R to G
   cplex = 1 ! fofr is real
-  !here we are only interested in the total charge density including nhat, which is rhor(:,1)
+  !here we are only interested in the valence pseudo charge density, which is rhor(:,1)-nhat(:,1)
   !regardless of the value of nspden. This may change in the future depending on
   !developments with noncollinear magnetization and so forth. Such a change will
   !require an additional loop over nspden.
   !Multiply by -1 to convert the electron particle density to the charge density
-  fofr(:) = -rhor(:,1)
+  fofr(:) = -(rhor(:,1)-nhat(:,1))
 
   ! Get the distrib associated with this fft_grid  See hartre.F90 for another example where
   ! this is done
@@ -780,7 +782,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
 
   ! In order to speed the routine, precompute the components of g
   ! Also check if the booked space was large enough...
-  ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+  ABI_MALLOC(gq,(3,max(n1,n2,n3)))
   do ii=1,3
      id(ii)=ngfft(ii)/2+2
      do ing=1,ngfft(ii)
@@ -793,13 +795,13 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
   ! Triple loop on each dimension
   do i3=1,n3
      ig3=i3-(i3/id3)*n3-1
-     gred(3) = gq(3,i3)
+     gqred(3) = gq(3,i3)
 
      do i2=1,n2
         ig2=i2-(i2/id2)*n2-1
         if (fftn2_distrib(i2) == me_fft) then
 
-           gred(2) = gq(2,i2)
+           gqred(2) = gq(2,i2)
            i2_local = ffti2_local(i2)
            i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
            ! Do the test that eliminates the Gamma point outside of the inner loop
@@ -809,8 +811,8 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
            ! Final inner loop on the first dimension (note the lower limit)
            do i1=ii1,n1
               !         gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-              gred(1) = gq(1,i1)
-              gvec(1:3) = MATMUL(gprimd,gred)
+              gqred(1) = gq(1,i1)
+              gvec(1:3) = MATMUL(gprimd,gqred)
               fofg_index=i1+i23
               trace = dot_product(gvec,gvec)
               do ii = 1, 3 ! sum over components of efg tensor
@@ -839,10 +841,10 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,rhor,rprimd,sy
      call matpointsym(iatom,efg(:,:,iatom),natom,nsym,rprimd,symrel,tnons,xred)
   end do
 
-  ABI_DEALLOCATE(fofg)
-  ABI_DEALLOCATE(fofr)
-  ABI_DEALLOCATE(xcart)
-  ABI_DEALLOCATE(gq)
+  ABI_FREE(fofg)
+  ABI_FREE(fofr)
+  ABI_FREE(xcart)
+  ABI_FREE(gq)
 
   !DEBUG
   !write(std_out,*)' make_efg_el : exit '

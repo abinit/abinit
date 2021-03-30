@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2021 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -146,6 +146,7 @@ contains
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
 !!   | e_corepsp(IN)=psp core-core energy
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
+!!   | e_nucdip(IN)=energy of nuclear dipole array
 !!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
@@ -255,27 +256,27 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !faire un test sur optres=1, usewvl=0, nspden=1,nhatgrdim
  if(optres/=1)then
    write(message,'(a,i0,a)')' optres=',optres,', not allowed in oda => stop '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(dtset%usewvl/=0)then
    write(message,'(a,i0,a)')' usewvl=',dtset%usewvl,', not allowed in oda => stop '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if(dtset%nspden/=1)then
    write(message,'(a,i0,a)')'  nspden=',dtset%nspden,', not allowed in oda => stop '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (my_natom>0) then
    if(paw_ij(1)%has_dijhat==0)then
      message = ' dijhat variable must be allocated in odamix ! '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%qphase==2)then
      message = ' complex dij not allowed in odamix! '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -337,7 +338,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    if (dtset%xclevel==2.and.usexcnhat==1) ider=ider+2
    if (ider>0) then
      nhatgrdim=1
-     ABI_ALLOCATE(nhatgr,(nfft,dtset%nspden,3))
+     ABI_MALLOC(nhatgr,(nfft,dtset%nspden,3))
    end if
    if (ider>=0) then
      ider=0;izero=0;cplex=1;ipert=0;idir=0;qpt(:)=zero
@@ -391,7 +392,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    nzlmopt=dtset%pawnzlm; option=2
    do iatom=1,my_natom
      itypat=paw_ij(iatom)%itypat
-     ABI_ALLOCATE(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
+     ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
@@ -399,7 +400,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
-     ABI_DEALLOCATE(paw_ij(iatom)%dijhartree)
+     ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
    end do
  end if
@@ -500,7 +501,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  etotal = energies%e_kinetic+ energies%e_hartree + energies%e_xc + &
 & energies%e_localpsp + energies%e_nlpsp_vfock - energies%e_fock0 + energies%e_corepsp + &
-& energies%e_entropy + energies%e_elecfield + energies%e_magfield
+& energies%e_entropy + energies%e_elecfield + energies%e_magfield + &
+& energies%e_nucdip
 !etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 !& energies%e_xcdc + energies%e_corepsp + &
 !& energies%e_entropy + energies%e_elecfield
@@ -532,7 +534,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  if (usepaw==1) then
    if (my_natom>0) then
-     ABI_ALLOCATE(rhoijtmp,(pawrhoij(1)%cplex_rhoij*pawrhoij(1)%lmn2_size,pawrhoij(1)%nspden))
+     ABI_MALLOC(rhoijtmp,(pawrhoij(1)%cplex_rhoij*pawrhoij(1)%lmn2_size,pawrhoij(1)%nspden))
    end if
    do iatom=1,my_natom
      rhoijtmp=zero
@@ -575,7 +577,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &                         pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
    end do ! iatom
    if (allocated(rhoijtmp)) then
-     ABI_DEALLOCATE(rhoijtmp)
+     ABI_FREE(rhoijtmp)
    end if
  end if ! usepaw
 
@@ -606,7 +608,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 & usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
  if (nhatgrdim>0)  then
-   ABI_DEALLOCATE(nhatgr)
+   ABI_FREE(nhatgr)
  end if
 
 !------Compute parts of total energy depending on potentials--------
@@ -628,7 +630,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  if (usepaw==1) then
    do iatom=1,my_natom
      itypat=paw_ij(iatom)%itypat
-     ABI_ALLOCATE(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
+     ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom, &
@@ -637,7 +639,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &   dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
-     ABI_DEALLOCATE(paw_ij(iatom)%dijhartree)
+     ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
    end do
    etotal=etotal+energies%e_paw

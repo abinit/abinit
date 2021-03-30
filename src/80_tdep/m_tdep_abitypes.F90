@@ -393,7 +393,7 @@ contains
   if (Invar%natom_unitcell.gt.ddb_hdr%matom) then
     write(message, '(a,i3,a,i3,a)' )&
 &   ' natom ',Invar%natom_unitcell,' is greater than matom ',ddb_hdr%matom,' !'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
   ddb_hdr%mband=mband
   ddb_hdr%mkpt=1
@@ -401,13 +401,13 @@ contains
   if (Sym%nsym.gt.ddb_hdr%msym) then
     write(message, '(a,i3,a,i3,a)' )&
 &   ' nsym ',Sym%nsym,' is greater than msym ',ddb_hdr%msym,' !'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
   ddb_hdr%mtypat=5
   if (Invar%ntypat.gt.ddb_hdr%mtypat) then
     write(message, '(a,i3,a,i3,a)' )&
 &   ' nsym ',Invar%ntypat,' is greater than mtypat ',ddb_hdr%mtypat,' !'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
   ddb_hdr%ddb_version=100401
 
@@ -613,7 +613,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,Invar,MPIdata,natom_unitcell,unitfile)
   else
     write(message, '(a,i3,a)' )&
 &   ' The value of unitfile ',unitfile,' is not allowed.'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 #ifdef HAVE_NETCDF
   if (unitfile.eq.0) then
