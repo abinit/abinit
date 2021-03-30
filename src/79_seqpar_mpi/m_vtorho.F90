@@ -1181,8 +1181,8 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
      if(associated(hightemp)) then
        hightemp%vtrial=vtrial
-       call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,dtset%nband,&
-&       dtset%nkpt,dtset%nsppol,dtset%wtk)
+       call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
+&       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
        ! if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
      end if
 
