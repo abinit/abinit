@@ -205,11 +205,11 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_e_shiftfactor(this,eigen,eknk,mband,nband,nkpt,nsppol,wtk)
+  subroutine compute_e_shiftfactor(this,eigen,eknk,mband,me,nband,nkpt,nsppol,wtk)
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
-    integer,intent(in) :: mband,nkpt,nsppol
+    integer,intent(in) :: mband,me,nkpt,nsppol
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
@@ -220,6 +220,7 @@ contains
     ! Scalars
     integer :: band_index,ii,ikpt,isppol,nband_k
     real(dp) :: abs_err,rel_err
+    character(len=500) :: msg
 
     ! *********************************************************************
 
@@ -228,24 +229,34 @@ contains
     ! Simplest and most precise way to evaluate U_0.
     if(this%version==1) then
       this%e_shiftfactor=sum(this%vtrial)/(this%nfftf*this%nspden)
+
       ! Compute the relative error of the model vs last eigenvalues
-      band_index=0
-      rel_err=zero
-      abs_err=zero
-      do isppol=1,nsppol
-        do ikpt=1,nkpt
-          nband_k=nband(ikpt+(isppol-1)*nkpt)
-          rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k)-&
-          & hightemp_e_heg(dble(nband_k),this%ucvol)-this%e_shiftfactor)/&
-          & eigen(band_index+nband_k))
-          abs_err=abs_err+wtk(ikpt)*abs(eigen(band_index+nband_k)-&
-          & hightemp_e_heg(dble(nband_k),this%ucvol)-this%e_shiftfactor)
-          band_index=band_index+nband_k
+      if(me==0) then
+        band_index=0
+        rel_err=zero
+        abs_err=zero
+        do isppol=1,nsppol
+          do ikpt=1,nkpt
+            nband_k=nband(ikpt+(isppol-1)*nkpt)
+            rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k)-&
+            & hightemp_e_heg(dble(nband_k),this%ucvol)-this%e_shiftfactor)/&
+            & eigen(band_index+nband_k))
+            abs_err=abs_err+wtk(ikpt)*abs(eigen(band_index+nband_k)-&
+            & hightemp_e_heg(dble(nband_k),this%ucvol)-this%e_shiftfactor)
+            band_index=band_index+nband_k
+          end do
         end do
-      end do
-      write(0,*) '--------'
-      write(0,*) 'rel_err=',rel_err
-      write(0,*) 'abs_err=',abs_err
+        if(rel_err.gt.tol2) then
+          write(msg,'(a,a)') 'Relative difference between eigenvalues and',ch10,&
+          & ' Fermi gas energy is over ',tol2,' (',rel_err,') at band cut.',ch10,&
+          & ' Execution will continue as this will not necessarily lead',ch10,&
+          & ' to false results but you should likely increase nband.'
+          ABI_WARNING(msg)
+        end if
+        write(0,*) '--------'
+        write(0,*) 'rel_err=',rel_err
+        write(0,*) 'abs_err=',abs_err
+      end if
     end if
 
     ! Compute U_0^{HEG} from the difference between
@@ -1268,7 +1279,7 @@ contains
     ! Scalars
     integer,intent(in) :: ckpt,cspinor,exchn2n3d,mcg,mpw,nkpt,nspinor,nsppol
     real(dp),intent(in) :: ecut
-    type(MPI_type) :: mpi_enreg
+    type(MPI_type),intent(inout) :: mpi_enreg
     character(len=*),intent(in) :: wfk_fname
     ! Arrays
     integer,intent(in) :: istwfk(nkpt),nband(nkpt),npwarr(nkpt)
