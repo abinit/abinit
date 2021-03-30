@@ -18,7 +18,7 @@ nstep_min 1
 rcut 11.09
 #OPTIONAL_INPUT_VARIABLES
 use_ideal_positions 1
-enunit 1
+enunit 3
 TheEnd
  
 #%%<BEGIN TEST_INFO>

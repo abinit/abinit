@@ -13,7 +13,6 @@ inp_files = [
     "tatdep1_1.abi",
     "tatdep1_2.abi",
     "tatdep1_3.abi",
-    "tatdep2_1.abi",
-    "tatdep2_2.abi",
-    "tatdep2_3.abi",
+    "tatdep1_4.abi",
+    "tatdep1_5.abi",
 ]
