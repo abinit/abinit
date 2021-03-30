@@ -58,24 +58,20 @@ This calculation is similar to the one performed in the following article [[cite
 
 ###	3.1 Convergence with respect to Rcut
 
-###	3.2 Another question?
+###	3.2 The LO-TO splitting
 
-## 4. Temperature effects on the sound speed : Fe-$\epsilon$
+###	3.3 Another question?
 
-This calculation is similar to the one performed in the following article [[cite:Dewaele2021]].
-
-###	4.1 Convergence with respect to Rcut
-
-###	4.2 Another question?
-
-## 5. Description of an alloy using VCA : UMo-$\gamma$
+## 4. Description of an alloy : UMo-$\gamma$
 
 This calculation is similar to the one performed in the following article [[cite:Castellano2020]].
 
-###	5.1 Convergence with respect to Rcut
+###	4.1 Convergence with respect to Rcut
 
-###	5.2 Another question?
+###	4.2 The VCA and the SIFC approaches
 
-## 6. HOWTO use `qtdep` ?
+###	4.3 Another question?
+
+## 5. HOWTO use `qtdep` ?
 
 ![Harmonic Potential](https://upload.wikimedia.org/wikipedia/commons/6/60/Potential_approximation.png)

@@ -140,7 +140,7 @@ The `atdep` code writes **many** output files (some of them are available in *$A
 
 {% dialog tests/tutoatdep/Refs/tatdep1_1.abo %}
 
-This file reproduces all the steps encountered during the execution of `atdep`. You are strongly adviced to detect all the following sequences in the main output file :
+This file reproduces all the steps encountered during the execution of `atdep`. You are strongly adviced to detect all the sequences listed below. The main output file :
 
 1. begins with the common header of the ABINIT output files
 
@@ -263,7 +263,7 @@ This file reproduces all the steps encountered during the execution of `atdep`. 
 ...
 ```
 
-10. writes in some files the dynamical matrix, the phonon spectrum and the vibrational density of states (vDOS)
+10. writes the dynamical matrix, the phonon spectrum and the vibrational density of states (vDOS) in specific files
 
 ```
    #############################################################################
@@ -398,7 +398,7 @@ $$
 
 All these thermodynamic data are computed and written in the *tatdep1_1thermo.dat*. Note that this file is divided in two parts :
  
-- the first one is dedicated to the thermodynamic data obtained at the temperature defined by input variable [[atdep:temperature]].
+- the first one is dedicated to the thermodynamic data obtained at the temperature defined by the input variable [[atdep:temperature]].
 
 ```
 ============= Direct results (without any inter/extrapolation) ==================
@@ -427,9 +427,9 @@ All these thermodynamic data are computed and written in the *tatdep1_1thermo.da
 ```
 
 !!! note
-    In the harmonic approximation (HA), the phonon frequencies do not depend on the temperature but only on the volume $V$, so we have $\omega_{\rm HA} = \omega(V)$. Using a constant vDOS, it's then possible to compute all the thermodynamic data, whathever the temperature. In this case, the temperature variation of the thermodynamic quantities only comes from the filling of phononic states using the Bose-Einstein statistics. To go beyond, and capture the thermal expansion for example, we can assume that the temperature effects are **implicit** through the variation of the volume $V(T)$. This is the quasi-harmonic approximations (QHA) : $\omega_{\rm QHA}=\omega(V(T))$. If in many cases the QHA gives excellent results, it fails to reproduce an **explicit** variation of the thermodynamic data with respect to the temperature (by definition, the phonon frequencies cannot vary at constant volume, along an isochore). This **explicit** variation comes from anharmonic effects and only be captured by going beyond the second order in the energy expansion. That is the work done by aTDEP, by recasting all the 3rd, 4th... terms of the energy expansion within the 2nd order, in an **effective** way. Since the 2nd order effective IFC now takes into account all these terms, it capture the temperature effects and we have $\omega_{\rm Anh}=\omega(T,V(T)$.
+    In the harmonic approximation (HA), the phonon frequencies do not depend on the temperature but only on the volume $V$, so we have $\omega_{\rm HA} = \omega(V)$. Using a constant vDOS, it's then possible to compute all the thermodynamic data, whatever the temperature "$\beta$" (see the equations above). In this case, the temperature variation of the thermodynamic quantities comes from the filling of phononic states using the Bose-Einstein statistics. To go beyond, and capture the thermal expansion for example, we can assume that the temperature effects are **implicit** through the variation of the volume $V(T)$. This is the quasi-harmonic approximation (QHA) : $\omega_{\rm QHA}=\omega(V(T))$. If in many cases the QHA gives excellent results, it fails to reproduce an **explicit** variation of the thermodynamic data with respect to the temperature (by definition, using QHA, the phonon frequencies cannot vary at constant volume ; i.e. along an isochore). This **explicit** variation comes from anharmonic effects and only be captured by going beyond the second order in the energy expansion. That is the work done by aTDEP, by recasting all the 3rd, 4th... terms of the energy expansion within the 2nd order, in an **effective** way. Since the 2nd order effective IFC now takes into account all these terms, it captures the temperature effects and we have $\omega_{\rm Anh}=\omega(T,V(T)$.
 
-In the *tatdep1_1thermo.dat* file corresponding to the present calculation, several remarks can be done. You can see that the specific heat $C_{\rm vib,V}$ is equal to 2.972 (in $k_B$ units) at $T$ = 900 K. In the second part of this file, you see that this quantity converges towards 3 at high temperature, as expected by the Dulong-Petit law (in this part we are in HA, so this law is fulfilled). This result is consistent with the experimental Debye temperature $\Theta_D \approx$ 400 K ; at $T$ = 900 K the behaviour of aluminum is classic and no longer quantic, since all the phononic states are filled. This can be seen also for another quantity. Plot the vibrational internal energy $U_{\rm vib}^{ \rm HA}$ as the function of temperature (see the second part of the file). And plot also $U_{\rm vib}^{\rm Classic}=3k_B T$ corresponding to the classic formulation (in eV, so use the conversion factor 1 eV = 11 604 K). You will see that the classic limit is achieved between 400 and 600 K, as expected.
+In the *tatdep1_1thermo.dat* file corresponding to the present calculation, several remarks can be done. You can see that the specific heat $C_{\rm vib,V}$ is equal to 2.972 (in $k_B$ units) at $T$ = 900 K. In the second part of this file, you see that this quantity converges towards 3 at high temperature, as expected by the Dulong-Petit law (in this part we are in HA, so this law is fulfilled). This result is consistent with the experimental Debye temperature $\Theta_D \approx$ 400 K ; at $T$ = 900 K the behaviour of aluminum is classical and no longer quantum, since all the phononic states are filled. This can be seen also for another quantity. Plot the vibrational internal energy $U_{\rm vib}^{ \rm HA}$ as the function of temperature (see the second part of the file). And plot also $U_{\rm vib}^{\rm Classic}=3k_B T$ corresponding to the classic formulation (in eV, so use the conversion factor 1 eV = 11 604 K). You will see that the classic limit is achieved between 400 and 600 K, as expected.
 
 ### 	2.3 Numerical convergence (accuracy and precision)
 
@@ -437,7 +437,7 @@ Several input variables have strong impact on the convergence of the effective I
 
 ####		^^2.3.1 The cutoff radius [[atdep:rcut]]^^
 
-The first one is the number of coordination shells included in the calculation of the 2nd order effective IFC. 
+The first one is the cutoff radius used to compute the 2nd order effective IFC. In practice, it defines the number of coordination shells included in the calculation. 
 
 ![Shells at 2nd order](atdep1_assets/tatdep1_1shell.jpg)
 
@@ -477,14 +477,14 @@ You should get the following picture :
 
 ![Al phonon spectrum wrt rcut](atdep1_assets/tatdep1_1rcut.png)
 
-Concerning this very simple case, the frequencies are almost converged with only two shells (the onsite interaction and the 1st shell of coordination). In most situations, this is not the case. Here, we can see that some differences remain for rcut = 6.0 and 8.0 a.u. with respect to higher shell radii. With 4 shells and rcut = 10.0, the phonon spectrum seems to be converged and almost equal to 5 shells and rcut = 11.45. This is confirmed by AIMD simulations with 216 atoms in the supercell and a higher shell radius (not shown here **OR SEE BELOW???**).
+Concerning this very simple case, the frequencies are almost converged with only two shells (the onsite interaction and the 1st shell of coordination). In most situations, this is not the case. Here, we can see that some differences remain for rcut = 6.0 and 8.0 a.u. with respect to higher shell radii. With 4 shells and rcut = 10.0, the phonon spectrum seems to be converged and almost equal to 5 shells and rcut = 11.45. This is confirmed by AIMD simulations with 216 atoms in the supercell and a higher shell radius (see below).
 
 !!! warning
-    The cutoff radius [[atdep:rcut]] cannot be greater than the shortest dimension of the supercell. Otherwise, the shell will include spurious atomic vibrations. The only way to have a larger cutoff radius is to perform AIMD simulations with a larger supercell/number of atoms.    
+    The cutoff radius [[atdep:rcut]] cannot be greater than half the shortest dimension of the supercell. Otherwise, the shell will include spurious atomic vibrations. The only way to have a larger cutoff radius is to perform AIMD simulations with a larger supercell/number of atoms.    
 
 ####		^^2.3.2 The number of atomic configurations^^
 
-Another key quantity is the number of atomic configurations used in the calculation. This one is defined by the difference between two input variables : [[atdep:nstep_max]] - [[atdep:nstep_min]]. For simplicity, we generally use as input data files (*etot.dat*, *xred.dat* and *fcart.dat*) the whole trajectory coming from the AIMD simulations, with thousands of atomic configurations. So, for an AIMD trajectory with 10 000 time steps including a thermalization over 5 000 time steps, we can set [[atdep:nstep_max]] to 10 000 and [[atdep:nstep_min]] to 5 000. However, all the AIMD time steps are not uncorrelated and 99% of the information coming from them is in general useless.
+Another key quantity is the number of atomic configurations used in the calculation. This one is defined by the difference between two input variables : [[atdep:nstep_max]] - [[atdep:nstep_min]]. For simplicity, we generally use as input data files (*etot.dat*, *xred.dat* and *fcart.dat*) the whole trajectory coming from the AIMD simulations, with thousands of atomic configurations. So, for an AIMD trajectory with 5 000 time steps including a thermalization over 2 000 time steps, we can set [[atdep:nstep_max]] to 5 000 and [[atdep:nstep_min]] to 2 000. However, the 3 000 AIMD time steps really used are not uncorrelated and 99% of the information coming from them is in general useless.
 
 The number of uncorrelated configurations needed for the calculation is direcly related to the number of non-zero and independent IFC coefficients which has to be computed. At the 2nd order, the whole effective IFC $\mathbf{\Theta}$ is a $(3N_a\times 3N_a)$ matrix. For instance, in the present calculation with $N_a$ = 108 atoms, the whole IFC has 104 976 coefficients. So, if one wants to obtain them (using a least square method $\mathbf{\Theta} = \mathbf{F} . \mathbf{u}^{-1}$), it would require tens of thousands time steps, which is out of reach (see the seminal article of Hellman and coworkers [[cite:Hellman2011]]), 
 
@@ -505,7 +505,7 @@ $$
 \end{pmatrix}
 $$     
 
-Thanks to this drastic reduction of the IFC coefficients, only 50 to 100 atomic uncorrelated configurations are generally needed to obtain converged properties at the 2nd order (in this example, and in the whole ABINIT package, we only propose examples with a maximum of 20 uncorrelated configurations in order to avoid a too huge amount of data). As previously for the cutoff radius, we can study the convergence of the calculation with respect to the number of uncorrelated atomic configurations. Set [[atdep:nstep_max]] equal to 5 in *tatdep1_1.abi*, replace the root of the ouput file name by "Ntep5" in the *tatdep1_1.files* and launch `atdep`. Do it again for 8 time steps then plot :
+Thanks to this drastic reduction of the IFC coefficients, only 50 to 100 atomic uncorrelated configurations are generally needed to obtain converged properties at the 2nd order (in this example, and in the whole ABINIT package, we only propose examples with a maximum of 20 uncorrelated configurations in order to avoid a too huge amount of data). As previously discussed for the cutoff radius, we can study the convergence of the calculation with respect to the number of uncorrelated atomic configurations. Set [[atdep:nstep_max]] equal to 5 in *tatdep1_1.abi*, replace the root of the ouput file name by "Ntep5" in the *tatdep1_1.files* and launch `atdep`. Do it again for 8 time steps then plot :
 
       xmgrace -nxy Nstep5omega.dat -nxy Nstep8omega.dat -nxy tatdep1_1omega.dat
 
@@ -528,7 +528,7 @@ The aTDEP results depend on the aTDEP input variables, but also on the features 
 
 ![Al phonon spectrum wrt kptnat](atdep1_assets/tatdep1_1kptnat.jpg)
 
-You can see that the **$\Gamma$**-point is never sufficient, as well with 108 atoms as with 216 atoms. The $(2\times2\times2)$ **k**-point MP mesh gives an almost converged phonon spectrum (lower than 2% with respect to the $(6\times6\times6)$ one), except at the $\Gamma$ point (around 5%). This last point will have consequences when we will compute elastic constants.
+You can see that the **$\Gamma$**-point is never sufficient, as well with 108 atoms as with 216 atoms. The $(2\times2\times2)$ **k**-point MP mesh gives an almost converged phonon spectrum (lower than 2% with respect to the $(6\times6\times6)$ one), except at the $\Gamma$ point (around 5%). This last point will have consequences on elastic constants (they are related to the slope of the acoustic branches at the $\Gamma$ point).
 
 !!! note
     You can see the impact of the **k**-point mesh on the phonon spectrum of $\beta$-Zr in this recent paper [[cite:Anzellini2020]]. All the calculations of this study are performed using ABINIT and aTDEP.
@@ -545,7 +545,14 @@ cp ../tatdep1_3.* .
 cp ../tatdep1_4.* . 
 ```
 
-![U phonons alpha](atdep1_assets/tatdep1_2phononsalpha.png)
+You can open the first input file :
+
+{% dialog tests/tutoatdep/Input/tatdep1_2.abi %}
+
+As can be seen in the first lines, U-$\alpha$ is an orthorombic ([[atdep:brav]](1)=3) C-face centered ([[atdep:brav]](2)=3) phase with two atoms in the unitcell : one at (0;0;0) and another at (-$y$;$y$;0.5) with $y$ an internal parameter. Two optional input parameters are set : [[atdep:enunit]]=3 (the frequency unit is THz) and [[atdep:use_ideal_positions]]=1 (the atomic displacements are computed wrt the U-$\alpha$ ideal positions). 
+
+!!! note
+    The T$\neq$ 0 K equilibrium positions are not necessary equal to the T=0 K ideal positions. For instance, the $y$ internal parameter of the U-$\alpha$ phase evolves as a function of the temperature. Therefore, it could be needed to compute the phonon spectrum using the T$\neq$ 0 K equilibrium positions ([[atdep:use_ideal_positions]]=0) rather than using a fixed $y$=0.2022 internal parameter. However, the the T$\neq$ 0 K equilibrium positions are computed by `atdep` as an average over all the AIMD steps. And to achieve a good accuracy, a long AIMD trajectory (with a good statistic) is needed. In the present case (U-$\alpha$), with only 20 configurations, its impossible to evaluate the "T$\neq$ 0 K equilibrium positions" accurately. So, to avoid spurious effects coming from a too bad description of the new "T$\neq$ 0 K equilibrium positions", we imposed the 0 K ideal positions whatever the temperature [[atdep:use_ideal_positions]]=1.    
 
 ###	3.1 Failure of the QHA
 
@@ -553,7 +560,11 @@ The $\alpha$ phase of uranium (C-face centered orthorombic) is stable from room 
 
 ![U structure alpha](atdep1_assets/tatdep1_2strucalpha.png)
 
-This phase transition goes with a phonon mode softening in the middle of the [100] direction (see the Figure at the begining of the section). For a long time, this phenomenon was puzzling, especially from a computational of view. In particular, if the DFPT is able to reproduce the phonon spectrum of U-$\alpha$ at 300 K, the QHA fails to reproduce the correct behaviour of the soft mode at low temperature : in experiments the soft mode decreases as a function of the temperature, whereas using DFPT this mode increases when the volume decreases. At odds, this behaviour is correctly reproduced when performing simulations with an explicit treatment of the temperature (AIMD) and using a post-process able to capture the anharmonicity (`atdep`) :
+This phase transition goes with a phonon mode softening in the middle of the [100] direction :
+
+![U phonons alpha](atdep1_assets/tatdep1_2phononsalpha.png)
+
+For a long time, this phenomenon was puzzling, especially from a computational of view. In particular, if the DFPT is able to reproduce the phonon spectrum of U-$\alpha$ at 300 K, the QHA fails to reproduce the correct behaviour of the soft mode at low temperature : in experiments the soft mode decreases as a function of the temperature, whereas using DFPT this mode increases when the volume decreases. At odds, this behaviour is correctly reproduced when performing simulations with an explicit treatment of the temperature (AIMD) and using a post-process able to capture the anharmonicity (`atdep`) :
 
 ![U soft mode alpha](atdep1_assets/tatdep1_2softmodealpha.png)
 
@@ -604,7 +615,7 @@ This quantity is very far from the ones obtained by DFPT and experiments.
 
 ###	3.3 Elastic moduli and size effect
 
-In this part we will focus on the problem of elastic constants.  The *tatdep1_4.abi* is the same input file as *tatdep1_2.abi* except that the first dimension of the supercell is increased. You can compare them :
+In this part we will focus on the bulk modulus and the discrepancies obtained previously.  The *tatdep1_4.abi* is the same input file as *tatdep1_2.abi* except that the first dimension of the supercell is increased. You can compare them :
 
 ```
 vimdiff tatdep1_2.abi tatdep1_4.abi
@@ -619,7 +630,7 @@ Along the [100] direction, the [[atdep:multiplicity]] is no longer 4 but 6. Cons
    Number of interactions in this shell=           2
 ```
 
-This one is at a distance equal to 10.79 a.u., which is exactly twice the unitcell lattice parameter along the [100] direction (5.395 a.u.). There are only 2 atoms in this shell : at the [-100] and [100] positions. If you search the coefficients of this IFC using the keyword "ishell=  13", you will find :
+This one is at a distance equal to 10.79 a.u., which is exactly twice the unitcell lattice parameter along the [100] direction (5.395 a.u.). There are only 2 atoms in this shell : at the [-200] and [200] positions. If you search the coefficients of this IFC using the keyword "ishell=  13", you will find :
 
 ```
  ======== NEW SHELL (ishell=  13): There are   2 atoms on this shell at distance=10.790000
@@ -639,7 +650,7 @@ This one is at a distance equal to 10.79 a.u., which is exactly twice the unitce
 
 ```
  
-The contribution of this shell is very large compared to the others. As one can see by computing the Trace of the IFC matrix, its absolute value (-0.010834) is lower than the one obtained for the 1st shell (the onsite contribution) and the 2nd shell, almost equal to the one obtained for the 4th shell but higher than all the others. This 13th shell contributes to the phase transition between U-$\alpha$ and U-$\alpha_1$. This one is reponsible for the twofold of the unitcell along the [100] direction at low temperature, so it was absolutely necessary to include it in the calculation. 
+The contribution of this shell is very large compared to the others. This can be seen on the "Trace" of the IFC matrix, its absolute value (-0.010834) is lower than the one obtained for the 1st shell (the onsite contribution) and the 2nd shell, almost equal to the one obtained for the 4th shell but higher than all the others. This 13th shell contributes to the phase transition between U-$\alpha$ and U-$\alpha_1$. This one is reponsible for the twofold of the unitcell along the [100] direction at low temperature, so it was absolutely necessary to include it in the calculation. 
 
 Using only 20 atomic configurations, we cannot see any quantitative improvement of the phonon spectrum (more steps are needed). However we can note a significant effect on the elastic moduli :
 
@@ -657,17 +668,73 @@ Present (300 K)   |   107
 DFPT$^1$ (0 K)    |   129 
 Expt$^2$ (300 K)  |   115
 
-The agreement is better.
+In conclusion, we can have in mind that the elastic constants/moduli (fixed by the slope of the acoustic branches at the $\Gamma$ point ; i.e. at long range) need to have very large supercell. See the following paper for more details : Schnell *et al.*, PRB **74**, 054104 (2006). 
 
 ## 4. Dynamic stabilization due to anharmonic effects : U-$\gamma$
 
-This calculation is similar to the ones performed in the following articles [[cite:Bouchet2017]].
-
 ###	4.1 Strong anharmonicity
+
+This calculation is similar to the one performed in the following article [[cite:Bouchet2017]]. The U-$\alpha$ orthorombic phase is stable up to 940 K, then the U-$\beta$ body-centered tetragonal phase is stable up to 1050 K, and finally the U-$\gamma$ body-centered cubic phase is stable up to the melting point. In this section, we will focus on this later. Using DFPT, the phonon spectrum of the U-$\gamma$ phase shows many soft modes (see the Figure 4 of [[cite:Bouchet2017]]). This phase is dynamically instable at T = 0 K. Consequently, it is impossible to deduce anything about its dynamic, elastic and thermodynamic properties. For a long time, the stability of this phase is expected to come from anharmonic effects. That's we will show in the following.  
+
+*Before proceeding, you can copy the next series of input files in the current directory.*
+
+```sh
+cp ../tatdep1_5.* . 
+```
+
+You can now open the input file :
+
+{% dialog tests/tutoatdep/Input/tatdep1_5.abi %}
+
+As can be seen in the first lines, U-$\gamma$ is a cubic ([[atdep:brav]](1)=7) body-centered ([[atdep:brav]](2)=-1) phase with one atom in the unitcell. Three optional input parameters are set : [[atdep:enunit]]=1 (the frequency unit is cm$^{-1}$), [[atdep:bzpath]]=5 G H P G N (the BZ path is $\Gamma-H-P-\Gamma-N$) and [[atdep:use_ideal_positions]]=1 (the atomic displacements are computed wrt the bcc ideal positions). Now you can execute `atdep` :
+
+```sh
+atdep < tatdep1_5.files > log 2> err &
+```
+
+You can plot the phonon spectrum of U-$\gamma$ : *tatdep1_5omega.dat*. This one is almost equal to the one published in [[cite:Bouchet2017]]. All the soft modes (around $\Gamma$, N and H) obtained using DFPT are now positive. This shows that the phase is now dynamically stable at T = 900 K (even if this phase is not yet thermodynamically stable). However, we can see that the system is on the verge of instability. The transverse branches at the $N$ point are very low and the Born criterion for cubic systems (C$_{11}$-C$_{12}$>0) highlighting the mechanical stability is hardly fulfilled.   
 
 ###	4.2 Thermodynamics
 
+Since we have the phonon spectrum (and the vDOS) of the U-$\gamma$ phase, we can now compute its thermodynamic properties (see the *tatdep1_5thermo.dat* file) and compare them to the ones obtained for the U-$\alpha$ phase (see the *tatdep1_4thermo.dat* file). Let us evaluate the thermodynamic stability of U-$\gamma$ phase wrt to the U-$\alpha$ one. For this purpose, we will focus on the data extrapolated at the harmonic level (the second part of these two \*thermo.dat files). If we plot the total free energy of these two phases, we obtain : 
+
+![U alpha_gamma](atdep1_assets/tatdep1_5freeenergy.png)
+
+We otbain that the phase transition between the U-$\alpha$ and the U-$\gamma$ phases is around T = 900 K, which is in very good agreement with experiments. You can see that he stabilization of the U-$\gamma$ phase wrt the U-$\alpha$ one comes from the entropy :
+
+```sh
+vimdiff tatdep1_5thermo.dat tatdep1_4thermo.dat
+```
+
+!!! note
+    The previous approach is very rough. Indeed, we used the results obtained at T = 300 K for U-$\alpha$ and at T = 900 K for U-$\gamma$, and extrapolated their free energies using the harmonic approximation. Moreover, we neglected the thermal pressure coming from each calculation. To be more accurate, we should compute the Gibbs free energy of each phase at several temperatures, make an interpolation, then compare them together. That's done in the Figure 7 of [[cite:Bouchet2017]]. 
+
 ###	4.3 U-$\gamma$ with 2 atoms in the unitcell.
 
-###	4.4 Another question?
+At last, we would ask the user to consider the U-$\gamma$ phase as a simple cubic phase with 2 atoms in the unitcell. 
 
+To do that, we suggest the  user to copy the previous input file in *tatdep1_6.abi* and to modify the following input variables : [[atdep:brav]](2)=0 since the system is now simple cubic, [[atdep:natom_unitcell]]=2 since there is two atoms in the unitcell, [[atdep:xred_unitcell]]=0 0 0 0.5 0.5 0.5, [[atdep:typat_unitcell]]=1 1, [[atdep:multiplicity]]=4 0 0 0 4 0 0 0 4 since the supercell is now just four times the conventional cell, and remove the line with [[atdep:bzpath]] since this path is no longer suited for a simple cubic. 
+
+You can now modify the files file *tatdep1_5.files* (in order to take into account the new input file and to prevent the previous output files from being overwritten) as follows :
+
+```
+tatdep1_6.abi
+tatdep1_5
+tatdep1_6
+```
+
+and execute `atdep` :
+
+```sh
+atdep < tatdep1_5.files > log 2> err &
+```
+
+It's now possible to compare the thermodynamics of the "bcc" and "sc" phases by doing :
+
+```sh
+vimdiff tatdep1_6thermo.dat tatdep1_5thermo.dat
+```
+
+You can see that the free energy, the entropy, the specific heat... are equal. The thermodynamics of the system is the same, whatever the "cell description" we can assume. This invariance is satisfactory from a scientific point of view.
+
+The user can try to do the same job for Aluminum (note : the conventional cell has 4 atoms).
