@@ -390,14 +390,20 @@ end subroutine pmat_renorm
 !!  brod=broadening in Ha(real)
 !!  fnam=root for filename that will contain the output filename will be trim(fnam)//'-linopt.out'
 !!  ncid=Netcdf id to save output data.
+!!  prtlincompmatrixelements=if set to 1, the matrix elements are dumped in the _OPTIC.nc file for post processing.
 !!
 !! SIDE EFFECTS
 !!  Dielectric function for semiconductors, on a desired energy mesh and for a desired
 !!  direction of polarisation is written to file.
 !!  The output is in a file named trim(fnam)//'-linopt.out' and contains
 !!  Im(\epsilon_{v1v2}(\omega), Re(\epsilon_{v1v2}(\omega) and abs(\epsilon_{v1v2}(\omega).
+!!
+!!  If 'prtlincompmatrixelements' is set to 1, the matrix elements and other quantities used to build
+!!  the chi tensor are stored in the _OPTIC.nc file as well. This includes the matrix elements,
+!!  the occupations, the renormalized but unshifted eigenvalues and the kpts weights.
+!!
 !!  Comment:
-!!  Right now the routine sums over the kpoints. In future linear tetrahedron method should be useful.
+!!    Right now the routine sums over the kpoints. In future linear tetrahedron method should be useful.
 !!
 !! PARENTS
 !!      optic
@@ -408,7 +414,7 @@ end subroutine pmat_renorm
 !! SOURCE
 
 subroutine linopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
-  v1,v2,nmesh,de,sc,brod,fnam,ncid,comm)
+  v1,v2,nmesh,de,sc,brod,fnam,ncid,comm,prtlincompmatrixelements)
 
 !Arguments ------------------------------------
 integer, intent(in) :: icomp,itemp,nspin,ncid
@@ -429,6 +435,7 @@ real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 character(len=*), intent(in) :: fnam
 integer, intent(in) :: comm
+integer, intent(in) :: prtlincompmatrixelements
 
 !Local variables -------------------------
 !no_abirules
@@ -459,6 +466,8 @@ character(len=500) :: msg
 ! local allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
 complex(dpc), allocatable :: chi(:,:)
+complex(dpc), allocatable :: matrix_elements(:,:,:,:)  ! nbands x nbands x nkpts x nsppol
+complex(dpc), allocatable :: renorm_eigs(:,:,:)        ! nbands x nkpts x nsppol
  real(dp), allocatable :: im_refract(:),re_refract(:)
 complex(dpc), allocatable :: eps(:)
 
@@ -571,8 +580,17 @@ complex(dpc), allocatable :: eps(:)
 
  ! Split work
  call xmpi_split_work(nkpt,comm,my_k1,my_k2)
+ ! if we print matrix elements, allocate full arrays for each process
+ ! this is not optimized memory-wise since we could just allocate what is needed
+ ! however we would need to write all data using mpi-io.
+ if (prtlincompmatrixelements == 1) then
+   ABI_MALLOC(matrix_elements,(nstval,nstval,nkpt,nspin))
+   ABI_MALLOC(renorm_eigs,(nstval,nkpt,nspin))
+   matrix_elements(:,:,:,:) = czero
+   renorm_eigs(:,:,:) = czero
+ endif
 
-!start calculating linear optical response
+ ! start calculating linear optical response
  chi(:,:)=0._dp
  do isp=1,nspin
    do ik=my_k1,my_k2
@@ -613,6 +631,12 @@ complex(dpc), allocatable :: eps(:)
              end do
            end do
            b12=b11*renorm_factor*(1._dp/(e12**2))
+           ! store data for printing if necessary
+           if (prtlincompmatrixelements == 1) then
+             matrix_elements(ist1,ist2,ik,isp) = b12
+             renorm_eigs(ist1,ik,isp) = e1_ep
+             renorm_eigs(ist2,ik,isp) = e2_ep
+           endif
 !          calculate on the desired energy grid
            do iw=2,nmesh
              w=(iw-1)*de+ieta
@@ -627,13 +651,17 @@ complex(dpc), allocatable :: eps(:)
  end do ! spin
 
  call xmpi_sum(chi,comm,ierr)
+ if (prtlincompmatrixelements == 1) then
+   ! gather all data to main process in order to write them using a single process
+   ! in the netcdf file. This could be avoided by doing mpiio.
+   call xmpi_sum(matrix_elements,comm,ierr)
+   call xmpi_sum(renorm_eigs,comm,ierr)
+ endif
 
  ! calculate epsilon
  eps(1) = zero
  deltav1v2=zero; if (v1 == v2) deltav1v2=one
  do iw=2,nmesh
-   ene=(iw-1)*de
-   ene=ene*ha2ev
    eps(iw)=deltav1v2+4._dp*pi*sum(chi(iw,:))
  end do
 
@@ -655,8 +683,7 @@ complex(dpc), allocatable :: eps(:)
    if(nspin==1)write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
    if(nspin==2)write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))         Spin up       Spin down '
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      if(nspin==1)write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
      if(nspin==2)write(fout1, '(4es16.6)' ) ene,aimag(eps(iw)),4._dp*pi*aimag(chi(iw,1)),4._dp*pi*aimag(chi(iw,2))
    end do
@@ -665,8 +692,7 @@ complex(dpc), allocatable :: eps(:)
    if(nspin==1)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))'
    if(nspin==2)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))         Spin up       Spin down    +delta(diag) '
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      if(nspin==1)write(fout1, '(2es16.6)' ) ene,dble(eps(iw))
      if(nspin==2)write(fout1, '(5es16.6)' ) ene,dble(eps(iw)),4._dp*pi*dble(chi(iw,1)),4._dp*pi*dble(chi(iw,2)),deltav1v2
    end do
@@ -674,8 +700,7 @@ complex(dpc), allocatable :: eps(:)
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         abs(eps(w))'
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      abs_eps=abs(eps(iw))
      re_eps=dble(eps(iw))
      write(fout1, '(2es16.6)' ) ene,abs_eps
@@ -686,24 +711,21 @@ complex(dpc), allocatable :: eps(:)
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         Im(refractive index(w)) aka kappa'
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      write(fout1, '(2es16.6)' ) ene,im_refract(iw)
    end do
    write(fout1,*)
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         Re(refractive index(w)) aka n'
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      write(fout1, '(2es16.6)' ) ene,re_refract(iw)
    end do
    write(fout1,*)
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         Reflectivity(w) from vacuum, at normal incidence'
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      write(fout1, '(2es16.6)' ) ene, ((re_refract(iw)-one)**2+im_refract(iw)**2)/((re_refract(iw)+one)**2+im_refract(iw)**2)
    end do
    write(fout1,*)
@@ -726,8 +748,26 @@ complex(dpc), allocatable :: eps(:)
      ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_epsilon"), c2r(eps), start=[1, 1, icomp, itemp])
      NCF_CHECK(ncerr)
    end if
+   if (prtlincompmatrixelements == 1) then
+     ! write matrix elements and other quantities used to build the chi tensor.
+     write(std_out, '(a)') 'Writing linopt matrix elements in _OPTIC.nc file.'
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_matrix_elements"), c2r(matrix_elements),&
+                          start=[1, 1, 1, 1, 1, icomp, itemp])
+     NCF_CHECK(ncerr)
+     ABI_FREE(matrix_elements)
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_renorm_eigs"), c2r(renorm_eigs), start=[1, 1, 1, 1])
+     NCF_CHECK(ncerr)
+     ABI_FREE(renorm_eigs)
+     ! also write occupations and kpt weights
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_occupations"), KSBSt%occ, start=[1, 1, 1])
+     NCF_CHECK(ncerr)
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_wkpts"), wkpt, start=[1])
+     NCF_CHECK(ncerr)
+     write(std_out, '(a)') 'Writing linopt matrix elements done.'
+   endif
+
 #endif
- end if
+ end if  ! if main rank
 
  ABI_FREE(chi)
  ABI_FREE(eps)
