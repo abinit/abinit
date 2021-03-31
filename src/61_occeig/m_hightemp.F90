@@ -238,6 +238,11 @@ contains
         do isppol=1,nsppol
           do ikpt=1,nkpt
             nband_k=nband(ikpt+(isppol-1)*nkpt)
+            if(ikpt==1) then
+              write(0,*) wtk(ikpt),eigen(band_index+nband_k),&
+              & hightemp_e_heg(dble(band_index+nband_k),this%ucvol),&
+              & this%e_shiftfactor
+            end if
             rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k)-&
             & hightemp_e_heg(dble(nband_k),this%ucvol)-this%e_shiftfactor)/&
             & eigen(band_index+nband_k))
@@ -246,16 +251,15 @@ contains
             band_index=band_index+nband_k
           end do
         end do
-        if(rel_err.gt.tol2) then
-          write(msg,'(a,a)') 'Relative difference between eigenvalues and',ch10,&
-          & ' Fermi gas energy is over ',tol2,' (',rel_err,') at band cut.',ch10,&
-          & ' Execution will continue as this will not necessarily lead',ch10,&
-          & ' to false results but you should likely increase nband.'
+        if(rel_err.gt.tol1) then
+          write(msg,'(a,es8.2,3a,es8.2,a,es8.2,7a)')&
+          & 'Relative difference between eigenvalues and Fermi gas energy (',rel_err,')',ch10,&
+          & 'is over ',tol1,' at band cut. Absolute difference is ',abs_err,' Ha.',ch10,&
+          & 'Execution will continue as the code will still add contributions in the right',ch10,&
+          & 'direction, but you should likely increase nband to make sure electrons of last',ch10,&
+          & 'band can be considered as free fermions in a constant potential.'
           ABI_WARNING(msg)
         end if
-        write(0,*) '--------'
-        write(0,*) 'rel_err=',rel_err
-        write(0,*) 'abs_err=',abs_err
       end if
     end if
 
