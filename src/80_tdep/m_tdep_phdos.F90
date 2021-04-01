@@ -248,7 +248,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB! Compute the spectrum and the dynamical matrix
 !FB! =============================================
 !FB  if (Qbz%nqbz.ne.Qbz%nqibz) then
-!FB    write(6,*) 'DIFFERENCES BETWEEN NQBZ \& NQIBZ :',Qbz%nqbz,Qbz%nqibz
+!FB    write(Invar%stdlog,*) 'DIFFERENCES BETWEEN NQBZ \& NQIBZ :',Qbz%nqbz,Qbz%nqibz
 !FB  end if  
 !FB! Compute the frequencies(1)
 !FB! =======================
@@ -401,7 +401,8 @@ subroutine tdep_calc_thermo(Invar,Lattice,MPIdata,PHdos,U0)
   write(20,'(1x,a,f10.3)')'     The <Omega^(-2)> factor (in THz^(-2)) =',Omega_m2/(Ha_THz)**2
   write(20,'(1x,a,f10.3)')'     The Wigner-Seitz radius (in a.u.) : d_at =',(6*Lattice%ucvol/pi/real(Invar%natom_unitcell))**(1./3.)
   write(20,'(1x,a,f10.3)')'     The average mass / proton-electron mass ratio (in a.u.) =', mass_amu/amu_emass
-  write(20,'(1x,a,f10.3)')'     The Lindemann constant : sqrt(<u^2>)/d_at =',(MSD)**0.5/(6*Lattice%ucvol/pi/real(Invar%natom_unitcell))**(1./3.)
+  write(20,'(1x,a,f10.3)')'     The Lindemann constant : sqrt(<u^2>)/d_at =',(MSD)**0.5/&
+&                               (6*Lattice%ucvol/pi/real(Invar%natom_unitcell))**(1./3.)
   write(20,'(1x,a,f10.3)')'     The integral of vDOS =',vdos
   write(20,'(a)')' '
 

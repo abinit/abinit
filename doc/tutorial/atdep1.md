@@ -23,7 +23,7 @@ You are not supposed to know how to use ABINIT, but you are strongly encouraged 
 
 This tutorial should take about 1.5 hour.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1. Summary of the aTDEP method
 

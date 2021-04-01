@@ -536,7 +536,7 @@ contains
   Invar%nstep_tot=int(float(Invar%nstep_max-Invar%nstep_min)/float(Invar%slice)+1)
   close(40)
 
-  write(6,*) 'nstep_tot=',Invar%nstep_tot
+  write(Invar%stdlog,*) 'nstep_tot=',Invar%nstep_tot
 
 
  end subroutine tdep_read_input
@@ -752,7 +752,7 @@ contains
     nstep_acc(ii)=nstep_acc(ii-1)+MPIdata%nstep_all(ii-1)
   end do
   if (nstep_acc(MPIdata%nproc_step+1).ne.Invar%nstep_tot) then
-    write(6,*) 'STOP : pb in nstep_acc'
+    write(Invar%stdlog,*) 'STOP : pb in nstep_acc'
     stop
   end if
 

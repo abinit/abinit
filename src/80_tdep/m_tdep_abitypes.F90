@@ -337,15 +337,15 @@ contains
   mpert=Invar%natom_unitcell
   msize=3*mpert*3*mpert
 
-!FB  write(6,*) 'BEFORE INIT VAL'
+!FB  write(Invar%stdlog,*) 'BEFORE INIT VAL'
   ABI_MALLOC(d2cart,(2,3,Invar%natom_unitcell,3,Invar%natom_unitcell));d2cart=zero
   ABI_MALLOC(d2red ,(2,3,Invar%natom_unitcell,3,Invar%natom_unitcell));d2red =zero
 ! Fill the DDB%val and DDB%flg datatype
   ddb%flg(:,:)=zero
-!FB  write(6,*) ' In cartesian coordinates'
+!FB  write(Invar%stdlog,*) ' In cartesian coordinates'
   do iq_ibz=1,Qbz%nqibz
 !FB  do iq_ibz=1,Qbz%nqbz
-!FB    write(6,*) 'qpt=',iq_ibz
+!FB    write(Invar%stdlog,*) 'qpt=',iq_ibz
     d2cart=zero ; d2red=zero
     do jatom=1,Invar%natom_unitcell
       do jj=1,3
@@ -354,12 +354,12 @@ contains
             counter=counter+1
             d2cart(1,ii,iatom,jj,iatom) =Eigen2nd%dynmat(1,ii,iatom,jj,jatom,iq_ibz)
             d2cart(2,ii,iatom,jj,iatom) =Eigen2nd%dynmat(2,ii,iatom,jj,jatom,iq_ibz)
-!FB            write(6,'(a,4i4,2d22.14)')'In cart :',ii,iatom,jj,jatom,d2cart(1,ii,iatom,jj,iatom),d2cart(2,ii,iatom,jj,iatom)
+!FB            write(Invar%stdlog,'(a,4i4,2d22.14)')'In cart :',ii,iatom,jj,jatom,d2cart(1,ii,iatom,jj,iatom),d2cart(2,ii,iatom,jj,iatom)
           end do
         end do
       end do
     end do
-!FB    write(6,*) ' '
+!FB    write(Invar%stdlog,*) ' '
     call d2cart_to_red(d2cart,d2red,Crystal%gprimd,Crystal%rprimd,mpert, &
 &                      Invar%natom_unitcell,Invar%ntypat,Crystal%typat,Crystal%ucvol,Crystal%zion)
     counter=0
@@ -371,7 +371,7 @@ contains
             DDB%val(1,counter,iq_ibz) =d2red(1,ii,iatom,jj,jatom)
             DDB%val(2,counter,iq_ibz) =d2red(2,ii,iatom,jj,jatom)
             DDB%flg(counter,iq_ibz)=1
-!FB            write(6,'(a,4i4,2d22.14)')'In red :',ii,iatom,jj,jatom,DDB%val(1,counter,iq_ibz),DDB%val(2,counter,iq_ibz)
+!FB            write(Invar%stdlog,'(a,4i4,2d22.14)')'In red :',ii,iatom,jj,jatom,DDB%val(1,counter,iq_ibz),DDB%val(2,counter,iq_ibz)
           end do
         end do
       end do
@@ -380,7 +380,7 @@ contains
   ABI_FREE(d2cart)
   ABI_FREE(d2red)
 
-!FB  write(6,*) 'BEFORE ERROR'
+!FB  write(Invar%stdlog,*) 'BEFORE ERROR'
 ! Print the header of the DDB
   unddb=16
   filename = trim(Invar%output_prefix)//'_DDB'
@@ -411,7 +411,7 @@ contains
   end if
   ddb_hdr%ddb_version=100401
 
-!FB  write(6,*) 'BEFORE CONSTANT'
+!FB  write(Invar%stdlog,*) 'BEFORE CONSTANT'
   ddb_hdr%dilatmx=0
   ddb_hdr%ecut=0
   ddb_hdr%ecutsm=0
@@ -436,11 +436,11 @@ contains
   ddb_hdr%nsym=Sym%nsym
   ddb_hdr%ntypat=Invar%ntypat
 
-!FB  write(6,*) 'BEFORE MALLOC'
+!FB  write(Invar%stdlog,*) 'BEFORE MALLOC'
 !FB TO REMOVE  call ddb_hdr_malloc(ddb_hdr)
   call ddb_hdr%malloc()
 
-!FB  write(6,*) 'BEFORE TABS'
+!FB  write(Invar%stdlog,*) 'BEFORE TABS'
   ddb_hdr%acell=Lattice%acell_unitcell
   ddb_hdr%rprim=Lattice%rprimt
   ddb_hdr%amu=Invar%amu
@@ -458,11 +458,11 @@ contains
   ddb_hdr%znucl=0
 
   if (MPIdata%iam_master) then
-!FB  write(6,*) 'BEFORE OPEN DDB'
+!FB  write(Invar%stdlog,*) 'BEFORE OPEN DDB'
 !FB TO REMOVE    call ddb_hdr_open_write(ddb_hdr, filename, unddb)
     call ddb_hdr%open_write(filename, unddb)
 
-!FB  write(6,*) 'BEFORE WRITE BLOK'
+!FB  write(Invar%stdlog,*) 'BEFORE WRITE BLOK'
 ! Print each blok of the DDB
     do iq_ibz=1,Qbz%nqibz
 !FB  do iq_ibz=1,Qbz%nqbz
@@ -476,7 +476,7 @@ contains
   nqshft=1
 !FB  ngqpt=Invar%ngqpt1/2.d0
   ngqpt=Invar%ngqpt1
-  allocate(qshft(3,nqshft))
+  ABI_MALLOC(qshft,(3,nqshft))
   qshft(:,:)=0.5d0
   ABI_MALLOC(qdrp_cart,(3,3,3,Invar%natom_unitcell))
 !FB  qshft(:,:)=0.0d0
@@ -488,6 +488,7 @@ contains
     call tdep_write_ifc(Crystal_tmp,Ifc_tmp,Invar,MPIdata,Invar%natom_unitcell,unitfile)
   end if  
   ABI_FREE(qdrp_cart)
+  ABI_FREE(qshft)
 
  end subroutine tdep_write_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -85,7 +85,7 @@ contains
     do eatom=1,natom
       if (ref1at(eatom,1).eq.0) then
         do isym=1,Sym%nsym
-!FB          write(6,'(4(i5,x))') Sym%indsym(4,isym,eatom),eatom,iatcell,isym
+!FB          write(Invar%stdlog,'(4(i5,x))') Sym%indsym(4,isym,eatom),eatom,iatcell,isym
           if (Sym%indsym(4,isym,eatom).eq.iatcell) then
             Isym1at(eatom,1)=isym
             ref1at(eatom,1)=iatcell
@@ -361,7 +361,7 @@ contains
   do iatom=1,natom_unitcell
     do jatom=1,natom
       do katom=1,natom
-!FB        write(6,*) 'NEW COORD1 : iatom,jatom,katom=',iatom,jatom,katom
+!FB        write(Invar%stdlog,*) 'NEW COORD1 : iatom,jatom,katom=',iatom,jatom,katom
 !       WARNING: distance(j,k).ne.|djk| due to the inbox procedure when computing distance(j,k). 
 !                So, compute |djk| using vec(ij) and vec(ik).      
         norma=dsqrt((distance(iatom,katom,2)-distance(iatom,jatom,2))**2+&
@@ -406,7 +406,7 @@ contains
                 if (Isym3at(2).eq.1) find_equivalent=1
                 if (find_equivalent.eq.1) then 
                   interactions(iatom,ishell)=interactions(iatom,ishell)+1
-!FB                  write(6,*) 'The number of interactions in this shell is=',ishell,interactions(iatom,ishell)
+!FB                  write(Invar%stdlog,*) 'The number of interactions in this shell is=',ishell,interactions(iatom,ishell)
                   exit
                 end if  
               end if
@@ -423,7 +423,7 @@ contains
             atref(nshell_tmp,1)=iatom
             atref(nshell_tmp,2)=jatom
             atref(nshell_tmp,3)=katom
-!FB            write(6,'(a,1x,4(i5,1x))') 'NEW SHELL1 : nshell_tmp,iatom,jatom,katom=',nshell_tmp,iatom,jatom,katom
+!FB            write(Invar%stdlog,'(a,1x,4(i5,1x))') 'NEW SHELL1 : nshell_tmp,iatom,jatom,katom=',nshell_tmp,iatom,jatom,katom
           end if  
         end if  
       end do !katom
@@ -462,7 +462,7 @@ contains
   do iatom=1,natom
     do jatom=1,natom
       do katom=1,natom
-!FB        write(6,*) 'NEW COORD2 : iatom,jatom,katom=',iatom,jatom,katom
+!FB        write(Invar%stdlog,*) 'NEW COORD2 : iatom,jatom,katom=',iatom,jatom,katom
         if (nshell_tmp.eq.0) then
           nshell_tmp=nshell_tmp+1
           interactions(iatom,nshell_tmp)=1
@@ -539,7 +539,7 @@ contains
           eatom=iatom ; fatom=jatom ; gatom=katom
           Isym3at(:)=1
           ishell=nshell_tmp
-!FB          write(6,'(a,1x,4(i5,1x))') 'NEW SHELL2 : nshell_tmp,iatom,jatom,katom=',nshell_tmp,iatom,jatom,katom
+!FB          write(Invar%stdlog,'(a,1x,4(i5,1x))') 'NEW SHELL2 : nshell_tmp,iatom,jatom,katom=',nshell_tmp,iatom,jatom,katom
         end if  
 !       Classify the informations of the triplet in Shell3at
         do ii=1,6
@@ -557,21 +557,21 @@ contains
           if ((fatom.eq.gatom).and.((ii.eq.2).or.(ii.eq.5).or.(ii.eq.6))) cycle
           if ((eatom.eq.fatom).and.(fatom.eq.gatom).and.(ii.gt.1)) cycle
           interactions(watom,ishell)=interactions(watom,ishell)+1
-!FB          write(6,*) 'For ishell and eatom=',ishell,watom
-!FB          write(6,*) '  --> the number of interactions in the shell is=',interactions(watom,ishell)
+!FB          write(Invar%stdlog,*) 'For ishell and eatom=',ishell,watom
+!FB          write(Invar%stdlog,*) '  --> the number of interactions in the shell is=',interactions(watom,ishell)
           if (interactions(watom,ishell).gt.Shell3at%neighbours(watom,ishell)%n_interactions) then
-            write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-            write(6,*) ' >>>>>> Verify that the Rcut used in the input file is lower '
-            write(6,*) ' >>>>>> than half of the smallest lattice parameter'
-            write(6,*) ' >>>>>> Solution : Reduce the Rcut parameter'
-            write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+            write(Invar%stdlog,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+            write(Invar%stdlog,*) ' >>>>>> Verify that the Rcut used in the input file is lower '
+            write(Invar%stdlog,*) ' >>>>>> than half of the smallest lattice parameter'
+            write(Invar%stdlog,*) ' >>>>>> Solution : Reduce the Rcut parameter'
+            write(Invar%stdlog,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
             ABI_ERROR('The interaction number index is greater than the interaction number max computed previously (3rd order)')
           end if
           Shell3at%neighbours(watom,ishell)%atomj_in_shell(interactions(watom,ishell))=xatom
           Shell3at%neighbours(watom,ishell)%atomk_in_shell(interactions(watom,ishell))=yatom
           Shell3at%neighbours(watom,ishell)%sym_in_shell(interactions(watom,ishell))=Isym3at(1)
           Shell3at%neighbours(watom,ishell)%transpose_in_shell(interactions(watom,ishell))=ii
-!DEBUG          write(6,'(a,9(i5,x))') 'ishell,iatref,jatref,katref,iatom,atomj_in_shell,atomk_in_shell,isym,itrans=',&
+!DEBUG          write(Invar%stdlog,'(a,9(i5,x))') 'ishell,iatref,jatref,katref,iatom,atomj_in_shell,atomk_in_shell,isym,itrans=',&
 !DEBUG&         ishell,Shell3at%iatref(ishell),Shell3at%jatref(ishell),Shell3at%katref(ishell),watom,xatom,yatom,Isym3at(1),ii
         end do !ii
       end do !katom
@@ -740,7 +740,7 @@ contains
 &                      (distance(iatom,katom,4)-distance(iatom,jatom,4))**2)
         if (norma1                 .gt.(Invar%rcut4*0.99)) cycle
         do latom=1,natom
-!FB          write(6,*) 'NEW COORD1 : iatom,jatom,katom=',iatom,jatom,katom,latom
+!FB          write(Invar%stdlog,*) 'NEW COORD1 : iatom,jatom,katom=',iatom,jatom,katom,latom
           if (distance(iatom,latom,1).gt.(Invar%rcut4*0.99)) cycle
           norma2=dsqrt((distance(iatom,latom,2)-distance(iatom,jatom,2))**2+&
 &                      (distance(iatom,latom,3)-distance(iatom,jatom,3))**2+&
@@ -819,7 +819,7 @@ contains
                 if (Isym4at(2).eq.1) find_equivalent=1
                 if (find_equivalent.eq.1) then 
                   interactions(iatom,ishell)=interactions(iatom,ishell)+1
-!FB                  write(6,*) 'The number of interactions in this shell is=',ishell,interactions(iatom,ishell)
+!FB                  write(Invar%stdlog,*) 'The number of interactions in this shell is=',ishell,interactions(iatom,ishell)
                   exit
                 end if  
               end if
@@ -837,7 +837,7 @@ contains
             atref(nshell_tmp,2)=jatom
             atref(nshell_tmp,3)=katom
             atref(nshell_tmp,4)=latom
-!FB            write(6,'(a,1x,5(i5,1x))') 'NEW SHELL1 : nshell_tmp,iatom,jatom,katom,latom=',nshell_tmp,iatom,jatom,katom,latom
+!FB            write(Invar%stdlog,'(a,1x,5(i5,1x))') 'NEW SHELL1 : nshell_tmp,iatom,jatom,katom,latom=',nshell_tmp,iatom,jatom,katom,latom
           end if  
         end do !latom  
       end do !katom
@@ -888,7 +888,7 @@ contains
 &                    (distance(iatom,katom,4)-distance(iatom,jatom,4))**2)
         if (norma1                 .gt.(Invar%rcut4*0.99)) cycle
         do latom=1,natom
-!FB          write(6,*) 'NEW COORD2 : iatom,jatom,katom=',iatom,jatom,katom,latom
+!FB          write(Invar%stdlog,*) 'NEW COORD2 : iatom,jatom,katom=',iatom,jatom,katom,latom
           if (distance(iatom,latom,1).gt.(Invar%rcut4*0.99)) cycle
           norma2=dsqrt((distance(iatom,latom,2)-distance(iatom,jatom,2))**2+&
 &                      (distance(iatom,latom,3)-distance(iatom,jatom,3))**2+&
@@ -925,7 +925,8 @@ contains
           if (find_equivalent.eq.1) cycle
 !         Search if the quadruplet belongs to a shell already found
           do ishell=1,nshell_tmp
-            iat_ref=Shell4at%iatref(ishell) ; jat_ref=Shell4at%jatref(ishell) ; kat_ref=Shell4at%katref(ishell) ; lat_ref=Shell4at%latref(ishell)
+            iat_ref=Shell4at%iatref(ishell) ; jat_ref=Shell4at%jatref(ishell)
+            kat_ref=Shell4at%katref(ishell) ; lat_ref=Shell4at%latref(ishell)
             normb1=dsqrt((distance(iat_ref,kat_ref,2)-distance(iat_ref,jat_ref,2))**2+&
 &                        (distance(iat_ref,kat_ref,3)-distance(iat_ref,jat_ref,3))**2+&
 &                        (distance(iat_ref,kat_ref,4)-distance(iat_ref,jat_ref,4))**2)
@@ -1003,7 +1004,7 @@ contains
             eatom=iatom ; fatom=jatom ; gatom=katom ; hatom=latom
             Isym4at(:)=1
             ishell=nshell_tmp
-!FB            write(6,'(a,1x,5(i5,1x))') 'NEW SHELL2 : nshell_tmp,iatom,jatom,katom=',nshell_tmp,iatom,jatom,katom,latom
+!FB            write(Invar%stdlog,'(a,1x,5(i5,1x))') 'NEW SHELL2 : nshell_tmp,iatom,jatom,katom=',nshell_tmp,iatom,jatom,katom,latom
           end if  
 !         Classify the informations of the quadruplet in Shell4at
           do ii=1,24
@@ -1051,14 +1052,14 @@ contains
             end do
             if (already_found==1) cycle
             interactions(watom,ishell)=interactions(watom,ishell)+1
-!FB            write(6,*) 'For ishell and eatom=',ishell,watom
-!FB            write(6,*) '  --> the number of interactions in the shell is=',interactions(watom,ishell)
+!FB            write(Invar%stdlog,*) 'For ishell and eatom=',ishell,watom
+!FB            write(Invar%stdlog,*) '  --> the number of interactions in the shell is=',interactions(watom,ishell)
             if (interactions(watom,ishell).gt.Shell4at%neighbours(watom,ishell)%n_interactions) then
-              write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-              write(6,*) ' >>>>>> Verify that the Rcut used in the input file is lower '
-              write(6,*) ' >>>>>> than half of the smallest lattice parameter'
-              write(6,*) ' >>>>>> Solution : Reduce the Rcut parameter'
-              write(6,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+              write(Invar%stdlog,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+              write(Invar%stdlog,*) ' >>>>>> Verify that the Rcut used in the input file is lower '
+              write(Invar%stdlog,*) ' >>>>>> than half of the smallest lattice parameter'
+              write(Invar%stdlog,*) ' >>>>>> Solution : Reduce the Rcut parameter'
+              write(Invar%stdlog,*) '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
               ABI_ERROR('The interaction number index is greater than the interaction number max computed previously (4th order)')
             end if
             Shell4at%neighbours(watom,ishell)%atomj_in_shell(interactions(watom,ishell))=xatom
@@ -1066,7 +1067,7 @@ contains
             Shell4at%neighbours(watom,ishell)%atoml_in_shell(interactions(watom,ishell))=zatom
             Shell4at%neighbours(watom,ishell)%sym_in_shell(interactions(watom,ishell))=Isym4at(1)
             Shell4at%neighbours(watom,ishell)%transpose_in_shell(interactions(watom,ishell))=ii
-!DEBUG            write(6,'(a,9(i5,x))') 'ishell,iatref,jatref,katref,iatom,atomj_in_shell,atomk_in_shell,isym,itrans=',&
+!DEBUG            write(Invar%stdlog,'(a,9(i5,x))') 'ishell,iatref,jatref,katref,iatom,atomj_in_shell,atomk_in_shell,isym,itrans=',&
 !DEBUG&           ishell,Shell4at%iatref(ishell),Shell4at%jatref(ishell),Shell4at%katref(ishell),watom,xatom,yatom,Isym4at(1),ii
           end do !ii
         end do !latom

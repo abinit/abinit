@@ -151,12 +151,14 @@ contains
   A_tot(1:ntotcoeff,1:ntotcoeff)=ffcoeff_tmp(1:ntotcoeff,1:ntotcoeff)
   ABI_FREE(ffcoeff_tmp)
   if (ntotconst.gt.0) then
-    A_tot(ntotcoeff+1:nconcoef,1:ntotcoeff)=CoeffMoore%const(nconst_prev+1:nconst_prev+ntotconst,ncoeff_prev+1:ncoeff_prev+ntotcoeff)
+    A_tot(ntotcoeff+1:nconcoef,1:ntotcoeff)=&
+&                     CoeffMoore%const(nconst_prev+1:nconst_prev+ntotconst,ncoeff_prev+1:ncoeff_prev+ntotcoeff)
 !FB    do iconst=1,ntotconst
 !FB      write(Invar%stdout,*) 'A_tot=',A_tot(ntotcoeff+iconst,1:ntotcoeff)
 !FB      write(Invar%stdout,*) 'const=',CoeffMoore%const(nconst_prev+iconst,:)
 !FB    end do  
-    A_tot(1:ntotcoeff,ntotcoeff+1:nconcoef)=transpose(CoeffMoore%const(nconst_prev+1:nconst_prev+ntotconst,ncoeff_prev+1:ncoeff_prev+ntotcoeff))
+    A_tot(1:ntotcoeff,ntotcoeff+1:nconcoef)=&
+&                     transpose(CoeffMoore%const(nconst_prev+1:nconst_prev+ntotconst,ncoeff_prev+1:ncoeff_prev+ntotcoeff))
 !FB    ABI_FREE(CoeffMoore%const)
   end if  
   b_tot(1:ntotcoeff)=fforces_tmp(:)
@@ -365,16 +367,16 @@ contains
     end do
     if (foo2.eq.Invar%natom_unitcell) then
       atom_ref=iatom
-!FB      write(6,*) 'natom_unitcell (ok)=',Invar%natom_unitcell
-!FB      write(6,*) 'foo2 (ok)=',foo2
-!FB      write(6,*) 'ATOM REF (ok)=',iatom
+!FB      write(Invar%stdlog,*) 'natom_unitcell (ok)=',Invar%natom_unitcell
+!FB      write(Invar%stdlog,*) 'foo2 (ok)=',foo2
+!FB      write(Invar%stdlog,*) 'ATOM REF (ok)=',iatom
 !FB      write(Invar%stdout,*) 'ATOM REF=',atom_ref
       ok=.false.
       exit
     else if (foo2.gt.Invar%natom_unitcell) then
-!FB      write(6,*) 'natom_unitcell (bug)=',Invar%natom_unitcell
-!FB      write(6,*) 'foo2 (bug)=',foo2
-!FB      write(6,*) 'ATOM REF (bug)=',iatom
+!FB      write(Invar%stdlog,*) 'natom_unitcell (bug)=',Invar%natom_unitcell
+!FB      write(Invar%stdlog,*) 'foo2 (bug)=',foo2
+!FB      write(Invar%stdlog,*) 'ATOM REF (bug)=',iatom
       ABI_BUG(' Something wrong: WTF')
     endif
   end do  
@@ -691,7 +693,8 @@ contains
   write(Invar%stdout,'(a)') '      as a function of the step number (energies in eV/atom and forces in Ha/bohr) :'
   if (Invar%order.eq.4) then
     write(Invar%stdout,'(a)') ' <U_TDEP> = U_0 + U_1 + U_2 + U_3 + U_4'
-    write(Invar%stdout,'(a)') '       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj - 1/6 sum_ijk Phi3 ui uj uk - 1/24 sum_ijkl Phi4 ui uj uk ul >'
+    write(Invar%stdout,'(a)') '       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj ',&
+&                             '- 1/6 sum_ijk Phi3 ui uj uk - 1/24 sum_ijkl Phi4 ui uj uk ul >'
     write(Invar%stdout,'(a)') '        and U_1 = <      sum_i    Phi1 ui >'
     write(Invar%stdout,'(a)') '        and U_2 = < 1/2  sum_ij   Phi2 ui uj >'
     write(Invar%stdout,'(a)') '        and U_3 = < 1/6  sum_ijk  Phi3 ui uj uk >'
@@ -1446,7 +1449,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 ! fourth order IFCs are symmetric with respect to some permutations.
 ! Some constraints have to be added :
   if (order.eq.4) then
-    if ((iatcell.eq.jatom).or.(iatcell.eq.katom).or.(iatcell.eq.latom).or.(jatom.eq.katom).or.(jatom.eq.latom).or.(katom.eq.latom)) then
+    if ((iatcell.eq.jatom).or.(iatcell.eq.katom).or.(iatcell.eq.latom)&
+&                         .or.(jatom.eq.katom).or.(jatom.eq.latom).or.(katom.eq.latom)) then
       nconst_perm=17
       if (MPIdata%iam_master) write(16,'(a)')'=========== The IFCs are symmetric'
       const_tot=const_tot+nconst_perm*norder

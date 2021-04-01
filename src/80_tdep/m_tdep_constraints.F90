@@ -414,8 +414,10 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
               do gama=1,3
                 do lambda=1,3
                   do icoeff=1,ncoeff
-                    terme1=sum(Const3%Sprod(isym,itrans)%SSS(alpha,:,beta,gama  )*proj3rd(:,icoeff,ishell))*distance(iatom,katom,lambda+1)
-                    terme2=sum(Const3%Sprod(isym,itrans)%SSS(alpha,:,beta,lambda)*proj3rd(:,icoeff,ishell))*distance(iatom,katom,gama+1)
+                    terme1=sum(Const3%Sprod(isym,itrans)%SSS(alpha,:,beta,gama  )&
+&                          *proj3rd(:,icoeff,ishell))*distance(iatom,katom,lambda+1)
+                    terme2=sum(Const3%Sprod(isym,itrans)%SSS(alpha,:,beta,lambda)&
+&                          *proj3rd(:,icoeff,ishell))*distance(iatom,katom,gama+1)
                     Const3%AsrRot3(iatom,jatom,icoeff+ncoeff_prev)%ABGD(alpha,beta,gama,lambda)=&
 &                   Const3%AsrRot3(iatom,jatom,icoeff+ncoeff_prev)%ABGD(alpha,beta,gama,lambda)+terme1-terme2
                   end do
@@ -436,8 +438,10 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
       do jatom=1,natom
         do katom=1,natom
           do icoeff=1,ntotcoeff
-            ABI_MALLOC(Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGD,   (3,3,3,3)); Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGD(:,:,:,:)   =zero
-!FB            ABI_MALLOC(Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGDE,(3,3,3,3,3)); Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGDE(:,:,:,:,:)=zero
+            ABI_MALLOC(Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGD,   (3,3,3,3))
+                       Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGD(:,:,:,:)   =zero
+!FB            ABI_MALLOC(Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGDE,(3,3,3,3,3))
+!FB                       Const4%AsrRot4(iatom,jatom,katom,icoeff)%ABGDE(:,:,:,:,:)=zero
           end do  
         end do  
       end do  
@@ -511,8 +515,10 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
 !FB              do gama=1,3
 !FB                do lambda=1,3
 !FB                  do icoeff=1,ncoeff
-!FB                    terme1=sum(Const4%Sprod(isym,itrans)%SSS(alpha,:,beta,gama  )*proj3rd(:,icoeff,ishell))*distance(iatom,katom,lambda+1)
-!FB                    terme2=sum(Const4%Sprod(isym,itrans)%SSS(alpha,:,beta,lambda)*proj3rd(:,icoeff,ishell))*distance(iatom,katom,gama+1)
+!FB                    terme1=sum(Const4%Sprod(isym,itrans)%SSS(alpha,:,beta,gama  )&
+!FB                               &*proj3rd(:,icoeff,ishell))*distance(iatom,katom,lambda+1)
+!FB                    terme2=sum(Const4%Sprod(isym,itrans)%SSS(alpha,:,beta,lambda)&
+!FB                               &*proj3rd(:,icoeff,ishell))*distance(iatom,katom,gama+1)
 !FB                    Const4%AsrRot3(iatom,jatom,icoeff+ncoeff_prev)%ABGD(alpha,beta,gama,lambda)=&
 !FB&                   Const4%AsrRot3(iatom,jatom,icoeff+ncoeff_prev)%ABGD(alpha,beta,gama,lambda)+terme1-terme2
 !FB                  end do
@@ -934,7 +940,8 @@ end subroutine tdep_calc_constraints
             norm1=norm1+Phi1(3*(iatom-1)+beta)*Kroenecker(alpha,gama)&
 &                      -Phi1(3*(iatom-1)+gama)*Kroenecker(alpha,beta)
             if (abs(norm1).gt.tol8) then
-              write(std_out,'(a,4(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT2) : iatom,alpha,beta,gama,Sum =',iatom,alpha,beta,gama,norm1
+              write(std_out,'(a,4(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT2) : iatom,alpha,beta,gama,Sum =',&
+&                                                        iatom,alpha,beta,gama,norm1
               if (abs(norm1).gt.tol4) then
                 ABI_ERROR('The invariance under arbitrary rotation is not fulfilled (order 2)')
               end if 
@@ -1005,7 +1012,8 @@ end subroutine tdep_calc_constraints
 !           Check the first acoustic sum rule
             do jatom=1,Invar%natom
               if (abs(asr3(1,jatom,ii,jj,kk)).gt.tol8) then
-                write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',ii,jj,kk,iatom,jatom,asr3(1,jatom,ii,jj,kk)
+                write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',&
+&                                                             ii,jj,kk,iatom,jatom,asr3(1,jatom,ii,jj,kk)
                 if (abs(asr3(1,jatom,ii,jj,kk)).gt.tol6)&
 &                  ABI_ERROR('The acoustic sum rule is not fulfilled (order 3, 3rd dim)')
               end if
@@ -1013,7 +1021,8 @@ end subroutine tdep_calc_constraints
 !           Check the second acoustic sum rule
             do katom=1,Invar%natom
               if (abs(asr3(2,katom,ii,jj,kk)).gt.tol8) then
-                write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',ii,jj,kk,iatom,katom,asr3(2,katom,ii,jj,kk)
+                write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',&
+&                                                             ii,jj,kk,iatom,katom,asr3(2,katom,ii,jj,kk)
                 if (abs(asr3(2,katom,ii,jj,kk)).gt.tol6)&                
 &                  ABI_ERROR('The acoustic sum rule is not fulfilled (order 3, 2nd dim)')
               end if
@@ -1101,7 +1110,8 @@ end subroutine tdep_calc_constraints
               do jatom=1,Invar%natom
                 do katom=1,Invar%natom
                   if (abs(asr4(jatom,katom,ii,jj,kk,ll)).gt.tol8) then
-                    write(std_out,'(a,1x,7(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR4) --->',ii,jj,kk,ll,iatom,jatom,katom,asr4(jatom,katom,ii,jj,kk,ll)
+                    write(std_out,'(a,1x,7(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR4) --->',&
+&                      ii,jj,kk,ll,iatom,jatom,katom,asr4(jatom,katom,ii,jj,kk,ll)
                     if (abs(asr4(jatom,katom,ii,jj,kk,ll)).gt.tol6)&
 &                      ABI_ERROR('The acoustic sum rule is not fulfilled (order 4)')
                   end if
@@ -1118,7 +1128,8 @@ end subroutine tdep_calc_constraints
 !FB            do gama=1,3
 !FB              do lambda=1,3
 !FB                if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol8) then
-!FB                  write(std_out,'(a,6(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT3) ---> iatom,jatom,alpha,beta,gama,lambda,norm =',&
+!FB                  write(std_out,'(a,6(i3,1x),1(e17.10,1x))') &
+!FB                        &'>>>>> WARNING (ROT3) ---> iatom,jatom,alpha,beta,gama,lambda,norm =',&
 !FB&                                iatom,jatom,alpha,beta,gama,lambda,rot3(jatom,alpha,beta,gama,lambda)
 !FB                  if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol6)& 
 !FB&                     ABI_ERROR('The invariance under arbitrary rotation is not fulfilled (order 3)')

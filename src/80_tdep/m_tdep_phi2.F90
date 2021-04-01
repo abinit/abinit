@@ -194,7 +194,7 @@ subroutine tdep_calc_phi2fcoeff(CoeffMoore,Invar,proj,Shell2at,Sym,ucart)
           do mu=1,3
             do icoeff=1,ncoeff
               terme=sum(SSu(mu,:)*proj(:,icoeff,ishell))
-!FB              write(6,*) 'indices=', mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev
+!FB              write(Invar%stdlog,*) 'indices=', mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev
               CoeffMoore%fcoeff(mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)= &
 &             CoeffMoore%fcoeff(mu+3*(iatom-1)+3*Invar%natom*(istep-1),icoeff+ncoeff_prev)+terme
             end do    

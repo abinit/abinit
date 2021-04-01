@@ -191,7 +191,8 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
 !FB          udiff_ki(:)=ucart(:,katom,istep)-ucart(:,iatom,istep)
           udiff_ji(:)=ucart(:,jatom,istep)
           udiff_ki(:)=ucart(:,katom,istep)
-!         F_i^{\mu}(t)=\sum_{\alpha\beta\gamma,jk,\nu\xi} S^{\mu\alpha}.S^{\nu\beta}.S^{\xi\gamma}.\Psi_{ijk}^{\alpha\beta\gamma}.udiff_k^\xi(t).udiff_j^\nu(t)
+!         F_i^{\mu}(t)=\sum_{\alpha\beta\gamma,jk,\nu\xi} S^{\mu\alpha}.S^{\nu\beta}.S^{\xi\gamma}.
+!                      \Psi_{ijk}^{\alpha\beta\gamma}.udiff_k^\xi(t).udiff_j^\nu(t)
           do nu=1,3
             do xi=1,3
               CoeffMoore%fcoeff(iindex+1:iindex+3,ncoeff_prev+1:ncoeff_prev+ncoeff)= &
@@ -384,7 +385,8 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Lattice,Ph
             omega(imode)=omega(imode)+eigen_prod(ii,jj,iatcell,jatcell,imode)*&
 &                              dcmplx(Eigen2nd%dynmat(1,ii,iatcell,jj,jatcell,iqpt),&
 &                                     Eigen2nd%dynmat(2,ii,iatcell,jj,jatcell,iqpt))
-!FB            write(Invar%stdlog,'(a,5(1x,i4),2(1x,f15.3))') 'imode,iatcell,jatcell,ii,jj=',imode,iatcell,jatcell,ii,jj,eigen_prod(ii,jj,iatcell,jatcell,imode)
+!FB            write(Invar%stdlog,'(a,5(1x,i4),2(1x,f15.3))') 'imode,iatcell,jatcell,ii,jj=',imode,iatcell,jatcell,ii,jj
+!FB                                                           eigen_prod(ii,jj,iatcell,jatcell,imode)
           end do !imode 
         end do !ii 
       end do !jj 
@@ -393,7 +395,8 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Lattice,Ph
 
   do imode=1,nmode
     if (abs(aimag(omega(imode))).gt.tol8) then
-      write(Invar%stdlog,'(a,1x,e15.8,1x,a,i4)') '>>>> WARNING : Imaginary part of the phonon frequency is not zero (',aimag(omega(imode)),') for mode :',imode 
+      write(Invar%stdlog,'(a,1x,e15.8,1x,a,i4)') '>>>> WARNING : Imaginary part of the phonon frequency is not zero (',&
+&                                                aimag(omega(imode)),') for mode :',imode 
 !FB      stop
     end if
   end do  
@@ -599,8 +602,10 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
       xx=Eigen2nd%eigenval(ii,iq_ibz)*Ha_eV
       if (xx.le.0) cycle
       heatcapa(ii)       =heatcapa(ii)       +(wovert*xx/sinh(wovert*xx))**2*Qbz%wtqibz(iq_ibz)
-      grun_thermo(ii,:,:)=grun_thermo(ii,:,:)+(wovert*xx/sinh(wovert*xx))**2*Qbz%wtqibz(iq_ibz)*real(Gruneisen(ii,:,:))*3.d0 ! Gamma= sum_i Gamma_i*C_Vi / C_V
-      p_thermo1(ii,:,:)  =p_thermo1(ii,:,:)  +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)*real(Gruneisen(ii,:,:))*3.d0 ! P    = sum_i Gamma_i*E_i / V
+      ! Gamma= sum_i Gamma_i*C_Vi / C_V
+      grun_thermo(ii,:,:)=grun_thermo(ii,:,:)+(wovert*xx/sinh(wovert*xx))**2*Qbz%wtqibz(iq_ibz)*real(Gruneisen(ii,:,:))*3.d0 
+      ! P    = sum_i Gamma_i*E_i / V
+      p_thermo1(ii,:,:)  =p_thermo1(ii,:,:)  +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)*real(Gruneisen(ii,:,:))*3.d0 
       u_vib(ii)          =u_vib(ii)          +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)
     end do  
 !   Compute the heat capacity and thermodynamical gruneisen parameter as a function of temperature
@@ -611,8 +616,10 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
         xx=Eigen2nd%eigenval(ii,iq_ibz)*Ha_eV
         if (xx.le.0) cycle
         heatcapa_HA(ii,itemp)       =heatcapa_HA(ii,itemp)       +(wovert*xx/sinh(wovert*xx))**2*Qbz%wtqibz(iq_ibz)
-        grun_thermo_HA(ii,itemp,:,:)=grun_thermo_HA(ii,itemp,:,:)+(wovert*xx/sinh(wovert*xx))**2*Qbz%wtqibz(iq_ibz)*real(Gruneisen(ii,:,:))*3.d0
-        p_thermo_HA(ii,itemp,:,:)   =p_thermo_HA(ii,itemp,:,:)   +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)*real(Gruneisen(ii,:,:))*3.d0
+        grun_thermo_HA(ii,itemp,:,:)=grun_thermo_HA(ii,itemp,:,:)+(wovert*xx/sinh(wovert*xx))**2*Qbz%wtqibz(iq_ibz)&
+&                                   *real(Gruneisen(ii,:,:))*3.d0
+        p_thermo_HA(ii,itemp,:,:)   =p_thermo_HA(ii,itemp,:,:)   +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)&
+&                                   *real(Gruneisen(ii,:,:))*3.d0
         u_vib_HA(ii,itemp)          =u_vib_HA(ii,itemp)          +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)
       end do  
     end do  
@@ -620,7 +627,7 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
   ABI_FREE(Gruneisen)
   ABI_FREE(Grun_mean)
 ! Compute the pressure as the integral of Gamma*C_v overt T  
-  allocate(tmp(ntemp)); tmp(:)=0.d0
+  ABI_MALLOC(tmp,(ntemp)) ; tmp(:)=0.d0 
   do itemp=1,ntemp
     do ii=1,3
       do jj=1,3
@@ -629,7 +636,7 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
     end do  
   end do  
   call simpson_int(ntemp,10.d0,tmp,p_thermo2)
-  deallocate(tmp)
+  ABI_FREE(tmp)
 
   if (MPIdata%iam_master) then
     open(unit=20,file=trim(Invar%output_prefix)//'thermo3.dat')
@@ -637,8 +644,10 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
     write(20,'(a)')'#   T(K)    C_v(k_B/fu)        Gamma     alpha_v*10^6(K^-1)   E_th(eV)                       P_th_(GPa)'
     write(20,'(a,72x,a)')'#',' ----------------------------------------------'
     write(20,'(a,72x,a)')'#','  {sum G_i.U_iV}  {int G.C_v/V dT}    {G.U/V}'
-    write(21,'(a)')'#   T(K)      Gamma_11         Gamma_22        Gamma_33      alpha_11        alpha_22        alpha_33        alpha_12        alpha_13        alpha_23'
-    write(20,'(a)')'# ---------------------------------------------------------------------------------------------------------------------------------------------------'
+    write(21,'(a)')'#   T(K)      Gamma_11         Gamma_22        Gamma_33      alpha_11        alpha_22        alpha_33',&
+&                  '        alpha_12        alpha_13        alpha_23'
+    write(20,'(a)')'# ---------------------------------------------------------------------------------------------------',&
+&                  '------------------------------------------------'
   end if  
   do itemp=1,ntemp
     C_v    =sum(heatcapa_HA   (:,itemp))
@@ -674,7 +683,8 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
             if (kk.eq.3.and.ll.eq.2) beta=4
             if (kk.eq.3.and.ll.eq.1) beta=5
             if (kk.eq.2.and.ll.eq.1) beta=6
-            alpha_v_tensor(ii,jj)=alpha_v_tensor(ii,jj)+Lattice%Sij(alpha,beta)*Gama_tensor(kk,ll)*C_v*kb_HaK*Ha_J/1.d9/(Lattice%ucvol*Bohr_Ang**3*1.d-30)
+            alpha_v_tensor(ii,jj)=alpha_v_tensor(ii,jj)+Lattice%Sij(alpha,beta)*Gama_tensor(kk,ll)*C_v*kb_HaK*Ha_J/1.d9/&
+&                                 (Lattice%ucvol*Bohr_Ang**3*1.d-30)
           end do
         end do
         P_th_tensor(ii,jj)   =Gama_tensor(ii,jj)*E_th/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
@@ -739,7 +749,8 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
           if (kk.eq.3.and.ll.eq.2) beta=4
           if (kk.eq.3.and.ll.eq.1) beta=5
           if (kk.eq.2.and.ll.eq.1) beta=6
-          alpha_v_tensor(ii,jj)=alpha_v_tensor(ii,jj)+Lattice%Sij(alpha,beta)*Gama_tensor(kk,ll)*C_v*kb_HaK*Ha_J/1.d9/(Lattice%ucvol*Bohr_Ang**3*1.d-30)
+          alpha_v_tensor(ii,jj)=alpha_v_tensor(ii,jj)+Lattice%Sij(alpha,beta)*Gama_tensor(kk,ll)*C_v*kb_HaK*Ha_J/1.d9/&
+&                               (Lattice%ucvol*Bohr_Ang**3*1.d-30)
         end do
       end do
       P_th_tensor(ii,jj)=Gama_tensor(ii,jj)*E_th/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
@@ -747,33 +758,49 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
   end do  
   P_th2  =p_thermo2(int(Invar%temperature/10))*k_B/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
   Lattice%BulkModulus_S=Lattice%BulkModulus_T*(1.+(alpha_v_tensor(1,1)+alpha_v_tensor(2,2)+alpha_v_tensor(3,3))*&
-&                                                    (Gama_tensor(1,1)+   Gama_tensor(2,2)+   Gama_tensor(3,3))/3.d0*Invar%temperature)
+&                       (Gama_tensor(1,1)+   Gama_tensor(2,2)+   Gama_tensor(3,3))/3.d0*Invar%temperature)
   Lattice%HeatCapa_P=C_v*Lattice%BulkModulus_S/Lattice%BulkModulus_T
   Vp=dsqrt(1.d9*(Lattice%BulkModulus_S+4.d0*Lattice%Shear/3.d0)/Lattice%Density)
   Vs=dsqrt(1.d9*Lattice%Shear/Lattice%Density)
   write(Invar%stdout,'(a)') ' See the gruneisen.dat, alpha_gamma.dat and thermo3.dat files'
   write(Invar%stdout,'(a)') ' '
-  write(Invar%stdout,'(a,1x,f15.3)') ' Gruneisen parameter :                 Gamma=',(Gama_tensor(1,1)+Gama_tensor(2,2)+Gama_tensor(3,3))/3.d0
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                The Gruneisen matrix is  |',Gama_tensor(1,1),Gama_tensor(1,2),Gama_tensor(1,3),'|'
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',Gama_tensor(2,1),Gama_tensor(2,2),Gama_tensor(2,3),'|'
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',Gama_tensor(3,1),Gama_tensor(3,2),Gama_tensor(3,3),'|'
-  write(Invar%stdout,'(a,1x,f15.3)') ' Thermal expansion (K^{-1}*10^6) :   alpha_v=',(alpha_v_tensor(1,1)+alpha_v_tensor(2,2)+alpha_v_tensor(3,3))*1.d6
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '        The thermal expansion matrix is  |',alpha_v_tensor(1,1)*1.d6,alpha_v_tensor(1,2)*1.d6,alpha_v_tensor(1,3)*1.d6,'|'
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',alpha_v_tensor(2,1)*1.d6,alpha_v_tensor(2,2)*1.d6,alpha_v_tensor(2,3)*1.d6,'|'
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',alpha_v_tensor(3,1)*1.d6,alpha_v_tensor(3,2)*1.d6,alpha_v_tensor(3,3)*1.d6,'|'
+  write(Invar%stdout,'(a,1x,f15.3)') ' Gruneisen parameter :                 Gamma=',&
+&          (Gama_tensor(1,1)+Gama_tensor(2,2)+Gama_tensor(3,3))/3.d0
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                The Gruneisen matrix is  |',&
+&          Gama_tensor(1,1),Gama_tensor(1,2),Gama_tensor(1,3),'|'
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',&
+&          Gama_tensor(2,1),Gama_tensor(2,2),Gama_tensor(2,3),'|'
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',&
+&          Gama_tensor(3,1),Gama_tensor(3,2),Gama_tensor(3,3),'|'
+  write(Invar%stdout,'(a,1x,f15.3)') ' Thermal expansion (K^{-1}*10^6) :   alpha_v=',&
+&          (alpha_v_tensor(1,1)+alpha_v_tensor(2,2)+alpha_v_tensor(3,3))*1.d6
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '        The thermal expansion matrix is  |',&
+&          alpha_v_tensor(1,1)*1.d6,alpha_v_tensor(1,2)*1.d6,alpha_v_tensor(1,3)*1.d6,'|'
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',&
+&          alpha_v_tensor(2,1)*1.d6,alpha_v_tensor(2,2)*1.d6,alpha_v_tensor(2,3)*1.d6,'|'
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',&
+&          alpha_v_tensor(3,1)*1.d6,alpha_v_tensor(3,2)*1.d6,alpha_v_tensor(3,3)*1.d6,'|'
   write(Invar%stdout,'(a)') ' Thermal pressure (in GPa) : '
   write(Invar%stdout,'(a)') '    ------- w   intrinsic effects and w   ZPE --------'
-  write(Invar%stdout,'(a,1x,f15.3)') '                 P_th=sum_i Gamma_i*E_i/V   =',(P_th1_tensor(1,1)+P_th1_tensor(2,2)+P_th1_tensor(3,3))/3.d0
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '           The thermal pressure matrix is|',P_th1_tensor(1,1),P_th1_tensor(1,2),P_th1_tensor(1,3),'|'
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',P_th1_tensor(2,1),P_th1_tensor(2,2),P_th1_tensor(2,3),'|'
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',P_th1_tensor(3,1),P_th1_tensor(3,2),P_th1_tensor(3,3),'|'
+  write(Invar%stdout,'(a,1x,f15.3)') '                 P_th=sum_i Gamma_i*E_i/V   =',&
+&          (P_th1_tensor(1,1)+P_th1_tensor(2,2)+P_th1_tensor(3,3))/3.d0
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '           The thermal pressure matrix is|',&
+&          P_th1_tensor(1,1),P_th1_tensor(1,2),P_th1_tensor(1,3),'|'
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',&
+&          P_th1_tensor(2,1),P_th1_tensor(2,2),P_th1_tensor(2,3),'|'
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',&
+&          P_th1_tensor(3,1),P_th1_tensor(3,2),P_th1_tensor(3,3),'|'
   write(Invar%stdout,'(a)') '    ------- w   intrinsic effects and w/o ZPE --------'
   write(Invar%stdout,'(a,1x,f15.3)') '                 P_th=integ{Gamma*C_v/V dT} =',P_th2
   write(Invar%stdout,'(a)') '    ------- w/o intrinsic effects and w/o ZPE --------'
-  write(Invar%stdout,'(a,1x,f15.3)') '                 P_th=Gamma*E_th/V          =',(P_th_tensor(1,1)+P_th_tensor(2,2)+P_th_tensor(3,3))/3.d0
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '           The thermal pressure matrix is|',P_th_tensor(1,1),P_th_tensor(1,2),P_th_tensor(1,3),'|'
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',P_th_tensor(2,1),P_th_tensor(2,2),P_th_tensor(2,3),'|'
-  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',P_th_tensor(3,1),P_th_tensor(3,2),P_th_tensor(3,3),'|'
+  write(Invar%stdout,'(a,1x,f15.3)') '                 P_th=Gamma*E_th/V          =',&
+&          (P_th_tensor(1,1)+P_th_tensor(2,2)+P_th_tensor(3,3))/3.d0
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '           The thermal pressure matrix is|',&
+&          P_th_tensor(1,1),P_th_tensor(1,2),P_th_tensor(1,3),'|'
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',&
+&          P_th_tensor(2,1),P_th_tensor(2,2),P_th_tensor(2,3),'|'
+  write(Invar%stdout,'(a,3(1x,f8.3),a)') '                                         |',&
+&          P_th_tensor(3,1),P_th_tensor(3,2),P_th_tensor(3,3),'|'
   write(Invar%stdout,'(a,1x,f15.3)') ' Volume (bohr^3 per unit cell):            V=',Lattice%ucvol
   write(Invar%stdout,'(a,1x,f15.3)') ' Thermal energy (eV) :                  E_th=',E_th
   write(Invar%stdout,'(a,1x,f15.3)') ' Heat capacity at constant V (k_B/f.u.): C_v=',C_v
@@ -864,7 +891,8 @@ subroutine tdep_write_gruneisen(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3
       ABI_ERROR_NOSTOP(message,ierr)
       ABI_ERROR('tdep_write_gruneisen : The imaginary part of Grun_mean is not equal to zero')
     else 
-!FB      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode),((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)
+!FB      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode),&
+!FB                ((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)
       write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode)
     end if  
   end do  
@@ -926,7 +954,7 @@ subroutine tdep_calc_lifetime1(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3_
         if (sum(abs(ipjpk(:)-int(ipjpk(:)))).lt.tol4) then
           write(Invar%stdout,'(a,i4,1x,i4,1x,i4)')'OK for qi+qj+qk=G',iq_bz,jq_bz,kq_bz  
           okp_count=okp_count+1
-	else if (sum(abs(imjpk(:)-int(imjpk(:)))).lt.tol4) then
+        else if (sum(abs(imjpk(:)-int(imjpk(:)))).lt.tol4) then
           write(Invar%stdout,'(a,i4,1x,i4,1x,i4)')'OK for qi-qj+qk=G',iq_bz,jq_bz,kq_bz  
           okm_count=okm_count+1
         else 

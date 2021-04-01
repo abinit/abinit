@@ -79,8 +79,8 @@ program atdep
   use m_tdep_utils,       only : Coeff_Moore_type, tdep_calc_MoorePenrose, tdep_MatchIdeal2Average, tdep_calc_model
   use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type
   use m_tdep_phdos,       only : tdep_calc_phdos,tdep_calc_elastic,tdep_calc_thermo
-  use m_tdep_shell,       only : Shell_Variables_type, tdep_init_shell2at, tdep_init_shell3at, tdep_init_shell4at, tdep_init_shell1at, &
-&                                tdep_destroy_shell
+  use m_tdep_shell,       only : Shell_Variables_type, tdep_init_shell2at, tdep_init_shell3at, tdep_init_shell4at, &
+&                                tdep_init_shell1at, tdep_destroy_shell
   use m_tdep_constraints, only : tdep_calc_constraints, tdep_check_constraints
 
   implicit none
@@ -154,7 +154,7 @@ program atdep
 !FB do istep=1,Invar%nstep_tot
 !FB   data_tmp(:,dim2*(istep-1)+1:dim1*istep)=istep
 !FB end do
-!FB if (MPIdata%iam_master) write(6,*) MPIdata%me_step,data_tmp(:,:)
+!FB if (MPIdata%iam_master) write(Invar%stdlog,*) MPIdata%me_step,data_tmp(:,:)
 !FB
 !FB Invar%my_nstep=int(Invar%nstep_tot/MPIdata%nproc)
 !FB remain=Invar%nstep_tot-MPIdata%nproc*Invar%my_nstep
@@ -163,7 +163,7 @@ program atdep
 !FB end do
 !FB!FB ABI_MALLOC(MPIdata%nstep_all,(MPIdata%nproc)); MPIdata%nstep_all(:)=zero
 !FB call xmpi_allgather(Invar%my_nstep,MPIdata%nstep_all,MPIdata%comm_step,ierr)
-!FB if (MPIdata%me_step.eq.MPIdata%master) write(6,*) 'Nstep(nproc)=',MPIdata%nstep_all(:)
+!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) 'Nstep(nproc)=',MPIdata%nstep_all(:)
 !FB call flush_unit(6)
 !FB call xmpi_barrier(MPIdata%comm_step)
 !FB
@@ -172,7 +172,7 @@ program atdep
 !FB do ii=2,MPIdata%nproc+1
 !FB   nstep_acc(ii)=nstep_acc(ii-1)+MPIdata%nstep_all(ii-1)
 !FB end do
-!FB if (MPIdata%me_step.eq.MPIdata%master) write(6,*) 'NSTEP_ACC=',nstep_acc(:)
+!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) 'NSTEP_ACC=',nstep_acc(:)
 !FB call flush_unit(6)
 !FB call xmpi_barrier(MPIdata%comm_step)
 !FB
@@ -196,12 +196,12 @@ program atdep
 !FB   end do
 !FB end do
 !FB
-!FB if (MPIdata%me_step.eq.MPIdata%master) write(6,*) 'TAB_STEP=',tab_step(:)
+!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) 'TAB_STEP=',tab_step(:)
 !FB call flush_unit(6)
 !FB call xmpi_barrier(MPIdata%comm_step)
 !FB
 !FB if (nstep_acc(MPIdata%nproc+1).ne.Invar%nstep_tot) then
-!FB   write(6,*) 'STOP : pb in nstep_acc'
+!FB   write(Invar%stdlog,*) 'STOP : pb in nstep_acc'
 !FB   stop
 !FB end if
 !FB
@@ -215,7 +215,7 @@ program atdep
 !FB end do
 !FB
 !FB do iproc=1,MPIdata%nproc
-!FB   if (iproc-1.eq.MPIdata%me_step) write(6,*) 'DATA_LOC =',MPIdata%me_step,data_loc(:,:)
+!FB   if (iproc-1.eq.MPIdata%me_step) write(Invar%stdlog,*) 'DATA_LOC =',MPIdata%me_step,data_loc(:,:)
 !FB end do
 !FB call flush_unit(6)
 !FB call xmpi_barrier(MPIdata%comm_step)
@@ -232,8 +232,8 @@ program atdep
 !FB!FB&                    MPIdata%master,MPIdata%comm_step,ierr)
 !FB!FB end do
 !FB!FB
-!FB!FB if (MPIdata%me_step.eq.MPIdata%master) write(6,*) "============================================"
-!FB!FB if (MPIdata%me_step.eq.MPIdata%master) write(6,*) MPIdata%me_step,data_gather(:,:)
+!FB!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) "============================================"
+!FB!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) MPIdata%me_step,data_gather(:,:)
 !FB!FB call flush_unit(6)
 !FB!!FBFB
 !FB 
@@ -242,12 +242,12 @@ program atdep
 !FB!FB call xmpi_scatterv(data_gather,MPIdata%nstep_all,nstep_acc,data_loc,Invar%my_nstep,&
 !FB!FB&                    MPIdata%master,MPIdata%comm_step,ierr)
 !FB do iproc=1,MPIdata%nproc
-!FB   if (MPIdata%me_step.eq.(iproc-1)) write(6,*) "============================================"
-!FB   if (MPIdata%me_step.eq.(iproc-1)) write(6,*) MPIdata%me_step,data_gather(:,:)
+!FB   if (MPIdata%me_step.eq.(iproc-1)) write(Invar%stdlog,*) "============================================"
+!FB   if (MPIdata%me_step.eq.(iproc-1)) write(Invar%stdlog,*) MPIdata%me_step,data_gather(:,:)
 !FB   call flush_unit(6)
 !FB   call xmpi_barrier(MPIdata%comm_step)
 !FB end do
-!FB write(6,*) '====== END ======='
+!FB write(Invar%stdlog,*) '====== END ======='
 !FB call flush_unit(6)
 !FB call abi_abort("COLL")
 !TEST
