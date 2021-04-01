@@ -238,11 +238,6 @@ contains
         do isppol=1,nsppol
           do ikpt=1,nkpt
             nband_k=nband(ikpt+(isppol-1)*nkpt)
-            if(ikpt==1) then
-              write(0,*) wtk(ikpt),eigen(band_index+nband_k),&
-              & hightemp_e_heg(dble(band_index+nband_k),this%ucvol),&
-              & this%e_shiftfactor
-            end if
             rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k)-&
             & hightemp_e_heg(dble(nband_k),this%ucvol)-this%e_shiftfactor)/&
             & eigen(band_index+nband_k))
