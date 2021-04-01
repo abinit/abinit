@@ -37,6 +37,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   Uranium (othorombic with 8 atoms) with 96 atoms at T = 50 K. Debug mode.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

@@ -36,6 +36,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   Uranium (bcc) with 128 atoms at T = 900 K. Conventional cell.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

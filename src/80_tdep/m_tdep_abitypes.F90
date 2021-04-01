@@ -146,14 +146,14 @@ contains
   nqshft=      1
   ABI_MALLOC(q1shft,(3,nqshft)); q1shft(:,:)=0.5d0
 !FB  ABI_MALLOC(q1shft,(3,nqshft)); q1shft(:,:)=0.0d0
-  ABI_ALLOCATE(qdrp_cart,(3,3,3,Invar%natom_unitcell))
+  ABI_MALLOC(qdrp_cart,(3,3,3,Invar%natom_unitcell))
 
   call ifc_init(Ifc,Crystal,DDB,Lattice%brav,asr,symdynmat,dipdip,&
 !FB  call ifc_init(Ifc,Crystal,DDB,1,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
   prtsrlr,enunit,XMPI_WORLD)
 
-  ABI_DEALLOCATE(qdrp_cart)
+  ABI_FREE(qdrp_cart)
 
   ABI_FREE(q1shft)
   ABI_FREE(zeff)
@@ -265,17 +265,17 @@ contains
   end do
 
 ! Reduce the number of such points by symmetrization.
-  ABI_ALLOCATE(Qbz%ibz2bz,(nqbz)); Qbz%ibz2bz=zero
-  ABI_ALLOCATE(Qbz%wtq,(nqbz)); Qbz%wtq=zero
-  ABI_ALLOCATE(wtq_folded,(nqbz)); wtq_folded=zero
-  ABI_ALLOCATE(bz2ibz_smap,(6,nqbz)); wtq_folded=zero
+  ABI_MALLOC(Qbz%ibz2bz,(nqbz)); Qbz%ibz2bz=zero
+  ABI_MALLOC(Qbz%wtq,(nqbz)); Qbz%wtq=zero
+  ABI_MALLOC(wtq_folded,(nqbz)); wtq_folded=zero
+  ABI_MALLOC(bz2ibz_smap,(6,nqbz)); wtq_folded=zero
   Qbz%wtq(:)=one/nqbz         ! Weights sum up to one
 ! Set nsym=1 in order to compute this quantity in the full BZ. 
   call symkpt(0,Crystal%gmet,Qbz%ibz2bz,Invar%stdlog,Qbz%qbz,Qbz%nqbz,Qbz%nqibz,&
 &             1,Crystal%symrec,1,Qbz%wtq,wtq_folded,bz2ibz_smap,xmpi_comm_self)
-  ABI_ALLOCATE(Qbz%wtqibz   ,(Qbz%nqibz))
-  ABI_ALLOCATE(Qbz%qibz     ,(3,Qbz%nqibz))
-  ABI_ALLOCATE(Qbz%qibz_cart,(3,Qbz%nqibz))
+  ABI_MALLOC(Qbz%wtqibz   ,(Qbz%nqibz))
+  ABI_MALLOC(Qbz%qibz     ,(3,Qbz%nqibz))
+  ABI_MALLOC(Qbz%qibz_cart,(3,Qbz%nqibz))
   do iq_ibz=1,Qbz%nqibz
     Qbz%wtqibz(iq_ibz)=wtq_folded(Qbz%ibz2bz(iq_ibz))
     Qbz%qibz(:,iq_ibz)=Qbz%qbz(:,Qbz%ibz2bz(iq_ibz))
@@ -293,8 +293,8 @@ contains
     close(40)
     close(41)
   end if  
-  ABI_DEALLOCATE(wtq_folded)
-  ABI_DEALLOCATE(bz2ibz_smap)
+  ABI_FREE(wtq_folded)
+  ABI_FREE(bz2ibz_smap)
 
  end subroutine tdep_init_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -478,7 +478,7 @@ contains
   ngqpt=Invar%ngqpt1
   allocate(qshft(3,nqshft))
   qshft(:,:)=0.5d0
-  ABI_ALLOCATE(qdrp_cart,(3,3,3,Invar%natom_unitcell))
+  ABI_MALLOC(qdrp_cart,(3,3,3,Invar%natom_unitcell))
 !FB  qshft(:,:)=0.0d0
   if (MPIdata%iam_master) then
     comm=xmpi_world
@@ -487,7 +487,7 @@ contains
     unitfile=2
     call tdep_write_ifc(Crystal_tmp,Ifc_tmp,Invar,MPIdata,Invar%natom_unitcell,unitfile)
   end if  
-  ABI_DEALLOCATE(qdrp_cart)
+  ABI_FREE(qdrp_cart)
 
  end subroutine tdep_write_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

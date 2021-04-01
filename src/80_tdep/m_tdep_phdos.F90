@@ -407,11 +407,11 @@ subroutine tdep_calc_thermo(Invar,Lattice,MPIdata,PHdos,U0)
 
 ! The free energy (extrapolation)
 ! ===============================
-  write(20,'(a)')'============= Quasi-Harmonic Approximation (QHA) =================='
+  write(20,'(a)')'============= Harmonic Approximation (HA) =================='
   write(20,'(1x,a)')'  Note that the following results come from an EXTRAPOLATION:'
-  write(20,'(1x,a,i5,a)')'    1/ F_vib^QHA(T) is computed for each T using vDOS(T=',int(Invar%temperature),')'
-  write(20,'(1x,a)')'    2/ F_tot^QHA(T) = F_vib^QHA(T) + U_0'
-  write(20,'(a)')'   T      F_vib^QHA(T)   F_tot^QHA(T)           C_v(T)  '&
+  write(20,'(1x,a,i5,a)')'    1/ F_vib^HA(T) is computed for each T using vDOS(T=',int(Invar%temperature),')'
+  write(20,'(1x,a)')'    2/ F_tot^HA(T) = F_vib^HA(T) + U_0'
+  write(20,'(a)')'   T         F_vib^HA(T)   F_tot^HA(T)           C_v(T)  '&
 &   //'       S_vib(T)        U_vib(T)        MSD(T)'
   do itemp=1,100
     wovert=1.d0/(2*real(itemp)*100*k_B)
@@ -545,15 +545,15 @@ subroutine tdep_calc_elastic(Phi2,distance,Invar,Lattice)
 
 ! Compute the eigenvalues of the Cij matrix in order to find the Born-Huang
 ! stability criterion (see Wallace, Thermodynamics of crystal, p39) 
-  ABI_ALLOCATE(WORK,(1))
+  ABI_MALLOC(WORK,(1))
   ABI_MALLOC(Sij,(6,6)) ; Sij(:,:)=0.d0
   ABI_MALLOC(eigenvalues,(6)) ; eigenvalues(:)=0.d0
   Sij(:,:)=Cij(:,:)
   LWORK=-1
   call DSYEV('N','U',6,Sij,6,eigenvalues,WORK,LWORK,INFO)
   LWORK=WORK(1)
-  ABI_DEALLOCATE(WORK)
-  ABI_ALLOCATE(WORK,(LWORK))
+  ABI_FREE(WORK)
+  ABI_MALLOC(WORK,(LWORK))
   call DSYEV('N','U',6,Sij,6,eigenvalues,WORK,LWORK,INFO)
   do ii=1,6
     if (eigenvalues(ii).lt.0.d0) then
@@ -563,7 +563,7 @@ subroutine tdep_calc_elastic(Phi2,distance,Invar,Lattice)
     end if
   end do  
 
-  ABI_DEALLOCATE(WORK)
+  ABI_FREE(WORK)
   ABI_FREE(Sij)  
   ABI_FREE(eigenvalues)  
 

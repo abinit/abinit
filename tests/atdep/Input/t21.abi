@@ -42,6 +42,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (3rd order)
+#%%   Gold (fcc) with 256 atoms at T = 300 K.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

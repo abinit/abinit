@@ -36,6 +36,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   Iron (hcp) with 180 atoms at T = 5000 K.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

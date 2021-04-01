@@ -37,6 +37,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   Aluminum (fcc) with 108 atoms at T = 900 K. Primitive cell. Write and read IFC.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

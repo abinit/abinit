@@ -37,6 +37,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   Plutonium (fcc) with 54 atoms at T = 1200 K. The supercell in a SQS.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

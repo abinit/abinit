@@ -35,6 +35,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (3rd order)
+#%%   Silicon (diamond) with 216 atoms at T = 300 K. With a NetCDF file.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

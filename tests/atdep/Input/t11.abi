@@ -15,7 +15,7 @@ temperature 300
 #DEFINE_COMPUTATIONAL_DETAILS
 nstep_max 20
 nstep_min 1
-rcut 9.64 11.1381
+rcut 9.64
 #OPTIONAL_INPUT_VARIABLES
 use_ideal_positions 1
 enunit 1
@@ -36,6 +36,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   Titanium (hcp) with 128 atoms at T = 300 K.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

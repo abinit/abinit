@@ -39,6 +39,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   Plutonium (monoclinic with 16 atoms) with 64 atoms at T = 300 K.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

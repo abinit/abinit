@@ -16,7 +16,7 @@ temperature 300
 #DEFINE_COMPUTATIONAL_DETAILS
 nstep_max 20
 nstep_min 1
-rcut 14. 14.8 6.0 
+rcut 14.
 #OPTIONAL_INPUT_VARIABLES
 order 3 5.
 use_ideal_positions 0
@@ -38,6 +38,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (3rd order)
+#%%   Bismuth (rhombohedral) with 128 atoms at T = 300 K.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

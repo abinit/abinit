@@ -36,6 +36,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   Uranium (C-face centered othorombic with 2 atoms) with 144 atoms at T = 300 K.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

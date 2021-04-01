@@ -15,7 +15,7 @@ temperature 300
 #DEFINE_COMPUTATIONAL_DETAILS
 nstep_max 20
 nstep_min 1
-rcut 17.5 9.64 11.1381  
+rcut 17.5
 #OPTIONAL_INPUT_VARIABLES
 readifc 1 1.d-4
 enunit 2
@@ -40,6 +40,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   Titanium (hcp) with 512 atoms at T = 300 K. Restart with IFC coming from ANADDB.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

@@ -251,11 +251,11 @@ contains
  !Open netCDF file
   ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
   if(ncerr /= NF90_NOERR) then
-    write(Invar%stdout,'(3a)') '-'//'Could not open ',trim(filename),', starting from scratch'
+    write(Invar%stdlog,'(3a)') '-'//'Could not open ',trim(filename),', starting from scratch'
     Invar%netcdf=.false.
   else
-    write(Invar%stdout,'(3a)') '-'//'Succesfully open ',trim(filename),' for reading'
-    write(Invar%stdout,'(a)') ' Extracting information from NetCDF file...'
+    write(Invar%stdlog,'(3a)') '-'//'Succesfully open ',trim(filename),' for reading'
+    write(Invar%stdlog,'(a)') ' Extracting information from NetCDF file...'
     Invar%netcdf=.true.
   end if
 
@@ -681,27 +681,27 @@ contains
 
 ! Create the global cartesian 2D-communicator
   dimcart=2
-  ABI_ALLOCATE(sizecart,(dimcart))
-  ABI_ALLOCATE(periode,(dimcart))
+  ABI_MALLOC(sizecart,(dimcart))
+  ABI_MALLOC(periode,(dimcart))
   sizecart(1)=MPIdata%nproc_shell ! MPIdata%nproc_shell
   sizecart(2)=MPIdata%nproc_step  ! MPIdata%nproc_step
   periode(:)=.false.;reorder=.false.
   call MPI_CART_CREATE(xmpi_world,dimcart,sizecart,periode,reorder,commcart_2d,ierr)
-  ABI_DEALLOCATE(periode)
-  ABI_DEALLOCATE(sizecart)
+  ABI_FREE(periode)
+  ABI_FREE(sizecart)
 
 ! Find the index and coordinates of the current processor
   call MPI_COMM_RANK(commcart_2d,me_cart_2d,ierr)
-  ABI_ALLOCATE(coords,(dimcart))
+  ABI_MALLOC(coords,(dimcart))
   call MPI_CART_COORDS(commcart_2d,me_cart_2d,dimcart,coords,ierr)
   MPIdata%me_shell=coords(1)
   MPIdata%me_step =coords(2)
-  ABI_DEALLOCATE(coords)
+  ABI_FREE(coords)
   if ((MPIdata%me_shell == MPIdata%master).and.(MPIdata%me_step == MPIdata%master)) then
     MPIdata%iam_master = .true.
   end if  
 
-  ABI_ALLOCATE(keepdim,(dimcart))
+  ABI_MALLOC(keepdim,(dimcart))
 ! Create the communicator for shell distribution
   keepdim(1)=.true.
   keepdim(2)=.false.
@@ -714,7 +714,7 @@ contains
   keepdim(1)=.true.
   keepdim(2)=.true.
   call MPI_CART_SUB(commcart_2d,keepdim,MPIdata%comm_shellstep,ierr)
-  ABI_DEALLOCATE(keepdim)
+  ABI_FREE(keepdim)
   call xmpi_comm_free(commcart_2d)
 
 ! Write some data

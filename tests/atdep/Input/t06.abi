@@ -40,6 +40,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   MgO (B2) with 128 atoms at T = 2000 K. With LOTO.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

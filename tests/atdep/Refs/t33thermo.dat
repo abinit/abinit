@@ -14,11 +14,11 @@
       The Lindemann constant : sqrt(<u^2>)/d_at =     0.036
       The integral of vDOS =     1.000
  
-============= Quasi-Harmonic Approximation (QHA) ==================
+============= Harmonic Approximation (HA) ==================
    Note that the following results come from an EXTRAPOLATION:
-     1/ F_vib^QHA(T) is computed for each T using vDOS(T=  300)
-     2/ F_tot^QHA(T) = F_vib^QHA(T) + U_0
-   T      F_vib^QHA(T)   F_tot^QHA(T)           C_v(T)         S_vib(T)        U_vib(T)        MSD(T)
+     1/ F_vib^HA(T) is computed for each T using vDOS(T=  300)
+     2/ F_tot^HA(T) = F_vib^HA(T) + U_0
+   T         F_vib^HA(T)   F_tot^HA(T)           C_v(T)         S_vib(T)        U_vib(T)        MSD(T)
    100           0.007       -1416.772           2.633           2.622           0.029           0.141
    200          -0.025       -1416.803           2.902           4.559           0.053           0.193
    300          -0.070       -1416.848           2.956           5.748           0.079           0.234

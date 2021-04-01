@@ -817,7 +817,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 
 
   integer,intent(in) :: iatcell,ishell,jatom,katom,latom,nshell,order,norder
-  integer,intent(out) :: ncoeff
+  integer,intent(inout) :: ncoeff
   type(Input_Variables_type),intent(in) :: Invar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
@@ -885,8 +885,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     if (order==1) then
       if (Sym%indsym(4,isym,iatcell)==iatcell) then
         if (MPIdata%iam_master) then 
-	  write(16,'(a,1x,i3)')'===========The atom is kept invariant for isym=',isym
-	end if  
+          write(16,'(a,1x,i3)')'===========The atom is kept invariant for isym=',isym
+        end if  
       else
         cycle
       end if  
@@ -909,7 +909,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
         if (MPIdata%iam_master) then 
           if (inv==1) write(16,'(a,1x,i3)')'===========The bond is kept invariant for isym=',isym
           if (inv==2) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j) --> (j,i) for isym=',isym
-	end if  
+        end if  
       else
         cycle
       end if  
@@ -948,7 +948,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
           if (inv==4) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (j,k,i) for isym=',isym
           if (inv==5) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (k,i,j) for isym=',isym
           if (inv==6) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (k,j,i) for isym=',isym
-	end if  
+        end if  
       else
         cycle
       end if  
@@ -1041,7 +1041,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
           if (inv==22) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,j,k,i) for isym=',isym !\Psi_ljki
           if (inv==23) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,k,i,j) for isym=',isym !\Psi_lkij
           if (inv==24) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,k,j,i) for isym=',isym !\Psi_lkji
-	end if  
+        end if  
       else
         cycle
       end if  
@@ -1096,7 +1096,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 !FB      write(16,'(2(f16.12,1x))') eigenvectors(2,ii)
 !FB      write(16,'(2(f16.12,1x))') eigenvectors(3,ii)
       if ((aimag(eigenvalues(1)).ne.0).or.(aimag(eigenvalues(2)).ne.0).or.(aimag(eigenvalues(3)).ne.0)) then
-	ok=.true.
+        ok=.true.
       end if  
     end do  
     if (ok.and.MPIdata%iam_master) write(16,'(a)') '            WARNING: THERE IS COMPLEX EIGENVALUES'

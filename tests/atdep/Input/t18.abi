@@ -37,6 +37,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP 
+#%%   test aTDEP (2nd order)
+#%%   Uranium (bct) with 128 atoms at T = 2000 K.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

@@ -107,7 +107,7 @@ Variable(
     mnemonics="ENergy UNIT",
     added_in_version="before_v9",
     text="""
-OPTIONAL: Defines the energy unit used for the phonon spectrum (0 for meV, 1 for cm-1 and 2 for Ha).
+OPTIONAL: Defines the energy unit used for the phonon spectrum (0 for meV, 1 for cm-1, 2 for Ha and 3 for THz).
 """,
 ),
 
