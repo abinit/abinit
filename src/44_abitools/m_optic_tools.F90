@@ -642,11 +642,11 @@ complex(dpc), allocatable :: eps(:)
              w=(iw-1)*de+ieta
              chi(iw,isp)=chi(iw,isp)+(wkpt(ik)*(KSBSt%occ(ist1,ik,isp)-KSBSt%occ(ist2,ik,isp))* &
              (b12/(-e12_ep-w)))
-           end do
+           end do ! frequencies
          end if
-       end do ! states
+       end do  ! states 2
 !      end if
-     end do
+     end do  ! states 1
    end do ! k points
  end do ! spin
 
