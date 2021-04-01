@@ -324,7 +324,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
  if (enable_cgwf_paw) then
-   call wrtout(std_out,' In vtowfk : use of cprj in memory')
+   if(ikpt==1) then
+     write(message,'(a,i3)') ' In vtowfk : use of cprj in memory with cprj_update_lvl=',dtset%cprj_update_lvl
+     call wrtout(std_out,message,'COLL')
+   end if
    cprj_cwavef_bands => cprj(:,1+ibg:nband_k*my_nspinor+ibg)
  end if
 
@@ -560,7 +563,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end do ! End loop over inonsc (NON SELF-CONSISTENT LOOP)
 
  if (enable_cgwf_paw) then
-   update_cprj=dtset%cprj_update_lvl<=3.and.dtset%cprj_update_lvl/=2
+   update_cprj=dtset%cprj_update_lvl<=3.and.dtset%cprj_update_lvl/=2.and.dtset%cprj_update_lvl>=-1
    if (update_cprj) then
      call timab(1205,1,tsec)
      call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg)

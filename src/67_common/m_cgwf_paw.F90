@@ -33,9 +33,8 @@ module m_cgwf_paw
 
  use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
- use m_numeric_tools, only : rhophi
- use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
-                             pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn,&
+ use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_copy, &
+                             pawcprj_free,&
                              pawcprj_axpby,pawcprj_zaxpby,pawcprj_projbd
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_getchc,        only : getchc,getcsc
@@ -133,7 +132,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  integer :: n4,n5,n6,natom,ncpgr,npw,nspinor
  integer :: optekin,sij_opt,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
- real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,xnorm,xnormd
+ real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,xnorm,xnormd,xnormg
  character(len=500) :: message
 !arrays
  real(dp) :: dot(2)
@@ -147,6 +146,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  real(dp) :: z_tmp(2),z_tmp2(2)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:),cprj_cwavef_left(:,:)
  type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_conjgr(:,:)
+ !LTEST
+ !real(dp) :: chd
+ !LTEST
 
 ! *********************************************************************
 
@@ -202,6 +204,17 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
  cwavef_bands => cg(:,1+icg:nband*npw*nspinor+icg)
 
+ !LTEST
+ !gs_hamk%ekb=zero
+ !gs_hamk%kinpw_k=zero
+ !gs_hamk%vlocal=zero
+ !LTEST
+ if (cprj_update_lvl==-1.or.cprj_update_lvl==-5) then
+   call timab(1203,1,tsec)
+   call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
+   call timab(1203,2,tsec)
+ end if
+
  ! Big iband loop
  do iband=1,nband
 
@@ -219,11 +232,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
    ! Extraction of the vector that is iteratively updated
    cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
    cprj_cwavef => cprj_cwavef_bands(:,nspinor*(iband-1)+1:nspinor*iband)
-   if (cprj_update_lvl<0) then
-     call timab(1203,1,tsec)
-     call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
-     call timab(1203,2,tsec)
-   end if
+   !LTEST
+   !write(std_out,'(a,es27.14e3)') 'cwavef ID :',sum(abs(cwavef))
+   !LTEST
 
    ! Normalize incoming wf:
    call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
@@ -243,7 +254,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
    call get_cwavefr(cwavef,cwavef_r,gs_hamk,mpi_enreg)
 
    if (prtvol==-level) then
-     write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
+     write(message,'(a,f26.14)')' cgwf: xnorm = ',xnorm
+!     write(message,'(a,es27.14e3)')' cgwf: xnorm = ',xnorm
      call wrtout(std_out,message,'PERS')
    end if
 
@@ -290,9 +302,16 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call timab(1305,2,tsec)
 
        if (prtvol==-level) then
-         write(message,'(a,i0,2es21.10e3)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
+!         write(message,'(a,i0,2es27.14e3)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
+         write(message,'(a,i0,f26.14,es27.14e3)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
          call wrtout(std_out,message,'PERS')
        end if
+       !LTEST
+       !write(std_out,'(a,es27.14e3)') 'direc ID :',sum(abs(direc))
+       !LTEST
+       xnormd=1/sqrt(resid(iband))
+       z_tmp = (/xnormd,zero/)
+       call cg_zscal(npw*nspinor,z_tmp,direc)
 
        ! ======================================================================
        ! ============== CHECK FOR CONVERGENCE CRITERIA ========================
@@ -337,6 +356,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          ! Note that the current band (|C_iband>) is not used here
          call projbd(cg,direc,iband,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
+         !LTEST
+         !write(std_out,'(a,es27.14e3)') 'direc+projbd(1) ID :',sum(abs(direc))/xnormd
+         !LTEST
        end if
 
        ! For a generalized eigenpb, store the steepest descent direction
@@ -361,6 +383,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          end do
        end if
        call timab(1305,2,tsec)
+       !LTEST
+       !write(std_out,'(a,es27.14e3)') 'direc+pcon ID :',sum(abs(direc))/xnormd
+       !LTEST
 
        ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
        ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
@@ -407,6 +432,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          end do
          call timab(1305,2,tsec)
        end if
+       !LTEST
+       !write(std_out,'(a,es27.14e3)') 'direc+pcon+projbd ID :',sum(abs(direc))/xnormd
+       !LTEST
        ! Apply projbd to cprj_direc
        scprod=-scprod
        call timab(1303,1,tsec)
@@ -431,6 +459,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call dotprod_g(dotgg,doti,istwf_k,npw*nspinor,1,direc,direc_tmp,me_g0,mpi_enreg%comm_spinorfft)
        call timab(1305,2,tsec)
 
+       dotgg=dotgg/xnormd**2
+
        ! MJV: added 5 Feb 2012 - causes divide by 0 on next iteration of iline
        if (abs(dotgg) < TINY(0.0_dp)*1.e50_dp) dotgg = TINY(0.0_dp)*1.e50_dp
 
@@ -440,12 +470,17 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          dotgp=dotgg
          call timab(1305,1,tsec)
          call cg_zcopy(npw*nspinor,direc,conjgr)
+         z_tmp = (/one/xnormd,zero/)
+         call cg_zscal(npw*nspinor,z_tmp,conjgr)
          call timab(1305,2,tsec)
          call timab(1302,1,tsec)
          call pawcprj_copy(cprj_direc,cprj_conjgr)
+         !call pawcprj_axpby(one/xnormd,zero,cprj_direc,cprj_conjgr)
          call timab(1302,2,tsec)
          if (prtvol==-level)then
-           write(message,'(a,es21.10e3)')' cgwf: dotgg = ',dotgg
+           write(message,'(a,es27.14e3)')' cgwf: dotgg = ',dotgg
+!           write(message,'(2(a,es27.14e3))')' cgwf: dotgg = ',dotgg,' xnormd = ',xnormd
+!           write(message,'(a,f26.14)')' cgwf: dotgg = ',dotgg
            call wrtout(std_out,message,'PERS')
          end if
        else
@@ -453,30 +488,64 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          dotgp=dotgg
 
          if (prtvol==-level)then
-           write(message,'(a,2es21.10e3)')' cgwf: dotgg,gamma = ',dotgg,gamma
+           write(message,'(a,2es27.14e3)')' cgwf: dotgg,gamma = ',dotgg,gamma
+!           write(message,'(2(a,2es27.14e3))')' cgwf: dotgg,gamma = ',dotgg,gamma,' xnormd,xnormg = ',xnormd,xnormg
+!           write(message,'(a,2f26.14)')' cgwf: dotgg,gamma = ',dotgg,gamma
            call wrtout(std_out,message,'PERS')
          end if
 
          call timab(1305,1,tsec)
 !$OMP PARALLEL DO
          do ipw=1,npw*nspinor
-           conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
-           conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
+!           conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
+!           conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
+           conjgr(1,ipw)=direc(1,ipw)/xnormd+gamma*conjgr(1,ipw)/xnormg
+           conjgr(2,ipw)=direc(2,ipw)/xnormd+gamma*conjgr(2,ipw)/xnormg
          end do
          call timab(1305,2,tsec)
          call timab(1302,1,tsec)
-         call pawcprj_axpby(one,gamma,cprj_direc,cprj_conjgr)
+         call pawcprj_axpby(one,gamma*xnormd/xnormg,cprj_direc,cprj_conjgr)
+!         call pawcprj_axpby(one/xnormd,gamma/xnormg,cprj_direc,cprj_conjgr)
          call timab(1302,2,tsec)
        end if
+       call timab(1305,1,tsec)
+       call sqnorm_g(dotr,istwf_k,npw*nspinor,conjgr,me_g0,mpi_enreg%comm_fft)
+       xnormg=one/sqrt(dotr)
+       z_tmp = (/xnormg,zero/)
+       call cg_zscal(npw*nspinor,z_tmp,conjgr)
+       call timab(1305,2,tsec)
+       call timab(1302,1,tsec)
+       call pawcprj_axpby(zero,xnormg/xnormd,cprj_conjgr,cprj_conjgr)
+       call timab(1302,2,tsec)
+       !LTEST
+       write(std_out,'(a,es27.14e3)') 'conjgr ID :',sum(abs(conjgr))/xnormg
+       !LTEST
+
+       call getcsc(dot,cpopt,conjgr,conjgr,cprj_conjgr,cprj_conjgr,&
+&       gs_hamk,mpi_enreg,1,tim_getcsc)
 
        ! ======================================================================
        ! ============ PROJECTION OF THE CONJUGATED GRADIENT ===================
        ! ======================================================================
 
+       !LTEST
+       !if (cprj_update_lvl==-2.or.cprj_update_lvl==-4.or.cprj_update_lvl==-5) then
+       !  call timab(1203,1,tsec)
+       !  call cprj_update_oneband(conjgr,cprj_conjgr,gs_hamk,mpi_enreg)
+       !  call timab(1203,2,tsec)
+       !end if
+       !LTEST
        call getcsc(dot,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
 &       gs_hamk,mpi_enreg,1,tim_getcsc)
        dotr=dot(1)
        doti=dot(2)
+       !LTEST
+       if (prtvol==-level) then
+         write(message,'(a,2f26.14)') 'conjgr dotr,doti :',dotr/xnormg,doti/xnormg
+!         write(message,'(a,2es27.14e3)') 'conjgr dotr,doti :',dotr/xnormg,doti/xnormg
+         call wrtout(std_out,message,'PERS')
+       end if
+       !LTEST
 
        ! Project the conjugated gradient onto the current band
        call timab(1305,1,tsec)
@@ -497,19 +566,35 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call timab(1305,2,tsec)
        call timab(1302,1,tsec)
        call pawcprj_copy(cprj_conjgr,cprj_direc)
-       z_tmp   = (/one,zero/)
-       z_tmp2  = (/-dotr,-doti/)
-       call pawcprj_zaxpby(z_tmp2,z_tmp,cprj_cwavef,cprj_direc)
+       z_tmp  = (/-dotr,-doti/)
+       z_tmp2 = (/one,zero/)
+       call pawcprj_zaxpby(z_tmp,z_tmp2,cprj_cwavef,cprj_direc)
        call timab(1302,2,tsec)
+       !LTEST
+       write(std_out,'(a,es27.14e3)') 'direc (new) ID :',sum(abs(direc))/xnormg
+       !LTEST
 
        ! ======================================================================
        ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
        ! ======================================================================
 
+       !LTEST
+       !if (cprj_update_lvl==-3.or.cprj_update_lvl==-4.or.cprj_update_lvl==-5) then
+       !  call timab(1203,1,tsec)
+       !  call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
+       !  call timab(1203,2,tsec)
+       !end if
+       !LTEST
        ! Compute norm of direc
        call getcsc(dot,cpopt,direc,direc,cprj_direc,cprj_direc,&
 &       gs_hamk,mpi_enreg,1,tim_getcsc)
        xnormd=one/sqrt(abs(dot(1)))
+       !LTEST
+       if (prtvol==-level) then
+         write(message,'(a,es27.14e3)') 'xnormd :',xnormd*xnormg
+         call wrtout(std_out,message,'PERS')
+       end if
+       !LTEST
 
        sij_opt=0
        ! Compute direc in real space
@@ -519,6 +604,14 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
        dhc=z_tmp(1)
        dhc=dhc*xnormd
+       !LTEST
+       !! Compute chd = Re{<C|H|D>}
+       !call getchc(z_tmp,cpopt,direc,cwavef,cprj_direc,cprj_cwavef,direc_r,cwavef_r,&
+       !  &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
+       !chd=z_tmp(1)
+       !chd=chd*xnormd
+       !write(std_out,'(a,2f26.14)') 'dhc,chd=',dhc,chd
+       !LTEST
 
        ! Compute <D|H|D> or <D|(H-zshift)^2|D>
        call getchc(z_tmp,cpopt,direc,direc,cprj_direc,cprj_direc,direc_r,direc_r,&
@@ -526,8 +619,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        dhd=z_tmp(1)
        dhd=dhd*xnormd**2
 
-       if(prtvol==-level)then
-         write(message,'(a,3es21.10e3)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
+       if (prtvol==-level) then
+!         write(message,'(a,3es27.14e3)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
+         write(message,'(a,3f26.14)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
          call wrtout(std_out,message,'PERS')
        end if
 
@@ -537,6 +631,13 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
        ! Compute tan(2 theta),sin(theta) and cos(theta)
        tan2th=2.0_dp*dhc/(chc-dhd)
+       !LTEST
+       if (prtvol==-level) then
+         write(message,'(a,f26.14)') 'tan2th :',tan2th
+!         write(message,'(a,es27.14e3)') 'tan2th :',tan2th
+         call wrtout(std_out,message,'PERS')
+       end if
+       !LTEST
 
        if (abs(tan2th)<1.d-05) then
          costh=1.0_dp-0.125_dp*tan2th**2
@@ -575,6 +676,13 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        ! ============================================================
 
        sintn=sinth*xnormd
+       !LTEST
+       if (prtvol==-level) then
+         write(message,'(a,2f26.14)') 'costh,sintn :',costh,sintn*xnormg
+!         write(message,'(a,2es27.14e3)') 'costh,sintn :',costh,sintn*xnormg
+         call wrtout(std_out,message,'PERS')
+       end if
+       !LTEST
 
        call timab(1305,1,tsec)
 !$OMP PARALLEL DO
@@ -593,7 +701,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          end do
        end do
        call timab(1305,2,tsec)
-       if (cprj_update_lvl<=0) then
+       if (cprj_update_lvl<=0.and.cprj_update_lvl>=-1) then
          call timab(1203,1,tsec)
          call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
          call timab(1203,1,tsec)
@@ -602,6 +710,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
          call timab(1302,2,tsec)
        end if
+       !LTEST
+       write(std_out,'(a,es27.14e3)') 'cwavef (end) ID :',sum(abs(cwavef))
+       !LTEST
 
        ! ======================================================================
        ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
@@ -657,7 +768,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
  !  ======================================================================
 
- if (cprj_update_lvl<=2) then
+ if (cprj_update_lvl<=2.and.cprj_update_lvl>=-1) then
    call timab(1203,1,tsec)
    call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
    call timab(1203,2,tsec)
@@ -673,6 +784,10 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
    ! Compute local+kinetic part
    call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
      &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,3)
+!LTEST
+!   call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
+!     &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
+!LTEST
    isubh=isubh0
    call timab(1304,1,tsec)
    do jband=1,iband
@@ -695,7 +810,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
    do iband=1,nband
      do jband=1,iband
        if (jband<=10) then
-         write(message,'(i7,2es21.10e3)')isubh,subham(isubh:isubh+1)
+!         write(message,'(i7,2es27.14e3)')isubh,subham(isubh:isubh+1)
+         write(message,'(i7,2f26.14)')isubh,subham(isubh:isubh+1)
          call wrtout(std_out,message,'PERS')
        end if
        isubh=isubh+2

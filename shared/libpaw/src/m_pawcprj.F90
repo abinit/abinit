@@ -576,7 +576,7 @@ end subroutine pawcprj_axpby
  norma=alpha(1)**2+alpha(2)**2
  normb=beta(1) **2+beta(2) **2
  n1dimy=size(cprjy,dim=1);n2dimy=size(cprjy,dim=2);ncpgry=cprjy(1,1)%ncpgr
- if (norma>tol16) then
+ if (norma>tol16*tol16) then
    n1dimx=size(cprjx,dim=1);n2dimx=size(cprjx,dim=2);ncpgrx=cprjx(1,1)%ncpgr
    msg = ""
    if (n1dimx/=n1dimy) msg = TRIM(msg)//"Error in pawcprj_zaxpby: n1 wrong sizes !"//ch10
@@ -587,7 +587,7 @@ end subroutine pawcprj_axpby
    end if
  end if
 
- if (norma<=tol16) then
+ if (norma<=tol16*tol16) then
    do jj=1,n2dimy
      do ii=1,n1dimy
        nlmn=cprjy(ii,jj)%nlmn
@@ -614,7 +614,7 @@ end subroutine pawcprj_axpby
        end do
      end do
    end if
- else if (normb<=tol16) then
+ else if (normb<=tol16*tol16) then
    do jj=1,n2dimx
      do ii=1,n1dimx
        nlmn=cprjx(ii,jj)%nlmn
@@ -638,6 +638,38 @@ end subroutine pawcprj_axpby
        end do
      end do
    end if
+! else if (abs(beta(1)-one)<tol16.and.abs(beta(2))<tol16) then
+!   do jj=1,n2dimx
+!     do ii=1,n1dimx
+!       nlmn=cprjx(ii,jj)%nlmn
+!       cprjy(ii,jj)%nlmn =nlmn
+!       do kk=1,nlmn
+!         cp1=cprjy(ii,jj)%cp(1,kk)
+!         cp2=cprjy(ii,jj)%cp(2,kk)
+!         cp1=cp1+alpha(1)*cprjx(ii,jj)%cp(1,kk)-alpha(2)*cprjx(ii,jj)%cp(2,kk)
+!         cp2=cp2+alpha(1)*cprjx(ii,jj)%cp(2,kk)+alpha(2)*cprjx(ii,jj)%cp(1,kk)
+!         cprjy(ii,jj)%cp(1,kk)=cp1
+!         cprjy(ii,jj)%cp(2,kk)=cp2
+!       end do
+!     end do
+!   end do
+!   if (ncpgrx>0) then
+!     do jj=1,n2dimx
+!       do ii=1,n1dimx
+!         nlmn=cprjx(ii,jj)%nlmn
+!         do kk=1,nlmn
+!           do ll=1,ncpgrx
+!             cp1=cprjy(ii,jj)%dcp(1,ll,kk)
+!             cp2=cprjy(ii,jj)%dcp(2,ll,kk)
+!             cp1=cp1+alpha(1)*cprjx(ii,jj)%dcp(1,ll,kk)-alpha(2)*cprjx(ii,jj)%dcp(2,ll,kk)
+!             cp2=cp2+alpha(1)*cprjx(ii,jj)%dcp(2,ll,kk)+alpha(2)*cprjx(ii,jj)%dcp(1,ll,kk)
+!             cprjy(ii,jj)%dcp(1,ll,kk)=cp1
+!             cprjy(ii,jj)%dcp(2,ll,kk)=cp2
+!           end do
+!         end do
+!       end do
+!     end do
+!   end if
  else
    do jj=1,n2dimx
      do ii=1,n1dimx
@@ -648,6 +680,10 @@ end subroutine pawcprj_axpby
 &         +beta(1) *cprjy(ii,jj)%cp(1,kk)-beta(2) *cprjy(ii,jj)%cp(2,kk)
          cp2=alpha(1)*cprjx(ii,jj)%cp(2,kk)+alpha(2)*cprjx(ii,jj)%cp(1,kk) &
 &         +beta(1) *cprjy(ii,jj)%cp(2,kk)+beta(2) *cprjy(ii,jj)%cp(1,kk)
+!         cp1=beta(1) *cprjy(ii,jj)%cp(1,kk)-beta(2) *cprjy(ii,jj)%cp(2,kk)
+!         cp1=cp1+alpha(1)*cprjx(ii,jj)%cp(1,kk)-alpha(2)*cprjx(ii,jj)%cp(2,kk)
+!         cp2=beta(1) *cprjy(ii,jj)%cp(2,kk)+beta(2) *cprjy(ii,jj)%cp(1,kk)
+!         cp2=cp2+alpha(1)*cprjx(ii,jj)%cp(2,kk)+alpha(2)*cprjx(ii,jj)%cp(1,kk)
          cprjy(ii,jj)%cp(1,kk)=cp1
          cprjy(ii,jj)%cp(2,kk)=cp2
        end do
@@ -663,6 +699,10 @@ end subroutine pawcprj_axpby
 &             +beta(1) *cprjy(ii,jj)%dcp(1,ll,kk)-beta(2) *cprjy(ii,jj)%dcp(2,ll,kk)
              cp2=alpha(1)*cprjx(ii,jj)%dcp(2,ll,kk)+alpha(2)*cprjx(ii,jj)%dcp(1,ll,kk) &
 &             +beta(1) *cprjy(ii,jj)%dcp(2,ll,kk)+beta(2) *cprjy(ii,jj)%dcp(1,ll,kk)
+!             cp1=beta(1) *cprjy(ii,jj)%dcp(1,ll,kk)-beta(2) *cprjy(ii,jj)%dcp(2,ll,kk)
+!             cp1=cp1+alpha(1)*cprjx(ii,jj)%dcp(1,ll,kk)-alpha(2)*cprjx(ii,jj)%dcp(2,ll,kk)
+!             cp2=beta(1) *cprjy(ii,jj)%dcp(2,ll,kk)+beta(2) *cprjy(ii,jj)%dcp(1,ll,kk)
+!             cp2=cp2+alpha(1)*cprjx(ii,jj)%dcp(2,ll,kk)+alpha(2)*cprjx(ii,jj)%dcp(1,ll,kk)
              cprjy(ii,jj)%dcp(1,ll,kk)=cp1
              cprjy(ii,jj)%dcp(2,ll,kk)=cp2
            end do
@@ -732,7 +772,7 @@ end subroutine pawcprj_zaxpby
 
  do ia=1,n2dima
    norma=alpha(1,ia)**2+alpha(2,ia)**2
-   if (norma>tol12*tol12) then
+   if (norma>tol16*tol16) then
      do jj=1,n2dimy
        do ii=1,n1dimx
          nlmn=cprjy(ii,jj)%nlmn
