@@ -2626,6 +2626,10 @@ energy = energy + energy_part
 fcart = fcart + fcart_part
 endif
 
+! multiply forces by -1
+  fcart = -1 * fcart
+
+
 !-----------------------------------
 ! 9 - Add variation of the atomic
 !     displacement due to the strain
@@ -2654,9 +2658,6 @@ endif
 
 ! write(*,*) "--- STRTEN after /ucvol  --- " 
 ! write(*,*) strten(:)
-! multiply forces by -1
-  fcart = -1 * fcart
-
 ! Redistribute the residuale of the forces
   call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom)
 
@@ -2841,16 +2842,16 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   if (strain%name /= "reference")  then
     has_strain = .TRUE.
     strain_tmp = strain%strain 
-    strain_tmp(1,1) = strain_tmp(1,1) + 1
-    strain_tmp(2,2) = strain_tmp(2,2) + 1
-    strain_tmp(3,3) = strain_tmp(3,3) + 1
+    strain_tmp(1,1) = strain_tmp(1,1) + 1.0
+    strain_tmp(2,2) = strain_tmp(2,2) + 1.0
+    strain_tmp(3,3) = strain_tmp(3,3) + 1.0
     ! get (1+eta)^-1 
     call matr3inv(strain_tmp,strain_inv)
   else if (strain%name == "reference")  then
     strain_inv(:,:) = zero
-    strain_inv(1,1) = 1
-    strain_inv(2,2) = 1
-    strain_inv(3,3) = 1
+    strain_inv(1,1) = 1.0
+    strain_inv(2,2) = 1.0
+    strain_inv(3,3) = 1.0
   end if 
 !  write(*,*) "---- STRAIN ----" 
 !  do ii = 1,3 
