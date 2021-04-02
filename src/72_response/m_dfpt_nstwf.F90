@@ -1048,6 +1048,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          end if
          iband_me = iband_me + 1
 
+         ch1c_tmp = zero
+
          bands_treated_now = 0
          bands_treated_now(iband) = 1
          call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
@@ -1244,6 +1246,10 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
                  gvnlx1_tmp = gvnlx1 
                end if
                call xmpi_bcast(gvnlx1_tmp, band_procs(iband), mpi_enreg%comm_band, ierr)
+               if (option == 1) then
+! in case I need to reuse the ch1c (option 1) then load them here
+                 ch1c_tmp(:,1:nband_me) = ch1c(:,1:nband_me,iband_,ikpt_me)
+               end if
 
  
 !            Compute -Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
@@ -1256,7 +1262,10 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
 ! keep my own gvnlx
                if (iband_ == iband) then
                  gvnlx1 = gvnlx1_tmp
-                 ch1c(:,1:nband_me,iband,ikpt_me) = ch1c_tmp
+               end if
+               if (option == 0) then
+! save ch1c for all of the iband_ on each proc, for later use. First band index only for my nband_me which matches cgq
+                 ch1c(:,1:nband_me,iband_,ikpt_me) = ch1c_tmp(:,1:nband_me)
                end if
              end do ! iband_
              ABI_FREE(gvnlx1_tmp)
@@ -1270,6 +1279,9 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
 !                Add contribution to DDB
 !                Note: factor 2 (from d2E/dj1dj2=2E^(j1j2)) eliminated by factor 1/2
 !                (-1) factor already present
+#ifdef DEV_MJV
+print *, "term1 ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dotr, doti ", dotr, doti
+#endif
                  d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband)*elfd_fact*dotr
                  d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband)*elfd_fact*doti
                end if
@@ -1305,6 +1317,9 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
                    cs1c(1,jband_me,iband,ikpt_me)=dot1r
                    cs1c(2,jband_me,iband,ikpt_me)=dot1i
                  end if
+#ifdef DEV_MJV
+print *, "initial ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot1r, dot1i ", dot1r, dot1i
+#endif
                end if
 
                if (abs(occ_k(iband))>tol8) then
@@ -1315,15 +1330,22 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
                    dot2i=cs1c(2,jband_me,iband,ikpt_me)
                    dotr=dotr+(dot1r*dot2r+dot1i*dot2i)*arg
                    doti=doti+(dot1i*dot2r-dot1r*dot2i)*arg
+#ifdef DEV_MJV
+print *, "dcwf2 ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot2r, dot2i ", dot2r, dot2i, " dotr, doti ", dotr, doti
+#endif
                  end if
 !                Computation of term (II)
                  if (is_metal) then
                    if (abs(rocceig(jband,iband))>tol8) then
                      ii=2*jband-1+(iband-1)*2*nband_k
                      arg=invocc*rocceig(jband,iband)*(eig_k(iband)-eig_kq(jband))
-                     dot2r=eig1_k(ii);dot2i=eig1_k(ii+1)
+                     dot2r=eig1_k(ii)
+                     dot2i=eig1_k(ii+1)
                      dotr=dotr+arg*(dot1r*dot2r-dot1i*dot2i)
                      doti=doti+arg*(dot1r*dot2i+dot2r*dot1i)
+#ifdef DEV_MJV
+print *, "ismetal ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot2r, dot2i ", dot2r, dot2i, " dotr, doti ", dotr, doti
+#endif
                    end if
                  end if
                end if ! occ bands
@@ -1343,6 +1365,9 @@ print *, '   ',  cs1c(:,:,4,ikpt_me)
 
              dotr=quarter*dotr
              doti=quarter*doti
+#ifdef DEV_MJV
+print *, "condense ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dotr, doti ", dotr, doti
+#endif
 !            Note: factor 2 (from d2E/dj1dj2=2E^(j1j2))
 !  Note2: do not sum over bands here - comm_band is a sub communicator of spacecomm, and a full sum is done later
              d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*dotr
@@ -1456,6 +1481,10 @@ print *, ' nstpaw drhoaug1 check ', any(isnan(drhoaug1))
 !      Accumulate contribution of this k-point
        d2nl (:,:,ipert1,idir,ipert)=d2nl (:,:,ipert1,idir,ipert)+d2nl_k (:,:)
        if (usepaw==1) d2ovl(:,:,ipert1,idir,ipert)=d2ovl(:,:,ipert1,idir,ipert)+d2ovl_k(:,:)
+#ifdef DEV_MJV
+print *, ' nstpaw  d2ovl_k all idir; ipert1 idir ipert ', ipert1,idir,ipert, d2ovl_k(:,:)
+#endif
+
 
 !      Deallocations of arrays used for this k-point
        ABI_FREE(gh1)
@@ -1668,7 +1697,7 @@ print *, 'nstpaw dotr doti ', dotr, doti
        d2ovl_drho(1,idir1,ipert1,idir,ipert)=elfd_fact*dotr
        d2ovl_drho(2,idir1,ipert1,idir,ipert)=elfd_fact*doti
 #ifdef DEV_MJV
-print *, 'nstpaw d2ovl_drho(1,idir1,ipert1,idir,ipert) ', idir1,ipert1,idir,ipert, d2ovl_drho(:,idir1,ipert1,idir,ipert)
+print *, 'OK nstpaw d2ovl_drho(1,idir1,ipert1,idir,ipert) ', idir1,ipert1,idir,ipert, d2ovl_drho(:,idir1,ipert1,idir,ipert)
 #endif
 
      end do ! End loop over perturbation directions
@@ -1726,13 +1755,13 @@ print *, 'nstpaw d2ovl_drho(1,idir1,ipert1,idir,ipert) ', idir1,ipert1,idir,iper
  end if
 
 #ifdef DEV_MJV
-print *, 'nstpaw bare d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(:,:,1,idir,ipert)
+print *, 'nstpaw bare d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(1,:,:,idir,ipert)
 #endif
 !Build complete d2ovl matrix
  if (usepaw==1) d2ovl(:,:,:,idir,ipert)=d2ovl(:,:,:,idir,ipert)+d2ovl_drho(:,:,:,idir,ipert)
 
 #ifdef DEV_MJV
-print *, 'nstpaw completed d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(:,:,1,idir,ipert)
+print *, 'nstpaw completed d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(1,:,:,idir,ipert)
 #endif
  if (usepaw==1) then
    ABI_FREE(d2ovl_drho)
@@ -1767,7 +1796,7 @@ print *, 'nstpaw completed d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(:,:,1,id
  ABI_FREE(work)
 
 #ifdef DEV_MJV
-print *, 'nstpaw phon sym d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(:,:,1,idir,ipert)
+print *, 'nstpaw phon sym d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(1,:,:,idir,ipert)
 #endif
 !In the case of the strain perturbation time-reversal symmetry will always
 !be true so imaginary part of d2nl will be must be set to zero here since
@@ -1822,7 +1851,8 @@ print *, 'nstpaw phon sym d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(:,:,1,idi
 !end if
 
 #ifdef DEV_MJV
-print *, 'nstpaw strain sym d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(:,:,1,idir,ipert)
+print *, 'nstpaw strain sym d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(1,:,:,idir,ipert)
+print *, 'nstpaw strain sym d2nl(1,:,:,idir,ipert) ', idir,ipert, d2nl(1,:,:,idir,ipert)
 #endif
 !Must also symmetrize the electric field perturbation response !
 !Note: d2ovl is not symetrized because it is zero for electric field perturbation
