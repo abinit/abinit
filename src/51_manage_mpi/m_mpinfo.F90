@@ -2497,7 +2497,7 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !Local variables-------------------------------
  integer :: maxproc_bandpool
- integer :: inb,inb1,ind,ind0,nband_k,proc_max,proc_min
+ integer :: inb1,ind,ind0,nband_k,proc_max,proc_min
  integer :: nband_k_sp2,minb_per_proc
  integer :: iiband,iikpt,iisppol,ikpt_this_proc,nb_per_proc,nproc_spkpt,temp_unit
  integer :: kpt_distrb(nkpt)
