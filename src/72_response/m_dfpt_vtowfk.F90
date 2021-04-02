@@ -461,7 +461,6 @@ print *, ' occ_k, eig0nk,eig0_kq ', occ_k(iband), eig0nk,eig0_kq
 print *, 'cgwf cwavef 444 ', cwavef(:,1:5)
 print *, 'cgwf cwave0 444 ', cwave0(:,1:5)
 print *, 'cgwf cgq 444 ', cgq(:,1:5)
-print *, 'cgwf gscq 444 ', gscq(:,1:5)
 #endif
        call dfpt_cgwf(iband,iband_me,band_procs,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 &       rf2,dcwavef,&
@@ -485,7 +484,6 @@ print *, 'cgwf gscq 444 ', gscq(:,1:5)
 print *, 'prtfull1wf ', dtset%prtfull1wf
 print *, 'vtowfk before corrmetal iband, cwavef ', iband, cwavef(:,1:5)
 print *, 'vtowfk before corrmetal iband, gh0c1 ', iband, gh0c1(:,1:5)
-print *, 'vtowfk before corrmetal iband, gh0c1 ', iband, gsc(:,1:5)
 #endif
        if (dtset%prtfull1wf>0) then
          call full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,eig1_k,fermie1,&

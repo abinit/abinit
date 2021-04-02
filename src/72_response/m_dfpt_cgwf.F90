@@ -640,7 +640,6 @@ print *, 'eig1_k_loc 619 line for iband ', iband, eig1_k_loc(:,:,iband)
 
 #ifdef DEV_MJV
 print *, 'gh1c 619 ', gh1c(:,1:10)
-print *, 'gscq 619 ', gscq(:,1:10)
 #endif
 
  if(ipert/=natom+10.and.ipert/=natom+11) then
@@ -825,7 +824,6 @@ end if
  end if
 #ifdef DEV_MJV
 print *, 'cwavef 763 ', cwavef(:,1:10)
-print *, 'gsc 778 ', band, gsc(:,1:10)
 print *, 'ghc 778 ',band,  ghc(:,1:10)
 print *, 'gh1c 778 ',band,  gh1c(:,1:10)
 #endif

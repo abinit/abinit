@@ -758,8 +758,10 @@ print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
    if(iscf_mod>0) then
      if (psps%usepaw==0) then
 #ifdef DEV_MJV
-print *, ' rhor1 726 ', rhor1(:,1:10)
-print *, ' rhoaug1 my bands and k 726 ', rhoaug1(:,1:10,1,1)
+print *, " dims of rhor1 = ", cplex,nfftf,nspden
+print *, " dims of rhoaug1 ", cplex,n4,n5,n6,gs_hamkq%nvloc
+!print *, ' rhor1 726 ', rhor1(:,1:10)
+!print *, ' rhoaug1 my bands and k 726 ', rhoaug1(:,1:10,1,1)
 #endif
        call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhor1,rhoaug1(:,:,:,1),1)
        if(nspden==4)then
