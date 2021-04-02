@@ -2565,7 +2565,13 @@ endif
        call Wfd_nato_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)     ! Construct the density
        if (dtset%prtwf == 1) then
          gw1rdm_fname=dtfil%fnameabo_wfk
+#ifdef MJV_DEV
+print *, 'RDM sigma writing wfk file ', gw1rdm_fname
+#endif
          call Wfd_nato_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)   ! Print WFK file, here QP_BSt contains nat. orb. occs.
+#ifdef MJV_DEV
+print *, 'RDM finished writing wfk file ', gw1rdm_fname
+#endif
        end if
        if (dtset%prtden == 1) then
          gw1rdm_fname=dtfil%fnameabo_den
