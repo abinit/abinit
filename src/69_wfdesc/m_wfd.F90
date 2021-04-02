@@ -4569,7 +4569,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
 
  DBG_ENTER("COLL")
  nocheck=.false.
- if(present(wfknocheck)) nocheck=.true.
+ if(present(wfknocheck)) nocheck=wfknocheck
 
  nprocs = xmpi_comm_size(Wfd%comm); my_rank = xmpi_comm_rank(Wfd%comm)
  iam_master = (my_rank == master)
@@ -4632,7 +4632,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
        ABI_ERROR("Impossible to continue when the npw in the Hdr is diff. to the npw in the Wfd")
      end if
    end do
-   call wfkfile%open_write(Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.TRUE.,write_frm=.FALSE.)
+   call wfkfile%open_write(Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.TRUE.,write_frm=.TRUE.)
  end if
 
  ! Other nodes wait here before opening the same file.
@@ -4688,7 +4688,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
                                                                                              ! kg_k obtained from Wfd so OK! It is
                                                                                              ! how Gs are ordered.
        else
-         ABI_ERROR("This should not happen in the present version!")
+         ABI_ERROR("band_block(1)>1 should not happen in the present version!")
          !call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,cg_k=cg_k(:,1+icg:))
        end if
      end do

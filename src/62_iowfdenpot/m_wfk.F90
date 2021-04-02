@@ -558,7 +558,9 @@ print *, 'do_write_frm do_write_hdr ', do_write_frm, do_write_hdr
  Wfk%nproc     = xmpi_comm_size(comm)
  Wfk%fform     = 2
 
+#ifdef DEV_MJV
 Wfk%debug = .true.
+#endif
 
  ! Copy the header
  call hdr_copy(Hdr,Wfk%Hdr)

@@ -739,6 +739,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
    Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,use_fnl_dir0der0=(Dtset%gw1rdm==2))
 
+#ifdef DEV_MJV
+print *, 'RDM bdm_mask = ', bdm_mask, ' read in wfk_fname ', wfk_fname
+call flush()
+#endif
  ! MRM: also initialize the Wfd_nato_master for GW 1-RDM if required.
  ! Warning, this should be replaced by copy but copy fails due to bands being allocated in different manners. Do it in the future! FIXME
  if (rdm_update) then
@@ -761,6 +765,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call timab(402,2,tsec) ! sigma(Init1)
  call timab(404,1,tsec) ! rdkss
 
+#ifdef DEV_MJV
+print *, 'RDM  call bdm_mask ', wfk_fname
+call flush()
+#endif
  call wfd%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
 
  if (Dtset%pawcross==1) then
@@ -2565,12 +2573,14 @@ endif
        call Wfd_nato_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)     ! Construct the density
        if (dtset%prtwf == 1) then
          gw1rdm_fname=dtfil%fnameabo_wfk
-#ifdef MJV_DEV
-print *, 'RDM sigma writing wfk file ', gw1rdm_fname
+#ifdef DEV_MJV
+print *, 'RDM sigma writing wfk file ', trim(gw1rdm_fname), wfknocheck
+call flush()
 #endif
          call Wfd_nato_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)   ! Print WFK file, here QP_BSt contains nat. orb. occs.
-#ifdef MJV_DEV
-print *, 'RDM finished writing wfk file ', gw1rdm_fname
+#ifdef DEV_MJV
+print *, 'RDM finished writing wfk file ', trim(gw1rdm_fname)
+call flush()
 #endif
        end if
        if (dtset%prtden == 1) then
