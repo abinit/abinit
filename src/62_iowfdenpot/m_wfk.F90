@@ -2204,8 +2204,10 @@ print *, 'in writing of records for mpio formeig 1'
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG) + my_offpad
 #ifdef DEV_MJV
-print *, 'RF writing mpio eig spin, ik, band_block(1), band_block(2), Wfk%offset_ks(ik_ibz,spin,REC_EIG), my_offset, my_offpad, xmpio_bsize_frm ', &
-&                     spin, ik_ibz, band_block(1), band_block(2), Wfk%offset_ks(ik_ibz,spin,REC_EIG), my_offset, my_offpad, xmpio_bsize_frm
+print *, 'RF writing mpio eig spin, ik, band_block(1), band_block(2),',&
+&        ' Wfk%offset_ks(ik_ibz,spin,REC_EIG), my_offset, my_offpad, xmpio_bsize_frm ', &
+&                     spin, ik_ibz, band_block(1), band_block(2), &
+&          Wfk%offset_ks(ik_ibz,spin,REC_EIG), my_offset, my_offpad, xmpio_bsize_frm
 #endif
 
        call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,gkk_type,'native',xmpio_info,mpierr)
@@ -3438,7 +3440,8 @@ print *, ' distrb_flags(:,:,:) ', distrb_flags
        if (rbz2disk_sort(ii) /= ik_disk) exit
        nqst = nqst + 1
 #ifdef DEV_MJV
-print *, 'iqst, ii, iperm(ii), nqst, ik_disk, distrb_flags(iperm(ii),:,spin)  ', iqst, ii, iperm(ii), nqst, ik_disk, distrb_flags(iperm(ii),:,spin)
+print *, 'iqst, ii, iperm(ii), nqst, ik_disk, distrb_flags(iperm(ii),:,spin)  ', &
+&  iqst, ii, iperm(ii), nqst, ik_disk, distrb_flags(iperm(ii),:,spin)
 #endif
        if (any(distrb_flags(iperm(ii),:,spin))) needthisk=.true.
        if (convnsppol1to2 .and. any(distrb_flags(iperm(ii),:,nsppol+1-spin))) needthisk=.true.
@@ -3553,7 +3556,8 @@ print *, 'ikf, kf, isym, itimrev, g0,  jj, iqst, ik_disk, k_disk ', &
          if (present(eigen)) then
            ibdoff = ibdeig(ikf,spin_sym)+(iband-1)*(2*nband_k)**formeig
 #ifdef DEV_MJV
-print *, "(iband-1+nband_me)*(2*nband_k)**formeig, iband,nband_me,nband_k,formeig ", (iband-1+nband_me)*(2*nband_k)**formeig, iband,nband_me,nband_k,formeig
+print *, "(iband-1+nband_me)*(2*nband_k)**formeig, iband,nband_me,nband_k,formeig ", &
+&   (iband-1+nband_me)*(2*nband_k)**formeig, iband,nband_me,nband_k,formeig
 call flush()
 #endif
            eigen(ibdoff+1:ibdoff+nband_me_disk*(2*nband_k)**formeig) = &

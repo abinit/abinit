@@ -836,7 +836,8 @@ print *, 'kbz ', kbz
        bz2kin_smap(ikpt_found, 3:5) = nint(kbz(:,ikpt_found)-ksym)
        bz2kin_smap(ikpt_found,   6) = itim
 #ifdef DEV_MJV
-print *, 'bz2kin_smap(1,2,6, ikpt_found= ', ikpt_found, ' : ik_in,isym,itim  ', bz2kin_smap(ikpt_found,1), bz2kin_smap(ikpt_found,2),bz2kin_smap(ikpt_found,6)
+print *, 'bz2kin_smap(1,2,6, ikpt_found= ', ikpt_found, ' : ik_in,isym,itim  ', &
+&   bz2kin_smap(ikpt_found,1), bz2kin_smap(ikpt_found,2),bz2kin_smap(ikpt_found,6)
 print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(ikpt_found, 3:5)
 #endif
      end do
