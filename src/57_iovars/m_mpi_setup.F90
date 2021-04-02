@@ -664,6 +664,17 @@ end do ! isppol
 
    do ii=1,3
 
+!    Read in mkmem here if it is in the input file
+!    TODO: mkmem is not supported any longer. These variables can be removed.
+     if(ii==1)then
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mkmem',tread0,'INT')
+     else if(ii==2)then
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mkqmem',tread0,'INT')
+     else if(ii==3)then
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mk1mem',tread0,'INT')
+     end if
+
+
 !    Note that mkmem is used as a dummy variable, representing mkmem as well
 !    as mkqmem, and mk1mem.
      if(tread0==1) then
