@@ -485,6 +485,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call timab(1302,1,tsec)
        call pawcprj_axpby(zero,xnormg,cprj_conjgr,cprj_conjgr)
        call timab(1302,2,tsec)
+       xnormg=xnormg*xnormd
 
        call getcsc(dot,cpopt,conjgr,conjgr,cprj_conjgr,cprj_conjgr,&
 &       gs_hamk,mpi_enreg,1,tim_getcsc)
