@@ -82,6 +82,9 @@ module m_vtorho
  use m_cgprj,              only : ctocprj
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
+ !LTEST
+ use m_cgwf_paw,           only : cprj_check,get_cprj_id
+ !LTEST
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -383,6 +386,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
  type(oper_type) :: dft_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
+ !LTEST
+ type(pawcprj_type),pointer :: cprj_cwavef_bands(:,:)
+ !LTEST
+
 
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
@@ -901,6 +908,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),&
 &         compute_gbound=(mpi_enreg%paral_kgb/=1))
        end if
+       !LTEST
+       cprj_cwavef_bands => cprj(:,1+ibg:nband_k*my_nspinor+ibg)
+       write(std_out,'(a,es27.14e3)') ' cg ID (vtorho) : ',sum(abs(cg))
+       write(std_out,'(a,es27.14e3)') ' cprj ID (vtorho) : ',get_cprj_id(cprj)
+       !call cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,'vtorho',mpi_enreg)
+       !LTEST
 
 !      Load band-FFT tabs (transposed k-dependent arrays)
        if (mpi_enreg%paral_kgb==1) then

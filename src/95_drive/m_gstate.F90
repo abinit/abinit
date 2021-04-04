@@ -103,6 +103,9 @@ module m_gstate
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
  use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
  use m_cgprj,            only : ctocprj
+ !LTEST
+ use m_cgwf_paw,         only : get_cprj_id
+ !LTEST
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -1045,11 +1048,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
      call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred)
      call wrtout(std_out,' Computing cprj from initial wavefunctions (gstate)')
+     !LTEST
+     write(std_out,'(a,es27.14e3)') ' cg ID (before ctocprj) : ',sum(abs(cg))
+     !LTEST
      call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
-&   iorder_cprj,dtset%istwfk,kg,dtset%kpt,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&   iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,ncprj,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 &   dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
      call wrtout(std_out,' cprj is computed')
+     !LTEST
+     write(std_out,'(a,es27.14e3)') ' cprj ID (after ctocprj) : ',get_cprj_id(cprj)
+     !LTEST
      ABI_DEALLOCATE(ph1d)
    end if
  end if
@@ -1296,6 +1305,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    call timab(35,3,tsec)
 
+   !LTEST
+   write(std_out,'(a,es27.14e3)') ' cg ID (before scfcv_init) : ',sum(abs(cg))
+   write(std_out,'(a,es27.14e3)') ' cprj ID (before scfcv_init) : ',get_cprj_id(cprj)
+   !LTEST
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
 &   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
 &   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&

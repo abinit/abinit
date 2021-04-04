@@ -53,6 +53,7 @@ module m_cgwf_paw
  public :: mksubovl
  public :: cprj_update
  public :: cprj_check
+ public :: get_cprj_id
 
 !!***
 
@@ -208,6 +209,10 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  !gs_hamk%ekb=zero
  !gs_hamk%kinpw_k=zero
  !gs_hamk%vlocal=zero
+ write(std_out,'(a,es27.14e3)') ' cprj ID (cgwf_paw) : ',get_cprj_id(cprj_cwavef_bands)
+ !call cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,'cgwf_paw',mpi_enreg)
+ call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
+ write(std_out,'(a,es27.14e3)') ' cprj ID (cgwf_paw) : ',get_cprj_id(cprj_cwavef_bands)
  !LTEST
  if (cprj_update_lvl==-1.or.cprj_update_lvl==-5) then
    call timab(1203,1,tsec)
@@ -233,7 +238,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
    cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
    cprj_cwavef => cprj_cwavef_bands(:,nspinor*(iband-1)+1:nspinor*iband)
    !LTEST
-   !write(std_out,'(a,es27.14e3)') 'cwavef ID :',sum(abs(cwavef))
+   write(std_out,'(a,es27.14e3)') 'cwavef ID :',sum(abs(cwavef))
    !LTEST
 
    ! Normalize incoming wf:
@@ -385,6 +390,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call timab(1305,2,tsec)
        !LTEST
        !write(std_out,'(a,es27.14e3)') 'direc+pcon ID :',sum(abs(direc))/xnormd
+       !write(std_out,'(a,es27.14e3)') 'direc+pcon ID :',sum(abs(direc))
        !LTEST
 
        ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
@@ -470,8 +476,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          dotgp=dotgg
          call timab(1305,1,tsec)
          call cg_zcopy(npw*nspinor,direc,conjgr)
-         z_tmp = (/one/xnormd,zero/)
-         call cg_zscal(npw*nspinor,z_tmp,conjgr)
+!         z_tmp = (/one/xnormd,zero/)
+!         call cg_zscal(npw*nspinor,z_tmp,conjgr)
          call timab(1305,2,tsec)
          call timab(1302,1,tsec)
          call pawcprj_copy(cprj_direc,cprj_conjgr)
@@ -494,31 +500,41 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
            call wrtout(std_out,message,'PERS')
          end if
 
+         gamma=gamma*xnormd/xnormg
+
          call timab(1305,1,tsec)
 !$OMP PARALLEL DO
          do ipw=1,npw*nspinor
-!           conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
-!           conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
-           conjgr(1,ipw)=direc(1,ipw)/xnormd+gamma*conjgr(1,ipw)/xnormg
-           conjgr(2,ipw)=direc(2,ipw)/xnormd+gamma*conjgr(2,ipw)/xnormg
+           conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
+           conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
+!           conjgr(1,ipw)=direc(1,ipw)/xnormd+gamma*conjgr(1,ipw)/xnormg
+!           conjgr(2,ipw)=direc(2,ipw)/xnormd+gamma*conjgr(2,ipw)/xnormg
          end do
          call timab(1305,2,tsec)
          call timab(1302,1,tsec)
-         call pawcprj_axpby(one,gamma*xnormd/xnormg,cprj_direc,cprj_conjgr)
+         call pawcprj_axpby(one,gamma,cprj_direc,cprj_conjgr)
+!         call pawcprj_axpby(one,gamma*xnormd/xnormg,cprj_direc,cprj_conjgr)
 !         call pawcprj_axpby(one/xnormd,gamma/xnormg,cprj_direc,cprj_conjgr)
          call timab(1302,2,tsec)
        end if
        call timab(1305,1,tsec)
        call sqnorm_g(dotr,istwf_k,npw*nspinor,conjgr,me_g0,mpi_enreg%comm_fft)
+!       xnormg=xnormd/sqrt(dotr)
        xnormg=one/sqrt(dotr)
+!       z_tmp = (/xnormg/xnormd,zero/)
        z_tmp = (/xnormg,zero/)
        call cg_zscal(npw*nspinor,z_tmp,conjgr)
        call timab(1305,2,tsec)
        call timab(1302,1,tsec)
-       call pawcprj_axpby(zero,xnormg/xnormd,cprj_conjgr,cprj_conjgr)
+!       call pawcprj_axpby(zero,xnormg/xnormd,cprj_conjgr,cprj_conjgr)
+       call pawcprj_axpby(zero,xnormg,cprj_conjgr,cprj_conjgr)
        call timab(1302,2,tsec)
        !LTEST
-       write(std_out,'(a,es27.14e3)') 'conjgr ID :',sum(abs(conjgr))/xnormg
+       !write(std_out,'(a,es27.14e3)') 'conjgr ID :',sum(abs(conjgr))/xnormg
+       write(std_out,'(a,es27.14e3)') 'conjgr ID :',sum(abs(conjgr))
+       !write(std_out,'(a,es27.14e3)') 'xnormg :',xnormg*xnormd
+       write(std_out,'(a,es27.14e3)') 'xnormg :',xnormg
+       xnormg=xnormg*xnormd
        !LTEST
 
        call getcsc(dot,cpopt,conjgr,conjgr,cprj_conjgr,cprj_conjgr,&
@@ -541,7 +557,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        doti=dot(2)
        !LTEST
        if (prtvol==-level) then
-         write(message,'(a,2f26.14)') 'conjgr dotr,doti :',dotr/xnormg,doti/xnormg
+         write(message,'(a,2f26.14)') 'conjgr dotr,doti :',dotr,doti
+         !write(message,'(a,2f26.14)') 'conjgr dotr,doti :',dotr/xnormg,doti/xnormg
 !         write(message,'(a,2es27.14e3)') 'conjgr dotr,doti :',dotr/xnormg,doti/xnormg
          call wrtout(std_out,message,'PERS')
        end if
@@ -571,7 +588,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call pawcprj_zaxpby(z_tmp,z_tmp2,cprj_cwavef,cprj_direc)
        call timab(1302,2,tsec)
        !LTEST
-       write(std_out,'(a,es27.14e3)') 'direc (new) ID :',sum(abs(direc))/xnormg
+       !write(std_out,'(a,es27.14e3)') 'direc (new) ID :',sum(abs(direc))/xnormg
        !LTEST
 
        ! ======================================================================
@@ -591,7 +608,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        xnormd=one/sqrt(abs(dot(1)))
        !LTEST
        if (prtvol==-level) then
-         write(message,'(a,es27.14e3)') 'xnormd :',xnormd*xnormg
+!         write(message,'(a,es27.14e3)') 'xnormd :',xnormd*xnormg
+         write(message,'(a,es27.14e3)') 'xnormd :',xnormd
          call wrtout(std_out,message,'PERS')
        end if
        !LTEST
@@ -678,7 +696,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        sintn=sinth*xnormd
        !LTEST
        if (prtvol==-level) then
-         write(message,'(a,2f26.14)') 'costh,sintn :',costh,sintn*xnormg
+         write(message,'(a,2f26.14)') 'costh,sintn :',costh,sintn
+!         write(message,'(a,2f26.14)') 'costh,sintn :',costh,sintn*xnormg
 !         write(message,'(a,2es27.14e3)') 'costh,sintn :',costh,sintn*xnormg
          call wrtout(std_out,message,'PERS')
        end if
@@ -1084,7 +1103,7 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
  integer :: choice,iband,ispinor,ncpgr,wfsize
  real(dp),pointer :: cwavef(:,:),cwavef_bands(:,:)
  integer :: iatom
- real(dp) :: re
+ real(dp) :: re,ratio
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
 
  write(std_out,'(a)') ''
@@ -1115,8 +1134,9 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
      do iatom=1,gs_hamk%natom
        re = sum(abs(cprj_tmp(iatom,ispinor)%cp-cprj_cwavef_bands(iatom,gs_hamk%nspinor*(iband-1)+ispinor)%cp))
        if (re>tol6) then
+         ratio = sum(abs(cprj_tmp(iatom,ispinor)%cp))/sum(abs(cprj_cwavef_bands(iatom,gs_hamk%nspinor*(iband-1)+ispinor)%cp))
          write(std_out,'(a)') 'cprj_check:'
-         write(std_out,'(a,2i5,es11.3e3)') 'iband,iatom:',iband,iatom,re
+         write(std_out,'(a,2i5,2es11.3e3)') 'iband,iatom:',iband,iatom,re,ratio
          write(std_out,'(a)') ''
          flush(std_out)
          MSG_ERROR('dif too large')
@@ -1235,6 +1255,49 @@ subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
  ABI_DATATYPE_DEALLOCATE(cprj_tmp)
 
 end subroutine cprj_check_oneband
+!!***
+
+!!****f* m_cgwf/get_cprj_id
+!! NAME
+!! get_cprj_id
+!!
+!! FUNCTION
+!!   Get an id from cprj array.
+!!   Useful for debugging only.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!!
+real(dp) function get_cprj_id(cprj) 
+
+!Arguments ------------------------------------
+!arrays
+ type(pawcprj_type),intent(in) :: cprj(:,:)
+
+!Local variables-------------------------------
+ integer :: i1,i2
+ real(dp) :: id_tmp
+
+ id_tmp=zero
+ do i2=1,size(cprj,2)
+   do i1=1,size(cprj,1)
+     id_tmp = id_tmp + sum(abs(cprj(i1,i2)%cp))
+   end do
+ end do
+ get_cprj_id=id_tmp
+
+end function get_cprj_id
 !!***
 
 !!****f* m_cgwf/get_cwavefr
