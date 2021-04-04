@@ -211,8 +211,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  !gs_hamk%vlocal=zero
  write(std_out,'(a,es27.14e3)') ' cprj ID (cgwf_paw) : ',get_cprj_id(cprj_cwavef_bands)
  !call cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,'cgwf_paw',mpi_enreg)
- call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
- write(std_out,'(a,es27.14e3)') ' cprj ID (cgwf_paw) : ',get_cprj_id(cprj_cwavef_bands)
+ !call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
+ !write(std_out,'(a,es27.14e3)') ' cprj ID (cgwf_paw) : ',get_cprj_id(cprj_cwavef_bands)
  !LTEST
  if (cprj_update_lvl==-1.or.cprj_update_lvl==-5) then
    call timab(1203,1,tsec)
