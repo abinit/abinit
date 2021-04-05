@@ -133,7 +133,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  integer :: n4,n5,n6,natom,ncpgr,npw,nspinor
  integer :: optekin,sij_opt,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
- real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,xnorm,xnormd,xnormg
+ real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,xnorm,xnormd,xnormd_previous
  character(len=500) :: message
 !arrays
  real(dp) :: dot(2)
@@ -382,7 +382,6 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        scprod = reshape(scprod_csc,(/2,nband/))
        call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &       direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
-!       if (abs(xnorm-one)>tol10) then
        if (iline==1) then
          ! Again we have to compensate the normalization of the current band.
          ! Indeed, by calling projbd we compute:
@@ -416,7 +415,6 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        call timab(1303,1,tsec)
        call pawcprj_projbd(scprod,cprj_cwavef_bands,cprj_direc)
        call timab(1303,2,tsec)
-!       if (abs(xnorm-one)>tol10) then
        if (iline==1) then
          ! Same correction than for WFs
          z_tmp  = -scprod_csc(2*iband-1:2*iband)*(one-xnorm)/xnorm
@@ -463,7 +461,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
            call wrtout(std_out,message,'PERS')
          end if
 
-         gamma=gamma*xnormd/xnormg
+         gamma=gamma*xnormd/xnormd_previous
 
          call timab(1305,1,tsec)
 !$OMP PARALLEL DO
@@ -477,15 +475,8 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          call timab(1302,2,tsec)
        end if
        call timab(1305,1,tsec)
-       call sqnorm_g(dotr,istwf_k,npw*nspinor,conjgr,me_g0,mpi_enreg%comm_fft)
-       xnormg=one/sqrt(dotr)
-       z_tmp = (/xnormg,zero/)
-       call cg_zscal(npw*nspinor,z_tmp,conjgr)
-       call timab(1305,2,tsec)
-       call timab(1302,1,tsec)
-       call pawcprj_axpby(zero,xnormg,cprj_conjgr,cprj_conjgr)
-       call timab(1302,2,tsec)
-       xnormg=xnormg*xnormd
+
+       xnormd_previous=xnormd
 
        call getcsc(dot,cpopt,conjgr,conjgr,cprj_conjgr,cprj_conjgr,&
 &       gs_hamk,mpi_enreg,1,tim_getcsc)
