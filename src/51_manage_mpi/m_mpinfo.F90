@@ -2299,27 +2299,25 @@ call flush()
        ABI_MALLOC(ranks,(0))
      end if
 
-     mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks)
-
-     ABI_FREE(ranks)
-   end if
-
 !     ABI_CHECK(nrank*nkpt==nproc, ' band and k-point distribution should be rectangular: make sure nproc=nkpt*integer')
 
 #ifdef DEV_MJV
 print *, 'call subcomm ',  spacecomm, nrank, ' ranks ', ranks
 call flush()
 #endif
+
 ! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
-   mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
-   mpi_enreg%nproc_band=nrank
-!   mpi_enreg%me_band=mod(me, nrank)
+     mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
+     mpi_enreg%nproc_band=nrank
+!     mpi_enreg%me_band=mod(me, nrank)
+
 #ifdef DEV_MJV
 print *, ' spacecomm,nrank,ranks ', spacecomm,nrank,ranks, '    me_band ', mpi_enreg%me_band
 print *, ' mpi_enreg%comm_band me ', mpi_enreg%comm_band, mpi_enreg%me_band
 #endif
 
-   ABI_FREE(ranks)
+     ABI_FREE(ranks)
+   end if
 
  end if
 
