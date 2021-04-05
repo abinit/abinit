@@ -383,8 +383,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    !call cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg(:, icg+1))
 
-!  Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
-!  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
+!!  Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
+!!  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
    do iband=1,nband_k
      iwavef=(iband-1)*npw_k*my_nspinor+icg
      cwavef_iband => cg(:,1+iwavef:npw_k*my_nspinor+iwavef)
@@ -394,11 +394,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        do ipw=1+igs,npw_k+igs
          if(kinpw(ipw-igs)>huge(zero)*1.d-11)then
            norm=cwavef_iband(1,ipw)**2+cwavef_iband(2,ipw)**2
-           if (norm>tol15*tol15) then
-             cwavef_iband(1,ipw)=zero
-             cwavef_iband(2,ipw)=zero
-             update_cprj=.True.
-           end if
+           if (norm>tol15*tol15) update_cprj=.True.
+           cwavef_iband(1,ipw)=zero
+           cwavef_iband(2,ipw)=zero
          end if
        end do
      end do
@@ -409,6 +407,21 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call timab(1205,2,tsec)
      end if
    end do
+
+!   !  Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
+!!  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
+!   do ispinor=1,my_nspinor
+!     do iband=1,nband_k
+!       igs=(ispinor-1)*npw_k
+!       iwavef=(iband-1)*npw_k*my_nspinor+icg
+!        do ipw=1+igs,npw_k+igs
+!          if(kinpw(ipw-igs)>huge(zero)*1.d-11)then
+!           cg(1,ipw+iwavef)=zero
+!           cg(2,ipw+iwavef)=zero
+!          end if
+!        end do
+!      end do
+!    end do
 
    ! JLJ 17/10/2014: If it is a GWLS calculation, construct the hamiltonian
    ! as in a usual GS calc., but skip any minimisation procedure.
