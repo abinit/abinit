@@ -2666,7 +2666,7 @@ print *, 'yes band paral now'
        ind0=0
        maxproc_bandpool=nproc/(nkpt*nsppol)
 #ifdef DEV_MJV
-print *, ' maxproc_bandpool = ', maxproc_bandpool
+print *, ' maxproc_bandpool = ', maxproc_bandpool, " nkpt,nsppol ", nkpt, nsppol
 #endif
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
