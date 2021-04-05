@@ -3042,7 +3042,6 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        ABI_MALLOC(ipiv,(nbdmix))
 !      The smn is destroyed by the following inverse call
        call zgesv(nbdmix,nbdmix,smn,nbdmix,ipiv,mmn,nbdmix,ierr)
-!       call zgesv(nbdmix,nbdmix,smn,nbdmix,ipiv,dcmplx(mmn),nbdmix,ierr)
        ABI_FREE(ipiv)
 !DEBUG
        if(ierr/=0)then

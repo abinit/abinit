@@ -1353,7 +1353,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 
 !Local variables-------------------------------
 !scalars
- integer :: choice,cpopt,dimenl1,dimenl2,iband,iband1,iband2,ierr,index_cg,index_cprj
+ integer :: choice,cpopt,dimenl1,dimenl2,iband,iband1,iband2,index_cg,index_cprj
  integer :: index_gsc,me,my_nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm
  !character(len=500) :: msg
 !arrays
@@ -1437,14 +1437,6 @@ print *, ' iband cwaveprj 1448 ', iband, cwaveprj(1,1)%cp
    index_cg=index_cg+npw_k*my_nspinor
    index_gsc=index_gsc+npw_k*my_nspinor
  end do
-
-!Reduction in case of parallelization
-! combines all gsc so each proc in band pool has full set. No longer needed 28/03/2020 to parallelize memory
-! if ((xmpi_paral==1)) then
-!   call timab(48,1,tsec)
-!   call xmpi_sum(gsc,mpi_enreg%comm_band,ierr)
-!   call timab(48,2,tsec)
-! end if
 
 !Memory deallocation
  ABI_FREE(cwavef)

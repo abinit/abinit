@@ -4056,12 +4056,12 @@ print *, ' cycle, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_
 !    Note that dfpt_wfkfermi is called with kpoint, while kpt is used inside dfpt_wfkfermi
      if (nspden/=4) then
        call dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,dtfil,eig0_k,eig1_k,fe1fixed_k,&
-&       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband,mband_mem,&
+&       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband_mem,&
 &       mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k,&
 &       pawrhoijfermi_unsym,prtvol,rf_hamkq,rhoaug,rocceig,wtk_k)
      else
        call dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,dtfil,eig0_k,eig1_k,fe1fixed_k,&
-&       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband,mband_mem,&
+&       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband_mem,&
 &       mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k,&
 &       pawrhoijfermi_unsym,prtvol,rf_hamkq,rhoaug4,rocceig,wtk_k)
      end if
@@ -4323,7 +4323,6 @@ end subroutine dfpt_rhofermi
 !!  ipert=type of the perturbation
 !!  isppol=1 for unpolarized, 2 for spin-polarized
 !!  kptopt=option for the generation of k points
-!!  mband=maximum number of bands
 !!  mband_mem=maximum number of bands on this cpu
 !!  mcgq=second dimension of the cgq array
 !!  mcprjq=second dimension of the cprjq array
@@ -4368,14 +4367,14 @@ end subroutine dfpt_rhofermi
 subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 &          dtfil,eig0_k,eig1_k,fe1fixed_k,fe1norm_k,gs_hamkq,&
 &          ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,&
-&          kptopt,mband,mband_mem,mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,&
+&          kptopt,mband_mem,mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,&
 &          npw_k,npw1_k,nspinor,nsppol,occ_k,pawrhoijfermi,prtvol,&
 &          rf_hamkq,rhoaug,rocceig,wtk_k)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ibg,ibgq,icg,icgq,idir,ikpt
- integer,intent(in) :: ipert,isppol,kptopt,mband,mcgq,mcprjq,mkmem,mpw,ncpgr
+ integer,intent(in) :: ipert,isppol,kptopt,mcgq,mcprjq,mkmem,mpw,ncpgr
  integer,intent(in) :: mband_mem
  integer,intent(in) :: npw1_k,nspinor,nsppol,prtvol
  integer,intent(inout) :: nband_k,npw_k

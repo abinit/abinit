@@ -2497,7 +2497,7 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !Local variables-------------------------------
  integer :: maxproc_bandpool
- integer :: inb,inb1,ind,ind0,nband_k,proc_max,proc_min
+ integer :: inb1,ind,ind0,nband_k,proc_max,proc_min
  integer :: nband_k_sp2,minb_per_proc
  integer :: iiband,iikpt,iisppol,ikpt_this_proc,nb_per_proc,nproc_spkpt,temp_unit
  integer :: kpt_distrb(nkpt)
@@ -2508,7 +2508,8 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 
  nproc_spkpt=mpi_enreg%nproc_spkpt
 #ifdef DEV_MJV
-print *, ' nproc_spkpt, nproc, mpi_enreg%paral_pertmpi_enreg%nproc_pert ', nproc_spkpt, nproc, mpi_enreg%paral_pert, mpi_enreg%nproc_pert
+print *, ' nproc_spkpt, nproc, mpi_enreg%paral_pertmpi_enreg%nproc_pert ', &
+&  nproc_spkpt, nproc, mpi_enreg%paral_pert, mpi_enreg%nproc_pert
 #endif
  if (mpi_enreg%paral_pert==1) nproc_spkpt=nproc
 ! if (mpi_enreg%paral_pert==1) nproc_spkpt=nproc/mpi_enreg%nproc_pert
