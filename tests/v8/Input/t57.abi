@@ -56,6 +56,7 @@
   # Response Function calculation : d/dk  at the specific points, with added bands.
     rfelfd5   2         # Activate the calculation of the d/dk perturbation (required for effective mass calc.)
     iscf5    -2
+    nstep5    10
   
     getden5   1
     getwfk5   4
@@ -67,7 +68,7 @@
               0.00 0.50 0.50   # X
               
                                                                                                           
-    tolwfr5   1.0d-12  # Must use tolwfr for non-self-consistent calculations.
+    tolwfr5   1.0d-13  # Must use tolwfr for non-self-consistent calculations.
   
     efmas5       1     # Triggers the calculation of effective mass tensors for the specified k-points.
     efmas_bands5 6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
