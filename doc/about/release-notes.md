@@ -782,7 +782,6 @@ By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
 **D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
 including parallelization over k points of the Chern number calculation.
-New test [[test:v8_39]].
 
 By J. Zwanziger (MR 469, 500, 545, 588)
 
@@ -1515,7 +1514,6 @@ By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
 **D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
 including parallelization over k points of the Chern number calculation.
-New test [[test:v8_39]].
 
 By J. Zwanziger (MR 469, 500, 545, 588)
 
@@ -1946,7 +1944,7 @@ B.5 A new algorithm (Wigner-Seitz cell based) for computing the weights for the 
 
 B.6 The Chern number can be computed, in the norm-conserving case as well as in the PAW case.
     See the theory in [[cite:Ceresoli2006]].
-    Associated input variable: [[orbmag]]. Associated test [[test:v8_33]].
+    Associated input variable: [[orbmag]]. 
     Nuclear magnetic dipole moment code has been improved for efficiency. In particular,
     this improvement is due to converted nucdipmom_k to complex type and explicit BLAS call.
     Tutorial [[tutorial:nuc|nuc]] is nightly tested.
