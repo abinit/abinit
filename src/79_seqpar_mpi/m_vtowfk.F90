@@ -46,7 +46,7 @@ module m_vtowfk
  use m_gwls_hamiltonian, only : build_H
  use m_fftcore,     only : fftcore_set_mixprec, fftcore_mixprec
  use m_cgwf,        only : cgwf
- use m_cgwf_paw,    only : cgwf_paw,mksubovl,cprj_update,cprj_check
+ use m_cgwf_paw,    only : cgwf_paw,mksubovl,cprj_update,cprj_update_oneband
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
  use m_spacepar,    only : meanvalue_g
@@ -185,7 +185,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp), intent(out) :: enlx_k(nband_k)
  real(dp), intent(out) :: grnl_k(3*natom,nband_k*optforces)
  real(dp), intent(out) :: resid_k(nband_k)
- real(dp), intent(inout) :: cg(2,mcg),rhoaug(gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,gs_hamk%nvloc)
+ real(dp), intent(inout),target :: cg(2,mcg)
+ real(dp), intent(inout) :: rhoaug(gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,gs_hamk%nvloc)
  type(pawcprj_type),intent(inout),target :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
@@ -204,7 +205,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: nband_k_cprj,nblockbd,ncpgr,ndat,nkpt_max,nnlout,ortalgo
  integer :: paw_opt,quit,signs,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: ar,ar_im,eshift,occblock
+ real(dp) :: ar,ar_im,eshift,occblock,norm
  real(dp) :: res,residk,weight,cpu,wall,gflops
  character(len=500) :: message
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
@@ -212,8 +213,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),evec_loc(:,:),gsc(:,:)
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
+ real(dp),pointer :: cwavef_iband(:,:)
  type(pawcprj_type),pointer :: cwaveprj(:,:)
- type(pawcprj_type),pointer :: cprj_cwavef_bands(:,:)
+ type(pawcprj_type),pointer :: cprj_cwavef_bands(:,:),cprj_cwavef(:,:)
 
 ! **********************************************************************
 
@@ -361,17 +363,29 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !  Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
 !  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
-   do ispinor=1,my_nspinor
-     do iband=1,nband_k
+   do iband=1,nband_k
+     iwavef=(iband-1)*npw_k*my_nspinor+icg
+     cwavef_iband => cg(:,1+iwavef:npw_k*my_nspinor+iwavef)
+     update_cprj=.False.
+     do ispinor=1,my_nspinor
        igs=(ispinor-1)*npw_k
-       iwavef=(iband-1)*npw_k*my_nspinor+icg
        do ipw=1+igs,npw_k+igs
          if(kinpw(ipw-igs)>huge(zero)*1.d-11)then
-           cg(1,ipw+iwavef)=zero
-           cg(2,ipw+iwavef)=zero
+           norm=cwavef_iband(1,ipw)**2+cwavef_iband(2,ipw)**2
+           if (norm>tol15*tol15) then
+             cwavef_iband(1,ipw)=zero
+             cwavef_iband(2,ipw)=zero
+             update_cprj=.True.
+           end if
          end if
        end do
      end do
+     if (enable_cgwf_paw.and.update_cprj) then
+       cprj_cwavef => cprj_cwavef_bands(:,my_nspinor*(iband-1)+1:my_nspinor*iband)
+       call timab(1205,1,tsec)
+       call cprj_update_oneband(cwavef_iband,cprj_cwavef,gs_hamk,mpi_enreg)
+       call timab(1205,2,tsec)
+     end if
    end do
 
    ! JLJ 17/10/2014: If it is a GWLS calculation, construct the hamiltonian

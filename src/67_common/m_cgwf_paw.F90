@@ -52,6 +52,7 @@ module m_cgwf_paw
  public :: cgwf_paw
  public :: mksubovl
  public :: cprj_update
+ public :: cprj_update_oneband
  public :: cprj_check
  public :: get_cprj_id
 
@@ -202,7 +203,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
  cwavef_bands => cg(:,1+icg:nband*npw*nspinor+icg)
 
- if (cprj_update_lvl==-1.or.cprj_update_lvl==-5) then
+ if (cprj_update_lvl==-1) then
    call timab(1203,1,tsec)
    call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
    call timab(1203,2,tsec)
