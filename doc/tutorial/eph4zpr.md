@@ -226,34 +226,6 @@ some conduction states
     When [[symsigma]] is set to 1 (default), the code may decide to enlarge the initial value of [[bdgw]]
     so that all **degenerate states** for that particular $\kk$-point are included in the calculation.
 
-
-## Eliashberg functions
-
-In the adiabatic approximation the phonon frequencies in the denominator of the Fan-Migdal term are neglected and 
-the FM term simplifies to:
-
-\begin{equation}
-    \Sigma^\FM_{n\kk}(\ee_nk, T) =
-                \sum_{m,\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} |\gkq|^2
-                \dfrac{2  n_\qnu(T)}{{\ee_\nk - \emkq  + \wqnu + i \eta} 
-\label{eq:adiabatci_fan_selfen}
-\end{equation}
-
-The adiabatic ZPR can also be expressed as:
-
-$$
-\int \dd\ww (2  n(\ww, T) + 1) F_2(\ww)
-$$
-
-where $F_2^\nk(\ww)$ is given by:
-
-$$
-F_2^\nk(\ww) = 
-\sum_{m,\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} (|\gkq|^2 - g_{mn\nu}^{2,DW}(\kk, \qq)}) 
-\dfrac{\delta(\ww - \wqnu)}{\ee_\nk - \ee_{m\kq}}
-$$
-
-
 ## Typical workflow for ZPR
 
 A typical workflow for ZPR calculations involves the following steps 
@@ -1333,4 +1305,57 @@ Last but not least, one can estimate the correction to the ZPR in polar material
 using a generalized Fr\"ohlich model based on *ab initio* effective masses computed with DFPT [[cite:Laflamme2016]]
 The formalism is detailed in XXX.
 An example of input file is available in [[test:v7_88]].
+-->
+
+
+## Eliashberg function
+
+The Fan-Migdal self-energy can be rewritten in terms of the spectral representation:
+
+\begin{equation} 
+\Sigma^\FM_{n\kk}(\ww) = 
+\int \dd\ee\dd\ww  \left [
+\frac{n(\ww') + f(\ee)}{\ww - \ee  + \ww' + i \eta} +
+\frac{n(\ww') + 1 - f(\ee)}{\omega - \ee  - \ww' + i \eta} 
+\right ] 
+\alpha^2 F_\nk(\ee,\ww')
+\end{equation}
+
+where we have introduced the real, positive and T-independent Eliashberg function
+
+\begin{equation}
+\alpha^2 F_\nk(\ee,\ww') =
+\sum_{m,\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} |\gkq|^2
+\delta(\ee - \ee_{m\kq})\delta(\ww - \wqnu).
+\end{equation}
+
+The computation of $\alpha^2 F_\nk$ is activated by setting [[prteliash]] to 3.
+The frequency mesh for phonons is defined by [[ph_wstep]], [[ph_smear]]
+The frequency mesh for electrons is defined by [[dosdeltae]], [[tsmear]]
+
+In the adiabatic approximation the phonon frequencies in the denominator of the Fan-Migdal term are neglected and 
+the FM term simplifies to:
+
+\begin{equation}
+\Sigma^{a-\FM}_{n\kk}(\ee_\nk) =
+\sum_{m\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} 
+\dfrac{(2 n_\qnu + 1) |\gkq|^2} {\ee_\nk - \emkq + i \eta}
+\label{eq:adiabatic_fan_selfen}
+\end{equation}
+
+The adiabatic ZPR can also be expressed as:
+
+$$
+\int \dd\ww (2 n(\ww) + 1) F_2(\ww)
+$$
+
+where $F_2^\nk(\ww)$ is given by:
+
+$$
+F_2^\nk(\ww) = 
+\sum_{m\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} (|\gkq|^2 - g_{mn\nu}^{2,\DW}(\kk,\qq)) 
+\dfrac{\delta(\ww - \wqnu)}{\ee_\nk - \ee_{m\kq}}
+$$
+
+<!--
 -->

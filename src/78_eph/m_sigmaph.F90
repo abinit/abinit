@@ -110,9 +110,10 @@ module m_sigmaph
 !! sigmaph_t
 !!
 !! FUNCTION
-!! Container for the (diagonal) matrix elements of the electronic self-energy (phonon contribution)
-!! computed in the KS representation i.e. Sigma_eph(omega, T, band, k, spin).
-!! Provides methods to compute the QP corrections, the spectral functions and save the results to file.
+!! Container for the (diagonal) matrix elements of the electron-phonon self-energy
+!! in the KS representation i.e. Sigma_eph(omega, T, band, k, spin).
+!! Provides methods to compute QP corrections, spectral functions, QP linewidths and
+!! save the results to netcdf file.
 !!
 !! SOURCE
 
@@ -264,10 +265,11 @@ module m_sigmaph
    ! > 0 to treat the q --> 0 divergence and accelerate convergence in polar semiconductors.
    !   1: Use spherical integration inside the micro zone around the Gamma point
    !   3
+   ! TODO: Under development
 
   integer :: mrta = 0
    ! 0 to disable MRTA.
-   ! > 0 if the self-energy in the energy-momentum relaxation time approximation should be computed
+   ! > 0 if linewidths in the energy-momentum relaxation time approximation should be computed
 
   logical :: use_doublegrid = .False.
    ! whether to use double grid or not
@@ -352,7 +354,7 @@ module m_sigmaph
   integer,allocatable:: indkk_kq(:, :)
    ! (6, %nqibz_k))
    ! Mapping k+q --> initial IBZ. Depends on ikcalc.
-   ! These table used the conventions for the symmetrization of the wavefunctions expcted by  cgtk_rotate.
+   ! These table used the conventions for the symmetrization of the wavefunctions expected by cgtk_rotate.
    ! In this case listkk has been called with symrel and use_symrec=False
 
   integer,allocatable :: ind_q2dvdb_k(:,:)
@@ -480,14 +482,6 @@ module m_sigmaph
    !  dw_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
    !  Debye-Waller term (static).
 
-  !real(dp),allocatable :: qpoms_enes(:,:)
-  ! qp_adbenes(ntemp, max_nbcalc)
-  ! (Real) QP energies computed with the adiabatic formalism.
-
-  !complex(dpc),allocatable :: qp_enes(:,:)
-  ! qp_enes(ntemp, max_nbcalc)
-  ! (Complex) QP energies computed with the non-adiabatic formalism.
-
   complex(dpc),allocatable :: vals_wr(:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc)
    ! Sigma_eph(omega, kT, band) for given (ikcalc, spin).
@@ -505,15 +499,16 @@ module m_sigmaph
 
   real(dp),allocatable :: gf_nnuq(:,:,:,:)
    ! (nbcalc_ks, natom3, %nqibz_k, 3)
-   ! Quantities needed to compute generalized Eliashberg functions (gkq2/Fan-Migdal/DW terms)
+   ! Quantities needed to compute the generalized Eliashberg functions (gkq2/Fan-Migdal/DW terms)
    ! This array depends on (ikcalc, spin)
    ! NB: q-weights for integration are not included.
 
   real(dp),allocatable :: gfw_vals(:,:,:)
-   !gfw_vals(gfw_nomega, 3, max_nbcalc)
+   ! gfw_vals(gfw_nomega, 3, max_nbcalc)
    ! Generalized Eliashberg function a2F_{n,k,spin}(w)
-   ! 1:   gkk^2 with delta(en - em)
-   ! 2:3 (Fan-Migdal/DW contribution in the adiabatic approximation)
+   !     1: |g(k,q)|^2 with delta(e_\nk - e_{m\kq})
+   !     2: Fan-Migdal in the adiabatic approximation
+   !     3: DW contribution in the adiabatic approximation.
    ! This array depends on (ikcalc, spin)
 
   integer :: a2f_ne = 0
@@ -521,9 +516,12 @@ module m_sigmaph
 
   real(dp),allocatable :: a2f_emesh(:)
    ! a2f_emesh(a2f_ne)
+   ! Energy mesh for electrons
 
   real(dp),allocatable :: a2few(:,:,:)
    ! a2few(a2f_ne, gwf_nomega, max_nbcalc)
+   ! FM Eliashberg function a2f_\nk(e, w) = \sum_{mq} |g(k,q)|^2 delta(e - e_{m\kq}) delta(w - w_\qnu}
+   ! This array depends on (ikcalc, spin) and is computed only if prteliash == 3
 
   type(ephwg_t) :: ephwg
    ! This object computes the weights for the BZ integration in q-space if qint_method > 0
@@ -569,10 +567,6 @@ module m_sigmaph
 
 !----------------------------------------------------------------------
 
- public :: test_phrotation
-
-!----------------------------------------------------------------------
-
 !!****t* m_sigmaph/phstore_t
 !! NAME
 !! phstore_t
@@ -604,7 +598,7 @@ module m_sigmaph
    ! (2, natom3, natom3, %nqibz))
 
    real(dp),allocatable :: phfrq(:)
-   ! natom3
+   ! (natom3)
 
    real(dp),allocatable :: displ_cart(:,:,:,:)
    ! displ_cart(2, 3, natom, %natom3)
@@ -619,6 +613,8 @@ module m_sigmaph
 !!***
 
  private :: phstore_new   ! Creation method (allocates memory, initialize data from input vars).
+
+ public :: test_phrotation
 
 contains  !=====================================================
 !!***
@@ -1303,7 +1299,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end do
      end if
 
-     ! Prepare Eliasberg function.
+     ! Prepare Eliasberg functions.
      if (sigma%gfw_nomega > 0) then
        ABI_SFREE(sigma%gf_nnuq)
        ABI_CALLOC(sigma%gf_nnuq, (nbcalc_ks, natom3, sigma%nqibz_k, 3))
@@ -1874,7 +1870,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
              ! Optionally, accumulate contribution to Eliashberg functions
              if (dtset%prteliash /= 0) then
-               ! EPH strength with delta(en - emkq)
+               ! EPH strength with delta(e_{nk} - e_{m\kq})
                rfact = gaussian(eig0nk - eig0mkq, dtset%tsmear)
                sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 1) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 1) + &
                     rfact * (gkq_nu(1, ib_k, nu) ** 2 + gkq_nu(2, ib_k, nu) ** 2)
@@ -1893,9 +1889,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  gf_val = frohl_sphcorr(nu) * (four_pi / three * q0rad ** 3)
                end if
                sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 2) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 2) + gf_val * rfact
-               ! TODO: Sternheimer
+               ! TODO: Add Sternheimer contribution
 
                if (dtset%prteliash == 3) then
+                 ! Accumulate: |g(k,q)|^2 delta(e - e_{m\kq}) delta(w - w_\qnu}
                  delta_e_minus_emkq = gaussian(sigma%a2f_emesh - eig0mkq, dtset%tsmear)
                  dwargs = sigma%gfw_mesh - phfrq(nu)
                  dtw_weights(:, 1) = gaussian(dwargs, dtset%ph_smear)
@@ -2315,7 +2312,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (dtset%prteliash == 3) call xmpi_sum(sigma%a2few, sigma%pqb_comm%value, ierr)
 
        ! Collect all terms on each node so that we can MPI-parallelize easily inside pqb_comm
-       ! NB: gf_nnuq does not include the q-weights from integration.
+       ! Note that: gf_nnuq does not include the q-weights from the integration.
        call xmpi_sum(sigma%gf_nnuq, sigma%pqb_comm%value, ierr)
        sigma%gfw_vals = zero
 
@@ -4601,7 +4598,6 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  integer :: grp_ncid, ncerr
 #endif
 !arrays
- !integer :: shape3(3),shape4(4),shape5(5),shape6(6)
  integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
  !real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:), rdata4(:,:,:,:), rdata5(:,:,:,:,:), rdata6(:,:,:,:,:,:)
@@ -4925,21 +4921,13 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  ! NB: Only master writes
  ! (use iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
  ! Well, cannot use c_loc with gcc <= 4.8 due to internal compiler error so use c2r and stack memory.
- !shape3(1) = 2; shape4(1) = 2; shape5(1) = 2; shape6(1) = 2
-
- !shape3(2:) = shape(self%vals_e0ks); call c_f_pointer(c_loc(self%vals_e0ks), rdata3, shape3)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), c2r(self%vals_e0ks), start=[1,1,1,ikcalc,spin]))
-
- !shape3(2:) = shape(self%dvals_de0ks); call c_f_pointer(c_loc(self%dvals_de0ks), rdata3, shape3)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dvals_de0ks"), c2r(self%dvals_de0ks), start=[1,1,1,ikcalc,spin]))
-
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dw_vals"), self%dw_vals, start=[1,1,ikcalc,spin]))
 
  ! Dump QP energies and gaps for this (kpt, spin)
- !shape3(2:) = shape(qpoms_enes); call c_f_pointer(c_loc(qpoms_enes), rdata3, shape3)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpoms_enes"), c2r(qpoms_enes), start=[1,1,1,ikcalc,spin]))
 
- !shape3(2:) = shape(qp_enes); call c_f_pointer(c_loc(qp_enes), rdata3, shape3)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_enes"), c2r(qp_enes), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ze0_vals"), ze0_vals, start=[1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_enes"), ks_enes, start=[1,ikcalc,spin]))
@@ -4987,13 +4975,13 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
 
  if (dtset%ibte_prep > 0) then
    call wrtout(std_out, " Writing scattering matrix elements to disk...")
-   ! Get ncid of group used to store scattering rate (ragged array implemented with groups).
+   ! Get ncid of group used to store scattering rate (ragged array implemented with netcdf groups).
    ! FIXME: Unfortunately, this algo cannot be used if parallelism over kcalc/spin is on since
    ! we have to change the metadata at runtime.
    sr_ncid = self%ncid
    NCF_CHECK(nf90_inq_ncid(sr_ncid, strcat("srate_k", itoa(ikcalc), "_s", itoa(spin)), grp_ncid))
 
-   ! Define dimensions and arrays inside group at runtime).
+   ! Define dimensions and arrays inside group at runtime
    ncerr = nctk_def_dims(grp_ncid, [ &
      nctkdim_t("lgk_nsym", self%lgk_nsym), &
      nctkdim_t("nbcalc", self%nbcalc_ks(ikcalc, spin)), &
@@ -5789,6 +5777,212 @@ end subroutine pheigvec_rotate
 !!***
 
 !----------------------------------------------------------------------
+!!****f* m_sigmaph/phstore_new
+!! NAME
+!! phstore_new
+!!
+!! FUNCTION
+!!  Create new object with phonon quantities in the IBZ.
+!!
+!! INPUTS
+!!  ifc:
+!!  nqibz:
+!!  qibz:
+!!  use_ifc_fourq:
+!!  comm:
+!!
+
+type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, comm) result(new)
+
+!Arguments ------------------------------------
+ type(crystal_t),intent(in) :: cryst
+ type(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: nqibz, comm
+ logical,intent(in) :: use_ifc_fourq
+ real(dp),target,intent(in) :: qibz(3, nqibz)
+
+!Local variables ------------------------------
+!scalars
+ integer :: natom3, my_q1, my_q2, iq_ibz
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ new%qibz => qibz
+
+ new%natom = cryst%natom
+ natom3 = cryst%natom * 3
+ new%natom3 = natom3
+ new%comm = comm
+ new%nprocs = xmpi_comm_size(comm)
+ new%my_rank = xmpi_comm_rank(comm)
+ new%use_ifc_fourq = use_ifc_fourq
+
+ ABI_MALLOC(new%displ_cart, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(new%phfrq, (3*cryst%natom))
+
+ if (new%use_ifc_fourq) return
+
+ ! Split qibz in blocks inside comm
+ ABI_MALLOC(new%qibz_start, (0:new%nprocs-1))
+ ABI_MALLOC(new%qibz_stop, (0:new%nprocs-1))
+ call xmpi_split_work2_i4b(nqibz, new%nprocs, new%qibz_start, new%qibz_stop)
+ my_q1 = new%qibz_start(new%my_rank)
+ my_q2 = new%qibz_stop(new%my_rank)
+
+ call wrtout(std_out, " Computing all phonon frequencies and eigenvectors in the IBZ.", pre_newlines=1)
+ call wrtout(std_out, sjoin(" Number of IBZ q-point stored by this rank inside pert_comm:", itoa(my_q2 - my_q1 + 1)))
+ write(msg, "(a,f8.1,a)") &
+   " Memory required by pheigvec_qibz: ", 2 * natom3**2 * (my_q2 - my_q1 + 1) * dp * b2Mb, " [Mb] <<< MEM"
+ call wrtout(std_out, msg)
+
+ ABI_MALLOC(new%phfreqs_qibz, (natom3, my_q1:my_q2))
+ ABI_MALLOC(new%pheigvec_qibz, (2, natom3, natom3, my_q1:my_q2))
+
+ do iq_ibz=my_q1, my_q2
+   call ifc%fourq(cryst, qibz(:,iq_ibz), new%phfreqs_qibz(:, iq_ibz), new%displ_cart, &
+                  out_eigvec=new%pheigvec_qibz(:,:,:,iq_ibz))
+ end do
+
+end function phstore_new
+!!***
+
+!----------------------------------------------------------------------
+!!****f* m_sigmaph/phstore_free
+!! NAME
+!! phstore_free
+!!
+!! FUNCTION
+!!  Free memory.
+!!
+!! INPUTS
+
+subroutine phstore_free(self)
+
+!Arguments ------------------------------------
+ class(phstore_t),intent(inout) :: self
+
+! *************************************************************************
+
+ ABI_SFREE(self%qibz_start)
+ ABI_SFREE(self%qibz_stop)
+ ABI_SFREE(self%phfreqs_qibz)
+ ABI_SFREE(self%pheigvec_qibz)
+ ABI_SFREE(self%displ_cart)
+ ABI_SFREE(self%phfrq)
+
+ self%qibz => null()
+
+end subroutine phstore_free
+!!***
+
+!----------------------------------------------------------------------
+!!****f* m_sigmaph/phstore_async_rotate
+!! NAME
+!! phstore_async_rotate
+!!
+!! FUNCTION
+!!  Beging non-blocking collective MPI communication to obtain phonon frequencies and eigenvectors
+!!  in the BZ from data in the IBZ.
+!!
+!! INPUTS
+!!
+
+subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_q, trev_q)
+
+!Arguments ------------------------------------
+ class(phstore_t),intent(inout) :: self
+ type(crystal_t), intent(in) :: cryst
+ type(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: iq_ibz, isym_q, trev_q
+ real(dp),intent(in) :: qpt_ibz(3), qpt_bz(3)
+
+!Local variables ------------------------------
+!scalars
+ integer :: rank, master, ierr
+ logical :: isirr_q
+ real(dp) :: eigvec_qpt(2, self%natom3, self%natom3)
+
+! *************************************************************************
+
+ ABI_UNUSED(qpt_ibz(1))
+
+ if (self%use_ifc_fourq) then
+   ! Debugging section.
+   call ifc%fourq(cryst, qpt_bz, self%phfrq, self%displ_cart)
+   return
+ end if
+
+ ! Find the rank storing the q-point in the IBZ.
+ do rank=0,self%nprocs-1
+   if (iq_ibz >= self%qibz_start(rank) .and. iq_ibz <= self%qibz_stop(rank)) then
+     master = rank; exit
+   end if
+ end do
+ ABI_CHECK(rank /= self%nprocs, sjoin("Nobody has iq_ibz: ", itoa(iq_ibz)))
+
+ ! Begin non-blocking communication for phfrq
+ if (self%my_rank == master) self%phfrq = self%phfreqs_qibz(:, iq_ibz)
+ call xmpi_ibcast(self%phfrq, master, self%comm, self%requests(1), ierr)
+
+ ! Rotate eigvectors at q_ibz to get eigenvector at q_bz
+ ! Don't test if umklapp == 0 because we use the periodic gauge: phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
+ isirr_q = (isym_q == 1 .and. trev_q == 0)
+
+ if (self%my_rank == master) then
+   if (isirr_q) then
+     ! q in IBZ --> no rotation is needed.
+     call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, &
+                              self%pheigvec_qibz(:,:,:,iq_ibz), self%displ_cart)
+   else
+     ! q in BZ --> master rotates phonon eigenvectors.
+     call pheigvec_rotate(cryst, self%qibz(:, iq_ibz), qpt_bz, isym_q, trev_q, self%pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
+     call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, self%displ_cart)
+   end if
+ end if
+
+ ! Begin non-blocking bcast for displ_cart.
+ call xmpi_ibcast(self%displ_cart, master, self%comm, self%requests(2), ierr)
+
+end subroutine phstore_async_rotate
+!!***
+
+!----------------------------------------------------------------------
+!!****f* m_sigmaph/phstore_wait
+!! NAME
+!! phstore_wait
+!!
+!! FUNCTION
+!!  Wait from non-blocking MPI BCAST started in phstore_async_rotate,
+!!  returns phonon frequencies and displacements in Cartesian and reduced coordinates.
+!!
+!! INPUTS
+!!
+
+subroutine phstore_wait(self, cryst, phfrq, displ_cart, displ_red)
+
+!Arguments ------------------------------------
+ class(phstore_t),intent(inout) :: self
+ type(crystal_t),intent(in) :: cryst
+ real(dp) ABI_ASYNC, intent(out) :: phfrq(self%natom3)
+ real(dp) ABI_ASYNC, intent(out) :: displ_cart(2, 3, self%natom, self%natom3)
+ real(dp),intent(out) :: displ_red(2, 3, self%natom, self%natom3)
+
+!Local variables ------------------------------
+!scalars
+ integer :: ierr
+
+! *************************************************************************
+
+ if (.not. self%use_ifc_fourq) call xmpi_waitall(self%requests, ierr)
+ phfrq = self%phfrq
+ displ_cart = self%displ_cart
+ call phdispl_cart2red(cryst%natom, cryst%gprimd, displ_cart, displ_red)
+
+end subroutine phstore_wait
+!!***
+
+!----------------------------------------------------------------------
 !!****f* m_sigmaph/test_phrotation
 !! NAME
 !! test_phrotation
@@ -5984,213 +6178,6 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  ABI_FREE(toinv)
 
 end subroutine test_phrotation
-!!***
-
-!----------------------------------------------------------------------
-!!****f* m_sigmaph/phstore_new
-!! NAME
-!! phstore_new
-!!
-!! FUNCTION
-!!  Create new object with phonon quantities in the IBZ.
-!!
-!! INPUTS
-!!  ifc:
-!!  nqibz:
-!!  qibz:
-!!  use_ifc_fourq:
-!!  comm:
-!!
-
-type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, comm) result(new)
-
-!Arguments ------------------------------------
- type(crystal_t),intent(in) :: cryst
- type(ifc_type),intent(in) :: ifc
- integer,intent(in) :: nqibz, comm
- logical,intent(in) :: use_ifc_fourq
- real(dp),target,intent(in) :: qibz(3, nqibz)
-
-!Local variables ------------------------------
-!scalars
- integer :: natom3, my_q1, my_q2, iq_ibz
- character(len=500) :: msg
-
-! *************************************************************************
-
- new%qibz => qibz
-
- new%natom = cryst%natom
- natom3 = cryst%natom * 3
- new%natom3 = natom3
- new%comm = comm
- new%nprocs = xmpi_comm_size(comm)
- new%my_rank = xmpi_comm_rank(comm)
- new%use_ifc_fourq = use_ifc_fourq
-
- ABI_MALLOC(new%displ_cart, (2, 3, cryst%natom, natom3))
- ABI_MALLOC(new%phfrq, (3*cryst%natom))
-
- if (new%use_ifc_fourq) return
-
- ! Split qibz in blocks inside comm
- ABI_MALLOC(new%qibz_start, (0:new%nprocs-1))
- ABI_MALLOC(new%qibz_stop, (0:new%nprocs-1))
- call xmpi_split_work2_i4b(nqibz, new%nprocs, new%qibz_start, new%qibz_stop)
- my_q1 = new%qibz_start(new%my_rank)
- my_q2 = new%qibz_stop(new%my_rank)
-
- call wrtout(std_out, " Computing all phonon frequencies and eigenvectors in the IBZ.", pre_newlines=1)
- call wrtout(std_out, sjoin(" Number of IBZ q-point stored by this rank inside pert_comm:", itoa(my_q2 - my_q1 + 1)))
- write(msg, "(a,f8.1,a)") &
-   " Memory required by pheigvec_qibz: ", 2 * natom3**2 * (my_q2 - my_q1 + 1) * dp * b2Mb, " [Mb] <<< MEM"
- call wrtout(std_out, msg)
-
- ABI_MALLOC(new%phfreqs_qibz, (natom3, my_q1:my_q2))
- ABI_MALLOC(new%pheigvec_qibz, (2, natom3, natom3, my_q1:my_q2))
-
- do iq_ibz=my_q1, my_q2
-   call ifc%fourq(cryst, qibz(:,iq_ibz), new%phfreqs_qibz(:, iq_ibz), new%displ_cart, &
-                  out_eigvec=new%pheigvec_qibz(:,:,:,iq_ibz))
- end do
-
-end function phstore_new
-!!***
-
-!----------------------------------------------------------------------
-!!****f* m_sigmaph/phstore_free
-!! NAME
-!! phstore_free
-!!
-!! FUNCTION
-!!  Free memory.
-!!
-!! INPUTS
-
-subroutine phstore_free(self)
-
-!Arguments ------------------------------------
- class(phstore_t),intent(inout) :: self
-
-! *************************************************************************
-
- ABI_SFREE(self%qibz_start)
- ABI_SFREE(self%qibz_stop)
-
- ABI_SFREE(self%phfreqs_qibz)
- ABI_SFREE(self%pheigvec_qibz)
- ABI_SFREE(self%displ_cart)
- ABI_SFREE(self%phfrq)
-
- self%qibz => null()
-
-end subroutine phstore_free
-!!***
-
-!----------------------------------------------------------------------
-!!****f* m_sigmaph/phstore_async_rotate
-!! NAME
-!! phstore_async_rotate
-!!
-!! FUNCTION
-!!  Beging non-blocking collective MPI communication to obtain phonon frequencies and eigenvectors
-!!  in the BZ from data in the IBZ.
-!!
-!! INPUTS
-!!
-
-subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_q, trev_q)
-
-!Arguments ------------------------------------
- class(phstore_t),intent(inout) :: self
- type(crystal_t), intent(in) :: cryst
- type(ifc_type),intent(in) :: ifc
- integer,intent(in) :: iq_ibz, isym_q, trev_q
- real(dp),intent(in) :: qpt_ibz(3), qpt_bz(3)
-
-!Local variables ------------------------------
-!scalars
- integer :: rank, master, ierr
- logical :: isirr_q
- real(dp) :: eigvec_qpt(2, self%natom3, self%natom3)
-
-! *************************************************************************
-
- ABI_UNUSED(qpt_ibz(1))
-
- if (self%use_ifc_fourq) then
-   ! Debugging section.
-   call ifc%fourq(cryst, qpt_bz, self%phfrq, self%displ_cart)
-   return
- end if
-
- ! Find the rank storing the q-point in the IBZ.
- do rank=0,self%nprocs-1
-   if (iq_ibz >= self%qibz_start(rank) .and. iq_ibz <= self%qibz_stop(rank)) then
-     master = rank; exit
-   end if
- end do
- ABI_CHECK(rank /= self%nprocs, sjoin("Nobody has iq_ibz: ", itoa(iq_ibz)))
-
- ! Begin non-blocking communication for phfrq
- if (self%my_rank == master) self%phfrq = self%phfreqs_qibz(:, iq_ibz)
- call xmpi_ibcast(self%phfrq, master, self%comm, self%requests(1), ierr)
-
- ! Rotate eigvectors at q_ibz to get eigenvector at q_bz
- ! Don't test if umklapp == 0 because we use the periodic gauge: phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
- isirr_q = (isym_q == 1 .and. trev_q == 0)
-
- if (self%my_rank == master) then
-   if (isirr_q) then
-     ! q in IBZ --> no rotation is needed.
-     call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, &
-                              self%pheigvec_qibz(:,:,:,iq_ibz), self%displ_cart)
-   else
-     ! q in BZ --> master rotates phonon eigenvectors.
-     call pheigvec_rotate(cryst, self%qibz(:, iq_ibz), qpt_bz, isym_q, trev_q, self%pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
-     call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, self%displ_cart)
-   end if
- end if
-
- ! Begin non-blocking bcast for displ_cart.
- call xmpi_ibcast(self%displ_cart, master, self%comm, self%requests(2), ierr)
-
-end subroutine phstore_async_rotate
-!!***
-
-!----------------------------------------------------------------------
-!!****f* m_sigmaph/phstore_wait
-!! NAME
-!! phstore_wait
-!!
-!! FUNCTION
-!!  Wait from non-blocking MPI BCAST started in phstore_async_rotate,
-!!  returns phonon frequencies and displacements in Cartesian and reduced coordinates.
-!!
-!! INPUTS
-!!
-
-subroutine phstore_wait(self, cryst, phfrq, displ_cart, displ_red)
-
-!Arguments ------------------------------------
- class(phstore_t),intent(inout) :: self
- type(crystal_t),intent(in) :: cryst
- real(dp) ABI_ASYNC, intent(out) :: phfrq(self%natom3)
- real(dp) ABI_ASYNC, intent(out) :: displ_cart(2, 3, self%natom, self%natom3)
- real(dp),intent(out) :: displ_red(2, 3, self%natom, self%natom3)
-
-!Local variables ------------------------------
-!scalars
- integer :: ierr
-
-! *************************************************************************
-
- if (.not. self%use_ifc_fourq) call xmpi_waitall(self%requests, ierr)
- phfrq = self%phfrq
- displ_cart = self%displ_cart
- call phdispl_cart2red(cryst%natom, cryst%gprimd, displ_cart, displ_red)
-
-end subroutine phstore_wait
 !!***
 
 end module m_sigmaph
