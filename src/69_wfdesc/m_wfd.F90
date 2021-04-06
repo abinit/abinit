@@ -4744,7 +4744,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  integer,intent(in) :: iomode
  character(len=*),intent(in) :: wfk_fname
  class(wfd_t),target,intent(inout) :: Wfd
- type(Hdr_type),optional,intent(out) :: out_hdr
+ type(Hdr_type),optional,intent(inout) :: out_hdr ! ifort and others are buggy for optional intent(out) structured types
 
 !Local variables ------------------------------
 !scalars

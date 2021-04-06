@@ -2935,7 +2935,7 @@ type(ebands_t) function wfk_read_ebands(path, comm, out_hdr) result(ebands)
 !scalars
  character(len=*),intent(in) :: path
  integer,intent(in) :: comm
- type(hdr_type),optional,intent(out) :: out_hdr
+ type(hdr_type),optional,intent(inout) :: out_hdr ! ifort and others are buggy for optional intent(out) structured types
 
 !Local variables-------------------------------
 !scalars
