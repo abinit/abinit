@@ -62,13 +62,16 @@ module m_respfn_driver
  use m_ioarr,       only : read_rhor
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
- use m_pawtab,      only : pawtab_type, pawtab_get_lsize
+ use m_pawtab,      only : pawtab_type, pawtab_get_lsize, pawtab_print
  use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
-                           pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim
- use m_pawdij,      only : pawdij, symdij
+                           pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim, &
+                           pawrhoij_print_rhoij
+
+ use m_pawdij,      only : pawdij, symdij, pawdij_print_dij
+
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
  use m_pawxc,       only : pawxc_get_nkxc
@@ -481,7 +484,18 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab)
  end if
-
+#ifdef DEV_MJV
+print *, ' after read my kptbands, hdr%pawrhoij : ireadwf0 ', ireadwf0, ''
+print *, 'hdr%pawrhoij(1)%cplex_rhoij ', hdr%pawrhoij(1)%cplex_rhoij, ' hdr%pawrhoij(1)%qphase ', hdr%pawrhoij(1)%qphase
+call pawrhoij_print_rhoij(hdr%pawrhoij(1)%rhoijp,1,&
+  1,1,dtset%natom,&
+  unit=std_out,opt_prtvol=dtset%pawprtvol)
+print *, ' (no hdr)   pawrhoij  '
+print *, 'pawrhoij(1)%cplex_rhoij ', pawrhoij(1)%cplex_rhoij, ' pawrhoij(1)%qphase ', pawrhoij(1)%qphase
+call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,1,&
+  1,1,dtset%natom,&
+  unit=std_out,opt_prtvol=dtset%pawprtvol)
+#endif
  call timab(135,2,tsec)
  call timab(136,1,tsec)
 
@@ -810,6 +824,16 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
  else
    ABI_MALLOC(nhat,(0,0))
  end if
+#ifdef DEV_MJV
+print *, ' rhog after nhat ', rhog(:,1:10)
+print *, ' rhor after nhat ', rhor(1:10,:)
+print *, ' pawtab: '
+call pawtab_print(pawtab)
+print *, ' pawrhoij ', allocated (pawrhoij)
+call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,pawrhoij(1)%cplex_rhoij,&
+  pawrhoij(1)%qphase,1,natom,&
+  unit=std_out,opt_prtvol=dtset%pawprtvol)
+#endif
 
 !The GS irrzon and phnons were only needed to symmetrize the GS density
  ABI_FREE(irrzon)
@@ -907,6 +931,9 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
    end do
  end if
  ABI_FREE(vhartr)
+#ifdef DEV_MJV
+print *, ' vtrial ', vtrial(1:10,1)
+#endif
 
 
  if(dtset%prtvol==-level)then
@@ -935,6 +962,12 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call timab(561,2,tsec)
 
+#ifdef DEV_MJV
+print *, 'paw_ij'
+call pawdij_print_dij(paw_ij(1)%dij,paw_ij(1)%cplex_dij,&
+&  paw_ij(1)%qphase,1,natom,paw_ij(1)%nspden,&
+&  unit=std_out,Ha_or_eV=1,opt_prtvol=dtset%pawprtvol)
+#endif
  end if
 
 !-----2. Frozen-wavefunctions and Ewald(q=0) parts of 2DTE

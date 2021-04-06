@@ -497,6 +497,7 @@ print *, 'bands_skipped_now 308 ', bands_skipped_now
 
 #ifdef DEV_MJV
 print *, 'gh1c 490 ', gh1c(:,1:10)
+print *, 'gs1c 490 ', gs1c(:,1:10)
 #endif
    if (gen_eigenpb) then
      if (ipert/=natom+2) then  ! S^(1) is zero for ipert=natom+2
@@ -506,6 +507,10 @@ print *, 'gh1c 490 ', gh1c(:,1:10)
          gh1c (1:2,ipw)=gh1c (1:2,ipw)-eshift*gs1c(1:2,ipw)
        end do
 !$OMP END DO NOWAIT
+#ifdef DEV_MJV
+print *, 'eshift ', eshift
+print *, 'gh1c 491 ', gh1c(:,1:10)
+#endif
        if (opt_gvnlx1/=1) then
 !$OMP DO
          do ipw=1,npw1*nspinor
