@@ -2236,7 +2236,7 @@ call flush()
  if (mpi_enreg%paralbd==1 .and. xmpi_paral==1 .and. nproc >= 2*nkpt*nsppol) then
 
 ! number of procs per kpt/spin, on which we can distribute bands
-   maxproc_bandpool=ceiling(nproc/(nkpt*nsppol))
+   maxproc_bandpool=floor(nproc*one/(nkpt*nsppol))
    me=mpi_enreg%me_kpt
 #ifdef DEV_MJV
 print *, 'me, nproc, maxproc_bandpool, mkmem = ', me, nproc, maxproc_bandpool, mkmem
@@ -2664,14 +2664,14 @@ print *, 'yes band paral now'
 #endif
 !      Does not allow a processor to treat different spins
        ind0=0
-       maxproc_bandpool=ceiling(nproc/(nkpt*nsppol))
+       maxproc_bandpool=floor(nproc*one/(nkpt*nsppol))
 #ifdef DEV_MJV
 print *, ' maxproc_bandpool = ', maxproc_bandpool, " nkpt,nsppol ", nkpt, nsppol
 #endif
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
          nband_k_sp2=nband(iikpt+nkpt*(nsppol-1))
-         minb_per_proc=floor(nband_k/maxproc_bandpool)
+         minb_per_proc=floor(nband_k*one/maxproc_bandpool)
 #ifdef DEV_MJV
 print *, ' minb_per_proc = ', minb_per_proc
 #endif
@@ -2685,7 +2685,7 @@ print *, ' nb_per_proc = ', nb_per_proc
 
          mband_mem_out = max(mband_mem_out,nb_per_proc)
          do iiband=1,nband_k
-           ind=(iiband-1)/nb_per_proc+ind0
+           ind=mod((iiband-1)/nb_per_proc+ind0, nproc)
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
 !TODO : could end up with 0 bands on certain procs with this configuration and nband(k) /= constant
            if (nsppol==2 .and. iiband <= nband_k_sp2) then
