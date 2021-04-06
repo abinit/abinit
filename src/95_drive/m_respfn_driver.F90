@@ -62,7 +62,7 @@ module m_respfn_driver
  use m_ioarr,       only : read_rhor
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
- use m_pawtab,      only : pawtab_type, pawtab_get_lsize, pawtab_print
+ use m_pawtab,      only : pawtab_type, pawtab_get_lsize
  use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
@@ -845,8 +845,6 @@ call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,1,&
 #ifdef DEV_MJV
 print *, ' rhog after nhat ', rhog(:,1:10)
 print *, ' rhor after nhat ', rhor(1:10,:)
-print *, ' pawtab: '
-call pawtab_print(pawtab)
 print *, ' pawrhoij ', allocated (pawrhoij)
 call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,pawrhoij(1)%cplex_rhoij,&
   pawrhoij(1)%qphase,1,natom,&
