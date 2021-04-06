@@ -527,7 +527,7 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
 
   integer :: iq_ibz,ii,jj,nmode,ntemp,itemp,kk,imode,ll
   integer :: alpha,beta
-  double precision :: k_B,wovert,xx,C_v,P_th,E_th,Vp,Vs,P_th2
+  double precision :: k_B,wovert,xx,C_v,E_th,Vp,Vs,P_th2
   double precision, allocatable :: heatcapa(:),grun_thermo(:,:,:),u_vib(:)
   double precision, allocatable :: heatcapa_HA(:,:),grun_thermo_HA(:,:,:,:),p_thermo1(:,:,:)
   double precision, allocatable :: p_thermo_HA(:,:,:,:),u_vib_HA(:,:)
@@ -815,14 +815,13 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
 end subroutine tdep_calc_alpha_gamma
 
 !=====================================================================================================
-subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Lattice,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
+subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
 
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: Invar
   type(Shell_Variables_type),intent(in) :: Shell3at
-  type(Lattice_Variables_type),intent(in) :: Lattice
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   type(Qpoints_type),intent(in) :: Qpt
   double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)

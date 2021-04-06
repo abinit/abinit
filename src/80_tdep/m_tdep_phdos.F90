@@ -36,14 +36,15 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Lattice,MPIdata,natom,&
-&                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Rlatt_cart,Shell2at,Sym)
+&                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Shell2at,Sym)
+!FB&                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Rlatt_cart,Shell2at,Sym)
 
   implicit none
 
   integer, intent(in) :: natom,natom_unitcell
   double precision, intent(in) :: Phi2(3*natom,3*natom)
   double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,natom)
-  double precision, intent(in) :: Rlatt_cart(3,natom_unitcell,natom)
+!FB  double precision, intent(in) :: Rlatt_cart(3,natom_unitcell,natom)
   type(Input_Variables_type),intent(in) :: Invar
   type(phonon_dos_type),intent(out) :: PHdos
   type(ifc_type),intent(inout) :: Ifc

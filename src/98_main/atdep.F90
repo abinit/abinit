@@ -569,7 +569,7 @@ program atdep
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 
  if (MPIdata%iam_master) then
-   call tdep_write_gruneisen(distance,Eigen2nd_path,Invar,Lattice,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
+   call tdep_write_gruneisen(distance,Eigen2nd_path,Invar,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
  end if  
  call tdep_calc_alpha_gamma(distance,Eigen2nd_MP,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 
