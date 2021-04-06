@@ -462,6 +462,9 @@ call pawrhoij_io(hdr%pawrhoij,std_out,dtset%nsppol,dtset%nspinor,dtset%nspden,dt
 print *, 'after hdr update'
 call pawrhoij_io(hdr%pawrhoij,std_out,dtset%nsppol,dtset%nspinor,dtset%nspden,dtset%typat,dtset%typat,&
     &                   0,'D')
+print *, 'non hdr pawrhoij = '
+call pawrhoij_io(pawrhoij,std_out,dtset%nsppol,dtset%nspinor,dtset%nspden,dtset%typat,dtset%typat,&
+    &                   0,'D')
 #endif
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
@@ -478,7 +481,9 @@ call pawrhoij_io(hdr%pawrhoij,std_out,dtset%nsppol,dtset%nspinor,dtset%nspden,dt
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
+#ifdef DEV_MJV
 print *, 'respfn dtset%mkmem ', dtset%mkmem
+#endif
 ! Initialize the wave function type and read GS WFK
  ABI_MALLOC(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
  distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
@@ -488,7 +493,9 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
 &          cg, eigen=eigen0, pawrhoij=hdr%pawrhoij)
  ABI_FREE(distrb_flags)
 
- if (psps%usepaw==1.and.ireadwf0==1) then
+ if (psps%usepaw==1 .and. ireadwf0==1) then
+   call pawrhoij_copy(pawrhoij,hdr%pawrhoij)
+
 !  if parallelism, pawrhoij is distributed, hdr%pawrhoij is not
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab)
