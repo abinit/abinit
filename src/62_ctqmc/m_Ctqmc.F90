@@ -1289,7 +1289,7 @@ SUBROUTINE Ctqmc_computeF(this, Gomega, F, opt_fk)
     DO iflavor = 1, flavors
       write(346,*) "#",iflavor
       do  itau=1,this%samples+1
-        write(346,*) itau,real(F(itau,iflavor))
+        write(346,*) itau,F(itau,iflavor)
       enddo
       write(346,*) 
     END DO

@@ -920,8 +920,10 @@ SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
 
   MALLOC(F,(1:op%samples+1,1:op%flavors,1:op%flavors))
   CALL Ctqmcoffdiag_computeF(op,Gomega, F, opt_fk)  ! mu is changed
+ !write(6,*) "eee111"
   CALL BathOperatoroffdiag_setF(op%Bath, F)
  ! CALL BathOperatoroffdiag_printF(op%Bath,333)
+ !write(6,*) "eee"
   FREE(F)
 
   op%inF = .TRUE.
@@ -1478,14 +1480,13 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
          DO iflavor2 = 1, flavors
              write(4367,*) "#",iflavor,iflavor2
            do  itau=1,op%samples+1
-             write(4367,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
+             write(4367,*) (itau-1)*op%beta/(op%samples),F(itau,iflavor,iflavor2)
            enddo
              write(4367,*) 
          END DO
        !sui!write(std_out,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
        END DO
      ENDIF
-     !call flush(436)
      !call flush(437)
      close(4367)
      !call flush(6)
@@ -1627,6 +1628,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   !CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
    write(std_out,*) "WARNING opt_hybri_limit==0"
   CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=0)
+  !write(6,*) "QQQQ"
 !  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=1)
  ! CALL GreenHyboffdiag_backFourier(F_tmp)
 
@@ -1678,27 +1680,32 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   !    enddo
   !  END DO
   !END DO
+  !write(6,*) "QQQQ1",op%rank
 
+  open (unit=436,file='Hybridization.dat',status='unknown',form='formatted')
+  rewind(436)
   IF ( op%rank .EQ. 0 ) THEN
-    open (unit=436,file='Hybridization.dat',status='unknown',form='formatted')
-    rewind(436)
     ifl=0
     DO iflavor = 1, flavors
       DO iflavor2 = 1, flavors
         ifl=ifl+1
-          write(436,*) "#",iflavor,iflavor2,ifl,op%hybri_limit(iflavor,iflavor2)
+          write(436,*) "#",iflavor,iflavor2 !,ifl,op%hybri_limit(iflavor,iflavor2)
         do  itau=1,op%samples+1
-          write(436,*) itau,real(F(itau,iflavor,iflavor2))
+          write(436,*) itau,F(itau,iflavor,iflavor2)
         enddo
           write(436,*) 
       END DO
     END DO
-    close(436)
   ENDIF
+  close(436)
+     call xmpi_barrier(op%MY_COMM)
+  !write(6,*) "QQQQ3"
   FREE(Gomega_tmp)
   FREE(F_omega)
   FREE(F_omega_inv)
+  !write(6,*) "QQQQ4"
   CALL GreenHyboffdiag_destroy(F_tmp)
+  !write(6,*) "QQQQ2"
 
 
 END SUBROUTINE Ctqmcoffdiag_computeF
@@ -1857,6 +1864,7 @@ include 'mpif.h'
   END IF
 !sui!write(std_out,*) "op%sweeps",op%thermalization,op%sweeps
 
+    !write(6,*) "kkkkk1"
   CALL Ctqmcoffdiag_allocateOpt(op)
   
 !#ifdef CTCtqmcoffdiag_MOVIE  
@@ -1887,6 +1895,7 @@ include 'mpif.h'
   !=================================
   !write(std_out,*) "sweeps before thermalization",op%sweeps
   !write(std_out,*) "op%stats",op%stats
+    !write(6,*) "kkkkk2"
   CALL Ctqmcoffdiag_loop(op,op%thermalization,ilatex)
   !=================================
   ! ENDING   THERMALIZATION 
@@ -1898,6 +1907,7 @@ include 'mpif.h'
              0, op%MY_COMM, ierr)
 #endif
 
+    !write(6,*) "kkkkk3"
   IF ( op%rank .EQ. 0 ) THEN
     WRITE(op%ostream,'(A26,I6,A11)') "Thermalization done in    ", CEILING(estimatedTime), "    seconds"
     WRITE(op%ostream,'(A25,I7,A15,I5,A5)') "The QMC should run in    ", &
@@ -1915,6 +1925,7 @@ include 'mpif.h'
   !=================================
   !write(std_out,*) "sweeps before loop",op%sweeps
   !write(std_out,*) "op%stats",op%stats
+    !write(6,*) "kkkkk4"
   CALL Ctqmcoffdiag_loop(op,op%sweeps,ilatex)
   !=================================
   ! ENDING   CTQMC          
@@ -1928,6 +1939,7 @@ include 'mpif.h'
 
   op%done     = .TRUE.
 !sui!write(std_out,*) "op%stats en of ctqmc_run",op%stats
+    !write(6,*) "kkkkk5"
 
 END SUBROUTINE Ctqmcoffdiag_run
 !!***
@@ -2052,6 +2064,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   !write(std_out,*) "itotal",itotal
   indDensity = 1
   !write(std_out,*) "op%stats",op%stats
+   ! write(6,*) "lllll1"
   DO isweep = 1, itotal
   !ii if(op%prtopt==1) write(std_out,*) "======== Isweep = ",isweep
     !updated_seg=.FALSE.
@@ -2067,23 +2080,30 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
       !==========================
       CALL Ctqmcoffdiag_tryAddRemove(op,updated_seg)
     !sui!write(std_out,*) "after tryaddremove",updated_seg
+   ! write(6,*) "lllll2"
 
       updated = updated_seg .OR.  updated_swap(iflavor).OR.(isweep==1)
       updated_swap(iflavor) = .FALSE.
       if ( op%opt_nondiag >0 )  iflavor_d=0
       if ( op%opt_nondiag==0 )  iflavor_d=iflavor
+   ! write(6,*) "lllll2b"
       CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d) 
+   ! write(6,*) "lllll3"
 
       CALL Ctqmcoffdiag_measN        (op, iflavor, updated)
+   ! write(6,*) "lllll41"
       IF ( op%opt_analysis .EQ. 1 ) &
         CALL Ctqmcoffdiag_measCorrelation (op, iflavor)
+   ! write(6,*) "lllll42"
       IF ( op%opt_order .GT. 0 ) &
         CALL Ctqmcoffdiag_measPerturbation(op, iflavor)
+   ! write(6,*) "lllll43"
     END DO
     !CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d) 
     !DO iflavor = 1,flavors
     !  CALL Ctqmcoffdiag_measN        (op, iflavor, updated)
     !END DO
+   !  write(6,*) "lllll4"
 
     IF ( MOD(isweep,modGlobalMove) .EQ. 0 ) THEN
   ! !sui!write(std_out,*) "isweep,modGlobalMove,inside",isweep,modGlobalMove
@@ -2133,6 +2153,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
       END IF
     END IF
 
+    ! write(6,*) "lllll5"
     IF ( MOD(isweep,modNoise2) .EQ. 0 ) THEN
       NRJ_new = op%measDE(1,1)
       CALL Vector_pushBack(op%measNoise(2),NRJ_new - NRJ_old2)
@@ -2178,6 +2199,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   FREE(gtmp_old1)
   FREE(gtmp_old2)
   FREE(updated_swap)
+   ! write(6,*) "lllll6"
 
   IF ( op%opt_spectra .GE. 1 .AND. itotal .EQ. op%sweeps ) THEN
     IF ( endDensity .NE. indDensity-1 ) THEN
@@ -2858,10 +2880,12 @@ SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
 !  --- accumulate occupations with values op%measN(3,iflavor) from the last measurements with the corresponding weight
 !  ---  op*measN(4,iflavor)
     op%measN(1,iflavor) = op%measN(1,iflavor) + op%measN(3,iflavor)*op%measN(4,iflavor)
+   ! write(6,*) "Cllll42"
 
 !  --- Compute total number of new measurements 
     op%measN(2,iflavor) = op%measN(2,iflavor) + op%measN(4,iflavor)
 
+   ! write(6,*) "Allll42"
 !  --- Compute the occupation for this configuration (will be put in
 !  --- op%measN(1,iflavor) at the next occurence of updated=.true.), with
 !  --- the corresponding weight  op%measN(4,iflavor) (we do not now it yet)
@@ -2873,6 +2897,7 @@ SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
   ELSE
 !  --- increased the count so that at new move, we will be able to update measN(1) correctly.
     op%measN(4,iflavor) = op%measN(4,iflavor) + 1.d0
+   ! write(6,*) "Bllll42"
   END IF
 END SUBROUTINE Ctqmcoffdiag_measN
 !!***
