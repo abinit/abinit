@@ -75,6 +75,7 @@ module m_positron
  use m_prep_kgb,    only : prep_fourwf
  use m_fft,         only : fourwf, fourdp
  use m_cgprj,       only : ctocprj
+ use m_cgwf_paw,    only : enable_cgwf_paw
 
  implicit none
 
@@ -821,7 +822,7 @@ type(fock_type),pointer, intent(inout) :: fock
    end if
 
    ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
-   if (dtset%usepaw==1.and.dtset%wfoptalg==10.and.dtset%berryopt==0.and.dtset%usefock==0.and.dtset%paral_kgb==0) then
+   if (enable_cgwf_paw(dtset)) then
      iatom=0
      call wrtout(std_out,' Computing cprj from wavefunctions (positron)')
      call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,0,&

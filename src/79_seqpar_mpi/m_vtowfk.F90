@@ -46,6 +46,7 @@ module m_vtowfk
  use m_gwls_hamiltonian, only : build_H
  use m_fftcore,     only : fftcore_set_mixprec, fftcore_mixprec
  use m_cgwf,        only : cgwf
+ use m_cgwf_paw,    only : cgwf_paw,mksubovl,cprj_update,cprj_update_oneband,enable_cgwf_paw
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
  use m_spacepar,    only : meanvalue_g
@@ -53,6 +54,7 @@ module m_vtowfk
  use m_rmm_diis,    only : rmm_diis
  use m_nonlop,      only : nonlop !, nonlop_counter
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
+ use m_cgprj,       only : cprj_rotate
  use m_fft,         only : fourwf
  use m_cgtk,        only : cgtk_fixphase
 
@@ -194,7 +196,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout),target :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
- logical :: has_fock,newlobpcg,enable_cgwf_paw,update_cprj,do_subdiago,do_ortho, rotate_subvnlx
+ logical :: has_fock,newlobpcg,enable_cgwf_paw_,update_cprj,do_subdiago,do_ortho, rotate_subvnlx
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -285,13 +287,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
  !nonlop_counter = 0
 
- enable_cgwf_paw = gs_hamk%usepaw==1.and.dtset%wfoptalg==10.and.dtset%paral_kgb==0
- if (dtset%berryopt/=0.or.dtset%usefock/=0) then
-   enable_cgwf_paw = .false.
- end if
+ enable_cgwf_paw_ = enable_cgwf_paw(dtset)
  mgsc=0
  igsc=0
- if ((.not. newlobpcg .and. .not. enable_cgwf_paw).or.dtset%rmm_diis/=0) then
+ if ((.not. newlobpcg .and. .not. enable_cgwf_paw_).or.dtset%rmm_diis/=0) then
    mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
 
    ABI_MALLOC_OR_DIE(gsc,(2,mgsc), ierr)
@@ -400,7 +399,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          end if
        end do
      end do
-     if (enable_cgwf_paw.and.update_cprj) then
+     if (enable_cgwf_paw_.and.update_cprj) then
        cprj_cwavef => cprj_cwavef_bands(:,my_nspinor*(iband-1)+1:my_nspinor*iband)
        call timab(1205,1,tsec)
        call cprj_update_oneband(cwavef_iband,cprj_cwavef,gs_hamk,mpi_enreg)
@@ -483,7 +482,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        ! use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
 
        if (.not. use_rmm_diis) then
-         if (enable_cgwf_paw) then
+         if (enable_cgwf_paw_) then
            call cgwf_paw(cg,cprj_cwavef_bands,dtset%cprj_update_lvl,eig_k,&
 &             gs_hamk,icg,mcg,mpi_enreg,nband_k,dtset%nline,&
 &             dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
@@ -638,7 +637,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end do ! inonsc (NON SELF-CONSISTENT LOOP)
 
- if (enable_cgwf_paw) then
+ if (enable_cgwf_paw_) then
    update_cprj=dtset%cprj_update_lvl<=3.and.dtset%cprj_update_lvl/=2.and.dtset%cprj_update_lvl>=-1
    if (update_cprj) then
      call timab(1205,1,tsec)
@@ -672,7 +671,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  else
    choice=2*optforces
    paw_opt=2;cpopt=0;tim_nonlop=10-8*optforces
-   if (enable_cgwf_paw) cpopt=2 ! cprj are in memory (but not the derivatives)
+   if (enable_cgwf_paw_) cpopt=2 ! cprj are in memory (but not the derivatives)
    if (dtset%usefock==1) then
 !     if (dtset%optforces/= 0) then
      if (optforces/= 0) then
@@ -685,7 +684,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Allocation of memory space for one WF
  ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
- if (.not.enable_cgwf_paw) then
+ if (.not.enable_cgwf_paw_) then
    if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
      iorder_cprj=0
      nband_k_cprj=nband_k*(mband_cprj/dtset%mband)
@@ -882,7 +881,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    Call to nonlocal operator:
 !    - Compute nonlocal forces from most recent wfs
 !    - PAW: compute projections of WF onto NL projectors (cprj)
-   if (enable_cgwf_paw) then
+   if (enable_cgwf_paw_) then
      if (optforces>0) then
 !      Treat all wavefunctions in case of PAW
        cwaveprj => cprj(:,1+(iblock-1)*my_nspinor*blocksize+ibg:iblock*my_nspinor*blocksize+ibg)
@@ -954,7 +953,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ABI_FREE(cwavef)
  ABI_FREE(enlout)
 
- if (.not.enable_cgwf_paw) then
+ if (.not.enable_cgwf_paw_) then
    if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
      call pawcprj_free(cwaveprj)
    end if
@@ -1043,7 +1042,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call build_H(dtset,mpi_enreg,cpopt,cg,gs_hamk,kg_k,kinpw)
  end if
 
- if (enable_cgwf_paw) nullify(cprj_cwavef_bands)
+ if (enable_cgwf_paw_) nullify(cprj_cwavef_bands)
 
  if(wfopta10 /= 1 .and. .not. newlobpcg) then
    ABI_FREE(evec)

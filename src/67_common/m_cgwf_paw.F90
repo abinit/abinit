@@ -43,6 +43,7 @@ module m_cgwf_paw
  use m_paw_overlap,   only : smatrix_k_paw
  use m_cgprj,         only : getcprj
  use m_fft,           only : fourwf
+ use m_dtset,         only : dataset_type
 
  implicit none
 
@@ -55,6 +56,7 @@ module m_cgwf_paw
  public :: cprj_update_oneband
  public :: cprj_check
  public :: get_cprj_id
+ public :: enable_cgwf_paw
 
 !!***
 
@@ -399,7 +401,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          ! |projdirec_i> = |direc'_i> - <c_i|S|direc_i>|c_i> + xnorm.<c_i|S|direc_i>|c_i>
          !               = |direc'_i> - (1-xnorm) <c_i|S|direc_i>|c_i>
          !               = |direc'_i> - (1-xnorm)/xnorm <c_i|S|direc_i>|c'_i>
-         ! 
+         !
          z_tmp = -scprod_csc(2*iband-1:2*iband)*(one-xnorm)/xnorm
          call timab(1305,1,tsec)
          do ispinor=1,nspinor
@@ -1157,7 +1159,7 @@ end subroutine cprj_check_oneband
 !!
 !! SOURCE
 !!
-real(dp) function get_cprj_id(cprj) 
+real(dp) function get_cprj_id(cprj)
 
 !Arguments ------------------------------------
 !arrays
@@ -1244,6 +1246,43 @@ subroutine get_cwavefr(cwavef,cwavef_r,gs_hamk,mpi_enreg)
  ABI_DEALLOCATE(fofgout_dum)
 
 end subroutine get_cwavefr
+!!***
+
+!!****f* ABINIT/enable_cgwf_paw
+!!
+!! NAME
+!! enable_cgwf_paw
+!!
+!! FUNCTION
+!! Return a logical value determining if the "cgwf_paw" implementation can be used or not
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!
+!! OUTPUT
+!!  enable_cgwf_paw : true if "cgwf_paw" can be used
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+logical function enable_cgwf_paw(dtset)
+
+   type(dataset_type), intent(in) :: dtset
+
+   enable_cgwf_paw = .false.
+   ! cgwf_paw is supposed to work for the following cases :
+   if (dtset%usepaw==1.and.dtset%wfoptalg==10.and.dtset%paral_kgb==0) then
+     enable_cgwf_paw = .true.
+   end if
+   ! but the following cases are not implemented yet:
+   if (dtset%berryopt/=0.or.dtset%usefock/=0.or.sum(abs(dtset%nucdipmom))>tol16) then
+     enable_cgwf_paw = .false.
+   end if
+
+end function enable_cgwf_paw
 !!***
 
 end module m_cgwf_paw
